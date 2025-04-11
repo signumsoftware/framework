@@ -346,113 +346,71 @@ public enum SearchMessage
 
     SearchHelp,   
     SearchControl,
-    [Description("is very powerfull, but can be intimidating. Take some time to learn how to use it... will be worth it!")]
-    IsVeryPowerfullButCanBeIntimidatingTakeSomeTimeToLearnHowToUseItWillBeWorthIt,
+    [Description("The {0} is very powerful, but can be intimidating. Take some time to learn how to use it... will be worth it!")]
+    The0IsVeryPowerfulButCanBeIntimidatingTakeSomeTimeToLearnHowToUseItWillBeWorthIt,
     TheBasics,
-    [Description("Currently we are in the query")]
-    CurrentlyWeAreInTheQuery,
-    [Description("you can open a")]
-    YouCanOpenA,
-    [Description("by clicking the")]
-    ByClickingThe,
-    [Description("icon, or doing")]
-    IconOrDoing,
+    [Description("Currently we are in the query {0}, you can open a {1} by clicking the {2} icon, or doing {3} in the row (but not in a link!).")]
+    CurrentlyWeAreInTheQuery0YouCanOpenA1ByClickingThe2IconOrDoing3InTheRowButNotInALink,
+    [Description("Currently we are in the query {0}, grouped by {1}, you can open a group by clicking the {2} icon, or doing {3} in the row (but not in a link!).")]
+    CurrentlyWeAreInTheQuery0GroupedBy1YouCanOpenAGroupByClickingThe2IconOrDoing3InTheRowButNotInALink,
     [Description("double-click")]
     DoubleClick,
-    [Description("in the row (but not in a link!).")]
-    InTheRowButNotInALink,
     GroupedBy,
     [Description("you can open a group by clicking in the")]
     YouCanOpenAGroupByClickingInThe,
-    Doing,
-    [Description("in the row will select the entity and close the modal automatically, alternatively you can select one entity and click OK.")]
-    InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK,
-    [Description("You can use the prepared filters on the top to quickly find the")]
-    YouCanUseThePreparedFiltersOnTheTopToQuicklyFindThe,
-    [Description("you are looking for.")]
-    YouAreLookingFor,
+    [Description("Doing {0} in the row will select the entity and close the modal automatically, alternatively you can select one entity and click OK.")]
+    Doing0InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK,
+    [Description("You can use the prepared filters on the top to quickly find the {0} you are looking for.")]
+    YouCanUseThePreparedFiltersOnTheTopToQuicklyFindThe0YouAreLookingFor,
     [Description("Ordering results")]
     OrderingResults,
-    [Description("You can order results by clicking in a column header, default ordering is")]
-    YouCanOrderResultsByClickingInAColumnHeaderDefaultOrderingIs,
+    [Description("You can order results by clicking in a column header, default ordering is {0} and by clicking again it changes to {1}. You can order by more than one column if you keep {2} down when clicking on the columns header.")]
+    YouCanOrderResultsByClickingInAColumnHeaderDefaultOrderingIs0AndByClickingAgainItChangesTo1YouCanOrderByMoreThanOneColumnIfYouKeep2DownWhenClickingOnTheColumnsHeader,
     Ascending,
-    [Description("and by clicking again it changes to")]
-    AndByClickingAgainItChangesTo,
     Descending,
-    [Description("You can order by more than one column if you keep")]
-    YouCanOrderByMoreThanOneColumnIfYouKeep,
     Shift,
-    [Description("down when clicking on the columns header.")]
-    DownWhenClickingOnTheColumnsHeader,
     [Description("Change columns")]
     ChangeColumns,
-    [Description("You are not limited to the columns you see! The default columns can be changed at will by")]
-    YouAreNotLimitedToTheColumnsYouSeeTheDefaultColumnsCanBeChangedAtWillBy,
+    [Description("You are not limited to the columns you see! The default columns can be changed by {0} in a column header and then select {1}, {2} or {3}.")]
+    YouAreNotLimitedToTheColumnsYouSeeTheDefaultColumnsCanBeChangedBy0InAColumnHeaderAndThenSelect123,
     [Description("right-clicking")]
     RightClicking,
-    [Description("in a column header and then select")]
-    InAColumnHeaderAndThenSelect,
+    [Description("right-click")]
+    RightClick,
     [Description("Insert Column")]
     InsertColumn,
     [Description("Edit Column")]
     EditColumn,
-    Or,
     [Description("Remove Column")]
     RemoveColumn,
-    [Description("You can also")]
-    YouCanAlso,
+    [Description("You can also {0} the columns by dragging and dropping them to another position.")]
+    YouCanAlso0TheColumnsByDraggingAndDroppingThemToAnotherPosition,
     [Description("rearrange")]
     Rearrange,
-    [Description("the columns by dragging and dropping them to another position.")]
-    TheColumnsByDraggingAndDroppingThemToAnotherPosition,
-    [Description("When inserting, the new column will be added before or after the selected column, depending where you")]
-    WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumnDependingWhereYou,
-    [Description("Click on the")]
-    ClickOnThe,
-    [Description("button to open the Advanced filters, this will allow you create complex filters manually by selecting the")]
-    ButtonToOpenTheAdvancedFiltersThisWillAllowYouCreateComplexFiltersManuallyBySelectingThe,
-    [Description("of the entity (or a related entities), a comparison")]
-    OfTheEntityOrARelatedEntitiesAComparison,
-    [Description("and a")]
-    AndA,
-    [Description("on a")]
-    OnA,
-    [Description("to compare.")]
-    ToCompare,
-    [Description("Trick: You can")]
-    TrickYouCan,
+    [Description("When inserting, the new column will be added before or after the selected column, depending where you {0}.")]
+    WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumnDependingWhereYou0,
+    [Description("Click on the {0} button to open the Advanced filters, this will allow you create complex filters manually by selecting the {1} of the entity (or a related entities), a comparison {2} and a {3} to compare.")]
+    ClickOnThe0ButtonToOpenTheAdvancedFiltersThisWillAllowYouCreateComplexFiltersManuallyBySelectingThe1OfTheEntityOrARelatedEntitiesAComparison2AndA3ToCompare,
+    [Description("Trick: You can {0} on a {1} and choose {2} to quickly filter by this column. Even more, you can {3} to filter by this {4} directly.")]
+    TrickYouCan0OnA1AndChoose2ToQuicklyFilterByThisColumnEvenMoreYouCan3ToFilterByThis4Directly,
     [Description("column header")]
     ColumnHeader,
-    [Description("and choose")]
-    AndChoose,
-    [Description("to quickly filter by this column. Even more, you can")]
-    ToQuicklyFilterByThisColumnEvenMoreYouCan,
-    [Description("to filter by this value directly.")]
-    ToFilterByThisValueDirectly,
     [Description("Grouping results by one (or more) column")]
     GroupingResultsByOneOrMoreColumn,
-    [Description("You can group results by")]
-    YouCanGroupResultsBy,
-    [Description("in a column header and selecting")]
-    InAColumnHeaderAndSelecting,
+    [Description("You can group results by {0} in a column header and selecting {1}. All the columns will disapear except the selected one and an agregation column (typically {2}).")]
+    YouCanGroupResultsBy0InAColumnHeaderAndSelecting1AllTheColumnsWillDisappearExceptTheSelectedOneAndAnAggregationColumnTypically2,
     [Description("Group by this column")]
     GroupByThisColumn,
-    [Description("All the columns will disapear except the selected one and an agregation column (typically")]
-    AllTheColumnsWillDisappearExceptTheSelectedOneAndAnAggregationColumnTypically,
     [Description("Group help")]
     GroupHelp,
-    [Description("Any new column should either be an aggregate")]
-    AnyNewColumnShouldEitherBeAnAggregate,
-    [Description("or it will be considered a new group key")]
-    OrItWillBeConsideredANewGroupKey,
-    [Description("Once grouping you can filter normally or using aggregates as the field")]
-    OnceGroupingYouCanFilterNormallyOrUsingAggregatesAsTheField,
+    [Description("Any new column should either be an aggregate {0} or it will be considered a new group key {1}.")]
+    AnyNewColumnShouldEitherBeAnAggregate0OrItWillBeConsideredANewGroupKey1,
+    [Description("Once grouping you can filter normally or using aggregates as the field ({0}).")]
+    OnceGroupingYouCanFilterNormallyOrUsingAggregatesAsTheField0,
     [Description("in SQL")]
     InSql,
-    [Description("Finally you can stop grouping by")]
-    FinallyYouCanStopGroupingBy,
-    [Description("in a column header and select")]
-    InAColumnHeaderAndSelect,
+    [Description("Finally you can stop grouping by {0} in a column header and select {1}")]
+    FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1,
     [Description("Restore default columns")]
     RestoreDefaultColumns,
     [Description("A query expression could be any field of the")]
