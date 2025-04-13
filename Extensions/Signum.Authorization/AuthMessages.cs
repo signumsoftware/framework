@@ -94,6 +94,21 @@ public enum LoginAuthMessage
 
     [Description("Sign in with Microsoft")]
     SignInWithMicrosoft,
+
+
+}
+
+[AllowUnathenticated]
+public enum ResetPasswordB2CMessage
+{
+    [Description("Reset Password requested")]
+    ResetPasswordRequested,
+
+    [Description("Do you want to continue?")]
+    DoYouWantToContinue,
+
+    [Description("Reset Password")]
+    ResetPassword,
 }
 
 public enum AuthMessage

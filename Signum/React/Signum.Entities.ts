@@ -440,6 +440,11 @@ export namespace FrameMessage {
   export const Main: MessageKey = new MessageKey("FrameMessage", "Main");
 }
 
+export namespace HtmlEditorMessage {
+  export const Hyperlink: MessageKey = new MessageKey("HtmlEditorMessage", "Hyperlink");
+  export const EnterYourUrlHere: MessageKey = new MessageKey("HtmlEditorMessage", "EnterYourUrlHere");
+}
+
 export interface ImmutableEntity extends Entity {
   allowChange: boolean;
 }

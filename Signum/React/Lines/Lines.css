@@ -35,9 +35,10 @@ input[type=checkbox].form-control {
     background-color: #e9ecef;
     opacity: 1;
 }
-.form-control.readonly::-webkit-scrollbar, .form-control:disabled::-webkit-scrollbar, .form-control[readonly]::-webkit-scrollbar {
-    display: none;
-}
+
+    .form-control.readonly::-webkit-scrollbar, .form-control:disabled::-webkit-scrollbar, .form-control[readonly]::-webkit-scrollbar {
+        display: none;
+    }
 
 .form-control.readonly {
     background-color: #e9ecef; /*Not included in bootstrap*/
@@ -132,32 +133,60 @@ li.sf-strip-element {
     align-items: stretch;
 }
 
-.input-group-vertical.before {
-    margin-right: -1px;
-}
+    .input-group-vertical.before {
+        margin-right: -1px;
+    }
 
     .input-group-vertical.after {
         margin-left: -1px;
     }
 
 
-        .input-group-vertical.after > .btn:first-child:not(:last-child) {
-            border-top-right-radius: 4px;
-        }
+    /*Connections between buttons*/
+    .input-group-vertical > .btn:not(:last-child) {
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+    }
 
-        .input-group-vertical.before > .btn:first-child:not(:last-child) {
-            border-top-left-radius: 4px;
-        }
+    .input-group-vertical > .btn:not(:first-child) {
+        border-top-right-radius: 0;
+        border-top-left-radius: 0;
+    }
 
-        .input-group-vertical > .btn:not(:last-child) {
-            border-bottom-right-radius: 0;
-            border-bottom-left-radius: 0;
-        }
+    /*Connections to text area*/
 
-        .input-group-vertical > .btn:not(:first-child) {
-            border-top-right-radius: 0;
-            border-top-left-radius: 0;
-        }
+    .input-group-vertical.after > .btn {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .input-group-vertical.before > .btn {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    /*Connections first and last button*/
+
+
+    .input-group-vertical.after > .btn:first-child:not(:last-child) {
+        border-bottom-right-radius: 0;
+    }
+
+    .input-group-vertical.after > .btn:last-child:not(:first-child) {
+        border-top-right-radius: 0;
+    }
+
+    .input-group-vertical.before > .btn:first-child:not(:last-child) {
+        border-bottom-left-radius: 0;
+    }
+
+    .input-group-vertical.before > .btn:last-child:not(:first-child) {
+        border-top-left-radius: 0;
+    }
+
+
+
+
 
 /*legends*/
 fieldset {
@@ -643,21 +672,20 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     padding: 6px;
 }
 
-.sf-color.form-control.form-control-xs {
-    width: 26px;
-    height: 26px;
-    padding: 4px;
-}
+    .sf-color.form-control.form-control-xs {
+        width: 26px;
+        height: 26px;
+        padding: 4px;
+    }
 
-.sf-color.form-control.form-control-sm {
-    width: 32px;
-    height: 32px;
-    padding: 4px;
-}
+    .sf-color.form-control.form-control-sm {
+        width: 32px;
+        height: 32px;
+        padding: 4px;
+    }
 
-.sf-color.form-control.form-control-lg {
-    width: 48px;
-    height: 48px;
-    padding: 8px;
-}
-
+    .sf-color.form-control.form-control-lg {
+        width: 48px;
+        height: 48px;
+        padding: 8px;
+    }

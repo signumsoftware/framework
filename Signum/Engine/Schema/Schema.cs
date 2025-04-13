@@ -573,7 +573,7 @@ public class Schema : IImplementationsFinder
         BeforeDatabaseAccess = null;
     }
 
-    public event Action? InvalidateCache; 
+    public event Action? OnInvalidateCache; 
 
     public event Action? Initializing;
 
@@ -584,12 +584,7 @@ public class Schema : IImplementationsFinder
         if (Initializing == null)
             return;
 
-        if (InvalidateCache != null)
-        {
-            foreach (var ic in InvalidateCache.GetInvocationListTyped())
-                using (HeavyProfiler.Log("InvalidateCache", () => ic.Method.DeclaringType!.ToString()))
-                    ic();
-        }
+        InvalidateCache();
 
         using (ExecutionMode.Global())
             foreach (var init in Initializing.GetInvocationListTyped())
@@ -597,6 +592,16 @@ public class Schema : IImplementationsFinder
                     init();
 
         Initializing = null;
+    }
+
+    public void InvalidateCache()
+    {
+        if (OnInvalidateCache != null)
+        {
+            foreach (var ic in OnInvalidateCache.GetInvocationListTyped())
+                using (HeavyProfiler.Log("InvalidateCache", () => ic.Method.DeclaringType!.ToString()))
+                    ic();
+        }
     }
 
     #endregion
@@ -634,7 +639,7 @@ public class Schema : IImplementationsFinder
         Synchronizing += Assets.Schema_Synchronizing;
         Synchronizing += TypeLogic.Schema_Synchronizing;
 
-        InvalidateCache += GlobalLazy.ResetAll;
+        OnInvalidateCache += GlobalLazy.ResetAll;
 
         SchemaCompleted += Schema.CheckImplementedByAllPrimaryKeyTypes;
     }

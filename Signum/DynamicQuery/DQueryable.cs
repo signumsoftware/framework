@@ -390,7 +390,7 @@ public static class DQueryable
     }
 
     #region SelectMany
-    public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<CollectionElementToken> elementTokens, List<FilterFullText> fullTextTableFilters)
+    public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<CollectionElementToken> elementTokens, List<FilterSqlServerFullText> fullTextTableFilters)
     {
         foreach (var cet in elementTokens)
         {
@@ -399,13 +399,13 @@ public static class DQueryable
 
         foreach (var fttf in fullTextTableFilters)
         {
-            query = query.JoinWith(fttf);
+            query = query.JoinWithFullText(fttf);
         }
 
         return query;
     }
 
-    public static DQueryable<T> JoinWith<T>(this DQueryable<T> query, FilterFullText fft)
+    public static DQueryable<T> JoinWithFullText<T>(this DQueryable<T> query, FilterSqlServerFullText fft)
     {
         if (!fft.IsTable)
             throw new InvalidOperationException("IsTable should be true");
@@ -470,7 +470,7 @@ public static class DQueryable
         return expression;
     }
 
-    private static IQueryable<FullTextResultTable> GetFullTextTableQuery(FilterFullText fft, out ITable table)
+    private static IQueryable<FullTextResultTable> GetFullTextTableQuery(FilterSqlServerFullText fft, out ITable table)
     {
         var schema = Schema.Current;
         table = fft.Tokens.Select(a => a.GetPropertyRoute()!).Select(pr =>
