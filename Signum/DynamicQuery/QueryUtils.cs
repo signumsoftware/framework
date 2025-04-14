@@ -1,3 +1,4 @@
+using NpgsqlTypes;
 using Signum.DynamicQuery.Tokens;
 using Signum.Utilities.Reflection;
 using System.Collections.ObjectModel;
@@ -43,6 +44,9 @@ public static class QueryUtils
 
         if (uType == typeof(TimeSpan) || uType == typeof(TimeOnly))
             return FilterType.Time;
+
+        if (uType == typeof(NpgsqlTsVector))
+            return FilterType.TsVector;
 
         if (uType.IsEnum)
             return FilterType.Enum;
@@ -225,6 +229,15 @@ public static class QueryUtils
             {
                 FilterOperation.EqualTo,
                 FilterOperation.DistinctTo,
+            }.ToReadOnly()
+        },
+        {
+            FilterType.TsVector, new List<FilterOperation>
+            {
+                FilterOperation.TsQuery,
+                FilterOperation.TsQuery_Plain,
+                FilterOperation.TsQuery_Plain,
+                FilterOperation.TsQuery_WebSearch,
             }.ToReadOnly()
         },
     };
@@ -423,7 +436,7 @@ public static class QueryUtils
         if (token == null)
             return "No column selected";
 
-        if (token.Type != typeof(string) && token.Type.ElementType() != null)
+        if (token.Type != typeof(string) && token.Type != typeof(NpgsqlTsVector) && token.Type.ElementType() != null)
             return "You can not filter by collections, continue the sequence";
 
         if (token is OperationsToken or OperationToken or ManualContainerToken or ManualToken)
@@ -437,7 +450,7 @@ public static class QueryUtils
         if (token == null)
             return "No column selected";
 
-        if (token.Type != typeof(string) && token.Type != typeof(byte[]) && token.Type.ElementType() != null)
+        if (QueryToken.IsCollection(token.Type))
             return "You can not add collections as columns";
 
         if (token.HasAllOrAny())
@@ -447,7 +460,7 @@ public static class QueryUtils
                 CollectionAnyAllType.NotAny.NiceToString(),
                 CollectionAnyAllType.NotAll.NiceToString());
 
-        if (token is OperationsToken or ManualContainerToken)
+        if (token is OperationsToken or ManualContainerToken or PgTsVectorColumnToken)
             return $"{token} is not a valid column";
 
         return null;
@@ -649,6 +662,14 @@ public static class QueryUtils
     public static bool IsList(this FilterOperation fo)
     {
         return fo == FilterOperation.IsIn || fo == FilterOperation.IsNotIn;
+    }
+
+    public static bool IsTsQuery(this FilterOperation fo)
+    {
+        return fo == FilterOperation.TsQuery || 
+            fo == FilterOperation.TsQuery_Plain ||
+            fo == FilterOperation.TsQuery_Phrase ||
+            fo == FilterOperation.TsQuery_WebSearch;
     }
 }
 

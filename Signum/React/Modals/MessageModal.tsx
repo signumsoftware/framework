@@ -28,6 +28,7 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
   buttonContent?: (button: MessageModalResult) => string | React.ReactElement | null | undefined;
   buttonHtmlAttributes?: (button: MessageModalResult) => React.ButtonHTMLAttributes<any> | null | undefined;
   buttonClass?: (button: MessageModalResult) => string | undefined;
+  onButtonClicked?: (button: MessageModalResult) => void;
   icon?: MessageModalIcon | null;
   customIcon?: IconProp;
   size?: BsSize;
@@ -96,7 +97,12 @@ function MessageModal(p: MessageModalProps): React.JSX.Element {
         {...htmlAtts}
         ref={res == 'yes' || res == 'ok' ? setFocus : undefined}
         className={classes(htmlAtts?.className, baseButtonClass)}
-        onClick={() => handleButtonClicked(res)}
+        onClick={() => {
+          if (p.onButtonClicked)
+            p.onButtonClicked(res);
+          else
+            handleButtonClicked(res);
+        }}
         name={res}>
         {getButtonContent(res)}
       </button>

@@ -1,1 +1,0 @@
-{"version":3,"file":"BasicCommandsPlugin.d.ts","sourceRoot":"","sources":["BasicCommandsPlugin.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,OAAO,MAAM,UAAU,CAAC;AACpC,OAAO,EAAE,gBAAgB,EAAE,oBAAoB,EAAE,MAAM,eAAe,CAAC;AAEvE,MAAM,CAAC,OAAO,OAAO,mBAAoB,YAAW,gBAAgB;IAElE,iBAAiB,CAAC,CAAC,KAAK,EAAE,OAAO,CAAC,WAAW,EAAE,UAAU,EAAE,oBAAoB,GAAG,OAAO,CAAC,WAAW;CA2BtG"}

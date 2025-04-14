@@ -85,6 +85,12 @@ export type MergeStrategy =
   "Union" |
   "Intersection";
 
+export namespace ResetPasswordB2CMessage {
+  export const ResetPasswordRequested: MessageKey = new MessageKey("ResetPasswordB2CMessage", "ResetPasswordRequested");
+  export const DoYouWantToContinue: MessageKey = new MessageKey("ResetPasswordB2CMessage", "DoYouWantToContinue");
+  export const ResetPassword: MessageKey = new MessageKey("ResetPasswordB2CMessage", "ResetPassword");
+}
+
 export const RoleEntity: Type<RoleEntity> = new Type<RoleEntity>("Role");
 export interface RoleEntity extends Entities.Entity {
   Type: "Role";
