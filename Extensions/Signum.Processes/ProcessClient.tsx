@@ -115,11 +115,10 @@ export namespace ProcessClient {
         this.event = me;
         processSettings?.onClick ? processSettings.onClick!(this) : defaultConstructProcessFromMany(this)
       }
-  
-      return [
-        <ContextualOperations.OperationMenuItem coc={this}
-          extraButtons={<span className="process-contextual-icon" onClick={processOnClick} ><FontAwesomeIcon icon="gear" title={ProcessMessage.ProcessSettings.niceToString()}/></span>} />
-      ];
+
+      return [{
+        fullText: this.operationInfo.niceName, menu: <ContextualOperations.OperationMenuItem coc={this}
+          extraButtons={<span className="process-contextual-icon" onClick={processOnClick} ><FontAwesomeIcon icon="gear" title={ProcessMessage.ProcessSettings.niceToString()} /></span>} /> } as ContextualMenuItem];  
     };
   }
   
