@@ -1,5 +1,5 @@
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
-import { $getRoot, $getSelection, EditorState, LexicalEditor } from "lexical";
+import { $getRoot, $getSelection, $setSelection, EditorState, LexicalEditor } from "lexical";
 
 export interface ITextConverter {
   $convertToText(editor: LexicalEditor): string;
@@ -26,6 +26,7 @@ export class HtmlContentStateConverter implements ITextConverter {
       const nodes = $generateNodesFromDOM(editor, doc);
       $getRoot().clear().select();
       $getSelection()?.insertNodes(nodes);
+      $setSelection(null);
     }, { discrete: true })
 
     return editor.getEditorState();

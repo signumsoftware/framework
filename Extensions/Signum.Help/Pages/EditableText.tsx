@@ -14,9 +14,9 @@ import { FileImage } from '../../Signum.Files/Components/FileImage';
 import { toFileEntity } from '../../Signum.Files/Components/FileUploader';
 import { ListExtension } from '../../Signum.HtmlEditor/Extensions/ListExtension';
 import { BasicCommandsExtensions } from '../../Signum.HtmlEditor/Extensions/BasicCommandsExtension';
-import { AutoLinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension/AutoLinkExtension';
 import { ImageConverter } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
+import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
 
 export function EditableTextComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
   var [editable, setEditable] = React.useState(defaultEditable || false);
@@ -60,8 +60,9 @@ export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined>
   return (
     <ErrorBoundary>
       <HtmlEditor
-        binding={p.binding} plugins={[
-          new AutoLinkExtension(),
+        binding={p.binding}
+        plugins={[
+          new LinkExtension(),
           new BasicCommandsExtensions(),
           new ImageExtension(new InlineImageConverter())
         ]} />
@@ -84,8 +85,9 @@ export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?
         <HtmlEditor readOnly
           binding={binding as any}
           htmlAttributes={p.htmlAttributes}
-          toolbarButtons={c => null} plugins={[
-            new AutoLinkExtension(),
+          small
+          plugins={[
+            new LinkExtension(),
             new BasicCommandsExtensions(),
             new ImageExtension(new InlineImageConverter())
           ]} />

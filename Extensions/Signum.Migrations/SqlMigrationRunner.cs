@@ -246,7 +246,7 @@ public class SqlMigrationRunner
     private static void ResetCache()
     {
         CacheLogic.ForceReset(systemLog: false);
-        GlobalLazy.ResetAll();
+        GlobalLazy.ResetAll(systemLog: false);
         Schema.Current.InvalidateMetadata();
     }
 

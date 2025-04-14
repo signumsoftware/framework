@@ -365,7 +365,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         {
             var columns = index.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
 
-            return new SqlPreCommandSimple($"ALTER TABLE {index.Table.Name} ADD CONSTRAINT {index.IndexName.SqlEscape(isPostgres)} PRIMARY KEY {(index.Clustered? "CLUSTERED" : "NONCLUSTERED")}({columns}){(index.Partitioned ? $" ON {index.PartitionSchemeName} ({index.PartitionColumnName})" : null)};");
+            return new SqlPreCommandSimple($"ALTER TABLE {index.Table.Name} ADD CONSTRAINT {index.IndexName.SqlEscape(isPostgres)} PRIMARY KEY {(IsPostgres ? "": index.Clustered? "CLUSTERED" : "NONCLUSTERED")}({columns}){(index.Partitioned ? $" ON {index.PartitionSchemeName} ({index.PartitionColumnName})" : null)};");
         }
 
         if (index.Unique)

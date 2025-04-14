@@ -11,10 +11,10 @@ import { WhatsNewEntity } from '../Signum.WhatsNew';
 import { ImageModal } from '../../Signum.Files/Components/ImageModal';
 import { LexicalEditor } from "lexical";
 import { BasicCommandsExtensions } from '../../Signum.HtmlEditor/Extensions/BasicCommandsExtension';
-import { AutoLinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension/AutoLinkExtension';
 import { ImageConverter } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
 import { ListExtension } from '../../Signum.HtmlEditor/Extensions/ListExtension';
+import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
 
 export default function WhatsNewHtmlEditor(p: {
   binding: Binding<string | undefined | null>;
@@ -25,7 +25,7 @@ export default function WhatsNewHtmlEditor(p: {
   return (
     <ErrorBoundary>
       <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} plugins={[
-        new AutoLinkExtension(),
+        new LinkExtension(),
         new BasicCommandsExtensions(),
         new ImageExtension(new AttachmentImageConverter())
       ]} />
@@ -40,8 +40,8 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
   return (
     <div className="html-viewer" >
       <ErrorBoundary>
-        <HtmlEditor readOnly binding={binding} toolbarButtons={c => null} plugins={[
-          new AutoLinkExtension(),
+        <HtmlEditor readOnly binding={binding} small plugins={[
+          new LinkExtension(),
           new BasicCommandsExtensions(),
           new ImageExtension(new AttachmentImageConverter())
         ]} />

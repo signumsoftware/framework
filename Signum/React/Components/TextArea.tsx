@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { whenVisible } from '../Hooks';
+import { useWindowEvent, whenVisible } from '../Hooks';
 
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   innerRef?: React.Ref<HTMLTextAreaElement>;
@@ -38,6 +38,8 @@ export default function TextArea(p: TextAreaProps): React.JSX.Element {
     }
     innerRef && (typeof innerRef == "function" ? innerRef(ta) : (innerRef as any).current = ta);
   }, [innerRef, minHeight]);
+
+  useWindowEvent("resize", () => textAreaRef.current && handleResize(textAreaRef.current), [textAreaRef]);
 
   React.useEffect(() => {
     if (p.autoResize && textAreaRef.current && p.value != null)
