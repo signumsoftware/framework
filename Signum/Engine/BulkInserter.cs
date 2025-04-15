@@ -152,7 +152,7 @@ public static class BulkInserter
             var isPostgres = Schema.Current.Settings.IsPostgres;
 
             DataTable dt = new DataTable();
-            var columns = t.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && (disableIdentityBehaviour || !c.IdentityBehaviour)).ToList();
+            var columns = t.Columns.Values.Where(c => (disableIdentityBehaviour || !c.IdentityBehaviour) && c.GetGeneratedAlwaysType() == Sync.GeneratedAlwaysType.None && c.ComputedColumn == null).ToList();
             foreach (var c in columns)
                 dt.Columns.Add(GetColumn(c, isPostgres));
 
@@ -328,7 +328,7 @@ public static class BulkInserter
             var isPostgres = Schema.Current.Settings.IsPostgres;
 
             var dt = new DataTable();
-            var columns = mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && (!c.IdentityBehaviour || disableIdentityBehaviour)).ToList();
+            var columns = mlistTable.Columns.Values.Where(c => (!c.IdentityBehaviour || disableIdentityBehaviour) && c.GetGeneratedAlwaysType() == Sync.GeneratedAlwaysType.None && c.ComputedColumn == null).ToList();
             foreach (var c in columns)
                 dt.Columns.Add(GetColumn(c, isPostgres));
 
@@ -388,7 +388,7 @@ public static class BulkInserter
 
             var isPostgres = Schema.Current.Settings.IsPostgres;
 
-            var columns = t.Columns.Values.ToList();
+            var columns = t.Columns.Values.Where(c => (!c.IdentityBehaviour || disableIdentityBehaviour) && c.GetGeneratedAlwaysType() == Sync.GeneratedAlwaysType.None && c.ComputedColumn == null).ToList();
             DataTable dt = new DataTable();
             foreach (var c in columns)
                 dt.Columns.Add(GetColumn(c, isPostgres));
