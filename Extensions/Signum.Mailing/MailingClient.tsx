@@ -18,7 +18,7 @@ import { QuickLinkClient, QuickLinkExplore } from '@framework/QuickLinkClient'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { ModifiableEntity } from "@framework/Signum.Entities";
-import { ContextualItemsContext, MenuItemBlock } from "@framework/SearchControl/ContextualItems";
+import { ContextualItemsContext, MenuItemBlock, ContextualMenuItem } from "@framework/SearchControl/ContextualItems";
 import { ModelEntity } from "@framework/Signum.Entities";
 import { QueryRequest } from "@framework/FindOptions";
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
@@ -176,10 +176,13 @@ export namespace MailingClient {
         return {
           header: EmailTemplateEntity.nicePluralName(),
           menuItems: wts.map(et =>
-            <Dropdown.Item data-operation={et.EntityType} onClick={() => handleMenuClick(et, ctx)}>
+          ({
+            fullText: getToString(et),
+            menu: <Dropdown.Item data-operation={et.EntityType} onClick={() => handleMenuClick(et, ctx)}>
               <FontAwesomeIcon icon="envelope" className="icon" />
               {getToString(et)}
             </Dropdown.Item>
+          } as ContextualMenuItem)
           )
         } as MenuItemBlock;
       });

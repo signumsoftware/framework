@@ -142,7 +142,7 @@ export namespace AuthAdminClient {
       Operations.Options.maybeReadonly = ti => ti.maxTypeAllowed == "Write" && ti.minTypeAllowed != "Write";
       Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Rules/TypeRulePackControl')));
 
-      QuickLinkClient.registerQuickLink(RoleEntity, new QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(), (ctx, e) => API.fetchTypeRulePack(ctx.lite.id!)
+      QuickLinkClient.registerQuickLink(RoleEntity, new  QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(), (ctx, e) => API.fetchTypeRulePack(ctx.lite.id!)
             .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })), {
         isVisible: AppContext.isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null
       }));

@@ -490,6 +490,19 @@ export default function renderPivotTable({ data, width, height, parameters, load
             p.isSummary == 1 ? "#f8f8f8" :
               style && style.background && style.background(gr?.value, firstValue(multiVal ??= sumValue(p.gor)));
 
+
+    function replacePalette(cssProps: React.CSSProperties | undefined): React.CSSProperties | undefined {
+
+      if (cssProps == null || gr?.column == null)
+        return undefined;
+
+      return Dic.mapObject(cssProps as any, (key, value) => {
+        if (typeof value == "string" && value.contains("%PALETTE%"))
+          return value.replace("%PALETTE%", gr?.value == null ? "" : gr!.column.getColor(gr.value) ?? "")
+
+        return value;
+      });
+    }
     
 
     let cssStyle: React.CSSProperties | undefined = style && {
@@ -503,7 +516,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       paddingLeft: p.indent ? (p.indent * 30) + "px" : undefined,
       textAlign: p.indent != undefined ? "left" : "center",
       fontWeight: p.isSummary ? "bold" : undefined,
-      ...style?.cssStyle,
+      ...replacePalette(style?.cssStyle),
     };
 
 
@@ -542,7 +555,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       if (style?.cssStyleDiv)
         return (
           <td style={cssStyle}>
-            <div style={style.cssStyleDiv}>
+            <div style={replacePalette(style.cssStyleDiv)}>
               {link}
               {createLink}
             </div>
@@ -572,7 +585,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     if (style?.cssStyleDiv)
       return (
         <th style={cssStyle} colSpan={p.colSpan} rowSpan={p.rowSpan}>
-          <div style={style.cssStyleDiv}>
+          <div style={replacePalette(style.cssStyleDiv)}>
             {titleElement}
             {link && <span> ({link})</span>}
             {createLink}

@@ -142,7 +142,12 @@ public class FullTextTableIndex : TableIndex
     public class PostgresOptions
     {
         public string TsVectorColumnName = PostgresTsVectorColumn.DefaultTsVectorColumn;
-        public string Configuration = Schema.Current.ForceCultureInfo?.EnglishName.ToLower().Try(a => a.TryBefore(" ") ?? a) ?? "english";
+        public string Configuration = DefaultLanguage();
+
+        public static string DefaultLanguage()
+        {
+            return Schema.Current.ForceCultureInfo?.EnglishName.ToLower().Try(a => a.TryBefore(" ") ?? a) ?? "english";
+        }
 
         public Dictionary<string, NpgsqlTsVector.Lexeme.Weight> Weights = new Dictionary<string, NpgsqlTsVector.Lexeme.Weight>(); //If not set it will use the order A, B, C, D, D, D...
         internal void DefaultWeights(IColumn[] columns)

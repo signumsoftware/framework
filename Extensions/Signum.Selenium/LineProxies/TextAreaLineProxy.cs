@@ -22,7 +22,7 @@ public class TextAreaLineProxy : BaseLineProxy
     {
         var textLine = TextAreaLocator.Find();
 
-        return /*textLine.GetDomAttribute("data-value") ??*/ textLine.GetDomProperty("value");
+        return /*textLine.GetDomAttribute("data-value") ??*/ textLine.GetDomProperty("value")!;
     }
 
 

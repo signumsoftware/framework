@@ -93,7 +93,7 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
     if (props.children)
       return props.children;
 
-    let text: string = coc.settings?.text ? coc.settings.text(coc) : coc.operationInfo.niceName;
+    let text: string = coc.text ?? (coc.settings?.text ? coc.settings.text(coc) : coc.operationInfo.niceName);
 
     return EntityOperations.withIcon(text, icon, iconColor, iconAlign);
   }

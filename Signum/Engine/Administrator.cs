@@ -153,7 +153,7 @@ public static class Administrator
 
         command.OpenSqlFileRetry();
 
-        GlobalLazy.ResetAll();
+        GlobalLazy.ResetAll(systemLog: false);
         Schema.Current.InvalidateMetadata();
         Schema.Current.InvalidateCache();
     }
@@ -172,6 +172,11 @@ public static class Administrator
             Connector.Current.SqlBuilder.UseDatabase(),
             command,
             new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
+    }
+
+    public static bool NeedsSynchrhronization()
+    {
+        return Schema.Current.NeedsSynchronization();
     }
 
     public static void CreateTemporaryTable<T>()

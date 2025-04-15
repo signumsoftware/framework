@@ -178,6 +178,11 @@
   <Type Name="QueryRulePack" Description="Abfrageregelpack">
     <Member Name="Type" Description="Typ" />
   </Type>
+  <Type Name="ResetPasswordB2CMessage">
+    <Member Name="DoYouWantToContinue" Description="Möchten Sie fortfahren?" />
+    <Member Name="ResetPassword" Description="Passwort zurücksetzen" />
+    <Member Name="ResetPasswordRequested" Description="Passwort zurücksetzen angefordert" />
+  </Type>
   <Type Name="RoleEntity" Description="Rolle">
     <Member Name="Description" Description="Beschreibung" />
     <Member Name="InheritsFrom" Description="Erbt von" />

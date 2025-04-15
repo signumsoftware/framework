@@ -4,7 +4,7 @@ import { classes } from '@framework/Globals'
 import { isTypeEnum, PropertyRoute } from '@framework/Reflection'
 import { Typeahead } from '@framework/Components'
 import { TypeHelpClient } from './TypeHelpClient'
-import ContextMenu from '@framework/SearchControl/ContextMenu'
+import ContextMenu, { getMouseEventPosition } from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import "./TypeHelpComponent.css"
 import { useAPI } from '@framework/Hooks'
@@ -149,7 +149,7 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
     e.stopPropagation();
     var pr = PropertyRoute.parse((help as TypeHelpClient.TypeHelp).cleanTypeName, m.propertyString);
     setSelected(pr);
-    setContextMenuPosition(ContextMenu.getPositionEvent(e));
+    setContextMenuPosition(getMouseEventPosition(e));
   }
 
   function renderMember(h: TypeHelpClient.TypeHelp, m: TypeHelpClient.TypeMemberHelp, index: number): React.ReactChild {

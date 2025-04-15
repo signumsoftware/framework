@@ -1671,6 +1671,10 @@ export class QueryTokenString<T> {
     return new QueryTokenString<number>(this.token + ".Rank");
   }
 
+  tsvector(column = "tsvector"): QueryTokenString<string> {
+    return new QueryTokenString<string>(this.token + "." + column);
+  }
+
   operation(os: OperationSymbol): string { //operation tokens are leaf
     return this.token + ".[Operations]." + os.key.replace(".", "#");
   }

@@ -10,6 +10,7 @@ using Microsoft.Kiota.Abstractions.Extensions;
 using Signum.Authorization;
 using Signum.Files;
 using Signum.Authorization.ActiveDirectory.Azure;
+using Signum.Utilities.Synchronization;
 
 namespace Signum.Mailing.MicrosoftGraph;
 
@@ -27,72 +28,61 @@ public class MicrosoftGraphSender : EmailSenderBase
 
     protected override void SendInternal(EmailMessageEntity email)
     {
+        var tokenCritical = microsoftGraph.GeTokenCredential();
+        GraphServiceClient graphClient = new GraphServiceClient(tokenCritical);
+
+        var message = ToGraphMessage(email);
+        var userId = email.From.AzureUserId.ToString();
+        var senderUser = graphClient.Users[userId];
+
+        SendMessage(senderUser, message);
+    }
+
+    public static void SendMessage(Microsoft.Graph.Users.Item.UserItemRequestBuilder senderUser, Message message)
+    {
         try
         {
-            try
+            var bigAttachments = message.Attachments?.Extract(a => a is FileAttachment fa && fa.ContentBytes!.Length > MicrosoftGraphFileSizeLimit);
+            if (bigAttachments.IsNullOrEmpty())
             {
-                var tokenCritical = microsoftGraph.GeTokenCredential();
-                GraphServiceClient graphClient = new GraphServiceClient(tokenCritical);
-
-                var bigAttachments = email.Attachments.Where(a => a.File.FileLength > MicrosoftGraphFileSizeLimit).ToList();
-
-                var message = ToGraphMessageWithSmallAttachments(email);
-                var userId = email.From.AzureUserId.ToString();
-                var user = graphClient.Users[userId];
-
-                if (bigAttachments.IsEmpty())
+                senderUser.SendMail.PostAsync(new Microsoft.Graph.Users.Item.SendMail.SendMailPostRequestBody
                 {
-                    user.SendMail.PostAsync(new Microsoft.Graph.Users.Item.SendMail.SendMailPostRequestBody
-                    {
-                        Message = message,
-                        SaveToSentItems = false,
-                    }).Wait();
-                }
-                else if (bigAttachments.Any())
-                {
-                    message.IsDraft = true;
+                    Message = message,
+                    SaveToSentItems = false,
+                }).WaitSafe();
+            }
+            else if (bigAttachments.Any())
+            {
+                message.IsDraft = true;
 
-                    var newMessage = user.Messages.PostAsync(message).Result!;
-                    foreach (var a in bigAttachments)
+                var newMessage = senderUser.Messages.PostAsync(message).ResultSafe()!;
+                foreach (var a in bigAttachments.Cast<FileAttachment>())
+                {
+                    UploadSession uploadSession = senderUser.Messages[newMessage.Id].Attachments.CreateUploadSession.PostAsync(new CreateUploadSessionPostRequestBody
                     {
-                        UploadSession uploadSession = user.Messages[newMessage.Id].Attachments.CreateUploadSession.PostAsync(new CreateUploadSessionPostRequestBody
+                        AttachmentItem = new AttachmentItem
                         {
-                            AttachmentItem = new AttachmentItem
-                            {
-                                AttachmentType = AttachmentType.File,
-                                IsInline = a.Type == EmailAttachmentType.LinkedResource,
-                                Name = a.File.FileName,
-                                Size = a.File.FileLength,
-                                ContentType = MimeMapping.GetMimeType(a.File.FileName)
-                            },
-                        }).Result!;
+                            AttachmentType = AttachmentType.File,
+                            IsInline = a.IsInline,
+                            Name = a.Name,
+                            Size = a.ContentBytes!.Length,
+                            ContentType = MimeMapping.GetMimeType(a.Name!)
+                        },
+                    }).ResultSafe()!;
 
-                        int maxSliceSize = 320 * 1024;
-                        
-                        using var fileStream = new MemoryStream(a.File.GetByteArray());
+                    int maxSliceSize = 320 * 1024;
 
-                        var fileUploadTask = new LargeFileUploadTask<FileAttachment>(uploadSession, fileStream, maxSliceSize).UploadAsync().Result;
+                    using var fileStream = new MemoryStream(a.ContentBytes!, false);
 
-                        if (!fileUploadTask.UploadSucceeded)
-                            throw new InvalidOperationException("Upload of big files to Microsoft Graph didn't succeed");
-                    }
+                    var fileUploadTask = new LargeFileUploadTask<FileAttachment>(uploadSession, fileStream, maxSliceSize).UploadAsync().Result;
 
-                    user.MailFolders["Drafts"].Messages[newMessage.Id].Send.PostAsync().Wait();
+                    if (!fileUploadTask.UploadSucceeded)
+                        throw new InvalidOperationException("Upload of big files to Microsoft Graph didn't succeed");
                 }
+
+                senderUser.MailFolders["Drafts"].Messages[newMessage.Id].Send.PostAsync().WaitSafe();
             }
-            catch (AggregateException e)
-            {
-                var only = e.InnerExceptions.Only();
-                if (only != null)
-                {
-                    only.PreserveStackTrace();
-                    throw only;
-                }
-                else
-                {
-                    throw;
-                }
-            }
+
         }
         catch (ODataError e)
         {
@@ -100,7 +90,7 @@ public class MicrosoftGraphSender : EmailSenderBase
         }
     }
 
-    private Message ToGraphMessageWithSmallAttachments(EmailMessageEntity email)
+    private Message ToGraphMessage(EmailMessageEntity email)
     {
         return new Message
         {
@@ -114,27 +104,15 @@ public class MicrosoftGraphSender : EmailSenderBase
             ToRecipients = email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => r.ToRecipient()).ToList(),
             CcRecipients = email.Recipients.Where(r => r.Kind == EmailRecipientKind.Cc).Select(r => r.ToRecipient()).ToList(),
             BccRecipients = email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => r.ToRecipient()).ToList(),
-            Attachments = GetAttachments(email.Attachments)
+            Attachments = email.Attachments.Select(a => (Attachment)new FileAttachment
+            {
+                ContentId = a.ContentId,
+                Name = a.File.FileName,
+                IsInline = a.Type == EmailAttachmentType.LinkedResource,
+                ContentType = MimeMapping.GetMimeType(a.File.FileName),
+                ContentBytes = a.File.GetByteArray(),
+            }).ToList()
         };
-    }
-
-    private List<Attachment> GetAttachments(MList<EmailAttachmentEmbedded> attachments)
-    {
-        var result = new List<Attachment>();
-        
-        foreach (var a in attachments)
-        {
-            if (a.File.FileLength <= MicrosoftGraphFileSizeLimit)
-                result.Add(new FileAttachment
-                {
-                    ContentId = a.ContentId,
-                    Name = a.File.FileName,
-                    IsInline = a.Type == EmailAttachmentType.LinkedResource,
-                    ContentType = MimeMapping.GetMimeType(a.File.FileName),
-                    ContentBytes = a.File.GetByteArray(),
-                });
-        }
-        return result;
     }
 }
 

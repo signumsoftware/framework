@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, Binding,  } from '@framework/Lines'
+import { AutoLine, Binding, } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { TextPartEntity, TextPartType } from '../Signum.Dashboard';
 import { Entity } from '@framework/Signum.Entities';
@@ -16,11 +16,12 @@ export function HtmlViewer(p: { text: string; htmlAttributes?: React.HTMLAttribu
 
   return (
     <div className="html-viewer" >
-        <HtmlEditor readOnly
-          binding={binding}
-          htmlAttributes={p.htmlAttributes}
-          toolbarButtons={c => null} plugins={[
-          ]} />
+      <HtmlEditor readOnly
+        binding={binding}
+        htmlAttributes={p.htmlAttributes}
+        small
+        plugins={[]}
+      />
     </div>
   );
 }
@@ -37,7 +38,7 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
   }, [p.ctx.value]);
 
   const forceUpdate = useForceUpdate();
-  
+
 
   function getEditType(): React.JSX.Element {
     if (p.ctx.value.textPartType == "Text")
@@ -67,26 +68,26 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
   }
 
 
- return (
-   <div>
-     <div style={{ marginBottom: "20px" }}>
-    </div>
-    <div className="row">
-       <div className="col-sm-4">
-         <AutoLine ctx={ctx.subCtx(s => s.textPartType)} onChange={() => forceUpdate()} />
+  return (
+    <div>
+      <div style={{ marginBottom: "20px" }}>
       </div>
-       <div className="col-sm-4">
-         {p.ctx.value.textPartType  == "Markdown" ? <a href="#" onClick={e => { e.preventDefault(); setIsPreview(!isPreview); }} >
-           <FontAwesomeIcon icon={isPreview ? "edit" : "eye"} className="me-1" />{isPreview ? "Edit" : "Preview"}
-         </a> : null}
+      <div className="row">
+        <div className="col-sm-4">
+          <AutoLine ctx={ctx.subCtx(s => s.textPartType)} onChange={() => forceUpdate()} />
+        </div>
+        <div className="col-sm-4">
+          {p.ctx.value.textPartType == "Markdown" ? <a href="#" onClick={e => { e.preventDefault(); setIsPreview(!isPreview); }} >
+            <FontAwesomeIcon icon={isPreview ? "edit" : "eye"} className="me-1" />{isPreview ? "Edit" : "Preview"}
+          </a> : null}
+        </div>
+      </div>
+      <div className="form-inline">
+        {isPreview ?
+          getPreviewType() :
+          getEditType()
+        }
       </div>
     </div>
-    <div className="form-inline">
-      {isPreview ?
-         getPreviewType() :
-         getEditType() 
-      }
-    </div>
-  </div>
   );
 }

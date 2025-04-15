@@ -161,7 +161,7 @@ public static class EntityButtonContainerExtensions
     {
         try
         {
-            return container.Element.TryFindElement(By.CssSelector("div.sf-main-control[data-refresh-count]"))?.GetDomAttribute("data-refresh-count").ToLong();
+            return container.Element.TryFindElement(By.CssSelector("div.sf-main-control[data-refresh-count]"))?.GetDomAttribute("data-refresh-count")!.ToLong();
         }
         catch
         {

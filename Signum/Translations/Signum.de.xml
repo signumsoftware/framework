@@ -286,6 +286,10 @@
     <Member Name="NotLike" Description="nicht wie" />
     <Member Name="NotStartsWith" Description="beginnt nicht mit" />
     <Member Name="StartsWith" Description="beginnt mit" />
+    <Member Name="TsQuery" Description="tsquery" />
+    <Member Name="TsQuery_Phrase" Description="tsquery (Phrase)" />
+    <Member Name="TsQuery_Plain" Description="tsquery (einfach)" />
+    <Member Name="TsQuery_WebSearch" Description="tsquery (Websuche)" />
   </Type>
   <Type Name="FrameMessage">
     <Member Name="Copied" Description="Kopiert" />

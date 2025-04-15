@@ -35,6 +35,7 @@ export interface HtmlEditorProps {
   converter?: ITextConverter;
   innerRef?: React.Ref<LexicalEditor>;
   plugins?: HtmlEditorExtension[];
+  handleKeybindings?: (event: KeyboardEvent) => boolean;
   toolbarButtons?: (
     c: HtmlEditorController
   ) => React.ReactElement | React.ReactFragment | null;
@@ -62,6 +63,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
     htmlAttributes,
     mandatory,
     initiallyFocused,
+    handleKeybindings,
     ...props }: HtmlEditorProps,
   ref?: React.Ref<HtmlEditorController>
 ) {
@@ -73,6 +75,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
     innerRef,
     initiallyFocused,
     plugins,
+    handleKeybindings,
   });
 
   React.useImperativeHandle(ref, () => controller, [controller]);
@@ -100,6 +103,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
             nodes: [HeadingNode, QuoteNode, ...nodes!],
             theme: LexicalTheme,
             onError: (error) => console.error(error),
+            editable: !readOnly
           }}
         >
             {controller.overrideToolbar ? (
@@ -114,7 +118,6 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
                   <ContentEditable
                     id="editor-editable"
                     className="public-DraftEditor-content"
-                    readOnly={controller.readOnly}
                     onFocus={(event: React.FocusEvent) => {
                       props.onEditorFocus?.(event, controller);
                     }}

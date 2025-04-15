@@ -9,6 +9,7 @@ public class UserTicketServer
 {
     public static Func<string> OnCookieName = () => "sfUser";
     public static string CookieName { get { return OnCookieName(); } }
+    public static Action<ActionContext> OnSaveCookie = ac => SaveCookie(ac);
 
     public static bool LoginFromCookie(ActionContext ac)
     {
