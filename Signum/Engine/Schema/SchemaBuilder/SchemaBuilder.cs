@@ -1202,6 +1202,8 @@ public class GlobalLazyManager
         };
         ee.PreUnsafeUpdate += (u, eq) => { action(); return null; };
         ee.PreUnsafeDelete += (q) => { action(); return null; };
+        ee.PreUnsafeInsert += (query, constructor, entityQuery) => { action(); return constructor; };
+        ee.PreBulkInsert += (isMList) => { action(); };
     }
 
     public virtual void OnLoad(SchemaBuilder sb, InvalidateWith invalidateWith)

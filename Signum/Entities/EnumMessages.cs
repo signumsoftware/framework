@@ -342,7 +342,113 @@ public enum SearchMessage
     AdvancedFilters,
     FilterDesigner,
     TimeMachine,
-    Options
+    Options,
+
+    SearchHelp,   
+    SearchControl,
+    [Description("The {0} is very powerful, but can be intimidating. Take some time to learn how to use it... will be worth it!")]
+    The0IsVeryPowerfulButCanBeIntimidatingTakeSomeTimeToLearnHowToUseItWillBeWorthIt,
+    TheBasics,
+    [Description("Currently we are in the query {0}, you can open a {1} by clicking the {2} icon, or doing {3} in the row (but not in a link!).")]
+    CurrentlyWeAreInTheQuery0YouCanOpenA1ByClickingThe2IconOrDoing3InTheRowButNotInALink,
+    [Description("Currently we are in the query {0}, grouped by {1}, you can open a group by clicking the {2} icon, or doing {3} in the row (but not in a link!).")]
+    CurrentlyWeAreInTheQuery0GroupedBy1YouCanOpenAGroupByClickingThe2IconOrDoing3InTheRowButNotInALink,
+    [Description("double-click")]
+    DoubleClick,
+    GroupedBy,
+    [Description("you can open a group by clicking in the")]
+    YouCanOpenAGroupByClickingInThe,
+    [Description("Doing {0} in the row will select the entity and close the modal automatically, alternatively you can select one entity and click OK.")]
+    Doing0InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK,
+    [Description("You can use the prepared filters on the top to quickly find the {0} you are looking for.")]
+    YouCanUseThePreparedFiltersOnTheTopToQuicklyFindThe0YouAreLookingFor,
+    [Description("Ordering results")]
+    OrderingResults,
+    [Description("You can order results by clicking in a column header, default ordering is {0} and by clicking again it changes to {1}. You can order by more than one column if you keep {2} down when clicking on the columns header.")]
+    YouCanOrderResultsByClickingInAColumnHeaderDefaultOrderingIs0AndByClickingAgainItChangesTo1YouCanOrderByMoreThanOneColumnIfYouKeep2DownWhenClickingOnTheColumnsHeader,
+    Ascending,
+    Descending,
+    Shift,
+    [Description("Change columns")]
+    ChangeColumns,
+    [Description("You are not limited to the columns you see! The default columns can be changed by {0} in a column header and then select {1}, {2} or {3}.")]
+    YouAreNotLimitedToTheColumnsYouSeeTheDefaultColumnsCanBeChangedBy0InAColumnHeaderAndThenSelect123,
+    [Description("right-clicking")]
+    RightClicking,
+    [Description("right-click")]
+    RightClick,
+    [Description("Insert Column")]
+    InsertColumn,
+    [Description("Edit Column")]
+    EditColumn,
+    [Description("Remove Column")]
+    RemoveColumn,
+    [Description("You can also {0} the columns by dragging and dropping them to another position.")]
+    YouCanAlso0TheColumnsByDraggingAndDroppingThemToAnotherPosition,
+    [Description("rearrange")]
+    Rearrange,
+    [Description("When inserting, the new column will be added before or after the selected column, depending where you {0}.")]
+    WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumnDependingWhereYou0,
+    [Description("Click on the {0} button to open the Advanced filters, this will allow you create complex filters manually by selecting the {1} of the entity (or a related entities), a comparison {2} and a {3} to compare.")]
+    ClickOnThe0ButtonToOpenTheAdvancedFiltersThisWillAllowYouCreateComplexFiltersManuallyBySelectingThe1OfTheEntityOrARelatedEntitiesAComparison2AndA3ToCompare,
+    [Description("Trick: You can {0} on a {1} and choose {2} to quickly filter by this column. Even more, you can {3} to filter by this {4} directly.")]
+    TrickYouCan0OnA1AndChoose2ToQuicklyFilterByThisColumnEvenMoreYouCan3ToFilterByThis4Directly,
+    [Description("column header")]
+    ColumnHeader,
+    [Description("Grouping results by one (or more) column")]
+    GroupingResultsByOneOrMoreColumn,
+    [Description("You can group results by {0} in a column header and selecting {1}. All the columns will disapear except the selected one and an agregation column (typically {2}).")]
+    YouCanGroupResultsBy0InAColumnHeaderAndSelecting1AllTheColumnsWillDisappearExceptTheSelectedOneAndAnAggregationColumnTypically2,
+    [Description("Group by this column")]
+    GroupByThisColumn,
+    [Description("Group help")]
+    GroupHelp,
+    [Description("Any new column should either be an aggregate {0} or it will be considered a new group key {1}.")]
+    AnyNewColumnShouldEitherBeAnAggregate0OrItWillBeConsideredANewGroupKey1,
+    [Description("Once grouping you can filter normally or using aggregates as the field ({0}).")]
+    OnceGroupingYouCanFilterNormallyOrUsingAggregatesAsTheField0,
+    [Description("in SQL")]
+    InSql,
+    [Description("Finally you can stop grouping by {0} in a column header and select {1}")]
+    FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1,
+    [Description("Restore default columns")]
+    RestoreDefaultColumns,
+    [Description("A query expression could be any field of the")]
+    AQueryExpressionCouldBeAnyFieldOfThe,
+    [Description("like")]
+    Like,
+    [Description("or any other field that you see in the")]
+    OrAnyOtherFieldThatYouSeeInThe,
+    [Description("when you click")]
+    WhenYouClick,
+    [Description("icon) or any related entity.")]
+    IconOrAnyRelatedEntity,
+    [Description("A query expression could be any column of the")]
+    AQueryExpressionCouldBeAnyColumnOfThe,
+    [Description("or any other field that you see in the Project when you click")]
+    OrAnyOtherFieldThatYouSeeInTheProjectWhenYouClick,
+    [Description("The operation that will be used to compare the")]
+    TheOperationThatWillBeUsedToCompareThe,
+    [Description("with the")]
+    WithThe,
+    [Description("Equals, Distinct, GreaterThan")]
+    EqualsDistinctGreaterThan,
+    [Description("etc...")]
+    Etc,
+    [Description("IsIn")]
+    IsIn,
+    [Description("IsNotIn")]
+    IsNotIn,
+    [Description("The value that will be compared with the")]
+    TheValueThatWillBeComparedWithThe,
+    [Description("typically has the same type as the field, but some operators like")]
+    TypicallyHasTheSameTypeAsTheFieldButSomeOperatorsLike,
+    [Description("allow to select multiple values.")]
+    AllowToSelectMultipleValues,
+    [Description("You are editing a column, let me explain what each field does:")]
+    YouAreEditingAColumnLetMeExplainWhatEachFieldDoes,
+    [Description("Can be used as the first item, counts the number of rows on each group.")]
+    CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup
 }
 
 public enum SelectorMessage

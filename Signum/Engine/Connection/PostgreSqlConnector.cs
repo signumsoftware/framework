@@ -173,10 +173,8 @@ public class PostgreSqlConnector : Connector
         if (Transaction.HasTransaction)
             return action(null);
 
-        using (NpgsqlConnection con = new NpgsqlConnection(this.ConnectionString))
+        using (NpgsqlConnection con = this.DataSource.OpenConnection())
         {
-            con.Open();
-
             return action(con);
         }
     }

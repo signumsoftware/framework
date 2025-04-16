@@ -72,7 +72,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
                     BlobContainerName = client.Name,
                     BlobName = efp.Suffix,
                     Resource = "b", // "b" = blob, "c" = container
-                    StartsOn = DateTimeOffset.UtcNow.AddSeconds(-10),
+                    StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
                     ExpiresOn = DateTimeOffset.UtcNow.Add(SASTokenExpires(efp))
                 };
 

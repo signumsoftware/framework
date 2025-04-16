@@ -58,6 +58,7 @@ public class PostgresBroadcast : IServerBroadcast
                     Running = true;
                     while (true)
                     {
+                        //Running TestEnvironment? Just continue!
                         conn.Wait();   // Thread will block here
                     }
                 }
@@ -67,12 +68,14 @@ public class PostgresBroadcast : IServerBroadcast
                     {
                         Receive?.Invoke(CacheLogic.Method_InvalidateAllTable, "nodb");
                     }
-
-                    e.LogException(a =>
+                    else
                     {
-                        a.ControllerName = nameof(PostgresBroadcast);
-                        a.ActionName = "Fatal";
-                    });
+                        e.LogException(a =>
+                        {
+                            a.ControllerName = nameof(PostgresBroadcast);
+                            a.ActionName = "Fatal";
+                        });
+                    }
                 }
 
                 Running = false;
