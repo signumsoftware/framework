@@ -185,8 +185,10 @@ ErrorModal.register = () => {
     if (error != null)
       logError(error);
 
-    if (Modals.isStarted()) 
+    if (Modals.isStarted()) {
+      console.error(error);
       ErrorModal.showErrorModal(error);
+    }
     else if (oldOnError != null) {
       if (error instanceof ServiceError)
         oldOnError(message, filename, lineno, colno, {
