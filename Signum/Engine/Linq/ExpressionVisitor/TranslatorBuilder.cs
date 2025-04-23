@@ -446,10 +446,12 @@ internal static class TranslatorBuilder
 
             var model = Visit(lite.CustomModelExpression);
 
-            return Expression.Call(miToLiteFatInternal.MakeGenericMethod(reference.Type),
+            var result =  Expression.Call(miToLiteFatInternal.MakeGenericMethod(reference.Type),
                 reference,
                 model ?? Expression.Constant(null, typeof(object)),
                 Expression.Constant(lite.CustomModelTypes, typeof(ReadOnlyDictionary<Type, Type>)));
+
+            return PostRetrieving(result);
         }
 
         static MethodInfo miToLiteFatInternal = ReflectionTools.GetMethodInfo(() => ToLiteFatInternal<Entity>(null, null, null!)).GetGenericMethodDefinition();

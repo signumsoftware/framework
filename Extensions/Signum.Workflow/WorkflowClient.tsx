@@ -62,8 +62,26 @@ import { isPermissionAuthorized } from '@framework/AppContext';
 import "./Case/Inbox.css";
 import { useAPI } from '../../Signum/React/Hooks';
 
+
 export namespace WorkflowClient {
 
+  export interface WorkflowCustomClick<T extends Entity> {
+    onClick: (eoc: EntityOperationContext<T>) => Promise<void>
+    onContextualClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
+    onContextualFromManyClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
+  }
+
+  export const registeredOnClick: Record<string, Record<string, WorkflowCustomClick<any>>> = {};
+
+  export function registerCustomClick<T extends Entity>(type: Type<T>, workflowActivity: string, customClickName: string, wcc: WorkflowCustomClick<T>): void {
+
+    if (!registeredOnClick[workflowActivity])
+      registeredOnClick[workflowActivity] = {}; 
+
+    registeredOnClick[workflowActivity][customClickName] = wcc;
+
+  }
+  
   export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }): void {
 
     UserAssetClient.start({ routes: options.routes });
@@ -329,7 +347,17 @@ export namespace WorkflowClient {
             order: s?.order ?? 0,
             shortcut: e => eoc.onKeyDown(e),
             button: wa.customNextButton == null ? <OperationButton eoc={eoc} group={group} />
-              : <OperationButton eoc={eoc} group={group} color={wa.customNextButton.style.toLowerCase() as BsColor}>{wa.customNextButton.name} </OperationButton>
+              : <OperationButton eoc={eoc} group={group} color={wa.customNextButton.style.toLowerCase() as BsColor}
+                onOperationClick={async () => {
+                  if (registeredOnClick[wa.name] != undefined && registeredOnClick[wa.name][wa.customNextButton!.name] != undefined) {
+                    registeredOnClick[wa.name][wa.customNextButton!.name].onClick(eoc);
+                  }
+                  else {
+                    eoc.frame.execute(() =>
+                      eoc.defaultClick(wa.customNextButton!.name)
+                    );
+                  }
+                }}>{wa.customNextButton.name} </OperationButton>
           }];
         } else if (wa.type == "Decision") {
           return wa.decisionOptions.map(mle => ({
@@ -338,10 +366,15 @@ export namespace WorkflowClient {
             button: <OperationButton eoc={eoc} group={group}
               color={mle.element.style.toLowerCase() as BsColor}
               onOperationClick={async () => {
+
+                if (registeredOnClick[wa.name] != undefined && registeredOnClick[wa.name][mle.element.name] != undefined) { 
+                  registeredOnClick[wa.name][mle.element.name].onClick;
+                }
+
                 if (mle.element.withConfirmation) {
                   const answer = await MessageModal.show({
-                    title: WorkflowActivityMessage.Conformation.niceToString(),
-                    message: WorkflowActivityMessage.Conformation0.niceToString(mle.element.name),
+                    title: WorkflowActivityMessage.Confirmation.niceToString(),
+                    message: WorkflowActivityMessage.AreYouSureYouWantToExecute0.niceToString(mle.element.name),
                     buttons: "yes_no",
                     style: "warning",
                   });
