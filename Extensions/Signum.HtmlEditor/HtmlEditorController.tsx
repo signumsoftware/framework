@@ -1,5 +1,5 @@
 import { IBinding } from "@framework/Reflection";
-import { EditorState } from "lexical";
+import { $getRoot, EditorState } from "lexical";
 import { LexicalEditor } from "lexical/LexicalEditor";
 import React from "react";
 import { HtmlEditorExtension } from "./Extensions/types";
@@ -9,6 +9,7 @@ import { isEmpty } from "./Utils/editorState";
 
 export interface HtmlEditorControllerProps {
   binding: IBinding<string | null | undefined>;
+  editableId: string;
   readOnly?: boolean;
   small?: boolean;
   converter: ITextConverter;
@@ -32,11 +33,7 @@ export class HtmlEditorController {
   small?: boolean;
   initialEditorContent?: string;
 
-  lastSavedString?: string | null
-
-  private initializeEditableElement() {
-    return document.getElementById("editor-editable");
-  }
+  lastSavedString?: { str: string | null }
 
   init(p: HtmlEditorControllerProps): void {
     this.binding = p.binding;
@@ -44,7 +41,7 @@ export class HtmlEditorController {
     this.small = p.small;
     this.converter = p.converter;
     this.plugins = p.plugins ?? [];
-    this.editableElement = this.initializeEditableElement();
+    this.editableElement = document.getElementById(p.editableId);
 
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<
       React.ReactElement | undefined
@@ -63,18 +60,26 @@ export class HtmlEditorController {
 
     const newValue = this.binding.getValue();
     React.useEffect(() => {
-      if(!this.editor || !newValue) return;
+      if(!this.editor) return;
 
-      if (this.lastSavedString === newValue) {
+      if (this.lastSavedString && this.lastSavedString.str === newValue) {
         this.lastSavedString = undefined;
         return;
       }
 
-      const newState = this.converter.$convertFromText(this.editor, newValue);
+      
+      const newState = this.converter.$convertFromText(this.editor, newValue ||'');
+       
       queueMicrotask(() => {
-        this.editor.setEditorState(newState);
+        if(newState.isEmpty()) {
+          this.editor.update(() => {
+            $getRoot().clear();
+          })
+        } else {
+          this.editor.setEditorState(newState);
+        }
         const htmlString = this.converter.$convertToText(this.editor);
-        this.initialEditorContent = htmlString
+        this.initialEditorContent = htmlString;
       })
     }, [newValue, this.editor]);
 
@@ -104,7 +109,7 @@ export class HtmlEditorController {
     
     if (newContentString !== this.initialEditorContent) {
       const value = isEmpty(this.editorState) ? null : newContentString;
-      this.lastSavedString = value;
+      this.lastSavedString = { str: value };
       this.binding.setValue(value);
     }
   }

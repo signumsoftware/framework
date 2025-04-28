@@ -198,7 +198,7 @@ public static partial class TypeAuthLogic
 
             var min = access.MinDB();
             var max = access.MaxDB();
-            if (requested <= min)
+            if (requested <= min && TypeConditionsForBinding(ident.GetType()).IsNullOrEmpty())
                 return;
 
             if (max < requested)
