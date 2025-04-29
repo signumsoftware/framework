@@ -5,7 +5,7 @@ using System.ComponentModel;
 namespace Signum.Entities;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum, AllowMultiple = false)]
-public sealed class AllowUnathenticatedAttribute : Attribute
+public sealed class AllowUnauthenticatedAttribute : Attribute
 {
 
 }
@@ -482,7 +482,7 @@ public enum SelectorMessage
     PleaseSelectAtLeastOneValueToContinue
 }
 
-[AllowUnathenticated]
+[AllowUnauthenticated]
 public enum ConnectionMessage
 {
     VersionInfo,
@@ -524,7 +524,7 @@ public enum CalendarMessage
     Today,
 }
 
-[AllowUnathenticated]
+[AllowUnauthenticated]
 public enum JavascriptMessage
 {
     [Description("Choose a type")]
@@ -627,7 +627,7 @@ public enum JavascriptMessage
 }
 
 //https://github.com/jquense/react-widgets/blob/5d4985c6dac0df34b86c7d8ad311ff97066977ab/packages/react-widgets/src/messages.tsx#L35
-[AllowUnathenticated]
+[AllowUnauthenticated]
 public enum ReactWidgetsMessage
 {
     [Description("Today")]

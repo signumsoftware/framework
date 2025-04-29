@@ -1,6 +1,6 @@
 namespace Signum.Authorization;
 
-[AllowUnathenticated]
+[AllowUnauthenticated]
 public enum LoginAuthMessage
 {
     [Description("The password must have at least {0} characters")]
@@ -98,7 +98,7 @@ public enum LoginAuthMessage
 
 }
 
-[AllowUnathenticated]
+[AllowUnauthenticated]
 public enum ResetPasswordB2CMessage
 {
     [Description("Reset Password requested")]

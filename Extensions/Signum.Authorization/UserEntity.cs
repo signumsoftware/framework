@@ -119,7 +119,7 @@ public static class UserTypeCondition
 }
 
 
-[AllowUnathenticated]
+[AllowUnauthenticated]
 public class UserLiteModel : ModelEntity
 {
     public string UserName { get; set; }
