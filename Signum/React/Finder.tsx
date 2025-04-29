@@ -1000,7 +1000,7 @@ export namespace Finder {
     if (fop.dashboardBehaviour == "UseAsInitialSelection")
       return undefined;
 
-    var operation = (fop as FilterConditionOptionParsed).operation;
+    const operation = (fop as FilterConditionOptionParsed).operation;
 
     if (fop.pinned && overridenValue == null) {
       if (fop.pinned.splitValue) {
@@ -1062,14 +1062,14 @@ export namespace Finder {
       if (overridenValue == null && fop.pinned && fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value === ""))
         return undefined;
 
-      var value = overridenValue ? overridenValue.value : fop.value;
+      const value = overridenValue ? overridenValue.value : fop.value;
 
       if (fop.token && typeof value == "string") {
         if (isNumberType(fop.token.type.name)) {
 
-          var numVal = parseInt(value);
+          const numVal = parseInt(value);
 
-          var limits = numberLimits[fop.token.type.name]
+          const limits = numberLimits[fop.token.type.name]
 
           if (isNaN(numVal) || numVal < limits.min || limits.max < numVal) {
             if (overridenValue)
@@ -1107,6 +1107,14 @@ export namespace Finder {
             value: value,
           } as FilterConditionRequest);
         }
+      }
+
+      if (Array.isArray(value)) {
+        return ({
+          token: fop.token.fullKey,
+          operation: fop.operation,
+          value: value.notNull(),
+        } as FilterConditionRequest);
       }
 
       return ({

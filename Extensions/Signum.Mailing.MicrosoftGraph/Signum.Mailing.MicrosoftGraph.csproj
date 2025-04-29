@@ -10,14 +10,14 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.1">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
 		<PackageReference Include="Signum.MSBuildTask" Version="9.0.0" />
 		<PackageReference Include="Signum.TSGenerator" Version="9.0.1" />
-		<PackageReference Include="Microsoft.Graph" Version="5.75.0" />
+		<PackageReference Include="Microsoft.Graph" Version="5.77.0" />
 	</ItemGroup>
 
 	<ItemGroup>

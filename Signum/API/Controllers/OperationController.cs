@@ -544,7 +544,8 @@ internal static class MultiSetter
     {
         var param = Expression.Parameter(typeof(object), "p");
 
-        var body = predicate.Select(p =>
+
+        var body = predicate.IsEmpty() ? Expression.Constant(true) : predicate.Select(p =>
         {
             var pr = mainRoute.AddMany(p.Property);
 

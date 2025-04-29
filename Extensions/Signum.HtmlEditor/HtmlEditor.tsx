@@ -1,7 +1,7 @@
 import { classes } from "@framework/Globals";
 import { IBinding } from "@framework/Reflection";
 import { $isCodeNode } from "@lexical/code";
-import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { InitialConfigType, LexicalComposer } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { EditorRefPlugin } from "@lexical/react/LexicalEditorRefPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
@@ -51,6 +51,8 @@ export interface HtmlEditorProps {
   ) => void;
 }
 
+const createUid = () => Math.random().toString(36).substring(2, 9);
+
 const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAttributes<HtmlEditorController>> = React.forwardRef(function HtmlEditor(
   {
     readOnly,
@@ -67,6 +69,8 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
     ...props }: HtmlEditorProps,
   ref?: React.Ref<HtmlEditorController>
 ) {
+  const id = React.useMemo(() => createUid(), []);
+  const editableId = "editable_" + id;
   const { controller, nodes, builtinComponents } = useController({
     binding,
     readOnly,
@@ -76,6 +80,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
     initiallyFocused,
     plugins,
     handleKeybindings,
+    editableId
   });
 
   React.useImperativeHandle(ref, () => controller, [controller]);
@@ -99,7 +104,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
     >
         <LexicalComposer
           initialConfig={{
-            namespace: "HtmlEditor",
+            namespace: "HtmlEditor_" + id,
             nodes: [HeadingNode, QuoteNode, ...nodes!],
             theme: LexicalTheme,
             onError: (error) => console.error(error),
@@ -116,7 +121,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
               <RichTextPlugin
                 contentEditable={
                   <ContentEditable
-                    id="editor-editable"
+                    id={editableId}
                     className="public-DraftEditor-content"
                     onFocus={(event: React.FocusEvent) => {
                       props.onEditorFocus?.(event, controller);
