@@ -398,7 +398,7 @@ public static class TypeConditionLogic
         var d = (Dictionary<TypeConditionSymbol, bool>)entity._TypeConditions!;
 
         if (d == null || !d.TryGetValue(typeCodition, out var result))
-            throw new InvalidOperationException($"TypeCondition {typeCodition} can not be evaluated in-memory for {typeof(T).Name} and has not been included when retrieving the entity. Cached entities should have in-memory type conditions");
+            throw new InvalidOperationException($"TypeCondition {typeCodition} can not be evaluated in-memory for {typeof(T).Name} and has not been included when retrieving/saving the entity.\nNote: Cached entities should have in-memory type conditions");
 
         return result;
     }
