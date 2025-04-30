@@ -675,7 +675,7 @@ public static class AuthLogic
                    roleInsertsDeletes,
                    new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
 
-                if (!SafeConsole.Ask("Did you run the previous script (Sync Roles)?"))
+                if (!interactive && !SafeConsole.Ask("Did you run the previous script (Sync Roles)?"))
                     return;
             }
             else

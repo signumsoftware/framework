@@ -815,7 +815,15 @@ END $$;"); ;
         }
 
         if (!includeCollections)
-            return update;
+        {
+            if (declare == null)
+                return update;
+
+            if (Schema.Current.Settings.IsPostgres)
+                return PostgresDoBlock(entity.Id.VariableName!, declare, update!);
+            else
+                return SqlPreCommand.Combine(Spacing.Simple, declare, update);
+        }
 
         var vmis = VirtualMList.RegisteredVirtualMLists.TryGetC(this.Type);
 
