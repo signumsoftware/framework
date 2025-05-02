@@ -13,7 +13,7 @@ namespace Signum.Basics;
 
 public static class PropertyRouteTranslationLogic
 {
-    public static Dictionary<Type, Dictionary<PropertyRoute, TranslateableRouteType>> TranslateableRoutes = new Dictionary<Type, Dictionary<PropertyRoute, TranslateableRouteType>>();
+    public static Dictionary<Type, Dictionary<PropertyRoute, TranslatableRouteType>> TranslateableRoutes = new Dictionary<Type, Dictionary<PropertyRoute, TranslatableRouteType>>();
 
     public static bool IsActivated { get; set; }
 
@@ -41,12 +41,12 @@ public static class PropertyRouteTranslationLogic
     }
 
 
-    public static void RegisterRoute<T, S>(Expression<Func<T, S>> propertyRoute, TranslateableRouteType type = TranslateableRouteType.Text) where T : Entity
+    public static void RegisterRoute<T, S>(Expression<Func<T, S>> propertyRoute, TranslatableRouteType type = TranslatableRouteType.Text) where T : Entity
     {
         RegisterRoute(PropertyRoute.Construct(propertyRoute), type);
     }
 
-    public static void RegisterRoute(PropertyRoute route, TranslateableRouteType type = TranslateableRouteType.Text)
+    public static void RegisterRoute(PropertyRoute route, TranslatableRouteType type = TranslatableRouteType.Text)
     {
         if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
             throw new InvalidOperationException("Routes of type {0} can not be traducibles".FormatWith(route.PropertyRouteType));
@@ -62,7 +62,7 @@ public static class PropertyRouteTranslationLogic
         return IsActivated && TranslateableRoutes.TryGetC(route.RootType)?.ContainsKey(route) == true;
     }
 
-    public static TranslateableRouteType? RouteType(PropertyRoute route)
+    public static TranslatableRouteType? RouteType(PropertyRoute route)
     {
         var dic = TranslateableRoutes.TryGetC(route.RootType);
 
@@ -177,13 +177,13 @@ public struct TranslatableElement<T>
 
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class TranslatableAttribute(TranslateableRouteType translatableRouteType = TranslateableRouteType.Text) : Attribute
+public sealed class TranslatableAttribute(TranslatableRouteType translatableRouteType = TranslatableRouteType.Text) : Attribute
 {
-    public TranslateableRouteType TranslatableRouteType = translatableRouteType;
+    public TranslatableRouteType TranslatableRouteType = translatableRouteType;
 }
 
 [InTypeScript(true)]
-public enum TranslateableRouteType
+public enum TranslatableRouteType
 {
     Text,
     Html

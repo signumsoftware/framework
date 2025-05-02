@@ -441,7 +441,7 @@ public static class WorkflowLogic
     {
         PropertyRouteTranslationLogic.RegisterRoute((WorkflowEntity tb) => tb.Name);
         PropertyRouteTranslationLogic.RegisterRoute((WorkflowActivityEntity tb) => tb.Name);
-        PropertyRouteTranslationLogic.RegisterRoute((WorkflowActivityEntity tb) => tb.UserHelp, TranslateableRouteType.Html);
+        PropertyRouteTranslationLogic.RegisterRoute((WorkflowActivityEntity tb) => tb.UserHelp, TranslatableRouteType.Html);
     }
 
 

@@ -182,8 +182,8 @@ export interface SystemEventLogEntity extends Entities.Entity {
   exception: Entities.Lite<ExceptionEntity> | null;
 }
 
-export const TranslateableRouteType = new EnumType<TranslateableRouteType>("TranslateableRouteType");
-export type TranslateableRouteType =
+export const TranslatableRouteType = new EnumType<TranslatableRouteType>("TranslatableRouteType");
+export type TranslatableRouteType =
   "Text" |
   "Html";
 
