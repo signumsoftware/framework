@@ -28,9 +28,9 @@ public static class PropertyRouteTranslationLogic
                 var prs = (from t in s.Tables.Keys
                            from pr in PropertyRoute.GenerateRoutes(t)
                            where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string) &&
-                           s.Settings.FieldAttribute<TranslateFieldAttribute>(pr) != null &&
+                           s.Settings.FieldAttribute<TranslatableAttribute>(pr) != null &&
                            s.Settings.FieldAttribute<IgnoreAttribute>(pr) == null
-                           select KeyValuePair.Create(pr, s.Settings.FieldAttribute<TranslateFieldAttribute>(pr)!.TranslatableRouteType)).ToList();
+                           select KeyValuePair.Create(pr, s.Settings.FieldAttribute<TranslatableAttribute>(pr)!.TranslatableRouteType)).ToList();
 
                 foreach (var kvp in prs)
                 {
@@ -177,11 +177,9 @@ public struct TranslatableElement<T>
 
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class TranslateFieldAttribute : Attribute
+public sealed class TranslatableAttribute(TranslateableRouteType translatableRouteType = TranslateableRouteType.Text) : Attribute
 {
-    public TranslateableRouteType TranslatableRouteType = TranslateableRouteType.Text;
-
-
+    public TranslateableRouteType TranslatableRouteType = translatableRouteType;
 }
 
 [InTypeScript(true)]
