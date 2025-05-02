@@ -21,6 +21,8 @@ class Upgrade_20250425_UpdateNugets : CodeUpgradeBase
                 <PackageReference Include="xunit.v3" Version="2.0.1" />
                 <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.3">
                 <PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
+                <PackageReference Include="Microsoft.Graph" Version="5.77.0" />
+                <PackageReference Include="Selenium.WebDriver" Version="4.31.0" />
                 """);
         });
 

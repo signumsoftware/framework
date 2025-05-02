@@ -95,48 +95,47 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
       className={classes(
         "sf-html-editor",
         mandatory &&
-          isEmpty(controller.editorState) &&
-          (mandatory == "warning" ? "sf-mandatory-warning" : "sf-mandatory"),
+        isEmpty(controller.editorState) &&
+        (mandatory == "warning" ? "sf-mandatory-warning" : "sf-mandatory"),
         error && "has-error",
         controller.small ? "small-mode" : "",
         htmlAttributes?.className
       )}
     >
-        <LexicalComposer
-          initialConfig={{
-            namespace: "HtmlEditor_" + id,
-            nodes: [HeadingNode, QuoteNode, ...nodes!],
-            theme: LexicalTheme,
-            onError: (error) => console.error(error),
-            editable: !readOnly
-          }}
-        >
-            {controller.overrideToolbar ? (
-              <div className="sf-draft-toolbar">{controller.overrideToolbar}</div>
-            ) : toolbarButtons ? (
-              toolbarButtons(controller)
-            ) : controller.readOnly || controller.small ? null : (
-              defaultToolbarButtons(controller)
-            )}
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable
-                    id={editableId}
-                    className="public-DraftEditor-content"
-                    onFocus={(event: React.FocusEvent) => {
-                      props.onEditorFocus?.(event, controller);
-                    }}
-                    onBlur={(event: React.FocusEvent) => {
-                      props.onEditorBlur?.(event, controller);
-                      controller.saveHtml();
-                    }}
-                  />
-                }
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <EditorRefPlugin editorRef={controller.setRefs} />
-              {builtinComponents.map(({component: Component, props }) => <Component key={Component.name} {...props} />)}
-        </LexicalComposer>
+      <LexicalComposer
+        initialConfig={{
+          namespace: "HtmlEditor_" + id,
+          nodes: [HeadingNode, QuoteNode, ...nodes!],
+          theme: LexicalTheme,
+          onError: (error) => console.error(error),
+          editable: !readOnly
+        }}
+      >
+        {
+          controller.overrideToolbar ? <div className="sf-draft-toolbar">{controller.overrideToolbar}</div> :
+            toolbarButtons ? toolbarButtons(controller) :
+              controller.readOnly || controller.small ? null :
+                defaultToolbarButtons(controller)
+        }
+        <RichTextPlugin
+          contentEditable={
+            <ContentEditable
+              id={editableId}
+              className="public-DraftEditor-content"
+              onFocus={(event: React.FocusEvent) => {
+                props.onEditorFocus?.(event, controller);
+              }}
+              onBlur={(event: React.FocusEvent) => {
+                props.onEditorBlur?.(event, controller);
+                controller.saveHtml();
+              }}
+            />
+          }
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+        <EditorRefPlugin editorRef={controller.setRefs} />
+        {builtinComponents.map(({ component: Component, props }) => <Component key={Component.name} {...props} />)}
+      </LexicalComposer>
     </div>
   );
 });
@@ -145,24 +144,9 @@ export default HtmlEditor;
 
 const defaultToolbarButtons = (c: HtmlEditorController) => (
   <div className="sf-draft-toolbar">
-    <InlineStyleButton
-      controller={c}
-      style="bold"
-      icon="bold"
-      title="Bold (Ctrl + B)"
-    />
-    <InlineStyleButton
-      controller={c}
-      style="italic"
-      icon="italic"
-      title="Italic (Ctrl + I)"
-    />
-    <InlineStyleButton
-      controller={c}
-      style="underline"
-      icon="underline"
-      title="Underline (Ctrl + U)"
-    />
+    <InlineStyleButton controller={c} style="bold" icon="bold" title="Bold (Ctrl + B)" />
+    <InlineStyleButton controller={c} style="italic" icon="italic" title="Italic (Ctrl + I)" />
+    <InlineStyleButton controller={c} style="underline" icon="underline" title="Underline (Ctrl + U)" />
     <InlineStyleButton controller={c} style="code" icon="code" title="Code" />
     <Separator />
     <SubMenuButton controller={c} title="Headings..." icon="heading">
@@ -170,38 +154,10 @@ const defaultToolbarButtons = (c: HtmlEditorController) => (
       <BlockStyleButton controller={c} blockType="h2" content="H2" isActiveFn={isHeadingActive} onClick={(editor) => formatHeading(editor, "h2")} />
       <BlockStyleButton controller={c} blockType="h3" content="H3" isActiveFn={isHeadingActive} onClick={(editor) => formatHeading(editor, "h3")} />
     </SubMenuButton>
-    <BlockStyleButton
-      controller={c}
-      blockType="ul"
-      icon="list-ul"
-      title="Unordered list"
-      isActiveFn={isListActive}
-      onClick={(editor) => formatList(editor, "ul")}
-    />
-    <BlockStyleButton
-      controller={c}
-      blockType="ol"
-      icon="list-ol"
-      title="Ordered list"
-      isActiveFn={isListActive}
-      onClick={(editor) => formatList(editor, "ol")}
-    />
-    <BlockStyleButton
-      controller={c}
-      blockType="blockquote"
-      icon="quote-right"
-      title="Quote"
-      isActiveFn={isQuoteActive}
-      onClick={formatQuote}
-    />
-    <BlockStyleButton
-      controller={c}
-      blockType="code-block"
-      icon="file-code"
-      title="Code Block"
-      isActiveFn={(selection) => !!$findMatchingParent(selection.anchor.getNode(), node => $isCodeNode(node))}
-      onClick={formatCode}
-    />
+    <BlockStyleButton controller={c} blockType="ul" icon="list-ul" title="Unordered list" isActiveFn={isListActive} onClick={(editor) => formatList(editor, "ul")} />
+    <BlockStyleButton controller={c} blockType="ol" icon="list-ol" title="Ordered list" isActiveFn={isListActive} onClick={(editor) => formatList(editor, "ol")} />
+    <BlockStyleButton controller={c} blockType="blockquote" icon="quote-right" title="Quote" isActiveFn={isQuoteActive} onClick={formatQuote} />
+    <BlockStyleButton controller={c} blockType="code-block" icon="file-code" title="Code Block" isActiveFn={(selection) => !!$findMatchingParent(selection.anchor.getNode(), node => $isCodeNode(node))} onClick={formatCode} />
     {c.extraButtons()}
   </div>
 );
