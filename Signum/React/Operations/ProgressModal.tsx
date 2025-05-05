@@ -18,7 +18,7 @@ interface ProgressModalProps<T> extends IModalProps<Operations.API.ProgressStep<
   makeRequest: () => Promise<Response>;
 }
 
-export function ProgressModal<T>(p: ProgressModalProps<T>) {
+export function ProgressModal<T>(p: ProgressModalProps<T>): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();
@@ -99,32 +99,35 @@ export function ProgressModal<T>(p: ProgressModalProps<T>) {
   );
 }
 
-ProgressModal.show = <T,>(abortController: AbortController, modalOptions: ProgressModalOptions | undefined, makeRequest: () => Promise<Response>): Promise<T> => {
+export namespace ProgressModal {
+  export function show<T>(abortController: AbortController, modalOptions: ProgressModalOptions | undefined, makeRequest: () => Promise<Response>): Promise<T> {
 
-  if (modalOptions) {
+    if (modalOptions) {
 
-    return openModal<Operations.API.ProgressStep<T> | undefined>(<ProgressModal options={modalOptions} makeRequest={makeRequest} abortController={abortController} />)
-      .then(r => {
-        if (r == null)
-          throw new Error("Operation cancelled");
+      return openModal<Operations.API.ProgressStep<T> | undefined>(<ProgressModal options={modalOptions} makeRequest={makeRequest} abortController={abortController} />)
+        .then(r => {
+          if (r == null)
+            throw new Error("Operation cancelled");
 
-        if (r.error)
-          throw new ServiceError(r.error);
-        return r.result!;
+          if (r.error)
+            throw new ServiceError(r.error);
+          return r.result!;
+        });
+
+    } else {
+
+      return makeRequest().then(r => r.json()).then(obj => {
+        var results = obj as Operations.API.ProgressStep<T>[];
+        var last = results.last();
+        if (last.error)
+          throw new ServiceError(last.error);
+        return last.result!;
       });
 
-  } else {
+    }
+  };
+}
 
-    return makeRequest().then(r => r.json()).then(obj => {
-      var results = obj as Operations.API.ProgressStep<T>[];
-      var last = results.last();
-      if (last.error)
-        throw new ServiceError(last.error);
-      return last.result!;
-    });
-
-  }
-};
 
 export interface ProgressModalOptions {
   title: React.ReactNode;

@@ -39,7 +39,7 @@ export class EntityTabRepeaterController<V extends ModifiableEntity> extends Ent
   setSelectedIndex!: (index: number) => void;
   initialIsControlled!: boolean;
 
-  init(p: EntityTabRepeaterProps<V>) {
+  init(p: EntityTabRepeaterProps<V>): void {
     super.init(p);
 
     this.initialIsControlled = React.useMemo(() => isControlled(p), []);
@@ -55,13 +55,13 @@ export class EntityTabRepeaterController<V extends ModifiableEntity> extends Ent
     }
   }
 
-  getDefaultProps(p: EntityTabRepeaterProps<V>) {
+  getDefaultProps(p: EntityTabRepeaterProps<V>): void {
     super.getDefaultProps(p);
     p.createAsLink = true;
     p.viewOnCreate = false;
   }
 
-  removeElement(mle: MListElement<V>) {
+  removeElement(mle: MListElement<V>): void {
     const list = this.props.ctx.value!;
     let deleteIndex = list.indexOf(mle);
 
@@ -70,7 +70,7 @@ export class EntityTabRepeaterController<V extends ModifiableEntity> extends Ent
     this.setValue(list);
   }
 
-  addElement(entityOrLite: V) {
+  addElement(entityOrLite: V): void {
 
     if (isLite(entityOrLite) != (this.props.type!.isLite || false))
       throw new Error("entityOrLite should be already converted");
@@ -83,7 +83,7 @@ export class EntityTabRepeaterController<V extends ModifiableEntity> extends Ent
 
 }
 
-export const EntityTabRepeater = genericForwardRef(function EntityTabRepeater<V extends ModifiableEntity>(props: EntityTabRepeaterProps<V>, ref: React.Ref<EntityTabRepeaterController<V>>) {
+export const EntityTabRepeater: <V extends ModifiableEntity>(props: EntityTabRepeaterProps<V> & React.RefAttributes<EntityTabRepeaterController<V>>) => React.ReactNode | null = genericForwardRef(function EntityTabRepeater<V extends ModifiableEntity>(props: EntityTabRepeaterProps<V>, ref: React.Ref<EntityTabRepeaterController<V>>) {
   const c = useController(EntityTabRepeaterController, props, ref);
   const p = c.props;
 
@@ -129,7 +129,7 @@ export const EntityTabRepeater = genericForwardRef(function EntityTabRepeater<V 
     return (
       <Tabs activeKey={c.selectedIndex || 0} onSelect={handleSelectTab} id={ctx.prefix + "_tab"} transition={false} mountOnEnter unmountOnExit>
         {
-          c.getMListItemContext(ctx).map((mlec, i) => {
+          c.getMListItemContext(ctx).map((mlec, i): React.JSX.Element => {
 
             if (mlec.binding == null && mlec.previousVersion) {
               return (
@@ -159,7 +159,7 @@ export const EntityTabRepeater = genericForwardRef(function EntityTabRepeater<V 
                       <span className={classes("sf-line-button", "sf-remove", "ms-2")}
                         onClick={e => { e.stopPropagation(); c.handleRemoveElementClick(e, mlec.index!) }}
                         title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-                        {EntityBaseController.getRemoveIcon()}
+                        {EntityBaseController.getTrashIcon()}
                       </span>
                     }
                     {drag && <span className={classes("sf-line-button", "sf-move", "ms-2")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}

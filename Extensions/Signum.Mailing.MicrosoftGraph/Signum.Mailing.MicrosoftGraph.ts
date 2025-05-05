@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Mailing from '../Signum.Mailing/Signum.Mailing'
 
 
-export const MicrosoftGraphEmailServiceEntity = new Type<MicrosoftGraphEmailServiceEntity>("MicrosoftGraphEmailService");
+export const MicrosoftGraphEmailServiceEntity: Type<MicrosoftGraphEmailServiceEntity> = new Type<MicrosoftGraphEmailServiceEntity>("MicrosoftGraphEmailService");
 export interface MicrosoftGraphEmailServiceEntity extends Mailing.EmailServiceEntity {
   Type: "MicrosoftGraphEmailService";
   useActiveDirectoryConfiguration: boolean;

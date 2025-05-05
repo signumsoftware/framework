@@ -2,12 +2,12 @@ import { RouteObject } from 'react-router'
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { NoteEntity, NoteOperation } from './Signum.Notes'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkExplore } from '@framework/QuickLinkClient'
 import { getQueryKey } from '@framework/Reflection'
 
 export namespace NotesClient {
   
-  export function start(options: { routes: RouteObject[], couldHaveNotes?: (typeName: string) => boolean }) {
+  export function start(options: { routes: RouteObject[], couldHaveNotes?: (typeName: string) => boolean }): void {
     Navigator.addSettings(new EntitySettings(NoteEntity, e => import('./Templates/Note')));
   
     const couldHaveNotes = options.couldHaveNotes ?? (typeName => true);
@@ -22,7 +22,7 @@ export namespace NotesClient {
     }));
   
     if (Navigator.isViewable(NoteEntity)) {
-      QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinks.QuickLinkExplore(NoteEntity, ctx => ({ queryName: NoteEntity, filterOptions: [{ token: NoteEntity.token(e => e.target), value: ctx.lite }] }),
+      QuickLinkClient.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinkExplore(NoteEntity, ctx => ({ queryName: NoteEntity, filterOptions: [{ token: NoteEntity.token(e => e.target), value: ctx.lite }] }),
         {
           isVisible: couldHaveNotes(entityType),
           icon: "note-sticky",

@@ -8,9 +8,9 @@ import { useAPIWithReload, useInterval, useSize } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 import { classes } from '@framework/Globals'
 
-export default function HeavyList() {
+export default function HeavyList(): React.JSX.Element {
 
-    const[ignoreProfilerHeavyEntries, setIgnoreProfilerHeavyEntries] = React.useState<boolean>(true)
+  const [ignoreProfilerHeavyEntries, setIgnoreProfilerHeavyEntries] = React.useState<boolean>(true)
 
 
   const [enabled, reloadEnabled] = useAPIWithReload(() => ProfilerClient.API.Heavy.isEnabled(), [], { avoidReset: true });
@@ -71,7 +71,7 @@ export default function HeavyList() {
   }
 
   const { size, setContainer } = useSize();
-  
+
   if (entries == undefined)
     return <h3 className="display-6">Heavy Profiler (loading...) </h3>;
 
@@ -84,10 +84,10 @@ export default function HeavyList() {
         <button onClick={handleUpload} className="btn btn-info" disabled={!fileToUpload}><FontAwesomeIcon icon="cloud-arrow-up" /> Upload</button>
       </div>
       <div className="btn-toolbar">
-        <button className={classes("sf-button btn", enabled ? "btn-outline-danger" : "btn-outline-secondary")} onClick={() => handleSetEnabled(!enabled)}><FontAwesomeIcon icon={["fas", "circle"]} /> Record</button>
+        <button className={classes("btn btn-light", enabled ? "btn-outline-danger" : "btn-outline-secondary")} onClick={() => handleSetEnabled(!enabled)}><FontAwesomeIcon icon={["fas", "circle"]} /> Record</button>
         <button onClick={handleUpdate} className="btn btn-light"><FontAwesomeIcon icon="refresh" /> Update</button>
         <button onClick={handleClear} className="btn btn-light"><FontAwesomeIcon icon="trash" /> Clear</button>
-        <button onClick={handleDownload} className="btn btn-outline-info"><FontAwesomeIcon icon="cloud-arrow-down" /> Download</button>
+        <button onClick={handleDownload} className="btn btn-light btn-outline-info"><FontAwesomeIcon icon="cloud-arrow-down" /> Download</button>
       </div>
       <label>
         <input type="checkbox" className="form-check-input me-1" checked={ignoreProfilerHeavyEntries} onChange={e => setIgnoreProfilerHeavyEntries(e.currentTarget.checked)} />
@@ -144,10 +144,10 @@ function EntrieListPath({ width, entries }: { width: number, entries: ProfilerCl
   return (
     <svg width={width + "px"} height={height + "px"}>
       {data.map((v, i) => {
-        var isPH = v.role == "Web.ProfilerClient.API GET" && v.additionalData != null && v.additionalData.contains("/api/profilerHeavy/");
+        var isPH = v.kind == "Web.ProfilerClient.API GET" && v.additionalData != null && v.additionalData.contains("/api/profilerHeavy/");
         return (<g className="entry" data-full-key={v.fullIndex} key={v.fullIndex} onClick={e => handleOnClick(e, v)} opacity={isPH ? 0.5 : undefined}>
           <rect className="left-background" x={0} y={y(i)} width={labelWidth} height={entryHeight} fill="#ddd" stroke="#fff" />
-          <text className="label label-left" y={y(i)} dy={fontPadding + fontSize} fill="#000">{v.role + " " + v.additionalData}</text>
+          <text className="label label-left" y={y(i)} dy={fontPadding + fontSize} fill="#000">{v.kind + " " + v.additionalData}</text>
           <rect className="right-background" x={labelWidth} y={y(i)} width={width - labelWidth} height={entryHeight} fill="#fff" stroke="#ddd" />
           <rect className="shape" x={x(v.start)} y={y(i)} width={x(v.end)! - x(v.start)!} height={entryHeight} fill={v.color} />
           <text className="label label-right" x={x(v.end)! + 3} y={y(i)} width={x(v.end)! - x(v.start)!} dy={fontPadding + fontSize} height={entryHeight} fill='#000'>{v.elapsed}</text>

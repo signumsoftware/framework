@@ -7,6 +7,7 @@ using Signum.DynamicQuery.Tokens;
 using Microsoft.AspNetCore.Mvc;
 using Signum.API.Json;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection.Metadata;
 
 namespace Signum.API.Controllers;
 
@@ -27,6 +28,12 @@ public class QueryController : ControllerBase
     public async Task<List<Lite<Entity>>> FetchAllLites(string types, CancellationToken token)
     {
         Implementations implementations = ParseImplementations(types);
+
+        foreach (var type in implementations.Types)
+        {
+            if (EntityKindCache.GetEntityData(type) == EntityData.Transactional)
+                throw new ArgumentNullException($"{type} is a Transactional entity");
+        }
 
         return await AutocompleteUtils.FindAllLiteAsync(implementations, token);
     }
@@ -128,7 +135,7 @@ public class QueryController : ControllerBase
 
     class QueryValueResolver : IEmbeddedPropertyRouteResolver
     {
-        public PropertyRoute GetPropertyRoute(EmbeddedEntity embedde, FilterContext filterContext)
+        PropertyRoute IEmbeddedPropertyRouteResolver.GetPropertyRoute(EmbeddedEntity embedded, FilterContext filterContext)
         {
             var qvr = (QueryValueRequest)filterContext.HttpContext.Items["queryValueRequests"]!;
             return qvr.ValueToken!.GetPropertyRoute()!;
@@ -219,6 +226,7 @@ public class QueryTokenTS
         this.queryTokenType = GetQueryTokenType(qt);
         this.isGroupable = qt.IsGroupable;
         this.hasOrderAdapter = QueryUtils.OrderAdapters.Any(a => a(qt) != null);
+        this.tsVectorFor = qt is PgTsVectorColumnToken tsqt ? tsqt.GetColumnsRoutes().Select(a => a.ToString()).ToList() : null;
 
         this.preferEquals = qt.Type == typeof(string) &&
             qt.GetPropertyRoute() is PropertyRoute pr &&
@@ -235,10 +243,13 @@ public class QueryTokenTS
         if (qt is AggregateToken)
             return QueryTokenType.Aggregate;
 
-        if (qt is CollectionElementToken ce)
+        if (qt is CollectionElementToken)
             return QueryTokenType.Element;
 
-        if (qt is CollectionAnyAllToken caat)
+        if (qt is CollectionNestedToken)
+            return QueryTokenType.Nested;
+
+        if (qt is CollectionAnyAllToken)
             return QueryTokenType.AnyOrAll;
 
         if (qt is CollectionToArrayToken)
@@ -269,6 +280,8 @@ public class QueryTokenTS
     public bool hasOrderAdapter;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool preferEquals;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public IReadOnlyList<string>? tsVectorFor;
     public QueryTokenTS? parent;
     public string? propertyRoute;
 }
@@ -280,5 +293,6 @@ public enum QueryTokenType
     AnyOrAll,
     Operation,
     ToArray,
-    Manual
+    Manual,
+    Nested
 }

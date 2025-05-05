@@ -16,7 +16,7 @@ interface AutoLineModalProps extends IModalProps<any> {
   options: AutoLineModalOptions;
 }
 
-export default function AutoLineModal(p: AutoLineModalProps) {
+function AutoLineModal(p: AutoLineModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();
@@ -62,6 +62,7 @@ export default function AutoLineModal(p: AutoLineModalProps) {
     propertyRoute: props.propertyRoute,
     formGroupStyle: label ? "Basic" : "SrOnly",
     onChange: forceUpdate,
+    mandatory: p.options.allowEmptyValue == false,
   };
 
   const disabled = p.options.allowEmptyValue == false && (ctx.value == null || ctx.value == "");
@@ -74,9 +75,9 @@ export default function AutoLineModal(p: AutoLineModalProps) {
     <Modal size={p.options.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
       <div className="modal-header">
         <h5 className="modal-title">{title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}</h5>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}/>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked} />
       </div>
-      <div className="modal-body" onKeyUp={handleFiltersKeyUp}>
+      <div className="modal-body" onKeyUp={(member && member.isMultiline || p.options.doNotCloseByEnter) ? undefined : handleFiltersKeyUp}>
         <p>
           {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
         </p>
@@ -103,9 +104,13 @@ export default function AutoLineModal(p: AutoLineModalProps) {
   );
 }
 
-AutoLineModal.show = (options: AutoLineModalOptions): Promise<any> => {
-  return openModal<any>(<AutoLineModal options={options} />);
+namespace AutoLineModal {
+  export var show = (options: AutoLineModalOptions): Promise<any> => {
+    return openModal<any>(<AutoLineModal options={options} />);
+  }
 }
+
+export default AutoLineModal;
 
 export interface AutoLineModalOptions {
   propertyRoute?: PropertyRoute;
@@ -121,6 +126,7 @@ export interface AutoLineModalOptions {
   valueHtmlAttributes?: React.HTMLAttributes<any>;
   allowEmptyValue?: boolean;
   modalSize?: BsSize;
+  doNotCloseByEnter?: Boolean;
 }
 
 

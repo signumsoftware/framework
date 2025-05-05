@@ -8,7 +8,7 @@ import { FilterOptionParsed } from '../Search';
 import { CollectionMessage } from '../Signum.External';
 import { ValidationMessage } from '../Signum.Entities.Validation';
 
-export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, mainType: TypeReference }) {
+export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, mainType: TypeReference }): React.JSX.Element | null {
   const fops = p.findOptions;
 
   function getFilterTokens(fop: FilterOptionParsed): (QueryToken | undefined)[] {

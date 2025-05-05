@@ -5,6 +5,7 @@ using System.Data.SqlTypes;
 using Microsoft.Data.SqlClient;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.SqlServer;
+using Npgsql;
 
 namespace Signum.Engine;
 
@@ -89,6 +90,11 @@ public class SqlServerConnector : Connector
     public ResetLazy<Tuple<byte>> DateFirstLazy = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")!));
     public byte DateFirst => DateFirstLazy.Value.Item1;
 
+    public ResetLazy<string> LocalTimeZoneLazy = new ResetLazy<string>(() => ((SqlServerConnector) Connector.Current).Version < SqlServerVersion.SqlServer2022 ? 
+    TimeZoneInfo.Local.StandardName :
+    (string)Executor.ExecuteScalar("SELECT CURRENT_TIMEZONE_ID()")!);
+    public override string LocalTimeZone => LocalTimeZoneLazy.Value;
+
     public SqlServerVersion Version { get; set; }
 
     public SqlServerConnector(string connectionString, Schema schema, SqlServerVersion version) : base(schema)
@@ -106,7 +112,7 @@ public class SqlServerConnector : Connector
     public override bool SupportsScalarSubquery { get { return true; } }
     public override bool SupportsScalarSubqueryInAggregates { get { return false; } }
 
-    public override bool SupportsFullTextSearch
+    public bool SupportsFullTextSearch
     {
         get
         {
@@ -423,14 +429,17 @@ public class SqlServerConnector : Connector
         });
     }
 
+
+    public override string OriginalDatabaseName() => DatabaseName();
+
     public override string DatabaseName()
     {
-        return new SqlConnection(ConnectionString).Database;
+        return new SqlConnectionStringBuilder(ConnectionString).InitialCatalog;
     }
 
     public override string DataSourceName()
     {
-        return new SqlConnection(ConnectionString).DataSource;
+        return new SqlConnectionStringBuilder(ConnectionString).DataSource;
     }
 
     public override void SaveTransactionPoint(DbTransaction transaction, string savePointName)
@@ -490,10 +499,7 @@ public class SqlServerConnector : Connector
 
     public override bool AllowsSetSnapshotIsolation => this.Version >= SqlServerVersion.SqlServer2008;
 
-    public override bool AllowsIndexWithWhere(string Where)
-    {
-        return Version > SqlServerVersion.SqlServer2005 && !ComplexWhereKeywords.Any(Where.Contains);
-    }
+    public override bool AllowsIndexWithWhere(string where) => Version > SqlServerVersion.SqlServer2005 && !ComplexWhereKeywords.Any(where.Contains);
 
     public override bool RequiresRetry => this.Version == SqlServerVersion.AzureSQL;
 
@@ -521,35 +527,19 @@ public class SqlServerConnector : Connector
             }.Combine(Spacing.Simple)!;
     }
 
-    public override bool AllowsConvertToDate
-    {
-        get { return Version >= SqlServerVersion.SqlServer2008; }
-    }
+    public override bool AllowsConvertToDate => Version >= SqlServerVersion.SqlServer2008;
 
-    public override bool AllowsConvertToTime
-    {
-        get { return Version >= SqlServerVersion.SqlServer2008; }
-    }
+    public override bool AllowsConvertToTime => Version >= SqlServerVersion.SqlServer2008;
 
-    public override bool SupportsSqlDependency
-    {
-        get { return Version != SqlServerVersion.AzureSQL && Version >= SqlServerVersion.SqlServer2008; }
-    }
+    public override bool SupportsStringAggr => Version >= SqlServerVersion.SqlServer2017;
 
-    public override bool SupportsFormat
-    {
-        get { return Version >= SqlServerVersion.SqlServer2012; }
-    }
+    public override bool SupportsSqlDependency => Version != SqlServerVersion.AzureSQL && Version >= SqlServerVersion.SqlServer2008;
 
-    public override bool SupportsTemporalTables
-    {
-        get { return Version >= SqlServerVersion.SqlServer2016; }
-    }
+    public override bool SupportsFormat => Version >= SqlServerVersion.SqlServer2012;
 
-    public bool SupportsDateTrunc
-    {
-        get { return Version >= SqlServerVersion.SqlServer2022; }
-    }
+    public override bool SupportsTemporalTables => Version >= SqlServerVersion.SqlServer2016;
+
+    public bool SupportsDateTrunc => Version >= SqlServerVersion.SqlServer2022;
 
     public override bool SupportsPartitioning => true;
 
@@ -598,9 +588,9 @@ public class SqlParameterBuilder : ParameterBuilder
 
         var exp =
             uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?)), Expression.Constant(dateTimeKind)) :
-            //https://github.com/dotnet/SqlClient/issues/1009
-            uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
-            uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :
+            ////https://github.com/dotnet/SqlClient/issues/1009
+            //uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
+            //uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :
             value;
 
         Expression valueExpr = Expression.Convert(exp, typeof(object));
@@ -809,8 +799,8 @@ deallocate cur";
     public static SqlPreCommand RemoveAllScript(DatabaseName? databaseName)
     {
         var sqlBuilder = Connector.Current.SqlBuilder;
-        var systemSchemas = sqlBuilder.SystemSchemas.ToString(a => "'" + a + "'", ", ");
-        var systemSchemasExeptDbo = sqlBuilder.SystemSchemas.Where(s => s != "dbo").ToString(a => "'" + a + "'", ", ");
+        var systemSchemas = sqlBuilder.SystemSchemasSqlServer.ToString(a => "'" + a + "'", ", ");
+        var systemSchemasExeptDbo = sqlBuilder.SystemSchemasSqlServer.Where(s => s != "dbo").ToString(a => "'" + a + "'", ", ");
 
         return SqlPreCommand.Combine(Spacing.Double,
             new SqlPreCommandSimple(Use(databaseName, RemoveAllProceduresScript)),
@@ -821,7 +811,7 @@ deallocate cur";
             new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(systemSchemas))),
             Connector.Current.SupportsPartitioning ? new SqlPreCommandSimple(RemoveAllPartitionSchemas) : null,
             Connector.Current.SupportsPartitioning ? new SqlPreCommandSimple(RemoveAllPartitionFunction) : null,
-            Connector.Current.SupportsFullTextSearch ? new SqlPreCommandSimple(Use(databaseName, RemoveAllFullTextCatallogs)) : null
+            Connector.Current is SqlServerConnector ss && ss.SupportsFullTextSearch ? new SqlPreCommandSimple(Use(databaseName, RemoveAllFullTextCatallogs)) : null
             )!;
     }
 

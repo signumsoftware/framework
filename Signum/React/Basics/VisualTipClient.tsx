@@ -5,11 +5,11 @@ import { RouteObject } from "react-router";
 
 export namespace VisualTipClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     AppContext.clearSettingsActions.push(() => API.cached = null);
   }
   
-  export module API {
+  export namespace API {
   
     export let cached: Promise<string[] | null> | null | undefined  = null;
   

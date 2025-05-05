@@ -35,14 +35,14 @@ export namespace ContextualOperations {
       .map(oi => {
 
         if (oi.operationType == "ConstructorFromMany") {
-        const cos = Operations.getSettings(oi.key) as ContextualOperationSettings<Entity> | undefined;
-        return new ContextualOperationContext<Entity>(oi, ctx, cos);
+          const cos = Operations.getSettings(oi.key) as ContextualOperationSettings<Entity> | undefined;
+          return new ContextualOperationContext<Entity>(oi, ctx, cos);
         } else {
-        const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
-        const cos = eos == undefined ? undefined :
-          ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
-        const coc = new ContextualOperationContext<Entity>(oi, ctx, cos, eos);
-        return coc;
+          const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
+          const cos = eos == undefined ? undefined :
+            ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
+          const coc = new ContextualOperationContext<Entity>(oi, ctx, cos, eos);
+          return coc;
         }
       })
       .filter(coc => coc.isVisibleInContextualMenu())
@@ -58,9 +58,13 @@ export namespace ContextualOperations {
         if (normal.length) {
           var ep = await Navigator.API.fetchEntityPack(ctx.lites[0]);
           normal.forEach(coc => {
-            coc.pack = ep;
-            coc.canExecute = ep.canExecute[coc.operationInfo.key];
-            coc.isReadonly = Navigator.isReadOnly(ep, { ignoreTypeIsReadonly: true });
+            if (!(coc.operationInfo.key in ep.canExecute)) //Not allowed
+              contexts.remove(coc);
+            else {
+              coc.pack = ep;
+              coc.canExecute = ep.canExecute[coc.operationInfo.key];
+              coc.isReadonly = Navigator.isReadOnly(ep, { ignoreTypeIsReadonly: true });
+            }
           });
         }
 
@@ -204,7 +208,11 @@ function defaultHasConfirmMessage(coc: ContextualOperationContext<Entity>) {
     iconColor?: string;
   }
 
-  export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps) {
+  export const OperationMenuItem: {
+    (p: OperationMenuItemProps): React.JSX.Element;
+    getText: (coc: ContextualOperationContext<any>) => React.ReactNode;
+    simplifyName: (niceName: string) => string;
+  } = function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps): React.JSX.Element {
     const text = children ?? OperationMenuItem.getText(coc);
 
     const eos = coc.entityOperationSettings;

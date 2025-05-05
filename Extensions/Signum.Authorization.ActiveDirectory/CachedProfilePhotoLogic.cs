@@ -31,6 +31,7 @@ public static class CachedProfilePhotoLogic
                     Entity = e,
                     e.Id,
                     e.CreationDate,
+                    e.InvalidationDate,
                     e.Size,
                     e.User,
                     e.Photo,
@@ -40,13 +41,15 @@ public static class CachedProfilePhotoLogic
         }
     }
 
+    public static Func<CachedProfilePhotoEntity, DateTime> CalculateInvalidationDate = p => p.Photo == null ? Clock.Now.AddDays(7) : Clock.Now.AddMonths(1);
+
     internal static async Task<CachedProfilePhotoEntity> GetOrCreateCachedPicture(Guid oid, int size)
     {
         using (AuthLogic.Disable())
         {
             var result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size);
 
-            if (result != null)
+            if (result != null && result.InvalidationDate >= Clock.Now)
                 return result;
 
             size = AzureADLogic.ToAzureSize(size);
@@ -56,22 +59,46 @@ public static class CachedProfilePhotoLogic
             using (var tr = new Transaction())
             {
                 result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size);
+                if (result != null && result.InvalidationDate >= Clock.Now)
+                    return tr.Commit(result);
+
+                var bytes = stream?.ReadAllBytes();
+
+                if(result != null)
+                {
+                    if (bytes == null && result.Photo == null ||
+                       bytes != null && result.Photo != null && bytes.AsSpan().SequenceEqual(result.Photo.GetByteArray().AsSpan()))
+                    {
+                        result.InvalidationDate = CalculateInvalidationDate(result);
+                        result.Save();
+                        return tr.Commit(result);
+                    }
+                    else
+                    {
+                        result.Photo = bytes == null ? null : new FilePathEmbedded(AuthADFileType.CachedProfilePhoto, oid.ToString() + "x" + size + ".jpg", bytes);
+                        result.InvalidationDate = CalculateInvalidationDate(result);
+                        result.Save();
+                        return tr.Commit(result);
+                    }
+                }
+
                 if (result != null)
-                    return result;
+                    result.Delete();
 
                 var user = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
-
                 result = new CachedProfilePhotoEntity
                 {
-                    Photo = stream == null ? null :  new FilePathEmbedded(AuthADFileType.CachedProfilePhoto, oid.ToString() + "x" + size + ".jpg", stream.ReadAllBytes()),
+                    Photo = stream == null ? null : new FilePathEmbedded(AuthADFileType.CachedProfilePhoto, oid.ToString() + "x" + size + ".jpg", stream.ReadAllBytes()),
                     User = user,
                     Size = size
-                }.Save();
+                };
 
-                tr.Commit();
+                result.InvalidationDate = CalculateInvalidationDate(result);
+
+                result.Save();
+
+                return tr.Commit(result);
             }
-
-            return result;
         }
     }
 

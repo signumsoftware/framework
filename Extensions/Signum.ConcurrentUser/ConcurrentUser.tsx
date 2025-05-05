@@ -5,7 +5,7 @@ import { useSignalRCallback, useSignalRConnection, useSignalRGroup } from '@fram
 import { ConcurrentUserEntity, ConcurrentUserMessage } from './Signum.ConcurrentUser'
 import { OverlayTrigger, Popover } from 'react-bootstrap';
 import { Entity, getToString, Lite, liteKey, toLite } from '@framework/Signum.Entities'
-import { useAPI, useForceUpdate, useUpdatedRef } from '@framework/Hooks'
+import { useAPI, useForceUpdate, useUpdatedRef, useVersion } from '@framework/Hooks'
 import { GraphExplorer } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,7 +17,7 @@ import { HubConnectionState } from '@microsoft/signalr'
 import { SmallProfilePhoto } from '../Signum.Authorization/Templates/ProfilePhoto'
 import { UserEntity } from '../Signum.Authorization/Signum.Authorization'
 
-export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void }) {
+export default function ConcurrentUser(p: { entity: Entity, isExecuting: boolean, onReload: () => void }): React.JSX.Element | null {
   
   const conn = useSignalRConnection("/api/concurrentUserHub");
 
@@ -43,11 +43,11 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
     if (conn) {
 
       function updateModified() {
-        GraphExplorer.propagateAll(p.entity);
+        const modified = GraphExplorer.hasChangesNoClean(p.entity);
 
-        if (p.entity.modified != isModified.current && conn?.state == HubConnectionState.Connected) {
-          conn?.send("EntityModified", entityKey, userKey, p.entity.modified);
-          isModified.current = p.entity.modified;
+        if (modified != isModified.current && conn?.state == HubConnectionState.Connected) {
+          conn?.send("EntityModified", entityKey, userKey, modified);
+          isModified.current = modified;
         }
       }
 
@@ -60,27 +60,32 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
     }
   }, [conn, p.entity, ticks]);
 
-  var [refreshKey, setRefreshKey] = React.useState(0);
+  var [concurrentUserVersion, updateConcurrentUsers] = useVersion();
 
-  var concurrentUsers = useAPI(() => ConcurrentUserClient.API.getUsers(entityKey), [refreshKey, isModified.current, entityKey]);
+  var concurrentUsers = useAPI(() => ConcurrentUserClient.API.getUsers(entityKey), [concurrentUserVersion, isModified.current, entityKey]);
 
-  useSignalRCallback(conn, "EntitySaved", (a: string) => setTicks(a), []);
+  useSignalRCallback(conn, "EntitySaved", (a: string) => {
+    console.log(`${DateTime.now().toISO()}: EntitySaved ${a}`);
+    setTicks(a);
+  }, []);
 
-  useSignalRCallback(conn, "ConcurrentUsersChanged", () => setRefreshKey(a => a + 1), []);
+  useSignalRCallback(conn, "ConcurrentUsersChanged", () => updateConcurrentUsers(), []);
 
   if (window.__disableSignalR)
     return <FontAwesomeIcon icon="triangle-exclamation" color={"#ddd"} title={window.__disableSignalR} />;
 
-  const ticksRef = useUpdatedRef(ticks);
-  const entityRef = useUpdatedRef(p.entity);
+  //const ticksRef = useUpdatedRef(ticks);
+  //const entityRef = useUpdatedRef(p.entity);
 
+  React.useEffect(() => {
+    console.log(`${DateTime.now().toISO()}: NewEntity ${p.entity.ticks}`);
+  }, [p.entity.ticks]);
 
   //Is conditionally but the condition is a constant
-  React.useEffect(() => {
-    const handle = window.setTimeout(() => {
-
+    React.useEffect(() => {
+        console.log(`${DateTime.now().toISO()}: isExecuting: ${p.isExecuting} useEffect ${ticks} (ticks) = ${p.entity.ticks} (entity)`);
       //console.log("Effect", { ticks: ticksRef.current, entityTicks: entityRef.current.ticks });
-      if (ticksRef.current != null && ticksRef.current != entityRef.current.ticks) {
+      if (!p.isExecuting && ticks != p.entity.ticks) {
         MessageModal.show({
           title: ConcurrentUserMessage.DatabaseChangesDetected.niceToString(),
           style: "warning",
@@ -102,9 +107,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
           buttons: "yes_cancel",
         }).then(b => b == "yes" && p.onReload());
       }
-    }, 1000);
-    return () => clearTimeout(handle);
-  }, [ticks, p.entity.ticks]);
+  }, [ticks, p.entity.ticks, p.isExecuting]);
 
   //console.log("Render", { ticks, entityTicks: p.entity.ticks });
 

@@ -1,19 +1,22 @@
 import * as React from 'react'
-import { SystemTimeEmbedded, UserQueryEntity, UserQueryMessage } from '../Signum.UserQueries'
-import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip, CheckboxLine, TextBoxLine, EntityDetail } from '@framework/Lines'
+import { HealthCheckConditionEmbedded, SystemTimeEmbedded, UserQueryEntity, UserQueryMessage } from '../Signum.UserQueries'
+import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip, CheckboxLine, TextBoxLine, EntityDetail, EnumLine, NumberLine } from '@framework/Lines'
+import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
-import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
+import { FilterConditionOption, filterOperations, FindOptions, getFilterOperations, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
-import { SearchMessage, getToString } from '@framework/Signum.Entities'
-import { QueryColumnEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
+import { SearchMessage, getToString, toLite } from '@framework/Signum.Entities'
+import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
+import { CopyHealthCheckButton } from '@framework/Components/CopyHealthCheckButton'
+import { UserQueryClient } from '../UserQueryClient'
 
 const CurrentEntityKey = "[CurrentEntity]";
 
-export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
+export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): React.JSX.Element | null {
 
   const forceUpdate = useForceUpdate();
 
@@ -23,6 +26,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
   const ctxxs = ctx.subCtx({ formSize: "xs" });
 
   const canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
+  const canTimeSeries = ctx.value.systemTime?.mode == "TimeSeries" ? SubTokensOptions.CanTimeSeries : 0;
 
   const qd = useAPI(() => Finder.getQueryDescription(query.key), [query.key]);
   if (!qd)
@@ -31,6 +35,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
   var qs = Finder.querySettings[query.key];
 
   var hasSystemTime = qs?.allowSystemTime ?? getTypeInfos(qd.columns["Entity"].type);
+  const url = window.location;
 
   return (
     <div>
@@ -80,7 +85,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
           <div>
             <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
               avoidFieldSet="h5"
-              subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+              subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate | canTimeSeries}
               queryKey={ctxxs.value.query!.key}
               showPinnedFilterOptions={true} />
             <EntityTable ctx={ctxxs.subCtx(e => e.columns)} avoidFieldSet="h5" columns={[
@@ -92,7 +97,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                       ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                       queryKey={p.ctx.value.query!.key}
                       onTokenChanged={() => { ctx.value.summaryToken = null; ctx.value.modified = true; row.forceUpdate(); }}
-                      subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | (canAggregate ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual)} />
+                      subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | (canAggregate ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual) | canTimeSeries} />
 
                     <div className="d-flex">
                       <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
@@ -133,7 +138,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                 template: ctx => <QueryTokenEmbeddedBuilder
                   ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                   queryKey={p.ctx.value.query!.key}
-                  subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate} />
+                  subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate | canTimeSeries} />
               },
               { property: a => a.orderType }
             ]} />
@@ -149,7 +154,21 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
           </div>
 
           {(hasSystemTime || ctx.value.systemTime) && <EntityDetail ctx={ctx.subCtx(a => a.systemTime)} avoidFieldSet="h5"
-            getComponent={st => <SystemTime ctx={st} />} />}
+          getComponent={st => <SystemTime ctx={st} />} />}
+
+        <EntityDetail ctx={ctx.subCtx(a => a.healthCheck)} avoidFieldSet="h5"
+          showAsCheckBox
+          extraButtons={() => !ctx.value.healthCheck || ctx.value.isNew ? undefined :
+            <CopyHealthCheckButton name={ctx.value.displayName}
+              healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/userQueries/healthCheck/' + ctx.value.id)}
+              clickUrl={url.origin + AppContext.toAbsoluteUrl(UserQueryClient.userQueryUrl(toLite(ctx.value)))} />
+          }
+          onChange={()=>forceUpdate()}
+          getComponent={hcctx => 
+            <div>
+              <HealthCondition ctx={hcctx.subCtx(a => a.failWhen)} color="rgb(255 177 177)" queryNiceName={getQueryNiceName(qd.queryKey)} />
+              <HealthCondition ctx={hcctx.subCtx(a => a.degradedWhen)} color="rgb(255 241 183)" queryNiceName={getQueryNiceName(qd.queryKey)} />
+            </div>} />
         </div>)
       }
     </div>
@@ -188,24 +207,70 @@ function SystemTime(p: { ctx: TypeContext<SystemTimeEmbedded> }) {
   const forceUpdate = useForceUpdate();
   const ctx = p.ctx.subCtx({ formSize: "xs", formGroupStyle: "Basic" });
   return (
-    <div className="row">
-      <div className="col-sm-3">
-        <AutoLine ctx={ctx.subCtx(e => e.mode)} onChange={() => {
-          ctx.value.startDate = ctx.value.mode == "All" ? null : ctx.value.startDate;
-          ctx.value.endDate = ctx.value.mode == "All" || ctx.value.mode == "AsOf" ? null : ctx.value.endDate;
-          ctx.value.joinMode = ctx.value.mode == "AsOf" ? null : (ctx.value.joinMode ?? "FirstCompatible");
-          forceUpdate();
-        }} />
+    <div>
+      <div className="row">
+        <div className="col-sm-3">
+          <AutoLine ctx={ctx.subCtx(e => e.mode)} onChange={() => {
+            ctx.value.startDate = ctx.value.mode == "All" ? null : ctx.value.startDate;
+            ctx.value.endDate = ctx.value.mode == "All" || ctx.value.mode == "AsOf" ? null : ctx.value.endDate;
+            ctx.value.joinMode = ctx.value.mode == "AsOf" ? null : (ctx.value.joinMode ?? "FirstCompatible");
+            ctx.value.timeSeriesStep = ctx.value.mode == "TimeSeries" ? 1 : null;
+            ctx.value.timeSeriesUnit = ctx.value.mode == "TimeSeries" ? "Day" : null;
+            ctx.value.timeSeriesMaxRowsPerStep = ctx.value.mode == "TimeSeries" ? 10 : null;
+            ctx.value.splitQueries = ctx.value.mode == "TimeSeries" ? false : false;
+            forceUpdate();
+          }} />
+        </div>
+        <div className="col-sm-3">
+          {ctx.value.mode == "All" ? null : <AutoLine ctx={ctx.subCtx(e => e.startDate)} label={ctx.value.mode == "AsOf" ? UserQueryMessage.Date.niceToString() : undefined} mandatory />}
+        </div>
+        <div className="col-sm-3">
+          {ctx.value.mode == "All" || ctx.value.mode == "AsOf" ? null : <AutoLine ctx={ctx.subCtx(e => e.endDate)} mandatory />}
+        </div>
+        <div className="col-sm-3">
+          {ctx.value.mode == "AsOf" || ctx.value.mode == "TimeSeries" ? null : <AutoLine ctx={ctx.subCtx(e => e.joinMode)} mandatory />}
+        </div>
       </div>
-      <div className="col-sm-3">
-        {ctx.value.mode == "All" ? null : <AutoLine ctx={ctx.subCtx(e => e.startDate)} label={ctx.value.mode == "AsOf" ? UserQueryMessage.Date.niceToString() : undefined} mandatory />}
-      </div>
-      <div className="col-sm-3">
-        {ctx.value.mode == "All" || ctx.value.mode == "AsOf" ? null : <AutoLine ctx={ctx.subCtx(e => e.endDate)} mandatory />}
-      </div>
-      <div className="col-sm-3">
-        {ctx.value.mode == "AsOf" ? null : <AutoLine ctx={ctx.subCtx(e => e.joinMode)} mandatory />}
-      </div>
+      {
+        ctx.value.mode == "TimeSeries" &&
+
+        <div className="row">
+            <div className="col-sm-3">
+              <AutoLine ctx={ctx.subCtx(e => e.timeSeriesStep)} mandatory />
+            </div>
+            <div className="col-sm-3">
+              <AutoLine ctx={ctx.subCtx(e => e.timeSeriesUnit)} mandatory />
+            </div>
+            <div className="col-sm-3">
+              <AutoLine ctx={ctx.subCtx(e => e.timeSeriesMaxRowsPerStep)} mandatory />
+            </div>
+        </div>
+
+      }
     </div>
   );
+}
+
+function HealthCondition(p: { ctx: TypeContext<HealthCheckConditionEmbedded | null>, color: string, queryNiceName: string }) {
+  const ctx = p.ctx.subCtx({ formGroupStyle: "None", formSize: "xs" }) as TypeContext<HealthCheckConditionEmbedded>;
+  const forceUpdate = useForceUpdate();
+  return (<>
+    <label className="d-flex flex-row align-items-center">
+      <input type="checkbox" checked={p.ctx.value != null}
+        className="form-check-input me-2"
+        onChange={() => { p.ctx.value = p.ctx.value == null ? HealthCheckConditionEmbedded.New() : null; forceUpdate() }} />
+      {p.ctx.value == null ? p.ctx.niceName() :
+        <span style={{ backgroundColor: p.color }} className="p-2">
+          {
+            UserQueryMessage._0CountOf1Is2Than3.niceToString().formatHtml(
+              <strong>{ctx.niceName()}</strong>,
+              p.queryNiceName,
+              <EnumLine ctx={ctx.subCtx(a => a.operation)} optionItems={filterOperations["Integer"]} formGroupHtmlAttributes={{ className: "d-inline-block" }} />,
+              <NumberLine ctx={ctx.subCtx(a => a.value)} formGroupHtmlAttributes={{ className: "d-inline-block" }} />,
+            )
+          }
+        </span>
+      }
+    </label>
+  </>);
 }

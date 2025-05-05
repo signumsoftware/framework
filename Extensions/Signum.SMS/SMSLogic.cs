@@ -87,7 +87,7 @@ public static class SMSLogic
 
             sb.Schema.EntityEvents<SMSTemplateEntity>().PreSaving += new PreSavingEventHandler<SMSTemplateEntity>(EmailTemplate_PreSaving);
             sb.Schema.EntityEvents<SMSTemplateEntity>().Retrieved += SMSTemplateLogic_Retrieved;
-            sb.Schema.Table<SMSModelEntity>().PreDeleteSqlSync += e =>
+            sb.Schema.EntityEvents<SMSModelEntity>().PreDeleteSqlSync += e =>
                 Administrator.UnsafeDeletePreCommand(Database.Query<SMSTemplateEntity>()
                     .Where(a => a.Model.Is(e)));
 
@@ -337,7 +337,7 @@ public static class SMSLogic
                 Orders = model?.GetOrders(qd) ?? new List<Order>(),
             });
 
-            var columnTokens = table.Columns.ToDictionary(a => a.Column.Token);
+            var columnTokens = table.Columns.ToDictionary(a => a.Token);
 
             var ownerData = (SMSOwnerData)table.Rows[0][columnTokens.GetOrThrow(t.To!.Token)]!;
 

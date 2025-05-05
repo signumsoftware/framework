@@ -54,7 +54,7 @@ export interface SearchValueController {
   value: unknown | undefined;
   queryDescription: QueryDescription | undefined;
   hasHistoryChanges: boolean | undefined;
-  renderValue(): React.ReactChild | null;
+  renderValue(): React.ReactElement | string | null;
   refreshValue: () => void;
   handleClick: (e: React.MouseEvent<any>) => void;
 }
@@ -70,7 +70,8 @@ function getQueryRequestValue(fo: FindOptionsParsed, valueToken?: string | Query
   };
 }
 
-const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, ref: React.Ref<SearchValueController>): React.ReactElement | null {
+const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefAttributes<SearchValueController>> =
+  React.forwardRef(function SearchValue(p: SearchValueProps, ref: React.Ref<SearchValueController>): React.ReactElement | null {
 
   const fo = p.findOptions;
 
@@ -460,7 +461,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
 
 export default SearchValue;
 
-export function renderTimeMachineIcon(hasHistoryChanges: boolean | undefined, transform: string) {
+export function renderTimeMachineIcon(hasHistoryChanges: boolean | undefined, transform: string): React.JSX.Element | null {
 
   if (hasHistoryChanges === undefined)
     return null;

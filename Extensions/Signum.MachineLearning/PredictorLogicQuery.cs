@@ -22,11 +22,11 @@ public static class PredictorLogicQuery
 
             if (!mainQueryRequest.GroupResults)
             {
-                ctx.MainQuery.GetParentKey = (ResultRow row) => new object[] { row.Entity };
+                ctx.MainQuery.GetParentKey = (ResultRow row) => [row.Entity];
             }
             else
             {
-                var rcs = mainResult.Columns.Where(a => !(a.Column.Token is AggregateToken)).ToArray();
+                var rcs = mainResult.Columns.Where(a => a.Token is not AggregateToken).ToArray();
                 ctx.MainQuery.GetParentKey = (ResultRow row) => row.GetValues(rcs);
             }
 

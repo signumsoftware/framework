@@ -19,7 +19,7 @@ public class ResultTableConverter : JsonConverter<ResultTable>
             writer.WriteStartArray();
             foreach (var rc in rt.Columns)
             {
-                writer.WriteStringValue(rc.Column.Token.FullKey());
+                writer.WriteStringValue(rc.Token.FullKey());
             }
             writer.WriteEndArray();
 
@@ -27,13 +27,13 @@ public class ResultTableConverter : JsonConverter<ResultTable>
 
             writer.WritePropertyName("uniqueValues");
             writer.WriteStartObject();
-            foreach (var rc in rt.Columns.Where(a => a.CompressUniqueValues).DistinctBy(rc => rc.Column.Token))
+            foreach (var rc in rt.Columns.Where(a => a.CompressUniqueValues).DistinctBy(rc => rc.Token))
             {
-                writer.WritePropertyName(rc.Column.Token.FullKey());
+                writer.WritePropertyName(rc.Token.FullKey());
                 {
-                    var pair = giUniqueValues.GetInvoker(rc.Column.Token.Type)(rc.Values);
+                    var pair = giUniqueValues.GetInvoker(rc.Token.Type)(rc.Values);
 
-                    using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((rc.Column.Token.GetPropertyRoute()!, null, null)))
+                    using (EntityJsonContext.AddSerializationStep(new (rc.Token.GetPropertyRoute()!)))
                     {
                         JsonSerializer.Serialize(writer, pair.UniqueValues, pair.UniqueValues.GetType(), options);
                     }
@@ -78,7 +78,7 @@ public class ResultTableConverter : JsonConverter<ResultTable>
                     }
                     else
                     {
-                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((column.Column.Token.GetPropertyRoute()!, null, null)))
+                        using (EntityJsonContext.AddSerializationStep(new(column.Token.GetPropertyRoute()!)))
                         {
                             JsonSerializer.Serialize(writer, row[column], options);
                         }

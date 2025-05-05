@@ -17,7 +17,7 @@ export namespace MapClient {
   
   
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Map", () => import("./Changelog"));
   
@@ -37,7 +37,7 @@ export namespace MapClient {
   
   }
   
-  export function clearProviders() {
+  export function clearProviders(): void {
     getColorProviders.clear();
   }
   

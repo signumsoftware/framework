@@ -14,8 +14,10 @@ export interface EnumLineProps<V extends string | number | boolean | null> exten
   "DropDownList" | /*For Enums! (only values in optionItems can be selected)*/
   "ComboBoxText" | /*For Text! (with freedom to choose a different value not in optionItems)*/
   "RadioGroup";
+  emptyLabel?: string;
   optionItems?: (OptionItem | MemberInfo | V)[];
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
+  optionHtmlAttributes?: (oi: OptionItem) => React.OptionHTMLAttributes<HTMLOptionElement>;
   columnCount?: number;
   columnWidth?: number;
 }
@@ -29,49 +31,58 @@ export interface OptionItem {
   label: string;
 }
 
-export const EnumLine = genericForwardRefWithMemo(function EnumLine<V extends string | number | boolean | null>(props: EnumLineProps<V>, ref: React.Ref<EnumLineController<V>>) {
+export const EnumLine: <V extends string | number | boolean | null>(props: EnumLineProps<V> & React.RefAttributes<EnumLineController<V>>) => React.ReactNode | null =
+  genericForwardRefWithMemo(function EnumLine<V extends string | number | boolean | null>(props: EnumLineProps<V>, ref: React.Ref<EnumLineController<V>>) {
 
   const c = useController(EnumLineController<V>, props, ref);
 
   if (c.isHidden)
     return null;
 
-  return props.lineType == 'ComboBoxText' ? internalComboBoxText(c) : props.lineType == 'RadioGroup' ? internalRadioGroup(c) : internalDropDownList(c);
-}, (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
+    return props.lineType == 'ComboBoxText' ? internalComboBoxText(c) :
+      props.lineType == 'RadioGroup' ? internalRadioGroup(c) :
+        internalDropDownList(c);
+  }, (prev, next) => {
+    if (prev.optionHtmlAttributes || next.optionHtmlAttributes)
+      return false;
+
+    if (prev.onRenderDropDownListItem || next.onRenderDropDownListItem)
+      return false;
 
   return LineBaseController.propEquals(prev, next);
 });
 
-function internalDropDownList<V extends string | number | boolean | null>(vl: EnumLineController<V>) {
+function internalDropDownList<V extends string | number | boolean | null>(c: EnumLineController<V>) {
 
-  var optionItems = getOptionsItems(vl);
+  var optionItems = getOptionsItems(c);
 
-  const s = vl.props;
-  if (!s.type!.isNotNullable || s.ctx.value == undefined)
-    optionItems = [{ value: null, label: " - " }].concat(optionItems);
+  const p = c.props;
+  if (!p.type!.isNotNullable || p.ctx.value == undefined)
+    optionItems = [{ value: null, label: p.emptyLabel ?? " - " }].concat(optionItems);
 
-  if (s.ctx.readOnly) {
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
+  if (p.ctx.readOnly) {
 
     var label: string | null = null;
-    if (s.ctx.value != undefined) {
+    if (p.ctx.value != undefined) {
 
-      var item = optionItems.filter(a => a.value == s.ctx.value).singleOrNull();
+      var item = optionItems.filter(a => a.value == p.ctx.value).singleOrNull();
 
-      label = item ? item.label : s.ctx.value.toString();
+      label = item ? item.label : p.ctx.value.toString();
     }
 
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
         {inputId =>
-          vl.withItemGroup(
+          c.withItemGroup(
             <FormControlReadonly
               id={inputId}
               htmlAttributes={{
-                ...vl.props.valueHtmlAttributes,
-                ...({ 'data-value': s.ctx.value } as any) /*Testing*/
-              }} ctx={s.ctx} innerRef={vl.setRefs}>
+                ...c.props.valueHtmlAttributes,
+                ...({ 'data-value': p.ctx.value } as any) /*Testing*/
+              }} ctx={p.ctx} innerRef={c.setRefs}>
               {label}
             </FormControlReadonly>)
         }
@@ -86,27 +97,33 @@ function internalDropDownList<V extends string | number | boolean | null>(vl: En
           val.toString();
   }
 
-  if (vl.props.onRenderDropDownListItem) {
+  if (c.props.onRenderDropDownListItem) {
 
-    var oi = optionItems.singleOrNull(a => a.value == s.ctx.value) ?? {
-      value: s.ctx.value,
-      label: s.ctx.value,
+    var oi = optionItems.singleOrNull(a => a.value == p.ctx.value) ?? {
+      value: p.ctx.value,
+      label: p.ctx.value,
     };
 
+    function renderElement({item} : any){
+      var result = c.props.onRenderDropDownListItem!(item) as React.ReactElement;
+      return React.cloneElement(result, {'data-value': item.value});
+    }
+
+    
+
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {inputId => vl.withItemGroup(
-          <DropdownList<OptionItem> className={classes(vl.props.valueHtmlAttributes?.className, s.ctx.formControlClass, vl.mandatoryClass, "p-0")} data={optionItems}
+      <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+        {inputId => c.withItemGroup(
+          <DropdownList<OptionItem> className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formControlClass, c.mandatoryClass, "p-0")} data={optionItems}
             id={inputId}
-            onChange={(oe, md) => vl.setValue(oe.value, md.originalEvent)}
+            onChange={(oe, md) => c.setValue(oe.value, md.originalEvent)}
             value={oi}
-            filter={false}
             autoComplete="off"
             dataKey="value"
             textField="label"
-            renderValue={a => vl.props.onRenderDropDownListItem!(a.item)}
-            renderListItem={a => vl.props.onRenderDropDownListItem!(a.item)}
-            {...(s.valueHtmlAttributes as any)}
+            renderValue={renderElement}
+            renderListItem={renderElement}
+            {...(p.valueHtmlAttributes as any)}
           />)
         }
       </FormGroup>
@@ -116,15 +133,15 @@ function internalDropDownList<V extends string | number | boolean | null>(vl: En
     const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
       const option = optionItems.filter(a => toStr(a.value) == input.value).single();
-      vl.setValue(option.value, e);
+      c.setValue(option.value, e);
     };
 
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {inputId => vl.withItemGroup(
-          <select id={inputId} {...vl.props.valueHtmlAttributes} value={toStr(s.ctx.value)} className={classes(vl.props.valueHtmlAttributes?.className, s.ctx.formSelectClass, vl.mandatoryClass)} onChange={handleEnumOnChange} >
-            {!optionItems.some(a => toStr(a.value) == toStr(s.ctx.value)) && <option key={-1} value={toStr(s.ctx.value)}>{toStr(s.ctx.value)}</option>}
-            {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)}>{oi.label}</option>)}
+      <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+        {inputId => c.withItemGroup(
+          <select id={inputId} {...c.props.valueHtmlAttributes} value={toStr(p.ctx.value)} className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formSelectClass, c.mandatoryClass)} onChange={handleEnumOnChange} >
+            {!optionItems.some(a => toStr(a.value) == toStr(p.ctx.value)) && <option key={-1} value={toStr(p.ctx.value)}>{toStr(p.ctx.value)}</option>}
+            {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)} {...p.optionHtmlAttributes?.(oi)}>{oi.label}</option>)}
           </select>)
         }
       </FormGroup>
@@ -132,78 +149,91 @@ function internalDropDownList<V extends string | number | boolean | null>(vl: En
   }
 }
 
-function internalComboBoxText<V extends string | number | boolean | null>(el: EnumLineController<V>) {
+function internalComboBoxText<V extends string | number | boolean | null>(c: EnumLineController<V>) {
 
-  var optionItems = getOptionsItems(el);
+  var optionItems = getOptionsItems(c);
 
-  const s = el.props;
-  if (!s.type!.isNotNullable || s.ctx.value == undefined)
+  const p = c.props;
+  if (!p.type!.isNotNullable || p.ctx.value == undefined)
     optionItems = [{ value: null, label: " - " }].concat(optionItems);
 
-  if (s.ctx.readOnly) {
+  if (p.ctx.readOnly) {
 
     var label: string | null = null;
-    if (s.ctx.value != undefined) {
+    if (p.ctx.value != undefined) {
 
-      var item = optionItems.filter(a => a.value == s.ctx.value).singleOrNull();
+      var item = optionItems.filter(a => a.value == p.ctx.value).singleOrNull();
 
-      label = item ? item.label : s.ctx.value.toString();
+      label = item ? item.label : p.ctx.value.toString();
     }
 
+    const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+    const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...el.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {inputId => el.withItemGroup(
+      <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+        {inputId => c.withItemGroup(
           <FormControlReadonly id={inputId} htmlAttributes={{
-            ...el.props.valueHtmlAttributes,
-            ...({ 'data-value': s.ctx.value } as any) /*Testing*/
-          }} ctx={s.ctx} innerRef={el.setRefs}>
+            ...c.props.valueHtmlAttributes,
+            ...({ 'data-value': p.ctx.value } as any) /*Testing*/
+          }} ctx={p.ctx} innerRef={c.setRefs}>
             {label}
           </FormControlReadonly>)}
       </FormGroup>
     );
   }
 
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
-  var renderItem = el.props.onRenderDropDownListItem ? (a: any) => el.props.onRenderDropDownListItem!(a.item) : undefined;
+  var renderItem = c.props.onRenderDropDownListItem ? (a: any) => c.props.onRenderDropDownListItem!(a.item) : undefined;
 
   return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...el.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-      {inputId => el.withItemGroup(
-        <Combobox<OptionItem> id={inputId} className={classes(el.props.valueHtmlAttributes?.className, s.ctx.formControlClass, el.mandatoryClass)} data={optionItems} onChange={(e: string | OptionItem, md) => {
-          el.setValue(e == null ? null : typeof e == "string" ? e : e.value, md.originalEvent);
-        }} value={s.ctx.value}
+    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      {inputId => c.withItemGroup(
+        <Combobox<OptionItem>
+          id={inputId}
+          className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formControlClass, c.mandatoryClass)} data={optionItems}
+          onChange={(e: string | OptionItem, md) => {
+            c.setValue(e == null ? null : typeof e == "string" ? e : e.value, md.originalEvent);
+          }}
+          value={p.ctx.value}
           dataKey="value"
           textField="label"
           focusFirstItem
           autoSelectMatches
           renderListItem={renderItem}
-          {...(s.valueHtmlAttributes as any)}
-        />)
+          {...(p.valueHtmlAttributes as any)}
+        />
+      )
       }
     </FormGroup>
   );
 }
 
-function internalRadioGroup<V extends string | number | boolean | null>(elc: EnumLineController<V>) {
+function internalRadioGroup<V extends string | number | boolean | null>(c: EnumLineController<V>) {
 
-  var optionItems = getOptionsItems(elc);
+  var optionItems = getOptionsItems(c);
 
-  const s = elc.props;
+  const p = c.props;
 
   const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
     const input = e.currentTarget as HTMLInputElement;
     const option = optionItems.filter(a => a.value == input.value).single();
-    elc.setValue(option.value, e);
+    c.setValue(option.value, e);
   };
 
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
   return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...elc.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => <>
-        {getTimeMachineIcon({ ctx: s.ctx })}
+        {getTimeMachineIcon({ ctx: p.ctx })}
         <div style={getColumnStyle()}>
           {optionItems.map((oi, i) =>
-            <label {...elc.props.valueHtmlAttributes} className={classes("sf-radio-element", elc.props.ctx.errorClass)}>
-              <input type="radio" key={i} value={oi.value} checked={s.ctx.value == oi.value} onChange={handleEnumOnChange} disabled={s.ctx.readOnly} />
+            <label {...c.props.valueHtmlAttributes} className={classes("sf-radio-element", c.props.ctx.errorClass)}>
+              <input type="radio" key={i} value={oi.value} checked={p.ctx.value == oi.value} onChange={handleEnumOnChange} disabled={p.ctx.readOnly} />
               {" " + oi.label}
             </label>)}
         </div>
@@ -213,7 +243,7 @@ function internalRadioGroup<V extends string | number | boolean | null>(elc: Enu
 
   function getColumnStyle(): React.CSSProperties | undefined {
 
-    const p = elc.props;
+    const p = c.props;
 
     if (p.columnCount && p.columnWidth)
       return {

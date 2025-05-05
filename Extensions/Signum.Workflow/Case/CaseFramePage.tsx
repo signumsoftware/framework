@@ -30,7 +30,7 @@ interface CaseFramePageState {
   executing?: boolean;
 }
 
-export default function CaseFramePage() {
+function CaseFramePage(): React.JSX.Element {
 
   var params = useParams() as { workflowId: string; mainEntityStrategy: string; caseActivityId?: string };
   let [state, setState] = useStateWithPromise<CaseFramePageState | undefined>(undefined);
@@ -40,7 +40,9 @@ export default function CaseFramePage() {
   const validationErrorsTop = React.useRef<ValidationErrorsHandle>(null);
   const validationErrorsBottom = React.useRef<ValidationErrorsHandle>(null);
   const forceUpdate = useForceUpdate();
-  
+
+  const [errorsPosition, setErrorsPosition] = React.useState<"top" | "bottom">("top");
+
   React.useEffect(() => {
 
     function loadEntity(): Promise<WorkflowClient.CaseEntityPack | undefined> {
@@ -142,6 +144,7 @@ export default function CaseFramePage() {
     revalidate: () => { throw new Error("Not implemented"); },
     setError: (ms, initialPrefix) => {
       GraphExplorer.setModelState(pack.activity, ms, initialPrefix ?? "");
+      setErrorsPosition("bottom");
       forceUpdate()
     },
     refreshCount: state.refreshCount,
@@ -184,6 +187,7 @@ export default function CaseFramePage() {
     },
     setError: (ms, initialPrefix) => {
       GraphExplorer.setModelState(mainEntity, ms, initialPrefix ?? "");
+      setErrorsPosition("top");
       forceUpdate()
     },
     refreshCount: state.refreshCount,
@@ -229,12 +233,12 @@ export default function CaseFramePage() {
           <div className="sf-button-widget-container">
             {entityComponentRef.current && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={buttonBarRef} frame={mainFrame} pack={mainFrame.pack} /> : <br />}
           </div>
-          <ValidationErrors entity={mainEntity} ref={validationErrorsTop} prefix="caseFrame" />
+          {errorsPosition == "top" && < ValidationErrors entity={mainEntity} ref={validationErrorsTop} prefix="caseFrame" />}
           <ErrorBoundary>
             {state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(state.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
           </ErrorBoundary>
           <br />
-          <ValidationErrors entity={mainEntity} ref={validationErrorsBottom} prefix="caseFrame" />
+          {errorsPosition == "bottom" && <ValidationErrors entity={mainEntity} ref={validationErrorsBottom} prefix="caseFrame" />}
         </div>
       </div>
       {entityComponentRef.current && <CaseButtonBar frame={activityFrame} pack={activityPack} />}
@@ -269,4 +273,8 @@ export default function CaseFramePage() {
   }
 }
 
-CaseFramePage.showSubTitle = true;
+namespace CaseFramePage {
+  export let showSubTitle = true;
+}
+
+export default CaseFramePage;

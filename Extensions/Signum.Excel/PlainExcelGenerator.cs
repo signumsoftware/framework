@@ -59,22 +59,22 @@ public static class PlainExcelGenerator
         }
     }
     
-    public static byte[] WritePlainExcel(ResultTable results, string title, bool forImport = false)
+    public static byte[] WritePlainExcel(ResultTable results, QueryRequest request, string title, bool forImport = false)
     {
         using (MemoryStream ms = new MemoryStream())
         {
-            WritePlainExcel(results, ms, title, forImport);
+            WritePlainExcel(results, request, ms, title, forImport);
             return ms.ToArray(); 
         }
     }
 
-    public static void WritePlainExcel(ResultTable results, string fileName, string title, bool forImport = false)
+    public static void WritePlainExcel(ResultTable results, QueryRequest request, string fileName, string title, bool forImport = false)
     {
         using (FileStream fs = File.Create(fileName))
-            WritePlainExcel(results, fs,title, forImport);
+            WritePlainExcel(results, request, fs, title, forImport);
     }
 
-    static void WritePlainExcel(ResultTable results, Stream stream, string title, bool forImport)
+    static void WritePlainExcel(ResultTable results, QueryRequest request, Stream stream, string title, bool forImport)
     {
         stream.WriteAllBytes(Template);
 
@@ -92,17 +92,17 @@ public static class PlainExcelGenerator
 
             worksheetPart.Worksheet = new Worksheet();
 
-            worksheetPart.Worksheet.Append(new Columns(results.Columns.Select((c, i) => new DocumentFormat.OpenXml.Spreadsheet.Column()
+            worksheetPart.Worksheet.Append(new Columns(request.Columns.Select((c, i) => new DocumentFormat.OpenXml.Spreadsheet.Column()
             {
                 Min = (uint)i + 1,
                 Max = (uint)i + 1,
-                Width = GetColumnWidth(c.Column.Type),
+                Width = GetColumnWidth(c.Token.Type),
                 BestFit = true,
                 CustomWidth = true
             }).ToArray()));
 
-            Dictionary<ResultColumn, (DefaultStyle defaultStyle, UInt32Value styleIndex)> indexes =
-                results.Columns.ToDictionary(c => c, c => CellBuilder.GetDefaultStyleAndIndex(c));
+            Dictionary<DynamicQuery.Column, (DefaultStyle defaultStyle, UInt32Value styleIndex)> styleIndexes =
+                request.Columns.ToDictionary(c => c, c => CellBuilder.GetDefaultStyleAndIndex(c));
 
             var ss = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet;
             {
@@ -129,25 +129,67 @@ public static class PlainExcelGenerator
                 }
             }
 
-
             worksheetPart.Worksheet.Append(new Sequence<Row>()
             {
                 new [] { CellBuilder.Cell(title, DefaultStyle.Title, forImport) }.ToRow(),
 
-                (from c in results.Columns
-                select CellBuilder.Cell(c.Column.DisplayName, DefaultStyle.Header, forImport)).ToRow(),
+                (from c in request.Columns
+                select CellBuilder.Cell(c.DisplayName, DefaultStyle.Header, forImport)).ToRow(),
 
                 from r in results.Rows
-                select (from c in results.Columns
-                        let t = indexes.GetOrThrow(c)
-                        let value = c.Column.Token is CollectionToArrayToken cta ?
-                        ((IEnumerable?)r[c])?.Cast<object>().ToString(cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct? ", " : "\n"):
-                        r[c]
-                        select CellBuilder.Cell(value, t.defaultStyle, t.styleIndex, forImport)).ToRow()
+                select request.Columns.Select(c =>
+                {
+                    var t = styleIndexes.GetOrThrow(c);
+                    var rt = results.GetResultRow(c.Token);
+
+                    var cta = c.Token.HasCollectionToArray();
+                    var value = cta != null ?
+                        ((IEnumerable?)r[rt])?.Cast<object>().ToString(cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct? ", " : "\r\n"):
+                        r[rt];
+
+                    var cell = CellBuilder.Cell(value, t.defaultStyle, t.styleIndex, forImport);
+
+                    if ((cta != null && (cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct) == false))
+                        ApplyWrapTextStyle(workbookPart, cell);
+
+                    return cell;
+                }).ToRow()
             }.ToSheetDataWithIndexes());
 
             workbookPart.Workbook.Save();
         }
+    }
+
+    private static void ApplyWrapTextStyle(WorkbookPart workbookPart, Cell cell)
+    {
+       
+        var stylesheet = workbookPart.WorkbookStylesPart?.Stylesheet;
+        if (stylesheet == null)
+        {
+            workbookPart.AddNewPart<WorkbookStylesPart>().Stylesheet = new Stylesheet();
+            stylesheet = workbookPart.WorkbookStylesPart!.Stylesheet;
+
+            stylesheet.Fonts = new Fonts(new Font());
+            stylesheet.Fills = new Fills(new Fill());
+            stylesheet.Borders = new Borders(new Border());
+            stylesheet.CellFormats = new CellFormats(new CellFormat()); 
+            stylesheet.Save();
+        }
+
+
+        var cellFormat = new CellFormat()
+        {
+            ApplyAlignment = true,
+            Alignment = new Alignment() { WrapText = true}
+        };
+
+   
+        stylesheet.CellFormats!.Append(cellFormat);
+        stylesheet.CellFormats!.Count!++;
+        stylesheet.Save();
+
+ 
+        cell.StyleIndex = (uint)(stylesheet.CellFormats.Count - 1);
     }
 
     public static byte[] WritePlainExcel<T>(IEnumerable<T> results, string? title = null)
@@ -242,4 +284,5 @@ public static class PlainExcelGenerator
             return data.Descendants<Row>().Skip(1).Select(r => selector(r.Descendants<Cell>().Select(c => document.GetCellValue(c)!).ToArray())).ToList();
         }
     }
+
 }

@@ -10,13 +10,13 @@ export function useForceUpdate(): () => void {
   return forceUpdate
 }
 
-export function useRefreshKey(): [number, () => void] {
-  const [count, setCount] = React.useState(0);
-  const refreshKey = React.useCallback(() => {
-    setCount(c => c + 1);
+export function useVersion(): [version: number, updateVersion: () => void] {
+  const [version, setVersion] = React.useState(0);
+  const updateVersion = React.useCallback(() => {
+    setVersion(c => c + 1);
   }, []);
 
-  return [count, refreshKey]
+  return [version, updateVersion]
 }
 
 export function useUpdatedRef<T>(newValue: T): React.MutableRefObject<T> {
@@ -26,11 +26,25 @@ export function useUpdatedRef<T>(newValue: T): React.MutableRefObject<T> {
 }
 
 export function useForceUpdatePromise(): () => Promise<void> {
-  var [count, setCount] = useStateWithPromise(0);
-  return () => setCount(c => c + 1) as Promise<any>;
+  const [ticks, setTick] = React.useState(0); // State used to trigger re-render
+  const resolveRef = React.useRef<(value?: void) => void>(); // Ref to store resolve function
+
+  const forceUpdate = React.useCallback(() => new Promise<void>((resolve) => {
+      resolveRef.current = resolve; // Store the resolve function
+      setTick((tick) => tick + 1); // Trigger re-render
+  }), []);
+
+  React.useEffect(() => {
+    if (resolveRef.current) {
+      resolveRef.current();
+      resolveRef.current = undefined;
+    }
+  }, [ticks]);
+
+  return forceUpdate;
 }
 
-export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T, deps?: ReadonlyArray<any>) {
+export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T, deps?: ReadonlyArray<any>): T {
   const [val, setVal] = React.useState(initialState);
 
   React.useEffect(() => {
@@ -59,7 +73,7 @@ export interface Size {
   height: number;
 }
 
-export function whenVisible<T extends HTMLElement>(element: T, callback: (visible: boolean) => void, options?: IntersectionObserverInit) {
+export function whenVisible<T extends HTMLElement>(element: T, callback: (visible: boolean) => void, options?: IntersectionObserverInit): IntersectionObserver {
 
   var observer = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
@@ -72,8 +86,20 @@ export function whenVisible<T extends HTMLElement>(element: T, callback: (visibl
   return observer;
 }
 
-export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout = 0, resizeTimeout = 300, autoResetOnHide = false):
+export function useSize<T extends HTMLElement = HTMLDivElement>(options?: { 
+  initialTimeout?: number ,
+   resizeTimeout ? : number, 
+  autoResetOnHide?: boolean, 
+  deps?: React.DependencyList
+}):
+
   { size: Size | undefined, setContainer: (element: T | null) => void, element: T | null } {
+
+  const initialTimeout = options?.initialTimeout  ?? 0;
+  const resizeTimeout = options?.resizeTimeout  ?? 300;
+  const autoResetOnHide = options?.autoResetOnHide  ?? false;
+  const deps = options?.deps  ?? [];
+
   const [size, setSize] = React.useState<Size | undefined>();
   const sizeRef = useUpdatedRef(size);
   const htmlElement = React.useRef<T | null>(null);
@@ -83,6 +109,16 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
     if (size == null || size.width != rect.width || size.height != rect.height)
       setSize({ width: rect.width, height: rect.height });
   }
+
+  React.useEffect(()=> {
+    if(size&& deps.length)
+    { 
+      setSize(undefined);
+      setTimeout(() => {
+        setNewSize();
+      }, resizeTimeout);
+    }
+}, deps);
 
   const initialHandle = React.useRef<number | null>(null);
   const visibleObserver = React.useRef<IntersectionObserver | null>(null);
@@ -232,7 +268,7 @@ export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined
   return data && data.result;
 }
 
-export function areEqualDeps(depsA: React.DependencyList, depsB: React.DependencyList) {
+export function areEqualDeps(depsA: React.DependencyList, depsB: React.DependencyList): boolean {
 
   if (depsA.length !== depsB.length)
     return false;
@@ -245,7 +281,7 @@ export function areEqualDeps(depsA: React.DependencyList, depsB: React.Dependenc
   return true;
 }
 
-export function useMounted() {
+export function useMounted(): React.MutableRefObject<boolean> {
   const mounted = React.useRef<boolean>(true);
   React.useEffect(() => {
     return () => { mounted.current = false; };
@@ -312,7 +348,7 @@ export function useLock<T>(): [/*isLocked:*/boolean, /*lock:*/(makeCall: () => P
 }
 
 
-export const useDoubleClick = (doubleClick: React.MouseEventHandler, click: React.MouseEventHandler, options?: { timeout?: number }) => {
+export const useDoubleClick = (doubleClick: React.MouseEventHandler, click: React.MouseEventHandler, options?: { timeout?: number }): (event: React.MouseEvent) => void => {
   options = {
     timeout: 200,
     ...options,

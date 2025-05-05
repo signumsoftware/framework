@@ -40,10 +40,10 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
                 if (TryToClose())
                     return true;
 
-                if (MessageModalProxyExtensions.IsMessageModalPresent(this.Selenium))
+                var message = this.Selenium.GetMessageModal()!;
+                if (message != null)
                 {
-                    var alert = MessageModalProxyExtensions.GetMessageModal(this.Selenium)!;
-                    alert.Click(MessageModalButton.Yes);
+                    message.Click(MessageModalButton.Yes);
                 }
 
                 return false;
@@ -78,7 +78,7 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
 
     public EntityInfoProxy EntityInfo()
     {
-        return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("div.sf-main-control")).GetAttribute("data-main-entity"))!;
+        return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("div.sf-main-control")).GetDomAttribute("data-main-entity")!)!;
     }
 
     public FrameModalProxy<T> WaitLoaded()

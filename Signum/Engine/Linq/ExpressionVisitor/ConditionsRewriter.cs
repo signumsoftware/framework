@@ -310,8 +310,9 @@ internal class ConditionsRewriter: DbExpressionVisitor
     protected internal override Expression VisitAggregate(AggregateExpression aggregate)
     {
         var arguments = Visit(aggregate.Arguments).Select(a => MakeSqlValue(a)).ToReadOnly();
-        if (arguments != aggregate.Arguments)
-            return new AggregateExpression(aggregate.Type, aggregate.AggregateFunction, arguments);
+        var orderBy = aggregate.OrderBy == null ? null : Visit(aggregate.OrderBy, VisitOrderBy);
+        if (arguments != aggregate.Arguments || orderBy != aggregate.OrderBy)
+            return new AggregateExpression(aggregate.Type, aggregate.AggregateFunction, arguments, orderBy);
         return aggregate;
     }
 
@@ -362,6 +363,22 @@ internal class ConditionsRewriter: DbExpressionVisitor
             return o;
 
         return new OrderExpression(o.OrderType, e);
+    }
+
+    protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+    {
+        var source = (SourceWithAliasExpression)VisitSource(insertSelect.Source);
+       
+        var assigments = Visit(insertSelect.Assigments, c =>
+        {
+            var exp = MakeSqlValue(Visit(c.Expression));
+            if (exp != c.Expression)
+                return new ColumnAssignment(c.Column, exp);
+            return c;
+        });
+        if (source != insertSelect.Source ||  assigments != insertSelect.Assigments)
+            return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, source, assigments, insertSelect.ReturnRowCount);
+        return insertSelect;
     }
 
     protected internal override Expression VisitUpdate(UpdateExpression update)

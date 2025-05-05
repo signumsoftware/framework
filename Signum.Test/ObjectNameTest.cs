@@ -17,7 +17,7 @@ public class ObjectNameTest
     {
         var simple = ObjectName.Parse("MyTable", isPostgres);
         Assert.Equal("MyTable", simple.Name);
-        Assert.Equal(isPostgres? "\"public\"" : "dbo", simple.Schema.ToString());
+        Assert.Equal(isPostgres? "public" : "dbo", simple.Schema.ToString());
     }
 
     [Fact]

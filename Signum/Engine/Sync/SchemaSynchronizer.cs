@@ -1,10 +1,8 @@
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using NpgsqlTypes;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
-using Signum.Utilities;
 using System.Data;
 using System.Text.RegularExpressions;
 
@@ -22,28 +20,37 @@ public static class SchemaSynchronizer
 
         var sqlBuilder = Connector.Current.SqlBuilder;
 
-
+        var isPostgres = sqlBuilder.IsPostgres;
 
         Dictionary<string, ITable> modelTables = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToDictionaryEx(a => a.Name.ToString(), "schema tables");
+
+        
+
         var modelTablesHistory = modelTables.Values.Where(a => a.SystemVersioned != null).ToDictionaryEx(a => a.SystemVersioned!.TableName.ToString(), "history schema tables");
-        HashSet<SchemaName> modelSchemas = modelTables.Values.Select(a => a.Name.Schema).Where(a => !sqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
+        var systemSchemas = sqlBuilder.GetSystemSchemas(isPostgres);
+        HashSet<SchemaName> modelSchemas = modelTables.Values.Select(a => a.Name.Schema).Where(a => !systemSchemas.Contains(a.Name)).ToHashSet();
 
-        var modelPartitionSchemas = modelTables.Values.Where(a => a.PartitionScheme != null).Select(a => (db: a.Name.Schema.Database, scheme: a.PartitionScheme!)).Distinct().ToDictionary(a => (a.db, name: a.scheme.Name), a => a.scheme);
-        var modelPartitionFunction = modelPartitionSchemas.Select(kvp => (kvp.Key.db, kvp.Value.PartitionFunction)).Distinct().ToDictionary(a => (a.db, name: a.PartitionFunction.Name), a => a.PartitionFunction);
+        var modelPartitionSchemas = isPostgres ? null:  modelTables.Values.Where(a => a.PartitionScheme != null).Select(a => (db: a.Name.Schema.Database, scheme: a.PartitionScheme!)).Distinct().ToDictionary(a => (a.db, name: a.scheme.Name), a => a.scheme);
+        var modelPartitionFunction = isPostgres ? null : modelPartitionSchemas!.Select(kvp => (kvp.Key.db, kvp.Value.PartitionFunction)).Distinct().ToDictionary(a => (a.db, name: a.PartitionFunction.Name), a => a.PartitionFunction);
 
-        Dictionary<string, DiffTable> databaseTables = Schema.Current.Settings.IsPostgres ?
+        Dictionary<string, DiffTable> databaseTables = isPostgres ?
             PostgresCatalogSchema.GetDatabaseDescription(Schema.Current.DatabaseNames()) :
             SysTablesSchema.GetDatabaseDescription(s.DatabaseNames());
 
         var databaseTablesHistory = databaseTables.Extract((key, val) => val.TemporalType == SysTableTemporalType.HistoryTable);
 
-
-        foreach (var kvp in databaseTables.Where(a=>a.Value.Name.Name.EndsWith("_History")).ToList()) // Disconnected History tables
+        bool? considerHistory = null;
+        foreach (var kvp in databaseTables.Where(a=>a.Value.Name.Name.EndsWith("_History", StringComparison.OrdinalIgnoreCase)).ToList()) // Disconnected History tables
         {
             var name = kvp.Value.Name;
-            var originalName = new ObjectName(name.Schema, name.Name.Before("_History"), name.IsPostgres);
+            var originalName = new ObjectName(name.Schema, name.Name.RemoveEnd("_History".Length), name.IsPostgres);
             var original = databaseTables.TryGetC(originalName.ToString());
-            if(original != null && SafeConsole.AskRetry($"Consider {name} a history table of {originalName} "))
+            if(original != null && SafeConsole.Ask(ref considerHistory,
+                $"""
+
+                Consider the table {name}
+                a history table of {originalName}?
+                """))
             {
                 original.InferredTemporalTableName = name;
                 databaseTablesHistory.Add(kvp.Key, kvp.Value);
@@ -51,7 +58,7 @@ public static class SchemaSynchronizer
             }
         }
 
-        HashSet <SchemaName> databaseSchemas = Schema.Current.Settings.IsPostgres ?
+        HashSet<SchemaName> databaseSchemas = Schema.Current.Settings.IsPostgres ?
             PostgresCatalogSchema.GetSchemaNames(s.DatabaseNames()) :
             SysTablesSchema.GetSchemaNames(s.DatabaseNames());
 
@@ -72,12 +79,15 @@ public static class SchemaSynchronizer
         Dictionary<ITable, Dictionary<string, TableIndex>> modelIndices = modelTables.Values
             .ToDictionary(t => t, t => t.AllIndexes().ToDictionaryEx(a => a.IndexName, "Indexes for {0}".FormatWith(t.Name)));
 
-        var modelFullTextCatallogs = (from kvp in modelIndices
+        List<FullTextCatallogName>? modelFullTextCatallogs = Schema.Current.Settings.IsPostgres ? null: 
+                                      (from kvp in modelIndices
                                       from fti in kvp.Value.Values.OfType<FullTextTableIndex>()
-                                      select new FullTextCatallogName(fti.CatallogName, kvp.Key.Name.Schema.Database)).Distinct().ToList();
+                                      select new FullTextCatallogName(fti.SqlServer.CatallogName, kvp.Key.Name.Schema.Database)).Distinct().ToList();
 
-        List<FullTextCatallogName> databaseFullTextCatallogs = Schema.Current.Settings.IsPostgres ?
-            PostgresCatalogSchema.GetFullTextSearchCatallogs(s.DatabaseNames()) :
+        if (modelFullTextCatallogs != null && modelFullTextCatallogs.Any() && !((SqlServerConnector)Connector.Current).SupportsFullTextSearch)
+            throw new InvalidOperationException("Current database does not support Full-Text Search");
+
+        List<FullTextCatallogName>? databaseFullTextCatallogs = Schema.Current.Settings.IsPostgres ? null :
             SysTablesSchema.GetFullTextSearchCatallogs(s.DatabaseNames());
 
 
@@ -99,7 +109,7 @@ public static class SchemaSynchronizer
 
             foreach (var inc in incompatibleTypes.Where(kvp => kvp.col.Name == kvp.diff.Name))
             {
-                var newColName = inc.diff.Name + "_OLD";
+                var newColName =  inc.diff.Name + "_old";
                 preRenameColumnsList.GetOrCreate(diff.Name).Add(inc.diff.Name, newColName);
                 inc.diff.Name = newColName;
             }
@@ -143,25 +153,28 @@ public static class SchemaSynchronizer
             if (preRenameColumns != null)
                 preRenameColumns.GoAfter = true;
 
-            SqlPreCommand? createFullTextCatallogs = Synchronizer.SynchronizeScript(Spacing.Double,
-                modelFullTextCatallogs.ToDictionary(a => a),
-                databaseFullTextCatallogs.ToDictionary(a => a),
+
+
+
+            SqlPreCommand? createFullTextCatallogs = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
+                modelFullTextCatallogs!.ToDictionary(a => a),
+                databaseFullTextCatallogs!.ToDictionary(a => a),
                 createNew: (_, newFTC) => sqlBuilder.CreateFullTextCatallog(newFTC),
                 removeOld: null,
                 mergeBoth: null
                 );
 
-            SqlPreCommand? createPartitionFunction = databasePartitionFunctions == null ? null : Synchronizer.SynchronizeScript(Spacing.Double,
-                 modelPartitionFunction,
-                 databasePartitionFunctions,
+            SqlPreCommand? createPartitionFunction = isPostgres? null : Synchronizer.SynchronizeScript(Spacing.Double,
+                 modelPartitionFunction!,
+                 databasePartitionFunctions!,
                  createNew: (a, newPF) => sqlBuilder.CreateSqlPartitionFunction(newPF, a.db),
                  removeOld: null,
                  mergeBoth: null
                  );
 
-            SqlPreCommand? createPartitionSchema = databasePartitionSchemas == null ? null : Synchronizer.SynchronizeScript(Spacing.Double,
-                  modelPartitionSchemas,
-                  databasePartitionSchemas,
+            SqlPreCommand? createPartitionSchema = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
+                  modelPartitionSchemas!,
+                  databasePartitionSchemas!,
                   createNew: (a, newPS) => sqlBuilder.CreateSqlPartitionScheme(newPS, a.db),
                 removeOld: null,
                 mergeBoth: null
@@ -189,7 +202,9 @@ public static class SchemaSynchronizer
 
 
             SqlPreCommand? dropIndices =
-                Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
+                Synchronizer.SynchronizeScript(Spacing.Double, 
+                modelTables, 
+                databaseTables,
                 createNew: null,
                 removeOld: (tn, dif) => dif.Indices.Values.Where(ix => !(ix.IsPrimary || ix.Type == DiffIndexType.Heap)).Select(ix => sqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
                 mergeBoth: (tn, tab, dif) =>
@@ -207,8 +222,8 @@ public static class SchemaSynchronizer
                         modelIxs.Where(kvp => !kvp.Value.PrimaryKey).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: null,
-                        removeOld: (i, dix) => dix.IsControlledIndex || dix.Columns.Any(IsColumnRemovedOrModified) ? sqlBuilder.DropIndex(dif.Name, dix) : null,
-                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.DropIndex(dif.Name, dix) : null
+                        removeOld: (i, dix) => dix.IsControlledIndex(isPostgres) || dix.Columns.Any(IsColumnRemovedOrModified) ? sqlBuilder.DropIndex(dif.Name, dix) : null,
+                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.DropIndex(dif.Name, dix) : null
                         );
 
                     return changes;
@@ -222,14 +237,19 @@ public static class SchemaSynchronizer
                 {
                     Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
 
-                    var removedColums = dif.Columns.Keys.Except(tab.Columns.Keys).ToHashSet();
+                    bool IsColumnRemovedOrModified(DiffIndexColumn c)
+                    {
+                        var newName = dif.Columns.ContainsKey(c.ColumnName) ? c.ColumnName : dif.Columns.SingleEx(a => a.Value.Name == c.ColumnName).Key;
+                        var tc = tab.Columns.TryGetC(newName);
+                        return tc == null || !dif.Columns[newName].ColumnEquals(tc, true, true, true);
+                    }
 
                     var changes = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex) && !kvp.Value.PrimaryKey && !kvp.Value.Unique).ToDictionary(),
-                        dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
+                        dif.Indices.Where(kvp => !kvp.Value.IsPrimary && kvp.Value.Type != DiffIndexType.Heap).ToDictionary(),
                         createNew: null,
-                        removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex ? sqlBuilder.DropIndex(dif.Name, dix) : null,
-                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.DropIndex(dif.Name, dix) : null
+                        removeOld: (i, dix) => dix.Columns.Any(IsColumnRemovedOrModified) || dix.IsControlledIndex(isPostgres) ? sqlBuilder.DropIndex(dif.Name, dix) : null,
+                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.DropIndex(dif.Name, dix) : null
                         );
 
                     return changes;
@@ -271,6 +291,25 @@ public static class SchemaSynchronizer
 
             }
 
+            SqlPreCommand? UpdateForeignKeys(ObjectName tableName, string newId, string oldId)
+            {
+                return (from t in databaseTables.Values
+                        from c in t.Columns.Values
+                        where c.ForeignKey != null && c.ForeignKey.TargetTable.Equals(tableName)
+                        select isPostgres ? new SqlPreCommandSimple($"""
+                            UPDATE {t.Name} s 
+                            SET {c.Name.SqlEscape(isPostgres)} = t.{newId.SqlEscape(isPostgres)} 
+                            FROM {tableName} t WHERE s.{c} = t.{oldId}
+                            """) :
+                        new SqlPreCommandSimple($"""
+                            UPDATE s
+                            SET {c.Name.SqlEscape(isPostgres)} = t.{newId.SqlEscape(isPostgres)}
+                            FROM {t.Name} s 
+                            JOIN {tableName} t ON s.{c} = t.{oldId}
+                            """)).Combine(Spacing.Double);
+
+            }
+
             SqlPreCommand? tables =
                     Synchronizer.SynchronizeScript(
                     Spacing.Double,
@@ -300,16 +339,17 @@ public static class SchemaSynchronizer
                         var modelPK = modelIndices[tab].Values.SingleOrDefaultEx(a => a.PrimaryKey);
                         var diffPK = dif.Indices.Values.SingleOrDefaultEx(a => a.IsPrimary);
 
-                        var dropPrimaryKey = diffPK != null && (modelPK == null || !diffPK.IndexEquals(dif, modelPK)) ?
+                        var dropPrimaryKey = diffPK != null && (modelPK == null || !diffPK.IndexEquals(dif, modelPK, sqlBuilder.IsPostgres)) ?
                         SqlPreCommand.Combine(Spacing.Simple,
                             DropForeignKeys(tab.Name),
-                            sqlBuilder.DropIndex(tab.Name, diffPK)) :
-                         diffPK != null && modelPK != null && diffPK.IndexName != modelPK.IndexName ? sqlBuilder.RenameForeignKey(tab.Name, new ObjectName(dif.Name.Schema, diffPK.IndexName, sqlBuilder.IsPostgres), modelPK.IndexName) :
+                            sqlBuilder.DropIndex(tab.Name, diffPK)
+                            ) :
+                         diffPK != null && modelPK != null && diffPK.IndexName != modelPK.IndexName ? sqlBuilder.RenameForeignKey(tab.Name, new ObjectName(dif.Name.Schema, diffPK.IndexName, sqlBuilder.IsPostgres), modelPK.IndexName).Do(a => a.GoBefore = true) :
                         null;
 
                         var diffHeap = dif.Indices.Values.SingleOrDefaultEx(a => a.Type == DiffIndexType.Heap || a.Type == DiffIndexType.Clustered);
 
-                        var disconnectFromPartition = modelPK != null && (diffPK == null || !diffPK.IndexEquals(dif, modelPK)) ?
+                        var disconnectFromPartition = modelPK != null && (diffPK == null || !diffPK.IndexEquals(dif, modelPK, sqlBuilder.IsPostgres)) ?
                         (diffHeap != null && diffHeap.DataSpaceName != "PRIMARY" && !modelPK.Partitioned ? sqlBuilder.DisconnectTableFromPartitionSchema(dif) : null) : null;
 
                         //var modelClus = modelIndices[tab].Values.SingleOrDefaultEx(a => a.Clustered);
@@ -348,7 +388,14 @@ public static class SchemaSynchronizer
 
                                 mergeBoth: (cn, tabCol, difCol) =>
                                 {
-                                    if (difCol.CompatibleTypes(tabCol) && difCol.Identity == tabCol.Identity)
+                                    if ((tabCol.ComputedColumn != null || difCol.ComputedColumn != null) && !difCol.ComputedEquals(tabCol))
+                                    {
+                                        return SqlPreCommand.Combine(Spacing.Simple,
+                                            sqlBuilder.AlterTableDropColumn(tab, difCol.Name),
+                                            sqlBuilder.AlterTableAddColumn(tab, tabCol)
+                                        );
+                                    }
+                                    else if (difCol.CompatibleTypes(tabCol) && difCol.Identity == tabCol.Identity)
                                     {
                                         var columnEquals = difCol.ColumnEquals(tabCol, ignorePrimaryKey: true, ignoreIdentity: false, ignoreGenerateAlways: true);
                                         var defaultEquals = difCol.DefaultEquals(tabCol);
@@ -378,7 +425,10 @@ public static class SchemaSynchronizer
                                     }
                                     else
                                     {
-                                        var update = difCol.PrimaryKey ? null : UpdateForeignKeyTypeChanged(sqlBuilder, tab, dif, tabCol, difCol, ChangeName, preRenameColumnsList) ?? UpdateCustom(tab, tabCol, difCol);
+                                        var update = difCol.PrimaryKey ? 
+                                            (difCol.CompatibleTypes(tabCol) && difCol.Identity != tabCol.Identity ? UpdateForeignKeys(tab.Name, tabCol.Name, difCol.Name) : null): 
+                                            UpdateForeignKeyTypeChanged(sqlBuilder, tab, dif, tabCol, difCol, ChangeName, preRenameColumnsList) ?? UpdateCustom(tab, tabCol, difCol);
+
                                         var drop = sqlBuilder.AlterTableDropColumn(tab, difCol.Name);
 
                                         delayedUpdates.Add(update);
@@ -401,10 +451,11 @@ public static class SchemaSynchronizer
                         );
 
 
-                        var createPrimaryKey = modelPK != null && (diffPK == null || !diffPK.IndexEquals(dif, modelPK)) ? sqlBuilder.CreateIndex(modelPK, null) : null;
+                        var createPrimaryKey = modelPK != null && (diffPK == null || !diffPK.IndexEquals(dif, modelPK, sqlBuilder.IsPostgres)) ? sqlBuilder.CreateIndex(modelPK, null) : null;
 
 
-                        var columnsHistory = columns != null && (disableEnableSystemVersioning || sqlBuilder.IsPostgres && tab.SystemVersioned != null && dif.TemporalType == SysTableTemporalType.SystemVersionTemporalTable) ?
+                        var columnsHistory = columns != null && (disableEnableSystemVersioning || sqlBuilder.IsPostgres && tab.SystemVersioned != null && 
+                        (dif.TemporalType == SysTableTemporalType.SystemVersionTemporalTable || dif.InferredTemporalTableName != null)) ?
                             ForHistoryTable(columns, tab).Replace(new Regex(" IDENTITY "), m => " ") : null;/*HACK*/
 
                         var addPeriod = !sqlBuilder.IsPostgres && tab.SystemVersioned != null &&
@@ -544,15 +595,15 @@ public static class SchemaSynchronizer
                         return tc == null || !dif.Columns[newName].ColumnEquals(tc, true, true, true);
                     }
 
-                    var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple,
+                    var indexes = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => !kvp.Value.PrimaryKey).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: (i, mix) => mix.Unique || mix is FullTextTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
-                        removeOld: (i, dix) => !dix.IsControlledIndex && dix.Columns.Any(IsColumnRemovedOrModified) && SafeConsole.Ask($"Recreate non-controlled index {dix.IndexName}?") ? sqlBuilder.RecreateDiffIndex(tab, dix) : null,
-                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
+                        removeOld: (i, dix) => !dix.IsControlledIndex(isPostgres) && dix.Columns.Any(IsColumnRemovedOrModified) && SafeConsole.Ask($"Recreate non-controlled index {dix.IndexName}?") ? sqlBuilder.RecreateDiffIndex(tab, dix) : null,
+                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                             mix.IndexName != dix.IndexName ? sqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
 
-                    return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
+                    return SqlPreCommand.Combine(Spacing.Simple, indexes);
                 });
 
             SqlPreCommand? addIndicesHistory =
@@ -572,7 +623,7 @@ public static class SchemaSynchronizer
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: (i, mix) => mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
                         removeOld: null,
-                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
+                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
                             mix.GetIndexName(tab.SystemVersioned!.TableName) != dix.IndexName ? sqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.GetIndexName(tab.SystemVersioned!.TableName)) : null);
 
 
@@ -591,25 +642,25 @@ public static class SchemaSynchronizer
                 mergeBoth: (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : sqlBuilder.DropSchema(oldSN)
              );
 
-            SqlPreCommand? dropPartitionSchema = databasePartitionSchemas == null ? null : Synchronizer.SynchronizeScript(Spacing.Double,
-                modelPartitionSchemas,
-                databasePartitionSchemas,
+            SqlPreCommand? dropPartitionSchema = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
+                modelPartitionSchemas!,
+                databasePartitionSchemas!,
                 createNew: null,
                 removeOld: (_, oldPS) => sqlBuilder.DropSqlPartitionScheme(oldPS),
                 mergeBoth: null
                 );
 
-            SqlPreCommand? dropPartitionFunction = databasePartitionFunctions == null ? null : Synchronizer.SynchronizeScript(Spacing.Double,
-                 modelPartitionFunction,
-                 databasePartitionFunctions,
+            SqlPreCommand? dropPartitionFunction = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
+                 modelPartitionFunction!,
+                 databasePartitionFunctions!,
                  createNew: null,
                  removeOld: (_, oldPF) => sqlBuilder.DropSqlPartitionFunction(oldPF),
                  mergeBoth: null
                  );
 
-            SqlPreCommand? dropFullTextCatallogs = Synchronizer.SynchronizeScript(Spacing.Double,
-                modelFullTextCatallogs.ToDictionary(a => a),
-                databaseFullTextCatallogs.ToDictionary(a => a),
+            SqlPreCommand? dropFullTextCatallogs = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
+                modelFullTextCatallogs!.ToDictionary(a => a),
+                databaseFullTextCatallogs!.ToDictionary(a => a),
                 createNew: null,
                 removeOld: (_, newSN) => sqlBuilder.DropFullTextCatallog(newSN),
                 mergeBoth: null
@@ -646,7 +697,7 @@ public static class SchemaSynchronizer
 
     private static SqlPreCommand ForHistoryTable(SqlPreCommand sqlCommand, ITable tab)
     {
-        return sqlCommand.Replace(new Regex(@$"\b{Regex.Escape(tab.Name.Name)}\b"), m => tab.SystemVersioned!.TableName.Name);
+        return sqlCommand.Replace(new Regex(@$"\b{Regex.Escape(tab.Name.ToString())}\b"), m => tab.SystemVersioned!.TableName.ToString());
     }
 
     private static SqlPreCommand? UpdateForeignKeyTypeChanged(SqlBuilder sqlBuilder, ITable tab, DiffTable dif, IColumn tabCol, DiffColumn difCol, Func<ObjectName, ObjectName> changeName, Dictionary<ObjectName, Dictionary<string, string>> preRenameColumnsList)
@@ -733,32 +784,6 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
     {
         var isPostgres = sqlBuilder.IsPostgres;
 
-        if (table.Name.Name == "EmailTemplate" && column.Name == "From_AddressSourceID") // Delete this if after 1.4.2024
-        {
-            return SqlPreCommand.Combine(Spacing.Simple,
-                sqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
-                new SqlPreCommandSimple($@"UPDATE {table.Name} SET
-    {column.Name.SqlEscape(isPostgres)} = CASE WHEN From_Token_HasValue = 1 THEN 0 ELSE 1 END
-WHERE From_HasValue = 1"))!;
-        }
-
-        if (table.Name.Name == "EmailTemplateRecipients" && column.Name == "AddressSourceID") // Delete this if after 1.4.2024
-        {
-            var tempDefault = new SqlBuilder.DefaultConstraint(
-                columnName: column.Name,
-                name: "DF_TEMP_" + column.Name,
-                quotedDefinition: sqlBuilder.Quote(column.DbType, "0"));
-
-            return SqlPreCommand.Combine(Spacing.Simple,
-                sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
-                sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name).Do(a => a.GoAfter = true),
-                new SqlPreCommandSimple($@"UPDATE {table.Name} SET
-    {column.Name.SqlEscape(isPostgres)} = CASE WHEN Token_HasValue = 1 THEN 0 ELSE 1 END")
-
-                )!;
-        }
-
-
         if (!NeedsDefaultValue(table, column) || avoidDefault)
             return sqlBuilder.AlterTableAddColumn(table, column);
 
@@ -773,13 +798,13 @@ WHERE From_HasValue = 1"))!;
             if (defaultValue == "force")
                 return sqlBuilder.AlterTableAddColumn(table, column);
 
-            var where = hasValueColumn != null ? $"{hasValueColumn.Name} = 1" : "??";
+            var where = hasValueColumn != null ? $"{hasValueColumn.Name.SqlEscape(isPostgres)} = {(isPostgres ? "TRUE" : 1)}" : "??";
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 sqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
                 new SqlPreCommandSimple($@"UPDATE {table.Name} SET
     {column.Name.SqlEscape(isPostgres)} = {sqlBuilder.Quote(column.DbType, defaultValue)}
-WHERE {where}"))!;
+WHERE {where};"))!;
         }
         else if (column is FieldPartitionId)
         {
@@ -795,13 +820,9 @@ WHERE {where}"))!;
                new SqlPreCommandSimple($@"UPDATE mle SET
     {column.Name.SqlEscape(isPostgres)} = e.{tm.BackReference.ReferenceTable.PartitionId?.Name.SqlEscape(sqlBuilder.IsPostgres) ?? " -- ??"}
 FROM {table.Name} mle
-JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e.{tm.BackReference.ReferenceTable.PrimaryKey.Name}
-
-") :
+JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e.{tm.BackReference.ReferenceTable.PrimaryKey.Name};") :
                new SqlPreCommandSimple($@"UPDATE {table.Name} SET
-    {column.Name.SqlEscape(isPostgres)} = -- Your code here")
-
-               )!;
+    {column.Name.SqlEscape(isPostgres)} = -- Your code here"))!;
         }
         else
         {
@@ -809,7 +830,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             if (defaultValue == "force")
                 return sqlBuilder.AlterTableAddColumn(table, column);
 
-            if (column is FieldEmbedded.EmbeddedHasValueColumn hv && defaultValue == "0")
+            if (column is FieldEmbedded.EmbeddedHasValueColumn hv && (defaultValue == (isPostgres ? "false" :"0")))
                 hasValueFalse.Add(hv);
 
             var tempDefault = new SqlBuilder.DefaultConstraint(
@@ -820,6 +841,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
+                column.ComputedColumn != null || column.GetGeneratedAlwaysType() != GeneratedAlwaysType.None ? null :
                 sqlBuilder.IsPostgres ?
                 sqlBuilder.AlterTableAlterColumnDropDefault(table.Name, column.Name) :
                 sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name))!;
@@ -874,7 +896,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             column.DbType.IsDate() ? "GetDate()" :
             column.DbType.IsGuid() ? "NEWID()" :
         column.DbType.IsTime() ? "'00:00'" :
-        column.DbType.IsPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), 'infinity', '[)')" :
+        column.DbType.HasPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), 'infinity', '[)')" :
             "?");
 
         string defaultValue = rep.Interactive ? SafeConsole.AskString($"Default value for '{table.Name.Name}.{column.Name}'? ([Enter] for {typeDefault} or 'force' if there are no {(forNewColumn ? "rows" : "nulls")}) ", stringValidator: str => null) : "";
@@ -1017,7 +1039,7 @@ JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
 
                     List<Entity> current = Administrator.TryRetrieveAll(table.Type, replacements);
                     int nullVal = 0;
-                    Dictionary<string, Entity> currentByName = current.ToDictionaryEx(a => a.toStr ?? $"NULL{nullVal++}", table.Name.Name);
+                    Dictionary<string, Entity> currentByName = current.ToDictionaryEx(a => a.ToStr ?? $"NULL{nullVal++}", table.Name.Name);
 
                     string key = Replacements.KeyEnumsForTable(table.Name.Name);
 
@@ -1071,7 +1093,7 @@ JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
 
         var deletes = Synchronizer.SynchronizeScript(Spacing.Double, should, current,
                    createNew: null,
-                   removeOld: (str, c) => table.DeleteSqlSync(c, null, comment: c.toStr),
+                   removeOld: (str, c) => table.DeleteSqlSync(c, null, comment: c.ToStr),
                    mergeBoth: null);
 
         var moves = Synchronizer.SynchronizeScript(Spacing.Double, should, current,
@@ -1080,7 +1102,7 @@ JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
                    mergeBoth: (str, s, c) =>
                    {
                        if (s.id == c.id)
-                           return table.UpdateSqlSync(c, null, comment: c.toStr);
+                           return table.UpdateSqlSync(c, null, comment: c.ToStr);
 
                        var insert = table.InsertSqlSync(s);
 
@@ -1088,10 +1110,10 @@ JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
                                    from col in t.Columns.Values
                                    where col.ReferenceTable == table
                                    select new SqlPreCommandSimple("UPDATE {0} SET {1} = {2} WHERE {1} = {3}; -- {4} re-indexed"
-                                       .FormatWith(t.Name, col.Name.SqlEscape(isPostgres), s.Id, c.Id, c.toStr)))
+                                       .FormatWith(t.Name, col.Name.SqlEscape(isPostgres), s.Id, c.Id, c.ToStr)))
                                     .Combine(Spacing.Simple);
 
-                       var delete = table.DeleteSqlSync(c, null, comment: c.toStr);
+                       var delete = table.DeleteSqlSync(c, null, comment: c.ToStr);
 
                        return SqlPreCommand.Combine(Spacing.Simple, insert, move, delete);
                    });
@@ -1107,7 +1129,7 @@ JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
     private static Entity Clone(Entity current)
     {
         var instance = (Entity)Activator.CreateInstance(current.GetType())!;
-        instance.toStr = current.toStr;
+        instance.ToStr = current.ToStr;
         instance.id = (int)current.id!.Value + 1000000;
         return instance;
     }
@@ -1156,4 +1178,44 @@ JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
 SELECT @{1} = COALESCE(@{1},'')+'KILL '+CAST(SPID AS VARCHAR)+'; 'FROM master..SysProcesses WHERE DB_NAME(DBId) = '{0}'
 EXEC(@{1})".FormatWith(databaseName.Name, variableName));
     }
+
+    public static SqlPreCommand? SyncPostgresExtensions(Replacements replacements)
+    {
+        if (!Schema.Current.Settings.IsPostgres)
+            return null;
+
+        var current = Database.View<PgExtension>().ToDictionary(a => a.extname);
+
+        var s = Schema.Current;
+        var should = s.PostgresExtensions.Where(kvp => kvp.Value(s)).ToDictionary(a => a.Key, a => a.Key);
+
+
+        var sb = Connector.Current.SqlBuilder;
+        var result = Synchronizer.SynchronizeScript(Spacing.Simple,
+              newDictionary: should,
+              oldDictionary: current,
+              createNew: (key, n) => sb.CreateExtensionIfNotExist(key),
+              removeOld: (key, o) => sb.DropExtension(key),
+              mergeBoth: (k, n, o) => null);
+
+        return result;
+    }
+
+
+    public static SqlPreCommand? SyncPostgresDefaultTextLanguage(Replacements replacements)
+    {
+        if (!Schema.Current.Settings.IsPostgres)
+            return null;
+
+        var culture = (string)Executor.ExecuteScalar("SHOW default_text_search_config;")!;
+
+        if(culture.StartsWith("pg_catalog."))
+            culture = culture.After("pg_catalog.");
+
+        if (culture != FullTextTableIndex.PostgresOptions.DefaultLanguage())
+            return new SqlPreCommandSimple($"ALTER DATABASE \"{ObjectName.CurrentOptions.DatabaseNameReplacement ?? Connector.Current.DatabaseName()}\" SET default_text_search_config = '{FullTextTableIndex.PostgresOptions.DefaultLanguage()}';");
+
+        return null;
+    }
+
 }

@@ -8,7 +8,7 @@ export interface WorkflowEventTaskConditionComponentProps {
   ctx: TypeContext<WorkflowEventTaskConditionEval | null>;
 }
 
-export default function WorkflowEventTaskConditionComponent(p : WorkflowEventTaskConditionComponentProps){
+export default function WorkflowEventTaskConditionComponent(p : WorkflowEventTaskConditionComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   function handleCodeChange(newScript: string) {

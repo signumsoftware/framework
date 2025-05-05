@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.Authorization;
 using Signum.Basics;
 using Signum.Utilities.DataStructures;
@@ -31,11 +32,11 @@ public static class ScheduleTaskRunner
                 Task.Run(() => { Thread.Sleep(1000); ReloadPlan(); });
     }
 
-    public static SimpleStatus GetSimpleStatus()
+    public static HealthCheckResult GetHealthStatus()
     {
-        return running ? SimpleStatus.Ok :
-            InitialDelayMilliseconds == null ? SimpleStatus.Disabled :
-            SimpleStatus.Error;
+        return running ? new HealthCheckResult(HealthStatus.Healthy, "Running") :
+          InitialDelayMilliseconds == null ? new HealthCheckResult(HealthStatus.Healthy, "Disabled") :
+          new HealthCheckResult(HealthStatus.Unhealthy, "Not Running!");
     }
 
     public static SchedulerState GetSchedulerState()

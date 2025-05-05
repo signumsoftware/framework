@@ -28,6 +28,7 @@ public sealed class InTypeScriptAttribute : Attribute
 }
 
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+//For Enums in other assemblies but not in entity properties, like DayOfWeek
 public sealed class ImportInTypeScriptAttribute : Attribute
 {
     public Type Type { get; set; }

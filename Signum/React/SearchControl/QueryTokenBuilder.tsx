@@ -21,7 +21,7 @@ interface QueryTokenBuilderProps {
 
 let copiedToken: { fullKey: string, queryKey: string } | undefined;
 
-export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
+export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.JSX.Element {
   var [expanded, setExpanded] = React.useState(false);
   const [lastTokenChanged, setLastTokenChanged] = React.useState<string | undefined>(undefined);
 
@@ -43,7 +43,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
     tokenList.push(undefined);
 
   return (
-    <div className={classes("sf-query-token-builder", p.className)} onKeyDown={handleKeyDown}>
+    <div className={classes("sf-query-token-builder", p.className)} onKeyDown={handleKeyDown} data-token={p.queryToken?.fullKey}>
       {initialIndex != 0 && <button onClick={handleExpandButton} className="btn btn-sm sf-prefix-btn">…</button>}
       {tokenList.map((a, i) => {
         if (i < initialIndex)
@@ -142,7 +142,7 @@ interface QueryTokenPartProps {
 const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
 
 
-export function QueryTokenPart(p: QueryTokenPartProps) {
+export function QueryTokenPart(p: QueryTokenPartProps): React.JSX.Element | null {
 
   const subTokens = useAPI(() => {
     if (p.readOnly)
@@ -194,7 +194,7 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
   }
 }
 
-export function QueryTokenItem(p: { item: QueryToken | null }) {
+export function QueryTokenItem(p: { item: QueryToken | null }): React.JSX.Element | null {
 
   const item = p.item;
 
@@ -211,7 +211,7 @@ export function QueryTokenItem(p: { item: QueryToken | null }) {
 }
 
 
-export function QueryTokenOptionalItem(p: { item: QueryToken | null }) {
+export function QueryTokenOptionalItem(p: { item: QueryToken | null }): React.JSX.Element {
 
   const item = p.item;
 
@@ -230,13 +230,13 @@ export function QueryTokenOptionalItem(p: { item: QueryToken | null }) {
 }
 
 
-export function clearManualSubTokens() {
+export function clearManualSubTokens(): void {
   Dic.clear(manualSubTokens);
 }
 
 export const manualSubTokens: { [key: string]: (entityType: string) => Promise<ManualToken[]> } = {};
 
-export function registerManualSubTokens(key: string, func: (entityType: string) => Promise<ManualToken[]>) {
+export function registerManualSubTokens(key: string, func: (entityType: string) => Promise<ManualToken[]>): void {
   Dic.addOrThrow(manualSubTokens, key, func);
 }
 

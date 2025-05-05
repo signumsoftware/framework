@@ -12,7 +12,7 @@ import { Lite, SearchMessage, tryGetMixin } from '@framework/Signum.Entities';
 import SelectorModal from '@framework/SelectorModal';
 import { QueryString } from '@framework/QueryString';
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
-import { urlProviders } from '../Signum.Authorization/Templates/ProfilePhoto';
+import * as ProfilePhoto from '../Signum.Authorization/Templates/ProfilePhoto';
 import * as AppContext from "@framework/AppContext"
 import { ADGroupEntity, ActiveDirectoryConfigurationEmbedded, ActiveDirectoryMessage, ActiveDirectoryPermission, UserADMessage, UserADMixin } from './Signum.Authorization.ActiveDirectory';
 import * as User from '../Signum.Authorization/Templates/User'
@@ -21,88 +21,92 @@ import { TextBoxLine } from '@framework/Lines';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace ActiveDirectoryClient {
-  
-  export function start(options: { routes: RouteObject[], adGroups: boolean, cachedProfilePhoto: boolean; }) {
-  
+
+  export function start(options: { routes: RouteObject[], adGroups: boolean, inviteUsers: boolean, profilePhotos: boolean | "cached"; }): void {
+
     ChangeLogClient.registerChangeLogModule("Signum.ActiveDirectory", () => import("./Changelog"));
-  
+
     Navigator.addSettings(new EntitySettings(ActiveDirectoryConfigurationEmbedded, e => import('./ActiveDirectoryConfiguration')));
-  
+
     User.setChangePasswordVisibleFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID == null);
     User.setUserNameReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null);
     User.setEmailReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null);
-  
-    if (window.__azureApplicationId) {
-      urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
-  
-  
-        var oid =
-          (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :
-          tryGetMixin(u, UserADMixin)?.oID;
-  
-        if (oid == null)
-          return null;
-  
-        if (!options.cachedProfilePhoto)
+
+    if (options.profilePhotos) {
+      if (window.__azureADConfig) {
+        ProfilePhoto.urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
+
+          var oid =
+            (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :
+              tryGetMixin(u, UserADMixin)?.oID;
+
+          if (oid == null)
+            return null;
+
+          if (options.profilePhotos == "cached")
+            return API.cachedAzureUserPhotoUrl(size, oid);
+
           return AppContext.toAbsoluteUrl("/api/azureUserPhoto/" + size + "/" + oid);
-  
-        return API.cachedAzureUserPhotoUrl(size, oid);
-      })
+        })
+      }
+
+      ProfilePhoto.urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
+        var sid =
+          (UserEntity.isLite(u)) ? (u.model as UserLiteModel).sID :
+            tryGetMixin(u, UserADMixin)?.sID;
+
+        if (sid == null)
+          return null;
+
+        var url = UserEntity.isLite(u) ?
+          AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u.model as UserLiteModel)?.userName) :
+          AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u as UserEntity).userName);
+
+        return url;
+      });
     }
-  
-    urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
-      var sid =
-        (UserEntity.isLite(u)) ? (u.model as UserLiteModel).sID :
-          tryGetMixin(u, UserADMixin)?.sID;
-  
-      if (sid == null)
-        return null;
-  
-      var url = UserEntity.isLite(u) ?
-        AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u.model as UserLiteModel)?.userName) :
-        AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u as UserEntity).userName);
-  
-      return url;
-    });
-  
-  
-    Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) ? ({
-      type: UserEntity,
-      customElement: <em><FontAwesomeIcon icon="address-book" />&nbsp;{UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(<strong>{str}</strong>)}</em>,
-      onClick: () => importADUser(str),
-    }) : null;
-  
-    Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-      if (ctx.findOptions.queryKey != UserEntity.typeName || !AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD))
-        return undefined;
-  
-      var search = getSearch(ctx.findOptions);
-  
-      return (
-        {
-          order: -1,
-          button: <button className="btn btn-info ms-2"
-            onClick={e => {
-              e.preventDefault();
-              var promise = AutoLineModal.show({
-                type: { name: "string" },
-                modalSize: "md",
-                title: <><FontAwesomeIcon icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
-                label: UserADMessage.NameOrEmail.niceToString(),
-                initialValue: search
-              }) as Promise<string>;
-  
-              return promise.then(str => !str ? null : importADUser(str))
-                .then(u => u && Navigator.view(u))
-                .then(u => u && ctx.searchControl.handleCreated(u));
-  
-            }}>
-            <FontAwesomeIcon icon="user-plus" /> {!search ? UserADMessage.FindInActiveDirectory.niceToString() : UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(search == null ? UserEntity.niceName() : <strong>{search}</strong>)}
-          </button>
-        }
-      );
-    });
-  
+
+    if (options.inviteUsers) {
+
+      Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) && str.length > 2 ? ({
+        type: UserEntity,
+        customElement: <em><FontAwesomeIcon icon="address-book" />&nbsp;{UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(<strong>{str}</strong>)}</em>,
+        onClick: () => importADUser(str),
+      }) : null;
+
+      Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
+        if (ctx.findOptions.queryKey != UserEntity.typeName || !AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) ||
+          (ctx.searchControl.props.extraOptions?.avoidFindInActiveDirectory ?? (!ctx.searchControl.props.create)))
+          return undefined;
+
+        var search = getSearch(ctx.findOptions);
+
+        return (
+          {
+            order: -1,
+            button: <button className="btn btn-info ms-2"
+              onClick={e => {
+                e.preventDefault();
+                var promise = AutoLineModal.show({
+                  type: { name: "string" },
+                  modalSize: "md",
+                  title: <><FontAwesomeIcon icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
+                  label: UserADMessage.NameOrEmail.niceToString(),
+                  initialValue: search
+                }) as Promise<string>;
+
+                return promise.then(str => !str ? null : importADUser(str))
+                  .then(u => u && Navigator.view(u))
+                  .then(u => u && ctx.searchControl.handleCreated(u));
+
+              }}>
+              <FontAwesomeIcon icon="user-plus" /> {!search ? UserADMessage.FindInActiveDirectory.niceToString() : UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(search == null ? UserEntity.niceName() : <strong>{search}</strong>)}
+            </button>
+          }
+        );
+      });
+    }
+
     if (options.adGroups) {
       Navigator.addSettings(new EntitySettings(ADGroupEntity, e => import('./ADGroup'), { isCreable: "Never" }));
       Finder.addSettings({
@@ -132,7 +136,7 @@ export namespace ActiveDirectoryClient {
           { token: "DisplayName", orderType: "Ascending" }
         ],
       });
-  
+
       Finder.addSettings({
         queryName: AzureADQuery.ActiveDirectoryGroups,
         defaultFilters: [
@@ -149,7 +153,7 @@ export namespace ActiveDirectoryClient {
         ],
       });
     }
-  
+
   }
   
   function findActiveDirectoryUser(): Promise<Lite<UserEntity> | undefined> {
@@ -237,7 +241,7 @@ export namespace ActiveDirectoryClient {
   
   
   
-  export module API {
+  export namespace API {
   
     export function findADUsers(request: Finder.API.AutocompleteRequest, signal?: AbortSignal): Promise<ActiveDirectoryUser[]> {
       return ajaxGet({ url: "/api/findADUsers?" + QueryString.stringify({ ...request }), signal });

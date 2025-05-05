@@ -19,7 +19,7 @@ interface ColumnEditorProps {
   close: () => void;
 }
 
-export default function ColumnEditor(p: ColumnEditorProps) {
+export default function ColumnEditor(p: ColumnEditorProps): React.JSX.Element {
 
   function handleSummaryTokenChanged(newToken: QueryToken | undefined) {
     p.columnOption.summaryToken = newToken;
@@ -40,14 +40,6 @@ export default function ColumnEditor(p: ColumnEditorProps) {
 
   function handleSummaryCheck() {
     co.summaryToken = co.summaryToken ? undefined : co.token;
-    p.onChange(undefined);
-  }
-
-  function handleHiddenColumnClick() {
-    co.hiddenColumn = co.hiddenColumn ? undefined : true;
-    co.displayName = co.token?.niceName;
-    co.summaryToken = undefined;
-    co.combineRows = undefined;
     p.onChange(undefined);
   }
 

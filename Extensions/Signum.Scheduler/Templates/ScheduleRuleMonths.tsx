@@ -3,7 +3,7 @@ import { AutoLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ScheduleRuleMonthsEntity } from '../Signum.Scheduler'
 
-export default function ScheduleRuleMonths(p : { ctx: TypeContext<ScheduleRuleMonthsEntity> }){
+export default function ScheduleRuleMonths(p : { ctx: TypeContext<ScheduleRuleMonthsEntity> }): React.JSX.Element {
   const ctx4 = p.ctx.subCtx({ labelColumns: { sm: 4 } });
   const ctx2 = p.ctx.subCtx({ labelColumns: { sm: 2 } });
 

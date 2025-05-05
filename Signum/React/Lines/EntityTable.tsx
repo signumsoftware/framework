@@ -55,7 +55,7 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
   tfoot!: React.RefObject<HTMLTableSectionElement>;
   recentlyCreated!: React.MutableRefObject<Lite<Entity> | ModifiableEntity | null>;
 
-  init(p: EntityTableProps<V, RS>) {
+  init(p: EntityTableProps<V, RS>): void {
     super.init(p);
     this.containerDiv = React.useRef<HTMLDivElement>(null);
     this.thead = React.useRef<HTMLTableSectionElement>(null);
@@ -70,14 +70,14 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
     }, []);
   }
 
-  getDefaultProps(p: EntityTableProps<V, RS>) {
+  getDefaultProps(p: EntityTableProps<V, RS>): void {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.view = false;
     p.createAsLink = true;
   }
 
-  overrideProps(state: EntityTableProps<V, RS>, overridenProps: EntityTableProps<V, RS>) {
+  overrideProps(state: EntityTableProps<V, RS>, overridenProps: EntityTableProps<V, RS>): void {
     super.overrideProps(state, overridenProps);
 
     if (state.ctx.propertyRoute) {
@@ -105,7 +105,7 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
           var propertyRoute = c.property == "string" ? pr.addMember("Member", c.property, true) : pr.addLambda(c.property!);
           var factory = AutoLine.getComponentFactory(propertyRoute.typeReference(), propertyRoute);
 
-          c.template = (ctx, row, state) => {
+          c.template = (ctx, row, state): React.ReactElement<any, string | React.JSXElementConstructor<any>> => {
             var subCtx = typeof c.property == "string" ? ctx.subCtx(c.property) : ctx.subCtx(c.property!);
             return factory({ ctx: subCtx });
           };
@@ -130,7 +130,7 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
     }
   }
 
-  handleKeyDown = (sender: EntityTableRowHandle<V, RS>, e: React.KeyboardEvent<HTMLTableRowElement>) => {
+  handleKeyDown = (sender: EntityTableRowHandle<V, RS>, e: React.KeyboardEvent<HTMLTableRowElement>): void => {
 
     if (e.key != KeyNames.tab) {
       if (this.recentlyCreated.current && sender.props.ctx.value == this.recentlyCreated.current)
@@ -140,7 +140,7 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
     }
   }
 
-  handleCreateLastRowBlur = (sender: EntityTableRowHandle<V, RS>, e: React.FocusEvent<HTMLTableRowElement>) => {
+  handleCreateLastRowBlur = (sender: EntityTableRowHandle<V, RS>, e: React.FocusEvent<HTMLTableRowElement>): void => {
     const p = this.props;
     var tr = DomUtils.closest(e.target, "tr")!;
 
@@ -174,7 +174,7 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
     }
   }
 
-  async createLastRow() {
+  async createLastRow(): Promise<void> {
     const p = this.props;
     var pr = this.props.ctx.propertyRoute!.addLambda(a => a[0]);
     const entity = p.onCreate ? await p.onCreate(pr) : await this.defaultCreate(pr);
@@ -192,7 +192,7 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
 //  typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[]
 //}
 
-export const EntityTable = genericForwardRef(function EntityTable<V extends ModifiableEntity, RS>(props: EntityTableProps<V, RS>, ref: React.Ref<EntityTableController<V, RS>>) {
+export const EntityTable: <V extends ModifiableEntity, RS>(props: EntityTableProps<V, RS> & React.RefAttributes<EntityTableController<V, RS>>) => React.ReactNode | null = genericForwardRef(function EntityTable<V extends ModifiableEntity, RS>(props: EntityTableProps<V, RS>, ref: React.Ref<EntityTableController<V, RS>>) {
   const c = useController(EntityTableController, props, ref);
   const p = c.props;
 
@@ -243,7 +243,9 @@ export const EntityTable = genericForwardRef(function EntityTable<V extends Modi
 
     return (
       <div ref={c.containerDiv}
-        className={classes(p.scrollable ? "sf-scroll-table-container" : undefined, p.responsive && "table-responsive")}
+        className={classes(
+          p.scrollable ? "sf-scroll-table-container position-relative" /*Fix chrome double scroll bar (in div and in page)*/ : undefined,
+          p.responsive && "table-responsive")}
         style={{ maxHeight: p.scrollable ? p.maxResultsHeight : undefined }}>
         <table className={classes("table table-sm sf-table", p.tableClasses, c.mandatoryClass)} >
           {
@@ -341,7 +343,7 @@ export interface EntityTableRowHandle<V extends ModifiableEntity, RS = unknown> 
   forceUpdate(): void;
 }
 
-export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRowProps<V, RS>) {
+export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRowProps<V, RS>): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   const rowState = p.rowHooks?.(p.ctx, { props: p as EntityTableRowProps<V, unknown>, forceUpdate })!;

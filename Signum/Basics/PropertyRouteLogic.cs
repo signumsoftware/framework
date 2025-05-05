@@ -34,7 +34,7 @@ public static class PropertyRouteLogic
 
             PropertyRouteEntity.ToPropertyRouteFunc = ToPropertyRouteImplementation;
 
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += PropertyRouteLogic_PreDeleteSqlSync;
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += PropertyRouteLogic_PreDeleteSqlSync;
 
             if (sb.WebServerBuilder != null)
             {
@@ -52,11 +52,9 @@ public static class PropertyRouteLogic
         }
     }
 
-    private static SqlPreCommand? PropertyRouteLogic_PreDeleteSqlSync(Entity arg)
+    private static SqlPreCommand? PropertyRouteLogic_PreDeleteSqlSync(TypeEntity type)
     {
         Table table = Schema.Current.Table<PropertyRouteEntity>();
-
-        var type = (TypeEntity)arg;
 
         var prs = Database.Query<PropertyRouteEntity>().Where(a => a.RootType.Is(type)).ToList();
 
@@ -131,5 +129,6 @@ public static class PropertyRouteLogic
              };
     }
 
-   
+
+
 }

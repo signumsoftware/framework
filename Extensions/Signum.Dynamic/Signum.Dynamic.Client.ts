@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Operations from '../../Signum/React/Signum.Operations'
 
 
-export const DynamicClientEntity = new Type<DynamicClientEntity>("DynamicClient");
+export const DynamicClientEntity: Type<DynamicClientEntity> = new Type<DynamicClientEntity>("DynamicClient");
 export interface DynamicClientEntity extends Entities.Entity {
   Type: "DynamicClient";
   name: string;

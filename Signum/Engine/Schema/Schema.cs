@@ -1,9 +1,12 @@
 using Signum.Engine.Linq;
-using Signum.Security;
 using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
 using System.Globalization;
 using Signum.Engine.Sync;
+using Microsoft.SqlServer.Types;
+using NpgsqlTypes;
+using System.Data;
+using static Signum.Engine.Maps.FullTextTableIndex;
 
 namespace Signum.Engine.Maps;
 
@@ -11,7 +14,21 @@ public class Schema : IImplementationsFinder
 {
     public CultureInfo? ForceCultureInfo { get; set; }
 
-    public TimeZoneMode TimeZoneMode { get; set; }
+    private TimeZoneMode timeZoneMode;
+
+    public TimeZoneMode TimeZoneMode
+    {
+        get => timeZoneMode;
+        set {
+
+            timeZoneMode = value;
+            if (Settings.IsPostgres)
+            {
+                Settings.TypeValues[typeof(DateTime)] = new AbstractDbType(SqlDbType.DateTime2, timeZoneMode == TimeZoneMode.Local ? NpgsqlDbType.Timestamp: NpgsqlDbType.TimestampTz);
+                Settings.TypeValues[typeof(DateTimeOffset)] = new AbstractDbType(SqlDbType.DateTimeOffset, timeZoneMode == TimeZoneMode.Local ? NpgsqlDbType.Timestamp: NpgsqlDbType.TimestampTz);
+            }
+        }
+    }
 
     public DateTimeKind DateTimeKind => TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local;
     public Func<Entity, Expression<Func<Entity, bool>>?>? AttachToUniqueFilter = null;
@@ -61,9 +78,11 @@ public class Schema : IImplementationsFinder
         get { return tables; }
     }
 
-    public List<string> PostgresExtensions = new List<string>()
+    public Dictionary<string, Func<Schema, bool>> PostgresExtensions = new Dictionary<string, Func<Schema, bool>>()
     {
-        "uuid-ossp"
+        { "plpgsql", s => true },
+        { "uuid-ossp", s => true },
+        { "ltree", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.Type.UnNullify() == typeof(SqlHierarchyId)))},
     };
 
     #region Events
@@ -279,7 +298,7 @@ public class Schema : IImplementationsFinder
         if (entityCompleter && !ab.ShouldSet())
             return null;
 
-        return ab.ValueExpression;
+        return ab.GetValueExpression();
     }
 
     internal CacheControllerBase<T>? CacheController<T>() where T : Entity
@@ -447,6 +466,44 @@ public class Schema : IImplementationsFinder
         }
     }
 
+    public bool NeedsSynchronization()
+    {
+        OnBeforeDatabaseAccess();
+
+        if (Synchronizing == null)
+            return false;
+
+        using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
+        using (ExecutionMode.Global())
+        {
+            Replacements replacements = new Replacements()
+            {
+                Interactive = false,
+                ReplaceDatabaseName = null,
+                SchemaOnly = false
+            };
+
+            return Synchronizing
+                .GetInvocationListTyped()
+                .Any(e =>
+                {
+                    SafeConsole.WriteColor(ConsoleColor.White, e.Method.DeclaringType!.TypeName());
+                    Console.Write(".");
+                    SafeConsole.WriteColor(ConsoleColor.DarkGray, e.Method.MethodName());
+                    Console.Write("...");
+
+                    var result = e(replacements);
+
+                    if (result == null)
+                        SafeConsole.WriteLineColor(ConsoleColor.Green, "OK");
+                    else
+                        SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Changes"); 
+
+                    return result != null;
+                });
+        }
+    }
+
     public Table View<T>() where T : IView
     {
         return View(typeof(T));
@@ -554,7 +611,7 @@ public class Schema : IImplementationsFinder
         BeforeDatabaseAccess = null;
     }
 
-    public event Action? InvalidateCache; 
+    public event Action? OnInvalidateCache; 
 
     public event Action? Initializing;
 
@@ -565,12 +622,7 @@ public class Schema : IImplementationsFinder
         if (Initializing == null)
             return;
 
-        if (InvalidateCache != null)
-        {
-            foreach (var ic in InvalidateCache.GetInvocationListTyped())
-                using (HeavyProfiler.Log("InvalidateCache", () => ic.Method.DeclaringType!.ToString()))
-                    ic();
-        }
+        InvalidateCache();
 
         using (ExecutionMode.Global())
             foreach (var init in Initializing.GetInvocationListTyped())
@@ -578,6 +630,16 @@ public class Schema : IImplementationsFinder
                     init();
 
         Initializing = null;
+    }
+
+    public void InvalidateCache()
+    {
+        if (OnInvalidateCache != null)
+        {
+            foreach (var ic in OnInvalidateCache.GetInvocationListTyped())
+                using (HeavyProfiler.Log("InvalidateCache", () => ic.Method.DeclaringType!.ToString()))
+                    ic();
+        }
     }
 
     #endregion
@@ -598,9 +660,10 @@ public class Schema : IImplementationsFinder
         this.ViewBuilder = new Maps.ViewBuilder(this);
 
         Generating += SchemaGenerator.SnapshotIsolation;
-        Generating += SchemaGenerator.PostgresExtensions;
-        Generating += SchemaGenerator.PostgresTemporalTableScript;
+        Generating += SchemaGenerator.CreatePostgresExtensions;
+        Generating += SchemaGenerator.CreatePostgresDefaultTextLanguage;
         Generating += SchemaGenerator.CreatePartitioningFunctionScript;
+        Generating += Assets.Schema_GeneratingBeforeTables;
         Generating += SchemaGenerator.CreateSchemasScript;
         Generating += SchemaGenerator.CreateTablesScript;
         Generating += SchemaGenerator.InsertEnumValuesScript;
@@ -608,12 +671,15 @@ public class Schema : IImplementationsFinder
         Generating += Assets.Schema_Generating;
 
         Synchronizing += SchemaSynchronizer.SnapshotIsolation;
-        Synchronizing += Assets.Schema_SynchronizingDrop;
+        Synchronizing += SchemaSynchronizer.SyncPostgresExtensions;
+        Synchronizing += SchemaSynchronizer.SyncPostgresDefaultTextLanguage;
+
+        Synchronizing += Assets.Schema_SynchronizingBeforeTables;
         Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
         Synchronizing += Assets.Schema_Synchronizing;
         Synchronizing += TypeLogic.Schema_Synchronizing;
 
-        InvalidateCache += GlobalLazy.ResetAll;
+        OnInvalidateCache += () => GlobalLazy.ResetAll(systemLog: false);
 
         SchemaCompleted += Schema.CheckImplementedByAllPrimaryKeyTypes;
     }
@@ -799,7 +865,7 @@ public class Schema : IImplementationsFinder
             (ITable)Table(route.RootType) :
             (ITable)((FieldMList)Field(mlistPr.Parent!)).TableMList;
 
-        return table.MultiColumnIndexes != null && table.MultiColumnIndexes.Any(index => index.Columns.Any(c => cols.Contains(c)));
+        return table.AdditionalIndexes != null && table.AdditionalIndexes.Any(index => index.Columns.Any(c => cols.Contains(c)));
     }
 
     public override string ToString()
@@ -847,7 +913,7 @@ public class Schema : IImplementationsFinder
         if (table == null)
             return false;
 
-        var fullTextIndex = table.MultiColumnIndexes?.OfType<FullTextTableIndex>().SingleOrDefaultEx();
+        var fullTextIndex = table.AdditionalIndexes?.OfType<FullTextTableIndex>().SingleOrDefaultEx();
 
         if (fullTextIndex == null)
             return false;

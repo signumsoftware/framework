@@ -14,11 +14,11 @@ export interface ModifiableEntity {
   isNew: boolean | undefined; //required in embedded to remove and re-create in EntityJsonSerializer
   temporalId: string;
   error?: { [member: string]: string };
-  readonlyProperties?: string[];
+  propsMeta?: string[];
   mixins?: { [name: string]: MixinEntity }
 }
 
-export function liteKeyLong(lite: Lite<Entity>) {
+export function liteKeyLong(lite: Lite<Entity>): string {
   return lite.EntityType + ";" + (lite.id == undefined ? "" : lite.id) + ";" + getToString(lite);
 }
 
@@ -99,12 +99,12 @@ export interface EntityPack<T extends ModifiableEntity> {
 
 export const toStringDictionary: { [name: string]: ((entity: any) => string) | null } = {};
 
-export function registerToString<T extends ModifiableEntity>(type: Type<T>, toStringFunc: ((e: T) => string) | null) {
+export function registerToString<T extends ModifiableEntity>(type: Type<T>, toStringFunc: ((e: T) => string) | null): void {
   toStringDictionary[type.typeName] = toStringFunc as ((e: ModifiableEntity) => string) | null;
 }
 
 
-export function registerCustomModelConsturctor<T extends Entity, M extends ModelEntity>(type: Type<T>, modelType: Type<T>, constructLiteModel: ((e: T) => M)) {
+export function registerCustomModelConsturctor<T extends Entity, M extends ModelEntity>(type: Type<T>, modelType: Type<T>, constructLiteModel: ((e: T) => M)): void {
   var ti = Reflection.tryGetTypeInfo(type.typeName);
 
   if (ti) {
@@ -120,7 +120,7 @@ export function registerCustomModelConsturctor<T extends Entity, M extends Model
 import * as Reflection from './Reflection'
 import { object } from 'prop-types';
 
-export function newNiceName(ti: Reflection.TypeInfo) {
+export function newNiceName(ti: Reflection.TypeInfo): string {
   return FrameMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
 }
 
@@ -182,6 +182,7 @@ function compileFunction(functionString: string): (e: any) => any {
     dateToString: Reflection.dateToString,
     timeToString: Reflection.timeToString,
     getTypeInfo: Reflection.getTypeInfo,
+    symbolNiceName: Reflection.symbolNiceName,
     newNiceName: newNiceName,
     New : Reflection.New,
     toLite: toLite,
@@ -252,18 +253,30 @@ export function toLiteFat<T extends Entity>(entity: T, model?: unknown): Lite<T>
   }
 }
 
-export function liteKey(lite: Lite<Entity>) {
+export function liteKey(lite: Lite<Entity>): string {
   return lite.EntityType + ";" + (lite.id == undefined ? "" : lite.id);
 }
 
 export function parseLite(lite: string): Lite<Entity> {
-  return {
-    EntityType: lite.before(";"),
-    id: lite.after(";"),
-  };
+
+  const type = lite.before(";");
+  const rest = lite.after(";");
+  if (rest.contains(";")) {
+    return {
+      EntityType: type,
+      id: rest.before(";"),
+      model: rest.after(";")
+    }
+  }
+  else {
+    return {
+      EntityType: type,
+      id: rest,
+    }
+  }
 }
 
-export const liteKeyRegEx = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
+export const liteKeyRegEx: RegExp = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
 export function parseLiteList(text: string): Lite<Entity>[] {
   const lines = text.split("|");
   const liteKeys = lines.map(l => liteKeyRegEx.test(l) ? l : null).notNull();
@@ -272,7 +285,7 @@ export function parseLiteList(text: string): Lite<Entity>[] {
   return lites;
 }
 
-export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<T> | T | null | undefined, compareTicks = false, assertTypesFound = true) {
+export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<T> | T | null | undefined, compareTicks = false, assertTypesFound = true): boolean {
 
   if (a == undefined && b == undefined)
     return true;
@@ -322,7 +335,7 @@ export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity> {
     (obj as EntityPack<ModifiableEntity>).canExecute !== undefined;
 }
 
-export function entityInfo(entity: ModifiableEntity | Lite<Entity> | null | undefined) {
+export function entityInfo(entity: ModifiableEntity | Lite<Entity> | null | undefined): string {
   if (!entity)
     return "undefined";
 
@@ -333,35 +346,35 @@ export function entityInfo(entity: ModifiableEntity | Lite<Entity> | null | unde
   return `${type};${id || ""};${isNew || ""}`;
 }
 
-export const BigStringEmbedded = new Type<BigStringEmbedded>("BigStringEmbedded");
+export const BigStringEmbedded: Type<BigStringEmbedded> = new Type<BigStringEmbedded>("BigStringEmbedded");
 export interface BigStringEmbedded extends EmbeddedEntity {
   Type: "BigStringEmbedded";
   text: string | null;
 }
 
-export const BooleanEnum = new EnumType<BooleanEnum>("BooleanEnum");
+export const BooleanEnum: EnumType<BooleanEnum> = new EnumType<BooleanEnum>("BooleanEnum");
 export type BooleanEnum =
   "False" |
   "True";
 
-export module CalendarMessage {
-  export const Today = new MessageKey("CalendarMessage", "Today");
+export namespace CalendarMessage {
+  export const Today: MessageKey = new MessageKey("CalendarMessage", "Today");
 }
 
-export module ConnectionMessage {
-  export const VersionInfo = new MessageKey("ConnectionMessage", "VersionInfo");
-  export const ANewVersionHasJustBeenDeployedSaveChangesAnd0 = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedSaveChangesAnd0");
-  export const OutdatedClientApplication = new MessageKey("ConnectionMessage", "OutdatedClientApplication");
-  export const ANewVersionHasJustBeenDeployedConsiderReload = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedConsiderReload");
-  export const Refresh = new MessageKey("ConnectionMessage", "Refresh");
+export namespace ConnectionMessage {
+  export const VersionInfo: MessageKey = new MessageKey("ConnectionMessage", "VersionInfo");
+  export const ANewVersionHasJustBeenDeployedSaveChangesAnd0: MessageKey = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedSaveChangesAnd0");
+  export const OutdatedClientApplication: MessageKey = new MessageKey("ConnectionMessage", "OutdatedClientApplication");
+  export const ANewVersionHasJustBeenDeployedConsiderReload: MessageKey = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedConsiderReload");
+  export const Refresh: MessageKey = new MessageKey("ConnectionMessage", "Refresh");
 }
 
-export module ContainerToggleMessage {
-  export const Compress = new MessageKey("ContainerToggleMessage", "Compress");
-  export const Expand = new MessageKey("ContainerToggleMessage", "Expand");
+export namespace ContainerToggleMessage {
+  export const Compress: MessageKey = new MessageKey("ContainerToggleMessage", "Compress");
+  export const Expand: MessageKey = new MessageKey("ContainerToggleMessage", "Expand");
 }
 
-export const CorruptMixin = new Type<CorruptMixin>("CorruptMixin");
+export const CorruptMixin: Type<CorruptMixin> = new Type<CorruptMixin>("CorruptMixin");
 export interface CorruptMixin extends MixinEntity {
   Type: "CorruptMixin";
   corrupt: boolean;
@@ -370,317 +383,379 @@ export interface CorruptMixin extends MixinEntity {
 export interface EmbeddedEntity extends ModifiableEntity {
 }
 
-export module EngineMessage {
-  export const ConcurrencyErrorOnDatabaseTable0Id1 = new MessageKey("EngineMessage", "ConcurrencyErrorOnDatabaseTable0Id1");
-  export const EntityWithType0AndId1NotFound = new MessageKey("EngineMessage", "EntityWithType0AndId1NotFound");
-  export const NoWayOfMappingType0Found = new MessageKey("EngineMessage", "NoWayOfMappingType0Found");
-  export const TheEntity0IsNew = new MessageKey("EngineMessage", "TheEntity0IsNew");
-  export const ThereAre0ThatReferThisEntityByProperty1 = new MessageKey("EngineMessage", "ThereAre0ThatReferThisEntityByProperty1");
-  export const ThereAreRecordsIn0PointingToThisTableByColumn1 = new MessageKey("EngineMessage", "ThereAreRecordsIn0PointingToThisTableByColumn1");
-  export const UnauthorizedAccessTo0Because1 = new MessageKey("EngineMessage", "UnauthorizedAccessTo0Because1");
-  export const TheresAlreadyA0With1EqualsTo2_G = new MessageKey("EngineMessage", "TheresAlreadyA0With1EqualsTo2_G");
+export namespace EngineMessage {
+  export const ConcurrencyErrorOnDatabaseTable0Id1: MessageKey = new MessageKey("EngineMessage", "ConcurrencyErrorOnDatabaseTable0Id1");
+  export const EntityWithType0AndId1NotFound: MessageKey = new MessageKey("EngineMessage", "EntityWithType0AndId1NotFound");
+  export const NoWayOfMappingType0Found: MessageKey = new MessageKey("EngineMessage", "NoWayOfMappingType0Found");
+  export const TheEntity0IsNew: MessageKey = new MessageKey("EngineMessage", "TheEntity0IsNew");
+  export const ThereAre0ThatReferThisEntityByProperty1: MessageKey = new MessageKey("EngineMessage", "ThereAre0ThatReferThisEntityByProperty1");
+  export const ThereAreRecordsIn0PointingToThisTableByColumn1: MessageKey = new MessageKey("EngineMessage", "ThereAreRecordsIn0PointingToThisTableByColumn1");
+  export const UnauthorizedAccessTo0Because1: MessageKey = new MessageKey("EngineMessage", "UnauthorizedAccessTo0Because1");
+  export const ThereIsAlreadyA0WithTheSame1_G: MessageKey = new MessageKey("EngineMessage", "ThereIsAlreadyA0WithTheSame1_G");
+  export const ThereIsAlreadyA0With1EqualsTo2_G: MessageKey = new MessageKey("EngineMessage", "ThereIsAlreadyA0With1EqualsTo2_G");
 }
 
-export module EntityControlMessage {
-  export const Create = new MessageKey("EntityControlMessage", "Create");
-  export const Find = new MessageKey("EntityControlMessage", "Find");
-  export const Detail = new MessageKey("EntityControlMessage", "Detail");
-  export const MoveDown = new MessageKey("EntityControlMessage", "MoveDown");
-  export const MoveUp = new MessageKey("EntityControlMessage", "MoveUp");
-  export const MoveRight = new MessageKey("EntityControlMessage", "MoveRight");
-  export const MoveLeft = new MessageKey("EntityControlMessage", "MoveLeft");
-  export const Move = new MessageKey("EntityControlMessage", "Move");
-  export const MoveWithDragAndDropOrCtrlUpDown = new MessageKey("EntityControlMessage", "MoveWithDragAndDropOrCtrlUpDown");
-  export const MoveWithDragAndDropOrCtrlLeftRight = new MessageKey("EntityControlMessage", "MoveWithDragAndDropOrCtrlLeftRight");
-  export const Navigate = new MessageKey("EntityControlMessage", "Navigate");
-  export const Remove = new MessageKey("EntityControlMessage", "Remove");
-  export const View = new MessageKey("EntityControlMessage", "View");
-  export const Add = new MessageKey("EntityControlMessage", "Add");
-  export const Paste = new MessageKey("EntityControlMessage", "Paste");
-  export const PreviousValueWas0 = new MessageKey("EntityControlMessage", "PreviousValueWas0");
-  export const Moved = new MessageKey("EntityControlMessage", "Moved");
-  export const Removed0 = new MessageKey("EntityControlMessage", "Removed0");
-  export const NoChanges = new MessageKey("EntityControlMessage", "NoChanges");
-  export const Changed = new MessageKey("EntityControlMessage", "Changed");
-  export const Added = new MessageKey("EntityControlMessage", "Added");
-  export const RemovedAndSelectedAgain = new MessageKey("EntityControlMessage", "RemovedAndSelectedAgain");
-  export const Selected = new MessageKey("EntityControlMessage", "Selected");
-  export const Edit = new MessageKey("EntityControlMessage", "Edit");
-  export const Reload = new MessageKey("EntityControlMessage", "Reload");
-  export const Download = new MessageKey("EntityControlMessage", "Download");
-  export const Expand = new MessageKey("EntityControlMessage", "Expand");
-  export const Collapse = new MessageKey("EntityControlMessage", "Collapse");
-  export const ToggleSideBar = new MessageKey("EntityControlMessage", "ToggleSideBar");
-  export const Maximize = new MessageKey("EntityControlMessage", "Maximize");
-  export const Minimize = new MessageKey("EntityControlMessage", "Minimize");
-  export const _0Characters = new MessageKey("EntityControlMessage", "_0Characters");
-  export const _0CharactersRemaining = new MessageKey("EntityControlMessage", "_0CharactersRemaining");
+export namespace EntityControlMessage {
+  export const Create: MessageKey = new MessageKey("EntityControlMessage", "Create");
+  export const Find: MessageKey = new MessageKey("EntityControlMessage", "Find");
+  export const Detail: MessageKey = new MessageKey("EntityControlMessage", "Detail");
+  export const MoveDown: MessageKey = new MessageKey("EntityControlMessage", "MoveDown");
+  export const MoveUp: MessageKey = new MessageKey("EntityControlMessage", "MoveUp");
+  export const MoveRight: MessageKey = new MessageKey("EntityControlMessage", "MoveRight");
+  export const MoveLeft: MessageKey = new MessageKey("EntityControlMessage", "MoveLeft");
+  export const Move: MessageKey = new MessageKey("EntityControlMessage", "Move");
+  export const MoveWithDragAndDropOrCtrlUpDown: MessageKey = new MessageKey("EntityControlMessage", "MoveWithDragAndDropOrCtrlUpDown");
+  export const MoveWithDragAndDropOrCtrlLeftRight: MessageKey = new MessageKey("EntityControlMessage", "MoveWithDragAndDropOrCtrlLeftRight");
+  export const Navigate: MessageKey = new MessageKey("EntityControlMessage", "Navigate");
+  export const Remove: MessageKey = new MessageKey("EntityControlMessage", "Remove");
+  export const View: MessageKey = new MessageKey("EntityControlMessage", "View");
+  export const Add: MessageKey = new MessageKey("EntityControlMessage", "Add");
+  export const Paste: MessageKey = new MessageKey("EntityControlMessage", "Paste");
+  export const PreviousValueWas0: MessageKey = new MessageKey("EntityControlMessage", "PreviousValueWas0");
+  export const Moved: MessageKey = new MessageKey("EntityControlMessage", "Moved");
+  export const Removed0: MessageKey = new MessageKey("EntityControlMessage", "Removed0");
+  export const NoChanges: MessageKey = new MessageKey("EntityControlMessage", "NoChanges");
+  export const Changed: MessageKey = new MessageKey("EntityControlMessage", "Changed");
+  export const Added: MessageKey = new MessageKey("EntityControlMessage", "Added");
+  export const RemovedAndSelectedAgain: MessageKey = new MessageKey("EntityControlMessage", "RemovedAndSelectedAgain");
+  export const Selected: MessageKey = new MessageKey("EntityControlMessage", "Selected");
+  export const Edit: MessageKey = new MessageKey("EntityControlMessage", "Edit");
+  export const Reload: MessageKey = new MessageKey("EntityControlMessage", "Reload");
+  export const Download: MessageKey = new MessageKey("EntityControlMessage", "Download");
+  export const Expand: MessageKey = new MessageKey("EntityControlMessage", "Expand");
+  export const Collapse: MessageKey = new MessageKey("EntityControlMessage", "Collapse");
+  export const ToggleSideBar: MessageKey = new MessageKey("EntityControlMessage", "ToggleSideBar");
+  export const Maximize: MessageKey = new MessageKey("EntityControlMessage", "Maximize");
+  export const Minimize: MessageKey = new MessageKey("EntityControlMessage", "Minimize");
+  export const _0Characters: MessageKey = new MessageKey("EntityControlMessage", "_0Characters");
+  export const _0CharactersRemaining: MessageKey = new MessageKey("EntityControlMessage", "_0CharactersRemaining");
 }
 
-export module FrameMessage {
-  export const New0_G = new MessageKey("FrameMessage", "New0_G");
-  export const Copied = new MessageKey("FrameMessage", "Copied");
-  export const CopyToClipboard = new MessageKey("FrameMessage", "CopyToClipboard");
-  export const Fullscreen = new MessageKey("FrameMessage", "Fullscreen");
-  export const ThereAreErrors = new MessageKey("FrameMessage", "ThereAreErrors");
-  export const Main = new MessageKey("FrameMessage", "Main");
+export namespace FrameMessage {
+  export const New0_G: MessageKey = new MessageKey("FrameMessage", "New0_G");
+  export const Copied: MessageKey = new MessageKey("FrameMessage", "Copied");
+  export const CopyToClipboard: MessageKey = new MessageKey("FrameMessage", "CopyToClipboard");
+  export const Fullscreen: MessageKey = new MessageKey("FrameMessage", "Fullscreen");
+  export const ThereAreErrors: MessageKey = new MessageKey("FrameMessage", "ThereAreErrors");
+  export const Main: MessageKey = new MessageKey("FrameMessage", "Main");
+}
+
+export namespace HtmlEditorMessage {
+  export const Hyperlink: MessageKey = new MessageKey("HtmlEditorMessage", "Hyperlink");
+  export const EnterYourUrlHere: MessageKey = new MessageKey("HtmlEditorMessage", "EnterYourUrlHere");
 }
 
 export interface ImmutableEntity extends Entity {
   allowChange: boolean;
 }
 
-export module JavascriptMessage {
-  export const chooseAType = new MessageKey("JavascriptMessage", "chooseAType");
-  export const chooseAValue = new MessageKey("JavascriptMessage", "chooseAValue");
-  export const addFilter = new MessageKey("JavascriptMessage", "addFilter");
-  export const openTab = new MessageKey("JavascriptMessage", "openTab");
-  export const error = new MessageKey("JavascriptMessage", "error");
-  export const executed = new MessageKey("JavascriptMessage", "executed");
-  export const hideFilters = new MessageKey("JavascriptMessage", "hideFilters");
-  export const showFilters = new MessageKey("JavascriptMessage", "showFilters");
-  export const groupResults = new MessageKey("JavascriptMessage", "groupResults");
-  export const ungroupResults = new MessageKey("JavascriptMessage", "ungroupResults");
-  export const ShowGroup = new MessageKey("JavascriptMessage", "ShowGroup");
-  export const activateTimeMachine = new MessageKey("JavascriptMessage", "activateTimeMachine");
-  export const deactivateTimeMachine = new MessageKey("JavascriptMessage", "deactivateTimeMachine");
-  export const showRecords = new MessageKey("JavascriptMessage", "showRecords");
-  export const joinMode = new MessageKey("JavascriptMessage", "joinMode");
-  export const loading = new MessageKey("JavascriptMessage", "loading");
-  export const noActionsFound = new MessageKey("JavascriptMessage", "noActionsFound");
-  export const saveChangesBeforeOrPressCancel = new MessageKey("JavascriptMessage", "saveChangesBeforeOrPressCancel");
-  export const loseCurrentChanges = new MessageKey("JavascriptMessage", "loseCurrentChanges");
-  export const noElementsSelected = new MessageKey("JavascriptMessage", "noElementsSelected");
-  export const searchForResults = new MessageKey("JavascriptMessage", "searchForResults");
-  export const selectOnlyOneElement = new MessageKey("JavascriptMessage", "selectOnlyOneElement");
-  export const popupErrors = new MessageKey("JavascriptMessage", "popupErrors");
-  export const popupErrorsStop = new MessageKey("JavascriptMessage", "popupErrorsStop");
-  export const insertColumn = new MessageKey("JavascriptMessage", "insertColumn");
-  export const editColumn = new MessageKey("JavascriptMessage", "editColumn");
-  export const removeColumn = new MessageKey("JavascriptMessage", "removeColumn");
-  export const groupByThisColumn = new MessageKey("JavascriptMessage", "groupByThisColumn");
-  export const removeOtherColumns = new MessageKey("JavascriptMessage", "removeOtherColumns");
-  export const restoreDefaultColumns = new MessageKey("JavascriptMessage", "restoreDefaultColumns");
-  export const saved = new MessageKey("JavascriptMessage", "saved");
-  export const search = new MessageKey("JavascriptMessage", "search");
-  export const Selected = new MessageKey("JavascriptMessage", "Selected");
-  export const selectToken = new MessageKey("JavascriptMessage", "selectToken");
-  export const find = new MessageKey("JavascriptMessage", "find");
-  export const remove = new MessageKey("JavascriptMessage", "remove");
-  export const view = new MessageKey("JavascriptMessage", "view");
-  export const create = new MessageKey("JavascriptMessage", "create");
-  export const moveDown = new MessageKey("JavascriptMessage", "moveDown");
-  export const moveUp = new MessageKey("JavascriptMessage", "moveUp");
-  export const navigate = new MessageKey("JavascriptMessage", "navigate");
-  export const newEntity = new MessageKey("JavascriptMessage", "newEntity");
-  export const ok = new MessageKey("JavascriptMessage", "ok");
-  export const cancel = new MessageKey("JavascriptMessage", "cancel");
-  export const showPeriod = new MessageKey("JavascriptMessage", "showPeriod");
-  export const showPreviousOperation = new MessageKey("JavascriptMessage", "showPreviousOperation");
-  export const Date = new MessageKey("JavascriptMessage", "Date");
+export namespace JavascriptMessage {
+  export const chooseAType: MessageKey = new MessageKey("JavascriptMessage", "chooseAType");
+  export const chooseAValue: MessageKey = new MessageKey("JavascriptMessage", "chooseAValue");
+  export const addFilter: MessageKey = new MessageKey("JavascriptMessage", "addFilter");
+  export const openTab: MessageKey = new MessageKey("JavascriptMessage", "openTab");
+  export const error: MessageKey = new MessageKey("JavascriptMessage", "error");
+  export const executed: MessageKey = new MessageKey("JavascriptMessage", "executed");
+  export const hideFilters: MessageKey = new MessageKey("JavascriptMessage", "hideFilters");
+  export const showFilters: MessageKey = new MessageKey("JavascriptMessage", "showFilters");
+  export const groupResults: MessageKey = new MessageKey("JavascriptMessage", "groupResults");
+  export const ungroupResults: MessageKey = new MessageKey("JavascriptMessage", "ungroupResults");
+  export const ShowGroup: MessageKey = new MessageKey("JavascriptMessage", "ShowGroup");
+  export const activateTimeMachine: MessageKey = new MessageKey("JavascriptMessage", "activateTimeMachine");
+  export const deactivateTimeMachine: MessageKey = new MessageKey("JavascriptMessage", "deactivateTimeMachine");
+  export const showRecords: MessageKey = new MessageKey("JavascriptMessage", "showRecords");
+  export const joinMode: MessageKey = new MessageKey("JavascriptMessage", "joinMode");
+  export const loading: MessageKey = new MessageKey("JavascriptMessage", "loading");
+  export const noActionsFound: MessageKey = new MessageKey("JavascriptMessage", "noActionsFound");
+  export const saveChangesBeforeOrPressCancel: MessageKey = new MessageKey("JavascriptMessage", "saveChangesBeforeOrPressCancel");
+  export const loseCurrentChanges: MessageKey = new MessageKey("JavascriptMessage", "loseCurrentChanges");
+  export const noElementsSelected: MessageKey = new MessageKey("JavascriptMessage", "noElementsSelected");
+  export const searchForResults: MessageKey = new MessageKey("JavascriptMessage", "searchForResults");
+  export const selectOnlyOneElement: MessageKey = new MessageKey("JavascriptMessage", "selectOnlyOneElement");
+  export const popupErrors: MessageKey = new MessageKey("JavascriptMessage", "popupErrors");
+  export const popupErrorsStop: MessageKey = new MessageKey("JavascriptMessage", "popupErrorsStop");
+  export const insertColumn: MessageKey = new MessageKey("JavascriptMessage", "insertColumn");
+  export const editColumn: MessageKey = new MessageKey("JavascriptMessage", "editColumn");
+  export const removeColumn: MessageKey = new MessageKey("JavascriptMessage", "removeColumn");
+  export const groupByThisColumn: MessageKey = new MessageKey("JavascriptMessage", "groupByThisColumn");
+  export const removeOtherColumns: MessageKey = new MessageKey("JavascriptMessage", "removeOtherColumns");
+  export const restoreDefaultColumns: MessageKey = new MessageKey("JavascriptMessage", "restoreDefaultColumns");
+  export const saved: MessageKey = new MessageKey("JavascriptMessage", "saved");
+  export const search: MessageKey = new MessageKey("JavascriptMessage", "search");
+  export const Selected: MessageKey = new MessageKey("JavascriptMessage", "Selected");
+  export const selectToken: MessageKey = new MessageKey("JavascriptMessage", "selectToken");
+  export const find: MessageKey = new MessageKey("JavascriptMessage", "find");
+  export const remove: MessageKey = new MessageKey("JavascriptMessage", "remove");
+  export const view: MessageKey = new MessageKey("JavascriptMessage", "view");
+  export const create: MessageKey = new MessageKey("JavascriptMessage", "create");
+  export const moveDown: MessageKey = new MessageKey("JavascriptMessage", "moveDown");
+  export const moveUp: MessageKey = new MessageKey("JavascriptMessage", "moveUp");
+  export const navigate: MessageKey = new MessageKey("JavascriptMessage", "navigate");
+  export const newEntity: MessageKey = new MessageKey("JavascriptMessage", "newEntity");
+  export const ok: MessageKey = new MessageKey("JavascriptMessage", "ok");
+  export const cancel: MessageKey = new MessageKey("JavascriptMessage", "cancel");
+  export const showPeriod: MessageKey = new MessageKey("JavascriptMessage", "showPeriod");
+  export const showPreviousOperation: MessageKey = new MessageKey("JavascriptMessage", "showPreviousOperation");
+  export const Date: MessageKey = new MessageKey("JavascriptMessage", "Date");
 }
 
-export module LiteMessage {
-  export const IdNotValid = new MessageKey("LiteMessage", "IdNotValid");
-  export const InvalidFormat = new MessageKey("LiteMessage", "InvalidFormat");
-  export const Type0NotFound = new MessageKey("LiteMessage", "Type0NotFound");
-  export const ToStr = new MessageKey("LiteMessage", "ToStr");
+export namespace LiteMessage {
+  export const IdNotValid: MessageKey = new MessageKey("LiteMessage", "IdNotValid");
+  export const InvalidFormat: MessageKey = new MessageKey("LiteMessage", "InvalidFormat");
+  export const Type0NotFound: MessageKey = new MessageKey("LiteMessage", "Type0NotFound");
+  export const ToStr: MessageKey = new MessageKey("LiteMessage", "ToStr");
 }
 
 export interface ModelEntity extends ModifiableEntity {
 }
 
-export module NormalControlMessage {
-  export const ViewForType0IsNotAllowed = new MessageKey("NormalControlMessage", "ViewForType0IsNotAllowed");
-  export const SaveChangesFirst = new MessageKey("NormalControlMessage", "SaveChangesFirst");
-  export const CopyEntityTypeAndIdForAutocomplete = new MessageKey("NormalControlMessage", "CopyEntityTypeAndIdForAutocomplete");
-  export const CopyEntityUrl = new MessageKey("NormalControlMessage", "CopyEntityUrl");
+export namespace NormalControlMessage {
+  export const ViewForType0IsNotAllowed: MessageKey = new MessageKey("NormalControlMessage", "ViewForType0IsNotAllowed");
+  export const SaveChangesFirst: MessageKey = new MessageKey("NormalControlMessage", "SaveChangesFirst");
+  export const CopyEntityTypeAndIdForAutocomplete: MessageKey = new MessageKey("NormalControlMessage", "CopyEntityTypeAndIdForAutocomplete");
+  export const CopyEntityUrl: MessageKey = new MessageKey("NormalControlMessage", "CopyEntityUrl");
 }
 
-export module OperationMessage {
-  export const Create = new MessageKey("OperationMessage", "Create");
-  export const CreateFromRegex = new MessageKey("OperationMessage", "CreateFromRegex");
-  export const Create0 = new MessageKey("OperationMessage", "Create0");
-  export const StateShouldBe0InsteadOf1 = new MessageKey("OperationMessage", "StateShouldBe0InsteadOf1");
-  export const TheStateOf0ShouldBe1InsteadOf2 = new MessageKey("OperationMessage", "TheStateOf0ShouldBe1InsteadOf2");
-  export const InUserInterface = new MessageKey("OperationMessage", "InUserInterface");
-  export const Operation01IsNotAuthorized = new MessageKey("OperationMessage", "Operation01IsNotAuthorized");
-  export const Confirm = new MessageKey("OperationMessage", "Confirm");
-  export const PleaseConfirmYouWouldLikeToDelete0FromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouWouldLikeToDelete0FromTheSystem");
-  export const PleaseConfirmYouWouldLikeTo01 = new MessageKey("OperationMessage", "PleaseConfirmYouWouldLikeTo01");
-  export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
-  export const Logs = new MessageKey("OperationMessage", "Logs");
-  export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
-  export const LastOperationLog = new MessageKey("OperationMessage", "LastOperationLog");
-  export const _0AndClose = new MessageKey("OperationMessage", "_0AndClose");
-  export const _0AndNew = new MessageKey("OperationMessage", "_0AndNew");
-  export const BulkModifications = new MessageKey("OperationMessage", "BulkModifications");
-  export const PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12 = new MessageKey("OperationMessage", "PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12");
-  export const Condition = new MessageKey("OperationMessage", "Condition");
-  export const Setters = new MessageKey("OperationMessage", "Setters");
-  export const AddSetter = new MessageKey("OperationMessage", "AddSetter");
-  export const MultiSetter = new MessageKey("OperationMessage", "MultiSetter");
-  export const Deleting = new MessageKey("OperationMessage", "Deleting");
-  export const Executing0 = new MessageKey("OperationMessage", "Executing0");
-  export const _0Errors = new MessageKey("OperationMessage", "_0Errors");
-  export const ClosingThisModalOrBrowserTabWillCancelTheOperation = new MessageKey("OperationMessage", "ClosingThisModalOrBrowserTabWillCancelTheOperation");
-  export const CancelOperation = new MessageKey("OperationMessage", "CancelOperation");
-  export const AreYouSureYouWantToCancelTheOperation = new MessageKey("OperationMessage", "AreYouSureYouWantToCancelTheOperation");
-  export const Operation = new MessageKey("OperationMessage", "Operation");
+export namespace OperationMessage {
+  export const Create: MessageKey = new MessageKey("OperationMessage", "Create");
+  export const CreateFromRegex: MessageKey = new MessageKey("OperationMessage", "CreateFromRegex");
+  export const Create0: MessageKey = new MessageKey("OperationMessage", "Create0");
+  export const StateShouldBe0InsteadOf1: MessageKey = new MessageKey("OperationMessage", "StateShouldBe0InsteadOf1");
+  export const TheStateOf0ShouldBe1InsteadOf2: MessageKey = new MessageKey("OperationMessage", "TheStateOf0ShouldBe1InsteadOf2");
+  export const InUserInterface: MessageKey = new MessageKey("OperationMessage", "InUserInterface");
+  export const Operation01IsNotAuthorized: MessageKey = new MessageKey("OperationMessage", "Operation01IsNotAuthorized");
+  export const Confirm: MessageKey = new MessageKey("OperationMessage", "Confirm");
+  export const PleaseConfirmYouWouldLikeToDelete0FromTheSystem: MessageKey = new MessageKey("OperationMessage", "PleaseConfirmYouWouldLikeToDelete0FromTheSystem");
+  export const PleaseConfirmYouWouldLikeTo01: MessageKey = new MessageKey("OperationMessage", "PleaseConfirmYouWouldLikeTo01");
+  export const TheOperation0DidNotReturnAnEntity: MessageKey = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
+  export const Logs: MessageKey = new MessageKey("OperationMessage", "Logs");
+  export const PreviousOperationLog: MessageKey = new MessageKey("OperationMessage", "PreviousOperationLog");
+  export const LastOperationLog: MessageKey = new MessageKey("OperationMessage", "LastOperationLog");
+  export const _0AndClose: MessageKey = new MessageKey("OperationMessage", "_0AndClose");
+  export const _0AndNew: MessageKey = new MessageKey("OperationMessage", "_0AndNew");
+  export const BulkModifications: MessageKey = new MessageKey("OperationMessage", "BulkModifications");
+  export const PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12: MessageKey = new MessageKey("OperationMessage", "PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12");
+  export const Condition: MessageKey = new MessageKey("OperationMessage", "Condition");
+  export const Setters: MessageKey = new MessageKey("OperationMessage", "Setters");
+  export const AddSetter: MessageKey = new MessageKey("OperationMessage", "AddSetter");
+  export const MultiSetter: MessageKey = new MessageKey("OperationMessage", "MultiSetter");
+  export const Deleting: MessageKey = new MessageKey("OperationMessage", "Deleting");
+  export const Executing0: MessageKey = new MessageKey("OperationMessage", "Executing0");
+  export const _0Errors: MessageKey = new MessageKey("OperationMessage", "_0Errors");
+  export const ClosingThisModalOrBrowserTabWillCancelTheOperation: MessageKey = new MessageKey("OperationMessage", "ClosingThisModalOrBrowserTabWillCancelTheOperation");
+  export const CancelOperation: MessageKey = new MessageKey("OperationMessage", "CancelOperation");
+  export const AreYouSureYouWantToCancelTheOperation: MessageKey = new MessageKey("OperationMessage", "AreYouSureYouWantToCancelTheOperation");
+  export const Operation: MessageKey = new MessageKey("OperationMessage", "Operation");
 }
 
-export module PaginationMessage {
-  export const All = new MessageKey("PaginationMessage", "All");
+export namespace PaginationMessage {
+  export const All: MessageKey = new MessageKey("PaginationMessage", "All");
 }
 
-export module QuickLinkMessage {
-  export const Quicklinks = new MessageKey("QuickLinkMessage", "Quicklinks");
-  export const No0Found = new MessageKey("QuickLinkMessage", "No0Found");
+export namespace QuickLinkMessage {
+  export const Quicklinks: MessageKey = new MessageKey("QuickLinkMessage", "Quicklinks");
+  export const No0Found: MessageKey = new MessageKey("QuickLinkMessage", "No0Found");
 }
 
-export module ReactWidgetsMessage {
-  export const MoveToday = new MessageKey("ReactWidgetsMessage", "MoveToday");
-  export const MoveBack = new MessageKey("ReactWidgetsMessage", "MoveBack");
-  export const MoveForward = new MessageKey("ReactWidgetsMessage", "MoveForward");
-  export const DateButton = new MessageKey("ReactWidgetsMessage", "DateButton");
-  export const OpenCombobox = new MessageKey("ReactWidgetsMessage", "OpenCombobox");
-  export const FilterPlaceholder = new MessageKey("ReactWidgetsMessage", "FilterPlaceholder");
-  export const EmptyList = new MessageKey("ReactWidgetsMessage", "EmptyList");
-  export const EmptyFilter = new MessageKey("ReactWidgetsMessage", "EmptyFilter");
-  export const CreateOption = new MessageKey("ReactWidgetsMessage", "CreateOption");
-  export const CreateOption0 = new MessageKey("ReactWidgetsMessage", "CreateOption0");
-  export const TagsLabel = new MessageKey("ReactWidgetsMessage", "TagsLabel");
-  export const RemoveLabel = new MessageKey("ReactWidgetsMessage", "RemoveLabel");
-  export const NoneSelected = new MessageKey("ReactWidgetsMessage", "NoneSelected");
-  export const SelectedItems0 = new MessageKey("ReactWidgetsMessage", "SelectedItems0");
-  export const IncrementValue = new MessageKey("ReactWidgetsMessage", "IncrementValue");
-  export const DecrementValue = new MessageKey("ReactWidgetsMessage", "DecrementValue");
+export namespace ReactWidgetsMessage {
+  export const MoveToday: MessageKey = new MessageKey("ReactWidgetsMessage", "MoveToday");
+  export const MoveBack: MessageKey = new MessageKey("ReactWidgetsMessage", "MoveBack");
+  export const MoveForward: MessageKey = new MessageKey("ReactWidgetsMessage", "MoveForward");
+  export const DateButton: MessageKey = new MessageKey("ReactWidgetsMessage", "DateButton");
+  export const OpenCombobox: MessageKey = new MessageKey("ReactWidgetsMessage", "OpenCombobox");
+  export const FilterPlaceholder: MessageKey = new MessageKey("ReactWidgetsMessage", "FilterPlaceholder");
+  export const EmptyList: MessageKey = new MessageKey("ReactWidgetsMessage", "EmptyList");
+  export const EmptyFilter: MessageKey = new MessageKey("ReactWidgetsMessage", "EmptyFilter");
+  export const CreateOption: MessageKey = new MessageKey("ReactWidgetsMessage", "CreateOption");
+  export const CreateOption0: MessageKey = new MessageKey("ReactWidgetsMessage", "CreateOption0");
+  export const TagsLabel: MessageKey = new MessageKey("ReactWidgetsMessage", "TagsLabel");
+  export const RemoveLabel: MessageKey = new MessageKey("ReactWidgetsMessage", "RemoveLabel");
+  export const NoneSelected: MessageKey = new MessageKey("ReactWidgetsMessage", "NoneSelected");
+  export const SelectedItems0: MessageKey = new MessageKey("ReactWidgetsMessage", "SelectedItems0");
+  export const IncrementValue: MessageKey = new MessageKey("ReactWidgetsMessage", "IncrementValue");
+  export const DecrementValue: MessageKey = new MessageKey("ReactWidgetsMessage", "DecrementValue");
 }
 
-export module SaveChangesMessage {
-  export const ThereAreChanges = new MessageKey("SaveChangesMessage", "ThereAreChanges");
-  export const YoureTryingToCloseAnEntityWithChanges = new MessageKey("SaveChangesMessage", "YoureTryingToCloseAnEntityWithChanges");
-  export const LoseChanges = new MessageKey("SaveChangesMessage", "LoseChanges");
+export namespace SaveChangesMessage {
+  export const ThereAreChanges: MessageKey = new MessageKey("SaveChangesMessage", "ThereAreChanges");
+  export const YoureTryingToCloseAnEntityWithChanges: MessageKey = new MessageKey("SaveChangesMessage", "YoureTryingToCloseAnEntityWithChanges");
+  export const LoseChanges: MessageKey = new MessageKey("SaveChangesMessage", "LoseChanges");
 }
 
-export module SearchMessage {
-  export const ChooseTheDisplayNameOfTheNewColumn = new MessageKey("SearchMessage", "ChooseTheDisplayNameOfTheNewColumn");
-  export const Field = new MessageKey("SearchMessage", "Field");
-  export const ColumnField = new MessageKey("SearchMessage", "ColumnField");
-  export const AddColumn = new MessageKey("SearchMessage", "AddColumn");
-  export const CollectionsCanNotBeAddedAsColumns = new MessageKey("SearchMessage", "CollectionsCanNotBeAddedAsColumns");
-  export const InvalidColumnExpression = new MessageKey("SearchMessage", "InvalidColumnExpression");
-  export const AddFilter = new MessageKey("SearchMessage", "AddFilter");
-  export const AddOrGroup = new MessageKey("SearchMessage", "AddOrGroup");
-  export const AddAndGroup = new MessageKey("SearchMessage", "AddAndGroup");
-  export const OrGroup = new MessageKey("SearchMessage", "OrGroup");
-  export const AndGroup = new MessageKey("SearchMessage", "AndGroup");
-  export const GroupPrefix = new MessageKey("SearchMessage", "GroupPrefix");
-  export const AddValue = new MessageKey("SearchMessage", "AddValue");
-  export const DeleteFilter = new MessageKey("SearchMessage", "DeleteFilter");
-  export const DeleteAllFilter = new MessageKey("SearchMessage", "DeleteAllFilter");
-  export const Filters = new MessageKey("SearchMessage", "Filters");
-  export const Columns = new MessageKey("SearchMessage", "Columns");
-  export const Find = new MessageKey("SearchMessage", "Find");
-  export const FinderOf0 = new MessageKey("SearchMessage", "FinderOf0");
-  export const Name = new MessageKey("SearchMessage", "Name");
-  export const NewColumnSName = new MessageKey("SearchMessage", "NewColumnSName");
-  export const NoActionsFound = new MessageKey("SearchMessage", "NoActionsFound");
-  export const NoColumnSelected = new MessageKey("SearchMessage", "NoColumnSelected");
-  export const NoFiltersSpecified = new MessageKey("SearchMessage", "NoFiltersSpecified");
-  export const Of = new MessageKey("SearchMessage", "Of");
-  export const Operator = new MessageKey("SearchMessage", "Operator");
-  export const Query0IsNotAllowed = new MessageKey("SearchMessage", "Query0IsNotAllowed");
-  export const Query0NotAllowed = new MessageKey("SearchMessage", "Query0NotAllowed");
-  export const Query0NotRegistered = new MessageKey("SearchMessage", "Query0NotRegistered");
-  export const Rename = new MessageKey("SearchMessage", "Rename");
-  export const _0Results_N = new MessageKey("SearchMessage", "_0Results_N");
-  export const First0Results_N = new MessageKey("SearchMessage", "First0Results_N");
-  export const _01of2Results_N = new MessageKey("SearchMessage", "_01of2Results_N");
-  export const Search = new MessageKey("SearchMessage", "Search");
-  export const Refresh = new MessageKey("SearchMessage", "Refresh");
-  export const Create = new MessageKey("SearchMessage", "Create");
-  export const CreateNew0_G = new MessageKey("SearchMessage", "CreateNew0_G");
-  export const ThereIsNo0 = new MessageKey("SearchMessage", "ThereIsNo0");
-  export const Value = new MessageKey("SearchMessage", "Value");
-  export const View = new MessageKey("SearchMessage", "View");
-  export const ViewSelected = new MessageKey("SearchMessage", "ViewSelected");
-  export const Operations = new MessageKey("SearchMessage", "Operations");
-  export const NoResultsFound = new MessageKey("SearchMessage", "NoResultsFound");
-  export const NoResultsInThisPage = new MessageKey("SearchMessage", "NoResultsInThisPage");
-  export const NoResultsFoundInPage01 = new MessageKey("SearchMessage", "NoResultsFoundInPage01");
-  export const GoBackToPageOne = new MessageKey("SearchMessage", "GoBackToPageOne");
-  export const PinnedFilter = new MessageKey("SearchMessage", "PinnedFilter");
-  export const Label = new MessageKey("SearchMessage", "Label");
-  export const Column = new MessageKey("SearchMessage", "Column");
-  export const ColSpan = new MessageKey("SearchMessage", "ColSpan");
-  export const Row = new MessageKey("SearchMessage", "Row");
-  export const WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull = new MessageKey("SearchMessage", "WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull");
-  export const WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound = new MessageKey("SearchMessage", "WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound");
-  export const ParentValue = new MessageKey("SearchMessage", "ParentValue");
-  export const PleaseSelectA0_G = new MessageKey("SearchMessage", "PleaseSelectA0_G");
-  export const PleaseSelectOneOrMore0_G = new MessageKey("SearchMessage", "PleaseSelectOneOrMore0_G");
-  export const PleaseSelectAnEntity = new MessageKey("SearchMessage", "PleaseSelectAnEntity");
-  export const PleaseSelectOneOrSeveralEntities = new MessageKey("SearchMessage", "PleaseSelectOneOrSeveralEntities");
-  export const _0FiltersCollapsed = new MessageKey("SearchMessage", "_0FiltersCollapsed");
-  export const DisplayName = new MessageKey("SearchMessage", "DisplayName");
-  export const ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton = new MessageKey("SearchMessage", "ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton");
-  export const PaginationAll_0Elements = new MessageKey("SearchMessage", "PaginationAll_0Elements");
-  export const PaginationPages_0Of01lements = new MessageKey("SearchMessage", "PaginationPages_0Of01lements");
-  export const PaginationFirst_01Elements = new MessageKey("SearchMessage", "PaginationFirst_01Elements");
-  export const ReturnNewEntity = new MessageKey("SearchMessage", "ReturnNewEntity");
-  export const DoYouWantToSelectTheNew01_G = new MessageKey("SearchMessage", "DoYouWantToSelectTheNew01_G");
-  export const EditPinnedFilters = new MessageKey("SearchMessage", "EditPinnedFilters");
-  export const PinFilter = new MessageKey("SearchMessage", "PinFilter");
-  export const UnpinFilter = new MessageKey("SearchMessage", "UnpinFilter");
-  export const IsActive = new MessageKey("SearchMessage", "IsActive");
-  export const Split = new MessageKey("SearchMessage", "Split");
-  export const SummaryHeader = new MessageKey("SearchMessage", "SummaryHeader");
-  export const SummaryHeaderMustBeAnAggregate = new MessageKey("SearchMessage", "SummaryHeaderMustBeAnAggregate");
-  export const HiddenColumn = new MessageKey("SearchMessage", "HiddenColumn");
-  export const ShowHiddenColumns = new MessageKey("SearchMessage", "ShowHiddenColumns");
-  export const HideHiddenColumns = new MessageKey("SearchMessage", "HideHiddenColumns");
-  export const GroupKey = new MessageKey("SearchMessage", "GroupKey");
-  export const DerivedGroupKey = new MessageKey("SearchMessage", "DerivedGroupKey");
-  export const Copy = new MessageKey("SearchMessage", "Copy");
-  export const MoreThanOne0Selected = new MessageKey("SearchMessage", "MoreThanOne0Selected");
-  export const CombineRowsWith = new MessageKey("SearchMessage", "CombineRowsWith");
-  export const Equal0 = new MessageKey("SearchMessage", "Equal0");
-  export const SwitchViewMode = new MessageKey("SearchMessage", "SwitchViewMode");
-  export const SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup");
-  export const SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup");
-  export const NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst = new MessageKey("SearchMessage", "NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst");
-  export const NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First = new MessageKey("SearchMessage", "NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First");
-  export const SimpleFilters = new MessageKey("SearchMessage", "SimpleFilters");
-  export const AdvancedFilters = new MessageKey("SearchMessage", "AdvancedFilters");
-  export const FilterDesigner = new MessageKey("SearchMessage", "FilterDesigner");
-  export const TimeMachine = new MessageKey("SearchMessage", "TimeMachine");
-  export const Options = new MessageKey("SearchMessage", "Options");
+export namespace SearchMessage {
+  export const ChooseTheDisplayNameOfTheNewColumn: MessageKey = new MessageKey("SearchMessage", "ChooseTheDisplayNameOfTheNewColumn");
+  export const Field: MessageKey = new MessageKey("SearchMessage", "Field");
+  export const ColumnField: MessageKey = new MessageKey("SearchMessage", "ColumnField");
+  export const AddColumn: MessageKey = new MessageKey("SearchMessage", "AddColumn");
+  export const CollectionsCanNotBeAddedAsColumns: MessageKey = new MessageKey("SearchMessage", "CollectionsCanNotBeAddedAsColumns");
+  export const InvalidColumnExpression: MessageKey = new MessageKey("SearchMessage", "InvalidColumnExpression");
+  export const AddFilter: MessageKey = new MessageKey("SearchMessage", "AddFilter");
+  export const AddOrGroup: MessageKey = new MessageKey("SearchMessage", "AddOrGroup");
+  export const AddAndGroup: MessageKey = new MessageKey("SearchMessage", "AddAndGroup");
+  export const OrGroup: MessageKey = new MessageKey("SearchMessage", "OrGroup");
+  export const AndGroup: MessageKey = new MessageKey("SearchMessage", "AndGroup");
+  export const GroupPrefix: MessageKey = new MessageKey("SearchMessage", "GroupPrefix");
+  export const AddValue: MessageKey = new MessageKey("SearchMessage", "AddValue");
+  export const DeleteFilter: MessageKey = new MessageKey("SearchMessage", "DeleteFilter");
+  export const DeleteAllFilter: MessageKey = new MessageKey("SearchMessage", "DeleteAllFilter");
+  export const Filters: MessageKey = new MessageKey("SearchMessage", "Filters");
+  export const Columns: MessageKey = new MessageKey("SearchMessage", "Columns");
+  export const Find: MessageKey = new MessageKey("SearchMessage", "Find");
+  export const FinderOf0: MessageKey = new MessageKey("SearchMessage", "FinderOf0");
+  export const Name: MessageKey = new MessageKey("SearchMessage", "Name");
+  export const NewColumnSName: MessageKey = new MessageKey("SearchMessage", "NewColumnSName");
+  export const NoActionsFound: MessageKey = new MessageKey("SearchMessage", "NoActionsFound");
+  export const NoColumnSelected: MessageKey = new MessageKey("SearchMessage", "NoColumnSelected");
+  export const NoFiltersSpecified: MessageKey = new MessageKey("SearchMessage", "NoFiltersSpecified");
+  export const Of: MessageKey = new MessageKey("SearchMessage", "Of");
+  export const Operator: MessageKey = new MessageKey("SearchMessage", "Operator");
+  export const Query0IsNotAllowed: MessageKey = new MessageKey("SearchMessage", "Query0IsNotAllowed");
+  export const Query0NotAllowed: MessageKey = new MessageKey("SearchMessage", "Query0NotAllowed");
+  export const Query0NotRegistered: MessageKey = new MessageKey("SearchMessage", "Query0NotRegistered");
+  export const Rename: MessageKey = new MessageKey("SearchMessage", "Rename");
+  export const _0Results_N: MessageKey = new MessageKey("SearchMessage", "_0Results_N");
+  export const First0Results_N: MessageKey = new MessageKey("SearchMessage", "First0Results_N");
+  export const _01of2Results_N: MessageKey = new MessageKey("SearchMessage", "_01of2Results_N");
+  export const Search: MessageKey = new MessageKey("SearchMessage", "Search");
+  export const Refresh: MessageKey = new MessageKey("SearchMessage", "Refresh");
+  export const Create: MessageKey = new MessageKey("SearchMessage", "Create");
+  export const CreateNew0_G: MessageKey = new MessageKey("SearchMessage", "CreateNew0_G");
+  export const ThereIsNo0: MessageKey = new MessageKey("SearchMessage", "ThereIsNo0");
+  export const Value: MessageKey = new MessageKey("SearchMessage", "Value");
+  export const View: MessageKey = new MessageKey("SearchMessage", "View");
+  export const ViewSelected: MessageKey = new MessageKey("SearchMessage", "ViewSelected");
+  export const Operations: MessageKey = new MessageKey("SearchMessage", "Operations");
+  export const NoResultsFound: MessageKey = new MessageKey("SearchMessage", "NoResultsFound");
+  export const NoResultsInThisPage: MessageKey = new MessageKey("SearchMessage", "NoResultsInThisPage");
+  export const NoResultsFoundInPage01: MessageKey = new MessageKey("SearchMessage", "NoResultsFoundInPage01");
+  export const GoBackToPageOne: MessageKey = new MessageKey("SearchMessage", "GoBackToPageOne");
+  export const PinnedFilter: MessageKey = new MessageKey("SearchMessage", "PinnedFilter");
+  export const Label: MessageKey = new MessageKey("SearchMessage", "Label");
+  export const Column: MessageKey = new MessageKey("SearchMessage", "Column");
+  export const ColSpan: MessageKey = new MessageKey("SearchMessage", "ColSpan");
+  export const Row: MessageKey = new MessageKey("SearchMessage", "Row");
+  export const WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull: MessageKey = new MessageKey("SearchMessage", "WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull");
+  export const WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound: MessageKey = new MessageKey("SearchMessage", "WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound");
+  export const ParentValue: MessageKey = new MessageKey("SearchMessage", "ParentValue");
+  export const PleaseSelectA0_G: MessageKey = new MessageKey("SearchMessage", "PleaseSelectA0_G");
+  export const PleaseSelectOneOrMore0_G: MessageKey = new MessageKey("SearchMessage", "PleaseSelectOneOrMore0_G");
+  export const PleaseSelectAnEntity: MessageKey = new MessageKey("SearchMessage", "PleaseSelectAnEntity");
+  export const PleaseSelectOneOrSeveralEntities: MessageKey = new MessageKey("SearchMessage", "PleaseSelectOneOrSeveralEntities");
+  export const _0FiltersCollapsed: MessageKey = new MessageKey("SearchMessage", "_0FiltersCollapsed");
+  export const DisplayName: MessageKey = new MessageKey("SearchMessage", "DisplayName");
+  export const ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton: MessageKey = new MessageKey("SearchMessage", "ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton");
+  export const PaginationAll_0Elements: MessageKey = new MessageKey("SearchMessage", "PaginationAll_0Elements");
+  export const PaginationPages_0Of01lements: MessageKey = new MessageKey("SearchMessage", "PaginationPages_0Of01lements");
+  export const PaginationFirst_01Elements: MessageKey = new MessageKey("SearchMessage", "PaginationFirst_01Elements");
+  export const ReturnNewEntity: MessageKey = new MessageKey("SearchMessage", "ReturnNewEntity");
+  export const DoYouWantToSelectTheNew01_G: MessageKey = new MessageKey("SearchMessage", "DoYouWantToSelectTheNew01_G");
+  export const EditPinnedFilters: MessageKey = new MessageKey("SearchMessage", "EditPinnedFilters");
+  export const PinFilter: MessageKey = new MessageKey("SearchMessage", "PinFilter");
+  export const UnpinFilter: MessageKey = new MessageKey("SearchMessage", "UnpinFilter");
+  export const IsActive: MessageKey = new MessageKey("SearchMessage", "IsActive");
+  export const Split: MessageKey = new MessageKey("SearchMessage", "Split");
+  export const SummaryHeader: MessageKey = new MessageKey("SearchMessage", "SummaryHeader");
+  export const SummaryHeaderMustBeAnAggregate: MessageKey = new MessageKey("SearchMessage", "SummaryHeaderMustBeAnAggregate");
+  export const HiddenColumn: MessageKey = new MessageKey("SearchMessage", "HiddenColumn");
+  export const ShowHiddenColumns: MessageKey = new MessageKey("SearchMessage", "ShowHiddenColumns");
+  export const HideHiddenColumns: MessageKey = new MessageKey("SearchMessage", "HideHiddenColumns");
+  export const GroupKey: MessageKey = new MessageKey("SearchMessage", "GroupKey");
+  export const DerivedGroupKey: MessageKey = new MessageKey("SearchMessage", "DerivedGroupKey");
+  export const Copy: MessageKey = new MessageKey("SearchMessage", "Copy");
+  export const MoreThanOne0Selected: MessageKey = new MessageKey("SearchMessage", "MoreThanOne0Selected");
+  export const CombineRowsWith: MessageKey = new MessageKey("SearchMessage", "CombineRowsWith");
+  export const Equal0: MessageKey = new MessageKey("SearchMessage", "Equal0");
+  export const SwitchViewMode: MessageKey = new MessageKey("SearchMessage", "SwitchViewMode");
+  export const SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup: MessageKey = new MessageKey("SearchMessage", "SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup");
+  export const SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup: MessageKey = new MessageKey("SearchMessage", "SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup");
+  export const NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst: MessageKey = new MessageKey("SearchMessage", "NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst");
+  export const NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First: MessageKey = new MessageKey("SearchMessage", "NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First");
+  export const SimpleFilters: MessageKey = new MessageKey("SearchMessage", "SimpleFilters");
+  export const AdvancedFilters: MessageKey = new MessageKey("SearchMessage", "AdvancedFilters");
+  export const FilterDesigner: MessageKey = new MessageKey("SearchMessage", "FilterDesigner");
+  export const TimeMachine: MessageKey = new MessageKey("SearchMessage", "TimeMachine");
+  export const Options: MessageKey = new MessageKey("SearchMessage", "Options");
+  export const SearchHelp: MessageKey = new MessageKey("SearchMessage", "SearchHelp");
+  export const SearchControl: MessageKey = new MessageKey("SearchMessage", "SearchControl");
+  export const The0IsVeryPowerfulButCanBeIntimidatingTakeSomeTimeToLearnHowToUseItWillBeWorthIt: MessageKey = new MessageKey("SearchMessage", "The0IsVeryPowerfulButCanBeIntimidatingTakeSomeTimeToLearnHowToUseItWillBeWorthIt");
+  export const TheBasics: MessageKey = new MessageKey("SearchMessage", "TheBasics");
+  export const CurrentlyWeAreInTheQuery0YouCanOpenA1ByClickingThe2IconOrDoing3InTheRowButNotInALink: MessageKey = new MessageKey("SearchMessage", "CurrentlyWeAreInTheQuery0YouCanOpenA1ByClickingThe2IconOrDoing3InTheRowButNotInALink");
+  export const CurrentlyWeAreInTheQuery0GroupedBy1YouCanOpenAGroupByClickingThe2IconOrDoing3InTheRowButNotInALink: MessageKey = new MessageKey("SearchMessage", "CurrentlyWeAreInTheQuery0GroupedBy1YouCanOpenAGroupByClickingThe2IconOrDoing3InTheRowButNotInALink");
+  export const DoubleClick: MessageKey = new MessageKey("SearchMessage", "DoubleClick");
+  export const GroupedBy: MessageKey = new MessageKey("SearchMessage", "GroupedBy");
+  export const YouCanOpenAGroupByClickingInThe: MessageKey = new MessageKey("SearchMessage", "YouCanOpenAGroupByClickingInThe");
+  export const Doing0InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK: MessageKey = new MessageKey("SearchMessage", "Doing0InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK");
+  export const YouCanUseThePreparedFiltersOnTheTopToQuicklyFindThe0YouAreLookingFor: MessageKey = new MessageKey("SearchMessage", "YouCanUseThePreparedFiltersOnTheTopToQuicklyFindThe0YouAreLookingFor");
+  export const OrderingResults: MessageKey = new MessageKey("SearchMessage", "OrderingResults");
+  export const YouCanOrderResultsByClickingInAColumnHeaderDefaultOrderingIs0AndByClickingAgainItChangesTo1YouCanOrderByMoreThanOneColumnIfYouKeep2DownWhenClickingOnTheColumnsHeader: MessageKey = new MessageKey("SearchMessage", "YouCanOrderResultsByClickingInAColumnHeaderDefaultOrderingIs0AndByClickingAgainItChangesTo1YouCanOrderByMoreThanOneColumnIfYouKeep2DownWhenClickingOnTheColumnsHeader");
+  export const Ascending: MessageKey = new MessageKey("SearchMessage", "Ascending");
+  export const Descending: MessageKey = new MessageKey("SearchMessage", "Descending");
+  export const Shift: MessageKey = new MessageKey("SearchMessage", "Shift");
+  export const ChangeColumns: MessageKey = new MessageKey("SearchMessage", "ChangeColumns");
+  export const YouAreNotLimitedToTheColumnsYouSeeTheDefaultColumnsCanBeChangedBy0InAColumnHeaderAndThenSelect123: MessageKey = new MessageKey("SearchMessage", "YouAreNotLimitedToTheColumnsYouSeeTheDefaultColumnsCanBeChangedBy0InAColumnHeaderAndThenSelect123");
+  export const RightClicking: MessageKey = new MessageKey("SearchMessage", "RightClicking");
+  export const RightClick: MessageKey = new MessageKey("SearchMessage", "RightClick");
+  export const InsertColumn: MessageKey = new MessageKey("SearchMessage", "InsertColumn");
+  export const EditColumn: MessageKey = new MessageKey("SearchMessage", "EditColumn");
+  export const RemoveColumn: MessageKey = new MessageKey("SearchMessage", "RemoveColumn");
+  export const YouCanAlso0TheColumnsByDraggingAndDroppingThemToAnotherPosition: MessageKey = new MessageKey("SearchMessage", "YouCanAlso0TheColumnsByDraggingAndDroppingThemToAnotherPosition");
+  export const Rearrange: MessageKey = new MessageKey("SearchMessage", "Rearrange");
+  export const WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumnDependingWhereYou0: MessageKey = new MessageKey("SearchMessage", "WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumnDependingWhereYou0");
+  export const ClickOnThe0ButtonToOpenTheAdvancedFiltersThisWillAllowYouCreateComplexFiltersManuallyBySelectingThe1OfTheEntityOrARelatedEntitiesAComparison2AndA3ToCompare: MessageKey = new MessageKey("SearchMessage", "ClickOnThe0ButtonToOpenTheAdvancedFiltersThisWillAllowYouCreateComplexFiltersManuallyBySelectingThe1OfTheEntityOrARelatedEntitiesAComparison2AndA3ToCompare");
+  export const TrickYouCan0OnA1AndChoose2ToQuicklyFilterByThisColumnEvenMoreYouCan3ToFilterByThis4Directly: MessageKey = new MessageKey("SearchMessage", "TrickYouCan0OnA1AndChoose2ToQuicklyFilterByThisColumnEvenMoreYouCan3ToFilterByThis4Directly");
+  export const ColumnHeader: MessageKey = new MessageKey("SearchMessage", "ColumnHeader");
+  export const GroupingResultsByOneOrMoreColumn: MessageKey = new MessageKey("SearchMessage", "GroupingResultsByOneOrMoreColumn");
+  export const YouCanGroupResultsBy0InAColumnHeaderAndSelecting1AllTheColumnsWillDisappearExceptTheSelectedOneAndAnAggregationColumnTypically2: MessageKey = new MessageKey("SearchMessage", "YouCanGroupResultsBy0InAColumnHeaderAndSelecting1AllTheColumnsWillDisappearExceptTheSelectedOneAndAnAggregationColumnTypically2");
+  export const GroupByThisColumn: MessageKey = new MessageKey("SearchMessage", "GroupByThisColumn");
+  export const GroupHelp: MessageKey = new MessageKey("SearchMessage", "GroupHelp");
+  export const AnyNewColumnShouldEitherBeAnAggregate0OrItWillBeConsideredANewGroupKey1: MessageKey = new MessageKey("SearchMessage", "AnyNewColumnShouldEitherBeAnAggregate0OrItWillBeConsideredANewGroupKey1");
+  export const OnceGroupingYouCanFilterNormallyOrUsingAggregatesAsTheField0: MessageKey = new MessageKey("SearchMessage", "OnceGroupingYouCanFilterNormallyOrUsingAggregatesAsTheField0");
+  export const InSql: MessageKey = new MessageKey("SearchMessage", "InSql");
+  export const FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1: MessageKey = new MessageKey("SearchMessage", "FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1");
+  export const RestoreDefaultColumns: MessageKey = new MessageKey("SearchMessage", "RestoreDefaultColumns");
+  export const AQueryExpressionCouldBeAnyFieldOfThe: MessageKey = new MessageKey("SearchMessage", "AQueryExpressionCouldBeAnyFieldOfThe");
+  export const Like: MessageKey = new MessageKey("SearchMessage", "Like");
+  export const OrAnyOtherFieldThatYouSeeInThe: MessageKey = new MessageKey("SearchMessage", "OrAnyOtherFieldThatYouSeeInThe");
+  export const WhenYouClick: MessageKey = new MessageKey("SearchMessage", "WhenYouClick");
+  export const IconOrAnyRelatedEntity: MessageKey = new MessageKey("SearchMessage", "IconOrAnyRelatedEntity");
+  export const AQueryExpressionCouldBeAnyColumnOfThe: MessageKey = new MessageKey("SearchMessage", "AQueryExpressionCouldBeAnyColumnOfThe");
+  export const OrAnyOtherFieldThatYouSeeInTheProjectWhenYouClick: MessageKey = new MessageKey("SearchMessage", "OrAnyOtherFieldThatYouSeeInTheProjectWhenYouClick");
+  export const TheOperationThatWillBeUsedToCompareThe: MessageKey = new MessageKey("SearchMessage", "TheOperationThatWillBeUsedToCompareThe");
+  export const WithThe: MessageKey = new MessageKey("SearchMessage", "WithThe");
+  export const EqualsDistinctGreaterThan: MessageKey = new MessageKey("SearchMessage", "EqualsDistinctGreaterThan");
+  export const Etc: MessageKey = new MessageKey("SearchMessage", "Etc");
+  export const IsIn: MessageKey = new MessageKey("SearchMessage", "IsIn");
+  export const IsNotIn: MessageKey = new MessageKey("SearchMessage", "IsNotIn");
+  export const TheValueThatWillBeComparedWithThe: MessageKey = new MessageKey("SearchMessage", "TheValueThatWillBeComparedWithThe");
+  export const TypicallyHasTheSameTypeAsTheFieldButSomeOperatorsLike: MessageKey = new MessageKey("SearchMessage", "TypicallyHasTheSameTypeAsTheFieldButSomeOperatorsLike");
+  export const AllowToSelectMultipleValues: MessageKey = new MessageKey("SearchMessage", "AllowToSelectMultipleValues");
+  export const YouAreEditingAColumnLetMeExplainWhatEachFieldDoes: MessageKey = new MessageKey("SearchMessage", "YouAreEditingAColumnLetMeExplainWhatEachFieldDoes");
+  export const CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup: MessageKey = new MessageKey("SearchMessage", "CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup");
 }
 
-export module SelectorMessage {
-  export const ConstructorSelector = new MessageKey("SelectorMessage", "ConstructorSelector");
-  export const PleaseChooseAValueToContinue = new MessageKey("SelectorMessage", "PleaseChooseAValueToContinue");
-  export const PleaseSelectAConstructor = new MessageKey("SelectorMessage", "PleaseSelectAConstructor");
-  export const PleaseSelectAType = new MessageKey("SelectorMessage", "PleaseSelectAType");
-  export const TypeSelector = new MessageKey("SelectorMessage", "TypeSelector");
-  export const ValueMustBeSpecifiedFor0 = new MessageKey("SelectorMessage", "ValueMustBeSpecifiedFor0");
-  export const ChooseAValue = new MessageKey("SelectorMessage", "ChooseAValue");
-  export const SelectAnElement = new MessageKey("SelectorMessage", "SelectAnElement");
-  export const PleaseSelectAnElement = new MessageKey("SelectorMessage", "PleaseSelectAnElement");
-  export const _0Selector = new MessageKey("SelectorMessage", "_0Selector");
-  export const PleaseChooseA0ToContinue = new MessageKey("SelectorMessage", "PleaseChooseA0ToContinue");
-  export const CreationOf0Cancelled = new MessageKey("SelectorMessage", "CreationOf0Cancelled");
-  export const ChooseValues = new MessageKey("SelectorMessage", "ChooseValues");
-  export const PleaseSelectAtLeastOneValueToContinue = new MessageKey("SelectorMessage", "PleaseSelectAtLeastOneValueToContinue");
+export namespace SelectorMessage {
+  export const ConstructorSelector: MessageKey = new MessageKey("SelectorMessage", "ConstructorSelector");
+  export const PleaseChooseAValueToContinue: MessageKey = new MessageKey("SelectorMessage", "PleaseChooseAValueToContinue");
+  export const PleaseSelectAConstructor: MessageKey = new MessageKey("SelectorMessage", "PleaseSelectAConstructor");
+  export const PleaseSelectAType: MessageKey = new MessageKey("SelectorMessage", "PleaseSelectAType");
+  export const TypeSelector: MessageKey = new MessageKey("SelectorMessage", "TypeSelector");
+  export const ValueMustBeSpecifiedFor0: MessageKey = new MessageKey("SelectorMessage", "ValueMustBeSpecifiedFor0");
+  export const ChooseAValue: MessageKey = new MessageKey("SelectorMessage", "ChooseAValue");
+  export const SelectAnElement: MessageKey = new MessageKey("SelectorMessage", "SelectAnElement");
+  export const PleaseSelectAnElement: MessageKey = new MessageKey("SelectorMessage", "PleaseSelectAnElement");
+  export const _0Selector: MessageKey = new MessageKey("SelectorMessage", "_0Selector");
+  export const PleaseChooseA0ToContinue: MessageKey = new MessageKey("SelectorMessage", "PleaseChooseA0ToContinue");
+  export const CreationOf0Cancelled: MessageKey = new MessageKey("SelectorMessage", "CreationOf0Cancelled");
+  export const ChooseValues: MessageKey = new MessageKey("SelectorMessage", "ChooseValues");
+  export const PleaseSelectAtLeastOneValueToContinue: MessageKey = new MessageKey("SelectorMessage", "PleaseSelectAtLeastOneValueToContinue");
 }
 
-export module SynchronizerMessage {
-  export const EndOfSyncScript = new MessageKey("SynchronizerMessage", "EndOfSyncScript");
-  export const StartOfSyncScriptGeneratedOn0 = new MessageKey("SynchronizerMessage", "StartOfSyncScriptGeneratedOn0");
+export namespace SynchronizerMessage {
+  export const EndOfSyncScript: MessageKey = new MessageKey("SynchronizerMessage", "EndOfSyncScript");
+  export const StartOfSyncScriptGeneratedOn0: MessageKey = new MessageKey("SynchronizerMessage", "StartOfSyncScriptGeneratedOn0");
 }
 
-export module VoidEnumMessage {
-  export const Instance = new MessageKey("VoidEnumMessage", "Instance");
+export namespace VoidEnumMessage {
+  export const Instance: MessageKey = new MessageKey("VoidEnumMessage", "Instance");
 }
 

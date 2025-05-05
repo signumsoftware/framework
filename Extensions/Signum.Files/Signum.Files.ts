@@ -12,7 +12,7 @@ export interface IFile
   __isFile__ : true; //only for type-checking
   binaryFile?: string | null;
   fileName?: string | null;
-  fullWebPath?: string | null;
+
 }
 
 export interface FileEntity extends IFile { }
@@ -22,6 +22,10 @@ export interface IFilePath extends IFile
 {
   fileType?: FileTypeSymbol | null;
   suffix?: string | null;
+  hash?: string | null;
+  fullWebPath?: string | null;
+  fileLength: number;
+  __uploadingOffset?: number;
 }
 
 export interface FilePathEntity extends IFilePath { }
@@ -32,20 +36,20 @@ export interface FilePathEmbedded extends IFilePath {
   rootType: string;
 }
 
-export const BigStringMixin = new Type<BigStringMixin>("BigStringMixin");
+export const BigStringMixin: Type<BigStringMixin> = new Type<BigStringMixin>("BigStringMixin");
 export interface BigStringMixin extends Entities.MixinEntity {
   Type: "BigStringMixin";
   file: FilePathEmbedded | null;
 }
 
-export const FileEmbedded = new Type<FileEmbedded>("FileEmbedded");
+export const FileEmbedded: Type<FileEmbedded> = new Type<FileEmbedded>("FileEmbedded");
 export interface FileEmbedded extends Entities.EmbeddedEntity {
   Type: "FileEmbedded";
   fileName: string;
   binaryFile: string /*Byte[]*/;
 }
 
-export const FileEntity = new Type<FileEntity>("File");
+export const FileEntity: Type<FileEntity> = new Type<FileEntity>("File");
 export interface FileEntity extends Entities.ImmutableEntity {
   Type: "File";
   fileName: string;
@@ -53,28 +57,31 @@ export interface FileEntity extends Entities.ImmutableEntity {
   binaryFile: string /*Byte[]*/;
 }
 
-export module FileMessage {
-  export const DownloadFile = new MessageKey("FileMessage", "DownloadFile");
-  export const ErrorSavingFile = new MessageKey("FileMessage", "ErrorSavingFile");
-  export const FileTypes = new MessageKey("FileMessage", "FileTypes");
-  export const Open = new MessageKey("FileMessage", "Open");
-  export const OpeningHasNotDefaultImplementationFor0 = new MessageKey("FileMessage", "OpeningHasNotDefaultImplementationFor0");
-  export const WebDownload = new MessageKey("FileMessage", "WebDownload");
-  export const WebImage = new MessageKey("FileMessage", "WebImage");
-  export const Remove = new MessageKey("FileMessage", "Remove");
-  export const SavingHasNotDefaultImplementationFor0 = new MessageKey("FileMessage", "SavingHasNotDefaultImplementationFor0");
-  export const SelectFile = new MessageKey("FileMessage", "SelectFile");
-  export const ViewFile = new MessageKey("FileMessage", "ViewFile");
-  export const ViewingHasNotDefaultImplementationFor0 = new MessageKey("FileMessage", "ViewingHasNotDefaultImplementationFor0");
-  export const OnlyOneFileIsSupported = new MessageKey("FileMessage", "OnlyOneFileIsSupported");
-  export const OrDragAFileHere = new MessageKey("FileMessage", "OrDragAFileHere");
-  export const TheFile0IsNotA1 = new MessageKey("FileMessage", "TheFile0IsNotA1");
-  export const File0IsTooBigTheMaximumSizeIs1 = new MessageKey("FileMessage", "File0IsTooBigTheMaximumSizeIs1");
-  export const TheNameOfTheFileMustNotContainPercentSymbol = new MessageKey("FileMessage", "TheNameOfTheFileMustNotContainPercentSymbol");
-  export const FileImage = new MessageKey("FileMessage", "FileImage");
+export namespace FileMessage {
+  export const DownloadFile: MessageKey = new MessageKey("FileMessage", "DownloadFile");
+  export const ErrorSavingFile: MessageKey = new MessageKey("FileMessage", "ErrorSavingFile");
+  export const FileTypes: MessageKey = new MessageKey("FileMessage", "FileTypes");
+  export const Open: MessageKey = new MessageKey("FileMessage", "Open");
+  export const OpeningHasNotDefaultImplementationFor0: MessageKey = new MessageKey("FileMessage", "OpeningHasNotDefaultImplementationFor0");
+  export const WebDownload: MessageKey = new MessageKey("FileMessage", "WebDownload");
+  export const WebImage: MessageKey = new MessageKey("FileMessage", "WebImage");
+  export const Remove: MessageKey = new MessageKey("FileMessage", "Remove");
+  export const SavingHasNotDefaultImplementationFor0: MessageKey = new MessageKey("FileMessage", "SavingHasNotDefaultImplementationFor0");
+  export const SelectFile: MessageKey = new MessageKey("FileMessage", "SelectFile");
+  export const ViewFile: MessageKey = new MessageKey("FileMessage", "ViewFile");
+  export const ViewingHasNotDefaultImplementationFor0: MessageKey = new MessageKey("FileMessage", "ViewingHasNotDefaultImplementationFor0");
+  export const OnlyOneFileIsSupported: MessageKey = new MessageKey("FileMessage", "OnlyOneFileIsSupported");
+  export const OrDragAFileHere: MessageKey = new MessageKey("FileMessage", "OrDragAFileHere");
+  export const TheFile0IsNotA1: MessageKey = new MessageKey("FileMessage", "TheFile0IsNotA1");
+  export const File0IsTooBigTheMaximumSizeIs1: MessageKey = new MessageKey("FileMessage", "File0IsTooBigTheMaximumSizeIs1");
+  export const TheNameOfTheFileMustNotContainPercentSymbol: MessageKey = new MessageKey("FileMessage", "TheNameOfTheFileMustNotContainPercentSymbol");
+  export const FileImage: MessageKey = new MessageKey("FileMessage", "FileImage");
+  export const File0IsStillUploading: MessageKey = new MessageKey("FileMessage", "File0IsStillUploading");
+  export const Uploading01: MessageKey = new MessageKey("FileMessage", "Uploading01");
+  export const SaveThe0WhenFinished: MessageKey = new MessageKey("FileMessage", "SaveThe0WhenFinished");
 }
 
-export const FilePathEmbedded = new Type<FilePathEmbedded>("FilePathEmbedded");
+export const FilePathEmbedded: Type<FilePathEmbedded> = new Type<FilePathEmbedded>("FilePathEmbedded");
 export interface FilePathEmbedded extends Entities.EmbeddedEntity {
   Type: "FilePathEmbedded";
   fileName: string;
@@ -85,7 +92,7 @@ export interface FilePathEmbedded extends Entities.EmbeddedEntity {
   fileType: FileTypeSymbol;
 }
 
-export const FilePathEntity = new Type<FilePathEntity>("FilePath");
+export const FilePathEntity: Type<FilePathEntity> = new Type<FilePathEntity>("FilePath");
 export interface FilePathEntity extends Entities.Entity {
   Type: "FilePath";
   creationDate: string /*DateTime*/;
@@ -97,11 +104,11 @@ export interface FilePathEntity extends Entities.Entity {
   fileType: FileTypeSymbol;
 }
 
-export module FilePathOperation {
+export namespace FilePathOperation {
   export const Save : Operations.ExecuteSymbol<FilePathEntity> = registerSymbol("Operation", "FilePathOperation.Save");
 }
 
-export const FileTypeSymbol = new Type<FileTypeSymbol>("FileType");
+export const FileTypeSymbol: Type<FileTypeSymbol> = new Type<FileTypeSymbol>("FileType");
 export interface FileTypeSymbol extends Basics.Symbol {
   Type: "FileType";
 }

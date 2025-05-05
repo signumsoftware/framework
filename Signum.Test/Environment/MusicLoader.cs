@@ -1,4 +1,7 @@
 using Microsoft.SqlServer.Types;
+using Microsoft.Win32;
+using Npgsql;
+using NpgsqlTypes;
 using Signum.Engine.Maps;
 using System.Threading;
 
@@ -20,9 +23,6 @@ public static class MusicLoader
 
     public static SqlHierarchyId NextLabelNode()
     {
-        if (Schema.Current.Settings.IsPostgres)
-            return SqlHierarchyId.Null;
-
         var max = Database.Query<LabelEntity>()
             .Where(lab => (bool)(lab.Node.GetAncestor(1) == SqlHierarchyId.GetRoot()))
             .Select(lab => lab.Node)
@@ -58,8 +58,13 @@ public static class MusicLoader
             ReleaseDate = DateTime.Now.AddHours(+8).ToDateOnly(),
             CreationTime = DateTime.Now.AddHours(+8),
             CreationDate = DateTime.Now.AddHours(+8).ToDateOnly(),
-            Text = "American alternative rock band",
-            Target = smashingPumpkins
+            Target = smashingPumpkins,
+            Title = "American alternative rock band",
+            Text = """
+            The Smashing Pumpkins are an alternative rock band formed in 1988, known for their dreamy yet heavy sound. 
+            Led by Billy Corgan, they blended grunge, shoegaze, and psychedelia into hits like 1979 and Tonight, Tonight. 
+            Their album Mellon Collie and the Infinite Sadness remains a '90s classic.
+            """
         }.Execute(NoteWithDateOperation.Save);
 
         LabelEntity virgin = new LabelEntity { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() }
@@ -94,8 +99,9 @@ public static class MusicLoader
             ReleaseDate = DateTime.Now.AddDays(-100).ToDateOnly(),
             CreationTime = DateTime.Now.AddDays(-100).AddHours(-8),
             CreationDate = DateTime.Now.AddDays(-100).AddHours(-8).ToDateOnly(),
-            Text = "The blue one with the angel",
-            Target = mellon
+            Target = mellon,
+            Title = "The blue one with the angel",
+            Text = "Mellon Collie and the Infinite Sadness is a sprawling 1995 double album by The Smashing Pumpkins, blending alt-rock, orchestral elements, and introspective lyrics."
         }.Execute(NoteWithDateOperation.Save);
 
         LabelEntity wea = new LabelEntity { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() }
@@ -135,23 +141,31 @@ public static class MusicLoader
         {
             CreationTime = new DateTime(2009, 6, 25, 0, 0, 0),
             CreationDate = new DateOnly(2009, 6, 25),
-            Text = "Death on June, 25th",
-            Target = michael
+            Target = michael,
+            Title = "Death on June, 25th",
+            Text = """
+            Michael Jackson, the "King of Pop," was a groundbreaking artist known for his iconic music, dance moves, and record-breaking albums like Thriller. 
+            His influence on pop culture, from the Moonwalk to his innovative music videos, remains unparalleled.
+            """
         }.Execute(NoteWithDateOperation.Save);
 
         new NoteWithDateEntity
         {
             CreationTime = new DateTime(2010, 6, 25, 0, 0, 0),
             CreationDate = new DateOnly(2010, 6, 25),
-            Text = "Membedr of The Jackson 5 Pop band",
-            Target = michael
+            Target = michael,
+            Title = "Member of The Jackson 5 Pop band",
+            Text = """
+            The Jackson 5 was a Motown family band that rose to fame in the late 1960s, featuring a young Michael Jackson as the lead singer. 
+            Known for hits like I Want You Back and ABC, their energetic performances and catchy melodies made them one of the biggest pop acts of their time.
+            """
         }.Execute(NoteWithDateOperation.Save);
 
         new NoteWithDateEntity
         {
             CreationTime = new DateTime(2000, 1, 1, 0, 0, 0),
             CreationDate = new DateOnly(2000, 1, 1),
-            Text = null!,
+            Title = null!,
             Target = michael
         }
             .SetMixin((CorruptMixin c) => c.Corrupt, true)

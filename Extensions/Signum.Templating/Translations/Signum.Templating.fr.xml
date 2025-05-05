@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ModelConverterSymbol" Description="le convertisseur de modèles" PluralDescription="Convertisseurs de modèles" />
+  <Type Name="MultiEntityModel" Description="Multi-entités">
+    <Member Name="Entities" Description="Entités" />
+  </Type>
+  <Type Name="QueryModel" Description="Requête">
+    <Member Name="Filters" Description="Filtres" />
+    <Member Name="Orders" Description="Séquence " />
+    <Member Name="Pagination" Description="Pagination" />
+    <Member Name="QueryName" Description="Nom de la requête" />
+  </Type>
+  <Type Name="QueryModelMessage">
+    <Member Name="ConfigureYourQueryAndPressSearchBeforeOk" Description="Configurez votre requête et appuyez sur [Rechercher] avant [Ok]" />
+  </Type>
+  <Type Name="TemplateApplicableEval" Description="Template applicable eval" />
+  <Type Name="TemplateTokenMessage">
+    <Member Name="Insert" Description="Insérer" />
+    <Member Name="NoColumnSelected" Description="Aucune colonne sélectionnée" />
+    <Member Name="YouCannotAddBlocksWithAllOrAny" Description="Vous ne pouvez pas ajouter de blocs avec All ou Any" />
+    <Member Name="YouCannotAddIfBlocksOnCollectionFields" Description="Impossible d’ajouter des blocs 'Si' dans les champs de collection" />
+    <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Vous ne pouvez ajouter que des blocs Foreach avec des champs de collection" />
+    <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Vous devez ajouter le jeton Element pour utiliser Foreach sur les champs de collection" />
+  </Type>
+</Translations>

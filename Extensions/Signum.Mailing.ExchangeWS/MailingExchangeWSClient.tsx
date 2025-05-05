@@ -8,7 +8,7 @@ export namespace MailingExchangeWSClient {
   
   export function start(options: {
     routes: RouteObject[],
-  }) {
+  }): void {
   
     Navigator.addSettings(new EntitySettings(ExchangeWebServiceEmailServiceEntity, e => import('./Templates/ExchangeWebServiceEmailService')));
   

@@ -6,15 +6,31 @@ import { translate, rotate } from './ChartUtils';
 import TextEllipsis from './TextEllipsis';
 import { Rule } from './Rule';
 
-export function YScaleTicks({ xRule, yRule, valueColumn, y, format }: { xRule: Rule<"title" | "labels" | "ticks" | "content">, yRule: Rule<"content">, valueColumn: ChartColumn<number>, y: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string }) {
 
-  var availableHeight = yRule.size("content");
+function getTicks(availableSize: number, valueColumn: ChartColumn<number>,  scale: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string): {ticks: number[], ticksFormat: (n: number) => string} {
 
-  var yTicks = y.ticks(availableHeight / 50);
+  let ticksCount = availableSize / 50;
+  if (valueColumn.type == "Integer") {
+    var domain = scale.domain();
+    const domainSize = domain[1] - domain[0];
+
+    if (ticksCount > domainSize)
+      ticksCount = domainSize;
+  }
+
+  var ticks = scale.ticks(ticksCount);
 
   var isDate = valueColumn.type == "DateOnly" || valueColumn.type == "DateTime";
 
-  var yTickFormat = format ?? (isDate ? y.tickFormat(availableHeight / 50) : valueColumn.getNiceName);
+  var ticksFormat = format ?? (isDate ? scale.tickFormat(ticksCount) : valueColumn.getNiceName);
+
+  return { ticks, ticksFormat }
+}
+
+export function YScaleTicks({ xRule, yRule, valueColumn, y, format }:
+  { xRule: Rule<"title" | "labels" | "ticks" | "content">, yRule: Rule<"content">, valueColumn: ChartColumn<number>, y: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string }): React.JSX.Element {
+
+  const { ticks: yTicks, ticksFormat: yTickFormat } = getTicks(yRule.size("content"), valueColumn, y, format); 
 
   return (
     <>
@@ -53,15 +69,9 @@ export function YScaleTicks({ xRule, yRule, valueColumn, y, format }: { xRule: R
   );
 }
 
-export function YScaleTicksEnd({ xRule, yRule, valueColumn, y, format }: { xRule: Rule<"content" | "ticks2" | "labels2" | "title2">, yRule: Rule<"content">, valueColumn: ChartColumn<number>, y: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string }) {
+export function YScaleTicksEnd({ xRule, yRule, valueColumn, y, format }: { xRule: Rule<"content" | "ticks2" | "labels2" | "title2">, yRule: Rule<"content">, valueColumn: ChartColumn<number>, y: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string }): React.JSX.Element {
 
-  var availableHeight = yRule.size("content");
-
-  var yTicks = y.ticks(availableHeight / 50);
-
-  var isDate = valueColumn.type == "DateOnly" || valueColumn.type == "DateTime";
-
-  var yTickFormat = format ?? (isDate ? y.tickFormat(availableHeight / 50) : valueColumn.getNiceName);
+  const { ticks: yTicks, ticksFormat: yTickFormat } = getTicks(yRule.size("content"), valueColumn, y, format);
 
   return (
     <>
@@ -93,15 +103,9 @@ export function YScaleTicksEnd({ xRule, yRule, valueColumn, y, format }: { xRule
 }
 
 
-export function XScaleTicks({ xRule, yRule, valueColumn, x, format }: { xRule: Rule<"content" | "title">, yRule: Rule<"labels" | "ticks" | "content" | "title">, valueColumn: ChartColumn<number>, x: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string }) {
+export function XScaleTicks({ xRule, yRule, valueColumn, x, format }: { xRule: Rule<"content" | "title">, yRule: Rule<"labels" | "ticks" | "content" | "title">, valueColumn: ChartColumn<number>, x: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string }): React.JSX.Element {
 
-  var availableWidth = yRule.size("content");
-
-  var xTicks = x.ticks(availableWidth / 50);
-
-  var isDate = valueColumn.type == "DateOnly" || valueColumn.type == "DateTime";
-
-  var xTickFormat = format ?? (isDate ? x.tickFormat(availableWidth / 50) : valueColumn.getNiceName);
+  const { ticks: xTicks, ticksFormat: xTickFormat } = getTicks(xRule.size("content"), valueColumn, x, format);
 
   return (
     <>
@@ -142,7 +146,7 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines, on
   xRule: Rule<"content">, yRule: Rule<"content" | "ticks" | "labels" | "title">, keyValues: unknown[], keyColumn: ChartColumn<unknown>, x: d3.ScaleBand<string>, showLines?: boolean,
   isActive?: (value: unknown) => boolean;
   onDrillDown?: (value: unknown, e: React.MouseEvent<any> | MouseEvent) => void;
-}) {
+}): React.JSX.Element {
 
   const bandwith = x.bandwidth();
   var stableKeys = keyValues.orderBy(keyColumn.getKey);
@@ -186,7 +190,7 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines, on
   );
 }
 
-export function XTitle({ xRule, yRule, keyColumn }: { xRule: Rule<"content">, yRule: Rule<"title">, keyColumn: ChartColumn<unknown> }) {
+export function XTitle({ xRule, yRule, keyColumn }: { xRule: Rule<"content">, yRule: Rule<"title">, keyColumn: ChartColumn<unknown> }): React.JSX.Element {
   return (
     <g className="x-title-group" transform={translate(xRule.middle('content'), yRule.middle('title'))}>
       <text className="x-title"
@@ -203,7 +207,7 @@ export function YKeyTicks({ xRule, yRule, keyValues, keyColumn, y, showLabels, s
   keyValues: unknown[], keyColumn: ChartColumn<unknown>, y: d3.ScaleBand<string>, showLabels: boolean, showLines?: boolean,
   isActive?: (value: unknown) => boolean;
   onDrillDown?: (value: unknown, e: React.MouseEvent<any> | MouseEvent) => void;
-}) {
+}): React.JSX.Element {
   var orderedKeys = keyValues.orderBy(keyColumn.getKey);
 
   return (

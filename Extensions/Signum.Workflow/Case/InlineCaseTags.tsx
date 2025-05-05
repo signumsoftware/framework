@@ -17,7 +17,7 @@ export interface InlineCaseTagsProps {
   wrap?: boolean;
 }
 
-export default function InlineCaseTags(p: InlineCaseTagsProps) {
+export default function InlineCaseTags(p: InlineCaseTagsProps): React.JSX.Element {
 
   const [tags, setTags] = React.useState<CaseTagTypeEntity[]>(() => p.defaultTags ?? []);
 

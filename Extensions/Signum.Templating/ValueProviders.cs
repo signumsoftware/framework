@@ -140,7 +140,7 @@ public abstract class ValueProviderBase
                     if (ConstantValueProvider.TryParseConstantValue(token, out var val))
                         return new ConstantValueProvider(val, tp) { Variable = variable };
 
-                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement | SubTokensOptions.CanToArray, tp.AssertQueryDescription("parse " + token), tp.Variables, tp.AddError);
+                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanNested, tp.AssertQueryDescription("parse " + token), tp.Variables, tp.AddError);
 
                     AssertNoColectionToken(result);
 
@@ -151,13 +151,13 @@ public abstract class ValueProviderBase
                 }
             case "q":
                 {
-                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement | SubTokensOptions.CanToArray, tp.AssertQueryDescription("parse " + token), tp.Variables, tp.AddError);
+                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanNested, tp.AssertQueryDescription("parse " + token), tp.Variables, tp.AddError);
                     AssertNoColectionToken(result);
                     return new TokenValueProvider(result, true) { Variable = variable };
                 }
             case "t":
                 {
-                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, tp.AssertQueryDescription("parse " + token), tp.Variables, tp.AddError);
+                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement | SubTokensOptions.CanNested, tp.AssertQueryDescription("parse " + token), tp.Variables, tp.AddError);
                     AssertNoColectionToken(result);
                     return new TranslateInstanceValueProvider(result, true, tp) { Variable = variable };
                 }
@@ -191,13 +191,19 @@ public class QueryContext
     {
         this.QueryDescription = qd;
         this.ResultTable = rt;
-        this.ResultColumns = rt.Columns.ToDictionary(a => a.Column.Token);
+        this.ResultColumns = rt.Columns.ToDictionary(a => a.Token);
+        if (rt.EntityColumn != null)
+            this.ResultColumns.Add(rt.EntityColumn.Token, rt.EntityColumn);
+        
         this.CurrentRows = rt.Rows;
+        this.SubQueryContext = new Dictionary<CollectionNestedToken, QueryContext>();
     }
 
     public readonly QueryDescription QueryDescription;
     public readonly ResultTable ResultTable;
     public readonly Dictionary<QueryToken, ResultColumn> ResultColumns;
+    public readonly Dictionary<CollectionNestedToken, QueryContext> SubQueryContext;
+
     public IEnumerable<ResultRow> CurrentRows { get; private set; }
 
     public IDisposable OverrideRows(IEnumerable<ResultRow> rows)
@@ -205,6 +211,20 @@ public class QueryContext
         var old = this.CurrentRows;
         this.CurrentRows = rows;
         return new Disposable(() => this.CurrentRows = old);
+    }
+
+    public QueryContext GetMainOrSubQueryContext(QueryToken queryToken)
+    {
+        var nested = queryToken.HasNested();
+
+        if (nested != null)
+        {
+            var parentQc = this.GetMainOrSubQueryContext(nested.Parent!);
+
+            return parentQc.SubQueryContext.GetOrThrow(nested, $"No SubQueryContext for {nested} found. Missing @foreach?");
+        }
+
+        return this;
     }
 }
 
@@ -254,7 +274,7 @@ public class TokenValueProvider : ValueProviderBase
 
     public override object? GetValue(TemplateParameters p)
     {
-        var qc = p.QueryContext!;
+        var qc = p.QueryContext!.GetMainOrSubQueryContext(ParsedToken.QueryToken!);
 
         if (qc.CurrentRows.IsEmpty())
             return null;
@@ -273,15 +293,48 @@ public class TokenValueProvider : ValueProviderBase
         return value;
     }
 
+    public IDisposable? GetOrCreateQueryContext(TemplateParameters p, QueryToken token, out QueryContext qc)
+    {
+        if (ParsedToken.QueryToken!.HasNested() is CollectionNestedToken cnt)
+        {
+            var pc = p.QueryContext!.GetMainOrSubQueryContext(cnt.Parent!);
+            var already = pc.SubQueryContext.TryGetC(cnt);
+            if (already != null)
+            {
+                qc = already;
+                return null;
+            }
+
+            var rc = pc.ResultColumns[cnt];
+
+            var row = pc.CurrentRows.SingleEx(() => "No Current Rows", () => $"More than one Row when accesing nested query {cnt.FullKey()},\nmaybe mixing 'Nested' and 'Element' at the same level?");
+
+            var rt = (ResultTable)row[rc]!;
+            qc = new QueryContext(pc.QueryDescription, rt);
+            pc.SubQueryContext.Add(cnt, qc);
+
+            return new Disposable(() =>
+            {
+                pc.SubQueryContext.Remove(cnt);
+            });
+        }
+        else
+        {
+            qc = p.QueryContext!.GetMainOrSubQueryContext(ParsedToken.QueryToken!);
+            return null;
+        }
+    }
+
     public override void Foreach(TemplateParameters p, Action forEachElement)
     {
-        var qc = p.QueryContext!;
-        var col = qc.ResultColumns[ParsedToken.QueryTokenOrRowId!];
-
-        foreach (var group in qc.CurrentRows.GroupByColumn(col))
+        using (GetOrCreateQueryContext(p, ParsedToken.QueryToken!, out QueryContext qc))
         {
-            using (qc.OverrideRows(group))
-                forEachElement();
+            var col = qc.ResultColumns[ParsedToken.QueryTokenOrRowId!];
+            foreach (var group in qc.CurrentRows.GroupByColumn(col))
+            {
+                using (qc.OverrideRows(group))
+                    forEachElement();
+            }
         }
     }
 
@@ -341,7 +394,7 @@ public class TranslateInstanceValueProvider : ValueProviderBase
 
     public override object? GetValue(TemplateParameters p)
     {
-        var qc = p.QueryContext!;
+        var qc = p.QueryContext!.GetMainOrSubQueryContext(EntityToken!);
         var entity = (Lite<Entity>)qc.CurrentRows.DistinctSingle(qc.ResultColumns[EntityToken!])!;
         var fallback = (string)qc.CurrentRows.DistinctSingle(qc.ResultColumns[ParsedToken.QueryToken!])!;
 

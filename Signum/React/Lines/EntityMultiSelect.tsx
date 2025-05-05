@@ -18,24 +18,16 @@ import { getTimeMachineIcon } from './TimeMachineIcon';
 import Input from 'react-widgets/cjs/Input';
 
 export interface EntityMultiSelectProps<V extends Lite<Entity> | Entity> extends EntityListBaseProps<V> {
-  vertical?: boolean;
   onRenderItem?: (item: ResultRow) => React.ReactNode;
   showType?: boolean;
-  autocomplete?: AutocompleteConfig<any> | null;
   data?: Lite<Entity>[];
   toStringFromData?: boolean;
   delayLoadData?: boolean;
   deps?: React.DependencyList;
 }
 
-export interface EntityMultiSelectHandle {
-  getSelect(): HTMLSelectElement | null;
-  getData(): Lite<Entity>[] | ResultTable | undefined;
-}
-
-
 export class EntityMultiSelectController<V extends Lite<Entity> | Entity> extends EntityListBaseController<EntityMultiSelectProps<V>, V> {
-  overrideProps(p: EntityMultiSelectProps<V>, overridenProps: EntityMultiSelectProps<V>) {
+  overrideProps(p: EntityMultiSelectProps<V>, overridenProps: EntityMultiSelectProps<V>): void {
     super.overrideProps(p, overridenProps);
 
     if (p.type) {
@@ -62,7 +54,7 @@ export class EntityMultiSelectController<V extends Lite<Entity> | Entity> extend
   }
 }
 
-export const EntityMultiSelect = genericForwardRef(function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V>, ref: React.Ref<EntityMultiSelectController<V>>) {
+export const EntityMultiSelect: <V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V> & React.RefAttributes<EntityMultiSelectController<V>>) => React.ReactNode | null = genericForwardRef(function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V>, ref: React.Ref<EntityMultiSelectController<V>>) {
   const c = useController(EntityMultiSelectController, props, ref);
   const p = c.props;
 
@@ -109,12 +101,17 @@ export const EntityMultiSelect = genericForwardRef(function EntityMultiSelect<V 
 
     throw new Error("Unexpected value " + JSON.stringify(e));
   }
+
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
   //TODO add TimeMachineIcon
   return (
     <FormGroup ctx={p.ctx!}
       label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
-      helpText={p.helpText}
+      helpText={helpText}
+      helpTextOnTop={helpTextOnTop}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       {inputId => <div className={classes(p.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined)}>
         <Multiselect<any>
@@ -148,7 +145,7 @@ export const EntityMultiSelect = genericForwardRef(function EntityMultiSelect<V 
     p.ctx.value.forEach(mle => {
       const entityOrLite = mle.element;
 
-      const lite = isEntity(entityOrLite) ? toLite(entityOrLite) : 
+      const lite: Lite<V & Entity> | (V & Lite<Entity>) | null = isEntity(entityOrLite) ? toLite(entityOrLite) : 
       isLite(entityOrLite) ? entityOrLite : null;
 
       if(lite == null)

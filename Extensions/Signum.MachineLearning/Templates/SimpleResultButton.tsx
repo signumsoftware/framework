@@ -11,7 +11,7 @@ interface SimpleResultButtonProps {
   ctx: TypeContext<PredictorEntity>;
 }
 
-export default function SimpleResultButton(p : SimpleResultButtonProps){
+export default function SimpleResultButton(p : SimpleResultButtonProps): React.JSX.Element {
 
   function handleOnClick(e: React.MouseEvent<any>) {
     e.preventDefault();
@@ -33,7 +33,7 @@ export default function SimpleResultButton(p : SimpleResultButtonProps){
         columnOptions: [
           { token: PredictSimpleResultEntity.token(e => e.originalCategory), displayName: "Original " + outToken.niceName },
           { token: PredictSimpleResultEntity.token(e => e.predictedCategory), displayName: "Predicted " + outToken.niceName },
-          { token: QueryTokenString.count() },
+          { token: QueryTokenString.count },
         ],
       });
     else

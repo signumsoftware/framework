@@ -9,7 +9,7 @@ import { HtmlViewer } from './WhatsNewHtmlEditor';
 import { Link } from 'react-router-dom';
 import { Navigator } from '@framework/Navigator';
 
-export default function AllNews() {
+export default function AllNews(): React.JSX.Element {
   const news: WhatsNewClient.WhatsNewFull[] | undefined = useAPI(() => WhatsNewClient.API.getAllNews().then(w => w), []);
 
   if (news == undefined)
@@ -30,7 +30,7 @@ export default function AllNews() {
   );
 }
 
-export function WhatsNewPreviewPicture(p: { news: WhatsNewClient.WhatsNewFull}) {
+export function WhatsNewPreviewPicture(p: { news: WhatsNewClient.WhatsNewFull}): React.JSX.Element {
 
   const whatsnew = p.news;
 
@@ -78,7 +78,7 @@ export function WhatsNewPreviewPicture(p: { news: WhatsNewClient.WhatsNewFull}) 
   );
 }
 
-export function NewsBadge(p: { news: WhatsNewClient.WhatsNewFull }) {
+export function NewsBadge(p: { news: WhatsNewClient.WhatsNewFull }): React.JSX.Element {
   if (!p.news.read)
     return (
       <span className="sf-news-notify-badge" style={{ right: "0", top: "0" }}>NEW</span>
@@ -88,7 +88,7 @@ export function NewsBadge(p: { news: WhatsNewClient.WhatsNewFull }) {
   }
 }
 
-export function Attachments(p: { news: WhatsNewClient.WhatsNewFull }) {
+export function Attachments(p: { news: WhatsNewClient.WhatsNewFull }): React.JSX.Element {
   return (
     <div>
       <hr />

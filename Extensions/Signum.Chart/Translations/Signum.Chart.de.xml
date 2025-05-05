@@ -259,6 +259,7 @@
   </Type>
   <Type Name="ChartRequestModel" Description="Diagrammanforderung">
     <Member Name="ChartScript" Description="Diagrammskript" />
+    <Member Name="ChartTimeSeries" Description="Zeitreihen in Diagrammen" />
     <Member Name="Columns" Description="Spalten" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="MaxRows" Description="Max. Zeilen" />
@@ -267,6 +268,14 @@
     <Member Name="QueryName" Description="Abfrage-Name" />
   </Type>
   <Type Name="ChartScriptSymbol" Description="Diagrammskript" Gender="n" />
+  <Type Name="ChartTimeSeriesEmbedded" Description="Zeitreihen in Diagrammen">
+    <Member Name="EndDate" Description="Enddatum" />
+    <Member Name="SplitQueries" Description="Geteilte Abfragen" />
+    <Member Name="StartDate" Description="Startdatum" />
+    <Member Name="TimeSeriesMaxRowsPerStep" Description="Zeitreihe max. Zeilen pro Schritt" />
+    <Member Name="TimeSeriesStep" Description="Zeitreihenschritt" />
+    <Member Name="TimeSeriesUnit" Description="Einheit Zeitreihen" />
+  </Type>
   <Type Name="ColorPaletteEntity" Description="Farbpalette">
     <Member Name="CategoryName" Description="Name der Kategorie" />
     <Member Name="Seed" Description="Seed" />
@@ -331,6 +340,7 @@
   </Type>
   <Type Name="UserChartEntity" Description="Benutzerdiagramm" PluralDescription="Benutzerdiagramme" Gender="f">
     <Member Name="ChartScript" Description="Diagrammskript" />
+    <Member Name="ChartTimeSeries" Description="Zeitreihen in Diagrammen" />
     <Member Name="Columns" Description="Spalten" />
     <Member Name="CustomDrilldowns" Description="Benutzerdefinierte Drilldowns" />
     <Member Name="DisplayName" Description="Angezeigter Name" />

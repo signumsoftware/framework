@@ -3,11 +3,8 @@ using Signum.Utilities.Reflection;
 using System.Collections.Immutable;
 using System.Collections;
 using Signum.DynamicQuery.Tokens;
-using Signum.Security;
 using Signum.Engine.Sync;
 using System.Collections.Frozen;
-using System.Collections.Generic;
-using System.Xml.Linq;
 
 namespace Signum.Operations;
 
@@ -72,7 +69,7 @@ public static class OperationLogic
     {
         allowedTypes.Value = (allowedTypes.Value ?? ImmutableStack<Type>.Empty).PushRange(types);
 
-        return new Disposable(() => 
+        return new Disposable(() =>
         {
             foreach (var type in types)
                 allowedTypes.Value = allowedTypes.Value.Pop();
@@ -118,8 +115,8 @@ public static class OperationLogic
 
             sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
 
-            sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(Operation_PreDeleteSqlSync);
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(Type_PreDeleteSqlSync);
+            sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += Operation_PreDeleteSqlSync;
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
 
             sb.Schema.SchemaCompleted += OperationLogic_Initializing;
             sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema);
@@ -196,7 +193,7 @@ public static class OperationLogic
 
     private static string? OperationToken_IsAllowedExtension(OperationSymbol operationSymbol, Type entityType)
     {
-        return OperationAllowedMessage(operationSymbol, entityType, true);
+        return OperationAllowedMessage(operationSymbol, entityType, true, null);
     }
 
     private static void RegisterCurrentLogs(Schema schema)
@@ -269,16 +266,16 @@ Consider the following options:
         }
     }
 
-    static SqlPreCommand Operation_PreDeleteSqlSync(Entity arg)
+    static SqlPreCommand Operation_PreDeleteSqlSync(OperationSymbol op)
     {
-        return Administrator.DeleteWhereScript((OperationLogEntity ol) => ol.Operation, (OperationSymbol)arg);
+        return Administrator.DeleteWhereScript((OperationLogEntity ol) => ol.Operation, op);
     }
 
-    static SqlPreCommand Type_PreDeleteSqlSync(Entity arg)
+    static SqlPreCommand Type_PreDeleteSqlSync(TypeEntity type)
     {
         var table = Schema.Current.Table<OperationLogEntity>();
         var column = (IColumn)((FieldImplementedByAll)Schema.Current.Field((OperationLogEntity ol) => ol.Target)).TypeColumn;
-        return Administrator.DeleteWhereScript(table, column, ((TypeEntity)arg).Id);
+        return Administrator.DeleteWhereScript(table, column, type.Id);
     }
 
     static void EntityEventsGlobal_Saving(Entity ident)
@@ -310,26 +307,26 @@ Consider the following options:
             ex.Data["args"] = args;
     }
 
-    public static bool OperationAllowed(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
+    public static bool OperationAllowed(OperationSymbol operationSymbol, Type entityType, bool inUserInterface, Entity? entity)
     {
         if (AllowOperation != null)
-            return AllowOperation(operationSymbol, entityType, inUserInterface);
+            return AllowOperation(operationSymbol, entityType, inUserInterface, entity);
         else
             return true;
     }
 
-    public static string? OperationAllowedMessage(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
+    public static string? OperationAllowedMessage(OperationSymbol operationSymbol, Type entityType, bool inUserInterface, Entity? entity)
     {
-        if (!OperationAllowed(operationSymbol, entityType, inUserInterface))
+        if (!OperationAllowed(operationSymbol, entityType, inUserInterface, entity))
             return OperationMessage.Operation01IsNotAuthorized.NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key) +
                 (inUserInterface ? " " + OperationMessage.InUserInterface.NiceToString() : "");
 
         return null;
     }
 
-    public static void AssertOperationAllowed(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
+    public static void AssertOperationAllowed(OperationSymbol operationSymbol, Type entityType, bool inUserInterface, Entity? entity)
     {
-        var allowed = OperationAllowedMessage(operationSymbol, entityType, inUserInterface);
+        var allowed = OperationAllowedMessage(operationSymbol, entityType, inUserInterface, entity);
 
         if (allowed != null)
             throw new UnauthorizedAccessException(allowed);
@@ -368,12 +365,12 @@ Consider the following options:
         return operation is IExecuteOperation && ((IEntityOperation)operation).CanBeModified == true;
     }
 
-    public static List<OperationInfo> ServiceGetOperationInfos(Type entityType)
+    public static List<OperationInfo> ServiceGetOperationInfos(Type entityType, Entity? entity)
     {
         try
         {
             return (from oper in TypeOperations(entityType)
-                    where OperationAllowed(oper.OperationSymbol, entityType, true)
+                    where OperationAllowed(oper.OperationSymbol, entityType, true, entity)
                     select ToOperationInfo(oper)).ToList();
         }
         catch (Exception e)
@@ -407,7 +404,6 @@ Consider the following options:
     {
         return new OperationInfo(oper.OperationSymbol, oper.OperationType)
         {
-            Returns = oper.Returns,
             ReturnType = oper.ReturnType,
             HasStates = (oper as IGraphHasStatesOperation)?.HasFromStates,
             HasCanExecute = (oper as IEntityOperation)?.HasCanExecute,
@@ -420,16 +416,36 @@ Consider the following options:
         };
     }
 
+    static readonly Variable<Dictionary<string, object>> multiCanExecuteState = Statics.ThreadVariable<Dictionary<string, object>>("multicanExecuteState");
+
+    public static IDisposable? CreateMultiCanExecuteState()
+    {
+        var oldState = multiCanExecuteState.Value;
+        multiCanExecuteState.Value = new Dictionary<string, object>();
+        return new Disposable(() => multiCanExecuteState.Value = oldState);
+    }
+
+    public static Dictionary<string, object>? MultiCanExecuteState => multiCanExecuteState.Value;
+    public static bool IsMultiCanExecute => multiCanExecuteState.Value != null;
+
     public static Dictionary<OperationSymbol, string> ServiceCanExecute(Entity entity)
     {
         try
         {
-            var entityType = entity.GetType();
 
-            return (from o in TypeOperations(entityType)
-                    let eo = o as IEntityOperation
-                    where eo != null && (eo.CanBeNew || !entity.IsNew) && OperationAllowed(o.OperationSymbol, entityType, true)
-                    select KeyValuePair.Create(eo.OperationSymbol, eo.CanExecute(entity))).ToDictionary();
+            using (CreateMultiCanExecuteState())
+            {
+                var entityType = entity.GetType();
+
+                var result = (from o in TypeOperations(entityType)
+                              let eo = o as IEntityOperation
+                              where eo != null && (eo.CanBeNew || !entity.IsNew) && OperationAllowed(o.OperationSymbol, entityType, true, entity)
+                              select KeyValuePair.Create(eo.OperationSymbol, eo.CanExecute(entity))).ToDictionary();
+
+                return result;
+            }
+
+
         }
         catch (Exception e)
         {
@@ -854,7 +870,6 @@ Consider the following options:
         if (!LogOperation(log))
             return;
 
-
         using (ExecutionMode.Global())
             log.Save();
     }
@@ -875,12 +890,12 @@ public static class FluentOperationInclude
         return fi;
     }
 
-    public static FluentInclude<T> WithDelete<T>(this FluentInclude<T> fi, DeleteSymbol<T> delete)
+    public static FluentInclude<T> WithDelete<T>(this FluentInclude<T> fi, DeleteSymbol<T> deleteOperation, Action<T, object?[]?>? delete = null)
            where T : Entity
     {
-        new Graph<T>.Delete(delete)
+        new Graph<T>.Delete(deleteOperation)
         {
-            Delete = (e, _) => e.Delete()
+            Delete = delete ?? ((e, _) => e.Delete())
         }.Register();
         return fi;
     }
@@ -911,7 +926,6 @@ public interface IOperation
     OperationSymbol OperationSymbol { get; }
     Type OverridenType { get; }
     OperationType OperationType { get; }
-    bool Returns { get; }
     Type? ReturnType { get; }
     void AssertIsValid();
 
@@ -936,6 +950,6 @@ public interface IEntityOperation : IOperation
 
 
 public delegate IDisposable? SurroundOperationHandler(IOperation operation, OperationLogEntity log, Entity? entity, object?[]? args);
-public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, Type entityType, bool inUserInterface);
+public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, Type entityType, bool inUserInterface, Entity? entity);
 
 

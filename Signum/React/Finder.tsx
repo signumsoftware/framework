@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { DateTime, Duration } from 'luxon'
 import * as AppContext from "./AppContext"
 import { Navigator, ViewPromise } from "./Navigator"
-import { Dic, classes, softCast } from './Globals'
+import { Dic, classes, isNumber, softCast } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
@@ -25,7 +25,10 @@ import {
   Type, QueryKey, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType,
   TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions,
-  Anonymous, toLuxonDurationFormat, toFormatWithFixes, isTypeModel
+  Anonymous, toLuxonDurationFormat, toFormatWithFixes, isTypeModel,
+  isNumberType,
+  isDecimalType,
+  numberLimits
 } from './Reflection';
 
 import EntityLink from './SearchControl/EntityLink';
@@ -45,6 +48,8 @@ import { QueryTokenMessage } from "./Signum.DynamicQuery.Tokens";
 import { TextHighlighter } from "./Components/Typeahead";
 import * as FinderRules from "./FinderRules";
 import { Operations } from "./Operations";
+import ProgressBar from "./Components/ProgressBar";
+import Notify, { NotifyOptions } from "./Frames/Notify";
 
 
 export namespace Finder {
@@ -52,11 +57,11 @@ export namespace Finder {
 
   export const querySettings: { [queryKey: string]: QuerySettings } = {};
 
-  export function clearQuerySettings() {
+  export function clearQuerySettings(): void {
     Dic.clear(querySettings);
   }
 
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     options.routes.push({ path: "/find/:queryName", element: <ImportComponent onImport={() => Options.getSearchPage()} /> });
     AppContext.clearSettingsActions.push(clearContextualItems);
     AppContext.clearSettingsActions.push(clearQuerySettings);
@@ -67,7 +72,7 @@ export namespace Finder {
     onReloadTypesActions.push(clearQueryDescriptionCache);
   }
 
-  export function addSettings(...settings: QuerySettings[]) {
+  export function addSettings(...settings: QuerySettings[]): void {
     settings.forEach(s => Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
   }
 
@@ -157,21 +162,21 @@ export namespace Finder {
   }
 
   export namespace Options {
-    export function getSearchPage() {
+    export function getSearchPage(): Promise<typeof import("./SearchControl/SearchPage")> {
       return import("./SearchControl/SearchPage");
     }
-    export function getSearchModal() {
+    export function getSearchModal(): Promise<typeof import("./SearchControl/SearchModal")> {
       return import("./SearchControl/SearchModal");
     }
 
     export let entityColumnHeader: () => React.ReactElement | string | null | undefined = () => "";
 
-    export let tokenCanSetPropery = (qt: QueryToken) =>
+    export let tokenCanSetPropery = (qt: QueryToken): boolean =>
       qt.filterType == "Lite" && qt.key != "Entity" ||
       qt.filterType == "Enum" && !isState(qt.type) ||
       qt.filterType == "DateTime" && qt.propertyRoute != null && PropertyRoute.tryParseFull(qt.propertyRoute)?.member?.type.name == "DateOnly";
 
-    export let isState = (ti: TypeReference) => ti.name.endsWith("State");
+    export let isState = (ti: TypeReference): boolean => ti.name.endsWith("State");
 
     export let defaultPagination: Pagination = {
       mode: "Paginate",
@@ -243,7 +248,7 @@ export namespace Finder {
       .then(a => a.default.openMany(fo, modalOptions));
   }
 
-  export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>) {
+  export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>): void {
     e.preventDefault();
     if (e.ctrlKey || e.button == 1)
       window.open(AppContext.toAbsoluteUrl(findOptionsPath(findOptions)));
@@ -279,10 +284,14 @@ export namespace Finder {
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
       currentPage: fo.pagination && fo.pagination.currentPage,
-      systemTimeMode: fo.systemTime && fo.systemTime.mode,
-      systemTimeJoinMode: fo.systemTime && fo.systemTime.joinMode,
-      systemTimeStartDate: fo.systemTime && fo.systemTime.startDate,
-      systemTimeEndDate: fo.systemTime && fo.systemTime.endDate,
+      systemTimeMode: fo.systemTime?.mode,
+      systemTimeJoinMode: fo.systemTime?.joinMode,
+      systemTimeStartDate: fo.systemTime?.startDate,
+      systemTimeEndDate: fo.systemTime?.endDate,
+      timeSeriesStep: fo.systemTime?.timeSeriesStep,
+      timeSeriesUnit: fo.systemTime?.timeSeriesUnit,
+      timeSeriesMaxRowsPerStep: fo.systemTime?.timeSeriesMaxRowsPerStep,
+      splitQueries: fo.systemTime?.splitQueries,
       ...extra
     };
 
@@ -293,7 +302,7 @@ export namespace Finder {
     return query;
   }
 
-  export function getTypeNiceName(tr: TypeReference) {
+  export function getTypeNiceName(tr: TypeReference): string {
 
     const niceName = tr.typeNiceName ??
       tryGetTypeInfos(tr)
@@ -303,7 +312,13 @@ export namespace Finder {
     return tr.isCollection ? QueryTokenMessage.ListOf0.niceToString(niceName) : niceName;
   }
 
-  export function getSimpleTypeNiceName(name: string) {
+  export function getSimpleTypeNiceName(name: string): string {
+
+    if (isDecimalType(name))
+      return QueryTokenMessage.DecimalNumber.niceToString();
+
+    if (isNumberType(name))
+      return QueryTokenMessage.Number.niceToString();
 
     switch (name) {
       case "string":
@@ -312,8 +327,6 @@ export namespace Finder {
       case "Date": return QueryTokenMessage.Date.niceToString();
       case "DateTime": return QueryTokenMessage.DateTime.niceToString();
       case "DateTimeOffset": return QueryTokenMessage.DateTimeOffset.niceToString();
-      case "number": return QueryTokenMessage.Number.niceToString();
-      case "decimal": return QueryTokenMessage.DecimalNumber.niceToString();
       case "boolean": return QueryTokenMessage.Check.niceToString();
     }
 
@@ -341,6 +354,10 @@ export namespace Finder {
         joinMode: query.systemTimeJoinMode,
         startDate: query.systemTimeStartDate,
         endDate: query.systemTimeEndDate,
+        timeSeriesUnit: query.timeSeriesUnit,
+        timeSeriesStep: query.timeSeriesStep && parseInt(query.timeSeriesStep),
+        timeSeriesMaxRowsPerStep: query.timeSeriesMaxRowsPerStep && parseInt(query.timeSeriesMaxRowsPerStep),
+        splitQueries: Boolean(query.splitQueries),
       }
     };
 
@@ -383,7 +400,7 @@ export namespace Finder {
   export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescription[]): { mode: ColumnOptionsMode; columns: ColumnOption[] } {
 
     const similar = (c: ColumnOptionParsed, d: ColumnDescription) =>
-      c.token!.fullKey == d.name && (c.displayName == d.displayName) && c.summaryToken == null && !c.hiddenColumn;
+      c.token!.fullKey == d.name && (c.displayName == d.displayName) && c.summaryToken == null && c.combineRows == null && !c.hiddenColumn;
 
     const toColumnOption = (c: ColumnOptionParsed) => ({
       token: c.token!.fullKey,
@@ -582,7 +599,7 @@ export namespace Finder {
         return Promise.resolve(value);
     }
 
-    if (type.name == "number") {
+    if (isNumberType(type.name)) {
       if (typeof value === "number")
         return Promise.resolve(value);
     }
@@ -790,18 +807,19 @@ export namespace Finder {
 
     const canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
     const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
+    const canTimeSeries = (fo.systemTime?.mode == QueryTokenString.timeSeries.token ? SubTokensOptions.CanTimeSeries : 0);
 
     const completer = new TokenCompleter(qd);
 
 
     if (fo.filterOptions)
-      fo.filterOptions.notNull().forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate));
+      fo.filterOptions.notNull().forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate | canTimeSeries));
 
     if (fo.orderOptions)
-      fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate));
+      fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate | canTimeSeries));
 
     if (fo.columnOptions) {
-      fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation));
+      fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation | canTimeSeries));
       fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
     }
 
@@ -810,8 +828,8 @@ export namespace Finder {
       var result: FindOptionsParsed = {
         queryKey: qd.queryKey,
         groupResults: fo.groupResults == true,
-        pagination: fo.pagination != null ? fo.pagination : qs?.pagination ?? Options.defaultPagination,
-        systemTime: fo.systemTime,
+        pagination: fixPagination(fo.pagination != null ? fo.pagination : qs?.pagination ?? Options.defaultPagination),
+        systemTime: fo.systemTime && fixSystemTime(fo.systemTime),
 
         columnOptions: (fo.columnOptions?.notNull() ?? []).map(co => ({
           token: completer.get(co.token.toString()),
@@ -832,6 +850,20 @@ export namespace Finder {
       return parseFilterValues(result.filterOptions)
         .then(() => result)
     });
+  }
+
+  function fixPagination(p: Pagination): Pagination {
+      return {
+        mode: p.mode,
+        elementsPerPage: p.mode == "All" ? undefined : p.elementsPerPage == null || p.elementsPerPage < 0 ? 20 : p.elementsPerPage,  
+        currentPage: p.mode != "Paginate" ? undefined : p.currentPage == null || p.currentPage < 0 ? 1 : p.currentPage,  
+      };
+  }
+
+  function fixSystemTime(p: SystemTime): SystemTime {
+    return {
+      ...p
+    };
   }
 
   function simplifyPinnedFilters(fos: FilterOption[]): FilterOption[] {
@@ -968,7 +1000,7 @@ export namespace Finder {
     if (fop.dashboardBehaviour == "UseAsInitialSelection")
       return undefined;
 
-    var operation = (fop as FilterConditionOptionParsed).operation;
+    const operation = (fop as FilterConditionOptionParsed).operation;
 
     if (fop.pinned && overridenValue == null) {
       if (fop.pinned.splitValue) {
@@ -1030,14 +1062,16 @@ export namespace Finder {
       if (overridenValue == null && fop.pinned && fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value === ""))
         return undefined;
 
-      var value = overridenValue ? overridenValue.value : fop.value;
+      const value = overridenValue ? overridenValue.value : fop.value;
 
       if (fop.token && typeof value == "string") {
-        if (fop.token.type.name == "number") {
+        if (isNumberType(fop.token.type.name)) {
 
-          var numVal = parseInt(value);
+          const numVal = parseInt(value);
 
-          if (isNaN(numVal)) {
+          const limits = numberLimits[fop.token.type.name]
+
+          if (isNaN(numVal) || numVal < limits.min || limits.max < numVal) {
             if (overridenValue)
               return undefined;
 
@@ -1073,6 +1107,14 @@ export namespace Finder {
             value: value,
           } as FilterConditionRequest);
         }
+      }
+
+      if (Array.isArray(value)) {
+        return ({
+          token: fop.token.fullKey,
+          operation: fop.operation,
+          value: value.notNull(),
+        } as FilterConditionRequest);
       }
 
       return ({
@@ -1166,7 +1208,7 @@ export namespace Finder {
     return newFO;
   }
 
-  export function getTrivialColumns(fos: FilterOption[]) {
+  export function getTrivialColumns(fos: FilterOption[]): ColumnOption[] {
     return fos
       .filter(fo => !isFilterGroup(fo) && (fo.operation == null || fo.operation == "EqualTo") && !fo.token.toString().contains(".") && fo.pinned == null && fo.value != null)
       .map(fo => ({ token: fo.token }) as ColumnOption);
@@ -1204,7 +1246,7 @@ export namespace Finder {
       this.queryCache = (TokenCompleter.globalCache[queryDescription.queryKey] ??= {});
     }
 
-    requestFilter(fo: FilterOption, options: SubTokensOptions) {
+    requestFilter(fo: FilterOption, options: SubTokensOptions): void {
 
       if (isFilterGroup(fo)) {
         fo.token && this.request(fo.token.toString(), options);
@@ -1252,8 +1294,8 @@ export namespace Finder {
       };
     }
 
-    isSimple(fullKey: string) {
-      return !fullKey.contains(".") && fullKey != "Count";
+    isSimple(fullKey: string): boolean {
+      return !fullKey.contains(".") && fullKey != QueryTokenString.count.token && fullKey != QueryTokenString.timeSeries.token;
     }
 
     finished(): Promise<void> {
@@ -1512,7 +1554,11 @@ export namespace Finder {
   }
 
   export type AddToLite<T> = T extends Entity ? Lite<T> : T;
-  export type ExtractQueryToken<T> = T extends QueryTokenString<infer S> ? AddToLite<S> : any;
+  export type ExtractQueryToken<T> =
+    T extends QueryTokenString<infer S> ? AddToLite<S> :
+    T extends TokenObject ? ExtractTokensObject<T>[] :
+    T extends undefined ? undefined :
+    any;
 
   export type ExtractTokensObject<T> = {
     [P in keyof T]: ExtractQueryToken<T[P]>;
@@ -1520,7 +1566,7 @@ export namespace Finder {
 
   export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null {
     return useAPI(
-      signal => fo == null ? Promise.resolve<ResultTable | null>(null) : getResultTable(fo, signal),
+      signal => fo == null ? null : getResultTable(fo, signal),
       [fo && findOptionsPath(fo), ...(additionalDeps || [])],
       options);
 
@@ -1536,7 +1582,7 @@ export namespace Finder {
 
 
 
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined | null {
+  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined {
     return useAPI(() => fetchLites(fo),
       [
         findOptionsPath({
@@ -1551,30 +1597,94 @@ export namespace Finder {
     );
   }
 
-  export function getResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<ExtractTokensObject<TO>[]> {
+  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | undefined {
+    return useAPI(() => fetchEntities(fo),
+      [
+        findOptionsPath({
+          queryName: fo.queryName,
+          filterOptions: fo.filterOptions,
+          orderOptions: fo.orderOptions,
+          pagination: fo.count == null ? { mode: "All" } : { mode: "Firsts", elementsPerPage: fo.count }
+        }),
+        ...additionalDeps ?? []
+      ],
+      options,
+    );
+  }
+
+  
+  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined {
+    var fo2: FindOptions | null = fo && {
+      pagination: { mode: "All" },
+      ...fo,
+      columnOptions: getAllColumns(tokensObject),
+      columnOptionsMode: "ReplaceAll",
+    };
+
+    var result = useAPI(signal => fo2 && getResultTable(fo2, signal), [fo2 && findOptionsPath(fo2), ...(additionalDeps || [])], options);
+
+    return result && result.rows.map(row => toTypedRow(tokensObject, result!.columns, row));
+  }
+
+  function getAllColumns(tokensObject: TokenObject): ColumnOption[] {
+    return Dic.getValues(tokensObject).flatMap(a => {
+      if (a == undefined)
+        return [];
+
+      if (typeof a == "string" || a instanceof QueryTokenString)
+        return [{ token: a }];
+
+      return getAllColumns(a);
+    });
+  }
+
+  export interface TokenObject {
+    [name: string]: QueryTokenString<any> | string | TokenObject | undefined;
+  }
+
+  export function toTypedRow<TO extends TokenObject>(tokensObject: TO, columns: string[], row: ResultRow): ExtractTokensObject<TO> {
+    return Dic.mapObject(tokensObject, (key, value) => {
+
+      if (value == undefined)
+        return undefined;
+
+      var token = value.toString();
+
+      if (token == "Entity" && row.entity)
+        return row.entity;
+
+      const index = columns.indexOf(token);
+
+      return row.columns[index];
+    }) as ExtractTokensObject<TO>;
+  }
+
+  export async function getResultTableTyped<TO extends TokenObject>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<ExtractTokensObject<TO>[]> {
     var fo2: FindOptions = {
       pagination: { mode: "All" },
       ...fo,
-      columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
+      columnOptions: getAllColumns(tokensObject),
       columnOptionsMode: "ReplaceAll",
     };
 
-    return getResultTable(fo2)
-      .then(fop => fop.rows.map(row => Dic.mapObject(tokensObject, (key, value, index) => row.columns[index]) as ExtractTokensObject<TO>));
+    const rt = await getResultTable(fo2);
+
+    return rt.rows.map(row => toTypedRow(tokensObject, rt.columns, row));
   }
 
-  export function getResultTableTypedWithPagination<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<{ totalElements?: number, rows: ExtractTokensObject<TO>[] }> {
+  export async function getResultTableTypedWithPagination<TO extends TokenObject>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<{ totalElements?: number, rows: ExtractTokensObject<TO>[] }> {
     var fo2: FindOptions = {
       ...fo,
-      columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
+      columnOptions: getAllColumns(tokensObject),
       columnOptionsMode: "ReplaceAll",
     };
 
-    return getResultTable(fo2)
-      .then(fop => ({
-        totalElements: fop.totalElements,
-        rows: fop.rows.map(row => Dic.mapObject(tokensObject, (key, value, index) => row.columns[index]) as ExtractTokensObject<TO>)
-      }));
+    const rt = await getResultTable(fo2);
+
+    return ({
+      totalElements: rt.totalElements,
+      rows: rt.rows.map(row => toTypedRow(tokensObject, rt.columns, row))
+    });
   }
 
   export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<ResultTable> {
@@ -1675,7 +1785,7 @@ export namespace Finder {
     return rt;
   }
 
-  export module API {
+  export namespace API {
 
     export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
       return ajaxGet({ url: "/api/query/description/" + queryKey });
@@ -1686,7 +1796,78 @@ export namespace Finder {
     }
 
 
+    export async function executeQuerySplitTimeSeries(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
+      const st = request.systemTime!;
+      const endDate = DateTime.fromISO(st.endDate!);
+
+      const resultTables: { timeSerie: string, rt: ResultTable }[] = [];
+      const timeSeries = QueryTokenString.timeSeries.toString();
+
+      var dates = new Array<string>();
+      {
+        let dt = DateTime.fromISO(st.startDate!);
+        while (dt < endDate) {
+          dt = dt.plus({ [st.timeSeriesUnit!.toLowerCase()]: st.timeSeriesStep });
+          dates.push(dt.toISO()!);
+        }
+      }
+
+      var notifyOptions: NotifyOptions = {
+        text: "",
+        type: "loading",
+        priority: 10,
+      };
+     
+
+      for (var i = 0; i < dates.length; i++) {
+
+        const dt = dates[i];
+        const newRequest: QueryRequest = {
+          queryKey: request.queryKey,
+          filters: request.filters,
+          columns: request.columns.filter(a => a.token != timeSeries.toString()),
+          orders: request.orders.filter(a => a.token != timeSeries.toString()),
+          systemTime: {
+            mode: "AsOf",
+            startDate: dt,
+          },
+          groupResults: request.groupResults,
+          pagination: { mode: "Firsts", elementsPerPage: st.timeSeriesMaxRowsPerStep }
+        };
+        const rt = await executeQuery(newRequest, signal);
+        resultTables.push({ timeSerie: dt, rt: decompress(rt) });
+
+        notifyOptions.text = JavascriptMessage.loading.niceToString() + `[${i + 1}/${dates.length}]`;
+        Notify.singleton?.notifyTimeout(notifyOptions);
+      }
+
+      Notify.singleton?.remove(notifyOptions);
+
+      const index = request.columns.findIndex(a => a.token == timeSeries);
+
+      var combined: ResultTable = {
+        columns: [timeSeries, ...resultTables.first().rt.columns],
+        uniqueValues: {},
+        rows: index == -1 ? resultTables.flatMap(a => a.rt.rows) :
+          resultTables.flatMap(a => a.rt.rows.map(row => ({
+            entity: row.entity,
+            columns: [
+              a.timeSerie,
+              ...row.columns
+            ]
+          }))),
+        totalElements: resultTables.sum(a => a.rt.totalElements! ?? 0),
+        pagination: { mode: "All" }
+      };
+
+      return combined;
+    }
+
+
     export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
+      if (request.systemTime?.mode == "TimeSeries" && request.systemTime.splitQueries) {
+        return executeQuerySplitTimeSeries(request, signal);
+      }
 
       return ajaxPost<ResultTable>({ url: "/api/query/executeQuery/" + request.queryKey, signal }, request)
         .then(rt => decompress(rt));
@@ -1751,11 +1932,11 @@ export namespace Finder {
     return pinned != null && (pinned.active == "Always" || pinned.active == "WhenHasValue");
   }
 
-  export module Encoder {
+  export namespace Encoder {
 
 
 
-    export function encodeFilters(query: any, filterOptions?: FilterOption[], prefix?: string) {
+    export function encodeFilters(query: any, filterOptions?: FilterOption[], prefix?: string): void {
 
       var i: number = 0;
 
@@ -1788,12 +1969,12 @@ export namespace Finder {
         filterOptions.forEach(fo => encodeFilter(fo, 0, false));
     }
 
-    export function encodeOrders(query: any, orderOptions?: OrderOption[], prefix?: string) {
+    export function encodeOrders(query: any, orderOptions?: OrderOption[], prefix?: string): void {
       if (orderOptions)
         orderOptions.forEach((oo, i) => query[(prefix ?? "") + "order" + i] = (oo.orderType == "Descending" ? "-" : "") + oo.token);
     }
 
-    export function encodeColumns(query: any, columnOptions?: ColumnOption[], prefix?: string) {
+    export function encodeColumns(query: any, columnOptions?: ColumnOption[], prefix?: string): void {
       if (columnOptions) {
         columnOptions.forEach((co, i) => {
 
@@ -1833,7 +2014,7 @@ export namespace Finder {
       return scapeTilde(value.toString());
     }
 
-    export function scapeTilde(str: string) {
+    export function scapeTilde(str: string): string {
       if (str == undefined)
         return "";
 
@@ -1846,7 +2027,7 @@ export namespace Finder {
 
   const HIDDEN = "__";
 
-  export module Decoder {
+  export namespace Decoder {
 
     export const decodeModel: { [typeName: string]: (string: any) => ModelEntity | null } = {};
 
@@ -1966,7 +2147,7 @@ export namespace Finder {
   }
 
 
-  export module ButtonBarQuery {
+  export namespace ButtonBarQuery {
 
     interface ButtonBarQueryContext {
       searchControl: SearchControlLoaded;
@@ -1979,7 +2160,7 @@ export namespace Finder {
       return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined).map(a => a as ButtonBarElement);
     }
 
-    export function clearButtonBarElements() {
+    export function clearButtonBarElements(): void {
       ButtonBarQuery.onButtonBarElements.clear();
     }
 
@@ -1996,7 +2177,7 @@ export namespace Finder {
     defaultAggregates?: ColumnOption[];
     hiddenColumns?: ColumnOption[];
     formatters?: { [token: string]: CellFormatter };
-    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
+    rowAttributes?: (row: ResultRow, searchControl: SearchControlLoaded) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
     inPlaceNavigation?: boolean;
     modalSize?: BsSize;
@@ -2026,7 +2207,7 @@ export namespace Finder {
 
 
 
-  export function isSystemVersioned(tr?: TypeReference) {
+  export function isSystemVersioned(tr?: TypeReference): boolean {
     return tr != null && getTypeInfos(tr).some(ti => ti.isSystemVersioned == true)
   }
 
@@ -2046,7 +2227,7 @@ export namespace Finder {
     return rule.formatter(qt, sc);
   }
 
-  export function resetFormatRules() {
+  export function resetFormatRules(): void {
     Dic.clear(registeredPropertyFormatters);
 
     formatRules.clear();
@@ -2087,7 +2268,7 @@ export namespace Finder {
 
   export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
 
-  export function registerPropertyFormatter(pr: PropertyRoute | string/*For expressions*/ | undefined, formater: CellFormatter) {
+  export function registerPropertyFormatter(pr: PropertyRoute | string/*For expressions*/ | undefined, formater: CellFormatter): void {
     if (pr == null)
       return;
     registeredPropertyFormatters[pr.toString()] = formater;
@@ -2136,7 +2317,7 @@ export namespace Finder {
 
   export const filterValueFormatRules: FilterValueFormatter[] = FinderRules.initFilterValueFormatRules();
 
-  export function renderFilterValue(f: FilterOptionParsed, ffc: FilterFormatterContext) {
+  export function renderFilterValue(f: FilterOptionParsed, ffc: FilterFormatterContext): React.ReactElement<any, string | React.JSXElementConstructor<any>> {
     var rule = filterValueFormatRules.filter(r => r.applicable(f, ffc)).last();
     return rule.renderValue(f, ffc);
   }

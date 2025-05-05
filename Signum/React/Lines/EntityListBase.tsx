@@ -52,17 +52,17 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
 {
   dragIndex!: number | undefined;
   setDragIndex!: React.Dispatch<number | undefined>;
-  dropBorderIndex!: IndexWithOffset | undefined
+  dropBorderIndex!: IndexWithOffset | undefined;
   setDropBorderIndex!: React.Dispatch<IndexWithOffset | undefined>;
 
-  init(p: P) {
+  init(p: P): void {
     super.init(p);
     [this.dragIndex, this.setDragIndex] = React.useState<number | undefined>(undefined);
     [this.dropBorderIndex, this.setDropBorderIndex] = React.useState<IndexWithOffset | undefined>(undefined);
   }
 
-  keyGenerator = new KeyGenerator();
-  getDefaultProps(state: P) {
+  keyGenerator: KeyGenerator = new KeyGenerator();
+  getDefaultProps(state: P): void {
     if (state.type) {
       const type = state.type;
 
@@ -80,7 +80,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
   }
 
 
-  overrideProps(p: P, overridenProps: P) {
+  overrideProps(p: P, overridenProps: P): void {
 
     super.overrideProps(p, overridenProps);
   }
@@ -95,7 +95,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     return rows;
   }
 
-  renderCreateButton(btn: boolean, createMessage?: string) {
+  renderCreateButton(btn: boolean, createMessage?: string): React.JSX.Element | undefined {
     if (!this.props.create || this.props.ctx.readOnly)
       return undefined;
 
@@ -108,7 +108,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     );
   }
 
-  renderFindButton(btn: boolean) {
+  renderFindButton(btn: boolean): React.JSX.Element | undefined {
     if (!this.props.find || this.props.ctx.readOnly)
       return undefined;
 
@@ -121,13 +121,13 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     );
   }
 
-  moveUp(index: number) {
+  moveUp(index: number): void {
     const list = this.props.ctx.value!;
     list.moveUp(index);
     this.setValue(list);
   }
 
-  renderMoveUp(btn: boolean, index: number, orientation: "h" | "v") {
+  renderMoveUp(btn: boolean, index: number, orientation: "h" | "v"): React.JSX.Element | undefined {
     if (!this.canMove(this.props.ctx.value[index].element) || this.props.ctx.readOnly)
       return undefined;
 
@@ -140,13 +140,13 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     );
   }
 
-  moveDown(index: number) {
+  moveDown(index: number): void {
     const list = this.props.ctx.value!;
     list.moveDown(index);
     this.setValue(list);
   }
 
-  renderMoveDown(btn: boolean, index: number, orientation: "h" | "v") {
+  renderMoveDown(btn: boolean, index: number, orientation: "h" | "v"): React.JSX.Element | undefined {
     if (!this.canMove(this.props.ctx.value[index].element) || this.props.ctx.readOnly)
       return undefined;
 
@@ -161,7 +161,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
 
 
 
-  doView(entity: V) {
+  doView(entity: V): Promise<NoInfer<V extends Entity ? V | Lite<V> : V extends Lite<infer E extends Entity> ? E | Lite<E> : V extends ModifiableEntity ? V : never> | undefined> | undefined {
     const pr = this.props.ctx.propertyRoute?.addLambda(a => a[0])!;
     return this.props.onView ?
       this.props.onView(entity, pr) :
@@ -188,7 +188,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     return undefined;
   }
 
-  handleViewElement = (event: React.MouseEvent<any>, index: number) => {
+  handleViewElement = (event: React.MouseEvent<any>, index: number): void => {
 
     event.preventDefault();
 
@@ -268,7 +268,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
 
   
 
-  handleCreateClick = async (event: React.SyntheticEvent<any>) => {
+  handleCreateClick = async (event: React.SyntheticEvent<any>): Promise<void> => {
 
     event.preventDefault();
 
@@ -294,7 +294,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     }
   }
 
-  getFindOptions(typeName: string) {
+  getFindOptions(typeName: string): FindOptions | undefined {
     if (this.props.findOptionsDictionary)
       return this.props.findOptionsDictionary[typeName];
 
@@ -334,7 +334,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       });
   }
 
-  addElement(entityOrLite: V) {
+  addElement(entityOrLite: V): void {
 
     if (isLite(entityOrLite) != (this.props.type!.isLite || false))
       throw new Error("entityOrLite should be already converted");
@@ -348,7 +348,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     this.setValue(list);
   }
 
-  renderPasteButton(btn: boolean) {
+  renderPasteButton(btn: boolean): React.JSX.Element | undefined {
     if (!this.props.paste || this.props.ctx.readOnly)
       return undefined;
 
@@ -361,7 +361,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     );
   }
 
-  paste(text: string) {
+  paste(text: string): Promise<void | undefined> | undefined {
     var lites = parseLiteList(text);
     if (lites.length == 0)
       return;
@@ -386,7 +386,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     }).first();
   }
 
-  handlePasteClick = (event: React.SyntheticEvent<any>) => {
+  handlePasteClick = (event: React.SyntheticEvent<any>): void => {
 
     event.preventDefault();
 
@@ -394,7 +394,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       .then(text => this.paste(text));
   }
 
-  handleFindClick = async (event: React.SyntheticEvent<any>) => {
+  handleFindClick = async (event: React.SyntheticEvent<any>): Promise<void> => {
 
     event.preventDefault();
 
@@ -410,7 +410,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     converted.forEach(e => this.addElement(e));
   };
 
-  handleRemoveElementClick = async (event: React.SyntheticEvent<any>, index: number) => {
+  handleRemoveElementClick = async (event: React.SyntheticEvent<any>, index: number): Promise<void> => {
 
     event.preventDefault();
 
@@ -423,7 +423,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       this.removeElement(mle)
   }
 
-  removeElement(mle: MListElement<V>) {
+  removeElement(mle: MListElement<V>): void {
     const list = this.props.ctx.value!;
     list.remove(mle);
     this.setValue(list);
@@ -443,19 +443,19 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
   }
 
 
-  handleDragStart = (de: React.DragEvent<any>, index: number) => {
+  handleDragStart = (de: React.DragEvent<any>, index: number): void => {
     de.dataTransfer.setData('text', "start"); //cannot be empty string
     de.dataTransfer.effectAllowed = "move";
     this.setDragIndex(index);
   }
 
-  handleDragEnd = (de: React.DragEvent<any>) => {
+  handleDragEnd = (de: React.DragEvent<any>): void => {
     this.setDragIndex(undefined);
     this.setDropBorderIndex(undefined);
     this.forceUpdate();
   }
 
-  getOffsetHorizontal(dragEvent: DragEvent, rect: ClientRect) {
+  getOffsetHorizontal(dragEvent: DragEvent, rect: DOMRect): 0 | 1 | undefined {
 
     const margin = Math.min(50, rect.width / 2);
 
@@ -471,7 +471,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     return undefined;
   }
 
-  getOffsetVertical(dragEvent: DragEvent, rect: ClientRect) {
+  getOffsetVertical(dragEvent: DragEvent, rect: DOMRect): 0 | 1 | undefined {
 
     var margin = Math.min(50, rect.height / 2);
 
@@ -487,7 +487,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     return undefined;
   }
 
-  handlerDragOver = (de: React.DragEvent<any>, index: number, orientation: "h" | "v") => {
+  handlerDragOver = (de: React.DragEvent<any>, index: number, orientation: "h" | "v"): void => {
     if (this.dragIndex == null)
       return;
 
@@ -529,12 +529,12 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
 
   getMoveConfig(btn: boolean, index: number, orientation: "h" | "v") {
     return {
-      renderMoveUp: () => this.renderMoveUp(false, index, orientation)!,
-      renderMoveDown: () => this.renderMoveDown(false, index, orientation)
+      renderMoveUp: (): React.JSX.Element => this.renderMoveUp(false, index, orientation)!,
+      renderMoveDown: (): React.JSX.Element | undefined => this.renderMoveDown(false, index, orientation)
     }
   }
 
-  dropClass(index: number, orientation: "h" | "v") {
+  dropClass(index: number, orientation: "h" | "v"): "drag-left" | "drag-top" | "drag-right" | "drag-bottom" | undefined {
     const dropBorderIndex = this.dropBorderIndex;
 
 
@@ -585,7 +585,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
   }
 
 
-  handleMoveKeyDown = (ke: React.KeyboardEvent<any>, index : number) => {
+  handleMoveKeyDown = (ke: React.KeyboardEvent<any>, index : number): void => {
 
     if (ke.ctrlKey) {
 
@@ -599,7 +599,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     }
   }
 
-  handleDrop = (de: React.DragEvent<any>) => {
+  handleDrop = (de: React.DragEvent<any>): void => {
 
     de.preventDefault();
     const dropBorderIndex = this.dropBorderIndex;
@@ -610,7 +610,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     this.onMoveElement(dragIndex, dropBorderIndex);
   }
 
-  onMoveElement(oldIndex: number, newIndex: IndexWithOffset) {
+  onMoveElement(oldIndex: number, newIndex: IndexWithOffset): void {
     const list = this.props.ctx.value!;
 
     if (this.props.onMove) {
@@ -648,7 +648,7 @@ export interface MoveConfig {
 
 
 tasks.push(taskSetMove);
-export function taskSetMove(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+export function taskSetMove(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
   if (lineBase instanceof EntityListBaseController &&
     (state as EntityListBaseProps<any>).move == undefined &&
     state.ctx.propertyRoute &&

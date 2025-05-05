@@ -7,7 +7,7 @@ import { ModulesHelp } from '../View/ModulesHelp';
 import { DynamicClientEntity } from '../Signum.Dynamic.Client'
 
 
-export default function DynamicClientComponent(p: { ctx: TypeContext<DynamicClientEntity> }) {
+export default function DynamicClientComponent(p: { ctx: TypeContext<DynamicClientEntity> }): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
   var ctx = p.ctx;

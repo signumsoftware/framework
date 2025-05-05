@@ -1,3 +1,4 @@
+using Azure.Core;
 using Signum.API.Json;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -11,6 +12,8 @@ public class SimpleHttpBroadcast : IServerBroadcast
     readonly string bordcastSecretHash;
     readonly string[] broadcastUrls;
 
+    public bool Running => true;
+
     public SimpleHttpBroadcast(string broadcastSecret, string broadcastUrls)
     {
         this.bordcastSecretHash = Convert.ToBase64String(PasswordEncoding.EncodePassword("", broadcastSecret));
@@ -23,21 +26,33 @@ public class SimpleHttpBroadcast : IServerBroadcast
 
     public event Action<string, string>? Receive;
 
-    public void Start()
+    public void StartIfNecessary()
     {
     }
 
     //Called from Controller
     public void InvalidateTable(InvalidateTableRequest request)
     {
-        if (this.bordcastSecretHash != request.SecretHash)
-            throw new InvalidOperationException("invalidationSecret does not match");
+        AssertHash(request.SecretHash);
 
         if (request.OriginMachineName == Environment.MachineName &&
             request.OriginApplicationName == Schema.Current.ApplicationName)
             return;
 
         Receive?.Invoke(request.MethodName, request.Argument);
+    }
+
+    //Called from Controller
+    public void InvalidateAllTables(InvalidateAllRequest req)
+    {
+        AssertHash(req.SecretHash);
+        Receive?.Invoke(CacheLogic.Method_InvalidateAllTable, "");
+    }
+
+    public void AssertHash(string secretHash)
+    {
+        if (this.bordcastSecretHash != secretHash)
+            throw new InvalidOperationException("invalidationSecret does not match");
     }
 
     public void Send(string methodName, string argument)
@@ -85,7 +100,7 @@ public class SimpleHttpBroadcast : IServerBroadcast
         return $"{nameof(SimpleHttpBroadcast)}(Urls={broadcastUrls.ToString(", ")})";
     }
 
-
+  
 }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

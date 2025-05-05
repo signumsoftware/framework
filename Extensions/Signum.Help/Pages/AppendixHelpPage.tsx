@@ -17,7 +17,7 @@ import { useTitle } from '@framework/AppContext'
 import { Shortcut } from './TypeHelpPage'
 
 
-export default function AppendixHelpHelp() {
+export default function AppendixHelpHelp(): React.JSX.Element {
   const params = useParams() as { uniqueName: string | undefined };
 
   var [appendix, reloadAppendix] = useAPIWithReload(() => HelpClient.API.appendix(params.uniqueName), []);

@@ -305,7 +305,7 @@ public static class AlertLogic
         return CreateAlert(entity.ToLiteFat(), alertType, text, textArguments, alertDate, createdBy, title, recipient, linkTarget, groupTarget, avoidSendMail);
     }
 
-    static IDisposable AllowSaveAlerts() => TypeAuthLogic.OverrideTypeAllowed<AlertEntity>(tac => new TypeAllowedAndConditions(TypeAllowed.Write));
+    static IDisposable AllowSaveAlerts() => TypeAuthLogic.OverrideTypeAllowed<AlertEntity>(tac => WithConditions<TypeAllowed>.Simple(TypeAllowed.Write));
 
     public static AlertEntity? CreateAlert(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, 
         Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null, bool avoidSendMail = false)
@@ -314,6 +314,7 @@ public static class AlertLogic
             return null;
 
         using (AllowSaveAlerts())
+        using (OperationLogic.AllowSave<AlertEntity>())
         {
             var result = new AlertEntity
             {
@@ -327,10 +328,11 @@ public static class AlertLogic
                 GroupTarget = groupTarget,
                 AlertType = alertType,
                 Recipient = recipient,
-                AvoidSendMail = avoidSendMail
-            };
+                AvoidSendMail = avoidSendMail,
+                State = AlertState.Saved,
+            }.Save();
 
-            return result.Execute(AlertOperation.Save);
+            return result;
         }
     }
 

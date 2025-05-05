@@ -7,18 +7,10 @@
     <Member Name="AllowMatchUsersBySimpleUserName" Description="Benutzer durch einfachen Benutzernamen zulassen" />
     <Member Name="AutoCreateUsers" Description="Benutzer automatisch erstellen" />
     <Member Name="AutoUpdateUsers" Description="Benutzer automatisch aktualisieren" />
-    <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
-    <Member Name="Azure_ClientSecret" Description="Azure Client Secret Value" />
-    <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
+    <Member Name="AzureAD" Description="Azure AD" />
     <Member Name="DefaultRole" Description="Standardrolle" />
-    <Member Name="DirectoryRegistry_Password" Description="DirectoryRegistry Passwort" />
-    <Member Name="DirectoryRegistry_Username" Description="DirectoryRegistry Benutzername" />
-    <Member Name="DomainName" Description="Domain-Name" />
-    <Member Name="LoginWithActiveDirectoryRegistry" Description="Login mit Active Directory Registry" />
-    <Member Name="LoginWithAzureAD" Description="Login mit Azure AD" />
-    <Member Name="LoginWithWindowsAuthenticator" Description="Login mit Windows-Authentifikator" />
     <Member Name="RoleMapping" Description="Rollenzuordnung" />
-    <Member Name="UseDelegatedPermission" Description="Delegierte Erlaubnis verwenden" />
+    <Member Name="WindowsAD" Description="Windows AD" />
   </Type>
   <Type Name="ActiveDirectoryMessage">
     <Member Name="AccountEnabled" Description="Konto aktiviert" />
@@ -54,12 +46,29 @@
   <Type Name="AuthADFileType">
     <Member Name="CachedProfilePhoto" Description="gecachte Profilfoto" />
   </Type>
+  <Type Name="AzureActiveDirectoryEmbedded" Description="Azure Active Directory">
+    <Member Name="ApplicationID" Description="Application-ID (Client)" />
+    <Member Name="AzureB2C" Description="Azure B2C" />
+    <Member Name="ClientSecret" Description="Client Secret Value" />
+    <Member Name="DirectoryID" Description="Directory(Tenant) ID" />
+    <Member Name="LoginWithAzureAD" Description="Anmelden mit azure AD" />
+    <Member Name="UseDelegatedPermission" Description="Use delegated permission" />
+  </Type>
   <Type Name="AzureADQuery">
     <Member Name="ActiveDirectoryGroups" Description="Active Directory-Gruppen" />
     <Member Name="ActiveDirectoryUsers" Description="Active Directory-Benutzer" />
   </Type>
+  <Type Name="AzureB2CEmbedded" Description="Azure B2C">
+    <Member Name="LoginWithAzureB2C" Description="Anmelden mit azure B2C" />
+    <Member Name="ResetPassword_UserFlow" Description="ResetPassword UserFlow" />
+    <Member Name="SignIn_UserFlow" Description="SignIn UserFlow" />
+    <Member Name="SignInSignUp_UserFlow" Description="SignInSignUp UserFlow" />
+    <Member Name="SignUp_UserFlow" Description="SignUp UserFlow" />
+    <Member Name="TenantName" Description="Name des Mandanten" />
+  </Type>
   <Type Name="CachedProfilePhotoEntity" Description="gecachte Profilfoto" PluralDescription="gecachte Profilfotos" Gender="n">
     <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="InvalidationDate" Description="Datum der Ungültigkeit" />
     <Member Name="Photo" Description="Foto" />
     <Member Name="Size" Description="Größe" />
     <Member Name="User" Description="Benutzer" />
@@ -103,5 +112,12 @@
   </Type>
   <Type Name="UserOIDMessage">
     <Member Name="TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet" Description="Der Benutzer {0} ist mit Active Directory verbunden und kann kein lokales Kennwort festgelegt haben" />
+  </Type>
+  <Type Name="WindowsActiveDirectoryEmbedded" Description="Windows-Active-Directory">
+    <Member Name="DirectoryRegistry_Password" Description="DirectoryRegistry-Kennwort" />
+    <Member Name="DirectoryRegistry_Username" Description="DirectoryRegistry-Benutzername" />
+    <Member Name="DomainName" Description="Domänenname" />
+    <Member Name="LoginWithActiveDirectoryRegistry" Description="Anmeldung mit Active Directory Registry" />
+    <Member Name="LoginWithWindowsAuthenticator" Description="Anmeldung mit Windows Authenticator" />
   </Type>
 </Translations>

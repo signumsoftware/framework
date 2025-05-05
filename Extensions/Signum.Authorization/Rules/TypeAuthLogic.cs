@@ -1,14 +1,18 @@
+using Microsoft.AspNetCore.Routing;
 using Signum.Authorization.Rules;
 using Signum.Utilities.Reflection;
+using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace Signum.Authorization;
 
 public static partial class TypeAuthLogic
 {
-    static TypeAuthCache cache = null!;
+    static TypeCache cache = null!;
 
-    public static IManualAuth<Type, TypeAllowedAndConditions> Manual { get { return cache; } }
+    public static IManualAuth<Type, WithConditions<TypeAllowed>> Manual { get { return cache; } }
 
     public static bool IsStarted { get { return cache != null; } }
 
@@ -32,30 +36,142 @@ public static partial class TypeAuthLogic
                 }
             };
 
-            sb.Schema.Synchronizing += Schema_Synchronizing;
 
             sb.Schema.EntityEventsGlobal.PreUnsafeDelete += query =>
             {
-                return TypeAuthLogic.OnIsWriting(query.ElementType);
+                return OnIsWriting(query.ElementType);
             };
 
-            cache = new TypeAuthCache(sb, merger: TypeAllowedMerger.Instance);
+            sb.Include<RuleTypeEntity>()
+                .WithUniqueIndex(rt => new { rt.Resource, rt.Role })
+                .WithVirtualMList(rt => rt.ConditionRules, c => c.RuleType);
 
-            AuthLogic.ExportToXml += exportAll => cache.ExportXml(exportAll ? TypeLogic.TypeToEntity.Keys.ToList() : null);
-            AuthLogic.ImportFromXml += (x, roles, replacements) => cache.ImportXml(x, roles, replacements);
+            cache = new TypeCache(sb);
+
+            sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RuleTypeConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleType.Entity.Resource, rtc => rtc.RuleType.Entity.Role);
+            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleTypeEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(t)));
+            sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RuleTypeConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
+            
+            Validator.PropertyValidator((RuleTypeEntity r) => r.ConditionRules).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
+            
+   
+
+
+            AuthLogic.ExportToXml += cache.ExportXml;
+            AuthLogic.ImportFromXml += cache.ImportXml;
 
             AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
-            TypeConditionLogic.Register(UserTypeCondition.DeactivatedUsers, (UserEntity u) => u.State == UserState.Deactivated);
+            TypeConditionLogic.RegisterCompile(UserTypeCondition.DeactivatedUsers, (UserEntity u) => u.State == UserState.Deactivated);
+        }
+    }
+
+    static string? TypeAuthCache_StaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
+    {
+        RuleTypeEntity rt = (RuleTypeEntity)sender;
+        if (rt.Resource == null)
+        {
+            if (rt.ConditionRules.Any())
+                return "Default {0} should not have conditions".FormatWith(typeof(RuleTypeEntity).NiceName());
+
+            return null;
+        }
+
+        try
+        {
+            Type type = TypeLogic.EntityToType.GetOrThrow(rt.Resource);
+            var conditions = rt.ConditionRules.Where(a =>
+                a.Conditions.Any(c => c.FieldInfo != null && /*Not 100% Sync*/
+                !TypeConditionLogic.IsDefined(type, c)));
+
+            if (conditions.IsEmpty())
+                return null;
+
+            return "Type {0} has no definitions for the conditions: {1}".FormatWith(type.Name, conditions.CommaAnd(a => a.Conditions.CommaAnd(c => c.Key)));
+        }
+        catch (Exception ex) when (StartParameters.IgnoredDatabaseMismatches != null)
+        {
+            //This try { throw } catch is here to alert developers.
+            //In production, in some cases its OK to attempt starting an application with a slightly different schema (dynamic entities, green-blue deployments).
+            //In development, consider synchronize.
+            StartParameters.IgnoredDatabaseMismatches.Add(ex);
+            return null;
         }
     }
 
     static GenericInvoker<Action<Schema>> miRegister =
         new(s => RegisterSchemaEvent<TypeEntity>(s));
-    static void RegisterSchemaEvent<T>(Schema sender)
+    static void RegisterSchemaEvent<T>(Schema schema)
          where T : Entity
     {
-        sender.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(TypeAuthLogic_FilterQuery<T>);
+        schema.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(TypeAuthLogic_FilterQuery<T>);
+
+        schema.EntityEvents<T>().RegisterBinding(a => a._TypeConditions,
+            () => TypeConditionsForBinding(typeof(T)) != null,
+            () =>
+            {
+                var conditions = TypeConditionsForBinding(typeof(T))!;
+                if (conditions == null || conditions.IsEmpty())
+                    return (e, rowId) => (IDictionary?)null;
+
+                return GetTypeConditionsDictionary<T>(conditions);
+            },
+            (e, rowId, ret) => null);
     }
+
+    private static Expression<Func<T, PrimaryKey?, IDictionary?>> GetTypeConditionsDictionary<T>(List<TypeConditionSymbol> conditions) where T : Entity
+    {
+        var entity = Expression.Parameter(typeof(T));
+        var rowId = Expression.Parameter(typeof(PrimaryKey?));
+        var type = typeof(Dictionary<TypeConditionSymbol, bool>);
+        var miAdd = type.GetMethod("Add")!;
+        var newDic = Expression.ListInit(Expression.New(type),
+            conditions.Select(c => Expression.ElementInit(miAdd, Expression.Constant(c),
+                Expression.Invoke(TypeConditionLogic.GetCondition(typeof(T), c, null), entity))));
+
+        return Expression.Lambda<Func<T, PrimaryKey?, IDictionary?>>(newDic, [entity, rowId]);
+    }
+
+    static List<TypeConditionSymbol>? TypeConditionsForBinding(Type type)
+    {
+        if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+            return null;
+
+        var tac = GetAllowed(type);
+
+        var role = RoleEntity.Current;
+
+        if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(role, type) && !HasTypeConditionInOperations(role, type))
+            return null;
+
+        return tac.ConditionRules.SelectMany(a => a.TypeConditions).Distinct()
+            .Where(cond => !TypeConditionLogic.HasInMemoryCondition(type, cond))
+            .ToList();
+    }
+
+
+    public static TypeAllowedBasic? TrivialTypeGetUI(WithConditions<TypeAllowed> tac)
+    {
+        var conditions = tac.ConditionRules.Where(a => a.Allowed != TypeAllowed.None).Select(a => a.Allowed.GetUI()).ToHashSet();
+
+        if (tac.Fallback != TypeAllowed.None)
+            conditions.Add(tac.Fallback.GetUI());
+
+        if (conditions.Count > 1)
+            return null;
+
+        if (conditions.Count == 0)
+            return TypeAllowedBasic.None;
+        else if (conditions.Count == 1)
+            return conditions.SingleEx();
+        else
+            return null;
+    }
+
+    public static Func<Lite<RoleEntity>, Type, bool> HasTypeConditionInProperties = (role, t) => false;
+
+    public static Func<Lite<RoleEntity>, Type, bool> HasTypeConditionInOperations = (role, t) => false;
+
 
     public static void AssertStarted(SchemaBuilder sb)
     {
@@ -76,17 +192,22 @@ public static partial class TypeAuthLogic
     {
         if (ident.IsGraphModified && !inSave.Value)
         {
-            TypeAllowedAndConditions access = GetAllowed(ident.GetType());
+            WithConditions<TypeAllowed> access = GetAllowed(ident.GetType());
 
             var requested = TypeAllowedBasic.Write;
 
             var min = access.MinDB();
             var max = access.MaxDB();
-            if (requested <= min)
+            if (requested <= min && TypeConditionsForBinding(ident.GetType()).IsNullOrEmpty())
                 return;
 
             if (max < requested)
-                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
+            {
+                if (ident.IsNew)
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo01.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName()));
+                else
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
+            }
 
             Schema_Saving_Instance(ident);
         }
@@ -101,45 +222,45 @@ public static partial class TypeAuthLogic
             throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedToRetrieve0.NiceToString().FormatWith(type.NicePluralName()));
     }
 
-    public static TypeRulePack GetTypeRules(Lite<RoleEntity> roleLite)
+    public static TypeRulePack GetTypeRules(Lite<RoleEntity> role)
     {
-        var result = new TypeRulePack { Role = roleLite };
-        Schema s = Schema.Current;
-        cache.GetRules(result, TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null).Select(a => a.Value));
-
-        foreach (TypeAllowedRule r in result.Rules)
+        using (HeavyProfiler.LogNoStackTrace("GetTypeRules"))
         {
-            Type type = TypeLogic.EntityToType[r.Resource];
+            var result = new TypeRulePack { Role = role };
+            Schema s = Schema.Current;
+            var types = TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null).Select(a => a.Value);
+            cache.GetRules(result, types);
 
-            if (OperationAuthLogic.IsStarted)
-                r.Operations = OperationAuthLogic.GetAllowedThumbnail(roleLite, type);
-
-            if (PropertyAuthLogic.IsStarted)
-                r.Properties = PropertyAuthLogic.GetAllowedThumbnail(roleLite, type);
-
-            if (QueryAuthLogic.IsStarted)
-                r.Queries = QueryAuthLogic.GetAllowedThumbnail(roleLite, type);
+            return result;
         }
+    }
 
-        return result;
-
+    public static Dictionary<Type, WithConditions<TypeAllowed>> GetTypeRulesSimple(Lite<RoleEntity> role)
+    {
+        using (HeavyProfiler.LogNoStackTrace("GetTypeRulesSimple"))
+        {
+            Schema s = Schema.Current;
+            return TypeLogic.TypeToEntity
+                .Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null)
+                .ToDictionary(kvp => kvp.Key, kvp => GetAllowed(role, kvp.Key));
+        }
     }
 
     public static void SetTypeRules(TypeRulePack rules)
     {
-        cache.SetRules(rules);
+        cache.SetRules(rules, t => true);
     }
 
-    public static TypeAllowedAndConditions GetAllowed(Type type)
+    public static WithConditions<TypeAllowed> GetAllowed(Type type)
     {
         if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-            return new TypeAllowedAndConditions(TypeAllowed.Write);
+            return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
 
         if (!TypeLogic.TypeToEntity.ContainsKey(type))
-            return new TypeAllowedAndConditions(TypeAllowed.Write);
+            return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
 
-        if (EnumEntity.Extract(type) != null)
-            return new TypeAllowedAndConditions(TypeAllowed.Read);
+        if (type.IsEnumEntity())
+            return WithConditions<TypeAllowed>.Simple(TypeAllowed.Read);
 
         var allowed = cache.GetAllowed(RoleEntity.Current, type);
 
@@ -150,35 +271,35 @@ public static partial class TypeAuthLogic
         return allowed;
     }
 
-    public static TypeAllowedAndConditions GetAllowed(Lite<RoleEntity> role, Type type)
+    public static WithConditions<TypeAllowed> GetAllowed(Lite<RoleEntity> role, Type type)
     {
         return cache.GetAllowed(role, type);
     }
 
-    public static TypeAllowedAndConditions GetAllowedBase(Lite<RoleEntity> role, Type type)
+    public static WithConditions<TypeAllowed> GetAllowedBase(Lite<RoleEntity> role, Type type)
     {
         return cache.GetAllowedBase(role, type);
     }
 
-    public static DefaultDictionary<Type, TypeAllowedAndConditions> AuthorizedTypes()
+    public static DefaultDictionary<Type, WithConditions<TypeAllowed>> AuthorizedTypes()
     {
         return cache.GetDefaultDictionary();
     }
 
-    static readonly Variable<ImmutableStack<(Type type, Func<TypeAllowedAndConditions, TypeAllowedAndConditions> typeAllowedOverride)>> tempAllowed =
-        Statics.ThreadVariable<ImmutableStack<(Type type, Func<TypeAllowedAndConditions, TypeAllowedAndConditions> typeAllowedOverride)>>("temporallyAllowed");
+    static readonly Variable<ImmutableStack<(Type type, Func<WithConditions<TypeAllowed>, WithConditions<TypeAllowed>> typeAllowedOverride)>> tempAllowed =
+        Statics.ThreadVariable<ImmutableStack<(Type type, Func<WithConditions<TypeAllowed>, WithConditions<TypeAllowed>> typeAllowedOverride)>>("temporallyAllowed");
 
-    public static IDisposable OverrideTypeAllowed<T>(Func<TypeAllowedAndConditions, TypeAllowedAndConditions> typeAllowedOverride)
+    public static IDisposable OverrideTypeAllowed<T>(Func<WithConditions<TypeAllowed>, WithConditions<TypeAllowed>> typeAllowedOverride)
         where T : Entity
     {
         var old = tempAllowed.Value;
 
-        tempAllowed.Value = (old ?? ImmutableStack<(Type type, Func<TypeAllowedAndConditions, TypeAllowedAndConditions> typeAllowedOverride)>.Empty).Push((typeof(T), typeAllowedOverride));
+        tempAllowed.Value = (old ?? ImmutableStack<(Type type, Func<WithConditions<TypeAllowed>, WithConditions<TypeAllowed>> typeAllowedOverride)>.Empty).Push((typeof(T), typeAllowedOverride));
 
         return new Disposable(() => tempAllowed.Value = tempAllowed.Value.Pop());
     }
 
-    internal static Func<TypeAllowedAndConditions, TypeAllowedAndConditions>? GetOverrideTypeAllowed(Type type)
+    internal static Func<WithConditions<TypeAllowed>, WithConditions<TypeAllowed>>? GetOverrideTypeAllowed(Type type)
     {
         var ta = tempAllowed.Value;
         if (ta == null || ta.IsEmpty)
@@ -193,245 +314,6 @@ public static partial class TypeAuthLogic
     }
 }
 
-class TypeAllowedMerger : IMerger<Type, TypeAllowedAndConditions>
-{
-    public static readonly TypeAllowedMerger Instance = new TypeAllowedMerger();
-
-    TypeAllowedMerger() { }
-
-    public TypeAllowedAndConditions Merge(Type key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, TypeAllowedAndConditions>> baseValues)
-    {
-        if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
-            return MergeBase(baseValues.Select(a => a.Value), MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
-        else
-            return MergeBase(baseValues.Select(a => a.Value), MinTypeAllowed, TypeAllowed.None, TypeAllowed.Write);
-    }
-
-    static TypeAllowed MinTypeAllowed(IEnumerable<TypeAllowed> collection)
-    {
-        TypeAllowed result = TypeAllowed.Write;
-
-        foreach (var item in collection)
-        {
-            if (item < result)
-                result = item;
-
-            if (result == TypeAllowed.None)
-                return result;
-
-        }
-        return result;
-    }
-
-    static TypeAllowed MaxTypeAllowed(IEnumerable<TypeAllowed> collection)
-    {
-        TypeAllowed result = TypeAllowed.None;
-
-        foreach (var item in collection)
-        {
-            if (item > result)
-                result = item;
-
-            if (result == TypeAllowed.Write)
-                return result;
-
-        }
-        return result;
-    }
-
-    public Func<Type, TypeAllowedAndConditions> MergeDefault(Lite<RoleEntity> role)
-    {
-        var taac = new TypeAllowedAndConditions(AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Write : TypeAllowed.None);
-        return new ConstantFunctionButEnums(taac).GetValue;
-    }
-
-    public static TypeAllowedAndConditions MergeBase(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)
-    {
-        TypeAllowedAndConditions? only = baseRules.Only();
-        if (only != null)
-            return only;
-
-        if (baseRules.Any(a => a.Exactly(max)))
-            return new TypeAllowedAndConditions(max);
-
-        TypeAllowedAndConditions? onlyNotOposite = baseRules.Where(a => !a.Exactly(min)).Only();
-        if (onlyNotOposite != null)
-            return onlyNotOposite;
-
-        if (baseRules.All(a => a.ConditionRules.Count == 0))
-            return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)));
-
-        var conditions = baseRules.SelectMany(a => a.ConditionRules).SelectMany(a => a.TypeConditions).Distinct().OrderBy(a => a.ToString()).ToList();
-
-        if (conditions.Count > 31)
-            throw new InvalidOperationException("You can not merge more than 31 type conditions");
-
-        var conditionDictionary = conditions.Select((tc, i) => KeyValuePair.Create(tc, 1 << i)).ToDictionaryEx();
-
-        int numCells = 1 << conditionDictionary.Count;
-
-        var matrixes = baseRules.Select(tac => GetMatrix(tac, numCells, conditionDictionary)).ToList();
-
-        var maxMatrix = 0.To(numCells).Select(i => maxMerge(matrixes.Select(m => m[i]))).ToArray();
-
-        return GetRules(maxMatrix, numCells, conditionDictionary);
-    }
-
-    static string Debug(int cell, Dictionary<TypeConditionSymbol, int> conditionDictionary)
-    {
-        return conditionDictionary.ToString(kvp => ((kvp.Value & cell) == kvp.Value ? " " : "!") + kvp.Key.ToString().After("."), " & ");
-    }
-
-    static string Debug(TypeAllowed[] matrix, Dictionary<TypeConditionSymbol, int> conditionDictionary)
-    {
-        return matrix.Select((ta, i) => Debug(i, conditionDictionary) + " => " + ta).ToString("\n");
-    }
-
-    static string Debug(TypeAllowed?[] matrix, Dictionary<TypeConditionSymbol, int> conditionDictionary)
-    {
-        return matrix.Select((ta, i) => Debug(i, conditionDictionary) + " => " + ta).ToString("\n");
-    }
-
-    static TypeAllowed[] GetMatrix(TypeAllowedAndConditions tac, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
-    {
-        var matrix = 0.To(numCells).Select(a => tac.Fallback).ToArray();
-
-        foreach (var rule in tac.ConditionRules)
-        {
-            var mask = rule.TypeConditions.Select(tc => conditionDictionary.GetOrThrow(tc)).Aggregate((a, b) => a | b);
-
-            for (int i = 0; i < numCells; i++)
-            {
-                if ((i & mask) == mask)
-                {
-                    matrix[i] = rule.Allowed;
-                }
-            }
-        }
-
-        return matrix;
-    }
-
-    static TypeAllowedAndConditions GetRules(TypeAllowed[] matrix, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
-    {
-        var array = matrix.Select(ta => (TypeAllowed?)ta).ToArray();
-
-        var conditionRules = new List<TypeConditionRuleModel>();
-
-        var availableTypeConditions = conditionDictionary.Keys.ToList();
-
-        while (true)
-        {
-            { //0 Conditions
-                var ta = OnlyOneValue(0);
-
-                if (ta != null)
-                    return new TypeAllowedAndConditions(ta.Value, conditionRules.AsEnumerable().Reverse().ToArray());
-            }
-
-            { //1 Condition
-                foreach (var tc in availableTypeConditions)
-                {
-                    var mask = conditionDictionary[tc];
-
-                    var ta = OnlyOneValue(mask);
-
-                    if (ta.HasValue)
-                    {
-                        conditionRules.Add(new TypeConditionRuleModel(new[] { tc }, ta.Value));
-                        availableTypeConditions.Remove(tc);
-
-                        ClearArray(mask);
-
-                        goto next;
-                    }
-                }
-
-            }
-
-            //>= 2 Conditions
-            for (int numConditions = 2; numConditions <= availableTypeConditions.Count; numConditions++)
-            {
-                foreach (var mask in GetMasksOf(numConditions, availableTypeConditions))
-                {
-                    var ta = OnlyOneValue(mask);
-
-                    if (ta.HasValue)
-                    {
-                        conditionRules.Add(new TypeConditionRuleModel(availableTypeConditions.Where(tc => (conditionDictionary[tc] & mask) == conditionDictionary[tc]).ToArray(), ta.Value));
-
-                        ClearArray(mask);
-
-                        goto next;
-                    }
-                }
-            }
-
-        next: continue;
-        }
-
-
-        TypeAllowed? OnlyOneValue(int mask)
-        {
-            TypeAllowed? currentValue = null;
-
-            for (int i = 0; i < numCells; i++)
-            {
-                if ((i & mask) == mask)
-                {
-                    var v = array![i];
-                    if (v != null)
-                    {
-                        if (currentValue == null)
-                            currentValue = v;
-                        else if (currentValue != v)
-                            return null;
-                    }
-                }
-            }
-
-            if (currentValue == null)
-                throw new InvalidOperationException("Array is empty!");
-
-            return currentValue;
-        }
-
-        void ClearArray(int mask)
-        {
-            for (int i = 0; i < numCells; i++)
-            {
-                if ((i & mask) == mask)
-                {
-                    array![i] = null;
-                }
-            }
-        }
-
-
-        IEnumerable<int> GetMasksOf(int numConditions, List<TypeConditionSymbol> availableTypeConditions, int skip = 0)
-        {
-            if (numConditions == 1)
-            {
-                for (int i = skip; i < availableTypeConditions.Count; i++)
-                {
-                    yield return conditionDictionary[availableTypeConditions[i]];
-                }
-            }
-            else
-            {
-                for (int i = skip; i < availableTypeConditions.Count; i++)
-                {
-                    var val = conditionDictionary[availableTypeConditions[i]];
-
-                    foreach (var item in GetMasksOf(numConditions -1, availableTypeConditions, skip + 1))
-                    {
-                        yield return item | val;
-                    }
-                }
-            }
-        }
-    }
-}
 
 public static class AuthThumbnailExtensions
 {

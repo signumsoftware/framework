@@ -1,4 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Xml.Linq;
 
 namespace Signum.Files;
 
@@ -35,8 +37,12 @@ public class FileEntity : ImmutableEntity, IFile
         return "{0} - {1}".FormatWith(FileName, BinaryFile?.Let(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
     }
 
-    public string? FullWebPath()
+    public XElement ToXML(string elementName)
     {
-        return null;
+        return new XElement(elementName,
+               new XAttribute("FileName", FileName),
+               new XCData(Convert.ToBase64String(BinaryFile))
+        );
     }
 }
+

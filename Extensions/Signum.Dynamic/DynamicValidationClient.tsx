@@ -11,7 +11,7 @@ import { DynamicValidationEntity, DynamicValidationEval } from './Signum.Dynamic
 
 export namespace DynamicValidationClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(DynamicValidationEntity, w => import('./Validation/DynamicValidation')));
     Constructor.registerConstructor(DynamicValidationEntity, () => DynamicValidationEntity.New({ eval: DynamicValidationEval.New() }));
   

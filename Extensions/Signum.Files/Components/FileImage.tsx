@@ -12,7 +12,7 @@ interface FileImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   ajaxOptions?: Omit<Services.AjaxOptions, "url">;
 }
 
-export function FileImage(p: FileImageProps) {
+export function FileImage(p: FileImageProps): React.JSX.Element {
 
   var [objectUrl, setObjectUrl] = React.useState<string | undefined>(undefined);
   var { file, ajaxOptions, placeholderSrc, ...rest } = p;
@@ -20,7 +20,7 @@ export function FileImage(p: FileImageProps) {
   React.useEffect(() => {
     if (file) {
 
-      if (isModifiableEntity(file) && (file.fullWebPath || file.binaryFile))
+      if (isModifiableEntity(file) && ((file as ModifiableEntity & IFilePath).fullWebPath || file.binaryFile))
         return;
 
       var url =
@@ -37,11 +37,11 @@ export function FileImage(p: FileImageProps) {
   }, [p.file]);
 
   var src = !file ? placeholderSrc :
-    isModifiableEntity(file) && file.fullWebPath ? file.fullWebPath :
+    isModifiableEntity(file) && (file as ModifiableEntity & IFilePath).fullWebPath ? (file as ModifiableEntity & IFilePath).fullWebPath :
       isModifiableEntity(file) && file.binaryFile ? "data:image/jpeg;base64," + file.binaryFile :
         objectUrl;
 
   return (
-    <img {...rest} src={src} alt={p.alt ?? FileMessage.FileImage.niceToString()} />
+    <img {...rest} src={src!} alt={p.alt ?? FileMessage.FileImage.niceToString()} />
   );
 }

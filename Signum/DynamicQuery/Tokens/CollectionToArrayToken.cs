@@ -38,6 +38,9 @@ public class CollectionToArrayToken : QueryToken
         get { return ToArrayType.ToString(); }
     }
 
+
+    public override CollectionToArrayToken? HasCollectionToArray() => this;
+
     protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
     {
         var st = SubTokensBase(Type, options, GetImplementations());
@@ -151,7 +154,10 @@ public class CollectionToArrayToken : QueryToken
             subCtx = new BuildExpressionContext(mleType, param, new Dictionary<QueryToken, ExpressionBox>
             {
                 [cta] = new ExpressionBox(param, mlistElementRoute: cta.GetPropertyRoute())
-            }, context.Filters);
+            }, 
+             context.Filters,
+             context.Orders, 
+             context.Pagination);
         }
         else
         {
@@ -162,7 +168,10 @@ public class CollectionToArrayToken : QueryToken
             subCtx = new BuildExpressionContext(elemeType, param, new Dictionary<QueryToken, ExpressionBox>()
             {
                 [cta] = new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { cta.GetPropertyRoute()! }))
-            }, context.Filters);
+            },
+            context.Filters, 
+            context.Orders, 
+            context.Pagination);
         }
 
         var cets = token.Follow(a => a.Parent).TakeWhile(a => a != cta).OfType<CollectionElementToken>().Reverse().ToList();
@@ -178,7 +187,10 @@ public class CollectionToArrayToken : QueryToken
                 subCtx = new BuildExpressionContext(mleType, param, new Dictionary<QueryToken, ExpressionBox>()
                 {
                     [ce] = new ExpressionBox(param, mlistElementRoute: ce.GetPropertyRoute())
-                }, context.Filters);
+                }, 
+                context.Filters,
+                context.Orders,
+                context.Pagination);
             }
             else
             {
@@ -190,7 +202,10 @@ public class CollectionToArrayToken : QueryToken
                 subCtx = new BuildExpressionContext(elementType, param, new Dictionary<QueryToken, ExpressionBox>()
                 {
                     [ce] = new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { ce.GetPropertyRoute()! }))
-                }, context.Filters);
+                }, 
+                context.Filters, 
+                context.Orders,
+                context.Pagination);
             }
         }
 

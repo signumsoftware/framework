@@ -123,7 +123,7 @@ public class QueryFilterEmbedded : EmbeddedEntity
         }
     }
 
-    public void FromXml(XElement element, IFromXmlContext ctx)
+    public void FromXml(XElement element, IFromXmlContext ctx, IUserAssetEntity parentEntity, PropertyRoute valuePr)
     {
         IsGroup = element.Attribute("GroupOperation") != null;
         Indentation = element.Attribute("Indentation")?.Value.ToInt() ?? 0;
@@ -131,6 +131,14 @@ public class QueryFilterEmbedded : EmbeddedEntity
         Operation = element.Attribute("Operation")?.Value.ToEnum<FilterOperation>();
         Token = element.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
         ValueString = element.Attribute("Value")?.Value;
+        if(ValueString.HasText() && Lite.TryParseLite(ValueString, out var result) == null)
+        {
+            var lite = ctx.ParseLite(ValueString, parentEntity, valuePr);
+            if (lite != null && lite.KeyLong() != ValueString)
+                ValueString = lite.KeyLong();
+
+        }
+
         DashboardBehaviour = element.Attribute("DashboardBehaviour")?.Value.ToEnum<DashboardBehaviour>();
         Pinned = element.Element("Pinned")?.Let(p => (Pinned ?? new PinnedQueryFilterEmbedded()).FromXml(p, ctx));
     }

@@ -165,7 +165,7 @@ export function CalendarYear({ year, rules, rowByDate, width, height, onDrillDow
   color: (cr: ChartRow) => string;
   dashboardFilter?: DashboardFilter,
   chartRequest: ChartRequestModel
-}) {
+}): React.JSX.Element {
 
   var cellSize = rules.cellSize;
 

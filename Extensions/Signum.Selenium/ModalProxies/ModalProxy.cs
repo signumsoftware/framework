@@ -26,7 +26,7 @@ public class ModalProxy : IDisposable
 
     public virtual void Dispose()
     {
-        if (!MessageModalProxyExtensions.IsMessageModalPresent(this.Selenium))
+        if (this.Selenium.GetMessageModal() == null)
             if (!AvoidClose)
             {
                 try
@@ -38,9 +38,9 @@ public class ModalProxy : IDisposable
                     if (button != null && button.Displayed)
                         button.SafeClick();
                 }
-                catch (ElementNotVisibleException)
-                {
-                }
+                //catch (ElementNotVisibleException)
+                //{
+                //}
                 catch (StaleElementReferenceException)
                 {
                 }

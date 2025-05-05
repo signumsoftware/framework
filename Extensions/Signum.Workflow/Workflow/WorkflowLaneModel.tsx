@@ -9,7 +9,7 @@ interface WorkflowLaneModelComponentProps {
   ctx: TypeContext<WorkflowLaneModel>;
 }
 
-export default function WorkflowLaneModelComponent(p : WorkflowLaneModelComponentProps){
+export default function WorkflowLaneModelComponent(p : WorkflowLaneModelComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   function handleCodeChange(newScript: string) {

@@ -8,7 +8,7 @@ import { LoginAuthMessage } from '../Signum.Authorization'
 import { AuthClient } from '../AuthClient'
 import { useStateWithPromise } from '@framework/Hooks'
 
-export default function ChangePasswordPage() {
+export default function ChangePasswordPage(): React.JSX.Element {
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
 
 

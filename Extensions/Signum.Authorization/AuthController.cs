@@ -53,6 +53,8 @@ public class AuthController : ControllerBase
 
         AuthServer.AddUserSession(ControllerContext, user);
 
+        user.FillTypeConditions();
+
         if (data.rememberMe == true)
         {
             UserTicketServer.OnSaveCookie(ControllerContext);

@@ -4,7 +4,7 @@ import { SearchControl, SearchValueLine } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { PackageLineEntity, ProcessExceptionLineEntity } from '../Signum.Processes'
 
-export default function Package(p : { ctx: TypeContext<PackageLineEntity> }){
+export default function Package(p : { ctx: TypeContext<PackageLineEntity> }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ readOnly: true });
 
   return (

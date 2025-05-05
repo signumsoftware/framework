@@ -7,20 +7,24 @@ public abstract class FilterProxy { }
 public class FilterGroupProxy : FilterProxy
 {
     public IWebElement Element;
+    readonly object queryName;
 
-    public FilterGroupProxy(IWebElement element)
+    public FilterGroupProxy(IWebElement element, object queryName)
     {
         this.Element = element;
+        this.queryName = queryName;
     }
 }
 
 public class FilterConditionProxy : FilterProxy
 {
     public IWebElement Element;
+    readonly object QueryName;
 
-    public FilterConditionProxy(IWebElement element)
+    public FilterConditionProxy(IWebElement element, object queryName)
     {
         this.Element = element;
+        this.QueryName = queryName;
     }
 
     public WebElementLocator DeleteButton
@@ -45,18 +49,13 @@ public class FilterConditionProxy : FilterProxy
 
     public FilterOperation Operation
     {
-        get { return OperationElement.Find().SelectElement().SelectedOption.GetAttribute("value").ToEnum<FilterOperation>(); }
+        get { return OperationElement.Find().SelectElement().SelectedOption.GetDomProperty("value")!.ToEnum<FilterOperation>(); }
         set { OperationElement.Find().SelectElement().SelectByValue(value.ToString()); }
     }
 
     public void Delete()
     {
         DeleteButton.Find().Click();
-    }
-
-    public ValueLineProxy ValueLine()
-    {
-        return new ValueLineProxy(this.ValueElement.Find(), null!);
     }
 
     public EntityLineProxy EntityLine()
@@ -66,14 +65,13 @@ public class FilterConditionProxy : FilterProxy
 
     internal void SetValue(object? value)
     {
-        if (value == null)
-            return; //Hack
+        var qt = QueryUtils.Parse(this.QueryToken.FullKey!, QueryLogic.Queries.QueryDescription(this.QueryName), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll);
 
-        if (value is Lite<Entity>)
-            EntityLine().SetLite((Lite<Entity>)value);
-        else if (value is Entity)
-            EntityLine().SetLite(((Entity)value).ToLite());
+        var al = BaseLineProxy.AutoLine(this.ValueElement.Find(), qt.GetPropertyRoute()!);
+
+        if (value is PrimaryKey pk)
+            al.SetValueUntyped(pk.Object);
         else
-            ValueLine().SetStringValue(value.ToString());
+            al.SetValueUntyped(value);
     }
 }

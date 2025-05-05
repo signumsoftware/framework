@@ -6,7 +6,7 @@ import TextArea from '@framework/Components/TextArea';
 import { useForceUpdate } from '@framework/Hooks';
 import { KeyNames } from '@framework/Components';
 
-export function TranslationTypeTable(p: { type: TranslationClient.LocalizableType, result: TranslationClient.AssemblyResult, currentCulture: string }){
+export function TranslationTypeTable(p: { type: TranslationClient.LocalizableType, result: TranslationClient.AssemblyResult, currentCulture: string }): React.JSX.Element{
 
   function renderMembers(type: TranslationClient.LocalizableType): React.ReactElement<any>[] {
 
@@ -59,7 +59,7 @@ export function TranslationTypeTable(p: { type: TranslationClient.LocalizableTyp
   );
 }
 
-export function TranslationMember({ type, member, loc, edit }: { type: TranslationClient.LocalizableType, loc: TranslationClient.LocalizedType; member: TranslationClient.LocalizedMember; edit: boolean }) {
+export function TranslationMember({ type, member, loc, edit }: { type: TranslationClient.LocalizableType, loc: TranslationClient.LocalizedType; member: TranslationClient.LocalizedMember; edit: boolean }): React.JSX.Element {
 
   const [avoidCombo, setAvoidCombo] = React.useState(false);
   const forceUpdate = useForceUpdate();
@@ -120,11 +120,13 @@ export function TranslationMember({ type, member, loc, edit }: { type: Translati
   }
 }
 
-TranslationMember.normalizeString = (str: string | undefined): string | undefined => {
-  return str;
-};
+export namespace TranslationMember {
+  export function normalizeString(str: string | undefined): string | undefined {
+    return str;
+  };
+}
 
-export function initialElementIf(condition: boolean) {
+export function initialElementIf(condition: boolean): React.JSX.Element[] {
   return condition ? [<option key={""} value={""}>{" - "}</option>] : []
 }
 
@@ -135,7 +137,7 @@ export interface TranslationTypeDescriptionProps {
   result: TranslationClient.AssemblyResult
 };
 
-export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
+export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): React.JSX.Element {
 
   const [avoidCombo, setAvoidCombo] = React.useState(false);
 
@@ -231,8 +233,8 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
     <tr>
       <th className="leftCell">{loc.culture}</th>
       <th className="smallCell monospaceCell">
-        {type.hasGender && (edit ?
-          <select value={td.gender ?? ""} onChange={(e) => { td.gender = e.currentTarget.value; forceUpdate(); }}>
+        {type.hasGender && pronoms.length > 0 && (edit ?
+          <select value={td.gender ?? ""} onChange={(e) => { td.gender = e.currentTarget.value; forceUpdate(); }} className={!td.gender && Boolean(td.description) ? "sf-mandatory" : undefined}>
             {initialElementIf(!td.gender).concat(
               pronoms.map(a => <option key={a.gender} value={a.gender}>{a.singular}</option>))}
           </select> :
@@ -252,6 +254,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
         {
           type.hasPluralDescription && (edit ?
             <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.pluralDescription ?? ""}
+              className={!td.pluralDescription && Boolean(td.description) ? "sf-mandatory" : undefined}
               onChange={e => { td.pluralDescription = e.currentTarget.value; forceUpdate(); }}
               onBlur={e => { td.pluralDescription = TranslationMember.normalizeString(e.currentTarget.value); forceUpdate(); }} /> :
             td.pluralDescription)

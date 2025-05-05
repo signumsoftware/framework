@@ -12,7 +12,7 @@ export interface MailingMenuProps {
   searchControl: SearchControlLoaded;
 }
 
-export default function MailingMenu(p : MailingMenuProps){
+export default function MailingMenu(p : MailingMenuProps): React.JSX.Element | null {
   function handleClick(et: Lite<EmailTemplateEntity>) {
     Navigator.API.fetch(et)
       .then(emailTemplate => MailingClient.API.getConstructorType(emailTemplate.model!))
@@ -40,6 +40,7 @@ export default function MailingMenu(p : MailingMenuProps){
   return (
     <DropdownButton id="mailingDropDown" variant="light" className="sf-mailing-dropdown" title={label}>
       {
+        emailTemplates == "error" ? <Dropdown.Item className="text-danger">Error</Dropdown.Item> : 
         emailTemplates.map((wt, i) =>
           <Dropdown.Item key={i}
             onClick={() => handleClick(wt)}>

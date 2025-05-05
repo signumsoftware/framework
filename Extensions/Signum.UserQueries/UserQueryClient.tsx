@@ -8,7 +8,7 @@ import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, toMList, translated } from '@framework/Signum.Entities'
 import { Constructor } from '@framework/Constructor'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption, withoutPinned, withoutAggregate, hasAggregate, FilterOptionParsed } from '@framework/FindOptions'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { UserQueryEntity, UserQueryPermission, UserQueryMessage, ValueUserQueryListPartEntity, UserQueryPartEntity, UserQueryLiteModel } from './Signum.UserQueries'
@@ -31,7 +31,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace UserQueryClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.UserQueries", () => import("./Changelog"));
   
@@ -53,15 +53,15 @@ export namespace UserQueryClient {
     });
   
     if (AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
-      QuickLinks.registerGlobalQuickLink(entityType =>
+      QuickLinkClient.registerGlobalQuickLink(entityType =>
         API.forEntityType(entityType)
-          .then(uqs => uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq), ctx => window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`)), {
+          .then(uqs => uqs.map(uq => new QuickLinkAction(liteKey(uq), () => getToString(uq), ctx => window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`)), {
             icon: "rectangle-list", iconColor: "dodgerblue", color: "info",
             onlyForToken: (uq.model as UserQueryLiteModel).hideQuickLink
           })))
       );
   
-    QuickLinks.registerQuickLink(UserQueryEntity, new QuickLinks.QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(), ctx => {
+    QuickLinkClient.registerQuickLink(UserQueryEntity, new QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(), ctx => {
       Navigator.API.fetchAndRemember(ctx.lite!)
         .then(uq => {
           if (uq.entityType == undefined)
@@ -222,7 +222,7 @@ export namespace UserQueryClient {
     return drilldownToUserQuery(val.fo, val.uq, options);
   }
   
-  export function onDrilldownEntity(items: MList<Lite<Entity>>, entity: Lite<Entity>) {
+  export function onDrilldownEntity(items: MList<Lite<Entity>>, entity: Lite<Entity>): Promise<{ fo: FindOptions; uq: UserQueryEntity & Entity; } | undefined> {
     const elements = items.map(a => a.element);
     return SelectorModal.chooseElement(elements, { buttonDisplay: i => getToString(i), buttonName: i => liteKey(i) })
       .then(lite => {
@@ -235,7 +235,7 @@ export namespace UserQueryClient {
       });
   }
   
-  export function onDrilldownGroup(items: MList<Lite<Entity>>, filters?: FilterOption[]) {
+  export function onDrilldownGroup(items: MList<Lite<Entity>>, filters?: FilterOption[]): Promise<{ fo: FindOptions; uq: UserQueryEntity & Entity; } | undefined> {
     const elements = items.map(a => a.element);
     return SelectorModal.chooseElement(elements, { buttonDisplay: i => getToString(i), buttonName: i => liteKey(i) })
       .then(lite => {
@@ -253,7 +253,7 @@ export namespace UserQueryClient {
       });
   }
   
-  export async function drilldownToUserQuery(fo: FindOptions, uq: UserQueryEntity, options?: OnDrilldownOptions) {
+  export async function drilldownToUserQuery(fo: FindOptions, uq: UserQueryEntity, options?: OnDrilldownOptions): Promise<boolean> {
     const openInNewTab = options?.openInNewTab;
     const showInPlace = options?.showInPlace;
     const onReload = options?.onReload;
@@ -261,15 +261,7 @@ export namespace UserQueryClient {
     const qd = await Finder.getQueryDescription(fo.queryName);
     const fop = await Finder.parseFilterOptions(fo.filterOptions ?? [], fo.groupResults ?? false, qd);
   
-    const filters = fop.map(f => {
-      let f2 = withoutPinned(f);
-      if (f2 == null)
-        return null;
-  
-      return f2;
-    }).notNull();
-  
-    fo.filterOptions = Finder.toFilterOptions(filters);
+    fo.filterOptions = Finder.toFilterOptions(fop);
   
     if (openInNewTab || showInPlace) {
       const url = Finder.findOptionsPath(fo, { userQuery: liteKey(toLite(uq)) });
@@ -289,7 +281,7 @@ export namespace UserQueryClient {
       });
   }
   
-  export module Converter {
+  export namespace Converter {
   
     export async function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
   
@@ -300,6 +292,7 @@ export namespace UserQueryClient {
       const filters = await UserAssetClient.API.parseFilters({
         queryKey: query.key,
         canAggregate: uq.groupResults || false,
+        canTimeSeries: fo.systemTime?.mode == 'TimeSeries',
         entity: entity,
         filters: uq.filters!.map(mle => UserAssetClient.Converter.toQueryFilterItem(mle.element))
       });
@@ -343,6 +336,10 @@ export namespace UserQueryClient {
         startDate: await parseDate(uq.systemTime.startDate),
         endDate: await parseDate(uq.systemTime.endDate),
         joinMode: uq.systemTime.joinMode ?? undefined,
+        timeSeriesStep: uq.systemTime.timeSeriesStep ?? undefined,
+        timeSeriesUnit: uq.systemTime.timeSeriesUnit ?? undefined,
+        timeSeriesMaxRowsPerStep: uq.systemTime.timeSeriesMaxRowsPerStep ?? undefined,
+        splitQueries: uq.systemTime.splitQueries ?? undefined,
       };
   
       return fo;
@@ -366,7 +363,7 @@ export namespace UserQueryClient {
     }
   }
   
-  export module API {
+  export namespace API {
     export function forEntityType(type: string): Promise<Lite<UserQueryEntity>[]> {
       return ajaxGet({ url: "/api/userQueries/forEntityType/" + type });
     }

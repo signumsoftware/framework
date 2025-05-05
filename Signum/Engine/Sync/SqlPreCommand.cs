@@ -6,6 +6,8 @@ using System.Globalization;
 using Signum.Engine.Maps;
 using Npgsql;
 using Microsoft.Data.SqlClient;
+using Signum.Utilities.ExpressionTrees;
+using System.Diagnostics.Metrics;
 
 namespace Signum.Engine.Sync;
 
@@ -153,7 +155,7 @@ public static class SqlPreCommandExtensions
         }
     }
 
-    public static int Timeout = 20 * 60;
+    public static int DefaultScriptTimeout = 20 * 60;
 
     public static Regex regexBeginEnd = new Regex(@"^ *(GO--(?<type>BEGIN|END)) *(?<key>.*)$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
@@ -209,7 +211,7 @@ public static class SqlPreCommandExtensions
 
     public static void ExecuteScript(string title, string script)
     {
-        using (Connector.CommandTimeoutScope(Timeout))
+        using (Connector.CommandTimeoutScope(Connector.ScopeTimeout ?? DefaultScriptTimeout))
         {
             List<KeyValuePair<string, string>> beginEndParts = ExtractBeginEndParts(ref script).ToList();
 
@@ -294,7 +296,7 @@ public static class SqlPreCommandExtensions
 
         var list = currentPart.Lines();
 
-        var lineNumer = (pgE?.Line?.ToInt() ?? sqlE!.LineNumber);
+        var lineNumer = (sqlE?.LineNumber ?? currentPart.Substring(0, pgE!.Position).Lines().Count());
 
         SafeConsole.WriteLineColor(ConsoleColor.Red, "ERROR:");
 
@@ -458,15 +460,52 @@ public class SqlPreCommandSimple : SqlPreCommand
         }
     }
 
+
+    public string PreparedQuery()
+    {
+        var sqlBuilder = Connector.Current.SqlBuilder;
+        if (!sqlBuilder.IsPostgres)
+            return sp_executesql();
+
+        var ticks = DateTime.UtcNow.Ticks;
+
+        var pars = this.Parameters.EmptyIfNull();
+
+        var parameter = pars.Select(p => new
+        {
+            Name = p.ParameterName,
+            Value = LiteralValue(p.Value, simple: true),
+            ParameterType = "{0}{1}".FormatWith(
+                   p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString(),
+                   sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull(), p.DbType == System.Data.DbType.Decimal)),
+        }).ToList();
+
+        var index = 1;
+        var paramToIndex = parameter.ToDictionary(a => a.Name.StartsWith("@") ? a.Name : "@" + a.Name, a => index++);
+
+        var pgsql = Regex.Replace(this.Sql, @"@(\w+)", m => $"${paramToIndex.GetOrThrow(m.Value)}");
+
+        return $"""
+            DEALLOCATE ALL;
+            PREPARE my_query ({parameter.ToString(a => a.ParameterType, ", ")}) AS
+            {pgsql};
+            EXECUTE my_query ({parameter.ToString(a => a.Value + "::" + a.ParameterType, ", ")});
+            """;
+    }
+
     public string sp_executesql()
     {
-        var pars = this.Parameters.EmptyIfNull();
         var sqlBuilder = Connector.Current.SqlBuilder;
+        if (sqlBuilder.IsPostgres)
+            return PreparedQuery();
+
+        var pars = this.Parameters.EmptyIfNull();
 
         var parameterVars = pars.ToString(p => "{0} {1}{2}".FormatWith(
             p.ParameterName,
             p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString(),
             sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull(), p.DbType == System.Data.DbType.Decimal)), ", ");
+       
         var parameterValues = pars.ToString(p => p.ParameterName + " = " + LiteralValue(p.Value, simple: true), ",\r\n");
 
         return @$"EXEC sp_executesql N'{this.Sql.Replace("'", "''")}', 

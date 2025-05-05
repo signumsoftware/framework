@@ -13,10 +13,11 @@ export interface ContextMenuPosition {
 interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement> {
   position: ContextMenuPosition;
   onHide: () => void;
+  alignRight?: boolean;
   children: React.ReactNode;
 }
 
-export default function ContextMenu({ position, onHide, children, ...rest }: ContextMenuProps) {
+export default function ContextMenu({ position, onHide, children, alignRight, ...rest }: ContextMenuProps): React.ReactElement {
 
   const { top, left } = position;
 
@@ -33,8 +34,8 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
-      let adjustedTop = Math.min(top, adjustedPosition.top);
-      let adjustedLeft = Math.min(left, adjustedPosition.left);
+      let adjustedTop = top;
+      let adjustedLeft = left;
 
       if (adjustedTop + menuHeight > viewportHeight) {
         adjustedTop = Math.max(position.maxTop ?? 14, viewportHeight - menuHeight);
@@ -42,7 +43,7 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
 
       if (adjustedLeft + menuWidth > viewportWidth) {
         adjustedLeft = Math.max(14, viewportWidth - menuWidth - 14);
-      }
+  }
 
       setAdjustedPosition({ top: adjustedTop, left: adjustedLeft });
     }
@@ -52,7 +53,7 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         onHide();
-      }
+  }
     };
 
     const oldResize = window.onresize;
@@ -83,18 +84,18 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
       style={{
         position: 'absolute',
         top: `${adjustedPosition.top}px`,
-        left: `${adjustedPosition.left}px`,
+        left: alignRight ? `${adjustedPosition.left - (menuRef.current?.scrollWidth ?? 100)}px` : `${adjustedPosition.left}px`,
       }}
       {...rest as any}
     >
-      <Dropdown.Menu onClick={handleMenuClick} onKeyDown={handleKeyDown}>
+      <Dropdown.Menu onClick={handleMenuClick} onKeyDown={handleKeyDown} className="sf-context-menu">
         {children}
       </Dropdown.Menu>
     </Dropdown>
   );
 };
 
-ContextMenu.getMouseEventPosition = (e: React.MouseEvent<HTMLTableElement>, container?: Element | null) => {
+export function getMouseEventPosition(e: React.MouseEvent<HTMLTableElement>, container?: Element | null): ContextMenuPosition {
 
   const op = DomUtils.offsetParent(e.currentTarget);
 
@@ -104,6 +105,20 @@ ContextMenu.getMouseEventPosition = (e: React.MouseEvent<HTMLTableElement>, cont
     left: rec == null ? e.pageX : e.clientX - rec.left,
     top: rec == null ? e.pageY : e.clientY - rec.top,
     maxTop: container?.getBoundingClientRect().top, //table's body top
+  }) as ContextMenuPosition;
+
+  return result;
+};
+
+export function getPositionElement(button: HTMLElement, alignRight?: boolean): ContextMenuPosition {
+  const op = DomUtils.offsetParent(button);
+
+  const recOp = op!.getBoundingClientRect();
+  const recButton = button.getBoundingClientRect();
+  var result = ({
+    left: recButton.left + (alignRight ? recButton.width : 0) - recOp.left,
+    top: recButton.top + recButton.height - recOp.top,
+    width: (op ? op.offsetWidth : window.outerWidth)
   }) as ContextMenuPosition;
 
   return result;

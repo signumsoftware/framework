@@ -24,7 +24,7 @@ interface PredictModalProps extends IModalProps<undefined> {
   entity?: Lite<Entity>;
 }
 
-export function PredictModal(p: PredictModalProps) {
+export function PredictModal(p: PredictModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState<boolean>(true);
   const [hasChanged, setHasChanged] = React.useState<boolean>(false);
@@ -75,12 +75,13 @@ export function PredictModal(p: PredictModalProps) {
   );
 }
 
-
-PredictModal.show = (predict: PredictorClient.PredictRequest, entity: Lite<Entity> | undefined, isClassification: boolean): Promise<void> => {
-  return openModal<undefined>(<PredictModal initialPredict={predict} entity={entity} isClassification={isClassification} />);
+export namespace PredictModal {
+  export function show(predict: PredictorClient.PredictRequest, entity: Lite<Entity> | undefined, isClassification: boolean): Promise<void> {
+    return openModal<undefined>(<PredictModal initialPredict={predict} entity={entity} isClassification={isClassification} />);
+  }
 }
 
-export function AlternativesCheckBox(p : { binding: Binding<number | null>, onChange: () => void }){
+export function AlternativesCheckBox(p: { binding: Binding<number | null>, onChange: () => void }): React.ReactElement {
 
   function setValue(val: number | null) {
     p.binding.setValue(val);
@@ -89,8 +90,8 @@ export function AlternativesCheckBox(p : { binding: Binding<number | null>, onCh
   var val = p.binding.getValue();
   return (
     <label>
-      <input type="checkbox" className="form-check-input" checked={val != null} onChange={() => setValue(val == null ? 5 : null)} /> Show <NumberBox value={val} onChange={n => setValue(n)} validateKey={isNumber} format={toNumberFormat("0")} /> alternative predictions 
-      </label>
+      <input type="checkbox" className="form-check-input" checked={val != null} onChange={() => setValue(val == null ? 5 : null)} /> Show <NumberBox value={val} onChange={n => setValue(n)} validateKey={isNumber} format={toNumberFormat("0")} /> alternative predictions
+    </label>
   );
 }
 
@@ -104,7 +105,7 @@ interface PredictLineProps {
   onChange: () => void;
 }
 
-export default function PredictLine(p : PredictLineProps){
+export default function PredictLine(p : PredictLineProps): React.JSX.Element {
 
   function renderValue() {
     if (p.usage == "Output") {
@@ -172,7 +173,7 @@ interface PredictTableProps {
   onChange: () => void;
 }
 
-export function PredictTable(p : PredictTableProps){
+export function PredictTable(p : PredictTableProps): React.JSX.Element {
   var p = p;
   var { subQuery, columnHeaders, rows } = p.table;
   var sctx = new StyleContext(p.sctx, { formGroupStyle: "SrOnly" });
@@ -230,7 +231,7 @@ interface PredictValueProps {
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
 }
 
-export function PredictValue(p : PredictValueProps){
+export function PredictValue(p : PredictValueProps): React.JSX.Element {
   function handleValueChange() {
     if (p.onChange)
       p.onChange();

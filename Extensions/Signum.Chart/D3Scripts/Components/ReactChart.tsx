@@ -10,6 +10,7 @@ export interface ReactChartProps {
   data?: ChartTable;
   parameters: { [parameter: string]: string }; 
   loading: boolean;
+  sizeDeps?: React.DependencyList;
   onReload: (() => void) | undefined;
   onDrillDown: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
   onBackgroundClick?: (e: React.MouseEvent) => void;
@@ -19,7 +20,7 @@ export interface ReactChartProps {
 }
 
 
-export default function ReactChart(p: ReactChartProps) {
+function ReactChart(p: ReactChartProps): React.JSX.Element {
 
   const isSimple = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
   const oldData = useThrottle(p.data, 200, { enabled: isSimple });
@@ -27,7 +28,7 @@ export default function ReactChart(p: ReactChartProps) {
 
   const memo = React.useMemo(() => new MemoRepository(), [p.chartRequest, p.chartRequest.chartScript]);
 
-  const { size, setContainer } = useSize();
+  const { size, setContainer } = useSize({deps: p.sizeDeps});
 
   return (
     <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} style={{ minHeight: (p.minHeight ?? 400) + "px" }} ref={setContainer} onClick={p.onBackgroundClick}>
@@ -50,8 +51,11 @@ export default function ReactChart(p: ReactChartProps) {
   );
 }
 
-ReactChart.maxRowsForAnimation = 500;
+namespace ReactChart {
+   export let maxRowsForAnimation = 500;
+}
 
+export default ReactChart;
 
 export class MemoRepository {
   cache: Map<string, { val: unknown, deps: unknown[] }> = new Map();

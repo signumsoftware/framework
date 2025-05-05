@@ -79,9 +79,36 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
   });
 }
 
+export function ajaxPostUpload<T>(options: AjaxOptions, blob: Blob): Promise<T> {
+
+  return wrapRequest(options, () => {
+
+    if (options.signal?.aborted)
+      throw new Error();
+
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': "application/octet-stream",
+      ...options.headers
+    } as any;
+
+    return fetch(toAbsoluteUrl(options.url), {
+      method: "POST",
+      credentials: options.credentials || "same-origin",
+      headers: headers,
+      mode: options.mode,
+      cache: options.cache || 'no-store',
+      body: blob,
+      signal: options.signal
+    } as RequestInit);
+  }).then(res => res.text())
+    .then(text => text.length ? JSON.parse(text) : null);
+}
+
+
 export const addContextHeaders: ((options: AjaxOptions) => void)[] = [];
 
-export function clearContextHeaders() {
+export function clearContextHeaders(): void {
   addContextHeaders.clear();
 }
 
@@ -125,17 +152,17 @@ export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Respon
 
 }
 
-export module RetryFilter {
+export namespace RetryFilter {
   export function retryFilter(makeCall: () => Promise<Response>): Promise<Response>{
     return makeCall();
   }
 }
 
-export module AuthTokenFilter {
+export namespace AuthTokenFilter {
   export let addAuthToken: (options: AjaxOptions, makeCall: () => Promise<Response>) => Promise<Response>;
 }
 
-export module VersionFilter {
+export namespace VersionFilter {
   export let initialVersion: string | undefined;
   export let initialBuildTime: string | undefined;
   export let latestVersion: string | undefined;
@@ -169,7 +196,7 @@ export module VersionFilter {
   }
 }
 
-export module NotifyPendingFilter {
+export namespace NotifyPendingFilter {
   export let notifyPendingRequests: (pendingRequests: number) => void = () => { };
   let pendingRequests: number = 0;
   export function onPendingRequest(makeCall: () => Promise<Response>): Promise<Response> {
@@ -181,7 +208,7 @@ export module NotifyPendingFilter {
   }
 }
 
-export module ThrowErrorFilter {
+export namespace ThrowErrorFilter {
   export function throwError(makeCall: () => Promise<Response>, url: string): Promise<Response> {
     return makeCall().then(response => {
       if (response.status >= 200 && response.status < 300) {
@@ -229,7 +256,7 @@ a.href = "#";
 document.body.appendChild(a);
 a.style.display = "none";
 
-export function saveFile(response: Response, overrideFileName?: string) {
+export function saveFile(response: Response, overrideFileName?: string): Promise<void> {
 
   var fileName = overrideFileName || getFileName(response);
 
@@ -238,7 +265,7 @@ export function saveFile(response: Response, overrideFileName?: string) {
   });
 }
 
-export function getFileName(response: Response) {
+export function getFileName(response: Response): string {
   const contentDisposition = response.headers.get("Content-Disposition")!;
   const parts = contentDisposition.split(";");
 
@@ -254,7 +281,7 @@ export function getFileName(response: Response) {
     return "file.dat";
 }
 
-export function saveFileBlob(blob: Blob, fileName: string) {
+export function saveFileBlob(blob: Blob, fileName: string): void {
   if ((window.navigator as any).msSaveBlob)
     (window.navigator as any).msSaveBlob(blob, fileName);
   else {
@@ -269,7 +296,7 @@ export function saveFileBlob(blob: Blob, fileName: string) {
   }
 }
 
-export function b64toBlob(b64Data: string, contentType: string = "", sliceSize = 512) {
+export function b64toBlob(b64Data: string, contentType: string = "", sliceSize = 512): Blob {
   contentType = contentType || '';
   sliceSize = sliceSize || 512;
 
@@ -298,7 +325,7 @@ export class ServiceError {
     public httpError: WebApiHttpError) {
   }
 
-  get defaultIcon() {
+  get defaultIcon(): "lock" | "trash" | "clone" | "exclamation-triangle" {
     switch (this.httpError.exceptionType) {
       case "UnauthorizedAccessException": return "lock";
       case "EntityNotFoundException": return "trash";
@@ -307,7 +334,7 @@ export class ServiceError {
     }
   }
 
-  toString() {
+  toString(): string | null {
     return this.httpError.exceptionMessage;
   }
 }
@@ -370,11 +397,11 @@ export namespace SessionSharing {
 
   var _appName: string = "";
 
-  export function getAppName() {
+  export function getAppName(): string {
     return _appName;
   }
 
-  export function setAppNameAndRequestSessionStorage(appName: string) {
+  export function setAppNameAndRequestSessionStorage(appName: string): void {
     _appName = appName;
     if (!sessionStorage.length) { //Copied from anote
       requestSessionStorageFromAnyTab();
@@ -437,7 +464,7 @@ export class AbortableRequest<Q, A> {
     }
   }
 
-  isRunning() {
+  isRunning(): boolean {
     return this.abortController != null;
   }
 

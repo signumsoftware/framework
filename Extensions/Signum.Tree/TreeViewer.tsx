@@ -89,18 +89,18 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     };
   }
 
-  selectNode(node: TreeNode | undefined) {
+  selectNode(node: TreeNode | undefined) : void {
 
     this.setState({ selectedNode: node });
     if (this.props.onSelectedNode)
       this.props.onSelectedNode(node);
   }
 
-  componentWillMount() {
+  componentWillMount() : void {
     this.initialize(this.props.treeOptions);
   }
 
-  componentWillReceiveProps(newProps: TreeViewerProps) {
+  componentWillReceiveProps(newProps: TreeViewerProps) : void {
     var path = TreeClient.treePath(newProps.treeOptions);
     if (path == TreeClient.treePath(this.props.treeOptions)) {
       this.searchIfDeps(newProps);
@@ -123,13 +123,13 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     this.initialize(newProps.treeOptions);
   }
 
-  searchIfDeps(newProps: TreeViewerProps) {
+  searchIfDeps(newProps: TreeViewerProps): void {
     if (Hooks.areEqualDeps(this.props.deps ?? [], newProps.deps ?? [])) {
       this.search(false);
     }
   }
 
-  initialize(to: TreeOptions) {
+  initialize(to: TreeOptions): void {
 
     Finder.getQueryDescription(to.typeName)
       .then(qd => {
@@ -149,7 +149,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       });
   }
 
-  handleFullScreenClick = (ev: React.MouseEvent<any>) => {
+  handleFullScreenClick = (ev: React.MouseEvent<any>): void => {
 
     ev.preventDefault();
 
@@ -161,11 +161,11 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       AppContext.navigate(path);
   };
 
-  getCurrentUrl() {
+  getCurrentUrl() : string {
     return TreeClient.treePath(TreeClient.toTreeOptions(this.state.treeOptionsParsed!, this.state.queryDescription!));
   }
 
-  handleNodeIconClick = (n: TreeNode) => {
+  handleNodeIconClick = (n: TreeNode): void => {
     if (n.nodeState == "Collapsed" || n.nodeState == "Filtered") {
       n.nodeState = "Expanded";
       this.search(false);
@@ -177,25 +177,25 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
   }
 
-  handleNodeTextClick = (n: TreeNode) => {
+  handleNodeTextClick = (n: TreeNode): void => {
     this.selectNode(n);
   }
 
-  handleNodeTextDoubleClick = (n: TreeNode, e: React.MouseEvent<any>) => {
+  handleNodeTextDoubleClick = (n: TreeNode, e: React.MouseEvent<any>): void => {
     if (this.props.onDoubleClick)
       this.props.onDoubleClick(n, e);
     else
       this.handleView();
   }
 
-  handleView = () => {
+  handleView = (): void => {
     const node = this.state.selectedNode!;
     Navigator.view(node.lite)
       .then(() => this.search(false));
   }
 
 
-  render() {
+  render(): React.ReactElement {
     return (
       <div>
         {this.renderSearch()}
@@ -222,7 +222,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     );
   }
 
-  renderHeaders = () => {
+  renderHeaders = (): React.ReactElement => {
     const visibleColumns = this.getVisibleColumnsWithFormatter();
     return (
       <tr>
@@ -242,7 +242,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     );
   }
 
-  renderRows = () => {
+  renderRows = (): React.ReactNode | string => {
     if (!this.state.treeNodes)
       return JavascriptMessage.loading.niceToString();
 
@@ -251,7 +251,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       <TreeNodeControl key={i} treeViewer={this} treeNode={node} columns={visibleColumns} dropDisabled={node == this.state.draggedNode} />);
   }
 
-  getVisibleColumnsWithFormatter = () => {
+  getVisibleColumnsWithFormatter = (): VisibleColumnsWithFormatter[] => {
     if (!this.state.resultColumns)
       return [];
 
@@ -274,7 +274,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     } as VisibleColumnsWithFormatter));
   }
 
-  handleNodeTextContextMenu = (n: TreeNode, e: React.MouseEvent<any>) => {
+  handleNodeTextContextMenu = (n: TreeNode, e: React.MouseEvent<any>) : void => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -286,7 +286,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }, () => this.loadMenuItems());
   }
 
-  loadMenuItems() {
+  loadMenuItems() : void {
     if (this.props.showContextMenu == "Basic")
       this.setState({ currentMenuItems: [] });
     else {
@@ -305,11 +305,11 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
   }
 
-  handleContextOnHide = () => {
+  handleContextOnHide = (): void => {
     this.setState({ contextualMenu: undefined, currentMenuItems: undefined });
   }
 
-  renderContextualMenu() {
+  renderContextualMenu(): React.ReactElement | null {
     const cm = this.state.contextualMenu!;
     if (!this.state.selectedNode)
       return null;
@@ -375,7 +375,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     return menuItems;
   }
 
-  handleSearchSubmit = (e: React.FormEvent<any>) => {
+  handleSearchSubmit = (e: React.FormEvent<any>) : void => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -390,7 +390,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     return result;
   }
 
-  search(clearExpanded: boolean, loadDescendants: boolean = false, considerDefaultSelectedLite: boolean = false) {
+  search(clearExpanded: boolean, loadDescendants: boolean = false, considerDefaultSelectedLite: boolean = false): undefined {
 
     if (!this.state.treeOptionsParsed || !this.state.queryDescription)
       return;
@@ -431,7 +431,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       });
   }
 
-  renderSearch() {
+  renderSearch(): React.ReactElement {
     const s = this.state;
 
     const sfb = this.state.simpleFilterBuilder &&
@@ -449,7 +449,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     );
   }
 
-  handleAddRoot = () => {
+  handleAddRoot = (): void => {
     Operations.API.construct(this.props.treeOptions.typeName, TreeOperation.CreateRoot)
       .then(ep => Navigator.view(ep!, { requiresSaveOperation: true }))
       .then(te => {
@@ -467,7 +467,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       });
   }
 
-  handleAddChildren = () => {
+  handleAddChildren = (): void => {
     var parent = this.state.selectedNode!;
     Operations.API.constructFromLite(parent.lite, TreeOperation.CreateChild)
       .then(ep => Navigator.view(ep!, { requiresSaveOperation: true }))
@@ -489,7 +489,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       });
   }
 
-  handleAddSibling = () => {
+  handleAddSibling = (): void => {
 
     var sibling = this.state.selectedNode!;
 
@@ -513,7 +513,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       });
   }
 
-  handleCopyClick = () => {
+  handleCopyClick = (): void => {
     const supportsClipboard = (navigator.clipboard && window.isSecureContext);
     if (!supportsClipboard || !this.state.selectedNode)
       return;
@@ -522,7 +522,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     navigator.clipboard.writeText(text);
   }
 
-  findParent(childNode: TreeNode) {
+  findParent(childNode: TreeNode): TreeNode | null {
     return this.state.treeNodes!.flatMap(allNodes).filter(n => n.loadedChildren.contains(childNode)).singleOrNull();
   }
 
@@ -549,7 +549,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     });
   }
 
-  renderToolbar() {
+  renderToolbar(): React.ReactElement{
     const s = this.state;
     const selected = s.selectedNode;
     const menuItems = this.renderMenuItems();
@@ -582,7 +582,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     );
   }
 
-  renderExpandCollapseButtons() {
+  renderExpandCollapseButtons(): React.ReactElement {
     const s = this.state;
 
     return (
@@ -598,15 +598,15 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     );
   }
 
-  handleExpandAll = () => {
+  handleExpandAll = (): undefined => {
     this.search(true, true, true);
   }
 
-  handleCollapseAll = () => {
+  handleCollapseAll = (): undefined => {
     this.search(true, false, true);
   }
 
-  handleSelectedToggle = () => {
+  handleSelectedToggle = (): undefined => {
 
     if (!this.state.isSelectOpen && this.state.currentMenuItems == undefined)
       this.loadMenuItems();
@@ -614,7 +614,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     this.setState({ isSelectOpen: !this.state.isSelectOpen });
   }
 
-  handleExplore = (e: React.MouseEvent<any>) => {
+  handleExplore = (e: React.MouseEvent<any>) : void => {
     const fop = TreeClient.toFindOptionsParsed(this.state.treeOptionsParsed!);
     const fo = Finder.toFindOptions(fop, this.state.queryDescription!, false);
 
@@ -626,7 +626,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       AppContext.pushOrOpenInTab(path, e);
   }
 
-  handleToggleFilters = () => {
+  handleToggleFilters = () : void => {
 
     this.getFilterOptionsWithSFB().then(() => {
       this.simpleFilterBuilderInstance = undefined;
@@ -635,7 +635,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
 
-  handleDragStart = (node: TreeNode, e: React.DragEvent<any>) => {
+  handleDragStart = (node: TreeNode, e: React.DragEvent<any>): void => {
     e.dataTransfer.setData('text', "start"); //cannot be empty string
 
     var isCopy = e.ctrlKey || e.shiftKey || e.altKey;
@@ -644,7 +644,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
 
-  handleDragOver = (node: TreeNode, e: React.DragEvent<any>) => {
+  handleDragOver = (node: TreeNode, e: React.DragEvent<any>): void => {
     e.preventDefault();
     const de = e.nativeEvent as DragEvent;
     const span = e.currentTarget as HTMLElement;
@@ -679,11 +679,11 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     return "Middle";
   }
 
-  handleDragEnd = (node: TreeNode, e: React.DragEvent<any>) => {
+  handleDragEnd = (node: TreeNode, e: React.DragEvent<any>): void => {
     this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined });
   }
 
-  handleDrop = (node: TreeNode, e: React.DragEvent<any>) => {
+  handleDrop = (node: TreeNode, e: React.DragEvent<any>): void => {
     const dragged = this.state.draggedNode!;
     const over = this.state.draggedOver!;
 
@@ -705,7 +705,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       this.moveOrCopyOperation(nodeParent, dragged, over);
   }
 
-  moveOrCopyOperation(nodeParent: TreeNode | null, dragged: TreeNode, over: DraggedOver) {
+  moveOrCopyOperation(nodeParent: TreeNode | null, dragged: TreeNode, over: DraggedOver): void {
 
     var partial: Partial<MoveTreeModel> =
       over.position == "Middle" ? { newParent: over.node.lite, insertPlace: "LastNode" } :

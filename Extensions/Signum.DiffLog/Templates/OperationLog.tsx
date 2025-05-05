@@ -14,7 +14,7 @@ import "./DiffLog.css"
 import { useAPI } from '@framework/Hooks'
 import { clearSettingsActions, toAbsoluteUrl } from '@framework/AppContext'
 
-export default function OperationLog(p : { ctx: TypeContext<OperationLogEntity> }){
+export default function OperationLog(p : { ctx: TypeContext<OperationLogEntity> }): React.JSX.Element {
   const ctx = p.ctx;
   const ctx6 = ctx.subCtx({ labelColumns: { sm: 3 } });
 
@@ -40,7 +40,7 @@ export default function OperationLog(p : { ctx: TypeContext<OperationLogEntity> 
   );
 }
 
-export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
+export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }): React.JSX.Element {
 
   var [simplify, setSimplify] = React.useState(true);
 

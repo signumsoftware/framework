@@ -47,29 +47,29 @@ public class BrowserProxy
     }
 
 
-    public FramePageProxy<T> NormalPage<T>(PrimaryKey id) where T : Entity
+    public FramePageProxy<T> FramePage<T>(PrimaryKey id) where T : Entity
     {
-        return NormalPage<T>(Lite.Create<T>(id));
+        return FramePage<T>(Lite.Create<T>(id));
     }
 
-    public FramePageProxy<T> NormalPage<T>() where T : Entity
+    public FramePageProxy<T> FramePage<T>() where T : Entity
     {
         var url = Url(NavigateRoute(typeof(T), null));
 
-        return AsNormalPage<T>(url);
+        return AsFramePage<T>(url);
     }
 
-    public FramePageProxy<T> NormalPage<T>(Lite<T> lite) where T : Entity
+    public FramePageProxy<T> FramePage<T>(Lite<T> lite) where T : Entity
     {
         if(lite.EntityType != typeof(T))
             throw new InvalidOperationException("Use NormalPage<{0}> instead".FormatWith(lite.EntityType.Name));
 
         var url = Url(NavigateRoute(lite));
 
-        return AsNormalPage<T>(url);
+        return AsFramePage<T>(url);
     }
 
-    public FramePageProxy<T> AsNormalPage<T>(string url) where T : Entity
+    public FramePageProxy<T> AsFramePage<T>(string url) where T : Entity
     {
         Selenium.Url = url;
 
@@ -141,7 +141,7 @@ public class BrowserProxy
 
     public virtual void SetCurrentCulture()
     {
-        string? culture = Selenium.WaitElementPresent(By.ClassName("sf-culture-dropdown"))!.GetAttribute("data-culture");
+        string? culture = Selenium.WaitElementPresent(By.ClassName("sf-culture-dropdown"))!.GetDomAttribute("data-culture")!;
 
         Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
     }

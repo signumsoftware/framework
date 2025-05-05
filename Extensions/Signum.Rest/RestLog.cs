@@ -77,7 +77,7 @@ public class QueryStringValueEmbedded : EmbeddedEntity
     public string Key { get; set; }
 
     [DbType(Size = MaxValue)]
-    public string Value { get; set; }
+    public string? Value { get; set; }
 }
 
 public enum RestLogReplayState

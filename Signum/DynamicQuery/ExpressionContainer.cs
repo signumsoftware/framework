@@ -241,6 +241,17 @@ public class ExtensionWithParameterInfo<T, K, V> : IExtensionDictionaryInfo
     }
 }
 
+//To allow override null
+public class Box<T>
+{
+    public T Value { get; }
+    public Box(T value)
+    {
+        Value = value;
+    }
+
+    public static implicit operator Box<T>(T value) => new Box<T>(value);
+}
 
 public class ExtensionInfo
 {
@@ -263,10 +274,10 @@ public class ExtensionInfo
     public bool IsProjection;
     public bool Inherit = true;
 
-    public Implementations? ForceImplementations;
-    public PropertyRoute? ForcePropertyRoute;
-    public string? ForceFormat;
-    public string? ForceUnit;
+    public Box<Implementations?>? ForceImplementations;
+    public Box<PropertyRoute?>? ForcePropertyRoute;
+    public Box<string?>? ForceFormat;
+    public Box<string?>? ForceUnit;
     public Func<string?>? ForceIsAllowed;
 
 
@@ -319,16 +330,16 @@ public class ExtensionInfo
             result.IsAllowed = () => me?.Meta.IsAllowed();
 
             if (ForcePropertyRoute != null)
-                result.PropertyRoute = ForcePropertyRoute!;
+                result.PropertyRoute = ForcePropertyRoute.Value;
 
             if (ForceImplementations != null)
-                result.Implementations = ForceImplementations;
+                result.Implementations = ForceImplementations.Value;
 
             if (ForceFormat != null)
-                result.Format = ForceFormat;
+                result.Format = ForceFormat.Value;
 
             if (ForceUnit != null)
-                result.Unit = ForceUnit;
+                result.Unit = ForceUnit.Value;
 
             if (ForceIsAllowed != null)
                 result.IsAllowed = ForceIsAllowed!;

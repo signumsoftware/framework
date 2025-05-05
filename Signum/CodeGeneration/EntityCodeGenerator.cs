@@ -1,6 +1,5 @@
 using System.Data;
 using System.IO;
-using System.Text.RegularExpressions;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
