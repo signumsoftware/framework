@@ -280,6 +280,7 @@ public class TokenValueProvider : ValueProviderBase
 
         foreach (var group in qc.CurrentRows.GroupByColumn(col))
         {
+            using (p.Scope())
             using (qc.OverrideRows(group))
                 forEachElement();
         }
