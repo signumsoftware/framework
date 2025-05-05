@@ -16,7 +16,7 @@ import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getLambdaMembers } from '@framework/Reflection';
 import { TranslatedSummaryState } from './Signum.Translation.Instances';
-import { TranslateableRouteType } from '@framework/Signum.Basics';
+import { TranslatableRouteType } from '@framework/Signum.Basics';
 
 export namespace TranslatedInstanceClient {
   
@@ -149,7 +149,7 @@ export namespace TranslatedInstanceClient {
     type: string;
     masterCulture: string;
     totalInstances: number;
-    routes: { [propertyRoute: string]: TranslateableRouteType }
+    routes: { [propertyRoute: string]: TranslatableRouteType }
     instances: InstanceChange[];
     deletedTranslations: number;
   }
@@ -174,7 +174,7 @@ export namespace TranslatedInstanceClient {
   export interface TranslatedInstanceViewType {
     type: string;
     masterCulture: string;
-    routes: { [propertyRoute: string]: TranslateableRouteType }
+    routes: { [propertyRoute: string]: TranslatableRouteType }
     instances: TranslatedInstanceView[];
   }
   
