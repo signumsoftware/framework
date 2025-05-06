@@ -417,7 +417,7 @@ public static class SchemaSynchronizer
                                                     tabCol.DbType.PostgreSql == NpgsqlDbType.Varchar && difCol.DbType.PostgreSql == NpgsqlDbType.Char :
                                                     tabCol.DbType.SqlServer == SqlDbType.NVarChar && difCol.DbType.SqlServer == SqlDbType.NChar) ? sqlBuilder.UpdateTrim(tab, tabCol) : null),
 
-                                            UpdateByFkChange(tn, difCol, tabCol, ChangeName),
+                                            UpdateByFkChange(tn, difCol, tabCol, isPostgres, ChangeName),
 
                                             (!columnEquals || !defaultEquals) && tabCol.Default != null ? sqlBuilder.AlterTableAddDefaultConstraint(tab.Name, sqlBuilder.GetDefaultConstaint(tab, tabCol)!) : null,
                                             (!columnEquals || !defaultEquals) && tabCol.Check != null ? sqlBuilder.AlterTableAddCheckConstraint(tab.Name, sqlBuilder.GetCheckConstaint(tab, tabCol)!) : null
@@ -734,14 +734,6 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
         return new SqlPreCommandSimple($"UPDATE {tab.Name} SET {tabCol.Name} = YourCode({difCol.Name})");
     }
 
-    private static string GetZero(IColumn column)
-    {
-        return (column.DbType.IsNumber() ? "0" :
-            column.DbType.IsString() ? "''" :
-            column.DbType.IsDate() ? "GetDate()" :
-            column.DbType.IsGuid() ? Guid.Empty.ToString() :
-            "?");
-    }
 
     private static bool StrongColumnChanges(ITable tab, DiffTable dif)
     {
@@ -991,7 +983,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
         return diff.Indices.SelectDictionary(on => replacements.TryGetC(on) ?? on, dif => dif);
     }
 
-    private static SqlPreCommandSimple? UpdateByFkChange(string tn, DiffColumn difCol, IColumn tabCol, Func<ObjectName, ObjectName> changeName)
+    private static SqlPreCommandSimple? UpdateByFkChange(string tn, DiffColumn difCol, IColumn tabCol, bool isPostgres, Func<ObjectName, ObjectName> changeName)
     {
         if (difCol.ForeignKey == null || tabCol.ReferenceTable == null || tabCol.AvoidForeignKey)
             return null;
@@ -1007,12 +999,25 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
         var tnAlias = ag.NextTableAlias(tn);
         var oldFkAlias = ag.NextTableAlias(oldFk.Name);
 
-        return new SqlPreCommandSimple(
-@$"-- Column {tn}.{tabCol.Name} was referencing {oldFk} but not references {newFk}. An update is needed?
+        var message = @$"-- Column {tn}.{tabCol.Name} was referencing {oldFk} but not references {newFk}. An update is needed?";
+        if (isPostgres)
+        {
+            return new SqlPreCommandSimple(
+@$"{message}
+UPDATE {tn} {tnAlias}
+SET {tabCol.Name.SqlEscape(isPostgres)} =  -- get {newFk} id from {oldFkAlias}.Id
+FROM {oldFk} {oldFkAlias} 
+WHERE {tnAlias}.{tabCol.Name.SqlEscape(isPostgres)} = {oldFkAlias}.Id");
+        }
+        else
+        {
+            return new SqlPreCommandSimple(
+@$"{message}
 UPDATE {tnAlias}
-SET {tabCol.Name} =  -- get {newFk} id from {oldFkAlias}.Id
+SET {tabCol.Name.SqlEscape(isPostgres)} =  -- get {newFk} id from {oldFkAlias}.Id
 FROM {tn} {tnAlias}
-JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
+JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name.SqlEscape(isPostgres)} = {oldFkAlias}.Id");
+        }
     }
 
     public static Func<DiffTable, bool>? IgnoreTable = null;
