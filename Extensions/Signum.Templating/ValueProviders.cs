@@ -332,6 +332,7 @@ public class TokenValueProvider : ValueProviderBase
             var col = qc.ResultColumns[ParsedToken.QueryTokenOrRowId!];
             foreach (var group in qc.CurrentRows.GroupByColumn(col))
             {
+                using (p.Scope())
                 using (qc.OverrideRows(group))
                     forEachElement();
             }

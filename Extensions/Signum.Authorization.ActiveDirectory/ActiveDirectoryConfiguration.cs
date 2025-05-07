@@ -143,7 +143,7 @@ public enum ActiveDirectoryAuthorizerMessage
     ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication,
 }
 
-[AllowUnathenticated]
+[AllowUnauthenticated]
 public enum UserADMessage
 {
     [Description("Find '{0}' in Active Directory")]

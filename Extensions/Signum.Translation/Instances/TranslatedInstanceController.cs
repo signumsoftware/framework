@@ -263,7 +263,7 @@ public class TypeInstancesChangesTS
     public int TotalInstances;
     public List<InstanceChangesTS> Instances;
 
-    public Dictionary<string, TranslateableRouteType> Routes { get; internal set; }
+    public Dictionary<string, TranslatableRouteType> Routes { get; internal set; }
 
     public int DeletedTranslations;
 }
@@ -299,7 +299,7 @@ public class TranslatedInstanceViewTypeTS
 {
     public string TypeName;
     public string MasterCulture;
-    public Dictionary<string, TranslateableRouteType> Routes;
+    public Dictionary<string, TranslatableRouteType> Routes;
     public List<TranslatedInstanceViewTS> Instances;
 }
 

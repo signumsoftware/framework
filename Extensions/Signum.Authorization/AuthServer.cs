@@ -100,7 +100,7 @@ public static class AuthServer
                 }
                 else
                 {
-                    if (t.HasAttribute<AllowUnathenticatedAttribute>())
+                    if (t.HasAttribute<AllowUnauthenticatedAttribute>())
                         return ti;
 
                     if (UserEntity.Current == null)
@@ -189,7 +189,7 @@ public static class AuthServer
             {
                 if (UserEntity.Current == null)
                 {
-                    if (!pr.RootType.HasAttribute<AllowUnathenticatedAttribute>())
+                    if (!pr.RootType.HasAttribute<AllowUnauthenticatedAttribute>())
                         return null;
 
                     mi.Extension.Add("propertyAllowed", PropertyAllowed.Write);

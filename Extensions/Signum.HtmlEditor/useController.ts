@@ -14,13 +14,14 @@ import {
   HtmlContentStateConverter,
   ITextConverter,
 } from "./HtmlContentStateConverter";
+import { HtmlEditorProps } from "./HtmlEditor";
 import { HtmlEditorController } from "./HtmlEditorController";
 import { useRegisterExtensions } from "./useRegisterExtensions";
 import { useRegisterKeybindings } from "./useRegisterKeybindings";
-import { HtmlEditorProps } from "./HtmlEditor";
 
 type ControllerProps = {
   binding: IBinding<string | null | undefined>;
+  editableId: string;
   readOnly?: boolean;
   small?: boolean;
   converter?: ITextConverter;
@@ -44,7 +45,8 @@ export const useController = ({
   innerRef,
   plugins,
   initiallyFocused,
-  handleKeybindings
+  handleKeybindings,
+  editableId
 }: ControllerProps): ControllerReturnType => {
   const controller = React.useMemo(() => new HtmlEditorController(), []);
   const textConverter = converter ?? new HtmlContentStateConverter();
@@ -82,6 +84,7 @@ export const useController = ({
     innerRef,
     initiallyFocused,
     plugins: extensions,
+    editableId
   });
 
   const nodes = React.useMemo(() => {

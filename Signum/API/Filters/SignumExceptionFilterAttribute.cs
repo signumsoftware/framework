@@ -42,9 +42,7 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
                 using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
                 {
                     statusCode = GetStatus(context.Exception.GetType());
-                    error = CustomHttpErrorFactory(context.Exception);
                     error = CustomHttpErrorFactory(context);
-                    error = CustomHttpErrorFactory(context.Exception, context);
                 } //No await inside
 
                 response.StatusCode = (int)statusCode;

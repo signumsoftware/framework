@@ -388,8 +388,8 @@ export namespace WorkflowActivityMessage {
   export const LocateWorkflowActivityInDiagram: MessageKey = new MessageKey("WorkflowActivityMessage", "LocateWorkflowActivityInDiagram");
   export const Approve: MessageKey = new MessageKey("WorkflowActivityMessage", "Approve");
   export const Decline: MessageKey = new MessageKey("WorkflowActivityMessage", "Decline");
-  export const Conformation: MessageKey = new MessageKey("WorkflowActivityMessage", "Conformation");
-  export const Conformation0: MessageKey = new MessageKey("WorkflowActivityMessage", "Conformation0");
+  export const Confirmation: MessageKey = new MessageKey("WorkflowActivityMessage", "Confirmation");
+  export const AreYouSureYouWantToExecute0: MessageKey = new MessageKey("WorkflowActivityMessage", "AreYouSureYouWantToExecute0");
 }
 
 export const WorkflowActivityModel: Type<WorkflowActivityModel> = new Type<WorkflowActivityModel>("WorkflowActivityModel");
