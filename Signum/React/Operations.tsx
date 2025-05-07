@@ -13,7 +13,7 @@ import * as ContexualItems from './SearchControl/ContextualItems';
 import { ButtonBarManager } from './Frames/ButtonBar';
 import { EntityOperations, OperationButton } from './Operations/EntityOperations';
 import { ContextualOperations } from './Operations/ContextualOperations';
-import { ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems';
+import { ContextualItemsContext, MenuItemBlock, ContextualMenuItem } from './SearchControl/ContextualItems';
 import { BsColor, KeyNames } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Notify from './Frames/Notify';
@@ -60,8 +60,10 @@ export namespace Operations {
       isApplicable: c => {
         return c.type.name == "CellOperationDTO";
       },
-      formatter: c => new Finder.CellFormatter((dto: Operations.API.CellOperationDto, ctx) => dto && dto.lite ? <CellOperationButton coc={new CellOperationContext(ctx, dto)} /> : undefined, false)
-
+      formatter: c => new Finder.CellFormatter(
+        (dto: Operations.API.CellOperationDto, ctx, cp) =>
+          dto && dto.lite ? <CellOperationButton coc={(new CellOperationContext({ cellContext: ctx, text: cp.column.displayName, ...dto }))} /> : undefined,
+        false)
     });
 
   }
@@ -471,7 +473,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null | true;
-  createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
+  createMenuItems?: (eoc: ContextualOperationContext<T>) => ContextualMenuItem[];
   onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
   color?: BsColor;
@@ -493,7 +495,7 @@ export interface ContextualOperationOptions<T extends Entity> {
   showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null | true;
   onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
-  createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
+  createMenuItems?: (eoc: ContextualOperationContext<T>) => ContextualMenuItem[];
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
   color?: BsColor;
   icon?: IconProp;
@@ -594,12 +596,12 @@ export class ContextualOperationContext<T extends Entity> {
     throw new Error("Pack is not available for Contextual with many selected entities");
   }
 
-  createMenuItems(): React.ReactElement[] {
+  createMenuItems(): ContextualMenuItem[] {
 
     if (this.settings?.createMenuItems)
       return this.settings.createMenuItems(this);
 
-    return [<ContextualOperations.OperationMenuItem coc={this} />];
+    return [{ fullText: this.operationInfo.niceName, menu: <ContextualOperations.OperationMenuItem coc={ this} /> } as ContextualMenuItem];
   }
 
   raiseEntityChanged() {
@@ -666,14 +668,17 @@ export class CellOperationContext<T extends Entity> {
 
   tag?: string;
   readonly lite: Lite<T>;
+  readonly canExecute?: string;
+  readonly operationKey: string;
+
   readonly operationInfo: OperationInfo;
   readonly cellContext: Finder.CellFormatterContext;
-  readonly canExecute?: string;
   readonly settings?: CellOperationSettings<T>;
   readonly entityOperationSettings?: EntityOperationSettings<any>;
   event?: React.MouseEvent<any>;
   progressModalOptions?: Operations.API.OperationWithProgressOptions;
 
+  text?: string;
   color?: BsColor;
   icon?: IconProp;
   iconColor?: string;
@@ -684,12 +689,14 @@ export class CellOperationContext<T extends Entity> {
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
   onDeleteSuccess?: () => void;
 
-  constructor(ctx: Finder.CellFormatterContext, co: Operations.API.CellOperationDto) {
-    this.lite = co.lite as Lite<T>;
-    this.operationInfo = getOperationInfo(co.operationKey, co.lite.EntityType);
-    this.cellContext = ctx;
-    this.canExecute = co.canExecute;
-    this.entityOperationSettings = Operations.getSettings(co.operationKey) as EntityOperationSettings<Entity>;
+  constructor(init: Partial<CellOperationContext<T>>) {
+    Object.assign(this, init);
+    this.lite = init.lite as Lite<T>;
+    this.operationKey = init.operationKey!;
+    this.canExecute = init.canExecute;
+    this.operationInfo = getOperationInfo(this.operationKey!, this.lite.EntityType);
+    this.cellContext = init.cellContext!;
+    this.entityOperationSettings = Operations.getSettings(this.operationKey) as EntityOperationSettings<Entity>;
     this.settings = this.entityOperationSettings?.cell;
   }
 

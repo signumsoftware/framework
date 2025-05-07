@@ -149,7 +149,7 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
     e.stopPropagation();
     var pr = PropertyRoute.parse((help as TypeHelpClient.TypeHelp).cleanTypeName, m.propertyString);
     setSelected(pr);
-    setContextMenuPosition(ContextMenu.getPositionEvent(e));
+    setContextMenuPosition(ContextMenu.getMouseEventPosition(e));
   }
 
   function renderMember(h: TypeHelpClient.TypeHelp, m: TypeHelpClient.TypeMemberHelp, index: number): React.ReactChild {

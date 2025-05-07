@@ -62,7 +62,7 @@ public class SearchControlProxy
 
     public IWebElement WaitContextMenu()
     {
-        return Element.WaitElementVisible(By.CssSelector(".dropdown-menu.sf-context-menu"));
+        return Element.WaitElementVisible(By.CssSelector(".sf-context-menu .dropdown-menu"));
     }
 
     public WebElementLocator ToggleFiltersButton
