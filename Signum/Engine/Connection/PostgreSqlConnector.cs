@@ -7,6 +7,7 @@ using Signum.Engine.Sync.Postgres;
 using Signum.Utilities.Reflection;
 using System.Data;
 using System.Data.Common;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine;
 
@@ -373,6 +374,7 @@ public class PostgreSqlConnector : Connector
     {
         var nex = ReplaceException(ex, command);
         nex.Data["Sql"] = command.sp_executesql();
+        nex.Data["SqlRAW"] = command.Sql;
         return nex;
     }
 
@@ -627,5 +629,81 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
             mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.DataTypeName))!, Expression.Constant(udtTypeName)));
 
         return Expression.MemberInit(newExpr, mb);
+    }
+}
+
+public class PostgresStatementSplitter
+{
+    public static List<string> SplitPostgresScript(string sql)
+    {
+        var statements = new List<string>();
+        var sb = new StringBuilder();
+        bool inSingleQuote = false;
+        bool inDoubleQuote = false;
+        string? inDollarTag = null;
+        int i = 0;
+
+        while (i < sql.Length)
+        {
+            char c = sql[i];
+            sb.Append(c);
+
+            if (inDollarTag != null)
+            {
+                if (sql[i] == '$' && sql.Substring(i).StartsWith(inDollarTag))
+                {
+                    sb.Append(inDollarTag.Substring(1)); // we've already added one '$'
+                    i += inDollarTag.Length - 1;
+                    inDollarTag = null;
+                }
+            }
+            else if (inSingleQuote)
+            {
+                if (c == '\'' && (i + 1 >= sql.Length || sql[i + 1] != '\''))
+                {
+                    inSingleQuote = false;
+                }
+                else if (c == '\'' && sql[i + 1] == '\'')
+                {
+                    sb.Append('\''); // escape quote
+                    i++;
+                }
+            }
+            else if (inDoubleQuote)
+            {
+                if (c == '"') inDoubleQuote = false;
+            }
+            else
+            {
+                if (c == '\'') inSingleQuote = true;
+                else if (c == '"') inDoubleQuote = true;
+                else if (c == '$')
+                {
+                    // Look ahead to detect a dollar-quote tag like $$, $tag$
+                    var match = Regex.Match(sql.Substring(i), @"^\$[A-Za-z0-9_]*\$");
+                    if (match.Success)
+                    {
+                        inDollarTag = match.Value;
+                        sb.Append(match.Value.Substring(1)); // We've already added one '$'
+                        i += match.Length - 1;
+                    }
+                }
+                else if (c == ';')
+                {
+                    var statement = sb.ToString().Trim();
+                    if (!string.IsNullOrWhiteSpace(statement))
+                        statements.Add(statement);
+                    sb.Clear();
+                }
+            }
+
+            i++;
+        }
+
+        var final = sb.ToString().Trim();
+        if (!string.IsNullOrWhiteSpace(final))
+            statements.Add(final);
+
+        return statements;
     }
 }

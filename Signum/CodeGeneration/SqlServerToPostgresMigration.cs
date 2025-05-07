@@ -155,8 +155,8 @@ public static class SqlServerToPostgresMigration
 
         SafeConsole.WriteLineColor(ConsoleColor.Green, "Finished! Next Steps:");
         Console.WriteLine("* Change appconfig to connect to postgress");
-        Console.WriteLine("* Synchronize database to add the missing schema stuff (indexes, fks...)");
         Console.WriteLine($"* Execute {nameof(SqlServerToPostgresMigration)}.{nameof(UpdateIdentities)} to fix the Ids sequences");
+        Console.WriteLine("* Synchronize database to add the missing schema stuff (indexes, fks...)");
     }
 
     public static SqlPreCommand CreatePostgresTables(Dictionary<DiffTable, ObjectName> tables, SchemaBuilder sb, MigrateToPostgresOptions opts)

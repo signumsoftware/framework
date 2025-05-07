@@ -382,7 +382,7 @@ public static class PropertyAuthLogic
 
         if (UserEntity.Current == null)
             return new AuthSerializationMetadata(type,
-                type.HasAttribute<AllowUnathenticatedAttribute>() ? PropertyAllowed.Write : PropertyAllowed.None,
+                type.HasAttribute<AllowUnauthenticatedAttribute>() ? PropertyAllowed.Write : PropertyAllowed.None,
                 null);
 
         if (root is ModelEntity || !TypeLogic.TypeToEntity.ContainsKey(type))
@@ -400,7 +400,7 @@ public static class PropertyAuthLogic
 
         if (UserEntity.Current == null)
             return new AuthSerializationMetadata(type,
-                type.HasAttribute<AllowUnathenticatedAttribute>() ? PropertyAllowed.Write : PropertyAllowed.None,
+                type.HasAttribute<AllowUnauthenticatedAttribute>() ? PropertyAllowed.Write : PropertyAllowed.None,
                 null);
 
 

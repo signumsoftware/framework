@@ -624,7 +624,7 @@ public static class AuthLogic
             roles.Values.SaveList();
     }
 
-    public static void SynchronizeRoles(XDocument doc)
+    public static void SynchronizeRoles(XDocument doc, bool interactive = true)
     {
         Table table = Schema.Current.Table(typeof(RoleEntity));
         TableMList relationalTable = table.TablesMList().Single();
@@ -632,7 +632,7 @@ public static class AuthLogic
         Dictionary<string, XElement> rolesXml = doc.Root!.Element("Roles")!.Elements("Role").ToDictionary(x => x.Attribute("Name")!.Value);
 
         Dictionary<string, RoleEntity> rolesDic = Database.Query<RoleEntity>().Where(a => !a.IsTrivialMerge).ToDictionary(a => a.ToString());
-        Replacements replacements = new Replacements();
+        Replacements replacements = new Replacements { Interactive = interactive }; 
         replacements.AskForReplacements(rolesDic.Keys.ToHashSet(), rolesXml.Keys.ToHashSet(), "Roles");
         rolesDic = replacements.ApplyReplacementsToOld(rolesDic, "Roles");
 
@@ -675,7 +675,7 @@ public static class AuthLogic
                    roleInsertsDeletes,
                    new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
 
-                if (!SafeConsole.Ask("Did you run the previous script (Sync Roles)?"))
+                if (!interactive && !SafeConsole.Ask("Did you run the previous script (Sync Roles)?"))
                     return;
             }
             else
@@ -751,6 +751,11 @@ public static class AuthLogic
     public static void AutomaticImportAuthRules()
     {
         AutomaticImportAuthRules("AuthRules.xml");
+    }
+
+    public static void ImportAuthRules(XDocument authRules, bool interactive)
+    {
+        AuthLogic.ImportRulesScript(authRules, interactive: interactive)?.PlainSqlCommand().ExecuteLeaves();
     }
 
     public static void AutomaticImportAuthRules(string fileName)

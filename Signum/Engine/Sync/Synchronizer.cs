@@ -392,7 +392,7 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
         }
 
         if (!interactive)
-            throw new InvalidOperationException($"Unable to ask for renames for '{oldValue}' (in {replacementsKey}) without interactive Console. Please importing with (Terminal App -> Load -> Auth Rules)");
+            throw new InvalidOperationException($"Unable to ask for renames for '{oldValue}' (in {replacementsKey}) without interactive console, consider using the Terminal application.");
 
         if (alwaysNoRename)
             return new Selection(oldValue, null);
