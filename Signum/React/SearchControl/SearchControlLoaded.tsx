@@ -23,7 +23,7 @@ import { renderContextualItems, ContextualItemsContext, ContextualMenuItem, Mark
 import ContextMenu, { ContextMenuPosition, getMouseEventPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
-import { FilterOperation, RefreshMode, SystemTimeMode } from '../Signum.DynamicQuery';
+import { FilterOperation, PaginationMode, RefreshMode, SystemTimeMode } from '../Signum.DynamicQuery';
 import SystemTimeEditor from './SystemTimeEditor';
 import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -1259,6 +1259,42 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
   //SELECTED ROWS
+
+  async askAllLites(action: string): Promise<Lite<Entity>[] | undefined> {
+    const rt = this.state.resultTable;
+    const fo = this.state.resultFindOptions;
+    if (rt == null || fo == null)
+      return undefined;
+
+    if (!this.allSelected())
+      return this.getSelectedEntities();
+
+
+    const pm = await SelectorModal.chooseElement<PaginationMode>([fo.pagination.mode, "All"], {
+      title: action,
+      message: SearchMessage.YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages.niceToString().formatHtml(<strong>{action}</strong>),
+      buttonDisplay: a => <span>
+        {a == "All" ? SearchMessage.AllPages.niceToString() : SearchMessage.CurrentPage.niceToString()}{" "}
+        ({rt && SearchMessage._0Rows_N.niceToString().forGenderAndNumber(rt.totalElements).formatHtml(<strong>{a == "All" ? rt?.totalElements : rt?.rows.length}</strong>)})
+      </span>,
+      buttonName: a => a,
+      size: "md",
+    });
+
+    if (pm == null)
+      return undefined;
+
+    if (pm != "All")
+      return this.getSelectedEntities();
+
+    const allLites = await Finder.fetchLites({
+      queryName: fo!.queryKey,
+      filterOptions: Finder.toFilterOptions(fo!.filterOptions),
+      count: null,
+    });
+
+    return allLites;
+  }
 
   allSelected(): boolean {
     return this.state.resultTable != undefined && this.state.resultTable.rows.length != 0 && this.state.resultTable.rows.length == this.state.selectedRows!.length;
