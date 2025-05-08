@@ -44,6 +44,12 @@ public enum ExcelMessage
     TheExcelTemplateHasAColumn0NotPresentInTheFindWindow,
     ThereAreNoResultsToWrite,
     CreateNew,
+
+    [Description("Export to Excel")]
+    ExportToExcel,
+
+    [Description("What do you want to export?")]
+    WhatDoYouWantToExport,
 }
 
 public enum ImportFromExcelMessage
@@ -103,7 +109,8 @@ public enum ImportFromExcelMessage
     DuplicatedNonConsecutive0Found1,
 
     [Description("Columns do not match.\nExcel columns: {0}\nQuery columns: {1}")]
-    ColumnsDoNotMatchExcelColumns0QueryColumns1
+    ColumnsDoNotMatchExcelColumns0QueryColumns1,
+
 }
 
 

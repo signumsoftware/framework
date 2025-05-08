@@ -616,6 +616,7 @@ export namespace SearchMessage {
   export const _0Results_N: MessageKey = new MessageKey("SearchMessage", "_0Results_N");
   export const First0Results_N: MessageKey = new MessageKey("SearchMessage", "First0Results_N");
   export const _01of2Results_N: MessageKey = new MessageKey("SearchMessage", "_01of2Results_N");
+  export const _0Rows_N: MessageKey = new MessageKey("SearchMessage", "_0Rows_N");
   export const Search: MessageKey = new MessageKey("SearchMessage", "Search");
   export const Refresh: MessageKey = new MessageKey("SearchMessage", "Refresh");
   export const Create: MessageKey = new MessageKey("SearchMessage", "Create");
@@ -731,6 +732,9 @@ export namespace SearchMessage {
   export const AllowToSelectMultipleValues: MessageKey = new MessageKey("SearchMessage", "AllowToSelectMultipleValues");
   export const YouAreEditingAColumnLetMeExplainWhatEachFieldDoes: MessageKey = new MessageKey("SearchMessage", "YouAreEditingAColumnLetMeExplainWhatEachFieldDoes");
   export const CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup: MessageKey = new MessageKey("SearchMessage", "CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup");
+  export const YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages: MessageKey = new MessageKey("SearchMessage", "YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages");
+  export const CurrentPage: MessageKey = new MessageKey("SearchMessage", "CurrentPage");
+  export const AllPages: MessageKey = new MessageKey("SearchMessage", "AllPages");
 }
 
 export namespace SelectorMessage {

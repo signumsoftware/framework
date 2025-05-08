@@ -238,6 +238,8 @@ public enum SearchMessage
     First0Results_N,
     [Description("{0} - {1} of {2} result[s].")]
     _01of2Results_N,
+    [Description("{0} row[s]")]
+    _0Rows_N,
     Search,
     Refresh,
     Create,
@@ -448,7 +450,16 @@ public enum SearchMessage
     [Description("You are editing a column, let me explain what each field does:")]
     YouAreEditingAColumnLetMeExplainWhatEachFieldDoes,
     [Description("Can be used as the first item, counts the number of rows on each group.")]
-    CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup
+    CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup,
+
+    [Description("You have selected all rows on this page. Do you want to {0} only these rows, or to all rows across all pages?")]
+    YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages,
+
+    [Description("Current Page")]
+    CurrentPage,
+
+    [Description("All Pages")]
+    AllPages,
 }
 
 public enum SelectorMessage
