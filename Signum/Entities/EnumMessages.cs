@@ -240,6 +240,8 @@ public enum SearchMessage
     _01of2Results_N,
     [Description("{0} row[s]")]
     _0Rows_N,
+    [Description("{0} group[s] with {1}")]
+    _0GroupWith1_N,
     Search,
     Refresh,
     Create,

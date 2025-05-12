@@ -287,7 +287,7 @@ export namespace ContextualOperations {
     coc.event!.persist();
 
     const lites = coc.context.container instanceof SearchControlLoaded ?
-      await coc.context.container.askAllLites(coc.operationInfo.niceName) :
+      await coc.context.container.askAllLites(coc.context, coc.operationInfo.niceName) :
       coc.context.lites;
 
     if (lites == null)
