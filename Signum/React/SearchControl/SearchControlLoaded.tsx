@@ -1266,9 +1266,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if (rt == null || fo == null)
       return undefined;
 
-    if (!this.allSelected())
-      return this.getSelectedEntities();
 
+    const selected = this.getSelectedEntities();
+
+    if (!this.allSelected())
+      return selected;
+
+    if (rt.totalElements != null && rt.totalElements == selected.length)
+      return selected;
 
     const pm = await SelectorModal.chooseElement<PaginationMode>([fo.pagination.mode, "All"], {
       title: action,
@@ -1285,7 +1290,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return undefined;
 
     if (pm != "All")
-      return this.getSelectedEntities();
+      return selected;
 
     const allLites = await Finder.fetchLites({
       queryName: fo!.queryKey,
