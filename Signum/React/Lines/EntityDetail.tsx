@@ -14,6 +14,7 @@ import { GroupHeader, HeaderType, Title } from './GroupHeader'
 
 export interface EntityDetailProps<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseProps<V> {
   avoidFieldSet?: boolean | HeaderType;
+  avoidFieldSetHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   showAsCheckBox?: boolean;
   onEntityLoaded?: () => void;
   showType?: boolean;
@@ -74,7 +75,7 @@ export const EntityDetail: <V extends ModifiableEntity | Lite<Entity> | null>(pr
             {renderButtons()}
           </Title>
         }
-        <div className="ms-4 mt-2">
+        <div className="ms-4 mt-2" {...p.avoidFieldSetHtmlAttributes}>
           <RenderEntity ctx={p.ctx} getComponent={p.getComponent} getViewPromise={p.getViewPromise} onEntityLoaded={p.onEntityLoaded} />
         </div>
       </div>

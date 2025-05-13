@@ -87,7 +87,7 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
         var elementPr = state.ctx.propertyRoute!.addLambda(a => a[0].element);
 
         state.columns = Dic.getKeys(elementPr.subMembers())
-          .filter(a => a != "Id")
+          .filter(a => a != "Id" && !a.startsWith("["))
           .map(memberName => ({
             property: eval("(function(e){ return e." + memberName.firstLower() + "; })")
           }) as EntityTableColumn<V, RS>);
