@@ -8,7 +8,7 @@ import {
   withoutPinned
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
-import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName, isNumberType } from '../Reflection'
+import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName, isNumberType, getTypeInfo } from '../Reflection'
 import { Navigator, ViewPromise } from '../Navigator'
 import * as AppContext from '../AppContext';
 import { AbortableRequest } from '../Services'
@@ -17,13 +17,13 @@ import * as Hooks from '../Hooks'
 import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
-import MultipliedMessage from './MultipliedMessage'
+import MultipliedMessage, { multiplyResultTokens } from './MultipliedMessage'
 import GroupByMessage from './GroupByMessage'
 import { renderContextualItems, ContextualItemsContext, ContextualMenuItem, MarkedRowsDictionary, MarkedRow, SearchableMenuItem, ContextMenuPack } from './ContextualItems'
 import ContextMenu, { ContextMenuPosition, getMouseEventPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
-import { FilterOperation, RefreshMode, SystemTimeMode } from '../Signum.DynamicQuery';
+import { FilterOperation, PaginationMode, RefreshMode, SystemTimeMode } from '../Signum.DynamicQuery';
 import SystemTimeEditor from './SystemTimeEditor';
 import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -33,13 +33,14 @@ import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { AutoFocus } from '../Components/AutoFocus';
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { Button, ButtonGroup, Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { getBreakpoint, Breakpoints, useForceUpdate } from '../Hooks'
+import { getBreakpoint, Breakpoints, useForceUpdate, useAPI } from '../Hooks'
 import { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core'
 import { similarToken } from '../Search'
 import { SearchHelp } from './SearchControlVisualTips'
 import { VisualTipIcon } from '../Basics/VisualTipIcon'
-import { SearchVisualTip } from '../Signum.Basics'
+import { SearchVisualTip, TypeEntity } from '../Signum.Basics'
 import { KeyNames } from '../Components'
+import { CollectionMessage } from '../Signum.External'
 
 export interface ColumnParsed {
   column: ColumnOptionParsed;
@@ -1260,6 +1261,65 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   //SELECTED ROWS
 
+  async askAllLites(cic: ContextualItemsContext<Entity>, action: string): Promise<Lite<Entity>[] | undefined> {
+    const rt = this.state.resultTable;
+    const fo = this.state.resultFindOptions;
+    if (rt == null || fo == null)
+      return undefined;
+
+    if (!this.allSelected())
+      return cic.lites;
+
+    if (fo.pagination.mode != "Paginate")
+      return cic.lites;
+
+    if (rt.totalElements != null && rt.totalElements == this.state.selectedRows!.length)
+      return cic.lites;
+
+    const tis = this.entityColumnTypeInfos();
+
+    const selected = cic.lites.groupBy(a => a.EntityType)
+      .map(g => niceCount(g.elements.length, getTypeInfo(g.key)))
+      .joinCommaHtml(CollectionMessage.And.niceToString());
+
+    const all = tis.length == 1 && !fo.groupResults && multiplyResultTokens(fo).length == 0 ?
+      niceCount(rt.totalElements!, tis.single()) :
+      <CountEntities fop={fo} tis={tis} />;
+
+
+    const pm = await SelectorModal.chooseElement<PaginationMode>([fo.pagination.mode, "All"], {
+      title: action,
+      message: SearchMessage.YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages.niceToString().formatHtml(<strong>{action}</strong>),
+      buttonDisplay: a =>
+        a == "All" ? 
+        <span>
+            {SearchMessage.AllPages.niceToString()}{" "}
+            ({fo.groupResults ? SearchMessage._0GroupWith1_N.niceToString().forGenderAndNumber(rt.totalElements).formatHtml(<strong>{rt.totalElements}</strong>, all) : all})
+          </span> :
+            <span>
+            {SearchMessage.CurrentPage.niceToString()}{" "}
+            ({fo.groupResults ? SearchMessage._0GroupWith1_N.niceToString().forGenderAndNumber(this.state.selectedRows!.length).formatHtml(<strong>{this.state.selectedRows!.length}</strong>, selected) : selected})
+          </span>,
+      buttonName: a => a,
+      size: "md",
+    });
+
+
+    if (pm == null)
+      return undefined;
+
+    if (pm != "All")
+      return cic.lites;
+
+    const allLites = await Finder.fetchLites({
+      queryName: fo!.queryKey,
+      filterOptions: Finder.toFilterOptions(fo!.filterOptions),
+      count: null,
+    });
+
+    return allLites;
+  }
+
   allSelected(): boolean {
     return this.state.resultTable != undefined && this.state.resultTable.rows.length != 0 && this.state.resultTable.rows.length == this.state.selectedRows!.length;
   }
@@ -2294,6 +2354,31 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
       </Dropdown.Menu>
     </Dropdown>
   );
+}
+
+function niceCount(count: number, ti: TypeInfo) {
+  return <span><strong>{count}</strong> {count == 1 ? ti.niceName : ti.nicePluralName}</span>;
+}
+
+function CountEntities(p: { fop: FindOptionsParsed, tis: TypeInfo[] }): React.ReactElement {
+
+  var counts = useAPI<number|ResultTable>(() => p.tis.length == 1 ?
+    Finder.getQueryValue(p.fop.queryKey,
+      Finder.toFilterOptions(p.fop.filterOptions)): 
+    Finder.getResultTable({
+      queryName: p.fop.queryKey,
+      filterOptions: Finder.toFilterOptions(p.fop.filterOptions),
+      groupResults: true,
+      columnOptions: [
+        { token: "Count" },
+        { token: "Entity.Type" },
+      ]
+    }), []);
+
+  return counts == undefined ? <span>…</span> :
+    typeof counts == "number" ? niceCount(counts, p.tis.single()) :
+      counts.rows.map(a => niceCount(a.columns[0], getTypeInfo(a.columns[1])))
+        .joinCommaHtml(CollectionMessage.And.niceToString())
 }
 
 export default SearchControlLoaded;
