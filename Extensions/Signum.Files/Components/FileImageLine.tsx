@@ -84,6 +84,7 @@ export const FileImageLine: <V extends (ModifiableEntity & IFile) | Lite<IFile &
             onFileCreated={c.handleFileChanged}
             typeName={p.ctx.propertyRoute!.typeReference().name}
             buttonCss={p.ctx.buttonClass}
+            fileDropCssClass={c.mandatoryClass ?? undefined}
             divHtmlAttributes={{ className: "sf-file-line-new" }} />
         }
       </FormGroup>
