@@ -762,7 +762,7 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
 
     private static SqlPreCommandSimple NotNullUpdate(ObjectName tab, IColumn tabCol, string defaultValue, bool goBefore)
     {
-        return new SqlPreCommandSimple($"UPDATE {tab} SET {tabCol.Name} = {defaultValue} WHERE {tabCol.Name} IS NULL") { GoBefore = goBefore };
+        return new SqlPreCommandSimple($"UPDATE {tab} SET {tabCol.Name} = {defaultValue} WHERE {tabCol.Name} IS NULL;") { GoBefore = goBefore };
     }
 
     private static bool DifferentDatabase(ObjectName name, ObjectName name2)
