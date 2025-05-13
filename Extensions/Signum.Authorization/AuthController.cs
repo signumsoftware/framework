@@ -75,6 +75,16 @@ public class AuthController : ControllerBase
         return new LoginResponse { userEntity = user, token = token, authenticationType = "api-key" };
     }
 
+    [HttpGet("api/auth/relogin")]
+    public LoginResponse Relogin()
+    {
+        var user = UserEntity.Current.Retrieve();
+
+        var token = AuthTokenServer.CreateToken(user);
+
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "relogin" };
+    }
+
     [HttpPost("api/auth/loginFromCookie"), SignumAllowAnonymous]
     public LoginResponse? LoginFromCookie()
     {
