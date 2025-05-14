@@ -68,7 +68,7 @@ export const FileImageLine: <V extends (ModifiableEntity & IFile) | Lite<IFile &
     const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
     return (
-      <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon}
         labelHtmlAttributes={p.labelHtmlAttributes}
         htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
         helpText={helpText}

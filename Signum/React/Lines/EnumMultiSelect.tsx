@@ -59,8 +59,7 @@ export const EnumMultiSelect: <V extends string>(props: EnumMultiSelectProps<V> 
 
   //TODO add TimeMachineIcon
   return (
-    <FormGroup ctx={p.ctx!}
-      label={p.label} labelIcon={p.labelIcon}
+    <FormGroup ctx={p.ctx!} error={p.error} label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={helpText}
       helpTextOnTop={helpTextOnTop}

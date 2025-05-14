@@ -63,4 +63,7 @@ public enum FileMessage
 
     [Description("Save the {0} when finished")]
     SaveThe0WhenFinished,
+
+    [Description("Add more files")]
+    AddMoreFiles
 }

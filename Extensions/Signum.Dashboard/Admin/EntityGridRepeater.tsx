@@ -210,7 +210,7 @@ export const EntityGridRepeater: <V extends ModifiableEntity & IGridEntity>(prop
     return null;
 
   return (
-    <fieldset className={classes("sf-grid-repeater-field sf-control-container", p.ctx.errorClass)} {...p.ctx.errorAttributes()}>
+    <fieldset className={classes("sf-grid-repeater-field sf-control-container", c.getErrorClass())} {...c.errorAttributes()}>
       <legend>
         <div>
           <span>{p.label}</span>

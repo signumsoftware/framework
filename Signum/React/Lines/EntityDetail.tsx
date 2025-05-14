@@ -59,8 +59,8 @@ export const EntityDetail: <V extends ModifiableEntity | Lite<Entity> | null>(pr
 
   if (p.avoidFieldSet)
     return (
-      <div className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass, p.ctx.value && "mb-4")}
-        {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }}>
+      <div className={classes("sf-entity-line-details", c.getErrorClass(), c.mandatoryClass, p.ctx.value && "mb-4")}
+        {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }}>
         {getTimeMachineIcon({ ctx: p.ctx})}
         {showAsCheckBox ?
           <label><Title type={p.avoidFieldSet == true ? "lead" : p.avoidFieldSet}>
@@ -84,8 +84,8 @@ export const EntityDetail: <V extends ModifiableEntity | Lite<Entity> | null>(pr
   return (
     <>
       {getTimeMachineIcon({ ctx: p.ctx, translateY:"150%" })}
-      <fieldset className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass)}
-        {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }}>
+      <fieldset className={classes("sf-entity-line-details", c.getErrorClass(), c.mandatoryClass)}
+        {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }}>
         <legend className="lead">
           {showAsCheckBox ?
             <label>

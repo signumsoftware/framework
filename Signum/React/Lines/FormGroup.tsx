@@ -11,6 +11,7 @@ export interface FormGroupProps {
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   helpText?: React.ReactNode;
   helpTextOnTop?: React.ReactNode;
+  error?: string | null | undefined;
   children?: (inputId: string) => React.ReactNode;
 }
 
@@ -19,8 +20,12 @@ export function FormGroup(p: FormGroupProps): React.JSX.Element {
   const controlId = React.useId();
 
   const tCtx = ctx as TypeContext<any>;
-  const errorClass = tCtx.errorClass;
-  const errorAtts = tCtx.errorAttributes && tCtx.errorAttributes();
+  const error = p.error === undefined ? tCtx.error : p.error;
+  const errorClass = error && "has-error";
+  const errorAtts = error && {
+    title: error,
+    "data-error-path": tCtx.prefix
+  };
 
   if (ctx.formGroupStyle == "None") {
     const c = p.children?.(controlId);
