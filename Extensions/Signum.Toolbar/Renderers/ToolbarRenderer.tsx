@@ -117,9 +117,13 @@ export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse
       if (res.url) {
         var url = res.url!;
         var isExternalLink = url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName);
+        var config = res.content && ToolbarClient.getConfig(res);
         return (
           <ToolbarNavItem key={key} title={res.label} isExternalLink={isExternalLink} extraIcons={renderExtraIcons(res.extraIcons, active, onAutoClose)}
-            active={res == active} icon={ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
+            active={res == active} icon={<>
+              {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
+              {config?.getCounter(res)}
+            </>}
             onClick={(e: React.MouseEvent<any>) => {
 
               Dic.getKeys(urlVariables).forEach(v => {
