@@ -277,7 +277,7 @@ export namespace AuthClient {
   
   
     export function relogin(): Promise<LoginResponse> {
-      return ajaxPost({ url: "/api/auth/relogin" }, undefined);
+      return ajaxGet({ url: "/api/auth/relogin" });
     }
   
   
