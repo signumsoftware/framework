@@ -104,8 +104,8 @@ export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse
     case "Header":
     case "Item":
       if (res.elements && res.elements.length) {
-        var title = res.label || getToString(res.content);
-        var icon = ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor);
+        const title = res.label || getToString(res.content);
+        const icon = ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor);
 
         return (
           <ToolbarDropdown parentTitle={title} icon={icon} key={key} toolbarMenuId={res.content?.id} extraIcons={renderExtraIcons(res.extraIcons, active, onAutoClose)}>
@@ -115,9 +115,9 @@ export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse
       }
 
       if (res.url) {
-        var url = res.url!;
-        var isExternalLink = url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName);
-        var config = res.content && ToolbarClient.getConfig(res);
+        let url = res.url!;
+        const isExternalLink = url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName);
+        const config = res.content && ToolbarClient.getConfig(res);
         return (
           <ToolbarNavItem key={key} title={res.label} isExternalLink={isExternalLink} extraIcons={renderExtraIcons(res.extraIcons, active, onAutoClose)}
             active={res == active} icon={<>
@@ -142,7 +142,7 @@ export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse
       }
 
       if (res.content) {
-        var config = ToolbarClient.getConfig(res);
+        const config = ToolbarClient.getConfig(res);
         if (!config)
           return <Nav.Item className="text-danger">{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
 
