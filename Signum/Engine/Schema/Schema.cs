@@ -462,7 +462,7 @@ public class Schema : IImplementationsFinder
                 })
                 .Combine(Spacing.Triple);
 
-            return SurrownExecuteAs(command);
+            return WithExecuteAs(command);
         }
     }
 
@@ -538,13 +538,13 @@ public class Schema : IImplementationsFinder
                 .Select(e => e())
                 .Combine(Spacing.Triple);
 
-            return SurrownExecuteAs(result);
+            return WithExecuteAs(result);
         }
     }
 
 
     public string? ExecuteAs;
-    private SqlPreCommand? SurrownExecuteAs(SqlPreCommand? command)
+    private SqlPreCommand? WithExecuteAs(SqlPreCommand? command)
     {
         if (ExecuteAs == null || command == null)
             return command;
