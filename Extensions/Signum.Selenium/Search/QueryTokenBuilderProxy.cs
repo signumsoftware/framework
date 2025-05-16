@@ -24,7 +24,7 @@ public class QueryTokenBuilderProxy
         {
             var prev = parts.Take(i).ToString(".");
 
-            var qt = new QueryTokenPartProxy(TokenElement(i).WaitPresent());
+            var qt = new QueryTokenPartProxy(TokenElement(i).WaitVisible());
 
             qt.Select(parts[i]);
         }
