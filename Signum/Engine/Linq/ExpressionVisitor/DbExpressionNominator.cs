@@ -1565,10 +1565,10 @@ internal class DbExpressionNominator : DbExpressionVisitor
             var timeSpan = new SqlLiteralExpression(typeof(TimeSpan), $"INTERVAL '1 {unit}'");
 
             if (d.Type.UnNullify() == typeof(DateTime))
-                return Add(Expression.Add(date, Expression.Multiply(value, timeSpan)).CopyMetadata(date));
+                return Add(Expression.Add(d, Expression.Multiply(v, timeSpan)).CopyMetadata(d));
 
             if (d.Type.UnNullify() == typeof(DateOnly))
-                return Add(Expression.Add(date, Expression.Multiply(value, timeSpan, miPseudoMult), miPseudoAdd).CopyMetadata(date));
+                return Add(Expression.Add(d, Expression.Multiply(v, timeSpan, miPseudoMult), miPseudoAdd).CopyMetadata(d));
 
             throw new UnexpectedValueException(d.Type);
         }
