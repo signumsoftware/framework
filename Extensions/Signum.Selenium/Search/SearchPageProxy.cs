@@ -5,7 +5,7 @@ namespace Signum.Selenium;
 public class SearchPageProxy : IDisposable
 {
     public WebDriver Selenium { get; private set; }
-    public SearchControlProxy SearchControl { get; private set; }
+    public SearchControlProxy SearchControl => new SearchControlProxy(Selenium.WaitElementVisible(By.CssSelector(".sf-search-page .sf-search-control")));
     public ResultTableProxy Results { get { return SearchControl.Results; } }
     public FiltersProxy Filters { get { return SearchControl.Filters; } }
     public PaginationSelectorProxy Pagination { get { return SearchControl.Pagination; } }
@@ -13,7 +13,7 @@ public class SearchPageProxy : IDisposable
     public SearchPageProxy(WebDriver selenium)
     {
         this.Selenium = selenium;
-        this.SearchControl = new SearchControlProxy(selenium.WaitElementVisible(By.CssSelector(".sf-search-page .sf-search-control")));
+        //this.SearchControl = new SearchControlProxy(selenium.WaitElementVisible(By.CssSelector(".sf-search-page .sf-search-control")));
     }
 
     public FrameModalProxy<T> Create<T>() where T : ModifiableEntity
