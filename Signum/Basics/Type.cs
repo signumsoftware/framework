@@ -21,22 +21,5 @@ public class TypeEntity : Entity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => this.CleanName);
-
-    public string ToStringOriginal() => As.Expression(() => this.CleanName);
-
-    static Expression<Func<TypeEntity, string>> ToStringCorrect;
-    static void ToStringCorrectInit()
-    {
-        ToStringCorrect = t => t.CleanName;
-    }
-
-    public bool IsType(Type type)
-    {
-        if (type == null)
-            throw new ArgumentException("type");
-
-        return ClassName == type.Name && Namespace == type.Namespace;
-    }
-
 }
 

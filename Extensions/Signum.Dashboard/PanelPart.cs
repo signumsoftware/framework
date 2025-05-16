@@ -137,6 +137,11 @@ public interface IPartEntity : IEntity
     void FromXml(XElement element, IFromXmlContext ctx);
 }
 
+public interface IPartPostRetrievingEntity : IPartEntity
+{
+    void PartPostRetrieving(DashboardEntity dashboard); //Parent not bound yet
+}
+
 public static class PanelPartExtensions
 {
     public static DashboardEntity GetDashboard(this IPartEntity e)

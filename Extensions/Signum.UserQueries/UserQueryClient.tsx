@@ -11,7 +11,7 @@ import { Constructor } from '@framework/Constructor'
 import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption, withoutPinned, withoutAggregate, hasAggregate, FilterOptionParsed } from '@framework/FindOptions'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
-import { UserQueryEntity, UserQueryPermission, UserQueryMessage, ValueUserQueryListPartEntity, UserQueryPartEntity, UserQueryLiteModel } from './Signum.UserQueries'
+import { UserQueryEntity, UserQueryPermission, UserQueryMessage, ValueUserQueryListPartEntity, UserQueryPartEntity, UserQueryLiteModel, BigValuePartEntity } from './Signum.UserQueries'
 import UserQueryMenu from './UserQueryMenu'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { DashboardClient, CreateNewButton } from '../Signum.Dashboard/DashboardClient'
@@ -91,6 +91,7 @@ export namespace UserQueryClient {
     Navigator.addSettings(new EntitySettings(UserQueryEntity, e => import('./Templates/UserQuery'), { isCreable: "Never" }));
     Navigator.addSettings(new EntitySettings(ValueUserQueryListPartEntity, e => import('./Dashboard/Admin/ValueUserQueryListPart')));
     Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Dashboard/Admin/UserQueryPart')));
+    Navigator.addSettings(new EntitySettings(BigValuePartEntity, e => import('./Dashboard/Admin/BigValuePart')));
   
     SearchControlLoaded.onDrilldown = async (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => {
       return onDrilldownSearchControl(scl, row, options);
@@ -107,7 +108,7 @@ export namespace UserQueryClient {
       component: () => import('./Dashboard/View/UserQueryPart').then((a: any) => a.default),
       defaultIcon: () => ({ icon: "rectangle-list", iconColor: "#2E86C1" }),
       defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
-      withPanel: c => c.renderMode != "BigValue",
+      withPanel: c => true,
       getQueryNames: c => [c.userQuery?.query].notNull(),
       handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
         (c, e, cdRef, ev) => {
@@ -138,6 +139,15 @@ export namespace UserQueryClient {
   
         }} />
       }
+    });
+
+    DashboardClient.registerRenderer(BigValuePartEntity, {
+      waitForInvalidation: true,
+      component: () => import('./Dashboard/View/BigValuePart').then((a: any) => a.default),
+      defaultIcon: () => ({ icon: "circle", iconColor: "#2E86C1" }),
+      defaultTitle: c => (c.userQuery ? translated(c.userQuery, uc => uc.displayName) : c.valueToken?.token?.niceName ?? ""),
+      withPanel: c => false,
+      getQueryNames: c => [c.userQuery?.query].notNull(),
     });
   }
   

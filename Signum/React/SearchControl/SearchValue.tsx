@@ -19,7 +19,7 @@ import { TimeMachineColors } from '../Lines/TimeMachineIcon'
 export interface SearchValueProps {
   ctx?: StyleContext;
   id?: string;
-  valueToken?: string | QueryTokenString<any>;
+  valueToken?: string | QueryTokenString<any> | QueryToken;
   findOptions: FindOptions;
   multipleValues?: { vertical?: boolean, showType?: boolean };
   isLink?: boolean;
@@ -78,6 +78,9 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
   const valueToken = useAPI(() => {
     if (p.valueToken == null)
       return Promise.resolve(null);
+
+    if ((p.valueToken as QueryToken).key)
+      return p.valueToken as QueryToken;
 
     return Finder.parseSingleToken(p.findOptions.queryName, p.valueToken.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)
       .then(st => {

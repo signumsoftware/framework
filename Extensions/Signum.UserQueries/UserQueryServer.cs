@@ -1,6 +1,7 @@
 using Signum.UserAssets;
 using Microsoft.AspNetCore.Builder;
 using Signum.API;
+using Signum.Dashboard;
 
 namespace Signum.UserQueries;
 
@@ -18,6 +19,11 @@ public static class UserQueryServer
                 var qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
                 uq.ParseData(qd);
             }
+        });
+
+        SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((BigValuePartEntity uq) =>
+        {
+            uq.ParseData(uq.GetDashboard());
         });
 
         EntityPackTS.AddExtension += ep =>

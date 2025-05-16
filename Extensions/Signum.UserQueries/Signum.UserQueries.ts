@@ -18,6 +18,14 @@ export type AutoUpdate =
   "InteractionGroup" |
   "Dashboard";
 
+export const BigValuePartEntity: Type<BigValuePartEntity> = new Type<BigValuePartEntity>("BigValuePart");
+export interface BigValuePartEntity extends Entities.Entity, Dashboard.IPartPostRetrievingEntity, Dashboard.IPartEntity {
+  Type: "BigValuePart";
+  valueToken: Queries.QueryTokenEmbedded | null;
+  userQuery: UserQueryEntity | null;
+  requiresTitle: boolean;
+}
+
 export const HealthCheckConditionEmbedded: Type<HealthCheckConditionEmbedded> = new Type<HealthCheckConditionEmbedded>("HealthCheckConditionEmbedded");
 export interface HealthCheckConditionEmbedded extends Entities.EmbeddedEntity {
   Type: "HealthCheckConditionEmbedded";
@@ -102,8 +110,6 @@ export interface UserQueryPartEntity extends Entities.Entity, Dashboard.IPartEnt
   Type: "UserQueryPart";
   userQuery: UserQueryEntity;
   isQueryCached: boolean;
-  renderMode: UserQueryPartRenderMode;
-  aggregateFromSummaryHeader: boolean;
   autoUpdate: AutoUpdate;
   allowSelection: boolean;
   showFooter: boolean;
@@ -111,11 +117,6 @@ export interface UserQueryPartEntity extends Entities.Entity, Dashboard.IPartEnt
   allowMaxHeight: boolean;
   requiresTitle: boolean;
 }
-
-export const UserQueryPartRenderMode: EnumType<UserQueryPartRenderMode> = new EnumType<UserQueryPartRenderMode>("UserQueryPartRenderMode");
-export type UserQueryPartRenderMode =
-  "SearchControl" |
-  "BigValue";
 
 export namespace UserQueryPermission {
   export const ViewUserQuery : Basics.PermissionSymbol = registerSymbol("Permission", "UserQueryPermission.ViewUserQuery");
