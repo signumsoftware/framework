@@ -77,7 +77,7 @@ public class SearchControlProxy
 
     public void ToggleFilters(bool show)
     {
-        ToggleFiltersButton.Find().Click();
+        ToggleFiltersButton.Find().SafeClick();
         if (show)
             FiltersPanel.WaitVisible();
         else
