@@ -27,7 +27,7 @@ public static class CaseActivityLogic
 
     [AutoExpressionField]
     public static bool CurrentUserHasNotification(this ICaseMainEntity e) =>
-        As.Expression(() => e.CaseActivities().SelectMany(a => a.Notifications()).Any(a => a.User.Is(UserEntity.Current)));
+        As.Expression(() => e.CaseActivities().SelectMany(a => a.Notifications()).Any(cn => IsForMe.Evaluate(cn)));
 
     [AutoExpressionField]
     public static IQueryable<CaseEntity> Cases(this WorkflowEntity w) =>
@@ -35,7 +35,7 @@ public static class CaseActivityLogic
 
     [AutoExpressionField]
     public static bool CurrentUserHasNotification(this CaseActivityEntity ca) =>
-        As.Expression(() => ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current) &&
+        As.Expression(() => ca.Notifications().Any(cn => IsForMe.Evaluate(cn) &&
                                              (cn.State == CaseNotificationState.New ||
                                               cn.State == CaseNotificationState.Opened ||
                                               cn.State == CaseNotificationState.InProgress)));
@@ -89,6 +89,7 @@ public static class CaseActivityLogic
     public static CaseActivityExecutedTimerEntity? LastExecutedTimer(this CaseActivityEntity ca, Lite<WorkflowEventEntity> we) =>
         As.Expression(() => ca.ExecutedTimers().Where(a => a.BoundaryEvent.Is(we)).OrderByDescending(a => a.CreationDate).FirstOrDefault());
 
+    public static Expression<Func<CaseNotificationEntity, bool>> IsForMe = n => n.User.Is(UserEntity.Current); // For Deputy scenarios
     public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -177,7 +178,7 @@ public static class CaseActivityLogic
                             notification.Save();
                         }
                     }
-                     
+
                     c.FinishDate = Clock.Now;
                     CancelEntity(c.MainEntity, c);
                     c.Save();
@@ -214,12 +215,12 @@ public static class CaseActivityLogic
 
             IQueryable<CaseActivityEntity> RejectedCases(CaseEntity c)
             {
-                return c.CaseActivities().Where(a => a.DoneBy != null && ( a.DoneType == DoneType.Next || a.DoneType == DoneType.Recompose)).OrderByDescending(a => a.DoneDate).Take(1);
+                return c.CaseActivities().Where(a => a.DoneBy != null && (a.DoneType == DoneType.Next || a.DoneType == DoneType.Recompose)).OrderByDescending(a => a.DoneDate).Take(1);
             }
 
             new Graph<CaseEntity>.Execute(CaseOperation.Reactivate)
             {
-                CanExecute = c => c.FinishDate != null &&  CancelledCases(c).Any()  ? null : CaseActivityMessage.NotCanceled.NiceToString(),
+                CanExecute = c => c.FinishDate != null && CancelledCases(c).Any() ? null : CaseActivityMessage.NotCanceled.NiceToString(),
                 Execute = (c, _) =>
                 {
                     ReactivateEntity(c.MainEntity, c);
@@ -386,10 +387,10 @@ public static class CaseActivityLogic
                 }.Save(),
             }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
-            
+
             QueryLogic.Queries.Register(CaseActivityQuery.Inbox, () => DynamicQueryCore.Auto(
                     from cn in Database.Query<CaseNotificationEntity>()
-                    where cn.User.Is(UserEntity.Current)
+                    where IsForMe.Evaluate(cn)
                     let ca = cn.CaseActivity.Entity
                     let previous = ca.Previous!.Entity
                     select new
@@ -412,13 +413,14 @@ public static class CaseActivityLogic
                         SenderNote = previous.Note,
                         cn.State,
                         cn.Actor,
+                        cn.User,
                     })
                     .ColumnDisplayName(a => a.Activity, () => InboxMessage.Activity.NiceToString())
                     .ColumnDisplayName(a => a.Sender, () => InboxMessage.Sender.NiceToString())
                     .ColumnDisplayName(a => a.SenderNote, () => InboxMessage.SenderNote.NiceToString())
                     );
 
-          
+
             CaseActivityGraph.Register();
             OverrideCaseActivityMixin(sb);
         }
@@ -488,7 +490,7 @@ public static class CaseActivityLogic
 
         Options[typeof(T)] = new WorkflowOptions(constructor,
             saveEntity: e => save((T)e),
-            cancel: cancel  == null ? null : ((e, c) => cancel((T)e, c)),
+            cancel: cancel == null ? null : ((e, c) => cancel((T)e, c)),
             reactivate: reactivate == null ? null : ((e, c) => reactivate((T)e, c)));
 
         return fi;
@@ -508,7 +510,7 @@ public static class CaseActivityLogic
         using (AuthLogic.Disable())
             return Database.Query<CaseNotificationEntity>()
                 .Where(n => n.CaseActivity.Entity.Case.MainEntity == mainEntity && n.CaseActivity.Entity.DoneDate == null)
-                .Where(n => n.User.Is(UserEntity.Current) && (n.State == CaseNotificationState.New || n.State == CaseNotificationState.Opened))
+                .Where(n => IsForMe.Evaluate(n) && (n.State == CaseNotificationState.New || n.State == CaseNotificationState.Opened))
                 .UnsafeUpdate()
                 .Set(n => n.State, n => CaseNotificationState.InProgress)
                 .Execute();
@@ -614,13 +616,56 @@ public static class CaseActivityLogic
 
         if (ca.DoneBy == null)
             ca.Notifications()
-              .Where(n => n.User.Is(UserEntity.Current) && n.State == CaseNotificationState.New)
+              .Where(n => IsForMe.Evaluate(n) && n.State == CaseNotificationState.New)
               .UnsafeUpdate()
               .Set(a => a.State, a => CaseNotificationState.Opened)
               .Execute();
 
         return ca;
     }
+
+    public static List<Lite<Entity>> GetActors(this WorkflowLaneEntity lane, CaseActivityEntity? caseActivity)
+    {
+        if (caseActivity != null)
+        {
+            if (lane.ActorsEval == null)
+                return lane.Actors.ToList();
+
+            var newActors = lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity.Case, caseActivity, null)).EmptyIfNull().ToList();
+
+            if (lane.CombineActorAndActorEvalWhenContinuing)
+                newActors.AddRange(lane.Actors);
+            
+
+            return newActors.Distinct().ToList();
+        }
+        else
+        {
+            if (lane.UseActorEvalForStart)
+            {
+                return lane.ActorsEval!.Algorithm.GetActors(null!, new WorkflowTransitionContext(null, null, null)).Distinct().ToList();
+            }
+
+            return lane.Actors.ToList();
+        }
+    }
+
+
+    public static List<UserEntity> GetActorUsers(this WorkflowLaneEntity lane, CaseActivityEntity? caseActivity)
+    {
+        var actors = lane.GetActors(caseActivity);
+
+        var users = actors.OfType<Lite<UserEntity>>().Chunk(100)
+            .SelectMany(gr => Database.Query<UserEntity>().Where(u => gr.Contains(u.ToLite())))
+            .ToList();
+
+        var nonUsers = actors.Where(a => a is not Lite<UserEntity>)
+            .SelectMany(a => Database.Query<UserEntity>().Where(u => WorkflowLogic.IsUserActorForNotifications.Evaluate(u, a)).ToList())
+            .ToList();
+
+        return users.Concat(nonUsers).Distinct().ToList();
+    }
+
 
     public static void InsertCaseActivityNotifications(CaseActivityEntity caseActivity)
     {
@@ -631,27 +676,20 @@ public static class CaseActivityLogic
             using (ExecutionMode.Global())
             {
                 var lane = caseActivity.WorkflowActivity.Lane;
-                var actors = lane.Actors.ToList();
-                if (lane.ActorsEval != null)
-                {
-                    var newActors = lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity.Case, caseActivity, null)).EmptyIfNull().ToList();
 
-                    if (lane.CombineActorAndActorEvalWhenContinuing)
-                        actors.AddRange(newActors);
-                    else
-                        actors = newActors;
-                }
+                var actors = lane.GetActors(caseActivity);
 
-                var notifications = actors.Distinct().SelectMany(a =>
-                Database.Query<UserEntity>()
-                .Where(u => WorkflowLogic.IsUserActorForNotifications.Evaluate(u, a))
-                .Select(u => new CaseNotificationEntity
-                {
-                    CaseActivity = caseActivity.ToLite(),
-                    Actor = a,
-                    State = CaseNotificationState.New,
-                    User = u.ToLite()
-                })).ToList();
+                var notifications = (from a in actors
+                                     from u in (a is Lite<UserEntity> u ? [u] : Database.Query<UserEntity>().Where(u => WorkflowLogic.IsUserActorForNotifications.Evaluate(u, a)).Select(u => u.ToLite()).ToList())
+                                     select (a, u))
+                                     .DistinctBy(p => p.u)
+                                     .Select(p => new CaseNotificationEntity
+                                     {
+                                         CaseActivity = caseActivity.ToLite(),
+                                         Actor = p.a,
+                                         State = CaseNotificationState.New,
+                                         User = p.u
+                                     }).ToList();
 
                 if (!notifications.Any())
                     throw new ApplicationException(CaseActivityMessage.NoActorsFoundToInsertCaseActivityNotifications.NiceToString());
@@ -907,12 +945,12 @@ public static class CaseActivityLogic
             {
                 FromStates = { CaseActivityState.Pending },
                 ToStates = { CaseActivityState.Pending },
-                CanExecute = c => c.Notifications().Any(a => a.User.Is(UserEntity.Current) && (a.State == CaseNotificationState.InProgress || a.State == CaseNotificationState.Opened)) ? null :
+                CanExecute = c => c.Notifications().Any(cn => IsForMe.Evaluate(cn) && (cn.State == CaseNotificationState.InProgress || cn.State == CaseNotificationState.Opened)) ? null :
                     CaseActivityMessage.NoOpenedOrInProgressNotificationsFound.NiceToString(),
                 Execute = (ca, args) =>
                 {
                     ca.Notifications()
-                    .Where(cn => cn.User.Is(UserEntity.Current) && (cn.State == CaseNotificationState.InProgress || cn.State == CaseNotificationState.Opened))
+                    .Where(cn => IsForMe.Evaluate(cn) && (cn.State == CaseNotificationState.InProgress || cn.State == CaseNotificationState.Opened))
                     .UnsafeUpdate()
                     .Set(cn => cn.State, cn => CaseNotificationState.New)
                     .Execute();
@@ -1027,7 +1065,7 @@ public static class CaseActivityLogic
         {
             if (((WorkflowActivityEntity)ca.WorkflowActivity).RequiresOpen)
             {
-                if (!ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current) && cn.State != CaseNotificationState.New))
+                if (!ca.Notifications().Any(cn => IsForMe.Evaluate(cn) && cn.State != CaseNotificationState.New))
                     throw new ApplicationException(CaseActivityMessage.TheActivity0RequiresToBeOpened.NiceToString(ca.WorkflowActivity));
             }
         }
@@ -1207,50 +1245,58 @@ public static class CaseActivityLogic
 
         internal static void TryToRecompose(CaseEntity childCase)
         {
-            if (Database.Query<CaseEntity>().Where(cc => cc.ParentCase.Is(childCase.ParentCase) && cc.Workflow.Is(childCase.Workflow)).All(a => a.FinishDate.HasValue))
+            using (AuthLogic.Disable()) //Type Conditions may not give access to parent case
             {
-                var decompositionCaseActivity = childCase.DecompositionSurrogateActivity();
-                if (decompositionCaseActivity.DoneDate != null)
-                    throw new InvalidOperationException("The DecompositionCaseActivity is already finished");
+                if (Database.Query<CaseEntity>().Where(cc => cc.ParentCase.Is(childCase.ParentCase) && cc.Workflow.Is(childCase.Workflow)).All(a => a.FinishDate.HasValue))
+                {
+                    var decompositionCaseActivity = childCase.DecompositionSurrogateActivity();
+                    if (decompositionCaseActivity.DoneDate != null)
+                        throw new InvalidOperationException("The DecompositionCaseActivity is already finished");
 
-                var lastActivitiesNotes = Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(childCase.ParentCase)).Select(c => c.CaseActivities().OrderByDescending(ca => ca.DoneDate).FirstOrDefault())
-                    .Where(ca => ca != null)
-                    .Select(ca =>  new { ca!.DoneBy, ca!.Note})
-                    .ToList()
-                    .Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
+                    var lastActivitiesNotes = Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(childCase.ParentCase)).Select(c => c.CaseActivities().OrderByDescending(ca => ca.DoneDate).FirstOrDefault())
+                        .Where(ca => ca != null)
+                        .Select(ca => new { ca!.DoneBy, ca!.Note })
+                        .ToList()
+                        .Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
 
-                decompositionCaseActivity.Note = lastActivitiesNotes;
-                ExecuteStep(decompositionCaseActivity, DoneType.Recompose, null, null);
+                    decompositionCaseActivity.Note = lastActivitiesNotes;
+                    ExecuteStep(decompositionCaseActivity, DoneType.Recompose, null, null);
+                }
             }
-        }
+        } 
 
         private static void Decompose(CaseEntity @case, CaseActivityEntity? previous, WorkflowActivityEntity decActivity, WorkflowConnectionEntity conn, WorkflowExecuteStepContext ctx)
         {
-            var surrogate = InsertNewCaseActivity(@case, decActivity, previous);
-            ctx.NotifyTransitionContext(surrogate);
-            var subEntities = decActivity.SubWorkflow!.SubEntitiesEval.Algorithm.GetSubEntities(@case.MainEntity, new WorkflowTransitionContext(@case, previous, conn));
-            if (decActivity.Type == WorkflowActivityType.CallWorkflow && subEntities.Count > 1)
-                throw new InvalidOperationException("More than one entity generated using CallWorkflow. Use DecompositionWorkflow instead.");
-
-            if (subEntities.IsEmpty())
-                ExecuteStep(surrogate, DoneType.Recompose, null, null);
-            else
+            using (AuthLogic.Disable()) //Type Conditions may not give access to parent case
             {
-                var subWorkflow = decActivity.SubWorkflow.Workflow;
-                foreach (var se in subEntities)
+                var surrogate = InsertNewCaseActivity(@case, decActivity, previous);
+                ctx.NotifyTransitionContext(surrogate);
+                var subEntities = decActivity.SubWorkflow!.SubEntitiesEval.Algorithm.GetSubEntities(@case.MainEntity, new WorkflowTransitionContext(@case, previous, conn));
+                if (decActivity.Type == WorkflowActivityType.CallWorkflow && subEntities.Count > 1)
+                    throw new InvalidOperationException("More than one entity generated using CallWorkflow. Use DecompositionWorkflow instead.");
+
+                if (subEntities.IsEmpty())
+                    ExecuteStep(surrogate, DoneType.Recompose, null, null);
+                else
                 {
-                    var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseActivityFromWorkflow, se, @case.ToLite());
-                    caseActivity.Previous = surrogate.ToLite();
-                    caseActivity.Execute(CaseActivityOperation.Register);
+                    var subWorkflow = decActivity.SubWorkflow.Workflow;
+                    foreach (var se in subEntities)
+                    {
+                        var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseActivityFromWorkflow, se, @case.ToLite());
+                        caseActivity.Previous = surrogate.ToLite();
+                        caseActivity.Execute(CaseActivityOperation.Register);
+                    }
                 }
             }
         }
+
 
         private static bool FindNext(WorkflowConnectionEntity connection, WorkflowExecuteStepContext ctx)
         {
             ctx.ExecuteConnection(connection);
             return FindNext(connection.To, ctx);
         }
+
 
         private static bool FindNext(IWorkflowNodeEntity next, WorkflowExecuteStepContext ctx)
         {
@@ -1582,8 +1628,9 @@ public static class CaseActivityLogic
         ca.Save();
 
         ca.Notifications()
+           .DisableQueryFilter()
            .UnsafeUpdate()
-           .Set(a => a.State, a => a.User.Is(UserEntity.Current) ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
+           .Set(a => a.State, cn =>  IsForMe.Evaluate(cn) ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
            .Execute();
     }
 

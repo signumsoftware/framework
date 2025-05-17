@@ -81,17 +81,15 @@ public static class UserChartLogic
                     return null;
                 };
 
-                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += q =>
+                sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += q =>
                 {
                     var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart.Query.Is(q)));
                     var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserChartPartEntity>().Where(uqp => uqp.UserChart.Query.Is(q)));
                     return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
                 };
 
-                sb.Schema.Table<UserChartEntity>().PreDeleteSqlSync += arg =>
+                sb.Schema.EntityEvents<UserChartEntity>().PreDeleteSqlSync += uc =>
                 {
-                    var uc = (UserChartEntity)arg;
-
                     var mlistElems = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
                         .Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart.Is(uc)));
 
@@ -118,20 +116,16 @@ public static class UserChartLogic
                     return null;
                 };
 
-                sb.Schema.Table<UserChartEntity>().PreDeleteSqlSync += arg =>
+                sb.Schema.EntityEvents<UserChartEntity>().PreDeleteSqlSync += uc =>
                 {
-                    var uc = (UserChartEntity)arg;
-
                     var mlistElems2 = Administrator.UnsafeDeletePreCommandMList((CombinedUserChartPartEntity e) => e.UserCharts,
                             Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => mle.Element.UserChart.Is(uc)));
 
                     return SqlPreCommand.Combine(Spacing.Simple, mlistElems2);
                 };
 
-                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += arg =>
+                sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += query =>
                 {
-                    var query = (QueryEntity)arg;
-
                     var parts = Administrator.UnsafeDeletePreCommandMList((CombinedUserChartPartEntity e) => e.UserCharts,
                             Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => mle.Element.UserChart.Query.Is(query)));
                     return SqlPreCommand.Combine(Spacing.Simple, parts);
@@ -144,7 +138,7 @@ public static class UserChartLogic
 
             sb.Schema.EntityEvents<UserChartEntity>().Retrieved += ChartLogic_Retrieved;
 
-            sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
+            sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += e =>
               Administrator.UnsafeDeletePreCommand(Database.Query<UserChartEntity>().Where(a => a.Query.Is(e)));
 
 
@@ -257,6 +251,7 @@ public static class UserChartLogic
             Filters = userChart.Filters.ToFilterList(),
             Parameters = userChart.Parameters.ToMList(),
             MaxRows = userChart.MaxRows,
+            ChartTimeSeries = userChart.ChartTimeSeries,
         };
 
         cr.Columns.ZipForeach(userChart.Columns, (a, b) =>
@@ -289,11 +284,8 @@ public static class UserChartLogic
     {
         TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, conditionExpression);
 
-        TypeConditionLogic.Register<UserChartPartEntity>(typeCondition,
-             ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
-
-        TypeConditionLogic.Register<CombinedUserChartPartEntity>(typeCondition,
-            ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
+        DashboardLogic.RegisterTypeConditionForPart<UserChartPartEntity>(typeCondition);
+        DashboardLogic.RegisterTypeConditionForPart<CombinedUserChartPartEntity>(typeCondition);
     }
 
     public static void RegisterTranslatableRoutes()

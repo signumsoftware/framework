@@ -53,6 +53,8 @@ public class AuthController : ControllerBase
 
         AuthServer.AddUserSession(ControllerContext, user);
 
+        user.FillTypeConditions();
+
         if (data.rememberMe == true)
         {
             UserTicketServer.OnSaveCookie(ControllerContext);
@@ -71,6 +73,16 @@ public class AuthController : ControllerBase
         var token = AuthTokenServer.CreateToken(user);
 
         return new LoginResponse { userEntity = user, token = token, authenticationType = "api-key" };
+    }
+
+    [HttpGet("api/auth/relogin")]
+    public LoginResponse Relogin()
+    {
+        var user = UserEntity.Current.Retrieve();
+
+        var token = AuthTokenServer.CreateToken(user);
+
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "relogin" };
     }
 
     [HttpPost("api/auth/loginFromCookie"), SignumAllowAnonymous]

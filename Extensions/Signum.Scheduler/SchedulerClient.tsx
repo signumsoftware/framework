@@ -18,7 +18,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace SchedulerClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Scheduler", () => import("./Changelog"));
   
@@ -58,7 +58,7 @@ export namespace SchedulerClient {
   }
   
   
-  export module API {
+  export namespace API {
   
     export function start(): Promise<void> {
       return ajaxPost({ url: "/api/scheduler/start" }, undefined);

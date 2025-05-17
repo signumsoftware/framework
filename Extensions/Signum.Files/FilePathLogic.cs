@@ -30,7 +30,6 @@ public static class FilePathLogic
                     p.Suffix
                 });
 
-            FilePathEntity.CalculatePrefixPair = CalculatePrefixPair;
             sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
             sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
 
@@ -51,7 +50,7 @@ public static class FilePathLogic
                                 var preSufix = ofp.Suffix.Substring(0, ofp.Suffix.Length - ofp.FileName.Length);
                                 fp.Suffix = Path.Combine(preSufix, fp.FileName);
                                 fp.Save();
-                                fp.FileType.GetAlgorithm().MoveFile(ofp, fp);
+                                fp.FileType.GetAlgorithm().MoveFile(ofp, fp,true);
                                 tr.Commit();
                             }
                         }
@@ -60,12 +59,6 @@ public static class FilePathLogic
             }.Register();
 
         }
-    }
-
-    static PrefixPair CalculatePrefixPair(FilePathEntity fp)
-    {
-        using (new EntityCache(EntityCacheType.ForceNew))
-            return fp.FileType.GetAlgorithm().GetPrefixPair(fp);
     }
 
     static readonly Variable<bool> avoidDeleteFiles = Statics.ThreadVariable<bool>("filePathUnsafeMode");
@@ -99,7 +92,7 @@ public static class FilePathLogic
 
     public static void FilePath_PreSaving(FilePathEntity fp, PreSavingContext ctx)
     {
-        if (fp.IsNew && !fp.KeepSuffix)
+        if (fp.Suffix == null && fp.BinaryFile != null)
         {
             var alg = fp.FileType.GetAlgorithm();
             alg.ValidateFile(fp);
@@ -113,8 +106,9 @@ public static class FilePathLogic
                 Transaction.PreRealCommit += data =>
                 {
                     //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
-                    var a = fp; //For ebuggin
+                    var a = fp; //For debugging
                     task.Wait();
+                    fp.CleanBinaryFile();
                 };
             }
         }
@@ -126,6 +120,13 @@ public static class FilePathLogic
     {
         return fp.BinaryFile ?? fp.FileType.GetAlgorithm().ReadAllBytes(fp);
     }
+
+
+    public static string? GetAsString(this FilePathEntity fp)
+    {
+        return  fp.FileType.GetAlgorithm().ReadAsStringUTF8(fp);
+    }
+
 
     public static Stream OpenRead(this FilePathEntity fp)
     {

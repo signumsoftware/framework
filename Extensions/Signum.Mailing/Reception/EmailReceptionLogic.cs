@@ -135,19 +135,6 @@ public static class EmailReceptionLogic
                 if (!EmailLogic.Configuration.ReciveEmails)
                     throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");
 
-
-                var hour = DateTime.Now.Hour;
-                if (0 < hour && hour < 6)
-                {
-                    if(ctx!=null)
-                    ctx.StringBuilder.AppendLine("Avoid");
-                    return null;
-                }
-                    
-
-
-
-
                 foreach (var item in Database.Query<EmailReceptionConfigurationEntity>().Where(a => a.Active).ToList())
                 {
                     ctx.CancellationToken.ThrowIfCancellationRequested();

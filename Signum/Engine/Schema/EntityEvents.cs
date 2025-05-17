@@ -1,5 +1,6 @@
 using System.Collections;
 using Signum.Engine.Linq;
+using Signum.Engine.Sync;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps;
@@ -7,8 +8,19 @@ namespace Signum.Engine.Maps;
 public class EntityEvents<T> : IEntityEvents
         where T : Entity
 {
+    /// <summary>
+    /// Before validation
+    /// </summary>
     public event PreSavingEventHandler<T>? PreSaving;
+
+    /// <summary>
+    /// After validation, before DB Save
+    /// </summary>
     public event SavingEventHandler<T>? Saving;
+
+    /// <summary>
+    /// After DB Save and clean modifications, but inside transaction
+    /// </summary>
     public event SavedEventHandler<T>? Saved;
 
     public event AlternativeRetrieveEventHandler<T>? AlternativeRetrieve;
@@ -21,6 +33,8 @@ public class EntityEvents<T> : IEntityEvents
     public event PreUnsafeDeleteHandler<T>? PreUnsafeDelete;
     public event PreUnsafeMListDeleteHandler<T>? PreUnsafeMListDelete;
 
+    public event Func<T, SqlPreCommand?> PreDeleteSqlSync;
+
     public event PreUnsafeUpdateHandler<T>? PreUnsafeUpdate;
 
     public event PreUnsafeInsertHandler<T>? PreUnsafeInsert;
@@ -29,7 +43,7 @@ public class EntityEvents<T> : IEntityEvents
     public Dictionary<PropertyRoute, IAdditionalBinding>? AdditionalBindings { get; private set; }
 
     /// <param name="valueFunction">For Caching scenarios</param>
-    public void RegisterBinding<M>(PropertyRoute pr, Func<bool> shouldSet, Expression<Func<T, PrimaryKey? /*rowId*/, M>> valueExpression, Func<T, PrimaryKey? /*rowId*/, IRetriever, M>? valueFunction = null)
+    public void RegisterBinding<M>(PropertyRoute pr, Func<bool> shouldSet, Func<Expression<Func<T, PrimaryKey? /*rowId*/, M>>> valueExpression, Func<T, PrimaryKey? /*rowId*/, IRetriever, M>? valueFunction = null)
     {
         if (AdditionalBindings == null)
             AdditionalBindings = new Dictionary<PropertyRoute, IAdditionalBinding>();
@@ -38,7 +52,7 @@ public class EntityEvents<T> : IEntityEvents
     }
 
     /// <param name="valueFunction">For Caching scenarios</param>
-    public void RegisterBinding<M>(Expression<Func<T, M>> field, Func<bool> shouldSet, Expression<Func<T, PrimaryKey? /*rowId*/, M>> valueExpression, Func<T, PrimaryKey? /*rowId*/, IRetriever, M>? valueFunction = null)
+    public void RegisterBinding<M>(Expression<Func<T, M>> field, Func<bool> shouldSet, Func<Expression<Func<T, PrimaryKey? /*rowId*/, M>>> valueExpression, Func<T, PrimaryKey? /*rowId*/, IRetriever, M>? valueFunction = null)
     {
         var ma = (MemberExpression)field.Body;
 
@@ -74,6 +88,15 @@ public class EntityEvents<T> : IEntityEvents
                 result = Disposable.Combine(result, action(mlistQuery, entityQuery));
 
         return result;
+    }
+
+
+    internal SqlPreCommand? OnPreDeleteSqlSync(T entity)
+    {
+        if (PreDeleteSqlSync == null)
+            return null;
+
+        return PreDeleteSqlSync.GetInvocationListTyped().Reverse().Select(a => a(entity)).Combine(Spacing.Simple);
     }
 
     IDisposable? IEntityEvents.OnPreUnsafeUpdate(IUpdateable update)
@@ -163,7 +186,7 @@ public interface IAdditionalBinding
 {
     PropertyRoute PropertyRoute { get; }
     Func<bool> ShouldSet { get; }
-    LambdaExpression ValueExpression { get; }
+    LambdaExpression GetValueExpression();
     void SetInMemory(Entity entity, IRetriever retriever);
 }
 
@@ -172,14 +195,14 @@ public class AdditionalBinding<T, V> : IAdditionalBinding
 {
     public PropertyRoute PropertyRoute { get; set; }
     public Func<bool> ShouldSet { get; set; }
-    public Expression<Func<T, PrimaryKey? /*rowId*/, V>> ValueExpression { get; set; }
+    public Func<Expression<Func<T, PrimaryKey? /*rowId*/, V>>> ValueExpression { get; set; }
     public Func<T, PrimaryKey? /*rowId*/, IRetriever, V>? ValueFunction { get; set; }
-    LambdaExpression IAdditionalBinding.ValueExpression => ValueExpression;
+    LambdaExpression IAdditionalBinding.GetValueExpression() => ValueExpression();
 
     Action<T, IRetriever>? _setter;
 
     public AdditionalBinding(PropertyRoute propertyRoute, Func<bool> shouldSet, 
-        Expression<Func<T, PrimaryKey? /*rowId*/, V>> valueExpression, 
+        Func<Expression<Func<T, PrimaryKey? /*rowId*/, V>>> valueExpression, 
         Func<T, PrimaryKey? /*rowId*/, IRetriever, V>? valueFunction)
     {
         PropertyRoute = propertyRoute;
@@ -334,7 +357,7 @@ public class FilterQueryArgs
     }
 
     static GenericInvoker<Func<LambdaExpression, FilterQueryArgs>> giFromFilter = 
-        new GenericInvoker<Func<LambdaExpression, FilterQueryArgs>>(lambda => FromFilter((Expression<Func<Entity, bool>>)lambda));
+        new (lambda => FromFilter((Expression<Func<Entity, bool>>)lambda));
     public static FilterQueryArgs FromFilter<T>(Expression<Func<T, bool>> filter) where T: Entity
     {
         var query = filter == null ? Database.Query<T>() : Database.Query<T>().Where(filter);

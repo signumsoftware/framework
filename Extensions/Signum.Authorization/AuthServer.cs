@@ -12,6 +12,8 @@ using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Collections.Frozen;
+using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace Signum.Authorization;
 
@@ -23,10 +25,14 @@ public static class AuthServer
     public static Action<ActionContext, UserEntity> UserLogged;
     public static Action<ActionContext, UserWithClaims> UserLoggingOut;
 
-    
+
     public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
     {
         AuthTokenServer.Start(tokenConfig, hashableEncryptionKey);
+
+        RrgisterWithCondition<TypeAllowed>();
+        RrgisterWithCondition<PropertyAllowed>();
+        RrgisterWithCondition<AuthThumbnail>();
 
         ReflectionServer.GetContext = () => new
         {
@@ -59,31 +65,42 @@ public static class AuthServer
                 {
                     if (UserEntity.Current == null)
                         return null;
-                    
+
                     var ta = TypeAuthLogic.GetAllowed(t);
 
                     if (ta.MaxUI() == TypeAllowedBasic.None)
                         return null;
 
-                    ti.Extension.Add("maxTypeAllowed", ta.MaxUI());
-                    ti.Extension.Add("minTypeAllowed", ta.MinUI());
+                    var max = ta.MaxUI();
+                    var min = ta.MinUI();
+                    if (max == min)
+                    {
+                        ti.Extension.Add("typeAllowed", min); ;
+                    }
+                    else
+                    {
 
-                    if(ta.Fallback == TypeAllowed.None)
+                        ti.Extension.Add("maxTypeAllowed", max);
+                        ti.Extension.Add("minTypeAllowed", min);
+                    }
+
+
+                    if (ta.Fallback == TypeAllowed.None)
                     {
                         var conditions = ta.ConditionRules.SelectMany(a => a.TypeConditions)
-                        .Distinct().Where(a => TypeConditionLogic.IsQueryAuditor(t, a)).Select(a => a.Key);
+                            .Distinct()
+                            .Where(a => TypeConditionLogic.IsQueryAuditor(t, a))
+                            .Select(a => a.Key);
 
                         if (conditions.Any())
                             ti.Extension.Add("queryAuditors", conditions.ToList());
                     }
 
-                    ti.RequiresEntityPack |= ta.ConditionRules.Any();
-
                     return ti;
                 }
                 else
                 {
-                    if (t.HasAttribute<AllowUnathenticatedAttribute>())
+                    if (t.HasAttribute<AllowUnauthenticatedAttribute>())
                         return ti;
 
                     if (UserEntity.Current == null)
@@ -134,10 +151,10 @@ public static class AuthServer
             {
                 if (ti.QueryDefined)
                 {
-                    var allowed = UserEntity.Current == null ? QueryAllowed.None : 
+                    var allowed = UserEntity.Current == null ? QueryAllowed.None :
                     QueryLogic.Queries.QueryAllowed(t, fullScreen: true) ? QueryAllowed.Allow :
                     QueryLogic.Queries.QueryAllowed(t, fullScreen: false) ? QueryAllowed.EmbeddedOnly : QueryAllowed.None;
-                    
+
                     if (allowed == QueryAllowed.None)
                         ti.QueryDefined = false;
 
@@ -170,29 +187,90 @@ public static class AuthServer
         {
             ReflectionServer.PropertyRouteExtension += (mi, pr) =>
             {
-                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
-                if (allowed == PropertyAllowed.None)
-                    return null;
+                if (UserEntity.Current == null)
+                {
+                    if (!pr.RootType.HasAttribute<AllowUnauthenticatedAttribute>())
+                        return null;
 
-                mi.Extension.Add("propertyAllowed", allowed);
+                    mi.Extension.Add("propertyAllowed", PropertyAllowed.Write);
+                }
+                else
+                {
+                    var pac = pr.GetPropertyAllowed();
+                    if (pac.Max() == PropertyAllowed.None)
+                        return null;
+
+                    var tac = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed();
+                    if (!pac.Equals(tac))
+                    {
+                        var min = pac.Min();
+                        var max = pac.Max();
+                        if (min != max)
+                        {
+                            mi.Extension.Add("minPropertyAllowed", min);
+                            mi.Extension.Add("maxPropertyAllowed", max);
+                        }
+                        else
+                        {
+                            mi.Extension.Add("propertyAllowed", min);
+                        }
+                    }
+
+                }
                 return mi;
             };
 
-            SignumServer.WebEntityJsonConverterFactory.CanReadPropertyRoute += (pr, mod) =>
+            SignumServer.WebEntityJsonConverterFactory.GetSerializationMetadata += root =>
             {
-                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
-
-                return allowed == PropertyAllowed.None ? "Not allowed" : null;
+                return PropertyAuthLogic.GetAuthSerializationMetadata(root);
             };
 
-            SignumServer.WebEntityJsonConverterFactory.CanWritePropertyRoute += (pr, mod) =>
+            SignumServer.WebEntityJsonConverterFactory.GetSerializationMetadataEmbedded += root =>
             {
-                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
-
-                return allowed == PropertyAllowed.Write ? null : "Not allowed to write property: " + pr.ToString();
+                return PropertyAuthLogic.GetAuthSerializationMetadataEmbedded(root);
             };
 
-            PropertyAuthLogic.GetPropertyConverters = (t) => SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(t);
+            SignumServer.WebEntityJsonConverterFactory.CanReadPropertyRoute += (pr, mod, sm) =>
+            {
+                var asm = AssertSM(sm, pr.RootType);
+
+                var allowed = asm.Properties?.TryGetS(pr) ?? asm.Default;
+
+                if (allowed >= PropertyAllowed.Read)
+                    return null;
+
+                return "Not Allowed to Read " + (asm.Properties != null && asm.Properties.ContainsKey(pr) ? pr.ToString() : pr.RootType.CleanType());
+            };
+
+            SignumServer.WebEntityJsonConverterFactory.CanWritePropertyRoute += (pr, mod, sm) =>
+            {
+                var asm = AssertSM(sm, pr.RootType);
+
+                var allowed = asm.Properties?.TryGetS(pr) ?? asm.Default;
+
+                if (allowed == PropertyAllowed.Write)
+                    return null;
+
+                return "Not Allowed to Write " + (asm.Properties != null && asm.Properties.ContainsKey(pr) ? pr.ToString() : pr.RootType.CleanType());
+            };
+
+            SignumServer.WebEntityJsonConverterFactory.GetPropertyMetadata += (pr, mod, sm) =>
+            {
+                var asm = AssertSM(sm, pr.RootType);
+
+                var allowed = asm.Properties?.TryGetS(pr);
+
+                if (allowed == null)
+                    return null;
+
+                if (allowed == PropertyAllowed.None)
+                    return PropertyMetadata.Hidden;
+
+                if (allowed == PropertyAllowed.Read)
+                    return PropertyMetadata.ReadOnly;
+
+                return null;
+            };
         }
 
         if (OperationAuthLogic.IsStarted)
@@ -200,7 +278,7 @@ public static class AuthServer
             ReflectionServer.OperationExtension += (oits, oi, type) =>
             {
                 var allowed = UserEntity.Current == null ? false :
-                           OperationAuthLogic.GetOperationAllowed(oi.OperationSymbol, type, inUserInterface: true);
+                           OperationAuthLogic.GetOperationAllowed(oi.OperationSymbol, type).Max().ToBoolean(inUserInterface: true);
 
                 if (!allowed)
                     return null;
@@ -236,7 +314,9 @@ public static class AuthServer
             CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
             CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
             {
-                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPasswordHash), ctx.Entity);
+                var sm = EntityJsonContext.CurrentSerializationPath!.CurrentSerializationMetadata();
+
+                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPasswordHash), ctx.Entity, sm);
 
                 var password = reader.GetString();
 
@@ -254,7 +334,7 @@ public static class AuthServer
         });
 
         if (SessionLogLogic.IsStarted)
-            AuthServer.UserLogged +=  (ActionContext ac, UserEntity user) =>
+            AuthServer.UserLogged += (ActionContext ac, UserEntity user) =>
             {
                 Microsoft.AspNetCore.Http.HttpRequest re = ac.HttpContext.Request;
                 SessionLogLogic.SessionStart(
@@ -263,6 +343,24 @@ public static class AuthServer
             };
 
 
+    }
+
+    private static AuthSerializationMetadata AssertSM(SerializationMetadata? sm, Type rootType)
+    {
+        if (sm is not AuthSerializationMetadata asm)
+            throw new InvalidOperationException("No AuthSerializationMetadata found");
+
+        if (asm.Type != rootType)
+            throw new InvalidOperationException($"AuthSerializationMetadata is for {asm.Type.TypeName()} instead of {rootType.TypeName()}");
+
+        return asm;
+    }
+
+    private static void RrgisterWithCondition<T>()
+        where T : struct, Enum
+    {
+        ReflectionServer.RegisterGenericModel(typeof(WithConditionsModel<T>));
+        ReflectionServer.RegisterGenericModel(typeof(ConditionRuleModel<T>));
     }
 
     public static ResetLazy<FrozenDictionary<string, List<Type>>> entitiesByNamespace =
@@ -319,7 +417,4 @@ Consider calling ReflectionServer.RegisterLike(typeof({type.Name}), ()=> yourCon
 
         AuthServer.UserLogged?.Invoke(ac, user);
     }
-
-   
-
 }

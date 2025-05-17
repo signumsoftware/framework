@@ -10,13 +10,13 @@ export interface TextBoxLineProps extends TextBaseProps<string | null> {
 }
 
 export class TextBoxLineController extends TextBaseController<TextBoxLineProps, string | null> {
-  init(p: TextBoxLineProps) {
+  init(p: TextBoxLineProps): void {
     super.init(p);
     this.assertType("TextBoxLine", ["string"]);
   }
 }
 
-export const TextBoxLine = React.memo(React.forwardRef(function TextBoxLine(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
+export const TextBoxLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<TextBoxLineProps & React.RefAttributes<TextBoxLineController>>> = React.memo(React.forwardRef(function TextBoxLine(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
 
   const c = useController(TextBoxLineController, props, ref);
 
@@ -25,20 +25,18 @@ export const TextBoxLine = React.memo(React.forwardRef(function TextBoxLine(prop
 
   return internalTextBox(c, "text");
 }), (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
   return LineBaseController.propEquals(prev, next);
 });
 
 export class PasswordLineController extends TextBaseController<TextBoxLineProps, string | null> {
-  init(p: TextBoxLineProps) {
+  init(p: TextBoxLineProps): void {
     super.init(p);
     this.assertType("PasswordLine", ["string"]);
   }
 }
 
-export const PasswordLine = genericForwardRefWithMemo(function PasswordLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<PasswordLineController>) {
+export const PasswordLine: <V extends string | null>(props: TextBoxLineProps & React.RefAttributes<PasswordLineController>) => React.ReactNode | null =
+  genericForwardRefWithMemo(function PasswordLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<PasswordLineController>) {
 
   const c = useController(PasswordLineController, props, ref);
 
@@ -54,13 +52,14 @@ export const PasswordLine = genericForwardRefWithMemo(function PasswordLine<V ex
 });
 
 export class GuidLineController extends TextBaseController<TextBoxLineProps, string | null> {
-  init(p: TextBoxLineProps) {
+  init(p: TextBoxLineProps): void {
     super.init(p);
     this.assertType("TextBoxLine", ["Guid"]);
   }
 }
 
-export const GuidLine = genericForwardRefWithMemo(function GuidLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<GuidLineController>) {
+export const GuidLine: <V extends string | null>(props: TextBoxLineProps & React.RefAttributes<GuidLineController>) => React.ReactNode | null =
+  genericForwardRefWithMemo(function GuidLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<GuidLineController>) {
 
   const c = useController(GuidLineController, props, ref);
 
@@ -69,13 +68,10 @@ export const GuidLine = genericForwardRefWithMemo(function GuidLine<V extends st
 
   return internalTextBox(c, "guid");
 }, (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
   return LineBaseController.propEquals(prev, next);
 });
 
-export const ColorLine = genericForwardRefWithMemo(function ColorLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
+export const ColorLine: <V extends string | null>(props: TextBoxLineProps & React.RefAttributes<TextBoxLineController>) => React.ReactNode | null = genericForwardRefWithMemo(function ColorLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
 
   const c = useController(TextBoxLineController, props, ref);
 
@@ -84,24 +80,24 @@ export const ColorLine = genericForwardRefWithMemo(function ColorLine<V extends 
 
   return internalTextBox(c, "color");
 }, (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
   return LineBaseController.propEquals(prev, next);
 });
 
 
-function internalTextBox<V extends string | null>(vl: TextBoxLineController, type: "password" | "color" | "text" | "guid") {
+function internalTextBox<V extends string | null>(c: TextBoxLineController, type: "password" | "color" | "text" | "guid") {
 
-  const s = vl.props;
+  const p = c.props;
 
-  var htmlAtts = vl.props.valueHtmlAttributes;
+  var htmlAtts = c.props.valueHtmlAttributes;
 
-  if (s.ctx.readOnly)
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
+  if (p.ctx.readOnly)
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {inputId => vl.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={htmlAtts} ctx={s.ctx} innerRef={vl.setRefs}>
-          {s.ctx.value}
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+        {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={htmlAtts} ctx={p.ctx} innerRef={c.setRefs}>
+          {p.ctx.value}
         </FormControlReadonly>)}
       </FormGroup>
     );
@@ -109,19 +105,19 @@ function internalTextBox<V extends string | null>(vl: TextBoxLineController, typ
   const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
     const input = e.currentTarget as HTMLInputElement;
 
-    if (s.triggerChange == "onBlur")
-      vl.setTempValue(input.value as V)
+    if (p.triggerChange == "onBlur")
+      c.setTempValue(input.value as V)
     else
-      vl.setValue(input.value as V, e);
+      c.setValue(input.value as V, e);
   };
 
   let handleBlur: ((e: React.FocusEvent<any>) => void) | undefined = undefined;
-  if (s.autoFixString != false || s.triggerChange == "onBlur") {
+  if (p.autoFixString != false || p.triggerChange == "onBlur") {
     handleBlur = (e: React.FocusEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
-      var fixed = TextBoxLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : true, type == "guid");
-      if (fixed != (s.ctx.value ?? ""))
-        vl.setValue(fixed as V, e);
+      var fixed = TextBoxLineController.autoFixString(input.value, p.autoTrimString != null ? p.autoTrimString : true, type == "guid");
+      if (fixed != (p.ctx.value ?? ""))
+        c.setValue(fixed as V, e);
 
       if (htmlAtts?.onBlur)
         htmlAtts.onBlur(e);
@@ -129,30 +125,30 @@ function internalTextBox<V extends string | null>(vl: TextBoxLineController, typ
   }
 
   return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => <>
-        {vl.withItemGroup(
+        {c.withItemGroup(
           <input type={type == "color" || type == "guid" ? "text" : type}
             id={inputId}
             autoComplete="off" 
-            {...vl.props.valueHtmlAttributes}
-            className={classes(vl.props.valueHtmlAttributes?.className, s.ctx.formControlClass, vl.mandatoryClass)}
-            value={vl.getValue() ?? ""}
+            {...c.props.valueHtmlAttributes}
+            className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formControlClass, c.mandatoryClass)}
+            value={c.getValue() ?? ""}
             onBlur={handleBlur || htmlAtts?.onBlur}
             onChange={handleTextOnChange}
-            placeholder={vl.getPlaceholder()}
-            list={s.datalist ? s.ctx.getUniqueId("dataList") : undefined}
-            ref={vl.setRefs} />,
+            placeholder={c.getPlaceholder()}
+            list={p.datalist ? p.ctx.getUniqueId("dataList") : undefined}
+            ref={c.setRefs} />,
           type == "color" ? <input type="color"
-            className={classes(s.ctx.formControlClass, "sf-color")}
-            value={vl.getValue() ?? ""}
+            className={classes(p.ctx.formControlClass, "sf-color")}
+            value={c.getValue() ?? ""}
             onBlur={handleBlur || htmlAtts?.onBlur}
             onChange={handleTextOnChange}
           /> : undefined)
         }
-        {s.datalist &&
-          <datalist id={s.ctx.getUniqueId("dataList")}>
-            {s.datalist.map((item, i) => <option key={i} value={item} />)}
+        {p.datalist &&
+          <datalist id={p.ctx.getUniqueId("dataList")}>
+            {p.datalist.map((item, i) => <option key={i} value={item} />)}
           </datalist>
         }
       </>}

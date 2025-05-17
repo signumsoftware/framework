@@ -8,22 +8,22 @@ import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Authorization from '../Signum.Authorization/Signum.Authorization'
 
 
-export module ResetPasswordMessage {
-  export const YouRecentlyRequestedANewPassword = new MessageKey("ResetPasswordMessage", "YouRecentlyRequestedANewPassword");
-  export const YourUsernameIs = new MessageKey("ResetPasswordMessage", "YourUsernameIs");
-  export const YouCanResetYourPasswordByFollowingTheLinkBelow = new MessageKey("ResetPasswordMessage", "YouCanResetYourPasswordByFollowingTheLinkBelow");
-  export const ResetPasswordRequestSubject = new MessageKey("ResetPasswordMessage", "ResetPasswordRequestSubject");
-  export const YourResetPasswordRequestHasExpired = new MessageKey("ResetPasswordMessage", "YourResetPasswordRequestHasExpired");
-  export const WeHaveSendYouAnEmailToResetYourPassword = new MessageKey("ResetPasswordMessage", "WeHaveSendYouAnEmailToResetYourPassword");
-  export const EmailNotFound = new MessageKey("ResetPasswordMessage", "EmailNotFound");
-  export const YourAccountHasBeenLockedDueToSeveralFailedLogins = new MessageKey("ResetPasswordMessage", "YourAccountHasBeenLockedDueToSeveralFailedLogins");
-  export const YourAccountHasBeenLocked = new MessageKey("ResetPasswordMessage", "YourAccountHasBeenLocked");
-  export const TheCodeOfYourLinkIsIncorrect = new MessageKey("ResetPasswordMessage", "TheCodeOfYourLinkIsIncorrect");
-  export const TheCodeOfYourLinkHasAlreadyBeenUsed = new MessageKey("ResetPasswordMessage", "TheCodeOfYourLinkHasAlreadyBeenUsed");
-  export const IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword = new MessageKey("ResetPasswordMessage", "IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword");
+export namespace ResetPasswordMessage {
+  export const YouRecentlyRequestedANewPassword: MessageKey = new MessageKey("ResetPasswordMessage", "YouRecentlyRequestedANewPassword");
+  export const YourUsernameIs: MessageKey = new MessageKey("ResetPasswordMessage", "YourUsernameIs");
+  export const YouCanResetYourPasswordByFollowingTheLinkBelow: MessageKey = new MessageKey("ResetPasswordMessage", "YouCanResetYourPasswordByFollowingTheLinkBelow");
+  export const ResetPasswordRequestSubject: MessageKey = new MessageKey("ResetPasswordMessage", "ResetPasswordRequestSubject");
+  export const YourResetPasswordRequestHasExpired: MessageKey = new MessageKey("ResetPasswordMessage", "YourResetPasswordRequestHasExpired");
+  export const WeHaveSendYouAnEmailToResetYourPassword: MessageKey = new MessageKey("ResetPasswordMessage", "WeHaveSendYouAnEmailToResetYourPassword");
+  export const EmailNotFound: MessageKey = new MessageKey("ResetPasswordMessage", "EmailNotFound");
+  export const YourAccountHasBeenLockedDueToSeveralFailedLogins: MessageKey = new MessageKey("ResetPasswordMessage", "YourAccountHasBeenLockedDueToSeveralFailedLogins");
+  export const YourAccountHasBeenLocked: MessageKey = new MessageKey("ResetPasswordMessage", "YourAccountHasBeenLocked");
+  export const TheCodeOfYourLinkIsIncorrect: MessageKey = new MessageKey("ResetPasswordMessage", "TheCodeOfYourLinkIsIncorrect");
+  export const TheCodeOfYourLinkHasAlreadyBeenUsed: MessageKey = new MessageKey("ResetPasswordMessage", "TheCodeOfYourLinkHasAlreadyBeenUsed");
+  export const IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword: MessageKey = new MessageKey("ResetPasswordMessage", "IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword");
 }
 
-export const ResetPasswordRequestEntity = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");
+export const ResetPasswordRequestEntity: Type<ResetPasswordRequestEntity> = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");
 export interface ResetPasswordRequestEntity extends Entities.Entity {
   Type: "ResetPasswordRequest";
   code: string;
@@ -32,7 +32,7 @@ export interface ResetPasswordRequestEntity extends Entities.Entity {
   used: boolean;
 }
 
-export module ResetPasswordRequestOperation {
+export namespace ResetPasswordRequestOperation {
   export const Execute : Operations.ExecuteSymbol<ResetPasswordRequestEntity> = registerSymbol("Operation", "ResetPasswordRequestOperation.Execute");
 }
 

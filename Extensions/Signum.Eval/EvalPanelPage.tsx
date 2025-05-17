@@ -25,7 +25,7 @@ import { EvalPanelMessage, EvalPanelPermission } from './Signum.Eval'
 
 type DynamicPanelTab = "search" | "checkEvals";
 
-export default function DynamicPanelSimplePage() {
+export default function DynamicPanelSimplePage(): React.JSX.Element {
   const location = useLocation();
 
   function handleSelect(key: any /*string*/) {
@@ -56,7 +56,7 @@ export default function DynamicPanelSimplePage() {
 
 
 
-export function SearchPanel(props: {}) {
+export function SearchPanel(props: {}): React.JSX.Element {
 
 
   const [search, setSearch] = React.useState("");
@@ -79,7 +79,7 @@ export function SearchPanel(props: {}) {
   );
 }
 
-export function CheckEvalsStep() {
+export function CheckEvalsStep(): React.JSX.Element {
 
   const [autoStart, setAutoStart] = React.useState<number | undefined>(undefined);
 
@@ -110,7 +110,7 @@ interface CheckEvalTypeState {
 }
 
 
-export function CheckEvalType(p: CheckEvalTypeProps) {
+export function CheckEvalType(p: CheckEvalTypeProps): React.JSX.Element {
 
   const [{ state, errors }, setState] = React.useState<CheckEvalTypeState>({ state: "initial", errors: undefined });
 
@@ -177,7 +177,7 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
 }
 
 
-export function RefreshClientsStep() {
+export function RefreshClientsStep(): React.JSX.Element {
   function handleRefreshClient(e: React.MouseEvent<any>) {
     e.preventDefault();
     window.location.reload();

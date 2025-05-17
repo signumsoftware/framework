@@ -8,7 +8,7 @@ import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 
 
-export const TranslatedInstanceEntity = new Type<TranslatedInstanceEntity>("TranslatedInstance");
+export const TranslatedInstanceEntity: Type<TranslatedInstanceEntity> = new Type<TranslatedInstanceEntity>("TranslatedInstance");
 export interface TranslatedInstanceEntity extends Entities.Entity {
   Type: "TranslatedInstance";
   culture: Basics.CultureInfoEntity;
@@ -19,11 +19,11 @@ export interface TranslatedInstanceEntity extends Entities.Entity {
   originalText: string;
 }
 
-export module TranslatedInstanceOperation {
+export namespace TranslatedInstanceOperation {
   export const Delete : Operations.DeleteSymbol<TranslatedInstanceEntity> = registerSymbol("Operation", "TranslatedInstanceOperation.Delete");
 }
 
-export const TranslatedSummaryState = new EnumType<TranslatedSummaryState>("TranslatedSummaryState");
+export const TranslatedSummaryState: EnumType<TranslatedSummaryState> = new EnumType<TranslatedSummaryState>("TranslatedSummaryState");
 export type TranslatedSummaryState =
   "Completed" |
   "Pending" |

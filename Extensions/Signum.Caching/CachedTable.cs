@@ -4,6 +4,7 @@ using System.Data;
 using Signum.Engine.Sync;
 using System.Collections.Frozen;
 using System.Linq;
+using static Signum.Engine.Maps.FullTextTableIndex;
 
 namespace Signum.Cache;
 
@@ -33,17 +34,18 @@ class CachedTable<T> : CachedTableBase where T : Entity
     {
         this.table = Schema.Current.Table(typeof(T));
 
-        CachedTableConstructor ctr = this.Constructor = new CachedTableConstructor(this, aliasGenerator, table.Columns.Values.ToList());
+        CachedTableConstructor ctr = this.Constructor = new CachedTableConstructor(this, aliasGenerator, table.Columns.Values.Where(ShouldBeCached).ToList());
         var isPostgres = Schema.Current.Settings.IsPostgres;
         //Query
         using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
         {
             string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
-                Table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(isPostgres), ",\r\n"),
+                Table.Columns.Values.Where(ShouldBeCached).ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(isPostgres), ",\r\n"),
                 table.Name.ToString(),
                 ctr.currentAlias!.ToString());
 
-            ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias + ".Id\r\n" + remainingJoins;
+            
+            ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias + "." +  table.PrimaryKey.Name.SqlEscape(isPostgres) + "\r\n" + remainingJoins;
 
             if (ctr.remainingJoins != null)
                 select += ctr.remainingJoins;
@@ -201,6 +203,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     }
 
     public override int? Count
+
     {
         get { return rows.IsValueCreated ? rows.Value.Count : (int?)null; }
     }

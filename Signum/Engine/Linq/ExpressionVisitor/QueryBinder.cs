@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.SqlServer.Server;
 using Signum.Engine.Sync.Postgres;
+using Signum.Entities.TsVector;
+using static Signum.Entities.SystemTime;
 
 namespace Signum.Engine.Linq;
 
@@ -228,9 +230,40 @@ internal class QueryBinder : ExpressionVisitor
                 m.Method.Name == nameof(EntityContext.MListRowId) ? entityContext.MListRowId ?? new PrimaryKeyExpression(Expression.Constant(null, typeof(IComparable))) :
                  throw new InvalidOperationException($"EntityContext.${m.Method.Name} not supported for ${m.Arguments[0]}");
         }
+        else if (m.Method.DeclaringType == typeof(SystemTimeExtensions) && m.Method.Name == nameof(SystemTimeExtensions.OverrideSystemTime))
+        {
+            SystemTime? old = this.systemTime;
+            this.systemTime = ToSystemTime(m.Arguments[1]);
+            
+            Expression newValue = Visit(m.Arguments[0]);
+
+            this.systemTime = old;
+
+            return newValue;
+        }
 
         MethodCallExpression result = (MethodCallExpression)base.VisitMethodCall(m);
         return BindMethodCall(result);
+    }
+
+    private SystemTime? ToSystemTime(Expression expression)
+    {
+        if (expression is ConstantExpression ce)
+        {
+
+            return (SystemTime)ce.Value!;
+        }
+
+        if(expression is NewExpression ne && ne.Type == typeof(SystemTime.AsOf))
+        {
+            var at = Visit(ne.Arguments[0]);
+
+            var at2 = DbExpressionNominator.FullNominate(at);
+
+            return new SystemTime.AsOfExpression(at2);
+        }
+
+        throw new InvalidOperationException("Unable to convert to SystemTime the expression:" + expression.ToString());
     }
 
     private ReadOnlyDictionary<Type, Type>? ToTypeDictionary(Expression? modelType, Type entityType)
@@ -592,7 +625,11 @@ internal class QueryBinder : ExpressionVisitor
 
         var proj = uniqueFunctionReplacements.GetOrCreate(newProjection, () =>
         {
-            AddRequest(new UniqueRequest(newProjection.Select, outerApply: function == UniqueFunction.SingleOrDefault || function == UniqueFunction.FirstOrDefault));
+            var request = new UniqueRequest(newProjection.Select, outerApply: function == UniqueFunction.SingleOrDefault || function == UniqueFunction.FirstOrDefault);
+
+            var source = GetCurrentSource(request);
+
+            AddRequest(source, request);
 
             return newProjection.Projector;
         });
@@ -655,10 +692,10 @@ internal class QueryBinder : ExpressionVisitor
         string value = (string)((ConstantExpression)separator).Value!;
 
 
-        if (isPostgres)
+        if (Connector.Current.SupportsStringAggr)
         {
             ColumnDeclaration cd = new ColumnDeclaration(null!, new AggregateExpression(typeof(string), AggregateSqlFunction.string_agg,
-                new[] { nominated, new SqlConstantExpression(value, typeof(string)) }));
+                new[] { nominated, new SqlConstantExpression(value, typeof(string)) }, null));
 
             Alias alias = NextSelectAlias();
 
@@ -875,7 +912,7 @@ internal class QueryBinder : ExpressionVisitor
                 new AggregateExpression(
                     aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated),
                     distinct ? AggregateSqlFunction.CountDistinct : aggregateFunction,
-                   new Expression[] { nominated! }).CopyMetadata(nominated)
+                   new Expression[] { nominated! }, null).CopyMetadata(nominated)
                 ).CopyMetadata(nominated);
 
             return RestoreWrappedType(result, resultType);
@@ -895,7 +932,7 @@ internal class QueryBinder : ExpressionVisitor
                 var nominated = DbExpressionNominator.FullNominate(exp)!.Nullify();
 
                 aggregate = (Expression)Expression.Coalesce(
-                    new AggregateExpression(GetBasicType(nominated), aggregateFunction, new[] { nominated }),
+                    new AggregateExpression(GetBasicType(nominated), aggregateFunction, new[] { nominated }, null),
                     new SqlConstantExpression(Activator.CreateInstance(nominated.Type.UnNullify())!));
             }
             else
@@ -907,7 +944,7 @@ internal class QueryBinder : ExpressionVisitor
                 aggregate = new AggregateExpression(
                     aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated),
                     distinct ? AggregateSqlFunction.CountDistinct : aggregateFunction,
-                    new[] { nominated! }).CopyMetadata(nominated);
+                    new[] { nominated! }, null).CopyMetadata(nominated);
             }
 
             Alias alias = NextSelectAlias();
@@ -1042,7 +1079,7 @@ internal class QueryBinder : ExpressionVisitor
 
         SubqueryExpression? se;
         if (schema.Settings.IsDbType(pc.Projector.Type))
-            se = new InExpression(newItem, new SelectExpression(alias, false, null, pc.Columns, projection.Select, null, null, null, 0));
+            se = new InExpression(DbExpressionNominator.FullNominate(newItem), new SelectExpression(alias, false, null, pc.Columns, projection.Select, null, null, null, 0));
         else
         {
             Expression where = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem))!;
@@ -1433,7 +1470,7 @@ internal class QueryBinder : ExpressionVisitor
         TableExpression tableExpression = new TableExpression(tableAlias, table, st.SystemTime ?? (table.SystemVersioned != null ? this.systemTime : null), currentTableHint);
         currentTableHint = null;
 
-        if (this.systemTime is SystemTime.Interval inter && inter.JoinBehaviour == JoinBehaviour.Current)
+        if (this.systemTime is SystemTime.Interval inter && inter.JoinMode == SystemTimeJoinMode.Current)
             this.systemTime = null;
 
         Alias selectAlias = NextSelectAlias();
@@ -1614,6 +1651,11 @@ internal class QueryBinder : ExpressionVisitor
         if (source == null || m.Method.Name == "InSql" || m.Method.Name == "DisableQueryFilter")
             return m;
 
+        if (source is UnaryExpression ue && ue.NodeType == ExpressionType.Convert && !ue.Type.IsValueType && ue.Method == null)
+        {
+            source = ue.Operand;
+        }
+
         if (source.NodeType == ExpressionType.Conditional)
         {
             var con = (ConditionalExpression)source;
@@ -1737,6 +1779,19 @@ internal class QueryBinder : ExpressionVisitor
                 throw new InvalidOperationException("No System Period found in " + source);
 
             return tablePeriod;
+        }
+
+        if (m.Method.DeclaringType == typeof(TsVectorExtensions) && m.Method.Name.StartsWith(nameof(TsVectorExtensions.GetTsVectorColumn)))
+        {
+            var colArg = m.TryGetArgument("tsVectorColumnName");
+            var colName = colArg == null ? PostgresTsVectorColumn.DefaultTsVectorColumn : (string)((ConstantExpression)colArg).Value!;
+
+            var tsVectorColumn =
+                source is EntityExpression e ? Completed(e).Let(ec => ec.Table.GetTsVectorColumn(ec.TableAlias!, colName)) :
+                source is MListElementExpression mle ? mle.Table.GetTsVectorColumn(mle.Alias, colName) :
+                throw new InvalidOperationException("Unexpected source");
+
+            return tsVectorColumn;
         }
 
         if (m.Method.DeclaringType == typeof(TypeLogic) && m.Method.Name == nameof(TypeLogic.ToTypeEntity))
@@ -2086,8 +2141,8 @@ internal class QueryBinder : ExpressionVisitor
 
                                     return m.Member.Name switch
                                     {
-                                        "Min" => interval.Min ?? new SqlFunctionExpression(interval.ElementType, null, PostgresFunction.lower.ToString(), new[] { interval.PostgresRange! }),
-                                        "Max" => interval.Max ?? new SqlFunctionExpression(interval.ElementType, null, PostgresFunction.upper.ToString(), new[] { interval.PostgresRange! }),
+                                        "Min" => interval.Min ?? new SqlFunctionExpression(interval.ElementType, null, PostgresFunction.lower.ToString(), new[] { interval.PostgresRange! }).SetMetadata(ExpressionMetadata.UTC),
+                                        "Max" => interval.Max ?? new SqlFunctionExpression(interval.ElementType, null, PostgresFunction.upper.ToString(), new[] { interval.PostgresRange! }).SetMetadata(ExpressionMetadata.UTC),
                                         _ => throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".FormatWith(m.Member)),
                                     };
                                 }
@@ -2281,7 +2336,7 @@ internal class QueryBinder : ExpressionVisitor
             throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
 
         if (expressions.Any(e => e.Value is AdditionalFieldExpression))
-            throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
+            return strategy.CombineValues(expressions, returnType);
 
         if (expressions.Any(e => e.Value is TypeImplementedByAllExpression || e.Value is TypeImplementedByExpression || e.Value is TypeEntityExpression))
         {
@@ -2637,6 +2692,9 @@ internal class QueryBinder : ExpressionVisitor
             entity is MListElementExpression mlistEx ? (ITable)mlistEx.Table! :
             throw new UnexpectedValueException(entity);
 
+        
+
+
         Alias alias = aliasGenerator.Table(table.Name);
 
         Expression toUpdate =
@@ -2677,6 +2735,10 @@ internal class QueryBinder : ExpressionVisitor
 
         if (entity is EntityExpression ee)
         {
+            var originalTable = TableFinder.GetTable(pr.Select, ee.TableAlias!);
+            if (originalTable != null && originalTable.SystemTime is SystemTime.HistoryTable)
+                isHistory = true;
+
             Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.GetName(isHistory)))!;
 
             condition = SmartEqualizer.EqualNullable(id, ee.ExternalId);
@@ -2684,6 +2746,10 @@ internal class QueryBinder : ExpressionVisitor
         }
         else if (entity is MListElementExpression mlee)
         {
+            var originalTable = TableFinder.GetTable(pr.Select, mlee.Alias);
+            if (originalTable != null && originalTable.SystemTime is SystemTime.HistoryTable)
+                isHistory = true;
+
             Expression id = mlee.Table.RowIdExpression(aliasGenerator.Table(mlee.Table.GetName(isHistory)));
 
             condition = SmartEqualizer.EqualNullable(id, mlee.RowId);
@@ -2698,7 +2764,6 @@ internal class QueryBinder : ExpressionVisitor
         }
         else
             throw new InvalidOperationException("Update not supported for {0}".FormatWith(entity.GetType().TypeName()));
-
 
         var result = new CommandAggregateExpression(new CommandExpression[]
         {
@@ -2935,7 +3000,8 @@ internal class QueryBinder : ExpressionVisitor
                 unionEntity.UnionExternalId = new PrimaryKeyExpression(expression);
             }
 
-            AddRequest(result);
+            var source = GetCurrentSource(result);
+            AddRequest(source, result);
 
             return result;
         });
@@ -2949,31 +3015,29 @@ internal class QueryBinder : ExpressionVisitor
         return new Disposable(() => currentSource = currentSource.Pop());
     }
 
-    void AddRequest(ExpansionRequest req)
+    void AddRequest(SourceExpression source, ExpansionRequest req)
     {
-        if (currentSource.IsEmpty)
-            throw new InvalidOperationException("currentSource not set");
-
-        var source = GetCurrentSource(req);
-
         requests.GetOrCreate(source).Add(req);
     }
 
     private SourceExpression GetCurrentSource(ExpansionRequest req)
     {
+        if (currentSource.IsEmpty)
+            throw new InvalidOperationException("currentSource not set");
+
         var external = req.ExternalAlias(this);
+
+        if (external.IsEmpty())
+            return currentSource.Last();
 
         var result = currentSource.FirstOrDefault(s => //could be more than one on GroupBy aggregates
         {
             if (s == null)
                 return false;
 
-            if (external.IsEmpty())
-                return true;
-
             var knownAliases = KnownAliases(s);
 
-            return external.Intersect(knownAliases).Any();
+            return external.Any(a => knownAliases.Contains(a));
         });
 
         if (result == null)
@@ -3044,10 +3108,13 @@ internal class QueryBinder : ExpressionVisitor
 
             var result = new EntityExpression(entity.Type, entity.ExternalId, entity.ExternalPeriod, newAlias, bindings, mixins, period, avoidExpandOnRetrieving: false);
 
-            AddRequest(new TableRequest(
+            var request = new TableRequest(
                 table: new TableExpression(newAlias, table, table.SystemVersioned != null ? this.systemTime : null, null),
                 completeEntity: result
-            ));
+            );
+
+            var source = GetCurrentSource(request);
+            AddRequest(source, request);
 
             return result;
         });
@@ -3268,7 +3335,7 @@ internal class QueryBinder : ExpressionVisitor
         if (lambda == null)
             return null;
 
-        var cleanLambda = (LambdaExpression)DbQueryProvider.Clean(lambda, filter: true, log: null)!;
+        var cleanLambda = (LambdaExpression)DbQueryProvider.Clean(lambda, filter: false, log: null)!;
 
         var parentEntity = new EntityExpression(af.Route.RootType, af.BackID, af.ExternalPeriod, null, null, null, null, false);
 
@@ -3604,11 +3671,13 @@ class QueryJoinExpander : DbExpressionVisitor
 
                 Expression equal = DbExpressionNominator.FullNominate(eq)!;
 
-                if (this.systemTime is SystemTime.Interval inter && inter.JoinBehaviour == JoinBehaviour.FirstCompatible && tr.CompleteEntity.ExternalPeriod != null)
+                if (this.systemTime is SystemTime.Interval inter && inter.JoinMode == SystemTimeJoinMode.FirstCompatible && tr.CompleteEntity.ExternalPeriod != null)
                 {
                     Alias newAlias = aliasGenerator.NextSelectAlias();
+                    var period = tr.CompleteEntity.ExternalPeriod!;
                     source = new JoinExpression(JoinType.OuterApply, source,
-                        new SelectExpression(newAlias, false, top: new SqlConstantExpression(1, typeof(int)), null, tr.Table, equal, new[] { new OrderExpression(OrderType.Ascending, tr.CompleteEntity.ExternalPeriod!.Min!) }, null, 0),
+                        new SelectExpression(newAlias, false, top: new SqlConstantExpression(1, typeof(int)), null, tr.Table, equal,
+                        [new OrderExpression(OrderType.Ascending,  period.Min ?? new SqlFunctionExpression(period.ElementType, null, PostgresFunction.lower.ToString(), new[] { period.PostgresRange! }))], null, 0),
                         null);
                 }
                 else

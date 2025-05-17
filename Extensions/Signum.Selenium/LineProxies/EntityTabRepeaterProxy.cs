@@ -11,6 +11,10 @@ public class EntityTabRepeaterProxy : EntityBaseProxy
     {
     }
 
+
+    public override object? GetValueUntyped() => throw new NotImplementedException();
+    public override void SetValueUntyped(object? value) => throw new NotImplementedException();
+
     public WebElementLocator Tab(int index) => new WebElementLocator(this.Element, By.CssSelector($".nav-tabs .nav-item .nav-link[data-rr-ui-event-key=\"{index}\"]"));
     public WebElementLocator ElementPanel() => new WebElementLocator(this.Element, By.CssSelector($".sf-repeater-element.active"));
 
@@ -21,7 +25,7 @@ public class EntityTabRepeaterProxy : EntityBaseProxy
         this.Element.GetDriver().Wait(() =>
         {
             var elem = this.ElementPanel().TryFind();
-            return elem != null && elem.GetID().EndsWith("-" + index);
+            return elem != null && elem.GetID()!.EndsWith("-" + index);
         });
 
         return this.Details<T>();
@@ -31,7 +35,7 @@ public class EntityTabRepeaterProxy : EntityBaseProxy
     {
         var active = this.Element.FindElement(By.CssSelector(".nav-tabs .nav-item .nav-link.active"));
 
-        return int.Parse(active.GetAttribute("data-rr-ui-event-key"));
+        return int.Parse(active.GetDomAttribute("data-rr-ui-event-key")!);
     }
 
     public LineContainer<T> Details<T>() where T : ModifiableEntity

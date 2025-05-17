@@ -99,7 +99,7 @@ public static partial class TypeAuthLogic
                 using (var tr = Transaction.ForceNew())
                 {
                     foreach (var gr in groups)
-                        miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Write);
+                        miAssertAllowed.GetInvoker(gr.Key)(gr.ToList(), TypeAllowedBasic.Write);
 
                     tr.Commit();
                 }
@@ -107,7 +107,7 @@ public static partial class TypeAuthLogic
                 //Assert after
                 foreach (var gr in groups)
                 {
-                    miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Write);
+                    miAssertAllowed.GetInvoker(gr.Key)(gr.ToList(), TypeAllowedBasic.Write);
                 }
             }
 
@@ -115,19 +115,61 @@ public static partial class TypeAuthLogic
 
             if (created.HasItems())
             {
-                var groups = created.GroupBy(e => e.GetType(), e => e.Id);
+                var groups = created.GroupBy(e => e.GetType());
 
                 //Assert after
                 foreach (var gr in groups)
-                    miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Write);
+                    miAssertAllowed.GetInvoker(gr.Key)(gr.Select(a=>a.Id).ToList(), TypeAllowedBasic.Write);
+
+                foreach (var gr in groups)
+                {
+                    var tcs = TypeConditionsForBinding(gr.Key);
+
+                    if(tcs != null)
+                    {
+                        giFillTypeConditionsImp.GetInvoker(gr.Key)(gr, tcs);
+                    }
+                }
             }
         }
     }
 
+    static GenericInvoker<Action<IEnumerable<Entity>, List<TypeConditionSymbol>>> giFillTypeConditionsImp =
+        new((entities, conditions) => FillTypeConditionsImp<Entity>(entities, conditions));
+    static void FillTypeConditionsImp<T>(IEnumerable<Entity> entities, List<TypeConditionSymbol> typeConditions)
+    where T : Entity
+    {
+        var dic = GetTypeConditionsDictionary<T>(typeConditions);
+        foreach (var gr in entities.Chunk(100))
+        {
+            var list = Database.Query<T>().Where(e => gr.Contains(e)).Select(a => new
+            {
+                a.Id,
+                dic = dic.Evaluate(a, null)
+            }).ToList().ToDictionary(a => a.Id, a => a.dic);
 
-    static GenericInvoker<Action<PrimaryKey[], TypeAllowedBasic>> miAssertAllowed =
+
+            foreach (var e in gr)
+            {
+                e._TypeConditions = list.GetOrThrow(e.Id);
+            }
+        }
+    }
+
+    public static void FillTypeConditions(this Entity e, bool force = false)
+    {
+        if (e._TypeConditions != null && !force)
+            return;
+
+        var tcs = TypeConditionsForBinding(e.GetType());
+        if (tcs != null)
+            giFillTypeConditionsImp.GetInvoker(e.GetType())(new[] { e }, tcs);
+    }
+
+
+    static GenericInvoker<Action<List<PrimaryKey>, TypeAllowedBasic>> miAssertAllowed =
         new((a, tab) => AssertAllowed<Entity>(a, tab));
-    static void AssertAllowed<T>(PrimaryKey[] requested, TypeAllowedBasic typeAllowed)
+    static void AssertAllowed<T>(List<PrimaryKey> requested, TypeAllowedBasic typeAllowed)
         where T : Entity
     {
         using (DisableQueryFilter())
@@ -136,12 +178,12 @@ public static partial class TypeAuthLogic
             {
                 a.Id,
                 Allowed = a.IsAllowedFor(typeAllowed, ExecutionMode.InUserInterface, null! /*automatically populated*/),
-            })).ToArray();
+            })).ToList();
 
-            if (found.Length != requested.Length)
+            if (found.Count != requested.Count)
                 throw new EntityNotFoundException(typeof(T), requested.Except(found.Select(a => a.Id)).ToArray());
 
-            PrimaryKey[] notFound = found.Where(a => !a.Allowed).Select(a => a.Id).ToArray();
+            var notFound = found.Where(a => !a.Allowed).Select(a => a.Id).ToList();
             if (notFound.Any())
             {
                 var args = FilterQueryArgs.FromFilter<T>(t => notFound.Contains(t.Id));
@@ -155,7 +197,7 @@ public static partial class TypeAuthLogic
 
                 throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(
                     typeAllowed.NiceToString(),
-                    notFound.Length == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(), notFound.CommaAnd()) + "\r\n" + details);
+                    notFound.Count == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(), notFound.CommaAnd()) + "\r\n" + details);
             }
         }
     }
@@ -203,35 +245,24 @@ public static partial class TypeAuthLogic
         if (max < allowed)
             return false;
 
-        var inMemoryCodition = IsAllowedInMemory<T>(tac, allowed, inUserInterface);
-        if (inMemoryCodition != null)
-            return inMemoryCodition(entity);
-
-        using (DisableQueryFilter())
-            return entity.InDB().WhereIsAllowedFor(allowed, inUserInterface, args).Any();
-    }
-
-    private static Func<T, bool>? IsAllowedInMemory<T>(TypeAllowedAndConditions tac, TypeAllowedBasic allowed, bool inUserInterface) where T : Entity
-    {
-        if (tac.ConditionRules.SelectMany(c => c.TypeConditions).Any(tc => TypeConditionLogic.GetInMemoryCondition<T>(tc) == null))
-            return null;
-
-        return entity =>
+        if (entity.Modified != ModifiedState.Sealed)
         {
-            foreach (var cond in tac.ConditionRules.Reverse())
+            var role = RoleEntity.Current;
+            if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(role, entity.GetType()) && !HasTypeConditionInOperations(role, entity.GetType()))
             {
-                if (cond.TypeConditions.All(tc =>
-                {
-                    var func = TypeConditionLogic.GetInMemoryCondition<T>(tc)!;
-                    return func(entity);
-                }))
-                {
-                    return cond.Allowed.Get(inUserInterface) >= allowed;
-                }
+                return allowed <= max;
             }
+        }
 
-            return tac.Fallback.Get(inUserInterface) >= allowed;
-        };
+        foreach (var cond in tac.ConditionRules.Reverse())
+        {
+            if (cond.TypeConditions.All(tc => entity.InTypeCondition(tc)))
+            {
+                return cond.Allowed.Get(inUserInterface) >= allowed;
+            }
+        }
+
+        return tac.Fallback.Get(inUserInterface) >= allowed;
     }
 
     [MethodExpander(typeof(IsAllowedForExpander))]
@@ -330,13 +361,10 @@ public static partial class TypeAuthLogic
                 return null;
         }
 
-        Func<T, bool>? func = IsAllowedInMemory<T>(GetAllowed(typeof(T)), tab, ui);
-
-        return new FilterQueryResult<T>(Expression.Lambda<Func<T, bool>>(body, e), func);
+        return new FilterQueryResult<T>(
+            Expression.Lambda<Func<T, bool>>(body, e),
+            e => e.IsAllowedFor(tab, ui, args));
     }
-
-
-  
 
     private static void AssertMinimum<T>(bool ui) where T : Entity
     {
@@ -394,7 +422,7 @@ public static partial class TypeAuthLogic
     {
         Type type = entity.Type;
 
-        TypeAllowedAndConditions tac = GetAllowed(type);
+        WithConditions<TypeAllowed> tac = GetAllowed(type);
 
         var node = tac.ToTypeConditionNode(requested, inUserInterface);
 
@@ -415,7 +443,7 @@ public static partial class TypeAuthLogic
     {
         Type type = entity.Type;
 
-        TypeAllowedAndConditions tac = GetAllowed(type);
+        WithConditions<TypeAllowed> tac = GetAllowed(type);
 
         Expression baseValue = Expression.Constant(tac.Fallback.Get(inUserInterface) >= requested);
 
@@ -567,115 +595,61 @@ public static partial class TypeAuthLogic
         }
     }
 
-    public static RuleTypeEntity ToRuleType(this TypeAllowedAndConditions allowed, Lite<RoleEntity> role, TypeEntity resource)
+
+}
+
+static class TypeConditionRuleSync
+{
+    internal static SqlPreCommand? DeletedTypeCondition<RT>(Expression<Func<RT, MList<TypeConditionSymbol>>> conditionsMList,
+        Expression<Func<MListElement<RT, TypeConditionSymbol>, bool>> predicate,
+        string? comment = null)
+    where RT : Entity
     {
-        return new RuleTypeEntity
-        {
-            Role = role,
-            Resource = resource,
-            Allowed = allowed.Fallback,
-            ConditionRules = allowed.ConditionRules.Select(a => new RuleTypeConditionEntity
-            {
-                Allowed = a.Allowed,
-                Conditions = a.TypeConditions.ToMList()
-            }).ToMList()
-        };
+        if (!Database.MListQuery(conditionsMList).Any(predicate))
+            return null;
+
+        var mlist = Administrator.UnsafeDeletePreCommandMList(conditionsMList, Database.MListQuery(conditionsMList).Where(predicate))!.AddComment(comment);
+        var emptyRules = Administrator.UnsafeDeletePreCommand(Database.Query<RT>().Where(rt => conditionsMList.Evaluate(rt).Count == 0), force: true, avoidMList: true);
+
+        return SqlPreCommand.Combine(Spacing.Simple, mlist, emptyRules);
     }
 
-    public static TypeAllowedAndConditions ToTypeAllowedAndConditions(this RuleTypeEntity rule)
+    internal static SqlPreCommand? NotDefinedTypeCondition<RC>(Replacements rep,
+        Expression<Func<RC, MList<TypeConditionSymbol>>> mlist,
+        Expression<Func<RC, TypeEntity>> getType,
+        Expression<Func<RC, Lite<RoleEntity>>> getRole)
+    where RC : Entity
     {
-        return new TypeAllowedAndConditions(rule.Allowed,
-            rule.ConditionRules.Select(c => new TypeConditionRuleModel(c.Conditions, c.Allowed)));
-    }
+        var conds = (from ruleCondition in Database.Query<RC>()
+                     from tc in mlist.Evaluate(ruleCondition)
+                     select new { TypeCondition = tc, Type = getType.Evaluate(ruleCondition), Role = getRole.Evaluate(ruleCondition) })
+                   .ToList();
 
-    static SqlPreCommand? Schema_Synchronizing(Replacements rep)
-    {
-        var conds = (from rt in Database.Query<RuleTypeEntity>()
-                     from c in rt.ConditionRules
-                     from s in c.Conditions
-                     select new { rt.Resource, s, rt.Role }).ToList();
+        var errors = conds.GroupBy(a => new { a.Type, a.TypeCondition }, a => a.Role)
+       .Where(gr =>
+       {
+           if (gr.Key.TypeCondition.FieldInfo == null)
+           {
+               var replacedName = rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.TypeCondition.Key);
+               if (replacedName == null)
+                   return false; // Other Syncronizer will do it
 
-        var errors = conds.GroupBy(a => new { a.Resource, a.s}, a => a.Role)
-            .Where(gr =>
-            {
-                if (gr.Key.s.FieldInfo == null)
-                {
-                    var replacedName = rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.s.Key);
-                    if (replacedName == null)
-                        return false; // Other Syncronizer will do it
+               return !TypeConditionLogic.ConditionsFor(gr.Key.Type.ToType()).Any(a => a.Key == replacedName);
+           }
 
-                    return !TypeConditionLogic.ConditionsFor(gr.Key.Resource!.ToType()).Any(a => a.Key == replacedName);
-                }
-
-                return !TypeConditionLogic.IsDefined(gr.Key.Resource!.ToType(), gr.Key.s);
-            })
-            .ToList();
+           return !TypeConditionLogic.IsDefined(gr.Key.Type.ToType(), gr.Key.TypeCondition);
+       })
+       .ToList();
 
         using (rep.WithReplacedDatabaseName())
             return errors.Select(a =>
             {
-                return Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>()
-                    .Where(rule => rule.Conditions.Contains(a.Key.s) && rule.RuleType.Entity.Resource.Is(a.Key.Resource)))!
-                    .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.s, a.Key.Resource, a.ToString(", ")));
+                return DeletedTypeCondition(
+                    mlist,
+                    mle => mle.Element.Is(a.Key.TypeCondition) && getType.Evaluate(mle.Parent).Is(a.Key.Type),
+                comment: "TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.TypeCondition, a.Key.Type, a.ToString(", ")));
             }).Combine(Spacing.Double);
     }
 }
 
-//public static class AndOrSimplifierVisitor
-//{
-//    class HashSetComparer<T> : IEqualityComparer<HashSet<T>>
-//    {
-//        public bool Equals(HashSet<T>? x, HashSet<T>? y)
-//        {
-//            return x != null && y != null && x.SetEquals(y);
-//        }
 
-//        public int GetHashCode([DisallowNull] HashSet<T> obj)
-//        {
-//            return obj.Count;
-//        }
-//    }
-
-//    static IEqualityComparer<Expression> Comparer = ExpressionComparer.GetComparer<Expression>(false);
-//    static IEqualityComparer<HashSet<Expression>> HSetComparer = new HashSetComparer<Expression>();
-
-//    public static Expression SimplifyOrs(Expression expr)
-//    {
-//        if (expr is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
-//        {
-//            var orGroups = OrAndList(b);
-
-//            var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og))).ToList();
-
-//            return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.AndAlso)).Aggregate(Expression.OrElse);
-//        }
-
-//        return expr;
-//    }
-
-//    static HashSet<HashSet<Expression>> OrAndList(Expression expression)
-//    {
-//        if (expression is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
-//        {
-//            return OrAndList(b.Left).Concat(OrAndList(b.Right)).ToHashSet(HSetComparer);
-//        }
-//        else
-//        {
-//            var ands = AndList(expression);
-//            return new HashSet<HashSet<Expression>>(HSetComparer) { ands };
-//        }
-//    }
-
-//    static HashSet<Expression> AndList(Expression expression)
-//    {
-//        if (expression is BinaryExpression b && (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso))
-//            return AndList(b.Left).Concat(AndList(b.Right)).ToHashSet(Comparer);
-//        else
-//            return new HashSet<Expression>(Comparer) { expression };
-//    }
-
-//    static bool IsMoreSimpleAndGeneralThan(this HashSet<Expression> simple, HashSet<Expression> complex)
-//    {
-//        return simple.All(a => complex.Contains(a));
-//    }
-//}

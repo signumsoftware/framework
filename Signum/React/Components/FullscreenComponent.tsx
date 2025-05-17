@@ -5,11 +5,11 @@ import { EntityControlMessage } from '../Signum.Entities';
 
 
 interface FullscreenComponentProps {
-  children: React.ReactNode;
+  children: (fullScreen: boolean) =>  React.ReactNode;
   onReload?: (e: React.MouseEvent<any>) => void;
 }
 
-export function FullscreenComponent(p: FullscreenComponentProps) {
+export function FullscreenComponent(p: FullscreenComponentProps): React.JSX.Element {
 
   const [isFullScreen, setIsFullScreen] = React.useState(false);
 
@@ -31,15 +31,15 @@ export function FullscreenComponent(p: FullscreenComponentProps) {
       zIndex: 9999,
     })}>
 
-      <div key={isFullScreen ? "A" : "B"} style={{ flexGrow: 1, display: "flex", width: "0px" }}>
-        {p.children}
+      <div style={{ flexGrow: 1, display: "flex", width: "0px" }}>
+        {p.children(isFullScreen)}
       </div>
       <div style={{ display: "flex", flexDirection: "column", marginLeft: "5px" }}>
         <a onClick={handleExpandToggle} href="#" className="sf-chart-mini-icon" title={isFullScreen ? EntityControlMessage.Minimize.niceToString() : EntityControlMessage.Maximize.niceToString()}  >
           <FontAwesomeIcon icon={isFullScreen ? "compress" : "expand"} />
         </a>
         {p.onReload &&
-          <a onClick={p.onReload} href="#" className="sf-chart-mini-icon" title={EntityControlMessage.Reload.niceToString()} >
+          <a onClick={e => { e.preventDefault();  p.onReload!(e); }} href="#" className="sf-chart-mini-icon" title={EntityControlMessage.Reload.niceToString()} >
             <FontAwesomeIcon icon={"arrow-rotate-right"} />
           </a>
         }

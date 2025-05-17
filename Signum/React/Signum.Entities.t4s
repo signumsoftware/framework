@@ -7,11 +7,11 @@ export interface ModifiableEntity {
   isNew: boolean | undefined; //required in embedded to remove and re-create in EntityJsonSerializer
   temporalId: string;
   error?: { [member: string]: string };
-  readonlyProperties?: string[];
+  propsMeta?: string[];
   mixins?: { [name: string]: MixinEntity }
 }
 
-export function liteKeyLong(lite: Lite<Entity>) {
+export function liteKeyLong(lite: Lite<Entity>): string {
   return lite.EntityType + ";" + (lite.id == undefined ? "" : lite.id) + ";" + getToString(lite);
 }
 
@@ -92,12 +92,12 @@ export interface EntityPack<T extends ModifiableEntity> {
 
 export const toStringDictionary: { [name: string]: ((entity: any) => string) | null } = {};
 
-export function registerToString<T extends ModifiableEntity>(type: Type<T>, toStringFunc: ((e: T) => string) | null) {
+export function registerToString<T extends ModifiableEntity>(type: Type<T>, toStringFunc: ((e: T) => string) | null): void {
   toStringDictionary[type.typeName] = toStringFunc as ((e: ModifiableEntity) => string) | null;
 }
 
 
-export function registerCustomModelConsturctor<T extends Entity, M extends ModelEntity>(type: Type<T>, modelType: Type<T>, constructLiteModel: ((e: T) => M)) {
+export function registerCustomModelConsturctor<T extends Entity, M extends ModelEntity>(type: Type<T>, modelType: Type<T>, constructLiteModel: ((e: T) => M)): void {
   var ti = Reflection.tryGetTypeInfo(type.typeName);
 
   if (ti) {
@@ -113,7 +113,7 @@ export function registerCustomModelConsturctor<T extends Entity, M extends Model
 import * as Reflection from './Reflection'
 import { object } from 'prop-types';
 
-export function newNiceName(ti: Reflection.TypeInfo) {
+export function newNiceName(ti: Reflection.TypeInfo): string {
   return FrameMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
 }
 
@@ -175,6 +175,7 @@ function compileFunction(functionString: string): (e: any) => any {
     dateToString: Reflection.dateToString,
     timeToString: Reflection.timeToString,
     getTypeInfo: Reflection.getTypeInfo,
+    symbolNiceName: Reflection.symbolNiceName,
     newNiceName: newNiceName,
     New : Reflection.New,
     toLite: toLite,
@@ -245,18 +246,30 @@ export function toLiteFat<T extends Entity>(entity: T, model?: unknown): Lite<T>
   }
 }
 
-export function liteKey(lite: Lite<Entity>) {
+export function liteKey(lite: Lite<Entity>): string {
   return lite.EntityType + ";" + (lite.id == undefined ? "" : lite.id);
 }
 
 export function parseLite(lite: string): Lite<Entity> {
-  return {
-    EntityType: lite.before(";"),
-    id: lite.after(";"),
-  };
+
+  const type = lite.before(";");
+  const rest = lite.after(";");
+  if (rest.contains(";")) {
+    return {
+      EntityType: type,
+      id: rest.before(";"),
+      model: rest.after(";")
+    }
+  }
+  else {
+    return {
+      EntityType: type,
+      id: rest,
+    }
+  }
 }
 
-export const liteKeyRegEx = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
+export const liteKeyRegEx: RegExp = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
 export function parseLiteList(text: string): Lite<Entity>[] {
   const lines = text.split("|");
   const liteKeys = lines.map(l => liteKeyRegEx.test(l) ? l : null).notNull();
@@ -265,7 +278,7 @@ export function parseLiteList(text: string): Lite<Entity>[] {
   return lites;
 }
 
-export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<T> | T | null | undefined, compareTicks = false, assertTypesFound = true) {
+export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<T> | T | null | undefined, compareTicks = false, assertTypesFound = true): boolean {
 
   if (a == undefined && b == undefined)
     return true;
@@ -315,7 +328,7 @@ export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity> {
     (obj as EntityPack<ModifiableEntity>).canExecute !== undefined;
 }
 
-export function entityInfo(entity: ModifiableEntity | Lite<Entity> | null | undefined) {
+export function entityInfo(entity: ModifiableEntity | Lite<Entity> | null | undefined): string {
   if (!entity)
     return "undefined";
 

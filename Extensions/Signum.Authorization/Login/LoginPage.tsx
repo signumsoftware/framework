@@ -17,7 +17,7 @@ export interface LoginContext {
   userName?: React.RefObject<HTMLInputElement>;
 }
 
-export default function LoginPage() {
+function LoginPage(): React.JSX.Element {
 
   AppContext.useTitle(AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString());
 
@@ -53,13 +53,17 @@ export default function LoginPage() {
   );
 }
 
+namespace LoginPage {
+  export let customLoginButtons: ((ctx: LoginContext) => React.ReactElement<any>) | null = null;
+  export let showLoginForm: "yes" | "no" | "initially_not" = "yes";
+  export let usernameLabel: () => string = () => LoginAuthMessage.Username.niceToString();
+  export let resetPasswordControl = () => null as null | React.ReactElement;
+}
 
-LoginPage.customLoginButtons = null as (null | ((ctx: LoginContext) => React.ReactElement<any>));
-LoginPage.showLoginForm = "yes" as "yes" | "no" | "initially_not";
-LoginPage.usernameLabel = () => LoginAuthMessage.Username.niceToString();
-LoginPage.resetPasswordControl = () => null as null | React.ReactElement;
 
-export function LoginForm(p: { ctx: LoginContext }) {
+export default LoginPage;
+
+export function LoginForm(p: { ctx: LoginContext }): React.JSX.Element {
   const userName = React.useRef<HTMLInputElement>(null);
   p.ctx.userName = userName;
   const password = React.useRef<HTMLInputElement>(null);

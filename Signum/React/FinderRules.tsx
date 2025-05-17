@@ -1,20 +1,21 @@
 import * as React from "react";
-import { DateTime, Duration } from 'luxon'
+import { DateTime, DateTimeUnit, Duration } from 'luxon'
 import { Navigator } from "./Navigator"
 import { Dic, classes } from './Globals'
 import {
-  FilterOptionParsed, 
+  FilterOptionParsed,
   QueryToken,
-  FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroup, isFilterCondition, 
+  FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroup, isFilterCondition,
   hasToArray, getFilterOperations, getFilterGroupUnifiedFilterType, FilterConditionOption, isList
 } from './FindOptions';
 import { FilterOperation } from './Signum.DynamicQuery';
 import { Entity, Lite, SearchMessage, JavascriptMessage, getToString, MList, newMListElement } from './Signum.Entities';
 import {
   TypeReference,
-  tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, 
-  PropertyRoute, tryGetTypeInfo, 
-  toLuxonDurationFormat, toFormatWithFixes, IsByAll, getTypeInfos, Binding
+  tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat,
+  PropertyRoute, tryGetTypeInfo,
+  toLuxonDurationFormat, toFormatWithFixes, IsByAll, getTypeInfos, Binding,
+  QueryTokenString
 } from './Reflection';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
@@ -31,9 +32,10 @@ import { TextBoxLine } from "./Lines/TextBoxLine";
 import { AutoLine } from "./Lines/AutoLine";
 import { EnumLine } from "./Lines/EnumLine";
 import { KeyNames } from "./Components";
+import QueryTokenBuilder from "./SearchControl/QueryTokenBuilder";
 
 
-export function isMultiline(pr?: PropertyRoute) {
+export function isMultiline(pr?: PropertyRoute): boolean {
   if (pr == null || pr.member == null)
     return false;
 
@@ -100,7 +102,7 @@ export function initFormatRules(): Finder.FormatRule[] {
         return false;
       },
       formatter: (qt, sc) => {
-      
+
         var hl = new TextHighlighter(getKeywords(qt, sc?.state.resultFindOptions?.filterOptions));
 
         return new Finder.CellFormatter(cell => cell ? <span className="try-no-wrap">{hl.highlight(cell.toString())}</span> : undefined, false);
@@ -171,6 +173,27 @@ export function initFormatRules(): Finder.FormatRule[] {
         const durationFormat = toLuxonDurationFormat(qt.format) ?? "hh:mm:ss";
 
         return new Finder.CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{Duration.fromISOTime(cell).toFormat(durationFormat)}</bdi>, false, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+      }
+    },
+    {
+      name: "TimeSeries",
+      isApplicable: qt => qt.fullKey == QueryTokenString.timeSeries.token,
+      formatter: (qt, scl) => {
+        let luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
+        const st = scl?.props.findOptions.systemTime;
+        if (st) {
+          var start = DateTime.fromISO(st.startDate!);
+
+          if (start.equals(start.startOf(st.timeSeriesUnit?.firstLower() as DateTimeUnit))) {
+            luxonFormat = toLuxonFormat(st.timeSeriesUnit == "Year" ? "YYYY" :
+              st.timeSeriesUnit == "Month" ? "LLLL YYYY" :
+                st.timeSeriesUnit == "Day" ? "d" :
+                  qt.format, "DateTime");
+          }
+        }
+
+
+        return new Finder.CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>, false, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
     {
@@ -331,9 +354,9 @@ export function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): 
     token = token.parent;
 
   //Keep in sync with FilterFullText.GetKeywords
-  function extractComplexConditions(value: string) {
+  function extractSyntax(regex: RegExp, value: string) {
 
-    var result = value.split(/AND|OR|NOT|NEAR|\(|\)|\*/).map(a => {
+    var result = value.split(regex).map(a => {
       a = a.trim()
       if (a.startsWith("\"") && a.endsWith("\""))
         a = a.after("\"").beforeLast("\"");
@@ -344,12 +367,18 @@ export function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): 
     return result;
   }
 
-  function splitTokens(value: unknown, splitValue: boolean | undefined, operation: FilterOperation): string[] {
+  function splitKeywords(value: unknown, splitValue: boolean | undefined, operation: FilterOperation): string[] {
     if (typeof value == "string" && (splitValue || operation == "FreeText"))
       return (value as string).split(/\s+/);
 
     if (operation == "ComplexCondition")
-      return extractComplexConditions(value as string ?? "");
+      return extractSyntax(/AND|OR|NOT|NEAR|\(|\)|\*/g, value as string ?? "");
+
+    if (operation == "TsQuery")
+      return extractSyntax(/&|\||!|<->|<\d>|\(|\)|\*/g, value as string ?? "");
+
+    if (operation == "TsQuery_WebSearch")
+      return extractSyntax(/OR|-|\*/, value as string ?? "");
 
     if (operation == "IsIn" || operation == "IsNotIn") {
       if (Array.isArray(value))
@@ -379,7 +408,7 @@ export function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): 
         var filterConditions = fo.filters.filter(sf => sf.token != null && isFilterCondition(sf)) as FilterConditionOptionParsed[];
 
         var filters = filterConditions.filter(sf => similarTokenToStr(sf.token!, token) && sf.operation && !isNegative(sf.operation))
-          .flatMap(sf => splitTokens(fo.value!, fo.pinned?.splitValue, sf.operation!));
+          .flatMap(sf => splitKeywords(fo.value!, fo.pinned?.splitValue, sf.operation!));
 
         return filters;
       } else {
@@ -388,7 +417,7 @@ export function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): 
     }
     else {
       if (fo.token && fo.operation && !isNegative(fo.operation) && similarTokenToStr(fo.token, token)) {
-        return splitTokens(fo.value, fo.pinned?.splitValue, fo.operation);
+        return splitKeywords(fo.value, fo.pinned?.splitValue, fo.operation);
       } else {
         return [];
       }
@@ -398,24 +427,28 @@ export function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): 
   return filters.notNull().flatMap(f => getFiltersKeywords(f)).distinctBy(a => a);
 }
 
-export function similarTokenToStr(tokenA: QueryToken, tokenB: QueryToken) {
-  if (similarToken(tokenA.fullKey, tokenB.fullKey))
+export function similarTokenToStr(tokenF: QueryToken, tokenC: QueryToken): boolean {
+  if (similarToken(tokenF.fullKey, tokenC.fullKey))
     return true;
 
-  if (tokenA.propertyRoute != null && tokenA.propertyRoute == tokenB.propertyRoute)
+  if (tokenF.propertyRoute != null && tokenF.propertyRoute == tokenC.propertyRoute)
     return true;
 
-  if (tokenA && tokenA.key == "ToString") {
-    var steps = getToStringDependencies(tokenA.parent!.type);
+  if (tokenF.filterType == "TsVector" && tokenF.tsVectorFor && tokenC.propertyRoute && tokenF.tsVectorFor.contains(tokenC.propertyRoute)) {
+    return true;
+  }
 
-    if (steps && steps.some(a => similarToken(tokenA.parent?.fullKey + "." + a, tokenB.fullKey)))
+  if (tokenF && tokenF.key == "ToString") {
+    var steps = getToStringDependencies(tokenF.parent!.type);
+
+    if (steps && steps.some(a => similarToken(tokenF.parent?.fullKey + "." + a, tokenC.fullKey)))
       return true;
   }
 
-  if (tokenB && tokenB.key == "ToString") {
-    var steps = getToStringDependencies(tokenB.parent!.type);
+  if (tokenC && tokenC.key == "ToString") {
+    var steps = getToStringDependencies(tokenC.parent!.type);
 
-    if (steps && steps.some(a => similarToken(tokenB.parent?.fullKey + "." + a, tokenA.fullKey)))
+    if (steps && steps.some(a => similarToken(tokenC.parent?.fullKey + "." + a, tokenF.fullKey)))
       return true;
   }
 
@@ -424,7 +457,7 @@ export function similarTokenToStr(tokenA: QueryToken, tokenB: QueryToken) {
 
 const toStringFunctionTokensCache: { [typeName: string]: string[] | null } = {};
 
-export function getToStringDependencies(tr: TypeReference) {
+export function getToStringDependencies(tr: TypeReference): string[] | null {
 
   var ti = tryGetTypeInfo(tr.name);
   if (ti == null)
@@ -472,7 +505,7 @@ export function initEntityFormatRules(): Finder.EntityFormatRule[] {
       formatter: new Finder.EntityFormatter(({ row, columns, searchControl: sc }) =>
         <a href="#"
           className="sf-line-button sf-view"
-          onClick={e => { e.preventDefault(); sc!.openRowGroup(row); }}
+          onClick={e => { e.preventDefault(); sc!.openRowGroup(row, e); }}
         >
           <span title={JavascriptMessage.ShowGroup.niceToString()}>
             <FontAwesomeIcon icon="layer-group" />
@@ -544,7 +577,7 @@ export function initQuickFilterRules(): Finder.QuickFilterRule[] {
 
 
 
-export function initFilterValueFormatRules(): Finder.FilterValueFormatter[]{
+export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
   return [
 
     {
@@ -555,13 +588,24 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[]{
         f.token?.filterType == "Decimal" ||
         f.token?.filterType == "Guid" ||
         f.token?.filterType == "Integer" ||
-        f.token?.filterType == "Time" || 
+        f.token?.filterType == "Time" ||
         f.token?.filterType == "String"),
       renderValue: (f, ffc) => {
         var tokenType = f.token!.type;
         if (ffc.forceNullable)
           tokenType = { ...tokenType, isNotNullable: false };
         return <AutoLine ctx={ffc.ctx} type={tokenType} format={f.token!.format} unit={f.token!.unit} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
+      }
+    },
+    {
+      name: "String",
+      applicable: (f, ffc) => isFilterCondition(f) && (
+        f.token?.filterType == "String"),
+      renderValue: (f, ffc) => {
+        var tokenType = f.token!.type;
+        if (ffc.forceNullable)
+          tokenType = { ...tokenType, isNotNullable: false };
+        return <TextBoxLine ctx={ffc.ctx} type={tokenType} autoTrimString={false} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
       }
     },
     {
@@ -655,13 +699,12 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[]{
     },
     {
       name: "TextArea",
-      applicable: (f, ffc) => isFilterCondition(f) && (f.operation == "ComplexCondition" || f.operation == "FreeText"),
+      applicable: (f, ffc) => isFilterCondition(f) && isFullTextSearch(f.operation),
       renderValue: (f, ffc) => {
         const fc = f as FilterConditionOptionParsed;
-        const isComplex = fc.operation == "ComplexCondition";
         return <FilterTextArea ctx={ffc.ctx}
-          isComplex={isComplex}
-          onChange={(() => ffc.handleValueChange(f, isComplex))}
+          filterOperation={fc.operation ?? null}
+          onChange={(() => ffc.handleValueChange(f, isComplexFullTextSearch(fc.operation)))}
           label={ffc.label || SearchMessage.Search.niceToString()} />
       }
     },
@@ -685,17 +728,18 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[]{
     },
     {
       name: "FilterGroup_TextArea",
-      applicable: (f, ffc) => isFilterGroup(f) && f.filters.some(sf => isFilterCondition(sf) && (sf.operation == "ComplexCondition" || sf.operation == "FreeText")),
+      applicable: (f, ffc) => isFilterGroup(f) && f.filters.some(sf => isFilterCondition(sf) && isFullTextSearch(sf.operation)),
       renderValue: (f, ffc) => {
         var fg = f as FilterGroupOptionParsed;
-        var isComplex = fg.filters.some(sf => isFilterCondition(sf) && sf.operation == "ComplexCondition");
+        const isComplex = fg.filters.some(sf => isFilterCondition(sf) && isComplexFullTextSearch(sf.operation));
+        var filterOperation = fg.filters.map(sf => isFilterCondition(sf) && isFullTextSearch(sf.operation) ? sf.operation : null).notNull().distinctBy(a => a).onlyOrNull();
         return <FilterTextArea ctx={ffc.ctx}
-          isComplex={isComplex}
+          filterOperation={filterOperation}
           onChange={(() => ffc.handleValueChange(f, isComplex))}
           label={ffc.label || SearchMessage.Search.niceToString()} />;
       }
     },
-   ]
+  ]
 }
 
 
@@ -706,7 +750,7 @@ export interface MultiValueProps {
   onChange: () => void;
 }
 
-export function MultiValue(p: MultiValueProps) {
+export function MultiValue(p: MultiValueProps): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 
@@ -766,7 +810,7 @@ export function MultiValue(p: MultiValueProps) {
 }
 
 
-export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type: string, onChange: () => void, vertical?: boolean }) {
+export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type: string, onChange: () => void, vertical?: boolean }): React.JSX.Element {
   const mListEntity = React.useRef<MList<Lite<Entity>>>([]);
 
 
@@ -785,11 +829,11 @@ export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type
 
 
 
-export function FilterTextArea(p: { ctx: TypeContext<string>, isComplex: boolean, onChange: () => void, label?: string }) {
+export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: FilterOperation | null, onChange: () => void, label?: string }): React.JSX.Element {
   return <TextAreaLine ctx={p.ctx}
     type={{ name: "string" }}
     label={p.label}
-    valueHtmlAttributes={p.isComplex ? {
+    valueHtmlAttributes={p.filterOperation != null && p.filterOperation != "FreeText" ? {
       onKeyDown: e => {
         console.log(e);
         if (e.key == KeyNames.enter && !e.shiftKey) {
@@ -803,39 +847,116 @@ export function FilterTextArea(p: { ctx: TypeContext<string>, isComplex: boolean
         }
       }
     } : undefined}
-    extraButtons={p.isComplex ? (vlc => <ComplexConditionSyntax />) : undefined}
+    extraButtons={vlc => p.filterOperation && <ComplexConditionSyntax fo={p.filterOperation} />}
     onChange={p.onChange}
   />
 }
 
-export function ComplexConditionSyntax() {
+export function ComplexConditionSyntax(p: { fo: FilterOperation }): React.JSX.Element | null {
+  var help = FullTextSearchHelps[p.fo];
+
+  if (help == null)
+    return null;
+
   const popover = (
     <Popover id="popover-basic">
-      <Popover.Header as="h3">Full-Text Search Syntax</Popover.Header>
+      <Popover.Header as="h3">{ }</Popover.Header>
       <Popover.Body>
         <ul className="ps-3">
-          {ComplexConditionSyntax.examples.map((a, i) => <li key={i} style={{ whiteSpace: "nowrap" }}><code>{a}</code></li>)}
+          {help?.examples.map((a, i) => <li key={i} style={{ whiteSpace: "nowrap" }}><code>{a}</code></li>)}
         </ul>
-        <a href="https://learn.microsoft.com/en-us/sql/relational-databases/search/query-with-full-text-search" target="_blank">Microsoft Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>
       </Popover.Body>
     </Popover>
   );
 
   return (
     <OverlayTrigger trigger="click" placement="right" overlay={popover} >
-      <button className="sf-line-button sf-view btn input-group-text"><FontAwesomeIcon icon="asterisk" title="syntax" /></button>
+      <button className="sf-line-button sf-view btn input-group-text">{help?.icon}</button>
     </OverlayTrigger>
   );
 
 }
 
 
-ComplexConditionSyntax.examples = [
-  "banana AND strawberry",
-  "banana OR strawberry",
-  "apple AND NOT (banana OR strawberry)",
-  "\"Dragon Fruit\" OR \"Passion Fruit\"",
-  "*berry",
-  "NEAR(\"apple\", \"orange\")",
-  "NEAR((\"apple\", \"orange\"), 3)",
-];
+export interface FullTextSearchHelp {
+  icon: React.ReactElement;
+  title: string;
+  url: React.ReactElement;
+  examples: string[];
+}
+
+
+const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> = {
+  "ComplexCondition": {
+    icon: <span>OR</span>,
+    title: "Full-Text Search Syntax",
+    url: <a href="https://learn.microsoft.com/en-us/sql/relational-databases/search/query-with-full-text-search" target="_blank">Microsoft Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    examples: [
+      "banana AND strawberry",
+      "banana OR strawberry",
+      "apple AND NOT (banana OR strawberry)",
+      "\"Dragon Fruit\" OR \"Passion Fruit\"",
+      "*berry",
+      "NEAR(\"apple\", \"orange\")",
+      "NEAR((\"apple\", \"orange\"), 3)",
+    ]
+  },
+  "TsQuery": {
+    icon: <span>&</span>,
+    title: "Full-Text Search to_tsquery Syntax",
+    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    examples: [
+      "banana & strawberry",
+      "banana | strawberry",
+      "apple & !(banana | strawberry)",
+      "Dragon_Fruit | Passion_Fruit",
+      "grape*",
+      "apple <-> orange",
+      "apple <3> orange",
+    ]
+  },
+  "TsQuery_Plain": {
+    icon: <FontAwesomeIcon icon="quote-left" />,
+    title: "Full-Text Search to_simpletsquery Syntax",
+    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    examples: [
+      "banana strawberry",
+      "\"banana strawberry\" <3>",
+    ]
+  },
+  "TsQuery_Phrase": {
+    icon: <FontAwesomeIcon icon="text" />,
+    title: "Full-Text Search plainto_tsquery Syntax",
+    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    examples: [
+      "banana strawberry",
+    ]
+  },
+  "TsQuery_WebSearch": {
+    icon: <FontAwesomeIcon icon="globe" />,
+    title: "Full-Text Search to_tsquery Syntax",
+    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    examples: [
+      "banana strawberry",
+      "banana OR strawberry",
+      "apple -banana -strawberry",
+      "\"Dragon Fruit\" OR \"Passion Fruit\"",
+      "grape*"
+    ]
+  },
+};
+
+function isFullTextSearch(filterOperation?: FilterOperation) {
+  return filterOperation == "ComplexCondition" ||
+    filterOperation == "FreeText" ||
+    filterOperation == "TsQuery" ||
+    filterOperation == "TsQuery_Phrase" ||
+    filterOperation == "TsQuery_Plain" ||
+    filterOperation == "TsQuery_WebSearch";
+}
+
+function isComplexFullTextSearch(filterOperation?: FilterOperation) {
+  return filterOperation == "ComplexCondition" ||
+    filterOperation == "TsQuery";
+}
+

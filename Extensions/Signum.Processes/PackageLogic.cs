@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Signum.API.Controllers;
 using Signum.API.Json;
 using Signum.Authorization;
@@ -58,10 +59,8 @@ public static class PackageLogic
 
             if(packages || packageOperations)
             {
-                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += arg =>
+                sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += typeEntity =>
                 {
-                    var typeEntity = ((TypeEntity)arg);
-
                     var targetLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => pl.Target.GetType().ToTypeEntity().Is(typeEntity)));
                     var resultLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => pl.Result!.Entity.GetType().ToTypeEntity().Is(typeEntity)));
                     return SqlPreCommand.Combine(Spacing.Simple, targetLines, resultLines);
@@ -130,10 +129,8 @@ public static class PackageLogic
                 ProcessLogic.Register(PackageOperationProcess.PackageOperation, new PackageOperationAlgorithm());
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages<PackageOperationEntity>;
 
-                sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += arg =>
+                sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += operation =>
                 {
-                    var operation = (OperationSymbol)arg;
-
                     if (!Administrator.ExistsTable<PackageOperationEntity>() || !Database.Query<PackageOperationEntity>().Any(a => a.Operation.Is(operation)))
                         return null;
 
@@ -229,7 +226,7 @@ public static class PackageLogic
     {
         return package.OperationArguments == null ? null :
             JsonExtensions.FromJsonBytes<object[]>(package.OperationArguments, EntityJsonContext.FullJsonSerializerOptions)
-            .Select(a => a is JsonElement jse ? OperationController.BaseOperationRequest.ConvertObject(jse, null) : (object?)a).ToArray();
+            .Select(a => a is JsonElement jse ? OperationController.BaseOperationRequest.ConvertObject(jse, EntityJsonContext.FullJsonSerializerOptions, null) : (object?)a).ToArray();
     }
 
     public static PackageEntity SetOperationArgs(this PackageEntity package, object?[]? args)
@@ -261,24 +258,24 @@ public class PackageOperationAlgorithm : IProcessAlgorithm
             args=lo.ToArray();  
         }
 
-
-
-
         executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
         {
             OperationType operationType = OperationLogic.GetOperationInfo(line.Target.GetType(), operationSymbol).OperationType;
 
+            OperationLogic.AssertOperationAllowed(operationSymbol, line.Target.GetType(), inUserInterface: true, entity: line.Target);
+
+            var args2 = args.AppendArg(new ProgressProxy(executingProcess.CancellationToken));
             switch (operationType)
             {
                 case OperationType.Execute:
-                    OperationLogic.ServiceExecute(line.Target, operationSymbol, args);
+                    OperationLogic.ServiceExecute(line.Target, operationSymbol, args2);
                     break;
                 case OperationType.Delete:
-                    OperationLogic.ServiceDelete(line.Target, operationSymbol, args);
+                    OperationLogic.ServiceDelete(line.Target, operationSymbol, args2);
                     break;
                 case OperationType.ConstructorFrom:
                     {
-                        var result = OperationLogic.ServiceConstructFrom(line.Target, operationSymbol, args);
+                        var result = OperationLogic.ServiceConstructFrom(line.Target, operationSymbol, args2);
                         line.Result = result?.ToLite();
                     }
                     break;
@@ -307,9 +304,10 @@ public class PackageDeleteAlgorithm<T> : IProcessAlgorithm where T : class, IEnt
 
         var args = package.GetOperationArgs();
 
+       
         executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
         {
-            ((T)(IEntity)line.Target).Delete(DeleteSymbol, args);
+            ((T)(IEntity)line.Target).Delete(DeleteSymbol, args.AppendArg(new ProgressProxy(executingProcess.CancellationToken)));
 
             line.FinishTime = Clock.Now;
             line.Save();
@@ -334,7 +332,7 @@ public class PackageExecuteAlgorithm<T> : IProcessAlgorithm where T : class, IEn
 
         executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
         {
-            ((T)(object)line.Target).Execute(Symbol, args);
+            ((T)(object)line.Target).Execute(Symbol, args.AppendArg(new ProgressProxy(executingProcess.CancellationToken)));
             line.FinishTime = Clock.Now;
             line.Save();
         });
@@ -360,7 +358,7 @@ public class PackageConstructFromAlgorithm<F, T> : IProcessAlgorithm
 
         executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
         {
-            var result = ((F)(object)line.Target).ConstructFrom(Symbol, args);
+            var result = ((F)(object)line.Target).ConstructFrom(Symbol, args.AppendArg(executingProcess.CancellationToken));
             if (result != null)
             {
                 if (result.IsNew)

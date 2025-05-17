@@ -33,7 +33,7 @@ public static class FilePathEmbeddedLogic
 
             FilePathEmbedded.OnPreSaving += fpe =>
             {
-                if (fpe.BinaryFile != null && !fpe.KeepSuffix) //First time
+                if (fpe.Suffix == null && fpe.BinaryFile != null)
                 {
                     if (SyncFileSave)
                         fpe.SaveFile();
@@ -44,8 +44,8 @@ public static class FilePathEmbeddedLogic
                         {
                             //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
                             var a = fpe; //For debugging
-
                             task.WaitSafe();
+                            fpe.CleanBinaryFile();
                         };
                     }
                 }
@@ -164,31 +164,25 @@ public static class FilePathEmbeddedLogic
 
         entityEvents.RegisterBinding<PrimaryKey>(route.Add(nameof(FilePathEmbedded.EntityId)),
             () => true,
-            (t, rowId) => t.Id,
+            () => (t, rowId) => t.Id,
             (t, rowId, retriever) => t.Id);
 
         entityEvents.RegisterBinding<PrimaryKey?>(route.Add(nameof(FilePathEmbedded.MListRowId)),
             () => true,
-            (t, rowId) => rowId,
+            () => (t, rowId) => rowId,
             (t, rowId, retriever) => rowId);
 
         var routeType = TypeLogic.GetCleanName(route.RootType);
         entityEvents.RegisterBinding<string>(route.Add(nameof(FilePathEmbedded.RootType)),
             () => true,
-            (t, rowId) => routeType,
+            () => (t, rowId) => routeType,
             (t, rowId, retriever) => routeType);
 
         var propertyRoute = route.PropertyString();
         entityEvents.RegisterBinding<string>(route.Add(nameof(FilePathEmbedded.PropertyRoute)),
             () => true,
-            (t, rowId) => propertyRoute,
+            () => (t, rowId) => propertyRoute,
             (t, rowId, retriever) => propertyRoute);
-    }
-
-    public static PrefixPair CalculatePrefixPair(this FilePathEmbedded fpe)
-    {
-        using (new EntityCache(EntityCacheType.ForceNew))
-            return fpe.FileType.GetAlgorithm().GetPrefixPair(fpe);
     }
 
     public static byte[] GetByteArray(this FilePathEmbedded fpe)
@@ -203,6 +197,9 @@ public static class FilePathEmbeddedLogic
 
     public static Stream OpenRead(this FilePathEmbedded fpe)
     {
+        if (fpe.BinaryFile != null)
+            return new MemoryStream(fpe.BinaryFile);
+
         return fpe.FileType.GetAlgorithm().OpenRead(fpe);
     }
 

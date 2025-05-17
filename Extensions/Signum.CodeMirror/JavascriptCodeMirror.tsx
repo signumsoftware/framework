@@ -26,7 +26,7 @@ interface JavascriptCodeMirrorProps {
   innerRef?: React.Ref<CodeMirrorComponentHandler>;
 }
 
-export default function JavascriptCodeMirror(p : JavascriptCodeMirrorProps){
+export default function JavascriptCodeMirror(p : JavascriptCodeMirrorProps): React.JSX.Element {
 
   const options = {
     lineNumbers: true,

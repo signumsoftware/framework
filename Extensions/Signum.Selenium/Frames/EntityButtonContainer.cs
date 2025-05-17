@@ -26,7 +26,7 @@ public static class EntityButtonContainerExtensions
         if(groupId != null)
         {
             var groupButton = container.Element.WaitElementVisible(By.Id(groupId));
-            if (groupButton.GetAttribute("aria-expanded") != "true")
+            if (groupButton.GetDomAttribute("aria-expanded") != "true")
                 groupButton.Click();
 
             return container.ContainerElement().WithLocator(By.CssSelector($"a[data-operation='{symbol.Key}']"));
@@ -43,7 +43,7 @@ public static class EntityButtonContainerExtensions
 
     public static bool OperationEnabled(this IEntityButtonContainer container, OperationSymbol symbol)
     {
-        return container.OperationButton(symbol).Find().GetAttribute("disabled") == null;
+        return container.OperationButton(symbol).Find().GetDomProperty("disabled") == null;
     }
 
     public static bool OperationEnabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
@@ -54,7 +54,7 @@ public static class EntityButtonContainerExtensions
 
     public static bool OperationDisabled(this IEntityButtonContainer container, OperationSymbol symbol)
     {
-        return container.OperationButton(symbol).Find().GetAttribute("disabled") != null;
+        return container.OperationButton(symbol).Find().GetDomProperty("disabled") != null;
     }
 
     public static bool OperationDisabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
@@ -82,7 +82,7 @@ public static class EntityButtonContainerExtensions
 
     public static IWebElement OperationClickCapture(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
     {
-        return container.OperationButton(symbol, groupId).Find().CaptureOnClick();
+        return container.OperationButton(symbol, groupId).WaitVisible().CaptureOnClick();
     }
 
     public static IWebElement OperationClickCapture<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol, string? groupId = null)
@@ -161,7 +161,7 @@ public static class EntityButtonContainerExtensions
     {
         try
         {
-            return container.Element.TryFindElement(By.CssSelector("div.sf-main-control[data-refresh-count]"))?.GetAttribute("data-refresh-count").ToLong();
+            return container.Element.TryFindElement(By.CssSelector("div.sf-main-control[data-refresh-count]"))?.GetDomAttribute("data-refresh-count")!.ToLong();
         }
         catch
         {

@@ -2,11 +2,11 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
-import { Type, PropertyRoute } from '@framework/Reflection'
+import { Type, PropertyRoute, getTypeName, GraphExplorer } from '@framework/Reflection'
 import { AutoLine } from '@framework/Lines/AutoLine'
-import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from './Signum.Files'
+import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile, IFilePath, FileMessage } from './Signum.Files'
 import { FileLine } from './Components/FileLine'
-import { ModifiableEntity, Lite, Entity, isLite, registerToString, MList } from "@framework/Signum.Entities";
+import { ModifiableEntity, Lite, Entity, isLite, registerToString, MList, isModifiableEntity } from "@framework/Signum.Entities";
 import { FileImageLine } from './Components/FileImageLine';
 import { MultiFileLine } from './Components/MultiFileLine';
 import { FileDownloader } from './Components/FileDownloader';
@@ -16,10 +16,13 @@ import { ImageModal } from './Components/ImageModal';
 import { IconName, IconProp } from '@fortawesome/fontawesome-svg-core';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient'
 import { TypeContext } from '@framework/Lines'
+import { ajaxPost, ajaxPostRaw, ajaxPostUpload } from '@framework/Services'
+import { QueryString } from '@framework/QueryString'
+import { DeleteLogsTypeOverridesEmbedded } from '@framework/Signum.Basics'
 
 export namespace FilesClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Files", () => import("./Changelog"));
   
@@ -33,10 +36,21 @@ export namespace FilesClient {
     registerToString(FileEmbedded, f => f.toStr ?? f.fileName);
     registerToString(FilePathEntity, f => f.toStr ?? f.fileName);
     registerToString(FilePathEmbedded, f => f.toStr ?? f.fileName);
+
+    GraphExplorer.onModifiable = (e, obj) => {
+      if (e.mode == "clean") {
+        const fp = uploadingInProgress(obj);
+        if (fp != null)
+          throw new Error(FileMessage.File0IsStillUploading.niceToString(fp.fileName));
+      }
+    };
   }
-  
-  
+
+  export const fileEntityTypeNames: Record<string, boolean> = {};;
   function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
+
+    fileEntityTypeNames[getTypeName(type)] = true;
+
     AutoLine.registerComponent(type.typeName, (tr, pr) => { 
       if (tr.isCollection)
         return ({ ctx, ...rest }) => <MultiFileLine ctx={ctx as any} {...rest as any} />;
@@ -61,6 +75,17 @@ export namespace FilesClient {
         isLite(cell) ? <FetchInState lite={cell as Lite<IFile & Entity>}>{e => <FileThumbnail file={e as IFile & ModifiableEntity} />}</FetchInState> :
           <FileThumbnail file={cell as IFile & ModifiableEntity} />, false)
     });
+  }
+
+  export function uploadingInProgress(obj: unknown): IFilePath | undefined {
+    if (isLite(obj)) {
+      return uploadingInProgress(obj.entity);
+    }
+
+    if (isModifiableEntity(obj) && (obj as unknown as IFilePath).__uploadingOffset != null)
+      return obj as unknown as IFilePath;
+
+    return undefined;
   }
   
   export interface ExtensionInfo {
@@ -142,18 +167,7 @@ export namespace FilesClient {
   };
   
   
-  interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-    file: IFile & ModifiableEntity;
-  }
-  
-  export function FileThumbnail({ file, ...attrs }: FileThumbnailProps) {
-    return <FileImage file={file} onClick={e => ImageModal.show(file, e)} {...attrs} />
-  }
-  
-  FileThumbnail.defaultProps = {
-    style: { maxWidth: "150px" }
-  } as Partial<FileThumbnailProps>;
-  
+
   function isImage(propertyRoute: string | undefined) {
   
     if (propertyRoute == null)
@@ -166,6 +180,67 @@ export namespace FilesClient {
   
     return Boolean(pr?.member?.defaultFileTypeInfo?.onlyImages);
   }
+
+
+  export namespace API {
+    export function startUpload(request: StartUploadRequest): Promise<string> {
+      return ajaxPost({ url: `/api/files/startUpload` }, request);
+    }
+
+    export function uploadChunk(blob: Blob, query: UploadChunkQuery, signal?: AbortSignal): Promise<ChunkInfo> {
+      return ajaxPostUpload({ url: "/api/files/uploadChunk?" + QueryString.stringify({ ...query }), signal: signal }, blob);
+    }
+
+    export function finishUpload(request: FinishUploadRequest): Promise<FinishUploadResponse> {
+      return ajaxPost({ url: "/api/files/finishUpload" }, request);
+    }
+  }
+
+  export interface ChunkInfo {
+    partialHash: string;
+    blockId: string;
+  }
+
+  interface StartUploadRequest {
+    fileTypeKey: string;
+    fileName: string;
+    type: string;
+  }
+
+  interface UploadChunkQuery {
+    fileTypeKey: string;
+    fileName: string;
+    suffix: string;
+    type: string;
+    chunkIndex: number;
+  }
+
+  interface FinishUploadRequest {
+    fileTypeKey: string;
+    fileName: string;
+    suffix: string;
+    type: string;
+    chunks: ChunkInfo[];
+  }
+
+  interface FinishUploadResponse {
+    fileLength: number;
+    hash: string;
+    fullWebPath?: string;
+  }
+  
+}
+
+
+interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  file: IFile & ModifiableEntity;
+}
+
+export function FileThumbnail({ file, ...attrs }: FileThumbnailProps): React.JSX.Element {
+
+  const style = attrs?.style ?? { maxWidth: "150px" };
+
+  return <FileImage file={file} onClick={e => ImageModal.show(file, e)} {...attrs} style={style} />
 }
 
 declare module '@framework/Reflection' {

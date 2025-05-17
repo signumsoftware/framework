@@ -9,7 +9,7 @@ import * as AppContext from '@framework/AppContext'
 import MessageModal from '@framework/Modals/MessageModal'
 import { EntityData, EntityKind, symbolNiceName } from '@framework/Reflection'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkLink } from '@framework/QuickLinkClient'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import { EvalClient } from '../Signum.Eval/EvalClient'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
@@ -20,7 +20,7 @@ import { EvalPanelPermission } from '../Signum.Eval/Signum.Eval';
 
 export namespace DynamicTypeClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => import('./Type/DynamicType')));
     Navigator.addSettings(new EntitySettings(DynamicMixinConnectionEntity, w => import('./Type/DynamicMixinConnection')));
     Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => import('./Type/DynamicSqlMigration')));
@@ -55,7 +55,7 @@ export namespace DynamicTypeClient {
       alternatives: eoc => [],
     }));
   
-    QuickLinks.registerQuickLink(DynamicTypeEntity, new QuickLinks.QuickLinkLink("ViewDynamicPanel", () => symbolNiceName(EvalPanelPermission.ViewDynamicPanel), () => "/dynamic/panel",
+    QuickLinkClient.registerQuickLink(DynamicTypeEntity, new QuickLinkLink("ViewDynamicPanel", () => symbolNiceName(EvalPanelPermission.ViewDynamicPanel), () => "/dynamic/panel",
       {
         isVisible: AppContext.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel),
         icon: "up-down-left-right",
@@ -234,7 +234,7 @@ export namespace DynamicTypeClient {
       number: number;
     }
   
-    export const ComparisonTypeValues = ["EqualTo", "DistinctTo", "GreaterThan", "GreaterThanOrEqualTo", "LessThan", "LessThanOrEqualTo"];
+    export const ComparisonTypeValues: string[] = ["EqualTo", "DistinctTo", "GreaterThan", "GreaterThanOrEqualTo", "LessThan", "LessThanOrEqualTo"];
   
     export interface NumberBetween extends DynamicValidator {
       type: 'NumberBetween';
@@ -252,17 +252,17 @@ export namespace DynamicTypeClient {
       precision: string;
     }
   
-    export const DateTimePrecisionTypeValues = ["Days", "Hours", "Minutes", "Seconds", "Milliseconds"];
+    export const DateTimePrecisionTypeValues : string[] = ["Days", "Hours", "Minutes", "Seconds", "Milliseconds"];
   
     export interface StringCase extends DynamicValidator {
       type: 'StringCase';
       textCase: string;
     }
   
-    export const StringCaseTypeValues = ["UpperCase", "LowerCase"];
+    export const StringCaseTypeValues: string[] = ["UpperCase", "LowerCase"];
   
   }
   
-  export const IsNullableValues = ["Yes", "OnlyInMemory", "No"];
-  export const UniqueIndexValues = ["No", "Yes", "YesAllowNull"];
+  export const IsNullableValues : string[] = ["Yes", "OnlyInMemory", "No"];
+  export const UniqueIndexValues: string[] = ["No", "Yes", "YesAllowNull"];
 }

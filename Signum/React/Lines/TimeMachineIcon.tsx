@@ -13,7 +13,7 @@ export interface TimeMachineIconProps {
 }
 
 
-export function getTimeMachineIcon(p: TimeMachineIconProps) {
+export function getTimeMachineIcon(p: TimeMachineIconProps): React.JSX.Element | null {
   if (!p.ctx.previousVersion)
     return null;
 
@@ -85,7 +85,7 @@ export interface TimeMachineIconCheckboxProps {
   type?: TypeInfo;
 }
 
-export function getTimeMachineCheckboxIcon(p: TimeMachineIconCheckboxProps) {
+export function getTimeMachineCheckboxIcon(p: TimeMachineIconCheckboxProps): React.JSX.Element | null {
   
   if ((p.newCtx == null && p.oldCtx == null) || (p.newCtx != null && !p.newCtx.previousVersion))
     return null;

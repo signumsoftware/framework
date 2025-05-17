@@ -6,6 +6,9 @@ using System.Globalization;
 using Signum.Engine.Maps;
 using Npgsql;
 using Microsoft.Data.SqlClient;
+using Signum.Utilities.ExpressionTrees;
+using System.Diagnostics.Metrics;
+using Npgsql.PostgresTypes;
 
 namespace Signum.Engine.Sync;
 
@@ -153,7 +156,7 @@ public static class SqlPreCommandExtensions
         }
     }
 
-    public static int Timeout = 20 * 60;
+    public static int DefaultScriptTimeout = 20 * 60;
 
     public static Regex regexBeginEnd = new Regex(@"^ *(GO--(?<type>BEGIN|END)) *(?<key>.*)$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
@@ -209,7 +212,7 @@ public static class SqlPreCommandExtensions
 
     public static void ExecuteScript(string title, string script)
     {
-        using (Connector.CommandTimeoutScope(Timeout))
+        using (Connector.CommandTimeoutScope(Connector.ScopeTimeout ?? DefaultScriptTimeout))
         {
             List<KeyValuePair<string, string>> beginEndParts = ExtractBeginEndParts(ref script).ToList();
 
@@ -217,28 +220,62 @@ public static class SqlPreCommandExtensions
 
             var realParts = parts.Where(a => !string.IsNullOrWhiteSpace(a) && !regex.IsMatch(a)).ToArray();
 
-            for (int pos = 0; pos < realParts.Length; pos++)
+            if(Connector.Current is PostgreSqlConnector)
             {
-                var currentPart = realParts[pos];
-
-                try
+                for (int pos = 0; pos < realParts.Length; pos++)
                 {
-                    SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, realParts.Length),
-                        () => Executor.ExecuteNonQuery(currentPart));
-                }
-                catch (Exception ex)
-                {
-                    var sqlE = ex as SqlException ?? ex.InnerException as SqlException;
-                    var pgE = ex as PostgresException ?? ex.InnerException as PostgresException;
-                    if (sqlE == null && pgE == null)
-                        throw;
+                    var currentPart = realParts[pos];
 
-                    PrintExceptionLine(currentPart, ex, sqlE, pgE);
+                    var statements = PostgresStatementSplitter.SplitPostgresScript(currentPart);
 
-                    Console.WriteLine();
-                    throw new ExecuteSqlScriptException(ex.Message, ex);
+                    for (int i = 0; i < statements.Count; i++)
+                    {
+                        var statement = statements[i];
+                        try
+                        {
+                            SafeConsole.WaitExecute("Executing {0} [{1}/{2}]{3}".FormatWith(title, pos + 1, realParts.Length, statements.Count <= 1 ? "" : $" statement {i +1}/{statements.Count}"),
+                                () => Executor.ExecuteNonQuery(statement));
+                        }
+                        catch (Exception ex)
+                        {
+                            var pgE = ex as PostgresException ?? ex.InnerException as PostgresException;
+                            if (pgE == null)
+                                throw;
+
+                            PrintExceptionLine(statement, ex, null, pgE);
+
+                            Console.WriteLine();
+                            throw new ExecuteSqlScriptException(ex.Message, ex);
+                        }
+                    }
                 }
             }
+            else
+            {
+                for (int pos = 0; pos < realParts.Length; pos++)
+                {
+                    var currentPart = realParts[pos];
+
+                    try
+                    {
+                        SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, realParts.Length),
+                            () => Executor.ExecuteNonQuery(currentPart));
+                    }
+                    catch (Exception ex)
+                    {
+                        var sqlE = ex as SqlException ?? ex.InnerException as SqlException;
+                        if (sqlE == null)
+                            throw;
+
+                        PrintExceptionLine(currentPart, ex, sqlE, null);
+
+                        Console.WriteLine();
+                        throw new ExecuteSqlScriptException(ex.Message, ex);
+                    }
+                }
+            }
+
+              
 
             bool allYes = false;
             for (int i = 0; i < beginEndParts.Count; i++)
@@ -294,12 +331,12 @@ public static class SqlPreCommandExtensions
 
         var list = currentPart.Lines();
 
-        var lineNumer = (pgE?.Line?.ToInt() ?? sqlE!.LineNumber);
+        var lineNumber = (sqlE?.LineNumber ?? currentPart.Substring(0, pgE!.Position).Lines().Count());
 
         SafeConsole.WriteLineColor(ConsoleColor.Red, "ERROR:");
 
-        var min = Math.Max(0, lineNumer - 20);
-        var max = Math.Min(list.Length - 1, lineNumer + 20);
+        var min = Math.Max(0, lineNumber - 20);
+        var max = Math.Min(list.Length - 1, lineNumber + 20);
 
         if (min > 0)
             Console.WriteLine("...");
@@ -307,7 +344,7 @@ public static class SqlPreCommandExtensions
         for (int i = min; i <= max; i++)
         {
             Console.Write(i + ": ");
-            SafeConsole.WriteLineColor(i == (lineNumer - 1) ? ConsoleColor.Red : ConsoleColor.DarkRed, list[i]);
+            SafeConsole.WriteLineColor(i == (lineNumber - 1) ? ConsoleColor.DarkRed : ConsoleColor.DarkYellow, list[i]);
         }
 
         if (max < list.Length - 1)
@@ -458,15 +495,52 @@ public class SqlPreCommandSimple : SqlPreCommand
         }
     }
 
+
+    public string PreparedQuery()
+    {
+        var sqlBuilder = Connector.Current.SqlBuilder;
+        if (!sqlBuilder.IsPostgres)
+            return sp_executesql();
+
+        var ticks = DateTime.UtcNow.Ticks;
+
+        var pars = this.Parameters.EmptyIfNull();
+
+        var parameter = pars.Select(p => new
+        {
+            Name = p.ParameterName,
+            Value = LiteralValue(p.Value, simple: true),
+            ParameterType = "{0}{1}".FormatWith(
+                   p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString(),
+                   sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull(), p.DbType == System.Data.DbType.Decimal)),
+        }).ToList();
+
+        var index = 1;
+        var paramToIndex = parameter.ToDictionary(a => a.Name.StartsWith("@") ? a.Name : "@" + a.Name, a => index++);
+
+        var pgsql = Regex.Replace(this.Sql, @"@(\w+)", m => $"${paramToIndex.GetOrThrow(m.Value)}");
+
+        return $"""
+            DEALLOCATE ALL;
+            PREPARE my_query ({parameter.ToString(a => a.ParameterType, ", ")}) AS
+            {pgsql};
+            EXECUTE my_query ({parameter.ToString(a => a.Value + "::" + a.ParameterType, ", ")});
+            """;
+    }
+
     public string sp_executesql()
     {
-        var pars = this.Parameters.EmptyIfNull();
         var sqlBuilder = Connector.Current.SqlBuilder;
+        if (sqlBuilder.IsPostgres)
+            return PreparedQuery();
+
+        var pars = this.Parameters.EmptyIfNull();
 
         var parameterVars = pars.ToString(p => "{0} {1}{2}".FormatWith(
             p.ParameterName,
             p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString(),
             sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull(), p.DbType == System.Data.DbType.Decimal)), ", ");
+       
         var parameterValues = pars.ToString(p => p.ParameterName + " = " + LiteralValue(p.Value, simple: true), ",\r\n");
 
         return @$"EXEC sp_executesql N'{this.Sql.Replace("'", "''")}', 

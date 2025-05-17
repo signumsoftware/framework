@@ -12,7 +12,7 @@ export interface MoveTreeModelComponentProps {
   lite: Lite<TreeEntity>;
 }
 
-export default function MoveTreeModelComponent(p : MoveTreeModelComponentProps){
+export default function MoveTreeModelComponent(p : MoveTreeModelComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const ctx = p.ctx;
   const typeName = p.lite.EntityType;

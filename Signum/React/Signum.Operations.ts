@@ -16,7 +16,7 @@ export interface ConstructSymbol_Simple<T extends Entities.Entity> extends Opera
 export interface ConstructSymbol_From<T extends Entities.Entity, F extends Entities.Entity> extends OperationSymbol { _constructFrom_: T, _from_?: F /*TRICK*/ };
 export interface ConstructSymbol_FromMany<T extends Entities.Entity, F extends Entities.Entity> extends OperationSymbol { _constructFromMany_: T, _from_?: F /*TRICK*/ };
 
-export const OperationLogEntity = new Type<OperationLogEntity>("OperationLog");
+export const OperationLogEntity: Type<OperationLogEntity> = new Type<OperationLogEntity>("OperationLog");
 export interface OperationLogEntity extends Entities.Entity {
   Type: "OperationLog";
   target: Entities.Lite<Entities.Entity> | null;
@@ -28,12 +28,12 @@ export interface OperationLogEntity extends Entities.Entity {
   exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
-export const OperationSymbol = new Type<OperationSymbol>("Operation");
+export const OperationSymbol: Type<OperationSymbol> = new Type<OperationSymbol>("Operation");
 export interface OperationSymbol extends Basics.Symbol {
   Type: "Operation";
 }
 
-export const OperationType = new EnumType<OperationType>("OperationType");
+export const OperationType: EnumType<OperationType> = new EnumType<OperationType>("OperationType");
 export type OperationType =
   "Execute" |
   "Delete" |
@@ -41,7 +41,7 @@ export type OperationType =
   "ConstructorFrom" |
   "ConstructorFromMany";
 
-export const PropertyOperation = new EnumType<PropertyOperation>("PropertyOperation");
+export const PropertyOperation: EnumType<PropertyOperation> = new EnumType<PropertyOperation>("PropertyOperation");
 export type PropertyOperation =
   "Set" |
   "AddElement" |

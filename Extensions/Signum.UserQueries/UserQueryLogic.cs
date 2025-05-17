@@ -42,7 +42,7 @@ public static class UserQueryLogic
             UserAssetsImporter.Register("UserQuery", UserQueryOperation.Save);
 
             sb.Schema.Synchronizing += Schema_Synchronizing;
-            sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
+            sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += e =>
                 Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryEntity>().Where(a => a.Query.Is(e)));
 
             sb.Include<UserQueryEntity>()
@@ -96,14 +96,14 @@ public static class UserQueryLogic
                     return null;
                 };
 
-                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += q =>
+                sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += q =>
                 {
                     var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => ((UserQueryPartEntity)mle.Element.Content).UserQuery.Query.Is(q)));
                     var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryPartEntity>().Where(uqp => uqp.UserQuery.Query.Is(q)));
                     return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
                 };
 
-                sb.Schema.Table<UserQueryEntity>().PreDeleteSqlSync += arg =>
+                sb.Schema.EntityEvents<UserQueryEntity>().PreDeleteSqlSync += arg =>
                 {
                     var uq = (UserQueryEntity)arg;
 
@@ -164,7 +164,7 @@ public static class UserQueryLogic
             Columns = MergeColumns(userQuery, ignoreHidden),
             Orders = userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
             Pagination = userQuery.GetPagination() ?? new Pagination.All(),
-            SystemTime = userQuery.SystemTime?.GetSystemTime()
+            SystemTime = userQuery.SystemTime?.ToSystemTimeRequest()
         };
 
         return qr;
@@ -189,7 +189,7 @@ public static class UserQueryLogic
             Orders = valueToken is AggregateToken ? new List<Order>() : userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
 
             Pagination = userQuery.GetPagination() ?? new Pagination.All(),
-            SystemTime = userQuery.SystemTime?.GetSystemTime()
+            SystemTime = userQuery.SystemTime?.ToSystemTimeRequest()
         };
 
         return qr;
@@ -343,11 +343,8 @@ public static class UserQueryLogic
     {
         TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition, condition);
 
-        TypeConditionLogic.Register<ValueUserQueryListPartEntity>(typeCondition,
-             cscp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(cscp)));
-
-        TypeConditionLogic.Register<UserQueryPartEntity>(typeCondition,
-            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+        DashboardLogic.RegisterTypeConditionForPart<ValueUserQueryListPartEntity>(typeCondition);
+        DashboardLogic.RegisterTypeConditionForPart<UserQueryPartEntity>(typeCondition);
     }
 
     static SqlPreCommand? Schema_Synchronizing(Replacements replacements)

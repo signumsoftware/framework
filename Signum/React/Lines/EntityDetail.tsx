@@ -14,6 +14,7 @@ import { GroupHeader, HeaderType, Title } from './GroupHeader'
 
 export interface EntityDetailProps<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseProps<V> {
   avoidFieldSet?: boolean | HeaderType;
+  avoidFieldSetHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   showAsCheckBox?: boolean;
   onEntityLoaded?: () => void;
   showType?: boolean;
@@ -21,14 +22,15 @@ export interface EntityDetailProps<V extends ModifiableEntity | Lite<Entity> | n
 
 
 export class EntityDetailController<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseController<EntityDetailProps<V>, V> {
-  getDefaultProps(p: EntityDetailProps<V>) {
+  getDefaultProps(p: EntityDetailProps<V>): void {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.view = false;
   }
 }
 
-export const EntityDetail = genericForwardRef(function EntityDetail<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>, ref: React.Ref<EntityDetailController<V>>) {
+export const EntityDetail: <V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V> & React.RefAttributes<EntityDetailController<V>>) => React.ReactNode | null =
+  genericForwardRef(function EntityDetail<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>, ref: React.Ref<EntityDetailController<V>>) {
 
   const c = useController(EntityDetailController, props, ref);
   const p = c.props;
@@ -57,8 +59,8 @@ export const EntityDetail = genericForwardRef(function EntityDetail<V extends Mo
 
   if (p.avoidFieldSet)
     return (
-      <div className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass, p.ctx.value && "mb-4")}
-        {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }}>
+      <div className={classes("sf-entity-line-details", c.getErrorClass(), c.mandatoryClass, p.ctx.value && "mb-4")}
+        {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }}>
         {getTimeMachineIcon({ ctx: p.ctx})}
         {showAsCheckBox ?
           <label><Title type={p.avoidFieldSet == true ? "lead" : p.avoidFieldSet}>
@@ -73,7 +75,7 @@ export const EntityDetail = genericForwardRef(function EntityDetail<V extends Mo
             {renderButtons()}
           </Title>
         }
-        <div className="ms-4 mt-2">
+        <div className="ms-4 mt-2" {...p.avoidFieldSetHtmlAttributes}>
           <RenderEntity ctx={p.ctx} getComponent={p.getComponent} getViewPromise={p.getViewPromise} onEntityLoaded={p.onEntityLoaded} />
         </div>
       </div>
@@ -82,8 +84,8 @@ export const EntityDetail = genericForwardRef(function EntityDetail<V extends Mo
   return (
     <>
       {getTimeMachineIcon({ ctx: p.ctx, translateY:"150%" })}
-      <fieldset className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass)}
-        {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }}>
+      <fieldset className={classes("sf-entity-line-details", c.getErrorClass(), c.mandatoryClass)}
+        {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }}>
         <legend className="lead">
           {showAsCheckBox ?
             <label>

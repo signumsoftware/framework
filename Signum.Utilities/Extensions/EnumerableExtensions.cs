@@ -313,10 +313,13 @@ public static class EnumerableExtensions
     [MethodExpander(typeof(IsEmptyExpander))]
     public static bool IsEmpty<T>(this IEnumerable<T> collection)
     {
-        foreach (var item in collection)
-            return false;
+        return !collection.Any();
+    }
 
-        return true;
+    [MethodExpander(typeof(IsEmptyExpander))]
+    public static bool IsEmpty<T>(this IQueryable<T> collection)
+    {
+        return !collection.Any();
     }
 
     class IsEmptyExpander : IMethodExpander

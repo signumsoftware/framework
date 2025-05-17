@@ -24,6 +24,7 @@ public class FieldReader
 
     TypeCode GetTypeCode(int ordinal)
     {
+        //new PostgreSqlConnector(connectionString, sb.Schema, postgreeVersion, dsb => dsb.EnableArrays());
         Type type = reader.GetFieldType(ordinal);
         TypeCode tc = Type.GetTypeCode(type);
         if (tc == TypeCode.Object)
@@ -736,7 +737,7 @@ public class FieldReaderException : DbException
                 text += "\r\nCalling: row.Reader.{0}({1})".FormatWith(MethodName, Ordinal);
 
             if (Projector != null)
-                text += "\r\nProjector:\r\n{0}".FormatWith(Projector.ToString().Indent(4));
+                text += "\r\nProjector:\r\n{0}".FormatWith(Projector.ToStringIndented().Indent(4));
 
             if(Command != null)
                 text += "\r\nCommand:\r\n{0}".FormatWith(Command.PlainSql().Indent(4));

@@ -1,5 +1,3 @@
-using Signum.Security;
-
 namespace Signum.Operations;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.

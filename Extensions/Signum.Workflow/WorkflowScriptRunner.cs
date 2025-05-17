@@ -2,6 +2,7 @@ using Microsoft.Data.SqlClient;
 using Signum.Authorization;
 using Signum.Cache;
 using Signum.Basics;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Signum.Workflow;
 
@@ -41,11 +42,11 @@ public static class WorkflowScriptRunner
             });
     }
 
-    public static SimpleStatus GetSimpleStatus()
+    public static HealthCheckResult GetHealthStatus()
     {
-        return running ? SimpleStatus.Ok :
-            initialDelayMilliseconds == null ? SimpleStatus.Disabled :
-            SimpleStatus.Error;
+        return running ? new HealthCheckResult(HealthStatus.Healthy, "Running") :
+            initialDelayMilliseconds == null ? new HealthCheckResult(HealthStatus.Healthy, "Disabled") :
+            new HealthCheckResult(HealthStatus.Unhealthy, "Not Running!");
     }
 
     public static void StartRunningScripts()
@@ -215,7 +216,11 @@ public static class WorkflowScriptRunner
 
     private static void Transaction_PostRealCommit(System.Collections.Generic.Dictionary<string, object> obj)
     {
-        WakeUp("Save Transaction Commit", null);
+        Task.Delay(1000).ContinueWith(t =>
+        {
+            if (t.IsCompleted)
+                WakeUp("Save Transaction Commit", null);
+        });
     }
 
     internal static bool WakeUp(string reason, SqlNotificationEventArgs? args)

@@ -35,27 +35,29 @@ public static class Pop3ConfigurationLogic
             sb.Settings.AssertImplementedBy((EmailReceptionConfigurationEntity e) => e.Service, typeof(Pop3EmailReceptionServiceEntity));
 
 
-                                                  
-            EmailReceptionLogic.EmailReceptionServices.Register(new Func<Pop3EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, ScheduledTaskContext, EmailReceptionEntity >(ReceiveEmails));
 
-            if(sb.WebServerBuilder != null)
+            EmailReceptionLogic.EmailReceptionServices.Register(new Func<Pop3EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, ScheduledTaskContext, EmailReceptionEntity>(ReceiveEmails));
+
+            if (sb.WebServerBuilder != null)
             {
                 var piPassword = ReflectionTools.GetPropertyInfo((Pop3EmailReceptionServiceEntity e) => e.Password);
                 var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(Pop3EmailReceptionServiceEntity));
                 pcs.GetOrThrow("password").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { };
-                //pcs.Add("newPassword", new PropertyConverter
-                //{
-                //    AvoidValidate = true,
-                //    CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
-                //    CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
-                //    {
-                //        ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
+                pcs.Add("newPassword", new PropertyConverter
+                {
+                    AvoidValidate = true,
+                    CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
+                    CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
+                    {
+                        var sm = EntityJsonContext.CurrentSerializationPath!.CurrentSerializationMetadata();
 
-                //        var password = reader.GetString()!;
+                        ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity, sm);
 
-                //        ((Pop3EmailReceptionServiceEntity)ctx.Entity).Password = Pop3ConfigurationLogic.EncryptPassword(password);
-                //    }
-                //});
+                        var password = reader.GetString()!;
+
+                        ((Pop3EmailReceptionServiceEntity)ctx.Entity).Password = Pop3ConfigurationLogic.EncryptPassword(password);
+                    }
+                });
             }
         }
     }
@@ -67,7 +69,7 @@ public static class Pop3ConfigurationLogic
 
 
 
-    public static EmailReceptionEntity ReceiveEmails(   Pop3EmailReceptionServiceEntity service, EmailReceptionConfigurationEntity config, ScheduledTaskContext ctx)
+    public static EmailReceptionEntity ReceiveEmails(Pop3EmailReceptionServiceEntity service, EmailReceptionConfigurationEntity config, ScheduledTaskContext ctx)
     {
         if (!EmailLogic.Configuration.ReciveEmails)
             throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");

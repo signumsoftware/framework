@@ -4,14 +4,14 @@ import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { DynamicViewClient } from '../Signum.Dynamic/DynamicViewClient'
 import { WorkflowClient } from '../Signum.Workflow/WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityModel } from '../Signum.Workflow/Signum.Workflow'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient } from '@framework/QuickLinkClient'
 import { PropertyRoute, getQueryKey } from '@framework/Reflection'
 import { CodeContext } from '../Signum.Dynamic/View/NodeUtils'
 import { WorkflowActivityModelOptions } from '../Signum.Workflow/Workflow/WorkflowActivityModel'
 
 export namespace WorkflowDynamicClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     registerCustomContexts();
   
     WorkflowActivityModelOptions.getViewProps = (typeName, viewName) => DynamicViewClient.API.getDynamicViewProps(typeName, viewName);

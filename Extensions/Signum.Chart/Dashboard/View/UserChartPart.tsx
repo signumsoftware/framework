@@ -20,7 +20,7 @@ export interface UserChartPartHandler {
   reloadQuery: () => void;
 }
 
-export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
+export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>): React.JSX.Element {
 
   const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.content.userChart, p.entity), [p.content.userChart, p.entity && liteKey(p.entity), ...p.deps ?? []]);
   const initialSelection = React.useMemo(() => chartRequest?.filterOptions.singleOrNull(a => a.dashboardBehaviour == "UseAsInitialSelection"), [chartRequest]);

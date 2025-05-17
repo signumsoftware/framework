@@ -4,7 +4,7 @@ import { RouteObject } from "react-router";
 
 export namespace ChangeLogClient {
   
-  export function start(options: { routes: RouteObject[], applicationName: string, mainChangeLog: () => Promise<{ default: ChangeLogDic }> }) {
+  export function start(options: { routes: RouteObject[], applicationName: string, mainChangeLog: () => Promise<{ default: ChangeLogDic }> }): void {
     Options.mainChangeLog = options.mainChangeLog;
     Options.applicationName = options.applicationName;
     registerChangeLogModule("Signum", () => import("../../Changelog"))
@@ -76,7 +76,7 @@ export namespace ChangeLogClient {
     export let changeLogs: { [key: string]: () => Promise<{ default: ChangeLogDic }> } = {};
   }
   
-  export module API {
+  export namespace API {
     export function getLastDate(): Promise<string | null> {
       return ajaxGet({ url: "/api/changelog/getLastDate" });
     }
@@ -86,7 +86,7 @@ export namespace ChangeLogClient {
     }
   }
 
-  export function registerChangeLogModule(name: string, loader: () => Promise<{ default: ChangeLogDic }>) {
+  export function registerChangeLogModule(name: string, loader: () => Promise<{ default: ChangeLogDic }>): void {
     Options.changeLogs[name] = loader;
   }
 }

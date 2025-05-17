@@ -4,18 +4,18 @@ import { LoginAuthMessage, UserEntity } from '../Signum.Authorization'
 import { AuthClient } from '../AuthClient'
 import { LinkContainer } from '@framework/Components';
 import { Dropdown, NavItem, NavDropdown, Nav } from 'react-bootstrap';
-import { Lite, toLite, is } from '@framework/Signum.Entities';
+import { Lite, toLite, is, getToString } from '@framework/Signum.Entities';
 import { CultureClient } from '@framework/Basics/CultureClient'
 import { SmallProfilePhoto } from '../Templates/ProfilePhoto';
 
 
-export default function LoginDropdown(p: {
-  renderName?: (u: UserEntity) => React.ReactChild;
+function LoginDropdown(p: {
+  renderName?: (u: UserEntity) => React.ReactElement | string | null;
   changePasswordVisible?: boolean;
   switchUserVisible?: boolean;
   profileVisible?: boolean;
-  extraMenuItems?: (user: UserEntity) => React.ReactNode;
-}) {
+  extraMenuItems?: (user: UserEntity) => React.ReactNode | undefined | null;
+}): React.JSX.Element {
 
   const currentCulture = CultureClient.currentCulture;
   const user = AuthClient.currentUser();
@@ -43,7 +43,7 @@ export default function LoginDropdown(p: {
   var extraButtons = p.extraMenuItems && p.extraMenuItems(user);
 
   return (
-    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={<span className="d-inline-flex align-items-center">{LoginDropdown.customLoginIcon(user)} &nbsp;{p.renderName ? p.renderName(user) : user.userName!}</span>} align="end">
+    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={<span className="d-inline-flex align-items-center">{LoginDropdown.customLoginIcon(user)} &nbsp;{p.renderName ? p.renderName(user) : getToString(user)}</span>} align="end">
       {pv && <NavDropdown.Item id="sf-auth-profile" onClick={handleProfileClick}><FontAwesomeIcon icon="user-pen" fixedWidth className="me-2" /> {LoginAuthMessage.MyProfile.niceToString()}</NavDropdown.Item>}
       {cpv && <LinkContainer to="/auth/changePassword">
         <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth className="me-2" /> {LoginAuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>
@@ -56,11 +56,11 @@ export default function LoginDropdown(p: {
   );
 }
 
-LoginDropdown.customLoginIcon = (user: UserEntity | null | undefined) =>
-  user ? <SmallProfilePhoto user={toLite(user)} /> :
-    <FontAwesomeIcon icon="user" className="me-1" />;
+namespace LoginDropdown {
+  export function customLoginIcon(user: UserEntity | null | undefined): React.JSX.Element {
+    return user ? <SmallProfilePhoto user={toLite(user)} /> :
+      <FontAwesomeIcon icon="user" className="me-1" />;
+  }
+}
 
-
-
-
-
+export default LoginDropdown;

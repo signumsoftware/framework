@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 using Signum.API.Filters;
-using Signum.API;
 using System.ComponentModel.DataAnnotations;
 
 namespace Signum.API.ApiControllers;
@@ -13,10 +13,11 @@ public class EntitiesController : ControllerBase
         var entityType = TypeLogic.GetType(type);
 
         var primaryKey = PrimaryKey.Parse(id, entityType);
+        var lite = Lite.Create(entityType, primaryKey, partitionId: partitionId);
 
-        var entity = Database.Retrieve(entityType, primaryKey, partitionId);
-        using (ExecutionMode.ApiRetrievedScope(entity, "EntitiesController.GetEntity"))
+        using (ExecutionMode.ApiRetrievedScope(lite, "EntitiesController.GetEntity"))
         {
+            var entity = Database.Retrieve(entityType, primaryKey, partitionId);
             return entity;
         }
 
@@ -28,10 +29,11 @@ public class EntitiesController : ControllerBase
         var entityType = TypeLogic.GetType(type);
 
         var primaryKey = PrimaryKey.Parse(id, entityType);
+        var lite = Lite.Create(entityType, primaryKey, partitionId: partitionId);
 
-        var entity = Database.Retrieve(entityType, primaryKey, partitionId);
-        using (ExecutionMode.ApiRetrievedScope(entity, "EntitiesController.GetEntityPack"))
+        using (ExecutionMode.ApiRetrievedScope(lite, "EntitiesController.GetEntityPack"))
         {
+            var entity = Database.Retrieve(lite);
             return SignumServer.GetEntityPack(entity);
         }
     }
@@ -55,11 +57,13 @@ public class EntitiesController : ControllerBase
     public List<Entity> FetchAll(string typeName)
     {
         if (typeName == null)
-        {
             throw new ArgumentNullException(typeName);
-        }
 
         var type = TypeLogic.GetType(typeName);
+
+        if (EntityKindCache.GetEntityData(type) == EntityData.Transactional)
+            throw new ArgumentNullException($"{typeName} is a Transactional entity");
+
 
         return Database.RetrieveAll(type);
     }

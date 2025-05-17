@@ -12,7 +12,7 @@ import * as Files from '../Signum.Files/Signum.Files'
 import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
 
 
-export const AutoconfigureNeuralNetworkEntity = new Type<AutoconfigureNeuralNetworkEntity>("AutoconfigureNeuralNetwork");
+export const AutoconfigureNeuralNetworkEntity: Type<AutoconfigureNeuralNetworkEntity> = new Type<AutoconfigureNeuralNetworkEntity>("AutoconfigureNeuralNetwork");
 export interface AutoconfigureNeuralNetworkEntity extends Entities.Entity, Processes.IProcessDataEntity {
   Type: "AutoconfigureNeuralNetwork";
   initialPredictor: Entities.Lite<PredictorEntity>;
@@ -43,14 +43,14 @@ export module DefaultColumnEncodings {
 export interface IPredictorAlgorithmSettings extends Entities.Entity {
 }
 
-export const NeuralNetworkActivation = new EnumType<NeuralNetworkActivation>("NeuralNetworkActivation");
+export const NeuralNetworkActivation: EnumType<NeuralNetworkActivation> = new EnumType<NeuralNetworkActivation>("NeuralNetworkActivation");
 export type NeuralNetworkActivation =
   "None" |
   "ReLU" |
   "Sigmoid" |
   "Tanh";
 
-export const NeuralNetworkEvalFunction = new EnumType<NeuralNetworkEvalFunction>("NeuralNetworkEvalFunction");
+export const NeuralNetworkEvalFunction: EnumType<NeuralNetworkEvalFunction> = new EnumType<NeuralNetworkEvalFunction>("NeuralNetworkEvalFunction");
 export type NeuralNetworkEvalFunction =
   "softmax_cross_entropy_with_logits_v2" |
   "softmax_cross_entropy_with_logits" |
@@ -60,7 +60,7 @@ export type NeuralNetworkEvalFunction =
   "MeanAbsoluteError" |
   "MeanAbsolutePercentageError";
 
-export const NeuralNetworkHidenLayerEmbedded = new Type<NeuralNetworkHidenLayerEmbedded>("NeuralNetworkHidenLayerEmbedded");
+export const NeuralNetworkHidenLayerEmbedded: Type<NeuralNetworkHidenLayerEmbedded> = new Type<NeuralNetworkHidenLayerEmbedded>("NeuralNetworkHidenLayerEmbedded");
 export interface NeuralNetworkHidenLayerEmbedded extends Entities.EmbeddedEntity {
   Type: "NeuralNetworkHidenLayerEmbedded";
   size: number;
@@ -68,7 +68,7 @@ export interface NeuralNetworkHidenLayerEmbedded extends Entities.EmbeddedEntity
   initializer: NeuralNetworkInitializer;
 }
 
-export const NeuralNetworkInitializer = new EnumType<NeuralNetworkInitializer>("NeuralNetworkInitializer");
+export const NeuralNetworkInitializer: EnumType<NeuralNetworkInitializer> = new EnumType<NeuralNetworkInitializer>("NeuralNetworkInitializer");
 export type NeuralNetworkInitializer =
   "glorot_uniform_initializer" |
   "ones_initializer" |
@@ -79,7 +79,7 @@ export type NeuralNetworkInitializer =
   "truncated_normal_initializer" |
   "variance_scaling_initializer";
 
-export const NeuralNetworkSettingsEntity = new Type<NeuralNetworkSettingsEntity>("NeuralNetworkSettings");
+export const NeuralNetworkSettingsEntity: Type<NeuralNetworkSettingsEntity> = new Type<NeuralNetworkSettingsEntity>("NeuralNetworkSettings");
 export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
   Type: "NeuralNetworkSettings";
   device: string | null;
@@ -99,24 +99,24 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
   saveValidationProgressEvery: number;
 }
 
-export const PredictionSet = new EnumType<PredictionSet>("PredictionSet");
+export const PredictionSet: EnumType<PredictionSet> = new EnumType<PredictionSet>("PredictionSet");
 export type PredictionSet =
   "Validation" |
   "Training";
 
-export const PredictionType = new EnumType<PredictionType>("PredictionType");
+export const PredictionType: EnumType<PredictionType> = new EnumType<PredictionType>("PredictionType");
 export type PredictionType =
   "Regression" |
   "MultiRegression" |
   "Classification" |
   "MultiClassification";
 
-export const PredictorAlgorithmSymbol = new Type<PredictorAlgorithmSymbol>("PredictorAlgorithm");
+export const PredictorAlgorithmSymbol: Type<PredictorAlgorithmSymbol> = new Type<PredictorAlgorithmSymbol>("PredictorAlgorithm");
 export interface PredictorAlgorithmSymbol extends Basics.Symbol {
   Type: "PredictorAlgorithm";
 }
 
-export const PredictorClassificationMetricsEmbedded = new Type<PredictorClassificationMetricsEmbedded>("PredictorClassificationMetricsEmbedded");
+export const PredictorClassificationMetricsEmbedded: Type<PredictorClassificationMetricsEmbedded> = new Type<PredictorClassificationMetricsEmbedded>("PredictorClassificationMetricsEmbedded");
 export interface PredictorClassificationMetricsEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorClassificationMetricsEmbedded";
   totalCount: number;
@@ -124,7 +124,7 @@ export interface PredictorClassificationMetricsEmbedded extends Entities.Embedde
   missRate: number | null;
 }
 
-export const PredictorCodificationEntity = new Type<PredictorCodificationEntity>("PredictorCodification");
+export const PredictorCodificationEntity: Type<PredictorCodificationEntity> = new Type<PredictorCodificationEntity>("PredictorCodification");
 export interface PredictorCodificationEntity extends Entities.Entity {
   Type: "PredictorCodification";
   predictor: Entities.Lite<PredictorEntity>;
@@ -142,7 +142,7 @@ export interface PredictorCodificationEntity extends Entities.Entity {
   max: number | null;
 }
 
-export const PredictorColumnEmbedded = new Type<PredictorColumnEmbedded>("PredictorColumnEmbedded");
+export const PredictorColumnEmbedded: Type<PredictorColumnEmbedded> = new Type<PredictorColumnEmbedded>("PredictorColumnEmbedded");
 export interface PredictorColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorColumnEmbedded";
   usage: PredictorColumnUsage;
@@ -151,12 +151,12 @@ export interface PredictorColumnEmbedded extends Entities.EmbeddedEntity {
   nullHandling: PredictorColumnNullHandling;
 }
 
-export const PredictorColumnEncodingSymbol = new Type<PredictorColumnEncodingSymbol>("PredictorColumnEncoding");
+export const PredictorColumnEncodingSymbol: Type<PredictorColumnEncodingSymbol> = new Type<PredictorColumnEncodingSymbol>("PredictorColumnEncoding");
 export interface PredictorColumnEncodingSymbol extends Basics.Symbol {
   Type: "PredictorColumnEncoding";
 }
 
-export const PredictorColumnNullHandling = new EnumType<PredictorColumnNullHandling>("PredictorColumnNullHandling");
+export const PredictorColumnNullHandling: EnumType<PredictorColumnNullHandling> = new EnumType<PredictorColumnNullHandling>("PredictorColumnNullHandling");
 export type PredictorColumnNullHandling =
   "Zero" |
   "Error" |
@@ -164,12 +164,12 @@ export type PredictorColumnNullHandling =
   "Min" |
   "Max";
 
-export const PredictorColumnUsage = new EnumType<PredictorColumnUsage>("PredictorColumnUsage");
+export const PredictorColumnUsage: EnumType<PredictorColumnUsage> = new EnumType<PredictorColumnUsage>("PredictorColumnUsage");
 export type PredictorColumnUsage =
   "Input" |
   "Output";
 
-export const PredictorEntity = new Type<PredictorEntity>("Predictor");
+export const PredictorEntity: Type<PredictorEntity> = new Type<PredictorEntity>("Predictor");
 export interface PredictorEntity extends Entities.Entity, Processes.IProcessDataEntity {
   Type: "Predictor";
   name: string | null;
@@ -192,7 +192,7 @@ export interface PredictorEntity extends Entities.Entity, Processes.IProcessData
   regressionValidation: PredictorRegressionMetricsEmbedded | null;
 }
 
-export const PredictorEpochProgressEntity = new Type<PredictorEpochProgressEntity>("PredictorEpochProgress");
+export const PredictorEpochProgressEntity: Type<PredictorEpochProgressEntity> = new Type<PredictorEpochProgressEntity>("PredictorEpochProgress");
 export interface PredictorEpochProgressEntity extends Entities.Entity {
   Type: "PredictorEpochProgress";
   predictor: Entities.Lite<PredictorEntity>;
@@ -210,7 +210,7 @@ export module PredictorFileType {
   export const PredictorFile : Files.FileTypeSymbol = registerSymbol("FileType", "PredictorFileType.PredictorFile");
 }
 
-export const PredictorMainQueryEmbedded = new Type<PredictorMainQueryEmbedded>("PredictorMainQueryEmbedded");
+export const PredictorMainQueryEmbedded: Type<PredictorMainQueryEmbedded> = new Type<PredictorMainQueryEmbedded>("PredictorMainQueryEmbedded");
 export interface PredictorMainQueryEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorMainQueryEmbedded";
   query: Basics.QueryEntity;
@@ -220,36 +220,36 @@ export interface PredictorMainQueryEmbedded extends Entities.EmbeddedEntity {
 }
 
 export module PredictorMessage {
-  export const Csv = new MessageKey("PredictorMessage", "Csv");
-  export const Tsv = new MessageKey("PredictorMessage", "Tsv");
-  export const TsvMetadata = new MessageKey("PredictorMessage", "TsvMetadata");
-  export const TensorflowProjector = new MessageKey("PredictorMessage", "TensorflowProjector");
-  export const DownloadCsv = new MessageKey("PredictorMessage", "DownloadCsv");
-  export const DownloadTsv = new MessageKey("PredictorMessage", "DownloadTsv");
-  export const DownloadTsvMetadata = new MessageKey("PredictorMessage", "DownloadTsvMetadata");
-  export const OpenTensorflowProjector = new MessageKey("PredictorMessage", "OpenTensorflowProjector");
-  export const _0IsAlreadyBeingTrained = new MessageKey("PredictorMessage", "_0IsAlreadyBeingTrained");
-  export const StartingTraining = new MessageKey("PredictorMessage", "StartingTraining");
-  export const Preview = new MessageKey("PredictorMessage", "Preview");
-  export const Codifications = new MessageKey("PredictorMessage", "Codifications");
-  export const Progress = new MessageKey("PredictorMessage", "Progress");
-  export const Results = new MessageKey("PredictorMessage", "Results");
-  export const _0NotSuportedFor1 = new MessageKey("PredictorMessage", "_0NotSuportedFor1");
-  export const _0IsRequiredFor1 = new MessageKey("PredictorMessage", "_0IsRequiredFor1");
-  export const _0ShouldBeDivisibleBy12 = new MessageKey("PredictorMessage", "_0ShouldBeDivisibleBy12");
-  export const TheTypeOf01DoesNotMatch23 = new MessageKey("PredictorMessage", "TheTypeOf01DoesNotMatch23");
-  export const Predict = new MessageKey("PredictorMessage", "Predict");
-  export const ThereShouldBe0ColumnsWith12Currently3 = new MessageKey("PredictorMessage", "ThereShouldBe0ColumnsWith12Currently3");
-  export const ShouldBeOfType0 = new MessageKey("PredictorMessage", "ShouldBeOfType0");
-  export const TooManyParentKeys = new MessageKey("PredictorMessage", "TooManyParentKeys");
-  export const _0CanNotBe1Because2Use3 = new MessageKey("PredictorMessage", "_0CanNotBe1Because2Use3");
-  export const _0IsNotCompatibleWith12 = new MessageKey("PredictorMessage", "_0IsNotCompatibleWith12");
-  export const NoPublicationsForQuery0Registered = new MessageKey("PredictorMessage", "NoPublicationsForQuery0Registered");
-  export const NoPublicationsProcessRegisteredFor0 = new MessageKey("PredictorMessage", "NoPublicationsProcessRegisteredFor0");
-  export const PredictorIsPublishedUntrainAnyway = new MessageKey("PredictorMessage", "PredictorIsPublishedUntrainAnyway");
+  export const Csv: MessageKey = new MessageKey("PredictorMessage", "Csv");
+  export const Tsv: MessageKey = new MessageKey("PredictorMessage", "Tsv");
+  export const TsvMetadata: MessageKey = new MessageKey("PredictorMessage", "TsvMetadata");
+  export const TensorflowProjector: MessageKey = new MessageKey("PredictorMessage", "TensorflowProjector");
+  export const DownloadCsv: MessageKey = new MessageKey("PredictorMessage", "DownloadCsv");
+  export const DownloadTsv: MessageKey = new MessageKey("PredictorMessage", "DownloadTsv");
+  export const DownloadTsvMetadata: MessageKey = new MessageKey("PredictorMessage", "DownloadTsvMetadata");
+  export const OpenTensorflowProjector: MessageKey = new MessageKey("PredictorMessage", "OpenTensorflowProjector");
+  export const _0IsAlreadyBeingTrained: MessageKey = new MessageKey("PredictorMessage", "_0IsAlreadyBeingTrained");
+  export const StartingTraining: MessageKey = new MessageKey("PredictorMessage", "StartingTraining");
+  export const Preview: MessageKey = new MessageKey("PredictorMessage", "Preview");
+  export const Codifications: MessageKey = new MessageKey("PredictorMessage", "Codifications");
+  export const Progress: MessageKey = new MessageKey("PredictorMessage", "Progress");
+  export const Results: MessageKey = new MessageKey("PredictorMessage", "Results");
+  export const _0NotSuportedFor1: MessageKey = new MessageKey("PredictorMessage", "_0NotSuportedFor1");
+  export const _0IsRequiredFor1: MessageKey = new MessageKey("PredictorMessage", "_0IsRequiredFor1");
+  export const _0ShouldBeDivisibleBy12: MessageKey = new MessageKey("PredictorMessage", "_0ShouldBeDivisibleBy12");
+  export const TheTypeOf01DoesNotMatch23: MessageKey = new MessageKey("PredictorMessage", "TheTypeOf01DoesNotMatch23");
+  export const Predict: MessageKey = new MessageKey("PredictorMessage", "Predict");
+  export const ThereShouldBe0ColumnsWith12Currently3: MessageKey = new MessageKey("PredictorMessage", "ThereShouldBe0ColumnsWith12Currently3");
+  export const ShouldBeOfType0: MessageKey = new MessageKey("PredictorMessage", "ShouldBeOfType0");
+  export const TooManyParentKeys: MessageKey = new MessageKey("PredictorMessage", "TooManyParentKeys");
+  export const _0CanNotBe1Because2Use3: MessageKey = new MessageKey("PredictorMessage", "_0CanNotBe1Because2Use3");
+  export const _0IsNotCompatibleWith12: MessageKey = new MessageKey("PredictorMessage", "_0IsNotCompatibleWith12");
+  export const NoPublicationsForQuery0Registered: MessageKey = new MessageKey("PredictorMessage", "NoPublicationsForQuery0Registered");
+  export const NoPublicationsProcessRegisteredFor0: MessageKey = new MessageKey("PredictorMessage", "NoPublicationsProcessRegisteredFor0");
+  export const PredictorIsPublishedUntrainAnyway: MessageKey = new MessageKey("PredictorMessage", "PredictorIsPublishedUntrainAnyway");
 }
 
-export const PredictorMetricsEmbedded = new Type<PredictorMetricsEmbedded>("PredictorMetricsEmbedded");
+export const PredictorMetricsEmbedded: Type<PredictorMetricsEmbedded> = new Type<PredictorMetricsEmbedded>("PredictorMetricsEmbedded");
 export interface PredictorMetricsEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorMetricsEmbedded";
   loss: number | null;
@@ -273,12 +273,12 @@ export module PredictorProcessAlgorithm {
   export const AutoconfigureNeuralNetwork : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "PredictorProcessAlgorithm.AutoconfigureNeuralNetwork");
 }
 
-export const PredictorPublicationSymbol = new Type<PredictorPublicationSymbol>("PredictorPublication");
+export const PredictorPublicationSymbol: Type<PredictorPublicationSymbol> = new Type<PredictorPublicationSymbol>("PredictorPublication");
 export interface PredictorPublicationSymbol extends Basics.Symbol {
   Type: "PredictorPublication";
 }
 
-export const PredictorRegressionMetricsEmbedded = new Type<PredictorRegressionMetricsEmbedded>("PredictorRegressionMetricsEmbedded");
+export const PredictorRegressionMetricsEmbedded: Type<PredictorRegressionMetricsEmbedded> = new Type<PredictorRegressionMetricsEmbedded>("PredictorRegressionMetricsEmbedded");
 export interface PredictorRegressionMetricsEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorRegressionMetricsEmbedded";
   meanError: number | null;
@@ -289,12 +289,12 @@ export interface PredictorRegressionMetricsEmbedded extends Entities.EmbeddedEnt
   meanAbsolutePercentageError: number | null;
 }
 
-export const PredictorResultSaverSymbol = new Type<PredictorResultSaverSymbol>("PredictorResultSaver");
+export const PredictorResultSaverSymbol: Type<PredictorResultSaverSymbol> = new Type<PredictorResultSaverSymbol>("PredictorResultSaver");
 export interface PredictorResultSaverSymbol extends Basics.Symbol {
   Type: "PredictorResultSaver";
 }
 
-export const PredictorSettingsEmbedded = new Type<PredictorSettingsEmbedded>("PredictorSettingsEmbedded");
+export const PredictorSettingsEmbedded: Type<PredictorSettingsEmbedded> = new Type<PredictorSettingsEmbedded>("PredictorSettingsEmbedded");
 export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorSettingsEmbedded";
   testPercentage: number;
@@ -306,14 +306,14 @@ export module PredictorSimpleResultSaver {
   export const Full : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorSimpleResultSaver.Full");
 }
 
-export const PredictorState = new EnumType<PredictorState>("PredictorState");
+export const PredictorState: EnumType<PredictorState> = new EnumType<PredictorState>("PredictorState");
 export type PredictorState =
   "Draft" |
   "Training" |
   "Trained" |
   "Error";
 
-export const PredictorSubQueryColumnEmbedded = new Type<PredictorSubQueryColumnEmbedded>("PredictorSubQueryColumnEmbedded");
+export const PredictorSubQueryColumnEmbedded: Type<PredictorSubQueryColumnEmbedded> = new Type<PredictorSubQueryColumnEmbedded>("PredictorSubQueryColumnEmbedded");
 export interface PredictorSubQueryColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorSubQueryColumnEmbedded";
   usage: PredictorSubQueryColumnUsage;
@@ -322,14 +322,14 @@ export interface PredictorSubQueryColumnEmbedded extends Entities.EmbeddedEntity
   nullHandling: PredictorColumnNullHandling | null;
 }
 
-export const PredictorSubQueryColumnUsage = new EnumType<PredictorSubQueryColumnUsage>("PredictorSubQueryColumnUsage");
+export const PredictorSubQueryColumnUsage: EnumType<PredictorSubQueryColumnUsage> = new EnumType<PredictorSubQueryColumnUsage>("PredictorSubQueryColumnUsage");
 export type PredictorSubQueryColumnUsage =
   "ParentKey" |
   "SplitBy" |
   "Input" |
   "Output";
 
-export const PredictorSubQueryEntity = new Type<PredictorSubQueryEntity>("PredictorSubQuery");
+export const PredictorSubQueryEntity: Type<PredictorSubQueryEntity> = new Type<PredictorSubQueryEntity>("PredictorSubQuery");
 export interface PredictorSubQueryEntity extends Entities.Entity {
   Type: "PredictorSubQuery";
   predictor: Entities.Lite<PredictorEntity>;
@@ -340,7 +340,7 @@ export interface PredictorSubQueryEntity extends Entities.Entity {
   order: number;
 }
 
-export const PredictSimpleResultEntity = new Type<PredictSimpleResultEntity>("PredictSimpleResult");
+export const PredictSimpleResultEntity: Type<PredictSimpleResultEntity> = new Type<PredictSimpleResultEntity>("PredictSimpleResult");
 export interface PredictSimpleResultEntity extends Entities.Entity {
   Type: "PredictSimpleResult";
   predictor: Entities.Lite<PredictorEntity>;
@@ -355,7 +355,7 @@ export interface PredictSimpleResultEntity extends Entities.Entity {
   predictedValue: number | null;
 }
 
-export const TensorFlowOptimizer = new EnumType<TensorFlowOptimizer>("TensorFlowOptimizer");
+export const TensorFlowOptimizer: EnumType<TensorFlowOptimizer> = new EnumType<TensorFlowOptimizer>("TensorFlowOptimizer");
 export type TensorFlowOptimizer =
   "Adam" |
   "GradientDescentOptimizer";

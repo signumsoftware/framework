@@ -35,9 +35,12 @@
     <Member Name="Guid" Description="Guid" />
     <Member Name="HideDisplayName" Description="Anzeigename ausblenden" />
     <Member Name="HideQuickLink" Description="Quick Link verstecken" />
+    <Member Name="IconColor" Description="Symbolfarbe" />
+    <Member Name="IconName" Description="Symbolname" />
     <Member Name="Key" Description="Schlüssel" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parts" Description="Teile" />
+    <Member Name="TitleColor" Description="Titel Farbe" />
     <Member Name="TokenEquivalencesGroups" Description="Tokenäquivalenzengruppen" />
   </Type>
   <Type Name="DashboardLiteModel" Description="Dashboard lite">
@@ -48,6 +51,7 @@
     <Member Name="_0Is1InstedOf2In3" Description="{0} ist {1} (statt {2}) in {3}" />
     <Member Name="AltClickToOpenResultsInAModalWindow" Description="[Alt] + Klicken, um die Ergebnisse in einem modalen Fenster zu öffnen" />
     <Member Name="CLickInOneChartToFilterInTheOthers" Description="Klicken Sie in ein Diagramm, um in den anderen zu filtern" />
+    <Member Name="CopyHealthCheckDashboardData" Description="Kopieren von Daten aus dem Health Check Dashboard" />
     <Member Name="CreateNewPart" Description="Neues Teil erstellen" />
     <Member Name="CtrlClickToFilterByMultipleElements" Description="[Strg] + Klicken, um nach mehreren Elementen zu filtern" />
     <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="Titel muss angegeben werden für {0}" />
@@ -68,6 +72,19 @@
   </Type>
   <Type Name="DashboardPermission">
     <Member Name="ViewDashboard" Description="Dashboard anzeigen" />
+  </Type>
+  <Type Name="HealthCheckElementEmbedded" Description="Element der Gesundheitskontrolle">
+    <Member Name="CheckURL" Description="URL prüfen" />
+    <Member Name="NavigateURL" Description="URL navigieren" />
+    <Member Name="Title" Description="Titel" />
+  </Type>
+  <Type Name="HealthCheckPartEntity" Description="Teil Gesundheitskontrolle" PluralDescription="Teile der Gesundheitskontrolle" Gender="m">
+    <Member Name="Items" Description="Artikel" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+  </Type>
+  <Type Name="HealthCheckStatus">
+    <Member Name="Error" Description="Fehler" />
+    <Member Name="Ok" Description="Ok" />
   </Type>
   <Type Name="ImagePartEntity" Description="Bildteil" PluralDescription="Bildteile" Gender="m">
     <Member Name="AltText" Description="Alt-Text" />
@@ -107,11 +124,21 @@
     <Member Name="Row" Description="Zeile" />
     <Member Name="StartColumn" Description="Spalte Start" />
     <Member Name="Title" Description="Titel" />
-    <Member Name="UseIconColorForTitle" Description="Symbolfarbe für Titel verwenden" />
+    <Member Name="TitleColor" Description="Titel Farbe" />
   </Type>
   <Type Name="SeparatorPartEntity" Description="Trennzeichenteil" PluralDescription="Separatorteile" Gender="n">
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="Title" Description="Titel" />
+  </Type>
+  <Type Name="TextPartEntity" Description="Textteil" PluralDescription="Textteile" Gender="m">
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="TextContent" Description="Textinhalt" />
+    <Member Name="TextPartType" Description="Typ des Textteils" />
+  </Type>
+  <Type Name="TextPartType" Description="Typ des Textteils">
+    <Member Name="HTML" Description="HTML" />
+    <Member Name="Markdown" Description="Markdown" />
+    <Member Name="Text" Description="Text" />
   </Type>
   <Type Name="TokenEquivalenceEmbedded" Description="Token-Äquivalenz">
     <Member Name="Query" Description="Abfrage" />

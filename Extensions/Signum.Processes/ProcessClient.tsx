@@ -22,7 +22,7 @@ import { ContextualMenuItem } from '../../Signum/React/SearchControl/ContextualI
 
 export namespace ProcessClient {
   
-  export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }) {
+  export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Processes", () => import("./Changelog"));
   
@@ -75,10 +75,12 @@ export namespace ProcessClient {
       icon: "clone",
       color: "info",
     }));
+
+    AppContext.clearSettingsActions.push(() => Dic.clear(processOperationSettings));
   }
   
   export const processOperationSettings: { [key: string]: ContextualOperationSettings<any> } = {};
-  export function register<T extends Entity>(...settings: ContextualOperationSettings<T>[]) {
+  export function register<T extends Entity>(...settings: ContextualOperationSettings<T>[]): void {
     settings.forEach(s => Dic.addOrThrow(processOperationSettings, s.operationSymbol, s));
   }
   
@@ -122,13 +124,13 @@ export namespace ProcessClient {
     };
   }
   
-  function defaultConstructProcessFromMany(coc: ContextualOperationContext<Entity>, ...args: any[]) {
+  export function defaultConstructProcessFromMany(coc: ContextualOperationContext<Entity>, ...args: any[]) : Promise<void> {
     var event = coc.event!;
   
     event!.preventDefault();
     event.stopPropagation();
   
-    ContextualOperations.confirmInNecessary(coc).then(conf => {
+    return ContextualOperations.confirmInNecessary(coc).then(conf => {
       if (!conf)
         return;
   
@@ -148,8 +150,8 @@ export namespace ProcessClient {
       });
     });
   }
-  
-  export module API {
+
+  export namespace API {
   
     export function processFromMany<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, args?: any[]): Promise<EntityPack<ProcessEntity>> {
       GraphExplorer.propagateAll(lites, args);

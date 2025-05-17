@@ -17,6 +17,7 @@ public class UserAssetController : ControllerBase
     {
         public string queryKey;
         public bool canAggregate;
+        public bool canTimeSeries;
         public List<QueryFilterItem> filters;
         public Lite<Entity> entity;
     }
@@ -26,7 +27,7 @@ public class UserAssetController : ControllerBase
     {
         var queryName = QueryLogic.ToQueryName(request.queryKey);
         var qd = QueryLogic.Queries.QueryDescription(queryName);
-        var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.canAggregate ? SubTokensOptions.CanAggregate : 0);
+        var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.canAggregate ? SubTokensOptions.CanAggregate : 0) | (request.canTimeSeries ? SubTokensOptions.CanTimeSeries : 0);
 
         using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.RetrieveAndRemember()) : null)
         {
@@ -97,6 +98,7 @@ public class UserAssetController : ControllerBase
     {
         public string queryKey;
         public bool canAggregate;
+        public bool canTimeSeries;
         public List<FilterNode> filters;
     }
 
@@ -105,7 +107,7 @@ public class UserAssetController : ControllerBase
     {
         var queryName = QueryLogic.ToQueryName(request.queryKey);
         var qd = QueryLogic.Queries.QueryDescription(queryName);
-        var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.canAggregate ? SubTokensOptions.CanAggregate : 0);
+        var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.canAggregate ? SubTokensOptions.CanAggregate : 0) | (request.canTimeSeries ? SubTokensOptions.CanTimeSeries : 0);
 
         List<QueryFilterItem> result = new List<QueryFilterItem>();
         foreach (var f in request.filters)
@@ -205,7 +207,7 @@ public class UserAssetController : ControllerBase
     [HttpPost("api/userAssets/export")]
     public FileStreamResult Export([Required, FromBody]Lite<IUserAssetEntity>[] lites)
     {
-        var bytes = UserAssetsExporter.ToXml(lites.RetrieveFromListOfLite().ToArray());
+        var bytes = UserAssetsExporter.ToXml(lites.RetrieveList().ToArray());
 
         string typeName = lites.Select(a => a.EntityType).Distinct().SingleEx().Name;
         var fileName = "{0}{1}.xml".FormatWith(typeName, lites.ToString(a => a.Id.ToString(), "_"));

@@ -1,6 +1,7 @@
 ﻿{
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2018",
+    "isolatedDeclarations": true,
     "sourceMap": false,
     "module": "esnext",
     "moduleResolution": "node",

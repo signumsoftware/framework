@@ -11,7 +11,7 @@ public class AuthColorProvider
             return new MapColorProvider[0];
 
         var roleRules = AuthLogic.RolesInOrder(includeTrivialMerge: false).ToDictionary(r => r,
-            r => TypeAuthLogic.GetTypeRules(r).Rules.ToDictionary(a => a.Resource.CleanName, a => a.Allowed));
+            r => TypeAuthLogic.GetTypeRulesSimple(r).ToDictionary(a => TypeLogic.GetCleanName(a.Key), a => a.Value));
 
         return roleRules.Keys.Select((r, i) => new MapColorProvider
         {
@@ -19,7 +19,7 @@ public class AuthColorProvider
             NiceName = "Role - " + r.ToString(),
             AddExtra = t =>
             {
-                TypeAllowedAndConditions? tac = roleRules[r].TryGetC(t.typeName);
+                var tac = roleRules[r].TryGetC(t.typeName);
 
                 if (tac == null)
                     return;
@@ -38,17 +38,15 @@ public class AuthColorProvider
         return "auth-" + list.ToString("-");
     }
 
-    static List<TypeAllowedBasic> ToStringList(TypeAllowedAndConditions tac, bool userInterface)
+    static List<TypeAllowedBasic> ToStringList(WithConditions<TypeAllowed> tac, bool userInterface)
     {
-        List<TypeAllowedBasic> result = new List<TypeAllowedBasic>();
-        result.Add(tac.Fallback.Get(userInterface));
+        List<TypeAllowedBasic> result = [tac.Fallback.Get(userInterface)];
 
         foreach (var c in tac.ConditionRules)
             result.Add(c.Allowed.Get(userInterface));
 
         return result;
     }
-
 
     private static string ToString(TypeAllowed? typeAllowed)
     {

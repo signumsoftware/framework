@@ -8,7 +8,7 @@ import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Lite, Entity, getToString, isEntity, JavascriptMessage } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Operations'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkLink } from '@framework/QuickLinkClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { getTypeInfo, getTypeInfos, QueryTokenString } from '@framework/Reflection';
 import { EntityLink, SearchControl, SearchControlLoaded } from '@framework/Search';
@@ -27,14 +27,14 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace TimeMachineClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.TimeMachine", () => import("./Changelog"));
   
     if (AppContext.isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
-      QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve(!getTypeInfo(entityType).isSystemVersioned ? [] :
+      QuickLinkClient.registerGlobalQuickLink(entityType => Promise.resolve(!getTypeInfo(entityType).isSystemVersioned ? [] :
         [
-          new QuickLinks.QuickLinkLink("TimeMachine", () => TimeMachineMessage.TimeMachine.niceToString(), ctx => timeMachineRoute(ctx.lite), {
+          new QuickLinkLink("TimeMachine", () => TimeMachineMessage.TimeMachine.niceToString(), ctx => timeMachineRoute(ctx.lite), {
             isVisible: getTypeInfo(entityType) && getTypeInfo(entityType).operations && Finder.isFindable(OperationLogEntity, false),
             icon: "clock-rotate-left",
             iconColor: "blue",
@@ -82,7 +82,7 @@ export namespace TimeMachineClient {
   
           if (sc?.state.resultFindOptions?.groupResults) {
             return (
-              <a href="#" className="sf-line-button sf-view" onClick={e => { e.preventDefault(); sc!.openRowGroup(row); }}
+              <a href="#" className="sf-line-button sf-view" onClick={e => { e.preventDefault(); sc!.openRowGroup(row, e); }}
                 style={{ whiteSpace: "nowrap", opacity: deleted ? .5 : undefined }} >
                 <span title={JavascriptMessage.ShowGroup.niceToString()}>
                   <FontAwesomeIcon icon="layer-group" />
@@ -138,7 +138,7 @@ export namespace TimeMachineClient {
     }
   }
   
-  export function timeMachineRoute(lite: Lite<Entity>) {
+  export function timeMachineRoute(lite: Lite<Entity>): string {
     return "/timeMachine/" + lite.EntityType + "/" + lite.id;
   }
 }
@@ -148,7 +148,7 @@ export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorEle
   inSearch?: "main" | "related";
 }
 
-export default function TimeMachineLink(p: TimeMachineLinkProps) {
+export function TimeMachineLink(p: TimeMachineLinkProps): React.JSX.Element {
 
   function handleClick(event: React.MouseEvent<any>) {
     const lite = p.lite;

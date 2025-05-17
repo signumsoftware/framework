@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Security from '../../Signum/React/Signum.Security'
 
 
-export const ViewLogEntity = new Type<ViewLogEntity>("ViewLog");
+export const ViewLogEntity: Type<ViewLogEntity> = new Type<ViewLogEntity>("ViewLog");
 export interface ViewLogEntity extends Entities.Entity {
   Type: "ViewLog";
   target: Entities.Lite<Entities.Entity>;
@@ -18,7 +18,7 @@ export interface ViewLogEntity extends Entities.Entity {
   data: Entities.BigStringEmbedded;
 }
 
-export module ViewLogMessage {
-  export const ViewLogMyLast = new MessageKey("ViewLogMessage", "ViewLogMyLast");
+export namespace ViewLogMessage {
+  export const ViewLogMyLast: MessageKey = new MessageKey("ViewLogMessage", "ViewLogMyLast");
 }
 

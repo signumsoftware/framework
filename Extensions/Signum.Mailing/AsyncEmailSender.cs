@@ -2,6 +2,7 @@ using Microsoft.Data.SqlClient;
 using Signum.Authorization;
 using Signum.Cache;
 using Signum.Basics;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Signum.Mailing;
 
@@ -9,6 +10,7 @@ public static class AsyncEmailSender
 {
     static Timer timer = null!;
     internal static DateTime? nextPlannedExecution;
+    internal static DateTime? lastExecutionFinishedOn;
     static bool running = false;
     static CancellationTokenSource CancelProcess = null!;
     static long queuedItems;
@@ -26,6 +28,7 @@ public static class AsyncEmailSender
             MachineName = Schema.Current.MachineName,
             AsyncSenderPeriod = EmailLogic.Configuration.AsyncSenderPeriod,
             NextPlannedExecution = nextPlannedExecution,
+            LastExecutionFinishedOn = lastExecutionFinishedOn,
             IsCancelationRequested = CancelProcess != null && CancelProcess.IsCancellationRequested,
             QueuedItems = queuedItems,
         };
@@ -41,11 +44,11 @@ public static class AsyncEmailSender
         });
     }
 
-    public static SimpleStatus GetSimpleStatus()
+    public static HealthCheckResult GetHealthStatus()
     {
-        return running ? SimpleStatus.Ok :
-            initialDelayMilliseconds == null ? SimpleStatus.Disabled :
-            SimpleStatus.Error;
+        return running ? new HealthCheckResult(HealthStatus.Healthy, "Running") :
+          initialDelayMilliseconds == null ? new HealthCheckResult(HealthStatus.Healthy, "Disabled") :
+          new HealthCheckResult(HealthStatus.Unhealthy, "Not Running!");
     }
 
     public static void StartAsyncEmailSender()
@@ -149,6 +152,7 @@ public static class AsyncEmailSender
                                             m.ProcessIdentifier == processIdentifier &&
                                             m.State == EmailMessageState.RecruitedForSending).Count();
                                     }
+                                    lastExecutionFinishedOn = Clock.Now;
                                 }
                                 SetTimer();
                                 if (CacheLogic.WithSqlDependency)
@@ -213,6 +217,8 @@ public static class AsyncEmailSender
         return queuedItems > 0;
     }
 
+
+
     internal static bool WakeUp(string reason, SqlNotificationEventArgs? args)
     {
         using (HeavyProfiler.Log("EmailAsyncSender WakeUp", () => "WakeUp! " + reason + ToString(args)))
@@ -259,7 +265,9 @@ public class AsyncEmailSenderState
     public int AsyncSenderPeriod;
     public bool IsCancelationRequested;
     public DateTime? NextPlannedExecution;
+    public DateTime? LastExecutionFinishedOn;
     public long QueuedItems;
     public Guid CurrentProcessIdentifier;
+
 }
 #pragma warning restore CS8618 // Das Non-Nullable-Feld ist nicht initialisiert. Deklarieren Sie das Feld ggf. als "Nullable".

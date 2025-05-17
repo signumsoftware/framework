@@ -37,6 +37,13 @@ public static class ProgressExtensions
         return result;
     }
 
+    public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T, int> handler)
+    {
+        int idx = 0;
+        foreach (T item in enumerable)
+            handler(item, idx++);
+    }
+
     /// <summary>
     /// Executes an action for each element in the collection transactionally and showing the progress in the Console
     /// </summary>

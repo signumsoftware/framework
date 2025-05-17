@@ -1,8 +1,5 @@
 using Signum.Engine.Maps;
-using Signum.Utilities;
 using System.Data;
-using System.Data.Common;
-using static System.Net.WebRequestMethods;
 
 namespace Signum.Engine.Sync.SqlServer;
 
@@ -63,6 +60,7 @@ public static class SysTablesSchema
                                     join userType in Database.View<SysTypes>().DefaultIfEmpty() on c.user_type_id equals userType.user_type_id
                                     join sysType in Database.View<SysTypes>().DefaultIfEmpty() on c.system_type_id equals sysType.user_type_id
                                     join ctr in Database.View<SysDefaultConstraints>().DefaultIfEmpty() on c.default_object_id equals ctr.object_id
+                                    join cc in Database.View<SysComputedColumn>().DefaultIfEmpty() on new { c.column_id, c.object_id} equals new { cc.column_id, cc.object_id }
                                     select new DiffColumn
                                     {
                                         Name = c.name,
@@ -75,6 +73,11 @@ public static class SysTablesSchema
                                         Scale = c.scale,
                                         Identity = c.is_identity,
                                         GeneratedAlwaysType = con.SupportsTemporalTables ? c.generated_always_type : GeneratedAlwaysType.None,
+                                        ComputedColumn = cc.name == null ? null : new DiffComputedColumn 
+                                        {
+                                            Definition = cc.definition,
+                                            Persisted = cc.is_persisted,
+                                        },
                                         DefaultConstraint = ctr.name == null ? null : new DiffDefaultConstraint
                                         {
                                             Name = ctr.name,
@@ -157,7 +160,7 @@ public static class SysTablesSchema
                                        Columns = (from ic in fti.IndexColumns()
                                                   join c in t.Columns() on ic.column_id equals c.column_id
                                                   select new DiffIndexColumn { ColumnName = c.name }).ToList(),
-                                       IndexName = FullTextTableIndex.FULL_TEXT,
+                                       IndexName = FullTextTableIndex.SqlServerOptions.FULL_TEXT,
                                        IsUnique = false,
                                        IsPrimary = false,
                                        Type = DiffIndexType.FullTextIndex,
@@ -215,7 +218,7 @@ public static class SysTablesSchema
         {
             using (Administrator.OverrideDatabaseInSysViews(db))
             {
-                var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(sqlBuilder.SystemSchemas);
+                var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(sqlBuilder.SystemSchemasSqlServer);
 
                 result.AddRange(schemaNames.Select(sn => new SchemaName(db, sn, isPostgres)).Where(a => !SchemaSynchronizer.IgnoreSchema(a)));
             }
@@ -230,14 +233,16 @@ public static class SysTablesSchema
         {
             using (Administrator.OverrideDatabaseInSysViews(db))
             {
-                var functions = Database.View<SysPartitionFunction>().Select(f => new DiffPartitionFunction
-                {
-                    DatabaseName = db,
-                    FunctionName = f.name,
-                    Fanout = f.fanout,
-                    Values = Database.View<SysPartitionRangeValues>().Where(a => a.function_id == f.function_id).Select(a => a.value).ToArray()
+                var functions = Database.View<SysPartitionFunction>()
+                    .Where(a => !a.name.StartsWith("ifts_comp_fragmen")) //https://dba.stackexchange.com/questions/122021/restoring-sql-server-2012-enterprise-to-web-edition-not-possible-due-to-full-tex
+                    .Select(f => new DiffPartitionFunction
+                    {
+                        DatabaseName = db,
+                        FunctionName = f.name,
+                        Fanout = f.fanout,
+                        Values = Database.View<SysPartitionRangeValues>().Where(a => a.function_id == f.function_id).Select(a => a.value).ToArray()
 
-                });
+                    });
 
                 result.AddRange(functions);
             }
@@ -252,7 +257,9 @@ public static class SysTablesSchema
         {
             using (Administrator.OverrideDatabaseInSysViews(db))
             {
-                var functions = Database.View<SysPartitionSchemes>().Select(s => new DiffPartitionScheme
+                var functions = Database.View<SysPartitionSchemes>()
+                    .Where(a => !a.name.StartsWith("ifts_comp_fragmen"))
+                    .Select(s => new DiffPartitionScheme
                 {
                     DatabaseName = db,
                     SchemeName = s.name,

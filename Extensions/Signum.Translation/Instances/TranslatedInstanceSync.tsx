@@ -21,7 +21,7 @@ import { CultureInfoEntity } from '@framework/Signum.Basics'
 
 
 
-export default function TranslatedInstanceSync() {
+export default function TranslatedInstanceSync(): React.JSX.Element {
   const params = useParams() as { type: string; culture: string; };
 
   const type = params.type;
@@ -104,7 +104,7 @@ export default function TranslatedInstanceSync() {
   );
 }
 
-export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: string) => void }) {
+export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: string) => void }): React.JSX.Element {
 
   const [tmpFilter, setTmpFilter] = React.useState(p.filter);
 
@@ -131,7 +131,7 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
   );
 }
 
-export function TranslatedInstances(p: { data: TranslatedInstanceClient.TypeInstancesChanges, cultures: { [culture: string]: Lite<CultureInfoEntity> }, currentCulture: string }) {
+export function TranslatedInstances(p: { data: TranslatedInstanceClient.TypeInstancesChanges, cultures: { [culture: string]: Lite<CultureInfoEntity> }, currentCulture: string }): React.JSX.Element {
 
   return (
     <table id="results" style={{ width: "100%", margin: "0px" }} className="st">
@@ -192,7 +192,7 @@ export function TranslatedInstances(p: { data: TranslatedInstanceClient.TypeInst
 }
 
 
-export function TranslationProperty({ property }: { property: TranslatedInstanceClient.PropertyChange }) {
+export function TranslationProperty({ property }: { property: TranslatedInstanceClient.PropertyChange }): React.JSX.Element {
 
   const [avoidCombo, setAvoidCombo] = React.useState(false);
   const forceUpdate = useForceUpdate();

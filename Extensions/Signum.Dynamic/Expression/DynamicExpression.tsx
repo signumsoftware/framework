@@ -20,7 +20,7 @@ interface DynamicExpressionComponentProps {
   ctx: TypeContext<DynamicExpressionEntity>;
 }
 
-export default function DynamicExpressionComponent(p: DynamicExpressionComponentProps) {
+export default function DynamicExpressionComponent(p: DynamicExpressionComponentProps): React.JSX.Element {
 
 
 

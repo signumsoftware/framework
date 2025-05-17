@@ -134,7 +134,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
 
     public string GetChanges()
     {
-        return this.Element.GetAttribute("data-changes");
+        return this.Element.GetDomAttribute("data-changes")!;
     }
 
     public void WaitEntityInfoChanges(Action action, string actionDescription, int? index = null)
@@ -152,7 +152,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
         var element = index == null ? Element :
             this.Element.FindElements(By.CssSelector("[data-entity]")).ElementAt(index.Value);
 
-        return element.GetAttribute("data-entity");
+        return element.GetDomAttribute("data-entity")!;
     }
 
     protected EntityInfoProxy? EntityInfoInternal(int? index) => EntityInfoProxy.Parse(EntityInfoString(index));
@@ -188,10 +188,10 @@ public abstract class EntityBaseProxy : BaseLineProxy
     public static void AutoCompleteBasic(IWebElement input, IWebElement container, string beginning)
     {
         input.SafeSendKeys(beginning);
-
         var list = container.WaitElementVisible(By.CssSelector(".typeahead.dropdown-menu"));
         var elem = input.GetDriver().Wait(() =>
         {
+            Thread.Sleep(300);
             return list.FindElements(By.CssSelector("[data-entity-key]")).SingleEx(a => a.ContainsText(beginning));
         });
         elem.Click();

@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { ScheduleRuleWeekDaysEntity } from '../Signum.Scheduler'
 import { useForceUpdate } from '@framework/Hooks';
 
-export default function ScheduleRuleWeekDays(p : { ctx: TypeContext<ScheduleRuleWeekDaysEntity> }){
+export default function ScheduleRuleWeekDays(p : { ctx: TypeContext<ScheduleRuleWeekDaysEntity> }): React.JSX.Element {
   const ctx4 = p.ctx.subCtx({ labelColumns: { sm: 4 } });
   const ctx2 = p.ctx.subCtx({ labelColumns: { sm: 2 } });
   const forceUpdate = useForceUpdate();

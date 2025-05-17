@@ -21,7 +21,8 @@ export interface CodeMirrorComponentHandler {
   codeMirror?: CodeMirror.EditorFromTextArea;
 }
 
-export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent(p: CodeMirrorProps, ref: React.Ref<CodeMirrorComponentHandler>) {
+export const CodeMirrorComponent: React.ForwardRefExoticComponent<CodeMirrorProps & React.RefAttributes<CodeMirrorComponentHandler>> =
+  React.forwardRef(function CodeMirrorComponent(p: CodeMirrorProps, ref: React.Ref<CodeMirrorComponentHandler>) {
 
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   const codeMirrorRef = React.useRef<CodeMirror.EditorFromTextArea | undefined>(undefined);

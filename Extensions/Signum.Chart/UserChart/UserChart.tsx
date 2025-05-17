@@ -3,7 +3,7 @@ import ChartBuilder from '../Templates/ChartBuilder'
 import { FormGroup, AutoLine, EntityLine, EntityStrip, CheckboxLine } from '@framework/Lines'
 import { Finder } from '@framework/Finder'
 import { SubTokensOptions } from '@framework/FindOptions'
-import { getQueryNiceName } from '@framework/Reflection'
+import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import "../Chart.css"
 import { useAPI, useForceUpdate } from '@framework/Hooks'
@@ -14,7 +14,7 @@ import { UserQueryMessage } from '../../Signum.UserQueries/Signum.UserQueries'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
 
 const CurrentEntityKey = "[CurrentEntity]";
-export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
+export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }): React.JSX.Element | null {
   const forceUpdate = useForceUpdate();
   const ctx = p.ctx;
   const entity = ctx.value;
@@ -60,10 +60,11 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
         }/>
       <AutoLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} />
       <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={p.ctx.value.query.key}
-        subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
+        subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | (ctx.value.chartTimeSeries != null ? SubTokensOptions.CanTimeSeries : 0)}
         showPinnedFilterOptions={true}
       />
       <ChartBuilder queryKey={queryKey} ctx={p.ctx}
+        queryDescription={qd}
         onInvalidate={() => forceUpdate()}
         onTokenChange={() => forceUpdate()}
         onRedraw={() => forceUpdate()}

@@ -24,7 +24,7 @@ import { TimeMachineMessage } from './Signum.TimeMachine'
 import { OperationLogEntity } from '@framework/Signum.Operations'
 
 
-export default function TimeMachinePage() {
+export default function TimeMachinePage(): React.JSX.Element {
   const params = useParams() as { type: string; id: string };
 
   const lite = useAPI(() => {
@@ -42,7 +42,7 @@ export default function TimeMachinePage() {
 }
 
 
-export function TimeMachine(p: {lite: Lite<Entity>, isModal?: boolean }) {
+export function TimeMachine(p: { lite: Lite<Entity>, isModal?: boolean }): React.JSX.Element {
 
   const searchControl = React.useRef<SearchControlHandler>(null);
   const forceUpdate = useForceUpdate();
@@ -60,12 +60,12 @@ export function TimeMachine(p: {lite: Lite<Entity>, isModal?: boolean }) {
         if (e.ctrlKey) {
           if (checked) {
             sc.state.selectedRows?.remove(row)
-            sc.notifySelectedRowsChanged()
+            sc.notifySelectedRowsChanged("toggle")
           } else {
             if (sc.state.selectedRows && sc.state.selectedRows.length >= 2)
               return MessageModal.showError(TimeMachineMessage.YouCanNotSelectMoreThanTwoVersionToCompare.niceToString())
             sc.state.selectedRows?.push(row);
-            sc.notifySelectedRowsChanged();
+            sc.notifySelectedRowsChanged("toggle");
           }
         }
         else {
@@ -77,7 +77,7 @@ export function TimeMachine(p: {lite: Lite<Entity>, isModal?: boolean }) {
             sc.state.selectedRows?.push(nextRow);
           }
           sc.state.selectedRows?.push(row);
-          sc.notifySelectedRowsChanged();
+          sc.notifySelectedRowsChanged("toggle");
         }
       }}
       />
@@ -145,7 +145,7 @@ interface RenderEntityVersionProps {
   previousDate?: string;
 }
 
-export function RenderEntityVersion(p: RenderEntityVersionProps) {
+export function RenderEntityVersion(p: RenderEntityVersionProps): React.JSX.Element {
   var pair = useAPI(async signal => {
     var curr = p.current();
     var prev = p.previous == null ? Promise.resolve(null) : p.previous();
@@ -174,7 +174,7 @@ interface DiffEntityVersionProps {
   current: () => Promise<TimeMachineClient.EntityDump>;
 }
 
-export function DiffEntityVersion(p: DiffEntityVersionProps) {
+export function DiffEntityVersion(p: DiffEntityVersionProps): React.JSX.Element {
 
   var pair = useAPI(async signal => {
     var curr = p.current();
@@ -191,7 +191,7 @@ export function DiffEntityVersion(p: DiffEntityVersionProps) {
   return <DiffDocument first={pair.prev.dump} second={pair.curr.dump} />;
 }
 
-export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string[] }) {
+export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string[] }): React.JSX.Element | null {
 
   if (p.versionDatesUTC == null || p.versionDatesUTC.length < 1)
     return null;
@@ -217,8 +217,8 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
       <Tab title={<span>
         {hasPrevious ? TimeMachineMessage.UIDifferences.niceToString() : TimeMachineMessage.UISnapshot.niceToString()}
         <span className="ms-2">
-        <FontAwesomeIcon icon="eye" color="lightblue"/>
-        {hasPrevious && <FontAwesomeIcon icon="circle" transform="shrink-10 left-25 up-5" color="red" />}
+          <FontAwesomeIcon icon="eye" color="lightblue" />
+          {hasPrevious && <FontAwesomeIcon icon="circle" transform="shrink-10 left-25 up-5" color="red" />}
         </span>
       </span>}
         key={"ui"} eventKey={"ui"}>
@@ -228,17 +228,17 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
           currentDate={hasPrevious ? dates[1] : dates[0]}
           previousDate={hasPrevious ? dates[0] : undefined}
         />
-        </Tab>
+      </Tab>
       <Tab title={hasPrevious ?
         <span>{TimeMachineMessage.DataDifferences.niceToString()}
-          <FontAwesomeIcon icon="plus" color="green" transform="up-5 right-7"/>
+          <FontAwesomeIcon icon="plus" color="green" transform="up-5 right-7" />
           <FontAwesomeIcon icon="minus" color="red" transform="down-5 left-7" />
         </span> : <span>{TimeMachineMessage.DataSnapshot.niceToString()}
           <FontAwesomeIcon className="ms-2" icon="align-left" color="lightblue" />
         </span>}
         key={"data"} eventKey={"data"}>
         <DiffEntityVersion previous={previous} current={current} />
-      </Tab>      
+      </Tab>
     </Tabs>
   );
 }
@@ -248,7 +248,7 @@ interface TimeMachineModalProps extends IModalProps<boolean | undefined> {
   lite: Lite<Entity>
 }
 
-export function TimeMachineModal(p: TimeMachineModalProps) {
+export function TimeMachineModal(p: TimeMachineModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
   const answerRef = React.useRef<boolean | undefined>(undefined);
@@ -271,7 +271,7 @@ export function TimeMachineModal(p: TimeMachineModalProps) {
             <span style={{ color: "#aaa" }}>{getToString(p.lite)}</span>
           </small>
         </h4>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}/>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked} />
       </div>
       <div className="modal-body">
         <TimeMachine lite={p.lite} isModal={true} />
@@ -279,17 +279,18 @@ export function TimeMachineModal(p: TimeMachineModalProps) {
     </Modal>
   );
 }
-
-TimeMachineModal.show = (lite: Lite<Entity>): Promise<boolean | undefined> => {
-  return openModal<boolean | undefined>(<TimeMachineModal lite={lite} />);
-};
+export namespace TimeMachineModal {
+  export function show(lite: Lite<Entity>): Promise<boolean | undefined> {
+    return openModal<boolean | undefined>(<TimeMachineModal lite={lite} />);
+  };
+}
 
 interface TimeMachineModalCompareProps extends IModalProps<boolean | undefined> {
   lite: Lite<Entity>;
   versionDatesUTC: string[];
 }
 
-export function TimeMachineCompareModal(p: TimeMachineModalCompareProps) {
+export function TimeMachineCompareModal(p: TimeMachineModalCompareProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
   const answerRef = React.useRef<boolean | undefined>(undefined);
@@ -314,7 +315,8 @@ export function TimeMachineCompareModal(p: TimeMachineModalCompareProps) {
     </Modal>
   );
 }
-
-TimeMachineCompareModal.show = (lite: Lite<Entity>, versionDatesUTC: string[]): Promise<boolean | undefined> => {
-  return openModal<boolean | undefined>(<TimeMachineCompareModal lite={lite} versionDatesUTC={versionDatesUTC} />);
-};
+export namespace TimeMachineCompareModal {
+  export function show(lite: Lite<Entity>, versionDatesUTC: string[]): Promise<boolean | undefined> {
+    return openModal<boolean | undefined>(<TimeMachineCompareModal lite={lite} versionDatesUTC={versionDatesUTC} />);
+  }
+}

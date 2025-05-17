@@ -19,7 +19,7 @@ interface MultiOperationProgressModalProps extends IModalProps<Operations.API.Er
   abortController: AbortController;
 }
 
-export function MultiOperationProgressModal(p: MultiOperationProgressModalProps) {
+export function MultiOperationProgressModal(p: MultiOperationProgressModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();
@@ -88,15 +88,17 @@ export function MultiOperationProgressModal(p: MultiOperationProgressModalProps)
   );
 }
 
-MultiOperationProgressModal.show = (lites: Lite<Entity>[], operationKey: string | OperationSymbol, progressModal: boolean | undefined, abortController: AbortController, makeRequest: ()=> Promise<Response>): Promise<Operations.API.ErrorReport> => {
+export namespace MultiOperationProgressModal {
+  export function show(lites: Lite<Entity>[], operationKey: string | OperationSymbol, progressModal: boolean | undefined, abortController: AbortController, makeRequest: () => Promise<Response>): Promise<Operations.API.ErrorReport> {
 
-  if (progressModal ?? lites.length > 1) {
-    var oi = getOperationInfo(operationKey, lites[0].EntityType);
-    return openModal<Operations.API.ErrorReport>(<MultiOperationProgressModal operation={oi} lites={lites} makeRequest={makeRequest} abortController={abortController} />);
-  } else {
-    return makeRequest().then(r => r.json()).then(obj => {
-      var results = obj as Operations.API.OperationResult[];
-      return softCast<Operations.API.ErrorReport>({ errors: results.toObject(a => liteKey(a.entity), a => a.error) });
-    });
-  }
-};
+    if (progressModal ?? lites.length > 1) {
+      var oi = getOperationInfo(operationKey, lites[0].EntityType);
+      return openModal<Operations.API.ErrorReport>(<MultiOperationProgressModal operation={oi} lites={lites} makeRequest={makeRequest} abortController={abortController} />);
+    } else {
+      return makeRequest().then(r => r.json()).then(obj => {
+        var results = obj as Operations.API.OperationResult[];
+        return softCast<Operations.API.ErrorReport>({ errors: results.toObject(a => liteKey(a.entity), a => a.error) });
+      });
+    }
+  };
+}

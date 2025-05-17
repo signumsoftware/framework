@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Navigator } from '@framework/Navigator'
 import { mlistItemContext, TypeContext } from '@framework/TypeContext'
-import { getTypeInfo } from '@framework/Reflection'
+import { getTypeInfo, getTypeInfos, IsByAll, isTypeEntity, tryGetTypeInfo, tryGetTypeInfos } from '@framework/Reflection'
 import { UserAssetClient } from './UserAssetClient'
 import { UserAssetMessage, UserAssetPreviewModel, EntityAction, LiteConflictEmbedded } from './Signum.UserAssets'
 import { useForceUpdate } from '@framework/Hooks'
@@ -13,7 +13,7 @@ import { getToString, is, liteKey, liteKeyLong, MList } from '@framework/Signum.
 import SelectorModal from '@framework/SelectorModal'
 import MessageModal from '@framework/Modals/MessageModal'
 
-export default function ImportAssetsPage() {
+export default function ImportAssetsPage(): React.JSX.Element {
 
   const [file, setFile] = React.useState<UserAssetClient.API.FileUpload | undefined>(undefined);
   const [model, setModel] = React.useState<UserAssetPreviewModel | undefined>(undefined);
@@ -146,12 +146,7 @@ export default function ImportAssetsPage() {
                           columns={[
                             { property: a => a.propertyRoute, template: ctx => <code>{ctx.value.propertyRoute}</code> },
                             { property: a => a.from, template: ctx => <code>{liteKeyLong(ctx.value.from)}</code> },
-                            {
-                              property: a => a.to, template: ctx =>
-                                <EntityLine ctx={ctx.subCtx(a => a.to)} type={PropertyRoute.parseFull(ctx.value.propertyRoute).typeReference()}
-                                onChange={e =>  handleChangeConflict(ctx.value)}
-                                />
-                            }
+                            { property: a => a.to, template: ctx => <EntityLineSameType ctx={ctx} onChange={() => handleChangeConflict(ctx.value)} /> }
                           ]}
                         />
                       </td>
@@ -184,4 +179,20 @@ export default function ImportAssetsPage() {
       }
     </div>
   );
+}
+
+function EntityLineSameType(p: { ctx: TypeContext<LiteConflictEmbedded>, onChange: () => void }): JSX.Element{
+
+  const [avoidLastType, setAvoidLastType] = React.useState(false);
+
+  var prType = PropertyRoute.parseFull(p.ctx.value.propertyRoute).typeReference();
+
+  const validPrType = prType.name == IsByAll || tryGetTypeInfos(prType.name).some(a=> a != null);
+
+  const type = validPrType ? prType :
+    !avoidLastType ? { isLite: true, name: p.ctx.value.from.EntityType } :
+      { isLite: true, name: IsByAll }
+
+  return <EntityLine ctx={p.ctx.subCtx(a => a.to)} type={type} onChange={p.onChange}
+    helpText={!validPrType && !avoidLastType && <span><a href="#" onClick={e => { e.preventDefault(); setAvoidLastType(true) }}><FontAwesomeIcon icon="xmark" /></a> Assume is <code>{p.ctx.value.from.EntityType}</code></span >} />;
 }

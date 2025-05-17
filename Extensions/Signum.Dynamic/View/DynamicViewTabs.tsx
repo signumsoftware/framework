@@ -13,7 +13,7 @@ import { ModulesHelp } from "./ModulesHelp";
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror';
 import { DynamicViewEntity, DynamicViewPropEmbedded } from '../Signum.Dynamic.Views'
 
-export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicViewEntity>, rootNode: DesignerNode<BaseNode> }) {
+export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicViewEntity>, rootNode: DesignerNode<BaseNode> }): React.JSX.Element {
 
   const typeName = rootNode.route!.typeReference().name;
   const handleChange = () => rootNode.context.refreshView();

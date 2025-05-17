@@ -8,7 +8,7 @@ import { DisableOperation, DisabledMixin } from "../Signum.Basics";
 
 export namespace DisabledClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     Operations.addSettings(new EntityOperationSettings(DisableOperation.Disable, {
       contextual: {
@@ -49,10 +49,10 @@ export namespace DisabledClient {
           { token: DisabledMixin.token(e => e.entity.isDisabled) }
         ];
   
-        querySettings.rowAttributes = (row, columns) => {
-  
-          var index = columns.indexOf("Entity.IsDisabled");
-          return row.columns[index] ? { style: { fontStyle: "italic", color: "gray" } } : undefined;
+        querySettings.rowAttributes = (row, sc) => {
+
+          var disabled = sc.getRowValue(row, "Entity.IsDisabled");
+          return disabled ? { style: { fontStyle: "italic", color: "gray" } } : undefined;
         };
       }
   

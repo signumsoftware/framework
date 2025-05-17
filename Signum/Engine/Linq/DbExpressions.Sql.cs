@@ -1,3 +1,4 @@
+using Microsoft.SqlServer.Types;
 using NpgsqlTypes;
 using Signum.Engine.Maps;
 using Signum.Utilities.DataStructures;
@@ -28,6 +29,7 @@ internal enum DbExpressionType
     SqlConstant,
     SqlVariable,
     SqlLiteral,
+    SqlColumnList,
     SqlCast,
     Case,
     RowNumber,
@@ -58,6 +60,7 @@ internal enum DbExpressionType
     PrimaryKey,
     ToDayOfWeek,
     Interval,
+    IsDescendatOf
 }
 
 
@@ -322,7 +325,8 @@ internal class AggregateExpression : DbExpression
 {
     public readonly AggregateSqlFunction AggregateFunction;
     public readonly ReadOnlyCollection<Expression> Arguments;
-    public AggregateExpression(Type type, AggregateSqlFunction aggregateFunction, IEnumerable<Expression> arguments)
+    public readonly ReadOnlyCollection<OrderExpression>? OrderBy;
+    public AggregateExpression(Type type, AggregateSqlFunction aggregateFunction, IEnumerable<Expression> arguments, IEnumerable<OrderExpression>? orderBy)
         : base(DbExpressionType.Aggregate, type)
     {
         if (arguments == null)
@@ -330,11 +334,17 @@ internal class AggregateExpression : DbExpression
         
         this.AggregateFunction = aggregateFunction;
         this.Arguments = arguments.ToReadOnly();
+        this.OrderBy = orderBy?.ToReadOnly();
     }
 
     public override string ToString()
     {
-        return $"{AggregateFunction}({(AggregateFunction == AggregateSqlFunction.CountDistinct ? "Distinct " : "")}{Arguments.ToString(", ") ?? "*"})";
+        var result =  $"{AggregateFunction}({(AggregateFunction == AggregateSqlFunction.CountDistinct ? "Distinct " : "")}{Arguments.ToString(", ") ?? "*"})";
+
+        if (OrderBy == null)
+            return result;
+
+        return result + "WITHIN GROUP (" + OrderBy.ToString(", ") + ")";
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -663,15 +673,25 @@ internal enum PostgresFunction
     tstzrange,
     upper,
     lower,
+    subpath,
+    nlevel,
+    to_tsquery,
+    plainto_tsquery,
+    phraseto_tsquery,
+    websearch_to_tsquery,
+
+    ts_rank,
+    ts_rank_cd,
 }
 
 public static class PostgressOperator
 {
     public static string Overlap = "&&";
     public static string Contains = "@>";
+    public static string IsContained = "<@";
+    public static string Matches = "@@";
 
-    public static string[] All = new[] { Overlap, Contains };
-
+    public static string[] All = new[] { Overlap, Contains, IsContained, Matches };
 }
 
 internal enum SqlEnums
@@ -710,6 +730,30 @@ internal class SqlLiteralExpression : DbExpression
     protected override Expression Accept(DbExpressionVisitor visitor)
     {
         return visitor.VisitSqlLiteral(this);
+    }
+}
+
+internal class SqlColumnListExpression : DbExpression
+{
+    public readonly ReadOnlyCollection<ColumnExpression> Columns;
+    public SqlColumnListExpression(IEnumerable<ColumnExpression> column)
+        : base(DbExpressionType.SqlLiteral, typeof(void))
+    {
+        this.Columns = column.ToReadOnly();
+    }
+
+    public override string ToString()
+    {
+        var only = Columns.Only();
+        if (only != null)
+            return only.ToString();
+
+        return "(" + Columns.ToString(", ") + ")";
+    }
+
+    protected override Expression Accept(DbExpressionVisitor visitor)
+    {
+        return visitor.VisitSqlColumnList(this);
     }
 }
 
@@ -1060,6 +1104,19 @@ public static class SystemTimeExpressions
              );
     }
 
+    internal static Expression? Contains(this IntervalExpression interval, Expression expression)
+    {
+        if (interval.PostgresRange != null)
+        {
+            return new SqlFunctionExpression(typeof(bool), null, "@>", new Expression[] { interval.PostgresRange!, expression! });
+        }
+
+        return Expression.And(
+             Expression.LessThanOrEqual(interval.Min!, expression.Nullify()),
+             Expression.LessThan(expression.Nullify(), interval.Max!)
+             );
+    }
+
     public static Expression And(this Expression expression, Expression? other)
     {
         if (other == null)
@@ -1094,6 +1151,33 @@ internal class LikeExpression : DbExpression
     protected override Expression Accept(DbExpressionVisitor visitor)
     {
         return visitor.VisitLike(this);
+    }
+}
+
+internal class IsDesendantOfExpression : DbExpression
+{
+    public readonly Expression Child;
+    public readonly Expression Parent;
+
+    public IsDesendantOfExpression(Expression child, Expression parent) : base(DbExpressionType.IsDescendatOf, typeof(bool))
+    {
+        if (child == null || child.Type != typeof(SqlHierarchyId))
+            throw new ArgumentException("expression is wrong");
+
+        if (parent == null || parent.Type != typeof(SqlHierarchyId))
+            throw new ArgumentException("pattern is wrong");
+        this.Child = child;
+        this.Parent = parent;
+    }
+
+    public override string ToString()
+    {
+        return $"{Child} <@ {Parent}";
+    }
+
+    protected override Expression Accept(DbExpressionVisitor visitor)
+    {
+        return visitor.VisitIsDescendatOf(this);
     }
 }
 

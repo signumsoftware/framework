@@ -15,9 +15,14 @@ import { namespace } from 'd3';
 //http://codepen.io/m-e-conroy/pen/ALsdF
 interface ErrorModalProps extends Modals.IModalProps<undefined> {
   error: any;
+  beforeOkClicked?:()=> Promise<void>
 }
 
-export default function ErrorModal(p: ErrorModalProps) {
+const ErrorModal: {
+  (p: ErrorModalProps): React.JSX.Element;
+  register: () => void;
+  showErrorModal: (error: any, beforeOkClicked?: ()=> Promise<void>) => Promise<void>;
+} = function (p: ErrorModalProps) {
 
   const [show, setShow] = React.useState(true);
 
@@ -25,7 +30,9 @@ export default function ErrorModal(p: ErrorModalProps) {
     p.onExited!(undefined);
   }
 
-  function handleCloseClicked() {
+  async function handleCloseClicked() {
+    await p.beforeOkClicked?.();
+
     setShow(false);
   }
 
@@ -37,7 +44,7 @@ export default function ErrorModal(p: ErrorModalProps) {
   const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
 
   return (
-    <Modal show={show} onExited={handleOnExited} onHide={handleCloseClicked} size="lg">
+    <Modal show={show} onExited={handleOnExited} onHide={handleCloseClicked} size="lg" dialogClassName="error-modal">
       <div className="modal-header dialog-header-error">
         <h5 className="modal-title">
           {
@@ -47,14 +54,14 @@ export default function ErrorModal(p: ErrorModalProps) {
                   renderTitle(e)
           }
         </h5>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}/>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked} />
       </div>
 
       <div className="modal-body">
         {se ? ErrorModalOptions.renderServiceMessage(se) :
           ve ? ErrorModalOptions.renderValidationMessage(ve) :
             ese ? ErrorModalOptions.renderExternalServiceMessage(ese) :
-            ErrorModalOptions.renderMessage(e)}
+              ErrorModalOptions.renderMessage(e)}
       </div>
 
       <div className="modal-footer">
@@ -102,7 +109,7 @@ export default function ErrorModal(p: ErrorModalProps) {
   }
 }
 
-
+export default ErrorModal;
 
 var lastError: { model: ClientErrorModel, date: Date } | undefined;
 
@@ -147,11 +154,18 @@ function logError(error: Error) {
 ErrorModal.register = () => {
   window.onunhandledrejection = p => {
     var error = p.reason;
+
+    if (error.alreadyConsumed)
+      return;
+
+    error.alreadyConsumed = true;
+
     logError(error);
     if (Modals.isStarted()) {
       ErrorModal.showErrorModal(error);
     }
     else {
+      error.alreadyConsumed = false;
       window.onerror?.("error", undefined, undefined, undefined, error);
       console.error("Unhandled promise rejection:", error);
     }
@@ -161,11 +175,20 @@ ErrorModal.register = () => {
 
   window.onerror = (message: Event | string, filename?: string, lineno?: number, colno?: number, error?: Error) => {
 
+    if (error != null) {
+      if ((error as any).alreadyConsumed)
+        return;
+
+      (error as any).alreadyConsumed = true;
+    }
+
     if (error != null)
       logError(error);
 
-    if (Modals.isStarted()) 
+    if (Modals.isStarted()) {
+      console.error(error);
       ErrorModal.showErrorModal(error);
+    }
     else if (oldOnError != null) {
       if (error instanceof ServiceError)
         oldOnError(message, filename, lineno, colno, {
@@ -179,7 +202,7 @@ ErrorModal.register = () => {
   };
 }
 
-ErrorModal.showErrorModal = (error: any): Promise<void> => {
+ErrorModal.showErrorModal = (error: any, beforeOkClicked?: ()=> Promise<void>): Promise<void> => {
   if (error == null || error.code === 20) //abort
     return Promise.resolve();
 
@@ -197,7 +220,7 @@ ErrorModal.showErrorModal = (error: any): Promise<void> => {
       style: "warning"
     }).then(() => undefined);
 
-  return Modals.openModal<void>(<ErrorModal error={error} />);
+  return Modals.openModal<void>(<ErrorModal error={error} beforeOkClicked={beforeOkClicked} />);
 }
 
 function textDanger(message: string | null | undefined): React.ReactFragment | null | undefined {
@@ -208,7 +231,7 @@ function textDanger(message: string | null | undefined): React.ReactFragment | n
   return message;
 }
 
-export function RenderServiceMessageDefault(p: { error: ServiceError }) {
+export function RenderServiceMessageDefault(p: { error: ServiceError }): React.JSX.Element {
 
   const [showDetails, setShowDetails] = React.useState(false);
 
@@ -219,7 +242,8 @@ export function RenderServiceMessageDefault(p: { error: ServiceError }) {
 
   return (
     <div>
-      {textDanger(p.error.httpError.exceptionMessage)}
+
+      {ErrorModalOptions.preferPreFormated(p.error) ? <pre style={{ whiteSpace: "pre-wrap" }}>{p.error.httpError.exceptionMessage}</pre> : textDanger(p.error.httpError.exceptionMessage)}
       {p.error.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
         <div>
           <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
@@ -229,7 +253,7 @@ export function RenderServiceMessageDefault(p: { error: ServiceError }) {
   );
 }
 
-export function RenderExternalServiceMessageDefault(p: { error: ExternalServiceError }) {
+export function RenderExternalServiceMessageDefault(p: { error: ExternalServiceError }): React.JSX.Element {
 
   const [showDetails, setShowDetails] = React.useState(false);
 
@@ -250,7 +274,7 @@ export function RenderExternalServiceMessageDefault(p: { error: ExternalServiceE
   );
 }
 
-export function RenderValidationMessageDefault(p: { error: ValidationError }) {
+export function RenderValidationMessageDefault(p: { error: ValidationError }): React.JSX.Element {
   return (
     <div>
       {textDanger(Dic.getValues(p.error.modelState).join("\n"))}
@@ -258,7 +282,7 @@ export function RenderValidationMessageDefault(p: { error: ValidationError }) {
   );
 }
 
-export function RenderMessageDefault(p: { error: any }) {
+export function RenderMessageDefault(p: { error: any }): React.JSX.Element {
   const e = p.error;
   return (
     <div>
@@ -272,10 +296,13 @@ export namespace ErrorModalOptions {
     return undefined;
   }
 
-  export function isExceptionViewable() {
+  export function isExceptionViewable(): boolean {
     return false;
   }
 
+  export function preferPreFormated(se: ServiceError): boolean {
+    return se.httpError.exceptionType.contains("FieldReaderException");
+  }
   export function renderServiceMessage(se: ServiceError): React.ReactNode {
     return <RenderServiceMessageDefault error={se} />;
   }

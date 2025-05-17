@@ -9,16 +9,16 @@ import * as Operations from '../../../Signum/React/Signum.Operations'
 import * as Scheduler from '../../Signum.Scheduler/Signum.Scheduler'
 
 
-export const CompareInbox = new EnumType<CompareInbox>("CompareInbox");
+export const CompareInbox: EnumType<CompareInbox> = new EnumType<CompareInbox>("CompareInbox");
 export type CompareInbox =
   "Full" |
   "LastNEmails";
 
-export module EmailReceptionAction {
+export namespace EmailReceptionAction {
   export const ReceiveAllActiveEmailConfigurations : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "EmailReceptionAction.ReceiveAllActiveEmailConfigurations");
 }
 
-export const EmailReceptionConfigurationEntity = new Type<EmailReceptionConfigurationEntity>("EmailReceptionConfiguration");
+export const EmailReceptionConfigurationEntity: Type<EmailReceptionConfigurationEntity> = new Type<EmailReceptionConfigurationEntity>("EmailReceptionConfiguration");
 export interface EmailReceptionConfigurationEntity extends Entities.Entity, Scheduler.ITaskEntity {
   Type: "EmailReceptionConfiguration";
   active: boolean;
@@ -28,13 +28,13 @@ export interface EmailReceptionConfigurationEntity extends Entities.Entity, Sche
   service: EmailReceptionServiceEntity;
 }
 
-export module EmailReceptionConfigurationOperation {
+export namespace EmailReceptionConfigurationOperation {
   export const Save : Operations.ExecuteSymbol<EmailReceptionConfigurationEntity> = registerSymbol("Operation", "EmailReceptionConfigurationOperation.Save");
   export const ReceiveEmails : Operations.ConstructSymbol_From<EmailReceptionEntity, EmailReceptionConfigurationEntity> = registerSymbol("Operation", "EmailReceptionConfigurationOperation.ReceiveEmails");
   export const ReceiveLastEmails : Operations.ConstructSymbol_From<EmailReceptionEntity, EmailReceptionConfigurationEntity> = registerSymbol("Operation", "EmailReceptionConfigurationOperation.ReceiveLastEmails");
 }
 
-export const EmailReceptionEntity = new Type<EmailReceptionEntity>("EmailReception");
+export const EmailReceptionEntity: Type<EmailReceptionEntity> = new Type<EmailReceptionEntity>("EmailReception");
 export interface EmailReceptionEntity extends Entities.Entity {
   Type: "EmailReception";
   emailReceptionConfiguration: Entities.Lite<EmailReceptionConfigurationEntity>;
@@ -47,14 +47,14 @@ export interface EmailReceptionEntity extends Entities.Entity {
   exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
-export const EmailReceptionExceptionEntity = new Type<EmailReceptionExceptionEntity>("EmailReceptionException");
+export const EmailReceptionExceptionEntity: Type<EmailReceptionExceptionEntity> = new Type<EmailReceptionExceptionEntity>("EmailReceptionException");
 export interface EmailReceptionExceptionEntity extends Entities.Entity {
   Type: "EmailReceptionException";
   reception: Entities.Lite<EmailReceptionEntity>;
   exception: Entities.Lite<Basics.ExceptionEntity>;
 }
 
-export const EmailReceptionInfoEmbedded = new Type<EmailReceptionInfoEmbedded>("EmailReceptionInfoEmbedded");
+export const EmailReceptionInfoEmbedded: Type<EmailReceptionInfoEmbedded> = new Type<EmailReceptionInfoEmbedded>("EmailReceptionInfoEmbedded");
 export interface EmailReceptionInfoEmbedded extends Entities.EmbeddedEntity {
   Type: "EmailReceptionInfoEmbedded";
   uniqueId: string;
@@ -65,7 +65,7 @@ export interface EmailReceptionInfoEmbedded extends Entities.EmbeddedEntity {
   deletionDate: string /*DateTime*/ | null;
 }
 
-export const EmailReceptionMixin = new Type<EmailReceptionMixin>("EmailReceptionMixin");
+export const EmailReceptionMixin: Type<EmailReceptionMixin> = new Type<EmailReceptionMixin>("EmailReceptionMixin");
 export interface EmailReceptionMixin extends Entities.MixinEntity {
   Type: "EmailReceptionMixin";
   receptionInfo: EmailReceptionInfoEmbedded | null;

@@ -10,12 +10,16 @@ using Signum.Engine.Sync;
 using Microsoft.Data.SqlClient;
 using Signum.Engine.Sync.SqlServer;
 using Signum.API;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
+using DocumentFormat.OpenXml.Office2013.Drawing.Chart;
 
 namespace Signum.Cache;
 
 public interface IServerBroadcast
 {
-    void Start();
+    bool Running { get; }
+    void StartIfNecessary();
     void Send(string methodName, string argument);
     event Action<string, string>? Receive;
 }
@@ -70,14 +74,14 @@ public static class CacheLogic
             if(ServerBroadcast != null)
             {
                 ServerBroadcast!.Receive += ServerBroadcast_Receive;
-                sb.Schema.BeforeDatabaseAccess += () => ServerBroadcast!.Start();
+                sb.Schema.BeforeDatabaseAccess += () => ServerBroadcast!.StartIfNecessary();
             }
 
             sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
             sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
-            sb.Schema.InvalidateCache += CacheLogic.ForceReset;
+            sb.Schema.OnInvalidateCache += () => CacheLogic.ForceReset();
 
-            GlobalLazy.OnResetAll += CacheLogic.ForceReset;
+            GlobalLazy.OnResetAll += systemLog => CacheLogic.ForceReset(systemLog);
         }
     }
 
@@ -115,6 +119,18 @@ public static class CacheLogic
         {
             cont.CachedTable.SchemaCompleted();
         }
+
+        var missingInMemory = (from t in TypeConditionLogic.Types
+                               where controllers.ContainsKey(t)
+                               where !semiControllers.ContainsKey(t) || semiControllers[t].Any(a => a.Type.IsEntity())
+                               from tc in TypeConditionLogic.ConditionsFor(t)
+                               where !TypeConditionLogic.HasInMemoryCondition(t, tc)
+                               select new { t, tc }).ToList();
+
+        if (missingInMemory.Any())
+            throw new InvalidOperationException("The following types are cached, but do not have in-memory TypeConditions defined: " +
+                missingInMemory.GroupBy(a => a.t, a => a.tc).ToString(gr => " * " + gr.Key.TypeName() + ": " + gr.ToString(a => a.Key, ", "), "\n")
+                );
     }
 
     static void ServerBroadcast_Receive(string methodName, string argument)
@@ -124,8 +140,14 @@ public static class CacheLogic
 
     public static Dictionary<string /*methodName*/, Action<string /*argument*/>> BroadcastReceivers = new Dictionary<string, Action<string>>
     {
-        { InvalidateTable, ServerBroadcast_InvalidateTable}
+        { Method_InvalidateTable, ServerBroadcast_InvalidateTable },
+        { Method_InvalidateAllTable, ServerBroadcast_InvalidateAllTables },
     };
+
+    static void ServerBroadcast_InvalidateAllTables(string args)
+    {
+        CacheLogic.InvalidateAll(systemLog: args == "nodb" ? false : true);
+    }
 
     static void ServerBroadcast_InvalidateTable(string cleanName)
     {
@@ -741,7 +763,8 @@ Remember that the Start could be called with an empty database!");
         }
     }
 
-    const string InvalidateTable = "InvalidateTable";
+    public const string Method_InvalidateTable = "InvalidateTable";
+    public const string Method_InvalidateAllTable = "InvalidateAllTables";
 
     internal static void NotifyInvalidateAllConnectedTypes(Type type)
     {
@@ -753,7 +776,7 @@ Remember that the Start could be called with an empty database!");
             if (controller != null)
                 controller.NotifyInvalidated();
 
-            ServerBroadcast?.Send(InvalidateTable, TypeLogic.GetCleanName(stype));
+            ServerBroadcast?.Send(Method_InvalidateTable, TypeLogic.GetCleanName(stype));
         }
     }
 
@@ -781,14 +804,15 @@ Remember that the Start could be called with an empty database!");
         return controllers.GetOrThrow(type)!.CachedTable;
     }
 
-    public static void ForceReset()
+    public static void ForceReset(bool systemLog = true)
     {
         foreach (var controller in controllers.Values.NotNull())
         {
             controller.ForceReset();
         }
 
-        SystemEventLogLogic.Log("CacheLogic.ForceReset");
+        if (systemLog)
+            SystemEventLogLogic.Log("CacheLogic.ForceReset");
     }
 
     public static XDocument SchemaGraph(Func<Type, bool> cacheHint)
@@ -830,7 +854,7 @@ Remember that the Start could be called with an empty database!");
     {
         public override void AttachInvalidations(SchemaBuilder sb, InvalidateWith invalidateWith, EventHandler invalidate)
         {
-            if (CacheLogic.GloballyDisabled)
+            if (CacheLogic.GloballyDisabled || invalidateWith.UseBaseImplementation)
             {
                 base.AttachInvalidations(sb, invalidateWith, invalidate);
             }
@@ -865,23 +889,16 @@ Remember that the Start could be called with an empty database!");
 
         public override void OnLoad(SchemaBuilder sb, InvalidateWith invalidateWith)
         {
-            if (CacheLogic.GloballyDisabled)
+            if (CacheLogic.GloballyDisabled || invalidateWith.UseBaseImplementation)
             {
                 base.OnLoad(sb, invalidateWith);
             }
             else
             {
+                CacheLogic.ServerBroadcast?.StartIfNecessary(); //Typicaly NOOP
                 foreach (var t in invalidateWith.Types)
                     sb.Schema.CacheController(t)!.Load();
             }
-        }
-    }
-
-    public static void LoadAllControllers()
-    {
-        foreach (var c in controllers.Values.NotNull())
-        {
-            c.Load();
         }
     }
 
@@ -910,6 +927,14 @@ Remember that the Start could be called with an empty database!");
             if (dic.IsEmpty())
                 assumeMassiveChangesAsInvalidations.Value = null;
         });
+    }
+
+    public static void InvalidateAll(bool systemLog)
+    {
+        CacheLogic.ForceReset(systemLog);
+        GlobalLazy.ResetAll(systemLog);
+        Schema.Current.InvalidateMetadata();
+        GC.Collect(2);
     }
 }
 

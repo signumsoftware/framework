@@ -43,13 +43,30 @@ public interface IFileTypeAlgorithm
     long? MaxSizeInBytes { get; set; }
     void SaveFile(IFilePath fp);
     Task SaveFileAsync(IFilePath fp, CancellationToken token = default);
+
+    Task StartUpload(IFilePath fpe);
+    Task<ChunkInfo> UploadChunk(IFilePath fp, int chunkIndex, MemoryStream chunk, CancellationToken token = default);
+    Task FinishUpload(IFilePath fp, List<ChunkInfo> chunks, CancellationToken token = default);
+
     void ValidateFile(IFilePath fp);
     void DeleteFiles(IEnumerable<IFilePath> files);
     void DeleteFilesIfExist(IEnumerable<IFilePath> files);
+
     byte[] ReadAllBytes(IFilePath fp);
+
+    string? ReadAsStringUTF8(IFilePath fp) => Encoding.UTF8.GetString(ReadAllBytes(fp));
+
     Stream OpenRead(IFilePath fp);
-    void MoveFile(IFilePath ofp, IFilePath nfp);
-    PrefixPair GetPrefixPair(IFilePath efp);
+    void MoveFile(IFilePath ofp, IFilePath nfp, bool createTargetFolder);
+
+    string? GetFullWebPath(IFilePath efp);
+    string? GetFullPhysicalPath(IFilePath efp);
+}
+
+public class ChunkInfo
+{
+    public string PartialHash;
+    public string BlockId; 
 }
 
 public static class SuffixGenerators

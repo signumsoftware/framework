@@ -7,17 +7,21 @@ import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import { Operations } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, EntityFrame, ButtonBarElement } from '@framework/TypeContext'
-import { EntityLine, AutoLine } from '@framework/Lines'
+import { EntityLine, AutoLine, EntityBaseController } from '@framework/Lines'
 import SelectorModal from '@framework/SelectorModal'
 import MessageModal from '@framework/Modals/MessageModal'
 
-import { getTypeInfo, Binding, GraphExplorer } from '@framework/Reflection'
-import { ModelEntity, newMListElement, NormalControlMessage, getToString, toMList } from '@framework/Signum.Entities'
+import { getTypeInfo, Binding, GraphExplorer, EnumType } from '@framework/Reflection'
+import { ModelEntity, newMListElement, NormalControlMessage, getToString, toMList, Lite, EntityControlMessage, MList, MListElement } from '@framework/Signum.Entities'
 import { AuthAdminClient } from '../AuthAdminClient'
 import {
   TypeRulePack, TypeAllowed, TypeAllowedRule,
-  TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRuleModel, AuthThumbnail,
-  PropertyRulePack, OperationRulePack, QueryRulePack, TypeConditionSymbol, AuthAdminMessage
+  TypeAllowedBasic, AuthThumbnail,
+  PropertyRulePack, OperationRulePack, QueryRulePack, TypeConditionSymbol, AuthAdminMessage,
+  WithConditionsModel,
+  ConditionRuleModel,
+  PropertyAllowed,
+  OperationAllowed,
 } from './Signum.Authorization.Rules'
 
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
@@ -28,17 +32,17 @@ import { is } from '@framework/Signum.Entities';
 import { RoleEntity } from '../Signum.Authorization'
 import { OperationSymbol } from '@framework/Signum.Operations'
 import { QueryEntity } from '@framework/Signum.Basics'
+import { KeyNames } from '@framework/Components'
+import { useForceUpdate } from '@framework/Hooks'
 
-export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
+export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<TypeRulePack>, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
 
   const [filter, setFilter] = React.useState("");
 
   function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
 
-    GraphExplorer.propagateAll(bc.pack.entity);
 
-    const hasChanges = bc.pack.entity.modified;
-
+    const hasChanges = GraphExplorer.hasChanges(bc.pack.entity); 
     return [
       { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
       { button: <Button variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
@@ -46,7 +50,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     ];
   }
 
-  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value])
+  React.useImperativeHandle(innerRef, () => ({ renderButtons }), [ctx.value])
 
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
@@ -80,11 +84,9 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     });
   }
 
-
   function updateFrame() {
     ctx.frame!.frameComponent.forceUpdate();
   }
-
 
   function handleSetFilter(e: React.FormEvent<any>) {
     setFilter((e.currentTarget as HTMLInputElement).value);
@@ -116,7 +118,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
         return pair.isPositive;
 
       if (pair.token.startsWith("!")) {
-        if ("overriden".startsWith(pair.token.after("!")) && !typeAllowedEquals(rule.allowed, rule.allowedBase))
+        if ("overriden".startsWith(pair.token.after("!")) && !withConditionsEquals(rule.allowed, rule.allowedBase))
           return pair.isPositive;
 
         if ("conditions".startsWith(pair.token.after("!")) && rule.availableConditions.length)
@@ -176,211 +178,23 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
         <tbody>
           {ctx.mlistItemCtxs(a => a.rules)
             .filter((n, i) => isMatch(n.value))
-            .groupBy(a => a.value.resource.namespace).orderBy(a => a.key).flatMap(gr => [
-              <tr key={gr.key} className="sf-auth-namespace">
-                <td colSpan={10}><b>{gr.key}</b></td>
-              </tr>
-            ].concat(gr.elements.orderBy(a => a.value.resource.className).flatMap(c => renderType(c))))}
+            .groupBy(a => a.value.resource.namespace).orderBy(a => a.key).map(gr =>
+              <>
+                <tr key={gr.key} className="sf-auth-namespace">
+                  <td colSpan={10}><b>{gr.key}</b></td>
+                </tr>
+                {gr.elements.orderBy(a => a.value.resource.className)
+                  .map(c => <TypeRow tctx={c} role={ctx.value.role} updateFrame={updateFrame} />)}
+              </>)
+          }
         </tbody>
       </table>
 
     </div>
   );
+}
 
-  function handleAddConditionClick(conditions: TypeConditionSymbol[], taac: TypeAllowedAndConditions, type: TypeEntity) {
-
-    SelectorModal.chooseManyElement(conditions, {
-      buttonDisplay: a => getToString(a),
-      title: AuthAdminMessage.SelectTypeConditions.niceToString(),
-      message: <div>
-        <p>{AuthAdminMessage.ThereAre0TypeConditionsDefinedFor1.niceToString().formatHtml(<strong>{conditions.length}</strong>, <strong>{getTypeInfo(type.cleanName).niceName}</strong>)}</p>
-        <p>{AuthAdminMessage.SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition.niceToString().formatHtml(<strong>{getTypeInfo(type.cleanName).nicePluralName}</strong>)}</p>
-        <p>{AuthAdminMessage.SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime.niceToString().formatHtml(<strong>{getTypeInfo(type.cleanName).nicePluralName}</strong>)}</p>
-      </div>,
-      size: "md"
-    })
-      .then(tc => {
-        if (!tc)
-          return;
-
-        var combinedKey = tc.orderBy(a => a.key).map(a => a.key).join(" & ");
-
-        if (taac.conditionRules.some(cr => cr.element.typeConditions.orderBy(a => a.element.key).map(a => a.element.key).join(" & ") == combinedKey)) {
-          return MessageModal.showError(<div><p>{AuthAdminMessage.TheFollowingTypeConditionsHaveAlreadyBeenUsed.niceToString()}</p>
-            <p><strong>{combinedKey}</strong></p></div>,
-            AuthAdminMessage.RepeatedTypeCondition.niceToString());
-        }
-
-        taac.conditionRules.push(newMListElement(TypeConditionRuleModel.New({
-          typeConditions: tc.map(t => newMListElement(t)),
-          allowed: "None"
-        })));
-
-        updateFrame();
-      });
-  }
-
-  function handleRemoveConditionClick(taac: TypeAllowedAndConditions, con: TypeConditionRuleModel) {
-    taac.conditionRules.remove(taac.conditionRules.single(mle => mle.element == con));
-    taac.modified = true;
-    updateFrame();
-  }
-
-  function renderType(tctx: TypeContext<TypeAllowedRule>) {
-
-    let roleId = ctx.value.role.id!;
-
-    var typeInfo = getTypeInfo(tctx.value.resource.cleanName);
-    var conditions = tctx.value.availableConditions;
-
-    var masterClass = typeInfo.entityData == "Master" ? "sf-master" : undefined;
-
-    let fallback = Binding.create(tctx.value.allowed, a => a.fallback);
-    return [
-      <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className} className={classes("sf-auth-type", tctx.value.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
-        <td>
-          {conditions.length > 1 || conditions.length == 1 && tctx.value.allowed.conditionRules.length == 0 ?
-            <a className="sf-condition-icon" href="#" title={AuthAdminMessage.AddCondition.niceToString()} onClick={e => { e.preventDefault(); handleAddConditionClick(conditions, tctx.value.allowed, tctx.value.resource); }}>
-              <FontAwesomeIcon icon="circle-plus" />
-            </a> :
-            <FontAwesomeIcon icon="circle" className="sf-placeholder-icon"></FontAwesomeIcon>
-            }
-          &nbsp;
-          {typeInfo.niceName} {typeInfo.entityData && <small title={typeInfo.entityData}>{typeInfo.entityData[0]}</small>}
-        </td>
-        <td style={{ textAlign: "center" }} className={masterClass}>
-          {colorRadio(fallback, "Write", "green")}
-        </td>
-        <td style={{ textAlign: "center" }}>
-          {colorRadio(fallback, "Read", "#FFAD00")}
-        </td>
-        <td style={{ textAlign: "center" }}>
-          {colorRadio(fallback, "None", "red")}
-        </td>
-        <td style={{ textAlign: "center" }}>
-          <GrayCheckbox readOnly={ctx.readOnly} checked={!typeAllowedEquals(tctx.value.allowed, tctx.value.allowedBase)} onUnchecked={() => {
-            tctx.value.allowed = JSON.parse(JSON.stringify(tctx.value.allowedBase));
-            tctx.value.modified = true;
-            updateFrame();
-          }} />
-        </td>
-        {AuthAdminClient.properties && <td style={{ textAlign: "center" }}>
-          {link("edit", tctx.value.modified ? "Invalidated" : tctx.value.properties,
-            () => AuthAdminClient.API.fetchPropertyRulePack(tctx.value.resource.cleanName, roleId),
-            m => tctx.value.properties = m.rules.every(a => a.element.allowed == "None") ? "None" :
-              m.rules.every(a => a.element.allowed == "Write") ? "All" : "Mix"
-          )}
-        </td>}
-        {AuthAdminClient.operations && <td style={{ textAlign: "center" }}>
-          {link("bolt", tctx.value.modified ? "Invalidated" : tctx.value.operations,
-            () => AuthAdminClient.API.fetchOperationRulePack(tctx.value.resource.cleanName, roleId),
-            m => tctx.value.operations = m.rules.every(a => a.element.allowed == "None") ? "None" :
-              m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
-        </td>}
-        {AuthAdminClient.queries && <td style={{ textAlign: "center" }}>
-          {link("search", tctx.value.modified ? "Invalidated" : tctx.value.queries,
-            () => AuthAdminClient.API.fetchQueryRulePack(tctx.value.resource.cleanName, roleId),
-            m => tctx.value.queries = m.rules.every(a => a.element.allowed == "None") ? "None" :
-              m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
-        </td>}
-      </tr>
-    ].concat(tctx.value.allowed.conditionRules.map(mle => mle.element).map((cr, i) => {
-      let b = Binding.create(cr, ca => ca.allowed);
-      return (
-        <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className + "_" + cr.typeConditions.map(c => c.element.id).join("_")} className="sf-auth-condition" >
-          <td>
-            {"\u00A0 \u00A0"}
-            <a className="sf-condition-icon" href="#" title={AuthAdminMessage.RemoveCondition.niceToString()} onClick={e => { e.preventDefault(); handleRemoveConditionClick(tctx.value.allowed, cr); }}><FontAwesomeIcon icon="circle-minus" title={AuthAdminMessage.RemoveCondition.niceToString()} /></a>
-            &nbsp;
-            {cr.typeConditions.flatMap((tc, j) => [
-              <small className="mx-1" key={j}>{getToString(tc.element)}</small>,
-              j < cr.typeConditions.length - 1 ? <small className="and" key={j + "$"}>&</small> : null])
-              .notNull()}
-          </td>
-          <td style={{ textAlign: "center" }} className={masterClass}>
-            {colorRadio(b, "Write", "green")}
-          </td>
-          <td style={{ textAlign: "center" }}>
-            {colorRadio(b, "Read", "#FFAD00")}
-          </td>
-          <td style={{ textAlign: "center" }}>
-            {colorRadio(b, "None", "red")}
-          </td>
-          <td style={{ textAlign: "center" }} colSpan={1 + Number(AuthAdminClient.properties) + Number(AuthAdminClient.operations) + Number(AuthAdminClient.queries) }>
-          </td>
-        </tr>
-      );
-    }));
-  }
-
-  function colorRadio(b: Binding<TypeAllowed | null>, basicAllowed: TypeAllowedBasic, color: string) {
-    const allowed = b.getValue();
-
-    const niceName = TypeAllowedBasic.niceToString(basicAllowed)!;
-
-    const title = !allowed ? niceName :
-      getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? niceName :
-        getDB(allowed) == basicAllowed ? AuthAdminMessage._0InDB.niceToString(niceName) :
-          getUI(allowed) == basicAllowed ? AuthAdminMessage._0InUI.niceToString(niceName) :
-            niceName;
-
-    const icon: IconProp | undefined = !allowed ? undefined :
-      getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? undefined :
-        getDB(allowed) == basicAllowed ? "database" :
-          getUI(allowed) == basicAllowed ? "window-restore" :
-            undefined;
-
-    return <ColorRadio
-      checked={isActive(allowed, basicAllowed)}
-      title={title}
-      color={color}
-      icon={icon}
-      readOnly={ctx.readOnly}
-      onClicked={e => { b.setValue(select(b.getValue(), basicAllowed, e)); updateFrame(); }}
-    />;
-  }
-
-  function link<T extends ModelEntity>(icon: IconProp, allowed: AuthThumbnail | null | "Invalidated", action: () => Promise<T>, setNewValue: (model: T) => void) {
-    if (!allowed)
-      return undefined;
-
-    let onClick = () => {
-      GraphExplorer.propagateAll(ctx.value);
-
-      if (ctx.value.modified) {
-        MessageModal.show({
-          title: NormalControlMessage.SaveChangesFirst.niceToString(),
-          message: AuthAdminMessage.PleaseSaveChangesFirst.niceToString(),
-          buttons: "ok",
-          style: "warning",
-          icon: "warning"
-        });
-      }
-      else {
-        action()
-          .then(m => Navigator.view(m, { buttons: "close", readOnly: ctx.readOnly }))
-          .then(() => action())
-          .then(m => {
-            setNewValue(m);
-            updateFrame();
-          });
-      }
-    };
-
-    return (
-
-      <a onClick={onClick} title={allowed}>
-        <FontAwesomeIcon icon={icon}
-          className="sf-auth-link"
-          color={allowed == "Invalidated" ? "gray" :
-            allowed == "All" ? "green" :
-              allowed == "Mix" ? "#FFAD00" : "red"} />
-      </a>
-    );
-  }
-});
-
-function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeAllowedAndConditions) {
+function withConditionsEquals<A extends string>(allowed: WithConditionsModel<A>, allowedBase: WithConditionsModel<A>) {
   return allowed.fallback == allowedBase.fallback
     && allowed.conditionRules.length == allowedBase.conditionRules.length
     && allowed.conditionRules.map(mle => mle.element)
@@ -458,4 +272,438 @@ function select(current: TypeAllowed | null, basicAllowed: TypeAllowedBasic, e: 
   }
 
   return current;
+}
+
+export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<RoleEntity>, updateFrame: () => void }): React.ReactElement {
+
+  const getConfig = useDragAndDrop(p.tctx.value.allowed.conditionRules, () => p.updateFrame(), () => { p.tctx.value.modified = true; p.updateFrame(); });
+
+  let roleId = p.role.id!;
+
+  const rule = p.tctx.value;
+
+  const typeInfo = getTypeInfo(rule.resource.cleanName);
+  const conditions = rule.availableConditions;
+
+  const masterClass = typeInfo.entityData == "Master" ? "sf-master" : undefined;
+
+  function handleRemoveConditionClick(taac: WithConditionsModel<TypeAllowed>, con: ConditionRuleModel<TypeAllowed>) {
+    taac.conditionRules.remove(taac.conditionRules.single(mle => mle.element == con));
+    taac.modified = true;
+    p.updateFrame();
+  }
+
+  function renderRadio(b: Binding<TypeAllowed | null>, basicAllowed: TypeAllowedBasic, color: string) {
+    const allowed = b.getValue();
+
+    const niceName = TypeAllowedBasic.niceToString(basicAllowed)!;
+
+    const title = !allowed ? niceName :
+      getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? niceName :
+        getDB(allowed) == basicAllowed ? AuthAdminMessage._0InDB.niceToString(niceName) :
+          getUI(allowed) == basicAllowed ? AuthAdminMessage._0InUI.niceToString(niceName) :
+            niceName;
+
+    const icon: IconProp | undefined = !allowed ? undefined :
+      getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? undefined :
+        getDB(allowed) == basicAllowed ? "database" :
+          getUI(allowed) == basicAllowed ? "window-restore" :
+            undefined;
+
+    return <ColorRadio
+      checked={isActive(allowed, basicAllowed)}
+      title={title}
+      color={color}
+      icon={icon}
+      readOnly={p.tctx.readOnly}
+      onClicked={e => { b.setValue(select(b.getValue(), basicAllowed, e)); p.updateFrame(); }}
+    />;
+  }
+
+
+  function link<T extends ModelEntity>(icon: IconProp, allowed: AuthThumbnail | null | "Invalidated", fetch: () => Promise<T>, setNewValue: (model: T) => void, extraProps?: {}) {
+    if (!allowed)
+      return undefined;
+
+    let onClick = () => {
+      if (GraphExplorer.hasChanges(p.tctx.value)) {
+        MessageModal.show({
+          title: NormalControlMessage.SaveChangesFirst.niceToString(),
+          message: AuthAdminMessage.PleaseSaveChangesFirst.niceToString(),
+          buttons: "ok",
+          style: "warning",
+          icon: "warning"
+        });
+      }
+      else {
+        fetch()
+          .then(m => Navigator.view(m, { buttons: "close", readOnly: p.tctx.readOnly, extraProps: extraProps }))
+          .then(() => fetch())
+          .then(m => {
+            setNewValue(m);
+            p.updateFrame();
+          });
+      }
+    };
+
+    return (
+
+      <a onClick={onClick} title={allowed}>
+        <FontAwesomeIcon icon={icon}
+          className="sf-auth-link"
+          color={allowed == "Invalidated" ? "gray" :
+            allowed == "All" ? "green" :
+              allowed == "Mix" ? "#FFAD00" : "red"} />
+      </a>
+    );
+  }
+
+
+  let fallback = Binding.create(rule.allowed, a => a.fallback);
+  return (
+    <>
+      <tr key={rule.resource.namespace + "." + rule.resource.className} className={classes("sf-auth-type", rule.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
+        <td>
+          {conditions.length > 1 || conditions.length == 1 && rule.allowed.conditionRules.length == 0 ?
+            <a className="sf-condition-icon" href="#" title={AuthAdminMessage.AddCondition.niceToString()} onClick={async e => {
+              e.preventDefault();
+              await addConditionClick(TypeAllowed, conditions, rule.allowed, rule.resource);
+              p.updateFrame();
+            }}>
+              <FontAwesomeIcon icon="circle-plus" className="me-2" />
+            </a> :
+            <FontAwesomeIcon icon="circle" className="sf-placeholder-icon me-2"></FontAwesomeIcon>
+          }
+          {typeInfo.niceName}
+          {typeInfo.entityData && <small className="ms-1" title={typeInfo.entityData}>{typeInfo.entityData[0]}</small>}
+          {rule.allowed.conditionRules.length > 0 && <small className="shy-text ms-1">{AuthAdminMessage.Fallback.niceToString()}</small>}
+        </td>
+        <td style={{ textAlign: "center" }} className={masterClass}>
+          {renderRadio(fallback, "Write", "green")}
+        </td>
+        <td style={{ textAlign: "center" }}>
+          {renderRadio(fallback, "Read", "#FFAD00")}
+        </td>
+        <td style={{ textAlign: "center" }}>
+          {renderRadio(fallback, "None", "red")}
+        </td>
+        <td style={{ textAlign: "center" }}>
+          <GrayCheckbox readOnly={p.tctx.readOnly} checked={!withConditionsEquals(rule.allowed, rule.allowedBase)} onUnchecked={() => {
+            rule.allowed = JSON.parse(JSON.stringify(rule.allowedBase));
+            rule.modified = true;
+            p.updateFrame();
+          }} />
+        </td>
+        {AuthAdminClient.properties && <td style={{ textAlign: "center" }}>
+          {link("edit", rule.modified ? "Invalidated" : rule.properties?.fallback ?? null,
+            () => AuthAdminClient.API.fetchPropertyRulePack(rule.resource.cleanName, roleId),
+            m => rule.properties = collapsePropertyRules(m, rule.allowed)
+          )}
+        </td>}
+        {AuthAdminClient.operations && <td style={{ textAlign: "center" }}>
+          {link("bolt", rule.modified ? "Invalidated" : rule.operations?.fallback ?? null,
+            () => AuthAdminClient.API.fetchOperationRulePack(rule.resource.cleanName, roleId),
+            m => rule.operations = collapseOperationRules(m, rule.allowed)
+          )}
+        </td>}
+        {AuthAdminClient.queries && <td style={{ textAlign: "center" }}>
+          {link("search", rule.modified ? "Invalidated" : rule.queries,
+            () => AuthAdminClient.API.fetchQueryRulePack(rule.resource.cleanName, roleId),
+            m => rule.queries = m.rules.every(a => a.element.allowed == "None") ? "None" :
+              m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
+        </td>}
+      </tr>
+      {rule.allowed.conditionRules.map(mle => mle.element).map((cr, i) => {
+        let b = Binding.create(cr, ca => ca.allowed);
+
+        var drag = rule.allowed.conditionRules.length > 1 ? getConfig(i) : null;
+
+        return (
+          <tr key={rule.resource.namespace + "." + rule.resource.className + "_" + cr.typeConditions.map(c => c.element.id).join("_")}
+            className={classes("sf-auth-condition", drag?.dropClass)}
+            onDragEnter={drag?.onDragOver}
+            onDragOver={drag?.onDragOver}
+            onDrop={drag?.onDrop}
+          >
+            <td>
+              <a className="sf-condition-icon me-1 ms-3" href="#" title={AuthAdminMessage.RemoveCondition.niceToString()} onClick={e => {
+                e.preventDefault();
+                handleRemoveConditionClick(rule.allowed, cr);
+              }}>
+                <FontAwesomeIcon icon="circle-minus" title={AuthAdminMessage.RemoveCondition.niceToString()} />
+              </a>
+              {drag && <a className="sf-condition-icon me-1" href="#" title={drag.title}
+                onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+                draggable={true}
+                onKeyDown={drag.onKeyDown}
+                onDragStart={drag.onDragStart}
+                onDragEnd={drag.onDragEnd}
+              >
+                {EntityBaseController.getMoveIcon()}
+              </a>}
+              {cr.typeConditions.map((tc, j) => <>
+                <small className="mx-1" key={j}>{getToString(tc.element).after(".")}</small>
+                {j < cr.typeConditions.length - 1 ? <small className="and" key={j + "$"}>&</small> : null}
+              </>)}
+              <small className="shy-text ms-1">{(getRuleTitle(i, rule.allowed.conditionRules.length))}</small>
+            </td>
+            <td style={{ textAlign: "center" }} className={masterClass}>
+              {renderRadio(b, "Write", "green")}
+            </td>
+            <td style={{ textAlign: "center" }}>
+              {renderRadio(b, "Read", "#FFAD00")}
+            </td>
+            <td style={{ textAlign: "center" }}>
+              {renderRadio(b, "None", "red")}
+            </td>
+            <td>
+            </td>
+            {AuthAdminClient.properties && <td style={{ textAlign: "center" }}>
+              {link("edit", rule.modified ? "Invalidated" : rule.properties?.conditionRules.singleOrNull(a => matches(a.element.typeConditions, cr.typeConditions))?.element.allowed ?? null,
+                () => AuthAdminClient.API.fetchPropertyRulePack(rule.resource.cleanName, roleId),
+                m => rule.properties = collapsePropertyRules(m, rule.allowed),
+                { initialTypeConditions: cr.typeConditions.map(a=>a.element) }
+              )}
+            </td>}
+            {AuthAdminClient.operations && <td style={{ textAlign: "center" }}>
+              {link("bolt", rule.modified ? "Invalidated" : rule.operations?.conditionRules.singleOrNull(a => matches(a.element.typeConditions, cr.typeConditions))?.element.allowed ?? null,
+                () => AuthAdminClient.API.fetchOperationRulePack(rule.resource.cleanName, roleId),
+                m => rule.operations = collapseOperationRules(m, rule.allowed),
+                { initialTypeConditions: cr.typeConditions.map(a=>a.element) }                
+              )}
+            </td>}
+            <td style={{ textAlign: "center" }} colSpan={1 + Number(AuthAdminClient.properties) + Number(AuthAdminClient.operations) + Number(AuthAdminClient.queries)}>
+            </td>
+          </tr>
+        );
+      })}
+    </>
+  );
+}
+
+function collapsePropertyRules(pack: PropertyRulePack, tar: WithConditionsModel<TypeAllowed>): WithConditionsModel<AuthThumbnail> {
+
+  function collapse(properties: PropertyAllowed[]): AuthThumbnail {
+    if (properties.every(a => a == "None"))
+      return "None";
+
+    if (properties.every(a => a == "Write"))
+      return "All";
+
+    return "Mix";
+  }
+
+
+
+  return WithConditionsModel(AuthThumbnail).New({
+    fallback: collapse(pack.rules.map(mle => mle.element.allowed.fallback)),
+    conditionRules: tar.conditionRules.map(cr => newMListElement(ConditionRuleModel(AuthThumbnail).New({
+      typeConditions: cr.element.typeConditions,
+      allowed: collapse(pack.rules.map(mle => mle.element.allowed.conditionRules.singleOrNull(a => matches(a.element.typeConditions, cr.element.typeConditions))?.element.allowed).notNull())
+    })))
+  });
+}
+
+function collapseOperationRules(pack: OperationRulePack, tar: WithConditionsModel<TypeAllowed>): WithConditionsModel<AuthThumbnail> {
+
+  function collapse(operations: OperationAllowed[]): AuthThumbnail {
+    if (operations.every(a => a == "None"))
+      return "None";
+
+    if (operations.every(a => a == "Allow"))
+      return "All";
+
+    return "Mix";
+  }
+
+  return WithConditionsModel(AuthThumbnail).New({
+    fallback: collapse(pack.rules.map(mle => mle.element.allowed.fallback)),
+    conditionRules: tar.conditionRules.map(cr => newMListElement(ConditionRuleModel(AuthThumbnail).New({
+      typeConditions: cr.element.typeConditions,
+      allowed: collapse(pack.rules.map(mle => mle.element.allowed.conditionRules.singleOrNull(a => matches(a.element.typeConditions, cr.element.typeConditions))?.element.allowed).notNull())
+    })))
+  });
+}
+
+function matches(a: MList<TypeConditionSymbol>, b: MList<TypeConditionSymbol>) {
+  return a.length == b.length && a.every((tc, i) => is(tc.element, b[i].element));
+}
+
+export async function addConditionClick<A extends string>(allowedType: EnumType<A>, conditions: TypeConditionSymbol[], taac: WithConditionsModel<A>, type: TypeEntity): Promise<undefined> {
+
+  const tc = await SelectorModal.chooseManyElement(conditions, {
+    buttonDisplay: a => getToString(a).after("."),
+    title: AuthAdminMessage.SelectTypeConditions.niceToString(),
+    message: <div>
+      <p>{AuthAdminMessage.ThereAre0TypeConditionsDefinedFor1.niceToString().formatHtml(<strong>{conditions.length}</strong>, <strong>{getTypeInfo(type.cleanName).niceName}</strong>)}</p>
+      <p>{AuthAdminMessage.SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition.niceToString().formatHtml(<strong>{getTypeInfo(type.cleanName).nicePluralName}</strong>)}</p>
+      <p>{AuthAdminMessage.SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime.niceToString().formatHtml(<strong>{getTypeInfo(type.cleanName).nicePluralName}</strong>)}</p>
+    </div>,
+    size: "md"
+  });
+  if (!tc)
+    return;
+
+  var combinedKey = tc.orderBy(a => a.key).map(a => a.key.after(".")).join(" & ");
+
+  if (taac.conditionRules.some(cr => cr.element.typeConditions.orderBy(a => a.element.key).map(a => a.element.key.after(".")).join(" & ") == combinedKey)) {
+    return MessageModal.showError(<div>
+      <p>{AuthAdminMessage.TheFollowingTypeConditionsHaveAlreadyBeenUsed.niceToString()}</p>
+      <p><strong>{combinedKey}</strong></p>
+    </div>,
+      AuthAdminMessage.RepeatedTypeCondition.niceToString());
+  }
+
+  taac.conditionRules.push(newMListElement(ConditionRuleModel(allowedType).New({
+    typeConditions: tc.map(t => newMListElement(t)),
+    allowed: allowedType.values().first(),
+  })));
+}
+
+export function getRuleTitle(i: number, total: number): string {
+
+  const j = total - i;
+
+  return j == 1 ? AuthAdminMessage.FirstRule.niceToString() :
+    j == 2 ? AuthAdminMessage.SecondRule.niceToString() :
+      j == 3 ? AuthAdminMessage.ThirdRule.niceToString() : AuthAdminMessage.NthRule.niceToString(j);
+}
+
+export interface IndexWithOffset {
+  index: number;
+  offset: 0 | 1;
+}
+
+export function useDragAndDrop(list: MList<any>, forceUpdate: () => void, onChanged: () => void): (index: number) => DragConfig {
+
+  const [dragIndex, setDragIndex] = React.useState<number | undefined>();
+  const [dropBorderIndex, setDropBorderIndex] = React.useState<IndexWithOffset | undefined>();
+
+  function handleDragStart(de: React.DragEvent<any>, index: number) {
+    de.dataTransfer.setData('text', "start"); //cannot be empty string
+    de.dataTransfer.effectAllowed = "move";
+    setDragIndex(index);
+  }
+
+  function handleDragEnd(de: React.DragEvent<any>){
+    setDragIndex(undefined);
+    setDropBorderIndex(undefined);
+    forceUpdate();
+  }
+
+  function handlerDragOver(de: React.DragEvent<any>, index: number) {
+    if (dragIndex == null)
+      return;
+
+    de.preventDefault();
+
+    const th = de.currentTarget as HTMLElement;
+
+    const offset = getOffsetVertical((de.nativeEvent as DragEvent), th.getBoundingClientRect());
+
+    let dbi: IndexWithOffset | undefined = offset == undefined ? undefined :
+      { index, offset };
+
+    if (dbi != null && dbi.index == dragIndex)
+      dbi = undefined;
+
+    if (dropBorderIndex != dbi) {
+      setDropBorderIndex(dbi);
+    }
+  }
+
+  function getOffsetVertical(dragEvent: DragEvent, rect: DOMRect): 0 | 1 | undefined {
+
+    var margin = Math.min(50, rect.height / 2);
+
+    const height = rect.height;
+    const offsetY = dragEvent.y - rect.top;
+
+    if (offsetY < margin)
+      return 0;
+
+    if (offsetY > (height - margin))
+      return 1;
+
+    return undefined;
+  }
+
+  function dropClass(index: number): "drag-left" | "drag-top" | "drag-right" | "drag-bottom" | undefined {
+
+    if (dropBorderIndex != null) {
+
+      if (index == dropBorderIndex.index) {
+        if (dropBorderIndex.offset == 0)
+          return "drag-top";
+        else
+          return "drag-bottom"
+      }
+
+      if (dropBorderIndex.index == (index - 1) && dropBorderIndex.offset == 1)
+        return "drag-top";
+      else if (dropBorderIndex.index == (index + 1) && dropBorderIndex.offset == 0)
+        return "drag-bottom";
+    }
+
+    return undefined;
+  }
+
+  function handleDrop(de: React.DragEvent<any>) {
+
+    de.preventDefault();
+    if (dropBorderIndex == null || dragIndex == null)
+      return;
+
+    onMoveElement(dragIndex, dropBorderIndex);
+  }
+
+  function onMoveElement(oldIndex: number, newIndex: IndexWithOffset): void {
+
+    const temp = list[oldIndex];
+    list.removeAt(oldIndex);
+    var completeNewIndex = newIndex.index + newIndex.offset;
+    const rebasedDropIndex = newIndex.index > oldIndex ? completeNewIndex - 1 : completeNewIndex;
+    list.insertAt(rebasedDropIndex, temp);
+
+
+    setDropBorderIndex(undefined);
+    setDragIndex(undefined);
+    onChanged();
+  }
+
+  function handleMoveKeyDown(ke: React.KeyboardEvent<any>, index: number): void {
+
+    if (ke.ctrlKey) {
+
+      if (ke.key == KeyNames.arrowDown || ke.key == KeyNames.arrowRight) {
+        ke.preventDefault();
+        onMoveElement(index, ({ index: index + 1, offset: 1 }));
+      } else {
+        ke.preventDefault();
+        onMoveElement(index, ({ index: index - 1, offset: 0 }));
+      }
+    }
+  }
+
+  return index => ({
+    dropClass: classes(
+      index == dragIndex && "sf-dragging",
+      dropClass(index)),
+    onDragStart: e => handleDragStart(e, index),
+    onDragEnd: handleDragEnd,
+    onDragOver: e => handlerDragOver(e, index),
+    onKeyDown: e => handleMoveKeyDown(e, index),
+    onDrop: handleDrop,
+    title: EntityControlMessage.MoveWithDragAndDropOrCtrlUpDown.niceToString()
+  });
+}
+
+export interface DragConfig {
+  onDragStart?: React.DragEventHandler<any>;
+  onDragEnd?: React.DragEventHandler<any>;
+  onDragOver?: React.DragEventHandler<any>;
+  onDrop?: React.DragEventHandler<any>;
+  onKeyDown?: React.KeyboardEventHandler<any>;
+  dropClass?: string;
+  title?: string;
 }

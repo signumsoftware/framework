@@ -83,6 +83,27 @@ public class SelectImplementationsTest1
     }
 
     [Fact]
+    public void SelectIdLiteIBA()
+    {
+        var list = Database.Query<ArtistEntity>()
+            .Select(a => a.LastAward == null ? null : a.LastAward.Id.ToString()).ToList();
+    }
+
+    [Fact]
+    public void WhereIdLiteIB()
+    {
+        var list = Database.Query<ArtistEntity>()
+            .Where(a => a.LastAward!.Id.ToString() == "3").ToList();
+    }
+
+    [Fact]
+    public void ContainsIdLiteIB()
+    {
+        var list = Database.Query<ArtistEntity>()
+            .Where(a => a.Friends.Select(a=>a.ToString()).Contains(a.LastAward!.Id.ToString())).ToList();
+    }
+
+    [Fact]
     public void SelectEntityWithLiteIb()
     {
         var list = Database.Query<AwardNominationEntity>().Where(a => a.Award.Entity is GrammyAwardEntity).ToList();
@@ -325,7 +346,10 @@ public class SelectImplementationsTest1
                          FullName = n.Target is ArtistEntity ? ((ArtistEntity)n.Target).FullName : ((BandEntity)n.Target).FullName
                      });
 
-        Assert.Equal(1, query.QueryText().CountRepetitions("Artist"));
+        if (Connector.Current is SqlServerConnector)
+            Assert.Equal(1, query.QueryText().CountRepetitions("Artist"));
+        else if (Connector.Current is PostgreSqlConnector)
+            Assert.Equal(1, query.QueryText().CountRepetitions("artist"));
 
         query.ToList();
     }
@@ -337,7 +361,10 @@ public class SelectImplementationsTest1
                      where (n.Target is ArtistEntity ? ((ArtistEntity)n.Target).Name : ((BandEntity)n.Target).Name).Length > 0
                      select n.Target is ArtistEntity ? ((ArtistEntity)n.Target).FullName : ((BandEntity)n.Target).FullName);
 
-        Assert.Equal(1, query.QueryText().CountRepetitions("Artist"));
+        if (Connector.Current is SqlServerConnector)
+            Assert.Equal(1, query.QueryText().CountRepetitions("Artist"));
+        else if (Connector.Current is PostgreSqlConnector)
+            Assert.Equal(1, query.QueryText().CountRepetitions("artist"));
 
         query.ToList();
     }

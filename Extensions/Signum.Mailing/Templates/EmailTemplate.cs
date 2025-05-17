@@ -4,6 +4,7 @@ using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.Templating;
+using Signum.Chart.UserChart;
 
 namespace Signum.Mailing.Templates;
 
@@ -182,7 +183,8 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
         MasterTemplate = element.Attribute("MasterTemplate")?.Let(a => (Lite<EmailMasterTemplateEntity>)ctx.GetEntity(Guid.Parse(a.Value)).ToLiteFat());
 
         GroupResults = bool.Parse(element.Attribute("GroupResults")!.Value);
-        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
+        var valuePr = PropertyRoute.Construct((EmailTemplateEntity wt) => wt.Filters[0].ValueString);
+        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
         MessageFormat = element.Attribute("MessageFormat")?.Value.ToEnum<EmailMessageFormat>() ??

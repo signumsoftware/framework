@@ -11,7 +11,7 @@ interface WorkflowHelpComponentProps {
   mode: TypeHelpClient.TypeHelpMode;
 }
 
-export default function WorkflowHelpComponent(p : WorkflowHelpComponentProps){
+export default function WorkflowHelpComponent(p : WorkflowHelpComponentProps): React.JSX.Element {
 
   function handleActivityIsClick() {
     Finder.find<WorkflowEntity>({

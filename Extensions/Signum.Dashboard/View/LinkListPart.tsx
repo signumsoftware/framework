@@ -1,12 +1,12 @@
 
 import * as React from 'react'
 import * as AppContext from '@framework/AppContext'
-import { LinkListPartEntity, LinkElementEmbedded } from '../Signum.Dashboard'
-import { DashboardClient, PanelPartContentProps } from '../DashboardClient';
+import { LinkListPartEntity } from '../Signum.Dashboard'
+import { PanelPartContentProps } from '../DashboardClient';
 import { Dic } from '@framework/Globals';
 import { urlVariables } from '../../Signum.Toolbar/UrlVariables';
 
-export default function LinkListPart(p: PanelPartContentProps<LinkListPartEntity >){
+export default function LinkListPart(p: PanelPartContentProps<LinkListPartEntity >): React.JSX.Element {
   return (
     <ul className="sf-cp-link-list">
       {

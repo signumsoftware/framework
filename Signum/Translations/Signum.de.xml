@@ -33,6 +33,7 @@
     <Member Name="Message" Description="Nachricht" />
     <Member Name="Name" Description="Name" />
     <Member Name="Stack" Description="Stapel" />
+    <Member Name="Url" Description="URL" />
   </Type>
   <Type Name="CollapsableCardMessage">
     <Member Name="Collapse" Description="Einklappen" />
@@ -152,7 +153,8 @@
     <Member Name="TheEntity0IsNew" Description="Die Entität {0} ist neu" />
     <Member Name="ThereAre0ThatReferThisEntityByProperty1" Description="Es gibt '{0}', die sich auf diese Entität durch die Eigenschaft '{1}' beziehen" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Gibt es Datensätze in '{0}', die druch die Spalte '{1}' auf diese Tabelle verweisen" />
-    <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="Es gibt bereits [m:einen|f:eine|n:ein] {0} mit {1}, [m:der|f:die|n:das] {2} entspricht" />
+    <Member Name="ThereIsAlreadyA0With1EqualsTo2_G" Description="Es gibt bereits [m:ein|n:ein|f:eine] {0} mit {1} gleich {2}" />
+    <Member Name="ThereIsAlreadyA0WithTheSame1_G" Description="Es gibt bereits [m:ein|n:ein|f:eine] {0} mit dem gleichen {1}" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Nicht zulässiger Zugriff auf {0}, weil {1}" />
   </Type>
   <Type Name="Entity" Description="Entität">
@@ -214,6 +216,7 @@
     <Member Name="StackTrace" Description="Stack trace" />
     <Member Name="StackTraceHash" Description="Stack trace hash" />
     <Member Name="ThreadId" Description="Thread id" />
+    <Member Name="TraceId" Description="Trace-Id" />
     <Member Name="UrlReferer" Description="Referer Url" />
     <Member Name="User" Description="Benutzer" />
     <Member Name="UserAgent" Description="User agent" />
@@ -265,7 +268,7 @@
     <Member Name="Or" Description="Oder" />
   </Type>
   <Type Name="FilterOperation" Description="Filteroperation">
-    <Member Name="ComplexCondition" Description="Komplexer Zustand" />
+    <Member Name="ComplexCondition" Description="komplexe Bedingung" />
     <Member Name="Contains" Description="enthält" />
     <Member Name="DistinctTo" Description="anders als" />
     <Member Name="EndsWith" Description="endet mit" />
@@ -283,6 +286,10 @@
     <Member Name="NotLike" Description="nicht wie" />
     <Member Name="NotStartsWith" Description="beginnt nicht mit" />
     <Member Name="StartsWith" Description="beginnt mit" />
+    <Member Name="TsQuery" Description="tsquery" />
+    <Member Name="TsQuery_Phrase" Description="tsquery (Phrase)" />
+    <Member Name="TsQuery_Plain" Description="tsquery (einfach)" />
+    <Member Name="TsQuery_WebSearch" Description="tsquery (Websuche)" />
   </Type>
   <Type Name="FrameMessage">
     <Member Name="Copied" Description="Kopiert" />
@@ -291,6 +298,10 @@
     <Member Name="Main" Description="Haupt" />
     <Member Name="New0_G" Description="Neu[m:er|f:e|n:es] {0}" />
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
+  </Type>
+  <Type Name="HtmlEditorMessage">
+    <Member Name="EnterYourUrlHere" Description="Geben Sie hier Ihre URL ein..." />
+    <Member Name="Hyperlink" Description="Hyperlink" />
   </Type>
   <Type Name="IEntity">
     <Member Name="Id" Description="Id" />
@@ -446,12 +457,14 @@
     <Member Name="Key" Description="Schlüssel" />
   </Type>
   <Type Name="QueryTokenDateMessage">
+    <Member Name="_0Steps1Rows2TotalRowsAprox" Description="{0} Schritte x {1} Zeilen = {2} Zeilen insgesamt (ca.)" />
     <Member Name="Date" Description="Datum" />
     <Member Name="DateTimePart" Description="Datum und Uhrzeit Teile " />
     <Member Name="Day" Description="Tag" />
     <Member Name="DayOfWeek" Description="Tag der Woche" />
     <Member Name="DayOfYear" Description="Tag des Jahres" />
     <Member Name="Days" Description="Tage" />
+    <Member Name="Every01" Description="Jedes {0} {1}" />
     <Member Name="Every0Hours" Description="Alle {0} Stunden" />
     <Member Name="Every0Milliseconds" Description="Alle {0} Millisekunden" />
     <Member Name="Every0Minutes" Description="Alle {0} Minuten" />
@@ -467,6 +480,7 @@
     <Member Name="QuarterStart" Description="Quartalsstart" />
     <Member Name="Second" Description="Sekunde" />
     <Member Name="SecondStart" Description="Sekundenstart" />
+    <Member Name="SplitQueries" Description="Geteilte Abfragen" />
     <Member Name="TimeOfDay" Description="Tageszeit" />
     <Member Name="TotalDays" Description="Tage insgesamt" />
     <Member Name="TotalHours" Description="Stunden insgesamt" />
@@ -496,7 +510,7 @@
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
     <Member Name="DateTimeOffset" Description="Datum und Uhrzeit mit Zeitzone" />
     <Member Name="DecimalNumber" Description="Dezimalzahl" />
-    <Member Name="Distinct" Description="Unterschiedlich" />
+    <Member Name="Distinct" Description="Distinct" />
     <Member Name="Embedded0" Description="eingebettet {0}" />
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />
@@ -508,6 +522,7 @@
     <Member Name="MatchSnippet" Description="Match-Snippet" />
     <Member Name="Modulo0" Description="Modulo {0}" />
     <Member Name="MoreThanOneColumnNamed0" Description="Mehr als eine Spalte mit dem Namen {0}" />
+    <Member Name="Nested" Description="Verschachtelt" />
     <Member Name="Not" Description="Nicht" />
     <Member Name="Null" Description="Leer" />
     <Member Name="Number" Description="Nummer" />
@@ -571,6 +586,7 @@
     <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Collections können nicht als Spalten hinzugefügt werden" />
     <Member Name="ColSpan" Description="ColSpan" />
     <Member Name="Column" Description="Spalte" />
+    <Member Name="ColumnField" Description="Spalte Feld" />
     <Member Name="Columns" Description="Spalten" />
     <Member Name="CombineRowsWith" Description="Kombinieren von Zeilen mit" />
     <Member Name="Copy" Description="Kopieren" />
@@ -661,7 +677,7 @@
     <Member Name="ChooseValues" Description="Werte wählen" />
     <Member Name="ConstructorSelector" Description="Konstruktor Selektor" />
     <Member Name="CreationOf0Cancelled" Description="Erstellung von {0} abgebrochen" />
-    <Member Name="PleaseChooseA0ToContinue" Description="Wählen Sie einen wert '{0}', um fortzufahren:" />
+    <Member Name="PleaseChooseA0ToContinue" Description="Wählen Sie einen Wert '{0}', um fortzufahren:" />
     <Member Name="PleaseChooseAValueToContinue" Description="Bitte wählen Sie einen Wert, um fortzufahren:" />
     <Member Name="PleaseSelectAConstructor" Description="Bitte wählen Sie einen Konstruktor" />
     <Member Name="PleaseSelectAnElement" Description="Bitte wählen Sie ein Element" />
@@ -703,10 +719,22 @@
     <Member Name="AsOf" Description="Zum" />
     <Member Name="Between" Description="Zwischen" />
     <Member Name="ContainedIn" Description="Enthalten in" />
+    <Member Name="TimeSeries" Description="Zeitreihe" />
   </Type>
   <Type Name="SystemTimeProperty">
     <Member Name="SystemValidFrom" Description="System gültig von" />
     <Member Name="SystemValidTo" Description="System gültig bis" />
+  </Type>
+  <Type Name="TimeSeriesUnit">
+    <Member Name="Day" Description="Tag" />
+    <Member Name="Hour" Description="Stunde" />
+    <Member Name="Millisecond" Description="Millisekunde" />
+    <Member Name="Minute" Description="Minute" />
+    <Member Name="Month" Description="Monat" />
+    <Member Name="Quarter" Description="Quartal" />
+    <Member Name="Second" Description="Sekunde" />
+    <Member Name="Week" Description="Woche" />
+    <Member Name="Year" Description="Jahr" />
   </Type>
   <Type Name="TypeEntity" Description="Typ" PluralDescription="Typen" Gender="m">
     <Member Name="ClassName" Description="Klassen Name" />
@@ -787,6 +815,8 @@
     <Member Name="InvalidFormat" Description="Ungültiges Format" />
     <Member Name="IsATimeOfTheDay" Description="Ist eine Tageszeit" />
     <Member Name="NotPossibleToaAssign0" Description="Es ist nicht möglich {0} zuzuweisen" />
+    <Member Name="NumberIsTooBig" Description="Nummer ist zu groß" />
+    <Member Name="NumberIsTooSmall" Description="Anzahl ist zu klein" />
     <Member Name="Numeric" Description="Numerisch" />
     <Member Name="OrBeNull" Description="oder null sein" />
     <Member Name="PowerOf" Description="Potenz von " />

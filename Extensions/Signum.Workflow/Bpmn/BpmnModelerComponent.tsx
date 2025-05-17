@@ -44,7 +44,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
   }
 
 
-  componentDidMount() {
+  componentDidMount(): void {
     this.modeler = new CustomModeler({
       container: this.divArea,
       height: 1000,
@@ -71,7 +71,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
   }
 
-  focusElement(bpmnElementId: string) {
+  focusElement(bpmnElementId: string): void {
     var searchPad = this.modeler.get<any>("searchPad");
     searchPad._search(bpmnElementId);
     searchPad._resetOverlay();
@@ -118,7 +118,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
   }
 
-  configureModules() {
+  configureModules(): void {
     var conIcons = this.modeler.get<connectionIcons.ConnectionIcons>('connectionIcons');
     conIcons.hasAction = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
@@ -261,7 +261,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
       return this.props.entities[element.id];
   }
 
-  setModel(element: BPMN.DiElement, value: ModelEntity) {
+  setModel(element: BPMN.DiElement, value: ModelEntity): void {
     if (element.type == "bpmn:BoundaryEvent") {
       var parentTask = (this.props.entities[element.host.id] as WorkflowActivityModel);
       parentTask.boundaryTimers.single(a => a.element.bpmnElementId == element.id).element = (value as WorkflowEventModel);
@@ -270,7 +270,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
       this.props.entities[element.id] = value;
   }
 
-  handleElementDoubleClick = (e: BPMN.DoubleClickEvent) => {
+  handleElementDoubleClick = (e: BPMN.DoubleClickEvent): void => {
     if (e.element.type == "bpmn:EndEvent" || e.element.type == "label" || BpmnUtils.isGatewayAnyKind(e.element.type))
       return;
 
@@ -355,7 +355,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     });
   }
 
-  handleElementChanged = (e: BPMN.ElementEvent) => {
+  handleElementChanged = (e: BPMN.ElementEvent): void => {
     if (BpmnUtils.isTaskAnyKind(e.element.type)) {
       const act = this.props.entities[e.element.id] as WorkflowActivityModel | undefined;
       if (act) {
@@ -387,7 +387,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
   }
 
-  changeElementDefinition(element: BPMN.DiElement, shouldEvent?: string | null) {
+  changeElementDefinition(element: BPMN.DiElement, shouldEvent?: string | null): void {
     var bo = element.businessObject;
 
     if (shouldEvent) {
@@ -402,7 +402,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
   }
 
-  handleCreateEnded = (e: BPMN.EndedEvent | BPMN.AutoPlaceEndEvent) => {
+  handleCreateEnded = (e: BPMN.EndedEvent | BPMN.AutoPlaceEndEvent): void => {
     let shape = (e as BPMN.EndedEvent).context ?
       (e as BPMN.EndedEvent).context.shape :
       (e as BPMN.AutoPlaceEndEvent).shape;
@@ -429,7 +429,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
   }
 
   lastPasted?: { id: string; name?: string };
-  handleElementPaste = (e: BPMN.PasteEvent) => {
+  handleElementPaste = (e: BPMN.PasteEvent): void => {
     if (this.lastPasted) {
       console.error("lastPasted not consumed: " + this.lastPasted.id);
     }
@@ -441,7 +441,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
       };
   }
 
-  handleElementDeletePostExecuted = (e: BPMN.DeletePostExecutedEvent) => {
+  handleElementDeletePostExecuted = (e: BPMN.DeletePostExecutedEvent): void => {
     e.context.elements.forEach(element => {
       if (element.type == "bpmn:BoundaryEvent") {
 
@@ -460,7 +460,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     });
   }
 
-  handleAddShapeOrConnection = (e: BPMN.ElementEvent) => {
+  handleAddShapeOrConnection = (e: BPMN.ElementEvent): void => {
     if (this.lastPasted) {
       var model = this.props.entities[this.lastPasted.id];
       if (model) {
@@ -478,11 +478,11 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     this.modeler.destroy();
   }
 
-  componentWillReceiveProps(nextProps: BpmnModelerComponentProps) {
+  componentWillReceiveProps(nextProps: BpmnModelerComponentProps): void {
     if (this.modeler) {
       if (nextProps.diagramXML !== undefined && this.props.diagramXML !== nextProps.diagramXML) {
         this.modeler.importXML(nextProps.diagramXML, this.handleOnModelError);
@@ -490,7 +490,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
   }
 
-  setDiv = (div: HTMLDivElement) => {
+  setDiv = (div: HTMLDivElement): void => {
     if (this.divArea)
       this.divArea.removeEventListener("click", this.clickConnectionIconEvent as EventListener);
 
@@ -500,7 +500,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
       this.divArea.addEventListener("click", this.clickConnectionIconEvent);
   }
 
-  clickConnectionIconEvent = (e: MouseEvent) => {
+  clickConnectionIconEvent = (e: MouseEvent): void => {
     var d = e.target as HTMLDivElement;
 
     if (d.classList && d.classList.contains("connection-icon")) {
@@ -509,16 +509,16 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
   }
 
-  handleZoomClick = (e: React.MouseEvent<any>) => {
+  handleZoomClick = (e: React.MouseEvent<any>): void => {
     this.resetZoom();
   }
 
-  resetZoom() {
+  resetZoom(): void {
     var zoomScroll = this.modeler.get<any>("zoomScroll");
     zoomScroll.reset();
   }
 
-  render() {
+  render(): React.JSX.Element {
     return (
       <div>
         <Button variant="secondary" style={{ marginLeft: "10px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
@@ -530,7 +530,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     );
   }
 
-  handleSaveSvgClick = () => {
+  handleSaveSvgClick = (): void => {
     const fileName = this.props.workflow.name ? `${this.props.workflow.name}.svg` : "diagram.svg";
 
     this.getSvg()

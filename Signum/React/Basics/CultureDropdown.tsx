@@ -7,7 +7,7 @@ import { NavDropdown } from 'react-bootstrap';
 import { useAPI } from '../Hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-export default function CultureDropdown(p: { fullName?: boolean }) {
+export default function CultureDropdown(p: { fullName?: boolean }): React.JSX.Element | null {
 
   var cultures = useAPI(signal => CultureClient.getCultures(false), []);
 
@@ -35,7 +35,7 @@ function simplifyName(name: string) {
   return name.tryBefore("(")?.trim() ?? name;
 }
 
-export function CultureDropdownMenuItem(props: { fullName?: boolean }) {
+export function CultureDropdownMenuItem(props: { fullName?: boolean }): React.JSX.Element | null {
   var [show, setShow] = React.useState(false);
 
   var cultures = useAPI(signal => CultureClient.getCultures(false), []);

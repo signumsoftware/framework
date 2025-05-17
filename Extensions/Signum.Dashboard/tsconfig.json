@@ -13,6 +13,7 @@
     { "path": "../Signum.Omnibox" },
     { "path": "../Signum.Toolbar" },
     { "path": "../Signum.Scheduler" },
-    { "path": "../Signum.UserAssets" }
+    { "path": "../Signum.UserAssets" },
+    { "path": "../Signum.HtmlEditor" }
   ]
 }

@@ -9,7 +9,7 @@ import { FileLine } from '../../Signum.Files/Components/FileLine';
 import { JavascriptMessage } from '@framework/Signum.Entities';
 import { CachedQueryEntity } from '../Signum.Dashboard';
 
-export default function CachedQueryView(p: { ctx: TypeContext<CachedQueryEntity> }) {
+export default function CachedQueryView(p: { ctx: TypeContext<CachedQueryEntity> }): React.JSX.Element {
   
   const ctx = p.ctx;
 

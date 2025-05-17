@@ -13,10 +13,6 @@ import { useExpand } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 import { ClientColorProvider, IRelationInfo, ITableInfo, MListRelationInfo, SchemaMapInfo, getAllProviders } from './ClientColorProvider'
 
-interface SchemaMapState {
-  schemaMapInfo?: SchemaMapInfo;
-  providers?: { [name: string]: ClientColorProvider };
-}
 
 interface ParsedQueryString {
   filter?: string;
@@ -54,7 +50,7 @@ function getParsedQuery(location: Location): ParsedQueryString {
 }
 
 
-export default function SchemaMapPage() {
+export default function SchemaMapPage(): React.JSX.Element | null {
   const location = useLocation();
 
   const [filter, setFilter] = React.useState<string>("");
@@ -156,7 +152,7 @@ export default function SchemaMapPage() {
     return null;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
       {renderFilter()}
       {!(schemaInfo && schemaInfo && providers) ?
         <span>{JavascriptMessage.loading.niceToString()}</span> :
@@ -187,7 +183,7 @@ export interface SchemaMapRendererProps {
   tables: Tables;
 }
 
-export function SchemaMapRenderer(p: SchemaMapRendererProps) {
+export function SchemaMapRenderer(p: SchemaMapRendererProps): React.JSX.Element {
 
   const mapD3Ref = React.useRef<SchemaMapD3 | undefined>(undefined);
   const svgRef = React.useRef<SVGSVGElement>(null);

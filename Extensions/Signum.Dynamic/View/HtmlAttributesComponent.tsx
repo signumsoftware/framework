@@ -15,7 +15,7 @@ interface HtmlAttributesLineProps {
   dn: DesignerNode<BaseNode>;
 }
 
-export function HtmlAttributesLine(p: HtmlAttributesLineProps) {
+export function HtmlAttributesLine(p: HtmlAttributesLineProps): React.JSX.Element {
   function renderMember(expr: HtmlAttributesExpression | undefined): React.ReactNode {
     return (<span
       className={expr === undefined ? "design-default" : "design-changed"}>
@@ -146,7 +146,7 @@ const cssPropertyList = ["color", "opacity", "background", "background-attachmen
   "rest-after", "rest-before", "voice-balance", "voice-duration", "voice-pitch", "voice-pitch-range", "voice-rate", "voice-stress", "voice-volume", "marquee-direction",
   "marquee-play-count", "marquee-speed", "marquee-style"].sort();
 
-export function HtmlExpressionComponent(p: HtmlExpressionComponentProps) {
+export function HtmlExpressionComponent(p: HtmlExpressionComponentProps): React.JSX.Element {
   return (
     <div className="form-sm code-container">
       <fieldset>
@@ -170,7 +170,7 @@ export interface ExpressionOrValueStripProps {
   filterKey: (key: string) => boolean;
 }
 
-export function ExpressionOrValueStrip(p: ExpressionOrValueStripProps) {
+export function ExpressionOrValueStrip(p: ExpressionOrValueStripProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   function handleOnRemove(e: React.MouseEvent<any>, key: string) {

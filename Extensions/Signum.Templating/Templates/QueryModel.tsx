@@ -8,7 +8,7 @@ interface QueryModelComponentProps {
   ctx: TypeContext<QueryModel>
 }
 
-export default function QueryModelComponent(p : QueryModelComponentProps){
+export default function QueryModelComponent(p : QueryModelComponentProps): React.JSX.Element {
   function handleOnSearch() {
     const qr = searchControl.current!.searchControlLoaded!.getQueryRequest();
     const model = p.ctx.value;

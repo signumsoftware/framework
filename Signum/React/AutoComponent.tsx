@@ -7,16 +7,16 @@ import { ViewReplacer } from './Frames/ReactVisitor'
 import { EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute } from './Lines'
 import { AutoLine } from './Lines/AutoLine'
 
-export default function AutoComponent({ ctx, viewName }: { ctx: TypeContext<ModifiableEntity>, viewName?: string }) {
+export default function AutoComponent({ ctx, viewName }: { ctx: TypeContext<ModifiableEntity>, viewName?: string }): React.ReactNode {
   const subContexts = subContext(ctx);
-  const components = subContexts.filter(ctx => ctx.propertyRoute?.member?.name != "Id").map(ctx => <AutoLine ctx={ ctx}/>).filter(a => !!a).map(a => a!);
+  const components = subContexts.filter(ctx => ctx.propertyRoute?.member?.name != "Id").map(ctx => <AutoLine ctx={ctx} />).filter(a => !!a).map(a => a!);
   const result = React.createElement("div", undefined, ...components);
   const es = Navigator.getSettings(ctx.value.Type);
 
   var vos = es?.viewOverrides?.filter(a => a.viewName == viewName); //Should user viewDispatcher.getViewOverrides promise instead
 
   if (vos?.length) {
-    const replacer = new ViewReplacer(result, ctx);
+    const replacer = new ViewReplacer(result, ctx, AutoComponent);
     vos.forEach(vo => vo.override(replacer));
     return replacer.result;
   } else {
@@ -29,7 +29,6 @@ export default function AutoComponent({ ctx, viewName }: { ctx: TypeContext<Modi
 
     return result;
   }
-}
+};
 
-
-AutoComponent.withViewOverrides = true;
+(AutoComponent as any).withViewOverrides = true;

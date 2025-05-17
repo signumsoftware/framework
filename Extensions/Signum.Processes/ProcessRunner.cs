@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.Authorization;
 using Signum.Cache;
 using System.Threading.Channels;
@@ -66,11 +67,11 @@ public static class ProcessRunner
 
     }
 
-    public static SimpleStatus GetSimpleStatus()
+    public static HealthCheckResult GetHealthStatus()
     {
-        return running ? SimpleStatus.Ok :
-            initialDelayMilliseconds == null ? SimpleStatus.Disabled :
-            SimpleStatus.Error;
+        return running ? new HealthCheckResult(HealthStatus.Healthy, "Running") :
+            initialDelayMilliseconds == null ? new HealthCheckResult(HealthStatus.Healthy, "Disabled") :
+            new HealthCheckResult(HealthStatus.Unhealthy, "Not Running!");
     }
 
     public static void StartRunningProcessesAfter(int delayMilliseconds)
@@ -117,10 +118,7 @@ public static class ProcessRunner
         process.ApplicationName = ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
     }
 
-    internal static void WakeupExecuteInThisMachine(Dictionary<string, object> dic)
-    {
-        ProcessRunner.WakeUp("Execute in this machine", null);
-    }
+
 
     [AutoExpressionField]
     public static bool IsMine(this ProcessEntity p) => 
@@ -215,6 +213,25 @@ public static class ProcessRunner
                                 Log("Waiting Lock");
                                 lock (executing)
                                 {
+                                    var suspending = Database.Query<ProcessEntity>()
+                                         .Where(p => p.State == ProcessState.Suspending)
+                                         .Where(p => p.IsMine())
+                                         .Select(a => a.ToLite())
+                                         .ToListWakeup("Suspending dependency");
+
+                                    Log($"Suspending Count= {suspending.Count}");
+
+                                    foreach (var s in suspending)
+                                    {
+                                        ExecutingProcess execProc = executing.GetOrThrow(s);
+
+                                        if (execProc.CurrentProcess.State != ProcessState.Finished)
+                                        {
+                                            execProc.CurrentProcess = s.RetrieveAndRemember();
+                                            execProc.CancelationSource.Cancel();
+                                        }
+                                    }
+
                                     Log("Inside Lock");
 
                                     int remaining = MaxDegreeOfParallelism - executing.Count;
@@ -222,7 +239,7 @@ public static class ProcessRunner
                                     if (remaining > 0)
                                     {
 
-                                        retry:
+                                    retry:
                                         var queued = Database.Query<ProcessEntity>()
                                             .Where(p => p.State == ProcessState.Queued)
                                             .Where(p => p.IsMine() || p.IsShared())
@@ -285,7 +302,7 @@ public static class ProcessRunner
                                                         {
                                                             executingProcess.Execute();
                                                         }
-                                                       
+
                                                     }
                                                     catch (Exception ex)
                                                     {
@@ -316,26 +333,10 @@ public static class ProcessRunner
                                                 });
 
                                         }
-
-                                        var suspending = Database.Query<ProcessEntity>()
-                                                .Where(p => p.State == ProcessState.Suspending)
-                                                .Where(p => p.IsMine())
-                                                .Select(a => a.ToLite())
-                                                .ToListWakeup("Suspending dependency");
-
-                                        Log($"Suspending Count= {suspending.Count}");
-
-                                        foreach (var s in suspending)
-                                        {
-                                            ExecutingProcess execProc = executing.GetOrThrow(s);
-
-                                            if (execProc.CurrentProcess.State != ProcessState.Finished)
-                                            {
-                                                execProc.CurrentProcess = s.RetrieveAndRemember();
-                                                execProc.CancelationSource.Cancel();
-                                            }
-                                        }
                                     }
+
+                     
+                                    
                                 }
                             }
 
@@ -440,6 +441,11 @@ public static class ProcessRunner
         {
             p.CancelationSource.Cancel();
         }
+    }
+
+    public static bool IsExecutingInThisMachien(Lite<ProcessEntity> process)
+    {
+        return executing.ContainsKey(process);
     }
 }
 

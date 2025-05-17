@@ -2,7 +2,7 @@ import * as React from 'react'
 import { AutoLine, EntityRepeater, EntityDetail, PasswordLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded, SmtpEmailServiceEntity, } from '../../Signum.Mailing'
-export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceEntity> }) {
+export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceEntity> }): React.JSX.Element {
   const sc = p.ctx;
 
   return (
@@ -17,11 +17,10 @@ export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceE
           <AutoLine ctx={net.subCtx(s => s.useDefaultCredentials)} />
           <AutoLine ctx={net.subCtx(s => s.username)} />
           <PasswordLine ctx={net.subCtx(s => s.password)} />
-		  <PasswordLine ctx={net.subCtx(s => s.newPassword)} />
+          <PasswordLine ctx={net.subCtx(s => s.newPassword)} />
           <AutoLine ctx={net.subCtx(s => s.enableSSL)} />
           <EntityRepeater ctx={net.subCtx(s => s.clientCertificationFiles)} getComponent={cert =>
             <div>
-              <AutoLine ctx={cert.subCtx(s => s.certFileType)} />
               <AutoLine ctx={cert.subCtx(s => s.fullFilePath)} />
             </div>
           } />

@@ -19,7 +19,7 @@ interface SaveChangesModalProps extends IModalProps<SaveChangesResult | undefine
   eocs: EntityOperationContext<any>[];
 }
 
-export default function SaveChangesModal(p: SaveChangesModalProps) {
+function SaveChangesModal(p: SaveChangesModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
 
@@ -52,7 +52,7 @@ export default function SaveChangesModal(p: SaveChangesModalProps) {
       </div>
       <div className="modal-footer">
         <div className="btn-toolbar">
-          {p.eocs.map(eoc => <OperationButton key={eoc.operationInfo.key} eoc={eoc} avoidAlternatives onOperationClick={() => handleButtonClicked(eoc)} />)}
+          {p.eocs.map(eoc => <OperationButton key={eoc.operationInfo.key} eoc={eoc} avoidAlternatives onOperationClick={async () => handleButtonClicked(eoc)} />)}
           <button
             className="btn btn-secondary sf-close-button sf-no-button"
             onClick={() => handleButtonClicked("loseChanges")}
@@ -71,7 +71,12 @@ export default function SaveChangesModal(p: SaveChangesModalProps) {
   );
 }
 
-SaveChangesModal.show = (options: SaveChangesModalProps): Promise<SaveChangesResult | undefined> => {
-  return openModal(<SaveChangesModal {...options} />);
+namespace SaveChangesModal {
+  export function show(options: SaveChangesModalProps): Promise<SaveChangesResult | undefined> {
+    return openModal(<SaveChangesModal {...options} />);
+  }
 }
+
+export default SaveChangesModal; 
+
 

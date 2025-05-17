@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="IToolbarEntity">
+    <Member Name="Elements" Description="Éléments" />
+  </Type>
+  <Type Name="ShowCount" Description="Afficher le décompte">
+    <Member Name="Always" Description="Toujours" />
+    <Member Name="MoreThan0" Description="Plus de 0" />
+  </Type>
+  <Type Name="ToolbarElementEmbedded" Description="Élément de barre d’outils">
+    <Member Name="AutoRefreshPeriod" Description="Période d’actualisation automatique" />
+    <Member Name="Content" Description="Contenu" />
+    <Member Name="IconColor" Description="Couleur de l’icône" />
+    <Member Name="IconName" Description="Nom de l’icône" />
+    <Member Name="Label" Description="Étiquette" />
+    <Member Name="OpenInPopup" Description="Ouvrir dans la fenêtre contextuelle" />
+    <Member Name="ShowCount" Description="Afficher la quantité" />
+    <Member Name="Type" Description="Type" />
+    <Member Name="Url" Description="URL" />
+  </Type>
+  <Type Name="ToolbarElementType" Description="Type d’élément de barre d’outils">
+    <Member Name="Divider" Description="Diviseur" />
+    <Member Name="Header" Description="En-tête" />
+    <Member Name="Item" Description="Élément" />
+  </Type>
+  <Type Name="ToolbarEntity" Description="la barre d’outils" PluralDescription="Barres d’outils">
+    <Member Name="Elements" Description="Éléments" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Location" Description="Emplacement" />
+    <Member Name="Name" Description="Nom" />
+    <Member Name="Owner" Description="Propriétaire" />
+    <Member Name="Priority" Description="Priorité" />
+  </Type>
+  <Type Name="ToolbarLocation" Description="Emplacement de la barre d’outils">
+    <Member Name="Main" Description="Principal" />
+    <Member Name="Side" Description="Côté" />
+    <Member Name="Top" Description="En haut" />
+  </Type>
+  <Type Name="ToolbarMenuEntity" Description="le menu de la barre d’outils" PluralDescription="Menus de la barre d’outils">
+    <Member Name="Elements" Description="Éléments" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Name" Description="Nom" />
+    <Member Name="Owner" Description="Propriétaire" />
+  </Type>
+  <Type Name="ToolbarMenuOperation">
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="ToolbarMessage">
+    <Member Name="_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships" Description="{0} cycles ont été trouvés dans la barre d’outils en raison des relations suivantes :" />
+    <Member Name="RecursionDetected" Description="Récursivité détectée" />
+  </Type>
+  <Type Name="ToolbarOperation">
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+</Translations>

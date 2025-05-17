@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace Signum.Basics;
 
 public class FileContent
@@ -10,4 +12,8 @@ public class FileContent
         this.FileName = fileName;
         this.Bytes = bytes;
     }
+
+    public static FileContent ReadFrom(string filePath) => new FileContent(Path.GetFileName(filePath), File.ReadAllBytes(filePath));
+
+    public override string ToString() => $"{FileName} ({Bytes.Length} bytes)";
 }

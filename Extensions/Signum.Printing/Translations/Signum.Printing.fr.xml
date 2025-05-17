@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="PrintLineEntity" Description="La ligne d’impression" PluralDescription="Lignes d’impression">
+    <Member Name="CreationDate" Description="Date de création" />
+    <Member Name="File" Description="Fichier" />
+    <Member Name="Package" Description="Paquet" />
+    <Member Name="PrintedOn" Description="Imprimé le" />
+    <Member Name="Referred" Description="Relié" />
+    <Member Name="State" Description="État" />
+    <Member Name="TestFileType" Description="Type de fichier de test" />
+  </Type>
+  <Type Name="PrintLineOperation">
+    <Member Name="Cancel" Description="Annuler" />
+    <Member Name="CreateTest" Description="Créer un test" />
+    <Member Name="Print" Description="Imprimer" />
+    <Member Name="Retry" Description="Réessayer" />
+    <Member Name="SaveTest" Description="Enregistrer le test" />
+  </Type>
+  <Type Name="PrintLineState" Description="Imprimer l’état de la ligne">
+    <Member Name="Cancelled" Description="Annulé" />
+    <Member Name="Enqueued" Description="En file d’attente" />
+    <Member Name="Error" Description="Erreur" />
+    <Member Name="NewTest" Description="Nouveau test" />
+    <Member Name="Printed" Description="Imprimé" />
+    <Member Name="PrintedAndDeleted" Description="Imprimé et supprimé" />
+    <Member Name="ReadyToPrint" Description="Prêt à imprimer" />
+  </Type>
+  <Type Name="PrintPackageEntity" Description="Impression de l'emballage" PluralDescription="Impression des emballages">
+    <Member Name="Name" Description="Nom" />
+  </Type>
+  <Type Name="PrintPackageProcess">
+    <Member Name="PrintPackage" Description="Imprimer le paquet" />
+  </Type>
+  <Type Name="PrintPermission">
+    <Member Name="ViewPrintPanel" Description="Voir le panneau d’impression" />
+  </Type>
+  <Type Name="PrintTask">
+    <Member Name="RemoveOldFiles" Description="Supprimer les anciens fichiers" />
+  </Type>
+</Translations>

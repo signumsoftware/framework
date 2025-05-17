@@ -17,8 +17,8 @@ public static class WordImageReplacer
     /// 
     /// Word Image -> Right Click -> Format Picture -> Alt Text -> Title 
     /// </param>
-    public static void ReplaceImage<TImage>(this WordprocessingDocument doc, string titleOrDescription, TImage image, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, PartTypeInfo? imagePartType = null, 
-        ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center, 
+    public static void ReplaceImage<TImage>(this WordprocessingDocument doc, string titleOrDescription, TImage image, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, PartTypeInfo? imagePartType = null,
+        ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center,
         ImageHorizontalPosition horizontalPosition = ImageHorizontalPosition.Center)
     {
         var blip = doc.FindBlip(titleOrDescription);
@@ -37,8 +37,8 @@ public static class WordImageReplacer
     /// 
     /// Word Image -> Right Click -> Format Picture -> Alt Text -> Title 
     /// </param>
-    public static void ReplaceMultipleImages<TImage>(this WordprocessingDocument doc, string titleOrDescription, TImage[] images, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, PartTypeInfo? imagePartType = null, 
-        ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center, 
+    public static void ReplaceMultipleImages<TImage>(this WordprocessingDocument doc, string titleOrDescription, TImage[] images, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, PartTypeInfo? imagePartType = null,
+        ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center,
         ImageHorizontalPosition horizontalPosition = ImageHorizontalPosition.Center)
     {
         Blip[] blips = FindAllBlips(doc, d => d.Title == titleOrDescription || d.Description == titleOrDescription);
@@ -130,6 +130,12 @@ public static class WordImageReplacer
         return img;
     }
 
+    public static bool HasBlip(this WordprocessingDocument doc, string titleOrDescription)
+    {
+        var query = GetDrawings(doc);
+
+        return query.Any(r => r.GetTitle() == titleOrDescription);
+    }
 
     public static Blip FindBlip(this WordprocessingDocument doc, string titleOrDescription)
     {

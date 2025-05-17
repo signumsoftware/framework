@@ -25,7 +25,9 @@ export namespace EntityOperations {
 
     const operations = Operations.operationInfos(ti)
       .filter(oi => Operations.isEntityOperation(oi.operationType) && (oi.canBeNew || !ctx.pack.entity.isNew))
+      .filter(oi => ctx.pack.entity.isNew || oi.key in ctx.pack.canExecute)
       .map(oi => {
+
         const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity>;
 
         const eoc = new EntityOperationContext<Entity>(ctx.frame, ctx.pack.entity as Entity, oi);
@@ -83,7 +85,7 @@ export namespace EntityOperations {
           eoc.frame.onClose(pack);
           return Promise.resolve(undefined);
         };
-        eoc.click();
+        return eoc.click();
       }
     });
   }
@@ -104,14 +106,14 @@ export namespace EntityOperations {
           return (eoc.frame.createNew!(pack) ?? Promise.resolve(undefined))
             .then(newPack => newPack && eoc.frame.onReload(newPack, reloadComponent));
         };
-        eoc.defaultClick();
+        return eoc.defaultClick();
       }
     });
   }
 
 
 
-  export function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?: "start" | "end") {
+  export function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?: "start" | "end"): string | React.JSX.Element {
     if (icon) {
       switch (iconAlign) {
         case "end": return (<span>{text}<FontAwesomeIcon icon={icon} color={iconColor} fixedWidth className="ms-2" /></span>);
@@ -141,7 +143,7 @@ export namespace EntityOperations {
     throw new Error("Unexpected OperationType");
   }
 
-  export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
+  export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]): Promise<void | undefined> {
 
     return confirmInNecessary(eoc).then(conf => {
       if (!conf)
@@ -166,7 +168,7 @@ export namespace EntityOperations {
   }
 
 
-  export function defaultExecuteEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
+  export function defaultExecuteEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]): Promise<void | undefined> {
 
     return confirmInNecessary(eoc).then(conf => {
       if (!conf)
@@ -178,7 +180,7 @@ export namespace EntityOperations {
     });
   }
 
-  export function defaultExecuteLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
+  export function defaultExecuteLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]): Promise<void | undefined> {
 
     return confirmInNecessary(eoc).then(conf => {
       if (!conf)
@@ -194,7 +196,7 @@ export namespace EntityOperations {
     });
   }
 
-  export function defaultDeleteEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
+  export function defaultDeleteEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]): Promise<void | undefined> {
 
     return confirmInNecessary(eoc).then(conf => {
       if (!conf)
@@ -206,7 +208,7 @@ export namespace EntityOperations {
     });
   }
 
-  export function defaultDeleteLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
+  export function defaultDeleteLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]): Promise<void | undefined> {
 
     return confirmInNecessary(eoc).then(conf => {
       if (!conf)
@@ -296,7 +298,7 @@ interface OperationButtonProps extends ButtonProps {
   color?: BsColor;
   textInTitle?: boolean;
   avoidAlternatives?: boolean;
-  onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
+  onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => Promise<void>;
   children?: React.ReactNode;
   hideOnCanExecute?: boolean;
 }
@@ -324,9 +326,9 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
     name: "main",
     onClick: eoc => {
       if (onOperationClick)
-        onOperationClick(eoc);
+        return onOperationClick(eoc);
       else
-        eoc.click();
+        return eoc.click();
     },
     text: eoc.settings?.text ? eoc.settings.text(eoc) :
       group?.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
@@ -353,7 +355,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
       <Dropdown.Item
         {...props as any}
         disabled={disabled}
-        title={main?.keyboardShortcut && Operations.getShortcutToString(main.keyboardShortcut)}
+        title={props.title ?? (main?.keyboardShortcut && Operations.getShortcutToString(main.keyboardShortcut))}
         className={classes(disabled ? "disabled sf-pointer-events" : undefined, main?.classes, (main.color ? "text-" + main.color : undefined))}
         onClick={disabled ? undefined : e => { eoc.event = e; main.onClick(eoc); }}
         data-operation={eoc.operationInfo.key}>

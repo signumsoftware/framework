@@ -357,13 +357,13 @@ public static class Csv
             return ReadUntypedStream(fs, encoding, culture, options).ToList();
     }
 
-    public static List<string[]> ReadUntypedBytes(byte[] data, Encoding? encoding = null, CultureInfo? culture = null, CsvReadOptions? options = null) 
+    public static List<string[]> ReadUntypedBytes(byte[] data, Encoding? encoding = null, CultureInfo? culture = null, CsvReadOptions? options = null)
     {
         using (MemoryStream ms = new MemoryStream(data))
             return ReadUntypedStream(ms, encoding, culture, options).ToList();
     }
 
-    public static IEnumerable<string[]> ReadUntypedStream(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, CsvReadOptions? options = null) 
+    public static IEnumerable<string[]> ReadUntypedStream(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, CsvReadOptions? options = null)
     {
         encoding ??= DefaultEncoding;
         var defCulture = GetDefaultCulture(culture);
@@ -460,7 +460,7 @@ public static class Csv
         return classCode;
     }
 
-    public static string InferClassFromStream(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, CsvReadOptions? options = null) 
+    public static string InferClassFromStream(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, CsvReadOptions? options = null)
     {
         var lines = ReadUntypedStream(stream, encoding, culture, options);
         var classCode = InferClass(lines.ToList(), culture);
@@ -500,7 +500,7 @@ public static class Csv
                 return null;
 
             var longs = vals.Select(a => a.ToLong(NumberStyles.Integer, defCulture));
-            if(longs.All(a=> a != null))
+            if (longs.All(a => a != null))
                 return longs.All(a => int.MinValue <= a && a <= int.MaxValue) ? "int" : "long";
 
             if (vals.All(a => DateOnly.TryParse(a, defCulture, out _)))
@@ -540,7 +540,7 @@ public static class Csv
         return regexCache.GetOrAdd(separator, s =>
             new Regex(BaseRegex.Replace('\'', '"').Replace(';', s), RegexOptions.Multiline | RegexOptions.ExplicitCapture, timeout));
     }
-  
+
     private static char GetListSeparator(CultureInfo culture)
     {
         return culture.TextInfo.ListSeparator.SingleEx();
@@ -616,7 +616,7 @@ public static class Csv
 }
 
 public class CsvReadOptions<T> : CsvReadOptions
-    where T : class 
+    where T : class
 {
     public Func<CsvMemberInfo<T>, CultureInfo, Func<string, object?>?>? ParserFactory;
     public Func<Match, T>? Constructor;
@@ -624,7 +624,7 @@ public class CsvReadOptions<T> : CsvReadOptions
 
 public class CsvReadOptions
 {
-    public bool AsumeSingleLine = false;
+    public bool AsumeSingleLine = true;
     public Func<Exception, Match?, bool>? SkipError;
     public TimeSpan RegexTimeout = Regex.InfiniteMatchTimeout;
     public char? ListSeparator;

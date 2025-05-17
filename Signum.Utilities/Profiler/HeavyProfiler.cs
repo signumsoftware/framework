@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using Signum.Utilities.DataStructures;
+using Microsoft.Extensions.Logging;
 
 namespace Signum.Utilities;
 
@@ -10,6 +11,12 @@ public static class HeavyProfiler
     public static TimeSpan MaxEnabledTime = TimeSpan.FromMinutes(5);
 
     public static long? TimeLimit;
+
+    public static ILoggerFactory? LoggerFactory;
+    public static ActivitySource? ActivitySource;
+
+
+    public static bool FullyDisabled => !(Enabled || ActivitySource != null);
 
 
     static bool enabled;
@@ -43,86 +50,120 @@ public static class HeavyProfiler
         }
     }
 
-    public static Tracer? Log(string role)
+    public static Tracer? Log(string kind, LogLevel? logLevel = LogLevel.Information)
     {
-        if (!enabled)
+        if (FullyDisabled)
             return null;
 
-        var tracer = CreateNewEntry(role, null, stackTrace: true);
+        var tracer = CreateNewTracer(kind, null, null, stackTrace: true, logLevel);
 
         return tracer;
     }
 
-    public static Tracer? Log(string role, Func<string?> additionalData)
+    public static Tracer? Log(string kind, Func<string?> additionalData, LogLevel logLevel = LogLevel.Information)
     {
-        if (!enabled)
+        if (FullyDisabled)
             return null;
 
-        var tracer = CreateNewEntry(role, additionalData, stackTrace: true);
+        var tracer = CreateNewTracer(kind, null, additionalData, stackTrace: true, logLevel);
 
         return tracer;
     }
 
-    public static Tracer? LogNoStackTrace(string role)
+    public static Tracer? Log(string kind, StructuredLogMessage logMessage, LogLevel logLevel = LogLevel.Information)
     {
-        if (!enabled)
+        if (FullyDisabled)
             return null;
 
-        var tracer = CreateNewEntry(role, null, stackTrace: false);
+        var tracer = CreateNewTracer(kind, logMessage, null, stackTrace: true, logLevel);
 
         return tracer;
     }
 
-    public static Tracer? LogNoStackTrace(string role, Func<string> additionalData)
+    public static Tracer? LogNoStackTrace(string kind, LogLevel? logLevel = null)
     {
-        if (!enabled)
+        if (FullyDisabled)
             return null;
 
-        var tracer = CreateNewEntry(role, additionalData, stackTrace: false);
+        var tracer = CreateNewTracer(kind, null, null, stackTrace: false, logLevel);
 
         return tracer;
     }
 
-    public static T LogValue<T>(string role, Func<T> valueFactory)
+    public static Tracer? LogNoStackTrace(string kind, Func<string?> additionalData, LogLevel? logLevel = null)
     {
-        if (!enabled)
-            return valueFactory();
+        if (FullyDisabled)
+            return null;
 
-        using (HeavyProfiler.LogNoStackTrace(role))
-        {
-            return valueFactory();
-        }
+        var tracer = CreateNewTracer(kind, null, additionalData, stackTrace: false, logLevel);
+
+        return tracer;
     }
 
-    public static T LogValueNoStackTrace<T>(string role, Func<T> valueFactory)
+    private static void AutoStop(long beforeStart)
     {
-        if (!enabled)
-            return valueFactory();
-
-        using (HeavyProfiler.LogNoStackTrace(role))
-        {
-            return valueFactory();
-        }
-    }
-
-    private static Tracer? CreateNewEntry(string role, Func<string?>? additionalData, bool stackTrace)
-    {
-        long beforeStart = PerfCounter.Ticks;
-
-        if (enabled == false || TimeLimit! < beforeStart)
+        if (enabled && TimeLimit < beforeStart)
         {
             enabled = false;
             Clean();
+        }
+    }
+
+    private static Tracer? CreateNewTracer(string kind, StructuredLogMessage? logMessage, Func<string?>? additonalData, bool stackTrace, LogLevel? logLevel)
+    {
+        long beforeStart = PerfCounter.Ticks;
+
+        AutoStop(beforeStart);
+
+        StructuredLogMessage? GetLogMessage()
+        {
+            if (logMessage != null)
+                return logMessage;
+
+            var str = additonalData?.Invoke();
+
+            if (str != null)
+                return (logMessage = new StructuredLogMessage(str));
+
             return null;
         }
 
+        HeavyProfilerEntry? entry = enabled ? CreateEntry(kind, GetLogMessage()?.ToString(), stackTrace, beforeStart) : null;
+
+        Activity? activity = null;
+        if(ActivitySource != null && LoggerFactory != null && logLevel != null)
+        {
+            var logger = LoggerFactory.CreateLogger(kind);
+
+            if(logger.IsEnabled(logLevel.Value))
+            {
+                activity = ActivitySource.CreateActivity("Signum." + kind, ActivityKind.Internal);
+                activity?.Start();
+
+                if(activity != null)
+                {
+                    var message = GetLogMessage();
+                    if (message != null)
+                        logger.Log(logLevel.Value, message.Value.Message, message.Value.Arguments);
+                }
+            }
+        }
+
+        if (entry == null && activity == null)
+            return null;
+
+        return new Tracer(entry, activity, logLevel);
+    }
+
+    private static HeavyProfilerEntry CreateEntry(string kind, string? additionalData, bool stackTrace, long beforeStart)
+    {
         var parent = current.Value;
 
         var newCurrent = current.Value = new HeavyProfilerEntry()
         {
             BeforeStart = beforeStart,
-            Role = role,
-            AdditionalData = additionalData?.Invoke(),
+            Kind = kind,
+            AdditionalData = additionalData,
             StackTrace = stackTrace ? new StackTrace(2, true) : null,
             Parent = parent,
             Depth = parent == null ? 0 : (parent.Depth + 1),
@@ -152,42 +193,79 @@ public static class HeavyProfiler
             parent.Entries.Add(newCurrent);
         }
 
-        return new Tracer { newCurrent = newCurrent };
+        return newCurrent;
     }
+
+ 
+    
 
     public sealed class Tracer : IDisposable
     {
-        internal HeavyProfilerEntry? newCurrent;
-        
+        internal HeavyProfilerEntry? entry;
+        public Activity? activity;
+        internal LogLevel? logLevel;
+
+        public Tracer(HeavyProfilerEntry? entry, Activity? activity, LogLevel? logLevel)
+        {
+            this.entry = entry;
+            this.activity = activity;
+            this.logLevel = logLevel;
+        }
+
         public void Dispose()
         {
-            if (newCurrent == null) //After a Switch sequence disabled in the middle
-                return;
+            try
+            {
+                if (entry != null)
+                {
 
-            if (current.Value != newCurrent)
-                throw new InvalidOperationException("Unexpected");
+                    if (current.Value != entry)
+                        throw new InvalidOperationException("Unexpected");
 
-            var cur = newCurrent;
-            cur.End = PerfCounter.Ticks;
-            var parent = newCurrent.Parent;
+                    var cur = entry;
+                    cur.End = PerfCounter.Ticks;
+                    var parent = entry.Parent;
 
-
-            current.Value = parent;
+                    current.Value = parent;
+                }
+            }
+            finally
+            {
+                activity?.Dispose();
+            }
         }
     }
 
-    public static void Switch(this Tracer? tracer, string role, Func<string>? additionalData = null)
+
+    public static void Switch(this Tracer? tracer, string kind, StructuredLogMessage logMessage)
     {
         if (tracer == null)
             return;
 
-        bool hasStackTrace = current.Value!.StackTrace != null;
+        bool hasStackTrace = tracer.entry?.StackTrace != null;
 
         tracer.Dispose();
 
-        var newTracer = CreateNewEntry(role, additionalData, hasStackTrace);
+        var newTracer = CreateNewTracer(kind, logMessage, null, hasStackTrace, tracer.logLevel);
 
-        tracer.newCurrent = newTracer?.newCurrent;
+        tracer.entry = newTracer?.entry;
+        tracer.activity = newTracer?.activity;
+    }
+
+    public static void Switch(this Tracer? tracer, string kind, Func<string>? additionalData = null)
+    {
+        if(tracer == null) 
+            return;
+
+
+        bool hasStackTrace = tracer.entry?.StackTrace != null;
+
+        tracer.Dispose();
+
+        var newTracer = CreateNewTracer(kind, null, additionalData, hasStackTrace, tracer.logLevel);
+
+        tracer.entry = newTracer?.entry;
+        tracer.activity = newTracer?.activity;
     }
 
     public static IEnumerable<HeavyProfilerEntry> AllEntries()
@@ -259,7 +337,7 @@ public static class HeavyProfiler
 
     public static IOrderedEnumerable<SqlProfileResume> SqlStatistics()
     {
-        var statistics = AllEntries().Where(a => a.Role == "SQL").GroupBy(a => a.AdditionalData!).Select(gr =>
+        var statistics = AllEntries().Where(a => a.Kind == "SQL").GroupBy(a => a.AdditionalData!).Select(gr =>
                     new SqlProfileResume
                     {
                         Query = gr.Key,
@@ -301,7 +379,7 @@ public class HeavyProfilerEntry
 {
     public List<HeavyProfilerEntry> Entries;
     public HeavyProfilerEntry? Parent;
-    public string Role;
+    public string Kind;
 
     public int Index;
 
@@ -388,14 +466,14 @@ public class HeavyProfilerEntry
 
     public override string ToString()
     {
-        return "{0} {1}".FormatWith(Elapsed.NiceToString(), Role);
+        return "{0} {1}".FormatWith(Elapsed.NiceToString(), Kind);
     }
 
     public XElement ExportXml(bool includeStackTrace)
     {
         return new XElement("Log",
             new XAttribute("Index", this.Index),
-            new XAttribute("Role", this.Role),
+            new XAttribute("Role", this.Kind),
             new XAttribute("BeforeStart", this.BeforeStart),
             new XAttribute("Start", this.Start),
             new XAttribute("End", this.End ?? PerfCounter.Ticks),
@@ -450,7 +528,7 @@ public class HeavyProfilerEntry
         {
             Parent = parent,
             Index = int.Parse(xLog.Attribute("Index")!.Value),
-            Role = xLog.Attribute("Role")!.Value,
+            Kind = xLog.Attribute("Role")!.Value,
             BeforeStart = long.Parse(xLog.Attribute("BeforeStart")!.Value),
             Start = long.Parse(xLog.Attribute("Start")!.Value),
             End = long.Parse(xLog.Attribute("End")!.Value),
@@ -542,4 +620,29 @@ public class SqlProfileReference
 {
     public string FullKey;
     public string ElapsedToString;
+}
+
+public readonly struct StructuredLogMessage
+{
+    public string Message { get; }
+    public object?[] Arguments { get; }
+
+    public StructuredLogMessage(string format, params object?[] arguments)
+    {
+        Message = format;
+        Arguments = arguments;
+    }
+
+    public override string ToString()
+    {
+        var args = this.Arguments;
+        if (args == null)
+            return this.Message;
+
+        int i = 0;
+        return Regex.Replace(this.Message, @"\{(\w+)\}", match =>
+        {
+            return args[i++]?.ToString() ?? "";
+        });
+    }
 }

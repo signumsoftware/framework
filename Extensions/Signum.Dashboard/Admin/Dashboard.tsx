@@ -8,7 +8,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, CacheQueryConfigurationEmbedded, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, TokenEquivalenceEmbedded } from '../Signum.Dashboard'
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 import { DashboardClient } from "../DashboardClient";
-import { iconToString, parseIcon } from "@framework/Components/IconTypeahead";
+import { fallbackIcon, iconToString, parseIcon } from "@framework/Components/IconTypeahead";
 import "../Dashboard.css"
 import { getToString, toLite } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
@@ -20,7 +20,7 @@ import { EntityOperationContext } from '@framework/Operations';
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
 import { SubTokensOptions } from '@framework/FindOptions';
 
-export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
+export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleEntityTypeChange() {
     if (!p.ctx.value.entityType)
@@ -79,7 +79,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
       <div>
         <div className="d-flex">
           {icon && <div className="mx-2">
-            <FontAwesomeIcon icon={icon} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag}
+            <FontAwesomeIcon icon={fallbackIcon(icon)} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag}
               onClick={() => selectIcon(tc).then(a => {
                 if (a) {
                   tc.value.iconName = a.iconName;
@@ -121,17 +121,15 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
   const ctxBasic = ctx.subCtx({ formGroupStyle: "Basic" });
   const ctxLabel5 = ctx.subCtx({ labelColumns: 5 });
   const icon = parseIcon(ctx.value.iconName) ?? "border-none";
+
   return (
     <div>
       <div>
         <div className="row">
-          <div className="col-sm-6">
+          <div className="col-sm-8">
             <EntityLine ctx={ctx.subCtx(cp => cp.owner)} create={false} />
           </div>
-          <div className="col-sm-3">
-            <AutoLine ctx={ctxLabel5.subCtx(cp => cp.code)} />
-          </div>
-          <div className="col-sm-3">
+          <div className="col-sm-4">
             <NumberLine ctx={ctxLabel5.subCtx(cp => cp.dashboardPriority)} />
           </div>
         </div>
@@ -237,7 +235,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
   }
 }
 
-export function IsQueryCachedLine(p: { ctx: TypeContext<boolean> }) {
+export function IsQueryCachedLine(p: { ctx: TypeContext<boolean> }): React.JSX.Element {
   const forceUpate = useForceUpdate();
   return <CheckboxLine ctx={p.ctx} label={<span className={classes("fw-bold", p.ctx.value ? "text-success" : "text-danger")}> {p.ctx.niceName()}</span>} inlineCheckbox="block" onChange={forceUpate} />
 }

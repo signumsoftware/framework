@@ -103,15 +103,19 @@ class LiteModelExpressionVisitor : ExpressionVisitor
 
     private Expression BindMember(CachedEntityExpression n, Field field, Expression? prevPrimaryKey)
     {
-        Expression body = GetField(field, n.Constructor, prevPrimaryKey);
+        var body = GetField(field, n.Constructor, prevPrimaryKey);
 
-        if (!n.PrimaryKey.Type.IsNullable())
+        if (n.PrimaryKey == root.PrimaryKey)
             return body;
 
-        return Expression.Condition(
-            Expression.Equal(n.PrimaryKey, Expression.Constant(null, n.PrimaryKey.Type)),
-            Expression.Constant(null, body.Type.Nullify()),
-            body.Nullify());
+        ConstantExpression tab = Expression.Constant(n.Constructor.cachedTable, typeof(CachedTable<>).MakeGenericType(((Table)n.Constructor.table).Type));
+
+        Expression origin = Expression.Convert(Expression.Property(Expression.Call(tab, "GetRows", null), "Item", n.PrimaryKey.UnNullify()), n.Constructor.tupleType);
+
+        var result = ExpressionReplacer.Replace(body, new Dictionary<ParameterExpression, Expression> { { n.Constructor.origin, origin } });
+
+        return result;
+
     }
 
     private Expression GetField(Field field, CachedTableConstructor constructor, Expression? previousPrimaryKey)
@@ -136,7 +140,9 @@ class LiteModelExpressionVisitor : ExpressionVisitor
             {
                 IColumn column = (IColumn)field;
 
-                return GetEntity(isLite, column, field.FieldType.CleanType(),  constructor);
+                var cee =  GetEntity(isLite, column, field.FieldType.CleanType(),  constructor);
+
+                return cee;
             }
 
             if (field is FieldImplementedBy ib)
@@ -148,7 +154,8 @@ class LiteModelExpressionVisitor : ExpressionVisitor
 
                     var entity = GetEntity(isLite, column, kvp.Key, constructor);
 
-                    return Expression.Condition(Expression.NotEqual(constructor.GetTupleProperty(column), Expression.Constant(column.Type)),
+                    return Expression.Condition(
+                        Expression.NotEqual(constructor.GetTupleProperty(column), Expression.Constant(null, column.Type)),
                         Expression.Convert(entity, field.FieldType),
                         acum);
                 });
@@ -180,7 +187,7 @@ class LiteModelExpressionVisitor : ExpressionVisitor
         throw new InvalidOperationException("Unexpected {0}".FormatWith(field.GetType().Name));
     }
 
-    private Expression GetEntity(bool isLite, IColumn column, Type entityType, CachedTableConstructor constructor)
+    private CachedEntityExpression GetEntity(bool isLite, IColumn column, Type entityType, CachedTableConstructor constructor)
     {
         Expression id = constructor.GetTupleProperty(column);
 
@@ -241,7 +248,7 @@ class LiteModelExpressionVisitor : ExpressionVisitor
             {
                 return BindMember(ce, (FieldValue)table.ToStrColumn, null);
             }
-            else if(this.root != ce)
+            else if(this.root.PrimaryKey != ce.PrimaryKey)
             {
                 var cachedTableType = typeof(CachedTable<>).MakeGenericType(table.Type);
 

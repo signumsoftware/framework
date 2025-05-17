@@ -15,7 +15,7 @@ interface TreeModalProps extends  IModalProps<TreeNode | undefined> {
   title?: React.ReactNode;
 }
 
-export default function TreeModal(p : TreeModalProps){
+function TreeModal(p : TreeModalProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   const [show, setShow] = React.useState(true);
@@ -78,13 +78,17 @@ export default function TreeModal(p : TreeModalProps){
   );
 }
 
-TreeModal.open = (treeOptions: TreeOptions, options?: TreeClient.TreeModalOptions): Promise<Lite<TreeEntity> | undefined> => {
-  return openModal<TreeNode>(<TreeModal
-    treeOptions={treeOptions}
-    title={options?.title}
-  />)
-    .then(tn => tn?.lite);
+namespace TreeMap {
+  export function open(treeOptions: TreeOptions, options?: TreeClient.TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
+    return openModal<TreeNode>(<TreeModal
+      treeOptions={treeOptions}
+      title={options?.title}
+    />)
+      .then(tn => tn?.lite);
+  }
 }
+
+export default TreeMap;
 
 
 

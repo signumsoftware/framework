@@ -83,6 +83,7 @@ public abstract class Connector
 
     public abstract Connector ForDatabase(Maps.DatabaseName? database);
 
+    public abstract string OriginalDatabaseName();
     public abstract string DatabaseName();
 
     public abstract string DataSourceName();
@@ -107,8 +108,6 @@ public abstract class Connector
 
     public abstract bool SupportsScalarSubquery { get; }
     public abstract bool SupportsScalarSubqueryInAggregates { get; }
-
-    public abstract bool SupportsFullTextSearch { get; }
 
     public static string? TryExtractDatabaseNameWithPostfix(ref string connectionString, string catalogPostfix)
     {
@@ -146,6 +145,8 @@ public abstract class Connector
 
     public abstract bool AllowsConvertToTime { get; }
 
+    public abstract bool SupportsStringAggr { get; }
+
     public abstract bool SupportsSqlDependency { get; }
 
     public abstract bool SupportsFormat { get; }
@@ -157,6 +158,7 @@ public abstract class Connector
     public abstract bool SupportsDateDifBig { get; }
 
     public abstract bool SupportsPartitioning { get; }
+    public abstract string LocalTimeZone { get; }
 }
 
 public abstract class ParameterBuilder

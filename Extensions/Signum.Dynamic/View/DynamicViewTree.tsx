@@ -36,7 +36,7 @@ interface DraggedOverInfo {
   error: DraggedError
 }
 
-export function DynamicViewTree(p: DynamicViewTreeProps) {
+export function DynamicViewTree(p: DynamicViewTreeProps): React.JSX.Element {
 
   const [draggedNode, setDraggedNode] = React.useState<DesignerNode<BaseNode> | undefined>(undefined);
 
@@ -192,7 +192,7 @@ export interface DynamicViewNodeProps {
   dynamicTreeView: DynamicViewTreeHandle;
 }
 
-export function DynamicViewNode(p: DynamicViewNodeProps) {
+export function DynamicViewNode(p: DynamicViewNodeProps): React.JSX.Element {
 
 
   const [isOpened, setIsOpened] = React.useState<boolean>(true);

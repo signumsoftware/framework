@@ -23,7 +23,7 @@ import { AlertEntity, AlertMessage, AlertOperation } from './Signum.Alerts'
 const MaxNumberOfAlerts = 3;
 const MaxNumberOfGroups = 3;
 
-export default function AlertDropdown(props: { keepRingingFor?: number }) {
+export default function AlertDropdown(props: { keepRingingFor?: number }): React.JSX.Element | null {
 
   if (!Navigator.isViewable(AlertEntity))
     return null;
@@ -292,7 +292,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
 
 
 
-export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: AlertWithSize | AlertGroupWithSize) => void, onRefresh: () => void, style?: React.CSSProperties | undefined, onSizeSet: () => void }) {
+export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: AlertWithSize | AlertGroupWithSize) => void, onRefresh: () => void, style?: React.CSSProperties | undefined, onSizeSet: () => void }): React.JSX.Element {
 
   const [showAlerts, setShowAlert] = React.useState<number>(1);
   const [showHiddenAlerts, setShowHiddenAlert] = React.useState<number>(MaxNumberOfAlerts);
@@ -372,7 +372,15 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
   );
 }
 
-export function AlertToast(p: { alert: AlertWithSize, onSizeSet: () => void, expanded: boolean | "comming", onClose: (e: AlertWithSize) => void, refresh: () => void, className?: string, style?: React.CSSProperties | undefined }) {
+export function AlertToast(p: {
+  alert: AlertWithSize,
+  onSizeSet: () => void,
+  expanded: boolean | "comming",
+  onClose: (e: AlertWithSize) => void,
+  refresh: () => void,
+  className?: string,
+  style?: React.CSSProperties | undefined
+}): React.JSX.Element {
 
   var alert = p.alert.alert;
 
@@ -408,4 +416,7 @@ export function AlertToast(p: { alert: AlertWithSize, onSizeSet: () => void, exp
   );
 }
 
-AlertToast.icons = {} as { [alertTypeKey: string]: React.ReactNode };
+export namespace AlertToast {
+  export const icons: { [alertTypeKey: string]: React.ReactNode } = {};
+}
+

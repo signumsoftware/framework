@@ -104,6 +104,16 @@ export class StyleContext {
     }
   }
 
+  inputGroupVerticalClass(mode: "before" | "after"): string | undefined {
+    switch (this.formSize) {
+      case "xs": return "input-group-vertical " + mode + " input-group-xs";
+      case "sm": return "input-group-vertical " + mode + " input-group-sm";
+      case "md": return "input-group-vertical " + mode ;
+      case "lg": return "input-group-vertical " + mode + " input-group-lg";
+      default: throw new Error("Unexpected formSize " + this.formSize);
+    }
+  }
+
   get formControlClass(): string | undefined {
     switch (this.formSize) {
       case "xs": return "form-control form-control-xs";
@@ -194,7 +204,7 @@ export class StyleContext {
   }
 
 
-  static bsColumnsCss(bsColumns: BsColumns) {
+  static bsColumnsCss(bsColumns: BsColumns): string {
     return [
       (bsColumns.xs ? "col-xs-" + bsColumns.xs : ""),
       (bsColumns.sm ? "col-sm-" + bsColumns.sm : ""),
@@ -443,7 +453,7 @@ export class TypeContext<T> extends StyleContext {
     return result;
   }
 
-  using(render: (ctx: this) => React.ReactChild): React.ReactChild {
+  using(render: (ctx: this) => React.ReactNode): React.ReactNode {
     return render(this);
   }
 
@@ -451,28 +461,10 @@ export class TypeContext<T> extends StyleContext {
     return mlistItemContext(this.subCtx(property, styleOptions));
   }
 
-  get propertyPath() {
+  get propertyPath(): string | undefined {
     return this.propertyRoute && this.propertyRoute.propertyRouteType != "Root" ? this.propertyRoute.propertyPath() : undefined;
   }
 
-  get errorClass(): string | undefined {
-    return !!this.error ? "has-error" : undefined;
-  }
-
-  get errorClassBorder(): string | undefined {
-    return !!this.error ? "border has-error" : undefined;
-  }
-
-  errorAttributes(): React.HTMLAttributes<any> | undefined {
-
-    if (!this.error)
-      return undefined;
-
-    return {
-      title: this.error,
-      "data-error-path": this.prefix
-    } as any;
-  }
 }
 
 export interface ButtonsContext {

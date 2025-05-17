@@ -31,7 +31,7 @@ interface FramePageState {
   executing?: boolean;
 }
 
-export default function FramePage() {
+export default function FramePage(): React.JSX.Element {
 
   let [state, setState] = useStateWithPromise<FramePageState | undefined>(undefined);
   const stateRef = useUpdatedRef(state);
@@ -389,7 +389,7 @@ function hasChanges(state: FramePageState) {
 
 
 
-export function useLooseChanges(pair?: { entity: ModifiableEntity, lastEntity: string }) {
+export function useLooseChanges(pair?: { entity: ModifiableEntity, lastEntity: string }): void {
 
   let blocker = unstable_useBlocker(() => pair != null && JSON.stringify(pair.entity) != pair.lastEntity);
 

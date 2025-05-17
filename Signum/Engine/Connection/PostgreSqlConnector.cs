@@ -1,10 +1,13 @@
 using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.Types;
 using Npgsql;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
+using Signum.Utilities.Reflection;
 using System.Data;
 using System.Data.Common;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine;
 
@@ -41,21 +44,47 @@ public static class PostgresVersionDetector
 
 public class PostgreSqlConnector : Connector
 {
+    public ResetLazy<string> LocalTimeZoneLazy = new ResetLazy<string>(() => (string)Executor.ExecuteScalar("SELECT current_setting('TIMEZONE')")!);
+    public override string LocalTimeZone => LocalTimeZoneLazy.Value;
+
     public override ParameterBuilder ParameterBuilder { get; protected set; }
 
     public Version? PostgresVersion { get; set; }
 
-    public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion) : base(schema.Do(s => s.Settings.IsPostgres = true))
+    Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder;
+
+    string originalDatabaseName;
+    public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion, Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder = null) : base(schema.Do(s => s.Settings.IsPostgres = true))
     {
+        this.originalDatabaseName = new NpgsqlConnectionStringBuilder(connectionString).Database!;
+        this.customizeBuilder = customizeBuilder;
+        this.ChangeConnectionString(connectionString, runCustomizer: true);
         this.ConnectionString = connectionString;
         this.ParameterBuilder = new PostgreSqlParameterBuilder();
         this.PostgresVersion = postgresVersion;
     }
 
+    public void ChangeConnectionStringDatabase(string databaseName, bool runCustomizer = true)
+    {
+        NpgsqlConnectionStringBuilder csb = new NpgsqlConnectionStringBuilder(this.ConnectionString);
+        csb.Database = databaseName;
+        ChangeConnectionString(csb.ToString(), runCustomizer);
+    }
+    public void ChangeConnectionString(string connectionString, bool runCustomizer = true)
+    {
+        this.ConnectionString = connectionString;
+        var builder = new NpgsqlSlimDataSourceBuilder(connectionString);
+        if (runCustomizer)
+            customizeBuilder?.Invoke(builder);
+
+        this.DataSource = builder.Build();
+    }
+
     public override int MaxNameLength => 63;
 
     public int? CommandTimeout { get; set; } = null;
-    public string ConnectionString { get; set; }
+    public NpgsqlDataSource DataSource { get; private set; }
+    public string ConnectionString { get; private set; }
 
     public override bool AllowsMultipleQueries => true;
 
@@ -66,6 +95,8 @@ public class PostgreSqlConnector : Connector
     public override bool AllowsSetSnapshotIsolation => false;
 
     public override bool AllowsConvertToDate => true;
+
+    public override bool SupportsStringAggr => true;
 
     public override bool AllowsConvertToTime => true;
 
@@ -78,8 +109,6 @@ public class PostgreSqlConnector : Connector
     public override bool RequiresRetry => false;
 
     public override bool SupportsDateDifBig => false;
-
-    public override bool SupportsFullTextSearch => false;
 
     public override bool SupportsPartitioning => false; //for now
 
@@ -106,12 +135,17 @@ public class PostgreSqlConnector : Connector
 
     public override DbConnection CreateConnection()
     {
-        return new NpgsqlConnection(ConnectionString);
+        return DataSource.CreateConnection();
+    }
+
+    public override string OriginalDatabaseName()
+    {
+        return this.originalDatabaseName;
     }
 
     public override string DatabaseName()
     {
-        return new NpgsqlConnection(ConnectionString).Database!;
+        return new NpgsqlConnectionStringBuilder(ConnectionString).Database!;
     }
 
     public override string DataSourceName()
@@ -134,15 +168,14 @@ public class PostgreSqlConnector : Connector
         ((NpgsqlTransaction)transaction).Save(savePointName);
     }
 
+
     T EnsureConnectionRetry<T>(Func<NpgsqlConnection?, T> action)
     {
         if (Transaction.HasTransaction)
             return action(null);
 
-        using (NpgsqlConnection con = new NpgsqlConnection(this.ConnectionString))
+        using (NpgsqlConnection con = this.DataSource.OpenConnection())
         {
-            con.Open();
-
             return action(con);
         }
     }
@@ -341,6 +374,7 @@ public class PostgreSqlConnector : Connector
     {
         var nex = ReplaceException(ex, command);
         nex.Data["Sql"] = command.sp_executesql();
+        nex.Data["SqlRAW"] = command.Sql;
         return nex;
     }
 
@@ -529,6 +563,11 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
                 AssertDateTime(dt, datetimeKind);
         }
 
+        if(dbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree && value is SqlHierarchyId shi)
+        {
+            value = shi.ToSortableString();
+        }
+
         var result = new Npgsql.NpgsqlParameter(parameterName, value ?? DBNull.Value)
         {
             IsNullable = nullable
@@ -542,11 +581,17 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         return result;
     }
 
+    protected static MethodInfo miToSortableString = ReflectionTools.GetMethodInfo((SqlHierarchyId? s) => s.ToSortableString());
+
+
     public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, DateTimeKind dateTimeKind, Expression value)
     {
         var uType = value.Type.UnNullify();
         var exp =
              uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?)), Expression.Constant(dateTimeKind)) :
+             uType == typeof(SqlHierarchyId) ? Expression.Coalesce(
+                    Expression.Call(miToSortableString, Expression.Convert(value, typeof(SqlHierarchyId?))), 
+                    Expression.Constant(DBNull.Value, typeof(object))) :
              ////https://github.com/dotnet/SqlClient/issues/1009
              //uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
              //uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :
@@ -556,9 +601,11 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         Expression valueExpr = Expression.Convert(exp, typeof(object));
 
         if (nullable)
+        {
             valueExpr = Expression.Condition(Expression.Equal(value, Expression.Constant(null, value.Type)),
-                        Expression.Constant(DBNull.Value, typeof(object)),
-                        valueExpr);
+                Expression.Constant(DBNull.Value, typeof(object)),
+                valueExpr);
+        }
 
         NewExpression newExpr = Expression.New(typeof(NpgsqlParameter).GetConstructor(new[] { typeof(string), typeof(object) })!, parameterName, valueExpr);
 
@@ -582,5 +629,81 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
             mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.DataTypeName))!, Expression.Constant(udtTypeName)));
 
         return Expression.MemberInit(newExpr, mb);
+    }
+}
+
+public class PostgresStatementSplitter
+{
+    public static List<string> SplitPostgresScript(string sql)
+    {
+        var statements = new List<string>();
+        var sb = new StringBuilder();
+        bool inSingleQuote = false;
+        bool inDoubleQuote = false;
+        string? inDollarTag = null;
+        int i = 0;
+
+        while (i < sql.Length)
+        {
+            char c = sql[i];
+            sb.Append(c);
+
+            if (inDollarTag != null)
+            {
+                if (sql[i] == '$' && sql.Substring(i).StartsWith(inDollarTag))
+                {
+                    sb.Append(inDollarTag.Substring(1)); // we've already added one '$'
+                    i += inDollarTag.Length - 1;
+                    inDollarTag = null;
+                }
+            }
+            else if (inSingleQuote)
+            {
+                if (c == '\'' && (i + 1 >= sql.Length || sql[i + 1] != '\''))
+                {
+                    inSingleQuote = false;
+                }
+                else if (c == '\'' && sql[i + 1] == '\'')
+                {
+                    sb.Append('\''); // escape quote
+                    i++;
+                }
+            }
+            else if (inDoubleQuote)
+            {
+                if (c == '"') inDoubleQuote = false;
+            }
+            else
+            {
+                if (c == '\'') inSingleQuote = true;
+                else if (c == '"') inDoubleQuote = true;
+                else if (c == '$')
+                {
+                    // Look ahead to detect a dollar-quote tag like $$, $tag$
+                    var match = Regex.Match(sql.Substring(i), @"^\$[A-Za-z0-9_]*\$");
+                    if (match.Success)
+                    {
+                        inDollarTag = match.Value;
+                        sb.Append(match.Value.Substring(1)); // We've already added one '$'
+                        i += match.Length - 1;
+                    }
+                }
+                else if (c == ';')
+                {
+                    var statement = sb.ToString().Trim();
+                    if (!string.IsNullOrWhiteSpace(statement))
+                        statements.Add(statement);
+                    sb.Clear();
+                }
+            }
+
+            i++;
+        }
+
+        var final = sb.ToString().Trim();
+        if (!string.IsNullOrWhiteSpace(final))
+            statements.Add(final);
+
+        return statements;
     }
 }

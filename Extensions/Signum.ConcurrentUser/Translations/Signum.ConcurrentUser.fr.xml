@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ConcurrentUserEntity" Description="l’utilisateur simultané" PluralDescription="Utilisateurs simultanés">
+    <Member Name="IsModified" Description="Est modifié" />
+    <Member Name="SignalRConnectionID" Description="ID de connexion SignalR" />
+    <Member Name="StartTime" Description="Heure de début" />
+    <Member Name="TargetEntity" Description="Entité cible" />
+    <Member Name="User" Description="Utilisateur" />
+  </Type>
+  <Type Name="ConcurrentUserMessage">
+    <Member Name="ConcurrentUsers" Description="Utilisateurs simultanés" />
+    <Member Name="ConsiderOpening0InANewTabAndApplyYourChangesManually" Description="Envisagez d’ouvrir {0} dans un nouvel onglet et d’appliquer vos modifications manuellement" />
+    <Member Name="CurrentlyEditing" Description="En cours d’édition" />
+    <Member Name="DatabaseChangesDetected" Description="Modifications de la base de données détectées !" />
+    <Member Name="DoYouWantToReloadIt" Description="Voulez-vous le recharger ?" />
+    <Member Name="LooksLikeSomeoneJustSaved0ToTheDatabase" Description="On dirait que quelqu’un vient d'enregistrer {0} dans la base de données." />
+    <Member Name="LooksLikeYouAreNotTheOnlyOneCurrentlyModifiying0OnlyTheFirstOneWillBeAbleToSaveChanges" Description="On dirait que vous n’êtes pas le seul à modifier actuellement {0}... Seul le premier pourra enregistrer les modifications !" />
+    <Member Name="ReloadIt" Description="Rechargez-le !" />
+    <Member Name="ThisIsNotTheLatestVersionOf0" Description="Il ne s’agit pas de la dernière version de {0}" />
+    <Member Name="WarningYouWillLostYourCurrentChanges" Description="AVERTISSEMENT : Vous perdrez vos modifications actuelles." />
+    <Member Name="YouHaveLocalChangesBut0HasAlreadyBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges" Description="Vous avez des modifications locales, mais {0} a déjà été enregistrée dans la base de données... Vous ne pouvez plus enregistrer les modifications :(" />
+    <Member Name="YouHaveLocalChangesIn0ThatIsCurrentlyOpenByOtherUsersSoFarNoOneElseHasMadeModifications" Description="Vous avez des modifications locales dans {0} qui est actuellement ouvert par d’autres utilisateurs. Jusqu’à présent, personne d’autre n’a apporté de modifications. " />
+  </Type>
+  <Type Name="ConcurrentUserOperation">
+    <Member Name="Delete" Description="Supprimer" />
+  </Type>
+</Translations>

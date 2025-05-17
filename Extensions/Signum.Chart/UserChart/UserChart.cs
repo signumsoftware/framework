@@ -44,6 +44,8 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     public bool? IncludeDefaultFilters { get; set; }
 
     public int? MaxRows { get; set; }
+    
+    public ChartTimeSeriesEmbedded? ChartTimeSeries { get; set; }
 
     ChartScriptSymbol chartScript;
     public ChartScriptSymbol ChartScript
@@ -85,10 +87,12 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     internal void ParseData(QueryDescription description)
     {
         foreach (var f in Filters)
-            f.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate);
+            f.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate | (ChartTimeSeries != null ? SubTokensOptions.CanTimeSeries : 0));
 
         foreach (var c in Columns)
-            c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
+        {            
+            c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | (ChartTimeSeries != null ? SubTokensOptions.CanTimeSeries : 0));
+        }
     }
 
     static Func<QueryEntity, object> ToQueryName;
@@ -142,7 +146,9 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
         IncludeDefaultFilters = element.Attribute("IncludeDefaultFilters")?.Let(a => bool.Parse(a.Value));
         ChartScript = SymbolLogic<ChartScriptSymbol>.ToSymbol(element.Attribute("ChartScript")!.Value);
         MaxRows = element.Attribute("MaxRows")?.Let(at => at.Value.ToInt());
-        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
+
+        var valuePr = PropertyRoute.Construct((UserChartEntity wt) => wt.Filters[0].ValueString);
+        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
         Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
         CustomDrilldowns.Synchronize((element.Element("CustomDrilldowns")?.Elements("CustomDrilldown")).EmptyIfNull().Select(x => (Lite<Entity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLiteFat()).NotNull().ToMList());
         var paramsXml = (element.Element("Parameters")?.Elements()).EmptyIfNull().ToDictionary(a => a.Attribute("Name")!.Value);

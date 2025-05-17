@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using Signum.Entities.Internal;
-using Signum.Engine.Maps;
 
 namespace Signum.Entities;
 
@@ -74,11 +73,6 @@ public interface Lite<out T> : IComparable, IComparable<Lite<Entity>>
     /// Sets the model of the entity. Not checked in anyway. 
     /// </summary>
     void SetModel(object? model);
-
-    /// <summary>
-    /// Sets the id of the entity. Not checked in anyway. 
-    /// </summary>
-    void SetId(PrimaryKey id);
 
     /// <summary>
     /// Copies the Id from the entity to this lite instance. Typically used after saving by the framework. 

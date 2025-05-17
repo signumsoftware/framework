@@ -3,7 +3,7 @@ import { AutoLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { PredictorClassificationMetricsEmbedded, PredictorEntity } from '../Signum.MachineLearning'
 
-export default function PredictorClassificationMetrics(p : { ctx: TypeContext<PredictorEntity> }){
+export default function PredictorClassificationMetrics(p : { ctx: TypeContext<PredictorEntity> }): React.JSX.Element {
 
   function renderRow(ctx: TypeContext<PredictorEntity>, property: (val: PredictorClassificationMetricsEmbedded) => number | null | undefined) {
     const ctxT = ctx.subCtx(a => a.classificationTraining!);

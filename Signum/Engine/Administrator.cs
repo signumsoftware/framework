@@ -1,15 +1,17 @@
-using Microsoft.VisualBasic;
+using Microsoft.Identity.Client;
+using Npgsql;
 using Signum.CodeGeneration;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
-using Signum.Security;
+using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Data.Common;
 using System.Diagnostics;
+using System.IO;
 
 namespace Signum.Engine;
 
@@ -32,12 +34,18 @@ public static class Administrator
     {
         using (Connector.CommandTimeoutScope(TimeoutCreateDatabase))
         {
-            SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt()!;
-            foreach (SqlPreCommand command in totalScript.Commands)
+            using (var tr = new Transaction())
             {
-                command.ExecuteLeaves();
-                SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+                SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt()!;
+                foreach (SqlPreCommand command in totalScript.Commands)
+                {
+                    command.ExecuteLeaves();
+                    SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+                }
+
+                tr.Commit();
             }
+
         }
     }
 
@@ -124,8 +132,8 @@ public static class Administrator
         }
 
         Console.Write("Cleaning database...");
-        using(Connector.CommandTimeoutScope(5 * 60))
-        CleanAllDatabases();
+        using (Connector.CommandTimeoutScope(5 * 60))
+            CleanAllDatabases();
         Console.WriteLine("Done.");
 
         Console.Write("Generating new database...");
@@ -150,6 +158,10 @@ public static class Administrator
         }
 
         command.OpenSqlFileRetry();
+
+        GlobalLazy.ResetAll(systemLog: false);
+        Schema.Current.InvalidateMetadata();
+        Schema.Current.InvalidateCache();
     }
 
     public static SqlPreCommand? TotalSynchronizeScript(bool interactive = true, bool schemaOnly = false)
@@ -166,6 +178,11 @@ public static class Administrator
             Connector.Current.SqlBuilder.UseDatabase(),
             command,
             new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
+    }
+
+    public static bool NeedsSynchrhronization()
+    {
+        return Schema.Current.NeedsSynchronization();
     }
 
     public static void CreateTemporaryTable<T>()
@@ -417,6 +434,28 @@ public static class Administrator
         return prov.Translate(query.Expression, tr => tr.MainCommand);
     }
 
+    public static SqlPreCommand? UnsafeDeletePreCommandVirtualMList<T>(IQueryable<T> query, bool force = false)
+        where T : Entity
+    {
+        var virtualMList = VirtualMList.RegisteredVirtualMLists.GetOrThrow(typeof(T));
+
+        var mlist = virtualMList.Select(a => giUnsafeDeletePreCommandVirtualMListPrivate.GetInvoker(a.Value.BackReferenceRoute.RootType, typeof(T))(query, a.Value.BackReferenceExpression, force)).Combine(Spacing.Simple);
+
+        var basic = UnsafeDeletePreCommand<T>(query, force);
+
+        return SqlPreCommand.Combine(Spacing.Simple, mlist, basic);
+    }
+
+    static GenericInvoker<Func<IQueryable, LambdaExpression, bool, SqlPreCommandSimple?>> giUnsafeDeletePreCommandVirtualMListPrivate =
+        new((query, backReference, force) => UnsafeDeletePreCommandVirtualMListPrivate<ExceptionEntity, ExceptionEntity>((IQueryable<ExceptionEntity>)query, (Expression<Func<ExceptionEntity, Lite<ExceptionEntity>>>)backReference, force));
+    static SqlPreCommandSimple? UnsafeDeletePreCommandVirtualMListPrivate<V, T>(IQueryable<T> query, Expression<Func<V, Lite<T>>> backReference, bool force)
+    where T : Entity
+        where V : Entity
+    {
+        return UnsafeDeletePreCommand(query.SelectMany(e => Database.Query<V>().Where(v => backReference.Evaluate(v).Is(e))), force);
+    }
+
+
     public static SqlPreCommandSimple? UnsafeDeletePreCommand<T>(IQueryable<T> query, bool force = false, bool avoidMList = false)
         where T : Entity
     {
@@ -464,9 +503,9 @@ public static class Administrator
 
             foreach (var item in list)
             {
-                if (item.ToString() != item.toStr)
+                if (item.ToString() != item.ToStr)
                     item.InDB().UnsafeUpdate()
-                        .Set(a => a.toStr, a => item.ToString())
+                        .Set(a => a.ToStr, a => item.ToString())
                         .Execute();
             }
         });
@@ -480,20 +519,20 @@ public static class Administrator
     public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string?>> expression) where T : Entity, new()
     {
         SafeConsole.WaitRows("UnsafeUpdate toStr for {0}".FormatWith(typeof(T).TypeName()), () =>
-            query.UnsafeUpdate().Set(a => a.toStr, expression).Execute());
+            query.UnsafeUpdate().Set(a => a.ToStr, expression).Execute());
     }
 
     public static void UpdateToString<T>(T entity) where T : Entity, new()
     {
         entity.InDB().UnsafeUpdate()
-            .Set(e => e.toStr, e => entity.ToString())
+            .Set(e => e.ToStr, e => entity.ToString())
             .Execute();
     }
 
     public static void UpdateToString<T>(T entity, Expression<Func<T, string?>> expression) where T : Entity, new()
     {
         entity.InDB().UnsafeUpdate()
-            .Set(e => e.toStr, expression)
+            .Set(e => e.ToStr, expression)
             .Execute();
     }
 
@@ -797,6 +836,183 @@ public static class Administrator
             throw new UnexpectedValueException(f);
 
         return DeleteWhereScript(table, column, value.Id);
+    }
+
+
+    public static IDisposable DisableHistoryTable<T>(bool includeMList = true)
+        where T : Entity
+    {
+        return DisableHistoryTable(typeof(T), includeMList);
+    }
+       
+    public static IDisposable DisableHistoryTable( Type type, bool includeMList = true)
+    {
+        var builder = new SqlBuilder(Connector.Current);
+        var table = Schema.Current.Table(type);
+        var mlist = table.TablesMList().ToArray();
+        Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(table.Name));
+        Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(table));
+        if (includeMList)
+            foreach (var item in mlist)
+            {
+                Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(item.Name));
+                Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(item));
+            }
+
+        return new Disposable(() =>
+        {
+            if (includeMList)
+                foreach (var item in mlist)
+                {
+                    Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(item));
+                    Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(item));
+                }
+
+            Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(table));
+            Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(table));
+        });
+    }
+
+    public static IDisposable WithSnapshotOrTempalateDatabase(string? templateName = null)
+    {
+        var dbName = Connector.Current.DatabaseName();
+        templateName ??= dbName + "_Template";
+
+        if (Connector.Current is SqlServerConnector)
+            return new Disposable(() => Snapshots.CreateSnapshot(templateName, Directory.GetCurrentDirectory()));
+
+        else if (Connector.Current is PostgreSqlConnector pg)
+        {
+            pg.ChangeConnectionStringDatabase("postgres", runCustomizer: false);
+
+            PostgressTools.CreateDatabase(templateName);
+
+            pg.ChangeConnectionStringDatabase(templateName);
+
+            return new Disposable(() =>
+            {
+                pg.ChangeConnectionStringDatabase("postgres", runCustomizer: false);
+
+                PostgressTools.CreateDatabase(dbName, fromTemplate: templateName);
+
+                pg.ChangeConnectionStringDatabase(dbName);
+            });
+        }
+        else 
+            throw new UnexpectedValueException(Connector.Current);
+    }
+
+    public static void RestoreSnapshotOrDatabase(string? templateName = null)
+    {
+        var dbName = Connector.Current.DatabaseName();
+        templateName ??= dbName + "_Template";
+
+        if (Connector.Current is SqlServerConnector)
+            Snapshots.RestoreSnapshot(templateName);
+        else if (Connector.Current is PostgreSqlConnector pg)
+        {
+            pg.ChangeConnectionStringDatabase("postgres", runCustomizer: false);
+
+            PostgressTools.CreateDatabase(dbName, fromTemplate: templateName);
+
+            pg.ChangeConnectionStringDatabase(dbName);
+        }
+        else
+            throw new UnexpectedValueException(Connector.Current);
+    }
+
+    public static class Snapshots
+    {
+        public static void CreateSnapshot(string snapshotName, string directory, bool overwrite = true)
+        {
+            if (overwrite && Database.View<SysDatabases>().Any(a => a.name == snapshotName))
+                DropSnapshot(snapshotName);
+
+            var file = Database.View<SysDatabaseFiles>().SingleEx(a => a.type == 0);
+
+            var dbName = Connector.Current.DatabaseName();
+            Executor.ExecuteNonQuery($"CREATE DATABASE {snapshotName} ON (NAME=[{file.name}], FILENAME='{Path.Combine(directory,snapshotName)}.ss') AS SNAPSHOT OF [{dbName}]");
+        }
+
+        public static void DropSnapshot(string snapshotName)
+        {
+            Executor.ExecuteNonQuery($"DROP DATABASE {snapshotName}");
+        }
+
+        public static void RestoreSnapshot(string snapshotName)
+        {
+            var dbName = Connector.Current.DatabaseName();
+
+            Executor.ExecuteNonQuery(
+                $"""
+                USE master;
+                ALTER DATABASE {dbName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+
+                RESTORE DATABASE {dbName}
+                FROM DATABASE_SNAPSHOT = '{snapshotName}';
+
+                ALTER DATABASE {dbName} SET MULTI_USER;
+                """
+                );
+        }
+    }
+
+    public static class PostgressTools
+    {
+
+        public static void CreateDatabase(string dbName, bool closeConnections = true, string? fromTemplate = null)
+        {
+            if (closeConnections)
+            {
+                CloseConnections(dbName);
+
+                if (fromTemplate != null)
+                    CloseConnections(fromTemplate);
+            }
+
+            Executor.ExecuteNonQuery($"""DROP DATABASE IF EXISTS {dbName.SqlEscape(true)};""");
+
+            if (fromTemplate == null)
+                Executor.ExecuteNonQuery($"""CREATE DATABASE {dbName.SqlEscape(true)};""");
+            else
+                Executor.ExecuteNonQuery($"""CREATE DATABASE {dbName.SqlEscape(true)} WITH TEMPLATE {fromTemplate.SqlEscape(true)};""");
+
+        }
+
+      
+
+        private static void CloseConnections(string dbName)
+        {
+            Executor.ExecuteNonQuery($"""
+                    SELECT pg_terminate_backend(pg_stat_activity.pid)
+                    FROM pg_stat_activity
+                    WHERE pg_stat_activity.datname = '{dbName}'
+                    AND pid <> pg_backend_pid();
+                    """);
+        }
+
+        public static void CreateDatabaseIfNoExists(string connectionString)
+        {
+            NpgsqlConnectionStringBuilder csb = new NpgsqlConnectionStringBuilder(connectionString);
+            var dbName = csb.Database!;
+            csb.Database = "postgres";
+            using (var conn = new NpgsqlConnection(csb.ToString()))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand($"SELECT 1 FROM pg_database WHERE datname = '{dbName}';", conn))
+                {
+                    var exists = cmd.ExecuteScalar();
+
+                    if (exists == null) // Database does not exist
+                    {
+                        using (var createCmd = new NpgsqlCommand($"CREATE DATABASE {dbName.SqlEscape(true)};", conn))
+                        {
+                            createCmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }

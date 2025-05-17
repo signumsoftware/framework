@@ -46,7 +46,7 @@ public static class PredictorCodificationLogic
             {
                 string? GetSplitpKey(int index, int limit)
                 {
-                    var token = ctx.SubQueries[pcsq.SubQuery].SplitBy?.ElementAtOrDefault(index)?.Column.Token;
+                    var token = ctx.SubQueries[pcsq.SubQuery].SplitBy?.ElementAtOrDefault(index)?.Token;
                     var obj = pcsq.Keys?.ElementAtOrDefault(index);
                     return ToStringValue(token, obj, limit);
                 }

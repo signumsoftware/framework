@@ -1540,7 +1540,7 @@ NodeUtils.register<ButtonNode>({
 
 export namespace NodeConstructor {
 
-  export function createDefaultNode(ti: TypeInfo) {
+  export function createDefaultNode(ti: TypeInfo): DivNode {
     return {
       kind: "Div",
       children: createSubChildren(PropertyRoute.root(ti))

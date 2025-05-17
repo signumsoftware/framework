@@ -6,8 +6,8 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../S
 import * as Entities from '../../../Signum/React/Signum.Entities'
 
 
-export module TypeHelpMessage {
-  export const Previous = new MessageKey("TypeHelpMessage", "Previous");
-  export const Next = new MessageKey("TypeHelpMessage", "Next");
+export namespace TypeHelpMessage {
+  export const Previous: MessageKey = new MessageKey("TypeHelpMessage", "Previous");
+  export const Next: MessageKey = new MessageKey("TypeHelpMessage", "Next");
 }
 
