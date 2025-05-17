@@ -30,12 +30,10 @@ public class QueryTokenPartProxy
 
         var container = this.Element.WaitElementVisible(By.ClassName("rw-popup-container"));
 
-        var selector = key.HasText() ?
-            By.CssSelector("div > span[data-token='" + key + "']") :
-            By.CssSelector("div > span:not([data-token])");
+        var dataTokenAttr = key.HasText() ? $"[data-token='{key}']" : ":not([data-token])";
+        var tokenElement = container.WaitElementVisible(By.CssSelector($"div > span{dataTokenAttr}"));
+        tokenElement.SafeClick();
 
-        var elem = container.WaitElementVisible(selector);
-        elem.ScrollTo();
-        elem.Click();
+        Element.WaitElementVisible(By.CssSelector($".rw-dropdown-list-value span{dataTokenAttr}"));
     }
 }
