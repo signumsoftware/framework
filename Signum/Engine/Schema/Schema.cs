@@ -552,7 +552,7 @@ public class Schema : IImplementationsFinder
         if (Connector.Current is PostgreSqlConnector)
         {
             return new[] {
-                new SqlPreCommandSimple($"EXECUTE AS LOGIN = '{ExecuteAs}';"),
+                new SqlPreCommandSimple($"SET ROLE {ExecuteAs};"),
                 command!
             }.Combine(Spacing.Double);
 
@@ -560,7 +560,7 @@ public class Schema : IImplementationsFinder
         else
         {
             return new[] {
-                new SqlPreCommandSimple($"SET ROLE {ExecuteAs};"),
+                new SqlPreCommandSimple($"EXECUTE AS LOGIN = '{ExecuteAs}';"),
                 command!
             }.Combine(Spacing.Double);
         }
