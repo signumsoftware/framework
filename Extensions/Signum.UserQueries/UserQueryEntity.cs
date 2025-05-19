@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Signum.Basics;
 using Signum.Dashboard;
 using Signum.DynamicQuery;
+using Signum.Omnibox;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using System.ComponentModel;
@@ -365,15 +367,69 @@ public class ValueUserQueryElementEmbedded : EmbeddedEntity
 
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
+public class BigValuePartEntity : Entity, IPartParseDataEntity
+{
+    public QueryTokenEmbedded? ValueToken { get; set; }
+
+    public UserQueryEntity? UserQuery { get; set; }
+
+    public bool RequiresTitle => false;
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("BigValuePart",
+           UserQuery == null ? null : new XAttribute(nameof(UserQuery), ctx.Include(UserQuery)),
+           ValueToken == null ? null : new XAttribute(nameof(ValueToken), ValueToken.Token.FullKey())
+           );
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute(nameof(UserQuery))!.Value));
+        ValueToken = element.Attribute(nameof(ValueToken))?.Let(t => new QueryTokenEmbedded(t.Value));
+        this.ParseData(this.GetDashboard());
+    }
+
+    public void ParseData(DashboardEntity dashboardEntity)
+    {
+        if (ValueToken != null)
+        {
+            var queryKey = this.UserQuery != null ? this.UserQuery.Query.Key : dashboardEntity.EntityType?.ToString();
+
+            if (queryKey != null)
+            {
+                var qn = QueryLogic.ToQueryName(queryKey);
+                var qd = QueryLogic.Queries.QueryDescription(qn);
+                this.ValueToken.ParseData(this, qd, (this.UserQuery != null ? SubTokensOptions.CanElement | SubTokensOptions.CanAggregate : 0));
+            }
+        }
+
+    }
+
+    public IPartEntity Clone() => new BigValuePartEntity
+    {
+        ValueToken = ValueToken,
+        UserQuery = UserQuery,
+    };
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if(pi.Name == nameof(ValueToken))
+        {
+            if (UserQuery == null && this.GetDashboard().EntityType == null)
+                return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
+        }
+
+        return base.PropertyValidation(pi);
+    }
+}
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
 public class UserQueryPartEntity : Entity, IPartEntity
 {
     public UserQueryEntity UserQuery { get; set; }
 
     public bool IsQueryCached { get; set; }
-
-    public UserQueryPartRenderMode RenderMode { get; set; }
-
-    public bool AggregateFromSummaryHeader { get; set; }
 
     public AutoUpdate AutoUpdate { get; set; }
 
@@ -398,7 +454,6 @@ public class UserQueryPartEntity : Entity, IPartEntity
         return new UserQueryPartEntity
         {
             UserQuery = this.UserQuery,
-            RenderMode = this.RenderMode,
             AllowSelection = this.AllowSelection,
             ShowFooter = this.ShowFooter,
             CreateNew = this.CreateNew,
@@ -411,9 +466,7 @@ public class UserQueryPartEntity : Entity, IPartEntity
     {
         return new XElement("UserQueryPart",
             new XAttribute(nameof(UserQuery), ctx.Include(UserQuery)),
-            new XAttribute(nameof(RenderMode), RenderMode),
             new XAttribute(nameof(AllowSelection), AllowSelection),
-            AggregateFromSummaryHeader ? new XAttribute(nameof(AggregateFromSummaryHeader), AggregateFromSummaryHeader) : null,
             ShowFooter ? new XAttribute(nameof(ShowFooter), ShowFooter) : null,
             CreateNew ? new XAttribute(nameof(CreateNew), CreateNew) : null,
             IsQueryCached ? new XAttribute(nameof(IsQueryCached), IsQueryCached) : null,
@@ -424,10 +477,8 @@ public class UserQueryPartEntity : Entity, IPartEntity
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
         UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery")!.Value));
-        RenderMode = element.Attribute(nameof(RenderMode))?.Value.ToEnum<UserQueryPartRenderMode>() ?? UserQueryPartRenderMode.SearchControl;
         AllowSelection = element.Attribute(nameof(AllowSelection))?.Value.ToBool() ?? true;
         ShowFooter = element.Attribute(nameof(ShowFooter))?.Value.ToBool() ?? false;
-        AggregateFromSummaryHeader = element.Attribute(nameof(AggregateFromSummaryHeader))?.Value.ToBool() ?? false;
         CreateNew = element.Attribute(nameof(CreateNew))?.Value.ToBool() ?? false;
         IsQueryCached = element.Attribute(nameof(IsQueryCached))?.Value.ToBool() ?? false;
         AllowMaxHeight = element.Attribute(nameof(AllowMaxHeight))?.Value.ToBool() ?? false;

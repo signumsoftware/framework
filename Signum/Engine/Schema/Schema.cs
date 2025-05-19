@@ -462,7 +462,7 @@ public class Schema : IImplementationsFinder
                 })
                 .Combine(Spacing.Triple);
 
-            return command;
+            return WithExecuteAs(command);
         }
     }
 
@@ -520,7 +520,6 @@ public class Schema : IImplementationsFinder
         return ViewBuilder.NewView(viewType);
     }
 
-   
 
     public event Func<SqlPreCommand?> Generating;
     public SqlPreCommand? GenerationScipt(string? databaseNameReplacement = null)
@@ -534,14 +533,38 @@ public class Schema : IImplementationsFinder
         using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
         using (ExecutionMode.Global())
         {
-            return Generating
+            var result = Generating
                 .GetInvocationListTyped()
                 .Select(e => e())
                 .Combine(Spacing.Triple);
+
+            return WithExecuteAs(result);
         }
     }
 
 
+    public string? ExecuteAs;
+    private SqlPreCommand? WithExecuteAs(SqlPreCommand? command)
+    {
+        if (ExecuteAs == null || command == null)
+            return command;
+
+        if (Connector.Current is PostgreSqlConnector)
+        {
+            return new[] {
+                new SqlPreCommandSimple($"EXECUTE AS LOGIN = '{ExecuteAs}';"),
+                command!
+            }.Combine(Spacing.Double);
+
+        }
+        else
+        {
+            return new[] {
+                new SqlPreCommandSimple($"SET ROLE {ExecuteAs};"),
+                command!
+            }.Combine(Spacing.Double);
+        }
+    }
 
     public event Action? SchemaCompleted;
 

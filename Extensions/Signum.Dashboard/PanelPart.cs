@@ -9,6 +9,11 @@ namespace Signum.Dashboard;
 
 public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
 {
+    public PanelPartEmbedded()
+    {
+        BindParent();
+    }
+
     [StringLengthValidator(Min = 3, Max = 100)]
     public string? Title { get; set; }
 
@@ -135,6 +140,11 @@ public interface IPartEntity : IEntity
 
     XElement ToXml(IToXmlContext ctx);
     void FromXml(XElement element, IFromXmlContext ctx);
+}
+
+public interface IPartParseDataEntity : IPartEntity
+{
+    void ParseData(DashboardEntity dashboard); //Parent not bound yet
 }
 
 public static class PanelPartExtensions

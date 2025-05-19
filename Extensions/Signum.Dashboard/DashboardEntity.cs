@@ -233,6 +233,16 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
 
         return base.PropertyValidation(pi);
     }
+
+    protected override void PostRetrieving(PostRetrievingContext ctx)
+    {
+        base.PostRetrieving(ctx);
+
+        foreach (var item in this.Parts.Select(a => a.Content).OfType<IPartParseDataEntity>())
+        {
+            item.ParseData(this);
+        }
+    }
 }
 
 public class DashboardLiteModel : ModelEntity

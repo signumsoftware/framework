@@ -7,9 +7,10 @@ import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValu
 import { Lite, Entity, getToString, EmbeddedEntity, EntityControlMessage } from '../Signum.Entities'
 import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toLuxonDurationFormat, timeToString, toFormatWithFixes } from '../Reflection'
 import { SearchControlProps } from "./SearchControl";
+import { ColumnParsed } from "./SearchControlLoaded";
 import { BsColor, BsSize } from '../Components';
 import { PropertyRoute, StyleContext } from '../Lines'
-import { useAPI, usePrevious } from '../Hooks'
+import { useAPI, usePrevious, useVersion } from '../Hooks'
 import * as Hooks from '../Hooks'
 import { TypeBadge } from '../Lines/AutoCompleteConfig'
 import { toAbsoluteUrl } from '../AppContext'
@@ -19,7 +20,7 @@ import { TimeMachineColors } from '../Lines/TimeMachineIcon'
 export interface SearchValueProps {
   ctx?: StyleContext;
   id?: string;
-  valueToken?: string | QueryTokenString<any>;
+  valueToken?: string | QueryTokenString<any> | QueryToken;
   findOptions: FindOptions;
   multipleValues?: { vertical?: boolean, showType?: boolean };
   isLink?: boolean;
@@ -79,6 +80,9 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
     if (p.valueToken == null)
       return Promise.resolve(null);
 
+    if ((p.valueToken as QueryToken).key)
+      return p.valueToken as QueryToken;
+
     return Finder.parseSingleToken(p.findOptions.queryName, p.valueToken.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)
       .then(st => {
         controller.valueToken = st;
@@ -87,8 +91,8 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
       });
   }, [p.valueToken?.toString()]);
 
-  const [reloadTicks, setReloadTicks] = React.useState(0);
-  var deps = [reloadTicks, ...(p.deps ?? [])];
+  const [version, updateVersion] = useVersion();
+  var deps = [version, ...(p.deps ?? [])];
 
   var initialDeps = React.useRef(deps);
 
@@ -176,16 +180,14 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
 
   }, [p.initialValue, valueToken, Finder.findOptionsPath(p.findOptions), p.ctx?.frame?.currentDate, p.ctx?.frame?.previousDate, ...(deps || [])], { avoidReset: true });
 
-  function refreshValue() {
-    setReloadTicks(a => a + 1);
-  }
+
 
   var controller = React.useMemo(() => ({} as any as SearchValueController), []);
   controller.props = p;
   controller.value = value;
   controller.valueToken = valueToken;
   controller.renderValue = renderValue;
-  controller.refreshValue = refreshValue;
+  controller.refreshValue = updateVersion;
   controller.handleClick = handleClick;
 
 
@@ -332,7 +334,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
     }
 
     Navigator.view(lite)
-      .then(() => { refreshValue(); p.onExplored && p.onExplored(); });
+      .then(() => { updateVersion(); p.onExplored && p.onExplored(); });
   }
 
   function renderValue(): React.ReactElement | string | null{
@@ -350,39 +352,47 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
     if (!token)
       return null;
 
-    switch (token.filterType) {
-      case "Integer":
-      case "Decimal":
-        {
-          const numberFormat = toNumberFormat(p.format ?? token.format);
+    var qs = Finder.getSettings(p.findOptions.queryName);
 
-          var unit = p.unit === null ? p.unit : p.unit ?? token.unit;
-          if (unit)
-            return numberFormat.format(value) + " " + unit;
-          else
-            return numberFormat.format(value);
-        }
-      case "DateTime":
-        {
-          const luxonFormat = toLuxonFormat(p.format ?? token.format, token.type.name as "DateOnly" | "DateTime");
-          return toFormatWithFixes(DateTime.fromISO(value), luxonFormat);
-        }
-      case "Time":
-        {
-          const luxonFormat = toLuxonDurationFormat(p.format ?? token.format);
-          return Duration.fromISOTime(value).toFormat(luxonFormat ?? "hh:mm:ss");
-        }
-      case "String": return value;
-      case "Lite": return value && Navigator.renderLite(value as Lite<Entity>);
-      case "Embedded": return getToString(value as EmbeddedEntity);
-      case "Boolean": return <input type="checkbox" className="form-check-input" disabled={true} checked={value} />
-      case "Enum": return getEnumInfo(token!.type.name, value).niceName;
-      case "Guid":
-        let str = value as string;
-        return <span className="guid">{str.substring(0, 4) + "…" + str.substring(str.length - 4)}</span>;
-    }
+    var formatter = Finder.getCellFormatter(qs, token, undefined);
 
-    return value;
+    const cfc: Finder.CellFormatterContext = { columns: [token.fullKey], row: { entity: undefined, columns: [value] }, rowIndex: 0, refresh: () => updateVersion() };
+    const cp: ColumnParsed = { column: { token: token }, columnIndex: 0, resultIndex: 0 };
+    return formatter.formatter(value, cfc, cp) ?? null;
+
+    //switch (token.filterType) {
+    //  case "Integer":
+    //  case "Decimal":
+    //    {
+    //      const numberFormat = toNumberFormat(p.format ?? token.format);
+
+    //      var unit = p.unit === null ? p.unit : p.unit ?? token.unit;
+    //      if (unit)
+    //        return numberFormat.format(value) + " " + unit;
+    //      else
+    //        return numberFormat.format(value);
+    //    }
+    //  case "DateTime":
+    //    {
+    //      const luxonFormat = toLuxonFormat(p.format ?? token.format, token.type.name as "DateOnly" | "DateTime");
+    //      return toFormatWithFixes(DateTime.fromISO(value), luxonFormat);
+    //    }
+    //  case "Time":
+    //    {
+    //      const luxonFormat = toLuxonDurationFormat(p.format ?? token.format);
+    //      return Duration.fromISOTime(value).toFormat(luxonFormat ?? "hh:mm:ss");
+    //    }
+    //  case "String": return value;
+    //  case "Lite": return value && Navigator.renderLite(value as Lite<Entity>);
+    //  case "Embedded": return getToString(value as EmbeddedEntity);
+    //  case "Boolean": return <input type="checkbox" className="form-check-input" disabled={true} checked={value} />
+    //  case "Enum": return getEnumInfo(token!.type.name, value).niceName;
+    //  case "Guid":
+    //    let str = value as string;
+    //    return <span className="guid">{str.substring(0, 4) + "…" + str.substring(str.length - 4)}</span>;
+    //}
+
+    //return value;
   }
 
 
@@ -392,7 +402,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
     if (p.onExplore) {
       p.onExplore(controller).then(r => {
         if (r && !p.avoidAutoRefresh) 
-          refreshValue();
+          updateVersion();
 
         if (p.onExplored)
           p.onExplored();
@@ -445,7 +455,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
     else
       Finder.explore(fo, { searchControlProps: p.searchControlProps, modalSize: p.modalSize }).then(() => {
         if (!p.avoidAutoRefresh)
-          refreshValue();
+          updateVersion();
 
         if (p.onExplored)
           p.onExplored();
