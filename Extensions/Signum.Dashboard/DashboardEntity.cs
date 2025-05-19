@@ -238,9 +238,9 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
     {
         base.PostRetrieving(ctx);
 
-        foreach (var item in this.Parts.Select(a => a.Content).OfType<IPartPostRetrievingEntity>())
+        foreach (var item in this.Parts.Select(a => a.Content).OfType<IPartParseDataEntity>())
         {
-            item.PartPostRetrieving(this);
+            item.ParseData(this);
         }
     }
 }

@@ -141,7 +141,7 @@ export interface IPartEntity extends Entities.Entity {
   requiresTitle: boolean;
 }
 
-export interface IPartPostRetrievingEntity extends IPartEntity, Entities.Entity {
+export interface IPartParseDataEntity extends IPartEntity, Entities.Entity {
 }
 
 export const LinkElementEmbedded: Type<LinkElementEmbedded> = new Type<LinkElementEmbedded>("LinkElementEmbedded");

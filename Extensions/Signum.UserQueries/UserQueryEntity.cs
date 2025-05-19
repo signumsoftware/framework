@@ -367,7 +367,7 @@ public class ValueUserQueryElementEmbedded : EmbeddedEntity
 
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
-public class BigValuePartEntity : Entity, IPartPostRetrievingEntity
+public class BigValuePartEntity : Entity, IPartParseDataEntity
 {
     public QueryTokenEmbedded? ValueToken { get; set; }
 
@@ -390,7 +390,7 @@ public class BigValuePartEntity : Entity, IPartPostRetrievingEntity
         this.ParseData(this.GetDashboard());
     }
 
-    internal void ParseData(DashboardEntity dashboardEntity)
+    public void ParseData(DashboardEntity dashboardEntity)
     {
         if (ValueToken != null)
         {
@@ -421,11 +421,6 @@ public class BigValuePartEntity : Entity, IPartPostRetrievingEntity
         }
 
         return base.PropertyValidation(pi);
-    }
-
-    void IPartPostRetrievingEntity.PartPostRetrieving(DashboardEntity dashboard)
-    {
-        this.ParseData(dashboard);
     }
 }
 

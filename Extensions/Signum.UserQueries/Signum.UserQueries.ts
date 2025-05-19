@@ -19,7 +19,7 @@ export type AutoUpdate =
   "Dashboard";
 
 export const BigValuePartEntity: Type<BigValuePartEntity> = new Type<BigValuePartEntity>("BigValuePart");
-export interface BigValuePartEntity extends Entities.Entity, Dashboard.IPartPostRetrievingEntity, Dashboard.IPartEntity {
+export interface BigValuePartEntity extends Entities.Entity, Dashboard.IPartParseDataEntity, Dashboard.IPartEntity {
   Type: "BigValuePart";
   valueToken: Queries.QueryTokenEmbedded | null;
   userQuery: UserQueryEntity | null;

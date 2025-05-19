@@ -116,13 +116,13 @@ export function BigValueSearchCounter(p: BigValueBadgeProps): React.JSX.Element 
               <FontAwesomeIcon icon={parseIcon(p.iconName)!} color={p.iconColor} size="4x" />}
           </div>
           <div className={classes("col-lg-9 flip", "text-end")}>
-            <h1>
+            <h3>
               <SearchValue ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
                 searchControlProps={{ extraOptions: { userQuery: toLite(p.userQuery) } }}
                 valueToken={p.valueToken ?? undefined}
               />
                 {/*customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}*/}
-            </h1>
+            </h3>
           </div>
         </div>
         <div className={classes("flip", "text-end")}>

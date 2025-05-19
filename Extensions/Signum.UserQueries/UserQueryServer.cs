@@ -21,11 +21,6 @@ public static class UserQueryServer
             }
         });
 
-        SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((BigValuePartEntity uq) =>
-        {
-            uq.ParseData(uq.GetDashboard());
-        });
-
         EntityPackTS.AddExtension += ep =>
         {
             if (ep.entity.IsNew || !UserQueryPermission.ViewUserQuery.IsAuthorized())
