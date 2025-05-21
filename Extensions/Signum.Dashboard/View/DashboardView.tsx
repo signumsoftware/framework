@@ -214,15 +214,19 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
   const lite = p.entity ? toLite(p.entity) : undefined;
 
   if (renderer.withPanel && !renderer.withPanel(content)) {
-    return React.createElement(state.component, {
-      partEmbedded: part,
-      content: content,
-      entity: lite,
-      deps: p.deps,
-      dashboardController: p.dashboardController,
-      cachedQueries: p.cachedQueries,
-      customDataRef: customDataRef,
-    } as PanelPartContentProps<IPartEntity>);
+    return (
+      <ErrorBoundary>
+        {React.createElement(state.component, {
+          partEmbedded: part,
+          content: content,
+          entity: lite,
+          deps: p.deps,
+          dashboardController: p.dashboardController,
+          cachedQueries: p.cachedQueries,
+          customDataRef: customDataRef,
+        } as PanelPartContentProps<IPartEntity>)}
+      </ErrorBoundary >
+    );
   }
 
   const titleText = translated(part, p => p.title) ?? (renderer.defaultTitle ? renderer.defaultTitle(content) : getToString(content));
