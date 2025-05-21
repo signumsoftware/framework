@@ -286,7 +286,7 @@ public static class AuthLogic
         return UserHolder.UserSession(user);
     }
 
-    public static Func<string, UserEntity?> RetrieveUserByUsername = (username) => Database.Query<UserEntity>().Where(u => u.UserName == username).SingleOrDefaultEx();
+    public static Func<string, UserEntity?> RetrieveUserByUsername = (username) => Database.Query<UserEntity>().Where(u => u.UserName.ToLower() == username.ToLower()).SingleOrDefaultEx();
 
     public static UserEntity? RetrieveUser(string username)
     {

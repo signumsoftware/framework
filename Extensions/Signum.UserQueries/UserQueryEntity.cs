@@ -385,9 +385,9 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute(nameof(UserQuery))!.Value));
+        var uq = element.Attribute(nameof(UserQuery))?.Value;
+        UserQuery = uq == null ? null : (UserQueryEntity)ctx.GetEntity(Guid.Parse(uq));
         ValueToken = element.Attribute(nameof(ValueToken))?.Let(t => new QueryTokenEmbedded(t.Value));
-        this.ParseData(this.GetDashboard());
     }
 
     public void ParseData(DashboardEntity dashboardEntity)
