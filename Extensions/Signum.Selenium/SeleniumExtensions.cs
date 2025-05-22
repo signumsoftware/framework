@@ -191,10 +191,10 @@ public static class SeleniumExtensions
 
     public static bool IsElementVisible(this WebDriver selenium, By locator)
     {
-        var elements = selenium.FindElements(locator);
         try
         {
-            return elements.Any() && elements.First().Displayed;
+            var elements = selenium.FindElements(locator);
+            return elements.Count != 0 && elements.First().Displayed;
         }
         catch (StaleElementReferenceException)
         {
@@ -204,10 +204,10 @@ public static class SeleniumExtensions
 
     public static bool IsElementVisible(this IWebElement element, By locator)
     {
-        var elements = element.FindElements(locator);
         try
         {
-            return elements.Any() && elements.First().Displayed;
+            var elements = element.FindElements(locator);
+            return elements.Count != 0 && elements.First().Displayed;
         }
         catch (StaleElementReferenceException)
         {
