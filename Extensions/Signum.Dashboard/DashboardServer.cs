@@ -28,11 +28,6 @@ public static class DashboardServer
         SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((DashboardEntity d) =>
         {
             d.ParseData(q => QueryLogic.Queries.QueryDescription(q.ToQueryName()));
-
-            foreach (var item in d.Parts.Select(a => a.Content).OfType<IPartParseDataEntity>())
-            {
-                item.ParseData(d);
-            }
         });
     }
 }

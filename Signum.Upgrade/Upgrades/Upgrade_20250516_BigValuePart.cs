@@ -9,7 +9,7 @@ class Upgrade_20250516_BigValuePart : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        uctx.ForeachCodeFile(@"Southwind.Terminal/*.xml", file =>
+        uctx.ForeachCodeFile(@"*.xml", "Southwind.Terminal", file =>
         {
             file.ProcessLines(lines =>
             {

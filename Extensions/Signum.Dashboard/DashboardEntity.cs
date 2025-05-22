@@ -128,6 +128,11 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
                     t.Token.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
             }
         }
+
+        foreach (var item in this.Parts.Select(a => a.Content).OfType<IPartParseDataEntity>())
+        {
+            item.ParseData(this);
+        }
     }
 
     [Ignore]
@@ -238,10 +243,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
     {
         base.PostRetrieving(ctx);
 
-        foreach (var item in this.Parts.Select(a => a.Content).OfType<IPartParseDataEntity>())
-        {
-            item.ParseData(this);
-        }
+  
     }
 }
 
