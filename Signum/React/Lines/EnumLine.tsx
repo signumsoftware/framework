@@ -22,7 +22,7 @@ export interface EnumLineProps<V extends string | number | boolean | null> exten
   columnWidth?: number;
 }
 
-export class EnumLineController<V extends string | number | boolean | null> extends ValueBaseController<EnumLineProps<V>, V>{
+export class EnumLineController<V extends string | number | boolean | null> extends ValueBaseController<EnumLineProps<V>, V> {
 
 }
 
@@ -34,10 +34,10 @@ export interface OptionItem {
 export const EnumLine: <V extends string | number | boolean | null>(props: EnumLineProps<V> & React.RefAttributes<EnumLineController<V>>) => React.ReactNode | null =
   genericForwardRefWithMemo(function EnumLine<V extends string | number | boolean | null>(props: EnumLineProps<V>, ref: React.Ref<EnumLineController<V>>) {
 
-  const c = useController(EnumLineController<V>, props, ref);
+    const c = useController(EnumLineController<V>, props, ref);
 
-  if (c.isHidden)
-    return null;
+    if (c.isHidden)
+      return null;
 
     return props.lineType == 'ComboBoxText' ? internalComboBoxText(c) :
       props.lineType == 'RadioGroup' ? internalRadioGroup(c) :
@@ -49,8 +49,8 @@ export const EnumLine: <V extends string | number | boolean | null>(props: EnumL
     if (prev.onRenderDropDownListItem || next.onRenderDropDownListItem)
       return false;
 
-  return LineBaseController.propEquals(prev, next);
-});
+    return LineBaseController.propEquals(prev, next);
+  });
 
 function internalDropDownList<V extends string | number | boolean | null>(c: EnumLineController<V>) {
 
@@ -90,12 +90,7 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
     );
   }
 
-  function toStr(val: any) {
-    return val == null ? "" :
-      val === true ? "True" :
-        val === false ? "False" :
-          val.toString();
-  }
+
 
   if (c.props.onRenderDropDownListItem) {
 
@@ -104,12 +99,12 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
       label: p.ctx.value,
     };
 
-    function renderElement({item} : any){
+    function renderElement({ item }: any) {
       var result = c.props.onRenderDropDownListItem!(item) as React.ReactElement;
-      return React.cloneElement(result, {'data-value': item.value});
+      return React.cloneElement(result, { 'data-value': item.value });
     }
 
-    
+
 
     return (
       <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
@@ -147,6 +142,13 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
       </FormGroup>
     );
   }
+}
+
+function toStr(val: any) {
+  return val == null ? "" :
+    val === true ? "True" :
+      val === false ? "False" :
+        val.toString();
 }
 
 function internalComboBoxText<V extends string | number | boolean | null>(c: EnumLineController<V>) {
@@ -219,7 +221,7 @@ function internalRadioGroup<V extends string | number | boolean | null>(c: EnumL
 
   const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
     const input = e.currentTarget as HTMLInputElement;
-    const option = optionItems.filter(a => a.value == input.value).single();
+    const option = optionItems.filter(a => toStr(a.value).toLowerCase() == input.value.toLowerCase()).single();
     c.setValue(option.value, e);
   };
 
