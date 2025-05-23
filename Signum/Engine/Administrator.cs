@@ -34,18 +34,25 @@ public static class Administrator
     {
         using (Connector.CommandTimeoutScope(TimeoutCreateDatabase))
         {
+            SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt()!;
+
+            var (before, after) = totalScript.ExtractNoTransaction();
+            before?.ExecuteLeaves();
+
             using (var tr = new Transaction())
             {
-                SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt()!;
-                foreach (SqlPreCommand command in totalScript.Commands)
+                Schema.Current.ExecuteExecuteAs();
+
+                foreach (var p in totalScript.Commands)
                 {
-                    command.ExecuteLeaves();
+                    p.ExecuteLeaves();
                     SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
                 }
 
                 tr.Commit();
             }
 
+            after?.ExecuteLeaves();
         }
     }
 
