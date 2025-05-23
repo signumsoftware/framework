@@ -360,8 +360,6 @@ public enum SearchMessage
     [Description("double-click")]
     DoubleClick,
     GroupedBy,
-    [Description("you can open a group by clicking in the")]
-    YouCanOpenAGroupByClickingInThe,
     [Description("Doing {0} in the row will select the entity and close the modal automatically, alternatively you can select one entity and click OK.")]
     Doing0InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK,
     [Description("You can use the prepared filters on the top to quickly find the {0} you are looking for.")]
@@ -439,10 +437,6 @@ public enum SearchMessage
     EqualsDistinctGreaterThan,
     [Description("etc...")]
     Etc,
-    [Description("IsIn")]
-    IsIn,
-    [Description("IsNotIn")]
-    IsNotIn,
     [Description("The value that will be compared with the")]
     TheValueThatWillBeComparedWithThe,
     [Description("typically has the same type as the field, but some operators like")]
