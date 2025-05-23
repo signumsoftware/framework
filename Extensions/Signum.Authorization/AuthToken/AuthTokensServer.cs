@@ -71,7 +71,18 @@ public static class AuthTokenServer
         if (token?.User == null)
             return null;
 
+
         var c = Configuration();
+
+
+        if (AuthLogic.UsersDisabled.Count > 0)
+        {
+            var userDisabled = AuthLogic.UsersDisabled.Items.Any(u => u.Is(token!.User));
+            if (userDisabled)
+                throw new AuthenticationException(LoginAuthMessage.User0IsDeactivated.NiceToString(token!.User));
+
+        }
+
 
         bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < Clock.Now ||
             c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo ||
@@ -98,7 +109,7 @@ public static class AuthTokenServer
         if (user == null)
             throw new AuthenticationException(LoginAuthMessage.TheUserIsNotLongerInTheDatabase.NiceToString());
 
-        if (user.State == UserState.Deactivated)
+        if (user.State != UserState.Active)
             throw new AuthenticationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
 
         if (user.ToString() != oldToken.User.ToString())
@@ -124,7 +135,7 @@ public static class AuthTokenServer
     }
 
 
-    public static Func<string, AuthToken?> DeserializeAuthHeaderToken = (string authHeader) => 
+    public static Func<string, AuthToken?> DeserializeAuthHeaderToken = (string authHeader) =>
     {
         try
         {
