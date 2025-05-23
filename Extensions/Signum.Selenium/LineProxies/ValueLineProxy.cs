@@ -73,12 +73,12 @@ public class ValueLineProxy : BaseLineProxy
         IWebElement? textOrTextArea = this.Element.TryFindElement(By.CssSelector("input[type=text], textarea"));
         if (textOrTextArea != null)
         {
-            return textOrTextArea.GetAttribute("data-value")  ?? textOrTextArea.GetAttribute("value");
+            return /*textOrTextArea.GetAttribute("data-value")  ??*/ textOrTextArea.GetDomAttribute("value")!;
         }
 
         IWebElement? select = this.Element.TryFindElement(By.CssSelector("select"));
         if (select != null)
-            return select.SelectElement().SelectedOption.GetAttribute("value").ToString();
+            return select.SelectElement().SelectedOption.GetDomProperty("value")!.ToString();
 
         IWebElement? readonlyField =
             this.Element.TryFindElement(By.CssSelector("input.form-control")) ??

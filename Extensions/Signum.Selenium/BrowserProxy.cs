@@ -141,7 +141,7 @@ public class BrowserProxy
 
     public virtual void SetCurrentCulture()
     {
-        string? culture = Selenium.WaitElementPresent(By.ClassName("sf-culture-dropdown"))!.GetAttribute("data-culture");
+        string? culture = Selenium.WaitElementPresent(By.ClassName("sf-culture-dropdown"))!.GetDomAttributeOrThrow("data-culture");
 
         Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
     }
