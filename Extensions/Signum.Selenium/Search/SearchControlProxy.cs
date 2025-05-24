@@ -36,7 +36,7 @@ public class SearchControlProxy
 
     public void WaitSearchCompleted(Action searchTrigger)
     {
-        string counter = this.Element.GetDomAttribute("data-search-count")!;
+        string counter = this.Element.GetDomAttributeOrThrow("data-search-count");
         searchTrigger();
         WaitSearchCompleted(counter);
     }
