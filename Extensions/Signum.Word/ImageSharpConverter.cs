@@ -18,7 +18,7 @@ public class ImageSharpConverter : IImageConverter<Image>
 
     public (int width, int height) GetSize(Image image)
     {
-        var size = image.Size();
+        var size = image.Size;
         return (size.Width, size.Height);
     }
 

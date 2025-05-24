@@ -120,6 +120,10 @@ export interface UserLiteModel extends Entities.ModelEntity {
   photoSuffix: string | null;
 }
 
+export module UserMessage {
+  export const UserIsNotActive = new MessageKey("UserMessage", "UserIsNotActive");
+}
+
 export module UserOperation {
   export const Create : Operations.ConstructSymbol_Simple<UserEntity> = registerSymbol("Operation", "UserOperation.Create");
   export const Save : Operations.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Save");

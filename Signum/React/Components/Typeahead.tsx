@@ -360,4 +360,35 @@ export class TextHighlighter {
 
     return React.createElement(React.Fragment, undefined, ...result);
   }
+
+  highlightHtml(text: string): string {
+    if (!text || !this.regex)
+      return text;
+
+    var matches = Array.from(text.matchAll(this.regex));
+
+    if (matches.length == 0)
+      return text;
+
+    var result = [];
+
+    var pos = 0;
+    for (var i = 0; i < matches.length; i++) {
+      var m = matches[i];
+
+      if (pos < m.index!) {
+        result.push(text.substring(pos, m.index));
+      }
+
+      pos = m.index! + m[0].length;
+      result.push("<strong>");
+      result.push(text.substring(m.index!, pos))
+      result.push("</strong>");
+    }
+
+    if (pos < text.length)
+      result.push(text.substring(pos));
+
+    return result.join("");
+  }
 }

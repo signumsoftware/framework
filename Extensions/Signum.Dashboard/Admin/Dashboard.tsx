@@ -8,7 +8,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, CacheQueryConfigurationEmbedded, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, TokenEquivalenceEmbedded } from '../Signum.Dashboard'
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 import { DashboardClient } from "../DashboardClient";
-import { iconToString, parseIcon } from "@framework/Components/IconTypeahead";
+import { fallbackIcon, iconToString, parseIcon } from "@framework/Components/IconTypeahead";
 import "../Dashboard.css"
 import { getToString, toLite } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
@@ -79,7 +79,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
       <div>
         <div className="d-flex">
           {icon && <div className="mx-2">
-            <FontAwesomeIcon icon={icon} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag}
+            <FontAwesomeIcon icon={fallbackIcon(icon)} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag}
               onClick={() => selectIcon(tc).then(a => {
                 if (a) {
                   tc.value.iconName = a.iconName;
@@ -121,6 +121,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
   const ctxBasic = ctx.subCtx({ formGroupStyle: "Basic" });
   const ctxLabel5 = ctx.subCtx({ labelColumns: 5 });
   const icon = parseIcon(ctx.value.iconName) ?? "border-none";
+
   return (
     <div>
       <div>

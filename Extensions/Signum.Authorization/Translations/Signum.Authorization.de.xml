@@ -43,6 +43,7 @@
     <Member Name="TheUserStateMustBeDisabled" Description="Der Benutzerstatus muss deaktiviert werden." />
     <Member Name="TypeRules" Description="Typregeln" />
     <Member Name="Uncheck" Description="Deaktivieren" />
+    <Member Name="UsedByRoles" Description="Verwendet von Rollen" />
   </Type>
   <Type Name="AuthMessage">
     <Member Name="DefaultAuthorization" Description="Standardautorisierung: " />
@@ -252,6 +253,7 @@
     <Member Name="UserName" Description="Benutzername" />
   </Type>
   <Type Name="UserOperation">
+    <Member Name="AutoDeactivate" Description="Automatisch deaktivieren" />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="Deactivate" Description="Deaktivieren" />
     <Member Name="Delete" Description="Löschen" />
@@ -261,6 +263,7 @@
   </Type>
   <Type Name="UserState" Description="Benutzerstatus">
     <Member Name="Active" Description="Aktiv" />
+    <Member Name="AutoDeactivate" Description="Automatisch deaktivieren" />
     <Member Name="Deactivated" Description="Deaktiviert" />
     <Member Name="New" Description="Neu" />
   </Type>

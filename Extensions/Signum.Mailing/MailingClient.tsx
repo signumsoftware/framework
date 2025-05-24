@@ -8,7 +8,7 @@ import { Constructor } from '@framework/Constructor'
 import { Finder } from '@framework/Finder'
 import { Lite, Entity, newMListElement, registerToString, JavascriptMessage, getToString } from '@framework/Signum.Entities'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
-import { PseudoType, Type, getTypeName, isTypeEntity, getQueryKey } from '@framework/Reflection'
+import { PseudoType, Type, getTypeName, isTypeEntity, getQueryKey, getQueryInfo } from '@framework/Reflection'
 import { EmailMessageEntity, EmailMessageOperation, EmailRecipientEmbedded, EmailConfigurationEmbedded, AsyncEmailSenderPermission, EmailModelEntity, EmailFromEmbedded, SmtpEmailServiceEntity } from './Signum.Mailing'
 import { EmailSenderConfigurationEntity, EmailAddressEmbedded } from './Signum.Mailing'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
@@ -80,8 +80,10 @@ export namespace MailingClient {
         if (!ct || isTypeEntity(ct)) {
           if (ctx.entity.query == null)
             return ctx.defaultClick();
-  
-          const lite = await Finder.find({ queryName: ctx.entity.query!.key });
+
+          const lite = ct && ctx.entity.query.key != ct && getQueryInfo(ct) ? 
+            await Finder.find({ queryName: ct }):
+            await Finder.find({ queryName: ctx.entity.query!.key });
   
           if (!lite) return;
   

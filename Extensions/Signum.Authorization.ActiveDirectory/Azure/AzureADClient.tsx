@@ -20,30 +20,33 @@ export namespace AzureADClient {
       </>;
     LoginPage.showLoginForm = "initially_not";
     AuthClient.authenticators.push(loginWithAzureAD);
+
+    var msalConfig: msal.Configuration = {
+      auth: {
+        clientId: window.__azureApplicationId!, //This is your client ID
+        authority: window.__azureB2CTenantName ? getAzureB2C_Authority(window.__azureB2CSignInSignUp_UserFlow!) : ("https://login.microsoftonline.com/" + window.__azureTenantId)!, //This is your tenant info
+        redirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
+        postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
+      },
+      cache: {
+        cacheLocation: "localStorage",
+        storeAuthStateInCookie: true
+      }
+    };
+
+    if (window.__azureB2CTenantName)
+      msalConfig.auth.knownAuthorities = [getAzureB2C_AuthorityDomain()];
+
+    msalClient = new msal.PublicClientApplication(msalConfig);
   }
   
-  
   /*     Add this to Index.cshtml
-         var __azureApplicationId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_ApplicationID);
-         var __azureTenantId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_DirectoryID);
+        var __azureApplicationId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_ApplicationID);
+        var __azureTenantId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_DirectoryID);
   */
   
-
   
-  var msalConfig: msal.Configuration = {
-    auth: {
-      clientId: window.__azureApplicationId!, //This is your client ID
-      authority: "https://login.microsoftonline.com/" + window.__azureTenantId!, //This is your tenant info
-      redirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
-      postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
-    },
-    cache: {
-      cacheLocation: "localStorage",
-      storeAuthStateInCookie: true
-    }
-  };
-  
-  var msalClient = new msal.PublicClientApplication(msalConfig);
+  let msalClient: msal.PublicClientApplication;
   
   export namespace Config {
     export let scopes = ["user.read"];
@@ -72,12 +75,13 @@ export namespace AzureADClient {
           })
       })
       .catch(e => {
+        debugger;
         ctx.setLoading(undefined);
         if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
           return;
   
-        if (e instanceof msal.AuthError)
-          throw new ExternalServiceError("MSAL", e, e.name + ": " + e.errorCode, e.errorMessage, e.subError + "\n" + e.stack);
+        //if (e instanceof msal.AuthError)
+        //  throw new ExternalServiceError("MSAL", e, e.name + ": " + e.errorCode, e.errorMessage, e.subError + "\n" + e.stack);
   
         throw e;
       });
@@ -184,11 +188,24 @@ export namespace AzureADClient {
       return ajaxPost({ url: "/api/auth/loginWithAzureAD?throwErrors=" + throwErrors, avoidAuthToken: true }, { idToken: jwt, accessToken });
     }
   }
+
+
+  export function getAzureB2C_AuthorityDomain() {
+    return `${window.__azureB2CTenantName}.b2clogin.com`;
+  }
+
+  export function getAzureB2C_Authority(userFlow: string) {
+    return `https://${window.__azureB2CTenantName}.b2clogin.com/${window.__azureB2CTenantName}.onmicrosoft.com/${window.__azureB2CSignInSignUp_UserFlow}`;
+  }
+
 }
 
 declare global {
   interface Window {
     __azureApplicationId: string | null;
     __azureTenantId: string | null;
+
+    __azureB2CTenantName: string | null;
+    __azureB2CSignInSignUp_UserFlow: string | null;
   }
 }

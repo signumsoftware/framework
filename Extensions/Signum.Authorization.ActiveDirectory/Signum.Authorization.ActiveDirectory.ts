@@ -23,6 +23,7 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   directoryRegistry_Password: string | null;
   azure_ApplicationID: string /*Guid*/ | null;
   azure_DirectoryID: string /*Guid*/ | null;
+  azureB2C: AzureB2CEmbedded | null;
   azure_ClientSecret: string | null;
   useDelegatedPermission: boolean;
   loginWithWindowsAuthenticator: boolean;
@@ -75,6 +76,13 @@ export module ADGroupOperation {
 
 export module AuthADFileType {
   export const CachedProfilePhoto : Files.FileTypeSymbol = registerSymbol("FileType", "AuthADFileType.CachedProfilePhoto");
+}
+
+export const AzureB2CEmbedded = new Type<AzureB2CEmbedded>("AzureB2CEmbedded");
+export interface AzureB2CEmbedded extends Entities.EmbeddedEntity {
+  Type: "AzureB2CEmbedded";
+  tenantName: string;
+  signInSignUp_UserFlow: string;
 }
 
 export const CachedProfilePhotoEntity = new Type<CachedProfilePhotoEntity>("CachedProfilePhoto");

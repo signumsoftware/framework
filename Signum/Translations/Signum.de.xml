@@ -571,6 +571,7 @@
     <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Collections können nicht als Spalten hinzugefügt werden" />
     <Member Name="ColSpan" Description="ColSpan" />
     <Member Name="Column" Description="Spalte" />
+    <Member Name="ColumnField" Description="Spalte Feld" />
     <Member Name="Columns" Description="Spalten" />
     <Member Name="CombineRowsWith" Description="Kombinieren von Zeilen mit" />
     <Member Name="Copy" Description="Kopieren" />

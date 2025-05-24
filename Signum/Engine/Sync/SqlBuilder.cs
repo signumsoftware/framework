@@ -537,7 +537,13 @@ WHERE {primaryKey.Name} NOT IN
         var where = index.Where.HasText() ? $" WHERE {index.Where}" : null;
         var partitioning = index.Partitioned ? $" ON {index.PartitionSchemeName}({index.PartitionColumnName})" : " ON 'PRIMARY'";
 
-        return new SqlPreCommandSimple($"CREATE {indexType} {index.GetIndexName(tableName).SqlEscape(isPostgres)} ON {tableName}({columns}){include}{where}{partitioning};");
+
+        if (!isPostgres )
+
+            return new SqlPreCommandSimple($"CREATE {indexType} {index.GetIndexName(tableName).SqlEscape(isPostgres)} ON {tableName}({columns}){include}{where}{partitioning};");
+        else
+            return new SqlPreCommandSimple($"CREATE {indexType} {index.GetIndexName(tableName).SqlEscape(isPostgres)} ON {tableName}({columns}){include}{where};");
+
     }
 
 
