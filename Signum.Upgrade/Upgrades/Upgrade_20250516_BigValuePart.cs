@@ -27,6 +27,11 @@ class Upgrade_20250516_BigValuePart : CodeUpgradeBase
                 return changed;
             });
         });
+
+        uctx.ChangeCodeFile("Southwind/Starter.cs", a =>
+        {
+            a.Replace("typeof(UserQueryPartEntity),", "typeof(UserQueryPartEntity), typeof(BigValuePartEntity),");
+        });
     }
 }
 
