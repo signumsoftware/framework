@@ -94,6 +94,9 @@ public enum LoginAuthMessage
 
     [Description("Sign in with Microsoft")]
     SignInWithMicrosoft,
+
+    [Description("Invalid token date {0}")]
+    InvalidTokenDate0
 }
 
 public enum AuthMessage

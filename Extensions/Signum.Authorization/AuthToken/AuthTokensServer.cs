@@ -83,8 +83,13 @@ public static class AuthTokenServer
 
         }
 
+        if (token.CreationDate.AddSeconds(2) > Clock.Now)
+            throw new AuthenticationException(LoginAuthMessage.InvalidTokenDate0.NiceToString(token.CreationDate));
 
-        bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < Clock.Now ||
+
+        bool requiresRefresh =
+            token.CreationDate.AddMinutes(c.RefreshTokenEvery) < Clock.Now ||
+            
             c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo ||
             ctx.HttpContext.Request.Query.ContainsKey("refreshToken");
 

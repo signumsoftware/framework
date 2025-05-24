@@ -75,6 +75,7 @@ export module LoginAuthMessage {
   export const TryToLogInWithIt = new MessageKey("LoginAuthMessage", "TryToLogInWithIt");
   export const LoginWith0 = new MessageKey("LoginAuthMessage", "LoginWith0");
   export const SignInWithMicrosoft = new MessageKey("LoginAuthMessage", "SignInWithMicrosoft");
+  export const InvalidTokenDate0 = new MessageKey("LoginAuthMessage", "InvalidTokenDate0");
 }
 
 export const MergeStrategy = new EnumType<MergeStrategy>("MergeStrategy");
