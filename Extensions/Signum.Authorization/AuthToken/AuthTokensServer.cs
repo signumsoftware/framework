@@ -83,7 +83,7 @@ public static class AuthTokenServer
 
         }
 
-        if (token.CreationDate.AddSeconds(2) > Clock.Now)
+        if (token.CreationDate.AddSeconds(-2) > Clock.Now)
             throw new AuthenticationException(LoginAuthMessage.InvalidTokenDate0.NiceToString(token.CreationDate));
 
 
