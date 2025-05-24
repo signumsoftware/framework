@@ -5,6 +5,8 @@ public static class UserTicketLogic
     public static TimeSpan ExpirationInterval = TimeSpan.FromDays(60);
     public static int MaxTicketsPerUser = 4;
 
+
+
     public static bool IsStarted { get; private set; }
 
     public static void Start(SchemaBuilder sb)
@@ -53,11 +55,15 @@ public static class UserTicketLogic
         using (AuthLogic.Disable())
         using (var tr = new Transaction())
         {
-            CleanExpiredTickets(UserEntity.Current.Retrieve());
+            var user = UserEntity.Current.Retrieve();
+
+            CleanExpiredTickets(user);
+
+            CheckUser(user);
 
             UserTicketEntity result = new UserTicketEntity
             {
-                User = UserEntity.Current,
+                User = user.ToLite(),
                 Device = device,
                 ConnectionDate = Clock.Now,
                 Ticket = Guid.NewGuid().ToString(),
@@ -78,7 +84,11 @@ public static class UserTicketLogic
             var pair = UserTicketEntity.ParseTicket(ticket);
 
             UserEntity user = Database.Retrieve<UserEntity>(pair.userId);
+
             CleanExpiredTickets(user);
+
+            CheckUser(user);
+
 
             UserTicketEntity? userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.ticket);
             if (userTicket == null)
@@ -100,15 +110,42 @@ public static class UserTicketLogic
         }
     }
 
+    private static void CheckUser(UserEntity user)
+    {
+        if (user.State != UserState.Active)
+        {
+
+
+            if (!AuthLogic.UsersDisabled.Items.Any(u => u.Is(user.ToLite())))
+                AuthLogic.UsersDisabled.Add(user.ToLite());
+
+            throw new UnauthorizedAccessException(UserMessage.UserIsNotActive.NiceToString());
+
+        }
+
+    }
 
     static int CleanExpiredTickets(UserEntity user)
     {
         DateTime min = Clock.Now.Subtract(ExpirationInterval);
+
+        var rt = RemoveTickets(user);
+
+        if (rt != null)
+            return rt.Value;
 
         int expired = user.UserTickets().Where(d => d.ConnectionDate < min).UnsafeDelete();
 
         int tooMuch = user.UserTickets().OrderByDescending(t => t.ConnectionDate).Skip(MaxTicketsPerUser).UnsafeDelete();
 
         return expired + tooMuch;
+    }
+
+    public static int? RemoveTickets(UserEntity user)
+    {
+        if (user.State != UserState.Active)
+            return user.UserTickets().UnsafeDelete();
+
+        return null;
     }
 }

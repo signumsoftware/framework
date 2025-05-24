@@ -14,7 +14,24 @@ public static class AuthLogic
     public static event Action<UserEntity>? UserLogingIn;
     public static ICustomAuthorizer? Authorizer;
 
+    public static FixedSizeList<Lite<UserEntity>> UsersDisabled = new FixedSizeList<Lite<UserEntity>>(30);
 
+
+    public static void LoadLastUsersDisabled()
+    {
+        var luds = Database.Query<UserEntity>()
+            .Where(a => a.DisabledOn != null)
+            .OrderByDescending(a => a.DisabledOn)
+            .Select(a => a.ToLite())
+            .Take(20)
+            .ToList();
+
+        foreach (var item in luds)
+        {
+            UsersDisabled.Add(item);
+        }
+
+    }
 
     /// <summary>
     /// Gets or sets the number of failed login attempts allowed before a user is locked out.
@@ -69,7 +86,7 @@ public static class AuthLogic
     }
 
     public static void Start(SchemaBuilder sb, string? systemUserName, string? anonymousUserName)
-    {   
+    {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             SystemUserName = systemUserName;
@@ -143,12 +160,20 @@ public static class AuthLogic
             }, new InvalidateWith(typeof(RoleEntity)));
 
             sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
+            sb.Schema.BeforeDatabaseAccess += Schema_BeforeDatabaseAccess;
 
             UserGraph.Register();
 
 
         }
     }
+
+    private static void Schema_BeforeDatabaseAccess()
+    {
+        LoadLastUsersDisabled();
+    }
+
+   
 
     static SqlPreCommand? Role_PreDeleteSqlSync(Entity entity)
     {
@@ -180,7 +205,7 @@ public static class AuthLogic
         if (db != null)
             return db;
 
-        using (AuthLogic.Disable()) 
+        using (AuthLogic.Disable())
         using (OperationLogic.AllowSave<RoleEntity>())
         {
             var result = new RoleEntity
@@ -965,6 +990,43 @@ public static class AuthLogic
         return 0;
     }
 }
+
+
+
+
+public class FixedSizeList<T>
+{
+    private readonly int maxSize;
+    private readonly List<T> list;
+
+    public FixedSizeList(int size)
+    {
+        maxSize = size;
+        list = new List<T>();
+    }
+
+    public void Add(T item)
+    {
+        if (list.Count >= maxSize)
+        {
+            list.RemoveAt(0);
+        }
+        list.Add(item);
+    }
+
+    public bool Remove(T item)
+    {
+        return list.Remove(item);
+    }
+
+    public T this[int index] => list[index];
+
+    public int Count => list.Count;
+
+    public IEnumerable<T> Items => list;
+}
+
+
 
 public interface ICustomAuthorizer
 {
