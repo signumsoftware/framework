@@ -15,24 +15,9 @@ public static class AuthLogic
     public static event Action<UserEntity>? UserLogingIn;
     public static ICustomAuthorizer? Authorizer;
 
-    public static FixedSizeList<Lite<UserEntity>> UsersDisabled = new FixedSizeList<Lite<UserEntity>>(30);
+    public static ResetLazy<HashSet< Lite<UserEntity>>> UsersDisabled ;
 
 
-    public static void LoadLastUsersDisabled()
-    {
-        var luds = Database.Query<UserEntity>()
-            .Where(a => a.DisabledOn != null)
-            .OrderByDescending(a => a.DisabledOn)
-            .Select(a => a.ToLite())
-            .Take(20)
-            .ToList();
-
-        foreach (var item in luds)
-        {
-            UsersDisabled.Add(item);
-        }
-
-    }
 
     /// <summary>
     /// Gets or sets the number of failed login attempts allowed before a user is locked out.
@@ -70,7 +55,6 @@ public static class AuthLogic
     static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse = null!;
     static ResetLazy<FrozenDictionary<string, Lite<RoleEntity>>> rolesByName = null!;
     public static ResetLazy<FrozenDictionary<Lite<RoleEntity>, RoleEntity>> RolesByLite = null!;
-
 
 
     class RoleData
@@ -165,20 +149,15 @@ public static class AuthLogic
             }, new InvalidateWith(typeof(RoleEntity)));
 
             sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
-            sb.Schema.BeforeDatabaseAccess += Schema_BeforeDatabaseAccess;
-
             UserGraph.Register();
 
 
         }
     }
 
-    private static void Schema_BeforeDatabaseAccess()
-    {
-        LoadLastUsersDisabled();
-    }
 
-   
+
+
 
     static SqlPreCommand? Role_PreDeleteSqlSync(Entity entity)
     {
@@ -997,39 +976,6 @@ public static class AuthLogic
 }
 
 
-
-
-public class FixedSizeList<T>
-{
-    private readonly int maxSize;
-    private readonly List<T> list;
-
-    public FixedSizeList(int size)
-    {
-        maxSize = size;
-        list = new List<T>();
-    }
-
-    public void Add(T item)
-    {
-        if (list.Count >= maxSize)
-        {
-            list.RemoveAt(0);
-        }
-        list.Add(item);
-    }
-
-    public bool Remove(T item)
-    {
-        return list.Remove(item);
-    }
-
-    public T this[int index] => list[index];
-
-    public int Count => list.Count;
-
-    public IEnumerable<T> Items => list;
-}
 
 
 

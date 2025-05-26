@@ -9,6 +9,7 @@ using Signum.API.Filters;
 using Signum.API.Json;
 using Signum.API.Controllers;
 using Signum.API;
+using Signum.Authorization.UserTicket;
 
 namespace Signum.Authorization.AuthToken;
 
@@ -91,9 +92,9 @@ public static class AuthTokenServer
         var c = Configuration();
 
 
-        if (AuthLogic.UsersDisabled.Count > 0)
+        if (AuthLogic.UsersDisabled.Value.Count > 0)
         {
-            var userDisabled = AuthLogic.UsersDisabled.Items.Any(u => u.Is(token!.User));
+            var userDisabled = AuthLogic.UsersDisabled.Value.Any(u => u.Is(token!.User));
             if (userDisabled)
                 throw new AuthenticationException(LoginAuthMessage.User0IsDeactivated.NiceToString(token!.User));
 
@@ -102,11 +103,11 @@ public static class AuthTokenServer
         if (token.CreationDate.AddSeconds(-2) > Clock.Now)
             throw new AuthenticationException(LoginAuthMessage.InvalidTokenDate0.NiceToString(token.CreationDate));
 
+        //bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < Clock.Now ||
+        //        c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo ||
+        //        ctx.HttpContext.Request.Query.ContainsKey("refreshToken");
 
-        bool requiresRefresh =
-            token.CreationDate.AddMinutes(c.RefreshTokenEvery) < Clock.Now ||
-            
-            c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo ||
+        bool requiresRefresh = AuthTokenServer.MustRefresh(token.CreationDate) ||
             ctx.HttpContext.Request.Query.ContainsKey("refreshToken");
 
         if (requiresRefresh)
@@ -139,20 +140,23 @@ public static class AuthTokenServer
         if (!(user.PasswordHash.EmptyIfNull()).SequenceEqual((oldToken.PasswordHash.EmptyIfNull()).EmptyIfNull()))
             throw new AuthenticationException(LoginAuthMessage.InvalidPassword.NiceToString());
 
-        newUser = new UserWithClaims(user);
+        //newUser = new UserWithClaims(user);
 
-        AuthToken newToken = new AuthToken
-        {
-            User = newUser.User,
-            Claims = newUser.Claims,
-            PasswordHash = user.PasswordHash,
-            CreationDate = Clock.Now,
-        };
+        //AuthToken newToken = new AuthToken
+        //{
+        //    User = newUser.User,
+        //    Claims = newUser.Claims,
+        //    PasswordHash = user.PasswordHash,
+        //    CreationDate = Clock.Now,
+        //};
 
-        OnAuthToken?.Invoke(newUser, oldToken, newToken);
+        //OnAuthToken?.Invoke(newUser, oldToken, newToken);
 
-        var result = SerializeToken(newToken);
-        return result;
+        //var result = SerializeToken(newToken);
+
+        var token = AuthTokenServer.CreateToken(user,out newUser, oldToken);
+
+        return token;
     }
 
 
@@ -194,9 +198,22 @@ public static class AuthTokenServer
         }
     }
 
+
+
+
+
+
     public static string CreateToken(UserEntity user)
     {
-        var userWithClaims = new UserWithClaims(user);
+        UserWithClaims userWithClaims;
+        return CreateToken(user, out userWithClaims, null);
+    }
+    public static string CreateToken(UserEntity user, out UserWithClaims userWithClaims, AuthToken? oldToken = null)
+    {
+
+        UserTicketLogic. CheckUser(user);
+
+        userWithClaims = new UserWithClaims(user);
 
         AuthToken newToken = new AuthToken
         {
@@ -206,7 +223,7 @@ public static class AuthTokenServer
             PasswordHash = user.PasswordHash,
         };
 
-        OnAuthToken?.Invoke(userWithClaims, null, newToken);
+        OnAuthToken?.Invoke(userWithClaims, oldToken, newToken);
 
         return SerializeToken(newToken);
     }
