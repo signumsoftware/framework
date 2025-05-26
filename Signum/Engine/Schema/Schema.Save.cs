@@ -212,10 +212,10 @@ public partial class Table
                 var isPostgres = Schema.Current.Settings.IsPostgres;
 
                 string insertPattern(string[] suffixes) =>
-                        "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3};".FormatWith(table.Name,
+                        "INSERT INTO {0}\n  ({1})\n{2}VALUES\n{3};".FormatWith(table.Name,
                         trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                        isPostgres ? "OVERRIDING SYSTEM VALUE\r\n" : null,
-                        suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"));
+                        isPostgres ? "OVERRIDING SYSTEM VALUE\n" : null,
+                        suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\n"));
 
                 var expr = Expression.Lambda<Action<object, Forbidden, string, List<DbParameter>>>(
                     CreateBlock(trios.Select(a => a.ParameterBuilder), assigments, paramList), paramIdent, paramForbidden, paramSuffix, paramList);
@@ -308,11 +308,11 @@ public partial class Table
 
                 var isPostgres = Schema.Current.Settings.IsPostgres;
                 string sqlInsertPattern(string[] suffixes, string? output) =>
-                    "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3}{4};".FormatWith(
+                    "INSERT INTO {0}\n  ({1})\n{2}VALUES\n{3}{4};".FormatWith(
                     table.Name,
                     trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                    output != null && !isPostgres ? $"OUTPUT INSERTED.{table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}\r\n" : null,
-                    suffixes.ToString(s => " (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"),
+                    output != null && !isPostgres ? $"OUTPUT INSERTED.{table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}\n" : null,
+                    suffixes.ToString(s => " (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\n"),
                     output != null && isPostgres ? $"\r\nRETURNING {table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}" : null);
 
 
@@ -470,7 +470,7 @@ public partial class Table
                 new StringBuilder()
                   .AppendLine(Table.DeclareTempTable(updated, this.table.PrimaryKey, isPostgres))
                   .AppendLine()
-                  .AppendLines(Enumerable.Range(0, num).Select(i => SqlUpdatePattern(i.ToString(), true) + "\r\n"))
+                  .AppendLines(Enumerable.Range(0, num).Select(i => SqlUpdatePattern(i.ToString(), true) + "\n"))
                   .AppendLine()
                   .AppendLine($"SELECT {id} from {updated}")
                   .ToString();
@@ -585,13 +585,13 @@ public partial class Table
 
                 Func<string, bool, string> sqlUpdatePattern = (suffix, output) =>
                 {
-                    var result = $"UPDATE {table.Name} SET\r\n" +
-trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(isPostgres), p.ParameterName + suffix).Indent(2), ",\r\n") + "\r\n" +
-(output && !isPostgres ? $"OUTPUT INSERTED.{id} INTO {updated}\r\n" : null) +
+                    var result = $"UPDATE {table.Name} SET\n" +
+trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(isPostgres), p.ParameterName + suffix).Indent(2), ",\n") + "\n" +
+(output && !isPostgres ? $"OUTPUT INSERTED.{id} INTO {updated}\n" : null) +
 $"WHERE {id} = {idParamName + suffix}" +
 (table.PartitionId != null ? $" AND {table.PartitionId.Name.SqlEscape(isPostgres)} = {oldPartition + suffix}" : null) +
 (table.Ticks != null ? $" AND {table.Ticks.Name.SqlEscape(isPostgres)} = {oldTicksParamName + suffix}" : null) +
-"\r\n" +
+"\n" +
 (output && isPostgres ? $"RETURNING ({id})" : null);
 
                     if (!(isPostgres && output))
@@ -751,8 +751,8 @@ SELECT {id} FROM rows;";
 
         if (isPostgres)
         {
-            var otherDeclarations = virtualMList?.Leaves().Select(a => a.Sql.Between("DO $$\r\n", "BEGIN\r\n")).ToString("\r\n");
-            var virtualMListsBodies = virtualMList?.Leaves().Select(a => a.Sql.After("BEGIN\r\n").BeforeLast("END $$;")).ToString("\r\n\r\n");
+            var otherDeclarations = virtualMList?.Leaves().Select(a => a.Sql.Between("DO $$\n", "BEGIN\n")).ToString("\n");
+            var virtualMListsBodies = virtualMList?.Leaves().Select(a => a.Sql.After("BEGIN\n").BeforeLast("END $$;")).ToString("\n\n");
 
             return new SqlPreCommandSimple(@$"DO $$
 DECLARE {parentId} {pkType};
@@ -991,7 +991,7 @@ public partial class TableMList
         {
             return deleteCache.GetOrAdd(numEntities, num =>
             {
-                string sql = Enumerable.Range(0, num).ToString(i => sqlDelete(i.ToString()), ";\r\n");
+                string sql = Enumerable.Range(0, num).ToString(i => sqlDelete(i.ToString()), ";\n");
 
                 return list =>
                 {
@@ -1013,7 +1013,7 @@ public partial class TableMList
         {
             return deleteExceptCache.GetOrAdd(numExceptions, num =>
             {
-                string sql = sqlDeleteExcept(numExceptions); Enumerable.Range(0, num).ToString(i => sqlDelete(i.ToString()), ";\r\n");
+                string sql = sqlDeleteExcept(numExceptions); Enumerable.Range(0, num).ToString(i => sqlDelete(i.ToString()), ";\n");
 
                 return delete =>
                 {
@@ -1045,7 +1045,7 @@ public partial class TableMList
         {
             return updateCache.GetOrAdd(numElements, num =>
             {
-                string sql = Enumerable.Range(0, num).ToString(i => sqlUpdate(i.ToString()), ";\r\n");
+                string sql = Enumerable.Range(0, num).ToString(i => sqlUpdate(i.ToString()), ";\n");
 
                 return (List<MListUpdate> list) =>
                 {
@@ -1364,10 +1364,10 @@ public partial class TableMList
                 PartitionId.CreateParameter(trios, assigments, Expression.Field(paramIdent, Table.fiPartitionId), paramForbidden, paramSuffix);
             Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramSuffix);
 
-            result.sqlInsert = (suffixes, output) => "INSERT INTO {0} ({1})\r\n{2}VALUES\r\n{3}{4};".FormatWith(Name,
+            result.sqlInsert = (suffixes, output) => "INSERT INTO {0} ({1})\n{2}VALUES\n{3}{4};".FormatWith(Name,
                 trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                output && !isPostgres ? $"OUTPUT INSERTED.{PrimaryKey.Name.SqlEscape(isPostgres)}\r\n" : null,
-                suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"),
+                output && !isPostgres ? $"OUTPUT INSERTED.{PrimaryKey.Name.SqlEscape(isPostgres)}\n" : null,
+                suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\n"),
                 output && isPostgres ? $"\r\nRETURNING {PrimaryKey.Name.SqlEscape(isPostgres)}" : null);
 
          
@@ -1417,8 +1417,8 @@ public partial class TableMList
 
             Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramSuffix);
 
-            result.sqlUpdate = suffix => "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3} AND {4} = {5}{6};".FormatWith(Name,
-                trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(isPostgres), p.ParameterName + suffix).Indent(2), ",\r\n"),
+            result.sqlUpdate = suffix => "UPDATE {0} SET \n{1}\n WHERE {2} = {3} AND {4} = {5}{6};".FormatWith(Name,
+                trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(isPostgres), p.ParameterName + suffix).Indent(2), ",\n"),
                 this.BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(parentId + suffix),
                 this.PrimaryKey.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(rowId + suffix),
                 this.PartitionId != null ? " AND {0} = {1}".FormatWith(this.PartitionId.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(oldPartitionID + suffix)) : null
@@ -1680,7 +1680,7 @@ public partial class FieldImplementedBy
     Type? CheckType(Type? type)
     {
         if (type != null && !ImplementationColumns.ContainsKey(type))
-            throw new InvalidOperationException($"Type {type.Name} is not in the list of ImplementedBy of {Route}, currently types allowed: {ImplementationColumns.Keys.ToString(a => a.Name, ", ")}.\r\n" +
+            throw new InvalidOperationException($"Type {type.Name} is not in the list of ImplementedBy of {Route}, currently types allowed: {ImplementationColumns.Keys.ToString(a => a.Name, ", ")}.\n" +
                 $"Consider writing in your Starter class something like: sb.Schema.Settings.FieldAttributes(({Route.RootType.Name} e) => e.{Route.PropertyString().Replace("/", ".First().")}).Replace(new ImplementedByAttribute({ImplementationColumns.Keys.And(type).ToString(t => $"typeof({t.Name})", ", ")}));");
 
         return type;

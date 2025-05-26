@@ -708,11 +708,11 @@ public class CodeFile
             {
                 if (text.Trim().IsEmpty())
                     return
-                    "\tProjectSection(SolutionItems) = preProject\r\n" +
-                    "\t\t" + relativeFilePath + " = " + relativeFilePath + "\r\n" +
+                    "\tProjectSection(SolutionItems) = preProject\n" +
+                    "\t\t" + relativeFilePath + " = " + relativeFilePath + "\n" +
                     "\tEndProjectSection";
                 else
-                    return text.Replace("\tEndProjectSection", "\t\t" + relativeFilePath + " = " + relativeFilePath + "\r\n" +
+                    return text.Replace("\tEndProjectSection", "\t\t" + relativeFilePath + " = " + relativeFilePath + "\n" +
                     "\tEndProjectSection");
             });
     }

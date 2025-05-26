@@ -275,7 +275,7 @@ public class SchemaSettings
 
         if (imp.IsByAll || !imp.Types.Contains(typeToImplement))
             throw new InvalidOperationException("Route {0} is not ImplementedBy {1}".FormatWith(route, typeToImplement.Name) +
-                "\r\n" +
+                "\n" +
                 Implementations.ConsiderMessage(route, imp.Types.And(typeToImplement).ToString(t => $"typeof({t.TypeName()})", ", ")));
     }
 

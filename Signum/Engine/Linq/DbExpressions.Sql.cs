@@ -476,15 +476,15 @@ internal class SelectExpression : SourceWithAliasExpression
 
     public override string ToString()
     {
-        return "SELECT {0}{1}\r\n{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".FormatWith(
+        return "SELECT {0}{1}\n{2}\r\nFROM {3}\n{4}{5}{6}{7} AS {8}".FormatWith(
             IsDistinct ? "DISTINCT " : "",
             Top?.Let(t => "TOP {0} ".FormatWith(t.ToString())),
-            Columns.ToString(c => c.ToString().Indent(4), ",\r\n"),
-            From?.Let(f => f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
-            Where?.Let(a => "WHERE " + a.ToString() + "\r\n"),
-            OrderBy.Any() ? ("ORDER BY " + OrderBy.ToString(" ,") + "\r\n") : null,
-            GroupBy.Any() ? ("GROUP BY " + GroupBy.ToString(g => g.ToString(), " ,") + "\r\n") : null,
-            SelectOptions == 0 ? "" : SelectOptions.ToString() + "\r\n",
+            Columns.ToString(c => c.ToString().Indent(4), ",\n"),
+            From?.Let(f => f.ToString().Let(a => a.Contains("\n") ? "\n" + a.Indent(4) : a)),
+            Where?.Let(a => "WHERE " + a.ToString() + "\n"),
+            OrderBy.Any() ? ("ORDER BY " + OrderBy.ToString(" ,") + "\n") : null,
+            GroupBy.Any() ? ("GROUP BY " + GroupBy.ToString(g => g.ToString(), " ,") + "\n") : null,
+            SelectOptions == 0 ? "" : SelectOptions.ToString() + "\n",
             Alias);
     }
 
@@ -541,7 +541,7 @@ internal class JoinExpression : SourceExpression
 
     public override string ToString()
     {
-        return "{0}\r\n{1}\r\n{2}\r\nON {3}".FormatWith(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition?.ToString());
+        return "{0}\n{1}\n{2}\r\nON {3}".FormatWith(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition?.ToString());
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -590,7 +590,7 @@ internal class SetOperatorExpression : SourceWithAliasExpression
 
     public override string ToString()
     {
-        return "{0}\r\n{1}\r\n{2}\r\n as {3}".FormatWith(Left.ToString().Indent(4), Operator, Right.ToString().Indent(4), Alias);
+        return "{0}\n{1}\n{2}\n as {3}".FormatWith(Left.ToString().Indent(4), Operator, Right.ToString().Indent(4), Alias);
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -957,7 +957,7 @@ internal static class ExpressionTools
         if (returnType.IsAssignableFrom(expression.Type) || expression.Type.IsAssignableFrom(returnType))
             return Expression.Convert(expression, returnType);
 
-        throw new InvalidOperationException("Imposible to convert to {0} the expression: \r\n{1}"
+        throw new InvalidOperationException("Imposible to convert to {0} the expression: \n{1}"
             .FormatWith(returnType.TypeName(), expression.ToString()));
     }
 
@@ -1395,7 +1395,7 @@ internal class ProjectionExpression : DbExpression
 
     public override string ToString()
     {
-        return "(SOURCE\r\n{0}\r\nPROJECTOR\r\n{1})".FormatWith(Select.ToString().Indent(4), Projector.ToString().Indent(4));
+        return "(SOURCE\n{0}\nPROJECTOR\n{1})".FormatWith(Select.ToString().Indent(4), Projector.ToString().Indent(4));
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1463,7 +1463,7 @@ internal class DeleteExpression : CommandExpression
 
     public override string ToString()
     {
-        return "DELETE FROM {0}\r\nFROM {1}\r\n{2}".FormatWith(
+        return "DELETE FROM {0}\r\nFROM {1}\n{2}".FormatWith(
             (object?)Alias ?? Name,
             Source.ToString(),
             Where?.Let(w => "WHERE " + w.ToString())) + 
@@ -1500,9 +1500,9 @@ internal class UpdateExpression : CommandExpression
 
     public override string ToString()
     {
-        return "UPDATE {0}\r\nSET {1}\r\nFROM {2}\r\n{3}".FormatWith(
+        return "UPDATE {0}\r\nSET {1}\r\nFROM {2}\n{3}".FormatWith(
             Table.Name,
-            Assigments.ToString("\r\n"),
+            Assigments.ToString("\n"),
             Source.ToString(),
             Where?.Let(w => "WHERE " + w.ToString()));
     }
@@ -1536,8 +1536,8 @@ internal class InsertSelectExpression : CommandExpression
     {
         return "INSERT INTO {0}({1})\r\nSELECT {2}\r\nFROM {3}".FormatWith(
             Table.Name,
-            Assigments.ToString(a => a.Column, ",\r\n"),
-            Assigments.ToString(a => a.Expression.ToString(), ",\r\n"),
+            Assigments.ToString(a => a.Column, ",\n"),
+            Assigments.ToString(a => a.Expression.ToString(), ",\n"),
             Source.ToString());
     }
 
@@ -1576,7 +1576,7 @@ internal class CommandAggregateExpression : CommandExpression
 
     public override string ToString()
     {
-        return Commands.ToString(a => a.ToString(), "\r\n\r\n");
+        return Commands.ToString(a => a.ToString(), "\n\n");
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)

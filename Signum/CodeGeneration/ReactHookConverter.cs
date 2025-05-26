@@ -22,7 +22,7 @@ public class ReactHookConverter
 
                 var converted = SimplifyFile(content);
 
-                File.WriteAllText(file, converted);
+                File.WriteAllText(file, converted.Replace("\r\n", "\n");
             }
         }
     }
@@ -59,7 +59,7 @@ public class ReactHookConverter
         HashSet<string> hookImports = new HashSet<string>();
 
 
-        var componentStarts = Regex.Matches(content, @"^(?<export>export )?(?<default>default )?class (?<className>\w+) extends React\.Component<(?<props>.*?)>\s*{\s*\r\n", RegexOptions.Multiline).Cast<Match>();
+        var componentStarts = Regex.Matches(content, @"^(?<export>export )?(?<default>default )?class (?<className>\w+) extends React\.Component<(?<props>.*?)>\s*{\s*\r?\n", RegexOptions.Multiline).Cast<Match>();
 
         foreach (var m in componentStarts.Reverse())
         {
@@ -67,7 +67,7 @@ public class ReactHookConverter
 
             var simplifiedContent = SimplifyClass(content[m.EndIndex()..endMatch.Index], hookImports);
 
-            string newComponent = m.Groups["export"].Value + m.Groups["default"].Value + "function " + m.Groups["className"].Value + "(p : " + m.Groups["props"].Value + "){\r\n"
+            string newComponent = m.Groups["export"].Value + m.Groups["default"].Value + "function " + m.Groups["className"].Value + "(p : " + m.Groups["props"].Value + "){\n"
                  + simplifiedContent
                  + endMatch.Value;
 
@@ -78,10 +78,10 @@ public class ReactHookConverter
 
         if (hookImports.Any())
         {
-            var lastImport = Regex.Matches(content, "^import.*\r\n", RegexOptions.Multiline).Cast<Match>().Last();
+            var lastImport = Regex.Matches(content, "^import.*\r?\n", RegexOptions.Multiline).Cast<Match>().Last();
 
             return content.Substring(0, lastImport.EndIndex()) +
-                $"import {{ {hookImports.ToString(", ")} }} from '@framework/Hooks'\r\n" +
+                $"import {{ {hookImports.ToString(", ")} }} from '@framework/Hooks'\n" +
                 content[lastImport.EndIndex()..];
         }
         else
@@ -95,7 +95,7 @@ public class ReactHookConverter
     {
         HashSet<string> hooks = new HashSet<string>();
 
-        var matches = Regex.Matches(content, @"^  (?<text>\w.+)\s*\r\n", RegexOptions.Multiline).Cast<Match>().ToList();
+        var matches = Regex.Matches(content, @"^  (?<text>\w.+)\s*\r?\n", RegexOptions.Multiline).Cast<Match>().ToList();
         var endMatch = new Regex(@"^  };?\s*$", RegexOptions.Multiline).Matches(content).Cast<Match>().ToList();
 
         var pairs = matches.Select(m => new { isStart = true, m })
@@ -116,7 +116,7 @@ public class ReactHookConverter
 
             if (start.Value.Contains("render()"))
             {
-                render = simplifiedContent.Lines().Select(l => l.StartsWith("  ") ? l[2..] : l).ToString("\r\n");
+                render = simplifiedContent.Lines().Select(l => l.StartsWith("  ") ? l[2..] : l).ToString("\n");
 
                 content = content.Substring(0, start.Index) + content[end.EndIndex()..];
             }
@@ -128,7 +128,7 @@ public class ReactHookConverter
             }
         }
 
-        return hooks.ToString(s => s + ";\r\n", "").Indent(2) + content + render;
+        return hooks.ToString(s => s + ";\n", "").Indent(2) + content + render;
 
     }
 
@@ -137,13 +137,13 @@ public class ReactHookConverter
         {
             var lambda = Regex.Match(value, @"^(?<ident> *)(?<mods>(static )*)(?<name>\w+) *= *\((?<params>.*)\) *(?<return>: *.* *)?=> *{\s*$");
             if (lambda.Success)
-                return $"{lambda.Groups["ident"].Value}{lambda.Groups["mods"].Value}function {lambda.Groups["name"].Value}({lambda.Groups["params"].Value}) {lambda.Groups["return"].Value}{{\r\n";
+                return $"{lambda.Groups["ident"].Value}{lambda.Groups["mods"].Value}function {lambda.Groups["name"].Value}({lambda.Groups["params"].Value}) {lambda.Groups["return"].Value}{{\n";
         }
 
         {
             var method = Regex.Match(value, @"^(?<ident> *)(?<mods>((static|async) )*)(?<name>\w+) *\((?<params>.*)\) *(?<return>: *.* *)?{\s*$");
             if (method.Success)
-                return $"{method.Groups["ident"].Value}{method.Groups["mods"].Value}function {method.Groups["name"].Value}({method.Groups["params"].Value}) {method.Groups["return"].Value}{{\r\n";
+                return $"{method.Groups["ident"].Value}{method.Groups["mods"].Value}function {method.Groups["name"].Value}({method.Groups["params"].Value}) {method.Groups["return"].Value}{{\n";
         }
         return value;
     }

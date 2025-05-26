@@ -65,8 +65,8 @@ public static class ExceptionLogic
             agex.InnerExceptions.SelectMany(inner => inner.Follow(e => e.InnerException)).ToList() :
             ex.Follow(e => e.InnerException).ToList();
 
-        string messages = exceptions.ToString(e => e.Message, "\r\n\r\n");
-        string stacktraces = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
+        string messages = exceptions.ToString(e => e.Message, "\n");
+        string stacktraces = exceptions.ToString(e => e.StackTrace, "\n");
 
         entity.ExceptionMessage = messages.DefaultText("- No message - ");
         entity.StackTrace = new BigStringEmbedded(stacktraces.DefaultText("- No stacktrace -"));
