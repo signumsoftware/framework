@@ -135,7 +135,7 @@ public static class ToolbarLogic
                 if (problems.Count > 0)
                     throw new ApplicationException(
                         ToolbarMessage._0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships.NiceToString().FormatWith(problems.Count) +
-                        problems.ToString("\r\n"));
+                        problems.ToString("\n"));
             }
         }
     }

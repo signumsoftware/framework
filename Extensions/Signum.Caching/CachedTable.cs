@@ -39,13 +39,13 @@ class CachedTable<T> : CachedTableBase where T : Entity
         //Query
         using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
         {
-            string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
-                Table.Columns.Values.Where(ShouldBeCached).ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(isPostgres), ",\r\n"),
+            string select = "SELECT\n{0}\r\nFROM {1} {2}\n".FormatWith(
+                Table.Columns.Values.Where(ShouldBeCached).ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(isPostgres), ",\n"),
                 table.Name.ToString(),
                 ctr.currentAlias!.ToString());
 
             
-            ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias + "." +  table.PrimaryKey.Name.SqlEscape(isPostgres) + "\r\n" + remainingJoins;
+            ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias + "." +  table.PrimaryKey.Name.SqlEscape(isPostgres) + "\n" + remainingJoins;
 
             if (ctr.remainingJoins != null)
                 select += ctr.remainingJoins;

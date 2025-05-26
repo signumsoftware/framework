@@ -69,12 +69,12 @@ public static class StringExtensions
 
     public static string? AddLine(this string? str, string part)
     {
-        return Add(str, "\r\n", part);
+        return Add(str, "\n", part);
     }
 
     public static string[] Lines(this string str)
     {
-        return str.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        return str.Split(new[] { "\n", "\n" }, StringSplitOptions.None);
     }
 
     static InvalidOperationException NotFound(string str, char separator)
@@ -586,10 +586,10 @@ public static class StringExtensions
 
     public static string VerticalEtc(this string str, int maxLines, string etcString = "(…)")
     {
-        if (str.HasText() && (str.Contains("\r\n")))
+        if (str.HasText() && (str.Contains("\n")))
     {
-            string[] arr = str.Split(new string[] { "\r\n" }, maxLines - 1, StringSplitOptions.None);
-            string res = arr.ToString("\r\n");
+            string[] arr = str.Split(new string[] { "\n" }, maxLines - 1, StringSplitOptions.None);
+            string res = arr.ToString("\n");
             if (res.Length < str.Length)
                 res += etcString;
             return res;

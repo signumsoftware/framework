@@ -440,7 +440,7 @@ public static class UserChartLogic
             }
             catch (Exception e)
             {
-                return new SqlPreCommandSimple("-- Exception on {0}\r\n{1}".FormatWith(uc.BaseToString(), e.Message.Indent(2, '-')));
+                return new SqlPreCommandSimple("-- Exception on {0}\n{1}".FormatWith(uc.BaseToString(), e.Message.Indent(2, '-')));
             }
         }
     }
