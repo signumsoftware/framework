@@ -313,7 +313,7 @@ public partial class Table
                     trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
                     output != null && !isPostgres ? $"OUTPUT INSERTED.{table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}\n" : null,
                     suffixes.ToString(s => " (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\n"),
-                    output != null && isPostgres ? $"\r\nRETURNING {table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}" : null);
+                    output != null && isPostgres ? $"\nRETURNING {table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}" : null);
 
 
                 var expr = Expression.Lambda<Action<Entity, Forbidden, string, List<DbParameter>>>(
@@ -1368,7 +1368,7 @@ public partial class TableMList
                 trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
                 output && !isPostgres ? $"OUTPUT INSERTED.{PrimaryKey.Name.SqlEscape(isPostgres)}\n" : null,
                 suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\n"),
-                output && isPostgres ? $"\r\nRETURNING {PrimaryKey.Name.SqlEscape(isPostgres)}" : null);
+                output && isPostgres ? $"\nRETURNING {PrimaryKey.Name.SqlEscape(isPostgres)}" : null);
 
          
 

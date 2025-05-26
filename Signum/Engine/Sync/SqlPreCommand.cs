@@ -667,7 +667,7 @@ public class SqlPreCommandConcat : SqlPreCommand
             com.PlainSql(sb);
 
             if (simple != null && simple.GoAfter)
-                sb.Append("\r\nGO");
+                sb.Append("\nGO");
 
 
             sb.Append(sep);
