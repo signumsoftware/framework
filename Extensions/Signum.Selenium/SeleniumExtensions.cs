@@ -191,10 +191,10 @@ public static class SeleniumExtensions
 
     public static bool IsElementVisible(this WebDriver selenium, By locator)
     {
-        var elements = selenium.FindElements(locator);
         try
         {
-            return elements.Any() && elements.First().Displayed;
+            var elements = selenium.FindElements(locator);
+            return elements.Count != 0 && elements.First().Displayed;
         }
         catch (StaleElementReferenceException)
         {
@@ -204,10 +204,10 @@ public static class SeleniumExtensions
 
     public static bool IsElementVisible(this IWebElement element, By locator)
     {
-        var elements = element.FindElements(locator);
         try
         {
-            return elements.Any() && elements.First().Displayed;
+            var elements = element.FindElements(locator);
+            return elements.Count != 0 && elements.First().Displayed;
         }
         catch (StaleElementReferenceException)
         {
@@ -305,6 +305,19 @@ public static class SeleniumExtensions
     public static SelectElement SelectElement(this IWebElement element)
     {
         return new SelectElement(element);
+    }
+
+    //  blogs.rahulrpandya.in/understanding-the-deprecation-of-getattribute-in-selenium-26f490598d20
+    public static string GetDomAttributeOrThrow(this IWebElement element, string attributeName)
+    {
+        return element.GetDomAttribute(attributeName) ??  
+            throw new InvalidOperationException($"Attribute '{attributeName}' was not found on element: {element.TagName}.");
+    }
+
+    public static string GetDomPropertyOrThrow(this IWebElement element, string propertyName)
+    {
+        return element.GetDomProperty(propertyName) ??  
+            throw new InvalidOperationException($"Property '{propertyName}' was not found on element: {element.TagName}.");
     }
 
     public static string? GetID(this IWebElement element)
@@ -420,7 +433,7 @@ public static class SeleniumExtensions
         element.ScrollTo();
         new Actions(element.GetDriver()).MoveToElement(element).Perform();
         var length = 0;
-        while((length = element.GetDomProperty("value")!.Length) > 0)
+        while((length = element.GetDomPropertyOrThrow("value").Length) > 0)
         {
             for (int i = 0; i < length; i++)
                 element.SendKeys(Keys.Backspace);
@@ -434,7 +447,7 @@ public static class SeleniumExtensions
         element.GetDriver().Wait(() => element.GetDomProperty("value") == (text ?? ""));
     }
 
-    public static string Value(this IWebElement e) => e.GetDomProperty("value")!;
+    public static string Value(this IWebElement e) => e.GetDomPropertyOrThrow("value");
 
     public static void ButtonClick(this IWebElement button)
     {

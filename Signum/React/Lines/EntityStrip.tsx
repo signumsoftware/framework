@@ -98,8 +98,7 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
 
   const readOnly = p.ctx.readOnly;
   return (
-    <FormGroup ctx={p.ctx!}
-      label={p.label} labelIcon={p.labelIcon}
+    <FormGroup ctx={p.ctx!} error={p.error} label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={helpText}
       helpTextOnTop={helpTextOnTop}

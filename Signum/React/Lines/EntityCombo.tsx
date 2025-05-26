@@ -116,8 +116,7 @@ export const EntityCombo: <V extends Entity | Lite<Entity> | null>(props: Entity
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
   return (
-    <FormGroup ctx={c.props.ctx}
-      label={getLabelText()} labelIcon={p.labelIcon}
+    <FormGroup ctx={c.props.ctx} error={p.error} label={getLabelText()} labelIcon={p.labelIcon}
       helpText={helpText}
       helpTextOnTop={helpTextOnTop}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}

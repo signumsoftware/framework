@@ -39,6 +39,8 @@ public class SqlBuilder
             "db_denydatawriter"
         };
 
+
+
     internal List<string> GetSystemSchemas(bool isPostgres)
     {
         if (isPostgres)
@@ -416,7 +418,8 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
                     $"KEY INDEX {pk.IndexName}",
                     $"ON {sqls.CatallogName}",
                     options.Any() ? "WITH " + options.ToString(", ") : null
-                }.ToString("\n"));
+                }.ToString("\n"))
+                { NoTransaction = NoTransactionMode.AfterScript };
 
                 return indexSql;
             }
@@ -853,15 +856,14 @@ EXEC DB.dbo.sp_executesql @sql"
     public SqlPreCommand? CreateFullTextCatallog(FullTextCatallogName newSN) => WrapUseDatabase(newSN.Database, CreateFullTextCatallog(newSN.Name));
     public SqlPreCommand CreateFullTextCatallog(string catallogName)
     {
-        return new SqlPreCommandSimple("CREATE FULLTEXT CATALOG " + catallogName);
+        return new SqlPreCommandSimple("CREATE FULLTEXT CATALOG " + catallogName) { NoTransaction = NoTransactionMode.BeforeScript, GoAfter = true };
     }
 
     public SqlPreCommand? DropFullTextCatallog(FullTextCatallogName newSN) => WrapUseDatabase(newSN.Database, DropFullTextCatallog(newSN.Name));
     public SqlPreCommand DropFullTextCatallog(string catallogName)
     {
-        return new SqlPreCommandSimple("DROP FULLTEXT CATALOG " + catallogName);
+        return new SqlPreCommandSimple("DROP FULLTEXT CATALOG " + catallogName) { NoTransaction = NoTransactionMode.AfterScript, GoAfter = true };
     }
-
     
     SqlPreCommand WrapUseDatabase(DatabaseName? db, SqlPreCommand command)
     {

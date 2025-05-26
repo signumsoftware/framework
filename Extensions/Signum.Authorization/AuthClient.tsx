@@ -276,6 +276,9 @@ export namespace AuthClient {
     }
   
   
+    export function relogin(): Promise<LoginResponse> {
+      return ajaxGet({ url: "/api/auth/relogin" });
+    }
   
   
     export function changePassword(request: ChangePasswordRequest): Promise<LoginResponse> {

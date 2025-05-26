@@ -35,11 +35,24 @@ public static class Administrator
         using (Connector.CommandTimeoutScope(TimeoutCreateDatabase))
         {
             SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt()!;
-            foreach (SqlPreCommand command in totalScript.Commands)
+
+            var (before, after) = totalScript.ExtractNoTransaction();
+            before?.ExecuteLeaves();
+
+            using (var tr = new Transaction())
             {
-                command.ExecuteLeaves();
-                SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+                Schema.Current.ExecuteExecuteAs();
+
+                foreach (var p in totalScript.Commands)
+                {
+                    p.ExecuteLeaves();
+                    SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+                }
+
+                tr.Commit();
             }
+
+            after?.ExecuteLeaves();
         }
     }
 
@@ -126,8 +139,8 @@ public static class Administrator
         }
 
         Console.Write("Cleaning database...");
-        using(Connector.CommandTimeoutScope(5 * 60))
-        CleanAllDatabases();
+        using (Connector.CommandTimeoutScope(5 * 60))
+            CleanAllDatabases();
         Console.WriteLine("Done.");
 
         Console.Write("Generating new database...");

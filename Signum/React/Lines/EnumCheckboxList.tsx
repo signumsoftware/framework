@@ -50,12 +50,12 @@ export const EnumCheckboxList: <V extends string>(props: EnumCheckboxListProps<V
     return null;
 
   return (
-    <GroupHeader className={classes("sf-checkbox-list", p.ctx.errorClassBorder)} 
+    <GroupHeader className={classes("sf-checkbox-list", c.getErrorClass("border"))} 
       label={p.label}
       labelIcon={p.labelIcon}
       avoidFieldSet={p.avoidFieldSet}
       buttons={undefined}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }} >
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }} >
       {renderContent()}
     </GroupHeader >
   );

@@ -5,8 +5,8 @@
     text-align: center;
     padding: 1em 0;
     margin: .5em 0;
-    color: #555;
-    border: 2px dashed #555;
+    color: var(--bs-body-color);
+    border: 2px dashed var(--bs-border-color);
     border-radius: 7px;
     cursor: default;
 }

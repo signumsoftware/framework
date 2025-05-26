@@ -19,7 +19,12 @@ export abstract class ToolbarConfig<T extends Entity> {
 
   getIcon(element: ToolbarResponse<T>): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null {
     const defaultIcon = this.getDefaultIcon();
-    return ToolbarConfig.coloredIcon(parseIcon(element.iconName) ?? defaultIcon.icon, element.iconColor ?? defaultIcon.iconColor);
+    return (
+      <>
+        {ToolbarConfig.coloredIcon(parseIcon(element.iconName) ?? defaultIcon.icon, element.iconColor ?? defaultIcon.iconColor)}
+        {this.getCounter(element)}
+      </>
+    );
   }
 
   abstract getDefaultIcon(): IconColor;
@@ -29,6 +34,10 @@ export abstract class ToolbarConfig<T extends Entity> {
       return null;
 
     return <FontAwesomeIcon icon={fallbackIcon(icon)} className={"icon"} color={color} />;
+  }
+
+  getCounter(element: ToolbarResponse<T>): React.ReactElement | undefined {
+    return undefined;
   }
 
   abstract navigateTo(element: ToolbarResponse<T>): Promise<string | null>;

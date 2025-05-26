@@ -281,6 +281,12 @@ export namespace ContextualOperations {
     return array ? OperationMessage.Create0.niceToString(array[1].firstUpper()) : niceName;
   }
 
+  export function cloneWithPrototype<T extends object>(obj: T, overrides: Partial<T> = {}): T {
+    const proto = Object.getPrototypeOf(obj);
+    const clone = Object.create(proto);
+    return Object.assign(clone, obj, overrides);
+  }
+
 
   export async function defaultContextualOperationClick(coc: ContextualOperationContext<any>, ...args: any[]): Promise<void> {
 
@@ -293,7 +299,7 @@ export namespace ContextualOperations {
     if (lites == null)
       return;
 
-    coc.context.lites = lites;
+    coc = cloneWithPrototype(coc, { context: { ...coc.context, lites } });
 
     var conf = await confirmInNecessary(coc);
     if (!conf)

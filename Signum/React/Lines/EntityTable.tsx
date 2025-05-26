@@ -205,12 +205,12 @@ export const EntityTable: <V extends ModifiableEntity, RS>(props: EntityTablePro
   let ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly" });
 
   return (
-    <GroupHeader className={classes("sf-table-field sf-control-container", ctx.errorClassBorder)}
+    <GroupHeader className={classes("sf-table-field sf-control-container", c.getErrorClass("border"))}
       label={p.label}
       labelIcon={p.labelIcon}
       avoidFieldSet={p.avoidFieldSet}
       buttons={renderButtons()}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }}>
       {renderTable()}
     </GroupHeader >
   );

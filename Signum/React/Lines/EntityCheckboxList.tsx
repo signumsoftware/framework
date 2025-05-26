@@ -122,13 +122,13 @@ export const EntityCheckboxList: <V extends ModifiableEntity | Lite<Entity>>(pro
   if (c.isHidden)
     return null;
 
-  return (
-    <GroupHeader className={classes("sf-checkbox-list", p.ctx.errorClassBorder)}
+    return (
+      <GroupHeader className={classes("sf-checkbox-list", c.getErrorClass("border"))}
       label={p.label}
       labelIcon={p.labelIcon}
       avoidFieldSet={p.avoidFieldSet}
-      buttons={renderButtons()}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} >
+        buttons={renderButtons()}
+        htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }} >
       {renderCheckboxList()}
     </GroupHeader >
   );

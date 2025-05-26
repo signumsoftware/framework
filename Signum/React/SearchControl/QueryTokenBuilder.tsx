@@ -203,6 +203,7 @@ export function QueryTokenItem(p: { item: QueryToken | null }): React.JSX.Elemen
 
   return (
     <span
+      data-token={item.key}
       style={{ color: item.typeColor }}
       title={StyleContext.default.titleLabels ? item.niceTypeName : undefined}>
       {item.toStr}

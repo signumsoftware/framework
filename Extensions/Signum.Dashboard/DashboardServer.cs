@@ -25,9 +25,9 @@ public static class DashboardServer
                 ep.extension.Add("embeddedDashboards", result);
         };
 
-        SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((DashboardEntity uq) =>
+        SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((DashboardEntity d) =>
         {
-            uq.ParseData(q => QueryLogic.Queries.QueryDescription(q.ToQueryName()));
+            d.ParseData(q => QueryLogic.Queries.QueryDescription(q.ToQueryName()));
         });
     }
 }
