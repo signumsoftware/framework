@@ -756,6 +756,8 @@ public static class AuthLogic
     public static void ImportAuthRules(XDocument authRules, bool interactive)
     {
         AuthLogic.ImportRulesScript(authRules, interactive: interactive)?.PlainSqlCommand().ExecuteLeaves();
+
+        Schema.Current.InvalidateCache();
     }
 
     public static void AutomaticImportAuthRules(string fileName)
