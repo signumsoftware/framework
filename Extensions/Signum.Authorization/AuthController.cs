@@ -79,7 +79,7 @@ public class AuthController : ControllerBase
         if (!UserTicketServer.LoginFromCookie(ControllerContext))
             return null;
 
-        var user = UserEntity.Current.Retrieve();
+        UserEntity user = AuthLogic.Disable().Using(() => UserEntity.Current.Retrieve());
 
         var token = AuthTokenServer.CreateToken(user);
         return new LoginResponse { userEntity = user, token = token, authenticationType = "cookie" };
@@ -91,7 +91,7 @@ public class AuthController : ControllerBase
     public UserEntity? GetCurrentUser()
     {
         var result = UserEntity.Current;
-        return result.Is(AuthLogic.AnonymousUser) ? null : result.Retrieve();
+        return result.Is(AuthLogic.AnonymousUser) ? null : AuthLogic.Disable().Using(()=> result.Retrieve());
     }
 
     [HttpPost("api/auth/logout")]

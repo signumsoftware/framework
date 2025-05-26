@@ -1,6 +1,7 @@
 using Signum.API;
 using Signum.Authorization.AuthToken;
 using Signum.Authorization.Rules;
+using Signum.Entities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections.Frozen;
@@ -101,9 +102,13 @@ public static class AuthLogic
             };
 
             CultureInfoLogic.AssertStarted(sb);
+            UsersDisabled = sb.GlobalLazy(
+             () => Database.Query<UserEntity>() .Where(u => u.DisabledOn != null && !u.MustRefresh(AuthTokenServer.Configuration()) ).Select(a => a.ToLite()).ToHashSet(),
+             new InvalidateWith(null));
 
             sb.Include<UserEntity>()
               .WithExpressionFrom((RoleEntity r) => r.Users())
+               .WithIndex(a => new { a.DisabledOn })
               .WithQuery(() => e => new
               {
                   Entity = e,

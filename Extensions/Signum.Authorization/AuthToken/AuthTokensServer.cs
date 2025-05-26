@@ -30,6 +30,22 @@ public static class AuthTokenServer
         SignumAuthenticationFilter.Authenticators.Add(InvalidAuthenticator);
     }
 
+
+    [AutoExpressionField]
+    public static bool MustRefresh(this UserEntity entity, AuthTokenConfigurationEmbedded conf) =>
+        As.Expression(() => entity.DisabledOn!=null && 
+        (entity.DisabledOn.Value.AddMinutes(conf.RefreshTokenEvery) < Clock.Now || 
+        (conf.RefreshAnyTokenPreviousTo.HasValue && entity.DisabledOn.Value < conf.RefreshAnyTokenPreviousTo)));
+
+    public static bool MustRefresh(DateTime creationDate )
+    {
+        var c = Configuration();
+
+        return creationDate.AddMinutes(c.RefreshTokenEvery) < Clock.Now ||
+            (c.RefreshAnyTokenPreviousTo.HasValue && creationDate < c.RefreshAnyTokenPreviousTo);
+    }   
+
+
     public static SignumAuthenticationResult? InvalidAuthenticator(FilterContext actionContext)
     {
         throw new AuthenticationException("No authentication information found!");
