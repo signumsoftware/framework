@@ -16,9 +16,13 @@ public static class AuthLogic
     public static event Action<UserEntity>? UserLogingIn;
     public static ICustomAuthorizer? Authorizer;
 
-    public static ResetLazy<HashSet< Lite<UserEntity>>> UsersDisabled ;
+    public static ResetLazy<HashSet<Lite<UserEntity>>> RecentlyUsersDisabled;
 
-
+    public static void CheckUserActive(UserEntity user)
+    {
+        if (user.State != UserState.Active || AuthLogic.RecentlyUsersDisabled.Value.Contains(user.ToLite()))
+            throw new UnauthorizedAccessException(UserMessage.UserIsNotActive.NiceToString());
+    }
 
     /// <summary>
     /// Gets or sets the number of failed login attempts allowed before a user is locked out.
@@ -87,8 +91,7 @@ public static class AuthLogic
             };
 
             CultureInfoLogic.AssertStarted(sb);
-            UsersDisabled = sb.GlobalLazy(
-             () => Database.Query<UserEntity>() .Where(u => u.DisabledOn != null && !u.MustRefresh(AuthTokenServer.Configuration()) ).Select(a => a.ToLite()).ToHashSet(),
+            RecentlyUsersDisabled = sb.GlobalLazy(() => Database.Query<UserEntity>().Where(u => u.DisabledOn != null && AuthTokenServer.GetTokenLimitDate() < u.DisabledOn).Select(a => a.ToLite()).ToHashSet(),
              new InvalidateWith(null));
 
             sb.Include<UserEntity>()
@@ -955,6 +958,7 @@ public static class AuthLogic
 
         return 0;
     }
+
 }
 
 

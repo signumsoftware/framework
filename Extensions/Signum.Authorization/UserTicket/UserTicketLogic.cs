@@ -48,17 +48,6 @@ public static class UserTicketLogic
     public static IQueryable<UserTicketEntity> UserTickets(this UserEntity u) =>
         As.Expression(() => Database.Query<UserTicketEntity>().Where(ut => ut.User.Is(u.ToLite())));
 
-
-
-    public static void CheckUser(UserEntity user)
-    {
-
-
-        if (user.State != UserState.Active)
-            throw new UnauthorizedAccessException(UserMessage.UserIsNotActive.NiceToString());
-    }
-
-
     public static string NewTicket(string device)
     {
         using (AuthLogic.Disable())
@@ -68,7 +57,7 @@ public static class UserTicketLogic
 
             CleanExpiredTickets(user);
 
-            CheckUser(user);
+            AuthLogic.CheckUserActive(user);
 
             UserTicketEntity result = new UserTicketEntity
             {
@@ -82,10 +71,7 @@ public static class UserTicketLogic
 
             return tr.Commit(result.StringTicket());
         }
-
     }
-
-
 
     public static UserEntity UpdateTicket(string device, ref string ticket)
     {
@@ -98,8 +84,7 @@ public static class UserTicketLogic
 
             CleanExpiredTickets(user);
 
-            CheckUser(user);
-
+            AuthLogic.CheckUserActive(user);
 
             UserTicketEntity? userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.ticket);
             if (userTicket == null)
@@ -120,8 +105,6 @@ public static class UserTicketLogic
             return tr.Commit(user);
         }
     }
-
-
 
     static int CleanExpiredTickets(UserEntity user)
     {

@@ -32,21 +32,6 @@ public static class AuthTokenServer
     }
 
 
-    [AutoExpressionField]
-    public static bool MustRefresh(this UserEntity entity, AuthTokenConfigurationEmbedded conf) =>
-        As.Expression(() => entity.DisabledOn!=null && 
-        (entity.DisabledOn.Value.AddMinutes(conf.RefreshTokenEvery) < Clock.Now || 
-        (conf.RefreshAnyTokenPreviousTo.HasValue && entity.DisabledOn.Value < conf.RefreshAnyTokenPreviousTo)));
-
-    public static bool MustRefresh(DateTime creationDate )
-    {
-        var c = Configuration();
-
-        return creationDate.AddMinutes(c.RefreshTokenEvery) < Clock.Now ||
-            (c.RefreshAnyTokenPreviousTo.HasValue && creationDate < c.RefreshAnyTokenPreviousTo);
-    }   
-
-
     public static SignumAuthenticationResult? InvalidAuthenticator(FilterContext actionContext)
     {
         throw new AuthenticationException("No authentication information found!");
@@ -77,37 +62,30 @@ public static class AuthTokenServer
         AuthHeader = "Signum_Authorization";
     }
 
+    public static DateTime GetTokenLimitDate() => Clock.Now.AddMinutes(-Configuration().RefreshTokenEvery);
+
     public static SignumAuthenticationResult? TokenAuthenticator(FilterContext ctx)
     {
         var authHeader = ctx.HttpContext.Request.Headers[AuthHeader].FirstOrDefault();
         if (authHeader == null || !AuthenticateHeader(authHeader))
             return null;
 
-
         var token = DeserializeAuthHeaderToken(authHeader);
         if (token?.User == null)
             return null;
 
+        var conf = Configuration();
 
-        var c = Configuration();
+        var userDisabled = AuthLogic.RecentlyUsersDisabled.Value.Contains(token!.User);
+        if (userDisabled)
+            throw new AuthenticationException(LoginAuthMessage.User0IsDeactivated.NiceToString(token!.User));
 
-
-        if (AuthLogic.UsersDisabled.Value.Count > 0)
-        {
-            var userDisabled = AuthLogic.UsersDisabled.Value.Any(u => u.Is(token!.User));
-            if (userDisabled)
-                throw new AuthenticationException(LoginAuthMessage.User0IsDeactivated.NiceToString(token!.User));
-
-        }
-
-        if (token.CreationDate.AddSeconds(-2) > Clock.Now)
+        if (Clock.Now.AddSeconds(2) < token.CreationDate)
             throw new AuthenticationException(LoginAuthMessage.InvalidTokenDate0.NiceToString(token.CreationDate));
 
-        //bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < Clock.Now ||
-        //        c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo ||
-        //        ctx.HttpContext.Request.Query.ContainsKey("refreshToken");
-
-        bool requiresRefresh = AuthTokenServer.MustRefresh(token.CreationDate) ||
+        bool requiresRefresh =  
+            token.CreationDate < AuthTokenServer.GetTokenLimitDate() ||
+            conf.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < conf.RefreshAnyTokenPreviousTo ||
             ctx.HttpContext.Request.Query.ContainsKey("refreshToken");
 
         if (requiresRefresh)
@@ -199,9 +177,7 @@ public static class AuthTokenServer
     }
 
 
-
-
-
+    
 
     public static string CreateToken(UserEntity user)
     {
@@ -210,8 +186,7 @@ public static class AuthTokenServer
     }
     public static string CreateToken(UserEntity user, out UserWithClaims userWithClaims, AuthToken? oldToken = null)
     {
-
-        UserTicketLogic. CheckUser(user);
+        AuthLogic.CheckUserActive(user);
 
         userWithClaims = new UserWithClaims(user);
 

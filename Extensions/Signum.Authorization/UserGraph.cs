@@ -32,7 +32,7 @@ public class UserGraph : Graph<UserEntity, UserState>
                 u.DisabledOn = Clock.Now;
                 u.State = UserState.Deactivated;
 
-                AuthLogic.UsersDisabled.Reset();
+                AuthLogic.RecentlyUsersDisabled.Reset();
                 var rt = UserTicketLogic.RemoveTickets(u);
             },
         }.Register();
@@ -46,7 +46,7 @@ public class UserGraph : Graph<UserEntity, UserState>
                 u.DisabledOn = Clock.Now;
                 u.State = UserState.AutoDeactivate;
 
-                AuthLogic.UsersDisabled.Reset();
+                AuthLogic.RecentlyUsersDisabled.Reset();
                 var rt = UserTicketLogic.RemoveTickets(u);
             },
         }.Register();
@@ -60,7 +60,7 @@ public class UserGraph : Graph<UserEntity, UserState>
                 u.DisabledOn = null;
                 u.State = UserState.Active;
 
-                AuthLogic.UsersDisabled.Reset();
+                AuthLogic.RecentlyUsersDisabled.Reset();
             },
         }.Register();
 
