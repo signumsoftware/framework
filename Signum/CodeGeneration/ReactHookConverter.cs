@@ -22,7 +22,7 @@ public class ReactHookConverter
 
                 var converted = SimplifyFile(content);
 
-                File.WriteAllText(file, converted.Replace("\r\n", "\n");
+                File.WriteAllText(file, converted.Replace("\r\n", "\n"));
             }
         }
     }
