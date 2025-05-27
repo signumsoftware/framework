@@ -585,7 +585,7 @@ public class CodeFile
         {
             elem.Attribute("Version")!.Value = version;
 
-            this.Content = doc.ToString(SaveOptions.DisableFormatting);
+            this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\r\n", "\n");
         }
     }
 
@@ -606,7 +606,7 @@ public class CodeFile
         {
             eleme.Remove();
 
-            this.Content = doc.ToString(SaveOptions.DisableFormatting);
+            this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\r\n", "\n");
         }
     }
 
@@ -623,7 +623,7 @@ public class CodeFile
             new XAttribute("Include", version)
         ));
 
-        this.Content = doc.ToString(SaveOptions.DisableFormatting);
+        this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\r\n", "\n");
 
     }
 
