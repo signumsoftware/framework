@@ -216,7 +216,7 @@ static class EntityDeclarationGenerator
         }
 
 
-        return sb.ToString();
+        return sb.ToString().Replace("\r\n", "\n");
 
     }
 
@@ -735,16 +735,6 @@ static class EntityDeclarationGenerator
 
     private static string FindDeclarationsFile(AssemblyReference assemblyReference, string @namespace, TypeDefinition typeForError)
     {
-        //var fileTS = @namespace + ".ts";
-
-        //var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileTS).ToList();
-
-        //if (result.Count == 1)
-        //    return result.Single();
-
-        //if (result.Count > 1)
-        //    throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileTS}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
-
         var fileT4S = @namespace + ".t4s";
 
         var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileT4S).ToList();
@@ -753,7 +743,7 @@ static class EntityDeclarationGenerator
             return result.Single().RemoveSuffix(".t4s") + ".ts";
 
         if (result.Count > 1)
-            throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileT4S}' were found inside '{assemblyReference.Directory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
+            throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileT4S}' were found inside '{assemblyReference.Directory}':\n{string.Join("\n", result.Select(a => "  " + a).ToArray())}");
 
         throw new InvalidOperationException($"importing '{typeForError}' required but no '{fileT4S}' found inside '{assemblyReference.Directory}'");
     }
