@@ -7,7 +7,7 @@ namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20250527_UpdateNuges : CodeUpgradeBase
 {
-    public override string Description => "";
+    public override string Description => "Update nugets";
 
     public override void Execute(UpgradeContext uctx)
     {
@@ -33,7 +33,6 @@ class Upgrade_20250527_UpdateNuges : CodeUpgradeBase
                 """);
 
         });
-
     }
 }
 
