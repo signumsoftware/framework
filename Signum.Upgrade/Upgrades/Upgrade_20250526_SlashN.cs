@@ -7,7 +7,7 @@ namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20250526_SlashRSlashN : CodeUpgradeBase
 {
-    public override string Description => "This replaces \r\n literals in code to \n";
+    public override string Description => @"This replaces \r\n literals in code to \n";
 
     public override void Execute(UpgradeContext uctx)
     {
