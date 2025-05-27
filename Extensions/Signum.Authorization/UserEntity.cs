@@ -135,3 +135,11 @@ public class UserLiteModel : ModelEntity
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => ToStringValue ?? UserName);
 }
+
+
+
+public enum UserMessage
+{
+    UserIsNotActive
+
+}

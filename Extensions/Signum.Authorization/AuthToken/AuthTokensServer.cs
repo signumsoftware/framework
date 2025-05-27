@@ -9,6 +9,7 @@ using Signum.API.Filters;
 using Signum.API.Json;
 using Signum.API.Controllers;
 using Signum.API;
+using Signum.Authorization.UserTicket;
 
 namespace Signum.Authorization.AuthToken;
 
@@ -29,6 +30,22 @@ public static class AuthTokenServer
         SignumAuthenticationFilter.Authenticators.Add(AllowAnonymousAuthenticator);
         SignumAuthenticationFilter.Authenticators.Add(InvalidAuthenticator);
     }
+
+
+    [AutoExpressionField]
+    public static bool MustRefresh(this UserEntity entity, AuthTokenConfigurationEmbedded conf) =>
+        As.Expression(() => entity.DisabledOn!=null && 
+        (entity.DisabledOn.Value.AddMinutes(conf.RefreshTokenEvery) < Clock.Now || 
+        (conf.RefreshAnyTokenPreviousTo.HasValue && entity.DisabledOn.Value < conf.RefreshAnyTokenPreviousTo)));
+
+    public static bool MustRefresh(DateTime creationDate )
+    {
+        var c = Configuration();
+
+        return creationDate.AddMinutes(c.RefreshTokenEvery) < Clock.Now ||
+            (c.RefreshAnyTokenPreviousTo.HasValue && creationDate < c.RefreshAnyTokenPreviousTo);
+    }   
+
 
     public static SignumAuthenticationResult? InvalidAuthenticator(FilterContext actionContext)
     {
@@ -71,10 +88,26 @@ public static class AuthTokenServer
         if (token?.User == null)
             return null;
 
+
         var c = Configuration();
 
-        bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < Clock.Now ||
-            c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo ||
+
+        if (AuthLogic.UsersDisabled.Value.Count > 0)
+        {
+            var userDisabled = AuthLogic.UsersDisabled.Value.Any(u => u.Is(token!.User));
+            if (userDisabled)
+                throw new AuthenticationException(LoginAuthMessage.User0IsDeactivated.NiceToString(token!.User));
+
+        }
+
+        if (token.CreationDate.AddSeconds(-2) > Clock.Now)
+            throw new AuthenticationException(LoginAuthMessage.InvalidTokenDate0.NiceToString(token.CreationDate));
+
+        //bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < Clock.Now ||
+        //        c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo ||
+        //        ctx.HttpContext.Request.Query.ContainsKey("refreshToken");
+
+        bool requiresRefresh = AuthTokenServer.MustRefresh(token.CreationDate) ||
             ctx.HttpContext.Request.Query.ContainsKey("refreshToken");
 
         if (requiresRefresh)
@@ -98,7 +131,7 @@ public static class AuthTokenServer
         if (user == null)
             throw new AuthenticationException(LoginAuthMessage.TheUserIsNotLongerInTheDatabase.NiceToString());
 
-        if (user.State == UserState.Deactivated)
+        if (user.State != UserState.Active)
             throw new AuthenticationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
 
         if (user.ToString() != oldToken.User.ToString())
@@ -107,24 +140,27 @@ public static class AuthTokenServer
         if (!(user.PasswordHash.EmptyIfNull()).SequenceEqual((oldToken.PasswordHash.EmptyIfNull()).EmptyIfNull()))
             throw new AuthenticationException(LoginAuthMessage.InvalidPassword.NiceToString());
 
-        newUser = new UserWithClaims(user);
+        //newUser = new UserWithClaims(user);
 
-        AuthToken newToken = new AuthToken
-        {
-            User = newUser.User,
-            Claims = newUser.Claims,
-            PasswordHash = user.PasswordHash,
-            CreationDate = Clock.Now,
-        };
+        //AuthToken newToken = new AuthToken
+        //{
+        //    User = newUser.User,
+        //    Claims = newUser.Claims,
+        //    PasswordHash = user.PasswordHash,
+        //    CreationDate = Clock.Now,
+        //};
 
-        OnAuthToken?.Invoke(newUser, oldToken, newToken);
+        //OnAuthToken?.Invoke(newUser, oldToken, newToken);
 
-        var result = SerializeToken(newToken);
-        return result;
+        //var result = SerializeToken(newToken);
+
+        var token = AuthTokenServer.CreateToken(user,out newUser, oldToken);
+
+        return token;
     }
 
 
-    public static Func<string, AuthToken?> DeserializeAuthHeaderToken = (string authHeader) => 
+    public static Func<string, AuthToken?> DeserializeAuthHeaderToken = (string authHeader) =>
     {
         try
         {
@@ -162,9 +198,22 @@ public static class AuthTokenServer
         }
     }
 
+
+
+
+
+
     public static string CreateToken(UserEntity user)
     {
-        var userWithClaims = new UserWithClaims(user);
+        UserWithClaims userWithClaims;
+        return CreateToken(user, out userWithClaims, null);
+    }
+    public static string CreateToken(UserEntity user, out UserWithClaims userWithClaims, AuthToken? oldToken = null)
+    {
+
+        UserTicketLogic. CheckUser(user);
+
+        userWithClaims = new UserWithClaims(user);
 
         AuthToken newToken = new AuthToken
         {
@@ -174,7 +223,7 @@ public static class AuthTokenServer
             PasswordHash = user.PasswordHash,
         };
 
-        OnAuthToken?.Invoke(userWithClaims, null, newToken);
+        OnAuthToken?.Invoke(userWithClaims, oldToken, newToken);
 
         return SerializeToken(newToken);
     }

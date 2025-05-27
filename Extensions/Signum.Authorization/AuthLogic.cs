@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Signum.API;
 using Signum.Authorization.AuthToken;
 using Signum.Authorization.Rules;
+using Signum.Entities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections.Frozen;
@@ -14,6 +15,8 @@ public static class AuthLogic
 {
     public static event Action<UserEntity>? UserLogingIn;
     public static ICustomAuthorizer? Authorizer;
+
+    public static ResetLazy<HashSet< Lite<UserEntity>>> UsersDisabled ;
 
 
 
@@ -55,7 +58,6 @@ public static class AuthLogic
     public static ResetLazy<FrozenDictionary<Lite<RoleEntity>, RoleEntity>> RolesByLite = null!;
 
 
-
     class RoleData
     {
         public bool DefaultAllowed;
@@ -85,9 +87,13 @@ public static class AuthLogic
             };
 
             CultureInfoLogic.AssertStarted(sb);
+            UsersDisabled = sb.GlobalLazy(
+             () => Database.Query<UserEntity>() .Where(u => u.DisabledOn != null && !u.MustRefresh(AuthTokenServer.Configuration()) ).Select(a => a.ToLite()).ToHashSet(),
+             new InvalidateWith(null));
 
             sb.Include<UserEntity>()
               .WithExpressionFrom((RoleEntity r) => r.Users())
+               .WithIndex(a => new { a.DisabledOn })
               .WithQuery(() => e => new
               {
                   Entity = e,
@@ -140,7 +146,6 @@ public static class AuthLogic
             }, new InvalidateWith(typeof(RoleEntity)));
 
             sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
-
             UserGraph.Register();
 
 
@@ -717,7 +722,7 @@ public static class AuthLogic
             var trivialMergeRoles = Database.Query<RoleEntity>().Where(a => a.IsTrivialMerge == true).ToList();
 
             var trivialMerges = trivialMergeRoles.Select(tr =>
-            {
+                {
                 var oldName = tr.Name;
                 tr.Name = RoleEntity.CalculateTrivialMergeName(tr.InheritsFrom);
                 if (tr.IsGraphModified)
@@ -951,6 +956,10 @@ public static class AuthLogic
         return 0;
     }
 }
+
+
+
+
 
 public interface ICustomAuthorizer
 {
