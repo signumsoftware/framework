@@ -17,7 +17,11 @@ class Upgrade_20250525_CreateGitAttributesLF : CodeUpgradeBase
             file.UpdateNugetReferences("""
                 <PackageReference Include="Signum.TSGenerator" Version="9.1.0" />
                 """);
+        });
 
+        uctx.ForeachCodeFile(@".editorconfig", file =>
+        {
+            file.Replace("crlf", "lf");
         });
 
         SafeConsole.WriteLineColor(ConsoleColor.Yellow, "This upgrade will create .gitattributes with LF line endings for all files.");
