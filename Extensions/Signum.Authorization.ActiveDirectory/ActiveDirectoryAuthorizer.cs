@@ -263,7 +263,7 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                     return config.DefaultRole;
 
                 if (throwIfNull)
-                    throw new InvalidOperationException("No Default Role set and no matching RoleMapping found for any role: \r\n" + groups.ToString(a => a.Name, "\r\n"));
+                    throw new InvalidOperationException("No Default Role set and no matching RoleMapping found for any role: \n" + groups.ToString(a => a.Name, "\n"));
                 else
                     return null;
             }
@@ -294,7 +294,7 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                     return config.DefaultRole;
 
                 if (throwIfNull)
-                    throw new InvalidOperationException("No Default Role set and no matching RoleMapping found for any role: \r\n" + groups.ToString(a => a.Id + ": " + a.DisplayName, "\r\n"));
+                    throw new InvalidOperationException("No Default Role set and no matching RoleMapping found for any role: \n" + groups.ToString(a => a.Id + ": " + a.DisplayName, "\n"));
                 else
                     return null;
             }

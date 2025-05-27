@@ -779,7 +779,7 @@ public static class Administrator
 
         var isPostgres = Schema.Current.Settings.IsPostgres;
         var pb = Connector.Current.ParameterBuilder;
-        return columns.Select(ct => new ColumnTableScript(ct, new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @toEntity\r\nWHERE {1} = @fromEntity".FormatWith(ct.Table.Name, ct.Column.Name.SqlEscape(isPostgres)), new List<DbParameter>
+        return columns.Select(ct => new ColumnTableScript(ct, new SqlPreCommandSimple("UPDATE {0}\nSET {1} = @toEntity\nWHERE {1} = @fromEntity".FormatWith(ct.Table.Name, ct.Column.Name.SqlEscape(isPostgres)), new List<DbParameter>
         {
             pb.CreateReferenceParameter("@fromEntity", fromEntity.Id, ct.Column),
             pb.CreateReferenceParameter("@toEntity", toEntity.Id, ct.Column),

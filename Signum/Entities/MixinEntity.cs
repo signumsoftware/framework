@@ -93,7 +93,7 @@ public static class MixinDeclarations
 
             if (ci.IsPublic || pi.Length != 2 || pi[0].ParameterType != typeof(ModifiableEntity) || pi[1].ParameterType != typeof(MixinEntity))
                 throw new InvalidOperationException($"{me.Name} does not have a non-public construtor with parameters (ModifiableEntity mainEntity, MixinEntity next)." +
-                    (pi[0].ParameterType == typeof(Entity) ? "\r\nBREAKING CHANGE: The first parameter has changed from Entity -> ModifiableEntity" : null)
+                    (pi[0].ParameterType == typeof(Entity) ? "\nBREAKING CHANGE: The first parameter has changed from Entity -> ModifiableEntity" : null)
                     );
 
             return (Func<ModifiableEntity, MixinEntity?, MixinEntity>)Expression.Lambda(Expression.New(ci, pMainEntity, pNext), pMainEntity, pNext).Compile();

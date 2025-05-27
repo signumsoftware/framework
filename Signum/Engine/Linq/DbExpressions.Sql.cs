@@ -476,7 +476,7 @@ internal class SelectExpression : SourceWithAliasExpression
 
     public override string ToString()
     {
-        return "SELECT {0}{1}\n{2}\r\nFROM {3}\n{4}{5}{6}{7} AS {8}".FormatWith(
+        return "SELECT {0}{1}\n{2}\nFROM {3}\n{4}{5}{6}{7} AS {8}".FormatWith(
             IsDistinct ? "DISTINCT " : "",
             Top?.Let(t => "TOP {0} ".FormatWith(t.ToString())),
             Columns.ToString(c => c.ToString().Indent(4), ",\n"),
@@ -541,7 +541,7 @@ internal class JoinExpression : SourceExpression
 
     public override string ToString()
     {
-        return "{0}\n{1}\n{2}\r\nON {3}".FormatWith(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition?.ToString());
+        return "{0}\n{1}\n{2}\nON {3}".FormatWith(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition?.ToString());
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1463,11 +1463,11 @@ internal class DeleteExpression : CommandExpression
 
     public override string ToString()
     {
-        return "DELETE FROM {0}\r\nFROM {1}\n{2}".FormatWith(
+        return "DELETE FROM {0}\nFROM {1}\n{2}".FormatWith(
             (object?)Alias ?? Name,
             Source.ToString(),
             Where?.Let(w => "WHERE " + w.ToString())) + 
-            (ReturnRowCount ? "\r\nSELECT @@rowcount" : "");
+            (ReturnRowCount ? "\nSELECT @@rowcount" : "");
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1500,7 +1500,7 @@ internal class UpdateExpression : CommandExpression
 
     public override string ToString()
     {
-        return "UPDATE {0}\r\nSET {1}\r\nFROM {2}\n{3}".FormatWith(
+        return "UPDATE {0}\nSET {1}\nFROM {2}\n{3}".FormatWith(
             Table.Name,
             Assigments.ToString("\n"),
             Source.ToString(),
@@ -1534,7 +1534,7 @@ internal class InsertSelectExpression : CommandExpression
 
     public override string ToString()
     {
-        return "INSERT INTO {0}({1})\r\nSELECT {2}\r\nFROM {3}".FormatWith(
+        return "INSERT INTO {0}({1})\nSELECT {2}\nFROM {3}".FormatWith(
             Table.Name,
             Assigments.ToString(a => a.Column, ",\n"),
             Assigments.ToString(a => a.Expression.ToString(), ",\n"),

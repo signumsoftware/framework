@@ -75,7 +75,7 @@ public class SqlBuilder
             .ToString(",\n");
 
         var systemVersioning = t.SystemVersioned == null || avoidSystemVersioning || IsPostgres ? null :
-            $"\r\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SystemVersioned.TableName.OnDatabase(null)}))";
+            $"\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SystemVersioned.TableName.OnDatabase(null)}))";
 
         var result = new SqlPreCommandSimple($"CREATE {(IsPostgres && t.Name.IsTemporal ? "TEMPORARY " : "")}TABLE {tableName ?? t.Name}(\n{columns}\n)" + systemVersioning + ";");
 

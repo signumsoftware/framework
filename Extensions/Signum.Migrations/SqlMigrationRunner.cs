@@ -131,7 +131,7 @@ public class SqlMigrationRunner
 
         if (errors.Any())
             throw new InvalidOperationException("Some scripts in the migrations directory have an invalid format (yyyy.MM.dd-HH.mm.ss_OptionalComment.sql) " +
-                errors.ToString(a => Path.GetFileName(a.fileName), "\r\n"));
+                errors.ToString(a => Path.GetFileName(a.fileName), "\n"));
 
         var list = matches.Select(a => new MigrationInfo
         {

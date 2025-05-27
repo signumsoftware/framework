@@ -271,7 +271,7 @@ public static class WordTemplateLogic
                 parser.AssertClean();
 
                 error = parser.Errors.IsEmpty() ? null :
-                    parser.Errors.ToString(e => e.Message, "\r\n");
+                    parser.Errors.ToString(e => e.Message, "\n");
             });
 
             return error;
@@ -370,7 +370,7 @@ public static class WordTemplateLogic
                             parser.AssertClean();
 
                             if (parser.Errors.Any())
-                                throw new InvalidOperationException("Error in template {0}:\r\n".FormatWith(template) + parser.Errors.ToString(e => e.Message, "\r\n"));
+                                throw new InvalidOperationException("Error in template {0}:\n".FormatWith(template) + parser.Errors.ToString(e => e.Message, "\n"));
 
                             var parsedFileName = fileNameBox != null ? TextTemplateParser.Parse(template.FileName, qd, template.Model?.ToType()) : null;
 
@@ -666,7 +666,7 @@ public static class WordTemplateLogic
         }
         catch (Exception e)
         {
-            return new SqlPreCommandSimple("-- Exception on {0}\r\n{1}".FormatWith(wt.BaseToString(), e.Message.Indent(2, '-')));
+            return new SqlPreCommandSimple("-- Exception on {0}\n{1}".FormatWith(wt.BaseToString(), e.Message.Indent(2, '-')));
         }
     }
 
@@ -750,12 +750,12 @@ public static class WordTemplateLogic
             }
             catch (Exception ex)
             {
-                exceptions.Add("{0} in {1}:\r\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
+                exceptions.Add("{0} in {1}:\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
             }
         }
 
         if (exceptions.Any())
-            throw new Exception(exceptions.ToString("\r\n\r\n"));
+            throw new Exception(exceptions.ToString("\n\n"));
     }
 
     public static void OverrideWordTemplatesConsole()
@@ -813,7 +813,7 @@ public static class WordTemplateLogic
             catch (Exception ex)
             {
                 SafeConsole.WriteLineColor(ConsoleColor.Red, se.FullClassName);
-                SafeConsole.WriteLineColor(ConsoleColor.Red, "{0} in {1}:\r\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
+                SafeConsole.WriteLineColor(ConsoleColor.Red, "{0} in {1}:\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
             }
         }
     }

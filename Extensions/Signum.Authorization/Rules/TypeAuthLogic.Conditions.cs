@@ -193,11 +193,11 @@ public static partial class TypeAuthLogic
 
                 string details = 
                     debugInfo.Count == 1 ? debugInfo.SingleEx().ErrorMessage! : 
-                    debugInfo.ToString(a => "  {0}: {1}".FormatWith(a.Lite, a.ErrorMessage), "\r\n");
+                    debugInfo.ToString(a => "  {0}: {1}".FormatWith(a.Lite, a.ErrorMessage), "\n");
 
                 throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(
                     typeAllowed.NiceToString(),
-                    notFound.Count == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(), notFound.CommaAnd()) + "\r\n" + details);
+                    notFound.Count == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(), notFound.CommaAnd()) + "\n" + details);
             }
         }
     }

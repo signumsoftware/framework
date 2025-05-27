@@ -206,7 +206,7 @@ public static class AuthLogic
                     if (problems.Count > 0)
                         throw new ApplicationException(
                             AuthAdminMessage._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.NiceToString(problems.Count) +
-                            problems.ToString("\r\n"));
+                            problems.ToString("\n"));
                 }
 
                 var dic = allRoles.ToDictionary(a => a.ToLite());
@@ -216,7 +216,7 @@ public static class AuthLogic
                     throw new ApplicationException(
                         problems2.GroupBy(a => a.r, a => a.inh)
                         .Select(gr => AuthAdminMessage.Role0InheritsFromTrivialMergeRole1.NiceToString(gr.Key, gr.CommaAnd()))
-                        .ToString("\r\n"));
+                        .ToString("\n"));
             }
 
             if (!role.IsTrivialMerge)
@@ -267,7 +267,7 @@ public static class AuthLogic
         if (problems.Count > 0)
             throw new ApplicationException(
                 AuthAdminMessage._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.NiceToString().FormatWith(problems.Count) +
-                problems.ToString("\r\n"));
+                problems.ToString("\n"));
 
         return graph;
 
@@ -569,7 +569,7 @@ public static class AuthLogic
         }
         catch (InvalidOperationException ex)
         {
-            throw new InvalidRoleGraphException("The role graph does not match:\r\n" + ex.Message);
+            throw new InvalidRoleGraphException("The role graph does not match:\n" + ex.Message);
         }
 
         var dbOnlyWarnings = rolesDic.Keys.Except(rolesXml.Keys).Select(n =>

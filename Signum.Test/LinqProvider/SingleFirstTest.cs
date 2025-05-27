@@ -16,7 +16,7 @@ public class SingleFirstTest
         var bandsCount = Database.Query<BandEntity>().Select(b => new
         {
             b.Name,
-            Members = b.Members.Select(a => new { a.Name, a.Sex }).ToString(p => "{0} ({1})".FormatWith(p.Name, p.Sex), "\r\n")
+            Members = b.Members.Select(a => new { a.Name, a.Sex }).ToString(p => "{0} ({1})".FormatWith(p.Name, p.Sex), "\n")
         }).ToList();
 
         var bands1 = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.FirstOrDefault()!.Name }).ToList();
