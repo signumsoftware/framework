@@ -73,6 +73,11 @@ public static class HtmlToWordConverter
                     rp.Append(new Underline() { Val = UnderlineValues.Single });
                 }), addParagraphProperties, document));
 
+            case "del":
+                return htmlNode.ChildNodes.SelectMany(c => HtmlToWordPrivate(c, addRunProperties + ((RunProperties rp) =>
+                {
+                    rp.Append(new Strike() { Val = true });
+                }), addParagraphProperties, document));
 
             case "h1":
             case "h2":
@@ -100,7 +105,7 @@ public static class HtmlToWordConverter
                             var size = hi == "1" ? "32" :
                                 hi == "2" ? "26" :
                                 hi == "3" ? "24" :
-                                hi == "4" ? "22" : 
+                                hi == "4" ? "22" :
                                 throw new UnexpectedValueException(hi);
 
                             var color = hi == "1" ? "2F5496" :
@@ -125,8 +130,9 @@ public static class HtmlToWordConverter
                              new StyleParagraphProperties(
                                  new KeepNext(),
                                  new KeepLines(),
-                                 new SpacingBetweenLines() { Before = hi == "1" ? "240" : "40", After = "0" },
-                                 new OutlineLevel() { Val = int.Parse(hi) -1 }),
+                                 new SpacingBetweenLines() { Before = hi == "1" ? "240" : "40", After = "0" }
+                                 //new OutlineLevel() { Val = int.Parse(hi) -1 }),
+                             ),
                              new StyleRunProperties(
                                  new RunFonts() { AsciiTheme = ThemeFontValues.MajorHighAnsi, HighAnsiTheme = ThemeFontValues.MajorHighAnsi, EastAsiaTheme = ThemeFontValues.MajorEastAsia, ComplexScriptTheme = ThemeFontValues.MajorBidi },
                                  new Color() { Val = color, ThemeColor = ThemeColorValues.Accent1, ThemeShade = themeShade },
@@ -137,7 +143,7 @@ public static class HtmlToWordConverter
                             { Type = StyleValues.Paragraph, StyleId = "berschrift" + hi };
 
                             styles.Styles.InsertAfter(headingStyle,
-                                styles.Styles!.Elements<Style>().LastOrDefault(a => a.StyleName?.Val?.Value?.StartsWith("heading ") == true) ?? 
+                                styles.Styles!.Elements<Style>().LastOrDefault(a => a.StyleName?.Val?.Value?.StartsWith("heading ") == true) ??
                                 styles.Styles.Elements<Style>().LastOrDefault()
                                 );
                             styles.Styles.Save(styles);
@@ -161,7 +167,7 @@ public static class HtmlToWordConverter
                     var mainDocument = document.GetPartsOfType<MainDocumentPart>().SingleEx();
                     var listLevel = 0;
 
-                    int numberId; 
+                    int numberId;
                     {
                         var numberings = mainDocument.GetPartsOfType<NumberingDefinitionsPart>().FirstOrDefault();
 
@@ -203,7 +209,7 @@ public static class HtmlToWordConverter
                         numberings.Numbering.Save(numberings);
                     }
 
-                    Style listParagraph; 
+                    Style listParagraph;
                     {
                         var styles = mainDocument.GetPartsOfType<StyleDefinitionsPart>().FirstOrDefault();
                         if (styles == null)
@@ -267,6 +273,6 @@ public static class HtmlToWordConverter
         }
 
 
-        
+
     }
 }
