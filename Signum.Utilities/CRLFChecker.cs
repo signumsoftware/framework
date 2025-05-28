@@ -15,7 +15,7 @@ public class CRLFChecker
     /// This method checks that your working directory is using LF and not CRLF
     /// Feel remove this call once you think the local repos of all the devs have been converted to LF
     /// </summary>
-    public static void CheckGitCRLN()
+    public static void CheckGitCRLF()
     {
         var root = Path.Combine(Environment.CurrentDirectory, @"..\..\..\..");
 
@@ -52,6 +52,8 @@ public class CRLFChecker
 
     static void ExecuteCommand(string cmd, string arguments, string directory)
     {   
+        directory = Path.GetFullPath(directory);
+
         var processInfo = new ProcessStartInfo
         {
             FileName = cmd,
@@ -71,10 +73,10 @@ public class CRLFChecker
 
             process.WaitForExit();
 
-            Console.WriteLine("Output:\n" + output);
-            if (!string.IsNullOrWhiteSpace(error))
+            SafeConsole.WriteLineColor(ConsoleColor.Gray, "Output:\n" + output);
+            if (!string.IsNullOrWhiteSpace(error.Trim()))
             {
-                Console.WriteLine("Error:\n" + error);
+                SafeConsole.WriteLineColor(ConsoleColor.Red, "Error:\n" + error);
             }
 
         }

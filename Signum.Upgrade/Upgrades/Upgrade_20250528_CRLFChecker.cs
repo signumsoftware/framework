@@ -15,7 +15,7 @@ class Upgrade_20250528_CRLFChecker : CodeUpgradeBase
 
         uctx.ChangeCodeFile("Southwind.Terminal/Program.cs", pg =>
         {
-            pg.InsertBeforeFirstLine(a => a.Trim() == "try", "CRLFChecker.CheckGitCRLN();");
+            pg.InsertBeforeFirstLine(a => a.Trim() == "try", "CRLFChecker.CheckGitCRLF();");
         });
     }
 }
