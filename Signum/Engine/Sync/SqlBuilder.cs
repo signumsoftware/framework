@@ -763,22 +763,22 @@ FROM {1} as [table];".FormatWith(
 
     public SqlPreCommandSimple SetSingleUser(DatabaseName databaseName)
     {
-        return new SqlPreCommandSimple("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;".FormatWith(databaseName));
+        return new SqlPreCommandSimple("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;".FormatWith(databaseName)) { NoTransaction = NoTransactionMode.BeforeScript };
     }
 
     public SqlPreCommandSimple SetMultiUser(DatabaseName databaseName)
     {
-        return new SqlPreCommandSimple("ALTER DATABASE {0} SET MULTI_USER;".FormatWith(databaseName));
+        return new SqlPreCommandSimple("ALTER DATABASE {0} SET MULTI_USER;".FormatWith(databaseName)) { NoTransaction = NoTransactionMode.BeforeScript };
     }
 
     public SqlPreCommandSimple SetSnapshotIsolation(DatabaseName databaseName, bool value)
     {
-        return new SqlPreCommandSimple("ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION {1};".FormatWith(databaseName, value ? "ON" : "OFF"));
+        return new SqlPreCommandSimple("ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION {1};".FormatWith(databaseName, value ? "ON" : "OFF")) { NoTransaction = NoTransactionMode.BeforeScript };
     }
 
     public SqlPreCommandSimple MakeSnapshotIsolationDefault(DatabaseName databaseName, bool value)
     {
-        return new SqlPreCommandSimple("ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT {1};".FormatWith(databaseName, value ? "ON" : "OFF"));
+        return new SqlPreCommandSimple("ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT {1};".FormatWith(databaseName, value ? "ON" : "OFF")) { NoTransaction = NoTransactionMode.BeforeScript };
     }
 
     public SqlPreCommandSimple SelectRowCount()
