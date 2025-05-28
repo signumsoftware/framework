@@ -94,7 +94,7 @@ public struct Implementations : IEquatable<Implementations>
 
             if (t.IsInterface || t.IsAbstract)
             {
-                message += @"\r\n" + ConsiderMessage(route, "typeof(YourConcrete" + t.TypeName() + ")");
+                message += @"\n" + ConsiderMessage(route, "typeof(YourConcrete" + t.TypeName() + ")");
             }
 
             throw new InvalidOperationException(message);
@@ -129,7 +129,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         if (types.Length == 1)
             return By(types[0]);
 
-        var error = types.Select(Error).NotNull().ToString("\r\n");
+        var error = types.Select(Error).NotNull().ToString("\n");
 
         if (error.HasText())
             throw new InvalidOperationException(error);

@@ -215,7 +215,7 @@ function ToolbarDropdown(p: { parentTitle: string | undefined, icon: any, childr
           <ul style={{ display: show ? "block" : "none" }} className="nav-item-sub-menu">
             {p.children}
           </ul>
-        </li>}  
+        </li>}
       </ul>
     </li>
   );

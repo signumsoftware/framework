@@ -138,7 +138,7 @@ public static class DQueryable
 
     static LambdaExpression SelectTupleConstructor(BuildExpressionContext context, HashSet<QueryToken> tokens, out BuildExpressionContext newContext)
     {
-        string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\r\n");
+        string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\n");
         if (str.HasText())
             throw new ApplicationException(str);
 
@@ -170,7 +170,7 @@ public static class DQueryable
 
     static LambdaExpression SelectTupleWithNestedQueriesConstructor(BuildExpressionContext context, HashSet<QueryToken> tokens, out BuildExpressionContext newContext)
     {
-        string str = tokens.Select(t => new { t, error = QueryUtils.CanColumn(t) }).Where(a => a.error != null).ToString(a => a.t.FullKey() + ": " + a.error, "\r\n");
+        string str = tokens.Select(t => new { t, error = QueryUtils.CanColumn(t) }).Where(a => a.error != null).ToString(a => a.t.FullKey() + ": " + a.error, "\n");
         if (str.HasText())
             throw new ApplicationException(str);
 
@@ -344,7 +344,7 @@ public static class DQueryable
     public static DEnumerable<T> Concat<T>(this DEnumerable<T> collection, DEnumerable<T> other)
     {
         if (collection.Context.ElementType != other.Context.ElementType)
-            throw new InvalidOperationException("Enumerable's TupleType does not match Other's one.\r\n Enumerable: {0}: \r\n Other:  {1}".FormatWith(
+            throw new InvalidOperationException("Enumerable's TupleType does not match Other's one.\n Enumerable: {0}: \n Other:  {1}".FormatWith(
                 collection.Context.ElementType.TypeName(),
                 other.Context.ElementType.TypeName()));
 
@@ -354,7 +354,7 @@ public static class DQueryable
     public static DEnumerableCount<T> Concat<T>(this DEnumerableCount<T> collection, DEnumerableCount<T> other)
     {
         if (collection.Context.ElementType != other.Context.ElementType)
-            throw new InvalidOperationException("Enumerable's TupleType does not match Other's one.\r\n Enumerable: {0}: \r\n Other:  {1}".FormatWith(
+            throw new InvalidOperationException("Enumerable's TupleType does not match Other's one.\n Enumerable: {0}: \n Other:  {1}".FormatWith(
                 collection.Context.ElementType.TypeName(),
                 other.Context.ElementType.TypeName()));
 
@@ -606,7 +606,7 @@ public static class DQueryable
             .SelectMany(f => f.GetTokens())
             .Select(t => QueryUtils.CanFilter(t))
             .NotNull()
-            .ToString("\r\n");
+            .ToString("\n");
 
         if (str.HasText())
             throw new ApplicationException(str);
@@ -624,7 +624,7 @@ public static class DQueryable
 
     public static DQueryable<T> OrderBy<T>(this DQueryable<T> query, List<Order> orders, Pagination? pagination)
     {
-        string str = orders.Select(f => QueryUtils.CanOrder(f.Token)).NotNull().ToString("\r\n");
+        string str = orders.Select(f => QueryUtils.CanOrder(f.Token)).NotNull().ToString("\n");
         if (str.HasText())
             throw new ApplicationException(str);
 
@@ -836,7 +836,7 @@ public static class DQueryable
             Expression.New(ciAsOf, Expression.Field(pDate, nameof(DateValue.Date)))),
             pDate);
 
-        string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\r\n");
+        string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\n");
         if (str.HasText())
             throw new ApplicationException(str);
 

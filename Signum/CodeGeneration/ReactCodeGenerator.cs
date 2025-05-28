@@ -56,7 +56,7 @@ public class ReactCodeGenerator
                         }
                     }
 
-                    File.WriteAllLines(clientFile, lines);
+                    File.WriteAllText(clientFile, lines.ToString("\n"));
                 }
                 else
                 {
@@ -90,6 +90,7 @@ public class ReactCodeGenerator
         if (content == null)
             return;
 
+        content = content.Replace("\r\n", "\n");
 
         var fileName = getFileName();
 
@@ -323,7 +324,7 @@ public class ReactCodeGenerator
         foreach (var gr in mod.Types.GroupBy(a => a.Namespace))
         {
             sb.AppendLine("import { "
-                + gr.Select(t => t.Name).Chunk(5).ToString(a => a.ToString(", "), ",\r\n")
+                + gr.Select(t => t.Name).Chunk(5).ToString(a => a.ToString(", "), ",\n")
                 + " } from './" + gr.Key + "'");
         }
 

@@ -49,7 +49,7 @@ public static class Statics
 
     public static void CleanThreadContextAndAssert()
     {
-        string errors = threadVariables.Values.Where(v => !v.IsClean).ToString(v => "{0} contains the non-default value {1}".FormatWith(v.Name, v.UntypedValue), "\r\n");
+        string errors = threadVariables.Values.Where(v => !v.IsClean).ToString(v => "{0} contains the non-default value {1}".FormatWith(v.Name, v.UntypedValue), "\n");
 
         foreach (var v in threadVariables.Values)
         {
@@ -57,7 +57,7 @@ public static class Statics
         }
 
         if (errors.HasText())
-            throw new InvalidOperationException("The thread variable \r\n" + errors);
+            throw new InvalidOperationException("The thread variable \n" + errors);
     }
 
     static readonly Dictionary<string, IUntypedVariable> sessionVariables = new Dictionary<string, IUntypedVariable>();

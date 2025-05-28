@@ -23,7 +23,7 @@ public class CsvTest
 
         var result = Csv.ReadUntypedBytes(Encoding.UTF8.GetBytes(str), culture: CultureInfo.InvariantCulture);
 
-        Assert.Equal(str, result.ToString(a => a.ToString(","), "\r\n"));
+        Assert.Equal(str, result.ToString(a => a.ToString(","), "\n"));
     }
 
     class Person

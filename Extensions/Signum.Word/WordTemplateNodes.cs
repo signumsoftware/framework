@@ -611,8 +611,8 @@ public abstract class BlockContainerNode : BaseNode
             {
                 string hint = errorHintParent != errorHint1 && errorHintParent != errorHint2 ? " in " + errorHintParent.Match : "";
                 
-                throw new InvalidOperationException($"Node {errorHint1.Match} is not at the same level than {errorHint2.Match}{hint}. Important nodes could be removed in the chain:\r\n\r\n" +
-                    chain.Skip(chain.IndexOf(openXmlElement)).Select((a, p) => (a.GetType().Name + " with text:" + a.InnerText).Indent(p * 4)).ToString("\r\n\r\n"));
+                throw new InvalidOperationException($"Node {errorHint1.Match} is not at the same level than {errorHint2.Match}{hint}. Important nodes could be removed in the chain:\n\n" +
+                    chain.Skip(chain.IndexOf(openXmlElement)).Select((a, p) => (a.GetType().Name + " with text:" + a.InnerText).Indent(p * 4)).ToString("\n\n"));
             }
         }
     }

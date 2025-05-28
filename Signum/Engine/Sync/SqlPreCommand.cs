@@ -93,7 +93,7 @@ public static class SqlPreCommandExtensions
             noTransaction = ((SqlPreCommandConcat)command).ExtractNoTransaction();
         }
 
-        var list = command.PlainSql().SplitNoEmpty("GO\r\n")
+        var list = command.PlainSql().SplitNoEmpty("GO\n")
             .Select(s => (SqlPreCommand)new SqlPreCommandSimple(s) { GoAfter = true })
             .ToList();
 
@@ -572,7 +572,7 @@ public class SqlPreCommandSimple : SqlPreCommand
             p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString(),
             sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull(), p.DbType == System.Data.DbType.Decimal)), ", ");
        
-        var parameterValues = pars.ToString(p => p.ParameterName + " = " + LiteralValue(p.Value, simple: true), ",\r\n");
+        var parameterValues = pars.ToString(p => p.ParameterName + " = " + LiteralValue(p.Value, simple: true), ",\n");
 
         return @$"EXEC sp_executesql N'{this.Sql.Replace("'", "''")}', 
 @params = N'{parameterVars}', 
@@ -588,7 +588,7 @@ public class SqlPreCommandSimple : SqlPreCommand
     {
         if (comment.HasText())
         {
-            int index = Sql.IndexOf("\r\n");
+            int index = Sql.IndexOf("\n");
             if (index == -1)
                 Sql = Sql + " -- " + comment;
             else
@@ -643,9 +643,9 @@ public class SqlPreCommandConcat : SqlPreCommand
 
     static Dictionary<Spacing, string> separators = new Dictionary<Spacing, string>()
         {
-            {Spacing.Simple, "\r\n"},
-            {Spacing.Double, "\r\n\r\n"},
-            {Spacing.Triple, "\r\n\r\n\r\n"},
+            {Spacing.Simple, "\n"},
+            {Spacing.Double, "\n\n"},
+            {Spacing.Triple, "\n\n\n"},
         };
 
     protected internal override int NumParameters
@@ -662,12 +662,12 @@ public class SqlPreCommandConcat : SqlPreCommand
             var simple = com as SqlPreCommandSimple;
 
             if (simple != null && simple.GoBefore)
-                sb.Append("GO\r\n");
+                sb.Append("GO\n");
 
             com.PlainSql(sb);
 
             if (simple != null && simple.GoAfter)
-                sb.Append("\r\nGO");
+                sb.Append("\nGO");
 
 
             sb.Append(sep);

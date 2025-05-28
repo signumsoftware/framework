@@ -254,7 +254,7 @@ public static class OperationLogic
                             "'{0}' is 'EntityKind.{1}', but no operation for saving has been implemented.".FormatWith(t.TypeName(), attr.EntityKind)).ToList();
 
             if (errors.Any())
-                throw new InvalidOperationException(errors.ToString("\r\n") + @"
+                throw new InvalidOperationException(errors.ToString("\n") + @"
 Consider the following options:
 * Implement a save operation using sb.Include<T>().WithSave(..), or uinsg the 'save' snippet.
 * Change the EntityKind to a more appropiated one.
@@ -675,8 +675,8 @@ Consider the following options:
         {
             var list = GraphExplorer.FromRoot(entity).Where(a => a.Modified == ModifiedState.SelfModified);
             if (list.Any())
-                throw new InvalidOperationException("Operation {0} needs a Lite or a clean entity, but the entity has changes:\r\n {1}"
-                    .FormatWith(result.OperationSymbol, list.ToString("\r\n")));
+                throw new InvalidOperationException("Operation {0} needs a Lite or a clean entity, but the entity has changes:\n {1}"
+                    .FormatWith(result.OperationSymbol, list.ToString("\n")));
         }
 
         return result;
@@ -783,7 +783,7 @@ Consider the following options:
                         {
                             foreach (var kvp in dic)
                             {
-                                result[kvp.Key] = "\r\n".Combine(result.TryGetC(kvp.Key), kvp.Value);
+                                result[kvp.Key] = "\n".Combine(result.TryGetC(kvp.Key), kvp.Value);
                             }
                         }
                     }
@@ -797,7 +797,7 @@ Consider the following options:
                 {
                     foreach (var kvp in dic2)
                     {
-                        result[kvp.Key] = "\r\n".Combine(result.TryGetC(kvp.Key), kvp.Value);
+                        result[kvp.Key] = "\n".Combine(result.TryGetC(kvp.Key), kvp.Value);
                     }
                 }
 
@@ -842,7 +842,7 @@ Consider the following options:
         var states = lites.Chunk(200).SelectMany(list =>
             Database.Query<E>().Where(e => list.Contains(e.ToLite())).Select(canExecutes).Distinct()).ToList();
 
-        return operations.Select((o, i) => KeyValuePair.Create(o.OperationSymbol, states.Select(s => s[i]).Distinct().NotNull().ToString("\r\n").VerticalEtc(4)))
+        return operations.Select((o, i) => KeyValuePair.Create(o.OperationSymbol, states.Select(s => s[i]).Distinct().NotNull().ToString("\n").VerticalEtc(4)))
             .Where(a => a.Value.HasText())
             .ToDictionaryEx();
     }

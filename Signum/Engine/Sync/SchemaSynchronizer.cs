@@ -1088,7 +1088,7 @@ JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name.SqlEscape(isPostgres)} = {ol
         }
         catch (Exception e)
         {
-            return new SqlPreCommandSimple("-- Exception synchronizing enums\r\n{0}".FormatWith(e.Message.Indent(2, '-')));
+            return new SqlPreCommandSimple("-- Exception synchronizing enums\n{0}".FormatWith(e.Message.Indent(2, '-')));
         }
     }
 

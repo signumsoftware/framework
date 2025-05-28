@@ -72,12 +72,12 @@ public class SqlBuilder
             .And(primaryKeyConstraint)
             .And(systemPeriod)
             .NotNull()
-            .ToString(",\r\n");
+            .ToString(",\n");
 
         var systemVersioning = t.SystemVersioned == null || avoidSystemVersioning || IsPostgres ? null :
-            $"\r\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SystemVersioned.TableName.OnDatabase(null)}))";
+            $"\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SystemVersioned.TableName.OnDatabase(null)}))";
 
-        var result = new SqlPreCommandSimple($"CREATE {(IsPostgres && t.Name.IsTemporal ? "TEMPORARY " : "")}TABLE {tableName ?? t.Name}(\r\n{columns}\r\n)" + systemVersioning + ";");
+        var result = new SqlPreCommandSimple($"CREATE {(IsPostgres && t.Name.IsTemporal ? "TEMPORARY " : "")}TABLE {tableName ?? t.Name}(\n{columns}\n)" + systemVersioning + ";");
 
 
         return result;
@@ -848,7 +848,7 @@ EXEC DB.dbo.sp_executesql @sql"
         if (list.IsEmpty())
             return null;
 
-        return new SqlPreCommandSimple("DROP STATISTICS " + list.ToString(s => tn.SqlEscape(isPostgres) + "." + s.StatsName.SqlEscape(isPostgres), ",\r\n") + ";");
+        return new SqlPreCommandSimple("DROP STATISTICS " + list.ToString(s => tn.SqlEscape(isPostgres) + "." + s.StatsName.SqlEscape(isPostgres), ",\n") + ";");
     }
 
     public SqlPreCommand TruncateTable(ObjectName tableName) => new SqlPreCommandSimple($"TRUNCATE TABLE {tableName};");

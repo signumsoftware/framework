@@ -17,7 +17,7 @@ public static class ViewLogLogic
 
     public static Func<Type, bool> LogType = type => true;
     public static Func<BaseQueryRequest, DynamicQueryContainer.ExecuteType, bool> LogQuery = (request, type) => true;
-    public static Func<BaseQueryRequest, StringWriter, string> GetQueryData = (request, sw) => request.QueryUrl + "\r\n\r\n" + sw.ToString();
+    public static Func<BaseQueryRequest, StringWriter, string> GetQueryData = (request, sw) => request.QueryUrl + "\n\n" + sw.ToString();
 
 
     public static bool IsStarted = false;

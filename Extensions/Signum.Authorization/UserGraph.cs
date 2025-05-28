@@ -1,3 +1,5 @@
+using Signum.Authorization.UserTicket;
+
 namespace Signum.Authorization;
 
 public class UserGraph : Graph<UserEntity, UserState>
@@ -29,6 +31,9 @@ public class UserGraph : Graph<UserEntity, UserState>
             {
                 u.DisabledOn = Clock.Now;
                 u.State = UserState.Deactivated;
+
+                AuthLogic.RecentlyUsersDisabled.Reset();
+                var rt = UserTicketLogic.RemoveTickets(u);
             },
         }.Register();
 
@@ -40,6 +45,9 @@ public class UserGraph : Graph<UserEntity, UserState>
             {
                 u.DisabledOn = Clock.Now;
                 u.State = UserState.AutoDeactivate;
+
+                AuthLogic.RecentlyUsersDisabled.Reset();
+                var rt = UserTicketLogic.RemoveTickets(u);
             },
         }.Register();
 
@@ -51,6 +59,8 @@ public class UserGraph : Graph<UserEntity, UserState>
             {
                 u.DisabledOn = null;
                 u.State = UserState.Active;
+
+                AuthLogic.RecentlyUsersDisabled.Reset();
             },
         }.Register();
 

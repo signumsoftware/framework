@@ -539,7 +539,7 @@ public static class DashboardLogic
                 .Where(a => a.error != null);
 
             if (errors.Any())
-                throw new InvalidOperationException($"Unable to expand columns in '{cqd.UserAsset.KeyLong()}' (query {QueryUtils.GetKey(cqd.QueryRequest.QueryName)}) requested by {errorContext} because: \r\n{errors.ToString(a => a.token.FullKey() + ": " + a.error, "\r\n")}");
+                throw new InvalidOperationException($"Unable to expand columns in '{cqd.UserAsset.KeyLong()}' (query {QueryUtils.GetKey(cqd.QueryRequest.QueryName)}) requested by {errorContext} because: \n{errors.ToString(a => a.token.FullKey() + ": " + a.error, "\n")}");
         }
 
         cqd.QueryRequest.Columns.AddRange(extraColumns.Select(c => new Column(c, null)));

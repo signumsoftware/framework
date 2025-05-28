@@ -187,7 +187,7 @@ public static class CacheLogic
             {
                 if (args.Type != SqlNotificationType.Change)
                     throw new InvalidOperationException(
-                        "Problems with SqlDependency (Type : {0} Source : {1} Info : {2}) on query: \r\n{3}"
+                        "Problems with SqlDependency (Type : {0} Source : {1} Info : {2}) on query: \n{3}"
                         .FormatWith(args.Type, args.Source, args.Info, tr.MainCommand.PlainSql()));
 
                 if (args.Info == SqlNotificationInfo.PreviousFire)

@@ -108,7 +108,7 @@ export type FilterOptionParsed = FilterConditionOptionParsed | FilterGroupOption
 
 
 
-export function isActive(fo: FilterOptionParsed): boolean {
+export function isActive(fo: FilterOptionParsed | FilterOption): boolean {
   return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_Unchecked" || fo.pinned.active == "NotCheckbox_Unchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
 }
 

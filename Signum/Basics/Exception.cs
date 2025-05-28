@@ -137,7 +137,7 @@ public class ExceptionEntity : Entity
 
     public static string Dump(NameValueCollection nameValueCollection)
     {
-        return nameValueCollection.Cast<string>().ToString(key => key + ": " + nameValueCollection[key], "\r\n");
+        return nameValueCollection.Cast<string>().ToString(key => key + ": " + nameValueCollection[key], "\n");
     }
 }
 

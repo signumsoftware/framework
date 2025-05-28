@@ -105,7 +105,7 @@ public static class HtmlToWordConverter
                             var size = hi == "1" ? "32" :
                                 hi == "2" ? "26" :
                                 hi == "3" ? "24" :
-                                hi == "4" ? "22" : 
+                                hi == "4" ? "22" :
                                 throw new UnexpectedValueException(hi);
 
                             var color = hi == "1" ? "2F5496" :
@@ -143,7 +143,7 @@ public static class HtmlToWordConverter
                             { Type = StyleValues.Paragraph, StyleId = "berschrift" + hi };
 
                             styles.Styles.InsertAfter(headingStyle,
-                                styles.Styles!.Elements<Style>().LastOrDefault(a => a.StyleName?.Val?.Value?.StartsWith("heading ") == true) ?? 
+                                styles.Styles!.Elements<Style>().LastOrDefault(a => a.StyleName?.Val?.Value?.StartsWith("heading ") == true) ??
                                 styles.Styles.Elements<Style>().LastOrDefault()
                                 );
                             styles.Styles.Save(styles);
@@ -167,7 +167,7 @@ public static class HtmlToWordConverter
                     var mainDocument = document.GetPartsOfType<MainDocumentPart>().SingleEx();
                     var listLevel = 0;
 
-                    int numberId; 
+                    int numberId;
                     {
                         var numberings = mainDocument.GetPartsOfType<NumberingDefinitionsPart>().FirstOrDefault();
 
@@ -209,7 +209,7 @@ public static class HtmlToWordConverter
                         numberings.Numbering.Save(numberings);
                     }
 
-                    Style listParagraph; 
+                    Style listParagraph;
                     {
                         var styles = mainDocument.GetPartsOfType<StyleDefinitionsPart>().FirstOrDefault();
                         if (styles == null)
@@ -273,6 +273,6 @@ public static class HtmlToWordConverter
         }
 
 
-        
+
     }
 }
