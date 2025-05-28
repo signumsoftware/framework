@@ -6,6 +6,8 @@ using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.API;
 using System.Collections.ObjectModel;
+using System.Net.Http;
+using System.Text.Json;
 
 namespace Signum.Scheduler;
 
@@ -121,6 +123,42 @@ public static class SchedulerLogic
                 Execute = (c, _) => { },
             }.Register();
 
+            new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.ImportPublicHolidays)
+            {
+                CanExecute = (e) => e.FromYear.HasValue && e.ToYear.HasValue && e.CountryCode.HasText() ? null :
+                    HolidayCalendarMessage.ForImportFromYearToYearAndCountryCodeShouldBeSet.NiceToString(),
+                Execute = (e, _) =>
+                {
+                    for (int i = e.FromYear!.Value; i <= e.ToYear!.Value; i++)
+                    {
+                        string url = $"https://date.nager.at/api/v3/PublicHolidays/{i}/{e.CountryCode}";
+
+                        using var client = new HttpClient();
+                        var json = client.GetStringAsync(url).Result;
+
+                        var holidays = JsonSerializer.Deserialize<List<NagerHoliday>>(json, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        })!;
+
+                        foreach (var h in holidays.Where(h => h.Global || h.Counties.Contains(e.SubDivisionCode)))
+                        {
+                            var existing = e.Holidays.FirstOrDefault(a => a.Date == h.Date);
+
+                            if (existing == null)
+                            {
+                                e.Holidays.Add(new HolidayEmbedded
+                                {
+                                    Date = h.Date,
+                                    Name = h.LocalName,
+                                });
+                            }
+                        }
+                    }
+                    e.Save();
+                },
+            }.Register();
+
             new Graph<HolidayCalendarEntity>.Delete(HolidayCalendarOperation.Delete)
             {
                 Delete = (c, _) => { c.Delete(); },
@@ -138,8 +176,8 @@ public static class SchedulerLogic
                 Delete = (st, _) =>
                 {
                     st.Executions().UnsafeUpdate().Set(l => l.ScheduledTask, l => null).Execute();
-                    var rule = st.Rule; 
-                    st.Delete(); 
+                    var rule = st.Rule;
+                    st.Delete();
                     rule.Delete();
                 },
             }.Register();
@@ -196,8 +234,40 @@ public static class SchedulerLogic
         Remove(parameters.GetDateLimitDeleteWithExceptions(typeof(ScheduledTaskLogEntity).ToTypeEntity()), withExceptions: true);
     }
 
+    public static List<string>? GetCountries()
+    {
+        var countriesJson = new HttpClient().GetStringAsync("https://date.nager.at/api/v3/AvailableCountries").Result;
+        var countries = JsonSerializer.Deserialize<List<Country>>(countriesJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        return countries?.Select(c => c.CountryCode).ToList();
+    }
 
+    public static List<string>? GetSubDivisions(string countryCode)
+    {
+        var year = Clock.Now.Year;
+        var countriesJson = new HttpClient().GetStringAsync($"https://date.nager.at/api/v3/PublicHolidays/{year}/{countryCode}").Result;
+        var holidays = JsonSerializer.Deserialize<List<NagerHoliday>>(countriesJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var allRegions = holidays?
+            .Where(h => h.Counties != null)
+            .SelectMany(h => h.Counties!)
+            .Distinct()
+            .ToList();
+        return allRegions;
+    }
 
+    private class NagerHoliday
+    {
+        public DateOnly Date { get; set; }
+        public string LocalName { get; set; }
+        public string Name { get; set; }
+        public string CountryCode { get; set; }
+        public string[] Counties { get; set; }
+        public bool Global { get; set; }
+        public string[] Types { get; set; }
+    }
 
-   
+    private class Country
+    {
+        public string CountryCode { get; set; }
+        public string Name { get; set; }
+    }
 }

@@ -15,11 +15,20 @@ export interface HolidayCalendarEntity extends Entities.Entity, UserAssets.IUser
   Type: "HolidayCalendar";
   guid: string /*Guid*/;
   name: string;
+  fromYear: number | null;
+  toYear: number | null;
+  countryCode: string | null;
+  subDivisionCode: string | null;
   holidays: Entities.MList<HolidayEmbedded>;
+}
+
+export namespace HolidayCalendarMessage {
+  export const ForImportFromYearToYearAndCountryCodeShouldBeSet: MessageKey = new MessageKey("HolidayCalendarMessage", "ForImportFromYearToYearAndCountryCodeShouldBeSet");
 }
 
 export namespace HolidayCalendarOperation {
   export const Save : Operations.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Save");
+  export const ImportPublicHolidays : Operations.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.ImportPublicHolidays");
   export const Delete : Operations.DeleteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Delete");
 }
 

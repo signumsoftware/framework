@@ -55,8 +55,7 @@ export namespace SchedulerClient {
       }} />
     ]))
     Navigator.addSettings(es)
-  }
-  
+  }  
   
   export namespace API {
   
@@ -70,6 +69,14 @@ export namespace SchedulerClient {
   
     export function view(): Promise<SchedulerState> {
       return ajaxGet({ url: "/api/scheduler/view" });
+    }
+
+    export function getCountries(): Promise<string[]> {
+      return ajaxGet({ url: "/api/scheduler/countries" });
+    }
+
+    export function getSubDivisions(country: string): Promise<string[]> {
+      return ajaxGet({ url: "/api/scheduler/subDivisions/" + country });
     }
   }
   
