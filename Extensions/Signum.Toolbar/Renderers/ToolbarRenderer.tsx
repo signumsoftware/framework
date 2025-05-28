@@ -15,7 +15,6 @@ import { parseIcon } from '@framework/Components/IconTypeahead'
 import { urlVariables } from '../UrlVariables';
 import { Dic, classes } from '@framework/Globals';
 import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage } from '../Signum.Toolbar';
-import { SidebarMode } from '../SidebarContainer';
 
 
 
@@ -52,21 +51,6 @@ export default function ToolbarRenderer(p: {
     return window.setTimeout(() => setRefresh(!refresh), 500)
   }
 
-  function BechtleInfo(sidebarMode: SidebarMode) {
-    return (
-      <div style={{ width: "250px", opacity: sidebarMode == "Wide" ? 1 : 0, transition: "opacity 400ms" }} className="mt-auto m-3 p-1">
-        <div className="text-muted">
-          <h5>Bechtle Bonn</h5>
-          <p>
-            <small>
-              Made by <a href="https://av360.io/" target="_blank">AV 360 Software Solutions</a><br /> using <a href="https://av360.io/loesungen/signum/">Signum Framework</a>
-            </small>
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={"sidebar-inner"}>
       <div className={"close-sidebar"}
@@ -77,8 +61,7 @@ export default function ToolbarRenderer(p: {
       <ul>
         {response && response.elements && response.elements.map((res: ToolbarResponse<any>, i: number) => renderNavItem(res, active, i, handleRefresh, p.onAutoClose))}
       </ul>
-      {BechtleInfo("Wide")}
-      </div>
+    </div>
   );
 }
 
@@ -215,7 +198,7 @@ function ToolbarDropdown(p: { parentTitle: string | undefined, icon: any, childr
           <ul style={{ display: show ? "block" : "none" }} className="nav-item-sub-menu">
             {p.children}
           </ul>
-        </li>}
+        </li>}  
       </ul>
     </li>
   );
