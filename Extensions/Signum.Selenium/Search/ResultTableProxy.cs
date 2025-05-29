@@ -118,7 +118,7 @@ public class ResultTableProxy
     {
         var ths = this.Element.FindElements(By.CssSelector("thead > tr > th")).ToList();
 
-        return ths.Select(a => a.GetDomAttributeOrThrow("data-column-name")).ToArray();
+        return ths.Select(a => a.GetDomAttribute("data-column-name") ?? "").ToArray();
     }
 
     public WebElementLocator HeaderCellElement(string token)
