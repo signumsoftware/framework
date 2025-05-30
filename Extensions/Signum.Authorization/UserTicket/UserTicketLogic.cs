@@ -53,11 +53,15 @@ public static class UserTicketLogic
         using (AuthLogic.Disable())
         using (var tr = new Transaction())
         {
-            CleanExpiredTickets(UserEntity.Current.Retrieve());
+            var user = UserEntity.Current.Retrieve();
+
+            CleanExpiredTickets(user);
+
+            AuthLogic.CheckUserActive(user);
 
             UserTicketEntity result = new UserTicketEntity
             {
-                User = UserEntity.Current,
+                User = user.ToLite(),
                 Device = device,
                 ConnectionDate = Clock.Now,
                 Ticket = Guid.NewGuid().ToString(),
@@ -67,7 +71,6 @@ public static class UserTicketLogic
 
             return tr.Commit(result.StringTicket());
         }
-
     }
 
     public static UserEntity UpdateTicket(string device, ref string ticket)
@@ -78,7 +81,10 @@ public static class UserTicketLogic
             var pair = UserTicketEntity.ParseTicket(ticket);
 
             UserEntity user = Database.Retrieve<UserEntity>(pair.userId);
+
             CleanExpiredTickets(user);
+
+            AuthLogic.CheckUserActive(user);
 
             UserTicketEntity? userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.ticket);
             if (userTicket == null)
@@ -100,15 +106,27 @@ public static class UserTicketLogic
         }
     }
 
-
     static int CleanExpiredTickets(UserEntity user)
     {
         DateTime min = Clock.Now.Subtract(ExpirationInterval);
+
+        var rt = RemoveTickets(user);
+
+        if (rt != null)
+            return rt.Value;
 
         int expired = user.UserTickets().Where(d => d.ConnectionDate < min).UnsafeDelete();
 
         int tooMuch = user.UserTickets().OrderByDescending(t => t.ConnectionDate).Skip(MaxTicketsPerUser).UnsafeDelete();
 
         return expired + tooMuch;
+    }
+
+    public static int? RemoveTickets(UserEntity user)
+    {
+        if (user.State != UserState.Active)
+            return user.UserTickets().UnsafeDelete();
+
+        return null;
     }
 }

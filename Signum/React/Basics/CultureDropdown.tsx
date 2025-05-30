@@ -8,7 +8,7 @@ import { useAPI } from '../Hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconName } from '@fortawesome/fontawesome-svg-core';
 
-export default function CultureDropdown(p: { fullName?: boolean, }): React.JSX.Element | null {
+export default function CultureDropdown(p: { fullName?: boolean }): React.JSX.Element | null {
 
   var cultures = useAPI(signal => CultureClient.getCultures(false), []);
 
@@ -37,7 +37,9 @@ function simplifyName(name: string) {
 }
 
 export function CultureDropdownMenuItem(props: {
-  fullName?: boolean, triggerProps?: {
+  fullName?: boolean,
+  label?: string;
+  iconProps?: {
     chevronIcon?: {
       open: IconName;
       close: IconName;
@@ -58,7 +60,7 @@ export function CultureDropdownMenuItem(props: {
   }
 
   function getChevronIcon() {
-    const chevronIcon = props.triggerProps?.chevronIcon;
+    const chevronIcon = props.iconProps?.chevronIcon;
     if (chevronIcon) {
       return show ? chevronIcon.close : chevronIcon.open;
     }
@@ -71,7 +73,7 @@ export function CultureDropdownMenuItem(props: {
       <div className={"dropdown-item"}
         style={{ cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center" }}
         onClick={() => setShow(!show)}>
-        <FontAwesomeIcon icon="globe" fixedWidth className="me-2" /> <span style={{ width: "100%" }}>{CultureInfoEntity.niceName()}</span> <FontAwesomeIcon icon={getChevronIcon()} />
+        <FontAwesomeIcon icon="globe" fixedWidth className="me-2" /> <span style={{ width: "100%" }}>{props.label || CultureInfoEntity.niceName()}</span> <FontAwesomeIcon icon={getChevronIcon()} />
       </div>
       <div style={{ display: show ? "block" : "none" }}>
         {Dic.map(cultures, (name, c, i) =>

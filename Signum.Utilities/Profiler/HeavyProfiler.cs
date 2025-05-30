@@ -396,7 +396,7 @@ public class HeavyProfilerEntry
         if (string.IsNullOrEmpty(AdditionalData))
             return "";
 
-        return Regex.Match(AdditionalData, @"^[^\r\n]{0,100}").Value;
+        return Regex.Match(AdditionalData, @"^[^\n]{0,100}").Value;
     }
 
     public long BeforeStart;

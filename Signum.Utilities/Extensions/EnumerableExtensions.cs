@@ -640,7 +640,7 @@ public static class EnumerableExtensions
 
         int[] lengths = 0.To(width).Select(i => Math.Max(3, start.To(height).Max(j => table[i, j].Length))).ToArray();
 
-        return 0.To(height).Select(j => 0.To(width).ToString(i => table[i, j].PadTruncateRight(lengths[i]), separator)).ToString("\r\n");
+        return 0.To(height).Select(j => 0.To(width).ToString(i => table[i, j].PadTruncateRight(lengths[i]), separator)).ToString("\n");
     }
 
     public static void WriteFormattedStringTable<T>(this IEnumerable<T> collection, TextWriter textWriter, string? title, bool longHeaders)

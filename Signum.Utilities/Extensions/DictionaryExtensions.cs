@@ -278,12 +278,12 @@ public static class DictionaryExtensions
 
         if (currentOnly.Count != 0)
             if (shouldOnly.Count != 0)
-                throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".FormatWith(errorContext, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
+                throw new InvalidOperationException("Error {0}\n Extra: {1}\n Lacking: {2}".FormatWith(errorContext, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
             else
-                throw new InvalidOperationException("Error {0}\r\n Extra: {1}".FormatWith(errorContext, currentOnly.ToString(", ")));
+                throw new InvalidOperationException("Error {0}\n Extra: {1}".FormatWith(errorContext, currentOnly.ToString(", ")));
         else
             if (shouldOnly.Count != 0)
-            throw new InvalidOperationException("Error {0}\r\n Missing: {1}".FormatWith(errorContext, shouldOnly.ToString(", ")));
+            throw new InvalidOperationException("Error {0}\n Missing: {1}".FormatWith(errorContext, shouldOnly.ToString(", ")));
 
         return currentDictionary.ToDictionaryEx(kvp => kvp.Key, kvp => resultSelector(kvp.Value, shouldDictionary[kvp.Key]));
     }
@@ -311,12 +311,12 @@ public static class DictionaryExtensions
 
         if (currentOnly.Count != 0)
             if (shouldOnly.Count != 0)
-                throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".FormatWith(errorContext, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
+                throw new InvalidOperationException("Error {0}\n Extra: {1}\n Lacking: {2}".FormatWith(errorContext, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
             else
-                throw new InvalidOperationException("Error {0}\r\n Extra: {1}".FormatWith(errorContext, currentOnly.ToString(", ")));
+                throw new InvalidOperationException("Error {0}\n Extra: {1}".FormatWith(errorContext, currentOnly.ToString(", ")));
         else
             if (shouldOnly.Count != 0)
-            throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".FormatWith(errorContext, shouldOnly.ToString(", ")));
+            throw new InvalidOperationException("Error {0}\n Lacking: {1}".FormatWith(errorContext, shouldOnly.ToString(", ")));
 
         foreach (var kvp in currentDictionary)
         {
@@ -461,7 +461,7 @@ public static class DictionaryExtensions
         if (repetitions.Count > 0)
             throw new RepeatedElementsException($@"There are some repeated {errorContext}...
 {repetitions.ToString(kvp => $@"Key ""{kvp.Key}"" has {kvp.Value.Count} repetitions:
-{kvp.Value.Take(ErrorExampleLimit).ToString("\r\n").Indent(4)}", "\r\n")}");
+{kvp.Value.Take(ErrorExampleLimit).ToString("\n").Indent(4)}", "\n")}");
     }
 
     public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)

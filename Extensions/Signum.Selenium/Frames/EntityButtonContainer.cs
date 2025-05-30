@@ -124,7 +124,7 @@ public static class EntityButtonContainerExtensions
         var errors = vs.ValidationErrors();
 
         if (!errors.IsNullOrEmpty())
-            throw new InvalidOperationException("Validation Errors found: \r\n" + errors.ToString("\r\n").Indent(4));
+            throw new InvalidOperationException("Validation Errors found: \n" + errors.ToString("\n").Indent(4));
     }
 
     public static void Delete<T>(this FrameModalProxy<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
@@ -161,7 +161,7 @@ public static class EntityButtonContainerExtensions
     {
         try
         {
-            return container.Element.TryFindElement(By.CssSelector("div.sf-main-control[data-refresh-count]"))?.GetDomAttribute("data-refresh-count")!.ToLong();
+            return container.Element.TryFindElement(By.CssSelector("div.sf-main-control[data-refresh-count]"))?.GetDomAttributeOrThrow("data-refresh-count").ToLong();
         }
         catch
         {

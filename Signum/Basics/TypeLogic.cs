@@ -59,7 +59,7 @@ public static class TypeLogic
             {
                 var attributes = schema.Tables.Keys.Select(t => KeyValuePair.Create(t, t.GetCustomAttribute<EntityKindAttribute>(true))).ToList();
 
-                var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".FormatWith(a.Key.Name), "\r\n");
+                var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".FormatWith(a.Key.Name), "\n");
 
                 if (errors.HasText())
                     throw new InvalidOperationException(errors);

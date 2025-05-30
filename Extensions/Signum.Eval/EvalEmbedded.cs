@@ -85,11 +85,11 @@ public abstract class EvalEmbedded<T> : EmbeddedEntity
                             var errors = emit.Diagnostics.Where(a => a.DefaultSeverity == DiagnosticSeverity.Error);
                             return new CompilationResult
                             {
-                                CompilationErrors = errors.Count() + " Errors:\r\n" + errors.ToString(e =>
+                                CompilationErrors = errors.Count() + " Errors:\n" + errors.ToString(e =>
                                 {
                                     var line = e.Location.GetLineSpan().StartLinePosition.Line;
-                                    return "Line {0}: {1}".FormatWith(line, e.GetMessage() + "\r\n" + lines[line]);
-                                }, "\r\n\r\n")
+                                    return "Line {0}: {1}".FormatWith(line, e.GetMessage() + "\n" + lines[line]);
+                                }, "\n\n")
                             };
                         }
 
@@ -103,9 +103,9 @@ public abstract class EvalEmbedded<T> : EmbeddedEntity
                                 var lines = code.Split('\n');
                                 return new CompilationResult
                                 {
-                                    CompilationErrors = allCustomErrors.Count + " Errors:\r\n" + allCustomErrors.ToString(e => {
-                                        return "Line {0}: {1}".FormatWith(e.Line, e.ErrorText) + "\r\n" + lines[e.Line - 1];
-                                    }, "\r\n\r\n")
+                                    CompilationErrors = allCustomErrors.Count + " Errors:\n" + allCustomErrors.ToString(e => {
+                                        return "Line {0}: {1}".FormatWith(e.Line, e.ErrorText) + "\n" + lines[e.Line - 1];
+                                    }, "\n\n")
                                 };
                             }
                         }

@@ -457,12 +457,12 @@ public class Schema : IImplementationsFinder
                         SafeConsole.WriteColor(ConsoleColor.Red, "Error");
                         SafeConsole.WriteLineColor(ConsoleColor.DarkRed, " (...it's probably ok, execute this script and try again)");
 
-                        return new SqlPreCommandSimple("-- Exception on {0}.{1}\r\n{2}".FormatWith(e.Method.DeclaringType!.Name, e.Method.Name, ex.Message.Indent(2, '-')));
+                        return new SqlPreCommandSimple("-- Exception on {0}.{1}\n{2}".FormatWith(e.Method.DeclaringType!.Name, e.Method.Name, ex.Message.Indent(2, '-')));
                     }
                 })
                 .Combine(Spacing.Triple);
 
-            return WithExecuteAs(command);
+            return command;
         }
     }
 
@@ -538,32 +538,21 @@ public class Schema : IImplementationsFinder
                 .Select(e => e())
                 .Combine(Spacing.Triple);
 
-            return WithExecuteAs(result);
+            return result;
         }
     }
 
 
     public string? ExecuteAs;
-    private SqlPreCommand? WithExecuteAs(SqlPreCommand? command)
+    internal void ExecuteExecuteAs()
     {
-        if (ExecuteAs == null || command == null)
-            return command;
+        if (ExecuteAs == null)
+            return;
 
-        if (Connector.Current is PostgreSqlConnector)
-        {
-            return new[] {
-                new SqlPreCommandSimple($"SET ROLE {ExecuteAs};"),
-                command!
-            }.Combine(Spacing.Double);
-
-        }
+        if (this.Settings.IsPostgres)
+            new SqlPreCommandSimple($"SET ROLE {ExecuteAs};").ExecuteNonQuery();
         else
-        {
-            return new[] {
-                new SqlPreCommandSimple($"EXECUTE AS LOGIN = '{ExecuteAs}';"),
-                command!
-            }.Combine(Spacing.Double);
-        }
+            new SqlPreCommandSimple($"EXECUTE AS LOGIN = '{ExecuteAs}';").ExecuteNonQuery();
     }
 
     public event Action? SchemaCompleted;

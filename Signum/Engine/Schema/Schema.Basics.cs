@@ -768,10 +768,10 @@ public partial class FieldEmbedded : Field, IFieldFinder
 
     public override string ToString()
     {
-        return "\r\n".Combine(
+        return "\n".Combine(
             "Embedded",
-            EmbeddedFields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2),
-            Mixins == null ? null : Mixins.ToString(m => "Mixin {0} : {1}".FormatWith(m.Key.Name, m.Value.ToString()), "\r\n")
+            EmbeddedFields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\n").Indent(2),
+            Mixins == null ? null : Mixins.ToString(m => "Mixin {0} : {1}".FormatWith(m.Key.Name, m.Value.ToString()), "\n")
             );
     }
 
@@ -917,7 +917,7 @@ public partial class FieldMixin : Field, IFieldFinder
 
     public override string ToString()
     {
-        return "Mixin\r\n{0}".FormatWith(Fields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2));
+        return "Mixin\n{0}".FormatWith(Fields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\n").Indent(2));
     }
 
     public Field GetField(MemberInfo member)
@@ -1150,7 +1150,7 @@ public partial class FieldImplementedBy : Field, IFieldReference
 
     public override string ToString()
     {
-        return "ImplementedBy\r\n{0}".FormatWith(ImplementationColumns.ToString(k => "{0} -> {1} ({2})".FormatWith(k.Value.Name, k.Value.ReferenceTable.Name, k.Key.Name), "\r\n").Indent(2));
+        return "ImplementedBy\n{0}".FormatWith(ImplementationColumns.ToString(k => "{0} -> {1} ({2})".FormatWith(k.Value.Name, k.Value.ReferenceTable.Name, k.Key.Name), "\n").Indent(2));
     }
 
     public override IEnumerable<IColumn> Columns()
@@ -1343,7 +1343,7 @@ public partial class FieldMList : Field, IFieldFinder
 
     public override string ToString()
     {
-        return "Coleccion\r\n{0}".FormatWith(TableMList.ToString().Indent(2));
+        return "Coleccion\n{0}".FormatWith(TableMList.ToString().Indent(2));
     }
 
     public Field GetField(MemberInfo member)
@@ -1465,7 +1465,7 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
 
     public override string ToString()
     {
-        return "[{0}]\r\n  {1}\r\n  {2}".FormatWith(Name, BackReference.Name, Field.ToString());
+        return "[{0}]\n  {1}\n  {2}".FormatWith(Name, BackReference.Name, Field.ToString());
     }
 
     public void GenerateColumns()

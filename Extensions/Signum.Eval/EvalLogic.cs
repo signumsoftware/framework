@@ -93,7 +93,7 @@ public static class EvalLogic
 
     public static string CreateUsings(IEnumerable<string> namespaces)
     {
-        return namespaces.ToString(ns => "using {0};\r\n".FormatWith(ns), "");
+        return namespaces.ToString(ns => "using {0};\n".FormatWith(ns), "");
     }
 
     public static Func<string, List<CustomCompilerError>> GetCustomErrors;

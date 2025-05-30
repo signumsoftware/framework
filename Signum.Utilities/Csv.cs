@@ -525,14 +525,14 @@ public static class Csv
         {
             var type = InferType(i);
             return $"    public required {type ?? "string?"} {(type == null ? "_" : "") + ToName(name)};" + (type == null ? " //Empty" : null);
-        }).ToString("\r\n")}}
+        }).ToString("\n")}}
             }
             """;
     }
 
 
     static ConcurrentDictionary<char, Regex> regexCache = new ConcurrentDictionary<char, Regex>();
-    const string BaseRegex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)";
+    const string BaseRegex = @"^((?<val>'(?:[^']+|'')*'|[^;\n]*))?((?!($|\n));(?<val>'(?:[^']+|'')*'|[^;\n]*))*($|\n)";
     static Regex GetRegex(CultureInfo culture, TimeSpan timeout, char? listSeparator = null)
     {
         char separator = listSeparator ?? GetListSeparator(culture);
@@ -576,7 +576,7 @@ public static class Csv
         {
             string str = s[1..^1].Replace("\"\"", "\"");
 
-            return Regex.Replace(str, "(?<!\r)\n", "\r\n");
+            return Regex.Replace(str, "(?<!\r)\n", "\n");
         }
 
         return s;

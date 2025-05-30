@@ -731,16 +731,16 @@ public class FieldReaderException : DbException
     {
         get
         {
-            string text = "{0}\r\nOrdinal: {1}\r\nColumnName: {2}\r\nRow: {3}".FormatWith(InnerException!.Message, Ordinal, ColumnName, Row);
+            string text = "{0}\nOrdinal: {1}\nColumnName: {2}\nRow: {3}".FormatWith(InnerException!.Message, Ordinal, ColumnName, Row);
 
             if (Ordinal != null && MethodName != null)
-                text += "\r\nCalling: row.Reader.{0}({1})".FormatWith(MethodName, Ordinal);
+                text += "\nCalling: row.Reader.{0}({1})".FormatWith(MethodName, Ordinal);
 
             if (Projector != null)
-                text += "\r\nProjector:\r\n{0}".FormatWith(Projector.ToStringIndented().Indent(4));
+                text += "\nProjector:\n{0}".FormatWith(Projector.ToStringIndented().Indent(4));
 
             if(Command != null)
-                text += "\r\nCommand:\r\n{0}".FormatWith(Command.PlainSql().Indent(4));
+                text += "\nCommand:\n{0}".FormatWith(Command.PlainSql().Indent(4));
 
              return text;
         }

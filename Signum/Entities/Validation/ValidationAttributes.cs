@@ -1097,7 +1097,7 @@ public class StateValidator<E, S> : IEnumerable
 
     public string? PreviewErrors(E entity, S targetState, bool showState)
     {
-        string result = propertyNames.Select((pn, i) => GetMessage(entity, targetState, showState, i)).NotNull().ToString("\r\n");
+        string result = propertyNames.Select((pn, i) => GetMessage(entity, targetState, showState, i)).NotNull().ToString("\n");
 
         return string.IsNullOrEmpty(result) ? null : result;
     }

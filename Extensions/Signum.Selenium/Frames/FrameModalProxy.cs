@@ -78,7 +78,7 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
 
     public EntityInfoProxy EntityInfo()
     {
-        return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("div.sf-main-control")).GetDomAttribute("data-main-entity")!)!;
+        return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("div.sf-main-control")).GetDomAttributeOrThrow("data-main-entity"))!;
     }
 
     public FrameModalProxy<T> WaitLoaded()

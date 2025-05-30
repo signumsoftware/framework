@@ -519,7 +519,7 @@ public static class EmailTemplateLogic
         }
         catch (Exception e)
         {
-            return new SqlPreCommandSimple("-- Exception on {0}. {1}\r\n{2}".FormatWith(et.BaseToString(), e.GetType().Name, e.Message.Indent(2, '-')));
+            return new SqlPreCommandSimple("-- Exception on {0}. {1}\n{2}".FormatWith(et.BaseToString(), e.GetType().Name, e.Message.Indent(2, '-')));
         }
     }
 
@@ -539,7 +539,7 @@ public static class EmailTemplateLogic
         if (!emailModels.Any())
             return null;
 
-        if (!replacements.Interactive || !SafeConsole.Ask("{0}\r\n have no EmailTemplates. Create in {1}?".FormatWith(emailModels.ToString("\r\n"), cis.DefaultText("No CultureInfos registered!"))))
+        if (!replacements.Interactive || !SafeConsole.Ask("{0}\n have no EmailTemplates. Create in {1}?".FormatWith(emailModels.ToString("\n"), cis.DefaultText("No CultureInfos registered!"))))
             return null;
 
         using (replacements.WithReplacedDatabaseName())
@@ -577,12 +577,12 @@ public static class EmailTemplateLogic
             }
             catch (Exception ex)
             {
-                exceptions.Add("{0} in {1}:\r\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
+                exceptions.Add("{0} in {1}:\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
             }
         }
 
         if (exceptions.Any())
-            throw new Exception(exceptions.ToString("\r\n\r\n"));
+            throw new Exception(exceptions.ToString("\n\n"));
     }
 
     public static bool Regenerate(EmailTemplateEntity et)
