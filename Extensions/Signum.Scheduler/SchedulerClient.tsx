@@ -18,7 +18,6 @@ import { isPermissionAuthorized } from '@framework/AppContext';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 import { HolidayCalendarClient } from './HolidayCalendarClient';
 import { Constructor } from '@framework/Constructor';
-import ScheduleRuleWeekDays from './Templates/ScheduleRuleWeekDays.1';
 import { Finder } from '@framework/Finder';
 
 export namespace SchedulerClient {
