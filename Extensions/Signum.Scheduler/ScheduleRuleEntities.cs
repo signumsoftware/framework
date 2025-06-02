@@ -352,6 +352,8 @@ public enum SchedulerMessage
 
     [Description("Day {0} at {1} in {2}")]
     Day0At1In2,
-    TaskIsNotRunning
+    TaskIsNotRunning,
+
+    Holiday
 }
 

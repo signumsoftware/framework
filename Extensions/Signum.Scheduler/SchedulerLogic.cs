@@ -103,11 +103,13 @@ public static class SchedulerLogic
             }.Register();
 
             sb.Include<HolidayCalendarEntity>()
+                .WithUniqueIndex(hc => hc.IsDefault, hc => hc.IsDefault)
                 .WithQuery(() => st => new
                 {
                     Entity = st,
                     st.Id,
                     st.Name,
+                    st.IsDefault,
                     Holidays = st.Holidays.Count,
                 });
 

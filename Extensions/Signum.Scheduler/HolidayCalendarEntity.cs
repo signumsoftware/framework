@@ -19,6 +19,8 @@ public class HolidayCalendarEntity : Entity, IUserAssetEntity
     public int? ToYear { get; set; }
     public string? CountryCode { get; set; }
     public string? SubDivisionCode { get; set; }
+    public bool IsDefault { get; set; }
+
     public MList<HolidayEmbedded> Holidays { get; set; } = new MList<HolidayEmbedded>();
 
     public bool IsHoliday(DateOnly date)

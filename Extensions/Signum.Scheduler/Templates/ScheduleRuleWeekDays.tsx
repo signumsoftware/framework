@@ -24,7 +24,7 @@ export default function ScheduleRuleWeekDays(p : { ctx: TypeContext<ScheduleRule
           <AutoLine ctx={ctx4.subCtx(f => f.saturday)} />
           <AutoLine ctx={ctx4.subCtx(f => f.sunday)} />
           <AutoLine ctx={ctx4.subCtx(f => f.holiday)} onChange={forceUpdate} />
-          {ctx4.value.holiday && < EntityLine ctx={ctx4.subCtx(f => f.calendar)} />}
+          {ctx4.value.holiday && <EntityLine ctx={ctx4.subCtx(f => f.calendar)} />}
         </div>
       </div>
     </div>

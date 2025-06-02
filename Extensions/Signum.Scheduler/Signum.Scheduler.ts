@@ -19,6 +19,7 @@ export interface HolidayCalendarEntity extends Entities.Entity, UserAssets.IUser
   toYear: number | null;
   countryCode: string | null;
   subDivisionCode: string | null;
+  isDefault: boolean;
   holidays: Entities.MList<HolidayEmbedded>;
 }
 
@@ -106,6 +107,7 @@ export namespace SchedulerMessage {
   export const ScheduleRuleWeekDaysDN_Su: MessageKey = new MessageKey("SchedulerMessage", "ScheduleRuleWeekDaysDN_Su");
   export const Day0At1In2: MessageKey = new MessageKey("SchedulerMessage", "Day0At1In2");
   export const TaskIsNotRunning: MessageKey = new MessageKey("SchedulerMessage", "TaskIsNotRunning");
+  export const Holiday: MessageKey = new MessageKey("SchedulerMessage", "Holiday");
 }
 
 export namespace SchedulerPermission {
