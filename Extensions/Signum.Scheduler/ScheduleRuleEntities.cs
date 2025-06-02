@@ -354,6 +354,8 @@ public enum SchedulerMessage
     Day0At1In2,
     TaskIsNotRunning,
 
-    Holiday
+    Holiday,
+
+    SelectAll,
 }
 

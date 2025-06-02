@@ -108,6 +108,7 @@ export namespace SchedulerMessage {
   export const Day0At1In2: MessageKey = new MessageKey("SchedulerMessage", "Day0At1In2");
   export const TaskIsNotRunning: MessageKey = new MessageKey("SchedulerMessage", "TaskIsNotRunning");
   export const Holiday: MessageKey = new MessageKey("SchedulerMessage", "Holiday");
+  export const SelectAll: MessageKey = new MessageKey("SchedulerMessage", "SelectAll");
 }
 
 export namespace SchedulerPermission {
