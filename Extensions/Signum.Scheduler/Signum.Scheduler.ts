@@ -15,11 +15,21 @@ export interface HolidayCalendarEntity extends Entities.Entity, UserAssets.IUser
   Type: "HolidayCalendar";
   guid: string /*Guid*/;
   name: string;
+  fromYear: number | null;
+  toYear: number | null;
+  countryCode: string | null;
+  subDivisionCode: string | null;
+  isDefault: boolean;
   holidays: Entities.MList<HolidayEmbedded>;
+}
+
+export namespace HolidayCalendarMessage {
+  export const ForImportFromYearToYearAndCountryCodeShouldBeSet: MessageKey = new MessageKey("HolidayCalendarMessage", "ForImportFromYearToYearAndCountryCodeShouldBeSet");
 }
 
 export namespace HolidayCalendarOperation {
   export const Save : Operations.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Save");
+  export const ImportPublicHolidays : Operations.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.ImportPublicHolidays");
   export const Delete : Operations.DeleteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Delete");
 }
 
@@ -97,6 +107,7 @@ export namespace SchedulerMessage {
   export const ScheduleRuleWeekDaysDN_Su: MessageKey = new MessageKey("SchedulerMessage", "ScheduleRuleWeekDaysDN_Su");
   export const Day0At1In2: MessageKey = new MessageKey("SchedulerMessage", "Day0At1In2");
   export const TaskIsNotRunning: MessageKey = new MessageKey("SchedulerMessage", "TaskIsNotRunning");
+  export const Holiday: MessageKey = new MessageKey("SchedulerMessage", "Holiday");
 }
 
 export namespace SchedulerPermission {

@@ -7,7 +7,7 @@ import { Operations, EntityOperationGroup, EntityOperationSettings } from '@fram
 import { Lite } from '@framework/Signum.Entities'
 import {
   ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduleRuleMinutelyEntity, ScheduleRuleMonthsEntity,
-  ScheduleRuleWeekDaysEntity, HolidayCalendarEntity, SchedulerPermission, SchedulerTaskExceptionLineEntity, ITaskOperation, ITaskMessage
+  ScheduleRuleWeekDaysEntity, SchedulerPermission, SchedulerTaskExceptionLineEntity, ITaskOperation, ITaskMessage
 } from './Signum.Scheduler'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
@@ -15,6 +15,7 @@ import { ImportComponent } from '@framework/ImportComponent'
 import { SearchValueLine } from '@framework/Search';
 import { isPermissionAuthorized } from '@framework/AppContext';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
+import { HolidayCalendarClient } from './HolidayCalendarClient';
 
 export namespace SchedulerClient {
   
@@ -28,7 +29,6 @@ export namespace SchedulerClient {
     Navigator.addSettings(new EntitySettings(ScheduleRuleMinutelyEntity, e => import('./Templates/ScheduleRuleMinutely')));
     Navigator.addSettings(new EntitySettings(ScheduleRuleWeekDaysEntity, e => import('./Templates/ScheduleRuleWeekDays')));
     Navigator.addSettings(new EntitySettings(ScheduleRuleMonthsEntity, e => import('./Templates/ScheduleRuleMonths')));
-    Navigator.addSettings(new EntitySettings(HolidayCalendarEntity, e => import('./Templates/HolidayCalendar')));
   
     var group: EntityOperationGroup = {
       key: "execute",
@@ -54,9 +54,10 @@ export namespace SchedulerClient {
         filterOptions: [{ token: SchedulerTaskExceptionLineEntity.token(e => e.schedulerTaskLog), value: ctx.value}],
       }} />
     ]))
-    Navigator.addSettings(es)
-  }
-  
+    Navigator.addSettings(es);
+
+    HolidayCalendarClient.start(options);
+  }  
   
   export namespace API {
   
