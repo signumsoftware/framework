@@ -7,7 +7,7 @@ import { HolidayCalendarEntity, SchedulerMessage } from './Signum.Scheduler'
 import { Lite } from '../../Signum/React/Signum.Entities';
 import { RenderDayProp } from 'react-widgets/cjs/Month';
 import { DateTime } from 'luxon';
-import { DateTimeLineOptions } from '../../Signum/React/Lines/DateTimeLine';
+import { DateTimeLineOptions, RenderDayAndTitle } from '../../Signum/React/Lines/DateTimeLine';
 import React from 'react';
 import { useAPI } from '../../Signum/React/Hooks';
 
@@ -41,12 +41,13 @@ export namespace HolidayCalendarClient {
       .catch(e => { defaultHolidayCalendar = undefined; throw e; });
   }
 
-  export function useRenderHoliday() : {
-    renderDay: RenderDayProp,
-    getHolidayTitle: (date: DateTime) => string | null | undefined
-  } {
+  export function useRenderHoliday(): RenderDayAndTitle {
     const holidays = useAPI(() => getDefaultHolidayCalendar(), []);
     return {
+      getHolidayTitle: (d) =>
+        holidays?.[d.toISODate()!] ? { type: "holiday", text: holidays[d.toISODate()!] } :
+          DateTimeLineOptions.isWeekend(d) ? { type: "weekend", text: d.weekdayLong! } : undefined,
+
       renderDay: ({ date, label }: { date: Date; label: string }) => {
         var dt = DateTime.fromJSDate(date);
         var today = dt.toISODate() == DateTime.local().toISODate();
@@ -55,7 +56,6 @@ export namespace HolidayCalendarClient {
           title={holiday ? `${toFormatWithFixes(DateTime.fromJSDate(date), "D") } (${holiday})` : undefined}
         > {label}</span >
       },
-      getHolidayTitle: (d) => DateTimeLineOptions.isWeekend(d) ? d.weekdayLong : holidays?.[d.toISODate()!] ? holidays[d.toISODate()!] : undefined,
     }
   }
 

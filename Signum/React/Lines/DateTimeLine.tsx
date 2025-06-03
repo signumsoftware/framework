@@ -49,11 +49,15 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
     const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
     const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
+    var ht = dt && rdat.getHolidayTitle(dt);
+    var className =
+      ht?.type == "holiday" ? "sf-holiday" :
+      ht?.type == "weekend" ? "sf-weekend" : undefined;
 
     if (p.ctx.readOnly)
       return (
         <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
-          {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, "sf-readonly-date", c.mandatoryClass)} ctx={p.ctx} innerRef={c.setRefs}>
+          {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, className, "sf-readonly-date", c.mandatoryClass)} ctx={p.ctx} innerRef={c.setRefs}>
             {dt && toFormatWithFixes(dt, luxonFormat)}
           </FormControlReadonly>)}
         </FormGroup>
@@ -73,16 +77,21 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
                     m.toISO()!);
     };
 
+
+
     const htmlAttributes = {
-        placeholder: c.getPlaceholder(),
-        ...c.props.valueHtmlAttributes,
+      placeholder: c.getPlaceholder(),
+      title: ht?.text,
+      className: className,
+      ...c.props.valueHtmlAttributes,
     } as React.AllHTMLAttributes<any>;
 
     if (htmlAttributes.placeholder === undefined)
-        htmlAttributes.placeholder = dateTimePlaceholder(luxonFormat);
+      htmlAttributes.placeholder = dateTimePlaceholder(luxonFormat);
+
 
     return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{  ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
         {inputId => c.withItemGroup(
           <div className={classes(p.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined, p.calendarAlignEnd && "sf-calendar-end")}>
             <DatePicker
@@ -111,16 +120,18 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
 
 export interface RenderDayAndTitle {
   renderDay: RenderDayProp,
-  getHolidayTitle: (date: DateTime) => string | "weekend" | null | undefined;
+  getHolidayTitle: (date: DateTime) => {type: "holiday" | "weekend", text: string} | null | undefined;
 };
 
 export namespace DateTimeLineOptions {
 
 
-  export let useRenderDay: () => RenderDayAndTitle = () =>
-  ({
+  export let useRenderDay: () => RenderDayAndTitle = () => ({
     renderDay: defaultRenderDay,
-    getHolidayTitle: (d) => isWeekend(d) ? d.weekdayLong : undefined,
+    getHolidayTitle: (d) => isWeekend(d) ? {
+      type: "weekend",
+      text: d.weekdayLong!
+    } : undefined,
   });
 
   export function isWeekend(date: DateTime): boolean {
