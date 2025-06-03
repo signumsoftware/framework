@@ -661,6 +661,7 @@ export namespace SearchMessage {
   export const HiddenColumn: MessageKey = new MessageKey("SearchMessage", "HiddenColumn");
   export const ShowHiddenColumns: MessageKey = new MessageKey("SearchMessage", "ShowHiddenColumns");
   export const HideHiddenColumns: MessageKey = new MessageKey("SearchMessage", "HideHiddenColumns");
+  export const ShowMore: MessageKey = new MessageKey("SearchMessage", "ShowMore");
   export const GroupKey: MessageKey = new MessageKey("SearchMessage", "GroupKey");
   export const DerivedGroupKey: MessageKey = new MessageKey("SearchMessage", "DerivedGroupKey");
   export const Copy: MessageKey = new MessageKey("SearchMessage", "Copy");
