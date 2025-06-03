@@ -11,7 +11,6 @@ import {
   HolidayCalendarEntity
 } from './Signum.Scheduler'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
-import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { SearchValueLine } from '@framework/Search';
 import { isPermissionAuthorized } from '@framework/AppContext';

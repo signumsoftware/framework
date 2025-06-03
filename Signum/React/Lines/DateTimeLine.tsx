@@ -31,6 +31,8 @@ export class DateTimeLineController extends ValueBaseController<DateTimeLineProp
 export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<DateTimeLineProps & React.RefAttributes<DateTimeLineController>>> =
   React.memo(React.forwardRef(function DateTimeLine(props: DateTimeLineProps, ref: React.Ref<DateTimeLineController>) {
 
+    const rdat = DateTimeLineOptions.useRenderDay();
+
     const c = useController(DateTimeLineController, props, ref);
 
     if (c.isHidden)
@@ -49,13 +51,13 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
 
 
     if (p.ctx.readOnly)
-        return (
-          <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
-            {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, "sf-readonly-date", c.mandatoryClass)} ctx={p.ctx} innerRef={c.setRefs}>
-                    {dt && toFormatWithFixes(dt, luxonFormat)}
-                </FormControlReadonly>)}
-            </FormGroup>
-    );
+      return (
+        <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+          {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, "sf-readonly-date", c.mandatoryClass)} ctx={p.ctx} innerRef={c.setRefs}>
+            {dt && toFormatWithFixes(dt, luxonFormat)}
+          </FormControlReadonly>)}
+        </FormGroup>
+      );
 
     const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
 
@@ -95,7 +97,7 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
               min={p.minDate}
               max={p.maxDate}
               calendarProps={{
-                renderDay: DateTimeLineOptions.useRenderDay().renderDay,
+                renderDay: rdat.renderDay,
                 views: monthOnly ? ["year", "decade", "century"] : undefined,
                 ...p.calendarProps
               }} />
@@ -107,12 +109,15 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
     return LineBaseController.propEquals(prev, next);
   });
 
+export interface RenderDayAndTitle {
+  renderDay: RenderDayProp,
+  getHolidayTitle: (date: DateTime) => string | "weekend" | null | undefined;
+};
 
 export namespace DateTimeLineOptions {
-  export let useRenderDay: () => {
-    renderDay: RenderDayProp,
-    getHolidayTitle: (date: DateTime) => string | null | undefined
-  } = () =>
+
+
+  export let useRenderDay: () => RenderDayAndTitle = () =>
   ({
     renderDay: defaultRenderDay,
     getHolidayTitle: (d) => isWeekend(d) ? d.weekdayLong : undefined,
