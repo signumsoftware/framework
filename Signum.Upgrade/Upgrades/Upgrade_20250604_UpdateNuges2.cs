@@ -17,7 +17,8 @@ class Upgrade_20250604_UpdateNuges2 : CodeUpgradeBase
             file.UpdateNugetReferences("""
                 <PackageReference Include="Microsoft.Graph" Version="5.80.0" />
                 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-                <PackageReference Include="Microsoft.Graph" Version="5.80.0" />
+                <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="137.0.7151.6800" />
+                <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
                 """);
 
         });
