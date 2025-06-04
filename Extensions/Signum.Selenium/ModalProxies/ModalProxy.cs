@@ -38,7 +38,7 @@ public class ModalProxy : IDisposable
                     if (button != null && button.Displayed)
                         button.SafeClick();
                 }
-                catch (ElementNotVisibleException)
+                catch (ElementNotInteractableException)
                 {
                 }
                 catch (StaleElementReferenceException)

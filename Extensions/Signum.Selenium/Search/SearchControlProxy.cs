@@ -34,7 +34,7 @@ public class SearchControlProxy
 
     public void WaitSearchCompleted(Action searchTrigger)
     {
-        string counter = this.Element.GetAttribute("data-search-count");
+        string counter = this.Element.GetDomAttributeOrThrow("data-search-count");
         searchTrigger();
         WaitSearchCompleted(counter);
     }
@@ -77,7 +77,7 @@ public class SearchControlProxy
 
     public void ToggleFilters(bool show)
     {
-        ToggleFiltersButton.Find().Click();
+        ToggleFiltersButton.Find().SafeClick();
         if (show)
             FiltersPanel.WaitVisible();
         else

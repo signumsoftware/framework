@@ -36,7 +36,7 @@ public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, I
 
     public EntityInfoProxy EntityInfo()
     {
-        var attr = MainControl.Find().GetAttribute("data-main-entity");
+        var attr = MainControl.Find().GetDomAttributeOrThrow("data-main-entity");
 
         return EntityInfoProxy.Parse(attr)!;
     }

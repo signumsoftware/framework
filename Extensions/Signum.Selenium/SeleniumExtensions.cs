@@ -188,10 +188,10 @@ public static class SeleniumExtensions
 
     public static bool IsElementVisible(this WebDriver selenium, By locator)
     {
-        var elements = selenium.FindElements(locator);
         try
         {
-            return elements.Any() && elements.First().Displayed;
+            var elements = selenium.FindElements(locator);
+            return elements.Count != 0 && elements.First().Displayed;
         }
         catch (StaleElementReferenceException)
         {
@@ -201,10 +201,10 @@ public static class SeleniumExtensions
 
     public static bool IsElementVisible(this IWebElement element, By locator)
     {
-        var elements = element.FindElements(locator);
         try
         {
-            return elements.Any() && elements.First().Displayed;
+            var elements = element.FindElements(locator);
+            return elements.Count != 0 && elements.First().Displayed;
         }
         catch (StaleElementReferenceException)
         {
@@ -304,14 +304,27 @@ public static class SeleniumExtensions
         return new SelectElement(element);
     }
 
-    public static string GetID(this IWebElement element)
+    //  blogs.rahulrpandya.in/understanding-the-deprecation-of-getattribute-in-selenium-26f490598d20
+    public static string GetDomAttributeOrThrow(this IWebElement element, string attributeName)
     {
-        return element.GetAttribute("id");
+        return element.GetDomAttribute(attributeName) ??  
+            throw new InvalidOperationException($"Attribute '{attributeName}' was not found on element: {element.TagName}.");
+    }
+
+    public static string GetDomPropertyOrThrow(this IWebElement element, string propertyName)
+    {
+        return element.GetDomProperty(propertyName) ??  
+            throw new InvalidOperationException($"Property '{propertyName}' was not found on element: {element.TagName}.");
+    }
+
+    public static string? GetID(this IWebElement element)
+    {
+        return element.GetDomProperty("id");
     }
 
     public static IEnumerable<string> GetClasses(this IWebElement element)
     {
-        return element.GetAttribute("class").Split(' ');
+        return (element.GetDomAttribute("class") ?? "").Split(' ');
     }
 
     public static bool HasClass(this IWebElement element, string className)
@@ -392,7 +405,7 @@ public static class SeleniumExtensions
         element.ScrollTo();
         new Actions(element.GetDriver()).MoveToElement(element).Perform();
         var length = 0;
-        while((length = element.GetAttribute("value").Length) > 0)
+        while((length = element.GetDomPropertyOrThrow("value").Length) > 0)
         {
             for (int i = 0; i < length; i++)
                 element.SendKeys(Keys.Backspace);
@@ -406,7 +419,7 @@ public static class SeleniumExtensions
         element.GetDriver().Wait(() => element.GetAttribute("value") == (text ?? ""));
     }
 
-    public static string Value(this IWebElement e) => e.GetAttribute("value");
+    public static string Value(this IWebElement e) => e.GetDomPropertyOrThrow("value");
 
     public static void ButtonClick(this IWebElement button)
     {
