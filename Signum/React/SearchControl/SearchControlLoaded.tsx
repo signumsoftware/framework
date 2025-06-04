@@ -658,20 +658,20 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }
 
     const isManualOrAll = this.isManualRefreshOrAllPagination();
-    var changesExpected = s.dataChanged || s.resultFindOptions == null || toFindOptionsPath(s.resultFindOptions) != toFindOptionsPath(p.findOptions) || this.state.filterMode != 'Simple';
+    const changesExpected = s.dataChanged || s.resultFindOptions == null || toFindOptionsPath(s.resultFindOptions) != toFindOptionsPath(p.findOptions);
 
-    var buttonBarElements = [
+    const buttonBarElements = [
       ...Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this }),
       ...this.props.querySettings?.extraButtons?.(this) ?? [],
       ...this.props.extraButtons?.(this) ?? [],
     ].filter(a => Boolean(a)) as ButtonBarElement[];
 
-    var leftButtonBarElements = buttonBarElements.filter(a => a.order != null && a.order < 0).orderBy(a => a.order ?? 0);
-    var rightButtonBarElements = buttonBarElements.filter(a => a.order == null || a.order > 0).orderBy(a => a.order!);
+    const leftButtonBarElements = buttonBarElements.filter(a => a.order != null && a.order < 0).orderBy(a => a.order ?? 0);
+    const rightButtonBarElements = buttonBarElements.filter(a => a.order == null || a.order > 0).orderBy(a => a.order!);
 
     const titleLabels = StyleContext.default.titleLabels;
 
-    var leftButtons = ([
+    const leftButtons = ([
       p.showFilterButton && {
         order: -5,
         button: <SearchControlEllipsisMenu sc={this} isHidden={!p.showFilterButton} />

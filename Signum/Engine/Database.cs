@@ -1151,8 +1151,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         var areNew = collection.Where(a => a.IsNew);
         if (areNew.Any())
-            throw new InvalidOperationException("The following entities are new:\r\n" +
-                areNew.ToString(a => "\t{0}".FormatWith(a), "\r\n"));
+            throw new InvalidOperationException("The following entities are new:\n" +
+                areNew.ToString(a => "\t{0}".FormatWith(a), "\n"));
 
         var groups = collection.GroupBy(a => a.GetType(), a => a.Id).ToList();
 
@@ -1172,8 +1172,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         var areNew = collection.Where(a => a.IdOrNull == null);
         if (areNew.Any())
-            throw new InvalidOperationException("The following entities are new:\r\n" +
-                areNew.ToString(a => "\t{0}".FormatWith(a), "\r\n"));
+            throw new InvalidOperationException("The following entities are new:\n" +
+                areNew.ToString(a => "\t{0}".FormatWith(a), "\n"));
 
 
         var groups = collection.GroupBy(a => a.EntityType, a => a.Id).ToList();

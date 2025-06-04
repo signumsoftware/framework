@@ -569,7 +569,7 @@ internal class QueryBinder : ExpressionVisitor
             return (ProjectionExpression)nex.Arguments[1];
         }
 
-        throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.ToString());
+        throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \n" + expression.ToString());
     }
 
     private static Expression RemoveProjectionConvert(Expression expression)

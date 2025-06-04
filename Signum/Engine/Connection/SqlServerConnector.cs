@@ -820,6 +820,6 @@ deallocate cur";
         if (databaseName == null)
             return script;
 
-        return "use " + databaseName + "\r\n" + script;
+        return "use " + databaseName + "\n" + script;
     }
 }

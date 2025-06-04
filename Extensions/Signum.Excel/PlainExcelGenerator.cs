@@ -144,7 +144,7 @@ public static class PlainExcelGenerator
 
                     var cta = c.Token.HasCollectionToArray();
                     var value = cta != null ?
-                        ((IEnumerable?)r[rt])?.Cast<object>().ToString(cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct? ", " : "\r\n"):
+                        ((IEnumerable?)r[rt])?.Cast<object>().ToString(cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct? ", " : "\n"):
                         r[rt];
 
                     var cell = CellBuilder.Cell(value, t.defaultStyle, t.styleIndex, forImport);

@@ -327,7 +327,7 @@ public class DirectedGraph<T> : IEnumerable<T>
 
     public override string ToString()
     {
-        return adjacency.ToString(kvp => "{0}=>{1};".FormatWith(kvp.Key, kvp.Value.ToString(",")), "\r\n");
+        return adjacency.ToString(kvp => "{0}=>{1};".FormatWith(kvp.Key, kvp.Value.ToString(",")), "\n");
     }
 
     public string Graphviz()
@@ -340,11 +340,11 @@ public class DirectedGraph<T> : IEnumerable<T>
         int num = 0;
         Dictionary<T, int> nodeDic = Nodes.ToDictionary(n => n, n => num++, Comparer);
 
-        string nodes = Nodes.ToString(e => "   {0} [ label =\"{1}\"];".FormatWith(nodeDic[e], getName(e)), "\r\n");
+        string nodes = Nodes.ToString(e => "   {0} [ label =\"{1}\"];".FormatWith(nodeDic[e], getName(e)), "\n");
 
-        string edges = Edges.ToString(e => "   {0} -> {1};".FormatWith(nodeDic[e.From], nodeDic[e.To]), "\r\n");
+        string edges = Edges.ToString(e => "   {0} -> {1};".FormatWith(nodeDic[e.From], nodeDic[e.To]), "\n");
 
-        return "digraph \"{0}\"\r\n{{\r\n{1}\r\n{2}\r\n}}".FormatWith(name, nodes, edges);
+        return "digraph \"{0}\"\n{{\n{1}\n{2}\n}}".FormatWith(name, nodes, edges);
     }
 
     public XDocument ToDGML()

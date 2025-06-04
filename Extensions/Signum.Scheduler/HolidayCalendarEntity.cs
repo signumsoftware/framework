@@ -1,6 +1,7 @@
 using Signum.UserAssets;
 using System.Xml.Linq;
 using System.Globalization;
+using System.ComponentModel;
 
 namespace Signum.Scheduler;
 
@@ -14,6 +15,11 @@ public class HolidayCalendarEntity : Entity, IUserAssetEntity
     [StringLengthValidator(Min = 3, Max = 100)]
     public string Name { get; set; }
 
+    public int? FromYear { get; set; }
+    public int? ToYear { get; set; }
+    public string? CountryCode { get; set; }
+    public string? SubDivisionCode { get; set; }
+    public bool IsDefault { get; set; }
 
     public MList<HolidayEmbedded> Holidays { get; set; } = new MList<HolidayEmbedded>();
 
@@ -60,6 +66,7 @@ public class HolidayCalendarEntity : Entity, IUserAssetEntity
 public static class HolidayCalendarOperation
 {
     public static ExecuteSymbol<HolidayCalendarEntity> Save;
+    public static ExecuteSymbol<HolidayCalendarEntity> ImportPublicHolidays;
     public static DeleteSymbol<HolidayCalendarEntity> Delete;
 }
 
@@ -87,4 +94,11 @@ public class HolidayEmbedded : EmbeddedEntity
         this.Date = DateOnly.ParseExact(x.Attribute("Date")!.Value, "o", CultureInfo.InvariantCulture);
         this.Name = x.Attribute("Name")?.Value;
     }
+}
+
+
+public enum HolidayCalendarMessage
+{
+    [Description("For import, from year, to year and country code should be set.")]
+    ForImportFromYearToYearAndCountryCodeShouldBeSet
 }

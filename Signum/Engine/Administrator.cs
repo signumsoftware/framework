@@ -71,7 +71,7 @@ public static class Administrator
         }
     }
 
-    public static string GenerateViewCodes(params string[] tableNames) => tableNames.ToString(tn => GenerateViewCode(tn), "\r\n\r\n");
+    public static string GenerateViewCodes(params string[] tableNames) => tableNames.ToString(tn => GenerateViewCode(tn), "\n\n");
 
     public static string GenerateViewCode(string tableName) => GenerateViewCode(ObjectName.Parse(tableName, Schema.Current.Settings.IsPostgres));
 
@@ -591,7 +591,7 @@ public static class Administrator
             {
                 SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Multiple Indexes");
                 multiIndexes.Select(i => sqlBuilder.DisableIndex(table.Name, i)).Combine(Spacing.Simple)!.ExecuteLeaves();
-                Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".FormatWith(i, table.Name), "\r\n"));
+                Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".FormatWith(i, table.Name), "\n"));
 
                 onDispose += () =>
                 {
@@ -779,7 +779,7 @@ public static class Administrator
 
         var isPostgres = Schema.Current.Settings.IsPostgres;
         var pb = Connector.Current.ParameterBuilder;
-        return columns.Select(ct => new ColumnTableScript(ct, new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @toEntity\r\nWHERE {1} = @fromEntity".FormatWith(ct.Table.Name, ct.Column.Name.SqlEscape(isPostgres)), new List<DbParameter>
+        return columns.Select(ct => new ColumnTableScript(ct, new SqlPreCommandSimple("UPDATE {0}\nSET {1} = @toEntity\nWHERE {1} = @fromEntity".FormatWith(ct.Table.Name, ct.Column.Name.SqlEscape(isPostgres)), new List<DbParameter>
         {
             pb.CreateReferenceParameter("@fromEntity", fromEntity.Id, ct.Column),
             pb.CreateReferenceParameter("@toEntity", toEntity.Id, ct.Column),

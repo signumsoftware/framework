@@ -31,12 +31,12 @@ class CachedTableMList<T> : CachedTableBase
         //Query
         using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
         {
-            string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
-                ctr.table.Columns.Values.Where(ShouldBeCached).ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(isPostgres), ",\r\n"),
+            string select = "SELECT\n{0}\nFROM {1} {2}\n".FormatWith(
+                ctr.table.Columns.Values.Where(ShouldBeCached).ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(isPostgres), ",\n"),
                 table.Name.ToString(),
                 ctr.currentAlias!.ToString());
 
-            ctr.remainingJoins = lastPartialJoin + ctr.currentAlias + "." + table.BackReference.Name.SqlEscape(isPostgres) + "\r\n" + remainingJoins;
+            ctr.remainingJoins = lastPartialJoin + ctr.currentAlias + "." + table.BackReference.Name.SqlEscape(isPostgres) + "\n" + remainingJoins;
 
             query = new SqlPreCommandSimple(select);
         }

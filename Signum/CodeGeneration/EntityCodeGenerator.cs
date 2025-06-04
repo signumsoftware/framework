@@ -119,7 +119,7 @@ public class EntityCodeGenerator
         if (sb.Length == length)
             return null;
 
-        return sb.ToString();
+        return sb.ToString().Replace("\r\n", "\n");
     }
 
     protected virtual List<string> GetUsingNamespaces(string fileName, IEnumerable<DiffTable> tables)

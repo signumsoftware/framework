@@ -98,7 +98,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
                 string errorsUserQuery = idents.OfType<IHasEntityType>()
                     .Where(uc => uc.EntityType != null && !uc.EntityType.Is(EntityType))
                     .ToString(uc => DashboardMessage._0Is1InstedOf2In3.NiceToString(NicePropertyName(() => EntityType), uc.EntityType, entityType, uc),
-                    "\r\n");
+                    "\n");
 
                 return errorsUserQuery.DefaultText(null!);
             }

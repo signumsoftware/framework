@@ -67,6 +67,9 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.
               .flatMap(a => Array.range(0, a.pinned!.colSpan! - 1).map(i => (a.pinned!.column ?? 0) + i + 1))
               .distinctBy(a => a.toString());
 
+
+            const allCheckBox = rowPinned.every(a => isCheckBox(a.pinned?.active));
+
             return (
               <div key={i} className={classes("row", p.showGrid  && "py-2")}>
                 {Array.range(0, maxColumns).map((c, j) => {
@@ -81,7 +84,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.
                     || hiddenColumns.contains(c);
 
                   return (<div key={j} className={classes("col-sm-" + (bsBase * colSpan), error && "border-danger", p.showGrid && "border border-1 rounded-0")}>
-                    {cellPinned.map((f, i) => <div key={i} className={f == p.highlightFilter ? "sf-filter-highlight" : undefined}>{renderValue(f, i == 0)}</div>)}
+                    {cellPinned.map((f, i) => <div key={i} className={f == p.highlightFilter ? "sf-filter-highlight" : undefined}>{renderValue(f, i == 0 && !allCheckBox)}</div>)}
                   </div>
                   );
                 })}

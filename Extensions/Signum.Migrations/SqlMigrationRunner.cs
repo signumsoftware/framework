@@ -47,17 +47,49 @@ public class SqlMigrationRunner
         }
     }
 
-    public static void CreateInitialMigration()
+    public static List<(string version, string comment)> CreateInitialMigration()
     {
         var script = Schema.Current.GenerationScipt(databaseNameReplacement: DatabaseNameReplacement)!;
 
-        string version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
+        return SaveMigrations(script, InitialMigrationComment);
+    }
 
-        string comment = InitialMigrationComment;
+    public static List<(string version, string comment)> SaveMigrations(SqlPreCommand script, string comment)
+    {
+        static (string version, string comment) SaveFile(DateTime dt, string comment, SqlPreCommand script)
+        {
+            string ver = dt.ToString("yyyy.MM.dd-HH.mm.ss");
 
-        string fileName = version + "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment) + ".sql";
+            string finalComment = (script.HasNoTransaction ? "NT_" : "") +FileNameValidatorAttribute.RemoveInvalidCharts(comment);
 
-        File.WriteAllText(Path.Combine(MigrationsDirectory, fileName), script.ToString(), Encoding.UTF8);
+            string fileName = ver + "_"  + finalComment + ".sql";
+
+            File.WriteAllText(Path.Combine(MigrationsDirectory, fileName), script.ToString(), Encoding.UTF8);
+
+            return (ver, finalComment);
+        }
+      
+        List<(string version, string comment)> versions = new List<(string version, string comment)>();
+        if(script is SqlPreCommandSimple simple)
+        {
+            versions.Add(SaveFile(DateTime.Now, comment, simple));
+        }
+        else if(script is SqlPreCommandConcat concat)
+        {
+            var (before, after) = concat.ExtractNoTransaction();
+
+            var now = DateTime.Now;
+
+            if (before != null)
+                versions.Add(SaveFile(now.AddSeconds(-1), "Before " + comment, before));
+
+            versions.Add(SaveFile(now, comment, concat));
+
+            if (after != null)
+                versions.Add(SaveFile(now.AddSeconds(1), "After " + comment, after));
+        }
+
+        return versions;
     }
 
     private static void SetExecuted(List<MigrationInfo> migrations)
@@ -131,7 +163,7 @@ public class SqlMigrationRunner
 
         if (errors.Any())
             throw new InvalidOperationException("Some scripts in the migrations directory have an invalid format (yyyy.MM.dd-HH.mm.ss_OptionalComment.sql) " +
-                errors.ToString(a => Path.GetFileName(a.fileName), "\r\n"));
+                errors.ToString(a => Path.GetFileName(a.fileName), "\n"));
 
         var list = matches.Select(a => new MigrationInfo
         {
@@ -255,7 +287,7 @@ public class SqlMigrationRunner
         string? title = mi.Version + (mi.Comment.HasText() ? " ({0})".FormatWith(mi.Comment) : null);
         string text = File.ReadAllText(mi.FileName!, Encoding.UTF8);
         
-        using (var tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
+        using (var tr = mi.Comment.StartsWith("NT_") ? null : Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
         {
             string databaseName = Connector.Current.DatabaseName();
 
@@ -273,7 +305,7 @@ public class SqlMigrationRunner
 
             mi.IsExecuted = true;
 
-            tr.Commit();
+            tr?.Commit();
         }
     }
 
@@ -361,22 +393,12 @@ public class SqlMigrationRunner
 
         Console.WriteLine("Generating Initial Migration file...");
 
-        var script = Schema.Current.GenerationScipt(databaseNameReplacement: DatabaseNameReplacement)!;
-
-        string version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
-
-        string comment = InitialMigrationComment;
-
-        string fileName = version + "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment) + ".sql";
-
-
-        File.WriteAllText(Path.Combine(MigrationsDirectory, fileName), script.ToString(), Encoding.UTF8);
-
-        new SqlMigrationEntity
+        var versions = CreateInitialMigration();
+        versions.Select(a => new SqlMigrationEntity
         {
-            Comment = comment,
-            VersionNumber = version,
-        }.Save();
+            Comment = a.comment,
+            VersionNumber = a.version,
+        }).SaveList();
 
         SafeConsole.WriteLineColor(ConsoleColor.Green, "Initial Migration saved and marked as executed");
     }

@@ -96,6 +96,8 @@ public enum LoginAuthMessage
     SignInWithMicrosoft,
 
 
+    [Description("Invalid token date {0}")]
+    InvalidTokenDate0
 }
 
 [AllowUnauthenticated]

@@ -316,6 +316,8 @@ public enum SearchMessage
     ShowHiddenColumns,
     HideHiddenColumns,
 
+    ShowMore,
+
     GroupKey,
     DerivedGroupKey,
 

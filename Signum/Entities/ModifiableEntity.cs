@@ -297,7 +297,7 @@ public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneab
     [HiddenProperty]
     public string? Error
     {
-        get { return IntegrityCheck()?.Errors.Values.ToString("\r\n"); }
+        get { return IntegrityCheck()?.Errors.Values.ToString("\n"); }
     }
 
     
@@ -582,8 +582,8 @@ public class IntegrityCheck
 
     public override string ToString()
     {
-        return $"{Errors.Count} errors in {" ".Combine(Type.Name, Id)}\r\n"
-              + Errors.ToString(kvp => "    {0}: {1}".FormatWith(kvp.Key, kvp.Value), "\r\n");
+        return $"{Errors.Count} errors in {" ".Combine(Type.Name, Id)}\n"
+              + Errors.ToString(kvp => "    {0}: {1}".FormatWith(kvp.Key, kvp.Value), "\n");
     }
 }
 
@@ -601,12 +601,12 @@ public class IntegrityCheckWithEntity
     public override string ToString()
     {
         var validators = Validator.GetPropertyValidators(Entity.GetType());
-        return $"{IntegrityCheck.Errors.Count} errors in {" ".Combine(IntegrityCheck.Type.Name, IntegrityCheck.Id)}\r\n"
+        return $"{IntegrityCheck.Errors.Count} errors in {" ".Combine(IntegrityCheck.Type.Name, IntegrityCheck.Id)}\n"
               + IntegrityCheck.Errors.ToString(kvp => "    {0} ({1}): {2}".FormatWith(
                   kvp.Key,
                   validators.GetOrThrow(kvp.Key).GetValueUntyped(Entity) ?? "null", 
                   kvp.Value), 
-                  "\r\n");
+                  "\n");
     }
 }
 

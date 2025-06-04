@@ -418,11 +418,11 @@ public class WordTemplateParser : ITemplateParser
             var list = root.Descendants<MatchNode>().ToList();
 
             if (list.Any())
-                throw new InvalidOperationException("{0} unexpected MatchNode instances found: \r\n{1}".FormatWith(list.Count, 
+                throw new InvalidOperationException("{0} unexpected MatchNode instances found: \n{1}".FormatWith(list.Count, 
                     list.ToString(d => 
 @$"{d.Before()?.InnerText ?? "- None - "}
 {d.InnerText} <-- Unexpected
-{d.After()?.InnerText ?? "-- None --"}", "\r\n\r\n").Indent(2)));
+{d.After()?.InnerText ?? "-- None --"}", "\n\n").Indent(2)));
         }
     }
 

@@ -529,7 +529,7 @@ public static class UserQueryLogic
         }
         catch (Exception e)
         {
-            return new SqlPreCommandSimple("-- Exception on {0}\r\n{1}".FormatWith(uq.BaseToString(), e.Message.Indent(2, '-')));
+            return new SqlPreCommandSimple("-- Exception on {0}\n{1}".FormatWith(uq.BaseToString(), e.Message.Indent(2, '-')));
         }
     }
 

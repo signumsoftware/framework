@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Signum.API;
 using Signum.Authorization.AuthToken;
 using Signum.Authorization.Rules;
+using Signum.Entities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections.Frozen;
@@ -15,7 +16,13 @@ public static class AuthLogic
     public static event Action<UserEntity>? UserLogingIn;
     public static ICustomAuthorizer? Authorizer;
 
+    public static ResetLazy<HashSet<Lite<UserEntity>>> RecentlyUsersDisabled;
 
+    public static void CheckUserActive(UserEntity user)
+    {
+        if (user.State != UserState.Active || AuthLogic.RecentlyUsersDisabled.Value.Contains(user.ToLite()))
+            throw new UnauthorizedAccessException(UserMessage.UserIsNotActive.NiceToString());
+    }
 
     /// <summary>
     /// Gets or sets the number of failed login attempts allowed before a user is locked out.
@@ -55,7 +62,6 @@ public static class AuthLogic
     public static ResetLazy<FrozenDictionary<Lite<RoleEntity>, RoleEntity>> RolesByLite = null!;
 
 
-
     class RoleData
     {
         public bool DefaultAllowed;
@@ -85,9 +91,12 @@ public static class AuthLogic
             };
 
             CultureInfoLogic.AssertStarted(sb);
+            RecentlyUsersDisabled = sb.GlobalLazy(() => Database.Query<UserEntity>().Where(u => u.DisabledOn != null && AuthTokenServer.GetTokenLimitDate() < u.DisabledOn).Select(a => a.ToLite()).ToHashSet(),
+             new InvalidateWith(null));
 
             sb.Include<UserEntity>()
               .WithExpressionFrom((RoleEntity r) => r.Users())
+               .WithIndex(a => new { a.DisabledOn })
               .WithQuery(() => e => new
               {
                   Entity = e,
@@ -140,7 +149,6 @@ public static class AuthLogic
             }, new InvalidateWith(typeof(RoleEntity)));
 
             sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
-
             UserGraph.Register();
 
 
@@ -206,7 +214,7 @@ public static class AuthLogic
                     if (problems.Count > 0)
                         throw new ApplicationException(
                             AuthAdminMessage._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.NiceToString(problems.Count) +
-                            problems.ToString("\r\n"));
+                            problems.ToString("\n"));
                 }
 
                 var dic = allRoles.ToDictionary(a => a.ToLite());
@@ -216,7 +224,7 @@ public static class AuthLogic
                     throw new ApplicationException(
                         problems2.GroupBy(a => a.r, a => a.inh)
                         .Select(gr => AuthAdminMessage.Role0InheritsFromTrivialMergeRole1.NiceToString(gr.Key, gr.CommaAnd()))
-                        .ToString("\r\n"));
+                        .ToString("\n"));
             }
 
             if (!role.IsTrivialMerge)
@@ -267,7 +275,7 @@ public static class AuthLogic
         if (problems.Count > 0)
             throw new ApplicationException(
                 AuthAdminMessage._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.NiceToString().FormatWith(problems.Count) +
-                problems.ToString("\r\n"));
+                problems.ToString("\n"));
 
         return graph;
 
@@ -569,7 +577,7 @@ public static class AuthLogic
         }
         catch (InvalidOperationException ex)
         {
-            throw new InvalidRoleGraphException("The role graph does not match:\r\n" + ex.Message);
+            throw new InvalidRoleGraphException("The role graph does not match:\n" + ex.Message);
         }
 
         var dbOnlyWarnings = rolesDic.Keys.Except(rolesXml.Keys).Select(n =>
@@ -717,7 +725,7 @@ public static class AuthLogic
             var trivialMergeRoles = Database.Query<RoleEntity>().Where(a => a.IsTrivialMerge == true).ToList();
 
             var trivialMerges = trivialMergeRoles.Select(tr =>
-            {
+                {
                 var oldName = tr.Name;
                 tr.Name = RoleEntity.CalculateTrivialMergeName(tr.InheritsFrom);
                 if (tr.IsGraphModified)
@@ -756,6 +764,8 @@ public static class AuthLogic
     public static void ImportAuthRules(XDocument authRules, bool interactive)
     {
         AuthLogic.ImportRulesScript(authRules, interactive: interactive)?.PlainSqlCommand().ExecuteLeaves();
+
+        Schema.Current.InvalidateCache();
     }
 
     public static void AutomaticImportAuthRules(string fileName)
@@ -948,7 +958,12 @@ public static class AuthLogic
 
         return 0;
     }
+
 }
+
+
+
+
 
 public interface ICustomAuthorizer
 {

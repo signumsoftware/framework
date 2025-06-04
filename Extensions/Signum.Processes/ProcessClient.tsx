@@ -18,7 +18,7 @@ import { ImportComponent } from '@framework/ImportComponent'
 import "./Processes.css"
 import { ConstructSymbol_From, DeleteSymbol, ExecuteSymbol } from '@framework/Signum.Operations';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
-import { ContextualMenuItem } from '../../Signum/React/SearchControl/ContextualItems';
+import { ContextualItemsContext, ContextualMenuItem } from '../../Signum/React/SearchControl/ContextualItems';
 import { SearchControlLoaded } from '@framework/Search';
 
 export namespace ProcessClient {
@@ -138,7 +138,7 @@ export namespace ProcessClient {
     if (lites == null)
       return;
 
-    coc.context.lites = lites;
+    coc = ContextualOperations.cloneWithPrototype(coc, { context: { ...coc.context, lites } });
 
     var conf = await ContextualOperations.confirmInNecessary(coc);
     if (!conf)

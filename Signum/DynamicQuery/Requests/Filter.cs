@@ -204,7 +204,7 @@ public class FilterGroup : Filter
     public override string ToString()
     {
         return $@"{this.GroupOperation}{(this.Token != null ? $" ({this.Token})" : null)}
-{Filters.ToString("\r\n").Indent(4)}";
+{Filters.ToString("\n").Indent(4)}";
     }
 
     public override bool IsAggregate()

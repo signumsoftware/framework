@@ -15,15 +15,15 @@
 }
 
 .sf-toolbar-count-container {
-    position: absolute;
+    position: relative;
     display: inline;
 }
 
 .sf-toolbar-count {
     padding: 1px 2px;
-    position: relative;
-    top: -12px;
-    left: -10px;
+    position: absolute;
+    top: -6px;
+    left: -6px;
     border-radius: 10px !important;
 }
 

@@ -73,7 +73,8 @@ public static class VirtualMList
         Action<L, T>? onSave = null,
         Action<L, T>? onRemove = null,
         bool? lazyRetrieve = null,
-        bool? lazyDelete = null) //To avoid StackOverflows
+        bool? lazyDelete = null,  //To avoid StackOverflows
+        bool forceSeek = false)
         where T : Entity
         where L : Entity
     {
@@ -137,7 +138,8 @@ public static class VirtualMList
             };
         }
 
-        var baseQuery = /*Connector.Current is SqlServerConnector ? Database.Query<L>().WithHint("FORCESEEK").DisableQueryFilter() : */ 
+        var baseQuery = Connector.Current is SqlServerConnector && forceSeek ?
+            Database.Query<L>().WithHint("FORCESEEK").DisableQueryFilter() :
             Database.Query<L>().DisableQueryFilter();
 
         if (preserveOrder)
