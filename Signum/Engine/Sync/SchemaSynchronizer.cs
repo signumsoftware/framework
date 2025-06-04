@@ -999,7 +999,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
         var tnAlias = ag.NextTableAlias(tn);
         var oldFkAlias = ag.NextTableAlias(oldFk.Name);
 
-        var message = @$"-- Column {tn}.{tabCol.Name} was referencing {oldFk} but not references {newFk}. An update is needed?";
+        var message = @$"-- Column {tn}.{tabCol.Name} was referencing {oldFk} but now references {newFk}. An update is needed?";
         if (isPostgres)
         {
             return new SqlPreCommandSimple(
