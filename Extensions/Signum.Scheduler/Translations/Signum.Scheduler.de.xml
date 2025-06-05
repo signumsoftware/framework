@@ -2,7 +2,7 @@
 <Translations>
   <Type Name="HolidayCalendarEntity" Description="Ferienkalender" Gender="m">
     <Member Name="Guid" Description="Guid" />
-    <Member Name="Holidays" Description="Urlaub" />
+    <Member Name="Holidays" Description="Ferien" />
     <Member Name="Name" Description="Name" />
   </Type>
   <Type Name="HolidayCalendarOperation">

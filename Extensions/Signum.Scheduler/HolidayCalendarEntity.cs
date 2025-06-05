@@ -23,9 +23,16 @@ public class HolidayCalendarEntity : Entity, IUserAssetEntity
 
     public MList<HolidayEmbedded> Holidays { get; set; } = new MList<HolidayEmbedded>();
 
+    [Ignore]
+    Lazy<HashSet<DateOnly>> Dates;
+    public HolidayCalendarEntity()
+    {
+        Dates = new Lazy<HashSet<DateOnly>>(()=> this.Holidays.Select(a=>a.Date).ToHashSet());
+    }
+
     public bool IsHoliday(DateOnly date)
     {
-        return Holidays.Any(h => h.Date == date);
+        return this.Dates.Value.Contains(date);
     }
 
     protected override string? PropertyValidation(PropertyInfo pi)
@@ -52,6 +59,11 @@ public class HolidayCalendarEntity : Entity, IUserAssetEntity
         return new XElement("HolidayCalendar",
             new XAttribute("Guid", this.Guid),
             new XAttribute("Name", this.Name),
+            this.FromYear == null ? null : new XAttribute("FromYear", this.FromYear),
+            this.ToYear == null ? null : new XAttribute("ToYear", this.ToYear),
+            this.CountryCode == null ? null : new XAttribute("CountryCode", this.CountryCode),
+            this.SubDivisionCode == null ? null : new XAttribute("SubDivisionCode", this.SubDivisionCode),
+            new XAttribute("IsDefault", this.IsDefault),
             new XElement("Holidays", this.Holidays.Select(p => p.ToXml(ctx))));
     }
 

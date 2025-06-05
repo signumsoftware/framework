@@ -766,41 +766,37 @@ Consider the following options:
     public static Dictionary<OperationSymbol, string> GetContextualCanExecute(IEnumerable<Lite<IEntity>> lites, List<OperationSymbol> operationSymbols)
     {
         Dictionary<OperationSymbol, string> result = new Dictionary<OperationSymbol, string>();
-        using (ExecutionMode.Global())
+        foreach (var grLites in lites.GroupBy(a => a.EntityType))
         {
-            foreach (var grLites in lites.GroupBy(a => a.EntityType))
-            {
-                var operations = operationSymbols.Select(opKey => FindOperation(grLites.Key, opKey)).ToList();
+            var operations = operationSymbols.Select(opKey => FindOperation(grLites.Key, opKey)).ToList();
 
-                foreach (var grOperations in operations.Where(a => a.StateType != null).GroupBy(a => a.StateType!))
+            foreach (var grOperations in operations.Where(a => a.StateType != null).GroupBy(a => a.StateType!))
+            {
+                if (grOperations.Key != null)
                 {
-                    if (grOperations.Key != null)
+                    var dic = giGetContextualGraphCanExecute.GetInvoker(grLites.Key, grLites.Key, grOperations.Key)(grLites, grOperations);
+                    if (result.IsEmpty())
+                        result.AddRange(dic);
+                    else
                     {
-                        var dic = giGetContextualGraphCanExecute.GetInvoker(grLites.Key, grLites.Key, grOperations.Key)(grLites, grOperations);
-                        if (result.IsEmpty())
-                            result.AddRange(dic);
-                        else
+                        foreach (var kvp in dic)
                         {
-                            foreach (var kvp in dic)
-                            {
-                                result[kvp.Key] = "\n".Combine(result.TryGetC(kvp.Key), kvp.Value);
-                            }
+                            result[kvp.Key] = "\n".Combine(result.TryGetC(kvp.Key), kvp.Value);
                         }
                     }
                 }
+            }
 
-                var operationsWithCanExecute = operations.Where(a => a.CanExecuteExpression() != null && !result.ContainsKey(a.OperationSymbol));
-                var dic2 = giGetCanExecuteExpression.GetInvoker(grLites.Key)(grLites, operationsWithCanExecute);
-                if (result.IsEmpty())
-                    result.AddRange(dic2);
-                else
+            var operationsWithCanExecute = operations.Where(a => a.CanExecuteExpression() != null && !result.ContainsKey(a.OperationSymbol));
+            var dic2 = giGetCanExecuteExpression.GetInvoker(grLites.Key)(grLites, operationsWithCanExecute);
+            if (result.IsEmpty())
+                result.AddRange(dic2);
+            else
+            {
+                foreach (var kvp in dic2)
                 {
-                    foreach (var kvp in dic2)
-                    {
-                        result[kvp.Key] = "\n".Combine(result.TryGetC(kvp.Key), kvp.Value);
-                    }
+                    result[kvp.Key] = "\n".Combine(result.TryGetC(kvp.Key), kvp.Value);
                 }
-
             }
         }
 

@@ -42,15 +42,5 @@ public class SchedulerController : ControllerBase
         Thread.Sleep(1000);
     }
 
-    [HttpGet("api/scheduler/countries")]
-    public List<string> GetCountries()
-    {
-        return SchedulerLogic.GetCountries() ?? [];
-    }
-
-    [HttpGet("api/scheduler/subDivisions/{countryCode}")]
-    public List<string> GetSubDivisions(string countryCode)
-    {
-        return SchedulerLogic.GetSubDivisions(countryCode) ?? [];
-    }
+  
 }

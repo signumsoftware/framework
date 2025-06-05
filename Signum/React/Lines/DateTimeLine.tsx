@@ -19,6 +19,7 @@ export interface DateTimeLineProps extends ValueBaseProps<string | null> {
   maxDate?: Date;
   calendarProps?: Partial<CalendarProps>;
   calendarAlignEnd?: boolean;
+  renderDayAndTitle?: RenderDayAndTitle;
 }
 
 export class DateTimeLineController extends ValueBaseController<DateTimeLineProps, string | null>{
@@ -31,9 +32,11 @@ export class DateTimeLineController extends ValueBaseController<DateTimeLineProp
 export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<DateTimeLineProps & React.RefAttributes<DateTimeLineController>>> =
   React.memo(React.forwardRef(function DateTimeLine(props: DateTimeLineProps, ref: React.Ref<DateTimeLineController>) {
 
-    const rdat = DateTimeLineOptions.useRenderDay();
-
     const c = useController(DateTimeLineController, props, ref);
+
+    let rdat = DateTimeLineOptions.useRenderDay();
+
+    rdat = props.renderDayAndTitle ?? rdat;
 
     if (c.isHidden)
         return null;
@@ -50,14 +53,17 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
     const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
     var ht = dt && rdat.getHolidayTitle(dt);
-    var className =
+    var holidayClass =
       ht?.type == "holiday" ? "sf-holiday" :
       ht?.type == "weekend" ? "sf-weekend" : undefined;
 
     if (p.ctx.readOnly)
       return (
         <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
-          {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, className, "sf-readonly-date", c.mandatoryClass)} ctx={p.ctx} innerRef={c.setRefs}>
+          {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={{
+            title: ht?.text,
+            ...c.props.valueHtmlAttributes,
+          }} className={classes(c.props.valueHtmlAttributes?.className, holidayClass, "sf-readonly-date", c.mandatoryClass)} ctx={p.ctx} innerRef={c.setRefs}>
             {dt && toFormatWithFixes(dt, luxonFormat)}
           </FormControlReadonly>)}
         </FormGroup>
@@ -82,7 +88,7 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
     const htmlAttributes = {
       placeholder: c.getPlaceholder(),
       title: ht?.text,
-      className: className,
+      className: holidayClass,
       ...c.props.valueHtmlAttributes,
     } as React.AllHTMLAttributes<any>;
 
