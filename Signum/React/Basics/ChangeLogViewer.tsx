@@ -21,7 +21,7 @@ export default function ChangeLogViewer(p: { extraInformation?: string }): React
   var logs = useAPI(() => !hasUser ? null : ChangeLogClient.getChangeLogs(), [hasUser]);
 
   if (!hasUser || logs == null)
-    return <VersionInfo />;
+    return <VersionInfo extraInformation={p.extraInformation} />;
 
   var lastDate = lastDateString ? DateTime.fromISO(lastDateString) : null;
 
