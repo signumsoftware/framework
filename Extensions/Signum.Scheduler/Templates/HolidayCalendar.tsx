@@ -6,6 +6,8 @@ import { useAPI, useForceUpdate } from '../../../Signum/React/Hooks';
 import { SchedulerClient } from '../SchedulerClient';
 import { JavascriptMessage } from '../../../Signum/React/Signum.Entities';
 import { HolidayCalendarClient } from '../HolidayCalendarClient';
+import { Tabs, Tab } from 'react-bootstrap';
+import { DateTime } from 'luxon';
 
 export default function HolidayCalendar(p: { ctx: TypeContext<HolidayCalendarEntity> }): React.JSX.Element | string{
   const forceUpdate = useForceUpdate();
@@ -18,6 +20,12 @@ export default function HolidayCalendar(p: { ctx: TypeContext<HolidayCalendarEnt
 
   if (countries === undefined || subDivisions === undefined)
     return JavascriptMessage.loading.niceToString();
+
+
+  const years = ctx.value.holidays.map(a => !a.element.date ? null : DateTime.fromISO(a.element.date).year).distinctBy(a => a).orderBy(a => a);
+
+  years.remove(null);
+  years.insertAt(0, null);
 
   return (
     <div>
@@ -45,10 +53,20 @@ export default function HolidayCalendar(p: { ctx: TypeContext<HolidayCalendarEnt
         </div>
       </div>
       <div>
-        <EntityTable ctx={ctx.subCtx(f => f.holidays)} avoidFieldSet="h5" columns={[
-          { property: a => a.date },
-          { property: a => a.name },
-        ]} />
+        <h4>{ctx.niceName(a => a.holidays)}</h4>
+        <Tabs>
+          {years.map(y =>
+            <Tab eventKey={y ?? "none"} title={y == null ? "All" : y}>
+              <EntityTable ctx={ctx.subCtx(f => f.holidays)}
+                filterRows={dctx => dctx.filter(a => a.value.date == null || y == null || DateTime.fromISO(a.value.date).year == y)}
+                avoidFieldSet
+                columns={[
+                  { property: a => a.date },
+                  { property: a => a.name },
+                ]} />
+            </Tab>
+          )}
+        </Tabs>
       </div>
     </div>
   );

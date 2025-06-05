@@ -12,20 +12,20 @@ import React from 'react';
 import { useAPI } from '../../Signum/React/Hooks';
 
 export namespace HolidayCalendarClient {
-  
+
   export function start(options: { routes: RouteObject[] }): void {
-  
+
     Navigator.addSettings(new EntitySettings(HolidayCalendarEntity, e => import('./Templates/HolidayCalendar')));
 
     DateTimeLineOptions.useRenderDay = HolidayCalendarClient.useRenderHoliday;
-  }  
+  }
 
   export type CalendarDictionary = { [key: string]: string };
 
   let holidayCalendars: { [id: string]: Promise<CalendarDictionary> } = {};
   export function getHolidayCalendar(lite: Lite<HolidayCalendarEntity>): Promise<CalendarDictionary> {
 
-    var id = lite.id?.toString()!;
+    var id = lite.id!.toString()!;
     return holidayCalendars[id] ??= Navigator.API.fetchEntity(HolidayCalendarEntity, id)
       .then(hc => hc.holidays.toObject(d => d.element.date, d => d.element.name ?? SchedulerMessage.Holiday.niceToString()))
       .catch(e => { delete holidayCalendars[id]; throw e; });
@@ -42,30 +42,33 @@ export namespace HolidayCalendarClient {
   }
 
   export function useRenderHoliday(): RenderDayAndTitle {
-    const holidays = useAPI(() => getDefaultHolidayCalendar(), []);
-    return {
-      getHolidayTitle: (d) =>
-        holidays?.[d.toISODate()!] ? { type: "holiday", text: holidays[d.toISODate()!] } :
-          DateTimeLineOptions.isWeekend(d) ? { type: "weekend", text: d.weekdayLong! } : undefined,
+    const calendar = useAPI(() => getDefaultHolidayCalendar(), []);
+    return getRenderDayAndTitle(calendar)
+  }
 
-      renderDay: ({ date, label }: { date: Date; label: string }) => {
+  export function getRenderDayAndTitle(calendar: CalendarDictionary | null | undefined): RenderDayAndTitle {
+    return {
+      getHolidayTitle: (d) => calendar?.[d.toISODate()!] ? { type: "holiday", text: calendar[d.toISODate()!] } :
+        DateTimeLineOptions.isWeekend(d) ? { type: "weekend", text: d.weekdayLong! } : undefined,
+
+      renderDay: ({ date, label }: { date: Date; label: string; }) => {
         var dt = DateTime.fromJSDate(date);
         var today = dt.toISODate() == DateTime.local().toISODate();
-        var holiday = holidays?.[dt.toISODate()!];
+        var holiday = calendar?.[dt.toISODate()!];
         return <span className={today ? "sf-today" : DateTimeLineOptions.isWeekend(dt) ? "sf-weekend" : holiday ? "sf-holiday" : undefined}
-          title={holiday ? `${toFormatWithFixes(DateTime.fromJSDate(date), "D") } (${holiday})` : undefined}
-        > {label}</span >
+          title={holiday ? `${toFormatWithFixes(DateTime.fromJSDate(date), "D")} (${holiday})` : undefined}
+        > {label}</span>;
       },
-    }
+    };
   }
 
   export namespace API {
-      export function getCountries(): Promise<string[]> {
-      return ajaxGet({ url: "/api/scheduler/countries" });
+    export function getCountries(): Promise<string[]> {
+      return ajaxGet({ url: "/api/holidaycalendar/countries" });
     }
 
     export function getSubDivisions(country: string): Promise<string[]> {
-      return ajaxGet({ url: "/api/scheduler/subDivisions/" + country });
+      return ajaxGet({ url: "/api/holidaycalendar/subDivisions/" + country });
     }
   }
 }

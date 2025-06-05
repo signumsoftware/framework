@@ -1105,7 +1105,7 @@ public class SchemaBuilder
 
     public ResetLazy<T> GlobalLazy<T>(Func<T> func, InvalidateWith invalidateWith,
         Action? onInvalidated = null,
-        LazyThreadSafetyMode mode = LazyThreadSafetyMode.ExecutionAndPublication) where T : class
+        LazyThreadSafetyMode mode = LazyThreadSafetyMode.ExecutionAndPublication)
     {
         var result = Signum.Engine.GlobalLazy.WithoutInvalidations(() =>
         {
