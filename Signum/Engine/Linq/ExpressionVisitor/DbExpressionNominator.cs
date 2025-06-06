@@ -1495,6 +1495,12 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
                     return Add(new SqlCastExpression(typeof(int?), TrySqlFunction(null, SqlFunction.FLOOR, typeof(double?), diff)!));
                 }
+
+            case "TimeOnly.Hours": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.hour), m.Expression!);
+            case "TimeOnly.Minutes": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.minute), m.Expression!);
+            case "TimeOnly.Seconds": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.second), m.Expression!);
+            case "TimeOnly.Milliseconds": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.millisecond), m.Expression!);
+
             case "TimeSpan.Hours": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.hour), m.Expression!);
             case "TimeSpan.Minutes": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.minute), m.Expression!);
             case "TimeSpan.Seconds": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.second), m.Expression!);
