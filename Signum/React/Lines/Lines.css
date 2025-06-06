@@ -470,11 +470,11 @@ input[type=checkbox].form-control-xs {
     min-height: 24px;
 }
 
-.form-group .form-check-input{
+.form-group :not(label) > .form-check-input {
     margin-top: 0.5em;
 }
 
-.form-group.form-group-xs .form-check-input {
+.form-group.form-group-xs :not(label) > .form-check-input {
     margin-top: 0.25em;
 }
 
