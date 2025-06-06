@@ -14,10 +14,11 @@ import { useAPIWithReload, useInterval } from '@framework/Hooks'
 import { toAbsoluteUrl, useTitle } from '@framework/AppContext'
 import { classes } from '@framework/Globals'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import * as AppContext from '@framework/AppContext';
+import { CopyHealthCheckButton } from '@framework/Components/CopyHealthCheckButton'
 
 
-
-export default function SchedulerPanelPage() {
+export default function SchedulerPanelPage(): React.JSX.Element {
 
   const [state, reloadState] = useAPIWithReload(() => SchedulerClient.API.view(), [], { avoidReset: true });
 
@@ -27,7 +28,7 @@ export default function SchedulerPanelPage() {
     reloadState();
   }, [tick]);
 
-  useTitle("SchedulerLogic state");
+  useTitle("Scheduler Task Runner");
  
 
   function handleStop(e: React.MouseEvent<any>) {
@@ -47,10 +48,15 @@ export default function SchedulerPanelPage() {
   const s = state;
 
   const ctx = new StyleContext(undefined, undefined);
+  const url = window.location;
 
   return (
     <div>
-      <h2 className="display-6"><FontAwesomeIcon icon="clock" /> Scheduler Panel</h2>
+      <h2 className="display-6"><FontAwesomeIcon icon="clock" /> Scheduler Panel <CopyHealthCheckButton
+        name={url.hostname + " Scheduler Task Runner"}
+        healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/scheduler/healthCheck')}
+        clickUrl={url.href}
+      /></h2>
       <div className="btn-toolbar">
         <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
         <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" :  "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
@@ -61,7 +67,7 @@ export default function SchedulerPanelPage() {
             <span style={{ color: "green" }}> RUNNING </span> :
             <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
           }</strong>
-        <a className="ms-2" href={toAbsoluteUrl("/api/scheduler/simpleStatus")} target="_blank">SimpleStatus</a>
+        <a className="ms-2" href={toAbsoluteUrl("/api/scheduler/healthCheck")} target="_blank">SimpleStatus</a>
         <br />
         InitialDelayMilliseconds: {s.initialDelayMilliseconds}
         <br />

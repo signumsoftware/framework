@@ -8,9 +8,25 @@ import { FilterOptionParsed } from '../Search';
 import { CollectionMessage } from '../Signum.External';
 import { ValidationMessage } from '../Signum.Entities.Validation';
 
-export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, mainType: TypeReference }) {
-  const fops = p.findOptions;
+export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, mainType: TypeReference }): React.JSX.Element | null {
 
+  const tokens = multiplyResultTokens(p.findOptions);
+
+  if (tokens.length == 0)
+    return null;
+
+  const message = ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.niceToString().formatHtml(
+    getTypeInfos(p.mainType).map(a => a.nicePluralName).joinComma(CollectionMessage.And.niceToString()),
+    tokens.map(a => <strong>{a.parent!.niceName}</strong>).joinCommaHtml(CollectionMessage.And.niceToString()))
+
+  return (
+    <div className="sf-search-message alert alert-warning">
+      <FontAwesomeIcon icon="triangle-exclamation" />&nbsp;{message}
+    </div>
+  );
+}
+
+export function multiplyResultTokens(fops: FindOptionsParsed): QueryToken[] {
   function getFilterTokens(fop: FilterOptionParsed): (QueryToken | undefined)[] {
     if (isFilterGroup(fop))
       return fop.filters.flatMap(f => getFilterTokens(f));
@@ -47,21 +63,7 @@ export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, m
     .concat(fops.filterOptions.flatMap(fo => getFilterTokens(fo)))
     .concat(fops.orderOptions.map(a => a.token));
 
-  const tokens = getElementsTokens(candidateTokens).filter(t => !removeTokens.some(r => r.fullKey == t.fullKey));
-
-  if (tokens.length == 0)
-    return null;
-
-  const message = ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.niceToString().formatHtml(
-    getTypeInfos(p.mainType).map(a => a.nicePluralName).joinComma(CollectionMessage.And.niceToString()),
-    tokens.map(a => <strong>{a.parent!.niceName}</strong>).joinCommaHtml(CollectionMessage.And.niceToString()))
-
-  return (
-    <div className="sf-search-message alert alert-warning">
-      <FontAwesomeIcon icon="triangle-exclamation" />&nbsp;{message}
-    </div>
-  );
+  return getElementsTokens(candidateTokens).filter(t => !removeTokens.some(r => r.fullKey == t.fullKey));
 }
-
 
 

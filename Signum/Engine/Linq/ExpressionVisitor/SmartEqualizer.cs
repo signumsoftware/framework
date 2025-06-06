@@ -574,7 +574,7 @@ internal static class SmartEqualizer
     {
         var nominate = DbExpressionNominator.FullNominate(element)!;
 
-        if (nominate.RemoveUnNullify() is ToDayOfWeekExpression dowe)
+        if (nominate.RemoveAllNullify() is ToDayOfWeekExpression dowe)
         {
             if (isPostgres)
             {
@@ -755,6 +755,17 @@ internal static class SmartEqualizer
 
     static Expression EmbeddedNullEquals(EmbeddedEntityExpression eee)
     {
+        if (eee.HasValue is ColumnExpression ce)
+            return Expression.NotEqual(ce.Nullify(), Expression.Constant(true, typeof(bool?)));
+
+        if (eee.HasValue is BinaryExpression be)
+        {
+            if (be.NodeType == ExpressionType.NotEqual)
+                return Expression.Equal(be.Left, be.Right);
+            if (be.NodeType == ExpressionType.Equal)
+                return Expression.NotEqual(be.Left, be.Right);
+        }
+
         return Expression.Not(eee.HasValue);
     }
 

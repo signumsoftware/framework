@@ -1,5 +1,5 @@
 using System.Collections.Specialized;
-using Signum.Security;
+using System.Diagnostics;
 
 namespace Signum.Basics;
 
@@ -35,6 +35,7 @@ public class ExceptionEntity : Entity
         this.MachineName = System.Environment.MachineName;
         this.ApplicationName = AppDomain.CurrentDomain.FriendlyName;
         this.Origin = ExceptionOrigin.Backend_DotNet;
+        this.TraceId = Activity.Current?.Id;
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
@@ -126,6 +127,9 @@ public class ExceptionEntity : Entity
 
     public ExceptionOrigin Origin { get; set; }
 
+    [DbType(Size = 100)]
+    public string? TraceId { get; set; }
+
     public override string ToString()
     {
         return "{0}: {1}".FormatWith(ExceptionType, exceptionMessage).Etc(200);
@@ -133,7 +137,7 @@ public class ExceptionEntity : Entity
 
     public static string Dump(NameValueCollection nameValueCollection)
     {
-        return nameValueCollection.Cast<string>().ToString(key => key + ": " + nameValueCollection[key], "\r\n");
+        return nameValueCollection.Cast<string>().ToString(key => key + ": " + nameValueCollection[key], "\n");
     }
 }
 
@@ -201,7 +205,7 @@ public class DeleteLogsTypeOverridesEmbedded : EmbeddedEntity
     }
 }
 
-[AllowUnathenticated]
+[AllowUnauthenticated]
 public class ClientErrorModel : ModelEntity
 {
     public string? Url { get; set; }

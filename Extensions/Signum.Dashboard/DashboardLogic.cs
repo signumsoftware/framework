@@ -32,7 +32,7 @@ public static class DashboardLogic
     public static IQueryable<CachedQueryEntity> CachedQueries(this DashboardEntity db) =>
         As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.Dashboard.Is(db)));
 
-    public static void Start(SchemaBuilder sb, IFileTypeAlgorithm cachedQueryAlgorithm)
+    public static void Start(SchemaBuilder sb, IFileTypeAlgorithm? cachedQueryAlgorithm)
     {
 
 
@@ -40,8 +40,7 @@ public static class DashboardLogic
         {
             PermissionLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
 
-            FileTypeLogic.Register(CachedQueryFileType.CachedQuery, cachedQueryAlgorithm);
-
+            
             UserAssetsImporter.Register<DashboardEntity>("Dashboard", DashboardOperation.Save);
 
             PartNames.AddRange(new Dictionary<string, Type>
@@ -49,6 +48,7 @@ public static class DashboardLogic
                 {"LinkListPart", typeof(LinkListPartEntity)},
                 {"ImagePart", typeof(ImagePartEntity)},
                 {"SeparatorPart", typeof(SeparatorPartEntity)},
+                {"HealthCheckPart", typeof(HealthCheckPartEntity)},
             });
 
 
@@ -69,7 +69,6 @@ public static class DashboardLogic
                     cp.EntityType,
                     cp.Owner,
                     cp.DashboardPriority,
-                    cp.Code
                 });
 
             sb.Schema.EntityEvents<DashboardEntity>().Retrieved += DashboardLogic_Retrieved;
@@ -86,21 +85,28 @@ public static class DashboardLogic
               lite => Dashboards.Value.GetOrCreate(lite).IconColor);
             });
 
-            sb.Include<CachedQueryEntity>()
-                .WithExpressionFrom((DashboardEntity d) => d.CachedQueries())
-                  .WithQuery(() => e => new
-                  {
-                      Entity = e,
-                      e.Id,
-                      e.CreationDate,
-                      e.NumColumns,
-                      e.NumRows,
-                      e.QueryDuration,
-                      e.UploadDuration,
-                      e.File,
-                      UserAssetsCount = e.UserAssets.Count,
-                      e.Dashboard,
-                  });
+
+            if (cachedQueryAlgorithm != null)
+            {
+                FileTypeLogic.Register(CachedQueryFileType.CachedQuery, cachedQueryAlgorithm);
+
+
+                sb.Include<CachedQueryEntity>()
+                    .WithExpressionFrom((DashboardEntity d) => d.CachedQueries())
+                      .WithQuery(() => e => new
+                      {
+                          Entity = e,
+                          e.Id,
+                          e.CreationDate,
+                          e.NumColumns,
+                          e.NumRows,
+                          e.QueryDuration,
+                          e.UploadDuration,
+                          e.File,
+                          UserAssetsCount = e.UserAssets.Count,
+                          e.Dashboard,
+                      });
+            }
 
             sb.Schema.EntityEvents<DashboardEntity>().PreUnsafeDelete += query =>
             {
@@ -108,14 +114,15 @@ public static class DashboardLogic
                 return null;
             };
 
-            DashboardGraph.Register();
+            DashboardGraph.Register(cachedQueryAlgorithm != null);
 
 
             Dashboards = sb.GlobalLazy(() => Database.Query<DashboardEntity>().ToFrozenDictionary(a => a.ToLite()),
                 new InvalidateWith(typeof(DashboardEntity)));
 
-            CachedQueriesCache = sb.GlobalLazy(() => Database.Query<CachedQueryEntity>().GroupToDictionary(a => a.Dashboard).ToFrozenDictionary(),
-                new InvalidateWith(typeof(CachedQueryEntity)));
+            if (cachedQueryAlgorithm != null)
+                CachedQueriesCache = sb.GlobalLazy(() => Database.Query<CachedQueryEntity>().GroupToDictionary(a => a.Dashboard).ToFrozenDictionary(),
+                    new InvalidateWith(typeof(CachedQueryEntity)));
 
             DashboardsByType = sb.GlobalLazy(() => Dashboards.Value.Values.Where(a => a.EntityType != null)
             .SelectCatch(d => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(d.EntityType!.Id), d.ToLite()))
@@ -159,7 +166,7 @@ public static class DashboardLogic
 
     class DashboardGraph : Graph<DashboardEntity>
     {
-        public static void Register()
+        public static void Register(bool cachedQueries)
         {
             new Execute(DashboardOperation.Save)
             {
@@ -194,80 +201,83 @@ public static class DashboardLogic
                 Construct = (cp, _) => cp.Clone()
             }.Register();
 
-            new Execute(DashboardOperation.RegenerateCachedQueries)
+            if (cachedQueries)
             {
-                CanExecute = c => c.CacheQueryConfiguration == null ? ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo(() => c.CacheQueryConfiguration)) : null,
-                ForReadonlyEntity = true,
-                Execute = (db, _) =>
+                new Execute(DashboardOperation.RegenerateCachedQueries)
                 {
-                    var cq = db.CacheQueryConfiguration!;
-
-                    var oldCachedQueries = db.CachedQueries().ToList();
-                    oldCachedQueries.ForEach(a => a.File.DeleteFileOnCommit());
-                    db.CachedQueries().UnsafeDelete();
-
-                    var definitions = DashboardLogic.GetCachedQueryDefinitions(db).ToList();
-
-                    var combined = DashboardLogic.CombineCachedQueryDefinitions(definitions);
-
-                    foreach (var c in combined)
+                    CanExecute = c => c.CacheQueryConfiguration == null ? ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo(() => c.CacheQueryConfiguration)) : null,
+                    ForReadonlyEntity = true,
+                    Execute = (db, _) =>
                     {
-                        var qr = c.QueryRequest;
+                        var cq = db.CacheQueryConfiguration!;
 
-                        if (qr.Pagination is Pagination.All)
+                        var oldCachedQueries = db.CachedQueries().ToList();
+                        oldCachedQueries.ForEach(a => a.File.DeleteFileOnCommit());
+                        db.CachedQueries().UnsafeDelete();
+
+                        var definitions = DashboardLogic.GetCachedQueryDefinitions(db).ToList();
+
+                        var combined = DashboardLogic.CombineCachedQueryDefinitions(definitions);
+
+                        foreach (var c in combined)
                         {
-                            qr = qr.Clone();
-                            qr.Pagination = new Pagination.Firsts(cq.MaxRows + 1);
+                            var qr = c.QueryRequest;
+
+                            if (qr.Pagination is Pagination.All)
+                            {
+                                qr = qr.Clone();
+                                qr.Pagination = new Pagination.Firsts(cq.MaxRows + 1);
+                            }
+
+                            var now = Clock.Now;
+
+                            Stopwatch sw = Stopwatch.StartNew();
+
+                            var rt = Connector.CommandTimeoutScope(cq.TimeoutForQueries).Using(_ => QueryLogic.Queries.ExecuteQuery(qr));
+
+                            var queryDuration = sw.ElapsedMilliseconds;
+
+                            if (c.QueryRequest.Pagination is Pagination.All)
+                            {
+                                if (rt.Rows.Length == cq.MaxRows)
+                                    throw new ApplicationException($"The query for {c.UserAssets.CommaAnd(a => a.KeyLong())} has returned more than {cq.MaxRows} rows: " +
+                                        JsonSerializer.Serialize(QueryRequestTS.FromQueryRequest(c.QueryRequest), EntityJsonContext.FullJsonSerializerOptions));
+                                else
+                                    rt = new ResultTable(rt.AllColumns(), null, new Pagination.All(), c.QueryRequest.GroupResults);
+                            }
+
+
+                            sw.Restart();
+
+                            var json = new CachedQueryJS
+                            {
+                                CreationDate = now,
+                                QueryRequest = QueryRequestTS.FromQueryRequest(c.QueryRequest),
+                                ResultTable = rt,
+                            };
+
+                            var bytes = JsonSerializer.SerializeToUtf8Bytes(json, EntityJsonContext.FullJsonSerializerOptions);
+
+                            var file = new FilePathEmbedded(CachedQueryFileType.CachedQuery, "CachedQuery.json", bytes).SaveFile();
+
+                            var uploadDuration = sw.ElapsedMilliseconds;
+
+                            new CachedQueryEntity
+                            {
+                                CreationDate = now,
+                                UserAssets = c.UserAssets.ToMList(),
+                                NumColumns = qr.Columns.Count + (qr.GroupResults ? 0 : 1),
+                                NumRows = rt.Rows.Length,
+                                QueryDuration = queryDuration,
+                                UploadDuration = uploadDuration,
+                                File = file,
+                                Dashboard = db.ToLite(),
+                            }.Save();
                         }
 
-                        var now = Clock.Now;
-
-                        Stopwatch sw = Stopwatch.StartNew();
-
-                        var rt = Connector.CommandTimeoutScope(cq.TimeoutForQueries).Using(_ => QueryLogic.Queries.ExecuteQuery(qr));
-
-                        var queryDuration = sw.ElapsedMilliseconds;
-
-                        if (c.QueryRequest.Pagination is Pagination.All)
-                        {
-                            if (rt.Rows.Length == cq.MaxRows)
-                                throw new ApplicationException($"The query for {c.UserAssets.CommaAnd(a => a.KeyLong())} has returned more than {cq.MaxRows} rows: " +
-                                    JsonSerializer.Serialize(QueryRequestTS.FromQueryRequest(c.QueryRequest), EntityJsonContext.FullJsonSerializerOptions));
-                            else
-                                rt = new ResultTable(rt.AllColumns(), null, new Pagination.All());
-                        }
-
-
-                        sw.Restart();
-
-                        var json = new CachedQueryJS
-                        {
-                            CreationDate = now,
-                            QueryRequest = QueryRequestTS.FromQueryRequest(c.QueryRequest),
-                            ResultTable = rt,
-                        };
-
-                        var bytes = JsonSerializer.SerializeToUtf8Bytes(json, EntityJsonContext.FullJsonSerializerOptions);
-
-                        var file = new FilePathEmbedded(CachedQueryFileType.CachedQuery, "CachedQuery.json", bytes).SaveFile();
-
-                        var uploadDuration = sw.ElapsedMilliseconds;
-
-                        new CachedQueryEntity
-                        {
-                            CreationDate = now,
-                            UserAssets = c.UserAssets.ToMList(),
-                            NumColumns = qr.Columns.Count + (qr.GroupResults ? 0 : 1),
-                            NumRows = rt.Rows.Length,
-                            QueryDuration = queryDuration,
-                            UploadDuration = uploadDuration,
-                            File = file,
-                            Dashboard = db.ToLite(),
-                        }.Save();
                     }
-
-                }
-            }.Register();
+                }.Register();
+            }
         }
     }
 
@@ -404,16 +414,21 @@ public static class DashboardLogic
         TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition, conditionExpression);
 
         TypeConditionLogic.Register<TokenEquivalenceGroupEntity>(typeCondition,
-            teg => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.TokenEquivalencesGroups.Contains(teg)));
+            teg => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.TokenEquivalencesGroups.Contains(teg)),
+            teg => teg.GetParentEntity<DashboardEntity>().InCondition(typeCondition));
 
-        TypeConditionLogic.Register<LinkListPartEntity>(typeCondition,
-             llp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(llp)));
+        RegisterTypeConditionForPart<TextPartEntity>(typeCondition);
+        RegisterTypeConditionForPart<LinkListPartEntity>(typeCondition);
+        RegisterTypeConditionForPart<SeparatorPartEntity>(typeCondition);
+        RegisterTypeConditionForPart<HealthCheckPartEntity>(typeCondition);
+    }
 
-        TypeConditionLogic.Register<ImagePartEntity>(typeCondition,
-            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
-
-        TypeConditionLogic.Register<SeparatorPartEntity>(typeCondition,
-            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+    public static void RegisterTypeConditionForPart<T>(TypeConditionSymbol typeCondition)
+        where T : Entity, IPartEntity
+    {
+        TypeConditionLogic.Register<T>(typeCondition,
+             p => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(p)),
+             p => p.GetDashboard().InCondition(typeCondition));
     }
 
     public static List<CachedQueryDefinition> GetCachedQueryDefinitions(DashboardEntity db)
@@ -524,7 +539,7 @@ public static class DashboardLogic
                 .Where(a => a.error != null);
 
             if (errors.Any())
-                throw new InvalidOperationException($"Unable to expand columns in '{cqd.UserAsset.KeyLong()}' (query {QueryUtils.GetKey(cqd.QueryRequest.QueryName)}) requested by {errorContext} because: \r\n{errors.ToString(a => a.token.FullKey() + ": " + a.error, "\r\n")}");
+                throw new InvalidOperationException($"Unable to expand columns in '{cqd.UserAsset.KeyLong()}' (query {QueryUtils.GetKey(cqd.QueryRequest.QueryName)}) requested by {errorContext} because: \n{errors.ToString(a => a.token.FullKey() + ": " + a.error, "\n")}");
         }
 
         cqd.QueryRequest.Columns.AddRange(extraColumns.Select(c => new Column(c, null)));

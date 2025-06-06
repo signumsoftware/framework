@@ -1,6 +1,5 @@
 using System.IO;
 using System.Text;
-using Xunit.Abstractions;
 
 namespace Signum.Test.LinqProvider;
 
@@ -24,7 +23,7 @@ public class TestOutputTextWriter : TextWriter
     public override void Write(string? value)
     {
         Lines++;
-        OutputHelper.WriteLine(value);
+        OutputHelper.WriteLine(value ?? "");
     }
 
     public override Encoding Encoding

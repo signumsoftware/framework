@@ -9,7 +9,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { ToolbarCount } from '../QueryToolbarConfig'
 import { PermissionSymbol } from '@framework/Signum.Basics'
 
-export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbedded> }) {
+export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbedded> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleTypeChanges() {
     var a = p.ctx.value;
@@ -56,13 +56,13 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
           </div>
           <div className="col-sm-1">
             {icon && <div style={{ marginTop: "17px" }}>
-              <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px",  }} />
+              <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px", }} />
               {ctx.value.showCount && <ToolbarCount showCount={ctx.value.showCount} num={ctx.value.showCount == "Always" ? 0 : 1} />}
             </div>
             }
           </div>
           <div className="col-sm-5">
-          <TextBoxLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: getToString(content) || undefined }} />
+            <TextBoxLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: getToString(content) || undefined }} />
             {(ctx2.value.type == "Header" || ctx2.value.type == "Item") && (ctx2.value.content == null || PermissionSymbol.isLite(ctx2.value.content)) && <AutoLine ctx={ctx2.subCtx(t => t.url)} />}
             {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") &&
               <div>
@@ -77,12 +77,12 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
   );
 }
 
-export function fixToolbarElementType(a: ToolbarElementEmbedded) {
-    if (a.type == "Divider") {
-        a.iconName = null;
-        a.content = null;
-        a.label = null;
-        a.url = null;
-        a.modified = true;
-    }
+function fixToolbarElementType(a: ToolbarElementEmbedded): void {
+  if (a.type == "Divider") {
+    a.iconName = null;
+    a.content = null;
+    a.label = null;
+    a.url = null;
+    a.modified = true;
+  }
 }

@@ -8,7 +8,7 @@ import * as Mailing from '../Signum.Mailing/Signum.Mailing'
 
 import * as External from './Signum.Mailing.ExchangeWS.External'
 
-export const ExchangeWebServiceEmailServiceEntity = new Type<ExchangeWebServiceEmailServiceEntity>("ExchangeWebServiceEmailService");
+export const ExchangeWebServiceEmailServiceEntity: Type<ExchangeWebServiceEmailServiceEntity> = new Type<ExchangeWebServiceEmailServiceEntity>("ExchangeWebServiceEmailService");
 export interface ExchangeWebServiceEmailServiceEntity extends Mailing.EmailServiceEntity {
   Type: "ExchangeWebServiceEmailService";
   exchangeVersion: External.ExchangeVersion;

@@ -5,9 +5,7 @@ namespace Signum.Workflow;
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class CaseNotificationEntity : Entity
 {
-
     public Lite<CaseActivityEntity> CaseActivity { get; set; }
-
 
     public Lite<UserEntity> User { get; set; }
 

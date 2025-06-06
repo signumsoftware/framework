@@ -5,7 +5,7 @@ export interface IFrameRendererProps extends React.HTMLAttributes<HTMLIFrameElem
   manipulateDom?: (doc:Document)=> void
 }
 
-export default function IFrameRenderer({ html, manipulateDom, ...props }: IFrameRendererProps) {
+export default function IFrameRenderer({ html, manipulateDom, ...props }: IFrameRendererProps): React.JSX.Element {
 
   const iframe = React.useRef<HTMLIFrameElement>(null)
 

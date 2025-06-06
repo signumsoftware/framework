@@ -64,7 +64,7 @@ public static class Untyped
     }
 
 
-    static MethodInfo miWhereQ =
+    internal static MethodInfo miWhereQ =
         ReflectionTools.GetMethodInfo(() => ((IQueryable<string>)null!).Where((Expression<Func<string, bool>>)null!)).GetGenericMethodDefinition();
     public static IQueryable Where(IQueryable query, LambdaExpression predicate)
     {
@@ -237,9 +237,13 @@ public static class Untyped
 
         return result;
     }
+    internal static MethodInfo miOrderByE = ReflectionTools.GetMethodInfo(() => new TypeEntity[0].OrderBy(t => t.Id)).GetGenericMethodDefinition();
+    internal static MethodInfo miOrderByDescendingE = ReflectionTools.GetMethodInfo(() => new TypeEntity[0].OrderByDescending(t => t.Id)).GetGenericMethodDefinition();
+    internal static MethodInfo miThenByE = ReflectionTools.GetMethodInfo(() => new TypeEntity[0].OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
+    internal static MethodInfo miThenByDescendingE = ReflectionTools.GetMethodInfo(() => new TypeEntity[0].OrderBy(t => t.Id).ThenByDescending(t => t.Id)).GetGenericMethodDefinition();
 
-    static MethodInfo miOrderByQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().OrderBy(t => t.Id)).GetGenericMethodDefinition();
-    static MethodInfo miOrderByDescendingQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().OrderByDescending(t => t.Id)).GetGenericMethodDefinition();
+    internal static MethodInfo miOrderByQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().OrderBy(t => t.Id)).GetGenericMethodDefinition();
+    internal static MethodInfo miOrderByDescendingQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().OrderByDescending(t => t.Id)).GetGenericMethodDefinition();
     public static IOrderedQueryable OrderBy(IQueryable query, LambdaExpression lambda, OrderType orderType)
     {
         MethodInfo mi = (orderType == OrderType.Ascending ? miOrderByQ : miOrderByDescendingQ).MakeGenericMethod(lambda.Type.GetGenericArguments());
@@ -247,8 +251,8 @@ public static class Untyped
         return (IOrderedQueryable)query.Provider.CreateQuery(Expression.Call(null, mi, new Expression[] { query.Expression, Expression.Quote(lambda) }));
     }
 
-    static MethodInfo miThenByQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
-    static MethodInfo miThenByDescendingQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().OrderBy(t => t.Id).ThenByDescending(t => t.Id)).GetGenericMethodDefinition();
+    internal static MethodInfo miThenByQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
+    internal static MethodInfo miThenByDescendingQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().OrderBy(t => t.Id).ThenByDescending(t => t.Id)).GetGenericMethodDefinition();
     public static IOrderedQueryable ThenBy(IOrderedQueryable query, LambdaExpression lambda, OrderType orderType)
     {
         MethodInfo mi = (orderType == OrderType.Ascending ? miThenByQ : miThenByDescendingQ).MakeGenericMethod(lambda.Type.GetGenericArguments());
@@ -270,4 +274,6 @@ public static class Untyped
 
         return result;
     }
+
+   
 }

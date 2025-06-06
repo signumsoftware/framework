@@ -1,4 +1,6 @@
 
+using System.Threading.Tasks;
+
 namespace Signum.Test.LinqProvider;
 
 /// <summary>
@@ -14,26 +16,26 @@ public class AsyncTest
     }
 
     [Fact]
-    public async void ToListAsync()
+    public async Task ToListAsync()
     {
         var artistsInBands = await Database.Query<BandEntity>().ToListAsync();
     }
 
     [Fact]
-    public async void ToArrayAsync()
+    public async Task ToArrayAsync()
     {
         var artistsInBands = await Database.Query<BandEntity>().ToArrayAsync();
     }
 
     [Fact]
-    public async void AverageAsync()
+    public async Task AverageAsync()
     {
         var artistsInBands = await Database.Query<BandEntity>().AverageAsync(a => a.Members.Count);
     }
 
 
     [Fact]
-    public async void MinAsync()
+    public async Task MinAsync()
     {
         var artistsInBands = await Database.Query<BandEntity>().MinAsync(a => a.Members.Count);
     }

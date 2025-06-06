@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using NpgsqlTypes;
 using Signum.Engine.Linq;
 using Signum.Utilities.Reflection;
 
@@ -46,6 +47,13 @@ public partial class Table
     internal IntervalExpression? GenerateSystemPeriod(Alias tableAlias, QueryBinder binder, bool force = false)
     {
         return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? this.SystemVersioned.IntervalExpression(tableAlias) : null;
+    }
+
+    internal ColumnExpression GetTsVectorColumn(Alias tableAlias, string columnName)
+    {
+        var column = (PostgresTsVectorColumn)this.Columns.GetOrThrow(columnName);
+
+        return new ColumnExpression(typeof(NpgsqlTsVector), tableAlias, column.Name);
     }
 
     internal ColumnExpression PartitionIdExpression(Alias tableAlias)

@@ -26,7 +26,7 @@ public class MetaTest
     [Fact]
     public void MetaAnonymousType()
     {
-        var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new { a.Target, a.Text, a.ToString().Length, Sum = a.ToString() + a.ToString() }))!;
+        var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new { a.Target, a.Title, a.ToString().Length, Sum = a.ToString() + a.ToString() }))!;
         Assert.IsType<CleanMeta>(dic["Target"]);
         Assert.IsType<CleanMeta>(dic["Text"]);
         Assert.IsType<DirtyMeta>(dic["Length"]);

@@ -12,7 +12,7 @@ interface CaseFromSenderInfoState {
   prev?: CaseActivityEntity;
 }
 
-export default function CaseFromSenderInfo(p: CaseFromSenderInfoProps) {
+export default function CaseFromSenderInfo(p: CaseFromSenderInfoProps): React.JSX.Element {
 
   const prev = Navigator.useFetchInState(p.current.previous);
 

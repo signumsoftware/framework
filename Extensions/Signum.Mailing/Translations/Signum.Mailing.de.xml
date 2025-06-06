@@ -3,12 +3,7 @@
   <Type Name="AsyncEmailSenderPermission">
     <Member Name="ViewAsyncEmailSenderPanel" Description="E-Mail-Absender Ansichtsbereich async" />
   </Type>
-  <Type Name="CertFileType" Description="Zertifikationsdateityp">
-    <Member Name="CertFile" Description="Zertiikationsdatei" />
-    <Member Name="SignedFile" Description="Signierte Datei" />
-  </Type>
   <Type Name="ClientCertificationFileEmbedded" Description="Client-Zertifikat-Datei">
-    <Member Name="CertFileType" Description="Zertifikationsdateityp" />
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
   <Type Name="CompareInbox" Description="Posteingang vergleichen">
@@ -64,7 +59,9 @@
     <Member Name="Text" Description="Text" />
   </Type>
   <Type Name="EmailMasterTemplateOperation">
+    <Member Name="Clone" Description="Klonen" />
     <Member Name="Create" Description="Erstellen" />
+    <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="EmailMessageEntity" Description="E-Mail Nachricht" PluralDescription="E-Mail Nachrichten" Gender="f">
@@ -245,6 +242,7 @@
     <Member Name="Text" Description="Text" />
   </Type>
   <Type Name="EmailTemplateOperation">
+    <Member Name="Clone" Description="Klonen" />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="CreateEmailTemplateFromModel" Description="E-Mail-Vorlage aus Modell erstellen" />
     <Member Name="Delete" Description="Löschen" />

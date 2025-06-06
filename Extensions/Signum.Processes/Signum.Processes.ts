@@ -12,7 +12,7 @@ import * as Security from '../../Signum/React/Signum.Security'
 export interface IProcessDataEntity extends Entities.Entity {
 }
 
-export const PackageEntity = new Type<PackageEntity>("Package");
+export const PackageEntity: Type<PackageEntity> = new Type<PackageEntity>("Package");
 export interface PackageEntity extends Entities.Entity, IProcessDataEntity {
   Type: "Package";
   name: string | null;
@@ -20,7 +20,7 @@ export interface PackageEntity extends Entities.Entity, IProcessDataEntity {
   configString: string | null;
 }
 
-export const PackageLineEntity = new Type<PackageLineEntity>("PackageLine");
+export const PackageLineEntity: Type<PackageLineEntity> = new Type<PackageLineEntity>("PackageLine");
 export interface PackageLineEntity extends Entities.Entity {
   Type: "PackageLine";
   package: Entities.Lite<PackageEntity>;
@@ -29,27 +29,27 @@ export interface PackageLineEntity extends Entities.Entity {
   finishTime: string /*DateTime*/ | null;
 }
 
-export const PackageOperationEntity = new Type<PackageOperationEntity>("PackageOperation");
+export const PackageOperationEntity: Type<PackageOperationEntity> = new Type<PackageOperationEntity>("PackageOperation");
 export interface PackageOperationEntity extends PackageEntity {
   operation: Operations.OperationSymbol;
 }
 
-export module PackageOperationProcess {
+export namespace PackageOperationProcess {
   export const PackageOperation : ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "PackageOperationProcess.PackageOperation");
 }
 
-export module PackageQuery {
-  export const PackageLineLastProcess = new QueryKey("PackageQuery", "PackageLineLastProcess");
-  export const PackageLastProcess = new QueryKey("PackageQuery", "PackageLastProcess");
-  export const PackageOperationLastProcess = new QueryKey("PackageQuery", "PackageOperationLastProcess");
+export namespace PackageQuery {
+  export const PackageLineLastProcess: QueryKey = new QueryKey("PackageQuery", "PackageLineLastProcess");
+  export const PackageLastProcess: QueryKey = new QueryKey("PackageQuery", "PackageLastProcess");
+  export const PackageOperationLastProcess: QueryKey = new QueryKey("PackageQuery", "PackageOperationLastProcess");
 }
 
-export const ProcessAlgorithmSymbol = new Type<ProcessAlgorithmSymbol>("ProcessAlgorithm");
+export const ProcessAlgorithmSymbol: Type<ProcessAlgorithmSymbol> = new Type<ProcessAlgorithmSymbol>("ProcessAlgorithm");
 export interface ProcessAlgorithmSymbol extends Basics.Symbol {
   Type: "ProcessAlgorithm";
 }
 
-export const ProcessEntity = new Type<ProcessEntity>("Process");
+export const ProcessEntity: Type<ProcessEntity> = new Type<ProcessEntity>("Process");
 export interface ProcessEntity extends Entities.Entity {
   Type: "Process";
   algorithm: ProcessAlgorithmSymbol;
@@ -71,7 +71,7 @@ export interface ProcessEntity extends Entities.Entity {
   status: string | null;
 }
 
-export const ProcessExceptionLineEntity = new Type<ProcessExceptionLineEntity>("ProcessExceptionLine");
+export const ProcessExceptionLineEntity: Type<ProcessExceptionLineEntity> = new Type<ProcessExceptionLineEntity>("ProcessExceptionLine");
 export interface ProcessExceptionLineEntity extends Entities.Entity {
   Type: "ProcessExceptionLine";
   elementInfo: string | null;
@@ -80,19 +80,19 @@ export interface ProcessExceptionLineEntity extends Entities.Entity {
   exception: Entities.Lite<Basics.ExceptionEntity>;
 }
 
-export module ProcessMessage {
-  export const Process0IsNotRunningAnymore = new MessageKey("ProcessMessage", "Process0IsNotRunningAnymore");
-  export const ProcessStartIsGreaterThanProcessEnd = new MessageKey("ProcessMessage", "ProcessStartIsGreaterThanProcessEnd");
-  export const ProcessStartIsNullButProcessEndIsNot = new MessageKey("ProcessMessage", "ProcessStartIsNullButProcessEndIsNot");
-  export const Lines = new MessageKey("ProcessMessage", "Lines");
-  export const LastProcess = new MessageKey("ProcessMessage", "LastProcess");
-  export const ExceptionLines = new MessageKey("ProcessMessage", "ExceptionLines");
-  export const SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway = new MessageKey("ProcessMessage", "SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway");
-  export const ProcessSettings = new MessageKey("ProcessMessage", "ProcessSettings");
-  export const OnlyActive = new MessageKey("ProcessMessage", "OnlyActive");
+export namespace ProcessMessage {
+  export const Process0IsNotRunningAnymore: MessageKey = new MessageKey("ProcessMessage", "Process0IsNotRunningAnymore");
+  export const ProcessStartIsGreaterThanProcessEnd: MessageKey = new MessageKey("ProcessMessage", "ProcessStartIsGreaterThanProcessEnd");
+  export const ProcessStartIsNullButProcessEndIsNot: MessageKey = new MessageKey("ProcessMessage", "ProcessStartIsNullButProcessEndIsNot");
+  export const Lines: MessageKey = new MessageKey("ProcessMessage", "Lines");
+  export const LastProcess: MessageKey = new MessageKey("ProcessMessage", "LastProcess");
+  export const ExceptionLines: MessageKey = new MessageKey("ProcessMessage", "ExceptionLines");
+  export const SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway: MessageKey = new MessageKey("ProcessMessage", "SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway");
+  export const ProcessSettings: MessageKey = new MessageKey("ProcessMessage", "ProcessSettings");
+  export const OnlyActive: MessageKey = new MessageKey("ProcessMessage", "OnlyActive");
 }
 
-export module ProcessOperation {
+export namespace ProcessOperation {
   export const Save : Operations.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Save");
   export const Execute : Operations.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Execute");
   export const Suspend : Operations.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Suspend");
@@ -101,11 +101,11 @@ export module ProcessOperation {
   export const Retry : Operations.ConstructSymbol_From<ProcessEntity, ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Retry");
 }
 
-export module ProcessPermission {
+export namespace ProcessPermission {
   export const ViewProcessPanel : Basics.PermissionSymbol = registerSymbol("Permission", "ProcessPermission.ViewProcessPanel");
 }
 
-export const ProcessState = new EnumType<ProcessState>("ProcessState");
+export const ProcessState: EnumType<ProcessState> = new EnumType<ProcessState>("ProcessState");
 export type ProcessState =
   "Created" |
   "Planned" |

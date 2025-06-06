@@ -2,7 +2,7 @@ import * as React from 'react';
 import { TypeContext, AutoLine } from '@framework/Lines';
 import { ImagePartEntity } from '../Signum.Dashboard';
 
-export default function ImagePart(p: { ctx: TypeContext<ImagePartEntity> }) {
+export default function ImagePart(p: { ctx: TypeContext<ImagePartEntity> }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
 
   return (

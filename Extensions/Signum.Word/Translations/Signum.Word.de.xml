@@ -10,10 +10,11 @@
   <Type Name="WordModelEntity" Description="Word-Modell" PluralDescription="Word-Modelle" Gender="n">
     <Member Name="FullClassName" Description="Full Class Name" />
   </Type>
-  <Type Name="WordTemplateEntity" Description="Word-Vorlage" Gender="f">
+  <Type Name="WordTemplateEntity" Description="Word-Vorlage">
     <Member Name="Applicable" Description="Anwendbar" />
     <Member Name="Culture" Description="Kultur" />
     <Member Name="DisableAuthorization" Description="Autorisierung deaktivieren" />
+    <Member Name="DisableValidation" Description="Validierung deaktivieren" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren" />

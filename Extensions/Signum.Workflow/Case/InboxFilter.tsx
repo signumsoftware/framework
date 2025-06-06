@@ -9,13 +9,13 @@ import CollapsableCard from "@framework/Components/CollapsableCard";
 import { Button } from 'react-bootstrap';
 
 export default class InboxFilter extends React.Component<{ ctx: TypeContext<InboxFilterModel> }> implements ISimpleFilterBuilder {
-  handleOnClearFiltersClick = () => {
+  handleOnClearFiltersClick = (): void => {
     //this.props.ctx.value = CaseNotificationFilterModel.New();
     InboxFilter.resetModel(this.props.ctx.value);
     this.forceUpdate();
   };
 
-  static resetModel(model: InboxFilterModel) {
+  static resetModel(model: InboxFilterModel): void {
     model.range = "All";
     model.states = [
       newMListElement("New" as CaseNotificationState),
@@ -26,7 +26,7 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
     model.toDate = null;
   }
 
-  render() {
+  render(): React.JSX.Element {
     var ctx = this.props.ctx;
     var ctx4 = this.props.ctx.subCtx({ labelColumns: 4 });
 

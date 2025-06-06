@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Operations from '../../Signum/React/Signum.Operations'
 
 
-export const DynamicExpressionEntity = new Type<DynamicExpressionEntity>("DynamicExpression");
+export const DynamicExpressionEntity: Type<DynamicExpressionEntity> = new Type<DynamicExpressionEntity>("DynamicExpression");
 export interface DynamicExpressionEntity extends Entities.Entity {
   Type: "DynamicExpression";
   name: string;
@@ -25,7 +25,7 @@ export module DynamicExpressionOperation {
   export const Delete : Operations.DeleteSymbol<DynamicExpressionEntity> = registerSymbol("Operation", "DynamicExpressionOperation.Delete");
 }
 
-export const DynamicExpressionTranslation = new EnumType<DynamicExpressionTranslation>("DynamicExpressionTranslation");
+export const DynamicExpressionTranslation: EnumType<DynamicExpressionTranslation> = new EnumType<DynamicExpressionTranslation>("DynamicExpressionTranslation");
 export type DynamicExpressionTranslation =
   "TranslateExpressionName" |
   "ReuseTranslationOfReturnType" |

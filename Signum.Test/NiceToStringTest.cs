@@ -90,4 +90,13 @@ juanola\n".Indent(2));
 
     }
 
+    [Fact]
+    public void PascalToSnake()
+    {
+        Assert.Equal("pascal_case_example", "PascalCaseExample".PascalToSnake());
+        Assert.Equal("camel_case_example", "camelCaseExample".PascalToSnake());
+        Assert.Equal("xml_parser", "XMLParser".PascalToSnake());
+        Assert.Equal("http_request", "HTTPRequest".PascalToSnake());
+        Assert.Equal("area51_exists", "Area51Exists".PascalToSnake());
+    }
 }

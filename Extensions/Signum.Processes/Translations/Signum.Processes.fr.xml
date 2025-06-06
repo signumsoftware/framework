@@ -2,6 +2,7 @@
 <Translations>
   <Type Name="PackageEntity" Description="Paquet">
     <Member Name="Name" Description="Nom" />
+    <Member Name="OperationArguments" Description="Paramètres de l'opération" />
   </Type>
   <Type Name="PackageLineEntity" Description="Line de Paquet">
     <Member Name="FinishTime" Description="Heure de fin" />
@@ -9,19 +10,66 @@
     <Member Name="Result" Description="Résultat" />
     <Member Name="Target" Description="Cible" />
   </Type>
-  <Type Name="ProcessEntity" Description="Processus" />
+  <Type Name="PackageOperationEntity" Description="Package operation" PluralDescription="Package operations">
+    <Member Name="Operation" Description="Opération" />
+  </Type>
+  <Type Name="PackageOperationProcess">
+    <Member Name="PackageOperation" Description="Package operation" />
+  </Type>
+  <Type Name="PackageQuery">
+    <Member Name="PackageLastProcess" Description="Package last process" />
+    <Member Name="PackageLineLastProcess" Description="Package line last process" />
+    <Member Name="PackageOperationLastProcess" Description="Package operation last process" />
+  </Type>
+  <Type Name="ProcessAlgorithmSymbol" Description="Process algorithm" PluralDescription="Process algorithms" />
+  <Type Name="ProcessEntity" Description="Processus">
+    <Member Name="Algorithm" Description="Algorithme" />
+    <Member Name="ApplicationName" Description="Nom de l’application" />
+    <Member Name="CancelationDate" Description="Date d’annulation" />
+    <Member Name="CreationDate" Description="Date de création" />
+    <Member Name="Data" Description="Données" />
+    <Member Name="Duration" Description="Durée" />
+    <Member Name="DurationSpan" Description="Durée" />
+    <Member Name="Exception" Description="Exception" />
+    <Member Name="ExceptionDate" Description="Date d’exception" />
+    <Member Name="ExecutionEnd" Description="Fin d’exécution" />
+    <Member Name="ExecutionStart" Description="Début de l’exécution" />
+    <Member Name="MachineName" Description="Nom de la machine" />
+    <Member Name="PlannedDate" Description="Date prévue" />
+    <Member Name="Progress" Description="Progrès" />
+    <Member Name="QueuedDate" Description="Date de mise en file d’attente" />
+    <Member Name="State" Description="État" />
+    <Member Name="Status" Description="Statut" />
+    <Member Name="SuspendDate" Description="Date de suspension" />
+    <Member Name="User" Description="Utilisateur" />
+  </Type>
+  <Type Name="ProcessExceptionLineEntity" Description="Process exception line" PluralDescription="Process exception lines">
+    <Member Name="ElementInfo" Description="Informations sur l’élément" />
+    <Member Name="Exception" Description="Exception" />
+    <Member Name="Line" Description="Ligne" />
+    <Member Name="Process" Description="Processus" />
+  </Type>
   <Type Name="ProcessMessage">
+    <Member Name="ExceptionLines" Description="Lignes d'erreur" />
+    <Member Name="LastProcess" Description="Dernière execution" />
+    <Member Name="Lines" Description="Lignes" />
+    <Member Name="Process0IsNotRunningAnymore" Description="Le processus {0} n’est plus en cours d’exécution" />
     <Member Name="ProcessStartIsGreaterThanProcessEnd" Description="Le début du processus est plus grand que sa fin" />
     <Member Name="ProcessStartIsNullButProcessEndIsNot" Description="Le début du procéssus est nul mais pas sa fin" />
+    <Member Name="SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway" Description="La suspension est le moyen le plus sûr d’arrêter un processus en cours. Annuler quand même ?" />
   </Type>
   <Type Name="ProcessOperation">
     <Member Name="Cancel" Description="Annuler" />
     <Member Name="Execute" Description="Executer" />
     <Member Name="Plan" Description="Plan" />
+    <Member Name="Retry" Description="Réessayer" />
     <Member Name="Save" Description="Sauver" />
     <Member Name="Suspend" Description="Suspendre" />
   </Type>
-  <Type Name="ProcessState">
+  <Type Name="ProcessPermission">
+    <Member Name="ViewProcessPanel" Description="Voir le tableau de bord du processus" />
+  </Type>
+  <Type Name="ProcessState" Description="Statut du processus">
     <Member Name="Canceled" Description="Annulé" />
     <Member Name="Created" Description="Créé" />
     <Member Name="Error" Description="Erreur" />

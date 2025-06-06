@@ -10,7 +10,7 @@ import { useStateWithPromise } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { LoginAuthMessage } from '../Signum.Authorization/Signum.Authorization'
 
-export default function ResetPassword() {
+export default function ResetPassword(): React.JSX.Element {
   const location = useLocation();
 
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);

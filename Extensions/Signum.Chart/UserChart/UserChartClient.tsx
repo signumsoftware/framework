@@ -6,10 +6,10 @@ import * as AppContext from '@framework/AppContext'
 import { Constructor } from '@framework/Constructor'
 import { Finder } from '@framework/Finder'
 import { Entity, getToString, Lite, liteKey, SelectorMessage, toLite, translated } from '@framework/Signum.Entities'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 import { AuthClient } from '../../Signum.Authorization/AuthClient'
 import { DashboardClient, CreateNewButton } from '../../Signum.Dashboard/DashboardClient';
-import { ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Chart'
+import { ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedded, ChartColumnEmbedded, ChartTimeSeriesEmbedded } from '../Signum.Chart'
 import UserChartMenu from './UserChartMenu'
 import { ChartClient } from '../ChartClient'
 import { UserAssetClient } from '../../Signum.UserAssets/UserAssetClient'
@@ -25,7 +25,7 @@ import UserChartToolbarConfig from './UserChartToolbarConfig';
 
 export namespace UserChartClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     
     ToolbarClient.registerConfig(new UserChartToolbarConfig());
     OmniboxClient.registerProvider(new UserChartOmniboxProvider());
@@ -44,10 +44,10 @@ export namespace UserChartClient {
     });
   
     if (AppContext.isPermissionAuthorized(ChartPermission.ViewCharting) && Navigator.isViewable(UserChartEntity))
-      QuickLinks.registerGlobalQuickLink(entityType =>
+      QuickLinkClient.registerGlobalQuickLink(entityType =>
         API.forEntityType(entityType)
           .then(ucs => ucs.map(uc =>
-            new QuickLinks.QuickLinkAction(liteKey(uc), () => getToString(uc), (ctx, e) => window.open(AppContext.toAbsoluteUrl(`/userChart/${uc.id}/${liteKey(ctx.lite)}`)),
+            new QuickLinkAction(liteKey(uc), () => getToString(uc), (ctx, e) => window.open(AppContext.toAbsoluteUrl(`/userChart/${uc.id}/${liteKey(ctx.lite)}`)),
               {
                 onlyForToken: (uc.model as UserChartLiteModel).hideQuickLink,
                 icon: "chart-bar", iconColor: "darkviolet"
@@ -55,7 +55,7 @@ export namespace UserChartClient {
             ))
           ));
   
-    QuickLinks.registerQuickLink(UserChartEntity, new QuickLinks.QuickLinkAction("preview", () => ChartMessage.Preview.niceToString(),
+    QuickLinkClient.registerQuickLink(UserChartEntity, new QuickLinkAction("preview", () => ChartMessage.Preview.niceToString(),
       ctx => {
         Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
           if (uc.entityType == undefined)
@@ -76,8 +76,8 @@ export namespace UserChartClient {
       }
     ));
   
-  
-    Navigator.addSettings(new EntitySettings(UserChartEntity, e => import('./UserChart'), { isCreable: "Never" }));
+   
+    Navigator.addSettings(new EntitySettings(UserChartEntity, e => import('./UserChart'), { isCreable: "Never", modalSize: 'xl' }));
     Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('../Dashboard/Admin/UserChartPart')));
     Navigator.addSettings(new EntitySettings(CombinedUserChartPartEntity, e => import('../Dashboard/Admin/CombinedUserChartPart')));
   
@@ -154,7 +154,7 @@ export namespace UserChartClient {
   }
   
   
-  export module Converter {
+  export namespace Converter {
   
   
     export async function applyUserChart(cr: ChartRequestModel, uc: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
@@ -164,6 +164,7 @@ export namespace UserChartClient {
       const filters = await UserAssetClient.API.parseFilters({
         queryKey: uc.query.key,
         canAggregate: true,
+        canTimeSeries: cr.chartTimeSeries != null,
         entity: entity,
         filters: uc.filters!.map(mle => UserAssetClient.Converter.toQueryFilterItem(mle.element))
       });
@@ -210,14 +211,31 @@ export namespace UserChartClient {
         });
     }
   
-    export function toChartRequest(uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
-      const cs = ChartRequestModel.New({ queryKey: uq.query!.key });
+    async function parseDate(dateExpression: string | null): Promise<string | undefined> {
+      if (dateExpression == null)
+        return undefined;
+
+      var date = await UserAssetClient.API.parseDate(dateExpression);
+
+      return date;
+    }
+    
+    export async function toChartRequest(uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
+      var ts = uq.chartTimeSeries;
+      const cs = ChartRequestModel.New({ queryKey: uq.query!.key, chartTimeSeries: !ts ? null : ChartTimeSeriesEmbedded.New({
+        timeSeriesUnit: ts.timeSeriesUnit,
+        startDate: await parseDate(ts.startDate),
+        endDate: await parseDate(ts.endDate),
+        timeSeriesStep: ts.timeSeriesStep,
+        timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep,
+        splitQueries: ts.splitQueries,
+      })});
       return applyUserChart(cs, uq, entity);
     }
   }
   
   
-  export module API {
+  export namespace API {
     export function forEntityType(type: string): Promise<Lite<UserChartEntity>[]> {
       return ajaxGet({ url: "/api/userChart/forEntityType/" + type });
     }

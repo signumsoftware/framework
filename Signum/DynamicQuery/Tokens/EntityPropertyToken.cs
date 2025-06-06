@@ -61,17 +61,12 @@ public class EntityPropertyToken : QueryToken
         get { return PropertyInfo.Name; }
     }
 
-    public static Dictionary<PropertyRoute, Func<BuildExpressionContext, Expression/* parent/base expression*/, Expression>> CustomPropertyExpression = new Dictionary<PropertyRoute, Func<BuildExpressionContext, Expression , Expression>>();
-
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
-
         var baseExpression = parent.BuildExpression(context);
 
-        CustomPropertyExpression.TryGetValue(PropertyRoute, out var customExpression);
-
-        if (customExpression != null)
-            return customExpression(context, baseExpression);
+        if(baseExpression is ConstantExpression ce && ce.Value == null) //Hidden property
+            return Expression.Constant(null, PropertyInfo.PropertyType.Nullify()).BuildLiteNullifyUnwrapPrimaryKey(new[] { this.PropertyRoute });
 
         if (PropertyInfo.Name == nameof(Entity.Id) ||
             PropertyInfo.Name == nameof(Entity.ToStringProperty))
@@ -122,6 +117,20 @@ public class EntityPropertyToken : QueryToken
                 if (att != null)
                 {
                     return TimeSpanProperties(this, att.Precision).AndHasValue(this);
+                }
+            }
+        }
+
+        if (uType == typeof(TimeOnly))
+        {
+            PropertyRoute? route = this.GetPropertyRoute();
+
+            if (route != null)
+            {
+                var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators.OfType<TimePrecisionValidatorAttribute>().SingleOrDefaultEx();
+                if (att != null)
+                {
+                    return TimeOnlyProperties(this, att.Precision).AndHasValue(this);
                 }
             }
         }
@@ -188,16 +197,19 @@ public class EntityPropertyToken : QueryToken
         get { return PropertyInfo.GetCustomAttribute<UnitAttribute>()?.UnitName; }
     }
 
+    public static Func<PropertyRoute, string?>? CustomIsAllowed;
+
     public override string? IsAllowed()
     {
         string? parent = this.parent.IsAllowed();
 
-        string? route = GetPropertyRoute()?.IsAllowed();
+        var pr = GetPropertyRoute();
 
-        if (parent.HasText() && route.HasText())
-            return QueryTokenMessage.And.NiceToString().Combine(parent!, route!);
+        string? route = pr?.IsAllowed();
 
-        return parent ?? route;
+        string? custom = pr == null ? null : CustomIsAllowed?.GetInvocationListTyped().CommaAnd(a => a(pr)).DefaultToNull();
+
+        return QueryTokenMessage.And.NiceToString().Combine(parent!, route!, custom).DefaultToNull();
     }
 
     public override PropertyRoute? GetPropertyRoute()

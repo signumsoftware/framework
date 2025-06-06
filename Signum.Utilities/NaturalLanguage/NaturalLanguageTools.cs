@@ -171,6 +171,17 @@ public static class NaturalLanguageTools
         return sb.ToString();
     }
 
+    public static string PascalToSnake(this string pascalStr)
+    {
+        if (string.IsNullOrEmpty(pascalStr))
+            return pascalStr;
+
+        string result = Regex.Replace(pascalStr, @"([a-z0-9])([A-Z])", "$1_$2");
+        result = Regex.Replace(result, @"([A-Z]+)([A-Z][a-z])", "$1_$2");
+
+        return result.ToLower();
+    }
+
     static CharKind Kind(string pascalStr, int i)
     {
         if (i == 0)

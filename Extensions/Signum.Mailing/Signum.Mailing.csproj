@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<WarningsAsErrors>nullable</WarningsAsErrors>
 		<OutputType>Library</OutputType>
@@ -9,21 +9,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Senders\**" />
-	  <Content Remove="Senders\**" />
-	  <EmbeddedResource Remove="Senders\**" />
-	  <None Remove="Senders\**" />
-	  <TypeScriptCompile Remove="Senders\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.4.4">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
-		<PackageReference Include="Signum.MSBuildTask" Version="8.0.0" />
-		<PackageReference Include="Signum.TSGenerator" Version="8.0.0" />
+		<PackageReference Include="Signum.MSBuildTask" Version="9.0.0" />
+		<PackageReference Include="Signum.TSGenerator" Version="9.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -32,6 +24,7 @@
 		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
 		<ProjectReference Include="..\Signum.Caching\Signum.Caching.csproj" />
 		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
+		<ProjectReference Include="..\Signum.HtmlEditor\Signum.HtmlEditor.csproj" />
 		<ProjectReference Include="..\Signum.Templating\Signum.Templating.csproj" />
 		<ProjectReference Include="..\Signum.UserAssets\Signum.UserAssets.csproj" />
 		<ProjectReference Include="..\Signum.Processes\Signum.Processes.csproj" />
@@ -39,7 +32,4 @@
 		<ProjectReference Include="..\Signum.UserQueries\Signum.UserQueries.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Attachments\" />
-	</ItemGroup>
 </Project>

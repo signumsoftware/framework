@@ -5,7 +5,7 @@ import { AlertEntity, AlertMessage } from '../Signum.Alerts'
 import { AlertsClient } from '../AlertsClient'
 import { useForceUpdate } from '@framework/Hooks';
 
-export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
+export default function Alert(p: { ctx: TypeContext<AlertEntity> }): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 

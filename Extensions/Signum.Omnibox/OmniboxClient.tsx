@@ -11,7 +11,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace OmniboxClient {
   
-  export function start() {
+  export function start(): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Omnibox", () => import("./Changelog"));
   
@@ -24,11 +24,11 @@ export namespace OmniboxClient {
   
   export const providers: { [resultTypeName: string]: OmniboxProvider<OmniboxResult> } = {};
   
-  export function clearProviders() {
+  export function clearProviders(): void {
     Dic.clear(providers);
   }
   
-  export function registerProvider(prov: OmniboxProvider<OmniboxResult>) {
+  export function registerProvider(prov: OmniboxProvider<OmniboxResult>): void {
     if (providers[prov.getProviderName()])
       throw new Error(`Provider '${prov.getProviderName()}' already registered`);
   
@@ -69,7 +69,7 @@ export namespace OmniboxClient {
     return result;
   }
   
-  export function navigateTo(result: OmniboxResult) {
+  export function navigateTo(result: OmniboxResult): Promise<string | undefined> | undefined {
   
     if (result.resultTypeName == "HelpOmniboxResult")
       return undefined;

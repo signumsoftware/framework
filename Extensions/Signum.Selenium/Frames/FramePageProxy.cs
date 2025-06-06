@@ -49,7 +49,16 @@ public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, I
 
     public FramePageProxy<T> WaitLoaded()
     {
-        MainControl.WaitPresent();
+        this.Selenium.Wait(() =>
+        {
+            var error = this.Selenium.GetErrorModal();
+            if(error != null)
+            {
+                error.ThrowErrorModal();
+            }
+
+            return MainControl.IsPresent();
+        }, () => "{0} to be present".FormatWith(MainControl.Locator));
         return this;
     }
 }

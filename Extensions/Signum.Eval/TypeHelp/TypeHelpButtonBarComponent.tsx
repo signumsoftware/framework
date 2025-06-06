@@ -9,7 +9,7 @@ interface TypeHelpButtonBarComponentProps {
   ctx?: TypeContext<any>;
 }
 
-export default function TypeHelpButtonBarComponent(p : TypeHelpButtonBarComponentProps){
+export function TypeHelpButtonBarComponent(p : TypeHelpButtonBarComponentProps): React.JSX.Element {
   return (
     <div className="btn-toolbar">
       {p.extraButtons}
@@ -23,4 +23,8 @@ export default function TypeHelpButtonBarComponent(p : TypeHelpButtonBarComponen
   );
 }
 
-TypeHelpButtonBarComponent.getTypeHelpButtons = [] as Array<(props: TypeHelpButtonBarComponentProps) => ({ element: React.ReactElement<any>, order: number })[]>;
+export namespace TypeHelpButtonBarComponent {
+  export let getTypeHelpButtons: Array<(props: TypeHelpButtonBarComponentProps) => ({ element: React.ReactElement<any>, order: number })[]> = [];
+}
+
+export default TypeHelpButtonBarComponent

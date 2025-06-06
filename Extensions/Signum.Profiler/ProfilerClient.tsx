@@ -11,7 +11,7 @@ import { UserEntity } from '../Signum.Authorization/Signum.Authorization';
 
 export namespace ProfilerClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     options.routes.push(
       { path: "/profiler/times", element: <ImportComponent onImport={() => import("./Times/TimesPage")} /> },
       { path: "/profiler/heavy", element: <ImportComponent onImport={() => import("./Heavy/HeavyListPage")} /> },
@@ -40,9 +40,9 @@ export namespace ProfilerClient {
   }
   
   
-  export module API {
+  export namespace API {
   
-    export module Heavy {
+    export namespace Heavy {
       export function setEnabled(isEnabled: boolean): Promise<void> {
         return ajaxPost({ url: "/api/profilerHeavy/setEnabled/" + isEnabled }, undefined);
       }
@@ -77,7 +77,7 @@ export namespace ProfilerClient {
       }
     }
   
-    export module Times {
+    export namespace Times {
   
       export function clear(): Promise<void> {
         return ajaxPost({ url: "/api/profilerTimes/clear" }, undefined);
@@ -104,7 +104,7 @@ export namespace ProfilerClient {
     end: number;
     elapsed: string;
     isFinished: boolean;
-    role: string;
+    kind: string;
     color: string;
     depth: number;
     asyncDepth: number;

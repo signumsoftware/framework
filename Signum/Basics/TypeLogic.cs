@@ -59,7 +59,7 @@ public static class TypeLogic
             {
                 var attributes = schema.Tables.Keys.Select(t => KeyValuePair.Create(t, t.GetCustomAttribute<EntityKindAttribute>(true))).ToList();
 
-                var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".FormatWith(a.Key.Name), "\r\n");
+                var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".FormatWith(a.Key.Name), "\n");
 
                 if (errors.HasText())
                     throw new InvalidOperationException(errors);
@@ -142,12 +142,13 @@ public static class TypeLogic
                         var pc = ObjectName.Parse(c.TableName, isPostgres);
                         var ps = ObjectName.Parse(s.TableName, isPostgres);
 
-                        if (!EqualsIgnoringDatabasePrefix(pc, ps))
+                        if(pc.Schema.Database != null ||  pc.Schema.Database != null ? !EqualsIgnoringDatabasePrefix(pc, ps) : c.TableName != s.TableName)
                         {
                             c.TableName = ps.ToString();
                         }
                     }
 
+                    c.TableName = s.TableName;
                     c.CleanName = s.CleanName;
                     c.Namespace = s.Namespace;
                     c.ClassName = s.ClassName;

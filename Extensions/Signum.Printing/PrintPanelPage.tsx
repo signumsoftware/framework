@@ -10,7 +10,7 @@ import { ProcessEntity } from '../Signum.Processes/Signum.Processes'
 import { useAPI } from '@framework/Hooks'
 import { getToString, JavascriptMessage } from '@framework/Signum.Entities'
 
-export default function PrintPanelPage(p: {}) {
+export default function PrintPanelPage(p: {}): React.JSX.Element {
 
   const stats = useAPI(() => PrintClient.API.getStats(), []);
 

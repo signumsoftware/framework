@@ -12,7 +12,7 @@ export interface WorkflowEventTaskActionComponentProps {
   mainEntityType: TypeEntity;
 }
 
-export default function WorkflowEventTaskActionComponent(p : WorkflowEventTaskActionComponentProps){
+export default function WorkflowEventTaskActionComponent(p : WorkflowEventTaskActionComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   function handleCodeChange(newScript: string) {

@@ -7,7 +7,7 @@ import { PredictSimpleResultEntity, PredictorMessage } from '../Signum.MachineLe
 import { PredictorClient } from '../PredictorClient';
 
 export default class PredictSimpleResult extends React.Component<{ ctx: TypeContext<PredictSimpleResultEntity> }> implements IRenderButtons {
-  handleClick = () => {
+  handleClick = () : void => {
     var psr = this.props.ctx.value;
     Navigator.API.fetch(psr.predictor!).then(p => {
       if (!p.mainQuery.groupResults) {
@@ -25,7 +25,7 @@ export default class PredictSimpleResult extends React.Component<{ ctx: TypeCont
     });
   }
 
-  render() {
+  render(): React.ReactElement {
     const ctx = this.props.ctx;
 
     return (

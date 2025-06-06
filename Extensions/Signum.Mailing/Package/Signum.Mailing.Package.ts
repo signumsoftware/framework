@@ -13,34 +13,34 @@ import * as UserQueries from '../../Signum.UserQueries/Signum.UserQueries'
 import * as Templating from '../../Signum.Templating/Signum.Templating'
 
 
-export const EmailMessagePackageMixin = new Type<EmailMessagePackageMixin>("EmailMessagePackageMixin");
+export const EmailMessagePackageMixin: Type<EmailMessagePackageMixin> = new Type<EmailMessagePackageMixin>("EmailMessagePackageMixin");
 export interface EmailMessagePackageMixin extends Entities.MixinEntity {
   Type: "EmailMessagePackageMixin";
   package: Entities.Lite<EmailPackageEntity> | null;
 }
 
-export module EmailMessagePackageOperation {
+export namespace EmailMessagePackageOperation {
   export const ReSendEmails : Operations.ConstructSymbol_FromMany<Processes.ProcessEntity, Mailing.EmailMessageEntity> = registerSymbol("Operation", "EmailMessagePackageOperation.ReSendEmails");
 }
 
-export module EmailMessageProcess {
+export namespace EmailMessageProcess {
   export const CreateEmailsSendAsync : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "EmailMessageProcess.CreateEmailsSendAsync");
   export const SendEmails : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "EmailMessageProcess.SendEmails");
 }
 
-export const EmailPackageEntity = new Type<EmailPackageEntity>("EmailPackage");
+export const EmailPackageEntity: Type<EmailPackageEntity> = new Type<EmailPackageEntity>("EmailPackage");
 export interface EmailPackageEntity extends Entities.Entity, Processes.IProcessDataEntity {
   Type: "EmailPackage";
   name: string | null;
 }
 
-export const EmaiTemplateTargetFrom = new EnumType<EmaiTemplateTargetFrom>("EmaiTemplateTargetFrom");
+export const EmaiTemplateTargetFrom: EnumType<EmaiTemplateTargetFrom> = new EnumType<EmaiTemplateTargetFrom>("EmaiTemplateTargetFrom");
 export type EmaiTemplateTargetFrom =
   "NoTarget" |
   "Unique" |
   "UserQuery";
 
-export const SendEmailTaskEntity = new Type<SendEmailTaskEntity>("SendEmailTask");
+export const SendEmailTaskEntity: Type<SendEmailTaskEntity> = new Type<SendEmailTaskEntity>("SendEmailTask");
 export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEntity {
   Type: "SendEmailTask";
   name: string;
@@ -51,7 +51,7 @@ export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEnt
   modelConverter: Templating.ModelConverterSymbol | null;
 }
 
-export module SendEmailTaskOperation {
+export namespace SendEmailTaskOperation {
   export const Save : Operations.ExecuteSymbol<SendEmailTaskEntity> = registerSymbol("Operation", "SendEmailTaskOperation.Save");
 }
 

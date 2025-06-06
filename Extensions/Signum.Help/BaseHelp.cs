@@ -251,7 +251,7 @@ public class OperationHelp : BaseHelp
     
     public override string? IsAllowed()
     {
-        return OperationLogic.OperationAllowed(OperationSymbol, this.Type, inUserInterface: true) ? null :
+        return OperationLogic.OperationAllowed(OperationSymbol, this.Type, inUserInterface: true, null) ? null :
             OperationMessage.Operation01IsNotAuthorized.NiceToString(this.OperationSymbol.NiceToString(), this.OperationSymbol.Key);
     }
 

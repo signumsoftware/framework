@@ -1,6 +1,6 @@
 namespace Signum.Authorization;
 
-[AllowUnathenticated]
+[AllowUnauthenticated]
 public enum LoginAuthMessage
 {
     [Description("The password must have at least {0} characters")]
@@ -95,16 +95,33 @@ public enum LoginAuthMessage
     [Description("Sign in with Microsoft")]
     SignInWithMicrosoft,
 
+
     [Description("Invalid token date {0}")]
     InvalidTokenDate0
 }
 
+[AllowUnauthenticated]
+public enum ResetPasswordB2CMessage
+{
+    [Description("Reset Password requested")]
+    ResetPasswordRequested,
+
+    [Description("Do you want to continue?")]
+    DoYouWantToContinue,
+
+    [Description("Reset Password")]
+    ResetPassword,
+}
+
 public enum AuthMessage
 {
-    [Description("Not authorized to {0} the {1} with Id {2}")]
+    [Description("Not authorized to {0} the '{1}' with Id {2}")]
     NotAuthorizedTo0The1WithId2,
     [Description("Not authorized to retrieve '{0}'")]
     NotAuthorizedToRetrieve0,
+    [Description("Not authorized to {0} '{1}'")]
+    NotAuthorizedTo01,
+
     OnlyActive,
 
     IncludeTrivialMerges,
@@ -120,4 +137,9 @@ public enum AuthMessage
     SameAs0,
     Nothing,
     Everything,
+    [Description("Unable to determine if you can read {0}")]
+    UnableToDetermineIfYouCanRead0,
+
+    [Description("The query does not ensure that you can read {0}")]
+    TheQueryDoesNotEnsureThatYouCanRead0,
 }

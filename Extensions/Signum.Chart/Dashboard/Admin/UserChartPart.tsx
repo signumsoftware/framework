@@ -5,7 +5,7 @@ import { UserChartPartEntity } from '../../UserChart/Signum.Chart.UserChart';
 import { DashboardEntity } from '../../../Signum.Dashboard/Signum.Dashboard';
 import { IsQueryCachedLine } from '../../../Signum.Dashboard/Admin/Dashboard';
 
-export default function UserChartPart(p: { ctx: TypeContext<UserChartPartEntity> }) {
+export default function UserChartPart(p: { ctx: TypeContext<UserChartPartEntity> }): React.JSX.Element {
   const ctx = p.ctx;
 
   return (

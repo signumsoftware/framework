@@ -3,7 +3,7 @@ import { AutoLine, EntityRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailReceptionConfigurationEntity } from '../Signum.Mailing.Reception';
 
-export default function EmailReceptionConfiguration(p: { ctx: TypeContext<EmailReceptionConfigurationEntity> }) {
+export default function EmailReceptionConfiguration(p: { ctx: TypeContext<EmailReceptionConfigurationEntity> }): React.JSX.Element {
   const sc = p.ctx.subCtx({ formGroupStyle: "Basic" });
 
   return (

@@ -8,7 +8,7 @@ import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 
 
-export const DynamicMixinConnectionEntity = new Type<DynamicMixinConnectionEntity>("DynamicMixinConnection");
+export const DynamicMixinConnectionEntity: Type<DynamicMixinConnectionEntity> = new Type<DynamicMixinConnectionEntity>("DynamicMixinConnection");
 export interface DynamicMixinConnectionEntity extends Entities.Entity {
   Type: "DynamicMixinConnection";
   entityType: Entities.Lite<Basics.TypeEntity>;

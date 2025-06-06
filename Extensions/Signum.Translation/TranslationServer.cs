@@ -15,12 +15,9 @@ namespace Signum.Translation;
 
 public class TranslationServer
 {
-    public static ITranslator[] Translators;
 
-    public static void Start(IApplicationBuilder app, params ITranslator[] translators)
-    {
-        Translators = translators;
-        
+    public static void Start(IApplicationBuilder app)
+    {        
         ReflectionServer.RegisterLike(typeof(TranslationMessage), () => TranslationPermission.TranslateCode.IsAuthorized() || TranslationPermission.TranslateInstances.IsAuthorized());
 
         ReflectionServer.PropertyRouteExtension += (mi, pr) =>
@@ -63,9 +60,11 @@ public class TranslationServer
 
                     var hastMList = pr.GetMListItemsRoute() != null;
 
-                    var entity = ctx.Entity as Entity ?? (Entity?)EntityJsonContext.FindCurrentRootEntity();
+                    var path = EntityJsonContext.CurrentSerializationPath;
 
-                    var rowId = hastMList ? EntityJsonContext.FindCurrentRowId() : null;
+                    var entity = ctx.Entity as Entity ?? (Entity?)path?.CurrentRootEntity();
+
+                    var rowId = hastMList ? path?.CurrentRowId() : null;
 
                     writer.WritePropertyName(ctx.LowerCaseName);
 

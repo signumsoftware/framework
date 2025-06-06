@@ -1,6 +1,5 @@
 using System.Data;
 using System.IO;
-using System.Text.RegularExpressions;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
@@ -120,7 +119,7 @@ public class EntityCodeGenerator
         if (sb.Length == length)
             return null;
 
-        return sb.ToString();
+        return sb.ToString().Replace("\r\n", "\n");
     }
 
     protected virtual List<string> GetUsingNamespaces(string fileName, IEnumerable<DiffTable> tables)

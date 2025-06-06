@@ -13,7 +13,7 @@ import { UserLiteModel } from '../../Signum.Authorization/Signum.Authorization'
 import { saveFile } from '@framework/Services'
 import { getToString } from '@framework/Signum.Entities'
 
-export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMessageModel> }) {
+export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMessageModel> }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ readOnly: true });
 
   var oid = (ctx.value.user.model as UserLiteModel).oID!;
@@ -89,7 +89,7 @@ export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMess
   );
 }
 
-export function RemoteEmailRenderer(p: { remoteEmail: RemoteEmailMessageModel }) {
+export function RemoteEmailRenderer(p: { remoteEmail: RemoteEmailMessageModel }): React.JSX.Element {
 
   var oid = (p.remoteEmail.user.model as UserLiteModel).oID!;
 

@@ -2,13 +2,14 @@ using Microsoft.AspNetCore.Builder;
 using Signum.API;
 using Signum.API.Filters;
 using Signum.API.Json;
+using Signum.Files.FileTypeAlgorithms;
 using System.Text.Json;
 
 namespace Signum.Files;
 
 public static class FilesServer
 {
-    public static Func<string, string> Content = (url) => url;
+    
 
     public static void Start(IApplicationBuilder app)
     {
@@ -66,7 +67,6 @@ public static class FilesServer
             return mi;
         };
 
-        FilePathEntity.ToAbsolute = FilePathEmbedded.ToAbsolute = url => SignumCurrentContextFilter.Url == null ? Content(url) : SignumCurrentContextFilter.Url!.Content(url);
 
         ReflectionServer.RegisterLike(typeof(FileMessage), () => true);
     }

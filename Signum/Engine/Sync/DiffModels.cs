@@ -53,9 +53,9 @@ public class DiffTable
         set
         {
             if (value != null)
-                Indices[FullTextTableIndex.FULL_TEXT] = value;
+                Indices[FullTextTableIndex.SqlServerOptions.FULL_TEXT] = value;
             else
-                Indices.Remove(FullTextTableIndex.FULL_TEXT);
+                Indices.Remove(FullTextTableIndex.SqlServerOptions.FULL_TEXT);
         }
     }
 
@@ -183,35 +183,35 @@ public class DiffIndex
         return "{0} ({1})".FormatWith(IndexName, Columns.ToString(", "));
     }
 
-    internal bool IndexEquals(DiffTable dif, Maps.TableIndex mix)
+    internal bool IndexEquals(DiffTable dif, Maps.TableIndex mix, bool isPostgress)
     {
         if (this.ViewName != mix.ViewName)
             return false;
 
-        if (this.ColumnsChanged(dif, mix))
+        if (this.ColumnsChanged(dif, mix) && Type != DiffIndexType.Heap)
             return false;
 
         if (this.IsPrimary != mix.PrimaryKey)
             return false;
 
-        if (this.DataSpaceName != (mix.PartitionSchemeName ?? "PRIMARY"))
+        if (this.DataSpaceName != null && this.DataSpaceName != (mix.PartitionSchemeName ?? "PRIMARY"))
             return false;
 
-        if (this.Type != GetIndexType(mix))
+        if (this.Type != GetIndexType(mix, isPostgress))
             return false;
 
         return true;
     }
 
-    private static DiffIndexType? GetIndexType(TableIndex mix)
+    private static DiffIndexType? GetIndexType(TableIndex mix, bool isPostgress)
     {
         if (mix.Unique && mix.ViewName != null)
             return null;
 
-        if (mix is FullTextTableIndex)
+        if (mix is FullTextTableIndex && !isPostgress)
             return DiffIndexType.FullTextIndex;
 
-        if (mix.Clustered)
+        if (mix.Clustered && !isPostgress)
             return DiffIndexType.Clustered;
 
         return DiffIndexType.NonClustered;
@@ -219,13 +219,23 @@ public class DiffIndex
 
     bool ColumnsChanged(DiffTable dif, TableIndex mix)
     {
-        bool sameCols = IdenticalColumns(dif, mix.Columns, this.Columns.Where(a => a.Type == DiffIndexColumnType.Key).ToList());
-        bool sameIncCols = IdenticalColumns(dif, mix.IncludeColumns, this.Columns.Where(a => a.Type == DiffIndexColumnType.Included).ToList());
+        if (mix is FullTextTableIndex fti && dif.Name.IsPostgres)
+        {
+            if (fti.Postgres.TsVectorColumnName == this.Columns.Only()?.ColumnName)
+                return false;
 
-        if (sameCols && sameIncCols)
-            return false;
+            return true;
+        }
+        else
+        {
+            bool sameCols = IdenticalColumns(dif, mix.Columns, this.Columns.Where(a => a.Type == DiffIndexColumnType.Key).ToList());
+            bool sameIncCols = IdenticalColumns(dif, mix.IncludeColumns, this.Columns.Where(a => a.Type == DiffIndexColumnType.Included).ToList());
 
-        return true;
+            if (sameCols && sameIncCols)
+                return false;
+
+            return true;
+        }
     }
 
     private static bool IdenticalColumns(DiffTable dif, IColumn[]? modColumns, List<DiffIndexColumn> diffColumns)
@@ -242,9 +252,12 @@ public class DiffIndex
         return perfect;
     }
 
-    public bool IsControlledIndex
+    public bool IsControlledIndex(bool isPostgres)
     {
-        get { return IndexName.StartsWith("IX_") || IndexName.StartsWith("UIX_") || IndexName.StartsWith("CIX_"); }
+        return
+            IndexName.StartsWith(isPostgres ? "ix_" : "IX_") ||
+            IndexName.StartsWith(isPostgres ? "uix_" : "UIX_") ||
+            IndexName.StartsWith(isPostgres ? "cix_" : "CIX_");
     }
 }
 
@@ -283,6 +296,12 @@ public class DiffDefaultConstraint
     public string Definition;
 }
 
+public class DiffComputedColumn
+{
+    public bool Persisted;
+    public string Definition;
+}
+
 public class DiffColumn
 {
     public string Name;
@@ -298,11 +317,13 @@ public class DiffColumn
 
     public DiffForeignKey? ForeignKey;
 
+    public DiffComputedColumn? ComputedColumn;
     public DiffDefaultConstraint? DefaultConstraint;
 
     public DiffCheckConstraint? CheckConstraint;
 
     public GeneratedAlwaysType GeneratedAlwaysType;
+
 
     public bool ColumnEquals(IColumn other, bool ignorePrimaryKey, bool ignoreIdentity, bool ignoreGenerateAlways)
     {
@@ -315,7 +336,8 @@ public class DiffColumn
             && ScaleEquals(other)
             && (ignoreIdentity || Identity == other.Identity)
             && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey)
-            && (ignoreGenerateAlways || GeneratedAlwaysType == other.GetGeneratedAlwaysType());
+            && (ignoreGenerateAlways || GeneratedAlwaysType == other.GetGeneratedAlwaysType())
+            && ComputedEquals(other);
 
         if (!result)
             return false;
@@ -346,6 +368,20 @@ public class DiffColumn
         var result = CleanParenthesis(this.DefaultConstraint?.Definition) == CleanParenthesis(other.Default);
 
         return result;
+    }
+
+    public bool ComputedEquals(IColumn other)
+    {
+        if (other.ComputedColumn == null && this.ComputedColumn == null)
+            return true;
+
+        if (other.ComputedColumn?.Persisted != this.ComputedColumn?.Persisted)
+            return false;
+
+        if (CleanParenthesis(this.ComputedColumn?.Definition) != CleanParenthesis(other.ComputedColumn?.Expression))
+            return false;
+
+        return true;
     }
 
     public bool CheckEquals(IColumn other)

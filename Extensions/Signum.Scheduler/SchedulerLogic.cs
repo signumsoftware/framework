@@ -6,6 +6,8 @@ using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.API;
 using System.Collections.ObjectModel;
+using System.Net.Http;
+using System.Text.Json;
 
 namespace Signum.Scheduler;
 
@@ -37,10 +39,9 @@ public static class SchedulerLogic
 
     public static void Start(SchemaBuilder sb)
     {
-
-
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
+            HolidayCalendarLogic.Start(sb);
             AuthLogic.AssertStarted(sb);
             OperationLogic.AssertStarted(sb);
 
@@ -100,31 +101,14 @@ public static class SchedulerLogic
                 Execute = (e, _) => { ScheduleTaskRunner.RunningTasks[e].CancellationTokenSource.Cancel(); },
             }.Register();
 
-            sb.Include<HolidayCalendarEntity>()
-                .WithQuery(() => st => new
-                {
-                    Entity = st,
-                    st.Id,
-                    st.Name,
-                    Holidays = st.Holidays.Count,
-                });
+
 
             QueryLogic.Expressions.Register((ITaskEntity ct) => ct.Executions(), ITaskMessage.Executions);
             QueryLogic.Expressions.Register((ITaskEntity ct) => ct.LastExecution(), ITaskMessage.LastExecution);
             QueryLogic.Expressions.Register((ScheduledTaskEntity ct) => ct.Executions(), ITaskMessage.Executions);
             QueryLogic.Expressions.Register((ScheduledTaskLogEntity ct) => ct.ExceptionLines(), ITaskMessage.ExceptionLines);
 
-            new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.Save)
-            {
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (c, _) => { },
-            }.Register();
-
-            new Graph<HolidayCalendarEntity>.Delete(HolidayCalendarOperation.Delete)
-            {
-                Delete = (c, _) => { c.Delete(); },
-            }.Register();
+         
 
             new Graph<ScheduledTaskEntity>.Execute(ScheduledTaskOperation.Save)
             {
@@ -138,8 +122,8 @@ public static class SchedulerLogic
                 Delete = (st, _) =>
                 {
                     st.Executions().UnsafeUpdate().Set(l => l.ScheduledTask, l => null).Execute();
-                    var rule = st.Rule; 
-                    st.Delete(); 
+                    var rule = st.Rule;
+                    st.Delete();
                     rule.Delete();
                 },
             }.Register();
@@ -195,9 +179,4 @@ public static class SchedulerLogic
         Remove(parameters.GetDateLimitDelete(typeof(ScheduledTaskLogEntity).ToTypeEntity()), withExceptions: false);
         Remove(parameters.GetDateLimitDeleteWithExceptions(typeof(ScheduledTaskLogEntity).ToTypeEntity()), withExceptions: true);
     }
-
-
-
-
-   
 }

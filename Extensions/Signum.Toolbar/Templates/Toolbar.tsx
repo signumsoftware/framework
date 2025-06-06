@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { ToolbarEntity, ToolbarElementEmbedded, ToolbarMenuEntity } from '../Signum.Toolbar'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Entity, MList } from '@framework/Signum.Entities';
-import { parseIcon } from '@framework/Components/IconTypeahead';
+import { fallbackIcon, parseIcon } from '@framework/Components/IconTypeahead';
 import { ToolbarClient } from '../ToolbarClient';
 import SelectorModal from '@framework/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
@@ -15,7 +15,7 @@ import { ToolbarCount } from '../QueryToolbarConfig';
 import { PermissionSymbol } from '@framework/Signum.Basics';
 import { IconColor } from '../ToolbarConfig';
 
-export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }) {
+export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }): React.JSX.Element {
   const ctx = p.ctx;
   const ctx3 = ctx.subCtx({ labelColumns: 3 });
   return (
@@ -55,7 +55,7 @@ function getDefaultIcon(ti: TypeInfo): IconColor | null {
   return  conf.first().getDefaultIcon();
 }
 
-export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarElementEmbedded>> }) {
+export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarElementEmbedded>> }): React.JSX.Element {
 
   function selectContentType(filter: (ti: TypeInfo) => boolean) {
     const pr = ctx.memberInfo(ml => ml[0].element.content);
@@ -84,7 +84,7 @@ export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarEle
             var icon = parseIcon(ctx.value.iconName);
             var bgColor = (ctx.value.iconColor && ctx.value.iconColor.toLowerCase() == "white" ? "black" : undefined)
             return icon && <div>
-              <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} />
+              <FontAwesomeIcon icon={fallbackIcon(icon)} style={{ backgroundColor: bgColor, color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} />
               {ctx.value.showCount && <ToolbarCount showCount={ctx.value.showCount} num={ctx.value.showCount == "Always" ? 0 : 1} />}
             </div>
         },

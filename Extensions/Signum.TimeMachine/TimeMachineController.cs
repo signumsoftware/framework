@@ -5,12 +5,12 @@ namespace Signum.TimeMachine;
 public class TimeMachineController : ControllerBase
 {
     [HttpGet("api/retrieveVersion/{typeName}/{id}")]
-    public EntityDump RetrieveVersion(string typeName, string id, DateTimeOffset asOf)
+    public EntityDump RetrieveVersion(string typeName, string id, DateTime asOf)
     {
         var type = TypeLogic.GetType(typeName);
         var pk = PrimaryKey.Parse(id, type);
 
-        using (SystemTime.Override(asOf))
+        using (SystemTime.Override(asOf.ToKind(DateTimeKind.Utc)))
         {
             var entity = Database.Retrieve(type, pk);
             return new EntityDump

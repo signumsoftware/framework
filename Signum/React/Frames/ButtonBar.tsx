@@ -14,7 +14,7 @@ export interface ButtonBarHandle {
 }
 
 
-export const ButtonBar = React.forwardRef(function ButtonBar(p: ButtonBarProps, ref: React.Ref<ButtonBarHandle>) {
+export const ButtonBar: React.ForwardRefExoticComponent<ButtonBarProps & React.RefAttributes<ButtonBarHandle>> = React.forwardRef(function ButtonBar(p: ButtonBarProps, ref: React.Ref<ButtonBarHandle>) {
 
   const ctx: ButtonsContext = p;
   const rb = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IRenderButtons | null;
@@ -54,7 +54,7 @@ export namespace ButtonBarManager {
 
   export const onButtonBarRender = [] as ((c: ButtonsContext) => Array<ButtonBarElement | undefined> | undefined)[];
 
-  export function clearButtonBarRenderer(){
+  export function clearButtonBarRenderer(): void{
     onButtonBarRender.clear();
   }
 }

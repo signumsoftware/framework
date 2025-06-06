@@ -12,7 +12,7 @@ interface WorkflowConditionComponentProps {
   ctx: TypeContext<WorkflowActionEntity>;
 }
 
-export default function WorkflowConditionComponent(p: WorkflowConditionComponentProps) {
+export default function WorkflowConditionComponent(p: WorkflowConditionComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleMainEntityTypeChange() {
     p.ctx.value.eval!.script = "";

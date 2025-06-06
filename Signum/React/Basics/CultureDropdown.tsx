@@ -6,8 +6,9 @@ import { CultureClient } from './CultureClient'
 import { NavDropdown } from 'react-bootstrap';
 import { useAPI } from '../Hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconName } from '@fortawesome/fontawesome-svg-core';
 
-export default function CultureDropdown(p: { fullName?: boolean }) {
+export default function CultureDropdown(p: { fullName?: boolean }): React.JSX.Element | null {
 
   var cultures = useAPI(signal => CultureClient.getCultures(false), []);
 
@@ -35,7 +36,16 @@ function simplifyName(name: string) {
   return name.tryBefore("(")?.trim() ?? name;
 }
 
-export function CultureDropdownMenuItem(props: { fullName?: boolean }) {
+export function CultureDropdownMenuItem(props: {
+  fullName?: boolean,
+  label?: string;
+  iconProps?: {
+    chevronIcon?: {
+      open: IconName;
+      close: IconName;
+    }
+  }
+}): React.JSX.Element | null {
   var [show, setShow] = React.useState(false);
 
   var cultures = useAPI(signal => CultureClient.getCultures(false), []);
@@ -49,12 +59,21 @@ export function CultureDropdownMenuItem(props: { fullName?: boolean }) {
     CultureClient.changeCurrentCulture(c);
   }
 
+  function getChevronIcon() {
+    const chevronIcon = props.iconProps?.chevronIcon;
+    if (chevronIcon) {
+      return show ? chevronIcon.close : chevronIcon.open;
+    }
+
+    return show ? "caret-down" : "caret-up"
+  }
+
   return (
     <div>
       <div className={"dropdown-item"}
         style={{ cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center" }}
         onClick={() => setShow(!show)}>
-        <FontAwesomeIcon icon="globe" fixedWidth className="me-2" /> <span style={{ width: "100%" }}>{CultureInfoEntity.niceName()}</span> <FontAwesomeIcon icon={!show ? "caret-down" : "caret-up"} />
+        <FontAwesomeIcon icon="globe" fixedWidth className="me-2" /> <span style={{ width: "100%" }}>{props.label || CultureInfoEntity.niceName()}</span> <FontAwesomeIcon icon={getChevronIcon()} />
       </div>
       <div style={{ display: show ? "block" : "none" }}>
         {Dic.map(cultures, (name, c, i) =>

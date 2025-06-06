@@ -398,7 +398,7 @@ public enum WorkflowActivityMessage
     LocateWorkflowActivityInDiagram,
     Approve,
     Decline,
-    Conformation,
-    [Description("Conformation: {0}")]
-    Conformation0,
+    Confirmation,
+    [Description("Are you sure you want to execute: {0}")]
+    AreYouSureYouWantToExecute0,
 }

@@ -5,11 +5,28 @@
     <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
     <Member Name="None" Description="Nichts" />
   </Type>
+  <Type Name="BigValuePartEntity" Description="Große-Wert-teil" Gender="m">
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
+    <Member Name="ValueToken" Description="Wert-Token" />
+  </Type>
+  <Type Name="HealthCheckConditionEmbedded" Description="Health check Zustand">
+    <Member Name="Operation" Description="Operation" />
+    <Member Name="Value" Description="Wert" />
+  </Type>
+  <Type Name="HealthCheckEmbedded" Description="Health check">
+    <Member Name="DegradedWhen" Description="Eingeschränkt, wenn" />
+    <Member Name="FailWhen" Description="Fehler, wenn" />
+  </Type>
   <Type Name="SystemTimeEmbedded" Description="Systemzeit">
     <Member Name="EndDate" Description="Enddatum" />
     <Member Name="JoinMode" Description="Join-Modus" />
     <Member Name="Mode" Description="Modus" />
+    <Member Name="SplitQueries" Description="Geteilte Abfragen" />
     <Member Name="StartDate" Description="Startdatum" />
+    <Member Name="TimeSeriesMaxRowsPerStep" Description="Zeitreihe max. Zeilen pro Schritt" />
+    <Member Name="TimeSeriesStep" Description="Zeitreihenschritt" />
+    <Member Name="TimeSeriesUnit" Description="Einheit Zeitreihen" />
   </Type>
   <Type Name="UserQueryEntity" Description="Benutzer-Abfrage">
     <Member Name="AppendFilters" Description="Filters anfügen" />
@@ -22,6 +39,7 @@
     <Member Name="Filters" Description="Filter" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="HealthCheck" Description="Health check" />
     <Member Name="HideQuickLink" Description="Quick Link verstecken" />
     <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
     <Member Name="Orders" Description="Reihenfolge" />
@@ -37,6 +55,7 @@
     <Member Name="Query" Description="Abfrage" />
   </Type>
   <Type Name="UserQueryMessage">
+    <Member Name="_0CountOf1Is2Than3" Description="{0} Anzahl der {1} ist {2} als {3}" />
     <Member Name="ApplyChanges" Description="Änderungen anwenden" />
     <Member Name="BackToDefault" Description="Zurück zum Standard" />
     <Member Name="CreateNew" Description="Erstellen" />
@@ -54,20 +73,14 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
-    <Member Name="AggregateFromSummaryHeader" Description="Aggregieren aus Zusammenfassungskopfzeile" />
     <Member Name="AllowMaxHeight" Description="Maximale Höhe zulassen" />
     <Member Name="AllowSelection" Description="Auswahl zulassen" />
     <Member Name="AutoUpdate" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
     <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
-    <Member Name="RenderMode" Description="Render-Modus" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowFooter" Description="Show-Fußzeile" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
-  </Type>
-  <Type Name="UserQueryPartRenderMode" Description="Benutzerabfrage Teil Rendermodus">
-    <Member Name="BigValue" Description="Großer Wert" />
-    <Member Name="SearchControl" Description="Suchliste Komponente" />
   </Type>
   <Type Name="UserQueryPermission">
     <Member Name="ViewUserQuery" Description="Benutzer-Abfrage anzeigen" />

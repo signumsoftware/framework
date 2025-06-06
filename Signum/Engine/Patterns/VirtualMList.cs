@@ -68,42 +68,50 @@ public static class VirtualMList
     }
 
     public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
-        Expression<Func<T, MList<L>>> mListField,
+        Expression<Func<T, MList<L>>> mlistProperty,
         Expression<Func<L, Lite<T>?>> backReference,
         Action<L, T>? onSave = null,
         Action<L, T>? onRemove = null,
         bool? lazyRetrieve = null,
-        bool? lazyDelete = null) //To avoid StackOverflows
+        bool? lazyDelete = null,  //To avoid StackOverflows
+        bool forceSeek = false)
         where T : Entity
         where L : Entity
     {
         fi.SchemaBuilder.Include<L>();
 
-        var mListPropertRoute = PropertyRoute.Construct(mListField);
+        var mListRoute = PropertyRoute.Construct(mlistProperty);
         var backReferenceRoute = PropertyRoute.Construct(backReference, avoidLastCasting: true);
 
-        if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null ||
-            mListPropertRoute.PropertyInfo!.GetCustomAttribute<QueryablePropertyAttribute>() == null)
-            throw new InvalidOperationException($"The property {mListPropertRoute} should have the attributes [Ignore, QueryableProperty] to be used as VirtualMList");
+        if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListRoute) == null ||
+            mListRoute.PropertyInfo!.GetCustomAttribute<QueryablePropertyAttribute>() == null)
+            throw new InvalidOperationException($"The property {mListRoute} should have the attributes [Ignore, QueryableProperty] to be used as VirtualMList");
 
         var nn = Validator.TryGetPropertyValidator(backReferenceRoute)?.Validators.OfType<NotNullValidatorAttribute>().SingleOrDefaultEx();
         if (nn != null && !nn.Disabled)
             throw new InvalidOperationException($"The property {backReferenceRoute} should have an [NotNullValidator(Disabled = true)] to be used as back reference in a VirtualMList");
 
-        Func<T, MList<L>> getMList = GetAccessor(mListField);
+        Func<T, MList<L>> getMList = GetAccessor(mlistProperty);
 
-        RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListPropertRoute, new VirtualMListInfo(mListPropertRoute, backReferenceRoute, e => getMList((T)e)));
+        RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListRoute, new VirtualMListInfo
+        {
+            MListRoute = mListRoute,
+            MListExpression = mlistProperty,
+            BackReferenceExpression = backReference,
+            BackReferenceRoute = backReferenceRoute,
+            GetMList = e => getMList((T)e)
+        });
 
         var defLazyRetrieve = lazyRetrieve ?? (typeof(L) == typeof(T));
         var defLazyDelete = lazyDelete ?? (typeof(L) == typeof(T));
 
         Action<L, Lite<T>>? setter = null;
-        bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListPropertRoute)!
+        bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListRoute)!
             .OfType<PreserveOrderAttribute>()
             .Any();
 
         if (preserveOrder && !typeof(ICanBeOrdered).IsAssignableFrom(typeof(L)))
-            throw new InvalidOperationException($"'{typeof(L).Name}' should implement '{nameof(ICanBeOrdered)}' because '{ReflectionTools.GetPropertyInfo(mListField).Name}' contains '[{nameof(PreserveOrderAttribute)}]'");
+            throw new InvalidOperationException($"'{typeof(L).Name}' should implement '{nameof(ICanBeOrdered)}' because '{ReflectionTools.GetPropertyInfo(mlistProperty).Name}' contains '[{nameof(PreserveOrderAttribute)}]'");
 
         var sb = fi.SchemaBuilder;
 
@@ -130,11 +138,15 @@ public static class VirtualMList
             };
         }
 
+        var baseQuery = Connector.Current is SqlServerConnector && forceSeek ?
+            Database.Query<L>().WithHint("FORCESEEK").DisableQueryFilter() :
+            Database.Query<L>().DisableQueryFilter();
+
         if (preserveOrder)
         {
-            sb.Schema.EntityEvents<T>().RegisterBinding<MList<L>>(mListField,
+            sb.Schema.EntityEvents<T>().RegisterBinding<MList<L>>(mlistProperty,
                  shouldSet: () => !defLazyRetrieve && !VirtualMList.ShouldAvoidMListType(typeof(L)),
-                 valueExpression: (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder(),
+                 valueExpression: () => (e, rowId) => baseQuery.Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder(),
                  valueFunction: (e, rowId, retriever) => Schema.Current.CacheController<L>()!.Enabled ?
                  Schema.Current.CacheController<L>()!.RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMListWithOrder():
                  Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder()
@@ -143,9 +155,9 @@ public static class VirtualMList
         }
         else
         {
-            sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
+            sb.Schema.EntityEvents<T>().RegisterBinding(mlistProperty,
                 shouldSet: () => !defLazyRetrieve && !VirtualMList.ShouldAvoidMListType(typeof(L)),
-                valueExpression: (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMList(),
+                valueExpression: () => (e, rowId) => baseQuery.Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMList(),
                 valueFunction: (e, rowId, retriever) => Schema.Current.CacheController<L>()!.Enabled ?
                 Schema.Current.CacheController<L>()!.RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMList() :
                 Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMList()
@@ -282,7 +294,7 @@ public static class VirtualMList
 
         sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
             shouldSet: () => false,
-            valueExpression: (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder()
+            valueExpression: () => (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder()
             );
 
         sb.Schema.EntityEvents<T>().Saving += (T e) =>
@@ -394,14 +406,9 @@ public static class VirtualMList
 
 public class VirtualMListInfo
 {
-    public readonly PropertyRoute MListRoute;
-    public readonly PropertyRoute BackReferenceRoute;
-    public readonly Func<Entity, IMListPrivate?> GetMList;
-
-    public VirtualMListInfo(PropertyRoute mListRoute, PropertyRoute backReferenceRoute, Func<Entity, IMListPrivate?> getMList)
-    {
-        MListRoute = mListRoute;
-        BackReferenceRoute = backReferenceRoute;
-        GetMList = getMList;
-    }
+    public PropertyRoute MListRoute { get; init; }
+    public LambdaExpression MListExpression { get; init; }
+    public PropertyRoute BackReferenceRoute { get; init; }
+    public LambdaExpression BackReferenceExpression { get; init; }
+    public Func<Entity, IMListPrivate?> GetMList { get; init; }
 }

@@ -1,7 +1,7 @@
 
 export namespace Cookies {
 
-  export function set(name: string, value: string, days?: number, path?: string, domain?: string) {
+  export function set(name: string, value: string, days?: number, path?: string, domain?: string): string {
     let cookie: any = { [name]: value, path: path ?? '/' };
     
     if (days) {
@@ -23,7 +23,9 @@ export namespace Cookies {
     return get(name);
   }
 
-  export function getAll() {
+  export function getAll(): {
+      [name: string]: string;
+  } {
     let cookie: { [name: string]: string } = {};
     document.cookie.split(';').forEach(el => {
       let [k, v] = el.split('=');
@@ -32,11 +34,11 @@ export namespace Cookies {
     return cookie;
   }
 
-  export function get(name : string) {
+  export function get(name : string): string {
     return getAll()[name];
   }
 
-  export function remove(name: string, path?: string, domain?: string) {
+  export function remove(name: string, path?: string, domain?: string): void {
     set(name, '', -1, path, domain);
   }
 };

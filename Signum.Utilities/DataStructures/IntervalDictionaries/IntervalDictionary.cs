@@ -263,7 +263,7 @@ public class IntervalDictionary<K,V>: IEnumerable<KeyValuePair<Interval<K>, V>>
 
     public override string ToString()
     {
-        return dic.ToString(a => "[{0},{1}] -> {2}".FormatWith(a.Key.Min, a.Key.Max, a.Value), "\r\n");
+        return dic.ToString(a => "[{0},{1}] -> {2}".FormatWith(a.Key.Min, a.Key.Max, a.Value), "\n");
     }
 }
 

@@ -364,7 +364,7 @@ public class SaveTest
                 CreationTime = Clock.Now,
                 CreationDate = DateTime.Now.ToDateOnly(),
                 ReleaseDate = DateTime.Now.ToDateOnly(),
-                Text = "Nice album " + a.Name,
+                Title = "Nice album " + a.Name,
                 Target = a
             }).ToList();
 

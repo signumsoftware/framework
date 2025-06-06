@@ -6,7 +6,7 @@ import { IsQueryCachedLine } from '../../../Signum.Dashboard/Admin/Dashboard';
 import { ValueUserQueryElementEmbedded, ValueUserQueryListPartEntity } from '../../Signum.UserQueries';
 import { DashboardEntity } from '../../../Signum.Dashboard/Signum.Dashboard';
 
-export default function ValueUserQueryListPart(p : { ctx: TypeContext<ValueUserQueryListPartEntity> }){
+export default function ValueUserQueryListPart(p : { ctx: TypeContext<ValueUserQueryListPartEntity> }): React.JSX.Element {
   
   const ctx = p.ctx;
 

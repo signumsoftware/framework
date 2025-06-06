@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="DefaultState">
+    <Member Name="All" Description="Tout" />
+    <Member Name="End" Description="Fin" />
+    <Member Name="Start" Description="Commencer" />
+  </Type>
+  <Type Name="MapMessage">
+    <Member Name="Color" Description="Couleur" />
+    <Member Name="Columns" Description="Colonnes" />
+    <Member Name="Filter" Description="Filtre" />
+    <Member Name="Map" Description="Carte" />
+    <Member Name="Namespace" Description="Namespace" />
+    <Member Name="Press0ToExploreEachTable" Description="Appuyez sur {0} pour explorer chaque table" />
+    <Member Name="Press0ToExploreStatesAndOperations" Description="Appuyez sur {0} pour explorer les états et les opérations" />
+    <Member Name="Rows" Description="Lignes" />
+    <Member Name="RowsHistory" Description="Historique des rangées" />
+    <Member Name="State" Description="État" />
+    <Member Name="StateColor" Description="Couleur d’état" />
+    <Member Name="TableSize" Description="Taille de la table" />
+    <Member Name="TableSizeHistory" Description="Historique de la taille des tables" />
+  </Type>
+  <Type Name="MapPermission">
+    <Member Name="ViewMap" Description="Voir la carte" />
+  </Type>
+</Translations>

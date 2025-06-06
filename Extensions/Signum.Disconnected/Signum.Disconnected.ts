@@ -8,13 +8,13 @@ import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 
 
-export const DisconnectedCreatedMixin = new Type<DisconnectedCreatedMixin>("DisconnectedCreatedMixin");
+export const DisconnectedCreatedMixin: Type<DisconnectedCreatedMixin> = new Type<DisconnectedCreatedMixin>("DisconnectedCreatedMixin");
 export interface DisconnectedCreatedMixin extends Entities.MixinEntity {
   Type: "DisconnectedCreatedMixin";
   disconnectedCreated: boolean;
 }
 
-export const DisconnectedExportEntity = new Type<DisconnectedExportEntity>("DisconnectedExport");
+export const DisconnectedExportEntity: Type<DisconnectedExportEntity> = new Type<DisconnectedExportEntity>("DisconnectedExport");
 export interface DisconnectedExportEntity extends Entities.Entity {
   Type: "DisconnectedExport";
   creationDate: string /*DateTime*/;
@@ -33,13 +33,13 @@ export interface DisconnectedExportEntity extends Entities.Entity {
   exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
-export const DisconnectedExportState = new EnumType<DisconnectedExportState>("DisconnectedExportState");
+export const DisconnectedExportState: EnumType<DisconnectedExportState> = new EnumType<DisconnectedExportState>("DisconnectedExportState");
 export type DisconnectedExportState =
   "InProgress" |
   "Completed" |
   "Error";
 
-export const DisconnectedExportTableEmbedded = new Type<DisconnectedExportTableEmbedded>("DisconnectedExportTableEmbedded");
+export const DisconnectedExportTableEmbedded: Type<DisconnectedExportTableEmbedded> = new Type<DisconnectedExportTableEmbedded>("DisconnectedExportTableEmbedded");
 export interface DisconnectedExportTableEmbedded extends Entities.EmbeddedEntity {
   Type: "DisconnectedExportTableEmbedded";
   type: Entities.Lite<Basics.TypeEntity>;
@@ -47,7 +47,7 @@ export interface DisconnectedExportTableEmbedded extends Entities.EmbeddedEntity
   errors: string;
 }
 
-export const DisconnectedImportEntity = new Type<DisconnectedImportEntity>("DisconnectedImport");
+export const DisconnectedImportEntity: Type<DisconnectedImportEntity> = new Type<DisconnectedImportEntity>("DisconnectedImport");
 export interface DisconnectedImportEntity extends Entities.Entity {
   Type: "DisconnectedImport";
   creationDate: string /*DateTime*/;
@@ -64,13 +64,13 @@ export interface DisconnectedImportEntity extends Entities.Entity {
   exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
-export const DisconnectedImportState = new EnumType<DisconnectedImportState>("DisconnectedImportState");
+export const DisconnectedImportState: EnumType<DisconnectedImportState> = new EnumType<DisconnectedImportState>("DisconnectedImportState");
 export type DisconnectedImportState =
   "InProgress" |
   "Completed" |
   "Error";
 
-export const DisconnectedImportTableEmbedded = new Type<DisconnectedImportTableEmbedded>("DisconnectedImportTableEmbedded");
+export const DisconnectedImportTableEmbedded: Type<DisconnectedImportTableEmbedded> = new Type<DisconnectedImportTableEmbedded>("DisconnectedImportTableEmbedded");
 export interface DisconnectedImportTableEmbedded extends Entities.EmbeddedEntity {
   Type: "DisconnectedImportTableEmbedded";
   type: Entities.Lite<Basics.TypeEntity>;
@@ -81,7 +81,7 @@ export interface DisconnectedImportTableEmbedded extends Entities.EmbeddedEntity
   insertedOrUpdated: number | null;
 }
 
-export const DisconnectedMachineEntity = new Type<DisconnectedMachineEntity>("DisconnectedMachine");
+export const DisconnectedMachineEntity: Type<DisconnectedMachineEntity> = new Type<DisconnectedMachineEntity>("DisconnectedMachine");
 export interface DisconnectedMachineEntity extends Entities.Entity {
   Type: "DisconnectedMachine";
   creationDate: string /*DateTime*/;
@@ -97,7 +97,7 @@ export module DisconnectedMachineOperation {
   export const FixImport : Operations.ConstructSymbol_From<DisconnectedImportEntity, DisconnectedMachineEntity> = registerSymbol("Operation", "DisconnectedMachineOperation.FixImport");
 }
 
-export const DisconnectedMachineState = new EnumType<DisconnectedMachineState>("DisconnectedMachineState");
+export const DisconnectedMachineState: EnumType<DisconnectedMachineState> = new EnumType<DisconnectedMachineState>("DisconnectedMachineState");
 export type DisconnectedMachineState =
   "Connected" |
   "Disconnected" |
@@ -105,28 +105,28 @@ export type DisconnectedMachineState =
   "Fixed";
 
 export module DisconnectedMessage {
-  export const NotAllowedToSave0WhileOffline = new MessageKey("DisconnectedMessage", "NotAllowedToSave0WhileOffline");
-  export const The0WithId12IsLockedBy3 = new MessageKey("DisconnectedMessage", "The0WithId12IsLockedBy3");
-  export const Imports = new MessageKey("DisconnectedMessage", "Imports");
-  export const Exports = new MessageKey("DisconnectedMessage", "Exports");
-  export const _0OverlapsWith1 = new MessageKey("DisconnectedMessage", "_0OverlapsWith1");
+  export const NotAllowedToSave0WhileOffline: MessageKey = new MessageKey("DisconnectedMessage", "NotAllowedToSave0WhileOffline");
+  export const The0WithId12IsLockedBy3: MessageKey = new MessageKey("DisconnectedMessage", "The0WithId12IsLockedBy3");
+  export const Imports: MessageKey = new MessageKey("DisconnectedMessage", "Imports");
+  export const Exports: MessageKey = new MessageKey("DisconnectedMessage", "Exports");
+  export const _0OverlapsWith1: MessageKey = new MessageKey("DisconnectedMessage", "_0OverlapsWith1");
 }
 
-export const DisconnectedSubsetMixin = new Type<DisconnectedSubsetMixin>("DisconnectedSubsetMixin");
+export const DisconnectedSubsetMixin: Type<DisconnectedSubsetMixin> = new Type<DisconnectedSubsetMixin>("DisconnectedSubsetMixin");
 export interface DisconnectedSubsetMixin extends Entities.MixinEntity {
   Type: "DisconnectedSubsetMixin";
   lastOnlineTicks: number | null;
   disconnectedMachine: Entities.Lite<DisconnectedMachineEntity> | null;
 }
 
-export const Download = new EnumType<Download>("Download");
+export const Download: EnumType<Download> = new EnumType<Download>("Download");
 export type Download =
   "None" |
   "All" |
   "Subset" |
   "Replace";
 
-export const Upload = new EnumType<Upload>("Upload");
+export const Upload: EnumType<Upload> = new EnumType<Upload>("Upload");
 export type Upload =
   "None" |
   "New" |

@@ -8,13 +8,13 @@ import { Constructor } from '@framework/Constructor'
 import { Finder } from '@framework/Finder'
 import { Lite, Entity, newMListElement, registerToString, JavascriptMessage, getToString } from '@framework/Signum.Entities'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
-import { PseudoType, Type, getTypeName, isTypeEntity, getQueryKey } from '@framework/Reflection'
+import { PseudoType, Type, getTypeName, isTypeEntity, getQueryKey, getQueryInfo } from '@framework/Reflection'
 import { EmailMessageEntity, EmailMessageOperation, EmailRecipientEmbedded, EmailConfigurationEmbedded, AsyncEmailSenderPermission, EmailModelEntity, EmailFromEmbedded, SmtpEmailServiceEntity } from './Signum.Mailing'
 import { EmailSenderConfigurationEntity, EmailAddressEmbedded } from './Signum.Mailing'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { EvalClient } from '../Signum.Eval/EvalClient'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkExplore } from '@framework/QuickLinkClient'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { ModifiableEntity } from "@framework/Signum.Entities";
@@ -40,7 +40,7 @@ export namespace MailingClient {
     contextual: boolean,
     queryButton: boolean,
     quickLinkInDefaultGroup?: boolean
-  }) {
+  }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Mailing", () => import("./Changelog"));
   
@@ -80,8 +80,10 @@ export namespace MailingClient {
         if (!ct || isTypeEntity(ct)) {
           if (ctx.entity.query == null)
             return ctx.defaultClick();
-  
-          const lite = await Finder.find({ queryName: ctx.entity.query!.key });
+
+          const lite = ct && ctx.entity.query.key != ct && getQueryInfo(ct) ? 
+            await Finder.find({ queryName: ct }):
+            await Finder.find({ queryName: ctx.entity.query!.key });
   
           if (!lite) return;
   
@@ -124,9 +126,9 @@ export namespace MailingClient {
   
     if (Finder.isFindable(EmailMessageEntity, false)) {
       var cachedAllTypes: Promise<string[]>;
-      QuickLinks.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
+      QuickLinkClient.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
         .then(types => !types.contains(entityType) ? [] :
-          [new QuickLinks.QuickLinkExplore(EmailMessageEntity, ctx => ({ queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }] }),
+          [new QuickLinkExplore(EmailMessageEntity, ctx => ({ queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }] }),
             {
               key: getQueryKey(EmailMessageEntity),
               text: () => EmailMessageEntity.nicePluralName(),
@@ -151,7 +153,7 @@ export namespace MailingClient {
   
   export const settings: { [typeName: string]: EmailModelSettings<ModifiableEntity> } = {};
   
-  export function register<T extends ModifiableEntity>(type: Type<T>, setting: EmailModelSettings<T>) {
+  export function register<T extends ModifiableEntity>(type: Type<T>, setting: EmailModelSettings<T>): void {
     settings[type.typeName] = setting;
   }
   
@@ -186,7 +188,7 @@ export namespace MailingClient {
       });
   }
   
-  export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualItemsContext<Entity>) {
+  export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualItemsContext<Entity>): void {
   
     Navigator.API.fetch(et)
       .then(emailTemplate => emailTemplate.model ? API.getConstructorType(emailTemplate.model) : Promise.resolve(undefined))
@@ -206,13 +208,13 @@ export namespace MailingClient {
       });
   }
   
-  export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args: any[]) {
+  export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args: any[]): void {
   
     Operations.API.constructFromLite(template, EmailMessageOperation.CreateEmailFromTemplate, ...args)
       .then(pack => pack && Navigator.view(pack));
   }
   
-  export module API {
+  export namespace API {
     export function start(): Promise<void> {
       return ajaxPost({ url: "/api/asyncEmailSender/start" }, undefined);
     }
@@ -260,6 +262,7 @@ export namespace MailingClient {
     machineName: string;
     isCancelationRequested: boolean;
     nextPlannedExecution: string;
+    lastExecutionFinishedOn: string;
     queuedItems: number;
     currentProcessIdentifier: string;
   }
@@ -269,7 +272,7 @@ export namespace MailingClient {
 declare module '@framework/FindOptions' {
 
   export interface QueryDescription {
-    emailTemplates?: Array<Lite<EmailTemplateEntity>>;
+    emailTemplates?: Array<Lite<EmailTemplateEntity>> | "error";
   }
 }
 

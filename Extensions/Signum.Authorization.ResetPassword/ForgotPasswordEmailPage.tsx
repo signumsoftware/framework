@@ -7,7 +7,7 @@ import { ResetPasswordClient } from './ResetPasswordClient'
 import { useStateWithPromise } from '@framework/Hooks'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 
-export default function ForgotPasswordEmailPage() {
+export default function ForgotPasswordEmailPage(): React.JSX.Element {
 
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
   const [success, setSuccess] = React.useState(false);

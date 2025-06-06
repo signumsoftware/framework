@@ -4,7 +4,7 @@ import * as React from 'react';
 import { RouteObject } from 'react-router'
 import * as AppContext from '@framework/AppContext'
 import * as ColorUtils from './ColorUtils'
-import { PseudoType, getTypeName } from '@framework/Reflection';
+import { PseudoType, getTypeInfo, getTypeName } from '@framework/Reflection';
 import { Lite } from '@framework/Signum.Entities';
 import { Constructor } from '@framework/Constructor';
 import { Finder } from '@framework/Finder';
@@ -14,7 +14,7 @@ import { ColorPaletteEntity } from './Signum.Chart.ColorPalette';
 
 export namespace ColorPaletteClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(ColorPaletteEntity, e => import('./ColorPalette')));
   
     Finder.registerPropertyFormatter(ColorPaletteEntity.tryPropertyRoute(a => a.categoryName),
@@ -41,13 +41,16 @@ export namespace ColorPaletteClient {
   
   export let colorPalette: { [typeName: string]: Promise<ColorPalette | null> } = {};
   export function getColorPalette(type: PseudoType): Promise<ColorPalette | null> {
-  
-    const typeName = getTypeName(type);
-  
-    if (colorPalette[typeName] !== undefined)
-      return colorPalette[typeName];
-  
-    return colorPalette[typeName] = API.colorPalette(typeName).then(pal => {
+
+    const ti = getTypeInfo(type);
+
+    if (colorPalette[ti.name] !== undefined)
+      return colorPalette[ti.name];
+
+    if (ti.noSchema)
+      return colorPalette[ti.name] = Promise.resolve(null);
+
+    return colorPalette[ti.name] = API.colorPalette(ti.name).then(pal => {
       if (pal == null)
         return pal;
   
@@ -97,7 +100,7 @@ export namespace ColorPaletteClient {
     return h;
   }
   
-  export module API {
+  export namespace API {
   
     export function colorPalette(typeName: string): Promise<ColorPalette> {
       return ajaxGet({ url: `/api/colorPalette/${typeName}`, });
@@ -109,13 +112,13 @@ export namespace ColorPaletteClient {
 
 }
 
-export function ColorScheme(p: { colorScheme: string }) {
+export function ColorScheme(p: { colorScheme: string }): React.JSX.Element {
   return (<div style={{ height: "20px", width: "150px", display: "inline-flex", verticalAlign: "text-bottom" }} className="me-2">
     {ColorUtils.colorSchemes[p.colorScheme]?.map(c => <div key={c} style={{ flex: "1", backgroundColor: c }} />)}
   </div>);
 }
 
-export function ColorInterpolate(p: { colorInterpolator: string }) {
+export function ColorInterpolate(p: { colorInterpolator: string }): React.JSX.Element {
 
   const inter = getColorInterpolation(p.colorInterpolator);
 

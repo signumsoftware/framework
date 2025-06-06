@@ -16,7 +16,7 @@ import { EntityOperationSettings, Operations } from "../../Signum/React/Operatio
 
 export namespace AuthClient {
   
-  export function startPublic(options: { routes: RouteObject[], userTicket: boolean, notifyLogout: boolean }) {
+  export function startPublic(options: { routes: RouteObject[], userTicket: boolean, notifyLogout: boolean }): void {
     Options.userTicket = options.userTicket;
   
     options.routes.push({ path: "/auth/login", element: <ImportComponent onImport={() => import("./Login/LoginPage")} /> });
@@ -90,7 +90,7 @@ export namespace AuthClient {
     return AppContext.currentUser as UserEntity;
   }
   
-  export function logout() {
+  export function logout(): void {
     var user = currentUser();
     if (user == null)
       return;
@@ -114,7 +114,7 @@ export namespace AuthClient {
   
   export const onCurrentUserChanged: Array<(newUser: UserEntity | undefined, avoidReRender?: boolean) => void> = [];
   
-  export function setCurrentUser(user: UserEntity | undefined, avoidReRender?: boolean) {
+  export function setCurrentUser(user: UserEntity | undefined, avoidReRender?: boolean): void {
   
     const changed = !is(AppContext.currentUser, user, true);
   
@@ -172,7 +172,7 @@ export namespace AuthClient {
     sessionStorage.setItem("authenticationType", authenticationType ?? "");
   }
   
-  export function registerUserTicketAuthenticator() {
+  export function registerUserTicketAuthenticator(): void {
   
     if (Reflection.isStarted())
       throw new Error("call AuthClient.registerUserTicketAuthenticator in MainPublic.tsx before AuthClient.autoLogin");
@@ -224,7 +224,7 @@ export namespace AuthClient {
       });
   }
   
-  export function logoutOtherTabs(user: UserEntity) {
+  export function logoutOtherTabs(user: UserEntity): void {
     if (notifyLogout)
       localStorage.setItem('requestLogout' + Services.SessionSharing.getAppName(), user.userName + "&&" + new Date().toString());
   }
@@ -232,7 +232,7 @@ export namespace AuthClient {
   export namespace Options {
   
     export function getCookie(): string | null { return Cookies.get("sfUser"); }
-    export function removeCookie() { return Cookies.remove("sfUser", "/", document.location.hostname); }
+    export function removeCookie(): void { return Cookies.remove("sfUser", "/", document.location.hostname); }
   
     export let onLogout: () => void = () => {
       throw new Error("onLogout should be defined (check MainPublic.tsx in Southwind)");
@@ -247,7 +247,7 @@ export namespace AuthClient {
   
   export type AuthenticationType = "database" | "resetPassword" | "changePassword" | "api-key" | "azureAD" | "cookie" | "windows";
   
-  export module API {
+  export namespace API {
     export interface LoginRequest {
       userName: string;
       password: string;
@@ -276,6 +276,9 @@ export namespace AuthClient {
     }
   
   
+    export function relogin(): Promise<LoginResponse> {
+      return ajaxGet({ url: "/api/auth/relogin" });
+    }
   
   
     export function changePassword(request: ChangePasswordRequest): Promise<LoginResponse> {

@@ -27,7 +27,7 @@ interface FindOptionsLineProps {
   onQueryChanged?: () => void;
 }
 
-export function FindOptionsLine(p : FindOptionsLineProps){
+export function FindOptionsLine(p : FindOptionsLineProps): React.JSX.Element {
   function renderMember(fo: FindOptionsExpr | undefined): React.ReactNode {
     return (<span
       className={fo === undefined ? "design-default" : "design-changed"}>
@@ -132,7 +132,7 @@ interface QueryTokenLineProps {
   queryKey: string;
 }
 
-export function QueryTokenLine(p: QueryTokenLineProps) {
+export function QueryTokenLine(p: QueryTokenLineProps): React.JSX.Element {
 
   const [parsedToken, setParsedToken] = React.useState<QueryToken | undefined>(undefined);
 
@@ -198,7 +198,7 @@ interface FetchQueryDescriptionState {
   queryDescription?: QueryDescription
 }
 
-export function FetchQueryDescription(p: FetchQueryDescriptionProps) {
+export function FetchQueryDescription(p: FetchQueryDescriptionProps): React.JSX.Element {
   const queryDescription = useAPI(() => !p.queryName ? Promise.resolve(undefined) : Finder.getQueryDescription(p.queryName), [p.queryName]);
   return p.children(queryDescription);
 }
@@ -209,7 +209,7 @@ interface ViewNameComponentProps {
   typeName?: string;
 }
 
-export function ViewNameComponent(p: ViewNameComponentProps) {
+export function ViewNameComponent(p: ViewNameComponentProps): React.JSX.Element {
 
   const viewNames = useAPI(() => p.typeName && !p.typeName.contains(", ") && !isTypeEntity(p.typeName) ? Promise.resolve(undefined) :
     Promise.all(getTypeInfos(p.typeName ?? "").map(ti => Navigator.viewDispatcher.getViewNames(ti.name).then(array => [...array, (hastStaticView(ti) ? "STATIC" : undefined)])))
@@ -229,7 +229,7 @@ interface FindOptionsComponentProps {
   findOptions: FindOptionsExpr;
 }
 
-export function FindOptionsComponent(p : FindOptionsComponentProps){
+export function FindOptionsComponent(p : FindOptionsComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleChangeQueryKey(queryKey: string | undefined) {
     const fo = p.findOptions;
@@ -265,7 +265,7 @@ export function FindOptionsComponent(p : FindOptionsComponentProps){
     );
 }
 
-export function QueryKeyLine(p : { queryKey: string | undefined, label: string; onChange: (queryKey: string | undefined) => void }){
+export function QueryKeyLine(p: { queryKey: string | undefined, label: string; onChange: (queryKey: string | undefined) => void }): React.ReactElement {
   function handleGetItems(query: string) {
     return Finder.API.findLiteLike({ types: QueryEntity.typeName, subString: query, count: 5 })
       .then(lites => lites.map(a => getToString(a)));

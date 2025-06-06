@@ -2,14 +2,8 @@ using Signum.Utilities.Reflection;
 using System.ComponentModel;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Signum.Entities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Runtime.Intrinsics.X86;
-using System.Xml.Linq;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
-using System.Linq.Expressions;
+using Signum.Engine.Maps;
+using NpgsqlTypes;
 
 namespace Signum.DynamicQuery.Tokens;
 
@@ -84,20 +78,49 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return Expression.Lambda<Func<object, T>>(BuildExpression(context), context.Parameter).Compile();
     }
 
+    public static Func<QueryToken, BuildExpressionContext, Expression?>? IsValueHidden;
+
+    private Expression WithHidden(Expression expression, BuildExpressionContext context)
+    {
+        var isHidden = IsValueHidden?.Invoke(this, context);
+
+        if (isHidden == null)
+            return expression;
+
+        if (isHidden is ConstantExpression ce && ce.Value != null)
+        {
+            if(ce.Value.Equals(true))
+                return Expression.Constant(null, expression.Type.Nullify());
+            if (ce.Value.Equals(false))
+                return expression;
+        }
+
+        return Expression.Condition(isHidden, Expression.Constant(null, expression.Type.Nullify()), expression.Nullify());
+    }
+
     public Expression BuildExpression(BuildExpressionContext context, bool searchToArray = false)
     {
+
         if (context.Replacements.TryGetValue(this, out var result))
-            return result.GetExpression();
+        {
+            var exp = result.GetExpression();
+            if (result.AlreadyHidden)
+                return exp;
+
+            return WithHidden(exp, context);
+        }
 
         if (searchToArray)
         {
             var cta = HasToArray();
             if (cta != null)
-                return CollectionToArrayToken.BuildToArrayExpression(this, cta, context);
+                return WithHidden(CollectionToArrayToken.BuildToArrayExpression(this, cta, context), context);
         }
 
-        return BuildExpressionInternal(context);
+        return WithHidden(BuildExpressionInternal(context), context);
     }
+
+  
 
     protected abstract Expression BuildExpressionInternal(BuildExpressionContext context);
 
@@ -119,6 +142,8 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return pr;
     }
 
+    public bool IsEntity() => this is ColumnToken ct && ct.Column.IsEntity;
+
     public abstract Implementations? GetImplementations();
     public abstract string? IsAllowed();
 
@@ -137,8 +162,11 @@ public abstract class QueryToken : IEquatable<QueryToken>
     {
         if (this is ManualContainerToken mc)
             return new ManualToken(mc, key, mc.Parent!.Type);
-        
-        var result = CachedSubTokensOverride(options).TryGetC(key) ?? QueryLogic.Expressions.GetExtensionsWithParameterTokens(this).SingleOrDefaultEx(a => a.Key == key);
+
+        var result = CachedSubTokensOverride(options).TryGetC(key);
+
+        if (result == null)
+            result = QueryLogic.Expressions.GetExtensionsWithParameterTokens(this).SingleOrDefaultEx(a => a.Key == key);
 
         if (result == null)
             return null;
@@ -193,6 +221,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
         if (ut == typeof(TimeSpan))
             return TimeSpanProperties(this, DateTimePrecision.Milliseconds).AndHasValue(this);
 
+        if (ut == typeof(TimeOnly))
+            return TimeOnlyProperties(this, DateTimePrecision.Milliseconds).AndHasValue(this);
+
         if (ut == typeof(float) || ut == typeof(double) || ut == typeof(decimal))
             return StepTokens(this, 4).AndHasValue(this);
 
@@ -228,7 +259,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
                     (options & SubTokensOptions.CanManual) != 0 ? new QuickLinksToken(this) : null,
                 }
                 .NotNull()
-                .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this);
+                .Concat(EntityProperties(onlyType))
+                .Concat(TsVectorColumns(onlyType))
+                .ToList().AndHasValue(this);
             }
 
             return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).PreAnd(new EntityTypeToken(this)).ToList().AndHasValue(this);
@@ -245,6 +278,19 @@ public abstract class QueryToken : IEquatable<QueryToken>
         }
 
         return new List<QueryToken>();
+    }
+
+    private IEnumerable<QueryToken> TsVectorColumns(Type onlyType)
+    {
+        var table = Schema.Current.Tables.TryGetC(onlyType);
+
+        if (table != null)
+        {
+            foreach (var item in table.Columns.Values.OfType<PostgresTsVectorColumn>())
+            {
+                yield return new PgTsVectorColumnToken(this, item);
+            }
+        }
     }
 
     public List<QueryToken> StringTokens()
@@ -451,6 +497,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
         if (options.HasFlag(SubTokensOptions.CanElement))
             tokens.AddRange(EnumExtensions.GetValues<CollectionElementType>().Select(cet => new CollectionElementToken(parent, cet)));
 
+        if (options.HasFlag(SubTokensOptions.CanNested))
+            tokens.AddRange(new CollectionNestedToken(parent));
+
         if (options.HasFlag(SubTokensOptions.CanAnyAll))
             tokens.AddRange(EnumExtensions.GetValues<CollectionAnyAllType>().Select(caat => new CollectionAnyAllToken(parent, caat)));
 
@@ -470,9 +519,19 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return Parent != null && Parent.HasAllOrAny();
     }
 
+    public virtual CollectionNestedToken? HasNested()
+    {
+        return Parent?.HasNested();
+    }
+
     public virtual bool HasElement()
     {
         return Parent != null && Parent.HasElement();
+    }
+
+    public virtual CollectionToArrayToken? HasCollectionToArray()
+    {
+        return Parent == null ? null : Parent.HasCollectionToArray();
     }
 
     IEnumerable<QueryToken> EntityProperties(Type type)
@@ -538,7 +597,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
         }
     }
 
-    public string NiceTypeName
+    public virtual string NiceTypeName
     {
         get
         {
@@ -564,7 +623,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     public static bool IsCollection(Type type)
     {
-        return type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null;
+        return type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null && type != typeof(NpgsqlTsVector);
     }
 
     static string GetNiceTypeName(Type type, Implementations? implementations)
@@ -609,6 +668,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     internal bool Dominates(QueryToken t)
     {
+        if (t is CollectionNestedToken)
+            return false; 
+
         if (t is CollectionAnyAllToken)
             return false;
 
@@ -624,18 +686,22 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
 public class BuildExpressionContext
 {
-    public BuildExpressionContext(Type elementType, ParameterExpression parameter, Dictionary<QueryToken, ExpressionBox> replacements, List<Filter>? filters)
+    public BuildExpressionContext(Type elementType, ParameterExpression parameter, Dictionary<QueryToken, ExpressionBox> replacements, List<Filter>? filters, List<Order>? orders, Pagination? pagination)
     {
         this.ElementType = elementType;
         this.Parameter = parameter;
         this.Replacements = replacements;
         this.Filters = filters;
+        this.Orders = orders;
+        this.Pagination = pagination;
     }
 
     public readonly Type ElementType;
     public readonly ParameterExpression Parameter;
     public readonly Dictionary<QueryToken, ExpressionBox> Replacements;
-    public readonly List<Filter>? Filters; //For Snippet keyword detection
+    public readonly List<Filter>? Filters; //For SubQueries and  Snippet keyword detection
+    public readonly List<Order>? Orders; //For SubQueries  detection
+    public readonly Pagination? Pagination; 
 
     public Expression<Func<object, T>>? TryGetSelectorUntyped<T>(string key)
     {
@@ -669,13 +735,13 @@ public class BuildExpressionContext
         return Expression.Lambda(Expression.Convert(entityColumn.GetExpression().ExtractEntity(false), typeof(Entity)), Parameter);
     }
 
-    internal List<CollectionElementToken> SubQueries()
-    {
-        return Replacements
-            .Where(a => a.Value.SubQueryContext != null)
-            .Select(a => (CollectionElementToken)a.Key)
-            .ToList();
-    }
+    //internal List<CollectionNestedToken> SubQueries()
+    //{
+    //    return Replacements
+    //        .Where(a => a.Value.SubQueryContext != null)
+    //        .Select(a => (CollectionNestedToken)a.Key)
+    //        .ToList();
+    //}
 }
 
 public struct ExpressionBox
@@ -683,12 +749,14 @@ public struct ExpressionBox
     public readonly Expression RawExpression;
     public readonly PropertyRoute? MListElementRoute;
     public readonly BuildExpressionContext? SubQueryContext;
+    public readonly bool AlreadyHidden;
 
-    public ExpressionBox(Expression rawExpression, PropertyRoute? mlistElementRoute = null, BuildExpressionContext? subQueryContext = null)
+    public ExpressionBox(Expression rawExpression, PropertyRoute? mlistElementRoute = null, BuildExpressionContext? subQueryContext = null, bool alreadyHidden = false)
     {
         RawExpression = rawExpression;
         MListElementRoute = mlistElementRoute;
         SubQueryContext = subQueryContext;
+        AlreadyHidden = alreadyHidden;
     }
 
     public Expression GetExpression()
@@ -788,6 +856,7 @@ public enum QueryTokenMessage
     [Description("Snippet for {0}")]
     SnippetOf0,
     PartitionId,
+    Nested,
 }
 
 //The order of the elemens matters!
@@ -844,6 +913,13 @@ public enum QueryTokenDateMessage
     [Description("Every {0} Milliseconds")]
     Every0Milliseconds,
 
+    [Description("Every {0} {1}")]
+    Every01,
+
+    [Description("{0} steps x {1} rows = {2} total rows (aprox)")]
+    _0Steps1Rows2TotalRowsAprox,
+
+    SplitQueries,
 }
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.All)]

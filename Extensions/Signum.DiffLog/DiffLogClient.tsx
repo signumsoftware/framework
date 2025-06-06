@@ -10,7 +10,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 export namespace DiffLogClient {
   
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.DiffLog", () => import("./Changelog"));
   

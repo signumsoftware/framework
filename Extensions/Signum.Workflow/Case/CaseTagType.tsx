@@ -4,7 +4,7 @@ import { AutoLine, TypeContext } from '@framework/Lines'
 import Tag from './Tag'
 import { useForceUpdate } from '@framework/Hooks'
 
-export default function CaseTagTypeComponent(p : { ctx: TypeContext<CaseTagTypeEntity> }){
+export default function CaseTagTypeComponent(p : { ctx: TypeContext<CaseTagTypeEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   var ctx = p.ctx;
   return (

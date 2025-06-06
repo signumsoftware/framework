@@ -4,7 +4,7 @@ import { FilterOptionParsed, FilterGroupOptionParsed, isFilterGroup } from '@fra
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
-import { ChartMessage, ChartRequestModel } from './Signum.Chart'
+import { ChartMessage, ChartRequestModel, ChartTimeSeriesEmbedded } from './Signum.Chart'
 import { ChartClient } from './ChartClient'
 import { Button } from 'react-bootstrap'
 import { Finder } from '@framework/Finder';
@@ -15,7 +15,7 @@ export interface ChartButtonProps {
 
 export default class ChartButton extends React.Component<ChartButtonProps> {
 
-  handleOnMouseUp = (e: React.MouseEvent<any>) => {
+  handleOnMouseUp = (e: React.MouseEvent<any>): void => {
     e.preventDefault();
 
     if (e.button == 2)
@@ -31,7 +31,8 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
       const path = ChartClient.Encoder.chartPath({
         queryName: fo.queryName,
         orderOptions: [],
-        filterOptions: fo.filterOptions
+        filterOptions: fo.filterOptions,
+        timeSeries: ChartClient.cloneChartTimeSeries(fo.systemTime as any),
       })
 
       if (sc.props.avoidChangeUrl)
@@ -41,7 +42,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
     });
   }
 
-  render() {
+  render(): React.JSX.Element {
     var label = this.props.searchControl.props.largeToolbarButtons == true ? <span className="d-none d-sm-inline">{" " + ChartMessage.Chart.niceToString()}</span> : undefined;
     return (
       <Button variant="light" onMouseUp={this.handleOnMouseUp} title={ChartMessage.Chart.niceToString()}><FontAwesomeIcon icon="chart-bar" />&nbsp;{label}</Button>

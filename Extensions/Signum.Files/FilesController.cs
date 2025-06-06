@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
+using System.Reflection.Metadata.Ecma335;
+using Azure.Core;
 
 namespace Signum.Files;
 
@@ -93,5 +96,90 @@ public class FilesController : ControllerBase
         };
     }
 
-   
+    [HttpPost("api/files/startUpload")]
+    public async Task<string> StartUpload([FromBody] StartUploadRequest request)
+    {
+        var fileType = SymbolLogic<FileTypeSymbol>.ToSymbol(request.FileTypeKey);
+
+        var algorithm = FileTypeLogic.GetAlgorithm(fileType);
+
+        IFilePath fpe = CreateEmptyFile(request.Type, fileType, request.FileName, null);
+
+        await algorithm.StartUpload(fpe);
+
+        return fpe.Suffix;
+    }
+
+    public class StartUploadRequest
+    {
+        public string FileTypeKey { get; set; }
+        public string FileName { get; set; }
+        public string Type { get; set; }
+    }
+
+    [HttpPost("api/files/uploadChunk")]
+    public async Task<ChunkInfo> UploadChunk(
+        [FromQuery] string fileName,
+        [FromQuery] string fileTypeKey,
+        [FromQuery] string suffix,
+        [FromQuery] string type,
+        [FromQuery] int chunkIndex,
+        CancellationToken token)
+    {
+        var fileType = SymbolLogic<FileTypeSymbol>.ToSymbol(fileTypeKey);
+
+        var algorithm = FileTypeLogic.GetAlgorithm(fileType);
+
+        IFilePath fpe = CreateEmptyFile(type, fileType, fileName, suffix);
+
+        using MemoryStream ms = new MemoryStream();
+            await Request.Body.CopyToAsync(ms);
+
+        var chunkInfo = await algorithm.UploadChunk(fpe, chunkIndex, ms, token);
+
+        return chunkInfo;
+    }
+
+
+    static IFilePath CreateEmptyFile(string type, FileTypeSymbol fileType, string fileName, string? suffix)
+    {
+        if (type == typeof(FilePathEmbedded).Name)
+            return new FilePathEmbedded(fileType, fileName, null!) { Suffix = suffix! };
+
+        if (type == TypeLogic.TryGetCleanName(typeof(FilePathEntity)))
+            return new FilePathEntity(fileType, fileName, null!) { Suffix = suffix! };
+
+        throw new UnexpectedValueException(type);
+    }
+
+    [HttpPost("api/files/finishUpload")]
+    public async Task<FinishUploadResponse> FinishUpload([FromBody] FinishUploadRequest request, CancellationToken token)
+    {
+        var fileType = SymbolLogic<FileTypeSymbol>.ToSymbol(request.FileTypeKey);
+
+        var algorithm = FileTypeLogic.GetAlgorithm(fileType);
+
+        IFilePath fpe = CreateEmptyFile(request.Type, fileType, request.FileName, request.Suffix);
+
+        await algorithm.FinishUpload(fpe, request.Chunks, token);
+
+        return new FinishUploadResponse { Hash = fpe.Hash!, FileLength = fpe.FileLength, FullWebPath = fpe.FullWebPath() };
+    }
+
+
+    public class FinishUploadRequest
+    {
+        public string FileTypeKey { get; set; }
+        public string FileName { get; set; }
+        public string Suffix { get; set; }
+        public string Type { get; set; }
+        public List<ChunkInfo> Chunks { get; set; }
+    }
+
+    public class FinishUploadResponse
+    {
+        public long FileLength { get; set; }
+        public string Hash { get; set; }
+        public string? FullWebPath { get; internal set; }
+    }
 }

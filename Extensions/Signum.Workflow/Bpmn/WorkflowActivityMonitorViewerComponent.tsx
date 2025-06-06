@@ -29,12 +29,12 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
   viewer!: NavigatedViewer;
   divArea!: HTMLDivElement;
 
-  handleOnModelError = (err: string) => {
+  handleOnModelError = (err: string): void => {
     if (err)
       throw new Error('Error rendering the model ' + err);
   }
 
-  componentDidMount() {
+  componentDidMount(): void {
     this.viewer = new CustomViewer({
       container: this.divArea,
       keyboard: {
@@ -50,7 +50,7 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
     this.viewer.importXML(this.props.workflowModel.diagramXml, this.handleOnModelError);
   }
 
-  handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
+  handleElementDoubleClick = (obj: BPMN.DoubleClickEvent): void => {
 
     obj.preventDefault();
     obj.stopPropagation();
@@ -67,11 +67,11 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     this.viewer.destroy();
   }
 
-  componentWillReceiveProps(nextProps: WorkflowActivityMonitorViewerComponentProps) {
+  componentWillReceiveProps(nextProps: WorkflowActivityMonitorViewerComponentProps): void {
 
     if (this.viewer) {
 
@@ -103,7 +103,7 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
     }
   }
 
-  configureModules(props: WorkflowActivityMonitorViewerComponentProps) {
+  configureModules(props: WorkflowActivityMonitorViewerComponentProps): void {
     var workflowActivityMonitorRenderer = this.viewer.get<WorkflowActivityMonitorRenderer.WorkflowActivityMonitorRenderer>('workflowActivityMonitorRenderer');
     workflowActivityMonitorRenderer.viewer = this.viewer;
     workflowActivityMonitorRenderer.workflowActivityMonitor = props.workflowActivityMonitor;
@@ -111,23 +111,23 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
     workflowActivityMonitorRenderer.workflowConfig = props.workflowConfig;
   }
 
-  handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
     var searchPad = this.viewer.get<any>("searchPad");
     searchPad.toggle();
   }
 
-  resetZoom() {
+  resetZoom(): void {
     var zoomScroll = this.viewer.get<any>("zoomScroll");
     zoomScroll.reset();
   }
 
-  handleZoomClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  handleZoomClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
     this.resetZoom();
   }
 
-  render() {
+  render(): React.JSX.Element {
     return (
       <div>
         <div className="btn-toolbar" style={{ marginBottom: "5px" }}>

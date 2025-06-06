@@ -20,6 +20,8 @@ public class EntityComboProxy : EntityBaseProxy
         get { return this.Element.FindElement(By.CssSelector(".rw-dropdown-list-input")); }
     }
 
+    public override object? GetValueUntyped() => this.LiteValue;
+    public override void SetValueUntyped(object? value) => this.LiteValue = value is Entity e ? e.ToLite() : (Lite<Entity>?)value;
 
     public Lite<IEntity>? LiteValue
     {
@@ -37,7 +39,7 @@ public class EntityComboProxy : EntityBaseProxy
         set
         {
             var val = value == null ? "" : value.Key();
-            this.Element.GetDriver().Wait(() => this.ComboElement.Options.Any(o => o.GetAttribute("value") == val));
+            this.Element.GetDriver().Wait(() => this.ComboElement.Options.Any(o => o.GetDomProperty("value") == val));
             this.ComboElement.SelectByValue(val);
         }
     }

@@ -31,6 +31,7 @@ body.rtl .sf-pagination-right {
 div.sf-pagination-right > ul.pagination {
     display: inline-flex;
     padding: 0px;
+    margin: 0px;
 }
 
     div.sf-pagination-right > ul.pagination > li > a,

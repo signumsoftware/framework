@@ -10,7 +10,7 @@ interface WorkflowEventModelComponentProps {
   ctx: TypeContext<WorkflowEventModel>;
 }
 
-export default function WorkflowEventModelComponent(p: WorkflowEventModelComponentProps) {
+export default function WorkflowEventModelComponent(p: WorkflowEventModelComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function isSchedulesStart() {
     return (p.ctx.value.type == "ScheduledStart");

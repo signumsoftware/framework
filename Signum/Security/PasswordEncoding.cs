@@ -1,3 +1,4 @@
+using System.IO;
 using System.Security.Cryptography;
 
 namespace Signum.Security;
@@ -38,6 +39,19 @@ public class CryptorEngine
         MD5 md5 = MD5.Create();
         byte[] hash = md5.ComputeHash(inputBytes);
 
+        return ConvertToHex(hash);
+    }
+
+    public static string CalculateMD5Hash(Stream stream)
+    {
+        MD5 md5 = MD5.Create();
+        byte[] hash = md5.ComputeHash(stream);
+
+        return ConvertToHex(hash);
+    }
+
+    private static string ConvertToHex(byte[] hash)
+    {
         // step 2, convert byte array to hex string
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < hash.Length; i++)

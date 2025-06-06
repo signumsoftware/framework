@@ -7,7 +7,7 @@ import { Tab, Tabs } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { classes } from '../Globals';
 
-export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
+export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }): React.JSX.Element {
   const ctx = p.ctx;
   const sc = p.ctx.subCtx({ labelColumns: { sm: 4 } });
   return (
@@ -66,7 +66,7 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
   }
 }
 
-export function FormatJson(p: { code: string | undefined | null }) {
+export function FormatJson(p: { code: string | undefined | null }): React.JSX.Element {
 
   const [formatJson, setFormatJson] = React.useState<boolean>(false);
 

@@ -53,6 +53,8 @@ public class AuthController : ControllerBase
 
         AuthServer.AddUserSession(ControllerContext, user);
 
+        user.FillTypeConditions();
+
         if (data.rememberMe == true)
         {
             UserTicketServer.OnSaveCookie(ControllerContext);
@@ -73,13 +75,23 @@ public class AuthController : ControllerBase
         return new LoginResponse { userEntity = user, token = token, authenticationType = "api-key" };
     }
 
+    [HttpGet("api/auth/relogin")]
+    public LoginResponse Relogin()
+    {
+        var user = UserEntity.Current.Retrieve();
+
+        var token = AuthTokenServer.CreateToken(user);
+
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "relogin" };
+    }
+
     [HttpPost("api/auth/loginFromCookie"), SignumAllowAnonymous]
     public LoginResponse? LoginFromCookie()
     {
         if (!UserTicketServer.LoginFromCookie(ControllerContext))
             return null;
 
-        UserEntity user = AuthLogic.Disable().Using(() => UserEntity.Current.Retrieve());
+        var user = UserEntity.Current.Retrieve();
 
         var token = AuthTokenServer.CreateToken(user);
         return new LoginResponse { userEntity = user, token = token, authenticationType = "cookie" };
@@ -91,7 +103,7 @@ public class AuthController : ControllerBase
     public UserEntity? GetCurrentUser()
     {
         var result = UserEntity.Current;
-        return result.Is(AuthLogic.AnonymousUser) ? null : AuthLogic.Disable().Using(()=> result.Retrieve());
+        return result.Is(AuthLogic.AnonymousUser) ? null : result.Retrieve();
     }
 
     [HttpPost("api/auth/logout")]

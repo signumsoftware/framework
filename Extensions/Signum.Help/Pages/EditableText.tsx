@@ -7,16 +7,18 @@ import { classes } from '@framework/Globals';
 import { HelpImageEntity, HelpMessage } from '../Signum.Help';
 import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor';
 import { ErrorBoundary } from '@framework/Components';
-import LinksPlugin from '../../Signum.HtmlEditor/Plugins/LinksPlugin';
-import BasicCommandsPlugin from '../../Signum.HtmlEditor/Plugins/BasicCommandsPlugin';
-import ImagePlugin, { ImageConverter } from '../../Signum.HtmlEditor/Plugins/ImagePlugin';
 import { FilePathEmbedded, FileTypeSymbol } from '../../Signum.Files/Signum.Files';
 import { FilesClient } from '../../Signum.Files/FilesClient';
 import { IBinding, getSymbol } from '@framework/Reflection';
 import { FileImage } from '../../Signum.Files/Components/FileImage';
 import { toFileEntity } from '../../Signum.Files/Components/FileUploader';
+import { ListExtension } from '../../Signum.HtmlEditor/Extensions/ListExtension';
+import { BasicCommandsExtensions } from '../../Signum.HtmlEditor/Extensions/BasicCommandsExtension';
+import { ImageConverter } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
+import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
+import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
 
-export function EditableTextComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }) {
+export function EditableTextComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
   var [editable, setEditable] = React.useState(defaultEditable || false);
   var forceUpdate = useForceUpdate();
 
@@ -36,7 +38,7 @@ export function EditableTextComponent({ ctx, defaultText, onChange, defaultEdita
 }
   
 
-export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }) {
+export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element{
 
   var [editable, setEditable] = React.useState(defaultEditable || false);
   var forceUpdate = useForceUpdate();
@@ -53,22 +55,23 @@ export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEdita
   );
 }
 
-export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined> }) {
+export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined> }): React.JSX.Element {
 
   return (
     <ErrorBoundary>
       <HtmlEditor
-        binding={p.binding} plugins={[
-          new LinksPlugin(),
-          new BasicCommandsPlugin(),
-          new ImagePlugin(new InlineImageConverter())
+        binding={p.binding}
+        plugins={[
+          new LinkExtension(),
+          new BasicCommandsExtensions(),
+          new ImageExtension(new InlineImageConverter())
         ]} />
     </ErrorBoundary>
   );
 }
 
 
-export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?: React.HTMLAttributes<HTMLDivElement>; }) {
+export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?: React.HTMLAttributes<HTMLDivElement>; }): React.JSX.Element | null {
 
   var htmlText = React.useMemo(() => HelpClient.replaceHtmlLinks(p.text ?? ""), [p.text]);
   if (!htmlText)
@@ -80,12 +83,13 @@ export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?
     <div className="html-viewer">
       <ErrorBoundary>
         <HtmlEditor readOnly
-          binding={binding}
+          binding={binding as any}
           htmlAttributes={p.htmlAttributes}
-          toolbarButtons={c => null} plugins={[
-            new LinksPlugin(),
-            new BasicCommandsPlugin(),
-            new ImagePlugin(new InlineImageConverter())
+          small
+          plugins={[
+            new LinkExtension(),
+            new BasicCommandsExtensions(),
+            new ImageExtension(new InlineImageConverter())
           ]} />
       </ErrorBoundary>
     </div>
@@ -103,6 +107,20 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
   pr: PropertyRoute;
   constructor() {
     this.pr = HelpImageEntity.propertyRouteAssert(a => a.file);;
+  }
+
+  toElement(val: ImageInfo): HTMLElement | undefined {
+    const img = document.createElement("img");
+    if (val.binaryFile) {
+      img.setAttribute("data-binary-file", val.binaryFile);
+      img.setAttribute("data-file-name", val.fileName || "");
+      return img;
+    }
+
+    if (val.inlineImageId) {
+      img.setAttribute("data-attachment-id", val.inlineImageId);
+      return img;
+    }
   }
 
   uploadData(blob: Blob): Promise<ImageInfo> {

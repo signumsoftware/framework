@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
+using Signum.Basics;
 using Signum.Dashboard;
 using Signum.DynamicQuery;
+using Signum.Omnibox;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using System.ComponentModel;
@@ -62,6 +65,8 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
 
     public SystemTimeEmbedded? SystemTime { get; set; }
 
+    public HealthCheckEmbedded? HealthCheck { get; set; }
+
     [PreserveOrder, NoRepeatValidator]
     [ImplementedBy(typeof(UserQueryEntity))]
     public MList<Lite<Entity>> CustomDrilldowns { get; set; } = new MList<Lite<Entity>>();
@@ -97,12 +102,13 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     internal void ParseData(QueryDescription description)
     {
         var canAggregate = this.GroupResults ? SubTokensOptions.CanAggregate : 0;
+        var canTimeSeries = this.SystemTime?.Mode == SystemTimeMode.TimeSeries ? SubTokensOptions.CanTimeSeries : 0;
 
         foreach (var f in Filters)
-            f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate);
+            f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate | canTimeSeries);
 
         foreach (var c in Columns)
-            c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | SubTokensOptions.CanToArray | (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual));
+            c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | SubTokensOptions.CanToArray | (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual) | canTimeSeries);
 
         foreach (var o in Orders)
             o.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate);
@@ -145,7 +151,9 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
         ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
         PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());
         ColumnsMode = element.Attribute("ColumnsMode")!.Value.Let(cm => cm == "Replace" ? "ReplaceAll" : cm).ToEnum<ColumnOptionsMode>();
-        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
+
+        var valuePr = PropertyRoute.Construct((UserQueryEntity wt) => wt.Filters[0].ValueString);
+        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
         Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
         CustomDrilldowns.Synchronize((element.Element("CustomDrilldowns")?.Elements("CustomDrilldown")).EmptyIfNull().Select(x => (Lite<Entity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLiteFat()).NotNull().ToMList());
@@ -177,25 +185,32 @@ public class SystemTimeEmbedded : EmbeddedEntity
 
     public SystemTimeJoinMode? JoinMode { get; set; }
 
+    public TimeSeriesUnit? TimeSeriesUnit { get; set; }
+
+    [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+    public int? TimeSeriesStep { get; set; }
+
+    [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+    public int? TimeSeriesMaxRowsPerStep { get; set; }
+
+    public bool SplitQueries { get; set; }
+
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Name == nameof(StartDate))
-        {
-            return (pi, StartDate).IsSetOnlyWhen(Mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn or SystemTimeMode.AsOf);
-        }
-
-        if (pi.Name == nameof(EndDate))
-        {
-            return (pi, EndDate).IsSetOnlyWhen(Mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn);
-        }
-
-        if (pi.Name == nameof(JoinMode))
-        {
-            return (pi, JoinMode).IsSetOnlyWhen(Mode is not SystemTimeMode.AsOf);
-        }
-
-        return base.PropertyValidation(pi);
+        return stateValidator.Validate(this, pi) ??  base.PropertyValidation(pi);
     }
+
+    static StateValidator<SystemTimeEmbedded, SystemTimeMode> stateValidator = new StateValidator<SystemTimeEmbedded, SystemTimeMode>
+        (a => a.Mode, a => a.StartDate, a => a.EndDate, a => a.JoinMode, a => a.TimeSeriesUnit, a => a.TimeSeriesStep, a => a.TimeSeriesMaxRowsPerStep)
+    {
+ { SystemTimeMode.AsOf,       true,          false,            false,          false,                false,                false  },
+ { SystemTimeMode.Between,    true,          true,             true,           false,                false,                false  },
+ { SystemTimeMode.ContainedIn,true,          true,             true,           false,                false,                false  },
+ { SystemTimeMode.All,        false,         false,            true,           false,                false,                false  },
+ { SystemTimeMode.TimeSeries,  true,          true,             false,          true,                 true,                 true  },
+
+
+    };
 
     internal SystemTimeEmbedded? FromXml(XElement xml)
     {
@@ -203,41 +218,45 @@ public class SystemTimeEmbedded : EmbeddedEntity
         StartDate = xml.Attribute("StartDate")?.Value;
         EndDate = xml.Attribute("EndDate")?.Value;
         JoinMode = xml.Attribute("JoinMode")?.Value.ToEnum<SystemTimeJoinMode>();
+        TimeSeriesUnit = xml.Attribute("TimeSeriesUnit")?.Value.ToEnum<TimeSeriesUnit>();
+        TimeSeriesStep = xml.Attribute("TimeSeriesStep")?.Value.ToInt();
+        TimeSeriesMaxRowsPerStep = xml.Attribute("TimeSeriesMaxRowsPerStep")?.Value.ToInt();
+        SplitQueries = xml.Attribute("SplitQueries")?.Value.ToBool() ?? false;
         return this;
     }
 
-    internal SystemTime GetSystemTime() {
-
-        JoinBehaviour GetJoinMode() => JoinMode!.Value switch
-        {
-            SystemTimeJoinMode.Current => JoinBehaviour.Current,
-            SystemTimeJoinMode.FirstCompatible => JoinBehaviour.FirstCompatible,
-            SystemTimeJoinMode.AllCompatible => JoinBehaviour.AllCompatible,
-            _ => throw new UnexpectedValueException(JoinMode!.Value)
-        };
-
-        DateTimeOffset ParseDate(string date)
-        {
-            return (DateTimeOffset)(DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
-        }
-
-        return Mode switch
-        {
-            SystemTimeMode.All => new SystemTime.All(GetJoinMode()),
-            SystemTimeMode.AsOf => new SystemTime.AsOf(ParseDate(StartDate!)),
-            SystemTimeMode.Between => new SystemTime.Between(ParseDate(StartDate!), ParseDate(EndDate!), GetJoinMode()),
-            SystemTimeMode.ContainedIn => new SystemTime.Between(ParseDate(StartDate!), ParseDate(EndDate!), GetJoinMode()),
-            _ => throw new UnexpectedValueException(Mode)
-        };
-    }
     internal XElement ToXml()
     {
         return new XElement("SystemTime",
-        new XAttribute("Mode", Mode.ToString()),
+            new XAttribute("Mode", Mode.ToString()),
             StartDate == null ? null : new XAttribute("StartDate", StartDate),
             EndDate == null ? null : new XAttribute("EndDate", EndDate),
-            JoinMode == null ? null : new XAttribute("JoinMode", JoinMode.ToString()!)
+            JoinMode == null ? null : new XAttribute("JoinMode", JoinMode.ToString()!),
+            TimeSeriesUnit == null ? null : new XAttribute("TimeSeriesUnit", TimeSeriesUnit.ToString()!),
+            TimeSeriesStep == null ? null : new XAttribute("TimeSeriesStep", TimeSeriesStep.ToString()!),
+            TimeSeriesMaxRowsPerStep == null ? null : new XAttribute("TimeSeriesMaxRowsPerStep", TimeSeriesMaxRowsPerStep.ToString()!),
+            SplitQueries  == false ? null : new XAttribute("SplitQueries", SplitQueries.ToString()!)
         );
+    }
+
+    internal SystemTimeRequest ToSystemTimeRequest() => new SystemTimeRequest
+    {
+        mode = this.Mode,
+        joinMode = this.JoinMode,
+        endDate = ParseDate(this.EndDate),
+        startDate = ParseDate(this.StartDate),
+        timeSeriesStep = this.TimeSeriesStep,
+        timeSeriesUnit = this.TimeSeriesUnit,
+        timeSeriesMaxRowsPerStep = this.TimeSeriesMaxRowsPerStep,
+    };
+
+    DateTime? ParseDate(string? date)
+    {
+        if (date.IsNullOrEmpty())
+            return null;
+
+
+        return (DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
     }
 }
 
@@ -348,15 +367,69 @@ public class ValueUserQueryElementEmbedded : EmbeddedEntity
 
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
+public class BigValuePartEntity : Entity, IPartParseDataEntity
+{
+    public QueryTokenEmbedded? ValueToken { get; set; }
+
+    public UserQueryEntity? UserQuery { get; set; }
+
+    public bool RequiresTitle => false;
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("BigValuePart",
+           UserQuery == null ? null : new XAttribute(nameof(UserQuery), ctx.Include(UserQuery)),
+           ValueToken == null ? null : new XAttribute(nameof(ValueToken), ValueToken.Token.FullKey())
+           );
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        var uq = element.Attribute(nameof(UserQuery))?.Value;
+        UserQuery = uq == null ? null : (UserQueryEntity)ctx.GetEntity(Guid.Parse(uq));
+        ValueToken = element.Attribute(nameof(ValueToken))?.Let(t => new QueryTokenEmbedded(t.Value));
+    }
+
+    public void ParseData(DashboardEntity dashboardEntity)
+    {
+        if (ValueToken != null)
+        {
+            var queryKey = this.UserQuery != null ? this.UserQuery.Query.Key : dashboardEntity.EntityType?.ToString();
+
+            if (queryKey != null)
+            {
+                var qn = QueryLogic.ToQueryName(queryKey);
+                var qd = QueryLogic.Queries.QueryDescription(qn);
+                this.ValueToken.ParseData(this, qd, (this.UserQuery != null ? SubTokensOptions.CanElement | SubTokensOptions.CanAggregate : 0));
+            }
+        }
+
+    }
+
+    public IPartEntity Clone() => new BigValuePartEntity
+    {
+        ValueToken = ValueToken,
+        UserQuery = UserQuery,
+    };
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if(pi.Name == nameof(ValueToken))
+        {
+            if (UserQuery == null && this.GetDashboard().EntityType == null)
+                return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
+        }
+
+        return base.PropertyValidation(pi);
+    }
+}
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
 public class UserQueryPartEntity : Entity, IPartEntity
 {
     public UserQueryEntity UserQuery { get; set; }
 
     public bool IsQueryCached { get; set; }
-
-    public UserQueryPartRenderMode RenderMode { get; set; }
-
-    public bool AggregateFromSummaryHeader { get; set; }
 
     public AutoUpdate AutoUpdate { get; set; }
 
@@ -381,7 +454,6 @@ public class UserQueryPartEntity : Entity, IPartEntity
         return new UserQueryPartEntity
         {
             UserQuery = this.UserQuery,
-            RenderMode = this.RenderMode,
             AllowSelection = this.AllowSelection,
             ShowFooter = this.ShowFooter,
             CreateNew = this.CreateNew,
@@ -394,9 +466,7 @@ public class UserQueryPartEntity : Entity, IPartEntity
     {
         return new XElement("UserQueryPart",
             new XAttribute(nameof(UserQuery), ctx.Include(UserQuery)),
-            new XAttribute(nameof(RenderMode), RenderMode),
             new XAttribute(nameof(AllowSelection), AllowSelection),
-            AggregateFromSummaryHeader ? new XAttribute(nameof(AggregateFromSummaryHeader), AggregateFromSummaryHeader) : null,
             ShowFooter ? new XAttribute(nameof(ShowFooter), ShowFooter) : null,
             CreateNew ? new XAttribute(nameof(CreateNew), CreateNew) : null,
             IsQueryCached ? new XAttribute(nameof(IsQueryCached), IsQueryCached) : null,
@@ -407,10 +477,8 @@ public class UserQueryPartEntity : Entity, IPartEntity
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
         UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery")!.Value));
-        RenderMode = element.Attribute(nameof(RenderMode))?.Value.ToEnum<UserQueryPartRenderMode>() ?? UserQueryPartRenderMode.SearchControl;
         AllowSelection = element.Attribute(nameof(AllowSelection))?.Value.ToBool() ?? true;
         ShowFooter = element.Attribute(nameof(ShowFooter))?.Value.ToBool() ?? false;
-        AggregateFromSummaryHeader = element.Attribute(nameof(AggregateFromSummaryHeader))?.Value.ToBool() ?? false;
         CreateNew = element.Attribute(nameof(CreateNew))?.Value.ToBool() ?? false;
         IsQueryCached = element.Attribute(nameof(IsQueryCached))?.Value.ToBool() ?? false;
         AllowMaxHeight = element.Attribute(nameof(AllowMaxHeight))?.Value.ToBool() ?? false;
@@ -451,4 +519,32 @@ public enum UserQueryMessage
     TheSelected0,
     Date,
     Pagination,
+    [Description("{0} count of {1} is {2} than {3}")]
+    _0CountOf1Is2Than3,
+}
+
+public class HealthCheckEmbedded : EmbeddedEntity
+{
+    public HealthCheckConditionEmbedded? FailWhen { get; set; }
+    public HealthCheckConditionEmbedded? DegradedWhen { get; set; }
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if(pi.Name == nameof(DegradedWhen) && DegradedWhen == null && FailWhen == null)
+        {
+            return ValidationMessage._0Or1ShouldBeSet.NiceToString(NicePropertyName(() => FailWhen), pi.NiceName());
+        }
+
+        return base.PropertyValidation(pi);
+    }
+}
+
+public class HealthCheckConditionEmbedded : EmbeddedEntity
+{
+    public FilterOperation Operation { get; set; }
+
+    public int Value { get; set; }
+
+    [Ignore]
+    internal Func<int, bool> _CachedPredicate;
 }

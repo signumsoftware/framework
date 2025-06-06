@@ -5,8 +5,8 @@ public abstract class TypeConditionNode
 {
     public abstract bool? ConstantValue { get; }
 
-    public static readonly TypeConditionNode True = new AndNode(new TypeConditionNode[0]);
-    public static readonly TypeConditionNode False = new OrNode(new TypeConditionNode[0]);
+    public static readonly TypeConditionNode True = new AndNode([]);
+    public static readonly TypeConditionNode False = new OrNode([]);
 
     public abstract bool IsMoreSimpleAndGeneralThan(TypeConditionNode og);
 }
@@ -120,7 +120,22 @@ public class SymbolNode : TypeConditionNode
 
 public static class TypeConditionNodeExtensions
 {
-    public static TypeConditionNode ToTypeConditionNode(this TypeAllowedAndConditions tac, TypeAllowedBasic requested, bool inUserInterface)
+    public static TypeConditionNode ToTypeConditionNode(this WithConditions<PropertyAllowed> tac, PropertyAllowed requested)
+    {
+        var baseValue = tac.Fallback >= requested ? TypeConditionNode.True : TypeConditionNode.False;
+
+        return tac.ConditionRules.Aggregate(baseValue, (acum, tacRule) =>
+        {
+            var iExp = new AndNode(tacRule.TypeConditions.Select(a => (TypeConditionNode)new SymbolNode(a)).ToHashSet());
+
+            if (tacRule.Allowed >= requested)
+                return new OrNode(new TypeConditionNode[] { iExp, acum });
+            else
+                return new AndNode(new TypeConditionNode[] { new NotNode(iExp), acum });
+        });
+    }
+
+    public static TypeConditionNode ToTypeConditionNode(this WithConditions<TypeAllowed> tac, TypeAllowedBasic requested, bool inUserInterface)
     {
         var baseValue = tac.Fallback.Get(inUserInterface) >= requested ? TypeConditionNode.True : TypeConditionNode.False;
 

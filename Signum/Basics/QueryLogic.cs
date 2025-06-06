@@ -3,6 +3,7 @@ using Signum.Utilities.Reflection;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
 using System.Collections.Frozen;
+using System.Data.Common;
 
 namespace Signum.Basics;
 
@@ -19,8 +20,8 @@ public static class QueryLogic
 
     static QueryLogic()
     {
-        FilterFullText.miContains = ReflectionTools.GetMethodInfo(() => FullTextSearch.Contains(new string[0], ""));
-        FilterFullText.miFreeText = ReflectionTools.GetMethodInfo(() => FullTextSearch.FreeText(new string[0], ""));
+        FilterSqlServerFullText.miContains = ReflectionTools.GetMethodInfo(() => FullTextSearch.Contains(new string[0], ""));
+        FilterSqlServerFullText.miFreeText = ReflectionTools.GetMethodInfo(() => FullTextSearch.FreeText(new string[0], ""));
 
         ExtensionToken.BuildExtension = (parentType, key, parentExpression) => Expressions.BuildExtension(parentType, key, parentExpression);
     }
@@ -57,7 +58,18 @@ public static class QueryLogic
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             QueryEntity.GetEntityImplementations = query => Queries.GetEntityImplementations(query.ToQueryName());
-            FilterCondition.ToLowerString = () => Schema.Current.Settings.IsPostgres;
+            var schema = Schema.Current;
+            FilterCondition.ToLowerString = token =>
+            {
+                if (!schema.Settings.IsPostgres)
+                    return false;
+
+                var pr = token?.GetPropertyRoute();
+
+                var dbType = pr == null ? null : schema.Settings.FieldAttribute<DbTypeAttribute>(pr);
+
+                return dbType == null || !dbType.CollationPostgres_AvoidToLower;
+            };
 
             // QueryManagers = queryManagers;
             sb.Schema.Initializing += () =>
@@ -91,9 +103,16 @@ public static class QueryLogic
                     "caching " + nameof(QueryEntity)).ToFrozenDictionaryEx(),
                 new InvalidateWith(typeof(QueryEntity)),
                 Schema.Current.InvalidateMetadata);
+
+            sb.Schema.SchemaCompleted += () =>
+            {
+                if (Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
+                {
+                    QueryTimeSeriesLogic.Start(sb);
+                }
+            };
         }
     }
-
 
     public static object ToQueryName(this QueryEntity query)
     {

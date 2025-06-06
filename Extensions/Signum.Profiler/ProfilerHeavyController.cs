@@ -46,7 +46,7 @@ public class ProfilerHeavyController : ControllerBase
         for (int i = 0; i < entries.Count; i++)
         {
             var e = entries[i];
-            if (ignoreProfilerHeavyEntries && (e.Role == "Web.API GET" && e.AdditionalData != null && e.AdditionalData.Contains("/api/profilerHeavy/")))
+            if (ignoreProfilerHeavyEntries && (e.Kind == "Web.API GET" && e.AdditionalData != null && e.AdditionalData.Contains("/api/profilerHeavy/")))
                 continue;
 
             result.Add(new HeavyProfofilerEntryTS(e, false, now));
@@ -173,7 +173,7 @@ public class ProfilerHeavyController : ControllerBase
         public long Start;
         public long End;
         public string Elapsed;
-        public string Role;
+        public string Kind;
         public string Color;
         public int Depth;
         public int AsyncDepth;
@@ -188,8 +188,8 @@ public class ProfilerHeavyController : ControllerBase
             End = e.End ?? now;
             Elapsed = e.ElapsedToString();
             IsFinished = e.End.HasValue;
-            Role = e.Role;
-            Color = GetColor(e.Role);
+            Kind = e.Kind;
+            Color = GetColor(e.Kind);
             Depth = e.Depth;
             FullIndex = e.FullIndex();
             AdditionalData = fullAditionalData ? e.AdditionalData : e.AdditionalDataPreview();

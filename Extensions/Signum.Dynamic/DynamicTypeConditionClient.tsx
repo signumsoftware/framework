@@ -12,7 +12,7 @@ import { DynamicTypeConditionEntity, DynamicTypeConditionEval, DynamicTypeCondit
 
 export namespace DynamicTypeConditionClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     Navigator.addSettings(new EntitySettings(DynamicTypeConditionEntity, w => import('./TypeCondition/DynamicTypeCondition')));
   

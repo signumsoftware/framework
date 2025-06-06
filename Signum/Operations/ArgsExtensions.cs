@@ -10,6 +10,8 @@ public static class ArgsExtensions
         return args!.SmartConvertTo<T>().SingleEx(() => "{0} in the argument list".FormatWith(typeof(T))); ;
     }
 
+
+
     public static T? TryGetArgC<T>(this object?[]? args) where T : class
     {
         return args?.SmartConvertTo<T?>().SingleOrDefaultEx(() => "There are more than one {0} in the argument list".FormatWith(typeof(T)));
@@ -23,6 +25,17 @@ public static class ArgsExtensions
             return null;
 
         return casted.SingleEx(() => "{0} in the argument list".FormatWith(typeof(T)));
+    }
+
+    public static object?[]? AppendArg(this object?[]? args, object? obj)
+    {
+        if (obj == null)
+            return args;
+
+        if (args == null || args.Length == 0)
+            return [obj];
+
+        return args.And(obj).ToArray();   
     }
 
     static IEnumerable<T> SmartConvertTo<T>(this IEnumerable<object?>? args)

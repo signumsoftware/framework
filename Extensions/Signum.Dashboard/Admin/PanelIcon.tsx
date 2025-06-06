@@ -6,7 +6,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getToString } from '@framework/Signum.Entities';
 
-export default function PanelIcon(p: { ctx: TypeContext<DashboardEntity | PanelPartEmbedded> }) {
+export default function PanelIcon(p: { ctx: TypeContext<DashboardEntity | PanelPartEmbedded> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const ctx = p.ctx.subCtx({ formGroupStyle: "Basic", formSize: "xs" });
   const title = DashboardEntity.isInstance(ctx.value) ? ctx.value.displayName : (ctx.value.title ?? getToString(ctx.value.content));

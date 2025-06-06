@@ -145,3 +145,14 @@ a.sf-auth-link:hover {
 .sf-master {
     background: #fffbc2 !important;
 }
+
+small.shy-text {
+    opacity: 0;
+    font-size: smaller;
+    color: #aaa;
+    transition: opacity 1s;
+}
+
+tr:hover small.shy-text {
+    opacity: 1;
+}

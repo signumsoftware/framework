@@ -44,16 +44,6 @@ public class Column
     }
 }
 
-internal class _EntityColumn : Column
-{
-    public _EntityColumn(ColumnDescription entityColumn, object queryName)
-        : base(new ColumnToken(entityColumn, queryName), null!)
-    {
-        if (!entityColumn.IsEntity)
-            throw new ArgumentException("entityColumn");
-    }
-}
-
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
 public enum ColumnOptionsMode
 {

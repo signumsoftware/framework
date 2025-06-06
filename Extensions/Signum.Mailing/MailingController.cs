@@ -6,6 +6,7 @@ using Signum.API.Filters;
 using Signum.Basics;
 using Signum.API;
 using Signum.Authorization;
+using Microsoft.AspNetCore.Cors;
 
 namespace Signum.Mailing;
 
@@ -42,13 +43,12 @@ public class MailingController : ControllerBase
         Thread.Sleep(1000);
     }
 
-    [HttpGet("api/asyncEmailSender/simpleStatus"), SignumAllowAnonymous]
-    public SimpleStatus SimpleStatus()
+    [HttpGet("api/asyncEmailSender/healthCheck"), SignumAllowAnonymous, EnableCors(PolicyName = "HealthCheck")]
+    public SignumHealthResult HealthCheck()
     {
-        return AsyncEmailSender.GetSimpleStatus();
+        var status = AsyncEmailSender.GetHealthStatus();
+        return new SignumHealthResult(status);
     }
-
-
 
 #pragma warning disable IDE1006 // Naming Styles
     public class CreateEmailRequest

@@ -135,7 +135,7 @@ public static class ToolbarLogic
                 if (problems.Count > 0)
                     throw new ApplicationException(
                         ToolbarMessage._0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships.NiceToString().FormatWith(problems.Count) +
-                        problems.ToString("\r\n"));
+                        problems.ToString("\n"));
             }
         }
     }
@@ -168,10 +168,8 @@ public static class ToolbarLogic
                 return null;
             };
 
-            sb.Schema.Table<T>().PreDeleteSqlSync += arg =>
+            sb.Schema.EntityEvents<T>().PreDeleteSqlSync += entity =>
             {
-                var entity = (T)arg;
-
                 var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarEntity tb) => tb.Elements, Database.MListQuery((ToolbarEntity tb) => tb.Elements)
                     .Where(mle => mle.Element.Content!.Entity == entity));
 
@@ -180,7 +178,7 @@ public static class ToolbarLogic
 
             if(querySelectorForSync != null)
             {
-                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += q =>
+                sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += q =>
                 {
                     var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarEntity te) => te.Elements, Database.MListQuery((ToolbarEntity tb) => tb.Elements).Where(mle => querySelectorForSync.Evaluate((T)mle.Element.Content!.Entity).Is(q)));
                     return parts;
@@ -197,10 +195,8 @@ public static class ToolbarLogic
                 return null;
             };
 
-            sb.Schema.Table<T>().PreDeleteSqlSync += arg =>
+            sb.Schema.EntityEvents<T>().PreDeleteSqlSync += entity =>
             {
-                var entity = (T)arg;
-
                 var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarMenuEntity tb) => tb.Elements, Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements)
                     .Where(mle => mle.Element.Content!.Entity == entity));
 
@@ -209,7 +205,7 @@ public static class ToolbarLogic
 
             if (querySelectorForSync != null)
             {
-                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += q =>
+                sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += q =>
                 {
                     var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarMenuEntity te) => te.Elements, Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements).Where(mle => querySelectorForSync.Evaluate((T)mle.Element.Content!.Entity).Is(q)));
                     return parts;

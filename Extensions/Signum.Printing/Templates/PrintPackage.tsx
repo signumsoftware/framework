@@ -4,7 +4,7 @@ import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { PrintPackageEntity, PrintLineEntity } from '../Signum.Printing'
 
-export default function PrintPackage(p : { ctx: TypeContext<PrintPackageEntity> }){
+export default function PrintPackage(p : { ctx: TypeContext<PrintPackageEntity> }): React.JSX.Element {
   const e = p.ctx;
 
   return (

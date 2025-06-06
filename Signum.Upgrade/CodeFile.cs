@@ -274,7 +274,7 @@ public class CodeFile
 
             var text = getText(oldText);
             if (text.HasText())
-                lines.InsertRange(from, text.Lines().Select(a => IndentAndReplace(a, indent)));
+                lines.InsertRange(from, text.Lines().Select(a => IndentAndReplace(a, "")));
 
             return true;
         });
@@ -585,7 +585,7 @@ public class CodeFile
         {
             elem.Attribute("Version")!.Value = version;
 
-            this.Content = doc.ToString(SaveOptions.DisableFormatting);
+            this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\r\n", "\n");
         }
     }
 
@@ -606,7 +606,7 @@ public class CodeFile
         {
             eleme.Remove();
 
-            this.Content = doc.ToString(SaveOptions.DisableFormatting);
+            this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\r\n", "\n");
         }
     }
 
@@ -623,7 +623,7 @@ public class CodeFile
             new XAttribute("Include", version)
         ));
 
-        this.Content = doc.ToString(SaveOptions.DisableFormatting);
+        this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\r\n", "\n");
 
     }
 
@@ -708,11 +708,11 @@ public class CodeFile
             {
                 if (text.Trim().IsEmpty())
                     return
-                    "\tProjectSection(SolutionItems) = preProject\r\n" +
-                    "\t\t" + relativeFilePath + " = " + relativeFilePath + "\r\n" +
+                    "\tProjectSection(SolutionItems) = preProject\n" +
+                    "\t\t" + relativeFilePath + " = " + relativeFilePath + "\n" +
                     "\tEndProjectSection";
                 else
-                    return text.Replace("\tEndProjectSection", "\t\t" + relativeFilePath + " = " + relativeFilePath + "\r\n" +
+                    return text.Replace("\tEndProjectSection", "\t\t" + relativeFilePath + " = " + relativeFilePath + "\n" +
                     "\tEndProjectSection");
             });
     }

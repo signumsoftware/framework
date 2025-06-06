@@ -66,6 +66,7 @@
   <Type Name="UserAssetPreviewLineEmbedded" Description="Benutzer-Asset-Vorschau-Linie">
     <Member Name="Action" Description="Aktion" />
     <Member Name="CustomResolution" Description="Benutzerdefinierte Auflösung" />
+    <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="LiteConflicts" Description="Leichte Konflikte" />
     <Member Name="OverrideEntity" Description="Entität überschreiben" />

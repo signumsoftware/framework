@@ -8,7 +8,7 @@ interface ImportComponentProps {
   componentProps?: any;
 }
 
-export function ImportComponent({ onImport, componentProps }: ImportComponentProps) {
+export function ImportComponent({ onImport, componentProps }: ImportComponentProps): React.ReactElement | null {
   const module = useAPI(() => onImport(), [onImport.toString()]);
 
   if (!module)

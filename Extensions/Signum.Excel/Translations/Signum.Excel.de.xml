@@ -18,10 +18,12 @@
     <Member Name="Excel2007Spreadsheet" Description="Microsoft Office Excel 2007 Spreadsheet (*.xlsx)|*.xlsx" />
     <Member Name="ExcelReport" Description="Excel Bericht" />
     <Member Name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" Description="Die Excel Vorlage muss eine xlsx-Erweiterung haben, und die Aktuelle hat eine {0}-Erweiterung" />
+    <Member Name="ExportToExcel" Description="Nach Excel exportieren" />
     <Member Name="FindLocationFoExcelReport" Description="Speicherort für Excel Bericht finden" />
     <Member Name="Reports" Description="Berichte" />
     <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="Die Excel Vorlage hat eine Spalte {0}, die nicht in der Suche vorhanden ist" />
     <Member Name="ThereAreNoResultsToWrite" Description="Es gibt keine Ergebnisse für den Bericht zu exportieren" />
+    <Member Name="WhatDoYouWantToExport" Description="Was möchten Sie exportieren?" />
   </Type>
   <Type Name="ExcelPermission">
     <Member Name="ImportFromExcel" Description="Import aus Excel" />

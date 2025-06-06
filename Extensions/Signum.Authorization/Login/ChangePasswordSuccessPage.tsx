@@ -7,7 +7,7 @@ import { LoginAuthMessage } from '../Signum.Authorization'
 import { AuthClient } from '../AuthClient'
 import { useStateWithPromise } from '@framework/Hooks'
 
-export default function ChangePasswordSucessPage() {
+export default function ChangePasswordSucessPage(): React.JSX.Element {
   return (
     <div className="container sf-change-password-success">
       <div className="row">

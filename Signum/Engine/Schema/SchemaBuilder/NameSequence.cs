@@ -3,14 +3,12 @@ namespace Signum.Engine.Maps;
 
 public class NameSequence
 {
-    public static readonly NameSequence Void = new VoidNameSequence();
+    public static NameSequence GetVoid(bool isPostgres) => isPostgres ? new VoidNameSequence("value") : new VoidNameSequence("Value");
 
     class VoidNameSequence : NameSequence
     {
-        public override string ToString()
-        {
-            return "Value";
-        }
+        public VoidNameSequence(string value) :base(value, null!){}
+        public override string ToString() => Value;
     }
 
     readonly string Value;
@@ -30,7 +28,7 @@ public class NameSequence
 
     public override string ToString()
     {
-        if(PreSequence is VoidNameSequence)
+        if (PreSequence is VoidNameSequence)
             return Value;
 
         return "_".Combine(PreSequence.ToString(), Value);

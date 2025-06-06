@@ -12,7 +12,7 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
     return "EntityOmniboxResult";
   }
 
-  icon() {
+  icon(): React.ReactElement<any, string | React.JSXElementConstructor<any>> {
     return this.coloredIcon("arrow-circle-right", "#BCDEFF");
   }
 
@@ -61,7 +61,7 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
 
   }
 
-  navigateTo(result: EntityOmniboxResult) {
+  navigateTo(result: EntityOmniboxResult): Promise<string> | undefined {
 
     if (result.lite == undefined)
       return undefined;
@@ -69,7 +69,7 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
     return Promise.resolve(Navigator.navigateRoute(result.lite));
   }
 
-  toString(result: EntityOmniboxResult) {
+  toString(result: EntityOmniboxResult): string {
     if (result.id)
       return `${result.typeMatch.text} ${result.id}`;
 

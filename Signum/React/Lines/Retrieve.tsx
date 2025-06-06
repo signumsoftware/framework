@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Entity, Lite } from "../Signum.Entities";
 import { Navigator } from "../Navigator";
 
-export function FetchInState<T extends Entity>(p: { lite: Lite<T> | null, children: (val: T | null | undefined) => React.ReactElement | null | undefined}) {
+export function FetchInState<T extends Entity>(p: { lite: Lite<T> | null, children: (val: T | null | undefined) => React.ReactElement | null | undefined}): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null {
 
   var entity = Navigator.useFetchInState(p.lite);
 
@@ -14,7 +14,7 @@ export function FetchInState<T extends Entity>(p: { lite: Lite<T> | null, childr
   return res;
 }
 
-export function FetchAndRemember<T extends Entity>(p: { lite: Lite<T> | null, children: (val: T | null | undefined) => React.ReactElement | null | undefined }) {
+export function FetchAndRemember<T extends Entity>(p: { lite: Lite<T> | null, children: (val: T | null | undefined) => React.ReactElement | null | undefined }): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null {
 
   var entity = Navigator.useFetchAndRemember(p.lite);
 

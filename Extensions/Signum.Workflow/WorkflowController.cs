@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Signum.API;
 using Signum.API.Filters;
 using Signum.API.Json;
 using Signum.Basics;
+using Signum.Processes;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using static Signum.API.Controllers.OperationController;
@@ -213,10 +216,12 @@ public class WorkflowController : Controller
         public bool validationResult;
     }
 
-    [HttpGet("api/workflow/scriptRunner/simpleStatus"), SignumAllowAnonymous]
-    public SimpleStatus GetSimpleStatus()
+    [HttpGet("api/workflow/healthCheck"), SignumAllowAnonymous, EnableCors(PolicyName = "HealthCheck")]
+    public SignumHealthResult HealthCheck()
     {
-        return WorkflowScriptRunner.GetSimpleStatus();
+        var status = WorkflowScriptRunner.GetHealthStatus();
+
+        return new SignumHealthResult(status);
     }
 
     [HttpGet("api/workflow/scriptRunner/view")]
@@ -271,6 +276,20 @@ public class WorkflowController : Controller
             .Select(a => a.To.ToLite())
             .ToList();
     }
+
+    [HttpPost("api/workflow/onlyWorkflowActivity")]
+    public WorkflowActivityEntity? OnlyWorkflowActivity([Required, FromBody] List<Lite<CaseActivityEntity>> caseActivitiesLites)
+    {
+        var workflowActivities = caseActivitiesLites.Chunk(100).SelectMany(cas =>
+        {
+            return Database.Query<CaseActivityEntity>().Where(ca => cas.Contains(ca.ToLite()))
+            .Select(ca => ca.WorkflowActivity)
+            .Distinct()
+            .ToList();
+        }).Distinct().ToList();
+
+        return (WorkflowActivityEntity?)workflowActivities.Only();
+    }
 }
 
 public class NextConnectionsRequest
@@ -292,8 +311,8 @@ public class WorkflowActivityMonitorRequestTS
         return new WorkflowActivityMonitorRequest
         {
             Workflow = workflow,
-            Filters = filters.Select(f => f.ToFilter(qd, true, SignumServer.JsonSerializerOptions)).ToList(),
-            Columns = columns.Select(c => c.ToColumn(qd, true)).ToList(),
+            Filters = filters.Select(f => f.ToFilter(qd, canAggregate: true, SignumServer.JsonSerializerOptions, canTimeSeries: false)).ToList(),
+            Columns = columns.Select(c => c.ToColumn(qd, canAggregate: true, canTimeSeries: false)).ToList(),
         };
     }
 }

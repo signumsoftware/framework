@@ -14,7 +14,7 @@ export interface TemplateControlsProps {
   widgetButtons?: React.ReactElement;
 }
 
-export default function TemplateControls(p: TemplateControlsProps) {
+export default function TemplateControls(p: TemplateControlsProps): React.JSX.Element {
 
   const [currentToken, setCurrentToken] = React.useState<{ type: "Query", token?: QueryToken } | { type: "Global", expression?: GlobalVariable }>({ type: p.queryKey ? 'Query' : "Global" });
 

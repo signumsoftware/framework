@@ -12,7 +12,7 @@ import { Operations } from '@framework/Operations'
 import { TreeOptions } from '../../TreeClient'
 
 
-export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity>) {
+export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity>): React.JSX.Element {
 
   const treeViewRef = React.useRef<TreeViewer>(null);
   const fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity, ...p.deps ?? []]);

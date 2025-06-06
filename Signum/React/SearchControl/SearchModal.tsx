@@ -29,7 +29,7 @@ interface SearchModalProps extends IModalProps<{ rows: ResultRow[], searchContro
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }
 
-function SearchModal(p: SearchModalProps) {
+function SearchModal(p: SearchModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
 
@@ -156,7 +156,7 @@ function SearchModal(p: SearchModalProps) {
   const okEnabled = p.isMany ? (p.allowNoSelection || selectedRows.current.length > 0) : selectedRows.current.length == 1;
 
   return (
-    <Modal size={(p.size ?? qs?.modalSize ?? "lg") as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf - search - modal">
+    <Modal size={(p.size ?? qs?.modalSize ?? "lg") as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-search-modal">
       <ModalHeaderButtons onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}>
         <span className="sf-entity-title">
           {p.title}
@@ -250,7 +250,7 @@ namespace SearchModal {
 
 export default SearchModal;
 
-export function defaultSelectMessage(queryName: PseudoType | QueryKey, plural: boolean, forProperty?: string) {
+export function defaultSelectMessage(queryName: PseudoType | QueryKey, plural: boolean, forProperty?: string): string {
 
   var type = queryName instanceof QueryKey ? null : getTypeInfo(queryName);
 

@@ -14,7 +14,7 @@ import {
   NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState,
   PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol, PredictorEpochProgressEntity, TensorFlowPredictorAlgorithm
 } from './Signum.MachineLearning'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 import { QueryToken } from '@framework/FindOptions';
 import { ImportComponent } from '@framework/ImportComponent';
 import { TypeContext } from '@framework/Lines';
@@ -22,7 +22,7 @@ import SelectorModal from '@framework/SelectorModal';
 
 export namespace PredictorClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(PredictorEntity, e => import('./Templates/Predictor')));
     Navigator.addSettings(new EntitySettings(PredictorSubQueryEntity, e => import('./Templates/PredictorSubQuery')));
     Navigator.addSettings(new EntitySettings(NeuralNetworkSettingsEntity, e => import('./Templates/NeuralNetworkSettings')));
@@ -39,10 +39,10 @@ export namespace PredictorClient {
     Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.accuracyValidation), numbericCellFormatter("#D98880"));
   
   
-    QuickLinks.registerQuickLink(PredictorEntity, new QuickLinks.QuickLinkAction(PredictorMessage.DownloadCsv.name, () => PredictorMessage.DownloadCsv.niceToString(), ctx => API.downloadCsvById(ctx.lite)));
-    QuickLinks.registerQuickLink(PredictorEntity, new QuickLinks.QuickLinkAction(PredictorMessage.DownloadTsv.name, () => PredictorMessage.DownloadTsv.niceToString(), ctx => API.downloadTsvById(ctx.lite)));
-    QuickLinks.registerQuickLink(PredictorEntity, new QuickLinks.QuickLinkAction(PredictorMessage.DownloadTsvMetadata.name, () => PredictorMessage.DownloadTsvMetadata.niceToString(), ctx => API.downloadTsvMetadataById(ctx.lite)));
-    QuickLinks.registerQuickLink(PredictorEntity, new QuickLinks.QuickLinkAction(PredictorMessage.OpenTensorflowProjector.name, () => PredictorMessage.OpenTensorflowProjector.niceToString(), ctx => window.open("http://projector.tensorflow.org/", "_blank")));
+    QuickLinkClient.registerQuickLink(PredictorEntity, new QuickLinkAction(PredictorMessage.DownloadCsv.name, () => PredictorMessage.DownloadCsv.niceToString(), ctx => API.downloadCsvById(ctx.lite)));
+    QuickLinkClient.registerQuickLink(PredictorEntity, new QuickLinkAction(PredictorMessage.DownloadTsv.name, () => PredictorMessage.DownloadTsv.niceToString(), ctx => API.downloadTsvById(ctx.lite)));
+    QuickLinkClient.registerQuickLink(PredictorEntity, new QuickLinkAction(PredictorMessage.DownloadTsvMetadata.name, () => PredictorMessage.DownloadTsvMetadata.niceToString(), ctx => API.downloadTsvMetadataById(ctx.lite)));
+    QuickLinkClient.registerQuickLink(PredictorEntity, new QuickLinkAction(PredictorMessage.OpenTensorflowProjector.name, () => PredictorMessage.OpenTensorflowProjector.niceToString(), ctx => window.open("http://projector.tensorflow.org/", "_blank")));
   
     Operations.addSettings(new EntityOperationSettings(PredictorOperation.StopTraining, { hideOnCanExecute: true }));
     Operations.addSettings(new EntityOperationSettings(PredictorOperation.CancelTraining, { hideOnCanExecute: true }));
@@ -102,12 +102,12 @@ export namespace PredictorClient {
   }
   
   export const initializers: { [key: string]: (pred: PredictorEntity) => void } = {};
-  export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize: (predictor: PredictorEntity) => void) {
+  export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize: (predictor: PredictorEntity) => void) : void {
     initializers[symbol.key] = initialize;
   }
   
   export const resultRenderers: { [key: string]: (ctx: TypeContext<PredictorEntity>) => React.ReactNode } = {};
-  export function registerResultRenderer(symbol: PredictorResultSaverSymbol, renderer: (ctx: TypeContext<PredictorEntity>) => React.ReactNode) {
+  export function registerResultRenderer(symbol: PredictorResultSaverSymbol, renderer: (ctx: TypeContext<PredictorEntity>) => React.ReactNode): void {
     resultRenderers[symbol.key] = renderer;
   }
   

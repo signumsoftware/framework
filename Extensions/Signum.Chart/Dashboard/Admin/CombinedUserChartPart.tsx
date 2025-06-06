@@ -6,7 +6,7 @@ import { CombinedUserChartElementEmbedded, CombinedUserChartPartEntity, UserChar
 import { DashboardEntity } from '../../../Signum.Dashboard/Signum.Dashboard';
 import { IsQueryCachedLine } from '../../../Signum.Dashboard/Admin/Dashboard';
 
-export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUserChartPartEntity> }) {
+export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUserChartPartEntity> }): React.JSX.Element {
   const ctx = p.ctx;
 
   return (

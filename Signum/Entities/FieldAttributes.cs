@@ -28,6 +28,8 @@ public class AssemblySchemaNameAttribute : Attribute
 
     public string SchemaName { get; private set; }
 
+    public bool AvoidIdiomatic { get; set; }
+
     public string? ForNamespace { get; set; }
 
     public AssemblySchemaNameAttribute(string schemaName)
@@ -92,7 +94,7 @@ public struct Implementations : IEquatable<Implementations>
 
             if (t.IsInterface || t.IsAbstract)
             {
-                message += @"\r\n" + ConsiderMessage(route, "typeof(YourConcrete" + t.TypeName() + ")");
+                message += @"\n" + ConsiderMessage(route, "typeof(YourConcrete" + t.TypeName() + ")");
             }
 
             throw new InvalidOperationException(message);
@@ -127,7 +129,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         if (types.Length == 1)
             return By(types[0]);
 
-        var error = types.Select(Error).NotNull().ToString("\r\n");
+        var error = types.Select(Error).NotNull().ToString("\n");
 
         if (error.HasText())
             throw new InvalidOperationException(error);
@@ -137,6 +139,9 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
     static string? Error(Type type)
     {
+        if(type.IsLite())
+            return "{0} is a Lite".FormatWith(type.CleanType().TypeName());
+
         if (type.IsInterface)
             return "{0} is an interface".FormatWith(type.Name);
 
@@ -315,7 +320,15 @@ public class DbTypeAttribute : Attribute
     }
 
 
-    public string? Collation { get; set; }
+    public string? CollationSqlServer { get; set; }
+    public string? CollationPostgres { get; set; }
+
+    public string? GetCollation(bool isPostgres)
+    {
+        return (isPostgres ? CollationPostgres : CollationSqlServer);
+    }
+
+    public bool CollationPostgres_AvoidToLower { get; set; }
 
     public const string SqlServer_NewId = "NEWID()";
     public const string SqlServer_NewSequentialId = "NEWSEQUENTIALID()";
@@ -330,7 +343,7 @@ public sealed class PrimaryKeyAttribute : DbTypeAttribute
 {
     public Type Type { get; set; }
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     public bool Identity { get; set; }
 
@@ -350,10 +363,9 @@ public sealed class PrimaryKeyAttribute : DbTypeAttribute
         }
     }
 
-    public PrimaryKeyAttribute(Type type, string name = "ID")
+    public PrimaryKeyAttribute(Type type)
     {
         this.Type = type;
-        this.Name = name;
         this.Identity = type != typeof(Guid);
         this.IdentityBehaviour = true;
     }
@@ -444,6 +456,8 @@ public sealed class TicksColumnAttribute : DbTypeAttribute
 public sealed class ToStringColumnAttribute : DbTypeAttribute
 {
     public string? Name { get; set; }
+
+    public bool AvoidIdiomatic { get; set; }
 
     public Type? Type { get; set; }
 

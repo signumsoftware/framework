@@ -77,7 +77,7 @@ internal class ChildProjectionFlattener : DbExpressionVisitor
 
                 if (!IsKey(currentSource, columns))
                 {
-                    Alias aliasDistinct = aliasGenerator.GetUniqueAlias(currentSource.Alias.Name + "D");
+                    Alias aliasDistinct = aliasGenerator.GetUniqueAlias(currentSource.Alias.Name + "_d");
                     ColumnGenerator generatorDistinct = new ColumnGenerator();
 
                     List<ColumnDeclaration> columnDistinct = columns.Select(ce => generatorDistinct.MapColumn(ce)).ToList();
@@ -104,7 +104,7 @@ internal class ChildProjectionFlattener : DbExpressionVisitor
 
                 SelectExpression @internal = ExtractOrders(proj.Select, out List<OrderExpression>? innerOrders);
 
-                Alias aliasSM = aliasGenerator.GetUniqueAlias(@internal.Alias.Name + "SM");
+                Alias aliasSM = aliasGenerator.GetUniqueAlias(@internal.Alias.Name + "_sm");
                 SelectExpression selectMany = new SelectExpression(aliasSM, false, null, columnsSMExternal.Concat(columnsSMInternal),
                     new JoinExpression(JoinType.CrossApply,
                         external,

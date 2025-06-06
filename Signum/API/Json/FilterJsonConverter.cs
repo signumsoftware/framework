@@ -52,7 +52,7 @@ public class FilterJsonConverter : JsonConverter<FilterTS>
 [JsonConverter(typeof(FilterJsonConverter))]
 public abstract class FilterTS
 {
-    public abstract Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions);
+    public abstract Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions, bool canTimeSeries);
 
     public static FilterTS FromFilter(Filter filter)
     {
@@ -82,15 +82,23 @@ public class FilterConditionTS : FilterTS
     public FilterOperation operation;
     public object? value;
 
-    public override Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions)
+    public override Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions, bool canTimeSeries)
     {
-        var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
+        var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0) | (canTimeSeries ? SubTokensOptions.CanTimeSeries : 0);
         var parsedToken = QueryUtils.Parse(token, qd, options);
-        var expectedValueType = operation.IsList() ? typeof(List<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
+        var expectedValueType = FilterCondition.GetValueType(parsedToken, operation);
 
-        var val = value is JsonElement jtok ?
-             jtok.ToObject(expectedValueType, jsonSerializerOptions) :
-             value;
+        object? val;
+        try
+        {
+            val = value is JsonElement jtok ?
+                 jtok.ToObject(expectedValueType, jsonSerializerOptions) :
+                 value;
+        }
+        catch(JsonException)
+        {
+            throw new InvalidOperationException("Invalid value when filtering by " + token.ToString());
+        }
 
         if (val is DateTime dt)
         {
@@ -115,12 +123,14 @@ public class FilterGroupTS : FilterTS
     public string? token;
     public required List<FilterTS> filters;
 
-    public override Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions)
+    public override Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions, bool canTimeSeries)
     {
-        var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
+        var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | 
+            (canAggregate ? SubTokensOptions.CanAggregate : 0) | (canTimeSeries ? SubTokensOptions.CanTimeSeries : 0);
+
         var parsedToken = token == null ? null : QueryUtils.Parse(token, qd, options);
 
-        var parsedFilters = filters.Select(f => f.ToFilter(qd, canAggregate, jsonSerializerOptions)).ToList();
+        var parsedFilters = filters.Select(f => f.ToFilter(qd, canAggregate, jsonSerializerOptions, canTimeSeries)).ToList();
 
         return new FilterGroup(groupOperation, parsedToken, parsedFilters);
     }
@@ -131,9 +141,11 @@ public class ColumnTS
     public required string token;
     public string? displayName;
 
-    public Column ToColumn(QueryDescription qd, bool canAggregate)
+    public Column ToColumn(QueryDescription qd, bool canAggregate, bool canTimeSeries)
     {
-        var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet  | (canAggregate ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual));
+        var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet |
+            (canAggregate ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual) |
+            (canTimeSeries ? SubTokensOptions.CanTimeSeries : 0));
 
         return new Column(queryToken, displayName ?? queryToken.NiceName());
     }
@@ -172,84 +184,7 @@ public class PaginationTS
     }
 }
 
-public class SystemTimeTS
-{
-    public SystemTimeMode mode;
-    public SystemTimeJoinMode? joinMode;
-    public DateTimeOffset? startDate;
-    public DateTimeOffset? endDate;
 
-    public SystemTimeTS() { }
-
-    public SystemTimeTS(SystemTime systemTime)
-    {
-        if (systemTime is SystemTime.AsOf asOf)
-        {
-            mode = SystemTimeMode.AsOf;
-            startDate = asOf.DateTime;
-        }
-        else if (systemTime is SystemTime.Between between)
-        {
-            mode = SystemTimeMode.Between;
-            joinMode = ToSystemTimeJoinMode(between.JoinBehaviour);
-            startDate = between.StartDateTime;
-            endDate = between.EndtDateTime;
-        }
-        else if (systemTime is SystemTime.ContainedIn containedIn)
-        {
-            mode = SystemTimeMode.ContainedIn;
-            joinMode = ToSystemTimeJoinMode(containedIn.JoinBehaviour);
-            startDate = containedIn.StartDateTime;
-            endDate = containedIn.EndtDateTime;
-        }
-        else if (systemTime is SystemTime.All all)
-        {
-            mode = SystemTimeMode.All;
-            joinMode = ToSystemTimeJoinMode(all.JoinBehaviour);
-            startDate = null;
-            endDate = null;
-        }
-        else
-            throw new InvalidOperationException("Unexpected System Time");
-    }
-
-    public override string ToString() => $"{mode} {startDate} {endDate}";
-
-
-    public SystemTime ToSystemTime()
-    {
-        return mode switch
-        {
-            SystemTimeMode.AsOf => new SystemTime.AsOf(startDate!.Value),
-            SystemTimeMode.Between => new SystemTime.Between(startDate!.Value, endDate!.Value, ToJoinBehaviour(joinMode!.Value)),
-            SystemTimeMode.ContainedIn => new SystemTime.ContainedIn(startDate!.Value, endDate!.Value, ToJoinBehaviour(joinMode!.Value)),
-            SystemTimeMode.All => new SystemTime.All(ToJoinBehaviour(joinMode!.Value)),
-            _ => throw new InvalidOperationException($"Unexpected {mode}"),
-        };
-    }
-
-    public static JoinBehaviour ToJoinBehaviour(SystemTimeJoinMode joinMode)
-    {
-        return joinMode switch
-        {
-            SystemTimeJoinMode.Current => JoinBehaviour.Current,
-            SystemTimeJoinMode.FirstCompatible => JoinBehaviour.FirstCompatible,
-            SystemTimeJoinMode.AllCompatible => JoinBehaviour.AllCompatible,
-            _ => throw new UnexpectedValueException(joinMode),
-        };
-    }
-
-    public static SystemTimeJoinMode ToSystemTimeJoinMode(JoinBehaviour joinBehaviour)
-    {
-        return joinBehaviour switch
-        {
-            JoinBehaviour.Current => SystemTimeJoinMode.Current,
-            JoinBehaviour.FirstCompatible => SystemTimeJoinMode.FirstCompatible,
-            JoinBehaviour.AllCompatible => SystemTimeJoinMode.AllCompatible,
-            _ => throw new UnexpectedValueException(joinBehaviour),
-        };
-    }
-}
 
 public class QueryValueRequestTS
 {
@@ -257,7 +192,7 @@ public class QueryValueRequestTS
     public List<FilterTS>? filters;
     public string? valueToken;
     public bool? multipleValues;
-    public SystemTimeTS? systemTime;
+    public SystemTimeRequest? systemTime;
 
     public QueryValueRequest ToQueryValueRequest(string queryKey, JsonSerializerOptions jsonSerializerOptions)
     {
@@ -273,7 +208,7 @@ public class QueryValueRequestTS
         {
             QueryName = qn,
             MultipleValues = multipleValues ?? false,
-            Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false, jsonSerializerOptions)).ToList(),
+            Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false, jsonSerializerOptions, this.systemTime?.mode == SystemTimeMode.TimeSeries)).ToList(),
             ValueToken = value,
             SystemTime = this.systemTime?.ToSystemTime(),
         };
@@ -290,7 +225,7 @@ public class QueryRequestTS
     public required List<OrderTS> orders;
     public required List<ColumnTS> columns;
     public required PaginationTS pagination;
-    public SystemTimeTS? systemTime;
+    public SystemTimeRequest? systemTime;
 
     public static QueryRequestTS FromQueryRequest(QueryRequest qr)
     {
@@ -302,7 +237,7 @@ public class QueryRequestTS
             filters = qr.Filters.Select(f => FilterTS.FromFilter(f)).ToList(),
             orders = qr.Orders.Select(o => new OrderTS { orderType = o.OrderType, token = o.Token.FullKey() }).ToList(),
             pagination = new PaginationTS(qr.Pagination),
-            systemTime = qr.SystemTime == null ? null : new SystemTimeTS(qr.SystemTime),
+            systemTime = qr.SystemTime?.Clone(),
         };
     }
 
@@ -313,17 +248,18 @@ public class QueryRequestTS
 
         var qn = QueryLogic.ToQueryName(this.queryKey);
         var qd = QueryLogic.Queries.QueryDescription(qn);
+        var timeSeries = this.systemTime?.mode == SystemTimeMode.TimeSeries;
 
         return new QueryRequest
         {
             QueryUrl = referrerUrl,
             QueryName = qn,
             GroupResults = groupResults,
-            Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: groupResults, jsonSerializerOptions)).ToList(),
-            Orders = this.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: groupResults)).ToList(),
-            Columns = this.columns.EmptyIfNull().Select(f => f.ToColumn(qd, canAggregate: groupResults)).ToList(),
+            Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: groupResults, jsonSerializerOptions, timeSeries)).ToList(),
+            Orders = this.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: groupResults, canTimeSeries: timeSeries)).ToList(),
+            Columns = this.columns.EmptyIfNull().Select(f => f.ToColumn(qd, canAggregate: groupResults, canTimeSeries: timeSeries)).ToList(),
             Pagination = this.pagination.ToPagination(),
-            SystemTime = this.systemTime?.ToSystemTime(),
+            SystemTime = this.systemTime,
         };
     }
 
@@ -351,8 +287,8 @@ public class QueryEntitiesRequestTS
         {
             QueryName = qn,
             Count = count,
-            Filters = filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false, jsonSerializerOptions)).ToList(),
-            Orders = orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: false)).ToList(),
+            Filters = filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false, jsonSerializerOptions, canTimeSeries: false)).ToList(),
+            Orders = orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: false, canTimeSeries: false)).ToList(),
         };
     }
 }
@@ -362,9 +298,12 @@ public class OrderTS
     public required string token;
     public required OrderType orderType;
 
-    public Order ToOrder(QueryDescription qd, bool canAggregate)
+    public Order ToOrder(QueryDescription qd, bool canAggregate, bool canTimeSeries)
     {
-        return new Order(QueryUtils.Parse(this.token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | (canAggregate ? SubTokensOptions.CanAggregate : 0)), orderType);
+        return new Order(QueryUtils.Parse(this.token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | 
+            (canAggregate ? SubTokensOptions.CanAggregate : 0) | 
+            (canTimeSeries ? SubTokensOptions.CanTimeSeries : 0)
+            ), orderType);
     }
 
     public override string ToString() => $"{token} {orderType}";

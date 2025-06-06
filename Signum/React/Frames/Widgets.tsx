@@ -14,7 +14,7 @@ export const onWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => React.Re
 export const onEmbeddedWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => EmbeddedWidget[] | undefined> = [];
 
 
-export function clearWidgets() {
+export function clearWidgets(): void {
   onWidgets.clear();
   onEmbeddedWidgets.clear();
 }

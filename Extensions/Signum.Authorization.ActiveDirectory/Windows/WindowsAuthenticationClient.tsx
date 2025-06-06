@@ -12,7 +12,7 @@ export namespace WindowsAuthenticationClient {
   
   /* Install and enable Windows authentication in IIS https://docs.microsoft.com/en-us/aspnet/core/security/authentication/windowsauth?view=aspnetcore-2.2&tabs=visual-studio */
   
-  export function registerWindowsAuthenticator() {
+  export function registerWindowsAuthenticator(): void {
   
     if (Reflection.isStarted())
       throw new Error("call WindowsAuthenticationClient.registerWindowsAuthenticator in MainPublic.tsx before AuthClient.autoLogin");
@@ -35,7 +35,7 @@ export namespace WindowsAuthenticationClient {
     }).catch(() => undefined);
   }
   
-  export module API {
+  export namespace API {
   
     export function loginWindowsAuthentication( throwError : boolean): Promise<AuthClient.API.LoginResponse | undefined> {
       return ajaxPost({ url: `/api/auth/loginWindowsAuthentication?throwError=${throwError}`, avoidAuthToken: true }, undefined);
@@ -43,7 +43,7 @@ export namespace WindowsAuthenticationClient {
   }
   
   
-  export function LoginWithWindowsButton() {
+  export function LoginWithWindowsButton(): React.JSX.Element {
   
     function onClick() {
       return API.loginWindowsAuthentication(true)

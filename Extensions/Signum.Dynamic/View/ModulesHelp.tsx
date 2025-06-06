@@ -6,7 +6,7 @@ import { globalModules } from './GlobalModules';
 import { DynamicViewMessage } from '../Signum.Dynamic.Views';
 import { TextAreaLine } from '@framework/Lines';
 
-export function ModulesHelp(p: { cleanName: string; clientCode?: boolean; }) {
+export function ModulesHelp(p: { cleanName: string; clientCode?: boolean; }): React.JSX.Element {
 
   var modules: { [name: string]: string; } = {};
 

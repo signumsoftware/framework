@@ -4,6 +4,9 @@ using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using Signum.Engine.Sync;
+using System.Collections.ObjectModel;
+using Microsoft.SqlServer.Types;
+using NpgsqlTypes;
 
 namespace Signum.Engine.Linq;
 
@@ -56,7 +59,8 @@ internal class QueryFormatter : DbExpressionVisitor
             val = val == null ? (int?)null : Convert.ToInt32(val);
         }
 
-        var typePair = Schema.Current.Settings.GetSqlDbTypePair(clrType);
+        var typePair = isPostgres && clrType == typeof(DateTime) && value.Value is DateTime dt && dt.Kind == DateTimeKind.Utc ? new DbTypePair(new AbstractDbType(NpgsqlDbType.TimestampTz), null) :
+            Schema.Current.Settings.GetSqlDbTypePair(clrType);
 
         var pb = Connector.Current.ParameterBuilder;
 
@@ -196,7 +200,9 @@ internal class QueryFormatter : DbExpressionVisitor
 
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
-                    if (this.isPostgres && (b.Left.Type == typeof(string) || b.Right.Type == typeof(string)))
+                    if (this.isPostgres &&
+                        (b.Left.Type == typeof(string) || b.Right.Type == typeof(string) ||
+                        b.Left.Type == typeof(SqlHierarchyId) || b.Right.Type == typeof(SqlHierarchyId)))
                         sb.Append(" || ");
                     else
                         sb.Append(" + ");
@@ -234,8 +240,11 @@ internal class QueryFormatter : DbExpressionVisitor
             if (i > 0)
                 sb.Append(", ");
             this.Visit(exp.Expression);
-            if (exp.OrderType != OrderType.Ascending)
-                sb.Append(" DESC");
+
+            if (exp.OrderType == OrderType.Ascending)
+                sb.Append(isPostgres ? " NULLS FIRST" : "");
+            else
+                sb.Append(isPostgres ? " DESC NULLS LAST" : " DESC");
         }
         sb.Append(')');
         return rowNumber;
@@ -411,6 +420,29 @@ internal class QueryFormatter : DbExpressionVisitor
         return column;
     }
 
+    protected internal override Expression VisitSqlColumnList(SqlColumnListExpression sqlColumnList)
+    {
+        if (sqlColumnList.Columns.Count == 0)
+            sb.Append("*");
+        else
+        {
+            if (sqlColumnList.Columns.Count > 1)
+                sb.Append("(");
+
+            foreach (var col in sqlColumnList.Columns)
+            {
+                sb.Append(col.Alias.ToString());
+                sb.Append('.');
+                sb.Append(col.Name == "*" ? "*" : col.Name!.SqlEscape(isPostgres));
+            }
+
+            if (sqlColumnList.Columns.Count > 1)
+                sb.Append(")");
+        }
+
+        return sqlColumnList;
+    }
+
     protected internal override Expression VisitSelect(SelectExpression select)
     {
         bool isFirst = sb.Length == 0;
@@ -482,19 +514,7 @@ internal class QueryFormatter : DbExpressionVisitor
         {
             this.AppendNewLine(Indentation.Same);
             sb.Append("ORDER BY ");
-            for (int i = 0, n = select.OrderBy.Count; i < n; i++)
-            {
-                OrderExpression exp = select.OrderBy[i];
-                if (i > 0)
-                {
-                    sb.Append(", ");
-                }
-                this.Visit(exp.Expression);
-                if (exp.OrderType != OrderType.Ascending)
-                {
-                    sb.Append(" DESC");
-                }
-            }
+            VisitOrderBys(select.OrderBy);
         }
 
         if (select.Top != null && this.isPostgres)
@@ -519,7 +539,23 @@ internal class QueryFormatter : DbExpressionVisitor
         return select;
     }
 
-    
+    private void VisitOrderBys(ReadOnlyCollection<OrderExpression> orderBys)
+    {
+        for (int i = 0, n = orderBys.Count; i < n; i++)
+        {
+            OrderExpression exp = orderBys[i];
+            if (i > 0)
+            {
+                sb.Append(", ");
+            }
+            this.Visit(exp.Expression);
+            if (exp.OrderType == OrderType.Ascending)
+                sb.Append(isPostgres ? " NULLS FIRST" : "");
+            else
+                sb.Append(isPostgres ? " DESC NULLS LAST" : " DESC");
+        }
+    }
+
     string GetAggregateFunction(AggregateSqlFunction agg)
     {
         return agg switch
@@ -557,8 +593,24 @@ internal class QueryFormatter : DbExpressionVisitor
                     sb.Append(", ");
                 this.Visit(exp);
             }
+
+            if(aggregate.OrderBy != null && aggregate.OrderBy.Count > 0 && isPostgres)
+            {
+                sb.Append(" ORDER BY ");
+                VisitOrderBys(aggregate.OrderBy!);
+            }
         }
         sb.Append(')');
+
+        if (aggregate.OrderBy != null && aggregate.OrderBy.Count > 0 && !isPostgres)
+        {
+            sb.Append(" WITHIN GROUP (ORDER BY ");
+            VisitOrderBys(aggregate.OrderBy!);
+            sb.Append(")");
+
+        }
+
+
 
         return aggregate;
     }

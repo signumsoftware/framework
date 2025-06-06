@@ -1,4 +1,6 @@
+using Microsoft.Identity.Client;
 using Signum.Engine.Maps;
+using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
 using System.IO;
 
@@ -75,13 +77,13 @@ public static class SchemaGenerator
         if (foreignKeys != null)
             foreignKeys.GoAfter = true;
 
-        HashSet<string> fullTextSearchCatallogs = new HashSet<string>(); 
+        HashSet<string>? fullTextSearchCatallogs = sqlBuilder.IsPostgres ? null : new HashSet<string>(); 
 
         SqlPreCommand? indices = tables.Select(t =>
         {
             var allIndexes = t.AllIndexes().Where(a => !a.PrimaryKey);
 
-            fullTextSearchCatallogs.AddRange(allIndexes.OfType<FullTextTableIndex>().Select(a => a.CatallogName));
+            fullTextSearchCatallogs?.AddRange(allIndexes.OfType<FullTextTableIndex>().Select(a => a.SqlServer.CatallogName));
 
             var mainIndices = allIndexes.Select(ix => sqlBuilder.CreateIndex(ix, checkUnique: null)).Combine(Spacing.Simple);
 
@@ -95,7 +97,10 @@ public static class SchemaGenerator
         if (indices != null)
             indices.GoAfter = true;
 
-        var catallogs = fullTextSearchCatallogs.Select(a => sqlBuilder.CreateFullTextCatallog(a)).Combine(Spacing.Simple);
+        if (fullTextSearchCatallogs != null && fullTextSearchCatallogs.Any() && Connector.Current is SqlServerConnector ssc && !ssc.SupportsFullTextSearch)
+            throw new InvalidOperationException("Current database does not support Full-Text Search");
+
+        var catallogs = fullTextSearchCatallogs?.Select(a => sqlBuilder.CreateFullTextCatallog(a)).Combine(Spacing.Simple);
         if (catallogs != null)
             catallogs.GoAfter = true;
 
@@ -116,29 +121,23 @@ public static class SchemaGenerator
         return result;
     }
 
-    public static SqlPreCommand? PostgresExtensions()
+    public static SqlPreCommand? CreatePostgresExtensions()
     {
         if (!Schema.Current.Settings.IsPostgres)
             return null;
 
-        return Schema.Current.PostgresExtensions.Select(p => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(p)).Combine(Spacing.Simple);
+        var s = Schema.Current;
+
+        return s.PostgresExtensions.Where(kvp => kvp.Value(s)).Select(kvp => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(kvp.Key)).Combine(Spacing.Simple);
     }
 
-    public static SqlPreCommand? PostgresTemporalTableScript()
+
+    internal static SqlPreCommand? CreatePostgresDefaultTextLanguage()
     {
         if (!Schema.Current.Settings.IsPostgres)
             return null;
 
-        if (!Schema.Current.Tables.Any(t => t.Value.SystemVersioned != null))
-            return null;
-
-        var file = Schema.Current.Settings.PostresVersioningFunctionNoChecks ?
-            "versioning_function_nochecks.sql" :
-            "versioning_function.sql";
-
-        var text = new StreamReader(typeof(Schema).Assembly.GetManifestResourceStream($"Signum.Engine.Sync.Postgres.{file}")!).Using(a => a.ReadToEnd());
-
-        return new SqlPreCommandSimple(text);
+        return new SqlPreCommandSimple($"ALTER DATABASE \"{ObjectName.CurrentOptions.DatabaseNameReplacement ?? Connector.Current.DatabaseName()}\" SET default_text_search_config = '{FullTextTableIndex.PostgresOptions.DefaultLanguage()}';");
     }
 
     public static SqlPreCommand? SnapshotIsolation()

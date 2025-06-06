@@ -9,6 +9,9 @@ public class EntityListCheckBoxProxy : EntityBaseProxy
     {
     }
 
+    public override object? GetValueUntyped() => throw new NotImplementedException();
+    public override void SetValueUntyped(object? value) => throw new NotImplementedException();
+
     public WebElementLocator CheckBoxElement(Lite<Entity> lite)
     {
         return this.Element.WithLocator(By.CssSelector("input[name='{0}']".FormatWith(lite.Key())));

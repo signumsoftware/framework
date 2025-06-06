@@ -42,7 +42,7 @@ public static class UserQueryLogic
             UserAssetsImporter.Register("UserQuery", UserQueryOperation.Save);
 
             sb.Schema.Synchronizing += Schema_Synchronizing;
-            sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
+            sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += e =>
                 Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryEntity>().Where(a => a.Query.Is(e)));
 
             sb.Include<UserQueryEntity>()
@@ -84,10 +84,18 @@ public static class UserQueryLogic
                 {
                     {"ValueUserQueryListPart", typeof(ValueUserQueryListPartEntity)},
                     {"UserQueryPart", typeof(UserQueryPartEntity)},
+                    {"BigValuePart", typeof(BigValuePartEntity)},
                 });
 
                 DashboardLogic.OnGetCachedQueryDefinition.Register((ValueUserQueryListPartEntity vuql, PanelPartEmbedded pp) => vuql.UserQueries.Select(uqe => new CachedQueryDefinition(uqe.UserQuery.ToQueryRequestValue(), uqe.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqe.UserQuery, uqe.IsQueryCached, canWriteFilters: false)));
-                DashboardLogic.OnGetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.RenderMode == UserQueryPartRenderMode.BigValue ? uqp.UserQuery.ToQueryRequestValue() : uqp.UserQuery.ToQueryRequest(), uqp.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqp.UserQuery, uqp.IsQueryCached, canWriteFilters: false) });
+                DashboardLogic.OnGetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.UserQuery.ToQueryRequest(), uqp.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqp.UserQuery, uqp.IsQueryCached, canWriteFilters: false) });
+
+                sb.Schema.EntityEvents<UserQueryEntity>().PreUnsafeDelete += query =>
+                {
+                    Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((BigValuePartEntity)mle.Element.Content).UserQuery)).UnsafeDeleteMList();
+                    Database.Query<BigValuePartEntity>().Where(uqp => query.Contains(uqp.UserQuery)).UnsafeDelete();
+                    return null;
+                };
 
                 sb.Schema.EntityEvents<UserQueryEntity>().PreUnsafeDelete += query =>
                 {
@@ -96,37 +104,30 @@ public static class UserQueryLogic
                     return null;
                 };
 
-                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += q =>
+                sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += q =>
                 {
                     var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => ((UserQueryPartEntity)mle.Element.Content).UserQuery.Query.Is(q)));
                     var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryPartEntity>().Where(uqp => uqp.UserQuery.Query.Is(q)));
                     return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
                 };
 
-                sb.Schema.Table<UserQueryEntity>().PreDeleteSqlSync += arg =>
+                sb.Schema.EntityEvents<UserQueryEntity>().PreDeleteSqlSync += arg =>
                 {
                     var uq = (UserQueryEntity)arg;
 
-                    var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
+                    var uqPartsMList = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
                         .Where(mle => ((UserQueryPartEntity)mle.Element.Content).UserQuery.Is(uq)));
 
-                    var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryPartEntity>()
+                    var uqParts = Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryPartEntity>()
                       .Where(mle => mle.UserQuery.Is(uq)));
 
-                    return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
-                };
+                    var bigValuePartsMList = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
+                  .Where(mle => ((BigValuePartEntity)mle.Element.Content).UserQuery.Is(uq)));
 
-                Validator.PropertyValidator((UserQueryPartEntity e) => e.AggregateFromSummaryHeader).StaticPropertyValidation += (UserQueryPartEntity uqp, PropertyInfo pi) =>
-                {
-                    if (uqp.AggregateFromSummaryHeader && uqp.RenderMode == UserQueryPartRenderMode.BigValue && uqp.UserQuery != null)
-                    {
-                        var first = uqp.UserQuery.Columns.FirstOrDefault(a => a.SummaryToken != null);
+                    var bigValueParts = Administrator.UnsafeDeletePreCommand(Database.Query<BigValuePartEntity>()
+                      .Where(mle => mle.UserQuery.Is(uq)));
 
-                        if (first == null)
-                            return DashboardMessage.TheUserQuery0HasNoColumnWithSummaryHeader.NiceToString(uqp.UserQuery);
-                    }
-
-                    return null;
+                    return SqlPreCommand.Combine(Spacing.Simple, uqPartsMList, uqParts, bigValueParts, bigValuePartsMList);
                 };
             });
 
@@ -164,7 +165,7 @@ public static class UserQueryLogic
             Columns = MergeColumns(userQuery, ignoreHidden),
             Orders = userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
             Pagination = userQuery.GetPagination() ?? new Pagination.All(),
-            SystemTime = userQuery.SystemTime?.GetSystemTime()
+            SystemTime = userQuery.SystemTime?.ToSystemTimeRequest()
         };
 
         return qr;
@@ -189,7 +190,7 @@ public static class UserQueryLogic
             Orders = valueToken is AggregateToken ? new List<Order>() : userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
 
             Pagination = userQuery.GetPagination() ?? new Pagination.All(),
-            SystemTime = userQuery.SystemTime?.GetSystemTime()
+            SystemTime = userQuery.SystemTime?.ToSystemTimeRequest()
         };
 
         return qr;
@@ -343,11 +344,9 @@ public static class UserQueryLogic
     {
         TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition, condition);
 
-        TypeConditionLogic.Register<ValueUserQueryListPartEntity>(typeCondition,
-             cscp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(cscp)));
-
-        TypeConditionLogic.Register<UserQueryPartEntity>(typeCondition,
-            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+        DashboardLogic.RegisterTypeConditionForPart<ValueUserQueryListPartEntity>(typeCondition);
+        DashboardLogic.RegisterTypeConditionForPart<UserQueryPartEntity>(typeCondition);
+        DashboardLogic.RegisterTypeConditionForPart<BigValuePartEntity>(typeCondition);
     }
 
     static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
@@ -530,7 +529,7 @@ public static class UserQueryLogic
         }
         catch (Exception e)
         {
-            return new SqlPreCommandSimple("-- Exception on {0}\r\n{1}".FormatWith(uq.BaseToString(), e.Message.Indent(2, '-')));
+            return new SqlPreCommandSimple("-- Exception on {0}\n{1}".FormatWith(uq.BaseToString(), e.Message.Indent(2, '-')));
         }
     }
 

@@ -7,7 +7,7 @@ interface CaseFlowButtonProps {
   caseActivity: CaseActivityEntity;
 }
 
-export default function CaseFlowButton(p: CaseFlowButtonProps) {
+export default function CaseFlowButton(p: CaseFlowButtonProps): React.JSX.Element {
   function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
     e.preventDefault();
     var ca = p.caseActivity;

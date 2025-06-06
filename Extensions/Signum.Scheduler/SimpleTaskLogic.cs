@@ -26,15 +26,15 @@ public static class SimpleTaskLogic
                     ct.Key,
                 });
 
-            sb.Schema.Table<SimpleTaskSymbol>().PreDeleteSqlSync += SimpleTaskLogic_PreDeleteSqlSync;
+            sb.Schema.EntityEvents<SimpleTaskSymbol>().PreDeleteSqlSync += SimpleTaskLogic_PreDeleteSqlSync;
 
         }
     }
 
-    private static SqlPreCommand? SimpleTaskLogic_PreDeleteSqlSync(Entity arg)
+    private static SqlPreCommand? SimpleTaskLogic_PreDeleteSqlSync(SimpleTaskSymbol st)
     {
-        var deleteLogs =Administrator.DeleteWhereScript((ScheduledTaskLogEntity ol) => ol.Task, (ITaskEntity)arg);
-        var deleteTasks = Administrator.DeleteWhereScript((ScheduledTaskEntity ol) => ol.Task, (ITaskEntity)arg);
+        var deleteLogs =Administrator.DeleteWhereScript((ScheduledTaskLogEntity ol) => ol.Task, st);
+        var deleteTasks = Administrator.DeleteWhereScript((ScheduledTaskEntity ol) => ol.Task, st);
 
         return SqlPreCommand.Combine(Spacing.Double, deleteLogs, deleteTasks);
     }

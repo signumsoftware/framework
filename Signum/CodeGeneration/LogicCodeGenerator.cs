@@ -1,6 +1,5 @@
 using System.Data;
 using System.IO;
-using System.Linq.Expressions;
 using Signum.Engine.Maps;
 
 namespace Signum.CodeGeneration;
@@ -52,7 +51,7 @@ public class LogicCodeGenerator
 
                 lines.InsertRange(notDefined + 2, WriteTypesAndExpresions(mod.Types, expression).Indent(4 + 4 + 4).Lines());
 
-                File.WriteAllText(fileName, lines.ToString("\r\n"));
+                File.WriteAllText(fileName, lines.ToString("\n"));
             }
         }
     }
@@ -109,7 +108,7 @@ public class LogicCodeGenerator
         sb.AppendLine();
         sb.Append(WriteLogicClass(mod, expression));
 
-        return sb.ToString();
+        return sb.ToString().Replace("\r\n", "\n");
     }
 
     protected virtual string WriteLogicClass(Module mod, List<ExpressionInfo> expressions)
@@ -245,9 +244,9 @@ public class LogicCodeGenerator
             GetWithVirtualMLists(type),
             save != null && ShouldWriteSimpleOperations(save) ? ("   .WithSave(" + save.Symbol.ToString() + ")") : null,
             delete != null && ShouldWriteSimpleOperations(delete) ? ("   .WithDelete(" + delete.Symbol.ToString() + ")") : null,
-            simpleExpressions.HasItems() ? simpleExpressions.ToString(e => $"   .WithExpressionFrom(({e.FromType.Name} {GetVariableName(e.FromType)}) => {GetVariableName(e.FromType)}.{e.Name}())", "\r\n") : null,
+            simpleExpressions.HasItems() ? simpleExpressions.ToString(e => $"   .WithExpressionFrom(({e.FromType.Name} {GetVariableName(e.FromType)}) => {GetVariableName(e.FromType)}.{e.Name}())", "\n") : null,
             p == null ? null : $"   .WithQuery(() => {p} => {WriteQueryConstructor(type, p)})"
-        }.NotNull().ToString("\r\n") + ";";
+        }.NotNull().ToString("\n") + ";";
     }
 
     protected virtual bool IsSimpleExpression(ExpressionInfo exp, Type type)
@@ -396,7 +395,7 @@ public static IQueryable<{to}> {Method}(this {from} {f}) => As.Expression(() => 
         return (from p in Reflector.PublicInstancePropertiesInOrder(type)
                 let bp = GetVirtualMListBackReference(p)
                 where bp != null
-                select GetWithVirtualMList(type, p, bp)).ToString("\r\n").DefaultText(null!);
+                select GetWithVirtualMList(type, p, bp)).ToString("\n").DefaultText(null!);
     }
 
     protected virtual string GetWithVirtualMList(Type type, PropertyInfo p, PropertyInfo bp)

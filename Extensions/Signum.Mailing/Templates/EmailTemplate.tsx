@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { FormGroup, AutoLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable, EntityAccordion, Binding, CheckboxLine } from '@framework/Lines'
+import { FormGroup, AutoLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable, EntityAccordion, Binding, CheckboxLine, TextAreaLine } from '@framework/Lines'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
 import { TemplateApplicableEval } from '../../Signum.Templating/Signum.Templating'
@@ -18,7 +18,7 @@ import { EmailMessageFormat, EmailTemplateEntity, EmailTemplateFromEmbedded, Ema
 import { QueryOrderEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 import { ValidationMessage } from '../../../Signum/React/Signum.Entities.Validation'
 
-export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }) {
+export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
   const ctx = p.ctx;
@@ -79,7 +79,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
 
 
               <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} onChanged={forceUpdate}
-                subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanNested | canAggregate}
                 queryKey={ctx.value.query!.key} />
               <EntityTable ctx={ctx.subCtx(e => e.orders)} onChange={forceUpdate} columns={[
                 {
@@ -87,7 +87,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
                   template: ctx => <QueryTokenEmbeddedBuilder
                     ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                     queryKey={p.ctx.value.query!.key}
-                    subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
+                    subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanNested | canAggregate} />
                 },
                 { property: a => a.orderType }
               ]} />
@@ -232,7 +232,7 @@ export interface EmailTemplateMessageComponentProps {
   invalidate: () => void;
 }
 
-export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentProps) {
+export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const [showPreview, setShowPreview] = React.useState(false);
   const showPreviewRef = useUpdatedRef(showPreview);
@@ -255,10 +255,13 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
       <div>
         <TemplateControls queryKey={p.queryKey} forHtml={true} />
         <AutoLine ctx={ec.subCtx(e => e.subject)} formGroupStyle={"SrOnly"} placeholderLabels={true} labelHtmlAttributes={{ style: { width: "100px" } }} />
-        {p.messageFormat != 'HtmlSimple' ?
+        {
+          p.messageFormat == 'PlainText' ? <TextAreaLine ctx={ec.subCtx(e => e.text)} formGroupStyle="SrOnly" /> :
+          p.messageFormat == 'HtmlSimple' ?  <HtmlEditor binding={Binding.create(ec.value, e => e.text)} readOnly={ec.readOnly} /> :
           <div className="code-container">
             <HtmlCodeMirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />
-          </div> : <HtmlEditor binding={Binding.create(ec.value, e => e.text)} readOnly={ec.readOnly} />}
+          </div>
+         }
         <br />
         {p.messageFormat == 'HtmlComplex' && <a href="#" onClick={handlePreviewClick}>
           {showPreview ?

@@ -5,7 +5,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { EmailMessageEntity } from '../../Signum.Mailing/Signum.Mailing';
 import { EmailMessagePackageMixin, EmailPackageEntity } from './Signum.Mailing.Package';
 
-export default function EmailPackage(p : { ctx: TypeContext<EmailPackageEntity> }){
+export default function EmailPackage(p : { ctx: TypeContext<EmailPackageEntity> }): React.JSX.Element {
   const e = p.ctx;
 
   return (

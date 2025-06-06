@@ -43,7 +43,7 @@ export class EntityAccordionController<V extends ModifiableEntity> extends Entit
   setSelectedIndex!: (index: number | null) => void;
   initialIsControlled!: boolean;
 
-  init(p: EntityAccordionProps<V>) {
+  init(p: EntityAccordionProps<V>): void {
     super.init(p);
 
     this.initialIsControlled = React.useMemo(() => isControlled(p), []);
@@ -64,13 +64,13 @@ export class EntityAccordionController<V extends ModifiableEntity> extends Entit
     }, [p.initialSelectedIndex]);
   }
 
-  getDefaultProps(p: EntityAccordionProps<V>) {
+  getDefaultProps(p: EntityAccordionProps<V>): void {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.createAsLink = true;
   }
 
-  addElement(entityOrLite: V) {
+  addElement(entityOrLite: V): void {
 
     if (isLite(entityOrLite) != (this.props.type!.isLite || false))
       throw new Error("entityOrLite should be already converted");
@@ -83,7 +83,7 @@ export class EntityAccordionController<V extends ModifiableEntity> extends Entit
 }
 
 
-export const EntityAccordion = genericForwardRef(function EntityAccordion<V extends ModifiableEntity>(props: EntityAccordionProps<V>, ref: React.Ref<EntityAccordionController<V>>) {
+export const EntityAccordion: <V extends ModifiableEntity>(props: EntityAccordionProps<V> & React.RefAttributes<EntityAccordionController<V>>) => React.ReactNode | null = genericForwardRef(function EntityAccordion<V extends ModifiableEntity>(props: EntityAccordionProps<V>, ref: React.Ref<EntityAccordionController<V>>) {
   var c = useController(EntityAccordionController<V>, props, ref);
   var p = c.props;
 
@@ -93,12 +93,12 @@ export const EntityAccordion = genericForwardRef(function EntityAccordion<V exte
   let ctx = p.ctx;
 
   return (
-    <GroupHeader className={classes("sf-accordion-field sf-control-container", ctx.errorClassBorder)}
+    <GroupHeader className={classes("sf-accordion-field sf-control-container", c.getErrorClass("border"))}
       label={p.label}
       labelIcon={p.labelIcon}
       avoidFieldSet={p.avoidFieldSet}
       buttons={renderButtons()}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...ctx.errorAttributes() }} >
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }} >
       {renderAccordion()}
     </GroupHeader >
   );
@@ -127,7 +127,7 @@ export const EntityAccordion = genericForwardRef(function EntityAccordion<V exte
     return (
       <Accordion className="sf-accordion-elements" activeKey={c.selectedIndex?.toString()} onSelect={handleSelectTab}>
         {
-          c.getMListItemContext(ctx).map((mlec, i) => (
+          c.getMListItemContext(ctx).map((mlec, i): React.JSX.Element => (
             <EntityAccordionElement<V> key={i}
               onSelectTab={() => handleSelectTab(mlec.index!.toString())}
               onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
@@ -172,7 +172,7 @@ export interface EntityAccordionElementProps<V extends ModifiableEntity> {
   headerHtmlAttributes?: React.HTMLAttributes<any>;
 }
 
-export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes, headerHtmlAttributes, onSelectTab }: EntityAccordionElementProps<V>)
+export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes, headerHtmlAttributes, onSelectTab }: EntityAccordionElementProps<V>): React.JSX.Element
 {
 
   const forceUpdate = useForceUpdate();

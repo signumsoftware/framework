@@ -11,10 +11,11 @@ import { useForceUpdate } from '@framework/Hooks';
 import { getToString } from '@framework/Signum.Entities';
 import { QueryEntity } from '@framework/Signum.Basics'
 
-export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: TypeContext<QueryRulePack> }, ref: React.Ref<IRenderButtons>) {
+export default function QueryRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<QueryRulePack>, innerRef: React.Ref<IRenderButtons> }): React.JSX.Element {
 
-  const forceUpdate = useForceUpdate();
-
+  function updateFrame() {
+    ctx.frame!.frameComponent.forceUpdate();
+  }
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
 
@@ -32,18 +33,16 @@ export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: T
     ];
   }
 
-  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value]);
+  React.useImperativeHandle(innerRef, () => ({ renderButtons }), [ctx.value]);
 
   function handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: QueryAllowed) {
 
     ctx.value.rules.forEach(mle => {
-      if (!mle.element.coercedValues!.contains(hc)) {
-        mle.element.allowed = hc;
-        mle.element.modified = true;
-      }
+      mle.element.allowed = QueryAllowed.min(hc, mle.element.coerced);
+      mle.element.modified = true;
     });
 
-    forceUpdate();
+    updateFrame();
   }
 
   return (
@@ -92,7 +91,7 @@ export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: T
                 <GrayCheckbox readOnly={ctx.readOnly} checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
                   c.value.allowed = c.value.allowedBase;
                   ctx.value.modified = true;
-                  forceUpdate();
+                  updateFrame();
                 }} />
               </td>
             </tr>
@@ -107,9 +106,13 @@ export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: T
 
   function renderRadio(c: QueryAllowedRule, allowed: QueryAllowed, color: string) {
 
-    if (c.coercedValues.contains(allowed))
+    if (QueryAllowed.index(c.coerced) < QueryAllowed.index(allowed))
       return;
 
-    return <ColorRadio readOnly={ctx.readOnly} checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }} />;
+    return <ColorRadio readOnly={ctx.readOnly} checked={c.allowed == allowed} color={color} onClicked={a => {
+      c.allowed = allowed;
+      c.modified = true;
+      updateFrame()
+    }} />;
   }
-});
+}

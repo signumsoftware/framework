@@ -6,6 +6,10 @@ using System.Globalization;
 using Signum.Engine.Maps;
 using Npgsql;
 using Microsoft.Data.SqlClient;
+using Signum.Utilities.ExpressionTrees;
+using System.Diagnostics.Metrics;
+using Npgsql.PostgresTypes;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Engine.Sync;
 
@@ -22,6 +26,7 @@ public abstract class SqlPreCommand
 
     public abstract SqlPreCommand Clone();
 
+    public abstract bool HasNoTransaction { get; }
     public abstract bool GoBefore { get; set; }
     public abstract bool GoAfter { get; set; }
 
@@ -36,9 +41,6 @@ public abstract class SqlPreCommand
         this.PlainSql(sb);
         return sb.ToString();
     }
-
-
-
 
     protected internal abstract void PlainSql(StringBuilder sb);
 
@@ -82,9 +84,26 @@ public static class SqlPreCommandExtensions
 
     public static SqlPreCommand PlainSqlCommand(this SqlPreCommand command)
     {
-        return command.PlainSql().SplitNoEmpty("GO\r\n")
-            .Select(s => new SqlPreCommandSimple(s))
-            .Combine(Spacing.Simple)!;
+        (SqlPreCommand? before, SqlPreCommand? after) noTransaction = default;
+        if (command.HasNoTransaction)
+        {
+            if (command is SqlPreCommandSimple)
+                return command;
+
+            noTransaction = ((SqlPreCommandConcat)command).ExtractNoTransaction();
+        }
+
+        var list = command.PlainSql().SplitNoEmpty("GO\n")
+            .Select(s => (SqlPreCommand)new SqlPreCommandSimple(s) { GoAfter = true })
+            .ToList();
+
+        if (noTransaction.before != null)
+            list.Insert(0, noTransaction.before!);
+
+        if (noTransaction.after != null)
+            list.Add(noTransaction.after);
+
+        return list.Combine(Spacing.Simple)!;
     }
 
     public static void OpenSqlFileRetry(this SqlPreCommand command)
@@ -153,7 +172,7 @@ public static class SqlPreCommandExtensions
         }
     }
 
-    public static int Timeout = 20 * 60;
+    public static int DefaultScriptTimeout = 20 * 60;
 
     public static Regex regexBeginEnd = new Regex(@"^ *(GO--(?<type>BEGIN|END)) *(?<key>.*)$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
@@ -205,40 +224,71 @@ public static class SqlPreCommandExtensions
         return result;
     }
 
-    public static Regex regex = new Regex(@"^ *(GO|USE \w+|USE \[[^\]]+\]) *(\r?\n|$)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
     public static void ExecuteScript(string title, string script)
     {
-        using (Connector.CommandTimeoutScope(Timeout))
+        using (Connector.CommandTimeoutScope(Connector.ScopeTimeout ?? DefaultScriptTimeout))
         {
             List<KeyValuePair<string, string>> beginEndParts = ExtractBeginEndParts(ref script).ToList();
 
-            var parts = regex.Split(script);
+            string[] realParts = SplitGOs(script);
 
-            var realParts = parts.Where(a => !string.IsNullOrWhiteSpace(a) && !regex.IsMatch(a)).ToArray();
-
-            for (int pos = 0; pos < realParts.Length; pos++)
+            if (Connector.Current is PostgreSqlConnector)
             {
-                var currentPart = realParts[pos];
-
-                try
+                for (int pos = 0; pos < realParts.Length; pos++)
                 {
-                    SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, realParts.Length),
-                        () => Executor.ExecuteNonQuery(currentPart));
-                }
-                catch (Exception ex)
-                {
-                    var sqlE = ex as SqlException ?? ex.InnerException as SqlException;
-                    var pgE = ex as PostgresException ?? ex.InnerException as PostgresException;
-                    if (sqlE == null && pgE == null)
-                        throw;
+                    var currentPart = realParts[pos];
 
-                    PrintExceptionLine(currentPart, ex, sqlE, pgE);
+                    var statements = PostgresStatementSplitter.SplitPostgresScript(currentPart);
 
-                    Console.WriteLine();
-                    throw new ExecuteSqlScriptException(ex.Message, ex);
+                    for (int i = 0; i < statements.Count; i++)
+                    {
+                        var statement = statements[i];
+                        try
+                        {
+                            SafeConsole.WaitExecute("Executing {0} [{1}/{2}]{3}".FormatWith(title, pos + 1, realParts.Length, statements.Count <= 1 ? "" : $" statement {i + 1}/{statements.Count}"),
+                                () => Executor.ExecuteNonQuery(statement));
+                        }
+                        catch (Exception ex)
+                        {
+                            var pgE = ex as PostgresException ?? ex.InnerException as PostgresException;
+                            if (pgE == null)
+                                throw;
+
+                            PrintExceptionLine(statement, ex, null, pgE);
+
+                            Console.WriteLine();
+                            throw new ExecuteSqlScriptException(ex.Message, ex);
+                        }
+                    }
                 }
             }
+            else
+            {
+                for (int pos = 0; pos < realParts.Length; pos++)
+                {
+                    var currentPart = realParts[pos];
+
+                    try
+                    {
+                        SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, realParts.Length),
+                            () => Executor.ExecuteNonQuery(currentPart));
+                    }
+                    catch (Exception ex)
+                    {
+                        var sqlE = ex as SqlException ?? ex.InnerException as SqlException;
+                        if (sqlE == null)
+                            throw;
+
+                        PrintExceptionLine(currentPart, ex, sqlE, null);
+
+                        Console.WriteLine();
+                        throw new ExecuteSqlScriptException(ex.Message, ex);
+                    }
+                }
+            }
+
+
 
             bool allYes = false;
             for (int i = 0; i < beginEndParts.Count; i++)
@@ -262,12 +312,12 @@ public static class SqlPreCommandExtensions
 
 
                         var answer = allYes ? "yes" : SafeConsole.Ask("Continue anyway?", new[] { "yes", "no", "all yes", sqlE != null || pgE != null ? "+ exception details" : null }.NotNull().ToArray());
-                        if(answer == "+ exception details")
+                        if (answer == "+ exception details")
                         {
                             PrintExceptionLine(kvp.Value, ex, sqlE, pgE);
                             answer = SafeConsole.Ask("Continue anyway?", new[] { "yes", "no", "all yes" });
                         }
-                        
+
                         switch (answer)
                         {
                             case "no": throw new ExecuteSqlScriptException(ex.Message, ex);
@@ -287,6 +337,16 @@ public static class SqlPreCommandExtensions
         }
     }
 
+    static Regex regex = new Regex(@"^ *(GO|USE \w+|USE \[[^\]]+\]) *(\r?\n|$)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
+    static string[] SplitGOs(string script)
+    {
+        var parts = regex.Split(script);
+
+        var realParts = parts.Where(a => !string.IsNullOrWhiteSpace(a) && !regex.IsMatch(a)).ToArray();
+        return realParts;
+    }
+
     private static void PrintExceptionLine(string currentPart, Exception ex, SqlException? sqlE, PostgresException? pgE)
     {
         Console.WriteLine();
@@ -294,12 +354,12 @@ public static class SqlPreCommandExtensions
 
         var list = currentPart.Lines();
 
-        var lineNumer = (pgE?.Line?.ToInt() ?? sqlE!.LineNumber);
+        var lineNumber = (sqlE?.LineNumber ?? currentPart.Substring(0, pgE!.Position).Lines().Count());
 
         SafeConsole.WriteLineColor(ConsoleColor.Red, "ERROR:");
 
-        var min = Math.Max(0, lineNumer - 20);
-        var max = Math.Min(list.Length - 1, lineNumer + 20);
+        var min = Math.Max(0, lineNumber - 20);
+        var max = Math.Min(list.Length - 1, lineNumber + 20);
 
         if (min > 0)
             Console.WriteLine("...");
@@ -307,7 +367,7 @@ public static class SqlPreCommandExtensions
         for (int i = min; i <= max; i++)
         {
             Console.Write(i + ": ");
-            SafeConsole.WriteLineColor(i == (lineNumer - 1) ? ConsoleColor.Red : ConsoleColor.DarkRed, list[i]);
+            SafeConsole.WriteLineColor(i == (lineNumber - 1) ? ConsoleColor.DarkRed : ConsoleColor.DarkYellow, list[i]);
         }
 
         if (max < list.Length - 1)
@@ -355,8 +415,16 @@ public class ExecuteSqlScriptException : Exception
     public ExecuteSqlScriptException(string message, Exception inner) : base(message, inner) { }
 }
 
+public enum NoTransactionMode
+{
+    BeforeScript,
+    AfterScript,
+}
+
 public class SqlPreCommandSimple : SqlPreCommand
 {
+    public NoTransactionMode? NoTransaction { get; set; }
+    public override bool HasNoTransaction => NoTransaction != null;
     public override bool GoBefore { get; set; }
     public override bool GoAfter { get; set; }
 
@@ -458,16 +526,53 @@ public class SqlPreCommandSimple : SqlPreCommand
         }
     }
 
+
+    public string PreparedQuery()
+    {
+        var sqlBuilder = Connector.Current.SqlBuilder;
+        if (!sqlBuilder.IsPostgres)
+            return sp_executesql();
+
+        var ticks = DateTime.UtcNow.Ticks;
+
+        var pars = this.Parameters.EmptyIfNull();
+
+        var parameter = pars.Select(p => new
+        {
+            Name = p.ParameterName,
+            Value = LiteralValue(p.Value, simple: true),
+            ParameterType = "{0}{1}".FormatWith(
+                   p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString(),
+                   sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull(), p.DbType == System.Data.DbType.Decimal)),
+        }).ToList();
+
+        var index = 1;
+        var paramToIndex = parameter.ToDictionary(a => a.Name.StartsWith("@") ? a.Name : "@" + a.Name, a => index++);
+
+        var pgsql = Regex.Replace(this.Sql, @"@(\w+)", m => $"${paramToIndex.GetOrThrow(m.Value)}");
+
+        return $"""
+            DEALLOCATE ALL;
+            PREPARE my_query ({parameter.ToString(a => a.ParameterType, ", ")}) AS
+            {pgsql};
+            EXECUTE my_query ({parameter.ToString(a => a.Value + "::" + a.ParameterType, ", ")});
+            """;
+    }
+
     public string sp_executesql()
     {
-        var pars = this.Parameters.EmptyIfNull();
         var sqlBuilder = Connector.Current.SqlBuilder;
+        if (sqlBuilder.IsPostgres)
+            return PreparedQuery();
+
+        var pars = this.Parameters.EmptyIfNull();
 
         var parameterVars = pars.ToString(p => "{0} {1}{2}".FormatWith(
             p.ParameterName,
             p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString(),
             sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull(), p.DbType == System.Data.DbType.Decimal)), ", ");
-        var parameterValues = pars.ToString(p => p.ParameterName + " = " + LiteralValue(p.Value, simple: true), ",\r\n");
+       
+        var parameterValues = pars.ToString(p => p.ParameterName + " = " + LiteralValue(p.Value, simple: true), ",\n");
 
         return @$"EXEC sp_executesql N'{this.Sql.Replace("'", "''")}', 
 @params = N'{parameterVars}', 
@@ -483,7 +588,7 @@ public class SqlPreCommandSimple : SqlPreCommand
     {
         if (comment.HasText())
         {
-            int index = Sql.IndexOf("\r\n");
+            int index = Sql.IndexOf("\n");
             if (index == -1)
                 Sql = Sql + " -- " + comment;
             else
@@ -521,6 +626,7 @@ public class SqlPreCommandConcat : SqlPreCommand
     public Spacing Spacing { get; private set; }
     public SqlPreCommand[] Commands { get; private set; }
 
+    public override bool HasNoTransaction => this.Commands.Any(a => a.HasNoTransaction);
     public override bool GoBefore { get { return this.Commands.First().GoBefore; } set { this.Commands.First().GoBefore = true; } }
     public override bool GoAfter { get { return this.Commands.Last().GoAfter; } set { this.Commands.Last().GoAfter = true; } }
 
@@ -537,9 +643,9 @@ public class SqlPreCommandConcat : SqlPreCommand
 
     static Dictionary<Spacing, string> separators = new Dictionary<Spacing, string>()
         {
-            {Spacing.Simple, "\r\n"},
-            {Spacing.Double, "\r\n\r\n"},
-            {Spacing.Triple, "\r\n\r\n\r\n"},
+            {Spacing.Simple, "\n"},
+            {Spacing.Double, "\n\n"},
+            {Spacing.Triple, "\n\n\n"},
         };
 
     protected internal override int NumParameters
@@ -550,25 +656,26 @@ public class SqlPreCommandConcat : SqlPreCommand
     protected internal override void PlainSql(StringBuilder sb)
     {
         string sep = separators[Spacing];
-        bool borrar = false;
+        bool remove = false;
         foreach (SqlPreCommand com in Commands)
         {
             var simple = com as SqlPreCommandSimple;
 
             if (simple != null && simple.GoBefore)
-                sb.Append("GO\r\n");
+                sb.Append("GO\n");
 
             com.PlainSql(sb);
 
             if (simple != null && simple.GoAfter)
-                sb.Append("\r\nGO");
+                sb.Append("\nGO");
 
 
             sb.Append(sep);
-            borrar = true;
+            remove = true;
         }
 
-        if (borrar) sb.Remove(sb.Length - sep.Length, sep.Length);
+        if (remove)
+            sb.Remove(sb.Length - sep.Length, sep.Length);
     }
 
     public override SqlPreCommand Clone()
@@ -579,6 +686,55 @@ public class SqlPreCommandConcat : SqlPreCommand
     public override SqlPreCommand Replace(Regex regex, MatchEvaluator matchEvaluator)
     {
         return new SqlPreCommandConcat(Spacing, Commands.Select(c => c.Replace(regex, matchEvaluator)).ToArray());
+    }
+
+    public (SqlPreCommand? before, SqlPreCommand? after) ExtractNoTransaction()
+    {
+        if (!HasNoTransaction)
+            return (null, null);
+
+        var noTransaction = new List<(SqlPreCommand? before, SqlPreCommand? after)>();
+
+        Commands = Commands.Select(a =>
+        {
+            if (a is SqlPreCommandConcat concat)
+            {
+                var nt = concat.ExtractNoTransaction();
+
+                if (nt.before != null || nt.after != null)
+                    noTransaction.Add(nt);
+
+                if (concat.Commands.Count() == 0)
+                    return null;
+
+                if (concat.Commands.Length == 1)
+                    return concat.Commands.SingleEx();
+
+                return concat;
+            }
+
+            if (a is SqlPreCommandSimple simple)
+            {
+                if (simple.NoTransaction != null)
+                {
+                    if (simple.NoTransaction == NoTransactionMode.BeforeScript)
+                        noTransaction.Add((simple, null));
+                    else
+                        noTransaction.Add((null, simple));
+
+                    return null;
+                }
+                else
+                    return simple;
+            }
+
+            return null;
+        }).NotNull().ToArray();
+
+        return (
+            noTransaction.Select(a => a.before).Combine(this.Spacing),
+            noTransaction.Select(a => a.after).Combine(this.Spacing)
+        );
     }
 }
 

@@ -4,17 +4,17 @@ namespace Signum.Entities.Reflection;
 public static class StringHashEncoder
 {
     public const int HashSize = 7;
-    public static string ChopHash(string str, int maxLength)
+    public static string ChopHash(string str, int maxLength, bool lowercase)
     {
         if (str.Length > maxLength)
-            return str.Substring(0, maxLength - HashSize) + Codify(str.Substring(maxLength - HashSize));
+            return str.Substring(0, maxLength - HashSize) + Codify(str.Substring(maxLength - HashSize), lowercase);
 
         return str;
     }
 
     static readonly string letters = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 
-    public static string Codify(string str)
+    public static string Codify(string str, bool lowercase)
     {
         int hash = GetHashCode32(str);
 
@@ -25,7 +25,7 @@ public static class StringHashEncoder
             hash >>= 5;
         }
 
-        return sb.ToString();
+        return lowercase ? sb.ToString().ToLower() : sb.ToString();
     }
 
     public static int GetHashCode32(string value)

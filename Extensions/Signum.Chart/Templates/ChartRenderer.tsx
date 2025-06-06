@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
-import { ChartRequestModel} from '../Signum.Chart'
+import { ChartRequestModel } from '../Signum.Chart'
 
 import "../Chart.css"
 import { ChartClient, ChartRow, ChartScriptProps, ChartTable } from '../ChartClient';
@@ -31,7 +31,7 @@ export interface ChartRendererProps {
   minHeight: number | null;
 }
 
-export default function ChartRenderer(p: ChartRendererProps) {
+export default function ChartRenderer(p: ChartRendererProps): React.JSX.Element {
   const cs = useAPI(async signal => {
     const chartScriptPromise = ChartClient.getChartScript(p.chartRequest.chartScript);
     const chartComponentModulePromise = ChartClient.getRegisteredChartScriptComponent(p.chartRequest.chartScript);
@@ -46,27 +46,29 @@ export default function ChartRenderer(p: ChartRendererProps) {
 
   return (
     <FullscreenComponent onReload={p.onReload}>
-      <ErrorBoundary deps={[p.data]}>
+      {fullScreen => <ErrorBoundary deps={[p.data]}>
         {cs && parameters &&
           <ReactChart
-          chartRequest={p.chartRequest}
-          data={p.data}
-          dashboardFilter={p.dashboardFilter}
-          loading={p.loading}
-          onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.userChart, p.autoRefresh ? p.onReload : undefined))}
-          onBackgroundClick={p.onBackgroundClick}
-          parameters={parameters}
-          onReload={p.onReload}
-          onRenderChart={cs.chartComponent as ((p: ChartScriptProps) => React.ReactNode)}
-          minHeight={p.minHeight}
-        />
+            chartRequest={p.chartRequest}
+            data={p.data}
+            sizeDeps={[fullScreen]}
+            dashboardFilter={p.dashboardFilter}
+            loading={p.loading}
+            onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.userChart, p.autoRefresh ? p.onReload : undefined))}
+            onBackgroundClick={p.onBackgroundClick}
+            parameters={parameters}
+            onReload={p.onReload}
+            onRenderChart={cs.chartComponent as ((p: ChartScriptProps) => React.ReactNode)}
+            minHeight={p.minHeight}
+          />
         }
       </ErrorBoundary>
+      }
     </FullscreenComponent>
   );
 }
 
-export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel, uc?: Lite<UserChartEntity>, onReload?: () => void) {
+export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel, uc?: Lite<UserChartEntity>, onReload?: () => void): void {
 
   e.stopPropagation();
   var newWindow = e.ctrlKey || e.button == 1;
@@ -74,20 +76,20 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
   ChartClient.onDrilldownUserChart(cr, r, uc, { openInNewTab: newWindow, onReload })
     .then(done => {
       if (done == false) {
-  if (r.entity) {
-    if (newWindow)
-      window.open(toAbsoluteUrl(Navigator.navigateRoute(r.entity)));
-    else
-      Navigator.view(r.entity)
+        if (r.entity) {
+          if (newWindow)
+            window.open(toAbsoluteUrl(Navigator.navigateRoute(r.entity)));
+          else
+            Navigator.view(r.entity)
               .then(() => onReload?.());
-  } else {
+        } else {
           const fo = ChartClient.extractFindOptions(cr, r);
-    if (newWindow)
-      window.open(toAbsoluteUrl(Finder.findOptionsPath(fo)));
-    else
-      Finder.explore(fo)
+          if (newWindow)
+            window.open(toAbsoluteUrl(Finder.findOptionsPath(fo)));
+          else
+            Finder.explore(fo)
               .then(() => onReload?.());
         }
-  }
+      }
     });
 }

@@ -169,8 +169,8 @@ export class Color {
     return new Color(this.r, this.g, this.b, a);
   }
 
-  static White = new Color(255, 255, 255);
-  static Black = new Color(0, 0, 0);
+  static White: Color = new Color(255, 255, 255);
+  static Black: Color = new Color(0, 0, 0);
 
   lerp(ratio: number, target: Color): Color {
 

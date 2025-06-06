@@ -25,7 +25,7 @@ export namespace WorkflowActivityModelOptions {
   export let navigateToView: undefined | ((typeName: string, viewName: string, props: { [name: string]: any }) => Promise<void>);
 }
 
-export default function WorkflowActivityModelComponent(p : WorkflowActivityModelComponentProps){
+export default function WorkflowActivityModelComponent(p : WorkflowActivityModelComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   const [viewNames, setViewNames] = React.useState<string[] | undefined>(undefined);

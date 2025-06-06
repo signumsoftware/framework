@@ -4,13 +4,14 @@ import { Finder } from '@framework/Finder'
 import { getToString, Lite, SearchMessage, SelectorMessage } from '@framework/Signum.Entities'
 import { Navigator } from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
-import { ExcelReportEntity, ExcelMessage, ExcelReportOperation, ImportFromExcelMessage } from './Signum.Excel'
+import { ExcelReportEntity, ExcelMessage, ExcelReportOperation, ImportFromExcelMessage, ExcelPermission } from './Signum.Excel'
 import { ExcelClient } from './ExcelClient'
 import { Dropdown } from 'react-bootstrap';
 import { Operations } from '@framework/Operations';
 import SelectorModal from '@framework/SelectorModal'
 import { PaginationMode, QueryRequest } from '@framework/FindOptions'
 import { onImportFromExcel } from './Templates/ImportExcelModel'
+import { isPermissionAuthorized } from '@framework/AppContext'
 
 
 export interface ExcelMenuProps {
@@ -20,7 +21,7 @@ export interface ExcelMenuProps {
   excelReport: boolean;
 }
 
-export default function ExcelMenu(p: ExcelMenuProps) {
+export default function ExcelMenu(p: ExcelMenuProps): React.JSX.Element {
 
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
@@ -77,7 +78,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
       <Dropdown.Menu>
         {...addDropdownDividers([
           p.plainExcel && <Dropdown.Item onClick={handlePlainExcel} ><span><FontAwesomeIcon icon={"file-excel"} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>,
-          p.importFromExcel && <Dropdown.Item onClick={handleImportFromExcel} ><span><FontAwesomeIcon icon={"file-excel"} />&nbsp; {ImportFromExcelMessage.ImportFromExcel.niceToString()}</span></Dropdown.Item>,
+          p.importFromExcel && isPermissionAuthorized(ExcelPermission.ImportFromExcel) && <Dropdown.Item onClick={handleImportFromExcel} ><span><FontAwesomeIcon icon={"file-excel"} />&nbsp; {ImportFromExcelMessage.ImportFromExcel.niceToString()}</span></Dropdown.Item>,
           p.excelReport && addDropdownDividers([
             excelReports?.map((uq, i) =>
             <Dropdown.Item key={i}
@@ -132,11 +133,13 @@ export async function selectPagination(sc: SearchControlLoaded): Promise<QueryRe
   if (request.pagination.mode == "Firsts" || request.pagination.mode == "Paginate" && (rt == null || rt!.totalElements! > rt!.rows.length)) {
 
     const pm = await SelectorModal.chooseElement<PaginationMode>([request.pagination.mode, "All"], {
-      buttonDisplay: a => <span>{PaginationMode.niceToString(a)} {rt && SearchMessage._0Results_N.niceToString().forGenderAndNumber(rt.totalElements).formatHtml(
-        <span className="sf-pagination-strong" key={1}>{a == "All" ? rt?.totalElements : rt?.rows.length}</span>)}</span>,
+      title: ExcelMessage.ExportToExcel.niceToString(),
+      message: ExcelMessage.WhatDoYouWantToExport.niceToString(),
+      buttonDisplay: a => <span>
+        {a == "All" ? SearchMessage.AllPages.niceToString() : SearchMessage.CurrentPage.niceToString()}{" "}
+        ({rt && SearchMessage._0Rows_N.niceToString().forGenderAndNumber(rt.totalElements).formatHtml(<strong>{a == "All" ? rt?.totalElements : rt?.rows.length}</strong>)})
+      </span>,
       buttonName: a => a,
-      title: SelectorMessage._0Selector.niceToString(PaginationMode.niceTypeName()),
-      message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(PaginationMode.niceTypeName()),
       size: "md",
     });
 

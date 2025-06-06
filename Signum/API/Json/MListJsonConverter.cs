@@ -2,6 +2,7 @@ using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static System.Net.WebRequestMethods;
 
 namespace Signum.API.Json;
 
@@ -23,9 +24,9 @@ public abstract class JsonConverterWithExisting<T> : JsonConverter<T>, IJsonConv
 
 public class MListJsonConverterFactory : JsonConverterFactory
 {
-    protected readonly Action<PropertyRoute, ModifiableEntity?> AsserCanWrite;
+    protected readonly Action<PropertyRoute, ModifiableEntity?, SerializationMetadata?> AsserCanWrite;
 
-    public MListJsonConverterFactory(Action<PropertyRoute, ModifiableEntity?> asserCanWrite)
+    public MListJsonConverterFactory(Action<PropertyRoute, ModifiableEntity?, SerializationMetadata?> asserCanWrite)
     {
         AsserCanWrite = asserCanWrite;
     }
@@ -43,7 +44,7 @@ public class MListJsonConverterFactory : JsonConverterFactory
 
 public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
 {
-    protected readonly Action<PropertyRoute, ModifiableEntity?> AsserCanWrite;
+    protected readonly Action<PropertyRoute, ModifiableEntity?, SerializationMetadata?> AsserCanWrite;
 
     protected virtual bool IsAllowedToAddNewValue(T newValue)
     {
@@ -56,7 +57,7 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
     }
 
     protected readonly JsonConverter<T> converter;
-    public MListJsonConverter(JsonSerializerOptions options, Action<PropertyRoute, ModifiableEntity?> asserCanWrite)
+    public MListJsonConverter(JsonSerializerOptions options, Action<PropertyRoute, ModifiableEntity?, SerializationMetadata?> asserCanWrite)
     {
         this.converter = (JsonConverter<T>)options.GetConverter(typeof(T));
         AsserCanWrite = asserCanWrite;
@@ -65,9 +66,9 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
     public override void Write(Utf8JsonWriter writer, MList<T> value, JsonSerializerOptions options)
     {
         writer.WriteStartArray();
-        var (pr, mod, rowId) = EntityJsonContext.CurrentPropertyRouteAndEntity!.Value;
+        var step = EntityJsonContext.CurrentSerializationPath!.Peek();
 
-        var elementPr = pr.Add("Item");
+        var elementPr = step.Route.Add("Item");
 
         foreach (var item in ((IMListPrivate<T>)value).InnerList)
         {
@@ -77,7 +78,7 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
             JsonSerializer.Serialize(writer, item.RowId?.Object, item.RowId?.Object.GetType() ?? typeof(object), options);
 
             writer.WritePropertyName("element");
-            using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((elementPr, mod, item.RowId)))
+            using (EntityJsonContext.AddSerializationStep(new (elementPr, item.Element as ModifiableEntity, rowId: item.RowId)))
             {
                 JsonSerializer.Serialize(writer, item.Element, item.Element?.GetType() ?? typeof(T), options);
             }
@@ -98,11 +99,12 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
 
         var newList = new List<MList<T>.RowIdElement>();
 
-        var tup = EntityJsonContext.CurrentPropertyRouteAndEntity!.Value;
+        var path = EntityJsonContext.CurrentSerializationPath!;
 
-        var elementPr = tup.pr.Add("Item");
+        var pr = path.CurrentPropertyRoute();
+        var elementPr = pr!.Add("Item");
 
-        var rowIdType = GetRowIdTypeFromAttribute(tup.pr);
+        var rowIdType = GetRowIdTypeFromAttribute(pr);
 
         reader.Assert(JsonTokenType.StartArray);
 
@@ -133,7 +135,7 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
 
                     var oldValue = dic.TryGetS(rowId);
 
-                    using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((elementPr, tup.mod, rowId)))
+                    using (EntityJsonContext.AddSerializationStep(new (elementPr, oldValue == null ? null : oldValue.Value.Element as ModifiableEntity, rowId)))
                     {
                         if (oldValue == null)
                         {
@@ -160,7 +162,7 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
                 }
                 else
                 {
-                    using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((elementPr, tup.mod, null)))
+                    using (EntityJsonContext.AddSerializationStep(new (elementPr, null, (PrimaryKey?)null)))
                     {
                         var newValue = (T)converter.Read(ref reader, typeof(T), options)!;
 
@@ -185,14 +187,17 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
                 existingMList = new MList<T>();
         }
 
-        bool orderMatters = GetPreserveOrderFromAttribute(tup.pr);
+        bool orderMatters = GetPreserveOrderFromAttribute(pr);
 
         if (!existingMList.IsEqualTo(newList, orderMatters))
         {
             if (!EntityJsonContext.AllowDirectMListChanges)
                 return new MList<T>(newList);
 
-            this.AsserCanWrite(tup.pr, tup.mod);
+            var mod = path.CurrentModifiableEntity();
+            var metadata = path.CurrentSerializationMetadata();
+
+            this.AsserCanWrite(pr, mod, metadata);
 
             existingMList.AssignMList(newList);
         }

@@ -11,7 +11,6 @@ internal class QueryRebinder : DbExpressionVisitor
 
     private QueryRebinder() { }
 
-
     internal class ColumnCollector : DbExpressionVisitor
     {
         internal Alias[] knownAliases = null!;

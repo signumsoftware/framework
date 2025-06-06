@@ -13,7 +13,7 @@ public class LiteFilterValueConverter : IFilterValueConverter
         if (!(value is Lite<Entity> lite))
             return null;
 
-        return new Result<string?>.Success(lite.Key());
+        return new Result<string?>.Success(lite.KeyLong());
     }
 
     public Result<object?>? TryParseExpression(string? expression, Type targetType)

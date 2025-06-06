@@ -30,7 +30,9 @@ public static class ChartServer
 
                 if (cr.Columns != null)
                     foreach (var c in cr.Columns)
-                        c.ParseData(cr, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
+                    {
+                        c.ParseData(cr, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | (cr.ChartTimeSeries != null ? SubTokensOptions.CanTimeSeries : 0));
+                    }
             }
         });
 
@@ -93,7 +95,7 @@ public static class ChartServer
 
                 var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
-                cr.Filters = list.Select(l => l.ToFilter(qd, canAggregate: true, SignumServer.JsonSerializerOptions)).ToList();
+                cr.Filters = list.Select(l => l.ToFilter(qd, canAggregate: true, SignumServer.JsonSerializerOptions, cr.ChartTimeSeries != null)).ToList();
             },
             CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) =>
             {

@@ -23,7 +23,7 @@ export interface EntityRepeaterProps<V extends ModifiableEntity | Lite<Entity>> 
 
 export class EntityRepeaterController<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseController<EntityRepeaterProps<V>, V> {
 
-  getDefaultProps(p: EntityRepeaterProps<V>) {
+  getDefaultProps(p: EntityRepeaterProps<V>): void {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.createAsLink = true;
@@ -31,7 +31,7 @@ export class EntityRepeaterController<V extends ModifiableEntity | Lite<Entity>>
 }
 
 
-export const EntityRepeater = genericForwardRef(function EntityRepeater<V extends ModifiableEntity | Lite<Entity>>(props: EntityRepeaterProps<V>, ref: React.Ref<EntityRepeaterController<V>>) {
+export const EntityRepeater: <V extends ModifiableEntity | Lite<Entity>>(props: EntityRepeaterProps<V> & React.RefAttributes<EntityRepeaterController<V>>) => React.ReactNode | null = genericForwardRef(function EntityRepeater<V extends ModifiableEntity | Lite<Entity>>(props: EntityRepeaterProps<V>, ref: React.Ref<EntityRepeaterController<V>>) {
   var c = useController(EntityRepeaterController, props, ref);
   var p = c.props;
 
@@ -41,12 +41,12 @@ export const EntityRepeater = genericForwardRef(function EntityRepeater<V extend
   let ctx = p.ctx;
 
   return (
-    <GroupHeader className={classes("sf-repeater-field sf-control-container", ctx.errorClassBorder)}
+    <GroupHeader className={classes("sf-repeater-field sf-control-container", c.getErrorClass("border"))}
       label={p.label}
       labelIcon={p.labelIcon}
       avoidFieldSet={p.avoidFieldSet}
       buttons={renderButtons()}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...ctx.errorAttributes() }} >
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }} >
       {renderElements()}
     </GroupHeader >
   );
@@ -109,7 +109,7 @@ export interface EntityRepeaterElementProps<V extends ModifiableEntity | Lite<En
   htmlAttributes?: () => React.HTMLAttributes<any> | null | undefined;
 }
 
-export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, htmlAttributes }: EntityRepeaterElementProps<V>)
+export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, htmlAttributes }: EntityRepeaterElementProps<V>): React.JSX.Element
 {
 
   var attrs = htmlAttributes?.();
@@ -130,7 +130,7 @@ export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>
               {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
                 onClick={onRemove}
                 title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-                {EntityBaseController.getRemoveIcon()}
+                {EntityBaseController.getTrashIcon()}
               </a>}
               &nbsp;
               {move?.renderMoveUp()}

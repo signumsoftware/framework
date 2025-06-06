@@ -11,7 +11,7 @@ export interface TreeButtonProps {
   searchControl: SearchControlLoaded;
 }
 
-export default function TreeButton(p : TreeButtonProps){
+export default function TreeButton(p : TreeButtonProps): React.JSX.Element {
   function handleClick(e: React.MouseEvent<any>) {
     debugger;
     const fo = p.searchControl.props.findOptions;

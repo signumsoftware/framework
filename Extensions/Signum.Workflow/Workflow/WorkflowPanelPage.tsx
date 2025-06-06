@@ -11,8 +11,9 @@ import { useAPIWithReload, useInterval } from '@framework/Hooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { OperationLogEntity } from '@framework/Signum.Operations'
+import { CopyHealthCheckButton } from '../../../Signum/React/Components/CopyHealthCheckButton'
 
-export default function WorkflowPanelPage(){
+export default function WorkflowPanelPage(): React.JSX.Element {
 
   return (
     <div>
@@ -31,7 +32,7 @@ export default function WorkflowPanelPage(){
 }
 
 
-export function WorkflowScriptRunnerTab(p: {}) {
+export function WorkflowScriptRunnerTab(p: {}): React.JSX.Element {
 
   const [state, reloadState] = useAPIWithReload(() => {
     AppContext.assertPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel);
@@ -54,16 +55,21 @@ export function WorkflowScriptRunnerTab(p: {}) {
     WorkflowClient.API.start().then(() => reloadState());
   }
 
-  var title =  "WorkflowScriptRunner State";
+  var title = "WorkflowScriptRunner State";
 
   if (state == undefined)
     return <h4>{title} (loading...) </h4>;
 
   const s = state;
+  const url = window.location;
 
   return (
     <div>
-      <h4>{title}</h4>
+      <h4>{title} <CopyHealthCheckButton
+        name={url.hostname + " Workflow Runner"}
+        healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/workflow/healthCheck')}
+        clickUrl={url.href}
+      /></h4>
       <div className="btn-toolbar mt-3">
         <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
         <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
@@ -81,9 +87,9 @@ export function WorkflowScriptRunnerTab(p: {}) {
         CurrentProcessIdentifier: {state.currentProcessIdentifier}
         <br />
         ScriptRunnerPeriod: {state.scriptRunnerPeriod} sec
-                  <br />
+        <br />
         NextPlannedExecution: {state.nextPlannedExecution} ({state.nextPlannedExecution == undefined ? "-None-" : DateTime.fromISO(state.nextPlannedExecution).toRelative()})
-                  <br />
+        <br />
         IsCancelationRequested: {state.isCancelationRequested}
         <br />
         QueuedItems: {state.queuedItems}
@@ -146,7 +152,7 @@ export function WorkflowScriptRunnerTab(p: {}) {
                 { token: CaseActivityEntity.token(e => e.startDate) },
                 { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity).append(a => a.lane!.pool!.workflow) },
                 { token: CaseActivityEntity.token(a => a.workflowActivity) },
-                { token: CaseActivityEntity.token(a=>a.case) },
+                { token: CaseActivityEntity.token(a => a.case) },
                 { token: CaseActivityEntity.token(e => e.entity.doneDate) },
                 { token: CaseActivityEntity.token(e => e.entity.doneType) },
                 { token: CaseActivityEntity.token(a => a.entity.scriptExecution!.nextExecution) },
@@ -162,7 +168,3 @@ export function WorkflowScriptRunnerTab(p: {}) {
     </div>
   );
 }
-
-
-
-

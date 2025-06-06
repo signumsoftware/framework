@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 
 namespace Signum.Selenium;
 
@@ -8,6 +8,16 @@ public class FileLineProxy : BaseLineProxy
         : base(element, route)
     {
 
+    }
+
+
+    public override object? GetValueUntyped() => throw new NotImplementedException();
+    public override void SetValueUntyped(object? value)
+    {
+        if (value is string path)
+            this.SetPath(path);
+
+        throw new InvalidOperationException();
     }
 
     public void SetPath(string path)

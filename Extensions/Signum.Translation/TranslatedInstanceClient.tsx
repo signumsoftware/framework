@@ -20,7 +20,7 @@ import { TranslatableRouteType } from '@framework/Signum.Basics';
 
 export namespace TranslatedInstanceClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     OmniboxSpecialAction.registerSpecialAction({
       allowed: () => AppContext.isPermissionAuthorized(TranslationPermission.TranslateInstances),
@@ -37,7 +37,7 @@ export namespace TranslatedInstanceClient {
   }
   
   tasks.push(taskSetTranslatableIcon)
-  export function taskSetTranslatableIcon(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+  export function taskSetTranslatableIcon(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
     if (lineBase instanceof TextBoxLineController) {
       const vProps = state as TextBoxLineProps;
   
@@ -58,7 +58,7 @@ export namespace TranslatedInstanceClient {
     }
   }
   
-  export function TranslateButton(p: { controller: TextBoxLineController }) {
+  export function TranslateButton(p: { controller: TextBoxLineController }): React.JSX.Element {
   
     var ctx = p.controller.props.ctx.tryFindRootEntity();
   
@@ -82,18 +82,18 @@ export namespace TranslatedInstanceClient {
   
 
   
-  export module API {
+  export namespace API {
   
     export function status(): Promise<TranslatedTypeSummary[]> {
       return ajaxGet({ url: "/api/translatedInstance" });
     }
   
-    export function downloadView(type: string, culture: string | undefined) {
+    export function downloadView(type: string, culture: string | undefined): void {
       ajaxGetRaw({ url: `/api/translatedInstance/viewFile/${type}?${QueryString.stringify({ culture })}` })
         .then(response => saveFile(response));
     }
   
-    export function downloadSync(type: string, culture: string | undefined) {
+    export function downloadSync(type: string, culture: string | undefined): void {
       ajaxGetRaw({ url: `/api/translatedInstance/syncFile/${type}?${QueryString.stringify({ culture })}` })
         .then(response => saveFile(response));
     }

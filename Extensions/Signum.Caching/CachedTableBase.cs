@@ -2,6 +2,7 @@ using Signum.Utilities.Reflection;
 using System.Data;
 using Signum.Engine.Sync;
 using Microsoft.Data.SqlClient;
+using System.Reflection.Metadata;
 
 namespace Signum.Cache;
 
@@ -16,6 +17,14 @@ public abstract class CachedTableBase
     protected SqlPreCommandSimple query = null!;
     internal ICacheLogicController controller;
     internal CachedTableConstructor Constructor = null!;
+
+    protected static bool ShouldBeCached(IColumn column)
+    {
+        if (column is PostgresTsVectorColumn)
+            return false;
+
+        return true;
+    }
 
     internal CachedTableBase(ICacheLogicController controller)
     {

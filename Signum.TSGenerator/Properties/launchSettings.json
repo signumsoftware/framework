@@ -8,7 +8,7 @@
     "Authorization": {
       "commandName": "Project",
       "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.Authorization.dll\" \"obj\\SignumReferences.txt\"",
-      "workingDirectory": "C:\\Code\\Agile360\\Framework\\Extensions\\Signum.Authorization\\"
+      "workingDirectory": "..\\Extensions\\Signum.Authorization\\"
     },
     "Files": {
       "commandName": "Project",

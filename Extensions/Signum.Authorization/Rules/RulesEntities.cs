@@ -1,24 +1,16 @@
+using System.Collections.Concurrent;
+using System.Data;
+using System.Diagnostics;
+
 namespace Signum.Authorization.Rules;
 
 [EntityKind(EntityKind.System, EntityData.Master)]
-public abstract class RuleEntity<R, A> : Entity
+public abstract class RuleEntity<R> : Entity
     where R : class
 {
     public Lite<RoleEntity> Role { get; set; }
 
     public R Resource { get; set; }
-
-    public A Allowed { get; set; }
-
-    public override string ToString()
-    {
-        return "{0} for {1} <- {2}".FormatWith(Resource, Role, Allowed);
-    }
-
-    protected override void PreSaving(PreSavingContext ctx)
-    {
-        this.toStr = this.ToString();
-    }
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
@@ -29,11 +21,46 @@ public abstract class RuleEntity<R, A> : Entity
     }
 }
 
-public class RuleQueryEntity : RuleEntity<QueryEntity, QueryAllowed> { }
+public class RuleQueryEntity : RuleEntity<QueryEntity> 
+{
+    public QueryAllowed Allowed { get; set; }
 
-public class RulePermissionEntity : RuleEntity<PermissionSymbol, bool> { }
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Resource} for {Role} <- {Allowed}");
+}
 
-public class RuleOperationEntity : RuleEntity<OperationTypeEmbedded, OperationAllowed> { }
+public class RulePermissionEntity : RuleEntity<PermissionSymbol> 
+{
+    public bool Allowed { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Resource} for {Role} <- {Allowed}");
+}
+
+public class RuleOperationEntity : RuleEntity<OperationTypeEmbedded> 
+{
+    public OperationAllowed Fallback { get; set; }
+
+    [PreserveOrder, Ignore, QueryableProperty]
+    [BindParent]
+    public MList<RuleOperationConditionEntity> ConditionRules { get; set; } = new MList<RuleOperationConditionEntity>();
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(ConditionRules))
+        {
+            var errors = NoRepeatValidatorAttribute.ByKey(ConditionRules, a => a.Conditions.OrderBy(a => a.ToString()).ToString(" & "));
+
+            if (errors != null)
+                return ValidationMessage._0HasSomeRepeatedElements1.NiceToString(this.Resource, errors);
+        }
+
+        return base.PropertyValidation(pi);
+    }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Resource} for {Role} <- {Fallback}");
+}
 
 
 public class OperationTypeEmbedded : EmbeddedEntity
@@ -42,16 +69,76 @@ public class OperationTypeEmbedded : EmbeddedEntity
 
     public TypeEntity Type { get; set; }
 
-    public override string ToString()
-    {
-        return $"{Operation}/{Type}";
-    }
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Operation}/{Type}");
 }
 
-public class RulePropertyEntity : RuleEntity<PropertyRouteEntity, PropertyAllowed> { }
-
-public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed>
+[EntityKind(EntityKind.System, EntityData.Master)]
+public class RuleOperationConditionEntity : Entity, ICanBeOrdered
 {
+    [NotNullValidator(Disabled = true)]
+    public Lite<RuleOperationEntity> RuleOperation { get; set; }
+
+    [PreserveOrder, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 0)]
+    public MList<TypeConditionSymbol> Conditions { get; set; } = new MList<TypeConditionSymbol>();
+
+    public OperationAllowed Allowed { get; set; }
+
+    public int Order { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Allowed.ToString());
+}
+
+public class RulePropertyEntity : RuleEntity<PropertyRouteEntity> 
+{
+    public PropertyAllowed Fallback { get; set; }
+
+    [PreserveOrder, Ignore, QueryableProperty]
+    [BindParent]
+    public MList<RulePropertyConditionEntity> ConditionRules { get; set; } = new MList<RulePropertyConditionEntity>();
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(ConditionRules))
+        {
+            var errors = NoRepeatValidatorAttribute.ByKey(ConditionRules, a => a.Conditions.OrderBy(a => a.ToString()).ToString(" & "));
+
+            if (errors != null)
+                return ValidationMessage._0HasSomeRepeatedElements1.NiceToString(this.Resource, errors);
+        }
+
+        return base.PropertyValidation(pi);
+    }
+
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Resource} for {Role} <- {Fallback}");
+}
+
+[EntityKind(EntityKind.System, EntityData.Master)]
+public class RulePropertyConditionEntity : Entity, ICanBeOrdered
+{
+    [NotNullValidator(Disabled = true)]
+    public Lite<RulePropertyEntity> RuleProperty { get; set; }
+
+    [PreserveOrder, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 0)]
+    public MList<TypeConditionSymbol> Conditions { get; set; } = new MList<TypeConditionSymbol>();
+
+    public PropertyAllowed Allowed { get; set; }
+
+    public int Order { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Allowed.ToString());
+
+}
+
+
+public class RuleTypeEntity : RuleEntity<TypeEntity>
+{
+    public TypeAllowed Fallback { get; set; }
+
     [PreserveOrder, Ignore, QueryableProperty]
     [BindParent]
     public MList<RuleTypeConditionEntity> ConditionRules { get; set; } = new MList<RuleTypeConditionEntity>();
@@ -68,10 +155,13 @@ public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed>
 
         return base.PropertyValidation(pi);
     }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Resource} for {Role} <- {Fallback}");
 }
 
 [EntityKind(EntityKind.System, EntityData.Master)]
-public class RuleTypeConditionEntity : Entity, IEquatable<RuleTypeConditionEntity>, ICanBeOrdered
+public class RuleTypeConditionEntity : Entity, ICanBeOrdered
 {
     [NotNullValidator(Disabled = true)]
     public Lite<RuleTypeEntity> RuleType { get; set; }
@@ -82,17 +172,6 @@ public class RuleTypeConditionEntity : Entity, IEquatable<RuleTypeConditionEntit
     public TypeAllowed Allowed { get; set; }
 
     public int Order { get; set; }
-
-    public override int GetHashCode() => Conditions.Count ^ Allowed.GetHashCode();
-
-    public override bool Equals(object? obj) => obj is RuleTypeConditionEntity rtc && Equals(rtc);
-    public bool Equals(RuleTypeConditionEntity? other)
-    {
-        if (other == null)
-            return false;
-
-        return this.Conditions.ToHashSet().SetEquals(other.Conditions) && this.Allowed == other.Allowed;
-    }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Allowed.ToString());
@@ -114,6 +193,8 @@ public enum OperationAllowed
     DBOnly = 1,
     Allow = 2,
 }
+
+
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum PropertyAllowed
@@ -185,6 +266,31 @@ public static class TypeAllowedExtensions
             ta == TypeAllowedBasic.None ? PropertyAllowed.None :
             ta == TypeAllowedBasic.Read ? PropertyAllowed.Read : PropertyAllowed.Write;
         return pa;
+    }
+
+    public static bool EqualsForRead(this WithConditions<PropertyAllowed> a, WithConditions<PropertyAllowed> b)
+    {
+        bool CanRead(PropertyAllowed pa) => pa >= PropertyAllowed.Read;
+        if (CanRead(a.Fallback) != CanRead(b.Fallback))
+            return false;
+
+        for (int i = 0; i < a.ConditionRules.Count; i++)
+        {
+            Debug.Assert(a.ConditionRules[i].TypeConditions.SetEquals(b.ConditionRules[i].TypeConditions));
+
+            if (CanRead(a.ConditionRules[i].Allowed) != CanRead(b.ConditionRules[i].Allowed))
+                return false;
+        }
+
+        return true;
+    }
+
+    static ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>> cache = new ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>>();
+    public static WithConditions<PropertyAllowed> ToPropertyAllowed(this WithConditions<TypeAllowed> taac)
+    {
+        return cache.GetOrAdd(taac, taac =>
+            new WithConditions<PropertyAllowed>(taac.Fallback.GetUI().ToPropertyAllowed(), taac.ConditionRules.Select(cr => new ConditionRule<PropertyAllowed>(cr.TypeConditions, cr.Allowed.GetUI().ToPropertyAllowed())).ToReadOnly()).Intern()
+        );
     }
 }
 

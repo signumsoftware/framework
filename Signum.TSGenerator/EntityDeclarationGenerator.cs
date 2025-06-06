@@ -216,7 +216,7 @@ static class EntityDeclarationGenerator
         }
 
 
-        return sb.ToString();
+        return sb.ToString().Replace("\r\n", "\n");
 
     }
 
@@ -240,7 +240,7 @@ static class EntityDeclarationGenerator
     private static string EnumInTypeScript(TypeDefinition type, AssemblyOptions options)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"export const {type.Name} = new EnumType<{type.Name}>(\"{type.Name}\");");
+        sb.AppendLine($"export const {type.Name}: EnumType<{type.Name}> = new EnumType<{type.Name}>(\"{type.Name}\");");
 
         sb.AppendLine($"export type {type.Name} =");
         var fields = type.Fields.OrderBy(a => a.Constant as IComparable).Where(a => a.IsPublic && a.IsStatic).ToList();
@@ -260,13 +260,13 @@ static class EntityDeclarationGenerator
     private static string MessageInTypeScript(TypeDefinition type, AssemblyOptions options)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"export module {type.Name} {{");
+        sb.AppendLine($"export namespace {type.Name} {{");
         var fields = type.Fields.OrderBy(a => a.MetadataToken.RID).Where(a => a.IsPublic && a.IsStatic).ToList();
 
         foreach (var field in fields)
         {
             string context = $"By type {type.Name} and field {field.Name}";
-            sb.AppendLine($"  export const {field.Name} = new MessageKey(\"{type.Name}\", \"{field.Name}\");");
+            sb.AppendLine($"  export const {field.Name}: MessageKey = new MessageKey(\"{type.Name}\", \"{field.Name}\");");
         }
         sb.AppendLine(@"}");
 
@@ -276,13 +276,13 @@ static class EntityDeclarationGenerator
     private static string QueryInTypeScript(TypeDefinition type, AssemblyOptions options)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"export module {type.Name} {{");
+        sb.AppendLine($"export namespace {type.Name} {{");
         var fields = type.Fields.OrderBy(a => a.MetadataToken.RID).Where(a => a.IsPublic && a.IsStatic).ToList();
 
         foreach (var field in fields)
         {
             string context = $"By type {type.Name} and field {field.Name}";
-            sb.AppendLine($"  export const {field.Name} = new QueryKey(\"{type.Name}\", \"{field.Name}\");");
+            sb.AppendLine($"  export const {field.Name}: QueryKey = new QueryKey(\"{type.Name}\", \"{field.Name}\");");
         }
         sb.AppendLine(@"}");
 
@@ -294,7 +294,7 @@ static class EntityDeclarationGenerator
     private static string SymbolInTypeScript(TypeDefinition type, AssemblyOptions options, Dictionary<string, Dictionary<string, NamespaceTSReference>> namespacesReferences)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"export module {type.Name} {{");
+        sb.AppendLine($"export namespace {type.Name} {{");
         var fields = type.Fields.OrderBy(a => a.MetadataToken.RID).Where(a => a.IsPublic && a.IsStatic).ToList();
 
         foreach (var field in fields)
@@ -311,11 +311,46 @@ static class EntityDeclarationGenerator
         return sb.ToString();
     }
 
+    enum ConstraintKind
+    {
+        Enum,
+        ModifiableEntity
+    }
+
     private static string EntityInTypeScript(TypeDefinition type, AssemblyOptions options, Dictionary<string, Dictionary<string, NamespaceTSReference>> namespacesReferences)
     {
         StringBuilder sb = new StringBuilder();
         if (!type.IsAbstract)
-            sb.AppendLine($"export const {type.Name} = new Type<{type.Name}>(\"{CleanTypeName(type)}\");");
+        {
+            if (!type.HasGenericParameters)
+                sb.AppendLine($"export const {type.Name}: Type<{type.Name}> = new Type<{type.Name}>(\"{CleanTypeName(type)}\");");
+            else
+            {
+                var parameters = type.GenericParameters.Select(a => new
+                {
+                    a.Name,
+                    Type = 
+                    a.Constraints.Any(c => c.ConstraintType.FullName == "System.Enum") ? ConstraintKind.Enum :
+                    a.Constraints.Any(c => IsModifiableEntity(c.ConstraintType)) ? ConstraintKind.ModifiableEntity :
+                     throw new Exception($"GenericParameter {a.Name} of {type.ToString()} is not an enum or a ModifiableEntity")
+                }).ToList();
+
+                var genericParametersDefinitions = string.Join(", ", parameters.Select(a => $"{a.Name} extends " +
+                    (a.Type == ConstraintKind.Enum ? "string" : "ModifiableEntity")));
+
+                var genericParameters = string.Join(", ", parameters.Select(a => $"{a.Name}"));
+
+                var functionParameters = string.Join(", ", parameters.Select(a => $"{FirstLower(a.Name)} : " +
+                    (a.Type == ConstraintKind.Enum ? $"EnumType<{a.Name}>" : $"Type<{a.Name}>")));
+
+                var cleanName = type.Name.Substring(0, type.Name.IndexOf('`'));
+                var typeNameParts = string.Join(" + \"_\" + ", parameters.Select(a => FirstLower(a.Name) + ".typeName"));
+
+                sb.AppendLine(@$"export function {cleanName}<{genericParametersDefinitions}>({functionParameters}): Type<{cleanName}<{genericParameters}>> {{
+    return new Type<{cleanName}<{genericParameters}>>(""{cleanName}_"" + {typeNameParts});
+}}");
+            }
+        }
 
         List<string> baseTypes = new List<string>();
         if (type.BaseType != null)
@@ -330,7 +365,7 @@ static class EntityDeclarationGenerator
             baseTypes.Add(TypeScriptName(i, type, options, namespacesReferences, $"By type {type.Name}"));
 
         sb.AppendLine($"export interface {TypeScriptName(type, type, options, namespacesReferences, "declaring " + type.Name)} extends {string.Join(", ", baseTypes.Distinct())} {{");
-        if (!type.IsAbstract && Parents(type.BaseType?.Resolve()).All(a => a.IsAbstract))
+        if (!type.IsAbstract && !type.HasGenericParameters && Parents(type.BaseType?.Resolve()).All(a => a.IsAbstract))
             sb.AppendLine($"  Type: \"{CleanTypeName(type)}\";");
 
         var properties = GetProperties(type);
@@ -360,9 +395,9 @@ static class EntityDeclarationGenerator
 
     static ConcurrentDictionary<TypeReference, bool> IsModifiableDictionary = new ConcurrentDictionary<TypeReference, bool>(); 
 
-    static bool IsModifiableEntity(TypeDefinition t)
+    static bool IsModifiableEntity(TypeReference t)
     {
-        if (t.IsValueType || t.IsInterface)
+        if (t.IsValueType || t.Resolve().IsInterface)
             return false;
 
         if (!InheritsFromModEntity(t))
@@ -700,16 +735,6 @@ static class EntityDeclarationGenerator
 
     private static string FindDeclarationsFile(AssemblyReference assemblyReference, string @namespace, TypeDefinition typeForError)
     {
-        //var fileTS = @namespace + ".ts";
-
-        //var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileTS).ToList();
-
-        //if (result.Count == 1)
-        //    return result.Single();
-
-        //if (result.Count > 1)
-        //    throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileTS}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
-
         var fileT4S = @namespace + ".t4s";
 
         var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileT4S).ToList();
@@ -718,7 +743,7 @@ static class EntityDeclarationGenerator
             return result.Single().RemoveSuffix(".t4s") + ".ts";
 
         if (result.Count > 1)
-            throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileT4S}' were found inside '{assemblyReference.Directory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
+            throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileT4S}' were found inside '{assemblyReference.Directory}':\n{string.Join("\n", result.Select(a => "  " + a).ToArray())}");
 
         throw new InvalidOperationException($"importing '{typeForError}' required but no '{fileT4S}' found inside '{assemblyReference.Directory}'");
     }

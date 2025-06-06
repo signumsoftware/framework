@@ -488,17 +488,17 @@ public class UserChartDataTableProvider : IWordDataTableProvider
 
             overridenColors = result.Columns.SelectMany(c =>
             {
-                if (typeof(Lite<Entity>).IsAssignableFrom(c.Column.Type))
+                if (typeof(Lite<Entity>).IsAssignableFrom(c.Token.Type))
                     return (from lite in c.Values.OfType<Lite<Entity>>().Distinct()
                             let color = ColorPaletteLogic.ColorFor(lite)
                             where color != null
-                            select KeyValuePair.Create((string)converter.ConvertValue(lite, c.Column)!, color));
+                            select KeyValuePair.Create((string)converter.ConvertValue(lite, c.Token)!, color));
 
-                if (c.Column.Type.UnNullify().IsEnum)
+                if (c.Token.Type.UnNullify().IsEnum)
                     return (from e in c.Values.OfType<Enum>().Distinct()
                             let color = ColorPaletteLogic.ColorFor(EnumEntity.FromEnumUntyped(e).ToLite())
                             where color != null
-                            select KeyValuePair.Create((string)converter.ConvertValue(e, c.Column)!, color));
+                            select KeyValuePair.Create((string)converter.ConvertValue(e, c.Token)!, color));
 
                 return Enumerable.Empty<KeyValuePair<string, string>>();
             }).DistinctBy(a => a.Key).ToDictionary();

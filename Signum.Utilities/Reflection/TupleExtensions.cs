@@ -68,31 +68,33 @@ public static class TupleReflection
 
     public static Type TupleChainType(IEnumerable<Type> tupleElementTypes)
     {
-        int count = tupleElementTypes.Count();
+        var list = tupleElementTypes.ToList();
+        int count = list.Count();
 
         if (count == 0)
             throw new InvalidOperationException("typleElementTypes is empty"); 
 
         if (count >= 8)
-            return TupleOf(8).MakeGenericType(tupleElementTypes.Take(7).And(TupleChainType(tupleElementTypes.Skip(7))).ToArray());
+            return TupleOf(8).MakeGenericType(list.Take(7).And(TupleChainType(list.Skip(7))).ToArray());
 
-        return TupleOf(tupleElementTypes.Count()).MakeGenericType(tupleElementTypes.ToArray());
+        return TupleOf(list.Count()).MakeGenericType(list.ToArray());
     }
 
     public static Expression TupleChainConstructor(IEnumerable<Expression> fieldExpressions)
     {
-        int count  = fieldExpressions.Count();
+        var list = fieldExpressions.ToList();
+        int count  = list.Count();
 
         if (count == 0)
             return Expression.Constant(new object(), typeof(object));
 
-        Type type = TupleChainType(fieldExpressions.Select(e => e.Type));
+        Type type = TupleChainType(list.Select(e => e.Type));
         ConstructorInfo ci = type.GetConstructors().SingleEx();
 
         if (count >= 8)
-            return Expression.New(ci, fieldExpressions.Take(7).And(TupleChainConstructor(fieldExpressions.Skip(7))));
+            return Expression.New(ci, list.Take(7).And(TupleChainConstructor(list.Skip(7))));
 
-        return Expression.New(ci, fieldExpressions); 
+        return Expression.New(ci, list); 
     }
 
     public static Expression TupleChainProperty(Expression expression, int index)

@@ -17,7 +17,7 @@ import { useTitle } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 import { getToString } from '@framework/Signum.Entities'
 
-export default function TranslationInstanceView() {
+export default function TranslationInstanceView(): React.JSX.Element {
   const params = useParams() as { type: string; culture?: string; };
   const location = useLocation();
 
@@ -97,7 +97,7 @@ export default function TranslationInstanceView() {
   );
 }
 
-export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: string) => void }) {
+export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: string) => void }): React.JSX.Element {
 
   const [tmpFilter, setTmpFilter] = React.useState(p.filter);
 
@@ -124,7 +124,7 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
   );
 }
 
-export function TranslatedInstances(p: { data: TranslatedInstanceClient.TranslatedInstanceViewType, cultures: string[], currentCulture?: string | undefined }) {
+export function TranslatedInstances(p: { data: TranslatedInstanceClient.TranslatedInstanceViewType, cultures: string[], currentCulture?: string | undefined }): React.JSX.Element {
 
 
   return (
@@ -134,7 +134,7 @@ export function TranslatedInstances(p: { data: TranslatedInstanceClient.Translat
   );
 }
 
-export function TranslatedInstance(p: { ins: TranslatedInstanceClient.TranslatedInstanceView, cultures: string[], currentCulture?: string | undefined, data: TranslatedInstanceClient.TranslatedInstanceViewType }) {
+export function TranslatedInstance(p: { ins: TranslatedInstanceClient.TranslatedInstanceView, cultures: string[], currentCulture?: string | undefined, data: TranslatedInstanceClient.TranslatedInstanceViewType }): React.JSX.Element {
 
   const ins = p.ins;
   const forceUpdate = useForceUpdate();

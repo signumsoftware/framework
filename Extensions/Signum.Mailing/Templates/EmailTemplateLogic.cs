@@ -123,7 +123,7 @@ public static class EmailTemplateLogic
             sb.Schema.Synchronizing += Schema_Synchronizing_Tokens;
             sb.Schema.Synchronizing += Schema_Synchronizing_DefaultTemplates;
 
-            sb.Schema.Table<EmailModelEntity>().PreDeleteSqlSync += EmailTemplateLogic_PreDeleteSqlSync;
+            sb.Schema.EntityEvents<EmailModelEntity>().PreDeleteSqlSync += EmailTemplateLogic_PreDeleteSqlSync;
 
             Validator.PropertyValidator<EmailTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
             {
@@ -137,31 +137,30 @@ public static class EmailTemplateLogic
         }
     }
 
-    static SqlPreCommand? EmailTemplateLogic_PreDeleteSqlSync(Entity arg)
+    static SqlPreCommand? EmailTemplateLogic_PreDeleteSqlSync(EmailModelEntity entityModel)
     {
-        EmailModelEntity emailModel = (EmailModelEntity)arg;
     retry:
-        var result = new ConsoleSwitch<string, Func<SqlPreCommand>>($"EmailModel {arg} has been removed... What you want to do?")
+        var result = new ConsoleSwitch<string, Func<SqlPreCommand>>($"EmailModel {entityModel} has been removed... What you want to do?")
         {
             {
                 "mt",
                 () => SqlPreCommand.Combine(Spacing.Simple,
-                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template!.Entity.Model.Is(emailModel))),
-                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)))
+                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template!.Entity.Model.Is(entityModel))),
+                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(entityModel)))
                 )!,
                 "Delete Messages and Templates"
             },
             { "t",
                 () => SqlPreCommand.Combine(Spacing.Simple,
-                    Administrator.UnsafeUpdatePartPreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template!.Entity.Model.Is(emailModel)).UnsafeUpdate().Set(em  => em.Template, em => null)),
-                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)))
+                    Administrator.UnsafeUpdatePartPreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template!.Entity.Model.Is(entityModel)).UnsafeUpdate().Set(em  => em.Template, em => null)),
+                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(entityModel)))
                 )!,
                 "Delete Templates only, Update Messages"
 
             },
             {
                 "n",
-                () => Administrator.UnsafeUpdatePartPreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)).UnsafeUpdate().Set(a => a.Model, a => null)),
+                () => Administrator.UnsafeUpdatePartPreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(entityModel)).UnsafeUpdate().Set(a => a.Model, a => null)),
                 "Nothing, just Update Templates"
             },
         }.Choose();
@@ -520,7 +519,7 @@ public static class EmailTemplateLogic
         }
         catch (Exception e)
         {
-            return new SqlPreCommandSimple("-- Exception on {0}. {1}\r\n{2}".FormatWith(et.BaseToString(), e.GetType().Name, e.Message.Indent(2, '-')));
+            return new SqlPreCommandSimple("-- Exception on {0}. {1}\n{2}".FormatWith(et.BaseToString(), e.GetType().Name, e.Message.Indent(2, '-')));
         }
     }
 
@@ -540,7 +539,7 @@ public static class EmailTemplateLogic
         if (!emailModels.Any())
             return null;
 
-        if (!replacements.Interactive || !SafeConsole.Ask("{0}\r\n have no EmailTemplates. Create in {1}?".FormatWith(emailModels.ToString("\r\n"), cis.DefaultText("No CultureInfos registered!"))))
+        if (!replacements.Interactive || !SafeConsole.Ask("{0}\n have no EmailTemplates. Create in {1}?".FormatWith(emailModels.ToString("\n"), cis.DefaultText("No CultureInfos registered!"))))
             return null;
 
         using (replacements.WithReplacedDatabaseName())
@@ -578,12 +577,12 @@ public static class EmailTemplateLogic
             }
             catch (Exception ex)
             {
-                exceptions.Add("{0} in {1}:\r\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
+                exceptions.Add("{0} in {1}:\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
             }
         }
 
         if (exceptions.Any())
-            throw new Exception(exceptions.ToString("\r\n\r\n"));
+            throw new Exception(exceptions.ToString("\n\n"));
     }
 
     public static bool Regenerate(EmailTemplateEntity et)

@@ -29,7 +29,7 @@ export interface ChartColumnProps {
 }
 
 
-export function ChartColumn(p: ChartColumnProps) {
+export function ChartColumn(p: ChartColumnProps): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 
@@ -111,7 +111,7 @@ export function ChartColumn(p: ChartColumnProps) {
   const sc = p.scriptColumn;
   const cb = p.chartBase;
 
-  const subTokenOptions = SubTokensOptions.CanElement | SubTokensOptions.CanAggregate;
+  var subTokenOptions = SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | (p.chartBase.chartTimeSeries ? SubTokensOptions.CanTimeSeries : 0);
 
   const ctx = p.ctx;
 
@@ -165,7 +165,7 @@ export function ChartColumn(p: ChartColumnProps) {
               </div>
               {getColorPalettes().map((t, i) =>
                 <div className="col-sm-3" key={i}>
-                  {t && <ChartPaletteLink ctx={ctxBasic} type={t} refresh={forceUpdate} />}
+                  {t && !t.noSchema && < ChartPaletteLink ctx={ctxBasic} type={t} refresh={forceUpdate} />}
                 </div>)
               }
             </div>
@@ -193,7 +193,7 @@ export interface ChartPaletteLinkProps {
   ctx: StyleContext;
 }
 
-export function ChartPaletteLink(p: ChartPaletteLinkProps) {
+export function ChartPaletteLink(p: ChartPaletteLinkProps): React.JSX.Element {
 
   const [palette, reload] = useAPIWithReload(() => ColorPaletteClient.getColorPalette(p.type.name), [p.type.name]);
 

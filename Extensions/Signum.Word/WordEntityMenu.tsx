@@ -11,7 +11,7 @@ export interface WordEntityMenuProps {
   entityPack: EntityPack<Entity>;
 }
 
-export default function WordEntityMenu(p : WordEntityMenuProps){
+export default function WordEntityMenu(p : WordEntityMenuProps): React.JSX.Element {
   function handleOnClick(wt: Lite<WordTemplateEntity>) {
     Navigator.API.fetch(wt)
       .then<string | undefined>(wordTemplate => wordTemplate.model ? WordClient.API.getConstructorType(wordTemplate.model) : undefined)
@@ -37,7 +37,8 @@ export default function WordEntityMenu(p : WordEntityMenuProps){
 
   return (
     <DropdownButton id="wordMenu" className="sf-word-dropdown" variant="outline-info" title={label}> 
-        {
+      {
+          p.entityPack.wordTemplates == "error" ? <Dropdown.Item className="text-danger">Error</Dropdown.Item> : 
           p.entityPack.wordTemplates!.map((wt, i) =>
             <Dropdown.Item key={i}
               onClick={() => handleOnClick(wt)}>

@@ -43,7 +43,7 @@ public static partial class TextTemplateParser
         {
             ParseInternal();
             if (errors.Any())
-                throw new FormatException(errors.ToString("\r\n"));
+                throw new FormatException(errors.ToString("\n"));
             return mainBlock;
         }
 
@@ -51,7 +51,7 @@ public static partial class TextTemplateParser
         {
             ParseInternal();
 
-            string fatalErrors = errors.Where(a => a.IsFatal).ToString("\r\n");
+            string fatalErrors = errors.Where(a => a.IsFatal).ToString("\n");
 
             if (fatalErrors.HasText())
                 throw new FormatException(fatalErrors);
@@ -62,7 +62,7 @@ public static partial class TextTemplateParser
         public BlockNode TryParse(out string errorMessages)
         {
             ParseInternal();
-            errorMessages = this.errors.ToString(a => a.Message, ", ");
+            errorMessages = this.errors.ToString(a => a.Message, "\n");
             return mainBlock;
         }
 

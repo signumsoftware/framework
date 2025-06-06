@@ -14,7 +14,7 @@ interface SidebarContainerProps {
   children: React.ReactNode;
 }
 
-export function SidebarContainer(p: SidebarContainerProps){
+export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element{
   function renderSideBar() {
     return (
       <nav
@@ -28,7 +28,7 @@ export function SidebarContainer(p: SidebarContainerProps){
   return (
     <div className="sidebar-container">
       {p.sidebarContent && renderSideBar()}
-      <div className="container-fluid sf-page-container">
+      <div className="sf-page-container">
         <ErrorBoundary>
           {p.children}
         </ErrorBoundary>
@@ -37,7 +37,7 @@ export function SidebarContainer(p: SidebarContainerProps){
   );
 }
 
-export function SidebarToggleItem(p: { isMobile: boolean, simpleMode?: boolean, mode: SidebarMode, setMode: (mode: SidebarMode) => void }) {
+export function SidebarToggleItem(p: { isMobile: boolean, simpleMode?: boolean, mode: SidebarMode, setMode: (mode: SidebarMode) => void }): React.JSX.Element {
   return (
     <a className={classes("main-sidebar-button", "nav-link", "main-sidebar-button-" + p.mode.toLowerCase())} onClick={(ev) => {
       window.dispatchEvent(new CustomEvent("sidebarMove"));

@@ -18,11 +18,12 @@ import { ImportComponent } from '@framework/ImportComponent'
 import "./Processes.css"
 import { ConstructSymbol_From, DeleteSymbol, ExecuteSymbol } from '@framework/Signum.Operations';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
-import { ContextualMenuItem } from '../../Signum/React/SearchControl/ContextualItems';
+import { ContextualItemsContext, ContextualMenuItem } from '../../Signum/React/SearchControl/ContextualItems';
+import { SearchControlLoaded } from '@framework/Search';
 
 export namespace ProcessClient {
   
-  export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }) {
+  export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Processes", () => import("./Changelog"));
   
@@ -75,10 +76,12 @@ export namespace ProcessClient {
       icon: "clone",
       color: "info",
     }));
+
+    AppContext.clearSettingsActions.push(() => Dic.clear(processOperationSettings));
   }
   
   export const processOperationSettings: { [key: string]: ContextualOperationSettings<any> } = {};
-  export function register<T extends Entity>(...settings: ContextualOperationSettings<T>[]) {
+  export function register<T extends Entity>(...settings: ContextualOperationSettings<T>[]): void {
     settings.forEach(s => Dic.addOrThrow(processOperationSettings, s.operationSymbol, s));
   }
   
@@ -122,34 +125,40 @@ export namespace ProcessClient {
     };
   }
   
-  function defaultConstructProcessFromMany(coc: ContextualOperationContext<Entity>, ...args: any[]) {
+  export async function defaultConstructProcessFromMany(coc: ContextualOperationContext<Entity>, ...args: any[]): Promise<void> {
     var event = coc.event!;
-  
+
     event!.preventDefault();
     event.stopPropagation();
-  
-    ContextualOperations.confirmInNecessary(coc).then(conf => {
-      if (!conf)
-        return;
-  
-      API.processFromMany<Entity>(coc.context.lites, coc.operationInfo.key).then(pack => {
-  
-        if (!pack || !pack.entity)
-          return;
-  
-        const es = Navigator.getSettings(pack.entity.Type);
-        if (es?.avoidPopup || event.ctrlKey || event.button == 1) {
-          AppContext.navigate('/create/', { state: pack });
-          return;
-        }
-        else {
-          Navigator.view(pack);
-        }
-      });
-    });
+
+    const lites = coc.context.container instanceof SearchControlLoaded ?
+      await coc.context.container.askAllLites(coc.context, coc.operationInfo.niceName) :
+      coc.context.lites;
+
+    if (lites == null)
+      return;
+
+    coc = ContextualOperations.cloneWithPrototype(coc, { context: { ...coc.context, lites } });
+
+    var conf = await ContextualOperations.confirmInNecessary(coc);
+    if (!conf)
+      return;
+
+    const pack = await API.processFromMany<Entity>(coc.context.lites, coc.operationInfo.key, args);
+    if (!pack || !pack.entity)
+      return;
+
+    const es = Navigator.getSettings(pack.entity.Type);
+    if (es?.avoidPopup || event.ctrlKey || event.button == 1) {
+      AppContext.navigate('/create/', { state: pack });
+      return;
+    }
+    else {
+      await Navigator.view(pack);
+    }
   }
-  
-  export module API {
+
+  export namespace API {
   
     export function processFromMany<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, args?: any[]): Promise<EntityPack<ProcessEntity>> {
       GraphExplorer.propagateAll(lites, args);

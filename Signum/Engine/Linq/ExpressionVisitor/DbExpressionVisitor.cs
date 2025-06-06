@@ -192,6 +192,15 @@ internal class DbExpressionVisitor : ExpressionVisitor
         return sqlEnum;
     }
 
+    protected internal virtual Expression VisitSqlColumnList(SqlColumnListExpression sqlColumnList)
+    {
+        var cols = Visit<ColumnExpression>(sqlColumnList.Columns, vc => (ColumnExpression)VisitColumn(vc));
+        if (cols != sqlColumnList.Columns)
+            return new SqlColumnListExpression(cols);
+
+        return sqlColumnList;
+    }
+
     protected internal virtual Expression VisitSqlCast(SqlCastExpression castExpr)
     {
         var expression = Visit(castExpr.Expression);
@@ -202,7 +211,24 @@ internal class DbExpressionVisitor : ExpressionVisitor
 
     protected internal virtual Expression VisitTable(TableExpression table)
     {
+        var st = VisitSystemTime(table.SystemTime);
+
+        if(st != table.SystemTime)
+            return new TableExpression(table.Alias, table.Table, st, table.WithHint);
+
         return table;
+    }
+
+    protected SystemTime? VisitSystemTime(SystemTime? st)
+    {
+        if (st is SystemTime.AsOfExpression aoe)
+        {
+            var exp = Visit(aoe.Expression);
+            if (exp != aoe.Expression)
+                return new SystemTime.AsOfExpression(exp);
+        }
+
+        return st;
     }
 
     protected internal virtual Expression VisitColumn(ColumnExpression column)
@@ -303,6 +329,15 @@ internal class DbExpressionVisitor : ExpressionVisitor
         return like;
     }
 
+    protected internal virtual Expression VisitIsDescendatOf(IsDesendantOfExpression isDesendantOf)
+    {
+        Expression child = Visit(isDesendantOf.Child);
+        Expression parent = Visit(isDesendantOf.Parent);
+        if (child != isDesendantOf.Child || parent != isDesendantOf.Parent)
+            return new IsDesendantOfExpression(child, parent);
+        return isDesendantOf;
+    }
+
     protected internal virtual Expression VisitScalar(ScalarExpression scalar)
     {
         var select = (SelectExpression)this.Visit(scalar.Select)!;
@@ -360,8 +395,9 @@ internal class DbExpressionVisitor : ExpressionVisitor
     protected internal virtual Expression VisitAggregate(AggregateExpression aggregate)
     {
         var expressions = Visit(aggregate.Arguments);
-        if (expressions != aggregate.Arguments)
-            return new AggregateExpression(aggregate.Type, aggregate.AggregateFunction, expressions);
+        var orderBys = aggregate.OrderBy == null ? null : Visit(aggregate.OrderBy, VisitOrderBy);
+        if (expressions != aggregate.Arguments || orderBys != aggregate.OrderBy)
+            return new AggregateExpression(aggregate.Type, aggregate.AggregateFunction, expressions, orderBys);
         return aggregate;
     }
 

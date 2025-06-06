@@ -20,11 +20,11 @@ export namespace CultureClient {
   }
   
   export let onCultureChanged: (previousCulture: Lite<CultureInfoEntity>, newCulture: Lite<CultureInfoEntity>) => void = (pci, nci) => { };
-  export function setOnCultureChanged(onChanged: (previousCulture: Lite<CultureInfoEntity>, newCulture: Lite<CultureInfoEntity>) => void) {
+  export function setOnCultureChanged(onChanged: (previousCulture: Lite<CultureInfoEntity>, newCulture: Lite<CultureInfoEntity>) => void): void {
     onCultureChanged = onChanged;
   }
   
-  export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
+  export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>): void {
     const previousCulture = currentCulture;
     API.setCurrentCulture(newCulture)
       .then(() => loadCurrentCulture())

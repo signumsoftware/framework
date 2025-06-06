@@ -5,6 +5,8 @@ using Signum.API;
 using Signum.Mailing;
 using Signum.Authorization.ActiveDirectory.Azure;
 using DocumentFormat.OpenXml.Vml.Office;
+using Signum.Engine.Sync;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Signum.Authorization.ActiveDirectory.Windows;
 
@@ -37,9 +39,11 @@ public static class WindowsActiveDirectoryLogic
                 {
                     var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
 
+                    var windowsAD = config.GetWindowsAD();
+
                     var list = Database.Query<UserEntity>().ToList();
 
-                    using (var domainContext = new PrincipalContext(ContextType.Domain, config.DomainName, config.DirectoryRegistry_Username + "@" + config.DomainName, config.DirectoryRegistry_Password!))
+                    using (var domainContext = new PrincipalContext(ContextType.Domain, windowsAD.DomainName, windowsAD.DirectoryRegistry_Username + "@" + windowsAD.DomainName, windowsAD.DirectoryRegistry_Password!))
                     {
                         stc.ForeachWriting(list, u => u.UserName, u =>
                         {
@@ -85,62 +89,124 @@ public static class WindowsActiveDirectoryLogic
     static PrincipalContext GetPrincipalContext()
     {
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
+        var windowsAD = config.GetWindowsAD();
 
-        if (config.DirectoryRegistry_Username.HasText() && config.DirectoryRegistry_Password.HasText())
-            return new PrincipalContext(ContextType.Domain, config.DomainName, config.DirectoryRegistry_Username + "@" + config.DomainName, config.DirectoryRegistry_Password!);
+        if (windowsAD.DirectoryRegistry_Username.HasText() && windowsAD.DirectoryRegistry_Password.HasText())
+            return new PrincipalContext(ContextType.Domain, windowsAD.DomainName, windowsAD.DirectoryRegistry_Username + "@" + windowsAD.DomainName, windowsAD.DirectoryRegistry_Password!);
         else
-            return new PrincipalContext(ContextType.Domain, config.DomainName);
+            return new PrincipalContext(ContextType.Domain, windowsAD.DomainName);
     }
 
-    public static Task<List<ActiveDirectoryUser>> SearchUser(string searchUserName)
+    public static Task<List<ActiveDirectoryUser>> SearchUser(string searchUserName, int limit)
     {
         using (var pc = GetPrincipalContext())
         {
-            List<UserPrincipal> searchPrinciples = new List<UserPrincipal>();
-
-            searchPrinciples.Add(new UserPrincipal(pc)
+            using (var searcher = new DirectorySearcher())
             {
-                SamAccountName = "*" + searchUserName + "*",
-            });
+                // Construct the LDAP OR filter
+                var filters = new List<string>();
 
-            searchPrinciples.Add(new UserPrincipal(pc)
-            {
-                DisplayName = "*" + searchUserName + "*",
-            });
+                filters.Add($"(sAMAccountName=*{searchUserName}*)");
+                filters.Add($"(displayName=*{searchUserName}*)");
 
-
-            if (searchUserName.Contains("@"))
-            {
-                searchPrinciples.Add(new UserPrincipal(pc)
+                if (searchUserName.Contains("@"))
                 {
-                    EmailAddress = searchUserName,
-                });
+                    filters.Add($"(mail={searchUserName})");
+                }
+
+                // Combine the filters into an OR condition using the | operator
+                var ldapFilter = $"(|{string.Join("", filters)})";
+                searcher.Filter = $"(&(objectCategory=person)(objectClass=user){ldapFilter})";
+
+                // Specify properties to load
+                searcher.PropertiesToLoad.Add("userPrincipalName");
+                searcher.PropertiesToLoad.Add("displayName");
+                searcher.PropertiesToLoad.Add("description");
+                searcher.PropertiesToLoad.Add("objectSid");
+
+                // Enable paging
+                searcher.SizeLimit = limit;
+
+                // Perform the search
+                var results = searcher.FindAll();
+
+                // Map results to ActiveDirectoryUser objects
+                var activeDirectoryUsers = new List<ActiveDirectoryUser>();
+                foreach (SearchResult result in results)
+                {
+                    var user = new ActiveDirectoryUser
+                    {
+                        UPN = result.Properties["userPrincipalName"]?.Count > 0 ? result.Properties["userPrincipalName"][0].ToString()! : "",
+                        DisplayName = result.Properties["displayName"]?.Count > 0 ? result.Properties["displayName"][0].ToString()! : "",
+                        JobTitle = result.Properties["description"]?.Count > 0 ? result.Properties["description"][0].ToString()! : "",
+                        SID = result.Properties["objectSid"]?.Count > 0 ? new System.Security.Principal.SecurityIdentifier((byte[])result.Properties["objectSid"][0], 0).ToString() : null,
+                        ObjectID = null
+                    };
+
+                    activeDirectoryUsers.Add(user);
+                }
+
+                // Return distinct results
+                var distinctUsers = activeDirectoryUsers
+                    .DistinctBy(a => a.SID)
+                    .OrderBy(a => a.UPN)
+                    .ToList();
+
+                return Task.FromResult(distinctUsers);
             }
-
-            List<Principal> principals = new List<Principal>();
-            var searcher = new PrincipalSearcher();
-
-            foreach (var item in searchPrinciples)
-            {
-                searcher = new PrincipalSearcher(item);
-                principals.AddRange(searcher.FindAll());
-            }
-
-            var result = principals.Select(a => new ActiveDirectoryUser
-            {
-                UPN = a.UserPrincipalName,
-                DisplayName = a.DisplayName,
-                JobTitle = a.Description,
-                SID = a.Sid.ToString(),
-                ObjectID = null,
-            })
-                .DistinctBy(a => a.SID)
-            .OrderBy(a => a.UPN)
-            .ToList();
-
-            return Task.FromResult(result);
         }
     }
+
+
+    //public static Task<List<ActiveDirectoryUser>> SearchUser(string searchUserName)
+    //{
+    //    using (var pc = GetPrincipalContext())
+    //    {
+    //        List<UserPrincipal> searchPrinciples = new List<UserPrincipal>();
+
+    //        searchPrinciples.Add(new UserPrincipal(pc)
+    //        {
+    //            SamAccountName = "*" + searchUserName + "*",
+    //        });
+
+    //        searchPrinciples.Add(new UserPrincipal(pc)
+    //        {
+    //            DisplayName = "*" + searchUserName + "*",
+    //        });
+
+
+    //        if (searchUserName.Contains("@"))
+    //        {
+    //            searchPrinciples.Add(new UserPrincipal(pc)
+    //            {
+    //                EmailAddress = searchUserName,
+    //            });
+    //        }
+
+    //        List<Principal> principals = new List<Principal>();
+    //        var searcher = new PrincipalSearcher();
+
+    //        foreach (var item in searchPrinciples)
+    //        {
+    //            searcher = new PrincipalSearcher(item);
+    //            principals.AddRange(searcher.FindOne());
+    //        }
+
+    //        var result = principals.Select(a => new ActiveDirectoryUser
+    //        {
+    //            UPN = a.UserPrincipalName,
+    //            DisplayName = a.DisplayName,
+    //            JobTitle = a.Description,
+    //            SID = a.Sid.ToString(),
+    //            ObjectID = null,
+    //        })
+    //            .DistinctBy(a => a.SID)
+    //        .OrderBy(a => a.UPN)
+    //        .ToList();
+
+    //        return Task.FromResult(result);
+    //    }
+    //}
 
     public static UserEntity CreateUserFromAD(ActiveDirectoryUser adUser)
     {
@@ -224,7 +290,7 @@ public static class WindowsActiveDirectoryLogic
     {
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
 
-        using (var domainContext = new PrincipalContext(ContextType.Domain, config.DomainName))
+        using (var domainContext = new PrincipalContext(ContextType.Domain, config.WindowsAD!.DomainName))
         {
             using (var foundUser = UserPrincipal.FindByIdentity(domainContext, IdentityType.SamAccountName, username))
             {

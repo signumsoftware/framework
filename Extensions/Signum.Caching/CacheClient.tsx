@@ -12,7 +12,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 export namespace CacheClient {
   
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Caching", () => import("./Changelog"));
   
@@ -28,7 +28,7 @@ export namespace CacheClient {
   }
   
   
-  export module API {
+  export namespace API {
   
     export function enable(): Promise<void> {
       return ajaxPost({ url: "/api/cache/enable" }, undefined);

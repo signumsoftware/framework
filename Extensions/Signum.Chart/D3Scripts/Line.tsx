@@ -99,7 +99,7 @@ export interface ChartScriptHorizontalProps {
   detector?: (row: ChartRow) => boolean;
 }
 
-export function paintLine({ xRule, yRule, x, y, keyValues, data, hasHorizontalScale, parameters, onDrillDown, initialLoad, detector }: ChartScriptHorizontalProps) {
+export function paintLine({ xRule, yRule, x, y, keyValues, data, hasHorizontalScale, parameters, onDrillDown, initialLoad, detector }: ChartScriptHorizontalProps): React.JSX.Element {
 
   var keyColumn = data.columns.c0! as ChartColumn<unknown>;
   var valueColumn = data.columns.c1! as ChartColumn<number>;

@@ -8,17 +8,13 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Signum.Engine.Maps;
-using Signum.API.ApiControllers;
 using Signum.API.Filters;
 using Signum.API.JsonModelValidators;
 using Signum.API.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using System.Globalization;
 using Signum.DynamicQuery.Tokens;
-using Signum.Operations;
 
 namespace Signum.API;
 
@@ -48,7 +44,7 @@ public static class SignumServer
         jso.WriteIndented = true;
         jso.Converters.Add(WebEntityJsonConverterFactory);
         jso.Converters.Add(new LiteJsonConverterFactory());
-        jso.Converters.Add(new MListJsonConverterFactory(WebEntityJsonConverterFactory.AssertCanWrite));
+        jso.Converters.Add(new MListJsonConverterFactory((pr, root, metadata) => WebEntityJsonConverterFactory.AssertCanWrite(pr, root as ModifiableEntity, metadata)));
         jso.Converters.Add(new JsonStringEnumConverter());
         jso.Converters.Add(new ResultTableConverter());
         jso.Converters.Add(new TimeSpanConverter());
@@ -104,7 +100,7 @@ public static class SignumServer
         ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(CollectionMessage).Namespace!, () => UserHolder.Current != null);
     }
 
-    private static string? EntityJsonConverter_CanWritePropertyRoute(PropertyRoute arg, ModifiableEntity? mod)
+    private static string? EntityJsonConverter_CanWritePropertyRoute(PropertyRoute arg, ModifiableEntity? mod, SerializationMetadata? metadata)
     {
         var val = Validator.TryGetPropertyValidator(arg);
 
@@ -146,7 +142,7 @@ public class WebEntityJsonConverterFactory : EntityJsonConverterFactory
 {
     public override EntityJsonConverterStrategy Strategy => EntityJsonConverterStrategy.WebAPI;
 
-    protected override PropertyRoute GetCurrentPropertyRouteEmbedded(EmbeddedEntity embedded)
+    protected override PropertyRoute GetCurrentPropertyRouteAndMetadataEmbedded(EmbeddedEntity embedded)
     {
         var filterContext = SignumCurrentContextFilter.CurrentContext!;
         var controller = (ControllerActionDescriptor)filterContext.ActionDescriptor;

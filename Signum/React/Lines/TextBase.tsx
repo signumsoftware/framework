@@ -10,17 +10,17 @@ export interface TextBaseProps<V = any> extends ValueBaseProps<V> {
 export class TextBaseController<T extends TextBaseProps<V>, V> extends ValueBaseController<T, V> {
 
   tempValueRef!: React.RefObject<V>;
-  init(p: T) {
+  init(p: T): void {
     super.init(p);
     this.tempValueRef = React.useRef<V>(null);
   }
 
-  setTempValue(value: V) {
+  setTempValue(value: V): void {
     (this.tempValueRef as React.MutableRefObject<V>).current = value;
     this.forceUpdate();
   }
 
-  getValue() {
+  getValue(): V {
     return this.tempValueRef.current ?? this.props.ctx.value;
   }
 }

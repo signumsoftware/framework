@@ -26,10 +26,6 @@ public class FileEmbedded : EmbeddedEntity, IFile
         return "{0} - {1}".FormatWith(FileName, BinaryFile?.Let(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
     }
 
-    public string? FullWebPath()
-    {
-        throw new NotImplementedException("Full web path not implemented for File Embedded");
-    }
 
     public XElement ToXml(string elementName)
     {

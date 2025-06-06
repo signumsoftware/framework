@@ -32,7 +32,6 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
     public Lite<Entity>? Owner { get; set; }
 
     public int? DashboardPriority { get; set; }
-    public string? Code { get; set; }
 
     [Unit("s"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 10)]
     public int? AutoRefreshPeriod { get; set; }
@@ -50,7 +49,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
     [NoRepeatValidator]
     public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 
-    [Ignore, QueryableProperty]
+    [Ignore, QueryableProperty, BindParent]
     public MList<TokenEquivalenceGroupEntity> TokenEquivalencesGroups { get; set; } = new MList<TokenEquivalenceGroupEntity>();
 
     [UniqueIndex]
@@ -99,7 +98,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
                 string errorsUserQuery = idents.OfType<IHasEntityType>()
                     .Where(uc => uc.EntityType != null && !uc.EntityType.Is(EntityType))
                     .ToString(uc => DashboardMessage._0Is1InstedOf2In3.NiceToString(NicePropertyName(() => EntityType), uc.EntityType, entityType, uc),
-                    "\r\n");
+                    "\n");
 
                 return errorsUserQuery.DefaultText(null!);
             }
@@ -129,6 +128,11 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
                     t.Token.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
             }
         }
+
+        foreach (var item in this.Parts.Select(a => a.Content).OfType<IPartParseDataEntity>())
+        {
+            item.ParseData(this);
+        }
     }
 
     [Ignore]
@@ -157,7 +161,6 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
             EmbeddedInEntity = this.EmbeddedInEntity,
             Owner = Owner,
             DashboardPriority = DashboardPriority,
-            Code = Code,
             AutoRefreshPeriod = this.AutoRefreshPeriod,
             DisplayName = "Clone {0}".FormatWith(this.DisplayName),
             HideDisplayName = this.HideDisplayName,
@@ -177,7 +180,6 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             HideDisplayName == false ? null! : new XAttribute("HideDisplayName", HideDisplayName.ToString()),
             DashboardPriority == null ? null! : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
-            Code == null ? null! : new XAttribute("Code", Code),
             EmbeddedInEntity == null ? null! : new XAttribute("EmbeddedInEntity", EmbeddedInEntity.Value.ToString()),
             new XAttribute("CombineSimilarRows", CombineSimilarRows),
             IconName == null ? null! : new XAttribute("IconName", IconName),
@@ -197,7 +199,6 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
         Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, d => d.Owner));
         HideDisplayName = element.Attribute("HideDisplayName")?.Let(a => bool.Parse(a.Value)) ?? false;
         DashboardPriority = element.Attribute("DashboardPriority")?.Let(a => int.Parse(a.Value));
-        Code = element.Attribute("Code")?.Let(a => a.Value);
         EmbeddedInEntity = element.Attribute("EmbeddedInEntity")?.Let(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
         CombineSimilarRows = element.Attribute("CombineSimilarRows")?.Let(a => bool.Parse(a.Value)) ?? false;
         IconName = element.Attribute("IconName")?.Value;
@@ -236,6 +237,13 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
         }
 
         return base.PropertyValidation(pi);
+    }
+
+    protected override void PostRetrieving(PostRetrievingContext ctx)
+    {
+        base.PostRetrieving(ctx);
+
+  
     }
 }
 
@@ -341,6 +349,8 @@ public enum DashboardMessage
 
     [Description("[Alt] + Click to open results in a modal window")]
     AltClickToOpenResultsInAModalWindow,
+
+    CopyHealthCheckDashboardData,
 }
 
 public enum DashboardEmbedededInEntity

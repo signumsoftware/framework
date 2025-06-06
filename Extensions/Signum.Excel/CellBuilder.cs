@@ -106,7 +106,7 @@ public class CellBuilder
             forImport && template == DefaultStyle.Enum ? value.ToString()! :
             template == DefaultStyle.Enum ? ((Enum)value).NiceToString() :
             forImport && value is Lite<Entity> lite ? lite.KeyLong() :
-            value is string s ? s.Replace("\r\n", "\n").Replace("\n", "\r\n") :
+            value is string s ? s.Replace("\n", "\n").Replace("\n", "\n") :
             value.ToString()!;
 
         Cell cell = 
@@ -144,27 +144,27 @@ public class CellBuilder
     public UInt32Value CellFormatCount = null!;
         
 
-    internal (DefaultStyle defaultStyle, UInt32Value styleIndex) GetDefaultStyleAndIndex(ResultColumn c)
+    internal (DefaultStyle defaultStyle, UInt32Value styleIndex) GetDefaultStyleAndIndex(DynamicQuery.Column c)
     {
 
-        if (ReflectionTools.IsNumber(c.Column.Type))
+        if (ReflectionTools.IsNumber(c.Type))
         {
-            if (c.Column.Unit.HasText() || c.Column.Format != null && c.Column.Format != Reflector.FormatString(c.Column.Type))
+            if (c.Unit.HasText() || c.Format != null && c.Format != Reflector.FormatString(c.Type))
             {
-                string formatExpression = GetCustomFormatExpression(c.Column.Unit, c.Column.Format);
+                string formatExpression = GetCustomFormatExpression(c.Unit, c.Format);
                 var styleIndex = CustomDecimalStyles.GetOrCreate(formatExpression, () => CellFormatCount++);
-                return (ReflectionTools.IsIntegerNumber(c.Column.Type) ? DefaultStyle.Number : DefaultStyle.Decimal,
+                return (ReflectionTools.IsIntegerNumber(c.Type) ? DefaultStyle.Number : DefaultStyle.Decimal,
                     styleIndex);
 
             }
         }
 
         var defaultStyle = 
-            c.Column.Type == typeof(string) && c.Column.Token is EntityPropertyToken ept && Validator.TryGetPropertyValidator(ept.PropertyRoute)?.Validators.Any(v => v is StringLengthValidatorAttribute slv && slv.MultiLine) == true? DefaultStyle.Multiline: 
-            c.Column.Token is CollectionToArrayToken at && at.ToArrayType is CollectionToArrayType.SeparatedByNewLine or  CollectionToArrayType.SeparatedByNewLineDistinct ? DefaultStyle.Text :
-            c.Column.Type.UnNullify() == typeof(DateTime) && c.Column.Format == "d" ? DefaultStyle.Date :
-            ReflectionTools.IsDecimalNumber(c.Column.Type) && c.Column.Format?.ToLower()== "p"? DefaultStyle.Percentage :
-            GetDefaultStyle(c.Column.Type);
+            c.Type == typeof(string) && c.Token is EntityPropertyToken ept && Validator.TryGetPropertyValidator(ept.PropertyRoute)?.Validators.Any(v => v is StringLengthValidatorAttribute slv && slv.MultiLine) == true? DefaultStyle.Multiline: 
+            c.Token is CollectionToArrayToken at && at.ToArrayType is CollectionToArrayType.SeparatedByNewLine or  CollectionToArrayType.SeparatedByNewLineDistinct ? DefaultStyle.Text :
+            c.Type.UnNullify() == typeof(DateTime) && c.Format == "d" ? DefaultStyle.Date :
+            ReflectionTools.IsDecimalNumber(c.Type) && c.Format?.ToLower()== "p"? DefaultStyle.Percentage :
+            GetDefaultStyle(c.Type);
 
         return (defaultStyle, DefaultStyles.GetOrThrow(defaultStyle));
     }

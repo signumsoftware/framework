@@ -1,3 +1,4 @@
+using NpgsqlTypes;
 using Signum.DynamicQuery.Tokens;
 using Signum.Utilities.Reflection;
 using System.Collections.ObjectModel;
@@ -43,6 +44,9 @@ public static class QueryUtils
 
         if (uType == typeof(TimeSpan) || uType == typeof(TimeOnly))
             return FilterType.Time;
+
+        if (uType == typeof(NpgsqlTsVector))
+            return FilterType.TsVector;
 
         if (uType.IsEnum)
             return FilterType.Enum;
@@ -227,6 +231,15 @@ public static class QueryUtils
                 FilterOperation.DistinctTo,
             }.ToReadOnly()
         },
+        {
+            FilterType.TsVector, new List<FilterOperation>
+            {
+                FilterOperation.TsQuery,
+                FilterOperation.TsQuery_Plain,
+                FilterOperation.TsQuery_Plain,
+                FilterOperation.TsQuery_WebSearch,
+            }.ToReadOnly()
+        },
     };
 
 
@@ -238,7 +251,14 @@ public static class QueryUtils
             return result;
 
         if ((options & SubTokensOptions.CanAggregate) != 0)
-            return AggregateTokens(token, qd).SingleOrDefaultEx(a => a.Key == key);
+        {
+            var agg = AggregateTokens(token, qd).SingleOrDefaultEx(a => a.Key == key);
+            if (agg != null)
+                return agg;
+        }
+
+        if (options.HasFlag(SubTokensOptions.CanTimeSeries) && key == TimeSeriesToken.KeyText)
+            return new TimeSeriesToken(qd.QueryName);
 
         return null;
     }
@@ -247,8 +267,11 @@ public static class QueryUtils
     {
         var result = SubTokensBasic(token, qd, options);
 
-        if ((options & SubTokensOptions.CanAggregate) != 0)
+        if (options.HasFlag(SubTokensOptions.CanAggregate))
             result.InsertRange(0, AggregateTokens(token, qd));
+
+        if (options.HasFlag(SubTokensOptions.CanTimeSeries))
+            result.Insert(0, new TimeSeriesToken(qd.QueryName));
 
         return result;
     }
@@ -363,8 +386,8 @@ public static class QueryUtils
         if (string.IsNullOrEmpty(tokenString))
             throw new ArgumentNullException(nameof(tokenString));
 
-        //https://stackoverflow.com/questions/35418597/split-string-on-the-dot-characters-that-are-not-inside-of-brackets
-        string[] parts = Regex.Split(tokenString, @"\.(?!([^[]*\]|[^(]*\)))");
+        //Dot not inside of brackets
+        string[] parts = Regex.Split(tokenString, @"(?<!\[[^\]]*)\.(?![^\[]*\])");
 
         string firstPart = parts.FirstEx();
 
@@ -382,12 +405,38 @@ public static class QueryUtils
         return result;
     }
 
+    public static QueryToken? TryParse(string tokenString, QueryDescription qd, SubTokensOptions options)
+    {
+        if (string.IsNullOrEmpty(tokenString))
+            return null;
+
+        //https://stackoverflow.com/questions/35418597/split-string-on-the-dot-characters-that-are-not-inside-of-brackets
+        string[] parts = Regex.Split(tokenString, @"\.(?!([^[]*\]|[^(]*\)))");
+
+        string firstPart = parts.FirstEx();
+
+        QueryToken? result = SubToken(null, qd, options, firstPart);
+
+        if (result == null)
+            return null;
+
+        foreach (var part in parts.Skip(1))
+        {
+            var newResult = SubToken(result, qd, options, part);
+            if (newResult == null)
+                return null;
+            result = newResult;
+        }
+
+        return result;
+    }
+
     public static string? CanFilter(QueryToken token)
     {
         if (token == null)
             return "No column selected";
 
-        if (token.Type != typeof(string) && token.Type.ElementType() != null)
+        if (token.Type != typeof(string) && token.Type != typeof(NpgsqlTsVector) && token.Type.ElementType() != null)
             return "You can not filter by collections, continue the sequence";
 
         if (token is OperationsToken or OperationToken or ManualContainerToken or ManualToken)
@@ -401,7 +450,7 @@ public static class QueryUtils
         if (token == null)
             return "No column selected";
 
-        if (token.Type != typeof(string) && token.Type != typeof(byte[]) && token.Type.ElementType() != null)
+        if (QueryToken.IsCollection(token.Type))
             return "You can not add collections as columns";
 
         if (token.HasAllOrAny())
@@ -411,7 +460,7 @@ public static class QueryUtils
                 CollectionAnyAllType.NotAny.NiceToString(),
                 CollectionAnyAllType.NotAll.NiceToString());
 
-        if (token is OperationsToken or ManualContainerToken)
+        if (token is OperationsToken or ManualContainerToken or PgTsVectorColumnToken)
             return $"{token} is not a valid column";
 
         return null;
@@ -614,6 +663,14 @@ public static class QueryUtils
     {
         return fo == FilterOperation.IsIn || fo == FilterOperation.IsNotIn;
     }
+
+    public static bool IsTsQuery(this FilterOperation fo)
+    {
+        return fo == FilterOperation.TsQuery || 
+            fo == FilterOperation.TsQuery_Plain ||
+            fo == FilterOperation.TsQuery_Phrase ||
+            fo == FilterOperation.TsQuery_WebSearch;
+    }
 }
 
 public enum SubTokensOptions
@@ -625,4 +682,6 @@ public enum SubTokensOptions
     CanToArray = 16,
     CanSnippet= 32,
     CanManual = 64,
+    CanTimeSeries = 128,
+    CanNested = 256,
 }

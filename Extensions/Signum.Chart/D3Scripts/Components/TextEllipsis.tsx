@@ -10,7 +10,7 @@ export interface TextEllipsisProps extends React.SVGProps<SVGTextElement>{
   etcText?: string;
 }
 
-export default function TextEllipsis({ maxWidth, padding, children, etcText, ...atts } :  TextEllipsisProps) {
+export default function TextEllipsis({ maxWidth, padding, children, etcText, ...atts } :  TextEllipsisProps): React.JSX.Element {
 
   const txt = React.useRef<SVGTextElement>(null);
 

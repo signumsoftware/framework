@@ -6,7 +6,6 @@ public class EnglishPluralizer : IPluralizer
     //http://www.csse.monash.edu.au/~damian/papers/HTML/Plurals.html
     Dictionary<string, string> exceptions = new Dictionary<string, string>
     {
-        {"an", "en"}, // woman -> women
         {"ch", "ches"}, // church -> churches
         {"eau", "eaus"},  //chateau -> chateaus
         {"en", "ens"}, //foramen -> foramens

@@ -1,7 +1,6 @@
 using Signum.Utilities.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 
 namespace Signum.API.Json;
@@ -145,6 +144,10 @@ public class LambdaToJavascriptConverter
                     ExpressionType.GreaterThan => ">",
                     ExpressionType.GreaterThanOrEqual => ">=",
                     ExpressionType.Coalesce => "??",
+                    ExpressionType.And => "&",
+                    ExpressionType.AndAlso => "&&",
+                    ExpressionType.Or => "|",
+                    ExpressionType.OrElse => "||",
                     _ => null
                 };
             }
@@ -175,7 +178,7 @@ public class LambdaToJavascriptConverter
                 var op = ToJsOperator(be.NodeType);
 
                 if (a != null && op != null && b != null)
-                    return a + op + b;
+                    return "(" + a + op + b + ")";
             }
             else if (be.NodeType is ExpressionType.Equal or ExpressionType.NotEqual && IsEnumConvertToNumber(be.Right, out var enumOp2) && IsNumberConstant(be.Left, out var num2))
             {
@@ -185,7 +188,7 @@ public class LambdaToJavascriptConverter
                 var op = ToJsOperator(be.NodeType);
 
                 if (a != null && op != null && b != null)
-                    return a + op + b;
+                    return "(" + a + op + b + ")";
             }
             else
             {
@@ -195,7 +198,7 @@ public class LambdaToJavascriptConverter
                 var op = ToJsOperator(be.NodeType);
 
                 if (a != null && op != null && b != null)
-                    return a + op + b;
+                    return "(" + a + op + b + ")";
             }
         }
 
@@ -285,7 +288,7 @@ public class LambdaToJavascriptConverter
                 {
                     var obj = ToJavascript(param, mc.Object!);
                     if (obj != null)
-                        return "fd.getToString(" + obj + ")";
+                        return "fd.symbolNiceName(" + obj + ")";
                 }
             }
 

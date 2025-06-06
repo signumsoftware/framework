@@ -3,7 +3,7 @@ import { AutoLine, PasswordLine, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ExchangeWebServiceEmailServiceEntity } from '../Signum.Mailing.ExchangeWS';
 
-export default function ExchangeWebServiceEmailService(p: { ctx: TypeContext<ExchangeWebServiceEmailServiceEntity> }) {
+export default function ExchangeWebServiceEmailService(p: { ctx: TypeContext<ExchangeWebServiceEmailServiceEntity> }): React.JSX.Element {
   const sc = p.ctx;
 
   return (

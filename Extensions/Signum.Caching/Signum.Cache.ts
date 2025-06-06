@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 
 
-export module CachePermission {
+export namespace CachePermission {
   export const ViewCache : Basics.PermissionSymbol = registerSymbol("Permission", "CachePermission.ViewCache");
   export const InvalidateCache : Basics.PermissionSymbol = registerSymbol("Permission", "CachePermission.InvalidateCache");
 }

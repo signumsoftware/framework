@@ -17,7 +17,7 @@ interface ChartTableProps {
   onReload?: (e: React.MouseEvent<any>) => void;
 }
 
-export default function ChartTableComponent(p: ChartTableProps) {
+export default function ChartTableComponent(p: ChartTableProps): React.JSX.Element {
   function handleHeaderClick(e: React.MouseEvent<any>, col: ColumnOptionParsed) {
     var chartCol = p.chartRequest.columns.map(mle => mle.element)
       .firstOrNull(a => a.token != null && a.token.token != null && a.token.token.fullKey == col.token!.fullKey);
@@ -98,11 +98,21 @@ export default function ChartTableComponent(p: ChartTableProps) {
 
   const columns = chartRequest.columns.map(c => c.element).filter(cc => cc.token != undefined)
     .map(cc => ({ token: cc.token!.token, displayName: cc.displayName } as ColumnOptionParsed))
-    .map(co => ({
-      column: co,
-      cellFormatter: (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co.token!, undefined)).last("FormatRules").formatter(co.token!, undefined),
-      resultIndex: resultTable.columns.indexOf(co.token!.fullKey)
-    }));
+    .map(co => {
+
+      const formatter = (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co.token!, undefined)).last("FormatRules").formatter(co.token!, undefined);
+
+      let resultIndex: number | "Entity" = resultTable.columns.indexOf(co.token!.fullKey);
+
+      if (resultIndex == -1 && co.token?.fullKey == "Entity")
+        resultIndex = "Entity";
+
+      return ({
+        column: co,
+        cellFormatter: formatter,
+        resultIndex: resultIndex
+      });
+    });
 
   var hasEntity = !ChartClient.hasAggregates(chartRequest);
 
@@ -111,7 +121,7 @@ export default function ChartTableComponent(p: ChartTableProps) {
   return (
     <div className="sf-scroll-table-container">
       <FullscreenComponent onReload={p.onReload}>
-        <table className="sf-search-results table table-hover table-sm">
+        {fullScreen => <table className="sf-search-results table table-hover table-sm">
           <thead>
             <tr>
               {hasEntity && <th></th>}
@@ -141,7 +151,8 @@ export default function ChartTableComponent(p: ChartTableProps) {
                     }
                     {columns.map((c, j) =>
                       <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                        {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx, c)}
+                        {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(c.resultIndex == "Entity" ? row.entity : row.columns[c.resultIndex], ctx,
+                          { column: c.column, resultIndex: c.resultIndex, columnIndex: j, cellFormatter: c.cellFormatter })}
                       </td>)
                     }
                   </tr>
@@ -150,6 +161,7 @@ export default function ChartTableComponent(p: ChartTableProps) {
             }
           </tbody>
         </table>
+        }
       </FullscreenComponent>
     </div>
   );

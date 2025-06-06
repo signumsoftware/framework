@@ -17,7 +17,7 @@ public static class ViewLogLogic
 
     public static Func<Type, bool> LogType = type => true;
     public static Func<BaseQueryRequest, DynamicQueryContainer.ExecuteType, bool> LogQuery = (request, type) => true;
-    public static Func<BaseQueryRequest, StringWriter, string> GetQueryData = (request, sw) => request.QueryUrl + "\r\n\r\n" + sw.ToString();
+    public static Func<BaseQueryRequest, StringWriter, string> GetQueryData = (request, sw) => request.QueryUrl + "\n\n" + sw.ToString();
 
 
     public static bool IsStarted = false;
@@ -53,22 +53,22 @@ public static class ViewLogLogic
             }
 
             QueryLogic.Queries.QueryExecuted += Current_QueryExecuted;
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
             ExecutionMode.OnApiRetrieved += ExecutionMode_OnApiRetrieved;
         }
     }
 
-    private static IDisposable? ExecutionMode_OnApiRetrieved(Entity entity, string viewAction)
+    private static IDisposable? ExecutionMode_OnApiRetrieved(Lite<Entity> entity, string viewAction)
     {
-        return ViewLogLogic.LogView(entity.ToLite(), viewAction);
+        return ViewLogLogic.LogView(entity, viewAction);
     }
 
   
-    static SqlPreCommand Type_PreDeleteSqlSync(Entity arg)
+    static SqlPreCommand Type_PreDeleteSqlSync(TypeEntity type)
     {
         var t = Schema.Current.Table<ViewLogEntity>();
         var f = ((FieldImplementedByAll)Schema.Current.Field((ViewLogEntity vl) => vl.Target)).TypeColumn;
-        return Administrator.DeleteWhereScript(t, f, arg.Id);
+        return Administrator.DeleteWhereScript(t, f, type.Id);
     }
 
     static IDisposable? Current_QueryExecuted(DynamicQueryContainer.ExecuteType type, object queryName, BaseQueryRequest? request)

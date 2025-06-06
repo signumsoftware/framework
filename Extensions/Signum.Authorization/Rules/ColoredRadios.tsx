@@ -14,7 +14,7 @@ interface ColorRadioProps {
   icon?: IconProp;
 }
 
-export function ColorRadio(p : ColorRadioProps){
+export function ColorRadio(p : ColorRadioProps): React.JSX.Element{
   return (
     <a onClick={e => { e.preventDefault(); !p.readOnly && p.onClicked(e); }} title={p.title}
       className={classes("sf-auth-chooser", p.readOnly && "sf-not-allowed")}
@@ -24,7 +24,7 @@ export function ColorRadio(p : ColorRadioProps){
   );
 }
 
-export function GrayCheckbox(p : { checked: boolean, onUnchecked: () => void, readOnly: boolean }){
+export function GrayCheckbox(p : { checked: boolean, onUnchecked: () => void, readOnly: boolean }): React.JSX.Element{
   return (
     <span className={classes("sf-auth-checkbox", p.readOnly && "sf-not-allowed")}      
       onClick={p.checked && !p.readOnly ? p.onUnchecked : undefined}>

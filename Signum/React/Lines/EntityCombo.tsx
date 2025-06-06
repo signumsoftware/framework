@@ -4,7 +4,7 @@ import { Finder } from '../Finder'
 import { FindOptions, ResultRow } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
 import { getTypeInfos, tryGetTypeInfos, TypeReference } from '../Reflection'
-import { EntityBaseController, EntityBaseProps, AsLite, AsEntity } from './EntityBase'
+import { EntityBaseController, EntityBaseProps, AsLite, AsEntity, Aprox } from './EntityBase'
 import { FormGroup } from './FormGroup'
 import { Navigator } from '../Navigator'
 import { FormControlReadonly } from './FormControlReadonly'
@@ -23,7 +23,8 @@ export interface EntityComboProps<V extends Entity | Lite<Entity> | null> extend
   labelTextWithData?: (data: Lite<Entity>[] | undefined | null, resultTable?: ResultTable | null) => React.ReactElement | string;
   deps?: React.DependencyList;
   initiallyFocused?: boolean;
-  selectHtmlAttributes?: React.AllHTMLAttributes<any>;
+  selectHtmlAttributes?: React.SelectHTMLAttributes<any>;
+  optionHtmlAttributes?: (lite: ResultRow | undefined) => React.OptionHTMLAttributes<any> | undefined;
   onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem", searchTerm?: string) => React.ReactElement | string;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
@@ -37,7 +38,7 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
 
   refresh = 0;
 
-  getDefaultProps(p: EntityComboProps<V>) {
+  getDefaultProps(p: EntityComboProps<V>): void {
     p.remove = false;
     p.create = false;
     p.view = false;
@@ -45,14 +46,14 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
     p.find = false;
   }
 
-  overrideProps(p: EntityComboProps<V>, overridenProps: EntityComboProps<V>) {
+  overrideProps(p: EntityComboProps<V>, overridenProps: EntityComboProps<V>): void {
     super.overrideProps(p, overridenProps);
     if (p.onRenderItem === undefined && p.type && tryGetTypeInfos(p.type).some(a => a && Navigator.getSettings(a)?.renderLite)) {
       p.onRenderItem = (row, role, searchTerm) => row == null ? <span className="mx-2">-</span>: (row?.entity && Navigator.renderLite(row.entity, TextHighlighter.fromString(searchTerm))) ?? "";
     }
   }
-
-  async doView(entity: V) {
+  
+  async doView(entity: V): Promise<Aprox<V> | undefined> {
     var val = await super.doView(entity);
 
     this.refresh++;
@@ -60,7 +61,7 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
     return val;
   }
 
-  handleOnChange = async (e: React.SyntheticEvent | undefined, lite: AsLite<V> | null) => {
+  handleOnChange = async (e: React.SyntheticEvent | undefined, lite: AsLite<V> | null): Promise<void> => {
     if (lite == null)
       this.setValue(null!);
     else {
@@ -70,7 +71,7 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
   }
 }
 
-export const EntityCombo = genericForwardRefWithMemo(function EntityCombo<V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V>, ref: React.Ref<EntityComboController<V>>) {
+export const EntityCombo: <V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V> & React.RefAttributes<EntityComboController<V>>) => React.ReactNode | null = genericForwardRefWithMemo(function EntityCombo<V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V>, ref: React.Ref<EntityComboController<V>>) {
 
   const c = useController(EntityComboController, props, ref);
   const p = c.props;
@@ -111,10 +112,13 @@ export const EntityCombo = genericForwardRefWithMemo(function EntityCombo<V exte
     return p.labelTextWithData(data == null ? null : Array.isArray(data) ? data : data.rows.map(a => a.entity!), data && (Array.isArray(data) ? undefined : data));
   }
 
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
   return (
-    <FormGroup ctx={c.props.ctx}
-      label={getLabelText()} labelIcon={p.labelIcon}
-      helpText={p.helpText}
+    <FormGroup ctx={c.props.ctx} error={p.error} label={getLabelText()} labelIcon={p.labelIcon}
+      helpText={helpText}
+      helpTextOnTop={helpTextOnTop}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => <div className="sf-entity-combo">
@@ -135,6 +139,7 @@ export const EntityCombo = genericForwardRefWithMemo(function EntityCombo<V exte
             delayLoadData={p.delayLoadData}
             toStringFromData={p.toStringFromData}
             selectHtmlAttributes={p.selectHtmlAttributes}
+            optionHtmlAttributes={p.optionHtmlAttributes}
             liteToString={p.liteToString as (e : Entity) => string}
             nullPlaceHolder={p.nullPlaceHolder}
             onRenderItem={p.onRenderItem}
@@ -145,7 +150,7 @@ export const EntityCombo = genericForwardRefWithMemo(function EntityCombo<V exte
       </div>}
     </FormGroup>
   );
-}, (prev, next) => EntityBaseController.propEquals(prev, next));
+}, (prev, next): boolean => EntityBaseController.propEquals(prev, next));
 
 export interface EntityComboSelectProps<V extends ModifiableEntity | Lite<Entity> | null> {
   ctx: TypeContext<V>;
@@ -157,7 +162,8 @@ export interface EntityComboSelectProps<V extends ModifiableEntity | Lite<Entity
   mandatoryClass: string | null;
   onDataLoaded?: (data: AsLite<V>[] | ResultTable | undefined) => void;
   deps?: React.DependencyList;
-  selectHtmlAttributes?: React.AllHTMLAttributes<any>;
+  selectHtmlAttributes?: React.SelectHTMLAttributes<any>;
+  optionHtmlAttributes?: (lite: ResultRow | undefined) => React.OptionHTMLAttributes<any> | undefined;
   onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem", searchTerm?: string) => React.ReactNode;
   liteToString?: (e: Entity) => string;
   nullPlaceHolder?: string;
@@ -169,7 +175,7 @@ export interface EntityComboSelectProps<V extends ModifiableEntity | Lite<Entity
 
 
 const __normalized: Lite<Entity>[] = [];
-export function normalizeEmptyArray(data: Lite<Entity>[] | undefined) {
+export function normalizeEmptyArray(data: Lite<Entity>[] | undefined): Lite<Entity>[] | undefined {
   if (data == undefined)
     return undefined;
 
@@ -184,7 +190,7 @@ export interface  EntityComboSelectHandle {
   getData(): Lite<Entity>[] | ResultTable | undefined;
 }
 //Extracted to another component
-export const EntityComboSelect = genericForwardRef(function EntityComboSelect<V extends Entity | Lite<Entity> | null>(p: EntityComboSelectProps<V>, ref: React.Ref<EntityComboSelectHandle>) {
+export const EntityComboSelect: <V extends Entity | Lite<Entity> | null>(props: EntityComboSelectProps<V> & React.RefAttributes<EntityComboSelectHandle>) => React.ReactNode | null = genericForwardRef(function EntityComboSelect<V extends Entity | Lite<Entity> | null>(p: EntityComboSelectProps<V>, ref: React.Ref<EntityComboSelectHandle>) {
 
   const [data, _setData] = React.useState<Lite<Entity>[] | ResultTable | undefined>(p.data);
   const requestStarted = React.useRef(false);
@@ -238,7 +244,7 @@ export const EntityComboSelect = genericForwardRef(function EntityComboSelect<V 
         {ctx.value &&
           (p.onRenderItem ? p.onRenderItem({ entity: lite } as ResultRow, "Value", undefined) :
           p.liteToString ? getToString(lite!, p.liteToString) :
-            Navigator.renderLite(lite!))
+            Navigator.renderLite((p.toStringFromData ? p.data?.singleOrNull(a=> is(a, lite)) : null) ?? lite!))
         }
       </FormControlReadonly>
     );
@@ -265,7 +271,8 @@ export const EntityComboSelect = genericForwardRef(function EntityComboSelect<V 
         id={p.id}
         onClick={() => setLoadData(true)}
         disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >
-        {getOptionRows().map((r, i) => <option key={i} value={r?.entity ? liteKey(r.entity!) : ""}>{r?.entity ? getToString(r.entity, p.liteToString) : (p.nullPlaceHolder ?? " - ")}</option>)}
+        {getOptionRows().map((r, i) =>
+          <option key={i} value={r?.entity ? liteKey(r.entity!) : ""} {...p.optionHtmlAttributes?.(r)}>{r?.entity ? getToString(r.entity, p.liteToString) : (p.nullPlaceHolder ?? " - ")}</option>)}
       </select>
     );
   }

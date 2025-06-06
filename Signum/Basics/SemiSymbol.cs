@@ -82,7 +82,7 @@ public abstract class SemiSymbol : Entity
     {
         this.id = other.id;
         this.IsNew = false;
-        this.toStr = this.Key;
+        this.ToStr = this.Key;
         this.Name = other.Name;
         if (this.Modified != ModifiedState.Sealed)
             this.Modified = ModifiedState.Sealed;
@@ -129,7 +129,7 @@ public abstract class SemiSymbol : Entity
     {
         this.id = id;
         this.IsNew = false;
-        this.toStr = this.Key;
+        this.ToStr = this.Key;
         if (this.Modified != ModifiedState.Sealed)
             this.Modified = ModifiedState.Sealed;
     }

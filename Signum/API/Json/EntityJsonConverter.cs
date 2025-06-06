@@ -15,13 +15,6 @@ public class PropertyConverter
     public ReadJsonPropertyDelegate? CustomReadJsonProperty { get; set; }
     public WriteJsonPropertyDelegate? CustomWriteJsonProperty { get; set; }
 
-    /// <summary>
-    /// Return <c>true</c> to block writing to entity property silently.
-    /// To block with raise exception use <c>PropertyValidator.IsReadonly</c> or <c>Entity.IsPropertyReadonly</c> or <c>GlobalIsReadonly</c>
-    /// </summary>
-    public AvoidReadJsonPropertyDelegate? AvoidReadJsonProperty { get; set; }
-    public AvoidWriteJsonPropertyDelegate? AvoidWriteJsonProperty { get; set; }
-
     public bool AvoidValidate { get; set; }
 
     public PropertyConverter()
@@ -50,6 +43,7 @@ public class PropertyConverter
 
 public delegate bool AvoidReadJsonPropertyDelegate(ReadJsonPropertyContext ctx);
 public delegate void ReadJsonPropertyDelegate(ref Utf8JsonReader reader, ReadJsonPropertyContext ctx);
+
 public class ReadJsonPropertyContext
 {
     public ReadJsonPropertyContext(JsonSerializerOptions jsonSerializerOptions, PropertyConverter propertyConverter, ModifiableEntity entity, PropertyRoute parentPropertyRoute, EntityJsonConverterFactory factory)
@@ -103,17 +97,31 @@ public enum EntityJsonConverterStrategy
     Full,
 }
 
+public enum PropertyMetadata
+{
+    Hidden, 
+    ReadOnly,
+}
+
+public abstract class SerializationMetadata
+{
+
+}
+
 public class EntityJsonConverterFactory : JsonConverterFactory
 {
     public Polymorphic<Action<ModifiableEntity>> AfterDeserilization = new Polymorphic<Action<ModifiableEntity>>();
     public Dictionary<Type, Func<ModifiableEntity>> CustomConstructor = new Dictionary<Type, Func<ModifiableEntity>>();
-    public Func<PropertyRoute, ModifiableEntity?, string?>? CanWritePropertyRoute;
-    public Func<PropertyRoute, ModifiableEntity, string?>? CanReadPropertyRoute;
+    public Func<IRootEntity, SerializationMetadata?>? GetSerializationMetadata;
+    public Func<PropertyRoute, SerializationMetadata?>? GetSerializationMetadataEmbedded;
+    public Func<PropertyRoute, ModifiableEntity?, SerializationMetadata?, string?>? CanWritePropertyRoute;
+    public Func<PropertyRoute, ModifiableEntity, SerializationMetadata?, string?>? CanReadPropertyRoute;
+    public Func<PropertyRoute, ModifiableEntity, SerializationMetadata?, PropertyMetadata?>? GetPropertyMetadata;
     public Func<PropertyInfo, Exception, string?> GetErrorMessage = (pi, ex) => "Unexpected error in " + pi.Name;
 
-    public void AssertCanWrite(PropertyRoute pr, ModifiableEntity? mod)
+    public void AssertCanWrite(PropertyRoute pr, ModifiableEntity? mod, SerializationMetadata? serializationMetadata)
     {
-        string? error = CanWritePropertyRoute.GetInvocationListTyped().Select(a => a(pr, mod)).NotNull().FirstOrDefault();
+        string? error = CanWritePropertyRoute.GetInvocationListTyped().Select(a => a(pr, mod, serializationMetadata)).NotNull().FirstOrDefault();
         if (error != null)
             throw new UnauthorizedAccessException(error);
     }
@@ -151,25 +159,37 @@ public class EntityJsonConverterFactory : JsonConverterFactory
         return true;
     }
 
-    public virtual (PropertyRoute pr, ModifiableEntity? mod, PrimaryKey? rowId) GetCurrentPropertyRoute(ModifiableEntity mod)
+    public virtual (PropertyRoute pr, SerializationMetadata? metadata) GetCurrentPropertyRouteAndMetadata(ModifiableEntity mod)
     {
-        var tup = EntityJsonContext.CurrentPropertyRouteAndEntity;
-
         if (mod is IRootEntity re)
-            tup = (PropertyRoute.Root(mod.GetType()), mod, null);
-        if (tup == null)
+            return (PropertyRoute.Root(mod.GetType()), GetSerializationMetadata?.Invoke(re));
+
+        var path = EntityJsonContext.CurrentSerializationPath;
+
+        if (path == null)
         {
             var embedded = (EmbeddedEntity)mod;
-            var route = GetCurrentPropertyRouteEmbedded(embedded);
-            return (route, embedded, null);
+            var route = GetCurrentPropertyRouteAndMetadataEmbedded(embedded);
+            var metadata = GetSerializationMetadataEmbedded?.Invoke(route);
+            return (route, metadata);
         }
-        else if (tup.Value.pr.Type.ElementType() == mod.GetType())
-            tup = (tup.Value.pr.Add("Item"), null, null); //We have a custom MListConverter but not for other simple collections
+        else
+        {
+            var route = path.CurrentPropertyRoute();
+            if (route == null)
+                throw new InvalidOperationException("No Route found in Serialization Path");
+            var metadata = path.CurrentSerializationMetadata();
+            if (route != null && route.Type.ElementType() == mod.GetType())
+                route = route.Add("Item");
 
-        return tup.Value;
+            if(metadata == null)
+                metadata = GetSerializationMetadataEmbedded?.Invoke(route!);
+
+            return (route!, metadata);
+        }
     }
 
-    protected virtual PropertyRoute GetCurrentPropertyRouteEmbedded(EmbeddedEntity embedded)
+    protected virtual PropertyRoute GetCurrentPropertyRouteAndMetadataEmbedded(EmbeddedEntity embedded)
     {
         throw new InvalidOperationException(@$"Impossible to determine PropertyRoute for {embedded.GetType().Name}.");
     }
@@ -230,91 +250,114 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
     {
         using (HeavyProfiler.LogNoStackTrace("WriteJson", () => value!.GetType().Name))
         {
-            var tup = Factory.GetCurrentPropertyRoute((ModifiableEntity)(IModifiableEntity)value!);
+            var tup = Factory.GetCurrentPropertyRouteAndMetadata((ModifiableEntity)(IModifiableEntity)value!);
 
             ModifiableEntity mod = (ModifiableEntity)(IModifiableEntity)value!;
 
-            writer.WriteStartObject();
-
-            if (mod is Entity entity)
+            using (mod is IRootEntity root ?
+                EntityJsonContext.AddSerializationStep(new (tup.pr, root, tup.metadata)) :
+                EntityJsonContext.AddSerializationStep(new (tup.pr, mod)))
             {
-                writer.WriteString("Type", TypeLogic.TryGetCleanName(mod.GetType()));
-
-                writer.WritePropertyName("id");
-                JsonSerializer.Serialize(writer, entity.IdOrNull?.Object, entity.IdOrNull?.Object.GetType() ?? typeof(object), options);
-
-
-                if (entity.IsNew)
-                {
-                    writer.WriteBoolean("isNew", true);
-                }
-
-                var table = Schema.Current.Table(entity.GetType());
-
-                if (table.PartitionId != null && entity.PartitionId != null)
-                {
-                    writer.WriteNumber("partitionId", entity.PartitionId!.Value);
-                }
-
-                if (table.Ticks != null)
-                {
-                    writer.WriteString("ticks", entity.Ticks.ToString());
-                }
-            }
-            else
-            {
-                writer.WriteString("Type", mod.GetType().Name);
-            }
-
-            writer.WriteString("temporalId", mod.temporalId);
-
-            if (!(mod is MixinEntity))
-            {
-                writer.WriteString("toStr", mod.ToString());
-            }
-
-            writer.WriteBoolean("modified", mod.Modified == ModifiedState.Modified || mod.Modified == ModifiedState.SelfModified);
-
-            foreach (var kvp in Factory.GetPropertyConverters(value!.GetType()))
-            {
-                WriteJsonProperty(writer, options, mod, kvp.Key, kvp.Value, tup.pr);
-            }
-
-            var readonlyProps = Factory.GetPropertyConverters(value!.GetType())
-                .Where(kvp => kvp.Value.PropertyValidator?.IsPropertyReadonly(mod) == true)
-                .Select(a => a.Key)
-                .ToList();
-
-            if (readonlyProps.Any())
-            {
-                writer.WritePropertyName("readonlyProperties");
-                JsonSerializer.Serialize(writer, readonlyProps, readonlyProps.GetType(), options);
-            }
-
-            if (mod.Mixins.Any())
-            {
-                writer.WritePropertyName("mixins");
                 writer.WriteStartObject();
 
-                foreach (var m in mod.Mixins)
+                if (mod is Entity entity)
                 {
-                    var prm = tup.pr.Add(m.GetType());
+                    writer.WriteString("Type", TypeLogic.TryGetCleanName(mod.GetType()));
 
-                    using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((prm, m, null)))
+                    writer.WritePropertyName("id");
+                    JsonSerializer.Serialize(writer, entity.IdOrNull?.Object, entity.IdOrNull?.Object.GetType() ?? typeof(object), options);
+
+
+                    if (entity.IsNew)
                     {
-                        writer.WritePropertyName(m.GetType().Name);
-                        JsonSerializer.Serialize(writer, m, options);
+                        writer.WriteBoolean("isNew", true);
                     }
+
+                    var table = Schema.Current.Table(entity.GetType());
+
+                    if (table.PartitionId != null && entity.PartitionId != null)
+                    {
+                        writer.WriteNumber("partitionId", entity.PartitionId!.Value);
+                    }
+
+                    if (table.Ticks != null)
+                    {
+                        writer.WriteString("ticks", entity.Ticks.ToString());
+                    }
+                }
+                else
+                {
+                    writer.WriteString("Type", ReflectionServer.GetTypeName(mod.GetType()));
+                }
+
+                writer.WriteString("temporalId", mod.temporalId);
+
+                if (!(mod is MixinEntity))
+                {
+                    writer.WriteString("toStr", mod.ToString());
+                }
+
+                writer.WriteBoolean("modified", mod.Modified == ModifiedState.Modified || mod.Modified == ModifiedState.SelfModified);
+
+                foreach (var kvp in Factory.GetPropertyConverters(mod.GetType()))
+                {
+                    WriteJsonProperty(writer, options, mod, kvp.Key, kvp.Value, tup.pr, tup.metadata);
+                }
+
+                var props = Factory.GetPropertyConverters(mod.GetType())
+                    .Where(a => a.Value.PropertyValidator != null)
+                    .Select(a =>
+                    {
+                        var pi = a.Value.PropertyValidator!.PropertyInfo;
+                        var pr = tup.pr.Add(pi);
+                        var result = Factory.GetPropertyMetadata.GetInvocationListTyped().Select(a => a(pr, mod, tup.metadata)).Min();
+
+                        if (result == null)
+                        {
+                            if (a.Value.PropertyValidator.IsPropertyReadonly(mod))
+                                return a.Key;
+
+                            return null;
+                        }
+
+                        if (result == PropertyMetadata.Hidden)
+                            return "!" + a.Key;
+                        else
+                            return a.Key;
+                    }).NotNull().ToArray();
+
+                if (props.Any())
+                {
+                    writer.WritePropertyName("propsMeta");
+                    JsonSerializer.Serialize(writer, props, props.GetType(), options);
+                }
+
+                if (mod.Mixins.Any())
+                {
+                    writer.WritePropertyName("mixins");
+                    writer.WriteStartObject();
+
+                    foreach (var m in mod.Mixins)
+                    {
+                        var prm = tup.pr.Add(m.GetType());
+
+                        using (EntityJsonContext.AddSerializationStep(new SerializationStep(prm, m)))
+                        {
+                            writer.WritePropertyName(m.GetType().Name);
+                            JsonSerializer.Serialize(writer, m, options);
+                        }
+                    }
+
+                    writer.WriteEndObject();
                 }
 
                 writer.WriteEndObject();
             }
-
-            writer.WriteEndObject();
         }
     }
 
-    public void WriteJsonProperty(Utf8JsonWriter writer, JsonSerializerOptions options, ModifiableEntity mod, string lowerCaseName, PropertyConverter pc, PropertyRoute route)
+    public void WriteJsonProperty(Utf8JsonWriter writer, JsonSerializerOptions options, ModifiableEntity mod, string lowerCaseName, PropertyConverter pc, 
+        PropertyRoute route, SerializationMetadata? metadata)
     {
         if (pc.CustomWriteJsonProperty != null)
         {
@@ -329,25 +372,16 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
         }
         else
         {
-            if (pc.AvoidWriteJsonProperty!= null && pc.AvoidWriteJsonProperty(new WriteJsonPropertyContext(
-                    entity: mod,
-                    lowerCaseName: lowerCaseName,
-                    propertyConverter: pc,
-                    parentPropertyRoute: route,
-                    jsonSerializerOptions: options,
-                    factory: this.Factory)))
-                return;
-
             var pr = route.Add(pc.PropertyValidator!.PropertyInfo);
 
             if (Factory.Strategy == EntityJsonConverterStrategy.WebAPI)
             {
-                string? error = Factory.CanReadPropertyRoute?.Invoke(pr, mod);
+                string? error = Factory.CanReadPropertyRoute.GetInvocationListTyped().Select(a => a(pr, mod, metadata)).NotNull().FirstOrDefault();
                 if (error != null)
                     return;
             }
 
-            using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((pr, mod, null)))
+            using (EntityJsonContext.AddSerializationStep(new (pr, mod)))
             {
                 writer.WritePropertyName(lowerCaseName);
                 var val = pc.GetValue!(mod);
@@ -375,9 +409,12 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
 
                 ModifiableEntity mod = GetEntity(ref reader, typeToConvert, existingValue, parseType, out bool markedAsModified);
 
-                var tup = Factory.GetCurrentPropertyRoute(mod);
+                var tup = Factory.GetCurrentPropertyRouteAndMetadata(mod);
 
                 var dic = Factory.GetPropertyConverters(mod.GetType());
+                using (mod is IRootEntity root ? 
+                    EntityJsonContext.AddSerializationStep(new(tup.pr, root, tup.metadata)) :
+                    EntityJsonContext.AddSerializationStep(new(tup.pr, mod)))
                 using (EntityJsonContext.SetAllowDirectMListChanges(Factory.Strategy == EntityJsonConverterStrategy.Full || markedAsModified))
                     while (reader.TokenType == JsonTokenType.PropertyName)
                     {
@@ -397,7 +434,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                                     reader.Read();
 
                                     var converter = (IJsonConverterWithExisting)options.GetConverter(mixin.GetType());
-                                    using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((tup.pr.Add(mixin.GetType()), mixin, null)))
+                                    using (EntityJsonContext.AddSerializationStep(new (tup.pr.Add(mixin.GetType()), mixin)))
                                         converter.Read(ref reader, mixin.GetType(), options, mixin, null);
 
                                     reader.Read();
@@ -406,7 +443,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                                 reader.Assert(JsonTokenType.EndObject);
                                 reader.Read();
                             }
-                            else if (propertyName == "readonlyProperties")
+                            else if (propertyName == "propsMeta")
                             {
                                 reader.Read();
                                 JsonSerializer.Deserialize(ref reader, typeof(List<string>), options);
@@ -424,7 +461,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                                 }
 
                                 reader.Read();
-                                ReadJsonProperty(ref reader, options, mod, pc, tup.pr, markedAsModified);
+                                ReadJsonProperty(ref reader, options, mod, pc, tup.pr, tup.metadata, markedAsModified);
 
                                 reader.Read();
                             }
@@ -446,7 +483,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
         }
     }
 
-    public void ReadJsonProperty(ref Utf8JsonReader reader, JsonSerializerOptions options, ModifiableEntity entity, PropertyConverter pc, PropertyRoute parentRoute, bool markedAsModified)
+    public void ReadJsonProperty(ref Utf8JsonReader reader, JsonSerializerOptions options, ModifiableEntity entity, PropertyConverter pc, PropertyRoute parentRoute, SerializationMetadata? metadata, bool markedAsModified)
     {
         if (pc.CustomReadJsonProperty != null)
         {
@@ -460,21 +497,13 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
         }
         else
         {
-            if (pc.AvoidReadJsonProperty != null && pc.AvoidReadJsonProperty(new ReadJsonPropertyContext(
-                    jsonSerializerOptions: options,
-                    entity: entity,
-                    parentPropertyRoute: parentRoute,
-                    propertyConverter: pc,
-                    factory: this.Factory)))
-                return; //silently block writing to property
-
             object? oldValue = pc.GetValue!(entity);
 
             var pi = pc.PropertyValidator!.PropertyInfo;
 
             var pr = parentRoute.Add(pi);
 
-            using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((pr, entity, null)))
+            using (EntityJsonContext.AddSerializationStep(new (pr, oldValue as ModifiableEntity)))
             {
                 try
                 {
@@ -514,7 +543,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                                 }
                                 else
                                 {
-                                    Factory.AssertCanWrite(pr, entity);
+                                    Factory.AssertCanWrite(pr, entity, metadata);
                                     if (newValue == null && pc.IsNotNull())
                                     {
                                         entity.SetTemporalError(pi, ValidationMessage._0IsNotSet.NiceToString(pi.NiceName()));

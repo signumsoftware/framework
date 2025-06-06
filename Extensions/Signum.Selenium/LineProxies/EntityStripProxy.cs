@@ -9,6 +9,9 @@ public class EntityStripProxy : EntityBaseProxy
     {
     }
 
+
+    public override object? GetValueUntyped() => throw new NotImplementedException();
+    public override void SetValueUntyped(object? value) => throw new NotImplementedException();
     public WebElementLocator ItemsContainerElement
     {
         get { return this.Element.WithLocator(By.CssSelector("ul.sf-strip")); }

@@ -5,9 +5,6 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Signum.Engine.Sync;
-using Signum.Engine.Sync.Postgres;
-using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Signum.Engine;
 
@@ -104,7 +101,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             throw new ArgumentNullException(nameof(lite));
 
         if (lite.EntityOrNull == null)
-            lite.SetEntity(await RetrieveAsync(lite.EntityType, lite.Id, token));
+            lite.SetEntity(await RetrieveAsync(lite.EntityType, lite.Id, token, lite.PartitionId));
 
         return lite.EntityOrNull!;
     }
@@ -117,7 +114,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         if (lite == null)
             throw new ArgumentNullException(nameof(lite));
 
-        return (T)(object)Retrieve(lite.EntityType, lite.Id);
+        return (T)(object)Retrieve(lite.EntityType, lite.Id, lite.PartitionId);
     }
 
     /// <summary>
@@ -128,7 +125,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         if (lite == null)
             throw new ArgumentNullException(nameof(lite));
 
-        return (T)(object)await RetrieveAsync(lite.EntityType, lite.Id, token);
+        return (T)(object)await RetrieveAsync(lite.EntityType, lite.Id, token, lite.PartitionId);
     }
 
     static readonly GenericInvoker<Func<PrimaryKey, int?, Entity>> giRetrieve = new((id, partitionId) => Retrieve<Entity>(id, partitionId));
@@ -1052,7 +1049,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return list.Cast<Lite<Entity>>().ToList();
     }
 
-    public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites, string? message = null)
+    public static List<T> RetrieveList<T>(this IEnumerable<Lite<T>> lites, string? message = null)
         where T : class, IEntity
     {
         if (lites == null)
@@ -1072,7 +1069,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
     }
 
-    public static async Task<List<T>> RetrieveFromListOfLiteAsync<T>(this IEnumerable<Lite<T>> lites, CancellationToken token)
+    public static async Task<List<T>> RetrieveListAsync<T>(this IEnumerable<Lite<T>> lites, CancellationToken token)
        where T : class, IEntity
     {
         if (lites == null)
@@ -1154,8 +1151,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         var areNew = collection.Where(a => a.IsNew);
         if (areNew.Any())
-            throw new InvalidOperationException("The following entities are new:\r\n" +
-                areNew.ToString(a => "\t{0}".FormatWith(a), "\r\n"));
+            throw new InvalidOperationException("The following entities are new:\n" +
+                areNew.ToString(a => "\t{0}".FormatWith(a), "\n"));
 
         var groups = collection.GroupBy(a => a.GetType(), a => a.Id).ToList();
 
@@ -1175,8 +1172,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         var areNew = collection.Where(a => a.IdOrNull == null);
         if (areNew.Any())
-            throw new InvalidOperationException("The following entities are new:\r\n" +
-                areNew.ToString(a => "\t{0}".FormatWith(a), "\r\n"));
+            throw new InvalidOperationException("The following entities are new:\n" +
+                areNew.ToString(a => "\t{0}".FormatWith(a), "\n"));
 
 
         var groups = collection.GroupBy(a => a.EntityType, a => a.Id).ToList();
@@ -1270,19 +1267,21 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     public static IQueryable<MListElement<E, V>> MListElements<E, V>(this E entity, Expression<Func<E, MList<V>>> mListProperty)
             where E : Entity
     {
-        return MListQuery(mListProperty).Where(mle => mle.Parent == entity);
+        return MListQuery(mListProperty).DisableQueryFilter().Where(mle => mle.Parent == entity);
     }
 
     [MethodExpander(typeof(MListElementsExpander))]
     public static IQueryable<MListElement<E, V>> MListElementsLite<E, V>(this Lite<E> entity, Expression<Func<E, MList<V>>> mListProperty)
             where E : Entity
     {
-        return MListQuery(mListProperty).Where(mle => mle.Parent.ToLite().Is(entity));
+        
+        return MListQuery(mListProperty).DisableQueryFilter().Where(mle => mle.Parent.ToLite().Is(entity));
     }
 
     class MListElementsExpander : IMethodExpander
     {
         static readonly MethodInfo miMListQuery = ReflectionTools.GetMethodInfo(() => Database.MListQuery<Entity, int>(null!)).GetGenericMethodDefinition();
+        static readonly MethodInfo miDisableQueryFilger = ReflectionTools.GetMethodInfo(() => LinqHints.DisableQueryFilter<Entity>(null!)).GetGenericMethodDefinition();
         static readonly MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<Entity>(null!, a => false)).GetGenericMethodDefinition();
         static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()).GetGenericMethodDefinition();
 
@@ -1305,7 +1304,10 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
             var lambda = Expression.Lambda(Expression.Equal(prop, entity), p);
 
-            return Expression.Call(miWhere.MakeGenericMethod(mleType), Expression.Constant(query, mi.ReturnType), lambda);
+            return Expression.Call(miWhere.MakeGenericMethod(mleType),
+                Expression.Call(miDisableQueryFilger.MakeGenericMethod(mleType),
+                    Expression.Constant(query, mi.ReturnType)
+                ), lambda);
         }
     }
 

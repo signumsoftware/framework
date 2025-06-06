@@ -69,7 +69,10 @@ public sealed class QueryTokenEmbedded : EmbeddedEntity, IEquatable<QueryTokenEm
         }
         catch (Exception e)
         {
-            parseException = new FormatException("{0} {1}: {2}\r\n{3}".FormatWith(context.GetType().Name, (context as Entity)?.IdOrNull, context, e.Message), e);
+            parseException = new FormatException("{0} {1}: {2}\n{3}".FormatWith(context.GetType().Name, (context as Entity)?.IdOrNull, context, e.Message), e);
+
+            if (Transaction.HasRollbackedTransaction != null)
+                throw;
         }
     }
 

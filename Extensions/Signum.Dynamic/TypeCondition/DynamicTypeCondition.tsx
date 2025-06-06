@@ -17,7 +17,7 @@ interface DynamicTypeConditionComponentProps {
   ctx: TypeContext<DynamicTypeConditionEntity>;
 }
 
-export default function DynamicTypeConditionComponent(p: DynamicTypeConditionComponentProps) {
+export default function DynamicTypeConditionComponent(p: DynamicTypeConditionComponentProps): React.JSX.Element {
 
 
   const [response, setResponse] = React.useState<DynamicTypeConditionClient.DynamicTypeConditionTestResponse | undefined>(undefined);

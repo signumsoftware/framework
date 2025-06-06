@@ -5,17 +5,19 @@ namespace Signum.Selenium;
 public class FiltersProxy
 {
     public IWebElement Element { get; private set; }
+    public object QueryName { get; }
 
-    public FiltersProxy(IWebElement element)
+    public FiltersProxy(IWebElement element, object queryName)
     {
         this.Element = element;
+        QueryName = queryName;
     }
 
     public IEnumerable<FilterProxy> Filters()
     {
         return Element.FindElements(By.XPath("table/tbody/tr")).Select(a =>
-            a.HasClass("sf-filter-condition") ? new FilterConditionProxy(a): 
-            a.HasClass("sf-filter-group") ? new FilterGroupProxy(a) : (FilterProxy?)null).NotNull().ToList();
+            a.HasClass("sf-filter-condition") ? new FilterConditionProxy(a, QueryName): 
+            a.HasClass("sf-filter-group") ? new FilterGroupProxy(a, QueryName) : (FilterProxy?)null).NotNull().ToList();
     }
 
     public FilterProxy GetNewFilter(Action action)

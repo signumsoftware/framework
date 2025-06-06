@@ -1,39 +1,46 @@
-import * as draftjs from 'draft-js';
-import draftToHtml from 'draftjs-to-html';
-import htmlToDraft from 'html-to-draftjs';
-import { IContentStateConverter, HtmlEditorController } from "./HtmlEditor"
+import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
+import { $getRoot, $getSelection, $setSelection, EditorState, LexicalEditor } from "lexical";
 
-interface DraftToHtmlOptions {
-  hashConfig?: { trigger: "#", separator: " " },
-  directional?: boolean,
-  customEntityTransform?: (entity: draftjs.RawDraftEntity, text: string) => string | undefined
+export interface ITextConverter {
+  $convertToText(editor: LexicalEditor): string;
+  $convertFromText(editor: LexicalEditor, html: string): EditorState;
 }
 
-interface HtmlToDraftOptions {
-  customChunkRenderer?: (nodeName: string, node: HTMLElement) => draftjs.RawDraftEntity | undefined
+export class HtmlContentStateConverter implements ITextConverter {
+  $convertToText(
+    editor: LexicalEditor
+  ): ReturnType<ITextConverter["$convertToText"]> {
+    return editor.read(() => $generateHtmlFromNodes(editor));
+  }
+  
+  $convertFromText(
+    editor: LexicalEditor,
+    html: string
+  ): ReturnType<ITextConverter["$convertFromText"]> {
+
+    editor.update(() => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+
+      createImagePlaceholders(doc);
+      const nodes = $generateNodesFromDOM(editor, doc);
+      $getRoot().clear().select();
+      $getSelection()?.insertNodes(nodes);
+      $setSelection(null);
+    }, { discrete: true })
+
+    return editor.getEditorState();
+  }
 }
 
-export class HtmlContentStateConverter implements IContentStateConverter {
+function createImagePlaceholders(doc: Document) {
+  const imgElements = doc.querySelectorAll("img");
+  for(let i = 0; i < imgElements.length; i++) {
+    const img = imgElements[i];
+    const attachmentId = img.getAttribute("data-attachment-id");
+    if(!attachmentId) continue;
 
-  constructor(
-    public draftToHtmlOptions: DraftToHtmlOptions,
-    public htmlToDraftOptions: HtmlToDraftOptions)
-  {
-  }
-
-  contentStateToText(content: draftjs.ContentState): string {
-
-    const rawContentState = draftjs.convertToRaw(content);
-    const { hashConfig, directional, customEntityTransform } = this.draftToHtmlOptions;
-    return draftToHtml(rawContentState, hashConfig, directional, customEntityTransform);
-  }
-
-  textToContentState(html: string): draftjs.ContentState {
-    //console.log("Parsing: " + html);
-    const { customChunkRenderer } = this.htmlToDraftOptions;
-    const { contentBlocks, entityMap } = htmlToDraft(html, customChunkRenderer);
-    const result = draftjs.ContentState.createFromBlockArray(contentBlocks, entityMap);
-    //console.log("Parsed: " + JSON.stringify(draftjs.convertToRaw(result), undefined, 2));
-    return result;
+    const placeholderText = `[IMAGE_${attachmentId}]`;
+    img.replaceWith(document.createTextNode(placeholderText));
   }
 }

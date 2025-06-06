@@ -44,12 +44,12 @@ public static class ExcelLogic
 
     public static async Task<byte[]> ExecuteExcelReportAsync(Lite<ExcelReportEntity> excelReport, QueryRequest request, CancellationToken token)
     {
-        ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(request, token);
+        ResultTable resultTable = await QueryLogic.Queries.ExecuteQueryAsync(request, token);
 
         ExcelReportEntity report = excelReport.Retrieve();
         AsserExtension(report);
 
-        return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);
+        return ExcelGenerator.WriteDataInExcelFile(resultTable, request, report.File.BinaryFile);
     }
 
     private static void AsserExtension(ExcelReportEntity report)
@@ -66,20 +66,20 @@ public static class ExcelLogic
         ExcelReportEntity report = excelReport.Retrieve();
         AsserExtension(report);
 
-        return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);
+        return ExcelGenerator.WriteDataInExcelFile(queryResult, request, report.File.BinaryFile);
     }
 
     public static async Task<byte[]> ExecutePlainExcelAsync(QueryRequest request, string title, CancellationToken token)
     {
-        ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(request, token);
+        ResultTable resultTable = await QueryLogic.Queries.ExecuteQueryAsync(request, token);
 
-        return PlainExcelGenerator.WritePlainExcel(queryResult, title);
+        return PlainExcelGenerator.WritePlainExcel(resultTable, request, title);
     }
 
     public static byte[] ExecutePlainExcel(QueryRequest request, string title)
     {
-        ResultTable queryResult = QueryLogic.Queries.ExecuteQuery(request);
+        ResultTable resultTable = QueryLogic.Queries.ExecuteQuery(request);
 
-        return PlainExcelGenerator.WritePlainExcel(queryResult, title);
+        return PlainExcelGenerator.WritePlainExcel(resultTable, request, title);
     }
 }

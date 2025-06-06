@@ -7,7 +7,7 @@ import { useForceUpdate } from '@framework/Hooks';
 import { SearchValueLine } from '@framework/Search';
 import { toLite } from '@framework/Signum.Entities'
 
-export default function SendNotificationEmailTask(p: { ctx: TypeContext<SendNotificationEmailTaskEntity> }) {
+export default function SendNotificationEmailTask(p: { ctx: TypeContext<SendNotificationEmailTaskEntity> }): React.JSX.Element {
   const ctx = p.ctx;
   const forceUpdate = useForceUpdate();
 

@@ -1,7 +1,5 @@
 using Microsoft.Data.SqlClient;
-using Signum.Engine.Linq;
 using Signum.Engine.Maps;
-using Signum.Security;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using System.Data;
@@ -154,9 +152,9 @@ public static class BulkInserter
             var isPostgres = Schema.Current.Settings.IsPostgres;
 
             DataTable dt = new DataTable();
-            var columns = t.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && (disableIdentityBehaviour || !c.IdentityBehaviour)).ToList();
+            var columns = t.Columns.Values.Where(c => (disableIdentityBehaviour || !c.IdentityBehaviour) && c.GetGeneratedAlwaysType() == Sync.GeneratedAlwaysType.None && c.ComputedColumn == null).ToList();
             foreach (var c in columns)
-                dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type, isPostgres)));
+                dt.Columns.Add(GetColumn(c, isPostgres));
 
             using (disableIdentityBehaviour ? Administrator.DisableIdentity(t, behaviourOnly: true) : null)
             {
@@ -184,18 +182,37 @@ public static class BulkInserter
         }
     }
 
+    private static DataColumn GetColumn(IColumn c, bool isPostgres)
+    {
+        var dc = new DataColumn(c.Name, ConvertType(c.Type, isPostgres));
+        if (c.Type.UnNullify() == typeof(DateTime))
+            dc.DateTimeMode = ToDataSetDateTime(c.DateTimeKind);
+        return dc;
+    }
+
+    private static DataSetDateTime ToDataSetDateTime(DateTimeKind dateTimeKind)
+    {
+        return dateTimeKind switch
+        {
+            DateTimeKind.Utc => DataSetDateTime.Utc,
+            DateTimeKind.Unspecified => DataSetDateTime.Unspecified,
+            DateTimeKind.Local => DataSetDateTime.Local,
+            _ => throw new UnexpectedValueException(Schema.Current.DateTimeKind)
+        };
+    }
+
     private static Type ConvertType(Type type, bool isPostgres)
     {
         var result = type.UnNullify();
 
-        if (!isPostgres)
-        {
-            if (result == typeof(DateOnly))
-                return typeof(DateTime);
+        //if (!isPostgres)
+        //{
+        //    if (result == typeof(DateOnly))
+        //        return typeof(DateTime);
 
-            if (result == typeof(TimeOnly))
-                return typeof(TimeSpan);
-        }
+        //    if (result == typeof(TimeOnly))
+        //        return typeof(TimeSpan);
+        //}
 
         return result;
     }
@@ -311,15 +328,15 @@ public static class BulkInserter
             var isPostgres = Schema.Current.Settings.IsPostgres;
 
             var dt = new DataTable();
-            var columns = mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && (!c.IdentityBehaviour || disableIdentityBehaviour)).ToList();
+            var columns = mlistTable.Columns.Values.Where(c => (!c.IdentityBehaviour || disableIdentityBehaviour) && c.GetGeneratedAlwaysType() == Sync.GeneratedAlwaysType.None && c.ComputedColumn == null).ToList();
             foreach (var c in columns)
-                dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type, isPostgres)));
+                dt.Columns.Add(GetColumn(c, isPostgres));
 
             var list = mlistElements.ToList();
 
             foreach (var e in list)
             {
-                dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.RowOrder));
+                dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.RowOrder, disableMListIdentity ? e.RowId : null));
             }
 
             using (var tr = new Transaction())
@@ -371,10 +388,10 @@ public static class BulkInserter
 
             var isPostgres = Schema.Current.Settings.IsPostgres;
 
-            var columns = t.Columns.Values.ToList();
+            var columns = t.Columns.Values.Where(c => (!c.IdentityBehaviour || disableIdentityBehaviour) && c.GetGeneratedAlwaysType() == Sync.GeneratedAlwaysType.None && c.ComputedColumn == null).ToList();
             DataTable dt = new DataTable();
             foreach (var c in columns)
-                dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type, isPostgres)));
+                dt.Columns.Add(GetColumn(c, isPostgres));
 
             foreach (var e in entities)
             {

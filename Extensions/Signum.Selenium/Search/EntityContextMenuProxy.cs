@@ -102,8 +102,7 @@ public class EntityContextMenuProxy
     {
         Operation(operationSymbol).WaitVisible();
 
-        var popup = this.Element.GetDriver().CapturePopup(() =>
-        ResultTable.Selenium.ConsumeAlert());
+        var popup = this.Element.GetDriver().CapturePopup(() => ResultTable.Selenium.ConsumeAlert());
 
         return new FrameModalProxy<ProcessEntity>(popup).WaitLoaded();
     }
@@ -115,7 +114,7 @@ public class EntityContextMenuProxy
 
     public bool OperationIsDisabled(IOperationSymbolContainer symbolContainer)
     {
-        return Operation(symbolContainer).WaitVisible().GetAttribute("disabled").HasText();
+        return Operation(symbolContainer).WaitVisible().GetDomProperty("disabled").HasText();
     }
 
     public IWebElement OperationClickCapture(IOperationSymbolContainer symbolContainer, bool scrollTo = false)

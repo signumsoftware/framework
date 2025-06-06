@@ -6,7 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum/React/Signum.Entities'
 
 
-export const CalendarDayEntity = new Type<CalendarDayEntity>("CalendarDay");
+export const CalendarDayEntity: Type<CalendarDayEntity> = new Type<CalendarDayEntity>("CalendarDay");
 export interface CalendarDayEntity extends Entities.Entity {
   Type: "CalendarDay";
   date: string /*DateOnly*/;

@@ -28,7 +28,7 @@ class Program
             while (true)
             {
                 Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write("GET " + url + "...");
+                Console.Write("GET " + url + " ...");
                 try
                 {
                     var response = await client.GetAsync(url);
@@ -41,16 +41,17 @@ class Program
                         Console.WriteLine();
                         return;
                     }
-
-
-
                 }
-                catch(HttpRequestException e)
+                catch (HttpRequestException e)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.Write(e.Message);
                 }
-
+                catch (TaskCanceledException e)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write(e.Message);
+                }
 
                 retry--;
 

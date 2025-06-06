@@ -73,7 +73,7 @@ public class RoleEntity : Entity
     {
         var name = roles.OrderBy(a => a.ToString()).ToString(" + ");
 
-        return (StringHashEncoder.Codify(name) + ": " + name).Etc(200);
+        return (StringHashEncoder.Codify(name, lowercase: false) + ": " + name).Etc(200);
     }
 }
 

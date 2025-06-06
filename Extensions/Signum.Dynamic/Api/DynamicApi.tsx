@@ -12,7 +12,7 @@ interface DynamicApiProps {
   ctx: TypeContext<DynamicApiEntity>;
 }
 
-export default function DynamicApi(p: DynamicApiProps) {
+export default function DynamicApi(p: DynamicApiProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   function handleCodeChange(newScript: string) {

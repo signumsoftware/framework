@@ -34,7 +34,7 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
 
   typeahead!: React.RefObject<TypeaheadController>;
 
-  overrideProps(p: EntityStripProps<V>, overridenProps: EntityStripProps<V>) {
+  overrideProps(p: EntityStripProps<V>, overridenProps: EntityStripProps<V>): void {
     super.overrideProps(p, overridenProps);
     this.typeahead = React.useRef<TypeaheadController>(null);
 
@@ -85,34 +85,44 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
   }
 }
 
-export const EntityStrip = genericForwardRef(function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V>, ref: React.Ref<EntityStripController<V>>) {
+export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V> & React.RefAttributes<EntityStripController<V>>) => React.ReactNode | null = genericForwardRef(function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V>, ref: React.Ref<EntityStripController<V>>) {
   const c = useController(EntityStripController, props, ref);
   const p = c.props;
 
   if (c.isHidden)
     return null;
 
+
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
   const readOnly = p.ctx.readOnly;
   return (
-    <FormGroup ctx={p.ctx!}
-      label={p.label} labelIcon={p.labelIcon}
+    <FormGroup ctx={p.ctx!} error={p.error} label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
-      helpText={p.helpText}
+      helpText={helpText}
+      helpTextOnTop={helpTextOnTop}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       {inputId => <div className="sf-entity-strip sf-control-container">
-        <ul id={inputId} className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
-          {
-            p.groupElementsBy == undefined ?
-              c.getMListItemContext(p.ctx).map((mlec, i) => renderElement(mlec, i)) :
+        {p.groupElementsBy == undefined ?
+          <ul id={inputId} className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
+            {c.getMListItemContext(p.ctx).map((mlec, i) => renderElement(mlec, i))}
+            {renderLastElement()}
+          </ul>
+          :
 
-              c.getMListItemContext(p.ctx).groupBy(a => (a.binding == null && a.previousVersion) ? p.groupElementsBy!(a.previousVersion.value) : p.groupElementsBy!(a.value)).map((gr, i) =>
-                <div className={classes("mb-2")} key={i} >
-                  <small className="text-muted">{p.renderGroupTitle != undefined ? p.renderGroupTitle(gr.key, i) : gr.key}</small>
+          <>
+            {c.getMListItemContext(p.ctx).groupBy(a => (a.binding == null && a.previousVersion) ? p.groupElementsBy!(a.previousVersion.value) : p.groupElementsBy!(a.value)).map((gr, i) =>
+              <div className={classes("mb-2")} key={i} >
+                <small className="text-muted">{p.renderGroupTitle != undefined ? p.renderGroupTitle(gr.key, i) : gr.key}</small>
+                <ul className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
                   {gr.elements.map((mlec, i) => renderElement(mlec, i))}
-                </div>)
-          }
-          {renderLastElement()}
-        </ul>
+                </ul>
+              </div>)}
+            {renderLastElement()}
+          </>
+        }
+    
       </div>}
     </FormGroup>
   );
@@ -135,7 +145,7 @@ export const EntityStrip = genericForwardRef(function EntityStrip<V extends Modi
   }
 
   function renderLastElement() {
-    
+
     const buttons = (
       <>
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
@@ -145,18 +155,24 @@ export const EntityStrip = genericForwardRef(function EntityStrip<V extends Modi
         {p.extraButtons && p.extraButtons(c)}
       </>
     );
+    var autocomplete = !EntityBaseController.hasChildrens(buttons) ?
+      renderAutoComplete() :
+      renderAutoComplete(input => <div className={p.ctx.inputGroupClass}>
+        {input}
+        {buttons}
+      </div>);
+
+    if (p.groupElementsBy == null)
+      return (
+        <li className={"sf-strip-input"}>
+          {autocomplete}
+        </li>
+      );
 
     return (
-      <li className={"sf-strip-input"}>
-        {
-          !EntityBaseController.hasChildrens(buttons) ?
-            renderAutoComplete() :
-            renderAutoComplete(input => <div className={p.ctx.inputGroupClass}>
-              {input}
-              {buttons}
-            </div>)
-        }
-      </li>
+      <div className={"sf-strip-input"}>
+        {autocomplete}
+      </div>
     );
   }
 
@@ -210,7 +226,7 @@ export interface EntityStripElementProps<V extends ModifiableEntity | Lite<Entit
   vertical?: boolean;
 }
 
-export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p: EntityStripElementProps<V>) {
+export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p: EntityStripElementProps<V>): React.JSX.Element {
   var currentEntityRef = React.useRef<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
   const forceUpdate = useForceUpdate();
 
@@ -281,13 +297,13 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
     <li className={classes("sf-strip-element", containerHtmlAttributes?.className, drag?.dropClass)}
       {...EntityBaseController.entityHtmlAttributes(p.ctx.value)}
       {...containerHtmlAttributes}>
-      <div className={classes(drag && "sf-strip-dropable")}
+      <div className="sf-strip-dropable"
         onDragEnter={drag?.onDragOver}
         onDragOver={drag?.onDragOver}
         onDrop={drag?.onDrop}
       >
         {p.vertical ? getTimeMachineIcon({ ctx: p.ctx, translateX: "-90%", translateY: "20%" }) : getTimeMachineIcon({ ctx: p.ctx, translateX: "-75%", translateY: "-50%" })}
-        {hasIcon && p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}{p.move?.renderMoveUp()}{p.move?.renderMoveDown()}</span>}
+        {hasIcon && p.iconStart && <span style={{ marginRight: "5px", whiteSpace: "nowrap" }}>{removeIcon()}&nbsp;{dragIcon()}{p.move?.renderMoveUp()}{p.move?.renderMoveDown()}</span>}
         {
           p.onView ?
             <a href={url} className={classes("sf-strip-link", htmlAttributes?.className)} onClick={p.onView} {...htmlAttributes}>
@@ -328,7 +344,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
 }
 
 //tasks.push(taskSetAvoidDuplicates);
-//export function taskSetAvoidDuplicates(lineBase: LineBaseController<any>, state: LineBaseProps) {
+//export function taskSetAvoidDuplicates(lineBase: LineBaseController<any>, state: LineBaseProps): React.JSX.Element {
 //  if (lineBase instanceof EntityStripController &&
 //    (state as EntityStripProps).avoidDuplicates == undefined &&
 //    state.ctx.propertyRoute &&

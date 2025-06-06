@@ -17,7 +17,7 @@ public partial class Table
 
         var variableOrId = entity.Id.VariableName ?? entity.Id.Object;
         var isPostgres = Schema.Current.Settings.IsPostgres;
-        var pre = OnPreDeleteSqlSync(entity);
+        var pre = Schema.Current.EntityEvents<T>().OnPreDeleteSqlSync(entity);
         var collections = (from tml in this.TablesMList()
                            select new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}; --{3}"
                                .FormatWith(tml.Name, tml.BackReference.Name.SqlEscape(isPostgres), variableOrId, comment ?? entity.ToString()))).Combine(Spacing.Simple);
@@ -71,9 +71,11 @@ public partial class Table
 
         string queryCommandString = queryCommand.PlainSql().Lines().ToString(" ");
 
+        var columnType = Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey);
+
         var result = Schema.Current.Settings.IsPostgres ?
-        new SqlPreCommandSimple(@$"{variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)} = ({queryCommandString});") :
-        new SqlPreCommandSimple($"DECLARE {variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)} = COALESCE(({queryCommandString}), {(this.PrimaryKey.DbType.SqlServer == SqlDbType.UniqueIdentifier ? "CAST(CAST(1 / 0 AS BINARY) AS UNIQUEIDENTIFIER)" : "1 / 0")});");
+        new SqlPreCommandSimple(@$"{variableName} {columnType} = ({queryCommandString});") :
+        new SqlPreCommandSimple($"DECLARE {variableName} {columnType} = COALESCE(({queryCommandString}), CAST('{typeof(T).TypeName()} not found!' as {columnType}));");
 
         return result;
     }
@@ -91,13 +93,6 @@ END IF;
 END $$;");
     }
 
-    public event Func<Entity, SqlPreCommand?> PreDeleteSqlSync;
 
-    SqlPreCommand? OnPreDeleteSqlSync(Entity entity)
-    {
-        if (PreDeleteSqlSync == null)
-            return null;
 
-        return PreDeleteSqlSync.GetInvocationListTyped().Reverse().Select(a => a(entity)).Combine(Spacing.Simple);
-    }
 }

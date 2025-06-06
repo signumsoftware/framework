@@ -9,7 +9,7 @@ import { VisualTipIcon } from '../Basics/VisualTipIcon';
 import { SearchVisualTip } from '../Signum.Basics';
 import { GroupHelp } from './SearchControlVisualTips';
 
-export default function GroupByMessage(p: { findOptions: FindOptionsParsed, mainType: TypeReference}) {
+export default function GroupByMessage(p: { findOptions: FindOptionsParsed, mainType: TypeReference}): React.JSX.Element {
   const fo = p.findOptions;
 
   const tokensObj = fo.columnOptions.map(a => a.token)

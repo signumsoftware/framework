@@ -12,7 +12,7 @@ interface WorkflowTimerConditionComponentProps {
   ctx: TypeContext<WorkflowTimerConditionEntity>;
 }
 
-export default function WorkflowTimerConditionComponent(p : WorkflowTimerConditionComponentProps){
+export default function WorkflowTimerConditionComponent(p : WorkflowTimerConditionComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleMainEntityTypeChange() {
     p.ctx.value.eval!.script = "";

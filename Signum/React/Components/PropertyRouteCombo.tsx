@@ -14,7 +14,7 @@ export interface PropertyRouteComboProps {
   onChange?: () => void;
 }
 
-export default function PropertyRouteCombo(p : PropertyRouteComboProps){
+export default function PropertyRouteCombo(p : PropertyRouteComboProps): React.JSX.Element{
   const forceUpdate = useForceUpdate();
 
 
@@ -40,6 +40,6 @@ export default function PropertyRouteCombo(p : PropertyRouteComboProps){
   );;
 }
 
-PropertyRouteCombo.defaultProps = {
+(PropertyRouteCombo as any).defaultProps = {
   filter: a => a.name != "Id"
 } as Partial<PropertyRouteComboProps>;

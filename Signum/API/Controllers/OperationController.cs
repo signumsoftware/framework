@@ -6,6 +6,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using static Signum.API.Controllers.OperationController;
+using Signum.API.Json;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Signum.API.Controllers;
 
@@ -27,7 +29,7 @@ public class OperationController : ControllerBase
     [HttpPost("api/operation/constructFromEntity/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public EntityPackTS? ConstructFromEntity(string operationKey, [Required, FromBody] EntityOperationRequest request)
     {
-        var op = request.GetOperationSymbol(operationKey, request.entity.GetType());
+        var op = request.GetOperationSymbol(operationKey, request.entity);
 
         var entity = OperationLogic.ServiceConstructFrom(request.entity, op, request.ParseArgs(op));
 
@@ -37,16 +39,16 @@ public class OperationController : ControllerBase
     [HttpPost("api/operation/constructFromLite/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public EntityPackTS? ConstructFromLite(string operationKey, [Required, FromBody] LiteOperationRequest request)
     {
-        var op = request.GetOperationSymbol(operationKey, request.lite.EntityType);
-        var entity = OperationLogic.ServiceConstructFromLite(request.lite, op, request.ParseArgs(op));
-        return entity == null ? null : SignumServer.GetEntityPack(entity);
+        var entity = request.lite.Retrieve();
+        var op = request.GetOperationSymbol(operationKey, entity);
+        var result = OperationLogic.ServiceConstructFrom(entity, op, request.ParseArgs(op));
+        return result == null ? null : SignumServer.GetEntityPack(result);
     }
-
 
     [HttpPost("api/operation/executeEntity/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public ActionResult<EntityPackTS> ExecuteEntity(string operationKey, [Required, FromBody] EntityOperationRequest request)
     {
-        var op = request.GetOperationSymbol(operationKey, request.entity.GetType());
+        var op = request.GetOperationSymbol(operationKey, request.entity);
         Entity entity;
         try
         {
@@ -69,20 +71,22 @@ public class OperationController : ControllerBase
     [HttpPost("api/operation/executeLite/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public EntityPackTS ExecuteLite(string operationKey, [Required, FromBody] LiteOperationRequest request)
     {
-        var op = request.GetOperationSymbol(operationKey, request.lite.EntityType);
-        var entity = OperationLogic.ServiceExecuteLite(request.lite, op, request.ParseArgs(op));
+        var entity = request.lite.Retrieve();
+        var op = request.GetOperationSymbol(operationKey, entity);
+        var result = OperationLogic.ServiceExecute(entity, op, request.ParseArgs(op));
 
-        return SignumServer.GetEntityPack(entity);
+        return SignumServer.GetEntityPack(result);
     }
 
     [HttpPost("api/operation/executeLiteWithProgress/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public IAsyncEnumerable<ProgressStep<EntityPackTS>> ExecuteLiteWithProgress(string operationKey, [Required, FromBody] LiteOperationRequest request, CancellationToken cancellationToken)
     {
-        var op = request.GetOperationSymbol(operationKey, request.lite.EntityType);
+        var e = request.lite.Retrieve();
+        var op = request.GetOperationSymbol(operationKey, e);
 
         return WithProgressProxy(pp =>
         {
-            var entity = OperationLogic.ServiceExecuteLite(request.lite, op, request.ParseArgs(op).EmptyIfNull().And(pp).ToArray());
+            var entity = OperationLogic.ServiceExecute(e, op, request.ParseArgs(op).EmptyIfNull().And(pp).ToArray());
             return SignumServer.GetEntityPack(entity);
         }, ControllerContext, cancellationToken);
     }
@@ -90,15 +94,16 @@ public class OperationController : ControllerBase
     [HttpPost("api/operation/deleteEntity/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public void DeleteEntity(string operationKey, [Required, FromBody] EntityOperationRequest request)
     {
-        var op = request.GetOperationSymbol(operationKey, request.entity.GetType());
+        var op = request.GetOperationSymbol(operationKey, request.entity);
         OperationLogic.ServiceDelete(request.entity, op, request.ParseArgs(op));
     }
 
     [HttpPost("api/operation/deleteLite/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public void DeleteLite(string operationKey, [Required, FromBody] LiteOperationRequest request)
     {
+        var e = request.lite.Retrieve();
         var op = request.GetOperationSymbol(operationKey, request.lite.EntityType);
-        OperationLogic.ServiceDelete(request.lite, op, request.ParseArgs(op));
+        OperationLogic.ServiceDelete(e, op, request.ParseArgs(op));
     }
 
 
@@ -119,13 +124,14 @@ public class OperationController : ControllerBase
 
     public class BaseOperationRequest
     {
-        public OperationSymbol GetOperationSymbol(string operationKey, Type entityType) => ParseOperationAssert(operationKey, entityType);
+        public OperationSymbol GetOperationSymbol(string operationKey, Entity entity) => ParseOperationAssert(operationKey, entity.GetType(), entity);
+        public OperationSymbol GetOperationSymbol(string operationKey, Type entityType) => ParseOperationAssert(operationKey, entityType, null);
 
-        public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType)
+        public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType, Entity? entity)
         {
             var symbol = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
-            OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true);
+            OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true, entity: entity);
 
             return symbol;
         }
@@ -134,7 +140,7 @@ public class OperationController : ControllerBase
 
         public object?[]? ParseArgs(OperationSymbol op)
         {
-            return Args == null ? null : Args.Select(a => ConvertObject(a, op)).ToArray();
+            return Args == null ? null : Args.Select(a => ConvertObject(a, SignumServer.JsonSerializerOptions, op)).ToArray();
         }
 
 
@@ -147,7 +153,7 @@ public class OperationController : ControllerBase
             CustomOperationArgsConverters[operationSymbol] = a + converter;
         }
 
-        public static object? ConvertObject(JsonElement token, OperationSymbol? operationSymbol)
+        public static object? ConvertObject(JsonElement token, JsonSerializerOptions jsonOptions, OperationSymbol? operationSymbol)
         {
             switch (token.ValueKind)
             {
@@ -167,17 +173,17 @@ public class OperationController : ControllerBase
                 case JsonValueKind.Object:
                     {
                         if (token.TryGetProperty("EntityType", out var entityType))
-                            return token.ToObject<Lite<Entity>>(SignumServer.JsonSerializerOptions);
+                            return token.ToObject<Lite<Entity>>(jsonOptions);
 
                         if (token.TryGetProperty("Type", out var type))
-                            return token.ToObject<ModifiableEntity>(SignumServer.JsonSerializerOptions);
+                            return token.ToObject<ModifiableEntity>(jsonOptions);
 
                         var conv = operationSymbol == null ? null : CustomOperationArgsConverters.TryGetC(operationSymbol);
 
                         return conv.GetInvocationListTyped().Select(f => f(token)).NotNull().FirstOrDefault();
                     }
                 case JsonValueKind.Array:
-                    var result = token.EnumerateArray().Select(t => ConvertObject(t, operationSymbol)).ToList();
+                    var result = token.EnumerateArray().Select(t => ConvertObject(t, jsonOptions, operationSymbol)).ToList();
                     return result;
                 default: 
                     throw new UnexpectedValueException(token.ValueKind);
@@ -204,7 +210,7 @@ public class OperationController : ControllerBase
         {
             var entity = await lite.RetrieveAsync(cancellationToken);
             if (request.Setters.HasItems())
-                MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
+                MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()), null);
             var op = request.GetOperationSymbol(operationKey, entity.GetType());
             OperationLogic.ServiceConstructFrom(entity, op, request.ParseArgs(op));
         }, cancellationToken);
@@ -218,7 +224,7 @@ public class OperationController : ControllerBase
         {
             var entity = await lite.RetrieveAsync(cancellationToken);
             if (request.Setters.HasItems())
-                MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
+                MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()), null);
             var op = request.GetOperationSymbol(operationKey, entity.GetType());
             OperationLogic.ServiceExecute(entity, op, request.ParseArgs(op));
         }, cancellationToken);
@@ -232,7 +238,7 @@ public class OperationController : ControllerBase
         {
             var entity = await lite.RetrieveAsync(cancellationToken);
             if (request.Setters.HasItems())
-                MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
+                MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()), null);
 
             var op = request.GetOperationSymbol(operationKey, entity.GetType());
             OperationLogic.ServiceDelete(entity, op, request.ParseArgs(op));
@@ -321,7 +327,7 @@ public class OperationController : ControllerBase
             catch(Exception ex)
             {
                 SignumExceptionFilterAttribute.LogException(ex, context).Wait();
-                var error = SignumExceptionFilterAttribute.CustomHttpErrorFactory(ex, context);
+                var error = SignumExceptionFilterAttribute.CustomHttpErrorFactory(new ResourceExecutedContext(context, []) { Exception = ex });
                 lastProgress = new ProgressStep<T>
                 {
                     IsFinished = true,
@@ -385,7 +391,7 @@ public class OperationController : ControllerBase
         var types = request.Lites.Select(a => a.EntityType).ToHashSet();
 
         var operationSymbols = request.OperationKeys
-            .Select(operationKey => types.Select(t => BaseOperationRequest.ParseOperationAssert(operationKey, t)).Distinct().SingleEx())
+            .Select(operationKey => types.Select(t => BaseOperationRequest.ParseOperationAssert(operationKey, t, null)).Distinct().SingleEx())
             .ToList();
 
         var result = OperationLogic.GetContextualCanExecute(request.Lites, operationSymbols);
@@ -420,8 +426,11 @@ public class OperationController : ControllerBase
 
 internal static class MultiSetter
 {
-    public static void SetSetters(ModifiableEntity entity, List<PropertySetter> setters, PropertyRoute route)
+    public static void SetSetters(ModifiableEntity entity, List<PropertySetter> setters, PropertyRoute route, SerializationMetadata? metadata)
     {
+        if (entity is IRootEntity root)
+            metadata = SignumServer.WebEntityJsonConverterFactory.GetSerializationMetadata?.Invoke(root);
+
         var options = SignumServer.JsonSerializerOptions;
 
         foreach (var setter in setters)
@@ -429,9 +438,9 @@ internal static class MultiSetter
             var pr = route.AddMany(setter.Property);
 
             if (pr.Parent!.Type.IsMixinEntity())
-                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, pr.Parent.GetLambdaExpression<ModifiableEntity, MixinEntity>(false).Compile()(entity));
+                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, pr.Parent.GetLambdaExpression<ModifiableEntity, MixinEntity>(false).Compile()(entity), metadata);
             else
-                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, entity);
+                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, entity, metadata);
 
             if (pr.Type.IsMList())
             {
@@ -451,7 +460,7 @@ internal static class MultiSetter
                             var item = (ModifiableEntity)Activator.CreateInstance(elementPr.Type)!;
                             var normalizedPr = elementPr.Type.IsEntity() ? PropertyRoute.Root(elementPr.Type) : elementPr;
                                 
-                            SetSetters(item, setter.Setters!, normalizedPr);
+                            SetSetters(item, setter.Setters!, normalizedPr, metadata);
                             ((IList)mlist).Add(item);
                         }
                         break;
@@ -462,7 +471,7 @@ internal static class MultiSetter
                             var normalizedPr = elementPr.Type.IsEntity() ? PropertyRoute.Root(elementPr.Type) : elementPr;
                             foreach (var item in toChange)
                             {
-                                SetSetters((ModifiableEntity)item, setter.Setters!, normalizedPr);
+                                SetSetters((ModifiableEntity)item, setter.Setters!, normalizedPr, metadata);
                             }
                         }
                         break;
@@ -490,7 +499,7 @@ internal static class MultiSetter
             {
                 var subPr = pr.Type.IsEmbeddedEntity() ? pr : PropertyRoute.Root(TypeLogic.GetType(setter.EntityType!));
                 var item = (ModifiableEntity)Activator.CreateInstance(subPr.Type)!;
-                SetSetters(item, setter.Setters!, subPr);
+                SetSetters(item, setter.Setters!, subPr, metadata);
                 SetProperty(entity, pr, route, item);
             }
             else if (setter.Operation == PropertyOperation.ModifyEntity)
@@ -499,7 +508,7 @@ internal static class MultiSetter
                 if (!(item is ModifiableEntity mod))
                     throw new InvalidOperationException($"Unable to change entity in {pr}: {item}");
 
-                SetSetters(mod, setter.Setters!, pr);
+                SetSetters(mod, setter.Setters!, pr, metadata);
                 SetProperty(entity, pr, route, mod);
             }
             else if (setter.Operation == PropertyOperation.Set)
@@ -535,7 +544,8 @@ internal static class MultiSetter
     {
         var param = Expression.Parameter(typeof(object), "p");
 
-        var body = predicate.Select(p =>
+
+        var body = predicate.IsEmpty() ? Expression.Constant(true) : predicate.Select(p =>
         {
             var pr = mainRoute.AddMany(p.Property);
 

@@ -9,7 +9,6 @@ import { tasks, LineBaseProps, LineBaseController } from '@framework/Lines/LineB
 import { EntityBaseController, FormGroup, TypeContext } from '@framework/Lines'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
-import * as QuickLinks from '@framework/QuickLinks'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
 import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo, getAllTypes, Type, QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol } from '@framework/Reflection'
@@ -29,6 +28,7 @@ import { similarTokenToStr } from '@framework/FinderRules';
 import { CollectionMessage } from '@framework/Signum.External';
 import { useAPI } from '@framework/Hooks';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
+import { QuickLinkAction, QuickLinkClient } from '@framework/QuickLinkClient';
 
 export namespace AuthAdminClient {
   
@@ -38,7 +38,7 @@ export namespace AuthAdminClient {
   export let queries: boolean;
   export let permissions: boolean;
   
-  export function start(options: { routes: RouteObject[], types: boolean; properties: boolean, operations: boolean, queries: boolean; permissions: boolean }) {
+  export function start(options: { routes: RouteObject[], types: boolean; properties: boolean, operations: boolean, queries: boolean; permissions: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Authorization", () => import("./Changelog"));
   
@@ -68,6 +68,8 @@ export namespace AuthAdminClient {
     Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
     Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(UserOperation.AutoDeactivate, { hideOnCanExecute: true, isVisible: () => false }));
+    Operations.addSettings(new EntityOperationSettings(UserOperation.Deactivate, { hideOnCanExecute: true }));
+    Operations.addSettings(new EntityOperationSettings(UserOperation.Reactivate, { hideOnCanExecute: true }));
 
     AppContext.clearSettingsActions.push(() => queryAuditorTokens.clear());
   
@@ -139,11 +141,35 @@ export namespace AuthAdminClient {
       Navigator.isViewableEvent.push(navigatorIsViewable);
       Operations.Options.maybeReadonly = ti => ti.maxTypeAllowed == "Write" && ti.minTypeAllowed != "Write";
       Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Rules/TypeRulePackControl')));
-  
-      QuickLinks.registerQuickLink(RoleEntity, new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),  (ctx, e) => API.fetchTypeRulePack(ctx.lite.id!)
+
+      QuickLinkClient.registerQuickLink(RoleEntity, new  QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(), (ctx, e) => API.fetchTypeRulePack(ctx.lite.id!)
             .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })), {
         isVisible: AppContext.isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null
       }));
+
+      getAllTypes().forEach(t => {
+        if (t.kind == "Entity") {
+          if ((t as any).typeAllowed) {
+            t.minTypeAllowed = (t as any).typeAllowed;
+            t.maxTypeAllowed = (t as any).typeAllowed;
+            delete (t as any).typeAllowed;
+          }
+
+          Object.values(t.members).forEach(m => {
+
+            if (!m.minPropertyAllowed) {
+              if ((m as any).propertyAllowed) {
+                m.minPropertyAllowed = (m as any).propertyAllowed;
+                m.maxPropertyAllowed = (m as any).propertyAllowed;
+                delete (t as any).typeAllowed;
+              } else {
+                m.minPropertyAllowed = t.minTypeAllowed;
+                m.maxPropertyAllowed = t.maxTypeAllowed;
+              }
+            }
+          });
+        }
+      });
   
       getAllTypes().filter(a => a.queryAuditors != null)
         .forEach(t => {
@@ -194,8 +220,8 @@ export namespace AuthAdminClient {
     if (options.permissions) {
   
       Navigator.addSettings(new EntitySettings(PermissionRulePack, e => import('./Rules/PermissionRulePackControl')));
-  
-      QuickLinks.registerQuickLink(RoleEntity, new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(), (ctx, e) => API.fetchPermissionRulePack(ctx.lite.id!)
+
+      QuickLinkClient.registerQuickLink(RoleEntity, new QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(), (ctx, e) => API.fetchPermissionRulePack(ctx.lite.id!)
         .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
         {
           isVisible: AppContext.isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "orange", color: "warning", group: null
@@ -208,45 +234,69 @@ export namespace AuthAdminClient {
       key: "DownloadAuthRules",
       onClick: () => { API.downloadAuthRules(); return Promise.resolve(undefined); }
     });
-  
-    PropertyRoute.prototype.canModify = function () {
-      return this.member != null && this.member.propertyAllowed == "Write"
+
+    TypeContext.prototype.isMemberHidden = function () {
+
+      var m = this.propertyRoute?.member;
+
+      if (m == null) {
+        return true;
+      } 
+
+      if (m.maxPropertyAllowed == "None") {
+        throw new Error("Unexpected");
+      }
+
+      if (m.minPropertyAllowed != "None") //Allways visible
+        return false;
+
+      return this.binding.getIsHidden();
+    }
+
+    TypeContext.prototype.isMemberReadOnly = function () {
+
+      var m = this.propertyRoute?.member;
+
+      if (m == null) {
+        return true;
+      }
+
+      if (m.minPropertyAllowed == "Write") //Always writable
+        return false;
+
+      if (m.maxPropertyAllowed == "Read") //Never writable
+        return true;
+
+      return this.binding.getIsReadonly();
     }
   }
   
   const queryAuditorTokens: { queryKey: string; token: string; typeCondition: TypeConditionSymbol }[] = []; 
   
-  export function registerQueryAuditorToken<T extends Entity>(queryName: Type<T> | QueryKey, token: QueryTokenString<any> | string, typeCondition: TypeConditionSymbol) {
+  export function registerQueryAuditorToken<T extends Entity>(queryName: Type<T> | QueryKey, token: QueryTokenString<any> | string, typeCondition: TypeConditionSymbol): void {
     queryAuditorTokens.push({ queryKey: getQueryKey(queryName), token: token.toString(), typeCondition: typeCondition });
   }
   
-  export function queryIsFindable(queryKey: string, fullScreen: boolean) {
+  export function queryIsFindable(queryKey: string, fullScreen: boolean): boolean {
     var allowed = getQueryInfo(queryKey).queryAllowed;
   
     return allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
   }
   
-  export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+  export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
     if (state.ctx.propertyRoute &&
       state.ctx.propertyRoute.propertyRouteType == "Field") {
-  
+
       const member = state.ctx.propertyRoute.member;
-  
-      switch (member!.propertyAllowed) {
-        case "None":
-          //state.visible = false;  //None is just not retuning the member info, LineBaseController.isHidden
-          break;
-        case "Read":
-          state.ctx.readOnly = true;
-          break;
-        case "Write":
-          break;
+
+      if (state.ctx.isMemberReadOnly()) {
+        state.ctx.readOnly = true;
       }
     }
   }
   
-  export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsReadonlyOptions) {
-  
+  export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsReadonlyOptions): boolean {
+
     if (options?.isEmbedded)
       return false;
   
@@ -260,7 +310,7 @@ export namespace AuthAdminClient {
     return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed == "Read";
   }
   
-  export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsViewableOptions) {
+  export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsViewableOptions): boolean {
   
     if (options?.isEmbedded)
       return true;
@@ -276,7 +326,7 @@ export namespace AuthAdminClient {
     return ti.maxTypeAllowed != "None";
   }
   
-  export function navigatorIsCreable(typeName: PseudoType, options?: Navigator.IsCreableOptions) {
+  export function navigatorIsCreable(typeName: PseudoType, options?: Navigator.IsCreableOptions): boolean {
   
     if (options?.isEmbedded)
       return true;
@@ -286,7 +336,7 @@ export namespace AuthAdminClient {
     return ti != null && ti.maxTypeAllowed == "Write";
   }
   
-  export module API {
+  export namespace API {
   
     export function fetchPermissionRulePack(roleId: number | string): Promise<PermissionRulePack> {
       return ajaxGet({ url: "/api/authAdmin/permissionRules/" + roleId, cache: "no-cache" });
@@ -347,7 +397,7 @@ export namespace AuthAdminClient {
   }
 
   
-  export function QuerytokenRenderer(p: { queryKey: string, token: string, subTokenOptions?: SubTokensOptions }) {
+  export function QuerytokenRenderer(p: { queryKey: string, token: string, subTokenOptions?: SubTokensOptions }): React.ReactElement<any, string | React.JSXElementConstructor<any>> {
     var token = useAPI(() => Finder.parseSingleToken(p.queryKey, p.token, p.subTokenOptions ?? (SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll)), [p.queryKey, p.token, p.subTokenOptions]);
   
     return getTokenParents(token).map(a => <strong>[{a.niceName}]</strong>).joinCommaHtml(".");
@@ -365,12 +415,9 @@ declare module '@framework/Reflection' {
   }
 
   export interface MemberInfo {
-    propertyAllowed: PropertyAllowed;
+    minPropertyAllowed: PropertyAllowed;
+    maxPropertyAllowed: PropertyAllowed;
     queryAllowed: QueryAllowed;
-  }
-
-  export interface PropertyRoute {
-    canModify(): boolean;
   }
 }
 
@@ -379,5 +426,13 @@ declare module '@framework/Signum.Entities' {
   export interface EntityPack<T extends ModifiableEntity> {
     typeAllowed?: TypeAllowedBasic;
   }
+
+  
 }
 
+declare module '@framework/TypeContext' {
+  export interface TypeContext<T> {
+    isMemberReadOnly(): boolean;
+    isMemberHidden(): boolean;
+  }
+}

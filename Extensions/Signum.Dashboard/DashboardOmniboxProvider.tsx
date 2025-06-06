@@ -11,7 +11,7 @@ export default class DashboardOmniboxProvider extends OmniboxProvider<DashboardO
     return "DashboardOmniboxResult";
   }
 
-  icon() {
+  icon(): React.ReactElement<any, string | React.JSXElementConstructor<any>> {
     return this.coloredIcon("tachometer-alt", "darkslateblue");
   }
 
@@ -26,7 +26,7 @@ export default class DashboardOmniboxProvider extends OmniboxProvider<DashboardO
     return array;
   }
 
-  navigateTo(result: DashboardOmniboxResult) {
+  navigateTo(result: DashboardOmniboxResult): Promise<string> | undefined {
 
     if (result.dashboard == undefined)
       return undefined;
@@ -34,7 +34,7 @@ export default class DashboardOmniboxProvider extends OmniboxProvider<DashboardO
     return Promise.resolve(DashboardClient.dashboardUrl(result.dashboard));
   }
 
-  toString(result: DashboardOmniboxResult) {
+  toString(result: DashboardOmniboxResult): string {
     return "\"{0}\"".formatWith(result.toStrMatch.text);
   }
 }

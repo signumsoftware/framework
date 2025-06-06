@@ -12,6 +12,10 @@ public class EntityRepeaterProxy : EntityBaseProxy
     {
     }
 
+
+    public override object? GetValueUntyped() => throw new NotImplementedException();
+    public override void SetValueUntyped(object? value) => throw new NotImplementedException();
+
     public virtual WebElementLocator ItemsContainerElement
     {
         get { return this.Element.WithLocator(By.CssSelector(".sf-repater-elements")); }

@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.API;
 using Signum.API.Controllers;
 using Signum.API.Filters;
+using Signum.Dashboard;
 using System.ComponentModel.DataAnnotations;
 
 namespace Signum.Processes;
@@ -12,9 +15,9 @@ public class ProcessController : ControllerBase
     [HttpPost("api/processes/constructFromMany/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public EntityPackTS ConstructFromMany(string operationKey, [Required, FromBody]OperationController.MultiOperationRequest request)
     {
-        var type = request.Type == null ? null : TypeLogic.GetType(request.Type);
+        var type = request.Lites.Select(l => l.EntityType).Distinct().Only() ?? TypeLogic.GetType(request.Type!);
 
-        var op = request.GetOperationSymbol(operationKey, type!);
+        var op = request.GetOperationSymbol(operationKey, type);
         var entity = PackageLogic.CreatePackageOperation(request.Lites, op, request.ParseArgs(op));
 
         return SignumServer.GetEntityPack(entity);
@@ -48,9 +51,12 @@ public class ProcessController : ControllerBase
         Thread.Sleep(1000);
     }
 
-    [HttpGet("api/processes/simpleStatus"), SignumAllowAnonymous]
-    public SimpleStatus SimpleStatus()
+
+    [HttpGet("api/processes/healthCheck"), SignumAllowAnonymous, EnableCors(PolicyName = "HealthCheck")]
+    public SignumHealthResult HealthCheck()
     {
-        return ProcessRunner.GetSimpleStatus();
+        var status = ProcessRunner.GetHealthStatus();
+
+        return new SignumHealthResult(status);
     }
 }

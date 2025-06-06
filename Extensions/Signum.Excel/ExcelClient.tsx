@@ -20,7 +20,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace ExcelClient {
   
-  export function start(options: { routes: RouteObject[], plainExcel: boolean, importFromExcel: boolean, excelReport: boolean }) {
+  export function start(options: { routes: RouteObject[], plainExcel: boolean, importFromExcel: boolean, excelReport: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Excel", () => import("./Changelog"));
   

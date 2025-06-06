@@ -90,7 +90,7 @@ export default function renderColumns({ data, width, height, parameters, loading
 
 export function paintColumns({ xRule, yRule, x : x2, y, keyValues, data, parameters, hasHorizontalScale, initialLoad, onDrillDown, colIndex, colCount, memo, detector }: ChartScriptHorizontalProps & {
   colIndex: number, colCount: number
-}) {
+}): React.JSX.Element {
 
   if (hasHorizontalScale)
     throw new Error("hasHorizontalScale is not supported");

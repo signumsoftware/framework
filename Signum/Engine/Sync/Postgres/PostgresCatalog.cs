@@ -19,6 +19,7 @@ public class PgNamespace : IView
         As.Expression(() => Database.View<PgClass>().Where(t => t.relnamespace == oid && t.relkind == RelKind.Table));
 }
 
+
 [TableName("pg_catalog.pg_class")]
 public class PgClass : IView
 {
@@ -82,12 +83,14 @@ public class PgAttribute : IView
     public short attnum;
     public bool attnotnull;
     public char attidentity;
+    public char attgenerated;
+    public bool attisdropped;
 
     [AutoExpressionField]
     public PgType? Type() => As.Expression(() => Database.View<PgType>().SingleOrDefault(t => t.oid == atttypid));
 
     [AutoExpressionField]
-    public PgAttributeDef? Default() => As.Expression(() => Database.View<PgAttributeDef>().SingleOrDefault(d => d.adrelid == attrelid && d.adnum == attnum));
+    public PgAttributeDef? AttrDef() => As.Expression(() => Database.View<PgAttributeDef>().SingleOrDefault(d => d.adrelid == attrelid && d.adnum == attnum));
 }
 
 [TableName("pg_catalog.pg_attrdef")]
@@ -142,7 +145,35 @@ public class PgProc : IView
     [AutoExpressionField]
     public PgNamespace? Namespace() => As.Expression(() => Database.View<PgNamespace>().SingleOrDefault(t => t.oid == pronamespace));
 
+    [AutoExpressionField]
+    public PgExtension? Extension() =>
+       As.Expression(() => Database.View<PgDepend>().Where(t => t.deptype == "e" && t.objid == this.oid)
+       .Select(d => Database.View<PgExtension>().SingleEx(e => e.oid == d.refobjid))
+       .SingleOrDefault());
+
     public string proname;
+}
+
+
+[TableName("pg_catalog.pg_extension")]
+public class PgExtension : IView
+{
+    [ViewPrimaryKey]
+    public int oid;
+
+    public string extname;
+}
+
+[TableName("pg_catalog.pg_depend")]
+public class PgDepend : IView
+{
+    [ViewPrimaryKey]
+    public int objid;
+
+    public string deptype;
+
+    public int refobjid;
+
 }
 
 [TableName("pg_catalog.pg_index")]

@@ -9,7 +9,7 @@ export default class HelpOmniboxProvider extends OmniboxProvider<HelpModuleOmnib
     return "HelpModuleOmniboxResult";
   }
 
-  icon() {
+   icon(): React.ReactElement<any, string | React.JSXElementConstructor<any>> {
     return this.coloredIcon("book", "darkviolet");
   }
 
@@ -31,7 +31,7 @@ export default class HelpOmniboxProvider extends OmniboxProvider<HelpModuleOmnib
     return array;
   }
 
-  navigateTo(result: HelpModuleOmniboxResult) {
+  navigateTo(result: HelpModuleOmniboxResult): Promise<string> | undefined {
 
     if (result.typeName != null)
       return Promise.resolve(HelpClient.Urls.typeUrl(result.typeName));
@@ -45,7 +45,7 @@ export default class HelpOmniboxProvider extends OmniboxProvider<HelpModuleOmnib
     return Promise.resolve(HelpClient.Urls.indexUrl());
   }
 
-  toString(result: HelpModuleOmniboxResult) {
+  toString(result: HelpModuleOmniboxResult): string {
     if (result.secondMatch)
       return "{0} {1}".formatWith(result.keywordMatch.text, result.secondMatch.text);
 

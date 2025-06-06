@@ -12,7 +12,7 @@ export interface WordSearchMenuProps {
   searchControl: SearchControlLoaded;
 }
 
-export default function WordSearchMenu(p : WordSearchMenuProps){
+export default function WordSearchMenu(p : WordSearchMenuProps): React.JSX.Element | null {
   function handleOnClick(wt: Lite<WordTemplateEntity>) {
     Navigator.API.fetch(wt)
       .then(wordTemplate => WordClient.API.getConstructorType(wordTemplate.model!))
@@ -40,6 +40,7 @@ export default function WordSearchMenu(p : WordSearchMenuProps){
   return (
     <DropdownButton id="wordTemplateDropDown" className="sf-word-dropdown" title={label}>
       {
+        wordReports == "error" ? <Dropdown.Item className="text-danger">Error</Dropdown.Item> : 
         wordReports.map((wt, i) =>
           <Dropdown.Item key={i}
             onClick={() => handleOnClick(wt)}>

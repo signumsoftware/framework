@@ -4,8 +4,8 @@ using Signum.Utilities.DataStructures;
 using System.Data.Common;
 using System.Collections.Concurrent;
 using Signum.Engine.Sync;
-using Signum.Entities;
-using Microsoft.AspNetCore.Server.IIS.Core;
+using NpgsqlTypes;
+using Signum.Engine.Linq;
 
 namespace Signum.Engine.Maps;
 
@@ -212,10 +212,10 @@ public partial class Table
                 var isPostgres = Schema.Current.Settings.IsPostgres;
 
                 string insertPattern(string[] suffixes) =>
-                        "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3};".FormatWith(table.Name,
+                        "INSERT INTO {0}\n  ({1})\n{2}VALUES\n{3};".FormatWith(table.Name,
                         trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                        isPostgres ? "OVERRIDING SYSTEM VALUE\r\n" : null,
-                        suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"));
+                        isPostgres ? "OVERRIDING SYSTEM VALUE\n" : null,
+                        suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\n"));
 
                 var expr = Expression.Lambda<Action<object, Forbidden, string, List<DbParameter>>>(
                     CreateBlock(trios.Select(a => a.ParameterBuilder), assigments, paramList), paramIdent, paramForbidden, paramSuffix, paramList);
@@ -308,12 +308,12 @@ public partial class Table
 
                 var isPostgres = Schema.Current.Settings.IsPostgres;
                 string sqlInsertPattern(string[] suffixes, string? output) =>
-                    "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3}{4};".FormatWith(
+                    "INSERT INTO {0}\n  ({1})\n{2}VALUES\n{3}{4};".FormatWith(
                     table.Name,
                     trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                    output != null && !isPostgres ? $"OUTPUT INSERTED.{table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}\r\n" : null,
-                    suffixes.ToString(s => " (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"),
-                    output != null && isPostgres ? $"\r\nRETURNING {table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}" : null);
+                    output != null && !isPostgres ? $"OUTPUT INSERTED.{table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}\n" : null,
+                    suffixes.ToString(s => " (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\n"),
+                    output != null && isPostgres ? $"\nRETURNING {table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}" : null);
 
 
                 var expr = Expression.Lambda<Action<Entity, Forbidden, string, List<DbParameter>>>(
@@ -342,7 +342,7 @@ public partial class Table
         get
         {
 
-            if (Fields.TryGetValue("toStr", out var entity))
+            if (Fields.TryGetValue(nameof(Entity.ToStr), out var entity))
                 return (IColumn)entity.Field;
 
             return null;
@@ -361,9 +361,9 @@ public partial class Table
             if (newStr.HasText() && toStrColumn.Size.HasValue && newStr.Length > toStrColumn.Size)
                 newStr = newStr.Substring(0, toStrColumn.Size.Value);
 
-            if (entity.toStr != newStr)
+            if (entity.ToStr != newStr)
             {
-                entity.toStr = newStr;
+                entity.ToStr = newStr;
                 return true;
             }
         }
@@ -470,7 +470,7 @@ public partial class Table
                 new StringBuilder()
                   .AppendLine(Table.DeclareTempTable(updated, this.table.PrimaryKey, isPostgres))
                   .AppendLine()
-                  .AppendLines(Enumerable.Range(0, num).Select(i => SqlUpdatePattern(i.ToString(), true) + "\r\n"))
+                  .AppendLines(Enumerable.Range(0, num).Select(i => SqlUpdatePattern(i.ToString(), true) + "\n"))
                   .AppendLine()
                   .AppendLine($"SELECT {id} from {updated}")
                   .ToString();
@@ -585,13 +585,13 @@ public partial class Table
 
                 Func<string, bool, string> sqlUpdatePattern = (suffix, output) =>
                 {
-                    var result = $"UPDATE {table.Name} SET\r\n" +
-trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(isPostgres), p.ParameterName + suffix).Indent(2), ",\r\n") + "\r\n" +
-(output && !isPostgres ? $"OUTPUT INSERTED.{id} INTO {updated}\r\n" : null) +
+                    var result = $"UPDATE {table.Name} SET\n" +
+trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(isPostgres), p.ParameterName + suffix).Indent(2), ",\n") + "\n" +
+(output && !isPostgres ? $"OUTPUT INSERTED.{id} INTO {updated}\n" : null) +
 $"WHERE {id} = {idParamName + suffix}" +
 (table.PartitionId != null ? $" AND {table.PartitionId.Name.SqlEscape(isPostgres)} = {oldPartition + suffix}" : null) +
 (table.Ticks != null ? $" AND {table.Ticks.Name.SqlEscape(isPostgres)} = {oldTicksParamName + suffix}" : null) +
-"\r\n" +
+"\n" +
 (output && isPostgres ? $"RETURNING ({id})" : null);
 
                     if (!(isPostgres && output))
@@ -692,7 +692,7 @@ SELECT {id} FROM rows;";
 
 
 
-    public SqlPreCommand InsertSqlSync(Entity ident, bool includeCollections = true, string? comment = null, string suffix = "", string? forceParentId = null)
+    public SqlPreCommand InsertSqlSync(Entity ident, bool includeCollections = true, string? comment = null, string suffix = "", string? forceParentId = null, Action<SqlPreCommandSimple>? fixMainCommand = null)
     {
         PrepareEntitySync(ident);
         SetToStrField(ident);
@@ -714,6 +714,8 @@ SELECT {id} FROM rows;";
                      inserterDisableIdentity.Value.SqlInsertPattern(new[] { suffix }),
                      new List<DbParameter>().Do(dbParams => inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment);
 
+            fixMainCommand?.Invoke(simpleInsert);
+
             return simpleInsert;
         }
 
@@ -728,10 +730,12 @@ SELECT {id} FROM rows;";
                  inserterDisableIdentity.Value.SqlInsertPattern(new[] { suffix }),
                  new List<DbParameter>().Do(dbParams => inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment);
 
+        fixMainCommand?.Invoke(insert);
+
         SqlPreCommand? collections = saveCollections.Value?.InsertCollectionsSync(ident, suffix, parentId!);
 
         SqlPreCommand? virtualMList = virtualMLists?.Values
-            .Select(vmi => giInsertVirtualMListSync.GetInvoker(this.Type, vmi.BackReferenceRoute.RootType)(ident, vmi, parentId!))
+            .Select(vmi => giInsertVirtualMListSync.GetInvoker(this.Type, vmi.BackReferenceRoute.RootType)(ident, vmi, parentId!)).ToList()
             .Combine(Spacing.Double);
 
 
@@ -747,13 +751,17 @@ SELECT {id} FROM rows;";
 
         if (isPostgres)
         {
+            var otherDeclarations = virtualMList?.Leaves().Select(a => a.Sql.Between("DO $$\n", "BEGIN\n")).ToString("\n");
+            var virtualMListsBodies = virtualMList?.Leaves().Select(a => a.Sql.After("BEGIN\n").BeforeLast("END $$;")).ToString("\n\n");
+
             return new SqlPreCommandSimple(@$"DO $$
 DECLARE {parentId} {pkType};
+{otherDeclarations}
 BEGIN
 {insert.PlainSql().Indent(4)}
 
 {collections?.PlainSql().Indent(4)}
-{virtualMList?.PlainSql().Indent(4)}
+{virtualMListsBodies}
 END $$;"); ;
         }
         else if (isGuid)
@@ -794,17 +802,12 @@ END $$;"); ;
         var sql = uc.SqlUpdatePattern(suffix, false);
         var parameters = new List<DbParameter>().Do(ps => uc.UpdateParameters(entity, (entity as Entity)?.Ticks ?? -1, new Forbidden(), suffix, ps));
 
+        SqlPreCommandSimple? declare = null;
         SqlPreCommand? update;
         if (where != null)
         {
-            bool isPostgres = Schema.Current.Settings.IsPostgres;
-
-            var declare = DeclarePrimaryKeyVariable(entity, where);
-            var updateSql = new SqlPreCommandSimple(sql, parameters).AddComment(comment).ReplaceFirstParameter( entity.Id.VariableName);
-
-            update = isPostgres ?
-                PostgresDoBlock(entity.Id.VariableName!, declare, updateSql) :
-                SqlPreCommand.Combine(Spacing.Simple, declare, updateSql); ;
+            declare = DeclarePrimaryKeyVariable(entity, where);
+            update = new SqlPreCommandSimple(sql, parameters).AddComment(comment).ReplaceFirstParameter(entity.Id.VariableName);
         }
         else
         {
@@ -812,7 +815,15 @@ END $$;"); ;
         }
 
         if (!includeCollections)
-            return update;
+        {
+            if (declare == null)
+                return update;
+
+            if (Schema.Current.Settings.IsPostgres)
+                return PostgresDoBlock(entity.Id.VariableName!, declare, update!);
+            else
+                return SqlPreCommand.Combine(Spacing.Simple, declare, update);
+        }
 
         var vmis = VirtualMList.RegisteredVirtualMLists.TryGetC(this.Type);
 
@@ -823,7 +834,14 @@ END $$;"); ;
         var cc = saveCollections.Value;
         SqlPreCommand? collections = cc?.UpdateCollectionsSync((Entity)entity, suffix, where != null);
 
-        return SqlPreCommand.Combine(Spacing.Double, update, collections, virtualMList);
+        var script = SqlPreCommand.Combine(Spacing.Double, update, collections, virtualMList);
+        if (declare == null)
+            return script;
+
+        if (Schema.Current.Settings.IsPostgres)
+            return PostgresDoBlock(entity.Id.VariableName!, declare, script!);
+        else
+            return SqlPreCommand.Combine(Spacing.Simple, declare, script);
     }
 
     static GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand>> giUpdateVirtualMListSync = new GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand>>(
@@ -880,13 +898,11 @@ END $$;"); ;
 
         var inserts = mlist.Select((elem, i) =>
         {
-            var result = table.InsertSqlSync(elem, forceParentId: parentId + "_" + i);
-
-            var simple = result as SqlPreCommandSimple ?? (SqlPreCommandSimple)((SqlPreCommandConcat)result).Commands.FirstEx(r => r is SqlPreCommandSimple s && s.Parameters != null);
-
-            var param = simple.Parameters!.SingleEx(p => p.ParameterName == paramName);
-
-            simple.ReplaceParameter(param, parentId);
+            var result = table.InsertSqlSync(elem, forceParentId: parentId + "_" + i, fixMainCommand: simple =>
+            {
+                var param = simple.Parameters!.SingleEx(p => p.ParameterName == paramName);
+                simple.ReplaceParameter(param, parentId);
+            });
 
             return result;
         }).Combine(Spacing.Simple);
@@ -960,7 +976,7 @@ public partial class TableMList
         void RelationalInserts(List<EntityForbidden> entities);
         void RelationalUpdates(List<EntityForbidden> entities);
 
-        object?[] BulkInsertDataRow(Entity entity, object value, int order);
+        object?[] BulkInsertDataRow(Entity entity, object value, int order, PrimaryKey? rowId);
     }
 
     internal class TableMListCache<T> : IMListCache
@@ -975,7 +991,7 @@ public partial class TableMList
         {
             return deleteCache.GetOrAdd(numEntities, num =>
             {
-                string sql = Enumerable.Range(0, num).ToString(i => sqlDelete(i.ToString()), ";\r\n");
+                string sql = Enumerable.Range(0, num).ToString(i => sqlDelete(i.ToString()), ";\n");
 
                 return list =>
                 {
@@ -997,7 +1013,7 @@ public partial class TableMList
         {
             return deleteExceptCache.GetOrAdd(numExceptions, num =>
             {
-                string sql = sqlDeleteExcept(numExceptions); Enumerable.Range(0, num).ToString(i => sqlDelete(i.ToString()), ";\r\n");
+                string sql = sqlDeleteExcept(numExceptions); Enumerable.Range(0, num).ToString(i => sqlDelete(i.ToString()), ";\n");
 
                 return delete =>
                 {
@@ -1029,7 +1045,7 @@ public partial class TableMList
         {
             return updateCache.GetOrAdd(numElements, num =>
             {
-                string sql = Enumerable.Range(0, num).ToString(i => sqlUpdate(i.ToString()), ";\r\n");
+                string sql = Enumerable.Range(0, num).ToString(i => sqlUpdate(i.ToString()), ";\n");
 
                 return (List<MListUpdate> list) =>
                 {
@@ -1065,6 +1081,7 @@ public partial class TableMList
 
         internal Func<string[], bool, string> sqlInsert = null!;
         public Action<Entity, T, int, Forbidden, string, List<DbParameter>> InsertParameters = null!;
+        public Lazy<Action<Entity, T, int, Forbidden, string, PrimaryKey, List<DbParameter>>> InsertParametersDisableIdentity = null!;
         public ConcurrentDictionary<int, Action<List<MListInsert>>> insertCache =
             new ConcurrentDictionary<int, Action<List<MListInsert>>>();
 
@@ -1082,7 +1099,7 @@ public partial class TableMList
                     for (int i = 0; i < num; i++)
                     {
                         var pair = list[i];
-                        InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Element, pair.Index, pair.Forbidden, i.ToString(), result);
+                        InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Element, pair.Index, pair.Forbidden, i.ToString(),  result);
                     }
 
                     DataTable dt = new SqlPreCommandSimple(sqlMulti, result).ExecuteDataTable();
@@ -1116,10 +1133,14 @@ public partial class TableMList
             }
         }
 
-        public object?[] BulkInsertDataRow(Entity entity, object value, int order)
+        public object?[] BulkInsertDataRow(Entity entity, object value, int order, PrimaryKey? rowId)
         {
             List<DbParameter> paramList = new List<DbParameter>();
-            InsertParameters(entity, (T)value, order, new Forbidden(null), "", paramList);
+            if(rowId == null)
+                InsertParameters(entity, (T)value, order, new Forbidden(null), "", paramList);
+            else
+                InsertParametersDisableIdentity.Value(entity, (T)value, order, new Forbidden(null), "", rowId.Value, paramList);
+
             return paramList.Select(a => a.Value).ToArray();
         }
 
@@ -1281,7 +1302,7 @@ public partial class TableMList
                 if (this.PartitionId != null)
                     sql += " AND {0} = {1}".FormatWith(this.PartitionId.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(PartitionId.Name));
 
-                return sql;
+                return sql + ";";
             },
             DeleteParameters = (entity, suffix) => 
             {
@@ -1307,7 +1328,7 @@ public partial class TableMList
                 sql += " AND {0} NOT IN ({1})"
                     .FormatWith(PrimaryKey.Name.SqlEscape(isPostgres), 0.To(num).Select(i => ParameterBuilder.GetParameterName("e" + i)).ToString(", "));
 
-                return sql;
+                return sql + ";";
             },
 
             DeleteExceptParameters = delete =>
@@ -1343,11 +1364,11 @@ public partial class TableMList
                 PartitionId.CreateParameter(trios, assigments, Expression.Field(paramIdent, Table.fiPartitionId), paramForbidden, paramSuffix);
             Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramSuffix);
 
-            result.sqlInsert = (suffixes, output) => "INSERT INTO {0} ({1})\r\n{2}VALUES\r\n{3}{4};".FormatWith(Name,
+            result.sqlInsert = (suffixes, output) => "INSERT INTO {0} ({1})\n{2}VALUES\n{3}{4};".FormatWith(Name,
                 trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                output && !isPostgres ? $"OUTPUT INSERTED.{PrimaryKey.Name.SqlEscape(isPostgres)}\r\n" : null,
-                suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"),
-                output && isPostgres ? $"\r\nRETURNING {PrimaryKey.Name.SqlEscape(isPostgres)}" : null);
+                output && !isPostgres ? $"OUTPUT INSERTED.{PrimaryKey.Name.SqlEscape(isPostgres)}\n" : null,
+                suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\n"),
+                output && isPostgres ? $"\nRETURNING {PrimaryKey.Name.SqlEscape(isPostgres)}" : null);
 
          
 
@@ -1355,6 +1376,22 @@ public partial class TableMList
                 Table.CreateBlock(trios.Select(a => a.ParameterBuilder), assigments, paramList), paramIdent, paramItem, paramOrder, paramForbidden, paramSuffix, paramList);
 
             result.InsertParameters = expr.Compile();
+
+            result.InsertParametersDisableIdentity = new Lazy<Action<Entity, T, int, Forbidden, string, PrimaryKey, List<DbParameter>>>(() =>
+            {
+                var paramRowId = Expression.Parameter(typeof(PrimaryKey), "rowId");
+
+                var trioIdent = new List<Table.Trio>
+                {
+                    new Table.Trio(this.PrimaryKey, Expression.Field(paramRowId, nameof(Signum.Entities.PrimaryKey.Object)), paramSuffix)
+                };
+                trioIdent.AddRange(trios);
+
+                var exprDI = Expression.Lambda<Action<Entity, T, int, Forbidden, string, PrimaryKey, List<DbParameter>>>(
+                    Table.CreateBlock(trioIdent.Select(a => a.ParameterBuilder), assigments, paramList), paramIdent, paramItem, paramOrder, paramForbidden, paramSuffix, paramRowId, paramList);
+
+                return exprDI.Compile();
+            });
         }
 
         result.hasOrder = this.Order != null;
@@ -1380,8 +1417,8 @@ public partial class TableMList
 
             Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramSuffix);
 
-            result.sqlUpdate = suffix => "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3} AND {4} = {5}{6};".FormatWith(Name,
-                trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(isPostgres), p.ParameterName + suffix).Indent(2), ",\r\n"),
+            result.sqlUpdate = suffix => "UPDATE {0} SET \n{1}\n WHERE {2} = {3} AND {4} = {5}{6};".FormatWith(Name,
+                trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(isPostgres), p.ParameterName + suffix).Indent(2), ",\n"),
                 this.BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(parentId + suffix),
                 this.PrimaryKey.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(rowId + suffix),
                 this.PartitionId != null ? " AND {0} = {1}".FormatWith(this.PartitionId.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(oldPartitionID + suffix)) : null
@@ -1403,6 +1440,13 @@ public partial class TableMList
         }
 
         return result;
+    }
+
+    internal ColumnExpression GetTsVectorColumn(Alias tableAlias, string columnName)
+    {
+        var column = (PostgresTsVectorColumn)this.Columns.GetOrThrow(columnName) ;
+
+        return new ColumnExpression(typeof(NpgsqlTsVector), tableAlias, column.Name);
     }
 }
 
@@ -1636,7 +1680,7 @@ public partial class FieldImplementedBy
     Type? CheckType(Type? type)
     {
         if (type != null && !ImplementationColumns.ContainsKey(type))
-            throw new InvalidOperationException($"Type {type.Name} is not in the list of ImplementedBy of {Route}, currently types allowed: {ImplementationColumns.Keys.ToString(a => a.Name, ", ")}.\r\n" +
+            throw new InvalidOperationException($"Type {type.Name} is not in the list of ImplementedBy of {Route}, currently types allowed: {ImplementationColumns.Keys.ToString(a => a.Name, ", ")}.\n" +
                 $"Consider writing in your Starter class something like: sb.Schema.Settings.FieldAttributes(({Route.RootType.Name} e) => e.{Route.PropertyString().Replace("/", ".First().")}).Replace(new ImplementedByAttribute({ImplementationColumns.Keys.And(type).ToString(t => $"typeof({t.Name})", ", ")}));");
 
         return type;

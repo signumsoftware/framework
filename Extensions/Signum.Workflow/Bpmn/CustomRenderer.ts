@@ -16,7 +16,7 @@ const bootstrapStyleToColor: { [style: string /* BootstrapStyle*/]: string } = {
 };
 
 export class CustomRenderer extends BpmnRenderer {
-  static $inject = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
+  static $inject: string[] = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
   constructor(config: any, eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, textRenderer: any, priority: number) {
     super(config, eventBus, styles, pathMap, canvas, textRenderer, 1200);
   }
@@ -24,7 +24,7 @@ export class CustomRenderer extends BpmnRenderer {
   getConnectionType!: (element: BPMN.Connection) => ConnectionType | undefined;
   getDecisionStyle!: (element: BPMN.Connection) => BootstrapStyle | undefined;
 
-  drawConnection(visuals: any, element: BPMN.Connection) {
+  drawConnection(visuals: any, element: BPMN.Connection): SVGElement {
     var result = super.drawConnection(visuals, element);
     var ct = this.getConnectionType(element);
     var ds = this.getDecisionStyle(element);
@@ -39,7 +39,7 @@ export class CustomRenderer extends BpmnRenderer {
     return result;
   }
 
-  drawShape(visuals: any, element: BPMN.DiElement) {
+  drawShape(visuals: any, element: BPMN.DiElement): SVGElement {
 
     var result = super.drawShape(visuals, element);
 
@@ -89,7 +89,7 @@ export class CustomRenderer extends BpmnRenderer {
   }
 }
 
-export var __init__ = ['customRenderer'];
-export var customRenderer = ['type', CustomRenderer];
+export var __init__: string[] = ['customRenderer'];
+export var customRenderer: (string | typeof CustomRenderer)[] = ['type', CustomRenderer];
 
 

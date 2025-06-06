@@ -10,7 +10,7 @@ import { ChangeLogClient } from "@framework/Basics/ChangeLogClient";
 
 export namespace ResetPasswordClient {
   
-  export function startPublic(options: { routes: RouteObject[] }) {
+  export function startPublic(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.ResetPassword", () => import("./Changelog"));
   
@@ -24,25 +24,25 @@ export namespace ResetPasswordClient {
     </span>;
   }
   
-  export module API {
-
+  export namespace API {
+  
     export function forgotPasswordEmail(request: ForgotPasswordEmailRequest): Promise<ForgotPasswordEmailResponse> {
       return ajaxPost({ url: "/api/auth/forgotPasswordEmail" }, request);
     }
-
-    export function resetPassword(request: ResetPasswordRequest): Promise<AuthClient.API.LoginResponse> {
+  
+    export function resetPassword(request: ResetPasswordRequest): Promise<AuthClient.API.LoginResponse > {
       return ajaxPost({ url: "/api/auth/resetPassword" }, request);
     }
-
-    export interface ResetPasswordRequest {
-      code: string;
-      newPassword: string;
-    }
-
-    export interface ForgotPasswordEmailRequest {
-      email: string;
-    }
-
+  
+  export interface ResetPasswordRequest {
+    code: string;
+    newPassword: string;
+  }
+  
+  export interface ForgotPasswordEmailRequest {
+    email: string;
+  }
+  
     export interface ForgotPasswordEmailResponse {
       success: boolean;
       message: string;

@@ -11,7 +11,7 @@ import * as Processes from '../Signum.Processes/Signum.Processes'
 import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
 
 
-export const PrintLineEntity = new Type<PrintLineEntity>("PrintLine");
+export const PrintLineEntity: Type<PrintLineEntity> = new Type<PrintLineEntity>("PrintLine");
 export interface PrintLineEntity extends Entities.Entity {
   Type: "PrintLine";
   creationDate: string /*DateTime*/;
@@ -31,7 +31,7 @@ export module PrintLineOperation {
   export const Cancel : Operations.ExecuteSymbol<PrintLineEntity> = registerSymbol("Operation", "PrintLineOperation.Cancel");
 }
 
-export const PrintLineState = new EnumType<PrintLineState>("PrintLineState");
+export const PrintLineState: EnumType<PrintLineState> = new EnumType<PrintLineState>("PrintLineState");
 export type PrintLineState =
   "NewTest" |
   "ReadyToPrint" |
@@ -41,7 +41,7 @@ export type PrintLineState =
   "Error" |
   "PrintedAndDeleted";
 
-export const PrintPackageEntity = new Type<PrintPackageEntity>("PrintPackage");
+export const PrintPackageEntity: Type<PrintPackageEntity> = new Type<PrintPackageEntity>("PrintPackage");
 export interface PrintPackageEntity extends Entities.Entity, Processes.IProcessDataEntity {
   Type: "PrintPackage";
   name: string | null;

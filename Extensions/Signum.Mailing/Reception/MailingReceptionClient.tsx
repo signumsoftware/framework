@@ -11,7 +11,7 @@ import { EmailMessageEntity } from '../Signum.Mailing'
 
 export namespace MailingReceptionClient {
   
-  export function start(options: {  routes: RouteObject[] }) {
+  export function start(options: {  routes: RouteObject[] }): void {
   
     Navigator.addSettings(new EntitySettings(EmailReceptionConfigurationEntity, e => import('./Templates/EmailReceptionConfiguration')));
     Navigator.addSettings(new EntitySettings(EmailReceptionEntity, e => import('./Templates/EmailReception')));

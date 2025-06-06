@@ -22,7 +22,7 @@ import { EvalClient } from '../Signum.Eval/EvalClient'
 
 type DynamicPanelTab = "search" | "compile" | "restartServerApp" | "migrations" | "checkEvals" | "refreshClients";
 
-export default function DynamicPanelPage() {
+export default function DynamicPanelPage(): React.JSX.Element {
   const location = useLocation();
 
   const [refreshKey, setRefreshKey] = React.useState(0);
@@ -100,7 +100,7 @@ interface DynamicCompileStepProps {
   panelInformation?: DynamicClient.DynamicPanelInformation;
 }
 
-export function CompileStep(p: DynamicCompileStepProps) {
+export function CompileStep(p: DynamicCompileStepProps): React.JSX.Element {
 
   const [compilationErrors, setCompilationErrors] = React.useState<DynamicClient.CompilationError[] | undefined>(undefined);
 
@@ -252,7 +252,7 @@ interface RestartServerAppStepProps {
 }
 
 
-export function RestartServerAppStep(p: RestartServerAppStepProps) {
+export function RestartServerAppStep(p: RestartServerAppStepProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   function handleRestartApplication(e: React.MouseEvent<any>) {
@@ -313,7 +313,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
   );
 }
 
-export function ErrorBlock(p: { error: WebApiHttpError }) {
+export function ErrorBlock(p: { error: WebApiHttpError }): React.JSX.Element {
 
   const [showDetails, setShowDetails] = React.useState(false)
 
@@ -346,7 +346,7 @@ function textDanger(message: string | null | undefined): React.ReactFragment | n
 }
 
 
-export function RefreshClientsStep() {
+export function RefreshClientsStep(): React.JSX.Element {
   function handleRefreshClient(e: React.MouseEvent<any>) {
     e.preventDefault();
     window.location.reload();

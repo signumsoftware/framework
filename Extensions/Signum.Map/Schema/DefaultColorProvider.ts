@@ -90,7 +90,7 @@ const scientificUnits = [ "", "k", "m", "b", "t" ];
 const computerUnitsAbrev = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" ];
 const computerUnits = ["Bytes", "KBytes", "MBytes", "GBytes", "TBytes", "PBytes", "EBytes", "ZBytes", "YBytes" ];
 
-export function roundValue(value: number, units: string[]) {
+export function roundValue(value: number, units: string[]): string {
 
   let valor = value;
   let i;

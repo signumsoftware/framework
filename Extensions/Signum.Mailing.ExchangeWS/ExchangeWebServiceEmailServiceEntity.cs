@@ -6,11 +6,6 @@ namespace Signum.Mailing.ExchangeWS;
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class ExchangeWebServiceEmailServiceEntity : EmailServiceEntity
 {
-    static ExchangeWebServiceEmailServiceEntity()
-    {
-        DescriptionManager.ExternalEnums.Add(typeof(ExchangeVersion), m => m.Name);
-    }
-
     public ExchangeVersion ExchangeVersion { get; set; }
 
     [StringLengthValidator(Max = 300)]

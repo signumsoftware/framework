@@ -1,10 +1,10 @@
+using Microsoft.Extensions.Primitives;
+using NpgsqlTypes;
 using Signum.DynamicQuery.Tokens;
+using Signum.Entities.TsVector;
 using Signum.Utilities.Reflection;
-using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 
 namespace Signum.DynamicQuery;
@@ -27,6 +27,7 @@ public abstract class Filter
     public abstract Filter? ToFullText();
 
     public abstract bool IsAggregate();
+    public abstract bool IsTimeSeries();
 
     public abstract IEnumerable<string> GetKeywords();
 
@@ -64,7 +65,7 @@ public abstract class Filter
     {
         var fullTextOrders = allTokens.OfType<FullTextRankToken>().Select(a => a.Parent!);
 
-        foreach (var fft in filters.OfType<FilterFullText>())
+        foreach (var fft in filters.OfType<FilterSqlServerFullText>())
         {
             fft.IsTable = fft.Tokens.Any(t => fullTextOrders.Contains(t));
             fft.TableOuterJoin = false;
@@ -76,6 +77,31 @@ public abstract class Filter
         }
     }
 
+    internal CollectionNestedToken? GetDeepestNestedToken()
+    {
+        var nested = GetTokens().Select(b => b.HasNested()).NotNull();
+
+
+        return nested.Aggregate((CollectionNestedToken?)null, (acum, token) =>
+        {
+            if (acum == null)
+                return token;
+
+            var acumFullKey = acum.FullKey();
+            var tokenFullKey = token.FullKey();
+            if (acumFullKey.StartsWith(tokenFullKey))
+                return token;
+
+            if (tokenFullKey.StartsWith(acumFullKey))
+                return acum;
+
+            throw new InvalidOperationException($"""
+                Unable to use independent nested tokens in the same filter: 
+                 {acumFullKey}
+                 {tokenFullKey}
+                """);
+        });
+    }
 }
 
 public class FilterGroup : Filter
@@ -100,6 +126,14 @@ public class FilterGroup : Filter
     {
         if (Token != null)
             yield return Token;
+
+        foreach (var item in Filters)
+        {
+            foreach (var t in item.GetTokens())
+            {
+                yield return t;
+            }
+        }
     }
 
 
@@ -137,7 +171,7 @@ public class FilterGroup : Filter
                 a.Value,
             })
             .Where(a => a.Key.Value is string s && s.Length > 0)
-            .Select(gr => new FilterFullText(gr.Key.Operation, gr.Select(a => a.Token).ToList(), (string)gr.Key.Value!))
+            .Select(gr => new FilterSqlServerFullText(gr.Key.Operation, gr.Select(a => a.Token).ToList(), (string)gr.Key.Value!))
             .ToList();
 
             filters.RemoveAll(aa => fullTextFilter.Contains(aa));
@@ -170,7 +204,7 @@ public class FilterGroup : Filter
     public override string ToString()
     {
         return $@"{this.GroupOperation}{(this.Token != null ? $" ({this.Token})" : null)}
-{Filters.ToString("\r\n").Indent(4)}";
+{Filters.ToString("\n").Indent(4)}";
     }
 
     public override bool IsAggregate()
@@ -178,11 +212,16 @@ public class FilterGroup : Filter
         return this.Filters.Any(f => f.IsAggregate());
     }
 
+    public override bool IsTimeSeries()
+    {
+        return this.Filters.Any(f => f.IsTimeSeries());
+    }
+
     internal void SetIsTable(IEnumerable<QueryToken> fullTextOrders, bool isOuter)
     {
         isOuter |= this.GroupOperation == FilterGroupOperation.Or && this.Filters.Count > 1;
 
-        foreach (var fft in this.Filters.OfType<FilterFullText>())
+        foreach (var fft in this.Filters.OfType<FilterSqlServerFullText>())
         {
             fft.IsTable = fft.Tokens.Any(t => fullTextOrders.Contains(t));
             fft.TableOuterJoin = isOuter;
@@ -208,7 +247,18 @@ public class FilterCondition : Filter
     {
         this.Token = token;
         this.Operation = operation;
-        this.Value = ReflectionTools.ChangeType(value, operation.IsList() ? typeof(IEnumerable<>).MakeGenericType(Token.Type.Nullify()) : Token.Type);
+        this.Value = ReflectionTools.ChangeType(value, GetValueType(Token, operation));
+    }
+
+    public static Type GetValueType(QueryToken token, FilterOperation operation)
+    {
+        if (operation.IsTsQuery())
+            return typeof(string);
+
+        if (operation.IsList())
+            return typeof(IEnumerable<>).MakeGenericType(token.Type.Nullify());
+        
+        return token.Type;
     }
 
     public override IEnumerable<Filter> GetAllFilters()
@@ -226,7 +276,7 @@ public class FilterCondition : Filter
         if (Operation.IsFullTextFilterOperation())
         {
             if (Value is string s && s.Length > 0)
-                return new FilterFullText(Operation.ToFullTextFilterOperation(), new List<QueryToken> { Token }, s);
+                return new FilterSqlServerFullText(Operation.ToFullTextFilterOperation(), new List<QueryToken> { Token }, s);
             return null;
         }
 
@@ -234,6 +284,7 @@ public class FilterCondition : Filter
     }
 
     static MethodInfo miContainsEnumerable = ReflectionTools.GetMethodInfo((IEnumerable<int> s) => s.Contains(2)).GetGenericMethodDefinition();
+
 
     public override Expression GetExpression(BuildExpressionContext ctx, bool inMemory)
     {
@@ -251,7 +302,7 @@ public class FilterCondition : Filter
 
 
 
-    public static Func<bool> ToLowerString = () => false;
+    public static Func<QueryToken?, bool> ToLowerString = qt => false;
 
     private Expression GetConditionExpressionBasic(BuildExpressionContext context, bool inMemory)
     {
@@ -282,7 +333,7 @@ public class FilterCondition : Filter
                 //    hasNull = true;
                 //}
 
-                if (ToLowerString())
+                if (ToLowerString(this.Token))
                 {
                     clone = clone.Cast<string>().Select(a => a.ToLower()).ToList();
                     left = Expression.Call(left, miToLower);
@@ -309,6 +360,19 @@ public class FilterCondition : Filter
 
             throw new InvalidOperationException("Unexpected operation");
         }
+        else if (Operation.IsTsQuery())
+        {
+            var strValue = (string?)Value;
+
+            if (!strValue.HasText())
+                return Expression.Constant(true);
+
+            MethodInfo mi = TsVectorExtensions.GetTsQueryMethodInfo(Operation);
+
+            var query = Expression.Call(mi, Expression.Constant(Value));
+
+            return Expression.Call(TsVectorExtensions.miMatches, left, query);
+        }
         else
         {
             var val = Value;
@@ -319,7 +383,7 @@ public class FilterCondition : Filter
             }
 
 
-            if (Token.Type == typeof(string) && ToLowerString())
+            if (Token.Type == typeof(string) && ToLowerString(Token))
             {
                 Expression right = Expression.Constant(((string)val!).ToLower(), Token.Type);
                 return QueryUtils.GetCompareExpression(Operation, Expression.Call(left, miToLower), right, inMemory);
@@ -336,11 +400,18 @@ public class FilterCondition : Filter
         }
     }
 
+  
+
     static MethodInfo miToLower = ReflectionTools.GetMethodInfo(() => "".ToLower());
 
     public override bool IsAggregate()
     {
         return this.Token is AggregateToken;
+    }
+
+    public override bool IsTimeSeries()
+    {
+        return this.Token is TimeSeriesToken;
     }
 
     public override string ToString()
@@ -371,6 +442,33 @@ public class FilterCondition : Filter
                 }
             case FilterOperation.IsIn:
                 return ((IEnumerable)this.Value!).OfType<string>();
+
+            case FilterOperation.TsQuery:
+                {
+                    if (this.Value is string s)
+                        return Regex.Split(s, @"&|\||!|<->|<\d>|\(|\)|\*")
+                    .Select(a => a.Trim(' ', '\r', '\n', '\t').Trim('"'))
+                    .Where(a => a.Length > 0);
+
+                    break;
+                }
+            case FilterOperation.TsQuery_WebSearch:
+                {
+                    if (this.Value is string s)
+                        return Regex.Split(s, @"(OR|-)")
+                        .Select(a => a.Trim(' ', '\r', '\n', '\t').Trim('"'))
+                        .Where(a => a.Length > 0);
+
+                    break;
+                }
+            case FilterOperation.TsQuery_Phrase:
+            case FilterOperation.TsQuery_Plain:
+                {
+                    if (this.Value is string s)
+                        return new[] { s };
+
+                    break;
+                }
         }
 
         return Enumerable.Empty<string>();
@@ -416,9 +514,19 @@ public enum FilterOperation
     IsNotIn,
     
     [Description("complex condition")]
-    ComplexCondition, //Full Text Search
+    ComplexCondition, //Full Text Search SQL Server
     [Description("free text")]
-    FreeText, //Full Text Search
+    FreeText, //Full Text Search SQL Server
+
+
+    [Description("tsquery")]
+    TsQuery,
+    [Description("tsquery (plain)")]
+    TsQuery_Plain,
+    [Description("tsquery (phrase)")]
+    TsQuery_Phrase,
+    [Description("tsquery (web search)")]
+    TsQuery_WebSearch,
 }
 
 [InTypeScript(true)]
@@ -435,11 +543,12 @@ public enum FilterType
     Boolean,
     Enum,
     Guid,
+    TsVector,
 }
 
-public class FilterFullText : Filter
+public class FilterSqlServerFullText : Filter
 {
-    public FilterFullText(FullTextFilterOperation operation, List<QueryToken> tokens, string value)
+    public FilterSqlServerFullText(FullTextFilterOperation operation, List<QueryToken> tokens, string value)
     {
         if (tokens.IsNullOrEmpty())
             throw new ArgumentNullException(nameof(tokens));
@@ -497,14 +606,19 @@ public class FilterFullText : Filter
         return false;
     }
 
+    public override bool IsTimeSeries()
+    {
+        return false;
+    }
+
     public override Filter ToFullText()
     {
         throw new InvalidOperationException("Already FilterFullText!");
     }
 
-    public static List<FilterFullText> TableFilters(List<Filter> filters)
+    public static List<FilterSqlServerFullText> TableFilters(List<Filter> filters)
     {
-        return filters.SelectMany(a => a.GetAllFilters()).OfType<FilterFullText>().Where(a => a.IsTable).ToList();
+        return filters.SelectMany(a => a.GetAllFilters()).OfType<FilterSqlServerFullText>().Where(a => a.IsTable).ToList();
     }
 
     //Keep in sync with Finder.tsx extractComplexConditions
@@ -517,6 +631,8 @@ public class FilterFullText : Filter
             .Select(a => a.Trim(' ', '\r', '\n', '\t').Trim('"'))
             .Where(a => a.Length > 0);
     }
+
+    
 }
 
 public static class FullTextFilterOperationExtensions

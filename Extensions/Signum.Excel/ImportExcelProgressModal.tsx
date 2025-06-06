@@ -16,7 +16,7 @@ interface ImportExcelProgressModalProps extends IModalProps<ExcelClient.ImportFr
   abortController: AbortController;
 }
 
-export function ImportExcelProgressModal(p: ImportExcelProgressModalProps) {
+export function ImportExcelProgressModal(p: ImportExcelProgressModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();
@@ -87,7 +87,8 @@ export function ImportExcelProgressModal(p: ImportExcelProgressModalProps) {
     </Modal>
   );
 }
-
-ImportExcelProgressModal.show = (abortController: AbortController, typeInfo: TypeInfo, makeRequest: () => Promise<Response>): Promise<ExcelClient.ImportFromExcelReport> => {
-  return openModal<ExcelClient.ImportFromExcelReport>(<ImportExcelProgressModal makeRequest={makeRequest} abortController={abortController} typeInfo={typeInfo} />);
-};
+export namespace ImportExcelProgressModal {
+  export function show(abortController: AbortController, typeInfo: TypeInfo, makeRequest: () => Promise<Response>): Promise<ExcelClient.ImportFromExcelReport> {
+    return openModal<ExcelClient.ImportFromExcelReport>(<ImportExcelProgressModal makeRequest={makeRequest} abortController={abortController} typeInfo={typeInfo} />);
+  };
+}

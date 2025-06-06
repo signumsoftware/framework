@@ -10,7 +10,6 @@ import { SearchMessage } from '../Signum.Entities';
 import { classes } from '../Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Finder } from '../Finder'
-import { Col } from 'react-bootstrap'
 
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -22,13 +21,13 @@ interface PinnedFilterBuilderProps {
   extraSmall?: boolean;
   showGrid?: boolean;
 }
-export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
+export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.JSX.Element | null {
 
   const timeoutWriteText = React.useRef<number | null>(null);
 
   var allPinned = getAllPinned(p.filterOptions).filter(fop => p.pinnedFilterVisible == null || p.pinnedFilterVisible(fop));
 
-  if (allPinned.length == 0)
+  if (allPinned.length == 0 && !p.showGrid)
     return null;
 
   function getColSpan(fo: FilterOptionParsed) {
@@ -67,6 +66,10 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
             var hiddenColumns = rowPinned.filter(a => getColSpan(a) > 1)
               .flatMap(a => Array.range(0, a.pinned!.colSpan! - 1).map(i => (a.pinned!.column ?? 0) + i + 1))
               .distinctBy(a => a.toString());
+
+
+            const allCheckBox = rowPinned.every(a => isCheckBox(a.pinned?.active));
+
             return (
               <div key={i} className={classes("row", p.showGrid  && "py-2")}>
                 {Array.range(0, maxColumns).map((c, j) => {
@@ -81,7 +84,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
                     || hiddenColumns.contains(c);
 
                   return (<div key={j} className={classes("col-sm-" + (bsBase * colSpan), error && "border-danger", p.showGrid && "border border-1 rounded-0")}>
-                    {cellPinned.map((f, i) => <div key={i} className={f == p.highlightFilter ? "sf-filter-highlight" : undefined}>{renderValue(f)}</div>)}
+                    {cellPinned.map((f, i) => <div key={i} className={f == p.highlightFilter ? "sf-filter-highlight" : undefined}>{renderValue(f, i == 0 && !allCheckBox)}</div>)}
                   </div>
                   );
                 })}
@@ -99,7 +102,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
     </div>
   );
 
-  function renderValue(filter: FilterOptionParsed) {
+  function renderValue(filter: FilterOptionParsed, isFirst: boolean) {
 
     const f = filter;
     const readOnly = f.frozen;
@@ -107,7 +110,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     if (f.pinned && (isCheckBox(f.pinned.active))) {
       return (
-        <div className="checkbox mt-4">
+        <div className={classes("checkbox", isFirst && "mt-4")}>
           <label>
             <input type="checkbox" className="form-check-input me-1" checked={f.pinned.active == "Checkbox_Checked" || f.pinned.active == "NotCheckbox_Checked"} readOnly={readOnly} onChange={() => {
               f.pinned!.active =

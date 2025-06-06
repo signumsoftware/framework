@@ -25,7 +25,7 @@ export interface EntityRadioButtonListProps<V extends Entity | Lite<Entity> | nu
 
 export class EntityRadioButtonListController<V extends Entity | Lite<Entity> | null> extends EntityBaseController<EntityRadioButtonListProps<V>, V> {
 
-  getDefaultProps(state: EntityRadioButtonListProps<V>) {
+  getDefaultProps(state: EntityRadioButtonListProps<V>): void {
     super.getDefaultProps(state);
 
     if (state.ctx.value == null)
@@ -38,7 +38,7 @@ export class EntityRadioButtonListController<V extends Entity | Lite<Entity> | n
     state.columnWidth = 200;
   }
 
-  handleOnChange = (lite: AsLite<V> | null) => {
+  handleOnChange = (lite: AsLite<V> | null): void => {
     if (lite == null)
       this.setValue(null!);
     else
@@ -48,7 +48,7 @@ export class EntityRadioButtonListController<V extends Entity | Lite<Entity> | n
 
 }
 
-export const EntityRadioButtonList = genericForwardRef(function EntityRadioButtonList<V extends Entity | Lite<Entity>>(props: EntityRadioButtonListProps<V>, ref: React.Ref<EntityRadioButtonListController<V>>) {
+export const EntityRadioButtonList: <V extends Entity | Lite<Entity>>(props: EntityRadioButtonListProps<V> & React.RefAttributes<EntityRadioButtonListController<V>>) => React.ReactNode | null = genericForwardRef(function EntityRadioButtonList<V extends Entity | Lite<Entity>>(props: EntityRadioButtonListProps<V>, ref: React.Ref<EntityRadioButtonListController<V>>) {
   const c = useController(EntityRadioButtonListController, props, ref);
   const p = c.props;
 
@@ -56,12 +56,12 @@ export const EntityRadioButtonList = genericForwardRef(function EntityRadioButto
     return null;
 
   return (
-    <GroupHeader className={classes("sf-radiobutton-list", p.ctx.errorClassBorder, c.mandatoryClass)}
+    <GroupHeader className={classes("sf-radiobutton-list", c.getErrorClass("border"), c.mandatoryClass)}
       label={<>{getTimeMachineIcon({ ctx: p.ctx, translateY: "100%" })}{p.label}</>}
       labelIcon={p.labelIcon}
       avoidFieldSet={p.avoidFieldSet}
       buttons={renderButtons()}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} >
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }} >
       {renderRadioList()}
     </GroupHeader >
   );
@@ -89,7 +89,7 @@ interface EntityRadioButtonListSelectProps<V extends Lite<Entity> | Entity | nul
   nullElement?: "No" | "Always" | "Initially";
 }
 
-export function EntityRadioButtonListSelect<V extends Lite<Entity> | Entity | null>(props: EntityRadioButtonListSelectProps<V>) {
+export function EntityRadioButtonListSelect<V extends Lite<Entity> | Entity | null>(props: EntityRadioButtonListSelectProps<V>): React.JSX.Element {
 
   const c = props.controller;
   const p = c.props;

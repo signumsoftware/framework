@@ -1,3 +1,4 @@
+using Microsoft.SqlServer.Types;
 using NpgsqlTypes;
 using Signum.Engine.Maps;
 using Signum.Utilities.DataStructures;
@@ -28,6 +29,7 @@ internal enum DbExpressionType
     SqlConstant,
     SqlVariable,
     SqlLiteral,
+    SqlColumnList,
     SqlCast,
     Case,
     RowNumber,
@@ -58,6 +60,7 @@ internal enum DbExpressionType
     PrimaryKey,
     ToDayOfWeek,
     Interval,
+    IsDescendatOf
 }
 
 
@@ -322,7 +325,8 @@ internal class AggregateExpression : DbExpression
 {
     public readonly AggregateSqlFunction AggregateFunction;
     public readonly ReadOnlyCollection<Expression> Arguments;
-    public AggregateExpression(Type type, AggregateSqlFunction aggregateFunction, IEnumerable<Expression> arguments)
+    public readonly ReadOnlyCollection<OrderExpression>? OrderBy;
+    public AggregateExpression(Type type, AggregateSqlFunction aggregateFunction, IEnumerable<Expression> arguments, IEnumerable<OrderExpression>? orderBy)
         : base(DbExpressionType.Aggregate, type)
     {
         if (arguments == null)
@@ -330,11 +334,17 @@ internal class AggregateExpression : DbExpression
         
         this.AggregateFunction = aggregateFunction;
         this.Arguments = arguments.ToReadOnly();
+        this.OrderBy = orderBy?.ToReadOnly();
     }
 
     public override string ToString()
     {
-        return $"{AggregateFunction}({(AggregateFunction == AggregateSqlFunction.CountDistinct ? "Distinct " : "")}{Arguments.ToString(", ") ?? "*"})";
+        var result =  $"{AggregateFunction}({(AggregateFunction == AggregateSqlFunction.CountDistinct ? "Distinct " : "")}{Arguments.ToString(", ") ?? "*"})";
+
+        if (OrderBy == null)
+            return result;
+
+        return result + "WITHIN GROUP (" + OrderBy.ToString(", ") + ")";
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -466,15 +476,15 @@ internal class SelectExpression : SourceWithAliasExpression
 
     public override string ToString()
     {
-        return "SELECT {0}{1}\r\n{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".FormatWith(
+        return "SELECT {0}{1}\n{2}\nFROM {3}\n{4}{5}{6}{7} AS {8}".FormatWith(
             IsDistinct ? "DISTINCT " : "",
             Top?.Let(t => "TOP {0} ".FormatWith(t.ToString())),
-            Columns.ToString(c => c.ToString().Indent(4), ",\r\n"),
-            From?.Let(f => f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
-            Where?.Let(a => "WHERE " + a.ToString() + "\r\n"),
-            OrderBy.Any() ? ("ORDER BY " + OrderBy.ToString(" ,") + "\r\n") : null,
-            GroupBy.Any() ? ("GROUP BY " + GroupBy.ToString(g => g.ToString(), " ,") + "\r\n") : null,
-            SelectOptions == 0 ? "" : SelectOptions.ToString() + "\r\n",
+            Columns.ToString(c => c.ToString().Indent(4), ",\n"),
+            From?.Let(f => f.ToString().Let(a => a.Contains("\n") ? "\n" + a.Indent(4) : a)),
+            Where?.Let(a => "WHERE " + a.ToString() + "\n"),
+            OrderBy.Any() ? ("ORDER BY " + OrderBy.ToString(" ,") + "\n") : null,
+            GroupBy.Any() ? ("GROUP BY " + GroupBy.ToString(g => g.ToString(), " ,") + "\n") : null,
+            SelectOptions == 0 ? "" : SelectOptions.ToString() + "\n",
             Alias);
     }
 
@@ -531,7 +541,7 @@ internal class JoinExpression : SourceExpression
 
     public override string ToString()
     {
-        return "{0}\r\n{1}\r\n{2}\r\nON {3}".FormatWith(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition?.ToString());
+        return "{0}\n{1}\n{2}\nON {3}".FormatWith(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition?.ToString());
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -580,7 +590,7 @@ internal class SetOperatorExpression : SourceWithAliasExpression
 
     public override string ToString()
     {
-        return "{0}\r\n{1}\r\n{2}\r\n as {3}".FormatWith(Left.ToString().Indent(4), Operator, Right.ToString().Indent(4), Alias);
+        return "{0}\n{1}\n{2}\n as {3}".FormatWith(Left.ToString().Indent(4), Operator, Right.ToString().Indent(4), Alias);
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -663,15 +673,25 @@ internal enum PostgresFunction
     tstzrange,
     upper,
     lower,
+    subpath,
+    nlevel,
+    to_tsquery,
+    plainto_tsquery,
+    phraseto_tsquery,
+    websearch_to_tsquery,
+
+    ts_rank,
+    ts_rank_cd,
 }
 
 public static class PostgressOperator
 {
     public static string Overlap = "&&";
     public static string Contains = "@>";
+    public static string IsContained = "<@";
+    public static string Matches = "@@";
 
-    public static string[] All = new[] { Overlap, Contains };
-
+    public static string[] All = new[] { Overlap, Contains, IsContained, Matches };
 }
 
 internal enum SqlEnums
@@ -710,6 +730,30 @@ internal class SqlLiteralExpression : DbExpression
     protected override Expression Accept(DbExpressionVisitor visitor)
     {
         return visitor.VisitSqlLiteral(this);
+    }
+}
+
+internal class SqlColumnListExpression : DbExpression
+{
+    public readonly ReadOnlyCollection<ColumnExpression> Columns;
+    public SqlColumnListExpression(IEnumerable<ColumnExpression> column)
+        : base(DbExpressionType.SqlLiteral, typeof(void))
+    {
+        this.Columns = column.ToReadOnly();
+    }
+
+    public override string ToString()
+    {
+        var only = Columns.Only();
+        if (only != null)
+            return only.ToString();
+
+        return "(" + Columns.ToString(", ") + ")";
+    }
+
+    protected override Expression Accept(DbExpressionVisitor visitor)
+    {
+        return visitor.VisitSqlColumnList(this);
     }
 }
 
@@ -913,7 +957,7 @@ internal static class ExpressionTools
         if (returnType.IsAssignableFrom(expression.Type) || expression.Type.IsAssignableFrom(returnType))
             return Expression.Convert(expression, returnType);
 
-        throw new InvalidOperationException("Imposible to convert to {0} the expression: \r\n{1}"
+        throw new InvalidOperationException("Imposible to convert to {0} the expression: \n{1}"
             .FormatWith(returnType.TypeName(), expression.ToString()));
     }
 
@@ -1060,6 +1104,19 @@ public static class SystemTimeExpressions
              );
     }
 
+    internal static Expression? Contains(this IntervalExpression interval, Expression expression)
+    {
+        if (interval.PostgresRange != null)
+        {
+            return new SqlFunctionExpression(typeof(bool), null, "@>", new Expression[] { interval.PostgresRange!, expression! });
+        }
+
+        return Expression.And(
+             Expression.LessThanOrEqual(interval.Min!, expression.Nullify()),
+             Expression.LessThan(expression.Nullify(), interval.Max!)
+             );
+    }
+
     public static Expression And(this Expression expression, Expression? other)
     {
         if (other == null)
@@ -1094,6 +1151,33 @@ internal class LikeExpression : DbExpression
     protected override Expression Accept(DbExpressionVisitor visitor)
     {
         return visitor.VisitLike(this);
+    }
+}
+
+internal class IsDesendantOfExpression : DbExpression
+{
+    public readonly Expression Child;
+    public readonly Expression Parent;
+
+    public IsDesendantOfExpression(Expression child, Expression parent) : base(DbExpressionType.IsDescendatOf, typeof(bool))
+    {
+        if (child == null || child.Type != typeof(SqlHierarchyId))
+            throw new ArgumentException("expression is wrong");
+
+        if (parent == null || parent.Type != typeof(SqlHierarchyId))
+            throw new ArgumentException("pattern is wrong");
+        this.Child = child;
+        this.Parent = parent;
+    }
+
+    public override string ToString()
+    {
+        return $"{Child} <@ {Parent}";
+    }
+
+    protected override Expression Accept(DbExpressionVisitor visitor)
+    {
+        return visitor.VisitIsDescendatOf(this);
     }
 }
 
@@ -1311,7 +1395,7 @@ internal class ProjectionExpression : DbExpression
 
     public override string ToString()
     {
-        return "(SOURCE\r\n{0}\r\nPROJECTOR\r\n{1})".FormatWith(Select.ToString().Indent(4), Projector.ToString().Indent(4));
+        return "(SOURCE\n{0}\nPROJECTOR\n{1})".FormatWith(Select.ToString().Indent(4), Projector.ToString().Indent(4));
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1379,11 +1463,11 @@ internal class DeleteExpression : CommandExpression
 
     public override string ToString()
     {
-        return "DELETE FROM {0}\r\nFROM {1}\r\n{2}".FormatWith(
+        return "DELETE FROM {0}\nFROM {1}\n{2}".FormatWith(
             (object?)Alias ?? Name,
             Source.ToString(),
             Where?.Let(w => "WHERE " + w.ToString())) + 
-            (ReturnRowCount ? "\r\nSELECT @@rowcount" : "");
+            (ReturnRowCount ? "\nSELECT @@rowcount" : "");
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1416,9 +1500,9 @@ internal class UpdateExpression : CommandExpression
 
     public override string ToString()
     {
-        return "UPDATE {0}\r\nSET {1}\r\nFROM {2}\r\n{3}".FormatWith(
+        return "UPDATE {0}\nSET {1}\nFROM {2}\n{3}".FormatWith(
             Table.Name,
-            Assigments.ToString("\r\n"),
+            Assigments.ToString("\n"),
             Source.ToString(),
             Where?.Let(w => "WHERE " + w.ToString()));
     }
@@ -1450,10 +1534,10 @@ internal class InsertSelectExpression : CommandExpression
 
     public override string ToString()
     {
-        return "INSERT INTO {0}({1})\r\nSELECT {2}\r\nFROM {3}".FormatWith(
+        return "INSERT INTO {0}({1})\nSELECT {2}\nFROM {3}".FormatWith(
             Table.Name,
-            Assigments.ToString(a => a.Column, ",\r\n"),
-            Assigments.ToString(a => a.Expression.ToString(), ",\r\n"),
+            Assigments.ToString(a => a.Column, ",\n"),
+            Assigments.ToString(a => a.Expression.ToString(), ",\n"),
             Source.ToString());
     }
 
@@ -1492,7 +1576,7 @@ internal class CommandAggregateExpression : CommandExpression
 
     public override string ToString()
     {
-        return Commands.ToString(a => a.ToString(), "\r\n\r\n");
+        return Commands.ToString(a => a.ToString(), "\n\n");
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)

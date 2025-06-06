@@ -48,20 +48,37 @@ public class CacheController : ControllerBase
     {
         CachePermission.InvalidateCache.AssertAuthorized();
 
-        CacheLogic.ForceReset();
-        GlobalLazy.ResetAll();
-        Schema.Current.InvalidateMetadata();
-        GC.Collect(2);
+        CacheLogic.InvalidateAll(systemLog: true);
     }
+
+    [HttpPost("api/cache/invalidateAll"), SignumAllowAnonymous]
+    public void InvalidateAll([FromBody] InvalidateAllRequest req)
+    {
+        SimpleHttpBroadcast sci = GetSimpleHttpBroadcast();
+
+        sci.InvalidateAllTables(req);
+    }
+
 
     [HttpPost("api/cache/invalidateTable"), SignumAllowAnonymous]
     public void InvalidateTable([FromBody]InvalidateTableRequest req)
     {
-        if (CacheLogic.ServerBroadcast is not SimpleHttpBroadcast sci)
-            throw new InvalidOperationException("CacheInvalidator is not a SimpleHttpCacheInvalidator");
+        SimpleHttpBroadcast sci = GetSimpleHttpBroadcast();
 
         sci.InvalidateTable(req);
     }
+
+    static SimpleHttpBroadcast GetSimpleHttpBroadcast()
+    {
+        if (CacheLogic.ServerBroadcast is not SimpleHttpBroadcast sci)
+            throw new InvalidOperationException("CacheInvalidator is not a SimpleHttpCacheInvalidator");
+        return sci;
+    }
+}
+
+public class InvalidateAllRequest
+{
+    public string SecretHash;
 }
 
 public class ResetLazyStatsTS

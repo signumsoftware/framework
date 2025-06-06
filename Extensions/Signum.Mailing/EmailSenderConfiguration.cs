@@ -149,15 +149,7 @@ public class ClientCertificationFileEmbedded : EmbeddedEntity
     [StringLengthValidator(Min = 2, Max = 300),]
     public string FullFilePath { get; set; }
 
-    public CertFileType CertFileType { get; set; }
-
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => FullFilePath);
-}
-
-public enum CertFileType
-{
-    CertFile,
-    SignedFile
 }
 

@@ -8,7 +8,9 @@ public class SearchControlProxy
 
     public IWebElement Element { get; private set; }
 
-    public FiltersProxy Filters => new FiltersProxy(this.FiltersPanel.Find());
+    public object QueryName => QueryLogic.ToQueryName(this.Element.GetDomAttribute("data-query-key")!);
+
+    public FiltersProxy Filters => new FiltersProxy(this.FiltersPanel.Find(), QueryName);
     public ColumnEditorProxy ColumnEditor() => new ColumnEditorProxy(this.Element.FindElement(By.CssSelector(".sf-column-editor")));
 
     public PaginationSelectorProxy Pagination => new PaginationSelectorProxy(this);
@@ -47,7 +49,7 @@ public class SearchControlProxy
     void WaitSearchCompleted(string? counter)
     {
         Selenium.Wait(() =>
-         this.Element.GetAttribute("data-search-count") != counter
+         this.Element.GetDomAttribute("data-search-count") != counter
             , () => "button {0} to finish searching".FormatWith(SearchButton));
     }
 

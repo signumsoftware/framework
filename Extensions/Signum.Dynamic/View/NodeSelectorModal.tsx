@@ -7,7 +7,7 @@ import { Modal } from 'react-bootstrap';
 import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 import { DynamicViewMessage } from '../Signum.Dynamic.Views';
 
-export default function NodeSelectorModal(p: IModalProps<any | undefined>) {
+function NodeSelectorModal(p: IModalProps<any | undefined>): React.JSX.Element {
 
   const [show, setShow] = React.useState<boolean>(true);
 
@@ -65,10 +65,14 @@ export default function NodeSelectorModal(p: IModalProps<any | undefined>) {
   );
 }
 
-NodeSelectorModal.chooseElement = (parentNode: string): Promise<NodeUtils.NodeOptions<BaseNode> | undefined> => {
-  var o = NodeUtils.registeredNodes[parentNode];
-  if (o.validChild)
-    return Promise.resolve(NodeUtils.registeredNodes[o.validChild]);
+namespace NodeSelectorModal {
+  export function chooseElement(parentNode: string): Promise<NodeUtils.NodeOptions<BaseNode> | undefined> {
+    var o = NodeUtils.registeredNodes[parentNode];
+    if (o.validChild)
+      return Promise.resolve(NodeUtils.registeredNodes[o.validChild]);
 
-  return openModal<NodeUtils.NodeOptions<BaseNode>>(<NodeSelectorModal />);
+    return openModal<NodeUtils.NodeOptions<BaseNode>>(<NodeSelectorModal />);
+  }
 }
+
+export default NodeSelectorModal;

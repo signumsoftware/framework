@@ -6,12 +6,12 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum/React/Signum.Entities'
 
 
-export module AzureADQuery {
-  export const ActiveDirectoryUsers = new QueryKey("AzureADQuery", "ActiveDirectoryUsers");
-  export const ActiveDirectoryGroups = new QueryKey("AzureADQuery", "ActiveDirectoryGroups");
+export namespace AzureADQuery {
+  export const ActiveDirectoryUsers: QueryKey = new QueryKey("AzureADQuery", "ActiveDirectoryUsers");
+  export const ActiveDirectoryGroups: QueryKey = new QueryKey("AzureADQuery", "ActiveDirectoryGroups");
 }
 
-export const OnPremisesExtensionAttributesModel = new Type<OnPremisesExtensionAttributesModel>("OnPremisesExtensionAttributesModel");
+export const OnPremisesExtensionAttributesModel: Type<OnPremisesExtensionAttributesModel> = new Type<OnPremisesExtensionAttributesModel>("OnPremisesExtensionAttributesModel");
 export interface OnPremisesExtensionAttributesModel extends Entities.ModelEntity {
   Type: "OnPremisesExtensionAttributesModel";
   extensionAttribute1: string | null;

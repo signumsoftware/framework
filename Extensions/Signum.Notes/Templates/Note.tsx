@@ -3,7 +3,7 @@ import { AutoLine, EntityLine, EntityCombo, TextAreaLine } from '@framework/Line
 import { TypeContext } from '@framework/TypeContext'
 import { NoteEntity } from '../Signum.Notes'
 
-export default function Note(p : { ctx: TypeContext<NoteEntity> }){
+export default function Note(p : { ctx: TypeContext<NoteEntity> }): React.JSX.Element {
   const e = p.ctx;
 
   const ec = e.subCtx({ labelColumns: { sm: 2 } });

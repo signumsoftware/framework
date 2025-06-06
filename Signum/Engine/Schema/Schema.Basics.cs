@@ -22,7 +22,7 @@ public interface ITable
 
     Dictionary<string, IColumn> Columns { get; }
 
-    List<TableIndex>? MultiColumnIndexes { get; set; }
+    List<TableIndex>? AdditionalIndexes { get; set; }
 
     List<TableIndex> AllIndexes();
 
@@ -110,6 +110,7 @@ public class SystemVersionedInfo
         public bool Identity => false;
         public string? Default { get; set; }
         public string? Check { get; set; }
+        ComputedColumn? IColumn.ComputedColumn => null;
         public int? Size => null;
         public byte? Precision => null;
         public byte? Scale => null;
@@ -118,6 +119,8 @@ public class SystemVersionedInfo
         public bool AvoidForeignKey => false;
 
         public DateTimeKind DateTimeKind => DateTimeKind.Utc;
+
+
         public override string ToString()
         {
             return Name;
@@ -143,6 +146,7 @@ public class SystemVersionedInfo
         public bool Identity => false;
         public string? Default { get; set; }
         public string? Check { get; set; }
+        ComputedColumn? IColumn.ComputedColumn => null;
         public int? Size => null;
         public byte? Precision => null;
         public byte? Scale => null;
@@ -184,7 +188,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
     public Dictionary<string, IColumn> Columns { get; set; }
 
 
-    public List<TableIndex>? MultiColumnIndexes { get; set; }
+    public List<TableIndex>? AdditionalIndexes { get; set; }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public Table(Type type)
@@ -202,6 +206,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         var errorSuffix = "columns in table " + this.Name.Name;
         var columns = new Dictionary<string, IColumn>();
+
         void AddColumns(IEnumerable<IColumn> newColumns)
         {
             try
@@ -313,8 +318,8 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
 
         var result = fields.SelectMany(f => f.Field.GenerateIndexes(this)).ToList();
 
-        if (MultiColumnIndexes != null)
-            result.AddRange(MultiColumnIndexes);
+        if (AdditionalIndexes != null)
+            result.AddRange(AdditionalIndexes);
 
         if (result.Where(a=>a.Unique).Any())
         {
@@ -516,6 +521,7 @@ public partial interface IColumn
     bool IdentityBehaviour { get; }
     bool Identity { get; }
     string? Default { get; }
+    ComputedColumn? ComputedColumn { get; }
     string? Check { get; }
     int? Size { get; }
     byte? Precision { get; }
@@ -523,6 +529,18 @@ public partial interface IColumn
     string? Collation { get; }
     Table? ReferenceTable { get; }
     bool AvoidForeignKey { get; }
+}
+
+public struct ComputedColumn
+{
+    public ComputedColumn(string expression, bool persisted)
+    {
+        Expression = expression;
+        Persisted = persisted;
+    }
+
+    public string Expression { get; }
+    public bool Persisted { get; }
 }
 
 public enum IsNullable
@@ -580,6 +598,7 @@ public partial class FieldPrimaryKey : Field, IColumn
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
     public string? Check { get; set; }
+    ComputedColumn? IColumn.ComputedColumn => null;
 
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
@@ -645,6 +664,7 @@ public partial class FieldValue : Field, IColumn
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
     public string? Check { get; set; }
+    ComputedColumn? IColumn.ComputedColumn => null;
     public DateTimeKind DateTimeKind { get; set; }
 
     public FieldValue(PropertyRoute route, Type? fieldType, string name)
@@ -724,6 +744,7 @@ public partial class FieldEmbedded : Field, IFieldFinder
         public bool AvoidForeignKey => false;
         public string? Default { get; set; }
         public string? Check { get; set; }
+        ComputedColumn? IColumn.ComputedColumn => null;
         public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
         public EmbeddedHasValueColumn(string name)
@@ -747,10 +768,10 @@ public partial class FieldEmbedded : Field, IFieldFinder
 
     public override string ToString()
     {
-        return "\r\n".Combine(
+        return "\n".Combine(
             "Embedded",
-            EmbeddedFields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2),
-            Mixins == null ? null : Mixins.ToString(m => "Mixin {0} : {1}".FormatWith(m.Key.Name, m.Value.ToString()), "\r\n")
+            EmbeddedFields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\n").Indent(2),
+            Mixins == null ? null : Mixins.ToString(m => "Mixin {0} : {1}".FormatWith(m.Key.Name, m.Value.ToString()), "\n")
             );
     }
 
@@ -896,7 +917,7 @@ public partial class FieldMixin : Field, IFieldFinder
 
     public override string ToString()
     {
-        return "Mixin\r\n{0}".FormatWith(Fields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2));
+        return "Mixin\n{0}".FormatWith(Fields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\n").Indent(2));
     }
 
     public Field GetField(MemberInfo member)
@@ -1003,6 +1024,7 @@ public partial class FieldReference : Field, IColumn, IFieldReference
     public bool AvoidExpandOnRetrieving { get; set; }
     public string? Default { get; set; }
     public string? Check { get; set; }
+    ComputedColumn? IColumn.ComputedColumn => null;
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
     public FieldReference(PropertyRoute route, Type? fieldType, string name, Table referenceTable) : base(route, fieldType)
@@ -1128,7 +1150,7 @@ public partial class FieldImplementedBy : Field, IFieldReference
 
     public override string ToString()
     {
-        return "ImplementedBy\r\n{0}".FormatWith(ImplementationColumns.ToString(k => "{0} -> {1} ({2})".FormatWith(k.Value.Name, k.Value.ReferenceTable.Name, k.Key.Name), "\r\n").Indent(2));
+        return "ImplementedBy\n{0}".FormatWith(ImplementationColumns.ToString(k => "{0} -> {1} ({2})".FormatWith(k.Value.Name, k.Value.ReferenceTable.Name, k.Key.Name), "\n").Indent(2));
     }
 
     public override IEnumerable<IColumn> Columns()
@@ -1260,6 +1282,7 @@ public partial class ImplementationColumn : IColumn
     public bool AvoidForeignKey { get; set; }
     public string? Default { get; set; }
     public string? Check { get; set; }
+    ComputedColumn? IColumn.ComputedColumn => null;
     public Type? CustomLiteModelType { get; internal set; }
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
@@ -1293,6 +1316,7 @@ public partial class ImplementedByAllIdColumn : IColumn
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
     public string? Check { get; set; }
+    ComputedColumn? IColumn.ComputedColumn => null;
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
     public ImplementedByAllIdColumn(string name, Type type, AbstractDbType dbType)
@@ -1319,7 +1343,7 @@ public partial class FieldMList : Field, IFieldFinder
 
     public override string ToString()
     {
-        return "Coleccion\r\n{0}".FormatWith(TableMList.ToString().Indent(2));
+        return "Coleccion\n{0}".FormatWith(TableMList.ToString().Indent(2));
     }
 
     public Field GetField(MemberInfo member)
@@ -1396,6 +1420,7 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         public bool AvoidForeignKey => false;
         public string? Default { get; set; }
         public string? Check { get; set; }
+        ComputedColumn? IColumn.ComputedColumn => null;
         public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
 
@@ -1409,7 +1434,7 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
     }
 
     public Dictionary<string, IColumn> Columns { get; set; }
-    public List<TableIndex>? MultiColumnIndexes { get; set; }
+    public List<TableIndex>? AdditionalIndexes { get; set; }
 
     public ObjectName Name { get; set; }
     public PrimaryKeyColumn PrimaryKey { get; set; }
@@ -1440,25 +1465,41 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
 
     public override string ToString()
     {
-        return "[{0}]\r\n  {1}\r\n  {2}".FormatWith(Name, BackReference.Name, Field.ToString());
+        return "[{0}]\n  {1}\n  {2}".FormatWith(Name, BackReference.Name, Field.ToString());
     }
 
     public void GenerateColumns()
     {
-        List<IColumn> cols = new List<IColumn> { PrimaryKey, BackReference };
+        var errorSuffix = "columns in table " + this.Name.Name;
+        var columns = new Dictionary<string, IColumn>();
+
+        void AddColumns(params IEnumerable<IColumn> newColumns)
+        {
+            try
+            {
+                columns.AddRange(newColumns, c => c.Name, c => c, errorSuffix);
+            }
+            catch (RepeatedElementsException ex) when (StartParameters.IgnoredCodeErrors != null)
+            {
+                StartParameters.IgnoredCodeErrors.Add(ex);
+            }
+        }
+
+        AddColumns(PrimaryKey);
+        AddColumns(BackReference);
 
         if (Order != null)
-            cols.Add(Order);
+            AddColumns(Order);
 
         if (PartitionId != null)
-            cols.Add(PartitionId);
+            AddColumns(PartitionId);
 
-        cols.AddRange(Field.Columns());
+        AddColumns(Field.Columns());
 
         if (this.SystemVersioned != null)
-            cols.AddRange(this.SystemVersioned.Columns());
+            AddColumns(this.SystemVersioned.Columns());
 
-        Columns = cols.ToDictionary(a => a.Name);
+        Columns = columns;
     }
 
     List<TableIndex>? allIndexes;
@@ -1479,8 +1520,8 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         result.AddRange(BackReference.GenerateIndexes(this));
         result.AddRange(Field.GenerateIndexes(this));
 
-        if (MultiColumnIndexes != null)
-            result.AddRange(MultiColumnIndexes);
+        if (AdditionalIndexes != null)
+            result.AddRange(AdditionalIndexes);
 
         return result;
     }
@@ -1543,9 +1584,9 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
 
     public bool IdentityBehaviour => true; //For now
 
-    internal object?[] BulkInsertDataRow(Entity entity, object value, int order)
+    internal object?[] BulkInsertDataRow(Entity entity, object value, int order, PrimaryKey? rowId)
     {
-        return this.cache.Value.BulkInsertDataRow(entity, value, order);
+        return this.cache.Value.BulkInsertDataRow(entity, value, order, rowId);
     }
 
     public IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -1570,7 +1611,8 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
     NpgsqlDbType? postgreSql;
     public NpgsqlDbType PostgreSql => postgreSql ?? throw new InvalidOperationException("No PostgresSql type defined");
 
-    public bool IsPostgres => postgreSql.HasValue;
+    public bool HasPostgres => postgreSql.HasValue;
+    public bool HasSqlServer => sqlServer.HasValue;
 
     public AbstractDbType(SqlDbType sqlDbType)
     {

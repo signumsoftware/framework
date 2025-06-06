@@ -1,4 +1,4 @@
-﻿
+
 namespace Signum.Test;
 
 public class StringDistanceTest
@@ -119,5 +119,19 @@ Adios Juani";
 [+]+Que til
 [=]Adios -Juan+Juani", str);
 
+    }
+
+    [Fact]
+    public void SmithWatermanScore()
+    {
+        Assert.Equal(4 * 2, d.SmithWatermanScore("Hola dola caracola", pattern: "dola"));
+
+        Assert.Equal(3 * 2 - 1, d.SmithWatermanScore("Hola dola caracola", pattern: "dila"));
+
+        Assert.Equal((3 * 2 - 1, "dola"), d.SmithWatermanScoreWithResult("Hola dola caracola", pattern: "dila"));
+
+        Assert.Equal((3 * 2 - 1, "dla"), d.SmithWatermanScoreWithResult("Hola dola caracola", pattern: "dla"));
+
+        Assert.Equal((7 * 2 - 1, "carcola"), d.SmithWatermanScoreWithResult("Hola dola carcola", pattern: "caracola"));
     }
 }

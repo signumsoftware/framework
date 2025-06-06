@@ -11,7 +11,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace TranslationClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Translation", () => import("./Changelog"));
   
@@ -30,7 +30,7 @@ export namespace TranslationClient {
   }
   
   
-  export module API {
+  export namespace API {
     export function status(): Promise<TranslationFileStatus[]> {
       return ajaxGet({ url: "/api/translation/state" });
     }

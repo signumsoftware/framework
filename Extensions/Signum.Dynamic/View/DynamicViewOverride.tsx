@@ -24,7 +24,7 @@ interface DynamicViewOverrideComponentProps {
   ctx: TypeContext<DynamicViewOverrideEntity>;
 }
 
-export default function DynamicViewOverrideComponent(p: DynamicViewOverrideComponentProps) {
+export default function DynamicViewOverrideComponent(p: DynamicViewOverrideComponentProps): React.JSX.Element {
 
   const typeName: string | null = p.ctx.value.entityType?.cleanName;
   const typeHelp = useAPI(() => typeName ? TypeHelpClient.API.typeHelp(typeName, "CSharp") : Promise.resolve(undefined), [typeName]);
@@ -300,7 +300,7 @@ interface RenderWithReplacementsProps {
   viewOverride?: (vr: ViewReplacer<Entity>) => void;
 }
 
-export function RenderWithReplacements(p: RenderWithReplacementsProps) {
+export function RenderWithReplacements(p: RenderWithReplacementsProps): React.JSX.Element {
 
   const originalRenderRef = React.useRef<Function | undefined>(undefined);
 

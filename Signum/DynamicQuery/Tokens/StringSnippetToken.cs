@@ -42,7 +42,7 @@ internal class StringSnippetToken : QueryToken
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
         var filters = context.Filters.EmptyIfNull().SelectMany(a => a.GetAllFilters())
-            .Where(f => f.GetTokens().Contains(this.Parent))
+            .Where(f => f.GetTokens().Any(t => t.Equals(this.Parent) || t is PgTsVectorColumnToken tsvt && tsvt.GetColumnsRoutes().Contains(this.Parent!.GetPropertyRoute())))
             .SelectMany(a => a.GetKeywords())
             .ToHashSet();
 

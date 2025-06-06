@@ -11,7 +11,7 @@ import { HelpMessage, NamespaceHelpEntity, AppendixHelpEntity } from '../Signum.
 import { getTypeInfo } from '@framework/Reflection';
 import { useTitle } from '@framework/AppContext'
 
-export default function HelpIndexPage() {
+export default function HelpIndexPage(): React.JSX.Element {
 
   useTitle(HelpMessage.Help.niceToString());
 

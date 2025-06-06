@@ -51,7 +51,7 @@ public class Transaction : IDisposableException
                 throw new ArgumentNullException(nameof(parent));
 
             if (parent.IsRolledback != null)
-                throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back. Exception:\r\n\t" + parent.IsRolledback.Message, parent.IsRolledback);
+                throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back. Exception:\n\t" + parent.IsRolledback.Message, parent.IsRolledback);
 
             this.parent = parent;
         }
@@ -226,7 +226,7 @@ public class Transaction : IDisposableException
                 throw new InvalidOperationException("Named transactions should be nested inside another transaction");
 
             if (parent.IsRolledback != null)
-                throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back. Exception:\r\n\t" + parent.IsRolledback.Message, parent.IsRolledback);
+                throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back. Exception:\n\t" + parent.IsRolledback.Message, parent.IsRolledback);
 
             this.parent = parent;
             this.savePointName = savePointName;
@@ -507,6 +507,11 @@ public class Transaction : IDisposableException
         get { return currents.Value != null && currents.Value!.ContainsKey(Connector.Current); }
     }
 
+    public static Exception? HasRollbackedTransaction
+    {
+        get { return currents.Value?.TryGetC(Connector.Current)?.IsRolledback; }
+    }
+
     public static DbConnection? CurrentConnection
     {
         get
@@ -527,6 +532,8 @@ public class Transaction : IDisposableException
         }
     }
 
+
+
     public static string CurrentStatus()
     {
         return GetCurrent().Follow(a => a.Parent).ToString(t => "{0} Started : {1} Rollbacked: {2} Connection: {3} Transaction: {4}".FormatWith(
@@ -534,7 +541,7 @@ public class Transaction : IDisposableException
             t.Started,
             t.IsRolledback,
             t.Connection == null ? "null" : (t.Connection.State.ToString() + " Hash " + t.Connection.GetHashCode()),
-            t.Transaction == null ? "null" : (" Hash " + t.Transaction.GetHashCode())), "\r\n");
+            t.Transaction == null ? "null" : (" Hash " + t.Transaction.GetHashCode())), "\n");
     }
 
     public T Commit<T>(T returnValue)

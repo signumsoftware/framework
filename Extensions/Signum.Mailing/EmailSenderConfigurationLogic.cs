@@ -94,9 +94,7 @@ public static class EmailSenderConfigurationLogic
 
             foreach (var cc in config.Network.ClientCertificationFiles)
             {
-                client.ClientCertificates.Add(cc.CertFileType == CertFileType.CertFile ?
-                    X509Certificate.CreateFromCertFile(cc.FullFilePath)
-                    : X509Certificate.CreateFromSignedFile(cc.FullFilePath));
+                client.ClientCertificates.Add(X509CertificateLoader.LoadCertificateFromFile(cc.FullFilePath));
             }
 
             return client;

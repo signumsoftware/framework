@@ -8,7 +8,7 @@ import * as Basics from '../../../Signum/React/Signum.Basics'
 import * as Operations from '../../../Signum/React/Signum.Operations'
 
 
-export const ColorPaletteEntity = new Type<ColorPaletteEntity>("ColorPalette");
+export const ColorPaletteEntity: Type<ColorPaletteEntity> = new Type<ColorPaletteEntity>("ColorPalette");
 export interface ColorPaletteEntity extends Entities.Entity {
   Type: "ColorPalette";
   type: Basics.TypeEntity;
@@ -17,19 +17,19 @@ export interface ColorPaletteEntity extends Entities.Entity {
   specificColors: Entities.MList<SpecificColorEmbedded>;
 }
 
-export module ColorPaletteMessage {
-  export const FillAutomatically = new MessageKey("ColorPaletteMessage", "FillAutomatically");
-  export const Select0OnlyIfYouWantToOverrideTheAutomaticColor = new MessageKey("ColorPaletteMessage", "Select0OnlyIfYouWantToOverrideTheAutomaticColor");
-  export const ShowPalette = new MessageKey("ColorPaletteMessage", "ShowPalette");
-  export const ShowList = new MessageKey("ColorPaletteMessage", "ShowList");
+export namespace ColorPaletteMessage {
+  export const FillAutomatically: MessageKey = new MessageKey("ColorPaletteMessage", "FillAutomatically");
+  export const Select0OnlyIfYouWantToOverrideTheAutomaticColor: MessageKey = new MessageKey("ColorPaletteMessage", "Select0OnlyIfYouWantToOverrideTheAutomaticColor");
+  export const ShowPalette: MessageKey = new MessageKey("ColorPaletteMessage", "ShowPalette");
+  export const ShowList: MessageKey = new MessageKey("ColorPaletteMessage", "ShowList");
 }
 
-export module ColorPaletteOperation {
+export namespace ColorPaletteOperation {
   export const Save : Operations.ExecuteSymbol<ColorPaletteEntity> = registerSymbol("Operation", "ColorPaletteOperation.Save");
   export const Delete : Operations.DeleteSymbol<ColorPaletteEntity> = registerSymbol("Operation", "ColorPaletteOperation.Delete");
 }
 
-export const SpecificColorEmbedded = new Type<SpecificColorEmbedded>("SpecificColorEmbedded");
+export const SpecificColorEmbedded: Type<SpecificColorEmbedded> = new Type<SpecificColorEmbedded>("SpecificColorEmbedded");
 export interface SpecificColorEmbedded extends Entities.EmbeddedEntity {
   Type: "SpecificColorEmbedded";
   entity: Entities.Lite<Entities.Entity>;

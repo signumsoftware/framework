@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Globalization;
 using Signum.Utilities.Reflection;
-using System.Runtime.Serialization;
 
 namespace Signum.Entities;
 
@@ -239,6 +238,12 @@ public struct PrimaryKey : IEquatable<PrimaryKey>, IComparable, IComparable<Prim
     public static PrimaryKey Parse(string value, Type entityType)
     {
         return new PrimaryKey((IComparable)ReflectionTools.Parse(value, Type(entityType))!);
+    }
+
+
+    public static PrimaryKey Parse(string value, PropertyRoute mListPropertyRoute)
+    {
+        return new PrimaryKey((IComparable)ReflectionTools.Parse(value, MListType(mListPropertyRoute))!);
     }
 
     public static PrimaryKey? Wrap(IComparable value)

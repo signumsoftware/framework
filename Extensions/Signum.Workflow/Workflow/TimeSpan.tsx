@@ -3,7 +3,7 @@ import { AutoLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { TimeSpanEmbedded } from '../Signum.Workflow';
 
-export default function TimeSpan(p : { ctx: TypeContext<TimeSpanEmbedded> }){
+export default function TimeSpan(p : { ctx: TypeContext<TimeSpanEmbedded> }): React.JSX.Element {
   const e = p.ctx;
   const sc = e.subCtx({ formGroupStyle: "BasicDown" });
 

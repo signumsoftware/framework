@@ -10,7 +10,7 @@ interface WorkflowEventTaskComponentProps {
   ctx: TypeContext<WorkflowEventTaskEntity>;
 }
 
-export default function WorkflowEventTaskComponent(p : WorkflowEventTaskComponentProps){
+export default function WorkflowEventTaskComponent(p : WorkflowEventTaskComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   React.useEffect(handleWorkflowChange, [p.ctx.value.workflow]);

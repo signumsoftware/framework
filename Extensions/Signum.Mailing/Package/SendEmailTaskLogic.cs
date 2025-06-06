@@ -135,7 +135,7 @@ public static class SendEmailTaskLogic
                         var result = QueryLogic.Queries.ExecuteQuery(qr);
 
                         var col = result.Columns.FirstOrDefault();
-                        if (col == null || !col.Column.Type.IsLite())
+                        if (col == null || !col.Token.Type.IsLite())
                             throw new InvalidOperationException("Grouping UserQueries should have the target entity as first column");
 
                         entities = result.Rows.Select(row => (Lite<Entity>?)row[col]).Distinct().NotNull().ToList();

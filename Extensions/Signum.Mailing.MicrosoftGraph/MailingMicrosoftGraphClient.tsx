@@ -9,7 +9,7 @@ export namespace MailingMicrosoftGraphClient {
   
   export function start(options: {
     routes: RouteObject[],
-  }) {
+  }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.MicrosoftGraph", () => import("./Changelog"));
   

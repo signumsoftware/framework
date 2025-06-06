@@ -17,6 +17,8 @@ using Order = Signum.DynamicQuery.Order;
 using Microsoft.Graph.Models.ODataErrors;
 using System;
 using Signum.Files;
+using Signum.Utilities.Synchronization;
+using Signum.Engine.Sync;
 
 namespace Signum.Authorization.ActiveDirectory.Azure;
 
@@ -417,7 +419,7 @@ public static class AzureADLogic
             {
                 req.QueryParameters.Top = 999;
                 req.QueryParameters.Select = new[] { "id", "displayName", "ODataType" };
-            }).Result;
+            }).ResultSafe();
 
             return result!.Value!.Select(di => new SimpleGroup(Guid.Parse(di.Id!), di.DisplayName)).ToList();
         }

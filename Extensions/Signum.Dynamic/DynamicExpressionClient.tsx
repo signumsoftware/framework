@@ -10,7 +10,7 @@ import { DynamicExpressionEntity } from './Signum.Dynamic.Expression';
 
 export namespace DynamicExpressionClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     Navigator.addSettings(new EntitySettings(DynamicExpressionEntity, w => import('./Expression/DynamicExpression')));
     EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity }} />);

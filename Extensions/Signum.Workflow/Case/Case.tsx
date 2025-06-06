@@ -22,7 +22,7 @@ interface CaseComponentProps {
   workflowActivity?: IWorkflowNodeEntity;
 }
 
-export default function CaseComponent(p: CaseComponentProps) {
+export default function CaseComponent(p: CaseComponentProps): React.JSX.Element {
 
   const [activeEventKey, setActiveEventKey] = React.useState<CaseTab>("CaseFlow");
 

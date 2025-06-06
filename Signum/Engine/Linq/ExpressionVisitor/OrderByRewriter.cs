@@ -71,21 +71,8 @@ internal class OrderByRewriter : DbExpressionVisitor
         if (gatheredKeys != null && (select.IsDistinct || select.GroupBy.HasItems() || select.IsAllAggregates))
             savedKeys = gatheredKeys.ToList();
 
-        if ((AggregateFinder.GetAggregates(select.Columns)?.Any(a => a.AggregateFunction.OrderMatters()) ?? false) && select.From is SelectExpression from)
-        {
-            var oldOuterMostSelect = outerMostSelect;
-            outerMostSelect = from;
-
-            select = (SelectExpression)base.VisitSelect(select);
-
-            outerMostSelect = oldOuterMostSelect;
-        }
-        else
-        {
-            select = (SelectExpression)base.VisitSelect(select);
-        }
-
-
+        select = (SelectExpression)base.VisitSelect(select);
+        
         if (savedKeys != null)
             gatheredKeys = savedKeys;
 
@@ -173,12 +160,7 @@ internal class OrderByRewriter : DbExpressionVisitor
 
     protected internal override Expression VisitScalar(ScalarExpression scalar)
     {
-        if (!scalar.Select!.IsForXmlPathEmpty)
-        {
-            using (Scope())
-                return base.VisitScalar(scalar);
-        }
-        else
+        if (scalar.Select!.IsForXmlPathEmpty)
         {
             using (Scope())
             {
@@ -190,6 +172,38 @@ internal class OrderByRewriter : DbExpressionVisitor
 
                 return result;
             }
+        }
+        if (scalar.Select.Columns.Only()?.Expression is AggregateExpression ag && ag.AggregateFunction == AggregateSqlFunction.string_agg)
+        {
+            using (Scope())
+            {
+                var oldOuterMostSelect = outerMostSelect;
+                outerMostSelect = scalar.Select!;
+
+                var result = base.VisitScalar(scalar);
+                outerMostSelect = oldOuterMostSelect;
+
+                if(result is ScalarExpression s && s.Select?.OrderBy != null)
+                {
+                    var col = s.Select.Columns.Only();
+                    if (col != null && col.Expression is AggregateExpression ag2 && ag2.AggregateFunction == AggregateSqlFunction.string_agg) 
+                    {
+                        var newSelect = new SelectExpression(s.Select.Alias, s.Select.IsDistinct, s.Select.Top,
+                            [new ColumnDeclaration(col.Name,
+                              new AggregateExpression(ag2.Type, ag2.AggregateFunction, ag2.Arguments, s.Select.OrderBy)
+                            )], s.Select.From, s.Select.Where, null, s.Select.GroupBy, s.Select.SelectOptions);
+
+                        return new ScalarExpression(s.Type, newSelect);
+                    }
+                }
+
+                return result;
+            }
+        }
+        else
+        {
+            using (Scope())
+                return base.VisitScalar(scalar);
         }
     }
 

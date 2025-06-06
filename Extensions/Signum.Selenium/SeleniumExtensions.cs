@@ -46,10 +46,14 @@ public static class SeleniumExtensions
         }
         catch (WebDriverTimeoutException ex)
         {
-            if (Debugger.IsAttached)
+            var errorModal = selenium.GetErrorModal();
+
+            if (errorModal != null)
             {
-                Debugger.Break();
-                return default!;
+                throw new WebDriverTimeoutException(
+                    $"ErrorModal '{errorModal.TitleText}' ..waiting for {(actionDescription?.Invoke() ?? "visual condition")}\n" +
+                    errorModal.BodyText
+                );
             }
 
             throw new WebDriverTimeoutException(ex.Message + ": waiting for {0} in page {1}({2})".FormatWith(
@@ -151,16 +155,15 @@ public static class SeleniumExtensions
     //[DebuggerHidden]
     public static bool IsStale(this IWebElement element)
     {
-        //try
-        //{
-        //    // Calling any method forces a staleness check
-        //    return element == null || !element.Enabled;
-        //}
-        //catch (StaleElementReferenceException)
-        //{
-        //    return true;
-        //}
-        return SeleniumExtras.WaitHelpers.ExpectedConditions.StalenessOf(element)(element.GetDriver());
+        try
+        {
+            // Calling any method forces a staleness check
+            return element == null || !element.Enabled;
+        }
+        catch (StaleElementReferenceException)
+        {
+            return true;
+        }
     }
 
     public static IWebElement WaitElementVisible(this WebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
@@ -267,7 +270,7 @@ public static class SeleniumExtensions
 
     public static void ConsumeAlert(this WebDriver selenium)
     {
-        var alertPresent = selenium.Wait(() => MessageModalProxyExtensions.IsMessageModalPresent(selenium));
+        var alertPresent = selenium.Wait(() => selenium.GetMessageModal());
 
         var alert = selenium.Wait(() => selenium.SwitchTo().Alert());
 
@@ -363,6 +366,11 @@ public static class SeleniumExtensions
         return button.GetDriver().CapturePopup(() => button.SafeClick());
     }
 
+    public static List<IWebElement> CaptureManyOnClick(this IWebElement button)
+    {
+        return button.GetDriver().CaptureManyPopup(() => button.SafeClick());
+    }
+
     public static IWebElement CaptureOnDoubleClick(this IWebElement button)
     {
         return button.GetDriver().CapturePopup(() => button.DoubleClick());
@@ -388,16 +396,36 @@ public static class SeleniumExtensions
         return result;
     }
 
-    public static void ContextClick(this IWebElement element)
+    public static List<IWebElement> CaptureManyPopup(this WebDriver selenium, Action clickToOpen)
+    {
+        var body = selenium.FindElement(By.TagName("body"));
+        var oldDialogs = body.FindElements(By.CssSelector("div.modal.fade.show"));
+        clickToOpen();
+        var result = selenium.Wait(() =>
+        {
+            Thread.Sleep(300);
+            var newDialogs = body.FindElements(By.CssSelector("div.modal.fade.show"));
+
+            var newTop = newDialogs.Where(a => !oldDialogs.Contains(a)).ToList();
+
+            if (newTop == null)
+                return null;
+
+            return newTop;
+        })!;
+
+        return result;
+    }
+    public static void ContextClick(this IWebElement element, int offsetX = 2, int offsetY = 2)
     {
         Actions builder = new Actions(element.GetDriver());
-        builder.MoveToElement(element, 2, 2).ContextClick().Build().Perform();
+        builder.MoveToElement(element, offsetX, offsetY).ContextClick().Build().Perform();
     }
 
-    public static void DoubleClick(this IWebElement element)
+    public static void DoubleClick(this IWebElement element, int offsetX = 2, int offsetY = 2)
     {
         Actions builder = new Actions(element.GetDriver());
-        builder.MoveToElement(element, 2, 2).DoubleClick().Build().Perform();
+        builder.MoveToElement(element, offsetX, offsetY).DoubleClick().Build().Perform();
     }
 
     public static void SafeSendKeys(this IWebElement element, string? text)
@@ -416,7 +444,7 @@ public static class SeleniumExtensions
             element.SendKeys(text);
 
         Thread.Sleep(0);
-        element.GetDriver().Wait(() => element.GetAttribute("value") == (text ?? ""));
+        element.GetDriver().Wait(() => element.GetDomProperty("value") == (text ?? ""));
     }
 
     public static string Value(this IWebElement e) => e.GetDomPropertyOrThrow("value");

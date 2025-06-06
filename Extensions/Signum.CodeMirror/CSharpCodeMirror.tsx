@@ -28,7 +28,7 @@ interface CSharpCodeMirrorProps {
   onInit?: (cm: CodeMirror.EditorFromTextArea) => void;
 }
 
-export default function CSharpCodeMirror(p: CSharpCodeMirrorProps) {
+export default function CSharpCodeMirror(p: CSharpCodeMirrorProps): React.JSX.Element {
 
   const options = {
     lineNumbers: true,

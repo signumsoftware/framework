@@ -20,7 +20,7 @@ interface WorkflowActivityStatsModalProps extends IModalProps<undefined> {
   activity: WorkflowActivityModel;
 }
 
-export default function WorkflowActivityStatsModal(p: WorkflowActivityStatsModalProps) {
+function WorkflowActivityStatsModal(p: WorkflowActivityStatsModalProps): React.JSX.Element {
 
 const [show, setShow] = React.useState<boolean>(true);
 
@@ -109,6 +109,10 @@ const [show, setShow] = React.useState<boolean>(true);
   </Modal>;
 }
 
-WorkflowActivityStatsModal.show = (stats: WorkflowClient.WorkflowActivityStats, config: WorkflowActivityMonitorConfig, activity: WorkflowActivityModel): Promise<any> => {
-  return openModal<any>(<WorkflowActivityStatsModal stats={stats} config={config} activity={activity} />);
+namespace WorkflowActivityStatsModal {
+  export function show(stats: WorkflowClient.WorkflowActivityStats, config: WorkflowActivityMonitorConfig, activity: WorkflowActivityModel): Promise<any> {
+    return openModal<any>(<WorkflowActivityStatsModal stats={stats} config={config} activity={activity} />);
+  }
 }
+
+export default WorkflowActivityStatsModal;

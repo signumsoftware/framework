@@ -18,7 +18,7 @@ import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
 import { clearWidgets } from "./Frames/Widgets";
 import { toAbsoluteUrl, currentUser } from "./AppContext";
-import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
+import { useForceUpdate, useAPI, useAPIWithReload, APIHookOptions } from "./Hooks";
 import { ErrorModalOptions, RenderServiceMessageDefault, RenderValidationMessageDefault, RenderMessageDefault } from "./Modals/ErrorModal";
 import CopyLiteButton from "./Components/CopyLiteButton";
 import { Typeahead } from "./Components";
@@ -33,7 +33,7 @@ if (!window.__allowNavigatorWithoutUser && (currentUser == null || getToString(c
 
 export namespace Navigator {
 
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     options.routes.push({ path: "/view/:type/:id", element: <ImportComponent onImport={() => getFramePage()} /> });
     options.routes.push({ path: "/create/:type", element: <ImportComponent onImport={() => getFramePage()} /> });
 
@@ -51,7 +51,7 @@ export namespace Navigator {
 
   export const entityChanged: { [typeName: string]: Array<(cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void> } = {};
 
-  export function registerEntityChanged<T extends Entity>(type: Type<T>, callback: (cleanName: string, entity: T | undefined, isRedirect: boolean) => void) {
+  export function registerEntityChanged<T extends Entity>(type: Type<T>, callback: (cleanName: string, entity: T | undefined, isRedirect: boolean) => void): void {
     var cleanName = type.typeName;
     (entityChanged[cleanName] ??= []).push(callback as any);
   }
@@ -86,7 +86,7 @@ export namespace Navigator {
     Dic.clear(entityChanged);
   }
 
-  export function raiseEntityChanged(typeOrEntity: Type<any> | string | Entity, isRedirect = false) {
+  export function raiseEntityChanged(typeOrEntity: Type<any> | string | Entity, isRedirect = false): void {
     var cleanName = isEntity(typeOrEntity) ? typeOrEntity.Type : typeOrEntity.toString();
     var entity = isEntity(typeOrEntity) ? typeOrEntity : undefined;
 
@@ -121,7 +121,7 @@ export namespace Navigator {
     return <span>{typeInfo.niceName} {renderId(entity as Entity)}</span>;
   }
 
-  export function setDefaultRenderTitleFunction(newFunction: (typeInfo: TypeInfo, entity: ModifiableEntity) => React.ReactElement | null) {
+  export function setDefaultRenderTitleFunction(newFunction: (typeInfo: TypeInfo, entity: ModifiableEntity) => React.ReactElement | null): void {
     defaultRenderSubTitle = newFunction;
   }
 
@@ -141,7 +141,7 @@ export namespace Navigator {
     );
   }
 
-  export function setRenderIdFunction(newFunction: (entity: Entity) => React.ReactElement | string | number) {
+  export function setRenderIdFunction(newFunction: (entity: Entity) => React.ReactElement | string | number): void {
     renderId = newFunction;
   }
 
@@ -175,18 +175,18 @@ export namespace Navigator {
   }
 
 
-  export function navigateRouteDefault(typeName: string, id: number | string, viewName?: string) {
+  export function navigateRouteDefault(typeName: string, id: number | string, viewName?: string): string {
     return "/view/" + typeName.firstLower() + "/" + id + (viewName ? "?viewName=" + viewName : "");
 
   }
 
-  export function createRoute(type: PseudoType, viewName?: string) {
+  export function createRoute(type: PseudoType, viewName?: string): string {
     return "/create/" + getTypeName(type) + (viewName ? "?viewName=" + viewName : "");
   }
 
 
 
-  export function renderLiteOrEntity(entity: Lite<Entity> | Entity | ModifiableEntity, modelType?: string) {
+  export function renderLiteOrEntity(entity: Lite<Entity> | Entity | ModifiableEntity, modelType?: string): string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined {
     if (isLite(entity))
       return renderLite(entity);
 
@@ -224,11 +224,11 @@ export namespace Navigator {
     return getToString(entity);
   }
 
-  export function clearEntitySettings() {
+  export function clearEntitySettings(): void {
     Dic.clear(entitySettings);
   }
 
-  export function clearEvents() {
+  export function clearEvents(): void {
 
     isCreableEvent.clear();
     isReadonlyEvent.clear();
@@ -237,7 +237,7 @@ export namespace Navigator {
   }
 
   export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
-  export function addSettings(...settings: EntitySettings<any>[]) {
+  export function addSettings(...settings: EntitySettings<any>[]): void {
     settings.forEach(s => Dic.addOrThrow(entitySettings, s.typeName, s));
   }
 
@@ -257,19 +257,19 @@ export namespace Navigator {
     return entitySettings[typeName];
   }
 
-  export function setViewDispatcher(newDispatcher: ViewDispatcher) {
+  export function setViewDispatcher(newDispatcher: ViewDispatcher): void {
     viewDispatcher = newDispatcher;
   }
 
-  export function getFramePage() {
+  export function getFramePage(): Promise<typeof import("./Frames/FramePage")> {
     return import("./Frames/FramePage");
   }
 
-  export function getFrameModal() {
+  export function getFrameModal(): Promise<typeof import("./Frames/FrameModal")> {
     return import("./Frames/FrameModal");
   }
 
-  export function onFramePageCreationCancelled() {
+  export function onFramePageCreationCancelled(): void {
     AppContext.navigate("/", { replace: true });
   }
 
@@ -281,23 +281,23 @@ export namespace Navigator {
   }
 
   export class BasicViewDispatcher implements ViewDispatcher {
-    hasDefaultView(typeName: string) {
+    hasDefaultView(typeName: string): boolean {
       const es = getSettings(typeName);
       return (es?.getViewPromise) != null;
     }
 
-    getViewNames(typeName: string) {
+    getViewNames(typeName: string): Promise<string[]> {
       const es = getSettings(typeName);
       return Promise.resolve((es?.namedViews && Dic.getKeys(es.namedViews)) ?? []);
     }
 
-    getViewOverrides(typeName: string, viewName?: string) {
+    getViewOverrides(typeName: string, viewName?: string): Promise<ViewOverride<ModifiableEntity>[]> {
       const es = getSettings(typeName);
       return Promise.resolve(es?.viewOverrides?.filter(a => a.viewName == viewName) ?? []);
     }
 
 
-    getViewPromise(entity: ModifiableEntity, viewName?: string) {
+    getViewPromise(entity: ModifiableEntity, viewName?: string): ViewPromise<ModifiableEntity> {
       const es = getSettings(entity.Type);
 
       if (!es)
@@ -327,17 +327,17 @@ export namespace Navigator {
       return true;
     }
 
-    getViewNames(typeName: string) {
+    getViewNames(typeName: string): Promise<string[]> {
       const es = getSettings(typeName);
       return Promise.resolve((es?.namedViews && Dic.getKeys(es.namedViews)) ?? []);
     }
 
-    getViewOverrides(typeName: string, viewName?: string) {
+    getViewOverrides(typeName: string, viewName?: string): Promise<ViewOverride<ModifiableEntity>[]> {
       const es = getSettings(typeName);
       return Promise.resolve(es?.viewOverrides?.filter(a => a.viewName == viewName) ?? []);
     }
 
-    getViewPromise(entity: ModifiableEntity, viewName?: string) {
+    getViewPromise(entity: ModifiableEntity, viewName?: string): ViewPromise<ModifiableEntity> {
       const es = getSettings(entity.Type);
 
       if (viewName == undefined) {
@@ -374,7 +374,7 @@ export namespace Navigator {
     isEmbedded?: boolean;
   }
 
-  export function isCreable(type: PseudoType, options?: IsCreableOptions) {
+  export function isCreable(type: PseudoType, options?: IsCreableOptions): boolean {
 
     const typeName = getTypeName(type);
 
@@ -438,7 +438,7 @@ export namespace Navigator {
     isEmbedded?: boolean;
   }
 
-  export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, options?: IsReadonlyOptions) {
+  export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, options?: IsReadonlyOptions): boolean {
 
     const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
@@ -477,7 +477,7 @@ export namespace Navigator {
       default: return false;
     }
   }
-  export function checkFlag(entityWhen: EntityWhen, isSearchMainEntity: boolean | undefined) {
+  export function checkFlag(entityWhen: EntityWhen, isSearchMainEntity: boolean | undefined): boolean {
     return entityWhen == "Always" ||
       entityWhen == (isSearchMainEntity ? "IsSearch" : "IsLine");
   }
@@ -506,7 +506,7 @@ export namespace Navigator {
     isEmbeddedEntity?: boolean;
   }
 
-  export function isFindable(type: PseudoType, options?: IsFindableOptions) {
+  export function isFindable(type: PseudoType, options?: IsFindableOptions): boolean {
 
     const typeName = getTypeName(type);
 
@@ -709,13 +709,13 @@ export namespace Navigator {
       .then(NP => NP.FrameModalManager.openView(entityOrPack, viewOptions ?? {}));
   }
 
-  export function createInNewTab(pack: EntityPack<ModifiableEntity>, viewName?: string) {
+  export function createInNewTab(pack: EntityPack<ModifiableEntity>, viewName?: string): void {
     var url = createRoute(pack.entity.Type, viewName) + "?waitOpenerData=true";
     window.dataForChildWindow = pack;
     var win = window.open(toAbsoluteUrl(url));
   }
 
-  export function createInCurrentTab(pack: EntityPack<ModifiableEntity>, viewName?: string) {
+  export function createInCurrentTab(pack: EntityPack<ModifiableEntity>, viewName?: string): void {
     var url = createRoute(pack.entity.Type, viewName) + "?waitCurrentData=true";
     window.dataForCurrentWindow = pack;
     AppContext.navigate(url);
@@ -735,7 +735,6 @@ export namespace Navigator {
     }
   }
 
-
   export function toEntityPack<T extends ModifiableEntity>(entityOrEntityPack: Lite<T & Entity> | T | EntityPack<T>): Promise<EntityPack<T>> {
     if ((entityOrEntityPack as EntityPack<T>).canExecute)
       return Promise.resolve(entityOrEntityPack as EntityPack<T>);
@@ -747,15 +746,13 @@ export namespace Navigator {
     if (entity == undefined)
       return API.fetchEntityPack(entityOrEntityPack as Lite<T & Entity>);
 
-    let ti = tryGetTypeInfo(entity.Type);
-    if (ti == null || !ti.requiresEntityPack)
+    if (!isEntity(entity))
       return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
     return API.fetchEntityPackEntity(entity as T & Entity).then(ep => ({ ...ep, entity: cloneEntity(entity) }));
   }
 
-
-  export async function reloadFrameIfNecessary(frame: EntityFrame) {
+  export async function reloadFrameIfNecessary(frame: EntityFrame): Promise<void> {
 
     var entity = frame.pack.entity;
     if (isEntity(entity) && entity.id && entity.ticks != null) {
@@ -770,18 +767,18 @@ export namespace Navigator {
   }
 
 
-  export function useFetchInState<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
+  export function useFetchInState<T extends Entity>(lite: Lite<T> | null | undefined, options?: APIHookOptions): T | null | undefined {
     return useAPI(signal =>
       lite == null ? Promise.resolve<T | null | undefined>(lite) :
         API.fetch(lite),
-      [lite && liteKey(lite)]);
+      [lite && liteKey(lite)], options);
   }
 
-  export function useFetchInStateWithReload<T extends Entity>(lite: Lite<T> | null | undefined): [T | null | undefined, () => void] {
+  export function useFetchInStateWithReload<T extends Entity>(lite: Lite<T> | null | undefined, options?: APIHookOptions): [T | null | undefined, () => void] {
     return useAPIWithReload(signal =>
       lite == null ? Promise.resolve<T | null | undefined>(lite) :
         API.fetch(lite),
-      [lite && liteKey(lite)]);
+      [lite && liteKey(lite)], options);
   }
 
   export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLoaded?: () => void): T | null | undefined {
@@ -806,23 +803,27 @@ export namespace Navigator {
     return lite.entity;
   }
 
-  export function useFetchAll<T extends Entity>(type: Type<T>): T[] | undefined {
-    return useAPI(signal => API.fetchAll(type), []);
+  export function useFetchEntity<T extends Entity>(type: Type<T>, id: any, partitionId?: number, deps?: React.DependencyList, options?: APIHookOptions): T | undefined {
+    return useAPI(signal => API.fetchEntity(type, id, partitionId), [type, id, partitionId, ...(deps ?? [])], options);
   }
 
-  export function useLiteToString<T extends Entity>(type: Type<T>, id: number | string): Lite<T> {
+  export function useFetchAll<T extends Entity>(type: Type<T>, deps?: React.DependencyList): T[] | undefined {
+    return useAPI(signal => API.fetchAll(type), [type, ...(deps ?? [])]);
+  }
 
-    var lite = React.useMemo(() => newLite(type, id), [type, id]);
+  export function useLiteToString<T extends Entity>(type: Type<T>, id: number | string, deps?: React.DependencyList, options?: APIHookOptions): Lite<T> {
 
-    useAPI(() => API.fillLiteModels(lite), [lite]);
+    var lite = React.useMemo(() => newLite(type, id), [type, id, ...(deps ?? [])]);
+
+    useAPI(() => API.fillLiteModels(lite), [lite, ...(deps ?? [])], options);
 
     return lite;
   }
 
-  export function useFillToString<T extends Entity>(lite: Lite<T> | null | undefined, force: boolean = false): void {
+  export function useFillToString<T extends Entity>(lite: Lite<T> | null | undefined, force: boolean = false, deps?: React.DependencyList): void {
     useAPI(() => {
       return lite == null || ((lite.model != null || lite.entity != null) && !force) ? Promise.resolve() : API.fillLiteModels(lite);
-    }, [lite]);
+    }, [lite, ...(deps ?? [])]);
   }
 
 
@@ -844,7 +845,7 @@ export namespace Navigator {
   }
 
 
-  export module API {
+  export namespace API {
 
     export function fillLiteModels(...lites: (Lite<Entity> | null | undefined)[]): Promise<void> {
       return fillLiteModelsArray(lites.filter(l => l != null) as Lite<Entity>[]);
@@ -933,7 +934,8 @@ export namespace Navigator {
     }
 
     export function fetchEntityPackEntity<T extends Entity>(entity: T): Promise<EntityPack<T>> {
-      return ajaxPost({ url: "/api/entityPackEntity" }, entity);
+      return ajaxPost<EntityPack<T>>({ url: "/api/entityPackEntity" }, entity)
+        .then(ep => ({ ...ep, entity }));
     }
 
     export function validateEntity(entity: ModifiableEntity): Promise<void> {
@@ -949,7 +951,7 @@ export namespace Navigator {
     export function getEnumEntities(typeName: string): Promise<EnumConverter<string>>;
     export function getEnumEntities(type: string | EnumType<string>): Promise<EnumConverter<string>> {
 
-      var typeName = typeof type == "string" ? type : type.type;
+      var typeName = typeof type == "string" ? type : type.typeName;
 
       return ajaxGet<{ [enumValue: string]: Entity }>({ url: `/api/reflection/enumEntities/${typeName}` })
         .then(enumToEntity => softCast<EnumConverter<string>>({
@@ -981,6 +983,9 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   avoidFillSearchColumnWidth?: boolean;
 
   modalSize?: BsSize;
+  modalMaxWidth?: boolean;
+  modalDialogClass?: string;
+  modalFullScreen?: boolean;
 
   stickyHeader?: boolean;
 
@@ -1046,6 +1051,9 @@ export class EntitySettings<T extends ModifiableEntity> {
   avoidFillSearchColumnWidth?: boolean;
 
   modalSize?: BsSize;
+  modalMaxWidth?: boolean;
+  modalDialogClass?: string;
+  modalFullScreen?: boolean;
 
   stickyHeader?: boolean;
 
@@ -1062,7 +1070,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   onNavigateRoute?: (typeName: string, id: string | number, viewName?: string) => string;
 
   namedViews?: { [viewName: string]: NamedViewSettings<T> };
-  overrideView(override: (replacer: ViewReplacer<T>) => void, viewName?: string) {
+  overrideView(override: (replacer: ViewReplacer<T>) => void, viewName?: string): void {
     if (this.viewOverrides == undefined)
       this.viewOverrides = [];
 
@@ -1074,7 +1082,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   extraToolbarButtons?: (ctx: ButtonsContext) => (ButtonBarElement | undefined)[];
   enforceFocusInModal?: boolean;
 
-  showContextualSearchBox = (ctx: any, blocks?: MenuItemBlock[]) => Boolean(blocks && blocks.notNull().sum(b => b.menuItems?.length) > 20);
+  showContextualSearchBox = (ctx: any, blocks?: MenuItemBlock[]) : boolean => Boolean(blocks && blocks.notNull().sum(b => b.menuItems?.length) > 20);
 
   constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {
 
@@ -1090,7 +1098,7 @@ export class EntitySettings<T extends ModifiableEntity> {
     }
   }
 
-  registerNamedView(settings: NamedViewSettings<T>) {
+  registerNamedView(settings: NamedViewSettings<T>): void {
     if (!this.namedViews)
       this.namedViews = {};
 
@@ -1133,7 +1141,7 @@ export class ViewPromise<T extends ModifiableEntity> {
         });
   }
 
-  static resolve<T extends ModifiableEntity>(getComponent: (ctx: TypeContext<T>) => React.ReactElement) {
+  static resolve<T extends ModifiableEntity>(getComponent: (ctx: TypeContext<T>) => React.ReactElement): ViewPromise<T> {
     var result = new ViewPromise<T>();
     result.promise = Promise.resolve(getComponent);
     return result;
@@ -1197,7 +1205,7 @@ export class ViewPromise<T extends ModifiableEntity> {
     var result = function NewComponent(props: { ctx: TypeContext<T> }) {
       var view = functionComponent(props);
 
-      const replacer = new ViewReplacer<T>(view! as React.ReactElement, props.ctx);
+      const replacer = new ViewReplacer<T>(view! as React.ReactElement, props.ctx, functionComponent);
       viewOverrides.forEach(vo => vo.override(replacer));
       return replacer.result;
     };
@@ -1230,7 +1238,7 @@ function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.
 
     const view = baseRender.call(this);
 
-    const replacer = new ViewReplacer<T>(view!, ctx);
+    const replacer = new ViewReplacer<T>(view!, ctx, component);
     viewOverrides.forEach(vo => vo.override(replacer));
     return replacer.result;
   };

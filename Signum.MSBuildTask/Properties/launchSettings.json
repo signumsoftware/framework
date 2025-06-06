@@ -4,6 +4,11 @@
       "commandName": "Project",
       "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.dll\" \"obj\\SignumReferences.txt\"",
       "workingDirectory": "..\\Signum\\"
+    },
+    "Signum.Authorization": {
+      "commandName": "Project",
+      "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.Authorization.dll\" \"obj\\SignumReferences.txt\"",
+      "workingDirectory": "..\\Extensions\\Signum.Authorization"
     }
   }
 }

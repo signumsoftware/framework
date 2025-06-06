@@ -1,7 +1,4 @@
 using System.ComponentModel;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
-using System.Diagnostics.Metrics;
-using Signum.Entities;
 
 namespace Signum.DynamicQuery.Tokens;
 

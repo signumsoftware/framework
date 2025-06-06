@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Dic, areEqual, classes } from '../Globals'
-import { tryGetTypeInfos, TypeReference, TypeInfo, tryGetTypeInfo, getTypeName, Binding, getTypeInfos, IsByAll, getTypeInfo, MemberInfo, OperationInfo } from '../Reflection'
+import { tryGetTypeInfos, TypeReference, TypeInfo, tryGetTypeInfo, getTypeName, Binding, getTypeInfos, IsByAll, getTypeInfo, MemberInfo, OperationInfo, isNumberType } from '../Reflection'
 import { ModifiableEntity, SearchMessage, JavascriptMessage, Lite, Entity, OperationMessage } from '../Signum.Entities'
 import { Navigator } from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
@@ -18,13 +18,12 @@ import { openModal, IModalProps } from '../Modals'
 import { Modal } from 'react-bootstrap'
 import { ErrorBoundary } from '../Components'
 import './MultiPropertySetter.css';
-import SelectorModal from '../SelectorModal'
 import { FilterOperation, filterOperations, getFilterType } from '../FindOptions'
 import { PropertyOperation } from '../Signum.Operations'
 import { CollectionMessage } from '../Signum.External'
 import { EnumLine } from '../Lines/EnumLine'
 import { AutoLine } from '../Lines/AutoLine'
-
+import SelectorModal from '../SelectorModal'
 
 
 interface MultiPropertySetterModalProps extends IModalProps<boolean | undefined> {
@@ -35,7 +34,7 @@ interface MultiPropertySetterModalProps extends IModalProps<boolean | undefined>
   mandatory: boolean;
 }
 
-export function MultiPropertySetterModal(p: MultiPropertySetterModalProps) {
+export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
   const answerRef = React.useRef<boolean | undefined>(undefined);
@@ -89,12 +88,14 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps) {
   }
 }
 
-MultiPropertySetterModal.show = (typeInfo: TypeInfo, lites: Lite<Entity>[], operationInfo: OperationInfo, mandatory: boolean, setters?: Operations.API.PropertySetter[]): Promise<Operations.API.PropertySetter[] | undefined> => {
-  var settersOrDefault = setters ?? [{ property: null!, operation: null! } as Operations.API.PropertySetter];
-  return openModal<boolean | undefined>(<MultiPropertySetterModal typeInfo={typeInfo} lites={lites} operationInfo={operationInfo} mandatory={mandatory} setters={settersOrDefault} />).then(a => a ? settersOrDefault : undefined);
-};
+export namespace MultiPropertySetterModal {
+  export function show(typeInfo: TypeInfo, lites: Lite<Entity>[], operationInfo: OperationInfo, mandatory: boolean, setters?: Operations.API.PropertySetter[]): Promise<Operations.API.PropertySetter[] | undefined> {
+    var settersOrDefault = setters ?? [{ property: null!, operation: null! } as Operations.API.PropertySetter];
+    return openModal<boolean | undefined>(<MultiPropertySetterModal typeInfo={typeInfo} lites={lites} operationInfo={operationInfo} mandatory={mandatory} setters={settersOrDefault} />).then(a => a ? settersOrDefault : undefined);
+  };
+}
 
-export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { root: PropertyRoute, setters: Operations.API.PropertySetter[], isPredicate: boolean, onChange: () => void }) {
+export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { root: PropertyRoute, setters: Operations.API.PropertySetter[], isPredicate: boolean, onChange: () => void }): React.JSX.Element {
 
   function handleNewPropertySetter(e: React.MouseEvent) {
     e.preventDefault();
@@ -187,7 +188,7 @@ export interface PropertySetterComponentProps {
 }
 
 
-export function PropertySetterComponent(p: PropertySetterComponentProps) {
+export function PropertySetterComponent(p: PropertySetterComponentProps): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 
@@ -263,7 +264,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
   var fOperations = filterType ? filterOperations[filterType] : null;
 
   var subRoot = pr &&
-    (pr.typeReference().isCollection ? (pr.typeReference().isEmbedded ? pr.addMember("Indexer", "Item", true) : PropertyRoute.root(getTypeInfo(pr.typeReference().name))) :
+    (pr.typeReference().isCollection ? (pr.typeReference().isEmbedded ? pr.addMember("Indexer", "Item", true) : tryGetTypeInfo(pr.typeReference().name) && PropertyRoute.root(getTypeInfo(pr.typeReference().name))) :
       (pr.typeReference().isEmbedded ? pr : (p.setter.entityType != null ? PropertyRoute.root(getTypeInfo(p.setter.entityType)) : null)));
 
   return (
@@ -381,7 +382,7 @@ interface PropertySelectorProps {
   onPropertyChanged: (newProperty: PropertyRoute | undefined) => void;
 }
 
-export default function PropertySelector(p: PropertySelectorProps) {
+export default function PropertySelector(p: PropertySelectorProps): React.JSX.Element {
   var lastTokenChanged = React.useRef<string | undefined>(undefined);
 
   var rootList = p.root.allParents();
@@ -411,7 +412,7 @@ interface PropertyPartProps {
   defaultOpen: boolean;
 }
 
-export function PropertyPart(p: PropertyPartProps) {
+export function PropertyPart(p: PropertyPartProps): React.JSX.Element | null {
 
   if (p.parentRoute.propertyRouteType != "Mixin") {
     var tr = p.parentRoute.typeReference();
@@ -457,7 +458,7 @@ export function PropertyPart(p: PropertyPartProps) {
   }
 }
 
-export function PropertyItem(p: { item: MemberInfo | null }) {
+export function PropertyItem(p: { item: MemberInfo | null }): React.JSX.Element | null {
 
   const item = p.item;
 
@@ -473,7 +474,7 @@ export function PropertyItem(p: { item: MemberInfo | null }) {
   );
 }
 
-export function PropertyItemOptional(p: { item: MemberInfo | null }) {
+export function PropertyItemOptional(p: { item: MemberInfo | null }): React.JSX.Element {
 
   const item = p.item;
 
@@ -491,13 +492,15 @@ export function PropertyItemOptional(p: { item: MemberInfo | null }) {
 }
 
 
-export function getTypeColor(type: TypeReference) {
+export function getTypeColor(type: TypeReference): string {
 
   if (type.isCollection)
     return "#CE6700";
 
+  if (isNumberType(type.name))
+    return "#000000";
+
   switch (type.name) {
-    case "number":
     case "string":
     case "Guid":
     case "boolean": return "#000000";
@@ -523,7 +526,7 @@ export function getTypeColor(type: TypeReference) {
   }
 }
 
-export function getNiceTypeName(tr: TypeReference) {
+export function getNiceTypeName(tr: TypeReference): string {
   if (tr.isCollection)
     return QueryTokenMessage.ListOf0.niceToString(Finder.getTypeNiceName({ ...tr, isCollection: false }));
 

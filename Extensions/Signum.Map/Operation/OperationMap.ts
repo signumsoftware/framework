@@ -60,7 +60,7 @@ export interface Transition {
 
 export class OperationMapD3 {
 
-  static opacities = [1, .5, .3, .2, .1];
+  static opacities: number[] = [1, .5, .3, .2, .1];
 
   simulation: d3.Simulation<ForceNode, ForceLink>;
   selectedNode: ForceNode | undefined;
@@ -114,7 +114,7 @@ export class OperationMapD3 {
     this.simulation.on("tick", () => this.onTick());
   }
 
-  initStates(svg: d3.Selection<SVGElement, any, any, any>) {
+  initStates(svg: d3.Selection<SVGElement, any, any, any>): void {
 
     const drag = d3.drag<SVGGElement, MapState>()
       .on("start", (e, d) => {
@@ -192,7 +192,7 @@ export class OperationMapD3 {
       .text(t => t.niceName + " (" + t.count + ")");
   }
 
-  initOperations(svg: d3.Selection<SVGElement, any, any, any>) {
+  initOperations(svg: d3.Selection<SVGElement, any, any, any>): void {
 
     const drag = d3.drag<SVGGElement, MapOperation>()
       .on("start", (e, d) => {
@@ -265,24 +265,24 @@ export class OperationMapD3 {
       .text(t => t.niceName + " (" + t.count + ")");
   }
 
-  selectLinks() {
+  selectLinks(): void {
     this.link.style("stroke-width", d => d.fromState == this.selectedNode || d.toState == this.selectedNode || d.operation == this.selectedNode ? 1.5 : 1)
       .style("opacity", d => d.fromState == this.selectedNode || d.toState == this.selectedNode || d.operation == this.selectedNode ? 1 : 0.5);
   }
 
-  selectNodes() {
+  selectNodes(): void {
     this.labelStates.style("font-weight", d => d == this.selectedNode ? "bold" : null);
     this.labelOperations.style("font-weight", d => d == this.selectedNode ? "bold" : null);
   }
 
 
-  setColor(newColor: string) {
+  setColor(newColor: string): void {
     this.color = newColor;
     this.onStateColorChange();
     this.onOperationColorChange();
   }
 
-  onStateColorChange() {
+  onStateColorChange(): void {
 
     let c: (d: MapState) => any;
 
@@ -299,7 +299,7 @@ export class OperationMapD3 {
       .attr('fill', c);
   }
 
-  onOperationColorChange() {
+  onOperationColorChange(): void {
     let c: (d: MapOperation) => any;
 
     if (this.color == "rows") {
@@ -315,7 +315,7 @@ export class OperationMapD3 {
   }
 
 
-  onTick() {
+  onTick(): void {
 
 
     //this.fanInOut();
@@ -332,7 +332,7 @@ export class OperationMapD3 {
 
   }
 
-  getPathExpression(t: Transition) {
+  getPathExpression(t: Transition): string {
     if (t.fromState == t.toState) {
 
       const dx = t.sourcePoint.x! - t.operation.x!;
@@ -345,13 +345,13 @@ export class OperationMapD3 {
   }
 
 
-  stop() {
+  stop(): void {
     this.simulation.stop();
   }
 }
 
 
-export function forceFanInOut<T extends d3.SimulationNodeDatum>() {
+export function forceFanInOut<T extends d3.SimulationNodeDatum>(): (alpha: number) => void {
   var nodes: MapState[];
   const fanInConstant = 30;
   function force(alpha: number) {

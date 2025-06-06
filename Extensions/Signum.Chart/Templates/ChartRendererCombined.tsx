@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ChartRequestModel} from '../Signum.Chart'
+import { ChartRequestModel } from '../Signum.Chart'
 import { ChartClient, ChartTable } from '../ChartClient'
 import "../Chart.css"
 import { ErrorBoundary } from '@framework/Components';
@@ -25,22 +25,23 @@ export interface ChartRendererCombinedInfo {
   chartScript: ChartClient.ChartScript;
   data?: ChartTable;
   memo: MemoRepository;
-} 
+}
 
-export default function ChartRendererCombined(p: ChartRendererCombinedProps) {
+export default function ChartRendererCombined(p: ChartRendererCombinedProps): React.JSX.Element {
 
   return (
     <FullscreenComponent onReload={p.onReload} >
-      <ErrorBoundary deps={p.infos.map(a => a.data)}>
-        <ReactChartCombined useSameScale={p.useSameScale} minHeigh={p.minHeigh} infos={p.infos.map(info => ({
-          chartRequest: info.chartRequest,
-          onDrillDown: (r, e) => handleDrillDown(r, e, info.chartRequest, info.userChart),
-          parameters: ChartClient.API.getParameterWithDefault(info.chartRequest, info.chartScript),
-          data: info.data,
-          memo: info.memo
-        }))} />
-      </ErrorBoundary>
-    </FullscreenComponent>
+    {fullScreen => <ErrorBoundary deps={p.infos.map(a => a.data)}>
+      <ReactChartCombined useSameScale={p.useSameScale} minHeigh={p.minHeigh} infos={p.infos.map(info => ({
+        chartRequest: info.chartRequest,
+        onDrillDown: (r, e) => handleDrillDown(r, e, info.chartRequest, info.userChart),
+        parameters: ChartClient.API.getParameterWithDefault(info.chartRequest, info.chartScript),
+        data: info.data,
+        memo: info.memo
+      }))} />
+    </ErrorBoundary>
+    }
+  </FullscreenComponent>
   );
 }
 

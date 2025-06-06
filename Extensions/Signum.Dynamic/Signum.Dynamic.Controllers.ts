@@ -9,14 +9,14 @@ import * as Eval from '../Signum.Eval/Signum.Eval'
 
 interface IDynamicApiEvaluator {}
 
-export const DynamicApiEntity = new Type<DynamicApiEntity>("DynamicApi");
+export const DynamicApiEntity: Type<DynamicApiEntity> = new Type<DynamicApiEntity>("DynamicApi");
 export interface DynamicApiEntity extends Entities.Entity {
   Type: "DynamicApi";
   name: string;
   eval: DynamicApiEval;
 }
 
-export const DynamicApiEval = new Type<DynamicApiEval>("DynamicApiEval");
+export const DynamicApiEval: Type<DynamicApiEval> = new Type<DynamicApiEval>("DynamicApiEval");
 export interface DynamicApiEval extends Eval.EvalEmbedded<IDynamicApiEvaluator> {
   Type: "DynamicApiEval";
 }

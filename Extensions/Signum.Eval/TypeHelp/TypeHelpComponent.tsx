@@ -4,7 +4,7 @@ import { classes } from '@framework/Globals'
 import { isTypeEnum, PropertyRoute } from '@framework/Reflection'
 import { Typeahead } from '@framework/Components'
 import { TypeHelpClient } from './TypeHelpClient'
-import ContextMenu from '@framework/SearchControl/ContextMenu'
+import ContextMenu, { getMouseEventPosition } from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import "./TypeHelpComponent.css"
 import { useAPI } from '@framework/Hooks'
@@ -17,7 +17,7 @@ interface TypeHelpComponentProps {
   renderContextMenu?: (pr: PropertyRoute) => React.ReactElement<any>;
 }
 
-export default function TypeHelpComponent(p: TypeHelpComponentProps) {
+function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
 
   const history = React.useMemo<string[]>(() => [], []);
 
@@ -149,7 +149,7 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
     e.stopPropagation();
     var pr = PropertyRoute.parse((help as TypeHelpClient.TypeHelp).cleanTypeName, m.propertyString);
     setSelected(pr);
-    setContextMenuPosition(ContextMenu.getMouseEventPosition(e));
+    setContextMenuPosition(getMouseEventPosition(e));
   }
 
   function renderMember(h: TypeHelpClient.TypeHelp, m: TypeHelpClient.TypeMemberHelp, index: number): React.ReactChild {
@@ -246,23 +246,27 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
   );
 }
 
-TypeHelpComponent.getExpression = function getExpression(initial: string, pr: PropertyRoute | string, mode: TypeHelpClient.TypeHelpMode, options?: { stronglyTypedMixinTS?: boolean }): string {
+namespace TypeHelpComponent {
+  export function getExpression(initial: string, pr: PropertyRoute | string, mode: TypeHelpClient.TypeHelpMode, options?: { stronglyTypedMixinTS?: boolean }): string {
 
-  if (pr instanceof PropertyRoute)
-    pr = pr.propertyPath();
+    if (pr instanceof PropertyRoute)
+      pr = pr.propertyPath();
 
-  return pr.split(".").reduce((prev, curr) => {
-    if (curr.startsWith("[") && curr.endsWith("]")) {
-      const mixin = curr.after("[").beforeLast("]");
-      return mode == "CSharp" ?
-        `${prev}.Mixin<${mixin}>()` :
-        options?.stronglyTypedMixinTS ?
-          `getMixin(${prev}, ${mixin})` :
-          `${prev}.mixins["${mixin}"]`;
-    }
-    else
-      return mode == "TypeScript" ?
-        `${prev}.${curr.firstLower()}` :
-        `${prev}.${curr}`;
-  }, initial);
+    return pr.split(".").reduce((prev, curr) => {
+      if (curr.startsWith("[") && curr.endsWith("]")) {
+        const mixin = curr.after("[").beforeLast("]");
+        return mode == "CSharp" ?
+          `${prev}.Mixin<${mixin}>()` :
+          options?.stronglyTypedMixinTS ?
+            `getMixin(${prev}, ${mixin})` :
+            `${prev}.mixins["${mixin}"]`;
+      }
+      else
+        return mode == "TypeScript" ?
+          `${prev}.${curr.firstLower()}` :
+          `${prev}.${curr}`;
+    }, initial);
+  }
 }
+
+export default TypeHelpComponent;

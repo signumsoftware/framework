@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkLink } from '@framework/QuickLinkClient'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { ajaxGet, ajaxPost } from '@framework/Services'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
@@ -13,7 +13,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient'
 
 export namespace WhatsNewClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.WhatsNew", () => import("./Changelog"));
   
@@ -27,7 +27,7 @@ export namespace WhatsNewClient {
     //  hideOnCanExecute: true
     //}));
   
-    QuickLinks.registerQuickLink(WhatsNewEntity, new QuickLinks.QuickLinkLink("Preview",
+    QuickLinkClient.registerQuickLink(WhatsNewEntity, new QuickLinkLink("Preview",
       () => WhatsNewMessage.Preview.niceToString(),
       ctx => "/newspage/" + ctx.lite.id,
       {
@@ -135,7 +135,7 @@ export namespace WhatsNewClient {
   
   export const configs: { [type: string]: WhatsNewConfig<any>[] } = {};
   
-  export function registerConfig<T extends Entity>(config: WhatsNewConfig<T>) {
+  export function registerConfig<T extends Entity>(config: WhatsNewConfig<T>): void {
     (configs[config.type.typeName] ??= []).push(config);
   }
 }

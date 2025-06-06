@@ -11,12 +11,13 @@ import { useAPI } from '@framework/Hooks';
 import { TypeContext } from '@framework/Lines';
 import { HtmlViewer } from './Pages/EditableText';
 import './HelpWidget.css';
+import { classes } from '@framework/Globals';
 
 export interface HelpWidgetProps {
   wc: WidgetContext<Entity>
 }
 
-export function HelpWidget(p: HelpWidgetProps) {
+export function HelpWidget(p: HelpWidgetProps): React.JSX.Element {
 
   const entity = p.wc.ctx.value;
 
@@ -38,7 +39,7 @@ export function HelpWidget(p: HelpWidgetProps) {
   );
 }
 
-export function HelpIcon(p: { ctx: TypeContext<any>, typeHelp?: TypeHelpEntity }) {
+export function HelpIcon(p: { ctx: TypeContext<any>, typeHelp?: TypeHelpEntity }): React.JSX.Element | undefined | null | boolean {
 
   //debugger;
 
@@ -81,3 +82,15 @@ export function HelpIcon(p: { ctx: TypeContext<any>, typeHelp?: TypeHelpEntity }
   );
 }
 
+interface TypeHelpIconProps extends React.HTMLAttributes<HTMLAnchorElement>{
+  type: string
+}
+
+export function TypeHelpIcon({type, className, ...props} : TypeHelpIconProps): React.JSX.Element {
+
+  return (
+    <a href={AppContext.toAbsoluteUrl(HelpClient.Urls.typeUrl(type))} target="_blank" className={classes("sf-help-button", className)} {...props}>
+      <FontAwesomeIcon icon="circle-question" />
+    </a>
+  );
+}

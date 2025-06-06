@@ -26,11 +26,11 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
     });
   }
 
-  isApplicableTo(element: ToolbarResponse<PermissionSymbol>) {
+  isApplicableTo(element: ToolbarResponse<PermissionSymbol>): boolean {
     return is(element.content, WorkflowPermission.WorkflowToolbarMenu);
   }
 
-  getMenuItem(res: ToolbarResponse<PermissionSymbol>, active: ToolbarResponse<any> | null, key: number | string) {
+  getMenuItem(res: ToolbarResponse<PermissionSymbol>, active: ToolbarResponse<any> | null, key: number | string): React.JSX.Element {
     return <WorkflowDropdownImp key={ key}/>
   }
 
@@ -38,7 +38,7 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
     return 0;
   }
 
-  navigateTo() {
+  navigateTo(): Promise<string> {
     return Promise.resolve("");
   }
 }

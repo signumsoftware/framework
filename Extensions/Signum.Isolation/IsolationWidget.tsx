@@ -9,7 +9,7 @@ export interface IsolationWidgetProps {
   wc: WidgetContext<ModifiableEntity>
 }
 
-export function IsolationWidget(p: IsolationWidgetProps) {
+export function IsolationWidget(p: IsolationWidgetProps): React.JSX.Element | null {
 
   const entity = p.wc.ctx.value;
 

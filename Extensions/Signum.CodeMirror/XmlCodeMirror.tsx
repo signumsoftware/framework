@@ -26,7 +26,7 @@ interface XmlCodeMirrorProps {
   innerRef?: React.Ref<CodeMirrorComponentHandler>;
 }
 
-export default function XmlCodeMirror(p: XmlCodeMirrorProps) {
+export default function XmlCodeMirror(p: XmlCodeMirrorProps): React.JSX.Element {
 
   const options = {
     lineNumbers: true,

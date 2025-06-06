@@ -42,7 +42,8 @@ interface CaseFrameModalState {
 
 var modalCount = 0;
 
-export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFrameModalProps, ref: React.Ref<IHandleKeyboard>) {
+export const CaseFrameModal: React.ForwardRefExoticComponent<CaseFrameModalProps & React.RefAttributes<IHandleKeyboard>> =
+  React.forwardRef(function CaseFrameModal(p: CaseFrameModalProps, ref: React.Ref<IHandleKeyboard>) {
 
   const [state, setState] = useStateWithPromise<CaseFrameModalState | undefined>(undefined);
   const [show, setShow] = React.useState(true);
@@ -55,6 +56,8 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
   const frameRef = React.useRef<EntityFrame | undefined>(undefined);
 
   const forceUpdate = useForceUpdate();
+
+  const [errorsPosition, setErrorsPosition] = React.useState<"top" | "bottom">("top");
 
   React.useImperativeHandle(ref, () => ({
     handleKeyDown(e: KeyboardEvent) {
@@ -219,6 +222,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
     },
     setError: (modelState, initialPrefix) => {
       GraphExplorer.setModelState(pack!.activity, modelState, initialPrefix || "");
+      setErrorsPosition("bottom");
       forceUpdate();
     },
     refreshCount: state.refreshCount,
@@ -263,6 +267,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
     },
     setError: (ms, initialPrefix) => {
       GraphExplorer.setModelState(mainEntity, ms, initialPrefix || "");
+      setErrorsPosition("top");
       forceUpdate()
     },
     refreshCount: state.refreshCount,
@@ -314,12 +319,12 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
             <div className="sf-button-widget-container">
               {entityComponentRef.current && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={buttonBarRef} frame={mainFrame} pack={mainFrame.pack} /> : <br />}
             </div>
-            <ValidationErrors entity={mainEntity} ref={validationErrorsTop} prefix={prefix} />
+            {errorsPosition == "top" && <ValidationErrors entity={mainEntity} ref={validationErrorsTop} prefix="caseFrame" />}
             <ErrorBoundary>
               {state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(state.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
             </ErrorBoundary>
             <br />
-            <ValidationErrors entity={mainEntity} ref={validationErrorsBottom } prefix={prefix} />
+            {errorsPosition == "bottom" && <ValidationErrors entity={mainEntity} ref={validationErrorsBottom} prefix="caseFrame" />}
           </div>
         </div>
         {entityComponentRef.current && <CaseButtonBar frame={activityFrame} pack={activityPack} />}

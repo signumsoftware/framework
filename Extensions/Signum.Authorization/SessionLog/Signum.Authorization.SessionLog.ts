@@ -8,7 +8,7 @@ import * as Basics from '../../../Signum/React/Signum.Basics'
 import * as Authorization from '../Signum.Authorization'
 
 
-export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
+export const SessionLogEntity: Type<SessionLogEntity> = new Type<SessionLogEntity>("SessionLog");
 export interface SessionLogEntity extends Entities.Entity {
   Type: "SessionLog";
   user: Entities.Lite<Authorization.UserEntity>;
@@ -19,7 +19,7 @@ export interface SessionLogEntity extends Entities.Entity {
   userAgent: string | null;
 }
 
-export module SessionLogPermission {
+export namespace SessionLogPermission {
   export const TrackSession : Basics.PermissionSymbol = registerSymbol("Permission", "SessionLogPermission.TrackSession");
 }
 

@@ -47,7 +47,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
   viewer!: NavigatedViewer;
   divArea!: HTMLDivElement;
 
-  handleOnModelError = (err: string) => {
+  handleOnModelError = (err: string): void => {
     if (err)
       throw new Error('Error rendering the model ' + err);
     else {
@@ -59,7 +59,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     }
   }
 
-  componentDidMount() {
+  componentDidMount(): void {
     this.viewer = new CustomViewer({
       container: this.divArea,
       keyboard: {
@@ -78,24 +78,24 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     }
   }
 
-  handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
+  handleElementDoubleClick = (obj: BPMN.DoubleClickEvent): void => {
 
     obj.preventDefault();
     obj.stopPropagation();
     this.showCaseActivityStatsModal(obj.element.id);
   }
 
-  showCaseActivityStatsModal(bpmnElementId: string) {
+  showCaseActivityStatsModal(bpmnElementId: string): void {
     const stats = this.props.caseFlow.activities[bpmnElementId];
     if (stats)
       CaseActivityStatsModal.show(this.props.case, stats);
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     this.viewer.destroy();
   }
 
-  componentWillReceiveProps(nextProps: CaseFlowViewerComponentProps) {
+  componentWillReceiveProps(nextProps: CaseFlowViewerComponentProps): void {
     if (this.viewer) {
       if (nextProps.diagramXML !== undefined && this.props.diagramXML !== nextProps.diagramXML) {
         this.viewer.importXML(nextProps.diagramXML, this.handleOnModelError);
@@ -103,7 +103,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     }
   }
 
-  configureModules() {
+  configureModules(): void {
     var conIcons = this.viewer.get<connectionIcons.ConnectionIcons>('connectionIcons');
     conIcons.hasAction = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
@@ -132,7 +132,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     conIcons.show();
   }
 
-  handleChangeColor = (eventKey: any) => {
+  handleChangeColor = (eventKey: any): void => {
     this.setState({ caseFlowColor: eventKey });
     var caseFlowRenderer = this.viewer.get<caseFlowRenderer.CaseFlowRenderer>('caseFlowRenderer');
     caseFlowRenderer.caseFlowColor = eventKey;
@@ -147,21 +147,21 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     });
   }
 
-  handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
     var searchPad = this.viewer.get<any>("searchPad");
     searchPad.toggle();
   }
 
-  handleZoomClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  handleZoomClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
     this.resetZoom();
   }
 
-  resetZoom() {
+  resetZoom(): void {
     var zoomScroll = this.viewer.get<any>("zoomScroll");
     zoomScroll.reset();
   }
 
-  render() {
+  render(): React.JSX.Element {
     return (
       <div>
         <div className="btn-toolbar">
@@ -178,13 +178,13 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     );
   }
 
-  focusElement(bpmnElementId: string) {
+  focusElement(bpmnElementId: string): void {
     var searchPad = this.viewer.get<any>("searchPad");
     searchPad._search(bpmnElementId);
     searchPad._resetOverlay();
   }
 
-  menuItem(color: CaseFlowColor) {
+  menuItem(color: CaseFlowColor): React.JSX.Element {
     return (
       <Dropdown.Item onClick={() => this.handleChangeColor(color)} active={this.state.caseFlowColor == color}>
         {CaseFlowColor.niceToString(color)}

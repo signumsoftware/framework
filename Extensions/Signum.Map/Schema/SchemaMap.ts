@@ -142,7 +142,7 @@ export class SchemaMapD3 {
   }
 
 
-  regenerate() {
+  regenerate(): void {
 
     const parts = this.filter.match(/[+-]?((\w+)|\*)/g);
 
@@ -194,26 +194,26 @@ export class SchemaMapD3 {
       .restart();
   }
 
-  selectedLinks() {
+  selectedLinks(): void {
     const selectedTable = this.selectedTable;
     this.link
       .style("stroke-width", d => d.source == selectedTable || d.target == selectedTable ? 1.5 : d.isMList ? 1.5 : 1)
       .style("opacity", d => d.source == selectedTable || d.target == selectedTable ? 1 : d.isMList ? 0.8 : Math.max(.1, this.getOpacity((<RelationInfo>d).toTable)));
   }
 
-  selectedNode() {
+  selectedNode(): void {
     this.label.style("font-weight", d => d == this.selectedTable ? "bold" : null);
   }
 
-  showHideNodes() {
+  showHideNodes(): void {
     this.nodeGroup.style("display", n => this.nodes.indexOf(n) == -1 ? "none" : "inline");
     this.link.style("display", r => this.links.indexOf(r) == -1 ? "none" : "inline");
   }
 
 
-  static opacities = [1, .9, .8, .7, .6, .5, .4, .3, .25, .2, .15, .1, .07, .05, .03, .02];
+  static opacities: number[] = [1, .9, .8, .7, .6, .5, .4, .3, .25, .2, .15, .1, .07, .05, .03, .02];
 
-  getOpacity(toTable: string) {
+  getOpacity(toTable: string): number {
     const length = this.fanIn[toTable].filter(l => this.nodes.indexOf(<ITableInfo>l.source) != -1).length;
 
     const min = Math.min(length, SchemaMapD3.opacities.length - 1);
@@ -222,7 +222,7 @@ export class SchemaMapD3 {
   }
 
 
-  setFilter(newFilter: string) {
+  setFilter(newFilter: string): void {
     this.filter = newFilter;
 
     this.regenerate();
@@ -231,13 +231,13 @@ export class SchemaMapD3 {
   }
 
 
-  setColor(newColor: string) {
+  setColor(newColor: string): void {
 
     this.color = newColor;
     this.drawColor();
   }
 
-  drawColor() {
+  drawColor(): void {
     const cp = this.providers[this.color];
 
     this.node.style("fill", cp.getFill)
@@ -247,12 +247,12 @@ export class SchemaMapD3 {
     this.titles.text(t => cp.getTooltip(t) + " (" + t.entityBaseType + ")");
   }
 
-  stop() {
+  stop(): void {
     this.simulation.stop();
   }
 
 
-  onTick = () => {
+  onTick = (): void => {
 
     const visibleLink = this.link.filter(f => this.links.indexOf(f) != -1);
 
@@ -269,7 +269,7 @@ export class SchemaMapD3 {
         (d.y! - d.height / 2) + ")");
   }
 
-  getPathExpression(l: IRelationInfo) {
+  getPathExpression(l: IRelationInfo): string {
 
     const s = l.sourcePoint;
     const t = l.targetPoint;

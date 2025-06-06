@@ -43,22 +43,40 @@ public static class StreamExtensions
         }
     }
 
-    static int BytesToRead = sizeof(Int64);
-    public static bool StreamsAreEqual(Stream first, Stream second)
+    public static bool StreamsAreEqual(Stream stream1, Stream stream2)
     {
-        int iterations = (int)Math.Ceiling((double)first.Length / BytesToRead);
+        if (stream1 == null || stream2 == null)
+            throw new ArgumentNullException("Streams cannot be null.");
 
-        byte[] one = new byte[BytesToRead];
-        byte[] two = new byte[BytesToRead];
+        if (!stream1.CanRead || !stream2.CanRead)
+            throw new ArgumentException("Streams must be readable.");
 
-        for (int i = 0; i < iterations; i++)
+        // Ensure streams start at the beginning
+        if (stream1.CanSeek) stream1.Seek(0, SeekOrigin.Begin);
+        if (stream2.CanSeek) stream2.Seek(0, SeekOrigin.Begin);
+
+        const int bufferSize = 4096;
+        byte[] buffer1 = new byte[bufferSize];
+        byte[] buffer2 = new byte[bufferSize];
+
+        int bytesRead1, bytesRead2;
+
+        do
         {
-            first.Read(one, 0, BytesToRead);
-            second.Read(two, 0, BytesToRead);
+            bytesRead1 = stream1.Read(buffer1, 0, buffer1.Length);
+            bytesRead2 = stream2.Read(buffer2, 0, buffer2.Length);
 
-            if (BitConverter.ToInt64(one, 0) != BitConverter.ToInt64(two, 0))
+            // If the number of bytes read is different, streams are not equal
+            if (bytesRead1 != bytesRead2)
                 return false;
-        }
+
+            // Compare the bytes
+            for (int i = 0; i < bytesRead1; i++)
+            {
+                if (buffer1[i] != buffer2[i])
+                    return false;
+            }
+        } while (bytesRead1 > 0);
 
         return true;
     }

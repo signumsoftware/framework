@@ -3,7 +3,7 @@ import { CaseTagTypeEntity } from '../Signum.Workflow'
 import { Color } from '@framework/Basics/Color'
 import "./Tag.css"
 
-export default function Tag(p : { tag: CaseTagTypeEntity }){
+export default function Tag(p : { tag: CaseTagTypeEntity }): React.JSX.Element {
   const tag = p.tag;
   var color = Color.tryParse(tag.color!) ?? Color.Black;
 

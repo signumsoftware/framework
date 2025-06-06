@@ -37,7 +37,7 @@ function useStateFromProps<T>(propsValue: T): [T, (newValue: T) => void] {
   return [val, setVal];
 }
 
-export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps) {
+export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps): React.JSX.Element {
 
   const [remarks, setRemarks] = useStateFromProps(p.data.remarks);
   const [alerts, setAlerts] = useStateFromProps(p.data.alerts);

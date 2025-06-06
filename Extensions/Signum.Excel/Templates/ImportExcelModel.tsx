@@ -18,7 +18,7 @@ import { liteKey, newMListElement } from '@framework/Signum.Entities'
 import { useForceUpdate } from '@framework/Hooks'
 import { selectPagination } from '../ExcelMenu'
 
-export default function ImportExcel(p: { ctx: TypeContext<ImportExcelModel>, searchControl: SearchControlLoaded, fop: FindOptionsParsed, topElementToken: QueryToken | null }) {
+export default function ImportExcel(p: { ctx: TypeContext<ImportExcelModel>, searchControl: SearchControlLoaded, fop: FindOptionsParsed, topElementToken: QueryToken | null }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ formGroupStyle: "Basic" });
   const forceUpdate = useForceUpdate();
 
@@ -96,7 +96,7 @@ function getSaveOperations(type: PseudoType, mode: ImportExcelMode | null) {
 }
 
 
-export async function onImportFromExcel(sc: SearchControlLoaded) {
+export async function onImportFromExcel(sc: SearchControlLoaded): Promise<void> {
 
   var qr = sc.getQueryRequest(true);
   qr.pagination = { mode: "All" };

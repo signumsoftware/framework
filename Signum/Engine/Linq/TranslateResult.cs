@@ -1,6 +1,5 @@
 using System.Collections;
 using Signum.Engine.Sync;
-using Signum.Utilities;
 
 namespace Signum.Engine.Linq;
 
@@ -278,6 +277,7 @@ class TranslateResult<T> : ITranslateResult
             }
         }
     }
+
 
     public async Task<object?> ExecuteAsync(CancellationToken token)
     {

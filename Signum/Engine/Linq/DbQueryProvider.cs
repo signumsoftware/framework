@@ -1,6 +1,5 @@
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
-using Signum.Utilities;
 
 namespace Signum.Engine.Linq;
 
@@ -32,10 +31,10 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
             return this.Translate(expression, tr => tr.Execute()!);
     }
 
-    public async Task<object?> ExecuteAsync(Expression expression, CancellationToken token)
+    public Task<object?> ExecuteAsync(Expression expression, CancellationToken token)
     {
         using (HeavyProfiler.Log("DBQuery", () => expression.Type.TypeName()))
-            return await this.Translate(expression, tr => tr.ExecuteAsync(token));
+            return this.Translate(expression, async tr => await tr.ExecuteAsync(token));
     }
 
     public ITranslateResult GetRawTranslateResult(Expression expression)
@@ -84,18 +83,18 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
 
         log.Switch("Aggregate");
         Expression rewriten = AggregateRewriter.Rewrite(binded);
-        log.Switch("DupHistory");
-        Expression dupHistory = DuplicateHistory.Rewrite(rewriten, ag);
         log.Switch("EntityCompleter");
-        Expression completed = EntityCompleter.Complete(dupHistory, binder);
+        Expression completed = EntityCompleter.Complete(rewriten, binder);
         log.Switch("AliasReplacer");
         Expression replaced = AliasProjectionReplacer.Replace(completed, ag);
         log.Switch("OrderBy");
         Expression orderRewrited = OrderByRewriter.Rewrite(replaced);
-        log.Switch("OrderBy");
-        Expression lazyCastRemoved = SqlCastLazyRemover.Remove(orderRewrited);
+        log.Switch("AsOfExpression");
+        Expression asOf = AsOfExpressionVisitor.Rewrite(orderRewrited, ag);
+        log.Switch("DupHistory");
+        Expression dupHistory = DuplicateHistory.Rewrite(asOf, ag);
         log.Switch("Rebinder");
-        Expression rebinded = QueryRebinder.Rebind(lazyCastRemoved);
+        Expression rebinded = QueryRebinder.Rebind(dupHistory);
         log.Switch("UnusedColumn");
         Expression columnCleaned = UnusedColumnRemover.Remove(rebinded);
         log.Switch("Redundant");

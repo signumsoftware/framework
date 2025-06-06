@@ -6,6 +6,8 @@ using Signum.Basics;
 using Signum.Mailing;
 using Signum.API;
 using Signum.Templating;
+using Signum.Processes;
+using Signum.Cache;
 
 namespace Signum.Mailing;
 
@@ -70,6 +72,15 @@ public static class EmailLogic
                     e.Exception,
                 });
 
+            if (CacheLogic.ServerBroadcast != null)
+            {
+                CacheLogic.ServerBroadcast.Receive += (method, args) =>
+                {
+                    if (method == "EmailReadyToSend")
+                        AsyncEmailSender.WakeUp("ServerBroadcast Notification", null);
+                };
+            }
+
             PermissionLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
 
             EmailLogic.getEmailSenderConfiguration = getEmailSenderConfiguration;
@@ -99,7 +110,12 @@ public static class EmailLogic
         }
     }
 
-  
+    internal static void WakeupReadyToSendInThisMachine(Dictionary<string, object> dic)
+    {
+        CacheLogic.ServerBroadcast?.Send("EmailReadyToSend", "");
+
+        AsyncEmailSender.WakeUp("ReadyToSend in this machine", null);
+    }
 
     public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
     {
@@ -182,11 +198,20 @@ public static class EmailLogic
 
     public static void SendMailAsync(this EmailMessageEntity email)
     {
-        using (OperationLogic.AllowSave<EmailMessageEntity>())
+        using (var tr = new Transaction())
         {
-            email.State = EmailMessageState.ReadyToSend;
-            email.Save();
+            using (OperationLogic.AllowSave<EmailMessageEntity>())
+            {
+                email.State = EmailMessageState.ReadyToSend;
+                email.Save();
+            }
+
+            Transaction.PostRealCommit -= WakeupReadyToSendInThisMachine;
+            Transaction.PostRealCommit += WakeupReadyToSendInThisMachine;
+
+            tr.Commit();
         }
+
     }
 
     public static SmtpClient SafeSmtpClient()
@@ -216,14 +241,23 @@ public static class EmailLogic
     public static void SendAllAsync<T>(List<T> emails)
                where T : IEmailModel
     {
-        var list = emails.SelectMany(a => a.CreateEmailMessage()).ToList();
-
-        list.ForEach(a => a.State = EmailMessageState.ReadyToSend);
-
-        using (OperationLogic.AllowSave<EmailMessageEntity>())
+        using (var tr = new Transaction())
         {
-            list.SaveList();
+            var list = emails.SelectMany(a => a.CreateEmailMessage()).ToList();
+
+            list.ForEach(a => a.State = EmailMessageState.ReadyToSend);
+
+            using (OperationLogic.AllowSave<EmailMessageEntity>())
+            {
+                list.SaveList();
+            }
+
+            Transaction.PostRealCommit -= WakeupReadyToSendInThisMachine;
+            Transaction.PostRealCommit += WakeupReadyToSendInThisMachine;
+
+            tr.Commit();
         }
+
     }
 
     class EmailGraph : Graph<EmailMessageEntity, EmailMessageState>
@@ -287,6 +321,9 @@ public static class EmailLogic
                     m.SendRetries = 0;
                     m.Exception = null;
                     m.State = EmailMessageState.ReadyToSend;
+
+                    Transaction.PostRealCommit -= WakeupReadyToSendInThisMachine;
+                    Transaction.PostRealCommit += WakeupReadyToSendInThisMachine;
                 }
             }.Register();
 

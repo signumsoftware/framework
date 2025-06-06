@@ -31,7 +31,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     this.state = { exampleEntity : null };
   }
 
-  handleShowCode = () => {
+  handleShowCode = (): undefined => {
     ShowCodeModal.showCode(this.props.ctx.value.entityType!.cleanName, this.state.rootNode!);
   }
 
@@ -41,21 +41,21 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     ];
   }
 
-  componentWillMount() {
+  componentWillMount(): undefined {
     this.updateRoot();
   }
 
-  updateStateSelectedNode(newNode: DesignerNode<BaseNode>) {
+  updateStateSelectedNode(newNode: DesignerNode<BaseNode>): undefined {
     this.setState({ selectedNode: newNode });
   }
 
-  beforeSave() {
+  beforeSave(): undefined{
     const ctx = this.props.ctx;
     ctx.value.viewContent = JSON.stringify(this.state.rootNode!);
     ctx.value.modified = true;
   }
 
-  updateRoot() {
+  updateRoot(): undefined {
 
     const ctx = this.props.ctx;
 
@@ -83,7 +83,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     ctx.frame!.frameComponent.forceUpdate();
   }
 
-  getZeroNode() {
+  getZeroNode(): DesignerNode<BaseNode>{
 
     var { ctx, ...extraProps } = this.props;
 
@@ -107,7 +107,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     return DesignerNode.zero(context, this.props.ctx.value.entityType!.cleanName);
   }
 
-  handleTypeChange = () => {
+  handleTypeChange = () : void => {
 
     this.state = { exampleEntity : null };
 
@@ -123,7 +123,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     this.updateRoot();
   }
 
-  handleTypeRemove = () => {
+  handleTypeRemove = (): Promise<boolean> => {
     if (this.props.ctx.value.modified || this.props.ctx.value.viewContent != JSON.stringify(this.state.rootNode!))
       return MessageModal.show({
         title: SaveChangesMessage.ThereAreChanges.niceToString(),
@@ -136,7 +136,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     return Promise.resolve(true);
   }
 
-  render() {
+  render(): JSX.Element {
     const ctx = this.props.ctx;
 
     return (
@@ -149,7 +149,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     );
   }
 
-  renderDesigner() {
+  renderDesigner(): JSX.Element{
     const root = this.getZeroNode().createChild(this.state.rootNode!);
 
     const ctx = this.props.ctx;

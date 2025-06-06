@@ -2,28 +2,35 @@
 import * as React from 'react'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import { is } from '@framework/Signum.Entities'
-import { ChartColumnEmbedded, ChartMessage, ChartParameterEmbedded } from '../Signum.Chart'
+import { ChartColumnEmbedded, ChartMessage, ChartParameterEmbedded, ChartTimeSeriesEmbedded } from '../Signum.Chart'
 import { ChartClient } from '../ChartClient'
 import { ChartColumn } from './ChartColumn'
-import { ColorPaletteClient, ColorInterpolate, ColorScheme } from '../ColorPalette/ColorPaletteClient'
+import { ColorInterpolate, ColorScheme } from '../ColorPalette/ColorPaletteClient'
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { colorInterpolators, colorSchemes } from '../ColorPalette/ColorUtils'
 import { Dic } from '@framework/Globals'
 import { IChartBase } from '../UserChart/Signum.Chart.UserChart'
-import { AutoLine, EnumLine, NumberLine, NumberLineProps, TextBoxLine, TextBoxLineProps } from '@framework/Lines'
+import { EnumLine, NumberLine, TextBoxLine, TextBoxLineProps } from '@framework/Lines'
 import { EnumLineProps, OptionItem } from '@framework/Lines/EnumLine'
+import { Finder } from '@framework/Finder'
+import { getTypeInfos } from '@framework/Reflection'
+import { QueryDescription } from '@framework/FindOptions'
+import { DateTime } from 'luxon'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import ChartTimeSeries from './ChartTimeSeries'
 
 export interface ChartBuilderProps {
   ctx: TypeContext<IChartBase>; /*IChart*/
   queryKey: string;
   maxRowsReached?: boolean;
+  queryDescription: QueryDescription;
   onInvalidate: () => void;
   onTokenChange: () => void;
   onRedraw: () => void;
   onOrderChanged: () => void;
 }
 
-export default function ChartBuilder(p: ChartBuilderProps) {
+export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   const chartScripts = useAPI(signal => ChartClient.getChartScripts(), []);
@@ -79,8 +86,37 @@ export default function ChartBuilder(p: ChartBuilderProps) {
   const chartScript = chartScripts?.single(cs => is(cs.symbol, chart.chartScript));
 
   var parameterDic = mlistItemContext(p.ctx.subCtx(c => c.parameters, { formSize: "xs", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
+  const qs = Finder.getSettings(p.queryKey);
+  
+  const tis = getTypeInfos(p.queryDescription.columns["Entity"].type);
 
-  return (
+  return (<>
+      {(qs?.allowSystemTime ?? tis.some(a => a.isSystemVersioned == true)) && <div className='d-flex align-items-center mb-1' style={{minHeight: 34}}>
+        <label>
+          <input className='me-1' type={'checkbox'} defaultChecked={chart.chartTimeSeries != null}
+            onChange={e => {
+              
+              if(e.target.checked) {
+                if(!chart.chartTimeSeries)
+                  chart.chartTimeSeries = ChartTimeSeriesEmbedded.New({
+                    timeSeriesStep: 1,
+                    timeSeriesUnit: 'Month',
+                    startDate: DateTime.now().startOf('year').toISODate(),
+                    endDate: DateTime.now().toISODate(),
+                    splitQueries: true,
+                  });
+              } else {
+                chart.chartTimeSeries = null;
+              }
+              chart.modified = true;
+              forceUpdate();
+            }} 
+          />
+          Time machine
+          <FontAwesomeIcon className='mx-1' icon='clock-rotate-left' />
+        </label>
+        {chart.chartTimeSeries && <ChartTimeSeries chartTimeSeries={chart.chartTimeSeries} chartBase={p.ctx.value} onChange={handleOnRedraw}/>}
+      </div>}
     <div className="row sf-chart-builder gx-2">
       <div className="col-lg-2">
         <div className="sf-chart-type card">
@@ -116,11 +152,12 @@ export default function ChartBuilder(p: ChartBuilderProps) {
                 </tr>
               </thead>
               <tbody>
+                
                 {chartScript && mlistItemContext(p.ctx.subCtx(c => c.columns, { formSize: "xs" })).map((ctx, i) =>
                   <ChartColumn chartBase={chart} chartScript={chartScript} ctx={ctx} key={"C" + i} scriptColumn={chartScript!.columns[i]}
-                    queryKey={p.queryKey} onTokenChange={() => handleTokenChange(ctx.value)}
-                    onRedraw={handleOnRedraw}
-                    onOrderChanged={handleOrderChart} columnIndex={i} parameterDic={parameterDic} />)
+                  queryKey={p.queryKey} onTokenChange={() => handleTokenChange(ctx.value)}
+                  onRedraw={handleOnRedraw}
+                  onOrderChanged={handleOrderChart} columnIndex={i} parameterDic={parameterDic} />)
                 }
               </tbody>
             </table>
@@ -129,6 +166,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
         {chartScript && <Parameters chart={p.ctx.value} chartScript={chartScript} parameterDic={parameterDic} columnIndex={null} onRedraw={handleOnRedraw} />}
       </div>
     </div >
+  </>
   );
 }
 
@@ -138,7 +176,7 @@ export function Parameters(props: {
   onRedraw?: () => void,
   parameterDic: { [name: string]: TypeContext<ChartParameterEmbedded> },
   columnIndex: number | null
-}) {
+}): React.JSX.Element | null {
 
 
   var groups = props.chartScript.parameterGroups

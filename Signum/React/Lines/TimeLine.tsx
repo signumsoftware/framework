@@ -7,76 +7,75 @@ import { FormControlReadonly } from '../Lines/FormControlReadonly';
 import { ValueBaseController, ValueBaseProps } from './ValueBase';
 import { Duration } from 'luxon';
 import { isNumberKey } from './NumberLine';
-import { Value } from 'react-widgets/cjs';
-import { render } from 'react-dom';
 
 export interface TimeLineProps extends ValueBaseProps<string | null> {
 
 }
 
-export class TimeLineController extends ValueBaseController<TimeLineProps, string | null>{
-  init(p: TimeLineProps) {
+export class TimeLineController extends ValueBaseController<TimeLineProps, string | null> {
+  init(p: TimeLineProps): void {
     super.init(p);
     this.assertType("TimeLine", ["TimeOnly", "TimeSpan"]);
   }
 }
 
 
-export const TimeLine = React.memo(React.forwardRef(function TimeLine(props: TimeLineProps, ref: React.Ref<TimeLineController>) {
+export const TimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<TimeLineProps & React.RefAttributes<TimeLineController>>> =
+  React.memo(React.forwardRef(function TimeLine(props: TimeLineProps, ref: React.Ref<TimeLineController>) {
 
-  const c = useController(TimeLineController, props, ref);
+    const c = useController(TimeLineController, props, ref);
 
-  if (c.isHidden)
-    return null;
+    if (c.isHidden)
+      return null;
 
-  const s = c.props;
+    const p = c.props;
 
-  if (s.ctx.readOnly) {
+    const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+    const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
+    if (p.ctx.readOnly) {
+      return (
+        <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+          {inputId => c.withItemGroup(
+            <FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} ctx={p.ctx} className={classes(c.props.valueHtmlAttributes?.className, "numeric")} innerRef={c.setRefs}>
+              {timeToString(p.ctx.value, p.format)}
+            </FormControlReadonly>
+          )}
+        </FormGroup>
+      );
+    }
+
+    const handleOnChange = (newValue: string | null) => {
+      c.setValue(newValue);
+    };
+
+    const htmlAttributes = {
+      placeholder: c.getPlaceholder(),
+      ...c.props.valueHtmlAttributes
+    } as React.AllHTMLAttributes<any>;
+
+    const durationFormat = toLuxonDurationFormat(p.format) ?? "hh:mm:ss";
+
+    if (htmlAttributes.placeholder == undefined)
+      htmlAttributes.placeholder = timePlaceholder(durationFormat);
+
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
         {inputId => c.withItemGroup(
-          <FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} ctx={s.ctx} className={classes(c.props.valueHtmlAttributes?.className, "numeric")} innerRef={c.setRefs}>
-            {timeToString(s.ctx.value, s.format)}
-          </FormControlReadonly>
+          <TimeTextBox htmlAttributes={htmlAttributes}
+            id={inputId}
+            value={p.ctx.value}
+            onChange={handleOnChange}
+            validateKey={isDurationKey}
+            formControlClass={classes(p.ctx.formControlClass, c.mandatoryClass)}
+            durationFormat={durationFormat}
+            innerRef={c.setRefs} />
         )}
       </FormGroup>
     );
-  }
-
-  const handleOnChange = (newValue: string | null) => {
-    c.setValue(newValue);
-  };
-
-  const htmlAttributes = {
-    placeholder: c.getPlaceholder(),
-    ...c.props.valueHtmlAttributes
-  } as React.AllHTMLAttributes<any>;
-
-  const durationFormat = toLuxonDurationFormat(s.format) ?? "hh:mm:ss";
-
-  if (htmlAttributes.placeholder == undefined)
-    htmlAttributes.placeholder = timePlaceholder(durationFormat);
-
-  return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-      {inputId => c.withItemGroup(
-        <TimeTextBox htmlAttributes={htmlAttributes}
-          id={inputId}
-          value={s.ctx.value}
-          onChange={handleOnChange}
-          validateKey={isDurationKey}
-          formControlClass={classes(s.ctx.formControlClass, c.mandatoryClass)}
-          durationFormat={durationFormat}
-          innerRef={c.setRefs} />
-      )}
-    </FormGroup>
-  );
-}), (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
-  return LineBaseController.propEquals(prev, next);
-});
+  }), (prev, next) => {
+    return LineBaseController.propEquals(prev, next);
+  });
 
 
 
@@ -86,12 +85,12 @@ export interface TimeTextBoxProps {
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
   formControlClass?: string;
   durationFormat?: string;
-  htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
+  htmlAttributes?: React.InputHTMLAttributes<HTMLInputElement>;
   innerRef?: React.Ref<HTMLInputElement>;
   id?: string;
 }
 
-export function TimeTextBox(p: TimeTextBoxProps) {
+export function TimeTextBox(p: TimeTextBoxProps): React.JSX.Element {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 
@@ -166,9 +165,11 @@ export function TimeTextBox(p: TimeTextBoxProps) {
 
 }
 
-TimeTextBox.defaultProps = {
-  durationFormat: "hh:mm:ss"
-};
+export namespace TimeTextBox {
+  export const defaultProps = {
+    durationFormat: "hh:mm:ss"
+  };
+}
 
 export function isDurationKey(e: React.KeyboardEvent<any>): boolean {
   return isNumberKey(e) || e.key == ":";

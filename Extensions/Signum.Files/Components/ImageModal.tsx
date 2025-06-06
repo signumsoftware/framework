@@ -15,7 +15,7 @@ interface ImageModalProps extends IModalProps<undefined> {
   title?: string;
 }
 
-export function ImageModal(p: ImageModalProps) {
+export function ImageModal(p: ImageModalProps): React.JSX.Element {
 
   const [showImage, setShow] = React.useState(true);
 
@@ -42,30 +42,30 @@ export function ImageModal(p: ImageModalProps) {
   );
 }
 
-ImageModal.show = (file: IFile & ModifiableEntity, event: React.MouseEvent<HTMLImageElement, MouseEvent>, title?: string, imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>) => {
-  if (event.ctrlKey || event.button == 1) {
+export namespace ImageModal {
+  export function show(file: IFile & ModifiableEntity, event: React.MouseEvent<HTMLImageElement, MouseEvent>, title?: string, imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>): void {
+    if (event.ctrlKey || event.button == 1) {
 
-    var w = window.open("")!;
+      var w = window.open("")!;
 
-    if (w == null)
-      return; 
+      if (w == null)
+        return;
 
-    var url =
+      var url =
         configurations[file.Type].fileUrl!(file);
 
-    Services.ajaxGetRaw({ url: url })
-      .then(resp => resp.blob())
-      .then(blob => {
+      Services.ajaxGetRaw({ url: url })
+        .then(resp => resp.blob())
+        .then(blob => {
 
-        var image = new Image();
-        image.src = URL.createObjectURL(blob);
-        w!.document.write(image.outerHTML);
-        w!.document.title = document.title;
-      });
+          var image = new Image();
+          image.src = URL.createObjectURL(blob);
+          w!.document.write(image.outerHTML);
+          w!.document.title = document.title;
+        });
+    }
+    else {
+      openModal(<ImageModal file={file} title={title} imageHtmlAttributes={imageHtmlAttributes} />);
+    }
   }
-  else {
-    openModal(<ImageModal file={file} title={title} imageHtmlAttributes={imageHtmlAttributes} />);
-  }
-} 
-
-
+}

@@ -5,7 +5,7 @@ import { SearchValueLine } from '@framework/Search';
 import { ADGroupEntity } from './Signum.Authorization.ActiveDirectory';
 import { AzureADQuery } from './Signum.Authorization.ActiveDirectory.Azure';
 
-export default function ADGroup(p: { ctx: TypeContext<ADGroupEntity> }) {
+export default function ADGroup(p: { ctx: TypeContext<ADGroupEntity> }): React.JSX.Element {
   const ctx = p.ctx;
   return (
     <div>

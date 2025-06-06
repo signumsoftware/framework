@@ -8,11 +8,11 @@ import { QueryString } from '@framework/QueryString';
 
 export namespace RestApiKeyClient {
   
-  export function registerAuthenticator() {
+  export function registerAuthenticator(): void {
     AuthClient.authenticators.insertAt(0, loginFromApiKey);
   }
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(RestApiKeyEntity, e => import('./Templates/RestApiKey')));
   }
   

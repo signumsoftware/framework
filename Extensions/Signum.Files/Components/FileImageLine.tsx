@@ -28,9 +28,9 @@ export interface FileImageLineProps<V extends ModifiableEntity & IFile | Lite<IF
 }
 
 
-export class FileImageLineController<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null> extends EntityBaseController<FileImageLineProps<V>, V>{
+export class FileImageLineController<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null> extends EntityBaseController<FileImageLineProps<V>, V> {
 
-  getDefaultProps(state: FileImageLineProps<V>) {
+  getDefaultProps(state: FileImageLineProps<V>): void {
 
     super.getDefaultProps(state);
 
@@ -48,64 +48,73 @@ export class FileImageLineController<V extends ModifiableEntity & IFile | Lite<I
     }
   }
 
-  handleFileLoaded = (file: IFile & ModifiableEntity) => {
+  handleFileChanged = (file: IFile & ModifiableEntity): void => {
     this.convert(file as Aprox<V>)
       .then(f => this.setValue(f));
   }
 }
 
-export const FileImageLine = genericForwardRef(function FileImageLine<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null>(props: FileImageLineProps<V>, ref: React.Ref<FileImageLineController<V>>) {
-  const c = useController(FileImageLineController, props, ref);
-  const p = c.props;
+export const FileImageLine: <V extends (ModifiableEntity & IFile) | Lite<IFile & Entity> | null>(props: FileImageLineProps<V> & React.RefAttributes<FileImageLineController<V>>) => React.ReactNode | null =
+  genericForwardRef(function FileImageLine<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null>(props: FileImageLineProps<V>, ref: React.Ref<FileImageLineController<V>>) {
+    const c = useController(FileImageLineController, props, ref);
+    const p = c.props;
 
-  const hasValue = !!p.ctx.value;
+    const hasValue = !!p.ctx.value;
 
-  if (c.isHidden)
-    return null;
+    if (c.isHidden)
+      return null;
 
-  return (
-    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
-      labelHtmlAttributes={p.labelHtmlAttributes}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
-      helpText={c.props.helpText}>
-      {() => hasValue ? renderImage() : p.ctx.readOnly ? undefined :
-        <FileUploader
-          accept={p.accept}
-          maxSizeInBytes={p.maxSizeInBytes}
-          dragAndDrop={c.props.dragAndDrop}
-          dragAndDropMessage={c.props.dragAndDropMessage}
-          fileType={c.props.fileType}
-          onFileLoaded={c.handleFileLoaded}
-          typeName={p.ctx.propertyRoute!.typeReference().name}
-          buttonCss={p.ctx.buttonClass}
-          divHtmlAttributes={{ className: "sf-file-line-new" }} />
-      }
-    </FormGroup>
-  );
-
-  function renderImage() {
-
-    var ctx = p.ctx;
-
-    const val = ctx.value!;
-
-    var content = ctx.propertyRoute!.typeReference().isLite ?
-      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(file as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
-      <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} ajaxOptions={p.ajaxOptions} />;
-
-    const removeButton = c.renderRemoveButton(true);
-
-    if (removeButton == null)
-      return content;
+    const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+    const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
     return (
-      <div className="sf-file-image-container">
-        {removeButton}
-        {content}
-      </div>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon}
+        labelHtmlAttributes={p.labelHtmlAttributes}
+        htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
+        helpText={helpText}
+        helpTextOnTop={helpTextOnTop}
+      >
+        {() => hasValue ? renderImage() : p.ctx.readOnly ? undefined :
+          <FileUploader
+            accept={p.accept}
+            maxSizeInBytes={p.maxSizeInBytes}
+            dragAndDrop={c.props.dragAndDrop}
+            dragAndDropMessage={c.props.dragAndDropMessage}
+            fileType={c.props.fileType}
+            onFileCreated={c.handleFileChanged}
+            typeName={p.ctx.propertyRoute!.typeReference().name}
+            buttonCss={p.ctx.buttonClass}
+            fileDropCssClass={c.mandatoryClass ?? undefined}
+            divHtmlAttributes={{ className: "sf-file-line-new" }} />
+        }
+      </FormGroup>
     );
-  }
-});
+
+    function renderImage() {
+
+      var ctx = p.ctx;
+
+      const val = ctx.value!;
+
+      const display = ctx.formGroupStyle == "Basic" ? "block" : undefined;
+
+      var content = ctx.propertyRoute!.typeReference().isLite ?
+        <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} style={{ maxWidth: "100px", display }} onClick={e => ImageModal.show(file as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
+        <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px", display }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} ajaxOptions={p.ajaxOptions} />;
+
+      const removeButton = c.renderRemoveButton(true);
+
+      if (removeButton == null)
+        return content;
+
+      return (
+        <div className="sf-file-image-container">
+          {removeButton}
+          {content}
+        </div>
+      );
+    }
+  });
 
 (FileImageLine as any).defaultProps = {
   accept: "image/*",

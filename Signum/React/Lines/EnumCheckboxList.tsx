@@ -16,7 +16,7 @@ export interface EnumCheckboxListProps<V extends string> extends LineBaseProps<M
 
 export class EnumCheckboxListController<V extends string> extends LineBaseController<EnumCheckboxListProps<V>, MList<V>> {
 
-  getDefaultProps(p: EnumCheckboxListProps<V>) {
+  getDefaultProps(p: EnumCheckboxListProps<V>): void {
     super.getDefaultProps(p);
     p.columnWidth = 200;
     if (p.type) {
@@ -25,7 +25,7 @@ export class EnumCheckboxListController<V extends string> extends LineBaseContro
     }
   }
 
-  handleOnChange = (event: React.ChangeEvent<HTMLInputElement>, val: V) => {
+  handleOnChange = (event: React.ChangeEvent<HTMLInputElement>, val: V): void => {
 
     var list = this.props.ctx.value;
     var toRemove = list.filter(mle => mle.element == val)
@@ -42,7 +42,7 @@ export class EnumCheckboxListController<V extends string> extends LineBaseContro
 
 }
 
-export const EnumCheckboxList = genericForwardRef(function EnumCheckboxList<V extends string>(props: EnumCheckboxListProps<V>, ref: React.Ref<EnumCheckboxListController<V>>) {
+export const EnumCheckboxList: <V extends string>(props: EnumCheckboxListProps<V> & React.RefAttributes<EnumCheckboxListController<V>>) => React.ReactNode | null = genericForwardRef(function EnumCheckboxList<V extends string>(props: EnumCheckboxListProps<V>, ref: React.Ref<EnumCheckboxListController<V>>) {
   const c = useController(EnumCheckboxListController, props, ref);
   const p = c.props;
 
@@ -50,34 +50,15 @@ export const EnumCheckboxList = genericForwardRef(function EnumCheckboxList<V ex
     return null;
 
   return (
-    <GroupHeader className={classes("sf-checkbox-list", p.ctx.errorClassBorder)} 
+    <GroupHeader className={classes("sf-checkbox-list", c.getErrorClass("border"))} 
       label={p.label}
       labelIcon={p.labelIcon}
       avoidFieldSet={p.avoidFieldSet}
       buttons={undefined}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }} >
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }} >
       {renderContent()}
     </GroupHeader >
   );
-
-  if (p.avoidFieldSet == true)
-    return (
-      <div{...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes}>
-        {renderContent()}
-      </div>
-    );
-
-  return (
-    <fieldset className={classes("sf-checkbox-list", p.ctx.errorClass)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes}>
-      <legend>
-        <div>
-          <span>{p.label}</span>
-        </div>
-      </legend>
-      {renderContent()}
-    </fieldset>
-  );
-
 
   function renderContent() {
     if (p.data == null)

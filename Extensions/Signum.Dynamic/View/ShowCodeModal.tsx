@@ -11,7 +11,7 @@ interface ShowCodeModalProps extends IModalProps<undefined> {
   node: BaseNode;
 }
 
-export default function ShowCodeModal(p: ShowCodeModalProps) {
+function ShowCodeModal(p: ShowCodeModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState<boolean>(true);
 
@@ -38,9 +38,13 @@ export default function ShowCodeModal(p: ShowCodeModalProps) {
   );
 }
 
-ShowCodeModal.showCode = (typeName: string, node: BaseNode): Promise<void> => {
-  return openModal<void>(<ShowCodeModal typeName={typeName} node={node} />);
+namespace ShowCodeModal {
+  export function showCode(typeName: string, node: BaseNode): Promise<void> {
+    return openModal<void>(<ShowCodeModal typeName={typeName} node={node} />);
+  }
 }
+
+export default ShowCodeModal;
 
 function renderFile(typeName: string, node: BaseNode): string {
 

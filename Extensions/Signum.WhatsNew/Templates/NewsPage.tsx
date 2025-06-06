@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 import { Navigator } from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink';
 
-export default function NewsPage() {
+export default function NewsPage(): React.JSX.Element {
   const params = useParams() as { newsId: string };
 
   const [refreshValue, setRefreshValue] = React.useState<number>(0);

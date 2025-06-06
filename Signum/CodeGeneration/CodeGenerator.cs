@@ -17,8 +17,8 @@ public static class CodeGenerator
             {
                 {"E", Entities.GenerateEntitiesFromDatabaseTables, "Entities (from Database tables)"},
                 {"L", Logic.GenerateLogicFromEntities, "Logic (from entites)"},
-                {"React", React.GenerateReactFromEntities, "React (from entites)"},
-                {"Hook", Hook.ConvertFilesToHooks, "Hook (converts tsx files from class to functional components)"},
+                {"R", React.GenerateReactFromEntities, "React (from entites)"},
+                //{"Hook", Hook.ConvertFilesToHooks, "Hook (converts tsx files from class to functional components)"},
             }.Choose();
 
             if (action == null)

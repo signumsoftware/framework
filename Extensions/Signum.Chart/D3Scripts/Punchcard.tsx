@@ -60,11 +60,11 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
 
     var extendedValues = ChartUtils.completeValues(column, values, completeValues, chartRequest.filterOptions, "After");
     switch (shortType) {
-      case "Ascending": return extendedValues.orderBy(a => a);
+      case "Ascending": return extendedValues.orderBy(a => a as number | string);
       case "AscendingToStr": return extendedValues.orderBy(a => column.getNiceName(a));
       case "AscendingKey": return extendedValues.orderBy(a => column.getKey(a));
       case "AscendingSumOrder": return extendedValues.orderBy(a => getSum(dictionary["k" + column.getKey(a)]));
-      case "Descending": return extendedValues.orderByDescending(a => a);
+      case "Descending": return extendedValues.orderByDescending(a => a as number | string);
       case "DescendingToStr": return extendedValues.orderByDescending(a => column.getNiceName(a));
       case "DescendingKey": return extendedValues.orderByDescending(a => column.getKey(a));
       case "DescendingSumOrder": return extendedValues.orderByDescending(a => getSum(dictionary["k" + column.getKey(a)]));
@@ -83,7 +83,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
     if ((elements as any).__sum__ !== undefined)
       return (elements as any).__sum__;
 
-    return (elements as any).__sum__ = elements.reduce<number>((acum, r) => acum + orderColumn!.getValue(r) ?? 0, 0);
+    return (elements as any).__sum__ = elements.sum(r => orderColumn!.getValue(r) ?? 0);
   }
 
   var horizontalKeys = groupAndSort(data.rows, parameters["XSort"]!, horizontalColumn, parameters['CompleteHorizontalValues']);

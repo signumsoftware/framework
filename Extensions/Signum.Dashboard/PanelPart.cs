@@ -2,11 +2,18 @@ using Signum.UserAssets;
 using System.Xml.Linq;
 using Signum.Utilities.DataStructures;
 using System.ComponentModel;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Dashboard;
 
 public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
 {
+    public PanelPartEmbedded()
+    {
+        BindParent();
+    }
+
     [StringLengthValidator(Min = 3, Max = 100)]
     public string? Title { get; set; }
 
@@ -17,7 +24,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     [Format(FormatAttribute.Color)]
     public string? IconColor { get; set; }
 
-    [StringLengthValidator(Min = 3, Max = 20)]
+    [StringLengthValidator(Min = 1, Max = 20)]
     [Format(FormatAttribute.Color)]
     public string? TitleColor { get; set; }
 
@@ -39,7 +46,8 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     [ImplementedBy(
         typeof(LinkListPartEntity),
         typeof(ImagePartEntity),
-        typeof(SeparatorPartEntity))]
+        typeof(SeparatorPartEntity),
+        typeof(HealthCheckPartEntity))]
     public IPartEntity Content { get; set; }
 
     public override string ToString()
@@ -132,6 +140,19 @@ public interface IPartEntity : IEntity
 
     XElement ToXml(IToXmlContext ctx);
     void FromXml(XElement element, IFromXmlContext ctx);
+}
+
+public interface IPartParseDataEntity : IPartEntity
+{
+    void ParseData(DashboardEntity dashboard); //Parent not bound yet
+}
+
+public static class PanelPartExtensions
+{
+    public static DashboardEntity GetDashboard(this IPartEntity e)
+    {
+        return ((ModifiableEntity)e).GetParentEntity<PanelPartEmbedded>().GetParentEntity<DashboardEntity>();
+    }
 }
 
 public enum InteractionGroup
@@ -284,4 +305,117 @@ public class SeparatorPartEntity : Entity, IPartEntity
     {
         throw new NotImplementedException();
     }
+}
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class HealthCheckPartEntity : Entity, IPartEntity
+{
+    [PreserveOrder]
+    public MList<HealthCheckElementEmbedded> Items { get; set; } = [];
+
+    public override string ToString()
+    {
+        return "{0} {1}".FormatWith(Items.Count, typeof(HealthCheckElementEmbedded).NicePluralName());
+    }
+
+    public bool RequiresTitle
+    {
+        get { return true; }
+    }
+
+    public IPartEntity Clone()
+    {
+        return new HealthCheckPartEntity
+        {
+            Items = this.Items.Select(e => e.Clone()).ToMList(),
+        };
+    }
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("HealthCheckPart",
+            Items.Select(i => i.ToXml(ctx)));
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        Items.Synchronize(element.Elements().ToList(), (le, x) => le.FromXml(x));
+    }
+}
+
+public class HealthCheckElementEmbedded : EmbeddedEntity
+{
+    [StringLengthValidator(Max = 100)]
+    public string Title { get; set; }
+
+    [StringLengthValidator(Max = 400)]
+    public string CheckURL { get; set; }
+
+    [StringLengthValidator(Max = 400)]
+    public string NavigateURL { get; set; }
+
+    public HealthCheckElementEmbedded Clone()
+    {
+        return new HealthCheckElementEmbedded
+        {
+            Title = this.Title,
+            CheckURL = this.CheckURL,
+            NavigateURL = this.NavigateURL
+        };
+    }
+
+    internal XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("HealthCheckElement",
+            new XAttribute("Title", Title),
+            new XAttribute("CheckURL", CheckURL),
+            new XAttribute("NavigateURL", NavigateURL));
+    }
+
+    internal void FromXml(XElement element)
+    {
+        Title = element.Attribute("Title")!.Value;
+        CheckURL = element.Attribute("CheckURL")!.Value;
+        NavigateURL = element.Attribute("NavigateURL")!.Value;
+    }
+}
+
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class TextPartEntity : Entity, IPartEntity
+{
+    [StringLengthValidator(Min = 1, MultiLine = true)]
+    public string? TextContent { get; set; }
+
+    public TextPartType TextPartType { get; set; }
+
+    public bool RequiresTitle
+    {
+        get { return false; }
+    }
+
+    public IPartEntity Clone()
+    {
+        return new TextPartEntity
+        {
+            TextContent = this.TextContent
+        };
+    }
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public enum TextPartType
+{
+    Text,
+    Markdown,
+    HTML,
 }

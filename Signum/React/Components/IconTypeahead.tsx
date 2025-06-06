@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes, Dic } from '../Globals'
 import { FormGroup } from '../Lines'
 import { TypeContext } from '../TypeContext'
-import { library, config, IconLookup } from '@fortawesome/fontawesome-svg-core'
+import { library, config, IconLookup, CssStyleClass, IconStyle } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useForceUpdate } from '../Hooks'
 import { TextHighlighter, Typeahead, TypeaheadOptions } from './Typeahead'
@@ -16,7 +16,7 @@ export interface IconTypeaheadLineProps {
   extraButtons?: () => React.ReactNode;
 }
 
-export function IconTypeaheadLine(p : IconTypeaheadLineProps){
+export function IconTypeaheadLine(p : IconTypeaheadLineProps): React.JSX.Element{
   const forceUpdate = useForceUpdate();
   function handleChange(newIcon: string | undefined | null) {
     p.ctx.value = newIcon;
@@ -88,19 +88,25 @@ function toLongPrefix(prefix: IconPrefix): string | undefined{
   };
 }
 
-//function toPrefix(family: string): IconPrefix | undefined  {
-//  switch (family) {
-//    case "fa-solid": return "fas"; 
-//    case "fa-brands": return "fab";
-//    case "fa-regular": return "far";
-//    case "fa-light": return "fal";
-//    case "fa-thin": return "fat"; 
-//    case "fa-duotone": return "fad"; 
-//    default: return undefined;
-//  };
-//}
+function toSortPrefix(family: CssStyleClass | IconStyle | IconPrefix): IconPrefix  {
+  switch (family) {
+    case "fa-solid": return "fas";
+    case "fa-brands": return "fab";
+    case "fa-regular": return "far";
+    case "fa-light": return "fal";
+    case "fa-thin": return "fat"; 
+    case "fa-duotone": return "fad"; 
+    case "solid": return "fas";
+    case "brands": return "fab";
+    case "regular": return "far";
+    case "light": return "fal";
+    case "thin": return "fat";
+    case "duotone": return "fad"; 
+    default: return family;
+  };
+}
 
-export function IconTypeahead(p: IconTypeaheadProps) {
+export function IconTypeahead(p: IconTypeaheadProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   var parsedIcon = parseIcon(p.icon);
@@ -216,15 +222,43 @@ export function parseIcon(iconName: string | undefined | null): IconProp | undef
     return undefined;
 
   if (iconName.contains(" "))
-    return {
-      prefix: iconName.tryBefore(" ") as IconPrefix,
-      iconName: iconName.tryAfter(" fa-") as IconName,
-    };
+    return (
+      {
+        prefix: iconName.tryBefore(" ") as IconPrefix,
+        iconName: iconName.tryAfter(" fa-") as IconName,
+      } satisfies IconLookup);
 
   return (iconName.tryAfter("fa-") ?? iconName) as IconName;
 }
 
-export function iconToString(icon: IconProp) {
+export function fallbackIcon(icon: IconProp) : IconProp {
+  if (isIconDefined(icon))
+    return icon;
+
+  console.error("Icon not found " + JSON.stringify(icon));
+
+  return ({ prefix: "fas", iconName: "question" });
+}
+
+export function isIconDefined(icon: IconProp): any {
+
+  if (Array.isArray(icon))
+    return lib.definitions[toSortPrefix(icon[0])]?.[icon[1]]
+
+  if (typeof icon == "object")
+    return lib.definitions[toSortPrefix(icon.prefix)]?.[icon.iconName];
+
+  if (typeof icon == "string") {
+    if (lib.definitions[toSortPrefix(config.styleDefault)]?.[icon])
+      return true;
+    else {
+      return false;
+    }
+  }
+  return false;
+}
+
+export function iconToString(icon: IconProp): string {
   return typeof icon == "string" ? "fas fa-" + icon :
     Array.isArray(icon) ? icon[0] + " fa-" + icon[1] :
       icon.prefix + " fa-" + icon.iconName;

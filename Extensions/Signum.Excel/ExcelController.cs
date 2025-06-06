@@ -6,6 +6,7 @@ using Signum.API.Filters;
 using Signum.Excel;
 using Signum.API;
 using Signum.API.Controllers;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Signum.Excel;
 
@@ -19,8 +20,8 @@ public class ExcelController : ControllerBase
 
         var queryRequest = request.ToQueryRequest(queryKey, SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
 
-        ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(queryRequest, token);
-        byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(queryRequest.QueryName), forImport: forImport);
+        ResultTable resultTable = await QueryLogic.Queries.ExecuteQueryAsync(queryRequest, token);
+        byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(resultTable, queryRequest, QueryUtils.GetNiceName(queryRequest.QueryName), forImport: forImport);
 
         var fileName = request.queryKey + Clock.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 
@@ -62,6 +63,8 @@ public class ExcelController : ControllerBase
     [HttpPost("api/excel/import/{queryKey}"), ProfilerActionSplitter("queryKey")]
     public IAsyncEnumerable<ImportResult> ImportFromExcel(string queryKey, [Required, FromBody] ImportFromExcelRequest request)
     {
+        HttpContext.Features.Get<IHttpResponseBodyFeature>()?.DisableBuffering();
+
         ExcelPermission.ImportFromExcel.AssertAuthorized();
 
         var qr = request.QueryRequest.ToQueryRequest(queryKey, SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
@@ -83,7 +86,7 @@ public class ImportFromExcelRequest
     {
         var symbol = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
-        OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true);
+        OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true, null);
 
         return symbol;
     }

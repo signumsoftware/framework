@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { SearchControl } from '@framework/Search';
 import { SMSUpdatePackageEntity, SMSMessageEntity } from '../Signum.SMS'
 
-export default function SMSSendPackage(p: { ctx: TypeContext<SMSUpdatePackageEntity> }) {
+export default function SMSSendPackage(p: { ctx: TypeContext<SMSUpdatePackageEntity> }): React.JSX.Element {
 
   return (
     <div>

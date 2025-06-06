@@ -53,21 +53,21 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
   itemsDelay?: number | undefined;
   minLength?: number | undefined;
 
-  abortableRequest = new AbortableRequest((signal, subStr: string) => this.getItemsFunction(signal, subStr));
+  abortableRequest: AbortableRequest<string, (Lite<T> | AutocompleteConstructor<T>)[]> = new AbortableRequest((signal, subStr: string) => this.getItemsFunction(signal, subStr));
 
-  getItemsDelay() {
+  getItemsDelay(): number | undefined {
     return this.itemsDelay;
   }
 
-  getMinLength() {
+  getMinLength(): number | undefined {
     return this.minLength;
   }
 
-  abort() {
+  abort(): void {
     this.abortableRequest.abort();
   }
 
-  getItems(subStr: string) {
+  getItems(subStr: string): Promise<(Lite<T> | AutocompleteConstructor<T>)[]> {
     return this.abortableRequest.getData(subStr);
   }
 
@@ -202,19 +202,19 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     Dic.assign(this, options);
   }
 
-  getItemsDelay() {
+  getItemsDelay(): number | undefined {
     return this.itemsDelay;
   }
 
-  getMinLength() {
+  getMinLength(): number | undefined {
     return this.minLength;
   }
 
-  abort() {
+  abort(): void {
     this.abortableRequest.abort();
   }
 
-  abortableRequest = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
+  abortableRequest: AbortableRequest<QueryRequest, ResultTable> = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
 
   static filtersWithSubStr(fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined, subStr: string): FilterOption[] {
 
@@ -300,6 +300,10 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   renderItem(item: ResultRow | AutocompleteConstructor<Entity>, hl: TextHighlighter): React.ReactNode {
     if (isAutocompleteConstructor<Entity>(item)) {
+
+      if (item.customElement)
+        return item.customElement;
+
       var ti = getTypeInfo(item.type);
       return <em>{SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "{hl.query}"</em>;
     }
@@ -360,7 +364,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       );
   }
 
-  convertToLite(entity: Lite<Entity> | ModifiableEntity) {
+  convertToLite(entity: Lite<Entity> | ModifiableEntity): Lite<Entity> {
 
     if (isLite(entity))
       return entity;
@@ -384,7 +388,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
   }
 }
 
-export function TypeBadge(p: { entity: Lite<Entity> | ModifiableEntity }) {
+export function TypeBadge(p: { entity: Lite<Entity> | ModifiableEntity }): React.JSX.Element {
 
   var typeName = isEntity(p.entity) ? p.entity.Type :
     isLite(p.entity) ? p.entity.EntityType :
@@ -424,11 +428,11 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
     ];
   }
 
-  getItemsDelay() {
+  getItemsDelay(): number | undefined {
     return Object.values(this.implementations).map(a => a.getItemsDelay()).notNull().max() ?? undefined;
   }
 
-  getMinLength() {
+  getMinLength(): number | undefined {
     return Object.values(this.implementations).map(a => a.getMinLength()).notNull().max() ?? undefined;
   }
 

@@ -11,6 +11,8 @@ public class QueryTokenBuilderProxy
         this.Element = element;
     }
 
+    public string? FullKey => this.Element.GetDomAttribute("data-token");
+
     public WebElementLocator TokenElement(int tokenIndex)
     {
         return this.Element.WithLocator(By.CssSelector($".sf-query-token-part:nth-child({tokenIndex + 1})"));

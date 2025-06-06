@@ -20,7 +20,6 @@ import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage } from '../Signum.Tool
 
 export default function ToolbarRenderer(p: {
   onAutoClose?: () => void;
-  appTitle: React.ReactNode
 }): React.ReactElement | null {
 
   Navigator.useEntityChanged(ToolbarEntity, () => reload(), []);
@@ -54,7 +53,6 @@ export default function ToolbarRenderer(p: {
 
   return (
     <div className={"sidebar-inner"}>
-      {p.appTitle}
       <div className={"close-sidebar"}
         onClick={() => p.onAutoClose && p.onAutoClose()}>
         <FontAwesomeIcon icon={"angles-left"} aria-label="Close" />
@@ -98,7 +96,7 @@ export function inferActive(r: ToolbarResponse<any>, location: Location, query: 
 }
 
 
-export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse<any> | null, key: string | number, onRefresh: () => void, onAutoClose?: () => void) {
+export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse<any> | null, key: string | number, onRefresh: () => void, onAutoClose?: () => void): React.JSX.Element {
 
   switch (res.type) {
     case "Divider":
@@ -106,8 +104,8 @@ export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse
     case "Header":
     case "Item":
       if (res.elements && res.elements.length) {
-        var title = res.label || getToString(res.content);
-        var icon = ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor);
+        const title = res.label || getToString(res.content);
+        const icon = ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor);
 
         return (
           <ToolbarDropdown parentTitle={title} icon={icon} key={key} toolbarMenuId={res.content?.id} extraIcons={renderExtraIcons(res.extraIcons, active, onAutoClose)}>
@@ -117,11 +115,15 @@ export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse
       }
 
       if (res.url) {
-        var url = res.url!;
-        var isExternalLink = url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName);
+        let url = res.url!;
+        const isExternalLink = url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName);
+        const config = res.content && ToolbarClient.getConfig(res);
         return (
           <ToolbarNavItem key={key} title={res.label} isExternalLink={isExternalLink} extraIcons={renderExtraIcons(res.extraIcons, active, onAutoClose)}
-            active={res == active} icon={ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
+            active={res == active} icon={<>
+              {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
+              {config?.getCounter(res)}
+            </>}
             onClick={(e: React.MouseEvent<any>) => {
 
               Dic.getKeys(urlVariables).forEach(v => {
@@ -140,7 +142,7 @@ export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse
       }
 
       if (res.content) {
-        var config = ToolbarClient.getConfig(res);
+        const config = ToolbarClient.getConfig(res);
         if (!config)
           return <Nav.Item className="text-danger">{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
 
@@ -149,11 +151,11 @@ export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse
 
       if (res.type == "Header") {
         return (
-          <div key={key} className={"nav-item-header"}>
+          <li key={key} className={"nav-item-header"}>
             {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
             <span className={"nav-item-text"}>{res.label}</span>
             <div className={"nav-item-float"}>{res.label}</div>
-          </div>
+          </li>
         );
       }
 
@@ -178,25 +180,31 @@ function ToolbarDropdown(p: { parentTitle: string | undefined, icon: any, childr
 
 
   return (
-    <div>
-      <ToolbarNavItem title={p.parentTitle} extraIcons={p.extraIcons} onClick={() => handleSetShow(!show)}
-        icon={
-          <div style={{ display: 'inline-block', position: 'relative' }}>
-            <div className="nav-arrow-icon" style={{ position: 'absolute' }}><FontAwesomeIcon icon={show ? "caret-down" : "caret-right"} className="icon" /></div>
-            <div className="nav-icon-with-arrow">
-              {p.icon ?? <div className="icon" />}
+    <li>
+      <ul>
+        <ToolbarNavItem title={p.parentTitle} extraIcons={p.extraIcons} onClick={() => handleSetShow(!show)}
+          icon={
+            <div style={{ display: 'inline-block', position: 'relative' }}>
+              <div className="nav-arrow-icon" style={{ position: 'absolute' }}>
+                <FontAwesomeIcon icon={show ? "chevron-down" : "chevron-right"} className="icon" />
+              </div>
+              <div className="nav-icon-with-arrow">
+                {p.icon ?? <div className="icon" />}
+              </div>
             </div>
-          </div>
-        }
-      />
-      <div style={{ display: show ? "block" : "none" }} className="nav-item-sub-menu">
-        {show && p.children}
-      </div>
-    </div>
+          }
+        />
+       {show && <li>
+          <ul style={{ display: show ? "block" : "none" }} className="nav-item-sub-menu">
+            {p.children}
+          </ul>
+        </li>}  
+      </ul>
+    </li>
   );
 }
 
-export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }) {
+export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
   return (
     <li className="nav-item d-flex">
       <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100">

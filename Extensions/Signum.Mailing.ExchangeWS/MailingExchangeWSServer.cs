@@ -27,7 +27,9 @@ internal class MailingExchangeWSServer
                 CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
                 CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
                 {
-                    ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
+                    var sm = EntityJsonContext.CurrentSerializationPath!.CurrentSerializationMetadata();
+
+                    ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity, sm);
 
                     var password = reader.GetString()!;
 

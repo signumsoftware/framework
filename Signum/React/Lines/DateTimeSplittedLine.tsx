@@ -22,30 +22,34 @@ export interface DateTimeSplittedLineProps extends ValueBaseProps<string /*Date 
 }
 
 export class DateTimeSplittedLineController extends ValueBaseController<DateTimeSplittedLineProps, string /*Date or DateTime*/ | null >{
-  init(p: DateTimeSplittedLineProps) {
+  init(p: DateTimeSplittedLineProps): void {
     super.init(p);
     this.assertType("DateTimeSplittedLine", ["DateOnly", "DateTime"]);
   }
 }
 
 
-export const DateTimeSplittedLine = React.memo(React.forwardRef(function DateTimeSplittedLine(props: DateTimeSplittedLineProps, ref: React.Ref<DateTimeSplittedLineController>) {
+export const DateTimeSplittedLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<DateTimeSplittedLineProps & React.RefAttributes<DateTimeSplittedLineController>>> =
+  React.memo(React.forwardRef(function DateTimeSplittedLine(props: DateTimeSplittedLineProps, ref: React.Ref<DateTimeSplittedLineController>) {
 
   const c = useController(DateTimeSplittedLineController, props, ref);
 
   if (c.isHidden)
     return null;
 
-  const s = c.props;
+  const p = c.props;
   const type = c.props.type!.name as "DateOnly" | "DateTime";
-  const luxonFormat = toLuxonFormat(s.format, type);
+  const luxonFormat = toLuxonFormat(p.format, type);
 
-  const dt = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
+  const dt = p.ctx.value ? DateTime.fromISO(p.ctx.value) : undefined;
 
-  if (s.ctx.readOnly)
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
+  if (p.ctx.readOnly)
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, "sf-readonly-date")} ctx={s.ctx} innerRef={c.setRefs}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+        {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, "sf-readonly-date")} ctx={p.ctx} innerRef={c.setRefs}>
           {dt && toFormatWithFixes(dt, luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>
@@ -56,38 +60,35 @@ export const DateTimeSplittedLine = React.memo(React.forwardRef(function DateTim
     var newDT = date && DateTime.fromJSDate(date);
 
     if (newDT)
-      newDT = trimDateToFormat(newDT, type, s.format);
+      newDT = trimDateToFormat(newDT, type, p.format);
 
     // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
     c.setValue(newDT == null || !newDT.isValid ? null : newDT.toISO()!);
   };
 
-  return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    return (
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => c.withItemGroup(
         <DateTimePickerSplitted value={dt?.toJSDate()} onChange={handleDatePickerOnChange}
           id={inputId}
           initiallyFocused={Boolean(c.props.initiallyFocused)}
           initiallyShowOnly={c.props.initiallyShowOnly}
           luxonFormat={luxonFormat}
-          minDate={s.minDate}
-          maxDate={s.maxDate}
+          minDate={p.minDate}
+          maxDate={p.maxDate}
           mandatoryClass={c.mandatoryClass}
-          timeTextBoxClass={s.ctx.formControlClass}
-          htmlAttributes={s.valueHtmlAttributes}
-          widgetClass={s.ctx.rwWidgetClass}
+          timeTextBoxClass={p.ctx.formControlClass}
+          htmlAttributes={p.valueHtmlAttributes}
+          widgetClass={p.ctx.rwWidgetClass}
           calendarProps={{
             renderDay: defaultRenderDay,
-            ...s.calendarProps
+            ...p.calendarProps
           }}
         />
       )}
     </FormGroup>
   );
 }), (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
   return LineBaseController.propEquals(prev, next);
 });
 

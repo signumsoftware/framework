@@ -19,7 +19,7 @@ interface ColumnEditorProps {
   close: () => void;
 }
 
-export default function ColumnEditor(p: ColumnEditorProps) {
+export default function ColumnEditor(p: ColumnEditorProps): React.JSX.Element {
 
   function handleSummaryTokenChanged(newToken: QueryToken | undefined) {
     p.columnOption.summaryToken = newToken;
@@ -43,14 +43,6 @@ export default function ColumnEditor(p: ColumnEditorProps) {
     p.onChange(undefined);
   }
 
-  function handleHiddenColumnClick() {
-    co.hiddenColumn = co.hiddenColumn ? undefined : true;
-    co.displayName = co.token?.niceName;
-    co.summaryToken = undefined;
-    co.combineRows = undefined;
-    p.onChange(undefined);
-  }
-
   function handleCombineEqualsVertically(e: React.ChangeEvent<HTMLSelectElement>) {
     co.combineRows = (e.currentTarget.value as CombineRows) || undefined;
     p.onChange(undefined);
@@ -61,6 +53,14 @@ export default function ColumnEditor(p: ColumnEditorProps) {
   const isCollection = co.token && co.token.type.isCollection;
   const isInvalid = co.token && (co.token.queryTokenType == "Operation" || co.token.queryTokenType == "Manual");
 
+
+  const [showMore, setShowMore] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (co.summaryToken || co.displayName != co.token?.niceName || co.combineRows)
+      setShowMore(true);
+  }, [co.summaryToken, co.displayName != co.token?.niceName, co.combineRows]);
+
   const summaryNotAggregate = co.summaryToken != null && co.summaryToken.queryTokenType != "Aggregate";
 
   return (
@@ -68,7 +68,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
 
 
       <div className="row">
-        <div className="col-sm-7">
+        <div className={showMore ? "col-sm-7" : "col-sm-11" }>
 
           <div className="d-flex" title={!StyleContext.default.titleLabels ? undefined :
             isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() :
@@ -84,10 +84,12 @@ export default function ColumnEditor(p: ColumnEditorProps) {
                   readOnly={false} />
               </div>
             </div>
+
+            {!showMore && <a href="#" onClick={e => { e.preventDefault(); setShowMore(true); }}>{SearchMessage.ShowMore.niceToString()}</a>}
           </div>
 
 
-          <div className={classes("d-flex", co.summaryToken && summaryNotAggregate ? "error" : undefined)}
+          {showMore && < div className={classes("d-flex", co.summaryToken && summaryNotAggregate ? "error" : undefined)}
             title={StyleContext.default.titleLabels && summaryNotAggregate ? SearchMessage.SummaryHeaderMustBeAnAggregate.niceToString() : undefined}>
             <label className="col-form-label col-form-label-xs me-2">
               <input type="checkbox" disabled={co.token == null} className="form-check-input me-2" checked={co.summaryToken != null} onChange={handleSummaryCheck} />
@@ -102,13 +104,12 @@ export default function ColumnEditor(p: ColumnEditorProps) {
                 readOnly={false} />
               }
             </div>
-          </div>
-
+          </div>}
         </div>
 
-        <div className="col-sm-4">
+        {showMore && <div className="col-sm-4">
 
-          <div className="d-flex">
+          < div className="d-flex">
             <label className="col-form-label col-form-label-xs me-2">{SearchMessage.DisplayName.niceToString()}</label>
             <div className="flex-grow-1">
               <input className="form-control form-control-xs "
@@ -127,13 +128,15 @@ export default function ColumnEditor(p: ColumnEditorProps) {
               </select>
             </div>
           </div>
+
         </div>
+        }
 
         <div className="col-sm-1">
           <button type="button" className="btn-close float-end" aria-label="Close" onClick={p.close} />
           <VisualTipIcon visualTip={SearchVisualTip.ColumnHelp} content={props => <ColumnHelp queryDescription={p.queryDescription} injected={props} />} />
         </div>
-
+      
       </div>
 
     </div >

@@ -6,7 +6,7 @@ import * as GoogleMapsChartUtils from './GoogleMapsChartUtils';
 import googleMapStyles from "./GoogleMapStyles"
 
 
-export default function renderHeatmapChart(p: ChartScriptProps) {
+export default function renderHeatmapChart(p: ChartScriptProps): React.JSX.Element {
   return <HeatmapChartImp {...p} />
 }
 

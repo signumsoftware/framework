@@ -18,22 +18,18 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     super(type);
   }
 
-  getIcon(element: ToolbarResponse<QueryEntity>) {
-
+  getCounter(element: ToolbarResponse<QueryEntity>): React.ReactElement | undefined {
     if (element.showCount != null) {
       return (
-        <>
-          {super.getIcon(element)}
-          <SearchToolbarCount
-            findOptions={{ queryName: getToString(element.content)! }}
-            color={element.iconColor ?? "red"}
-            autoRefreshPeriod={element.autoRefreshPeriod}
-            showCount={element.showCount} />
-        </>
+        <SearchToolbarCount
+          findOptions={{ queryName: getToString(element.content)! }}
+          color={element.iconColor ?? "red"}
+          autoRefreshPeriod={element.autoRefreshPeriod}
+          showCount={element.showCount} />
       );
     }
 
-    return  super.getIcon(element);
+    return undefined;
   }
 
   getDefaultIcon(): IconColor {
@@ -43,7 +39,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     });
   }
 
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
+  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<QueryEntity>): void {
     if (!res.openInPopup)
       super.handleNavigateClick(e, res);
     else {
@@ -68,7 +64,7 @@ interface CountIconProps {
   showCount: ShowCount;
 }
 
-export function SearchToolbarCount(p: CountIconProps) {
+export function SearchToolbarCount(p: CountIconProps): React.JSX.Element {
 
   const deps = useInterval(p.autoRefreshPeriod == null ? null : p.autoRefreshPeriod! * 1000, 0, a => a + 1);
 
@@ -90,7 +86,7 @@ export function SearchToolbarCount(p: CountIconProps) {
 }
 
 
-export function ToolbarCount(p: { num: number | null | undefined, showCount: ShowCount }) {
+export function ToolbarCount(p: { num: number | null | undefined, showCount: ShowCount }): React.JSX.Element | null {
 
   if (!p.num && p.showCount == "MoreThan0")
     return null;

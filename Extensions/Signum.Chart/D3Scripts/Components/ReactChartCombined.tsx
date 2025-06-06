@@ -16,14 +16,14 @@ export interface ReactChartCombinedInfo {
   onDrillDown: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
 }
 
-export function ReactChartCombined(p: { infos: ReactChartCombinedInfo[], useSameScale: boolean, minHeigh: number | null }) {
+export function ReactChartCombined(p: { infos: ReactChartCombinedInfo[], useSameScale: boolean, minHeigh: number | null, sizeDeps?: React.DependencyList }): React.JSX.Element {
 
   const isSimple = p.infos.every(a => a.data == null || a.data.rows.length < ReactChart.maxRowsForAnimation);
   const allData = p.infos.every(a => a.data != null);
   const oldAllData = useThrottle(allData, 200, { enabled: isSimple });
   const initialLoad = oldAllData == false && allData && isSimple;
 
-  const { size, setContainer } = useSize();
+  const { size, setContainer } = useSize({deps: p.sizeDeps});
 
   return (
     <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")}

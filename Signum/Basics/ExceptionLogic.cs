@@ -1,7 +1,7 @@
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
-using Signum.Security;
 using Signum.Engine.Sync;
+using Signum.Entities;
 
 namespace Signum.Basics;
 
@@ -19,6 +19,7 @@ public static class ExceptionLogic
                     e.CreationDate,
                     e.ExceptionType,
                     e.Origin,
+                    e.User,
                     e.ExceptionMessage,
                     e.StackTraceHash,
                 });
@@ -27,31 +28,24 @@ public static class ExceptionLogic
         }
     }
 
-    public static event Action<Exception, ExceptionEntity>? OnExceptionLogged;
+    public static event Action<Exception, ExceptionEntity?>? OnExceptionLogged;
 
-    public static ExceptionEntity LogException(this Exception ex, Action<ExceptionEntity> completeContext)
+    public static ExceptionEntity LogException(this Exception ex, Action<ExceptionEntity>? completeContext = null)
     {
-        var entity = GetEntity(ex);
+        ExceptionEntity? entity = null;
+        try
+        {
+            entity = GetEntity(ex);
+            completeContext?.Invoke(entity);
+            entity.SaveForceNew();
 
-        completeContext(entity);
-
-        entity = entity.SaveForceNew();
-
-        if (OnExceptionLogged is not null)
-            OnExceptionLogged(ex, entity);
-
-        return entity;
-    }
-
-    public static ExceptionEntity LogException(this Exception ex)
-    {
-        var entity = GetEntity(ex);
-        entity = entity.SaveForceNew();
-
-        if (OnExceptionLogged is not null)
-            OnExceptionLogged(ex, entity);
-
-        return entity;
+            return entity;
+        }
+        finally
+        {
+            if (OnExceptionLogged is not null)
+                OnExceptionLogged(ex, entity);
+        }
     }
 
     public static ExceptionEntity? GetExceptionEntity(this Exception ex)
@@ -71,8 +65,8 @@ public static class ExceptionLogic
             agex.InnerExceptions.SelectMany(inner => inner.Follow(e => e.InnerException)).ToList() :
             ex.Follow(e => e.InnerException).ToList();
 
-        string messages = exceptions.ToString(e => e.Message, "\r\n\r\n");
-        string stacktraces = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
+        string messages = exceptions.ToString(e => e.Message, "\n");
+        string stacktraces = exceptions.ToString(e => e.StackTrace, "\n");
 
         entity.ExceptionMessage = messages.DefaultText("- No message - ");
         entity.StackTrace = new BigStringEmbedded(stacktraces.DefaultText("- No stacktrace -"));

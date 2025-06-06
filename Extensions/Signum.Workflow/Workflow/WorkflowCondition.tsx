@@ -11,7 +11,7 @@ import AutoLineModal from '@framework/AutoLineModal'
 import { useForceUpdate, useAPI, useAPIWithReload } from '@framework/Hooks'
 
 
-export default function WorkflowConditionComponent(p: { ctx: TypeContext<WorkflowConditionEntity> }) {
+export default function WorkflowConditionComponent(p: { ctx: TypeContext<WorkflowConditionEntity> }): React.JSX.Element {
 
   const exampleEntityRef = React.useRef<ICaseMainEntity | null>(null);
 

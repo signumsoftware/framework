@@ -1,6 +1,7 @@
 using Signum.UserAssets;
 using System.Xml.Linq;
 using System.Globalization;
+using System.ComponentModel;
 
 namespace Signum.Scheduler;
 
@@ -14,12 +15,24 @@ public class HolidayCalendarEntity : Entity, IUserAssetEntity
     [StringLengthValidator(Min = 3, Max = 100)]
     public string Name { get; set; }
 
+    public int? FromYear { get; set; }
+    public int? ToYear { get; set; }
+    public string? CountryCode { get; set; }
+    public string? SubDivisionCode { get; set; }
+    public bool IsDefault { get; set; }
 
     public MList<HolidayEmbedded> Holidays { get; set; } = new MList<HolidayEmbedded>();
 
+    [Ignore]
+    Lazy<HashSet<DateOnly>> Dates;
+    public HolidayCalendarEntity()
+    {
+        Dates = new Lazy<HashSet<DateOnly>>(()=> this.Holidays.Select(a=>a.Date).ToHashSet());
+    }
+
     public bool IsHoliday(DateOnly date)
     {
-        return Holidays.Any(h => h.Date == date);
+        return this.Dates.Value.Contains(date);
     }
 
     protected override string? PropertyValidation(PropertyInfo pi)
@@ -46,6 +59,11 @@ public class HolidayCalendarEntity : Entity, IUserAssetEntity
         return new XElement("HolidayCalendar",
             new XAttribute("Guid", this.Guid),
             new XAttribute("Name", this.Name),
+            this.FromYear == null ? null : new XAttribute("FromYear", this.FromYear),
+            this.ToYear == null ? null : new XAttribute("ToYear", this.ToYear),
+            this.CountryCode == null ? null : new XAttribute("CountryCode", this.CountryCode),
+            this.SubDivisionCode == null ? null : new XAttribute("SubDivisionCode", this.SubDivisionCode),
+            new XAttribute("IsDefault", this.IsDefault),
             new XElement("Holidays", this.Holidays.Select(p => p.ToXml(ctx))));
     }
 
@@ -60,6 +78,7 @@ public class HolidayCalendarEntity : Entity, IUserAssetEntity
 public static class HolidayCalendarOperation
 {
     public static ExecuteSymbol<HolidayCalendarEntity> Save;
+    public static ExecuteSymbol<HolidayCalendarEntity> ImportPublicHolidays;
     public static DeleteSymbol<HolidayCalendarEntity> Delete;
 }
 
@@ -87,4 +106,11 @@ public class HolidayEmbedded : EmbeddedEntity
         this.Date = DateOnly.ParseExact(x.Attribute("Date")!.Value, "o", CultureInfo.InvariantCulture);
         this.Name = x.Attribute("Name")?.Value;
     }
+}
+
+
+public enum HolidayCalendarMessage
+{
+    [Description("For import, from year, to year and country code should be set.")]
+    ForImportFromYearToYearAndCountryCodeShouldBeSet
 }

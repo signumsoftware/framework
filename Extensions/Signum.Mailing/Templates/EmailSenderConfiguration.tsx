@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { EmailSenderConfigurationEntity, EmailRecipientEmbedded, EmailMessageEntity } from '../Signum.Mailing'
 import { SearchValueLine } from '@framework/Search';
 
-export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSenderConfigurationEntity> }) {
+export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSenderConfigurationEntity> }): React.JSX.Element {
   const sc = p.ctx;
 
   return (

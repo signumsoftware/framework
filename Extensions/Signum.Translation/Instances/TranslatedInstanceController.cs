@@ -98,7 +98,7 @@ public class TranslatedInstanceController : ControllerBase
         var c = CultureInfo.GetCultureInfo(culture);
 
         int totalInstances;
-        var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChangesTranslated(TranslationServer.Translators, t, c, out totalInstances);
+        var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChangesTranslated(TranslationLogic.Translators, t, c, out totalInstances);
 
         var sd = new StringDistance();
 

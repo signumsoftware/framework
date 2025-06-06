@@ -59,17 +59,6 @@ public class Graph<T, S>
             ToStates = new List<S>();
         }
 
-        protected Construct(OperationSymbol symbol)
-            : base(symbol)
-        {
-        }
-
-        public static new Construct Untyped<B>(ConstructSymbol<B>.Simple symbol)
-             where B : class, IEntity
-        {
-            return new Construct(symbol.Symbol);
-        }
-
         protected override void AssertEntity(T entity)
         {
             Graph<T, S>.AssertToState(entity, this);
@@ -86,7 +75,7 @@ public class Graph<T, S>
             base.AssertIsValid();
 
             if (ToStates.IsEmpty())
-                throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(operationSymbol));
+                throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(this.operationSymbol));
 
         }
     }
@@ -114,17 +103,6 @@ public class Graph<T, S>
         public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
             : base(symbol)
         {
-        }
-
-        protected ConstructFrom(OperationSymbol operationSymbol, Type baseType)
-            : base(operationSymbol, baseType)
-        {
-        }
-
-        public static new ConstructFrom<F> Untyped<B>(ConstructSymbol<B>.From<F> symbol)
-             where B : class, IEntity
-        {
-            return new ConstructFrom<F>(symbol.Symbol, symbol.BaseType);
         }
 
         protected override void AssertEntity(T result)
@@ -163,19 +141,6 @@ public class Graph<T, S>
         {
             ToStates = new List<S>();
         }
-
-
-        protected ConstructFromMany(OperationSymbol operationSymbol, Type baseType)
-            : base(operationSymbol, baseType)
-        {
-        }
-
-        public static new ConstructFromMany<F> Untyped<B>(ConstructSymbol<B>.FromMany<F> symbol)
-             where B : class, IEntity
-        {
-            return new ConstructFromMany<F>(symbol.Symbol, symbol.BaseType);
-        }
-
 
         protected override void AssertEntity(T result)
         {
@@ -249,7 +214,7 @@ public class Graph<T, S>
                 {
                     S endState = GetStateFunc(entity);
                     if (!targetStates.Contains(endState))
-                        throw new InvalidOperationException("After executing {0} from state {1} should be {2}, but is {3}".FormatWith(Symbol.Symbol, initialState, targetStates.CommaOr(), endState));
+                        throw new InvalidOperationException("After executing {0} from state {1} should be {2}, but is {3}".FormatWith(operationSymbol, initialState, targetStates.CommaOr(), endState));
                 };
             }
         }
@@ -262,10 +227,10 @@ public class Graph<T, S>
             if (FromToStates.Any())
             {
                 if (FromStates.Any())
-                    throw new InvalidOperationException("Operation {0} has FromStates and FromToStates at the same time".FormatWith(Symbol.Symbol));
+                    throw new InvalidOperationException("Operation {0} has FromStates and FromToStates at the same time".FormatWith(operationSymbol));
 
                 if (ToStates.Any())
-                    throw new InvalidOperationException("Operation {0} has ToStates and FromToStates at the same time".FormatWith(Symbol.Symbol));
+                    throw new InvalidOperationException("Operation {0} has ToStates and FromToStates at the same time".FormatWith(operationSymbol));
 
                 FromStates.AddRange(FromToStates.Select(a => a.from).Distinct());
                 ToStates.AddRange(FromToStates.Select(a => a.to).Distinct());
@@ -273,10 +238,10 @@ public class Graph<T, S>
             else
             {
                 if (ToStates.IsEmpty())
-                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(Symbol.Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(operationSymbol));
 
                 if (FromStates.IsEmpty())
-                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".FormatWith(Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".FormatWith(operationSymbol));
             }
         }
 
@@ -332,7 +297,7 @@ public class Graph<T, S>
             base.AssertIsValid();
 
             if (FromStates.IsEmpty())
-                throw new InvalidOperationException("Operation {0} does not have FromStates initialized".FormatWith(Symbol.Symbol));
+                throw new InvalidOperationException("Operation {0} does not have FromStates initialized".FormatWith(operationSymbol));
         }
     }
 

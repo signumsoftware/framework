@@ -13,7 +13,7 @@ import { isPermissionAuthorized } from '@framework/AppContext';
 
 export namespace PrintClient {
   
-  export function start(options: { routes: RouteObject[], }) {
+  export function start(options: { routes: RouteObject[], }): void {
     Navigator.addSettings(new EntitySettings(PrintLineEntity, e => import('./Templates/PrintLine'), { isCreable: "IsSearch" }));
     Navigator.addSettings(new EntitySettings(PrintPackageEntity, e => import('./Templates/PrintPackage')));
   

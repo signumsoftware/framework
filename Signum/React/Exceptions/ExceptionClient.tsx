@@ -8,7 +8,7 @@ import { AutoLine, TextAreaLine } from '../Lines';
 
 export namespace ExceptionClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(ExceptionEntity, e => import('./Exception'), { allowWrapEntityLink: true }));
     AutoLine.registerComponent(BigStringEmbedded.typeName, (tr, pr) => {
       if (tr.isCollection)

@@ -10,7 +10,7 @@ import { useForceUpdate } from '../Hooks';
 type NotifyType = "warning" | "error" | "success" | "loading";
 
 export interface NotifyOptions {
-  text: React.ReactChild;
+  text: string | React.ReactElement;
   type: NotifyType;
   priority?: number; 
   timeoutHandler?: number;
@@ -23,7 +23,7 @@ interface NotifyHandle {
   remove(options: NotifyOptions): void;
 }
 
-export default function Notify() {
+function Notify(): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 
@@ -126,6 +126,10 @@ export default function Notify() {
   );
 }
 
+namespace Notify {
+  export let singleton = undefined as (NotifyHandle | undefined);
+  export let lockScreenOnLoading = false;
+}
 
-Notify.singleton = undefined as (NotifyHandle | undefined);
-Notify.lockScreenOnLoading = false;
+export default Notify;
+
