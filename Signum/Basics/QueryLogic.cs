@@ -3,6 +3,7 @@ using Signum.Utilities.Reflection;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
 using System.Collections.Frozen;
+using System.Data.Common;
 
 namespace Signum.Basics;
 
@@ -57,7 +58,18 @@ public static class QueryLogic
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             QueryEntity.GetEntityImplementations = query => Queries.GetEntityImplementations(query.ToQueryName());
-            FilterCondition.ToLowerString = () => Schema.Current.Settings.IsPostgres;
+            var schema = Schema.Current;
+            FilterCondition.ToLowerString = token =>
+            {
+                if (!schema.Settings.IsPostgres)
+                    return false;
+
+                var pr = token?.GetPropertyRoute();
+
+                var dbType = pr == null ? null : schema.Settings.FieldAttribute<DbTypeAttribute>(pr);
+
+                return dbType == null || !dbType.CollationPostgres_AvoidToLower;
+            };
 
             // QueryManagers = queryManagers;
             sb.Schema.Initializing += () =>

@@ -328,6 +328,8 @@ public class DbTypeAttribute : Attribute
         return (isPostgres ? CollationPostgres : CollationSqlServer);
     }
 
+    public bool CollationPostgres_AvoidToLower { get; set; }
+
     public const string SqlServer_NewId = "NEWID()";
     public const string SqlServer_NewSequentialId = "NEWSEQUENTIALID()";
     public const string Postgres_UuidGenerateV1 = "uuid_generate_v1()";
