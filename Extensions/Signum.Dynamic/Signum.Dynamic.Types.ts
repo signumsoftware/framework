@@ -30,7 +30,7 @@ export interface DynamicTypeConditionEval extends Eval.EvalEmbedded<IDynamicType
   Type: "DynamicTypeConditionEval";
 }
 
-export module DynamicTypeConditionOperation {
+export namespace DynamicTypeConditionOperation {
   export const Clone : Operations.ConstructSymbol_From<DynamicTypeConditionEntity, DynamicTypeConditionEntity> = registerSymbol("Operation", "DynamicTypeConditionOperation.Clone");
   export const Save : Operations.ExecuteSymbol<DynamicTypeConditionEntity> = registerSymbol("Operation", "DynamicTypeConditionOperation.Save");
 }
@@ -41,7 +41,7 @@ export interface DynamicTypeConditionSymbolEntity extends Entities.Entity {
   name: string;
 }
 
-export module DynamicTypeConditionSymbolOperation {
+export namespace DynamicTypeConditionSymbolOperation {
   export const Save : Operations.ExecuteSymbol<DynamicTypeConditionSymbolEntity> = registerSymbol("Operation", "DynamicTypeConditionSymbolOperation.Save");
 }
 
@@ -53,7 +53,7 @@ export interface DynamicTypeEntity extends Entities.Entity {
   typeDefinition: string;
 }
 
-export module DynamicTypeMessage {
+export namespace DynamicTypeMessage {
   export const TypeSaved: MessageKey = new MessageKey("DynamicTypeMessage", "TypeSaved");
   export const DynamicType0SucessfullySavedGoToDynamicPanelNow: MessageKey = new MessageKey("DynamicTypeMessage", "DynamicType0SucessfullySavedGoToDynamicPanelNow");
   export const ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain: MessageKey = new MessageKey("DynamicTypeMessage", "ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain");
@@ -61,7 +61,7 @@ export module DynamicTypeMessage {
   export const TheEntityShouldBeSynchronizedToApplyMixins: MessageKey = new MessageKey("DynamicTypeMessage", "TheEntityShouldBeSynchronizedToApplyMixins");
 }
 
-export module DynamicTypeOperation {
+export namespace DynamicTypeOperation {
   export const Create : Operations.ConstructSymbol_Simple<DynamicTypeEntity> = registerSymbol("Operation", "DynamicTypeOperation.Create");
   export const Clone : Operations.ConstructSymbol_From<DynamicTypeEntity, DynamicTypeEntity> = registerSymbol("Operation", "DynamicTypeOperation.Clone");
   export const Save : Operations.ExecuteSymbol<DynamicTypeEntity> = registerSymbol("Operation", "DynamicTypeOperation.Save");

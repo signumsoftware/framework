@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
-import ContextMenu from '@framework/SearchControl/ContextMenu'
+import ContextMenu, { getMouseEventPosition } from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import * as NodeUtils from './NodeUtils'
 import NodeSelectorModal from './NodeSelectorModal'
@@ -54,7 +54,7 @@ export function DynamicViewTree(p: DynamicViewTreeProps): React.JSX.Element {
 
     p.rootNode.context.setSelectedNode(n);
     setContextualMenu({
-      position: ContextMenu.getMouseEventPosition(e)
+      position: getMouseEventPosition(e)
     });
   }
 

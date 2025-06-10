@@ -20,7 +20,7 @@ export interface NoteEntity extends Entities.Entity {
   noteType: NoteTypeSymbol | null;
 }
 
-export module NoteMessage {
+export namespace NoteMessage {
   export const NewNote: MessageKey = new MessageKey("NoteMessage", "NewNote");
   export const Note: MessageKey = new MessageKey("NoteMessage", "Note");
   export const _note: MessageKey = new MessageKey("NoteMessage", "_note");
@@ -31,12 +31,12 @@ export module NoteMessage {
   export const ViewNotes: MessageKey = new MessageKey("NoteMessage", "ViewNotes");
 }
 
-export module NoteOperation {
+export namespace NoteOperation {
   export const CreateNoteFromEntity : Operations.ConstructSymbol_From<NoteEntity, Entities.Entity> = registerSymbol("Operation", "NoteOperation.CreateNoteFromEntity");
   export const Save : Operations.ExecuteSymbol<NoteEntity> = registerSymbol("Operation", "NoteOperation.Save");
 }
 
-export module NoteTypeOperation {
+export namespace NoteTypeOperation {
   export const Save : Operations.ExecuteSymbol<NoteTypeSymbol> = registerSymbol("Operation", "NoteTypeOperation.Save");
 }
 

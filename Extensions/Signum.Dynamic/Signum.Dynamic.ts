@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 
 
-export module DynamicPanelPermission {
+export namespace DynamicPanelPermission {
   export const RestartApplication : Basics.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.RestartApplication");
 }
 

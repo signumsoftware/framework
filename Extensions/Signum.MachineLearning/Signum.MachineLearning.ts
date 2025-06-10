@@ -31,7 +31,7 @@ export interface AutoconfigureNeuralNetworkEntity extends Entities.Entity, Proce
   seed: number | null;
 }
 
-export module DefaultColumnEncodings {
+export namespace DefaultColumnEncodings {
   export const None : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.None");
   export const OneHot : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.OneHot");
   export const NormalizeZScore : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.NormalizeZScore");
@@ -206,7 +206,7 @@ export interface PredictorEpochProgressEntity extends Entities.Entity {
   accuracyValidation: number | null;
 }
 
-export module PredictorFileType {
+export namespace PredictorFileType {
   export const PredictorFile : Files.FileTypeSymbol = registerSymbol("FileType", "PredictorFileType.PredictorFile");
 }
 
@@ -219,7 +219,7 @@ export interface PredictorMainQueryEmbedded extends Entities.EmbeddedEntity {
   columns: Entities.MList<PredictorColumnEmbedded>;
 }
 
-export module PredictorMessage {
+export namespace PredictorMessage {
   export const Csv: MessageKey = new MessageKey("PredictorMessage", "Csv");
   export const Tsv: MessageKey = new MessageKey("PredictorMessage", "Tsv");
   export const TsvMetadata: MessageKey = new MessageKey("PredictorMessage", "TsvMetadata");
@@ -256,7 +256,7 @@ export interface PredictorMetricsEmbedded extends Entities.EmbeddedEntity {
   accuracy: number | null;
 }
 
-export module PredictorOperation {
+export namespace PredictorOperation {
   export const Save : Operations.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Save");
   export const Train : Operations.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Train");
   export const CancelTraining : Operations.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.CancelTraining");
@@ -269,7 +269,7 @@ export module PredictorOperation {
   export const AutoconfigureNetwork : Operations.ConstructSymbol_From<Processes.ProcessEntity, PredictorEntity> = registerSymbol("Operation", "PredictorOperation.AutoconfigureNetwork");
 }
 
-export module PredictorProcessAlgorithm {
+export namespace PredictorProcessAlgorithm {
   export const AutoconfigureNeuralNetwork : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "PredictorProcessAlgorithm.AutoconfigureNeuralNetwork");
 }
 
@@ -301,7 +301,7 @@ export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
   seed: number | null;
 }
 
-export module PredictorSimpleResultSaver {
+export namespace PredictorSimpleResultSaver {
   export const StatisticsOnly : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorSimpleResultSaver.StatisticsOnly");
   export const Full : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorSimpleResultSaver.Full");
 }
@@ -360,7 +360,7 @@ export type TensorFlowOptimizer =
   "Adam" |
   "GradientDescentOptimizer";
 
-export module TensorFlowPredictorAlgorithm {
+export namespace TensorFlowPredictorAlgorithm {
   export const NeuralNetworkGraph : PredictorAlgorithmSymbol = registerSymbol("PredictorAlgorithm", "TensorFlowPredictorAlgorithm.NeuralNetworkGraph");
 }
 
