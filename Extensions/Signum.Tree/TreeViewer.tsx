@@ -13,7 +13,7 @@ import { FilterOptionParsed, ColumnOptionParsed, QueryDescription, SubTokensOpti
 import FilterBuilder from "@framework/SearchControl/FilterBuilder";
 import { ISimpleFilterBuilder } from "@framework/Search";
 import { is } from "@framework/Signum.Entities";
-import ContextMenu, { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
+import ContextMenu, { ContextMenuPosition, getMouseEventPosition } from '@framework/SearchControl/ContextMenu'
 import { ContextualItemsContext, ContextualMenuItem, renderContextualItems, SearchableMenuItem } from "@framework/SearchControl/ContextualItems";
 import { Entity } from "@framework/Signum.Entities";
 import { tryGetMixin } from "@framework/Signum.Entities";
@@ -281,7 +281,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     this.setState({
       selectedNode: n,
       contextualMenu: {
-        position: ContextMenu.getMouseEventPosition(e, document.querySelector('.tree-container tbody')),
+        position: getMouseEventPosition(e, document.querySelector('.tree-container tbody')),
       }
     }, () => this.loadMenuItems());
   }
@@ -331,13 +331,13 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     );
   }
 
-  handleMenuFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  handleMenuFilterChange = (e: React.ChangeEvent<HTMLInputElement>) : void=> {
     const cm = this.state.contextualMenu;
 
     cm && this.setState({ contextualMenu: Object.assign(cm, { filter: e.currentTarget.value }) })
   }
 
-  handleMenuFilterKeyDown = (e: React.KeyboardEvent<any>) => {
+  handleMenuFilterKeyDown = (e: React.KeyboardEvent<any>): void => {
     if (!e.shiftKey && e.key == KeyNames.arrowDown) {
 
       e.preventDefault();
@@ -860,9 +860,9 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
     };
 
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
-      c.hasToArray != null ? SearchControlLoaded.joinNodes((node.values[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c)),
+      c.hasToArray != null ? SearchControlLoaded.joinNodes((node.values[c.resultIndex as number] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c)),
         c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />, TreeViewer.maxToArrayElements) :
-        c.cellFormatter.formatter(node.values[c.resultIndex], fctx, c);
+        c.cellFormatter.formatter(node.values[c.resultIndex as number], fctx, c);
   }
 
   getDragAndDropStyle(node: TreeNode): React.CSSProperties | undefined {
