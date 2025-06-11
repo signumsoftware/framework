@@ -336,7 +336,7 @@ public static class AutocompleteUtils
 
     public static string[] SplitParts(this string str)
     {
-        if (FilterCondition.ToLowerString())
+        if (FilterCondition.ToLowerString(null))
             return str.Trim().ToLower().SplitNoEmpty(' ');
 
         return str.Trim().SplitNoEmpty(' ');
@@ -344,7 +344,7 @@ public static class AutocompleteUtils
 
     [AutoExpressionField]
     public static bool ContainsAllParts(this string str, string[] parts) => As.Expression(() =>
-        FilterCondition.ToLowerString() ?
+        FilterCondition.ToLowerString(null) ?
         str.ToLower().ContainsAll(parts) :
         str.ContainsAll(parts));
 

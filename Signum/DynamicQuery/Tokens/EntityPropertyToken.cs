@@ -121,6 +121,20 @@ public class EntityPropertyToken : QueryToken
             }
         }
 
+        if (uType == typeof(TimeOnly))
+        {
+            PropertyRoute? route = this.GetPropertyRoute();
+
+            if (route != null)
+            {
+                var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators.OfType<TimePrecisionValidatorAttribute>().SingleOrDefaultEx();
+                if (att != null)
+                {
+                    return TimeOnlyProperties(this, att.Precision).AndHasValue(this);
+                }
+            }
+        }
+
         if (uType == typeof(double) ||
             uType == typeof(float) ||
             uType == typeof(decimal))

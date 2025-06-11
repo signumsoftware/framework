@@ -34,11 +34,11 @@ public static class SqlServerVersionDetector
         Azure = 5,
     }
 
-    public static SqlServerVersion Detect(string connectionString, SqlServerVersion fallback, string? accessToken = null)
+    public static SqlServerVersion Detect(string connectionString, SqlServerVersion fallback)
     {
         try
         {
-            using (var con = new SqlConnection(connectionString) { AccessToken = accessToken })
+            using (var con = new SqlConnection(connectionString))
             {
                 //Login failed? System.Security.Principal.WindowsIdentity.GetCurrent().Name
                 con.Open();
@@ -128,7 +128,7 @@ public class SqlServerConnector : Connector
 
         return SqlServerRetry.Retry(() =>
         {
-            using (var con = new SqlConnection(this.ConnectionString) { AccessToken = StaticSqlServerAccessToken })
+            using (var con = new SqlConnection(this.ConnectionString))
             {
                 con.Open();
 
@@ -464,7 +464,7 @@ public class SqlServerConnector : Connector
 
     public override DbConnection CreateConnection()
     {
-        return new SqlConnection(ConnectionString) { AccessToken = StaticSqlServerAccessToken };
+        return new SqlConnection(ConnectionString);
     }
 
     public override ParameterBuilder ParameterBuilder { get; protected set; }
@@ -544,8 +544,6 @@ public class SqlServerConnector : Connector
     public override bool SupportsPartitioning => true;
 
     public override int MaxNameLength => 128;
-
-    public string? StaticSqlServerAccessToken { get; set; }
 
     public override string ToString() => $"SqlServerConnector({Version}, Database: {this.DatabaseName()}, DataSource: {this.DataSourceName()})";
 
