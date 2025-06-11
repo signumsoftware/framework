@@ -9,7 +9,6 @@ public class Graph<T>
 {
     public class Construct : _Construct<T>, IConstructOperation
     {
-        protected readonly ConstructSymbol<T>.Simple constructSymbol;
         protected readonly OperationSymbol operationSymbol;
         OperationSymbol IOperation.OperationSymbol => operationSymbol;
         Type IOperation.OverridenType => typeof(T);
@@ -25,13 +24,22 @@ public class Graph<T>
         //public Func<object[]?, T> Construct { get; set; } (inherited)
         public bool Lite { get { return false; } }
 
-        public Construct(ConstructSymbol<T>.Simple symbol)
+        public Construct(ConstructSymbol<T>.Simple symbol) : this(symbol.Symbol)
+        {
+           
+        }
+
+        Construct(OperationSymbol symbol)
         {
             if (symbol == null)
                 throw AutoInitAttribute.ArgumentNullException(typeof(ConstructSymbol<T>.Simple), nameof(symbol));
 
-            this.constructSymbol = symbol;
-            this.operationSymbol = symbol.Symbol;
+            this.operationSymbol = symbol;
+        }
+
+        public static Construct Untyped(IOperationSymbolContainer symbol)
+        {
+            return new Construct(symbol.Symbol);
         }
 
         public void OverrideConstruct(Overrider<Func<object?[]?, T?>> overrider)
@@ -142,12 +150,13 @@ public class Graph<T>
         }
 
         public LambdaExpression? CanExecuteExpression() => null;
+
+      
     }
 
     public class ConstructFrom<F> : IConstructorFromOperation
         where F : class, IEntity
     {
-        protected readonly ConstructSymbol<T>.From<F> constructSymbol;
         protected readonly OperationSymbol operationSymbol;
 
         OperationSymbol IOperation.OperationSymbol => operationSymbol;
@@ -188,14 +197,22 @@ public class Graph<T>
             Construct = overrider(Construct);
         }
 
-        public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
+        ConstructFrom(OperationSymbol symbol, Type baseType)
         {
             if (symbol == null)
                 throw AutoInitAttribute.ArgumentNullException(typeof(ConstructSymbol<T>.From<F>), nameof(symbol));
 
-            this.constructSymbol = symbol;
-            this.operationSymbol = symbol.Symbol;
-            baseType = symbol.BaseType;
+            this.operationSymbol = symbol;
+            this.baseType = baseType;
+        }
+
+        public ConstructFrom(ConstructSymbol<T>.From<F> symbol): this(symbol.Symbol, symbol.BaseType)
+        {
+        }
+
+        public static ConstructFrom<F> Untyped(IEntityOperationSymbolContainer<F> symbol)
+        {
+            return new ConstructFrom<F>(symbol.Symbol, symbol.BaseType);
         }
 
         LambdaExpression? IOperation.CanExecuteExpression()
