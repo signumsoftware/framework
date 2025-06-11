@@ -247,7 +247,7 @@ public static class TreeLogic
 
     public static void RegisterOperations<T>(Func<T, MoveTreeModel, T>? copy) where T : TreeEntity, new()
     {
-        new Graph<T>.Construct((ConstructSymbol<T>.Simple)TreeOperation.CreateRoot).Do(c =>
+        Graph<T>.Construct.Untyped(TreeOperation.CreateRoot).Do(c =>
         {
             c.Construct = (_) => new T
             {
@@ -258,7 +258,7 @@ public static class TreeLogic
             c.Register();
         });
 
-        new Graph<T>.ConstructFrom<T>((ConstructSymbol<T>.From<T>)TreeOperation.CreateChild).Do(c =>
+        Graph<T>.ConstructFrom<T>.Untyped(TreeOperation.CreateChild).Do(c =>
         {
             c.Construct = (t, _) => new T
             {
@@ -270,7 +270,7 @@ public static class TreeLogic
             c.Register();
         });
 
-        new Graph<T>.ConstructFrom<T>((ConstructSymbol<T>.From<T>)TreeOperation.CreateNextSibling).Do(c =>
+        Graph<T>.ConstructFrom<T>.Untyped(TreeOperation.CreateNextSibling).Do(c =>
         {
             c.Construct = (t, _) => new T
             {
@@ -305,7 +305,7 @@ public static class TreeLogic
 
         if (copy != null)
         {
-            new Graph<T>.ConstructFrom<T>((ConstructSymbol<T>.From<T>)TreeOperation.Copy).Do(c =>
+            Graph<T>.ConstructFrom<T>.Untyped(TreeOperation.Copy).Do(c =>
             {
                 c.Construct = (t, args) =>
                  {
