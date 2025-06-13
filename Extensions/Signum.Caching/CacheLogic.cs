@@ -121,15 +121,14 @@ public static class CacheLogic
         }
 
         var missingInMemory = (from t in TypeConditionLogic.Types
-                               where controllers.ContainsKey(t)
-                               where !semiControllers.ContainsKey(t) || semiControllers[t].Any(a => a.Type.IsEntity())
+                               where controllers.TryGetCN(t) != null || semiControllers.TryGetC(t).EmptyIfNull().Any(a => a.Type.IsEntity())
                                from tc in TypeConditionLogic.ConditionsFor(t)
                                where !TypeConditionLogic.HasInMemoryCondition(t, tc)
                                select new { t, tc }).ToList();
 
         if (missingInMemory.Any())
             throw new InvalidOperationException("The following types are cached, but do not have in-memory TypeConditions defined: " +
-                missingInMemory.GroupBy(a => a.t, a => a.tc).ToString(gr => " * " + gr.Key.TypeName() + ": " + gr.ToString(a => a.Key, ", "), "\n")
+                missingInMemory.GroupBy(a => a.t, a => a.tc).ToString(gr => $" * {gr.Key.TypeName()} ({EntityKindCache.GetEntityData(gr.Key)}): {gr.ToString(a => a.Key, ", ")}", "\n")
                 );
     }
 
