@@ -331,13 +331,13 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     );
   }
 
-  handleMenuFilterChange = (e: React.ChangeEvent<HTMLInputElement>) : void=> {
+  handleMenuFilterChange = (e: React.ChangeEvent<HTMLInputElement>) : void => {
     const cm = this.state.contextualMenu;
 
     cm && this.setState({ contextualMenu: Object.assign(cm, { filter: e.currentTarget.value }) })
   }
 
-  handleMenuFilterKeyDown = (e: React.KeyboardEvent<any>): void => {
+  handleMenuFilterKeyDown = (e: React.KeyboardEvent<any>) : void => {
     if (!e.shiftKey && e.key == KeyNames.arrowDown) {
 
       e.preventDefault();
@@ -860,9 +860,16 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
     };
 
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
-      c.hasToArray != null ? SearchControlLoaded.joinNodes((node.values[c.resultIndex as number] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c)),
-        c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />, TreeViewer.maxToArrayElements) :
-        c.cellFormatter.formatter(node.values[c.resultIndex as number], fctx, c);
+      c.hasToArray != null ? SearchControlLoaded.joinNodes((this.getRowValue(fctx.row, c.resultIndex) as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c)),
+      c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />, TreeViewer.maxToArrayElements) :
+    c.cellFormatter.formatter(this.getRowValue(fctx.row, c.resultIndex), fctx, c);
+  }
+
+  getRowValue(row: ResultRow, resultIndex: number | "Entity") {
+    if (resultIndex == "Entity")
+      return row.entity;
+
+    return row.columns[resultIndex];
   }
 
   getDragAndDropStyle(node: TreeNode): React.CSSProperties | undefined {

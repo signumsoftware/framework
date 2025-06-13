@@ -153,7 +153,7 @@ public class OperationController : ControllerBase
             CustomOperationArgsConverters[operationSymbol] = a + converter;
         }
 
-        public static object? ConvertObject(JsonElement token, JsonSerializerOptions jsonOptions, OperationSymbol? operationSymbol)
+        public static object? ConvertObject(JsonElement token, JsonSerializerOptions? jsonOptions, OperationSymbol? operationSymbol)
         {
             switch (token.ValueKind)
             {

@@ -14,7 +14,7 @@ export interface DynamicClientEntity extends Entities.Entity {
   code: string;
 }
 
-export module DynamicClientOperation {
+export namespace DynamicClientOperation {
   export const Clone : Operations.ConstructSymbol_From<DynamicClientEntity, DynamicClientEntity> = registerSymbol("Operation", "DynamicClientOperation.Clone");
   export const Save : Operations.ExecuteSymbol<DynamicClientEntity> = registerSymbol("Operation", "DynamicClientOperation.Save");
   export const Delete : Operations.DeleteSymbol<DynamicClientEntity> = registerSymbol("Operation", "DynamicClientOperation.Delete");

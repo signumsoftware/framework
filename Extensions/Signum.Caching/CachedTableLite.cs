@@ -97,10 +97,10 @@ class CachedTableLite<T> : CachedTableBase where T : Entity
             });
         }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
 
-        if (!CacheLogic.WithSqlDependency) //Always semi
-        {
+        //if (!CacheLogic.WithSqlDependency) //Always semi
+        //{
             semiCachedController = new SemiCachedController<T>(this);
-        }
+        //}
     }
 
     public override void SchemaCompleted()

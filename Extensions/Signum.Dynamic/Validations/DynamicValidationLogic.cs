@@ -58,7 +58,7 @@ public static class DynamicValidationLogic
             sb.Schema.Initializing += () => { initialized = true; };
 
             Validator.GlobalValidation += DynamicValidation;
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicValidationEntity>().Where(dv => dv.EntityType.Is(type)));
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicValidationEntity>().Where(dv => dv.EntityType.Is(type)));
         }
     }
     static bool initialized = false;
