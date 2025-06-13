@@ -96,11 +96,8 @@ class CachedTableLite<T> : CachedTableBase where T : Entity
                 return result.ToFrozenDictionary();
             });
         }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
-
-        //if (!CacheLogic.WithSqlDependency) //Always semi
-        //{
-            semiCachedController = new SemiCachedController<T>(this);
-        //}
+        
+        semiCachedController = new SemiCachedController<T>(this);
     }
 
     public override void SchemaCompleted()
