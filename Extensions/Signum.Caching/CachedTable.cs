@@ -100,7 +100,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
             });
         }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
 
-        if(!CacheLogic.WithSqlDependency && lastPartialJoin.HasText()) //Is semi
+        if(/*!CacheLogic.WithSqlDependency &&*/ lastPartialJoin.HasText()) //Is semi
         {
             semiCachedController = new SemiCachedController<T>(this);
         }
