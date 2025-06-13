@@ -378,7 +378,8 @@ body.rtl .form-group.row > label {
 
     .has-error input,
     .has-error textarea,
-    .has-error select {
+    .has-error select,
+    .has-error .form-control {
         border-color: #a94442;
     }
 
