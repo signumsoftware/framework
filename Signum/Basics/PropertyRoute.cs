@@ -226,10 +226,10 @@ public class PropertyRoute : IEquatable<PropertyRoute>
             throw new ArgumentNullException(nameof(type));
 
         if (!typeof(IRootEntity).IsAssignableFrom(type))
-            throw new ArgumentException("Type must implement IPropertyRouteRoot");
+            throw new ArgumentException($"Type {type.FullName} must implement IPropertyRouteRoot");
 
         if (type.IsAbstract)
-            throw new ArgumentException("Type must be non-abstract");
+            throw new ArgumentException($"Type {type.FullName} must be non-abstract");
 
         this.type = type;
         this.PropertyRouteType = PropertyRouteType.Root;
