@@ -153,9 +153,12 @@ public static class SqlServerToPostgresMigration
             CopyTable(diffTable, pgName, postgresConnector, sb, options);
         }
 
+        SafeConsole.WriteLineColor(ConsoleColor.Green, "Updating identities");
+        using (Connector.Override(postgresConnector))
+            SqlServerToPostgresMigration.UpdateIdentities();
+
         SafeConsole.WriteLineColor(ConsoleColor.Green, "Finished! Next Steps:");
         Console.WriteLine("* Change appconfig to connect to postgress");
-        Console.WriteLine($"* Execute {nameof(SqlServerToPostgresMigration)}.{nameof(UpdateIdentities)} to fix the Ids sequences");
         Console.WriteLine("* Synchronize database to add the missing schema stuff (indexes, fks...)");
     }
 
