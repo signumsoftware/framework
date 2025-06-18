@@ -21,7 +21,7 @@ export interface DynamicApiEval extends Eval.EvalEmbedded<IDynamicApiEvaluator> 
   Type: "DynamicApiEval";
 }
 
-export module DynamicApiOperation {
+export namespace DynamicApiOperation {
   export const Clone : Operations.ConstructSymbol_From<DynamicApiEntity, DynamicApiEntity> = registerSymbol("Operation", "DynamicApiOperation.Clone");
   export const Save : Operations.ExecuteSymbol<DynamicApiEntity> = registerSymbol("Operation", "DynamicApiOperation.Save");
   export const Delete : Operations.DeleteSymbol<DynamicApiEntity> = registerSymbol("Operation", "DynamicApiOperation.Delete");

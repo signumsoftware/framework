@@ -33,7 +33,7 @@ export interface TreeEntity extends Entities.Entity {
   fullName: string;
 }
 
-export module TreeMessage {
+export namespace TreeMessage {
   export const Tree: MessageKey = new MessageKey("TreeMessage", "Tree");
   export const Descendants: MessageKey = new MessageKey("TreeMessage", "Descendants");
   export const Parent: MessageKey = new MessageKey("TreeMessage", "Parent");
@@ -50,7 +50,7 @@ export module TreeMessage {
   export const ListView: MessageKey = new MessageKey("TreeMessage", "ListView");
 }
 
-export module TreeOperation {
+export namespace TreeOperation {
   export const CreateRoot : Operations.ConstructSymbol_Simple<TreeEntity> = registerSymbol("Operation", "TreeOperation.CreateRoot");
   export const CreateChild : Operations.ConstructSymbol_From<TreeEntity, TreeEntity> = registerSymbol("Operation", "TreeOperation.CreateChild");
   export const CreateNextSibling : Operations.ConstructSymbol_From<TreeEntity, TreeEntity> = registerSymbol("Operation", "TreeOperation.CreateNextSibling");
@@ -60,7 +60,7 @@ export module TreeOperation {
   export const Delete : Operations.DeleteSymbol<TreeEntity> = registerSymbol("Operation", "TreeOperation.Delete");
 }
 
-export module TreeViewerMessage {
+export namespace TreeViewerMessage {
   export const Search: MessageKey = new MessageKey("TreeViewerMessage", "Search");
   export const AddRoot: MessageKey = new MessageKey("TreeViewerMessage", "AddRoot");
   export const AddChild: MessageKey = new MessageKey("TreeViewerMessage", "AddChild");

@@ -84,4 +84,12 @@ public static class JsonExtensions
         return result!;
     }
 
+
+    public static JsonElement? TryGetProperty(this JsonElement element, string propertyName)
+    {
+        if (element.TryGetProperty(propertyName, out var value))
+            return value;
+
+        return null;
+    }
 }

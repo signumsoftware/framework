@@ -14,7 +14,7 @@ export interface DynamicCSSOverrideEntity extends Entities.Entity {
   script: string;
 }
 
-export module DynamicCSSOverrideOperation {
+export namespace DynamicCSSOverrideOperation {
   export const Save : Operations.ExecuteSymbol<DynamicCSSOverrideEntity> = registerSymbol("Operation", "DynamicCSSOverrideOperation.Save");
   export const Delete : Operations.DeleteSymbol<DynamicCSSOverrideEntity> = registerSymbol("Operation", "DynamicCSSOverrideOperation.Delete");
 }

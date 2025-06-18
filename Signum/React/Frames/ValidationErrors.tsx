@@ -37,7 +37,11 @@ export const ValidationErrors: React.ForwardRefExoticComponent<{ entity: Modifia
 
     var result = document.querySelector(`[data-error-path='${key}']`);
     if (result != null && result.checkVisibility()) {
-      result.scrollIntoView();
+      result.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'nearest'
+      });
       var input = result.querySelector("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
       if (input)
         (input as HTMLInputElement).focus();

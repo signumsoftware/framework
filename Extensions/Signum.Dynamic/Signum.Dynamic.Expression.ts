@@ -19,7 +19,7 @@ export interface DynamicExpressionEntity extends Entities.Entity {
   translation: DynamicExpressionTranslation;
 }
 
-export module DynamicExpressionOperation {
+export namespace DynamicExpressionOperation {
   export const Clone : Operations.ConstructSymbol_From<DynamicExpressionEntity, DynamicExpressionEntity> = registerSymbol("Operation", "DynamicExpressionOperation.Clone");
   export const Save : Operations.ExecuteSymbol<DynamicExpressionEntity> = registerSymbol("Operation", "DynamicExpressionOperation.Save");
   export const Delete : Operations.DeleteSymbol<DynamicExpressionEntity> = registerSymbol("Operation", "DynamicExpressionOperation.Delete");

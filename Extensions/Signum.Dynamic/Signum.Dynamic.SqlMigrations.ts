@@ -28,12 +28,12 @@ export interface DynamicSqlMigrationEntity extends Entities.Entity {
   script: string;
 }
 
-export module DynamicSqlMigrationMessage {
+export namespace DynamicSqlMigrationMessage {
   export const TheMigrationIsAlreadyExecuted: MessageKey = new MessageKey("DynamicSqlMigrationMessage", "TheMigrationIsAlreadyExecuted");
   export const PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer: MessageKey = new MessageKey("DynamicSqlMigrationMessage", "PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer");
 }
 
-export module DynamicSqlMigrationOperation {
+export namespace DynamicSqlMigrationOperation {
   export const Create : Operations.ConstructSymbol_Simple<DynamicSqlMigrationEntity> = registerSymbol("Operation", "DynamicSqlMigrationOperation.Create");
   export const Save : Operations.ExecuteSymbol<DynamicSqlMigrationEntity> = registerSymbol("Operation", "DynamicSqlMigrationOperation.Save");
   export const Execute : Operations.ExecuteSymbol<DynamicSqlMigrationEntity> = registerSymbol("Operation", "DynamicSqlMigrationOperation.Execute");
