@@ -17,6 +17,8 @@ public class MigrateToPostgresOptions
     public Action<DataTable, DiffTable>? CleanDataTable;
 
     public int BatchSize = 10000;
+
+    public string ExecuteAs { get; set; }
 }
 
 public static class SqlServerToPostgresMigration
@@ -46,6 +48,8 @@ public static class SqlServerToPostgresMigration
         var tables = SysTablesSchema.GetDatabaseDescription(Schema.Current.DatabaseNames()).Values.ToList()
             .OrderBy(a => a.ToString())
             .ToDictionary(a => a, a => GetNewTableName(sb, a));
+
+        var oldNameToNewName = tables.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Value);
 
         Console.WriteLine();
 
@@ -85,8 +89,9 @@ public static class SqlServerToPostgresMigration
                 if (tables.Any(kvp => !sqlStats.ContainsKey(kvp.Key.Name)))
                     throw new InvalidOperationException("unexpected");
 
-                if (tables.Any(kvp => !pgStats.ContainsKey(kvp.Value)))
-                    SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Target database has missing tables");
+                var missings = sqlStats.Where(kvp => !pgStats.ContainsKey(oldNameToNewName.GetOrThrow(kvp.Key))).ToList();
+                if (missings.Any())
+                    SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Target database has missing tables: " + missings.ToString(a => a.Key.ToString(), ", "));
                 else
                 {
                     Console.WriteLine("Recovering previous migration...");
@@ -153,15 +158,21 @@ public static class SqlServerToPostgresMigration
             CopyTable(diffTable, pgName, postgresConnector, sb, options);
         }
 
+        SafeConsole.WriteLineColor(ConsoleColor.Green, "Updating identities");
+        using (Connector.Override(postgresConnector))
+            SqlServerToPostgresMigration.UpdateIdentities();
+
         SafeConsole.WriteLineColor(ConsoleColor.Green, "Finished! Next Steps:");
         Console.WriteLine("* Change appconfig to connect to postgress");
-        Console.WriteLine($"* Execute {nameof(SqlServerToPostgresMigration)}.{nameof(UpdateIdentities)} to fix the Ids sequences");
         Console.WriteLine("* Synchronize database to add the missing schema stuff (indexes, fks...)");
     }
 
     public static SqlPreCommand CreatePostgresTables(Dictionary<DiffTable, ObjectName> tables, SchemaBuilder sb, MigrateToPostgresOptions opts)
     {
         List<SqlPreCommandSimple> result = new List<SqlPreCommandSimple>();
+        if(opts.ExecuteAs.HasText())
+            result.Add(new SqlPreCommandSimple($"SET ROLE {opts.ExecuteAs};"));
+
         HashSet<SchemaName> createdSchemas = new HashSet<SchemaName>(); // Track created schemas
 
         if (tables.Keys.Any(a => a.Columns.Any(c => c.Value.UserTypeName == "hierarchyid")))
