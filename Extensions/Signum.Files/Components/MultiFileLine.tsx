@@ -29,6 +29,7 @@ interface MultiFileLineProps<V extends ModifiableEntity/* & IFile*/ | Lite</*IFi
   maxSizeInBytes?: number;
   getFileFromElement?: (ectx: NoInfer<V>) => ModifiableEntity & IFile | Lite<IFile & Entity>;
   createElementFromFile?: (file: ModifiableEntity & IFile) => Promise<NoInfer<V> | undefined>;
+  forceShowUploader?: boolean;
 }
 
 export class MultiFileLineController<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile & */Entity>> extends EntityListBaseController<MultiFileLineProps<V>, V> {
@@ -164,7 +165,7 @@ export const MultiFileLine: <V extends ModifiableEntity /*& IFile*/ | Lite</*IFi
             <tr >
               <td colSpan={4}>
                 {p.ctx.readOnly ? undefined :
-                  ctxs.length == 0 || c.forceShowUploader ?
+                  ctxs.length == 0 || c.forceShowUploader || p.forceShowUploader ?
                     <FileUploader
                       accept={p.accept}
                       multiple={true}
