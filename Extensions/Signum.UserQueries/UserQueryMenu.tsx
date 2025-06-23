@@ -214,11 +214,15 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
       ...fo.columnOptions?.map(a => a?.token) ?? [],
       ...fo.columnOptions?.map(a => a?.summaryToken) ?? [],
       ...fo.orderOptions?.map(a => a?.token) ?? [],
-    ].notNull().forEach(a => parser.request(a.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | SubTokensOptions.CanOperation | SubTokensOptions.CanSnippet | SubTokensOptions.CanToArray | SubTokensOptions.CanManual));
+    ].notNull().forEach(a => parser.request(a.toString()));
 
     await parser.finished();
 
     const qe = await Finder.API.fetchQueryEntity(getQueryKey(fo.queryName));
+
+    var stoColumn = (fo.groupResults ? SubTokensOptions.CanAggregate : 0) | SubTokensOptions.CanElement | SubTokensOptions.CanOperation | SubTokensOptions.CanSnippet | SubTokensOptions.CanToArray | SubTokensOptions.CanManual;
+    var stoOrder = (fo.groupResults ? SubTokensOptions.CanAggregate : 0) | SubTokensOptions.CanElement | SubTokensOptions.CanSnippet;
+    var stoSummary = SubTokensOptions.CanAggregate | SubTokensOptions.CanElement;
 
     return UserQueryEntity.New({
       query: qe,
@@ -227,9 +231,9 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       includeDefaultFilters: fo.includeDefaultFilters,
       columns: (fo.columnOptions ?? []).notNull().map(c => newMListElement(QueryColumnEmbedded.New({
-        token: QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parser.get(c.token.toString()) }),
+        token: QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parser.get(c.token.toString(), stoColumn) }),
         displayName: typeof c.displayName == "function" ? c.displayName() : c.displayName,
-        summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.summaryToken.toString(), token: parser.get(c.summaryToken.toString()) }) : null,
+        summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.summaryToken.toString(), token: parser.get(c.summaryToken.toString(), stoSummary) }) : null,
         hiddenColumn: c.hiddenColumn,
         combineRows: c.combineRows ?? null,
       }))),
@@ -238,7 +242,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
         orderType: c.orderType,
         token: QueryTokenEmbedded.New({
           tokenString: c.token.toString(),
-          token: parser.get(c.token.toString())
+          token: parser.get(c.token.toString(), stoOrder)
         })
       }))),
       systemTime: fo.systemTime && SystemTimeEmbedded.New({

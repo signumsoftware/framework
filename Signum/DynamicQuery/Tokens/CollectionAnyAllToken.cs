@@ -21,6 +21,10 @@ public class CollectionAnyAllToken : QueryToken
         this.CollectionAnyAllType = type;
     }
 
+    protected override bool AutoExpandInternal => false;
+
+    public override bool HideInAutoExpand => true;
+
 
     public override Type Type
     {

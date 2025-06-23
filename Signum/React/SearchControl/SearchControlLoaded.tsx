@@ -3,8 +3,9 @@ import { DateTime } from 'luxon'
 import { DomUtils, classes, Dic, softCast, isNumber } from '../Globals'
 import { Finder } from '../Finder'
 import {
-  ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, isFilterCondition, hasManual,
+  ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed,
+  Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive,
+  hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, isFilterCondition, hasManual,
   withoutPinned
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
@@ -241,7 +242,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     this.abortableSearchSummary.abort();
   }
 
-  entityColumn(): ColumnDescription {
+  entityColumn(): QueryToken {
     return this.props.queryDescription.columns["Entity"];
   }
 
@@ -1035,28 +1036,35 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     var defAggregate = this.props.querySettings?.defaultAggregates;
 
+    var sto = SubTokensOptions.CanAggregate | SubTokensOptions.CanElement;
     var parsedTokens: QueryToken[] = [];
     if (defAggregate) {
-      parsedTokens = await Finder.API.parseTokens(fo.queryKey, [
-        ...defAggregate.map(a => ({ token: a.token.toString(), options: SubTokensOptions.CanAggregate })),
-        ...defAggregate.filter(a => a.summaryToken != null).map(a => ({ token: a.summaryToken!.toString(), options: SubTokensOptions.CanAggregate }))
-      ].distinctBy(a => a.token));
 
-      var ptDic = parsedTokens.toObject(a => a.fullKey);
+      var tokenParser = new Finder.TokenCompleter(this.props.queryDescription);
 
-      fo.columnOptions.push(...defAggregate.map(t => ({
-        token: ptDic[t.token.toString()],
-        summaryToken: t.summaryToken != null ? ptDic[t.summaryToken!.toString()] : undefined,
-        displayName: (typeof t.displayName == "function" ? t.displayName() : t.displayName) ?? ptDic[t.token.toString()].niceName,
-        hiddenColumn: t.hiddenColumn,
-        combineRows: t.combineRows,
-      })));
+      defAggregate.forEach(a => tokenParser.request(a.token.toString()));
+      defAggregate.filter(a => a.summaryToken != null).forEach(a => tokenParser.request(a.summaryToken!.toString()));
+
+      await tokenParser.finished();
+
+      fo.columnOptions.push(...defAggregate.map(t => {
+        var token = tokenParser.get(t.token.toString(), sto);
+
+        return ({
+          token: token,
+          summaryToken: t.summaryToken != null ? tokenParser.get(t.summaryToken!.toString(), sto) : undefined,
+          displayName: (typeof t.displayName == "function" ? t.displayName() : t.displayName) ?? token.niceName,
+          hiddenColumn: t.hiddenColumn,
+          combineRows: t.combineRows,
+        });
+      }));
     }
     else {
-      parsedTokens = await Finder.API.parseTokens(fo.queryKey, [
-        { token: "Count", options: SubTokensOptions.CanAggregate }
-      ]);
-      fo.columnOptions.push({ token: parsedTokens[0], displayName: parsedTokens[0].niceName });
+      var tokenParser = new Finder.TokenCompleter(this.props.queryDescription);
+      tokenParser.request("Count");
+      await tokenParser.finished();
+      var count = tokenParser.get("Count", sto);
+      fo.columnOptions.push({ token: count, displayName: count.niceName });
     }
 
     if(timeSeriesColumn)
@@ -1096,7 +1104,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     fo.columnOptions.clear();
     if(timeSeriesColumn)
       fo.columnOptions.push(timeSeriesColumn);
-    fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns).filter(a => a.name != "Entity").map(cd => softCast<ColumnOptionParsed>({ displayName: cd.displayName, token: toQueryToken(cd) })));   
+    fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns)
+      .filter(a => a.fullKey != "Entity")
+      .map(cd => softCast<ColumnOptionParsed>({ displayName: cd.niceName, token: cd })));   
 
     if (fo.groupResults) {
       fo.orderOptions.clear();
@@ -2253,53 +2263,6 @@ function withoutAllAny(qt: QueryToken | undefined): QueryToken | undefined {
 
   return par;
 }
-
-function removeAggregates(array: { token?: QueryToken, displayName?: string }[], qd: QueryDescription) {
-  array.filter(a => a.token != null && a.token.queryTokenType == "Aggregate").forEach(a => {
-    if (a.token) {
-      if (a.token.parent) {
-        a.token = a.token.parent;
-      } else {
-        a.token = qd.columns["Id"] ? toQueryToken(qd.columns["Id"]) : undefined;
-      }
-
-      if (a.displayName && a.token)
-        a.displayName = a.token!.niceName;
-    }
-  });
-
-  array.extract(a => a.token == null);
-}
-
-function withAggregates(array: { token?: QueryToken, displayName?: string }[], tc: Finder.TokenCompleter, mode: "request" | "get"): void {
-  array.forEach(a => {
-    if (a.token) {
-      if (canHaveMin(a.token.type.name)) {
-
-        var tokenName = a.token.fullKey == "Id" ? "Count" : a.token.fullKey + ".Min";
-
-        if (mode == "request")
-          tc.request(tokenName, SubTokensOptions.CanAggregate);
-        else {
-          a.token = tc.get(tokenName);
-          if (a.displayName)
-            a.displayName = a.token.niceName;
-        }
-      } else if (a.token.isGroupable) {
-        //Nothing, will be group key
-      } else {
-        a.token = undefined;
-      }
-    }
-  });
-
-  array.extract(a => a.token == undefined);
-}
-
-function canHaveMin(typeName: string): boolean {
-  return isNumberType(typeName) || typeName == "TimeSpan";
-}
-
 
 function getRootKeyColumn(columnOptions: ColumnOptionParsed[]): ColumnOptionParsed[] {
   return columnOptions.filter(t => t.token != null && !columnOptions.some(root => root.token != null && dominates(root.token, t.token!)));

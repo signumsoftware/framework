@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { areEqual, classes, Dic } from '../Globals'
 import { Finder } from '../Finder'
-import { QueryToken, SubTokensOptions, getTokenParents, isPrefix, ManualToken } from '../FindOptions'
+import { QueryToken, SubTokensOptions, getTokenParents, isPrefix, ManualToken, QueryDescription } from '../FindOptions'
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
 import { DropdownList } from 'react-widgets'
@@ -28,7 +28,9 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.JSX.
 
   React.useEffect(() => {
     setExpanded(false);
-  }, [p.queryKey, p.prefixQueryToken])
+  }, [p.queryKey, p.prefixQueryToken]);
+
+  const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
 
   function handleExpandButton(e: React.MouseEvent<any>) {
     setExpanded(true);
@@ -45,7 +47,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.JSX.
   return (
     <div className={classes("sf-query-token-builder", p.className)} onKeyDown={handleKeyDown} data-token={p.queryToken?.fullKey}>
       {initialIndex != 0 && <button onClick={handleExpandButton} className="btn btn-sm sf-prefix-btn">…</button>}
-      {tokenList.map((a, i) => {
+      {qd && tokenList.map((a, i) => {
         if (i < initialIndex)
           return null;
 
@@ -53,6 +55,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.JSX.
 
         return (
           <QueryTokenPart key={i == 0 ? "__first__" : parentToken!.fullKey}
+            queryDescription={qd}
             queryKey={p.queryKey}
             readOnly={p.readOnly}
             setLastTokenChange={(fullKey) => { setLastTokenChanged(fullKey); }}
@@ -71,7 +74,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.JSX.
     </div>
   );
 
-  async function tryApplyToken(token: QueryToken | null | undefined, newToken: QueryToken | undefined) {
+  async function tryApplyToken(token: QueryToken | null | undefined, newToken: QueryToken | undefined): Promise<QueryToken | undefined> {
     if (newToken == undefined)
       return undefined;
 
@@ -91,9 +94,10 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.JSX.
       var extraTokens = tokenParents.slice(newTokenParents.length);
 
       var tempToken = newToken;
+      var tokenCompleter = new Finder.TokenCompleter(qd!);
       for (var i = 0; i < extraTokens.length; i++) {
         var key = extraTokens[i].key;
-        var t = (await Finder.API.getSubTokens(p.queryKey, tempToken, p.subTokenOptions)).singleOrNull(a => a.key == key);
+        var t = (await tokenCompleter.getSubTokens(tempToken, p.subTokenOptions, false)).singleOrNull(a => a.key == key);
         if (t == null)
           return newToken;
 
@@ -105,7 +109,6 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.JSX.
     } else {
       return newToken;
     }
-
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
@@ -129,6 +132,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.JSX.
 
 
 interface QueryTokenPartProps {
+  queryDescription: QueryDescription;
   parentToken: QueryToken | undefined;
   selectedToken: QueryToken | undefined;
   onTokenSelected: (newToken: QueryToken | undefined, keyboard: boolean) => void;
@@ -139,10 +143,12 @@ interface QueryTokenPartProps {
   setLastTokenChange: (fullKey: string | undefined) => void;
 }
 
-const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
+//const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
 
 
 export function QueryTokenPart(p: QueryTokenPartProps): React.JSX.Element | null {
+
+  const autoExpand = !p.parentToken?.type.isCollection;
 
   const subTokens = useAPI(() => {
     if (p.readOnly)
@@ -152,38 +158,46 @@ export function QueryTokenPart(p: QueryTokenPartProps): React.JSX.Element | null
     if (manuals)
       return manuals.then(tokens => tokens.length == 0 ? tokens : [null, ...tokens]);
 
-    return Finder.API.getSubTokens(p.queryKey, p.parentToken, p.subTokenOptions)
+    var tc = new Finder.TokenCompleter(p.queryDescription);
+  
+    return tc.getSubTokens(p.parentToken, p.subTokenOptions, autoExpand)
       .then(tokens => tokens.length == 0 ? tokens : [null, ...tokens])
   }, [p.readOnly, p.parentToken && p.parentToken.fullKey, p.subTokenOptions, p.queryKey])
+
+
+  const [open, setOpen] = React.useState(p.defaultOpen)
+
 
   if (subTokens != undefined && subTokens.length == 0)
     return null;
 
   return (
-    <ParentTokenContext.Provider value={p.parentToken}>
-      <div className="sf-query-token-part" onKeyUp={handleKeyUp} onKeyDown={handleKeyUp}>
-        {p.selectedToken || p.parentToken == null || p.defaultOpen ?
-          <DropdownList
-            disabled={p.readOnly}
-            filter="contains"
-            autoComplete="off"
-            focusFirstItem={true}
-            data={subTokens ?? []}
-            placeholder={p.selectedToken == null ? "..." : undefined}
-            value={p.selectedToken}
-            onChange={(value, metadata) => p.onTokenSelected(value ?? p.parentToken, metadata.originalEvent?.nativeEvent instanceof KeyboardEvent)}
-            dataKey="fullKey"
-            textField="toStr"
-            onBlur={() => { p.selectedToken == null && p.setLastTokenChange(undefined); }}
-            renderValue={a => <QueryTokenItem item={a.item} />}
-            renderListItem={a => <QueryTokenOptionalItem item={a.item} />}
-            defaultOpen={p.defaultOpen}
-            busy={!p.readOnly && subTokens == undefined}
-          /> : <button className="btn btn-sm sf-query-token-plus" onClick={e => { e.preventDefault(); p.setLastTokenChange(p.parentToken!.fullKey); }}>
-            <FontAwesomeIcon icon="plus" />
-          </button>}
-      </div>
-    </ParentTokenContext.Provider>
+    //<ParentTokenContext.Provider value={p.parentToken}>
+    <div className="sf-query-token-part" onKeyUp={handleKeyUp} onKeyDown={handleKeyUp}>
+      {p.selectedToken || p.parentToken == null || p.defaultOpen ?
+        <DropdownList
+          disabled={p.readOnly}
+          selectIcon={open && autoExpand ? <FontAwesomeIcon icon="magnifying-glass" /> : undefined}
+          onToggle={isOpen => setOpen(isOpen)}
+          filter={(item, searchTerm, idx) => item != null && searchTerm.toLowerCase().split(" ").filter(a => a != "").every(part => parentsUntil(item, p.parentToken).some(t => t.key.toLowerCase().contains(part) || t.toStr.toLowerCase().contains(part)))}
+          autoComplete="off"
+          focusFirstItem={true}
+          data={subTokens?.orderBy(a => a?.parent != null) ?? []}
+          placeholder={p.selectedToken == null ? "..." : undefined}
+          value={p.selectedToken}
+          onChange={(value, metadata) => p.onTokenSelected(value ?? p.parentToken, metadata.originalEvent?.nativeEvent instanceof KeyboardEvent)}
+          dataKey="fullKey"
+          textField="toStr"
+          onBlur={() => {  p.selectedToken == null && p.setLastTokenChange(undefined); }}
+          renderValue={a => <QueryTokenItem item={a.item} />}
+          renderListItem={a => <QueryTokenListItem item={a.item} ancestor={p.parentToken} />}
+          defaultOpen={p.defaultOpen}
+          busy={!p.readOnly && subTokens == undefined}
+        /> : <button className="btn btn-sm sf-query-token-plus" onClick={e => { e.preventDefault(); p.setLastTokenChange(p.parentToken!.fullKey); }}>
+          <FontAwesomeIcon icon="plus" />
+        </button>}
+    </div>
+    //</ParentTokenContext.Provider>
   );
 
   function handleKeyUp(e: React.KeyboardEvent<any>) {
@@ -203,7 +217,7 @@ export function QueryTokenItem(p: { item: QueryToken | null }): React.JSX.Elemen
 
   return (
     <span
-      data-token={item.key}
+      data-full-token={item.fullKey}
       style={{ color: item.typeColor }}
       title={StyleContext.default.titleLabels ? item.niceTypeName : undefined}>
       {item.toStr}
@@ -212,22 +226,32 @@ export function QueryTokenItem(p: { item: QueryToken | null }): React.JSX.Elemen
 }
 
 
-export function QueryTokenOptionalItem(p: { item: QueryToken | null }): React.JSX.Element {
+export function QueryTokenListItem(p: { item: QueryToken | null, ancestor: QueryToken | undefined }): React.JSX.Element {
 
   const item = p.item;
 
   if (item == null)
     return <span> - </span>;
 
-  var parentToken = React.useContext(ParentTokenContext);
-
   return (
-    <span data-token={item.key}
-      style={{ color: item.typeColor, whiteSpace: 'nowrap' }}
-      title={StyleContext.default.titleLabels ? item.niceTypeName : undefined}>
-      {((item.parent && !parentToken) ? (item.parent.niceName + " › ") : "") + item.toStr}
+    <span data-full-token={item.fullKey} style={{ whiteSpace: "nowrap" }} className="sf-token-list-item">
+      {parentsUntil(item, p.ancestor)
+        .map(a => <span style={{ color: a.typeColor }} title={StyleContext.default.titleLabels ? a.niceTypeName : undefined}>{a.toStr}</span>)
+        .joinHtml(" › ")}
     </span>
   );
+}
+
+function parentsUntil(token: QueryToken, ancestor?: QueryToken) {
+  const tokens: QueryToken[] = [];
+
+  for (let t: QueryToken | undefined = token; t != null && t != ancestor; t = t?.parent) {
+    tokens.push(t);
+  }
+
+  tokens.reverse();
+
+  return tokens;
 }
 
 
@@ -243,7 +267,6 @@ export function registerManualSubTokens(key: string, func: (entityType: string) 
 
 function getManualSubTokens(token?: QueryToken) {
 
-  //if (token?.type.name == "ManualCellDTO")
   if (token?.parent && token.queryTokenType == 'Manual' && token.parent.queryTokenType == 'Manual')//it is a Manual sub token
     return Promise.resolve([]); //prevents sending to server
 

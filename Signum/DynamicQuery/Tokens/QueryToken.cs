@@ -19,6 +19,69 @@ public abstract class QueryToken : IEquatable<QueryToken>
     public abstract Type Type { get; }
     public virtual DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
     public abstract string Key { get; }
+    bool? autoExpand; 
+    public bool AutoExpand 
+    {
+
+        get
+        {
+            return autoExpand ??= CalculateAutoExpand();
+        }
+    }
+
+    public virtual bool HideInAutoExpand => false;
+
+    private bool CalculateAutoExpand()
+    {
+        if (!AutoExpandInternal)
+            return false;
+
+        for (var p = this.Parent; p != null; p = p.Parent)
+        {
+            if (!p.AutoExpand)
+                break;
+
+            if (p.Type == this.Type)
+                return false;
+        }
+
+        return true;
+    }
+
+    protected virtual bool AutoExpandInternal
+    {
+        get
+        {
+            var pr = this.GetPropertyRoute();
+            var attr = pr != null && pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Schema.Current.Settings.FieldAttribute<AutoExpandSubTokensAttribute>(pr) : null;
+
+            if (attr != null)
+                return attr.AutoExpand;
+
+
+            var t = this.Type;
+            if (t.IsEmbeddedEntity())
+                return true;
+
+            if (t.IsMList())
+                return true;
+
+            if (t.IsEntity() || t.IsLite())
+            {
+                var imps = this.GetImplementations();
+                if (imps == null || imps.Value.IsByAll)
+                    return false;
+
+                if (imps.Value.Types.Count() != 1)
+                    return true;
+
+                return false;
+            }
+
+            return false;
+        }
+    }
+       
 
     public virtual bool IsGroupable
     {

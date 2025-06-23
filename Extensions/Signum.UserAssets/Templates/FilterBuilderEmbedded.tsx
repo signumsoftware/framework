@@ -176,7 +176,7 @@ export namespace FilterBuilderEmbedded {
 
     allFilters.forEach(mle => {
       if (mle.element.token && mle.element.token.tokenString)
-        completer.request(mle.element.token.tokenString, subTokenOptions);
+        completer.request(mle.element.token.tokenString);
     });
 
     await completer.finished();
@@ -190,7 +190,7 @@ export namespace FilterBuilderEmbedded {
           const pinned = gr.key.pinned;
 
           const filterCondition: FilterConditionOptionParsed = {
-            token: completer.get(gr.key.token!.tokenString),
+            token: completer.get(gr.key.token!.tokenString, subTokenOptions),
             operation: gr.key.operation ?? "EqualTo",
             value: gr.key.valueString,
             frozen: false,
@@ -205,7 +205,7 @@ export namespace FilterBuilderEmbedded {
           const pinned = gr.key.pinned;
 
           const filterGroup: FilterGroupOptionParsed = {
-            token: gr.key.token ? completer.get(gr.key.token.tokenString) : undefined,
+            token: gr.key.token ? completer.get(gr.key.token.tokenString, subTokenOptions) : undefined,
             groupOperation: gr.key.groupOperation!,
             filters: toFilterList(gr.elements, indent + 1),
             value: gr.key.valueString ?? undefined,

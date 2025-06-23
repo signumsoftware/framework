@@ -10,6 +10,8 @@ public class QuickLinksToken : ManualContainerToken
 
     public QuickLinksToken(QueryToken parent) : base(parent) { }
 
+    public override bool HideInAutoExpand => true;
+
     public override QueryToken Clone()
     {
         return new QuickLinksToken(this.parent.Clone());

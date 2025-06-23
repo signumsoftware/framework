@@ -35,6 +35,8 @@ public class HasValueToken : QueryToken
         this.Priority = -1;
     }
 
+    public override bool HideInAutoExpand => true;
+
     public override Type Type
     {
         get { return typeof(bool?); }

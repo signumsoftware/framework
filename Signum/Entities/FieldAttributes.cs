@@ -516,6 +516,18 @@ public sealed class LiteModelAttribute : Attribute
     }
 }
 
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+public sealed class AutoExpandSubTokensAttribute : Attribute
+{
+    public bool AutoExpand { get; }
+
+    public AutoExpandSubTokensAttribute(bool autoExpand)
+    {
+        AutoExpand = autoExpand;
+    }
+}
+
+
 public enum CombineStrategy
 {
     Union,
