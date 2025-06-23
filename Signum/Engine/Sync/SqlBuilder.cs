@@ -914,5 +914,13 @@ CREATE PARTITION SCHEME {partScheme.Name.SqlEscape(isPostgres)}
             new SqlPreCommandSimple($"""DROP PARTITION SCHEME {partSchema.SchemeName.SqlEscape(isPostgres: false)}"""));
     }
 
+    internal SqlPreCommandSimple AlterTableChangeOwner(ObjectName name, string executeAs)
+    {
+        return new SqlPreCommandSimple($"ALTER TABLE {name} OWNER TO {executeAs};");
+    }
 
+    internal SqlPreCommandSimple AlterSchemaChangeOwner(SchemaName name, string executeAs)
+    {
+        return new SqlPreCommandSimple($"ALTER SCHEMA {name} OWNER TO {executeAs};");
+    }
 }

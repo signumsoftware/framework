@@ -4,6 +4,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
 using System.Data;
+using System.Data.SqlTypes;
 using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Sync;
@@ -58,7 +59,7 @@ public static class SchemaSynchronizer
             }
         }
 
-        HashSet<SchemaName> databaseSchemas = Schema.Current.Settings.IsPostgres ?
+        Dictionary<SchemaName, DiffSchema> databaseSchemas = Schema.Current.Settings.IsPostgres ?
             PostgresCatalogSchema.GetSchemaNames(s.DatabaseNames()) :
             SysTablesSchema.GetSchemaNames(s.DatabaseNames());
 
@@ -173,20 +174,28 @@ public static class SchemaSynchronizer
                  );
 
             SqlPreCommand? createPartitionSchema = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
-                  modelPartitionSchemas!,
-                  databasePartitionSchemas!,
-                  createNew: (a, newPS) => sqlBuilder.CreateSqlPartitionScheme(newPS, a.db),
-                removeOld: null,
-                mergeBoth: null
+                 modelPartitionSchemas!,
+                 databasePartitionSchemas!,
+                 createNew: (a, newPS) => sqlBuilder.CreateSqlPartitionScheme(newPS, a.db),
+                 removeOld: null,
+                 mergeBoth: null
                 );
 
             SqlPreCommand? createSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas", Spacing.Double,
                 modelSchemas.ToDictionary(a => a.ToString()),
-                databaseSchemas.ToDictionary(a => a.ToString()),
+                databaseSchemas.SelectDictionary(sn => sn.ToString(), diff => diff),
                 createNew: (_, newSN) => sqlBuilder.CreateSchema(newSN),
                 removeOld: null,
-                mergeBoth: (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : sqlBuilder.CreateSchema(newSN)
-                );
+                mergeBoth: (_, newSN, diffSN) =>
+                {
+                    if (!newSN.Equals(diffSN.Name))
+                        return sqlBuilder.CreateSchema(newSN);
+
+                    var changeOwner = sqlBuilder.IsPostgres && s.ExecuteAs != null && diffSN.Owner != null && s.ExecuteAs != diffSN.Owner ? 
+                        sqlBuilder.AlterSchemaChangeOwner(diffSN.Name, s.ExecuteAs) : null;
+
+                    return changeOwner;
+                });
 
             //use database without replacements to just remove indexes
             SqlPreCommand? dropStatistics =
@@ -322,6 +331,9 @@ public static class SchemaSynchronizer
                     mergeBoth: (tn, tab, dif) =>
                     {
                         var rename = !object.Equals(dif.Name, tab.Name) ? sqlBuilder.RenameOrMove(dif, tab, tab.Name, forHistoryTable: false) : null;
+
+                        var changeOWner = sqlBuilder.IsPostgres && s.ExecuteAs != null && dif.Owner != null && s.ExecuteAs != dif.Owner ?
+                             sqlBuilder.AlterTableChangeOwner(tab.Name, s.ExecuteAs) : null;
 
                         bool disableEnableSystemVersioning = false;
 
@@ -489,6 +501,7 @@ public static class SchemaSynchronizer
 
                         return SqlPreCommand.Combine(Spacing.Simple,
                             rename,
+                            changeOWner,
                             disableSystemVersioning,
                             dropPeriod,
                             dropPrimaryKey,
@@ -636,10 +649,10 @@ public static class SchemaSynchronizer
 
             SqlPreCommand? dropSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas", Spacing.Double,
                 modelSchemas.ToDictionary(a => a.ToString()),
-                databaseSchemas.ToDictionary(a => a.ToString()),
+                databaseSchemas.SelectDictionary(sn => sn.ToString(), diff => diff),
                 createNew: null,
-                removeOld: (_, oldSN) => DropSchema(oldSN) ? sqlBuilder.DropSchema(oldSN) : null,
-                mergeBoth: (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : sqlBuilder.DropSchema(oldSN)
+                removeOld: (_, diffSN) => DropSchema(diffSN.Name) ? sqlBuilder.DropSchema(diffSN.Name) : null,
+                mergeBoth: (_, newSN, diffSN) => newSN.Equals(diffSN.Name) ? null : sqlBuilder.DropSchema(diffSN.Name)
              );
 
             SqlPreCommand? dropPartitionSchema = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
