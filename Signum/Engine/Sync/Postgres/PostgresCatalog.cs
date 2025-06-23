@@ -10,13 +10,31 @@ public class PgNamespace : IView
     public int oid;
 
     public string nspname;
+    public int nspowner;
 
     [AutoExpressionField]
     public bool IsInternal() => As.Expression(() => nspname == "information_schema" || nspname.StartsWith("pg_"));
 
+
+    [AutoExpressionField]
+    public PgRoles? Owner() =>
+     As.Expression(() => Database.View<PgRoles>().SingleOrDefaultEx(t => t.oid == nspowner));
+
+
     [AutoExpressionField]
     public IQueryable<PgClass> Tables() =>
         As.Expression(() => Database.View<PgClass>().Where(t => t.relnamespace == oid && t.relkind == RelKind.Table));
+}
+
+
+[TableName("pg_catalog.pg_roles")]
+public class PgRoles : IView
+{
+    [ViewPrimaryKey]
+    public int oid;
+
+    public string rolname;
+
 }
 
 
@@ -30,6 +48,12 @@ public class PgClass : IView
     public int relnamespace;
     public char relkind;
     public int reltuples;
+
+    public int relowner;
+
+    [AutoExpressionField]
+    public PgRoles? Owner() =>
+     As.Expression(() => Database.View<PgRoles>().SingleOrDefaultEx(t => t.oid == relowner));
 
     [AutoExpressionField]
     public IQueryable<PgTrigger> Triggers() =>

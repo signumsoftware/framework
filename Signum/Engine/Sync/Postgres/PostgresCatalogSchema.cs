@@ -45,7 +45,7 @@ public static class PostgresCatalogSchema
                              })
                              .SingleOrDefault(),
 
-                      
+                         Owner = t.Owner()!.rolname,
 
                          PrimaryKeyName = (from c in t.Constraints()
                                            where c.contype == ConstraintType.PrimaryKey
@@ -220,25 +220,28 @@ public static class PostgresCatalogSchema
         { "tid", (NpgsqlDbType)(-1) }
     };
 
-    public static HashSet<SchemaName> GetSchemaNames(List<DatabaseName?> list)
+    public static Dictionary<SchemaName, DiffSchema> GetSchemaNames(List<DatabaseName?> list)
     {
         var sqlBuilder = Connector.Current.SqlBuilder;
         var isPostgres = sqlBuilder.IsPostgres;
-        HashSet<SchemaName> result = new HashSet<SchemaName>();
+        var result = new Dictionary<SchemaName, DiffSchema>();
         foreach (var db in list)
         {
             using (Administrator.OverrideDatabaseInSysViews(db))
             {
-                var schemaNames = Database.View<PgNamespace>().Where(a => !a.IsInternal()).Select(s => s.nspname).ToList();
-
-                result.AddRange(schemaNames.Select(sn => new SchemaName(db, sn, isPostgres)).Where(a => !SchemaSynchronizer.IgnoreSchema(a)));
+                result.AddRange(Database.View<PgNamespace>().Where(a => !a.IsInternal())
+                    .Select(ns => new DiffSchema
+                    {
+                        Name = new SchemaName(db, ns.nspname, isPostgres),
+                        Owner = ns.Owner()!.rolname,
+                    })
+                    .ToList()
+                    .Where(a => !SchemaSynchronizer.IgnoreSchema(a.Name))
+                    .ToDictionary(a => a.Name));
             }
         }
         return result;
     }
-
-
-
 }
 
 
