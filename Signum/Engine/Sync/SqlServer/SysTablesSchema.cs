@@ -209,18 +209,18 @@ public static class SysTablesSchema
     }
 
 
-    public static HashSet<SchemaName> GetSchemaNames(List<DatabaseName?> list)
+    public static Dictionary<SchemaName, DiffSchema> GetSchemaNames(List<DatabaseName?> list)
     {
         var sqlBuilder = Connector.Current.SqlBuilder;
         var isPostgres = false;
-        HashSet<SchemaName> result = new HashSet<SchemaName>();
+        var result = new Dictionary<SchemaName, DiffSchema>();
         foreach (var db in list)
         {
             using (Administrator.OverrideDatabaseInSysViews(db))
             {
-                var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(sqlBuilder.SystemSchemasSqlServer);
-
-                result.AddRange(schemaNames.Select(sn => new SchemaName(db, sn, isPostgres)).Where(a => !SchemaSynchronizer.IgnoreSchema(a)));
+                result.AddRange(Database.View<SysSchemas>().Select(sn => new DiffSchema { Name = new SchemaName(db, sn.name, isPostgres) })
+                    .ToList().Where(a => !sqlBuilder.SystemSchemasSqlServer.Contains(a.Name.Name) && !SchemaSynchronizer.IgnoreSchema(a.Name))
+                    .ToDictionary(a => a.Name));
             }
         }
         return result;

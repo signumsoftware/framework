@@ -27,6 +27,12 @@ public class DiffPostgresVersioningTrigger
     public int tgfoid;
 }
 
+public class DiffSchema
+{
+    public SchemaName Name;
+    public string? Owner;
+}
+
 public class DiffTable
 {
     public ObjectName Name;
@@ -59,8 +65,8 @@ public class DiffTable
         }
     }
 
-    public DiffPostgresVersioningTrigger? VersionningTrigger { get; internal set; }
-
+    public DiffPostgresVersioningTrigger? VersionningTrigger;
+    public string? Owner;
     public SysTableTemporalType TemporalType;
     public ObjectName? TemporalTableName;
     public ObjectName? InferredTemporalTableName;
