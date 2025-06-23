@@ -48,9 +48,10 @@ public class WebElementLocator
         ParentElement.WaitElementNotPresent(this.Locator);
     }
 
-    public IWebElement WaitVisible()
+    public IWebElement WaitVisible(bool scrollTo = false)
     {
-        return ParentElement.WaitElementVisible(this.Locator);
+        var element = ParentElement.WaitElementVisible(this.Locator);
+        return scrollTo ? element.ScrollTo() : element;
     }
 
     public void WaitNoVisible()

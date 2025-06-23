@@ -67,6 +67,18 @@ span.sf-today {
     font-weight: bold;
 }
 
+span.sf-weekend,
+span.sf-holiday {
+    background-color: #e6e6e6;
+    padding: 2px 3px;
+}
+
+.rw-state-selected span.sf-weekend,
+.rw-state-selected span.sf-holiday {
+    background-color: inherit;
+    padding: inherit;
+}
+
 .sf-entity-line-entity,
 .sf-entity-line-entity:focus {
     background-color: #f8f8f8;
@@ -366,7 +378,8 @@ body.rtl .form-group.row > label {
 
     .has-error input,
     .has-error textarea,
-    .has-error select {
+    .has-error select,
+    .has-error .form-control {
         border-color: #a94442;
     }
 
@@ -456,6 +469,14 @@ input[type=checkbox].form-control-xs {
 .form-control-xs .rw-widget-picker,
 .rw-widget-xs .rw-widget-picker {
     min-height: 24px;
+}
+
+.form-group :not(label) > .form-check-input {
+    margin-top: 0.5em;
+}
+
+.form-group.form-group-xs :not(label) > .form-check-input {
+    margin-top: 0.25em;
 }
 
 .form-group.form-group-xs {

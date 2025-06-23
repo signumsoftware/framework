@@ -1080,7 +1080,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
     }
     else {
       throw new Error(`Impossible to extract the properties from: ${body}` +
-        (body.contains("Mixin") ? "\r\n Consider using subCtx(MyMixin) directly." : null));
+        (body.contains("Mixin") ? "\n Consider using subCtx(MyMixin) directly." : null));
     }
   }
 

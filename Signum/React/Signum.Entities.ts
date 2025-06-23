@@ -616,6 +616,8 @@ export namespace SearchMessage {
   export const _0Results_N: MessageKey = new MessageKey("SearchMessage", "_0Results_N");
   export const First0Results_N: MessageKey = new MessageKey("SearchMessage", "First0Results_N");
   export const _01of2Results_N: MessageKey = new MessageKey("SearchMessage", "_01of2Results_N");
+  export const _0Rows_N: MessageKey = new MessageKey("SearchMessage", "_0Rows_N");
+  export const _0GroupWith1_N: MessageKey = new MessageKey("SearchMessage", "_0GroupWith1_N");
   export const Search: MessageKey = new MessageKey("SearchMessage", "Search");
   export const Refresh: MessageKey = new MessageKey("SearchMessage", "Refresh");
   export const Create: MessageKey = new MessageKey("SearchMessage", "Create");
@@ -659,6 +661,7 @@ export namespace SearchMessage {
   export const HiddenColumn: MessageKey = new MessageKey("SearchMessage", "HiddenColumn");
   export const ShowHiddenColumns: MessageKey = new MessageKey("SearchMessage", "ShowHiddenColumns");
   export const HideHiddenColumns: MessageKey = new MessageKey("SearchMessage", "HideHiddenColumns");
+  export const ShowMore: MessageKey = new MessageKey("SearchMessage", "ShowMore");
   export const GroupKey: MessageKey = new MessageKey("SearchMessage", "GroupKey");
   export const DerivedGroupKey: MessageKey = new MessageKey("SearchMessage", "DerivedGroupKey");
   export const Copy: MessageKey = new MessageKey("SearchMessage", "Copy");
@@ -683,7 +686,6 @@ export namespace SearchMessage {
   export const CurrentlyWeAreInTheQuery0GroupedBy1YouCanOpenAGroupByClickingThe2IconOrDoing3InTheRowButNotInALink: MessageKey = new MessageKey("SearchMessage", "CurrentlyWeAreInTheQuery0GroupedBy1YouCanOpenAGroupByClickingThe2IconOrDoing3InTheRowButNotInALink");
   export const DoubleClick: MessageKey = new MessageKey("SearchMessage", "DoubleClick");
   export const GroupedBy: MessageKey = new MessageKey("SearchMessage", "GroupedBy");
-  export const YouCanOpenAGroupByClickingInThe: MessageKey = new MessageKey("SearchMessage", "YouCanOpenAGroupByClickingInThe");
   export const Doing0InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK: MessageKey = new MessageKey("SearchMessage", "Doing0InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK");
   export const YouCanUseThePreparedFiltersOnTheTopToQuicklyFindThe0YouAreLookingFor: MessageKey = new MessageKey("SearchMessage", "YouCanUseThePreparedFiltersOnTheTopToQuicklyFindThe0YouAreLookingFor");
   export const OrderingResults: MessageKey = new MessageKey("SearchMessage", "OrderingResults");
@@ -724,13 +726,14 @@ export namespace SearchMessage {
   export const WithThe: MessageKey = new MessageKey("SearchMessage", "WithThe");
   export const EqualsDistinctGreaterThan: MessageKey = new MessageKey("SearchMessage", "EqualsDistinctGreaterThan");
   export const Etc: MessageKey = new MessageKey("SearchMessage", "Etc");
-  export const IsIn: MessageKey = new MessageKey("SearchMessage", "IsIn");
-  export const IsNotIn: MessageKey = new MessageKey("SearchMessage", "IsNotIn");
   export const TheValueThatWillBeComparedWithThe: MessageKey = new MessageKey("SearchMessage", "TheValueThatWillBeComparedWithThe");
   export const TypicallyHasTheSameTypeAsTheFieldButSomeOperatorsLike: MessageKey = new MessageKey("SearchMessage", "TypicallyHasTheSameTypeAsTheFieldButSomeOperatorsLike");
   export const AllowToSelectMultipleValues: MessageKey = new MessageKey("SearchMessage", "AllowToSelectMultipleValues");
   export const YouAreEditingAColumnLetMeExplainWhatEachFieldDoes: MessageKey = new MessageKey("SearchMessage", "YouAreEditingAColumnLetMeExplainWhatEachFieldDoes");
   export const CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup: MessageKey = new MessageKey("SearchMessage", "CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup");
+  export const YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages: MessageKey = new MessageKey("SearchMessage", "YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages");
+  export const CurrentPage: MessageKey = new MessageKey("SearchMessage", "CurrentPage");
+  export const AllPages: MessageKey = new MessageKey("SearchMessage", "AllPages");
 }
 
 export namespace SelectorMessage {

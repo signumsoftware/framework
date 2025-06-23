@@ -88,6 +88,22 @@ public class ColumnToken : QueryToken
             }
         }
 
+        if (uType == typeof(TimeOnly))
+        {
+            if (Column.PropertyRoutes != null)
+            {
+                DateTimePrecision? precision =
+                    Column.PropertyRoutes
+                    .Select(pr => Validator.TryGetPropertyValidator(pr.Parent!.Type, pr.PropertyInfo!.Name)?.Validators.OfType<TimePrecisionValidatorAttribute>().SingleOrDefaultEx())
+                    .Select(dtp => dtp?.Precision)
+                    .Distinct()
+                    .Only();
+
+                if (precision != null)
+                    return TimeOnlyProperties(this, precision.Value).AndHasValue(this);
+            }
+        }
+
 
         if (uType == typeof(double) ||
             uType == typeof(float) ||

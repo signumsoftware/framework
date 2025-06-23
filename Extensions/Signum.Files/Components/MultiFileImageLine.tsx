@@ -93,7 +93,7 @@ export const MultiFileImageLine: <V extends ModifiableEntity /*& IFile*/ | Lite<
 
 
     return (
-      <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon}
         htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
         helpText={helpText}
         helpTextOnTop={helpTextOnTop}
@@ -130,6 +130,7 @@ export const MultiFileImageLine: <V extends ModifiableEntity /*& IFile*/ | Lite<
                   p.ctx.propertyRoute!.addMember("Indexer", "", true).addLambda(p.getFileFromElement).typeReference().name! :
                   p.ctx.propertyRoute!.typeReference().name}
                 buttonCss={p.ctx.buttonClass}
+                fileDropCssClass={c.mandatoryClass ?? undefined}
                 divHtmlAttributes={{ className: "sf-file-line-new" }} />}
           </div>
         </div>}

@@ -254,9 +254,10 @@ export namespace ActiveDirectoryClient {
     export function createADGroup(request: ADGroupRequest): Promise<Lite<ADGroupEntity>> {
       return ajaxPost({ url: `/api/createADGroup` }, request);
     }
-  
+
+    export let forceCacheInvalidationKey: string | undefined = undefined
     export function cachedAzureUserPhotoUrl(size: number, oID: string): Promise<string | null> {
-      return ajaxGet({ url: `/api/cachedAzureUserPhoto/${size}/${oID}`, cache: "default"  });
+      return ajaxGet({ url: `/api/cachedAzureUserPhoto/${size}/${oID}` + (forceCacheInvalidationKey ? ("?inv=" + forceCacheInvalidationKey) : ""), cache: "default" });
     }
   }
   

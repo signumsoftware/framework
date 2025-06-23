@@ -95,6 +95,8 @@ export function FileUploader(p: FileUploaderProps): React.JSX.Element {
     setErrors(errors => [...errors, newError]);
   }
 
+  
+
   return (
     <div {...p.divHtmlAttributes}>
       {isLoading ? <div className="sf-file-drop">{JavascriptMessage.loading.niceToString()}</div> :
@@ -104,7 +106,7 @@ export function FileUploader(p: FileUploaderProps): React.JSX.Element {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <div className={classes("sf-upload btn btn-light", p.buttonCss)}>
+          <div className={classes("sf-upload btn btn-light", p.buttonCss, )}>
             <FontAwesomeIcon icon="upload" className="me-2" />
             {FileMessage.SelectFile.niceToString()}
             <input type='file' accept={p.accept} onChange={handleFileChange} multiple={p.multiple} />

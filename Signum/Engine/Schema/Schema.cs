@@ -457,7 +457,7 @@ public class Schema : IImplementationsFinder
                         SafeConsole.WriteColor(ConsoleColor.Red, "Error");
                         SafeConsole.WriteLineColor(ConsoleColor.DarkRed, " (...it's probably ok, execute this script and try again)");
 
-                        return new SqlPreCommandSimple("-- Exception on {0}.{1}\r\n{2}".FormatWith(e.Method.DeclaringType!.Name, e.Method.Name, ex.Message.Indent(2, '-')));
+                        return new SqlPreCommandSimple("-- Exception on {0}.{1}\n{2}".FormatWith(e.Method.DeclaringType!.Name, e.Method.Name, ex.Message.Indent(2, '-')));
                     }
                 })
                 .Combine(Spacing.Triple);
@@ -520,7 +520,6 @@ public class Schema : IImplementationsFinder
         return ViewBuilder.NewView(viewType);
     }
 
-   
 
     public event Func<SqlPreCommand?> Generating;
     public SqlPreCommand? GenerationScipt(string? databaseNameReplacement = null)
@@ -534,14 +533,27 @@ public class Schema : IImplementationsFinder
         using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
         using (ExecutionMode.Global())
         {
-            return Generating
+            var result = Generating
                 .GetInvocationListTyped()
                 .Select(e => e())
                 .Combine(Spacing.Triple);
+
+            return result;
         }
     }
 
 
+    public string? ExecuteAs;
+    internal void ExecuteExecuteAs()
+    {
+        if (ExecuteAs == null)
+            return;
+
+        if (this.Settings.IsPostgres)
+            new SqlPreCommandSimple($"SET ROLE {ExecuteAs};").ExecuteNonQuery();
+        else
+            new SqlPreCommandSimple($"EXECUTE AS LOGIN = '{ExecuteAs}';").ExecuteNonQuery();
+    }
 
     public event Action? SchemaCompleted;
 

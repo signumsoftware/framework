@@ -133,11 +133,13 @@ export async function selectPagination(sc: SearchControlLoaded): Promise<QueryRe
   if (request.pagination.mode == "Firsts" || request.pagination.mode == "Paginate" && (rt == null || rt!.totalElements! > rt!.rows.length)) {
 
     const pm = await SelectorModal.chooseElement<PaginationMode>([request.pagination.mode, "All"], {
-      buttonDisplay: a => <span>{PaginationMode.niceToString(a)} {rt && SearchMessage._0Results_N.niceToString().forGenderAndNumber(rt.totalElements).formatHtml(
-        <span className="sf-pagination-strong" key={1}>{a == "All" ? rt?.totalElements : rt?.rows.length}</span>)}</span>,
+      title: ExcelMessage.ExportToExcel.niceToString(),
+      message: ExcelMessage.WhatDoYouWantToExport.niceToString(),
+      buttonDisplay: a => <span>
+        {a == "All" ? SearchMessage.AllPages.niceToString() : SearchMessage.CurrentPage.niceToString()}{" "}
+        ({rt && SearchMessage._0Rows_N.niceToString().forGenderAndNumber(rt.totalElements).formatHtml(<strong>{a == "All" ? rt?.totalElements : rt?.rows.length}</strong>)})
+      </span>,
       buttonName: a => a,
-      title: SelectorMessage._0Selector.niceToString(PaginationMode.niceTypeName()),
-      message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(PaginationMode.niceTypeName()),
       size: "md",
     });
 

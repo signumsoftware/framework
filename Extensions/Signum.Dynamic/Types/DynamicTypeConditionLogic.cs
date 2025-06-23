@@ -64,7 +64,7 @@ public static class DynamicTypeConditionLogic
             DynamicLogic.GetCodeFiles += GetCodeFiles;
             DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
             EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicTypeConditionEntity));
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicTypeConditionEntity>().Where(dtc => dtc.EntityType.Is(type)));
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicTypeConditionEntity>().Where(dtc => dtc.EntityType.Is(type)));
         }
     }
 

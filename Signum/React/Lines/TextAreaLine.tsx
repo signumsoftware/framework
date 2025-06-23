@@ -38,7 +38,7 @@ export const TextAreaLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
 
     if (p.ctx.readOnly)
       return (
-        <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+        <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
           {inputId => <>
             {getTimeMachineIcon({ ctx: p.ctx })}
             <TextArea id={inputId} {...htmlAtts} autoResize={autoResize} className={classes(htmlAtts?.className, p.ctx.formControlClass, c.mandatoryClass)} value={p.ctx.value || ""}
@@ -83,7 +83,7 @@ export const TextAreaLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
 
 
     return (
-      <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
+      <FormGroup ctx={p.ctx} error={c.getError()} label={p.label} labelIcon={p.labelIcon}
         helpText={helpText && cc ? <>{cc}<br />{helpText}</> : (cc ?? helpText)}
         helpTextOnTop={helpTextOnTop}
         htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>

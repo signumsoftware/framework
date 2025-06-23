@@ -453,7 +453,7 @@ export class TypeContext<T> extends StyleContext {
     return result;
   }
 
-  using(render: (ctx: this) => React.ReactChild): React.ReactChild {
+  using(render: (ctx: this) => React.ReactNode): React.ReactNode {
     return render(this);
   }
 
@@ -465,24 +465,6 @@ export class TypeContext<T> extends StyleContext {
     return this.propertyRoute && this.propertyRoute.propertyRouteType != "Root" ? this.propertyRoute.propertyPath() : undefined;
   }
 
-  get errorClass(): string | undefined {
-    return !!this.error ? "has-error" : undefined;
-  }
-
-  get errorClassBorder(): string | undefined {
-    return !!this.error ? "border has-error" : undefined;
-  }
-
-  errorAttributes(): React.HTMLAttributes<any> | undefined {
-
-    if (!this.error)
-      return undefined;
-
-    return {
-      title: this.error,
-      "data-error-path": this.prefix
-    } as any;
-  }
 }
 
 export interface ButtonsContext {

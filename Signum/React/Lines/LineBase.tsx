@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Dic } from '../Globals'
+import { classes, Dic } from '../Globals'
 import { TypeContext, StyleOptions } from '../TypeContext'
 import { TypeReference } from '../Reflection'
 import { ValidationMessage } from '../Signum.Entities.Validation'
@@ -8,7 +8,7 @@ import { useForceUpdate } from '../Hooks'
 export interface ChangeEvent {
   newValue: any;
   oldValue: any;
-  originalEvent?: React.SyntheticEvent; 
+  originalEvent?: React.SyntheticEvent;
 }
 
 export interface LineBaseProps<V = unknown> extends StyleOptions {
@@ -21,7 +21,8 @@ export interface LineBaseProps<V = unknown> extends StyleOptions {
   visible?: boolean;
   hideIfNull?: boolean;
   onChange?: (e: ChangeEvent) => void;
-  onValidate?: (val: any) => string;
+  error?: string | null;
+  resetValidationError?: (val: any) => string | undefined;
   extraButtons?: (c: LineBaseController<any, V>) => React.ReactNode;
   extraButtonsBefore?: (c: LineBaseController<any, V>) => React.ReactNode;
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
@@ -32,7 +33,7 @@ export interface LineBaseProps<V = unknown> extends StyleOptions {
 }
 
 export function useController<C extends LineBaseController<P, V>, P extends LineBaseProps<V>, V>(controllerType: new () => C, props: P, ref: React.Ref<C>): C {
-  var controller = React.useMemo<C>(()=> new controllerType(), []);
+  var controller = React.useMemo<C>(() => new controllerType(), []);
   controller.init(props);
   React.useImperativeHandle(ref, () => controller, []);
   return controller;
@@ -77,14 +78,36 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
       this.props.onChange({ oldValue: oldValue, newValue: val, originalEvent: event });
   }
 
+  getError(): string | null | undefined {
+    return this.props.error == undefined ? this.props.ctx.error : this.props.error;
+  }
+
+  getErrorClass(extraClasses?: "border"): string | undefined {
+
+    return this.getError() ? classes("has-error", extraClasses) : undefined;
+  }
+
+  errorAttributes(): React.HTMLAttributes<any> | undefined {
+
+    const error = this.getError();
+
+    if (!error)
+      return undefined;
+
+    return {
+      title: error,
+      "data-error-path": this.props.ctx.prefix
+    } as any;
+  }
+
   validate(): void {
-    const error = this.props.onValidate ? this.props.onValidate(this.props.ctx.value) : this.defaultValidate(this.props.ctx.value);
+    const error = this.props.resetValidationError ? this.props.resetValidationError(this.props.ctx.value) : this.defaultResetValidationError(this.props.ctx.value);
     this.props.ctx.error = error;
     if (this.props.ctx.frame)
       this.props.ctx.frame.revalidate();
   }
 
-  defaultValidate(val: V): string | undefined {
+  defaultResetValidationError(val: V): string | undefined {
     if (this.props.type!.isNotNullable && val == undefined)
       return ValidationMessage._0IsNotSet.niceToString(this.props.ctx.niceName());
 
@@ -205,7 +228,7 @@ export function taskSetNiceName(lineBase: LineBaseController<LineBaseProps, unkn
 
 tasks.push(taskSetReadOnlyProperty);
 export function taskSetReadOnlyProperty(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
-  if (state.ctx.styleOptions.readOnly === undefined && !state.ctx.readOnly && 
+  if (state.ctx.styleOptions.readOnly === undefined && !state.ctx.readOnly &&
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
     state.ctx.propertyRoute.member!.isReadOnly) {

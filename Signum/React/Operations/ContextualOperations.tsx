@@ -74,15 +74,15 @@ export namespace ContextualOperations {
           cfm.forEach(coc => {
             coc.canExecute = response.canExecutes[coc.operationInfo.key];
             coc.isReadonly = response.isReadOnly;
-        });
+          });
         }
 
       } else /*if (ctx.lites.length > 1)*/ {
         const response = await Operations.API.stateCanExecutes(ctx.lites, contexts.filter(coc => coc.operationInfo.hasStates || coc.operationInfo.hasCanExecuteExpression).map(a => a.operationInfo.key))
-            contexts.forEach(coc => {
-              coc.canExecute = response.canExecutes[coc.operationInfo.key];
-              coc.isReadonly = response.isReadOnly;
-            });
+        contexts.forEach(coc => {
+          coc.canExecute = response.canExecutes[coc.operationInfo.key];
+          coc.isReadonly = response.isReadOnly;
+        });
       }
     } else {
 
@@ -92,19 +92,19 @@ export namespace ContextualOperations {
     }
 
     const menuItems = contexts
-        .filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
-        .filter(coc => !coc.isReadonly || showOnReadonly(coc))
-        .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
-          coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
-        .flatMap(coc => coc.createMenuItems());
+      .filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
+      .filter(coc => !coc.isReadonly || showOnReadonly(coc))
+      .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
+        coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
+      .flatMap(coc => coc.createMenuItems());
 
-      if (menuItems.length == 0)
-        return undefined;
+    if (menuItems.length == 0)
+      return undefined;
 
-      return {
-        header: SearchMessage.Operations.niceToString(),
-        menuItems: menuItems
-      } as MenuItemBlock;
+    return {
+      header: SearchMessage.Operations.niceToString(),
+      menuItems: menuItems
+    } as MenuItemBlock;
   }
 
 
@@ -160,17 +160,17 @@ export namespace ContextualOperations {
     }
 
 
-  if (defaultHasConfirmMessage(coc)) {
+    if (defaultHasConfirmMessage(coc)) {
       return getDefaultConfirmMessage(coc);
     }
 
     return undefined;
   }
 
-function defaultHasConfirmMessage(coc: ContextualOperationContext<Entity>) {
-  return coc.operationInfo.operationType == "Delete" ||
-    coc.operationInfo.operationType != "ConstructorFromMany" && coc.context.lites.length > 1;
-}
+  function defaultHasConfirmMessage(coc: ContextualOperationContext<Entity>) {
+    return coc.operationInfo.operationType == "Delete" ||
+      coc.operationInfo.operationType != "ConstructorFromMany" && coc.context.lites.length > 1;
+  }
 
   function getDefaultConfirmMessage(coc: ContextualOperationContext<Entity>) {
 
@@ -281,91 +281,116 @@ function defaultHasConfirmMessage(coc: ContextualOperationContext<Entity>) {
     return array ? OperationMessage.Create0.niceToString(array[1].firstUpper()) : niceName;
   }
 
+  export function cloneWithPrototype<T extends object>(obj: T, overrides: Partial<T> = {}): T {
+    const proto = Object.getPrototypeOf(obj);
+    const clone = Object.create(proto);
+    return Object.assign(clone, obj, overrides);
+  }
 
-  export function defaultContextualOperationClick(coc: ContextualOperationContext<any>, ...args: any[]): Promise<void> {
+
+  export async function defaultContextualOperationClick(coc: ContextualOperationContext<any>, ...args: any[]): Promise<void> {
 
     coc.event!.persist();
 
-    return confirmInNecessary(coc).then(conf => {
-      if (!conf)
-        return;
+    const lites = coc.context.container instanceof SearchControlLoaded ?
+      await coc.context.container.askAllLites(coc.context, coc.operationInfo.niceName) :
+      coc.context.lites;
 
-      switch (coc.operationInfo.operationType) {
-        case "ConstructorFromMany":
-          {
-            return Operations.API.constructFromMany(coc.context.lites, coc.operationInfo.key, ...args)
-              .then(coc.onConstructFromSuccess ?? (pack => {
-                Operations.notifySuccess();
-                if (pack?.entity.id != null)
-                  Navigator.raiseEntityChanged(pack.entity);
-                Navigator.createNavigateOrTab(pack, coc.event!)
-                  .then(() => coc.context.markRows({}));
-              }));
-          }
-        case "ConstructorFrom":
-          if (coc.context.lites.length == 1) {
-            return Operations.API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
-              .then(coc.onConstructFromSuccess ?? (pack => {
-                if (pack?.entity.id != null)
-                  Navigator.raiseEntityChanged(pack.entity);
-                Operations.notifySuccess();
-                return Navigator.createNavigateOrTab(pack, coc.event!)
-                  .then(() => coc.context.markRows({}))
-              }));
-          } else {
-            return getSetters(coc)
-              .then(setters => setters && Operations.API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
-                .then(coc.onContextualSuccess ?? (report => {
-                  //Navigator.raiseEntityChanged(??);
-                  Operations.notifySuccess();
-                  coc.context.markRows(report.errors);
-                })));
-          }
-        case "Execute":
-          if (coc.progressModalOptions && coc.context.lites.length == 1) {
-            return Operations.API.executeLiteWithProgress(coc.context.lites[0], coc.operationInfo.key, coc.progressModalOptions, ...args)
-              .then(pack => softCast<Operations.API.ErrorReport>({ errors: {} })/*, error => softCast<API.ErrorReport>({ errors: { [liteKey(coc.context.lites[0])]: (error as Error).message } })*/)
-              .then(coc.onContextualSuccess ?? (report => {
-                coc.raiseEntityChanged();
-                Operations.notifySuccess();
-                coc.context.markRows(report.errors);
-              }));
-          } else {
-            return getSetters(coc)
-              .then(setters => setters && Operations.API.executeMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
-                .then(coc.onContextualSuccess ?? (report => {
-                  coc.raiseEntityChanged();
-                  Operations.notifySuccess();
-                  coc.context.markRows(report.errors);
-                })));
-          }
-        case "Delete":
-          return getSetters(coc)
-            .then(setters => setters && Operations.API.deleteMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
-              .then(coc.onContextualSuccess ?? (report => {
-                coc.raiseEntityChanged();
-                Operations.notifySuccess();
-                coc.context.markRows(report.errors);
-              })));
+    if (lites == null)
+      return;
+
+    coc = cloneWithPrototype(coc, { context: { ...coc.context, lites } });
+
+    var conf = await confirmInNecessary(coc);
+    if (!conf)
+      return;
+
+    switch (coc.operationInfo.operationType) {
+      case "ConstructorFromMany":
+        {
+          return Operations.API.constructFromMany(lites, coc.operationInfo.key, ...args)
+            .then(coc.onConstructFromSuccess ?? (pack => {
+              Operations.notifySuccess();
+              if (pack?.entity.id != null)
+                Navigator.raiseEntityChanged(pack.entity);
+              Navigator.createNavigateOrTab(pack, coc.event!)
+                .then(() => coc.context.markRows({}));
+            }));
+        }
+      case "ConstructorFrom":
+        if (lites.length == 1) {
+          return Operations.API.constructFromLite(lites[0], coc.operationInfo.key, ...args)
+            .then(coc.onConstructFromSuccess ?? (pack => {
+              if (pack?.entity.id != null)
+                Navigator.raiseEntityChanged(pack.entity);
+              Operations.notifySuccess();
+              return Navigator.createNavigateOrTab(pack, coc.event!)
+                .then(() => coc.context.markRows({}))
+            }));
+        } else {
+
+          var setters = await getSetters(coc);
+          if (!setters)
+            return;
+
+          return Operations.API.constructFromMultiple(lites, coc.operationInfo.key, { setters }, ...args)
+            .then(coc.onContextualSuccess ?? (report => {
+              //Navigator.raiseEntityChanged(??);
+              Operations.notifySuccess();
+              coc.context.markRows(report.errors);
+            }));
+        }
+      case "Execute":
+        if (coc.progressModalOptions && lites.length == 1) {
+          return Operations.API.executeLiteWithProgress(lites[0], coc.operationInfo.key, coc.progressModalOptions, ...args)
+            .then(pack => softCast<Operations.API.ErrorReport>({ errors: {} })/*, error => softCast<API.ErrorReport>({ errors: { [liteKey(lites[0])]: (error as Error).message } })*/)
+            .then(coc.onContextualSuccess ?? (report => {
+              coc.raiseEntityChanged();
+              Operations.notifySuccess();
+              coc.context.markRows(report.errors);
+            }));
+        } else {
+          var setters = await getSetters(coc);
+          if (!setters)
+            return;
+
+          return Operations.API.executeMultiple(lites, coc.operationInfo.key, { setters }, ...args)
+            .then(coc.onContextualSuccess ?? (report => {
+              coc.raiseEntityChanged();
+              Operations.notifySuccess();
+              coc.context.markRows(report.errors);
+            }));
+        }
+      case "Delete": {
+        var setters = await getSetters(coc);
+        if (!setters)
+          return;
+
+        return Operations.API.deleteMultiple(lites, coc.operationInfo.key, { setters }, ...args)
+          .then(coc.onContextualSuccess ?? (report => {
+            coc.raiseEntityChanged();
+            Operations.notifySuccess();
+            coc.context.markRows(report.errors);
+          }));
       }
-    });
-
-    function getSetters(coc: ContextualOperationContext<Entity>): Promise<Operations.API.PropertySetter[] | undefined> {
-
-      if (!coc.operationInfo.canBeModified)
-        return Promise.resolve([]);
-
-      var settersConfig = (coc.settings?.settersConfig ?? Operations.Defaults.defaultSetterConfig)(coc);
-
-      if (settersConfig == "NoDialog")
-        return Promise.resolve([]);
-
-      var onlyType = coc.context.lites.map(a => a.EntityType).distinctBy().onlyOrNull();
-
-      if (!onlyType)
-        return Promise.resolve([]);
-
-      return MultiPropertySetterModal.show(getTypeInfo(onlyType), coc.context.lites, coc.operationInfo, settersConfig == "Mandatory");
     }
+  }
+
+  function getSetters(coc: ContextualOperationContext<Entity>): Promise<Operations.API.PropertySetter[] | undefined> {
+
+    if (!coc.operationInfo.canBeModified)
+      return Promise.resolve([]);
+
+    var settersConfig = (coc.settings?.settersConfig ?? Operations.Defaults.defaultSetterConfig)(coc);
+
+    if (settersConfig == "NoDialog")
+      return Promise.resolve([]);
+
+    var onlyType = coc.context.lites.map(a => a.EntityType).distinctBy().onlyOrNull();
+
+    if (!onlyType)
+      return Promise.resolve([]);
+
+    return MultiPropertySetterModal.show(getTypeInfo(onlyType), coc.context.lites, coc.operationInfo, settersConfig == "Mandatory");
   }
 }

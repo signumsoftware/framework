@@ -157,7 +157,7 @@ export const EntityList: <V extends Lite<Entity> | ModifiableEntity>(props: Enti
     return null;
 
   return (
-    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
+    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => <div className="sf-entity-line">

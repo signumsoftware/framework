@@ -24,11 +24,11 @@ export interface DynamicValidationEval extends Eval.EvalEmbedded<IDynamicValidat
   Type: "DynamicValidationEval";
 }
 
-export module DynamicValidationMessage {
+export namespace DynamicValidationMessage {
   export const PropertyIs: MessageKey = new MessageKey("DynamicValidationMessage", "PropertyIs");
 }
 
-export module DynamicValidationOperation {
+export namespace DynamicValidationOperation {
   export const Clone : Operations.ConstructSymbol_From<DynamicValidationEntity, DynamicValidationEntity> = registerSymbol("Operation", "DynamicValidationOperation.Clone");
   export const Save : Operations.ExecuteSymbol<DynamicValidationEntity> = registerSymbol("Operation", "DynamicValidationOperation.Save");
   export const Delete : Operations.DeleteSymbol<DynamicValidationEntity> = registerSymbol("Operation", "DynamicValidationOperation.Delete");

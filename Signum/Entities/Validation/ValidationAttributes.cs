@@ -1097,7 +1097,7 @@ public class StateValidator<E, S> : IEnumerable
 
     public string? PreviewErrors(E entity, S targetState, bool showState)
     {
-        string result = propertyNames.Select((pn, i) => GetMessage(entity, targetState, showState, i)).NotNull().ToString("\r\n");
+        string result = propertyNames.Select((pn, i) => GetMessage(entity, targetState, showState, i)).NotNull().ToString("\n");
 
         return string.IsNullOrEmpty(result) ? null : result;
     }
@@ -1221,6 +1221,8 @@ public enum ValidationMessage
     _0ShouldBeNullWhen1IsSetTo2,
     [Description("{0} should be null")]
     _0ShouldBeNull,
+    [Description("{0} should be {1} when {2} is {3}")]
+    _0ShouldBe1When2Is3,
     [Description("{0} should be a date in the past")]
     _0ShouldBeADateInThePast,
     [Description("{0} should be a date in the future")]

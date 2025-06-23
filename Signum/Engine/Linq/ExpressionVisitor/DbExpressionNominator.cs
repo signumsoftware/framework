@@ -1495,6 +1495,12 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
                     return Add(new SqlCastExpression(typeof(int?), TrySqlFunction(null, SqlFunction.FLOOR, typeof(double?), diff)!));
                 }
+
+            case "TimeOnly.Hour": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.hour), m.Expression!);
+            case "TimeOnly.Minute": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.minute), m.Expression!);
+            case "TimeOnly.Second": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.second), m.Expression!);
+            case "TimeOnly.Millisecond": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.millisecond), m.Expression!);
+
             case "TimeSpan.Hours": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.hour), m.Expression!);
             case "TimeSpan.Minutes": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.minute), m.Expression!);
             case "TimeSpan.Seconds": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.second), m.Expression!);
@@ -1565,10 +1571,10 @@ internal class DbExpressionNominator : DbExpressionVisitor
             var timeSpan = new SqlLiteralExpression(typeof(TimeSpan), $"INTERVAL '1 {unit}'");
 
             if (d.Type.UnNullify() == typeof(DateTime))
-                return Add(Expression.Add(date, Expression.Multiply(value, timeSpan)).CopyMetadata(date));
+                return Add(Expression.Add(d, Expression.Multiply(v, timeSpan)).CopyMetadata(d));
 
             if (d.Type.UnNullify() == typeof(DateOnly))
-                return Add(Expression.Add(date, Expression.Multiply(value, timeSpan, miPseudoMult), miPseudoAdd).CopyMetadata(date));
+                return Add(Expression.Add(d, Expression.Multiply(v, timeSpan, miPseudoMult), miPseudoAdd).CopyMetadata(d));
 
             throw new UnexpectedValueException(d.Type);
         }

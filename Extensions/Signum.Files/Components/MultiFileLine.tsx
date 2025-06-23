@@ -5,7 +5,7 @@ import { ButtonBarElement, TypeContext } from '@framework/TypeContext'
 import { Type, getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EntityControlMessage, EmbeddedEntity, MListElement, getToString } from '@framework/Signum.Entities'
-import { IFile, FileTypeSymbol } from '../Signum.Files'
+import { IFile, FileTypeSymbol, FileMessage } from '../Signum.Files'
 import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
 import { FileUploader } from './FileUploader'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -32,6 +32,16 @@ interface MultiFileLineProps<V extends ModifiableEntity/* & IFile*/ | Lite</*IFi
 }
 
 export class MultiFileLineController<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile & */Entity>> extends EntityListBaseController<MultiFileLineProps<V>, V> {
+
+  forceShowUploader!: boolean;
+  setForceShowUploader!: React.Dispatch<boolean>;
+
+
+  init(p: MultiFileLineProps<V>): void {
+    super.init(p);
+    [this.forceShowUploader, this.setForceShowUploader] = React.useState<boolean>(() => this.getMListItemContext(p.ctx).length == 0);
+  }
+
 
   overrideProps(p: MultiFileLineProps<V>, overridenProps: MultiFileLineProps<V>): void {
 
@@ -73,6 +83,7 @@ export class MultiFileLineController<V extends ModifiableEntity /*& IFile*/ | Li
 
   handleFileLoaded = (file: IFile & ModifiableEntity): void => {
 
+    this.setForceShowUploader(false);
     if (this.props.createElementFromFile)
       this.props.createElementFromFile(file)
         .then(em => em && this.addElement(em));
@@ -102,14 +113,18 @@ export const MultiFileLine: <V extends ModifiableEntity /*& IFile*/ | Lite</*IFi
     const c = useController(MultiFileLineController, props, ref);
     const p = c.props;
 
+
+
     if (c.isHidden)
       return null;
 
     const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
     const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
+    const ctxs = c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" }));
+
     return (
-      <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon}
         htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
         helpText={helpText}
         helpTextOnTop={helpTextOnTop}
@@ -117,7 +132,7 @@ export const MultiFileLine: <V extends ModifiableEntity /*& IFile*/ | Lite</*IFi
         {() => <table className="sf-multi-value">
           <tbody>
             {
-              c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
+              ctxs.map(mlec =>
                 <tr key={mlec.index!}>
                   <td>
                     {!p.ctx.readOnly &&
@@ -145,22 +160,29 @@ export const MultiFileLine: <V extends ModifiableEntity /*& IFile*/ | Lite</*IFi
                   {p.view && <td> {c.renderElementViewButton(false, mlec.value, mlec.index!)} </td>}
                 </tr>)
             }
+  
             <tr >
               <td colSpan={4}>
                 {p.ctx.readOnly ? undefined :
-                  <FileUploader
-                    accept={p.accept}
-                    multiple={true}
-                    maxSizeInBytes={p.maxSizeInBytes}
-                    dragAndDrop={p.dragAndDrop}
-                    dragAndDropMessage={p.dragAndDropMessage}
-                    fileType={p.fileType}
-                    onFileCreated={c.handleFileLoaded}
-                    typeName={p.getFileFromElement ?
-                      p.ctx.propertyRoute!.addMember("Indexer", "", true).addLambda(p.getFileFromElement).typeReference().name! :
-                      p.ctx.propertyRoute!.typeReference().name}
-                    buttonCss={p.ctx.buttonClass}
-                    divHtmlAttributes={{ className: "sf-file-line-new" }} />}
+                  ctxs.length == 0 || c.forceShowUploader ?
+                    <FileUploader
+                      accept={p.accept}
+                      multiple={true}
+                    
+                      maxSizeInBytes={p.maxSizeInBytes}
+                      dragAndDrop={p.dragAndDrop}
+                      dragAndDropMessage={p.dragAndDropMessage}
+                      fileType={p.fileType}
+                      onFileCreated={c.handleFileLoaded}
+                      typeName={p.getFileFromElement ?
+                        p.ctx.propertyRoute!.addMember("Indexer", "", true).addLambda(p.getFileFromElement).typeReference().name! :
+                        p.ctx.propertyRoute!.typeReference().name}
+                      buttonCss={p.ctx.buttonClass}
+                      fileDropCssClass={c.mandatoryClass ?? undefined}
+                      divHtmlAttributes={{ className: "sf-file-line-new" }}
+                    /> :
+                    <button className="btn btn-link p-0 ms-3 sf-line-button sf-create" onClick={() => c.setForceShowUploader(true)}>{FileMessage.AddMoreFiles.niceToString()}</button>
+                }
               </td>
             </tr>
           </tbody>

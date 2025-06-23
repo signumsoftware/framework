@@ -56,12 +56,12 @@ export const EntityRadioButtonList: <V extends Entity | Lite<Entity>>(props: Ent
     return null;
 
   return (
-    <GroupHeader className={classes("sf-radiobutton-list", p.ctx.errorClassBorder, c.mandatoryClass)}
+    <GroupHeader className={classes("sf-radiobutton-list", c.getErrorClass("border"), c.mandatoryClass)}
       label={<>{getTimeMachineIcon({ ctx: p.ctx, translateY: "100%" })}{p.label}</>}
       labelIcon={p.labelIcon}
       avoidFieldSet={p.avoidFieldSet}
       buttons={renderButtons()}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} >
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }} >
       {renderRadioList()}
     </GroupHeader >
   );

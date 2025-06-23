@@ -262,7 +262,7 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     }
 
 
-    string IFileTypeAlgorithm.GetFullPhysicalPath(Signum.Files.IFilePath efp)
+    public string? GetFullPhysicalPath(IFilePath efp)
     {
         return FilePathUtils.SafeCombine(GetPhisicalPrefix(efp), efp.Suffix);
     }

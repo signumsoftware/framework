@@ -52,22 +52,22 @@ public class ScopedDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TVa
 
     public override string ToString()
     {
-        var str = map.ToString(kvp => kvp.Key + " -> " + kvp.Value, "\r\n");
+        var str = map.ToString(kvp => kvp.Key + " -> " + kvp.Value, "\n");
 
         if (this.previous == null)
             return str;
 
-        return str + "\r\n-----------------------\r\n" + previous.ToString();
+        return str + "\n-----------------------\n" + previous.ToString();
     }
 
     public string ToString(Func<TKey, string> keyRenderer, Func<TValue, string> valueRenderer)
     {
-        var str = map.ToString(kvp => keyRenderer(kvp.Key) + " -> " + valueRenderer(kvp.Value), "\r\n");
+        var str = map.ToString(kvp => keyRenderer(kvp.Key) + " -> " + valueRenderer(kvp.Value), "\n");
 
         if (this.previous == null)
             return str;
 
-        return str + "\r\n-----------------------\r\n" + previous.ToString(keyRenderer, valueRenderer);
+        return str + "\n-----------------------\n" + previous.ToString(keyRenderer, valueRenderer);
     }
 
     public TValue GetOrCreate(TKey key, Func<TValue> valueFactory)

@@ -218,14 +218,14 @@ public static class BigStringLogic
 
         Func<PropertyRoute, string> registerExample = pr => "  BigStringLogic.Register(sb, ({0} a) => a.{1}, new BigStringConfiguration(BigStringMode.XXX, YYY));".FormatWith(pr.RootType.TypeName(), pr.PropertyString().Replace("/", "[0]"));
 
-        var extra = result.Extra.OrderBy(a => a.RootType.FullName).ToString(registerExample, "\r\n");
+        var extra = result.Extra.OrderBy(a => a.RootType.FullName).ToString(registerExample, "\n");
 
-        var lacking = result.Missing.OrderBy(a => a.RootType.FullName).ToString(registerExample, "\r\n"); ;
+        var lacking = result.Missing.OrderBy(a => a.RootType.FullName).ToString(registerExample, "\n"); ;
 
         if (extra.HasText() || lacking.HasText())
-            throw new InvalidOperationException("BigStringLogic's configuration are not synchronized with the Schema. At the beginning of your Starter.Start method you need to...\r\n" +
-                    (extra.HasText() ? ("Remove something like:\r\n" + extra + "\r\n\r\n") : null) +
-                    (lacking.HasText() ? ("Add something like:\r\n" + lacking + "\r\n\r\n") : null));
+            throw new InvalidOperationException("BigStringLogic's configuration are not synchronized with the Schema. At the beginning of your Starter.Start method you need to...\n" +
+                    (extra.HasText() ? ("Remove something like:\n" + extra + "\n\n") : null) +
+                    (lacking.HasText() ? ("Add something like:\n" + lacking + "\n\n") : null));
 
         CandidatesByDeclaringType = Configurations.Keys.GroupToDictionary(a => a.PropertyInfo!.DeclaringType!);
 

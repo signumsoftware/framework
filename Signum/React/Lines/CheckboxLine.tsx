@@ -34,7 +34,7 @@ export const CheckboxLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
 
       var { style, className, ...otherAtts } = { ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...p.labelHtmlAttributes };
       return (
-        <label style={{ display: p.inlineCheckbox == "block" ? "block" : undefined, ...style }} {...otherAtts} className={classes(p.ctx.labelClass, c.props.ctx.errorClass, className)}>
+        <label style={{ display: p.inlineCheckbox == "block" ? "block" : undefined, ...style }} {...otherAtts} className={classes(p.ctx.labelClass, c.getErrorClass(), className)}>
           {getTimeMachineIcon({ ctx: p.ctx })}
           <input type="checkbox" {...c.props.valueHtmlAttributes} checked={p.ctx.value || false} onChange={handleCheckboxOnChange} disabled={p.ctx.readOnly}
             className={classes(c.props.valueHtmlAttributes?.className, "form-check-input")}
@@ -47,7 +47,7 @@ export const CheckboxLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
     else {
       const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
       return (
-        <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+        <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
           {inputId => <>
             {getTimeMachineIcon({ ctx: p.ctx })}
             <input id={inputId} type="checkbox" {...c.props.valueHtmlAttributes} checked={p.ctx.value || false} onChange={handleCheckboxOnChange}

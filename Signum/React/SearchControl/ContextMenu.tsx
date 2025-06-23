@@ -79,7 +79,7 @@ export default function ContextMenu({ position, onHide, children, alignRight, ..
   }
 
   return (
-    <Dropdown show={true} 
+    <Dropdown className="sf-context-menu" show={true}
       ref={menuRef}
       style={{
         position: 'absolute',

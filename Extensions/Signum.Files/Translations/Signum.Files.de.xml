@@ -13,6 +13,7 @@
     <Member Name="Hash" Description="Hash" />
   </Type>
   <Type Name="FileMessage">
+    <Member Name="AddMoreFiles" Description="Weitere Dateien hinzufügen" />
     <Member Name="DownloadFile" Description="Datei downloaden" />
     <Member Name="ErrorSavingFile" Description="Fehler beim Speichern der Datei" />
     <Member Name="File0IsStillUploading" Description="Datei {0} wird noch hochgeladen" />

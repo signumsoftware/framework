@@ -204,7 +204,7 @@ public class FilterGroup : Filter
     public override string ToString()
     {
         return $@"{this.GroupOperation}{(this.Token != null ? $" ({this.Token})" : null)}
-{Filters.ToString("\r\n").Indent(4)}";
+{Filters.ToString("\n").Indent(4)}";
     }
 
     public override bool IsAggregate()
@@ -302,7 +302,7 @@ public class FilterCondition : Filter
 
 
 
-    public static Func<bool> ToLowerString = () => false;
+    public static Func<QueryToken?, bool> ToLowerString = qt => false;
 
     private Expression GetConditionExpressionBasic(BuildExpressionContext context, bool inMemory)
     {
@@ -333,7 +333,7 @@ public class FilterCondition : Filter
                 //    hasNull = true;
                 //}
 
-                if (ToLowerString())
+                if (ToLowerString(this.Token))
                 {
                     clone = clone.Cast<string>().Select(a => a.ToLower()).ToList();
                     left = Expression.Call(left, miToLower);
@@ -383,7 +383,7 @@ public class FilterCondition : Filter
             }
 
 
-            if (Token.Type == typeof(string) && ToLowerString())
+            if (Token.Type == typeof(string) && ToLowerString(Token))
             {
                 Expression right = Expression.Constant(((string)val!).ToLower(), Token.Type);
                 return QueryUtils.GetCompareExpression(Operation, Expression.Call(left, miToLower), right, inMemory);

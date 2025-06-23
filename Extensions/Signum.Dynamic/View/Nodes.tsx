@@ -1432,7 +1432,7 @@ export interface ButtonNode extends BaseNode {
   kind: "Button",
   name: string;
   operationName?: string;
-  onOperationClick?: ExpressionOrValue<(e: EntityOperationContext<any>) => void>;
+  onOperationClick?: ExpressionOrValue<(e: EntityOperationContext<any>) => Promise<void>>;
   canExecute?: ExpressionOrValue<string>;
   text?: ExpressionOrValue<string>;
   active?: ExpressionOrValue<boolean>;

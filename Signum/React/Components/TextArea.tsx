@@ -12,9 +12,9 @@ export default function TextArea(p: TextAreaProps): React.JSX.Element {
   var textAreaRef = React.useRef<HTMLTextAreaElement | null | undefined>();
   const visibleObserver = React.useRef<IntersectionObserver | null>(null);
 
-    function handleResize(ta: HTMLTextAreaElement) {
+  function handleResize(ta: HTMLTextAreaElement) {
     if (ta.style.height == ta.scrollHeight + 'px') { // do not move to a variable
-        return;
+      return;
     }
     ta.style.height = "0";
     ta.style.height = ta.scrollHeight + 'px';
@@ -22,7 +22,7 @@ export default function TextArea(p: TextAreaProps): React.JSX.Element {
     ta.scrollTop = ta.scrollHeight;
   }
 
-  const { autoResize, innerRef, minHeight, ...props } = p;
+  const { autoResize = true, innerRef, minHeight = "50px", ...props } = p;
 
   const handleRef = React.useCallback((ta: HTMLTextAreaElement | null) => {
     textAreaRef.current = ta;
@@ -68,5 +68,3 @@ export default function TextArea(p: TextAreaProps): React.JSX.Element {
     } ref={handleRef} />
   );
 }
-
-(TextArea as any).defaultProps = { autoResize: true, minHeight: "50px" };

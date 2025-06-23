@@ -18,7 +18,7 @@ export interface DynamicViewEntity extends Entities.Entity {
   viewContent: string;
 }
 
-export module DynamicViewMessage {
+export namespace DynamicViewMessage {
   export const AddChild: MessageKey = new MessageKey("DynamicViewMessage", "AddChild");
   export const AddSibling: MessageKey = new MessageKey("DynamicViewMessage", "AddSibling");
   export const Remove: MessageKey = new MessageKey("DynamicViewMessage", "Remove");
@@ -38,7 +38,7 @@ export module DynamicViewMessage {
   export const PropsHelp: MessageKey = new MessageKey("DynamicViewMessage", "PropsHelp");
 }
 
-export module DynamicViewOperation {
+export namespace DynamicViewOperation {
   export const Create : Operations.ConstructSymbol_Simple<DynamicViewEntity> = registerSymbol("Operation", "DynamicViewOperation.Create");
   export const Clone : Operations.ConstructSymbol_From<DynamicViewEntity, DynamicViewEntity> = registerSymbol("Operation", "DynamicViewOperation.Clone");
   export const Save : Operations.ExecuteSymbol<DynamicViewEntity> = registerSymbol("Operation", "DynamicViewOperation.Save");
@@ -53,7 +53,7 @@ export interface DynamicViewOverrideEntity extends Entities.Entity {
   script: string;
 }
 
-export module DynamicViewOverrideOperation {
+export namespace DynamicViewOverrideOperation {
   export const Save : Operations.ExecuteSymbol<DynamicViewOverrideEntity> = registerSymbol("Operation", "DynamicViewOverrideOperation.Save");
   export const Delete : Operations.DeleteSymbol<DynamicViewOverrideEntity> = registerSymbol("Operation", "DynamicViewOverrideOperation.Delete");
 }
@@ -72,12 +72,12 @@ export interface DynamicViewSelectorEntity extends Entities.Entity {
   script: string;
 }
 
-export module DynamicViewSelectorOperation {
+export namespace DynamicViewSelectorOperation {
   export const Save : Operations.ExecuteSymbol<DynamicViewSelectorEntity> = registerSymbol("Operation", "DynamicViewSelectorOperation.Save");
   export const Delete : Operations.DeleteSymbol<DynamicViewSelectorEntity> = registerSymbol("Operation", "DynamicViewSelectorOperation.Delete");
 }
 
-export module DynamicViewValidationMessage {
+export namespace DynamicViewValidationMessage {
   export const OnlyChildNodesOfType0Allowed: MessageKey = new MessageKey("DynamicViewValidationMessage", "OnlyChildNodesOfType0Allowed");
   export const Type0DoesNotContainsField1: MessageKey = new MessageKey("DynamicViewValidationMessage", "Type0DoesNotContainsField1");
   export const Member0IsMandatoryFor1: MessageKey = new MessageKey("DynamicViewValidationMessage", "Member0IsMandatoryFor1");

@@ -134,10 +134,10 @@ public static class GraphExplorer
 
 
         throw new InvalidOperationException(
-        "CLONE ATTACK!\r\n\r\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\r\n {2}".FormatWith(
+        "CLONE ATTACK!\n\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\n {2}".FormatWith(
             p.Count(),
             p.Key,
-            p.ToString(m => "  {0}{1}".FormatWith(m.Modified, m), "\r\n")), "\r\n\r\n"));
+            p.ToString(m => "  {0}{1}".FormatWith(m.Modified, m), "\n")), "\n\n"));
     }
 
     public static bool IsGraphModified(Modifiable modifiable)
@@ -235,11 +235,11 @@ public static class GraphExplorer
         }).ToList();
 
         string nodes = listNodes.ToString(t => "    {0} [color={1}, fillcolor={2}, shape={3}{4}, label=\"{5}\", tooltip=\"{6}\"]"
-        .FormatWith(modifiables.Comparer.GetHashCode(t.Node), t.Color, t.Fillcolor, t.Shape, t.Style, t.Label, t.Tooltip), "\r\n");
+        .FormatWith(modifiables.Comparer.GetHashCode(t.Node), t.Color, t.Fillcolor, t.Shape, t.Style, t.Label, t.Tooltip), "\n");
 
-        string arrows = modifiables.Edges.ToString(e => "    {0} -> {1}".FormatWith(modifiables.Comparer.GetHashCode(e.From), modifiables.Comparer.GetHashCode(e.To)), "\r\n");
+        string arrows = modifiables.Edges.ToString(e => "    {0} -> {1}".FormatWith(modifiables.Comparer.GetHashCode(e.From), modifiables.Comparer.GetHashCode(e.To)), "\n");
 
-        return "digraph \"Grafo\"\r\n{{\r\n    node [ style = \"filled,bold\"]\r\n\r\n{0}\r\n\r\n{1}\r\n}}".FormatWith(nodes, arrows);
+        return "digraph \"Grafo\"\n{{\n    node [ style = \"filled,bold\"]\n\n{0}\n\n{1}\n}}".FormatWith(nodes, arrows);
     }
 
     public static DirectedGraph<Entity> ColapseIdentifiables(DirectedGraph<Modifiable> modifiables)
@@ -357,7 +357,7 @@ public static class GraphExplorer
         }
 
         if (copy.Any())
-            throw new InvalidOperationException(copy.Values.ToString("\r\n"));
+            throw new InvalidOperationException(copy.Values.ToString("\n"));
     }
 }
 
@@ -376,13 +376,13 @@ public class IntegrityCheckException : Exception
     }
 
     public IntegrityCheckException(List<IntegrityCheckWithEntity> errors)
-        : base(errors.ToString("\r\n\r\n"))
+        : base(errors.ToString("\n\n"))
     {
         this.Errors = errors.Select(a => a.IntegrityCheck).ToDictionary(a => a.TemporalId);
     }
 
     public IntegrityCheckException(Dictionary<Guid, IntegrityCheck> errors)
-        : base(errors.Values.ToString("\r\n\r\n"))
+        : base(errors.Values.ToString("\n\n"))
     {
         this.Errors = errors;
     }

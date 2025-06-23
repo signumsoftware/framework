@@ -8,7 +8,7 @@ import { UserQueryClient } from '../../UserQueryClient'
 import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Finder } from '@framework/Finder'
-import { useAPI } from '@framework/Hooks'
+import { useAPI, useVersion } from '@framework/Hooks'
 import { DashboardClient, PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 import { FullscreenComponent } from '@framework/Components/FullscreenComponent'
 import { parseIcon } from '@framework/Components/IconTypeahead'
@@ -25,7 +25,7 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
 
   let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity && liteKey(p.entity)]);
 
-  const [refreshKey, setRefreshKey] = React.useState<number>(0);
+  const [version, updateVersion] = useVersion();
 
   React.useEffect(() => {
 
@@ -37,11 +37,11 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
           .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, fo!.groupResults ?? false, qd))
           .then(fops => {
             p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops));
-            p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
+            p.dashboardController.registerInvalidations(p.partEmbedded, () => updateVersion());
           });
       } else {
         p.dashboardController.clearPinnesFilter(p.partEmbedded);
-        p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
+        p.dashboardController.registerInvalidations(p.partEmbedded, () => updateVersion());
       }
     }
   }, [fo, p.partEmbedded]);
@@ -58,28 +58,8 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
 
   p.customDataRef.current = softCast<UserQueryPartHandler>({
     findOptions: foExpanded,
-    refresh: handleOnRefresh,
+    refresh: updateVersion,
   });
-
-  if (p.content.renderMode == "BigValue") {
-    return <BigValueSearchCounter
-      findOptions={foExpanded}
-      aggregateFromSummaryHeader={p.content.aggregateFromSummaryHeader}
-      text={translated(p.partEmbedded, a => a.title) || translated(p.content.userQuery, a => a.displayName)}
-      iconName={p.partEmbedded.iconName ?? undefined}
-      iconColor={p.partEmbedded.iconColor ?? undefined}
-      deps={[...p.deps ?? [], refreshKey]}
-      cachedQuery={cachedQuery}
-      customColor={p.partEmbedded.customColor}
-      titleColor={p.partEmbedded.titleColor}
-      userQuery={p.content.userQuery}
-    />;
-  }
-
-  function handleOnRefresh() {
-    setRefreshKey(a => a + 1);
-    handleOnDataChanged();
-  }
 
   function handleOnDataChanged() {
 
@@ -96,7 +76,7 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
     <SearchContolInPart
       part={p.content}
       findOptions={foExpanded}
-      deps={[...p.deps ?? [], refreshKey]}
+      deps={[...p.deps ?? [], version]}
       //onReload={() => setRefreshKey(a => a + 1)}
       onDataChanged={handleOnDataChanged}
       cachedQuery={cachedQuery} />
@@ -132,55 +112,5 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChange
         extraOptions={{ userQuery: toLite(part.userQuery) }}
       />}
     </FullscreenComponent>
-  );
-}
-
-interface BigValueBadgeProps {
-  findOptions: FindOptions;
-  aggregateFromSummaryHeader: boolean;
-  text?: string;
-  iconName?: string;
-  iconColor?: string;
-  titleColor?: string | null;
-  deps?: React.DependencyList;
-  cachedQuery?: Promise<CachedQueryJS>;
-  customColor: string | null;
-  userQuery: UserQueryEntity;
-}
-
-export function BigValueSearchCounter(p: BigValueBadgeProps): React.JSX.Element {
-
-  const vsc = React.useRef<SearchValueController>(null);
-
-  return (
-    <div className={classes("card", !p.customColor && "bg-ligth", "o-hidden")}
-      style={{
-      backgroundColor: p.customColor ?? undefined,
-      color: Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black"
-    }}>
-      <div className={classes("card-body")} onClick={e => vsc.current!.handleClick(e)} style={{
-        cursor: "pointer",
-        color: p.titleColor ?? (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black")
-      }}>
-        <div className="row">
-          <div className="col-lg-3">
-            {p.iconName &&
-              <FontAwesomeIcon icon={parseIcon(p.iconName)!} color={p.iconColor} size="4x" />}
-          </div>
-          <div className={classes("col-lg-9 flip", "text-end")}>
-            <h1>
-              <SearchValue ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
-                searchControlProps={{ extraOptions: { userQuery: toLite(p.userQuery) } }}
-                valueToken={!p.aggregateFromSummaryHeader ? undefined : p.findOptions.columnOptions!.first(a => a?.summaryToken != null)?.summaryToken}
-                customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}
-              />
-            </h1>
-          </div>
-        </div>
-        <div className={classes("flip", "text-end")}>
-          <h6 className="large">{p.text || getQueryNiceName(p.findOptions.queryName)}</h6>
-        </div>
-      </div>
-    </div>
   );
 }

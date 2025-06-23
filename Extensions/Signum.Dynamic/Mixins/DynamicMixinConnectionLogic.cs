@@ -25,7 +25,7 @@ public static class DynamicMixinConnectionLogic
             DynamicLogic.GetCodeFiles += GetCodeFiles;
             DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
             EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicMixinConnectionEntity));
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicMixinConnectionEntity>().Where(dm => dm.EntityType.Is(type)));
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicMixinConnectionEntity>().Where(dm => dm.EntityType.Is(type)));
         }
     }
 

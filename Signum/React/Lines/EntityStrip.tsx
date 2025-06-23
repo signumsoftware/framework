@@ -28,6 +28,7 @@ export interface EntityStripProps<V extends ModifiableEntity | Lite<Entity>> ext
   avoidDuplicates?: boolean;
   groupElementsBy?: (e: V) => string;
   renderGroupTitle?: (key: string, i?: number) => React.ReactElement;
+  inputAttributes?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
 export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseController<EntityStripProps<V>, V> {
@@ -98,8 +99,7 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
 
   const readOnly = p.ctx.readOnly;
   return (
-    <FormGroup ctx={p.ctx!}
-      label={p.label} labelIcon={p.labelIcon}
+    <FormGroup ctx={p.ctx!} error={p.error} label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={helpText}
       helpTextOnTop={helpTextOnTop}
@@ -200,7 +200,12 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
 
     return (
       <Typeahead ref={c.typeahead}
-        inputAttrs={{ className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString(), onPaste: p.paste == false ? undefined : handleOnPaste }}
+        inputAttrs={{
+          className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass),
+          placeholder: EntityControlMessage.Add.niceToString(),
+          onPaste: p.paste == false ? undefined : handleOnPaste,
+          ...p.inputAttributes
+        }}
         getItems={q => ac!.getItems(q)}
         itemsDelay={ac.getItemsDelay()}
         renderItem={(e, hl) => ac!.renderItem(e, hl)}

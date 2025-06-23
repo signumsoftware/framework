@@ -221,6 +221,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
         if (ut == typeof(TimeSpan))
             return TimeSpanProperties(this, DateTimePrecision.Milliseconds).AndHasValue(this);
 
+        if (ut == typeof(TimeOnly))
+            return TimeOnlyProperties(this, DateTimePrecision.Milliseconds).AndHasValue(this);
+
         if (ut == typeof(float) || ut == typeof(double) || ut == typeof(decimal))
             return StepTokens(this, 4).AndHasValue(this);
 

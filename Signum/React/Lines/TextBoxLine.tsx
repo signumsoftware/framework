@@ -95,7 +95,7 @@ function internalTextBox<V extends string | null>(c: TextBoxLineController, type
 
   if (p.ctx.readOnly)
     return (
-      <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
         {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={htmlAtts} ctx={p.ctx} innerRef={c.setRefs}>
           {p.ctx.value}
         </FormControlReadonly>)}
@@ -125,7 +125,7 @@ function internalTextBox<V extends string | null>(c: TextBoxLineController, type
   }
 
   return (
-    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => <>
         {c.withItemGroup(
           <input type={type == "color" || type == "guid" ? "text" : type}

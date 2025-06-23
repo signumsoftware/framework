@@ -14,4 +14,6 @@ public class FileContent
     }
 
     public static FileContent ReadFrom(string filePath) => new FileContent(Path.GetFileName(filePath), File.ReadAllBytes(filePath));
+
+    public override string ToString() => $"{FileName} ({Bytes.Length} bytes)";
 }

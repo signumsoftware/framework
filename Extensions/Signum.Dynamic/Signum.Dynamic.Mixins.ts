@@ -15,7 +15,7 @@ export interface DynamicMixinConnectionEntity extends Entities.Entity {
   mixinName: string;
 }
 
-export module DynamicMixinConnectionOperation {
+export namespace DynamicMixinConnectionOperation {
   export const Save : Operations.ExecuteSymbol<DynamicMixinConnectionEntity> = registerSymbol("Operation", "DynamicMixinConnectionOperation.Save");
   export const Delete : Operations.DeleteSymbol<DynamicMixinConnectionEntity> = registerSymbol("Operation", "DynamicMixinConnectionOperation.Delete");
 }

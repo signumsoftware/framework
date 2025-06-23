@@ -39,6 +39,8 @@ export namespace ExcelMessage {
   export const TheExcelTemplateHasAColumn0NotPresentInTheFindWindow: MessageKey = new MessageKey("ExcelMessage", "TheExcelTemplateHasAColumn0NotPresentInTheFindWindow");
   export const ThereAreNoResultsToWrite: MessageKey = new MessageKey("ExcelMessage", "ThereAreNoResultsToWrite");
   export const CreateNew: MessageKey = new MessageKey("ExcelMessage", "CreateNew");
+  export const ExportToExcel: MessageKey = new MessageKey("ExcelMessage", "ExportToExcel");
+  export const WhatDoYouWantToExport: MessageKey = new MessageKey("ExcelMessage", "WhatDoYouWantToExport");
 }
 
 export namespace ExcelPermission {

@@ -47,12 +47,12 @@ public static class CachedProfilePhotoLogic
     {
         using (AuthLogic.Disable())
         {
+            size = AzureADLogic.ToAzureSize(size);
+
             var result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size);
 
             if (result != null && result.InvalidationDate >= Clock.Now)
                 return result;
-
-            size = AzureADLogic.ToAzureSize(size);
 
             var stream = await AzureADLogic.GetUserPhoto(oid, size).ContinueWith(promise => promise.IsFaulted || promise.IsCanceled ? null : promise.Result);
 
@@ -64,7 +64,7 @@ public static class CachedProfilePhotoLogic
 
                 var bytes = stream?.ReadAllBytes();
 
-                if(result != null)
+                if (result != null)
                 {
                     if (bytes == null && result.Photo == null ||
                        bytes != null && result.Photo != null && bytes.AsSpan().SequenceEqual(result.Photo.GetByteArray().AsSpan()))
@@ -81,23 +81,22 @@ public static class CachedProfilePhotoLogic
                         return tr.Commit(result);
                     }
                 }
-
-                if (result != null)
-                    result.Delete();
-
-                var user = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
-                result = new CachedProfilePhotoEntity
+                else
                 {
-                    Photo = stream == null ? null : new FilePathEmbedded(AuthADFileType.CachedProfilePhoto, oid.ToString() + "x" + size + ".jpg", stream.ReadAllBytes()),
-                    User = user,
-                    Size = size
-                };
+                    var user = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
+                    result = new CachedProfilePhotoEntity
+                    {
+                        Photo = stream == null ? null : new FilePathEmbedded(AuthADFileType.CachedProfilePhoto, oid.ToString() + "x" + size + ".jpg", stream.ReadAllBytes()),
+                        User = user,
+                        Size = size,
+                    };
 
-                result.InvalidationDate = CalculateInvalidationDate(result);
+                    result.InvalidationDate = CalculateInvalidationDate(result);
 
-                result.Save();
+                    result.Save();
 
-                return tr.Commit(result);
+                    return tr.Commit(result);
+                }
             }
         }
     }

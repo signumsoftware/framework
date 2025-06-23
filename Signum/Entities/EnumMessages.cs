@@ -238,6 +238,10 @@ public enum SearchMessage
     First0Results_N,
     [Description("{0} - {1} of {2} result[s].")]
     _01of2Results_N,
+    [Description("{0} row[s]")]
+    _0Rows_N,
+    [Description("{0} group[s] with {1}")]
+    _0GroupWith1_N,
     Search,
     Refresh,
     Create,
@@ -312,6 +316,8 @@ public enum SearchMessage
     ShowHiddenColumns,
     HideHiddenColumns,
 
+    ShowMore,
+
     GroupKey,
     DerivedGroupKey,
 
@@ -356,8 +362,6 @@ public enum SearchMessage
     [Description("double-click")]
     DoubleClick,
     GroupedBy,
-    [Description("you can open a group by clicking in the")]
-    YouCanOpenAGroupByClickingInThe,
     [Description("Doing {0} in the row will select the entity and close the modal automatically, alternatively you can select one entity and click OK.")]
     Doing0InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK,
     [Description("You can use the prepared filters on the top to quickly find the {0} you are looking for.")]
@@ -435,10 +439,6 @@ public enum SearchMessage
     EqualsDistinctGreaterThan,
     [Description("etc...")]
     Etc,
-    [Description("IsIn")]
-    IsIn,
-    [Description("IsNotIn")]
-    IsNotIn,
     [Description("The value that will be compared with the")]
     TheValueThatWillBeComparedWithThe,
     [Description("typically has the same type as the field, but some operators like")]
@@ -448,7 +448,16 @@ public enum SearchMessage
     [Description("You are editing a column, let me explain what each field does:")]
     YouAreEditingAColumnLetMeExplainWhatEachFieldDoes,
     [Description("Can be used as the first item, counts the number of rows on each group.")]
-    CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup
+    CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup,
+
+    [Description("You have selected all rows on this page. Do you want to {0} only these rows, or to all rows across all pages?")]
+    YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages,
+
+    [Description("Current Page")]
+    CurrentPage,
+
+    [Description("All Pages")]
+    AllPages,
 }
 
 public enum SelectorMessage

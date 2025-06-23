@@ -106,7 +106,7 @@ public class CellBuilder
             forImport && template == DefaultStyle.Enum ? value.ToString()! :
             template == DefaultStyle.Enum ? ((Enum)value).NiceToString() :
             forImport && value is Lite<Entity> lite ? lite.KeyLong() :
-            value is string s ? s.Replace("\r\n", "\n").Replace("\n", "\r\n") :
+            value is string s ? s.Replace("\n", "\n").Replace("\n", "\n") :
             value.ToString()!;
 
         Cell cell = 

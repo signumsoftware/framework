@@ -19,14 +19,13 @@ public class QueryTokenPartProxy
             this.Element.FindElement(By.CssSelector(".rw-dropdown-list,.sf-query-token-plus")).SafeClick();
         }
 
-        var container = this.Element.WaitElementVisible(By.ClassName("rw-popup-container"));
+        var dropdownContainer = this.Element.WaitElementVisible(By.ClassName("rw-popup-container"));
+        
+        var tokenSelector = key.HasText() ? $"[data-token='{key}']" : ":not([data-token])";
 
-        var selector = key.HasText() ?
-            By.CssSelector("div > span[data-token='" + key + "']") :
-            By.CssSelector("div > span:not([data-token])");
+        var optionElement = dropdownContainer.WaitElementVisible(By.CssSelector($"div > span{tokenSelector}"));
+        optionElement.SafeClick();
 
-        var elem = container.WaitElementVisible(selector);
-        elem.ScrollTo();
-        elem.Click();
+        Element.WaitElementVisible(By.CssSelector($".rw-dropdown-list-value span{tokenSelector}"));
     }
 }

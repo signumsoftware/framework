@@ -17,18 +17,13 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     super(type);
   }
 
-  getIcon(element: ToolbarResponse<UserQueryEntity>): React.JSX.Element | null {
 
+  getCounter(element: ToolbarResponse<UserQueryEntity>): React.ReactElement | undefined {
     if (element.showCount != null) {
-      return (
-        <>
-          {super.getIcon(element)}
-          <SearchUserQueryCount userQuery={element.content!} color={element.iconColor} autoRefreshPeriod={element.autoRefreshPeriod} showCount={element.showCount} />
-        </>
-      );
+      return <SearchUserQueryCount userQuery={element.content!} color={element.iconColor} autoRefreshPeriod={element.autoRefreshPeriod} showCount={element.showCount} />
     }
 
-    return super.getIcon(element);
+    return undefined;
   }
 
   getDefaultIcon(): IconColor {

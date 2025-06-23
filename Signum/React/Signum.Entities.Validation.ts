@@ -75,6 +75,7 @@ export namespace ValidationMessage {
   export const _0ShouldBeNullWhen1IsSet: MessageKey = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsSet");
   export const _0ShouldBeNullWhen1IsSetTo2: MessageKey = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsSetTo2");
   export const _0ShouldBeNull: MessageKey = new MessageKey("ValidationMessage", "_0ShouldBeNull");
+  export const _0ShouldBe1When2Is3: MessageKey = new MessageKey("ValidationMessage", "_0ShouldBe1When2Is3");
   export const _0ShouldBeADateInThePast: MessageKey = new MessageKey("ValidationMessage", "_0ShouldBeADateInThePast");
   export const _0ShouldBeADateInTheFuture: MessageKey = new MessageKey("ValidationMessage", "_0ShouldBeADateInTheFuture");
   export const BeInThePast: MessageKey = new MessageKey("ValidationMessage", "BeInThePast");

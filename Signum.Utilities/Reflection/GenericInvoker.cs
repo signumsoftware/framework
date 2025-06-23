@@ -68,7 +68,7 @@ internal class GenericParametersVisitor : ExpressionVisitor
         gpv.Visit(expression);
 
         if (gpv.parameters == null)
-            throw new InvalidOperationException("No generic method or constructor found on expression:\r\n{0}".FormatWith(expression.ToString()));
+            throw new InvalidOperationException("No generic method or constructor found on expression:\n{0}".FormatWith(expression.ToString()));
 
         return gpv.parameters.Value;
     }

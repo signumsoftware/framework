@@ -2,6 +2,8 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using System.Diagnostics.CodeAnalysis;
+using Signum.DynamicQuery;
+using System.Reflection;
 
 namespace Signum.Engine.Linq;
 
@@ -163,6 +165,12 @@ internal class MetadataVisitor : ExpressionVisitor
                 CleanMeta cm = (CleanMeta)me.Meta;
 
                 var mixinType = m.Method.GetGenericArguments().Single();
+
+                if (cm.Implementations != null)
+                {
+                    var routes = cm.Implementations.Value.Types.Select(t => PropertyRoute.Root(t).Add(mixinType)).ToArray();
+                    return new MetaExpression(mixinType, new CleanMeta(GetImplementations(routes, mixinType), routes));
+                }
 
                 return new MetaExpression(mixinType, new CleanMeta(null, cm.PropertyRoutes.Select(a =>
                 {

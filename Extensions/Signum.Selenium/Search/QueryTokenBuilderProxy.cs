@@ -15,7 +15,7 @@ public class QueryTokenBuilderProxy
 
     public WebElementLocator TokenElement(int tokenIndex)
     {
-        return this.Element.WithLocator(By.CssSelector($".sf-query-token-part:nth-child({tokenIndex + 1}"));
+        return this.Element.WithLocator(By.CssSelector($".sf-query-token-part:nth-child({tokenIndex + 1})"));
     }
 
     public void SelectToken(string token)
@@ -26,7 +26,7 @@ public class QueryTokenBuilderProxy
         {
             var prev = parts.Take(i).ToString(".");
 
-            var qt = new QueryTokenPartProxy(TokenElement(i).WaitPresent());
+            var qt = new QueryTokenPartProxy(TokenElement(i).WaitVisible());
 
             qt.Select(parts[i]);
         }

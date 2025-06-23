@@ -26,12 +26,12 @@ public class EntityContextMenuProxy
         return new SearchModalProxy(popup);
     }
 
-    public void ExecuteClick<T>(ExecuteSymbol<T> executeSymbol, bool consumeConfirmation = false, bool shouldDisapear = false)
+    public void ExecuteClick<T>(ExecuteSymbol<T> executeSymbol, bool consumeConfirmation = false, bool shouldDisapear = false, bool scrollTo = false)
         where T : Entity
     {
         var lites = ResultTable.SelectedEntities();
 
-        Operation(executeSymbol).WaitVisible().SafeClick();
+        Operation(executeSymbol).WaitVisible(scrollTo).SafeClick();
         if (consumeConfirmation)
             this.ResultTable.Selenium.ConsumeAlert();
 
@@ -41,13 +41,13 @@ public class EntityContextMenuProxy
             ResultTable.WaitSuccess(lites);
     }
 
-    public FrameModalProxy<T> ConstructFrom<F, T>(ConstructSymbol<T>.From<F> constructSymbol, bool shouldDisapear = false)
+    public FrameModalProxy<T> ConstructFrom<F, T>(ConstructSymbol<T>.From<F> constructSymbol, bool shouldDisapear = false, bool scrollTo = false)
         where F : Entity
         where T : Entity
     {
         var lites = ResultTable.SelectedEntities();
 
-        var modal = Operation(constructSymbol).WaitVisible().CaptureOnClick();
+        var modal = Operation(constructSymbol).WaitVisible(scrollTo).CaptureOnClick();
 
         var result = new FrameModalProxy<T>(modal);
         result.Disposing += okPressed =>
@@ -61,11 +61,11 @@ public class EntityContextMenuProxy
         return result;
     }
 
-    public void DeleteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = true, bool shouldDisapear = true)
+    public void DeleteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = true, bool shouldDisapear = true, bool scrollTo = false)
     {
         var lites = ResultTable.SelectedEntities();
 
-        Operation(symbolContainer).WaitVisible().Click();
+        Operation(symbolContainer).WaitVisible(scrollTo).Click();
         if (consumeConfirmation)
             ResultTable.Selenium.ConsumeAlert();
 
@@ -76,13 +76,13 @@ public class EntityContextMenuProxy
     }
 
 
-    public FrameModalProxy<T> ConstructFromMany<F, T>(ConstructSymbol<T>.FromMany<F> symbolContainer, bool shouldDisapear = true, Action<List<Lite<IEntity>>, ResultTableProxy>? customCheck = null)
+    public FrameModalProxy<T> ConstructFromMany<F, T>(ConstructSymbol<T>.FromMany<F> symbolContainer, bool shouldDisapear = true, Action<List<Lite<IEntity>>, ResultTableProxy>? customCheck = null, bool scrollTo = false)
         where F : Entity
         where T : Entity
     {
         var lites = ResultTable.SelectedEntities();
 
-        var modal = Operation(symbolContainer).WaitVisible().CaptureOnClick();
+        var modal = Operation(symbolContainer).WaitVisible(scrollTo).CaptureOnClick();
 
         return new FrameModalProxy<T>(modal)
         {
@@ -117,9 +117,9 @@ public class EntityContextMenuProxy
         return Operation(symbolContainer).WaitVisible().GetDomProperty("disabled").HasText();
     }
 
-    public IWebElement OperationClickCapture(IOperationSymbolContainer symbolContainer)
+    public IWebElement OperationClickCapture(IOperationSymbolContainer symbolContainer, bool scrollTo = false)
     {
-        var popup = Operation(symbolContainer).WaitVisible().CaptureOnClick();
+        var popup = Operation(symbolContainer).WaitVisible(scrollTo).CaptureOnClick();
         return popup;
     }
 

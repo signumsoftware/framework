@@ -67,7 +67,7 @@ public abstract class Connector
                     .ToString(p => "{0} {1}: {2}".FormatWith(
                         p.ParameterName,
                         Connector.Current.GetSqlDbType(p),
-                        p.Value?.Let(v => v.ToString())), "\r\n"));
+                        p.Value?.Let(v => v.ToString())), "\n"));
             log.WriteLine();
         }
     }
