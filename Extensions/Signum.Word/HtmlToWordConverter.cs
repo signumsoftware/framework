@@ -18,15 +18,12 @@ public static class HtmlToWordConverter
         htmlDoc.LoadHtml(html);
         var currentParagraph = p.CurrentTokenNode!.Ancestors<Paragraph>().FirstEx();
 
-
         var elements = HtmlToWordPrivate(htmlDoc.DocumentNode, rp =>
         {
             p.CurrentTokenNode!.RunProperties.CopyTo(rp);
-
         }, pp =>
         {
             currentParagraph.ParagraphProperties.CopyTo(pp);
-
         }, p.Document).ToList();
 
         if (elements.Any(a => a is Paragraph))
@@ -46,6 +43,26 @@ public static class HtmlToWordConverter
                 return new[] { new Break() };
 
             case "li":
+                {
+                    var pp = new ParagraphProperties();
+                    addParagraphProperties?.Invoke(pp);
+
+                    var nonListChildren = htmlNode.ChildNodes
+                        .Where(c => c.Name != "ul" && c.Name != "ol")
+                        .SelectMany(c => HtmlToWordPrivate(c, addRunProperties, addParagraphProperties, document))
+                        .ToList();
+
+                    nonListChildren.Insert(0, pp);
+
+                    var paragraph = new Paragraph(nonListChildren);
+
+                    var listChildren = htmlNode.ChildNodes
+                        .Where(c => c.Name == "ul" || c.Name == "ol")
+                        .SelectMany(c => HtmlToWordPrivate(c, addRunProperties, addParagraphProperties, document));
+
+                    return new[] { paragraph }.Concat(listChildren);
+                }
+
             case "p":
                 {
                     var pp = new ParagraphProperties();
@@ -54,6 +71,7 @@ public static class HtmlToWordConverter
                     childrens.Insert(0, pp);
                     return new[] { new Paragraph(childrens) };
                 }
+
             case "em":
                 return htmlNode.ChildNodes.SelectMany(c => HtmlToWordPrivate(c, addRunProperties + ((RunProperties rp) =>
                 {
@@ -85,9 +103,7 @@ public static class HtmlToWordConverter
             case "h4":
                 {
                     var mainDocument = document.GetPartsOfType<MainDocumentPart>().SingleEx();
-
                     var hi = htmlNode.Name.After("h");
-
 
                     Style headingStyle;
                     {
@@ -124,14 +140,12 @@ public static class HtmlToWordConverter
                              new StyleName() { Val = "heading " + hi },
                              new BasedOn() { Val = "Standard" },
                              new NextParagraphStyle() { Val = "Standard" },
-                             //new LinkedStyle() { Val = "berschrift1Zchn" },
                              new UIPriority() { Val = 9 },
                              new PrimaryStyle(),
                              new StyleParagraphProperties(
                                  new KeepNext(),
                                  new KeepLines(),
                                  new SpacingBetweenLines() { Before = hi == "1" ? "240" : "40", After = "0" }
-                                 //new OutlineLevel() { Val = int.Parse(hi) -1 }),
                              ),
                              new StyleRunProperties(
                                  new RunFonts() { AsciiTheme = ThemeFontValues.MajorHighAnsi, HighAnsiTheme = ThemeFontValues.MajorHighAnsi, EastAsiaTheme = ThemeFontValues.MajorEastAsia, ComplexScriptTheme = ThemeFontValues.MajorBidi },
@@ -139,7 +153,7 @@ public static class HtmlToWordConverter
                                  new FontSize() { Val = size },
                                  new FontSizeComplexScript() { Val = size }
                              )
-                             )
+                            )
                             { Type = StyleValues.Paragraph, StyleId = "berschrift" + hi };
 
                             styles.Styles.InsertAfter(headingStyle,
@@ -150,7 +164,6 @@ public static class HtmlToWordConverter
                         }
                     }
 
-
                     var pp = new ParagraphProperties
                     {
                         ParagraphStyleId = new ParagraphStyleId { Val = headingStyle.StyleId }
@@ -158,56 +171,41 @@ public static class HtmlToWordConverter
                     var childrens = htmlNode.ChildNodes.SelectMany(c => HtmlToWordPrivate(c, null, null, document)).ToList();
                     childrens.Insert(0, pp);
                     return new[] { new Paragraph(childrens) };
-
                 }
 
             case "ul":
             case "ol":
                 {
                     var mainDocument = document.GetPartsOfType<MainDocumentPart>().SingleEx();
-                    var listLevel = 0;
 
-                    int numberId;
+                    var numberings = mainDocument.GetPartsOfType<NumberingDefinitionsPart>().FirstOrDefault();
+                    if (numberings == null)
                     {
-                        var numberings = mainDocument.GetPartsOfType<NumberingDefinitionsPart>().FirstOrDefault();
-
-                        if (numberings == null)
-                        {
-                            numberings = mainDocument.AddNewPart<NumberingDefinitionsPart>();
-                            numberings.Numbering = new Numbering();
-                        }
-
-                        int abstractId = (numberings.Numbering.Elements<AbstractNum>().Max(a => a.AbstractNumberId?.Value) ?? 0) + 1;
-                        numberId = (numberings.Numbering.Elements<NumberingInstance>().Max(a => a.NumberID?.Value) ?? 0) + 1;
-
-                        var node = htmlNode;
-                        while(node.ParentNode != null)
-                        {
-                            if(node.ParentNode.Name == "ul" || node.ParentNode.Name == "li")
-                                listLevel++;
-                            node = node.ParentNode;
-                        }
-                        numberings.Numbering.InsertAfter(new AbstractNum(
-                            new Level(
-                                new StartNumberingValue { Val = 1 },
-                                new NumberingFormat() { Val = htmlNode.Name == "ul" ? NumberFormatValues.Bullet : NumberFormatValues.Decimal },
-                                new LevelText() { Val = htmlNode.Name == "ul" ? "\x2022" : "%1." },
-                                new PreviousParagraphProperties(new Indentation() { Left = (360 * (listLevel + 1)).ToString(), Hanging = "180" }),
-                                null!
-                                )
-                            { LevelIndex = 0 })
-                        { AbstractNumberId = abstractId },
-                          numberings.Numbering.OfType<AbstractNum>().LastOrDefault()
-                        );
-
-                        numberings.Numbering.InsertAfter(
-                            new NumberingInstance(new AbstractNumId() { Val = abstractId }) { NumberID = numberId },
-                            (OpenXmlElement?)numberings.Numbering.Elements<NumberingInstance>().LastOrDefault() ??
-                            numberings.Numbering.Elements<AbstractNum>().LastOrDefault()
-                            );
-
-                        numberings.Numbering.Save(numberings);
+                        numberings = mainDocument.AddNewPart<NumberingDefinitionsPart>();
+                        numberings.Numbering = new Numbering();
                     }
+
+                    int abstractId = (numberings.Numbering.Elements<AbstractNum>().Max(a => a.AbstractNumberId?.Value) ?? 0) + 1;
+                    int numberId = (numberings.Numbering.Elements<NumberingInstance>().Max(a => a.NumberID?.Value) ?? 0) + 1;
+
+                    var abstractNum = new AbstractNum() { AbstractNumberId = abstractId };
+
+                    for (int level = 0; level < 9; level++)
+                    {
+                        abstractNum.AppendChild(new Level(
+                            new StartNumberingValue { Val = 1 },
+                            new NumberingFormat() { Val = htmlNode.Name == "ul" ? NumberFormatValues.Bullet : NumberFormatValues.Decimal },
+                            new LevelText() { Val = htmlNode.Name == "ul" ? "•" : $"%{level + 1}." },
+                            new ParagraphProperties(
+                                new Indentation() { Left = (360 * (level + 1)).ToString(), Hanging = "180" }
+                            )
+                        )
+                        { LevelIndex = level });
+                    }
+
+                    numberings.Numbering.Append(abstractNum);
+                    numberings.Numbering.Append(new NumberingInstance(new AbstractNumId() { Val = abstractId }) { NumberID = numberId });
+                    numberings.Numbering.Save();
 
                     Style listParagraph;
                     {
@@ -220,7 +218,7 @@ public static class HtmlToWordConverter
 
                         listParagraph = styles.Styles!.ChildElements.OfType<Style>().FirstOrDefault(a => a.StyleName?.Val == "List Paragraph")!;
 
-                        if(listParagraph == null)
+                        if (listParagraph == null)
                         {
                             listParagraph = new Style(
                                new StyleName() { Val = "List Paragraph" },
@@ -228,7 +226,7 @@ public static class HtmlToWordConverter
                                new UIPriority() { Val = 34 },
                                new PrimaryStyle(),
                                new StyleParagraphProperties(
-                                   new Indentation() { Left = (360 * (listLevel + 1)).ToString() },
+                                   new Indentation() { Left = "360" },
                                    new ContextualSpacing()
                                )
                            )
@@ -241,9 +239,18 @@ public static class HtmlToWordConverter
 
                     var childrens = htmlNode.ChildNodes.SelectMany(c => HtmlToWordPrivate(c, addRunProperties, addParagraphProperties + ((ParagraphProperties pp) =>
                     {
+                        int listLevel = 0;
+                        var node = c;
+                        while (node.ParentNode != null)
+                        {
+                            if (node.ParentNode.Name == "ul" || node.ParentNode.Name == "ol")
+                                listLevel++;
+                            node = node.ParentNode;
+                        }
+
                         pp.NumberingProperties = new NumberingProperties
                         {
-                            NumberingLevelReference = new NumberingLevelReference { Val = 0 },
+                            NumberingLevelReference = new NumberingLevelReference { Val = (listLevel > 8 ? 8 : listLevel) },
                             NumberingId = new NumberingId { Val = numberId }
                         };
                         pp.ParagraphStyleId = new ParagraphStyleId { Val = listParagraph.StyleId };
@@ -251,6 +258,7 @@ public static class HtmlToWordConverter
 
                     return childrens;
                 }
+
             case "#text":
                 var runProperties = new RunProperties();
                 addRunProperties?.Invoke(runProperties);
@@ -259,20 +267,16 @@ public static class HtmlToWordConverter
 
                 return new[]
                 {
-                     new Run(runProperties, new DocumentFormat.OpenXml.Wordprocessing.Text(text)
-                     {
-                          Space =  SpaceProcessingModeValues.Preserve,
-                     })
+                    new Run(runProperties, new DocumentFormat.OpenXml.Wordprocessing.Text(text)
+                    {
+                        Space = SpaceProcessingModeValues.Preserve,
+                    })
                 };
 
             default:
-                //throw new UnexpectedValueException(htmlNode.Name);
                 return htmlNode.ChildNodes.SelectMany(c => HtmlToWordPrivate(c, addRunProperties + ((RunProperties rp) =>
                 {
                 }), addParagraphProperties, document));
         }
-
-
-
     }
 }
