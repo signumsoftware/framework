@@ -437,10 +437,10 @@ public static class ReflectionTools
         //{ typeof(SqlGeometry), str => SqlGeometry.Parse(str) },
     };
 
-    public static T Parse<T>(string value, CultureInfo culture)
+    public static T Parse<T>(string? value, CultureInfo culture)
     {
         if (typeof(T) == typeof(string))
-            return (T)(object)value;
+            return (T)(object)value!;
 
         if (value == null || value == "")
             return (T)(object?)null!;
