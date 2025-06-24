@@ -498,6 +498,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   handleFiltersKeyUp = (e: React.KeyboardEvent<HTMLDivElement>): void => {
     if (e.key == KeyNames.enter) {
+      e.stopPropagation();
       window.setTimeout(() => {
         var input = (document.activeElement as HTMLInputElement);
         input.blur();
