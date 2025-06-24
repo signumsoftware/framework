@@ -23,6 +23,10 @@ public class OperationsToken : QueryToken
 
     }
 
+    public override bool HideInAutoExpand => true;
+
+    protected override bool AutoExpandInternal => false;
+
     public override string ToString()
     {
         return _OperationsTokenKey;
@@ -50,6 +54,8 @@ public class OperationsToken : QueryToken
             .Select(o => (QueryToken)new OperationToken(this, o.Key.Replace(".", "#"), parent.Type, o))
             .ToList();
     }
+
+
 
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {

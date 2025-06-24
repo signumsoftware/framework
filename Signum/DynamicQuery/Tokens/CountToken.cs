@@ -12,6 +12,8 @@ public class CountToken : QueryToken
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
     }
 
+    public override bool HideInAutoExpand => true;
+
     public override Type Type
     {
         get { return typeof(int?); }

@@ -17,7 +17,7 @@ import SearchControl from "./SearchControl";
 export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInjectedProps }): React.JSX.Element {
   var sc = p.sc;
   var query = getQueryNiceName(sc.props.queryDescription.queryKey);
-  var type = sc.props.queryDescription.columns['Entity'].displayName;
+  var type = sc.props.queryDescription.columns['Entity'].niceTypeName;
   var searchMode = getSearchMode(sc);
   const fo = sc.props.findOptions;
 
@@ -79,9 +79,9 @@ function getSearchMode(sc: SearchControlLoaded): SearchMode {
 
 export function FilterHelp(p: { queryDescription: QueryDescription, injected: OverlayInjectedProps }): React.JSX.Element {
   const [expressionExpanded, setExpressionExpanded] = React.useState(false);
-  var type = p.queryDescription.columns['Entity'].displayName;
+  var type = p.queryDescription.columns['Entity'].niceTypeName;
   const isDefaultQuery = isTypeEntity(p.queryDescription.queryKey);
-  var sampleColumns = Object.values(p.queryDescription.columns).filter(cd => cd.name != "Id" && cd.name != "Entity");
+  var sampleColumns = Object.values(p.queryDescription.columns).filter(cd => cd.key != "Id" && cd.key != "Entity");
   return (
     <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: expressionExpanded ? 900 : 600 }}>
       <Popover.Header as="h3"><strong>{FilterFieldMessage.FiltersHelp.niceToString()}</strong></Popover.Header>
@@ -90,8 +90,8 @@ export function FilterHelp(p: { queryDescription: QueryDescription, injected: Ov
           .formatHtml(<strong>{FilterFieldMessage.Field.niceToString()}</strong>, <strong>{FilterFieldMessage.Operator.niceToString()}</strong>, <strong>{FilterFieldMessage.Value.niceToString()}</strong>)}</div>
         <ul>
           <li>
-            {isDefaultQuery && <div className="my-2"><strong>{FilterFieldMessage.Field.niceToString()}: </strong>{SearchMessage.AQueryExpressionCouldBeAnyColumnOfThe.niceToString()} <strong><samp>{type}</samp></strong> ({SearchMessage.Like.niceToString()} {sampleColumns.filter((c, i) => i < 3).map((c, i) => <strong><samp>{c.displayName}</samp></strong>).notNull().joinHtml(', ')} {SearchMessage.OrAnyOtherFieldThatYouSeeInThe.niceToString()} <strong><samp>{type}</samp></strong> {SearchMessage.WhenYouClick.niceToString()} <FontAwesomeIcon icon="arrow-right" color="#b1bac4" /> {SearchMessage.IconOrAnyRelatedEntity.niceToString()}</div>}
-            {!isDefaultQuery && <div className="my-2"><strong>{FilterFieldMessage.Field.niceToString()}: </strong>{SearchMessage.AQueryExpressionCouldBeAnyColumnOfThe.niceToString()} <strong><samp>{getQueryNiceName(p.queryDescription.queryKey)}</samp></strong> (like {Object.values(p.queryDescription.columns).map((c, i) => i < 3 && <strong><samp>{c.displayName}</samp></strong>).joinCommaHtml(',')}, {SearchMessage.OrAnyOtherFieldThatYouSeeInTheProjectWhenYouClick.niceToString()} <FontAwesomeIcon icon="arrow-right" color="#b1bac4" /> {SearchMessage.IconOrAnyRelatedEntity.niceToString()}</div>}
+            {isDefaultQuery && <div className="my-2"><strong>{FilterFieldMessage.Field.niceToString()}: </strong>{SearchMessage.AQueryExpressionCouldBeAnyColumnOfThe.niceToString()} <strong><samp>{type}</samp></strong> ({SearchMessage.Like.niceToString()} {sampleColumns.filter((c, i) => i < 3).map((c, i) => <strong><samp>{c.niceName}</samp></strong>).notNull().joinHtml(', ')} {SearchMessage.OrAnyOtherFieldThatYouSeeInThe.niceToString()} <strong><samp>{type}</samp></strong> {SearchMessage.WhenYouClick.niceToString()} <FontAwesomeIcon icon="arrow-right" color="#b1bac4" /> {SearchMessage.IconOrAnyRelatedEntity.niceToString()}</div>}
+            {!isDefaultQuery && <div className="my-2"><strong>{FilterFieldMessage.Field.niceToString()}: </strong>{SearchMessage.AQueryExpressionCouldBeAnyColumnOfThe.niceToString()} <strong><samp>{getQueryNiceName(p.queryDescription.queryKey)}</samp></strong> (like {Object.values(p.queryDescription.columns).map((c, i) => i < 3 && <strong><samp>{c.niceName}</samp></strong>).joinCommaHtml(',')}, {SearchMessage.OrAnyOtherFieldThatYouSeeInTheProjectWhenYouClick.niceToString()} <FontAwesomeIcon icon="arrow-right" color="#b1bac4" /> {SearchMessage.IconOrAnyRelatedEntity.niceToString()}</div>}
             <LearnMoreAboutFieldExpressions expanded={expressionExpanded} onSetExpanded={setExpressionExpanded} showAny={true} />
           </li>
           <li><div className="my-2"><strong>{FilterFieldMessage.Operator.niceToString()}: </strong>{SearchMessage.TheOperationThatWillBeUsedToCompareThe.niceToString()} <strong><samp>field</samp></strong><samp></samp> {SearchMessage.WithThe.niceToString()} <strong><samp>value</samp></strong>, {SearchMessage.Like.niceToString()} <samp>{SearchMessage.EqualsDistinctGreaterThan.niceToString()}</samp>, {SearchMessage.Etc.niceToString()}</div></li>

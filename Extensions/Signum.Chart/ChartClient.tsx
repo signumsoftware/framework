@@ -693,18 +693,14 @@ export namespace ChartClient {
           const ts = Decoder.decodeTimeSeries(query);
   
           const fos = Finder.Decoder.decodeFilters(query);
-          fos.forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate| (ts ? SubTokensOptions.CanTimeSeries : 0)));
-  
-          const oos = Finder.Decoder.decodeOrders(query);
-          oos.forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
-  
+          fos.forEach(fo => completer.requestFilter(fo));
 
           const cols = Decoder.decodeColumns(query);
-          cols.map(a => a.element.token).filter(te => te != undefined).forEach(te => completer.request(te!.tokenString!, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | (ts ? SubTokensOptions.CanTimeSeries : 0)));
+          cols.map(a => a.element.token).filter(te => te != undefined).forEach(te => completer.request(te!.tokenString!));
   
           return completer.finished().then(() => {
   
-            cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.tokenString));
+            cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.tokenString, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | (ts ? SubTokensOptions.CanTimeSeries : 0)));
   
             var cr = query.script == undefined ? scripts.first("ChartScript") :
               scripts
@@ -715,7 +711,7 @@ export namespace ChartClient {
               chartScript: cr.symbol,
               maxRows: query.maxRows == "null" ? null : query.maxRows || Decoder.DefaultMaxRows,
               queryKey: getQueryKey(queryName),
-              filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
+              filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate | (ts ? SubTokensOptions.CanTimeSeries : 0))),
               columns: cols,
               parameters: Decoder.decodeParameters(query),
               chartTimeSeries: ts,
@@ -755,8 +751,8 @@ export namespace ChartClient {
             token: Boolean(token) ? QueryTokenEmbedded.New({
               tokenString: token,
             }) : undefined,
-            orderByType: order == null ? null : (order.charAt(order.length -1) == "A" ? "Ascending" : "Descending"),
-            orderByIndex: order == null ? null : (parseInt(order.substr(0, order.length - 1))),
+            orderByType: order == null ? null : (order.charAt(order.length - 1) == "A" ? "Ascending" : "Descending"),
+            orderByIndex: order == null ? null : (parseInt(order.slice(0, -1))),
             format: unscapeTildes(format),
             displayName: unscapeTildes(displayName),
           })

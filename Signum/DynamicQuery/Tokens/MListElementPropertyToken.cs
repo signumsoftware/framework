@@ -28,6 +28,8 @@ public class MListElementPropertyToken : QueryToken
         return new MListElementPropertyToken(parent, mleType.GetProperty("RowOrder")!, ept.PropertyRoute, "RowOrder", () => QueryTokenMessage.RowOrder.NiceToString()) { Priority = -5 };
     }
 
+    public override bool HideInAutoExpand => true;
+
     public static MListElementPropertyToken PartitionId(QueryToken parent, EntityPropertyToken ept)
     {
         var mleType = MListElementPropertyToken.MListElementType(ept);

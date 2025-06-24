@@ -17,6 +17,8 @@ public class AggregateToken : QueryToken
     QueryToken? parent;
     public override QueryToken? Parent => parent;
 
+    public override bool HideInAutoExpand => Parent != null;
+
     public AggregateToken(AggregateFunction function, object queryName)
     {
         if (function != AggregateFunction.Count)

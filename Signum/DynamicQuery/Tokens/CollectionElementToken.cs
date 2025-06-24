@@ -26,6 +26,32 @@ public class CollectionElementToken : QueryToken
         get { return elementType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); }
     }
 
+    protected override bool AutoExpandInternal
+    {
+        get
+        {
+            if (CollectionElementType != CollectionElementType.Element)
+                return false;
+
+            if (base.AutoExpandInternal)
+                return true;
+
+            var pr = this.GetPropertyRoute();
+
+            if (pr != null && pr.Parent != null && pr.Parent.IsVirtualMList())
+            {
+                var type = pr.GetImplementations().Types.SingleEx();
+
+                if (EntityKindCache.GetEntityKind(type) is EntityKind.Part or EntityKind.SharedPart)
+                    return true;
+            }
+         
+            return false;
+        }
+    }
+
+    public override bool HideInAutoExpand => CollectionElementType != CollectionElementType.Element;
+
     public override string ToString()
     {
         return CollectionElementType.NiceToString();

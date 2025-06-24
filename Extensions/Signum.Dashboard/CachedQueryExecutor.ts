@@ -39,6 +39,7 @@ export function executeQueryValueCached(request: QueryValueRequest, fop: FindOpt
       typeColor: "",
       isGroupable: false,
       filterType: "Integer",
+      __fake__: true
     };
 
   var queryRequest: QueryRequest = {

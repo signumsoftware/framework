@@ -8,7 +8,7 @@ public class ExtensionToken : QueryToken
 
     public ExtensionToken(QueryToken parent, string key, Type type, bool isProjection,
         string? unit, string? format, Implementations? implementations,
-        Func<string?> isAllowed, PropertyRoute? propertyRoute, Func<string> displayName)
+        Func<string?> isAllowed, PropertyRoute? propertyRoute, Func<string> displayName, bool autoExpandExtension)
     {
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
@@ -21,7 +21,6 @@ public class ExtensionToken : QueryToken
 Consider using QueryLogic.Expressions.Register(({parentType} e) => e.{key}()).ForceImplementations = Implementations.By(typeof({type.CleanType().TypeName()}));");
 
         }
-            
 
         this.key = key;
         this.type = type;
@@ -31,8 +30,13 @@ Consider using QueryLogic.Expressions.Register(({parentType} e) => e.{key}()).Fo
         this.implementations = implementations;
         this.isAllowedFunc = isAllowed;
         this.propertyRoute = propertyRoute;
+        this.autoExpandExtension = autoExpandExtension;
         this.DisplayNameFunc = displayName;
     }
+
+    bool autoExpandExtension;
+
+    protected override bool AutoExpandInternal => autoExpandExtension;
 
     Func<string> DisplayNameFunc;
     public string DisplayName => DisplayNameFunc();
@@ -120,6 +124,6 @@ Consider using QueryLogic.Expressions.Register(({parentType} e) => e.{key}()).Fo
 
     public override QueryToken Clone()
     {
-        return new ExtensionToken(this.parent.Clone(), key, type, isProjection, unit, format, implementations, isAllowedFunc, propertyRoute, DisplayNameFunc);
+        return new ExtensionToken(this.parent.Clone(), key, type, isProjection, unit, format, implementations, isAllowedFunc, propertyRoute, DisplayNameFunc, autoExpandExtension);
     }
 }

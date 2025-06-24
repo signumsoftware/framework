@@ -257,7 +257,7 @@ public static class QueryUtils
                 return agg;
         }
 
-        if (options.HasFlag(SubTokensOptions.CanTimeSeries) && key == TimeSeriesToken.KeyText)
+        if (options.HasFlag(SubTokensOptions.CanTimeSeries) && key == TimeSeriesToken.KeyText && token == null)
             return new TimeSeriesToken(qd.QueryName);
 
         return null;
@@ -270,7 +270,7 @@ public static class QueryUtils
         if (options.HasFlag(SubTokensOptions.CanAggregate))
             result.InsertRange(0, AggregateTokens(token, qd));
 
-        if (options.HasFlag(SubTokensOptions.CanTimeSeries))
+        if (options.HasFlag(SubTokensOptions.CanTimeSeries) && token == null)
             result.Insert(0, new TimeSeriesToken(qd.QueryName));
 
         return result;
@@ -684,4 +684,9 @@ public enum SubTokensOptions
     CanManual = 64,
     CanTimeSeries = 128,
     CanNested = 256,
+
+
+    All = CanAggregate | CanAnyAll | CanElement | 
+        CanOperation | CanToArray | CanSnippet | 
+        CanManual | CanTimeSeries | CanNested,
 }

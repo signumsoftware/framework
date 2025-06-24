@@ -266,11 +266,13 @@ export const EntityComboSelect: <V extends Entity | Lite<Entity> | null>(props: 
     );
   } else {
     return (
-      <select className={classes(ctx.formSelectClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""}
+      <select {...p.selectHtmlAttributes}
+        className={classes(ctx.formSelectClass, p.mandatoryClass, p.selectHtmlAttributes?.className)}
+        onChange={handleOnChange} value={lite ? liteKey(lite) : ""}
         title={getToString(lite)}
         id={p.id}
         onClick={() => setLoadData(true)}
-        disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >
+        disabled={ctx.readOnly}  ref={selectRef} >
         {getOptionRows().map((r, i) =>
           <option key={i} value={r?.entity ? liteKey(r.entity!) : ""} {...p.optionHtmlAttributes?.(r)}>{r?.entity ? getToString(r.entity, p.liteToString) : (p.nullPlaceHolder ?? " - ")}</option>)}
       </select>

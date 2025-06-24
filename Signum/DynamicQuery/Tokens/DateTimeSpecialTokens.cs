@@ -25,6 +25,8 @@ public class DatePartStartToken : QueryToken
         Priority = -((int)name) * 1000 + (step ?? 0);
     }
 
+    protected override bool AutoExpandInternal => false;
+
     private static MethodInfo GetMethodInfoDateTime(QueryTokenDateMessage name)
     {
         return

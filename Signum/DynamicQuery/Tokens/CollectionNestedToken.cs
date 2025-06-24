@@ -17,6 +17,9 @@ public class CollectionNestedToken : QueryToken
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
     }
 
+    protected override bool AutoExpandInternal => false;
+    public override bool HideInAutoExpand => true;
+
     public override Type Type
     {
         get { return elementType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); }

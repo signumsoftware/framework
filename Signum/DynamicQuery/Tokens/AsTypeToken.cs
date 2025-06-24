@@ -20,6 +20,8 @@ public class AsTypeToken : QueryToken
         get { return entityType.BuildLite(); }
     }
 
+    protected override bool AutoExpandInternal => false;
+
     public override string ToString()
     {
         var cleanType = EnumEntity.Extract(entityType) ?? entityType;

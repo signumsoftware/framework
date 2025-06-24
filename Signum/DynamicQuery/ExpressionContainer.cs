@@ -279,7 +279,7 @@ public class ExtensionInfo
     public Box<string?>? ForceFormat;
     public Box<string?>? ForceUnit;
     public Func<string?>? ForceIsAllowed;
-
+    public bool AutoExpand = false;
 
     internal readonly LambdaExpression Lambda;
     public Func<string> NiceName;
@@ -348,7 +348,7 @@ public class ExtensionInfo
         });
 
         return new ExtensionToken(parent, Key, Type, IsProjection, info.Unit, info.Format,
-            info.Implementations, info.IsAllowed, info.PropertyRoute, displayName: NiceName);
+            info.Implementations, info.IsAllowed, info.PropertyRoute, displayName: NiceName, AutoExpand);
     }
 }
 

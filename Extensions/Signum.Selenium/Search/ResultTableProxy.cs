@@ -55,10 +55,14 @@ public class ResultTableProxy
 
     public List<Lite<IEntity>> SelectedEntities()
     {
-        return RowsLocator.FindElements()
+        var entities = RowsLocator.FindElements()
             .Where(tr => tr.IsElementPresent(By.CssSelector("input.sf-td-selection:checked")))
-            .Select(a => Lite.Parse<IEntity>(a.GetDomAttributeOrThrow("data-entity")))
-            .ToList();
+            .Select(a => a.GetDomAttribute("data-entity")!);
+
+        if (entities.Any() && entities.All(a => a == null)) //Group By
+            throw new InvalidOperationException("Unable to find selected entities, grouping?");
+
+        return entities.NotNull().Select(a => Lite.Parse<IEntity>(a)).ToList();
     }
 
     public WebElementLocator CellElement(int rowIndex, string token)
