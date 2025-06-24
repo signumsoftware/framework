@@ -1301,11 +1301,19 @@ export namespace Finder {
 
         parentToken ??= (dto.parent != null ? this.addToCache(dto.parent) : undefined)
 
+        function removeDotsInsideBrackets(token: string) {
+          return token.replace(/\[(.*?)\]/g, (match, content) => {
+            const cleaned = content.replace(/\./g, '');
+            return `[${cleaned}]`;
+          });
+        }
+
+
         if (parentToken == null) {
-          if (dto.fullKey.contains("."))
+          if (removeDotsInsideBrackets(dto.fullKey).contains("."))
             throw new Error(`Token with key '${dto.fullKey}' on query '${this.qd.queryKey}' has no parent, but it is not a root token`);
         } else {
-          if (parentToken.fullKey != dto.fullKey.beforeLast("."))
+          if (removeDotsInsideBrackets(parentToken.fullKey) != removeDotsInsideBrackets(dto.fullKey).beforeLast("."))
             throw new Error("Invalid parent");
         }
 
