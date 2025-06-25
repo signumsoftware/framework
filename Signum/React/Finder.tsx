@@ -1388,7 +1388,8 @@ export namespace Finder {
           return [cached.token];
         }
 
-        candidates = candidates.flatMap(t => autoExpandToken(this.queryCache.get(t.fullKey)!));
+        candidates = candidates.flatMap(t => autoExpandToken(this.queryCache.get(t.fullKey)!))
+          .orderBy(a => a.parent == parentToken ? 0 : 1);
       }
 
       candidates = candidates.filter(t => {
