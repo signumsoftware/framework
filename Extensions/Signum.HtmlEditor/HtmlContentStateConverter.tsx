@@ -46,32 +46,37 @@ function createImagePlaceholders(doc: Document) {
 }
 
 function fixListHTML(html: string): string {
+  // Remove `value="..."` from OL elements
   html = html.replace(/\svalue="\d+"/g, '');
 
   const container = document.createElement('div');
   container.innerHTML = html;
 
   function fixBrokenNestedLists(element: HTMLElement): void {
-    const olElements = Array.from(element.querySelectorAll('ol'));
+    const listTags = ['ol', 'ul'];
 
-    for (const ol of olElements) {
-      const children = Array.from(ol.children);
+    for (const tag of listTags) {
+      const listElements = Array.from(element.querySelectorAll(tag));
 
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i];
+      for (const list of listElements) {
+        const children = Array.from(list.children);
 
-        if (
-          child.tagName === 'LI' &&
-          child.children.length === 1 &&
-          child.firstElementChild?.tagName === 'OL'
-        ) {
-          const prevLi = child.previousElementSibling;
+        for (let i = 0; i < children.length; i++) {
+          const child = children[i];
 
-          if (prevLi?.tagName === 'LI') {
-            const nestedOl = child.firstElementChild as HTMLOListElement;
-            prevLi.appendChild(nestedOl);
-            child.remove();
-            i--;
+          if (
+            child.tagName === 'LI' &&
+            child.children.length === 1 &&
+            (child.firstElementChild?.tagName === 'OL' || child.firstElementChild?.tagName === 'UL')
+          ) {
+            const prevLi = child.previousElementSibling;
+
+            if (prevLi?.tagName === 'LI') {
+              const nestedList = child.firstElementChild as HTMLOListElement | HTMLUListElement;
+              prevLi.appendChild(nestedList);
+              child.remove();
+              i--;
+            }
           }
         }
       }
