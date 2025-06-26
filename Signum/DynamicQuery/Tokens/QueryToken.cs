@@ -53,7 +53,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
         get
         {
             var pr = this.GetPropertyRoute();
-            var attr = pr != null && pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Schema.Current.Settings.FieldAttribute<AutoExpandSubTokensAttribute>(pr) : null;
+            var attr = pr != null && pr.PropertyRouteType is PropertyRouteType.FieldOrProperty  or PropertyRouteType.MListItems ? 
+                Schema.Current.Settings.FieldAttribute<AutoExpandSubTokensAttribute>(pr) : 
+                null;
 
             if (attr != null)
                 return attr.AutoExpand;
