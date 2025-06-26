@@ -1393,7 +1393,7 @@ export namespace Finder {
       }
 
       candidates = candidates.filter(t => {
-        debugger;
+
         if (t.hideInAutoExpand && t.parent != parentToken)
           return false;
 
