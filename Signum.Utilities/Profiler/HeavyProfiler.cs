@@ -144,7 +144,12 @@ public static class HeavyProfiler
                 {
                     var message = GetLogMessage();
                     if (message != null)
-                        logger.Log(logLevel.Value, message.Value.Message, message.Value.Arguments);
+                    {
+                        if (message.Value.Arguments != null)
+                            logger.Log(logLevel.Value, message.Value.Message, message.Value.Arguments);
+                        else
+                            logger.Log(logLevel.Value, message.Value.Message);
+                    }
                 }
             }
         }
@@ -625,8 +630,12 @@ public class SqlProfileReference
 public readonly struct StructuredLogMessage
 {
     public string Message { get; }
-    public object?[] Arguments { get; }
+    public object?[]? Arguments { get; }
 
+    public StructuredLogMessage(string format)
+    {
+        Message = format;
+    }
     public StructuredLogMessage(string format, params object?[] arguments)
     {
         Message = format;

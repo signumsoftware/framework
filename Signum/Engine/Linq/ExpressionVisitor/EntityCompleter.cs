@@ -62,7 +62,7 @@ internal class EntityCompleter : DbExpressionVisitor
 
             return new Dictionary<Type, ExpressionOrType>
             {
-                { entityExp.Type, lite.LazyModel  || entityExp.AvoidExpandOnRetrieving ? new ExpressionOrType(modelType) : new ExpressionOrType(GetModel(entityExp, modelType)) }
+                { entityExp.Type, lite.LazyModel  || entityExp.AvoidExpandOnRetrieving || IsCached(entityExp.Type) ? new ExpressionOrType(modelType) : new ExpressionOrType(GetModel(entityExp, modelType)) }
             };
         }
 
