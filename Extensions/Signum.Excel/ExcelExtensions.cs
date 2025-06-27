@@ -393,7 +393,7 @@ public static class ExcelExtensions
             if (isDate)
             {
                 // Excel uses OADate: 1.0 = Jan 1, 1900
-                return DateTime.FromOADate(oaDate);
+                return DateTime.SpecifyKind(DateTime.FromOADate(oaDate), DateTimeKind.Utc);
             }
         }
 
