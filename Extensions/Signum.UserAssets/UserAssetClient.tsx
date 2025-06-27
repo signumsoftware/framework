@@ -23,7 +23,6 @@ import SelectorModal from '@framework/SelectorModal';
 import { SearchControlLoaded } from '@framework/Search';
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from './Signum.UserAssets.Queries';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
-import { toDTO } from './Templates/QueryTokenEmbeddedBuilder';
 
 export namespace UserAssetClient {
   
@@ -58,18 +57,17 @@ export namespace UserAssetClient {
   export function toQueryTokenEmbedded(token: QueryToken): QueryTokenEmbedded {
 
     return QueryTokenEmbedded.New({
-      token: toDTO(token),
+      token: token,
       tokenString: token.fullKey,
     });
   }
 
-  export function getToken(token: QueryTokenEmbedded, qd: QueryDescription): QueryToken {
+  export function getToken(token: QueryTokenEmbedded): QueryToken {
     if (token.parseException)
       throw new Error(token.parseException);
 
-    var tokenCompleter = new Finder.TokenCompleter(qd);
 
-    return tokenCompleter.addToCache(token.token!);
+    return token.token!;
   }
   
   export namespace Converter {
@@ -154,7 +152,7 @@ export namespace UserAssetClient {
         groupOperation: e.groupOperation,
         token: e.token && QueryTokenEmbedded.New({
           tokenString: e.token.fullKey,
-          token: toDTO(e.token)
+          token: e.token
         }),
         operation: e.operation,
         valueString: e.valueString,

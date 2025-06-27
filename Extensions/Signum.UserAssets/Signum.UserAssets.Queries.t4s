@@ -1,6 +1,6 @@
-import { QueryTokenDTO } from '@framework/FindOptions'
+import { QueryToken } from '@framework/FindOptions'
 
 export interface QueryTokenEmbedded {
-    token?: QueryTokenDTO;
+    token?: QueryToken;
     parseException?: string;
 }

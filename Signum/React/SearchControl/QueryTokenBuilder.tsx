@@ -23,9 +23,6 @@ let copiedToken: { fullKey: string, queryKey: string } | undefined;
 
 export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.JSX.Element {
 
-  if (p.queryToken && !p.queryToken.__isCached__)
-    throw new Error("QueryToken is DTO!");
-
   var [expanded, setExpanded] = React.useState(false);
   const [lastTokenChanged, setLastTokenChanged] = React.useState<string | undefined>(undefined);
 
@@ -152,10 +149,7 @@ interface QueryTokenPartProps {
 
 export function QueryTokenPart(p: QueryTokenPartProps): React.JSX.Element | null {
 
-  if (p.parentToken && !p.parentToken.__isCached__)
-    throw new Error("QueryToken is DTO!");
-
-  const autoExpand = !p.parentToken?.type.isCollection;
+  const doAutoExpand = !p.parentToken?.type.isCollection;
 
   const subTokens = useAPI(() => {
     if (p.readOnly)
@@ -167,7 +161,7 @@ export function QueryTokenPart(p: QueryTokenPartProps): React.JSX.Element | null
 
     var tc = new Finder.TokenCompleter(p.queryDescription);
   
-    return tc.getSubTokens(p.parentToken, p.subTokenOptions, autoExpand)
+    return tc.getSubTokens(p.parentToken, p.subTokenOptions, doAutoExpand)
       .then(tokens => tokens.length == 0 ? tokens : [null, ...tokens])
   }, [p.readOnly, p.parentToken && p.parentToken.fullKey, p.subTokenOptions, p.queryKey])
 
@@ -184,7 +178,7 @@ export function QueryTokenPart(p: QueryTokenPartProps): React.JSX.Element | null
       {p.selectedToken || p.parentToken == null || p.defaultOpen ?
         <DropdownList
           disabled={p.readOnly}
-          selectIcon={open && autoExpand ? <FontAwesomeIcon icon="magnifying-glass" /> : undefined}
+          selectIcon={open && doAutoExpand ? <FontAwesomeIcon icon="magnifying-glass" /> : undefined}
           onToggle={isOpen => setOpen(isOpen)}
           filter={(item, searchTerm, idx) => item != null && searchTerm.toLowerCase().split(" ").filter(a => a != "").every(part => parentsUntil(item, p.parentToken).some(t => t.key.toLowerCase().contains(part) || t.toStr.toLowerCase().contains(part)))}
           autoComplete="off"
@@ -252,7 +246,7 @@ export function QueryTokenListItem(p: { item: QueryToken | null, ancestor: Query
 function parentsUntil(token: QueryToken, ancestor?: QueryToken) {
   const tokens: QueryToken[] = [];
 
-  for (let t: QueryToken | undefined = token; t != null && t != ancestor; t = t?.parent) {
+  for (let t: QueryToken | undefined = token; t != null && t.fullKey != ancestor?.fullKey; t = t?.parent) {
     tokens.push(t);
   }
 

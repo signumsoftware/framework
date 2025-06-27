@@ -23,7 +23,7 @@ export default function QueryTokenEmbeddedBuilder(p: QueryTokenEmbeddedBuilderPr
     else
       p.ctx.value = QueryTokenEmbedded.New({
         tokenString: newToken.fullKey,
-        token: toDTO(newToken)
+        token: newToken
       });
 
     if (p.onTokenChanged)
@@ -36,11 +36,11 @@ export default function QueryTokenEmbeddedBuilder(p: QueryTokenEmbeddedBuilderPr
 
   const qte = p.ctx.value;
 
-  
+
   const tokenBuilder = (
     <div className={p.ctx.rwWidgetClass}>
       {qd &&
-        <QueryTokenBuilder queryToken={qte?.token && new Finder.TokenCompleter(qd).addToCache(qte.token)}
+        <QueryTokenBuilder queryToken={qte?.token}
           onTokenChange={handleTokenChanged} queryKey={p.queryKey} subTokenOptions={p.subTokenOptions}
           readOnly={p.ctx.readOnly} />
       }
@@ -50,26 +50,16 @@ export default function QueryTokenEmbeddedBuilder(p: QueryTokenEmbeddedBuilderPr
   return (
     <FormGroup ctx={p.ctx} helpText={p.helpText}>
       {() => !qte || !qte.parseException ? tokenBuilder :
-          <div>
-            <code>{qte.tokenString}</code>
-            <br />
-            {tokenBuilder}
-            <br />
-            <p className="alert alert-danger">
-              {qte.parseException}
-            </p>
-          </div>
+        <div>
+          <code>{qte.tokenString}</code>
+          <br />
+          {tokenBuilder}
+          <br />
+          <p className="alert alert-danger">
+            {qte.parseException}
+          </p>
+        </div>
       }
     </FormGroup>
   );
-}
-
-
-export function toDTO(token: QueryToken | undefined): QueryTokenDTO | undefined{
-
-  if (token == null)
-    return undefined;
-
-  var { __isCached__, parent, ...dto } = token;
-  return { ...dto, parent: toDTO(parent) } satisfies Omit<QueryTokenDTO, "__isDTO__"> as QueryTokenDTO;
 }

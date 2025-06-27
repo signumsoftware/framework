@@ -20,7 +20,6 @@ import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded, UserAssetQueryMessage } from '../Signum.UserAssets.Queries'
 import { MultiValue } from '@framework/FinderRules'
 import { HeaderType } from '@framework/Lines/GroupHeader'
-import { toDTO } from './QueryTokenEmbeddedBuilder'
 
 interface FilterBuilderEmbeddedProps {
   ctx: TypeContext<MList<QueryFilterEmbedded>>;
@@ -52,7 +51,7 @@ export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.
           indentation: indent,
           groupOperation: fo.groupOperation,
           token: fo.token && QueryTokenEmbedded.New({
-            token: toDTO(fo.token),
+            token: fo.token,
             tokenString: fo.token.fullKey
           }),
           valueString: fo.value,
@@ -73,7 +72,7 @@ export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.
         ctx.value.push(newMListElement(QueryFilterEmbedded.New({
           token: fo.token && QueryTokenEmbedded.New({
             tokenString: fo.token.fullKey,
-            token: toDTO(fo.token),
+            token: fo.token,
           }),
           operation: fo.operation,
           valueString: fo.value,
