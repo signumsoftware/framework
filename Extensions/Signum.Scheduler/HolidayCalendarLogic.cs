@@ -45,7 +45,11 @@ public static class HolidayCalendarLogic
             new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.ImportPublicHolidays)
             {
                 CanExecute = (e) => e.FromYear.HasValue && e.ToYear.HasValue && e.CountryCode.HasText() ? null :
-                    HolidayCalendarMessage.ForImportFromYearToYearAndCountryCodeShouldBeSet.NiceToString(),
+                    HolidayCalendarMessage.ForImport01and2ShouldBeSet.NiceToString(
+                        Entity.NicePropertyName(()=> e.FromYear),
+                        Entity.NicePropertyName(()=> e.ToYear),
+                        Entity.NicePropertyName(()=> e.CountryCode)
+                    ),
                 Execute = (e, _) =>
                 {
                     for (int i = e.FromYear!.Value; i <= e.ToYear!.Value; i++)

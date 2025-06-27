@@ -350,7 +350,19 @@ public enum SearchMessage
     TimeMachine,
     Options,
 
-    SearchHelp,   
+    [Description("You have selected all rows on this page. Do you want to {0} only these rows, or to all rows across all pages?")]
+    YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages,
+
+    [Description("Current Page")]
+    CurrentPage,
+
+    [Description("All Pages")]
+    AllPages,
+}
+
+public enum SearchHelpMessage
+{
+    SearchHelp,
     SearchControl,
     [Description("The {0} is very powerful, but can be intimidating. Take some time to learn how to use it... will be worth it!")]
     The0IsVeryPowerfulButCanBeIntimidatingTakeSomeTimeToLearnHowToUseItWillBeWorthIt,
@@ -450,14 +462,6 @@ public enum SearchMessage
     [Description("Can be used as the first item, counts the number of rows on each group.")]
     CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup,
 
-    [Description("You have selected all rows on this page. Do you want to {0} only these rows, or to all rows across all pages?")]
-    YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages,
-
-    [Description("Current Page")]
-    CurrentPage,
-
-    [Description("All Pages")]
-    AllPages,
 }
 
 public enum SelectorMessage

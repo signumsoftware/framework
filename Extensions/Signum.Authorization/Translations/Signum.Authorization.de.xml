@@ -106,6 +106,7 @@
     <Member Name="IHaveForgottenMyPassword" Description="Ich habe mein Passwort vergessen" />
     <Member Name="IncorrectPassword" Description="Falsches Passwort" />
     <Member Name="InvalidPassword" Description="Ungültiges Passwort" />
+    <Member Name="InvalidTokenDate0" Description="Ungültiges Token Datum {0}" />
     <Member Name="InvalidUsername" Description="Ungültiger Benutzername" />
     <Member Name="InvalidUsernameOrPassword" Description="Ungültiger Benutzername oder Kennwort" />
     <Member Name="Login" Description="Login" />
@@ -284,6 +285,9 @@
     <Member Name="SID" Description="SID" />
     <Member Name="ToStringValue" Description="Zum Zeichenfolgenwert" />
     <Member Name="UserName" Description="Benutzername" />
+  </Type>
+  <Type Name="UserMessage">
+    <Member Name="UserIsNotActive" Description="Benutzer ist nicht aktiv" />
   </Type>
   <Type Name="UserOperation">
     <Member Name="AutoDeactivate" Description="Automatisch deaktivieren" />
