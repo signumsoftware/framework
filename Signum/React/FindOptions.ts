@@ -231,13 +231,13 @@ export interface QueryToken {
   readonly queryTokenType?: QueryTokenType;
   readonly parent?: QueryToken;
   readonly propertyRoute?: string;
-  readonly __fake__: boolean;
+  readonly __isCached__: true;
 }
 
-export interface QueryTokenDTO extends Omit<QueryToken, "subTokens" | "parent" | "__fake__"> {
+export interface QueryTokenDTO extends Omit<QueryToken, "subTokens" | "parent" | "__isCached__"> {
   subTokens?: { [name: string]: QueryTokenDTO };
   parent?: QueryTokenDTO;
-  __fake__: number;
+  __isDTO__: undefined;
 }
 
 export interface ManualToken { 

@@ -1317,9 +1317,12 @@ export namespace Finder {
             throw new Error("Invalid parent");
         }
 
-        const { subTokens, parent, __fake__, ...rest } = dto;
+        const { subTokens, parent, __isDTO__, ...rest } = dto;
         const token = rest as Writable<QueryToken>;
         token.parent = parentToken;
+        token.__isCached__ = true;
+        //if (token.fullKey == "Locked")
+        //  console.log(token);
         Object.freeze(token);
         cached = { token: token as QueryToken, subTokens: undefined };
         this.queryCache.set(dto.fullKey, cached);

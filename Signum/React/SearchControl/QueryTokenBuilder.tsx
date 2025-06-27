@@ -22,6 +22,10 @@ interface QueryTokenBuilderProps {
 let copiedToken: { fullKey: string, queryKey: string } | undefined;
 
 export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.JSX.Element {
+
+  if (p.queryToken && !p.queryToken.__isCached__)
+    throw new Error("QueryToken is DTO!");
+
   var [expanded, setExpanded] = React.useState(false);
   const [lastTokenChanged, setLastTokenChanged] = React.useState<string | undefined>(undefined);
 
@@ -147,6 +151,9 @@ interface QueryTokenPartProps {
 
 
 export function QueryTokenPart(p: QueryTokenPartProps): React.JSX.Element | null {
+
+  if (p.parentToken && !p.parentToken.__isCached__)
+    throw new Error("QueryToken is DTO!");
 
   const autoExpand = !p.parentToken?.type.isCollection;
 
