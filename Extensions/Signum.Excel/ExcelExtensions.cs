@@ -359,4 +359,45 @@ public static class ExcelExtensions
         WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(sheet.Id!));
         return wsPart;
     }
+
+    public static bool IsDateCell(this Cell cell, WorkbookPart workbookPart)
+    {
+        if (cell.StyleIndex == null)
+            return false;
+
+        var stylesPart = workbookPart.WorkbookStylesPart;
+        if (stylesPart == null)
+            return false;
+
+        var styleIndex = (int)cell.StyleIndex.Value;
+        var cellFormat = stylesPart.Stylesheet.CellFormats?.ElementAt(styleIndex) as CellFormat;
+
+        if (cellFormat == null)
+            return false;
+
+        // Excel built-in date number format IDs: 14–22, 45–47
+        var dateFormatIds = new HashSet<uint> { 14, 15, 16, 17, 18, 19, 20, 21, 22, 45, 46, 47 };
+
+        return dateFormatIds.Contains(cellFormat.NumberFormatId!.Value);
+    }
+
+    public static DateTime? GetDateCellValue(this Cell cell, WorkbookPart workbookPart)
+    {
+        if (cell == null || cell.CellValue == null)
+            return null;
+
+        // Excel stores dates as doubles (days since 1900-01-01)
+        if (double.TryParse(cell.CellValue.InnerText, out double oaDate))
+        {
+            bool isDate = IsDateCell(cell, workbookPart);
+            if (isDate)
+            {
+                // Excel uses OADate: 1.0 = Jan 1, 1900
+                return DateTime.FromOADate(oaDate);
+            }
+        }
+
+        return null; // Not a valid date
+    }
+
 }
