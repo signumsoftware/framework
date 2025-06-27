@@ -6,7 +6,8 @@ import { Entity, getToString, Lite, liteKey, MList, ModelEntity, parseLite, toLi
 import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 import {
   FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed,
-  FilterGroupOption, FilterConditionOption, PinnedFilter, toPinnedFilterParsed, FindOptions, FindOptionsParsed, isFilterGroup
+  FilterGroupOption, FilterConditionOption, PinnedFilter, toPinnedFilterParsed, FindOptions, FindOptionsParsed, isFilterGroup,
+  QueryDescription
 } from '@framework/FindOptions'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission } from './Signum.UserAssets'
@@ -22,6 +23,7 @@ import SelectorModal from '@framework/SelectorModal';
 import { SearchControlLoaded } from '@framework/Search';
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from './Signum.UserAssets.Queries';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
+import { toDTO } from './Templates/QueryTokenEmbeddedBuilder';
 
 export namespace UserAssetClient {
   
@@ -54,17 +56,20 @@ export namespace UserAssetClient {
   }
   
   export function toQueryTokenEmbedded(token: QueryToken): QueryTokenEmbedded {
+
     return QueryTokenEmbedded.New({
-      token: token,
+      token: toDTO(token),
       tokenString: token.fullKey,
     });
   }
-  
-  export function getToken(token: QueryTokenEmbedded): QueryToken {
+
+  export function getToken(token: QueryTokenEmbedded, qd: QueryDescription): QueryToken {
     if (token.parseException)
       throw new Error(token.parseException);
-  
-    return token.token!;
+
+    var tokenCompleter = new Finder.TokenCompleter(qd);
+
+    return tokenCompleter.addToCache(token.token!);
   }
   
   export namespace Converter {
@@ -149,7 +154,7 @@ export namespace UserAssetClient {
         groupOperation: e.groupOperation,
         token: e.token && QueryTokenEmbedded.New({
           tokenString: e.token.fullKey,
-          token: e.token
+          token: toDTO(e.token)
         }),
         operation: e.operation,
         valueString: e.valueString,

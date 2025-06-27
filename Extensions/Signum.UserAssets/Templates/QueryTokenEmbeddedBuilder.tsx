@@ -1,17 +1,18 @@
 import * as React from 'react'
 import { FormGroup } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { QueryToken, SubTokensOptions } from '@framework/FindOptions'
+import { QueryToken, QueryTokenDTO, SubTokensOptions } from '@framework/FindOptions'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
-import { useForceUpdate } from '@framework/Hooks'
+import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { QueryTokenEmbedded } from '../Signum.UserAssets.Queries'
+import { Finder } from '../../../Signum/React/Finder'
 
 interface QueryTokenEmbeddedBuilderProps {
   ctx: TypeContext<QueryTokenEmbedded | null>;
   queryKey: string;
   subTokenOptions: SubTokensOptions;
   onTokenChanged?: (newToken: QueryToken | undefined) => void;
-  helpText?: React.ReactChild;
+  helpText?: React.ReactNode;
 }
 
 export default function QueryTokenEmbeddedBuilder(p: QueryTokenEmbeddedBuilderProps): React.JSX.Element {
@@ -22,7 +23,7 @@ export default function QueryTokenEmbeddedBuilder(p: QueryTokenEmbeddedBuilderPr
     else
       p.ctx.value = QueryTokenEmbedded.New({
         tokenString: newToken.fullKey,
-        token: newToken
+        token: toDTO(newToken)
       });
 
     if (p.onTokenChanged)
@@ -31,13 +32,18 @@ export default function QueryTokenEmbeddedBuilder(p: QueryTokenEmbeddedBuilderPr
     forceUpdate();
   }
 
+  const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
+
   const qte = p.ctx.value;
 
+  
   const tokenBuilder = (
     <div className={p.ctx.rwWidgetClass}>
-      <QueryTokenBuilder queryToken={qte?.token}
-        onTokenChange={handleTokenChanged} queryKey={p.queryKey} subTokenOptions={p.subTokenOptions}
-        readOnly={p.ctx.readOnly} />
+      {qd &&
+        <QueryTokenBuilder queryToken={qte?.token && new Finder.TokenCompleter(qd).addToCache(qte.token)}
+          onTokenChange={handleTokenChanged} queryKey={p.queryKey} subTokenOptions={p.subTokenOptions}
+          readOnly={p.ctx.readOnly} />
+      }
     </div>
   );
 
@@ -58,3 +64,12 @@ export default function QueryTokenEmbeddedBuilder(p: QueryTokenEmbeddedBuilderPr
   );
 }
 
+
+export function toDTO(token: QueryToken | undefined): QueryTokenDTO | undefined{
+
+  if (token == null)
+    return undefined;
+
+  var { __isCached__, parent, ...dto } = token;
+  return { ...dto, parent: toDTO(parent) } satisfies Omit<QueryTokenDTO, "__isDTO__"> as QueryTokenDTO;
+}
