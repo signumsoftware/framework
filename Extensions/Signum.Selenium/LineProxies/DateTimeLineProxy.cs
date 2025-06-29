@@ -16,6 +16,7 @@ public class DateTimeLineProxy : BaseLineProxy
     }
 
     public WebElementLocator InputLocator => this.Element.WithLocator(By.CssSelector("div.rw-date-picker input[type=text]"));
+    public WebElementLocator InputReadonlyLocator => this.Element.WithLocator(By.CssSelector("input.sf-readonly-date"));
 
     public void SetValue(IFormattable? value, string? format = null)
     {
@@ -28,13 +29,19 @@ public class DateTimeLineProxy : BaseLineProxy
 
     public IFormattable? GetValue()
     {
-        var textLine = InputLocator.Find();
+        var textLine = InputLocator.TryFind() ?? InputReadonlyLocator.Find();
 
         var strValue = textLine.GetDomProperty("value");
 
         return strValue == null ? null : (IFormattable?)ReflectionTools.Parse(strValue, this.Route.Type);
     }
 
+    public bool IsReadonly()
+    {
+        var element = InputReadonlyLocator.TryFind();
+
+        return element != null;
+    }
 
     public override object? GetValueUntyped() => this.GetValue();
     public override void SetValueUntyped(object? value) => SetValue((IFormattable?)value);

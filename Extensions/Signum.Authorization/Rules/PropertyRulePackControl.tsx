@@ -11,6 +11,7 @@ import "./AuthAdmin.css"
 import { is } from '@framework/Signum.Entities';
 import { useDragAndDrop } from './TypeRulePackControl';
 import { GraphExplorer } from '@framework/Reflection';
+import SelectorModal from '../../../Signum/React/SelectorModal';
 
 export default function PropertyRulesPackControl({ ctx, initialTypeConditions, innerRef }: { ctx: TypeContext<PropertyRulePack>, initialTypeConditions: TypeConditionSymbol[] | undefined, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
 
@@ -21,7 +22,15 @@ export default function PropertyRulesPackControl({ ctx, initialTypeConditions, i
     let pack = ctx.value;
 
     AuthAdminClient.API.savePropertyRulePack(pack)
-      .then(() => AuthAdminClient.API.fetchPropertyRulePack(pack.type.cleanName!, pack.role.id!))
+      .then(() => fetchPropertyRulePack(pack, bc));
+  }
+
+  function handleResetChangesClick(bc: ButtonsContext) {
+    fetchPropertyRulePack(ctx.value, bc);
+  }
+
+  function fetchPropertyRulePack(pack: PropertyRulePack, bc: ButtonsContext) {
+    return AuthAdminClient.API.fetchPropertyRulePack(pack.type.cleanName!, pack.role.id!)
       .then(newPack => {
         Operations.notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
@@ -33,7 +42,8 @@ export default function PropertyRulesPackControl({ ctx, initialTypeConditions, i
     const hasChanges = GraphExplorer.hasChanges(bc.pack.entity); 
 
     return [
-      { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }
+      { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
+      { button: <Button variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> }
     ];
   }
 
@@ -66,19 +76,49 @@ export default function PropertyRulesPackControl({ ctx, initialTypeConditions, i
         <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
         <EntityLine ctx={ctx.subCtx(f => f.type)} />
         <FormGroup ctx={ctx} label="Type Conditions">
-          {id => <select id={id} className={hasOverrides(typeConditions)} value={typeConditions?.map(a => a.key).join(" & ") ?? "Fallback"} onChange={e => {
-            if (e.currentTarget.value == "Fallback")
-              setTypeConditions(undefined);
-            else {
-              var tcs = ctx.value.availableTypeConditions.single(arr => arr.map(a => a.key).join(" & ") == e.currentTarget.value);
-              setTypeConditions(tcs);
-            }
-          }} >
-            <option value="Fallback" className={hasOverrides(undefined)}>Fallback</option>
-            {ctx.value.availableTypeConditions.map((arr, i) => <option value={arr.map(a => a.key).join(" & ")} className={hasOverrides(arr)}>
-              {arr.map(a => a.key.after(".")).join(" & ")}
-            </option>)}
-          </select>}
+          {id =>
+            <div id={id}>
+              <select className={hasOverrides(typeConditions)} value={typeConditions?.map(a => a.key).join(" & ")} onChange={e => {
+                if (e.currentTarget.value == "Fallback")
+                  setTypeConditions(undefined);
+                else {
+                  var tcs = ctx.value.availableTypeConditions.single(arr => arr.map(a => a.key).join(" & ") == e.currentTarget.value);
+                  setTypeConditions(tcs);
+                }
+              }} >
+                <option value="Fallback" className={hasOverrides(undefined)}>Fallback</option>
+                {ctx.value.availableTypeConditions.map((arr, i) => <option value={arr.map(a => a.key).join(" & ")} className={hasOverrides(arr)}>
+                  {arr.map(a => a.key.after(".")).join(" & ")}
+                </option>)}
+              </select>
+
+              {ctx.value.availableTypeConditions.length > 1 && 
+                <button className="btn btn-xs btn-primary mx-1" onClick={e => {
+                  var options = ["Fallback", ...ctx.value.availableTypeConditions.map(a => a.map(a => a.key).join(" & "))]
+                    .filter(o => o != (typeConditions?.map(a => a.key).join(" & ") ?? "Fallback"))
+                    .map(o => o.tryAfter(".") ?? o);
+
+                  SelectorModal.chooseElement(options)
+                    .then(option => {
+                      if (!option)
+                        return;
+
+                      var tcs = option == "Fallback" ? undefined : ctx.value.availableTypeConditions.single(arr => arr.map(a => a.key.after(".")).join(" & ") == option);
+                      Promise.resolve(() => ctx.mlistItemCtxs(a => a.rules).forEach(tctx => {
+                        const allowedBinding = getBinding(tctx.value.allowed, typeConditions);
+                        const coercedBinding = getBinding(tctx.value.coerced, typeConditions);
+                        const allowed = getBinding(tctx.value.allowed, tcs).getValue();
+
+                        if (PropertyAllowed.index(coercedBinding.getValue()) < PropertyAllowed.index(allowed))
+                          return;
+
+                        allowedBinding.setValue(allowed);
+                      }))
+                        .then(f => f())
+                        .then(() => updateFrame());
+                    });
+                }}>Copy from…</button>}
+            </div>}
         </FormGroup>
       </div>
       <table className="table table-sm sf-auth-rules">
