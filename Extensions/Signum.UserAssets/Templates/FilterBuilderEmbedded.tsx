@@ -50,7 +50,10 @@ export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.
           isGroup: true,
           indentation: indent,
           groupOperation: fo.groupOperation,
-          token: fo.token && QueryTokenEmbedded.New({ token: fo.token, tokenString: fo.token.fullKey }),
+          token: fo.token && QueryTokenEmbedded.New({
+            token: fo.token,
+            tokenString: fo.token.fullKey
+          }),
           valueString: fo.value,
           pinned: !fo.pinned ? undefined : toPinnedQueryFilterEmbedded(fo.pinned),
           dashboardBehaviour: fo.dashboardBehaviour,
@@ -67,7 +70,10 @@ export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.
         }
 
         ctx.value.push(newMListElement(QueryFilterEmbedded.New({
-          token: fo.token && QueryTokenEmbedded.New({ token: fo.token, tokenString: fo.token.fullKey }),
+          token: fo.token && QueryTokenEmbedded.New({
+            tokenString: fo.token.fullKey,
+            token: fo.token,
+          }),
           operation: fo.operation,
           valueString: fo.value,
           indentation: indent,

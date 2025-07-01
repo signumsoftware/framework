@@ -17,8 +17,8 @@ import {
   hasSnippet,
   hasNested,
   hasTimeSeries,
-  QueryTokenDTO,
-  QueryDescriptionDTO
+  QueryDescriptionDTO,
+  QueryTokenWithoutParent
 } from './FindOptions';
 
 import { FilterOperation, FilterGroupOperation, PinnedFilterActive } from './Signum.DynamicQuery';
@@ -372,7 +372,7 @@ export namespace Finder {
 
   export function mergeColumns(qd: QueryDescription, mode: ColumnOptionsMode, columnOptions: ColumnOption[]): ColumnOption[] {
 
-    var columns = Dic.getValues(qd.columns).filter(cd => cd.key != "Entity");
+    var columns = Dic.getValues(qd.columns).filter(cd => cd.key != "Entity" && cd.queryTokenType != "Aggregate");
 
     switch (mode) {
       case "Add":
@@ -1294,42 +1294,46 @@ export namespace Finder {
       });
     }
 
-    addToCache(dto: QueryTokenDTO, parentToken?: QueryToken): QueryToken {
+    addToCache(dto: QueryTokenWithoutParent | QueryToken, parentToken?: QueryToken): QueryToken {
 
       let cached = this.queryCache.get(dto.fullKey);
       if (cached == null) {
 
-        parentToken ??= (dto.parent != null ? this.addToCache(dto.parent) : undefined)
+        parentToken ??= (dto.parent != null ? this.addToCache(dto.parent as QueryToken) : undefined)
 
-        function removeDotsInsideBrackets(token: string) {
-          return token.replace(/\[(.*?)\]/g, (match, content) => {
-            const cleaned = content.replace(/\./g, '');
-            return `[${cleaned}]`;
-          });
+        function getParent(token: string) {
+          if (token.endsWith("]"))
+            return token.beforeLast("[").beforeLast(".");
+
+          return token.tryBeforeLast(".");
         }
 
 
         if (parentToken == null) {
-          if (removeDotsInsideBrackets(dto.fullKey).contains("."))
+          if (getParent(dto.fullKey) != null)
             throw new Error(`Token with key '${dto.fullKey}' on query '${this.qd.queryKey}' has no parent, but it is not a root token`);
         } else {
-          if (removeDotsInsideBrackets(parentToken.fullKey) != removeDotsInsideBrackets(dto.fullKey).beforeLast("."))
+          if (parentToken.fullKey != getParent(dto.fullKey))
             throw new Error("Invalid parent");
         }
 
-        const { subTokens, parent, __fake__, ...rest } = dto;
+        const { subTokens, parent, ...rest } = dto as QueryTokenWithoutParent;
         const token = rest as Writable<QueryToken>;
         token.parent = parentToken;
+        token.__isCached__ = true;
+        //if (token.fullKey == "Locked")
+        //  console.log(token);
         Object.freeze(token);
         cached = { token: token as QueryToken, subTokens: undefined };
         this.queryCache.set(dto.fullKey, cached);
       }
 
       if (cached.token.parent == null && dto.parent != null)
-        (cached.token as any).parent = this.addToCache(dto.parent);
+        (cached.token as any).parent = this.addToCache(dto.parent as QueryToken);
 
-      if (dto.subTokens != null && (cached.subTokens == null)) {
-        cached.subTokens = Dic.map(dto.subTokens, (key, st) => this.addToCache(st, cached.token).fullKey);
+      const subTokens = (dto as QueryTokenWithoutParent).subTokens;
+      if (subTokens != null && (cached.subTokens == null)) {
+        cached.subTokens = Dic.map(subTokens, (key, st) => this.addToCache(st, cached.token).fullKey);
       }
 
       return cached.token;
@@ -1435,11 +1439,14 @@ export namespace Finder {
 
       var cached = this.queryCache.get(parentToken.fullKey);
 
-      if (cached == null)
-        throw new Error(`Token with key '${parentToken.fullKey}' not found in the cache`);
+      if (cached == null) {
+        this.addToCache(parentToken);
 
-      if (cached?.token != parentToken)
-        throw new Error(`Token '${parentToken.fullKey}' is not the same instance as in the cache`);
+        cached = this.queryCache.get(parentToken.fullKey)!;
+      }
+
+      //if (cached?.token != parentToken)
+      //  throw new Error(`Token '${parentToken.fullKey}' is not the same instance as in the cache`);
 
       if (cached.subTokens != null)
         return cached.subTokens.map(fullKey => this.queryCache.get(fullKey)?.token!);
@@ -1484,11 +1491,11 @@ export namespace Finder {
       }
     }
 
-    private static API_parseTokens(queryKey: string, tokens: string[]): Promise<QueryTokenDTO[]> {
+    private static API_parseTokens(queryKey: string, tokens: string[]): Promise<QueryToken[]> {
       return ajaxPost({ url: "/api/query/parseTokens" }, { queryKey, tokens });
     }
 
-    private static API_getSubTokens(queryKey: string, token: string): Promise<QueryTokenDTO[]> {
+    private static API_getSubTokens(queryKey: string, token: string): Promise<QueryTokenWithoutParent[]> {
       return ajaxPost({ url: "/api/query/subTokens" }, { queryKey, token: token });
     }
   }

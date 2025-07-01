@@ -1,12 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="HolidayCalendarEntity" Description="Ferienkalender" Gender="m">
+    <Member Name="CountryCode" Description="Landescode" />
+    <Member Name="FromYear" Description="Ab Jahr" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="Holidays" Description="Ferien" />
+    <Member Name="IsDefault" Description="Ist Standard" />
     <Member Name="Name" Description="Name" />
+    <Member Name="SubDivisionCode" Description="Code der Unterteilung" />
+    <Member Name="ToYear" Description="Bis Jahr" />
+  </Type>
+  <Type Name="HolidayCalendarMessage">
+    <Member Name="ForImport01and2ShouldBeSet" Description="Für den Import sollten {0}, {1} und {2} eingestellt werden." />
   </Type>
   <Type Name="HolidayCalendarOperation">
     <Member Name="Delete" Description="Löschen" />
+    <Member Name="ImportPublicHolidays" Description="Feiertage importieren" />
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="HolidayEmbedded" Description="Feiertag">
@@ -23,7 +32,6 @@
     <Member Name="LastExecution" Description="Letzte Ausführung" />
   </Type>
   <Type Name="ITaskOperation">
-    <Member Name="ExecuteAsync" Description="Async ausführen" />
     <Member Name="ExecuteSync" Description="Sync ausführen" />
   </Type>
   <Type Name="ScheduledTaskEntity" Description="Geplante Task" PluralDescription="Geplanten Tasks" Gender="f">
@@ -57,6 +65,7 @@
   <Type Name="SchedulerMessage">
     <Member Name="Day0At1In2" Description="Tag {0} auf {1} in {2}" />
     <Member Name="Each0Minutes" Description="Alle {0} Minuten" />
+    <Member Name="Holiday" Description="Feiertag" />
     <Member Name="ScheduleRuleWeekDaysDN_AndHoliday" Description="und an Feiertagen" />
     <Member Name="ScheduleRuleWeekDaysDN_At" Description="an" />
     <Member Name="ScheduleRuleWeekDaysDN_ButHoliday" Description="aber Feiertage" />
@@ -67,6 +76,7 @@
     <Member Name="ScheduleRuleWeekDaysDN_Th" Description="Do" />
     <Member Name="ScheduleRuleWeekDaysDN_Tu" Description="Di" />
     <Member Name="ScheduleRuleWeekDaysDN_We" Description="Mi" />
+    <Member Name="SelectAll" Description="Alle auswählen" />
     <Member Name="TaskIsNotRunning" Description="Die Task wird nicht ausgeführt" />
   </Type>
   <Type Name="SchedulerPermission">

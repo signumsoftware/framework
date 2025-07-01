@@ -510,7 +510,7 @@ public static class OperationAllowedAndConditionsExtensions
         if (assumingTaac == null)
             return paac.Min();
 
-        List<OperationAllowed> candidates = CandidatesAssuming(paac, assumingTaac);
+        List<OperationAllowed> candidates = CandidatesAssuming(paac, assumingTaac, inUserInterface: false);
 
         if (candidates.IsEmpty())
             return OperationAllowed.None;
@@ -531,11 +531,11 @@ public static class OperationAllowedAndConditionsExtensions
         return candidates.MinBy(a => (int)a);
     }
 
-    public static List<OperationAllowed> CandidatesAssuming(this WithConditions<OperationAllowed> paac, WithConditions<TypeAllowed> assumingTaac)
+    public static List<OperationAllowed> CandidatesAssuming(this WithConditions<OperationAllowed> paac, WithConditions<TypeAllowed> assumingTaac, bool inUserInterface)
     {
-        var candidates = paac.ConditionRules.Where((a, i) => assumingTaac.ConditionRules[i].Allowed.GetUI() > TypeAllowedBasic.None).Select(a => a.Allowed).ToList();
+        var candidates = paac.ConditionRules.Where((a, i) => assumingTaac.ConditionRules[i].Allowed.Get(inUserInterface) > TypeAllowedBasic.None).Select(a => a.Allowed).ToList();
 
-        if (assumingTaac.Fallback.GetUI() > TypeAllowedBasic.None)
+        if (assumingTaac.Fallback.Get(inUserInterface) > TypeAllowedBasic.None)
             candidates.Add(paac.Fallback);
 
         return candidates;
@@ -566,7 +566,7 @@ public static class OperationAllowedAndConditionsExtensions
             if (assumingTaac == null)
                 return paac.Max();
 
-            List<OperationAllowed> candidates = CandidatesAssuming(paac, assumingTaac);
+            List<OperationAllowed> candidates = CandidatesAssuming(paac, assumingTaac, inUserInterface: false);
 
             if (candidates.IsEmpty())
                 return OperationAllowed.None;

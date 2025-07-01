@@ -14,7 +14,7 @@ public class VersionFilterAttribute : ActionFilterAttribute
     public override void OnActionExecuted(ActionExecutedContext context)
     {
         base.OnActionExecuted(context);
-        if (context.HttpContext.Response != null)
+        if (context.HttpContext.Response != null  && !context.HttpContext.Response.HasStarted)
         {
             if (Version == null)
                 Version = MainAssembly.GetName().Version!.ToString();

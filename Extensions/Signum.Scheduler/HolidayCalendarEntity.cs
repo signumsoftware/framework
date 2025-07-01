@@ -111,6 +111,6 @@ public class HolidayEmbedded : EmbeddedEntity
 
 public enum HolidayCalendarMessage
 {
-    [Description("For import, from year, to year and country code should be set.")]
-    ForImportFromYearToYearAndCountryCodeShouldBeSet
+    [Description("For import {0}, {1} and {2} should be set.")]
+    ForImport01and2ShouldBeSet
 }

@@ -144,11 +144,15 @@ public class QueryDescriptionTS
     public QueryDescriptionTS(QueryDescription qd)
     {
         this.queryKey = QueryUtils.GetKey(qd.QueryName);
-        this.columns = qd.Columns.ToDictionary(a => a.Name, cd =>
+        this.columns =  qd.Columns.ToDictionary(a => a.Name, cd =>
         {
             var token = new ColumnToken(cd, qd.QueryName);
             return QueryTokenTS.WithAutoExpand(token, qd);
         });
+
+        var count = new AggregateToken(AggregateFunction.Count, qd.QueryName);
+
+        this.columns.Add(count.Key, QueryTokenTS.WithAutoExpand(count, qd));
 
         foreach (var action in AddExtension.GetInvocationListTyped())
         {

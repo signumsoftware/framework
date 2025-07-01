@@ -26,7 +26,7 @@ export namespace RestApiKeyClient {
     return Promise.resolve(undefined);
   }
   
-  export module API {
+  export namespace API {
     export function generateRestApiKey(): Promise<string> {
       return ajaxGet({ url: "/api/restApiKey/generate" });
     }

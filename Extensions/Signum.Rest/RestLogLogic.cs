@@ -50,14 +50,16 @@ public class RestLogLogic
         Remove(parameters.GetDateLimitDeleteWithExceptions(typeof(RestLogEntity).ToTypeEntity()), withExceptions: true);
     }
 
-    public static async Task<string> GetRestDiffResult(HttpMethod httpMethod, string url, string apiKey, string? oldRequestBody)
+    public static async Task<string> GetRestDiffResult(HttpMethod httpMethod, string url, string? apiKey, string? oldRequestBody)
     {
         //create the new Request
         var restClient = new HttpClient
         {
             BaseAddress = new Uri(url),
-            DefaultRequestHeaders = { { "X-ApiKey", apiKey } }
         };
+
+        if (apiKey != null)
+            restClient.DefaultRequestHeaders.Add("X-ApiKey", apiKey);
 
         var request = new HttpRequestMessage(httpMethod, url);
         var requestUriAbsoluteUri = request.RequestUri!.AbsoluteUri;
