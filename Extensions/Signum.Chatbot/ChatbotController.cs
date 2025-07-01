@@ -35,16 +35,22 @@ public class ChatbotController : Controller
     [HttpPost("api/askQuestionAsync")]
     public  async Task AskQuestionAsync(CancellationToken ct)
     {
+        var resp = this.HttpContext.Response;
+        var context = this.HttpContext;
+
         var sessionID = HttpContext.Request.Headers["X-Chatbot-Session-Id"].ToString();
         var message = Encoding.UTF8.GetString(HttpContext.Request.Body.ReadAllBytesAsync().Result);
 
-        var session = sessionID.HasText() ? new ChatSessionEntity
+        var session = sessionID.HasText() == false ||  sessionID == "undefined" ? new ChatSessionEntity
         {
             LanguageModel = ChatbotLanguageModelLogic.DefaultLanguageModel.Value ?? throw new InvalidOperationException($"No default {typeof(ChatbotLanguageModelEntity).Name}"),
             User = UserEntity.Current,
             StartDate = Clock.Now,
         }.Save() : Database.Query<ChatSessionEntity>().SingleEx(a => a.Id == PrimaryKey.Parse(sessionID, typeof(ChatSessionEntity)));
 
+
+        await resp.WriteAsync(UICommand("SessionId", session.Id.ToString()), ct);
+        await resp.Body.FlushAsync();
 
         var chatMessage = new ChatMessageEntity()
         {
@@ -63,14 +69,8 @@ public class ChatbotController : Controller
             Model = session.LanguageModel.RetrieveFromCache(),
         };
 
-        
-        var resp = this.HttpContext.Response;
-
-        var context = this.HttpContext;
-
         await resp.WriteAsync(UICommand("QuestionId", chatMessage.Id.ToString()), ct);
         await resp.Body.FlushAsync();
-
 
         await foreach(var item in ChatbotLanguageModelLogic.AskQuestionAsync(history, ct))
         {
@@ -89,9 +89,9 @@ public class ChatbotController : Controller
     }
 
     [HttpGet("api/session/{id}")]
-    public ChatSessionEntity? GetChatSessionById(int id)
+    public Lite<ChatSessionEntity>? GetChatSessionById(int id)
     {
-       return Database.Query<ChatSessionEntity>().Where(c => c.Id == id).FirstOrDefault();
+       return Database.Query<ChatSessionEntity>().Where(c => c.Id == id).Select( s => s.ToLite()).FirstOrDefault();
     }
 
 

@@ -67,6 +67,7 @@ export type ChatMessageRole =
 export const ChatSessionEntity: Type<ChatSessionEntity> = new Type<ChatSessionEntity>("ChatSession");
 export interface ChatSessionEntity extends Entities.Entity {
   Type: "ChatSession";
+  title: string | null;
   languageModel: Entities.Lite<ChatbotLanguageModelEntity>;
   user: Entities.Lite<Authorization.UserEntity>;
   startDate: string /*DateTime*/;

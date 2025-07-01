@@ -11,6 +11,8 @@ namespace Signum.Chatbot;
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class ChatSessionEntity : Entity
 {
+    public string? Title { get; set; }
+
     public Lite<ChatbotLanguageModelEntity> LanguageModel { get; set; }
 
     public Lite<UserEntity> User { get; set; }

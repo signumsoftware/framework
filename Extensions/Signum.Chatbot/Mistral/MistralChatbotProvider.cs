@@ -36,7 +36,7 @@ public class MistralChatbotProvider : IChatbotProvider
             messages = history.Chats.Select(c => new { role = ToMistalRole(c.Role), content = c.Message }).ToArray(),
             stream = true,
             temperature =  0.8,
-            max_tokens = 512
+            max_tokens = 1024
         };
 
         var responseClient = await client.PostAsJsonAsync(BaseUrl, payload);
@@ -75,13 +75,41 @@ public class MistralChatbotProvider : IChatbotProvider
             }
         }
 
-        new ChatMessageEntity()
+        var answerChat = new ChatMessageEntity()
         {
             ChatSession = history.Session.ToLite(),
             Message = answer,
             DateTime = DateTime.Now,
             Role = ChatMessageRole.Assistant,
         }.Save();
+
+        history.Chats.Add(answerChat);
+
+        if (history.Session.Title == null)
+        {
+            payload = new
+            {
+                model = "mistral-medium-latest",
+                messages = new[]
+                {
+                    new { role = "system", content = "Fasse das Thema dieses Gesprächs in maximal 6 Wörtern als Titel zusammen." },
+                    new { role = "user", content = string.Join("\n", history.Chats.Select(m => m.Message)) }
+                },
+                stream = false,
+                temperature = 0.5,
+                max_tokens = 24
+            };
+
+            responseClient = await client.PostAsJsonAsync(BaseUrl, payload);
+            responseClient.EnsureSuccessStatusCode();
+
+            var result = await responseClient.Content.ReadFromJsonAsync<ChatCompletionResponse>();
+
+            history.Session.Title = result != null ? result.choices[0].message.content : null;
+
+            history.Session.Save();
+
+        }
 
     }
 
