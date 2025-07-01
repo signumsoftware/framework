@@ -97,7 +97,7 @@ export namespace MultiOperationProgressModal {
     } else {
       return makeRequest().then(r => r.json()).then(obj => {
         var a = obj as Operations.API.OperationResult;
-        return softCast<Operations.API.ErrorReport>({ errors: [{ [liteKey(a.entity)]: a.error }] });
+        return softCast<Operations.API.ErrorReport>({ errors: { [liteKey(a.entity)]: a.error } });
       });
     }
   };
