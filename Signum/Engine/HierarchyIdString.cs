@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
 using Microsoft.SqlServer.Types;
-using Signum.Engine.Maps; // Requires Microsoft.SqlServer.Types NuGet package
+
+namespace Signum.Engine;
 
 public static class HierarchyIdString
 {

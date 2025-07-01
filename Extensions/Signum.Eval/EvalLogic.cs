@@ -102,7 +102,8 @@ public static class EvalLogic
 
     public static void AddFullAssembly(Type type)
     {
-        Namespaces.AddRange(type.Assembly.ExportedTypes.Select(a => a.Namespace!));
+        var nn = type.Assembly.ExportedTypes.Where(a => a.Namespace == null).ToList();
+        Namespaces.AddRange(type.Assembly.ExportedTypes.Select(a => a.Namespace).NotNull());
         AssemblyTypes.Add(type);
     }
 
