@@ -1106,7 +1106,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if(timeSeriesColumn)
       fo.columnOptions.push(timeSeriesColumn);
     fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns)
-      .filter(a => a.fullKey != "Entity")
+      .filter(a => a.fullKey != "Entity" && a.queryTokenType != "Aggregate")
       .map(cd => softCast<ColumnOptionParsed>({ displayName: cd.niceName, token: cd })));   
 
     if (fo.groupResults) {
