@@ -418,7 +418,7 @@ export namespace Finder {
       hiddenColumn: c.hiddenColumn,
     }) as ColumnOption;
 
-    var ideal = Dic.getValues(qd.columns).filter(a => a.key != "Entity");
+    var ideal = Dic.getValues(qd.columns).filter(a => a.key != "Entity" && a.queryTokenType != "Aggregate");
 
     current = current.filter(a => a.token != null);
 

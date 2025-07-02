@@ -72,18 +72,12 @@ export class ImageExtension<T extends object = {}> implements HtmlEditorExtensio
 
   replaceImagePlaceholders(controller: HtmlEditorController): void {
     const attachments = (() => {
-      const binding = controller.binding;
-      if('parentObject' in binding) {
-        const parentObject = binding.parentObject as object;
-        if('attachments' in parentObject) {
-          const attachments = parentObject.attachments as { rowId: number }[];
-          return attachments.map(att => att.rowId?.toString()) ?? []
-        }
-      }
-
+      const value = controller.binding.getValue();
+      if (value) 
+        return [...value.matchAll(/data-attachment-id="(\d+)"/g)].map(m => m[1]);
       return [];
     })();
-    
+
     if(!attachments.length) return;
     
     const editorState =  controller.editor.getEditorState();
