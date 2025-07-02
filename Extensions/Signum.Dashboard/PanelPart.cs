@@ -47,6 +47,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         typeof(LinkListPartEntity),
         typeof(ImagePartEntity),
         typeof(SeparatorPartEntity),
+        typeof(TextPartEntity),
         typeof(HealthCheckPartEntity))]
     public IPartEntity Content { get; set; }
 

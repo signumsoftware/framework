@@ -99,6 +99,7 @@ export namespace DashboardClient {
     registerRenderer(TextPartEntity, {
       component: () => import('./View/TextPart').then(a => a.default),
       defaultIcon: () => ({ icon: "code", iconColor: "#000000" }),
+      withPanel: () => false,
     });
 
     registerRenderer(LinkListPartEntity, {
