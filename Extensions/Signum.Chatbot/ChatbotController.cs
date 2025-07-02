@@ -98,9 +98,17 @@ public class ChatbotController : Controller
     [HttpGet("api/messages/session/{id}")]
     public List<ChatMessageEntity> GetMessagesBySessionId(int id)
     {
-        var messages = Database.Query<ChatMessageEntity>().Where(m => m.ChatSession.Id == id).ToList();
+        var messages = Database.Query<ChatMessageEntity>().Where(m => m.ChatSession.Id == id).OrderByDescending(cm => cm.DateTime).ToList();
 
         return messages;
+    }
+
+    [HttpGet("api/userSessions")]
+    public List<ChatSessionEntity>? GetUserSessions(int id)
+    {
+        var session = Database.Query<ChatSessionEntity>().Where(m => m.User.Is(UserEntity.Current)).OrderByDescending(s => s.StartDate).ToList();
+
+        return session;
     }
 
     [HttpGet("api/lastSession")]

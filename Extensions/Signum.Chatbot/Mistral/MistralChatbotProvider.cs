@@ -30,6 +30,14 @@ public class MistralChatbotProvider : IChatbotProvider
 
         var client = LeChatClient();
 
+        history.Chats.Insert(0, new ChatMessageEntity() 
+        { 
+            Role = ChatMessageRole.System, 
+            ChatSession = session, 
+            DateTime = DateTime.Now,  
+            Message = "Bitte gib alle Formeln in LaTeX - Schreibweise zurück. Beispiel: $E_0=mc^2$ also nur mit $ Schreibweise. Keine anderen Formatierungen"
+        });
+
         var payload = new
         {
             model =  "mistral-medium-latest",
@@ -38,7 +46,7 @@ public class MistralChatbotProvider : IChatbotProvider
             temperature =  0.8,
             max_tokens = 1024
         };
-
+        
         var responseClient = await client.PostAsJsonAsync(BaseUrl, payload);
         responseClient.EnsureSuccessStatusCode();
 
@@ -93,7 +101,7 @@ public class MistralChatbotProvider : IChatbotProvider
                 messages = new[]
                 {
                     new { role = "system", content = "Fasse das Thema dieses Gesprächs in maximal 6 Wörtern als Titel zusammen." },
-                    new { role = "user", content = string.Join("\n", history.Chats.Select(m => m.Message)) }
+                    new { role = "user", content = string.Join("\n", history.Chats.Skip(1).Select(m => m.Message)) }
                 },
                 stream = false,
                 temperature = 0.5,

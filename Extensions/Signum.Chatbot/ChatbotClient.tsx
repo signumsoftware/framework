@@ -3,7 +3,7 @@ import { ajaxPost, ajaxGet, ajaxPostRaw, wrapRequest, AjaxOptions } from '@frame
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity } from './Signum.Chatbot'
 import { toAbsoluteUrl } from '../../Signum/React/AppContext';
-import { Lite } from '../../Signum/React/Signum.Entities';
+import { Lite, MList } from '../../Signum/React/Signum.Entities';
 
 
 export namespace ChatbotClient {
@@ -39,10 +39,12 @@ export namespace ChatbotClient {
       });
     }
 
-    
-
     export function getChatSessionById(id: string | number | undefined): Promise<Lite<ChatSessionEntity>> {
       return ajaxGet<Lite<ChatSessionEntity>>({ url: "/api/session/" + id });
+    }
+
+    export function getUserSessions(): Promise<Array<ChatSessionEntity>> {
+      return ajaxGet<Array<ChatSessionEntity>>({ url: "/api/userSessions"});
     }
 
     export function getMessagesBySessionId(id: string | number | undefined): Promise<Array<ChatMessageEntity>> {
