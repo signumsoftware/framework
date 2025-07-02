@@ -1106,7 +1106,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if(timeSeriesColumn)
       fo.columnOptions.push(timeSeriesColumn);
     fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns)
-      .filter(a => a.fullKey != "Entity")
+      .filter(a => a.fullKey != "Entity" && a.queryTokenType != "Aggregate")
       .map(cd => softCast<ColumnOptionParsed>({ displayName: cd.niceName, token: cd })));   
 
     if (fo.groupResults) {
@@ -2303,10 +2303,13 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
   var props = p.sc.props;
   var filterMode = p.sc.state.filterMode;
   const active = filterMode == "Advanced" || filterMode == "Pinned";
+
+  const activeFilters = p.sc.props.findOptions.filterOptions.filter(f => isActive(f)).length ?? 0;
+
   return (
     <Dropdown as={ButtonGroup} title={SearchMessage.Filters.niceToString()}>
       <Button variant="light" id="" className="sf-filter-button" active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
-        <FontAwesomeIcon icon="filter" />
+        <FontAwesomeIcon icon="filter" /> {activeFilters == 0 ? null : activeFilters}
       </Button>
       <Dropdown.Toggle split className="px-2" variant={"light"} ></Dropdown.Toggle>
       <Dropdown.Menu>
