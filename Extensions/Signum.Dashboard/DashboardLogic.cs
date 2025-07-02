@@ -49,6 +49,7 @@ public static class DashboardLogic
                 {"ImagePart", typeof(ImagePartEntity)},
                 {"SeparatorPart", typeof(SeparatorPartEntity)},
                 {"HealthCheckPart", typeof(HealthCheckPartEntity)},
+                {"TextPart", typeof(TextPartEntity)},
             });
 
 

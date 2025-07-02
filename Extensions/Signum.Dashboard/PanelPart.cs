@@ -263,7 +263,7 @@ public class ImagePartEntity : Entity, IPartEntity
 
     public XElement ToXml(IToXmlContext ctx)
     {
-        return new XElement("UserQueryPart",
+        return new XElement("ImagePart",
             new XAttribute("ImageSrcContent", ImageSrcContent),
             new XAttribute("ClickActionURL", ClickActionURL!)
             );
@@ -398,18 +398,22 @@ public class TextPartEntity : Entity, IPartEntity
     {
         return new TextPartEntity
         {
-            TextContent = this.TextContent
+            TextContent = this.TextContent,
+            TextPartType = this.TextPartType
         };
     }
 
     public XElement ToXml(IToXmlContext ctx)
     {
-        throw new NotImplementedException();
+        return new XElement("TextPart",
+            new XAttribute("TextContent", TextContent!),
+            new XAttribute("TextPartType", TextPartType));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        throw new NotImplementedException();
+        TextContent = element.Attribute("TextContent")!.Value;
+        TextPartType = Enum.Parse<TextPartType>(element.Attribute("TextPartType")!.Value);
     }
 }
 
