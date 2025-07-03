@@ -43,6 +43,7 @@ public static class Pop3ConfigurationLogic
                 var piPassword = ReflectionTools.GetPropertyInfo((Pop3EmailReceptionServiceEntity e) => e.Password);
                 var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(Pop3EmailReceptionServiceEntity));
                 pcs.GetOrThrow("password").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { };
+                pcs.Remove("newPassword"); /* Pop3EmailReceptionServiceEntity already has NewPassword property */
                 pcs.Add("newPassword", new PropertyConverter
                 {
                     AvoidValidate = true,

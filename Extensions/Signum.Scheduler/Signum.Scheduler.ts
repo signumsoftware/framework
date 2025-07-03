@@ -24,7 +24,7 @@ export interface HolidayCalendarEntity extends Entities.Entity, UserAssets.IUser
 }
 
 export namespace HolidayCalendarMessage {
-  export const ForImportFromYearToYearAndCountryCodeShouldBeSet: MessageKey = new MessageKey("HolidayCalendarMessage", "ForImportFromYearToYearAndCountryCodeShouldBeSet");
+  export const ForImport01and2ShouldBeSet: MessageKey = new MessageKey("HolidayCalendarMessage", "ForImport01and2ShouldBeSet");
 }
 
 export namespace HolidayCalendarOperation {

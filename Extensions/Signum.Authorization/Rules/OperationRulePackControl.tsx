@@ -11,6 +11,7 @@ import "./AuthAdmin.css"
 import { OperationSymbol } from '@framework/Signum.Operations'
 import { Binding, getOperationInfo, GraphExplorer } from '@framework/Reflection'
 import { useDragAndDrop } from './TypeRulePackControl'
+import SelectorModal from '../../../Signum/React/SelectorModal';
 
 
 
@@ -22,7 +23,15 @@ export default function OperationRulePackControl({ ctx, initialTypeConditions, i
     let pack = ctx.value;
 
     AuthAdminClient.API.saveOperationRulePack(pack)
-      .then(() => AuthAdminClient.API.fetchOperationRulePack(pack.type.cleanName!, pack.role.id!))
+      .then(() => fetchOperationRulePack(pack, bc));
+  }
+
+  function handleResetChangesClick(bc: ButtonsContext) {
+    fetchOperationRulePack(ctx.value, bc);
+  }
+
+  function fetchOperationRulePack(pack: OperationRulePack, bc: ButtonsContext) {
+    return AuthAdminClient.API.fetchOperationRulePack(pack.type.cleanName!, pack.role.id!)
       .then(newPack => {
         Operations.notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
@@ -33,7 +42,8 @@ export default function OperationRulePackControl({ ctx, initialTypeConditions, i
     const hasChanges = GraphExplorer.hasChanges(bc.pack.entity);
 
     return [
-      { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }
+      { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
+      { button: <Button variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> }
     ];
   }
 
@@ -59,8 +69,6 @@ export default function OperationRulePackControl({ ctx, initialTypeConditions, i
         <EntityLine ctx={ctx.subCtx(f => f.role)} />
         <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
         <EntityLine ctx={ctx.subCtx(f => f.type)} />
-
-
       </div>
       {ctx.value.rules.some(a => isConstructor(a.element)) &&
         <OperationTable ctx={ctx} filter={oar => isConstructor(oar)} typeConditions={undefined} updateFrame={updateFrame} />}
@@ -68,19 +76,49 @@ export default function OperationRulePackControl({ ctx, initialTypeConditions, i
       {ctx.value.rules.some(a => !isConstructor(a.element)) &&
         <div className="form-compact">
           <FormGroup ctx={ctx} label="Type Conditions">
-            {id => <select id={id} className={hasOverrides(typeConditions)} value={typeConditions?.map(a => a.key).join(" & ") ?? "Fallback"} onChange={e => {
-              if (e.currentTarget.value == "Fallback")
-                setTypeConditions(undefined);
-              else {
-                var tcs = ctx.value.availableTypeConditions.single(arr => arr.map(a => a.key).join(" & ") == e.currentTarget.value);
-                setTypeConditions(tcs);
-              }
-            }} >
-              <option value="Fallback" className={hasOverrides(undefined)}>Fallback</option>
-              {ctx.value.availableTypeConditions.map((arr, i) => <option value={arr.map(a => a.key).join(" & ")} className={hasOverrides(arr)}>
-                {arr.map(a => a.key.after(".")).join(" & ")}
-              </option>)}
-            </select>}
+            {id =>
+              <div id={id}>
+                <select id={id} className={hasOverrides(typeConditions)} value={typeConditions?.map(a => a.key).join(" & ")} onChange={e => {
+                  if (e.currentTarget.value == "Fallback")
+                    setTypeConditions(undefined);
+                  else {
+                    var tcs = ctx.value.availableTypeConditions.single(arr => arr.map(a => a.key).join(" & ") == e.currentTarget.value);
+                    setTypeConditions(tcs);
+                  }
+                }} >
+                  <option value="Fallback" className={hasOverrides(undefined)}>Fallback</option>
+                  {ctx.value.availableTypeConditions.map((arr, i) => <option value={arr.map(a => a.key).join(" & ")} className={hasOverrides(arr)}>
+                    {arr.map(a => a.key.after(".")).join(" & ")}
+                  </option>)}
+                </select>
+
+                {ctx.value.availableTypeConditions.length > 1 &&
+                  <button className="btn btn-xs btn-primary mx-1" onClick={e => {
+                    var options = ["Fallback", ...ctx.value.availableTypeConditions.map(a => a.map(a => a.key).join(" & "))]
+                      .filter(o => o != (typeConditions?.map(a => a.key).join(" & ") ?? "Fallback"))
+                      .map(o => o.tryAfter(".") ?? o);
+
+                    SelectorModal.chooseElement(options)
+                      .then(option => {
+                        if (!option)
+                          return;
+
+                        var tcs = option == "Fallback" ? undefined : ctx.value.availableTypeConditions.single(arr => arr.map(a => a.key.after(".")).join(" & ") == option);
+                        Promise.resolve(() => ctx.mlistItemCtxs(a => a.rules).forEach(tctx => {
+                          const allowedBinding = getBinding(tctx.value.allowed, typeConditions);
+                          const coercedBinding = getBinding(tctx.value.coerced, typeConditions);
+                          const allowed = getBinding(tctx.value.allowed, tcs).getValue();
+
+                          if (OperationAllowed.index(coercedBinding.getValue()) < OperationAllowed.index(allowed))
+                            return;
+
+                          allowedBinding.setValue(allowed);
+                        }))
+                          .then(f => f())
+                          .then(() => updateFrame());
+                      });
+                  }}>Copy from…</button>}
+              </div>}
           </FormGroup>
           <OperationTable ctx={ctx} filter={oar => !isConstructor(oar)} typeConditions={typeConditions} updateFrame={updateFrame} />
         </div>

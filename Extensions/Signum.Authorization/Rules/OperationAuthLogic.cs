@@ -70,7 +70,7 @@ public static class OperationAuthLogic
 
                 var paac = cache.GetAllowed(e.role, (op.OperationSymbol, type));
 
-                return paac.CandidatesAssuming(taac).Distinct().Count() > 1; //If for all the type rules that are visible the property has the same value, we don't need the type conditions
+                return paac.CandidatesAssuming(taac, inUserInterface: false).Distinct().Count() > 1; //If for all the type rules that are visible the property has the same value, we don't need the type conditions
             });
         });
     }
@@ -106,7 +106,7 @@ public static class OperationAuthLogic
         {
             var ta = TypeAuthLogic.GetAllowed(entityType);
 
-            var single = oa.CandidatesAssuming(ta).Distinct().SingleEx();
+            var single = oa.CandidatesAssuming(ta, inUserInterface).Distinct().SingleEx();
 
             return single.ToBoolean(inUserInterface);
         }

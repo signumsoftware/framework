@@ -49,6 +49,7 @@ public static class DashboardLogic
                 {"ImagePart", typeof(ImagePartEntity)},
                 {"SeparatorPart", typeof(SeparatorPartEntity)},
                 {"HealthCheckPart", typeof(HealthCheckPartEntity)},
+                {"TextPart", typeof(TextPartEntity)},
             });
 
 
@@ -312,6 +313,7 @@ public static class DashboardLogic
     {
         PropertyRouteTranslationLogic.RegisterRoute((DashboardEntity d) => d.DisplayName);
         PropertyRouteTranslationLogic.RegisterRoute((DashboardEntity d) => d.Parts[0].Title);
+        PropertyRouteTranslationLogic.RegisterRoute((TextPartEntity tp) => tp.TextContent);
     }
 
     public static List<DashboardEntity> GetEmbeddedDashboards(Type entityType)

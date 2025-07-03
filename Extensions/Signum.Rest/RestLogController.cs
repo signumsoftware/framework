@@ -13,9 +13,9 @@ public class RestLogController : ControllerBase
         {
             throw new InvalidOperationException("Replay not allowed for this RestLog");
         }
-        var oldCredentials = Database.Query<RestApiKeyEntity>().Single(r => r.User.Is(oldRequest.User));
+        var oldCredentials = Database.Query<RestApiKeyEntity>().FirstOrDefault(r => r.User.Is(oldRequest.User));
 
-        var result = await RestLogLogic.GetRestDiffResult(new HttpMethod(oldRequest.HttpMethod!), url, oldCredentials.ApiKey, oldRequest.RequestBody.Text);
+        var result = await RestLogLogic.GetRestDiffResult(new HttpMethod(oldRequest.HttpMethod!), url, oldCredentials?.ApiKey, oldRequest.RequestBody.Text);
 
         return result;
     }

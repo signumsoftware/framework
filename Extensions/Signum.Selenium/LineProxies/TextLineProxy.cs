@@ -35,7 +35,7 @@ public abstract class TextBoxBaseLineProxy : BaseLineProxy
     {
         var element = InputLocator.Find();
 
-        return element.HasClass("readonly") || element.HasClass("form-control-plaintext") || element.GetDomProperty("readonly") != null;
+        return element.HasClass("readonly") || element.HasClass("form-control-plaintext") || element.GetDomAttribute("readonly") != null || element.GetDomProperty("readonly") != null;
     }
 }
 

@@ -40,7 +40,7 @@ export namespace ConcurrentUserClient {
     });
   }
   
-  export module API {
+  export namespace API {
     export function getUsers(key: string): Promise<ConcurrentUserResponse[]> {
       return ajaxGet({ url: "/api/concurrentUser/getUsers/" + key});
     }
