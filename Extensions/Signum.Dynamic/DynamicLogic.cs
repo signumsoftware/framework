@@ -148,8 +148,11 @@ public static class DynamicLogic
         if (e == null)
             return;
 
-        if (Administrator.ExistsTable<ExceptionEntity>())
-            e.LogException();
+        Schema.Current.BeforeDatabaseAccess += () =>
+        {
+            if (Administrator.ExistsTable<ExceptionEntity>())
+                e.LogException();
+        };
 
         Console.WriteLine();
         SafeConsole.WriteLineColor(ConsoleColor.Red, "IMPORTANT!: Starting without Dynamic Entities.");
