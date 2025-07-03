@@ -148,7 +148,7 @@ public static class DynamicLogic
         if (e == null)
             return;
 
-        Schema.Current.BeforeDatabaseAccess += () =>
+        Schema.Current.Initializing += () =>
         {
             if (Administrator.ExistsTable<ExceptionEntity>())
                 e.LogException();

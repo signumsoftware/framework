@@ -2960,7 +2960,7 @@ internal class QueryBinder : ExpressionVisitor
             return ids.PreAnd(AssignColumn(colIba.TypeId.TypeColumn.Value, expIba.TypeId.TypeColumn.Value)).ToArray();
         }
 
-        throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".FormatWith(colExpression.Type.TypeName(), expression.ToString()));
+        throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".FormatWith(colExpression, expression.ToString()));
     }
 
     static ColumnAssignment AssignColumn(Expression column, Expression expression)
