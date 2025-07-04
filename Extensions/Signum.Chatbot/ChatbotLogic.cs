@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Signum.Authorization.Rules;
 using Signum.Basics;
+using Signum.Chatbot.Agents;
 using Signum.Chatbot.OpenAI;
 using Signum.DynamicQuery;
 using Signum.Engine.Maps;
@@ -15,9 +16,8 @@ using System.Runtime.CompilerServices;
 namespace Signum.Chatbot;
 
 
-public static class ChatbotLanguageModelLogic
+public static class ChatbotLogic
 {
-
     public static ResetLazy<Dictionary<Lite<ChatbotLanguageModelEntity>, ChatbotLanguageModelEntity>> LanguageModels = null!;
     public static ResetLazy<Lite<ChatbotLanguageModelEntity>?> DefaultLanguageModel = null!;
 
@@ -40,6 +40,7 @@ public static class ChatbotLanguageModelLogic
             GetConfig = config;
 
             SymbolLogic<ChatbotProviderSymbol>.Start(sb, () => Providers.Keys);
+
             sb.Include<ChatbotLanguageModelEntity>()
                 .WithSave(ChatbotLanguageModelOperation.Save)
                 .WithDelete(ChatbotLanguageModelOperation.Delete)
@@ -66,6 +67,7 @@ public static class ChatbotLanguageModelLogic
                    e.User,
                });
     
+
             sb.Include<ChatMessageEntity>()
                 .WithQuery(() => e => new
                 {
@@ -75,13 +77,36 @@ public static class ChatbotLanguageModelLogic
                     e.Message,
                 });
 
+
+            sb.Include<ChatbotAgentEntity>()
+                .WithQuery(() => e => new
+                {
+                    Entity = e,
+                    e.Id,
+                });
+
         }
     }
+
+    public static async Task<string> SumarizeTitle(ConversationHistory history, CancellationToken ct)
+    {
+        var prompt = ChatbotAgentLogic.GetAgent(DefaultAgent.QuestionSumarizer).GetPrompt(null, history);
+        StringBuilder sb = new StringBuilder();
+        await foreach (var item in AskQuestionAsync([new ChatMessage { Role = ChatMessageRole.System, Content = prompt }], history.LanguageModel, ct))
+        {
+            sb.Append(item);
+        }
+
+        var title = sb.ToString();
+        return title;
+    }
+
 
     public static void RegisterProvider(ChatbotProviderSymbol symbol, IChatbotProvider provider)
     {
         Providers.Add(symbol, provider);
     }
+
 
     public static string[] GetModelNames(ChatbotProviderSymbol provider)
     {
@@ -89,10 +114,9 @@ public static class ChatbotLanguageModelLogic
     }
 
 
-
-    public static  IAsyncEnumerable<string> AskQuestionAsync(ConversationHistory history, CancellationToken ct)
+    public static  IAsyncEnumerable<string> AskQuestionAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
     {
-        return  Providers.GetOrThrow(history.Model.Provider).AskQuestionAsync(history, ct);
+        return  Providers.GetOrThrow(model.Provider).AskQuestionAsync(messages, model, ct);
     }
 }
 
@@ -100,12 +124,25 @@ public interface IChatbotProvider
 {
     string[] GetModelNames();
     string[] GetModelVersions(string name);
-    IAsyncEnumerable<string> AskQuestionAsync(ConversationHistory history, CancellationToken ct);
+    IAsyncEnumerable<string> AskQuestionAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct);
+
+    Task<string?> GenerateSessionTitle(List<ChatMessage> messages, List<ChatMessage> chatMessages, CancellationToken ct);
 }
 
 public class ConversationHistory
 {
     public ChatSessionEntity Session; 
-    public ChatbotLanguageModelEntity Model;
-    public List<ChatMessageEntity> Chats; 
+    public ChatbotLanguageModelEntity LanguageModel;
+    public List<ChatMessageEntity> Messages; 
+
+    public List<ChatMessage> GetMessages()
+    {
+        return Messages.Select( c => new ChatMessage() { Role = c.Role, Content = c.Message}).ToList();
+    }
+}
+
+public class ChatMessage
+{
+    public ChatMessageRole Role;
+    public string Content; 
 }

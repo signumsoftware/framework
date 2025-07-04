@@ -22,12 +22,14 @@ public class ChatbotLanguageModelEntity : Entity
     public bool IsDefault { get; set; }
 }
 
+
 [AutoInit]
 public static class ChatbotLanguageModelOperation
 {
     public static readonly ExecuteSymbol<ChatbotLanguageModelEntity> Save;
     public static readonly DeleteSymbol<ChatbotLanguageModelEntity> Delete;
 }
+
 
 
 [EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
@@ -42,6 +44,7 @@ public class ChatbotProviderSymbol : Symbol
 }
 
 
+
 [AutoInit]
 public static class ChatbotProviders
 {
@@ -50,6 +53,7 @@ public static class ChatbotProviders
     public static readonly ChatbotProviderSymbol Mistral; 
     public static readonly ChatbotProviderSymbol Anthropic;
 }
+
 
 public class ChatbotConfigurationEmbedded : EmbeddedEntity
 {
@@ -64,3 +68,4 @@ public class ChatbotConfigurationEmbedded : EmbeddedEntity
     public string? MistralAPIKey{ get; set; }
 
 }
+

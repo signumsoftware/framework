@@ -47,7 +47,7 @@ export const ChatMessageEntity: Type<ChatMessageEntity> = new Type<ChatMessageEn
 export interface ChatMessageEntity extends Entities.Entity {
   Type: "ChatMessage";
   chatSession: Entities.Lite<ChatSessionEntity>;
-  dateTime: string /*DateTime*/;
+  creationDate: string /*DateTime*/;
   role: ChatMessageRole;
   message: string;
 }

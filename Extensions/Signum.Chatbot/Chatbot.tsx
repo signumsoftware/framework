@@ -7,33 +7,39 @@ import { Lite, toLite } from '../../Signum/React/Signum.Entities';
 import { ErrorBoundary } from '../../Signum/React/Components';
 import { DateTime } from 'luxon'
 import { ReadonlyBinding, TypeContext } from '@framework/Lines';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import HtmlEditor from '../Signum.HtmlEditor/HtmlEditor';
 import ReactMarkdown from "react-markdown";
-import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm'
 import 'katex/dist/katex.min.css';
 import { Navigator } from '@framework/Navigator'
 import "./ChatBot.css"
 
-const remarkPlugins = [remarkMath as any];
+const remarkPlugins = [remarkGfm as any, remarkMath as any];
 const rehypePlugins = [rehypeKatex as any];
 
-export function Chatbot() : React.JSX.Element {
+export default function Chatbot(): React.JSX.Element {
 
   const [currentSession, setCurrentSession] = useState<Lite<ChatSessionEntity> | null>();
-
-  const [answer, setAnswer] = useState<string>("");
 
   const [currentSessionTitle, setCurrentSessionTitle] = useState<string>("");
 
   const [userSessions, reloadUserSessions] = useAPIWithReload(signal => ChatbotClient.API.getUserSessions(), [currentSession?.id]);
 
+  const [answer, setAnswer] = useState<string>("");
+
   const [messages, reloadMessages] = useAPIWithReload(signal => currentSession?.id ?
     ChatbotClient.API.getMessagesBySessionId(currentSession.id) : ChatbotClient.API.getMessagesBySessionId(undefined), [currentSession?.id], { avoidReset: true });
 
-  const newQuestionRef = React.useRef<string>();
-  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [botOpen, setBotOpen] = useState<boolean>(false);
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  const newQuestionRef = React.useRef<string>();
+
+  const scrollRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -41,6 +47,7 @@ export function Chatbot() : React.JSX.Element {
     }
   }, [answer, messages]);
   const forceUpdate = useForceUpdate();
+
 
 
   function creatNewSession() {
@@ -59,6 +66,7 @@ export function Chatbot() : React.JSX.Element {
     const newQuestion = newQuestionRef.current;
     
     let visibleText = "";
+    setIsLoading(true);
 
     ChatbotClient.API.askQuestionAsync(newQuestion!, currentSession?.id, undefined).then(async r => {
       const reader = r.body?.getReader();
@@ -71,7 +79,11 @@ export function Chatbot() : React.JSX.Element {
       reloadHistoryAndNotifyWidget();
       newQuestionRef.current = undefined;
       setAnswer("");
-      
+      setIsLoading(false);
+    }).catch(error => {
+      newQuestionRef.current = undefined;
+      setAnswer("❌ Fehler beim Laden der Antwort.");
+      setIsLoading(false);
     });
   }
 
@@ -136,59 +148,78 @@ export function Chatbot() : React.JSX.Element {
   return (
 
     <div>
-      <div className="row">
-        <div className="col-sm-3">
-          <div style={{ marginTop: "7px" }}>
-            <a className="btn btn-success list-create-card-button" href="#" onClick={e => { e.preventDefault(); creatNewSession(); }}>Neue Chat Session</a>
-          </div>
 
-          <div className={"scrollContainer"} style={{ height: "300px", marginTop: "12px" }}>
-            {userSessions?.map((us, index) =>
-              <div key={index} className={`session ${activeIndex === index ? 'active' : ''}`} onClick={e => handleSessionClick(us, index)}>
-                
-                    <ReactMarkdown remarkPlugins={[remarkMath as any]} 
-                      rehypePlugins={[rehypeKatex as any]}>
-                      {us.title != null ? us.title.replace(/(?<!^)\s*(### )/g, '\n\n$1') : null}
-                    </ReactMarkdown>
-                  
-              </div>)}
-          </div>
-        </div>
-
-
-        <div className="col-sm-9">
-          <div className={"scrollContainer"} style={{ maxHeight: "600px", marginTop: "12px" }} ref={scrollRef}>
-            <div style={{ marginTop: "12px" }}>
-              <ReactMarkdown remarkPlugins={remarkPlugins}
-                rehypePlugins={rehypePlugins}>
-                {currentSessionTitle.replace(/(?<!^)\s*(### )/g, '\n\n$1')}
-              </ReactMarkdown>
-            </div>
-
-            <div style={{ marginTop: "12px" }}>
-              <CurrentSession messages={messages} reload={reloadHistoryAndNotifyWidget} />
-            </div>
-
-            <div style={{ marginTop: "12px" }}>
-              <ReactMarkdown remarkPlugins={remarkPlugins}
-                rehypePlugins={rehypePlugins} children={answer!} />
-            </div>
-
-          </div>
-
-          <div style={{ marginTop: "24px" }}>
-            
-            <TextArea value={newQuestionRef.current} className="form-control form-control-sm" onChange={e => {
-              newQuestionRef.current = e.target.value;
-            }} />
-
-          </div>
-
-          <div style={{ marginTop: "7px" }}>
-            <a className="btn btn-success list-create-card-button" href="#" onClick={e => { e.preventDefault(); handleCreateRequestAsync(); }}>Frage</a>
-          </div>
-        </div>
+      <div>
+        {botOpen ? <FontAwesomeIcon icon="rectangle-xmark" color="#aaaaaa" size="2x" onClick={() => setBotOpen(false)} style={{cursor: "pointer" }} /> :
+          <FontAwesomeIcon icon="comments" color="#aaaaaa" size="2x" onClick={() => setBotOpen(true)} style={{ cursor: "pointer" }} /> }
       </div>
+      
+
+      {botOpen ?
+        <div className="row">
+          <div className="col-sm-3">
+
+
+            <div style={{ marginTop: "7px" }}>
+              <a className="btn btn-success list-create-card-button" href="#" onClick={e => { e.preventDefault(); creatNewSession(); }}>Neue Chat Session</a>
+            </div>
+
+
+            <div className={"scrollContainer"} style={{ height: "500px", marginTop: "12px" }}>
+              {userSessions?.map((us, index) =>
+                <div key={index} className={`session ${activeIndex === index ? 'active' : ''}`} onClick={e => handleSessionClick(us, index)}>
+
+                  <ReactMarkdown remarkPlugins={remarkPlugins}
+                    rehypePlugins={rehypePlugins}
+                    children={us.title!} />
+
+                </div>)}
+            </div>
+          </div>
+
+
+          <div className="col-sm-9">
+            <div className={"scrollContainer"} style={{ maxHeight: "600px", marginTop: "12px" }} ref={scrollRef}>
+
+              <div style={{ marginTop: "12px" }}>
+                <ReactMarkdown remarkPlugins={remarkPlugins}
+                  rehypePlugins={rehypePlugins}>
+                  {currentSessionTitle}
+                </ReactMarkdown>
+              </div>
+
+              <div style={{ marginTop: "12px" }}>
+                <CurrentSession messages={messages} reload={reloadHistoryAndNotifyWidget} />
+              </div>
+
+              {isLoading && <div className="typing">Antwort wird geladen<span className="dots"></span></div>}
+
+              <div style={{ marginTop: "12px" }}>
+                <ReactMarkdown remarkPlugins={remarkPlugins}
+                  rehypePlugins={rehypePlugins} children={answer!} />
+              </div>
+
+            </div>
+
+            <div style={{ marginTop: "24px" }}>
+
+              <TextArea value={newQuestionRef.current} className="form-control form-control-sm" onChange={e => {
+                newQuestionRef.current = e.target.value;
+              }} />
+
+            </div>
+
+            {isLoading ?
+              <div style={{ marginTop: "7px" }}>
+                <a style={{ cursor:"default", opacity:"0.2"}} className="btn btn-success list-create-card-button" href="#">Frage</a>
+              </div> :
+              <div style={{ marginTop: "7px" }}>
+                <a className="btn btn-success list-create-card-button" href="#" onClick={e => { e.preventDefault(); handleCreateRequestAsync(); }}>Frage</a>
+              </div>}
+
+          </div>
+        </div> : null
+      }
     </div>
   );
 }
@@ -209,7 +240,7 @@ export function CurrentSession(p: {
 
   return (
     <div>
-      {p.messages != null ? p.messages.orderBy(c => c.dateTime).map((c, i) => {
+      {p.messages != null ? p.messages.orderBy(c => c.creationDate).map((c, i) => {
 
         var message = c.message.replace(/(?<!^)\s*(### )/g, '\n\n$1');
        
@@ -217,7 +248,7 @@ export function CurrentSession(p: {
           return (
             <div style={{marginTop: "12px" }}>
               {c.role == "User"  ? <div className="history-item-title d-flex align-items-center">
-                <span className="mx-1" title={DateTime.fromISO(c.dateTime).toFormat("DDD tt")}>{DateTime.fromISO(c.dateTime).toRelative()}</span>
+                <span className="mx-1" title={DateTime.fromISO(c.creationDate).toFormat("DDD tt")}>{DateTime.fromISO(c.creationDate).toRelative()}</span>
               </div> : null}
               <div  className={c.role == "User" ? "userMessage" : ""}>
                 <ReactMarkdown remarkPlugins={remarkPlugins}

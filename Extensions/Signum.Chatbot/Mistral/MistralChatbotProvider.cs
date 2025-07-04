@@ -20,35 +20,36 @@ public class MistralChatbotProvider : IChatbotProvider
     static string BaseUrl = "https://api.mistral.ai/v1/chat/completions";
 
 
-    public async IAsyncEnumerable<string> AskQuestionAsync(ConversationHistory history, CancellationToken ct)
+    public async IAsyncEnumerable<string> AskQuestionAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
     {
         List<ChatMessageEntity> answers = new List<ChatMessageEntity>();
 
-        Lite<ChatSessionEntity> session = history.Session.ToLite();
-
-        var configuration = session.InDB(s => s.LanguageModel).RetrieveAndRemember();
-
         var client = LeChatClient();
 
-        history.Chats.Insert(0, new ChatMessageEntity() 
-        { 
-            Role = ChatMessageRole.System, 
-            ChatSession = session, 
-            DateTime = DateTime.Now,  
-            Message = "Bitte gib alle Formeln in LaTeX - Schreibweise zurück. Beispiel: $E_0=mc^2$ also nur mit $ Schreibweise. Keine anderen Formatierungen"
-        });
+        //history.Chats.Insert(0, new ChatMessageEntity() 
+        //{ 
+        //    Role = ChatMessageRole.System, 
+        //    ChatSession = session, 
+        //    DateTime = DateTime.Now,  
+        //    Message = "Gib alle mathematischen Ausdrücke und Formeln ausschließlich in LaTeX-Schreibweise zurück, " +
+        //              "wobei jede Formel in $-Zeichen eingeschlossen sein muss. Verwende keine anderen Formatierungen oder Zeichen für die Darstellung von Formeln außer den $-Zeichen. " +
+        //              "Achte darauf, dass keine zusätzlichen Zeichen wie Backticks oder andere Formatierungen vor oder nach den $-Zeichen stehen."
+        //});
 
         var payload = new
         {
             model =  "mistral-medium-latest",
-            messages = history.Chats.Select(c => new { role = ToMistalRole(c.Role), content = c.Message }).ToArray(),
+            messages = messages.Select(c => new { role = ToMistalRole(c.Role), content = c.Content }).ToArray(),
             stream = true,
             temperature =  0.8,
             max_tokens = 1024
         };
         
         var responseClient = await client.PostAsJsonAsync(BaseUrl, payload);
+
+      
         responseClient.EnsureSuccessStatusCode();
+      
 
         var stream = await responseClient.Content.ReadAsStreamAsync();
         using var reader = new StreamReader(stream);
@@ -82,44 +83,45 @@ public class MistralChatbotProvider : IChatbotProvider
                 }
             }
         }
-
-        var answerChat = new ChatMessageEntity()
-        {
-            ChatSession = history.Session.ToLite(),
-            Message = answer,
-            DateTime = DateTime.Now,
-            Role = ChatMessageRole.Assistant,
-        }.Save();
-
-        history.Chats.Add(answerChat);
-
-        if (history.Session.Title == null)
-        {
-            payload = new
-            {
-                model = "mistral-medium-latest",
-                messages = new[]
-                {
-                    new { role = "system", content = "Fasse das Thema dieses Gesprächs in maximal 6 Wörtern als Titel zusammen." },
-                    new { role = "user", content = string.Join("\n", history.Chats.Skip(1).Select(m => m.Message)) }
-                },
-                stream = false,
-                temperature = 0.5,
-                max_tokens = 24
-            };
-
-            responseClient = await client.PostAsJsonAsync(BaseUrl, payload);
-            responseClient.EnsureSuccessStatusCode();
-
-            var result = await responseClient.Content.ReadFromJsonAsync<ChatCompletionResponse>();
-
-            history.Session.Title = result != null ? result.choices[0].message.content : null;
-
-            history.Session.Save();
-
-        }
-
     }
+
+    public async Task<string?> GenerateSessionTitle(List<ChatMessage> configMessages, List<ChatMessage> chatMessages, CancellationToken ct)
+    {
+        var client = LeChatClient();
+
+        var payload = new
+        {
+            model = "mistral-medium-latest",
+            messages = new[]
+                {
+                    new {
+                        role = "system", content = "Gib alle mathematischen Ausdrücke und Formeln ausschließlich in LaTeX-Schreibweise zurück, " +
+                                                   "wobei jede Formel in $-Zeichen eingeschlossen sein muss. Verwende keine anderen Formatierungen oder Zeichen für die Darstellung von Formeln außer den $-Zeichen. " +
+                                                   "Achte darauf, dass keine zusätzlichen Zeichen wie Backticks oder andere Formatierungen vor oder nach den $-Zeichen stehen."
+                    },
+                    new { role = "system", content = "Fasse das Thema dieses Gesprächs in maximal 6 Wörtern als Titel zusammen. Keine Zeilenumbrüche oder Absätze verwenden. Eine Formel gilt als ein Wort." },
+                    new { role = "user", content = string.Join("\n", chatMessages.Select(m => m.Content)) }
+                },
+            stream = false,
+            temperature = 0.5,
+            max_tokens = 24
+        };
+
+        var responseClient = await client.PostAsJsonAsync(BaseUrl, payload);
+
+
+        responseClient.EnsureSuccessStatusCode();
+
+        responseClient = await client.PostAsJsonAsync(BaseUrl, payload);
+        responseClient.EnsureSuccessStatusCode();
+
+        var result = await responseClient.Content.ReadFromJsonAsync<ChatCompletionResponse>();
+
+       var title = result != null ? result.choices[0].message.content : null;
+
+        return title;
+    }
+
 
     private string ToMistalRole(ChatMessageRole role) => role switch
     {
@@ -145,13 +147,14 @@ public class MistralChatbotProvider : IChatbotProvider
 
     private  HttpClient LeChatClient(bool stream = false)
     {
-        var apiKey = ChatbotLanguageModelLogic.GetConfig().MistralAPIKey;
+        var apiKey = ChatbotLogic.GetConfig().MistralAPIKey;
 
         if(apiKey.IsNullOrEmpty())
             throw new InvalidOperationException("No API Key for Mistral configured!");
 
         var client = new HttpClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
         if (stream)
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
