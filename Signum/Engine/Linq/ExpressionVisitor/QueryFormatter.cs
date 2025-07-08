@@ -641,7 +641,7 @@ internal class QueryFormatter : DbExpressionVisitor
             if (sqlFunction.Arguments[1] is SqlConstantExpression ce)
                 sb.Append((string)ce.Value!);
         }
-        else if (sqlFunction.SqlFunction == SqlFunction.AtTimeZone.ToString())
+        else if (sqlFunction.SqlFunction == (isPostgres ? SqlFunction.AtTimeZone.ToString().ToLower() : SqlFunction.AtTimeZone.ToString()))
         {
             this.Visit(sqlFunction.Object);
             sb.Append(" AT TIME ZONE ");
@@ -1121,7 +1121,6 @@ internal class QueryFormatter : DbExpressionVisitor
     {
         throw InvalidSqlExpression(nex);
     }
-
 
 
     protected override Expression VisitNewArray(NewArrayExpression na)

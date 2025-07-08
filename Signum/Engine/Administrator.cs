@@ -846,38 +846,65 @@ public static class Administrator
     }
 
 
-    public static IDisposable DisableHistoryTable<T>(bool includeMList = true)
+    public static IDisposable? DisableHistoryTable<T>(bool includeMList = true)
         where T : Entity
     {
         return DisableHistoryTable(typeof(T), includeMList);
     }
        
-    public static IDisposable DisableHistoryTable( Type type, bool includeMList = true)
+    public static IDisposable? DisableHistoryTable( Type type, bool includeMList = true)
     {
         var builder = new SqlBuilder(Connector.Current);
         var table = Schema.Current.Table(type);
         var mlist = table.TablesMList().ToArray();
-        Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(table.Name));
-        Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(table));
-        if (includeMList)
-            foreach (var item in mlist)
-            {
-                Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(item.Name));
-                Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(item));
-            }
 
-        return new Disposable(() =>
+        if (Connector.Current is PostgreSqlConnector)
         {
+            Executor.ExecuteNonQuery(builder.DisableVersionningTrigger(table.Name));
             if (includeMList)
                 foreach (var item in mlist)
                 {
-                    Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(item));
-                    Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(item));
+                    Executor.ExecuteNonQuery(builder.DisableVersionningTrigger(item.Name));
                 }
 
-            Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(table));
-            Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(table));
-        });
+            return new Disposable(() =>
+            {
+                if (includeMList)
+                    foreach (var item in mlist)
+                    {
+                        Executor.ExecuteNonQuery(builder.EnableVersionningTrigger(item.Name));
+                    }
+
+                Executor.ExecuteNonQuery(builder.EnableVersionningTrigger(table.Name));
+            });
+        }
+        else
+        {
+
+        
+            Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(table.Name));
+            Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(table));
+            if (includeMList)
+                foreach (var item in mlist)
+                {
+                    Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(item.Name));
+                    Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(item));
+                }
+
+            return new Disposable(() =>
+            {
+                if (includeMList)
+                    foreach (var item in mlist)
+                    {
+                        Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(item));
+                        Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(item));
+                    }
+
+                Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(table));
+                Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(table));
+            });
+
+        }
     }
 
     public static IDisposable WithSnapshotOrTempalateDatabase(string? templateName = null)

@@ -13,6 +13,7 @@ import { OverlayInjectedProps } from "react-bootstrap/esm/Overlay";
 import { FilterOperation, QueryDescription } from "../FindOptions";
 import { getNiceTypeName } from "../Operations/MultiPropertySetter";
 import SearchControl from "./SearchControl";
+import { Finder } from "../Finder";
 
 export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInjectedProps }): React.JSX.Element {
   var sc = p.sc;
@@ -81,7 +82,7 @@ export function FilterHelp(p: { queryDescription: QueryDescription, injected: Ov
   const [expressionExpanded, setExpressionExpanded] = React.useState(false);
   var type = p.queryDescription.columns['Entity'].niceTypeName;
   const isDefaultQuery = isTypeEntity(p.queryDescription.queryKey);
-  var sampleColumns = Object.values(p.queryDescription.columns).filter(cd => cd.key != "Id" && cd.key != "Entity");
+  var sampleColumns = Finder.getDefaultColumns(p.queryDescription);
   return (
     <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: expressionExpanded ? 900 : 600 }}>
       <Popover.Header as="h3"><strong>{FilterFieldMessage.FiltersHelp.niceToString()}</strong></Popover.Header>
