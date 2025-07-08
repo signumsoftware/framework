@@ -63,7 +63,6 @@ export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined>
         binding={p.binding}
         plugins={[
           new LinkExtension(),
-          new BasicCommandsExtensions(),
           new ImageExtension(new InlineImageConverter())
         ]} />
     </ErrorBoundary>
@@ -88,7 +87,6 @@ export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?
           small
           plugins={[
             new LinkExtension(),
-            new BasicCommandsExtensions(),
             new ImageExtension(new InlineImageConverter())
           ]} />
       </ErrorBoundary>

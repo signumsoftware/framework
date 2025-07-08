@@ -32,6 +32,7 @@ public class ResetLazy<T>: IResetLazy
 {
     class Box
     {
+        public DateTimeOffset LoadedOn = DateTimeOffset.UtcNow; 
         public Box(T value)
         {
             this.Value = value;
@@ -57,7 +58,6 @@ public class ResetLazy<T>: IResetLazy
     public int Hits;
     public int Invalidations;
     public TimeSpan SumLoadtime;
-    public DateTimeOffset? LoadedOn; 
 
     object syncLock = new();
 
@@ -70,63 +70,63 @@ public class ResetLazy<T>: IResetLazy
         get { return declaringType; }
     }
 
-    public T Value
+    public T Value => GetBox().Value;
+
+    public T GetValue(out DateTimeOffset loadedOn)
     {
-        get
+        var box = GetBox();
+        loadedOn = box.LoadedOn;
+        return box.Value;
+    }
+
+    private Box GetBox()
+    {
+        var b1 = this.box;
+        if (b1 != null)
         {
-            var b1 = this.box;
-            if (b1 != null)
-            {
-                Interlocked.Increment(ref Hits);
-                return b1.Value;
-            }
+            Interlocked.Increment(ref Hits);
+            return b1;
+        }
 
-            if (mode == LazyThreadSafetyMode.ExecutionAndPublication)
+        if (mode == LazyThreadSafetyMode.ExecutionAndPublication)
+        {
+            lock (syncLock)
             {
-                lock (syncLock)
+                var b2 = box;
+                if (b2 != null)
+                    return b2;
+
+                if (this.loading == true)
+                    throw new InvalidOperationException("Cyclic dependency detected loading " + this.GetType());
+
+                this.loading = true;
+                try
                 {
-                    var b2 = box;
-                    if (b2 != null)
-                        return b2.Value;
-
-                    if (this.loading == true)
-                        throw new InvalidOperationException("Cyclic dependency detected loading " + this.GetType());
-
-                    this.loading = true;
-                    try
-                    {
-                        this.box = new Box(InternalLoaded());
-                    }
-                    finally
-                    {
-                        this.loading = false;
-                    }
-
-                    return box.Value;
+                    this.box = new Box(InternalLoaded());
                 }
-            }
-
-            else if (mode == LazyThreadSafetyMode.PublicationOnly)
-            {
-                var newValue = InternalLoaded(); 
-
-                lock (syncLock)
+                finally
                 {
-                    var b2 = box;
-                    if (b2 != null)
-                        return b2.Value;
-
-                    this.box = new Box(newValue);
-
-                    return box.Value;
+                    this.loading = false;
                 }
+
+                return box;
             }
-            else
+        }
+
+        else if (mode == LazyThreadSafetyMode.PublicationOnly)
+        {
+            var newValue = InternalLoaded();
+
+            lock (syncLock)
             {
-                var b = new Box(InternalLoaded());
-                this.box = b;
-                return b.Value;
+                return box ??= new Box(newValue);
             }
+        }
+        else
+        {
+            var b = new Box(InternalLoaded());
+            this.box = b;
+            return b;
         }
     }
 
@@ -134,7 +134,6 @@ public class ResetLazy<T>: IResetLazy
     {
         Stopwatch sw = Stopwatch.StartNew();
         var result = valueFactory();
-        LoadedOn = DateTimeOffset.UtcNow;
         sw.Stop();
         this.SumLoadtime += sw.Elapsed;
         Interlocked.Increment(ref Loads);
@@ -160,13 +159,11 @@ public class ResetLazy<T>: IResetLazy
             {
                 this.box = null;
                 this.loading = false;
-                this.LoadedOn = null;
             }
         }
         else
         {
             this.box = null;
-            this.LoadedOn = null;
         }
 
         Interlocked.Increment(ref Invalidations);
