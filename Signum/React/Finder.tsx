@@ -370,9 +370,15 @@ export namespace Finder {
     return Dic.simplify(result)!;
   }
 
+  export function getDefaultColumns(qd: QueryDescription): QueryToken[] {
+    return Dic.getValues(qd.columns)
+      .filter(a => a.fullKey != "Entity" && a.queryTokenType != "Aggregate" && a.queryTokenType != "TimeSeries");
+
+  }
+
   export function mergeColumns(qd: QueryDescription, mode: ColumnOptionsMode, columnOptions: ColumnOption[]): ColumnOption[] {
 
-    var columns = Dic.getValues(qd.columns).filter(cd => cd.key != "Entity" && cd.queryTokenType != "Aggregate");
+    var columns = getDefaultColumns(qd);
 
     switch (mode) {
       case "Add":
@@ -418,7 +424,7 @@ export namespace Finder {
       hiddenColumn: c.hiddenColumn,
     }) as ColumnOption;
 
-    var ideal = Dic.getValues(qd.columns).filter(a => a.key != "Entity" && a.queryTokenType != "Aggregate");
+    var ideal = Finder.getDefaultColumns(qd);
 
     current = current.filter(a => a.token != null);
 
@@ -1953,8 +1959,8 @@ export namespace Finder {
       {
         let dt = DateTime.fromISO(st.startDate!);
         while (dt < endDate) {
-          dt = dt.plus({ [st.timeSeriesUnit!.toLowerCase()]: st.timeSeriesStep });
           dates.push(dt.toISO()!);
+          dt = dt.plus({ [st.timeSeriesUnit!.toLowerCase()]: st.timeSeriesStep });
         }
       }
 

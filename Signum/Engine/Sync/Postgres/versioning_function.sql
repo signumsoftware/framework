@@ -17,10 +17,6 @@ DECLARE
 BEGIN
   -- version 0.2.0
 
-   RAISE TRIGGER_PROTOCOL_VIOLATED USING
-    MESSAGE = 'just a check';
-
-
   IF TG_WHEN != 'BEFORE' OR TG_LEVEL != 'ROW' THEN
     RAISE TRIGGER_PROTOCOL_VIOLATED USING
     MESSAGE = 'function "versioning" must be fired BEFORE ROW';
