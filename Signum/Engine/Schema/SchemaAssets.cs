@@ -194,10 +194,8 @@ public class SchemaAssets
                createNew: (name, newProc) => newProc.BeforeTables ? newProc.CreateSql() : null,
                removeOld: null,
                mergeBoth: (name, newProc, oldProc) => Clean(newProc.ProcedureCodeAndArguments) == Clean("(" + oldProc.After("(")) ? null :
-               new[]{
-                   newProc.DropSql(),
-                   newProc.BeforeTables ? newProc.CreateSql() : null,
-               }.Combine(Spacing.Double));
+                   newProc.BeforeTables ? newProc.AlterSql() : null
+                );
         }
         else
         {
@@ -209,7 +207,7 @@ public class SchemaAssets
                removeOld: null,
                mergeBoth: (name, newProc, oldProc) => Clean(newProc.ProcedureCodeAndArguments) == Clean("(" + oldProc.After("(")) ? null :
                newProc.BeforeTables ? null :
-               newProc.CreateSql()
+               newProc.AlterSql()
            );
         }
     }
@@ -249,6 +247,11 @@ public class SchemaAssets
 
         public SqlPreCommandSimple AlterSql()
         {
+            if(Connector.Current is PostgreSqlConnector)
+            {
+                return new SqlPreCommandSimple("CREATE OR REPLACE {0} {1} ".FormatWith(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true, GoAfter = true };
+            }
+
             return new SqlPreCommandSimple("ALTER {0} {1} ".FormatWith(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true, GoAfter = true };
         }
 

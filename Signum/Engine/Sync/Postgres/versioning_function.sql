@@ -17,6 +17,10 @@ DECLARE
 BEGIN
   -- version 0.2.0
 
+   RAISE TRIGGER_PROTOCOL_VIOLATED USING
+    MESSAGE = 'just a check';
+
+
   IF TG_WHEN != 'BEFORE' OR TG_LEVEL != 'ROW' THEN
     RAISE TRIGGER_PROTOCOL_VIOLATED USING
     MESSAGE = 'function "versioning" must be fired BEFORE ROW';
@@ -60,15 +64,15 @@ BEGIN
 
   IF TG_OP = 'UPDATE' OR TG_OP = 'DELETE' THEN
     -- Ignore rows already modified in this transaction
-    transaction_info := txid_current_snapshot();
-    IF OLD.xmin::text >= (txid_snapshot_xmin(transaction_info) % (2^32)::bigint)::text
-    AND OLD.xmin::text <= (txid_snapshot_xmax(transaction_info) % (2^32)::bigint)::text THEN
-      IF TG_OP = 'DELETE' THEN
-        RETURN OLD;
-      END IF;
+    --transaction_info := txid_current_snapshot();
+    --IF OLD.xmin::text >= (txid_snapshot_xmin(transaction_info) % (2^32)::bigint)::text
+    --AND OLD.xmin::text <= (txid_snapshot_xmax(transaction_info) % (2^32)::bigint)::text THEN
+    --  IF TG_OP = 'DELETE' THEN
+    --    RETURN OLD;
+    --  END IF;
 
-      RETURN NEW;
-    END IF;
+    --  RETURN NEW;
+    --END IF;
 
     SELECT current_setting('server_version_num')::integer
     INTO pg_version;

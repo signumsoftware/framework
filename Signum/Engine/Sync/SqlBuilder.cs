@@ -106,6 +106,16 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         return new SqlPreCommandSimple($"DROP TRIGGER {triggerName} ON {tableName};");
     }
 
+    public SqlPreCommandSimple DisableVersionningTrigger(ObjectName tableName)
+    {
+        return new SqlPreCommandSimple($"ALTER TABLE {tableName} DISABLE TRIGGER versioning_trigger;");
+    }
+
+    public SqlPreCommandSimple EnableVersionningTrigger(ObjectName tableName)
+    {
+        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ENABLE TRIGGER versioning_trigger;");
+    }
+
 
     public SqlPreCommand DropTable(DiffTable diffTable)
     {
