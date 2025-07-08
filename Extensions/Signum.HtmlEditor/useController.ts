@@ -63,7 +63,10 @@ export const useController = ({
       return defaultPlugins;
     }
 
-    return [...defaultPlugins, ...plugins];
+    const result = [...defaultPlugins, ...plugins];
+    result.toObject(a => a.constructor.name); // To throw if there are duplicates
+
+    return result;
   }, [plugins, controller]);
 
   React.useEffect(() => {

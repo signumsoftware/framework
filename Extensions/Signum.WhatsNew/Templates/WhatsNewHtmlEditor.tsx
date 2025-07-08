@@ -26,7 +26,6 @@ export default function WhatsNewHtmlEditor(p: {
     <ErrorBoundary>
       <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} plugins={[
         new LinkExtension(),
-        new BasicCommandsExtensions(),
         new ImageExtension(new AttachmentImageConverter())
       ]} />
     </ErrorBoundary>
@@ -42,7 +41,6 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
       <ErrorBoundary>
         <HtmlEditor readOnly binding={binding} small plugins={[
           new LinkExtension(),
-          new BasicCommandsExtensions(),
           new ImageExtension(new AttachmentImageConverter())
         ]} />
       </ErrorBoundary>
