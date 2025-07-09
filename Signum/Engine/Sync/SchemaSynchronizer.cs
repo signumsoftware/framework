@@ -861,7 +861,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
         var defaultValue =
             column.DbType.IsNumber() ? "0" :
             column.DbType.IsString() ? "''" :
-            column.DbType.IsDate() ? "GetDate()" :
+            column.DbType.IsDate() ? (Schema.Current.Settings.IsPostgres ?  "now()" : "GetDate()") :
             column.DbType.IsGuid() ? "'00000000-0000-0000-0000-000000000000'" :
             "?";
 
@@ -898,7 +898,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             column.DbType.IsBoolean() ? (Schema.Current.Settings.IsPostgres ? "false" : "0") :
             column.DbType.IsNumber() ? "0" :
             column.DbType.IsString() ? "''" :
-            column.DbType.IsDate() ? "GetDate()" :
+            column.DbType.IsDate() ? (Schema.Current.Settings.IsPostgres ? "now()" : "GetDate()") :
             column.DbType.IsGuid() ? "NEWID()" :
         column.DbType.IsTime() ? "'00:00'" :
         column.DbType.HasPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), 'infinity', '[)')" :

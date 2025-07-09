@@ -58,6 +58,7 @@ export namespace DashboardClient {
 
 
   export const partRenderers: { [typeName: string]: PartRenderer<IPartEntity> } = {};
+  export const GlobalVariables: Map<string, () => string> = new Map<string, () => string>();
 
   export function start(options: { routes: RouteObject[] }): void {
 
@@ -98,6 +99,7 @@ export namespace DashboardClient {
     registerRenderer(TextPartEntity, {
       component: () => import('./View/TextPart').then(a => a.default),
       defaultIcon: () => ({ icon: "code", iconColor: "#000000" }),
+      withPanel: () => false,
     });
 
     registerRenderer(LinkListPartEntity, {
@@ -173,6 +175,8 @@ export namespace DashboardClient {
         color: "info"
       }
     ));
+
+    GlobalVariables.set('UserName', () => AuthClient.currentUser().userName);
   };
 
 
@@ -281,7 +285,6 @@ declare module '@framework/Signum.Entities' {
     embeddedDashboards?: DashboardEntity[];
   }
 }
-
 
 export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo[], qd: QueryDescription) => void }): React.JSX.Element | null {
 

@@ -376,11 +376,6 @@ public static class QueryUtils
             return token.SubTokensInternal(options);
     }
 
-    public static bool IsColumnToken(string tokenString)
-    {
-        return !tokenString.Contains('.') && tokenString != "Entity";
-    }
-
     public static QueryToken Parse(string tokenString, QueryDescription qd, SubTokensOptions options)
     {
         if (string.IsNullOrEmpty(tokenString))
@@ -394,12 +389,12 @@ public static class QueryUtils
         QueryToken? result = SubToken(null, qd, options, firstPart);
 
         if (result == null)
-            throw new FormatException("Column {0} not found on query {1}".FormatWith(firstPart, QueryUtils.GetKey(qd.QueryName)));
+            throw new FormatException("Column '{0}' not found on query {1}".FormatWith(firstPart, QueryUtils.GetKey(qd.QueryName)));
 
         foreach (var part in parts.Skip(1))
         {
             var newResult = SubToken(result, qd, options, part);
-            result = newResult ?? throw new FormatException("Token with key '{0}' not found on {1} of query {2}".FormatWith(part, result.FullKey(), QueryUtils.GetKey(qd.QueryName)));
+            result = newResult ?? throw new FormatException("Token with key '{0}' not found on token '{1}' of query {2}".FormatWith(part, result.FullKey(), QueryUtils.GetKey(qd.QueryName)));
         }
 
         return result;

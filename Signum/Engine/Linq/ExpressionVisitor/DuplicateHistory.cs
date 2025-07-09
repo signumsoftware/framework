@@ -46,10 +46,10 @@ internal class DuplicateHistory : DbExpressionVisitor
                 var where = table.SystemTime switch
                 {
                     SystemTime.All => null,
-                    SystemTime.AsOf asOf => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { GetTablePeriod(), Expression.Constant(asOf.DateTime) }),
+                    SystemTime.AsOf asOf => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { GetTablePeriod(), Expression.Constant(asOf.DateTime.ToUniversalTime()) }),
                     SystemTime.AsOfExpression asOf => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { GetTablePeriod(), asOf.Expression }),
-                    SystemTime.Between b => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Overlap, new Expression[] { tstzrange(b.StartDateTime, b.EndtDateTime), GetTablePeriod() }),
-                    SystemTime.ContainedIn ci => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { tstzrange(ci.StartDateTime, ci.EndtDateTime), GetTablePeriod() }),
+                    SystemTime.Between b => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Overlap, new Expression[] { tstzrange(b.StartDateTime.ToUniversalTime(), b.EndtDateTime.ToUniversalTime()), GetTablePeriod() }),
+                    SystemTime.ContainedIn ci => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { tstzrange(ci.StartDateTime.ToUniversalTime(), ci.EndtDateTime.ToUniversalTime()), GetTablePeriod() }),
                     _ => throw new UnexpectedValueException(table.SystemTime),
                 };
 
