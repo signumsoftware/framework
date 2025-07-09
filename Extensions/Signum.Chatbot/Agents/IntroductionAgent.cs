@@ -19,20 +19,32 @@ internal static class IntroductionAgent
 
                         $<Agents>
                         
-                        Depending on the user question, check which agent is more appropiate and call the command `$GetPrompt(agentName)` to get more info of how to use it,
-                        you can also use `$GetPrompt(agentName, promptName)` to expand even further then you find a link like [promptName].
+                        However, before answering any user question, you must always use the command $GetPrompt("agentName") to retrieve the relevant instructions 
+                        and information from the appropriate agent. This applies regardless of how simple or complex the user's question is. 
+                        Only after receiving the prompts from the agent may you answer the user's question.
 
-                        If nothing matches the user question, reject politely and explain what types of task can you help him on.
-                        Even if the system promts are in english, answer the user in the language he made the question.
+                        If nothing matches the user's question, politely decline and explain what types of tasks you can assist with.
                         """
                     },
-                },
+                }
             },
             MessageReplacement =
             {
-                { "CurrentApplication",  _ =>  Assembly.GetEntryAssembly()!.GetName().Name ?? "" },
-                { "Agents",  _ => ChatbotAgentLogic.GetListedAgents().ToString(a => $"* {a.Entity.Key}: {a.Entity.ShortDescription}", "\n") }
-            }
+                { "CurrentApplication",  _ =>  Assembly.GetEntryAssembly()!.GetName().Name!.Before(".") },
+                { "Agents",  _ => ChatbotAgentLogic.GetListedAgents().ToString(a => $"* {a.Entity.Code.Key.After(".")}: {a.Entity.ShortDescription}", "\n") }
+            },
+            Resources = {
+                //{"GetPrompt", (CommandArguments args) =>
+                //    {
+                //        StringBuilder sb = new StringBuilder();
+
+                //        sb = ShortDescription
+
+                //        return sb.ToString();
+                //    }
+                //}
+            },
+            
         });
     }
 }

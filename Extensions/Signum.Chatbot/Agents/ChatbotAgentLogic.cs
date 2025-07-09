@@ -2,14 +2,17 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Signum.Authorization;
 using Signum.Utilities;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Signum.Chatbot.Agents;
 
 public static class ChatbotAgentLogic
 {
-    public static Dictionary<ChatbotAgentTypeSymbol, ChatbotAgentCode> AgentCodes = new Dictionary<ChatbotAgentTypeSymbol, ChatbotAgentCode>();
-    public static ResetLazy<Dictionary<ChatbotAgentTypeSymbol, ChatbotAgentEntity>> AgentEntities;
+    public static Dictionary<ChatbotAgentCodeSymbol, ChatbotAgentCode> AgentCodes = new Dictionary<ChatbotAgentCodeSymbol, ChatbotAgentCode>();
+    public static ResetLazy<Dictionary<ChatbotAgentCodeSymbol, ChatbotAgentEntity>> AgentEntities;
+
+    public static ResetLazy<Dictionary<string, Func<CommandArguments, CancellationToken, Task<string>>>> AllResources;
 
 
     public static void Start(SchemaBuilder sb)
@@ -24,20 +27,24 @@ public static class ChatbotAgentLogic
                 {
                     Entity = e,
                     e.Id,
-                    e.Key,
+                    e.Code,
                     e.ShortDescription,
                 });
 
-            SymbolLogic<ChatbotAgentTypeSymbol>.Start(sb, () => AgentCodes.Keys);
+            SymbolLogic<ChatbotAgentCodeSymbol>.Start(sb, () => AgentCodes.Keys);
 
-            AgentEntities = sb.GlobalLazy(() => Database.Query<ChatbotAgentEntity>().ToDictionaryEx(a => a.Key), new InvalidateWith(typeof(ChatbotAgentEntity)));
+            AgentEntities = sb.GlobalLazy(() => Database.Query<ChatbotAgentEntity>().ToDictionaryEx(a => a.Code), new InvalidateWith(typeof(ChatbotAgentEntity)));
+
+            AllResources = new ResetLazy<Dictionary<string, Func<CommandArguments, CancellationToken, Task<string>>>>(() => AgentCodes.SelectMany(a => a.Value.Resources).ToDictionaryEx(StringComparer.InvariantCultureIgnoreCase));
 
             IntroductionAgent.Register();
             SumarizerAgent.Register();
+            SienceAgent.Register();
+            SeachControlAgent.Register();
         }
     }
 
-    public static ChatbotAgent GetAgent(ChatbotAgentTypeSymbol symbol)
+    public static ChatbotAgent GetAgent(ChatbotAgentCodeSymbol symbol)
     {
         CreateAgentEntitiesIfNecessary();
 
@@ -57,6 +64,7 @@ public static class ChatbotAgentLogic
         .ToList();
     }
 
+
     static object lockKey = new object();
     private static void CreateAgentEntitiesIfNecessary()
     {
@@ -70,16 +78,64 @@ public static class ChatbotAgentLogic
                     missing.Select(a =>
                     {
                         var entity = a.Value.CreateDefaultEntity();
-                        entity.Key = a.Key;
+                        entity.Code = a.Key;
                         return entity;
                     }).SaveList();
                 }
         }
     }
 
-    public static void RegisterAgent(ChatbotAgentTypeSymbol agentSymbol, ChatbotAgentCode agentCode)
+    public static void RegisterAgent(ChatbotAgentCodeSymbol agentSymbol, ChatbotAgentCode agentCode)
     {
         AgentCodes.Add(agentSymbol, agentCode);
+        AllResources.Reset();
+    }
+
+
+    public async static Task<string> EvaluateCommand(string answer, CancellationToken token)
+    {
+        string commandName = string.Empty;
+        try
+        {
+            commandName = answer.After("$").Before("(");
+
+            var args = new CommandArguments(answer.After("(").Before(")"));
+
+            if (commandName == "GetPrompt")
+                return await GetPrompt(args);
+
+            var action = AllResources.Value.TryGetC(commandName);
+
+            if (action == null)
+                throw new InvalidOperationException("Unknown command: " + commandName);
+
+            return await action(args, token);
+
+        }
+        catch (Exception e)
+        {
+            if(commandName.HasText())
+                return $"Error evaluating command '{commandName}'!\n{e.GetType().Name}: {e.Message}";
+            else
+                return $"Error evaluating command!\n{e.GetType().Name}: {e.Message}";
+        }
+    }
+
+    private static Task<string> GetPrompt(CommandArguments args)
+    {
+        var agentName = args.GetArgument<string>(0);
+        var promptName = args.TryArgumentC<string>(1);
+
+        var key = AgentCodes.Keys.FirstOrDefault(a =>
+        string.Equals(a.Key, agentName, StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(a.Key.After("."), agentName, StringComparison.OrdinalIgnoreCase));
+
+        if (key == null)
+            throw new InvalidOperationException($"No Agent '{agentName}' found");
+
+        var result = GetAgent(key).GetPrompt(promptName);
+
+        return Task.FromResult(result);
     }
 }
 
@@ -89,17 +145,17 @@ public class ChatbotAgentCode
     public Func<ChatbotAgentEntity> CreateDefaultEntity;
     public Func<bool> IsListed;
     public Dictionary<string, Func<object?, string>> MessageReplacement = new Dictionary<string, Func<object?, string>>();
-    public Dictionary<string, Func<Arguments, string>> Resources = new Dictionary<string, Func<Arguments, string>>();
-    public Dictionary<string, Func<Arguments, string>> Tools = new Dictionary<string, Func<Arguments, string>>();
+    public Dictionary<string, Func<CommandArguments, CancellationToken, Task<string>>> Resources = new Dictionary<string, Func<CommandArguments, CancellationToken, Task<string>>>();
+    //public Dictionary<string, Func<Arguments, Task<string>>> Tools = new Dictionary<string, Func<Arguments, Task<string>>>();
 }
 
 public class ChatbotAgent
 {
-    public ChatbotAgentTypeSymbol Symbol;
+    public ChatbotAgentCodeSymbol Symbol;
     public ChatbotAgentCode Code;
     public ChatbotAgentEntity Entity;
 
-    public ChatbotAgent(ChatbotAgentTypeSymbol symbol, ChatbotAgentCode code, ChatbotAgentEntity entity)
+    public ChatbotAgent(ChatbotAgentCodeSymbol symbol, ChatbotAgentCode code, ChatbotAgentEntity entity)
     {
         Symbol = symbol;
         Code = code;
@@ -110,7 +166,7 @@ public class ChatbotAgent
 
     public string GetPrompt(string? name, object? context = null)
     {
-        var prompt = Entity.ChatbotPrompts.SingleOrDefault(a => a.PromptName == name);
+        var prompt = Entity.ChatbotPrompts.SingleOrDefault(a => a.PromptName.DefaultToNull() == name.DefaultToNull());
 
         if (prompt == null)
             throw new InvalidOperationException($"No prompt with name '{0}'. Did you mean {Entity.ChatbotPrompts.CommaOr(a => a.PromptName)}");
@@ -120,8 +176,29 @@ public class ChatbotAgent
     }
 }
 
-public class Arguments : Dictionary<string, string>
+public class CommandArguments
 {
+    public string RawText;
+    public JsonElement JsonArray; 
 
+    public CommandArguments(string rawText)
+    {
+        RawText = rawText;
+        JsonArray = JsonDocument.Parse("[" + rawText + "]").RootElement;
+    }
+
+    public T GetArgument<T>(int index)
+    {
+        return JsonArray[index].ToObject<T>();
+    }
+
+    public T? TryArgumentC<T>(int index)
+        where T : class
+    {
+        if (index >= JsonArray.GetArrayLength())
+            return null;
+
+        return JsonArray[index].ToObject<T>();
+    }
 
 }

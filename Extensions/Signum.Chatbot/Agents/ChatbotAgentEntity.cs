@@ -3,7 +3,7 @@ namespace Signum.Chatbot.Agents;
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class ChatbotAgentEntity : Entity
 {
-    public ChatbotAgentTypeSymbol Key { get; set; }
+    public ChatbotAgentCodeSymbol Code { get; set; }
 
     [StringLengthValidator(Max = 100)]
     public string ShortDescription { get; set; }
@@ -11,7 +11,7 @@ public class ChatbotAgentEntity : Entity
     public MList<ChatbotAgentPromptEmbedded> ChatbotPrompts { get; set; }
 
     [AutoExpressionField]
-    public override string ToString() => As.Expression(()  => Key.ToString());
+    public override string ToString() => As.Expression(()  => Code.ToString());
 }
 
 
@@ -44,11 +44,11 @@ public enum ConfigChatbotType
 
 
 [EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
-public class ChatbotAgentTypeSymbol : Symbol
+public class ChatbotAgentCodeSymbol : Symbol
 {
-    private ChatbotAgentTypeSymbol() { }
+    private ChatbotAgentCodeSymbol() { }
 
-    public ChatbotAgentTypeSymbol(Type declaringType, string fieldName) :
+    public ChatbotAgentCodeSymbol(Type declaringType, string fieldName) :
         base(declaringType, fieldName)
     {
     }
@@ -57,8 +57,9 @@ public class ChatbotAgentTypeSymbol : Symbol
 [AutoInit]
 public static class DefaultAgent
 {
-    public static readonly ChatbotAgentTypeSymbol Introduction; 
-    public static readonly ChatbotAgentTypeSymbol QuestionSumarizer;
-    public static readonly ChatbotAgentTypeSymbol SearchControl;
+    public static readonly ChatbotAgentCodeSymbol Introduction; 
+    public static readonly ChatbotAgentCodeSymbol QuestionSumarizer;
+    public static readonly ChatbotAgentCodeSymbol Sience;
+    public static readonly ChatbotAgentCodeSymbol SearchControl;
 }
 

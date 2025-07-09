@@ -3,6 +3,7 @@ using Signum.Authorization.Rules;
 using Signum.Basics;
 using Signum.Chatbot.Agents;
 using Signum.Chatbot.OpenAI;
+using Signum.CodeGeneration;
 using Signum.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -11,6 +12,7 @@ using Signum.Utilities;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 
 namespace Signum.Chatbot;
@@ -118,6 +120,12 @@ public static class ChatbotLogic
     {
         return  Providers.GetOrThrow(model.Provider).AskQuestionAsync(messages, model, ct);
     }
+
+    public static Task<string?> GetAgent(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
+    {
+        return Providers.GetOrThrow(model.Provider).GetAgentAsync(messages, model, ct);
+    }
+
 }
 
 public interface IChatbotProvider
@@ -126,7 +134,7 @@ public interface IChatbotProvider
     string[] GetModelVersions(string name);
     IAsyncEnumerable<string> AskQuestionAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct);
 
-    Task<string?> GenerateSessionTitle(List<ChatMessage> messages, List<ChatMessage> chatMessages, CancellationToken ct);
+    Task<string?> GetAgentAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct);
 }
 
 public class ConversationHistory

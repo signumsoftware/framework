@@ -8,10 +8,15 @@ import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 
 
+export const ChatbotAgentCodeSymbol: Type<ChatbotAgentCodeSymbol> = new Type<ChatbotAgentCodeSymbol>("ChatbotAgentCode");
+export interface ChatbotAgentCodeSymbol extends Basics.Symbol {
+  Type: "ChatbotAgentCode";
+}
+
 export const ChatbotAgentEntity: Type<ChatbotAgentEntity> = new Type<ChatbotAgentEntity>("ChatbotAgent");
 export interface ChatbotAgentEntity extends Entities.Entity {
   Type: "ChatbotAgent";
-  key: ChatbotAgentTypeSymbol;
+  code: ChatbotAgentCodeSymbol;
   shortDescription: string;
   chatbotPrompts: Entities.MList<ChatbotAgentPromptEmbedded>;
 }
@@ -28,14 +33,10 @@ export interface ChatbotAgentPromptEmbedded extends Entities.EmbeddedEntity {
   content: string;
 }
 
-export const ChatbotAgentTypeSymbol: Type<ChatbotAgentTypeSymbol> = new Type<ChatbotAgentTypeSymbol>("ChatbotAgentType");
-export interface ChatbotAgentTypeSymbol extends Basics.Symbol {
-  Type: "ChatbotAgentType";
-}
-
 export namespace DefaultAgent {
-  export const Introduction : ChatbotAgentTypeSymbol = registerSymbol("ChatbotAgentType", "DefaultAgent.Introduction");
-  export const QuestionSumarizer : ChatbotAgentTypeSymbol = registerSymbol("ChatbotAgentType", "DefaultAgent.QuestionSumarizer");
-  export const SearchControl : ChatbotAgentTypeSymbol = registerSymbol("ChatbotAgentType", "DefaultAgent.SearchControl");
+  export const Introduction : ChatbotAgentCodeSymbol = registerSymbol("ChatbotAgentCode", "DefaultAgent.Introduction");
+  export const QuestionSumarizer : ChatbotAgentCodeSymbol = registerSymbol("ChatbotAgentCode", "DefaultAgent.QuestionSumarizer");
+  export const Sience : ChatbotAgentCodeSymbol = registerSymbol("ChatbotAgentCode", "DefaultAgent.Sience");
+  export const SearchControl : ChatbotAgentCodeSymbol = registerSymbol("ChatbotAgentCode", "DefaultAgent.SearchControl");
 }
 

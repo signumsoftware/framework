@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using Signum.Authorization;
 using Signum.Chatbot.Agents;
+using Signum.Utilities;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Security;
@@ -53,7 +54,7 @@ public class ChatbotController : Controller
         ConversationHistory history;
         if (sessionID.HasText() == false || sessionID == "undefined") 
         {
-            await resp.WriteAsync(UICommand("SessionId", session.Id.ToString()), ct);
+            await resp.WriteAsync(UINotification("SessionId", session.Id.ToString()), ct);
             await resp.Body.FlushAsync();
             history = new ConversationHistory
             {
@@ -89,28 +90,65 @@ public class ChatbotController : Controller
 
         history.Messages.Add(userQuestion);
 
-        await resp.WriteAsync(UICommand("QuestionId", userQuestion.Id.ToString()), ct);
+        await resp.WriteAsync(UINotification("QuestionId", userQuestion.Id.ToString()), ct);
         await resp.Body.FlushAsync();
 
-        string answer = "";
 
-
-        await foreach(var item in ChatbotLogic.AskQuestionAsync(history.GetMessages(), history.LanguageModel, ct))
+        string lastAnswer;
+        while (true)
         {
-            await resp.WriteAsync(item);
-            await resp.Body.FlushAsync();
+            lastAnswer = "";
+            bool isCommand = false;
+            await foreach (var item in ChatbotLogic.AskQuestionAsync(history.GetMessages(), history.LanguageModel, ct))
+            {
+                lastAnswer += item;
+                if (lastAnswer.Length == 0 && item.StartsWith("$"))
+                {
+                    isCommand = true;
+                    UINotification("InternalCommand");
+                }
+                else
+                {
+                    UINotification("FinalAnswer");
+                }
 
-            answer += item;
+                await resp.WriteAsync(item);
+                await resp.Body.FlushAsync();
+            }
+
+            if (!isCommand)
+                break;
+
+            var command = new ChatMessageEntity()
+            {
+                ChatSession = history.Session.ToLite(),
+                Message = lastAnswer,
+                Role = ChatMessageRole.Assistant,
+                IsCommand = isCommand,
+            }.Save();
+
+            history.Messages.Add(command);
+
+            if (!isCommand)
+                break;
+
+            UINotification("InternalResult");
+
+            string response = await ChatbotAgentLogic.EvaluateCommand(lastAnswer, ct);
+
+            var pendingResponse  = resp.WriteAsync(response);
+
+            var responseMsg = new ChatMessageEntity()
+            {
+                ChatSession = history.Session.ToLite(),
+                Message = response,
+                Role = ChatMessageRole.Tool,
+            }.Save();
+
+            history.Messages.Add(responseMsg);
+
+            await pendingResponse;
         }
-
-        var answerChat = new ChatMessageEntity()
-        {
-            ChatSession = history.Session.ToLite(),
-            Message = answer,
-            Role = ChatMessageRole.Assistant,
-        }.Save();
-
-        history.Messages.Add(answerChat);
 
         if (history.Session.Title == null)
         {
@@ -119,14 +157,17 @@ public class ChatbotController : Controller
             {
                 history.Session.Title = title;
                 history.Session.Save();
-                await resp.WriteAsync(UICommand("SessionTitle", title), ct);
+                await resp.WriteAsync(UINotification("SessionTitle", title), ct);
             }
         }
     }
 
    
-    private string UICommand(string commandName, string payload)
+    private string UINotification(string commandName, string? payload = null)
     {
+        if (payload == null)
+            return "§$%" + commandName + "\n";
+
         if (payload.Contains("\n"))
             throw new InvalidOperationException("Payload has newlines!");
 

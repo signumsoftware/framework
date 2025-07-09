@@ -49,6 +49,7 @@ export interface ChatMessageEntity extends Entities.Entity {
   chatSession: Entities.Lite<ChatSessionEntity>;
   creationDate: string /*DateTime*/;
   role: ChatMessageRole;
+  isCommand: boolean;
   message: string;
 }
 
