@@ -231,7 +231,17 @@ internal class DbExpressionNominator : DbExpressionVisitor
             }
 
             if (args.All(a => Has(a)))
+            {
+                if (nex.Constructor!.DeclaringType!.IsInstantiationOf(typeof(NpgsqlTypes.NpgsqlRange<>)))
+                {
+                    if (!(nex.Arguments is [Expression lowerBound, Expression upperBound]))
+                        throw new InvalidOperationException("NpgsqlRange constructor must have 2 arguments: lowerBound, upperBound");
+
+                    return Add(new SqlFunctionExpression(nex.Type, null, "tstzrange", [lowerBound, upperBound, new SqlConstantExpression("[)")]));
+                }
+
                 return Add(nex);
+            }
 
             return nex;
         }

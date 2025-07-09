@@ -235,7 +235,7 @@ public static class DictionaryExtensions
 
 
     public static FrozenDictionary<K, V> ToFrozenDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, IEqualityComparer<K> comparer, string? errorContext = null)
-        where K : notnull => collection.ToDictionaryEx(comparer, errorContext).ToFrozenDictionary();
+        where K : notnull => collection.ToDictionaryEx(comparer, errorContext).ToFrozenDictionary(comparer);
 
     public static FrozenDictionary<K, T> ToFrozenDictionaryEx<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, string? errorContext = null)
         where K : notnull => source.ToDictionaryEx(keySelector, errorContext).ToFrozenDictionary();
@@ -244,10 +244,10 @@ public static class DictionaryExtensions
         where K : notnull => source.ToDictionaryEx(keySelector, elementSelector, errorContext).ToFrozenDictionary();
 
     public static FrozenDictionary<K, T> ToFrozenDictionaryEx<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, IEqualityComparer<K> comparer, string? errorContext = null)
-        where K : notnull => source.ToDictionaryEx(keySelector, comparer, errorContext).ToFrozenDictionary();
+        where K : notnull => source.ToDictionaryEx(keySelector, comparer, errorContext).ToFrozenDictionary(comparer);
 
     public static FrozenDictionary<K, V> ToFrozenDictionaryEx<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, IEqualityComparer<K> comparer, string? errorContext = null)
-        where K : notnull => source.ToDictionaryEx(keySelector, elementSelector, comparer, errorContext).ToFrozenDictionary();
+        where K : notnull => source.ToDictionaryEx(keySelector, elementSelector, comparer, errorContext).ToFrozenDictionary(comparer);
 
     public static Dictionary<K, V> JumpDictionary<K, Z, V>(this IDictionary<K, Z> dictionary, IDictionary<Z, V> other)
         where K : notnull

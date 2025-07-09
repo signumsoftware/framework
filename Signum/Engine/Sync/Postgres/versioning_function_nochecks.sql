@@ -14,20 +14,24 @@ DECLARE
 BEGIN
   -- version 0.0.1
 
+  --RAISE NOTICE '% row with id: %', TG_OP, OLD.id;
+
   sys_period := TG_ARGV[0];
   history_table := TG_ARGV[1];
 
   IF TG_OP = 'UPDATE' OR TG_OP = 'DELETE' THEN
     -- Ignore rows already modified in this transaction
-    transaction_info := txid_current_snapshot();
-    IF OLD.xmin::text >= (txid_snapshot_xmin(transaction_info) % (2^32)::bigint)::text
-    AND OLD.xmin::text <= (txid_snapshot_xmax(transaction_info) % (2^32)::bigint)::text THEN
-      IF TG_OP = 'DELETE' THEN
-        RETURN OLD;
-      END IF;
+    --transaction_info := txid_current_snapshot();
+    --IF OLD.xmin::text >= (txid_snapshot_xmin(transaction_info) % (2^32)::bigint)::text
+    --AND OLD.xmin::text <= (txid_snapshot_xmax(transaction_info) % (2^32)::bigint)::text THEN
+    --  IF TG_OP = 'DELETE' THEN
+    --    RAISE NOTICE 'RETURN OLD';
+    --    RETURN OLD;
+    --  END IF;
 
-      RETURN NEW;
-    END IF;
+    --  RAISE NOTICE 'RETURN NEW';
+    --  RETURN NEW;
+    --END IF;
 
     EXECUTE format('SELECT $1.%I', sys_period) USING OLD INTO existing_range;
 
@@ -65,6 +69,8 @@ BEGIN
       array_to_string(commonColumns, ',$1.') ||
       ',tstzrange($2, $3, ''[)''))')
        USING OLD, range_lower, time_stamp_to_use;
+
+     --RAISE NOTICE 'INSERT History row with id: %', OLD.id;
   END IF;
 
   IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT' THEN

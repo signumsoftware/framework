@@ -376,11 +376,6 @@ public static class QueryUtils
             return token.SubTokensInternal(options);
     }
 
-    public static bool IsColumnToken(string tokenString)
-    {
-        return !tokenString.Contains('.') && tokenString != "Entity";
-    }
-
     public static QueryToken Parse(string tokenString, QueryDescription qd, SubTokensOptions options)
     {
         if (string.IsNullOrEmpty(tokenString))
