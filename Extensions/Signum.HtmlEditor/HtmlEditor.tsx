@@ -40,7 +40,7 @@ export interface HtmlEditorProps {
     c: HtmlEditorController
   ) => React.ReactElement | React.ReactFragment | null;
   placeholder?: React.ReactNode;
-  //htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
+  htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   initiallyFocused?: boolean | number;
   onEditorFocus?: (
     e: React.FocusEvent,
