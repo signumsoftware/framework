@@ -41,6 +41,9 @@ public class TranslatedInstanceController : ControllerBase
             if (li.RowId.ToString() == filter || li.Instance.Id.ToString() == filter || li.Instance.Key() == filter)
                 return true;
 
+            if (li.Instance.ToString()?.Contains(filter, StringComparison.InvariantCultureIgnoreCase) == true)
+                return true;
+
             if (li.Route.PropertyString().Contains(filter, StringComparison.InvariantCultureIgnoreCase))
                 return true;
 
