@@ -133,7 +133,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
               }}
             />
           }
-          placeholder={placeholder && <div className="sf-html-editor-placeholder">{placeholder}</div>}
+          placeholder={Boolean(placeholder) ? <div className="sf-html-editor-placeholder">{placeholder}</div> : undefined}
           ErrorBoundary={LexicalErrorBoundary}
         />
         <EditorRefPlugin editorRef={controller.setRefs} />

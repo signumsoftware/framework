@@ -1153,7 +1153,7 @@ public static class EnumerableExtensions
         {
             try
             {
-                throw new InvalidOperationException($@"Mismatches {action}:
+               throw new InvalidOperationException($@"Mismatches {action}:
 {differences}
 Consider Synchronize.");
             }
