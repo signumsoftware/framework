@@ -143,7 +143,7 @@ public static class ReflectionExtensions
             try
             {
                 s = new System.IO.FileStream(filePath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-                s.Read(b, 0, 2048);
+                s.ReadExactly(b, 0, 2048);
             }
             finally
             {
