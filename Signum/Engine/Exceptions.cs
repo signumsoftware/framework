@@ -15,7 +15,6 @@ public class UniqueKeyException : ApplicationException
     public string? IndexName { get; private set; }
     public TableIndex? Index { get; private set; }
     public List<PropertyInfo>? Properties { get; private set; }
-    public bool MListParentColumn { get; set; }
 
     public string? Values { get; private set; }
     public object?[]? HumanValues { get; private set; }
