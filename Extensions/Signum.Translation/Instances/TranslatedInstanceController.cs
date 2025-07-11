@@ -187,7 +187,7 @@ public class TranslatedInstanceController : ControllerBase
 
         var records = GetTranslationRecords(body, t);
 
-        TranslatedInstanceLogic.SaveRecords(records, t, isSync, c);
+        TranslatedInstanceLogic.SaveRecordsByInstance(records, t, isSync, c);
     }
 
     private List<TranslationRecord> GetTranslationRecords(List<TranslationRecordTS> records, Type type)
@@ -244,7 +244,7 @@ public class TranslatedInstanceController : ControllerBase
     [HttpPost("api/translatedInstance/uploadFile")]
     public void UploadFile([Required, FromBody] FileUpload file)
     {
-        TranslatedInstanceLogic.ImportExcelFile(new MemoryStream(file.content), file.fileName);
+        TranslatedInstanceLogic.ImportExcelFile(new MemoryStream(file.content), file.fileName, MatchTranslatedInstances.ByInstanceID);
     }
 }
 
