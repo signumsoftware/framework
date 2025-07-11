@@ -2,6 +2,7 @@ import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet, ajaxPostRaw, wrapRequest, AjaxOptions } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity } from './Signum.Chatbot'
+import { ChatbotAgentEntity } from './Signum.Chatbot.Agents';
 import { toAbsoluteUrl } from '../../Signum/React/AppContext';
 import { Lite, MList } from '../../Signum/React/Signum.Entities';
 
@@ -11,6 +12,7 @@ export namespace ChatbotClient {
   export function start(options: { routes: RouteObject[] }): void {
 
     Navigator.addSettings(new EntitySettings(ChatbotLanguageModelEntity, e => import('./Templates/ChatbotLanguageModel')));
+    Navigator.addSettings(new EntitySettings(ChatbotAgentEntity, a => import('./Templates/ChatbotAgent')));
   }
 
   export module API {

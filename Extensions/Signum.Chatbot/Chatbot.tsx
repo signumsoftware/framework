@@ -23,9 +23,7 @@ const rehypePlugins = [rehypeKatex as any];
 export default function Chatbot(): React.JSX.Element {
 
   const [currentSession, setCurrentSession] = useState<Lite<ChatSessionEntity> | null>();
-
   const [currentSessionTitle, setCurrentSessionTitle] = useState<string>("");
-
   const [userSessions, reloadUserSessions] = useAPIWithReload(signal => ChatbotClient.API.getUserSessions(), [currentSession?.id]);
 
   const [answer, setAnswer] = useState<string>("");
@@ -34,11 +32,9 @@ export default function Chatbot(): React.JSX.Element {
     ChatbotClient.API.getMessagesBySessionId(currentSession.id) : ChatbotClient.API.getMessagesBySessionId(undefined), [currentSession?.id], { avoidReset: true });
 
   const [botOpen, setBotOpen] = useState<boolean>(false);
-
   const [isLoading, setIsLoading] = useState(false);
 
   const newQuestionRef = React.useRef<string>();
-
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,6 +42,7 @@ export default function Chatbot(): React.JSX.Element {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [answer, messages]);
+
   const forceUpdate = useForceUpdate();
 
 
@@ -75,6 +72,7 @@ export default function Chatbot(): React.JSX.Element {
         visibleText += chunk;
         setAnswer(visibleText);
       }
+
       reloadUserSessions();
       reloadHistoryAndNotifyWidget();
       newQuestionRef.current = undefined;

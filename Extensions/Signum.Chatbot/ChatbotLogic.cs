@@ -68,7 +68,6 @@ public static class ChatbotLogic
                    e.LanguageModel,
                    e.User,
                });
-    
 
             sb.Include<ChatMessageEntity>()
                 .WithQuery(() => e => new
@@ -76,23 +75,15 @@ public static class ChatbotLogic
                     Entity = e,
                     e.Id,
                     e.Role,
+                    e.IsCommand,
                     e.Message,
                 });
-
-
-            sb.Include<ChatbotAgentEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                });
-
         }
     }
 
     public static async Task<string> SumarizeTitle(ConversationHistory history, CancellationToken ct)
     {
-        var prompt = ChatbotAgentLogic.GetAgent(DefaultAgent.QuestionSumarizer).GetPrompt(null, history);
+        var prompt = ChatbotAgentLogic.GetAgent(DefaultAgent.QuestionSumarizer).GetDescribe(null, history);
         StringBuilder sb = new StringBuilder();
         await foreach (var item in AskQuestionAsync([new ChatMessage { Role = ChatMessageRole.System, Content = prompt }], history.LanguageModel, ct))
         {

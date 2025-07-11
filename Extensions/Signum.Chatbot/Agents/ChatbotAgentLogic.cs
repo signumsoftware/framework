@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Signum.Authorization;
+using Signum.Engine.Sync;
 using Signum.Utilities;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -22,7 +23,7 @@ public static class ChatbotAgentLogic
             sb.Include<ChatbotAgentEntity>()
                 .WithSave(ChatbotAgentOperation.Save)
                 .WithDelete(ChatbotAgentOperation.Delete)
-                .WithUniqueIndexMList(a => a.ChatbotPrompts, mle => new { mle.Parent, mle.Element.PromptName })
+                .WithUniqueIndexMList(a => a.Descriptions, mle => new { mle.Parent, mle.Element.PromptName })
                 .WithQuery(() => e => new
                 {
                     Entity = e,
@@ -37,9 +38,17 @@ public static class ChatbotAgentLogic
 
             AllResources = new ResetLazy<Dictionary<string, Func<CommandArguments, CancellationToken, Task<string>>>>(() => AgentCodes.SelectMany(a => a.Value.Resources).ToDictionaryEx(StringComparer.InvariantCultureIgnoreCase));
 
+            sb.Schema.EntityEvents<ChatbotAgentCodeSymbol>().PreDeleteSqlSync += symbol =>
+            {
+                var parts = Administrator.UnsafeDeletePreCommandMList((ChatbotAgentEntity cp) => cp.Descriptions, 
+                    Database.MListQuery((ChatbotAgentEntity cp) => cp.Descriptions).Where(mle => mle.Parent.Code.Is(symbol)));
+                var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<ChatbotAgentEntity>().Where(uqp => uqp.Code.Is(symbol)));
+
+                return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
+            };
+
             IntroductionAgent.Register();
             SumarizerAgent.Register();
-            SienceAgent.Register();
             SeachControlAgent.Register();
         }
     }
@@ -101,8 +110,8 @@ public static class ChatbotAgentLogic
 
             var args = new CommandArguments(answer.After("(").Before(")"));
 
-            if (commandName == "GetPrompt")
-                return await GetPrompt(args);
+            if (commandName == "Describe")
+                return await GetDescribe(args);
 
             var action = AllResources.Value.TryGetC(commandName);
 
@@ -121,7 +130,7 @@ public static class ChatbotAgentLogic
         }
     }
 
-    private static Task<string> GetPrompt(CommandArguments args)
+    private static Task<string> GetDescribe(CommandArguments args)
     {
         var agentName = args.GetArgument<string>(0);
         var promptName = args.TryArgumentC<string>(1);
@@ -133,7 +142,7 @@ public static class ChatbotAgentLogic
         if (key == null)
             throw new InvalidOperationException($"No Agent '{agentName}' found");
 
-        var result = GetAgent(key).GetPrompt(promptName);
+        var result = GetAgent(key).GetDescribe(promptName);
 
         return Task.FromResult(result);
     }
@@ -164,12 +173,15 @@ public class ChatbotAgent
 
     static Regex ReplacementRegex = new Regex(@"\$<(?<replacement>\w+)>");
 
-    public string GetPrompt(string? name, object? context = null)
+    public string GetDescribe(string? name, object? context = null)
     {
-        var prompt = Entity.ChatbotPrompts.SingleOrDefault(a => a.PromptName.DefaultToNull() == name.DefaultToNull());
+        if (name.IsNullOrEmpty())
+            name = "Default";
+
+        var prompt = Entity.Descriptions.SingleOrDefault(a => a.PromptName.DefaultToNull() == name.DefaultToNull());
 
         if (prompt == null)
-            throw new InvalidOperationException($"No prompt with name '{0}'. Did you mean {Entity.ChatbotPrompts.CommaOr(a => a.PromptName)}");
+            throw new InvalidOperationException($"No prompt with name '{0}'. Did you mean {Entity.Descriptions.CommaOr(a => a.PromptName)}");
 
 
         return ReplacementRegex.Replace(prompt.Content, a => Code.MessageReplacement.GetOrThrow(a.Groups["replacement"].Value)(context));

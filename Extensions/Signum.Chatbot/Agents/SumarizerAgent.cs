@@ -10,9 +10,9 @@ internal static class SumarizerAgent
             CreateDefaultEntity = () => new ChatbotAgentEntity
             {
                 ShortDescription = "Sumarizer",
-                ChatbotPrompts = new MList<ChatbotAgentPromptEmbedded>
+                Descriptions = new MList<ChatbotAgentDescriptionsEmbedded>
                 {
-                    new ChatbotAgentPromptEmbedded
+                    new ChatbotAgentDescriptionsEmbedded
                     {
                         Content = """
                         Summarize the user questions in 4 to 6 words.

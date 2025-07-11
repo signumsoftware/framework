@@ -9,10 +9,10 @@ internal static class SeachControlAgent
             IsListed = () => true,
             CreateDefaultEntity = () => new ChatbotAgentEntity
             {
-                ShortDescription = "SearchControl Signum Framework",
-                ChatbotPrompts = new MList<ChatbotAgentPromptEmbedded>
+                ShortDescription = "Helps searching any database table (not working)",
+                Descriptions = new MList<ChatbotAgentDescriptionsEmbedded>
                 {
-                    new ChatbotAgentPromptEmbedded
+                    new ChatbotAgentDescriptionsEmbedded
                     {
                         Content = """
                          Use the SearchControl of Signum Framework to help

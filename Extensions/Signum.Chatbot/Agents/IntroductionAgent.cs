@@ -10,9 +10,9 @@ internal static class IntroductionAgent
             CreateDefaultEntity = () => new ChatbotAgentEntity
             {
                 ShortDescription = "Introduction",
-                ChatbotPrompts = new MList<ChatbotAgentPromptEmbedded>
+                Descriptions = new MList<ChatbotAgentDescriptionsEmbedded>
                 {
-                    new ChatbotAgentPromptEmbedded
+                    new ChatbotAgentDescriptionsEmbedded
                     {
                         Content = """
                         You are a chatbot of $<CurrentApplication>, and you can help with different tasks: 
@@ -31,7 +31,7 @@ internal static class IntroductionAgent
             MessageReplacement =
             {
                 { "CurrentApplication",  _ =>  Assembly.GetEntryAssembly()!.GetName().Name!.Before(".") },
-                { "Agents",  _ => ChatbotAgentLogic.GetListedAgents().ToString(a => $"* {a.Entity.Code.Key.After(".")}: {a.Entity.ShortDescription}", "\n") }
+                { "Agents",  _ => ChatbotAgentLogic.GetListedAgents().ToString(a => $"* \"{a.Entity.Code.Key.After(".")}\": {a.Entity.ShortDescription}", "\n") }
             },
             Resources = {
                 //{"GetPrompt", (CommandArguments args) =>

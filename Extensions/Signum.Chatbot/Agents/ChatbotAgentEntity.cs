@@ -8,7 +8,7 @@ public class ChatbotAgentEntity : Entity
     [StringLengthValidator(Max = 100)]
     public string ShortDescription { get; set; }
 
-    public MList<ChatbotAgentPromptEmbedded> ChatbotPrompts { get; set; }
+    public MList<ChatbotAgentDescriptionsEmbedded> Descriptions { get; set; }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(()  => Code.ToString());
@@ -24,7 +24,7 @@ public static class ChatbotAgentOperation
 
 
 [EntityKind(EntityKind.Main, EntityData.Transactional)]
-public class ChatbotAgentPromptEmbedded : EmbeddedEntity
+public class ChatbotAgentDescriptionsEmbedded : EmbeddedEntity
 {
     public string? PromptName { get; set; }
 
@@ -59,7 +59,6 @@ public static class DefaultAgent
 {
     public static readonly ChatbotAgentCodeSymbol Introduction; 
     public static readonly ChatbotAgentCodeSymbol QuestionSumarizer;
-    public static readonly ChatbotAgentCodeSymbol Sience;
     public static readonly ChatbotAgentCodeSymbol SearchControl;
 }
 

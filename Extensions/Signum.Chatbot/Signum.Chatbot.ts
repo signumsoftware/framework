@@ -63,7 +63,8 @@ export type ChatMessageRole =
   "System" |
   "User" |
   "Assistant" |
-  "Tool";
+  "Tool" |
+  "Function";
 
 export const ChatSessionEntity: Type<ChatSessionEntity> = new Type<ChatSessionEntity>("ChatSession");
 export interface ChatSessionEntity extends Entities.Entity {

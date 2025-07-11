@@ -15,26 +15,6 @@ namespace Signum.Chatbot;
 
 public class ChatbotController : Controller
 {
-    [HttpPost("api/session")]
-    public ChatSessionEntity NewChatSession()
-    {
-        var configuration = Database.Query<ChatbotLanguageModelEntity>().Where( cb => cb.IsDefault).FirstEx().ToLite();
-
-        var newChatSession = new ChatSessionEntity()
-        {
-            LanguageModel = configuration,
-            StartDate = DateTime.Now,
-            User = UserEntity.Current,
-        }.Save();
-
-
-        return newChatSession;
-    }
-
-
-    
-
-
     [HttpPost("api/askQuestionAsync")]
     public  async Task AskQuestionAsync(CancellationToken ct)
     {
@@ -66,7 +46,7 @@ public class ChatbotController : Controller
                     {
                         Role = ChatMessageRole.System,
                         ChatSession = session.ToLite(),
-                        Message = ChatbotAgentLogic.GetAgent(DefaultAgent.Introduction).GetPrompt(null)
+                        Message = ChatbotAgentLogic.GetAgent(DefaultAgent.Introduction).GetDescribe(null)
                     }.Save()
                 }
             };
@@ -101,23 +81,25 @@ public class ChatbotController : Controller
             bool isCommand = false;
             await foreach (var item in ChatbotLogic.AskQuestionAsync(history.GetMessages(), history.LanguageModel, ct))
             {
+                if (lastAnswer.Length == 0)
+                {
+                    if (item.StartsWith("$"))
+                    {
+                        isCommand = true;
+                        UINotification("InternalCommand");
+                    }
+                    else
+                    {
+                        UINotification("FinalAnswer");
+                    }
+                }
+
                 lastAnswer += item;
-                if (lastAnswer.Length == 0 && item.StartsWith("$"))
-                {
-                    isCommand = true;
-                    UINotification("InternalCommand");
-                }
-                else
-                {
-                    UINotification("FinalAnswer");
-                }
 
                 await resp.WriteAsync(item);
                 await resp.Body.FlushAsync();
             }
 
-            if (!isCommand)
-                break;
 
             var command = new ChatMessageEntity()
             {
@@ -128,6 +110,9 @@ public class ChatbotController : Controller
             }.Save();
 
             history.Messages.Add(command);
+
+            await resp.WriteAsync(UINotification("QuestionId", command.Id.ToString()), ct);
+            await resp.Body.FlushAsync();
 
             if (!isCommand)
                 break;
@@ -142,12 +127,15 @@ public class ChatbotController : Controller
             {
                 ChatSession = history.Session.ToLite(),
                 Message = response,
-                Role = ChatMessageRole.Tool,
+                Role = ChatMessageRole.Function,
             }.Save();
 
             history.Messages.Add(responseMsg);
-
             await pendingResponse;
+
+            await resp.WriteAsync(UINotification("QuestionId", responseMsg.Id.ToString()), ct);
+            await resp.Body.FlushAsync();
+
         }
 
         if (history.Session.Title == null)

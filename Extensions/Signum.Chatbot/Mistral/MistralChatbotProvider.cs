@@ -39,7 +39,11 @@ public class MistralChatbotProvider : IChatbotProvider
         var responseClient = await client.PostAsJsonAsync(BaseUrl, payload);
 
       
-        responseClient.EnsureSuccessStatusCode();
+        if(!responseClient.IsSuccessStatusCode)
+        {
+            var errorResult = await responseClient.Content.ReadAsStringAsync();
+            throw new MistralException(errorResult);
+        }
       
 
         var stream = await responseClient.Content.ReadAsStreamAsync();
@@ -175,6 +179,7 @@ public class MistralChatbotProvider : IChatbotProvider
         ChatMessageRole.User => "user",
         ChatMessageRole.Assistant => "assistant",
         ChatMessageRole.Tool => "tool",
+        ChatMessageRole.Function => "function",
         _ => throw new UnexpectedValueException(role)
     };
         
@@ -223,4 +228,11 @@ public class MistralChatbotProvider : IChatbotProvider
         public string role { get; set; }
         public string content { get; set; }
     }
+}
+
+
+[Serializable]
+public class MistralException : Exception
+{
+    public MistralException(string message) : base(message) { }
 }

@@ -56,6 +56,7 @@ public enum ChatMessageRole
     User,
     Assistant,
     Tool, 
+    Function,
 }
 
 [AutoInit]
