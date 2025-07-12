@@ -10,13 +10,14 @@ import { QueryString } from '@framework/QueryString';
 import { Lite, Entity, ModifiableEntity } from '@framework/Signum.Entities';
 import { CultureClient } from '@framework/Basics/CultureClient'
 import { TranslationClient } from './TranslationClient';
-import { Binding, TextBoxLineController, TextBoxLineProps, tasks } from '@framework/Lines';
+import { Binding, TextAreaLineController, TextBoxLineController, TextBoxLineProps, tasks } from '@framework/Lines';
 import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
 import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getLambdaMembers } from '@framework/Reflection';
 import { TranslatedSummaryState } from './Signum.Translation.Instances';
 import { TranslatableRouteType } from '@framework/Signum.Basics';
+import { TextAreaLineProps } from '../../Signum/React/Lines/TextAreaLine';
 
 export namespace TranslatedInstanceClient {
   
@@ -38,15 +39,15 @@ export namespace TranslatedInstanceClient {
   
   tasks.push(taskSetTranslatableIcon)
   export function taskSetTranslatableIcon(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
-    if (lineBase instanceof TextBoxLineController) {
-      const vProps = state as TextBoxLineProps;
+    if (lineBase instanceof TextBoxLineController || lineBase instanceof TextAreaLineController) {
+      const vProps = lineBase instanceof TextBoxLineController ? state as TextBoxLineProps : state as TextAreaLineProps;
   
       if (state.ctx.propertyRoute &&
         state.ctx.propertyRoute.propertyRouteType == "Field" &&
         state.ctx.propertyRoute.member!.translatable && 
         AppContext.isPermissionAuthorized(TranslationPermission.TranslateInstances)) {
         if (!vProps.extraButtons)
-          vProps.extraButtons = vlc => <TranslateButton controller={vlc as TextBoxLineController} />;
+          vProps.extraButtons = vlc => <TranslateButton controller={lineBase instanceof TextBoxLineController ? vlc as TextBoxLineController : vlc as TextAreaLineController} />;
   
         if (!vProps.helpText) {
           var binding = (vProps.ctx.binding as Binding<string>);
@@ -57,8 +58,8 @@ export namespace TranslatedInstanceClient {
       }
     }
   }
-  
-  export function TranslateButton(p: { controller: TextBoxLineController }): React.JSX.Element {
+
+  export function TranslateButton(p: { controller: TextBoxLineController | TextAreaLineController }): React.JSX.Element {
   
     var ctx = p.controller.props.ctx.tryFindRootEntity();
   
