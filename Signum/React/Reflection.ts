@@ -1678,6 +1678,10 @@ export class QueryTokenString<T> {
   operation(os: OperationSymbol): string { //operation tokens are leaf
     return this.token + ".[Operations]." + os.key.replace(".", "#");
   }
+
+  indexer(prefix: string, key: string): string {
+    return this.token + ".[" + prefix + "].[" + key + "]";
+  }
 }
 
 type ArrayElement<ArrayType> = ArrayType extends (infer ElementType)[] ? RemoveMListElement<ElementType> : never;

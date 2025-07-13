@@ -228,8 +228,8 @@ public class QueryTokenTS
         if (qt is CollectionToArrayToken)
             return QueryTokenType.ToArray;
 
-        if (qt is OperationsToken)
-            return QueryTokenType.Operation;
+        if (qt is OperationsContainerToken)
+            return QueryTokenType.OperationContainer;
         
         if (qt is ManualContainerToken or ManualToken)
             return QueryTokenType.Manual;
@@ -240,13 +240,16 @@ public class QueryTokenTS
         if (qt is TimeSeriesToken)
             return QueryTokenType.TimeSeries;
 
+        if (qt is IndexerContainerToken)
+            return QueryTokenType.IndexerContainer;
+
         return null;
     }
 
+    public required string fullKey;
+    public required string key;
     public required string toStr;
     public required string niceName;
-    public required string key;
-    public required string fullKey;
     public required string typeColor;
     public required string niceTypeName;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -283,10 +286,11 @@ public enum QueryTokenType
     Aggregate,
     Element,
     AnyOrAll,
-    Operation,
+    OperationContainer,
     ToArray,
     Manual,
     Nested,
     Snippet,
     TimeSeries,
+    IndexerContainer,
 }

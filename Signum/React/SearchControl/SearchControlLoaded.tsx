@@ -17,7 +17,7 @@ import { Constructor } from '../Constructor'
 import * as Hooks from '../Hooks'
 import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
-import ColumnEditor from './ColumnEditor'
+import ColumnEditor, { columnError, columnSummaryError } from './ColumnEditor'
 import MultipliedMessage, { multiplyResultTokens } from './MultipliedMessage'
 import GroupByMessage from './GroupByMessage'
 import { renderContextualItems, ContextualItemsContext, ContextualMenuItem, MarkedRowsDictionary, MarkedRow, SearchableMenuItem, ContextMenuPack } from './ContextualItems'
@@ -1527,10 +1527,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               co == this.state.editingColumn && "sf-current-column",
               co.hiddenColumn && "sf-hidden-column",
               !this.canOrder(co) && "noOrder",
-              co.token && co.token.type.isCollection && "error",
+              (columnError(co.token) || columnSummaryError(co.summaryToken)) && "error",
               co.token && this.props.findOptions.groupResults && isNotDerivedToArray(co.token) && "error",
               this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
                 this.state.dropBorderIndex != null && i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
+            title={columnError(co.token) ?? columnSummaryError(co.summaryToken)}
             data-column-name={co.token && co.token.fullKey}
             data-column-index={i}
             onClick={this.canOrder(co) ? this.handleHeaderClick : undefined}

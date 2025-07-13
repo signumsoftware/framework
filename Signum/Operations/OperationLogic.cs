@@ -123,7 +123,7 @@ public static class OperationLogic
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
-            OperationsToken.GetEligibleTypeOperations = (entityType) => OperationsToken_GetEligibleTypeOperations(entityType);
+            OperationsContainerToken.GetEligibleTypeOperations = (entityType) => OperationsToken_GetEligibleTypeOperations(entityType);
             OperationToken.IsAllowedExtension = (operationSymbol, entityType) => OperationToken_IsAllowedExtension(operationSymbol, entityType);
             OperationToken.BuildExtension = (entityType, operationSymbol, parentExpression) => OperationToken_BuildExpression(entityType, operationSymbol, parentExpression);
         }
