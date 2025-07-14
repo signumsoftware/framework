@@ -904,6 +904,7 @@ internal class QueryFormatter : DbExpressionVisitor
                 sb.Append("WHERE ");
                 Visit(delete.Where);
             }
+            sb.Append(";");
             return delete;
         }
     }
@@ -938,6 +939,7 @@ internal class QueryFormatter : DbExpressionVisitor
                 sb.Append("WHERE ");
                 Visit(update.Where);
             }
+            sb.Append(";");
             return update;
         }
     }
@@ -982,6 +984,7 @@ internal class QueryFormatter : DbExpressionVisitor
             sb.Append(" FROM ");
             VisitSource(insertSelect.Source);
 
+            sb.Append(";");
             return insertSelect;
         }
     }
