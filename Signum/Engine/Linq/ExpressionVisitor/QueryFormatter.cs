@@ -1009,6 +1009,9 @@ internal class QueryFormatter : DbExpressionVisitor
 
             return new Disposable(() =>
             {
+                if (sb[sb.Length - 1] == ';')
+                    sb.Remove(sb.Length - 1, 1);
+
                 this.AppendNewLine(Indentation.Same);
                 sb.Append("RETURNING 1");
                 this.AppendNewLine(Indentation.Outer);
