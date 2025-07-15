@@ -1045,10 +1045,9 @@ public static class EnumerableExtensions
         }
     }
 
-    public static ObservableCollection<T>? ToObservableCollection<T>(this IEnumerable<T>? collection)
+    public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)
     {
-        return collection == null ? null :
-          collection as ObservableCollection<T> ?? new ObservableCollection<T>(collection);
+        return collection as ObservableCollection<T> ?? new ObservableCollection<T>(collection);
     }
 
     public static IEnumerable<T> AsThreadSafe<T>(this IEnumerable<T> source)
