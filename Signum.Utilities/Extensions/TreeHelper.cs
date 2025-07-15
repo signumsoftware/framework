@@ -81,9 +81,9 @@ public static class TreeHelper
         }
     }
 
-    public static ObservableCollection<Node<S>>? SelectTree<T, S>(ObservableCollection<Node<T>> nodes, Func<T, S> selector)
+    public static ObservableCollection<Node<S>> SelectTree<T, S>(ObservableCollection<Node<T>> nodes, Func<T, S> selector)
     {
-        return nodes.Select(n => new Node<S>(selector(n.Value), SelectTree(n.Children, selector))).ToObservableCollection();
+        return nodes.Select(n => new Node<S>(selector(n.Value), SelectTree(n.Children, selector))).ToObservableCollection()!;
     }
 
     public static ObservableCollection<Node<S>> SelectSimplifyTreeC<T, S>(ObservableCollection<Node<T>> nodes, Func<T, S> selector) where S : class
@@ -120,7 +120,7 @@ public static class TreeHelper
         return result;
     }
 
-    public static ObservableCollection<Node<T>>? Apply<T>(ObservableCollection<Node<T>> collection, Func<ObservableCollection<Node<T>>, ObservableCollection<Node<T>>> action)
+    public static ObservableCollection<Node<T>> Apply<T>(ObservableCollection<Node<T>> collection, Func<ObservableCollection<Node<T>>, ObservableCollection<Node<T>>> action)
     {
         return action(collection).Select(a => new Node<T>(a.Value, Apply(a.Children, action))).ToObservableCollection();
     }
