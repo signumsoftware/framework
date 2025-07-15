@@ -1404,7 +1404,7 @@ export namespace Finder {
 
       candidates = candidates.filter(t => {
 
-        if (t.hideInAutoExpand && t.parent != parentToken)
+        if (t.hideInAutoExpand && t.parent?.fullKey != parentToken?.fullKey)
           return false;
 
         if ((options & SubTokensOptions.CanAggregate) == 0 && hasAggregate(t))
