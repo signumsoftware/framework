@@ -440,6 +440,22 @@ public static class QueryUtils
         return null;
     }
 
+    public static void RegisterOrderAdapter<T, V>(Expression<Func<T, V>> orderByMember)
+    {
+        OrderAdapters.Add(qt =>
+        {
+            if (qt.Type != typeof(T))
+                return null;
+
+            return ctx =>
+            {
+                var exp = qt.BuildExpression(ctx);
+
+                return Expression.Invoke(orderByMember, exp);
+            };
+        });
+    }
+
     public static List<Func<QueryToken, Func<BuildExpressionContext, Expression>?>> OrderAdapters = 
         new List<Func<QueryToken, Func<BuildExpressionContext, Expression>?>>();
 

@@ -18,18 +18,7 @@ public static class FilePathEmbeddedLogic
         {
             FileTypeLogic.Start(sb);
 
-            QueryUtils.OrderAdapters.Add(qt =>
-            {
-                if (qt.Type != typeof(FilePathEmbedded))
-                    return null;
-
-                return ctx =>
-                {
-                    var exp = qt.BuildExpression(ctx);
-
-                    return Expression.Property(exp, nameof(FilePathEmbedded.FileName));
-                };
-            });
+            QueryUtils.RegisterOrderAdapter((FilePathEmbedded e) => e.FileLength);
 
             FilePathEmbedded.OnPreSaving += fpe =>
             {

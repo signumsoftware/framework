@@ -246,7 +246,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
 
   return (
     <div className={classes("card", !part.customColor && "border-light", "shadow-sm", "mb-4")} style={{ flex: p.flex ? 1 : undefined }}>
-      <div className={classes("card-header", "sf-show-hover", "d-flex", !part.customColor)}
+      <div className={classes("card-header fw-bold", "sf-show-hover", "d-flex", !part.customColor)}
         style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined}}
       >
 
