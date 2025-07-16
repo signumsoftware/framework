@@ -909,7 +909,7 @@ export namespace ChartClient {
       if ((token.filterType == "Decimal" || token.filterType == "Integer"))
         return v => {
           var number = v as number | null;
-          var format = chartColumn.format || (token.key == "Sum" ? "0.#K" : undefined) || token.format || "0";
+          var format = chartColumn.format || (token.key == "Sum" ? "K1" : undefined) || token.format || "0";
           var numFormat = toNumberFormat(format);
           return number == null ? String(null) : numFormat.format(number);
         };

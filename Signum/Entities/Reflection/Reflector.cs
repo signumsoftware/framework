@@ -1,3 +1,4 @@
+using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
@@ -401,7 +402,7 @@ public static class Reflector
     {
         PropertyRoute simpleRoute = route.SimplifyToProperty();
 
-        FormatAttribute? format = simpleRoute.PropertyInfo!.GetCustomAttribute<FormatAttribute>();
+        FormatAttribute? format = Schema.Current.Settings.FieldAttribute<FormatAttribute>(simpleRoute);
         if (format != null)
             return format.Format;
 
