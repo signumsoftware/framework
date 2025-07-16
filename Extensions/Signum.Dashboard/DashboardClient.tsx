@@ -69,7 +69,7 @@ export namespace DashboardClient {
 
     Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: AppContext.currentUser && toLite(AppContext.currentUser) }));
 
-    Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard')));
+    Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard'), { modalSize: "xl" }));
     Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
     Navigator.addSettings(new EntitySettings(TextPartEntity, e => import('./Admin/TextPart')));
