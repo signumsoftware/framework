@@ -148,7 +148,7 @@ export namespace RemoteEmailsClient {
     await Navigator.view(message);
   }
   
-  export module API {
+  export namespace API {
     export function getRemoteEmail(userOID: string, messageId: string): Promise<RemoteEmailMessageModel> {
       return ajaxGet({ url: `/api/remoteEmail/${userOID}/${messageId}` });
     }

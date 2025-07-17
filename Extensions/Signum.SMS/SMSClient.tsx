@@ -41,7 +41,7 @@ export namespace SMSClient {
       });
   }
   
-  export module API {
+  export namespace API {
    
     export function getRemainingCharacters(message: string, removeNoSMSCharacters: boolean,): Promise<number> {
       return ajaxPost({ url: `/api/sms/remainingCharacters` }, { message, removeNoSMSCharacters});
