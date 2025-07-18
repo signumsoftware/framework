@@ -7,12 +7,12 @@ public class BubbleplotChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("bubbles.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.Bubble, ChartColumnType.Groupable),
-            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis, ChartColumnType.Positionable) ,
-            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.Positionable) ,
-            new ChartScriptColumn(ChartColumnMessage.Size, ChartColumnType.Magnitude),
-            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.ColorCategory, ChartColumnType.Groupable) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.Bubble, ChartColumnType.AnyGroupKey),
+            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis, ChartColumnType.AnyNumberDateTime) ,
+            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.AnyNumberDateTime) ,
+            new ChartScriptColumn(ChartColumnMessage.Size, ChartColumnType.AnyNumber),
+            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.AnyNumber) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.ColorCategory, ChartColumnType.AnyGroupKey) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

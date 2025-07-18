@@ -7,13 +7,13 @@ public class StackedBarsChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("stackedbars.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.Groupable),
-            new ChartScriptColumn(ChartColumnMessage.SplitBars, ChartColumnType.Groupable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Width, ChartColumnType.Magnitude) ,
-            new ChartScriptColumn(ChartColumnMessage.Width2, ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Width3, ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Width4, ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Width5, ChartColumnType.Magnitude) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.AnyGroupKey),
+            new ChartScriptColumn(ChartColumnMessage.SplitBars, ChartColumnType.AnyGroupKey) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Width, ChartColumnType.AnyNumber) ,
+            new ChartScriptColumn(ChartColumnMessage.Width2, ChartColumnType.AnyNumber) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Width3, ChartColumnType.AnyNumber) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Width4, ChartColumnType.AnyNumber) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Width5, ChartColumnType.AnyNumber) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

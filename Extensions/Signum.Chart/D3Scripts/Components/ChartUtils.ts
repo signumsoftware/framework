@@ -58,7 +58,7 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
   }
 
   if (scaleName == "MinMax" || scaleName == "MinZeroMax") {
-    if (column.type == "DateOnly" || column.type == "DateTime") {
+    if (column.type == "Date" || column.type == "DateTime") {
       var dates = values.map(d => new Date(d));
 
       const scale = d3.scaleTime()
@@ -208,10 +208,10 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
   if (isInFilter)
     return complete(values, isInFilter.value as unknown[], column, insertPoint);
 
-  if (column.type == "Lite" || column.type == "String")
+  if (column.type == "Entity" || column.type == "String")
     return values;
 
-  if (column.type == "DateOnly" || column.type == "DateTime") {
+  if (column.type == "Date" || column.type == "DateTime") {
 
     const unit: DurationUnit | null = columnNomalized.lastPart != null ? durationUnit(columnNomalized.lastPart.key) :
       columnNomalized.normalized.type.name == "DateOnly" ? "day" : null;
@@ -304,12 +304,12 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     return complete(values, allValues, column, insertPoint);
   }
 
-  if (column.type == "Integer" || column.type == "Real" || column.type == "RealGroupable") {
+  if (column.type == "Number" || column.type == "DecimalNumber" || column.type == "RoundedNumber") {
 
     const lastPart = column.token!.fullKey.tryAfterLast('.');
 
     const step: number | null = lastPart != null && lastPart.startsWith("Step") ? parseFloat(lastPart.after("Step").replace("_", ".")) :
-      (column.type == "Integer" ? 1 : null);
+      (column.type == "Number" ? 1 : null);
 
     if (step == null)
       return values;

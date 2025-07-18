@@ -7,13 +7,13 @@ public class MultiBarsChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("multibars.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.Groupable),
-            new ChartScriptColumn(ChartColumnMessage.SplitBars, ChartColumnType.Groupable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Width, ChartColumnType.Positionable) ,
-            new ChartScriptColumn(ChartColumnMessage.Width2, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Width3, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Width4, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Width5, ChartColumnType.Positionable) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.AnyGroupKey),
+            new ChartScriptColumn(ChartColumnMessage.SplitBars, ChartColumnType.AnyGroupKey) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Width, ChartColumnType.AnyNumberDateTime) ,
+            new ChartScriptColumn(ChartColumnMessage.Width2, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Width3, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Width4, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Width5, ChartColumnType.AnyNumberDateTime) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

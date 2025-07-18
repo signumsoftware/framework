@@ -7,15 +7,15 @@ public class ParallelCoordiantesChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("parallelcoordinates.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.Line, ChartColumnType.Groupable),
-            new ChartScriptColumn(ChartColumnMessage.Dimension1, ChartColumnType.Positionable) ,
-            new ChartScriptColumn(ChartColumnMessage.Dimension2, ChartColumnType.Positionable) ,
-            new ChartScriptColumn(ChartColumnMessage.Dimension3, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Dimension4, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Dimension5, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Dimension6, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Dimension7, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Dimension8, ChartColumnType.Positionable) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.Line, ChartColumnType.AnyGroupKey),
+            new ChartScriptColumn(ChartColumnMessage.Dimension1, ChartColumnType.AnyNumberDateTime) ,
+            new ChartScriptColumn(ChartColumnMessage.Dimension2, ChartColumnType.AnyNumberDateTime) ,
+            new ChartScriptColumn(ChartColumnMessage.Dimension3, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Dimension4, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Dimension5, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Dimension6, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Dimension7, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Dimension8, ChartColumnType.AnyNumberDateTime) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

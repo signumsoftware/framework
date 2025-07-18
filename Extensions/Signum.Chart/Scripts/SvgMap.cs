@@ -8,10 +8,10 @@ public class SvgMapScript : ChartScript
         Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn(ChartColumnMessage.LocationCode, ChartColumnType.String),
-            new ChartScriptColumn(ChartColumnMessage.Location, ChartColumnType.Groupable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.ColorCategory, ChartColumnType.Groupable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Opacity, ChartColumnType.Magnitude) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Location, ChartColumnType.AnyGroupKey) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.AnyNumber) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.ColorCategory, ChartColumnType.AnyGroupKey) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Opacity, ChartColumnType.AnyNumber) { IsOptional = true },
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

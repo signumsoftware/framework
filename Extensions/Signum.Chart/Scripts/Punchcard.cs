@@ -7,13 +7,13 @@ public class PunchcardChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("punchcard.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis, ChartColumnType.Groupable),
-            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.Groupable),
-            new ChartScriptColumn(ChartColumnMessage.Size, ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Color, ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Opacity, ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.InnerSize, ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Order, ChartColumnType.Magnitude) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis, ChartColumnType.AnyGroupKey),
+            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.AnyGroupKey),
+            new ChartScriptColumn(ChartColumnMessage.Size, ChartColumnType.AnyNumber) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Color, ChartColumnType.AnyNumber) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Opacity, ChartColumnType.AnyNumber) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.InnerSize, ChartColumnType.AnyNumber) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Order, ChartColumnType.AnyNumber) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

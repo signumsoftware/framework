@@ -100,19 +100,19 @@ export namespace ChartColumnMessage {
 
 export const ChartColumnType: EnumType<ChartColumnType> = new EnumType<ChartColumnType>("ChartColumnType");
 export type ChartColumnType =
-  "Integer" |
-  "Real" |
-  "DateOnly" |
+  "Number" |
+  "DecimalNumber" |
+  "Date" |
   "DateTime" |
   "String" |
-  "Lite" |
+  "Entity" |
   "Enum" |
-  "RealGroupable" |
+  "RoundedNumber" |
   "Time" |
-  "Magnitude" |
-  "Groupable" |
-  "Positionable" |
-  "Any";
+  "AnyNumber" |
+  "AnyGroupKey" |
+  "AnyNumberDateTime" |
+  "AllTypes";
 
 export namespace ChartMessage {
   export const _0CanOnlyBeCreatedFromTheChartWindow: MessageKey = new MessageKey("ChartMessage", "_0CanOnlyBeCreatedFromTheChartWindow");

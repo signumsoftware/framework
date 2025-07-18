@@ -7,11 +7,11 @@ public class BubblePackChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("bubblepack.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.Bubble, ChartColumnType.Groupable),
-            new ChartScriptColumn(ChartColumnMessage.Size, ChartColumnType.Magnitude) ,
-            new ChartScriptColumn(ChartColumnMessage.Parent, ChartColumnType.Groupable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.ColorCategory, ChartColumnType.Groupable) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.Bubble, ChartColumnType.AnyGroupKey),
+            new ChartScriptColumn(ChartColumnMessage.Size, ChartColumnType.AnyNumber) ,
+            new ChartScriptColumn(ChartColumnMessage.Parent, ChartColumnType.AnyGroupKey) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.AnyNumber) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.ColorCategory, ChartColumnType.AnyGroupKey) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

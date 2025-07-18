@@ -23,14 +23,14 @@ public static class ChartUtils
     {
         switch (QueryUtils.TryGetFilterType(token.Type))
         {
-            case FilterType.Lite: return ChartColumnType.Lite;
+            case FilterType.Lite: return ChartColumnType.Entity;
             case FilterType.Boolean:
             case FilterType.Enum: return ChartColumnType.Enum;
             case FilterType.String:
             case FilterType.Guid: return ChartColumnType.String;
-            case FilterType.Integer: return ChartColumnType.Integer;
-            case FilterType.Decimal: return token.IsGroupable ? ChartColumnType.RealGroupable : ChartColumnType.Real;
-            case FilterType.DateTime: return token.IsGroupable ? ChartColumnType.DateOnly : ChartColumnType.DateTime;
+            case FilterType.Integer: return ChartColumnType.Number;
+            case FilterType.Decimal: return token.IsGroupable ? ChartColumnType.RoundedNumber : ChartColumnType.DecimalNumber;
+            case FilterType.DateTime: return token.IsGroupable ? ChartColumnType.Date : ChartColumnType.DateTime;
             case FilterType.Time: return ChartColumnType.Time;
         }
 

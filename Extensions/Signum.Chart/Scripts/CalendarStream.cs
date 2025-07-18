@@ -7,8 +7,8 @@ public class CalendarStreamChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("calendar.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.Date, ChartColumnType.DateOnly),
-            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.Magnitude)
+            new ChartScriptColumn(ChartColumnMessage.Date, ChartColumnType.Date),
+            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.AnyNumber)
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

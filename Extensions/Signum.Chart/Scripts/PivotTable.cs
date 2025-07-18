@@ -7,18 +7,18 @@ public class PivotTableScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("pivottable.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis, ChartColumnType.Groupable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis2, ChartColumnType.Groupable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis3, ChartColumnType.Groupable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis4, ChartColumnType.Groupable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.Groupable){ IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.VerticalAxis2, ChartColumnType.Groupable){ IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.VerticalAxis3, ChartColumnType.Groupable){ IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.VerticalAxis4, ChartColumnType.Groupable){ IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Value, ChartColumnType.Magnitude),
-            new ChartScriptColumn(ChartColumnMessage.Value2, ChartColumnType.Magnitude){ IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Value3, ChartColumnType.Magnitude){ IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Value4, ChartColumnType.Magnitude){ IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis, ChartColumnType.AnyGroupKey) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis2, ChartColumnType.AnyGroupKey) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis3, ChartColumnType.AnyGroupKey) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis4, ChartColumnType.AnyGroupKey) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.AnyGroupKey){ IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.VerticalAxis2, ChartColumnType.AnyGroupKey){ IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.VerticalAxis3, ChartColumnType.AnyGroupKey){ IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.VerticalAxis4, ChartColumnType.AnyGroupKey){ IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Value, ChartColumnType.AnyNumber),
+            new ChartScriptColumn(ChartColumnMessage.Value2, ChartColumnType.AnyNumber){ IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Value3, ChartColumnType.AnyNumber){ IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Value4, ChartColumnType.AnyNumber){ IsOptional = true },
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

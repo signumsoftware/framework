@@ -111,7 +111,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
           transform={translate(x(d.column.name)!, 0)}
           dominantBaseline="middle"
           textAnchor="middle">
-          {d.column.type != "DateOnly" && d.column.type != "DateTime" ?
+          {d.column.type != "Date" && d.column.type != "DateTime" ?
             d.scale.domain()[1] :
             d.column.getNiceName(d3.max(data.rows, r => d.column.getValue(r))!)}
         </text>)}
@@ -122,7 +122,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
           transform={translate(x(d.column.name)!, 0)}
           dominantBaseline="middle"
           textAnchor="middle">
-          {d.column.type != "DateOnly" && d.column.type != "DateTime" ?
+          {d.column.type != "Date" && d.column.type != "DateTime" ?
             d.column.getNiceName(d.scale.domain()[0]) :
             d.column.getNiceName(d3.min(data.rows, r => d.column.getValue(r))!)}
         </text>)}

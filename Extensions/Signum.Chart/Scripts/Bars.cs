@@ -7,8 +7,8 @@ public class BarsChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("bars.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.Bars, ChartColumnType.Groupable),
-            new ChartScriptColumn(ChartColumnMessage.Width, ChartColumnType.Positionable)
+            new ChartScriptColumn(ChartColumnMessage.Bars, ChartColumnType.AnyGroupKey),
+            new ChartScriptColumn(ChartColumnMessage.Width, ChartColumnType.AnyNumberDateTime)
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

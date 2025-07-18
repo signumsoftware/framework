@@ -7,14 +7,14 @@ public class MarkermapChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("markermap.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.Latitude, ChartColumnType.Magnitude) ,
-            new ChartScriptColumn(ChartColumnMessage.Longitude, ChartColumnType.Magnitude) ,
+            new ChartScriptColumn(ChartColumnMessage.Latitude, ChartColumnType.AnyNumber) ,
+            new ChartScriptColumn(ChartColumnMessage.Longitude, ChartColumnType.AnyNumber) ,
             new ChartScriptColumn(ChartColumnMessage.Label, ChartColumnType.String) { IsOptional = true },
             new ChartScriptColumn(ChartColumnMessage.Icon, ChartColumnType.String) { IsOptional = true },
             new ChartScriptColumn(ChartColumnMessage.Title, ChartColumnType.String) { IsOptional = true },
             new ChartScriptColumn(ChartColumnMessage.Info, ChartColumnType.String) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.Real) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.ColorCategory, ChartColumnType.Groupable) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.DecimalNumber) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.ColorCategory, ChartColumnType.AnyGroupKey) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

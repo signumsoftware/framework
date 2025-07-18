@@ -7,9 +7,9 @@ public class HeatmapChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("heatmap.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.Latitude, ChartColumnType.Magnitude),
-            new ChartScriptColumn(ChartColumnMessage.Longitude, ChartColumnType.Magnitude),
-            new ChartScriptColumn(ChartColumnMessage.Weight, ChartColumnType.Magnitude) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.Latitude, ChartColumnType.AnyNumber),
+            new ChartScriptColumn(ChartColumnMessage.Longitude, ChartColumnType.AnyNumber),
+            new ChartScriptColumn(ChartColumnMessage.Weight, ChartColumnType.AnyNumber) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

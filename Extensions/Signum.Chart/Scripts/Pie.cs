@@ -7,8 +7,8 @@ public class PieChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("doughnut.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.Sections, ChartColumnType.Groupable),
-            new ChartScriptColumn(ChartColumnMessage.Angle, ChartColumnType.Magnitude)
+            new ChartScriptColumn(ChartColumnMessage.Sections, ChartColumnType.AnyGroupKey),
+            new ChartScriptColumn(ChartColumnMessage.Angle, ChartColumnType.AnyNumber)
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {

@@ -7,13 +7,13 @@ public class ScatterplotChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("points.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.Point, ChartColumnType.Groupable),
-            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis, ChartColumnType.Positionable) ,
-            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.Positionable),
-            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis2, ChartColumnType.Positionable) { IsOptional = true } ,
-            new ChartScriptColumn(ChartColumnMessage.VerticalAxis2, ChartColumnType.Positionable) { IsOptional = true } ,
-            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.ColorCategory, ChartColumnType.Groupable) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.Point, ChartColumnType.AnyGroupKey),
+            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis, ChartColumnType.AnyNumberDateTime) ,
+            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.AnyNumberDateTime),
+            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis2, ChartColumnType.AnyNumberDateTime) { IsOptional = true } ,
+            new ChartScriptColumn(ChartColumnMessage.VerticalAxis2, ChartColumnType.AnyNumberDateTime) { IsOptional = true } ,
+            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.AnyNumber) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.ColorCategory, ChartColumnType.AnyGroupKey) { IsOptional = true }
 
         };
         ParameterGroups = new List<ChartScriptParameterGroup>

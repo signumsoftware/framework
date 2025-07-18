@@ -387,30 +387,29 @@ export namespace ChartClient {
   
   
     switch (ct) {
-  
-      case "Groupable": return [
-        "RealGroupable",
-        "Integer",
-        "DateOnly",
+
+      case "AnyGroupKey": return softCast<ChartColumnType[]>([
+        "RoundedNumber",
+        "Number",
+        "Date",
         "String",
-        "Lite",
+        "Entity",
         "Enum"
-      ].contains(type);
-  
-      case "Magnitude": return [
-        "Integer",
-        "Real",
-        "RealGroupable"
-      ].contains(type);
-  
-      case "Positionable": return [
-        "Integer",
-        "Real",
-        "RealGroupable",
-        "DateOnly",
+      ]).contains(type);
+
+      case "AnyNumber": return softCast<ChartColumnType[]>([
+        "Number",
+        "DecimalNumber",
+        "RoundedNumber"
+      ]).contains(type);
+
+      case "AnyNumberDateTime": return softCast<ChartColumnType[]>([
+        "Number",
+        "DecimalNumber",
+        "Date",
         "DateTime",
         "Time"
-      ].contains(type);
+      ]).contains(type);
     }
   
     return false;
@@ -419,14 +418,14 @@ export namespace ChartClient {
   export function getChartColumnType(token: QueryToken): ChartColumnType | undefined {
   
     switch (token.filterType) {
-      case "Lite": return "Lite";
+      case "Lite": return "Entity";
       case "Boolean":
       case "Enum": return "Enum";
       case "String":
       case "Guid": return "String";
-      case "Integer": return "Integer";
-      case "Decimal": return token.isGroupable ? "RealGroupable" : "Real";
-      case "DateTime": return token.isGroupable ? "DateOnly" : "DateTime";
+      case "Integer": return "Number";
+      case "Decimal": return token.isGroupable ? "RoundedNumber" : "DecimalNumber";
+      case "DateTime": return token.isGroupable ? "Date" : "DateTime";
       case "Time": return "Time";
     }
   
@@ -812,20 +811,6 @@ export namespace ChartClient {
       };
     }
   
-    export function toChartColumnType(token: QueryToken): ChartColumnType | null {
-      switch (token.filterType) {
-        case "Lite": return "Lite";
-        case "Boolean":
-        case "Enum": return "Enum";
-        case "String":
-        case "Guid": return "String";
-        case "Integer": return "Integer";
-        case "Decimal": return token.isGroupable ? "RealGroupable" : "Real";
-        case "DateTime": return token.isGroupable ? "DateOnly" : "DateTime";
-        case "Time": return "Time";
-        default: return null;
-      }
-    }
   
     export function getKey(token: QueryToken): ((val: unknown) => string) {
   
@@ -948,7 +933,7 @@ export namespace ChartClient {
           displayName: scriptCol.displayName,
           title: (mle.element.displayName || token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
           token: token,
-          type: token && toChartColumnType(token),
+          type: (token && getChartColumnType(token)) ?? null,
           orderByIndex: mle.element.orderByIndex,
           orderByType: mle.element.orderByType,
           getKey: key,
@@ -971,7 +956,7 @@ export namespace ChartClient {
           displayName: "Entity",
           title: "",
           token: undefined,
-          type: "Lite",
+          type: "Entity",
           getKey: key,
           getNiceName: niceName,
           getColor: color,
