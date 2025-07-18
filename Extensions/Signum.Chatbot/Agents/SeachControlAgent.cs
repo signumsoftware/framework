@@ -16,7 +16,8 @@ internal static class SeachControlAgent
                     {
                         Content = """
                          Use the SearchControl of Signum Framework to help
-                         """
+                         """,
+                        PromptName = "Default",
                     },
                 },
             },

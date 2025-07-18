@@ -58,7 +58,6 @@ export default function ChatbotAgent(p: { ctx: TypeContext<ChatbotAgentEntity> }
   return (
     <div>
       <AutoLine ctx={ctx4.subCtx(n => n.shortDescription)} />
-
       <Tabs id="descriptions" onSelect={handleTabSelect} activeKey={activeKey}>
         {
           ctx.mlistItemCtxs(a => a.descriptions).map((etcx, i) => {
@@ -76,7 +75,7 @@ export default function ChatbotAgent(p: { ctx: TypeContext<ChatbotAgentEntity> }
                 >
                 <div>
                   <AutoLine ctx={etcx.subCtx(n => n.promptName)} />
-                    <TextAreaLine ctx={etcx.subCtx(n => n.content)} />
+                  <TextAreaLine ctx={etcx.subCtx(n => n.content)} />
                 </div>
               </Tab>
             );

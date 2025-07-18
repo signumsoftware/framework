@@ -10,7 +10,9 @@ export default function ChatbotConfiguration(p: { ctx: TypeContext<ChatbotLangua
     <div>
       <AutoLine ctx={ctx4.subCtx(n => n.provider)} />
       <AutoLine ctx={ctx4.subCtx(n => n.model)} />
+      <AutoLine ctx={ctx4.subCtx(n => n.temperature)} />
       <AutoLine ctx={ctx4.subCtx(n => n.version)} />
+      <AutoLine ctx={ctx4.subCtx(n => n.isDefault)} />
     </div>
   );
 }

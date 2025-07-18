@@ -19,6 +19,8 @@ public class ChatbotLanguageModelEntity : Entity
     [StringLengthValidator(Max = 24)]
     public string? Version { get; set; }
 
+    public double Temperature { get; set; }
+
     public bool IsDefault { get; set; }
 }
 

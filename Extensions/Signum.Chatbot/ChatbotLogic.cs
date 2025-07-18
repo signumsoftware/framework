@@ -107,7 +107,7 @@ public static class ChatbotLogic
     }
 
 
-    public static  IAsyncEnumerable<string> AskQuestionAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
+    public static  IAsyncEnumerable<string> AskQuestionAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model,  CancellationToken ct)
     {
         return  Providers.GetOrThrow(model.Provider).AskQuestionAsync(messages, model, ct);
     }
@@ -123,7 +123,7 @@ public interface IChatbotProvider
 {
     string[] GetModelNames();
     string[] GetModelVersions(string name);
-    IAsyncEnumerable<string> AskQuestionAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct);
+    IAsyncEnumerable<string> AskQuestionAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model,  CancellationToken ct);
 
     Task<string?> GetAgentAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct);
 }
@@ -131,8 +131,11 @@ public interface IChatbotProvider
 public class ConversationHistory
 {
     public ChatSessionEntity Session; 
+
     public ChatbotLanguageModelEntity LanguageModel;
+
     public List<ChatMessageEntity> Messages; 
+
 
     public List<ChatMessage> GetMessages()
     {
@@ -144,4 +147,5 @@ public class ChatMessage
 {
     public ChatMessageRole Role;
     public string Content; 
+    double? temperature;
 }

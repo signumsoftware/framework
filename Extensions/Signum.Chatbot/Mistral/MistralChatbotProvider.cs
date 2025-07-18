@@ -29,11 +29,11 @@ public class MistralChatbotProvider : IChatbotProvider
 
         var payload = new
         {
-            model =  "mistral-medium-latest",
+            model =  model.Model,
             messages = messages.Select(c => new { role = ToMistalRole(c.Role), content = c.Content }).ToArray(),
             stream = true,
-            temperature =  0.8,
-            max_tokens = 1024
+            temperature = model.Temperature,
+            max_tokens = 1024,
         };
         
         var responseClient = await client.PostAsJsonAsync(BaseUrl, payload);

@@ -56,10 +56,10 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
 
                 await response.WriteAsync(errorJson);
                 context.ExceptionHandled = true;
-
             }
         }
     }
+
 
     internal static async Task LogException(Exception exception, ActionContext actionContext)
     {

@@ -41,6 +41,7 @@ public class ChatMessageEntity : Entity
     [StringLengthValidator(MultiLine = true)]
     public string Message { get; set; }
 
+
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         if (pi.Name == nameof(IsCommand) && IsCommand && Role != ChatMessageRole.Assistant)

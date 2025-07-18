@@ -24,7 +24,8 @@ internal static class IntroductionAgent
                         Only after receiving the prompts from the agent may you answer the user's question.
 
                         If nothing matches the user's question, politely decline and explain what types of tasks you can assist with.
-                        """
+                        """,
+                        PromptName = "Default",
                     },
                 }
             },
@@ -44,7 +45,6 @@ internal static class IntroductionAgent
                 //    }
                 //}
             },
-            
         });
     }
 }

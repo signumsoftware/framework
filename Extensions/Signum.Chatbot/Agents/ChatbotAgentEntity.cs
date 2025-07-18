@@ -30,8 +30,6 @@ public class ChatbotAgentDescriptionsEmbedded : EmbeddedEntity
 
     [StringLengthValidator(MultiLine = true)]
     public string Content { get; set; }
-
-
 }
 
 

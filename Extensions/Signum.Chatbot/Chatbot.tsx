@@ -27,6 +27,7 @@ export default function Chatbot(): React.JSX.Element {
   const [userSessions, reloadUserSessions] = useAPIWithReload(signal => ChatbotClient.API.getUserSessions(), [currentSession?.id]);
 
   const [answer, setAnswer] = useState<string>("");
+  const [textAreaDisable, setTextAreaDisable] = useState<boolean>(false);
 
   const [messages, reloadMessages] = useAPIWithReload(signal => currentSession?.id ?
     ChatbotClient.API.getMessagesBySessionId(currentSession.id) : ChatbotClient.API.getMessagesBySessionId(undefined), [currentSession?.id], { avoidReset: true });
@@ -42,6 +43,7 @@ export default function Chatbot(): React.JSX.Element {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [answer, messages]);
+
 
   const forceUpdate = useForceUpdate();
 
@@ -61,9 +63,10 @@ export default function Chatbot(): React.JSX.Element {
 
   function  handleCreateRequestAsync() {
     const newQuestion = newQuestionRef.current;
-    
+
     let visibleText = "";
     setIsLoading(true);
+    setTextAreaDisable(true);
 
     ChatbotClient.API.askQuestionAsync(newQuestion!, currentSession?.id, undefined).then(async r => {
       const reader = r.body?.getReader();
@@ -74,14 +77,22 @@ export default function Chatbot(): React.JSX.Element {
       }
 
       reloadUserSessions();
-      reloadHistoryAndNotifyWidget();
-      newQuestionRef.current = undefined;
+      reloadMessages();
+      
       setAnswer("");
       setIsLoading(false);
-    }).catch(error => {
+
       newQuestionRef.current = undefined;
+      
+      setTextAreaDisable(false);
+      
+    }).catch(error => {
+      
       setAnswer("❌ Fehler beim Laden der Antwort.");
       setIsLoading(false);
+
+      newQuestionRef.current = undefined;
+      setTextAreaDisable(false);
     });
   }
 
@@ -107,7 +118,7 @@ export default function Chatbot(): React.JSX.Element {
         const newlineIndex = buffer.indexOf("\n");
 
         if (newlineIndex === -1) {
-          if (!buffer.startsWith("§$%")) {
+          if (!buffer.startsWith("$!")) {
             yield buffer;
             buffer = "";
           }
@@ -117,7 +128,7 @@ export default function Chatbot(): React.JSX.Element {
         const line = buffer.slice(0, newlineIndex + 1); 
         buffer = buffer.slice(newlineIndex + 1); 
 
-        if (line.startsWith("§$%")) {
+        if (line.startsWith("$!")) {
           if (line.contains("SessionId") && currentSession == undefined) {
             var id = line.after("Id:").before("\n");
 
@@ -187,7 +198,7 @@ export default function Chatbot(): React.JSX.Element {
               </div>
 
               <div style={{ marginTop: "12px" }}>
-                <CurrentSession messages={messages} reload={reloadHistoryAndNotifyWidget} />
+                <CurrentSession messages={messages}  />
               </div>
 
               {isLoading && <div className="typing">Antwort wird geladen<span className="dots"></span></div>}
@@ -201,9 +212,9 @@ export default function Chatbot(): React.JSX.Element {
 
             <div style={{ marginTop: "24px" }}>
 
-              <TextArea value={newQuestionRef.current} className="form-control form-control-sm" onChange={e => {
+              {textAreaDisable ? null : <TextArea value={newQuestionRef.current} className="form-control form-control-sm" disabled={textAreaDisable} onChange={e => {
                 newQuestionRef.current = e.target.value;
-              }} />
+              }} />}
 
             </div>
 
@@ -232,7 +243,6 @@ export function convertInlineFormulas(text: string): string {
 
 export function CurrentSession(p: {
   messages: Array<ChatMessageEntity> | undefined,
-  reload: () => void,
 }): React.JSX.Element {
 
 

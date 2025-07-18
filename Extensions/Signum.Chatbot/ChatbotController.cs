@@ -29,13 +29,16 @@ public class ChatbotController : Controller
             LanguageModel = ChatbotLogic.DefaultLanguageModel.Value ?? throw new InvalidOperationException($"No default {typeof(ChatbotLanguageModelEntity).Name}"),
             User = UserEntity.Current,
             StartDate = Clock.Now,
+            Title = "!*$Neuer Chat" + DateTime.Now,
         }.Save() : Database.Query<ChatSessionEntity>().SingleEx(a => a.Id == PrimaryKey.Parse(sessionID, typeof(ChatSessionEntity)));
 
         ConversationHistory history;
+
         if (sessionID.HasText() == false || sessionID == "undefined") 
         {
             await resp.WriteAsync(UINotification("SessionId", session.Id.ToString()), ct);
             await resp.Body.FlushAsync();
+
             history = new ConversationHistory
             {
                 Session = session,
@@ -46,7 +49,7 @@ public class ChatbotController : Controller
                     {
                         Role = ChatMessageRole.System,
                         ChatSession = session.ToLite(),
-                        Message = ChatbotAgentLogic.GetAgent(DefaultAgent.Introduction).GetDescribe(null)
+                        Message = ChatbotAgentLogic.GetAgent(DefaultAgent.Introduction).GetDescribe(null),
                     }.Save()
                 }
             };
@@ -135,10 +138,9 @@ public class ChatbotController : Controller
 
             await resp.WriteAsync(UINotification("QuestionId", responseMsg.Id.ToString()), ct);
             await resp.Body.FlushAsync();
-
         }
 
-        if (history.Session.Title == null)
+        if (history.Session.Title == null || history.Session.Title.StartsWith("!*$"))
         {
             string title = await ChatbotLogic.SumarizeTitle(history, ct);
             if (title.HasText() && title.ToLower() != "pending")
@@ -154,12 +156,12 @@ public class ChatbotController : Controller
     private string UINotification(string commandName, string? payload = null)
     {
         if (payload == null)
-            return "§$%" + commandName + "\n";
+            return "$!" + commandName + "\n";
 
         if (payload.Contains("\n"))
             throw new InvalidOperationException("Payload has newlines!");
 
-        return "§$%" + commandName + ":" + payload + "\n";
+        return "$!" + commandName + ":" + payload + "\n";
     }
 
     [HttpGet("api/session/{id}")]
