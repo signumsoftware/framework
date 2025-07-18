@@ -76,10 +76,11 @@ export default function Chatbot(): React.JSX.Element {
         setAnswer(visibleText);
       }
 
+      setAnswer("");
+
       reloadUserSessions();
       reloadMessages();
       
-      setAnswer("");
       setIsLoading(false);
 
       newQuestionRef.current = undefined;

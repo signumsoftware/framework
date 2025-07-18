@@ -24,13 +24,7 @@ public class ChatbotController : Controller
         var sessionID = HttpContext.Request.Headers["X-Chatbot-Session-Id"].ToString();
         var message = Encoding.UTF8.GetString(HttpContext.Request.Body.ReadAllBytesAsync().Result);
 
-        var session = sessionID.HasText() == false ||  sessionID == "undefined" ? new ChatSessionEntity
-        {
-            LanguageModel = ChatbotLogic.DefaultLanguageModel.Value ?? throw new InvalidOperationException($"No default {typeof(ChatbotLanguageModelEntity).Name}"),
-            User = UserEntity.Current,
-            StartDate = Clock.Now,
-            Title = "!*$Neuer Chat" + DateTime.Now,
-        }.Save() : Database.Query<ChatSessionEntity>().SingleEx(a => a.Id == PrimaryKey.Parse(sessionID, typeof(ChatSessionEntity)));
+        var session = GetOrCreateSession(sessionID);
 
         ConversationHistory history;
 
@@ -39,20 +33,7 @@ public class ChatbotController : Controller
             await resp.WriteAsync(UINotification("SessionId", session.Id.ToString()), ct);
             await resp.Body.FlushAsync();
 
-            history = new ConversationHistory
-            {
-                Session = session,
-                LanguageModel = session.LanguageModel.RetrieveFromCache(),
-                Messages = new List<ChatMessageEntity>
-                {
-                    new ChatMessageEntity
-                    {
-                        Role = ChatMessageRole.System,
-                        ChatSession = session.ToLite(),
-                        Message = ChatbotAgentLogic.GetAgent(DefaultAgent.Introduction).GetDescribe(null),
-                    }.Save()
-                }
-            };
+            history = CreateNewConversationHistory(session);
         }
         else
         {
@@ -64,24 +45,20 @@ public class ChatbotController : Controller
             };
         }
 
-        var userQuestion = new ChatMessageEntity()
-        {
-            ChatSession = session.ToLite(),
-            Role = ChatMessageRole.User,
-            Message = message,
-        }.Save();
+        var userQuestion = NewChatMessage(session.ToLite(), message, ChatMessageRole.User).Save();
 
         history.Messages.Add(userQuestion);
 
         await resp.WriteAsync(UINotification("QuestionId", userQuestion.Id.ToString()), ct);
         await resp.Body.FlushAsync();
 
-
         string lastAnswer;
+
         while (true)
         {
             lastAnswer = "";
             bool isCommand = false;
+
             await foreach (var item in ChatbotLogic.AskQuestionAsync(history.GetMessages(), history.LanguageModel, ct))
             {
                 if (lastAnswer.Length == 0)
@@ -103,14 +80,7 @@ public class ChatbotController : Controller
                 await resp.Body.FlushAsync();
             }
 
-
-            var command = new ChatMessageEntity()
-            {
-                ChatSession = history.Session.ToLite(),
-                Message = lastAnswer,
-                Role = ChatMessageRole.Assistant,
-                IsCommand = isCommand,
-            }.Save();
+            var command = NewChatMessage(history.Session.ToLite(), lastAnswer, ChatMessageRole.Assistant, isCommand).Save();
 
             history.Messages.Add(command);
 
@@ -126,12 +96,7 @@ public class ChatbotController : Controller
 
             var pendingResponse  = resp.WriteAsync(response);
 
-            var responseMsg = new ChatMessageEntity()
-            {
-                ChatSession = history.Session.ToLite(),
-                Message = response,
-                Role = ChatMessageRole.Function,
-            }.Save();
+            var responseMsg = NewChatMessage(history.Session.ToLite(), response, ChatMessageRole.Function).Save();
 
             history.Messages.Add(responseMsg);
             await pendingResponse;
@@ -163,6 +128,52 @@ public class ChatbotController : Controller
 
         return "$!" + commandName + ":" + payload + "\n";
     }
+
+    private ChatSessionEntity GetOrCreateSession(string? sessionID)
+    {
+        return sessionID.HasText() == false || sessionID == "undefined" ? new ChatSessionEntity
+        {
+            LanguageModel = ChatbotLogic.DefaultLanguageModel.Value ?? throw new InvalidOperationException($"No default {typeof(ChatbotLanguageModelEntity).Name}"),
+            User = UserEntity.Current,
+            StartDate = Clock.Now,
+            Title = "!*$Neuer Chat" + DateTime.Now,
+        }.Save() : Database.Query<ChatSessionEntity>().SingleEx(a => a.Id == PrimaryKey.Parse(sessionID, typeof(ChatSessionEntity)));
+    }
+
+    private ConversationHistory CreateNewConversationHistory(ChatSessionEntity session)
+    {
+        var history = new ConversationHistory
+        {
+            Session = session,
+            LanguageModel = session.LanguageModel.RetrieveFromCache(),
+            Messages = new List<ChatMessageEntity>
+                {
+                    new ChatMessageEntity
+                    {
+                        Role = ChatMessageRole.System,
+                        ChatSession = session.ToLite(),
+                        Message = ChatbotAgentLogic.GetAgent(DefaultAgent.Introduction).GetDescribe(null),
+                    }.Save()
+                }
+        };
+
+        return history;
+    }
+
+
+    private ChatMessageEntity NewChatMessage(Lite<ChatSessionEntity> session, string message, ChatMessageRole role, bool isCommand = false)
+    {
+        var command = new ChatMessageEntity()
+        {
+            ChatSession = session,
+            Message = message,
+            Role = role,
+            IsCommand = isCommand,
+        };
+
+        return command;
+    }
+
 
     [HttpGet("api/session/{id}")]
     public Lite<ChatSessionEntity>? GetChatSessionById(int id)
