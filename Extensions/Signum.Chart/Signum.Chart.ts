@@ -156,6 +156,8 @@ export namespace ChartMessage {
   export const HideChartSettings: MessageKey = new MessageKey("ChartMessage", "HideChartSettings");
   export const QueryResultReachedMaxRows0: MessageKey = new MessageKey("ChartMessage", "QueryResultReachedMaxRows0");
   export const ListView: MessageKey = new MessageKey("ChartMessage", "ListView");
+  export const TheSelectedTokenShouldBeA0: MessageKey = new MessageKey("ChartMessage", "TheSelectedTokenShouldBeA0");
+  export const TheSelectedTokenShouldBeEither: MessageKey = new MessageKey("ChartMessage", "TheSelectedTokenShouldBeEither");
 }
 
 export const ChartParameterEmbedded: Type<ChartParameterEmbedded> = new Type<ChartParameterEmbedded>("ChartParameterEmbedded");

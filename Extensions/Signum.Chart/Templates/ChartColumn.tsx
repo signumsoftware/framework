@@ -180,9 +180,9 @@ export function ChartColumn(p: ChartColumnProps): React.JSX.Element {
 
 function getTitle(ct: ChartColumnType): ChartColumnType[] {
   switch (ct) {
-    case "Groupable": return ["String", "Lite", "Enum", "DateOnly", "Integer", "RealGroupable"];
-    case "Magnitude": return ["Integer", "Real", "RealGroupable"];
-    case "Positionable": return ["Integer", "Real", "RealGroupable", "DateOnly", "DateTime"];
+    case "AnyGroupKey": return ["String", "Entity", "Enum", "Date", "Number", "RoundedNumber"];
+    case "AnyNumber": return ["Number", "DecimalNumber", "RoundedNumber"];
+    case "AnyNumberDateTime": return ["Number", "DecimalNumber", "RoundedNumber", "Date", "DateTime"];
     default: return [];
   }
 }

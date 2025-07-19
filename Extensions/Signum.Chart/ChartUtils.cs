@@ -225,7 +225,12 @@ public enum ChartMessage
     HideChartSettings,
     [Description("Query result reached max rows ({0})")]
     QueryResultReachedMaxRows0,
-    ListView, 
+    ListView,
+    [Description("The selected token should be a {0}")]
+    TheSelectedTokenShouldBeA0,
+
+    [Description("The selected token should be either:")]
+    TheSelectedTokenShouldBeEither
 }
 
 
