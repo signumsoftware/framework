@@ -38,10 +38,10 @@ export default function DashboardPage(): React.JSX.Element {
   var cachedQueries = React.useMemo(() => DashboardClient.toCachedQueries(dashboardWithQueries), [dashboardWithQueries]);
 
   return (
-    <div>
-      {!dashboard ? <h2 className="display-5">{JavascriptMessage.loading.niceToString()}</h2> :
+    <div className="sf-dashboard-page">
+      {!dashboard ? <h2 className="fs-5 fw-bold">{JavascriptMessage.loading.niceToString()}</h2> :
         <div className="d-flex">
-          {<h2 className="display-5">{DashboardClient.Options.customTitle(dashboard)}</h2>}
+          {<h2 className="fs-5 fw-bold">{DashboardClient.Options.customTitle(dashboard)}</h2>}
           {!Navigator.isReadOnly(DashboardEntity) &&
             <div className="ms-auto">
               {dashboardWithQueries.cachedQueries.length ? <span className="mx-4" title={DashboardMessage.ForPerformanceReasonsThisDashboardMayShowOutdatedInformation.niceToString() + "\n" +
@@ -49,7 +49,9 @@ export default function DashboardPage(): React.JSX.Element {
                 <FontAwesomeIcon icon="clock-rotate-left" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
               </span> : null}
               {dashboard.parts.some(a => a.element.interactionGroup != null) && <HelpIcon />}
-              <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="pen-to-square" />&nbsp;{DashboardMessage.Edit.niceToString()}</Link>
+              <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)} title={DashboardMessage.Edit.niceToString()}>
+                <FontAwesomeIcon icon="pen-to-square" />
+              </Link>
             </div>
           }
         </div>}

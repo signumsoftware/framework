@@ -101,7 +101,7 @@ export function BigValueSearchCounter(p: BigValueBadgeProps): React.JSX.Element 
   const vsc = React.useRef<SearchValueController>(null);
 
   return (
-    <div className={classes("card", !p.customColor && "bg-ligth", "o-hidden")}
+    <div className={classes("card", "border-light shadow-sm mb-3", "o-hidden")}
       style={{
       backgroundColor: p.customColor ?? undefined,
       color: Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black"

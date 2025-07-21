@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace Signum.Chart;
@@ -28,32 +29,32 @@ public class ChartScriptColumn
 public enum ChartColumnType
 {
     [Code("i")]
-    Integer = 1,
+    Number = 1,
     [Code("r")]
-    Real = 2,
+    DecimalNumber = 2,
     [Code("d")]
-    DateOnly = 4,
+    Date = 4,
     [Code("dt")]
     DateTime = 8,
     [Code("s")]
     String = 16, //Guid
     [Code("l")]
-    Lite = 32,
+    Entity = 32,
     [Code("e")]
     Enum = 64, // Boolean,
     [Code("rg")]
-    RealGroupable = 128,
+    RoundedNumber = 128,
     [Code("t")]
     Time = 256,
 
     [Code("G")]
-    Groupable = ChartColumnTypeUtils.GroupMargin | RealGroupable | Integer | DateOnly | String | Lite | Enum,
-    [Code("M")]
-    Magnitude = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable,
-    [Code("P")]
-    Positionable = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | DateOnly | DateTime | Time,
-    [Code("A")]
-    Any = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | DateOnly | DateTime | Time | String | Lite | Enum,
+    AnyGroupKey = ChartColumnTypeUtils.GroupMargin | RoundedNumber | Number | Date | String | Entity | Enum,
+    [Code("M"), Description("Any number")]
+    AnyNumber = ChartColumnTypeUtils.GroupMargin | Number | DecimalNumber | RoundedNumber,
+    [Code("P"), Description("Any number, date or time")]
+    AnyNumberDateTime = ChartColumnTypeUtils.GroupMargin | Number | DecimalNumber | RoundedNumber | Date | DateTime | Time,
+    [Code("A"), Description("All types")]
+    AllTypes = ChartColumnTypeUtils.GroupMargin | Number | DecimalNumber | RoundedNumber | Date | DateTime | Time | String | Entity | Enum,
 }
 
 

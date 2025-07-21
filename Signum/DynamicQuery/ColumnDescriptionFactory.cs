@@ -1,3 +1,5 @@
+using Signum.Engine.Maps;
+
 namespace Signum.DynamicQuery;
 
 public class ColumnDescriptionFactory
@@ -59,12 +61,17 @@ public class ColumnDescriptionFactory
             case PropertyRouteType.Root:
                 return null;
             case PropertyRouteType.FieldOrProperty:
-                return routes.Select(pr => pr.SimplifyToProperty().PropertyInfo!.GetCustomAttribute<UnitAttribute>()?.UnitName).Distinct().Only();
+                return routes.Select(pr => GetUnit(pr)).Distinct().Only();
             case PropertyRouteType.MListItems:
                 return null;
         }
 
         throw new InvalidOperationException();
+    }
+
+    private static string? GetUnit(PropertyRoute pr)
+    {
+        return Schema.Current.Settings.FieldAttribute<UnitAttribute>(pr)?.UnitName;
     }
 
     internal static string? GetFormat(PropertyRoute[] routes)

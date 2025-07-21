@@ -100,19 +100,19 @@ export namespace ChartColumnMessage {
 
 export const ChartColumnType: EnumType<ChartColumnType> = new EnumType<ChartColumnType>("ChartColumnType");
 export type ChartColumnType =
-  "Integer" |
-  "Real" |
-  "DateOnly" |
+  "Number" |
+  "DecimalNumber" |
+  "Date" |
   "DateTime" |
   "String" |
-  "Lite" |
+  "Entity" |
   "Enum" |
-  "RealGroupable" |
+  "RoundedNumber" |
   "Time" |
-  "Magnitude" |
-  "Groupable" |
-  "Positionable" |
-  "Any";
+  "AnyNumber" |
+  "AnyGroupKey" |
+  "AnyNumberDateTime" |
+  "AllTypes";
 
 export namespace ChartMessage {
   export const _0CanOnlyBeCreatedFromTheChartWindow: MessageKey = new MessageKey("ChartMessage", "_0CanOnlyBeCreatedFromTheChartWindow");
@@ -156,7 +156,103 @@ export namespace ChartMessage {
   export const HideChartSettings: MessageKey = new MessageKey("ChartMessage", "HideChartSettings");
   export const QueryResultReachedMaxRows0: MessageKey = new MessageKey("ChartMessage", "QueryResultReachedMaxRows0");
   export const ListView: MessageKey = new MessageKey("ChartMessage", "ListView");
+  export const TheSelectedTokenShouldBeA0: MessageKey = new MessageKey("ChartMessage", "TheSelectedTokenShouldBeA0");
+  export const TheSelectedTokenShouldBeEither: MessageKey = new MessageKey("ChartMessage", "TheSelectedTokenShouldBeEither");
 }
+
+export const ChartParameter: EnumType<ChartParameter> = new EnumType<ChartParameter>("ChartParameter");
+export type ChartParameter =
+  "CompleteValues" |
+  "Scale" |
+  "Labels" |
+  "LabelsMargin" |
+  "NumberOpacity" |
+  "NumberColor" |
+  "ColorCategory" |
+  "HorizontalScale" |
+  "VerticalScale" |
+  "UnitMargin" |
+  "NumberMinWidth" |
+  "CircleStroke" |
+  "CircleRadius" |
+  "CircleAutoReduce" |
+  "CircleRadiusHover" |
+  "Color" |
+  "Interpolate" |
+  "MapType" |
+  "MapStyle" |
+  "AnimateDrop" |
+  "AnimateOnClick" |
+  "InfoLinkPosition" |
+  "ClusterMap" |
+  "ColorScale" |
+  "ColorInterpolation" |
+  "LabelMargin" |
+  "NumberSizeLimit" |
+  "FillOpacity" |
+  "ColorInterpolate" |
+  "StrokeColor" |
+  "StrokeWidth" |
+  "Scale1" |
+  "Scale2" |
+  "Scale3" |
+  "Scale4" |
+  "Scale5" |
+  "Scale6" |
+  "Scale7" |
+  "Scale8" |
+  "InnerRadious" |
+  "Sort" |
+  "SvgUrl" |
+  "LocationSelector" |
+  "LocationAttribute" |
+  "LocationMatch" |
+  "ColorScaleMaxValue" |
+  "NoDataColor" |
+  "StartDate" |
+  "Opacity" |
+  "RadiousPx" |
+  "SizeScale" |
+  "TopMargin" |
+  "RightMargin" |
+  "ShowLabel" |
+  "LabelColor" |
+  "ForceColor" |
+  "SubTotal" |
+  "Placeholder" |
+  "MultiValueFormat" |
+  "Complete" |
+  "Order" |
+  "Gradient" |
+  "CSSStyle" |
+  "CSSStyleDiv" |
+  "MaxTextLength" |
+  "ShowCreateButton" |
+  "ShowAggregateValues" |
+  "PointSize" |
+  "DrawingMode" |
+  "MinZoom" |
+  "MaxZoom" |
+  "CompleteHorizontalValues" |
+  "CompleteVerticalValues" |
+  "Shape" |
+  "XMargin" |
+  "HorizontalLineColor" |
+  "VerticalLineColor" |
+  "XSort" |
+  "YSort" |
+  "FillColor" |
+  "OpacityScale" |
+  "InnerSizeType" |
+  "InnerFillColor" |
+  "Stack" |
+  "ValueAsPercent" |
+  "HorizontalMargin" |
+  "Padding" |
+  "Zoom" |
+  "Value" |
+  "Percent" |
+  "Total";
 
 export const ChartParameterEmbedded: Type<ChartParameterEmbedded> = new Type<ChartParameterEmbedded>("ChartParameterEmbedded");
 export interface ChartParameterEmbedded extends Entities.EmbeddedEntity {
@@ -195,106 +291,13 @@ export namespace ChartParameterGroupMessage {
   export const Scale: MessageKey = new MessageKey("ChartParameterGroupMessage", "Scale");
 }
 
-export namespace ChartParameterMessage {
-  export const CompleteValues: MessageKey = new MessageKey("ChartParameterMessage", "CompleteValues");
-  export const Scale: MessageKey = new MessageKey("ChartParameterMessage", "Scale");
-  export const Labels: MessageKey = new MessageKey("ChartParameterMessage", "Labels");
-  export const LabelsMargin: MessageKey = new MessageKey("ChartParameterMessage", "LabelsMargin");
-  export const NumberOpacity: MessageKey = new MessageKey("ChartParameterMessage", "NumberOpacity");
-  export const NumberColor: MessageKey = new MessageKey("ChartParameterMessage", "NumberColor");
-  export const ColorCategory: MessageKey = new MessageKey("ChartParameterMessage", "ColorCategory");
-  export const HorizontalScale: MessageKey = new MessageKey("ChartParameterMessage", "HorizontalScale");
-  export const VerticalScale: MessageKey = new MessageKey("ChartParameterMessage", "VerticalScale");
-  export const UnitMargin: MessageKey = new MessageKey("ChartParameterMessage", "UnitMargin");
-  export const NumberMinWidth: MessageKey = new MessageKey("ChartParameterMessage", "NumberMinWidth");
-  export const CircleStroke: MessageKey = new MessageKey("ChartParameterMessage", "CircleStroke");
-  export const CircleRadius: MessageKey = new MessageKey("ChartParameterMessage", "CircleRadius");
-  export const CircleAutoReduce: MessageKey = new MessageKey("ChartParameterMessage", "CircleAutoReduce");
-  export const CircleRadiusHover: MessageKey = new MessageKey("ChartParameterMessage", "CircleRadiusHover");
-  export const Color: MessageKey = new MessageKey("ChartParameterMessage", "Color");
-  export const Interpolate: MessageKey = new MessageKey("ChartParameterMessage", "Interpolate");
-  export const MapType: MessageKey = new MessageKey("ChartParameterMessage", "MapType");
-  export const MapStyle: MessageKey = new MessageKey("ChartParameterMessage", "MapStyle");
-  export const AnimateDrop: MessageKey = new MessageKey("ChartParameterMessage", "AnimateDrop");
-  export const AnimateOnClick: MessageKey = new MessageKey("ChartParameterMessage", "AnimateOnClick");
-  export const InfoLinkPosition: MessageKey = new MessageKey("ChartParameterMessage", "InfoLinkPosition");
-  export const ClusterMap: MessageKey = new MessageKey("ChartParameterMessage", "ClusterMap");
-  export const ColorScale: MessageKey = new MessageKey("ChartParameterMessage", "ColorScale");
-  export const ColorInterpolation: MessageKey = new MessageKey("ChartParameterMessage", "ColorInterpolation");
-  export const LabelMargin: MessageKey = new MessageKey("ChartParameterMessage", "LabelMargin");
-  export const NumberSizeLimit: MessageKey = new MessageKey("ChartParameterMessage", "NumberSizeLimit");
-  export const FillOpacity: MessageKey = new MessageKey("ChartParameterMessage", "FillOpacity");
-  export const ColorInterpolate: MessageKey = new MessageKey("ChartParameterMessage", "ColorInterpolate");
-  export const StrokeColor: MessageKey = new MessageKey("ChartParameterMessage", "StrokeColor");
-  export const StrokeWidth: MessageKey = new MessageKey("ChartParameterMessage", "StrokeWidth");
-  export const Scale1: MessageKey = new MessageKey("ChartParameterMessage", "Scale1");
-  export const Scale2: MessageKey = new MessageKey("ChartParameterMessage", "Scale2");
-  export const Scale3: MessageKey = new MessageKey("ChartParameterMessage", "Scale3");
-  export const Scale4: MessageKey = new MessageKey("ChartParameterMessage", "Scale4");
-  export const Scale5: MessageKey = new MessageKey("ChartParameterMessage", "Scale5");
-  export const Scale6: MessageKey = new MessageKey("ChartParameterMessage", "Scale6");
-  export const Scale7: MessageKey = new MessageKey("ChartParameterMessage", "Scale7");
-  export const Scale8: MessageKey = new MessageKey("ChartParameterMessage", "Scale8");
-  export const InnerRadious: MessageKey = new MessageKey("ChartParameterMessage", "InnerRadious");
-  export const Sort: MessageKey = new MessageKey("ChartParameterMessage", "Sort");
-  export const SvgUrl: MessageKey = new MessageKey("ChartParameterMessage", "SvgUrl");
-  export const LocationSelector: MessageKey = new MessageKey("ChartParameterMessage", "LocationSelector");
-  export const LocationAttribute: MessageKey = new MessageKey("ChartParameterMessage", "LocationAttribute");
-  export const LocationMatch: MessageKey = new MessageKey("ChartParameterMessage", "LocationMatch");
-  export const ColorScaleMaxValue: MessageKey = new MessageKey("ChartParameterMessage", "ColorScaleMaxValue");
-  export const NoDataColor: MessageKey = new MessageKey("ChartParameterMessage", "NoDataColor");
-  export const StartDate: MessageKey = new MessageKey("ChartParameterMessage", "StartDate");
-  export const Opacity: MessageKey = new MessageKey("ChartParameterMessage", "Opacity");
-  export const RadiousPx: MessageKey = new MessageKey("ChartParameterMessage", "RadiousPx");
-  export const SizeScale: MessageKey = new MessageKey("ChartParameterMessage", "SizeScale");
-  export const TopMargin: MessageKey = new MessageKey("ChartParameterMessage", "TopMargin");
-  export const RightMargin: MessageKey = new MessageKey("ChartParameterMessage", "RightMargin");
-  export const ShowLabel: MessageKey = new MessageKey("ChartParameterMessage", "ShowLabel");
-  export const LabelColor: MessageKey = new MessageKey("ChartParameterMessage", "LabelColor");
-  export const ForceColor: MessageKey = new MessageKey("ChartParameterMessage", "ForceColor");
-  export const SubTotal: MessageKey = new MessageKey("ChartParameterMessage", "SubTotal");
-  export const Placeholder: MessageKey = new MessageKey("ChartParameterMessage", "Placeholder");
-  export const MultiValueFormat: MessageKey = new MessageKey("ChartParameterMessage", "MultiValueFormat");
-  export const Complete: MessageKey = new MessageKey("ChartParameterMessage", "Complete");
-  export const Order: MessageKey = new MessageKey("ChartParameterMessage", "Order");
-  export const Gradient: MessageKey = new MessageKey("ChartParameterMessage", "Gradient");
-  export const CSSStyle: MessageKey = new MessageKey("ChartParameterMessage", "CSSStyle");
-  export const CSSStyleDiv: MessageKey = new MessageKey("ChartParameterMessage", "CSSStyleDiv");
-  export const MaxTextLength: MessageKey = new MessageKey("ChartParameterMessage", "MaxTextLength");
-  export const ShowCreateButton: MessageKey = new MessageKey("ChartParameterMessage", "ShowCreateButton");
-  export const ShowAggregateValues: MessageKey = new MessageKey("ChartParameterMessage", "ShowAggregateValues");
-  export const PointSize: MessageKey = new MessageKey("ChartParameterMessage", "PointSize");
-  export const DrawingMode: MessageKey = new MessageKey("ChartParameterMessage", "DrawingMode");
-  export const MinZoom: MessageKey = new MessageKey("ChartParameterMessage", "MinZoom");
-  export const MaxZoom: MessageKey = new MessageKey("ChartParameterMessage", "MaxZoom");
-  export const CompleteHorizontalValues: MessageKey = new MessageKey("ChartParameterMessage", "CompleteHorizontalValues");
-  export const CompleteVerticalValues: MessageKey = new MessageKey("ChartParameterMessage", "CompleteVerticalValues");
-  export const Shape: MessageKey = new MessageKey("ChartParameterMessage", "Shape");
-  export const XMargin: MessageKey = new MessageKey("ChartParameterMessage", "XMargin");
-  export const HorizontalLineColor: MessageKey = new MessageKey("ChartParameterMessage", "HorizontalLineColor");
-  export const VerticalLineColor: MessageKey = new MessageKey("ChartParameterMessage", "VerticalLineColor");
-  export const XSort: MessageKey = new MessageKey("ChartParameterMessage", "XSort");
-  export const YSort: MessageKey = new MessageKey("ChartParameterMessage", "YSort");
-  export const FillColor: MessageKey = new MessageKey("ChartParameterMessage", "FillColor");
-  export const OpacityScale: MessageKey = new MessageKey("ChartParameterMessage", "OpacityScale");
-  export const InnerSizeType: MessageKey = new MessageKey("ChartParameterMessage", "InnerSizeType");
-  export const InnerFillColor: MessageKey = new MessageKey("ChartParameterMessage", "InnerFillColor");
-  export const Stack: MessageKey = new MessageKey("ChartParameterMessage", "Stack");
-  export const ValueAsPercent: MessageKey = new MessageKey("ChartParameterMessage", "ValueAsPercent");
-  export const HorizontalMargin: MessageKey = new MessageKey("ChartParameterMessage", "HorizontalMargin");
-  export const Padding: MessageKey = new MessageKey("ChartParameterMessage", "Padding");
-  export const Zoom: MessageKey = new MessageKey("ChartParameterMessage", "Zoom");
-  export const Value: MessageKey = new MessageKey("ChartParameterMessage", "Value");
-  export const Percent: MessageKey = new MessageKey("ChartParameterMessage", "Percent");
-  export const Total: MessageKey = new MessageKey("ChartParameterMessage", "Total");
-}
-
 export const ChartParameterType: EnumType<ChartParameterType> = new EnumType<ChartParameterType>("ChartParameterType");
 export type ChartParameterType =
   "Enum" |
   "Number" |
   "String" |
-  "Special";
+  "Special" |
+  "Scala";
 
 export namespace ChartPermission {
   export const ViewCharting : Basics.PermissionSymbol = registerSymbol("Permission", "ChartPermission.ViewCharting");

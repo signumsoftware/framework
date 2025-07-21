@@ -1,10 +1,11 @@
-using Signum.Utilities.Reflection;
-using System.Text.RegularExpressions;
-using System.Globalization;
-using System.Collections;
-using System.Text.Json.Serialization;
-using System.Text.Json;
+using DocumentFormat.OpenXml;
 using Signum.DynamicQuery.Tokens;
+using Signum.Utilities.Reflection;
+using System.Collections;
+using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Signum.Chart;
 
@@ -196,19 +197,75 @@ public class SpecialParameter : IChartParameterValueDefinition
     }
 }
 
-public class EnumValueList : List<EnumValue>, IChartParameterValueDefinition
+public class Scala : IChartParameterValueDefinition
+{
+    public Dictionary<string, ChartColumnType?> StandardScalas;
+    public bool Custom;
+
+    public Scala(bool bands = false, bool zeroMax = true, bool minMax = true, bool minZeroMax = false, bool log = true, bool sqrt = true, bool custom = true)
+    {
+        StandardScalas = new Dictionary<string, ChartColumnType?>();
+        if (bands) 
+            StandardScalas.Add("Bands", ChartColumnType.AnyGroupKey);
+        if(zeroMax)
+            StandardScalas.Add("ZeroMax", ChartColumnType.AnyNumber);
+        if (minMax)
+            StandardScalas.Add("MinMax", null);
+        if (minZeroMax)
+            StandardScalas.Add("MinZeroMax", ChartColumnType.AnyNumber);
+        if (log)
+            StandardScalas.Add("Log", ChartColumnType.AnyNumber);
+        if (sqrt)
+            StandardScalas.Add("Sqrt", ChartColumnType.AnyNumber);
+
+        this.Custom = custom;
+    }
+
+
+    public string DefaultValue(QueryToken? token)
+    {
+        return StandardScalas.First(a =>  a.Value == null || token == null || ChartUtils.IsChartColumnType(token, a.Value.Value)).Key;
+    }
+
+    public string? Validate(string? parameter, QueryToken? token)
+    {
+        if (parameter == null)
+            return null;
+
+        if (StandardScalas.TryGetValue(parameter, out ChartColumnType? type))
+        {
+            if (type == null || token == null || ChartUtils.IsChartColumnType(token, type.Value))
+                return null;
+
+            return "{0} is not compatible with {1}".FormatWith(parameter, token?.NiceName());
+        }
+
+        if(Custom && parameter.Contains("..."))
+        {
+            var minValue = parameter.Before("...");
+            var maxValue = parameter.After("...");
+
+            if (!decimal.TryParse(minValue, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+                return "{0} is not a valid number".FormatWith(minValue);
+
+            if (!decimal.TryParse(maxValue, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+                return "{0} is not a valid number".FormatWith(maxValue);
+
+            return null;
+        }
+
+        if (Custom)
+            return "{0} is not in the list and is not a custom scala (min...max)".FormatWith(parameter);
+        else
+            return "{0} is not in the list".FormatWith(parameter);
+    }
+}
+
+public class EnumValueList : List<string>, IChartParameterValueDefinition
 {
     public static string? TryParse(string valueDefinition, out EnumValueList list)
     {
-        list = new EnumValueList();
-        foreach (var item in valueDefinition.SplitNoEmpty('|'))
-        {
-            string? error = EnumValue.TryParse(item, out EnumValue? val);
-            if (error.HasText())
-                return error;
-
-            list.Add(val!);
-        }
+        list = [.. valueDefinition.SplitNoEmpty('|')];
 
         if (list.Count == 0)
             return "No parameter values set";
@@ -230,77 +287,17 @@ public class EnumValueList : List<EnumValue>, IChartParameterValueDefinition
         if (token == null)
             return null; //?
 
-        var enumValue = this.SingleOrDefault(a => a.Name == parameter);
+        var enumValue = this.SingleOrDefault(a => a == parameter);
 
         if (enumValue == null)
             return "{0} is not in the list".FormatWith(parameter);
-
-        if (!enumValue.CompatibleWith(token))
-            return "{0} is not compatible with {1}".FormatWith(parameter, token?.NiceName());
 
         return null;
     }
 
     public string DefaultValue(QueryToken? token)
     {
-        return this.Where(a => a.CompatibleWith(token)).FirstEx(() => "No default parameter value for {0} found".FormatWith(token?.NiceName())).Name;
-    }
-
-    internal string ToCode()
-    {
-        return $@"EnumValueList.Parse(""{this.ToString("|")}"")";
-    }
-}
-
-public class EnumValue
-{
-    public string Name;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public ChartColumnType? TypeFilter;
-
-    public override string ToString()
-    {
-        if (TypeFilter == null)
-            return Name;
-
-        return "{0} ({1})".FormatWith(Name, TypeFilter.Value.GetComposedCode());
-    }
-
-    public static string? TryParse(string value, out EnumValue? enumValue)
-    {
-        var m = Regex.Match(value, @"^\s*(?<name>[^\(]*)\s*(\((?<filter>.*?)\))?\s*$");
-
-        if (!m.Success)
-        {
-            enumValue = null;
-            return "Invalid EnumValue";
-        }
-
-        enumValue = new EnumValue()
-        {
-            Name = m.Groups["name"].Value.Trim()
-        };
-
-        if (string.IsNullOrEmpty(enumValue!.Name))
-            return "Parameter has no name";
-
-        string composedCode = m.Groups["filter"].Value;
-        if (!composedCode.HasText())
-            return null;
-
-
-        string? error = ChartColumnTypeUtils.TryParseComposed(composedCode, out ChartColumnType filter);
-        if (error.HasText())
-            return enumValue.Name + ": " + error;
-
-        enumValue.TypeFilter = filter;
-
-        return null;
-    }
-
-    public bool CompatibleWith(QueryToken? token)
-    {
-        return TypeFilter == null || token != null && ChartUtils.IsChartColumnType(token, TypeFilter.Value);
+        return this.FirstEx(() => "No default parameter value for {0} found".FormatWith(token?.NiceName()));
     }
 }
 
@@ -311,6 +308,7 @@ public enum ChartParameterType
     Number,
     String,
     Special,
+    Scala,
 }
 
 public class StringValue : IChartParameterValueDefinition

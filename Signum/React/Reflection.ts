@@ -371,6 +371,16 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
     }
   }
 
+  if (f.startsWith("K")) {
+    return {
+      style: "decimal",
+      minimumFractionDigits: parseIntDefault(f.after("K"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("K"), 2),
+      notation: "compact",
+      useGrouping: true
+    }
+  }
+
   //simple heuristic
 
   var regex = /(?<plus>\+)?(?<body>[0#,.]+)(?<suffix>[%MKB])?/
@@ -383,7 +393,6 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
   var afterDot = body.tryAfter(".") ?? "";
   const result: Intl.NumberFormatOptions = {
     style: suffix == "%" ? "percent" : "decimal",
-    notation: suffix == "K" || suffix == "M" || suffix == "B" ? "compact" : undefined,
     minimumFractionDigits: afterDot.replaceAll("#", "").length,
     maximumFractionDigits: afterDot.length,
     useGrouping: f.contains(","),

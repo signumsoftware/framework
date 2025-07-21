@@ -85,7 +85,7 @@ export namespace UserChartClient {
     DashboardClient.registerRenderer(UserChartPartEntity, {
       waitForInvalidation: true,
       component: () => import('../Dashboard/View/UserChartPart').then(a => a.default),
-      defaultIcon: () => ({ icon: "chart-bar", iconColor: "#6C3483" }),
+      icon: () => ({ icon: "chart-bar", iconColor: "#6C3483" }),
       defaultTitle: c => translated(c.userChart, uc => uc.displayName),
       getQueryNames: c => [c.userChart?.query].notNull(),
       handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
@@ -118,7 +118,7 @@ export namespace UserChartClient {
   
     DashboardClient.registerRenderer(CombinedUserChartPartEntity, {
       component: () => import('../Dashboard/View/CombinedUserChartPart').then(a => a.default),
-      defaultIcon: () => ({ icon: "chart-line", iconColor: "#8E44AD" }),
+      icon: () => ({ icon: "chart-line", iconColor: "#8E44AD" }),
       getQueryNames: c => c.userCharts.map(a => a.element.userChart?.query).notNull(),
       handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
         (c, e, cdRef, ev) => {

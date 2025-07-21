@@ -36,7 +36,7 @@ export default function renderColumns({ data, width, height, parameters, loading
     _1: 10,
     legend: 15,
     _2: 5,
-    _labelTopMargin: parameters["Labels"] == "Inside" ? labelsPadding + labelsMargin : 0,
+    _labelTopMargin: isInside ? labelsPadding + labelsMargin : 0,
     content: '*',
     ticks: 4,
     _3: isMargin ? labelsPadding : 0,
@@ -65,7 +65,7 @@ export default function renderColumns({ data, width, height, parameters, loading
     .domain(keyValues.map(v => keyColumn.getKey(v)))
     .range([0, xRule.size('content')]);
 
-  var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content') - (isInside ? labelsMargin + labelsPadding : 0), parameters["Scale"]);
+  var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content'), parameters["Scale"]);
 
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 

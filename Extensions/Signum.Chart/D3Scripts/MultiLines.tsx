@@ -66,7 +66,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
     .domain(keyValues.map(v => keyColumn.getKey(v)))
     .range([0, xRule.size('content')]);
 
-  var allValues = pivot.rows.flatMap(r => pivot.columns.map(function (c) { return r.values[c.key]?.value; }));
+  var allValues = pivot.rows.flatMap(r => pivot.columns.map(c => r.values[c.key]?.value));
 
   var y = scaleFor(valueColumn0, allValues, 0, yRule.size('content'), parameters["VerticalScale"]);
 

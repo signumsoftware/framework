@@ -101,6 +101,26 @@ public class FormatAttribute : Attribute
     {
         this.Format = format;
     }
+
+    public static string FormatNumber(decimal number, string format, CultureInfo? culture = null)
+    {
+        culture ??= CultureInfo.CurrentCulture;
+
+        if (format.StartsWith("K"))
+        {
+            var baseFormat = format.Substring(4); //
+            if (number >= 1_000_000)
+                return (number / 1_000_000m).ToString(baseFormat, culture) + "M";
+            if (number >= 1_000)
+                return (number / 1_000m).ToString(baseFormat, culture) + "K";
+            return number.ToString(baseFormat, culture);
+        }
+        else
+        {
+            // fallback to normal formatting
+            return number.ToString(format, culture);
+        }
+    }
 }
 
 public static class DescriptionManager
