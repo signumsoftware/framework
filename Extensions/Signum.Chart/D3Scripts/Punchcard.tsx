@@ -114,7 +114,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
   var shape = parameters["Shape"];
   var innerSize = null
   if (innerSizeColumn != null) {
-    innerSize = scaleFor(innerSizeColumn, data.rows.map(innerSizeColumn.getValue), 0, 100, parameters["OpacityScale"])
+    innerSize = scaleFor(innerSizeColumn, data.rows.map(innerSizeColumn.getValue), 0, 100, "ZeroMax")
   }
 
   var scaleTransform = initialLoad ? scale(0, 0) : scale(1, 1);

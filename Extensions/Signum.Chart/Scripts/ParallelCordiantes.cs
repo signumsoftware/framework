@@ -22,22 +22,22 @@ public class ParallelCoordiantesChartScript : ChartScript
 
             new ChartScriptParameterGroup()
             {
-                new ChartScriptParameter(ChartParameterMessage.Scale1, ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale2, ChartParameterType.Enum) { ColumnIndex = 2,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale3, ChartParameterType.Enum) { ColumnIndex = 3,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale4, ChartParameterType.Enum) { ColumnIndex = 4,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale5, ChartParameterType.Enum) { ColumnIndex = 5,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale6, ChartParameterType.Enum) { ColumnIndex = 6,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale7, ChartParameterType.Enum) { ColumnIndex = 7,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale8, ChartParameterType.Enum) { ColumnIndex = 8,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
+                new ChartScriptParameter(ChartParameter.Scale1, ChartParameterType.Scala) { ColumnIndex = 1,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale2, ChartParameterType.Scala) { ColumnIndex = 2,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale3, ChartParameterType.Scala) { ColumnIndex = 3,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale4, ChartParameterType.Scala) { ColumnIndex = 4,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale5, ChartParameterType.Scala) { ColumnIndex = 5,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale6, ChartParameterType.Scala) { ColumnIndex = 6,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale7, ChartParameterType.Scala) { ColumnIndex = 7,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale8, ChartParameterType.Scala) { ColumnIndex = 8,  ValueDefinition = new Scala() },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Color)
             {
-                new ChartScriptParameter(ChartParameterMessage.ColorInterpolate, ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter(ChartParameter.ColorInterpolate, ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Shape)
             {
-                new ChartScriptParameter(ChartParameterMessage.Interpolate, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis|bundle") }
+                new ChartScriptParameter(ChartParameter.Interpolate, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis|bundle") }
             },
         };
     }

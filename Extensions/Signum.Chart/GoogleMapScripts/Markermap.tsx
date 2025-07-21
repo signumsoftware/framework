@@ -99,7 +99,7 @@ export function MarkermapChartImp({ data, parameters, onDrillDown, memo }: Chart
       var color: ((r: ChartRow) => string) | null = null;
       if (colorScaleColumn != null) {
         var scaleFunc = scaleFor(colorScaleColumn, data.rows.map(r => colorScaleColumn!.getValue(r)), 0, 100, parameters["ColorScale"]);
-        var colorInterpolator = ChartUtils.getColorInterpolation(parameters["ColorSet"])!;
+        var colorInterpolator = ChartUtils.getColorInterpolation(parameters["ColorInterpolation"])!;
         color = r => colorInterpolator!(scaleFunc(colorScaleColumn!.getValue(r))!);
       }
       else if (colorSchemeColumn != null) {

@@ -17,36 +17,36 @@ public class SvgMapScript : ChartScript
         {
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Url)
             {
-                new ChartScriptParameter(ChartParameterMessage.SvgUrl, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse(svgMaps.ToString("|")) },
+                new ChartScriptParameter(ChartParameter.SvgUrl, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse(svgMaps.ToString("|")) },
             },
 
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Location)
             {
-                new ChartScriptParameter(ChartParameterMessage.LocationSelector, ChartParameterType.String) { ColumnIndex = 0,  ValueDefinition = new StringValue("path[id]") },
-                new ChartScriptParameter(ChartParameterMessage.LocationAttribute, ChartParameterType.String) { ColumnIndex = 0,  ValueDefinition = new StringValue("id") },
-                new ChartScriptParameter(ChartParameterMessage.LocationMatch, ChartParameterType.Enum) {  ColumnIndex = 0, ValueDefinition = EnumValueList.Parse("Exact|Prefix") },
+                new ChartScriptParameter(ChartParameter.LocationSelector, ChartParameterType.String) { ColumnIndex = 0,  ValueDefinition = new StringValue("path[id]") },
+                new ChartScriptParameter(ChartParameter.LocationAttribute, ChartParameterType.String) { ColumnIndex = 0,  ValueDefinition = new StringValue("id") },
+                new ChartScriptParameter(ChartParameter.LocationMatch, ChartParameterType.Enum) {  ColumnIndex = 0, ValueDefinition = EnumValueList.Parse("Exact|Prefix") },
             },
 
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Stroke)
             {
-                new ChartScriptParameter(ChartParameterMessage.StrokeColor, ChartParameterType.String) {  ValueDefinition = new StringValue("") },
-                new ChartScriptParameter(ChartParameterMessage.StrokeWidth, ChartParameterType.String) {  ValueDefinition = new StringValue("") },
+                new ChartScriptParameter(ChartParameter.StrokeColor, ChartParameterType.String) {  ValueDefinition = new StringValue("") },
+                new ChartScriptParameter(ChartParameter.StrokeWidth, ChartParameterType.String) {  ValueDefinition = new StringValue("") },
             },
 
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Fill)
             {
-                new ChartScriptParameter(ChartParameterMessage.NoDataColor, ChartParameterType.String) {  ValueDefinition = new StringValue("#aaa") },
+                new ChartScriptParameter(ChartParameter.NoDataColor, ChartParameterType.String) {  ValueDefinition = new StringValue("#aaa") },
             },
 
             new ChartScriptParameterGroup(ChartParameterGroupMessage.ColorScale)
             {
-                new ChartScriptParameter(ChartParameterMessage.ColorScale, ChartParameterType.Enum) { ColumnIndex = 2,  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
-                new ChartScriptParameter(ChartParameterMessage.ColorInterpolate, ChartParameterType.Special) {  ColumnIndex = 2, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
-                new ChartScriptParameter(ChartParameterMessage.ColorScaleMaxValue, ChartParameterType.Number) { ColumnIndex = 2, ValueDefinition = new NumberInterval{  DefaultValue = null}  },
+                new ChartScriptParameter(ChartParameter.ColorScale, ChartParameterType.Scala) { ColumnIndex = 2,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.ColorInterpolate, ChartParameterType.Special) {  ColumnIndex = 2, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter(ChartParameter.ColorScaleMaxValue, ChartParameterType.Number) { ColumnIndex = 2, ValueDefinition = new NumberInterval{  DefaultValue = null}  },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.ColorCategory)
             {
-                new ChartScriptParameter(ChartParameterMessage.ColorCategory, ChartParameterType.Special) { ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
+                new ChartScriptParameter(ChartParameter.ColorCategory, ChartParameterType.Special) { ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             }
         };
     }

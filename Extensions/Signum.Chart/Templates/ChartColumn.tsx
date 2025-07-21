@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes } from '@framework/Globals'
-import { SubTokensOptions } from '@framework/FindOptions'
+import { QueryToken, SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext, StyleContext } from '@framework/TypeContext'
 import { tryGetTypeInfos, TypeInfo, isTypeEnum } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
@@ -10,7 +10,7 @@ import { ChartClient } from '../ChartClient'
 import { ColorPaletteClient } from '../ColorPalette/ColorPaletteClient'
 import { JavascriptMessage, toLite } from '@framework/Signum.Entities';
 import { useAPI, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
-import { Parameters } from './ChartBuilder'
+import { ColumnParameters, Parameters } from './ChartBuilder'
 import { IChartBase } from '../UserChart/Signum.Chart.UserChart'
 import { ColorPaletteEntity } from '../ColorPalette/Signum.Chart.ColorPalette'
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
@@ -146,7 +146,7 @@ export function ChartColumn(p: ChartColumnProps): React.JSX.Element {
               ChartClient.isChartColumnType(ctx.value.token.token, sc.columnType) ? "#52b980" : "#ff7575",
             marginLeft: "10px",
             cursor: "default"
-          }} title={getTitle(sc.columnType).map(a => ChartColumnType.niceToString(a)).join("\n")}>
+          }} title={getTitle(sc.columnType, ctx.value.token?.token)}>
             {ChartColumnType.niceToString(sc.columnType)}
           </span>
           <a className={classes("sf-chart-token-config-trigger", numParameters > 0 && ctx.value.token && "fw-bold")} onClick={handleExpanded}>{ChartMessage.ToggleInfo.niceToString()} {numParameters > 0 && ctx.value.token && <span>({numParameters})</span>} </a>
@@ -169,7 +169,7 @@ export function ChartColumn(p: ChartColumnProps): React.JSX.Element {
                 </div>)
               }
             </div>
-            <Parameters chart={p.chartBase} chartScript={p.chartScript} columnIndex={p.columnIndex} parameterDic={p.parameterDic} onRedraw={p.onRedraw} />
+            <ColumnParameters chart={p.chartBase} chartScript={p.chartScript} columnIndex={p.columnIndex} parameterDic={p.parameterDic} onRedraw={p.onRedraw} />
           </div>
         </td>
       </tr>
@@ -178,12 +178,28 @@ export function ChartColumn(p: ChartColumnProps): React.JSX.Element {
   );
 }
 
-function getTitle(ct: ChartColumnType): ChartColumnType[] {
+function getTitle(ct: ChartColumnType, token: QueryToken | undefined): string {
+
+  const group = expandGroup(ct);
+
+  const tokenType = token && ChartClient.getChartColumnType(token);
+
+  if (group != null)
+    return ChartMessage.TheSelectedTokenShouldBeEither.niceToString() + "\n" +
+      group.map(a => " - " + ChartColumnType.niceToString(a) + (a == tokenType ? " ✔" : "")).join("\n");
+
+
+  return ChartMessage.TheSelectedTokenShouldBeA0.niceToString(ChartColumnType.niceToString(ct)) + (ct == tokenType ? " ✔" : "");
+
+}
+
+
+function expandGroup(ct: ChartColumnType): ChartColumnType[] | undefined {
   switch (ct) {
     case "AnyGroupKey": return ["String", "Entity", "Enum", "Date", "Number", "RoundedNumber"];
     case "AnyNumber": return ["Number", "DecimalNumber", "RoundedNumber"];
     case "AnyNumberDateTime": return ["Number", "DecimalNumber", "RoundedNumber", "Date", "DateTime"];
-    default: return [];
+    default: return undefined;
   }
 }
 

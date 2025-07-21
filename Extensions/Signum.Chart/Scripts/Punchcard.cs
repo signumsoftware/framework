@@ -19,53 +19,53 @@ public class PunchcardChartScript : ChartScript
         {
             new ChartScriptParameterGroup()
             {
-                new ChartScriptParameter(ChartParameterMessage.CompleteHorizontalValues, ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
-                new ChartScriptParameter(ChartParameterMessage.CompleteVerticalValues, ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
+                new ChartScriptParameter(ChartParameter.CompleteHorizontalValues, ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
+                new ChartScriptParameter(ChartParameter.CompleteVerticalValues, ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Size)
             {
-                new ChartScriptParameter(ChartParameterMessage.SizeScale, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Log|Sqrt") },
-                new ChartScriptParameter(ChartParameterMessage.Shape, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Circle|Rectangle|ProgressBar") },
+                new ChartScriptParameter(ChartParameter.SizeScale, ChartParameterType.Scala) {  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Shape, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Circle|Rectangle|ProgressBar") },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Margin)
             {
-                new ChartScriptParameter(ChartParameterMessage.XMargin, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 110m } },
-                new ChartScriptParameter(ChartParameterMessage.HorizontalLineColor, ChartParameterType.String) {  ValueDefinition = new StringValue("LightGray") },
-                new ChartScriptParameter(ChartParameterMessage.VerticalLineColor, ChartParameterType.String) {  ValueDefinition = new StringValue("LightGray") }
+                new ChartScriptParameter(ChartParameter.XMargin, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 110m } },
+                new ChartScriptParameter(ChartParameter.HorizontalLineColor, ChartParameterType.String) {  ValueDefinition = new StringValue("LightGray") },
+                new ChartScriptParameter(ChartParameter.VerticalLineColor, ChartParameterType.String) {  ValueDefinition = new StringValue("LightGray") }
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Number)
             {
-                new ChartScriptParameter(ChartParameterMessage.NumberOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
-                new ChartScriptParameter(ChartParameterMessage.NumberColor, ChartParameterType.String) {  ValueDefinition = new StringValue("white") },
+                new ChartScriptParameter(ChartParameter.NumberOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
+                new ChartScriptParameter(ChartParameter.NumberColor, ChartParameterType.String) {  ValueDefinition = new StringValue("white") },
             },
             new ChartScriptParameterGroup()
             {
-                new ChartScriptParameter(ChartParameterMessage.XSort, ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Ascending|AscendingKey|AscendingToStr|AscendingSumOrder|Descending|DescendingKey|DescendingToStr|DescendingSumOrder|None") },
-                new ChartScriptParameter(ChartParameterMessage.YSort, ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Ascending|AscendingKey|AscendingToStr|AscendingSumOrder|Descending|DescendingKey|DescendingToStr|DescendingSumOrder|None") },
+                new ChartScriptParameter(ChartParameter.XSort, ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Ascending|AscendingKey|AscendingToStr|AscendingSumOrder|Descending|DescendingKey|DescendingToStr|DescendingSumOrder|None") },
+                new ChartScriptParameter(ChartParameter.YSort, ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Ascending|AscendingKey|AscendingToStr|AscendingSumOrder|Descending|DescendingKey|DescendingToStr|DescendingSumOrder|None") },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Opacity)
             {
-                new ChartScriptParameter(ChartParameterMessage.FillOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.4m } },
+                new ChartScriptParameter(ChartParameter.FillOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.4m } },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.FillColor)
             {
-                new ChartScriptParameter(ChartParameterMessage.ColorScale, ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
-                new ChartScriptParameter(ChartParameterMessage.ColorInterpolate, ChartParameterType.Special) { ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
-                new ChartScriptParameter(ChartParameterMessage.FillColor, ChartParameterType.String) {  ValueDefinition = new StringValue("gray") },
+                new ChartScriptParameter(ChartParameter.ColorScale, ChartParameterType.Scala) { ColumnIndex = 3, ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.ColorInterpolate, ChartParameterType.Special) { ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter(ChartParameter.FillColor, ChartParameterType.String) {  ValueDefinition = new StringValue("gray") },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Stroke)
             {
-                new ChartScriptParameter(ChartParameterMessage.StrokeColor, ChartParameterType.String) {  ValueDefinition = new StringValue("gray") },
-                new ChartScriptParameter(ChartParameterMessage.StrokeWidth, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 2m } },
+                new ChartScriptParameter(ChartParameter.StrokeColor, ChartParameterType.String) {  ValueDefinition = new StringValue("gray") },
+                new ChartScriptParameter(ChartParameter.StrokeWidth, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 2m } },
             },
             new ChartScriptParameterGroup()
             {
-                new ChartScriptParameter(ChartParameterMessage.OpacityScale, ChartParameterType.Enum) { ColumnIndex = 4,  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Log|Sqrt") },
+                new ChartScriptParameter(ChartParameter.OpacityScale, ChartParameterType.Scala) { ColumnIndex = 4,  ValueDefinition = new Scala() },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.InnerSize)
             {
-                new ChartScriptParameter(ChartParameterMessage.InnerSizeType, ChartParameterType.Enum) { ColumnIndex = 5, ValueDefinition = EnumValueList.Parse("Absolute|Relative|Independent") },
-                new ChartScriptParameter(ChartParameterMessage.InnerFillColor, ChartParameterType.String) { ColumnIndex = 5, ValueDefinition = new StringValue("red") },
+                new ChartScriptParameter(ChartParameter.InnerSizeType, ChartParameterType.Enum) { ColumnIndex = 5, ValueDefinition = EnumValueList.Parse("Absolute|Relative|Independent") },
+                new ChartScriptParameter(ChartParameter.InnerFillColor, ChartParameterType.String) { ColumnIndex = 5, ValueDefinition = new StringValue("red") },
             }
         };
     }

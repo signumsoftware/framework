@@ -234,7 +234,8 @@ public enum ChartMessage
 }
 
 
-public enum ChartParameterMessage
+[InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
+public enum ChartParameter
 {
     CompleteValues,
     Scale,

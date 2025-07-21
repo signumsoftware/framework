@@ -18,30 +18,30 @@ public class BubbleplotChartScript : ChartScript
         {
             new ChartScriptParameterGroup()
             {
-                new ChartScriptParameter(ChartParameterMessage.HorizontalScale, ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
-                new ChartScriptParameter(ChartParameterMessage.VerticalScale, ChartParameterType.Enum) { ColumnIndex = 2,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
-                new ChartScriptParameter(ChartParameterMessage.SizeScale, ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Log") },
+                new ChartScriptParameter(ChartParameter.HorizontalScale, ChartParameterType.Scala) { ColumnIndex = 1,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.VerticalScale, ChartParameterType.Scala) { ColumnIndex = 2,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.SizeScale, ChartParameterType.Scala) { ColumnIndex = 3, ValueDefinition = new Scala() },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Margin)
             {
-                new ChartScriptParameter(ChartParameterMessage.UnitMargin, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 40m } },
-                new ChartScriptParameter(ChartParameterMessage.TopMargin, ChartParameterType.String) {  ValueDefinition = new StringValue("0.15*") },
-                new ChartScriptParameter(ChartParameterMessage.RightMargin, ChartParameterType.String) {  ValueDefinition = new StringValue("0.15*") },
+                new ChartScriptParameter(ChartParameter.UnitMargin, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 40m } },
+                new ChartScriptParameter(ChartParameter.TopMargin, ChartParameterType.String) {  ValueDefinition = new StringValue("0.15*") },
+                new ChartScriptParameter(ChartParameter.RightMargin, ChartParameterType.String) {  ValueDefinition = new StringValue("0.15*") },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Label)
             {
-                new ChartScriptParameter(ChartParameterMessage.ShowLabel, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Yes|No") },
-                new ChartScriptParameter(ChartParameterMessage.LabelColor, ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") },
-                new ChartScriptParameter(ChartParameterMessage.FillOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.4m } },
+                new ChartScriptParameter(ChartParameter.ShowLabel, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Yes|No") },
+                new ChartScriptParameter(ChartParameter.LabelColor, ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") },
+                new ChartScriptParameter(ChartParameter.FillOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.4m } },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.ColorScale)
             {
-                new ChartScriptParameter(ChartParameterMessage.ColorScale, ChartParameterType.Enum) { ColumnIndex = 4,  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
-                new ChartScriptParameter(ChartParameterMessage.ColorInterpolate, ChartParameterType.Special) {  ColumnIndex = 4, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter(ChartParameter.ColorScale, ChartParameterType.Scala) { ColumnIndex = 4,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.ColorInterpolate, ChartParameterType.Special) {  ColumnIndex = 4, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.ColorCategory)
             {
-                new ChartScriptParameter(ChartParameterMessage.ColorCategory, ChartParameterType.Special) { ColumnIndex = 5, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
+                new ChartScriptParameter(ChartParameter.ColorCategory, ChartParameterType.Special) { ColumnIndex = 5, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             }
         };
     }

@@ -17,26 +17,26 @@ public class TreeMapChartScript : ChartScript
         {
             new ChartScriptParameterGroup()
             {
-                new ChartScriptParameter(ChartParameterMessage.Scale, ChartParameterType.Enum) { ColumnIndex = 0, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Log") },
+                new ChartScriptParameter(ChartParameter.Scale, ChartParameterType.Scala) { ColumnIndex = 0, ValueDefinition = new Scala() },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Margin)
             {
-                new ChartScriptParameter(ChartParameterMessage.Padding, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 4m } },
-                new ChartScriptParameter(ChartParameterMessage.Opacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.5m } },
+                new ChartScriptParameter(ChartParameter.Padding, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 4m } },
+                new ChartScriptParameter(ChartParameter.Opacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.5m } },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Number)
             {
-                new ChartScriptParameter(ChartParameterMessage.NumberOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
-                new ChartScriptParameter(ChartParameterMessage.NumberColor, ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") },
+                new ChartScriptParameter(ChartParameter.NumberOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
+                new ChartScriptParameter(ChartParameter.NumberColor, ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.ColorScale)
             {
-                new ChartScriptParameter(ChartParameterMessage.ColorScale, ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
-                new ChartScriptParameter(ChartParameterMessage.ColorInterpolate, ChartParameterType.Special) { ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter(ChartParameter.ColorScale, ChartParameterType.Scala) { ColumnIndex = 3, ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.ColorInterpolate, ChartParameterType.Special) { ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.ColorCategory)
             {
-                new ChartScriptParameter(ChartParameterMessage.ColorCategory, ChartParameterType.Special) { ColumnIndex = 4, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
+                new ChartScriptParameter(ChartParameter.ColorCategory, ChartParameterType.Special) { ColumnIndex = 4, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             }
         };
     }

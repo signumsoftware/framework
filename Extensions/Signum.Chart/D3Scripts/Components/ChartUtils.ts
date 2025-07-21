@@ -42,7 +42,18 @@ export function matrix(a: number, b: number, c: number, d: number, e: number, f:
   return 'matrix(' + a + ',' + b + ',' + c + ',' + d + ',' + e + ',' + f + ')';
 }
 
-export function scaleFor(column: ChartColumn<any>, values: number[], minRange: number, maxRange: number, scaleName: string | null | undefined): d3.ScaleContinuousNumeric<number, number> {
+export function scaleFor(column: ChartColumn<any>, values: number[], minRange: number, maxRange: number, scaleName: string | null | undefined):
+  d3.ScaleContinuousNumeric<number, number> {
+
+  if (scaleName?.contains("...")) {
+    const minV = parseFloat(scaleName.before("..."));
+    const maxV = parseFloat(scaleName.after("..."));
+
+    return d3.scaleLinear()
+      .domain([minV, maxV])
+      .range([minRange, maxRange])
+      .nice();
+  }
 
   if (scaleName == "ZeroMax") {
 
@@ -74,7 +85,7 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
       var dates = values.map(d => DateTime.fromFormat(d as any as string, "HH:mm:ss.u").toJSDate());
 
       const scale = d3.scaleTime()
-        .domain([d3.min(dates)!, d3.max(dates)!])
+        .domain([d3.min(dates)!,  d3.max(dates)!])
         .range([minRange, maxRange]);
 
       const f = function (d: string | Date) { return scale(typeof d == "string" ? DateTime.fromFormat(d, "HH:mm:ss.u").toJSDate() : d); } as any as d3.ScaleContinuousNumeric<number, number>;

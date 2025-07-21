@@ -7,6 +7,7 @@ import { Dic } from '@framework/Globals';
 import { XKeyTicks } from './Components/Ticks';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import { ChartParameter } from '../Signum.Chart';
 
 interface ColumnWithScales {
   column: ChartColumn<number>;
@@ -59,7 +60,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
     .map(p => {
       const c = p! as ChartColumn<number>;
       var values = data.rows.map(r => c.getValue(r));
-      var scaleType = parameters["Scale" + c.name.after("c")];
+      var scaleType = parameters[("Scale" + c.name.after("c")) as ChartParameter];
       var scale = scaleFor(c, values, 0, yRule.size('content'), scaleType);
       var scaleFunc = scaleFor(c, values, 0, 1, scaleType);
       var colorScale = (r: ChartRow) => colorInterpolation(scaleFunc(c.getValue(r))!);

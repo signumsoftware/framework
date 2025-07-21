@@ -15,17 +15,17 @@ public class HeatmapChartScript : ChartScript
         {
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Map)
             {
-                new ChartScriptParameter(ChartParameterMessage.MapType, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Roadmap|Satellite") },
-                new ChartScriptParameter(ChartParameterMessage.MapStyle, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Standard|Silver|Retro|Dark|Night|Aubergine") }
+                new ChartScriptParameter(ChartParameter.MapType, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Roadmap|Satellite") },
+                new ChartScriptParameter(ChartParameter.MapStyle, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Standard|Silver|Retro|Dark|Night|Aubergine") }
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Label)
             {
-                new ChartScriptParameter(ChartParameterMessage.Opacity, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("1|0.9|0.8|0.7|0.6|0.5|0.4|0.3|0.2|0.1") },
-                new ChartScriptParameter(ChartParameterMessage.RadiousPx, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 10m } },
+                new ChartScriptParameter(ChartParameter.Opacity, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("1|0.9|0.8|0.7|0.6|0.5|0.4|0.3|0.2|0.1") },
+                new ChartScriptParameter(ChartParameter.RadiousPx, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 10m } },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.ColorGradient)
             {
-                new ChartScriptParameter(ChartParameterMessage.ColorInterpolate, ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter(ChartParameter.ColorCategory, ChartParameterType.Special) {  ValueDefinition = EnumValueList.Parse("Greys|Blue-Red|Fire|Emerald|Cobalt|Purple-Blue|Orange-Red|Purples") },
             }
         };
     }
