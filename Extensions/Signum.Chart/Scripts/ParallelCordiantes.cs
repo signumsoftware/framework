@@ -7,37 +7,37 @@ public class ParallelCoordiantesChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("parallelcoordinates.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn(ChartColumnMessage.Line, ChartColumnType.Groupable),
-            new ChartScriptColumn(ChartColumnMessage.Dimension1, ChartColumnType.Positionable) ,
-            new ChartScriptColumn(ChartColumnMessage.Dimension2, ChartColumnType.Positionable) ,
-            new ChartScriptColumn(ChartColumnMessage.Dimension3, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Dimension4, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Dimension5, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Dimension6, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Dimension7, ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn(ChartColumnMessage.Dimension8, ChartColumnType.Positionable) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.Line, ChartColumnType.AnyGroupKey),
+            new ChartScriptColumn(ChartColumnMessage.Dimension1, ChartColumnType.AnyNumberDateTime) ,
+            new ChartScriptColumn(ChartColumnMessage.Dimension2, ChartColumnType.AnyNumberDateTime) ,
+            new ChartScriptColumn(ChartColumnMessage.Dimension3, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Dimension4, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Dimension5, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Dimension6, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Dimension7, ChartColumnType.AnyNumberDateTime) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Dimension8, ChartColumnType.AnyNumberDateTime) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {
 
             new ChartScriptParameterGroup()
             {
-                new ChartScriptParameter(ChartParameterMessage.Scale1, ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale2, ChartParameterType.Enum) { ColumnIndex = 2,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale3, ChartParameterType.Enum) { ColumnIndex = 3,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale4, ChartParameterType.Enum) { ColumnIndex = 4,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale5, ChartParameterType.Enum) { ColumnIndex = 5,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale6, ChartParameterType.Enum) { ColumnIndex = 6,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale7, ChartParameterType.Enum) { ColumnIndex = 7,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                new ChartScriptParameter(ChartParameterMessage.Scale8, ChartParameterType.Enum) { ColumnIndex = 8,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
+                new ChartScriptParameter(ChartParameter.Scale1, ChartParameterType.Scala) { ColumnIndex = 1,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale2, ChartParameterType.Scala) { ColumnIndex = 2,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale3, ChartParameterType.Scala) { ColumnIndex = 3,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale4, ChartParameterType.Scala) { ColumnIndex = 4,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale5, ChartParameterType.Scala) { ColumnIndex = 5,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale6, ChartParameterType.Scala) { ColumnIndex = 6,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale7, ChartParameterType.Scala) { ColumnIndex = 7,  ValueDefinition = new Scala() },
+                new ChartScriptParameter(ChartParameter.Scale8, ChartParameterType.Scala) { ColumnIndex = 8,  ValueDefinition = new Scala() },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Color)
             {
-                new ChartScriptParameter(ChartParameterMessage.ColorInterpolate, ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter(ChartParameter.ColorInterpolate, ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Shape)
             {
-                new ChartScriptParameter(ChartParameterMessage.Interpolate, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis|bundle") }
+                new ChartScriptParameter(ChartParameter.Interpolate, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis|bundle") }
             },
         };
     }

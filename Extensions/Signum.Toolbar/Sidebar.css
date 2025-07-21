@@ -49,8 +49,7 @@
 
 .sidebar-inner {
     overflow-x: hidden;
-    overflow-y: scroll;
-    scrollbar-width: thin;
+    overflow-y: auto;
 }
 
     .sidebar-inner:hover {

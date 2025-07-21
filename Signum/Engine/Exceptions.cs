@@ -10,7 +10,7 @@ namespace Signum.Engine;
 public class UniqueKeyException : ApplicationException
 {
     public string? TableName { get; private set; }
-    public Table? Table { get; private set; }
+    public ITable? Table { get; private set; }
 
     public string? IndexName { get; private set; }
     public TableIndex? Index { get; private set; }
@@ -23,7 +23,8 @@ public class UniqueKeyException : ApplicationException
     {
             new Regex(@"Cannot insert duplicate key row in object '(?<table>.*)' with unique index '(?<index>.*)'\. The duplicate key value is \((?<value>.*)\)"),
             new Regex(@"Eine Zeile mit doppeltem Schlüssel kann in das Objekt ""(?<table>.*)"" mit dem eindeutigen Index ""(?<index>.*)"" nicht eingefügt werden. Der doppelte Schlüsselwert ist \((?<value>.*)\)")
-        };
+    };
+
 
     public UniqueKeyException(Exception inner) : base(null, inner)
     {
@@ -73,7 +74,10 @@ public class UniqueKeyException : ApplicationException
 
                                     HumanValues = Properties.Select(p =>
                                     {
-                                        var f = Table.GetField(p);
+                                        var f = 
+                                        Table is Table t ? t.GetField(p) : 
+                                        Table is TableMList tm ? tm.GetField(p) : 
+                                        throw new NotImplementedException();
                                         if (f is FieldValue fv)
                                             return colValues.GetOrThrow(fv);
 
@@ -129,12 +133,12 @@ public class UniqueKeyException : ApplicationException
         }
     }
 
-    private Table? FindTable(string tableName)
+    private ITable? FindTable(string tableName)
     {
-        return cachedTables.GetOrAdd(tableName, tn => Schema.Current.Tables.Values.FirstOrDefault(t => t.Name.ToString() == tn));
+        return cachedTables.GetOrAdd(tableName, tn => Schema.Current.GetDatabaseTables().FirstOrDefault(t => t.Name.ToString() == tn));
     }
 
-    private (TableIndex index, List<PropertyInfo> properties)? GetIndexInfo(Table table, string indexName)
+    private (TableIndex index, List<PropertyInfo> properties)? GetIndexInfo(ITable table, string indexName)
     {
         return cachedLookups.GetOrAdd((table, indexName), tup =>
         {
@@ -143,21 +147,44 @@ public class UniqueKeyException : ApplicationException
             if (index == null)
                 return null;
 
-            var properties = (from f in tup.table.Fields.Values
-                              let cols = f.Field.Columns()
-                              where cols.Any() && cols.All(c => index.Columns.Contains(c))
-                              select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
+            if (table is Table t)
+            {
+                var properties = (from f in t.Fields.Values
+                                  let cols = f.Field.Columns()
+                                  where cols.Any() && cols.All(c => index.Columns.Contains(c))
+                                  select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
 
-            if (properties.IsEmpty())
-                return null;
+                if (properties.IsEmpty())
+                    return null;
 
-            return (index, properties);
+                return (index, properties);
+            }
+            else if(table is TableMList tm)
+            {
+                if (tm.Field is FieldEmbedded fe)
+                {
+                    var properties = (from f in fe.EmbeddedFields.Values
+                                      let cols = f.Field.Columns()
+                                      where cols.Any() && cols.All(c => index.Columns.Contains(c))
+                                      select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
+
+                    if (properties.IsEmpty())
+                        return null;
+                    return (index, properties);
+                }
+                else 
+                    return null;
+            }
+            else
+            {
+                throw new UnexpectedValueException(table);
+            }
         });
     }
 
-    static ConcurrentDictionary<string, Table?> cachedTables = new ConcurrentDictionary<string, Table?>();
-    static ConcurrentDictionary<(Table table, string indexName), (TableIndex index, List<PropertyInfo> properties)?> cachedLookups =
-        new ConcurrentDictionary<(Table table, string indexName), (TableIndex index, List<PropertyInfo> properties)?>();
+    static ConcurrentDictionary<string, ITable?> cachedTables = new ConcurrentDictionary<string, ITable?>();
+    static ConcurrentDictionary<(ITable table, string indexName), (TableIndex index, List<PropertyInfo> properties)?> cachedLookups =
+        new ConcurrentDictionary<(ITable table, string indexName), (TableIndex index, List<PropertyInfo> properties)?>();
 
     public override string Message
     {
@@ -166,20 +193,28 @@ public class UniqueKeyException : ApplicationException
             if (Table == null)
                 return InnerException!.Message;
 
-            if(Values == null && HumanValues == null)
-                return EngineMessage.ThereIsAlreadyA0WithTheSame1_G.NiceToString().ForGenderAndNumber(Table.Type.GetGender()).FormatWith(
-                Table.Type.NiceName(),
-                Index == null ? IndexName :
-                Properties != null ? Properties!.CommaAnd(p => p.NiceName()) :
-                Index.Columns.CommaAnd(c => c.Name));
+            var type = Table is Table t ? t.Type :
+                       Table is TableMList tm ? tm.PropertyRoute.RootType :
+                       null;
 
-            return EngineMessage.ThereIsAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(Table.Type.GetGender()).FormatWith(
-                Table.Type.NiceName(),
-                Index == null ? IndexName :
-                Properties != null ? Properties!.CommaAnd(p => p.NiceName()) :
-                Index.Columns.CommaAnd(c => c.Name),
-                HumanValues != null ? HumanValues.CommaAnd(a => a is string ? $"'{a}'" : a == null ? "NULL" : a.ToString()) :
-                Values);
+            if (type == null)
+                return InnerException!.Message;
+
+            var typeName = " / ".Combine(type.NiceName(), Table is TableMList tm2 ? tm2.PropertyRoute.PropertyInfo?.NiceName() : null);
+
+            var columns = Index == null ? IndexName :
+                Properties != null ? Properties!.CommaAnd(p => $"[{p.NiceName()}]") :
+                Index.Columns.CommaAnd(c => $"[{c.Name}]");
+
+            var values = HumanValues != null ? HumanValues.CommaAnd(a => a is string ? $"'{a}'" : a == null ? "NULL" : a.ToString()) :
+                Values;
+
+            if (values == null)
+                return EngineMessage.ThereIsAlreadyA0WithTheSame1_G.NiceToString().ForGenderAndNumber(type.GetGender())
+                    .FormatWith(typeName, columns);
+
+            return EngineMessage.ThereIsAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(type.GetGender())
+                .FormatWith(typeName, columns, values);
         }
     }
 }

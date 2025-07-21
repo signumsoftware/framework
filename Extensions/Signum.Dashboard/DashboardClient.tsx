@@ -47,7 +47,7 @@ export namespace DashboardClient {
   export interface PartRenderer<T extends IPartEntity> {
     component: () => Promise<React.ComponentType<PanelPartContentProps<T>>>;
     waitForInvalidation?: boolean;
-    defaultIcon: () => IconColor;
+    icon: () => IconColor;
     defaultTitle?: (elenent: T) => string;
     withPanel?: (element: T) => boolean;
     getQueryNames?: (element: T) => QueryEntity[];
@@ -69,7 +69,7 @@ export namespace DashboardClient {
 
     Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: AppContext.currentUser && toLite(AppContext.currentUser) }));
 
-    Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard')));
+    Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard'), { modalSize: "xl" }));
     Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
     Navigator.addSettings(new EntitySettings(TextPartEntity, e => import('./Admin/TextPart')));
@@ -98,30 +98,30 @@ export namespace DashboardClient {
 
     registerRenderer(TextPartEntity, {
       component: () => import('./View/TextPart').then(a => a.default),
-      defaultIcon: () => ({ icon: "code", iconColor: "#000000" }),
+      icon: () => ({ icon: "code", iconColor: "#000000" }),
       withPanel: () => false,
     });
 
     registerRenderer(LinkListPartEntity, {
       component: () => import('./View/LinkListPart').then(a => a.default),
-      defaultIcon: () => ({ icon: "list", iconColor: "#B9770E" })
+      icon: () => ({ icon: "list", iconColor: "#B9770E" })
     });
 
     registerRenderer(ImagePartEntity, {
       component: () => import('./View/ImagePartView').then(a => a.default),
-      defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
+      icon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
       withPanel: () => false
     });
 
     registerRenderer(SeparatorPartEntity, {
       component: () => import('./View/SeparatorPartView').then(a => a.default),
-      defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
+      icon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
       withPanel: () => false
     });
 
     registerRenderer(HealthCheckPartEntity, {
       component: () => import('./View/HealthCheckPart').then(a => a.default),
-      defaultIcon: () => ({ icon: "heart-pulse", iconColor: "forestgreen" }),
+      icon: () => ({ icon: "heart-pulse", iconColor: "forestgreen" }),
       withPanel: () => false
     });
 
@@ -191,8 +191,8 @@ export namespace DashboardClient {
     return partRenderers[getTypeName(type)].waitForInvalidation;
   }
 
-  export function defaultIcon(type: PseudoType): IconColor {
-    return partRenderers[getTypeName(type)].defaultIcon();
+  export function icon(type: PseudoType): IconColor {
+    return partRenderers[getTypeName(type)].icon();
   }
 
   export function getQueryNames(part: IPartEntity): QueryEntity[] {
@@ -252,7 +252,8 @@ export namespace DashboardClient {
       dashboard: p.dashboard,
       entity: p.pack.entity,
       reload: () => p.frame.onReload(),
-      cachedQueries: {} /*for now*/
+      cachedQueries: {}, /*for now*/
+      embedded: true,
     });
   }
 

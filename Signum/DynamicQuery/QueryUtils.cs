@@ -347,31 +347,10 @@ public static class QueryUtils
         }
     }
 
-    public static Func<bool>? MergeEntityColumns = null;
     static List<QueryToken> SubTokensBasic(QueryToken? token, QueryDescription qd, SubTokensOptions options)
     {
         if (token == null)
-        {
-            if (MergeEntityColumns != null && !MergeEntityColumns())
-                return qd.Columns.Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToList();
-
-            var dictonary = qd.Columns.Where(a => !a.IsEntity).Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToDictionary(t => t.Key);
-
-            var entity = new ColumnToken(qd.Columns.SingleEx(a => a.IsEntity), qd.QueryName);
-
-            dictonary.Add(entity.Key, entity);
-
-            foreach (var item in entity.SubTokensInternal(options).OrderByDescending(a=>a.Priority).ThenBy(a => a.ToString()))
-            {
-                if (!dictonary.ContainsKey(item.Key))
-                {
-                    dictonary.Add(item.Key, item);
-                }
-            }
-
-            return dictonary.Values.ToList();
-
-        }
+            return qd.Columns.Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToList();
         else
             return token.SubTokensInternal(options);
     }
@@ -434,7 +413,7 @@ public static class QueryUtils
         if (token.Type != typeof(string) && token.Type != typeof(NpgsqlTsVector) && token.Type.ElementType() != null)
             return "You can not filter by collections, continue the sequence";
 
-        if (token is OperationsToken or OperationToken or ManualContainerToken or ManualToken)
+        if (token is OperationsContainerToken or OperationToken or ManualContainerToken or ManualToken or IndexerContainerToken)
             return $"{token} is not a valid filter";
 
         return null;
@@ -455,10 +434,26 @@ public static class QueryUtils
                 CollectionAnyAllType.NotAny.NiceToString(),
                 CollectionAnyAllType.NotAll.NiceToString());
 
-        if (token is OperationsToken or ManualContainerToken or PgTsVectorColumnToken)
+        if (token is OperationsContainerToken or ManualContainerToken or PgTsVectorColumnToken or IndexerContainerToken)
             return $"{token} is not a valid column";
 
         return null;
+    }
+
+    public static void RegisterOrderAdapter<T, V>(Expression<Func<T, V>> orderByMember)
+    {
+        OrderAdapters.Add(qt =>
+        {
+            if (qt.Type != typeof(T))
+                return null;
+
+            return ctx =>
+            {
+                var exp = qt.BuildExpression(ctx);
+
+                return Expression.Invoke(orderByMember, exp);
+            };
+        });
     }
 
     public static List<Func<QueryToken, Func<BuildExpressionContext, Expression>?>> OrderAdapters = 
@@ -501,7 +496,7 @@ public static class QueryUtils
                 CollectionAnyAllType.NotAny.NiceToString(),
                 CollectionAnyAllType.NotAll.NiceToString());
 
-        if (token is OperationsToken or OperationToken or ManualContainerToken or ManualToken)
+        if (token is OperationsContainerToken or OperationToken or ManualContainerToken or ManualToken or IndexerContainerToken)
             return $"{token} is not a valid order";
 
         return null;

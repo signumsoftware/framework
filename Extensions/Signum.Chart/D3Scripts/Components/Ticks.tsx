@@ -10,7 +10,7 @@ import { Rule } from './Rule';
 function getTicks(availableSize: number, valueColumn: ChartColumn<number>,  scale: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string): {ticks: number[], ticksFormat: (n: number) => string} {
 
   let ticksCount = availableSize / 50;
-  if (valueColumn.type == "Integer") {
+  if (valueColumn.type == "Number") {
     var domain = scale.domain();
     const domainSize = domain[1] - domain[0];
 
@@ -20,7 +20,7 @@ function getTicks(availableSize: number, valueColumn: ChartColumn<number>,  scal
 
   var ticks = scale.ticks(ticksCount);
 
-  var isDate = valueColumn.type == "DateOnly" || valueColumn.type == "DateTime";
+  var isDate = valueColumn.type == "Date" || valueColumn.type == "DateTime";
 
   var ticksFormat = format ?? (isDate ? scale.tickFormat(ticksCount) : valueColumn.getNiceName);
 

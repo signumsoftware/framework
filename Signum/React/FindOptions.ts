@@ -271,7 +271,7 @@ export function tokenStartsWith(token: QueryToken | QueryTokenString<any> | stri
   return token == tokenStart || token.startsWith(tokenStart + ".");
 }
 
-export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll" | "Operation" | "ToArray" | "Manual" | "Nested" | "Snippet" | "TimeSeries";
+export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll" | "OperationContainer" | "ToArray" | "Manual" | "Nested" | "Snippet" | "TimeSeries" | "IndexerContainer";
 
 export function hasAnyOrAll(token: QueryToken | undefined, recursive: boolean = true): boolean {
   if (token == undefined)
@@ -321,7 +321,7 @@ export function hasOperation(token: QueryToken | undefined): boolean {
   if (token == undefined)
     return false;
 
-  if (token.queryTokenType == "Operation")
+  if (token.queryTokenType == "OperationContainer")
     return true;
 
   return false;

@@ -7,6 +7,7 @@ import { Dic } from '@framework/Globals';
 import { XKeyTicks } from './Components/Ticks';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import { ChartParameter } from '../Signum.Chart';
 
 interface ColumnWithScales {
   column: ChartColumn<number>;
@@ -59,7 +60,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
     .map(p => {
       const c = p! as ChartColumn<number>;
       var values = data.rows.map(r => c.getValue(r));
-      var scaleType = parameters["Scale" + c.name.after("c")];
+      var scaleType = parameters[("Scale" + c.name.after("c")) as ChartParameter];
       var scale = scaleFor(c, values, 0, yRule.size('content'), scaleType);
       var scaleFunc = scaleFor(c, values, 0, 1, scaleType);
       var colorScale = (r: ChartRow) => colorInterpolation(scaleFunc(c.getValue(r))!);
@@ -111,7 +112,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
           transform={translate(x(d.column.name)!, 0)}
           dominantBaseline="middle"
           textAnchor="middle">
-          {d.column.type != "DateOnly" && d.column.type != "DateTime" ?
+          {d.column.type != "Date" && d.column.type != "DateTime" ?
             d.scale.domain()[1] :
             d.column.getNiceName(d3.max(data.rows, r => d.column.getValue(r))!)}
         </text>)}
@@ -122,7 +123,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
           transform={translate(x(d.column.name)!, 0)}
           dominantBaseline="middle"
           textAnchor="middle">
-          {d.column.type != "DateOnly" && d.column.type != "DateTime" ?
+          {d.column.type != "Date" && d.column.type != "DateTime" ?
             d.column.getNiceName(d.scale.domain()[0]) :
             d.column.getNiceName(d3.min(data.rows, r => d.column.getValue(r))!)}
         </text>)}

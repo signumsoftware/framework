@@ -224,7 +224,7 @@ a.expand-window:hover {
 .sf-sticky-header {
     position: sticky;
     top: 0px;
-    z-index: 900;
+    z-index: 100;
     background: white;
 }
 

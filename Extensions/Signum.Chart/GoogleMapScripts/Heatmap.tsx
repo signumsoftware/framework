@@ -81,15 +81,15 @@ function HeatmapChartImp({ data, parameters }: ChartScriptProps) {
       heatmap.set("opacity", parseFloat(parameters["Opacity"]));
     }
 
-    if (parameters["Radius(px)"] != null) {
-      heatmap.set("radius", parseFloat(parameters["Radius(px)"]));
+    if (parameters["RadiousPx"] != null) {
+      heatmap.set("radius", parseFloat(parameters["RadiousPx"]));
     }
 
-    if (parameters["ColorGradient"] != null &&
-      parameters["ColorGradient"] != "Default") {
+    if (parameters["ColorCategory"] != null &&
+      parameters["ColorCategory"] != "Default") {
       var gradient;
 
-      switch (parameters["ColorGradient"]) {
+      switch (parameters["ColorCategory"]) {
         case "Blue-Red":
           gradient = [
             "rgba(0, 255, 255, 0)",
