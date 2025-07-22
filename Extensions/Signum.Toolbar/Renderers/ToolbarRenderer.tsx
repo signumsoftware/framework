@@ -73,9 +73,7 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
     const currentSegments = current.split("/");
     const targetSegments = target.split("/");
 
-    const isMatch = targetSegments.every((seg, i) => currentSegments[i] === seg);
-
-    return isMatch && currentSegments.length >= targetSegments.length ? 1 : 0;
+    return currentSegments.length >= targetSegments.length && targetSegments.every((seg, i) => currentSegments[i] === seg) ? 1 : 0;
   }
 
   if (!r.content)
