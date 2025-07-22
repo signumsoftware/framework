@@ -135,7 +135,7 @@ tr.drag-bottom td {
 }
 
 .sf-column-editor {
-    background: #eee;
+    background: #ffe4a6;
     padding: 8px;
     border-radius: 4px;
 }
@@ -154,7 +154,7 @@ tr.drag-bottom td {
 }
 
 table.sf-search-results th.sf-current-column {
-    background-color: #eee;
+    background-color: #ffe4a6;
     border-bottom: 2px solid #aaa;
 }
 
