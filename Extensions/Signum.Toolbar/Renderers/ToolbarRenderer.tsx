@@ -66,8 +66,17 @@ export default function ToolbarRenderer(p: {
 }
 
 export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location, query: any): number {
-  if (r.url)
-    return AppContext.toAbsoluteUrl(location.pathname + location.search).startsWith(AppContext.toAbsoluteUrl(r.url)) ? 1 : 0;
+  if (r.url){
+    const current = AppContext.toAbsoluteUrl(location.pathname).replace(/\/+$/, "");
+    const target = AppContext.toAbsoluteUrl(r.url).replace(/\/+$/, "");
+
+    const currentSegments = current.split("/");
+    const targetSegments = target.split("/");
+
+    const isMatch = targetSegments.every((seg, i) => currentSegments[i] === seg);
+
+    return isMatch && currentSegments.length >= targetSegments.length ? 1 : 0;
+  }
 
   if (!r.content)
     return 0;
