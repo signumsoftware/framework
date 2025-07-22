@@ -99,14 +99,14 @@ export namespace UserQueryClient {
   
     DashboardClient.registerRenderer(ValueUserQueryListPartEntity, {
       component: () => import('./Dashboard/View/ValueUserQueryListPart').then(a => a.default),
-      defaultIcon: () => ({ icon: ["fas", "list"], iconColor: "#21618C" }),
+      icon: () => ({ icon: ["fas", "list"], iconColor: "#21618C" }),
       getQueryNames: p => p.userQueries.map(a => a.element.userQuery?.query).notNull(),
     });
   
     DashboardClient.registerRenderer(UserQueryPartEntity, {
       waitForInvalidation: true,
       component: () => import('./Dashboard/View/UserQueryPart').then((a: any) => a.default),
-      defaultIcon: () => ({ icon: "rectangle-list", iconColor: "#2E86C1" }),
+      icon: () => ({ icon: "rectangle-list", iconColor: "#2E86C1" }),
       defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
       withPanel: c => true,
       getQueryNames: c => [c.userQuery?.query].notNull(),
@@ -144,7 +144,7 @@ export namespace UserQueryClient {
     DashboardClient.registerRenderer(BigValuePartEntity, {
       waitForInvalidation: true,
       component: () => import('./Dashboard/View/BigValuePart').then((a: any) => a.default),
-      defaultIcon: () => ({ icon: "circle", iconColor: "#2E86C1" }),
+      icon: () => ({ icon: "circle", iconColor: "#2E86C1" }),
       defaultTitle: c => (c.userQuery ? translated(c.userQuery, uc => uc.displayName) : c.valueToken?.token?.niceName ?? ""),
       withPanel: c => false,
       getQueryNames: c => [c.userQuery?.query].notNull(),

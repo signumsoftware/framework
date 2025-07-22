@@ -124,7 +124,7 @@ More info: https://docs.microsoft.com/en-us/iis/troubleshoot/request-restriction
         {
             try
             {
-                ConcurrentUserHub.Clients.Group(kvp.Key.Key()).EntitySaved(kvp.Value.ToString());
+                ConcurrentUserHub.Clients.Group(kvp.Key.Key()).EntitySaved(kvp.Key.Key(), kvp.Value.ToString());
             }
             catch (Exception ex)
             {

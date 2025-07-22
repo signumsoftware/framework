@@ -13,6 +13,7 @@ import "./HtmlEditorLine.css";
 export interface HtmlEditorLineProps
   extends Omit<HtmlEditorProps /*& Partial<draftjs.EditorProps>*/, "binding"> {
   ctx: TypeContext<string | null | undefined>;
+  labelIcon?: React.ReactNode; 
   htmlEditorRef?: React.Ref<HtmlEditorController>;
   handleKeybindings?: HtmlEditorProps['handleKeybindings'];
   extraButtons?: () => React.ReactNode;
@@ -29,7 +30,7 @@ export default function HtmlEditorLine({
 }: HtmlEditorLineProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   return (
-    <FormGroup ctx={ctx} >
+    <FormGroup ctx={ctx} labelIcon={p.labelIcon} >
       {(id) => (
         <ErrorBoundary>
           <div className="d-flex">

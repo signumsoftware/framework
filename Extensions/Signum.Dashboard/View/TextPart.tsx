@@ -1,10 +1,23 @@
 import * as React from 'react'
 import { TextPartEntity } from '../Signum.Dashboard';
-import { PanelPartContentProps } from '../DashboardClient';
+import { DashboardClient, PanelPartContentProps } from '../DashboardClient';
 import Markdown from 'react-markdown';
 import { HtmlViewer } from '../Admin/TextPart';
+import { useForceUpdate } from '../../../Signum/React/Hooks';
+import { translated } from '@framework/Signum.Entities';
 
-export default function TextPart(p:  PanelPartContentProps<TextPartEntity> ): React.JSX.Element {
+export default function TextPart(p: PanelPartContentProps<TextPartEntity>): React.JSX.Element {
+  const forceUpdate = useForceUpdate();
+
+  React.useEffect(() => {
+    if (p.content.textContent) {
+      p.content.textContent = translated(p.content, p => p.textContent) ?? p.content.textContent;
+      p.content.textContent = p.content.textContent?.replace(/\$(\w+)\$/g, (_, key) => {
+        return DashboardClient.GlobalVariables.get(key)?.() ?? `$${key}$`; // Keep it as-is if not found
+      });
+      forceUpdate();
+    }
+  }, []);
 
   function PreviewType(): React.JSX.Element {
     if (p.content?.textPartType == "Text")

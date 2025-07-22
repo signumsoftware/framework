@@ -293,7 +293,7 @@ function TotalNumStepsAndRows(p: { findOptions: FindOptionsParsed }) {
       <FormCheck
         className="ms-2"
         checked={st.splitQueries}
-        onChange={e => { st.splitQueries = e.currentTarget.checked; }}
+        onChange={e => { st.splitQueries = e.currentTarget.checked; forceUpdate(); }}
         label={QueryTokenDateMessage.SplitQueries.niceToString()}
         id={`split-queries`}
       />

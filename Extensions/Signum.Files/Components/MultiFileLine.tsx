@@ -133,9 +133,27 @@ export const MultiFileLine: <V extends ModifiableEntity /*& IFile*/ | Lite</*IFi
         {() => <table className="sf-multi-value">
           <tbody>
             {
-              ctxs.map(mlec =>
-                <tr key={mlec.index!}>
-                  <td>
+              ctxs.map(mlec => {
+
+                const drag = c.canMove(mlec.value) && p.moveMode == "DragIcon" && !p.ctx.readOnly ? c.getDragConfig(mlec.index!, "v") : undefined;
+
+                return (
+                  <tr key={mlec.index!}
+                    onDragEnter={drag?.onDragOver}
+                    onDragOver={drag?.onDragOver}
+                    onDrop={drag?.onDrop}
+                    className={classes(drag?.dropClass)}
+                  >
+                    <td className="item-group">
+                    {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+                      draggable={true}
+                      onKeyDown={drag.onKeyDown}
+                      onDragStart={drag.onDragStart}
+                      onDragEnd={drag.onDragEnd}
+                      title={drag.title}>
+                      {EntityBaseController.getMoveIcon()}
+                    </a>}
+
                     {!p.ctx.readOnly &&
                       <a href="#" title={EntityControlMessage.Remove.niceToString()}
                         className="sf-line-button sf-remove"
@@ -159,7 +177,10 @@ export const MultiFileLine: <V extends ModifiableEntity /*& IFile*/ | Lite</*IFi
                     }
                   </td>
                   {p.view && <td> {c.renderElementViewButton(false, mlec.value, mlec.index!)} </td>}
-                </tr>)
+                </tr>
+                );
+
+              })
             }
   
             <tr >

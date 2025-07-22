@@ -1,4 +1,7 @@
+using Microsoft.SqlServer.Server;
 using Signum.Engine.Maps;
+using Signum.Engine.Sync.Postgres;
+using Signum.Entities.TsVector;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections;
@@ -6,10 +9,6 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.SqlServer.Server;
-using Signum.Engine.Sync.Postgres;
-using Signum.Entities.TsVector;
-using static Signum.Entities.SystemTime;
 
 namespace Signum.Engine.Linq;
 
@@ -2959,8 +2958,28 @@ internal class QueryBinder : ExpressionVisitor
 
             return ids.PreAnd(AssignColumn(colIba.TypeId.TypeColumn.Value, expIba.TypeId.TypeColumn.Value)).ToArray();
         }
+        else if (colExpression is IntervalExpression interval && interval.PostgresRange != null)
+        {
+            if(expression is IntervalExpression expInterval && expInterval.PostgresRange != null)
+            {
+                return new[] { AssignColumn(interval.PostgresRange, expInterval.PostgresRange) };
+            }
+            else if(expression is NewExpression newExpr && newExpr.Type.IsInstantiationOf(typeof(NullableInterval<>)))
+            {
+                var elemType = newExpr.Type.GetGenericArguments().SingleEx();
 
-        throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".FormatWith(colExpression.Type.TypeName(), expression.ToString()));
+                var constructor = interval.PostgresRange.Type.GetConstructor([elemType, elemType])!;
+
+                var tz = Expression.New(constructor,
+                    newExpr.Arguments[0].UnNullify(),
+                    newExpr.Arguments[1].UnNullify()
+                    );
+
+                return new[] { AssignColumn(interval.PostgresRange, tz) };
+            }        
+        }
+
+        throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".FormatWith(colExpression, expression.ToString()));
     }
 
     static ColumnAssignment AssignColumn(Expression column, Expression expression)

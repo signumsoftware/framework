@@ -15,7 +15,7 @@ import DashboardPage from './DashboardPage';
 
 export default function HealthCheckPart(p: PanelPartContentProps<HealthCheckPartEntity>): React.JSX.Element {
   const part = p.partEmbedded;
-  const defaultIcon = DashboardClient.partRenderers[HealthCheckPartEntity.typeName].defaultIcon?.();
+  const defaultIcon = DashboardClient.partRenderers[HealthCheckPartEntity.typeName].icon?.();
   const icon = parseIcon(part.iconName) ?? defaultIcon?.icon;
   const iconColor = part.iconColor ?? defaultIcon?.iconColor;
 

@@ -39,6 +39,7 @@ export interface HtmlEditorProps {
   toolbarButtons?: (
     c: HtmlEditorController
   ) => React.ReactElement | React.ReactFragment | null;
+  placeholder?: React.ReactNode;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   initiallyFocused?: boolean | number;
   onEditorFocus?: (
@@ -66,6 +67,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
     mandatory,
     initiallyFocused,
     handleKeybindings,
+    placeholder,
     ...props }: HtmlEditorProps,
   ref?: React.Ref<HtmlEditorController>
 ) {
@@ -131,6 +133,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
               }}
             />
           }
+          placeholder={Boolean(placeholder) ? <div className="sf-html-editor-placeholder">{placeholder}</div> : undefined}
           ErrorBoundary={LexicalErrorBoundary}
         />
         <EditorRefPlugin editorRef={controller.setRefs} />

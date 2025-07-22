@@ -12,6 +12,7 @@ import { getToString } from '@framework/Signum.Entities'
 import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart'
 import { UserQueryMessage } from '../../Signum.UserQueries/Signum.UserQueries'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
+import { toAbsoluteUrl } from '@framework/AppContext'
 
 const CurrentEntityKey = "[CurrentEntity]";
 export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }): React.JSX.Element | null {
@@ -44,7 +45,7 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }): Re
       <FormGroup ctx={ctx.subCtx(e => e.query)}>
         {() =>
           Finder.isFindable(queryKey, true) ?
-            <a className="form-control-static" href={Finder.findOptionsPath({ queryName: queryKey })}>{getQueryNiceName(queryKey)}</a> :
+            <a className="form-control-static" target="_blank" href={toAbsoluteUrl(Finder.findOptionsPath({ queryName: queryKey }))}>{getQueryNiceName(queryKey)}</a> :
             <span>{getQueryNiceName(queryKey)}</span>
         }
       </FormGroup>

@@ -233,6 +233,8 @@ public static class SqlPreCommandExtensions
 
             string[] realParts = SplitGOs(script);
 
+            Schema.Current.ExecuteExecuteAs();
+
             if (Connector.Current is PostgreSqlConnector)
             {
                 for (int pos = 0; pos < realParts.Length; pos++)

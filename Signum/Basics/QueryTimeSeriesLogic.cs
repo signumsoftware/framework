@@ -7,7 +7,7 @@ namespace Signum.Basics;
 
 public class DateValue : IView
 {
-    [ViewPrimaryKey]
+    [ViewPrimaryKey, DbType(DateTimeKind = DateTimeKind.Utc)]
     public DateTime Date;
 }
 
@@ -22,6 +22,7 @@ public class QueryTimeSeriesLogic
            Expression.Constant(startDate, typeof(DateTime)),
            Expression.Constant(endDate, typeof(DateTime)),
            Expression.Constant(incrementType, typeof(string)),
+
            Expression.Constant(step, typeof(int))
        ));
     }

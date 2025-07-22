@@ -5,7 +5,7 @@ namespace Signum.ConcurrentUser;
 
 public interface IConcurrentUserClient
 {
-    Task EntitySaved(string? newTicks);
+    Task EntitySaved(string liteKey, string? newTicks);
 
     Task ConcurrentUsersChanged();
 }
@@ -31,6 +31,14 @@ public class ConcurrentUserHub : Hub<IConcurrentUserClient>
         return base.OnDisconnectedAsync(exception);
     }
 
+    public static Action CleanConcurrentUsersIfNeeded = () =>
+    {
+        if (Random.Shared.Next(100) == 0)
+        {
+            Database.Query<ConcurrentUserEntity>().Where(a => a.StartTime < Clock.Now.AddDays(-1)).UnsafeDelete();
+        }
+    };
+
     public Task EnterEntity(string liteKey, string userKey)
     {
         var lite = Lite.Parse(liteKey);
@@ -38,6 +46,8 @@ public class ConcurrentUserHub : Hub<IConcurrentUserClient>
         using (AuthLogic.Disable())
         using (OperationLogic.AllowSave<ConcurrentUserEntity>())
         {
+            CleanConcurrentUsersIfNeeded();
+
             new ConcurrentUserEntity
             {
                 TargetEntity = lite,

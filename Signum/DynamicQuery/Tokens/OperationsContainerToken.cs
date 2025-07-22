@@ -3,45 +3,32 @@ namespace Signum.DynamicQuery.Tokens;
 /// <summary>
 /// A container token for Entity operation tokens
 /// </summary>
-public class OperationsToken : QueryToken
+public class OperationsContainerToken : QueryToken
 {
-
-    static readonly string _OperationsTokenKey = "[Operations]";
-
     QueryToken parent;
 
     public override QueryToken? Parent => parent;
 
-
-    public OperationsToken(QueryToken parent)
+    public OperationsContainerToken(QueryToken parent)
     {
         if (!parent.Type.CleanType().IsIEntity())
             throw new InvalidOperationException("OperationsToken only can be child of entity type tokens");
 
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
-        key = _OperationsTokenKey;
-
     }
 
     public override bool HideInAutoExpand => true;
 
     protected override bool AutoExpandInternal => false;
 
-    public override string ToString()
-    {
-        return _OperationsTokenKey;
-    }
+    public override string ToString() => "[" + QueryTokenMessage.Operations.NiceToString() + "]";
 
-    public override string NiceName()
-    {
-        return _OperationsTokenKey;
-    }
+    public override string NiceName() => "[" + QueryTokenMessage.Operations.NiceToString() + "]";
 
     /*    Type type;*/
-    public override Type Type { get { return typeof(OperationsToken); } }
+    public override Type Type { get { return typeof(OperationsContainerToken); } }
 
-    string key;
-    public override string Key { get { return key; } }
+    public override string Key => "[Operations]";
 
     public static Func<Type, IEnumerable<OperationSymbol>>? GetEligibleTypeOperations;
     protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
@@ -55,8 +42,6 @@ public class OperationsToken : QueryToken
             .ToList();
     }
 
-
-
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
         return parent.BuildExpression(context);
@@ -69,7 +54,7 @@ public class OperationsToken : QueryToken
 
     public override QueryToken Clone()
     {
-        return new OperationsToken(parent.Clone());
+        return new OperationsContainerToken(parent.Clone());
     }
 
     public override string? Format
@@ -93,3 +78,5 @@ public class OperationsToken : QueryToken
     }
 
 }
+
+

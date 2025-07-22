@@ -10,14 +10,16 @@ import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { colorInterpolators, colorSchemes } from '../ColorPalette/ColorUtils'
 import { Dic } from '@framework/Globals'
 import { IChartBase } from '../UserChart/Signum.Chart.UserChart'
-import { EnumLine, NumberLine, TextBoxLine, TextBoxLineProps } from '@framework/Lines'
+import { EnumLine, FormGroup, NumberLine, TextBoxLine, TextBoxLineProps } from '@framework/Lines'
 import { EnumLineProps, OptionItem } from '@framework/Lines/EnumLine'
 import { Finder } from '@framework/Finder'
-import { getTypeInfos } from '@framework/Reflection'
+import { getTypeInfos, toNumberFormat } from '@framework/Reflection'
 import { QueryDescription } from '@framework/FindOptions'
 import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ChartTimeSeries from './ChartTimeSeries'
+import { isDecimalKey, NumberBox } from '@framework/Lines/NumberLine'
+import { AggregateFunction } from '@framework/Signum.DynamicQuery.Tokens'
 
 export interface ChartBuilderProps {
   ctx: TypeContext<IChartBase>; /*IChart*/
@@ -140,7 +142,7 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
             <h6 className="card-title mb-0">{ChartMessage.ChartSettings.niceToString()}</h6>
           </div>
           <div className="card-body">
-            <table className="table" style={{ marginBottom: "0px" }}>
+            <table className="table" style={{ marginBottom: "-1px" }}>
               <thead>
                 <tr>
                   <th className="sf-chart-token-narrow">
@@ -163,7 +165,7 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
             </table>
           </div>
         </div>
-        {chartScript && <Parameters chart={p.ctx.value} chartScript={chartScript} parameterDic={parameterDic} columnIndex={null} onRedraw={handleOnRedraw} />}
+        {chartScript && <Parameters chart={p.ctx.value} chartScript={chartScript} parameterDic={parameterDic} onRedraw={handleOnRedraw} />}
       </div>
     </div >
   </>
@@ -175,17 +177,16 @@ export function Parameters(props: {
   chart: IChartBase,
   onRedraw?: () => void,
   parameterDic: { [name: string]: TypeContext<ChartParameterEmbedded> },
-  columnIndex: number | null
 }): React.JSX.Element | null {
 
 
   var groups = props.chartScript.parameterGroups
-    .filter(gr => gr.parameters.some(param => param.columnIndex == props.columnIndex))
+    .filter(gr => gr.parameters.some(param => param.columnIndex == null))
     .map((gr, i) =>
-      <div className={props.columnIndex == null ? "col-sm-2" : "col-sm-3"} key={i} >
+      <div className={"col-sm-2"} key={i} >
         {gr.name && < span style={{ color: "gray", textDecoration: "underline" }}>{gr.name}</span>}
         {gr.parameters
-          .filter(sp => sp.columnIndex == props.columnIndex)
+          .filter(a => a.columnIndex == null)
           .map((sp, j) => props.parameterDic[sp.name] ?
             <ParameterValueLine key={sp.name} ctx={props.parameterDic[sp.name]} scriptParameter={sp} chart={props.chart} onRedraw={props.onRedraw} /> :
             <p key={sp.name} className="text-danger">{sp.name} ({sp.displayName})</p>)}
@@ -195,22 +196,52 @@ export function Parameters(props: {
   if (groups.length == 0)
     return null;
 
-  if (props.columnIndex == null)
-    return (
-      <fieldset className="sf-chart-parameters">
+  return (
+    <fieldset className="sf-chart-parameters">
+      <div className="row">
+        {groups}
+      </div>
+    </fieldset>
+  );
+}
+
+export function ColumnParameters(props: {
+  chartScript: ChartClient.ChartScript,
+  chart: IChartBase,
+  onRedraw?: () => void,
+  parameterDic: { [name: string]: TypeContext<ChartParameterEmbedded> },
+  columnIndex: number
+}): React.JSX.Element | null {
+
+
+  var groups = props.chartScript.parameterGroups
+    .filter(gr => gr.parameters.some(param => param.columnIndex == props.columnIndex))
+    .map((gr, i) =>
+      <div key={i} >
+        {gr.name && < div style={{ color: "gray", textDecoration: "underline" }}>{gr.name}</div>}
         <div className="row">
-          {groups}
-        </div>
-      </fieldset>
-    );
-  else
-    return (
-      <div className="sf-chart-parameters">
-        <div className="row">
-          {groups}
+          {gr.parameters
+            .filter(a => a.columnIndex == props.columnIndex)
+            .map((sp, j) =>
+              <div className={"col-sm-3"} key={sp.name}>
+                {props.parameterDic[sp.name] ?
+                  <ParameterValueLine key={sp.name} ctx={props.parameterDic[sp.name]} scriptParameter={sp} chart={props.chart} onRedraw={props.onRedraw} /> :
+                  <p key={sp.name} className="text-danger">{sp.name} ({sp.displayName})</p>
+                }
+              </div>
+            )}
         </div>
       </div>
     );
+
+  if (groups.length == 0)
+    return null;
+
+  return (
+    <div className="sf-chart-parameters">
+        {groups}
+    </div>
+  );
 }
 
 function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartClient.ChartScriptParameter, onRedraw?: () => void, chart: IChartBase }) {
@@ -275,24 +306,90 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
     };
     el.type = { name: "string", isNotNullable: true };
 
-    const compatible = (scriptParameter.valueDefinition as ChartClient.EnumValueList).filter(a => a.typeFilter == undefined || token == undefined || ChartClient.isChartColumnType(token, a.typeFilter));
+    const values = (scriptParameter.valueDefinition as ChartClient.EnumValueList);
 
-    if (compatible.length <= 1)
+    if (values.length <= 1)
       el.ctx.styleOptions.readOnly = true;
 
-    el.optionItems = compatible.map(ev => ({
-      value: ev.name,
-      label: ev.name
+    el.optionItems = values.map(ev => ({
+      value: ev,
+      label: ev
     } as OptionItem));
 
     el.valueHtmlAttributes = { size: null as any };
     el.onChange = onRedraw;
     if (ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token))
       el.labelHtmlAttributes = { style: { fontWeight: "bold" } };
-    return <EnumLine {...el} />
+    return <EnumLine {...el} />;
+  }
+  else if (scriptParameter.type == "Scala") {
+
+    return <Scala ctx={ctx} chart={chart} scriptParameter={scriptParameter} onRedraw={onRedraw} />;
   }
   else {
     throw new Error("Unexpected Type = " + scriptParameter.type);
   }
 }
 
+export function Scala(p: { ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartClient.ChartScriptParameter, onRedraw?: () => void, chart: IChartBase }): React.ReactElement {
+
+
+  const { ctx, scriptParameter, onRedraw, chart } = p;
+
+  const token = scriptParameter.columnIndex == undefined ? undefined :
+    chart.columns[scriptParameter.columnIndex].element.token?.token;
+
+  const scala = p.scriptParameter.valueDefinition as ChartClient.Scala;
+
+  const compatible = Object.entries(scala.standardScalas).filter(([value, columnType]) => columnType == undefined || token == undefined || ChartClient.isChartColumnType(token, columnType))
+    .map(([value, columnType]) => value);
+
+
+  const format = toNumberFormat(token?.format);
+
+  function numberLine(part: string | null | undefined, buildPart: (newNumber: number | null) => string, label: string) {
+
+
+    return <FormGroup label={label} ctx={ctx}>{id => <div className={p.ctx.inputGroupClass}>
+      <NumberBox formControlClass={p.ctx.formControlClass} value={part ? (parseFloat(part) ?? null) : null}
+        format={format}
+        validateKey={isDecimalKey}
+        onChange={newValue => {
+          ctx.value.value = buildPart(newValue);
+          p.onRedraw?.();
+        }}
+      />
+      {token?.unit && <span className={p.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{token?.unit}</span>}
+    </div>
+    }</FormGroup>;
+  }
+
+  return (
+    <div>
+      <FormGroup ctx={ctx} label={scriptParameter.displayName}
+        labelHtmlAttributes={{ style: { fontWeight: ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token) ? "bold" : undefined } }}>
+        {id => <select id={id} className={p.ctx.formSelectClass} value={ctx.value.value?.contains("...") ? "Custom" : (ctx.value.value ?? undefined)}
+          onChange={o => {
+            ctx.value.value = o.currentTarget.value == "Custom" ? "0...100" : o.currentTarget.value;
+            ctx.value.modified = true;
+            p.onRedraw?.();
+          }}>
+          {compatible.map(a => <option key={a}>{a}</option>)}
+          {scala.custom && <option>Custom</option>}
+      </select>
+      }
+      </FormGroup>
+
+      {ctx.value.value?.contains("...") && < div className="row">
+        <div className="col-sm-6">
+          {numberLine(ctx.value.value.before("..."), newValue => (newValue?.toString() ?? "") + "..." + ctx.value.value!.after("..."), AggregateFunction.niceToString("Min") + " " + token?.niceName)}
+        </div>
+        <div className="col-sm-6">
+          {numberLine(ctx.value.value.after("..."), newValue => ctx.value.value!.before("...") + "..." + (newValue?.toString() ?? ""), AggregateFunction.niceToString("Max") + " " + token?.niceName)}
+        </div>
+      </div>
+      }
+
+    </div>
+  );
+}

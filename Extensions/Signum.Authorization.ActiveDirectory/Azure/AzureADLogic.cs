@@ -1,24 +1,12 @@
 using Azure.Core;
 using Microsoft.Graph;
-using Microsoft.Graph.DeviceManagement.Reports.GetReportFilters;
 using Microsoft.Graph.Models;
-using Microsoft.Kiota.Abstractions.Authentication;
-using Microsoft.Identity.Client;
 using Signum.Scheduler;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Text.Json;
 using Signum.API;
-using Filter = Signum.DynamicQuery.Filter;
-using FilterGroup = Signum.DynamicQuery.FilterGroup;
-using DocumentFormat.OpenXml.Drawing.Charts;
-using Microsoft.Azure.Amqp.Framing;
-using Order = Signum.DynamicQuery.Order;
 using Microsoft.Graph.Models.ODataErrors;
-using System;
-using Signum.Files;
 using Signum.Utilities.Synchronization;
-using Signum.Engine.Sync;
 
 namespace Signum.Authorization.ActiveDirectory.Azure;
 
@@ -435,7 +423,7 @@ public static class AzureADLogic
 
         var acuCtx = GetMicrosoftGraphContext(adUser);
 
-        using (ExecutionMode.Global())
+        using (Signum.Security.ExecutionMode.Global())
         {
             using (var tr = new Transaction())
             {

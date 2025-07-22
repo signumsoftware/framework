@@ -40,7 +40,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
     return SelectorModal.chooseType(getTypeInfos(pr.type), {
       size: "def" as any,
       buttonDisplay: ti => {
-        var icon = DashboardClient.defaultIcon(ti);
+        var icon = DashboardClient.icon(ti);
         return <><FontAwesomeIcon icon={icon.icon} color={icon.iconColor} /><span className="ms-2">{ti.niceName}</span></>;
       }
     })
@@ -50,12 +50,11 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
 
         const part = New(ti.name) as any as IPartEntity;
 
-        const icon = DashboardClient.defaultIcon(ti);
 
         return PanelPartEmbedded.New({
           content: part,
-          iconName: iconToString(icon.icon),
-          iconColor: icon.iconColor,
+          iconName: null,
+          iconColor: null,
         });
       });
   }
