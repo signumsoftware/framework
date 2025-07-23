@@ -15,15 +15,15 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
         uctx.ChangeCodeFile(@"Southwind\tsconfig.json", file =>
         {
             file.ReplaceLine(a => a.Contains("target"), """
-                "target": "esnext", 
+                "target": "esnext",
                 """);
 
             file.ReplaceLine(a => a.Contains("sourceMap"), """
-                "sourceMap": "true", 
+                "sourceMap": true,
                 """);
 
             file.ReplaceLine(a => a.Contains("moduleResolution"), """
-                "moduleResolution": "bundler", 
+                "moduleResolution": "bundler",
                 """);
 
             file.ReplaceLine(a => a.Contains("jsx"), """
@@ -33,8 +33,8 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
             file.ReplaceBetween(
                 new ReplaceBetweenOption(a => a.Contains(@"""lib"": ["), 1),
                 new ReplaceBetweenOption(a => a.Contains(@"]"), -1), """
-                "ESNext",
-                "dom"
+                  "ESNext",
+                  "dom"
                 """
                 );
         });
