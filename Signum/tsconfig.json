@@ -1,12 +1,12 @@
 ﻿{
   "compilerOptions": {
-    "target": "ES2018",
+    "target": "ESNext",
     "isolatedDeclarations": true,
-    "sourceMap": false,
+    "sourceMap": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "incremental": true,
     "outDir": "./ts_out",
     "composite": true,
@@ -14,7 +14,7 @@
     "strict": true,
     "declarationMap": true,
     "lib": [
-      "ES2020",
+      "ESNext",
       "dom"
     ]
   }

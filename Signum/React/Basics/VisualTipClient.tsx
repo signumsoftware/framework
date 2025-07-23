@@ -1,4 +1,3 @@
-import { VisualTipSymbol } from "../Signum.Basics";
 import * as AppContext from "../AppContext";
 import { ajaxGet, ajaxPost } from "../Services";
 import { RouteObject } from "react-router";

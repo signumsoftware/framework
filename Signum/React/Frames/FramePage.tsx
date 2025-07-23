@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as AppContext from '../AppContext'
 import { Navigator, ViewPromise } from '../Navigator'
 import { Constructor } from '../Constructor'
-import { useLocation, useParams, unstable_useBlocker } from "react-router-dom"
+import { useBlocker, useLocation, useParams } from "react-router-dom"
 import { Finder } from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo, SelectorMessage, is, ModifiableEntity } from '../Signum.Entities'
@@ -391,7 +391,7 @@ function hasChanges(state: FramePageState) {
 
 export function useLooseChanges(pair?: { entity: ModifiableEntity, lastEntity: string }): void {
 
-  let blocker = unstable_useBlocker(() => pair != null && JSON.stringify(pair.entity) != pair.lastEntity);
+  let blocker = useBlocker(() => pair != null && JSON.stringify(pair.entity) != pair.lastEntity);
 
   React.useEffect(() => {
     if (blocker.state === "blocked") {

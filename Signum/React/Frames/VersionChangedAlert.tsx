@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './VersionChangedAlert.css'
 import { useForceUpdate } from '../Hooks';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { Placement } from 'popper.js';
 
 export const VersionChangedAlert: {
   (p: { blink?: boolean }): React.JSX.Element | null;

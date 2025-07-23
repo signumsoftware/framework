@@ -1,12 +1,12 @@
 import * as React from "react";
 import { To, NavigateOptions, useOutletContext } from "react-router";
-import type { Router } from "@remix-run/router";
 import { IUserEntity } from "./Signum.Security";
 import { PermissionSymbol } from "./Signum.Basics";
 import { Dic, classes, } from './Globals';
 import { clearContextHeaders, ajaxGet, ajaxPost, RetryFilter } from "./Services";
 import { PseudoType, Type, getTypeName, tryGetTypeInfo } from "./Reflection";
 import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
+import type { createBrowserRouter } from "react-router-dom";
 
 Dic.skipClasses.push(React.Component);
 
@@ -20,8 +20,8 @@ export function setCurrentUser(user: IUserEntity | undefined): void {
   currentUser = user;
 }
 
-export let _internalRouter: Router;
-export function setRouter(r: Router): void {
+export let _internalRouter: ReturnType<typeof createBrowserRouter>;
+export function setRouter(r: ReturnType<typeof createBrowserRouter>): void {
   _internalRouter = r
 }
 
@@ -68,14 +68,14 @@ export function isPermissionAuthorized(permission: PermissionSymbol | string): b
 export function navigate(to: To | number, options?: NavigateOptions): void
 export function navigate(to: To | number, options?: NavigateOptions): void
 export function navigate(to: To | number, options?: NavigateOptions): void {
-  if (typeof to == "number")
     _internalRouter.navigate(to);
-  else if (typeof to == "string")
-    _internalRouter.navigate(toAbsoluteUrl(to), options);
-  else if (typeof to == "object")
-    _internalRouter.navigate({ ...to, pathname: to.pathname && toAbsoluteUrl(to.pathname) }, options);
-  else
-    throw new Error("Unexpected argument type: to");
+  //if (typeof to == "number")
+  //else if (typeof to == "string")
+  //  _internalRouter.navigate(toAbsoluteUrl(to), options);
+  //else if (typeof to == "object")
+  //  _internalRouter.navigate({ ...to, pathname: to.pathname && toAbsoluteUrl(to.pathname) }, options);
+  //else
+  //  throw new Error("Unexpected argument type: to");
 };
 
 
