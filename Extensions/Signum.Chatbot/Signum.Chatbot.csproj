@@ -18,6 +18,7 @@
     <PackageReference Include="Signum.TSGenerator" Version="9.1.0" />
   </ItemGroup>
 
+	
   <ItemGroup>
     <ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
     <ProjectReference Include="..\..\Signum\Signum.csproj" />

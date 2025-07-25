@@ -4,6 +4,7 @@ using Signum.Entities.Validation;
 using Signum.Operations;
 using Signum.Security;
 using System;
+using System.ComponentModel;
 
 
 namespace Signum.Chatbot;
@@ -53,11 +54,10 @@ public class ChatMessageEntity : Entity
 
 public enum ChatMessageRole
 {
-    System,
-    User,
-    Assistant,
-    Tool, 
-    Function,
+    System,    //Prompts
+    User,      //Question user
+    Assistant, //Answer LLM (maybe a command to a tool / prompt)
+    Tool,      //Answer toool
 }
 
 [AutoInit]
@@ -65,4 +65,15 @@ public static class ChatMessageOperation
 {
     public static readonly ExecuteSymbol<ChatMessageEntity> Save;
     public static readonly DeleteSymbol<ChatMessageEntity> Delete;
+}
+
+public enum ChatbotMessage
+{
+    OpenSession,
+    NewSession,
+    Send,
+    [Description("Type a message...")]
+    TypeAMessage,
+    UsingInternalTool,
+    ReceivingInstructions,
 }

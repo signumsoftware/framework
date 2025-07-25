@@ -11,7 +11,16 @@
 	<ItemGroup>
 	  <TypeScriptCompile Remove="node_modules\**" />
 	</ItemGroup>
-
+	<Target Name="ForceCopyStaticWebAssets" AfterTargets="Build">
+		<ItemGroup>
+			<StaticWebAssetsFile Include="..\Signum\obj\Debug\net9.0\staticwebassets.build.json" />
+		</ItemGroup>
+		<Copy
+		  SourceFiles="@(StaticWebAssetsFile)"
+		  DestinationFolder="$(BaseIntermediateOutputPath)"
+		  SkipUnchangedFiles="false" />
+	</Target>
+	
 	<ItemGroup>
 		<EmbeddedResource Include="Engine\Sync\Postgres\versioning_function.sql" />
 		<EmbeddedResource Include="Engine\Sync\Postgres\versioning_function_nochecks.sql" />

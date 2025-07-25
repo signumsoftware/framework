@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace Signum.Chatbot.Agents;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
@@ -30,6 +32,18 @@ public class ChatbotAgentDescriptionsEmbedded : EmbeddedEntity
 
     [StringLengthValidator(MultiLine = true)]
     public string Content { get; set; }
+
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => PromptName ?? ChatbotAgentMessage.Default.NiceToString());
+
+    protected override void PreSaving(PreSavingContext ctx)
+    {
+        if (PromptName.IsNullOrEmpty())
+            PromptName = null;
+
+        base.PreSaving(ctx);
+    }
 }
 
 
@@ -38,7 +52,11 @@ public enum ConfigChatbotType
     GeneralConfig,
     Title,
 }
-
+public enum ChatbotAgentMessage
+{
+    [Description("[Default]")]
+    Default, 
+}
 
 
 [EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]

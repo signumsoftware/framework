@@ -101,18 +101,20 @@ public static class ChatbotAgentLogic
     }
 
 
-    public async static Task<string> EvaluateCommand(string answer, CancellationToken token)
+    public static (string commandName, CommandArguments args) ParseCommand(string answer)
     {
-        string commandName = string.Empty;
+        string commandName = answer.After("$").Before("(");
+        var args = new CommandArguments(answer.After("(").BeforeLast(")"));
+
+        return (commandName, args);
+    }
+
+
+    public async static Task<string> EvaluateTool(string commandName, CommandArguments args, CancellationToken token)
+    {
+        
         try
         {
-            commandName = answer.After("$").Before("(");
-
-            var args = new CommandArguments(answer.After("(").Before(")"));
-
-            if (commandName == "Describe")
-                return await GetDescribe(args);
-
             var action = AllResources.Value.TryGetC(commandName);
 
             if (action == null)
@@ -130,7 +132,7 @@ public static class ChatbotAgentLogic
         }
     }
 
-    private static Task<string> GetDescribe(CommandArguments args)
+    public static Task<string> GetDescribe(CommandArguments args)
     {
         var agentName = args.GetArgument<string>(0);
         var promptName = args.TryArgumentC<string>(1);

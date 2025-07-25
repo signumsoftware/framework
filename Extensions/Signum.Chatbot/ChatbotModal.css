@@ -1,0 +1,59 @@
+﻿.chat-modal {
+    position: fixed;
+    top: 70px;
+    bottom: 10px;
+    right: 10px;
+    width: 30vw;
+    max-width: 500px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 1051;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .chat-modal {
+        width: 100%;
+    }
+}
+
+/* Chat bubbles */
+.chat-history {
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.chat-internal {
+    text-decoration: none;
+    color: gray;
+}
+
+.chat-internal:hover {
+    text-decoration: unset;
+    color: unset;
+}
+
+.chat-bubble {
+    max-width: 70%;
+    padding: 8px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+}
+
+    .chat-bubble.user {
+        background-color: #007bff;
+        color: white;
+        border-bottom-right-radius: 0;
+    }
+
+    .chat-bubble.bot {
+        background-color: #e9ecef;
+        color: #333;
+        border-bottom-left-radius: 0;
+    }
+
+    .chat-bubble p:last-child {
+        margin-bottom: 0;
+    }

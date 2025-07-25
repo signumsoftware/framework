@@ -20,6 +20,11 @@ namespace Signum.Chatbot;
 
 public static class ChatbotLogic
 {
+
+    [AutoExpressionField]
+    public static IQueryable<ChatMessageEntity> Messages(this ChatSessionEntity session) =>
+        As.Expression(() => Database.Query<ChatMessageEntity>().Where(a => a.ChatSession.Is(session)));
+
     public static ResetLazy<Dictionary<Lite<ChatbotLanguageModelEntity>, ChatbotLanguageModelEntity>> LanguageModels = null!;
     public static ResetLazy<Lite<ChatbotLanguageModelEntity>?> DefaultLanguageModel = null!;
 
@@ -65,9 +70,17 @@ public static class ChatbotLogic
                {
                    Entity = e,
                    e.Id,
+                   e.Title,
                    e.LanguageModel,
                    e.User,
+                   e.StartDate,
                });
+
+            sb.Schema.EntityEvents<ChatSessionEntity>().PreUnsafeDelete += query =>
+            {
+                query.SelectMany(a => a.Messages()).UnsafeDelete();
+                return null;
+            };
 
             sb.Include<ChatMessageEntity>()
                 .WithQuery(() => e => new
@@ -77,6 +90,7 @@ public static class ChatbotLogic
                     e.Role,
                     e.IsCommand,
                     e.Message,
+                    e.ChatSession,
                 });
         }
     }

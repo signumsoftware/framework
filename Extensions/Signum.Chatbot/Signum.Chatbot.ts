@@ -32,6 +32,15 @@ export namespace ChatbotLanguageModelOperation {
   export const Delete : Operations.DeleteSymbol<ChatbotLanguageModelEntity> = registerSymbol("Operation", "ChatbotLanguageModelOperation.Delete");
 }
 
+export namespace ChatbotMessage {
+  export const OpenSession: MessageKey = new MessageKey("ChatbotMessage", "OpenSession");
+  export const NewSession: MessageKey = new MessageKey("ChatbotMessage", "NewSession");
+  export const Send: MessageKey = new MessageKey("ChatbotMessage", "Send");
+  export const TypeAMessage: MessageKey = new MessageKey("ChatbotMessage", "TypeAMessage");
+  export const UsingInternalTool: MessageKey = new MessageKey("ChatbotMessage", "UsingInternalTool");
+  export const ReceivingInstructions: MessageKey = new MessageKey("ChatbotMessage", "ReceivingInstructions");
+}
+
 export namespace ChatbotProviders {
   export const OpenAI : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.OpenAI");
   export const Gemini : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Gemini");
@@ -64,8 +73,7 @@ export type ChatMessageRole =
   "System" |
   "User" |
   "Assistant" |
-  "Tool" |
-  "Function";
+  "Tool";
 
 export const ChatSessionEntity: Type<ChatSessionEntity> = new Type<ChatSessionEntity>("ChatSession");
 export interface ChatSessionEntity extends Entities.Entity {

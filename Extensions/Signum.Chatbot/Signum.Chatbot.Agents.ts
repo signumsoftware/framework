@@ -28,6 +28,10 @@ export interface ChatbotAgentEntity extends Entities.Entity {
   descriptions: Entities.MList<ChatbotAgentDescriptionsEmbedded>;
 }
 
+export namespace ChatbotAgentMessage {
+  export const Default: MessageKey = new MessageKey("ChatbotAgentMessage", "Default");
+}
+
 export namespace ChatbotAgentOperation {
   export const Save : Operations.ExecuteSymbol<ChatbotAgentEntity> = registerSymbol("Operation", "ChatbotAgentOperation.Save");
   export const Delete : Operations.DeleteSymbol<ChatbotAgentEntity> = registerSymbol("Operation", "ChatbotAgentOperation.Delete");

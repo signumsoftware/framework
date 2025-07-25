@@ -178,8 +178,7 @@ public class MistralChatbotProvider : IChatbotProvider
         ChatMessageRole.System => "system",
         ChatMessageRole.User => "user",
         ChatMessageRole.Assistant => "assistant",
-        ChatMessageRole.Tool => "tool",
-        ChatMessageRole.Function => "function",
+        ChatMessageRole.Tool => "function",
         _ => throw new UnexpectedValueException(role)
     };
         

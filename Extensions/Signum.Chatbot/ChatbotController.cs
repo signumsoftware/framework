@@ -34,6 +34,13 @@ public class ChatbotController : Controller
             await resp.Body.FlushAsync();
 
             history = CreateNewConversationHistory(session);
+
+            var init = history.Messages.SingleEx();
+
+            await resp.WriteAsync(UINotification("System"), ct);
+            await resp.WriteAsync(init.Message, ct);
+            await resp.WriteAsync("\n", ct);
+            await resp.WriteAsync(UINotification("AnswerId", init.Id.ToString()), ct);
         }
         else
         {
@@ -66,11 +73,11 @@ public class ChatbotController : Controller
                     if (item.StartsWith("$"))
                     {
                         isCommand = true;
-                        UINotification("InternalCommand");
+                        await resp.WriteAsync(UINotification("AssistantCommand"), ct);
                     }
                     else
                     {
-                        UINotification("FinalAnswer");
+                        await resp.WriteAsync(UINotification("AssistantFinalAnswer"), ct);
                     }
                 }
 
@@ -83,25 +90,32 @@ public class ChatbotController : Controller
             var command = NewChatMessage(history.Session.ToLite(), lastAnswer, ChatMessageRole.Assistant, isCommand).Save();
 
             history.Messages.Add(command);
-
-            await resp.WriteAsync(UINotification("QuestionId", command.Id.ToString()), ct);
+            await resp.WriteAsync("\n");
+            await resp.WriteAsync(UINotification("AnswerId", command.Id.ToString()), ct);
             await resp.Body.FlushAsync();
 
             if (!isCommand)
                 break;
 
-            UINotification("InternalResult");
-
-            string response = await ChatbotAgentLogic.EvaluateCommand(lastAnswer, ct);
-
-            var pendingResponse  = resp.WriteAsync(response);
-
-            var responseMsg = NewChatMessage(history.Session.ToLite(), response, ChatMessageRole.Function).Save();
+            var parsedCommand = ChatbotAgentLogic.ParseCommand(lastAnswer);
+            ChatMessageEntity responseMsg;
+            if (parsedCommand.commandName == "Describe")
+            {
+                await resp.WriteAsync(UINotification("System"), ct);
+                string describeResponse = await ChatbotAgentLogic.GetDescribe(parsedCommand.args);
+                responseMsg = NewChatMessage(history.Session.ToLite(), describeResponse, ChatMessageRole.System).Save();
+            }
+            else
+            {
+                await resp.WriteAsync(UINotification("Tool"), ct);
+                string toolResponse = await ChatbotAgentLogic.EvaluateTool(parsedCommand.commandName, parsedCommand.args, ct);
+                responseMsg = NewChatMessage(history.Session.ToLite(), toolResponse, ChatMessageRole.Tool).Save();
+            }   
 
             history.Messages.Add(responseMsg);
-            await pendingResponse;
+            await resp.WriteAsync(responseMsg.Message, ct);
 
-            await resp.WriteAsync(UINotification("QuestionId", responseMsg.Id.ToString()), ct);
+            await resp.WriteAsync(UINotification("AnswerId", responseMsg.Id.ToString()), ct);
             await resp.Body.FlushAsync();
         }
 
@@ -117,7 +131,7 @@ public class ChatbotController : Controller
         }
     }
 
-   
+
     private string UINotification(string commandName, string? payload = null)
     {
         if (payload == null)
@@ -147,14 +161,14 @@ public class ChatbotController : Controller
             Session = session,
             LanguageModel = session.LanguageModel.RetrieveFromCache(),
             Messages = new List<ChatMessageEntity>
+            {
+                new ChatMessageEntity
                 {
-                    new ChatMessageEntity
-                    {
-                        Role = ChatMessageRole.System,
-                        ChatSession = session.ToLite(),
-                        Message = ChatbotAgentLogic.GetAgent(DefaultAgent.Introduction).GetDescribe(null),
-                    }.Save()
-                }
+                    Role = ChatMessageRole.System,
+                    ChatSession = session.ToLite(),
+                    Message = ChatbotAgentLogic.GetAgent(DefaultAgent.Introduction).GetDescribe(null),
+                }.Save()
+            }
         };
 
         return history;
@@ -185,7 +199,7 @@ public class ChatbotController : Controller
     [HttpGet("api/messages/session/{id}")]
     public List<ChatMessageEntity> GetMessagesBySessionId(int id)
     {
-        var messages = Database.Query<ChatMessageEntity>().Where(m => m.ChatSession.Id == id).OrderByDescending(cm => cm.CreationDate).ToList();
+        var messages = Database.Query<ChatMessageEntity>().Where(m => m.ChatSession.Id == id).OrderBy(cm => cm.CreationDate).ToList();
 
         return messages;
     }
