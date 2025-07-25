@@ -5,7 +5,7 @@ import { mlistItemContext } from "../TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ErrorBoundary } from "../Components";
 import { EntityBaseController } from "./EntityBase";
-import { LineBaseProps, LineBaseController, useController, genericForwardRef } from "./LineBase";
+import { LineBaseProps, LineBaseController, useController } from "./LineBase";
 import { KeyGenerator } from "../Globals";
 import { MListElementBinding } from "../Reflection";
 
@@ -15,6 +15,7 @@ interface MultiValueLineProps<V> extends LineBaseProps<MList<V>> {
   addValueText?: string;
   valueColumClass?: string;
   filterRows?: (ctxs: TypeContext<any /*T*/>[]) => TypeContext<any /*T*/>[];
+  ref?: React.Ref<MultiValueLineController<V>>;
 }
 
 export class MultiValueLineController<V> extends LineBaseController<MultiValueLineProps<V>, MList<V>> {
@@ -70,8 +71,9 @@ export class MultiValueLineController<V> extends LineBaseController<MultiValueLi
   }
 }
 
-export const MultiValueLine: <V>(props: MultiValueLineProps<V> & React.RefAttributes<MultiValueLineController<V>>) => React.ReactNode | null = genericForwardRef(function MultiValueLine<V>(props: MultiValueLineProps<V>, ref: React.Ref<MultiValueLineController<V>>) {
-  const c = useController(MultiValueLineController<V>, props, ref);
+export const MultiValueLine: React.NamedExoticComponent<MultiValueLineProps<unknown>>
+  = React.memo(function MultiValueLine<V>(props: MultiValueLineProps<V>) {
+    const c = useController<MultiValueLineController<V>, MultiValueLineProps<V>, MList<V>>(MultiValueLineController<V>, props);
   const p = c.props;
 
   var renderItem = React.useMemo(() => {

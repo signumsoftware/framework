@@ -2,12 +2,13 @@ import * as React from 'react'
 import { DropdownList, Combobox, Value } from 'react-widgets'
 import { Dic, classes } from '../Globals'
 import { MemberInfo, tryGetTypeInfo } from '../Reflection'
-import { LineBaseController, LineBaseProps, genericForwardRef, genericForwardRefWithMemo, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum } from '../Signum.Entities'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
+import { JSX } from 'react/jsx-runtime'
 
 export interface EnumLineProps<V extends string | number | boolean | null> extends ValueBaseProps<V> {
   lineType?:
@@ -20,6 +21,7 @@ export interface EnumLineProps<V extends string | number | boolean | null> exten
   optionHtmlAttributes?: (oi: OptionItem) => React.OptionHTMLAttributes<HTMLOptionElement>;
   columnCount?: number;
   columnWidth?: number;
+  ref?: React.Ref<EnumLineController<V>>;
 }
 
 export class EnumLineController<V extends string | number | boolean | null> extends ValueBaseController<EnumLineProps<V>, V> {
@@ -31,8 +33,8 @@ export interface OptionItem {
   label: string;
 }
 
-export const EnumLine: <V extends string | number | boolean | null>(props: EnumLineProps<V> & React.RefAttributes<EnumLineController<V>>) => React.ReactNode | null =
-  genericForwardRefWithMemo(function EnumLine<V extends string | number | boolean | null>(props: EnumLineProps<V>, ref: React.Ref<EnumLineController<V>>) {
+export const EnumLine: React.MemoExoticComponent<(<V extends string | number | boolean | null>(props: EnumLineProps<V>) => JSX.Element | null)>
+  = React.memo(function EnumLine<V extends string | number | boolean | null>(props: EnumLineProps<V>) {
 
     const c = useController(EnumLineController<V>, props);
 
@@ -101,7 +103,7 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
 
     function renderElement({ item }: any) {
       var result = c.props.onRenderDropDownListItem!(item) as React.ReactElement;
-      return React.cloneElement(result, { 'data-value': item.value });
+      return React.cloneElement(result, { 'data-value': item.value } as any);
     }
 
 

@@ -16,6 +16,7 @@ import { FormGroup } from './FormGroup';
 import { classes } from '../Globals';
 import { getTimeMachineIcon } from './TimeMachineIcon';
 import Input from 'react-widgets/cjs/Input';
+import { JSX } from 'react/jsx-runtime';
 
 export interface EntityMultiSelectProps<V extends Lite<Entity> | Entity> extends EntityListBaseProps<V> {
   onRenderItem?: (item: ResultRow) => React.ReactNode;
@@ -55,8 +56,8 @@ export class EntityMultiSelectController<V extends Lite<Entity> | Entity> extend
   }
 }
 
-export function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V>) {
-  const c = useController(EntityMultiSelectController, props);
+export function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V>): JSX.Element | null {
+  const c = useController<EntityMultiSelectController<V>, EntityMultiSelectProps<V>, MList<V>>(EntityMultiSelectController, props);
   const p = c.props;
 
   if (c.isHidden)
@@ -133,7 +134,7 @@ export function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: Entity
 
   function getOptionRows() {
 
-   // const lite = getLite();
+    // const lite = getLite();
 
     var rows = Array.isArray(data) ? data.map(lite => ({ entity: lite } as ResultRow)) :
       typeof data == "object" ? data.rows :
@@ -145,11 +146,11 @@ export function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: Entity
     p.ctx.value.forEach(mle => {
       const entityOrLite = mle.element;
 
-      const lite: Lite<V & Entity> | (V & Lite<Entity>) | null = isEntity(entityOrLite) ? toLite(entityOrLite) : 
-      isLite(entityOrLite) ? entityOrLite : null;
+      const lite: Lite<V & Entity> | (V & Lite<Entity>) | null = isEntity(entityOrLite) ? toLite(entityOrLite) :
+        isLite(entityOrLite) ? entityOrLite : null;
 
-      if(lite == null)
-        throw new Error("Unexpected " +  mle.element);
+      if (lite == null)
+        throw new Error("Unexpected " + mle.element);
 
       var index = elements.findIndex(a => is(a?.entity, lite));
       if (index == -1)
@@ -159,11 +160,11 @@ export function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: Entity
           elements[index]!.entity = lite;
       }
     });
-    
+
 
     return elements;
   }
-});
+}
 
 
 interface MultiSelectElement {

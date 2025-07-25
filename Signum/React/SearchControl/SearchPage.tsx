@@ -35,7 +35,7 @@ function SearchPage(): React.ReactElement {
     }
   }
 
-  const searchControl = React.useRef<SearchControlHandler | null | undefined>();
+  const searchControl = React.useRef<SearchControlHandler | null | undefined>(undefined);
 
   const subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
 

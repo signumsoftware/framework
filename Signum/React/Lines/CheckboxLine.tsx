@@ -18,7 +18,7 @@ export class CheckboxLineController extends ValueBaseController<CheckboxLineProp
 export const CheckboxLine: React.NamedExoticComponent<CheckboxLineProps> =
   React.memo(function CheckboxLine(props: CheckboxLineProps) {
 
-    const c = useController(CheckboxLineController, props, props.ref);
+    const c = useController(CheckboxLineController, props);
 
     if (c.isHidden)
       return null;

@@ -179,7 +179,7 @@ export function setRefProp(propRef: React.Ref<HTMLElement> | undefined, node: HT
   }
 }
 
-export function useInitiallyFocused(initiallyFocused: boolean | number | undefined, inputElement: React.RefObject<HTMLElement>): void {
+export function useInitiallyFocused(initiallyFocused: boolean | number | undefined, inputElement: React.RefObject<HTMLElement | null>): void {
   React.useEffect(() => {
     if (initiallyFocused) {
       window.setTimeout(() => {

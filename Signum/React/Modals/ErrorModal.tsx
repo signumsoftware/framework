@@ -223,7 +223,7 @@ ErrorModal.showErrorModal = (error: any, beforeOkClicked?: ()=> Promise<void>): 
   return Modals.openModal<void>(<ErrorModal error={error} beforeOkClicked={beforeOkClicked} />);
 }
 
-function textDanger(message: string | null | undefined): React.ReactFragment | null | undefined {
+function textDanger(message: string | null | undefined): React.ReactNode {
 
   if (typeof message == "string")
     return message.split("\n").map((s, i) => <p key={i} className="text-danger">{s}</p>);

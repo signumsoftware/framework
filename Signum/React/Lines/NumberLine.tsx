@@ -25,7 +25,7 @@ export class NumberLineController extends ValueBaseController<NumberLineProps, n
 
 export const NumberLine: React.NamedExoticComponent<NumberLineProps> = React.memo(function NumberLine(props: NumberLineProps) {
 
-  const c = useController(NumberLineController, props, props.ref);
+  const c = useController(NumberLineController, props);
 
   if (c.isHidden)
     return null;

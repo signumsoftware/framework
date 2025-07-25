@@ -340,7 +340,7 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
 
   function setComponent(c: React.Component | null) {
     if (c && entityComponent.current != c) {
-      (entityComponent as React.RefObject<React.Component>).current = c;
+      (entityComponent as React.RefObject<React.Component | null>).current = c;
       forceUpdate();
     }
   }

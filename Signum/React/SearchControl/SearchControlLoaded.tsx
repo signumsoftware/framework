@@ -533,7 +533,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const qd = this.props.queryDescription;
 
     const sfb = this.state.simpleFilterBuilder &&
-      React.cloneElement(this.state.simpleFilterBuilder, { ref: (e: ISimpleFilterBuilder) => { this.simpleFilterBuilderInstance = e } });
+      React.cloneElement(this.state.simpleFilterBuilder, { ref: (e: ISimpleFilterBuilder) => { this.simpleFilterBuilderInstance = e; } } as any);
 
     const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
     const canAggregateXorOperationOrManual = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
@@ -578,7 +578,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperationOrManual | canTimeSeries}
                 close={this.handleColumnClose} />
             }
-            <div ref={d => this.containerDiv = d}
+            <div ref={d => { this.containerDiv = d; }}
               className="sf-scroll-table-container table-responsive"
               style={{ maxHeight: this.props.maxResultsHeight }}>
               <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
@@ -600,7 +600,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   renderMobile(): React.ReactElement {
     return (
-      <div ref={d => this.containerDiv = d}
+      <div ref={d => {this.containerDiv = d;}}
         className="sf-scroll-table-container"
         style={{ maxHeight: this.props.maxResultsHeight }}>
         <div className="sf-search-results mobile">

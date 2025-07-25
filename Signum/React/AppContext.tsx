@@ -1,12 +1,11 @@
 import * as React from "react";
-import { To, NavigateOptions, useOutletContext, createBrowserRouter, DataRouter } from "react-router";
+import { To, NavigateOptions, useOutletContext, DataRouter } from "react-router";
 import { IUserEntity } from "./Signum.Security";
 import { PermissionSymbol } from "./Signum.Basics";
 import { Dic, classes, } from './Globals';
 import { clearContextHeaders, ajaxGet, ajaxPost, RetryFilter } from "./Services";
 import { PseudoType, Type, getTypeName, tryGetTypeInfo } from "./Reflection";
 import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
-import type { createBrowserRouter } from "react-router-dom";
 
 Dic.skipClasses.push(React.Component);
 
@@ -68,8 +67,11 @@ export function isPermissionAuthorized(permission: PermissionSymbol | string): b
 export function navigate(to: To | number, options?: NavigateOptions): void
 export function navigate(to: To | number, options?: NavigateOptions): void
 export function navigate(to: To | number, options?: NavigateOptions): void {
+  if (typeof to == "number")
     _internalRouter.navigate(to);
-  //if (typeof to == "number")
+  else
+    _internalRouter.navigate(to, options);
+
   //else if (typeof to == "string")
   //  _internalRouter.navigate(toAbsoluteUrl(to), options);
   //else if (typeof to == "object")

@@ -2,16 +2,18 @@ import * as React from 'react'
 import { classes, Dic } from '../Globals'
 import { mlistItemContext, TypeContext } from '../TypeContext'
 import { getTypeInfo } from '../Reflection'
-import { genericForwardRef, LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { MList, newMListElement } from '../Signum.Entities'
 import { getTimeMachineCheckboxIcon, getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
+import { JSX } from 'react'
 
 export interface EnumCheckboxListProps<V extends string> extends LineBaseProps<MList<V>> {
   data?: V[];
   columnCount?: number;
   columnWidth?: number;
   avoidFieldSet?: boolean | HeaderType;
+  ref?: React.Ref<EnumCheckboxListController<V>>
 }
 
 export class EnumCheckboxListController<V extends string> extends LineBaseController<EnumCheckboxListProps<V>, MList<V>> {
@@ -42,8 +44,9 @@ export class EnumCheckboxListController<V extends string> extends LineBaseContro
 
 }
 
-export const EnumCheckboxList: <V extends string>(props: EnumCheckboxListProps<V> & React.RefAttributes<EnumCheckboxListController<V>>) => React.ReactNode | null = genericForwardRef(function EnumCheckboxList<V extends string>(props: EnumCheckboxListProps<V>, ref: React.Ref<EnumCheckboxListController<V>>) {
-  const c = useController(EnumCheckboxListController, props, ref);
+export const EnumCheckboxList: React.MemoExoticComponent<(<V extends string>(props: EnumCheckboxListProps<V>) => JSX.Element | null)> =
+  React.memo(function EnumCheckboxList<V extends string>(props: EnumCheckboxListProps<V>) {
+    const c = useController<EnumCheckboxListController<V>, EnumCheckboxListProps<V>, MList<V>>(EnumCheckboxListController, props);
   const p = c.props;
 
   if (c.isHidden)

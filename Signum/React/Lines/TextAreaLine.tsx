@@ -25,7 +25,7 @@ export class TextAreaLineController extends TextBaseController<TextAreaLineProps
 export const TextAreaLine: React.NamedExoticComponent<TextAreaLineProps>
   = React.memo(function TextAreaLine(props: TextAreaLineProps) {
 
-  const c = useController(TextAreaLineController, props, props.ref);
+  const c = useController(TextAreaLineController, props);
   const ccRef = React.useRef<ChartCounterHandler>(null);
   if (c.isHidden)
     return null;
