@@ -27,7 +27,7 @@ export function useUpdatedRef<T>(newValue: T): React.MutableRefObject<T> {
 
 export function useForceUpdatePromise(): () => Promise<void> {
   const [ticks, setTick] = React.useState(0); // State used to trigger re-render
-  const resolveRef = React.useRef<(value?: void) => void>(); // Ref to store resolve function
+  const resolveRef = React.useRef<(value?: void) => void>(undefined); // Ref to store resolve function
 
   const forceUpdate = React.useCallback(() => new Promise<void>((resolve) => {
       resolveRef.current = resolve; // Store the resolve function
@@ -60,7 +60,7 @@ export function useInterval<T>(interval: number | undefined | null, initialState
 }
 
 export function usePrevious<T>(value: T): T | undefined {
-  var ref = React.useRef<T | undefined>();
+  var ref = React.useRef<T | undefined>(undefined);
   React.useEffect(() => {
     ref.current = value;
   }, [value]);
@@ -355,7 +355,7 @@ export const useDoubleClick = (doubleClick: React.MouseEventHandler, click: Reac
   };
 
   /** @type {{ current: number }} */
-  const handleRef = React.useRef<number | undefined>();
+  const handleRef = React.useRef<number | undefined>(undefined);
 
   const clearClickTimeout = () => {
     if (handleRef) {

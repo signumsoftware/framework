@@ -8,16 +8,17 @@ import { TypeContext } from '../Lines'
 
 export interface CheckboxLineProps extends ValueBaseProps<boolean | null> {
   inlineCheckbox?: boolean | "block";
+  ref?: React.Ref<CheckboxLineController>;
 }
 
 export class CheckboxLineController extends ValueBaseController<CheckboxLineProps, boolean | null>{
 
 }
 
-export const CheckboxLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<CheckboxLineProps & React.RefAttributes<CheckboxLineController>>> =
-  React.memo(React.forwardRef(function CheckboxLine(props: CheckboxLineProps, ref: React.Ref<CheckboxLineController>) {
+export const CheckboxLine: React.NamedExoticComponent<CheckboxLineProps> =
+  React.memo(function CheckboxLine(props: CheckboxLineProps) {
 
-    const c = useController(CheckboxLineController, props, ref);
+    const c = useController(CheckboxLineController, props, props.ref);
 
     if (c.isHidden)
       return null;
@@ -58,6 +59,6 @@ export const CheckboxLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
       );
     }
 
-  }), (prev, next) => {
+  }, (prev, next) => {
     return LineBaseController.propEquals(prev, next);
   });

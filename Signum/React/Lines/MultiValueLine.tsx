@@ -137,7 +137,7 @@ export interface MultiValueLineElementProps {
   valueColumClass: string;
 }
 
-export function MultiValueLineElement(props: MultiValueLineElementProps): React.JSX.Element {
+export function MultiValueLineElement(props: MultiValueLineElementProps): React.ReactElement {
   const mctx = props.ctx;
 
 

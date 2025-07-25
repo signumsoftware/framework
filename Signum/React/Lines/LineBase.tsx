@@ -32,10 +32,10 @@ export interface LineBaseProps<V = unknown> extends StyleOptions {
   mandatory?: boolean | "warning";
 }
 
-export function useController<C extends LineBaseController<P, V>, P extends LineBaseProps<V>, V>(controllerType: new () => C, props: P, ref: React.Ref<C>): C {
+export function useController<C extends LineBaseController<P, V>, P extends LineBaseProps<V> & { ref?: React.Ref<C> }, V>(controllerType: new () => C, props: P): C {
   var controller = React.useMemo<C>(() => new controllerType(), []);
   controller.init(props);
-  React.useImperativeHandle(ref, () => controller, []);
+  React.useImperativeHandle(props.ref, () => controller, []);
   return controller;
 }
 
@@ -196,19 +196,6 @@ export function useInitiallyFocused(initiallyFocused: boolean | number | undefin
 
   }, []);
 }
-
-
-export function genericForwardRef<T, P = {}>(render: (props: P, ref: React.Ref<T>) => React.ReactNode | null): (props: P & React.RefAttributes<T>) => React.ReactNode | null {
-  return React.forwardRef(render as any) as any;
-}
-
-export function genericForwardRefWithMemo<T, P = {}>(render: (props: P, ref: React.Ref<T>) => React.ReactNode | null, propsAreEqual?: (prevProps: P, nextProps: P) => boolean): (props: P & React.RefAttributes<T>) => React.ReactNode | null {
-  return React.memo(React.forwardRef(render as any), propsAreEqual as any) as any;
-}
-
-
-
-
 
 
 export const tasks: ((lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps, originalProps: LineBaseProps) => void)[] = [];

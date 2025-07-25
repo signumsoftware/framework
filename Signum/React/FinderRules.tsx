@@ -750,7 +750,7 @@ export interface MultiValueProps {
   onChange: () => void;
 }
 
-export function MultiValue(p: MultiValueProps): React.JSX.Element {
+export function MultiValue(p: MultiValueProps): React.ReactElement {
 
   const forceUpdate = useForceUpdate();
 
@@ -810,7 +810,7 @@ export function MultiValue(p: MultiValueProps): React.JSX.Element {
 }
 
 
-export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type: string, onChange: () => void, vertical?: boolean }): React.JSX.Element {
+export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type: string, onChange: () => void, vertical?: boolean }): React.ReactElement {
   const mListEntity = React.useRef<MList<Lite<Entity>>>([]);
 
 
@@ -829,7 +829,7 @@ export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type
 
 
 
-export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: FilterOperation | null, onChange: () => void, label?: string }): React.JSX.Element {
+export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: FilterOperation | null, onChange: () => void, label?: string }): React.ReactElement {
   return <TextAreaLine ctx={p.ctx}
     type={{ name: "string" }}
     label={p.label}
@@ -852,7 +852,7 @@ export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: F
   />
 }
 
-export function ComplexConditionSyntax(p: { fo: FilterOperation }): React.JSX.Element | null {
+export function ComplexConditionSyntax(p: { fo: FilterOperation }): React.ReactElement | null {
   var help = FullTextSearchHelps[p.fo];
 
   if (help == null)

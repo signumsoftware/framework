@@ -6,7 +6,7 @@ import { Aprox, EntityBaseController } from './EntityBase';
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase';
 import { Navigator } from '../Navigator'
 import { Multiselect } from 'react-widgets/cjs';
-import { genericForwardRef, useController } from './LineBase';
+import { useController } from './LineBase';
 import { number } from 'prop-types';
 import { FindOptions, ResultRow } from '../FindOptions'
 import { Finder } from '../Finder'
@@ -24,6 +24,7 @@ export interface EntityMultiSelectProps<V extends Lite<Entity> | Entity> extends
   toStringFromData?: boolean;
   delayLoadData?: boolean;
   deps?: React.DependencyList;
+  ref?: React.Ref<EntityMultiSelectController<V>>
 }
 
 export class EntityMultiSelectController<V extends Lite<Entity> | Entity> extends EntityListBaseController<EntityMultiSelectProps<V>, V> {
@@ -54,8 +55,8 @@ export class EntityMultiSelectController<V extends Lite<Entity> | Entity> extend
   }
 }
 
-export const EntityMultiSelect: <V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V> & React.RefAttributes<EntityMultiSelectController<V>>) => React.ReactNode | null = genericForwardRef(function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V>, ref: React.Ref<EntityMultiSelectController<V>>) {
-  const c = useController(EntityMultiSelectController, props, ref);
+export function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V>) {
+  const c = useController(EntityMultiSelectController, props);
   const p = c.props;
 
   if (c.isHidden)

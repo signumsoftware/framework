@@ -16,7 +16,7 @@ export interface ColumnsBuilderProps {
   readonly?: boolean;
 }
 
-export default function ColumnsBuilder(p: ColumnsBuilderProps): React.JSX.Element {
+export default function ColumnsBuilder(p: ColumnsBuilderProps): React.ReactElement {
 
   const forceUpdate = useForceUpdate();
 
@@ -97,7 +97,7 @@ export interface ColumnComponentProps {
   readonly: boolean;
 }
 
-export function ColumnComponent(p: ColumnComponentProps): React.JSX.Element {
+export function ColumnComponent(p: ColumnComponentProps): React.ReactElement {
 
   const forceUpdate = useForceUpdate();
   function handleDeleteColumn() {

@@ -10,7 +10,7 @@ import { QueryString } from '../QueryString'
 import { useAPI, useForceUpdate } from '../Hooks'
 
 
-function SearchPage(): React.JSX.Element {
+function SearchPage(): React.ReactElement {
 
   const params = useParams<{ queryName: string }>();
   const location = useLocation();

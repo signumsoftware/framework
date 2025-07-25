@@ -21,7 +21,7 @@ interface ModalHeaderButtonsProps {
   stickyHeader?: boolean;
 }
 
-export function ModalHeaderButtons(p: ModalHeaderButtonsProps): React.JSX.Element {
+export function ModalHeaderButtons(p: ModalHeaderButtonsProps): React.ReactElement {
 
   var close = p.onClose &&
     <button type="button" className="btn-close" aria-label="Close" onClick={p.onClose}/>
@@ -49,7 +49,7 @@ interface ModalFooterButtonsProps {
 }
 
 
-export function ModalFooterButtons(p: ModalFooterButtonsProps): React.JSX.Element {
+export function ModalFooterButtons(p: ModalFooterButtonsProps): React.ReactElement {
 
   return (
     <div className="modal-footer" {...p.htmlAttributes}>

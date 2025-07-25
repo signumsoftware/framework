@@ -7,7 +7,7 @@ import { mlistItemContext, TypeContext } from '../TypeContext'
 import { MListElementBinding, ReadonlyBinding, TypeReference } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey, getToString, MListElement } from '../Signum.Entities'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
-import { genericForwardRef, useController } from './LineBase'
+import { useController } from './LineBase'
 import { normalizeEmptyArray } from './EntityCombo'
 import { ResultTable } from '../Search'
 import { Navigator } from '../Navigator'
@@ -43,6 +43,8 @@ export interface EntityCheckboxListProps<V extends ModifiableEntity | Lite<Entit
 
   groupElementsBy?: (e: ResultRow) => string;
   renderGroupTitle?: (key: string, i?: number) => React.ReactElement;
+
+  ref?: React.Ref<EntityCheckboxListController<V>>;
 }
 
 export class EntityCheckboxListController<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseController<EntityCheckboxListProps<V>, V> {
@@ -114,9 +116,8 @@ export class EntityCheckboxListController<V extends Lite<Entity> | ModifiableEnt
   }
 }
 
-export const EntityCheckboxList: <V extends ModifiableEntity | Lite<Entity>>(props: EntityCheckboxListProps<V> & React.RefAttributes<EntityCheckboxListController<V>>) => React.ReactNode | null =
-  genericForwardRef(function EntityCheckboxList<V extends ModifiableEntity | Lite<Entity>>(props: EntityCheckboxListProps<V>, ref: React.Ref<EntityCheckboxListController<V>>) {
-  const c = useController(EntityCheckboxListController, props, ref);
+export function EntityCheckboxList<V extends ModifiableEntity | Lite<Entity>>(props: EntityCheckboxListProps<V>): React.JSX.Element | null {
+  const c = useController < EntityCheckboxListController<V>, EntityCheckboxListProps<V>, MList<V>>(EntityCheckboxListController, props);
   const p = c.props;
 
   if (c.isHidden)
@@ -149,7 +150,7 @@ export const EntityCheckboxList: <V extends ModifiableEntity | Lite<Entity>>(pro
       <EntityCheckboxListSelect ctx={p.ctx} controller={c}  />
     );
   }
-});
+}
 
 
 interface EntityCheckboxListSelectProps<V extends ModifiableEntity | Lite<Entity>> {
@@ -157,7 +158,7 @@ interface EntityCheckboxListSelectProps<V extends ModifiableEntity | Lite<Entity
   controller: EntityCheckboxListController<V>;
 }
 
-export function EntityCheckboxListSelect<V extends ModifiableEntity | Lite<Entity>>(props: EntityCheckboxListSelectProps<V>): React.JSX.Element {
+export function EntityCheckboxListSelect<V extends ModifiableEntity | Lite<Entity>>(props: EntityCheckboxListSelectProps<V>): React.ReactElement {
 
   const c = props.controller;
   const p = c.props;

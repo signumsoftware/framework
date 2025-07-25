@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 
-export function AutoFocus(p: { disabled?: boolean, delay?: number, children: React.ReactNode }): React.JSX.Element {
+export function AutoFocus(p: { disabled?: boolean, delay?: number, children: React.ReactNode }): React.ReactElement {
   var ref = React.useRef<HTMLDivElement | null>(null);
   React.useEffect(() => {
     if (!p.disabled) {

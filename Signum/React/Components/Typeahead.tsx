@@ -63,7 +63,15 @@ export class TypeaheadController {
       };
     }, []);
 
-    this.props = props;
+    this.props = {
+      itemsDelay: 200,
+      minLength: 1,
+      renderItem: (item, highlighter) => highlighter.highlight(item as string),
+      onSelect: (elem, event) => (elem as string),
+      scrollHeight: 0,
+      noResultsMessage: " - No results -",
+      ...props
+    };
   }
 
   setInput = (input: HTMLInputElement | null | undefined): void => {
@@ -282,16 +290,6 @@ export const Typeahead: React.ForwardRefExoticComponent<TypeaheadProps & React.R
   }
 });
 
-Typeahead.defaultProps = {
-  getItems: undefined as any,
-  itemsDelay: 200,
-  minLength: 1,
-  renderItem: (item, highlighter) => highlighter.highlight(item as string),
-  onSelect: (elem, event) => (elem as string),
-  scrollHeight: 0,
-
-  noResultsMessage: " - No results -",
-} as TypeaheadProps;
 
 
 export namespace TypeaheadOptions {
