@@ -1,5 +1,5 @@
 import * as React from "react";
-import { To, NavigateOptions, useOutletContext } from "react-router";
+import { To, NavigateOptions, useOutletContext, createBrowserRouter, DataRouter } from "react-router";
 import { IUserEntity } from "./Signum.Security";
 import { PermissionSymbol } from "./Signum.Basics";
 import { Dic, classes, } from './Globals';
@@ -20,8 +20,8 @@ export function setCurrentUser(user: IUserEntity | undefined): void {
   currentUser = user;
 }
 
-export let _internalRouter: ReturnType<typeof createBrowserRouter>;
-export function setRouter(r: ReturnType<typeof createBrowserRouter>): void {
+export let _internalRouter: DataRouter;
+export function setRouter(r: DataRouter): void {
   _internalRouter = r
 }
 

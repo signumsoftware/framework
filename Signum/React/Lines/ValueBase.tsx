@@ -38,7 +38,7 @@ export class ValueBaseController<T extends ValueBaseProps<V>, V> extends LineBas
       state.valueHtmlAttributes = valueHtmlAttributes;
   }
 
-  withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element, vertical?: boolean): JSX.Element {
+  withItemGroup(input: React.ReactElement, preExtraButton?: React.ReactElement, vertical?: boolean): React.ReactElement {
 
     if (!this.props.unit && !this.props.extraButtons && !this.props.extraButtonsBefore && !preExtraButton) {
         return (

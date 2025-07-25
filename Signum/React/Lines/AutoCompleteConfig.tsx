@@ -388,7 +388,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
   }
 }
 
-export function TypeBadge(p: { entity: Lite<Entity> | ModifiableEntity }): React.JSX.Element {
+export function TypeBadge(p: { entity: Lite<Entity> | ModifiableEntity }): React.ReactElement {
 
   var typeName = isEntity(p.entity) ? p.entity.Type :
     isLite(p.entity) ? p.entity.EntityType :

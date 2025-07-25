@@ -38,7 +38,7 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
 }
 
 
-function MessageModal(p: MessageModalProps): React.JSX.Element {
+function MessageModal(p: MessageModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
 

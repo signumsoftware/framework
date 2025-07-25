@@ -17,21 +17,21 @@ export interface NumberLineProps extends ValueBaseProps<number | null> {
   incrementWithArrow?: boolean | number;
   minValue?: number | null;
   maxValue?: number | null;
+  ref?: React.Ref<NumberLineController>;
 }
 
 export class NumberLineController extends ValueBaseController<NumberLineProps, number | null>{
 }
 
-export const NumberLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<NumberLineProps & React.RefAttributes<NumberLineController>>> =
-  React.memo(React.forwardRef(function NumberLine(props: NumberLineProps, ref: React.Ref<NumberLineController>) {
+export const NumberLine: React.NamedExoticComponent<NumberLineProps> = React.memo(function NumberLine(props: NumberLineProps) {
 
-  const c = useController(NumberLineController, props, ref);
+  const c = useController(NumberLineController, props, props.ref);
 
   if (c.isHidden)
     return null;
 
   return numericTextBox(c, c.props.type!.name == "decimal" ? isDecimalKey :  isNumberKey);
-}), (prev, next) => {
+}, (prev, next) => {
   if (next.extraButtons || prev.extraButtons)
     return false;
 
@@ -132,7 +132,7 @@ function getLocaleSeparators(locale: string) {
 }
 
 
-export function NumberBox(p: NumberBoxProps): React.JSX.Element {
+export function NumberBox(p: NumberBoxProps): React.ReactElement {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 

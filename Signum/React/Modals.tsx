@@ -132,7 +132,7 @@ export class FunctionalAdapter extends React.Component<FunctionalAdapterProps> {
     return React.cloneElement(only, { innerRef: (a: any) => { this.innerRef = a; } } as any); //TODO: To avoid having to use forward Ref until is removed
   }
 
-  static withRef(element: React.ReactElement, ref: React.Ref<React.Component>): React.JSX.Element {
+  static withRef(element: React.ReactElement, ref: React.Ref<React.Component>): React.ReactElement {
     var type = element.type as React.ComponentClass | React.FunctionComponent | string;
     if (typeof type == "string" || type.prototype?.render) {
       return React.cloneElement(element, { ref: ref });

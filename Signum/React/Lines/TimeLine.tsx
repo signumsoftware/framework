@@ -9,7 +9,7 @@ import { Duration } from 'luxon';
 import { isNumberKey } from './NumberLine';
 
 export interface TimeLineProps extends ValueBaseProps<string | null> {
-
+  ref?: React.Ref<TimeLineController>
 }
 
 export class TimeLineController extends ValueBaseController<TimeLineProps, string | null> {
@@ -20,10 +20,10 @@ export class TimeLineController extends ValueBaseController<TimeLineProps, strin
 }
 
 
-export const TimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<TimeLineProps & React.RefAttributes<TimeLineController>>> =
-  React.memo(React.forwardRef(function TimeLine(props: TimeLineProps, ref: React.Ref<TimeLineController>) {
+export const TimeLine: React.NamedExoticComponent<TimeLineProps> =
+  React.memo(function TimeLine(props: TimeLineProps) {
 
-    const c = useController(TimeLineController, props, ref);
+    const c = useController(TimeLineController, props);
 
     if (c.isHidden)
       return null;
@@ -73,7 +73,7 @@ export const TimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent
         )}
       </FormGroup>
     );
-  }), (prev, next) => {
+  }, (prev, next) => {
     return LineBaseController.propEquals(prev, next);
   });
 
@@ -90,7 +90,7 @@ export interface TimeTextBoxProps {
   id?: string;
 }
 
-export function TimeTextBox(p: TimeTextBoxProps): React.JSX.Element {
+export function TimeTextBox(p: TimeTextBoxProps): React.ReactElement {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 

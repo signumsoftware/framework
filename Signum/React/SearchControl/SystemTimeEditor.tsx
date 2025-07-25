@@ -20,7 +20,7 @@ interface SystemTimeEditorProps {
   onChanged: () => void;
 }
 
-export default function SystemTimeEditor(p : SystemTimeEditorProps): React.JSX.Element{
+export default function SystemTimeEditor(p : SystemTimeEditorProps): React.ReactElement{
 
   function renderShowPeriod() {
 

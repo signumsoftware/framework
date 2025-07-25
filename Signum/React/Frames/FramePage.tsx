@@ -31,7 +31,7 @@ interface FramePageState {
   executing?: boolean;
 }
 
-export default function FramePage(): React.JSX.Element {
+export default function FramePage(): React.ReactElement {
 
   let [state, setState] = useStateWithPromise<FramePageState | undefined>(undefined);
   const stateRef = useUpdatedRef(state);

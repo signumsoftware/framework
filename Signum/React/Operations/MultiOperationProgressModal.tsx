@@ -19,7 +19,7 @@ interface MultiOperationProgressModalProps extends IModalProps<Operations.API.Er
   abortController: AbortController;
 }
 
-export function MultiOperationProgressModal(p: MultiOperationProgressModalProps): React.JSX.Element {
+export function MultiOperationProgressModal(p: MultiOperationProgressModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();

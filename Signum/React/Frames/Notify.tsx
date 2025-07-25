@@ -23,7 +23,7 @@ interface NotifyHandle {
   remove(options: NotifyOptions): void;
 }
 
-function Notify(): React.JSX.Element {
+function Notify(): React.ReactElement {
 
   const forceUpdate = useForceUpdate();
 

@@ -12,7 +12,7 @@ interface PaginationSelectorProps {
   onPagination: (pag: Pagination) => void;
 }
 
-export function PaginationSelector(p: PaginationSelectorProps): React.JSX.Element | null {
+export function PaginationSelector(p: PaginationSelectorProps): React.ReactElement | null {
   if (!p.pagination)
     return null;
 
@@ -153,7 +153,7 @@ interface PaginationComponentProps {
   onSelect: (num: number) => void;
 }
 
-export function PaginationComponent(p: PaginationComponentProps): React.JSX.Element {
+export function PaginationComponent(p: PaginationComponentProps): React.ReactElement {
 
   function handlePageClicked(e: React.MouseEvent<any>, num: number) {
     e.preventDefault();

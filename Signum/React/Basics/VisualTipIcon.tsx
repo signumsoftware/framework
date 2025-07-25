@@ -9,7 +9,7 @@ import "./VisualTipIcon.css"
 import { OverlayInjectedProps } from "react-bootstrap/esm/Overlay";
 import createUtilityClassName from "react-bootstrap/esm/createUtilityClasses";
 
-export function VisualTipIcon(p: { visualTip: VisualTipSymbol, className?: string, content: (injected: OverlayInjectedProps) => ReactElement }): React.JSX.Element {
+export function VisualTipIcon(p: { visualTip: VisualTipSymbol, className?: string, content: (injected: OverlayInjectedProps) => ReactElement }): React.ReactElement {
 
   var [visualTipSymbols, reload] = useAPIWithReload(() => VisualTipClient.API.getConsumed(), []);
 
