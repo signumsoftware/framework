@@ -135,7 +135,7 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
           <button className="btn btn-default" onClick={this.handleZoomClick}>{WorkflowActivityMonitorMessage.ResetZoom.niceToString()}</button>
           <button className="btn btn-default" onClick={this.handleSearchClick}>{WorkflowActivityMonitorMessage.Find.niceToString()}</button>
         </div>
-        <div style={{ border: "1px solid lightgray" }} ref={de => this.divArea = de!} />
+        <div style={{ border: "1px solid lightgray" }} ref={de => { this.divArea = de! }} />
       </div>
     );
   }

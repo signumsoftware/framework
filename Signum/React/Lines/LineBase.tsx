@@ -197,6 +197,9 @@ export function useInitiallyFocused(initiallyFocused: boolean | number | undefin
   }, []);
 }
 
+export function genericMemo<T, P = {}>(render: (props: P) => React.ReactNode | null, propsAreEqual?: (prevProps: P, nextProps: P) => boolean): (props: P) => React.ReactNode | null {
+  return React.memo(render, propsAreEqual) as any;
+}
 
 export const tasks: ((lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps, originalProps: LineBaseProps) => void)[] = [];
 

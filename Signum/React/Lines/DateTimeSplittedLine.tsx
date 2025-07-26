@@ -4,7 +4,7 @@ import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { classes } from '../Globals'
 import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder } from '../Reflection'
-import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
+import { genericMemo, LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
@@ -30,7 +30,8 @@ export class DateTimeSplittedLineController extends ValueBaseController<DateTime
 }
 
 
-export const DateTimeSplittedLine: React.NamedExoticComponent<DateTimeSplittedLineProps> = React.memo(function DateTimeSplittedLine(props: DateTimeSplittedLineProps) {
+export const DateTimeSplittedLine: (props: DateTimeSplittedLineProps) => React.ReactNode | null =
+  genericMemo(function DateTimeSplittedLine(props: DateTimeSplittedLineProps) {
 
   const c = useController(DateTimeSplittedLineController, props);
 

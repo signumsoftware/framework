@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes, Dic } from '../Globals'
 import { mlistItemContext, TypeContext } from '../TypeContext'
 import { getTypeInfo } from '../Reflection'
-import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
+import { genericMemo, LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { isMListElement, MList, MListElement, newMListElement } from '../Signum.Entities'
 import { getTimeMachineCheckboxIcon, getTimeMachineIcon } from './TimeMachineIcon'
 import { Multiselect } from 'react-widgets/cjs';
@@ -45,8 +45,8 @@ export class EnumMultiSelectController<V extends string> extends LineBaseControl
   }
 }
 
-export const EnumMultiSelect: React.NamedExoticComponent<EnumMultiSelectProps<string>>
-  = React.memo(function EnumMultiSelect<V extends string>(props: EnumMultiSelectProps<V>) {
+export const EnumMultiSelect: <V extends string>(props: EnumMultiSelectProps<V>) => React.ReactNode | null
+  = genericMemo(function EnumMultiSelect<V extends string>(props: EnumMultiSelectProps<V>) {
     const c = useController<EnumMultiSelectController<V>, EnumMultiSelectProps<V>, MList<V>>(EnumMultiSelectController, props);
     const p = c.props;
 

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes } from '../Globals'
-import { LineBaseController, useController } from '../Lines/LineBase'
+import { genericMemo, LineBaseController, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { TextBaseController, TextBaseProps } from './TextBase'
@@ -17,17 +17,18 @@ export class TextBoxLineController extends TextBaseController<TextBoxLineProps, 
   }
 }
 
-export const TextBoxLine: React.NamedExoticComponent<TextBoxLineProps> = React.memo(function TextBoxLine(props: TextBoxLineProps) {
+export const TextBoxLine: (props: TextBoxLineProps) => React.ReactNode | null =
+  genericMemo(function TextBoxLine(props: TextBoxLineProps) {
 
-  const c = useController(TextBoxLineController, props);
+    const c = useController(TextBoxLineController, props);
 
-  if (c.isHidden)
-    return null;
+    if (c.isHidden)
+      return null;
 
-  return internalTextBox(c, "text");
-}, (prev, next) => {
-  return LineBaseController.propEquals(prev, next);
-});
+    return internalTextBox(c, "text");
+  }, (prev, next) => {
+    return LineBaseController.propEquals(prev, next);
+  });
 
 export interface PasswordLineProps extends TextBaseProps<string | null> {
   ref?: React.Ref<PasswordLineController>;
@@ -41,8 +42,8 @@ export class PasswordLineController extends TextBaseController<PasswordLineProps
   }
 }
 
-export const PasswordLine: React.MemoExoticComponent<(<V extends string | null>(props: PasswordLineProps) => React.JSX.Element | null)> =
-  React.memo(function PasswordLine<V extends string | null>(props: PasswordLineProps): React.JSX.Element | null {
+export const PasswordLine: <V extends string | null>(props: PasswordLineProps) => React.ReactNode | null =
+  genericMemo(function PasswordLine<V extends string | null>(props: PasswordLineProps): React.JSX.Element | null {
 
     const c = useController(PasswordLineController, props);
 
@@ -70,8 +71,8 @@ export class GuidLineController extends TextBaseController<GuidLineProps, string
 
 
 
-export const GuidLine: <V extends string | null>(props: GuidLineProps & React.RefAttributes<GuidLineController>) => React.ReactNode | null =
-  React.memo(function GuidLine<V extends string | null>(props: GuidLineProps) {
+export const GuidLine: <V extends string | null>(props: GuidLineProps) => React.ReactNode | null =
+  genericMemo(function GuidLine<V extends string | null>(props: GuidLineProps) {
 
     const c = useController(GuidLineController, props);
 
@@ -94,8 +95,8 @@ export class ColorLineController extends TextBaseController<ColorLineProps, stri
   }
 }
 
-export const ColorLine: <V extends string | null>(props: ColorLineProps & React.RefAttributes<TextBoxLineController>) => React.ReactNode | null
-  = React.memo(function ColorLine<V extends string | null>(props: ColorLineProps) {
+export const ColorLine: <V extends string | null>(props: ColorLineProps) => React.ReactNode | null
+  = genericMemo(function ColorLine<V extends string | null>(props: ColorLineProps) {
 
   const c = useController(TextBoxLineController, props);
 

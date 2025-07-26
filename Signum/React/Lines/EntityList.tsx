@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ModifiableEntity, Lite, Entity, is, getToString, EntityControlMessage, MList } from '../Signum.Entities'
 import { FormGroup } from './FormGroup'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
-import { useController } from './LineBase';
+import { genericMemo, useController } from './LineBase';
 import { classes } from '../Globals';
 import { EntityBaseController } from './EntityBase';
 
@@ -147,7 +147,8 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
 }
 
 
-export const EntityList: React.NamedExoticComponent<EntityListProps<ModifiableEntity | Lite<Entity>>> = React.memo(function EntityList<V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V>) {
+export const EntityList: <V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V>) => React.ReactNode | null =
+  genericMemo(function EntityList<V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V>) {
   const c = useController<EntityListController<V>, EntityListProps<V>, MList<V>>(EntityListController, props);
   const p = c.props;
   const list = p.ctx.value!;

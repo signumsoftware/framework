@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DropdownList, Combobox, Value } from 'react-widgets'
 import { Dic, classes } from '../Globals'
 import { MemberInfo, tryGetTypeInfo } from '../Reflection'
-import { LineBaseController, LineBaseProps, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
+import { genericMemo, LineBaseController, LineBaseProps, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum } from '../Signum.Entities'
@@ -33,8 +33,8 @@ export interface OptionItem {
   label: string;
 }
 
-export const EnumLine: React.MemoExoticComponent<(<V extends string | number | boolean | null>(props: EnumLineProps<V>) => JSX.Element | null)>
-  = React.memo(function EnumLine<V extends string | number | boolean | null>(props: EnumLineProps<V>) {
+export const EnumLine: <V extends string | number | boolean | null>(props: EnumLineProps<V>) => React.ReactNode | null
+  = genericMemo(function EnumLine<V extends string | number | boolean | null>(props: EnumLineProps<V>) {
 
     const c = useController(EnumLineController<V>, props);
 

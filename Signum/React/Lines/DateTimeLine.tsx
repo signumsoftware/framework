@@ -4,7 +4,7 @@ import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { DatePicker } from 'react-widgets';
 import { classes } from '../Globals';
 import { toLuxonFormat, toFormatWithFixes, dateTimePlaceholder } from '../Reflection';
-import { LineBaseController, useController } from '../Lines/LineBase';
+import { genericMemo, LineBaseController, useController } from '../Lines/LineBase';
 import { FormGroup } from '../Lines/FormGroup';
 import { FormControlReadonly } from '../Lines/FormControlReadonly';
 import { JavascriptMessage } from '../Signum.Entities';
@@ -30,7 +30,8 @@ export class DateTimeLineController extends ValueBaseController<DateTimeLineProp
   }
 }
 
-export const DateTimeLine: React.NamedExoticComponent<DateTimeLineProps> = React.memo(function DateTimeLine(props: DateTimeLineProps) {
+export const DateTimeLine: (props: DateTimeLineProps) => React.ReactNode | null =
+  genericMemo(function DateTimeLine(props: DateTimeLineProps) {
 
   const c = useController(DateTimeLineController, props);
 

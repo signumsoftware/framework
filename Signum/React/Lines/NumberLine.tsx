@@ -3,7 +3,7 @@ import { DateTime, Duration } from 'luxon'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, classes } from '../Globals'
 import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat, numberLimits } from '../Reflection'
-import { LineBaseController, LineBaseProps, setRefProp, tasks, useController, useInitiallyFocused } from '../Lines/LineBase'
+import { genericMemo, LineBaseController, LineBaseProps, setRefProp, tasks, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
@@ -23,7 +23,8 @@ export interface NumberLineProps extends ValueBaseProps<number | null> {
 export class NumberLineController extends ValueBaseController<NumberLineProps, number | null>{
 }
 
-export const NumberLine: React.NamedExoticComponent<NumberLineProps> = React.memo(function NumberLine(props: NumberLineProps) {
+export const NumberLine: (props: NumberLineProps) => React.ReactNode | null =
+  genericMemo(function NumberLine(props: NumberLineProps) {
 
   const c = useController(NumberLineController, props);
 

@@ -28,6 +28,7 @@ import { TextAreaLine } from '@framework/Lines'
 import Validators = DynamicTypeClient.Validators;
 import DynamicProperty = DynamicTypeClient.DynamicProperty;
 import DynamicTypeDefinition = DynamicTypeClient.DynamicTypeDefinition;
+import { JSX } from 'react'
 
 export interface DynamicTypeDesignContext {
   refreshView: () => void;

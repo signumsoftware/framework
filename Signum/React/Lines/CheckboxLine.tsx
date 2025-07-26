@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Dic, classes } from '../Globals'
-import { LineBaseController, LineBaseProps, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
+import { genericMemo, LineBaseController, LineBaseProps, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
@@ -15,8 +15,8 @@ export class CheckboxLineController extends ValueBaseController<CheckboxLineProp
 
 }
 
-export const CheckboxLine: React.NamedExoticComponent<CheckboxLineProps> =
-  React.memo(function CheckboxLine(props: CheckboxLineProps) {
+export const CheckboxLine: (props: CheckboxLineProps) => React.ReactNode | null =
+  genericMemo(function CheckboxLine(props: CheckboxLineProps) {
 
     const c = useController(CheckboxLineController, props);
 

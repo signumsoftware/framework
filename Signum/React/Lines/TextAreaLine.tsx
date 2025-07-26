@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes } from '../Globals'
-import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
+import { genericMemo, LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { EntityControlMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
@@ -22,8 +22,8 @@ export class TextAreaLineController extends TextBaseController<TextAreaLineProps
   }
 }
 
-export const TextAreaLine: React.NamedExoticComponent<TextAreaLineProps>
-  = React.memo(function TextAreaLine(props: TextAreaLineProps) {
+export const TextAreaLine: (props: TextAreaLineProps) => React.ReactNode | null
+  = genericMemo(function TextAreaLine(props: TextAreaLineProps) {
 
   const c = useController(TextAreaLineController, props);
   const ccRef = React.useRef<ChartCounterHandler>(null);

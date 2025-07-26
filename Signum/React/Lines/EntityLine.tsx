@@ -9,7 +9,7 @@ import { Aprox, EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
 import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { useAPI, useMounted } from '../Hooks'
-import { useController } from './LineBase'
+import { genericMemo, useController } from './LineBase'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 
 
@@ -123,8 +123,8 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
 }
 
 
-export const EntityLine: React.MemoExoticComponent<(<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V>) => React.ReactElement | null)>
-  = React.memo(function EntityLine<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V>): React.ReactElement | null {
+export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V>) => React.ReactNode | null
+  = genericMemo(function EntityLine<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V>): React.ReactElement | null {
     const c = useController<EntityLineController<V>, EntityLineProps<V>, V>(EntityLineController, props);
     const p = c.props;
 

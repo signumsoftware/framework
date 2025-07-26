@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { classes } from '../Globals';
 import { timeToString, timePlaceholder, toLuxonDurationFormat } from '../Reflection';
-import { LineBaseController, useController } from '../Lines/LineBase';
+import { genericMemo, LineBaseController, useController } from '../Lines/LineBase';
 import { FormGroup } from '../Lines/FormGroup';
 import { FormControlReadonly } from '../Lines/FormControlReadonly';
 import { ValueBaseController, ValueBaseProps } from './ValueBase';
@@ -20,8 +20,8 @@ export class TimeLineController extends ValueBaseController<TimeLineProps, strin
 }
 
 
-export const TimeLine: React.NamedExoticComponent<TimeLineProps> =
-  React.memo(function TimeLine(props: TimeLineProps) {
+export const TimeLine: (props: TimeLineProps) => React.ReactNode | null =
+  genericMemo(function TimeLine(props: TimeLineProps) {
 
     const c = useController(TimeLineController, props);
 

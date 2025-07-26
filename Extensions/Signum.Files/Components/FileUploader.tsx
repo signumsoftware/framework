@@ -95,7 +95,7 @@ export function FileUploader(p: FileUploaderProps): React.JSX.Element {
     setErrors(errors => [...errors, newError]);
   }
 
-  
+
 
   return (
     <div {...p.divHtmlAttributes}>
@@ -104,9 +104,8 @@ export function FileUploader(p: FileUploaderProps): React.JSX.Element {
           onDragEnter={handleDragOver}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <div className={classes("sf-upload btn btn-light", p.buttonCss, )}>
+          onDrop={handleDrop}>
+          <div className={classes("sf-upload btn btn-light", p.buttonCss,)}>
             <FontAwesomeIcon icon="upload" className="me-2" />
             {FileMessage.SelectFile.niceToString()}
             <input type='file' accept={p.accept} onChange={handleFileChange} multiple={p.multiple} />
@@ -182,7 +181,7 @@ export function toFileEntity(file: File, o: { accept?: string, maxSizeInBytes?: 
           fileEntity.suffix = suffix;
 
           const abortController = new AbortController();
-          o.asyncOptions?.onStart(fileEntity, abortController )
+          o.asyncOptions?.onStart(fileEntity, abortController)
 
           uploadChunksAsync(fileEntity, file, abortController.signal, o.asyncOptions!)
 
@@ -229,11 +228,11 @@ async function uploadChunksAsync(fileEntity: IFilePath & ModifiableEntity, file:
 
     options.onFinished(fileEntity);
 
-  } catch(error) {
+  } catch (error) {
     options.onError(fileEntity, error);
   }
 }
 
-  
+
 
 

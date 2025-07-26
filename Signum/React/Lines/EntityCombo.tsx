@@ -9,7 +9,7 @@ import { FormGroup } from './FormGroup'
 import { Navigator } from '../Navigator'
 import { FormControlReadonly } from './FormControlReadonly'
 import { classes } from '../Globals';
-import { useController } from './LineBase'
+import { genericMemo, useController } from './LineBase'
 import { useMounted } from '../Hooks'
 import { DropdownList } from 'react-widgets'
 import { ResultTable } from '../Search'
@@ -72,8 +72,8 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
   }
 }
 
-export const EntityCombo: React.NamedExoticComponent<EntityComboProps<Entity | Lite<Entity> | null>>
-  = React.memo(function EntityCombo<V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V>) {
+export const EntityCombo: <V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V>) => React.ReactNode | null 
+  = genericMemo(function EntityCombo<V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V>) {
 
     const c = useController<EntityComboController<V>, EntityComboProps<V>, V>(EntityComboController, props);
     const p = c.props;

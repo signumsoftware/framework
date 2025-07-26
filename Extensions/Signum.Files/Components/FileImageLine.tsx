@@ -11,7 +11,7 @@ import { FileUploader } from './FileUploader'
 import { FileImage } from './FileImage';
 import "./Files.css"
 import { FetchAndRemember } from '@framework/Lines'
-import { useController } from '@framework/Lines/LineBase'
+import { genericMemo, useController } from '@framework/Lines/LineBase'
 import { ImageModal } from './ImageModal'
 import { FileLineProps } from './FileLine'
 import { JSX } from 'react/jsx-runtime'
@@ -57,8 +57,8 @@ export class FileImageLineController<V extends ModifiableEntity & IFile | Lite<I
   }
 }
 
-export const FileImageLine: React.MemoExoticComponent<(<V extends (ModifiableEntity & IFile) | Lite<IFile & Entity> | null>(props: FileImageLineProps<V>) => JSX.Element | null)> =
-  React.memo(function FileImageLine<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null>(props: FileImageLineProps<V>): JSX.Element | null {
+export const FileImageLine: <V extends (ModifiableEntity & IFile) | Lite<IFile & Entity> | null>(props: FileImageLineProps<V>) => React.ReactNode | null=
+  genericMemo(function FileImageLine<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null>(props: FileImageLineProps<V>): JSX.Element | null {
     const c = useController<FileImageLineController<V>, FileImageLineProps<V>, V>(FileImageLineController, props);
     const p = c.props;
 

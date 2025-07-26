@@ -11,7 +11,7 @@ import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour, toCompu
 import { FileUploader, AsyncUploadOptions } from './FileUploader'
 
 import "./Files.css"
-import { useController } from '@framework/Lines/LineBase'
+import { genericMemo, useController } from '@framework/Lines/LineBase'
 import { FilesClient } from '../FilesClient'
 import ProgressBar from '@framework/Components/ProgressBar'
 import { FontAwesomeIcon } from '@framework/Lines'
@@ -112,8 +112,8 @@ export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*
   }
 }
 
-export const FileLine: React.MemoExoticComponent<(<V extends ModifiableEntity /* & IFile */ | Lite</*IFile &*/ Entity> | null>(props: FileLineProps<V>) => JSX.Element | null)>=
-  React.memo(function FileLine<V extends ModifiableEntity/* & IFile */ | Lite</*IFile &*/ Entity> | null>(props: FileLineProps<V>) {
+export const FileLine: <V extends ModifiableEntity /* & IFile */ | Lite</*IFile &*/ Entity> | null>(props: FileLineProps<V>) => React.ReactNode | null =
+  genericMemo(function FileLine<V extends ModifiableEntity/* & IFile */ | Lite</*IFile &*/ Entity> | null>(props: FileLineProps<V>) {
     const c = useController<FileLineController<V>, FileLineProps<V>, V>(FileLineController, props);
     const p = c.props;
 

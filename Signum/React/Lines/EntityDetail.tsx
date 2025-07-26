@@ -4,7 +4,7 @@ import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, isLite, isEntity } from '../Signum.Entities'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { RenderEntity } from './RenderEntity'
-import { useController } from './LineBase'
+import { genericMemo, useController } from './LineBase'
 import { getTypeInfos, tryGetTypeInfos } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { TypeBadge } from './AutoCompleteConfig'
@@ -30,8 +30,8 @@ export class EntityDetailController<V extends ModifiableEntity | Lite<Entity> | 
   }
 }
 
-export const EntityDetail: React.MemoExoticComponent<(<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>) => React.JSX.Element | null)> =
-  React.memo(function EntityDetail<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>): React.JSX.Element | null {
+export const EntityDetail: <V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>) => React.ReactNode | null =
+  genericMemo(function EntityDetail<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>): React.JSX.Element | null {
 
     const c = useController<EntityDetailController<V>, EntityDetailProps<V>, V>(EntityDetailController, props);
   const p = c.props;
