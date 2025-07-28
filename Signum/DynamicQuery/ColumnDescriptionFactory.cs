@@ -40,6 +40,7 @@ public class ColumnDescriptionFactory
         set
         {
             propertyRoutes = value;
+
             if (propertyRoutes != null && propertyRoutes.Any() /*Out of IB casting*/)
             {
                 Format = GetFormat(propertyRoutes);
