@@ -508,7 +508,12 @@ public class SqlPreCommandSimple : SqlPreCommand
             return Convert.ToInt32(value).ToString();
 
         if (value is byte[] bytes)
+        {
+            if(Schema.Current.Settings.IsPostgres)
+                return "'\\x" + BitConverter.ToString(bytes).Replace("-", "") + "'";
+
             return "0x" + BitConverter.ToString(bytes).Replace("-", "");
+        }
 
         if (value is IFormattable f)
             return f.ToString(null, CultureInfo.InvariantCulture);
