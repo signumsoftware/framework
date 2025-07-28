@@ -94,7 +94,7 @@ public struct Implementations : IEquatable<Implementations>
 
             if (t.IsInterface || t.IsAbstract)
             {
-                message += @"\n" + ConsiderMessage(route, "typeof(YourConcrete" + t.TypeName() + ")");
+                message += "\n" + ConsiderMessage(route, "typeof(YourConcrete" + t.TypeName() + ")");
             }
 
             throw new InvalidOperationException(message);

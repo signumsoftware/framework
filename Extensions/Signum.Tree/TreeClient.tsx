@@ -70,7 +70,7 @@ export namespace TreeClient {
 
     DashboardClient.registerRenderer(UserTreePartEntity, {
       component: () => import('./Dashboard/View/UserTreePart').then((a: any) => a.default),
-      defaultIcon: () => ({ icon: ["far", "network-wired"], iconColor: "#B7950B" }),
+      icon: () => ({ icon: ["far", "network-wired"], iconColor: "#B7950B" }),
       withPanel: c => true,
       getQueryNames: c => [c.userQuery?.query].notNull(),
       handleEditClick: !Navigator.isViewable(UserTreePartEntity) || Navigator.isReadOnly(UserTreePartEntity) ? undefined :
