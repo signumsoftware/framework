@@ -14,8 +14,6 @@ import ReactMarkdown from "react-markdown";
 
 export default function ChatModal(p: { onClose: () => void }): React.ReactElement {
 
-  //const [currentSession, setCurrentSession] = React.useState<Lite<ChatSessionEntity> | null>(null);
-
   const currentSessionRef = React.useRef<Lite<ChatSessionEntity> | null>(null);
   const messagesRef = React.useRef<ChatMessageEntity[] | undefined>([]);
 

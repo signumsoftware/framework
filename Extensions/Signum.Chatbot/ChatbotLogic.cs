@@ -28,6 +28,7 @@ public static class ChatbotLogic
     public static ResetLazy<Dictionary<Lite<ChatbotLanguageModelEntity>, ChatbotLanguageModelEntity>> LanguageModels = null!;
     public static ResetLazy<Lite<ChatbotLanguageModelEntity>?> DefaultLanguageModel = null!;
 
+
     public static Dictionary<ChatbotProviderSymbol, IChatbotProvider> Providers = new Dictionary<ChatbotProviderSymbol, IChatbotProvider>
     {
         { ChatbotProviders.Mistral, new MistralChatbotProvider()}
@@ -133,14 +134,18 @@ public static class ChatbotLogic
 
 }
 
+
 public interface IChatbotProvider
 {
     string[] GetModelNames();
+
     string[] GetModelVersions(string name);
+
     IAsyncEnumerable<string> AskQuestionAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model,  CancellationToken ct);
 
     Task<string?> GetAgentAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct);
 }
+
 
 public class ConversationHistory
 {
@@ -156,6 +161,7 @@ public class ConversationHistory
         return Messages.Select( c => new ChatMessage() { Role = c.Role, Content = c.Message}).ToList();
     }
 }
+
 
 public class ChatMessage
 {

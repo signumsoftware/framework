@@ -11,7 +11,6 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.Json;
 
 namespace Signum.Chatbot.OpenAI;
@@ -209,7 +208,6 @@ public class MistralChatbotProvider : IChatbotProvider
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
         return client;
-
     }
 
     public class ChatCompletionResponse
