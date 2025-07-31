@@ -28,7 +28,7 @@ type ControllerProps = {
   innerRef?: React.Ref<LexicalEditor>;
   plugins?: HtmlEditorExtension[];
   initiallyFocused?: boolean | number;
-  handleKeybindings?: HtmlEditorProps['handleKeybindings'];
+  handleKeybindings?: HtmlEditorProps["handleKeybindings"];
 };
 
 type ControllerReturnType = {
@@ -46,7 +46,7 @@ export const useController = ({
   plugins,
   initiallyFocused,
   handleKeybindings,
-  editableId
+  editableId,
 }: ControllerProps): ControllerReturnType => {
   const controller = React.useMemo(() => new HtmlEditorController(), []);
   const textConverter = converter ?? new HtmlContentStateConverter();
@@ -63,10 +63,11 @@ export const useController = ({
       return defaultPlugins;
     }
 
-    const result = [...defaultPlugins, ...plugins];
-    result.toObject(a => a.constructor.name); // To throw if there are duplicates
-
-    return result;
+    const seen = new Set<string>();
+    return [...defaultPlugins, ...plugins].filter(
+      (plugin) =>
+        !seen.has(plugin.constructor.name) && seen.add(plugin.constructor.name)
+    );
   }, [plugins, controller]);
 
   React.useEffect(() => {
@@ -87,7 +88,7 @@ export const useController = ({
     innerRef,
     initiallyFocused,
     plugins: extensions,
-    editableId
+    editableId,
   });
 
   const nodes = React.useMemo(() => {
