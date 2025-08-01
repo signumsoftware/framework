@@ -63,11 +63,10 @@ export const useController = ({
       return defaultPlugins;
     }
 
-    const seen = new Set<string>();
-    return [...defaultPlugins, ...plugins].filter(
-      (plugin) =>
-        !seen.has(plugin.constructor.name) && seen.add(plugin.constructor.name)
-    );
+    const result = [...defaultPlugins, ...plugins];
+    result.toObject((a) => a.name); // To throw if there are duplicates
+
+    return result;
   }, [plugins, controller]);
 
   React.useEffect(() => {
