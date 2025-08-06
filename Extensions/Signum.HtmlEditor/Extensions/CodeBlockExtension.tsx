@@ -1,17 +1,23 @@
-import { CodeHighlightNode, CodeNode, registerCodeHighlighting } from "@lexical/code";
+import {
+  CodeHighlightNode,
+  CodeNode,
+  registerCodeHighlighting,
+} from "@lexical/code";
 import { HtmlEditorController } from "../HtmlEditorController";
 import {
   HtmlEditorExtension,
   LexicalConfigNode,
-  OptionalCallback
+  OptionalCallback,
 } from "./types";
 
 export class CodeBlockExtension implements HtmlEditorExtension {
+  name = "CodeBlockExtension";
+
   registerExtension(controller: HtmlEditorController): OptionalCallback {
-      return registerCodeHighlighting(controller.editor);
+    return registerCodeHighlighting(controller.editor);
   }
 
   getNodes(): LexicalConfigNode {
-      return [CodeNode, CodeHighlightNode]
+    return [CodeNode, CodeHighlightNode];
   }
 }
