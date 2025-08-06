@@ -34,7 +34,7 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
   size?: BsSize;
   shouldSelect?: boolean;
   additionalDialogClassName?: string;
-  modalRef?: React.RefObject<MessageModalHandler>; //For closing the modal imperatively
+  modalRef?: React.RefObject<MessageModalHandler | null>; //For closing the modal imperatively
 }
 
 

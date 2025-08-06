@@ -67,6 +67,10 @@ export function isPermissionAuthorized(permission: PermissionSymbol | string): b
 export function navigate(to: To | number, options?: NavigateOptions): void
 export function navigate(to: To | number, options?: NavigateOptions): void
 export function navigate(to: To | number, options?: NavigateOptions): void {
+
+  if (typeof to == "string" && Boolean(window.__baseName) && to.startsWith(window.__baseName))
+    to = to.after(window.__baseName);
+
   if (typeof to == "number")
     _internalRouter.navigate(to);
   else
@@ -150,7 +154,7 @@ export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.K
   else if (path.startsWith("http"))
     window.location.href = path;
   else
-    navigate(path);
+    navigate(toAbsoluteUrl(path));
 }
 
 export function toAbsoluteUrl(appRelativeUrl: string): string {

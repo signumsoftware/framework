@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { DateTime, Duration } from 'luxon'
-import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, classes } from '../Globals'
 import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat, numberLimits } from '../Reflection'
 import { genericMemo, LineBaseController, LineBaseProps, setRefProp, tasks, useController, useInitiallyFocused } from '../Lines/LineBase'

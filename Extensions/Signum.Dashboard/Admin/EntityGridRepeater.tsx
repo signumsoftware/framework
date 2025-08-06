@@ -203,7 +203,7 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
 }
 
 
-export function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(props: EntityGridRepeaterProps<V>) {
+export function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(props: EntityGridRepeaterProps<V>): React.JSX.Element | null {
   const c = useController<EntityGridRepeaterController<V>, EntityGridRepeaterProps<V>, MList<V>>(EntityGridRepeaterController, props);
   const p = c.props;
 

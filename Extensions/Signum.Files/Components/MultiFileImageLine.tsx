@@ -80,7 +80,7 @@ export class MultiFileImageLineController<V extends ModifiableEntity /*& IFile*/
   }
 }
 
-export default function MultiFileLine<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile &*/ Entity>>(props: MultiFileImageLineProps<V>): JSX.Element | null {
+export function MultiFileImageLine<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile &*/ Entity>>(props: MultiFileImageLineProps<V>): JSX.Element | null {
 
   const c = useController(MultiFileImageLineController<V>, props);
   const p = c.props;
