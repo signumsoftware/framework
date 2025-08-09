@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { classes } from '../Globals'
 import { JavascriptMessage } from '../Signum.Entities'
-import { Transition } from 'react-transition-group'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import "./Notify.css"

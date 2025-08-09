@@ -5,7 +5,7 @@ import { AutocompleteConfig } from './AutoCompleteConfig';
 import { Aprox, EntityBaseController } from './EntityBase';
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase';
 import { Navigator } from '../Navigator'
-import { Multiselect } from 'react-widgets/cjs';
+import { Multiselect } from 'react-widgets-up';
 import { useController } from './LineBase';
 import { number } from 'prop-types';
 import { FindOptions, ResultRow } from '../FindOptions'
@@ -15,7 +15,7 @@ import { useMounted } from '../Hooks';
 import { FormGroup } from './FormGroup';
 import { classes } from '../Globals';
 import { getTimeMachineIcon } from './TimeMachineIcon';
-import Input from 'react-widgets/cjs/Input';
+import Input from 'react-widgets-up/Input';
 import { JSX } from 'react/jsx-runtime';
 
 export interface EntityMultiSelectProps<V extends Lite<Entity> | Entity> extends EntityListBaseProps<V> {

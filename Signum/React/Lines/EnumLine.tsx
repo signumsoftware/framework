@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { DropdownList, Combobox, Value } from 'react-widgets'
+import { DropdownList, Combobox, Value } from 'react-widgets-up'
 import { Dic, classes } from '../Globals'
 import { MemberInfo, tryGetTypeInfo } from '../Reflection'
 import { genericMemo, LineBaseController, LineBaseProps, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'

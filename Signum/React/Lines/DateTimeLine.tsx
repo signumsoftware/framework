@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DateTime } from 'luxon';
-import { CalendarProps } from 'react-widgets/cjs/Calendar'
-import { DatePicker } from 'react-widgets';
+import { CalendarProps } from 'react-widgets-up/Calendar'
+import { DatePicker } from 'react-widgets-up';
 import { classes } from '../Globals';
 import { toLuxonFormat, toFormatWithFixes, dateTimePlaceholder } from '../Reflection';
 import { genericMemo, LineBaseController, useController } from '../Lines/LineBase';
@@ -11,7 +11,7 @@ import { JavascriptMessage } from '../Signum.Entities';
 import { ValueBaseProps, ValueBaseController } from './ValueBase';
 import { TypeContext } from '../Lines';
 import Exception from '../Exceptions/Exception';
-import { RenderDayProp } from 'react-widgets/cjs/Month';
+import { RenderDayProp } from 'react-widgets-up/Month';
 
 export interface DateTimeLineProps extends ValueBaseProps<string | null> {
   showTimeBox?: boolean;

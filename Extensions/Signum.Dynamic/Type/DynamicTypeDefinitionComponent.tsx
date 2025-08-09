@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Combobox } from 'react-widgets'
+import { Combobox } from 'react-widgets-up'
 import { classes, Dic } from '@framework/Globals'
 import { Binding, EntityDataValues, EntityKindValues, EntityKind, PropertyRoute, Type } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'

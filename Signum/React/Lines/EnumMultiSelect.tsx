@@ -5,7 +5,7 @@ import { getTypeInfo } from '../Reflection'
 import { genericMemo, LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { isMListElement, MList, MListElement, newMListElement } from '../Signum.Entities'
 import { getTimeMachineCheckboxIcon, getTimeMachineIcon } from './TimeMachineIcon'
-import { Multiselect } from 'react-widgets/cjs';
+import { Multiselect } from 'react-widgets-up';
 import { HeaderType } from './GroupHeader'
 import { FormGroup } from './FormGroup'
 

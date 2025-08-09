@@ -11,7 +11,7 @@ import { FormControlReadonly } from './FormControlReadonly'
 import { classes } from '../Globals';
 import { genericMemo, useController } from './LineBase'
 import { useMounted } from '../Hooks'
-import { DropdownList } from 'react-widgets'
+import { DropdownList } from 'react-widgets-up'
 import { ResultTable } from '../Search'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { TextHighlighter } from '../Components/Typeahead'

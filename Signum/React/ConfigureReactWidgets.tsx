@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { DateTime, Settings } from 'luxon';
-import * as ReactWidgets from 'react-widgets';
-import { UserProvidedMessages } from 'react-widgets/cjs/messages';
+import * as ReactWidgets from 'react-widgets-up';
+import { UserProvidedMessages } from 'react-widgets-up/messages';
 import { ReactWidgetsMessage } from './Signum.Entities';
-import { NumberLocalizer } from 'react-widgets/cjs/IntlLocalizer';
+import { NumberLocalizer } from 'react-widgets-up/IntlLocalizer';
 import { toFormatWithFixes } from './Reflection';
 
 export function getMessages(): UserProvidedMessages{

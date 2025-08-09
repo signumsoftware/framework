@@ -4,7 +4,7 @@ import { Finder } from '../Finder'
 import { QueryToken, SubTokensOptions, getTokenParents, isPrefix, ManualToken, QueryDescription } from '../FindOptions'
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
-import { DropdownList } from 'react-widgets'
+import { DropdownList } from 'react-widgets-up'
 import { StyleContext } from '../Lines';
 import { useAPI, useForceUpdate } from '../Hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

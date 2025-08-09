@@ -11,7 +11,7 @@ import { MultiValueLine } from '../Lines/MultiValueLine';
 import { Operations } from '../Operations';
 import { useForceUpdate } from '../Hooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { DropdownList } from 'react-widgets'
+import { DropdownList } from 'react-widgets-up'
 import { QueryTokenMessage } from '../Signum.DynamicQuery.Tokens'
 import { Finder } from '../Finder'
 import { openModal, IModalProps } from '../Modals'
