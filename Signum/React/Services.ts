@@ -314,7 +314,7 @@ export function b64toBlob(b64Data: string, contentType: string = "", sliceSize =
     var byteArray = new Uint8Array(byteNumbers);
 
     byteArrays.push(byteArray);
-  }
+  } 
 
   var blob = new Blob(byteArrays, { type: contentType });
   return blob;
