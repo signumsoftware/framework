@@ -1,4 +1,4 @@
-import { $getRoot, LexicalEditor } from "lexical";
+import { $createTextNode, $getRoot, LexicalEditor } from "lexical";
 import { HtmlEditorController } from "../../HtmlEditorController";
 import {
   HtmlEditorExtension,
@@ -112,32 +112,41 @@ export class ImageExtension<T extends object = {}>
 
     const editorState = controller.editor.getEditorState();
     let hasUpdatedNodes = false;
-    controller.editor.update(
-      () => {
-        const nodes = Array.from(editorState._nodeMap.values());
-        if (!nodes.some((v) => isImagePlaceholderRegex(v.getTextContent())))
-          return;
-        editorState._nodeMap.forEach((node) => {
-          const text = node.getTextContent();
 
-          if (node.getType() === "text" && isImagePlaceholderRegex(text)) {
-            const attachmentId = extractAttachmentId(text);
-            if (attachmentId && !attachments.includes(attachmentId)) return;
-            node.replace(
-              $createImageNode({ attachmentId } as object, this.imageConverter)
-            );
+    controller.editor.update(() => {
+      const nodes = Array.from(editorState._nodeMap.values());
+      if (!nodes.some((v) => isImagePlaceholderRegex(v.getTextContent())))
+        return;
+      nodes.forEach((node) => {
+        if (node.getType() === "text") {
+          const text = node.getTextContent();
+          const match = text.match(IMAGE_PLACEHOLDER_REGEX);
+
+          if (match) {
+            const before = text.slice(0, match.index!);
+            const after = text.slice(match.index! + match[0].length);
+            const attachmentId = match[1];
+
+            const imageNode = $createImageNode({ attachmentId } as object, this.imageConverter);
+
+            // Replace the text node with the image node
+            const replaced = node.replace(imageNode);
+
+            // Insert neighbors around the image
+            if (before) replaced.insertBefore($createTextNode(before));
+            if (after) replaced.insertAfter($createTextNode(after));
+
             hasUpdatedNodes = true;
           }
-        });
-      },
-      { discrete: true }
-    );
+        }
+      });
+    }, { discrete: true });
 
     if (hasUpdatedNodes) controller.saveHtml();
   }
 }
 
-export const IMAGE_PLACEHOLDER_REGEX: RegExp = /^\[IMAGE_(\d+)\]$/;
+export const IMAGE_PLACEHOLDER_REGEX: RegExp = /\[IMAGE_(\d+)\]/;
 
 export function extractAttachmentId(text: string): string | null {
   const match = text.match(IMAGE_PLACEHOLDER_REGEX);
