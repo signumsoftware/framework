@@ -560,7 +560,7 @@ public class CodeFile
         });
     }
 
-    public void AddNpmPackage(string packageName, string version, bool devDependencies : false)
+    public void AddNpmPackage(string packageName, string version, bool devDependencies = false)
     {
         AssertExtension(".json");
 
