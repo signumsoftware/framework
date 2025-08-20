@@ -1,9 +1,11 @@
 ﻿.row-container {
     border: 1px solid silver;
+    margin-bottom: 4px;
 }
 
 .row-data {
     padding: 4px 8px;
+    background-color: #fff;
 }
 
 .row-title {
@@ -15,7 +17,7 @@
     margin-right: 5px;
 }
 
-.row-header {
+.row-data.row-header {
     background-color: #eee;
 }
 
