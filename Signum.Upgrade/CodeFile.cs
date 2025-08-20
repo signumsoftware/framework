@@ -566,9 +566,7 @@ public class CodeFile
 
         ProcessLines(lines =>
         {
-            var dependencies = devDependencies ?
-            @"""dependencies""" :
-            @"""devDependencies""";
+            var dependencies = devDependencies ? @"""devDependencies""": @"""dependencies""";
 
             var pos = lines.FindIndex(a => a.Contains(dependencies));
             
@@ -578,8 +576,6 @@ public class CodeFile
                 return false;
             }
             var indent = GetIndent(lines[pos]);
-            lines.RemoveRange(pos, 1);
-
             if (lines[pos].TrimEnd().EndsWith("},"))
             {
                 lines[pos] = lines[pos].Before("},");
@@ -597,7 +593,7 @@ public class CodeFile
                 lines[postEnd - 1] += ",";
             }
 
-            lines.Insert(postEnd, indent + $@"""{packageName}"", ""{version}""");
+            lines.Insert(postEnd, indent + $@"""{packageName}"": ""{version}""");
 
             return true;
         });

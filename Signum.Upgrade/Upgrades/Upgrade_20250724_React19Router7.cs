@@ -12,10 +12,12 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
+        var port = Random.Shared.Next(3000, 3500);
+
         uctx.ChangeCodeFile(@"Southwind.Server/appsettings.json", file =>
         {
             file.InsertAfterFirstLine(a => a.Contains("ServerName") || a.Contains("StartBackgroundProcesses"),
-                @"""ViteDevServerPort"": 3000,");
+                $@"""ViteDevServerPort"": {port},");
         });
 
         uctx.CreateCodeFile(@"Southwind.Server/main.tsx", """
@@ -46,13 +48,14 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
             file.UpdateNpmPackage("sass", "1.90.0");
             file.UpdateNpmPackage("typescript", "5.9.2");
             file.AddNpmPackage("vite", "7.1.1", devDependencies: true);
+            file.AddNpmPackage("@vitejs/plugin-react", "5.0.0", devDependencies: true);
         });
 
         uctx.DeleteFile(@"Southwind.Server\vendors.js");
         uctx.DeleteFile(@"Southwind.Server\webpack.config.dll.js");
         uctx.DeleteFile(@"Southwind.Server\webpack.config.js");
 
-        uctx.CreateCodeFile(@"Southwind.Server\vite.config.js", """
+        uctx.CreateCodeFile(@"Southwind.Server\vite.config.js", $$"""
             import { defineConfig } from 'vite';
             import react from '@vitejs/plugin-react';
             import path from 'path';
@@ -96,13 +99,13 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
                 },
               },
               server: {
-                port: 3000,
+                port: {{port}},
                 strictPort: true,
               },
             });
             """);
 
-        uctx.ForeachCodeFile(@"Southwind/Index.cshtml", file =>
+        uctx.ChangeCodeFile(@"Southwind/Index.cshtml", file =>
         {
             file.ReplaceLine(a => a.Contains("//FileNotFoundException"), "//Requires:");
 
@@ -169,7 +172,7 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
         });
 
 
-        uctx.ForeachCodeFile(@"Southwind/MainPublic.tsx", file =>
+        uctx.ChangeCodeFile(@"Southwind/MainPublic.tsx", file =>
         {
             file.ReplaceLine(a => a.Contains("react-widgets/scss/styles.scss"),
                 @"import ""react-widgets-up/scss/styles.scss""");
@@ -180,7 +183,7 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
 
         });
 
-        uctx.ForeachCodeFile(@"tsconfig.json", file =>
+        uctx.ChangeCodeFile(@"Southwind/tsconfig.json", file =>
         {
             file.ReplaceLine(a => a.Contains("target"), """
                 "target": "esnext",
@@ -209,14 +212,18 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
 
         uctx.ForeachCodeFile(@"*.csproj", file =>
         {
-            file.UpdateNpmPackage("Microsoft.Extensions.Configuration", "9.0.8");
-            file.UpdateNpmPackage("Microsoft.Extensions.Configuration.Binder", "9.0.8");
-            file.UpdateNpmPackage("Microsoft.Extensions.Configuration.Json", "9.0.8");
-            file.UpdateNpmPackage("Microsoft.Extensions.Configuration.UserSecrets", "9.0.8");
+            file.UpdateNugetReference("Microsoft.TypeScript.MSBuild", "5.9.2");
+
+            file.UpdateNugetReference("Microsoft.Extensions.Configuration", "9.0.8");
+            file.UpdateNugetReference("Microsoft.Extensions.Configuration.Binder", "9.0.8");
+            file.UpdateNugetReference("Microsoft.Extensions.Configuration.Json", "9.0.8");
+            file.UpdateNugetReference("Microsoft.Extensions.Configuration.UserSecrets", "9.0.8");
+            file.UpdateNugetReference("Microsoft.VisualStudio.Azure.Containers.Tools.Targets", "1.22.1");
+            file.UpdateNugetReference("Swashbuckle.AspNetCore", "9.0.3");
             
-            file.UpdateNpmPackage("xunit.v3", "3.0.0");
-            file.UpdateNpmPackage("xunit.runner.visualstudio", "3.1.3");
-            file.UpdateNpmPackage("Selenium.WebDriver.ChromeDriver", "139.0.7258.6600");
+            file.UpdateNugetReference("xunit.v3", "3.0.0");
+            file.UpdateNugetReference("xunit.runner.visualstudio", "3.1.3");
+            file.UpdateNugetReference("Selenium.WebDriver.ChromeDriver", "139.0.7258.6600");
         });
 
         uctx.ChangeCodeFile(@"package.json", file =>
