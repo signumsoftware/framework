@@ -581,7 +581,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             <div ref={d => this.containerDiv = d}
               className="sf-scroll-table-container table-responsive"
               style={{ maxHeight: this.props.maxResultsHeight }}>
-              <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
+              <table className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
                 <thead>
                   {this.renderHeaders()}
                 </thead>
@@ -603,7 +603,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       <div ref={d => this.containerDiv = d}
         className="sf-scroll-table-container"
         style={{ maxHeight: this.props.maxResultsHeight }}>
-        <div className="sf-search-results mobile">
+        <div className={classes("sf-search-results mobile", this.props.view && "sf-row-view")}>
           {this.renderRowsMobile()}
         </div>
       </div>
@@ -812,7 +812,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     ev.preventDefault();
 
-    var findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription, this.props.defaultIncudeDefaultFilters);
+    const findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription, this.props.defaultIncudeDefaultFilters || this.props.findOptions.filterOptions.some(a => a.pinned != null));
 
     const path = Finder.findOptionsPath(findOptions, this.extraUrlParams);
 

@@ -29,6 +29,10 @@ table.sf-search-results > thead {
 table.sf-search-results > tbody > tr > td {
     white-space: pre-wrap;
     vertical-align: middle;
+}
+
+table.sf-search-results.sf-row-view > tbody > tr > td,
+div.sf-search-results.sf-row-view div.row-container {
     cursor: pointer;
 }
 
