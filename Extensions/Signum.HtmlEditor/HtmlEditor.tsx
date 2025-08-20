@@ -6,6 +6,7 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { EditorRefPlugin } from "@lexical/react/LexicalEditorRefPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { LexicalEditor } from "lexical";
 import * as React from "react";
@@ -137,6 +138,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
           ErrorBoundary={LexicalErrorBoundary}
         />
         <EditorRefPlugin editorRef={controller.setRefs} />
+        <HistoryPlugin />
         {builtinComponents.map(({ component: Component, props }) => <Component key={Component.name} {...props} />)}
       </LexicalComposer>
     </div>

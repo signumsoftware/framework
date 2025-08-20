@@ -117,13 +117,13 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
     }
 
 
-    public SqlPreCommand DropTable(DiffTable diffTable)
+    public SqlPreCommand DropTable(DiffTable diffTable, bool isPostgres)
     {
         if (diffTable.TemporalTableName == null)
             return DropTable(diffTable.Name);
 
         return SqlPreCommand.Combine(Spacing.Simple,
-            AlterTableDisableSystemVersioning(diffTable.Name),
+            isPostgres ? null : AlterTableDisableSystemVersioning(diffTable.Name),
             DropTable(diffTable.Name)
         )!;
     }
@@ -709,7 +709,7 @@ WHERE {primaryKey.Name} NOT IN
         return SqlPreCommand.Combine(Spacing.Simple,
           CreateTableSql(newTable, newTableName, avoidSystemVersioning: true, forHistoryTable: forHistoryTable),
           MoveRows(oldTable.Name, newTableName, newTable.Columns.Keys, identityInsert: newTable.Columns.Values.Any(c => c.PrimaryKey && c.Identity) && !forHistoryTable),
-          DropTable(oldTable))!;
+          DropTable(oldTable, isPostgres))!;
     }
 
     public SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames, bool identityInsert = false)
