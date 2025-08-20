@@ -560,6 +560,49 @@ public class CodeFile
         });
     }
 
+    public void AddNpmPackage(string packageName, string version, bool devDependencies : false)
+    {
+        AssertExtension(".json");
+
+        ProcessLines(lines =>
+        {
+            var dependencies = devDependencies ?
+            @"""dependencies""" :
+            @"""devDependencies""";
+
+            var pos = lines.FindIndex(a => a.Contains(dependencies));
+            
+            if (pos == -1)
+            {
+                Warning(@$"Unable to find a line with {dependencies} to remove it");
+                return false;
+            }
+            var indent = GetIndent(lines[pos]);
+            lines.RemoveRange(pos, 1);
+
+            if (lines[pos].TrimEnd().EndsWith("},"))
+            {
+                lines[pos] = lines[pos].Before("},");
+                lines.Insert(pos + 1, indent + "},");
+            }
+
+            var postEnd = lines.FindIndex(pos, a => a.Contains("},"));
+
+
+            if (
+            !lines[postEnd - 1].TrimEnd().EndsWith(",") &&
+            !lines[postEnd - 1].TrimEnd().EndsWith("{")
+            )
+            {
+                lines[postEnd - 1] += ",";
+            }
+
+            lines.Insert(postEnd, indent + $@"""{packageName}"", ""{version}""");
+
+            return true;
+        });
+    }
+
     public void UpdateNugetReferences(string xmlSnippets)
     {
         foreach (var line in xmlSnippets.Lines().Where(a => a.HasText()))

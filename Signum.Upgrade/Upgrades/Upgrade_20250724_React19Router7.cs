@@ -8,11 +8,179 @@ namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20250724_React19Router7 : CodeUpgradeBase
 {
-    public override string Description => "React 19.1 and React Router 7.7";
+    public override string Description => "Webpack to Vite, React 19.1 and React Router 7.7";
 
     public override void Execute(UpgradeContext uctx)
     {
-        uctx.ChangeCodeFile(@"Southwind\tsconfig.json", file =>
+        uctx.ChangeCodeFile(@"Southwind.Server/appsettings.json", file =>
+        {
+            file.InsertAfterFirstLine(a => a.Contains("ServerName") || a.Contains("StartBackgroundProcesses"),
+                @"""ViteDevServerPort"": 3000,");
+        });
+
+        uctx.CreateCodeFile(@"Southwind.Server/main.tsx", """
+            import "../Southwind/MainPublic"
+            """.Replace("Southwind", uctx.ApplicationName));
+
+        uctx.ChangeCodeFile(@"Southwind.Server/package.json", file =>
+        {
+            file.ReplaceBetweenExcluded(
+                fromLine: a => a.Contains("scripts"),
+                toLine: a => a.Contains("}"),
+                """
+                "dev": "vite",
+                "build": "vite build"
+                """);
+
+            file.InsertBeforeFirstLine(
+                a => a.Contains("keywords"),
+                """
+                "engines": {
+                  "node": ">=22.12.0"
+                },
+                """);
+
+            file.RemoveAllLines(a => a.Contains("webpack"));
+            file.RemoveAllLines(a => a.Contains("-loader"));
+            file.RemoveAllLines(a => a.Contains("rimraf"));
+            file.UpdateNpmPackage("sass", "1.90.0");
+            file.UpdateNpmPackage("typescript", "5.9.2");
+            file.AddNpmPackage("vite", "7.1.1", devDependencies: true);
+        });
+
+        uctx.DeleteFile(@"Southwind.Server\vendors.js");
+        uctx.DeleteFile(@"Southwind.Server\webpack.config.dll.js");
+        uctx.DeleteFile(@"Southwind.Server\webpack.config.js");
+
+        uctx.CreateCodeFile(@"Southwind.Server\vite.config.js", """
+            import { defineConfig } from 'vite';
+            import react from '@vitejs/plugin-react';
+            import path from 'path';
+
+            export default defineConfig({
+              plugins: [react()],
+              resolve: {
+                alias: {
+                  '@framework': path.resolve(__dirname, '../Framework/Signum/React'),
+                  '@extensions': path.resolve(__dirname, '../Framework/Extensions'),
+                },
+              },
+              base: '/dist/',
+              build: {
+                manifest: true, // Needed if you're using the manifest in .cshtml
+                outDir: 'wwwroot/dist', // Or wherever your ASP.NET app serves static files
+                emptyOutDir: true, // Clears old files on build
+                rollupOptions: {
+                  input: '/main.tsx', // Full path relative to root
+                  output: {
+                    manualChunks: {
+                      // All dependencies in node_modules go into vendor.[hash].js
+                      vendor: [
+                        'react',
+                        'react-dom',
+                        'react-router-dom',
+                        'react-widgets-up',
+                        'react-bootstrap',
+                        'bootstrap',
+                        "@azure/msal-browser",
+                        "luxon",
+                        "@fortawesome/fontawesome-svg-core",
+                        "@fortawesome/free-regular-svg-icons",
+                        "@fortawesome/free-brands-svg-icons",
+                        "@fortawesome/free-solid-svg-icons",
+                        "@fortawesome/react-fontawesome",
+                        //"d3"
+                      ]
+                    }
+                  }
+                },
+              },
+              server: {
+                port: 3000,
+                strictPort: true,
+              },
+            });
+            """);
+
+        uctx.ForeachCodeFile(@"Southwind/Index.cshtml", file =>
+        {
+            file.ReplaceLine(a => a.Contains("//FileNotFoundException"), "//Requires:");
+
+            file.ReplaceBetweenIncluded(
+                a => a.Contains("string json"),
+                a => a.Contains("string vendor"),
+                """
+                                int? vitePort = Configuration.GetValue<int?>("ViteDevServerPort");
+                string mainJs;
+                if (vitePort != null) //yarn dev.
+                {
+                    mainJs = $"http://localhost:{vitePort}/dist/main.tsx";
+                }
+                else //yarn build
+                {
+                    var manifestJson = System.IO.File.ReadAllText(System.IO.Path.Combine(hostingEnv.WebRootPath, "dist/.vite/manifest.json"));
+                    var manifest = JsonNode.Parse(manifestJson)!.AsObject();
+                    var file = manifest["main.tsx"]!["file"]!.GetValue<string>();
+                    mainJs = Url.Content("~/dist/" + file);
+                }
+                """);
+
+            file.InsertBeforeFirstLine(a => a.Contains("<script>"),
+                """
+                @if (vitePort != null)
+                {
+                    var viteRtJs = $"http://localhost:{vitePort}/dist/@vite/client";
+                    var reactRefreshJs = $"http://localhost:{vitePort}/dist/@react-refresh";
+
+                    <script type="module" src="@viteRtJs"></script>
+                    <script type="module">
+                        import RefreshRuntime from '@reactRefreshJs'
+                        RefreshRuntime.injectIntoGlobalHook(window)
+                        window.$RefreshReg$ = () => {}
+                        window.$RefreshSig$ = () => (type) => type
+                        window.__vite_plugin_react_preamble_installed__ = true
+                    </script>
+                }
+                """);
+
+            file.ReplaceLine(a => a.Contains("window.onerror"), "function showError(error) {");
+            file.ReplaceLine(a => a.Contains("};"), """
+                }
+
+                window.onerror = function (message, filename, lineno, colno, error) {
+                    showError(error);
+                };
+                """);
+
+            file.ReplaceLine(a => a.Contains("var supportIE = true;"), """
+                var supportIE = false;
+                """);
+
+            file.ReplaceBetweenIncluded(
+                fromLine: a => a.Contains("(function () {"),
+                toLine: a => a.Contains("})();"),
+                """
+                var script = document.createElement('script');
+                script.type = 'module';
+                script.src = "@mainJs";
+                script.onerror = e => showError(new URIError(`The script ${e.target.src} didn't load correctly.`));
+                document.body.appendChild(script);
+                """);
+        });
+
+
+        uctx.ForeachCodeFile(@"Southwind/MainPublic.tsx", file =>
+        {
+            file.ReplaceLine(a => a.Contains("react-widgets/scss/styles.scss"),
+                @"import ""react-widgets-up/scss/styles.scss""");
+
+            file.Replace(@"""react-widgets""", @"""react-widgets-up""");
+
+            file.RemoveAllLines(a => a.Contains("__webpack_public_path__"));
+
+        });
+
+        uctx.ForeachCodeFile(@"tsconfig.json", file =>
         {
             file.ReplaceLine(a => a.Contains("target"), """
                 "target": "esnext",
@@ -37,6 +205,32 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
                   "dom"
                 """
                 );
+        });
+
+        uctx.ForeachCodeFile(@"*.csproj", file =>
+        {
+            file.UpdateNpmPackage("Microsoft.Extensions.Configuration", "9.0.8");
+            file.UpdateNpmPackage("Microsoft.Extensions.Configuration.Binder", "9.0.8");
+            file.UpdateNpmPackage("Microsoft.Extensions.Configuration.Json", "9.0.8");
+            file.UpdateNpmPackage("Microsoft.Extensions.Configuration.UserSecrets", "9.0.8");
+            
+            file.UpdateNpmPackage("xunit.v3", "3.0.0");
+            file.UpdateNpmPackage("xunit.runner.visualstudio", "3.1.3");
+            file.UpdateNpmPackage("Selenium.WebDriver.ChromeDriver", "139.0.7258.6600");
+        });
+
+        uctx.ChangeCodeFile(@"package.json", file =>
+        {
+            file.ReplaceLine(a => a.Contains("@types/react"),
+                """
+                "@types/react": "19.1.8",
+                """);
+
+            file.ReplaceLine(a => a.Contains("@types/node"),
+                """
+                "@types/node": "22.13.17"
+                """);
+
         });
 
         SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Remember to:");
