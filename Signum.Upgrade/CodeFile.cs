@@ -1,16 +1,11 @@
-using LibGit2Sharp;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http.Headers;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Signum.Upgrade;
 
@@ -593,7 +588,7 @@ public class CodeFile
                 lines[postEnd - 1] += ",";
             }
 
-            lines.Insert(postEnd, indent + $@"""{packageName}"": ""{version}""");
+            lines.Insert(postEnd, indent + $@"  ""{packageName}"": ""{version}""");
 
             return true;
         });
