@@ -20,6 +20,12 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
                 $@"""ViteDevServerPort"": {port},");
         });
 
+        uctx.ChangeCodeFile(@"Southwind.Server/Dockerfile", file =>
+        {
+            file.ReplaceLine(a => a.Contains("RUN yarn run build-production"),
+                "RUN yarn run build");
+        });
+
         uctx.CreateCodeFile(@"Southwind.Server/main.tsx", """
             import "../Southwind/MainPublic"
             """.Replace("Southwind", uctx.ApplicationName));
