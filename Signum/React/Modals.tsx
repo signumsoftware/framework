@@ -31,7 +31,7 @@ export function isStarted(): boolean {
 
 
 interface GlobalModalContainerHandles {
-  pushModal(element: React.ReactElement): number;
+  pushModal(element: React.ReactElement<IModalProps<any>>): number;
   popModal(index: number): Promise<void>;
   getCount(): number;
 }
@@ -132,10 +132,10 @@ export class FunctionalAdapter extends React.Component<FunctionalAdapterProps> {
     return React.cloneElement(only, { innerRef: (a: any) => { this.innerRef = a; } } as any); //TODO: To avoid having to use forward Ref until is removed
   }
 
-  static withRef(element: React.ReactElement, ref: React.Ref<React.Component>): React.JSX.Element {
+  static withRef<P>(element: React.ReactElement<P>, ref: React.Ref<any>): React.ReactElement<P> {
     var type = element.type as React.ComponentClass | React.FunctionComponent | string;
     if (typeof type == "string" || type.prototype?.render) {
-      return React.cloneElement(element, { ref: ref });
+      return React.cloneElement(element, { ref: ref } as any);
     } else {
       return <FunctionalAdapter ref={ref as React.Ref<FunctionalAdapter>}>{element}</FunctionalAdapter>
     }

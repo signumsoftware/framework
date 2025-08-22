@@ -42,7 +42,18 @@ export function matrix(a: number, b: number, c: number, d: number, e: number, f:
   return 'matrix(' + a + ',' + b + ',' + c + ',' + d + ',' + e + ',' + f + ')';
 }
 
-export function scaleFor(column: ChartColumn<any>, values: number[], minRange: number, maxRange: number, scaleName: string | null | undefined): d3.ScaleContinuousNumeric<number, number> {
+export function scaleFor(column: ChartColumn<any>, values: number[], minRange: number, maxRange: number, scaleName: string | null | undefined):
+  d3.ScaleContinuousNumeric<number, number> {
+
+  if (scaleName?.contains("...")) {
+    const minV = parseFloat(scaleName.before("..."));
+    const maxV = parseFloat(scaleName.after("..."));
+
+    return d3.scaleLinear()
+      .domain([minV, maxV])
+      .range([minRange, maxRange])
+      .nice();
+  }
 
   if (scaleName == "ZeroMax") {
 
@@ -58,7 +69,7 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
   }
 
   if (scaleName == "MinMax" || scaleName == "MinZeroMax") {
-    if (column.type == "DateOnly" || column.type == "DateTime") {
+    if (column.type == "Date" || column.type == "DateTime") {
       var dates = values.map(d => new Date(d));
 
       const scale = d3.scaleTime()
@@ -74,7 +85,7 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
       var dates = values.map(d => DateTime.fromFormat(d as any as string, "HH:mm:ss.u").toJSDate());
 
       const scale = d3.scaleTime()
-        .domain([d3.min(dates)!, d3.max(dates)!])
+        .domain([d3.min(dates)!,  d3.max(dates)!])
         .range([minRange, maxRange]);
 
       const f = function (d: string | Date) { return scale(typeof d == "string" ? DateTime.fromFormat(d, "HH:mm:ss.u").toJSDate() : d); } as any as d3.ScaleContinuousNumeric<number, number>;
@@ -130,7 +141,6 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         case "HourStart":
         case "Date":
         case "WeekStart":
-        case "MonthStart":
         case "MonthStart":
           return {
             normalized: qt.parent,
@@ -208,10 +218,10 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
   if (isInFilter)
     return complete(values, isInFilter.value as unknown[], column, insertPoint);
 
-  if (column.type == "Lite" || column.type == "String")
+  if (column.type == "Entity" || column.type == "String")
     return values;
 
-  if (column.type == "DateOnly" || column.type == "DateTime") {
+  if (column.type == "Date" || column.type == "DateTime") {
 
     const unit: DurationUnit | null = columnNomalized.lastPart != null ? durationUnit(columnNomalized.lastPart.key) :
       columnNomalized.normalized.type.name == "DateOnly" ? "day" : null;
@@ -304,12 +314,12 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     return complete(values, allValues, column, insertPoint);
   }
 
-  if (column.type == "Integer" || column.type == "Real" || column.type == "RealGroupable") {
+  if (column.type == "Number" || column.type == "DecimalNumber" || column.type == "RoundedNumber") {
 
     const lastPart = column.token!.fullKey.tryAfterLast('.');
 
     const step: number | null = lastPart != null && lastPart.startsWith("Step") ? parseFloat(lastPart.after("Step").replace("_", ".")) :
-      (column.type == "Integer" ? 1 : null);
+      (column.type == "Number" ? 1 : null);
 
     if (step == null)
       return values;

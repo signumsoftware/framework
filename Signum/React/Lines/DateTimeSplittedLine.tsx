@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { DateTime, Duration } from 'luxon'
-import { CalendarProps } from 'react-widgets/cjs/Calendar'
-import { DatePicker, DropdownList, Combobox } from 'react-widgets'
+import { CalendarProps } from 'react-widgets-up/Calendar'
+import { DatePicker, DropdownList, Combobox } from 'react-widgets-up'
 import { classes } from '../Globals'
 import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder } from '../Reflection'
-import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
+import { genericMemo, LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
@@ -19,6 +19,7 @@ export interface DateTimeSplittedLineProps extends ValueBaseProps<string /*Date 
   maxDate?: Date;
   calendarProps?: Partial<CalendarProps>;
   initiallyShowOnly?: "Date" | "Time";
+  ref?: React.Ref<DateTimeSplittedLineController>;
 }
 
 export class DateTimeSplittedLineController extends ValueBaseController<DateTimeSplittedLineProps, string /*Date or DateTime*/ | null >{
@@ -29,10 +30,10 @@ export class DateTimeSplittedLineController extends ValueBaseController<DateTime
 }
 
 
-export const DateTimeSplittedLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<DateTimeSplittedLineProps & React.RefAttributes<DateTimeSplittedLineController>>> =
-  React.memo(React.forwardRef(function DateTimeSplittedLine(props: DateTimeSplittedLineProps, ref: React.Ref<DateTimeSplittedLineController>) {
+export const DateTimeSplittedLine: (props: DateTimeSplittedLineProps) => React.ReactNode | null =
+  genericMemo(function DateTimeSplittedLine(props: DateTimeSplittedLineProps) {
 
-  const c = useController(DateTimeSplittedLineController, props, ref);
+  const c = useController(DateTimeSplittedLineController, props);
 
   if (c.isHidden)
     return null;
@@ -66,8 +67,8 @@ export const DateTimeSplittedLine: React.MemoExoticComponent<React.ForwardRefExo
     c.setValue(newDT == null || !newDT.isValid ? null : newDT.toISO()!);
   };
 
-    return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+  return (
+    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => c.withItemGroup(
         <DateTimePickerSplitted value={dt?.toJSDate()} onChange={handleDatePickerOnChange}
           id={inputId}
@@ -88,7 +89,7 @@ export const DateTimeSplittedLine: React.MemoExoticComponent<React.ForwardRefExo
       )}
     </FormGroup>
   );
-}), (prev, next) => {
+}, (prev, next) => {
   return LineBaseController.propEquals(prev, next);
 });
 

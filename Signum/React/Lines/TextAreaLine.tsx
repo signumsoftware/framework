@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes } from '../Globals'
-import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
+import { genericMemo, LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { EntityControlMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
@@ -12,6 +12,7 @@ import { TextBaseController, TextBaseProps } from './TextBase'
 export interface TextAreaLineProps extends TextBaseProps<string | null> {
   autoResize?: boolean;
   charCounter?: true | ((length: number) => React.ReactElement | string);
+  ref?: React.Ref<TextAreaLineController>;
 }
 
 export class TextAreaLineController extends TextBaseController<TextAreaLineProps, string | null> {
@@ -21,90 +22,90 @@ export class TextAreaLineController extends TextBaseController<TextAreaLineProps
   }
 }
 
-export const TextAreaLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<TextAreaLineProps & React.RefAttributes<TextAreaLineController>>>
-  = React.memo(React.forwardRef(function TextAreaLine(props: TextAreaLineProps, ref: React.Ref<TextAreaLineController>) {
+export const TextAreaLine: (props: TextAreaLineProps) => React.ReactNode | null
+  = genericMemo(function TextAreaLine(props: TextAreaLineProps) {
 
-    const c = useController(TextAreaLineController, props, ref);
-    const ccRef = React.useRef<ChartCounterHandler>(null);
-    if (c.isHidden)
-      return null;
+  const c = useController(TextAreaLineController, props);
+  const ccRef = React.useRef<ChartCounterHandler>(null);
+  if (c.isHidden)
+    return null;
 
-    const p = c.props;
+  const p = c.props;
 
-    var htmlAtts = c.props.valueHtmlAttributes;
-    var autoResize = p.autoResize ?? (htmlAtts?.style?.height == null && htmlAtts?.rows == null);
-    const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
-    const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+  var htmlAtts = c.props.valueHtmlAttributes;
+  var autoResize = p.autoResize ?? (htmlAtts?.style?.height == null && htmlAtts?.rows == null);
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
-    if (p.ctx.readOnly)
-      return (
-        <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
-          {inputId => <>
-            {getTimeMachineIcon({ ctx: p.ctx })}
-            <TextArea id={inputId} {...htmlAtts} autoResize={autoResize} className={classes(htmlAtts?.className, p.ctx.formControlClass, c.mandatoryClass)} value={p.ctx.value || ""}
-              disabled />
-          </>}
-        </FormGroup>
-      );
-
-    const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
-      const input = e.currentTarget as HTMLInputElement;
-
-      if (p.triggerChange == "onBlur")
-        c.setTempValue(input.value)
-      else
-        c.setValue(input.value, e);
-
-      ccRef.current?.setCurrentLength(input.value.length);
-    };
-
-    let handleBlur: ((e: React.FocusEvent<any>) => void) | undefined = undefined;
-    if (p.autoFixString != false || p.triggerChange == "onBlur") {
-      handleBlur = (e: React.FocusEvent<any>) => {
-        const input = e.currentTarget as HTMLInputElement;
-        var fixed = TextAreaLineController.autoFixString(input.value, p.autoTrimString != null ? p.autoTrimString : false, false);
-        if (fixed != (p.ctx.value ?? ""))
-          c.setValue(fixed!, e);
-
-        if (htmlAtts?.onBlur)
-          htmlAtts.onBlur(e);
-      };
-    }
-
-
-    var cc = c.props.charCounter == null ? null :
-      c.props.charCounter == true && c.props.valueHtmlAttributes?.maxLength ? <ChartCounter myRef={ccRef}>{v => {
-        var rem = c.props.valueHtmlAttributes!.maxLength! - v;
-        return EntityControlMessage._0CharactersRemaining.niceToString().forGenderAndNumber(rem).formatHtml(<strong className={rem <= 0 ? "text-danger" : undefined}>{rem}</strong>)
-      }}</ChartCounter> :
-
-        c.props.charCounter == true ? <ChartCounter myRef={ccRef}>{v => EntityControlMessage._0Characters.niceToString().forGenderAndNumber(p).formatHtml(<strong>{v}</strong>)}</ChartCounter > :
-          <ChartCounter myRef={ccRef}>{c.props.charCounter}</ChartCounter>;
-
-
+  if (p.ctx.readOnly)
     return (
-      <FormGroup ctx={p.ctx} error={c.getError()} label={p.label} labelIcon={p.labelIcon}
-        helpText={helpText && cc ? <>{cc}<br />{helpText}</> : (cc ?? helpText)}
-        helpTextOnTop={helpTextOnTop}
-        htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
-        {inputId => c.withItemGroup(
-          <TextArea {...c.props.valueHtmlAttributes}
-            autoResize={autoResize}
-            className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formControlClass, c.mandatoryClass)}
-            value={c.getValue() ?? ""}
-            id={inputId}
-            minHeight={c.props.valueHtmlAttributes?.style?.minHeight?.toString()}
-            onChange={handleTextOnChange}
-            onBlur={handleBlur ?? htmlAtts?.onBlur}
-
-            placeholder={c.getPlaceholder()}
-            innerRef={c.setRefs} />
-          , undefined, true)}
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+        {inputId => <>
+          {getTimeMachineIcon({ ctx: p.ctx })}
+          <TextArea id={inputId} {...htmlAtts} autoResize={autoResize} className={classes(htmlAtts?.className, p.ctx.formControlClass, c.mandatoryClass)} value={p.ctx.value || ""}
+            disabled />
+        </>}
       </FormGroup>
     );
-  }), (prev, next) => {
-    return LineBaseController.propEquals(prev, next);
-  });
+
+  const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
+    const input = e.currentTarget as HTMLInputElement;
+
+    if (p.triggerChange == "onBlur")
+      c.setTempValue(input.value)
+    else
+      c.setValue(input.value, e);
+
+    ccRef.current?.setCurrentLength(input.value.length);
+  };
+
+  let handleBlur: ((e: React.FocusEvent<any>) => void) | undefined = undefined;
+  if (p.autoFixString != false || p.triggerChange == "onBlur") {
+    handleBlur = (e: React.FocusEvent<any>) => {
+      const input = e.currentTarget as HTMLInputElement;
+      var fixed = TextAreaLineController.autoFixString(input.value, p.autoTrimString != null ? p.autoTrimString : false, false);
+      if (fixed != (p.ctx.value ?? ""))
+        c.setValue(fixed!, e);
+
+      if (htmlAtts?.onBlur)
+        htmlAtts.onBlur(e);
+    };
+  }
+
+
+  var cc = c.props.charCounter == null ? null :
+    c.props.charCounter == true && c.props.valueHtmlAttributes?.maxLength ? <ChartCounter myRef={ccRef}>{v => {
+      var rem = c.props.valueHtmlAttributes!.maxLength! - v;
+      return EntityControlMessage._0CharactersRemaining.niceToString().forGenderAndNumber(rem).formatHtml(<strong className={rem <= 0 ? "text-danger" : undefined}>{rem}</strong>)
+    }}</ChartCounter> :
+
+      c.props.charCounter == true ? <ChartCounter myRef={ccRef}>{v => EntityControlMessage._0Characters.niceToString().forGenderAndNumber(p).formatHtml(<strong>{v}</strong>)}</ChartCounter > :
+        <ChartCounter myRef={ccRef}>{c.props.charCounter}</ChartCounter>;
+
+
+  return (
+    <FormGroup ctx={p.ctx} error={c.getError()} label={p.label} labelIcon={p.labelIcon}
+      helpText={helpText && cc ? <>{cc}<br />{helpText}</> : (cc ?? helpText)}
+      helpTextOnTop={helpTextOnTop}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      {inputId => c.withItemGroup(
+        <TextArea {...c.props.valueHtmlAttributes}
+          autoResize={autoResize}
+          className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formControlClass, c.mandatoryClass)}
+          value={c.getValue() ?? ""}
+          id={inputId}
+          minHeight={c.props.valueHtmlAttributes?.style?.minHeight?.toString()}
+          onChange={handleTextOnChange}
+          onBlur={handleBlur ?? htmlAtts?.onBlur}
+
+          placeholder={c.getPlaceholder()}
+          innerRef={c.setRefs} />
+        , undefined, true)}
+    </FormGroup>
+  );
+}, (prev, next) => {
+  return LineBaseController.propEquals(prev, next);
+});
 
 interface ChartCounterHandler {
   setCurrentLength: (length: number) => void;

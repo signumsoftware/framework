@@ -8,7 +8,7 @@ import { useAPI } from '../Hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconName } from '@fortawesome/fontawesome-svg-core';
 
-export default function CultureDropdown(p: { fullName?: boolean }): React.JSX.Element | null {
+export default function CultureDropdown(p: { fullName?: boolean }): React.ReactElement | null {
 
   var cultures = useAPI(signal => CultureClient.getCultures(false), []);
 
@@ -45,7 +45,7 @@ export function CultureDropdownMenuItem(props: {
       close: IconName;
     }
   }
-}): React.JSX.Element | null {
+}): React.ReactElement | null {
   var [show, setShow] = React.useState(false);
 
   var cultures = useAPI(signal => CultureClient.getCultures(false), []);

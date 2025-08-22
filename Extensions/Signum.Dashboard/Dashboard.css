@@ -9,10 +9,31 @@
     border-radius: 4px;
 }
 
-.sf-grid-element .card {
-    margin-bottom: 0px;
-    overflow-x: hidden;
+.sf-dashboard-view-embedded {
+    background: #f8f9fa;
+    margin: -10px -1em -16px -1em;
+    padding: 1em;
 }
+
+.sf-dashboard-page {
+    background: #f8f9fa;
+    margin: -8px -12px;
+    padding: 20px;
+}
+
+.sf-dashboard-view .card-header {
+    background: white;
+    border: none;
+}
+
+    .sf-dashboard-view .card-header a{
+        color: black;
+    }
+
+    .sf-grid-element .card {
+        margin-bottom: 0px;
+        overflow-x: hidden;
+    }
 
 .sf-grid-element .card-header {
     cursor: move;

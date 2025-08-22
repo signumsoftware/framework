@@ -327,7 +327,7 @@ public static class SchemaSynchronizer
                     createNew: (tn, tab) => SqlPreCommand.Combine(Spacing.Double,
                         sqlBuilder.CreateTableSql(tab)
                     ),
-                    removeOld: (tn, dif) => sqlBuilder.DropTable(dif),
+                    removeOld: (tn, dif) => sqlBuilder.DropTable(dif, sqlBuilder.IsPostgres),
                     mergeBoth: (tn, tab, dif) =>
                     {
                         var rename = !object.Equals(dif.Name, tab.Name) ? sqlBuilder.RenameOrMove(dif, tab, tab.Name, forHistoryTable: false) : null;
@@ -340,7 +340,7 @@ public static class SchemaSynchronizer
                         var disableSystemVersioning = !sqlBuilder.IsPostgres && dif.TemporalType != SysTableTemporalType.None &&
                         (tab.SystemVersioned == null ||
                         !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName!.ToString()), tab.SystemVersioned.TableName.ToString()) && !DifferentDatabase(tab.Name, dif.Name) ||
-                        (disableEnableSystemVersioning = StrongColumnChanges(tab, dif))) ?
+                        (disableEnableSystemVersioning = StrongColumnChanges(tab, dif))) && !sqlBuilder.IsPostgres ?
                         sqlBuilder.AlterTableDisableSystemVersioning(tab.Name).Do(a => a.GoAfter = true) :
                         null;
 

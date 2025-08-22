@@ -1,7 +1,8 @@
+using Signum.Utilities.NaturalLanguage;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using System.Collections.ObjectModel;
-using Signum.Utilities.NaturalLanguage;
 
 namespace Signum.Utilities;
 
@@ -354,3 +355,116 @@ public class NumberWriterSettings
     public bool OmitDecimalZeros;
 }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
+
+public static class NumberFormatter
+{
+    private static bool TryExtractCompactFormat(string? format, out string innerFormat)
+    {
+        if (!string.IsNullOrEmpty(format) && format.StartsWith("K"))
+        {
+            innerFormat = format.Length > 1 ? format.Substring(1) : "0.#";
+            return true;
+        }
+        innerFormat = default!;
+        return false;
+    }
+
+    public static string ToStringWithCompact(this decimal number, string? format, CultureInfo? culture = null)
+        => TryExtractCompactFormat(format, out var f) ? FormatCompact(number, f, culture) : number.ToString(format, culture);
+
+    public static string ToStringWithCompact(this double number, string? format, CultureInfo? culture = null)
+        => TryExtractCompactFormat(format, out var f) ? FormatCompact((decimal)number, f, culture) : number.ToString(format, culture);
+
+    public static string ToStringWithCompact(this float number, string? format, CultureInfo? culture = null)
+        => TryExtractCompactFormat(format, out var f) ? FormatCompact((decimal)number, f, culture) : number.ToString(format, culture);
+
+    public static string ToStringWithCompact(this long number, string? format, CultureInfo? culture = null)
+        => TryExtractCompactFormat(format, out var f) ? FormatCompact(number, f, culture) : number.ToString(format, culture);
+
+    public static string ToStringWithCompact(this int number, string? format, CultureInfo? culture = null)
+       => TryExtractCompactFormat(format, out var f) ? FormatCompact(number, f, culture) : number.ToString(format, culture);
+
+    public static string ToStringWithCompact(this IFormattable number, string? format, CultureInfo? culture = null)
+    {
+        culture ??= CultureInfo.CurrentCulture;
+        if (number == null) throw new ArgumentNullException(nameof(number));
+        if (TryExtractCompactFormat(format, out var f))
+        {
+            return number switch
+            {
+                decimal d => FormatCompact(d, f, culture),
+                double d => FormatCompact((decimal)d, f, culture),
+                float f2 => FormatCompact((decimal)f2, f, culture),
+                long l => FormatCompact(l, f, culture),
+                int l => FormatCompact(l, f, culture),
+                _ => number.ToString(format, culture)
+            };
+        }
+        return number.ToString(format, culture);
+    }
+
+
+    public static string FormatCompact(decimal number, string format = "0.#", CultureInfo? culture = null)
+    {
+        culture ??= CultureInfo.CurrentCulture;
+
+        if (Math.Abs(number) < 1000)
+            return number.ToString(format, culture);
+
+        int suffixIndex = 0;
+        decimal reducedNumber = Math.Abs(number);
+
+        // Loop to reduce the number by thousands until it fits or enum max
+        while (reducedNumber >= 1000 && suffixIndex < Enum.GetValues(typeof(NumberUnitsMessage)).Length - 1)
+        {
+            reducedNumber /= 1000;
+            suffixIndex++;
+        }
+
+        string formattedNumber = reducedNumber.ToString(format, culture);
+
+        if (number < 0)
+            formattedNumber = "-" + formattedNumber;
+
+        if (suffixIndex == 0)
+            return formattedNumber;
+
+        // Cast suffixIndex to NumberUnits enum
+        NumberUnitsMessage unit = (NumberUnitsMessage)suffixIndex;
+
+        return formattedNumber + unit.NiceToString();
+    }
+}
+
+public enum NumberUnitsMessage
+{
+    [Description("K")]
+    Thousand = 1,
+
+    [Description("M")]
+    Million = 2,
+
+    [Description("B")]
+    Billion = 3,
+
+    [Description("T")]
+    Trillion = 4,
+
+    [Description("Q")]
+    Quadrillion = 5,
+
+    [Description("Qi")]
+    Quintillion = 6,
+
+    [Description("Sx")]
+    Sextillion = 7,
+
+    [Description("Sp")]
+    Septillion = 8,
+
+    [Description("Oc")]
+    Octillion = 9,
+
+    [Description("No")]
+    Nonillion = 10
+}

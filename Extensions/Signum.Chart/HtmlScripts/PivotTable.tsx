@@ -13,6 +13,7 @@ import { FilterOptionParsed } from '@framework/Search';
 import { QueryToken, FilterConditionOptionParsed, isFilterCondition } from '@framework/FindOptions';
 import { EntityBaseController } from '@framework/Lines';
 import { QueryTokenMessage } from '@framework/Signum.DynamicQuery.Tokens';
+import { ChartParameter } from '../Signum.Chart';
 
 interface RowDictionary {
   [key: string]: { value: unknown, dicOrRows: RowDictionary | ChartRow[] };
@@ -263,17 +264,17 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   function getDimParameters(columnName: string): DimParameters {
     return ({
-      complete: parameters["Complete" + columnName] as "No" | "Yes" | "Consistent" | "FromFilters",
-      createButton: parameters["ShowCreateButton" + columnName] as "No" | "Yes",
-      aggegrateValues: parameters["ShowAggregateValues" + columnName] as "No" | "Yes",
-      order: parameters["Order" + columnName],
-      gradient: parameters["Gradient" + columnName],
-      scale: parameters["Scale" + columnName],
-      placeholder: parameters["Placeholder" + columnName] as "no" | "empty" | "filled",
-      subTotal: parameters["SubTotal" + columnName] as "no" | "yes",
-      cssStyle: parameters["CSSStyle" + columnName],
-      cssStyleDiv: parameters["CSSStyleDiv" + columnName],
-      maxTextLength: parseInt(parameters["MaxTextLength" + columnName]) || undefined,
+      complete: parameters["Complete" + columnName as ChartParameter] as "No" | "Yes" | "Consistent" | "FromFilters",
+      createButton: parameters["ShowCreateButton" + columnName as ChartParameter] as "No" | "Yes",
+      aggegrateValues: parameters["ShowAggregateValues" + columnName as ChartParameter] as "No" | "Yes",
+      order: parameters["Order" + columnName as ChartParameter],
+      gradient: parameters["Gradient" + columnName as ChartParameter],
+      scale: parameters["Scale" + columnName as ChartParameter],
+      placeholder: parameters["Placeholder" + columnName as ChartParameter] as "no" | "empty" | "filled",
+      subTotal: parameters["SubTotal" + columnName as ChartParameter] as "no" | "yes",
+      cssStyle: parameters["CSSStyle" + columnName as ChartParameter],
+      cssStyleDiv: parameters["CSSStyleDiv" + columnName as ChartParameter],
+      maxTextLength: parseInt(parameters["MaxTextLength" + columnName as ChartParameter]) || undefined,
     });
   }
 

@@ -245,7 +245,7 @@ modules.Finder.getOrAddSettings("${p.cleanName}") /*: QuerySettings*/
 
 //export class Finder.CellFormatter {
 //  constructor(
-//    public formatter: (cell: any, ctx: Finder.CellFormatterContext) => React.ReactChild | undefined,
+//    public formatter: (cell: any, ctx: Finder.CellFormatterContext) => React.ReactNode | undefined,
 //    public cellClass?: string) {
 //  }
 //}

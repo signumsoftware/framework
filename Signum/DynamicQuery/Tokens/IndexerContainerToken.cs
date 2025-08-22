@@ -1,12 +1,82 @@
 namespace Signum.DynamicQuery.Tokens;
 
+
+
+/// <summary>
+/// A container token for Entity operation tokens
+/// </summary>
+public class IndexerContainerToken : QueryToken
+{
+    IExtensionDictionaryInfo info;
+
+    QueryToken parent;
+
+    public override QueryToken? Parent => parent;
+
+    public IndexerContainerToken(QueryToken parent, IExtensionDictionaryInfo info)
+    {
+        this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        this.info = info;
+    }
+
+    public override bool HideInAutoExpand => false;
+    protected override bool AutoExpandInternal => this.info.AutoExpand;
+
+    public override string ToString() => "[" + info.NiceName() + "]";
+
+    public override string NiceName() => "[" + info.NiceName() + "]";
+
+    public override Type Type => typeof(IndexerContainerToken);
+
+    public override string Key => "[" + info.Prefix + "]";
+
+    public override bool AvoidCacheSubTokens => true;
+   
+    protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
+    {
+        return info.GetAllTokens(this).ToList();
+    }
+
+    protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+    {
+        return parent.BuildExpression(context);
+    }
+
+    public override string? IsAllowed() => info.GetAllowed(this);
+
+    public override QueryToken Clone()
+    {
+        return new IndexerContainerToken(parent.Clone(), info);
+    }
+
+    public override string? Format
+    {
+        get { return null; }
+    }
+
+    public override string? Unit
+    {
+        get { return null; }
+    }
+
+    public override Implementations? GetImplementations()
+    {
+        return null;
+    }
+
+    public override PropertyRoute? GetPropertyRoute()
+    {
+        return null;
+    }
+
+}
+
 public class ExtensionWithParameterToken<T, K, V> : QueryToken
 {
     QueryToken parent;
     public override QueryToken? Parent => parent;
 
     public ExtensionWithParameterToken(QueryToken parent, K parameterValue,
-        string prefix,
         string? unit,
         string? format,
         Implementations? implementations,
@@ -14,7 +84,6 @@ public class ExtensionWithParameterToken<T, K, V> : QueryToken
         Expression<Func<T, V>> lambda)
     {
         ParameterValue = parameterValue;
-        Prefix = prefix;
         this.unit = unit;
         this.format = format;
         this.implementations = implementations;
@@ -26,19 +95,18 @@ public class ExtensionWithParameterToken<T, K, V> : QueryToken
 
     public override string ToString()
     {
-        return Prefix + "[" + (ParameterValue is Enum e ? e.NiceToString() : ParameterValue?.ToString() ?? "null") + "]";
+        return "[" + (ParameterValue is Enum e ? e.NiceToString() : ParameterValue?.ToString() ?? "null") + "]";
     }
 
     public override string NiceName()
     {
-        return (Prefix.Length > 0 ? $"({Prefix}) " : "") + (ParameterValue is Enum e ? e.NiceToString() : ParameterValue?.ToString() ?? "null");
+        return (ParameterValue is Enum e ? e.NiceToString() : ParameterValue?.ToString() ?? "null");
     }
 
     public override Type Type { get { return typeof(V).BuildLiteNullifyUnwrapPrimaryKey(new[] { GetPropertyRoute()! }); } }
 
-    public string Prefix { get; set; }
     public K ParameterValue { get; }
-    public override string Key => Prefix + "[" + (ParameterValue?.ToString() ?? "null") + "]";
+    public override string Key => "[" + (ParameterValue?.ToString() ?? "null") + "]";
 
     string? format;
     public override string? Format => format;
@@ -82,6 +150,6 @@ public class ExtensionWithParameterToken<T, K, V> : QueryToken
 
     public override QueryToken Clone()
     {
-        return new ExtensionWithParameterToken<T, K, V>(parent.Clone(), ParameterValue, Prefix, unit, format, implementations, propertyRoute, Lambda);
+        return new ExtensionWithParameterToken<T, K, V>(parent.Clone(), ParameterValue, unit, format, implementations, propertyRoute, Lambda);
     }
 }

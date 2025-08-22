@@ -95,7 +95,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     return rows;
   }
 
-  renderCreateButton(btn: boolean, createMessage?: string): React.JSX.Element | undefined {
+  renderCreateButton(btn: boolean, createMessage?: string): React.ReactElement | undefined {
     if (!this.props.create || this.props.ctx.readOnly)
       return undefined;
 
@@ -108,7 +108,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     );
   }
 
-  renderFindButton(btn: boolean): React.JSX.Element | undefined {
+  renderFindButton(btn: boolean): React.ReactElement | undefined {
     if (!this.props.find || this.props.ctx.readOnly)
       return undefined;
 
@@ -127,7 +127,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     this.setValue(list);
   }
 
-  renderMoveUp(btn: boolean, index: number, orientation: "h" | "v"): React.JSX.Element | undefined {
+  renderMoveUp(btn: boolean, index: number, orientation: "h" | "v"): React.ReactElement | undefined {
     if (!this.canMove(this.props.ctx.value[index].element) || this.props.ctx.readOnly)
       return undefined;
 
@@ -146,7 +146,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     this.setValue(list);
   }
 
-  renderMoveDown(btn: boolean, index: number, orientation: "h" | "v"): React.JSX.Element | undefined {
+  renderMoveDown(btn: boolean, index: number, orientation: "h" | "v"): React.ReactElement | undefined {
     if (!this.canMove(this.props.ctx.value[index].element) || this.props.ctx.readOnly)
       return undefined;
 
@@ -348,7 +348,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     this.setValue(list);
   }
 
-  renderPasteButton(btn: boolean): React.JSX.Element | undefined {
+  renderPasteButton(btn: boolean): React.ReactElement | undefined {
     if (!this.props.paste || this.props.ctx.readOnly)
       return undefined;
 
@@ -529,8 +529,8 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
 
   getMoveConfig(btn: boolean, index: number, orientation: "h" | "v") {
     return {
-      renderMoveUp: (): React.JSX.Element => this.renderMoveUp(false, index, orientation)!,
-      renderMoveDown: (): React.JSX.Element | undefined => this.renderMoveDown(false, index, orientation)
+      renderMoveUp: (): React.ReactElement => this.renderMoveUp(false, index, orientation)!,
+      renderMoveDown: (): React.ReactElement | undefined => this.renderMoveDown(false, index, orientation)
     }
   }
 
@@ -642,8 +642,8 @@ export interface DragConfig {
 }
 
 export interface MoveConfig {
-  renderMoveUp: () => (JSX.Element | undefined);
-  renderMoveDown: () => (JSX.Element | undefined);
+  renderMoveUp: () => (React.ReactElement | undefined);
+  renderMoveDown: () => (React.ReactElement | undefined);
 }
 
 

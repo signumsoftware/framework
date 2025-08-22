@@ -9,9 +9,9 @@ import { FormGroup } from './FormGroup'
 import { Navigator } from '../Navigator'
 import { FormControlReadonly } from './FormControlReadonly'
 import { classes } from '../Globals';
-import { genericForwardRef, genericForwardRefWithMemo, useController } from './LineBase'
+import { genericMemo, useController } from './LineBase'
 import { useMounted } from '../Hooks'
-import { DropdownList } from 'react-widgets'
+import { DropdownList } from 'react-widgets-up'
 import { ResultTable } from '../Search'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { TextHighlighter } from '../Components/Typeahead'
@@ -30,6 +30,7 @@ export interface EntityComboProps<V extends Entity | Lite<Entity> | null> extend
   delayLoadData?: boolean;
   toStringFromData?: boolean;
   overrideSelectedLite?: () => Lite<Entity> | null;
+  ref?: React.Ref<EntityComboController<V>>
 }
 
 
@@ -49,10 +50,10 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
   overrideProps(p: EntityComboProps<V>, overridenProps: EntityComboProps<V>): void {
     super.overrideProps(p, overridenProps);
     if (p.onRenderItem === undefined && p.type && tryGetTypeInfos(p.type).some(a => a && Navigator.getSettings(a)?.renderLite)) {
-      p.onRenderItem = (row, role, searchTerm) => row == null ? <span className="mx-2">-</span>: (row?.entity && Navigator.renderLite(row.entity, TextHighlighter.fromString(searchTerm))) ?? "";
+      p.onRenderItem = (row, role, searchTerm) => row == null ? <span className="mx-2">-</span> : (row?.entity && Navigator.renderLite(row.entity, TextHighlighter.fromString(searchTerm))) ?? "";
     }
   }
-  
+
   async doView(entity: V): Promise<Aprox<V> | undefined> {
     var val = await super.doView(entity);
 
@@ -71,86 +72,87 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
   }
 }
 
-export const EntityCombo: <V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V> & React.RefAttributes<EntityComboController<V>>) => React.ReactNode | null = genericForwardRefWithMemo(function EntityCombo<V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V>, ref: React.Ref<EntityComboController<V>>) {
+export const EntityCombo: <V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V>) => React.ReactNode | null 
+  = genericMemo(function EntityCombo<V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V>) {
 
-  const c = useController(EntityComboController, props, ref);
-  const p = c.props;
-  const hasValue = !!c.props.ctx.value;
-  const comboRef = React.useRef<EntityComboSelectHandle>(null);
+    const c = useController<EntityComboController<V>, EntityComboProps<V>, V>(EntityComboController, props);
+    const p = c.props;
+    const hasValue = !!c.props.ctx.value;
+    const comboRef = React.useRef<EntityComboSelectHandle>(null);
 
-  React.useEffect(() => {
-    if (p.initiallyFocused)
-      window.setTimeout(() => {
-        let select = comboRef.current && comboRef.current.getSelect(); 
-        if (select) {
-          select.focus();
-        }
-      }, 0);
-  }, []);
+    React.useEffect(() => {
+      if (p.initiallyFocused)
+        window.setTimeout(() => {
+          let select = comboRef.current && comboRef.current.getSelect();
+          if (select) {
+            select.focus();
+          }
+        }, 0);
+    }, []);
 
-  if (c.isHidden)
-    return null;
+    if (c.isHidden)
+      return null;
 
-  const buttons = (
-    <>
-      {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
-      {!hasValue && c.renderCreateButton(true)}
-      {!hasValue && c.renderFindButton(true)}
-      {hasValue && c.renderViewButton(true)}
-      {hasValue && c.renderRemoveButton(true)}
-      {c.props.extraButtons && c.props.extraButtons(c)}
-    </>
-  );
+    const buttons = (
+      <>
+        {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
+        {!hasValue && c.renderCreateButton(true)}
+        {!hasValue && c.renderFindButton(true)}
+        {hasValue && c.renderViewButton(true)}
+        {hasValue && c.renderRemoveButton(true)}
+        {c.props.extraButtons && c.props.extraButtons(c)}
+      </>
+    );
 
-  function getLabelText() {
+    function getLabelText() {
 
-    if (p.labelTextWithData == null)
-      return p.label;
+      if (p.labelTextWithData == null)
+        return p.label;
 
-    var data = c.props.data || comboRef.current && comboRef.current.getData();
+      var data = c.props.data || comboRef.current && comboRef.current.getData();
 
-    return p.labelTextWithData(data == null ? null : Array.isArray(data) ? data : data.rows.map(a => a.entity!), data && (Array.isArray(data) ? undefined : data));
-  }
+      return p.labelTextWithData(data == null ? null : Array.isArray(data) ? data : data.rows.map(a => a.entity!), data && (Array.isArray(data) ? undefined : data));
+    }
 
-  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
-  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+    const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+    const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
-  return (
-    <FormGroup ctx={c.props.ctx} error={p.error} label={getLabelText()} labelIcon={p.labelIcon}
-      helpText={helpText}
-      helpTextOnTop={helpTextOnTop}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
-      labelHtmlAttributes={p.labelHtmlAttributes}>
-      {inputId => <div className="sf-entity-combo">
-        <div className={EntityBaseController.hasChildrens(buttons) ? p.ctx.inputGroupClass : undefined}>
-          {getTimeMachineIcon({ ctx: p.ctx })}
-          <EntityComboSelect<V>
-            id={inputId}
-            ref={comboRef}
-            ctx={p.ctx}
-            onChange={c.handleOnChange}
-            type={p.type!}
-            data={p.data}
-            findOptions={p.findOptions}
-            findOptionsDictionary={p.findOptionsDictionary}
-            onDataLoaded={p.labelTextWithData == null ? undefined : () => c.forceUpdate()}
-            mandatoryClass={c.mandatoryClass}
-            deps={p.deps ? [c.refresh, ...p.deps] : [c.refresh]}
-            delayLoadData={p.delayLoadData}
-            toStringFromData={p.toStringFromData}
-            selectHtmlAttributes={p.selectHtmlAttributes}
-            optionHtmlAttributes={p.optionHtmlAttributes}
-            liteToString={p.liteToString as (e : Entity) => string}
-            nullPlaceHolder={p.nullPlaceHolder}
-            onRenderItem={p.onRenderItem}
-            overrideSelectedLite={p.overrideSelectedLite}
-          />
-          {EntityBaseController.hasChildrens(buttons) ? buttons : undefined}
-        </div>
-      </div>}
-    </FormGroup>
-  );
-}, (prev, next): boolean => EntityBaseController.propEquals(prev, next));
+    return (
+      <FormGroup ctx={c.props.ctx} error={p.error} label={getLabelText()} labelIcon={p.labelIcon}
+        helpText={helpText}
+        helpTextOnTop={helpTextOnTop}
+        htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
+        labelHtmlAttributes={p.labelHtmlAttributes}>
+        {inputId => <div className="sf-entity-combo">
+          <div className={EntityBaseController.hasChildrens(buttons) ? p.ctx.inputGroupClass : undefined}>
+            {getTimeMachineIcon({ ctx: p.ctx })}
+            <EntityComboSelect<V>
+              id={inputId}
+              ref={comboRef}
+              ctx={p.ctx}
+              onChange={c.handleOnChange}
+              type={p.type!}
+              data={p.data}
+              findOptions={p.findOptions}
+              findOptionsDictionary={p.findOptionsDictionary}
+              onDataLoaded={p.labelTextWithData == null ? undefined : () => c.forceUpdate()}
+              mandatoryClass={c.mandatoryClass}
+              deps={p.deps ? [c.refresh, ...p.deps] : [c.refresh]}
+              delayLoadData={p.delayLoadData}
+              toStringFromData={p.toStringFromData}
+              selectHtmlAttributes={p.selectHtmlAttributes}
+              optionHtmlAttributes={p.optionHtmlAttributes}
+              liteToString={p.liteToString as (e: Entity) => string}
+              nullPlaceHolder={p.nullPlaceHolder}
+              onRenderItem={p.onRenderItem}
+              overrideSelectedLite={p.overrideSelectedLite}
+            />
+            {EntityBaseController.hasChildrens(buttons) ? buttons : undefined}
+          </div>
+        </div>}
+      </FormGroup>
+    );
+  }, (prev, next): boolean => EntityBaseController.propEquals(prev, next));
 
 export interface EntityComboSelectProps<V extends ModifiableEntity | Lite<Entity> | null> {
   ctx: TypeContext<V>;
@@ -171,6 +173,7 @@ export interface EntityComboSelectProps<V extends ModifiableEntity | Lite<Entity
   toStringFromData?: boolean;
   overrideSelectedLite?: () => Lite<Entity> | null;
   id: string;
+  ref?: React.Ref<EntityComboSelectHandle>
 }
 
 
@@ -185,12 +188,12 @@ export function normalizeEmptyArray(data: Lite<Entity>[] | undefined): Lite<Enti
   return data;
 }
 
-export interface  EntityComboSelectHandle {
+export interface EntityComboSelectHandle {
   getSelect(): HTMLSelectElement | null;
   getData(): Lite<Entity>[] | ResultTable | undefined;
 }
 //Extracted to another component
-export const EntityComboSelect: <V extends Entity | Lite<Entity> | null>(props: EntityComboSelectProps<V> & React.RefAttributes<EntityComboSelectHandle>) => React.ReactNode | null = genericForwardRef(function EntityComboSelect<V extends Entity | Lite<Entity> | null>(p: EntityComboSelectProps<V>, ref: React.Ref<EntityComboSelectHandle>) {
+export function EntityComboSelect<V extends Entity | Lite<Entity> | null>(p: EntityComboSelectProps<V>): React.JSX.Element {
 
   const [data, _setData] = React.useState<Lite<Entity>[] | ResultTable | undefined>(p.data);
   const requestStarted = React.useRef(false);
@@ -200,7 +203,7 @@ export const EntityComboSelect: <V extends Entity | Lite<Entity> | null>(props: 
   const selectRef = React.useRef<HTMLSelectElement>(null);
   const mounted = useMounted();
 
-  React.useImperativeHandle(ref, () => ({
+  React.useImperativeHandle(p.ref, () => ({
     getData: () => data,
     getSelect: () => selectRef.current
   }));
@@ -243,8 +246,8 @@ export const EntityComboSelect: <V extends Entity | Lite<Entity> | null>(props: 
       <FormControlReadonly id={p.id} ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>
         {ctx.value &&
           (p.onRenderItem ? p.onRenderItem({ entity: lite } as ResultRow, "Value", undefined) :
-          p.liteToString ? getToString(lite!, p.liteToString) :
-            Navigator.renderLite((p.toStringFromData ? p.data?.singleOrNull(a=> is(a, lite)) : null) ?? lite!))
+            p.liteToString ? getToString(lite!, p.liteToString) :
+              Navigator.renderLite((p.toStringFromData ? p.data?.singleOrNull(a => is(a, lite)) : null) ?? lite!))
         }
       </FormControlReadonly>
     );
@@ -272,7 +275,7 @@ export const EntityComboSelect: <V extends Entity | Lite<Entity> | null>(props: 
         title={getToString(lite)}
         id={p.id}
         onClick={() => setLoadData(true)}
-        disabled={ctx.readOnly}  ref={selectRef} >
+        disabled={ctx.readOnly} ref={selectRef} >
         {getOptionRows().map((r, i) =>
           <option key={i} value={r?.entity ? liteKey(r.entity!) : ""} {...p.optionHtmlAttributes?.(r)}>{r?.entity ? getToString(r.entity, p.liteToString) : (p.nullPlaceHolder ?? " - ")}</option>)}
       </select>
@@ -346,7 +349,7 @@ export const EntityComboSelect: <V extends Entity | Lite<Entity> | null>(props: 
 
     return elements;
   }
-});
+}
 
 
 

@@ -290,7 +290,7 @@ class RedundantSubqueryRemover : DbExpressionVisitor
             if (source is SelectExpression select)
                 return select;
 
-            if (source is JoinExpression join)
+            if (source is JoinExpression join && join.JoinType is not (JoinType.RightOuterJoin or JoinType.FullOuterJoin))
                 return GetLeftMostSelect(join.Left);
 
             return null;

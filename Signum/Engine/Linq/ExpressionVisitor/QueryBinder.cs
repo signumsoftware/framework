@@ -2711,7 +2711,8 @@ internal class QueryBinder : ExpressionVisitor
                 {
                     var toUpdateParam = setter.PropertyExpression.Parameters.Single();
                     map.Add(toUpdateParam, toUpdate);
-                    colExpression = Visit(setter.PropertyExpression.Body);
+                    var cleanedProperty = DbQueryProvider.Clean(setter.PropertyExpression.Body, true, null);
+                    colExpression = Visit(cleanedProperty!);
                     map.Remove(toUpdateParam);
                 }
                 catch (CurrentSourceNotFoundException e)

@@ -443,13 +443,15 @@ public static class TranslatedInstanceLogic
         );
     }
 
-    public static TypeCulturePair ImportExcelFile(string filePath)
+
+
+    public static TypeCulturePair ImportExcelFile(string filePath, MatchTranslatedInstances mode = MatchTranslatedInstances.ByInstanceID)
     {
         using (var stream = File.OpenRead(filePath))
-            return ImportExcelFile(stream, Path.GetFileName(filePath));
+            return ImportExcelFile(stream, Path.GetFileName(filePath), mode);
     }
 
-    public static TypeCulturePair ImportExcelFile(Stream stream, string fileName)
+    public static TypeCulturePair ImportExcelFile(Stream stream, string fileName, MatchTranslatedInstances mode)
     {
         Type type = TypeLogic.GetType(fileName.Before('.'));
         CultureInfo culture = CultureInfo.GetCultureInfo(fileName.After('.').Before('.'));
@@ -464,7 +466,10 @@ public static class TranslatedInstanceLogic
             TranslatedText = cellValues[4]
         });
 
-        SaveRecords(records, type, isSync: false, culture);
+        if (mode == MatchTranslatedInstances.ByInstanceID)
+            SaveRecordsByInstance(records, type, isSync: false, culture);
+        else
+            SaveRecordsByOriginalText(records, type, isSync: false, culture);
 
         return new TypeCulturePair(type, culture);
     }
@@ -517,14 +522,14 @@ public static class TranslatedInstanceLogic
 
 
 
-    public static void SaveRecords(List<TranslationRecord> records, Type t, bool isSync, CultureInfo? c)
+    public static void SaveRecordsByInstance(List<TranslationRecord> records, Type type, bool isSync, CultureInfo? c)
     {
         Dictionary<(CultureInfo culture, LocalizedInstanceKey instanceKey), TranslationRecord> should = records
             .Where(a => !isSync || a.TranslatedText.HasText())
             .ToDictionary(a => (a.Culture, a.Key));
 
         Dictionary<(CultureInfo culture, LocalizedInstanceKey instanceKey), TranslatedInstanceEntity> current =
-            (from ci in TranslationsForType(t, c)
+            (from ci in TranslationsForType(type, c)
              from key in ci.Value
              select KeyValuePair.Create((culture: ci.Key, instanceKey: key.Key), key.Value)).ToDictionary();
 
@@ -563,6 +568,87 @@ public static class TranslatedInstanceLogic
                         r.Save();
                     }
                 });
+
+            toInsert.BulkInsert(message: "auto");
+
+            tr.Commit();
+        }
+    }
+
+    public static void SaveRecordsByOriginalText(List<TranslationRecord> records, Type type, bool isSync, CultureInfo? c)
+    {
+        Dictionary<(PropertyRoute route, string originalText), Dictionary<CultureInfo, string>> excelTranslations = records
+            .Where(a => !isSync || a.TranslatedText.HasText())
+            .GroupBy(a => (a.Key.Route, a.OriginalText), a => (a.Culture, a.TranslatedText))
+            .Select(gr => KeyValuePair.Create((gr.Key.Route, gr.Key.OriginalText), gr.AgGroupToDictionary(a=>a.Culture, a=>a.Select(a=>a.TranslatedText).Distinct().SingleEx())))
+            .ToDictionary();
+
+        Dictionary<LocalizedInstanceKey, List<TranslatedInstanceEntity>> databaseTranslations =
+            TranslationsForType(type, c).SelectMany(ci => ci.Value).GroupToDictionary(a => a.Key, a => a.Value);
+
+        Dictionary<(PropertyRoute route, string originalText), List<(Lite<Entity> instance, PrimaryKey? rowId)>> currentInstances =
+            FromEntities(type)
+            .Where(a=>a.Value != null)
+            .GroupToDictionary(a => (a.Key.Route, a.Value!), a => (a.Key.Instance, a.Key.RowId));
+
+        using (var tr = new Transaction())
+        {
+            Dictionary<PropertyRoute, PropertyRouteEntity> routes = excelTranslations.Keys.Select(a => a.route).Distinct().ToDictionary(a => a, a => a.ToPropertyRouteEntity());
+
+            routes.Values.Where(a => a.IsNew).SaveList();
+
+            List<TranslatedInstanceEntity> toInsert = new List<TranslatedInstanceEntity>();
+
+            List<TranslatedInstanceEntity> toDelete = new List<TranslatedInstanceEntity>();
+            Synchronizer.Synchronize(
+                excelTranslations,
+                currentInstances,
+                createNew: (k, excelTrans) =>
+                {
+                    //translations in excel are unnecessary (entity removed or old originalText
+                },
+                (k, entities) =>
+                {
+                    foreach (var e in entities)
+                    {
+                        toDelete.AddRange(databaseTranslations.TryGetC(new LocalizedInstanceKey(k.route, e.instance, e.rowId)).EmptyIfNull());
+                    }
+                    //Consoider deleting old translations in the database
+                },
+                (k, excelTrans, entities) =>
+                {
+                    foreach (var e in entities)
+                    {
+                        var dbTrans = databaseTranslations.TryGetC(new LocalizedInstanceKey(k.route, e.instance, e.rowId)).EmptyIfNull().ToDictionary(a => a.Culture.ToCultureInfo());
+
+                        Synchronizer.Synchronize(
+                            excelTrans,
+                            dbTrans,
+                            createNew: (ci, translatedText) => toInsert.Add(new TranslatedInstanceEntity
+                            {
+                                Culture = ci.ToCultureInfoEntity(),
+                                PropertyRoute = routes.GetOrThrow(k.route),
+                                Instance = e.instance,
+                                RowId = e.rowId?.ToString(),
+                                OriginalText = k.originalText,
+                                TranslatedText = translatedText,
+                            }),
+                            removeOld: (ci, dbTr) =>
+                            {
+                                toDelete.Add(dbTr);
+                            },
+                            merge: (ci, translatedText, dbTr) =>
+                            {
+                                dbTr.TranslatedText = translatedText; // Only translation changed
+                                dbTr.Save();
+                            });
+                    }
+                });
+
+            if (toDelete.Any())
+            {
+                Database.DeleteList(toDelete);
+            }
 
             toInsert.BulkInsert(message: "auto");
 
@@ -722,4 +808,13 @@ public class TranslatedTypeSummary
     public required Type Type;
     public required CultureInfo CultureInfo;
     public required TranslatedSummaryState? State;
+}
+
+public enum MatchTranslatedInstances
+{
+    //Export and import happend in the same DB (stable Ids)
+    ByInstanceID,
+
+    //Export and import happend in the a different DB (unstable Ids), like Generate Environment
+    ByOriginalText,
 }

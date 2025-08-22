@@ -29,6 +29,10 @@ table.sf-search-results > thead {
 table.sf-search-results > tbody > tr > td {
     white-space: pre-wrap;
     vertical-align: middle;
+}
+
+table.sf-search-results.sf-row-view > tbody > tr > td,
+div.sf-search-results.sf-row-view div.row-container {
     cursor: pointer;
 }
 
@@ -135,11 +139,12 @@ tr.drag-bottom td {
 }
 
 .sf-column-editor {
-    background: #eee;
+    background: #fffae4;
     padding: 8px;
     border-radius: 4px;
 }
 
+    .sf-column-editor.error,
     .sf-column-editor .error {
         background: #f2dede;
     }
@@ -154,7 +159,7 @@ tr.drag-bottom td {
 }
 
 table.sf-search-results th.sf-current-column {
-    background-color: #eee;
+    background-color: #fffae4;
     border-bottom: 2px solid #aaa;
 }
 

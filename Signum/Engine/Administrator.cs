@@ -124,6 +124,16 @@ public static class Administrator
 
     public static void NewDatabase()
     {
+        if (!CleanDatabase())
+            return;
+
+        Console.Write("Generating new database...");
+        ExecuteGenerationScript();
+        Console.WriteLine("Done.");
+    }
+
+    public static bool CleanDatabase()
+    {
         var databaseName = Connector.Current.DatabaseName();
         if (Connector.Current.HasTables())
         {
@@ -134,7 +144,7 @@ public static class Administrator
             {
                 Console.WriteLine($"Wrong name. No changes where made");
                 Console.WriteLine();
-                return;
+                return false;
             }
         }
 
@@ -142,10 +152,7 @@ public static class Administrator
         using (Connector.CommandTimeoutScope(5 * 60))
             CleanAllDatabases();
         Console.WriteLine("Done.");
-
-        Console.Write("Generating new database...");
-        ExecuteGenerationScript();
-        Console.WriteLine("Done.");
+        return true;
     }
 
     public static Func<bool> AvoidSimpleSynchronize = () => false;
@@ -827,7 +834,7 @@ public static class Administrator
             return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2};".FormatWith(table.Name, column.Name, id.VariableName));
 
         var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", id, column);
-        return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}:".FormatWith(table.Name, column.Name, param.ParameterName), new List<DbParameter> { param });
+        return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2};".FormatWith(table.Name, column.Name, param.ParameterName), new List<DbParameter> { param });
     }
 
 

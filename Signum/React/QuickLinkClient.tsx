@@ -205,7 +205,7 @@ export interface QuickLinkWidgetProps {
 }
 
 
-export function QuickLinkWidget(p: QuickLinkWidgetProps): React.JSX.Element | null {
+export function QuickLinkWidget(p: QuickLinkWidgetProps): React.ReactElement | null {
 
   const links = useAPI(signal => QuickLinkClient.getQuickLinks(p.qlc), [liteKey(p.qlc.lite)], { avoidReset: true });
 
@@ -343,7 +343,7 @@ export abstract class QuickLink<T extends Entity> {
       this.group = QuickLink.defaultGroup;
   }
 
-  toDropDownItem(ctx: QuickLinkContext<T>): React.JSX.Element {
+  toDropDownItem(ctx: QuickLinkContext<T>): React.ReactElement {
     return (
       <Dropdown.Item data-key={this.key} className="sf-quick-link" onClick={e => this.handleClick(ctx, e)}>
         {this.renderIcon()}&nbsp;{this.text()}
@@ -353,7 +353,7 @@ export abstract class QuickLink<T extends Entity> {
 
   abstract handleClick(ctx: QuickLinkContext<T>, e: React.MouseEvent<any>): void;
 
-  renderIcon(): React.JSX.Element | undefined {
+  renderIcon(): React.ReactElement | undefined {
     if (this.icon == undefined)
       return undefined;
 

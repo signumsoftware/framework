@@ -3,6 +3,8 @@ using Signum.DynamicQuery.Tokens;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
+using Signum.Engine.Maps;
+using System.Runtime.CompilerServices;
 
 namespace Signum.DynamicQuery;
 
@@ -93,7 +95,7 @@ public class ExpressionContainer
         var edi = RegisteredExtensionsWithParameter.TryGetC(parentTypeClean);
 
         IEnumerable<QueryToken> dicExtensionsTokens = edi == null ? Enumerable.Empty<QueryToken>() :
-            edi.Values.SelectMany(e => e.GetAllTokens(parent));
+            edi.Values.Select(e => new IndexerContainerToken(parent, e));
 
         return dicExtensionsTokens;
     }
@@ -146,67 +148,104 @@ public class ExpressionContainer
         return extension;
     }
 
-
-
     public ExtensionWithParameterInfo<T, K, V> RegisterWithParameter<T, K, V>(
+        string prefix,
+        Func<string> niceName,
+        Func<QueryToken, IEnumerable<K>> getKeys,
         Expression<Func<T, K, V>> extensionLambda,
-        string prefix = "",
-        Func<QueryToken, IEnumerable<K>>? getKeys = null)
+        bool autoExpand = false)
         where K : notnull
     {
-        if (getKeys == null)
-        {
-            var lazy = GetAllKeysLazy<K>();
-            getKeys = t => lazy.Value;
-        }
-
-        var ei = new ExtensionWithParameterInfo<T, K, V>(extensionLambda, prefix, getKeys);
+        var ei = new ExtensionWithParameterInfo<T, K, V>(extensionLambda, prefix, niceName, getKeys);
 
         RegisteredExtensionsWithParameter.GetOrCreate(typeof(T)).Add(ei.Prefix, ei);
+
+        ei.AutoExpand = autoExpand;
 
         return ei;
     }
 
-
-    private ResetLazy<FrozenSet<K>> GetAllKeysLazy<K>()
+    public ExtensionWithParameterInfo<T, K, V> RegisterWithParameter<T, K, V>(
+        Enum message,
+        Func<QueryToken, IEnumerable<K>> getKeys,
+        Expression<Func<T, K, V>> extensionLambda,
+        bool autoExpand = false)
+        where K : notnull
     {
-        if (typeof(K).IsEnum)
-            return new ResetLazy<FrozenSet<K>>(() => EnumExtensions.GetValues<K>().ToFrozenSet());
+        var ei = new ExtensionWithParameterInfo<T, K, V>(extensionLambda, message.ToString(), ()=> message.NiceToString(), getKeys);
 
-        if (typeof(K).IsLite())
-            return GlobalLazy.WithoutInvalidations(() => Database.RetrieveAllLite(typeof(K).CleanType()).Cast<K>().ToFrozenSet());
+        RegisteredExtensionsWithParameter.GetOrCreate(typeof(T)).Add(ei.Prefix, ei);
 
-        throw new InvalidOperationException("Unable to get all the possible keys for " + typeof(K).TypeName());
+        ei.AutoExpand = autoExpand;
+
+        return ei;
     }
-}
+} 
 
 public interface IExtensionDictionaryInfo
 {
-    IEnumerable<QueryToken> GetAllTokens(QueryToken parent);
+    IEnumerable<QueryToken> GetAllTokens(IndexerContainerToken parent);
+    string? GetAllowed(IndexerContainerToken container);
+
+    bool AutoExpand { get; } 
+    Func<string> NiceName { get; } 
+    string Prefix { get; } 
 }
 
 public class ExtensionWithParameterInfo<T, K, V> : IExtensionDictionaryInfo
 {
-    public string Prefix;
-    public Func<QueryToken, IEnumerable<K>> AllKeys;
+    public string Prefix { get; set; }
+    public Func<string> NiceName { get; set; }
+    public Func<QueryToken, IEnumerable<K>> AllKeys { get; set; }
+    public Func<QueryToken, string?> IsAllowed { get; set; }
 
     public Expression<Func<T, K, V>> LambdaExpression { get; set; }
+    public bool AutoExpand { get; set; }
 
     readonly ConcurrentDictionary<QueryToken, ExtensionRouteInfo> metas = new ConcurrentDictionary<QueryToken, ExtensionRouteInfo>();
 
     public ExtensionWithParameterInfo(
         Expression<Func<T, K, V>> expression,
         string prefix,
+        Func<string> niceName,
         Func<QueryToken, IEnumerable<K>> allKeys)
     {
         LambdaExpression = expression;
         Prefix = prefix;
+        this.NiceName = niceName;
         AllKeys = allKeys;
+
     }
 
-    public IEnumerable<QueryToken> GetAllTokens(QueryToken parent)
+    public string? GetAllowed(IndexerContainerToken container)
     {
-        var info = metas.GetOrAdd(parent, qt =>
+        var allowed = container.Parent!.IsAllowed();
+
+        if (allowed != null)
+            return allowed;
+
+        var info = GetExtensionRouteInfo(container);
+
+        return info.IsAllowed?.Invoke();
+    }
+
+    public IEnumerable<QueryToken> GetAllTokens(IndexerContainerToken container)
+    {
+        ExtensionRouteInfo info = GetExtensionRouteInfo(container);
+
+        return AllKeys(container.Parent!).Select(key => new ExtensionWithParameterToken<T, K, V>(container,
+            parameterValue: key,
+            unit: info.Unit,
+            format: info.Format,
+            implementations: info.Implementations,
+            propertyRoute: info.PropertyRoute,
+            lambda: t => LambdaExpression.Evaluate(t, key)
+        ));
+    }
+
+    private ExtensionRouteInfo GetExtensionRouteInfo(IndexerContainerToken container)
+    {
+        return metas.GetOrAdd(container, qt =>
         {
             var defaultValue = typeof(K).IsValueType && !typeof(K).IsNullable() ? Activator.CreateInstance<K>() : (K)(object)null!;
 
@@ -224,21 +263,14 @@ public class ExtensionWithParameterInfo<T, K, V> : IExtensionDictionaryInfo
                 result.Implementations = me.Meta.Implementations;
                 result.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
                 result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
+                result.IsAllowed = () => me.Meta.IsAllowed();
             }
 
             return result;
         });
-
-        return AllKeys(parent).Select(key => new ExtensionWithParameterToken<T, K, V>(parent,
-            parameterValue: key,
-            prefix: Prefix,
-            unit: info.Unit,
-            format: info.Format,
-            implementations: info.Implementations,
-            propertyRoute: info.PropertyRoute,
-            lambda: t => LambdaExpression.Evaluate(t, key)
-        ));
     }
+
+
 }
 
 //To allow override null

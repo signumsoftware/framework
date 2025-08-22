@@ -5,7 +5,7 @@ import { toFormatWithFixes } from '@framework/Reflection'
 import { Finder } from '@framework/Finder'
 import { HolidayCalendarEntity, SchedulerMessage } from './Signum.Scheduler'
 import { Lite } from '../../Signum/React/Signum.Entities';
-import { RenderDayProp } from 'react-widgets/cjs/Month';
+import { RenderDayProp } from 'react-widgets-up/Month';
 import { DateTime } from 'luxon';
 import { DateTimeLineOptions, RenderDayAndTitle } from '../../Signum/React/Lines/DateTimeLine';
 import React from 'react';

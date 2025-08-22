@@ -1,16 +1,11 @@
-using LibGit2Sharp;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http.Headers;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Signum.Upgrade;
 
@@ -555,6 +550,45 @@ public class CodeFile
                     lines[pos - 1] = lines[pos - 1].Replace(",", "");
                 }
             }
+
+            return true;
+        });
+    }
+
+    public void AddNpmPackage(string packageName, string version, bool devDependencies = false)
+    {
+        AssertExtension(".json");
+
+        ProcessLines(lines =>
+        {
+            var dependencies = devDependencies ? @"""devDependencies""": @"""dependencies""";
+
+            var pos = lines.FindIndex(a => a.Contains(dependencies));
+            
+            if (pos == -1)
+            {
+                Warning(@$"Unable to find a line with {dependencies} to remove it");
+                return false;
+            }
+            var indent = GetIndent(lines[pos]);
+            if (lines[pos].TrimEnd().EndsWith("},"))
+            {
+                lines[pos] = lines[pos].Before("},");
+                lines.Insert(pos + 1, indent + "},");
+            }
+
+            var postEnd = lines.FindIndex(pos, a => a.Contains("},"));
+
+
+            if (
+            !lines[postEnd - 1].TrimEnd().EndsWith(",") &&
+            !lines[postEnd - 1].TrimEnd().EndsWith("{")
+            )
+            {
+                lines[postEnd - 1] += ",";
+            }
+
+            lines.Insert(postEnd, indent + $@"  ""{packageName}"": ""{version}""");
 
             return true;
         });
