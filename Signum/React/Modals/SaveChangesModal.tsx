@@ -19,7 +19,7 @@ interface SaveChangesModalProps extends IModalProps<SaveChangesResult | undefine
   eocs: EntityOperationContext<any>[];
 }
 
-function SaveChangesModal(p: SaveChangesModalProps): React.JSX.Element {
+function SaveChangesModal(p: SaveChangesModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
 

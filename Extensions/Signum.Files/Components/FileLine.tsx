@@ -11,12 +11,13 @@ import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour, toCompu
 import { FileUploader, AsyncUploadOptions } from './FileUploader'
 
 import "./Files.css"
-import { genericForwardRefWithMemo, useController } from '@framework/Lines/LineBase'
+import { genericMemo, useController } from '@framework/Lines/LineBase'
 import { FilesClient } from '../FilesClient'
 import ProgressBar from '@framework/Components/ProgressBar'
 import { FontAwesomeIcon } from '@framework/Lines'
 import { EntityOperationContext, Operations } from '@framework/Operations'
 import { getNiceTypeName } from '@framework/Operations/MultiPropertySetter'
+import { JSX } from 'react/jsx-runtime'
 
 export { FileTypeSymbol };
 
@@ -32,6 +33,7 @@ export interface FileLineProps<V extends ModifiableEntity/* & IFile */ | Lite</*
   asyncUpload?: boolean;
   getFileFromElement?: (actx: NoInfer<V>) => ModifiableEntity & IFile | Lite<IFile & Entity>;
   createElementFromFile?: (file: ModifiableEntity & IFile) => Promise<NoInfer<V> | undefined>;
+  ref?: React.Ref<FileLineController<V>>
 }
 
 
@@ -110,9 +112,9 @@ export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*
   }
 }
 
-export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile & */Entity> | null>(props: FileLineProps<V> & React.RefAttributes<FileLineController<V>>) => React.ReactNode | null =
-  genericForwardRefWithMemo(function FileLine<V extends ModifiableEntity/* & IFile */ | Lite</*IFile &*/ Entity> | null>(props: FileLineProps<V>, ref: React.Ref<FileLineController<V>>) {
-    const c = useController(FileLineController, props, ref);
+export const FileLine: <V extends ModifiableEntity /* & IFile */ | Lite</*IFile &*/ Entity> | null>(props: FileLineProps<V>) => React.ReactNode | null =
+  genericMemo(function FileLine<V extends ModifiableEntity/* & IFile */ | Lite</*IFile &*/ Entity> | null>(props: FileLineProps<V>) {
+    const c = useController<FileLineController<V>, FileLineProps<V>, V>(FileLineController, props);
     const p = c.props;
 
     if (c.isHidden)

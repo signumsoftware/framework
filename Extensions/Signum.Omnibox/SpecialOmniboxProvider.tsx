@@ -13,9 +13,9 @@ export default class SpecialOmniboxProvider extends OmniboxProvider<SpecialOmnib
     return this.coloredIcon("cog", "limegreen");
   }
 
-  renderItem(result: SpecialOmniboxResult): React.ReactChild[] {
+  renderItem(result: SpecialOmniboxResult): React.ReactNode[] {
 
-    const array: React.ReactChild[] = [];
+    const array: React.ReactNode[] = [];
 
     array.push(this.icon());
 

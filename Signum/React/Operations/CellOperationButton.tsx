@@ -29,7 +29,7 @@ export interface CellOperationProps extends ButtonProps {
   outline?: boolean;
 }
 
-export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline, color, icon, iconColor, iconAlign, ...props }: CellOperationProps): React.JSX.Element | null {
+export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline, color, icon, iconColor, iconAlign, ...props }: CellOperationProps): React.ReactElement | null {
 
   if (cocOrNull == null)
     return null;

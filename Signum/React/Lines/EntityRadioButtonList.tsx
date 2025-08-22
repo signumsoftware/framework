@@ -4,7 +4,7 @@ import { Finder } from '../Finder'
 import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import { Aprox, AsLite, EntityBaseController, EntityBaseProps } from './EntityBase'
-import { genericForwardRef, useController } from './LineBase'
+import { useController } from './LineBase'
 import { ResultTable } from '../Search'
 import { ResultRow } from '../FindOptions'
 import { getTimeMachineIcon } from './TimeMachineIcon'
@@ -21,6 +21,7 @@ export interface EntityRadioButtonListProps<V extends Entity | Lite<Entity> | nu
   nullPlaceHolder?: string;
   onRenderItem?: (lite: AsLite<V> | null) => React.ReactElement | null;
   nullElement?: "No" | "Always" | "Initially";
+  ref?: React.Ref<EntityRadioButtonListController<V>>
 }
 
 export class EntityRadioButtonListController<V extends Entity | Lite<Entity> | null> extends EntityBaseController<EntityRadioButtonListProps<V>, V> {
@@ -48,8 +49,8 @@ export class EntityRadioButtonListController<V extends Entity | Lite<Entity> | n
 
 }
 
-export const EntityRadioButtonList: <V extends Entity | Lite<Entity>>(props: EntityRadioButtonListProps<V> & React.RefAttributes<EntityRadioButtonListController<V>>) => React.ReactNode | null = genericForwardRef(function EntityRadioButtonList<V extends Entity | Lite<Entity>>(props: EntityRadioButtonListProps<V>, ref: React.Ref<EntityRadioButtonListController<V>>) {
-  const c = useController(EntityRadioButtonListController, props, ref);
+export function EntityRadioButtonList<V extends Entity | Lite<Entity>>(props: EntityRadioButtonListProps<V>): React.JSX.Element | null {
+  const c = useController<EntityRadioButtonListController<V>, EntityRadioButtonListProps<V>, V>(EntityRadioButtonListController, props);
   const p = c.props;
 
   if (c.isHidden)
@@ -80,7 +81,7 @@ export const EntityRadioButtonList: <V extends Entity | Lite<Entity>>(props: Ent
       <EntityRadioButtonListSelect ctx={p.ctx} controller={c} nullElement={p.nullElement} />
     );
   }
-});
+};
 
 
 interface EntityRadioButtonListSelectProps<V extends Lite<Entity> | Entity | null> {
@@ -89,7 +90,7 @@ interface EntityRadioButtonListSelectProps<V extends Lite<Entity> | Entity | nul
   nullElement?: "No" | "Always" | "Initially";
 }
 
-export function EntityRadioButtonListSelect<V extends Lite<Entity> | Entity | null>(props: EntityRadioButtonListSelectProps<V>): React.JSX.Element {
+export function EntityRadioButtonListSelect<V extends Lite<Entity> | Entity | null>(props: EntityRadioButtonListSelectProps<V>): React.ReactElement {
 
   const c = props.controller;
   const p = c.props;

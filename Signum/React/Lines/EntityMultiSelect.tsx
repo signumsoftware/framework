@@ -5,8 +5,8 @@ import { AutocompleteConfig } from './AutoCompleteConfig';
 import { Aprox, EntityBaseController } from './EntityBase';
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase';
 import { Navigator } from '../Navigator'
-import { Multiselect } from 'react-widgets/cjs';
-import { genericForwardRef, useController } from './LineBase';
+import { Multiselect } from 'react-widgets-up';
+import { useController } from './LineBase';
 import { number } from 'prop-types';
 import { FindOptions, ResultRow } from '../FindOptions'
 import { Finder } from '../Finder'
@@ -15,7 +15,8 @@ import { useMounted } from '../Hooks';
 import { FormGroup } from './FormGroup';
 import { classes } from '../Globals';
 import { getTimeMachineIcon } from './TimeMachineIcon';
-import Input from 'react-widgets/cjs/Input';
+import Input from 'react-widgets-up/Input';
+import { JSX } from 'react/jsx-runtime';
 
 export interface EntityMultiSelectProps<V extends Lite<Entity> | Entity> extends EntityListBaseProps<V> {
   onRenderItem?: (item: ResultRow) => React.ReactNode;
@@ -24,6 +25,7 @@ export interface EntityMultiSelectProps<V extends Lite<Entity> | Entity> extends
   toStringFromData?: boolean;
   delayLoadData?: boolean;
   deps?: React.DependencyList;
+  ref?: React.Ref<EntityMultiSelectController<V>>
 }
 
 export class EntityMultiSelectController<V extends Lite<Entity> | Entity> extends EntityListBaseController<EntityMultiSelectProps<V>, V> {
@@ -54,8 +56,8 @@ export class EntityMultiSelectController<V extends Lite<Entity> | Entity> extend
   }
 }
 
-export const EntityMultiSelect: <V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V> & React.RefAttributes<EntityMultiSelectController<V>>) => React.ReactNode | null = genericForwardRef(function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V>, ref: React.Ref<EntityMultiSelectController<V>>) {
-  const c = useController(EntityMultiSelectController, props, ref);
+export function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V>): JSX.Element | null {
+  const c = useController<EntityMultiSelectController<V>, EntityMultiSelectProps<V>, MList<V>>(EntityMultiSelectController, props);
   const p = c.props;
 
   if (c.isHidden)
@@ -132,7 +134,7 @@ export const EntityMultiSelect: <V extends Lite<Entity> | Entity>(props: EntityM
 
   function getOptionRows() {
 
-   // const lite = getLite();
+    // const lite = getLite();
 
     var rows = Array.isArray(data) ? data.map(lite => ({ entity: lite } as ResultRow)) :
       typeof data == "object" ? data.rows :
@@ -144,11 +146,11 @@ export const EntityMultiSelect: <V extends Lite<Entity> | Entity>(props: EntityM
     p.ctx.value.forEach(mle => {
       const entityOrLite = mle.element;
 
-      const lite: Lite<V & Entity> | (V & Lite<Entity>) | null = isEntity(entityOrLite) ? toLite(entityOrLite) : 
-      isLite(entityOrLite) ? entityOrLite : null;
+      const lite: Lite<V & Entity> | (V & Lite<Entity>) | null = isEntity(entityOrLite) ? toLite(entityOrLite) :
+        isLite(entityOrLite) ? entityOrLite : null;
 
-      if(lite == null)
-        throw new Error("Unexpected " +  mle.element);
+      if (lite == null)
+        throw new Error("Unexpected " + mle.element);
 
       var index = elements.findIndex(a => is(a?.entity, lite));
       if (index == -1)
@@ -158,11 +160,11 @@ export const EntityMultiSelect: <V extends Lite<Entity> | Entity>(props: EntityM
           elements[index]!.entity = lite;
       }
     });
-    
+
 
     return elements;
   }
-});
+}
 
 
 interface MultiSelectElement {

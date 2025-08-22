@@ -9,14 +9,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.3">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.9.2">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="System.Drawing.Common" Version="9.0.7" />
+		<PackageReference Include="System.Drawing.Common" Version="9.0.8" />
 		<PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
-		<PackageReference Include="SixLabors.ImageSharp" Version="2.1.10" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.12.2" />
+		<PackageReference Include="SixLabors.ImageSharp" Version="2.1.11" />
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
 		<PackageReference Include="Signum.MSBuildTask" Version="9.0.0" />
 		<PackageReference Include="Signum.TSGenerator" Version="9.1.0" />

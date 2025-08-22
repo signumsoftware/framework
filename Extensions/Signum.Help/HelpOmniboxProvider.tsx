@@ -13,9 +13,9 @@ export default class HelpOmniboxProvider extends OmniboxProvider<HelpModuleOmnib
     return this.coloredIcon("book", "darkviolet");
   }
 
-  renderItem(result: HelpModuleOmniboxResult): React.ReactChild[] {
+  renderItem(result: HelpModuleOmniboxResult): React.ReactNode[] {
 
-    const array: React.ReactChild[] = [];
+    const array: React.ReactNode[] = [];
 
     array.push(this.icon());
 

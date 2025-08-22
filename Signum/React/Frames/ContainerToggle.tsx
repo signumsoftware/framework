@@ -8,7 +8,7 @@ import { useForceUpdate, useUpdatedRef } from '../Hooks';
 import { useLocation } from 'react-router';
 import { ContainerToggleMessage } from '../Signum.Entities';
 
-export default function ContainerToggleComponent(p: { children: React.ReactNode }): React.JSX.Element {
+export default function ContainerToggleComponent(p: { children: React.ReactNode }): React.ReactElement {
 
   const [fluid, setFluid] = React.useState(false);
   const fluidRef = useUpdatedRef(fluid);

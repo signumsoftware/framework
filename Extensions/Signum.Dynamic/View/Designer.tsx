@@ -390,7 +390,7 @@ interface DesignerModalProps extends IModalProps<boolean | undefined> {
 export function DesignerModal(p: DesignerModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState<boolean>(true);
-  const okClicked = React.useRef<boolean | undefined>();
+  const okClicked = React.useRef<boolean | undefined>(undefined);
 
   function handleOkClicked() {
     okClicked.current = true;

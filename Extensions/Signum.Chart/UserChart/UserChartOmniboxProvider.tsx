@@ -17,9 +17,9 @@ export default class UserChartOmniboxProvider extends OmniboxProvider<UserChartO
     return this.coloredIcon("chart-bar", "darkviolet");
   }
 
-  renderItem(result: UserChartOmniboxResult): React.ReactChild[] {
+  renderItem(result: UserChartOmniboxResult): React.ReactNode[] {
 
-    const array: React.ReactChild[] = [];
+    const array: React.ReactNode[] = [];
 
     array.push(this.icon());
 

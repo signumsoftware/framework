@@ -44,7 +44,7 @@ interface MultiCheckboxLineProps<T extends Entity> {
   onChange?: (newValue: boolean) => void;
 }
 
-export function SelectAllCheckbox<T extends Entity>({ ctx, properties, onChange }: MultiCheckboxLineProps<T>): JSX.Element {
+export function SelectAllCheckbox<T extends Entity>({ ctx, properties, onChange }: MultiCheckboxLineProps<T>): React.JSX.Element {
 
   const entity = ctx.value;
   const forceUpdate = useForceUpdate();

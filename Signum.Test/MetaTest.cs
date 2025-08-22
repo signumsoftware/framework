@@ -28,7 +28,7 @@ public class MetaTest
     {
         var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new { a.Target, a.Title, a.ToString().Length, Sum = a.ToString() + a.ToString() }))!;
         Assert.IsType<CleanMeta>(dic["Target"]);
-        Assert.IsType<CleanMeta>(dic["Text"]);
+        Assert.IsType<CleanMeta>(dic["Title"]);
         Assert.IsType<DirtyMeta>(dic["Length"]);
         Assert.IsType<DirtyMeta>(dic["Sum"]);
     }

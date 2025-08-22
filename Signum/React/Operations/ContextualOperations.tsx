@@ -209,10 +209,10 @@ export namespace ContextualOperations {
   }
 
   export const OperationMenuItem: {
-    (p: OperationMenuItemProps): React.JSX.Element;
+    (p: OperationMenuItemProps): React.ReactElement;
     getText: (coc: ContextualOperationContext<any>) => React.ReactNode;
     simplifyName: (niceName: string) => string;
-  } = function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps): React.JSX.Element {
+  } = function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps): React.ReactElement {
     const text = children ?? OperationMenuItem.getText(coc);
 
     const eos = coc.entityOperationSettings;

@@ -217,7 +217,7 @@ export namespace AlertsClient {
     return (object as any)[str.firstLower()]
   }
   
-  export module API {
+  export namespace API {
   
     export function myAlerts(): Promise<AlertEntity[]> {
       return ajaxGet({ url: "/api/alerts/myAlerts", avoidNotifyPendingRequests: true });

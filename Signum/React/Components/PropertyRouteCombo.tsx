@@ -14,7 +14,7 @@ export interface PropertyRouteComboProps {
   onChange?: () => void;
 }
 
-export default function PropertyRouteCombo(p : PropertyRouteComboProps): React.JSX.Element{
+export default function PropertyRouteCombo(p : PropertyRouteComboProps): React.ReactElement{
   const forceUpdate = useForceUpdate();
 
 

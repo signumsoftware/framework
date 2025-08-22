@@ -3,13 +3,13 @@ import { classes, Dic } from '../Globals'
 import { Navigator } from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList, MList } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
 import { AutocompleteConfig, TypeBadge } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Aprox, EntityBaseController, NN } from './EntityBase';
-import { genericForwardRef, LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
+import { LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
 import { getTypeInfo, getTypeInfos, getTypeName, QueryTokenString, tryGetTypeInfos } from '../Reflection'
 import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
@@ -29,11 +29,12 @@ export interface EntityStripProps<V extends ModifiableEntity | Lite<Entity>> ext
   groupElementsBy?: (e: V) => string;
   renderGroupTitle?: (key: string, i?: number) => React.ReactElement;
   inputAttributes?: React.InputHTMLAttributes<HTMLInputElement>;
+  ref?: React.Ref<EntityStripController<V>>
 }
 
 export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseController<EntityStripProps<V>, V> {
 
-  typeahead!: React.RefObject<TypeaheadController>;
+  typeahead!: React.RefObject<TypeaheadController | null>;
 
   overrideProps(p: EntityStripProps<V>, overridenProps: EntityStripProps<V>): void {
     super.overrideProps(p, overridenProps);
@@ -86,13 +87,12 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
   }
 }
 
-export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V> & React.RefAttributes<EntityStripController<V>>) => React.ReactNode | null = genericForwardRef(function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V>, ref: React.Ref<EntityStripController<V>>) {
-  const c = useController(EntityStripController, props, ref);
+export function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V>): React.JSX.Element | null {
+  const c = useController<EntityStripController<V>, EntityStripProps<V>, MList<V>>(EntityStripController, props);
   const p = c.props;
 
   if (c.isHidden)
     return null;
-
 
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
@@ -123,12 +123,12 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
             {renderLastElement()}
           </>
         }
-    
+
       </div>}
     </FormGroup>
   );
 
-  function renderElement(mlec: TypeContext<V>, index: number): JSX.Element {
+  function renderElement(mlec: TypeContext<V>, index: number): React.ReactElement {
     return <EntityStripElement<V> key={index}
       ctx={mlec}
       iconStart={p.iconStart}
@@ -182,7 +182,7 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
     const lites = parseLiteList(text);
     if (lites.length == 0)
       return;
-    
+
     e.preventDefault();
     c.paste(text)?.then(() => {
       c.typeahead.current?.writeInInput("");
@@ -215,7 +215,7 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
       />
     );
   }
-});
+}
 
 export interface EntityStripElementProps<V extends ModifiableEntity | Lite<Entity>> {
   iconStart?: boolean;
@@ -232,7 +232,7 @@ export interface EntityStripElementProps<V extends ModifiableEntity | Lite<Entit
   vertical?: boolean;
 }
 
-export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p: EntityStripElementProps<V>): React.JSX.Element {
+export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p: EntityStripElementProps<V>): React.ReactElement {
   var currentEntityRef = React.useRef<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
   const forceUpdate = useForceUpdate();
 
@@ -350,7 +350,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
 }
 
 //tasks.push(taskSetAvoidDuplicates);
-//export function taskSetAvoidDuplicates(lineBase: LineBaseController<any>, state: LineBaseProps): React.JSX.Element {
+//export function taskSetAvoidDuplicates(lineBase: LineBaseController<any>, state: LineBaseProps): React.ReactElement {
 //  if (lineBase instanceof EntityStripController &&
 //    (state as EntityStripProps).avoidDuplicates == undefined &&
 //    state.ctx.propertyRoute &&

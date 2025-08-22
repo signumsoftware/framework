@@ -14,7 +14,7 @@ public class JavascriptConversionTest
     public void TestToStringsToJavascript()
     {
         var result = LambdaToJavascriptConverter.ToJavascript((NoteWithDateEntity a) => $"Hi {(a.Title.HasText() ? ":" + a.Title : null)}", assert: false);
-        Assert.Equal("return \"Hi {0}\".formatWith((((e.text??\"\").length>0) ? (\":\" + fd.valToString(e.text)) : \"\"))", result);
+        Assert.Equal("return \"Hi {0}\".formatWith((((e.title??\"\").length>0) ? (\":\" + fd.valToString(e.title)) : \"\"))", result);
 
         result = LambdaToJavascriptConverter.ToJavascript((NoteWithDateEntity a) => new FooModel { Name = null }, assert: false);
         Assert.Equal("return fd.New(\"FooModel\", {\nname: null,\n})", result);

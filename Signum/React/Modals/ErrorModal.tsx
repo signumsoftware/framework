@@ -19,7 +19,7 @@ interface ErrorModalProps extends Modals.IModalProps<undefined> {
 }
 
 const ErrorModal: {
-  (p: ErrorModalProps): React.JSX.Element;
+  (p: ErrorModalProps): React.ReactElement;
   register: () => void;
   showErrorModal: (error: any, beforeOkClicked?: ()=> Promise<void>) => Promise<void>;
 } = function (p: ErrorModalProps) {
@@ -223,7 +223,7 @@ ErrorModal.showErrorModal = (error: any, beforeOkClicked?: ()=> Promise<void>): 
   return Modals.openModal<void>(<ErrorModal error={error} beforeOkClicked={beforeOkClicked} />);
 }
 
-function textDanger(message: string | null | undefined): React.ReactFragment | null | undefined {
+function textDanger(message: string | null | undefined): React.ReactNode {
 
   if (typeof message == "string")
     return message.split("\n").map((s, i) => <p key={i} className="text-danger">{s}</p>);
@@ -231,7 +231,7 @@ function textDanger(message: string | null | undefined): React.ReactFragment | n
   return message;
 }
 
-export function RenderServiceMessageDefault(p: { error: ServiceError }): React.JSX.Element {
+export function RenderServiceMessageDefault(p: { error: ServiceError }): React.ReactElement {
 
   const [showDetails, setShowDetails] = React.useState(false);
 
@@ -253,7 +253,7 @@ export function RenderServiceMessageDefault(p: { error: ServiceError }): React.J
   );
 }
 
-export function RenderExternalServiceMessageDefault(p: { error: ExternalServiceError }): React.JSX.Element {
+export function RenderExternalServiceMessageDefault(p: { error: ExternalServiceError }): React.ReactElement {
 
   const [showDetails, setShowDetails] = React.useState(false);
 
@@ -274,7 +274,7 @@ export function RenderExternalServiceMessageDefault(p: { error: ExternalServiceE
   );
 }
 
-export function RenderValidationMessageDefault(p: { error: ValidationError }): React.JSX.Element {
+export function RenderValidationMessageDefault(p: { error: ValidationError }): React.ReactElement {
   return (
     <div>
       {textDanger(Dic.getValues(p.error.modelState).join("\n"))}
@@ -282,7 +282,7 @@ export function RenderValidationMessageDefault(p: { error: ValidationError }): R
   );
 }
 
-export function RenderMessageDefault(p: { error: any }): React.JSX.Element {
+export function RenderMessageDefault(p: { error: any }): React.ReactElement {
   const e = p.error;
   return (
     <div>

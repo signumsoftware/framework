@@ -15,9 +15,9 @@ export default class DashboardOmniboxProvider extends OmniboxProvider<DashboardO
     return this.coloredIcon("tachometer-alt", "darkslateblue");
   }
 
-  renderItem(result: DashboardOmniboxResult): React.ReactChild[] {
+  renderItem(result: DashboardOmniboxResult): React.ReactNode[] {
 
-    const array: React.ReactChild[] = [];
+    const array: React.ReactNode[] = [];
 
     array.push(this.icon());
 

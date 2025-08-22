@@ -129,7 +129,6 @@ declare global {
     forGenderAndNumber(this: string, number: number): string;
     forGenderAndNumber(this: string, gender: string | undefined): string;
     forGenderAndNumber(this: string, gender: any, number?: number): string;
-    replaceAll(this: string, from: string, to: string): string;
     indent(this: string, numChars: number): string;
     between(this: string, separator: string): string;
     between(this: string, firstSeparator: string, secondSeparator: string): string;
@@ -882,10 +881,6 @@ export function isNumber(n: any): boolean {
 export function softCast<T>(val: T): T {
   return val;
 }
-
-String.prototype.replaceAll = function (this: string, from: string, to: string) {
-  return this.split(from).join(to)
-};
 
 String.prototype.indent = function (this: string, numChars: number) {
   const indent = " ".repeat(numChars);

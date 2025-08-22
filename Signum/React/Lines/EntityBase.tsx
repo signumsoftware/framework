@@ -59,17 +59,17 @@ export type AsLite<T> = NoInfer<
 
 export class EntityBaseController<P extends EntityBaseProps<V>, V extends ModifiableEntity | Lite<Entity> | null> extends LineBaseController<P, V>{
 
-  static getCreateIcon = (): React.JSX.Element => <FontAwesomeIcon icon="plus" title={EntityControlMessage.Create.niceToString()} />;
-  static getFindIcon = (): React.JSX.Element => <FontAwesomeIcon icon="magnifying-glass" title={EntityControlMessage.Find.niceToString()} />;
-  static getRemoveIcon = (): React.JSX.Element => <FontAwesomeIcon icon="xmark" title={EntityControlMessage.Remove.niceToString()} />;
-  static getTrashIcon = (): React.JSX.Element => <FontAwesomeIcon icon="trash-can" title={EntityControlMessage.Remove.niceToString()} />;
-  static getViewIcon = (): React.JSX.Element => <FontAwesomeIcon icon="arrow-right" title={EntityControlMessage.View.niceToString()} />;
-  static getMoveIcon = (): React.JSX.Element => <FontAwesomeIcon icon="bars" />;
-  static getPasteIcon = (): React.JSX.Element => <FontAwesomeIcon icon="clipboard" title={EntityControlMessage.Paste.niceToString()} />;
+  static getCreateIcon = (): React.ReactElement => <FontAwesomeIcon icon="plus" title={EntityControlMessage.Create.niceToString()} />;
+  static getFindIcon = (): React.ReactElement => <FontAwesomeIcon icon="magnifying-glass" title={EntityControlMessage.Find.niceToString()} />;
+  static getRemoveIcon = (): React.ReactElement => <FontAwesomeIcon icon="xmark" title={EntityControlMessage.Remove.niceToString()} />;
+  static getTrashIcon = (): React.ReactElement => <FontAwesomeIcon icon="trash-can" title={EntityControlMessage.Remove.niceToString()} />;
+  static getViewIcon = (): React.ReactElement => <FontAwesomeIcon icon="arrow-right" title={EntityControlMessage.View.niceToString()} />;
+  static getMoveIcon = (): React.ReactElement => <FontAwesomeIcon icon="bars" />;
+  static getPasteIcon = (): React.ReactElement => <FontAwesomeIcon icon="clipboard" title={EntityControlMessage.Paste.niceToString()} />;
 
   static hasChildrens(element: React.ReactElement): any {
      
-    return element.props.children && React.Children.toArray(element.props.children).length;
+    return (element.props as any).children && React.Children.toArray((element.props as any).children).length;
   }
 
   static defaultIsCreable(type: TypeReference, customComponent: boolean): boolean {
@@ -203,7 +203,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     }
   }
 
-  renderViewButton(btn: boolean): React.JSX.Element | undefined {
+  renderViewButton(btn: boolean): React.ReactElement | undefined {
 
     if (!this.props.view)
       return undefined;
@@ -325,7 +325,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       .then(text => this.paste(text));
   }
 
-  renderCreateButton(btn: boolean, createMessage?: string): React.JSX.Element | undefined {
+  renderCreateButton(btn: boolean, createMessage?: string): React.ReactElement | undefined {
     if (!this.props.create || this.props.ctx.readOnly)
       return undefined;
 
@@ -338,7 +338,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     );
   }
 
-  renderPasteButton(btn: boolean): React.JSX.Element | undefined {
+  renderPasteButton(btn: boolean): React.ReactElement | undefined {
     if (!this.props.paste || this.props.ctx.readOnly)
       return undefined;
 
@@ -395,7 +395,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     }
   }
 
-  renderFindButton(btn: boolean): React.JSX.Element | undefined {
+  renderFindButton(btn: boolean): React.ReactElement | undefined {
     if (!this.props.find || this.props.ctx.readOnly)
       return undefined;
 
@@ -421,7 +421,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       });
   };
 
-  renderRemoveButton(btn: boolean): React.JSX.Element | undefined {
+  renderRemoveButton(btn: boolean): React.ReactElement | undefined {
     if (!this.props.remove || this.props.ctx.readOnly)
       return undefined;
 

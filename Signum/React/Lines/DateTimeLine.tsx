@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { DateTime } from 'luxon';
-import { CalendarProps } from 'react-widgets/cjs/Calendar'
-import { DatePicker } from 'react-widgets';
+import { CalendarProps } from 'react-widgets-up/Calendar'
+import { DatePicker } from 'react-widgets-up';
 import { classes } from '../Globals';
 import { toLuxonFormat, toFormatWithFixes, dateTimePlaceholder } from '../Reflection';
-import { LineBaseController, useController } from '../Lines/LineBase';
+import { genericMemo, LineBaseController, useController } from '../Lines/LineBase';
 import { FormGroup } from '../Lines/FormGroup';
 import { FormControlReadonly } from '../Lines/FormControlReadonly';
 import { JavascriptMessage } from '../Signum.Entities';
 import { ValueBaseProps, ValueBaseController } from './ValueBase';
 import { TypeContext } from '../Lines';
 import Exception from '../Exceptions/Exception';
-import { RenderDayProp } from 'react-widgets/cjs/Month';
+import { RenderDayProp } from 'react-widgets-up/Month';
 
 export interface DateTimeLineProps extends ValueBaseProps<string | null> {
   showTimeBox?: boolean;
@@ -20,6 +20,7 @@ export interface DateTimeLineProps extends ValueBaseProps<string | null> {
   calendarProps?: Partial<CalendarProps>;
   calendarAlignEnd?: boolean;
   renderDayAndTitle?: RenderDayAndTitle;
+  ref?: React.Ref<DateTimeLineController>
 }
 
 export class DateTimeLineController extends ValueBaseController<DateTimeLineProps, string | null>{
@@ -29,100 +30,100 @@ export class DateTimeLineController extends ValueBaseController<DateTimeLineProp
   }
 }
 
-export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<DateTimeLineProps & React.RefAttributes<DateTimeLineController>>> =
-  React.memo(React.forwardRef(function DateTimeLine(props: DateTimeLineProps, ref: React.Ref<DateTimeLineController>) {
+export const DateTimeLine: (props: DateTimeLineProps) => React.ReactNode | null =
+  genericMemo(function DateTimeLine(props: DateTimeLineProps) {
 
-    const c = useController(DateTimeLineController, props, ref);
+  const c = useController(DateTimeLineController, props);
 
-    let rdat = DateTimeLineOptions.useRenderDay();
+  let rdat = DateTimeLineOptions.useRenderDay();
 
-    rdat = props.renderDayAndTitle ?? rdat;
+  rdat = props.renderDayAndTitle ?? rdat;
 
-    if (c.isHidden)
-        return null;
+  if (c.isHidden)
+    return null;
 
-    const p = c.props;
-    const type = c.props.type!.name as "DateOnly" | "DateTime";
-    const luxonFormat = toLuxonFormat(p.format, type);
+  const p = c.props;
+  const type = c.props.type!.name as "DateOnly" | "DateTime";
+  const luxonFormat = toLuxonFormat(p.format, type);
 
-    const dt = p.ctx.value ? DateTime.fromISO(p.ctx.value) : undefined;
-    const showTime = p.showTimeBox != null ? p.showTimeBox : type != "DateOnly" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
-    const monthOnly = luxonFormat == "LLLL yyyy";
+  const dt = p.ctx.value ? DateTime.fromISO(p.ctx.value) : undefined;
+  const showTime = p.showTimeBox != null ? p.showTimeBox : type != "DateOnly" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
+  const monthOnly = luxonFormat == "LLLL yyyy";
 
-    const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
-    const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
-    var ht = dt && rdat.getHolidayTitle(dt);
-    var holidayClass =
-      ht?.type == "holiday" ? "sf-holiday" :
+  var ht = dt && rdat.getHolidayTitle(dt);
+  var holidayClass =
+    ht?.type == "holiday" ? "sf-holiday" :
       ht?.type == "weekend" ? "sf-weekend" : undefined;
 
-    if (p.ctx.readOnly)
-      return (
-        <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
-          {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={{
-            title: ht?.text,
-            ...c.props.valueHtmlAttributes,
-          }} className={classes(c.props.valueHtmlAttributes?.className, holidayClass, "sf-readonly-date", c.mandatoryClass)} ctx={p.ctx} innerRef={c.setRefs}>
-            {dt && toFormatWithFixes(dt, luxonFormat)}
-          </FormControlReadonly>)}
-        </FormGroup>
-      );
-
-    const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
-
-        var m = date && DateTime.fromJSDate(date);
-
-        if (m)
-            m = trimDateToFormat(m, type, p.format);
-
-        // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
-        c.setValue(m == null || !m.isValid ? null :
-            type == "DateOnly" ? m.toISODate() :
-                !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss", { locale: 'en-GB' } /*No Z*/) :
-                    m.toISO()!);
-    };
-
-
-
-    const htmlAttributes = {
-      placeholder: c.getPlaceholder(),
-      title: ht?.text,
-      className: holidayClass,
-      ...c.props.valueHtmlAttributes,
-    } as React.AllHTMLAttributes<any>;
-
-    if (htmlAttributes.placeholder === undefined)
-      htmlAttributes.placeholder = dateTimePlaceholder(luxonFormat);
-
-
+  if (p.ctx.readOnly)
     return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{  ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
-        {inputId => c.withItemGroup(
-          <div className={classes(p.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined, p.calendarAlignEnd && "sf-calendar-end")}>
-            <DatePicker
-              id={inputId}
-              value={dt?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(c.props.initiallyFocused)}
-              valueEditFormat={luxonFormat}
-              valueDisplayFormat={luxonFormat}
-              includeTime={showTime}
-              inputProps={htmlAttributes as any}
-              placeholder={htmlAttributes.placeholder}
-              messages={{ dateButton: JavascriptMessage.Date.niceToString() }}
-              min={p.minDate}
-              max={p.maxDate}
-              calendarProps={{
-                renderDay: rdat.renderDay,
-                views: monthOnly ? ["year", "decade", "century"] : undefined,
-                ...p.calendarProps
-              }} />
-          </div>
-        )}
-        </FormGroup>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+        {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={{
+          title: ht?.text,
+          ...c.props.valueHtmlAttributes,
+        }} className={classes(c.props.valueHtmlAttributes?.className, holidayClass, "sf-readonly-date", c.mandatoryClass)} ctx={p.ctx} innerRef={c.setRefs}>
+          {dt && toFormatWithFixes(dt, luxonFormat)}
+        </FormControlReadonly>)}
+      </FormGroup>
     );
-}), (prev, next) => {
-    return LineBaseController.propEquals(prev, next);
-  });
+
+  const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
+
+    var m = date && DateTime.fromJSDate(date);
+
+    if (m)
+      m = trimDateToFormat(m, type, p.format);
+
+    // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
+    c.setValue(m == null || !m.isValid ? null :
+      type == "DateOnly" ? m.toISODate() :
+        !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss", { locale: 'en-GB' } /*No Z*/) :
+          m.toISO()!);
+  };
+
+
+
+  const htmlAttributes = {
+    placeholder: c.getPlaceholder(),
+    title: ht?.text,
+    className: holidayClass,
+    ...c.props.valueHtmlAttributes,
+  } as React.AllHTMLAttributes<any>;
+
+  if (htmlAttributes.placeholder === undefined)
+    htmlAttributes.placeholder = dateTimePlaceholder(luxonFormat);
+
+
+  return (
+    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      {inputId => c.withItemGroup(
+        <div className={classes(p.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined, p.calendarAlignEnd && "sf-calendar-end")}>
+          <DatePicker
+            id={inputId}
+            value={dt?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(c.props.initiallyFocused)}
+            valueEditFormat={luxonFormat}
+            valueDisplayFormat={luxonFormat}
+            includeTime={showTime}
+            inputProps={htmlAttributes as any}
+            placeholder={htmlAttributes.placeholder}
+            messages={{ dateButton: JavascriptMessage.Date.niceToString() }}
+            min={p.minDate}
+            max={p.maxDate}
+            calendarProps={{
+              renderDay: rdat.renderDay,
+              views: monthOnly ? ["year", "decade", "century"] : undefined,
+              ...p.calendarProps
+            }} />
+        </div>
+      )}
+    </FormGroup>
+  );
+}, (prev, next) => {
+  return LineBaseController.propEquals(prev, next);
+});
 
 export interface RenderDayAndTitle {
   renderDay: RenderDayProp,
@@ -145,7 +146,7 @@ export namespace DateTimeLineOptions {
   }
 }
 
-export function defaultRenderDay({ date, label }: { date: Date; label: string }): React.JSX.Element {
+export function defaultRenderDay({ date, label }: { date: Date; label: string }): React.ReactElement {
 
   var dt = DateTime.fromJSDate(date);
 

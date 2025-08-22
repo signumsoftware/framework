@@ -11,7 +11,7 @@ import { MultiValueLine } from '../Lines/MultiValueLine';
 import { Operations } from '../Operations';
 import { useForceUpdate } from '../Hooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { DropdownList } from 'react-widgets'
+import { DropdownList } from 'react-widgets-up'
 import { QueryTokenMessage } from '../Signum.DynamicQuery.Tokens'
 import { Finder } from '../Finder'
 import { openModal, IModalProps } from '../Modals'
@@ -34,7 +34,7 @@ interface MultiPropertySetterModalProps extends IModalProps<boolean | undefined>
   mandatory: boolean;
 }
 
-export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): React.JSX.Element {
+export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
   const answerRef = React.useRef<boolean | undefined>(undefined);
@@ -95,7 +95,7 @@ export namespace MultiPropertySetterModal {
   };
 }
 
-export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { root: PropertyRoute, setters: Operations.API.PropertySetter[], isPredicate: boolean, onChange: () => void }): React.JSX.Element {
+export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { root: PropertyRoute, setters: Operations.API.PropertySetter[], isPredicate: boolean, onChange: () => void }): React.ReactElement {
 
   function handleNewPropertySetter(e: React.MouseEvent) {
     e.preventDefault();
@@ -188,7 +188,7 @@ export interface PropertySetterComponentProps {
 }
 
 
-export function PropertySetterComponent(p: PropertySetterComponentProps): React.JSX.Element {
+export function PropertySetterComponent(p: PropertySetterComponentProps): React.ReactElement {
 
   const forceUpdate = useForceUpdate();
 
@@ -382,7 +382,7 @@ interface PropertySelectorProps {
   onPropertyChanged: (newProperty: PropertyRoute | undefined) => void;
 }
 
-export default function PropertySelector(p: PropertySelectorProps): React.JSX.Element {
+export default function PropertySelector(p: PropertySelectorProps): React.ReactElement {
   var lastTokenChanged = React.useRef<string | undefined>(undefined);
 
   var rootList = p.root.allParents();
@@ -412,7 +412,7 @@ interface PropertyPartProps {
   defaultOpen: boolean;
 }
 
-export function PropertyPart(p: PropertyPartProps): React.JSX.Element | null {
+export function PropertyPart(p: PropertyPartProps): React.ReactElement | null {
 
   if (p.parentRoute.propertyRouteType != "Mixin") {
     var tr = p.parentRoute.typeReference();
@@ -458,7 +458,7 @@ export function PropertyPart(p: PropertyPartProps): React.JSX.Element | null {
   }
 }
 
-export function PropertyItem(p: { item: MemberInfo | null }): React.JSX.Element | null {
+export function PropertyItem(p: { item: MemberInfo | null }): React.ReactElement | null {
 
   const item = p.item;
 
@@ -474,7 +474,7 @@ export function PropertyItem(p: { item: MemberInfo | null }): React.JSX.Element 
   );
 }
 
-export function PropertyItemOptional(p: { item: MemberInfo | null }): React.JSX.Element {
+export function PropertyItemOptional(p: { item: MemberInfo | null }): React.ReactElement {
 
   const item = p.item;
 
