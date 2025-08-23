@@ -16,10 +16,9 @@ public class ChatbotLanguageModelEntity : Entity
     [StringLengthValidator(Max = 50)]
     public string Model { get; set; }
 
-    [StringLengthValidator(Max = 24)]
-    public string? Version { get; set; }
+    public double? Temperature { get; set; }
 
-    public double Temperature { get; set; }
+    public int? MaxTokens { get; set; }
 
     public bool IsDefault { get; set; }
 }
@@ -63,7 +62,7 @@ public class ChatbotConfigurationEmbedded : EmbeddedEntity
     public string? OpenAIAPIKey { get; set; }
 
 
-    [StringLengthValidator(Max = 100), Format(FormatAttribute.Password)]
+    [StringLengthValidator(Max = 300), Format(FormatAttribute.Password)]
     public string? ClaudeAPIKey { get; set; }
 
     [StringLengthValidator(Max = 100), Format(FormatAttribute.Password)]

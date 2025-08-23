@@ -15,7 +15,23 @@ namespace Signum.Chatbot;
 
 public class ChatbotController : Controller
 {
-    [HttpPost("api/askQuestionAsync")]
+    [HttpGet("api/chatbot/models/{providerKey}")]
+    public string[] GetMessagesBySessionId(string providerKey)
+    {
+        var messages = ChatbotLogic.GetModelNames(SymbolLogic<ChatbotProviderSymbol>.ToSymbol(providerKey));
+
+        return messages;
+    }
+
+    [HttpGet("api/chatbot/messages/{sessionID}")]
+    public List<ChatMessageEntity> GetMessagesBySessionId(int sessionID)
+    {
+        var messages = Database.Query<ChatMessageEntity>().Where(m => m.ChatSession.Id == sessionID).OrderBy(cm => cm.CreationDate).ToList();
+
+        return messages;
+    }
+
+    [HttpPost("api/chatbot/ask")]
     public  async Task AskQuestionAsync(CancellationToken ct)
     {
         var resp = this.HttpContext.Response;
@@ -132,7 +148,7 @@ public class ChatbotController : Controller
     }
 
 
-    private string UINotification(string commandName, string? payload = null)
+    string UINotification(string commandName, string? payload = null)
     {
         if (payload == null)
             return "$!" + commandName + "\n";
@@ -143,7 +159,7 @@ public class ChatbotController : Controller
         return "$!" + commandName + ":" + payload + "\n";
     }
 
-    private ChatSessionEntity GetOrCreateSession(string? sessionID)
+    ChatSessionEntity GetOrCreateSession(string? sessionID)
     {
         return sessionID.HasText() == false || sessionID == "undefined" ? new ChatSessionEntity
         {
@@ -154,7 +170,7 @@ public class ChatbotController : Controller
         }.Save() : Database.Query<ChatSessionEntity>().SingleEx(a => a.Id == PrimaryKey.Parse(sessionID, typeof(ChatSessionEntity)));
     }
 
-    private ConversationHistory CreateNewConversationHistory(ChatSessionEntity session)
+    ConversationHistory CreateNewConversationHistory(ChatSessionEntity session)
     {
         var history = new ConversationHistory
         {
@@ -175,7 +191,7 @@ public class ChatbotController : Controller
     }
 
 
-    private ChatMessageEntity NewChatMessage(Lite<ChatSessionEntity> session, string message, ChatMessageRole role, bool isCommand = false)
+    ChatMessageEntity NewChatMessage(Lite<ChatSessionEntity> session, string message, ChatMessageRole role, bool isCommand = false)
     {
         var command = new ChatMessageEntity()
         {
@@ -189,34 +205,5 @@ public class ChatbotController : Controller
     }
 
 
-    [HttpGet("api/session/{id}")]
-    public Lite<ChatSessionEntity>? GetChatSessionById(int id)
-    {
-       return Database.Query<ChatSessionEntity>().Where(c => c.Id == id).Select( s => s.ToLite()).FirstOrDefault();
-    }
 
-
-    [HttpGet("api/messages/session/{id}")]
-    public List<ChatMessageEntity> GetMessagesBySessionId(int id)
-    {
-        var messages = Database.Query<ChatMessageEntity>().Where(m => m.ChatSession.Id == id).OrderBy(cm => cm.CreationDate).ToList();
-
-        return messages;
-    }
-
-    [HttpGet("api/userSessions")]
-    public List<ChatSessionEntity>? GetUserSessions(int id)
-    {
-        var session = Database.Query<ChatSessionEntity>().Where(m => m.User.Is(UserEntity.Current)).OrderByDescending(s => s.StartDate).ToList();
-
-        return session;
-    }
-
-    [HttpGet("api/lastSession")]
-    public ChatSessionEntity? GetLastSession(int id)
-    {
-        var session = Database.Query<ChatSessionEntity>().Where(m => m.User.Is(UserEntity.Current)).OrderByDescending( s => s.StartDate).FirstOrDefault();
-
-        return session;
-    }
 }

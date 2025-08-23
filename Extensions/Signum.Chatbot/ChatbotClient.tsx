@@ -2,7 +2,7 @@ import * as React  from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet, ajaxPostRaw, wrapRequest, AjaxOptions } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, ChatbotMessage } from './Signum.Chatbot'
+import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, ChatbotMessage, ChatbotProviderSymbol } from './Signum.Chatbot'
 import { ChatbotAgentEntity, ChatbotAgentDescriptionsEmbedded } from './Signum.Chatbot.Agents';
 import { toAbsoluteUrl } from '../../Signum/React/AppContext';
 import { Lite, MList, registerToString } from '../../Signum/React/Signum.Entities';
@@ -24,9 +24,9 @@ export namespace ChatbotClient {
 
   export namespace API {
 
-    export function askQuestionAsync(question: string, sessionId?: string | number, signal?: AbortSignal): Promise<Response> {
+    export function ask(question: string, sessionId?: string | number, signal?: AbortSignal): Promise<Response> {
 
-      const options: AjaxOptions = { url: "/api/askQuestionAsync", };
+      const options: AjaxOptions = { url: "/api/chatbot/ask", };
 
       return wrapRequest(options, () => {
 
@@ -48,16 +48,13 @@ export namespace ChatbotClient {
       });
     }
 
-    export function getChatSessionById(id: string | number | undefined): Promise<Lite<ChatSessionEntity>> {
-      return ajaxGet<Lite<ChatSessionEntity>>({ url: "/api/session/" + id });
+
+    export function getModels(provider: ChatbotProviderSymbol): Promise<Array<string>> {
+      return ajaxGet({ url: "/api/chatbot/models/" + provider.key });
     }
 
-    export function getUserSessions(): Promise<Array<ChatSessionEntity>> {
-      return ajaxGet<Array<ChatSessionEntity>>({ url: "/api/userSessions"});
-    }
-
-    export function getMessagesBySessionId(id: string | number | undefined): Promise<Array<ChatMessageEntity>> {
-      return ajaxGet<Array<ChatMessageEntity>>({ url: "/api/messages/session/" + id });
+    export function getMessagesBySessionId(sessionId: string | number | undefined): Promise<Array<ChatMessageEntity>> {
+      return ajaxGet({ url: "/api/chatbot/messages/" + sessionId });
     }
   }
 }

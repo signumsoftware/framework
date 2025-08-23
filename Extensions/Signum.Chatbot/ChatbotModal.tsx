@@ -62,9 +62,9 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
     isLoadingRef.current = true;
     forceUpdate();
 
-    const r = await ChatbotClient.API.askQuestionAsync(questionRef.current, currentSessionRef?.current?.id, undefined).catch(error => { });
+    const r = await ChatbotClient.API.ask(questionRef.current, currentSessionRef?.current?.id, undefined).catch(error => { });
 
-    const reader = r?.body?.getReader();
+    const reader = r!.body!.getReader();
 
     try {
 

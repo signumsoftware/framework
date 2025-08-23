@@ -22,8 +22,8 @@ export interface ChatbotLanguageModelEntity extends Entities.Entity {
   Type: "ChatbotLanguageModel";
   provider: ChatbotProviderSymbol;
   model: string;
-  version: string | null;
-  temperature: number;
+  temperature: number | null;
+  maxTokens: number | null;
   isDefault: boolean;
 }
 

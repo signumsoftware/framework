@@ -1,19 +1,6 @@
-using Microsoft.AspNetCore.Http;
-using Signum.Authorization.Rules;
-using Signum.Basics;
 using Signum.Chatbot.Agents;
-using Signum.Chatbot.OpenAI;
-using Signum.CodeGeneration;
-using Signum.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Entities;
-using Signum.Operations;
-using Signum.Utilities;
-using System.Collections.Generic;
-using System.Reflection;
+using Signum.Chatbot.Providers;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
-
 
 namespace Signum.Chatbot;
 
@@ -31,7 +18,10 @@ public static class ChatbotLogic
 
     public static Dictionary<ChatbotProviderSymbol, IChatbotProvider> Providers = new Dictionary<ChatbotProviderSymbol, IChatbotProvider>
     {
-        { ChatbotProviders.Mistral, new MistralChatbotProvider()}
+        { ChatbotProviders.OpenAI, new OpenAIChatbotProvider()},
+        //{ ChatbotProviders.Gemini, new AnthropicChatbotProvider()},
+        { ChatbotProviders.Anthropic, new AnthropicChatbotProvider()},
+        { ChatbotProviders.Mistral, new MistralChatbotProvider()},
     };
 
     public static Func<ChatbotConfigurationEmbedded> GetConfig;
@@ -59,7 +49,8 @@ public static class ChatbotLogic
                     e.Id,
                     e.Provider,
                     e.Model,
-                    e.Version,
+                    e.Temperature,
+                    e.MaxTokens,
                 });
 
             LanguageModels = sb.GlobalLazy(() => Database.Query<ChatbotLanguageModelEntity>().ToDictionary(a => a.ToLite()), new InvalidateWith(typeof(ChatbotLanguageModelEntity)));
@@ -124,12 +115,12 @@ public static class ChatbotLogic
 
     public static  IAsyncEnumerable<string> AskQuestionAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model,  CancellationToken ct)
     {
-        return  Providers.GetOrThrow(model.Provider).AskQuestionAsync(messages, model, ct);
+        return  Providers.GetOrThrow(model.Provider).AskStreaming(messages, model, ct);
     }
 
     public static Task<string?> GetAgent(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
     {
-        return Providers.GetOrThrow(model.Provider).GetAgentAsync(messages, model, ct);
+        return Providers.GetOrThrow(model.Provider).AskAsync(messages, model, ct);
     }
 
 }
@@ -141,9 +132,19 @@ public interface IChatbotProvider
 
     string[] GetModelVersions(string name);
 
-    IAsyncEnumerable<string> AskQuestionAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model,  CancellationToken ct);
+    IAsyncEnumerable<string> AskStreaming(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct);
 
-    Task<string?> GetAgentAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct);
+    async Task<string?> AskAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
+    {
+        var sb = new StringBuilder();
+
+        await foreach (var item in AskStreaming(messages, model, ct))
+        {
+            sb.Append(item);
+        }
+
+        return sb.ToString();
+    }
 }
 
 
@@ -167,5 +168,4 @@ public class ChatMessage
 {
     public ChatMessageRole Role;
     public string Content; 
-    double? temperature;
 }
