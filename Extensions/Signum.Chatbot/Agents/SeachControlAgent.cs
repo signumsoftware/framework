@@ -6,20 +6,13 @@ internal static class SeachControlAgent
     {
         ChatbotAgentLogic.RegisterAgent(DefaultAgent.SearchControl, new ChatbotAgentCode
         {
-            IsListed = () => true,
+            IsListedInIntroduction = () => true,
             CreateDefaultEntity = () => new ChatbotAgentEntity
             {
                 ShortDescription = "Helps searching any database table (not working)",
-                Descriptions = new MList<ChatbotAgentDescriptionsEmbedded>
-                {
-                    new ChatbotAgentDescriptionsEmbedded
-                    {
-                        Content = """
+                LongDescription = """
                          Use the SearchControl of Signum Framework to help
                          """,
-                        PromptName = "Default",
-                    },
-                },
             },
             MessageReplacements =
             {

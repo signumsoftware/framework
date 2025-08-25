@@ -117,7 +117,7 @@ public static class ChatbotLogic
 
     public static async Task<string> SumarizeTitle(ConversationHistory history, CancellationToken ct)
     {
-        var prompt = ChatbotAgentLogic.GetAgent(DefaultAgent.QuestionSumarizer).GetDescribe(null, history);
+        var prompt = ChatbotAgentLogic.GetAgent(DefaultAgent.QuestionSumarizer).LongDescriptionWithReplacements(history);
         StringBuilder sb = new StringBuilder();
         await foreach (var item in AskStreaming([new ChatMessage { Role = ChatMessageRole.System, Content = prompt }], history.LanguageModel, ct))
         {

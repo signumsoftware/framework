@@ -3,14 +3,17 @@ using System.ComponentModel;
 namespace Signum.Chatbot;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class ChatbotAgentEntity : Entity
+public class ChatbotAgentEntity: Entity
 {
     public ChatbotAgentCodeSymbol Code { get; set; }
 
     [StringLengthValidator(Max = 100)]
     public string ShortDescription { get; set; }
 
-    public MList<ChatbotAgentDescriptionsEmbedded> Descriptions { get; set; }
+    public string LongDescription { get; set; }
+
+    [PreserveOrder, NoRepeatValidator]
+    public MList<ChatbotAgentCodeSymbol> RelatedAgents { get; set; } = new MList<ChatbotAgentCodeSymbol>();
 
     protected override bool IsPropertyReadonly(PropertyInfo pi)
     {
@@ -31,41 +34,6 @@ public static class ChatbotAgentOperation
     public static readonly ExecuteSymbol<ChatbotAgentEntity> Save;
     public static readonly DeleteSymbol<ChatbotAgentEntity> Delete;
 }
-
-
-[EntityKind(EntityKind.Main, EntityData.Transactional)]
-public class ChatbotAgentDescriptionsEmbedded : EmbeddedEntity
-{
-    public string? PromptName { get; set; }
-
-    [StringLengthValidator(MultiLine = true)]
-    public string Content { get; set; }
-
-
-    [AutoExpressionField]
-    public override string ToString() => As.Expression(() => PromptName ?? ChatbotAgentMessage.Default.NiceToString());
-
-    protected override void PreSaving(PreSavingContext ctx)
-    {
-        if (PromptName.IsNullOrEmpty())
-            PromptName = null;
-
-        base.PreSaving(ctx);
-    }
-}
-
-
-public enum ConfigChatbotType
-{
-    GeneralConfig,
-    Title,
-}
-public enum ChatbotAgentMessage
-{
-    [Description("[Default]")]
-    Default, 
-}
-
 
 [EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
 public class ChatbotAgentCodeSymbol : Symbol

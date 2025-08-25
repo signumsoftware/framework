@@ -96,7 +96,7 @@ public class ChatbotController : Controller
                     if (item.StartsWith("$"))
                     {
                         isCommand = true;
-                        await resp.WriteAsync(UINotification("AssistantToolCall"), ct);
+                        await resp.WriteAsync(UINotification("AssistantTool"), ct);
                     }
                     else
                     {
@@ -189,7 +189,7 @@ public class ChatbotController : Controller
                 {
                     Role = ChatMessageRole.System,
                     ChatSession = session.ToLite(),
-                    Message = ChatbotAgentLogic.GetAgent(DefaultAgent.Introduction).GetDescribe(null),
+                    Message = ChatbotAgentLogic.GetAgent(DefaultAgent.Introduction).LongDescriptionWithReplacements(null),
                 }.Save()
             }
         };

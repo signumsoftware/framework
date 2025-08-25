@@ -40,16 +40,24 @@ public class ChatMessageEntity : Entity
     public bool IsToolCall { get; set; }
 
     [StringLengthValidator(MultiLine = true)]
-    public string Message { get; set; }
+    public string? Message { get; set; }
+
+    [StringLengthValidator(MultiLine = true)]
+    public string? ToolDescriptions { get; set; }
 
     [StringLengthValidator(MultiLine = true)]
     public string? ToolID { get; set; }
-
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         if (pi.Name == nameof(IsToolCall) && IsToolCall && Role != ChatMessageRole.Assistant)
             return ValidationMessage._0ShouldBe1.NiceToString(pi.NiceName(), false);
+
+        if(pi.Name == nameof(ToolID) && ToolID != null && Role != ChatMessageRole.Tool)
+            return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
+
+        if (pi.Name == nameof(ToolDescriptions) && ToolID != null && (Role != ChatMessageRole.System || Role != ChatMessageRole.Tool))
+            return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
 
         return base.PropertyValidation(pi);
     }

@@ -5,6 +5,7 @@ using Signum.Engine.Sync;
 using Signum.Utilities;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace Signum.Chatbot;
@@ -24,7 +25,6 @@ public static class ChatbotAgentLogic
             sb.Include<ChatbotAgentEntity>()
                 .WithSave(ChatbotAgentOperation.Save)
                 .WithDelete(ChatbotAgentOperation.Delete)
-                .WithUniqueIndexMList(a => a.Descriptions, mle => new { mle.Parent, mle.Element.PromptName })
                 .WithQuery(() => e => new
                 {
                     Entity = e,
@@ -32,6 +32,7 @@ public static class ChatbotAgentLogic
                     e.Code,
                     e.ShortDescription,
                 });
+
 
             SymbolLogic<ChatbotAgentCodeSymbol>.Start(sb, () => AgentCodes.Keys);
 
@@ -42,11 +43,7 @@ public static class ChatbotAgentLogic
 
             sb.Schema.EntityEvents<ChatbotAgentCodeSymbol>().PreDeleteSqlSync += symbol =>
             {
-                var parts = Administrator.UnsafeDeletePreCommandMList((cp) => cp.Descriptions, 
-                    Database.MListQuery((ChatbotAgentEntity cp) => cp.Descriptions).Where(mle => mle.Parent.Code.Is(symbol)));
-                var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<ChatbotAgentEntity>().Where(uqp => uqp.Code.Is(symbol)));
-
-                return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
+                return Administrator.UnsafeDeletePreCommand(Database.Query<ChatbotAgentEntity>().Where(uqp => uqp.Code.Is(symbol)));
             };
 
             IntroductionAgent.Register();
@@ -63,18 +60,6 @@ public static class ChatbotAgentLogic
         var entity = AgentEntities.Value.GetOrThrow(symbol);
         return new ChatbotAgent(symbol, code, entity);
     }
-
-
-
-    public static List<ChatbotAgent> GetListedAgents()
-    {
-        CreateAgentEntitiesIfNecessary();
-
-        return AgentCodes.Where(kvp => kvp.Value.IsListed())
-        .Select(kvp => new ChatbotAgent(kvp.Key, kvp.Value, AgentEntities.Value.GetOrThrow(kvp.Key)))
-        .ToList();
-    }
-
 
     static object lockKey = new object();
     private static void CreateAgentEntitiesIfNecessary()
@@ -103,16 +88,7 @@ public static class ChatbotAgentLogic
     }
 
 
-    public static (string commandName, CommandArguments args) ParseCommand(string answer)
-    {
-        string commandName = answer.After("$").Before("(");
-        var args = new CommandArguments(answer.After("(").BeforeLast(")"));
-
-        return (commandName, args);
-    }
-
-
-    public async static Task<string> EvaluateTool(string commandName, CommandArguments args, CancellationToken token)
+    public async static Task<string> EvaluateTool(string commandName, JsonDocument args, CancellationToken token)
     {   
         try
         {
@@ -134,10 +110,9 @@ public static class ChatbotAgentLogic
         }
     }
 
-    public static Task<string> GetDescribe(CommandArguments args)
+    public static Task<string> GetDescribe(JsonDocument args)
     {
-        var agentName = args.GetArgument<string>(0);
-        var promptName = args.TryArgumentC<string>(1);
+        var agentName = args.RootElement.gets<string>(0);
 
         var key = AgentCodes.Keys.FirstOrDefault(a =>
         string.Equals(a.Key, agentName, StringComparison.OrdinalIgnoreCase) ||
@@ -146,7 +121,7 @@ public static class ChatbotAgentLogic
         if (key == null)
             throw new InvalidOperationException($"No Agent '{agentName}' found");
 
-        var result = GetAgent(key).GetDescribe(promptName);
+        var result = GetAgent(key).LongDescriptionWithReplacements(promptName);
 
         return Task.FromResult(result);
     }
@@ -156,7 +131,7 @@ public static class ChatbotAgentLogic
 public class ChatbotAgentCode
 {
     public Func<ChatbotAgentEntity> CreateDefaultEntity;
-    public Func<bool> IsListed;
+    public Func<bool> IsListedInIntroduction;
     public Dictionary<string, Func<object?, string>> MessageReplacements = new Dictionary<string, Func<object?, string>>();
     public List<IChatbotAgentTool> Tools = new List<IChatbotAgentTool>();
 }
@@ -168,7 +143,7 @@ public interface IChatbotAgentTool
 
     object DescribeTool();
 
-    Task<object> DoExecuteAsync();
+    Task<string> DoExecuteAsync(JsonDocument arguments, CancellationToken token);
 }
 
 public interface IToolPayload { } //To prevent simple types
@@ -196,9 +171,11 @@ public class ChatbotAgentTool<Request, Response> : IChatbotAgentTool
         parameters = JSonSchema.For(typeof(Request)),
     };
 
-    Task<object> IChatbotAgentTool.DoExecuteAsync()
+
+    Task<string> IChatbotAgentTool.DoExecuteAsync(JsonDocument arguments, CancellationToken token)
     {
-        throw new NotImplementedException();
+        throw new InvalidOperationException();
+        //return DoExecuteAsync(arguments, token);
     }
 }
 
@@ -280,18 +257,9 @@ public class ChatbotAgent
 
     static Regex ReplacementRegex = new Regex(@"\$<(?<replacement>\w+)>");
 
-    public string GetDescribe(string? name, object? context = null)
+    public string LongDescriptionWithReplacements(object? context = null)
     {
-        if (name.IsNullOrEmpty())
-            name = "Default";
-
-        var prompt = Entity.Descriptions.SingleOrDefault(a => a.PromptName.DefaultToNull() == name.DefaultToNull());
-
-        if (prompt == null)
-            throw new InvalidOperationException($"No prompt with name '{0}'. Did you mean {Entity.Descriptions.CommaOr(a => a.PromptName)}");
-
-
-        return ReplacementRegex.Replace(prompt.Content, a => Code.MessageReplacements.GetOrThrow(a.Groups["replacement"].Value)(context));
+        return ReplacementRegex.Replace(Entity.LongDescription, a => Code.MessageReplacements.GetOrThrow(a.Groups["replacement"].Value)(context));
     }
 
     internal AgentInfo ToInfo() => new AgentInfo
@@ -303,31 +271,4 @@ public class ChatbotAgent
 public class AgentInfo
 {
     public string[] tools;
-}
-
-public class CommandArguments
-{
-    public string RawText;
-    public JsonElement JsonArray; 
-
-    public CommandArguments(string rawText)
-    {
-        RawText = rawText;
-        JsonArray = JsonDocument.Parse("[" + rawText + "]").RootElement;
-    }
-
-    public T GetArgument<T>(int index)
-    {
-        return JsonArray[index].ToObject<T>();
-    }
-
-    public T? TryArgumentC<T>(int index)
-        where T : class
-    {
-        if (index >= JsonArray.GetArrayLength())
-            return null;
-
-        return JsonArray[index].ToObject<T>();
-    }
-
 }
