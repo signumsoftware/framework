@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace Signum.Utilities;
 
@@ -16,7 +15,7 @@ public class ViteAssets
         return new ViteAssets { MainJs = mainJsUrl };
     }
 
-    public static ViteAssets FromManifestFile(string manifestFilePath, string mainEntry = "main.tsx")
+    public static ViteAssets FromManifestFile(string manifestFilePath, string mainEntry)
     {
         var content = System.IO.File.ReadAllText(manifestFilePath);
         var manifest = JsonDocument.Parse(content);
@@ -108,7 +107,7 @@ public class ViteAssets
         sb.AppendLine($$"""
             var script = document.createElement('script');
             script.type = 'module';
-            script.src = {{JsonSerializer.Serialize(MainJs)}};
+            script.src = {{JsonSerializer.Serialize(urlHelper.Content(MainJs))}};
             script.onerror = e => showError(new URIError(`The script ${e.target.src} didn't load correctly.`));
 
             document.head.appendChild(script);
@@ -116,5 +115,19 @@ public class ViteAssets
 
 
         return new HtmlString(sb.ToString());
+    }
+
+    public static HtmlString LoadViteReactRefresh(int vitePort)
+    {
+        return new HtmlString($$"""
+            <script type="module" src="http://localhost:{{vitePort}}/dist/@vite/client"></script>
+            <script type="module">
+            	import RefreshRuntime from 'http://localhost:{{vitePort}}/dist/@react-refresh'
+            	RefreshRuntime.injectIntoGlobalHook(window)
+            	window.$RefreshReg$ = () => {}
+            	window.$RefreshSig$ = () => (type) => type
+            	window.__vite_plugin_react_preamble_installed__ = true
+            </script>
+            """);
     }
 }
