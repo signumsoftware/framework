@@ -216,4 +216,19 @@ public static class FilePathEmbeddedLogic
             fpe.FileType.GetAlgorithm().DeleteFiles(new List<IFilePath> { fpe });
         };
     }
+
+    public static void TryDeleteFileOnCommit(this FilePathEmbedded fpe, Action<Exception> onError)
+    {
+        Transaction.PostRealCommit += dic =>
+        {
+            try
+            {
+                fpe.FileType.GetAlgorithm().DeleteFiles(new List<IFilePath> { fpe });
+            }
+            catch (Exception e)
+            {
+                onError(e);
+            }
+        };
+    }
 }
