@@ -1,45 +1,34 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Web;
-using System.Xml.Linq;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
-using static System.Net.Mime.MediaTypeNames;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Signum.Utilities;
-public class WebPackAssets
+
+public class ViteAssets
 {
     public string MainJs { get; set; } = string.Empty;
     public HashSet<string> PreloadJs { get; set; } = new();
     public HashSet<string> Css { get; set; } = new();
 
-    public static WebPackAssets FromViteServerUrl(string mainJsUrl)
+    public static ViteAssets FromViteServerUrl(string mainJsUrl)
     {
-        return new WebPackAssets { MainJs = mainJsUrl };
+        return new ViteAssets { MainJs = mainJsUrl };
     }
 
-    public static WebPackAssets FromManifestFile(JsonDocument manifest, string entryFile = "main.tsx")
+    public static ViteAssets FromManifestFile(string manifestFilePath, string mainEntry = "main.tsx")
     {
-        var assets = new WebPackAssets();
+        var content = System.IO.File.ReadAllText(manifestFilePath);
+        var manifest = JsonDocument.Parse(content);
 
+        if (!manifest.RootElement.TryGetProperty(mainEntry, out var entry))
+            throw new InvalidOperationException($"Entry {mainEntry} not found in manifest.");
 
-
-        if (!manifest.RootElement.TryGetProperty(entryFile, out var entry))
-            throw new InvalidOperationException($"Entry {entryFile} not found in manifest.");
-
-        // main.js
-        if (entry.TryGetProperty("file", out var file))
+        var assets = new ViteAssets
         {
-            assets.MainJs = "~/dist/" + file.GetString();
-        }
+            MainJs = "~/dist/" + entry.GetProperty("file").GetString()
+        };
 
-        // collect css + imports recursively
         assets.CollectAssets(entry, manifest);
 
         return assets;

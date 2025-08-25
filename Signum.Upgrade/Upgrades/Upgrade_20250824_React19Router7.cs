@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Signum.Upgrade.Upgrades;
 
-class Upgrade_20250724_React19Router7 : CodeUpgradeBase
+class Upgrade_20250824_React19Router7 : CodeUpgradeBase
 {
     public override string Description => "Webpack to Vite, React 19.1 and React Router 7.7";
 
@@ -230,6 +230,8 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
             file.UpdateNugetReference("xunit.v3", "3.0.0");
             file.UpdateNugetReference("xunit.runner.visualstudio", "3.1.3");
             file.UpdateNugetReference("Selenium.WebDriver.ChromeDriver", "139.0.7258.6600");
+            file.UpdateNugetReference("SixLabors.ImageSharp", "2.1.11")
+
         });
 
         uctx.ChangeCodeFile(@"package.json", file =>
