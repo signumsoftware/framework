@@ -248,7 +248,7 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
 
         SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Remember to:");
         SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, "Yarn install");
-        SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, "Delete bin, obj and ts_out inf Framework and your projects");
+        SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, "Delete bin, obj and ts_out in Framework and your projects");
         SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, "Compile again");
     }
 }

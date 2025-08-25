@@ -213,7 +213,7 @@ public static class DashboardLogic
                         var cq = db.CacheQueryConfiguration!;
 
                         var oldCachedQueries = db.CachedQueries().ToList();
-                        oldCachedQueries.ForEach(a => a.File.DeleteFileOnCommit());
+                        oldCachedQueries.ForEach(a => a.File.TryDeleteFileOnCommit(e => { }));
                         db.CachedQueries().UnsafeDelete();
 
                         var definitions = DashboardLogic.GetCachedQueryDefinitions(db).ToList();
