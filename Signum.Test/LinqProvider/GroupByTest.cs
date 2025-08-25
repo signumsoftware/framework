@@ -164,6 +164,17 @@ public class GroupByTest
     //    var list = Database.Query<AlbumEntity>().GroupBy(a => a.GetType()).ToList();
     //}
 
+    [Fact]
+    public void GroupByEntityInOptionalEmbedded()
+    {
+        var list = Database.Query<ConfigEntity>()
+            .GroupBy(a => new { DefaultLabel = a.EmbeddedConfig == null ? null : a.EmbeddedConfig!.DefaultLabel!.Entity.Country })
+            .Select(gr => new
+            {
+                gr.Key,
+                Count = gr.Count()
+            }).ToList();
+    }
 
     [Fact]
     public void GroupEntityByTypeIb()

@@ -7,12 +7,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './VersionChangedAlert.css'
 import { useForceUpdate } from '../Hooks';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { Placement } from 'popper.js';
 
 export const VersionChangedAlert: {
-  (p: { blink?: boolean }): React.JSX.Element | null;
+  (p: { blink?: boolean }): React.ReactElement | null;
   forceUpdateSingletone: (() => void) | undefined;
-} = function VersionChangedAlert(p: { blink?: boolean }): React.JSX.Element | null {
+} = function VersionChangedAlert(p: { blink?: boolean }): React.ReactElement | null {
 
   var forceUpdate = useForceUpdate();
 
@@ -40,7 +39,7 @@ export const VersionChangedAlert: {
 
 VersionChangedAlert.forceUpdateSingletone = undefined as (() => void) | undefined;
 
-export function VersionInfo(p: { extraInformation?: string }): React.JSX.Element {
+export function VersionInfo(p: { extraInformation?: string }): React.ReactElement {
   return (
     <div className="nav-link">
       <OverlayTrigger
@@ -59,7 +58,7 @@ export function VersionInfo(p: { extraInformation?: string }): React.JSX.Element
   );
 }
 
-export function VersionInfoTooltip(p: { extraInformation?: string}): React.JSX.Element {
+export function VersionInfoTooltip(p: { extraInformation?: string}): React.ReactElement {
 
   var bt = DateTime.fromISO(VersionFilter.initialBuildTime!);
 

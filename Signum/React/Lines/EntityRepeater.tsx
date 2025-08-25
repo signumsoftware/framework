@@ -2,12 +2,12 @@ import * as React from 'react'
 import { classes } from '../Globals'
 import { Navigator, ViewPromise } from '../Navigator'
 import { TypeContext } from '../TypeContext'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, MList } from '../Signum.Entities'
 import { AsEntity, EntityBaseController } from './EntityBase'
 import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
-import { genericForwardRef, useController } from './LineBase'
+import { useController } from './LineBase'
 import { TypeBadge } from './AutoCompleteConfig'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
@@ -19,6 +19,7 @@ export interface EntityRepeaterProps<V extends ModifiableEntity | Lite<Entity>> 
   getTitle?: (ctx: TypeContext<V>) => React.ReactElement | string;
   itemExtraButtons?: (er: EntityRepeaterController<V>, index: number) => React.ReactElement;
   elementHtmlAttributes?: (ctx: TypeContext<NoInfer<V>>) => React.HTMLAttributes<any> | null | undefined;
+  ref?: React.Ref<EntityRepeaterController<V>>
 }
 
 export class EntityRepeaterController<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseController<EntityRepeaterProps<V>, V> {
@@ -31,8 +32,8 @@ export class EntityRepeaterController<V extends ModifiableEntity | Lite<Entity>>
 }
 
 
-export const EntityRepeater: <V extends ModifiableEntity | Lite<Entity>>(props: EntityRepeaterProps<V> & React.RefAttributes<EntityRepeaterController<V>>) => React.ReactNode | null = genericForwardRef(function EntityRepeater<V extends ModifiableEntity | Lite<Entity>>(props: EntityRepeaterProps<V>, ref: React.Ref<EntityRepeaterController<V>>) {
-  var c = useController(EntityRepeaterController, props, ref);
+export function EntityRepeater<V extends ModifiableEntity | Lite<Entity>>(props: EntityRepeaterProps<V>): React.JSX.Element | null {
+  var c = useController<EntityRepeaterController<V>, EntityRepeaterProps<V>, MList<V>>(EntityRepeaterController, props);
   var p = c.props;
 
   if (c.isHidden)
@@ -94,7 +95,7 @@ export const EntityRepeater: <V extends ModifiableEntity | Lite<Entity>>(props: 
       </div>
     );
   }
-});
+}
 
 
 export interface EntityRepeaterElementProps<V extends ModifiableEntity | Lite<Entity>> {
@@ -109,8 +110,7 @@ export interface EntityRepeaterElementProps<V extends ModifiableEntity | Lite<En
   htmlAttributes?: () => React.HTMLAttributes<any> | null | undefined;
 }
 
-export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, htmlAttributes }: EntityRepeaterElementProps<V>): React.JSX.Element
-{
+export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, htmlAttributes }: EntityRepeaterElementProps<V>): React.ReactElement {
 
   var attrs = htmlAttributes?.();
 
@@ -121,7 +121,7 @@ export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>
       onDragEnter={drag?.onDragOver}
       onDragOver={drag?.onDragOver}
       onDrop={drag?.onDrop}>
-      {getTimeMachineIcon({ ctx: ctx, isContainer: true, translateY:"250%" })}
+      {getTimeMachineIcon({ ctx: ctx, isContainer: true, translateY: "250%" })}
       <fieldset className="sf-repeater-element"
         {...EntityBaseController.entityHtmlAttributes(ctx.value)}>
         {(onRemove || move || drag || itemExtraButtons || title) &&

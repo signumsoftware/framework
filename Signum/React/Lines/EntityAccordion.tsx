@@ -8,7 +8,7 @@ import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig }
 import { RenderEntity } from './RenderEntity'
 import { newMListElement } from '../Signum.Entities';
 import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
-import { genericForwardRef, useController } from './LineBase'
+import { useController } from './LineBase'
 import { TypeBadge } from './AutoCompleteConfig'
 import { Accordion } from 'react-bootstrap'
 import { useForceUpdate } from '../Hooks'
@@ -27,6 +27,7 @@ export interface EntityAccordionProps<V extends ModifiableEntity> extends Entity
   initialSelectedIndex?: number | null;
   selectedIndex?: number | null;
   onSelectTab?: (newIndex: number | null) => void;
+  ref?: React.Ref<EntityAccordionController<V>>
 }
 
 function isControlled(p: EntityAccordionProps<any>) {
@@ -83,8 +84,8 @@ export class EntityAccordionController<V extends ModifiableEntity> extends Entit
 }
 
 
-export const EntityAccordion: <V extends ModifiableEntity>(props: EntityAccordionProps<V> & React.RefAttributes<EntityAccordionController<V>>) => React.ReactNode | null = genericForwardRef(function EntityAccordion<V extends ModifiableEntity>(props: EntityAccordionProps<V>, ref: React.Ref<EntityAccordionController<V>>) {
-  var c = useController(EntityAccordionController<V>, props, ref);
+export function EntityAccordion<V extends ModifiableEntity>(props: EntityAccordionProps<V>): React.JSX.Element | null {
+  var c = useController(EntityAccordionController<V>, props);
   var p = c.props;
 
   if (c.isHidden)
@@ -127,7 +128,7 @@ export const EntityAccordion: <V extends ModifiableEntity>(props: EntityAccordio
     return (
       <Accordion className="sf-accordion-elements" activeKey={c.selectedIndex?.toString()} onSelect={handleSelectTab}>
         {
-          c.getMListItemContext(ctx).map((mlec, i): React.JSX.Element => (
+          c.getMListItemContext(ctx).map((mlec, i): React.ReactElement => (
             <EntityAccordionElement<V> key={i}
               onSelectTab={() => handleSelectTab(mlec.index!.toString())}
               onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
@@ -154,8 +155,7 @@ export const EntityAccordion: <V extends ModifiableEntity>(props: EntityAccordio
       </Accordion>
     );
   }
-});
-
+}
 
 export interface EntityAccordionElementProps<V extends ModifiableEntity> {
   ctx: TypeContext<V>;
@@ -172,7 +172,7 @@ export interface EntityAccordionElementProps<V extends ModifiableEntity> {
   headerHtmlAttributes?: React.HTMLAttributes<any>;
 }
 
-export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes, headerHtmlAttributes, onSelectTab }: EntityAccordionElementProps<V>): React.JSX.Element
+export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes, headerHtmlAttributes, onSelectTab }: EntityAccordionElementProps<V>): React.ReactElement
 {
 
   const forceUpdate = useForceUpdate();

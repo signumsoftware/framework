@@ -12,6 +12,7 @@ import ShowCodeModal from './ShowCodeModal'
 import { ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import "./DynamicView.css"
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Dynamic.Views'
+import { JSX } from 'react'
 
 interface DynamicViewEntityComponentProps {
   ctx: TypeContext<DynamicViewEntity>;

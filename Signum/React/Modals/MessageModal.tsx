@@ -34,11 +34,11 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
   size?: BsSize;
   shouldSelect?: boolean;
   additionalDialogClassName?: string;
-  modalRef?: React.RefObject<MessageModalHandler>; //For closing the modal imperatively
+  modalRef?: React.RefObject<MessageModalHandler | null>; //For closing the modal imperatively
 }
 
 
-function MessageModal(p: MessageModalProps): React.JSX.Element {
+function MessageModal(p: MessageModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
 

@@ -16,7 +16,7 @@ interface AutoLineModalProps extends IModalProps<any> {
   options: AutoLineModalOptions;
 }
 
-function AutoLineModal(p: AutoLineModalProps): React.JSX.Element {
+function AutoLineModal(p: AutoLineModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();

@@ -1,7 +1,6 @@
 import { $createCodeNode, $isCodeNode } from "@lexical/code";
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
 import { $createListNode } from "@lexical/list";
-import { ListNodeTagType } from "@lexical/list/LexicalListNode";
 import {
   $createHeadingNode,
   $createQuoteNode,
@@ -19,7 +18,7 @@ import { $findMatchingParent, isHeadingActive, isListActive } from "./node";
 
 export function formatList(
   editor: LexicalEditor,
-  listTag: ListNodeTagType
+  listTag: string
 ): void {
   editor.update(() => {
     const selection = $getSelection();

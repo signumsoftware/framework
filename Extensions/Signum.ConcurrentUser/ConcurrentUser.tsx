@@ -65,7 +65,7 @@ export default function ConcurrentUser(p: { entity: Entity, isExecuting: boolean
   const concurrentUsers = useAPI(() => ConcurrentUserClient.API.getUsers(entityKey), [concurrentUserVersion, isModified.current, entityKey]);
 
   useSignalRCallback(conn, "EntitySaved", (liteK: string, newKey: string) => {
-    console.log(`${DateTime.now().toISO()}: EntitySaved ${newKey}`);
+    //console.log(`${DateTime.now().toISO()}: EntitySaved ${newKey}`);
     if (entityTicks.lite && liteK == liteKey(entityTicks.lite))
       setEntityTicks({ lite: entityTicks.lite, ticks: newKey });
   }, []);
@@ -79,12 +79,12 @@ export default function ConcurrentUser(p: { entity: Entity, isExecuting: boolean
   //const entityRef = useUpdatedRef(p.entity);
 
   React.useEffect(() => {
-    console.log(`${DateTime.now().toISO()}: Entity Changed ${p.entity.Type} ${p.entity.id} ${p.entity.ticks}`);
+    //console.log(`${DateTime.now().toISO()}: Entity Changed ${p.entity.Type} ${p.entity.id} ${p.entity.ticks}`);
   }, [p.entity.ticks, p.entity.id, p.entity.Type]);
 
   //Is conditionally but the condition is a constant
   React.useEffect(() => {
-    console.log(`${DateTime.now().toISO()}: isExecuting: ${p.isExecuting} sameEntity ${entityTicks.lite && is(entityTicks.lite, p.entity)} useEffect ${entityTicks.ticks} = p.entity ${p.entity.ticks} (entity)`);
+    //console.log(`${DateTime.now().toISO()}: isExecuting: ${p.isExecuting} sameEntity ${entityTicks.lite && is(entityTicks.lite, p.entity)} useEffect ${entityTicks.ticks} = p.entity ${p.entity.ticks} (entity)`);
     //console.log("Effect", { ticks: ticksRef.current, entityTicks: entityRef.current.ticks });
     if (!p.isExecuting && entityTicks.lite && is(entityTicks.lite, p.entity) && entityTicks.ticks != p.entity.ticks) {
       MessageModal.show({

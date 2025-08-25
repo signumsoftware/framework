@@ -8,7 +8,7 @@ import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig }
 import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Breakpoints, getBreakpoint, useAPI, useBreakpoint, useForceUpdate } from '../Hooks'
-import { genericForwardRef, useController } from './LineBase'
+import { useController } from './LineBase'
 import { KeyNames } from '../Components'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
@@ -34,6 +34,7 @@ export interface EntityTableProps<V extends ModifiableEntity, RS> extends Entity
   customKey?: (entity: V) => string | undefined; 
   afterView?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, NoInfer<RS>>, rowState: NoInfer<RS>) => React.ReactElement | boolean | null | undefined;
   afterRow?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, NoInfer<RS>>, rowState: NoInfer<RS>) => React.ReactElement | boolean | null | undefined;
+  ref?: React.Ref<EntityTableController<V, RS>>;
 }
 
 export interface EntityTableColumn<V extends ModifiableEntity, RS> {
@@ -50,10 +51,10 @@ export interface EntityTableColumn<V extends ModifiableEntity, RS> {
 
 
 export class EntityTableController<V extends ModifiableEntity, RS> extends EntityListBaseController<EntityTableProps<V, RS>, V> {
-  containerDiv!: React.RefObject<HTMLDivElement>;
-  thead!: React.RefObject<HTMLTableSectionElement>;
-  tfoot!: React.RefObject<HTMLTableSectionElement>;
-  recentlyCreated!: React.MutableRefObject<Lite<Entity> | ModifiableEntity | null>;
+  containerDiv!: React.RefObject<HTMLDivElement |  null>;
+  thead!: React.RefObject<HTMLTableSectionElement | null>;
+  tfoot!: React.RefObject<HTMLTableSectionElement | null>;
+  recentlyCreated!: React.RefObject<Lite<Entity> | ModifiableEntity | null>;
 
   init(p: EntityTableProps<V, RS>): void {
     super.init(p);
@@ -192,8 +193,8 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
 //  typedColumns<T extends ModifiableEntity, RS = undefined>(columns: (EntityTableColumn<T, RS> | false | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[]
 //}
 
-export const EntityTable: <V extends ModifiableEntity, RS>(props: EntityTableProps<V, RS> & React.RefAttributes<EntityTableController<V, RS>>) => React.ReactNode | null = genericForwardRef(function EntityTable<V extends ModifiableEntity, RS>(props: EntityTableProps<V, RS>, ref: React.Ref<EntityTableController<V, RS>>) {
-  const c = useController(EntityTableController, props, ref);
+export function EntityTable<V extends ModifiableEntity, RS>(props: EntityTableProps<V, RS>): React.JSX.Element | null {
+  const c = useController<EntityTableController<V, RS>, EntityTableProps<V, RS>, MList<V>>(EntityTableController, props);
   const p = c.props;
 
   if (p.type && p.type.isLite)
@@ -312,7 +313,7 @@ export const EntityTable: <V extends ModifiableEntity, RS>(props: EntityTablePro
       </div >
     );
   }
-});
+};
 
 (EntityTable as any).defaultProps = {
   maxResultsHeight: "400px",
@@ -343,7 +344,7 @@ export interface EntityTableRowHandle<V extends ModifiableEntity, RS = unknown> 
   forceUpdate(): void;
 }
 
-export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRowProps<V, RS>): React.JSX.Element {
+export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRowProps<V, RS>): React.ReactElement {
   const forceUpdate = useForceUpdate();
 
   const rowState = p.rowHooks?.(p.ctx, { props: p as EntityTableRowProps<V, unknown>, forceUpdate })!;

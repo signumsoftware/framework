@@ -152,7 +152,7 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
     setContextMenuPosition(getMouseEventPosition(e));
   }
 
-  function renderMember(h: TypeHelpClient.TypeHelp, m: TypeHelpClient.TypeMemberHelp, index: number): React.ReactChild {
+  function renderMember(h: TypeHelpClient.TypeHelp, m: TypeHelpClient.TypeMemberHelp, index: number): React.ReactNode {
 
     var className = "sf-member-name";
     var onClick: React.MouseEventHandler<any> | undefined;
@@ -189,7 +189,7 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
     );
   }
 
-  function renderType(type: string, cleanType?: string | null): React.ReactChild {
+  function renderType(type: string, cleanType?: string | null): React.ReactNode {
 
     var startIndex = type.indexOf("<");
     var endIndex = type.lastIndexOf(">");

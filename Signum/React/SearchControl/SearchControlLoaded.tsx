@@ -527,13 +527,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   containerDiv?: HTMLDivElement | null;
 
-  render(): React.JSX.Element {
+  render(): React.ReactElement {
     const p = this.props;
     const fo = this.props.findOptions;
     const qd = this.props.queryDescription;
 
     const sfb = this.state.simpleFilterBuilder &&
-      React.cloneElement(this.state.simpleFilterBuilder, { ref: (e: ISimpleFilterBuilder) => { this.simpleFilterBuilderInstance = e } });
+      React.cloneElement(this.state.simpleFilterBuilder, { ref: (e: ISimpleFilterBuilder) => { this.simpleFilterBuilderInstance = e; } } as any);
 
     const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
     const canAggregateXorOperationOrManual = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
@@ -578,10 +578,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperationOrManual | canTimeSeries}
                 close={this.handleColumnClose} />
             }
-            <div ref={d => this.containerDiv = d}
+            <div ref={d => { this.containerDiv = d; }}
               className="sf-scroll-table-container table-responsive"
               style={{ maxHeight: this.props.maxResultsHeight }}>
-              <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
+              <table className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
                 <thead>
                   {this.renderHeaders()}
                 </thead>
@@ -598,12 +598,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     );
   }
 
-  renderMobile(): React.JSX.Element {
+  renderMobile(): React.ReactElement {
     return (
-      <div ref={d => this.containerDiv = d}
+      <div ref={d => {this.containerDiv = d;}}
         className="sf-scroll-table-container"
         style={{ maxHeight: this.props.maxResultsHeight }}>
-        <div className="sf-search-results mobile">
+        <div className={classes("sf-search-results mobile", this.props.view && "sf-row-view")}>
           {this.renderRowsMobile()}
         </div>
       </div>
@@ -647,7 +647,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     this.forceUpdate();
   }
 
-  renderToolBar(): React.JSX.Element {
+  renderToolBar(): React.ReactElement {
 
     const p = this.props;
     const s = this.state;
@@ -812,7 +812,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     ev.preventDefault();
 
-    var findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription, this.props.defaultIncudeDefaultFilters);
+    const findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription, this.props.defaultIncudeDefaultFilters || this.props.findOptions.filterOptions.some(a => a.pinned != null));
 
     const path = Finder.findOptionsPath(findOptions, this.extraUrlParams);
 
@@ -1119,7 +1119,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       this.doSearchPage1();
   }
 
-  renderContextualMenu(): React.JSX.Element | null {
+  renderContextualMenu(): React.ReactElement | null {
 
     var showCM = this.props.showContextMenu(this.state.resultFindOptions ?? this.props.findOptions);
 
@@ -1582,7 +1582,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     return true;
   }
 
-  orderIcon(column: ColumnOptionParsed): React.JSX.Element | "" {
+  orderIcon(column: ColumnOptionParsed): React.ReactElement | "" {
 
     if (column.token == undefined)
       return "";
@@ -1957,7 +1957,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     });
   }
 
-  getRowMarketIcon(row: ResultRow, rowIndex: number): React.JSX.Element | undefined {
+  getRowMarketIcon(row: ResultRow, rowIndex: number): React.ReactElement | undefined {
     const mark = this.getMarkedRow(row);
     if (!mark)
       return undefined;
@@ -1988,7 +1988,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     );
   }
 
-  renderRowsMobile(): React.JSX.Element | React.JSX.Element[] {
+  renderRowsMobile(): React.ReactElement | React.ReactElement[] {
     const resultTable = this.state.resultTable;
     if (!resultTable) {
       if (this.props.findOptions.pagination.mode == "All" && this.props.showFooter)
@@ -2201,49 +2201,49 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 }
 
-export function getResotreDefaultColumnsIcon(): React.JSX.Element {
+export function getResotreDefaultColumnsIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
     <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="black" />
   </span>
 }
 
-export function getGroupByThisColumnIcon(): React.JSX.Element {
+export function getGroupByThisColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
     <FontAwesomeIcon icon={["fas", "layer-group"]} transform="shrink-3 up-8 right-8" color="#21618C" />
   </span>
 }
 
-export function getRemoveOtherColumns(): React.JSX.Element {
+export function getRemoveOtherColumns(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
     <FontAwesomeIcon icon="remove" transform="shrink-4 up-8 right-8" color="black" />
   </span>
 }
 
-export function getRemoveColumnIcon(): React.JSX.Element {
+export function getRemoveColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
     <FontAwesomeIcon icon={["fas", "square-xmark"]} transform="shrink-3 up-8 right-8" color="#ca0000" />
   </span>
 }
 
-export function getEditColumnIcon(): React.JSX.Element {
+export function getEditColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
     <FontAwesomeIcon icon={["fas", "square-pen"]} transform="shrink-3 up-8 right-8" color="orange" />
   </span>
 }
 
-export function getInsertColumnIcon(): React.JSX.Element {
+export function getInsertColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
     <FontAwesomeIcon icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="#008400" />
   </span>
 }
 
-export function getAddFilterIcon(): React.JSX.Element {
+export function getAddFilterIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon icon="filter" transform="left-2" color="gray" />
     <FontAwesomeIcon icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="#21618C" />

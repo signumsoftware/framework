@@ -25,10 +25,10 @@ export class ReactVisitor {
 
   visitElement(element: React.ReactElement): React.ReactNode {
 
-    if (element.props.children == undefined || element.props.children.count == 0)
+    if ((element.props as any).children == undefined || (element.props as any).children.count == 0)
       return element;
 
-    const oldChildren = React.Children.toArray(element.props.children);
+    const oldChildren = React.Children.toArray((element.props as any).children);
 
     const newChildren = React.Children.map(oldChildren, c => this.visitChild(c as React.ReactNode | string | number | boolean | undefined | null));
 
@@ -150,11 +150,11 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
   replaceFindOptions(filter: (findOptions: FindOptions, e: React.ReactElement) => boolean, modifier: (clone: FindOptions) => void): this {
     this.result = new ReplaceVisitor(
-      e => e.props.findOptions && filter(e.props.findOptions, e),
+      e => (e.props as any).findOptions && filter((e.props as any).findOptions, e),
       e => {
-        var clone = cloneFindOptions(e.props.findOptions);
+        var clone = cloneFindOptions((e.props as any).findOptions);
         modifier(clone);
-        return React.cloneElement(e, { findOptions: clone });
+        return React.cloneElement(e, { findOptions: clone } as any);
       }
     ).visit(this.result);
 
@@ -198,7 +198,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
   }
 
   previousTypeContext(e: React.ReactElement) {
-    var ctx = e.props.ctx as TypeContext<any>;
+    var ctx = (e.props as any).ctx as TypeContext<any>;
 
     var parentCtx = ctx.findParentCtx(this.ctx.value.Type);
 
@@ -218,7 +218,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
   removeTab(eventKey: string): this {
     this.result = new ReplaceVisitor(
-      e => e.type == Tab && e.props.eventKey == eventKey,
+      e => e.type == Tab && (e.props as any).eventKey == eventKey,
       e => [])
       .visit(this.result);
 
@@ -227,8 +227,8 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
   addTab(tabsId: string, ...newTabs: (React.ReactElement | undefined | false | null)[]): this {
     this.result = new ReplaceVisitor(
-      e => e.type == Tabs && e.props.id == tabsId,
-      e => [React.cloneElement(e, { children: [...React.Children.toArray(e.props.children), ...newTabs] })])
+      e => e.type == Tabs && (e.props as any).id == tabsId,
+      e => [React.cloneElement(e, { children: [...React.Children.toArray((e.props as any).children), ...newTabs] } as any)])
       .visit(this.result);
 
     return this;
@@ -236,7 +236,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
   insertTabAfter(eventKey: string | number, ...newTabs: (React.ReactElement | undefined | false | null)[]): this {
     this.result = new ReplaceVisitor(
-      e => e.type == Tab && e.props.eventKey == eventKey,
+      e => e.type == Tab && (e.props as any).eventKey == eventKey,
       e => [e, ...newTabs])
       .visit(this.result);
 
@@ -245,7 +245,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
   insertTabBefore(eventKey: string | number, ...newTabs: (React.ReactElement | undefined | false | null)[]): this {
     this.result = new ReplaceVisitor(
-      e => e.type == Tab && e.props.eventKey == eventKey,
+      e => e.type == Tab && (e.props as any).eventKey == eventKey,
       e => [...newTabs, e])
       .visit(this.result);
 
@@ -286,7 +286,7 @@ export function cloneFindOptions(fo: FindOptions): FindOptions {
 }
 
 export function hasPropertyRoute(e: React.ReactElement, pr: PropertyRoute): boolean {
-  const tc = e.props.ctx as TypeContext<any>;
+  const tc = (e.props as any).ctx as TypeContext<any>;
 
   if (!tc)
     return false;

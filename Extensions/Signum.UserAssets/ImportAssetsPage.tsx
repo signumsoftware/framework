@@ -181,7 +181,7 @@ export default function ImportAssetsPage(): React.JSX.Element {
   );
 }
 
-function EntityLineSameType(p: { ctx: TypeContext<LiteConflictEmbedded>, onChange: () => void }): JSX.Element{
+function EntityLineSameType(p: { ctx: TypeContext<LiteConflictEmbedded>, onChange: () => void }) {
 
   const [avoidLastType, setAvoidLastType] = React.useState(false);
 

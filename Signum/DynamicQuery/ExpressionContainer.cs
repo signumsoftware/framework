@@ -164,6 +164,22 @@ public class ExpressionContainer
 
         return ei;
     }
+
+    public ExtensionWithParameterInfo<T, K, V> RegisterWithParameter<T, K, V>(
+        Enum message,
+        Func<QueryToken, IEnumerable<K>> getKeys,
+        Expression<Func<T, K, V>> extensionLambda,
+        bool autoExpand = false)
+        where K : notnull
+    {
+        var ei = new ExtensionWithParameterInfo<T, K, V>(extensionLambda, message.ToString(), ()=> message.NiceToString(), getKeys);
+
+        RegisteredExtensionsWithParameter.GetOrCreate(typeof(T)).Add(ei.Prefix, ei);
+
+        ei.AutoExpand = autoExpand;
+
+        return ei;
+    }
 } 
 
 public interface IExtensionDictionaryInfo

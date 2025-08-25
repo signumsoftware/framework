@@ -22,12 +22,12 @@ export interface SearchValueLineProps {
   findOptions?: FindOptions | Lite<Entity> | Entity;
   valueToken?: string | QueryTokenString<any>;
   multipleValues?: { vertical?: boolean, showType?: boolean };
-  label?: React.ReactChild | (() => React.ReactChild);
+  label?: React.ReactNode | (() => React.ReactNode);
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
-  unit?: React.ReactChild;
+  unit?: React.ReactNode;
   format?: string;
   formGroupHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
-  helpText?: (vscc: SearchValueController) => React.ReactChild | undefined;
+  helpText?: (vscc: SearchValueController) => React.ReactNode | undefined;
   initialValue?: any;
   isLink?: boolean;
   isBadge?: boolean | "MoreThanZero";
@@ -61,7 +61,7 @@ export interface SearchValueLineController {
 const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & React.RefAttributes<SearchValueLineController>> =
   React.forwardRef(function SearchValueLine(p: SearchValueLineProps, ref?: React.Ref<SearchValueLineController>) {
 
-  var svRef = React.useRef<SearchValueController | null>();
+  var svRef = React.useRef<SearchValueController>(null);
 
   React.useImperativeHandle(ref, () => ({
     searchValue: svRef.current,

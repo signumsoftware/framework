@@ -156,7 +156,7 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
     dashboardFilter?: DashboardFilter,
     chartRequest: ChartRequestModel,
     onDrillDown: (row: ChartRow, e: MouseEvent | React.MouseEvent<any, MouseEvent>) => void
-  }): JSX.Element {
+  }): React.JSX.Element {
 
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
@@ -254,7 +254,7 @@ function CanvasScatterplot(p: {
 
   var cRef = React.useRef<HTMLCanvasElement>(null);
   var vcRef = React.useRef<HTMLCanvasElement>(null);
-  var colorDataRef = React.useRef<{ [key: string]: ChartRow }>();
+  var colorDataRef = React.useRef<{ [key: string]: ChartRow }>({});
 
   React.useEffect(() => {
 
@@ -266,7 +266,7 @@ function CanvasScatterplot(p: {
 
     const ctx = c.getContext("2d")!;
     const vctx = vc.getContext("2d")!;
-    var colorToData: { [key: string]: ChartRow } = colorDataRef.current = {};
+    var colorToData: { [key: string]: ChartRow } = colorDataRef.current;
     ctx.clearRect(0, 0, w, h);
     vctx.clearRect(0, 0, w, h);
     data.rows.forEach((r, i) => {

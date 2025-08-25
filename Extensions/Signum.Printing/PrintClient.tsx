@@ -28,7 +28,7 @@ export namespace PrintClient {
     });
   }
   
-  export module API {
+  export namespace API {
     export function getStats(): Promise<PrintStat[]> {
       return ajaxGet({ url: `/api/printing/stats` });
     }

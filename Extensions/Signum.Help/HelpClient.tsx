@@ -94,7 +94,7 @@ export namespace HelpClient {
 
   const cache: { [cleanName: string]: Promise<TypeHelpEntity> } = {};
 
-  export module API {
+  export namespace API {
 
     export function index(): Promise<HelpIndexTS> {
       return ajaxGet({ url: "/api/help/index" });

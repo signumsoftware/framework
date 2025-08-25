@@ -19,6 +19,7 @@ import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import { DynamicViewClient } from '../DynamicViewClient'
 import * as Lines from '@framework/Lines'
 import { DynamicViewValidationMessage } from '../Signum.Dynamic.Views'
+import { JSX } from 'react'
 
 export type ExpressionOrValue<T> = T | Expression<T>;
 

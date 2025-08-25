@@ -6,6 +6,7 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { EditorRefPlugin } from "@lexical/react/LexicalEditorRefPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { LexicalEditor } from "lexical";
 import * as React from "react";
@@ -36,20 +37,12 @@ export interface HtmlEditorProps {
   innerRef?: React.Ref<LexicalEditor>;
   plugins?: HtmlEditorExtension[];
   handleKeybindings?: (event: KeyboardEvent) => boolean;
-  toolbarButtons?: (
-    c: HtmlEditorController
-  ) => React.ReactElement | React.ReactFragment | null;
+  toolbarButtons?: (c: HtmlEditorController) => React.ReactNode;
   placeholder?: React.ReactNode;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   initiallyFocused?: boolean | number;
-  onEditorFocus?: (
-    e: React.FocusEvent,
-    controller: HtmlEditorController
-  ) => void;
-  onEditorBlur?: (
-    e: React.FocusEvent,
-    controller: HtmlEditorController
-  ) => void;
+  onEditorFocus?: (e: React.FocusEvent, controller: HtmlEditorController) => void;
+  onEditorBlur?: (e: React.FocusEvent, controller: HtmlEditorController) => void;
 }
 
 const createUid = () => Math.random().toString(36).substring(2, 9);
@@ -137,6 +130,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
           ErrorBoundary={LexicalErrorBoundary}
         />
         <EditorRefPlugin editorRef={controller.setRefs} />
+        <HistoryPlugin />
         {builtinComponents.map(({ component: Component, props }) => <Component key={Component.name} {...props} />)}
       </LexicalComposer>
     </div>

@@ -9,7 +9,7 @@ interface CopyLiteButtonProps {
   className?: string;
 }
 
-export default function CopyLiteButton(p: CopyLiteButtonProps): React.JSX.Element | null {
+export default function CopyLiteButton(p: CopyLiteButtonProps): React.ReactElement | null {
 
   const supportsClipboard = (navigator.clipboard && window.isSecureContext);
   if (p.entity.isNew || !supportsClipboard)

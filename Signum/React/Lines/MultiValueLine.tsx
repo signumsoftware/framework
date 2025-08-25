@@ -5,7 +5,7 @@ import { mlistItemContext } from "../TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ErrorBoundary } from "../Components";
 import { EntityBaseController } from "./EntityBase";
-import { LineBaseProps, LineBaseController, useController, genericForwardRef } from "./LineBase";
+import { LineBaseProps, LineBaseController, useController, genericMemo } from "./LineBase";
 import { KeyGenerator } from "../Globals";
 import { MListElementBinding } from "../Reflection";
 
@@ -15,6 +15,7 @@ interface MultiValueLineProps<V> extends LineBaseProps<MList<V>> {
   addValueText?: string;
   valueColumClass?: string;
   filterRows?: (ctxs: TypeContext<any /*T*/>[]) => TypeContext<any /*T*/>[];
+  ref?: React.Ref<MultiValueLineController<V>>;
 }
 
 export class MultiValueLineController<V> extends LineBaseController<MultiValueLineProps<V>, MList<V>> {
@@ -70,65 +71,67 @@ export class MultiValueLineController<V> extends LineBaseController<MultiValueLi
   }
 }
 
-export const MultiValueLine: <V>(props: MultiValueLineProps<V> & React.RefAttributes<MultiValueLineController<V>>) => React.ReactNode | null = genericForwardRef(function MultiValueLine<V>(props: MultiValueLineProps<V>, ref: React.Ref<MultiValueLineController<V>>) {
-  const c = useController(MultiValueLineController<V>, props, ref);
-  const p = c.props;
+export const MultiValueLine: <V>(props: MultiValueLineProps<V>) => React.ReactNode | null
+  = genericMemo(function MultiValueLine<V>(props: MultiValueLineProps<V>) {
 
-  var renderItem = React.useMemo(() => {
-    if (props.onRenderItem)
-      return props.onRenderItem;
+    const c = useController<MultiValueLineController<V>, MultiValueLineProps<V>, MList<V>>(MultiValueLineController<V>, props);
+    const p = c.props;
 
-    var pr = c.props.ctx.propertyRoute?.addMember("Indexer", "", true);
-    if (pr)
-      return AutoLine.getComponentFactory(pr.typeReference(), pr);
+    var renderItem = React.useMemo(() => {
+      if (props.onRenderItem)
+        return props.onRenderItem;
 
-    return null;
-  }, [Boolean(p.onRenderItem), p.ctx.propertyPath]);
+      var pr = c.props.ctx.propertyRoute?.addMember("Indexer", "", true);
+      if (pr)
+        return AutoLine.getComponentFactory(pr.typeReference(), pr);
 
-  if (c.isHidden)
-    return null;
+      return null;
+    }, [Boolean(p.onRenderItem), p.ctx.propertyPath]);
+
+    if (c.isHidden)
+      return null;
 
 
-  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
-  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+    const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+    const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
-  return (
-    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
-      helpText={helpText}
-      helpTextOnTop={helpTextOnTop}
-      labelHtmlAttributes={p.labelHtmlAttributes}>
-      {inputId => <>
-        <div className="row">
-          {
-          c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) => {
-              return (
+    return (
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon}
+        htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
+        helpText={helpText}
+        helpTextOnTop={helpTextOnTop}
+        labelHtmlAttributes={p.labelHtmlAttributes}>
+        {inputId => <>
+          <div className="row">
+            {
+              c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) => {
+                return (
 
-                <ErrorBoundary key={c.keyGenerator.getKey((mlec.binding as MListElementBinding<any>).getMListElement())}>
-                  <div className={p.valueColumClass!} >
-                    <MultiValueLineElement
-                      ctx={mlec}
-                      onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
-                      onRenderItem={renderItem!}
-                      valueColumClass={p.valueColumClass!} />
-                  </div>
-                </ErrorBoundary>
+                  <ErrorBoundary key={c.keyGenerator.getKey((mlec.binding as MListElementBinding<any>).getMListElement())}>
+                    <div className={p.valueColumClass!} >
+                      <MultiValueLineElement
+                        ctx={mlec}
+                        onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
+                        onRenderItem={renderItem!}
+                        valueColumClass={p.valueColumClass!} />
+                    </div>
+                  </ErrorBoundary>
 
-              );
-            })
-          }
-        </div>
-        {!p.ctx.readOnly &&
-          <a href="#" title={p.ctx.titleLabels ? p.addValueText ?? SearchMessage.AddValue.niceToString() : undefined}
-            className="sf-line-button sf-create"
-            onClick={c.handleAddValue}>
-            {EntityBaseController.getCreateIcon()}&nbsp;{p.addValueText ?? SearchMessage.AddValue.niceToString()}
-          </a>}
+                );
+              })
+            }
+          </div>
+          {!p.ctx.readOnly &&
+            <a href="#" title={p.ctx.titleLabels ? p.addValueText ?? SearchMessage.AddValue.niceToString() : undefined}
+              className="sf-line-button sf-create"
+              onClick={c.handleAddValue}>
+              {EntityBaseController.getCreateIcon()}&nbsp;{p.addValueText ?? SearchMessage.AddValue.niceToString()}
+            </a>}
 
-      </>}
-    </FormGroup>
-  );
-});
+        </>}
+      </FormGroup>
+    );
+  });
 
 export interface MultiValueLineElementProps {
   ctx: TypeContext<any>;
@@ -137,7 +140,7 @@ export interface MultiValueLineElementProps {
   valueColumClass: string;
 }
 
-export function MultiValueLineElement(props: MultiValueLineElementProps): React.JSX.Element {
+export function MultiValueLineElement(props: MultiValueLineElementProps): React.ReactElement {
   const mctx = props.ctx;
 
 
@@ -150,7 +153,7 @@ export function MultiValueLineElement(props: MultiValueLineElementProps): React.
           <FontAwesomeIcon icon="xmark" />
         </a>
       }
-      {React.cloneElement(props.onRenderItem({ ctx: mctx, mandatory: true})!)}
+      {React.cloneElement(props.onRenderItem({ ctx: mctx, mandatory: true })!)}
     </div>
   );
 }
