@@ -9,11 +9,43 @@ import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Authorization from '../Signum.Authorization/Signum.Authorization'
 
 
+export const ChatbotAgentCodeSymbol: Type<ChatbotAgentCodeSymbol> = new Type<ChatbotAgentCodeSymbol>("ChatbotAgentCode");
+export interface ChatbotAgentCodeSymbol extends Basics.Symbol {
+  Type: "ChatbotAgentCode";
+}
+
+export const ChatbotAgentDescriptionsEmbedded: Type<ChatbotAgentDescriptionsEmbedded> = new Type<ChatbotAgentDescriptionsEmbedded>("ChatbotAgentDescriptionsEmbedded");
+export interface ChatbotAgentDescriptionsEmbedded extends Entities.EmbeddedEntity {
+  Type: "ChatbotAgentDescriptionsEmbedded";
+  promptName: string | null;
+  content: string;
+}
+
+export const ChatbotAgentEntity: Type<ChatbotAgentEntity> = new Type<ChatbotAgentEntity>("ChatbotAgent");
+export interface ChatbotAgentEntity extends Entities.Entity {
+  Type: "ChatbotAgent";
+  code: ChatbotAgentCodeSymbol;
+  shortDescription: string;
+  descriptions: Entities.MList<ChatbotAgentDescriptionsEmbedded>;
+}
+
+export namespace ChatbotAgentMessage {
+  export const Default: MessageKey = new MessageKey("ChatbotAgentMessage", "Default");
+}
+
+export namespace ChatbotAgentOperation {
+  export const Save : Operations.ExecuteSymbol<ChatbotAgentEntity> = registerSymbol("Operation", "ChatbotAgentOperation.Save");
+  export const Delete : Operations.DeleteSymbol<ChatbotAgentEntity> = registerSymbol("Operation", "ChatbotAgentOperation.Delete");
+}
+
 export const ChatbotConfigurationEmbedded: Type<ChatbotConfigurationEmbedded> = new Type<ChatbotConfigurationEmbedded>("ChatbotConfigurationEmbedded");
 export interface ChatbotConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "ChatbotConfigurationEmbedded";
   openAIAPIKey: string | null;
-  claudeAPIKey: string | null;
+  anthropicAPIKey: string | null;
+  deepSeekAPIKey: string | null;
+  geminiAPIKey: string | null;
+  grokAPIKey: string | null;
   mistralAPIKey: string | null;
 }
 
@@ -29,6 +61,7 @@ export interface ChatbotLanguageModelEntity extends Entities.Entity {
 
 export namespace ChatbotLanguageModelOperation {
   export const Save : Operations.ExecuteSymbol<ChatbotLanguageModelEntity> = registerSymbol("Operation", "ChatbotLanguageModelOperation.Save");
+  export const MakeDefault : Operations.ExecuteSymbol<ChatbotLanguageModelEntity> = registerSymbol("Operation", "ChatbotLanguageModelOperation.MakeDefault");
   export const Delete : Operations.DeleteSymbol<ChatbotLanguageModelEntity> = registerSymbol("Operation", "ChatbotLanguageModelOperation.Delete");
 }
 
@@ -43,9 +76,10 @@ export namespace ChatbotMessage {
 
 export namespace ChatbotProviders {
   export const OpenAI : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.OpenAI");
-  export const Gemini : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Gemini");
   export const Mistral : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Mistral");
   export const Anthropic : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Anthropic");
+  export const DeepSeek : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.DeepSeek");
+  export const Grok : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Grok");
 }
 
 export const ChatbotProviderSymbol: Type<ChatbotProviderSymbol> = new Type<ChatbotProviderSymbol>("ChatbotProvider");
@@ -59,8 +93,9 @@ export interface ChatMessageEntity extends Entities.Entity {
   chatSession: Entities.Lite<ChatSessionEntity>;
   creationDate: string /*DateTime*/;
   role: ChatMessageRole;
-  isCommand: boolean;
+  isToolCall: boolean;
   message: string;
+  toolID: string | null;
 }
 
 export namespace ChatMessageOperation {
@@ -86,5 +121,11 @@ export interface ChatSessionEntity extends Entities.Entity {
 
 export namespace ChatSessionOperation {
   export const Delete : Operations.DeleteSymbol<ChatSessionEntity> = registerSymbol("Operation", "ChatSessionOperation.Delete");
+}
+
+export namespace DefaultAgent {
+  export const Introduction : ChatbotAgentCodeSymbol = registerSymbol("ChatbotAgentCode", "DefaultAgent.Introduction");
+  export const QuestionSumarizer : ChatbotAgentCodeSymbol = registerSymbol("ChatbotAgentCode", "DefaultAgent.QuestionSumarizer");
+  export const SearchControl : ChatbotAgentCodeSymbol = registerSymbol("ChatbotAgentCode", "DefaultAgent.SearchControl");
 }
 

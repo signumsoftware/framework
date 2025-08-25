@@ -1,3 +1,6 @@
+
+using Azure.Core;
+
 namespace Signum.Chatbot.Agents;
 
 internal static class IntroductionAgent
@@ -29,22 +32,45 @@ internal static class IntroductionAgent
                     },
                 }
             },
-            MessageReplacement =
+            MessageReplacements =
             {
                 { "CurrentApplication",  _ =>  Assembly.GetEntryAssembly()!.GetName().Name!.Before(".") },
                 { "Agents",  _ => ChatbotAgentLogic.GetListedAgents().ToString(a => $"* \"{a.Entity.Code.Key.After(".")}\": {a.Entity.ShortDescription}", "\n") }
             },
-            Resources = {
-                //{"GetPrompt", (CommandArguments args) =>
-                //    {
-                //        StringBuilder sb = new StringBuilder();
-
-                //        sb = ShortDescription
-
-                //        return sb.ToString();
-                //    }
-                //}
+            Tools = 
+            {
+                new DescribeChatbotAgentTool
+                {
+                    Name = "Describe",
+                    Description = "Use this command to retrieve the prompt of a specific agent. Always use this command before answering any user question.",
+                }
             },
         });
     }
+}
+
+
+class DescribeChatbotAgentTool : IChatbotAgentTool
+{
+    public required string Name { get; set; }
+
+    public required string Description { get; set; }
+
+    public object DescribeTool() => new
+    {
+        type = "function",
+        name = Name,
+        description = Description,
+        strict = true,
+        parameters = JSonSchema.For(typeof(DescribeRequest)),
+    };
+
+    public Task<object> DoExecuteAsync()
+    {
+    }
+}
+
+class DescribeRequest : IToolPayload
+{
+    public string AgentName { get; set; }
 }

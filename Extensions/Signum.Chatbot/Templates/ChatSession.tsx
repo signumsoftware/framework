@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { AutoLine, EntityTabRepeater, TextAreaLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ChatbotAgentEntity, ChatbotAgentDescriptionsEmbedded } from '../Signum.Chatbot.Agents';
 import { Tabs, Tab, CloseButton } from 'react-bootstrap';
 import { newMListElement } from '../../../Signum/React/Signum.Entities';
 import { useForceUpdate } from '../../../Signum/React/Hooks';

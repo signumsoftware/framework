@@ -1,29 +1,24 @@
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Newtonsoft.Json;
-using Signum.Utilities.Synchronization;
-using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
-using static Signum.Chatbot.Providers.MistralChatbotProvider;
 
 namespace Signum.Chatbot.Providers;
 
-public class OpenAIChatbotProvider : ChatbotProviderBase
+public class DeepSeekChatbotProvider : ChatbotProviderBase
 {
+    protected override string GetMessagesUrl() => "chat/completions";
+
     protected override HttpClient GetClient(bool stream = false)
     {
-        var apiKey = ChatbotLogic.GetConfig().OpenAIAPIKey;
+        var apiKey = ChatbotLogic.GetConfig().DeepSeekAPIKey;
 
         if (apiKey.IsNullOrEmpty())
-            throw new InvalidOperationException("No API Key for OpenAI configured!");
+            throw new InvalidOperationException("No API Key for DeepSeek configured!");
 
         var client = new HttpClient
         {
-            BaseAddress = new Uri("https://api.openai.com/"),
+            BaseAddress = new Uri("https://api.deepseek.com"),
         };
+
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
         if (stream)

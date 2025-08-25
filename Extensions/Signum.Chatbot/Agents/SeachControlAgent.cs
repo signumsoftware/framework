@@ -21,7 +21,7 @@ internal static class SeachControlAgent
                     },
                 },
             },
-            MessageReplacement =
+            MessageReplacements =
             {
             }
         });

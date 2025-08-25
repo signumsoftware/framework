@@ -37,15 +37,18 @@ public class ChatMessageEntity : Entity
 
     public ChatMessageRole Role { get; set; }
 
-    public bool IsCommand { get; set; }
+    public bool IsToolCall { get; set; }
 
     [StringLengthValidator(MultiLine = true)]
     public string Message { get; set; }
 
+    [StringLengthValidator(MultiLine = true)]
+    public string? ToolID { get; set; }
+
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Name == nameof(IsCommand) && IsCommand && Role != ChatMessageRole.Assistant)
+        if (pi.Name == nameof(IsToolCall) && IsToolCall && Role != ChatMessageRole.Assistant)
             return ValidationMessage._0ShouldBe1.NiceToString(pi.NiceName(), false);
 
         return base.PropertyValidation(pi);

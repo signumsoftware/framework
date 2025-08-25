@@ -3,6 +3,7 @@ using Signum.Entities;
 using Signum.Entities.Validation;
 using Signum.Operations;
 using System;
+using System.ComponentModel;
 
 namespace Signum.Chatbot;
 
@@ -28,6 +29,7 @@ public class ChatbotLanguageModelEntity : Entity
 public static class ChatbotLanguageModelOperation
 {
     public static readonly ExecuteSymbol<ChatbotLanguageModelEntity> Save;
+    public static readonly ExecuteSymbol<ChatbotLanguageModelEntity> MakeDefault;
     public static readonly DeleteSymbol<ChatbotLanguageModelEntity> Delete;
 }
 
@@ -50,22 +52,32 @@ public class ChatbotProviderSymbol : Symbol
 public static class ChatbotProviders
 {
     public static readonly ChatbotProviderSymbol OpenAI;
-    public static readonly ChatbotProviderSymbol Gemini;
+    //public static readonly ChatbotProviderSymbol Gemini; // TODO: Api is not OpenAI based
     public static readonly ChatbotProviderSymbol Mistral; 
     public static readonly ChatbotProviderSymbol Anthropic;
+    public static readonly ChatbotProviderSymbol DeepSeek;
+    public static readonly ChatbotProviderSymbol Grok;
 }
 
 
 public class ChatbotConfigurationEmbedded : EmbeddedEntity
 {
-    [StringLengthValidator(Max = 100), Format(FormatAttribute.Password)]
+    [StringLengthValidator(Max = 300), Format(FormatAttribute.Password), Description("Open AI API Key")]
     public string? OpenAIAPIKey { get; set; }
 
+    [StringLengthValidator(Max = 300), Format(FormatAttribute.Password)]
+    public string? AnthropicAPIKey { get; set; }
 
     [StringLengthValidator(Max = 300), Format(FormatAttribute.Password)]
-    public string? ClaudeAPIKey { get; set; }
+    public string? DeepSeekAPIKey { get; set; }
 
-    [StringLengthValidator(Max = 100), Format(FormatAttribute.Password)]
+    [StringLengthValidator(Max = 300), Format(FormatAttribute.Password)]
+    public string? GeminiAPIKey { get; set; }
+
+    [StringLengthValidator(Max = 300), Format(FormatAttribute.Password)]
+    public string? GrokAPIKey { get; set; }
+
+    [StringLengthValidator(Max = 300), Format(FormatAttribute.Password)]
     public string? MistralAPIKey{ get; set; }
 
 }

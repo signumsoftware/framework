@@ -1,19 +1,20 @@
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Signum.Authorization;
+using Signum.Chatbot.Agents;
 using Signum.Engine.Sync;
 using Signum.Utilities;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace Signum.Chatbot.Agents;
+namespace Signum.Chatbot;
 
 public static class ChatbotAgentLogic
 {
     public static Dictionary<ChatbotAgentCodeSymbol, ChatbotAgentCode> AgentCodes = new Dictionary<ChatbotAgentCodeSymbol, ChatbotAgentCode>();
     public static ResetLazy<Dictionary<ChatbotAgentCodeSymbol, ChatbotAgentEntity>> AgentEntities;
 
-    public static ResetLazy<Dictionary<string, Func<CommandArguments, CancellationToken, Task<string>>>> AllResources;
+    public static ResetLazy<Dictionary<string, IChatbotAgentTool>> AllTools;
 
 
     public static void Start(SchemaBuilder sb)
@@ -36,11 +37,12 @@ public static class ChatbotAgentLogic
 
             AgentEntities = sb.GlobalLazy(() => Database.Query<ChatbotAgentEntity>().ToDictionaryEx(a => a.Code), new InvalidateWith(typeof(ChatbotAgentEntity)));
 
-            AllResources = new ResetLazy<Dictionary<string, Func<CommandArguments, CancellationToken, Task<string>>>>(() => AgentCodes.SelectMany(a => a.Value.Resources).ToDictionaryEx(StringComparer.InvariantCultureIgnoreCase));
+            AllTools = new ResetLazy<Dictionary<string, IChatbotAgentTool>>(() => AgentCodes.SelectMany(a => a.Value.Tools)
+            .ToDictionaryEx(a => a.Name, StringComparer.InvariantCultureIgnoreCase));
 
             sb.Schema.EntityEvents<ChatbotAgentCodeSymbol>().PreDeleteSqlSync += symbol =>
             {
-                var parts = Administrator.UnsafeDeletePreCommandMList((ChatbotAgentEntity cp) => cp.Descriptions, 
+                var parts = Administrator.UnsafeDeletePreCommandMList((cp) => cp.Descriptions, 
                     Database.MListQuery((ChatbotAgentEntity cp) => cp.Descriptions).Where(mle => mle.Parent.Code.Is(symbol)));
                 var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<ChatbotAgentEntity>().Where(uqp => uqp.Code.Is(symbol)));
 
@@ -97,7 +99,7 @@ public static class ChatbotAgentLogic
     public static void RegisterAgent(ChatbotAgentCodeSymbol agentSymbol, ChatbotAgentCode agentCode)
     {
         AgentCodes.Add(agentSymbol, agentCode);
-        AllResources.Reset();
+        AllTools.Reset();
     }
 
 
@@ -111,16 +113,16 @@ public static class ChatbotAgentLogic
 
 
     public async static Task<string> EvaluateTool(string commandName, CommandArguments args, CancellationToken token)
-    {
-        
+    {   
         try
         {
-            var action = AllResources.Value.TryGetC(commandName);
+            var action = AllTools.Value.TryGetC(commandName);
 
             if (action == null)
                 throw new InvalidOperationException("Unknown command: " + commandName);
 
-            return await action(args, token);
+            throw new InvalidOperationException();
+            //return await action.DoExecuteAsync(args, token);
 
         }
         catch (Exception e)
@@ -155,9 +157,112 @@ public class ChatbotAgentCode
 {
     public Func<ChatbotAgentEntity> CreateDefaultEntity;
     public Func<bool> IsListed;
-    public Dictionary<string, Func<object?, string>> MessageReplacement = new Dictionary<string, Func<object?, string>>();
-    public Dictionary<string, Func<CommandArguments, CancellationToken, Task<string>>> Resources = new Dictionary<string, Func<CommandArguments, CancellationToken, Task<string>>>();
-    //public Dictionary<string, Func<Arguments, Task<string>>> Tools = new Dictionary<string, Func<Arguments, Task<string>>>();
+    public Dictionary<string, Func<object?, string>> MessageReplacements = new Dictionary<string, Func<object?, string>>();
+    public List<IChatbotAgentTool> Tools = new List<IChatbotAgentTool>();
+}
+
+public interface IChatbotAgentTool
+{
+    string Name { get; }
+    string? Description { get; }
+
+    object DescribeTool();
+
+    Task<object> DoExecuteAsync();
+}
+
+public interface IToolPayload { } //To prevent simple types
+
+public class ChatbotAgentTool<Request, Response> : IChatbotAgentTool
+    where Request : IToolPayload
+    where Response : IToolPayload
+{
+    public ChatbotAgentTool(string name)
+    {
+        Name = name;
+    }
+
+    public string Name { get; set; }
+
+    public required string Description { get; set; }
+    public required Func<Request, CancellationToken, Task<Response>> Execute { get; set; }
+
+    public object DescribeTool() => new
+    {
+        type = "function",
+        name = Name,
+        description = Description,
+        strict = true,
+        parameters = JSonSchema.For(typeof(Request)),
+    };
+
+    Task<object> IChatbotAgentTool.DoExecuteAsync()
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public static class JSonSchema
+{
+    public static object For(Type type) => ForInternal(type, new HashSet<Type>());
+    public static object ForInternal(Type type, HashSet<Type> visited)
+    {
+        if (type == typeof(string))
+            return new { type = "string" };
+
+        if (type == typeof(int) || type == typeof(long) || type == typeof(short))
+            return new { type = "integer" };
+
+        if (type == typeof(float) || type == typeof(double) || type == typeof(decimal))
+            return new { type = "number" };
+
+        if (type == typeof(bool))
+            return new { type = "boolean" };
+
+        if (type == typeof(DateTime) || type == typeof(DateTimeOffset))
+            return new { type = "string", format = "date-time" };
+
+        if (type.IsEnum)
+            return new
+            {
+                type = "string",
+                enumValues = Enum.GetNames(type)
+            };
+
+        if (typeof(System.Collections.IEnumerable).IsAssignableFrom(type) && type != typeof(string))
+        {
+            var elementType = type.IsArray
+                ? type.GetElementType()!
+                : type.GetGenericArguments().FirstOrDefault() ?? typeof(object);
+
+            return new
+            {
+                type = "array",
+                items = ForInternal(elementType, visited)
+            };
+        }
+
+        // Avoid infinite recursion
+        if (visited.Contains(type))
+            return new { type = "object" };
+
+        visited.Add(type);
+
+        // Default: treat as object with properties
+        var props = type
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => p.CanRead)
+            .ToDictionary(
+                p => p.Name,
+                p => ForInternal(p.PropertyType, visited)
+            );
+
+        return new
+        {
+            type = "object",
+            properties = props
+        };
+    }
 }
 
 public class ChatbotAgent
@@ -186,8 +291,18 @@ public class ChatbotAgent
             throw new InvalidOperationException($"No prompt with name '{0}'. Did you mean {Entity.Descriptions.CommaOr(a => a.PromptName)}");
 
 
-        return ReplacementRegex.Replace(prompt.Content, a => Code.MessageReplacement.GetOrThrow(a.Groups["replacement"].Value)(context));
+        return ReplacementRegex.Replace(prompt.Content, a => Code.MessageReplacements.GetOrThrow(a.Groups["replacement"].Value)(context));
     }
+
+    internal AgentInfo ToInfo() => new AgentInfo
+    {
+        tools = this.Code.Tools.Select(a => a.Name).ToArray()
+    };
+}
+
+public class AgentInfo
+{
+    public string[] tools;
 }
 
 public class CommandArguments

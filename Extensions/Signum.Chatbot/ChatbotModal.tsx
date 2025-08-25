@@ -97,14 +97,14 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
                 id: id,
                 modified: false,
                 isNew: false,
-                isCommand: false,
+                isToolCall: false,
                 role: "User",
                 chatSession: currentSessionRef!.current!,
                 message: questionRef.current,
               }));
               break;
             }
-            case "AssistantCommand": {
+            case "AssistantToolCall": {
               setAnswer("Assistant", true);
               break;
             }
@@ -185,6 +185,12 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
           value={questionRef.current}
           disabled={isLoadingRef.current || messagesRef.current == undefined}
           onChange={(e) => { questionRef.current = e.target.value; forceUpdate() }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleCreateRequestAsync();
+            }
+          }}
         />
         <button className="btn btn-primary" onClick={handleCreateRequestAsync} title={ChatbotMessage.Send.niceToString()} disabled={isLoadingRef.current || messagesRef.current == undefined}>
           <FontAwesomeIcon icon={faPaperPlane} />
@@ -192,9 +198,9 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
       </div>
     </div>
   );
-  function setAnswer(role: ChatMessageRole, isCommand: boolean = false) {
+  function setAnswer(role: ChatMessageRole, isToolCall: boolean = false) {
     currentAnswerRef.current = ChatMessageEntity.New({
-      isCommand: isCommand,
+      isToolCall: isToolCall,
       role: role,
       chatSession: currentSessionRef!.current!,
       message: "",

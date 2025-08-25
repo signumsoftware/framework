@@ -1,13 +1,17 @@
-using Signum.Chatbot.Agents;
 using Signum.Chatbot.Providers;
+using Signum.Utilities.Synchronization;
+using System.Formats.Tar;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace Signum.Chatbot;
 
 
 public static class ChatbotLogic
 {
-
     [AutoExpressionField]
     public static IQueryable<ChatMessageEntity> Messages(this ChatSessionEntity session) =>
         As.Expression(() => Database.Query<ChatMessageEntity>().Where(a => a.ChatSession.Is(session)));
@@ -15,12 +19,12 @@ public static class ChatbotLogic
     public static ResetLazy<Dictionary<Lite<ChatbotLanguageModelEntity>, ChatbotLanguageModelEntity>> LanguageModels = null!;
     public static ResetLazy<Lite<ChatbotLanguageModelEntity>?> DefaultLanguageModel = null!;
 
-
     public static Dictionary<ChatbotProviderSymbol, IChatbotProvider> Providers = new Dictionary<ChatbotProviderSymbol, IChatbotProvider>
     {
         { ChatbotProviders.OpenAI, new OpenAIChatbotProvider()},
-        //{ ChatbotProviders.Gemini, new AnthropicChatbotProvider()},
         { ChatbotProviders.Anthropic, new AnthropicChatbotProvider()},
+        { ChatbotProviders.DeepSeek, new DeepSeekChatbotProvider()},
+        { ChatbotProviders.Grok, new GrokChatbotProvider()},
         { ChatbotProviders.Mistral, new MistralChatbotProvider()},
     };
 
@@ -41,17 +45,41 @@ public static class ChatbotLogic
 
             sb.Include<ChatbotLanguageModelEntity>()
                 .WithSave(ChatbotLanguageModelOperation.Save)
-                .WithDelete(ChatbotLanguageModelOperation.Delete)
                 .WithUniqueIndex(a=>a.IsDefault, a => a.IsDefault == true)
                 .WithQuery(() => e => new
                 {
                     Entity = e,
                     e.Id,
+                    e.IsDefault,
                     e.Provider,
                     e.Model,
                     e.Temperature,
                     e.MaxTokens,
                 });
+
+            new Graph<ChatbotLanguageModelEntity>.Execute(ChatbotLanguageModelOperation.MakeDefault)
+            {
+                CanExecute = a => !a.IsDefault ? null : ValidationMessage._0IsSet.NiceToString(Entity.NicePropertyName(() => a.IsDefault)),
+                Execute = (e, _) =>
+                {
+                    var other = Database.Query<ChatbotLanguageModelEntity>().Where(a => a.IsDefault).SingleOrDefaultEx();
+                    if(other != null)
+                    {
+                        other.IsDefault = false;
+                        other.Execute(ChatbotLanguageModelOperation.Save);
+                    }
+
+                    e.IsDefault = true;
+                    e.Save();
+                }
+            }.Register();
+
+
+            new Graph<ChatbotLanguageModelEntity>.Delete(ChatbotLanguageModelOperation.Delete)
+            {
+                Delete = (e, _) => { e.Delete(); },
+            }.Register();
+
 
             LanguageModels = sb.GlobalLazy(() => Database.Query<ChatbotLanguageModelEntity>().ToDictionary(a => a.ToLite()), new InvalidateWith(typeof(ChatbotLanguageModelEntity)));
             DefaultLanguageModel = sb.GlobalLazy(() => LanguageModels.Value.Values.SingleOrDefaultEx(a => a.IsDefault)?.ToLite(), new InvalidateWith(typeof(ChatbotLanguageModelEntity)));
@@ -80,7 +108,7 @@ public static class ChatbotLogic
                     Entity = e,
                     e.Id,
                     e.Role,
-                    e.IsCommand,
+                    e.IsToolCall,
                     e.Message,
                     e.ChatSession,
                 });
@@ -91,7 +119,7 @@ public static class ChatbotLogic
     {
         var prompt = ChatbotAgentLogic.GetAgent(DefaultAgent.QuestionSumarizer).GetDescribe(null, history);
         StringBuilder sb = new StringBuilder();
-        await foreach (var item in AskQuestionAsync([new ChatMessage { Role = ChatMessageRole.System, Content = prompt }], history.LanguageModel, ct))
+        await foreach (var item in AskStreaming([new ChatMessage { Role = ChatMessageRole.System, Content = prompt }], history.LanguageModel, ct))
         {
             sb.Append(item);
         }
@@ -101,7 +129,7 @@ public static class ChatbotLogic
     }
 
 
-    public static void RegisterProvider(ChatbotProviderSymbol symbol, IChatbotProvider provider)
+    public static void RegisterProvider(ChatbotProviderSymbol symbol, ChatbotProviderBase provider)
     {
         Providers.Add(symbol, provider);
     }
@@ -113,39 +141,24 @@ public static class ChatbotLogic
     }
 
 
-    public static  IAsyncEnumerable<string> AskQuestionAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model,  CancellationToken ct)
+    public static  IAsyncEnumerable<string> AskStreaming(List<ChatMessage> messages, ChatbotLanguageModelEntity model,  CancellationToken ct)
     {
         return  Providers.GetOrThrow(model.Provider).AskStreaming(messages, model, ct);
     }
 
-    public static Task<string?> GetAgent(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
-    {
-        return Providers.GetOrThrow(model.Provider).AskAsync(messages, model, ct);
-    }
-
+    //public static Task<string?> AskAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
+    //{
+    //    return Providers.GetOrThrow(model.Provider).AskAsync(messages, model, ct);
+    //}
 }
 
 
 public interface IChatbotProvider
 {
-    string[] GetModelNames();
-
-    string[] GetModelVersions(string name);
-
     IAsyncEnumerable<string> AskStreaming(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct);
-
-    async Task<string?> AskAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
-    {
-        var sb = new StringBuilder();
-
-        await foreach (var item in AskStreaming(messages, model, ct))
-        {
-            sb.Append(item);
-        }
-
-        return sb.ToString();
-    }
+    string[] GetModelNames();
 }
+
 
 
 public class ConversationHistory
@@ -159,7 +172,12 @@ public class ConversationHistory
 
     public List<ChatMessage> GetMessages()
     {
-        return Messages.Select( c => new ChatMessage() { Role = c.Role, Content = c.Message}).ToList();
+        return Messages.Select( c => new ChatMessage()
+        {
+            Role = c.Role,
+            Content = c.Message,
+            ToolID = c.ToolID
+        }).ToList();
     }
 }
 
@@ -167,5 +185,8 @@ public class ConversationHistory
 public class ChatMessage
 {
     public ChatMessageRole Role;
-    public string Content; 
+    public string Content;
+    public string? ToolID;
+
+    public override string ToString() => $"{Role}: {Content}";
 }

@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using Signum.Authorization;
-using Signum.Chatbot.Agents;
 using Signum.Utilities;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -15,12 +14,20 @@ namespace Signum.Chatbot;
 
 public class ChatbotController : Controller
 {
-    [HttpGet("api/chatbot/models/{providerKey}")]
-    public string[] GetMessagesBySessionId(string providerKey)
+    [HttpGet("api/chatbot/provider/{providerKey}/models")]
+    public string[] GetModels(string providerKey)
     {
         var messages = ChatbotLogic.GetModelNames(SymbolLogic<ChatbotProviderSymbol>.ToSymbol(providerKey));
 
         return messages;
+    }
+
+    [HttpGet("api/chatbot/agent/{agentCodeKey}")]
+    public AgentInfo GetAgentInfo(string agentCodeKey)
+    { 
+        var agent = ChatbotAgentLogic.GetAgent(SymbolLogic<ChatbotAgentCodeSymbol>.ToSymbol(agentCodeKey));
+
+        return agent.ToInfo();
     }
 
     [HttpGet("api/chatbot/messages/{sessionID}")]
@@ -82,14 +89,14 @@ public class ChatbotController : Controller
             lastAnswer = "";
             bool isCommand = false;
 
-            await foreach (var item in ChatbotLogic.AskQuestionAsync(history.GetMessages(), history.LanguageModel, ct))
+            await foreach (var item in ChatbotLogic.AskStreaming(history.GetMessages(), history.LanguageModel, ct))
             {
                 if (lastAnswer.Length == 0)
                 {
                     if (item.StartsWith("$"))
                     {
                         isCommand = true;
-                        await resp.WriteAsync(UINotification("AssistantCommand"), ct);
+                        await resp.WriteAsync(UINotification("AssistantToolCall"), ct);
                     }
                     else
                     {
@@ -119,13 +126,13 @@ public class ChatbotController : Controller
             {
                 await resp.WriteAsync(UINotification("System"), ct);
                 string describeResponse = await ChatbotAgentLogic.GetDescribe(parsedCommand.args);
-                responseMsg = NewChatMessage(history.Session.ToLite(), describeResponse, ChatMessageRole.System).Save();
+                responseMsg = NewChatMessage(history.Session.ToLite(), describeResponse, ChatMessageRole.Tool, toolId: parsedCommand.commandName).Save();
             }
             else
             {
                 await resp.WriteAsync(UINotification("Tool"), ct);
                 string toolResponse = await ChatbotAgentLogic.EvaluateTool(parsedCommand.commandName, parsedCommand.args, ct);
-                responseMsg = NewChatMessage(history.Session.ToLite(), toolResponse, ChatMessageRole.Tool).Save();
+                responseMsg = NewChatMessage(history.Session.ToLite(), toolResponse, ChatMessageRole.Tool, toolId: parsedCommand.commandName).Save();
             }   
 
             history.Messages.Add(responseMsg);
@@ -190,15 +197,17 @@ public class ChatbotController : Controller
         return history;
     }
 
-
-    ChatMessageEntity NewChatMessage(Lite<ChatSessionEntity> session, string message, ChatMessageRole role, bool isCommand = false)
+    ChatMessageEntity NewChatMessage(Lite<ChatSessionEntity> session, string message, ChatMessageRole role, 
+        bool isCommand = false, 
+        string? toolId = null)
     {
         var command = new ChatMessageEntity()
         {
             ChatSession = session,
             Message = message,
             Role = role,
-            IsCommand = isCommand,
+            IsToolCall = isCommand,
+            ToolID = toolId,
         };
 
         return command;

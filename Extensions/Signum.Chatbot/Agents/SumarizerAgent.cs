@@ -21,12 +21,11 @@ internal static class SumarizerAgent
 
                         $<Conversation>
                         """,
-                        PromptName = "Default",
                     },
                 },
               
             },
-            MessageReplacement =
+            MessageReplacements =
             {
                 { "Conversation",  ctx =>  ((ConversationHistory)ctx!).GetMessages().Where(a=>a.Role ==  ChatMessageRole.User).Select((a, i) => $"#Question {(i +1)}:#\n{a.Content}").ToString("\n\n").Etc(500) },
             }

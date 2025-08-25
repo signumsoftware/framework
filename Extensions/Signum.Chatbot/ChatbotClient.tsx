@@ -2,8 +2,7 @@ import * as React  from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet, ajaxPostRaw, wrapRequest, AjaxOptions } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, ChatbotMessage, ChatbotProviderSymbol } from './Signum.Chatbot'
-import { ChatbotAgentEntity, ChatbotAgentDescriptionsEmbedded } from './Signum.Chatbot.Agents';
+import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, ChatbotMessage, ChatbotProviderSymbol, ChatbotAgentCodeSymbol, ChatbotAgentDescriptionsEmbedded, ChatbotAgentEntity } from './Signum.Chatbot'
 import { toAbsoluteUrl } from '../../Signum/React/AppContext';
 import { Lite, MList, registerToString } from '../../Signum/React/Signum.Entities';
 
@@ -50,11 +49,19 @@ export namespace ChatbotClient {
 
 
     export function getModels(provider: ChatbotProviderSymbol): Promise<Array<string>> {
-      return ajaxGet({ url: "/api/chatbot/models/" + provider.key });
+      return ajaxGet({ url: `/api/chatbot/provider/${provider.key}/models` });
+    }
+
+    export function getAgentInfo(agentCode: ChatbotAgentCodeSymbol): Promise<AgentInfo> {
+      return ajaxGet({ url: "/api/chatbot/agent/" + agentCode.key });
     }
 
     export function getMessagesBySessionId(sessionId: string | number | undefined): Promise<Array<ChatMessageEntity>> {
       return ajaxGet({ url: "/api/chatbot/messages/" + sessionId });
     }
+  }
+
+  interface AgentInfo {
+    resources: string[];
   }
 }

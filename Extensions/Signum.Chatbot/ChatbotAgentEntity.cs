@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace Signum.Chatbot.Agents;
+namespace Signum.Chatbot;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class ChatbotAgentEntity : Entity
@@ -11,6 +11,14 @@ public class ChatbotAgentEntity : Entity
     public string ShortDescription { get; set; }
 
     public MList<ChatbotAgentDescriptionsEmbedded> Descriptions { get; set; }
+
+    protected override bool IsPropertyReadonly(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(Code))
+            return true;
+
+        return base.IsPropertyReadonly(pi);
+    }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(()  => Code.ToString());
