@@ -710,3 +710,8 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
         height: 48px;
         padding: 8px;
     }
+
+.btn.input-group-text {
+    background: var(--bs-tertiary-bg);
+    border: var(--bs-border-width) solid var(--bs-border-color);
+}

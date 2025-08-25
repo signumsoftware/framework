@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Signum.Upgrade.Upgrades;
 
-class Upgrade_20250724_React19Router7 : CodeUpgradeBase
+class Upgrade_20250824_React19Router7 : CodeUpgradeBase
 {
     public override string Description => "Webpack to Vite, React 19.1 and React Router 7.7";
 
@@ -119,36 +119,16 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
                 a => a.Contains("string json"),
                 a => a.Contains("string vendor"),
                 """
-                                int? vitePort = Configuration.GetValue<int?>("ViteDevServerPort");
-                string mainJs;
-                if (vitePort != null) //yarn dev.
-                {
-                    mainJs = $"http://localhost:{vitePort}/dist/main.tsx";
-                }
-                else //yarn build
-                {
-                    var manifestJson = System.IO.File.ReadAllText(System.IO.Path.Combine(hostingEnv.WebRootPath, "dist/.vite/manifest.json"));
-                    var manifest = JsonNode.Parse(manifestJson)!.AsObject();
-                    var file = manifest["main.tsx"]!["file"]!.GetValue<string>();
-                    mainJs = Url.Content("~/dist/" + file);
-                }
+                int? vitePort = Configuration.GetValue<int?>("ViteDevServerPort");
+                var viteAssets = vitePort != null ? ViteAssets.FromViteServerUrl($"http://localhost:{vitePort}/dist/main.tsx") :
+                	ViteAssets.FromManifestFile(System.IO.Path.Combine(hostingEnv.WebRootPath, "dist/.vite/manifest.json"), "main.tsx");
                 """);
 
             file.InsertBeforeFirstLine(a => a.Contains("<script>"),
                 """
                 @if (vitePort != null)
                 {
-                    var viteRtJs = $"http://localhost:{vitePort}/dist/@vite/client";
-                    var reactRefreshJs = $"http://localhost:{vitePort}/dist/@react-refresh";
-
-                    <script type="module" src="@viteRtJs"></script>
-                    <script type="module">
-                        import RefreshRuntime from '@reactRefreshJs'
-                        RefreshRuntime.injectIntoGlobalHook(window)
-                        window.$RefreshReg$ = () => {}
-                        window.$RefreshSig$ = () => (type) => type
-                        window.__vite_plugin_react_preamble_installed__ = true
-                    </script>
+                    @ViteAssets.LoadViteReactRefresh(vitePort.Value)
                 }
                 """);
 
@@ -169,11 +149,7 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
                 fromLine: a => a.Contains("(function () {"),
                 toLine: a => a.Contains("})();"),
                 """
-                var script = document.createElement('script');
-                script.type = 'module';
-                script.src = "@mainJs";
-                script.onerror = e => showError(new URIError(`The script ${e.target.src} didn't load correctly.`));
-                document.body.appendChild(script);
+                @viteAssets.GetHtmlString(Url)
                 """);
         });
 
@@ -230,6 +206,8 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
             file.UpdateNugetReference("xunit.v3", "3.0.0");
             file.UpdateNugetReference("xunit.runner.visualstudio", "3.1.3");
             file.UpdateNugetReference("Selenium.WebDriver.ChromeDriver", "139.0.7258.6600");
+            file.UpdateNugetReference("SixLabors.ImageSharp", "2.1.11");
+
         });
 
         uctx.ChangeCodeFile(@"package.json", file =>
@@ -248,7 +226,7 @@ class Upgrade_20250724_React19Router7 : CodeUpgradeBase
 
         SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Remember to:");
         SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, "Yarn install");
-        SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, "Delete bin, obj and ts_out inf Framework and your projects");
+        SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, "Delete bin, obj and ts_out in Framework and your projects");
         SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, "Compile again");
     }
 }
