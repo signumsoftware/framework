@@ -58,7 +58,7 @@ function isControlled(p: CollapsableCardProps): [boolean, (isOpen: boolean, e: R
   return [openState, (isOpen: boolean, e: React.MouseEvent) => { setOpenState(isOpen); p.toggle && p.toggle(isOpen, e); }];
 }
 
-export default function CollapsableCard(p: CollapsableCardProps): React.JSX.Element {
+export default function CollapsableCard(p: CollapsableCardProps): React.ReactElement {
 
   const [isOpen, setIsOpen] = isControlled(p);
   const collapsable = (p.collapsable == undefined || p.collapsable == true);

@@ -24,7 +24,7 @@ interface FuncBox<V  extends ModifiableEntity> {
   lastEntity: V;
 }
 
-export function RenderEntity<V extends ModifiableEntity | Lite<Entity> | null>(p: RenderEntityProps<V>): React.JSX.Element | null {
+export function RenderEntity<V extends ModifiableEntity | Lite<Entity> | null>(p: RenderEntityProps<V>): React.ReactElement | null {
 
   var e = p.ctx.value
 

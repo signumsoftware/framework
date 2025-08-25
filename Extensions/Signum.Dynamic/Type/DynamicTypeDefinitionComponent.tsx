@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Combobox } from 'react-widgets'
+import { Combobox } from 'react-widgets-up'
 import { classes, Dic } from '@framework/Globals'
 import { Binding, EntityDataValues, EntityKindValues, EntityKind, PropertyRoute, Type } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
@@ -28,6 +28,7 @@ import { TextAreaLine } from '@framework/Lines'
 import Validators = DynamicTypeClient.Validators;
 import DynamicProperty = DynamicTypeClient.DynamicProperty;
 import DynamicTypeDefinition = DynamicTypeClient.DynamicTypeDefinition;
+import { JSX } from 'react'
 
 export interface DynamicTypeDesignContext {
   refreshView: () => void;

@@ -14,7 +14,7 @@ import "./Login.css"
 export interface LoginContext {
   loading: string | undefined;
   setLoading: (loading: string | undefined) => void;
-  userName?: React.RefObject<HTMLInputElement>;
+  userNameRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 function LoginPage(): React.JSX.Element {
@@ -65,7 +65,7 @@ export default LoginPage;
 
 export function LoginForm(p: { ctx: LoginContext }): React.JSX.Element {
   const userName = React.useRef<HTMLInputElement>(null);
-  p.ctx.userName = userName;
+  p.ctx.userNameRef = userName;
   const password = React.useRef<HTMLInputElement>(null);
   const rememberMe = React.useRef<HTMLInputElement>(null);
   const [modelState, setModelState] = React.useState<ModelState | undefined>(undefined);

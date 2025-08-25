@@ -37,20 +37,12 @@ export interface HtmlEditorProps {
   innerRef?: React.Ref<LexicalEditor>;
   plugins?: HtmlEditorExtension[];
   handleKeybindings?: (event: KeyboardEvent) => boolean;
-  toolbarButtons?: (
-    c: HtmlEditorController
-  ) => React.ReactElement | React.ReactFragment | null;
+  toolbarButtons?: (c: HtmlEditorController) => React.ReactNode;
   placeholder?: React.ReactNode;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   initiallyFocused?: boolean | number;
-  onEditorFocus?: (
-    e: React.FocusEvent,
-    controller: HtmlEditorController
-  ) => void;
-  onEditorBlur?: (
-    e: React.FocusEvent,
-    controller: HtmlEditorController
-  ) => void;
+  onEditorFocus?: (e: React.FocusEvent, controller: HtmlEditorController) => void;
+  onEditorBlur?: (e: React.FocusEvent, controller: HtmlEditorController) => void;
 }
 
 const createUid = () => Math.random().toString(36).substring(2, 9);

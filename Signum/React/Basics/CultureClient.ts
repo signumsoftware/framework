@@ -46,7 +46,7 @@ export namespace CultureClient {
     });
   }
   
-  export module API {
+  export namespace API {
     export function fetchCultures(): Promise<CultureInfoEntity[]> {
       return ajaxGet({ url: "/api/culture/cultures" });
     }

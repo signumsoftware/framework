@@ -337,7 +337,7 @@ export function ErrorBlock(p: { error: WebApiHttpError }): React.JSX.Element {
   );
 }
 
-function textDanger(message: string | null | undefined): React.ReactFragment | null | undefined {
+function textDanger(message: string | null | undefined): React.ReactNode | null | undefined {
 
   if (typeof message == "string")
     return message.split("\n").map((s, i) => <p key={i} className="text-danger">{s}</p>);

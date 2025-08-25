@@ -46,7 +46,7 @@ export namespace OmniboxClient {
   }
   
   
-  export function renderItem(result: OmniboxResult): React.ReactChild {
+  export function renderItem(result: OmniboxResult): React.ReactNode {
     const items = result.resultTypeName == "HelpOmniboxResult" ?
       renderHelpItem(result as HelpOmniboxResult) :
       getProvider(result.resultTypeName).renderItem(result);

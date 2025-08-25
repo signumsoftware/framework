@@ -83,6 +83,20 @@ public class JoinGroupTest
     }
 
     [Fact]
+    public void FullOuterJoinWithFilter()
+    {
+        var query = (from b in Database.Query<AlbumEntity>().Where(b => b.Year == 1993).DefaultIfEmpty() 
+                     join a in Database.Query<ArtistEntity>().DefaultIfEmpty() on b.Author equals a
+                     where b == null
+                     select new { Artist = a.Name, Album = b.Name });
+
+        var list = query.ToList();
+
+        Assert.True(list.Any()); //if the Year = 1993 is moved out the condition is impossible (b == null && b.Year 1993)
+
+    }
+
+    [Fact]
     public void FullOuterJoinEntity()
     {
         var songsAlbum = (from a in Database.Query<ArtistEntity>().DefaultIfEmpty()

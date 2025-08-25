@@ -2,7 +2,6 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { RestLogEntity } from '../Signum.Rest'
 import { TypeContext, AutoLine, EntityLine, EntityRepeater, EntityTable } from "@framework/Lines";
-import { } from "@framework/ConfigureReactWidgets";
 import { RestClient } from '../RestClient'
 import { DiffDocument } from '../../Signum.DiffLog/Templates/DiffDocument';
 import * as AppContext from '@framework/AppContext'

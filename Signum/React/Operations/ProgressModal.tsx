@@ -18,7 +18,7 @@ interface ProgressModalProps<T> extends IModalProps<Operations.API.ProgressStep<
   makeRequest: () => Promise<Response>;
 }
 
-export function ProgressModal<T>(p: ProgressModalProps<T>): React.JSX.Element {
+export function ProgressModal<T>(p: ProgressModalProps<T>): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();

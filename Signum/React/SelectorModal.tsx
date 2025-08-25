@@ -19,7 +19,7 @@ interface SelectorModalProps extends IModalProps<any> {
   renderGroup?: (groupKey: string) => React.ReactNode;
 }
 
-function SelectorModal(p: SelectorModalProps): React.JSX.Element {
+function SelectorModal(p: SelectorModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
   const [selectedItems, setSelectedItems] = React.useState<unknown[]>([]);

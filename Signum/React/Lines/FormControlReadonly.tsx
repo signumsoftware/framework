@@ -12,7 +12,7 @@ export interface FormControlReadonlyProps {
   id: string;
 }
 
-export function FormControlReadonly({ ctx, htmlAttributes: attrs, className, innerRef, children, id }: FormControlReadonlyProps): React.JSX.Element {
+export function FormControlReadonly({ ctx, htmlAttributes: attrs, className, innerRef, children, id }: FormControlReadonlyProps): React.ReactElement {
 
   const array = React.Children.toArray(children);
   const onlyText = array.length == 1 && typeof array[0] == "string" ? array[0] as string : undefined;

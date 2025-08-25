@@ -1,19 +1,19 @@
 {
   "compilerOptions": {
-    "target": "es2022",
+    "target": "ESNext",
     "isolatedDeclarations": true,
     "sourceMap": true,
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "incremental": true,
     "composite": true,
     //"noEmit": true,
     "strict": true,
     "declarationMap": true,
     "lib": [
-      "ES2022",
+      "ESNext",
       "dom"
     ]
   }

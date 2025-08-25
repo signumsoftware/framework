@@ -7,7 +7,7 @@ import { FrameMessage } from '../Signum.Entities';
 
 
 
-export function CopyHealthCheckButton(p: { name: string, healthCheckUrl: string, clickUrl: string }): React.JSX.Element | null {
+export function CopyHealthCheckButton(p: { name: string, healthCheckUrl: string, clickUrl: string }): React.ReactElement | null {
 
   const supportsClipboard = (navigator.clipboard && window.isSecureContext);
   if (!supportsClipboard)

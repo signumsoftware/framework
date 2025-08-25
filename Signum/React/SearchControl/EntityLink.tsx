@@ -19,7 +19,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
   shy?: boolean
 }
 
-export default function EntityLink(p: EntityLinkProps): React.JSX.Element {
+export default function EntityLink(p: EntityLinkProps): React.ReactElement {
 
   const { lite, inSearch, children, onNavigated, getViewPromise, inPlaceNavigation, shy, ...htmlAtts } = p;
 

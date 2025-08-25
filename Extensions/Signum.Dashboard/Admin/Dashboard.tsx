@@ -78,7 +78,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
       <div>
         <div className="d-flex">
           {icon && <div className="mx-2">
-            <FontAwesomeIcon icon={fallbackIcon(icon)} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag}
+            <FontAwesomeIcon icon={fallbackIcon(icon)} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag as any}
               onClick={() => selectIcon(tc).then(a => {
                 if (a) {
                   tc.value.iconName = a.iconName;

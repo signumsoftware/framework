@@ -471,7 +471,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
 
 export default SearchValue;
 
-export function renderTimeMachineIcon(hasHistoryChanges: boolean | undefined, transform: string): React.JSX.Element | null {
+export function renderTimeMachineIcon(hasHistoryChanges: boolean | undefined, transform: string): React.ReactElement | null {
 
   if (hasHistoryChanges === undefined)
     return null;

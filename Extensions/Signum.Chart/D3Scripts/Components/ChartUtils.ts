@@ -142,7 +142,6 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         case "Date":
         case "WeekStart":
         case "MonthStart":
-        case "MonthStart":
           return {
             normalized: qt.parent,
             lastPart : qt,

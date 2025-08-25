@@ -4,7 +4,7 @@ import { TypeContext } from "../Lines";
 import { ViewReplacer } from "./ReactVisitor";
 import { ViewPromise } from '../Navigator';
 
-export function ViewOverrider<T extends ModifiableEntity>(p: { ctx: TypeContext<T>, viewOverride?: (replacer: ViewReplacer<T>) => void, children: React.ReactNode }): React.JSX.Element {
+export function ViewOverrider<T extends ModifiableEntity>(p: { ctx: TypeContext<T>, viewOverride?: (replacer: ViewReplacer<T>) => void, children: React.ReactNode }): React.ReactElement {
 
   var child = React.Children.only(p.children);
 
@@ -20,5 +20,5 @@ export function ViewOverrider<T extends ModifiableEntity>(p: { ctx: TypeContext<
   }
 
   var newFunc = ViewPromise.surroundFunctionComponent(component as React.FunctionComponent<{ ctx: TypeContext<T> }>, [{ override: p.viewOverride! }])
-  return <div>{React.createElement(newFunc, child.props)}</div>;
+  return <div>{React.createElement(newFunc, child.props as any)}</div>;
 }

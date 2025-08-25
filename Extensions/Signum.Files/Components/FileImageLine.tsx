@@ -11,8 +11,10 @@ import { FileUploader } from './FileUploader'
 import { FileImage } from './FileImage';
 import "./Files.css"
 import { FetchAndRemember } from '@framework/Lines'
-import { genericForwardRef, useController } from '@framework/Lines/LineBase'
+import { genericMemo, useController } from '@framework/Lines/LineBase'
 import { ImageModal } from './ImageModal'
+import { FileLineProps } from './FileLine'
+import { JSX } from 'react/jsx-runtime'
 
 export { FileTypeSymbol };
 
@@ -25,6 +27,7 @@ export interface FileImageLineProps<V extends ModifiableEntity & IFile | Lite<IF
   imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>;
   maxSizeInBytes?: number;
   ajaxOptions?: Omit<Services.AjaxOptions, "url">;
+  ref?: React.Ref<FileImageLineController<V>>;
 }
 
 
@@ -54,9 +57,9 @@ export class FileImageLineController<V extends ModifiableEntity & IFile | Lite<I
   }
 }
 
-export const FileImageLine: <V extends (ModifiableEntity & IFile) | Lite<IFile & Entity> | null>(props: FileImageLineProps<V> & React.RefAttributes<FileImageLineController<V>>) => React.ReactNode | null =
-  genericForwardRef(function FileImageLine<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null>(props: FileImageLineProps<V>, ref: React.Ref<FileImageLineController<V>>) {
-    const c = useController(FileImageLineController, props, ref);
+export const FileImageLine: <V extends (ModifiableEntity & IFile) | Lite<IFile & Entity> | null>(props: FileImageLineProps<V>) => React.ReactNode | null=
+  genericMemo(function FileImageLine<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null>(props: FileImageLineProps<V>): JSX.Element | null {
+    const c = useController<FileImageLineController<V>, FileImageLineProps<V>, V>(FileImageLineController, props);
     const p = c.props;
 
     const hasValue = !!p.ctx.value;

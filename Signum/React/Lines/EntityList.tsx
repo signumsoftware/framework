@@ -1,13 +1,14 @@
 import * as React from 'react'
-import { ModifiableEntity, Lite, Entity, is, getToString, EntityControlMessage } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, is, getToString, EntityControlMessage, MList } from '../Signum.Entities'
 import { FormGroup } from './FormGroup'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
-import { genericForwardRef, useController } from './LineBase';
+import { genericMemo, useController } from './LineBase';
 import { classes } from '../Globals';
 import { EntityBaseController } from './EntityBase';
 
 export interface EntityListProps<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseProps<V> {
   size?: number;
+  ref?: React.Ref<EntityListController<V>>;
 }
 
 export class EntityListController<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseController<EntityListProps<V>, V>
@@ -68,7 +69,7 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
       });
   };
 
-  renderViewButton(btn: boolean, item: V): React.JSX.Element | undefined {
+  renderViewButton(btn: boolean, item: V): React.ReactElement | undefined {
 
     if (!this.canView(item))
       return undefined;
@@ -82,7 +83,7 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
     );
   }
 
-  renderRemoveButton(btn: boolean, item: V): React.JSX.Element | undefined {
+  renderRemoveButton(btn: boolean, item: V): React.ReactElement | undefined {
     if (!this.canRemove(item))
       return undefined;
 
@@ -146,8 +147,9 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
 }
 
 
-export const EntityList: <V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V> & React.RefAttributes<EntityListController<V>>) => React.ReactNode | null = genericForwardRef(function EntityList<V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V>, ref: React.Ref<EntityListController<V>>) {
-  const c = useController(EntityListController, props, ref);
+export const EntityList: <V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V>) => React.ReactNode | null =
+  genericMemo(function EntityList<V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V>) {
+  const c = useController<EntityListController<V>, EntityListProps<V>, MList<V>>(EntityListController, props);
   const p = c.props;
   const list = p.ctx.value!;
 
