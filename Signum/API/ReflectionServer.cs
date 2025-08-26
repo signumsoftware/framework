@@ -60,7 +60,7 @@ public static class ReflectionServer
     {
         TypesByName.Reset();
         EntityAssemblies.GetOrCreate(exampleType.Assembly).Add(exampleType.Namespace!);
-        OverrideIsNamespaceAllowed[exampleType.Namespace!] = allowed;
+        OverrideIsNamespaceAllowed.Add(exampleType.Namespace!, allowed);
     }
 
     internal static void Start()

@@ -28,7 +28,7 @@ public static class ConcurrentUserLogic
                 });
 
             if (sb.WebServerBuilder != null)
-                ConcurrentUserServer.Start(sb.WebServerBuilder.WebApplication);
+                ConcurrentUserServer.Start(sb.WebServerBuilder);
         }
     }
 }

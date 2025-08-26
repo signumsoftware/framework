@@ -12,9 +12,12 @@ namespace Signum.Chart;
 
 public static class ChartServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder wsb)
     {
-        UserAssetServer.Start(app);
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
+        UserAssetServer.Start(wsb);
         UserAssetServer.QueryPermissionSymbols.Add(ChartPermission.ViewCharting);
 
         CustomizeChartRequest();

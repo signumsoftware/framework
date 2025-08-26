@@ -354,21 +354,6 @@ public class SchemaBuilder
     {
         this.Tracer.Switch(methodBase!.DeclaringType!.Name);
 
-        var methods = methodBase.DeclaringType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-         .Where(m => !m.HasAttribute<MethodExpanderAttribute>())
-         .Select(m => m.GetCustomAttribute<ExpressionFieldAttribute>()?.Name)
-         .NotNull()
-         .ToHashSet();
-
-        var fields = methodBase.DeclaringType.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-            .Where(f => f.Name.EndsWith("Expression") && f.FieldType.IsInstantiationOf(typeof(Expression<>)));
-
-        foreach (var f in fields)
-        {
-            if (!methods.Contains(f.Name))
-                throw new InvalidOperationException($"No Method found for expression '{f.Name}' in '{methodBase.DeclaringType.Name}'");
-        }
-
         return LoadedModules.Add((type: methodBase.DeclaringType, method: methodBase.Name));
     }
 

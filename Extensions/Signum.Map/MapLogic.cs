@@ -14,7 +14,7 @@ public static class MapLogic
 
             if (sb.WebServerBuilder != null)
             {
-                MapServer.Start(sb.WebServerBuilder.WebApplication);
+                MapServer.Start(sb.WebServerBuilder);
                 OmniboxParser.Generators.Add(new MapOmniboxResultGenerator(type => OperationLogic.TypeOperations(type).Any()));
             }
         }

@@ -14,7 +14,7 @@ public static class OmniboxLogic
 
             if (sb.WebServerBuilder != null)
             {
-                OmniboxServer.Start(sb.WebServerBuilder.WebApplication);
+                OmniboxServer.Start(sb.WebServerBuilder);
 
                 OmniboxParser.Generators.Add(new EntityOmniboxResultGenenerator());
                 OmniboxParser.Generators.Add(new DynamicQueryOmniboxResultGenerator());
