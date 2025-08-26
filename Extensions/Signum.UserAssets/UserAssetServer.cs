@@ -20,8 +20,11 @@ public static class UserAssetServer
     public static HashSet<PermissionSymbol> QueryPermissionSymbols = new HashSet<PermissionSymbol>();
 
     static bool started;
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder wsb)
     {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         if (started)
             return;
 

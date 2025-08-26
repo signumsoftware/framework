@@ -155,7 +155,7 @@ public static class SchedulerLogic
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
             if (sb.WebServerBuilder != null)
-                SchedulerServer.Start(sb.WebServerBuilder.WebApplication, sb.WebServerBuilder.WebApplication.Lifetime);
+                SchedulerServer.Start(sb.WebServerBuilder);
         }
     }
 

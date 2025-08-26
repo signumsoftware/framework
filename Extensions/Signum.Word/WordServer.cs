@@ -12,13 +12,14 @@ namespace Signum.Word;
 
 public static class WordServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder wsb)
     {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
 
         TemplatingServer.TemplateTokenMessageAllowed += () => TypeAuthLogic.GetAllowed(typeof(WordTemplateEntity)).MaxUI() > TypeAllowedBasic.None;
 
-
-        TemplatingServer.Start(app);
+        TemplatingServer.Start(wsb);
 
         CustomizeFiltersModel();
 

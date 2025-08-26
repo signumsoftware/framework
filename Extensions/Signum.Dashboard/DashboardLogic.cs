@@ -132,7 +132,7 @@ public static class DashboardLogic
 
             if (sb.WebServerBuilder != null)
             {
-                DashboardServer.Start(sb.WebServerBuilder.WebApplication);
+                DashboardServer.Start(sb.WebServerBuilder);
                 OmniboxParser.Generators.Add(new DashboardOmniboxResultGenerator(DashboardLogic.Autocomplete));
             }
         }

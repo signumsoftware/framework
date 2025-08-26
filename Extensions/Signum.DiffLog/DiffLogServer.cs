@@ -8,8 +8,11 @@ namespace Signum.DiffLog;
 
 public static class DiffLogServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder wsb)
     {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         ReflectionServer.RegisterLike(typeof(DiffLogMessage), () => TypeAuthLogic.GetAllowed(typeof(OperationLogEntity)).MaxUI() > TypeAllowedBasic.None);
     }
 }

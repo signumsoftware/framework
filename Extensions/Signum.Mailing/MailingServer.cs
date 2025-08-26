@@ -15,13 +15,16 @@ namespace Signum.Mailing;
 
 public static class MailingServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder wsb)
     {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         TemplatingServer.TemplateTokenMessageAllowed += () => TypeAuthLogic.GetAllowed(typeof(EmailTemplateEntity)).MaxUI() > TypeAllowedBasic.None;
         ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(SmtpDeliveryMethod).Namespace!, () => TypeAuthLogic.GetAllowed(typeof(EmailSenderConfigurationEntity)).MaxUI() > TypeAllowedBasic.None);
 
 
-        TemplatingServer.Start(app);
+        TemplatingServer.Start(wsb);
 
         SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((EmailTemplateEntity et) =>
         {
@@ -43,7 +46,7 @@ public static class MailingServer
 
                     if (templates.HasItems())
                         qd.Extension.Add("emailTemplates", templates);
-                } 
+                }
                 catch (Exception e)
                 {
                     e.LogException(); //An error could make the applicaiton unusable
@@ -74,6 +77,6 @@ public static class MailingServer
         //    });
         //}
 
-     
+
     }
 }

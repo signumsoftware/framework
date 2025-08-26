@@ -54,7 +54,7 @@ public static class TranslationLogic
                 DescriptionManager.NotLocalizedMember += DescriptionManager_NotLocalizedMemeber;
 
             if (sb.WebServerBuilder != null)
-                TranslationServer.Start(sb.WebServerBuilder.WebApplication);
+                TranslationServer.Start(sb.WebServerBuilder);
         }
     }
 
