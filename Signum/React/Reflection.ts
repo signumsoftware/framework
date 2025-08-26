@@ -1050,12 +1050,9 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
 
 const functionRegex = /^function\s*\(\s*(?<param>[$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*(var [^;]*;)?\s*return\s*(?<body>[^;]*)\s*;?\s*}$/;
 const lambdaRegex = /^\s*\(?\s*(?<param>[$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*(({\s*(\"use strict\"\;)?\s*(var [^;]*;)?\s*return\s*(?<body>[^;]*)\s*;?\s*})|(?<body2>[^;]*))\s*$/;
-const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
-const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/;
-const mixinMemberRegex = /^(.*)\.mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/;
-const indexRegex = /^(.*)\[(\d+)\]$/;
-const fixNullPropagator = /^\(([_\w]+)\s*=\s(.*?)\s*\)\s*===\s*null\s*\|\|\s*\1\s*===\s*void 0\s*\?\s*void 0\s*:\s*\1$/;
-const fixNullPropagatorProd = /^\s*null\s*===\(([_\w]+)\s*=\s*(.*?)\s*\)\s*\|\|\s*void 0\s*===\s*\1\s*\?\s*void 0\s*:\s*\1$/;
+const memberRegex = /^(.*?)\??\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
+const memberIndexerRegex = /^(.*?)(\?\.)?\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/;
+const indexRegex = /^(.*?)(\?\.)?\[(\d+)\]$/;
 
 export function getLambdaMembers(lambda: Function): LambdaMember[] {
 
@@ -1072,20 +1069,14 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
 
   while (body != parameter) {
     let m: RegExpExecArray | null;
-    if (m = mixinMemberRegex.exec(body)) {
-      result.push({ name: m[2], type: "Mixin" });
-      body = m[1];
-    }
-    else if (m = memberRegex.exec(body) ?? memberIndexerRegex.exec(body)) {
+
+    if (m = memberRegex.exec(body) ?? memberIndexerRegex.exec(body)) {
       result.push({ name: m[2], type: "Member" });
       body = m[1];
     }
     else if (m = indexRegex.exec(body)) {
       result.push({ name: m[2], type: "Indexer" });
       body = m[1];
-    }
-    else if (m = fixNullPropagator.exec(body) ?? fixNullPropagatorProd.exec(body)) {
-      body = m[2];
     }
     else {
       throw new Error(`Impossible to extract the properties from: ${body}` +
