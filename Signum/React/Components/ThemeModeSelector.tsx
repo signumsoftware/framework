@@ -59,7 +59,7 @@ export function ThemeModeSelector(): JSX.Element {
         {BOOTSTRAP_MODES.map((theme) => (
           <NavDropdown.Item
             key={theme}
-            disabled={bootstrapTheme === theme}
+            active={bootstrapTheme === theme}
             onClick={() => setBootstrapThemeState(theme)}
           >
             <FontAwesomeIcon icon={ICONS[theme]} className="me-2" />
