@@ -5,8 +5,11 @@ namespace Signum.SMS;
 
 public static class SMSServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder app)
     {
+        if (app.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((SMSTemplateEntity et) =>
         {
             if (et.Query != null)

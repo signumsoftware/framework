@@ -34,7 +34,7 @@ public class RestApiKeyLogic
 
 
             if (sb.WebServerBuilder != null)
-                RestApiKeyServer.Start(sb.WebServerBuilder.WebApplication);
+                RestApiKeyServer.Start(sb.WebServerBuilder);
         }
     }
 
