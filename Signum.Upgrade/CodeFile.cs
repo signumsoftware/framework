@@ -194,7 +194,7 @@ public class CodeFile
         });
     }
 
-    internal static string GetIndent(string v)
+    public static string GetIndent(string v)
     {
         return Regex.Match(v, @"^\s*").Value;
     }
