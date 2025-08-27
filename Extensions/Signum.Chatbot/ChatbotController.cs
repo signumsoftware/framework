@@ -25,7 +25,7 @@ public class ChatbotController : Controller
     [HttpGet("api/chatbot/agent/{agentCodeKey}")]
     public AgentInfo GetAgentInfo(string agentCodeKey)
     { 
-        var agent = ChatbotAgentLogic.GetAgent(SymbolLogic<ChatbotAgentCodeSymbol>.ToSymbol(agentCodeKey));
+        var agent = ChatbotAgentLogic.GetAgent(SymbolLogic<ChatbotAgentSymbol>.ToSymbol(agentCodeKey));
 
         return agent.ToInfo();
     }

@@ -8,7 +8,7 @@ internal static class IntroductionAgent
 {
     public static void Register()
     {
-        ChatbotAgentLogic.RegisterAgent(DefaultAgent.Introduction, new ChatbotAgentCode
+        ChatbotAgentLogic.RegisterAgent(DefaultAgent.Introduction, new ChatbotAgent
         {
             IsListedInIntroduction = () => false,
             CreateDefaultEntity = () => new ChatbotAgentEntity
@@ -23,7 +23,7 @@ internal static class IntroductionAgent
 
                         If nothing matches the user's question, politely decline and explain what types of tasks you can assist with.
                         """,
-                RelatedAgents = ChatbotAgentLogic.AgentCodes.Where(kvp => kvp.Value.IsListedInIntroduction()).Select(a=>a.Key).ToMList()
+                RelatedAgents = ChatbotAgentLogic.Agents.Where(kvp => kvp.Value.IsListedInIntroduction()).Select(a=>a.Key).ToMList()
             },
             MessageReplacements =
             {
@@ -41,29 +41,3 @@ internal static class IntroductionAgent
     }
 }
 
-
-class DescribeChatbotAgentTool : IChatbotAgentTool
-{
-    public required string Name { get; set; }
-
-    public required string Description { get; set; }
-
-    public object DescribeTool() => new
-    {
-        type = "function",
-        name = Name,
-        description = Description,
-        strict = true,
-        parameters = JSonSchema.For(typeof(DescribeRequest)),
-    };
-
-    public Task<string> DoExecuteAsync(CommandArguments arguments, CancellationToken token)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-class DescribeRequest : IToolPayload
-{
-    public string AgentName { get; set; }
-}

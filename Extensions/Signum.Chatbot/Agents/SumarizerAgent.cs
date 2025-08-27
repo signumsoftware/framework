@@ -4,7 +4,7 @@ internal static class SumarizerAgent
 {
     public static void Register()
     {
-        ChatbotAgentLogic.RegisterAgent(DefaultAgent.QuestionSumarizer, new ChatbotAgentCode
+        ChatbotAgentLogic.RegisterAgent(DefaultAgent.QuestionSumarizer, new ChatbotAgent
         {
             IsListedInIntroduction = () => false,
             CreateDefaultEntity = () => new ChatbotAgentEntity

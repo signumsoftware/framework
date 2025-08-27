@@ -4,7 +4,7 @@ internal static class SeachControlAgent
 {
     public static void Register()
     {
-        ChatbotAgentLogic.RegisterAgent(DefaultAgent.SearchControl, new ChatbotAgentCode
+        ChatbotAgentLogic.RegisterAgent(DefaultAgent.SearchControl, new ChatbotAgent
         {
             IsListedInIntroduction = () => true,
             CreateDefaultEntity = () => new ChatbotAgentEntity

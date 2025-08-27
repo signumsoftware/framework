@@ -175,7 +175,7 @@ public class ConversationHistory
         return Messages.Select( c => new ChatMessage()
         {
             Role = c.Role,
-            Content = c.Message,
+            Content = c.Message!,
             ToolID = c.ToolID
         }).ToList();
     }

@@ -1,10 +1,4 @@
-using Signum.Utilities.Synchronization;
-using System.IO;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
 
 namespace Signum.Chatbot.Providers;
 
