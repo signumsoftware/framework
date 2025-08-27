@@ -7,9 +7,12 @@ namespace Signum.UserQueries;
 
 public static class UserQueryServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder wsb)
     {
-        UserAssetServer.Start(app);
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
+        UserAssetServer.Start(wsb);
         UserAssetServer.QueryPermissionSymbols.Add(UserQueryPermission.ViewUserQuery);
 
         SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((UserQueryEntity uq) =>

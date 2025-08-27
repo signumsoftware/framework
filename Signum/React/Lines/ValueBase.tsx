@@ -13,7 +13,7 @@ export interface ValueBaseProps<V = any> extends LineBaseProps<V> {
 
 export class ValueBaseController<T extends ValueBaseProps<V>, V> extends LineBaseController<T, V> {
 
-  inputElement!: React.RefObject<HTMLElement>;
+  inputElement!: React.RefObject<HTMLElement | null>;
   init(p: T): void {
     super.init(p);
 
@@ -38,7 +38,7 @@ export class ValueBaseController<T extends ValueBaseProps<V>, V> extends LineBas
       state.valueHtmlAttributes = valueHtmlAttributes;
   }
 
-  withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element, vertical?: boolean): JSX.Element {
+  withItemGroup(input: React.ReactElement, preExtraButton?: React.ReactElement, vertical?: boolean): React.ReactElement {
 
     if (!this.props.unit && !this.props.extraButtons && !this.props.extraButtonsBefore && !preExtraButton) {
         return (

@@ -1,5 +1,6 @@
 import * as d3 from "d3"
 import { EntityData, EntityKind } from '@framework/Reflection'
+import React from "react";
 
 
 export const getColorProviders: Array<(info: SchemaMapInfo) => Promise<ClientColorProvider[]>> = [];
@@ -14,7 +15,7 @@ export interface ClientColorProvider {
   getStroke?: (t: ITableInfo) => string;
   getTooltip: (t: ITableInfo) => string;
   getMask?: (t: ITableInfo) => string | undefined;
-  defs?: JSX.Element[];
+  defs?: React.JSX.Element[];
 }
 
 export interface TableInfo extends ITableInfo {

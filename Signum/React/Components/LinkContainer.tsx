@@ -52,8 +52,8 @@ export function LinkContainer({
     : match);
 
   const handleClick = (event: React.MouseEvent) => {
-    if (child?.props.onClick) {
-      child.props.onClick(event);
+    if ((child?.props as any).onClick) {
+      (child.props as any).onClick(event);
     }
 
     if (onClick) {
@@ -75,8 +75,8 @@ export function LinkContainer({
   };
 
   return React.cloneElement(child, {
-    ...props,
-    className: classes(className, child.props.className,isActive ? (activeClassName ?? "active") : null),
+    ...(props as any),
+    className: classes(className, (child.props as any).className,isActive ? (activeClassName ?? "active") : null),
     style: isActive ? { ...style, ...activeStyle } : style,
     href,
     onClick: handleClick,

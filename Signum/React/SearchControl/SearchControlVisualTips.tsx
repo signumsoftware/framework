@@ -15,7 +15,7 @@ import { getNiceTypeName } from "../Operations/MultiPropertySetter";
 import SearchControl from "./SearchControl";
 import { Finder } from "../Finder";
 
-export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInjectedProps }): React.JSX.Element {
+export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInjectedProps }): React.ReactElement {
   var sc = p.sc;
   var query = getQueryNiceName(sc.props.queryDescription.queryKey);
   var type = sc.props.queryDescription.columns['Entity'].niceTypeName;
@@ -55,7 +55,7 @@ export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInject
   );
 }
 
-export function GroupHelp(p: { injected: OverlayInjectedProps }): React.JSX.Element {
+export function GroupHelp(p: { injected: OverlayInjectedProps }): React.ReactElement {
   return (
     <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 900 }}>
       <Popover.Header as="h3"><strong>{SearchHelpMessage.GroupHelp.niceToString()}</strong></Popover.Header>
@@ -78,7 +78,7 @@ function getSearchMode(sc: SearchControlLoaded): SearchMode {
   return "Search";
 }
 
-export function FilterHelp(p: { queryDescription: QueryDescription, injected: OverlayInjectedProps }): React.JSX.Element {
+export function FilterHelp(p: { queryDescription: QueryDescription, injected: OverlayInjectedProps }): React.ReactElement {
   const [expressionExpanded, setExpressionExpanded] = React.useState(false);
   var type = p.queryDescription.columns['Entity'].niceTypeName;
   const isDefaultQuery = isTypeEntity(p.queryDescription.queryKey);
@@ -109,7 +109,7 @@ export function FilterHelp(p: { queryDescription: QueryDescription, injected: Ov
     </Popover>);
 }
 
-export function ColumnHelp(p: { queryDescription: QueryDescription, injected: OverlayInjectedProps }): React.JSX.Element {
+export function ColumnHelp(p: { queryDescription: QueryDescription, injected: OverlayInjectedProps }): React.ReactElement {
   const [expressionExpanded, setExpressionExpanded] = React.useState(false);
   const type = getNiceTypeName(p.queryDescription.columns['Entity'].type);
   const isDefaultQuery = isTypeEntity(p.queryDescription.queryKey);
@@ -142,7 +142,7 @@ export function ColumnHelp(p: { queryDescription: QueryDescription, injected: Ov
 
 
 
-export function LearnMoreAboutFieldExpressions(p: { expanded: boolean, onSetExpanded: (a: any) => void, showAny: boolean }): React.JSX.Element {
+export function LearnMoreAboutFieldExpressions(p: { expanded: boolean, onSetExpanded: (a: any) => void, showAny: boolean }): React.ReactElement {
   return (
     <div className="mb-2">
       <a href="#" onClick={e => {

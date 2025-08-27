@@ -1029,7 +1029,7 @@ internal class QueryFormatter : DbExpressionVisitor
             CommandExpression command = cea.Commands[i];
             if (i > 0)
             {
-                sb.Append(';');
+                //sb.Append(';');
                 this.AppendNewLine(Indentation.Same);
             }
             this.Visit(command);

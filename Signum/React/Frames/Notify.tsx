@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { classes } from '../Globals'
 import { JavascriptMessage } from '../Signum.Entities'
-import { Transition } from 'react-transition-group'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import "./Notify.css"
@@ -23,7 +22,7 @@ interface NotifyHandle {
   remove(options: NotifyOptions): void;
 }
 
-function Notify(): React.JSX.Element {
+function Notify(): React.ReactElement {
 
   const forceUpdate = useForceUpdate();
 
@@ -79,9 +78,17 @@ function Notify(): React.JSX.Element {
     return () => Notify.singleton = undefined;
   }, []);
 
-  var opt = optionsStack.current.orderByDescending(a => a.priority).firstOrNull();
 
-  function getIcon() {
+  const [visible, setVisible] = React.useState(false);
+  const [currentOpt, setCurrentOpt] = React.useState<NotifyOptions | null>(null);
+
+  React.useEffect(() => {
+    const top = optionsStack.current.orderByDescending(a => a.priority).firstOrNull();
+    setCurrentOpt(top);
+    setVisible(!!top);
+  }, [optionsStack.current.length]);
+
+  function getIcon(opt: NotifyOptions) {
     if (!opt) {
       return undefined;
     }
@@ -116,11 +123,11 @@ function Notify(): React.JSX.Element {
   return (
     <div style={styleLock}>
       <div id="sfNotify" >
-        <Transition in={opt != undefined} timeout={200}>
-          {/*translation is made off for this span to avoid rendering error (Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.) 
-           * that occurs with Google/Microsoft page translator extensions*/}
-          {(state: string) => <span className={classes(opt?.type, "notify", state == "entering" || state == "entered" ? "in" : undefined, "notranslate")} translate="no">{getIcon()}&nbsp;{opt?.text}</span>}
-        </Transition>
+        {currentOpt && (
+          <span className={classes(currentOpt.type, "notify", "in", "notranslate")} translate="no" key={currentOpt.text.toString()}>
+            {getIcon(currentOpt)}&nbsp;{currentOpt.text}
+          </span>
+        )}
       </div>
     </div>
   );

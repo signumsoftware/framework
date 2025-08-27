@@ -317,7 +317,7 @@ export interface PanelPartContentProps<T extends IPartEntity> {
   entity?: Lite<Entity>;
   deps?: React.DependencyList;
   dashboardController: DashboardController;
-  customDataRef: React.MutableRefObject<any>;
+  customDataRef: React.RefObject<any>;
   cachedQueries: {
     [userAssetKey: string]: Promise<CachedQueryJS>
   }

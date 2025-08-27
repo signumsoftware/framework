@@ -63,7 +63,7 @@ export namespace IsolationClient {
   }
   
   
-  export module API {
+  export namespace API {
     export function isolations(): Promise<Lite<IsolationEntity>[]> {
       return ajaxGet({ url: "/api/isolations" });
     }

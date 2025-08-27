@@ -3,10 +3,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as _fontawesome_svg_core from '@fortawesome/fontawesome-svg-core'; //throwaway reference to avoid error the inferred type cannot be named without a reference -> https://github.com/microsoft/TypeScript/issues/5938
 import { classes } from '@framework/Globals'
 import { TypeContext } from '@framework/TypeContext'
-import { ModifiableEntity, EntityControlMessage, newMListElement } from '@framework/Signum.Entities'
+import { ModifiableEntity, EntityControlMessage, newMListElement, MList } from '@framework/Signum.Entities'
 import { EntityListBaseProps, EntityListBaseController } from '@framework/Lines/EntityListBase'
 import { isModifiableEntity } from '@framework/Signum.Entities';
-import { genericForwardRef, useController } from '@framework/Lines/LineBase';
+import { useController } from '@framework/Lines/LineBase';
 import { Aprox, AsEntity } from '@framework/Lines/EntityBase';
 
 
@@ -20,6 +20,7 @@ export interface EntityGridRepeaterProps<V extends ModifiableEntity & IGridEntit
   createAsLink?: boolean;
   /*move?: boolean;*/
   resize?: boolean;
+  ref?: React.Ref<EntityGridRepeaterController<V>>
 }
 
 export interface EntityGridRepaterDragging<V extends ModifiableEntity & IGridEntity> {
@@ -202,8 +203,8 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
 }
 
 
-export const EntityGridRepeater: <V extends ModifiableEntity & IGridEntity>(props: EntityGridRepeaterProps<V> & React.RefAttributes<EntityGridRepeaterController<V>>) => React.ReactNode | null = genericForwardRef(function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(props: EntityGridRepeaterProps<V>, ref: React.Ref<EntityGridRepeaterController<V>>) {
-  const c = useController(EntityGridRepeaterController, props, ref)
+export function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(props: EntityGridRepeaterProps<V>): React.JSX.Element | null {
+  const c = useController<EntityGridRepeaterController<V>, EntityGridRepeaterProps<V>, MList<V>>(EntityGridRepeaterController, props);
   const p = c.props;
 
   if (c.isHidden)
@@ -278,9 +279,7 @@ export const EntityGridRepeater: <V extends ModifiableEntity & IGridEntity>(prop
         onDrop={e => c.handleRowDrop(e, rowIndex)} />
     );
   }
-});
-
-
+}
 
 export interface EntityGridItemProps {
   title?: React.ReactElement<any>;

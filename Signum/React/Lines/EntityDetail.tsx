@@ -4,7 +4,7 @@ import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, isLite, isEntity } from '../Signum.Entities'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { RenderEntity } from './RenderEntity'
-import { genericForwardRef, useController } from './LineBase'
+import { genericMemo, useController } from './LineBase'
 import { getTypeInfos, tryGetTypeInfos } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { TypeBadge } from './AutoCompleteConfig'
@@ -18,6 +18,7 @@ export interface EntityDetailProps<V extends ModifiableEntity | Lite<Entity> | n
   showAsCheckBox?: boolean;
   onEntityLoaded?: () => void;
   showType?: boolean;
+  ref?: React.Ref<EntityDetailController<V>>
 }
 
 
@@ -29,10 +30,10 @@ export class EntityDetailController<V extends ModifiableEntity | Lite<Entity> | 
   }
 }
 
-export const EntityDetail: <V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V> & React.RefAttributes<EntityDetailController<V>>) => React.ReactNode | null =
-  genericForwardRef(function EntityDetail<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>, ref: React.Ref<EntityDetailController<V>>) {
+export const EntityDetail: <V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>) => React.ReactNode | null =
+  genericMemo(function EntityDetail<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>): React.JSX.Element | null {
 
-  const c = useController(EntityDetailController, props, ref);
+    const c = useController<EntityDetailController<V>, EntityDetailProps<V>, V>(EntityDetailController, props);
   const p = c.props;
 
   if (c.isHidden)

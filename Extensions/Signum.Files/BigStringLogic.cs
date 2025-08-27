@@ -88,7 +88,7 @@ public static class BigStringLogic
                 {
                     bs.Text = mixin.File == null ? null : Encoding.UTF8.GetString(mixin.File.GetByteArray());
                     ctx.InvalidateGraph();
-                    mixin.File?.DeleteFileOnCommit();
+                    mixin.File?.TryDeleteFileOnCommit(e => { });
                 }
                 break;
             default:

@@ -40,15 +40,42 @@ public class DeepLTranslator : ITranslator
                 targetLanguage = (await translator.GetTargetLanguagesAsync()).ToList();
 
             if (!sourceLanguages.Any(a => a.Code == from))
-                return null;
+            {
+                var fromNeutral = Neutral(from);
+                var candidates = sourceLanguages.Where(a => Neutral(a) == fromNeutral);
+
+                var best = BestCandidate(from, candidates);
+
+                if (best == null)
+                    return null;
+
+                from = best.Code;
+            }
 
             if (!targetLanguage.Any(a => a.Code == to))
-                return null;
+            {
+                var toNeutral = Neutral(to);
+                var candidates = targetLanguage.Where(a => Neutral(a) == toNeutral);
+
+                var best = BestCandidate(to, candidates);
+
+                if (best == null)
+                    return null;
+
+                to = best.Code;
+            }
 
             var translation = await translator.TranslateTextAsync(list, sourceLanguageCode: from, targetLanguageCode: to);
 
             return translation.Select(a => (string?)a.Text).ToList();
         }
+    }
+
+    private Func<string, IEnumerable<Language>, Language?> BestCandidate = (from, candidates) => candidates.FirstOrDefault();
+
+    string Neutral(string lang)
+    {
+        return lang.TryBefore("-") ?? lang;
     }
 
     private string NormalizeLanguage(string langCode)

@@ -21,7 +21,7 @@ interface PinnedFilterBuilderProps {
   extraSmall?: boolean;
   showGrid?: boolean;
 }
-export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.JSX.Element | null {
+export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.ReactElement | null {
 
   const timeoutWriteText = React.useRef<number | null>(null);
 

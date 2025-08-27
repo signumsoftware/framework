@@ -21,7 +21,7 @@ public static class ChartLogic
 
             if (sb.WebServerBuilder != null)
             {
-                ChartServer.Start(sb.WebServerBuilder.WebApplication);
+                ChartServer.Start(sb.WebServerBuilder);
                 OmniboxParser.Generators.Add(new ChartOmniboxResultGenerator());
                 OmniboxParser.Generators.Add(new UserChartOmniboxResultGenerator(UserChartLogic.Autocomplete));
             }

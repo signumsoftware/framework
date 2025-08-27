@@ -25,7 +25,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       this.setState({ error: undefined, info: undefined });
   }
 
-  render(): React.JSX.Element {
+  render(): React.ReactElement {
     if (this.state.error || this.state.info) {
       return (
         <div className="alert alert-danger" role="alert">

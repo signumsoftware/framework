@@ -6,7 +6,7 @@ import { classes } from '../Globals';
 import { SystemTime, FindOptionsParsed, QueryDescription, SubTokensOptions } from '../FindOptions'
 import { SystemTimeJoinMode, SystemTimeMode, TimeSeriesUnit } from '../Signum.DynamicQuery'
 import { JavascriptMessage } from '../Signum.Entities'
-import { DateTimePicker } from 'react-widgets';
+import { DateTimePicker } from 'react-widgets-up';
 import { QueryTokenString, toLuxonFormat, toNumberFormat } from '../Reflection';
 import { OperationLogEntity } from '../Signum.Operations';
 import { AggregateFunction, QueryTokenDateMessage } from '../Signum.DynamicQuery.Tokens';
@@ -20,7 +20,7 @@ interface SystemTimeEditorProps {
   onChanged: () => void;
 }
 
-export default function SystemTimeEditor(p : SystemTimeEditorProps): React.JSX.Element{
+export default function SystemTimeEditor(p : SystemTimeEditorProps): React.ReactElement{
 
   function renderShowPeriod() {
 

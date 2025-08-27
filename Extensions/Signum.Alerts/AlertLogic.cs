@@ -104,7 +104,7 @@ public static class AlertLogic
             Started = true;
 
             if (sb.WebServerBuilder != null)
-                AlertsServer.Start(sb.WebServerBuilder.WebApplication);
+                AlertsServer.Start(sb.WebServerBuilder);
         }
     }
 

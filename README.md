@@ -54,7 +54,16 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
-* [2024.08.28 CSV Performance Improvements?](https://github.com/signumsoftware/framework/commit/e17aeb8df452dfd8289586ccb0135019ad92de38#commitcomment-150176560)
+
+* [2025.08.22 Webpack -> Vite, React 19, React Router 7.7 and react-widgets-up](https://github.com/signumsoftware/framework/commit/f9aacfc47447c435e3708e86b92538238ca5c9b0#commitcomment-164464873)
+* 2025.07.21 Improvements in charting (translations, scales) ChartColumnType
+* 2025.07.16 Nicer Dashboards
+* 2025.06.23 AutoExpand in QueryTokens
+* 2025.05.25 Adopt LF (\n) as new-line separator for all file types (.ts, .tsx, .cs, etc...) using `.gitattributes`
+* 2025.04.01 Switch `Signum.HtmlEditor` from draft.js (deprecated) to lexical (great work @fwo-bechtle!)
+* 2025.03.03 MList tables have _ separating main table name from MList by default (dbo.Order_Details) 
+* 2024.11.16 DotNet 9
+* [2024.10.28 CSV Performance Improvements?](https://github.com/signumsoftware/framework/commit/e17aeb8df452dfd8289586ccb0135019ad92de38#commitcomment-150176560)
 * [2024.08.19 Time Machine in Charting! ⏲📈](https://github.com/signumsoftware/framework/commit/4a7cc1097f8e862b47d2dfd61216082b1c171be0)
 * [2024.07.02 Isolated Declarations](https://github.com/signumsoftware/framework/commit/bf08a77c430dd133b8eca50d502a14b91224267a)
 * [2024.03.27 Navigator, Finder, Operations, and *Client modules get a `namespace`](https://github.com/signumsoftware/framework/commit/2cf26f9cfe05f8707930bccf3c7427cc1522b99b#commitcomment-140281789)

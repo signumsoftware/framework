@@ -9,10 +9,11 @@ namespace Signum.Files;
 
 public static class FilesServer
 {
-    
-
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder wsb)
     {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         void RegisterFilePathEmbeddedProperty(string propertyName, Func<FilePathEmbedded, object?> getter)
         {
             SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(FilePathEmbedded)).Add(propertyName, new PropertyConverter()

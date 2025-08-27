@@ -1,7 +1,8 @@
 import { $applyNodeReplacement, DecoratorNode, DOMExportOutput, NodeKey } from "lexical";
 import { ImageConverter } from "./ImageConverter";
+import { ReactElement, JSXElementConstructor } from "react";
 
-export class ImageNode<T extends object = {}> extends DecoratorNode<JSX.Element> {
+export class ImageNode<T extends object = {}> extends DecoratorNode<React.ReactElement> {
   constructor(private fileInfo: T, private imageConverter: ImageConverter<T>, key?: NodeKey) {
     super(key);
     this.fileInfo = fileInfo;
@@ -24,7 +25,7 @@ export class ImageNode<T extends object = {}> extends DecoratorNode<JSX.Element>
     return false;
   }
 
-  decorate(): JSX.Element {
+  decorate(): ReactElement {
     return this.imageConverter.renderImage(this.fileInfo);
   }
 

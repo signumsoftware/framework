@@ -204,10 +204,10 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
         entityFormatter={p.entityFormatter}
         extraButtons={p.extraButtons}
         getViewPromise={p.getViewPromise}
-        maxResultsHeight={p.maxResultsHeight}
+        maxResultsHeight={p.maxResultsHeight === undefined ? "400px" : p.maxResultsHeight}
         tag={p.tag}
 
-        defaultIncudeDefaultFilters={p.defaultIncludeDefaultFilters!}
+        defaultIncudeDefaultFilters={p.defaultIncludeDefaultFilters ?? false}
         searchOnLoad={p.searchOnLoad != null ? p.searchOnLoad : true}
         showHeader={p.showHeader != null ? p.showHeader : true}
         pinnedFilterVisible={p.pinnedFilterVisible}
@@ -262,12 +262,6 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
     </ErrorBoundary>
   );
 });
-
-(SearchControl ).defaultProps = {
-  allowSelection: true,
-  maxResultsHeight: "400px",
-  defaultIncludeDefaultFilters: false,
-};
 
 export default SearchControl;
 

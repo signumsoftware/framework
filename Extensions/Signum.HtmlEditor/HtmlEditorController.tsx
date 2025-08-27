@@ -1,6 +1,6 @@
 import { IBinding } from "@framework/Reflection";
 import { $getRoot, EditorState } from "lexical";
-import { LexicalEditor } from "lexical/LexicalEditor";
+import { LexicalEditor } from "lexical";
 import React from "react";
 import { HtmlEditorExtension } from "./Extensions/types";
 import { ITextConverter } from "./HtmlContentStateConverter";

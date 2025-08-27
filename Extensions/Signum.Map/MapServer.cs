@@ -6,8 +6,10 @@ namespace Signum.Map;
 
 public static class MapServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder wsb)
     {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
 
         ReflectionServer.RegisterLike(typeof(MapMessage), () => MapPermission.ViewMap.IsAuthorized());
 

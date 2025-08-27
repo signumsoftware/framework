@@ -6,9 +6,12 @@ namespace Signum.Dashboard;
 
 public static class DashboardServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder wsb)
     {
-        UserAssetServer.Start(app);
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
+        UserAssetServer.Start(wsb);
         UserAssetServer.QueryPermissionSymbols.Add(DashboardPermission.ViewDashboard);
 
         EntityPackTS.AddExtension += ep =>

@@ -354,7 +354,7 @@ export function hasTimeSeries(token: QueryToken | undefined): boolean {
   if (token.queryTokenType == "TimeSeries")
     return true;
 
-  return hasNested(token.parent);
+  return hasTimeSeries(token.parent);
 }
 
 export function hasSnippet(token: QueryToken | undefined): boolean {

@@ -92,7 +92,7 @@ public static class EmailLogic
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
             if (sb.WebServerBuilder != null)
-                MailingServer.Start(sb.WebServerBuilder.WebApplication);
+                MailingServer.Start(sb.WebServerBuilder);
 
             sb.Schema.SchemaCompleted += () =>
             {

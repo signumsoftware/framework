@@ -199,7 +199,7 @@ export interface PanelPartProps {
 export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
   const content = p.ctx.value.content;
 
-  const customDataRef = React.useRef();
+  const customDataRef = React.useRef<any>(undefined);
 
   const state = useAPI(signal => DashboardClient.partRenderers[content.Type].component().then(c => ({ component: c, lastType: content.Type })),
     [content.Type], { avoidReset: true });

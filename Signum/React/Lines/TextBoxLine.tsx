@@ -1,12 +1,13 @@
 import * as React from 'react'
 import { classes } from '../Globals'
-import { LineBaseController, genericForwardRefWithMemo, useController } from '../Lines/LineBase'
+import { genericMemo, LineBaseController, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { TextBaseController, TextBaseProps } from './TextBase'
 
 export interface TextBoxLineProps extends TextBaseProps<string | null> {
   datalist?: string[];
+  ref?: React.Ref<TextBoxLineController>;
 }
 
 export class TextBoxLineController extends TextBaseController<TextBoxLineProps, string | null> {
@@ -16,64 +17,88 @@ export class TextBoxLineController extends TextBaseController<TextBoxLineProps, 
   }
 }
 
-export const TextBoxLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<TextBoxLineProps & React.RefAttributes<TextBoxLineController>>> = React.memo(React.forwardRef(function TextBoxLine(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
+export const TextBoxLine: (props: TextBoxLineProps) => React.ReactNode | null =
+  genericMemo(function TextBoxLine(props: TextBoxLineProps) {
 
-  const c = useController(TextBoxLineController, props, ref);
+    const c = useController(TextBoxLineController, props);
 
-  if (c.isHidden)
-    return null;
+    if (c.isHidden)
+      return null;
 
-  return internalTextBox(c, "text");
-}), (prev, next) => {
-  return LineBaseController.propEquals(prev, next);
-});
+    return internalTextBox(c, "text");
+  }, (prev, next) => {
+    return LineBaseController.propEquals(prev, next);
+  });
 
-export class PasswordLineController extends TextBaseController<TextBoxLineProps, string | null> {
-  init(p: TextBoxLineProps): void {
+export interface PasswordLineProps extends TextBaseProps<string | null> {
+  ref?: React.Ref<PasswordLineController>;
+}
+
+
+export class PasswordLineController extends TextBaseController<PasswordLineProps, string | null> {
+  init(p: PasswordLineProps): void {
     super.init(p);
     this.assertType("PasswordLine", ["string"]);
   }
 }
 
-export const PasswordLine: <V extends string | null>(props: TextBoxLineProps & React.RefAttributes<PasswordLineController>) => React.ReactNode | null =
-  genericForwardRefWithMemo(function PasswordLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<PasswordLineController>) {
+export const PasswordLine: <V extends string | null>(props: PasswordLineProps) => React.ReactNode | null =
+  genericMemo(function PasswordLine<V extends string | null>(props: PasswordLineProps): React.JSX.Element | null {
 
-  const c = useController(PasswordLineController, props, ref);
+    const c = useController(PasswordLineController, props);
 
-  if (c.isHidden)
-    return null;
+    if (c.isHidden)
+      return null;
 
-  return internalTextBox(c, "password");
-}, (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
+    return internalTextBox(c, "password");
+  }, (prev, next) => {
+    if (next.extraButtons || prev.extraButtons)
+      return false;
 
-  return LineBaseController.propEquals(prev, next);
-});
+    return LineBaseController.propEquals(prev, next);
+  });
 
-export class GuidLineController extends TextBaseController<TextBoxLineProps, string | null> {
+export interface GuidLineProps extends TextBaseProps<string | null> {
+  ref?: React.Ref<GuidLineController>;
+}
+
+export class GuidLineController extends TextBaseController<GuidLineProps, string | null> {
+  init(p: GuidLineProps): void {
+    super.init(p);
+    this.assertType("GuidLine", ["Guid"]);
+  }
+}
+
+
+
+export const GuidLine: <V extends string | null>(props: GuidLineProps) => React.ReactNode | null =
+  genericMemo(function GuidLine<V extends string | null>(props: GuidLineProps) {
+
+    const c = useController(GuidLineController, props);
+
+    if (c.isHidden)
+      return null;
+
+    return internalTextBox(c, "guid");
+  }, (prev, next) => {
+    return LineBaseController.propEquals(prev, next);
+  });
+
+export interface ColorLineProps extends TextBaseProps<string | null> {
+  ref?: React.Ref<TextBoxLineController>
+}
+
+export class ColorLineController extends TextBaseController<ColorLineProps, string | null> {
   init(p: TextBoxLineProps): void {
     super.init(p);
     this.assertType("TextBoxLine", ["Guid"]);
   }
 }
 
-export const GuidLine: <V extends string | null>(props: TextBoxLineProps & React.RefAttributes<GuidLineController>) => React.ReactNode | null =
-  genericForwardRefWithMemo(function GuidLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<GuidLineController>) {
+export const ColorLine: <V extends string | null>(props: ColorLineProps) => React.ReactNode | null
+  = genericMemo(function ColorLine<V extends string | null>(props: ColorLineProps) {
 
-  const c = useController(GuidLineController, props, ref);
-
-  if (c.isHidden)
-    return null;
-
-  return internalTextBox(c, "guid");
-}, (prev, next) => {
-  return LineBaseController.propEquals(prev, next);
-});
-
-export const ColorLine: <V extends string | null>(props: TextBoxLineProps & React.RefAttributes<TextBoxLineController>) => React.ReactNode | null = genericForwardRefWithMemo(function ColorLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
-
-  const c = useController(TextBoxLineController, props, ref);
+  const c = useController(TextBoxLineController, props);
 
   if (c.isHidden)
     return null;

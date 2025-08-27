@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.SqlServer.Types;
 using Signum.Basics;
 using Npgsql;
+using Npgsql.Internal;
 
 namespace Signum.Test.Environment;
 
@@ -33,6 +34,8 @@ public static class MusicStarter
 
             Schema.Current.Initialize();
 
+            (Connector.Current as PostgreSqlConnector)?.ReloadTypes();
+
             MusicLoader.Load();
        
             startedAndLoaded = true;
@@ -53,6 +56,7 @@ public static class MusicStarter
             var postgreeVersion = PostgresVersionDetector.Detect(connectionString, null);
             Connector.Default = new PostgreSqlConnector(connectionString, sb.Schema, postgreeVersion, builder =>
             {
+                builder.EnableArrays();
                 builder.EnableLTree();
                 builder.EnableRanges();
             });

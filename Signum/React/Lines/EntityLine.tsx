@@ -9,7 +9,7 @@ import { Aprox, EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
 import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { useAPI, useMounted } from '../Hooks'
-import { genericForwardRef, genericForwardRefWithMemo, useController } from './LineBase'
+import { genericMemo, useController } from './LineBase'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 
 
@@ -22,6 +22,7 @@ export interface EntityLineProps<V extends ModifiableEntity | Lite<Entity> | nul
   showType?: boolean;
   inputAttributes?: React.InputHTMLAttributes<HTMLInputElement>,
   itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  ref?: React.Ref<EntityLineController<NoInfer<V>>>;
 }
 
 interface ItemPair {
@@ -32,8 +33,8 @@ interface ItemPair {
 export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseController<EntityLineProps<V>,V> {
   currentItem!: ItemPair | undefined;
   setCurrentItem!: (v: ItemPair | undefined) => void;
-  focusNext!: React.MutableRefObject<boolean>;
-  typeahead!: React.RefObject<TypeaheadController>;
+  focusNext!: React.RefObject<boolean>;
+  typeahead!: React.RefObject<TypeaheadController | null>;
 
   init(pro: EntityLineProps<V>): void {
     super.init(pro);
@@ -122,130 +123,131 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
 }
 
 
-export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V> & React.RefAttributes<EntityLineController<V>>) => React.ReactNode | null = genericForwardRefWithMemo(function EntityLine<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V>, ref: React.Ref<EntityLineController<V>>) {
-  const c = useController(EntityLineController, props, ref);
-  const p = c.props;
+export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V>) => React.ReactNode | null
+  = genericMemo(function EntityLine<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V>): React.ReactElement | null {
+    const c = useController<EntityLineController<V>, EntityLineProps<V>, V>(EntityLineController, props);
+    const p = c.props;
 
-  if (c.isHidden)
-    return null;
+    if (c.isHidden)
+      return null;
 
-  const hasValue = !!p.ctx.value;
+    const hasValue = !!p.ctx.value;
 
-  const buttons = (
-    <>
-      {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
-      {!hasValue && !p.avoidViewButton && c.renderCreateButton(true)}
-      {!hasValue && c.renderFindButton(true)}
-      {hasValue && !p.avoidViewButton && c.renderViewButton(true)}
-      {hasValue && c.renderRemoveButton(true)}
-      {c.renderPasteButton(true)}
-      {c.props.extraButtons && c.props.extraButtons(c)}
-    </>
-  );
+    const buttons = (
+      <>
+        {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
+        {!hasValue && !p.avoidViewButton && c.renderCreateButton(true)}
+        {!hasValue && c.renderFindButton(true)}
+        {hasValue && !p.avoidViewButton && c.renderViewButton(true)}
+        {hasValue && c.renderRemoveButton(true)}
+        {c.renderPasteButton(true)}
+        {c.props.extraButtons && c.props.extraButtons(c)}
+      </>
+    );
 
-  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
-  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
-
-  return (
-    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
-      labelHtmlAttributes={p.labelHtmlAttributes}>
-      {inputId => <div className="sf-entity-line">
-        {getTimeMachineIcon({ ctx: p.ctx })}
-        {
-          !EntityBaseController.hasChildrens(buttons) ?
-            (hasValue ? renderLink(inputId) : renderAutoComplete(inputId)) :
-            (hasValue ?
-              <div className={p.ctx.inputGroupClass}>
-                {renderLink(inputId)}
-                {buttons}
-              </div> :
-              renderAutoComplete(inputId, input => <div className={p.ctx.inputGroupClass}>
-                {input}
-                {buttons}
-              </div>)
-            )
-        }
-      </div>}
-    </FormGroup>
-  );
-
-  function handleOnPaste(e: React.ClipboardEvent<HTMLInputElement>) {
-    const text = e.clipboardData.getData("text");
-    const lites = parseLiteList(text);
-    if (lites.length == 0)
-      return;
-    
-    e.preventDefault();
-    c.paste(text);
-  }
-
-  function renderAutoComplete(inputId: string, renderInput?: (input: React.ReactElement) => React.ReactElement) {
-
-    const ctx = p.ctx;
-
-    var ac = p.autocomplete;
-
-    if (ac == null || ctx.readOnly) {
-      var fcr = <FormControlReadonly id={inputId} ctx={ctx} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass)}>{ctx.value && Navigator.renderLiteOrEntity(ctx.value)}</FormControlReadonly>;
-      return renderInput ? renderInput(fcr) : fcr;
-    }
+    const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+    const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
     return (
-      <Typeahead ref={c.typeahead}
-        inputId={inputId}
-        inputAttrs={{
-          className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass),
-          placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined,
-          onPaste: p.paste == false ? undefined : handleOnPaste,
-          ...p.inputAttributes
-        }}
-        getItems={query => ac!.getItems(query)}
-        itemsDelay={ac.getItemsDelay()}
-        minLength={ac.getMinLength()}
-        renderItem={(item, hl) => ac!.renderItem(item, hl)}
-        renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
-        itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
-        onSelect={c.handleOnSelect}
-        renderInput={renderInput}
-      />
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop}
+        htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
+        labelHtmlAttributes={p.labelHtmlAttributes}>
+        {inputId => <div className="sf-entity-line">
+          {getTimeMachineIcon({ ctx: p.ctx })}
+          {
+            !EntityBaseController.hasChildrens(buttons) ?
+              (hasValue ? renderLink(inputId) : renderAutoComplete(inputId)) :
+              (hasValue ?
+                <div className={p.ctx.inputGroupClass}>
+                  {renderLink(inputId)}
+                  {buttons}
+                </div> :
+                renderAutoComplete(inputId, input => <div className={p.ctx.inputGroupClass}>
+                  {input}
+                  {buttons}
+                </div>)
+              )
+          }
+        </div>}
+      </FormGroup>
     );
-  }
 
-  function renderLink(inputId: string) {
+    function handleOnPaste(e: React.ClipboardEvent<HTMLInputElement>) {
+      const text = e.clipboardData.getData("text");
+      const lites = parseLiteList(text);
+      if (lites.length == 0)
+        return;
 
-    var value = p.ctx.value!;
+      e.preventDefault();
+      c.paste(text);
+    }
 
-    const str =
-      p.renderItem ? p.renderItem :
-        c.currentItem && c.currentItem.item && p.autocomplete ? p.autocomplete.renderItem(c.currentItem.item, new TextHighlighter(undefined)) :
-          getToString(value);
+    function renderAutoComplete(inputId: string, renderInput?: (input: React.ReactElement) => React.ReactElement) {
 
-    if (p.ctx.readOnly)
-      return <FormControlReadonly id={inputId} ctx={p.ctx}>{str}</FormControlReadonly>
+      const ctx = p.ctx;
 
-    if (p.view && !p.avoidLink) {
+      var ac = p.autocomplete;
+
+      if (ac == null || ctx.readOnly) {
+        var fcr = <FormControlReadonly id={inputId} ctx={ctx} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass)}>{ctx.value && Navigator.renderLiteOrEntity(ctx.value)}</FormControlReadonly>;
+        return renderInput ? renderInput(fcr) : fcr;
+      }
+
       return (
-        <a ref={e => setLinkOrSpan(e)}
-          href="#" onClick={c.handleViewClick}
-          className={classes(p.ctx.formControlClass, "sf-entity-line-entity")}
-          title={p.ctx.titleLabels ? JavascriptMessage.navigate.niceToString() : undefined} {...p.itemHtmlAttributes}>
-          {str}
-        </a>
-      );
-    } else {
-      return (
-        <span tabIndex={0} ref={e => setLinkOrSpan(e)} className={classes(p.ctx.formControlClass, "sf-entity-line-entity")} {...p.itemHtmlAttributes}>
-          {str}
-        </span>
+        <Typeahead ref={c.typeahead}
+          inputId={inputId}
+          inputAttrs={{
+            className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass),
+            placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined,
+            onPaste: p.paste == false ? undefined : handleOnPaste,
+            ...p.inputAttributes
+          }}
+          getItems={query => ac!.getItems(query)}
+          itemsDelay={ac.getItemsDelay()}
+          minLength={ac.getMinLength()}
+          renderItem={(item, hl) => ac!.renderItem(item, hl)}
+          renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
+          itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
+          onSelect={c.handleOnSelect}
+          renderInput={renderInput}
+        />
       );
     }
-  }
 
-  function setLinkOrSpan(linkOrSpan?: HTMLElement | null) {
-    if (c.focusNext.current && linkOrSpan != null) {
-      linkOrSpan.focus();
+    function renderLink(inputId: string) {
+
+      var value = p.ctx.value!;
+
+      const str =
+        p.renderItem ? p.renderItem :
+          c.currentItem && c.currentItem.item && p.autocomplete ? p.autocomplete.renderItem(c.currentItem.item, new TextHighlighter(undefined)) :
+            getToString(value);
+
+      if (p.ctx.readOnly)
+        return <FormControlReadonly id={inputId} ctx={p.ctx}>{str}</FormControlReadonly>
+
+      if (p.view && !p.avoidLink) {
+        return (
+          <a ref={e => setLinkOrSpan(e)}
+            href="#" onClick={c.handleViewClick}
+            className={classes(p.ctx.formControlClass, "sf-entity-line-entity")}
+            title={p.ctx.titleLabels ? JavascriptMessage.navigate.niceToString() : undefined} {...p.itemHtmlAttributes}>
+            {str}
+          </a>
+        );
+      } else {
+        return (
+          <span tabIndex={0} ref={e => setLinkOrSpan(e)} className={classes(p.ctx.formControlClass, "sf-entity-line-entity")} {...p.itemHtmlAttributes}>
+            {str}
+          </span>
+        );
+      }
     }
-    c.focusNext.current = false;
-  }
-}, (prev, next) => EntityBaseController.propEquals(prev, next));
+
+    function setLinkOrSpan(linkOrSpan?: HTMLElement | null) {
+      if (c.focusNext.current && linkOrSpan != null) {
+        linkOrSpan.focus();
+      }
+      c.focusNext.current = false;
+    }
+  }, (prev, next) => EntityBaseController.propEquals(prev, next));

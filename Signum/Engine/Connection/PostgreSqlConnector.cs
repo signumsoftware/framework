@@ -416,6 +416,15 @@ public class PostgreSqlConnector : Connector
                 from t in ns.Tables()
                 select t).Any();
     }
+
+    internal void ReloadTypes()
+    {
+        using (var conn = this.CreateConnection())
+        {
+            conn.Open();
+            ((NpgsqlConnection)conn).ReloadTypes();
+        }
+    }
 }
 
 public static class PostgreSqlConnectorScripts

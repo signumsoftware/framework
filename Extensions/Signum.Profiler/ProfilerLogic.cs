@@ -26,7 +26,7 @@ public static class ProfilerLogic
                 PermissionLogic.RegisterPermissions(ProfilerPermission.OverrideSessionTimeout);
 
             if (sb.WebServerBuilder != null)
-                ProfilerServer.Start(sb.WebServerBuilder.WebApplication);
+                ProfilerServer.Start(sb.WebServerBuilder);
         }
     }
 

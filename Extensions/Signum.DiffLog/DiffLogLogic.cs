@@ -26,7 +26,7 @@ public static class DiffLogLogic
                 RegisterShouldLog<Entity>((entity, oper) => true);
 
             if (sb.WebServerBuilder != null)
-                DiffLogServer.Start(sb.WebServerBuilder.WebApplication);
+                DiffLogServer.Start(sb.WebServerBuilder);
 
         }
     }

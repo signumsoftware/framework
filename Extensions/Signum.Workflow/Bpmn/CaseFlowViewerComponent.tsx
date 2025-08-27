@@ -173,7 +173,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
           </DropdownButton>
           <Button variant="light" onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
         </div>
-        <div ref={de => this.divArea = de!} />
+        <div ref={de => { this.divArea = de!; }} />
       </div>
     );
   }

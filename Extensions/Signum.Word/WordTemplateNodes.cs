@@ -395,7 +395,7 @@ public class TokenNode : BaseNode
             string? text = obj is Enum en ? en.NiceToString() :
                 obj is bool b ? (b ? BooleanEnum.True.NiceToString() : BooleanEnum.False.NiceToString()) :
                 obj is TimeSpan ts ? ts.ToString(Format?.Replace(":", @"\:") ?? ValueProvider.Format, p.Culture) :
-                obj is IFormattable fo ? fo.ToString(Format ?? ValueProvider.Format, p.Culture) :
+                obj is IFormattable fo ? SafeFormat(fo, Format ?? ValueProvider.Format, p.Culture) :
                 obj?.ToString();
 
             if (text != null && text.Contains('\n'))
@@ -409,6 +409,18 @@ public class TokenNode : BaseNode
             {
                 this.ReplaceBy(NodeProvider.NewRun((OpenXmlCompositeElement?)RunProperties?.CloneNode(true), text));
             }
+        }
+    }
+
+    static string SafeFormat(IFormattable fo, string? format, IFormatProvider provider)
+    {
+        try
+        {
+            return fo.ToString(format, provider);
+        }
+        catch (FormatException)
+        {
+            return fo.ToString(null, provider); // Fallback to default formatting
         }
     }
 

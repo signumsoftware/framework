@@ -113,7 +113,7 @@ export namespace EntityOperations {
 
 
 
-  export function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?: "start" | "end"): string | React.JSX.Element {
+  export function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?: "start" | "end"): string | React.ReactElement {
     if (icon) {
       switch (iconAlign) {
         case "end": return (<span>{text}<FontAwesomeIcon icon={icon} color={iconColor} fixedWidth className="ms-2" /></span>);

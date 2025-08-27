@@ -29,7 +29,7 @@ interface SearchModalProps extends IModalProps<{ rows: ResultRow[], searchContro
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }
 
-function SearchModal(p: SearchModalProps): React.JSX.Element {
+function SearchModal(p: SearchModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
 

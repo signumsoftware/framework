@@ -10,7 +10,7 @@ import { QueryString } from '../QueryString'
 import { useAPI, useForceUpdate } from '../Hooks'
 
 
-function SearchPage(): React.JSX.Element {
+function SearchPage(): React.ReactElement {
 
   const params = useParams<{ queryName: string }>();
   const location = useLocation();
@@ -35,7 +35,7 @@ function SearchPage(): React.JSX.Element {
     }
   }
 
-  const searchControl = React.useRef<SearchControlHandler | null | undefined>();
+  const searchControl = React.useRef<SearchControlHandler | null | undefined>(undefined);
 
   const subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
 

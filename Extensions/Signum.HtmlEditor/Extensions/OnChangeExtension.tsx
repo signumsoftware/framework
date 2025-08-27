@@ -2,22 +2,23 @@ import { EditorState } from "lexical";
 import { HtmlEditorController } from "../HtmlEditorController";
 import { HtmlEditorExtension, OptionalCallback } from "./types";
 
-type OnChangeCallback = (editorState?: EditorState) => void
-type OnChangeExtensionProps = { onChange?: OnChangeCallback }
-
+type OnChangeCallback = (editorState?: EditorState) => void;
+type OnChangeExtensionProps = { onChange?: OnChangeCallback };
 
 export class OnChangeExtension implements HtmlEditorExtension {
-    props: OnChangeExtensionProps;
+  name = "OnChangeExtension";
 
-    constructor(onChange?: OnChangeCallback) {
-        this.props = { onChange };
-    }
+  props: OnChangeExtensionProps;
 
-    registerExtension(controller: HtmlEditorController): OptionalCallback {
-        if(!controller.editor) return;
+  constructor(onChange?: OnChangeCallback) {
+    this.props = { onChange };
+  }
 
-        return controller.editor.registerUpdateListener(({editorState}) => {
-            this.props.onChange?.();
-        });
-    }
+  registerExtension(controller: HtmlEditorController): OptionalCallback {
+    if (!controller.editor) return;
+
+    return controller.editor.registerUpdateListener(({ editorState }) => {
+      this.props.onChange?.();
+    });
+  }
 }

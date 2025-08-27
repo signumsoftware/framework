@@ -124,8 +124,8 @@ export namespace WhatsNewClient {
     }
   
     abstract getDefaultIcon(): IconColor;
-  
-    static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactChild | null {
+
+    static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactNode | null {
       if (!icon)
         return null;
   

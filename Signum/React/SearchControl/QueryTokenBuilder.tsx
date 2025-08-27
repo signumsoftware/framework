@@ -4,7 +4,7 @@ import { Finder } from '../Finder'
 import { QueryToken, SubTokensOptions, getTokenParents, isPrefix, ManualToken, QueryDescription } from '../FindOptions'
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
-import { DropdownList } from 'react-widgets'
+import { DropdownList } from 'react-widgets-up'
 import { StyleContext } from '../Lines';
 import { useAPI, useForceUpdate } from '../Hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -21,7 +21,7 @@ interface QueryTokenBuilderProps {
 
 let copiedToken: { fullKey: string, queryKey: string } | undefined;
 
-export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.JSX.Element {
+export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.ReactElement {
 
   var [expanded, setExpanded] = React.useState(false);
   const [lastTokenChanged, setLastTokenChanged] = React.useState<string | undefined>(undefined);
@@ -147,7 +147,7 @@ interface QueryTokenPartProps {
 //const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
 
 
-export function QueryTokenPart(p: QueryTokenPartProps): React.JSX.Element | null {
+export function QueryTokenPart(p: QueryTokenPartProps): React.ReactElement | null {
 
   const doAutoExpand = !p.parentToken?.type.isCollection;
 
@@ -209,7 +209,7 @@ export function QueryTokenPart(p: QueryTokenPartProps): React.JSX.Element | null
   }
 }
 
-export function QueryTokenItem(p: { item: QueryToken | null }): React.JSX.Element | null {
+export function QueryTokenItem(p: { item: QueryToken | null }): React.ReactElement | null {
 
   const item = p.item;
 
@@ -227,7 +227,7 @@ export function QueryTokenItem(p: { item: QueryToken | null }): React.JSX.Elemen
 }
 
 
-export function QueryTokenListItem(p: { item: QueryToken | null, ancestor: QueryToken | undefined }): React.JSX.Element {
+export function QueryTokenListItem(p: { item: QueryToken | null, ancestor: QueryToken | undefined }): React.ReactElement {
 
   const item = p.item;
 
