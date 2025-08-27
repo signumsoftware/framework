@@ -529,6 +529,7 @@ public static class UserQueryLogic
         }
         catch (Exception e)
         {
+            SafeConsole.WriteLineColor(ConsoleColor.Red, e.GetType().Name + ": " + e.Message);
             return new SqlPreCommandSimple("-- Exception on {0}\n{1}".FormatWith(uq.BaseToString(), e.Message.Indent(2, '-')));
         }
     }
