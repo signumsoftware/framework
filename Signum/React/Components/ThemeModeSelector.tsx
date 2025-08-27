@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { NavDropdown } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun, faMoon, faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons";
+import { JSX } from "react/jsx-runtime";
 
 type BootstrapThemeModes = "light" | "dark" | "auto";
 
