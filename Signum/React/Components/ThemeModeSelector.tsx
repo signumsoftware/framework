@@ -28,7 +28,7 @@ function applyThemeMode(theme: BootstrapThemeModes) {
   }
 }
 
-export function ThemeModeSelector() {
+export function ThemeModeSelector(): JSX.Element {
 
     const getDefaultTheme = (): BootstrapThemeModes => {
     const stored = localStorage.getItem("bootstrap-theme-mode") as BootstrapThemeModes | null;
