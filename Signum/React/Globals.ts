@@ -1,6 +1,12 @@
 
 declare global {
 
+  namespace JSX {
+    // Fallback to React's JSX namespace
+    interface Element extends React.JSX.Element { }
+    interface IntrinsicElements extends React.JSX.IntrinsicElements { }
+  }
+
   interface RegExpConstructor {
     escape(s: string): string;
   }

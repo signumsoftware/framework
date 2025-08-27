@@ -162,7 +162,7 @@ public static class WordTemplateLogic
             Validator.PropertyValidator((WordTemplateEntity e) => e.FileName).StaticPropertyValidation += ValidateFileName;
 
             if (sb.WebServerBuilder != null)
-                WordServer.Start(sb.WebServerBuilder.WebApplication);
+                WordServer.Start(sb.WebServerBuilder);
         }
     }
 

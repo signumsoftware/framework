@@ -30,7 +30,7 @@ public static class ExcelLogic
             }
 
             if (sb.WebServerBuilder != null)
-                ExcelServer.Start(sb.WebServerBuilder.WebApplication);
+                ExcelServer.Start(sb.WebServerBuilder);
         }
     }
   
