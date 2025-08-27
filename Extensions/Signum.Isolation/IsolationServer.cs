@@ -8,8 +8,11 @@ namespace Signum.Isolation;
 
 public static class IsolationServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder app)
     {
+        if (app.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         MapColorProvider.GetColorProviders += GetMapColors;
 
         SignumExceptionFilterAttribute.ApplyMixins += (ctx, e) => 

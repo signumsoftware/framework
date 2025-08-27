@@ -17,7 +17,7 @@ public static class FileLogic
                 });
 
             if (sb.WebServerBuilder != null)
-                FilesServer.Start(sb.WebServerBuilder.WebApplication);
+                FilesServer.Start(sb.WebServerBuilder);
         }
     }
 }

@@ -32,7 +32,7 @@ public static class DynamicLogic
             EvalLogic.GetCodeGenAssemblyPath = () => CodeGenAssemblyPath;
 
             if (sb.WebServerBuilder != null)
-                DynamicServer.Start(sb.WebServerBuilder.WebApplication);
+                DynamicServer.Start(sb.WebServerBuilder);
         }
     }
 

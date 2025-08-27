@@ -98,7 +98,7 @@ function WhatsNewDropdownImp() {
 
   var divRef = React.useRef<HTMLDivElement>(null);
 
-  useRootClose(divRef, () => setIsOpen(false), { disabled: !isOpen });
+  useRootClose(divRef as any, () => setIsOpen(false), { disabled: !isOpen });
 
   return (
     <>

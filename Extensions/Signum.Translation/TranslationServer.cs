@@ -16,8 +16,11 @@ namespace Signum.Translation;
 public class TranslationServer
 {
 
-    public static void Start(IApplicationBuilder app)
-    {        
+    public static void Start(WebServerBuilder wsb)
+    {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         ReflectionServer.RegisterLike(typeof(TranslationMessage), () => TranslationPermission.TranslateCode.IsAuthorized() || TranslationPermission.TranslateInstances.IsAuthorized());
 
         ReflectionServer.PropertyRouteExtension += (mi, pr) =>

@@ -42,6 +42,6 @@
     "bootstrap": "5.3.7",
     "react-bootstrap": "2.10.10",
     "react-dom": "19.1.0",
-    "react-widgets-up": "6.0.7"
+    "react-widgets-up": "6.0.12"
   }
 }

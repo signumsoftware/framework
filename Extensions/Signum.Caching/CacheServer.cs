@@ -6,8 +6,11 @@ namespace Signum.Cache;
 
 public static class CacheServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder wsb)
     {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         ReflectionServer.RegisterLike(typeof(CachePermission), () => CachePermission.ViewCache.IsAuthorized());
 
         MapColorProvider.GetColorProviders += GetMapColors;

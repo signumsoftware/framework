@@ -1251,10 +1251,12 @@ public partial class FieldImplementedByAll : Field, IFieldReference
 
     public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
     {
-        if (UniqueIndex == null)
-            return new[] { new TableIndex(table, this.IdColumns.Values.Select(c => (IColumn)c).And((IColumn)this.TypeColumn).ToArray()) };
+        var baseIndexes = this.IdColumns.Values.Select(idCol => new TableIndex(table, this.TypeColumn, idCol)).ToList();
 
-        return base.GenerateIndexes(table);
+        if (UniqueIndex == null)
+            return baseIndexes;
+
+        return baseIndexes.Concat(base.GenerateIndexes(table));
     }
 
     internal override IEnumerable<TableMList> TablesMList()

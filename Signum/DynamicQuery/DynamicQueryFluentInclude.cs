@@ -151,26 +151,6 @@ public static class DynamicQueryFluentInclude
     /// <typeparam name="V">The value returned from accesing the pseudo-dictionary</typeparam>
     /// <param name="fi"></param>
     /// <param name="enumMessage">This message will be used for the key and the niceName</param>
-    /// <param name="keysLazy">Consider using something like sb.GetAllKeyLazy<ProductExtraFieldDefinitionEntity>()</param>
-    /// <param name="extensionLambda">A lambda like: (ProductEntity p, ProductExtraFieldDefinitionEntity pef) => p.ExtraFields.SingleOrDefault(ef => ef.Key.Is(pef))!.Value</param>
-    /// <returns></returns>
-    public static FluentInclude<E> WithExpressionWithParameter<E, K, V>(this FluentInclude<E> fi, Enum enumMessage, ResetLazy<FrozenSet<K>> keysLazy, Expression<Func<E, K, V>> extensionLambda, bool autoExpand = false)
-        where E : Entity
-        where K : notnull
-    {
-        QueryLogic.Expressions.RegisterWithParameter(enumMessage.ToString(), () => enumMessage.NiceToString(), qt => keysLazy.Value, extensionLambda, autoExpand);
-
-        return fi;
-    }
-
-    /// <summary>
-    /// Registers and dictionary-like expression, like: Product.ExtraFields.[Color]
-    /// </summary>
-    /// <typeparam name="E">The entity</typeparam>
-    /// <typeparam name="K">The key of the pseudo-dictonary, typically a lite, and enum, or a string</typeparam>
-    /// <typeparam name="V">The value returned from accesing the pseudo-dictionary</typeparam>
-    /// <param name="fi"></param>
-    /// <param name="enumMessage">This message will be used for the key and the niceName</param>
     /// <param name="getKeys">A lambda like: qt => ProducsKeysLazy.Value</param>
     /// <param name="extensionLambda">A lambda like: (ProductEntity p, ProductExtraFieldDefinitionEntity pef) => p.ExtraFields.SingleOrDefault(ef => ef.Key.Is(pef))!.Value</param>
     /// <returns></returns>

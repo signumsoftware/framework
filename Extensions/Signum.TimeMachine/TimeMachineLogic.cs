@@ -23,7 +23,7 @@ public static class TimeMachineLogic
             PermissionLogic.RegisterTypes(typeof(TimeMachinePermission));
 
             if (sb.WebServerBuilder != null)
-                TimeMachineServer.Start(sb.WebServerBuilder.WebApplication);
+                TimeMachineServer.Start(sb.WebServerBuilder);
         }
     }
 

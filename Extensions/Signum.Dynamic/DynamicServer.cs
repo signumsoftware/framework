@@ -8,8 +8,11 @@ namespace Signum.Dynamic;
 
 public static class DynamicServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder app)
     {
+        if (app.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         ReflectionServer.RegisterLike(typeof(DynamicPanelPermission), () => DynamicPanelPermission.RestartApplication.IsAuthorized());
     }
 }
