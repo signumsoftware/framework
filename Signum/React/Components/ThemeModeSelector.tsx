@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { NavDropdown } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun, faMoon, faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons";
+import { JSX } from "react/jsx-runtime";
 
 type BootstrapThemeModes = "light" | "dark" | "auto";
 
@@ -28,7 +29,7 @@ function applyThemeMode(theme: BootstrapThemeModes) {
   }
 }
 
-export function ThemeModeSelector() {
+export function ThemeModeSelector(): JSX.Element {
 
     const getDefaultTheme = (): BootstrapThemeModes => {
     const stored = localStorage.getItem("bootstrap-theme-mode") as BootstrapThemeModes | null;
