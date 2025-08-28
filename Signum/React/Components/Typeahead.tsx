@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { classes, softCast } from '../Globals'
+import { classes, Dic, softCast } from '../Globals'
 import { Dropdown } from 'react-bootstrap';
 import DropdownMenu from 'react-bootstrap/DropdownMenu';
 import { useStateWithPromise } from '../Hooks';
@@ -70,7 +70,7 @@ export class TypeaheadController {
       onSelect: (elem, event) => (elem as string),
       scrollHeight: 0,
       noResultsMessage: " - No results -",
-      ...props
+      ...Dic.simplify(props)
     };
   }
 

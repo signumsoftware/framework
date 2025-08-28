@@ -141,7 +141,7 @@ class Upgrade_20250824_React19Router7 : CodeUpgradeBase
                 };
                 """);
 
-            file.ReplaceLine(a => a.Contains("var supportIE = true;"), """
+            file.ReplaceLine(a => a.Contains("var supportIE"), """
                 var supportIE = false;
                 """);
 
