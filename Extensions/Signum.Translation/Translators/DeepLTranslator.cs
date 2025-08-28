@@ -11,9 +11,12 @@ public class DeepLTranslator : ITranslator
 
     public Func<string?>? Proxy { get; }
 
-    public DeepLTranslator(Func<string?> deepLKey)
+    public List<TargetLanguage> AdditionalTargetLanguages { get; }
+
+    public DeepLTranslator(Func<string?> deepLKey, List<TargetLanguage> additionalTargetLanguages)
     {
         DeepLApiKey = deepLKey;
+        AdditionalTargetLanguages = additionalTargetLanguages;
     }
 
     List<SourceLanguage>? sourceLanguages;
@@ -37,7 +40,12 @@ public class DeepLTranslator : ITranslator
                 sourceLanguages = (await translator.GetSourceLanguagesAsync()).ToList();
 
             if (targetLanguage == null)
+            { 
                 targetLanguage = (await translator.GetTargetLanguagesAsync()).ToList();
+
+                if (AdditionalTargetLanguages.Any())
+                    targetLanguage.AddRange(AdditionalTargetLanguages);
+            }
 
             if (!sourceLanguages.Any(a => a.Code == from))
             {
@@ -65,7 +73,7 @@ public class DeepLTranslator : ITranslator
                 to = best.Code;
             }
 
-            var translation = await translator.TranslateTextAsync(list, sourceLanguageCode: from, targetLanguageCode: to);
+            var translation = await translator.TranslateTextAsync(list.Where(l => !string.IsNullOrEmpty(l)), sourceLanguageCode: from, targetLanguageCode: to);
 
             return translation.Select(a => (string?)a.Text).ToList();
         }

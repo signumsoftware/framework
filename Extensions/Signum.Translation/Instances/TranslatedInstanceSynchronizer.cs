@@ -43,7 +43,7 @@ public static class TranslatedInstanceSynchronizer
                 {
                     gr.ZipForeach(result, (sp, translated) =>
                     {
-                        if (translated != null)
+                        if (!string.IsNullOrEmpty(translated))
                             sp.AutomaticTranslations.Add(new AutomaticTranslation { Text = translated, TranslatorName = tr.Name });
                     });
                 }

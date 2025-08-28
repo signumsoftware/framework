@@ -79,7 +79,7 @@ public static class TranslationSynchronizer
                         {
                             var lines = translated.Lines();
                             var singular = lines[0];
-                            var plural = sp.Original.Options.HasFlag(DescriptionOptions.PluralDescription) ? lines[1] : null;
+                            var plural = sp.Original.Options.HasFlag(DescriptionOptions.PluralDescription) && lines.Length > 1 ? lines[1] : null;
 
                             char? gender = null;
 
