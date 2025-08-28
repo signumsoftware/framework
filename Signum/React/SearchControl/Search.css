@@ -1,4 +1,17 @@
-﻿.sf-search-footer {
+﻿:root {
+    --qt-keyword: #0000FF;
+    --qt-exotic: #7D7D7D;
+    --qt-collection: #CE6700;
+    --qt-main-entity: #2B78AF;
+    --qt-value: var(--bs-body-color); /* using Bootstrap’s body text color */
+    --qt-date: #5100A1;
+    --qt-time: #9956db;
+    --qt-enum: #800046;
+    --qt-lite: #2B91AF;
+    --qt-embedded: #156F8A;
+}
+
+.sf-search-footer {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
