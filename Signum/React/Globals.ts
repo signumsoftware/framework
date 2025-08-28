@@ -1164,6 +1164,8 @@ export module Dic {
     dic[key] = value;
   }
 
+  export function simplify<T extends object>(a: T): T;
+  export function simplify<T extends object>(a: undefined): undefined;
   export function simplify<T extends {}>(a: T | undefined): T | undefined{
     if (a == null)
       return a;
