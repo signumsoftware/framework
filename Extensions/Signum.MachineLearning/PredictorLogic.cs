@@ -199,7 +199,7 @@ public static class PredictorLogic
             });
 
             if (sb.WebServerBuilder != null)
-                PredictorServer.Start(sb.WebServerBuilder.WebApplication);
+                PredictorServer.Start(sb.WebServerBuilder);
 
         }
     }

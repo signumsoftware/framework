@@ -6,8 +6,11 @@ namespace Signum.MachineLearning;
 
 public static class PredictorServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder app)
     {
+        if (app.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         UserAssetServer.Start(app);
 
         SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((PredictorMainQueryEmbedded p) =>
