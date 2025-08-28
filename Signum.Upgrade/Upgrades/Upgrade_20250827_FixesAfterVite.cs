@@ -33,7 +33,7 @@ class Upgrade_20250827_FixesAfterVite : CodeUpgradeBase
                 var pLine = lines.SingleEx(a => a.Contains("port:"));
                 port = int.Parse(pLine.After("port:").Before(","));
 
-                lines[lines.IndexOf(pLine)] = "port: port".Indent(CodeFile.GetIndent(pLine));
+                lines[lines.IndexOf(pLine)] = "port: port,".Indent(CodeFile.GetIndent(pLine));
 
                 return true;
             });
