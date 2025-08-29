@@ -218,7 +218,6 @@ export interface QueryToken {
   readonly format?: string;
   readonly unit?: string;
   readonly type: TypeReference;
-  readonly typeColor: string;
   readonly niceTypeName: string;
   readonly isGroupable: boolean;
   readonly hasOrderAdapter?: boolean;
@@ -232,6 +231,53 @@ export interface QueryToken {
   readonly parent?: QueryToken;
   readonly propertyRoute?: string;
   readonly __isCached__?: true;
+}
+
+export function getQueryTokenColor(token: QueryToken) : string {
+  switch (token.queryTokenType) {
+    case "Aggregate":
+    case "AnyOrAll":
+    case "Element":
+    case "ToArray":
+    case "Nested":
+      return "var(--qt-keyword)" /*#0000FF*/;
+
+    case "IndexerContainer":
+    case "Manual":
+    case "OperationContainer":
+    case "Snippet":
+    case "TimeSeries":
+      return "var(--qt-exotic)"; /*#7D7D7D */
+  }
+
+  if (token.type.isCollection)
+    return "var(--qt-collection)"; /*#CE6700*/
+
+
+  if (token.parent == null && token.key == "Entity")
+    return "var(--qt-main-entity)" /*#2B78AF*/;
+
+  switch (token.filterType) {
+    case "Integer":
+    case "Decimal":
+    case "String":
+    case "Guid":
+    case "Boolean":
+      return "var(--qt-value)" /**/;
+
+    case "DateTime":
+      return "var(--qt-date)" /*#5100A1*/;
+    case "Time":
+      return "var(--qt-time)" /*#9956db*/;
+    case "Enum":
+      return "var(--qt-enum)" /*#800046*/;
+    case "Lite":
+      return "var(--qt-lite)" /* #2B91AF*/;
+    case "Embedded":
+      return "var(--qt-embedded)" /* #156F8A*/;
+    default:
+      return "var(--qt-exotic)" /*  #7D7D7D */;
+  }
 }
 
 export interface QueryTokenWithoutParent extends Omit<QueryToken,  | "parent"> {
@@ -543,7 +589,7 @@ export interface SystemTime {
 
 }
 
-export module PaginateMath {
+export namespace PaginateMath {
   export function startElementIndex(p: Pagination): number {
     return (p.elementsPerPage! * (p.currentPage! - 1)) + 1;
   }
@@ -560,9 +606,6 @@ export module PaginateMath {
     return (p.elementsPerPage! * (p.currentPage! + 1)) - 1;
   }
 }
-
-
-
 
 
 export interface QueryDescription {

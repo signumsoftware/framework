@@ -42,8 +42,6 @@ internal class PgTsVectorColumnToken : QueryToken
 
     static MethodInfo miGetTsVectorColumna = ReflectionTools.GetMethodInfo(() => TsVectorExtensions.GetTsVectorColumn(null!, ""));
 
-    public override string TypeColor => "rgb(198 0 125)";
-
     public override string NiceTypeName => $"TsVector ({GetColumnsRoutes().ToString(a => a.PropertyString(), ", ")})";
 
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
