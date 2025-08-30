@@ -1,10 +1,10 @@
 import * as React  from 'react'
 import { RouteObject } from 'react-router'
-import { ajaxPost, ajaxGet, ajaxPostRaw, wrapRequest, AjaxOptions } from '@framework/Services';
+import { ajaxGet, wrapRequest, AjaxOptions } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, ChatbotMessage, ChatbotProviderSymbol, ChatbotAgentCodeSymbol, ChatbotAgentDescriptionsEmbedded, ChatbotAgentEntity } from './Signum.Chatbot'
+import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, ChatbotProviderSymbol } from './Signum.Chatbot'
 import { toAbsoluteUrl } from '../../Signum/React/AppContext';
-import { Lite, MList, registerToString } from '../../Signum/React/Signum.Entities';
+import { registerToString } from '../../Signum/React/Signum.Entities';
 
 const ReactMarkdown = React.lazy(() => import("react-markdown"));
 //const ReactMarkdownWithFormulas = React.lazy(() => import("./ReactMarkdownWithFormulas"));
@@ -16,9 +16,7 @@ export namespace ChatbotClient {
   export function start(options: { routes: RouteObject[] }): void {
 
     Navigator.addSettings(new EntitySettings(ChatbotLanguageModelEntity, e => import('./Templates/ChatbotLanguageModel')));
-    Navigator.addSettings(new EntitySettings(ChatbotAgentEntity, a => import('./Templates/ChatbotAgent')));
     Navigator.addSettings(new EntitySettings(ChatSessionEntity, a => import('./Templates/ChatSession')));
-    registerToString(ChatbotAgentDescriptionsEmbedded, e => e.promptName || e.toString());
   }
 
   export namespace API {
@@ -50,10 +48,6 @@ export namespace ChatbotClient {
 
     export function getModels(provider: ChatbotProviderSymbol): Promise<Array<string>> {
       return ajaxGet({ url: `/api/chatbot/provider/${provider.key}/models` });
-    }
-
-    export function getAgentInfo(agentCode: ChatbotAgentCodeSymbol): Promise<AgentInfo> {
-      return ajaxGet({ url: "/api/chatbot/agent/" + agentCode.key });
     }
 
     export function getMessagesBySessionId(sessionId: string | number | undefined): Promise<Array<ChatMessageEntity>> {

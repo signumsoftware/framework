@@ -1,29 +1,47 @@
 using Signum.Utilities.Synchronization;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Signum.Chatbot.Providers;
 
 public abstract class ChatbotProviderBase : IChatbotProvider
 {
-
     protected virtual string GetMessagesUrl() => "v1/messages";
 
-    public async IAsyncEnumerable<string> AskStreaming(List<ChatMessage> messages, ChatbotLanguageModelEntity model, [EnumeratorCancellation] CancellationToken ct)
+    public async IAsyncEnumerable<StreamingValue> AskStreaming(List<ChatMessage> messages, List<IChatbotTool> tools, ChatbotLanguageModelEntity model, [EnumeratorCancellation] CancellationToken ct)
     {
         var client = GetClient();
 
-        var payload = new
+        var system = model.Provider.Is(ChatbotProviders.Anthropic) ?            
+            messages.Where(a => a.Role == ChatMessageRole.System).FirstOrDefault() : null;
+
+        var payload = new JsonObject
         {
-            model = model.Model,
-            messages = messages.Select(c => new { role = ToRoleString(c.Role), content = c.Content, tool_call_id = c.ToolID }).ToArray(),
-            stream = true,
-            temperature = model.Temperature ?? 1,
-            max_tokens = model.MaxTokens ?? 1024,
-        };
+            { "model", model.Model },
+            { "messages",
+                new JsonArray(
+                    messages
+                    .Where(s => s != system)
+                    .Select(m => new JsonObject
+                    {
+                        { "role", ToRoleString(m.Role) },
+                        { "content", m.Content }
+                    }.AddIfNotNull("tool_call_id", m.ToolCallID))
+                    .ToArray()
+                )
+            },
+            { "stream", true },
+            { "temperature", model.Temperature ?? 1.0 },
+            { "max_tokens", model.MaxTokens ?? 1024 }
+        }
+        .AddIfNotNull("system", system?.Content)
+        .AddIfNotNull("tools", tools.IsNullOrEmpty() ? null : new JsonArray(tools.Select(t => t.ParametersSchema(model.Provider)).ToArray()));
+
 
         var responseClient = await client.PostAsJsonAsync(GetMessagesUrl(), payload);
 
@@ -45,27 +63,76 @@ public abstract class ChatbotProviderBase : IChatbotProvider
     }
 
 
-    protected async IAsyncEnumerable<string> ParseStream(
+    protected virtual async IAsyncEnumerable<StreamingValue> ParseStream(
         StreamReader reader,
         [EnumeratorCancellation] CancellationToken ct)
     {
-        string totalAnswer = "";
         string? line;
         while ((line = await reader.ReadLineAsync(ct)) != null)
         {
-            totalAnswer += line + "\n";
-            if (line.StartsWith("data: ") && !line.Contains("[DONE]"))
+            Debug.WriteLine(line);
+            if (line.HasText() && line.StartsWith("data: "))
             {
-                var jsonData = line.Substring(6);
+                var payload = line.After("data: ");
 
-                var eventData = JsonSerializer.Deserialize<JsonElement>(jsonData);
-                var text = eventData
+                if (payload == "[DONE]")
+                    yield break;
+
+                var eventData = JsonSerializer.Deserialize<JsonElement>(payload);
+                var delta = eventData
                     .GetProperty("choices")[0]
-                    .GetProperty("delta")
-                    .GetProperty("content")
-                    .GetString()!;
+                    .GetProperty("delta");
 
-                yield return text;
+                //    if(delta.TryGetProperty("tool_calls", out var tool_calls))
+                //    {
+                //        var tool = tool_calls.EnumerateArray().SingleEx();
+                //        if (mode == null)
+                //        {
+                //            mode = IChatbotProvider.ToolCall;
+                //            var functionName = tool.GetProperty("function").GetProperty("name").GetString();
+                //            if (functionName.IsNullOrEmpty())
+                //                throw new ChatbotProviderException("Tool call without function name");
+
+                //            var args = tool.GetProperty("function").GetProperty("arguments").GetString();
+                //            yield return IChatbotProvider.ToolCall + functionName;
+                //            if (args.HasText())
+                //                yield return StreamingValue.ToolCal_Start();
+                //        }
+                //        else
+                //        {
+                //            if(mode != IChatbotProvider.ToolCall)
+                //                throw new ChatbotProviderException("Mixed modes in the same response");
+                //            var args = tool.GetProperty("function").GetProperty("arguments").GetString();
+                //            if (args.HasText())
+                //                yield return args;
+                //        }                   
+                //    }
+                //    else if(delta.TryGetProperty("content", out var content))
+                //    {
+                //        if (mode == null)
+                //        {
+                //            mode = IChatbotProvider.Answer;
+                //            var text = content.GetString()!;
+                //            yield return new StreamingValue( IChatbotProvider.Answer + text;
+                //        }
+                //        else
+                //        {
+                //            if (mode != IChatbotProvider.Answer)
+                //                throw new ChatbotProviderException("Mixed modes in the same response");
+                //            var text = content.GetString()!;
+                //            if (text.HasText())
+                //                yield return text;
+                //        }
+                //    }
+                //    else if (delta.TryGetProperty("role", out var role))
+                //    {
+                //        // Ignore
+                //    }
+                //    else
+                //    {
+                //        throw new ChatbotProviderException("Unknown delta format: " + delta.ToString());
+                //    }
+                //}
             }
         }
     }

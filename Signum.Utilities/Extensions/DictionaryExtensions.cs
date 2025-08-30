@@ -2,6 +2,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Specialized;
+using System.Text.Json.Nodes;
 
 namespace Signum.Utilities;
 
@@ -647,6 +648,13 @@ public static class DictionaryExtensions
         }
 
         return collection;
+    }
+
+    public static JsonObject AddIfNotNull(this JsonObject obj, string key, JsonNode? value)
+    {
+        if (value != null)
+            obj.Add(key, value);
+        return obj;
     }
 }
 

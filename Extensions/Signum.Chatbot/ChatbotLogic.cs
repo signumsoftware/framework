@@ -1,4 +1,6 @@
+using Signum.Chatbot.Agents;
 using Signum.Chatbot.Providers;
+using Signum.Chatbot.Skills;
 using Signum.Utilities.Synchronization;
 using System.Formats.Tar;
 using System.IO;
@@ -108,8 +110,8 @@ public static class ChatbotLogic
                     Entity = e,
                     e.Id,
                     e.Role,
-                    e.IsToolCall,
-                    e.Message,
+                    e.ToolID,
+                    e.Content,
                     e.ChatSession,
                 });
         }
@@ -117,7 +119,7 @@ public static class ChatbotLogic
 
     public static async Task<string> SumarizeTitle(ConversationHistory history, CancellationToken ct)
     {
-        var prompt = ChatbotAgentLogic.GetAgent(DefaultAgent.QuestionSumarizer).LongDescriptionWithReplacements(history);
+        var prompt = ChatbotSkillLogic.GetSkill<QuestionSumarizerSkill>().GetInstruction(history);
         StringBuilder sb = new StringBuilder();
         await foreach (var item in AskStreaming([new ChatMessage { Role = ChatMessageRole.System, Content = prompt }], history.LanguageModel, ct))
         {
@@ -141,9 +143,15 @@ public static class ChatbotLogic
     }
 
 
-    public static  IAsyncEnumerable<string> AskStreaming(List<ChatMessage> messages, ChatbotLanguageModelEntity model,  CancellationToken ct)
+    public static IAsyncEnumerable<StreamingValue> AskStreaming(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
     {
-        return  Providers.GetOrThrow(model.Provider).AskStreaming(messages, model, ct);
+        var tools = messages.Where(m => m.SkillName != null)
+                            .Select(m => m.SkillName!)
+                            .Distinct()
+                            .SelectMany(skillName => ChatbotSkillLogic.GetSkill(skillName).GetTools())
+                            .ToList();
+
+        return Providers.GetOrThrow(model.Provider).AskStreaming(messages, tools, model, ct);
     }
 
     //public static Task<string?> AskAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
@@ -155,11 +163,31 @@ public static class ChatbotLogic
 
 public interface IChatbotProvider
 {
-    IAsyncEnumerable<string> AskStreaming(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct);
     string[] GetModelNames();
+
+    const string Answer = "<<Answer>>:";
+    const string ToolCall = "<<ToolCall>>:";
+
+    IAsyncEnumerable<StreamingValue> AskStreaming(List<ChatMessage> messages, List<IChatbotTool> tools, ChatbotLanguageModelEntity model, CancellationToken ct);
 }
 
+public struct StreamingValue
+{
+    public string? ToolCallId;
+    public string? ToolId;
+    public string? Value;
 
+    private StreamingValue(string? toolCallId, string? toolId, string? value)
+    {
+        ToolCallId = toolCallId;
+        ToolId = toolId;
+        Value = value;
+    }
+
+    public static StreamingValue Answer(string value) => new StreamingValue(null, null, value);
+    public static StreamingValue ToolCal_Start(string toolCallId, string toolId) => new StreamingValue(toolCallId, toolId, null);
+    public static StreamingValue ToolCall_Argument(string toolCallId, string argument) => new StreamingValue(toolCallId, null, argument);
+}
 
 public class ConversationHistory
 {
@@ -172,11 +200,14 @@ public class ConversationHistory
 
     public List<ChatMessage> GetMessages()
     {
-        return Messages.Select( c => new ChatMessage()
+        return Messages.Select(c => new ChatMessage()
         {
             Role = c.Role,
-            Content = c.Message!,
-            ToolID = c.ToolID
+            Content = c.Content!,
+            ToolCallID = c.ToolCallID,
+            SkillName = c.Role == ChatMessageRole.System ? ChatbotSkillLogic.IntroductionSkill?.Name :
+            c.Role == ChatMessageRole.Assistant && c.ToolID == nameof(IntroductionSkill.Describe) ? JsonDocument.Parse(c.Content!).RootElement.GetProperty("skillName").GetString() :
+                null
         }).ToList();
     }
 }
@@ -186,7 +217,8 @@ public class ChatMessage
 {
     public ChatMessageRole Role;
     public string Content;
-    public string? ToolID;
+    public string? SkillName; // For available tools
+    public string? ToolCallID;
 
     public override string ToString() => $"{Role}: {Content}";
 }

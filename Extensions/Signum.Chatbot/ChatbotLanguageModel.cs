@@ -22,6 +22,9 @@ public class ChatbotLanguageModelEntity : Entity
     public int? MaxTokens { get; set; }
 
     public bool IsDefault { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Provider}: {Model}");
 }
 
 

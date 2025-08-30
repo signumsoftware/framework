@@ -1,83 +1,157 @@
+using Signum.Utilities.Reflection;
+using System.ComponentModel;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Signum.Chatbot;
 
-public interface IChatbotToolFactory
-{
-    List<IChatbotTool> GetTools();
-}
-
 public interface IChatbotTool
 {
-    string Name { get; set; }
+    public string Name { get; }
+    public string? Description { get; }
 
-    List<object> DescribeTools();
-
-    Task<string> DoExecuteAsync(JsonDocument arguments, CancellationToken token);
-
+    JsonObject ParametersSchema(ChatbotProviderSymbol formatFor);
+    Task<string> ExecuteTool(string argumets, CancellationToken ct);
 }
 
-
-public class RemoteMCPServer : IChatbotToolFactory
+public class ChatbotTool : IChatbotTool
 {
-    public List<IChatbotTool> GetTools()
+    public string Name { get; set; }
+    public string? Description { get; set; }
+    private Delegate Function;
+
+    public ChatbotTool(string name, string description, Delegate function)
     {
-        throw new NotImplementedException();
+        if(function.Method.ReturnType != typeof(string) && 
+            function.Method.ReturnType != typeof(Task<string>))
+            throw new ArgumentException($"Function {name} must return a string or Task<string>", nameof(function));
+
+        this.Name = name;
+        this.Description = description;
+        this.Function = function;
     }
-}
-
-public class LocalMCPServer : IChatbotToolFactory
-{
-    public List<IChatbotTool> GetTools()
+    public JsonObject ParametersSchema(ChatbotProviderSymbol formatFor)
     {
-        throw new NotImplementedException();
-    }
-}
-
-public class InternalMCPServer : IChatbotToolFactory
-{
-    public List<IChatbotTool> GetTools()
-    {
-        throw new NotImplementedException();
+        return JSonSchema.ForFunction(Function.Method, formatFor);
     }
 
-}
-
-public class ModelTool : IChatbotToolFactory
-{
-    public List<IChatbotTool> GetTools()
+    public Task<string> ExecuteTool(string argumets, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var jsonDoc = JsonDocument.Parse(argumets);
+        if (jsonDoc.RootElement.ValueKind != JsonValueKind.Object)
+            throw new ArgumentException("Arguments must be a JSON object", nameof(argumets));
+
+        var argsDict = jsonDoc.RootElement.EnumerateObject().ToDictionary(p => p.Name, p => p.Value);
+        
+        var parameters = Function.Method.GetParameters();
+        var args = new object?[parameters.Length];
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            var p = parameters[i];
+            if (!argsDict.TryGetValue(p.Name!, out var jsonElement))
+                throw new ArgumentException($"Missing argument {p.Name}", nameof(argumets));
+
+            args[i] = jsonElement.Deserialize(p.ParameterType, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+        var result = Function.DynamicInvoke(args);
+        if (result is Task<string> taskResult)
+            return taskResult;
+        return Task.FromResult((string)result!);
     }
-
 }
-
 
 public static class JSonSchema
 {
-    public static object For(Type type) => ForInternal(type, new HashSet<Type>());
-    public static object ForInternal(Type type, HashSet<Type> visited)
+    public static JsonObject ForFunction(MethodInfo method, ChatbotProviderSymbol formatFor)
     {
+        var props = method.GetParameters()
+          .ToDictionary(p => p.Name!,
+              p => (JsonNode?)FotType(p.ParameterType, p.IsNullable())
+              .AddIfNotNull("description", p.GetCustomAttribute<DescriptionAttribute>()?.Description)
+              );
+
+        var args = new JsonObject
+        {
+            ["type"] = "object",
+            ["properties"] = new JsonObject(props),
+            ["required"] = new JsonArray(method.GetParameters().Select(p => JsonValue.Create(p.Name)).ToArray())
+        };
+
+        var description = method.GetCustomAttribute<DescriptionAttribute>()?.Description;
+        if(description == null)
+            throw new Exception("Description not set for " + method.MethodSignature());
+
+        if (formatFor.Is(ChatbotProviders.Anthropic))
+        {
+            return new JsonObject
+            {
+                ["name"] = method.Name,
+                ["description"] = description,
+                ["input_schema"] = args
+            };
+        }
+        else
+        {
+            return new JsonObject
+            {
+                ["type"] = "function",
+                ["function"] = new JsonObject
+                {
+                    ["name"] = method.Name,
+                    ["description"] = method.GetCustomAttribute<DescriptionAttribute>()?.Description,
+                    ["strict"] = true,
+                    ["parameters"] = args
+                },
+            };
+        }   
+    }
+
+    static JsonObject FotType(Type type, bool? isNullable) => FotType(type, isNullable, new HashSet<Type>());
+    static JsonObject FotType(Type type, bool? isNullable, HashSet<Type> visited)
+    {
+        type = type.UnNullify();
+
+        JsonNode MaybeNull(string type) => isNullable == true ? new JsonArray(type, "null") : type;
+
         if (type == typeof(string))
-            return new { type = "string" };
+            return new JsonObject { ["type"] = MaybeNull("string") };
 
         if (type == typeof(int) || type == typeof(long) || type == typeof(short))
-            return new { type = "integer" };
+            return new JsonObject { ["type"] = MaybeNull("integer") };
 
         if (type == typeof(float) || type == typeof(double) || type == typeof(decimal))
-            return new { type = "number" };
+            return new JsonObject { ["type"] = MaybeNull("number") };
 
         if (type == typeof(bool))
-            return new { type = "boolean" };
+            return new JsonObject { ["type"] = MaybeNull("boolean") };
 
         if (type == typeof(DateTime) || type == typeof(DateTimeOffset))
-            return new { type = "string", format = "date-time" };
+            return new JsonObject
+            {
+                ["type"] = MaybeNull("string"),
+                ["format"] = "date-time"
+            };
+
+        if (type == typeof(DateOnly))
+            return new JsonObject
+            {
+                ["type"] = MaybeNull("string"),
+                ["format"] = "date"
+            };
+
+        if (type == typeof(TimeOnly))
+            return new JsonObject
+            {
+                ["type"] = MaybeNull("string"),
+                ["format"] = "time"
+            };
 
         if (type.IsEnum)
-            return new
+            return new JsonObject
             {
-                type = "string",
-                enumValues = Enum.GetNames(type)
+                ["type"] = "string",
+                ["enumValues"] = new JsonArray(Enum.GetNames(type).Select(n => JsonValue.Create(n)).ToArray())
             };
 
         if (typeof(System.Collections.IEnumerable).IsAssignableFrom(type) && type != typeof(string))
@@ -86,32 +160,28 @@ public static class JSonSchema
                 ? type.GetElementType()!
                 : type.GetGenericArguments().FirstOrDefault() ?? typeof(object);
 
-            return new
+            return new JsonObject
             {
-                type = "array",
-                items = ForInternal(elementType, visited)
+                ["type"] = "array",
+                ["items"] = FotType(elementType, false, visited)
             };
         }
 
         // Avoid infinite recursion
         if (visited.Contains(type))
-            return new { type = "object" };
+            return new JsonObject { ["type"] = "object" };
 
         visited.Add(type);
 
-        // Default: treat as object with properties
-        var props = type
-            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+        var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(p => p.CanRead)
-            .ToDictionary(
-                p => p.Name,
-                p => ForInternal(p.PropertyType, visited)
-            );
+            .ToDictionary(p => p.Name, p => (JsonNode?)FotType(p.PropertyType, p.IsNullable(), visited).AddIfNotNull("description", p.GetCustomAttribute<DescriptionAttribute>()?.Description));
 
-        return new
+        return new JsonObject
         {
-            type = "object",
-            properties = props
+            ["type"] = "object",
+            ["properties"] =  new JsonObject(props)
         };
     }
+
 }

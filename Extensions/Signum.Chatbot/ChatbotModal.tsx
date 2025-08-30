@@ -4,7 +4,7 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import "./ChatbotModal.css";
 import { getToString, Lite } from "@framework/Signum.Entities";
 import { ChatbotClient } from './ChatbotClient';
-import { ChatbotMessage, ChatMessageEntity, ChatMessageRole, ChatSessionEntity } from "./Signum.Chatbot";
+import { ChatbotMessage, ChatMessageEntity, ChatMessageRole, ChatSessionEntity, ToolCallEmbedded } from "./Signum.Chatbot";
 import { useAPI, useAPIWithReload, useForceUpdate } from "@framework/Hooks";
 import { Navigator } from "@framework/Navigator";
 import { Finder } from "@framework/Finder";
@@ -31,7 +31,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [currentAnswerRef.current?.message.length, messagesRef.current?.length]);
+  }, [currentAnswerRef.current?.content?.length, messagesRef.current?.length]);
 
   function handleCreatNewSession() {
     currentSessionRef.current = null;
@@ -58,6 +58,8 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 
   async function handleCreateRequestAsync() {
 
+    if (questionRef.current.trim().length == 0)
+      return;
 
     isLoadingRef.current = true;
     forceUpdate();
@@ -78,38 +80,37 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
         if (chunk.startsWith("$!")) {
           const after = chunk.after("$!").trim();
           const commmand = after.tryBefore(":") ?? after;
-          const argument = after.tryAfter(":");
+          const args = after.tryAfter(":");
 
           switch (commmand) {
             case "SessionId": {
-              const id: string | number = ChatSessionEntity.memberInfo(a => a.id).type.name == "number" ? parseInt(argument!) : argument!;
+              const id: string | number = ChatSessionEntity.memberInfo(a => a.id).type.name == "number" ? parseInt(args!) : args!;
               currentSessionRef.current = newLite(ChatSessionEntity, id);
               break;
             }
             case "SessionTitle": {
-              currentSessionRef.current!.model = argument;
+              currentSessionRef.current!.model = args;
               break;
             }
             case "QuestionId": {
-              const id: string | number = ChatMessageEntity.memberInfo(a => a.id).type.name == "number" ? parseInt(argument!) : argument!;
+              const id: string | number = ChatMessageEntity.memberInfo(a => a.id).type.name == "number" ? parseInt(args!) : args!;
 
               messagesRef.current!.push(ChatMessageEntity.New({
                 id: id,
                 modified: false,
                 isNew: false,
-                isToolCall: false,
                 role: "User",
                 chatSession: currentSessionRef!.current!,
-                message: questionRef.current,
+                content: questionRef.current,
               }));
               break;
             }
             case "AssistantToolCall": {
-              setAnswer("Assistant", true);
+              setAnswer("Assistant", args);
               break;
             }
             case "Tool": {
-              setAnswer("Tool");
+              setAnswer("Tool", args);
               break;
             }
             case "System": {
@@ -121,7 +122,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
               break;
             }
             case "AnswerId": {
-              const id: string | number = ChatMessageEntity.memberInfo(a => a.id).type.name == "number" ? parseInt(argument!) : argument!;
+              const id: string | number = ChatMessageEntity.memberInfo(a => a.id).type.name == "number" ? parseInt(args!) : args!;
 
               currentAnswerRef.current!.id = id;
               currentAnswerRef.current!.modified = false;
@@ -135,7 +136,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
           }
         }
         else {
-          currentAnswerRef.current!.message += chunk;
+          currentAnswerRef.current!.content += chunk;
         }
 
         forceUpdate();
@@ -168,12 +169,8 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
       </h4>
       {/* Chat History */}
       <div className="chat-history flex-grow-1 p-3 pt-0">
-        {messagesRef.current?.map(msg => msg.role == "User" || msg.role == "Assistant" ?
-          <Message key={msg.id} msg={msg} /> :
-          <InternalMessage key={msg.id} msg={msg} />
-        )}
-
-        {currentAnswerRef.current && <CurrentMessage msg={currentAnswerRef.current} />}
+        {messagesRef.current?.map(msg => <Message key={msg.id} msg={msg} />)}
+        {currentAnswerRef.current && <Message msg={currentAnswerRef.current} />}
       </div>
 
       {/* Input */}
@@ -198,59 +195,139 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
       </div>
     </div>
   );
-  function setAnswer(role: ChatMessageRole, isToolCall: boolean = false) {
+  function setAnswer(role: ChatMessageRole, toolId?: string) {
     currentAnswerRef.current = ChatMessageEntity.New({
-      isToolCall: isToolCall,
+      toolID: toolId,
       role: role,
       chatSession: currentSessionRef!.current!,
-      message: "",
+      content: "",
     });
   }
 }
 
-const InternalMessage = React.memo(function Message(p: { msg: ChatMessageEntity }): React.ReactElement {
+function looksLikeJson(text: string) {
+  return text.startsWith("{") || text.startsWith("[")
+}
+
+const Message = React.memo(function Message(p: { msg: ChatMessageEntity }): React.ReactElement {
+  switch (p.msg.role) {
+    case "System": return <SystemMessage msg={p.msg} />;
+    case "Assistant": return <AssistantMessage msg={p.msg} />;
+    case "Tool": return <ToolMessage msg={p.msg} />;
+    case "User": return <UserMessage msg={p.msg} />;
+    default: throw new Error("Unexpected role " + p.msg.role);
+  }
+}, (a, b) => a.msg.id != null && b.msg.id != null && a.msg.id == b.msg.id);
+
+function SystemMessage(p: { msg: ChatMessageEntity }): React.ReactElement {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
     <div className={`mb-2 justify-content-start`}>
       <a className="chat-internal" href="#" onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}>
-        <FontAwesomeIcon icon={p.msg.role == "Tool" ? "hammer" : "book"} /> {p.msg.role == "Tool" ? ChatbotMessage.UsingInternalTool.niceToString() : ChatbotMessage.ReceivingInstructions.niceToString()}…
+        <FontAwesomeIcon icon={"book"} /> {ChatbotMessage.InitialInstruction.niceToString()}
       </a>
       {isOpen &&
         <div className={`chat-bubble bot`}>
           <React.Suspense fallback={null}>
-            {ChatbotClient.renderMarkdown(p.msg.message)}
+            {ChatbotClient.renderMarkdown(p.msg.content!)}
           </React.Suspense>
         </div>
       }
     </div>
   );
-}, (a, b) => a.msg.id == b.msg.id);
+}
 
-const Message = React.memo(function Message(p: { msg: ChatMessageEntity }): React.ReactElement {
+
+function AssistantMessage(p: { msg: ChatMessageEntity }): React.ReactElement {
+
   return (
-    <div className={`mb-2 d-flex ${p.msg.role == "User" ? "justify-content-end" : "justify-content-start"}`}>
-      <div className={`chat-bubble ${p.msg.role == "User" ? "user" : "bot"}`}>
-        <React.Suspense fallback={null}>
-          {ChatbotClient.renderMarkdown(p.msg.message)}
+    <div className={`mb-2 justify-content-start`}>
+      {
+        p.msg.content && <React.Suspense fallback={null}>
+          {ChatbotClient.renderMarkdown(p.msg.content)}
         </React.Suspense>
-      </div>
+      }
+      {p.msg.toolCalls.map(tc => <ToolCall toolCall={tc.element} />)}
     </div>
   );
-}, (a, b) => a.msg.id == b.msg.id);
+}
 
-function CurrentMessage(p: { msg: ChatMessageEntity }): React.ReactElement {
+function ToolCall(p: { toolCall: ToolCallEmbedded }): React.ReactElement {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const answer = p.toolCall._answer;
   return (
-    <div className={`mb-2 d-flex ${p.msg.role == "User" ? "justify-content-end" : "justify-content-start"}`}>
+    <div className={`mb-2 justify-content-start`}>
+      <a className="chat-internal" href="#" onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}>
+        <FontAwesomeIcon icon={"hammer"} /> {ChatbotMessage.InitialInstruction.niceToString()}
+      </a>
+      {isOpen &&
+        <div>
+          <div className={`chat-bubble bot`}>
+            <pre>
+              {p.toolCall.arguments}
+            </pre>
+          </div>
+          {answer && <div className={`mb-2 justify-content-start`}>
+            <a className="chat-internal" href="#" onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}>
+              <FontAwesomeIcon icon={"hammer"} /> {answer.toolID}…
+            </a>
+            <div className={`chat-bubble bot`}>
+              {answer.toolID && looksLikeJson(answer.content!) ?
+                <pre>
+                  {answer.content}
+                </pre>
+                :
+                <React.Suspense fallback={null}>
+                  {ChatbotClient.renderMarkdown(answer.content!)}
+                </React.Suspense>
+              }
+            </div>
+          </div>}
+        </div>
+      }
+    </div>
+  );
+}
+
+
+function ToolMessage(p: { msg: ChatMessageEntity }): React.ReactElement {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  return (
+    <div className={`mb-2 justify-content-start`}>
+      <a className="chat-internal" href="#" onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}>
+        <FontAwesomeIcon icon={"hammer"} /> {p.msg.toolID}…
+      </a>
+      {isOpen &&
+        <div className={`chat-bubble bot`}>
+          {p.msg.toolID && looksLikeJson(p.msg.content!) ?
+            <pre>
+              {p.msg.content}
+            </pre>
+            :
+            < React.Suspense fallback={null}>
+              {ChatbotClient.renderMarkdown(p.msg.content!)}
+            </React.Suspense>
+          }
+        </div>
+      }
+    </div>
+  );
+}
+
+function UserMessage(p: { msg: ChatMessageEntity }): React.ReactElement {
+  return (
+    <div className={`mb-2 d-flex justify-content-end justify-content-start"`}>
       <div className={`chat-bubble ${p.msg.role == "User" ? "user" : "bot"}`}>
         <React.Suspense fallback={null}>
-          {ChatbotClient.renderMarkdown(p.msg.message)}
+          {ChatbotClient.renderMarkdown(p.msg.content!)}
         </React.Suspense>
       </div>
     </div>
   );
 }
-
 
 async function* getWordsOrCommands(reader: ReadableStreamDefaultReader<Uint8Array>): AsyncGenerator<string> {
   const decoder = new TextDecoder();

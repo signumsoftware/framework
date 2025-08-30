@@ -29,6 +29,16 @@ public static class ReflectionTools
         return info.ReadState == NullabilityState.Nullable;
     }
 
+    public static bool? IsNullable(this ParameterInfo pi)
+    {
+        var info = new NullabilityInfoContext().Create(pi);
+
+        if (info.ReadState == NullabilityState.Unknown)
+            return null;
+
+        return info.ReadState == NullabilityState.Nullable;
+    }
+
     public static bool FieldEquals(FieldInfo? f1, FieldInfo? f2)
     {
         return MemeberEquals(f1, f2);

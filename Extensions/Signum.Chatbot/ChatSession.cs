@@ -19,6 +19,10 @@ public class ChatSessionEntity : Entity
     public Lite<UserEntity> User { get; set; }
 
     public DateTime StartDate { get; set; }
+
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Title ?? BaseToString());
 }
 
 [AutoInit]
@@ -37,30 +41,44 @@ public class ChatMessageEntity : Entity
 
     public ChatMessageRole Role { get; set; }
 
-    public bool IsToolCall { get; set; }
+    [StringLengthValidator(MultiLine = true)] // The arguments of the tool call if role is Assistant and ToolID is not null
+    public string? Content { get; set; }
 
-    [StringLengthValidator(MultiLine = true)]
-    public string? Message { get; set; }
+    [PreserveOrder, NoRepeatValidator]
+    public MList<ToolCallEmbedded> ToolCalls { get; set; } = new MList<ToolCallEmbedded>();
 
-    [StringLengthValidator(MultiLine = true)]
-    public string? ToolDescriptions { get; set; }
+    // For Tool role responses
+    [StringLengthValidator(Max = 100)]
+    public string? ToolCallID { get; set; }
 
-    [StringLengthValidator(MultiLine = true)]
+    [StringLengthValidator(Max = 100)]
     public string? ToolID { get; set; }
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Name == nameof(IsToolCall) && IsToolCall && Role != ChatMessageRole.Assistant)
-            return ValidationMessage._0ShouldBe1.NiceToString(pi.NiceName(), false);
-
         if(pi.Name == nameof(ToolID) && ToolID != null && Role != ChatMessageRole.Tool)
             return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
 
-        if (pi.Name == nameof(ToolDescriptions) && ToolID != null && (Role != ChatMessageRole.System || Role != ChatMessageRole.Tool))
+        if (pi.Name == nameof(ToolCallID) && ToolCallID != null && Role != ChatMessageRole.Tool)
             return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
+
+        if (pi.Name == nameof(Content) && Content == null && Role != ChatMessageRole.Assistant)
+            return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
         return base.PropertyValidation(pi);
     }
+}
+
+public class ToolCallEmbedded : EmbeddedEntity
+{
+    [StringLengthValidator(Max = 100)]
+    public string CallId { get; set; }
+
+    [StringLengthValidator(Max = 100)]
+    public string ToolID { get; set; }
+
+    [StringLengthValidator(Max = 100)]
+    public string Arguments { get; set; }
 }
 
 public enum ChatMessageRole
@@ -85,6 +103,5 @@ public enum ChatbotMessage
     Send,
     [Description("Type a message...")]
     TypeAMessage,
-    UsingInternalTool,
-    ReceivingInstructions,
+    InitialInstruction,
 }
