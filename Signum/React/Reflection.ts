@@ -1524,6 +1524,18 @@ In case of a collection of embedded entities, use something like: MyEntity.prope
       return new QueryTokenString(tokenSequence(lambdaToColumn, true));
   }
 
+  parseId(txt: string): string | number {
+    var miId = this.typeInfo().members["Id"]!;
+
+    if (miId == null)
+      throw new Error("Member Id not found");
+
+    if (miId.type.name == "number")
+      return parseInt(txt!);
+
+    return txt;
+  }
+
   toString(): string {
     return this.typeName;
   }

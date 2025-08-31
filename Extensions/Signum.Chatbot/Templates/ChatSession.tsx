@@ -2,11 +2,11 @@ import * as React from 'react'
 import { AutoLine, EntityTabRepeater, TextAreaLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { Tabs, Tab, CloseButton } from 'react-bootstrap';
-import { newMListElement } from '../../../Signum/React/Signum.Entities';
-import { useForceUpdate } from '../../../Signum/React/Hooks';
+import { newMListElement } from '@framework/Signum.Entities';
+import { useForceUpdate } from '@framework/Hooks';
 import { useState } from 'react';
 import { ChatMessageEntity, ChatSessionEntity } from '../Signum.Chatbot';
-import { SearchControl } from '../../../Signum/React/Search';
+import { SearchControl } from '@framework/Search';
 
 
 export default function ChatSession(p: { ctx: TypeContext<ChatSessionEntity> }): React.JSX.Element {
@@ -36,6 +36,10 @@ export default function ChatSession(p: { ctx: TypeContext<ChatSessionEntity> }):
         filterOptions: [{
           token: ChatMessageEntity.token(a => a.chatSession),
           value: ctx.value
+        }],
+        orderOptions: [{
+          token: ChatMessageEntity.token(a => a.id),
+          orderType: "Ascending"
         }]
       }} />
 

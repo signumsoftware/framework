@@ -9,7 +9,7 @@ import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Authorization from '../Signum.Authorization/Signum.Authorization'
 
 export interface ToolCallEmbedded {
-  _answer?: ChatMessageEntity
+  _response?: ChatMessageEntity
 }
 
 export const ChatbotConfigurationEmbedded: Type<ChatbotConfigurationEmbedded> = new Type<ChatbotConfigurationEmbedded>("ChatbotConfigurationEmbedded");
@@ -17,10 +17,10 @@ export interface ChatbotConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "ChatbotConfigurationEmbedded";
   openAIAPIKey: string | null;
   anthropicAPIKey: string | null;
-  deepSeekAPIKey: string | null;
   geminiAPIKey: string | null;
-  grokAPIKey: string | null;
   mistralAPIKey: string | null;
+  githubModelsToken: string | null;
+  ollamaUrl: string | null;
 }
 
 export const ChatbotLanguageModelEntity: Type<ChatbotLanguageModelEntity> = new Type<ChatbotLanguageModelEntity>("ChatbotLanguageModel");
@@ -47,12 +47,17 @@ export namespace ChatbotMessage {
   export const InitialInstruction: MessageKey = new MessageKey("ChatbotMessage", "InitialInstruction");
 }
 
+export namespace ChatbotPermission {
+  export const UseChatbot : Basics.PermissionSymbol = registerSymbol("Permission", "ChatbotPermission.UseChatbot");
+}
+
 export namespace ChatbotProviders {
   export const OpenAI : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.OpenAI");
-  export const Mistral : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Mistral");
+  export const Gemini : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Gemini");
   export const Anthropic : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Anthropic");
-  export const DeepSeek : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.DeepSeek");
-  export const Grok : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Grok");
+  export const Mistral : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Mistral");
+  export const GithubModels : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.GithubModels");
+  export const Ollama : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Ollama");
 }
 
 export const ChatbotProviderSymbol: Type<ChatbotProviderSymbol> = new Type<ChatbotProviderSymbol>("ChatbotProvider");
@@ -69,7 +74,8 @@ export type ChatbotUICommand =
   "AnswerId" |
   "AssistantAnswer" |
   "AssistantTool" |
-  "Tool";
+  "Tool" |
+  "Exception";
 
 export const ChatMessageEntity: Type<ChatMessageEntity> = new Type<ChatMessageEntity>("ChatMessage");
 export interface ChatMessageEntity extends Entities.Entity {
@@ -81,6 +87,7 @@ export interface ChatMessageEntity extends Entities.Entity {
   toolCalls: Entities.MList<ToolCallEmbedded>;
   toolCallID: string | null;
   toolID: string | null;
+  exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
 export namespace ChatMessageOperation {

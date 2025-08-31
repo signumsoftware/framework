@@ -13,21 +13,29 @@ namespace Signum.Chatbot.Providers;
 
 public class AnthropicChatbotProvider : IChatbotProvider
 {
-    public string[] GetModelNames()
+    public async Task<List<string>> GetModelNames(CancellationToken ct)
     {
-        var models = new AnthropicClient(null).Models.ListModelsAsync().ResultSafe();
-        return models.Models.Select(models => models.Id).ToArray();
+        string apiKey = GetApiKey();
+
+        var models = await new AnthropicClient(apiKey).Models.ListModelsAsync(ctx: ct);
+        return models.Models.Select(models => models.Id).ToList();
     }
 
-    public IChatClient CreateChatClient()
+    public IChatClient CreateChatClient(ChatbotLanguageModelEntity model)
+    {
+        string apiKey = GetApiKey();
+
+        IChatClient client = new AnthropicClient(new APIAuthentication(apiKey)).Messages;
+
+        return client;
+    }
+
+    private static string GetApiKey()
     {
         var apiKey = ChatbotLogic.GetConfig().AnthropicAPIKey;
 
         if (apiKey.IsNullOrEmpty())
             throw new InvalidOperationException("No API Key for Claude configured!");
-
-        IChatClient client = new AnthropicClient(new APIAuthentication(apiKey)).Messages;
-
-        return client;
+        return apiKey;
     }
 }

@@ -11,7 +11,14 @@ public class QuestionSumarizerSkill : ChatbotSkill
         IsAllowed = () => true;
         Replacements = new Dictionary<string, Func<object?, string>>()
         {
-              { "<Conversation>", obj => ((ConversationHistory)obj!).GetMessages().Where(a=>a.Role == ChatRole.User).Select((a, i) => $"#Question {(i +1)}:#\n{a.Text}").ToString("\n\n").Etc(500) }
+            { "<Conversation>", obj => ((ConversationHistory)obj!).GetMessages()
+            .Where(a=>a.Role == ChatRole.User)
+            .Select((a,i) => $"""
+            Question {(i +1)}:
+            {a.Text}
+            """)
+            .ToString("\n\n")
+            .Etc(500) }
         };
     }
 }

@@ -54,6 +54,8 @@ public class ChatMessageEntity : Entity
     [StringLengthValidator(Max = 100)]
     public string? ToolID { get; set; }
 
+    public Lite<ExceptionEntity>? Exception { get; set; }
+
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         if(pi.Name == nameof(ToolID) && ToolID != null && Role != ChatMessageRole.Tool)
@@ -62,7 +64,7 @@ public class ChatMessageEntity : Entity
         if (pi.Name == nameof(ToolCallID) && ToolCallID != null && Role != ChatMessageRole.Tool)
             return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
 
-        if (pi.Name == nameof(Content) && Content == null && Role != ChatMessageRole.Assistant)
+        if (pi.Name == nameof(Content) && Content == null && Role != ChatMessageRole.Assistant && Exception == null)
             return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
         return base.PropertyValidation(pi);
@@ -104,4 +106,10 @@ public enum ChatbotMessage
     [Description("Type a message...")]
     TypeAMessage,
     InitialInstruction,
+}
+
+[AutoInit]
+public static class ChatbotPermission
+{
+    public static PermissionSymbol UseChatbot;
 }

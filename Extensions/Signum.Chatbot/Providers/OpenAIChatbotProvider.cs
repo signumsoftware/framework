@@ -1,28 +1,34 @@
-using System.Net.Http;
-using System.Net.Http.Headers;
+using Microsoft.Extensions.AI;
+using OpenAI;
 
 namespace Signum.Chatbot.Providers;
 
-public class OpenAIChatbotProvider : ChatbotProviderBase
+public class OpenAIChatbotProvider : IChatbotProvider
 {
-    protected override HttpClient GetClient(bool stream = false)
+    public async Task<List<string>> GetModelNames(CancellationToken ct)
+    {
+        string? apiKey = GetApiKey();
+        var models = await new OpenAIClient(apiKey).GetOpenAIModelClient().GetModelsAsync(ct);
+        return models.Value.Select(a => a.Id).ToList();
+    }
+
+    public IChatClient CreateChatClient(ChatbotLanguageModelEntity model)
+    {
+        string apiKey = GetApiKey();
+
+        IChatClient client = new OpenAIClient(apiKey).GetChatClient(model.Model).AsIChatClient();
+
+        return client;
+    }
+
+    static string GetApiKey()
     {
         var apiKey = ChatbotLogic.GetConfig().OpenAIAPIKey;
 
         if (apiKey.IsNullOrEmpty())
-            throw new InvalidOperationException("No API Key for OpenAI configured!");
-
-        var client = new HttpClient
-        {
-            BaseAddress = new Uri("https://api.openai.com/"),
-        };
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-
-        if (stream)
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        else
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-        return client;
+            throw new InvalidOperationException("No API Key for Claude configured!");
+        return apiKey;
     }
+
+
 }

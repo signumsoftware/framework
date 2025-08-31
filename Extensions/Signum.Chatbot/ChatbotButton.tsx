@@ -4,6 +4,7 @@ import "./ChatButton.css";
 // Font Awesome imports
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComments } from "@fortawesome/free-solid-svg-icons";
+import { ErrorBoundary } from "@framework/Components";
 const ChatbotModal = React.lazy(() => import("./ChatbotModal"));
 
 export default function ChatbotButton(): React.ReactElement {
@@ -18,9 +19,9 @@ export default function ChatbotButton(): React.ReactElement {
         <FontAwesomeIcon icon={faComments} size="lg" />
       </button >
       {showModal && (
-        <React.Suspense fallback={null}>
-          <ChatbotModal onClose={() => setShowModal(false)} />
-        </React.Suspense>
+          <React.Suspense fallback={null}>
+            <ChatbotModal onClose={() => setShowModal(false)} />
+          </React.Suspense>
       )}
     </>
   );

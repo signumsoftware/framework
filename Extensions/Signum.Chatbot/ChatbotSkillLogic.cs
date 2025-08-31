@@ -1,5 +1,6 @@
 using Microsoft.Extensions.AI;
 using Microsoft.Identity.Client;
+using Signum.API;
 using Signum.Chatbot.Agents;
 using Signum.Chatbot.Skills;
 using System.ComponentModel;
@@ -99,7 +100,7 @@ public abstract class ChatbotSkill
         {
             var skill = ChatbotSkillLogic.GetSkill(item.Key);
 
-            sb.AppendLineLF("## Skill " + skill.Name);
+            sb.AppendLineLF("# Skill " + skill.Name);
             sb.AppendLineLF("**Summary**: " + skill.ShortDescription);
             sb.AppendLineLF();
 
@@ -123,7 +124,7 @@ public abstract class ChatbotSkill
                 Type types = Expression.GetDelegateType(m.GetParameters().Select(a => a.ParameterType).And(m.ReturnType).ToArray());
                 Delegate del = Delegate.CreateDelegate(types, this, m);
                 string? description = m.GetCustomAttribute<DescriptionAttribute>()?.Description;
-                return (AITool)AIFunctionFactory.Create(del, m.Name, description);
+                return (AITool)AIFunctionFactory.Create(del, m.Name, description, SignumServer.JsonSerializerOptions);
             })
             .ToList());
     }

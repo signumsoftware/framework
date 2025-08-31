@@ -11,18 +11,21 @@
   <ItemGroup>
     <Compile Remove="Providers\DeepSeekChatbotProvider.cs" />
     <Compile Remove="Providers\GrokChatbotProvider.cs" />
-    <Compile Remove="Providers\MistralChatbotProvider.cs" />
-    <Compile Remove="Providers\OpenAIChatbotProvider.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Anthropic.SDK" Version="5.5.1" />
+    <PackageReference Include="Google_GenerativeAI.Microsoft" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.8.0-preview.1.25412.6" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.3">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Mistral.SDK" Version="2.2.0" />
     <PackageReference Include="ModelContextProtocol" Version="0.3.0-preview.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="OllamaSharp" Version="5.3.6" />
+    <PackageReference Include="OpenAI" Version="2.3.0" />
     <PackageReference Include="Signum.Analyzer" Version="3.2.0" />
     <PackageReference Include="Signum.MSBuildTask" Version="9.0.0" />
     <PackageReference Include="Signum.TSGenerator" Version="9.1.0" />

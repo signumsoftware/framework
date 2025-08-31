@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.AI;
+using Signum.API;
+using Signum.API.Filters;
 using Signum.Authorization;
 using Signum.Chatbot.Agents;
 using System.Data;
@@ -12,13 +14,12 @@ namespace Signum.Chatbot;
 public class ChatbotController : Controller
 {
     [HttpGet("api/chatbot/provider/{providerKey}/models")]
-    public string[] GetModels(string providerKey)
+    public Task<List<string>> GetModels(string providerKey, CancellationToken token)
     {
-        var messages = ChatbotLogic.GetModelNames(SymbolLogic<ChatbotProviderSymbol>.ToSymbol(providerKey));
+        var symbol = SymbolLogic<ChatbotProviderSymbol>.ToSymbol(providerKey);
 
-        return messages;
+        return ChatbotLogic.GetModelNamesAsync(symbol, token);
     }
-
 
     [HttpGet("api/chatbot/messages/{sessionID}")]
     public List<ChatMessageEntity> GetMessagesBySessionId(int sessionID)
@@ -57,11 +58,19 @@ public class ChatbotController : Controller
         }
         else
         {
+            Schema.Current.AssertAllowed(typeof(ChatMessageEntity), true);
+
+            var messages = AuthLogic.Disable().Using(() => Database.Query<ChatMessageEntity>()
+                .Where(c => c.ChatSession.Is(session))
+                .ExpandLite(a => a.Exception, ExpandLite.EntityEager)
+                .OrderBy(a => a.CreationDate)
+                .ToList());
+
             history = new ConversationHistory
             {
                 Session = session,
                 LanguageModel = session.LanguageModel.RetrieveFromCache(),
-                Messages = Database.Query<ChatMessageEntity>().Where(c => c.ChatSession.Is(session)).OrderBy(a=>a.CreationDate).ToList()
+                Messages = messages,
             };
         }
 
@@ -86,7 +95,6 @@ public class ChatbotController : Controller
                     await resp.WriteAsync(UINotification(ChatbotUICommand.AssistantAnswer), ct);
 
                 updates.Add(update);
-                Debug.WriteLine(update);
                 var text = update.Text;
                 if (text.HasText())
                 {
@@ -131,30 +139,55 @@ public class ChatbotController : Controller
 
             history.Messages.Add(answer);
 
-            if (!responseMsg.Contents.Any())
+            if (toolCalls.IsEmpty())
                 break;
 
-            foreach (var item in toolCalls)
+            foreach (var funCall in toolCalls)
             {
-                await resp.WriteAsync(UINotification(ChatbotUICommand.Tool, item.CallId), ct);
+                await resp.WriteAsync(UINotification(ChatbotUICommand.Tool, funCall.Name + "/" + funCall.CallId), ct);
 
-                AITool tool = ChatbotSkillLogic.AllTools.Value.GetOrThrow(item.Name);
-                var obj = await ((AIFunction)tool).InvokeAsync(new AIFunctionArguments(item.Arguments), ct);
-                string toolResponse = JsonSerializer.Serialize(obj);
-                await resp.WriteAsync(toolResponse, ct);
-                var toolMsg = new ChatMessageEntity()
+                try
                 {
-                    ChatSession = history.Session.ToLite(),
-                    Role = ChatMessageRole.Tool,
-                    ToolCallID = item.CallId,
-                    ToolID = item.Name,
-                    Content = toolResponse,
-                }.Save();
+                    AITool tool = ChatbotSkillLogic.AllTools.Value.GetOrThrow(funCall.Name);
+                    var obj = await ((AIFunction)tool).InvokeAsync(new AIFunctionArguments(funCall.Arguments), ct);
+                    string toolResponse = JsonSerializer.Serialize(obj);
+                    var toolMsg = new ChatMessageEntity()
+                    {
+                        ChatSession = history.Session.ToLite(),
+                        Role = ChatMessageRole.Tool,
+                        ToolCallID = funCall.CallId,
+                        ToolID = funCall.Name,
+                        Content = toolResponse,
+                    }.Save();
 
-                await resp.WriteAsync(UINotification(ChatbotUICommand.AnswerId, toolMsg.Id.ToString()), ct);
-                await resp.Body.FlushAsync();
+                    await resp.WriteAsync(toolResponse, ct);
+                    await resp.WriteAsync("\n");
+                    await resp.WriteAsync(UINotification(ChatbotUICommand.AnswerId, toolMsg.Id.ToString()), ct);
+                    await resp.Body.FlushAsync();
+                    history.Messages.Add(toolMsg);
+                }
+                catch (Exception e)
+                {
+                    ChatMessageEntity toolMsg;
+                    using (AuthLogic.Disable())
+                    {
+                        toolMsg = new ChatMessageEntity()
+                        {
+                            ChatSession = history.Session.ToLite(),
+                            Role = ChatMessageRole.Tool,
+                            ToolCallID = funCall.CallId,
+                            ToolID = funCall.Name,
+                            Exception = e.LogException().ToLiteFat(),
+                        }.Save();
+                    }
 
-                history.Messages.Add(toolMsg);
+                    await resp.WriteAsync(UINotification(ChatbotUICommand.Exception, toolMsg.Exception!.Id.ToString()), ct);
+                    await resp.WriteAsync(toolMsg.Exception!.ToString()!, ct);
+                    await resp.WriteAsync("\n");
+                    await resp.WriteAsync(UINotification(ChatbotUICommand.AnswerId, toolMsg.Id.ToString()), ct);
+                    await resp.Body.FlushAsync();
+                    history.Messages.Add(toolMsg);
+                }
             }          
         }
 
@@ -189,7 +222,7 @@ public class ChatbotController : Controller
             LanguageModel = ChatbotLogic.DefaultLanguageModel.Value ?? throw new InvalidOperationException($"No default {typeof(ChatbotLanguageModelEntity).Name}"),
             User = UserEntity.Current,
             StartDate = Clock.Now,
-            Title = "!*$Neuer Chat" + DateTime.Now,
+            Title = null,
         }.Save() : Database.Query<ChatSessionEntity>().SingleEx(a => a.Id == PrimaryKey.Parse(sessionID, typeof(ChatSessionEntity)));
     }
 
@@ -239,4 +272,5 @@ public enum ChatbotUICommand
     AssistantAnswer,
     AssistantTool,
     Tool,
+    Exception,
 }

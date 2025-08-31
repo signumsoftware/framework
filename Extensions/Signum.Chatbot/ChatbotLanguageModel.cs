@@ -55,11 +55,11 @@ public class ChatbotProviderSymbol : Symbol
 public static class ChatbotProviders
 {
     public static readonly ChatbotProviderSymbol OpenAI;
-    //public static readonly ChatbotProviderSymbol Gemini; // TODO: Api is not OpenAI based
-    public static readonly ChatbotProviderSymbol Mistral; 
+    public static readonly ChatbotProviderSymbol Gemini;
     public static readonly ChatbotProviderSymbol Anthropic;
-    public static readonly ChatbotProviderSymbol DeepSeek;
-    public static readonly ChatbotProviderSymbol Grok;
+    public static readonly ChatbotProviderSymbol Mistral; 
+    public static readonly ChatbotProviderSymbol GithubModels; 
+    public static readonly ChatbotProviderSymbol Ollama;
 }
 
 
@@ -72,16 +72,15 @@ public class ChatbotConfigurationEmbedded : EmbeddedEntity
     public string? AnthropicAPIKey { get; set; }
 
     [StringLengthValidator(Max = 300), Format(FormatAttribute.Password)]
-    public string? DeepSeekAPIKey { get; set; }
-
-    [StringLengthValidator(Max = 300), Format(FormatAttribute.Password)]
     public string? GeminiAPIKey { get; set; }
 
     [StringLengthValidator(Max = 300), Format(FormatAttribute.Password)]
-    public string? GrokAPIKey { get; set; }
+    public string? MistralAPIKey { get; set; }
 
     [StringLengthValidator(Max = 300), Format(FormatAttribute.Password)]
-    public string? MistralAPIKey{ get; set; }
+    public string? GithubModelsToken { get; set; }
 
+    [StringLengthValidator(Max = 300)]
+    public string? OllamaUrl { get; set; }
 }
 

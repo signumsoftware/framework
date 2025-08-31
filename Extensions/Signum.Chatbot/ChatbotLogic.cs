@@ -2,12 +2,15 @@ using Anthropic.SDK;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
 using Signum.Chatbot.Agents;
 using Signum.Chatbot.Providers;
 using Signum.Chatbot.Skills;
 using Signum.Utilities.Synchronization;
 using System.Formats.Tar;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
@@ -27,11 +30,12 @@ public static class ChatbotLogic
 
     public static Dictionary<ChatbotProviderSymbol, IChatbotProvider> Providers = new Dictionary<ChatbotProviderSymbol, IChatbotProvider>
     {
-        { ChatbotProviders.OpenAI, new AnthropicChatbotProvider()/*new OpenAIChatbotProvider()*/},
+        { ChatbotProviders.OpenAI, new OpenAIChatbotProvider()},
+        { ChatbotProviders.Gemini, new GeminiChatbotProvider()},
         { ChatbotProviders.Anthropic, new AnthropicChatbotProvider()},
-        { ChatbotProviders.DeepSeek, new AnthropicChatbotProvider()/*new DeepSeekChatbotProvider()*/},
-        { ChatbotProviders.Grok, new AnthropicChatbotProvider()/*new GrokChatbotProvider()*/},
-        { ChatbotProviders.Mistral, new AnthropicChatbotProvider()/*new MistralChatbotProvider()*/},
+        { ChatbotProviders.GithubModels, new GithubModelsChatbotProvider()},
+        { ChatbotProviders.Mistral, new MistralChatbotProvider()},
+        { ChatbotProviders.Ollama, new OllamaChatbotProvider()},
     };
 
     public static Func<ChatbotConfigurationEmbedded> GetConfig;
@@ -116,17 +120,26 @@ public static class ChatbotLogic
                     e.Role,
                     e.ToolID,
                     e.Content,
+                    e.Exception,
                     e.ChatSession,
                 });
+
+            PermissionLogic.RegisterTypes(typeof(ChatbotPermission));
         }
+    }
+
+    public static void RegisterUserTypeCondition(TypeConditionSymbol userEntities)
+    {
+        TypeConditionLogic.RegisterCompile<ChatSessionEntity>(userEntities, cm => cm.User.Entity.Is(UserEntity.Current));
+        TypeConditionLogic.RegisterCompile<ChatMessageEntity>(userEntities, cm => cm.ChatSession.Entity.InCondition(userEntities));
     }
 
     public static async Task<string> SumarizeTitle(ConversationHistory history, CancellationToken ct)
     {
         var prompt = ChatbotSkillLogic.GetSkill<QuestionSumarizerSkill>().GetInstruction(history);
         var client = GetChatClient(history.LanguageModel);
-        var cr = await client.GetResponseAsync(prompt, ChatbotLogic.ChatOptions(history.LanguageModel, history.GetTools()), cancellationToken: ct);
-
+        var options = ChatbotLogic.ChatOptions(history.LanguageModel, []);
+        var cr = await client.GetResponseAsync(prompt, options, cancellationToken: ct);
         return cr.Text;
     }
 
@@ -136,15 +149,15 @@ public static class ChatbotLogic
     }
 
 
-    public static string[] GetModelNames(ChatbotProviderSymbol provider)
+    public static Task<List<string>> GetModelNamesAsync(ChatbotProviderSymbol provider, CancellationToken ct)
     {
-        return Providers.GetOrThrow(provider).GetModelNames();
+        return Providers.GetOrThrow(provider).GetModelNames(ct);
     }
 
 
     public static IChatClient GetChatClient(ChatbotLanguageModelEntity model)
     {
-        var result = Providers.GetOrThrow(model.Provider).CreateChatClient();
+        var result = Providers.GetOrThrow(model.Provider).CreateChatClient(model);
 
         return result;
     }
@@ -176,27 +189,9 @@ public static class ChatbotLogic
 
 public interface IChatbotProvider
 {
-    string[] GetModelNames();
+    Task<List<string>> GetModelNames(CancellationToken ct);
 
-    IChatClient CreateChatClient();
-}
-
-public struct StreamingValue
-{
-    public string? ToolCallId;
-    public string? ToolId;
-    public string? Value;
-
-    private StreamingValue(string? toolCallId, string? toolId, string? value)
-    {
-        ToolCallId = toolCallId;
-        ToolId = toolId;
-        Value = value;
-    }
-
-    public static StreamingValue Answer(string value) => new StreamingValue(null, null, value);
-    public static StreamingValue ToolCal_Start(string toolCallId, string toolId) => new StreamingValue(toolCallId, toolId, null);
-    public static StreamingValue ToolCall_Argument(string toolCallId, string argument) => new StreamingValue(toolCallId, null, argument);
+    IChatClient CreateChatClient(ChatbotLanguageModelEntity model);
 }
 
 public class ConversationHistory
@@ -210,7 +205,52 @@ public class ConversationHistory
 
     public List<ChatMessage> GetMessages()
     {
-        return Messages.Select(c => new ChatMessage(ToChatRole(c.Role), c.Content)).ToList();
+        return Messages.Select(c =>
+        {
+            var role = ToChatRole(c.Role);
+
+            var content = c.Exception == null ? c.Content :
+                $"{c.Exception.Entity.ExceptionType}:\n{c.Exception.Entity.ExceptionMessage}";
+
+            if(c.Role == ChatMessageRole.Tool)
+            {
+                return new ChatMessage(role, [
+                    new FunctionResultContent(c.ToolCallID!, c.Content)
+                ]);
+            }
+
+            if (c.ToolCalls.IsEmpty())
+                return new ChatMessage(role, content);
+
+            var contents = c.ToolCalls.Select(c =>
+            {
+                var arguments = JsonSerializer.Deserialize<Dictionary<string, object?>>(c.Arguments)!;
+                var cleanArguments = arguments.ToDictionary(kvp => kvp.Key, kvp => CleanValue(kvp.Value));
+                return (AIContent)new FunctionCallContent(c.CallId, c.ToolId, cleanArguments);
+            }).ToList();
+
+            if (c.Content.HasText())
+                contents.Insert(0, new TextContent(c.Content!));
+
+            return new ChatMessage(role, contents);
+        }).ToList();
+    }
+
+    private static object? CleanValue(object? value)
+    {
+        if (value is JsonElement je)
+        {
+            return je.ValueKind switch
+            {
+                JsonValueKind.String => je.GetString()!,
+                JsonValueKind.Number => je.GetDouble(),
+                JsonValueKind.True => true,
+                JsonValueKind.False => false,
+                JsonValueKind.Null => null,
+                _ => je
+            };
+        }
+        return value;
     }
 
     public List<AITool> GetTools()
@@ -237,14 +277,3 @@ public class ConversationHistory
         _ => throw new InvalidOperationException($"Unexpected {nameof(ChatMessageRole)} {role}"),
     };
 }
-
-
-//public class ChatMessage
-//{
-//    public ChatMessageRole Role;
-//    public string Content;
-//    public string? SkillName; // For available tools
-//    public string? ToolCallID;
-
-//    public override string ToString() => $"{Role}: {Content}";
-//}
