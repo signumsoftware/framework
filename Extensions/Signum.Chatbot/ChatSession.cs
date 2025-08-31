@@ -75,7 +75,7 @@ public class ToolCallEmbedded : EmbeddedEntity
     public string CallId { get; set; }
 
     [StringLengthValidator(Max = 100)]
-    public string ToolID { get; set; }
+    public string ToolId { get; set; }
 
     [StringLengthValidator(Max = 100)]
     public string Arguments { get; set; }

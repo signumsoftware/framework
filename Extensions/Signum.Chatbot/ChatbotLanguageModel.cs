@@ -17,7 +17,7 @@ public class ChatbotLanguageModelEntity : Entity
     [StringLengthValidator(Max = 50)]
     public string Model { get; set; }
 
-    public double? Temperature { get; set; }
+    public float? Temperature { get; set; }
 
     public int? MaxTokens { get; set; }
 

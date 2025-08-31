@@ -1,17 +1,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Identity.Client;
+using Microsoft.Extensions.AI;
 using Signum.Authorization;
 using Signum.Chatbot.Agents;
-using Signum.Utilities;
-using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Diagnostics;
-using System.Linq;
-using System.Net.Security;
 using System.Text.Json;
-using static Signum.Utilities.StringDistance;
 
 namespace Signum.Chatbot;
 
@@ -78,68 +72,90 @@ public class ChatbotController : Controller
         await resp.WriteAsync(UINotification(ChatbotUICommand.QuestionId, userQuestion.Id.ToString()), ct);
         await resp.Body.FlushAsync();
 
+        var client = ChatbotLogic.GetChatClient(history.LanguageModel);
         while (true)
         {
-            string lastAnswer = "";
-            string? mode = null;
-            string? tool_id = null;
-            await foreach (var item in ChatbotLogic.AskStreaming(history.GetMessages(), history.LanguageModel, ct))
+            var tools = history.GetTools();
+            var options = ChatbotLogic.ChatOptions(history.LanguageModel, tools);
+
+            var messages = history.GetMessages();
+            List<ChatResponseUpdate> updates = [];
+            await foreach (var update in client.GetStreamingResponseAsync(messages, options, ct))
             {
-                Debug.WriteLine(">> " + item);
-                if (item.HasText())
+                if (updates.Count == 0)
+                    await resp.WriteAsync(UINotification(ChatbotUICommand.AssistantAnswer), ct);
+
+                updates.Add(update);
+                Debug.WriteLine(update);
+                var text = update.Text;
+                if (text.HasText())
                 {
-                    if (lastAnswer.Length == 0 && mode == null)
-                    {
-                        if (item.StartsWith(IChatbotProvider.ToolCall))
-                        {
-                            mode = IChatbotProvider.ToolCall;
-                            tool_id = item.After(IChatbotProvider.ToolCall);
-                            if(tool_id.IsNullOrEmpty())
-                                throw new InvalidOperationException("Tool id cannot be empty");
-                            await resp.WriteAsync(UINotification(ChatbotUICommand.AssistantTool, tool_id), ct);
-                        }
-                        else if (item.StartsWith(IChatbotProvider.Answer))
-                        {
-                            mode = IChatbotProvider.Answer;
-                            lastAnswer = item.After(IChatbotProvider.Answer);
-                            await resp.WriteAsync(UINotification(ChatbotUICommand.AssistantFinalAnswer), ct);
-                            await resp.WriteAsync(lastAnswer);
-                        }
-                        else 
-                            throw new InvalidOperationException("Unexpected start of answer: " + item);
-                    }
-                    else
-                    {
-                        lastAnswer += item;
-                        await resp.WriteAsync(item);
-                        await resp.Body.FlushAsync();
-                    }
+                    await resp.WriteAsync(text);
+                    await resp.Body.FlushAsync();
                 }
-
             }
-            Debug.WriteLine(">>!!Finish!!");
 
-            ChatMessageEntity answer = NewChatMessage(history.Session.ToLite(), lastAnswer, ChatMessageRole.Assistant, tool_id).Save();
+            var response = updates.ToChatResponse();
+            var responseMsg = response.Messages.SingleEx();
 
-            history.Messages.Add(answer);
+
+            var notSupported = responseMsg.Contents.Where(a => !(a is FunctionCallContent or Microsoft.Extensions.AI.TextContent)).ToList();
+
+            if (notSupported.Any())
+                throw new InvalidOperationException("Unexpected response" + notSupported.ToString(a => a.GetType().Name, ", "));
+
+            var toolCalls = responseMsg.Contents.OfType<FunctionCallContent>().ToList();
+            var answer = new ChatMessageEntity
+            {
+                ChatSession = history.Session.ToLite(),
+                Role = ChatMessageRole.Assistant,
+                Content = responseMsg.Text,
+                ToolCalls = toolCalls.Select(fc => new ToolCallEmbedded
+                {
+                    ToolId = fc.Name,
+                    CallId = fc.CallId,
+                    Arguments = JsonSerializer.Serialize(fc.Arguments),
+                }).ToMList()
+            }.Save();
+
+            foreach (var item in answer.ToolCalls)
+            {
+                await resp.WriteAsync("\n");
+                await resp.WriteAsync(UINotification(ChatbotUICommand.AssistantTool, item.ToolId + "/" + item.CallId), ct);
+                await resp.WriteAsync(item.Arguments, ct);
+            }
+
             await resp.WriteAsync("\n");
             await resp.WriteAsync(UINotification(ChatbotUICommand.AnswerId, answer.Id.ToString()), ct);
             await resp.Body.FlushAsync();
 
-            if (tool_id == null)
+            history.Messages.Add(answer);
+
+            if (!responseMsg.Contents.Any())
                 break;
 
-            await resp.WriteAsync(UINotification(ChatbotUICommand.Tool, tool_id), ct);
-            IChatbotTool tool = ChatbotSkillLogic.AllTools.Value.GetOrThrow(tool_id);
-            string toolResponse = await tool.ExecuteTool(lastAnswer, ct); ;
-            ChatMessageEntity responseMsg = NewChatMessage(history.Session.ToLite(), toolResponse, ChatMessageRole.Tool, toolId: tool_id).Save();
+            foreach (var item in toolCalls)
+            {
+                await resp.WriteAsync(UINotification(ChatbotUICommand.Tool, item.CallId), ct);
 
+                AITool tool = ChatbotSkillLogic.AllTools.Value.GetOrThrow(item.Name);
+                var obj = await ((AIFunction)tool).InvokeAsync(new AIFunctionArguments(item.Arguments), ct);
+                string toolResponse = JsonSerializer.Serialize(obj);
+                await resp.WriteAsync(toolResponse, ct);
+                var toolMsg = new ChatMessageEntity()
+                {
+                    ChatSession = history.Session.ToLite(),
+                    Role = ChatMessageRole.Tool,
+                    ToolCallID = item.CallId,
+                    ToolID = item.Name,
+                    Content = toolResponse,
+                }.Save();
 
-            history.Messages.Add(responseMsg);
-            await resp.WriteAsync(responseMsg.Content!, ct);
+                await resp.WriteAsync(UINotification(ChatbotUICommand.AnswerId, toolMsg.Id.ToString()), ct);
+                await resp.Body.FlushAsync();
 
-            await resp.WriteAsync(UINotification(ChatbotUICommand.AnswerId, responseMsg.Id.ToString()), ct);
-            await resp.Body.FlushAsync();
+                history.Messages.Add(toolMsg);
+            }          
         }
 
         if (history.Session.Title == null || history.Session.Title.StartsWith("!*$"))
@@ -199,13 +215,12 @@ public class ChatbotController : Controller
         return history;
     }
 
-    ChatMessageEntity NewChatMessage(Lite<ChatSessionEntity> session, string message, ChatMessageRole role, string? toolId = null)
+    ChatMessageEntity NewChatMessage(Lite<ChatSessionEntity> session, string message, ChatMessageRole role)
     {
         var command = new ChatMessageEntity()
         {
             ChatSession = session,
             Role = role,
-            ToolID = toolId,
             Content = message,
         };
 
@@ -213,6 +228,7 @@ public class ChatbotController : Controller
     }
 }
 
+[InTypeScript(true)]
 public enum ChatbotUICommand
 {
     System,
@@ -220,7 +236,7 @@ public enum ChatbotUICommand
     SessionTitle,
     QuestionId,
     AnswerId,
-    AssistantFinalAnswer,
+    AssistantAnswer,
     AssistantTool,
     Tool,
 }

@@ -60,6 +60,17 @@ export interface ChatbotProviderSymbol extends Basics.Symbol {
   Type: "ChatbotProvider";
 }
 
+export const ChatbotUICommand: EnumType<ChatbotUICommand> = new EnumType<ChatbotUICommand>("ChatbotUICommand");
+export type ChatbotUICommand =
+  "System" |
+  "SessionId" |
+  "SessionTitle" |
+  "QuestionId" |
+  "AnswerId" |
+  "AssistantAnswer" |
+  "AssistantTool" |
+  "Tool";
+
 export const ChatMessageEntity: Type<ChatMessageEntity> = new Type<ChatMessageEntity>("ChatMessage");
 export interface ChatMessageEntity extends Entities.Entity {
   Type: "ChatMessage";
@@ -101,7 +112,7 @@ export const ToolCallEmbedded: Type<ToolCallEmbedded> = new Type<ToolCallEmbedde
 export interface ToolCallEmbedded extends Entities.EmbeddedEntity {
   Type: "ToolCallEmbedded";
   callId: string;
-  toolID: string;
+  toolId: string;
   arguments: string;
 }
 

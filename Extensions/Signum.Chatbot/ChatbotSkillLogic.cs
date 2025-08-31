@@ -1,3 +1,4 @@
+using Microsoft.Extensions.AI;
 using Microsoft.Identity.Client;
 using Signum.Chatbot.Agents;
 using Signum.Chatbot.Skills;
@@ -10,12 +11,13 @@ namespace Signum.Chatbot;
 public static class ChatbotSkillLogic
 {
     public static Dictionary<Type, ChatbotSkill> SkillsByType = new Dictionary<Type, ChatbotSkill>();
-    public static ResetLazy<Dictionary<string, ChatbotSkill>> SkillByName = new ResetLazy<Dictionary<string, ChatbotSkill>>(()=> SkillsByType.Values.ToDictionary(a => a.Name));
 
-    public static ResetLazy<Dictionary<string, IChatbotTool>> AllTools;
+    public static ResetLazy<Dictionary<string, ChatbotSkill>> SkillByName =
+        new ResetLazy<Dictionary<string, ChatbotSkill>>(() => SkillsByType.Values.ToDictionary(a => a.Name));
+
+    public static ResetLazy<Dictionary<string, AITool>> AllTools;
 
     public static ChatbotSkill? IntroductionSkill;
-
 
     public static void Start(SchemaBuilder sb, ChatbotSkill? defaultChatbotSkill)
     {
@@ -27,7 +29,7 @@ public static class ChatbotSkillLogic
                 IntroductionSkill = defaultChatbotSkill;
             }
 
-            AllTools = new ResetLazy<Dictionary<string, IChatbotTool>>(() => SkillsByType
+            AllTools = new ResetLazy<Dictionary<string, AITool>>(() => SkillsByType
             .SelectMany(a => a.Value.GetTools())
             .ToDictionaryEx(a => a.Name, StringComparer.InvariantCultureIgnoreCase));
 
@@ -111,17 +113,35 @@ public abstract class ChatbotSkill
     }
 
 
-    List<IChatbotTool> chatbotTools; 
-    internal List<IChatbotTool> GetTools()
+    IEnumerable<AITool> chatbotTools; 
+    internal IEnumerable<AITool> GetTools()
     {
         return (chatbotTools ??= this.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
             .Where(m => m.GetCustomAttribute<SkillToolAttribute>() != null)
             .Select(m =>
             {
-                var types = Expression.GetDelegateType(m.GetParameters().Select(a => a.ParameterType).And(m.ReturnType).ToArray());
-                return (IChatbotTool)new ChatbotTool(m.Name, m.GetCustomAttribute<DescriptionAttribute>()?.Description ?? "", Delegate.CreateDelegate(types, this, m));
+                Type types = Expression.GetDelegateType(m.GetParameters().Select(a => a.ParameterType).And(m.ReturnType).ToArray());
+                Delegate del = Delegate.CreateDelegate(types, this, m);
+                string? description = m.GetCustomAttribute<DescriptionAttribute>()?.Description;
+                return (AITool)AIFunctionFactory.Create(del, m.Name, description);
             })
             .ToList());
+    }
+
+    public IEnumerable<AITool> GetToolsRecursive()
+    {
+        var list = GetTools().ToList();
+
+        foreach (var item in SubSkills)
+        {
+            if (item.Value == SkillActivation.Eager)
+            {
+                var skill = ChatbotSkillLogic.GetSkill(item.Key);
+                list.AddRange(skill.GetToolsRecursive());
+            }
+        }
+
+        return list;
     }
 
     public Dictionary<Type, SkillActivation> SubSkills = new Dictionary<Type, SkillActivation>();

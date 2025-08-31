@@ -2,9 +2,9 @@ import * as React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import "./ChatbotModal.css";
-import { getToString, Lite } from "@framework/Signum.Entities";
+import { getToString, Lite, newMListElement } from "@framework/Signum.Entities";
 import { ChatbotClient } from './ChatbotClient';
-import { ChatbotMessage, ChatMessageEntity, ChatMessageRole, ChatSessionEntity, ToolCallEmbedded } from "./Signum.Chatbot";
+import { ChatbotMessage, ChatbotUICommand, ChatMessageEntity, ChatMessageRole, ChatSessionEntity, ToolCallEmbedded } from "./Signum.Chatbot";
 import { useAPI, useAPIWithReload, useForceUpdate } from "@framework/Hooks";
 import { Navigator } from "@framework/Navigator";
 import { Finder } from "@framework/Finder";
@@ -79,7 +79,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 
         if (chunk.startsWith("$!")) {
           const after = chunk.after("$!").trim();
-          const commmand = after.tryBefore(":") ?? after;
+          const commmand = (after.tryBefore(":") ?? after) as ChatbotUICommand;
           const args = after.tryAfter(":");
 
           switch (commmand) {
@@ -105,10 +105,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
               }));
               break;
             }
-            case "AssistantToolCall": {
-              setAnswer("Assistant", args);
-              break;
-            }
+
             case "Tool": {
               setAnswer("Tool", args);
               break;
@@ -117,8 +114,15 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
               setAnswer("System");
               break;
             }
-            case "AssistantFinalAnswer": {
+            case "AssistantAnswer": {
               setAnswer("Assistant");
+              break;
+            }
+            case "AssistantTool": {
+              currentAnswerRef.current!.toolCalls.push(newMListElement(ToolCallEmbedded.New({
+                toolId: args!.before("/"),
+                callId: args!.after("/"),
+              })));
               break;
             }
             case "AnswerId": {
@@ -136,7 +140,10 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
           }
         }
         else {
-          currentAnswerRef.current!.content += chunk;
+          var ans = currentAnswerRef.current!;
+          if (ans.toolCalls.length)
+            ans.toolCalls.single().element.arguments += chunk;
+          ans.content += chunk;
         }
 
         forceUpdate();

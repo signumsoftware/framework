@@ -1,3 +1,7 @@
+using Anthropic.SDK;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Options;
+using ModelContextProtocol.Protocol;
 using Signum.Chatbot.Agents;
 using Signum.Chatbot.Providers;
 using Signum.Chatbot.Skills;
@@ -23,11 +27,11 @@ public static class ChatbotLogic
 
     public static Dictionary<ChatbotProviderSymbol, IChatbotProvider> Providers = new Dictionary<ChatbotProviderSymbol, IChatbotProvider>
     {
-        { ChatbotProviders.OpenAI, new OpenAIChatbotProvider()},
+        { ChatbotProviders.OpenAI, new AnthropicChatbotProvider()/*new OpenAIChatbotProvider()*/},
         { ChatbotProviders.Anthropic, new AnthropicChatbotProvider()},
-        { ChatbotProviders.DeepSeek, new DeepSeekChatbotProvider()},
-        { ChatbotProviders.Grok, new GrokChatbotProvider()},
-        { ChatbotProviders.Mistral, new MistralChatbotProvider()},
+        { ChatbotProviders.DeepSeek, new AnthropicChatbotProvider()/*new DeepSeekChatbotProvider()*/},
+        { ChatbotProviders.Grok, new AnthropicChatbotProvider()/*new GrokChatbotProvider()*/},
+        { ChatbotProviders.Mistral, new AnthropicChatbotProvider()/*new MistralChatbotProvider()*/},
     };
 
     public static Func<ChatbotConfigurationEmbedded> GetConfig;
@@ -120,18 +124,13 @@ public static class ChatbotLogic
     public static async Task<string> SumarizeTitle(ConversationHistory history, CancellationToken ct)
     {
         var prompt = ChatbotSkillLogic.GetSkill<QuestionSumarizerSkill>().GetInstruction(history);
-        StringBuilder sb = new StringBuilder();
-        await foreach (var item in AskStreaming([new ChatMessage { Role = ChatMessageRole.System, Content = prompt }], history.LanguageModel, ct))
-        {
-            sb.Append(item);
-        }
+        var client = GetChatClient(history.LanguageModel);
+        var cr = await client.GetResponseAsync(prompt, ChatbotLogic.ChatOptions(history.LanguageModel, history.GetTools()), cancellationToken: ct);
 
-        var title = sb.ToString();
-        return title;
+        return cr.Text;
     }
 
-
-    public static void RegisterProvider(ChatbotProviderSymbol symbol, ChatbotProviderBase provider)
+    public static void RegisterProvider(ChatbotProviderSymbol symbol, IChatbotProvider provider)
     {
         Providers.Add(symbol, provider);
     }
@@ -143,21 +142,35 @@ public static class ChatbotLogic
     }
 
 
-    public static IAsyncEnumerable<StreamingValue> AskStreaming(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
+    public static IChatClient GetChatClient(ChatbotLanguageModelEntity model)
     {
-        var tools = messages.Where(m => m.SkillName != null)
-                            .Select(m => m.SkillName!)
-                            .Distinct()
-                            .SelectMany(skillName => ChatbotSkillLogic.GetSkill(skillName).GetTools())
-                            .ToList();
+        var result = Providers.GetOrThrow(model.Provider).CreateChatClient();
 
-        return Providers.GetOrThrow(model.Provider).AskStreaming(messages, tools, model, ct);
+        return result;
     }
 
-    //public static Task<string?> AskAsync(List<ChatMessage> messages, ChatbotLanguageModelEntity model, CancellationToken ct)
-    //{
-    //    return Providers.GetOrThrow(model.Provider).AskAsync(messages, model, ct);
-    //}
+    public static ChatOptions ChatOptions(ChatbotLanguageModelEntity languageModel, List<AITool>? tools)
+    {
+        var opts = new ChatOptions
+        {
+            ModelId = languageModel.Model,
+        };
+
+        if (languageModel.MaxTokens != null)
+            opts.MaxOutputTokens = languageModel.MaxTokens;
+        else
+            opts.MaxOutputTokens = 64000;
+
+        if (languageModel.Temperature != null)
+            opts.Temperature = languageModel.Temperature;
+
+        if (tools.HasItems())
+            opts.Tools = tools;
+
+        return opts;
+    }
+
+
 }
 
 
@@ -165,10 +178,7 @@ public interface IChatbotProvider
 {
     string[] GetModelNames();
 
-    const string Answer = "<<Answer>>:";
-    const string ToolCall = "<<ToolCall>>:";
-
-    IAsyncEnumerable<StreamingValue> AskStreaming(List<ChatMessage> messages, List<IChatbotTool> tools, ChatbotLanguageModelEntity model, CancellationToken ct);
+    IChatClient CreateChatClient();
 }
 
 public struct StreamingValue
@@ -195,30 +205,46 @@ public class ConversationHistory
 
     public ChatbotLanguageModelEntity LanguageModel;
 
-    public List<ChatMessageEntity> Messages; 
+    public List<ChatMessageEntity> Messages;
 
 
     public List<ChatMessage> GetMessages()
     {
-        return Messages.Select(c => new ChatMessage()
-        {
-            Role = c.Role,
-            Content = c.Content!,
-            ToolCallID = c.ToolCallID,
-            SkillName = c.Role == ChatMessageRole.System ? ChatbotSkillLogic.IntroductionSkill?.Name :
-            c.Role == ChatMessageRole.Assistant && c.ToolID == nameof(IntroductionSkill.Describe) ? JsonDocument.Parse(c.Content!).RootElement.GetProperty("skillName").GetString() :
-                null
-        }).ToList();
+        return Messages.Select(c => new ChatMessage(ToChatRole(c.Role), c.Content)).ToList();
     }
+
+    public List<AITool> GetTools()
+    {
+        var skills = Messages.Select(m =>
+            m.Role == ChatMessageRole.System ? ChatbotSkillLogic.IntroductionSkill?.Name :
+            m.Role == ChatMessageRole.Assistant && m.ToolID == nameof(IntroductionSkill.Describe) ? JsonDocument.Parse(m.Content!).RootElement.GetProperty("skillName").GetString() :
+            null)
+            .NotNull()
+            .Distinct()
+            .ToList();
+
+        return skills
+            .SelectMany(skillName => ChatbotSkillLogic.GetSkill(skillName).GetToolsRecursive())
+            .ToList();
+    }
+
+    private ChatRole ToChatRole(ChatMessageRole role) => role switch
+    {
+        ChatMessageRole.System => ChatRole.System,
+        ChatMessageRole.User => ChatRole.User,
+        ChatMessageRole.Assistant => ChatRole.Assistant,
+        ChatMessageRole.Tool => ChatRole.Tool,
+        _ => throw new InvalidOperationException($"Unexpected {nameof(ChatMessageRole)} {role}"),
+    };
 }
 
 
-public class ChatMessage
-{
-    public ChatMessageRole Role;
-    public string Content;
-    public string? SkillName; // For available tools
-    public string? ToolCallID;
+//public class ChatMessage
+//{
+//    public ChatMessageRole Role;
+//    public string Content;
+//    public string? SkillName; // For available tools
+//    public string? ToolCallID;
 
-    public override string ToString() => $"{Role}: {Content}";
-}
+//    public override string ToString() => $"{Role}: {Content}";
+//}
