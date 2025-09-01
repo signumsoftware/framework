@@ -17,6 +17,10 @@
 #tooltip-buildId .tooltip-inner {
     max-width: initial;
     white-space: normal;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+    box-shadow: var(--bs-box-shadow);
 }
 
 .sf-version-info {

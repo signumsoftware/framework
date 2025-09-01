@@ -172,7 +172,7 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
             <circle className="shape sf-transition hover-target"
               cx={x(horizontalColumn.getValue(r))!}
               cy={-y(verticalColumn.getValue(r))!}
-              stroke={active == true ? "black" : colorKeyColumn.getValueColor(r) ?? color(r)}
+              stroke={active == true ? "var(--bs-body-color)" : colorKeyColumn.getValueColor(r) ?? color(r)}
               strokeWidth={active == true ? 3 : undefined}
               fill={colorKeyColumn.getValueColor(r) ?? color(r)}
               shapeRendering="initial"
@@ -273,8 +273,8 @@ function CanvasScatterplot(p: {
 
       var c = colorKeyColumn.getValueColor(r) ?? color(r);
 
-      ctx.fillStyle = c ?? "black";
-      ctx.strokeStyle = c ?? "black";
+      ctx.fillStyle = c ?? "var(--bs-body-color)";
+      ctx.strokeStyle = c ?? "var(--bs-body-color)";
       var vColor = getVirtualColor(i);
       vctx.fillStyle = vColor;
       vctx.strokeStyle = vColor;

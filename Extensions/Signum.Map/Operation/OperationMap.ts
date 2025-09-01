@@ -102,7 +102,7 @@ export class OperationMapD3 {
       .data(map.allTransition)
       .enter().append<SVGPathElement>("path")
       .attr("class", "link")
-      .style("stroke", "black")
+      .style("stroke", "var(--bs-body-color)")
       .attr("marker-end", "url(#normal_arrow)");
 
     this.selectLinks();

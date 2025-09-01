@@ -256,7 +256,7 @@ export function SchemaMapRenderer(p: SchemaMapRendererProps): React.JSX.Element 
   }
 
   return (
-    <div id="map" style={{ backgroundColor: "transparent", width: "100%", height: p.height + "px" }}>
+    <div id="map" style={{ backgroundColor: "var(--bs-transparent)", width: "100%", height: p.height + "px" }}>
       <svg id="svgMap" ref={svgRef}>
         <defs>
           <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">

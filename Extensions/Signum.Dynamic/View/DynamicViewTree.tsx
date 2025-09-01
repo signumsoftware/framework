@@ -334,9 +334,9 @@ export function DynamicViewNode(p: DynamicViewNodeProps): React.JSX.Element {
     if (over && dn.node == over.dn.node) {
 
       const color =
-        over.error == "Error" ? "rgb(193, 0, 0)" :
-          over.error == "Warning" ? "rgb(255, 153, 0)" :
-            over.error == "Ok" ? "rgb(10, 162, 0)" : "";
+        over.error == "Error" ? "var(--bs-danger-bg-subtle)" :
+          over.error == "Warning" ? "var(--bs-warning-bg-subtle)" :
+            over.error == "Ok" ? "var(--bs-success-bg-subtle)" : "";
 
 
       if (over.position == "Top")

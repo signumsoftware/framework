@@ -204,14 +204,19 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
 
   return (
     <>
-      <button className="nav-link sf-bell-container" onClick={handleOnToggle} title={window.__disableSignalR ?? undefined} style={{ border: 0, backgroundColor: 'transparent' }}>
+      <button className="nav-link sf-bell-container" onClick={handleOnToggle} title={window.__disableSignalR ?? undefined} style={{ border: 0, backgroundColor: 'var(--alert-bg)' }}>
         <FontAwesomeIcon icon={window.__disableSignalR ? "bell-slash" : "bell"}
           title={(countResult ? AlertEntity.niceCount(countResult.numAlerts) : AlertEntity.nicePluralName()) + (ringing ? " " + AlertMessage.Ringing.niceToString() : "")}
           className={classes("sf-bell", ringing && "ringing", isOpen && "open", countResult && countResult.numAlerts > 0 && "active")} />
-        {countResult && countResult.numAlerts > 0 && <span className="badge bg-danger badge-pill sf-alerts-badge">{countResult.numAlerts}</span>}
+        {countResult && countResult.numAlerts > 0 && <span className="badge text-bg-danger badge-pill sf-alerts-badge" 
+        style={{
+            backgroundColor: "var(--alert-badge-bg)",
+            color: "var(--alert-badge-text)"
+          }}
+        >{countResult.numAlerts}</span>}
       </button>
       {isOpen && <div className="sf-alerts-toasts mt-2" ref={divRef} style={{
-        backgroundColor: "rgba(255,255,255, 0.7)",
+        backgroundColor: "--alert-toast-overlay",
         backdropFilter: "blur(10px)",
         transition: "transform .4s ease",
         height: ((alertGroups ?? []).orderByDescending(a => a.maxDate).filter((gr, i) => i < showGroups).sum(a => a.removing ? 0 : a.totalHight ?? 0) +
@@ -316,7 +321,7 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
 
   const totalExpandedHeight = alerts.filter((a, i) => i < showAlerts).sum((a, i) => (a.height ?? 0));
 
-  const textStyle: React.CSSProperties = { color: '#8c8c8c', fontSize: "0.8rem", fontWeight: 'bold' };
+  const textStyle: React.CSSProperties = { color: 'var(--alert-muted)', fontSize: "0.8rem", fontWeight: 'bold' };
   return (
     <div className="sf-alert-group pb-2" style={p.style} ref={htmlRef}>
       <div className="p-2 d-flex" style={{ position: 'relative',  }}>
@@ -347,7 +352,7 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
               refresh={p.onRefresh} className="mb-0 mt-0"
               style={{
                 borderRadius: ".15em",
-                boxShadow: "0 0 2px 1px rgba(0, 0, 0, 0.1), 0 2px 3px rgba(0, 0, 0, 0.16)",
+                boxShadow: "var(--alert-shadow)",
                 width: "100%",
                 transformOrigin: "50% 0",
                 position: "absolute",
@@ -402,7 +407,7 @@ export function AlertToast(p: {
         <strong className="me-auto">{AlertsClient.getTitle(alert.titleField, alert.alertType)}</strong>
         <small>{DateTime.fromISO(alert.alertDate!).toRelative()}</small>
       </Toast.Header>
-      <Toast.Body style={{ whiteSpace: "pre-wrap", opacity: p.expanded ? undefined : 0, transition: "transform .4s ease", }}>
+      <Toast.Body style={{ whiteSpace: "pre-wrap", opacity: p.expanded ? undefined : 0, transition: "transform .4s ease",  color: "var(--alert-text)"}}>
         <div className="row">
           <div className="col-sm-1">
             {alert.createdBy && <SmallProfilePhoto user={alert.createdBy as Lite<UserEntity>} />}

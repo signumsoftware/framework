@@ -5,7 +5,7 @@
 
 .error-block h3 {
     margin-top: 0px;
-    color: black;
+    color: var(--bs-body-color);
 }
 
 .mini-alert {
@@ -29,5 +29,5 @@
     line-height: 2.375rem;
     text-align: center;
     pointer-events: none;
-    color: #aaa;
+    color: var(--bs-secondary-color);
 }

@@ -17,7 +17,7 @@ export namespace DynamicTypeConditionClient {
     Navigator.addSettings(new EntitySettings(DynamicTypeConditionEntity, w => import('./TypeCondition/DynamicTypeCondition')));
   
     Operations.addSettings(new EntityOperationSettings(DynamicTypeConditionOperation.Clone, {
-      contextual: { icon: "clone", iconColor: "black" },
+      contextual: { icon: "clone", iconColor: "var(--bs-body-color)" },
     }))
   
     Constructor.registerConstructor(DynamicTypeConditionEntity, () => DynamicTypeConditionEntity.New({ eval: DynamicTypeConditionEval.New() }));

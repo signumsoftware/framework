@@ -72,7 +72,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
               <title>{`${keyColumn.getValueNiceName(slice.data)}: ${valueText}`}</title>
               <path className="shape sf-transition hover-target" d={arc(slice)!}
                 opacity={active == false ? .5 : undefined}
-                stroke={active == true ? "black" : undefined}
+                stroke={active == true ? "var(--bs-body-color)" : undefined}
                 strokeWidth={active == true ? 3 : undefined}
                 transform={initialLoad ? scale(0, 0) : scale(1, 1)}
                 fill={sliceColor}

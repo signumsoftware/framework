@@ -354,7 +354,7 @@ export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRow
   var ctx = p.ctx;
   
   if (ctx.binding == null && ctx.previousVersion) {
-    return (<tr style={{backgroundColor: "#ff000021" }}>
+    return (<tr style={{backgroundColor: "var(--bs-danger-bg-subtle)" }}>
       <td className="align-items-center p-0 ps-1" >{getTimeMachineIcon({ ctx: ctx, isContainer: true })}</td>
       {p.columns.map((c, i) => <td key={i} ></td>)}
     </tr>);
