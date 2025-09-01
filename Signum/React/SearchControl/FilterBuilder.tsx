@@ -319,7 +319,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
   var paddingLeftNext = (25 * (p.level + 1)) + 5;
   return (
     <>
-      <tr className="sf-filter-group" style={{ backgroundColor: "#eee" }}
+      <tr className="sf-filter-group" style={{ backgroundColor: "var(--bs-secondary-bg)" }}
         onMouseEnter={() => p.setHighlightFilter?.(fg.pinned ? fg : undefined)}
         onMouseLeave={() => p.setHighlightFilter?.(undefined)}
       >

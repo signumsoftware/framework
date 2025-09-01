@@ -1,39 +1,38 @@
-﻿
-.dialog-header-error {
-    background-color: #d2322d;
-    color: #ffffff;
+﻿.dialog-header-error {
+    background-color: var(--bs-danger-subtle);
+    color: var(--bs-body-color);
 }
 
-    .dialog-header-error a {
-        color: #B9DFFF;
-    }
+.dialog-header-error a {
+    color: var(--bs-body-color);
+}
 
 
 .dialog-header-warning {
-    background-color: #EAAB19;
-    color: #ffffff;
+    background-color: var(--bs-warning-subtle);
+    color: var(--bs-body-color);
 }
 
-    .dialog-header-warning a {
-        color: #FFECBE;
-    }
+.dialog-header-warning a {
+    color: var(--bs-body-color);
+}
 
 
 .dialog-header-info {
-    background-color: #4AB2E6;
-    color: #ffffff;
+    background-color: var(--bs-info-subtle);
+    color: var(--bs-body-color);
 }
 
-    .dialog-header-info a {
-        color: #B9DFFF;
-    }
+.dialog-header-info a {
+    color: var(--bs-body-color);
+}
 
 
 .dialog-header-success {
-    background-color: #74B45A;
-    color: #ffffff;
+    background-color: var(--bs-success-subtle);
+    color: var(--bs-body-color);
 }
 
-    .dialog-header-success a {
-        color: #DCF9CC;
-    }
+.dialog-header-success a {
+    color: var(--bs-body-color);
+}

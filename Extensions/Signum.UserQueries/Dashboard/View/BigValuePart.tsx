@@ -104,11 +104,11 @@ export function BigValueSearchCounter(p: BigValueBadgeProps): React.JSX.Element 
     <div className={classes("card", "border-light shadow-sm mb-3", "o-hidden")}
       style={{
       backgroundColor: p.customColor ?? undefined,
-      color: Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black"
+      color: Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "var(--bs-body-color)"
     }}>
       <div className={classes("card-body")} onClick={e => vsc.current!.handleClick(e)} style={{
         cursor: "pointer",
-        color: p.titleColor ?? (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black")
+        color: p.titleColor ?? (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "var(--bs-body-color)")
       }}>
         <div className="row">
           <div className="col-lg-3">

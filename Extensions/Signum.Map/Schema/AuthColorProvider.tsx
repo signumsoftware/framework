@@ -48,11 +48,11 @@ function gradient(name: string) {
 
 function color(typeAllowedBasic: TypeAllowedBasic | "Error"): string {
   switch (typeAllowedBasic) {
-    case undefined: return "black";
-    case "Write": return "green";
-    case "Read": return "gold";
-    case "None": return "red";
-    case "Error": return "magenta";
+    case undefined: return "var(--bs-body-color)";
+    case "Write": return "var(--bs-green)";
+    case "Read": return "var(--bs-yellow)";
+    case "None": return "var(--bs-red)";
+    case "Error": return "var(--bs-magenta)";
     default: throw new Error();
   }
 }

@@ -47,7 +47,7 @@ export namespace QuickLinkClient {
 
     if (!quickLink)
       return null
-    return (<a className={classes("badge badge-pill sf-quicklinks", "bg-" + quickLink.color, quickLink.color == "light" ? undefined : "text-white")}
+    return (<a className={classes("badge badge-pill sf-quicklinks", "text-bg-" + quickLink.color)}
       title={StyleContext.default.titleLabels ? quickLink.text() : undefined}
       role="button"
       href="#"
@@ -227,7 +227,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.ReactElement | n
           if (first.group == null)
             return (
               <a key={i}
-                className={classes("badge badge-pill sf-quicklinks", "bg-" + first.color, first.color == "light" ? undefined : "text-white")}
+                className={classes("badge badge-pill sf-quicklinks", "text-bg-" + first.color)}
                 title={StyleContext.default.titleLabels ? gr.elements[0].text() : undefined}
                 role="button"
                 href="#"
@@ -275,12 +275,11 @@ export interface QuickLinkContext<T extends Entity> {
 
 const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeColor: BsColor }, ref: React.Ref<HTMLAnchorElement>) {
 
-  var textColor = p.badgeColor == "warning" || p.badgeColor == "info" || p.badgeColor == "light" ? "text-dark" : undefined;
 
   return (
     <a
       ref={ref}
-      className={classes("badge badge-pill sf-quicklinks", "btn-" + p.badgeColor, textColor)}
+      className={classes("badge badge-pill sf-quicklinks", "text-bg-" + p.badgeColor)}
       title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
       role="button"
       href="#"

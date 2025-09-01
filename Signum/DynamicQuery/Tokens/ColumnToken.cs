@@ -199,15 +199,4 @@ public class ColumnToken : QueryToken
     {
         return new ColumnToken(Column, queryName);
     }
-
-    public override string TypeColor
-    {
-        get
-        {
-            if (Column.IsEntity)
-                return "#2B78AF";
-
-            return base.TypeColor;
-        }
-    }
 }

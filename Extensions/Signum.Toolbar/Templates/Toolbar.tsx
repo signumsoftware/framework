@@ -82,7 +82,7 @@ export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarEle
           headerHtmlAttributes: { style: { width: "5%" } },
           template: ctx => {
             var icon = parseIcon(ctx.value.iconName);
-            var bgColor = (ctx.value.iconColor && ctx.value.iconColor.toLowerCase() == "white" ? "black" : undefined)
+            var bgColor = (ctx.value.iconColor && ctx.value.iconColor.toLowerCase() == "var(--bs-body-bg)" ? "var(--bs-body-color)" : undefined)
             return icon && <div>
               <FontAwesomeIcon icon={fallbackIcon(icon)} style={{ backgroundColor: bgColor, color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} />
               {ctx.value.showCount && <ToolbarCount showCount={ctx.value.showCount} num={ctx.value.showCount == "Always" ? 0 : 1} />}

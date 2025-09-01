@@ -93,7 +93,7 @@ export function ToolbarCount(p: { num: number | null | undefined, showCount: Sho
 
   return (
     <div className="sf-toolbar-count-container">
-      <div className={classes("badge badge-pill sf-toolbar-count", !p.num ? "bg-light text-secondary" : "bg-danger")}>{p.num ?? "…"}</div>
+      <div className={classes("badge badge-pill sf-toolbar-count", !p.num ? "text-bg-light" : "text-bg-danger")}>{p.num ?? "…"}</div>
     </div>
   );
 }

@@ -34,7 +34,7 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
   const entityData: ClientColorProvider = {
     name: "entityData",
     getFill: t => t.entityData == "Master" ? "#2ca02c" :
-      t.entityData == "Transactional" ? "#d62728" : "black",
+      t.entityData == "Transactional" ? "#d62728" : "var(--bs-body-color)",
     getTooltip: t => t.entityData
   };
 

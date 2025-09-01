@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine, EntityCombo, FormGroup, TextBoxLine } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityCombo, FormGroup, TextBoxLine, TextAreaLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { AlertEntity, AlertMessage } from '../Signum.Alerts'
 import { AlertsClient } from '../AlertsClient'
@@ -50,7 +50,7 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }): React.JSX.E
           </FormGroup>
           
           :
-          <TextBoxLine ctx={ctx.subCtx(n => n.textField)} label={AlertMessage.Text.niceToString()} valueHtmlAttributes={{ style: { height: "180px" } }} />
+          <TextAreaLine ctx={ctx.subCtx(n => n.textField)} label={AlertMessage.Text.niceToString()} valueHtmlAttributes={{ style: { height: "180px" } }} />
       }
       {ctx.value.state == "Attended" &&
         <div>

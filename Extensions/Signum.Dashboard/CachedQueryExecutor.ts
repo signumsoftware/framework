@@ -36,7 +36,6 @@ export function executeQueryValueCached(request: QueryValueRequest, fop: FindOpt
       key: "Count",
       toStr: "Count",
       niceTypeName: "Number",
-      typeColor: "",
       isGroupable: false,
       filterType: "Integer",
     };

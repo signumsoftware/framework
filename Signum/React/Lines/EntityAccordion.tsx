@@ -198,7 +198,7 @@ export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getCom
       <Accordion.Item {...htmlAttributes} className={classes(drag?.dropClass, "sf-accordion-element")} eventKey="removed" title={EntityControlMessage.Removed0.niceToString()}>
         <h2 className="accordion-header bg-danger">
           <Accordion.Button>
-            <div className="d-flex align-items-center flex-grow-1" style={{ backgroundColor: "#ff000021" }}>
+            <div className="d-flex align-items-center flex-grow-1" style={{ backgroundColor: "var(--bs-danger-bg-subtle)" }}>
               {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
             </div>
           </Accordion.Button>

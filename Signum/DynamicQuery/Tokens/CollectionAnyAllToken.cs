@@ -133,11 +133,6 @@ public class CollectionAnyAllToken : QueryToken
         return parameter.BuildLite().Nullify();
     }
 
-    public override string TypeColor
-    {
-        get { return "#0000FF"; }
-    }
-
     static readonly MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null!)).GetGenericMethodDefinition();
     static readonly MethodInfo miAllE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.All(null!)).GetGenericMethodDefinition();
     static readonly MethodInfo miAnyQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.Any(null!)).GetGenericMethodDefinition();

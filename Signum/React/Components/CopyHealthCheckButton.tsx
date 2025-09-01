@@ -24,7 +24,7 @@ export function CopyHealthCheckButton(p: { name: string, healthCheckUrl: string,
   return (
     <span >
       <a ref={link} className="btn btn-sm btn-light sf-pointer mx-1" onClick={handleCopyLiteButton}
-        title="Copy Health Check dashboard data" style={{color: "gray"}}>
+        title="Copy Health Check dashboard data" style={{color: "var(--bs-secondary)", backgroundColor: "var(--bs-body-bg)", border: "1px solid var(--bs-border-color)"}}>
         <FontAwesomeIcon icon="heart-pulse"  /> Health Check Link
       </a>
       <Overlay target={link.current} show={showTooltip} placement="bottom">

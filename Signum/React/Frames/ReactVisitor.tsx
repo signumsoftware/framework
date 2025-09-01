@@ -5,6 +5,7 @@ import { TypeContext } from '../TypeContext'
 import { PropertyRoute } from '../Reflection'
 import { ColumnOption, OrderOption, Pagination } from '../Search';
 import { Tab, Tabs } from 'react-bootstrap'
+import { LineBaseProps } from '../Lines'
 
 export class ReactVisitor {
   visitChild(child: React.ReactNode): React.ReactNode {
@@ -96,41 +97,52 @@ export class ViewReplacer<T extends ModifiableEntity> {
   ) {
   }
 
-  removeElement(filter: (e: React.ReactElement) => boolean): this {
-
+  removeElement<C extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>>(
+    type: C,
+    filter: (e: React.ReactElement<React.ComponentProps<C>>) => boolean,
+  ): this {
     this.result = new ReplaceVisitor(
-      e => filter(e),
+      e => e.type == type && filter(e as React.ReactElement<React.ComponentProps<C>>),
       e => []
     ).visit(this.result);
 
     return this;
   }
 
-  insertAfterElement(filter: (e: React.ReactElement) => boolean, newElements: (e: React.ReactElement) => (React.ReactElement | undefined | false | null)[]): this {
-
+  insertAfterElement<C extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>>(
+    type: C,
+    filter: (e: React.ReactElement<React.ComponentProps<C>>) => boolean, 
+    newElements: (e: React.ReactElement<React.ComponentProps<C>>) => (React.ReactElement | undefined | false | null)[],
+  ): this {
     this.result = new ReplaceVisitor(
-      e => filter(e),
-      e => [e, ...newElements(e)]
+      e => e.type == type && filter(e as React.ReactElement<React.ComponentProps<C>>),
+      e => [e, ...newElements(e as React.ReactElement<React.ComponentProps<C>>)]
     ).visit(this.result);
 
     return this;
   }
 
-  insertBeforeElement(filter: (e: React.ReactElement) => boolean, newElements: (e: React.ReactElement) => (React.ReactElement | undefined | false | null)[]): this {
-
+  insertBeforeElement<C extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>>(
+    type: C,
+    filter: (e: React.ReactElement<React.ComponentProps<C>>) => boolean,
+    newElements: (e: React.ReactElement<React.ComponentProps<C>>) => (React.ReactElement | undefined | false | null)[],
+  ): this {
     this.result = new ReplaceVisitor(
-      e => filter(e),
-      e => [...newElements(e), e]
+      e => e.type == type && filter(e as React.ReactElement<React.ComponentProps<C>>),
+      e => [...newElements(e as React.ReactElement<React.ComponentProps<C>>), e]
     ).visit(this.result);
 
     return this;
   }
 
-  replaceElement(filter: (e: React.ReactElement) => boolean, newElements: (e: React.ReactElement) => (React.ReactElement | undefined | false | null)[]): this {
-
+  replaceElement<C extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>>(
+    type: C,
+    filter: (e: React.ReactElement<React.ComponentProps<C>>) => boolean,
+    newElements: (e: React.ReactElement<React.ComponentProps<C>>) => (React.ReactElement | undefined | false | null)[],
+  ): this {
     this.result = new ReplaceVisitor(
-      e => filter(e),
-      e => [...newElements(e)]
+      e => e.type == type && filter(e as React.ReactElement<React.ComponentProps<C>>),
+      e => [...newElements(e as React.ReactElement<React.ComponentProps<C>>)]
     ).visit(this.result);
 
     return this;
@@ -205,12 +217,12 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return parentCtx as TypeContext<T>;
   }
 
-  replaceLine(propertyRoute: ((entity: T) => any) | PropertyRoute, newElements: (e: React.ReactElement) => (React.ReactElement | undefined)[]): this {
+  replaceLine<P extends LineBaseProps<any> = LineBaseProps<any>>(propertyRoute: ((entity: T) => any) | PropertyRoute, newElements: (e: React.ReactElement<P>) => (React.ReactElement | undefined)[]): this {
     var pr = propertyRoute instanceof PropertyRoute ? propertyRoute : this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(
       e => hasPropertyRoute(e, pr),
-      e => newElements(e),
+      e => newElements(e as React.ReactElement<P>),
     ).visit(this.result);
 
     return this;
