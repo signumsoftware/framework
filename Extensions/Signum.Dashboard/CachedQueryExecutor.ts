@@ -3,7 +3,7 @@ import {
   ColumnRequest, FilterOperation, FilterOptionParsed, FilterRequest, FindOptionsParsed,
   OrderRequest, Pagination, QueryRequest, QueryValueRequest, ResultRow, ResultTable, isFilterGroup
 } from '@framework/FindOptions'
-import { complete, QueryToken } from '@framework/QueryToken';
+import { completeToken, QueryToken } from '@framework/QueryToken';
 import { Entity, getToString, is, Lite } from '@framework/Signum.Entities';
 
 
@@ -32,7 +32,7 @@ export function executeQueryCached(request: QueryRequest, fop: FindOptionsParsed
 export function executeQueryValueCached(request: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | null, cachedQuery: CachedQueryJS): unknown {
 
   if (token == null)
-    token = complete({
+    token = completeToken({
       fullKey: "Count",
       type: { name: "int" },
       queryTokenType: "Aggregate",

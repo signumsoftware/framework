@@ -176,9 +176,13 @@ public class QueryTokenTS
     public QueryTokenTS(QueryToken qt, bool withParents)
     {
         this.key = qt.Key;
-        this.fullKey = withParents ? qt.FullKey() : null;
+        this.fullKey = qt.FullKey();
         this.toStr = qt.ToString();
         this.niceName = qt.NiceName();
+        if (this.niceName == this.toStr)
+            this.niceName = null;
+        if (this.toStr == this.key)
+            this.toStr = null;
         this.type = new TypeReferenceTS(qt.Type, qt.GetImplementations());
         this.format = qt.Format;
         this.unit = UnitAttribute.GetTranslation(qt.Unit);
@@ -244,7 +248,7 @@ public class QueryTokenTS
     }
 
     public required string key;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public required string? fullKey;
+    public required string fullKey;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public required string? toStr;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public required string? niceName;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public QueryTokenType? queryTokenType;

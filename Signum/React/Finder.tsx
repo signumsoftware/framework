@@ -17,7 +17,7 @@ import {
   QueryDescriptionDTO,
   QueryTokenWithoutParent
 } from './FindOptions';
-import { hasAggregate, hasAnyOrAll, hasElement, hasManual, hasNested, hasOperation, hasSnippet, hasTimeSeries, hasToArray, QueryToken, SubTokensOptions } from './QueryToken';
+import { completeToken, hasAggregate, hasAnyOrAll, hasElement, hasManual, hasNested, hasOperation, hasSnippet, hasTimeSeries, hasToArray, QueryToken, SubTokensOptions, Writable } from './QueryToken';
 
 import { FilterOperation, FilterGroupOperation, PinnedFilterActive } from './Signum.DynamicQuery';
 
@@ -1312,7 +1312,6 @@ export namespace Finder {
           return token.tryBeforeLast(".");
         }
 
-
         if (parentToken == null) {
           if (getParent(dto.fullKey) != null)
             throw new Error(`Token with key '${dto.fullKey}' on query '${this.qd.queryKey}' has no parent, but it is not a root token`);
@@ -1327,6 +1326,7 @@ export namespace Finder {
         token.__isCached__ = true;
         //if (token.fullKey == "Locked")
         //  console.log(token);
+        completeToken(token);
         Object.freeze(token);
         cached = { token: token as QueryToken, subTokens: undefined };
         this.queryCache.set(dto.fullKey, cached);
@@ -2455,7 +2455,3 @@ export namespace Finder {
   }
 
 }
-
-type Writable<T> = {
-  -readonly [P in keyof T]: T[P];
-};

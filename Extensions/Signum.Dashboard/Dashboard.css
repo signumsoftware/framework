@@ -10,13 +10,13 @@
 }
 
 .sf-dashboard-view-embedded {
-    background: var(--bs-body-bg);
+    background: var(--bs-secondary-bg);
     margin: -10px -1em -16px -1em;
     padding: 1em;
 }
 
 .sf-dashboard-page {
-    background: var(--bs-body-bg);
+    background: var(--bs-secondary-bg);
     margin: -8px -12px;
     padding: 20px;
 }
@@ -38,7 +38,6 @@
 .sf-grid-element .card-header {
     cursor: move;
     color: var(--bs-body-color) !important;
-    background-color: var(--bs-body-bg) !important;
     border-color: var(--bs-border-color) !important;
 }
 

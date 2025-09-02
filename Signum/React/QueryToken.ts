@@ -41,14 +41,12 @@ export enum SubTokensOptions {
   CanNested = 256,
 }
 
-type Writable<T> = {
+export type Writable<T> = {
   -readonly [P in keyof T]: T[P];
 };
 
-export function complete(token: QueryToken): QueryToken {
-  if (token.fullKey)
-    return token;
-
+export function completeToken(token: QueryToken): QueryToken {
+  
   var t = token as Writable<QueryToken>;
 
   if (t.fullKey == null)
