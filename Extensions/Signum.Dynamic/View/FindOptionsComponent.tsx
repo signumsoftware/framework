@@ -18,7 +18,8 @@ import SelectorModal from '@framework/SelectorModal';
 import { TypeInfo } from '@framework/Reflection';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { DynamicViewMessage } from '../Signum.Dynamic.Views'
-import { QueryDescription, QueryToken, SubTokensOptions, getFilterOperations } from '@framework/FindOptions'
+import { QueryDescription, getFilterOperations } from '@framework/FindOptions'
+import { QueryToken, SubTokensOptions } from '@framework/QueryToken'
 
 interface FindOptionsLineProps {
   binding: Binding<FindOptionsExpr | undefined>;

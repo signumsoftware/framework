@@ -7,9 +7,10 @@ import { TypeContext } from '@framework/TypeContext'
 import { Finder } from '@framework/Finder'
 import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
 import {
-  QueryDescription, SubTokensOptions, FilterConditionOptionParsed,
-  isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed,
-	getFilterGroupUnifiedFilterType, getFilterType, isFilterGroup
+  QueryDescription, FilterConditionOptionParsed,
+  isList, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed,
+  getFilterGroupUnifiedFilterType, isFilterGroup,
+  FilterType
 } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey, liteKeyLong } from "@framework/Signum.Entities";
 import { Navigator } from "@framework/Navigator";
@@ -20,6 +21,7 @@ import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded, UserAssetQueryMessage } from '../Signum.UserAssets.Queries'
 import { MultiValue } from '@framework/FinderRules'
 import { HeaderType } from '@framework/Lines/GroupHeader'
+import { getFilterType, SubTokensOptions } from '@framework/QueryToken'
 
 interface FilterBuilderEmbeddedProps {
   ctx: TypeContext<MList<QueryFilterEmbedded>>;

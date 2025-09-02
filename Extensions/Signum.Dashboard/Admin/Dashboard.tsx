@@ -18,7 +18,7 @@ import { classes } from '@framework/Globals';
 import { EntityOperations, OperationButton } from '@framework/Operations/EntityOperations';
 import { EntityOperationContext } from '@framework/Operations';
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
-import { SubTokensOptions } from '@framework/FindOptions';
+import { SubTokensOptions } from '@framework/QueryToken';
 
 export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();

@@ -1,5 +1,9 @@
 import { Finder } from '@framework/Finder'
-import { ColumnRequest, FilterOperation, FilterOptionParsed, FilterRequest, FindOptionsParsed, OrderRequest, Pagination, QueryRequest, QueryToken, QueryValueRequest, ResultRow, ResultTable, isFilterGroup } from '@framework/FindOptions'
+import {
+  ColumnRequest, FilterOperation, FilterOptionParsed, FilterRequest, FindOptionsParsed,
+  OrderRequest, Pagination, QueryRequest, QueryValueRequest, ResultRow, ResultTable, isFilterGroup
+} from '@framework/FindOptions'
+import { complete, QueryToken } from '@framework/QueryToken';
 import { Entity, getToString, is, Lite } from '@framework/Signum.Entities';
 
 
@@ -28,17 +32,13 @@ export function executeQueryCached(request: QueryRequest, fop: FindOptionsParsed
 export function executeQueryValueCached(request: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | null, cachedQuery: CachedQueryJS): unknown {
 
   if (token == null)
-    token = {
+    token = complete({
       fullKey: "Count",
       type: { name: "int" },
       queryTokenType: "Aggregate",
-      niceName: "Count",
       key: "Count",
-      toStr: "Count",
-      niceTypeName: "Number",
       isGroupable: false,
-      filterType: "Integer",
-    };
+    } as Partial<QueryToken> as QueryToken);
 
   var queryRequest: QueryRequest = {
     queryKey: request.queryKey,

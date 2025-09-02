@@ -6,7 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum/React/Signum.Entities'
 import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
 
-import { QueryToken } from '@framework/FindOptions'
+import { QueryToken } from '@framework/QueryToken'
 
 export interface QueryTokenEmbedded {
     token?: QueryToken;

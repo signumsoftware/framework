@@ -1,9 +1,10 @@
 import { ModifiableEntity } from '@framework/Signum.Entities'
-import { ColumnOptionsMode, FilterOperation, OrderType, PaginationMode, FindOptions, FilterOption, OrderOption, ColumnOption, Pagination, QueryToken } from '@framework/FindOptions'
+import { ColumnOptionsMode, FilterOperation, OrderType, PaginationMode, FindOptions, FilterOption, OrderOption, ColumnOption, Pagination } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
 import { Finder } from '@framework/Finder'
 import { ExpressionOrValue } from './NodeUtils'
 import * as NodeUtils from './NodeUtils'
+import { QueryToken } from '@framework/QueryToken'
 //import { BaseNode } from './Nodes';
 
 export interface FindOptionsExpr {

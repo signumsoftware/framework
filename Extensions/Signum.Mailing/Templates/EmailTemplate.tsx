@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { FormGroup, AutoLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable, EntityAccordion, Binding, CheckboxLine, TextAreaLine } from '@framework/Lines'
-import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
 import { TemplateApplicableEval } from '../../Signum.Templating/Signum.Templating'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
@@ -17,6 +16,7 @@ import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor'
 import { EmailMessageFormat, EmailTemplateEntity, EmailTemplateFromEmbedded, EmailTemplateMessage, EmailTemplateMessageEmbedded, EmailTemplateRecipientEmbedded, EmailTemplateViewMessage } from '../Signum.Mailing.Templates'
 import { QueryOrderEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 import { ValidationMessage } from '../../../Signum/React/Signum.Entities.Validation'
+import { SubTokensOptions } from '@framework/QueryToken'
 
 export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();

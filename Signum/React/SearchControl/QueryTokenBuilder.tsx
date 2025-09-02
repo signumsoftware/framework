@@ -1,7 +1,9 @@
 import * as React from 'react'
 import { areEqual, classes, Dic } from '../Globals'
 import { Finder } from '../Finder'
-import { QueryToken, SubTokensOptions, getTokenParents, isPrefix, ManualToken, QueryDescription, getQueryTokenColor } from '../FindOptions'
+import { QueryDescription } from '../FindOptions'
+import { SubTokensOptions, getTokenParents, isPrefix, ManualToken } from '../QueryToken'
+import { QueryToken } from '../QueryToken';
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
 import { DropdownList } from 'react-widgets-up'
@@ -221,7 +223,7 @@ export function QueryTokenItem(p: { item: QueryToken | null }): React.ReactEleme
   return (
     <span
       data-full-token={item.fullKey}
-      style={{ color: getQueryTokenColor(item) }}
+      style={{ color: item.queryTokenColor }}
       title={StyleContext.default.titleLabels ? item.niceTypeName : undefined}>
       {item.toStr}
     </span>
@@ -239,7 +241,7 @@ export function QueryTokenListItem(p: { item: QueryToken | null, ancestor: Query
   return (
     <span data-full-token={item.fullKey} style={{ whiteSpace: "nowrap" }} className="sf-token-list-item">
       {parentsUntil(item, p.ancestor)
-        .map(a => <span style={{ color: getQueryTokenColor(a) }} title={StyleContext.default.titleLabels ? a.niceTypeName : undefined}>{a.toStr}</span>)
+        .map(qt => <span style={{ color: qt.queryTokenColor }} title={StyleContext.default.titleLabels ? qt.niceTypeName : undefined}>{qt.toStr}</span>)
         .joinHtml(" › ")}
     </span>
   );

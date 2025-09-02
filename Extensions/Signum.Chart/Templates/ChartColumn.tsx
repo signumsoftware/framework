@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { classes } from '@framework/Globals'
-import { QueryToken, SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext, StyleContext } from '@framework/TypeContext'
 import { tryGetTypeInfos, TypeInfo, isTypeEnum } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
@@ -14,6 +13,7 @@ import { ColumnParameters, Parameters } from './ChartBuilder'
 import { IChartBase } from '../UserChart/Signum.Chart.UserChart'
 import { ColorPaletteEntity } from '../ColorPalette/Signum.Chart.ColorPalette'
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
+import { QueryToken, SubTokensOptions } from '@framework/QueryToken'
 
 export interface ChartColumnProps {
   ctx: TypeContext<ChartColumnEmbedded>;

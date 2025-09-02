@@ -175,15 +175,13 @@ public class QueryTokenTS
     [SetsRequiredMembers]
     public QueryTokenTS(QueryToken qt, bool withParents)
     {
+        this.key = qt.Key;
+        this.fullKey = withParents ? qt.FullKey() : null;
         this.toStr = qt.ToString();
         this.niceName = qt.NiceName();
-        this.key = qt.Key;
-        this.fullKey = qt.FullKey();
         this.type = new TypeReferenceTS(qt.Type, qt.GetImplementations());
-        this.filterType = QueryUtils.TryGetFilterType(qt.Type);
         this.format = qt.Format;
         this.unit = UnitAttribute.GetTranslation(qt.Unit);
-        this.niceTypeName = qt.NiceTypeName;
         this.queryTokenType = GetQueryTokenType(qt);
         this.isGroupable = qt.IsGroupable;
         this.autoExpand = qt.AutoExpand;
@@ -205,7 +203,7 @@ public class QueryTokenTS
     {
         var qt2 = new QueryTokenTS(qt, withParents: false);
         if (qt.AutoExpand)
-            qt2.subTokens = QueryUtils.SubTokens(qt, qd, SubTokensOptions.All).Select(st => WithAutoExpand(st, qd)).ToDictionaryEx(a => a.key);
+            qt2.subTokens = QueryUtils.SubTokens(qt, qd, SubTokensOptions.All).Select(st => WithAutoExpand(st, qd)).ToDictionaryEx(a => a.key!);
 
         return qt2;
     }
@@ -229,7 +227,7 @@ public class QueryTokenTS
 
         if (qt is OperationsContainerToken)
             return QueryTokenType.OperationContainer;
-        
+
         if (qt is ManualContainerToken or ManualToken)
             return QueryTokenType.Manual;
 
@@ -245,38 +243,27 @@ public class QueryTokenTS
         return null;
     }
 
-    public required string fullKey;
     public required string key;
-    public required string toStr;
-    public required string niceName;
-    public required string niceTypeName;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public QueryTokenType? queryTokenType;
-    public required TypeReferenceTS type;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public FilterType? filterType;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? format;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? unit;
-    public bool isGroupable;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool hasOrderAdapter;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool preferEquals;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public IReadOnlyList<string>? tsVectorFor;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public QueryTokenTS? parent;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? propertyRoute;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool autoExpand;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool hideInAutoExpand;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public required string? fullKey;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public required string? toStr;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public required string? niceName;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public QueryTokenType? queryTokenType;
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, QueryTokenTS>? subTokens;
+    public required TypeReferenceTS type;
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? format;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? unit;
+
+    public bool isGroupable;
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool hasOrderAdapter;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool preferEquals;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public IReadOnlyList<string>? tsVectorFor;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public QueryTokenTS? parent;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? propertyRoute;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool autoExpand;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool hideInAutoExpand;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, QueryTokenTS>? subTokens;
 }
 
 public enum QueryTokenType

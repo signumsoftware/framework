@@ -1,7 +1,8 @@
 
 import * as React from 'react'
 import { classes } from '../Globals';
-import { ColumnOption, ColumnOptionParsed, QueryDescription, QueryToken, SubTokensOptions } from '../FindOptions'
+import { ColumnOption, ColumnOptionParsed, QueryDescription } from '../FindOptions'
+import { QueryToken, SubTokensOptions } from '../QueryToken';
 import { SearchMessage } from '../Signum.Entities'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { StyleContext } from '../Lines';

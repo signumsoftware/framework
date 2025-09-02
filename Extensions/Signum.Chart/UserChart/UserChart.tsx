@@ -2,7 +2,6 @@ import * as React from 'react'
 import ChartBuilder from '../Templates/ChartBuilder'
 import { FormGroup, AutoLine, EntityLine, EntityStrip, CheckboxLine } from '@framework/Lines'
 import { Finder } from '@framework/Finder'
-import { SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import "../Chart.css"
@@ -13,6 +12,7 @@ import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart'
 import { UserQueryMessage } from '../../Signum.UserQueries/Signum.UserQueries'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
 import { toAbsoluteUrl } from '@framework/AppContext'
+import { SubTokensOptions } from '@framework/QueryToken'
 
 const CurrentEntityKey = "[CurrentEntity]";
 export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }): React.JSX.Element | null {

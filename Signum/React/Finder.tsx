@@ -9,17 +9,15 @@ import { ajaxGet, ajaxPost } from './Services';
 import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed,
-  QueryToken, ColumnOption, ColumnOptionParsed, Pagination,
-  ResultTable, ResultRow, OrderOption, SubTokensOptions, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
+  ColumnOption, ColumnOptionParsed, Pagination,
+  ResultTable, ResultRow, OrderOption, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
   FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption,
-  FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement,
-  toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, hasManual,
-  hasSnippet,
-  hasNested,
-  hasTimeSeries,
+  FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime,
+  toPinnedFilterParsed, isActive, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, 
   QueryDescriptionDTO,
   QueryTokenWithoutParent
 } from './FindOptions';
+import { hasAggregate, hasAnyOrAll, hasElement, hasManual, hasNested, hasOperation, hasSnippet, hasTimeSeries, hasToArray, QueryToken, SubTokensOptions } from './QueryToken';
 
 import { FilterOperation, FilterGroupOperation, PinnedFilterActive } from './Signum.DynamicQuery';
 

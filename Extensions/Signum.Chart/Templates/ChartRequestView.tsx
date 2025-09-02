@@ -6,7 +6,7 @@ import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { ValidationError, AbortableRequest } from '@framework/Services'
 import { FrameMessage, Lite } from '@framework/Signum.Entities'
-import { SubTokensOptions, QueryToken, FilterOptionParsed } from '@framework/FindOptions'
+import { FilterOptionParsed } from '@framework/FindOptions'
 import { StyleContext, TypeContext } from '@framework/TypeContext'
 import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer, getTypeInfos } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
@@ -25,6 +25,7 @@ import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart';
 import ChartTimeSeries from './ChartTimeSeries';
 import { DateTime } from 'luxon';
+import { QueryToken, SubTokensOptions } from '@framework/QueryToken';
 
 interface ChartRequestViewProps {
   chartRequest: ChartRequestModel;

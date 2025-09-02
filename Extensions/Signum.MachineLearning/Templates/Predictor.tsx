@@ -9,7 +9,6 @@ import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSu
 import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
-import { SubTokensOptions } from '@framework/FindOptions'
 import { PredictorClient } from '../PredictorClient';
 import { toLite } from "@framework/Signum.Entities";
 import { newMListElement } from '@framework/Signum.Entities';
@@ -17,12 +16,12 @@ import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuild
 import PredictorSubQuery from './PredictorSubQuery';
 import ProgressBar from '@framework/Components/ProgressBar'
 import LineChart, { LineChartSerie } from './LineChart'
-import { QueryToken } from '@framework/FindOptions';
 import PredictorMetrics from './PredictorMetrics';
 import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
 import { useAPI, useForceUpdate, useInterval } from '@framework/Hooks'
 import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
+import { QueryToken, SubTokensOptions } from '@framework/QueryToken'
 
 export const Predictor: React.ForwardRefExoticComponent<{ ctx: TypeContext<PredictorEntity> } & React.RefAttributes<IRenderButtons>> =
   React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<PredictorEntity> }, ref: React.Ref<IRenderButtons>): React.ReactElement {

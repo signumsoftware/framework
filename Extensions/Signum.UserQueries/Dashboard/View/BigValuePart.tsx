@@ -1,6 +1,7 @@
 
 import * as React from 'react'
-import { FindOptions, QueryToken } from '@framework/FindOptions'
+import { FindOptions } from '@framework/FindOptions'
+import { QueryToken } from '@framework/QueryToken'
 import { getQueryKey, getQueryNiceName } from '@framework/Reflection'
 import { JavascriptMessage, toLite, liteKey, translated } from '@framework/Signum.Entities'
 import { SearchControl, SearchControlHandler, SearchValue, SearchValueController } from '@framework/Search'

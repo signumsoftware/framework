@@ -1,9 +1,12 @@
-import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum, TypeInfo, Type, isNumberType, isDecimalType } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum, TypeInfo, Type, isNumberType, isDecimalType, isTypeEntity, isTypeModel, getTypeInfo, IsByAll } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
-import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows, TimeSeriesUnit } from './Signum.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows, TimeSeriesUnit, FilterType } from './Signum.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
 import { BsSize } from './Components';
 import { isDecimalKey } from './Lines/NumberLine';
+import { QueryTokenDateMessage, QueryTokenMessage } from './Signum.DynamicQuery.Tokens';
+import { CollectionMessage } from './Signum.External';
+import { hasAggregate, hasAny, QueryToken } from './QueryToken';
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
@@ -199,229 +202,12 @@ export const DefaultPagination: Pagination = {
 
 export type FindMode = "Find" | "Explore";
 
-export enum SubTokensOptions {
-  CanAggregate = 1,
-  CanAnyAll = 2,
-  CanElement = 4,
-  CanOperation = 8,
-  CanToArray = 16,
-  CanSnippet= 32,
-  CanManual = 64,
-  CanTimeSeries = 128,
-  CanNested = 256,
-}
-
-export interface QueryToken {
-  readonly toStr: string;
-  readonly niceName: string;
-  readonly key: string;
-  readonly format?: string;
-  readonly unit?: string;
-  readonly type: TypeReference;
-  readonly niceTypeName: string;
-  readonly isGroupable: boolean;
-  readonly hasOrderAdapter?: boolean;
-  readonly tsVectorFor?: string[];
-  readonly preferEquals?: boolean;
-  readonly filterType?: FilterType;
-  readonly autoExpand?: boolean;
-  readonly hideInAutoExpand?: boolean;
-  readonly fullKey: string;
-  readonly queryTokenType?: QueryTokenType;
-  readonly parent?: QueryToken;
-  readonly propertyRoute?: string;
-  readonly __isCached__?: true;
-}
-
-export function getQueryTokenColor(token: QueryToken) : string {
-  switch (token.queryTokenType) {
-    case "Aggregate":
-    case "AnyOrAll":
-    case "Element":
-    case "ToArray":
-    case "Nested":
-      return "var(--qt-keyword)" /*#0000FF*/;
-
-    case "IndexerContainer":
-    case "Manual":
-    case "OperationContainer":
-    case "Snippet":
-    case "TimeSeries":
-      return "var(--qt-exotic)"; /*#7D7D7D */
-  }
-
-  if (token.type.isCollection)
-    return "var(--qt-collection)"; /*#CE6700*/
-
-
-  if (token.parent == null && token.key == "Entity")
-    return "var(--qt-main-entity)" /*#2B78AF*/;
-
-  switch (token.filterType) {
-    case "Integer":
-    case "Decimal":
-    case "String":
-    case "Guid":
-    case "Boolean":
-      return "var(--qt-value)"; //"var(--bs-body-color)"
-
-    case "DateTime":
-      return "var(--qt-date)" /*#5100A1*/;
-    case "Time":
-      return "var(--qt-time)" /*#9956db*/;
-    case "Enum":
-      return "var(--qt-enum)" /*#800046*/;
-    case "Lite":
-      return "var(--qt-lite)" /* #2B91AF*/;
-    case "Embedded":
-      return "var(--qt-embedded)" /* #156F8A*/;
-    default:
-      return "var(--qt-exotic)" /*  #7D7D7D */;
-  }
-}
 
 export interface QueryTokenWithoutParent extends Omit<QueryToken,  | "parent"> {
   subTokens?: { [name: string]: QueryTokenWithoutParent };
   parent: "fake";
 }
 
-export interface ManualToken { 
-  toStr: string;
-  niceName: string;
-  key: string;
-  typeColor?: string;
-  niceTypeName: string;
-  subToken?: Promise<ManualToken[]>;
-}
-export interface ManualCellDto {
-  lite: Lite<Entity>;
-  manualContainerTokenKey: string;
-  manualTokenKey: string;
-}
-
-function getFullKey(token: QueryToken | QueryTokenString<any> | string) : string {
-  if (token instanceof QueryTokenString)
-    return token.token;
-
-  if (typeof token == "object")
-    return token.fullKey;
-
-  return token;
-}
-
-export function tokenStartsWith(token: QueryToken | QueryTokenString<any> | string, tokenStart: QueryToken | QueryTokenString<any> | string): boolean {
-
-  token = getFullKey(token);
-  tokenStart = getFullKey(token);
-
-  return token == tokenStart || token.startsWith(tokenStart + ".");
-}
-
-export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll" | "OperationContainer" | "ToArray" | "Manual" | "Nested" | "Snippet" | "TimeSeries" | "IndexerContainer";
-
-export function hasAnyOrAll(token: QueryToken | undefined, recursive: boolean = true): boolean {
-  if (token == undefined)
-    return false;
-
-  if (token.queryTokenType == "AnyOrAll")
-    return true;
-
-  return recursive && hasAnyOrAll(token.parent);
-}
-
-export function hasAny(token: QueryToken | undefined): boolean {
-  if (token == undefined)
-    return false;
-
-  if (token.queryTokenType == "AnyOrAll" && token.key == "Any")
-    return true;
-
-  return hasAny(token.parent);
-}
-
-export function isPrefix(prefix: QueryToken, token: QueryToken): boolean {
-  return prefix.fullKey == token.fullKey || token.fullKey.startsWith(prefix.fullKey + ".");
-}
-
-export function hasAggregate(token: QueryToken | undefined): boolean {
-  if (token == undefined)
-    return false;
-
-  if (token.queryTokenType == "Aggregate")
-    return true;
-
-  return false;
-}
-
-export function hasElement(token: QueryToken | undefined): boolean {
-  if (token == undefined)
-    return false;
-
-  if (token.queryTokenType == "Element")
-    return true;
-
-  return hasElement(token.parent);
-}
-
-export function hasOperation(token: QueryToken | undefined): boolean {
-  if (token == undefined)
-    return false;
-
-  if (token.queryTokenType == "OperationContainer")
-    return true;
-
-  return false;
-}
-
-export function hasManual(token: QueryToken | undefined): boolean {
-  if (token == undefined)
-    return false;
-
-  if (token.queryTokenType == "Manual")
-    return true;
-
-  return false;
-}
-
-export function hasNested(token: QueryToken | undefined): boolean {
-  if (token == undefined)
-    return false;
-
-  if (token.queryTokenType == "Nested")
-    return true;
-
-  return hasNested(token.parent);
-}
-
-export function hasTimeSeries(token: QueryToken | undefined): boolean {
-  if (token == undefined)
-    return false;
-
-  if (token.queryTokenType == "TimeSeries")
-    return true;
-
-  return hasTimeSeries(token.parent);
-}
-
-export function hasSnippet(token: QueryToken | undefined): boolean {
-  if (token == undefined)
-    return false;
-
-  if (token.queryTokenType == "Snippet")
-    return true;
-
-  return false;
-}
-
-export function hasToArray(token: QueryToken | undefined): QueryToken | undefined {
-  if (token == undefined)
-    return undefined;
-
-  if (token.queryTokenType == "ToArray")
-    return token;
-
-  return hasToArray(token.parent);
-}
 
 export function withoutAggregate(fop: FilterOptionParsed): FilterOptionParsed | undefined {
 
@@ -498,14 +284,6 @@ export function mapFilterTokens(fo: FilterOption, mapToken : (token: string) => 
   }
 }
 
-export function getTokenParents(token: QueryToken | null | undefined): QueryToken[] {
-  const result: QueryToken[] = [];
-  while (token) {
-    result.insertAt(0, token);
-    token = token.parent;
-  }
-  return result;
-}
 
 export type FilterRequest = FilterConditionRequest | FilterGroupRequest;
 
@@ -625,33 +403,6 @@ export function isList(fo: FilterOperation): boolean {
 }
 
 
-export function getFilterType(tr: TypeReference): FilterType | null {
-  if (isNumberType(tr.name))
-    return isDecimalType(tr.name) ? "Decimal" : "Integer";
-    
-  if (tr.name == "boolean")
-    return "Boolean";
-
-  if (tr.name == "string")
-    return "String";
-
-  if (tr.name == "DateTime")
-    return "DateTime";
-
-  if (tr.name == "Guid")
-    return "Guid";
-
-  if (tr.isEmbedded)
-    return "Embedded";
-
-  if (isTypeEnum(tr.name))
-    return "Enum";
-
-  if (tr.isLite || tryGetTypeInfos(tr)[0]?.name)
-    return "Lite";
-
-  return null;
-}
 
 export function getFilterOperations(qt: QueryToken): FilterOperation[] {
 

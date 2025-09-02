@@ -511,7 +511,7 @@ public class TypeReferenceTS
         this.IsEmbedded = clean.IsEmbeddedEntity();
 
         if (this.IsEmbedded)
-            this.TypeNiceName = this.IsCollection ? type.ElementType()!.NiceName() :  type.NiceName();
+            this.TypeNiceName = clean.NiceName();
         if (implementations != null)
         {
             try

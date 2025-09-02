@@ -7,13 +7,14 @@ import { Finder } from '@framework/Finder'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded';
 import { UserAssetClient } from '../../Signum.UserAssets/UserAssetClient'
-import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
+import { QueryDescription } from '@framework/FindOptions'
 import { initializeColumn } from './Predictor';
 import { newMListElement } from '@framework/Signum.Entities';
 import { is } from '@framework/Signum.Entities';
 import { QueryTokenString } from '@framework/Reflection';
 import { useForceUpdate } from '@framework/Hooks'
 import { QueryFilterEmbedded, QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
+import { SubTokensOptions } from '@framework/QueryToken'
 
 export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQueryEntity>, mainQuery: PredictorMainQueryEmbedded, mainQueryDescription: QueryDescription }): React.JSX.Element {
   const forceUpdate = useForceUpdate();

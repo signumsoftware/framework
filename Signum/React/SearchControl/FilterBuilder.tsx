@@ -2,9 +2,11 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { areEqual, classes, KeyGenerator } from '../Globals'
 import {
-  FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, getFilterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
-  hasAnyOrAll, getTokenParents, isPrefix, isCheckBox, canSplitValue, isFilterGroup, isFilterCondition
+  FilterOptionParsed, QueryDescription, getFilterOperations, isList, FilterOperation,
+  FilterConditionOptionParsed, FilterGroupOptionParsed,
+  isCheckBox, canSplitValue, isFilterGroup, isFilterCondition
 } from '../FindOptions'
+import { getTokenParents, hasAnyOrAll, isPrefix, QueryToken, SubTokensOptions } from '../QueryToken'
 import { SearchMessage, Lite, EntityControlMessage } from '../Signum.Entities'
 import { StyleContext } from '../Lines'
 import { Binding, IsByAll, getTypeInfos, toNumberFormat } from '../Reflection'

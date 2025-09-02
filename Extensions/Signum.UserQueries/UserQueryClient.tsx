@@ -9,18 +9,15 @@ import { Finder } from '@framework/Finder'
 import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, toMList, translated } from '@framework/Signum.Entities'
 import { Constructor } from '@framework/Constructor'
 import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
-import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption, withoutPinned, withoutAggregate, hasAggregate, FilterOptionParsed } from '@framework/FindOptions'
-import { AuthClient } from '../Signum.Authorization/AuthClient'
+import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption } from '@framework/FindOptions'
 import { UserQueryEntity, UserQueryPermission, UserQueryMessage, ValueUserQueryListPartEntity, UserQueryPartEntity, UserQueryLiteModel, BigValuePartEntity } from './Signum.UserQueries'
 import UserQueryMenu from './UserQueryMenu'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { DashboardClient, CreateNewButton } from '../Signum.Dashboard/DashboardClient'
 import { ImportComponent } from '@framework/ImportComponent'
-import ContextMenu from '@framework/SearchControl/ContextMenu';
 import { ContextualItemsContext, MenuItemBlock, onContextualItems, ContextualMenuItem } from '@framework/SearchControl/ContextualItems';
 import SearchControlLoaded, { OnDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded';
 import SelectorModal from '@framework/SelectorModal';
-import { Dic } from '@framework/Globals';
 import { QueryColumnEmbedded, QueryFilterEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries';
 import { UserQueryPartHandler } from './Dashboard/View/UserQueryPart';
 import { ToolbarClient } from '../Signum.Toolbar/ToolbarClient';

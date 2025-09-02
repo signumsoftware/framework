@@ -10,10 +10,11 @@ import { Color } from '@framework/Basics/Color';
 import './PivotTable.css'
 import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
 import { FilterOptionParsed } from '@framework/Search';
-import { QueryToken, FilterConditionOptionParsed, isFilterCondition } from '@framework/FindOptions';
+import { FilterConditionOptionParsed, isFilterCondition } from '@framework/FindOptions';
 import { EntityBaseController } from '@framework/Lines';
 import { QueryTokenMessage } from '@framework/Signum.DynamicQuery.Tokens';
 import { ChartParameter } from '../Signum.Chart';
+import { QueryToken } from '@framework/QueryToken';
 
 interface RowDictionary {
   [key: string]: { value: unknown, dicOrRows: RowDictionary | ChartRow[] };

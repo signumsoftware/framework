@@ -23,12 +23,13 @@ import { TypeaheadOptions } from '@framework/Components/Typeahead';
 import { EntityLink, similarToken } from '@framework/Search';
 import UserCircle from './Templates/UserCircle';
 import { AuthMessage, RoleEntity, UserEntity, UserLiteModel, UserOperation, UserState } from './Signum.Authorization';
-import { QueryDescription, SubTokensOptions, getTokenParents, isFilterCondition } from '@framework/FindOptions';
+import { QueryDescription, isFilterCondition } from '@framework/FindOptions';
 import { similarTokenToStr } from '@framework/FinderRules';
 import { CollectionMessage } from '@framework/Signum.External';
 import { useAPI } from '@framework/Hooks';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 import { QuickLinkAction, QuickLinkClient } from '@framework/QuickLinkClient';
+import { getTokenParents, SubTokensOptions } from '@framework/QueryToken';
 
 export namespace AuthAdminClient {
   

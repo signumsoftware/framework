@@ -9,7 +9,10 @@ import { Finder } from '@framework/Finder'
 import { Operations } from '@framework/Operations'
 import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, getToString, Lite } from '@framework/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Tree'
-import { FilterOptionParsed, ColumnOptionParsed, QueryDescription, SubTokensOptions, FilterOption, ColumnOption, QueryRequest, hasToArray, ResultRow } from "@framework/FindOptions";
+import {
+  FilterOptionParsed, ColumnOptionParsed, QueryDescription, FilterOption,
+  ColumnOption, QueryRequest, ResultRow
+} from "@framework/FindOptions";
 import FilterBuilder from "@framework/SearchControl/FilterBuilder";
 import { ISimpleFilterBuilder } from "@framework/Search";
 import { is } from "@framework/Signum.Entities";
@@ -25,6 +28,7 @@ import { DisabledMixin } from '@framework/Signum.Basics'
 import SearchControlLoaded, { ColumnParsed } from '@framework/SearchControl/SearchControlLoaded';
 import { AutoFocus } from '../../Signum/React/Components/AutoFocus';
 import { KeyNames } from '../../Signum/React/Components/Basic';
+import { hasToArray, SubTokensOptions } from '@framework/QueryToken';
 
 interface TreeViewerProps {
   treeOptions: TreeOptions;
@@ -665,7 +669,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
   }
 
-  getOffset(pageY: number, rect: ClientRect, margin: number): DraggedPosition {
+  getOffset(pageY: number, rect: DOMRect, margin: number): DraggedPosition {
 
     const height = Math.round(rect.height / 5) * 5;
     const offsetY = pageY - rect.top;

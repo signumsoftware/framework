@@ -4,8 +4,8 @@ import { TypeContext } from '@framework/TypeContext'
 import { FileLine } from '../../Signum.Files/Files'
 import { EmailTemplateEntity, FileTokenAttachmentEntity } from '../Signum.Mailing.Templates';
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
-import { SubTokensOptions } from '@framework/FindOptions';
 import { ValidationMessage } from '../../../Signum/React/Signum.Entities.Validation';
+import { SubTokensOptions } from '@framework/QueryToken';
 
 export default function FileTokenAttachment(p: { ctx: TypeContext<FileTokenAttachmentEntity> }): React.JSX.Element {
   const sc = p.ctx.subCtx({ formGroupStyle: "Basic" });

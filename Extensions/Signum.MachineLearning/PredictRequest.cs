@@ -68,7 +68,7 @@ public static class PredictRequestExtensions
 
         foreach (var c in request.columns.Where(a => a.usage == PredictorColumnUsage.Output))
         {
-            var pValue = predictedMainCols.GetOrThrow(c.token.fullKey);
+            var pValue = predictedMainCols.GetOrThrow(c.token.fullKey!);
             if (request.hasOriginal)
                 ((PredictOutputTuple)c.value!).predicted = pValue;
             else
@@ -99,7 +99,7 @@ public static class PredictRequestExtensions
                     {
                         ref var box = ref r[splitKeys.Count + i];
 
-                        var token = fullKeyToToken.GetOrThrow(c.token.fullKey);
+                        var token = fullKeyToToken.GetOrThrow(c.token.fullKey!);
 
                         var pValue = dic?.GetOrThrow(token);
                         if (request.hasOriginal)

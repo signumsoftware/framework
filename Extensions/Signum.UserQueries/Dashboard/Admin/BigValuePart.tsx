@@ -5,7 +5,7 @@ import { useForceUpdate } from '@framework/Hooks';
 import { BigValuePartEntity } from '../../Signum.UserQueries';
 import { DashboardEntity } from '../../../Signum.Dashboard/Signum.Dashboard';
 import QueryTokenEmbeddedBuilder from '../../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
-import { SubTokensOptions } from '../../../../Signum/React/FindOptions';
+import { SubTokensOptions } from '@framework/QueryToken';
 
 export default function BigValuePart(p: { ctx: TypeContext<BigValuePartEntity> }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ formGroupStyle: "Basic" });

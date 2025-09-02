@@ -6,23 +6,18 @@ import { Entity, getToString, Lite, liteKey, MList, ModelEntity, parseLite, toLi
 import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 import {
   FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed,
-  FilterGroupOption, FilterConditionOption, PinnedFilter, toPinnedFilterParsed, FindOptions, FindOptionsParsed, isFilterGroup,
-  QueryDescription
+  FilterGroupOption, FilterConditionOption, PinnedFilter, toPinnedFilterParsed, isFilterGroup,
 } from '@framework/FindOptions'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission } from './Signum.UserAssets'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { ImportComponent } from '@framework/ImportComponent'
-import { QueryToken } from '@framework/FindOptions';
 import { DashboardBehaviour, FilterGroupOperation } from '@framework/Signum.DynamicQuery';
 import { Dic, softCast } from '@framework/Globals';
 import * as AppContext from '@framework/AppContext';
-import { Finder } from '@framework/Finder'
-import { Navigator } from '@framework/Navigator'
-import SelectorModal from '@framework/SelectorModal';
-import { SearchControlLoaded } from '@framework/Search';
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from './Signum.UserAssets.Queries';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
+import { QueryToken } from '@framework/QueryToken';
 
 export namespace UserAssetClient {
   

@@ -18,12 +18,13 @@ import { openModal, IModalProps } from '../Modals'
 import { Modal } from 'react-bootstrap'
 import { ErrorBoundary } from '../Components'
 import './MultiPropertySetter.css';
-import { FilterOperation, filterOperations, getFilterType } from '../FindOptions'
+import { FilterOperation, filterOperations } from '../FindOptions'
 import { PropertyOperation } from '../Signum.Operations'
 import { CollectionMessage } from '../Signum.External'
 import { EnumLine } from '../Lines/EnumLine'
 import { AutoLine } from '../Lines/AutoLine'
 import SelectorModal from '../SelectorModal'
+import { getFilterType } from '../QueryToken'
 
 
 interface MultiPropertySetterModalProps extends IModalProps<boolean | undefined> {

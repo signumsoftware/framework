@@ -4,10 +4,10 @@ import { Navigator } from "./Navigator"
 import { Dic, classes } from './Globals'
 import {
   FilterOptionParsed,
-  QueryToken,
   FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroup, isFilterCondition,
-  hasToArray, getFilterOperations, getFilterGroupUnifiedFilterType, FilterConditionOption, isList
+  getFilterOperations, getFilterGroupUnifiedFilterType, FilterConditionOption, isList
 } from './FindOptions';
+import { hasToArray, QueryToken } from './QueryToken';
 import { FilterOperation } from './Signum.DynamicQuery';
 import { Entity, Lite, SearchMessage, JavascriptMessage, getToString, MList, newMListElement } from './Signum.Entities';
 import {

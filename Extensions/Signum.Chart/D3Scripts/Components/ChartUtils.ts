@@ -3,9 +3,10 @@ import * as d3 from "d3"
 import { ChartClient, ChartColumn } from "../../ChartClient"
 import { Dic } from "@framework/Globals";
 import { tryGetTypeInfo } from "@framework/Reflection";
-import { isFilterGroup, FilterConditionOptionParsed, FilterOptionParsed, QueryToken } from "@framework/FindOptions";
+import { isFilterGroup, FilterConditionOptionParsed, FilterOptionParsed } from "@framework/FindOptions";
 import { MemoRepository } from "./ReactChart";
 import * as ColorUtils from "../../ColorPalette/ColorUtils"
+import { QueryToken } from "@framework/QueryToken";
 
 
 

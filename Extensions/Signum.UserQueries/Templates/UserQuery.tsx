@@ -3,7 +3,7 @@ import { HealthCheckConditionEmbedded, SystemTimeEmbedded, UserQueryEntity, User
 import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip, CheckboxLine, TextBoxLine, EntityDetail, EnumLine, NumberLine } from '@framework/Lines'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
-import { FilterConditionOption, filterOperations, FindOptions, getFilterOperations, SubTokensOptions } from '@framework/FindOptions'
+import { FilterConditionOption, filterOperations, FindOptions, getFilterOperations } from '@framework/FindOptions'
 import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
@@ -13,6 +13,7 @@ import { SearchMessage, getToString, toLite } from '@framework/Signum.Entities'
 import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 import { CopyHealthCheckButton } from '@framework/Components/CopyHealthCheckButton'
 import { UserQueryClient } from '../UserQueryClient'
+import { SubTokensOptions } from '@framework/QueryToken'
 
 const CurrentEntityKey = "[CurrentEntity]";
 

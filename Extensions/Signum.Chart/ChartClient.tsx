@@ -9,7 +9,8 @@ import { Constructor } from '@framework/Constructor'
 import { Entity, getToString, is, Lite, liteKey, MList, SelectorMessage, toLite, translated } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {
-  FilterOption, OrderOption, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions, withoutPinned, SystemTime
+  FilterOption, OrderOption, QueryRequest, ResultTable, OrderRequest, OrderType, FilterOptionParsed,
+  ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions, withoutPinned, SystemTime
 } from '@framework/FindOptions'
 import ChartButton from './ChartButton'
 import { ChartRequestViewHandle } from './Templates/ChartRequestView'
@@ -35,6 +36,7 @@ import { QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queri
 import { OmniboxClient } from '../Signum.Omnibox/OmniboxClient';
 import ChartOmniboxProvider from './ChartOmniboxProvider';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
+import { hasAggregate, QueryToken, SubTokensOptions } from '@framework/QueryToken';
 
 export namespace ChartClient {
   
@@ -414,7 +416,7 @@ export namespace ChartClient {
   }
   
   export function getChartColumnType(token: QueryToken): ChartColumnType | undefined {
-  
+
     switch (token.filterType) {
       case "Lite": return "Entity";
       case "Boolean":
