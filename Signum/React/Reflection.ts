@@ -964,6 +964,9 @@ export class MListElementBinding<T> implements IBinding<T> {
   constructor(
     public mListBinding: IBinding<MList<T>>,
     public index: number) {
+    if (isNaN(index))
+      throw new Error("NaN");
+
     this.suffix = "[" + this.index.toString() + "].element";
   }
 
@@ -1070,12 +1073,16 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
   while (body != parameter) {
     let m: RegExpExecArray | null;
 
-    if (m = memberRegex.exec(body) ?? memberIndexerRegex.exec(body)) {
+    if (m = memberRegex.exec(body)) {
       result.push({ name: m[2], type: "Member" });
       body = m[1];
     }
+    else if ( m = memberIndexerRegex.exec(body)) {
+      result.push({ name: m[3], type: "Member" });
+      body = m[1];
+    }
     else if (m = indexRegex.exec(body)) {
-      result.push({ name: m[2], type: "Indexer" });
+      result.push({ name: m[3], type: "Indexer" });
       body = m[1];
     }
     else {
