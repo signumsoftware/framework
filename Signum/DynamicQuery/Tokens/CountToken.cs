@@ -79,9 +79,4 @@ public class CountToken : QueryToken
     {
         return new CountToken(parent.Clone());
     }
-
-    public override string TypeColor
-    {
-        get { return "#0000FF"; }
-    }
 }

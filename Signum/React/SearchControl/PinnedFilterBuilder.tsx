@@ -56,7 +56,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.
         {
           p.showGrid && <div className="row">
             {Array.range(0, maxColumns).map((a, i) => <div key={i} className={classes(bsBase == null ? "col-sm" : "col-sm-" + bsBase)}>
-              <div className="bg-light px-2"> Col {a}</div>
+              <div className="var(--bs-secondary-bg) px-2"> Col {a}</div>
             </div>)}
           </div>
         }

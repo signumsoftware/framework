@@ -1,7 +1,7 @@
 ﻿
 
 .sf-help-button {
-    color: #ddd;
+    color: var(--bs-secondary-text);
     font-size: 16px;
     display: inline-block;
     margin-top: -2px;
@@ -9,7 +9,7 @@
 }
 
     .sf-help-button.active {
-        color: #9954bb;
+        color: var(--bs-primary-subtle);
     }
 
     .sf-help-button:hover {

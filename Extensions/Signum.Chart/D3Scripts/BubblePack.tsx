@@ -88,7 +88,7 @@ export default function renderBubblePack({ data, width, height, parameters, load
                 opacity={active == false ? .5 : undefined}
                 fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}
                 fillOpacity={parameters["FillOpacity"] ?? undefined}
-                stroke={active == true ? "black" : parameters["StrokeColor"] ?? (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) ?? undefined))}
+                stroke={active == true ? "var(--bs-body-color)" : parameters["StrokeColor"] ?? (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) ?? undefined))}
                 strokeWidth={parameters["StrokeWidth"]} strokeOpacity={1} />
               {!isFolder(d.data) &&
                 <TextEllipsis maxWidth={d.r * 2} padding={1} etcText=""

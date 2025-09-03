@@ -183,7 +183,6 @@ public class QueryTokenTS
         this.filterType = QueryUtils.TryGetFilterType(qt.Type);
         this.format = qt.Format;
         this.unit = UnitAttribute.GetTranslation(qt.Unit);
-        this.typeColor = qt.TypeColor;
         this.niceTypeName = qt.NiceTypeName;
         this.queryTokenType = GetQueryTokenType(qt);
         this.isGroupable = qt.IsGroupable;
@@ -250,7 +249,6 @@ public class QueryTokenTS
     public required string key;
     public required string toStr;
     public required string niceName;
-    public required string typeColor;
     public required string niceTypeName;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public QueryTokenType? queryTokenType;

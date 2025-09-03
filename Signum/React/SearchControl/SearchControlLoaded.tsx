@@ -681,7 +681,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       {
         order: -3,
-        button: <button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))}
+        button: <button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger" : "border-primary text-primary"))}
           onClick={this.handleSearchClick} title={changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()} >
           <FontAwesomeIcon icon={changesExpected ? "magnifying-glass" : "refresh"} />{changesExpected && <span className="d-none d-sm-inline ms-1">{SearchMessage.Search.niceToString()}</span>}
         </button>
@@ -691,7 +691,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       p.create && !this.props.ctx?.frame?.currentDate && {
         order: -2,
-        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ms-2")} title={titleLabels ? this.createTitle() : undefined} onClick={this.handleCreate}>
+        button: <button className={classes("btn ", p.createButtonClass ?? "btn-outline-secondary")} title={titleLabels ? this.createTitle() : undefined} onClick={this.handleCreate}>
           <FontAwesomeIcon icon="plus" className="sf-create" /><span className="d-none d-sm-inline ms-1">{this.createTitle()}</span>
         </button>
       },
@@ -709,13 +709,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       ...(this.props.hideButtonBar ? [] : rightButtonBarElements),
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
-        button: <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
+        button: <button className="btn btn-outline-secondary" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
           <FontAwesomeIcon icon="up-right-from-square" />
         </button>
       },
 
       this.state.isMobile == true && this.getMobileOptions(this.props.findOptions).showSwitchViewModesButton && {
-        button: <button className="sf-query-button btn btn-light" onClick={this.handleViewModeClick}>
+        button: <button className="btn btn-outline-secondary" onClick={this.handleViewModeClick}>
           <FontAwesomeIcon icon={this.state.viewMode == "Mobile" ? "desktop" : "mobile-alt"} title={SearchMessage.SwitchViewMode.niceToString()} />
         </button>
       }
@@ -2203,50 +2203,50 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
 export function getResotreDefaultColumnsIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-    <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="black" />
+    <FontAwesomeIcon icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="var(--bs-body-color)" />
   </span>
 }
 
 export function getGroupByThisColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-    <FontAwesomeIcon icon={["fas", "layer-group"]} transform="shrink-3 up-8 right-8" color="#21618C" />
+    <FontAwesomeIcon icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon icon={["fas", "layer-group"]} transform="shrink-3 up-8 right-8" color="var(--bs-cyan)" />
   </span>
 }
 
 export function getRemoveOtherColumns(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-    <FontAwesomeIcon icon="remove" transform="shrink-4 up-8 right-8" color="black" />
+    <FontAwesomeIcon icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon icon="remove" transform="shrink-4 up-8 right-8" color="var(--bs-body-color)" />
   </span>
 }
 
 export function getRemoveColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-    <FontAwesomeIcon icon={["fas", "square-xmark"]} transform="shrink-3 up-8 right-8" color="#ca0000" />
+    <FontAwesomeIcon icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon icon={["fas", "square-xmark"]} transform="shrink-3 up-8 right-8" color="var(--bs-danger)" />
   </span>
 }
 
 export function getEditColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-    <FontAwesomeIcon icon={["fas", "square-pen"]} transform="shrink-3 up-8 right-8" color="orange" />
+    <FontAwesomeIcon icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon icon={["fas", "square-pen"]} transform="shrink-3 up-8 right-8" color="var(--bs-orange)" />
   </span>
 }
 
 export function getInsertColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-    <FontAwesomeIcon icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="#008400" />
+    <FontAwesomeIcon icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="var(--bs-success)" />
   </span>
 }
 
 export function getAddFilterIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="filter" transform="left-2" color="gray" />
-    <FontAwesomeIcon icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="#21618C" />
+    <FontAwesomeIcon icon="filter" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="var(--bs-blue)" />
   </span>
 }
 
@@ -2308,10 +2308,10 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
 
   return (
     <Dropdown as={ButtonGroup} title={SearchMessage.Filters.niceToString()}>
-      <Button variant="light" id="" className="sf-filter-button" active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
+      <Button variant="outline-secondary" className="sf-filter-button" active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
         <FontAwesomeIcon icon="filter" /> {activeFilters == 0 ? null : activeFilters}
       </Button>
-      <Dropdown.Toggle split className="px-2" variant={"light"} ></Dropdown.Toggle>
+      <Dropdown.Toggle variant="outline-secondary" split className="px-2"></Dropdown.Toggle>
       <Dropdown.Menu>
         <Dropdown.Item data-key={("Simple" satisfies SearchControlFilterMode)} active={filterMode == 'Simple'} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
         <Dropdown.Item data-key={("Advanced" satisfies SearchControlFilterMode)} active={filterMode == 'Advanced'} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>

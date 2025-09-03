@@ -126,10 +126,5 @@ public class CollectionNestedToken : QueryToken
     {
         throw new InvalidOperationException("CollectionNestedToken should have a replacement at this stage");
     }
-
-    public override string TypeColor
-    {
-        get { return "#0000FF"; }
-    }
 }
 
