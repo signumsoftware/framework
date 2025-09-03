@@ -33,4 +33,5 @@ public class HtmlLineProxy : BaseLineProxy
 
     public override object? GetValueUntyped() => this.GetValue();
     public override void SetValueUntyped(object? value) => SetValue((string?)value);
+    public override bool IsReadonly() => throw new NotImplementedException();
 }
