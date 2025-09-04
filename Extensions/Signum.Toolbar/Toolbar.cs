@@ -1,14 +1,16 @@
 using Signum.Authorization;
+using Signum.DynamicQuery;
 using Signum.UserAssets;
-using System.Xml.Linq;
 using Signum.Utilities.Reflection;
+using System;
 using System.ComponentModel;
+using System.Xml.Linq;
 
 namespace  Signum.Toolbar;
 
 public interface IToolbarEntity: IEntity
 {
-    MList<ToolbarElementEmbedded> Elements { get; }
+    IEnumerable<Lite<IToolbarEntity>> GetSubToolbars();
 }
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
@@ -27,6 +29,8 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
     [PreserveOrder]
     [NoRepeatValidator]
     public MList<ToolbarElementEmbedded> Elements { get; set; } = new MList<ToolbarElementEmbedded>();
+
+    public IEnumerable<Lite<IToolbarEntity>> GetSubToolbars() => Elements.Select(a => a.Content).OfType<Lite<IToolbarEntity>>();
 
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
@@ -54,6 +58,8 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
+
+    
 }
 
 public enum ToolbarLocation
@@ -209,6 +215,7 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
             new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
     }
 
+    public IEnumerable<Lite<IToolbarEntity>> GetSubToolbars() => Elements.Select(a => a.Content).OfType<Lite<IToolbarEntity>>();
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
@@ -218,8 +225,12 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
     }
 
 
+
+
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
+
+
 }
 
 [AutoInit]
@@ -228,6 +239,7 @@ public static class ToolbarMenuOperation
     public static readonly ExecuteSymbol<ToolbarMenuEntity> Save;
     public static readonly DeleteSymbol<ToolbarMenuEntity> Delete;
 }
+
 
 public enum ToolbarMessage
 {

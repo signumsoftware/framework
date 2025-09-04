@@ -34,6 +34,7 @@ public static class ToolbarLogic
 
             sb.Schema.EntityEvents<ToolbarEntity>().Saving += IToolbar_Saving;
             sb.Schema.EntityEvents<ToolbarMenuEntity>().Saving += IToolbar_Saving;
+            sb.Schema.EntityEvents<ToolbarSwitcherEntity>().Saving += IToolbar_Saving;
 
             sb.Include<ToolbarMenuEntity>()
                 .WithSave(ToolbarMenuOperation.Save)
@@ -45,11 +46,22 @@ public static class ToolbarLogic
                     e.Name
                 });
 
+
+            sb.Include<ToolbarSwitcherEntity>()
+                  .WithSave(ToolbarSwitcherOperation.Save)
+                  .WithDelete(ToolbarSwitcherOperation.Delete)
+                  .WithQuery(() => e => new
+                  {
+                      Entity = e,
+                      e.Id,
+                      e.Name
+                  });
              
             sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(QueryEntity));
             sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(PermissionSymbol));
             sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(ToolbarEntity));
             sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(ToolbarMenuEntity));
+            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(ToolbarSwitcherEntity));
 
             AuthLogic.HasRuleOverridesEvent += role =>
                 Database.Query<ToolbarEntity>().Any(a => a.Owner.Is(role)) ||
@@ -116,19 +128,27 @@ public static class ToolbarLogic
 
     private static void IToolbar_Saving(IToolbarEntity tool)
     {
-        if (tool.Elements.FirstOrDefault()?.Type == ToolbarElementType.ExtraIcon)
-            throw new InvalidOperationException(ToolbarMessage.FirstElementCanNotBeExtraIcon.NiceToString());
+        var elements = 
+            tool is ToolbarEntity tb ? tb.Elements :
+            tool is ToolbarMenuEntity tbm ? tbm.Elements :
+            null;
 
-        if(tool.Elements.GroupWhen(e => e.Type != ToolbarElementType.ExtraIcon).Any(gr => gr.Count() > 0 && gr.Key.Type == ToolbarElementType.Divider))
-            throw new InvalidOperationException(ToolbarMessage.ExtraIconCanNotComeAfterDivider.NiceToString());
+        if (elements != null)
+        {
+            if (elements.FirstOrDefault()?.Type == ToolbarElementType.ExtraIcon)
+                throw new InvalidOperationException(ToolbarMessage.FirstElementCanNotBeExtraIcon.NiceToString());
 
-        if (!tool.IsNew && tool.Elements.IsGraphModified)
+            if (elements.GroupWhen(e => e.Type != ToolbarElementType.ExtraIcon).Any(gr => gr.Count() > 0 && gr.Key.Type == ToolbarElementType.Divider))
+                throw new InvalidOperationException(ToolbarMessage.ExtraIconCanNotComeAfterDivider.NiceToString());
+        }
+
+        if (!tool.IsNew)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
             {
                 EntityCache.AddFullGraph((Entity)tool);
 
-                var toolbarGraph = DirectedGraph<IToolbarEntity>.Generate(tool, t => t.Elements.Select(a => a.Content).Where(c => c is Lite<IToolbarEntity>).Select(t => (IToolbarEntity)t!.Retrieve()));
+                var toolbarGraph = DirectedGraph<IToolbarEntity>.Generate(tool, t => t.GetSubToolbars().Select(t => t!.Retrieve()));
 
                 var problems = toolbarGraph.FeedbackEdgeSet().Edges.ToList();
 

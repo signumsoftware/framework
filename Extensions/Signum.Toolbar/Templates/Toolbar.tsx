@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { AutoLine, EntityLine, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ToolbarEntity, ToolbarElementEmbedded, ToolbarMenuEntity } from '../Signum.Toolbar'
+import { ToolbarEntity, ToolbarElementEmbedded, ToolbarMenuEntity, ToolbarSwitcherEntity } from '../Signum.Toolbar'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Entity, MList } from '@framework/Signum.Entities';
 import { fallbackIcon, parseIcon } from '@framework/Components/IconTypeahead';
@@ -44,6 +44,9 @@ function getDefaultIcon(ti: TypeInfo): IconColor | null {
 
   if (ti.name == ToolbarMenuEntity.typeName)
     return ({ icon: "bars", iconColor: "#52BE80" });
+
+  if (ti.name == ToolbarSwitcherEntity.typeName)
+    return ({ icon: "square-caret-down", iconColor: "#39a1a3" });
 
   if (ti.name == PermissionSymbol.typeName)
     return ({ icon: "key", iconColor: "#F1C40F" });

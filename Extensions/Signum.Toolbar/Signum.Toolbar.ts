@@ -9,7 +9,6 @@ import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 
 
 export interface IToolbarEntity extends Entities.Entity {
-  elements: Entities.MList<ToolbarElementEmbedded>;
 }
 
 export const ShowCount: EnumType<ShowCount> = new EnumType<ShowCount>("ShowCount");
@@ -79,5 +78,26 @@ export namespace ToolbarMessage {
 export namespace ToolbarOperation {
   export const Save : Operations.ExecuteSymbol<ToolbarEntity> = registerSymbol("Operation", "ToolbarOperation.Save");
   export const Delete : Operations.DeleteSymbol<ToolbarEntity> = registerSymbol("Operation", "ToolbarOperation.Delete");
+}
+
+export const ToolbarSwitcherEntity: Type<ToolbarSwitcherEntity> = new Type<ToolbarSwitcherEntity>("ToolbarSwitcher");
+export interface ToolbarSwitcherEntity extends Entities.Entity, IToolbarEntity {
+  Type: "ToolbarSwitcher";
+  name: string;
+  options: Entities.MList<ToolbarSwitcherOptionEmbedded>;
+  guid: string /*Guid*/;
+}
+
+export namespace ToolbarSwitcherOperation {
+  export const Save : Operations.ExecuteSymbol<ToolbarSwitcherEntity> = registerSymbol("Operation", "ToolbarSwitcherOperation.Save");
+  export const Delete : Operations.DeleteSymbol<ToolbarSwitcherEntity> = registerSymbol("Operation", "ToolbarSwitcherOperation.Delete");
+}
+
+export const ToolbarSwitcherOptionEmbedded: Type<ToolbarSwitcherOptionEmbedded> = new Type<ToolbarSwitcherOptionEmbedded>("ToolbarSwitcherOptionEmbedded");
+export interface ToolbarSwitcherOptionEmbedded extends Entities.EmbeddedEntity {
+  Type: "ToolbarSwitcherOptionEmbedded";
+  toolbarMenu: Entities.Lite<ToolbarMenuEntity>;
+  iconName: string | null;
+  iconColor: string | null;
 }
 

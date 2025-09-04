@@ -5,7 +5,7 @@ import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation, ShowCount } from './Signum.Toolbar'
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation, ShowCount, ToolbarSwitcherEntity, ToolbarSwitcherOptionEmbedded } from './Signum.Toolbar'
 import { Constructor } from '@framework/Constructor'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { Dic } from '@framework/Globals';
@@ -22,6 +22,8 @@ export namespace ToolbarClient {
     Navigator.addSettings(new EntitySettings(ToolbarEntity, t => import('./Templates/Toolbar')));
     Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => import('./Templates/ToolbarMenu')));
     Navigator.addSettings(new EntitySettings(ToolbarElementEmbedded, t => import('./Templates/ToolbarElement')));
+    Navigator.addSettings(new EntitySettings(ToolbarSwitcherEntity, t => import('./Templates/ToolbarSwitcher')));
+    Navigator.addSettings(new EntitySettings(ToolbarSwitcherOptionEmbedded, t => import('./Templates/ToolbarSwitcherOption')));
   
     registerConfig(new QueryToolbarConfig());
   

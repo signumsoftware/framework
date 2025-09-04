@@ -106,7 +106,10 @@ public struct Implementations : IEquatable<Implementations>
     internal static string ConsiderMessage(PropertyRoute route, string targetTypes)
     {
         return $@"Consider writing something like this in your Starter class:
-sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.PropertyString().Replace("/", ".First().")}).Replace(new ImplementedByAttribute({targetTypes}))";
+
+sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.PropertyString().Replace("/", ".First().")}).Replace(new ImplementedByAttribute({targetTypes}))
+
+";
     }
 
     public static Implementations ByAll { get { return new Implementations(); } }
