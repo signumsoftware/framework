@@ -1,0 +1,43 @@
+﻿:root {
+    --bs-subtle-text: var(--bs-body-color);
+    --bs-subtle: var(--bs-light);
+    --bs-subtle-rgb: var(--bs-light-rgb);
+}
+
+[data-bs-theme="dark"] {
+    --bs-subtle-text: var(--bs-body-color);
+    --bs-subtle: var(--bs-dark);
+    --bs-subtle-rgb: var(--bs-dark-rgb);
+}
+
+.btn-subtle {
+    --bs-btn-color: var(--bs-subtle-text);
+    --bs-btn-bg: var(--bs-subtle);
+    --bs-btn-border-color: var(--bs-subtle);
+    --bs-btn-hover-color: var(--bs-subtle-text);
+    --bs-btn-hover-bg: color-mix(in srgb, var(--bs-subtle), var(--bs-body-color) 15%);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--bs-subtle), #000 20%);
+    --bs-btn-focus-shadow-rgb: var(--bs-subtle-rgb);
+    --bs-btn-active-color: var(--bs-subtle-text);
+    --bs-btn-active-bg: color-mix(in srgb, var(--bs-subtle), var(--bs-body-color) 20%);
+    --bs-btn-active-border-color: color-mix(in srgb, var(--bs-subtle), var(--bs-body-color) 25%);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0,0,0,.125);
+    --bs-btn-disabled-color: var(--bs-subtle-text);
+    --bs-btn-disabled-bg: var(--bs-subtle);
+    --bs-btn-disabled-border-color: var(--bs-subtle);
+}
+
+
+:root {
+    --sf-subtle-5: color-mix(in srgb, var(--bs-body-bg), var(--bs-body-color) 5%);
+    --sf-subtle-10: color-mix(in srgb, var(--bs-body-bg), var(--bs-body-color) 10%);
+    --sf-subtle-20: color-mix(in srgb, var(--bs-body-bg), var(--bs-body-color) 20%);
+}
+
+.rw-list-option:hover,
+.rw-list-option-create:hover,
+[data-intent=keyboard] .rw-list-option.rw-state-focus:not(.rw-state-selected),
+[data-intent=keyboard] .rw-state-focus.rw-list-option-create:not(.rw-state-selected) {
+    background-color: var(--sf-subtle-10);
+    border-color: var(--sf-subtle-10);
+}

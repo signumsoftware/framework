@@ -390,10 +390,6 @@ ul.sf-context-menu li a:not([disabled]) {
     background-color: var(--bs-body-bg);
     border-color: var(--bs-secondary-bg);
 }
-.rw-list-option:hover {
-    background-color: var(--bs-secondary-bg);
-    border-color: var(--bs-secondary-bg);
-}
 
 .sf-hide-group-button{
     font-weight: bold;
