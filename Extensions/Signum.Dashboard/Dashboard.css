@@ -10,13 +10,13 @@
 }
 
 .sf-dashboard-view-embedded {
-    background: var(--bs-body-bg);
+    background: var(--bs-tertiary-bg);
     margin: -10px -1em -16px -1em;
     padding: 1em;
 }
 
 .sf-dashboard-page {
-    background: var(--bs-body-bg);
+    background: var(--bs-tertiary-bg);
     margin: -8px -12px;
     padding: 20px;
 }
