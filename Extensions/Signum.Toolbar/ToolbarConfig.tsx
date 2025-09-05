@@ -55,22 +55,29 @@ export abstract class ToolbarConfig<T extends Entity> {
     return true;
   }
 
-  getMenuItem(res: ToolbarResponse<T>, active: ToolbarResponse<any> | null, key: number | string, onAutoClose?: () => void): React.JSX.Element {
+  getMenuItem(res: ToolbarResponse<T>, key: number | string, ctx: ToolbarContext): React.JSX.Element {
     return (
       <ToolbarNavItem key={key}
         title={res.label}
         onClick={(e: React.MouseEvent<any>) => {
           this.handleNavigateClick(e, res);
-          if (onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
-            onAutoClose();
+          if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
+            ctx.onAutoClose();
         }}
-        active={res == active}
-        extraIcons={renderExtraIcons(res.extraIcons, active, onAutoClose)}
+        active={res == ctx.active}
+        extraIcons={renderExtraIcons(res.extraIcons, ctx)}
         icon={this.getIcon(res)}
       />
     );
   }
 }
+
+export interface ToolbarContext {
+  onAutoClose?: () => void;
+  onRefresh: () => void;
+  active: ToolbarResponse<any> | null;
+}
+
 
 export interface IconColor {
   icon: IconProp;

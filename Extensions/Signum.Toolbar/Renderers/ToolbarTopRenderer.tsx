@@ -7,6 +7,7 @@ import { useAPI, useUpdatedRef } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { classes } from '@framework/Globals';
 import { inferActive, isCompatibleWithUrl, renderNavItem } from './ToolbarRenderer';
+import { ToolbarContext } from '../ToolbarConfig'
 
 
 export default function ToolbarTopRenderer(): React.ReactElement | null {
@@ -38,9 +39,14 @@ export default function ToolbarTopRenderer(): React.ReactElement | null {
     return window.setTimeout(() => setRefresh(!refresh), 500)
   }
 
+  const ctx: ToolbarContext = {
+    active,
+    onRefresh: handleRefresh
+  };
+
   return (
-     <div className={classes("nav navbar-nav")}>
-        {response && response.elements && response.elements.map((res: ToolbarResponse<any>, i: number) => renderNavItem(res, active, i, handleRefresh))}
-      </div>
+    <div className={classes("nav navbar-nav")}>
+      {response && response.elements && response.elements.map((res: ToolbarResponse<any>, i: number) => renderNavItem(res, i, ctx))}
+    </div>
   );
 }

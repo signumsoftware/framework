@@ -566,6 +566,7 @@ input[type=checkbox].form-control-xs {
     border: var(--bs-border-width) solid var(--bs-border-color);
 }
 
+
 .form-control-sm.rw-dropdown-list.rw-widget,
 .form-control-sm.rw-combobox.rw-widget {
     padding: 0px;
@@ -575,11 +576,6 @@ input[type=checkbox].form-control-xs {
 .form-control-sm .rw-widget-picker {
     min-height: 31px;
 }
-
-/*.rw-widget-sm .rw-multiselect-input {
-    padding: 3px 6px;
-    height: 28px;
-}*/
 
 .rw-widget-sm .rw-widget-picker {
     min-height: 31px;
@@ -692,10 +688,6 @@ body:not(.rtl) .sf-mandatory-warning,
 body:not(.rtl) .sf-mandatory-warning-widget .rw-input,
 body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     border-left: 2px solid var(--bs-warning);
-}
-
-.rw-dropdown-list .rw-popup-container {
-    right: unset;
 }
 
 .sf-no-padding {
