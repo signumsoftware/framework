@@ -11,6 +11,7 @@ export default function ToolbarMenu(p : { ctx: TypeContext<ToolbarMenuEntity> })
     <div>
       <AutoLine ctx={ctx.subCtx(f => f.name)} />
       <EntityLine ctx={ctx.subCtx(f => f.owner)} />
+      <EntityLine ctx={ctx.subCtx(f => f.entityType)}/>
       <ToolbarElementTable ctx={ctx.subCtx(m => m.elements)} />
     </div>
   );
