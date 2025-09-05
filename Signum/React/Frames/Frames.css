@@ -3,7 +3,7 @@
         min-width: 730px;
     }
 }*/
-@import "./Subtle.css";
+@import "./Tertiary.css";
 
 @media (min-width: 768px) {
     .modal-md,

@@ -16,7 +16,7 @@
 }
 
 .sf-dashboard-page {
-    background: var(--bs-body-bg);
+    background: var(--bs-tertiary-bg);
     margin: -8px -12px;
     padding: 20px;
 }
@@ -119,7 +119,7 @@ div.row-control-panel {
 }
 
 .sf-filter-pill.border {
-    padding: 0px 4px 3px 4px;
+    padding: 3px;
 }
 
 .sf-filter-pill .btn-close {

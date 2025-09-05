@@ -114,7 +114,7 @@ tr.drag-bottom td {
 .sf-search-results > thead > tr > th {
     box-shadow: inset 1px 1px 0 var(--bs-border-color), inset -1px -1px 0 var(--bs-border-color);
     cursor: pointer;
-    background-color: var(--bs-secondary-bg);
+    background-color: var(--bs-tertiary-bg);
     position: sticky;
     z-index: 5; /*prevnting overrided cell to render inside header*/
     top: 0; /* Don't forget this, required for the stickiness */
