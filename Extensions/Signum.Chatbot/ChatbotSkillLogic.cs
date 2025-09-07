@@ -1,11 +1,16 @@
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
+using ModelContextProtocol.Server;
+using Npgsql.Internal;
 using Signum.API;
 using Signum.Chatbot.Agents;
 using Signum.Chatbot.Skills;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace Signum.Chatbot;
 
@@ -96,6 +101,20 @@ public abstract class ChatbotSkill
         else
             sb.AppendLineLF(OriginalInstructions.Replace(Replacements.SelectDictionary(k => k, v => v(context))));
 
+        FillSubInstructions(sb);
+
+        return sb.ToString();
+    }
+
+    public string FillSubInstructions()
+    {
+        var sb = new StringBuilder();
+        FillSubInstructions(sb);
+        return sb.ToString();
+    }
+
+    private void FillSubInstructions(StringBuilder sb)
+    {
         foreach (var item in SubSkills)
         {
             var skill = ChatbotSkillLogic.GetSkill(item.Key);
@@ -109,25 +128,29 @@ public abstract class ChatbotSkill
             else
                 sb.AppendLineLF("Use the tool 'describe' to get more information about this skill.");
         }
-
-        return sb.ToString(); 
     }
 
+    public Dictionary<Type, SkillActivation> SubSkills = new Dictionary<Type, SkillActivation>();
 
     IEnumerable<AITool> chatbotTools; 
     internal IEnumerable<AITool> GetTools()
     {
-        return (chatbotTools ??= this.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-            .Where(m => m.GetCustomAttribute<SkillToolAttribute>() != null)
+        return (chatbotTools ??= this.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+            .Where(m => m.GetCustomAttribute<McpServerToolAttribute>() != null)
             .Select(m =>
             {
-                Type types = Expression.GetDelegateType(m.GetParameters().Select(a => a.ParameterType).And(m.ReturnType).ToArray());
-                Delegate del = Delegate.CreateDelegate(types, this, m);
+                Type delType = Expression.GetDelegateType(m.GetParameters().Select(a => a.ParameterType).And(m.ReturnType).ToArray());
+                Delegate del = m.IsStatic ?
+                    Delegate.CreateDelegate(delType, m) :
+                    Delegate.CreateDelegate(delType, this, m);
+
                 string? description = m.GetCustomAttribute<DescriptionAttribute>()?.Description;
-                return (AITool)AIFunctionFactory.Create(del, m.Name, description, SignumServer.JsonSerializerOptions);
+                return (AITool)AIFunctionFactory.Create(del, m.Name, description, GetJsonSerializerOptions());
             })
             .ToList());
     }
+
+    protected virtual JsonSerializerOptions GetJsonSerializerOptions() => SignumServer.JsonSerializerOptions;
 
     public IEnumerable<AITool> GetToolsRecursive()
     {
@@ -145,18 +168,41 @@ public abstract class ChatbotSkill
         return list;
     }
 
-    public Dictionary<Type, SkillActivation> SubSkills = new Dictionary<Type, SkillActivation>();
-}
+    public void AddMcpServer(IMcpServerBuilder builder)
+    {
+        foreach (var toolMethod in this.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+        {
+            if (toolMethod.GetCustomAttribute<McpServerToolAttribute>() is not null)
+            {
+                builder.Services.AddSingleton(services => McpServerTool.Create(
+                    toolMethod,
+                    toolMethod.IsStatic ? null : this,
+                    new() { Services = services, SerializerOptions = this.GetJsonSerializerOptions() }));
+            }
+        }
 
-[AttributeUsage(AttributeTargets.Method)]
-public sealed class SkillToolAttribute : Attribute
-{
-  
+        foreach (var subSkill in this.SubSkills.Where(a => a.Value == SkillActivation.Eager))
+        {
+            ChatbotSkillLogic.GetSkill(subSkill.Key).AddMcpServer(builder);
+        }
+    }
+
 }
 
 public enum SkillActivation
 {
     Eager,
     Lazy,
+}
+
+public static partial class SignumMcpServerBuilderExtensions
+{
+    public static IMcpServerBuilder WithSignumSkill(this IMcpServerBuilder builder, ChatbotSkill skill)
+    {
+        skill.AddMcpServer(builder);
+
+        //builder.Services.Configure((McpServerOptions opts) => opts.ServerInstructions = skill.GetInstruction(null));
+        return builder;
+    }
 }
 

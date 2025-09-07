@@ -79,7 +79,7 @@ public class ToolCallEmbedded : EmbeddedEntity
     [StringLengthValidator(Max = 100)]
     public string ToolId { get; set; }
 
-    [StringLengthValidator(Max = 100)]
+    [StringLengthValidator(MultiLine = true)]
     public string Arguments { get; set; }
 }
 

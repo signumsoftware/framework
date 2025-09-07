@@ -1,6 +1,7 @@
 
 using Azure.Core;
 using Microsoft.Identity.Client;
+using ModelContextProtocol.Server;
 using System.ComponentModel;
 
 namespace Signum.Chatbot.Agents;
@@ -18,9 +19,14 @@ public class IntroductionSkill : ChatbotSkill
         };
     }
 
-    [SkillTool, Description("Gets the introduction for an skill")]
+    [McpServerTool, Description("Gets the introduction for an skill")]
     public string Describe(string skillName)
     {
+        //throw new InvalidOperationException("bla");
+
+        if (skillName.Contains("error"))
+            throw new Exception(skillName + " has an error");
+
         var skill = ChatbotSkillLogic.GetSkill(skillName);
 
         return skill.GetInstruction(null);

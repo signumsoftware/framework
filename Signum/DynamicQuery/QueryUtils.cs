@@ -379,10 +379,13 @@ public static class QueryUtils
         return result;
     }
 
-    public static QueryToken? TryParse(string tokenString, QueryDescription qd, SubTokensOptions options)
+    public static QueryToken? TryParse(string tokenString, QueryDescription qd, SubTokensOptions options, out string? error)
     {
         if (string.IsNullOrEmpty(tokenString))
+        {
+            error = "Token is empty";
             return null;
+        }    
 
         //https://stackoverflow.com/questions/35418597/split-string-on-the-dot-characters-that-are-not-inside-of-brackets
         string[] parts = Regex.Split(tokenString, @"\.(?!([^[]*\]|[^(]*\)))");
@@ -392,16 +395,22 @@ public static class QueryUtils
         QueryToken? result = SubToken(null, qd, options, firstPart);
 
         if (result == null)
+        {
+            error = "Column '{0}' not found on query {1}".FormatWith(firstPart, QueryUtils.GetKey(qd.QueryName));
             return null;
+        }
 
         foreach (var part in parts.Skip(1))
         {
             var newResult = SubToken(result, qd, options, part);
             if (newResult == null)
+            {
+                error = "Token with key '{0}' not found on token '{1}' of query {2}".FormatWith(part, result.FullKey(), QueryUtils.GetKey(qd.QueryName));
                 return null;
+            }
             result = newResult;
         }
-
+        error = null;
         return result;
     }
 
