@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Location } from 'react-router'
 import { Navigator } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'
-import { Lite, liteKey } from '@framework/Signum.Entities'
+import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
 import { IconColor, ToolbarConfig } from '../Signum.Toolbar/ToolbarConfig'
 import { UserQueryClient } from './UserQueryClient'
 import { UserQueryEntity } from './Signum.UserQueries'
@@ -18,9 +18,14 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
   }
 
 
-  getCounter(element: ToolbarResponse<UserQueryEntity>): React.ReactElement | undefined {
+  getCounter(element: ToolbarResponse<UserQueryEntity>, entity: Lite<Entity> | null): React.ReactElement | undefined {
+
     if (element.showCount != null) {
-      return <SearchUserQueryCount userQuery={element.content!} color={element.iconColor} autoRefreshPeriod={element.autoRefreshPeriod} showCount={element.showCount} />
+      return <SearchUserQueryCount userQuery={element.content!}
+        entity={entity}
+        color={element.iconColor}
+        autoRefreshPeriod={element.autoRefreshPeriod}
+        showCount={element.showCount} />
     }
 
     return undefined;
@@ -33,36 +38,31 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     });
   }
 
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<UserQueryEntity>): void {
+  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<UserQueryEntity>, selectedEntity: Lite<Entity> | null): void {
     if (!res.openInPopup)
-      super.handleNavigateClick(e, res);
+      super.handleNavigateClick(e, res, selectedEntity);
     else {
       Navigator.API.fetch(res.content!)
         .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined)
-          .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content } } })));
+          .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content, entity: selectedEntity && liteKey(selectedEntity) } } })));
     }
   }
 
-  navigateTo(res: ToolbarResponse<UserQueryEntity>): Promise<string> {
+  navigateTo(res: ToolbarResponse<UserQueryEntity>, selectedEntity: Lite<Entity>| null): Promise<string> {
     return Navigator.API.fetch(res.content!)
-      .then(uq => {
-        if (uq.refreshMode == "Manual")
-          return Promise.resolve(UserQueryClient.userQueryUrl(res.content!));
-
-        return UserQueryClient.Converter.toFindOptions(uq, undefined)
-          .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(res.content!) }));
-      });
+      .then(uq => UserQueryClient.getUserQueryUrl(uq, selectedEntity ?? undefined));
   }
 
   isCompatibleWithUrlPrio(res: ToolbarResponse<UserQueryEntity>, location: Location, query: any): number {
     return query["userQuery"] == liteKey(res.content!) ||
-      location.pathname == UserQueryClient.userQueryUrl(res.content!) ? 2 : 0;
+      location.pathname.startsWith(UserQueryClient.userQueryUrl(res.content!, undefined)) ? 2 : 0;
   }
 }
 
 
 interface CountUserQueryIconProps {
   userQuery: Lite<UserQueryEntity>;
+  entity: Lite<Entity> | null;
   color?: string;
   autoRefreshPeriod?: number;
   showCount: ShowCount;
@@ -72,7 +72,7 @@ interface CountUserQueryIconProps {
 export function SearchUserQueryCount(p: CountUserQueryIconProps): React.JSX.Element {
 
   var userQuery = Navigator.useFetchInState(p.userQuery)
-  var findOptions = useAPI(signal => userQuery ? UserQueryClient.Converter.toFindOptions(userQuery, undefined) : Promise.resolve(undefined), [userQuery]);
+  var findOptions = useAPI(signal => userQuery && UserQueryClient.Converter.toFindOptions(userQuery, p.entity ?? undefined), [userQuery, p.entity]);
 
   if (findOptions == null)
     return <ToolbarCount num={undefined} showCount={p.showCount} />;

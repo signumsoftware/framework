@@ -65,6 +65,7 @@ export interface ToolbarResponse<T extends Entity> {
   type: ToolbarElementType;
   label?: string;
   content?: Lite<T>;
+  entityType?: string;
   url?: string;
   iconName?: string;
   iconColor?: string;

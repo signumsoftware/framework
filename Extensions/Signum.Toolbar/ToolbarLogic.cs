@@ -404,6 +404,7 @@ public static class ToolbarLogic
         if (element.Content is Lite<ToolbarMenuEntity> tm)
         {
             var tme = ToolbarMenus.Value.GetOrThrow(tm);
+            result.entityType = GetEntityType(tm);
             result.elements = ToResponseList(PropertyRouteTranslationLogic.TranslatedMList(tme, t => t.Elements).ToList());
             if (result.elements.Count == 0)
                 return null;
@@ -425,6 +426,7 @@ public static class ToolbarLogic
                 {
                     type = ToolbarElementType.Item,
                     content = o.ToolbarMenu,
+                    entityType = GetEntityType(o.ToolbarMenu),
                     elements = subElements,
                     iconColor = o.IconColor,
                     iconName = o.IconName,
@@ -437,6 +439,18 @@ public static class ToolbarLogic
         }
 
         return [result];
+    }
+
+    private static string? GetEntityType(Lite<ToolbarMenuEntity> toolbarMenu)
+    {
+        var tm = ToolbarMenus.Value.GetOrThrow(toolbarMenu);
+
+        if(tm.EntityType == null)
+            return null;
+
+        var type = TypeLogic.LiteToType.GetOrThrow(tm.EntityType);
+
+        return TypeLogic.GetCleanName(type);
     }
 
     public static void RegisterContentConfig<T>(Func<Lite<T>, bool> isAuthorized, Func<Lite<T>, string> defaultLabel, Func<Lite<T>, string?>? defaultIconName = null, Func<Lite<T>, string?>? defaultIconColor = null) 
@@ -528,6 +542,9 @@ public class ToolbarResponse : ToolbarResponseBase
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<ToolbarExtraIcon>? extraIcons;
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? entityType;
 
     public override string ToString() => $"{type} {label} {content} {url}";
 }
