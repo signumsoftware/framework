@@ -23,7 +23,7 @@ export function GroupHeader(p: {
   className?: string;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   fieldsetClassName?: string
-  fieldsetHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>
+  fieldsetHtmlAttributes?: React.HTMLAttributes<HTMLFieldSetElement>
 }): React.ReactElement {
 
   if (p.avoidFieldSet) {

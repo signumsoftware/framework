@@ -55,7 +55,7 @@
 }
 
 .nav-arrow-icon {
-    margin-left: 20px;
+    margin-left: 4px; /*place for icon*/
 }
 
 .sidebar-inner:hover {
