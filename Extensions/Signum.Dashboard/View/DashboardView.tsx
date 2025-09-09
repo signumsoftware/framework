@@ -27,7 +27,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
   
     return (
       <div>
-        <div className="sf-dashboard-view">
+        <div className="sf-dashboard-view bg-body my-3 px-2 py-2 rounded shadow-sm">
           {
             mlistItemContext(ctx.subCtx(a => a.parts))
               .groupBy(c => c.value.row!.toString())
@@ -72,7 +72,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
     var combinedRows = combineRows(rows);
 
     return (
-      <div className="sf-dashboard-view">
+      <div className="sf-dashboard-view bg-body my-3 px-2 px-3 py-2 py-3 rounded shadow-sm">
         {combinedRows.map((r, i) =>
           <div className="row row-control-panel" key={"row" + i}>
             {r.columns.orderBy(ctx => ctx.startColumn).map((c, j, list) => {
