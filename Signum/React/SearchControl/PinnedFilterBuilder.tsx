@@ -52,7 +52,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.
 
   return (
     <div onKeyUp={handleFiltersKeyUp}>
-      <div className={p.extraSmall ? "" : "mt-3 mb-3"}>
+      <div className={p.extraSmall ? "" : "sf-pinned-filters"}>
         {
           p.showGrid && <div className="row">
             {Array.range(0, maxColumns).map((a, i) => <div key={i} className={classes(bsBase == null ? "col-sm" : "col-sm-" + bsBase)}>

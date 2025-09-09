@@ -16,12 +16,14 @@
     --qt-value: var(--bs-body-color) !important; /*should not be necessary...*/
 }
 
+.sf-pinned-filters {
+}
+
 .sf-search-footer {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     margin-top: 10px;
-    margin-bottom: 10px;
 }
 
     .sf-search-footer > div {
@@ -201,7 +203,6 @@ table.sf-search-results th.sf-current-column {
 
 .sf-scroll-table-container {
     overflow-x: auto;
-    max-width: calc(100vw - 26px); /*Not sure why is necessary*/
 }
 
     /*Avoid EntityLines to get on top of sticky headers*/

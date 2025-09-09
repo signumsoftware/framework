@@ -93,6 +93,7 @@ span.sf-holiday {
 
 .sf-table {
     margin-bottom: 0;
+    --bs-table-bg: unset;
 }
 
 .sf-tab-dropable {

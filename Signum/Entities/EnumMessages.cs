@@ -263,6 +263,7 @@ public enum SearchMessage
     PinnedFilter,
     Label,
     Column,
+    [Description("ColSpan")]
     ColSpan,
     Row,
     [Description("When pressed, the filter will take no effect if the value is null")]

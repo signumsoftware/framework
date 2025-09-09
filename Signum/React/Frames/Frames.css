@@ -215,8 +215,9 @@ a.expand-window:hover {
 
 
 .sf-page-container {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-tertiary-bg);
 }
 
 .sf-page-container > div{
@@ -245,4 +246,14 @@ background: var(--bs-body-bg);
 .modal-max-width {
     max-width: none !important;
     width: calc(100vw - 30px);
+}
+
+
+.modal-body,
+.modal-footer{
+    background: var(--bs-tertiary-bg);
+}
+
+.modal-header {
+    background: var(--bs-secondary-bg);
 }
