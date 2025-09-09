@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Location } from 'react-router'
 import { IsByAll } from '@framework/Reflection'
-import { getToString } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite } from '@framework/Signum.Entities'
 import { Finder } from '@framework/Finder'
 import { QueryEntity } from '@framework/Signum.Basics'
 import { ToolbarClient, ToolbarResponse } from './ToolbarClient'
@@ -18,7 +18,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     super(type);
   }
 
-  getCounter(element: ToolbarResponse<QueryEntity>): React.ReactElement | undefined {
+  getCounter(element: ToolbarResponse<QueryEntity>, entity: Lite<Entity> | null): React.ReactElement | undefined {
     if (element.showCount != null) {
       return (
         <SearchToolbarCount
@@ -39,9 +39,9 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     });
   }
 
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<QueryEntity>): void {
+  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<QueryEntity>, selectedEntity: Lite<Entity> | null): void {
     if (!res.openInPopup)
-      super.handleNavigateClick(e, res);
+      super.handleNavigateClick(e, res, selectedEntity);
     else {
       Finder.explore({ queryName: getToString(res.content)! })
     }

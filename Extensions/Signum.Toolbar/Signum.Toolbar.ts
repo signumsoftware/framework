@@ -4,6 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 
@@ -61,6 +62,7 @@ export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAsse
   guid: string /*Guid*/;
   name: string;
   elements: Entities.MList<ToolbarElementEmbedded>;
+  entityType: Entities.Lite<Basics.TypeEntity> | null;
 }
 
 export namespace ToolbarMenuOperation {

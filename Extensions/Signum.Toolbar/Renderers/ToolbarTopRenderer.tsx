@@ -7,7 +7,7 @@ import { useAPI, useUpdatedRef } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { classes } from '@framework/Globals';
 import { inferActive, isCompatibleWithUrl, renderNavItem } from './ToolbarRenderer';
-import { ToolbarContext } from '../ToolbarConfig'
+import { InferActiveResponse, ToolbarContext } from '../ToolbarConfig'
 
 
 export default function ToolbarTopRenderer(): React.ReactElement | null {
@@ -15,18 +15,18 @@ export default function ToolbarTopRenderer(): React.ReactElement | null {
   const responseRef = useUpdatedRef(response);
 
   const [refresh, setRefresh] = React.useState(false);
-  const [active, setActive] = React.useState<ToolbarResponse<any> | null>(null);
+  const [active, setActive] = React.useState<InferActiveResponse | null>(null);
   const activeRef = useUpdatedRef(active);
 
   function changeActive(location: Location) {
     var query = QueryString.parse(location.search);
     if (responseRef.current) {
-      if (activeRef.current && isCompatibleWithUrl(activeRef.current, location, query)) {
+      if (activeRef.current && isCompatibleWithUrl(activeRef.current.response, location, query)) {
         return;
       }
 
       var newActive = inferActive(responseRef.current, location, query);
-      setActive(newActive?.response ?? null);
+      setActive(newActive ?? null);
     }
   }
   const location = useLocation();
@@ -40,13 +40,13 @@ export default function ToolbarTopRenderer(): React.ReactElement | null {
   }
 
   const ctx: ToolbarContext = {
-    active,
+    active: active,
     onRefresh: handleRefresh
   };
 
   return (
     <div className={classes("nav navbar-nav")}>
-      {response && response.elements && response.elements.map((res: ToolbarResponse<any>, i: number) => renderNavItem(res, i, ctx))}
+      {response && response.elements && response.elements.map((res: ToolbarResponse<any>, i: number) => renderNavItem(res, i, ctx, null))}
     </div>
   );
 }
