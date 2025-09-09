@@ -314,7 +314,6 @@ export namespace UserQueryClient {
   
     export async function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
 
-      debugger;
       var query = uq.query!;
   
       var fo = { queryName: query.key, groupResults: uq.groupResults } as FindOptions;

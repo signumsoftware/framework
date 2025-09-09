@@ -42,7 +42,6 @@ function SearchPage(): React.ReactElement {
   useTitle(getQueryNiceName(params.queryName!) + (subTitle ? (" - " + subTitle) : ""));
 
   function changeUrl() {
-    debugger;
     const scl = searchControl.current!.searchControlLoaded!;
     const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, true);
     const newPath = Finder.findOptionsPath(findOptions, scl.extraUrlParams);

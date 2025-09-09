@@ -71,7 +71,6 @@ export default function ToolbarRenderer(p: {
       </div>
 
       <ul>
-        {active?.menuWithEntity?.entity.id}
         {response && response.elements && response.elements.map((res: ToolbarResponse<any>, i: number) => renderNavItem(res, i, ctx, null))}
       </ul>
     </div>
@@ -259,7 +258,7 @@ function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx
 
   const entityType = p.response.entityType;
   const [selectedEntity, setSelectedEntity] = React.useState<Lite<Entity> | null>(null);
-  var entities = useAPI(() => !entityType ? null : Finder.API.fetchAllLites({ types: entityType }), [ entityType]);
+  var entities = useAPI(() => !entityType ? null : Finder.API.fetchAllLites({ types: entityType }), [entityType]);
 
   function renderEntity(e: Lite<Entity> | null) {
     if (e == null)
@@ -277,6 +276,15 @@ function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx
         setSelectedEntity(active.menuWithEntity.entity);
       
   }, [active?.menuWithEntity, entityType]);
+
+  React.useEffect(() => {
+
+    if (selectedEntity && !selectedEntity.model && entities) {
+      var only = entities.onlyOrNull(a => is(a, selectedEntity));
+      if (only != null)
+        setSelectedEntity(only);
+    }
+  }, [selectedEntity, entities]);
 
   return (
     <>
@@ -387,8 +395,8 @@ export function ToolbarNavItem(p: { title: string | undefined, active?: boolean,
   );
 }
 
-export function isActive(active: InferActiveResponse | null, res: ToolbarResponse<any>, selectedEntity: Lite<Entity> | null) {
-  return active && active.response == res && (active.menuWithEntity == null || is(active.menuWithEntity.entity, selectedEntity));
+export function isActive(active: InferActiveResponse | null, res: ToolbarResponse<any>, selectedEntity: Lite<Entity> | null): boolean{
+  return active != null && active.response == res && (active.menuWithEntity == null || is(active.menuWithEntity.entity, selectedEntity));
 }
 
 export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null): React.ReactElement | undefined {
