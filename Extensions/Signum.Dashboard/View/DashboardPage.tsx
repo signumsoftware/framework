@@ -39,9 +39,9 @@ export default function DashboardPage(): React.JSX.Element {
 
   return (
     <div className="sf-dashboard-page">
-      {!dashboard ? <h2 className="fs-5 fw-bold">{JavascriptMessage.loading.niceToString()}</h2> :
+      {!dashboard ? <h2 className="display-6"><span>{JavascriptMessage.loading.niceToString()}</span></h2> :
         <div className="d-flex">
-          {<h2 className="fs-5 fw-bold">{DashboardClient.Options.customTitle(dashboard)}</h2>}
+          {<h3 className="display-6"><span>{DashboardClient.Options.customTitle(dashboard)}</span></h3>}
           {!Navigator.isReadOnly(DashboardEntity) &&
             <div className="ms-auto">
               {dashboardWithQueries.cachedQueries.length ? <span className="mx-4" title={DashboardMessage.ForPerformanceReasonsThisDashboardMayShowOutdatedInformation.niceToString() + "\n" +

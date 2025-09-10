@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { AutoLine, EntityRepeater, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ToolbarMenuEntity } from '../Signum.Toolbar'
+import { ToolbarMenuElementEmbedded, ToolbarMenuEntity } from '../Signum.Toolbar'
 import { ToolbarElementTable } from './Toolbar';
 
 export default function ToolbarMenu(p : { ctx: TypeContext<ToolbarMenuEntity> }): React.JSX.Element {
@@ -12,7 +12,16 @@ export default function ToolbarMenu(p : { ctx: TypeContext<ToolbarMenuEntity> })
       <AutoLine ctx={ctx.subCtx(f => f.name)} />
       <EntityLine ctx={ctx.subCtx(f => f.owner)} />
       <EntityLine ctx={ctx.subCtx(f => f.entityType)}/>
-      <ToolbarElementTable ctx={ctx.subCtx(m => m.elements)} />
+      <ToolbarElementTable ctx={ctx.subCtx(m => m.elements)}
+        extraColumns={[
+          {
+          property: a => (a as ToolbarMenuElementEmbedded).autoSelect,
+          },
+          {
+            property: a => (a as ToolbarMenuElementEmbedded).noEntitySelected,
+          }
+        ]}
+      />
     </div>
   );
 }
