@@ -145,7 +145,7 @@ public static class ToolbarLogic
     {
         var elements = 
             tool is ToolbarEntity tb ? tb.Elements :
-            tool is ToolbarMenuEntity tbm ? tbm.Elements :
+            tool is ToolbarMenuEntity tbm ? tbm.Elements.Cast<ToolbarElementEmbedded>() :
             null;
 
         if (elements != null)
@@ -302,7 +302,8 @@ public static class ToolbarLogic
         };
     }
 
-    private static List<ToolbarResponse> ToResponseList(List<TranslatableElement<ToolbarElementEmbedded>> elements)
+    private static List<ToolbarResponse> ToResponseList<TE>(List<TranslatableElement<TE>> elements)
+        where TE : ToolbarElementEmbedded
     {
         var result = elements.GroupWhen(a=>a.Value.Type != ToolbarElementType.ExtraIcon, BeforeFirstKey.Skip).SelectMany(gr => ToResponse(gr) ?? Enumerable.Empty<ToolbarResponse>()).NotNull().ToList();
 
@@ -332,7 +333,8 @@ public static class ToolbarLogic
         return tr.type == ToolbarElementType.Header && tr.content == null && string.IsNullOrEmpty(tr.url);
     }
 
-    private static IEnumerable<ToolbarResponse>? ToResponse(IGrouping<TranslatableElement<ToolbarElementEmbedded>, TranslatableElement<ToolbarElementEmbedded>> gr)
+    private static IEnumerable<ToolbarResponse>? ToResponse<T>(IGrouping<TranslatableElement<T>, TranslatableElement<T>> gr)
+        where T: ToolbarElementEmbedded
     {
         var transElement = gr.Key;
         var element = gr.Key.Value;
@@ -370,6 +372,8 @@ public static class ToolbarLogic
             showCount = element.ShowCount,
             autoRefreshPeriod = element.AutoRefreshPeriod,
             openInPopup = element.OpenInPopup,
+            autoSelect = (element as ToolbarMenuElementEmbedded)?.AutoSelect == true,
+            noEntitySelected = (element as ToolbarMenuElementEmbedded)?.NoEntitySelected == true,
             extraIcons = gr.IsEmpty() ? null : gr.Select(extra =>
             {
                 var extraElement = extra.Value;
@@ -568,6 +572,8 @@ public class ToolbarResponseBase
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public int? autoRefreshPeriod;
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool openInPopup;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool autoSelect;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool noEntitySelected;
 
 
     public override string ToString() => $"{type} {label} {content} {url}";

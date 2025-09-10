@@ -55,13 +55,19 @@ export type ToolbarLocation =
   "Top" |
   "Main";
 
+export const ToolbarMenuElementEmbedded: Type<ToolbarMenuElementEmbedded> = new Type<ToolbarMenuElementEmbedded>("ToolbarMenuElementEmbedded");
+export interface ToolbarMenuElementEmbedded extends ToolbarElementEmbedded {
+  noEntitySelected: boolean;
+  autoSelect: boolean;
+}
+
 export const ToolbarMenuEntity: Type<ToolbarMenuEntity> = new Type<ToolbarMenuEntity>("ToolbarMenu");
 export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAssetEntity, IToolbarEntity {
   Type: "ToolbarMenu";
   owner: Entities.Lite<Entities.Entity> | null;
   guid: string /*Guid*/;
   name: string;
-  elements: Entities.MList<ToolbarElementEmbedded>;
+  elements: Entities.MList<ToolbarMenuElementEmbedded>;
   entityType: Entities.Lite<Basics.TypeEntity> | null;
 }
 

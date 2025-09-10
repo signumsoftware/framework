@@ -4,6 +4,7 @@ using Signum.UserAssets;
 using Signum.Utilities.Reflection;
 using System;
 using System.ComponentModel;
+using System.Net.Sockets;
 using System.Xml.Linq;
 
 namespace  Signum.Toolbar;
@@ -16,6 +17,11 @@ public interface IToolbarEntity: IEntity
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
 {
+    public ToolbarEntity()
+    {
+        this.BindParent();
+    }
+
     [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
     public Lite<IEntity>? Owner { get; set; }
 
@@ -27,7 +33,7 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
     public int? Priority { get; set; }
 
     [PreserveOrder]
-    [NoRepeatValidator]
+    [NoRepeatValidator, BindParent]
     public MList<ToolbarElementEmbedded> Elements { get; set; } = new MList<ToolbarElementEmbedded>();
 
     public IEnumerable<Lite<IToolbarEntity>> GetSubToolbars() => Elements.Select(a => a.Content).OfType<Lite<IToolbarEntity>>();
@@ -104,7 +110,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
     [Unit("s"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 10)]
     public int? AutoRefreshPeriod { get; set; }
 
-    internal XElement ToXml(IToXmlContext ctx)
+    public virtual XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("ToolbarElement",
             new XAttribute("Type", Type),
@@ -118,10 +124,11 @@ public class ToolbarElementEmbedded : EmbeddedEntity
             Content is Lite<QueryEntity> query ?  ctx.RetrieveLite(query).Key :
             Content is Lite<PermissionSymbol> perm ?  ctx.RetrieveLite(perm).Key :
             (object)ctx.Include((Lite<IUserAssetEntity>)Content)),
-            string.IsNullOrEmpty(Url) ? null! : new XAttribute("Url", Url));
+            string.IsNullOrEmpty(Url) ? null! : new XAttribute("Url", Url)
+        );
     }
 
-    internal void FromXml(XElement x, IFromXmlContext ctx)
+    public virtual void FromXml(XElement x, IFromXmlContext ctx)
     {
         Type = x.Attribute("Type")!.Value.ToEnum<ToolbarElementType>();
         Label = x.Attribute("Label")?.Value;
@@ -129,6 +136,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
         IconName = x.Attribute("IconName")?.Value;
         IconColor = x.Attribute("IconColor")?.Value;
         OpenInPopup = x.Attribute("OpenInPopup")?.Value.ToBool() ?? false;
+   
         AutoRefreshPeriod = x.Attribute("AutoRefreshPeriod")?.Value.ToInt() ?? null;
 
         var content = x.Attribute("Content")?.Value;
@@ -204,7 +212,7 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
 
     [PreserveOrder]
     [NoRepeatValidator]
-    public MList<ToolbarElementEmbedded> Elements { get; set; } = new MList<ToolbarElementEmbedded>();
+    public MList<ToolbarMenuElementEmbedded> Elements { get; set; } = new MList<ToolbarMenuElementEmbedded>();
 
     public Lite<TypeEntity>? EntityType { get; set; }
 
@@ -235,6 +243,29 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
     public override string ToString() => As.Expression(() => Name);
 
 
+}
+
+public class ToolbarMenuElementEmbedded: ToolbarElementEmbedded
+{
+    public bool NoEntitySelected { get; set; }
+
+    public bool AutoSelect { get; set; }
+
+    public override XElement ToXml(IToXmlContext ctx)
+    {
+        var e = base.ToXml(ctx);
+        e.Add(NoEntitySelected ? new XAttribute("NoEntitySelected", NoEntitySelected) : null!);
+        e.Add(AutoSelect ? new XAttribute("AutoSelect", AutoSelect) : null!);
+        return e;
+    }
+
+    public override void FromXml(XElement x, IFromXmlContext ctx)
+    {
+        base.FromXml(x, ctx);
+
+        NoEntitySelected = x.Attribute("NoEntitySelected")?.Value.ToBool() ?? false;
+        AutoSelect = x.Attribute("AutoSelect")?.Value.ToBool() ?? false;
+    }
 }
 
 [AutoInit]
