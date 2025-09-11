@@ -51,6 +51,11 @@
 .sidebar-inner {
     overflow-x: hidden;
     overflow-y: auto;
+    height: 100%;
+}
+
+.nav-arrow-icon {
+    margin-left: 4px; /*place for icon*/
 }
 
 .sidebar-inner:hover {

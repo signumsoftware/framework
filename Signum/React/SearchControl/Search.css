@@ -16,12 +16,14 @@
     --qt-value: var(--bs-body-color) !important; /*should not be necessary...*/
 }
 
+.sf-pinned-filters {
+}
+
 .sf-search-footer {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     margin-top: 10px;
-    margin-bottom: 10px;
 }
 
     .sf-search-footer > div {
@@ -170,6 +172,7 @@ tr.drag-bottom td {
     display: flex;
     flex-direction: row;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 table.sf-search-results th.sf-current-column {
@@ -201,7 +204,6 @@ table.sf-search-results th.sf-current-column {
 
 .sf-scroll-table-container {
     overflow-x: auto;
-    max-width: calc(100vw - 26px); /*Not sure why is necessary*/
 }
 
     /*Avoid EntityLines to get on top of sticky headers*/
@@ -416,4 +418,18 @@ a.sf-shy-link:not(:hover) {
 table.sf-search-results > tbody > tr.sf-row-selected {
     --bs-table-bg: var(--bs-primary-bg-subtle);
     --bs-table-color: var(--bs-body-color);
+}
+
+.sf-rule {
+    background-color: var(--bs-secondary-bg);
+    border-radius: 4px;
+}
+
+.sf-rule-item {
+    height: 16px;
+    background-color: var(--bs-secondary-bg-subtle);
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: center;
+    color: var(--bs-secondary);
 }

@@ -1,5 +1,5 @@
 ﻿.rule {
-    background-color: var(--bs-body-bg);
+    background-color: var(--bs-secondary-bg);
     border-radius: 4px;
 }
 
@@ -10,7 +10,7 @@
 }
 
 .sf-dashboard-view-embedded {
-    background: var(--bs-body-bg);
+    background: var(--bs-tertiary-bg);
     margin: -10px -1em -16px -1em;
     padding: 1em;
 }
@@ -19,6 +19,7 @@
     background: var(--bs-tertiary-bg);
     margin: -8px -12px;
     padding: 20px;
+    height: 100%;
 }
 
 .sf-dashboard-view .card-header {

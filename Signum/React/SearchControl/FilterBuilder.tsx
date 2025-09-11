@@ -114,12 +114,7 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
   var showDashboardBehaviour = showPinnedFiltersOptions && (p.showDashboardBehaviour ?? true);
   return (
     <>
-      {showPinnedFiltersOptions && !p.avoidPreview && <div className="mb-3">
-        <h4 className="lead">Preview</h4>
-        <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} highlightFilter={highlightFilter} showGrid={true} />
-      </div>
-      }
-      <GroupHeader label={p.title} avoidFieldSet={p.avoidFieldSet}>
+      <GroupHeader label={p.title} avoidFieldSet={p.avoidFieldSet} fieldsetClassName="my-3 p-3 pb-1 bg-body rounded shadow-sm border-0">
         <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
           <table className="table-sm">
             <thead>
@@ -201,6 +196,12 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
           </table>
         </div>
       </GroupHeader>
+
+      {showPinnedFiltersOptions && !p.avoidPreview && <div className="mb-3">
+        <h4 className="lead ms-2 mb-0">Preview</h4>
+        <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} highlightFilter={highlightFilter} showGrid={true} />
+      </div>
+      }
     </>
   );
 }

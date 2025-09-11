@@ -118,6 +118,7 @@ export namespace ChartMessage {
   export const _0CanOnlyBeCreatedFromTheChartWindow: MessageKey = new MessageKey("ChartMessage", "_0CanOnlyBeCreatedFromTheChartWindow");
   export const _0CanOnlyBeCreatedFromTheSearchWindow: MessageKey = new MessageKey("ChartMessage", "_0CanOnlyBeCreatedFromTheSearchWindow");
   export const Chart: MessageKey = new MessageKey("ChartMessage", "Chart");
+  export const ChartType: MessageKey = new MessageKey("ChartMessage", "ChartType");
   export const ChartToken: MessageKey = new MessageKey("ChartMessage", "ChartToken");
   export const ChartSettings: MessageKey = new MessageKey("ChartMessage", "ChartSettings");
   export const Dimension: MessageKey = new MessageKey("ChartMessage", "Dimension");

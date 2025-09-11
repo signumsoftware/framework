@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using Signum.Engine.Linq;
 
 namespace Signum.API.Controllers;
 

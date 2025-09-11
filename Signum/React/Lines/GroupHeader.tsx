@@ -20,8 +20,10 @@ export function GroupHeader(p: {
   buttons?: React.ReactNode;
   avoidFieldSet?: boolean | HeaderType;
   children: React.ReactNode;
-  className?: string
-  htmlAttributes?: React.HTMLAttributes<HTMLDivElement>
+  className?: string;
+  htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
+  fieldsetClassName?: string
+  fieldsetHtmlAttributes?: React.HTMLAttributes<HTMLFieldSetElement>
 }): React.ReactElement {
 
   if (p.avoidFieldSet) {
@@ -35,7 +37,7 @@ export function GroupHeader(p: {
   }
 
   return (
-    <fieldset>
+    <fieldset className={p.fieldsetClassName} {...p.fieldsetHtmlAttributes}>
       {(p.label || p.labelIcon || p.buttons) && < legend >
         <div>
           <span>{p.label}{p.labelIcon}</span>

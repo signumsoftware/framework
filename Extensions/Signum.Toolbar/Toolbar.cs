@@ -206,11 +206,14 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
     [NoRepeatValidator]
     public MList<ToolbarElementEmbedded> Elements { get; set; } = new MList<ToolbarElementEmbedded>();
 
+    public Lite<TypeEntity>? EntityType { get; set; }
+
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("ToolbarMenu",
             new XAttribute("Guid", Guid),
             new XAttribute("Name", Name),
+            EntityType == null ? null : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
     }
@@ -220,6 +223,7 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
         Name = element.Attribute("Name")!.Value;
+        EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value).ToLite());
         Elements.Synchronize(element.Element("Elements")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, tm =>tm.Owner));
     }
