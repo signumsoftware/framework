@@ -67,7 +67,7 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
         get
         {
             if (entityOrNull == null)
-                throw new InvalidOperationException("The lite {0} is not loaded, use DataBase.Retrieve or consider rewriting your query".FormatWith(this));
+                throw new InvalidOperationException("The lite {0} is not loaded, use Database.Retrieve or consider rewriting your query".FormatWith(this));
             return entityOrNull;
         }
     }
