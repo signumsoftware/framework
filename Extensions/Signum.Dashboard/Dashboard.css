@@ -106,9 +106,24 @@ div.row-control-panel {
     font-weight: bold;
 }
 
+.larger {
+    font-size: larger;
+    font-weight: bold;
+}
+
 .large {
     font-size: large;
     font-weight: bold;
+}
+
+.medium {
+    font-size: medium;
+    font-weight: normal;
+}
+
+.small {
+    font-size: small;
+    font-weight: normal;
 }
 
 .sf-dashboard-admin .sf-grid-repeater-field,
@@ -139,4 +154,23 @@ div.row-control-panel {
     border-radius: 50%;
     display: inline-block;
     margin-right: 5px;
+}
+
+.dashboard-flex {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.dashboard-flex .left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+        
+}
+
+.right {
+    align-self: flex-start;
 }
