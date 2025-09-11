@@ -691,7 +691,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       p.create && !this.props.ctx?.frame?.currentDate && {
         order: -2,
-        button: <button className={classes("btn ", p.createButtonClass ?? "btn-outline-secondary")} title={titleLabels ? this.createTitle() : undefined} onClick={this.handleCreate}>
+        button: <button className={classes("btn ", p.createButtonClass ?? "btn-tertiary")} title={titleLabels ? this.createTitle() : undefined} onClick={this.handleCreate}>
           <FontAwesomeIcon icon="plus" className="sf-create" /><span className="d-none d-sm-inline ms-1">{this.createTitle()}</span>
         </button>
       },
@@ -709,13 +709,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       ...(this.props.hideButtonBar ? [] : rightButtonBarElements),
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
-        button: <button className="btn btn-outline-secondary" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
+        button: <button className="btn btn-tertiary" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
           <FontAwesomeIcon icon="up-right-from-square" />
         </button>
       },
 
       this.state.isMobile == true && this.getMobileOptions(this.props.findOptions).showSwitchViewModesButton && {
-        button: <button className="btn btn-outline-secondary" onClick={this.handleViewModeClick}>
+        button: <button className="btn btn-tertiary" onClick={this.handleViewModeClick}>
           <FontAwesomeIcon icon={this.state.viewMode == "Mobile" ? "desktop" : "mobile-alt"} title={SearchMessage.SwitchViewMode.niceToString()} />
         </button>
       }
@@ -2308,10 +2308,10 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
 
   return (
     <Dropdown as={ButtonGroup} title={SearchMessage.Filters.niceToString()}>
-      <Button variant="outline-secondary" className="sf-filter-button" active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
+      <Button variant="tertiary" className="sf-filter-button" active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
         <FontAwesomeIcon icon="filter" /> {activeFilters == 0 ? null : activeFilters}
       </Button>
-      <Dropdown.Toggle variant="outline-secondary" split className="px-2"></Dropdown.Toggle>
+      <Dropdown.Toggle variant="tertiary" split className="px-2"></Dropdown.Toggle>
       <Dropdown.Menu>
         <Dropdown.Item data-key={("Simple" satisfies SearchControlFilterMode)} active={filterMode == 'Simple'} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
         <Dropdown.Item data-key={("Advanced" satisfies SearchControlFilterMode)} active={filterMode == 'Advanced'} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>

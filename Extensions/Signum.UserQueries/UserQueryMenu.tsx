@@ -294,7 +294,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     <Dropdown
       title={[UserQueryEntity.nicePluralName(), currentUserQueryToStr].notNull().join(" - ")}
       onToggle={handleSelectedToggle} show={isOpen}>
-      <Dropdown.Toggle id="userQueriesDropDown" variant="outline-secondary" >
+      <Dropdown.Toggle id="userQueriesDropDown" variant="tertiary" >
         {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>

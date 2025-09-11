@@ -334,7 +334,7 @@
     transition-property: all;
 }
 
-.sidebar-nav .nav-item span {
+.sidebar-nav .nav-item .nav-link > span {
     padding: 0 !important;
     border-radius: 5px;
     transition-duration: 150ms;
