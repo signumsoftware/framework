@@ -108,9 +108,9 @@ export type ChartColumnType =
   "Entity" |
   "Enum" |
   "RoundedNumber" |
-  "Time" |
   "AnyNumber" |
   "AnyGroupKey" |
+  "Time" |
   "AnyNumberDateTime" |
   "AllTypes";
 

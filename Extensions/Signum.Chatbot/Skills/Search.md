@@ -14,6 +14,8 @@ Here are the tables that can be use as root query in format "QueryName: DisplayN
 
 <LIST_ROOT_QUERIES>
 
+Note: Not all queries represent types, the ones with a (ImplementedBy) can be used as `queryName` but not as `typeName` in `autoCompleteLite`.
+
 Think which ones could be good candidates, you can ask the user to clarify.
 
 ## Get QueryDescription (metadata)
@@ -26,21 +28,24 @@ The tool also expands sub-tokens automatically using some heuristics.
 
 ## Exploring sub-tokens
 
-If you need to explore more, you can use the `subTokens` tool to get the properties of a related entity or any other sub-token. But maybe you don't need it... some tips: 
+If you need to explore more, you can use the `subTokens` tool to get the properties of a related entity or any other sub-token. 
 
-* If the QueryToken is a "Lite" or "Entity", use `subTokens` so explore the sub-properties.
-* Dates have many sub-tokens:
+But maybe you don't need it, this are the sub-tokens you can expect for each `filterType`, ignoring Aggregates: 
+
+* `Lite`: use `subTokens` so explore the sub-properties.
+* `DateTime`: have many sub-tokens:
 	* `Year`, `Month`, `Day`, `Hour`, `Minute`, `Second`, `Millisecond` (number)
 	* `MonthStart`, `Date`, `HourStart`, `MinuteStart`, `SecondStart` (date)
-* Strings only have one sub-token: `Length` (number)
-* Enums typically have no sub-token. 
-* Numbers have sub-tokens for grouping by range like `Step100`. If you need this functionality use `subTokens`. 
+* `String`: only have one sub-token: `Length` (number)
+* `Enums`, `Boolean`, `Guid`: typically have no sub-tokens. 
+* `Integer` / `Decimal`: Numbers have sub-tokens for grouping by range like `Step100`. If you need this functionality use `subTokens`. 
 * Collection have many sub-tokens 
 	* `Count`: The number of elements in the collection
 	* `Element`: Joins (using outer apply / outer join) with the collection table effectively multilying the number of results. If more than one filter/order/column repeat the same `Element` expression the same join will be re-used. `Element2`, `Element3` are usfull in the rare cases that you want to make independent joins to the collection table. 
 	* `Any`, `All`: Only for filters, allows to add conditions that some or every element should satisfy. `Entity.Details.Any.Quantity` `EqualsTo`  `2` translates in C# to `Entity.Details.Any(d => d.Quantity == 2)`
 	* `SeparatedByComma`, `SeparatedByNewLine`: Only for columns, shows the `ToString()` of all the elements in the collection in one column. The expression `Entity.Details.SeparatedByComma.Product` is in C# `string.Join(", ", Entity.Details.Select(a => a.Product.ToString()))`.
 
+Note: All the tips above are not considering the sub-tokens of type `Aggregate`, like `CountDistict`, `CountNull`, `CountNotNull`, etc..
 
 ## Preparing FindOptions
 
@@ -97,8 +102,8 @@ Each filter condition has:
 * A token (`fullToken`) from `queryDescription` or `subTokens`.
 * An operation that should be compatible with the type of the token. If not set `EqualtTo` is assumed. Tip: `Contains` is only for strings, for collections use `.Any` in the token and `EqualTo` in operation.`
 * A value that should match the type of the token, extept for `IsIn` or `IsNotIn` that should be an array of values. If not set `null` is assumed. 
-
-
+	* When filtering by an entity, you need to get a `Lite<T>`, you can get one using the tool `autoCompleteLite`. Check 'Finding simple entities by name' below.
+	* When filtering by an enum, you need to get a valid enum value. Fortunately, you can use `subTokens` on the enum token to get all the different values twice, since each enum value `X` has a `CountX` and `CountNotX` aggregates. 
 
 ```TS
 export interface FilterGroupOption {

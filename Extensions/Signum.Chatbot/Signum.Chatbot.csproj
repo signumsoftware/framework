@@ -36,6 +36,7 @@
     <ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
     <ProjectReference Include="..\..\Signum\Signum.csproj" />
     <ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
+    <ProjectReference Include="..\Signum.Chart\Signum.Chart.csproj" />
   </ItemGroup>
 	
 </Project>

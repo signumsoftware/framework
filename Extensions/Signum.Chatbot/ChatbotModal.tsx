@@ -11,6 +11,7 @@ import { newLite } from "Signum/React/Reflection";
 import { ChatbotClient } from "./ChatbotClient";
 import { Message, ToolResponseBlock } from "./Message";
 import { ExceptionEntity } from "@framework/Signum.Basics";
+import { ServiceError } from "@framework/Services";
 
 interface MessageCount {
   msg: ChatMessageEntity;
@@ -25,6 +26,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
   const isLoadingRef = React.useRef<boolean>(false);
 
   const answerRef = React.useRef<ChatMessageEntity | null>(null);
+  const generalExceptionRef = React.useRef<Lite<ExceptionEntity> | null>(null);
   const questionRef = React.useRef<string>("");
   const forceUpdate = useForceUpdate();
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -78,7 +80,8 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 
       for await (const chunk of getWordsOrCommands(reader!)) {
 
-        console.log(JSON.stringify(chunk));
+
+        console.log(chunk);
 
         if (!chunk)
           continue;
@@ -135,7 +138,14 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
               break;
             }
             case "Exception": {
-              answerRef.current!.exception = newLite(ExceptionEntity, args!);
+
+              if (answerRef.current){
+                answerRef.current!.exception = newLite(ExceptionEntity, args!, "");
+              }
+              else
+                generalExceptionRef.current = newLite(ExceptionEntity, args!, "");
+
+              break;
             }
             case "AnswerId": {
 
@@ -146,22 +156,37 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
               addMessage(messagesRef.current!, answerRef.current!);
 
               answerRef.current = null;
+
               break;
             }
             default: throw new Error("Unexpected UI command: " + commmand)
           }
         }
         else {
-          var ans = answerRef.current!;
-          if (ans.toolCalls.length)
-            ans.toolCalls.single().element.arguments += chunk;
-          else if (ans.exception)
-            ans.exception.model = +chunk;
-          else
-            ans.content += chunk;
+          var ans = answerRef.current;
+          if (ans) {
+            if (ans.toolCalls.length)
+              ans.toolCalls.single().element.arguments += chunk;
+            else if (ans.exception)
+              ans.exception.model += chunk;
+            else
+              ans.content += chunk;
+          } else if (generalExceptionRef.current)
+            generalExceptionRef.current.model += chunk;
         }
 
         forceUpdate();
+      }
+
+      const ge = generalExceptionRef.current; 
+      if (ge) {
+        throw new ServiceError({
+          exceptionId: ge.id!.toString(),
+          exceptionMessage: (ge.model as string)!.after(":"),
+          exceptionType: (ge.model as string)!.before(":"),
+          stackTrace: null,
+          innerException: null,
+        });
       }
 
 

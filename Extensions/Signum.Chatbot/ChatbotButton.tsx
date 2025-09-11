@@ -12,12 +12,12 @@ export default function ChatbotButton(): React.ReactElement {
 
   return (
     <>
-      <button
+      {!showModal && <button
         className="btn btn-primary chat-button shadow-lg rounded-circle"
         onClick={() => setShowModal(true)}
         aria-label="Chat"      >
         <FontAwesomeIcon icon={faComments} size="lg" />
-      </button >
+      </button >}
       {showModal && (
           <React.Suspense fallback={null}>
             <ChatbotModal onClose={() => setShowModal(false)} />

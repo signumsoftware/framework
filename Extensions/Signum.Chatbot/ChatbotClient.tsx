@@ -1,23 +1,39 @@
 import * as React  from 'react'
-import { RouteObject } from 'react-router'
+import { Link, RouteObject } from 'react-router'
 import { ajaxGet, wrapRequest, AjaxOptions } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, ChatbotProviderSymbol } from './Signum.Chatbot'
 import { toAbsoluteUrl } from '../../Signum/React/AppContext';
 import { registerToString } from '../../Signum/React/Signum.Entities';
+import { FontAwesomeIcon } from '@framework/Lines';
 
 const ReactMarkdown = React.lazy(() => import("react-markdown"));
 //const ReactMarkdownWithFormulas = React.lazy(() => import("./ReactMarkdownWithFormulas"));
 
 export namespace ChatbotClient {
 
-  export let renderMarkdown = (markdown: string): React.JSX.Element => <ReactMarkdown>{markdown}</ReactMarkdown>;
+  
+
+
+  export let renderMarkdown = (markdown: string): React.JSX.Element => <ReactMarkdown components={{ a: renderLink}}>{markdown}</ReactMarkdown>;
   //export let renderMarkdown = (markdown: string): React.JSX.Element => <ReactMarkdownWithFormulas>{markdown}</ReactMarkdownWithFormulas>;
   export function start(options: { routes: RouteObject[] }): void {
 
     Navigator.addSettings(new EntitySettings(ChatbotLanguageModelEntity, e => import('./Templates/ChatbotLanguageModel')));
     Navigator.addSettings(new EntitySettings(ChatSessionEntity, a => import('./Templates/ChatSession')));
     Navigator.addSettings(new EntitySettings(ChatMessageEntity, a => import('./Templates/ChatMessage')));
+  }
+
+  export function renderLink({ node, href, children, ...props }: React.PropsWithChildren<React.AnchorHTMLAttributes<HTMLAnchorElement>> & { node?: any }): React.ReactNode {
+    debugger;
+    if (href && href.startsWith("/")) 
+      return <Link to={href}>{children}</Link>;
+    
+    return (
+      <a href={href} {...props}>
+        {children} <FontAwesomeIcon icon="external-link" />
+      </a>
+    );
   }
 
   export namespace API {

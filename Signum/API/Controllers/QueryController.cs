@@ -184,6 +184,7 @@ public class QueryTokenTS
         if (this.toStr == this.key)
             this.toStr = null;
         this.type = new TypeReferenceTS(qt.Type, qt.GetImplementations());
+        this.filterType = QueryUtils.TryGetFilterType(qt.Type);
         this.format = qt.Format;
         this.unit = UnitAttribute.GetTranslation(qt.Unit);
         this.queryTokenType = GetQueryTokenType(qt);
@@ -254,7 +255,7 @@ public class QueryTokenTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public QueryTokenType? queryTokenType;
 
     public required TypeReferenceTS type;
-
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public FilterType? filterType;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? format;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? unit;
 

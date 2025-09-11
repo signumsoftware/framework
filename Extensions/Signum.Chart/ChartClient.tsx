@@ -555,7 +555,6 @@ export namespace ChartClient {
     queryName: any,
     chartScript?: string,
     maxRows?: number | null,
-    groupResults?: boolean,
     timeSeries?: ChartTimeSeriesEmbedded | null | undefined;
     filterOptions?: (FilterOption | null | undefined)[];
     orderOptions?: (OrderOption | null | undefined)[];
@@ -646,7 +645,6 @@ export namespace ChartClient {
         maxRows:
           co.maxRows === null ? "null" : 
           co.maxRows === undefined || co.maxRows == Decoder.DefaultMaxRows ? undefined : co.maxRows,
-        groupResults: co.groupResults,        
         userChart: userChart && liteKey(userChart)
       };
   

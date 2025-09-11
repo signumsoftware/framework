@@ -215,7 +215,7 @@ public class ConversationHistory
             if(c.Role == ChatMessageRole.Tool)
             {
                 return new ChatMessage(role, [
-                    new FunctionResultContent(c.ToolCallID!, c.Content)
+                    new FunctionResultContent(c.ToolCallID!, content)
                 ]);
             }
 
@@ -229,8 +229,8 @@ public class ConversationHistory
                 return (AIContent)new FunctionCallContent(c.CallId, c.ToolId, cleanArguments);
             }).ToList();
 
-            if (c.Content.HasText())
-                contents.Insert(0, new TextContent(c.Content!));
+            if (content.HasText())
+                contents.Insert(0, new TextContent(content));
 
             return new ChatMessage(role, contents);
         }).ToList();

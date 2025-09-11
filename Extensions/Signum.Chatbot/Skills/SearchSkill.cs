@@ -1,5 +1,6 @@
 using Azure;
 using Azure.Core;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol;
 using ModelContextProtocol.Server;
 using Newtonsoft.Json.Converters;
@@ -7,10 +8,14 @@ using Newtonsoft.Json.Linq;
 using Signum.API;
 using Signum.API.Controllers;
 using Signum.API.Json;
+using Signum.Chart;
 using Signum.DynamicQuery.Tokens;
+using Signum.Utilities.Reflection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
@@ -28,7 +33,14 @@ public class SearchSkill : ChatbotSkill
             {
                 "<LIST_ROOT_QUERIES>",
                 obj => QueryLogic.Queries.GetAllowedQueryNames(fullScreen: true)
-                .ToString(a => $"* {QueryUtils.GetKey(a)}: {QueryUtils.GetNiceName(a)}", "\n")
+                .ToString(a =>
+                {
+                    var imp = QueryLogic.Queries.GetEntityImplementations(a);
+
+                    var impStr = imp.Types.Only() == a ? "" : $" (ImplementedBy {imp.Types.ToString(t => t.Name, ", ")})";
+
+                    return $"* {QueryUtils.GetKey(a)}{impStr}: {QueryUtils.GetNiceName(a)}";
+                } , "\n")
             }
         };
     }
@@ -55,13 +67,22 @@ public class SearchSkill : ChatbotSkill
         return tokens.Select(qt => QueryTokenTS.WithAutoExpand(qt, qd)).ToList();
     }
 
-    [McpServerTool, Description("Convert FindOptions json string to a Url")]
-    public static string GetFindOptionsUrl(string findOptions)
+
+
+    [McpServerTool, Description("Convert FindOptions to a url")]
+    public static string GetFindOptionsUrl(string findOptionsJson)
+    {
+        FindOptions fo = ParseFindOptions(findOptionsJson);
+
+        return FindOptionsEncoder.FindOptionsPath(fo);
+    }
+
+    public static FindOptions ParseFindOptions(string findOptionsJson)
     {
         FindOptions fo;
         try
         {
-            fo = JsonSerializer.Deserialize<FindOptions>(findOptions, new JsonSerializerOptions
+            fo = JsonSerializer.Deserialize<FindOptions>(findOptionsJson, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
                 IncludeFields = true,
@@ -70,7 +91,7 @@ public class SearchSkill : ChatbotSkill
                 }
             })!;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             throw new McpException(e.Message, e);
         }
@@ -81,9 +102,16 @@ public class SearchSkill : ChatbotSkill
         var error = fo.Validate(qd);
         if (error.HasText())
             throw new McpException(error);
-
-        return FindOptionsEncoder.FindOptionsPath(fo);
+        return fo;
     }
+
+ 
+}
+
+public class SimpleChatScript
+{
+    public string Key { get; set; }
+    public List<ChartScriptColumn> Columns { get; set; }
 }
 
 public class FindOptionsEncoder
@@ -100,8 +128,8 @@ public class FindOptionsEncoder
     {
         var query = new Dictionary<string, object?>
         {
-            ["groupResults"] = fo.GroupResults,
-            ["idf"] = fo.IncludeDefaultFilters,
+            ["groupResults"] = fo.GroupResults?.ToString().ToLower(),
+            ["idf"] = fo.IncludeDefaultFilters?.ToString().ToLower(),
             ["columnMode"] = fo.ColumnOptionsMode.HasValue && fo.ColumnOptionsMode != ColumnOptionsMode.Add
                 ? fo.ColumnOptionsMode.ToString()
                 : null,
@@ -117,9 +145,20 @@ public class FindOptionsEncoder
         return query;
     }
 
+    static string EncodeValue(object? value) => value switch
+    {
+        Lite<Entity> lite => lite.Key(),
+        DateTime dt => dt.ToIsoString(),
+        DateOnly date => date.ToIsoString(),
+        bool b => b.ToString().ToLower(),
+        IFormattable f => f?.ToString(null, CultureInfo.InvariantCulture) ?? "",
+        var o => o?.ToString() ?? "",
+    };
+
     public static void EncodeFilters(Dictionary<string, object?> query, IEnumerable<FilterOption>? filters, string? prefix = null)
     {
-        if (filters == null) return;
+        if (filters == null) 
+            return;
 
         int i = 0;
         void Encode(FilterOption fo, int indent = 0)
@@ -129,14 +168,14 @@ public class FindOptionsEncoder
 
             if(fo.GroupOperation != null)
             {
-                query[keyBase + "filter" + i + identSuffix] = $"{fo.Token ?? ""}~{fo.GroupOperation}~{fo.Value}";
+                query[keyBase + "filter" + i + identSuffix] = $"{fo.Token ?? ""}~{fo.GroupOperation}~{EncodeValue(fo.Value)}";
                 i++;
                 foreach (var f in fo.Filters)
                     Encode(f, indent + 1);
             }
             else if(fo.Operation != null)
             {
-                query[keyBase + "filter" + i + identSuffix] = $"{fo.Token}~{fo.Operation?.ToString() ?? "EqualTo"}~{fo.Value}";
+                query[keyBase + "filter" + i + identSuffix] = $"{fo.Token}~{fo.Operation?.ToString() ?? "EqualTo"}~{EncodeValue(fo.Value)}";
                 i++;
             }
             else 
@@ -170,7 +209,7 @@ public class FindOptionsEncoder
         }
     }
 
-    private static string ToQueryString(Dictionary<string, object?> query)
+    public static string ToQueryString(Dictionary<string, object?> query)
     {
         return string.Join("&", query
             .Where(kv => kv.Value != null)
@@ -191,17 +230,60 @@ public class FindOptions
     public List<ColumnOption>? ColumnOptions { get; set; }
     public Pagination? Pagination { get; set; }
 
+    internal QueryRequest ToQueryRequest()
+    {
+
+        var queryName = QueryLogic.ToQueryName(QueryName);
+        var qd = QueryLogic.Queries.QueryDescription(queryName);
+        var aggregate = GroupResults == true ? SubTokensOptions.CanAggregate : (SubTokensOptions)0;
+        return new QueryRequest
+        {
+            QueryName = queryName,
+            GroupResults = GroupResults ?? false,
+            Filters = FilterOptions.EmptyIfNull().Select(a => a.ToFilter(qd, aggregate)).ToList(),
+            Columns = MergeColumns(qd, aggregate),
+            Orders = this.OrderOptions.EmptyIfNull().Select(a => a.ToOrder(qd, aggregate)).ToList(),
+            Pagination = Pagination?.ToPagination() ?? new DynamicQuery.Pagination.Firsts(20)
+        };
+    }
+
+    List<Column> MergeColumns(QueryDescription qd, SubTokensOptions aggregates)
+    {
+        var columns = this.ColumnOptions.EmptyIfNull();
+        switch (this.ColumnOptionsMode ?? DynamicQuery.ColumnOptionsMode.Add)
+        {
+            case DynamicQuery.ColumnOptionsMode.Add: return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(columns.Select(co => co.ToColumn(qd, aggregates))).ToList();
+            case DynamicQuery.ColumnOptionsMode.Remove: return qd.Columns.Where(cd => !cd.IsEntity && !columns.Any(co => co.Token == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
+            case DynamicQuery.ColumnOptionsMode.ReplaceAll: return columns.Select(co => co.ToColumn(qd,  aggregates)).ToList();
+            case DynamicQuery.ColumnOptionsMode.ReplaceOrAdd:
+                {
+                    var original = qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).ToList();
+                    var toReplaceOrAdd = columns.Select(co => co.ToColumn(qd, aggregates)).ToList();
+                    foreach (var item in toReplaceOrAdd)
+                    {
+                        var index = original.FindIndex(o => o.Token.Equals(item.Token));
+                        if (index != -1)
+                            original[index] = item;
+                        else
+                            original.Add(item);
+                    }
+                    return original;
+                }
+            default: throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".FormatWith(ColumnOptionsMode));
+        }
+    }
+
     internal string? Validate(QueryDescription qd)
     {
         var agg = this.GroupResults == true ? SubTokensOptions.CanAggregate : 0;
         var jsonOptions = SignumServer.JsonSerializerOptions;
         var sb = new StringBuilder();
-        //if (FilterOptions != null)
-        //{
-        //    int i = 0;
-        //    foreach (var f in FilterOptions)
-        //        f.Validate(sb, $"filterOptions[{i}]", qd, agg, jsonOptions);
-        //}
+        if (FilterOptions != null)
+        {
+            int i = 0;
+            foreach (var f in FilterOptions)
+                f.Validate(sb, $"filterOptions[{i}]", qd, agg, jsonOptions);
+        }
 
         if (ColumnOptions != null)
         {
@@ -260,12 +342,12 @@ public class FilterOption
 
             var expectedValueType = FilterCondition.GetValueType(qt, op);
 
-            object? val;
+            object? val = null;
             try
             {
-                val = Value is JsonElement jtok ?
-                     jtok.ToObject(expectedValueType, jsonOptions) :
-                     Value;
+                val = ((object?)Value) is JsonElement jtok ?
+                   jtok.ToObject(expectedValueType, jsonOptions) :
+                   Value;
             }
             catch (JsonException)
             {
@@ -273,17 +355,18 @@ public class FilterOption
                 return;
             }
 
-            if (Value is DateTime dt)
+            if (val is DateTime dt)
             {
                 var kind = qt.DateTimeKind;
                 val = dt.ToKind(kind);
             }
-            else if (Value is ObservableCollection<DateTime?> col)
+            else if (val is ObservableCollection<DateTime?> col)
             {
                 var kind = qt.DateTimeKind;
                 val = col.Select(dt => dt?.ToKind(kind)).ToObservableCollection();
             }
 
+            Value = val;
         }
         else if (GroupOperation != null)
         {
@@ -305,6 +388,26 @@ public class FilterOption
             sb.AppendLine($"{path}: Should be either a FilterCondition or a FilterGroup");
         }
     }
+
+    internal Filter ToFilter(QueryDescription qd, SubTokensOptions aggregate)
+    {
+        if (Operation != null)
+        {
+            var token = QueryUtils.Parse(Token!, qd, SubTokensOptions.CanElement | SubTokensOptions.All | aggregate);
+            return new FilterCondition(token, Operation ?? FilterOperation.EqualTo, Value);
+        }
+
+        if(GroupOperation != null)
+        {
+            var token = Token.HasText() ? null : QueryUtils.Parse(Token!, qd, SubTokensOptions.CanElement | SubTokensOptions.All | aggregate);
+
+            return new FilterGroup(GroupOperation.Value, token,
+                this.Filters.Select(a => a.ToFilter(qd, aggregate)).ToList()
+                );
+        }
+
+        throw new InvalidOperationException("Unexpected filter type");
+    }
 }
 
 
@@ -312,6 +415,13 @@ public class OrderOption
 {
     public string Token { get; set; } = null!;
     public OrderType OrderType { get; set; }
+
+    internal Order ToOrder(QueryDescription qd, SubTokensOptions agg)
+    {
+        var parsedToken = QueryUtils.Parse(Token, qd, agg);
+
+        return new Order(parsedToken, OrderType);
+    }
 
     internal void Validate(StringBuilder sb, string path, QueryDescription qd, SubTokensOptions agg)
     {
@@ -334,9 +444,16 @@ public class ColumnOption
     public string? SummaryToken { get; set; }
     public bool? HiddenColumn { get; set; }
 
+    public Column ToColumn(QueryDescription qd, SubTokensOptions aggregates)
+    {
+        var parsedToken = QueryUtils.Parse(Token, qd, aggregates);
+
+        return new DynamicQuery.Column(parsedToken, DisplayName);
+    }
+
     internal void Validate(StringBuilder sb, string path, QueryDescription qd, SubTokensOptions agg)
     {
-        var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | agg;
+        var options = SubTokensOptions.CanElement | agg;
 
         var parsedToken = QueryUtils.TryParse(Token, qd, options, out var error);
         if (error.HasText())
@@ -369,6 +486,14 @@ public class Pagination
     public PaginationMode Mode { get; set; }
     public int? ElementsPerPage { get; set; }
     public int? CurrentPage { get; set; }
+
+    internal DynamicQuery.Pagination ToPagination() => Mode switch
+    {
+        PaginationMode.All => new DynamicQuery.Pagination.All(),
+        PaginationMode.Firsts => new DynamicQuery.Pagination.Firsts(ElementsPerPage ?? 20),
+        PaginationMode.Paginate => new DynamicQuery.Pagination.Paginate(ElementsPerPage ?? 20, CurrentPage ?? 1),
+        _ => throw new UnexpectedValueException(Mode)
+    };
 
     internal void Validate(StringBuilder sb, string path)
     {
