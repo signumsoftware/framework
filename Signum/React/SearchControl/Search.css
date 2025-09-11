@@ -172,6 +172,7 @@ tr.drag-bottom td {
     display: flex;
     flex-direction: row;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 table.sf-search-results th.sf-current-column {
@@ -417,4 +418,18 @@ a.sf-shy-link:not(:hover) {
 table.sf-search-results > tbody > tr.sf-row-selected {
     --bs-table-bg: var(--bs-primary-bg-subtle);
     --bs-table-color: var(--bs-body-color);
+}
+
+.sf-rule {
+    background-color: var(--bs-secondary-bg);
+    border-radius: 4px;
+}
+
+.sf-rule-item {
+    height: 16px;
+    background-color: var(--bs-secondary-bg-subtle);
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: center;
+    color: var(--bs-secondary);
 }
