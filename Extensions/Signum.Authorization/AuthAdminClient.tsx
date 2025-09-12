@@ -11,7 +11,11 @@ import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
-import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo, getAllTypes, Type, QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol } from '@framework/Reflection'
+import {
+  PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo, getAllTypes, Type,
+  QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol, reloadQueryContexts,
+  queryAllowedInContext
+} from '@framework/Reflection'
 import {
   PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission,
   PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed, TypeConditionSymbol
@@ -35,10 +39,10 @@ export namespace AuthAdminClient {
   export let types: boolean;
   export let properties: boolean;
   export let operations: boolean;
-  export let queries: boolean;
+  export let queries: boolean | "queryContext";
   export let permissions: boolean;
   
-  export function start(options: { routes: RouteObject[], types: boolean; properties: boolean, operations: boolean, queries: boolean; permissions: boolean }): void {
+  export function start(options: { routes: RouteObject[], types: boolean; properties: boolean, operations: boolean, queries: boolean | "queryContext"; permissions: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Authorization", () => import("./Changelog"));
   
@@ -215,6 +219,9 @@ export namespace AuthAdminClient {
       Finder.isFindableEvent.push(queryIsFindable);
   
       Navigator.addSettings(new EntitySettings(QueryRulePack, e => import('./Rules/QueryRulePackControl')));
+
+      if (options.queries == "queryContext")
+        reloadQueryContexts(); //fire and forget
     }
   
     if (options.permissions) {
@@ -277,10 +284,15 @@ export namespace AuthAdminClient {
     queryAuditorTokens.push({ queryKey: getQueryKey(queryName), token: token.toString(), typeCondition: typeCondition });
   }
   
-  export function queryIsFindable(queryKey: string, fullScreen: boolean): boolean {
+  export function queryIsFindable(queryKey: string, fullScreen: boolean, context?: Lite<Entity>): boolean {
     var allowed = getQueryInfo(queryKey).queryAllowed;
   
-    return allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
+    var result = allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
+
+    if (queries == "queryContext" && context != null)
+      return result && queryAllowedInContext(queryKey, context);
+
+    return result;
   }
   
   export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {

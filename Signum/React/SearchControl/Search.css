@@ -172,6 +172,7 @@ tr.drag-bottom td {
     display: flex;
     flex-direction: row;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 table.sf-search-results th.sf-current-column {
