@@ -19,8 +19,8 @@ export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntit
     });
   }
 
-  navigateTo(element: ToolbarResponse<DashboardEntity>): Promise<string> {
-    return Promise.resolve(DashboardClient.dashboardUrl(element.content!));
+  override navigateTo(element: ToolbarResponse<DashboardEntity>, selectedEntity: Lite<Entity> | null): Promise<string> {
+    return Promise.resolve(DashboardClient.dashboardUrl(element.content!, selectedEntity));
   } 
 
   isCompatibleWithUrlPrio(res: ToolbarResponse<DashboardEntity>, location: Location, query: any, entityType?: string): { prio: number, inferredEntity?: Lite<Entity> } | null {
