@@ -3,7 +3,7 @@ import type { ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 import { IconColor, ToolbarConfig, ToolbarContext } from '../Signum.Toolbar/ToolbarConfig'
 import { DashboardClient } from './DashboardClient'
 import { DashboardEntity } from './Signum.Dashboard'
-import { Entity, Lite } from '@framework/Signum.Entities'
+import { Entity, Lite, parseLite } from '@framework/Signum.Entities'
 
 export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntity> {
    
@@ -23,7 +23,12 @@ export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntit
     return Promise.resolve(DashboardClient.dashboardUrl(element.content!));
   } 
 
-  isCompatibleWithUrlPrio(res: ToolbarResponse<DashboardEntity>, location: Location, query: any): number {
-    return location.pathname == DashboardClient.dashboardUrl(res.content!) ? 2 : 0;
+  isCompatibleWithUrlPrio(res: ToolbarResponse<DashboardEntity>, location: Location, query: any, entityType?: string): { prio: number, inferredEntity?: Lite<Entity> } | null {
+
+    if (location.pathname == DashboardClient.dashboardUrl(res.content!)) {
+      return { prio: 2, inferredEntity: query["entity"] && parseLite(query["entity"]) }
+    }
+
+    return null;
   }
 }

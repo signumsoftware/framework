@@ -41,7 +41,7 @@ export abstract class ToolbarConfig<T extends Entity> {
   }
 
   abstract navigateTo(element: ToolbarResponse<T>, selectedEntity: Lite<Entity> | null): Promise<string | null>;
-  abstract isCompatibleWithUrlPrio(element: ToolbarResponse<T>, location: Location, query: any): number;
+  abstract isCompatibleWithUrlPrio(element: ToolbarResponse<T>, location: Location, query: any, entityType?: string): { prio: number, inferredEntity ?: Lite<Entity> } | null;
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>, selectedEntity: Lite<Entity> | null): void {
     e.preventDefault();
@@ -81,6 +81,7 @@ export interface ToolbarContext {
 export interface InferActiveResponse {
   prio: number;
   response: ToolbarResponse<any>;
+  inferredEntity?: Lite<Entity>;
   menuWithEntity?: { menu: ToolbarResponse<any>, entity: Lite<Entity> };
 }
 

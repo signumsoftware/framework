@@ -247,14 +247,14 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
 
 public class ToolbarMenuElementEmbedded: ToolbarElementEmbedded
 {
-    public bool NoEntitySelected { get; set; }
+    public bool WithEntity { get; set; }
 
     public bool AutoSelect { get; set; }
 
     public override XElement ToXml(IToXmlContext ctx)
     {
         var e = base.ToXml(ctx);
-        e.Add(NoEntitySelected ? new XAttribute("NoEntitySelected", NoEntitySelected) : null!);
+        e.Add(WithEntity ? new XAttribute("WithEntity", WithEntity) : null!);
         e.Add(AutoSelect ? new XAttribute("AutoSelect", AutoSelect) : null!);
         return e;
     }
@@ -263,7 +263,7 @@ public class ToolbarMenuElementEmbedded: ToolbarElementEmbedded
     {
         base.FromXml(x, ctx);
 
-        NoEntitySelected = x.Attribute("NoEntitySelected")?.Value.ToBool() ?? false;
+        WithEntity = x.Attribute("WithEntity")?.Value.ToBool() ?? false;
         AutoSelect = x.Attribute("AutoSelect")?.Value.ToBool() ?? false;
     }
 }
@@ -282,5 +282,10 @@ public enum ToolbarMessage
     [Description(@"{0} cycles have been found in the Toolbar due to the relationships:")]
     _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships,
     FirstElementCanNotBeExtraIcon,
-    ExtraIconCanNotComeAfterDivider
+    ExtraIconCanNotComeAfterDivider,
+    [Description("If {0} selected")]
+    If0Selected,
+    [Description("No {0} selected")]
+    No0Selected,
+    ShowTogether,
 }

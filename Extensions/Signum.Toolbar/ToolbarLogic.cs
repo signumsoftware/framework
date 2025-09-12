@@ -70,6 +70,7 @@ public static class ToolbarLogic
 
             UserAssetsImporter.Register("Toolbar", ToolbarOperation.Save);
             UserAssetsImporter.Register("ToolbarMenu", ToolbarMenuOperation.Save);
+            UserAssetsImporter.Register("ToolbarSwitcher", ToolbarSwitcherOperation.Save);
 
             Toolbars = sb.GlobalLazy(() => Database.Query<ToolbarEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
                 new InvalidateWith(typeof(ToolbarEntity)));
@@ -373,7 +374,7 @@ public static class ToolbarLogic
             autoRefreshPeriod = element.AutoRefreshPeriod,
             openInPopup = element.OpenInPopup,
             autoSelect = (element as ToolbarMenuElementEmbedded)?.AutoSelect == true,
-            noEntitySelected = (element as ToolbarMenuElementEmbedded)?.NoEntitySelected == true,
+            withEntity = (element as ToolbarMenuElementEmbedded)?.WithEntity == true,
             extraIcons = gr.IsEmpty() ? null : gr.Select(extra =>
             {
                 var extraElement = extra.Value;
@@ -573,7 +574,7 @@ public class ToolbarResponseBase
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool openInPopup;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool autoSelect;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool noEntitySelected;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool withEntity;
 
 
     public override string ToString() => $"{type} {label} {content} {url}";

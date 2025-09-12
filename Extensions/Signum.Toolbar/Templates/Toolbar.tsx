@@ -1,19 +1,20 @@
 import * as React from 'react'
 import { AutoLine, EntityLine, EntityRepeater, EntityTable, EntityTableColumn } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ToolbarEntity, ToolbarElementEmbedded, ToolbarMenuEntity, ToolbarSwitcherEntity } from '../Signum.Toolbar'
+import { ToolbarEntity, ToolbarElementEmbedded, ToolbarMenuEntity, ToolbarSwitcherEntity, ToolbarMenuElementEmbedded } from '../Signum.Toolbar'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Entity, MList } from '@framework/Signum.Entities';
 import { fallbackIcon, parseIcon } from '@framework/Components/IconTypeahead';
 import { ToolbarClient } from '../ToolbarClient';
 import SelectorModal from '@framework/SelectorModal';
-import { getTypeInfos, TypeInfo } from '@framework/Reflection';
+import { getTypeInfos, New, TypeInfo } from '@framework/Reflection';
 import { Finder } from '@framework/Finder';
 import { Constructor } from '@framework/Constructor';
 import { Navigator } from '@framework/Navigator';
 import { ToolbarCount } from '../QueryToolbarConfig';
 import { PermissionSymbol } from '@framework/Signum.Basics';
 import { IconColor } from '../ToolbarConfig';
+import { softCast } from '../../../Signum/React/Globals';
 
 export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }): React.JSX.Element {
   const ctx = p.ctx;
@@ -58,7 +59,12 @@ function getDefaultIcon(ti: TypeInfo): IconColor | null {
   return conf.first().getDefaultIcon();
 }
 
-export function ToolbarElementTable({ ctx, extraColumns }: { ctx: TypeContext<MList<ToolbarElementEmbedded>>, extraColumns?: EntityTableColumn<ToolbarElementEmbedded, unknown>[] }): React.JSX.Element {
+export function ToolbarElementTable({ ctx, extraColumns, withEntity }: {
+  ctx: TypeContext<MList<ToolbarElementEmbedded>>,
+  extraColumns?: (EntityTableColumn<ToolbarElementEmbedded, unknown> | null | undefined)[],
+  withEntity?: boolean,
+}): React.JSX.Element {
+
 
   function selectContentType(filter: (ti: TypeInfo) => boolean) {
     const pr = ctx.memberInfo(ml => ml[0].element.content);
@@ -75,11 +81,12 @@ export function ToolbarElementTable({ ctx, extraColumns }: { ctx: TypeContext<ML
     });
   }
 
+  const type = ctx.propertyRoute!.typeReference()!.name;
 
   return (
     <EntityTable ctx={ctx} view
-      
-      onCreate={() => Promise.resolve(ToolbarElementEmbedded.New({ type: "Item" }))}
+      filterRows={withEntity == undefined ? undefined : ctxs => ctxs.filter(a => (a.value as ToolbarMenuElementEmbedded).withEntity === withEntity)}
+      onCreate={() => Promise.resolve(New(type, softCast<Partial<ToolbarMenuElementEmbedded>>({ type: "Item", withEntity })) as ToolbarElementEmbedded)}
       columns={[
         {
           header: "Icon",

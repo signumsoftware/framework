@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Location } from 'react-router'
 import { Navigator } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'
-import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
+import { Entity, Lite, liteKey, parseLite } from '@framework/Signum.Entities'
 import { IconColor, ToolbarConfig } from '../Signum.Toolbar/ToolbarConfig'
 import { UserQueryClient } from './UserQueryClient'
 import { UserQueryEntity } from './Signum.UserQueries'
@@ -53,9 +53,11 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
       .then(uq => UserQueryClient.getUserQueryUrl(uq, selectedEntity ?? undefined));
   }
 
-  isCompatibleWithUrlPrio(res: ToolbarResponse<UserQueryEntity>, location: Location, query: any): number {
-    return query["userQuery"] == liteKey(res.content!) ||
-      location.pathname.startsWith(UserQueryClient.userQueryUrl(res.content!, undefined)) ? 2 : 0;
+  isCompatibleWithUrlPrio(res: ToolbarResponse<UserQueryEntity>, location: Location, query: any, entityType?: string): { prio: number, inferredEntity?: Lite<Entity> } | null {
+    if (query["userQuery"] == liteKey(res.content!)) {
+      return { prio: 2, inferredEntity: query["entity"] && parseLite(query["entity"]) }
+    }
+    return null;
   }
 }
 

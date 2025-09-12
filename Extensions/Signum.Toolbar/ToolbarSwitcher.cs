@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace  Signum.Toolbar;
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
-public class ToolbarSwitcherEntity : Entity, IToolbarEntity
+public class ToolbarSwitcherEntity : Entity, IToolbarEntity, IUserAssetEntity
 {
     [UniqueIndex]
     [StringLengthValidator(Max = 100)]
@@ -55,7 +55,7 @@ public class ToolbarSwitcherOptionEmbedded : EmbeddedEntity
 
     internal XElement ToXml(IToXmlContext ctx)
     {
-        return new XElement("ToolbarElement",
+        return new XElement("ToolbarSwitcherOption",
             new XAttribute("ToolbarMenu", ctx.Include(ToolbarMenu)),
             string.IsNullOrEmpty(IconName) ? null! : new XAttribute("IconName", IconName),
             string.IsNullOrEmpty(IconColor) ? null! : new XAttribute("IconColor", IconColor)

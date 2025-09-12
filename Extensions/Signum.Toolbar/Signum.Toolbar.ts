@@ -57,7 +57,7 @@ export type ToolbarLocation =
 
 export const ToolbarMenuElementEmbedded: Type<ToolbarMenuElementEmbedded> = new Type<ToolbarMenuElementEmbedded>("ToolbarMenuElementEmbedded");
 export interface ToolbarMenuElementEmbedded extends ToolbarElementEmbedded {
-  noEntitySelected: boolean;
+  withEntity: boolean;
   autoSelect: boolean;
 }
 
@@ -81,6 +81,9 @@ export namespace ToolbarMessage {
   export const _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships: MessageKey = new MessageKey("ToolbarMessage", "_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships");
   export const FirstElementCanNotBeExtraIcon: MessageKey = new MessageKey("ToolbarMessage", "FirstElementCanNotBeExtraIcon");
   export const ExtraIconCanNotComeAfterDivider: MessageKey = new MessageKey("ToolbarMessage", "ExtraIconCanNotComeAfterDivider");
+  export const If0Selected: MessageKey = new MessageKey("ToolbarMessage", "If0Selected");
+  export const No0Selected: MessageKey = new MessageKey("ToolbarMessage", "No0Selected");
+  export const ShowTogether: MessageKey = new MessageKey("ToolbarMessage", "ShowTogether");
 }
 
 export namespace ToolbarOperation {
@@ -89,7 +92,7 @@ export namespace ToolbarOperation {
 }
 
 export const ToolbarSwitcherEntity: Type<ToolbarSwitcherEntity> = new Type<ToolbarSwitcherEntity>("ToolbarSwitcher");
-export interface ToolbarSwitcherEntity extends Entities.Entity, IToolbarEntity {
+export interface ToolbarSwitcherEntity extends Entities.Entity, IToolbarEntity, UserAssets.IUserAssetEntity {
   Type: "ToolbarSwitcher";
   name: string;
   options: Entities.MList<ToolbarSwitcherOptionEmbedded>;
