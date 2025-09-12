@@ -1,5 +1,5 @@
 ﻿.rule {
-    background-color: var(--bs-body-bg);
+    background-color: var(--bs-secondary-bg);
     border-radius: 4px;
 }
 
@@ -10,15 +10,16 @@
 }
 
 .sf-dashboard-view-embedded {
-    background: var(--bs-body-bg);
+    background: var(--bs-tertiary-bg);
     margin: -10px -1em -16px -1em;
     padding: 1em;
 }
 
 .sf-dashboard-page {
-    background: var(--bs-body-bg);
+    background: var(--bs-tertiary-bg);
     margin: -8px -12px;
     padding: 20px;
+    height: 100%;
 }
 
 .sf-dashboard-view .card-header {
@@ -106,9 +107,24 @@ div.row-control-panel {
     font-weight: bold;
 }
 
+.larger {
+    font-size: larger;
+    font-weight: bold;
+}
+
 .large {
     font-size: large;
     font-weight: bold;
+}
+
+.medium {
+    font-size: medium;
+    font-weight: normal;
+}
+
+.small {
+    font-size: small;
+    font-weight: normal;
 }
 
 .sf-dashboard-admin .sf-grid-repeater-field,
@@ -119,7 +135,7 @@ div.row-control-panel {
 }
 
 .sf-filter-pill.border {
-    padding: 0px 4px 3px 4px;
+    padding: 3px;
 }
 
 .sf-filter-pill .btn-close {
@@ -139,4 +155,23 @@ div.row-control-panel {
     border-radius: 50%;
     display: inline-block;
     margin-right: 5px;
+}
+
+.dashboard-flex {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.dashboard-flex .left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+        
+}
+
+.right {
+    align-self: flex-start;
 }

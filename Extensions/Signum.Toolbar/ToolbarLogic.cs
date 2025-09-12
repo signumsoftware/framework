@@ -11,6 +11,7 @@ public static class ToolbarLogic
 {
     public static ResetLazy<FrozenDictionary<Lite<ToolbarEntity>, ToolbarEntity>> Toolbars = null!;
     public static ResetLazy<FrozenDictionary<Lite<ToolbarMenuEntity>, ToolbarMenuEntity>> ToolbarMenus = null!;
+    public static ResetLazy<FrozenDictionary<Lite<ToolbarSwitcherEntity>, ToolbarSwitcherEntity>> ToolbarSwitchers = null!;
 
     public static Dictionary<PermissionSymbol, Func<List<ToolbarResponse>>> CustomPermissionResponse = 
         new Dictionary<PermissionSymbol, Func<List<ToolbarResponse>>>();
@@ -70,9 +71,18 @@ public static class ToolbarLogic
             UserAssetsImporter.Register("Toolbar", ToolbarOperation.Save);
             UserAssetsImporter.Register("ToolbarMenu", ToolbarMenuOperation.Save);
 
+            Toolbars = sb.GlobalLazy(() => Database.Query<ToolbarEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
+                new InvalidateWith(typeof(ToolbarEntity)));
+
+            ToolbarMenus = sb.GlobalLazy(() => Database.Query<ToolbarMenuEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
+               new InvalidateWith(typeof(ToolbarMenuEntity)));
+
+            ToolbarSwitchers = sb.GlobalLazy(() => Database.Query<ToolbarSwitcherEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
+                new InvalidateWith(typeof(ToolbarSwitcherEntity)));
+
             RegisterDelete<QueryEntity>(sb);
             RegisterDelete<ToolbarMenuEntity>(sb);
-    
+            RegisterDelete<ToolbarSwitcherEntity>(sb);
 
             RegisterContentConfig<ToolbarMenuEntity>(
                 lite =>
@@ -81,6 +91,15 @@ public static class ToolbarLogic
                     return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
                 },
                 lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarMenus.Value.GetOrCreate(lite), a => a.Name));
+
+            RegisterContentConfig<ToolbarSwitcherEntity>(
+               lite =>
+               {
+                   var entity = ToolbarSwitchers.Value.GetOrCreate(lite);
+                   return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
+               },
+             lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarSwitchers.Value.GetOrCreate(lite), a => a.Name));
+
 
             RegisterContentConfig<ToolbarEntity>(
                 lite =>
@@ -116,11 +135,7 @@ public static class ToolbarLogic
             //{ typeof(WorkflowEntity), a => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate((Lite<WorkflowEntity>)a); return InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); } },
 
 
-            Toolbars = sb.GlobalLazy(() => Database.Query<ToolbarEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
-               new InvalidateWith(typeof(ToolbarEntity)));
 
-            ToolbarMenus = sb.GlobalLazy(() => Database.Query<ToolbarMenuEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
-               new InvalidateWith(typeof(ToolbarMenuEntity)));
         }
     }
 
@@ -232,6 +247,16 @@ public static class ToolbarLogic
                 };
             }
         }
+
+        if (sb.Settings.ImplementedBy((ToolbarSwitcherEntity tb) => tb.Options.First().ToolbarMenu, typeof(T)))
+        {
+            sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
+            {
+                if (Schema.Current.IsAllowed(typeof(ToolbarSwitcherEntity), false) == null)
+                    Database.MListQuery((ToolbarSwitcherEntity tb) => tb.Options).Where(mle => query.Contains((T)(Entity)mle.Element.ToolbarMenu!.Entity)).UnsafeDeleteMList();
+                return null;
+            };
+        }
     }
 
     public static void RegisterTranslatableRoutes()
@@ -240,6 +265,8 @@ public static class ToolbarLogic
         PropertyRouteTranslationLogic.RegisterRoute((ToolbarEntity tb) => tb.Elements[0].Label);
         PropertyRouteTranslationLogic.RegisterRoute((ToolbarMenuEntity tm) => tm.Name);
         PropertyRouteTranslationLogic.RegisterRoute((ToolbarMenuEntity tb) => tb.Elements[0].Label);
+        PropertyRouteTranslationLogic.RegisterRoute((ToolbarSwitcherEntity tm) => tm.Name);
+
     }
 
     public static ToolbarEntity? GetCurrent(ToolbarLocation location)
@@ -374,15 +401,56 @@ public static class ToolbarLogic
             }).NotNull().ToList()
         };
 
-        if (element.Content is Lite<ToolbarMenuEntity>)
+        if (element.Content is Lite<ToolbarMenuEntity> tm)
         {
-            var tme = ToolbarMenus.Value.GetOrThrow((Lite<ToolbarMenuEntity>)element.Content);
+            var tme = ToolbarMenus.Value.GetOrThrow(tm);
+            result.entityType = GetEntityType(tm);
             result.elements = ToResponseList(PropertyRouteTranslationLogic.TranslatedMList(tme, t => t.Elements).ToList());
             if (result.elements.Count == 0)
                 return null;
-        }    
+        }
 
-        return new[] { result };
+        if (element.Content is Lite<ToolbarSwitcherEntity> ts)
+        {
+            var tme = ToolbarSwitchers.Value.GetOrThrow(ts);
+
+            result.elements = tme.Options.Select(o => 
+            {
+                var tm = ToolbarMenus.Value.GetOrThrow(o.ToolbarMenu);
+                var subElements = ToResponseList(PropertyRouteTranslationLogic.TranslatedMList(tm, t => t.Elements).ToList());
+
+                if (subElements.IsEmpty())
+                    return null;
+
+                return new ToolbarResponse
+                {
+                    type = ToolbarElementType.Item,
+                    content = o.ToolbarMenu,
+                    entityType = GetEntityType(o.ToolbarMenu),
+                    elements = subElements,
+                    iconColor = o.IconColor,
+                    iconName = o.IconName,
+                    label = tm.TranslatedField(a => a.Name),
+                };
+            }).NotNull().ToList();
+
+            if (result.elements.Count == 0)
+                return null;
+        }
+
+        return [result];
+    }
+
+    private static string? GetEntityType(Lite<ToolbarMenuEntity> toolbarMenu)
+    {
+        var tm = ToolbarMenus.Value.GetOrThrow(toolbarMenu);
+
+        if(tm.EntityType == null)
+            return null;
+
+        var type = TypeLogic.LiteToType.GetOrThrow(tm.EntityType);
+
+        return TypeLogic.GetCleanName(type);
     }
 
     public static void RegisterContentConfig<T>(Func<Lite<T>, bool> isAuthorized, Func<Lite<T>, string> defaultLabel, Func<Lite<T>, string?>? defaultIconName = null, Func<Lite<T>, string?>? defaultIconColor = null) 
@@ -474,6 +542,9 @@ public class ToolbarResponse : ToolbarResponseBase
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<ToolbarExtraIcon>? extraIcons;
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? entityType;
 
     public override string ToString() => $"{type} {label} {content} {url}";
 }

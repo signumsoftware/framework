@@ -57,7 +57,15 @@ public class AzureClaimsAutoCreateUserContext : IAutoCreateUserContext
 
     public string? TryGetClaim(string type) => ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == type)?.Value;
 
-    public virtual Guid? OID => Guid.Parse(GetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
+    public virtual Guid? OID
+    {
+        get
+        {
+            var oid = TryGetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier")
+                   ?? TryGetClaim("oid"); // fallback for AAD v2.0
+            return oid != null ? Guid.Parse(oid) : null;
+        }
+    }
 
     public string? SID => null;
 

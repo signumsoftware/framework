@@ -111,6 +111,11 @@ body.rtl .sf-chart-token .sf-query-token {
     user-select: none;
 }
 
+    .sf-chart-container svg text:not([fill]){
+        fill: currentColor;
+    }
+
+
 .sf-chart-color-table {
     width: 0%;
 }
