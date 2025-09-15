@@ -317,11 +317,14 @@ function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx
 
   React.useEffect(() => {
 
-    if (active?.menuWithEntity && entityType)
-      if (is(active.menuWithEntity.menu.content, p.response.content) && !is(active.menuWithEntity.entity, selectedEntity))
-        setSelectedEntity(active.menuWithEntity.entity);
-      
-  }, [active?.menuWithEntity, entityType]);
+    if (active?.menuWithEntity && p.response.entityType &&
+      is(active.menuWithEntity.menu.content, p.response.content) &&
+      !is(active.menuWithEntity.entity, selectedEntity))
+      setSelectedEntity(active.menuWithEntity.entity);
+    else
+      setSelectedEntity(null);
+
+  }, [active?.menuWithEntity, p.response]);
 
   React.useEffect(() => {
 
