@@ -4,6 +4,7 @@ import { IconColor, ToolbarConfig, ToolbarContext } from '../Signum.Toolbar/Tool
 import { DashboardClient } from './DashboardClient'
 import { DashboardEntity } from './Signum.Dashboard'
 import { Entity, Lite, parseLite } from '@framework/Signum.Entities'
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntity> {
    
@@ -12,11 +13,8 @@ export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntit
     super(type);
   }
 
-  getDefaultIcon(): IconColor{
-    return ({
-      icon: "table-cells-large",
-      iconColor: "darkslateblue",
-    });
+  getDefaultIcon(): IconProp {
+    return "table-cells-large";
   }
 
   override navigateTo(element: ToolbarResponse<DashboardEntity>, selectedEntity: Lite<Entity> | null): Promise<string> {

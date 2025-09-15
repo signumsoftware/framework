@@ -71,6 +71,7 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
   });
 
   return <BigValueSearchCounter
+    clickable={p.content.userQuery != null}
     findOptions={foExpanded}
     valueToken={valueToken}
     text={translated(p.partEmbedded, a => a.title) || (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName)}
@@ -85,6 +86,7 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
 
 interface BigValueBadgeProps {
   findOptions: FindOptions;
+  clickable: boolean;
   valueToken: QueryToken | null;
   text?: string;
   iconName?: string;
@@ -105,9 +107,9 @@ export function BigValueSearchCounter(p: BigValueBadgeProps): React.JSX.Element 
       style={{
       backgroundColor: p.customColor ?? undefined,
       color: Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "var(--bs-body-color)"
-    }}>
-      <div className={classes("card-body")} onClick={e => vsc.current!.handleClick(e)} style={{
-        cursor: "pointer",
+      }}>
+      <div className={classes("card-body")} onClick={p.clickable ? (e => vsc.current!.handleClick(e)) : undefined} style={{
+        cursor: p.clickable ? "pointer" : undefined,
         color: p.titleColor ?? (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "var(--bs-body-color)")
       }}>
         <div className="dashboard-flex">

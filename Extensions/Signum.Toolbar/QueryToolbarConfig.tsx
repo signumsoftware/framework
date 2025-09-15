@@ -4,8 +4,9 @@ import { IsByAll } from '@framework/Reflection'
 import { Entity, getToString, Lite } from '@framework/Signum.Entities'
 import { Finder } from '@framework/Finder'
 import { QueryEntity } from '@framework/Signum.Basics'
-import { ToolbarClient, ToolbarResponse } from './ToolbarClient'
-import { ToolbarConfig, IconColor } from "./ToolbarConfig"
+import { ToolbarClient, ToolbarResponse } from './ToolbarClient';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { ToolbarConfig} from "./ToolbarConfig"
 import { SearchValue, FindOptions } from '@framework/Search';
 import { Navigator } from '@framework/Navigator';
 import { useAPI, useInterval } from '@framework/Hooks'
@@ -32,11 +33,8 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     return undefined;
   }
 
-  getDefaultIcon(): IconColor {
-    return ({
-      icon: "rectangle-list",
-      iconColor: "dodgerblue",
-    });
+  getDefaultIcon(): IconProp {
+    return "rectangle-list";
   }
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<QueryEntity>, selectedEntity: Lite<Entity> | null): void {

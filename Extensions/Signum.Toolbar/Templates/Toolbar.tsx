@@ -15,6 +15,8 @@ import { ToolbarCount } from '../QueryToolbarConfig';
 import { PermissionSymbol } from '@framework/Signum.Basics';
 import { IconColor } from '../ToolbarConfig';
 import { softCast } from '../../../Signum/React/Globals';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+
 
 export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }): React.JSX.Element {
   const ctx = p.ctx;
@@ -38,19 +40,19 @@ export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }): React.J
 }
 
 
-function getDefaultIcon(ti: TypeInfo): IconColor | null {
+function getDefaultIcon(ti: TypeInfo): IconProp | null {
 
   if (ti.name == ToolbarEntity.typeName)
-    return ({ icon: "bars", iconColor: "#229954" });
+    return "bars-staggered";
 
   if (ti.name == ToolbarMenuEntity.typeName)
-    return ({ icon: "bars", iconColor: "#52BE80" });
+    return "bars";
 
   if (ti.name == ToolbarSwitcherEntity.typeName)
-    return ({ icon: "square-caret-down", iconColor: "#39a1a3" });
+    return "square-caret-down";
 
   if (ti.name == PermissionSymbol.typeName)
-    return ({ icon: "key", iconColor: "#F1C40F" });
+    return "key";
 
   var conf = ToolbarClient.configs[ti.name];
   if (conf == null || conf.length == 0)
@@ -76,7 +78,7 @@ export function ToolbarElementTable({ ctx, extraColumns, withEntity }: {
         if (icon == null)
           return ti.niceName;
 
-        return <><FontAwesomeIcon icon={icon.icon} color={icon.iconColor} /><span className="ms-2">{ti.niceName}</span></>;
+        return <><FontAwesomeIcon icon={icon} /><span className="ms-2">{ti.niceName}</span></>;
       }
     });
   }

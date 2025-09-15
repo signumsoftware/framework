@@ -6,6 +6,9 @@ import { UserChartClient } from '../UserChart/UserChartClient'
 import { ChartClient } from '../ChartClient'
 import { Entity, Lite, liteKey, parseLite } from '@framework/Signum.Entities'
 import { UserChartEntity } from './Signum.Chart.UserChart'
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+
+
 
 export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntity> {
   constructor() {
@@ -13,11 +16,8 @@ export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntit
     super(type);
   }
 
-  getDefaultIcon(): IconColor {
-    return ({
-      icon: "chart-bar",
-      iconColor: "darkviolet",
-    });
+  getDefaultIcon(): IconProp {
+    return "chart-bar";
   }
 
   navigateTo(element: ToolbarResponse<UserChartEntity>): Promise<string> {

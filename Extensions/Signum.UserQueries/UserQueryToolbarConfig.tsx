@@ -10,6 +10,8 @@ import { useAPI } from '@framework/Hooks';
 import { SearchToolbarCount, ToolbarCount } from '../Signum.Toolbar/QueryToolbarConfig';
 import { ShowCount } from '../Signum.Toolbar/Signum.Toolbar'
 import { ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+
 
 export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntity> {
   constructor() {
@@ -31,11 +33,8 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     return undefined;
   }
 
-  getDefaultIcon(): IconColor {
-    return ({
-      icon: "rectangle-list",
-      iconColor: "dodgerblue",
-    });
+  getDefaultIcon(): IconProp {
+    return "rectangle-list";
   }
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<UserQueryEntity>, selectedEntity: Lite<Entity> | null): void {

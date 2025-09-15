@@ -21,7 +21,7 @@ export default function ToolbarTopRenderer(): React.ReactElement | null {
   function changeActive(location: Location) {
     var query = QueryString.parse(location.search);
     if (responseRef.current) {
-      if (activeRef.current && isCompatibleWithUrl(activeRef.current.response, location, query)) {
+      if (activeRef.current && isCompatibleWithUrl(activeRef.current.response, location, query, undefined)) {
         return;
       }
 

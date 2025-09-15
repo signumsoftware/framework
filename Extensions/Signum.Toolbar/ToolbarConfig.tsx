@@ -21,13 +21,13 @@ export abstract class ToolbarConfig<T extends Entity> {
     const defaultIcon = this.getDefaultIcon();
     return (
       <>
-        {ToolbarConfig.coloredIcon(parseIcon(element.iconName) ?? defaultIcon.icon, element.iconColor ?? defaultIcon.iconColor)}
+        {ToolbarConfig.coloredIcon(parseIcon(element.iconName) ?? defaultIcon, element.iconColor)}
         {this.getCounter(element, entity)}
       </>
     );
   }
 
-  abstract getDefaultIcon(): IconColor;
+  abstract getDefaultIcon(): IconProp;
 
   static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactElement | null {
     if (!icon)
