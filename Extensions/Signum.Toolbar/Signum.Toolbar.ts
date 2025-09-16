@@ -4,12 +4,12 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 
 
 export interface IToolbarEntity extends Entities.Entity {
-  elements: Entities.MList<ToolbarElementEmbedded>;
 }
 
 export const ShowCount: EnumType<ShowCount> = new EnumType<ShowCount>("ShowCount");
@@ -55,13 +55,20 @@ export type ToolbarLocation =
   "Top" |
   "Main";
 
+export const ToolbarMenuElementEmbedded: Type<ToolbarMenuElementEmbedded> = new Type<ToolbarMenuElementEmbedded>("ToolbarMenuElementEmbedded");
+export interface ToolbarMenuElementEmbedded extends ToolbarElementEmbedded {
+  withEntity: boolean;
+  autoSelect: boolean;
+}
+
 export const ToolbarMenuEntity: Type<ToolbarMenuEntity> = new Type<ToolbarMenuEntity>("ToolbarMenu");
 export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAssetEntity, IToolbarEntity {
   Type: "ToolbarMenu";
   owner: Entities.Lite<Entities.Entity> | null;
   guid: string /*Guid*/;
   name: string;
-  elements: Entities.MList<ToolbarElementEmbedded>;
+  elements: Entities.MList<ToolbarMenuElementEmbedded>;
+  entityType: Entities.Lite<Basics.TypeEntity> | null;
 }
 
 export namespace ToolbarMenuOperation {
@@ -74,10 +81,34 @@ export namespace ToolbarMessage {
   export const _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships: MessageKey = new MessageKey("ToolbarMessage", "_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships");
   export const FirstElementCanNotBeExtraIcon: MessageKey = new MessageKey("ToolbarMessage", "FirstElementCanNotBeExtraIcon");
   export const ExtraIconCanNotComeAfterDivider: MessageKey = new MessageKey("ToolbarMessage", "ExtraIconCanNotComeAfterDivider");
+  export const If0Selected: MessageKey = new MessageKey("ToolbarMessage", "If0Selected");
+  export const No0Selected: MessageKey = new MessageKey("ToolbarMessage", "No0Selected");
+  export const ShowTogether: MessageKey = new MessageKey("ToolbarMessage", "ShowTogether");
 }
 
 export namespace ToolbarOperation {
   export const Save : Operations.ExecuteSymbol<ToolbarEntity> = registerSymbol("Operation", "ToolbarOperation.Save");
   export const Delete : Operations.DeleteSymbol<ToolbarEntity> = registerSymbol("Operation", "ToolbarOperation.Delete");
+}
+
+export const ToolbarSwitcherEntity: Type<ToolbarSwitcherEntity> = new Type<ToolbarSwitcherEntity>("ToolbarSwitcher");
+export interface ToolbarSwitcherEntity extends Entities.Entity, IToolbarEntity, UserAssets.IUserAssetEntity {
+  Type: "ToolbarSwitcher";
+  name: string;
+  options: Entities.MList<ToolbarSwitcherOptionEmbedded>;
+  guid: string /*Guid*/;
+}
+
+export namespace ToolbarSwitcherOperation {
+  export const Save : Operations.ExecuteSymbol<ToolbarSwitcherEntity> = registerSymbol("Operation", "ToolbarSwitcherOperation.Save");
+  export const Delete : Operations.DeleteSymbol<ToolbarSwitcherEntity> = registerSymbol("Operation", "ToolbarSwitcherOperation.Delete");
+}
+
+export const ToolbarSwitcherOptionEmbedded: Type<ToolbarSwitcherOptionEmbedded> = new Type<ToolbarSwitcherOptionEmbedded>("ToolbarSwitcherOptionEmbedded");
+export interface ToolbarSwitcherOptionEmbedded extends Entities.EmbeddedEntity {
+  Type: "ToolbarSwitcherOptionEmbedded";
+  toolbarMenu: Entities.Lite<ToolbarMenuEntity>;
+  iconName: string | null;
+  iconColor: string | null;
 }
 

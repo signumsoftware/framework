@@ -177,7 +177,7 @@ export default function UserChartMenu(p: UserChartMenuProps): React.JSX.Element 
 
   return (
     <Dropdown onToggle={() => setIsOpen(!isOpen)} show={isOpen}>
-      <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light">
+      <Dropdown.Toggle id="userQueriesDropDown" variant="tertiary">
         <span><FontAwesomeIcon icon="chart-bar" /> &nbsp; {label}</span>
       </Dropdown.Toggle>
       <Dropdown.Menu>

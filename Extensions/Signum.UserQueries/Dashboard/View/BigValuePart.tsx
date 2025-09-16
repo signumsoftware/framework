@@ -71,6 +71,7 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
   });
 
   return <BigValueSearchCounter
+    clickable={p.content.userQuery != null}
     findOptions={foExpanded}
     valueToken={valueToken}
     text={translated(p.partEmbedded, a => a.title) || (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName)}
@@ -85,6 +86,7 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
 
 interface BigValueBadgeProps {
   findOptions: FindOptions;
+  clickable: boolean;
   valueToken: QueryToken | null;
   text?: string;
   iconName?: string;
@@ -104,29 +106,28 @@ export function BigValueSearchCounter(p: BigValueBadgeProps): React.JSX.Element 
     <div className={classes("card", "border-light shadow-sm mb-3", "o-hidden")}
       style={{
       backgroundColor: p.customColor ?? undefined,
-      color: Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black"
-    }}>
-      <div className={classes("card-body")} onClick={e => vsc.current!.handleClick(e)} style={{
-        cursor: "pointer",
-        color: p.titleColor ?? (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black")
+      color: Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "var(--bs-body-color)"
       }}>
-        <div className="row">
-          <div className="col-lg-3">
-            {p.iconName &&
-              <FontAwesomeIcon icon={parseIcon(p.iconName)!} color={p.iconColor} size="4x" />}
-          </div>
-          <div className={classes("col-lg-9 flip", "text-end")}>
+      <div className={classes("card-body")} onClick={p.clickable ? (e => vsc.current!.handleClick(e)) : undefined} style={{
+        cursor: p.clickable ? "pointer" : undefined,
+        color: p.titleColor ?? (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "var(--bs-body-color)")
+      }}>
+        <div className="dashboard-flex">
+          <div className="left">
             <h3>
               <SearchValue ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
                 searchControlProps={{ extraOptions: { userQuery: toLite(p.userQuery) } }}
                 valueToken={p.valueToken ?? undefined}
               />
-                {/*customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}*/}
+              {/*customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}*/}
             </h3>
+            <h3 className="medium">{p.text}</h3>
+
           </div>
-        </div>
-        <div className={classes("flip", "text-end")}>
-          <h6 className="large">{p.text}</h6>
+          <div className="right"> 
+            {p.iconName &&
+              <FontAwesomeIcon icon={parseIcon(p.iconName)!} color={p.iconColor} size="3x" />}
+          </div>
         </div>
       </div>
     </div>

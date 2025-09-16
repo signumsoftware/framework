@@ -5,7 +5,7 @@ import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation, ShowCount } from './Signum.Toolbar'
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation, ShowCount, ToolbarSwitcherEntity, ToolbarSwitcherOptionEmbedded, ToolbarMenuElementEmbedded } from './Signum.Toolbar'
 import { Constructor } from '@framework/Constructor'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { Dic } from '@framework/Globals';
@@ -22,12 +22,13 @@ export namespace ToolbarClient {
     Navigator.addSettings(new EntitySettings(ToolbarEntity, t => import('./Templates/Toolbar')));
     Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => import('./Templates/ToolbarMenu')));
     Navigator.addSettings(new EntitySettings(ToolbarElementEmbedded, t => import('./Templates/ToolbarElement')));
+    Navigator.addSettings(new EntitySettings(ToolbarMenuElementEmbedded, t => import('./Templates/ToolbarElement')));
+    Navigator.addSettings(new EntitySettings(ToolbarSwitcherEntity, t => import('./Templates/ToolbarSwitcher')));
+    Navigator.addSettings(new EntitySettings(ToolbarSwitcherOptionEmbedded, t => import('./Templates/ToolbarSwitcherOption')));
   
     registerConfig(new QueryToolbarConfig());
   
     Finder.addSettings({ queryName: ToolbarEntity, defaultOrders: [{ token: ToolbarEntity.token(a => a.priority), orderType: "Descending" }] });
-  
-    Constructor.registerConstructor(ToolbarElementEmbedded, tn => ToolbarElementEmbedded.New({ type: "Item" }));
   
     AppContext.clearSettingsActions.push(cleanConfigs);
   
@@ -63,12 +64,15 @@ export interface ToolbarResponse<T extends Entity> {
   type: ToolbarElementType;
   label?: string;
   content?: Lite<T>;
+  entityType?: string;
   url?: string;
   iconName?: string;
   iconColor?: string;
   showCount?: ShowCount;
   autoRefreshPeriod?: number;
   openInPopup?: boolean;
+  autoSelect?: boolean;
+  withEntity?: boolean;
   elements?: Array<ToolbarResponse<any>>;
   extraIcons?: Array<ToolbarResponse<any>>;
 }

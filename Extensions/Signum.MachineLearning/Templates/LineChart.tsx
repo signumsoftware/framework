@@ -41,7 +41,7 @@ export default function LineChart(p: LineChartProps): React.JSX.Element {
     return (
       <svg width={width} height={height}>
         {series.map((s, i) => renderSerie(scaleX, height, s, i))}
-        <line x1={0} x2={width} y1={height - 20} y2={height - 20} stroke="black" strokeWidth={1} />
+        <line x1={0} x2={width} y1={height - 20} y2={height - 20} stroke="var(--bs-body-color)" strokeWidth={1} />
         {series.map((s, i) => (
           <g key={i}>
             {s.title && <title>{s.title}</title>}

@@ -117,7 +117,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
   return (
     <svg direction="ltr" width={width} height={height}>
-
+      
       {hasHorizontalScale ?
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={keyColumn as ChartColumn<number>} x={x as d3.ScaleContinuousNumeric<number, number>} /> :
         <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x as d3.ScaleBand<string>} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
@@ -159,7 +159,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
                   transform={translate(getX(v)! - rectRadious, -y(v[1])!)}
                   width={2 * rectRadious}
                   fillOpacity={active == true ? undefined : .2}
-                  fill={active == true ? "black" : colorByKey[s.key] ?? color(s.key)}
+                  fill={active == true ? "var(--bs-body-color)" : colorByKey[s.key] ?? color(s.key)}
                   height={y(v[1])! - y(v[0])!}
                   onClick={e => onDrillDown(row.rowClick, e)}
                   cursor="pointer">
@@ -171,9 +171,9 @@ export default function renderStackedLines({ data, width, height, parameters, lo
                 {(bw > 15 || hasHorizontalScale) && parseFloat(parameters["NumberOpacity"]) > 0 &&
                   <TextRectangle className="number-label sf-transition"
                     rectangleAtts={{
-                      fill: colorByKey[s.key] ?? color(s.key),
+                      fill: active == true ? "var(--bs-body-color)" : colorByKey[s.key] ?? color(s.key),
                       opacity: active == false ? .5 : parameters["NumberOpacity"],
-                      stroke: active == true ? "black" : "none",
+                      stroke: active == true ? "var(--bs-body-color)" : "none",
                       strokeWidth: active == true ? 2 : undefined,
                       className: "hover-target"
                     }}

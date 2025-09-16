@@ -24,7 +24,7 @@ export default function CultureDropdown(p: { fullName?: boolean }): React.ReactE
   return (
     <NavDropdown data-culture={current.name} title={p.fullName ? current.nativeName : simplifyName(current.nativeName)} className="sf-culture-dropdown">
       {Dic.map(cultures, (name, c, i) =>
-        <NavDropdown.Item key={i} data-culture={name} disabled={is(c, current)} onClick={() => handleSelect(c)}>
+        <NavDropdown.Item key={i} data-culture={name} active={is(c, current)} onClick={() => handleSelect(c)}>
           {p.fullName ? getToString(c) : simplifyName(getToString(c)!)}
         </NavDropdown.Item>
       )}
@@ -77,7 +77,7 @@ export function CultureDropdownMenuItem(props: {
       </div>
       <div style={{ display: show ? "block" : "none" }}>
         {Dic.map(cultures, (name, c, i) =>
-          <NavDropdown.Item key={i} data-culture={name} disabled={is(c, current)} onClick={() => handleSelect(c)}>
+          <NavDropdown.Item key={i} data-culture={name} active={is(c, current)} onClick={() => handleSelect(c)}>
             {props.fullName ? getToString(c) : simplifyName(getToString(c)!)}
           </NavDropdown.Item>
         )}

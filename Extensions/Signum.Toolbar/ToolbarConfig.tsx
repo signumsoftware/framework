@@ -3,10 +3,10 @@ import { Location } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import * as AppContext from '@framework/AppContext';
-import { Entity } from '@framework/Signum.Entities';
+import { Entity, Lite } from '@framework/Signum.Entities';
 import { Type } from '@framework/Reflection';
 import { fallbackIcon, parseIcon } from '@framework/Components/IconTypeahead';
-import { ToolbarNavItem, renderExtraIcons } from './Renderers/ToolbarRenderer';
+import { ToolbarNavItem, renderExtraIcons, isActive } from './Renderers/ToolbarRenderer';
 import { ToolbarClient, ToolbarResponse } from './ToolbarClient';
 
 
@@ -17,17 +17,17 @@ export abstract class ToolbarConfig<T extends Entity> {
   }
 
 
-  getIcon(element: ToolbarResponse<T>): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null {
+  getIcon(element: ToolbarResponse<T>, entity: Lite<Entity> | null): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null {
     const defaultIcon = this.getDefaultIcon();
     return (
       <>
-        {ToolbarConfig.coloredIcon(parseIcon(element.iconName) ?? defaultIcon.icon, element.iconColor ?? defaultIcon.iconColor)}
-        {this.getCounter(element)}
+        {ToolbarConfig.coloredIcon(parseIcon(element.iconName) ?? defaultIcon, element.iconColor)}
+        {this.getCounter(element, entity)}
       </>
     );
   }
 
-  abstract getDefaultIcon(): IconColor;
+  abstract getDefaultIcon(): IconProp;
 
   static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactElement | null {
     if (!icon)
@@ -36,16 +36,16 @@ export abstract class ToolbarConfig<T extends Entity> {
     return <FontAwesomeIcon icon={fallbackIcon(icon)} className={"icon"} color={color} />;
   }
 
-  getCounter(element: ToolbarResponse<T>): React.ReactElement | undefined {
+  getCounter(element: ToolbarResponse<T>, entity: Lite<Entity> | null): React.ReactElement | undefined {
     return undefined;
   }
 
-  abstract navigateTo(element: ToolbarResponse<T>): Promise<string | null>;
-  abstract isCompatibleWithUrlPrio(element: ToolbarResponse<T>, location: Location, query: any): number;
+  abstract navigateTo(element: ToolbarResponse<T>, selectedEntity: Lite<Entity> | null): Promise<string | null>;
+  abstract isCompatibleWithUrlPrio(element: ToolbarResponse<T>, location: Location, query: any, entityType?: string): { prio: number, inferredEntity ?: Lite<Entity> } | null;
 
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>): void {
+  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>, selectedEntity: Lite<Entity> | null): void {
     e.preventDefault();
-    this.navigateTo(res).then(url => {
+    this.navigateTo(res, selectedEntity).then(url => {
       if (url)
         AppContext.pushOrOpenInTab(url, e);
     });
@@ -55,22 +55,36 @@ export abstract class ToolbarConfig<T extends Entity> {
     return true;
   }
 
-  getMenuItem(res: ToolbarResponse<T>, active: ToolbarResponse<any> | null, key: number | string, onAutoClose?: () => void): React.JSX.Element {
+  getMenuItem(res: ToolbarResponse<T>, key: number | string, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null): React.JSX.Element {
     return (
       <ToolbarNavItem key={key}
         title={res.label}
         onClick={(e: React.MouseEvent<any>) => {
-          this.handleNavigateClick(e, res);
-          if (onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
-            onAutoClose();
+          this.handleNavigateClick(e, res, selectedEntity);
+          if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
+            ctx.onAutoClose();
         }}
-        active={res == active}
-        extraIcons={renderExtraIcons(res.extraIcons, active, onAutoClose)}
-        icon={this.getIcon(res)}
+        active={isActive(ctx.active, res, selectedEntity)}
+        extraIcons={renderExtraIcons(res.extraIcons, ctx, selectedEntity)}
+        icon={this.getIcon(res, selectedEntity)}
       />
     );
   }
 }
+
+export interface ToolbarContext {
+  onAutoClose?: () => void;
+  onRefresh: () => void;
+  active: InferActiveResponse | null;
+}
+
+export interface InferActiveResponse {
+  prio: number;
+  response: ToolbarResponse<any>;
+  inferredEntity?: Lite<Entity>;
+  menuWithEntity?: { menu: ToolbarResponse<any>, entity: Lite<Entity> };
+}
+
 
 export interface IconColor {
   icon: IconProp;

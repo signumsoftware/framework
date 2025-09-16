@@ -15,7 +15,7 @@ import { AuthClient } from '../Signum.Authorization/AuthClient'
 import {
   DashboardPermission, DashboardEntity, LinkListPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded,
   CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity, DashboardLiteModel,
-  HealthCheckPartEntity,
+  HealthCheckPartEntity, CustomPartEntity,
   TextPartEntity
 } from './Signum.Dashboard'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
@@ -72,6 +72,7 @@ export namespace DashboardClient {
     Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard'), { modalSize: "xl" }));
     Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
+    Navigator.addSettings(new EntitySettings(CustomPartEntity, e => import('./Admin/CustomPart')));
     Navigator.addSettings(new EntitySettings(TextPartEntity, e => import('./Admin/TextPart')));
     Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => import('./Admin/LinkListPart')));
     Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
@@ -123,6 +124,12 @@ export namespace DashboardClient {
       component: () => import('./View/HealthCheckPart').then(a => a.default),
       icon: () => ({ icon: "heart-pulse", iconColor: "forestgreen" }),
       withPanel: () => false
+    });
+
+    registerRenderer(CustomPartEntity, {
+      component: () => import('./View/CustomPart').then(a => a.default),
+      icon: () => ({ icon: "cube", iconColor: "forestgreen" }),
+      withPanel: () => true,
     });
 
     onEmbeddedWidgets.push(wc => {
@@ -196,7 +203,7 @@ export namespace DashboardClient {
   }
 
   export function getQueryNames(part: IPartEntity): QueryEntity[] {
-    return partRenderers[getTypeName(part)].getQueryNames?.(part) ?? [];
+    return partRenderers[getTypeName(part)]?.getQueryNames?.(part) ?? [];
   }
 
   export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>): string {
@@ -275,8 +282,28 @@ export namespace DashboardClient {
   export namespace Options {
 
     export let customTitle: (dashboard: DashboardEntity) => React.ReactNode = d => <DashboardTitle dashboard={d} />;
-  }
 
+    export const customPartRenderers: Record<string /*typeName*/, Record<string /*customPartName*/, CustomPartRenderer>> = {};
+
+    export function registerCustomPartRenderer<T extends Entity>(type: Type<T>, customPartName: string, renderer: () => Promise<{ default: React.ComponentType<CustomPartProps<T>> }>): void {
+      const dic = customPartRenderers[type.typeName] ??= {};
+      dic[customPartName] = {
+        renderer: renderer as () => Promise<{ default: React.ComponentType<CustomPartProps<Entity>> }>
+      };
+    }
+  }
+}
+
+interface CustomPartRenderer {
+  renderer: () => Promise<{ default: React.ComponentType<CustomPartProps<Entity>> }>;
+}
+
+export interface CustomPartProps<T extends Entity> {
+
+  partEmbedded: PanelPartEmbedded;
+  content: CustomPartEntity;
+  entity: Lite<T>;
+  dashboardController: DashboardController;
 }
 
 declare module '@framework/Signum.Entities' {
@@ -305,7 +332,7 @@ export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo
   var title = SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
 
   return (
-    <a onClick={e => { e.preventDefault(); p.onClick(tis, qd); }} href="#" className="btn btn-sm btn-light sf-create me-2" title={title}>
+    <a onClick={e => { e.preventDefault(); p.onClick(tis, qd); }} href="#" className="btn btn-sm btn-tertiary sf-create me-2" title={title}>
       <FontAwesomeIcon icon={"plus"} /> {title}
     </a>
   );

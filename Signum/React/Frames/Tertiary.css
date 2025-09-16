@@ -1,0 +1,17 @@
+﻿
+.btn.btn-tertiary {
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-bg: var(--bs-tertiary-bg);
+    --bs-btn-border-color: var(--bs-tertiary-bg);
+    --bs-btn-hover-color: var(--bs-body-color);
+    --bs-btn-hover-bg: color-mix(in srgb, var(--bs-tertiary-bg) 90%, var(--bs-body-color));
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--bs-tertiary-bg) 90%, var(--bs-body-color));
+    --bs-btn-focus-shadow-rgb: var(--bs-tertiary-bg-rgb, 108,117,125);
+    --bs-btn-active-color: var(--bs-body-color);
+    --bs-btn-active-bg: color-mix(in srgb, var(--bs-tertiary-bg) 80%, var(--bs-body-color));
+    --bs-btn-active-border-color: color-mix(in srgb, var(--bs-tertiary-bg) 80%, var(--bs-body-color));
+    --bs-btn-disabled-color: var(--bs-body-color);
+    --bs-btn-disabled-bg: var(--bs-tertiary-bg);
+    --bs-btn-disabled-border-color: var(--bs-tertiary-bg);
+}
+

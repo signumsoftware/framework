@@ -10,22 +10,6 @@ import { ErrorBoundary } from '@framework/Components/ErrorBoundary';
 import { ReadonlyBinding } from '@framework/Lines'
 import { useForceUpdate } from '../../../Signum/React/Hooks';
 
-export function HtmlViewer(p: { text: string; htmlAttributes?: React.HTMLAttributes<HTMLDivElement> }): React.JSX.Element {
-
-  var binding = new ReadonlyBinding(p.text, "");
-
-  return (
-    <div className="html-viewer" >
-      <HtmlEditor readOnly
-        binding={binding}
-        htmlAttributes={p.htmlAttributes}
-        small
-        plugins={[]}
-      />
-    </div>
-  );
-}
-
 export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
 
@@ -88,6 +72,22 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
           getEditType()
         }
       </div>
+    </div>
+  );
+}
+
+export function HtmlViewer(p: { text: string; htmlAttributes?: React.HTMLAttributes<HTMLDivElement> }): React.JSX.Element {
+
+  var binding = new ReadonlyBinding(p.text, "");
+
+  return (
+    <div className="html-viewer" >
+      <HtmlEditor readOnly
+        binding={binding}
+        htmlAttributes={p.htmlAttributes}
+        small
+        plugins={[]}
+      />
     </div>
   );
 }

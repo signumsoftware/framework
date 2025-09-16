@@ -1,11 +1,12 @@
 import * as React from 'react'
 import { Location } from 'react-router'
 import { IsByAll } from '@framework/Reflection'
-import { getToString } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite } from '@framework/Signum.Entities'
 import { Finder } from '@framework/Finder'
 import { QueryEntity } from '@framework/Signum.Basics'
-import { ToolbarClient, ToolbarResponse } from './ToolbarClient'
-import { ToolbarConfig, IconColor } from "./ToolbarConfig"
+import { ToolbarClient, ToolbarResponse } from './ToolbarClient';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { ToolbarConfig} from "./ToolbarConfig"
 import { SearchValue, FindOptions } from '@framework/Search';
 import { Navigator } from '@framework/Navigator';
 import { useAPI, useInterval } from '@framework/Hooks'
@@ -18,7 +19,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     super(type);
   }
 
-  getCounter(element: ToolbarResponse<QueryEntity>): React.ReactElement | undefined {
+  getCounter(element: ToolbarResponse<QueryEntity>, entity: Lite<Entity> | null): React.ReactElement | undefined {
     if (element.showCount != null) {
       return (
         <SearchToolbarCount
@@ -32,16 +33,13 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     return undefined;
   }
 
-  getDefaultIcon(): IconColor {
-    return ({
-      icon: "rectangle-list",
-      iconColor: "dodgerblue",
-    });
+  getDefaultIcon(): IconProp {
+    return "rectangle-list";
   }
 
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<QueryEntity>): void {
+  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<QueryEntity>, selectedEntity: Lite<Entity> | null): void {
     if (!res.openInPopup)
-      super.handleNavigateClick(e, res);
+      super.handleNavigateClick(e, res, selectedEntity);
     else {
       Finder.explore({ queryName: getToString(res.content)! })
     }
@@ -51,8 +49,11 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     return Promise.resolve(Finder.findOptionsPath({ queryName: getToString(res.content)! }));
   }
 
-  isCompatibleWithUrlPrio(res: ToolbarResponse<QueryEntity>, location: Location, query: any): number {
-    return location.pathname == Finder.findOptionsPath({ queryName: getToString(res.content)! }) ? 1 : 0;
+  isCompatibleWithUrlPrio(res: ToolbarResponse<QueryEntity>, location: Location, query: any, entityType?: string): { prio: number, inferredEntity?: Lite<Entity> } | null {
+    if (location.pathname == Finder.findOptionsPath({ queryName: getToString(res.content)! }))
+      return { prio: 1 };
+
+    return null;
   }
 }
 
@@ -93,7 +94,7 @@ export function ToolbarCount(p: { num: number | null | undefined, showCount: Sho
 
   return (
     <div className="sf-toolbar-count-container">
-      <div className={classes("badge badge-pill sf-toolbar-count", !p.num ? "bg-light text-secondary" : "bg-danger")}>{p.num ?? "…"}</div>
+      <div className={classes("badge badge-pill sf-toolbar-count", !p.num ? "text-bg-light" : "text-bg-danger")}>{p.num ?? "…"}</div>
     </div>
   );
 }

@@ -118,16 +118,16 @@ export namespace Finder {
     return querySettings[getQueryKey(queryName)] ?? (querySettings[getQueryKey(queryName)] = { queryName: queryName });
   }
 
-  export const isFindableEvent: Array<(queryKey: string, fullScreen: boolean) => boolean> = [];
+  export const isFindableEvent: Array<(queryKey: string, fullScreen: boolean, context?: Lite<Entity>) => boolean> = [];
 
-  export function isFindable(queryName: PseudoType | QueryKey, fullScreen: boolean): boolean {
+  export function isFindable(queryName: PseudoType | QueryKey, fullScreen: boolean, context?: Lite<Entity>): boolean {
 
     if (!isQueryDefined(queryName))
       return false;
 
     const queryKey = getQueryKey(queryName);
 
-    return isFindableEvent.every(f => f(queryKey, fullScreen));
+    return isFindableEvent.every(f => f(queryKey, fullScreen, context));
   }
 
   export function find<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;

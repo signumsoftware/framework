@@ -239,7 +239,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
   if (p.ctx.binding == null && p.ctx.previousVersion) {
     return (
       <li className="sf-strip-element" >
-        <div style={{ padding: 0, minHeight: p.vertical ? 10 : 12, minWidth: p.vertical ? undefined : 30, backgroundColor: "#ff000021" }}>
+        <div style={{ padding: 0, minHeight: p.vertical ? 10 : 12, minWidth: p.vertical ? undefined : 30, backgroundColor: "var(--bs-danger-bg-subtle)" }}>
           {p.vertical ? getTimeMachineIcon({ ctx: p.ctx, translateX: "-90%", translateY: "-10%" }) : getTimeMachineIcon({ ctx: p.ctx, translateX: "-80%", translateY: "-60%" })}
         </div>
       </li>

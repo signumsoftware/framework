@@ -84,7 +84,7 @@ export default function ChartTimeSeries(p: { chartTimeSeries: ChartTimeSeriesEmb
   }
 
   return (
-    <div className={classes("sf-system-time-editor", "alert alert-primary mb-0")}>
+    <div className={classes("sf-system-time-editor", "alert alert-primary")}>
       <span>Time series</span>
       <span className="ms-2 d-flex">{QueryTokenDateMessage.Every01.niceToString().formatHtml(renderTimeSerieStep(), renderTimeSeriesUnit())}</span>
       {renderDateTime("startDate")}

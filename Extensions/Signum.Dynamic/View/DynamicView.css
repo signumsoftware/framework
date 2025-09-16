@@ -4,14 +4,14 @@
 }
 
 div.design-left {
-    background-color: #f7f7f9;
-    border: 1px solid #e1e1e8;
+    background-color: var(--bs-secondary-bg);
+    border: 1px solid var(--bs-border-color);
     padding: 2px;
 }
 
-    div.design-left.open {
-        padding: 9px 14px;
-    }
+div.design-left.open {
+    padding: 9px 14px;
+}
 
 .design-left h3 {
     margin-top: 0px;
@@ -22,20 +22,20 @@ div.design-content {
 }
 
 span.design-changed {
-    color: black;
+    color: var(--bs-body-color);
 }
 
 span.design-default {
-    color: #777;
+    color: var(--bs-secondary-text);
 }
 
 .design-open-icon {
     opacity: 0.4;
 }
 
-    .design-open-icon:hover {
-        opacity: 0.6;
-    }
+.design-open-icon:hover {
+    opacity: 0.6;
+}
 
 @media screen and (min-width: 600px) {
 
@@ -60,7 +60,7 @@ span.design-default {
 
 .formula {
     margin-right: 5px;
-    color: #ccc;
+    color: var(--bs-secondary-text);
 }
 
 input[type=checkbox].design-check-box {
@@ -68,11 +68,11 @@ input[type=checkbox].design-check-box {
 }
 
 .formula:hover {
-    color: #aaa;
+    color: var(--bs-secondary-text);
 }
 
 .formula.active {
-    color: black;
+    color: var(--bs-body-color);
 }
 
 .filter-options .table {
@@ -89,14 +89,14 @@ ul.expression-list {
     padding-left: 20px;
 }
 
-    ul.expression-list a.sf-remove {
-        float: left;
-        margin-left: -20px;
-    }
+ul.expression-list a.sf-remove {
+    float: left;
+    margin-left: -20px;
+}
 
 
 .design-help-button {
-    background: #ddd;
+    background: var(--bs-secondary-bg);
     padding: 5px;
     margin: -5px;
 }
