@@ -8,7 +8,7 @@ import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useAPI, useUpdatedRef, useWindowEvent, useAPIWithReload } from '@framework/Hooks'
+import { useAPI, useUpdatedRef, useWindowEvent, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
 import { Entity, getToString, Lite, parseLite } from '@framework/Signum.Entities'
@@ -18,9 +18,10 @@ import { Dic, classes } from '@framework/Globals';
 import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage, ToolbarSwitcherEntity } from '../Signum.Toolbar';
 import DropdownList from "react-widgets-up/DropdownList";
 import { getNiceTypeName } from '../../../Signum/React/Operations/MultiPropertySetter';
-import { getTypeInfo, getTypeName, newLite } from '../../../Signum/React/Reflection';
+import { Binding, getTypeInfo, getTypeName, newLite } from '../../../Signum/React/Reflection';
 import { Finder } from '../../../Signum/React/Finder';
 import Toolbar from '../Templates/Toolbar';
+import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
 
 
 export default function ToolbarRenderer(p: {
@@ -204,9 +205,9 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
   }
 }
 
-function responseClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Lite<Entity> | null, e: React.SyntheticEvent, ctx: ToolbarContext) {
+function responseClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Lite<Entity> | null, e: React.SyntheticEvent | undefined, ctx: ToolbarContext) {
   if (r.url != null) {
-    linkClick(r, selectedEntity, e as React.MouseEvent, ctx);
+    linkClick(r, selectedEntity, e as React.MouseEvent | undefined, ctx);
   }
   else {
     var config = ToolbarClient.getConfig(r);
@@ -215,7 +216,7 @@ function responseClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Li
   }
 }
 
-function linkClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Lite<Entity> | null, e: React.MouseEvent, ctx: ToolbarContext) {
+function linkClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Lite<Entity> | null, e: React.MouseEvent | undefined, ctx: ToolbarContext) {
   let url = r.url!;
   Dic.getKeys(urlVariables).forEach(v => {
     url = url.replaceAll(v, urlVariables[v]());
@@ -229,7 +230,8 @@ function linkClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Lite<E
   else
     AppContext.pushOrOpenInTab(url, e);
 
-  if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
+
+  if (ctx.onAutoClose && !(e && (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)))
     ctx.onAutoClose();
 }
 
@@ -301,18 +303,30 @@ function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: Too
 }
 
 function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.ReactNode {
-
   const entityType = p.response.entityType;
-  const [selectedEntity, setSelectedEntity] = React.useState<Lite<Entity> | null>(null);
-  var entities = useAPI(() => !entityType ? null : Finder.API.fetchAllLites({ types: entityType }), [entityType]);
+  if (entityType)
+    return <ToolbarMenuItemsEntityType response={p.response} ctx={p.ctx} selectedEntity={p.selectedEntity} />
+  
+  return <>
+    {p.response.elements!.map((sr, i) => renderNavItem(sr, i, p.ctx, p.selectedEntity))}
+  </>;
+}
 
-  function renderEntity(e: Lite<Entity> | null) {
-    if (e == null)
-      return <span> - </span>;
 
-    return <span>{Navigator.renderLite(e)}</span>
+function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null  }): React.ReactNode {
+
+  const entityType = p.response.entityType!;
+  const selEntityRef = React.useRef<Lite<Entity> | null>(null);
+  const forceUpdate = useForceUpdate();
+
+  function setSelectedEntity(entity: Lite<Entity> | null) {
+    selEntityRef.current = entity;
+    forceUpdate();
   }
 
+
+  const entities = useAPI(() => Finder.API.fetchAllLites({ types: entityType }), [entityType]);
+  
   const active = p.ctx.active;
 
   React.useEffect(() => {
@@ -320,7 +334,7 @@ function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx
     if (active?.menuWithEntity && p.response.entityType &&
       is(active.menuWithEntity.menu.content, p.response.content)) {
 
-      if (!is(active.menuWithEntity.entity, selectedEntity))
+      if (!is(active.menuWithEntity.entity, selEntityRef.current))
         setSelectedEntity(active.menuWithEntity.entity);
     }
     else
@@ -330,30 +344,29 @@ function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx
 
   React.useEffect(() => {
 
-    if (selectedEntity && !selectedEntity.model && entities) {
-      var only = entities.onlyOrNull(a => is(a, selectedEntity));
+    if (selEntityRef.current && !selEntityRef.current.model && entities) {
+      var only = entities.onlyOrNull(a => is(a, selEntityRef.current));
       if (only != null)
         setSelectedEntity(only);
     }
-
     
-  }, [selectedEntity, entities]);
+  }, [selEntityRef.current, entities]);
 
-  function handleSelect(selectedEntity: Lite<Entity> | null, e: React.SyntheticEvent) {
+  function handleSelect(e: React.SyntheticEvent | undefined) {
 
-    setSelectedEntity(selectedEntity);
-
-    var autoSelect = p.response.elements?.firstOrNull(a => a.autoSelect && a.withEntity == Boolean(selectedEntity));
+    forceUpdate();
+    var autoSelect = p.response.elements?.firstOrNull(a => a.autoSelect && a.withEntity == Boolean(selEntityRef.current));
     if (autoSelect) {
-      responseClick(autoSelect, selectedEntity, e, p.ctx);
+      responseClick(autoSelect, selEntityRef.current, e, p.ctx);
     }
   }
 
+  const ctx = new TypeContext<Lite<Entity> | null>(undefined, undefined, undefined, new Binding(selEntityRef, "current"));
   return (
     <>
       {entityType && (
         <Nav.Item title={getTypeInfo(entityType).niceName} className="d-flex mx-2 mb-2">
-          <DropdownList
+          {/* <DropdownList
             value={selectedEntity}
             dataKey={((e: Lite<Entity>) => e && e.id) as any}
             textField={((e: Lite<Entity>) => e && getToString(e)) as any}
@@ -361,11 +374,16 @@ function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx
             data={[null, ...entities ?? []]}
             renderValue={a => renderEntity(a.item)}
             renderListItem={a => renderEntity(a.item)}
-          />
-          {renderExtraIcons(p.response.extraIcons, p.ctx, selectedEntity ?? p.selectedEntity)}
+            title={ctx.niceName(a => a.workLogReminder)}
+          /> */}
+          <div style={{ width: "100%" }}>
+            <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false}
+              onChange={e => handleSelect(e.originalEvent)} create={false} formGroupStyle="SrOnly" />
+          </div>
+          {renderExtraIcons(p.response.extraIcons, p.ctx, selEntityRef.current ?? p.selectedEntity)}
         </Nav.Item>
       )}
-      {p.response.elements!.filter(sr => Boolean(sr.withEntity) == Boolean(selectedEntity)).map((sr, i) => renderNavItem(sr, i, p.ctx, selectedEntity ?? p.selectedEntity))}
+      {p.response.elements!.filter(sr => Boolean(sr.withEntity) == Boolean(selEntityRef.current)).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity))}
     </>
   );
 }

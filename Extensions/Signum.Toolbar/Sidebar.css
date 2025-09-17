@@ -53,6 +53,20 @@
     overflow-y: auto;
     height: 100%;
 }
+.sidebar-inner .dropdown-menu.show {
+    position: relative;
+}
+.sidebar-inner .dropdown-item {
+    padding-left: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sidebar-inner .sf-entity-line .input-group .form-control {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .nav-arrow-icon {
     margin-left: 4px; /*place for icon*/

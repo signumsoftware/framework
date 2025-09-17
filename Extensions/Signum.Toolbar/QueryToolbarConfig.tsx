@@ -37,7 +37,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     return "rectangle-list";
   }
 
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<QueryEntity>, selectedEntity: Lite<Entity> | null): void {
+  override handleNavigateClick(e: React.MouseEvent<any> | undefined, res: ToolbarResponse<QueryEntity>, selectedEntity: Lite<Entity> | null): void {
     if (!res.openInPopup)
       super.handleNavigateClick(e, res, selectedEntity);
     else {
