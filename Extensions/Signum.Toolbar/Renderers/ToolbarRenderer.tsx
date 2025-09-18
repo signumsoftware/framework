@@ -87,6 +87,19 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
     const targetSegments = target.split("/");
 
     let id: number | string | undefined;
+    let type: string | undefined;
+    var idRegex = "(?<id>[0-9A-Za-z-]+)";
+    var typeRegex = "(?<type>[A-Za-z-]+)";
+
+    function assertValidId(id: string | undefined) {
+
+      if (!id)
+        return;
+
+      const m = id.match(new RegExp("^" + idRegex + "$"));
+      if (m == null)
+        throw new Error("Id is not valid:" + id);
+    }
 
     var matches = currentSegments.length == targetSegments.length && targetSegments.every((pattern, i) => {
 
@@ -95,22 +108,25 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
       if (value === pattern)
         return true;
 
-      if (pattern == ":id") {
-        id = value;
-        return true;
-      }
+      if (pattern.contains(":id") || pattern.contains(":type") || pattern.contains(":key")) {
 
-      if (pattern.contains(":id")) {
-
-        var idRegex = "([0-9A-Za-z-]+)";
-        const regexPattern = "^" + pattern.replace(":id", idRegex) + "$";
+        const regexPattern = "^" + pattern
+          .replace(":id", idRegex)
+          .replace(":type", typeRegex)
+          .replace(":key", typeRegex + ";" + idRegex) + "$";
         const regex = new RegExp(regexPattern);
         const match = value.match(regex)
-        id = match![1];
+        id = match.groups.id;
+        assertValidId(id);
+        type = match.groups.type;
+
+        if (type != null && type != entityType)
+          return false;
+
         return true;
       }
 
-      return currentSegments[i] === pattern;
+      return false;
     });
 
     if (matches)
@@ -238,7 +254,9 @@ function linkClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Lite<E
   });
 
   if (selectedEntity)
-    url = url.replaceAll(":id", selectedEntity.id!.toString());
+    url = url.replaceAll(":id", selectedEntity.id!.toString())
+      .replace(":type", selectedEntity.EntityType)
+      .replace(":key", liteKey(selectedEntity));
 
   if (isExternalLink(url))
     window.open(AppContext.toAbsoluteUrl(url));
