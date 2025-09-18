@@ -87,14 +87,29 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
 
     let id: number | string | undefined;
 
-    var matches = currentSegments.length == targetSegments.length && targetSegments.every((seg, i) => {
+    var matches = currentSegments.length == targetSegments.length && targetSegments.every((pattern, i) => {
 
-      if (seg == ":id") {
-        id = currentSegments[i];
+      const value = currentSegments[i];
+
+      if (value === pattern)
+        return true;
+
+      if (pattern == ":id") {
+        id = value;
         return true;
       }
 
-      return  currentSegments[i] === seg
+      if (pattern.contains(":id")) {
+
+        var idRegex = "([0-9A-Za-z-]+)";
+        const regexPattern = "^" + pattern.replace(":id", idRegex) + "$";
+        const regex = new RegExp(regexPattern);
+        const match = value.match(regex)
+        id = match![1];
+        return true;
+      }
+
+      return currentSegments[i] === pattern;
     });
 
     if (matches)

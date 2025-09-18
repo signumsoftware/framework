@@ -177,20 +177,24 @@ public static class ToolbarLogic
     }
 
     public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
-        RegisterTypeCondition(sb, typeCondition, owner => owner.Is(UserEntity.Current));
+        RegisterTypeCondition(sb, typeCondition,typeof(UserEntity), owner => owner.Is(UserEntity.Current));
 
     public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
-        RegisterTypeCondition(sb, typeCondition, owner => owner == null || AuthLogic.CurrentRoles().Contains(owner));
+        RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), owner => owner == null || AuthLogic.CurrentRoles().Contains(owner));
 
-    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Expression<Func<Lite<IEntity>?, bool>> isAllowed)
+    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<Lite<IEntity>?, bool>> isAllowed)
     {
-        sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, typeof(RoleEntity));
+        sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, ownerType);
 
         TypeConditionLogic.RegisterCompile<ToolbarEntity>(typeCondition, t => isAllowed.Evaluate(t.Owner));
 
-        sb.Schema.Settings.AssertImplementedBy((ToolbarMenuEntity t) => t.Owner, typeof(RoleEntity));
+        sb.Schema.Settings.AssertImplementedBy((ToolbarMenuEntity t) => t.Owner, ownerType);
 
         TypeConditionLogic.RegisterCompile<ToolbarMenuEntity>(typeCondition, t => isAllowed.Evaluate(t.Owner));
+
+        sb.Schema.Settings.AssertImplementedBy((ToolbarSwitcherEntity t) => t.Owner, ownerType);
+
+        TypeConditionLogic.RegisterCompile<ToolbarSwitcherEntity>(typeCondition, t => isAllowed.Evaluate(t.Owner));
     }
 
     public static void RegisterDelete<T>(SchemaBuilder sb, Expression<Func<T, QueryEntity>>? querySelectorForSync = null) where T : Entity

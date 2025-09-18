@@ -11,6 +11,7 @@ export default function ToolbarSwitcher(p: { ctx: TypeContext<ToolbarSwitcherEnt
   return (
     <div>
       <AutoLine ctx={ctx.subCtx(f => f.name)} />
+      <AutoLine ctx={ctx.subCtx(f => f.owner)} />
       <EntityTable ctx={ctx.subCtx(a => a.options)} view
         columns={[
           {

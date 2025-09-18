@@ -13,6 +13,7 @@ import { QueryString } from '@framework/QueryString'
 import { DashboardClient } from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 import { OverlayTrigger, Popover } from "react-bootstrap";
+import { useTitle } from '@framework/AppContext'
 
 export default function DashboardPage(): React.JSX.Element {
   const location = useLocation();
@@ -37,11 +38,31 @@ export default function DashboardPage(): React.JSX.Element {
 
   var cachedQueries = React.useMemo(() => DashboardClient.toCachedQueries(dashboardWithQueries), [dashboardWithQueries]);
 
+  useTitle(entity ? getToString(entity) : getToString(dashboard));
+
+
   return (
     <div className="sf-dashboard-page">
+    
       {!dashboard ? <h2 className="display-6"><span>{JavascriptMessage.loading.niceToString()}</span></h2> :
         <div className="d-flex">
-          {<h3 className="display-6"><span>{DashboardClient.Options.customTitle(dashboard)}</span></h3>}
+        <div>
+            {entityKey ?
+              <div>
+                {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
+                  <h3>
+                    <span className="display-6">{getToString(entity)}</span>
+                    {Navigator.isViewable({ entity: entity, canExecute: {} } as EntityPack<Entity>) &&
+                      <Link className="display-6 ms-2" to={Navigator.navigateRoute(entity)}><FontAwesomeIcon icon="external-link" /></Link>
+                    }
+                    <small className="ms-1 sf-type-nice-name text-muted"> - {Navigator.getTypeSubTitle(entity, undefined)}</small>
+                  </h3>
+                }
+                <h4 className="display-7">{DashboardClient.Options.customTitle(dashboard)}</h4>
+              </div> :
+              <h3 className="display-6">{DashboardClient.Options.customTitle(dashboard)}</h3>
+            }
+          </div>
           {!Navigator.isReadOnly(DashboardEntity) &&
             <div className="ms-auto">
               {dashboardWithQueries.cachedQueries.length ? <span className="mx-4" title={DashboardMessage.ForPerformanceReasonsThisDashboardMayShowOutdatedInformation.niceToString() + "\n" +
@@ -55,21 +76,6 @@ export default function DashboardPage(): React.JSX.Element {
             </div>
           }
         </div>}
-
-      {entityKey &&
-        <div>
-          {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
-            <h3>
-              {Navigator.isViewable({ entity: entity, canExecute: {} } as EntityPack<Entity>) ?
-                <Link className="display-6" to={Navigator.navigateRoute(entity)}>{getToString(entity)}</Link> :
-                <span className="display-6">{getToString(entity)}</span>
-              }
-              &nbsp;
-            <small className="sf-type-nice-name">{Navigator.getTypeSubTitle(entity, undefined)}</small>
-            </h3>
-          }
-        </div>
-      }
 
       {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} cachedQueries={cachedQueries!} entity={entity || undefined} deps={[refreshCounter, entity]} reload={reloadDashboard} hideEditButton={true} />}
     </div>

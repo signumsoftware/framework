@@ -95,6 +95,7 @@ export const ToolbarSwitcherEntity: Type<ToolbarSwitcherEntity> = new Type<Toolb
 export interface ToolbarSwitcherEntity extends Entities.Entity, IToolbarEntity, UserAssets.IUserAssetEntity {
   Type: "ToolbarSwitcher";
   name: string;
+  owner: Entities.Lite<Entities.Entity> | null;
   options: Entities.MList<ToolbarSwitcherOptionEmbedded>;
   guid: string /*Guid*/;
 }

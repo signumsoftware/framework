@@ -1,3 +1,4 @@
+using Signum.Authorization;
 using Signum.UserAssets;
 using System;
 using System.Xml.Linq;
@@ -10,6 +11,9 @@ public class ToolbarSwitcherEntity : Entity, IToolbarEntity, IUserAssetEntity
     [UniqueIndex]
     [StringLengthValidator(Max = 100)]
     public string Name { get; set; }
+
+    [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
+    public Lite<IEntity>? Owner { get; set; }
 
     [PreserveOrder, NoRepeatValidator]
     public MList<ToolbarSwitcherOptionEmbedded> Options { get; set; } = new MList<ToolbarSwitcherOptionEmbedded>();
