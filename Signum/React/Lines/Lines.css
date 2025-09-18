@@ -347,7 +347,7 @@ ul.nav-tabs {
 }
 
 .sf-move:not(.disabled):hover {
-    color: var(--bs-purple);
+    color: var(--bs-info);
     cursor: move;
 }
 

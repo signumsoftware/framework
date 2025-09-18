@@ -37,7 +37,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     return "rectangle-list";
   }
 
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<UserQueryEntity>, selectedEntity: Lite<Entity> | null): void {
+  override handleNavigateClick(e: React.MouseEvent<any> | undefined, res: ToolbarResponse<UserQueryEntity>, selectedEntity: Lite<Entity> | null): void {
     if (!res.openInPopup)
       super.handleNavigateClick(e, res, selectedEntity);
     else {

@@ -238,7 +238,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
 
   if (p.ctx.binding == null && p.ctx.previousVersion) {
     return (
-      <li className="sf-strip-element" >
+      <li className="sf-strip-element" title={getToString(p.ctx.value)} >
         <div style={{ padding: 0, minHeight: p.vertical ? 10 : 12, minWidth: p.vertical ? undefined : 30, backgroundColor: "var(--bs-danger-bg-subtle)" }}>
           {p.vertical ? getTimeMachineIcon({ ctx: p.ctx, translateX: "-90%", translateY: "-10%" }) : getTimeMachineIcon({ ctx: p.ctx, translateX: "-80%", translateY: "-60%" })}
         </div>
@@ -301,6 +301,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
 
   return (
     <li className={classes("sf-strip-element", containerHtmlAttributes?.className, drag?.dropClass)}
+      title={getToString(p.ctx.value)}
       {...EntityBaseController.entityHtmlAttributes(p.ctx.value)}
       {...containerHtmlAttributes}>
       <div className="sf-strip-dropable"

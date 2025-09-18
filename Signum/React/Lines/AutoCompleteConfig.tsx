@@ -13,6 +13,7 @@ export interface AutocompleteConfig<T> {
   getItemsDelay(): number | undefined;
   getMinLength(): number | undefined;
   renderItem(item: T, highlighter: TextHighlighter): React.ReactNode;
+  itemTitle(item: T, highlighter: TextHighlighter): string | undefined;
   renderList?(typeahead: TypeaheadController): React.ReactNode;
   getEntityFromItem(item: T): Promise<Lite<Entity> | ModifiableEntity | undefined>;
   getDataKeyFromItem(item: T): string | undefined;
@@ -71,6 +72,17 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     return this.abortableRequest.getData(subStr);
   }
 
+  itemTitle(item: Lite<T> | AutocompleteConstructor<T>, hl: TextHighlighter): string | undefined {
+    if (isAutocompleteConstructor<T>(item)) {
+      var ti = getTypeInfo(item.type);
+      return `${SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "${hl.query}"`;
+    }
+
+    var toStr = getToString(item);
+
+    return toStr;
+  }
+
   renderItem(item: Lite<T> | AutocompleteConstructor<T>, hl: TextHighlighter): React.ReactNode{
 
     if (isAutocompleteConstructor<T>(item)) {
@@ -81,10 +93,9 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
       return <em>{SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "{hl.query}"</em>;
     }
 
-    var toStr = getToString(item);
     var html = Navigator.renderLite(item, hl);
     if (this.showType)
-      return <span title={toStr}>{html}<TypeBadge entity={item} /></span>;
+      return <span>{html}<TypeBadge entity={item} /></span>;
     else
       return html;
   }
@@ -242,7 +253,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
     if (/^id[: ]/.test(subStr)) {
 
-      var id = subStr.substr(3)?.trim();
+      var id = subStr.slice(3)?.trim();
 
       filters.insertAt(0, {
         token: "Entity.Id",
@@ -296,6 +307,15 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
           ...(this.getAutocompleteConstructor && this.getAutocompleteConstructor(subStr, rt.rows)) ?? []
         ]
       });
+  }
+
+  itemTitle(item: ResultRow | AutocompleteConstructor<Entity>, hl: TextHighlighter): string {
+    if (isAutocompleteConstructor<Entity>(item)) {
+      var ti = getTypeInfo(item.type);
+      return `${SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "${hl.query}"`;
+    }
+
+    return getToString(item.entity!);
   }
 
   renderItem(item: ResultRow | AutocompleteConstructor<Entity>, hl: TextHighlighter): React.ReactNode {
@@ -434,6 +454,19 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
 
   getMinLength(): number | undefined {
     return Object.values(this.implementations).map(a => a.getMinLength()).notNull().max() ?? undefined;
+  }
+
+  itemTitle(item: unknown, hl: TextHighlighter): string | undefined {
+    for (var type in this.implementations) {
+      var acc = this.implementations[type];
+      if (acc.isCompatible(item, type))
+        return acc.itemTitle(item, hl);
+    }
+
+    if (isLite(item))
+      return getToString(item);
+
+    throw new Error("Unexpected " + JSON.stringify(item));
   }
 
   renderItem(item: unknown, hl: TextHighlighter): React.ReactNode {
