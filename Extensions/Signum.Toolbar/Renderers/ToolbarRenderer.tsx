@@ -22,384 +22,386 @@ import { Binding, getTypeInfo, getTypeName, newLite } from '../../../Signum/Reac
 import { Finder } from '../../../Signum/React/Finder';
 import Toolbar from '../Templates/Toolbar';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
+import { getDropdownMenuPlacement } from 'react-bootstrap/esm/DropdownMenu'
+import { RightCaretDropdown } from './RightCaretDropdown'
 
 
 export default function ToolbarRenderer(p: {
-  onAutoClose?: () => void;
+    onAutoClose?: () => void;
 }): React.ReactElement | null {
 
-  Navigator.useEntityChanged(ToolbarEntity, () => reload(), []);
-  Navigator.useEntityChanged(ToolbarMenuEntity, () => reload(), []);
-  Navigator.useEntityChanged(ToolbarSwitcherEntity, () => reload(), []);
+    Navigator.useEntityChanged(ToolbarEntity, () => reload(), []);
+    Navigator.useEntityChanged(ToolbarMenuEntity, () => reload(), []);
+    Navigator.useEntityChanged(ToolbarSwitcherEntity, () => reload(), []);
 
-  const [response, reload] = useAPIWithReload(() => ToolbarClient.API.getCurrentToolbar("Side"), [], { avoidReset: true });
-  const responseRef = useUpdatedRef(response);
+    const [response, reload] = useAPIWithReload(() => ToolbarClient.API.getCurrentToolbar("Side"), [], { avoidReset: true });
+    const responseRef = useUpdatedRef(response);
 
-  const [refresh, setRefresh] = React.useState(false);
-  const [active, setActive] = React.useState<InferActiveResponse | null>(null);
+    const [refresh, setRefresh] = React.useState(false);
+    const [active, setActive] = React.useState<InferActiveResponse | null>(null);
 
-  const location = useLocation();
+    const location = useLocation();
 
-  function changeActive(location: Location) {
-    var query = QueryString.parse(location.search);
-    if (responseRef.current) {
+    function changeActive(location: Location) {
+        var query = QueryString.parse(location.search);
+        if (responseRef.current) {
 
-      var newActive = inferActive(responseRef.current, location, query);
-      setActive(newActive ?? null);
+            var newActive = inferActive(responseRef.current, location, query);
+            setActive(newActive ?? null);
+        }
     }
-  }
 
-  React.useEffect(() => {
-    if (response)
-      changeActive(location)
-  }, [location, response]);
+    React.useEffect(() => {
+        if (response)
+            changeActive(location)
+    }, [location, response]);
 
-  function handleRefresh() {
-    return window.setTimeout(() => setRefresh(!refresh), 500)
-  }
+    function handleRefresh() {
+        return window.setTimeout(() => setRefresh(!refresh), 500)
+    }
 
-  const ctx: ToolbarContext = {
-    active,
-    onRefresh: handleRefresh,
-    onAutoClose: p.onAutoClose,
-  }
+    const ctx: ToolbarContext = {
+        active,
+        onRefresh: handleRefresh,
+        onAutoClose: p.onAutoClose,
+    }
 
-  return (
-    <div className={"sidebar-inner"}>
-      <div className={"close-sidebar"}
-        onClick={() => p.onAutoClose && p.onAutoClose()}>
-        <FontAwesomeIcon icon={"angles-left"} aria-label="Close" />
-      </div>
+    return (
+        <div className={"sidebar-inner"}>
+            <div className={"close-sidebar"}
+                onClick={() => p.onAutoClose && p.onAutoClose()}>
+                <FontAwesomeIcon icon={"angles-left"} aria-label="Close" />
+            </div>
 
-      <ul>
-        {response && response.elements && response.elements.map((res: ToolbarResponse<any>, i: number) => renderNavItem(res, i, ctx, null))}
-      </ul>
-    </div>
-  );
+            <ul>
+                {response && response.elements && response.elements.map((res: ToolbarResponse<any>, i: number) => renderNavItem(res, i, ctx, null))}
+            </ul>
+        </div>
+    );
 }
 
 export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location, query: any, entityType: string | undefined): { prio: number, inferredEntity?: Lite<Entity> } | null {
-  if (r.url){
-    const current = AppContext.toAbsoluteUrl(location.pathname).replace(/\/+$/, "");
-    const target = AppContext.toAbsoluteUrl(r.url).replace(/\/+$/, "");
+    if (r.url) {
+        const current = AppContext.toAbsoluteUrl(location.pathname).replace(/\/+$/, "");
+        const target = AppContext.toAbsoluteUrl(r.url).replace(/\/+$/, "");
 
-    const currentSegments = current.split("/");
-    const targetSegments = target.split("/");
+        const currentSegments = current.split("/");
+        const targetSegments = target.split("/");
 
-    let id: number | string | undefined;
-    let type: string | undefined;
-    var idRegex = "(?<id>[0-9A-Za-z-]+)";
-    var typeRegex = "(?<type>[A-Za-z-]+)";
+        let id: number | string | undefined;
+        let type: string | undefined;
+        var idRegex = "(?<id>[0-9A-Za-z-]+)";
+        var typeRegex = "(?<type>[A-Za-z-]+)";
 
-    function assertValidId(id: string | undefined) {
+        function assertValidId(id: string | undefined) {
 
-      if (!id)
-        return;
+            if (!id)
+                return;
 
-      const m = id.match(new RegExp("^" + idRegex + "$"));
-      if (m == null)
-        throw new Error("Id is not valid:" + id);
+            const m = id.match(new RegExp("^" + idRegex + "$"));
+            if (m == null)
+                throw new Error("Id is not valid:" + id);
+        }
+
+        var matches = currentSegments.length == targetSegments.length && targetSegments.every((pattern, i) => {
+
+            const value = currentSegments[i];
+
+            if (value === pattern)
+                return true;
+
+            if (pattern.contains(":id") || pattern.contains(":type") || pattern.contains(":key")) {
+
+                const regexPattern = "^" + pattern
+                    .replace(":id", idRegex)
+                    .replace(":type", typeRegex)
+                    .replace(":key", typeRegex + ";" + idRegex) + "$";
+                const regex = new RegExp(regexPattern);
+                const match = value.match(regex)
+                id = match?.groups?.id;
+                assertValidId(id);
+                type = match?.groups?.type;
+
+                if (type != null && type != entityType)
+                    return false;
+
+                return true;
+            }
+
+            return false;
+        });
+
+        if (matches)
+            return { prio: 1, inferredEntity: entityType && id ? newLite(entityType, id) : undefined };
     }
 
-    var matches = currentSegments.length == targetSegments.length && targetSegments.every((pattern, i) => {
+    if (!r.content)
+        return null;
 
-      const value = currentSegments[i];
+    var config = ToolbarClient.getConfig(r);
+    if (!config)
+        return null;
 
-      if (value === pattern)
-        return true;
-
-      if (pattern.contains(":id") || pattern.contains(":type") || pattern.contains(":key")) {
-
-        const regexPattern = "^" + pattern
-          .replace(":id", idRegex)
-          .replace(":type", typeRegex)
-          .replace(":key", typeRegex + ";" + idRegex) + "$";
-        const regex = new RegExp(regexPattern);
-        const match = value.match(regex)
-        id = match?.groups?.id;
-        assertValidId(id);
-        type = match?.groups?.type;
-
-        if (type != null && type != entityType)
-          return false;
-
-        return true;
-      }
-
-      return false;
-    });
-
-    if (matches)
-      return { prio: 1, inferredEntity: entityType && id ? newLite(entityType, id) : undefined };
-  }
-
-  if (!r.content)
-    return null;
-
-  var config = ToolbarClient.getConfig(r);
-  if (!config)
-    return null;
-
-  return config.isCompatibleWithUrlPrio(r, location, query);
+    return config.isCompatibleWithUrlPrio(r, location, query);
 }
 
 
 export function inferActive(r: ToolbarResponse<any>, location: Location, query: any, entityType?: string): InferActiveResponse | null {
-  if (r.elements) {
+    if (r.elements) {
 
-    var result = r.elements.map(e => inferActive(e, location, query, entityType ?? r.entityType)).notNull().maxBy(a => a.prio) ?? null;
+        var result = r.elements.map(e => inferActive(e, location, query, entityType ?? r.entityType)).notNull().maxBy(a => a.prio) ?? null;
 
-    if (result == null)
-      return null;
+        if (result == null)
+            return null;
 
-    if (r.entityType == null)
-      return result;
+        if (r.entityType == null)
+            return result;
 
-    if (!result.inferredEntity)
-      return result;
+        if (!result.inferredEntity)
+            return result;
 
-    if (result.inferredEntity.EntityType != r.entityType)
-      return null;
+        if (result.inferredEntity.EntityType != r.entityType)
+            return null;
 
-    return {
-      ...result,
-      inferredEntity: undefined,
-      menuWithEntity: { menu: r, entity: result.inferredEntity}
-    };
-  }
+        return {
+            ...result,
+            inferredEntity: undefined,
+            menuWithEntity: { menu: r, entity: result.inferredEntity }
+        };
+    }
 
-  var main = isCompatibleWithUrl(r, location, query, r.entityType ?? entityType);
-  var bestExtra = r.extraIcons?.map(e => inferActive(e, location, query)).notNull().maxBy(a => a.prio) ?? null;
+    var main = isCompatibleWithUrl(r, location, query, r.entityType ?? entityType);
+    var bestExtra = r.extraIcons?.map(e => inferActive(e, location, query)).notNull().maxBy(a => a.prio) ?? null;
 
-  if (bestExtra != null && (main == null || bestExtra.prio > main.prio))
-    return bestExtra;
+    if (bestExtra != null && (main == null || bestExtra.prio > main.prio))
+        return bestExtra;
 
-  if (main != null)
-    return {
-      prio: main.prio,
-      response: r,
-      inferredEntity: main.inferredEntity
-    };
+    if (main != null)
+        return {
+            prio: main.prio,
+            response: r,
+            inferredEntity: main.inferredEntity
+        };
 
-  return null;
+    return null;
 }
 
 export function renderNavItem(res: ToolbarResponse<any>, key: string | number, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null): React.JSX.Element {
 
-  switch (res.type) {
-    case "Divider":
-      return <hr style={{ margin: "10px 0 5px 0px" }} key={key}></hr>;
-    case "Header":
-    case "Item":
-      if (ToolbarMenuEntity.isLite(res.content)) {
-        return <ToolbarMenu response={res} key={key} ctx={ctx} selectedEntity={selectedEntity} />;
-      }
+    switch (res.type) {
+        case "Divider":
+            return <hr style={{ margin: "10px 0 5px 0px" }} key={key}></hr>;
+        case "Header":
+        case "Item":
+            if (ToolbarMenuEntity.isLite(res.content)) {
+                return <ToolbarMenu response={res} key={key} ctx={ctx} selectedEntity={selectedEntity} />;
+            }
 
-      if (ToolbarSwitcherEntity.isLite(res.content)) {
-        return <ToolbarSwitcher response={res} key={key} ctx={ctx} selectedEntity={selectedEntity} />;
-      }
+            if (ToolbarSwitcherEntity.isLite(res.content)) {
+                return <ToolbarSwitcher response={res} key={key} ctx={ctx} selectedEntity={selectedEntity} />;
+            }
 
-      if (res.url) {
-        const config = res.content && ToolbarClient.getConfig(res);
-        return (
-          <ToolbarNavItem key={key} title={res.label} isExternalLink={isExternalLink(res.url)} extraIcons={renderExtraIcons(res.extraIcons, ctx, selectedEntity)}
-            active={isActive(ctx.active, res, selectedEntity)} icon={<>
-              {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
-              {config?.getCounter(res, selectedEntity)}
-            </>}
-            onClick={(e: React.MouseEvent<any>) => linkClick(res, selectedEntity, e, ctx)} />
-        );
-      }
+            if (res.url) {
+                const config = res.content && ToolbarClient.getConfig(res);
+                return (
+                    <ToolbarNavItem key={key} title={res.label} isExternalLink={isExternalLink(res.url)} extraIcons={renderExtraIcons(res.extraIcons, ctx, selectedEntity)}
+                        active={isActive(ctx.active, res, selectedEntity)} icon={<>
+                            {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
+                            {config?.getCounter(res, selectedEntity)}
+                        </>}
+                        onClick={(e: React.MouseEvent<any>) => linkClick(res, selectedEntity, e, ctx)} />
+                );
+            }
 
-      if (res.content) {
-        const config = ToolbarClient.getConfig(res);
-        if (!config)
-          return <Nav.Item className="text-danger">{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
+            if (res.content) {
+                const config = ToolbarClient.getConfig(res);
+                if (!config)
+                    return <Nav.Item className="text-danger">{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
 
-        return config.getMenuItem(res, key, ctx, selectedEntity);
-      }
+                return config.getMenuItem(res, key, ctx, selectedEntity);
+            }
 
-      if (res.type == "Header") {
-        return (
-          <li key={key} className={"nav-item-header"}>
-            {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
-            <span className={"nav-item-text"}>{res.label}</span>
-            <div className={"nav-item-float"}>{res.label}</div>
-          </li>
-        );
-      }
+            if (res.type == "Header") {
+                return (
+                    <li key={key} className={"nav-item-header"}>
+                        {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
+                        <span className={"nav-item-text"}>{res.label}</span>
+                        <div className={"nav-item-float"}>{res.label}</div>
+                    </li>
+                );
+            }
 
-      return <Nav.Item key={key} style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
+            return <Nav.Item key={key} style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
 
-    default:
-      throw new Error("Unexpected " + res.type);
-  }
+        default:
+            throw new Error("Unexpected " + res.type);
+    }
 }
 
 function responseClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Lite<Entity> | null, e: React.SyntheticEvent | undefined, ctx: ToolbarContext) {
-  if (r.url != null) {
-    linkClick(r, selectedEntity, e as React.MouseEvent | undefined, ctx);
-  }
-  else {
-    var config = ToolbarClient.getConfig(r);
-    if (config != null)
-      config.handleNavigateClick(e as React.MouseEvent, r, selectedEntity);
-  }
+    if (r.url != null) {
+        linkClick(r, selectedEntity, e as React.MouseEvent | undefined, ctx);
+    }
+    else {
+        var config = ToolbarClient.getConfig(r);
+        if (config != null)
+            config.handleNavigateClick(e as React.MouseEvent, r, selectedEntity);
+    }
 }
 
 function linkClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Lite<Entity> | null, e: React.MouseEvent | undefined, ctx: ToolbarContext) {
-  let url = r.url!;
-  Dic.getKeys(urlVariables).forEach(v => {
-    url = url.replaceAll(v, urlVariables[v]());
-  });
+    let url = r.url!;
+    Dic.getKeys(urlVariables).forEach(v => {
+        url = url.replaceAll(v, urlVariables[v]());
+    });
 
-  if (selectedEntity)
-    url = url.replaceAll(":id", selectedEntity.id!.toString())
-      .replace(":type", selectedEntity.EntityType)
-      .replace(":key", liteKey(selectedEntity));
+    if (selectedEntity)
+        url = url.replaceAll(":id", selectedEntity.id!.toString())
+            .replace(":type", selectedEntity.EntityType)
+            .replace(":key", liteKey(selectedEntity));
 
-  if (isExternalLink(url))
-    window.open(AppContext.toAbsoluteUrl(url));
-  else
-    AppContext.pushOrOpenInTab(url, e);
+    if (isExternalLink(url))
+        window.open(AppContext.toAbsoluteUrl(url));
+    else
+        AppContext.pushOrOpenInTab(url, e);
 
 
-  if (ctx.onAutoClose && !(e && (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)))
-    ctx.onAutoClose();
+    if (ctx.onAutoClose && !(e && (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)))
+        ctx.onAutoClose();
 }
 
 function isExternalLink(url: string) {
-  return url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName)
+    return url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName)
 }
 
 function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }) {
 
-  const title = p.response.label || getToString(p.response.content);
-  const icon = ToolbarConfig.coloredIcon(parseIcon(p.response.iconName), p.response.iconColor);
+    const title = p.response.label || getToString(p.response.content);
+    const icon = ToolbarConfig.coloredIcon(parseIcon(p.response.iconName), p.response.iconColor);
 
-  const key = "toolbar-menu-" + p.response.content!.id;
+    const key = "toolbar-menu-" + p.response.content!.id;
 
-  const [show, setShow] = React.useState(localStorage.getItem(key) != null);
+    const [show, setShow] = React.useState(localStorage.getItem(key) != null);
 
-  function handleShowClick(e: React.MouseEvent | null) {
+    function handleShowClick(e: React.MouseEvent | null) {
 
-    var value = !show;
+        var value = !show;
 
-    if (value)
-      localStorage.setItem(key, "1");
-    else
-      localStorage.removeItem(key);
+        if (value)
+            localStorage.setItem(key, "1");
+        else
+            localStorage.removeItem(key);
 
-    setShow(value);
+        setShow(value);
 
-    if (value && e) {
-      var autoSelect = p.response.elements?.firstOrNull(a => a.autoSelect && !a.withEntity);
-      if (autoSelect) {
-        responseClick(autoSelect, p.selectedEntity, e, p.ctx);
-      }
+        if (value && e) {
+            var autoSelect = p.response.elements?.firstOrNull(a => a.autoSelect && !a.withEntity);
+            if (autoSelect) {
+                responseClick(autoSelect, p.selectedEntity, e, p.ctx);
+            }
+        }
     }
-  }
 
-  React.useEffect(() => {
+    React.useEffect(() => {
 
-    if (p.ctx.active && !show) {
-      const isContained = containsResponse(p.response, p.ctx.active.response);
-      if (isContained)
-        handleShowClick(null);
-    }
-  }, [p.ctx.active]);
+        if (p.ctx.active && !show) {
+            const isContained = containsResponse(p.response, p.ctx.active.response);
+            if (isContained)
+                handleShowClick(null);
+        }
+    }, [p.ctx.active]);
 
 
-  return (
-    <li>
-      <ul>
-        <ToolbarNavItem title={title} extraIcons={renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)} onClick={e => handleShowClick(e)}
-          icon={
-            <div style={{ display: 'inline-block', position: 'relative' }}>
-              <div className="nav-arrow-icon" style={{ position: 'absolute' }}>
-                <FontAwesomeIcon icon={show ? "chevron-down" : "chevron-right"} className="icon" />
-              </div>
-              <div className="nav-icon-with-arrow">
-                {icon ?? <div className="icon" />}
-              </div>
-            </div>
-          }
-        />
-       {show && <li>
-          <ul style={{ display: show ? "block" : "none" }} className="nav-item-sub-menu">
-            <ToolbarMenuItems response={p.response} ctx={p.ctx} selectedEntity={p.selectedEntity} />
-          </ul>
-        </li>}  
-      </ul>
-    </li>
-  );
+    return (
+        <li>
+            <ul>
+                <ToolbarNavItem title={title} extraIcons={renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)} onClick={e => handleShowClick(e)}
+                    icon={
+                        <div style={{ display: 'inline-block', position: 'relative' }}>
+                            <div className="nav-arrow-icon" style={{ position: 'absolute' }}>
+                                <FontAwesomeIcon icon={show ? "chevron-down" : "chevron-right"} className="icon" />
+                            </div>
+                            <div className="nav-icon-with-arrow">
+                                {icon ?? <div className="icon" />}
+                            </div>
+                        </div>
+                    }
+                />
+                {show && <li>
+                    <ul style={{ display: show ? "block" : "none" }} className="nav-item-sub-menu">
+                        <ToolbarMenuItems response={p.response} ctx={p.ctx} selectedEntity={p.selectedEntity} />
+                    </ul>
+                </li>}
+            </ul>
+        </li>
+    );
 }
 
 function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.ReactNode {
-  const entityType = p.response.entityType;
-  if (entityType)
-    return <ToolbarMenuItemsEntityType response={p.response} ctx={p.ctx} selectedEntity={p.selectedEntity} />
-  
-  return <>
-    {p.response.elements!.map((sr, i) => renderNavItem(sr, i, p.ctx, p.selectedEntity))}
-  </>;
+    const entityType = p.response.entityType;
+    if (entityType)
+        return <ToolbarMenuItemsEntityType response={p.response} ctx={p.ctx} selectedEntity={p.selectedEntity} />
+
+    return <>
+        {p.response.elements!.map((sr, i) => renderNavItem(sr, i, p.ctx, p.selectedEntity))}
+    </>;
 }
 
 
-function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null  }): React.ReactNode {
+function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.ReactNode {
 
-  const entityType = p.response.entityType!;
-  const selEntityRef = React.useRef<Lite<Entity> | null>(null);
-  const forceUpdate = useForceUpdate();
+    const entityType = p.response.entityType!;
+    const selEntityRef = React.useRef<Lite<Entity> | null>(null);
+    const forceUpdate = useForceUpdate();
 
-  function setSelectedEntity(entity: Lite<Entity> | null) {
-    selEntityRef.current = entity;
-    forceUpdate();
-  }
-
-
-  const entities = useAPI(() => Finder.API.fetchAllLites({ types: entityType }), [entityType]);
-  
-  const active = p.ctx.active;
-
-  React.useEffect(() => {
-
-    if (active?.menuWithEntity && p.response.entityType &&
-      is(active.menuWithEntity.menu.content, p.response.content)) {
-
-      if (!is(active.menuWithEntity.entity, selEntityRef.current))
-        setSelectedEntity(active.menuWithEntity.entity);
+    function setSelectedEntity(entity: Lite<Entity> | null) {
+        selEntityRef.current = entity;
+        forceUpdate();
     }
-    else
-      setSelectedEntity(null);
 
-  }, [active?.menuWithEntity, p.response]);
 
-  React.useEffect(() => {
+    const entities = useAPI(() => Finder.API.fetchAllLites({ types: entityType }), [entityType]);
 
-    if (selEntityRef.current && !selEntityRef.current.model && entities) {
-      var only = entities.onlyOrNull(a => is(a, selEntityRef.current));
-      if (only != null)
-        setSelectedEntity(only);
+    const active = p.ctx.active;
+
+    React.useEffect(() => {
+
+        if (active?.menuWithEntity && p.response.entityType &&
+            is(active.menuWithEntity.menu.content, p.response.content)) {
+
+            if (!is(active.menuWithEntity.entity, selEntityRef.current))
+                setSelectedEntity(active.menuWithEntity.entity);
+        }
+        else
+            setSelectedEntity(null);
+
+    }, [active?.menuWithEntity, p.response]);
+
+    React.useEffect(() => {
+
+        if (selEntityRef.current && !selEntityRef.current.model && entities) {
+            var only = entities.onlyOrNull(a => is(a, selEntityRef.current));
+            if (only != null)
+                setSelectedEntity(only);
+        }
+
+    }, [selEntityRef.current, entities]);
+
+    function handleSelect(e: React.SyntheticEvent | undefined) {
+
+        forceUpdate();
+        var autoSelect = p.response.elements?.firstOrNull(a => a.autoSelect && a.withEntity == Boolean(selEntityRef.current));
+        if (autoSelect) {
+            responseClick(autoSelect, selEntityRef.current, e, p.ctx);
+        }
     }
-    
-  }, [selEntityRef.current, entities]);
 
-  function handleSelect(e: React.SyntheticEvent | undefined) {
-
-    forceUpdate();
-    var autoSelect = p.response.elements?.firstOrNull(a => a.autoSelect && a.withEntity == Boolean(selEntityRef.current));
-    if (autoSelect) {
-      responseClick(autoSelect, selEntityRef.current, e, p.ctx);
-    }
-  }
-
-  const ctx = new TypeContext<Lite<Entity> | null>(undefined, undefined, undefined, new Binding(selEntityRef, "current"));
-  return (
-    <>
-      {entityType && (
-        <Nav.Item title={getTypeInfo(entityType).niceName} className="d-flex mx-2 mb-2">
-          {/* <DropdownList
+    const ctx = new TypeContext<Lite<Entity> | null>(undefined, undefined, undefined, new Binding(selEntityRef, "current"));
+    return (
+        <>
+            {entityType && (
+                <Nav.Item title={getTypeInfo(entityType).niceName} className="d-flex mx-2 mb-2">
+                    {/* <DropdownList
             value={selectedEntity}
             dataKey={((e: Lite<Entity>) => e && e.id) as any}
             textField={((e: Lite<Entity>) => e && getToString(e)) as any}
@@ -409,166 +411,178 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
             renderListItem={a => renderEntity(a.item)}
             title={ctx.niceName(a => a.workLogReminder)}
           /> */}
-          <div style={{ width: "100%" }}>
-            <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false}
-              onChange={e => handleSelect(e.originalEvent)} create={false} formGroupStyle="SrOnly" />
-          </div>
-          {renderExtraIcons(p.response.extraIcons, p.ctx, selEntityRef.current ?? p.selectedEntity)}
-        </Nav.Item>
-      )}
-      {p.response.elements!.filter(sr => Boolean(sr.withEntity) == Boolean(selEntityRef.current)).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity))}
-    </>
-  );
+                    <div style={{ width: "100%" }}>
+                        <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false}
+                            onChange={e => handleSelect(e.originalEvent)} create={false} formGroupStyle="SrOnly" />
+                    </div>
+                    {renderExtraIcons(p.response.extraIcons, p.ctx, selEntityRef.current ?? p.selectedEntity)}
+                </Nav.Item>
+            )}
+            {p.response.elements!.filter(sr => Boolean(sr.withEntity) == Boolean(selEntityRef.current)).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity))}
+        </>
+    );
 }
 
 function containsResponse(r: ToolbarResponse<any>, active: ToolbarResponse<any>): boolean {
-  return r == active || r.elements != null && r.elements.some(e => containsResponse(e, active)); 
+    return r == active || r.elements != null && r.elements.some(e => containsResponse(e, active));
 }
 
 function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }) {
 
-  const ts = p.response.content!;
+    const ts = p.response.content!;
 
-  const key = "toolbar-switcher-" + ts.id!;
+    const key = "toolbar-switcher-" + ts.id!;
 
-  const [selectedOption, setSelectedOption] = React.useState(() => {
-    const sel = localStorage.getItem(key);
-    return p.response.elements?.onlyOrNull(a => a.content!.id!.toString() == sel);
-  });
+    const [selectedOption, setSelectedOption] = React.useState(() => {
+        const sel = localStorage.getItem(key);
+        return p.response.elements?.onlyOrNull(a => a.content!.id!.toString() == sel);
+    });
 
-  function handleSetShow(value: ToolbarResponse<any>, e: React.SyntheticEvent | null) {
-    localStorage.setItem(key, value.content!.id!.toString());
+    function handleSetShow(value: ToolbarResponse<any>, e: React.SyntheticEvent | null) {
+        localStorage.setItem(key, value.content!.id!.toString());
 
-    setSelectedOption(value);
+        setSelectedOption(value);
 
-    if (value && e) {
-      var autoSelect = value.elements?.firstOrNull(a => a.autoSelect && !a.withEntity);
-      if (autoSelect) {
-        responseClick(autoSelect, p.selectedEntity, e, p.ctx);
-      }
-      
-    }
-  }
+        if (value && e) {
+            var autoSelect = value.elements?.firstOrNull(a => a.autoSelect && !a.withEntity);
+            if (autoSelect) {
+                responseClick(autoSelect, p.selectedEntity, e, p.ctx);
+            }
 
-
-  React.useEffect(() => {
-
-    if (p.ctx.active) {
-      const menu = p.response.elements?.firstOrNull(e => containsResponse(e, p.ctx.active!.response!));
-      if (menu != null && menu != selectedOption)
-        handleSetShow(menu, null);
-    }
-  }, [p.ctx.active]);
-
-  function renderDropDownOptions(p: ToolbarResponse<any>) {
-    if (p == null)
-      return <span> - </span>;
-
-    const icon = ToolbarConfig.coloredIcon(parseIcon(p.iconName), p.iconColor);
-    const title = p.label || getToString(p.content);
-    return <span>{icon}{title}</span>
-  }
-
-  const icon = ToolbarConfig.coloredIcon(parseIcon(p.response.iconName), p.response.iconColor);
-  const title = p.response.label || getToString(p.response.content);
-
-  return (
-    <li>
-      <ul>
-        <Nav.Item title={title} className="d-flex mx-2 mb-2">
-          {icon}
-          <DropdownList id={key}
-            inputProps={{disabled: true}}
-            value={selectedOption}
-            dataKey={((r: ToolbarResponse<any>) => r && r.content!.id) as any}
-            textField={((r: ToolbarResponse<any>) => r && r.label || getToString(r.content)) as any}
-            onChange={(r, m) => handleSetShow(r, m.originalEvent!)}
-            data={p.response.elements}
-            renderValue={a => renderDropDownOptions(a.item)}
-            renderListItem={a => renderDropDownOptions(a.item)}
-          />
-          {renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)}
-        </Nav.Item>
-
-        {selectedOption &&
-          <li>
-            <ul>
-              {selectedOption.elements && <ToolbarMenuItems response={selectedOption} ctx={p.ctx} selectedEntity={p.selectedEntity} />}
-            </ul>
-          </li>
         }
-      </ul>
-    </li>
-  );
-} 
+    }
 
-export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
-  return (
-    <li className="nav-item d-flex">
-      <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100">
-        {p.icon}
-        <span className={"nav-item-text"}>
-          {p.title}
-          {p.isExternalLink && <FontAwesomeIcon icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}
-        </span>
-        {p.extraIcons}
-        <div className={"nav-item-float"}>{p.title}</div>
-      </Nav.Link>
-    </li>
-  );
+
+    React.useEffect(() => {
+
+        if (p.ctx.active) {
+            const menu = p.response.elements?.firstOrNull(e => containsResponse(e, p.ctx.active!.response!));
+            if (menu != null && menu != selectedOption)
+                handleSetShow(menu, null);
+        }
+    }, [p.ctx.active]);
+
+    function renderDropDownOptions(p: ToolbarResponse<any>) {
+        if (p == null)
+            return <span> - </span>;
+
+        const icon = ToolbarConfig.coloredIcon(parseIcon(p.iconName), p.iconColor);
+        const title = p.label || getToString(p.content);
+        return <span>{icon}{title}</span>
+    }
+
+    const icon = ToolbarConfig.coloredIcon(parseIcon(p.response.iconName), p.response.iconColor);
+    const title = p.response.label || getToString(p.response.content);
+
+    const options = (p.response.elements ?? []).map(el => ({
+        value: el,
+        label: el.label || getToString(el.content),
+        icon: el.iconName ? ToolbarConfig.coloredIcon(parseIcon(el.iconName), el.iconColor) : undefined
+    }));
+    return (
+        <li>
+            <ul>
+                <Nav.Item title={title} className="d-flex mx-2 mb-2">
+                    {icon}
+                    {/* <DropdownList id={key}
+                        inputProps={{ disabled: true }}
+                        value={selectedOption}
+                        dataKey={((r: ToolbarResponse<any>) => r && r.content!.id) as any}
+                        textField={((r: ToolbarResponse<any>) => r && r.label || getToString(r.content)) as any}
+                        onChange={(r, m) => handleSetShow(r, m.originalEvent!)}
+                        data={p.response.elements}
+                        renderValue={a => renderDropDownOptions(a.item)}
+                        renderListItem={a => renderDropDownOptions(a.item)}
+                    /> */}
+                    <RightCaretDropdown
+                        options={options}
+                        value={selectedOption ?? null}
+                        onChange={val => val && handleSetShow(val, null)}
+                        placeholder={title}
+                        renderOption={opt => renderDropDownOptions(opt.value)}
+                        disabled={false} />
+                    {renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)}
+                </Nav.Item>
+
+                {selectedOption &&
+                    <li>
+                        <ul>
+                            {selectedOption.elements && <ToolbarMenuItems response={selectedOption} ctx={p.ctx} selectedEntity={p.selectedEntity} />}
+                        </ul>
+                    </li>
+                }
+            </ul>
+        </li>
+    );
 }
 
-export function isActive(active: InferActiveResponse | null, res: ToolbarResponse<any>, selectedEntity: Lite<Entity> | null): boolean{
-  return active != null && active.response == res && (active.menuWithEntity == null || is(active.menuWithEntity.entity, selectedEntity));
+export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
+    return (
+        <li className="nav-item d-flex">
+            <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100">
+                {p.icon}
+                <span className={"nav-item-text"}>
+                    {p.title}
+                    {p.isExternalLink && <FontAwesomeIcon icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}
+                </span>
+                {p.extraIcons}
+                <div className={"nav-item-float"}>{p.title}</div>
+            </Nav.Link>
+        </li>
+    );
+}
+
+export function isActive(active: InferActiveResponse | null, res: ToolbarResponse<any>, selectedEntity: Lite<Entity> | null): boolean {
+    return active != null && active.response == res && (active.menuWithEntity == null || is(active.menuWithEntity.entity, selectedEntity));
 }
 
 export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null): React.ReactElement | undefined {
-  if (extraIcons == null)
-    return undefined;
+    if (extraIcons == null)
+        return undefined;
 
-  return (<>
-    {extraIcons?.map((ei, i) => {
+    return (<>
+        {extraIcons?.map((ei, i) => {
 
-      if (ei.url) {
-        return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i} onClick={e => {
-          e.preventDefault();
-          e.stopPropagation();
+            if (ei.url) {
+                return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i} onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
 
-          let url = ei.url!;
-          var isExternalLink = url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName);
-          Dic.getKeys(urlVariables).forEach(v => {
-            url = url.replaceAll(v, urlVariables[v]());
-          });
+                    let url = ei.url!;
+                    var isExternalLink = url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName);
+                    Dic.getKeys(urlVariables).forEach(v => {
+                        url = url.replaceAll(v, urlVariables[v]());
+                    });
 
-          if (isExternalLink)
-            window.open(AppContext.toAbsoluteUrl(url));
-          else
-            AppContext.pushOrOpenInTab(url, e);
+                    if (isExternalLink)
+                        window.open(AppContext.toAbsoluteUrl(url));
+                    else
+                        AppContext.pushOrOpenInTab(url, e);
 
-          if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
-            ctx.onAutoClose();
+                    if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
+                        ctx.onAutoClose();
 
-        }}>{ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}</button>;
-      }
+                }}>{ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}</button>;
+            }
 
 
-      var config = ToolbarClient.getConfig(ei);
-      if (config == null) {
-        return <span className="text-danger sf-extra-icon">{ei.content!.EntityType + "ToolbarConfig not registered"}</span>
-      }
-      else {
+            var config = ToolbarClient.getConfig(ei);
+            if (config == null) {
+                return <span className="text-danger sf-extra-icon">{ei.content!.EntityType + "ToolbarConfig not registered"}</span>
+            }
+            else {
 
-        return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity)  && "active")} key={i} onClick={e => {
-          e.preventDefault();
-          e.stopPropagation();
-          config!.handleNavigateClick(e, ei, selectedEntity);
+                return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i} onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    config!.handleNavigateClick(e, ei, selectedEntity);
 
-          if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
-            ctx.onAutoClose();
+                    if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
+                        ctx.onAutoClose();
 
-        }} >{config.getIcon(ei, selectedEntity)}</button>
-      };
+                }} >{config.getIcon(ei, selectedEntity)}</button>
+            };
 
-    })}
-  </>);
+        })}
+    </>);
 }
