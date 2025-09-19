@@ -15,3 +15,8 @@
     --bs-btn-disabled-border-color: var(--bs-tertiary-bg);
 }
 
+.border-tertiary {
+    --bs-border-opacity: 1;
+    border-color: var(--bs-tertiary-bg) !important;
+}
+
