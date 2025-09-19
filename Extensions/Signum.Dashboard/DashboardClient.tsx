@@ -49,7 +49,7 @@ export namespace DashboardClient {
     waitForInvalidation?: boolean;
     icon: () => IconColor;
     defaultTitle?: (elenent: T) => string;
-    withPanel?: (element: T) => boolean;
+    withPanel?: (element: T, entity: Lite<Entity> | undefined) => boolean;
     getQueryNames?: (element: T) => QueryEntity[];
     handleTitleClick?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.MutableRefObject<any>, e: React.MouseEvent<any>) => void;
     handleEditClick?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.MutableRefObject<any>, e: React.MouseEvent<any>) => Promise<boolean>;
@@ -129,7 +129,7 @@ export namespace DashboardClient {
     registerRenderer(CustomPartEntity, {
       component: () => import('./View/CustomPart').then(a => a.default),
       icon: () => ({ icon: "cube", iconColor: "forestgreen" }),
-      withPanel: () => true,
+      withPanel: (cp, e) => DashboardClient.Options.customPartRenderers[e?.EntityType ?? "NONE"]?.[cp.customPartName]?.withPanel ?? true,
     });
 
     onEmbeddedWidgets.push(wc => {
@@ -285,10 +285,11 @@ export namespace DashboardClient {
 
     export const customPartRenderers: Record<string /*typeName*/, Record<string /*customPartName*/, CustomPartRenderer>> = {};
 
-    export function registerCustomPartRenderer<T extends Entity>(type: Type<T>, customPartName: string, renderer: () => Promise<{ default: React.ComponentType<CustomPartProps<T>> }>): void {
+    export function registerCustomPartRenderer<T extends Entity>(type: Type<T>, customPartName: string, renderer: () => Promise<{ default: React.ComponentType<CustomPartProps<T>> }>, opts?: { withPanel?: boolean }): void {
       const dic = customPartRenderers[type.typeName] ??= {};
       dic[customPartName] = {
-        renderer: renderer as () => Promise<{ default: React.ComponentType<CustomPartProps<Entity>> }>
+        renderer: renderer as () => Promise<{ default: React.ComponentType<CustomPartProps<Entity>> }>,
+        withPanel: opts?.withPanel ?? true,
       };
     }
   }
@@ -296,6 +297,7 @@ export namespace DashboardClient {
 
 interface CustomPartRenderer {
   renderer: () => Promise<{ default: React.ComponentType<CustomPartProps<Entity>> }>;
+  withPanel: boolean;
 }
 
 export interface CustomPartProps<T extends Entity> {

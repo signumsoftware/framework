@@ -213,7 +213,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
 
   const lite = p.entity ? toLite(p.entity) : undefined;
 
-  if (renderer.withPanel && !renderer.withPanel(content)) {
+  if (renderer.withPanel && !renderer.withPanel(content, lite)) {
     return (
       <ErrorBoundary>
         {React.createElement(state.component, {
@@ -245,7 +245,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
   }
 
   return (
-    <div className={classes("card", !part.customColor && "border-light", "shadow-sm", "mb-4")} style={{ flex: p.flex ? 1 : undefined }}>
+    <div className={classes("card", !part.customColor && "border-tertiary", "shadow-sm", "mb-4")} style={{ flex: p.flex ? 1 : undefined }}>
       <div className={classes("card-header fw-bold", "sf-show-hover", "d-flex", !part.customColor)}
         style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined}}
       >
@@ -258,7 +258,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
           </a>
         }
         {
-          dashboardFilter && <span className="badge bg-light text-dark border ms-2 sf-filter-pill">
+          dashboardFilter && <span className="badge bg-tertiary text-dark border ms-2 sf-filter-pill">
             {dashboardFilter.rows.length} {DashboardMessage.RowsSelected.niceToString().forGenderAndNumber(dashboardFilter.rows.length)}
             <button type="button" aria-label="Close" className="btn-close" onClick={handleClearFilter}/>
           </span>
