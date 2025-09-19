@@ -22,6 +22,8 @@ import { Binding, getTypeInfo, getTypeName, newLite } from '../../../Signum/Reac
 import { Finder } from '../../../Signum/React/Finder';
 import Toolbar from '../Templates/Toolbar';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
+import { getDropdownMenuPlacement } from 'react-bootstrap/esm/DropdownMenu'
+import { RightCaretDropdown } from './RightCaretDropdown'
 
 
 export default function ToolbarRenderer(p: {
@@ -495,12 +497,17 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   const icon = ToolbarConfig.coloredIcon(parseIcon(p.response.iconName), p.response.iconColor);
   const title = p.response.label || getToString(p.response.content);
 
+    const options = (p.response.elements ?? []).map(el => ({
+        value: el,
+        label: el.label || getToString(el.content),
+        icon: el.iconName ? ToolbarConfig.coloredIcon(parseIcon(el.iconName), el.iconColor) : undefined
+    }));
   return (
     <li>
       <ul>
         <Nav.Item title={title} className="d-flex mx-2 mb-2">
           {icon}
-          <DropdownList id={key}
+                    {/* <DropdownList id={key}
             inputProps={{disabled: true}}
             value={selectedOption}
             dataKey={((r: ToolbarResponse<any>) => r && r.content!.id) as any}
@@ -509,7 +516,14 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
             data={p.response.elements}
             renderValue={a => renderDropDownOptions(a.item)}
             renderListItem={a => renderDropDownOptions(a.item)}
-          />
+                    /> */}
+                    <RightCaretDropdown
+                        options={options}
+                        value={selectedOption ?? null}
+                        onChange={val => val && handleSetShow(val, null)}
+                        placeholder={title}
+                        renderOption={opt => renderDropDownOptions(opt.value)}
+                        disabled={false} />
           {renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)}
         </Nav.Item>
 
