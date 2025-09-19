@@ -27,6 +27,10 @@ export abstract class ToolbarConfig<T extends Entity> {
     );
   }
 
+  async selectSubEntityForUrl(element: ToolbarResponse<T>, entity: Lite<Entity> | null): Promise<Lite<Entity> | null> {
+    return null;
+  }
+
   abstract getDefaultIcon(): IconProp;
 
   static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactElement | null {

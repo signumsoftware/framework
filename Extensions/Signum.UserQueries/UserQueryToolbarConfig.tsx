@@ -11,6 +11,7 @@ import { SearchToolbarCount, ToolbarCount } from '../Signum.Toolbar/QueryToolbar
 import { ShowCount } from '../Signum.Toolbar/Signum.Toolbar'
 import { ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import SelectorModal from '@framework/SelectorModal'
 
 
 export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntity> {
@@ -18,7 +19,6 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     var type = UserQueryEntity;
     super(type);
   }
-
 
   getCounter(element: ToolbarResponse<UserQueryEntity>, entity: Lite<Entity> | null): React.ReactElement | undefined {
 
@@ -35,6 +35,18 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
 
   getDefaultIcon(): IconProp {
     return "rectangle-list";
+  }
+
+  async selectSubEntityForUrl(element: ToolbarResponse<UserQueryEntity>, entity: Lite<Entity> | null): Promise<Lite<Entity> | null> {
+    const uq = await Navigator.API.fetch(element.content!);
+    const fo = await UserQueryClient.Converter.toFindOptions(uq, entity ?? undefined);
+    const lites = await Finder.fetchLites({ queryName: fo.queryName, filterOptions: fo.filterOptions });
+    const onlyType = lites.map(a => a.EntityType).firstOrNull();
+    if (onlyType == null)
+      return null;
+
+    const lite = await SelectorModal.chooseLite(onlyType, lites);
+    return lite ?? null; 
   }
 
   override handleNavigateClick(e: React.MouseEvent<any> | undefined, res: ToolbarResponse<UserQueryEntity>, selectedEntity: Lite<Entity> | null): void {

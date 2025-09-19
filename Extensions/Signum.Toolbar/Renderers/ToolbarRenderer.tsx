@@ -88,8 +88,8 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
 
     let id: number | string | undefined;
     let type: string | undefined;
-    var idRegex = "(?<id>[0-9A-Za-z-]+)";
-    var typeRegex = "(?<type>[A-Za-z-]+)";
+    const idRegex = "[0-9A-Za-z-]+";
+    const typeRegex = "[A-Za-z-]+";
 
     function assertValidId(id: string | undefined) {
 
@@ -110,15 +110,24 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
 
       if (pattern.contains(":id") || pattern.contains(":type") || pattern.contains(":key")) {
 
-        const regexPattern = "^" + pattern
-          .replace(":id", idRegex)
-          .replace(":type", typeRegex)
-          .replace(":key", typeRegex + ";" + idRegex) + "$";
+        const regexPattern = "^" +
+          pattern
+            .replace(":id2", idRegex)
+            .replace(":type2", typeRegex)
+            .replace(":key2", typeRegex + ";" + idRegex)
+            .replace(":id", "(?<id>" + idRegex + ")")
+            .replace(":type", "(?<type>" + typeRegex + ")")
+            .replace(":key", "(?<type>" + typeRegex + ")" + ";" + "(?<id>" + idRegex + ")")
+          + "$";
+
         const regex = new RegExp(regexPattern);
-        const match = value.match(regex)
-        id = match.groups.id;
+        const match = value.match(regex);
+        if (match == null || match.groups == null)
+        return null;
+
+        id = match.groups?.id;
         assertValidId(id);
-        type = match.groups.type;
+        type = match!.groups?.type;
 
         if (type != null && type != entityType)
           return false;
@@ -202,7 +211,8 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
       if (res.url) {
         const config = res.content && ToolbarClient.getConfig(res);
         return (
-          <ToolbarNavItem key={key} title={res.label} isExternalLink={isExternalLink(res.url)} extraIcons={renderExtraIcons(res.extraIcons, ctx, selectedEntity)}
+          <ToolbarNavItem key={key} title={res.label} isExternalLink={isExternalLink(res.url)}
+            extraIcons={renderExtraIcons(res.extraIcons, ctx, selectedEntity)}
             active={isActive(ctx.active, res, selectedEntity)} icon={<>
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
               {config?.getCounter(res, selectedEntity)}
@@ -247,8 +257,21 @@ function responseClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Li
   }
 }
 
-function linkClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Lite<Entity> | null, e: React.MouseEvent | undefined, ctx: ToolbarContext) {
+async function linkClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Lite<Entity> | null, e: React.MouseEvent | undefined, ctx: ToolbarContext) {
+
   let url = r.url!;
+  if (url.contains(":type2") || url.contains(":id2") || url.contains(":key2")) {
+    const config = r.content && ToolbarClient.getConfig(r);
+    const subEntity = config && await config.selectSubEntityForUrl(r, selectedEntity);
+    if (subEntity == null)
+      return;
+
+    url = url
+      .replaceAll(":id2", subEntity.id!.toString())
+      .replace(":type2", subEntity.EntityType)
+      .replace(":key2", liteKey(subEntity));
+  }
+
   Dic.getKeys(urlVariables).forEach(v => {
     url = url.replaceAll(v, urlVariables[v]());
   });
