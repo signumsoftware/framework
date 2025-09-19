@@ -116,9 +116,9 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
           .replace(":key", typeRegex + ";" + idRegex) + "$";
         const regex = new RegExp(regexPattern);
         const match = value.match(regex)
-        id = match.groups.id;
+        id = match?.groups?.id;
         assertValidId(id);
-        type = match.groups.type;
+        type = match?.groups?.type;
 
         if (type != null && type != entityType)
           return false;
