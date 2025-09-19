@@ -4,8 +4,11 @@ import { ToolbarClient, ToolbarResponse } from '../../Signum.Toolbar/ToolbarClie
 import { IconColor, ToolbarConfig } from '../../Signum.Toolbar/ToolbarConfig'
 import { UserChartClient } from '../UserChart/UserChartClient'
 import { ChartClient } from '../ChartClient'
-import { liteKey } from '@framework/Signum.Entities'
+import { Entity, Lite, liteKey, parseLite } from '@framework/Signum.Entities'
 import { UserChartEntity } from './Signum.Chart.UserChart'
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+
+
 
 export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntity> {
   constructor() {
@@ -13,11 +16,8 @@ export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntit
     super(type);
   }
 
-  getDefaultIcon(): IconColor {
-    return ({
-      icon: "chart-bar",
-      iconColor: "darkviolet",
-    });
+  getDefaultIcon(): IconProp {
+    return "chart-bar";
   }
 
   navigateTo(element: ToolbarResponse<UserChartEntity>): Promise<string> {
@@ -26,7 +26,11 @@ export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntit
       .then(cr => ChartClient.Encoder.chartPathPromise(cr, element.content!));
   }
 
-  isCompatibleWithUrlPrio(res: ToolbarResponse<UserChartEntity>, location: Location, query: any): number {
-    return query["userChart"] == liteKey(res.content!) ? 2 : 0;
+  isCompatibleWithUrlPrio(res: ToolbarResponse<UserChartEntity>, location: Location, query: any, entityType?: string): { prio: number, inferredEntity?: Lite<Entity> } | null {
+    if (query["userChart"] == liteKey(res.content!)) {
+      return { prio: 2, inferredEntity: query["entity"] && parseLite(query["entity"]) }
+    }
+
+    return null;
   }
 }

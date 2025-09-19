@@ -57,7 +57,6 @@ export const EnumLine: <V extends string | number | boolean | null>(props: EnumL
 function internalDropDownList<V extends string | number | boolean | null>(c: EnumLineController<V>) {
 
   var optionItems = getOptionsItems(c);
-
   const p = c.props;
   if (!p.type!.isNotNullable || p.ctx.value == undefined)
     optionItems = [{ value: null, label: p.emptyLabel ?? " - " }].concat(optionItems);
@@ -65,15 +64,15 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
+  let niceValue: string | undefined = undefined;
+  if (p.ctx.value != undefined) {
+
+    var item = optionItems.filter(a => a.value == p.ctx.value).singleOrNull();
+
+    niceValue = item ? item.label : p.ctx.value.toString();
+  }
+
   if (p.ctx.readOnly) {
-
-    var label: string | null = null;
-    if (p.ctx.value != undefined) {
-
-      var item = optionItems.filter(a => a.value == p.ctx.value).singleOrNull();
-
-      label = item ? item.label : p.ctx.value.toString();
-    }
 
     return (
       <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
@@ -82,10 +81,11 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
             <FormControlReadonly
               id={inputId}
               htmlAttributes={{
+                title: niceValue,
                 ...c.props.valueHtmlAttributes,
-                ...({ 'data-value': p.ctx.value } as any) /*Testing*/
+                ...({ 'data-value': p.ctx.value } as any), /*Testing*/
               }} ctx={p.ctx} innerRef={c.setRefs}>
-              {label}
+              {niceValue}
             </FormControlReadonly>)
         }
       </FormGroup>
@@ -120,6 +120,7 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
             textField="label"
             renderValue={renderElement}
             renderListItem={renderElement}
+            title={niceValue}
             {...(p.valueHtmlAttributes as any)}
           />)
         }
@@ -136,7 +137,7 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
     return (
       <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
         {inputId => c.withItemGroup(
-          <select id={inputId} {...c.props.valueHtmlAttributes} value={toStr(p.ctx.value)} className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formSelectClass, c.mandatoryClass)} onChange={handleEnumOnChange} >
+          <select id={inputId} title={niceValue} {...c.props.valueHtmlAttributes} value={toStr(p.ctx.value)} className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formSelectClass, c.mandatoryClass)} onChange={handleEnumOnChange} >
             {!optionItems.some(a => toStr(a.value) == toStr(p.ctx.value)) && <option key={-1} value={toStr(p.ctx.value)}>{toStr(p.ctx.value)}</option>}
             {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)} {...p.optionHtmlAttributes?.(oi)}>{oi.label}</option>)}
           </select>)

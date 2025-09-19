@@ -1,4 +1,5 @@
 using Signum.Engine.Maps;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.DynamicQuery;
 
@@ -180,11 +181,34 @@ public class DynamicQueryContainer
 
     public event Func<object, bool, bool>? AllowQuery;
 
-    public bool QueryAllowed(object queryName, bool fullScreen)
+    //Query Context are entities that couold influence the query visibility
+    //Example: query TaskEntity is visible depending of the Lite<ProjectEntity> context
+    public Dictionary<Type, Func<object, IEnumerable<Lite<Entity>>?>> AllowedContexts = new Dictionary<Type, Func<object, IEnumerable<Lite<Entity>>?>>();
+
+    public Dictionary<Type, List<Lite<Entity>>>? GetAllowedContexts(object queryName)
+    {
+        if (AllowedContexts == null)
+            return null;
+
+        var dic = AllowedContexts.ToDictionary(a => a.Key, a => a.Value(queryName)?.ToList()).Where(a => a.Value != null).ToDictionary();
+        if (dic.IsEmpty())
+            return null;
+
+        return dic!;
+    }
+    
+    public bool QueryAllowed(object queryName, bool fullScreen, Lite<Entity>? context = null)
     {
         foreach (var f in AllowQuery.GetInvocationListTyped())
         {
             if (!f(queryName, fullScreen))
+                return false;
+        }
+
+        if(context != null)
+        {
+            var ac = GetAllowedContexts(queryName)?.TryGetC(context.EntityType);
+            if (ac != null && !ac.Contains(context))
                 return false;
         }
 

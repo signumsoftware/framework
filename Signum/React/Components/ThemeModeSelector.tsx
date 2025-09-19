@@ -3,6 +3,7 @@ import { NavDropdown } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun, faMoon, faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons";
 import { JSX } from "react/jsx-runtime";
+import { useWindowEvent } from "../Hooks";
 
 type BootstrapThemeModes = "light" | "dark" | "auto";
 
@@ -49,6 +50,10 @@ export function ThemeModeSelector(p: { onSetMode?: (mode: "dark" | "light") => v
     p.onSetMode?.(finalMode)
     localStorage.setItem("bootstrap-theme-mode", finalMode);
   }, [finalMode]);
+
+  useWindowEvent("change-theme-mode", (e) => {
+    setBootstrapMode((e as CustomEvent).detail as BootstrapThemeModes);
+  }, []);
 
   return (
     <div style={{ display: "flex", alignItems: "center" }}>

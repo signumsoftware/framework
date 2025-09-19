@@ -115,12 +115,15 @@ public class WhatsNewController : ControllerBase
 
         if (!wne.IsRead())
         {
-            new WhatsNewLogEntity()
+            using (AuthLogic.Disable())
             {
-                WhatsNew = wne.ToLite(),
-                User = UserEntity.Current,
-                ReadOn = Clock.Now
-            }.Save();
+                new WhatsNewLogEntity()
+                {
+                    WhatsNew = wne.ToLite(),
+                    User = UserEntity.Current,
+                    ReadOn = Clock.Now
+                }.Save();
+            }
         }
         var cm = wne.GetCurrentMessage();
 

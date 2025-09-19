@@ -87,7 +87,7 @@ export default function UserQueryPage(): React.JSX.Element | null {
         throwIfNotFindable={true}
         showBarExtension={true}
         allowSelection={qs && qs.allowSelection}
-        hideFullScreenButton={true}
+        //hideFullScreenButton={true}
         largeToolbarButtons={true}
         showFilters={false /*consider adding uq.showFilters*/}
         showGroupButton={true}

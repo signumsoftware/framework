@@ -280,7 +280,7 @@ export namespace EntityOperations {
 
 export type OutlineBsColor =
   | 'outline-primary'
-  | 'outline-secondary'
+  | 'tertiary'
   | 'outline-success'
   | 'outline-danger'
   | 'outline-warning'

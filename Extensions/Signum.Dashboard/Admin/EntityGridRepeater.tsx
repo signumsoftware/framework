@@ -223,10 +223,10 @@ export function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(pro
           </span>
         </div>
       </legend>
-      <div className="row rule">
+      <div className="row sf-rule">
         {Array.range(0, 12).map(i =>
           <div className="col-sm-1" key={i}>
-            <div className="ruleItem" />
+            <div className="sf-rule-item">Col {i}</div>
           </div>
         )}
       </div>

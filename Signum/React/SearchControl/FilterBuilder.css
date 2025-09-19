@@ -15,6 +15,10 @@ select.form-control.sf-group-selector {
     text-transform: uppercase;
 }
 
+.sf-filters-list table th{
+    white-space: nowrap;
+}
+
 .sf-user-filter {
     opacity: .3;
     transition: opacity .5s ease-in-out;

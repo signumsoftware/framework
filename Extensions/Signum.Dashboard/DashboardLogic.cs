@@ -50,6 +50,7 @@ public static class DashboardLogic
                 {"SeparatorPart", typeof(SeparatorPartEntity)},
                 {"HealthCheckPart", typeof(HealthCheckPartEntity)},
                 {"TextPart", typeof(TextPartEntity)},
+                {"CustomPart", typeof(CustomPartEntity)},
             });
 
 
@@ -423,6 +424,7 @@ public static class DashboardLogic
         RegisterTypeConditionForPart<LinkListPartEntity>(typeCondition);
         RegisterTypeConditionForPart<SeparatorPartEntity>(typeCondition);
         RegisterTypeConditionForPart<HealthCheckPartEntity>(typeCondition);
+        RegisterTypeConditionForPart<CustomPartEntity>(typeCondition);
     }
 
     public static void RegisterTypeConditionForPart<T>(TypeConditionSymbol typeCondition)

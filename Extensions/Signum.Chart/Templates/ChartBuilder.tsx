@@ -93,7 +93,7 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
   const tis = getTypeInfos(p.queryDescription.columns["Entity"].type);
 
   return (<>
-      {(qs?.allowSystemTime ?? tis.some(a => a.isSystemVersioned == true)) && <div className='d-flex align-items-center mb-1' style={{minHeight: 34}}>
+      {(qs?.allowSystemTime ?? tis.some(a => a.isSystemVersioned == true)) && <div className='d-flex align-items-center mb-3' style={{minHeight: 34}}>
         <label>
           <input className='me-1' type={'checkbox'} defaultChecked={chart.chartTimeSeries != null}
             onChange={e => {
@@ -121,28 +121,20 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
       </div>}
     <div className="row sf-chart-builder gx-2">
       <div className="col-lg-2">
-        <div className="sf-chart-type card">
-          <div className="card-header">
-            <h6 className="card-title mb-0">{ChartMessage.Chart.niceToString()}</h6>
-          </div>
-          <div className="card-body">
+        <div className="sf-chart-type bg-body rounded shadow-sm border-0 p-2">
+          <h6 className="mb-3">{ChartMessage.ChartType.niceToString()}</h6>
             {chartScripts?.map((cs, i) =>
               <div key={i} className={chartTypeImgClass(cs)} title={cs.symbol.key.after(".")} onClick={() => handleChartScriptOnClick(cs)}>
                 <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} alt={cs.icon.fileName} />
               </div>)}
-          </div>
-          <div className="card-body">
             <NumberLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="xs" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger fw-bold" : undefined }} />
-          </div>
         </div>
       </div >
       <div className="col-lg-10">
-        <div className="sf-chart-tokens card">
-          <div className="card-header">
-            <h6 className="card-title mb-0">{ChartMessage.ChartSettings.niceToString()}</h6>
-          </div>
-          <div className="card-body">
-            <table className="table" style={{ marginBottom: "-1px" }}>
+        <div className="sf-chart-tokens bg-body rounded shadow-sm border-0 p-2">
+            <h6>{ChartMessage.ChartSettings.niceToString()}</h6>
+          <div>
+            <table className="table table-borderless" style={{ marginBottom: "-1px" }}>
               <thead>
                 <tr>
                   <th className="sf-chart-token-narrow">
@@ -197,7 +189,7 @@ export function Parameters(props: {
     return null;
 
   return (
-    <fieldset className="sf-chart-parameters">
+    <fieldset className="sf-chart-parameters bg-body rounded shadow-sm border-0 my-1 p-2">
       <div className="row">
         {groups}
       </div>

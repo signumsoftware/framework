@@ -72,7 +72,7 @@ export default function ExcelMenu(p: ExcelMenuProps): React.JSX.Element {
 
   return (
     <Dropdown show={isOpen} onToggle={handleSelectedToggle} title={ExcelMessage.ExcelReport.niceToString()}>
-      <Dropdown.Toggle id="userQueriesDropDown" variant="outline-secondary">
+      <Dropdown.Toggle id="userQueriesDropDown" variant="tertiary">
       {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>

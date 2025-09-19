@@ -51,6 +51,26 @@
 .sidebar-inner {
     overflow-x: hidden;
     overflow-y: auto;
+    height: 100%;
+}
+.sidebar-inner .dropdown-menu.show {
+    position: relative;
+}
+.sidebar-inner .dropdown-item {
+    padding-left: 8px;
+    padding-right: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sidebar-inner .sf-entity-line .input-group .form-control {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-arrow-icon {
+    margin-left: 4px; /*place for icon*/
 }
 
 .sidebar-inner:hover {
@@ -334,7 +354,7 @@
     transition-property: all;
 }
 
-.sidebar-nav .nav-item span {
+.sidebar-nav .nav-item .nav-link > span {
     padding: 0 !important;
     border-radius: 5px;
     transition-duration: 150ms;

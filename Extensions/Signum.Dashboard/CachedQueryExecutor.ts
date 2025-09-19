@@ -42,9 +42,9 @@ export function executeQueryValueCached(request: QueryValueRequest, fop: FindOpt
 
   var queryRequest: QueryRequest = {
     queryKey: request.queryKey,
-    columns: [{ token: token.fullKey, displayName: token.niceName }],
+    columns: [{ token: token!.fullKey, displayName: token!.niceName }],
     filters: request.filters,
-    groupResults: token.queryTokenType == "Aggregate",
+    groupResults: token!.queryTokenType == "Aggregate",
     orders: [],
     pagination: request.multipleValues ? { mode: "All" } : { mode: "Firsts", elementsPerPage: 2 },
     systemTime: undefined,

@@ -33,7 +33,7 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
   if (!isOpen) {
     return (
       <FormGroup label={LoginAuthMessage.NewPassword.niceToString()} ctx={p.ctx}>
-        {() => <a className="btn btn-light btn-sm" onClick={() => setIsOpen(true)}>
+        {() => <a className="btn btn-tertiary btn-sm" onClick={() => setIsOpen(true)}>
           <FontAwesomeIcon icon="key" /> {LoginAuthMessage.ChangePassword.niceToString()}
         </a>}
       </FormGroup>

@@ -9,37 +9,41 @@
     transform: translateX(-50%);
 }
 
-#sfNotify span.notify {
-    font-weight: bold;
-    overflow: hidden;
-    text-align: center;
-    white-space: nowrap;
-    padding: 4px;
-    opacity: 0;
-    -webkit-transition: opacity 200ms linear;
-    -o-transition: opacity 200ms linear;
-    transition: opacity 200ms linear;
-    display: flex;
-    font-size: 14px;
-    align-items: center;
-}
+    #sfNotify span.notify {
+        font-weight: bold;
+        overflow: hidden;
+        text-align: center;
+        white-space: nowrap;
+        padding: 4px;
+        opacity: 0;
+        -webkit-transition: opacity 200ms linear;
+        -o-transition: opacity 200ms linear;
+        transition: opacity 200ms linear;
+        display: flex;
+        font-size: 14px;
+        align-items: center;
+    }
 
-#sfNotify span.notify.in {
-    opacity: 1;
-}
+        #sfNotify span.notify.in {
+            opacity: 1;
+        }
 
-#sfNotify span.notify.loading {
-    background-color: var(--bs-info-subtle);
-}
+        #sfNotify span.notify.loading {
+            background-color: var(--bs-info-bg-subtle);
+            color: var(--bs-info-text-emphasis);
+        }
 
-#sfNotify span.notify.error {
-    background-color: var(--bs-danger-subtle);
-}
+        #sfNotify span.notify.error {
+            background-color: var(--bs-danger-bg-subtle);
+            color: var(--bs-danger-text-emphasis);
+        }
 
-#sfNotify span.notify.warning {
-    background-color: var(--bs-warning-subtle);
-}
+        #sfNotify span.notify.warning {
+            background-color: var(--bs-warning-bg-subtle);
+            color: var(--bs-warning-text-emphasis);
+        }
 
-#sfNotify span.notify.success {
-    background-color: var(--bs-success-subtle);
-}
+        #sfNotify span.notify.success {
+            background-color: var(--bs-success-bg-subtle);
+            color: var(--bs-success-text-emphasis);
+        }

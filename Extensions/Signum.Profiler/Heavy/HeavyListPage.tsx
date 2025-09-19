@@ -84,7 +84,7 @@ export default function HeavyList(): React.JSX.Element {
         <button onClick={handleUpload} className="btn btn-info" disabled={!fileToUpload}><FontAwesomeIcon icon="cloud-arrow-up" /> Upload</button>
       </div>
       <div className="btn-toolbar">
-        <button className={classes("btn btn-light", enabled ? "btn-outline-danger" : "btn-outline-secondary")} onClick={() => handleSetEnabled(!enabled)}><FontAwesomeIcon icon={["fas", "circle"]} /> Record</button>
+        <button className={classes("btn btn-light", enabled ? "btn-outline-danger" : "btn-tertiary")} onClick={() => handleSetEnabled(!enabled)}><FontAwesomeIcon icon={["fas", "circle"]} /> Record</button>
         <button onClick={handleUpdate} className="btn btn-light"><FontAwesomeIcon icon="refresh" /> Update</button>
         <button onClick={handleClear} className="btn btn-light"><FontAwesomeIcon icon="trash" /> Clear</button>
         <button onClick={handleDownload} className="btn btn-light btn-outline-info"><FontAwesomeIcon icon="cloud-arrow-down" /> Download</button>

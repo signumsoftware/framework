@@ -252,7 +252,7 @@ export function EntityTable<V extends ModifiableEntity, RS>(props: EntityTablePr
           {
             !isEmpty &&
             <thead ref={c.thead}>
-              <tr className={p.theadClasses ?? "bg-light"}>
+              <tr className={p.theadClasses}>
                 {firstColumnVisible && <th {...p.firstColumnHtmlAttributes}></th>}
                 {
                   cleanColumns.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>

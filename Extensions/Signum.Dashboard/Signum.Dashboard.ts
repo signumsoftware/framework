@@ -37,6 +37,13 @@ export interface CacheQueryConfigurationEmbedded extends Entities.EmbeddedEntity
   autoRegenerateWhenOlderThan: number | null;
 }
 
+export const CustomPartEntity: Type<CustomPartEntity> = new Type<CustomPartEntity>("CustomPart");
+export interface CustomPartEntity extends Entities.Entity, IPartEntity {
+  Type: "CustomPart";
+  requiresTitle: boolean;
+  customPartName: string;
+}
+
 export const DashboardEmbedededInEntity: EnumType<DashboardEmbedededInEntity> = new EnumType<DashboardEmbedededInEntity>("DashboardEmbedededInEntity");
 export type DashboardEmbedededInEntity =
   "None" |
@@ -89,6 +96,7 @@ export namespace DashboardMessage {
   export const CtrlClickToFilterByMultipleElements: MessageKey = new MessageKey("DashboardMessage", "CtrlClickToFilterByMultipleElements");
   export const AltClickToOpenResultsInAModalWindow: MessageKey = new MessageKey("DashboardMessage", "AltClickToOpenResultsInAModalWindow");
   export const CopyHealthCheckDashboardData: MessageKey = new MessageKey("DashboardMessage", "CopyHealthCheckDashboardData");
+  export const _0CanOnlyBeUserInA1With2: MessageKey = new MessageKey("DashboardMessage", "_0CanOnlyBeUserInA1With2");
 }
 
 export namespace DashboardOperation {

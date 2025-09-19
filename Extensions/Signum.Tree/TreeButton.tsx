@@ -13,7 +13,6 @@ export interface TreeButtonProps {
 
 export default function TreeButton(p : TreeButtonProps): React.JSX.Element {
   function handleClick(e: React.MouseEvent<any>) {
-    debugger;
     const fo = p.searchControl.props.findOptions;
     const qd = p.searchControl.props.queryDescription;
 

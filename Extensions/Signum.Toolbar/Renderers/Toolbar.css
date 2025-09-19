@@ -35,3 +35,6 @@
 .sidebar-nav.narrow .sf-extra-icon{
     display: none;
 }
+#toolbar-switcher {
+    width: 100% !important;
+}

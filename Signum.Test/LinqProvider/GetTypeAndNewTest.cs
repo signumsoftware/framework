@@ -112,6 +112,57 @@ public class GetTypeAndNewTest
     }
 
     [Fact]
+    public void SelectToTypeEntity_UpCast()
+    {
+        var list = (from f in Database.Query<ArtistEntity>()
+                    select ((Entity)f).GetType().ToTypeEntity())
+                    .ToList();
+
+        Assert.NotEmpty(list);
+    }
+
+    [Fact]
+    public void SelectToTypeEntity_UpCast_Pushed()
+    {
+        var list = (from f in Database.Query<ArtistEntity>()
+                    select ((Lite<Entity>)f.ToLite()).Entity.GetType().ToTypeEntity())
+                    .ToList();
+
+        Assert.NotEmpty(list);
+    }
+
+    [Fact]
+    public void SelectToTypeLite()
+    {
+        var list = (from f in Database.Query<ArtistEntity>()
+                    where f.ToLite().EntityType.ToTypeEntity().Is(typeof(ArtistEntity).ToTypeEntity())
+                    select f)
+                    .ToList();
+
+        Assert.NotEmpty(list);
+    }
+
+    //class Juas
+    //{
+    //    public Lite<IAuthorEntity> Author;
+    //}
+
+    //[Fact]
+    //public void SelectToTypeEntity_UpCast_Pushed2()
+    //{
+    //    var query = (from f in Database.Query<ArtistEntity>()
+    //                 select new Juas
+    //                 {
+    //                     Author = f.ToLite()
+    //                 });
+
+    //    var list = query.Where(a => a.Author.EntityType.ToTypeEntity().Is(typeof(ArtistEntity).ToTypeEntity())).ToList();
+
+    //    Assert.NotEmpty(list);
+    //}
+
+
+    [Fact]
     public void WhereToTypeEntity()
     {
         var list = (from f in Database.Query<ArtistEntity>()

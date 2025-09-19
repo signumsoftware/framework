@@ -33,19 +33,21 @@ export interface UserQueryMenuProps {
   isHidden: boolean;
 }
 
-function decodeUserQueryFromUrl(location: Location) {
-  var userQueryKey = QueryString.parse(location.search)["userQuery"];
-  return userQueryKey ? parseLite(userQueryKey) as Lite<UserQueryEntity> : undefined;
-}
-
 export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element | null {
 
   const [filter, setFilter] = React.useState<string>();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [currentUserQuery, setCurrentUserQueryInternal] = React.useState<Lite<UserQueryEntity> | undefined>();
+  const [currentEntity, setCurrentEntityInternal] = React.useState<Lite<Entity> | undefined>();
   const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
   const forceUpdate = useForceUpdate();
   const location = useLocation();
+
+
+  function setCurrentEntity(entity: Lite<Entity> | undefined) {
+    setCurrentEntityInternal(entity);
+    p.searchControl.extraUrlParams.entity = entity && liteKey(entity);
+  }
 
   function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined, subTitle: string | undefined) {
     p.searchControl.extraUrlParams.userQuery = uq && liteKey(uq);
@@ -67,14 +69,27 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
   }
   
   React.useEffect(() => {
-    const uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl(location) : p.searchControl.props.extraOptions?.userQuery;
+    const query = p.searchControl.props.tag == "SearchPage" ? QueryString.parse(location.search) : null;
+
+    function tryParseLite(key: string | null | undefined) {
+      return key && parseLite(key);
+    }
+
+    const uq = query ? tryParseLite(query["userQuery"]) : p.searchControl.props.extraOptions?.userQuery;
     if (uq && UserQueryEntity.isLite(uq)) {
       if (!is(p.searchControl.getCurrentUserQuery?.(), uq) || !p.searchControl.pageSubTitle)
         setCurrentUserQuery(uq, undefined);
     }
     else
       setCurrentUserQuery(undefined, undefined);
-  }, [location, p.searchControl.props.extraOptions?.userQuery && liteKey(p.searchControl.props.extraOptions.userQuery)]);
+
+    const entity = query ? tryParseLite(query["entity"]) : p.searchControl.props.extraOptions?.entity;
+    p.searchControl.extraUrlParams.entity = entity && liteKey(entity);
+    setCurrentEntity(entity);
+  }, [location,
+    p.searchControl.props.extraOptions?.userQuery && liteKey(p.searchControl.props.extraOptions.userQuery),
+    p.searchControl.props.extraOptions?.entity && liteKey(p.searchControl.props.extraOptions.entity)
+  ]);
 
 
   if (p.isHidden)
@@ -114,6 +129,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
           sc.handleChangeFiltermode('Simple');
         sc.setState({ refreshMode: sc.props.defaultRefreshMode });
         setCurrentUserQuery(undefined, undefined);
+        setCurrentEntity(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
         }
@@ -129,7 +145,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
         .then(nfo => {
           sc.setState({ refreshMode: userQuery.refreshMode });
           sc.handleChangeFiltermode(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions) ? 'Simple' : "Advanced", false, true);
-          setCurrentUserQuery(uq, translated(userQuery, a=>a.displayName));
+          setCurrentUserQuery(uq, translated(userQuery, a => a.displayName));
+          setCurrentEntity(undefined);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
           }
@@ -146,17 +163,19 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     await Navigator.view(userQuery);
 
     await reloadList();
-    if (currentUserQuery  && await Navigator.API.exists(currentUserQuery))
+    if (currentUserQuery && await Navigator.API.exists(currentUserQuery))
       applyUserQueryToSearchControl(currentUserQuery!);
-     else
+    else {
       setCurrentUserQuery(undefined, undefined);
+      setCurrentEntity(undefined);
+    }
   }
 
   async function applyChangesToUserQuery(): Promise<UserQueryEntity> {
     const sc = p.searchControl;
 
     const uqOld = await Navigator.API.fetch(currentUserQuery!);
-    const foOld = await UserQueryClient.Converter.toFindOptions(uqOld, undefined)
+    const foOld = await UserQueryClient.Converter.toFindOptions(uqOld, currentEntity)
 
     const uqNew = await createUserQuery();
     const foNew = Finder.toFindOptions(sc.props.findOptions, sc.props.queryDescription, sc.props.defaultIncudeDefaultFilters);
@@ -194,8 +213,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
 
     if (currentUserQuery && await Navigator.API.exists(currentUserQuery))
       applyUserQueryToSearchControl(currentUserQuery!);
-    else
+    else {
       setCurrentUserQuery(undefined, undefined);
+      setCurrentEntity(undefined);
+    }
   }
 
   async function createUserQuery(): Promise<UserQueryEntity> {
@@ -298,7 +319,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     <Dropdown
       title={[UserQueryEntity.nicePluralName(), currentUserQueryToStr].notNull().join(" - ")}
       onToggle={handleSelectedToggle} show={isOpen}>
-      <Dropdown.Toggle id="userQueriesDropDown" variant="outline-secondary" >
+      <Dropdown.Toggle id="userQueriesDropDown" variant="tertiary" >
         {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>

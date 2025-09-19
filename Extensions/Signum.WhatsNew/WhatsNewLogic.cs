@@ -148,12 +148,11 @@ public static class WhatsNewLogic
         }
     }
 
-
     public static List<(WhatsNewEntity wn, bool isRead)> GetWhatNews()
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<WhatsNewEntity>(userInterface: false);
 
-        var read = Database.Query<WhatsNewLogEntity>().Where(a => a.User.Is(UserEntity.Current)).Select(a => a.WhatsNew).ToHashSet();
+        var read = AuthLogic.Disable().Using(() => Database.Query<WhatsNewLogEntity>().Where(a => a.User.Is(UserEntity.Current)).Select(a => a.WhatsNew).ToHashSet());
 
         return WhatsNews.Value.Values
             .Where(wn => isAllowed(wn))

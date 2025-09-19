@@ -1,0 +1,6 @@
+﻿.menu-right-of-caret.show {
+  position: fixed !important;
+}
+.dropdown-toggle::after {
+  display: none;
+}

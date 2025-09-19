@@ -169,6 +169,7 @@ public enum ChartMessage
     [Description("{0} can only be created from the search window")]
     _0CanOnlyBeCreatedFromTheSearchWindow,
     Chart,
+    ChartType,
     [Description("Chart")]
     ChartToken,
     [Description("Chart settings")]

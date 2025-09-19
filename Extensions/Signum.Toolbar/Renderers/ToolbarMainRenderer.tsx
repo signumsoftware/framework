@@ -108,10 +108,10 @@ function ToolbarIconButton({ tr }: { tr: ToolbarResponse<any> }) {
     );
 
   return (
-    <a href="#" onMouseDown={e => { e.preventDefault(); config.handleNavigateClick(e, tr); }}>
+    <a href="#" onMouseDown={e => { e.preventDefault(); config.handleNavigateClick(e, tr, null); }}>
       <div className="card toolbar-card">
         <div className="card-img-top" style={{ fontSize: "60px" }}>
-          {config.getIcon(tr)}
+          {config.getIcon(tr, null)}
         </div>
         <div className="card-body">
           <h5 className="card-title">{tr.label}</h5>
