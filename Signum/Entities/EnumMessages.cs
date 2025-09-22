@@ -358,6 +358,14 @@ public enum SearchMessage
 
     [Description("All Pages")]
     AllPages,
+
+    [Description("Filter-type Selection")]
+    FilterTypeSelection,
+    FilterMenu,
+    OperationsForSelectedElements,
+
+    PaginationMode,
+    NumberOfElementsForPagination,
 }
 
 public enum SearchHelpMessage
