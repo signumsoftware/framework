@@ -3,6 +3,7 @@
         min-width: 730px;
     }
 }*/
+@import "./Tertiary.css";
 
 @media (min-width: 768px) {
     .modal-md,
@@ -79,10 +80,13 @@
 .sf-chooser-button {
     width: 100%;
     margin-bottom: 6px;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
 }
 
 .modal-content {
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 5px 15px var(--bs-box-shadow);
 }
 
 .modal-title{
@@ -115,13 +119,13 @@ button.dropdown-item:not(:disabled):not(.disabled) {
 .tab-content .tab-pane {
     padding: 1em;
     margin-top: -1em;
-    border: 1px solid #e5e5e5;
+    border: 1px solid var(--bs-border-color);
     border-top: 0;
 }
 
 a.expand-window {
     cursor: pointer;
-    color: lightgray;
+    color: var(--bs-secondary-text);
     margin-top: 10px;
     position: fixed;
     top: 50px;
@@ -130,7 +134,7 @@ a.expand-window {
 }
 
 a.expand-window:hover {
-    color:gray;
+    color: var(--bs-secondary-text);
 }
 
 .btn-toolbar.right .btn,
@@ -149,7 +153,7 @@ a.expand-window:hover {
 .btn-toolbar > .input-group,
 .btn-toolbar > .dropdown {
     margin-bottom: 3px;
-    margin-right: 2px;
+    margin-right: 5px;
 }
 
 .code-container {
@@ -211,8 +215,9 @@ a.expand-window:hover {
 
 
 .sf-page-container {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-tertiary-bg);
 }
 
 .sf-page-container > div{
@@ -225,7 +230,7 @@ a.expand-window:hover {
     position: sticky;
     top: 0px;
     z-index: 100;
-    background: white;
+background: var(--bs-body-bg);
 }
 
 .sf-entity-sub-title {
@@ -241,4 +246,14 @@ a.expand-window:hover {
 .modal-max-width {
     max-width: none !important;
     width: calc(100vw - 30px);
+}
+
+
+.modal-body,
+.modal-footer{
+    background: var(--bs-tertiary-bg);
+}
+
+.modal-header {
+    background: var(--bs-secondary-bg);
 }

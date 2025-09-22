@@ -29,17 +29,21 @@
         }
 
         #sfNotify span.notify.loading {
-            background-color: #B6E2F3;
+            background-color: var(--bs-info-bg-subtle);
+            color: var(--bs-info-text-emphasis);
         }
 
         #sfNotify span.notify.error {
-            background-color: #ffafaf;
+            background-color: var(--bs-danger-bg-subtle);
+            color: var(--bs-danger-text-emphasis);
         }
 
         #sfNotify span.notify.warning {
-            background-color: #fff1a8;
+            background-color: var(--bs-warning-bg-subtle);
+            color: var(--bs-warning-text-emphasis);
         }
 
         #sfNotify span.notify.success {
-            background-color: #97E371;
+            background-color: var(--bs-success-bg-subtle);
+            color: var(--bs-success-text-emphasis);
         }

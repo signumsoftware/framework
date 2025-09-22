@@ -102,7 +102,7 @@ function WhatsNewDropdownImp() {
 
   return (
     <>
-      <button className="nav-link sf-bell-container" onClick={handleOnToggle} style={{ border: 0, backgroundColor: 'transparent' }}>
+      <button className="nav-link sf-bell-container" onClick={handleOnToggle} style={{ border: 0, backgroundColor: 'var(--bs-transparent)' }}>
         <FontAwesomeIcon icon="bullhorn"
           className={classes("sf-newspaper", isOpen && "open", countResult && countResult.numWhatsNews > 0 && "active")}
           title={(countResult ? WhatsNewEntity.niceCount(countResult.numWhatsNews) : WhatsNewEntity.nicePluralName())}
@@ -110,7 +110,7 @@ function WhatsNewDropdownImp() {
         {countResult && countResult.numWhatsNews > 0 && <span className="badge bg-danger badge-pill sf-news-badge">{countResult.numWhatsNews}</span>}
       </button>
       {isOpen && <div className="sf-news-toasts mt-2" ref={divRef} style={{
-        backgroundColor: "rgba(255,255,255, 0.7)",
+        backgroundColor: "rgba(var(--bs-white-rgb), 0.7)",
         backdropFilter: "blur(10px)",
         transition: "transform .4s ease" }}>
         {newsInOrder == null ? <Toast> <Toast.Body>{JavascriptMessage.loading.niceToString()}</Toast.Body></Toast> :
@@ -132,7 +132,7 @@ function WhatsNewDropdownImp() {
             }
             <Toast>
               <Toast.Body style={{ textAlign: "center" }}>
-                <a style={{ cursor: "pointer", color: "#114177" }}  onClick={() => handleClickAll()}>{WhatsNewMessage.AllMyNews.niceToString()}</a>
+                <a style={{ cursor: "pointer", color: "var(--bs-primary)" }}  onClick={() => handleClickAll()}>{WhatsNewMessage.AllMyNews.niceToString()}</a>
               </Toast.Body>
             </Toast>
           </>
@@ -170,7 +170,7 @@ export function WhatsNewToast(p: { whatsnew: WhatsNewClient.WhatsNewShort, onClo
   return (
     <Toast onClose={() => p.onClose([p.whatsnew])} className={p.className}>
       <Toast.Header>
-        <strong className="me-auto">{p.whatsnew.title} {!Navigator.isReadOnly(WhatsNewEntity) && <small style={{ color: "#d50a30" }}>{(p.whatsnew.status == "Draft") ? p.whatsnew.status : undefined}</small>}</strong>
+        <strong className="me-auto">{p.whatsnew.title} {!Navigator.isReadOnly(WhatsNewEntity) && <small style={{ color: "var(--bs-danger)" }}>{(p.whatsnew.status == "Draft") ? p.whatsnew.status : undefined}</small>}</strong>
         <small>{DateTime.fromISO(p.whatsnew.creationDate!).toRelative()}</small>
       </Toast.Header>
       <Toast.Body style={{ whiteSpace: "pre-wrap" }}>

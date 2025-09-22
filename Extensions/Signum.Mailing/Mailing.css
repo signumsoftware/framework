@@ -9,7 +9,7 @@
 }
 .sf-email-inserttoken-targetactive
 {
-   border: 2px solid #58ACFA !important;
+   border: 2px solid var(--bs-border-info) !important;
 }
 .sf-email-replacements-container
 {

@@ -497,7 +497,7 @@ public static class SchemaSynchronizer
                             }
                         }
 
-                        delayedAddSystemVersioning.Add(SqlPreCommand.Combine(Spacing.Simple, addPeriod, addSystemVersioning));
+                        delayedAddSystemVersioning.Add(SqlPreCommand.Combine(Spacing.Simple, columnsHistory, addPeriod, addSystemVersioning));
 
                         return SqlPreCommand.Combine(Spacing.Simple,
                             rename,
@@ -508,7 +508,6 @@ public static class SchemaSynchronizer
                             disconnectFromPartition,
                             combinedAddPeriod,
                             columns,
-                            columnsHistory,
                             createPrimaryKey);
                     });
 
@@ -638,9 +637,6 @@ public static class SchemaSynchronizer
                         removeOld: null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
                             mix.GetIndexName(tab.SystemVersioned!.TableName) != dix.IndexName ? sqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.GetIndexName(tab.SystemVersioned!.TableName)) : null);
-
-
-
 
                     return SqlPreCommand.Combine(Spacing.Simple, indices);
                 });

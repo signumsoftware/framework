@@ -1,6 +1,4 @@
-﻿
-.sf-file-drop
-{
+﻿.sf-file-drop {
     font-weight: bold;
     text-align: center;
     padding: 1em 0;
@@ -15,18 +13,19 @@
     padding: 4px 10px;
 }
 
-.sf-file-drop .sf-upload{
+.sf-file-drop .sf-upload {
     margin-top: -5px;
     margin-bottom: -5px;
 }
+
 .sf-file-drop-over {
-    color: #f00;
-    border-color: #f00;
+    color: var(--bs-danger-text);
+    border-color: var(--bs-danger-border);
     border-style: solid;
-    box-shadow: inset 0 3px 4px #888;
+    box-shadow: inset 0 3px 4px var(--bs-secondary-color);
 }
-.sf-file-line-new
-{
+
+.sf-file-line-new {
     overflow: hidden;
 }
 
@@ -39,23 +38,24 @@
 
 .sf-file-image-container {
     position: relative;
-    border: 1px solid #eee;
+    border: 1px solid var(--bs-border-color);
+    ;
 }
 
 .sf-file-image-container:hover {
-    border: 1px solid #ddd;
+    border: 1px solid var(--bs-secondary-color);
 }
 
-    .sf-file-image-container img {
-        width: 100%;
-    }
+.sf-file-image-container img {
+    width: 100%;
+}
 
-    .sf-file-image-container .sf-remove {
-        position: absolute;
-        right: 3px;
-        top: 2px;
-        padding: 3px 6px;
-    }
+.sf-file-image-container .sf-remove {
+    position: absolute;
+    right: 3px;
+    top: 2px;
+    padding: 3px 6px;
+}
 
 
 /*Upload file*/
@@ -64,23 +64,23 @@
     position: relative;
 }
 
-    .sf-upload i {
-        padding-right: 10px;
-    }
+.sf-upload i {
+    padding-right: 10px;
+}
 
-    .sf-upload input[type="file"] {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        left: 0;
-        top: 0;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-        filter: alpha(opacity=0);
-        -moz-opacity: 0;
-        -khtml-opacity: 0;
-        opacity: 0;
-        cursor: pointer;
-    }
+.sf-upload input[type="file"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: alpha(opacity=0);
+    -moz-opacity: 0;
+    -khtml-opacity: 0;
+    opacity: 0;
+    cursor: pointer;
+}
 
 
 /*.sf-image-container{

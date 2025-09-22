@@ -1,5 +1,4 @@
-﻿
-.sf-alerts-toasts .toast {
+﻿.sf-alerts-toasts .toast {
     backdrop-filter: blur(5px);
 }
 
@@ -92,11 +91,13 @@
     right: 5px;
     z-index: 100;
     min-width: 350px;
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
 }
 
-    .sf-alerts-toasts .toast:not(:last-child) {
-        margin-bottom: 0.25rem;
-    }
+.sf-alerts-toasts .toast:not(:last-child) {
+    margin-bottom: 0.25rem;
+}
 
 .sf-alert-signature {
     display: block;
@@ -109,18 +110,16 @@
     user-select: none;
 }
 
-.sf-bell {
-}
+.sf-bell {}
 
 .sf-bell.open {
-    color: #616A6B
+    color: var(--bs-secondary);
 }
 
 .sf-bell.active {
-    color: #D4AC0D
+    color: var(--bs-warning);
 }
 
 .sf-bell.active.open {
-    color: #9C640C
+    color: var(--bs-warning-dark);
 }
-

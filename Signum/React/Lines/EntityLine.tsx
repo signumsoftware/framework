@@ -212,6 +212,7 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
           itemsDelay={ac.getItemsDelay()}
           minLength={ac.getMinLength()}
           renderItem={(item, hl) => ac!.renderItem(item, hl)}
+          itemTitle={(item, hl) => ac!.itemTitle(item, hl)}
           renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
           itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
           onSelect={c.handleOnSelect}
@@ -237,13 +238,13 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
           <a ref={e => setLinkOrSpan(e)}
             href="#" onClick={c.handleViewClick}
             className={classes(p.ctx.formControlClass, "sf-entity-line-entity")}
-            title={p.ctx.titleLabels ? JavascriptMessage.navigate.niceToString() : undefined} {...p.itemHtmlAttributes}>
+            title={p.ctx.titleLabels ? getToString(value) : undefined} {...p.itemHtmlAttributes}>
             {str}
           </a>
         );
       } else {
         return (
-          <span tabIndex={0} ref={e => setLinkOrSpan(e)} className={classes(p.ctx.formControlClass, "sf-entity-line-entity")} {...p.itemHtmlAttributes}>
+          <span tabIndex={0} ref={e => setLinkOrSpan(e)} title={getToString(value)} className={classes(p.ctx.formControlClass, "sf-entity-line-entity")} {...p.itemHtmlAttributes}>
             {str}
           </span>
         );

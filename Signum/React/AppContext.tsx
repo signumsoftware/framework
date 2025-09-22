@@ -144,12 +144,12 @@ export function useExpand(): void {
 
 }
 
-export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.KeyboardEvent<any>): void {
-  if ((e as React.MouseEvent<any>).button == 2)
+export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.KeyboardEvent<any> | undefined): void {
+  if (e && (e as React.MouseEvent<any>).button == 2)
     return;
 
-  e.preventDefault();
-  if (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)
+  e?.preventDefault();
+  if (e && (e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
     window.open(toAbsoluteUrl(path));
   else if (path.startsWith("http"))
     window.location.href = path;

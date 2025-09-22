@@ -18,7 +18,7 @@ export function ColorRadio(p : ColorRadioProps): React.JSX.Element{
   return (
     <a onClick={e => { e.preventDefault(); !p.readOnly && p.onClicked(e); }} title={p.title}
       className={classes("sf-auth-chooser", p.readOnly && "sf-not-allowed")}
-      style={{ color: p.checked ? p.color : "#aaa" }}>
+      style={{ color: p.checked ? p.color : "var(--bs-secondary-text)" }}>
       <FontAwesomeIcon icon={p.icon ?? ["far", (p.checked ? "circle-dot" : "circle")]!} />
     </a>
   );

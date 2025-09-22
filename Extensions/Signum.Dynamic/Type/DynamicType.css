@@ -1,9 +1,9 @@
 ﻿div.properties h4 {
-    color: #87a6b5;
+    color: var(--bs-secondary-text);
 }
 
 div.properties a.sf-line-button:not(:hover) {
-    color: #87a6b5;
+    color: var(--bs-secondary-text);
 }
 
 div.properties div.card-header {
@@ -15,11 +15,11 @@ div.properties .panel-group {
 }
 
 div.validators h4 {
-    color: #e6b600;
+    color: var(--bs-warning);
 }
 
 div.validators a.sf-line-button:not(:hover) {
-    color: #e6b600;
+    color: var(--bs-warning);
 }
 
 div.validators div.card-header {
@@ -35,5 +35,5 @@ div.validators .panel-group {
 }
 
 .database-mapping {
-    color: #439b43;
+    color: var(--bs-success);
 }

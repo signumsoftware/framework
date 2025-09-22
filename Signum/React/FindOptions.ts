@@ -263,7 +263,7 @@ export function getQueryTokenColor(token: QueryToken) : string {
     case "String":
     case "Guid":
     case "Boolean":
-      return "var(--qt-value)" /**/;
+      return "var(--qt-value)"; //"var(--bs-body-color)"
 
     case "DateTime":
       return "var(--qt-date)" /*#5100A1*/;

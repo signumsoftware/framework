@@ -1,102 +1,96 @@
-﻿.sf-auth-rules
-{
+﻿.sf-auth-rules {
     margin-top: 20px;
     margin-bottom: 40px;
 }
 
-.sf-auth-rules th
-{
-    padding:2px;
+.sf-auth-rules th {
+    padding: 2px;
 }
-.sf-auth-rules td
-{
+
+.sf-auth-rules td {
     vertical-align: top;
 }
-.sf-auth-rules .sf-auth-overriden
-{
-    text-align:center;
+
+.sf-auth-rules .sf-auth-overriden {
+    text-align: center;
 }
-.sf-auth-rules a:hover
-{
-	cursor:pointer;
+
+.sf-auth-rules a:hover {
+    cursor: pointer;
 }
-.sf-auth-rules tr.first
-{
-    border-top: 1px gray solid
+
+.sf-auth-rules tr.first {
+    border-top: 1px var(--bs-border-color) solid
 }
-.sf-auth-rules tr:hover
-{
-    background-color: #F6F6F6
+
+.sf-auth-rules tr:hover {
+    background-color: var(--bs-body-bg);
 }
-.sf-auth-rules span
-{
+
+.sf-auth-rules span {
     line-height: 22px;
 }
-.sf-auth-rules .sf-auth-condition .sf-auth-label
-{
+
+.sf-auth-rules .sf-auth-condition .sf-auth-label {
     font-style: italic;
 }
 
-    .sf-auth-rules .sf-auth-condition td {
-        background-color: #f7f7f7
-    }
+.sf-auth-rules .sf-auth-condition td {
+    background-color: var(--bs-body-bg);
+}
 
-.sf-auth-rules .sf-auth-condition-button
-{
+.sf-auth-rules .sf-auth-condition-button {
     margin: 5px 0 5px 3px;
     width: 1.2em;
     background: none repeat scroll 0px 0px transparent !important;
     border: 0px none !important;
 }
-.sf-auth-rules .sf-auth-label
-{
+
+.sf-auth-rules .sf-auth-label {
     margin-left: 3px;
     vertical-align: top;
 }
 
-    .sf-auth-rules small {
-        color: #656565
-    }
+.sf-auth-rules small {
+    color: var(--bs-secondary)
+}
 
-    .sf-auth-rules small.and {
-        color: black
-    }
+.sf-auth-rules small.and {
+    color: var(--bs-body-color)
+}
 
-a.sf-auth-chooser
-{
+a.sf-auth-chooser {
     text-decoration: none !important;
-    font-size:18px;
-    vertical-align:middle;
+    font-size: 18px;
+    vertical-align: middle;
 }
 
 .sf-auth-checkbox {
     font-size: 18px;
     vertical-align: middle;
-    color: #aaa
+    color: var(--bs-secondary)
 }
 
-    .sf-auth-checkbox.fa-check-square-o {
-        cursor: pointer;
-        color: #555
-    }
-
-    .sf-not-allowed{
-        cursor: not-allowed !important;
-    }
-
-span.group.inactive
-{
-    color:#CCC
+.sf-auth-checkbox.fa-check-square-o {
+    cursor: pointer;
+    color: var(--bs-secondary)
 }
 
-span.group.active
-{
-    color:black
+.sf-not-allowed {
+    cursor: not-allowed !important;
+}
+
+span.group.inactive {
+    color: var(--bs-secondary)
+}
+
+span.group.active {
+    color: var(--bs-body-color)
 }
 
 
 table.sf-auth-rules tr.sf-auth-type td {
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--bs-border-color);
 }
 
 table.sf-auth-rules tr.sf-auth-type.sf-auth-with-conditions td {
@@ -112,12 +106,12 @@ table.sf-auth-rules tr.sf-auth-condition td {
 
 table.sf-auth-rules tr.sf-auth-namespace td {
     padding-top: 16px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--bs-border-color);
     border-top: 0;
 }
 
 .sf-placeholder-icon {
-    color: #d8d8d8
+    color: var(--bs-secondary)
 }
 
 .sf-auth-condition .sf-condition-icon {
@@ -125,31 +119,31 @@ table.sf-auth-rules tr.sf-auth-namespace td {
 }
 
 a.sf-condition-icon {
-    color: #999;
+    color: var(--bs-secondary);
 }
 
 a.sf-condition-icon:hover {
-    color: #666;
-    text-decoration:none;
+    color: var(--bs-secondary-dark);
+    text-decoration: none;
 }
 
 a.sf-auth-link {
-    opacity:0.5;
-    text-decoration:none;
+    opacity: 0.5;
+    text-decoration: none;
 }
 
 a.sf-auth-link:hover {
-    opacity:1;
+    opacity: 1;
 }
 
 .sf-master {
-    background: #fffbc2 !important;
+    background: var(--bs-warning-subtle) !important;
 }
 
 small.shy-text {
     opacity: 0;
     font-size: smaller;
-    color: #aaa;
+    color: var(--bs-gray-400);
     transition: opacity 1s;
 }
 
