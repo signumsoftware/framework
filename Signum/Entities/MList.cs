@@ -793,7 +793,7 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
 
     }
 
-    public void AssignAndPostRetrieving(IMListPrivate newList, PostRetrievingContext ctx)
+    void IMListPrivate.AssignAndPostRetrieving(IMListPrivate newList, PostRetrievingContext ctx)
     {
         this.AssignMList((MList<T>)newList);
         this.PostRetrieving(ctx);
