@@ -208,6 +208,7 @@
 
 .sf-page-container {
     flex-grow: 1;
+    z-index: 0;
 }
 
 .sidebar-inner .nav-item .nav-arrow-icon .icon {

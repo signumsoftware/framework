@@ -753,7 +753,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps): React.ReactEleme
 function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: boolean, onChange: () => void }) {
   return (
     <Dropdown>
-      <Dropdown.Toggle variant={p.filter.dashboardBehaviour ? "info" : "light"} id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className={classes("px-1", p.filter.dashboardBehaviour ? "text-light" : "text-info")}
+      <Dropdown.Toggle variant={p.filter.dashboardBehaviour ? "info" : "tertiary"} id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className={classes("px-1", p.filter.dashboardBehaviour ? "text-light" : "text-info")}
         title={StyleContext.default.titleLabels ? "Behaviour of the filter when used inside of a Dashboard" : undefined}>
         {<FontAwesomeIcon icon="gauge" className={classes("icon", p.filter.dashboardBehaviour ? "text-light" : "text-info")} />}{p.filter.dashboardBehaviour ? " " + DashboardBehaviour.niceToString(p.filter.dashboardBehaviour) : ""}
       </Dropdown.Toggle>

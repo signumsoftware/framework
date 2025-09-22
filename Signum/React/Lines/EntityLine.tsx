@@ -136,11 +136,11 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
     const buttons = (
       <>
         {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
-        {!hasValue && !p.avoidViewButton && c.renderCreateButton(true)}
-        {!hasValue && c.renderFindButton(true)}
-        {hasValue && !p.avoidViewButton && c.renderViewButton(true)}
-        {hasValue && c.renderRemoveButton(true)}
-        {c.renderPasteButton(true)}
+        {!hasValue && !p.avoidViewButton && c.renderCreateButton(true, undefined, false)}
+        {!hasValue && c.renderFindButton(true, false)}
+        {hasValue && !p.avoidViewButton && c.renderViewButton(true, false)}
+        {hasValue && c.renderRemoveButton(true, false)}
+        {c.renderPasteButton(true, false)}
         {c.props.extraButtons && c.props.extraButtons(c)}
       </>
     );
@@ -185,6 +185,11 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
     function renderAutoComplete(inputId: string, renderInput?: (input: React.ReactElement) => React.ReactElement) {
 
       const ctx = p.ctx;
+      const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
+      var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+      if (!isLabelVisible && p.label) {
+        ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
+      }
 
       var ac = p.autocomplete;
 
@@ -200,6 +205,7 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
             className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass),
             placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined,
             onPaste: p.paste == false ? undefined : handleOnPaste,
+            ...ariaAtts,
             ...p.inputAttributes
           }}
           getItems={query => ac!.getItems(query)}

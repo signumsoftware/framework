@@ -44,7 +44,9 @@ public static class ToolbarLogic
                 {
                     Entity = e,
                     e.Id,
-                    e.Name
+                    e.Name,
+                    e.Owner,
+                    e.EntityType,
                 });
 
 
@@ -55,7 +57,8 @@ public static class ToolbarLogic
                   {
                       Entity = e,
                       e.Id,
-                      e.Name
+                      e.Name,
+                      e.Owner,
                   });
              
             sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(QueryEntity));

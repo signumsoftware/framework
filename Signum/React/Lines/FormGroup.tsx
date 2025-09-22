@@ -9,6 +9,7 @@ export interface FormGroupProps {
   ctx: StyleContext;
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
+  ariaAttributes?: React.AriaAttributes;
   helpText?: React.ReactNode;
   helpTextOnTop?: React.ReactNode;
   error?: string | null | undefined;
@@ -37,6 +38,8 @@ export function FormGroup(p: FormGroupProps): React.ReactElement {
     );
   }
 
+  const requiredIndicator = tCtx.propertyRoute?.member?.required && !p.ariaAttributes?.['aria-readonly'];
+
   const labelClasses = classes(
     ctx.formGroupStyle == "SrOnly" && "visually-hidden",
     ctx.formGroupStyle == "LabelColumns" && ctx.labelColumnsCss,
@@ -47,7 +50,7 @@ export function FormGroup(p: FormGroupProps): React.ReactElement {
   var labelText = p.label ?? (pr?.member?.niceName);
   const label = (
     <label htmlFor={controlId} {...p.labelHtmlAttributes} className={classes(p.labelHtmlAttributes?.className, labelClasses)} >
-      {labelText} {p.labelIcon}
+      {labelText}{requiredIndicator && <span aria-hidden="true" className="required-indicator">*</span>} {p.labelIcon}
     </label>
   );
 
