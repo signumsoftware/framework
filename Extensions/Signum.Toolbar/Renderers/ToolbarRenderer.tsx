@@ -533,7 +533,6 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
                         value={selectedOption ?? null}
                         onChange={val => val && handleSetShow(val, null)}
                         placeholder={title}
-                        renderOption={opt => renderDropDownOptions(opt.value)}
                         disabled={false} />
           {renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)}
         </Nav.Item>
