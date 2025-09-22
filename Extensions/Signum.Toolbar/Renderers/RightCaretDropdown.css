@@ -1,7 +1,28 @@
-﻿.menu-right-of-caret.show {
-  position: fixed !important;
-  z-index: 1000;
+﻿.dropdown-menu.menu-right-of-caret.show {
+    position: fixed !important;
+    z-index: 1000;
+    min-width: 280px;
+    max-width: 400px;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
 }
-.dropdown-toggle::after {
-  display: none;
+
+.switcher-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+}
+
+.switcher-item-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 0.5rem;
 }
