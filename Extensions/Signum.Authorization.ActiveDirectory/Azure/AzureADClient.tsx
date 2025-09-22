@@ -219,7 +219,7 @@ export namespace AzureADClient {
 
   export function getMsalAccount(): msal.AccountInfo | null | undefined {
     let account = localStorage.getItem('msalAccount');
-    if (!account)
+    if (!account || !msalClient)
       return null;
 
     return msalClient.getAccountByUsername(account) ?? undefined;
