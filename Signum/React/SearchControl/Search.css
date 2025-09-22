@@ -14,6 +14,9 @@
 
 [data-bs-theme=dark] {
     --qt-value: var(--bs-body-color) !important; /*should not be necessary...*/
+    --qt-date: #942cfb;
+    --qt-enum: #c7006d;
+    --qt-time: #b871ff;
 }
 
 .sf-pinned-filters {
