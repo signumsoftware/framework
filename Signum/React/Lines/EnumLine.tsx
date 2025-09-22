@@ -62,6 +62,15 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
   if (!p.type!.isNotNullable || p.ctx.value == undefined)
     optionItems = [{ value: null, label: p.emptyLabel ?? " - " }].concat(optionItems);
 
+  const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
+  var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+  if (!isLabelVisible && p.label) {
+    ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
+  }
+
+  var htmlAtts = c.props.valueHtmlAttributes;
+  var mergedHtml = { ...htmlAtts, ...ariaAtts };
+
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
@@ -76,13 +85,13 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
     }
 
     return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId =>
           c.withItemGroup(
             <FormControlReadonly
               id={inputId}
               htmlAttributes={{
-                ...c.props.valueHtmlAttributes,
+                ...mergedHtml,
                 ...({ 'data-value': p.ctx.value } as any) /*Testing*/
               }} ctx={p.ctx} innerRef={c.setRefs}>
               {label}
@@ -109,7 +118,7 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
 
 
     return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => c.withItemGroup(
           <DropdownList<OptionItem> className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formControlClass, c.mandatoryClass, "p-0")} data={optionItems}
             id={inputId}
@@ -134,7 +143,7 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
     };
 
     return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => c.withItemGroup(
           <select id={inputId} {...c.props.valueHtmlAttributes} value={toStr(p.ctx.value)} className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formSelectClass, c.mandatoryClass)} onChange={handleEnumOnChange} >
             {!optionItems.some(a => toStr(a.value) == toStr(p.ctx.value)) && <option key={-1} value={toStr(p.ctx.value)}>{toStr(p.ctx.value)}</option>}
@@ -161,6 +170,15 @@ function internalComboBoxText<V extends string | number | boolean | null>(c: Enu
   if (!p.type!.isNotNullable || p.ctx.value == undefined)
     optionItems = [{ value: null, label: " - " }].concat(optionItems);
 
+  const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
+  var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+  if (!isLabelVisible && p.label) {
+    ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
+  }
+
+  var htmlAtts = c.props.valueHtmlAttributes;
+  var mergedHtmlReadOnly = { ...htmlAtts, ...ariaAtts };
+
   if (p.ctx.readOnly) {
 
     var label: string | null = null;
@@ -175,10 +193,10 @@ function internalComboBoxText<V extends string | number | boolean | null>(c: Enu
     const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
     return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => c.withItemGroup(
           <FormControlReadonly id={inputId} htmlAttributes={{
-            ...c.props.valueHtmlAttributes,
+            ...mergedHtmlReadOnly,
             ...({ 'data-value': p.ctx.value } as any) /*Testing*/
           }} ctx={p.ctx} innerRef={c.setRefs}>
             {label}
@@ -193,7 +211,7 @@ function internalComboBoxText<V extends string | number | boolean | null>(c: Enu
   var renderItem = c.props.onRenderDropDownListItem ? (a: any) => c.props.onRenderDropDownListItem!(a.item) : undefined;
 
   return (
-    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
       {inputId => c.withItemGroup(
         <Combobox<OptionItem>
           id={inputId}
@@ -218,8 +236,10 @@ function internalComboBoxText<V extends string | number | boolean | null>(c: Enu
 function internalRadioGroup<V extends string | number | boolean | null>(c: EnumLineController<V>) {
 
   var optionItems = getOptionsItems(c);
+  const baseId = React.useId();
 
   const p = c.props;
+  var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
 
   const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
     const input = e.currentTarget as HTMLInputElement;
@@ -231,13 +251,13 @@ function internalRadioGroup<V extends string | number | boolean | null>(c: EnumL
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
   return (
-    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
       {inputId => <>
         {getTimeMachineIcon({ ctx: p.ctx })}
         <div style={getColumnStyle()}>
           {optionItems.map((oi, i) =>
-            <label {...c.props.valueHtmlAttributes} className={classes("sf-radio-element", c.getErrorClass())}>
-              <input type="radio" key={i} value={oi.value} checked={p.ctx.value == oi.value} onChange={handleEnumOnChange} disabled={p.ctx.readOnly} />
+            <label key={i} htmlFor={baseId + "-" + i} {...c.props.valueHtmlAttributes} className={classes("sf-radio-element", c.getErrorClass())}>
+              <input id={baseId + "-" + i} type="radio" value={oi.value} checked={p.ctx.value == oi.value} onChange={handleEnumOnChange} disabled={p.ctx.readOnly} />
               {" " + oi.label}
             </label>)}
         </div>

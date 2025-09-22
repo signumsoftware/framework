@@ -94,6 +94,12 @@ export function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: En
   if (c.isHidden)
     return null;
 
+  const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
+  var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+  if (!isLabelVisible && p.label) {
+    ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
+  }
+
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
@@ -103,7 +109,8 @@ export function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: En
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={helpText}
       helpTextOnTop={helpTextOnTop}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
+      ariaAttributes={ariaAtts}>
       {inputId => <div className="sf-entity-strip sf-control-container">
         {p.groupElementsBy == undefined ?
           <ul id={inputId} className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
