@@ -280,7 +280,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
 
       p.isBadge == false ? "" :
         "badge badge-pill " +
-        (p.isBadge == "MoreThanZero" && (value == 0 || value == null) ? "text-bg-light":
+        (p.isBadge == "MoreThanZero" && (value == 0 || value == null) ? "text-bg-tertiary":
           p.badgeColor && typeof p.badgeColor == "function" ? "text-bg-" + p.badgeColor(value) :
             p.badgeColor ? "text-bg-" + p.badgeColor :
               "text-bg-secondary"),

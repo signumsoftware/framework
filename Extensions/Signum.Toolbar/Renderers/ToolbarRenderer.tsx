@@ -91,7 +91,8 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
     let id: number | string | undefined;
     let type: string | undefined;
     const idRegex = "[0-9A-Za-z-]+";
-    const typeRegex = "[A-Za-z-]+";
+    const typeRegex = "[A-Za-z-]+"; 
+    const toStrRegex = ".*"; 
 
     function assertValidId(id: string | undefined) {
 
@@ -110,26 +111,33 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
       if (value === pattern)
         return true;
 
-      if (pattern.contains(":id") || pattern.contains(":type") || pattern.contains(":key")) {
+      if (pattern.contains(":id") || pattern.contains(":type") || pattern.contains(":key") || pattern.contains(":toStr") || 
+        pattern.contains(":id2") || pattern.contains(":type2") || pattern.contains(":key2") || pattern.contains(":toStr2")) {
 
         const regexPattern = "^" +
           pattern
             .replace(":id2", idRegex)
             .replace(":type2", typeRegex)
             .replace(":key2", typeRegex + ";" + idRegex)
+            .replace(":toStr2", toStrRegex)
             .replace(":id", "(?<id>" + idRegex + ")")
             .replace(":type", "(?<type>" + typeRegex + ")")
             .replace(":key", "(?<type>" + typeRegex + ")" + ";" + "(?<id>" + idRegex + ")")
+            .replace(":toStr", toStrRegex)
           + "$";
 
         const regex = new RegExp(regexPattern);
         const match = value.match(regex);
-        if (match == null || match.groups == null)
-        return null;
+        if (match == null)
+          return null;
 
-        id = match.groups?.id;
-        assertValidId(id);
-        type = match!.groups?.type;
+        if (match.groups?.id) {
+          id = match.groups?.id;
+          assertValidId(id);
+        }
+
+        if (match.groups?.type)
+          type = match!.groups?.type;
 
         if (type != null && type != entityType)
           return false;
@@ -271,7 +279,8 @@ async function linkClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: 
     url = url
       .replaceAll(":id2", subEntity.id!.toString())
       .replace(":type2", subEntity.EntityType)
-      .replace(":key2", liteKey(subEntity));
+      .replace(":key2", liteKey(subEntity))
+      .replace(":toStr2", getToString(subEntity));
   }
 
   Dic.getKeys(urlVariables).forEach(v => {
@@ -279,9 +288,11 @@ async function linkClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: 
   });
 
   if (selectedEntity)
-    url = url.replaceAll(":id", selectedEntity.id!.toString())
+    url = url
+      .replaceAll(":id", selectedEntity.id!.toString())
       .replace(":type", selectedEntity.EntityType)
-      .replace(":key", liteKey(selectedEntity));
+      .replace(":key", liteKey(selectedEntity))
+      .replace(":toStr", getToString(selectedEntity));
 
   if (isExternalLink(url))
     window.open(AppContext.toAbsoluteUrl(url));

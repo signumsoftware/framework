@@ -20,3 +20,8 @@
     border-color: var(--bs-tertiary-bg) !important;
 }
 
+
+.text-bg-tertiary {
+    color: var(--bs-body-color) !important;
+    background-color: var(--bs-tertiary-rgb) !important;
+}
