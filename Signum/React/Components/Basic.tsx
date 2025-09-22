@@ -1,6 +1,6 @@
 
 export type BsSize = "xl" | "lg" | "md" | "sm" | "xs";
-export type BsColor = "primary" | "secondary" | "success" | "info" | "warning" | "danger" | "light" | "dark";
+export type BsColor = "primary" | "secondary" | "success" | "info" | "warning" | "danger" | "light" | "dark" | "tertiary";
 
 export const KeyNames = {
   backspace: "Backspace",
