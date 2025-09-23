@@ -21,7 +21,7 @@ export interface TypeaheadProps {
   scrollHeight?: number;
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
   itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLElement>;
-  noResultsMessage?: string;
+  noResultsMessage?: React.ReactNode;
   renderInput?: (input: React.ReactElement) => React.ReactElement;
   inputId?: string;
 }

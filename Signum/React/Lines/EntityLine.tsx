@@ -198,19 +198,6 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
         return renderInput ? renderInput(fcr) : fcr;
       }
 
-    function getAutocompleteQueryName(ac: AutocompleteConfig<any>): string {
-    const anyAc = ac as any;
-
-    const fo = anyAc.findOptions 
-        ? (typeof anyAc.findOptions === "function" ? anyAc.findOptions("") : anyAc.findOptions) 
-        : undefined;
-
-    const qn = fo?.queryName ?? (typeof anyAc.getQueryName === "function" ? anyAc.getQueryName() : undefined);
-
-    return (typeof qn === "string" ? qn : qn?.key ?? qn?.toString()) ?? "this entity";
-    }
-
-
       return (
         <Typeahead ref={c.typeahead}
           inputId={inputId}
@@ -230,7 +217,7 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
           itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
           onSelect={c.handleOnSelect}
           renderInput={renderInput}
-          noResultsMessage={`You are not a member of ${getAutocompleteQueryName(ac!)}`}
+          noResultsMessage={p.autocomplete?.getNotFoundMessage()}
         />
       );
     }
