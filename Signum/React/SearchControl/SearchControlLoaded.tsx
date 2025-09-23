@@ -1241,7 +1241,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               onKeyDown={this.handleMenuFilterKeyDown}
               onChange={this.handleMenuFilterChange} />
           </AutoFocus>}
-        {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+          <div style={{ position:"relative", maxHeight: "calc(100vh - 400px)", overflow: "auto" }}>
+            {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+          </div>
       </ContextMenu>
     );
   }
