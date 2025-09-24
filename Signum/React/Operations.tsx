@@ -522,15 +522,15 @@ export class ContextualOperationContext<T extends Entity> {
 
   constructor(operationInfo: OperationInfo, context: ContextualItemsContext<T>) {
 
-    let cos: ContextualOperationSettings<T>;
+    let cos: ContextualOperationSettings<T> | undefined = undefined;
     let eos: EntityOperationSettings<T> | undefined = undefined;
-    if (oi.operationType == "ConstructorFromMany") {
-      cos = Operations.getSettings(oi.key) as ContextualOperationSettings<T> | undefined;
+    if (operationInfo.operationType == "ConstructorFromMany") {
+      cos = Operations.getSettings(operationInfo.key) as ContextualOperationSettings<T> | undefined;
     }
     else {
-      eos = Operations.getSettings(oi.key) as EntityOperationSettings<T> | undefined;
+      eos = Operations.getSettings(operationInfo.key) as EntityOperationSettings<T> | undefined;
       cos = eos == undefined ? undefined :
-        ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
+        context.lites.length == 1 ? eos.contextual : eos.contextualFromMany
     }
 
     this.operationInfo = operationInfo;
