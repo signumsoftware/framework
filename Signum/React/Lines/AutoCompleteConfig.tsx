@@ -27,7 +27,7 @@ export interface AutocompleteConfig<T> {
 export interface AutocompleteConfigOptions {
   itemsDelay?: number;
   minLength?: number;
-  notFoundMessage: React.ReactNode;
+  notFoundMessage?: React.ReactNode;
 }
 
 export interface LiteAutocomplateConfigOptions extends AutocompleteConfigOptions {
@@ -59,7 +59,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
 
   abortableRequest: AbortableRequest<string, (Lite<T> | AutocompleteConstructor<T>)[]> = new AbortableRequest((signal, subStr: string) => this.getItemsFunction(signal, subStr));
 
-  getNotFoundMessage() {
+  getNotFoundMessage(): React.ReactNode | undefined {
     return this.notFoundMessage;
   }
 
@@ -221,7 +221,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     Dic.assign(this, options);
   }
 
-  getNotFoundMessage() {
+  getNotFoundMessage(): React.ReactNode  {
     return this.notFoundMessage;
   }
 
