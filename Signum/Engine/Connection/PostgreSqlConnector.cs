@@ -81,8 +81,6 @@ public class PostgreSqlConnector : Connector
         this.DataSource = builder.Build();
     }
 
-    public void ReloadTypes() => ChangeConnectionString(this.ConnectionString, runCustomizer: true);
-
     public override int MaxNameLength => 63;
 
     public int? CommandTimeout { get; set; } = null;
@@ -420,7 +418,7 @@ public class PostgreSqlConnector : Connector
                 select t).Any();
     }
 
-    internal void ReloadTypes()
+    public void ReloadTypes()
     {
         using (var conn = this.CreateConnection())
         {
