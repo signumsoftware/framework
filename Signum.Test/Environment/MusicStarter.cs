@@ -32,6 +32,9 @@ public static class MusicStarter
 
             Administrator.TotalGeneration(interactive: false);
 
+            if (Connector.Current is PostgreSqlConnector c)
+                c.ReloadTypes();
+
             Schema.Current.Initialize();
 
             (Connector.Current as PostgreSqlConnector)?.ReloadTypes();
