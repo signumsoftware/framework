@@ -88,6 +88,7 @@ export interface SearchControlLoadedProps {
   hideButtonBar: boolean;
   hideFullScreenButton: boolean;
   showHeader: boolean | "PinnedFilters";
+  avoidTableFooterContainer: boolean;
   pinnedFilterVisible?: (fop: FilterOptionParsed) => boolean;
   showBarExtension: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
@@ -569,7 +570,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
 
-        <div className="sf-table-footer-container  my-3 p-3 pb-1 bg-body rounded shadow-sm">
+        <div className={p.avoidTableFooterContainer ? undefined : "sf-table-footer-container  my-3 p-3 pb-1 bg-body rounded shadow-sm"}>
           {p.showHeader == true && !p.largeToolbarButtons && this.renderToolBar()}
           {this.state.isMobile == true && this.state.viewMode == "Mobile" ? this.renderMobile() :
             <>
@@ -1240,7 +1241,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               onKeyDown={this.handleMenuFilterKeyDown}
               onChange={this.handleMenuFilterChange} />
           </AutoFocus>}
-        {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+          <div style={{ position:"relative", maxHeight: "calc(100vh - 400px)", overflow: "auto" }}>
+            {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+          </div>
       </ContextMenu>
     );
   }

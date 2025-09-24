@@ -261,8 +261,8 @@ public class ExtensionWithParameterInfo<T, K, V> : IExtensionDictionaryInfo
 
                 result.PropertyRoute = cm.PropertyRoutes.Only();
                 result.Implementations = me.Meta.Implementations;
-                result.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
-                result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
+                result.Format = ColumnDescriptionFactory.CombineFormat(cm.PropertyRoutes);
+                result.Unit = ColumnDescriptionFactory.CombineUnit(cm.PropertyRoutes);
                 result.IsAllowed = () => me.Meta.IsAllowed();
             }
 
@@ -344,8 +344,8 @@ public class ExtensionInfo
             {
                 result.PropertyRoute = cleanMeta.PropertyRoutes.Only();
                 result.Implementations = me.Meta.Implementations;
-                result.Format = ColumnDescriptionFactory.GetFormat(cleanMeta.PropertyRoutes);
-                result.Unit = ColumnDescriptionFactory.GetUnit(cleanMeta.PropertyRoutes);
+                result.Format = ColumnDescriptionFactory.CombineFormat(cleanMeta.PropertyRoutes);
+                result.Unit = ColumnDescriptionFactory.CombineUnit(cleanMeta.PropertyRoutes);
             }
             else if (me?.Meta is DirtyMeta dirtyMeta)
             {
@@ -355,8 +355,8 @@ public class ExtensionInfo
                 {
                     result.Implementations = metaImps;
                 }
-                result.Format = dirtyMeta.CleanMetas.Select(cm => cm.PropertyRoutes.Length == 0 ? null : ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes)).Distinct().Only();
-                result.Unit = dirtyMeta.CleanMetas.Select(cm => cm.PropertyRoutes.Length == 0 ? null : ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes)).Distinct().Only();
+                result.Format = ColumnDescriptionFactory.CombineFormat(dirtyMeta.CleanMetas.SelectMany(a => a.PropertyRoutes).ToArray());
+                result.Unit = ColumnDescriptionFactory.CombineUnit(dirtyMeta.CleanMetas.SelectMany(a => a.PropertyRoutes).ToArray()); 
             }
 
             result.IsAllowed = () => me?.Meta.IsAllowed();

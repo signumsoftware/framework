@@ -18,6 +18,10 @@
     <Member Name="MaxRows" Description="Max. Zeilen" />
     <Member Name="TimeoutForQueries" Description="Timeout für Abfragen" />
   </Type>
+  <Type Name="CustomPartEntity" Description="Custom Teil" Gender="m">
+    <Member Name="CustomPartName" Description="Benutzerdefinierter Teilename" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+  </Type>
   <Type Name="DashboardEmbedededInEntity" Description="Dashboard eingebettet in">
     <Member Name="Bottom" Description="Nach unten" />
     <Member Name="None" Description="Keine" />
@@ -48,6 +52,7 @@
     <Member Name="HideQuickLink" Description="Quick Link verstecken" />
   </Type>
   <Type Name="DashboardMessage">
+    <Member Name="_0CanOnlyBeUserInA1With2" Description="{0} kann nur in einem {1} mit {2} verwendet werden" />
     <Member Name="_0Is1InstedOf2In3" Description="{0} ist {1} (statt {2}) in {3}" />
     <Member Name="AltClickToOpenResultsInAModalWindow" Description="[Alt] + Klicken, um die Ergebnisse in einem modalen Fenster zu öffnen" />
     <Member Name="CLickInOneChartToFilterInTheOthers" Description="Klicken Sie in ein Diagramm, um in den anderen zu filtern" />
@@ -81,10 +86,6 @@
   <Type Name="HealthCheckPartEntity" Description="Teil Gesundheitskontrolle" PluralDescription="Teile der Gesundheitskontrolle" Gender="m">
     <Member Name="Items" Description="Artikel" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
-  </Type>
-  <Type Name="HealthCheckStatus">
-    <Member Name="Error" Description="Fehler" />
-    <Member Name="Ok" Description="Ok" />
   </Type>
   <Type Name="ImagePartEntity" Description="Bildteil" PluralDescription="Bildteile" Gender="m">
     <Member Name="AltText" Description="Alt-Text" />

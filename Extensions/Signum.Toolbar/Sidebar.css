@@ -13,7 +13,7 @@
     border-right: 1px solid var(--bs-border-color);
     background-color: var(--bs-body-bg);
     color: var(--bs-body-color);
-    z-index: 1;
+    z-index: 1000;
     overflow: hidden;
     overflow-y: auto;
     transition-property: all;
@@ -208,7 +208,6 @@
 
 .sf-page-container {
     flex-grow: 1;
-    z-index: 0;
 }
 
 .sidebar-inner .nav-item .nav-arrow-icon .icon {
@@ -332,6 +331,8 @@
 
 .main-toolbar .dropdown-menu.show {
     margin-top: 12px;
+    overflow: auto;
+    max-height: calc(100vh - 60px);
 }
 
 .navbar-header {

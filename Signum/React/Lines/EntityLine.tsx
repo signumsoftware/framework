@@ -217,6 +217,7 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
           itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
           onSelect={c.handleOnSelect}
           renderInput={renderInput}
+          noResultsMessage={p.autocomplete?.getNotFoundMessage()}
         />
       );
     }

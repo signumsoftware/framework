@@ -70,17 +70,17 @@
     <Member Name="Width5" Description="Breite5" />
   </Type>
   <Type Name="ChartColumnType">
-    <Member Name="Any" Description="Any" />
-    <Member Name="DateOnly" Description="Datum" />
+    <Member Name="AllTypes" Description="Alle Typen" />
+    <Member Name="AnyGroupKey" Description="ein Gruppenschlüssel" />
+    <Member Name="AnyNumber" Description="ein Zahl" />
+    <Member Name="AnyNumberDateTime" Description="ein Zahl, Datum oder Uhrzeit" />
+    <Member Name="Date" Description="Datum" />
     <Member Name="DateTime" Description="Datum Uhrzeit" />
+    <Member Name="DecimalNumber" Description="Dezimalzahl" />
+    <Member Name="Entity" Description="Entität" />
     <Member Name="Enum" Description="Enum" />
-    <Member Name="Groupable" Description="Gruppierbar" />
-    <Member Name="Integer" Description="Ganze Zahl" />
-    <Member Name="Lite" Description="Lite" />
-    <Member Name="Magnitude" Description="Größe" />
-    <Member Name="Positionable" Description="Positionierbar" />
-    <Member Name="Real" Description="Real" />
-    <Member Name="RealGroupable" Description="Echte gruppierbare" />
+    <Member Name="Number" Description="Zahl" />
+    <Member Name="RoundedNumber" Description="Gerundete Zahl" />
     <Member Name="String" Description="String" />
     <Member Name="Time" Description="Zeit" />
   </Type>
@@ -100,6 +100,7 @@
     <Member Name="ChartOf0" Description="Diagramm von {0}" />
     <Member Name="ChartSettings" Description="Chart-Einstellungen" />
     <Member Name="ChartToken" Description="Diagramm" />
+    <Member Name="ChartType" Description="Diagrammtyp" />
     <Member Name="ChooseABasePalette" Description="Wählen Sie eine Basispalette" />
     <Member Name="ColorsFor0" Description="Farben für {0}" />
     <Member Name="CreateNew" Description="Erstellen" />
@@ -122,10 +123,105 @@
     <Member Name="Reload" Description="Neu laden" />
     <Member Name="SavePalette" Description="Palette speichern" />
     <Member Name="ShowChartSettings" Description="Diagrammeinstellungen anzeigen" />
+    <Member Name="TheSelectedTokenShouldBeA0" Description="Das ausgewählte Token sollte ein {0} sein." />
+    <Member Name="TheSelectedTokenShouldBeEither" Description="Das ausgewählte Token sollte entweder sein:" />
     <Member Name="ToggleInfo" Description="Information anzeigen/verbergen" />
     <Member Name="Type0NotFoundInTheDatabase" Description="Typ {0} nicht in der Datenbank enthalten ist" />
     <Member Name="TypeNotFound" Description="Typ nicht gefunden" />
     <Member Name="ViewPalette" Description="Palette anzeigen" />
+  </Type>
+  <Type Name="ChartParameter">
+    <Member Name="AnimateDrop" Description="Animate Drop" />
+    <Member Name="AnimateOnClick" Description="Animieren bei Klick" />
+    <Member Name="CircleAutoReduce" Description="Kreis automatisch reduzieren" />
+    <Member Name="CircleRadius" Description="Kreisradius" />
+    <Member Name="CircleRadiusHover" Description="Kreisradius-Mauszeiger" />
+    <Member Name="CircleStroke" Description="Kreisstrich" />
+    <Member Name="ClusterMap" Description="Cluster-Karte" />
+    <Member Name="Color" Description="Farbe" />
+    <Member Name="ColorCategory" Description="Farbe Kategorie" />
+    <Member Name="ColorInterpolate" Description="Farbe interpolieren" />
+    <Member Name="ColorInterpolation" Description="Interpolation der Farbe" />
+    <Member Name="ColorScale" Description="Farbskala" />
+    <Member Name="ColorScaleMaxValue" Description="Maximaler Wert der Farbskala" />
+    <Member Name="Complete" Description="Vollständig" />
+    <Member Name="CompleteHorizontalValues" Description="Vollständige horizontale Werte" />
+    <Member Name="CompleteValues" Description="Vollständige Werte" />
+    <Member Name="CompleteVerticalValues" Description="Vollständige vertikale Werte" />
+    <Member Name="CSSStyle" Description="CSS-Stil" />
+    <Member Name="CSSStyleDiv" Description="CSS-Stil (div)" />
+    <Member Name="DrawingMode" Description="Zeichnungsmodus" />
+    <Member Name="FillColor" Description="Füllfarbe" />
+    <Member Name="FillOpacity" Description="Deckkraft der Füllung" />
+    <Member Name="ForceColor" Description="Farbe erzwingen" />
+    <Member Name="Gradient" Description="Farbverlauf" />
+    <Member Name="HorizontalLineColor" Description="Farbe der horizontalen Linie" />
+    <Member Name="HorizontalMargin" Description="Horizontaler Rand" />
+    <Member Name="HorizontalScale" Description="Horizontale Skala" />
+    <Member Name="InfoLinkPosition" Description="Info-Link Position" />
+    <Member Name="InnerFillColor" Description="Innere Füllfarbe" />
+    <Member Name="InnerRadious" Description="Innerer Radious" />
+    <Member Name="InnerSizeType" Description="Innere Größe Typ" />
+    <Member Name="Interpolate" Description="Interpolieren" />
+    <Member Name="LabelColor" Description="Farbe des Etiketts" />
+    <Member Name="LabelMargin" Description="Etikettenrand" />
+    <Member Name="Labels" Description="Etiketten" />
+    <Member Name="LabelsMargin" Description="Etikettenrand" />
+    <Member Name="LocationAttribute" Description="Standort-Attribut" />
+    <Member Name="LocationMatch" Description="Standort-match" />
+    <Member Name="LocationSelector" Description="Standort-Wähler" />
+    <Member Name="MapStyle" Description="Kartenstil" />
+    <Member Name="MapType" Description="Kartentyp" />
+    <Member Name="MaxTextLength" Description="Maximale Textlänge" />
+    <Member Name="MaxZoom" Description="Maximaler Zoom" />
+    <Member Name="MinZoom" Description="Min-Zoom" />
+    <Member Name="MultiValueFormat" Description="Mehrwertiges Format" />
+    <Member Name="NoDataColor" Description="Keine Datenfarbe" />
+    <Member Name="NumberColor" Description="Nummer Farbe" />
+    <Member Name="NumberMinWidth" Description="Nummer Mindestbreite" />
+    <Member Name="NumberOpacity" Description="Nummer Opazität" />
+    <Member Name="NumberSizeLimit" Description="Begrenzung der Zahlengröße" />
+    <Member Name="Opacity" Description="Deckkraft" />
+    <Member Name="OpacityScale" Description="Deckkraft-Skala" />
+    <Member Name="Order" Description="Bestellung" />
+    <Member Name="Padding" Description="Abstand" />
+    <Member Name="Percent" Description="Prozent" />
+    <Member Name="Placeholder" Description="Platzhalter" />
+    <Member Name="PointSize" Description="Punktgröße" />
+    <Member Name="RadiousPx" Description="Radious(px)" />
+    <Member Name="RightMargin" Description="Rechter Rand" />
+    <Member Name="Scale" Description="Skala" />
+    <Member Name="Scale1" Description="Maßstab (1)" />
+    <Member Name="Scale2" Description="Maßstab (2)" />
+    <Member Name="Scale3" Description="Skala (3)" />
+    <Member Name="Scale4" Description="Skala (4)" />
+    <Member Name="Scale5" Description="Skala (5)" />
+    <Member Name="Scale6" Description="Skala (6)" />
+    <Member Name="Scale7" Description="Skala (7)" />
+    <Member Name="Scale8" Description="Skala (8)" />
+    <Member Name="Shape" Description="Form" />
+    <Member Name="ShowAggregateValues" Description="Aggregierte Werte anzeigen" />
+    <Member Name="ShowCreateButton" Description="Schaltfläche &quot;Erstellen&quot; anzeigen" />
+    <Member Name="ShowLabel" Description="Etikett anzeigen" />
+    <Member Name="SizeScale" Description="Größenskala" />
+    <Member Name="Sort" Description="Sortieren" />
+    <Member Name="Stack" Description="Stapel" />
+    <Member Name="StartDate" Description="Startdatum" />
+    <Member Name="StrokeColor" Description="Farbe des Strichs" />
+    <Member Name="StrokeWidth" Description="Strichstärke" />
+    <Member Name="SubTotal" Description="Zwischensumme" />
+    <Member Name="SvgUrl" Description="Svg-URL" />
+    <Member Name="TopMargin" Description="Oberer Rand" />
+    <Member Name="Total" Description="Gesamt" />
+    <Member Name="UnitMargin" Description="Einheitsspanne" />
+    <Member Name="Value" Description="Wert" />
+    <Member Name="ValueAsPercent" Description="Wert in Prozent" />
+    <Member Name="VerticalLineColor" Description="Vertikale Linienfarbe" />
+    <Member Name="VerticalScale" Description="Vertikale Skala" />
+    <Member Name="XMargin" Description="X-Rand" />
+    <Member Name="XSort" Description="X-Sortieren" />
+    <Member Name="YSort" Description="Y-Sortieren" />
+    <Member Name="Zoom" Description="Zoom" />
   </Type>
   <Type Name="ChartParameterEmbedded" Description="Diagramm-parameter">
     <Member Name="Name" Description="Name" />
@@ -159,99 +255,6 @@
     <Member Name="Size" Description="Größe" />
     <Member Name="Stroke" Description="Strich" />
     <Member Name="Url" Description="URL" />
-    <Member Name="Zoom" Description="Zoom" />
-  </Type>
-  <Type Name="ChartParameterMessage">
-    <Member Name="AnimateDrop" Description="Drop animieren" />
-    <Member Name="AnimateOnClick" Description="Bei Klick animieren" />
-    <Member Name="CircleAutoReduce" Description="Kreis automatisch reduzieren" />
-    <Member Name="CircleRadius" Description="Kreisradius" />
-    <Member Name="CircleRadiusHover" Description="Kreisradius Schweben" />
-    <Member Name="CircleStroke" Description="Kreisstrichstärke " />
-    <Member Name="ClusterMap" Description="Cluster-Karte" />
-    <Member Name="Color" Description="Farbe" />
-    <Member Name="ColorCategory" Description="Farbe Kategorie" />
-    <Member Name="ColorInterpolate" Description="Farbinterpolation" />
-    <Member Name="ColorInterpolation" Description="Farbinterpolation" />
-    <Member Name="ColorScale" Description="Farbskala" />
-    <Member Name="ColorScaleMaxValue" Description="Maximalwert der Farbskala" />
-    <Member Name="Complete" Description="Vollständig" />
-    <Member Name="CompleteHorizontalValues" Description="Horizontale Werte vervollständigen" />
-    <Member Name="CompleteValues" Description="Vollständige Werte" />
-    <Member Name="CompleteVerticalValues" Description="Vertikale Werte vervollständigen" />
-    <Member Name="CSSStyle" Description="CSS-Style" />
-    <Member Name="CSSStyleDiv" Description="CSS-Style (div)" />
-    <Member Name="DrawingMode" Description="Zeichnungsmodus" />
-    <Member Name="FillColor" Description="Füllfarbe" />
-    <Member Name="FillOpacity" Description="Füllungdeckkraft " />
-    <Member Name="ForceColor" Description="Farbe erzwingen" />
-    <Member Name="Gradient" Description="Gradienten" />
-    <Member Name="HorizontalLineColor" Description="Farbe der horizontalen Linie" />
-    <Member Name="HorizontalMargin" Description="Horizontaler Rand" />
-    <Member Name="HorizontalScale" Description="Horizontale Skala" />
-    <Member Name="InfoLinkPosition" Description="Info-Link Position" />
-    <Member Name="InnerFillColor" Description="Innere Füllfarbe" />
-    <Member Name="InnerRadious" Description="Innerer Radious" />
-    <Member Name="InnerSizeType" Description="Typ der Innengröße" />
-    <Member Name="Interpolate" Description="Interpolieren" />
-    <Member Name="LabelColor" Description="Farbe des Etiketts" />
-    <Member Name="LabelMargin" Description="Etikettenrand" />
-    <Member Name="Labels" Description="Etiketten" />
-    <Member Name="LabelsMargin" Description="Etikettenrand" />
-    <Member Name="LocationAttribute" Description="Standort-Attribut" />
-    <Member Name="LocationMatch" Description="Standort-Übereinstimmung" />
-    <Member Name="LocationSelector" Description="Standort-Auswahl" />
-    <Member Name="MapStyle" Description="Karten-Stil" />
-    <Member Name="MapType" Description="Kartentyp" />
-    <Member Name="MaxTextLength" Description="Maximale Textlänge" />
-    <Member Name="MaxZoom" Description="Max. Zoom" />
-    <Member Name="MinZoom" Description="Min. Zoom" />
-    <Member Name="MultiValueFormat" Description="Mehrwertiges Format" />
-    <Member Name="NoDataColor" Description="Keine-Daten-Farbe" />
-    <Member Name="NumberColor" Description="Zahlenfarbe" />
-    <Member Name="NumberMinWidth" Description="Anzahl min. Breite" />
-    <Member Name="NumberOpacity" Description="Zahlendeckkraft" />
-    <Member Name="NumberSizeLimit" Description="Zahlengrößegrenze" />
-    <Member Name="Opacity" Description="Deckkraft" />
-    <Member Name="OpacityScale" Description="Deckkraft-Skala" />
-    <Member Name="Order" Description="Reihenfolge" />
-    <Member Name="Padding" Description="Padding" />
-    <Member Name="Percent" Description="Prozent" />
-    <Member Name="Placeholder" Description="Platzhalter" />
-    <Member Name="PointSize" Description="Punktgröße" />
-    <Member Name="RadiousPx" Description="Radious(px)" />
-    <Member Name="RightMargin" Description="Rechter Rand" />
-    <Member Name="Scale" Description="Skala" />
-    <Member Name="Scale1" Description="" />
-    <Member Name="Scale2" Description="" />
-    <Member Name="Scale3" Description="Skala (3)" />
-    <Member Name="Scale4" Description="Skala (4)" />
-    <Member Name="Scale5" Description="" />
-    <Member Name="Scale6" Description="Skala (6)" />
-    <Member Name="Scale7" Description="Skala (7)" />
-    <Member Name="Scale8" Description="Skala (8)" />
-    <Member Name="Shape" Description="Form" />
-    <Member Name="ShowAggregateValues" Description="Aggregierte Werte anzeigen" />
-    <Member Name="ShowCreateButton" Description="Schaltfläche &quot;Erstellen&quot; anzeigen" />
-    <Member Name="ShowLabel" Description="Etikett anzeigen" />
-    <Member Name="SizeScale" Description="Größenskala" />
-    <Member Name="Sort" Description="Sortieren" />
-    <Member Name="Stack" Description="Stapel" />
-    <Member Name="StartDate" Description="Startdatum" />
-    <Member Name="StrokeColor" Description="Strichsfarbe" />
-    <Member Name="StrokeWidth" Description="Strichstärke" />
-    <Member Name="SubTotal" Description="Zwischensumme" />
-    <Member Name="SvgUrl" Description="Svg-URL" />
-    <Member Name="TopMargin" Description="Oberer Rand" />
-    <Member Name="Total" Description="Gesamt" />
-    <Member Name="UnitMargin" Description="Einheitsrand" />
-    <Member Name="Value" Description="Wert" />
-    <Member Name="ValueAsPercent" Description="Wert in Prozent" />
-    <Member Name="VerticalLineColor" Description="Farbe der vertikalen Linie" />
-    <Member Name="VerticalScale" Description="Vertikale Skala" />
-    <Member Name="XMargin" Description="X-Rand" />
-    <Member Name="XSort" Description="X-Sortierung" />
-    <Member Name="YSort" Description="Y-Sortierung" />
     <Member Name="Zoom" Description="Zoom" />
   </Type>
   <Type Name="ChartPermission">
