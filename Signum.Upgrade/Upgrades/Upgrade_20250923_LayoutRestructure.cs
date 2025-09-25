@@ -23,12 +23,13 @@ class Upgrade_20250923_LayoutRestructure : CodeUpgradeBase
             file.Replace("<div id=\"main\" key={refreshId}>", "<div id=\"site-content\" key={refreshId}>");
             file.Replace("<div id=\"main\">", "<div id=\"site-content\">");
 
-            file.Replace("<div className=\"container-fluid overflow-auto pt-2\">\n              <VersionChangedAlert />\n              <Outlet context={{ sidebarMode }} />\n            </div>", "<main className=\"container-fluid overflow-auto pt-2\">\n              <VersionChangedAlert />\n              <Outlet context={{ sidebarMode }} />\n            </main>");
+            file.Replace("<div className=\"container-fluid overflow-auto pt-2\">\n              <VersionChangedAlert />\n              <Outlet context={{ sidebarMode }} />\n            </div>", "<main id=\"maincontent\" className=\"container-fluid overflow-auto pt-2\" tabIndex={-1}>\n              <VersionChangedAlert />\n              <Outlet context={{ sidebarMode }} />\n            </main>");
         });
 
         uctx.ChangeCodeFile(@"Southwind/SCSS/site.css", file =>
         {
             file.Replace("#main {", "#site-content {");
+            file.InsertAfterLastLine(a => a.Contains('}'), ".skip-link {\n    position: absolute;\n    top: -40px;\n    left: 0;\n}");
         });
     }
 }

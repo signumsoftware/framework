@@ -706,3 +706,8 @@ public enum ContainerToggleMessage
     Compress,
     Expand,
 }
+
+public enum LayoutMessage
+{
+    JumpToMainContent,
+}
