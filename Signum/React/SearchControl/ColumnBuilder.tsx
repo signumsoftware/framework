@@ -68,7 +68,7 @@ export default function ColumnsBuilder(p: ColumnsBuilderProps): React.ReactEleme
               onColumnChanged={handleColumnChanged}
             />)}
             {!p.readonly &&
-              <tr>
+              <tr tabIndex={0}>
                 <td colSpan={4}>
                   <a title={StyleContext.default.titleLabels ? SearchMessage.AddColumn.niceToString() : undefined}
                     className="sf-line-button sf-create"
