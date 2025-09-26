@@ -11,7 +11,7 @@ import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
-import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo, getAllTypes, Type, QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol } from '@framework/Reflection'
+import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo, getAllTypes, Type, QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol, onReloadTypesActions } from '@framework/Reflection'
 import {
   PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission,
   PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed, TypeConditionSymbol
@@ -147,7 +147,7 @@ export namespace AuthAdminClient {
         isVisible: AppContext.isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null
       }));
 
-      getAllTypes().forEach(t => {
+      const fixTypes = () => getAllTypes().forEach(t => {
         if (t.kind == "Entity") {
           if ((t as any).typeAllowed) {
             t.minTypeAllowed = (t as any).typeAllowed;
@@ -170,6 +170,9 @@ export namespace AuthAdminClient {
           });
         }
       });
+
+      fixTypes();
+      onReloadTypesActions.push(() => fixTypes());
   
       getAllTypes().filter(a => a.queryAuditors != null)
         .forEach(t => {
