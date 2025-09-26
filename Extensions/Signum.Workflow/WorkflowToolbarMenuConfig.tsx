@@ -3,8 +3,10 @@ import * as AppContext from '@framework/AppContext'
 import { useAPI } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { getTypeInfo } from '@framework/Reflection'
-import { getToString, is } from '@framework/Signum.Entities'
+import { Entity, getToString, is, Lite } from '@framework/Signum.Entities'
 import * as React from 'react'
+import { Location } from 'react-router';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { ToolbarNavItem } from '../Signum.Toolbar/Renderers/ToolbarRenderer'
 import { ToolbarClient, ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 import { IconColor, ToolbarConfig, ToolbarContext } from '../Signum.Toolbar/ToolbarConfig'
@@ -19,11 +21,8 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
     super(type);
   }
 
-  getDefaultIcon(): IconColor {
-    return ({
-      icon: "shuffle",
-      iconColor: "#2471A3",
-    });
+  getDefaultIcon(): IconProp { 
+    return "shuffle";
   }
 
   isApplicableTo(element: ToolbarResponse<PermissionSymbol>): boolean {
@@ -34,8 +33,8 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
     return <WorkflowDropdownImp key={ key}/>
   }
 
-  isCompatibleWithUrlPrio() {
-    return 0;
+  isCompatibleWithUrlPrio(element: ToolbarResponse<PermissionSymbol>, location: Location, query: any, entityType?: string): { prio: number, inferredEntity?: Lite<Entity> } | null { 
+    return null;
   }
 
   navigateTo(): Promise<string> {

@@ -1,9 +1,10 @@
 import { Location } from 'react-router'
 import { ToolbarClient, ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 import { IconColor, ToolbarConfig } from '../Signum.Toolbar/ToolbarConfig'
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { WorkflowClient } from './WorkflowClient'
 import { WorkflowEntity, WorkflowMainEntityStrategy } from './Signum.Workflow'
-import { is } from '@framework/Signum.Entities'
+import { Entity, is, Lite } from '@framework/Signum.Entities'
 import SelectorModal from '@framework/SelectorModal'
 
 export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity> {
@@ -13,11 +14,8 @@ export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity>
     super(type);
   }
 
-  getDefaultIcon(): IconColor {
-    return ({
-      icon: "shuffle",
-      iconColor: "darkslateblue",
-    });
+  getDefaultIcon(): IconProp {
+    return "shuffle";
   }
 
   async navigateTo(element: ToolbarResponse<WorkflowEntity>): Promise<string | null> {
@@ -33,7 +31,7 @@ export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity>
     return WorkflowClient.workflowStartUrl(element.content!, strategy);
   }
 
-  isCompatibleWithUrlPrio(res: ToolbarResponse<WorkflowEntity>, location: Location, query: any): number {
-    return location.pathname.startsWith(WorkflowClient.workflowStartUrl(res.content!)) ? 2 : 0;
+  isCompatibleWithUrlPrio(element: ToolbarResponse<WorkflowEntity>, location: Location, query: any, entityType?: string): { prio: number, inferredEntity?: Lite<Entity> } | null {
+    return location.pathname.startsWith(WorkflowClient.workflowStartUrl(element.content!)) ? { prio: 2 } : null;
   }
 }
