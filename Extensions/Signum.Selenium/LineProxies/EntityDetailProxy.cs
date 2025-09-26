@@ -11,6 +11,7 @@ public class EntityDetailProxy : EntityBaseProxy
 
     public override object? GetValueUntyped() => this.Lite;
     public override void SetValueUntyped(object? value) => this.Lite = value is Entity e ? e.ToLite() : (Lite<Entity>?)value;
+    public override bool IsReadonly() => throw new NotImplementedException();
 
     public Lite<IEntity>? Lite
     {

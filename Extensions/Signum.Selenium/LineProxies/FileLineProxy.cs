@@ -19,6 +19,7 @@ public class FileLineProxy : BaseLineProxy
 
         throw new InvalidOperationException();
     }
+    public override bool IsReadonly() => throw new NotImplementedException();
 
     public void SetPath(string path)
     {

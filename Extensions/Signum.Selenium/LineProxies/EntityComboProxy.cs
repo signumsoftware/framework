@@ -22,6 +22,7 @@ public class EntityComboProxy : EntityBaseProxy
 
     public override object? GetValueUntyped() => this.LiteValue;
     public override void SetValueUntyped(object? value) => this.LiteValue = value is Entity e ? e.ToLite() : (Lite<Entity>?)value;
+    public override bool IsReadonly() => this.Element.TryFindElement(By.CssSelector("input[readonly]")) != null;
 
     public Lite<IEntity>? LiteValue
     {

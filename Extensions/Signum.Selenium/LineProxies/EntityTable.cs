@@ -14,6 +14,8 @@ public class EntityTableProxy : EntityBaseProxy
 
     public override object? GetValueUntyped() => throw new NotImplementedException();
     public override void SetValueUntyped(object? value) => throw new NotImplementedException();
+    public override bool IsReadonly() => throw new NotImplementedException();
+
     public virtual WebElementLocator TableElement
     {
         get { return this.Element.WithLocator(By.CssSelector(".sf-table")); }

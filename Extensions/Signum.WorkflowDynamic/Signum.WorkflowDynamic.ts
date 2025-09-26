@@ -8,7 +8,7 @@ import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Types from '../Signum.Dynamic/Signum.Dynamic.Types'
 
 
-export module DynamicTypeWorkflowOperation {
+export namespace DynamicTypeWorkflowOperation {
   export const FixCaseDescriptions : Operations.ExecuteSymbol<Types.DynamicTypeEntity> = registerSymbol("Operation", "DynamicTypeWorkflowOperation.FixCaseDescriptions");
 }
 

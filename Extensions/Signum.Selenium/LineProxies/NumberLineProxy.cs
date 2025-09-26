@@ -17,7 +17,8 @@ public class NumberLineProxy : BaseLineProxy
 
     public override object? GetValueUntyped() => this.GetValue();
     public override void SetValueUntyped(object? value) => this.SetValue((IFormattable?)value);
-
+    public override bool IsReadonly() => this.Element.WithLocator(By.CssSelector("input.numeric")).Find().Let(e => e.IsDomDisabled() || e.IsDomReadonly());
+    
     public  WebElementLocator InputLocator => this.Element.WithLocator(By.CssSelector("input[type=text].numeric"));
 
     public void SetValue(IFormattable? value, string? format = null)

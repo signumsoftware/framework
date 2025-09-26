@@ -29,5 +29,5 @@ public class CheckboxLineProxy : BaseLineProxy
 
     public override object? GetValueUntyped() => this.GetValue();
     public override void SetValueUntyped(object? value) => SetValue((bool)value!);
-
+    public override bool IsReadonly() => CheckboxLocator.Find().Let(e => e.IsDomDisabled() || e.IsDomReadonly());
 }

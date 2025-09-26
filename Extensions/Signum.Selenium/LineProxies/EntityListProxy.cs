@@ -14,6 +14,8 @@ public class EntityListProxy : EntityBaseProxy
 
     public override object? GetValueUntyped() => throw new NotImplementedException();
     public override void SetValueUntyped(object? value) => throw new NotImplementedException();
+    public override bool IsReadonly() => throw new NotImplementedException();
+
     public WebElementLocator OptionElement(int index)
     {
         return this.ListElement.Find().WithLocator(By.CssSelector("option:nth-child({0})".FormatWith(index + 1)));

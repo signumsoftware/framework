@@ -23,7 +23,7 @@ export interface PrintLineEntity extends Entities.Entity {
   state: PrintLineState;
 }
 
-export module PrintLineOperation {
+export namespace PrintLineOperation {
   export const CreateTest : Operations.ConstructSymbol_Simple<PrintLineEntity> = registerSymbol("Operation", "PrintLineOperation.CreateTest");
   export const SaveTest : Operations.ExecuteSymbol<PrintLineEntity> = registerSymbol("Operation", "PrintLineOperation.SaveTest");
   export const Print : Operations.ExecuteSymbol<PrintLineEntity> = registerSymbol("Operation", "PrintLineOperation.Print");
@@ -47,15 +47,15 @@ export interface PrintPackageEntity extends Entities.Entity, Processes.IProcessD
   name: string | null;
 }
 
-export module PrintPackageProcess {
+export namespace PrintPackageProcess {
   export const PrintPackage : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "PrintPackageProcess.PrintPackage");
 }
 
-export module PrintPermission {
+export namespace PrintPermission {
   export const ViewPrintPanel : Basics.PermissionSymbol = registerSymbol("Permission", "PrintPermission.ViewPrintPanel");
 }
 
-export module PrintTask {
+export namespace PrintTask {
   export const RemoveOldFiles : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "PrintTask.RemoveOldFiles");
 }
 
