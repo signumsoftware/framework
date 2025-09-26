@@ -32,19 +32,7 @@ export namespace ContextualOperations {
     const ti = getTypeInfo(types[0].key);
     const contexts = Operations.operationInfos(ti)
       .filter(oi => Operations.isEntityOperation(oi.operationType) || oi.operationType == "ConstructorFromMany")
-      .map(oi => {
-
-        if (oi.operationType == "ConstructorFromMany") {
-          const cos = Operations.getSettings(oi.key) as ContextualOperationSettings<Entity> | undefined;
-          return new ContextualOperationContext<Entity>(oi, ctx, cos);
-        } else {
-          const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
-          const cos = eos == undefined ? undefined :
-            ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
-          const coc = new ContextualOperationContext<Entity>(oi, ctx, cos, eos);
-          return coc;
-        }
-      })
+      .map(oi =>  new ContextualOperationContext<Entity>(oi, ctx))
       .filter(coc => coc.isVisibleInContextualMenu())
       .map(coc => coc!)
       .orderBy(coc => coc.settings && coc.settings.order);

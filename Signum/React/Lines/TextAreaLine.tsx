@@ -32,17 +32,25 @@ export const TextAreaLine: (props: TextAreaLineProps) => React.ReactNode | null
 
   const p = c.props;
 
+  const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
+  var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+  if (!isLabelVisible && p.label) {
+    ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
+  }
+
   var htmlAtts = c.props.valueHtmlAttributes;
+  var mergedHtmlReadOnly = { ...htmlAtts, ...ariaAtts };
+
   var autoResize = p.autoResize ?? (htmlAtts?.style?.height == null && htmlAtts?.rows == null);
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
   if (p.ctx.readOnly)
     return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => <>
           {getTimeMachineIcon({ ctx: p.ctx })}
-          <TextArea id={inputId} {...htmlAtts} autoResize={autoResize} className={classes(htmlAtts?.className, p.ctx.formControlClass, c.mandatoryClass)} value={p.ctx.value || ""}
+          <TextArea id={inputId} {...mergedHtmlReadOnly} autoResize={autoResize} className={classes(htmlAtts?.className, p.ctx.formControlClass, c.mandatoryClass)} value={p.ctx.value || ""}
             disabled />
         </>}
       </FormGroup>
@@ -82,14 +90,14 @@ export const TextAreaLine: (props: TextAreaLineProps) => React.ReactNode | null
       c.props.charCounter == true ? <ChartCounter myRef={ccRef}>{v => EntityControlMessage._0Characters.niceToString().forGenderAndNumber(p).formatHtml(<strong>{v}</strong>)}</ChartCounter > :
         <ChartCounter myRef={ccRef}>{c.props.charCounter}</ChartCounter>;
 
-
+  var mergedHtml = { ...htmlAtts, ...ariaAtts, ...c.props.valueHtmlAttributes };
   return (
     <FormGroup ctx={p.ctx} error={c.getError()} label={p.label} labelIcon={p.labelIcon}
       helpText={helpText && cc ? <>{cc}<br />{helpText}</> : (cc ?? helpText)}
       helpTextOnTop={helpTextOnTop}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
       {inputId => c.withItemGroup(
-        <TextArea {...c.props.valueHtmlAttributes}
+        <TextArea {...mergedHtml}
           autoResize={autoResize}
           className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formControlClass, c.mandatoryClass)}
           value={c.getValue() ?? ""}

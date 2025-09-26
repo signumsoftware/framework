@@ -74,6 +74,9 @@ export const EnumCheckboxList: <V extends string>(props: EnumCheckboxListProps<V
           data.insertAt(0, mle.element)
       });
 
+      var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+      const requiredIndicator = p.ctx.propertyRoute?.member?.required && !ariaAtts['aria-readonly'];
+
       const ti = getTypeInfo(p.type!.name);
 
       var listCtx = mlistItemContext(p.ctx);
@@ -81,20 +84,23 @@ export const EnumCheckboxList: <V extends string>(props: EnumCheckboxListProps<V
       return (
         <div className="sf-checkbox-elements" style={getColumnStyle()}>
           {data.map((val, i) => {
+            var controlId = React.useId();
             var ectx = listCtx.firstOrNull(ec => ec.value == val);
             var oldCtx = p.ctx.previousVersion == null || p.ctx.previousVersion.value == null ? null :
               listCtx.firstOrNull(el => el.previousVersion?.value == val);
 
-            return (<label className="sf-checkbox-element" key={val}>
-              {getTimeMachineCheckboxIcon({ newCtx: ectx, oldCtx: oldCtx, type: ti })}
-              <input type="checkbox"
-                className="form-check-input"
-                checked={p.ctx.value.some(mle => mle.element == val)}
-                disabled={p.ctx.readOnly}
-                name={val}
-                onChange={e => c.handleOnChange(e, val)} />
-              &nbsp;
-              <span>{ti.members[val].niceName}</span>
+            return (
+              <label className="sf-checkbox-element" key={val} htmlFor={controlId}>
+                {getTimeMachineCheckboxIcon({ newCtx: ectx, oldCtx: oldCtx, type: ti })}
+                <input type="checkbox"
+                  id={controlId}
+                  className="form-check-input"
+                  checked={p.ctx.value.some(mle => mle.element == val)}
+                  disabled={p.ctx.readOnly}
+                  name={val}
+                  onChange={e => c.handleOnChange(e, val)} />
+                &nbsp;
+                <span>{ti.members[val].niceName}{requiredIndicator && <span aria-hidden="true" className="required-indicator">*</span>}</span>
             </label>);
           })}
         </div>

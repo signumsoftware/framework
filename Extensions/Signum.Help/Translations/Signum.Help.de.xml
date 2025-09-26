@@ -59,6 +59,7 @@
     <Member Name="HelpNotLoaded" Description="Hilfe nicht geladen" />
     <Member Name="In0" Description="(in {0})" />
     <Member Name="Integer" Description="ganze Zahl " />
+    <Member Name="JumpToViewMore" Description="Zu Mehr Sehen springen" />
     <Member Name="Key0NotFound" Description="Key {0} wurde nicht gefunden" />
     <Member Name="lite" Description="leicht" />
     <Member Name="Next" Description="Nächster" />

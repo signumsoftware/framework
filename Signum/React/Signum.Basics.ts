@@ -209,6 +209,10 @@ export namespace VisualTipConsumedOperation {
   export const Delete : Operations.DeleteSymbol<VisualTipConsumedEntity> = registerSymbol("Operation", "VisualTipConsumedOperation.Delete");
 }
 
+export namespace VisualTipMessage {
+  export const Help: MessageKey = new MessageKey("VisualTipMessage", "Help");
+}
+
 export const VisualTipSymbol: Type<VisualTipSymbol> = new Type<VisualTipSymbol>("VisualTip");
 export interface VisualTipSymbol extends Symbol {
   Type: "VisualTip";

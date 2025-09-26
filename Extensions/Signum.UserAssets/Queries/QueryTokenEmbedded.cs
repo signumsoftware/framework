@@ -48,9 +48,9 @@ public sealed class QueryTokenEmbedded : EmbeddedEntity, IEquatable<QueryTokenEm
     }
 
     [Ignore]
-    Exception parseException;
+    Exception? parseException;
     [HiddenProperty]
-    public Exception ParseException
+    public Exception? ParseException
     {
         get { return parseException; }
     }

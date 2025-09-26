@@ -51,7 +51,9 @@ export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps): React.
         isDisabled={item => (item as OmniboxResult).resultTypeName == "HelpOmniboxResult"}
         onSelect={(item, e) => handleOnSelect(item as OmniboxResult, e)}
         inputAttrs={inputAttr}
-        minLength={0} />
+        minLength={0}
+        noResultsMessage={OmniboxMessage.NotFound.niceToString()}
+        />
     </ErrorBoundary>
   );
 }

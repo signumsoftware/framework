@@ -113,13 +113,27 @@ export function PaginationSelector(p: PaginationSelectorProps): React.ReactEleme
               SearchMessage.PaginationPages_0Of01lements)
             .niceToString().formatHtml(
 
-              <select value={p.pagination.mode} onChange={handleMode} className="form-select form-select-xs w-auto sf-pagination-mode mx-1">
+              <select
+                value={p.pagination.mode}
+                onChange={handleMode}
+                className="form-select form-select-xs w-auto sf-pagination-mode mx-1"
+                aria-label={SearchMessage.PaginationMode.niceToString()}
+                aria-required="false"
+                aria-readonly="false"
+                aria-disabled="false">
                 {PaginationSelector.onGetPaginationModes().map(mode =>
                     <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
                 </select>,
 
                 p.pagination.mode != "All" &&
-                <select value={p.pagination.elementsPerPage!.toString()} onChange={handleElementsPerPage} className="form-select form-select-xs w-auto sf-elements-per-page mx-1">
+                <select
+                    value={p.pagination.elementsPerPage!.toString()}
+                    onChange={handleElementsPerPage}
+                    className="form-select form-select-xs w-auto sf-elements-per-page mx-1"
+                    aria-label={SearchMessage.NumberOfElementsForPagination.niceToString()}
+                    aria-required="false"
+                    aria-readonly="false"
+                    aria-disabled="false">
                   {PaginationSelector.onGetPaginationSizes().map(elem =>
                     <option key={elem} value={elem.toString()}>{elem}</option>)}
                 </select>

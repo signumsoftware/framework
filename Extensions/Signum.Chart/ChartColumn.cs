@@ -64,7 +64,7 @@ public class ChartColumnEmbedded : EmbeddedEntity
             if (Token == null)
                 return !scriptColumn.IsOptional ? ChartMessage._0IsNotOptional.NiceToString().FormatWith(scriptColumn.GetDisplayName()) : null;
 
-            if (!ChartUtils.IsChartColumnType(Token.Token, ScriptColumn.ColumnType))
+            if (Token.TryToken != null && !ChartUtils.IsChartColumnType(Token.Token, ScriptColumn.ColumnType))
                 return ChartMessage._0IsNot1.NiceToString().FormatWith(DisplayName, ScriptColumn.ColumnType);
         }
 

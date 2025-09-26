@@ -43,14 +43,24 @@ function numericTextBox(c: NumberLineController, validateKey: (e: React.Keyboard
   const p = c.props
 
   const numberFormat = toNumberFormat(p.format);
+
+  const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
+  var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+  if (!isLabelVisible && p.label) {
+    ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
+  }
+
+  var htmlAtts = c.props.valueHtmlAttributes;
+  var mergedHtmlReadOnly = { ...htmlAtts, ...ariaAtts };
+
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
   if (p.ctx.readOnly)
     return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => c.withItemGroup(
-          <FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} ctx={p.ctx} className="numeric" innerRef={c.setRefs}>
+          <FormControlReadonly id={inputId} htmlAttributes={mergedHtmlReadOnly} ctx={p.ctx} className="numeric" innerRef={c.setRefs}>
             {p.ctx.value == null ? "" : numberFormat.format(p.ctx.value)}
           </FormControlReadonly>)}
       </FormGroup>
@@ -77,17 +87,18 @@ function numericTextBox(c: NumberLineController, validateKey: (e: React.Keyboard
     onKeyDown: (c.props.incrementWithArrow || c.props.incrementWithArrow == undefined ) ? handleKeyDown : undefined,
     ...c.props.valueHtmlAttributes
   } as React.AllHTMLAttributes<any>;
+  var mergedHtml = { ...htmlAttributes, ...ariaAtts };
 
   const limits = numberLimits[p.type?.name!];
 
   return (
-    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
       {inputId => c.withItemGroup(
         <NumberBox
           id={inputId}
           minValue={p.minValue != undefined ? p.minValue : limits?.min}
           maxValue={p.maxValue != undefined ? p.maxValue : limits?.max}
-          htmlAttributes={htmlAttributes}
+          htmlAttributes={mergedHtml}
           value={p.ctx.value}
           onChange={handleOnChange}
           formControlClass={classes(p.ctx.formControlClass, c.mandatoryClass)}

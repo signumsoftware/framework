@@ -51,11 +51,11 @@ export namespace AutoLine {
 
     if (tr.isCollection) {
       if (tr.name == IsByAll)
-        return p => <EntityStrip {...p} />;
+        return p => <EntityStrip {...p} />; 
 
       if (tis.length) {
         if (tis.length == 1 && tis.first().kind == "Enum")
-          return p => <EnumCheckboxList {...p} />;
+          return p => <EnumCheckboxList {...p} />; 
 
         if (tis.length == 1 && (tis.first().entityKind == "Part" || tis.first().entityKind == "SharedPart" || isTypeModel(tis.first())) && !tr.isLite)
           return p => <EntityTable {...p} />;
@@ -64,9 +64,9 @@ export namespace AutoLine {
           return p => <EntityRepeater {...p} />;
 
         if (tis.every(t => t.isLowPopulation == true))
-          return p => <EntityCheckboxList {...p} />; //Alternative <EntityCheckboxList {...p} />
+          return p => <EntityCheckboxList {...p} />; 
 
-        return p => <EntityStrip {...p} />;
+        return p => <EntityStrip {...p} />; 
       }
 
       if (tr.isEmbedded)
@@ -77,11 +77,11 @@ export namespace AutoLine {
     } else {
 
       if (tr.name == IsByAll)
-        return p => <EntityLine {...p} />;
+        return p => <EntityLine {...p} />; 
 
       if (tis.length) {
         if (tis.length == 1 && tis.first().kind == "Enum")
-          return p => <EnumLine {...p} />;
+          return p => <EnumLine {...p} />; 
 
         if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart") && !tr.isLite)
           return p => <EntityDetail {...p} />;
@@ -89,43 +89,43 @@ export namespace AutoLine {
         if (tis.every(t => t.isLowPopulation == true))
           return p => <EntityCombo {...p} />;
 
-        return p => <EntityLine {...p} />;
+        return p => <EntityLine {...p} />; 
       }
 
       if (tr.isEmbedded)
         return p => <EntityDetail {...p} />;
 
       if (isTypeEnum(tr.name) || tr.name == "boolean" && !tr.isNotNullable)
-        return p => <EnumLine {...p} />;
+        return p => <EnumLine {...p} />; 
 
       if (tr.name == "boolean")
-        return p => <CheckboxLine {...p} />;
+        return p => <CheckboxLine {...p} />; 
 
       if (tr.name == "DateTime" || tr.name == "DateTimeOffset" || tr.name == "DateOnly")
-        return p => <DateTimeLine {...p} />;
+        return p => <DateTimeLine {...p} />; 
 
       if (tr.name == "string") {
         var member = pr == null ? null : pr.propertyRouteType == "MListItem" ? pr.parent?.member : pr.member;
         if (member?.format == "Password")
-          return p => <PasswordLine {...p} />;
+          return p => <PasswordLine {...p} />; 
 
         if (member?.format == "Color")
-          return p => <ColorLine {...p} />;
+          return p => <ColorLine {...p} />; 
 
         if (member?.isMultiline)
-          return p => <TextAreaLine {...p} />;
+          return p => <TextAreaLine {...p} />; 
 
-        return p => <TextBoxLine {...p} />;
+        return p => <TextBoxLine {...p} />; 
       }
 
       if (tr.name == "Guid")
-        return p => <GuidLine {...p} />;
+        return p => <GuidLine {...p} />; 
 
       if (isNumberType(tr.name))
-        return p => <NumberLine {...p} />;
+        return p => <NumberLine {...p} />; 
 
       if (tr.name == "TimeSpan" || tr.name == "TimeOnly")
-        return p => <TimeLine {...p} />;
+        return p => <TimeLine {...p} />; 
 
       return p => <span className="text-danger">Not supported type {tr.name} by AutoLine</span>;
     }

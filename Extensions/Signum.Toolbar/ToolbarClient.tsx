@@ -34,6 +34,8 @@ export namespace ToolbarClient {
   
     UserAssetClient.start({ routes: options.routes });
     UserAssetClient.registerExportAssertLink(ToolbarEntity);
+    UserAssetClient.registerExportAssertLink(ToolbarMenuEntity);
+    UserAssetClient.registerExportAssertLink(ToolbarSwitcherEntity);
   }
   
   export function cleanConfigs(): void {

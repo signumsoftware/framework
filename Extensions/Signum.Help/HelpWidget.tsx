@@ -39,40 +39,49 @@ export function HelpWidget(p: HelpWidgetProps): React.JSX.Element {
   );
 }
 
-export function HelpIcon(p: { ctx: TypeContext<any>, typeHelp?: TypeHelpEntity }): React.JSX.Element | undefined | null | boolean {
+export function HelpIcon(p: { ctx: TypeContext<any>; typeHelp?: TypeHelpEntity }): React.JSX.Element | undefined | null | boolean {
 
-  if (p.ctx.propertyRoute == null)
-    return undefined;
+  if (!p.ctx.propertyRoute) return undefined;
 
-  var typeHelp = p.typeHelp ?? p.ctx.frame?.pack.typeHelp;
-
+  const typeHelp = p.typeHelp ?? p.ctx.frame?.pack.typeHelp;
   const pr = p.ctx.propertyRoute;
+  const rootType = pr.findRootType();
+  if (rootType?.name !== typeHelp?.type.cleanName) return false;
 
-  var rootType = pr.findRootType();
+  const prop = typeHelp?.properties.firstOrNull(a => a.element.property.path === p.ctx.propertyPath)?.element;
+  if (!prop?.description) return null;
 
-  if (rootType?.name != typeHelp?.type.cleanName)
-    return false;
-
-  var prop = typeHelp?.properties.firstOrNull(a => a.element.property.path == p.ctx.propertyPath)?.element;
-
-  if (prop == null || prop.description == null)
-    return null;
+  const bodyRef = React.useRef<HTMLDivElement>(null);
+  const uniqueId = `popover-viewmore-help-jump`;
 
   const popover = (
-    <Popover id="popover-basic">
-      <Popover.Header as="h3">{HelpMessage.Help.niceToString()}</Popover.Header>
-      <Popover.Body>
+    <Popover id="popover-basic" role="dialog" tabIndex={-1} aria-labelledby="popover-header" aria-describedby="popover-body">
+      <Popover.Header as="h3" id="popover-header">{HelpMessage.Help.niceToString()}</Popover.Header>
+
+      <a href={`#${uniqueId}`} style={{ position: "absolute", left: "-9999px" }}>{HelpMessage.JumpToViewMore.niceToString()}</a>
+
+      <Popover.Body id="popover-body" role="document" ref={bodyRef}>
         <HtmlViewer text={prop.description} />
-        <br/>
-        <a href={AppContext.toAbsoluteUrl(HelpClient.Urls.propertyUrl(rootType, pr))} target="_blank">
+        <br />
+        <a id={uniqueId} href={AppContext.toAbsoluteUrl(HelpClient.Urls.propertyUrl(rootType, pr))} target="_blank">
           {HelpMessage.ViewMore.niceToString()}
         </a>
       </Popover.Body>
     </Popover>
   );
 
+  const handleEntered = () => {
+    bodyRef.current?.parentElement?.focus();
+  };
+
   return (
-    <OverlayTrigger trigger="click" rootClose placement="right" overlay={popover}>
+    <OverlayTrigger
+      trigger="click"
+      rootClose
+      placement="right"
+      overlay={popover}
+      onEntered={handleEntered}
+    >
       <a href="#" onClick={e => e.preventDefault()} className="ms-1 sf-help-button" title={HelpMessage.Help.niceToString()}>
         <FontAwesomeIcon icon="circle-question" />
       </a>

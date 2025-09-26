@@ -242,9 +242,9 @@ internal class QueryFormatter : DbExpressionVisitor
             this.Visit(exp.Expression);
 
             if (exp.OrderType == OrderType.Ascending)
-                sb.Append(isPostgres ? " NULLS FIRST" : "");
+                sb.Append("");
             else
-                sb.Append(isPostgres ? " DESC NULLS LAST" : " DESC");
+                sb.Append(" DESC");
         }
         sb.Append(')');
         return rowNumber;
@@ -550,9 +550,9 @@ internal class QueryFormatter : DbExpressionVisitor
             }
             this.Visit(exp.Expression);
             if (exp.OrderType == OrderType.Ascending)
-                sb.Append(isPostgres ? " NULLS FIRST" : "");
+                sb.Append("");
             else
-                sb.Append(isPostgres ? " DESC NULLS LAST" : " DESC");
+                sb.Append(" DESC");
         }
     }
 

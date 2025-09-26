@@ -107,6 +107,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     protected override void PostRetrieving(PostRetrievingContext ctx)
     {
         base.PostRetrieving(ctx);
+        ((IMListPrivate)this.Columns).ExecutePostRetrieving(ctx);
 
         try
         {

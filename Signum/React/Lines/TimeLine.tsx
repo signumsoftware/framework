@@ -30,14 +30,23 @@ export const TimeLine: (props: TimeLineProps) => React.ReactNode | null =
 
     const p = c.props;
 
+    const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
+    var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+    if (!isLabelVisible && p.label) {
+      ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
+    }
+
+    var htmlAtts = c.props.valueHtmlAttributes;
+    var mergedHtmlReadOnly = { ...htmlAtts, ...ariaAtts };
+
     const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
     const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
     if (p.ctx.readOnly) {
       return (
-        <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+        <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
           {inputId => c.withItemGroup(
-            <FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} ctx={p.ctx} className={classes(c.props.valueHtmlAttributes?.className, "numeric")} innerRef={c.setRefs}>
+            <FormControlReadonly id={inputId} htmlAttributes={mergedHtmlReadOnly} ctx={p.ctx} className={classes(c.props.valueHtmlAttributes?.className, "numeric")} innerRef={c.setRefs}>
               {timeToString(p.ctx.value, p.format)}
             </FormControlReadonly>
           )}
@@ -53,6 +62,7 @@ export const TimeLine: (props: TimeLineProps) => React.ReactNode | null =
       placeholder: c.getPlaceholder(),
       ...c.props.valueHtmlAttributes
     } as React.AllHTMLAttributes<any>;
+    var mergedHtml = { ...htmlAttributes, ...ariaAtts };
 
     const durationFormat = toLuxonDurationFormat(p.format) ?? "hh:mm:ss";
 
@@ -60,9 +70,9 @@ export const TimeLine: (props: TimeLineProps) => React.ReactNode | null =
       htmlAttributes.placeholder = timePlaceholder(durationFormat);
 
     return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => c.withItemGroup(
-          <TimeTextBox htmlAttributes={htmlAttributes}
+          <TimeTextBox htmlAttributes={mergedHtml}
             id={inputId}
             value={p.ctx.value}
             onChange={handleOnChange}

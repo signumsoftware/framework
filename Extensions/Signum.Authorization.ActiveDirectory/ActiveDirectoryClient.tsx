@@ -70,7 +70,7 @@ export namespace ActiveDirectoryClient {
 
       Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) && str.length > 2 ? ({
         type: UserEntity,
-        customElement: <em><FontAwesomeIcon icon="address-book" />&nbsp;{UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(<strong>{str}</strong>)}</em>,
+        customElement: <em><FontAwesomeIcon icon="address-book" title={UserADMessage.Find0InActiveDirectory.niceToString()} />&nbsp;{UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(<strong>{str}</strong>)}</em>,
         onClick: () => importADUser(str),
       }) : null;
 
@@ -100,7 +100,7 @@ export namespace ActiveDirectoryClient {
                   .then(u => u && ctx.searchControl.handleCreated(u));
 
               }}>
-              <FontAwesomeIcon icon="user-plus" /> {!search ? UserADMessage.FindInActiveDirectory.niceToString() : UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(search == null ? UserEntity.niceName() : <strong>{search}</strong>)}
+              <FontAwesomeIcon icon="user-plus" title={!search ? UserADMessage.FindInActiveDirectory.niceToString() : UserADMessage.Find0InActiveDirectory.niceToString()} /> {!search ? UserADMessage.FindInActiveDirectory.niceToString() : UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(search == null ? UserEntity.niceName() : <strong>{search}</strong>)}
             </button>
           }
         );

@@ -35,3 +35,8 @@ public static class SearchVisualTip
     public static readonly VisualTipSymbol FilterHelp;
     public static readonly VisualTipSymbol ColumnHelp;
 }
+
+public enum VisualTipMessage
+{
+    Help
+}

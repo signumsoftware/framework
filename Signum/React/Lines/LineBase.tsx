@@ -145,8 +145,29 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
   baseHtmlAttributes(): React.HTMLAttributes<any> {
     return {
       'data-property-path': this.props.ctx.propertyPath,
-      'data-changes': this.changes
+      'data-changes': this.changes,
     } as any;
+  }
+
+  baseAriaAttributes(): React.AriaAttributes {
+    const p = this.props;
+
+    const ids: string[] = [];
+    if (p.helpText) ids.push(this.props.ctx.getUniqueId("help"));
+    if (this.getError()) ids.push(this.props.ctx.getUniqueId("error"));
+
+    return {
+      "aria-readonly": p.ctx.readOnly || undefined,
+      "aria-describedby": ids.length ? ids.join(" ") : undefined
+    };
+  }
+
+  extendedAriaAttributes(): React.AriaAttributes {
+    return {
+      ...this.baseAriaAttributes(),
+      "aria-required": this.mandatoryClass ? true : this.props.mandatory ? true : false,
+      "aria-invalid": !!this.getError() || undefined
+    };
   }
 
 

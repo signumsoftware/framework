@@ -134,7 +134,7 @@ public static class VirtualMList
                     query.ToVirtualMListWithOrder() :
                     query.ToVirtualMList();
 
-                mlist.AssignAndPostRetrieving(newList, ctx);
+                ((IMListPrivate<T>)mlist).AssignAndPostRetrieving(newList, ctx);
             };
         }
 

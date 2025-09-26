@@ -83,6 +83,7 @@ public enum HelpMessage
     Edit,
     Close,
     ViewMore,
+    JumpToViewMore,
 }
 
 public enum HelpKindMessage

@@ -35,6 +35,7 @@ export interface SearchControlProps {
   hideFullScreenButton?: boolean;
   defaultIncludeDefaultFilters?: boolean;
   showHeader?: boolean | "PinnedFilters";
+  avoidTableFooterContainer?: boolean;
   pinnedFilterVisible?: (fop: FilterOptionParsed) => boolean;
   showBarExtension?: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
@@ -210,6 +211,7 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
         defaultIncudeDefaultFilters={p.defaultIncludeDefaultFilters ?? false}
         searchOnLoad={p.searchOnLoad != null ? p.searchOnLoad : true}
         showHeader={p.showHeader != null ? p.showHeader : true}
+        avoidTableFooterContainer={p.avoidTableFooterContainer ?? false}
         pinnedFilterVisible={p.pinnedFilterVisible}
         showFilters={p.showFilters != null ? p.showFilters : false}
         showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}

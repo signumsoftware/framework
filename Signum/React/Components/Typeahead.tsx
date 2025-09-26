@@ -21,7 +21,7 @@ export interface TypeaheadProps {
   scrollHeight?: number;
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
   itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLElement>;
-  noResultsMessage?: string;
+  noResultsMessage?: React.ReactNode;
   renderInput?: (input: React.ReactElement) => React.ReactElement;
   inputId?: string;
 }
@@ -274,7 +274,7 @@ export const Typeahead: React.ForwardRefExoticComponent<TypeaheadProps & React.R
       <Dropdown.Menu align={controller.rtl ? "end" : undefined} className="typeahead">
         {
           !items ? null :
-            items.length == 0 ? <div className="no-results dropdown-item disabled"><small>{p.noResultsMessage}</small></div> :
+            items.length == 0 ? <div className="no-results dropdown-item disabled"><small style={{ pointerEvents: "stroke" }} title={typeof p.noResultsMessage == "string" ? p.noResultsMessage : undefined}>{p.noResultsMessage}</small></div> :
               items!.map((item, i) => {
                 var title = p.itemTitle?.(item, highlighter);
 

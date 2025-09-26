@@ -1,8 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
-  <Type Name="IToolbarEntity">
-    <Member Name="Elements" Description="Elemente" />
-  </Type>
   <Type Name="ShowCount" Description="Anzahl anzeigen">
     <Member Name="Always" Description="Immer" />
     <Member Name="MoreThan0" Description="Mehr als 0" />
@@ -37,8 +34,13 @@
     <Member Name="Side" Description="Seite" />
     <Member Name="Top" Description="Top" />
   </Type>
+  <Type Name="ToolbarMenuElementEmbedded" Description="Menüelement der Symbolleiste">
+    <Member Name="AutoSelect" Description="Automatisch auswählen" />
+    <Member Name="WithEntity" Description="Mit Entität" />
+  </Type>
   <Type Name="ToolbarMenuEntity" Description="Toolbar-Menü" PluralDescription="Toolbar-Menüs" Gender="f">
     <Member Name="Elements" Description="Elemente" />
+    <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="Name" Description="Name" />
     <Member Name="Owner" Description="Eigentümer" />
@@ -51,10 +53,28 @@
     <Member Name="_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships" Description="{0} Zyklen wurden aufgrund der Beziehungen in der Toolbar gefunden:" />
     <Member Name="ExtraIconCanNotComeAfterDivider" Description="Zusätzliches Symbol kann nicht nach der Trennwand kommen" />
     <Member Name="FirstElementCanNotBeExtraIcon" Description="Das erste Element kann kein zusätzliches Symbol sein" />
+    <Member Name="If0Selected" Description="Wenn {0} ausgewählt" />
+    <Member Name="No0Selected" Description="Keine {0} ausgewählt" />
     <Member Name="RecursionDetected" Description="Rekursion erkannt" />
+    <Member Name="ShowTogether" Description="Gemeinsam anzeigen" />
   </Type>
   <Type Name="ToolbarOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="ToolbarSwitcherEntity" Description="Toolbar-Umschalter" Gender="m">
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Options" Description="Optionen" />
+    <Member Name="Owner" Description="Besitzer" />
+  </Type>
+  <Type Name="ToolbarSwitcherOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="ToolbarSwitcherOptionEmbedded" Description="Toolbar-Umschalter-Option">
+    <Member Name="IconColor" Description="Symbolfarbe" />
+    <Member Name="IconName" Description="Symbolname" />
+    <Member Name="ToolbarMenu" Description="Toolbar-Menü" />
   </Type>
 </Translations>

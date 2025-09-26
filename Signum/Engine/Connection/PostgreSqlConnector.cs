@@ -70,6 +70,7 @@ public class PostgreSqlConnector : Connector
         csb.Database = databaseName;
         ChangeConnectionString(csb.ToString(), runCustomizer);
     }
+
     public void ChangeConnectionString(string connectionString, bool runCustomizer = true)
     {
         this.ConnectionString = connectionString;
@@ -417,7 +418,7 @@ public class PostgreSqlConnector : Connector
                 select t).Any();
     }
 
-    internal void ReloadTypes()
+    public void ReloadTypes()
     {
         using (var conn = this.CreateConnection())
         {
