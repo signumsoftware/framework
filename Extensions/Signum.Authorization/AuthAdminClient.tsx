@@ -14,7 +14,7 @@ import { PropertyRouteEntity } from '@framework/Signum.Basics'
 import {
   PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo, getAllTypes, Type,
   QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol, reloadQueryContexts,
-  queryAllowedInContext
+  queryAllowedInContext, onReloadTypesActions
 } from '@framework/Reflection'
 import {
   PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission,
