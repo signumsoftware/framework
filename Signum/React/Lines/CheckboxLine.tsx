@@ -34,8 +34,7 @@ export const CheckboxLine: (props: CheckboxLineProps) => React.ReactNode | null 
     var mergedHtml = { ...c.props.valueHtmlAttributes, ...ariaAtts };
 
     const tCtx = p.ctx as TypeContext<any>;
-    const requiredIndicator = tCtx.propertyRoute?.member?.required && !ariaAtts['aria-readonly'];
-
+    const requiredIndicator = false; // tCtx.propertyRoute?.member?.required && !ariaAtts['aria-readonly'];
     const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
 
     if (p.inlineCheckbox) {

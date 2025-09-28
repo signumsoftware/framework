@@ -3,7 +3,7 @@ import { ErrorBoundary } from '@framework/Components';
 import "./Sidebar.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals';
-import { EntityControlMessage } from '@framework/Signum.Entities';
+import { EntityControlMessage, LayoutMessage } from '@framework/Signum.Entities';
 
 export type SidebarMode = "Wide" | "Narrow" | "Hidden";   
 
@@ -20,6 +20,17 @@ export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element{
       <nav
         className={classes("sidebar sidebar-nav", p.mode.firstLower(), p.isMobile && "mobile")}
         role="navigation">
+        <a
+          href="#maincontent"
+          className="skip-link"
+          onClick={(e) => {
+            e.preventDefault();
+            const el = document.getElementById("maincontent");
+            if (el) {
+              el.focus();
+            }
+          }}
+        >{LayoutMessage.JumpToMainContent.niceToString()}</a>
         {p.sidebarContent}
       </nav>
     );

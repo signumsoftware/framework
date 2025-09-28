@@ -459,11 +459,12 @@ public static class TranslatedInstanceLogic
         var records = PlainExcelGenerator.ReadPlainExcel(stream, cellValues => new TranslationRecord
         {
             Culture = culture,
-            Key = new LocalizedInstanceKey(PropertyRoute.Parse(type, cellValues[1]),
-                Lite.Parse<Entity>(cellValues[0]),
-                cellValues[2].DefaultToNull()?.Let(s => PrimaryKey.Parse(s, type))),
-            OriginalText = cellValues[3],
-            TranslatedText = cellValues[4]
+            Key = new LocalizedInstanceKey(
+                route: PropertyRoute.Parse(type, cellValues[1]!),
+                instance: Lite.Parse<Entity>(cellValues[0]!)!,
+                rowId: cellValues[2].DefaultToNull()?.Let(s => PrimaryKey.Parse(s, type))),
+            OriginalText = cellValues[3]!,
+            TranslatedText = cellValues[4]!
         });
 
         if (mode == MatchTranslatedInstances.ByInstanceID)

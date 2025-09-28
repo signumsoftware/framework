@@ -359,6 +359,9 @@
     <Member Name="ungroupResults" Description="Resultate der Gruppierung aufheben" />
     <Member Name="view" Description="Ansicht" />
   </Type>
+  <Type Name="LayoutMessage">
+    <Member Name="JumpToMainContent" Description="Zum Hauptinhalt springen" />
+  </Type>
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="ID ungültig" />
     <Member Name="InvalidFormat" Description="Ungültiges Format" />
@@ -907,6 +910,9 @@
   </Type>
   <Type Name="VisualTipConsumedOperation">
     <Member Name="Delete" Description="Löschen" />
+  </Type>
+  <Type Name="VisualTipMessage">
+    <Member Name="Help" Description="Hilfe" />
   </Type>
   <Type Name="VisualTipSymbol" Description="Visual-Tipp" PluralDescription="Visuelle Tipps" Gender="m" />
   <Type Name="VoidEnumMessage">

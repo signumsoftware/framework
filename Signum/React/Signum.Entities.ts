@@ -499,6 +499,10 @@ export namespace JavascriptMessage {
   export const Date: MessageKey = new MessageKey("JavascriptMessage", "Date");
 }
 
+export namespace LayoutMessage {
+  export const JumpToMainContent: MessageKey = new MessageKey("LayoutMessage", "JumpToMainContent");
+}
+
 export namespace LiteMessage {
   export const IdNotValid: MessageKey = new MessageKey("LiteMessage", "IdNotValid");
   export const InvalidFormat: MessageKey = new MessageKey("LiteMessage", "InvalidFormat");

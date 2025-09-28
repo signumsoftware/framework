@@ -94,6 +94,7 @@ export namespace HelpMessage {
   export const Edit: MessageKey = new MessageKey("HelpMessage", "Edit");
   export const Close: MessageKey = new MessageKey("HelpMessage", "Close");
   export const ViewMore: MessageKey = new MessageKey("HelpMessage", "ViewMore");
+  export const JumpToViewMore: MessageKey = new MessageKey("HelpMessage", "JumpToViewMore");
 }
 
 export namespace HelpPermissions {
