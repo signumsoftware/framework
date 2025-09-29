@@ -57,7 +57,7 @@ export namespace ExcelClient {
   
         return (
           <button
-            className="sf-query-button sf-chart-script-edit btn btn-light"
+            className="sf-query-button sf-chart-script-edit btn btn-tertiary"
             onClick={() => { API.generatePlainExcel(ChartClient.API.getRequest(ctx.chartRequest)); }}>
             <FontAwesomeIcon icon={"file-excel"} /> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
           </button>

@@ -90,7 +90,7 @@ export function ProgressModal<T>(p: ProgressModalProps<T>): React.ReactElement {
       {p.options.showCloseWarningMessage &&
         <div className="modal-footer">
           <small className="text-muted">{OperationMessage.ClosingThisModalOrBrowserTabWillCancelTheOperation.niceToString()}</small>
-          <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+          <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
             {JavascriptMessage.cancel.niceToString()}
           </button>
         </div>
