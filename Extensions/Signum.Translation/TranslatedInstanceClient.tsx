@@ -15,7 +15,7 @@ import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
 import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getLambdaMembers } from '@framework/Reflection';
-import { TranslatedSummaryState } from './Signum.Translation.Instances';
+import { TranslatedSummaryState, MatchTranslatedInstances } from './Signum.Translation.Instances';
 import { TranslatableRouteType } from '@framework/Signum.Basics';
 import { TextAreaLineProps } from '../../Signum/React/Lines/TextAreaLine';
 
@@ -99,8 +99,8 @@ export namespace TranslatedInstanceClient {
         .then(response => saveFile(response));
     }
   
-    export function uploadFile(request: FileUpload): Promise<void> {
-      return ajaxPost({ url: "/api/translatedInstance/uploadFile/" }, request);
+    export function uploadFile(request: FileUpload, mode: MatchTranslatedInstances): Promise<void> {
+      return ajaxPost({ url: "/api/translatedInstance/uploadFile?" + QueryString.stringify({mode}) }, request);
     }
   
     export interface FileUpload {

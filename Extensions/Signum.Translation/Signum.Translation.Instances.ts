@@ -8,6 +8,11 @@ import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 
 
+export const MatchTranslatedInstances: EnumType<MatchTranslatedInstances> = new EnumType<MatchTranslatedInstances>("MatchTranslatedInstances");
+export type MatchTranslatedInstances =
+  "ByInstanceID" |
+  "ByOriginalText";
+
 export const TranslatedInstanceEntity: Type<TranslatedInstanceEntity> = new Type<TranslatedInstanceEntity>("TranslatedInstance");
 export interface TranslatedInstanceEntity extends Entities.Entity {
   Type: "TranslatedInstance";
