@@ -242,9 +242,9 @@ public class TranslatedInstanceController : ControllerBase
     }
 
     [HttpPost("api/translatedInstance/uploadFile")]
-    public void UploadFile([Required, FromBody] FileUpload file)
+    public void UploadFile([Required, FromBody] FileUpload file, [FromQuery] MatchTranslatedInstances mode)
     {
-        TranslatedInstanceLogic.ImportExcelFile(new MemoryStream(file.content), file.fileName, MatchTranslatedInstances.ByInstanceID);
+        TranslatedInstanceLogic.ImportExcelFile(new MemoryStream(file.content), file.fileName, mode);
     }
 }
 
