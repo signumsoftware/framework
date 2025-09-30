@@ -100,10 +100,7 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
     );
   }
 
-
-
   if (c.props.onRenderDropDownListItem) {
-
     var oi = optionItems.singleOrNull(a => a.value == p.ctx.value) ?? {
       value: p.ctx.value,
       label: p.ctx.value,
@@ -114,7 +111,12 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
       return React.cloneElement(result, { 'data-value': item.value } as any);
     }
 
-
+    //const renderElement = ({ item }: any) => (
+    //  <div role="option" aria-selected={oi?.value === item.value}>
+    //    {c.props.onRenderDropDownListItem ? c.props.onRenderDropDownListItem(item) : <span>{item.label}</span>}
+    //    <span className="sr-only">{item.label}</span>
+    //  </div>
+    //);
 
     return (
       <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
@@ -129,6 +131,18 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
             renderValue={renderElement}
             renderListItem={renderElement}
             title={niceValue}
+            inputProps={{
+              value: oi?.label ?? "",
+              role: "combobox",
+              "aria-haspopup": "listbox",
+              "aria-expanded": false,
+              "aria-controls": `${inputId}_listbox`,
+              "aria-label": p.label ?? "Auswahl"
+            }}
+            listProps={{
+              role: "listbox",
+              id: `${inputId}_listbox`,
+            }}
             {...(p.valueHtmlAttributes as any)}
           />)
         }

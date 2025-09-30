@@ -404,7 +404,8 @@ body.rtl .form-group.row>label {
 
 .form-select.form-select-xs {
     background-position: right 0.2rem center;
-    padding: 0px 20px 0px 5px;
+    padding: 0.5px 20px 0.5px 5px;
+    font-size: 0.875em;
 }
 
 input[type=checkbox].form-control-xs {
@@ -415,23 +416,22 @@ input[type=checkbox].form-control-xs {
 .input-group-xs>.form-control,
 .input-group-xs>.input-group-text,
 .input-group-xs>.btn {
-    padding: 1px 5px;
-    font-size: 0.875rem;
+    padding: 0.5px 5px;
+    font-size: 0.875em;
     line-height: 1.5;
-    height: 26px;
 }
 
 .col-form-label-xs {
     padding-top: 2px;
     padding-bottom: 2px;
-    font-size: 0.875rem;
+    font-size: 0.875em;
     line-height: 1.5;
 }
 
 
 
 .label-xs {
-    font-size: 0.875rem;
+    font-size: 0.875em;
     margin-bottom: 0px;
 }
 
@@ -442,7 +442,7 @@ input[type=checkbox].form-control-xs {
 .form-control-xs .rw-widget-input,
 .rw-widget-xs .rw-widget-input {
     min-height: 24px;
-    font-size: 0.875rem;
+    font-size: 0.875em;
 }
 /*.rw-calendar-header {
     background-color: var(--bs-body-bg);
@@ -507,7 +507,7 @@ input[type=checkbox].form-control-xs {
 .btn-xs,
 .btn-group-xs>.btn {
     padding: 0rem 0.2rem;
-    font-size: 0.875rem;
+    font-size: 0.875em;
     /*line-height: 1.5;*/
 }
 
@@ -518,7 +518,7 @@ input[type=checkbox].form-control-xs {
 }
 
 .label-sm {
-    font-size: 0.875rem;
+    font-size: 0.875em;
     margin-bottom: 0px;
 }
 /*
@@ -550,13 +550,13 @@ input[type=checkbox].form-control-xs {
 .rw-widget-sm .rw-widget-input {
     padding: 3px 6px;
     min-height: 28px;
-    font-size: 0.875rem;
+    font-size: 0.875em;
 }
 
 .rw-widget-sm .rw-multiselect .rw-widget-input {
     padding: 4px 3px;
     min-height: 28px;
-    font-size: 0.875rem;
+    font-size: 0.875em;
 }
 
 .rw-widget-sm .rw-multiselect-tag-label,

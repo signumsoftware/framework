@@ -721,7 +721,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps): React.ReactEleme
 
   //function renderButton(binding: Binding<boolean | undefined>, label: string, title: string) {
   //  return (
-  //    <button type="button" className={classes("px-1 btn btn-light", binding.getValue() && "active")} disabled={p.readonly}
+  //    <button type="button" className={classes("px-1 btn btn-tertiary", binding.getValue() && "active")} disabled={p.readonly}
   //      onClick={e => { binding.setValue(binding.getValue() ? undefined : true); p.onChange(); }}
   //      title={StyleContext.default.titleLabels ? title : undefined}>
   //      {label}

@@ -31,7 +31,7 @@ export default function TimesPage(): React.JSX.Element {
     <div>
       <h3 className="display-6">Times</h3>
       <div className="btn-toolbar">
-        <button onClick={() => reloadTimes()} className="btn btn-light">Reload</button>
+        <button onClick={() => reloadTimes()} className="btn btn-tertiary">Reload</button>
         <button onClick={handleClear} className="btn btn-warning">Clear</button>
       </div>
       <br />

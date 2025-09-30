@@ -76,7 +76,7 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): Reac
         <button className="btn btn-primary sf-entity-button sf-ok-button" disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} onClick={handleOkClicked}>
           {JavascriptMessage.ok.niceToString()}
         </button>
-        <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+        <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
           {JavascriptMessage.cancel.niceToString()}
         </button>
       </div>
