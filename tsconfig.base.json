@@ -9,7 +9,6 @@
     "jsx": "react-jsx",
     "incremental": true,
     "composite": true,
-    //"noEmit": true,
     "strict": true,
     "declarationMap": true,
     "lib": [

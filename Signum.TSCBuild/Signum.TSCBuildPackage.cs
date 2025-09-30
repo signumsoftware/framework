@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Task = System.Threading.Tasks.Task;
 
-namespace Signum.VSIX
+namespace Signum.TSCBuild
 {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
@@ -24,9 +24,9 @@ namespace Signum.VSIX
     /// </para>
     /// </remarks>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-    [Guid(SignumVSIXPackage.PackageGuidString)]
+    [Guid(SignumTSCBuildPackage.PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    public sealed class SignumVSIXPackage : AsyncPackage
+    public sealed class SignumTSCBuildPackage : AsyncPackage
     {
         /// <summary>
         /// Signum.VSIXPackage GUID string.
@@ -47,7 +47,7 @@ namespace Signum.VSIX
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-            await Signum.VSIX.CompileTypeScript.InitializeAsync(this);
+            await Signum.TSCBuild.CompileTypeScript.InitializeAsync(this);
         }
 
         #endregion

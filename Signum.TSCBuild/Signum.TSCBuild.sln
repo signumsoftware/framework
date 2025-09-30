@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36518.9 d17.14
+VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.VSIX", "Signum.VSIX.csproj", "{55DD3C57-CDF2-4128-9D20-D8D91FDFC417}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.TSCBuild", "Signum.TSCBuild.csproj", "{55DD3C57-CDF2-4128-9D20-D8D91FDFC417}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -12,7 +12,7 @@ using System.Text;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Threading;
 
-namespace Signum.VSIX
+namespace Signum.TSCBuild
 {
     /// <summary>
     /// Command handler
