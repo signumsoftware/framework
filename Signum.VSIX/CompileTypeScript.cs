@@ -372,6 +372,25 @@ namespace Signum.VSIX
                                 textView.CenterLines(lineNum, 1);
                             }
                         }
+     
+                        // Start a timer to remove all errors in the same file after 10 seconds
+                        var timer = new System.Timers.Timer(10000) { AutoReset = false };
+                        timer.Elapsed += (sender, args) =>
+                        {
+                            ThreadHelper.Generic.BeginInvoke(() =>
+                            {
+                                for (int i = errorListProvider.Tasks.Count - 1; i >= 0; i--)
+                                {
+                                    var t = errorListProvider.Tasks[i];
+                                    if (string.Equals(t.Document, filePath, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        errorListProvider.Tasks.Remove(t);
+                                    }
+                                }
+                            });
+                            timer.Dispose();
+                        };
+                        timer.Start();
                     };
 
                     errorListProvider.Tasks.Add(task);
