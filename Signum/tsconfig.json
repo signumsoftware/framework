@@ -1,4 +1,6 @@
 ﻿{
   "extends": "../tsconfig.base.json",
-  "outDir": "./ts_out"
+  "compilerOptions": {
+    "outDir": "./ts_out",
+  },
 }
