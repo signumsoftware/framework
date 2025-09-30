@@ -1,21 +1,4 @@
 ﻿{
-  "compilerOptions": {
-    "target": "ESNext",
-    "isolatedDeclarations": true,
-    "sourceMap": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true,
-    "jsx": "react-jsx",
-    "incremental": true,
-    "composite": true,
-    "outDir": "./ts_out",
-    //"noEmit": true,
-    "strict": true,
-    "declarationMap": true,
-    "lib": [
-      "ESNext",
-      "dom"
-    ]
-  }
+  "extends": "../tsconfig.base.json",
+  "outDir": "./ts_out"
 }
