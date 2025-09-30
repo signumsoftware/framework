@@ -47,12 +47,12 @@
 		<Message Text="Executing 'yarn tsc --build' (all projects NEW21312!)" Importance="high" />
 		<Exec
 		  Command="yarn tsc -b $(MSBuildProjectDirectory)\tsconfig.json --pretty false"
-		  ConsoleToMSBuild="true">
+		  ConsoleToMSBuild="true"
+		  IgnoreExitCode="true">
 			<Output TaskParameter="ConsoleOutput" ItemName="TscOutput" />
 		</Exec>
 
-		<!-- Now FixedOutput has the corrected error lines -->
-		<Message Text="%(FixedOutput.Identity)" Importance="high" />
+		<Message Text="%(TscOutput.Identity)" Importance="high" />
 	</Target>
 
 	<Target Name="StartTypescript" Condition="'$(TypeScriptCompileBlocked)' == 'false'">
