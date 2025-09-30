@@ -30,7 +30,7 @@ class Upgrade_20250923_LayoutRestructure : CodeUpgradeBase
 
                 var divIndex = lines.FindIndex(index, a => a.Contains("</div>"));
 
-                lines[divIndex] = lines[divIndex].Replace("</div>", "</main");
+                lines[divIndex] = lines[divIndex].Replace("</div>", "</main>");
 
                 return true;
             });

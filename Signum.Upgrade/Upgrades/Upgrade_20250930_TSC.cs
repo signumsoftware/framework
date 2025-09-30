@@ -34,6 +34,27 @@ class Upgrade_20250930_TSC : CodeUpgradeBase
             }
             """);
 
+        uctx.ChangeCodeFile(@"Southwind/tsconfig.json", cf =>
+        {
+            cf.InsertBeforeFirstLine(a => a.Contains("compilerOptions"), """
+                "extends": "../Framework/tsconfig.base.json",
+                """);
+
+            cf.RemoveAllLines(a =>
+            a.Contains(@"""target"":") ||
+            a.Contains(@"""isolatedDeclarations"":") ||
+            a.Contains(@"""sourceMap"":") ||
+            a.Contains(@"""module"":") ||
+            a.Contains(@"""moduleResolution"":") ||
+            a.Contains(@"""allowSyntheticDefaultImports"":") ||
+            a.Contains(@"""jsx"":") ||
+            a.Contains(@"""incremental"":") ||
+            a.Contains(@"""composite"":") ||
+            a.Contains(@"""noEmit"":") ||
+            a.Contains(@"""strict"":"));
+
+            cf.ReplaceBetweenIncluded(a => a.Contains(@"""lib"""), a => a.Contains("]"), "");
+        });
 
         uctx.CreateCodeFile(@"Southwind/package.json", $$"""
             {
@@ -92,17 +113,20 @@ class Upgrade_20250930_TSC : CodeUpgradeBase
 
         uctx.ChangeCodeFile(@".gitignore", cf =>
         {
-            cf.InsertAfterLastLine(a => a.Contains($"{uctx.ApplicationName}"), $"/{uctx.ApplicationName}.Server/ts_out/**");
+            cf.InsertAfterLastLine(a => a.Contains($"{uctx.ApplicationName}.Server"), $"/{uctx.ApplicationName}.Server/ts_out/**");
         });
 
         uctx.ChangeCodeFile(@"Directory.Build.props", cf =>
         {
             cf.RemoveAllLines(a =>
-                a.Contains("EnableRazorComponentCompile") &&
-                a.Contains("RazorCompileOnBuild") &&
+                a.Contains("EnableRazorComponentCompile") ||
+                a.Contains("RazorCompileOnBuild") ||
                 a.Contains("RazorCompileOnPublish")
             );
         });
+
+        SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Install https://marketplace.visualstudio.com/items?itemName=SignumSoftware.signumtscbuild");
+        SafeConsole.WriteLineColor(ConsoleColor.Magenta, "If(😊) add some ★★★★★ ");
     }
 }
 
