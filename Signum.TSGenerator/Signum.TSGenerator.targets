@@ -5,7 +5,18 @@
 			<Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
 		</Exec>
 	</Target>
-	<PropertyGroup>
+
+	<!-- Without Microsoft.TypeScript.MSBuild Nuget  -->
+	<PropertyGroup Condition="'$(CompileTypeScriptDependsOn)' == ''">
+		<BuildDependsOn>
+			$(BuildDependsOn);
+			GenerateSignumTS;
+			TSC_BuildAll;
+		</BuildDependsOn>
+	</PropertyGroup>
+
+	<!-- With Microsoft.TypeScript.MSBuild Nuget  -->
+	<PropertyGroup Condition="'$(CompileTypeScriptDependsOn)' != ''">
 		<CompileTypeScriptDependsOn>
 			GenerateSignumTS;
 			StartTypescript;
@@ -22,22 +33,28 @@
 			EndTypescript;
 			TSC_BuildAll;
 		</BuildDependsOn>
-	</PropertyGroup> 
+	</PropertyGroup>
+
 	<Target Name="CleanCompilerDependsOn">
-	    <PropertyGroup>
+		<PropertyGroup>
 			<CompileDependsOn>
 				$([MSBuild]::Unescape($(CompileDependsOn.Replace("CompileTypeScriptWithTSConfig;", ""))))
 			</CompileDependsOn>
 		</PropertyGroup>
 	</Target>
-	
+
 	<Target Name="TSC_BuildAll" Condition="'$(TSC_Build)' == 'true'">
-		<Message Text="Executing 'yarn tsc --build' (all projects)" Importance="high" />
-		<Exec Command="yarn run tsc --build" ConsoleToMSBuild="true">
-			<Output TaskParameter="ConsoleOutput" ItemName="OutputOfExec" />
+		<Message Text="Executing 'yarn tsc --build' (all projects NEW21312!)" Importance="high" />
+		<Exec
+		  Command="yarn tsc -b $(MSBuildProjectDirectory)\tsconfig.json --pretty false"
+		  ConsoleToMSBuild="true"
+		  IgnoreExitCode="true">
+			<Output TaskParameter="ConsoleOutput" ItemName="TscOutput" />
 		</Exec>
+
+		<Message Text="%(TscOutput.Identity)" Importance="high" />
 	</Target>
-	
+
 	<Target Name="StartTypescript" Condition="'$(TypeScriptCompileBlocked)' == 'false'">
 		<Message Text="TypeScript Compiler Starting $(MSBuildProjectFile)" Importance="high" />
 	</Target>
@@ -83,6 +100,6 @@
 			</Code>
 		</Task>
 	</UsingTask>
-	
-	
+
+
 </Project>

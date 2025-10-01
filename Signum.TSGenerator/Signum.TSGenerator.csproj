@@ -10,7 +10,7 @@
     <LangVersion>latest</LangVersion>
     <Platforms>x64;AnyCPU</Platforms>
     <NuSpecFile>Signum.TSGenerator.nuspec</NuSpecFile>
-    <Version>9.1.0</Version>
+    <Version>9.2.0</Version>
   </PropertyGroup>
 	
 
