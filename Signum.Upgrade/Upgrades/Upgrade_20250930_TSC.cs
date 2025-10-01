@@ -125,8 +125,10 @@ class Upgrade_20250930_TSC : CodeUpgradeBase
             );
         });
 
-        SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Install https://marketplace.visualstudio.com/items?itemName=SignumSoftware.signumtscbuild");
-        SafeConsole.WriteLineColor(ConsoleColor.Magenta, "If(😊) add some ★★★★★ ");
+        Console.WriteLine();
+        SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Install the Signum.TSCBuild VSIX extension!");
+        SafeConsole.WriteLineColor(ConsoleColor.Magenta, "https://marketplace.visualstudio.com/items?itemName=SignumSoftware.signumtscbuild");
+        SafeConsole.WriteLineColor(ConsoleColor.Magenta, "We're sure you will like it... Please add some starts/comments! :)");
     }
 }
 
