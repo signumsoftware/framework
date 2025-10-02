@@ -26,7 +26,7 @@ export namespace DynamicTypeClient {
     Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => import('./Type/DynamicSqlMigration')));
   
     Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Clone, {
-      contextual: { icon: "clone", iconColor: "black" },
+      contextual: { icon: "clone", iconColor: "var(--bs-body-color)" },
     }));
   
     Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Save, {

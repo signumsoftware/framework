@@ -129,11 +129,6 @@ public class CollectionToArrayToken : QueryToken
     }
 
 
-    public override string TypeColor
-    {
-        get { return "#0000FF"; }
-    }
-
     public static int MaxToArrayValues = 100;
 
     static MethodInfo miToArray = ReflectionTools.GetMethodInfo(() => Enumerable.ToArray<int>(null!)).GetGenericMethodDefinition();

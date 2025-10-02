@@ -525,7 +525,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       var active = detector((p.filters ?? gr?.getFilters(true))!.toObject(a => a.col.name, a => a.val) as ChartRow);
       cssStyle = {
         ...cssStyle,
-        color: active ? "black" : cssStyle?.color,
+        color: active ? "var(--bs-body-color)" : cssStyle?.color,
         opacity: !active ? .5 : cssStyle?.opacity,
         fontWeight: active ? "bold" : cssStyle?.fontWeight
       };

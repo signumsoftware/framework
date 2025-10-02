@@ -208,12 +208,6 @@ public class AggregateToken : QueryToken
         else
             return new AggregateToken(AggregateFunction, Parent.Clone(), this.FilterOperation, this.Value, this.Distinct);
     }
-
-
-    public override string TypeColor
-    {
-        get { return "#0000FF"; }
-    }
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]

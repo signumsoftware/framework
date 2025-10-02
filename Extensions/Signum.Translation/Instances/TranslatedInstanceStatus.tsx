@@ -4,6 +4,7 @@ import { Dic, classes } from '@framework/Globals'
 import { getToString, JavascriptMessage } from '@framework/Signum.Entities'
 import { TranslatedInstanceClient } from '../TranslatedInstanceClient'
 import { TranslationMessage } from '../Signum.Translation'
+import { MatchTranslatedInstances } from '../Signum.Translation.Instances'
 import "../Translation.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
@@ -11,6 +12,7 @@ import { getTypeInfo, reloadTypes } from '@framework/Reflection'
 import { Operations } from '@framework/Operations'
 import MessageModal from '@framework/Modals/MessageModal'
 import { CultureClient } from '@framework/Basics/CultureClient'
+import SelectorModal from '../../../Signum/React/SelectorModal'
 
 export default function TranslationCodeStatus(): React.JSX.Element {
 
@@ -34,7 +36,8 @@ export default function TranslationCodeStatus(): React.JSX.Element {
         setFile(file);
         setFileVer(fileVer + 1);
 
-        TranslatedInstanceClient.API.uploadFile(file!).then(model => { Operations.notifySuccess(); reload(); });
+        SelectorModal.chooseEnum(MatchTranslatedInstances)
+          .then(mode => mode && TranslatedInstanceClient.API.uploadFile(file!, mode).then(model => { Operations.notifySuccess(); reload(); }));
       };
       fileReader.readAsDataURL(f);
     }

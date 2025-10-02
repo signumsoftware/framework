@@ -3,6 +3,7 @@ import { NavDropdown } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun, faMoon, faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons";
 import { JSX } from "react/jsx-runtime";
+import { useWindowEvent } from "../Hooks";
 
 type BootstrapThemeModes = "light" | "dark" | "auto";
 
@@ -14,53 +15,60 @@ const ICONS: Record<BootstrapThemeModes, any> = {
   auto: faCircleHalfStroke,
 };
 
-function applyThemeMode(theme: BootstrapThemeModes) {
-  if (theme === "auto") {
-    const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const updateTheme = () => {
-      document.body.dataset.bsTheme = darkQuery.matches ? "dark" : "light";
-    };
-    updateTheme();
-    darkQuery.addEventListener("change", updateTheme);
-    return () => darkQuery.removeEventListener("change", updateTheme);
-  } else {
-    document.body.dataset.bsTheme = theme;
-    return undefined;
-  }
+export function useAuto(theme: BootstrapThemeModes): "dark" | "light" {
+  const query = window.matchMedia("(prefers-color-scheme: dark)");
+  const get = () => (query.matches ? "dark" : "light");
+
+  const [mode, setMode] = React.useState<"dark" | "light">(theme === "auto" ? get() : theme);
+
+  useEffect(() => {
+    if (theme !== "auto")
+      return setMode(theme);
+    const fn = () => setMode(get());
+    query.addEventListener("change", fn);
+    fn();
+    return () => query.removeEventListener("change", fn);
+  }, [theme]);
+
+  return mode;
 }
+export const STORAGE_KEY = "bootstrap-theme-mode";
+export function ThemeModeSelector(p: { onSetMode?: (mode: "dark" | "light") => void }): JSX.Element {
 
-export function ThemeModeSelector(): JSX.Element {
-
-    const getDefaultTheme = (): BootstrapThemeModes => {
-    const stored = localStorage.getItem("bootstrap-theme-mode") as BootstrapThemeModes | null;
+  const getDefaultTheme = (): BootstrapThemeModes => {
+    const stored = localStorage.getItem(STORAGE_KEY) as BootstrapThemeModes | null;
     if (stored) return stored;
     return "auto"; // fallback to system preference
   };
 
-  const [bootstrapTheme, setBootstrapThemeState] = React.useState<BootstrapThemeModes>(
-    getDefaultTheme()
-  );
+  const [bootstrapMode, setBootstrapMode] = React.useState<BootstrapThemeModes>(getDefaultTheme());
+
+  const finalMode = useAuto(bootstrapMode);
 
   useEffect(() => {
-    const cleanup = applyThemeMode(bootstrapTheme);
-    localStorage.setItem("bootstrap-theme-mode", bootstrapTheme);
-    return cleanup;
-  }, [bootstrapTheme]);
+    document.body.dataset.bsTheme = finalMode;
+    p.onSetMode?.(finalMode)
+    localStorage.setItem(STORAGE_KEY, finalMode);
+  }, [finalMode]);
+
+  useWindowEvent("change-theme-mode", (e) => {
+    setBootstrapMode((e as CustomEvent).detail as BootstrapThemeModes);
+  }, []);
 
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
       <NavDropdown
         title={
           <>
-            <FontAwesomeIcon icon={ICONS[bootstrapTheme]} /> {(bootstrapTheme.firstUpper())}
+            <FontAwesomeIcon icon={ICONS[bootstrapMode]} /> {(bootstrapMode.firstUpper())}
           </>
         }
       >
         {BOOTSTRAP_MODES.map((theme) => (
           <NavDropdown.Item
             key={theme}
-            active={bootstrapTheme === theme}
-            onClick={() => setBootstrapThemeState(theme)}
+            active={bootstrapMode === theme}
+            onClick={() => setBootstrapMode(theme)}
           >
             <FontAwesomeIcon icon={ICONS[theme]} className="me-2" />
             {(theme.firstUpper())}

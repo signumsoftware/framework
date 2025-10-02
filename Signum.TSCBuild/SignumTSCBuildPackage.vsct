@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+  <Commands package="guidSignumTSCBuildPackage">
+    <Groups>
+      <!-- Group for the project context menu, top position -->
+      <Group guid="guidSignumTSCBuildPackageCmdSet" id="ProjectContextMenuGroup" priority="0x0000">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE"/>
+      </Group>
+    </Groups>
+    <Buttons>
+      <!-- Build TypeScript button in project context menu -->
+      <Button guid="guidSignumTSCBuildPackageCmdSet" id="BuildTypeScriptId" priority="0x0100" type="Button">
+        <Parent guid="guidSignumTSCBuildPackageCmdSet" id="ProjectContextMenuGroup" />
+        <Icon guid="guidImages" id="bmpPic1" />
+        <Strings>
+          <ButtonText>Build TypeScript</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+    <Bitmaps>
+      <Bitmap guid="guidImages" href="Resources\CompileTypeScript.png" usedList="bmpPic1"/>
+    </Bitmaps>
+  </Commands>
+  <Symbols>
+    <GuidSymbol name="guidSignumTSCBuildPackage" value="{58ecfa23-b4d1-4b4c-bb23-b8ad57291e70}" />
+    <GuidSymbol name="guidSignumTSCBuildPackageCmdSet" value="{57018ec6-5e1b-4ac7-8226-30120d45e7c0}">
+      <IDSymbol name="ProjectContextMenuGroup" value="0x0110" />
+      <IDSymbol name="BuildTypeScriptId" value="0x0111" />
+    </GuidSymbol>
+    <GuidSymbol name="guidImages" value="{23cba6d2-98f6-4688-ac94-56b64f2a71d8}">
+      <IDSymbol name="bmpPic1" value="1" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

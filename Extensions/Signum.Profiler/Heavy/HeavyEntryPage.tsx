@@ -53,7 +53,7 @@ export default function HeavyEntry(): React.JSX.Element {
             <td colSpan={2}>
               <div className="btn-toolbar">
                 <button onClick={handleDownload} className="btn btn-info">Download</button>
-                {!current.isFinished && <button onClick={() => reloadEntries()} className="btn btn-light">Update</button>}
+                {!current.isFinished && <button onClick={() => reloadEntries()} className="btn btn-tertiary">Update</button>}
               </div>
             </td>
           </tr>

@@ -184,7 +184,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
                   fontWeight={active == true ? "bold" : undefined}
                   transform={translate(x(key)! + x.bandwidth() / 2, 0) + rotate(-90)}
                   dominantBaseline="middle"
-                  fill="black"
+                  fill="var(--bs-body-color)"
                   shapeRendering="geometricPrecision"
                   textAnchor="end">
                   {keyColumn.getNiceName(k)}

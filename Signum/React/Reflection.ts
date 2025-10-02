@@ -745,6 +745,24 @@ export function onReloadTypes(): void {
   onReloadTypesActions.forEach(a => a());
 }
 
+interface QueryContexts {
+  [queryName: string]: {
+    [contextType: string]: (string | number)[]
+  }
+}
+
+export let queryContexts: QueryContexts | undefined;
+export function queryAllowedInContext(queryKey: string, context: Lite<Entity>): boolean  {
+  var list = queryContexts?.[queryKey]?.[context.EntityType];
+
+  return list == null || list.contains(context.id!);
+}
+export function reloadQueryContexts(): Promise<void> {
+  return ajaxGet<QueryContexts>({ url: "/api/query/queryContexts" }).then(qc => {
+    queryContexts = qc;
+    AppContext.resetUI();
+  });
+}
 
 export function setTypes(types: TypeInfoDictionary): void {
 

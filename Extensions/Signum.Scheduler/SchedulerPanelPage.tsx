@@ -161,7 +161,7 @@ function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerClien
                 <td><EntityLink lite={item.schedulerTaskLog} inSearch="main" onNavigated={onReload} /></td>
                 <td>{item.startTime} ({DateTime.fromISO(item.startTime).toRelative()})</td>
                 <td><pre>{item.remarks}</pre></td>
-                <td><button className="btn btn-light btn-xs btn-danger" type="button" onClick={e => handleCancelClick(e, item.schedulerTaskLog)}>Cancel</button></td>
+                <td><button className="btn btn-tertiary btn-xs btn-danger" type="button" onClick={e => handleCancelClick(e, item.schedulerTaskLog)}>Cancel</button></td>
               </tr>)
             }
           </tbody>

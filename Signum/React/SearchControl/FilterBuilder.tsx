@@ -114,12 +114,7 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
   var showDashboardBehaviour = showPinnedFiltersOptions && (p.showDashboardBehaviour ?? true);
   return (
     <>
-      {showPinnedFiltersOptions && !p.avoidPreview && <div className="mb-3">
-        <h4 className="lead">Preview</h4>
-        <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} highlightFilter={highlightFilter} showGrid={true} />
-      </div>
-      }
-      <GroupHeader label={p.title} avoidFieldSet={p.avoidFieldSet}>
+      <GroupHeader label={p.title} avoidFieldSet={p.avoidFieldSet} fieldsetClassName="my-3 p-3 pb-1 bg-body rounded shadow-sm border-0">
         <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
           <table className="table-sm">
             <thead>
@@ -201,6 +196,12 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
           </table>
         </div>
       </GroupHeader>
+
+      {showPinnedFiltersOptions && !p.avoidPreview && <div className="mb-3">
+        <h4 className="lead ms-2 mb-0">Preview</h4>
+        <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} highlightFilter={highlightFilter} showGrid={true} />
+      </div>
+      }
     </>
   );
 }
@@ -319,7 +320,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
   var paddingLeftNext = (25 * (p.level + 1)) + 5;
   return (
     <>
-      <tr className="sf-filter-group" style={{ backgroundColor: "#eee" }}
+      <tr className="sf-filter-group" style={{ backgroundColor: "var(--bs-secondary-bg)" }}
         onMouseEnter={() => p.setHighlightFilter?.(fg.pinned ? fg : undefined)}
         onMouseLeave={() => p.setHighlightFilter?.(undefined)}
       >
@@ -720,7 +721,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps): React.ReactEleme
 
   //function renderButton(binding: Binding<boolean | undefined>, label: string, title: string) {
   //  return (
-  //    <button type="button" className={classes("px-1 btn btn-light", binding.getValue() && "active")} disabled={p.readonly}
+  //    <button type="button" className={classes("px-1 btn btn-tertiary", binding.getValue() && "active")} disabled={p.readonly}
   //      onClick={e => { binding.setValue(binding.getValue() ? undefined : true); p.onChange(); }}
   //      title={StyleContext.default.titleLabels ? title : undefined}>
   //      {label}
@@ -752,7 +753,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps): React.ReactEleme
 function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: boolean, onChange: () => void }) {
   return (
     <Dropdown>
-      <Dropdown.Toggle variant={p.filter.dashboardBehaviour ? "info" : "light"} id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className={classes("px-1", p.filter.dashboardBehaviour ? "text-light" : "text-info")}
+      <Dropdown.Toggle variant={p.filter.dashboardBehaviour ? "info" : "tertiary"} id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className={classes("px-1", p.filter.dashboardBehaviour ? "text-light" : "text-info")}
         title={StyleContext.default.titleLabels ? "Behaviour of the filter when used inside of a Dashboard" : undefined}>
         {<FontAwesomeIcon icon="gauge" className={classes("icon", p.filter.dashboardBehaviour ? "text-light" : "text-info")} />}{p.filter.dashboardBehaviour ? " " + DashboardBehaviour.niceToString(p.filter.dashboardBehaviour) : ""}
       </Dropdown.Toggle>

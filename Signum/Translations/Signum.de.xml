@@ -359,6 +359,9 @@
     <Member Name="ungroupResults" Description="Resultate der Gruppierung aufheben" />
     <Member Name="view" Description="Ansicht" />
   </Type>
+  <Type Name="LayoutMessage">
+    <Member Name="JumpToMainContent" Description="Zum Hauptinhalt springen" />
+  </Type>
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="ID ungültig" />
     <Member Name="InvalidFormat" Description="Ungültiges Format" />
@@ -515,6 +518,7 @@
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />
     <Member Name="HasValue" Description="Hat einen Wert" />
+    <Member Name="IndexerContainer" Description="Indexer-Container" />
     <Member Name="Length" Description="Länge" />
     <Member Name="ListOf0" Description="Liste von {0}" />
     <Member Name="MatchRank" Description="Match-Rang" />
@@ -526,6 +530,7 @@
     <Member Name="Not" Description="Nicht" />
     <Member Name="Null" Description="Leer" />
     <Member Name="Number" Description="Nummer" />
+    <Member Name="Operations" Description="Operationen" />
     <Member Name="PartitionId" Description="Partition Id" />
     <Member Name="RowId" Description="RowID" />
     <Member Name="RowOrder" Description="RowOrder" />
@@ -660,7 +665,9 @@
     <Member Name="Equal0" Description="Gleich {0}" />
     <Member Name="Field" Description="Feld" />
     <Member Name="FilterDesigner" Description="Filter-Designer" />
+    <Member Name="FilterMenu" Description="Filter Menü" />
     <Member Name="Filters" Description="Filter" />
+    <Member Name="FilterTypeSelection" Description="Auswahl des Filtertyps" />
     <Member Name="Find" Description="Finden" />
     <Member Name="FinderOf0" Description="Finder von {0}" />
     <Member Name="First0Results_N" Description="erste {0} Ergebnis[se]." />
@@ -683,13 +690,16 @@
     <Member Name="NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First" Description="Es wurden keine Ergebnisse gefunden, da Sie {0} nicht untersuchen dürfen, ohne zuerst nach {1} zu filtern" />
     <Member Name="NoResultsFoundInPage01" Description="Keine Ergebnisse auf Seite {0} gefunden, {1} " />
     <Member Name="NoResultsInThisPage" Description="Keine Ergebnisse auf dieser Seite" />
+    <Member Name="NumberOfElementsForPagination" Description="Anzahl der Elemente für die Paginierung" />
     <Member Name="Of" Description="von" />
     <Member Name="Operations" Description="Operationen" />
+    <Member Name="OperationsForSelectedElements" Description="Operationen für ausgewählte Elemente" />
     <Member Name="Operator" Description="Operator" />
     <Member Name="Options" Description="Optionen" />
     <Member Name="OrGroup" Description="OR-Gruppe" />
     <Member Name="PaginationAll_0Elements" Description="{0} Elemente" />
     <Member Name="PaginationFirst_01Elements" Description="{0} {1} Elemente" />
+    <Member Name="PaginationMode" Description="Paginierungsmodus" />
     <Member Name="PaginationPages_0Of01lements" Description="{0} mit {1} Elemente" />
     <Member Name="ParentValue" Description="Übergeordneter Wert" />
     <Member Name="PinFilter" Description="Pin-Filter" />
@@ -900,6 +910,9 @@
   </Type>
   <Type Name="VisualTipConsumedOperation">
     <Member Name="Delete" Description="Löschen" />
+  </Type>
+  <Type Name="VisualTipMessage">
+    <Member Name="Help" Description="Hilfe" />
   </Type>
   <Type Name="VisualTipSymbol" Description="Visual-Tipp" PluralDescription="Visuelle Tipps" Gender="m" />
   <Type Name="VoidEnumMessage">

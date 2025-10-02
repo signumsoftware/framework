@@ -1,5 +1,5 @@
 ﻿div.sf-type-help{
-    background: #eee;
+    background: var(--bs-light);
     margin: -5px;
     padding: 5px;
 }
@@ -9,7 +9,7 @@ div.sf-type-help h4{
 }
 
 div.sf-type-help-bar{
-    background: #ddd;
+    background: var(--bs-secondary-bg-subtle);
     margin: -5px;
     padding: 5px;
 }
@@ -24,7 +24,7 @@ ul.sf-members {
 }
 
 ul.sf-members ul.sf-members{
-    background:rgba(204, 204, 204, 0.5);
+    background:var(--bs-secondary-bg-subtle);
 }
 
 span.sf-member-name {
@@ -32,31 +32,31 @@ span.sf-member-name {
 }
 
 span.sf-member-primitive {
-    color: blue;
+    color: var(--bs-primary);
 }
 
 .sf-member-class {
-    color: #156F8A;
+    color: var(--bs-info);
 }
 
 span.sf-member-date {
-    color: #5100A1;
+    color: var(--bs-secondary);
 }
 
 .sf-member-enum {
-    color: #800046;
+    color: var(--bs-danger-subtle);
 }
 
 span.sf-member-lite {
-    color: #2B91AF;
+    color: var(--bs-info);
 }
 
 span.sf-member-collection {
-    color: #CE6700;
+    color: var(--bs-warning);
 }
 
 span.sf-member-others {
-    color: #808080;
+    color: var(--bs-secondary-color);
 }
 
 span.sf-member-click {

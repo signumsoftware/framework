@@ -1,14 +1,14 @@
 ﻿.progressContainer
 {
 	padding: 3px;
-	border: solid 1px #BDBDBD;
+	border: solid 1px var(--bs-border-color);
 	width: 250px;
 	height:15px;
 }
 
 .progressBar
 {
-	background-color: #A9F5F2;
+	background-color: var(--bs-info);
 	width: 0px;
 	height: auto;
 }
@@ -16,9 +16,9 @@
 span.process-contextual-icon {
     font-size: initial;
     margin-left: 5px;
-    color: gray;
+    color: var(--bs-secondary-text);
 }
 
 span.process-contextual-icon:hover {
-    color: black;
+    color: var(--bs-secondary-text);
 }

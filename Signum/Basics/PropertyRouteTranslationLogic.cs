@@ -130,6 +130,9 @@ public static class PropertyRouteTranslationLogic
     }
 
 
+    static Expression<Func<Lite<Entity>, PropertyRoute, string?, string?>> TranslatedFieldSimpleExpression = 
+        (Lite<Entity> lite, PropertyRoute route, string? fallbackString) => TranslatedFieldExpression!.Evaluate(lite, route, null, fallbackString);
+    [ExpressionField("TranslatedFieldSimpleExpression")]
     [return: NotNullIfNotNull("fallbackString")]
     public static string? TranslatedField(this Lite<Entity> lite, PropertyRoute route, string? fallbackString)
     {
@@ -137,15 +140,16 @@ public static class PropertyRouteTranslationLogic
     }
 
 
-    public static Func<Lite<Entity>, PropertyRoute, PrimaryKey?, string?, string?> TranslatedFieldFunc = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) => fallbackString;
-    public static Expression<Func<Lite<Entity>, PropertyRoute, PrimaryKey?, string?, string?>> TranslatedFieldExpression = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) => fallbackString;
-
+    public static Func<Lite<Entity>, PropertyRoute, PrimaryKey?, string?, string?> TranslatedFieldFunc = 
+        (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) => fallbackString;
+    public static Expression<Func<Lite<Entity>, PropertyRoute, PrimaryKey?, string?, string?>> TranslatedFieldExpression = 
+        (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) => fallbackString;
 
     public static MethodInfo miTranslatedField = ReflectionTools.GetMethodInfo(() => TranslatedField((Lite<Entity>)null!, (PropertyRoute)null!, (PrimaryKey?)null, (string?)null));
 
     [return: NotNullIfNotNull("fallbackString")]
     [ExpressionField("TranslatedFieldExpression")]
-    public static string? TranslatedField(Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString)
+    public static string? TranslatedField(this Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString)
     {
         return TranslatedFieldFunc(lite, route, rowId, fallbackString);
     }

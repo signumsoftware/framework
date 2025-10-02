@@ -263,6 +263,7 @@ public enum SearchMessage
     PinnedFilter,
     Label,
     Column,
+    [Description("ColSpan")]
     ColSpan,
     Row,
     [Description("When pressed, the filter will take no effect if the value is null")]
@@ -358,6 +359,14 @@ public enum SearchMessage
 
     [Description("All Pages")]
     AllPages,
+
+    [Description("Filter-type Selection")]
+    FilterTypeSelection,
+    FilterMenu,
+    OperationsForSelectedElements,
+
+    PaginationMode,
+    NumberOfElementsForPagination,
 }
 
 public enum SearchHelpMessage
@@ -696,4 +705,9 @@ public enum ContainerToggleMessage
 {
     Compress,
     Expand,
+}
+
+public enum LayoutMessage
+{
+    JumpToMainContent,
 }

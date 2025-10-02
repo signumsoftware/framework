@@ -1,85 +1,73 @@
-﻿.status-None
-{
-    color: red;
+﻿.status-None {
+    color: var(--bs-danger);
 }
 
-.status-Pending
-{
-    color: #ffc300;
+.status-Pending {
+    color: var(--bs-warning);
 }
 
-.status-Completed
-{
-    color: green;
+.status-Completed {
+    color: var(--bs-success);
 }
 
 
-table.st
-{
+table.st {
     margin: 20px;
     text-align: left;
 }
 
-    table.st th
-    {
-        border-top: 1px solid #E8EDFF;
-        background: #C9D7F1;
-        color: #039;
-        font-size: 13px;
-        font-weight: normal;
-        padding: 4px;
-    }
+table.st th {
+    border-top: 1px solid var(--bs-border-color);
+    background: var(--bs-secondary-bg-subtle);
+    color: var(--bs-secondary-text);
+    font-size: 13px;
+    font-weight: normal;
+    padding: 4px;
+}
 
-    table.st td
-    {
-        background: #E8EDFF;
-        border-top: 1px solid white;
-        color: #669;
-        padding: 4px;
-    }
+table.st td {
+    background: var(--bs-secondary-bg-subtle);
+    border-top: 1px solid var(--bs-border-color);
+    color: var(--bs-secondary-text);
+    padding: 4px;
+}
 
-    table.st select, table.st textarea
-    {
-        vertical-align:middle;
-    }
+table.st select,
+table.st textarea {
+    vertical-align: middle;
+}
 
-    table.st thead th
-    {
-        background: #B9C9FE;
-    }
+table.st thead th {
+    background: var(--bs-secondary-bg-subtle);
+}
 
-    table.st .leftCell
-    {
-        font-weight: bold;
-        width:1px;
-        text-align:right;
-    }
+table.st .leftCell {
+    font-weight: bold;
+    width: 1px;
+    text-align: right;
+}
 
-    table.st .smallCell
-    {
-        text-align:right;
-        width:1px;
-    }
+table.st .smallCell {
+    text-align: right;
+    width: 1px;
+}
 
-    table.st .titleCell
-    {
-        font-weight:bold;
-    }
+table.st .titleCell {
+    font-weight: bold;
+}
 
-    table.st .monospaceCell
-    {
-        font-family: monospace;
-        font-size:14px;
-    }
+table.st .monospaceCell {
+    font-family: monospace;
+    font-size: 14px;
+}
 
-        table.st .monospaceCell pre
-        {
-            padding:0px;
-            color: rgb(102, 102, 153);
-            background-color:transparent;
-            border:none;
-            font-size:14px;
-        }
+table.st .monospaceCell pre {
+    padding: 0px;
+    color: var(--bs-secondary-text);
+    background-color: transparent;
+    border: none;
+    font-size: 14px;
+}
 
 .auto-translate {
     font-size: small;

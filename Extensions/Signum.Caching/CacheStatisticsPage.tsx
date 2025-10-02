@@ -35,9 +35,9 @@ export default function CacheStatisticsPage(): React.JSX.Element {
     <div>
       <h2>Cache Statistics</h2>
       <div className="btn-toolbar">
-        {state.isEnabled == true && <button onClick={handleDisabled} className="sf-button btn btn-light" style={{ color: "red" }}>Disable</button>}
-        {state.isEnabled == false && <button onClick={handleEnabled} className="sf-button btn btn-light" style={{ color: "green" }}>Enabled</button>}
-        {<button onClick={handleClear} className="sf-button btn btn-light" style={{ color: "blue" }}>Clear</button>}
+        {state.isEnabled == true && <button onClick={handleDisabled} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-danger)" }}>Disable</button>}
+        {state.isEnabled == false && <button onClick={handleEnabled} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-success)" }}>Enabled</button>}
+        {<button onClick={handleClear} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-primary)" }}>Clear</button>}
       </div >
       <div className="m-2">
         <strong>Server Broadcast:</strong> <code>{state.serverBroadcast}</code>

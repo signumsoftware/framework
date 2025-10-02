@@ -459,11 +459,12 @@ public static class TranslatedInstanceLogic
         var records = PlainExcelGenerator.ReadPlainExcel(stream, cellValues => new TranslationRecord
         {
             Culture = culture,
-            Key = new LocalizedInstanceKey(PropertyRoute.Parse(type, cellValues[1]),
-                Lite.Parse<Entity>(cellValues[0]),
-                cellValues[2].DefaultToNull()?.Let(s => PrimaryKey.Parse(s, type))),
-            OriginalText = cellValues[3],
-            TranslatedText = cellValues[4]
+            Key = new LocalizedInstanceKey(
+                route: PropertyRoute.Parse(type, cellValues[1]!),
+                instance: Lite.Parse<Entity>(cellValues[0]!)!,
+                rowId: cellValues[2].DefaultToNull()?.Let(s => PrimaryKey.Parse(s, type))),
+            OriginalText = cellValues[3]!,
+            TranslatedText = cellValues[4]!
         });
 
         if (mode == MatchTranslatedInstances.ByInstanceID)
@@ -584,7 +585,14 @@ public static class TranslatedInstanceLogic
             .ToDictionary();
 
         Dictionary<LocalizedInstanceKey, List<TranslatedInstanceEntity>> databaseTranslations =
-            TranslationsForType(type, c).SelectMany(ci => ci.Value).GroupToDictionary(a => a.Key, a => a.Value);
+            Database.Query<TranslatedInstanceEntity>()
+            .Where(a => a.PropertyRoute.RootType.Is(type.ToTypeEntity()) && (c == null || a.Culture.Is(c.ToCultureInfoEntity())))
+            .ToList()
+            .GroupToDictionary(a =>
+            {
+                var pr = a.PropertyRoute.ToPropertyRoute();
+                return new LocalizedInstanceKey(pr, a.Instance, a.RowId == null ? null : PrimaryKey.Parse(a.RowId.ToString(), pr));
+            });
 
         Dictionary<(PropertyRoute route, string originalText), List<(Lite<Entity> instance, PrimaryKey? rowId)>> currentInstances =
             FromEntities(type)
@@ -810,6 +818,7 @@ public class TranslatedTypeSummary
     public required TranslatedSummaryState? State;
 }
 
+[InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
 public enum MatchTranslatedInstances
 {
     //Export and import happend in the same DB (stable Ids)

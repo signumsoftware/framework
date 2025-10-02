@@ -169,11 +169,6 @@ public class CollectionElementToken : QueryToken
 
         return ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.NiceToString().FormatWith(entityType.NiceName(), elements.CommaAnd(a => a.parent.ToString()));
     }
-
-    public override string TypeColor
-    {
-        get { return "#0000FF"; }
-    }
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]

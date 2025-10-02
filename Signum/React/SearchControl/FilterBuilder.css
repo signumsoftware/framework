@@ -15,6 +15,10 @@ select.form-control.sf-group-selector {
     text-transform: uppercase;
 }
 
+.sf-filters-list table th{
+    white-space: nowrap;
+}
+
 .sf-user-filter {
     opacity: .3;
     transition: opacity .5s ease-in-out;
@@ -24,7 +28,7 @@ select.form-control.sf-group-selector {
 
     .sf-user-filter.active {
         opacity: 1;
-        border: 1px solid orange;
+        border: 1px solid var(--bs-warning);
     }
 
     .sf-user-filter:hover {
@@ -33,7 +37,7 @@ select.form-control.sf-group-selector {
 
 
 .sf-pinned-filter-cell {
-    background-color: rgb(255, 246, 230);
+    background-color: var(--bs-warning-bg-subtle);
 }
 
 
@@ -45,4 +49,9 @@ select.form-control.sf-group-selector {
     .sf-remove-filter-icon .disable {
         cursor: default;
         opacity: 0;
+    }
+    .sf-filter-group{
+        border: 1px solid var(--bs-border-color);
+        background: var(--bs-secondary-bg) !important;
+        color: var(--bs-body-color) !important;
     }

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "esnext",
     "isolatedDeclarations": true,
     "sourceMap": true,
     "module": "esnext",
@@ -9,7 +9,6 @@
     "jsx": "react-jsx",
     "incremental": true,
     "composite": true,
-    //"noEmit": true,
     "strict": true,
     "declarationMap": true,
     "lib": [

@@ -96,7 +96,7 @@ function AutoLineModal(p: AutoLineModalProps): React.ReactElement {
         <button disabled={disabled || error != null} className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClick} ref={btnOkRef}>
           {JavascriptMessage.ok.niceToString()}
         </button>
-        <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+        <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
           {JavascriptMessage.cancel.niceToString()}
         </button>
       </div>

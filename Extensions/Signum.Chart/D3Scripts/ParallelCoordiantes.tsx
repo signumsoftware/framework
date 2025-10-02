@@ -94,7 +94,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
         {cords.map(d => <line key={d.column.name} className="x-tick sf-transition"
           transform={translate(x(d.column.name)!, 0)}
           y2={yRule.size('content')}
-          stroke="black" />)}
+          stroke="var(--bs-body-color)" />)}
       </g>
 
       <g className="x-label" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('title'))}>
@@ -143,7 +143,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
               className="shape sf-transition"
               fill="none"
               strokeWidth={active == true ? 3 : 2}
-              stroke={active == true ? "black" : selectedColumn.colorScale(r)}
+              stroke={active == true ? "var(--bs-body-color)" : selectedColumn.colorScale(r)}
               shapeRendering="initial"
               onClick={e => onDrillDown(r, e)}
               cursor="pointer"

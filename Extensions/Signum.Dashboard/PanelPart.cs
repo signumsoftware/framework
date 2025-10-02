@@ -31,6 +31,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
     public int Row { get; set; }
 
+
     [NumberBetweenValidator(0, 11)]
     public int StartColumn { get; set; }
 

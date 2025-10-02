@@ -112,16 +112,23 @@ export const ColorLine: <V extends string | null>(props: ColorLineProps) => Reac
 function internalTextBox<V extends string | null>(c: TextBoxLineController, type: "password" | "color" | "text" | "guid") {
 
   const p = c.props;
+  const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
+  var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+  if (!isLabelVisible && p.label) {
+    ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
+  }
 
   var htmlAtts = c.props.valueHtmlAttributes;
+  var mergedHtmlReadOnly = { ...htmlAtts, ...ariaAtts };
+
 
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
   if (p.ctx.readOnly)
     return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
-        {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={htmlAtts} ctx={p.ctx} innerRef={c.setRefs}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
+        {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={mergedHtmlReadOnly} ctx={p.ctx} innerRef={c.setRefs}>
           {p.ctx.value}
         </FormControlReadonly>)}
       </FormGroup>
@@ -149,14 +156,15 @@ function internalTextBox<V extends string | null>(c: TextBoxLineController, type
     };
   }
 
+  var mergedHtml = { ...htmlAtts, ...ariaAtts };
   return (
-    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
       {inputId => <>
         {c.withItemGroup(
           <input type={type == "color" || type == "guid" ? "text" : type}
             id={inputId}
             autoComplete="off" 
-            {...c.props.valueHtmlAttributes}
+            {...mergedHtml}
             className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formControlClass, c.mandatoryClass)}
             value={c.getValue() ?? ""}
             onBlur={handleBlur || htmlAtts?.onBlur}

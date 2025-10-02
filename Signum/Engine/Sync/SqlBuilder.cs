@@ -533,27 +533,21 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
 
     private SqlPreCommand RemoveDuplicates(TableIndex uniqueIndex, IColumn primaryKey, string columns, bool commentedOut)
     {
-        if (isPostgres) //Postgress doesn't have min on uuid
-        {
-            return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
-WHERE {primaryKey.Name} NOT IN
-(
-    SELECT DISTINCT ON ({columns}) {primaryKey.Name}
-    FROM {uniqueIndex.Table.Name}
-    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
-){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)};".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
-        }
-        else
-        {
-            return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
-WHERE {primaryKey.Name} NOT IN
-(
-    SELECT MIN({primaryKey.Name})
-    FROM {uniqueIndex.Table.Name}
-    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
-    GROUP BY {columns}
-){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)};".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
-        }
+        //Postgress doesn't have min on uuid
+        var minId = isPostgres && primaryKey.Type == typeof(Guid) ? $"MIN({primaryKey.Name}::text)::uuid" : $"MIN({primaryKey.Name})";
+
+        return new SqlPreCommandSimple($"""
+            DELETE FROM {uniqueIndex.Table.Name}
+            WHERE {primaryKey.Name} NOT IN
+            (
+                SELECT {minId}
+                FROM {uniqueIndex.Table.Name}
+                {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
+                GROUP BY {columns}
+            ){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)};
+            """
+            .Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
+
     }
 
     public SqlPreCommand CreateIndexBasic(TableIndex index, bool forHistoryTable)

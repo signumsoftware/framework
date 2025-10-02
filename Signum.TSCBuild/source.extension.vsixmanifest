@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+    <Metadata>
+        <Identity Id="Signum.TSCBuild.7b6cb8f6-75e3-46b0-9b92-34347dd4f1c0" Version="1.0.1" Language="en-US" Publisher="Signum Software" />
+        <DisplayName>Signum.TSCBuild</DisplayName>
+        <Description xml:space="preserve">Adds a "Build TypeScript" context menu to each .csproj in Solution Explorer, which runs tsc -b using the tsconfig.json in the same project.
+Calling tsc once is much faster thant running Microsoft.TypeScript.MSBuild nuget for each project, making it usefull for solutions structured with 'vertical modules' (such as the Signum Framework), where many reusable projects contain both C# and TypeScript code.
+</Description>
+        <License>MIT.txt</License>
+        <Icon>Resources\Framework.ico</Icon>
+        <Tags>tsc, TypeScript, msbuild, signum framework</Tags>
+    </Metadata>
+    <Installation>
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 19.0)">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+        <InstallationTarget Version="[17.0, 19.0)" Id="Microsoft.VisualStudio.Pro">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+        <InstallationTarget Version="[17.0, 19.0)" Id="Microsoft.VisualStudio.Enterprise">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+    </Installation>
+    <Dependencies>
+        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+    </Dependencies>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" DisplayName="Visual Studio core editor" />
+    </Prerequisites>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    </Assets>
+</PackageManifest>

@@ -49,7 +49,7 @@ export default function ChangeLogViewer(p: { extraInformation?: string }): React
       }}>
         <FontAwesomeIcon icon="circle-info" />
         <span className="sr-only">{ConnectionMessage.VersionInfo.niceToString()}</span>
-        {countLogs > 0 && <span className="badge bg-info badge-pill sf-change-log-badge">{countLogs}</span>}
+        {countLogs > 0 && <span className="badge text-bg-info badge-pill sf-change-log-badge">{countLogs}</span>}
       </a>
   </OverlayTrigger>
   );

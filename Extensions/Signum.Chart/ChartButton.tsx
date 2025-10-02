@@ -45,7 +45,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
   render(): React.JSX.Element {
     var label = this.props.searchControl.props.largeToolbarButtons == true ? <span className="d-none d-sm-inline">{" " + ChartMessage.Chart.niceToString()}</span> : undefined;
     return (
-      <Button variant="light" onMouseUp={this.handleOnMouseUp} title={ChartMessage.Chart.niceToString()}><FontAwesomeIcon icon="chart-bar" />&nbsp;{label}</Button>
+      <button className="btn btn-tertiary" onMouseUp={this.handleOnMouseUp} title={ChartMessage.Chart.niceToString()}><FontAwesomeIcon icon="chart-bar" />&nbsp;{label}</button>
     );
   }
 

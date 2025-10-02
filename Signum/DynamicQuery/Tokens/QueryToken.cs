@@ -642,29 +642,6 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return FullKey().GetHashCode() ^ QueryName.GetHashCode();
     }
 
-    public virtual string TypeColor
-    {
-        get
-        {
-            if (IsCollection(Type))
-                return "#CE6700";
-
-            return QueryUtils.TryGetFilterType(Type) switch
-            {
-                FilterType.Integer or
-                FilterType.Decimal or
-                FilterType.String or
-                FilterType.Guid or
-                FilterType.Boolean => "#000000",
-                FilterType.DateTime => "#5100A1",
-                FilterType.Time => "#9956db",
-                FilterType.Enum => "#800046",
-                FilterType.Lite => "#2B91AF",
-                FilterType.Embedded => "#156F8A",
-                _ => "#7D7D7D",
-            };
-        }
-    }
 
     public virtual string NiceTypeName
     {
