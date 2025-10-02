@@ -41,6 +41,10 @@ public class SolutionRenamer
 
     protected virtual void RenameRecursive(string currentPath, string oldName, string newName, bool isRoot = false)
     {
+        var dirName = Path.GetFileName(currentPath);
+        if (dirName is "bin" or "obj" or ".git" or "ts_out" or "node_modules")
+            return;
+
         // If this directory is a git submodule (not root), skip it
         if (!isRoot && File.Exists(Path.Combine(currentPath, ".gitignore")))
             return;
@@ -62,25 +66,31 @@ public class SolutionRenamer
                 var newContent = content.Replace(oldName, newName);
                 if (newContent != content)
                 {
+                    SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"{file} File Updated");
                     File.WriteAllText(file, newContent);
                 }
             }
 
-            var newFileName = file.Replace(oldName, newName);
-            if (newFileName != file)
+            // Only rename the file name, not the whole path
+            if (fileName.Contains(oldName))
             {
-                File.Move(file, newFileName);
+                var newFileName = fileName.Replace(oldName, newName);
+                var newFilePath = Path.Combine(Path.GetDirectoryName(file)!, newFileName);
+                SafeConsole.WriteLineColor(ConsoleColor.Green, $"{file} File Renamed");
+                File.Move(file, newFilePath);
             }
         }
 
         // Rename this directory if needed (never rename root)
-        if (!isRoot && currentPath.Contains(oldName))
+        if (!isRoot && dirName != null && dirName.Contains(oldName))
         {
             var parent = Path.GetDirectoryName(currentPath);
-            var newDirName = currentPath.Replace(oldName, newName);
-            if (newDirName != currentPath)
+            var newDirName = dirName.Replace(oldName, newName);
+            var newDirPath = Path.Combine(parent!, newDirName);
+            if (newDirPath != currentPath)
             {
-                Directory.Move(currentPath, newDirName);
+                SafeConsole.WriteLineColor(ConsoleColor.Green, $"{currentPath} Directory Moved");
+                Directory.Move(currentPath, newDirPath);
             }
         }
     }
