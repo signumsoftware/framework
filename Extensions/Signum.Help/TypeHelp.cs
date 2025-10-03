@@ -108,7 +108,7 @@ public class OperationHelpEmbedded : EmbeddedEntity
     public OperationSymbol Operation { get; set; }
 
     [Ignore]
-    public string Info { get; set; }
+    public string? Info { get; set; }
 
     [StringLengthValidator(MultiLine = true), ForceNotNullable]
     public string? Description { get; set; }

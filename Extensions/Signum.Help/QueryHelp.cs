@@ -10,7 +10,7 @@ public class QueryHelpEntity : Entity, IHelpImageTarget
     public CultureInfoEntity Culture { get; set; }
 
     [Ignore]
-    public string Info { get; set; }
+    public string? Info { get; set; }
 
     [StringLengthValidator(MultiLine = true)]
     public string? Description { get; set; }
@@ -72,10 +72,10 @@ public class QueryColumnHelpEmbedded : EmbeddedEntity
     public string? Description { get; set; }
 
     [Ignore]
-    public string NiceName { get; set; }
+    public string? NiceName { get; set; }
 
     [Ignore]
-    public string Info { get; set; }
+    public string? Info { get; set; }
 
     public override string ToString()
     {
