@@ -33,7 +33,7 @@ public class QueryHelpEntity : Entity, IHelpImageTarget
     }
 
     [AutoExpressionField]
-    public override string ToString() => As.Expression(() => Query.ToString());
+    public override string ToString() => As.Expression(() => (IsNew ? "" : Query.ToString()));
 
     bool IHelpImageTarget.ForeachHtmlField(Func<string, string> processHtml)
     {
