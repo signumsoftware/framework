@@ -7,7 +7,6 @@ public static class CodeGenerator
     public static EntityCodeGenerator Entities = new EntityCodeGenerator();
     public static LogicCodeGenerator Logic = new LogicCodeGenerator();
     public static ReactCodeGenerator React = new ReactCodeGenerator();
-    public static SolutionRenamer SolutionRenamer = new SolutionRenamer();
 
     public static void GenerateCodeConsole()
     {
@@ -18,7 +17,6 @@ public static class CodeGenerator
                 {"E", Entities.GenerateEntitiesFromDatabaseTables, "Entities (from Database tables)"},
                 {"L", Logic.GenerateLogicFromEntities, "Logic (from entites)"},
                 {"R", React.GenerateReactFromEntities, "React (from entites)"},
-                {"SR", SolutionRenamer.RenameSolution, "Rename Solution"},
             }.Choose();
 
             if (action == null)
