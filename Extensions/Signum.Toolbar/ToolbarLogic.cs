@@ -84,6 +84,7 @@ public static class ToolbarLogic
             ToolbarSwitchers = sb.GlobalLazy(() => Database.Query<ToolbarSwitcherEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
                 new InvalidateWith(typeof(ToolbarSwitcherEntity)));
 
+            RegisterDelete<PermissionSymbol>(sb);
             RegisterDelete<QueryEntity>(sb);
             RegisterDelete<ToolbarMenuEntity>(sb);
             RegisterDelete<ToolbarSwitcherEntity>(sb);
