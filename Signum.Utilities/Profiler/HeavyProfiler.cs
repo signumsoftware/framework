@@ -636,7 +636,7 @@ public readonly struct StructuredLogMessage
     public override string ToString()
     {
         var args = this.Arguments;
-        if (args == null)
+        if (args.IsNullOrEmpty())
             return this.Message;
 
         int i = 0;
