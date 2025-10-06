@@ -325,7 +325,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
         {
             var s = Schema.Current.Settings;
             List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo))!.OfType<AttachToUniqueIndexesAttribute>().Any())
-               .SelectMany(f => TableIndex.GetColumnsFromFields(f.Field))
+               .SelectMany(f => TableIndex.GetColumnsFromField(f.Field))
                .ToList();
 
             if (attachedFields.Any())
@@ -449,18 +449,20 @@ public abstract partial class Field
         return Enumerable.Empty<TableIndex>();
     }
 
-    public virtual TableIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
+    public virtual TableIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute, ImplementationColumn? columnIB = null)
     {
         if (attribute == null)
             return null;
 
-        var result = new TableIndex(table, TableIndex.GetColumnsFromFields(this))
+        var columns = columnIB != null ? [columnIB] : TableIndex.GetColumnsFromField(this);
+
+        var result = new TableIndex(table, columns)
         {
             Unique = true,
             AvoidAttachToUniqueIndexes = attribute.AvoidAttachToUniqueIndexes
         };
 
-        if (attribute.AllowMultipleNulls)
+        if (columns.Any(a => a.Nullable != IsNullable.No))
             result.Where = IndexWhereExpressionVisitor.IsNull(this, false, Schema.Current.Settings.IsPostgres);
 
         return result;
@@ -471,7 +473,7 @@ public abstract partial class Field
         if (attribute == null)
             return null;
 
-        var result = new TableIndex(table, TableIndex.GetColumnsFromFields(this));
+        var result = new TableIndex(table, TableIndex.GetColumnsFromField(this));
 
         return result;
     }
@@ -1171,7 +1173,8 @@ public partial class FieldImplementedBy : Field, IFieldReference
 
     public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
     {
-        return this.Columns().Select(c => new TableIndex(table, c)).Concat(base.GenerateIndexes(table));
+        return this.Columns().Select(c => new TableIndex(table, c))
+            .Concat(this.ImplementationColumns.Select(a => a.Value.UniqueIndex).NotNull());
     }
 
     bool clearEntityOnSaving;
@@ -1287,6 +1290,8 @@ public partial class ImplementationColumn : IColumn
     ComputedColumn? IColumn.ComputedColumn => null;
     public Type? CustomLiteModelType { get; internal set; }
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
+
+    public TableIndex? UniqueIndex { get; internal set; }
 
     public ImplementationColumn(string name, Table referenceTable)
     {

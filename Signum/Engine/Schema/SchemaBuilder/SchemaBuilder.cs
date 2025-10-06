@@ -55,7 +55,7 @@ public class SchemaBuilder
     }
 
 
-    public TableIndex AddUniqueIndex<T>(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null) where T : Entity
+    public void AddUniqueIndex<T>(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null) where T : Entity
     {
         var table = Schema.Table<T>();
 
@@ -165,7 +165,7 @@ public class SchemaBuilder
 
     public FullTextTableIndex AddFullTextIndex(ITable table, Field[] fields, Action<FullTextTableIndex>? customize)
     {
-        return AddFullTextIndex(table, TableIndex.GetColumnsFromFields(fields), customize);
+        return AddFullTextIndex(table, fields.SelectMany(f => TableIndex.GetColumnsFromField(f)).ToArray(), customize);
     }
 
     public FullTextTableIndex AddFullTextIndex(ITable table, IColumn[] columns, Action<FullTextTableIndex>? customize)
@@ -182,11 +182,17 @@ public class SchemaBuilder
         return index;
     }
 
-    public TableIndex AddUniqueIndex(ITable table, Field[] fields)
+    public void AddUniqueIndex(ITable table, Field[] fields)
     {
-        var index = new TableIndex(table, TableIndex.GetColumnsFromFields(fields)) { Unique = true };
+        var dic = fields.ToDictionary(f => f, f => TableIndex.GetColumnsFromField(f));
+
+
+
+
+
+        var index = new TableIndex(table, dic.SelectMany(f => f.Value).ToArray()) { Unique = true };
         AddIndex(index);
-        return index;
+
     }
 
     public TableIndex AddUniqueIndex(ITable table, IColumn[] columns)
@@ -198,7 +204,7 @@ public class SchemaBuilder
 
     public TableIndex AddIndex(ITable table, Field[] fields)
     {
-        var index = new TableIndex(table, TableIndex.GetColumnsFromFields(fields));
+        var index = new TableIndex(table, fields.SelectMany(f => TableIndex.GetColumnsFromField(f)).ToArray());
         AddIndex(index);
         return index;
     }
@@ -801,7 +807,10 @@ public class SchemaBuilder
             AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null
         }.Do(f =>
         {
-            f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route));
+            foreach (var impColumn in f.ImplementationColumns.Values)
+            {
+                impColumn.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route), impColumn);
+            }
             f.Index = f.GenerateIndex(table, Settings.FieldAttribute<IndexAttribute>(route));
         });
     }
