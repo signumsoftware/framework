@@ -462,8 +462,16 @@ public abstract partial class Field
             AvoidAttachToUniqueIndexes = attribute.AvoidAttachToUniqueIndexes
         };
 
-        if (columns.Any(a => a.Nullable != IsNullable.No))
+        var isPostgres = Schema.Current.Settings.IsPostgres;
+
+        if (columnIB != null)
+        {
+            result.Where = columnIB.Nullable == IsNullable.No ? null : "{0} IS NOT NULL".FormatWith(columnIB.Name.SqlEscape(isPostgres));
+        }
+        else
+        {
             result.Where = IndexWhereExpressionVisitor.IsNull(this, false, Schema.Current.Settings.IsPostgres);
+        }
 
         return result;
     }

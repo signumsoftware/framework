@@ -471,12 +471,15 @@ public class IndexWhereExpressionVisitor : ExpressionVisitor
     }
 
 
-    public static string IsNull(Field field, bool equals, bool isPostgres)
+    public static string? IsNull(Field field, bool equals, bool isPostgres)
     {
         string isNull = equals ? "{0} IS NULL" : "{0} IS NOT NULL";
 
         if (field is IColumn col)
         {
+            if (col.Nullable == IsNullable.No)
+                return null;
+
             string result = isNull.FormatWith(col.Name.SqlEscape(isPostgres));
 
             if (!col.DbType.IsString())
@@ -487,24 +490,33 @@ public class IndexWhereExpressionVisitor : ExpressionVisitor
         }
         else if (field is FieldImplementedBy ib)
         {
+            if (ib.ImplementationColumns.Count == 0)
+                return equals ? "TRUE" : "FALSE";
+
+            if (ib.ImplementationColumns.Values.Only()?.Nullable == IsNullable.No)
+                return null;
+
             return ib.ImplementationColumns.Values.ToString(ic => isNull.FormatWith(ic.Name.SqlEscape(isPostgres)), equals ? " AND " : " OR ");
         }
         else if (field is FieldImplementedByAll iba)
         {
-            return iba.IdColumns.Values.PreAnd((IColumn)iba.TypeColumn).ToString(ic => isNull.FormatWith(ic.Name), equals ? " AND " : " OR ");
+            if(iba.TypeColumn.Nullable == IsNullable.No) 
+                return null;
+
+            return isNull.FormatWith(iba.TypeColumn);
         }
         else if (field is FieldEmbedded fe)
         {
             if (fe.HasValue == null)
-                throw new NotSupportedException("{0} is not nullable".FormatWith(field));
+                return null;
 
-            return fe.HasValue.Name.SqlEscape(isPostgres) + " = 1";
+            return fe.HasValue.Name.SqlEscape(isPostgres) + (equals ? "<> 1" : " = 1");
         }
 
         throw new NotSupportedException(isNull.FormatWith(field.GetType()));
     }
 
-    static string Equals(Field field, object value, bool equals, bool isPostgres)
+    static string? Equals(Field field, object value, bool equals, bool isPostgres)
     {
         if (value == null)
         {
