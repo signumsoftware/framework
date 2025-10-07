@@ -483,7 +483,6 @@ function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<En
 
       return tr;
     }).notNull();
-  console.log('result', result);
 
   while (true) {
     var extraDividers = result.filter((a, i) => a.type == "Divider" && (
