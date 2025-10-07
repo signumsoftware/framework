@@ -291,6 +291,7 @@
     user-select: none;
 }
 
+
     .sidebar.sidebar-nav.hidden {
         width: 0px;
         min-width: 0px;
@@ -315,6 +316,10 @@
         width: 250px;
         min-width: 250px;
     }
+
+.sf-dashboard-view .sidebar.sidebar-nav {
+    border-right: none !important;
+}
 
 .main-toolbar {
     display: flex;
@@ -441,10 +446,11 @@
     background-color: var(--bs-secondary-bg);
     padding: 5px 20px;
     border-radius: 6px;
-    transform: translateY(-29px);
+    transform: translateY(-4px);
     box-shadow: 2px 2px 6px var(--bs-border-color-translucent);
     font-weight: bold;
     border-left: 4px solid var(--bs-primary);
+    z-index: 0;
 }
 
 .sidebar-nav.narrow .nav-item:hover .nav-link .nav-item-float,

@@ -45,7 +45,7 @@ public static class DashboardLogic
 
             PartNames.AddRange(new Dictionary<string, Type>
             {
-                {"LinkListPart", typeof(LinkListPartEntity)},
+                {"ToolbarPart", typeof(ToolbarPartEntity)},
                 {"ImagePart", typeof(ImagePartEntity)},
                 {"SeparatorPart", typeof(SeparatorPartEntity)},
                 {"HealthCheckPart", typeof(HealthCheckPartEntity)},
@@ -56,9 +56,11 @@ public static class DashboardLogic
 
             AuthLogic.HasRuleOverridesEvent += role => Database.Query<DashboardEntity>().Any(a => a.Owner.Is(role));
 
-            SchedulerLogic.ExecuteTask.Register((DashboardEntity db, ScheduledTaskContext ctx) => { db.Execute(DashboardOperation.RegenerateCachedQueries); return null; });
-
-            OnGetCachedQueryDefinition.Register((LinkListPartEntity uqp, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
+            SchedulerLogic.ExecuteTask.Register((DashboardEntity db, ScheduledTaskContext ctx) =>
+            {
+                db.Execute(DashboardOperation.RegenerateCachedQueries);
+                return null;
+            });
 
             sb.Include<DashboardEntity>()
                 .WithLiteModel(d => new DashboardLiteModel { DisplayName = d.DisplayName, HideQuickLink = d.HideQuickLink })
@@ -77,21 +79,23 @@ public static class DashboardLogic
 
             sb.Schema.WhenIncluded<ToolbarEntity>(() =>
             {
-            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(DashboardEntity));
+                sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(DashboardEntity));
 
-            ToolbarLogic.RegisterDelete<DashboardEntity>(sb);
-            ToolbarLogic.RegisterContentConfig<DashboardEntity>(
-              lite => ToolbarLogic.InMemoryFilter(Dashboards.Value.GetOrCreate(lite)),
-              lite => PropertyRouteTranslationLogic.TranslatedField(Dashboards.Value.GetOrCreate(lite), a => a.DisplayName),
-              lite => Dashboards.Value.GetOrCreate(lite).IconName,
-              lite => Dashboards.Value.GetOrCreate(lite).IconColor);
+                ToolbarLogic.RegisterDelete<DashboardEntity>(sb);
+
+                new ToolbarContentConfig<DashboardEntity>
+                {
+                    DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(Dashboards.Value.GetOrCreate(lite), a => a.DisplayName),
+                    IsAuthorized = lite => ToolbarLogic.InMemoryFilter(Dashboards.Value.GetOrCreate(lite)),
+                    DefaultIconColor = lite => Dashboards.Value.GetOrCreate(lite).IconColor,
+                    DefaultIconName = lite => Dashboards.Value.GetOrCreate(lite).IconName,
+                }.Register();
             });
 
 
             if (cachedQueryAlgorithm != null)
             {
                 FileTypeLogic.Register(CachedQueryFileType.CachedQuery, cachedQueryAlgorithm);
-
 
                 sb.Include<CachedQueryEntity>()
                     .WithExpressionFrom((DashboardEntity d) => d.CachedQueries())
@@ -421,7 +425,7 @@ public static class DashboardLogic
             teg => teg.GetParentEntity<DashboardEntity>().InCondition(typeCondition));
 
         RegisterTypeConditionForPart<TextPartEntity>(typeCondition);
-        RegisterTypeConditionForPart<LinkListPartEntity>(typeCondition);
+        RegisterTypeConditionForPart<ToolbarPartEntity>(typeCondition);
         RegisterTypeConditionForPart<SeparatorPartEntity>(typeCondition);
         RegisterTypeConditionForPart<HealthCheckPartEntity>(typeCondition);
         RegisterTypeConditionForPart<CustomPartEntity>(typeCondition);

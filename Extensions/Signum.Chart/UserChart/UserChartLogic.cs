@@ -51,9 +51,17 @@ public static class UserChartLogic
                 sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(UserChartEntity));
 
                 ToolbarLogic.RegisterDelete<UserChartEntity>(sb, uq => uq.Query);
-                ToolbarLogic.RegisterContentConfig<UserChartEntity>(
-                    lite => { var uc = UserCharts.Value.GetOrCreate(lite); return ToolbarLogic.InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true); },
-                    lite => PropertyRouteTranslationLogic.TranslatedField(UserCharts.Value.GetOrCreate(lite), a => a.DisplayName));
+
+                new ToolbarContentConfig<UserChartEntity>
+                {
+                    DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(UserCharts.Value.GetOrCreate(lite), a => a.DisplayName),
+                    IsAuthorized = lite =>
+                    {
+                        var uc = UserCharts.Value.GetOrCreate(lite);
+                        return ToolbarLogic.InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true);
+                    },
+                    GetRelatedQuery = lite => lite.RetrieveUserChart().Query,
+                }.Register();
             });
 
             sb.Schema.WhenIncluded<CachedQueryEntity>(() =>

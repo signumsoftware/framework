@@ -13,7 +13,7 @@ import { getTypeInfos, getTypeName, PseudoType, Type, TypeInfo } from '@framewor
 import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import {
-  DashboardPermission, DashboardEntity, LinkListPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded,
+  DashboardPermission, DashboardEntity, ToolbarPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded,
   CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity, DashboardLiteModel,
   HealthCheckPartEntity, CustomPartEntity,
   TextPartEntity
@@ -74,7 +74,7 @@ export namespace DashboardClient {
 
     Navigator.addSettings(new EntitySettings(CustomPartEntity, e => import('./Admin/CustomPart')));
     Navigator.addSettings(new EntitySettings(TextPartEntity, e => import('./Admin/TextPart')));
-    Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => import('./Admin/LinkListPart')));
+    Navigator.addSettings(new EntitySettings(ToolbarPartEntity, e => import('./Admin/ToolbarPart')));
     Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
     Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
     Navigator.addSettings(new EntitySettings(HealthCheckPartEntity, e => import('./Admin/HealthCheckPart')));
@@ -103,8 +103,8 @@ export namespace DashboardClient {
       withPanel: () => false,
     });
 
-    registerRenderer(LinkListPartEntity, {
-      component: () => import('./View/LinkListPart').then(a => a.default),
+    registerRenderer(ToolbarPartEntity, {
+      component: () => import('./View/ToolbarPart').then(a => a.default),
       icon: () => ({ icon: "list", iconColor: "#B9770E" })
     });
 

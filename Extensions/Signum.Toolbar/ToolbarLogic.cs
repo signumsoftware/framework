@@ -89,38 +89,48 @@ public static class ToolbarLogic
             RegisterDelete<ToolbarMenuEntity>(sb);
             RegisterDelete<ToolbarSwitcherEntity>(sb);
 
-            RegisterContentConfig<ToolbarMenuEntity>(
-                lite =>
+            new ToolbarContentConfig<ToolbarMenuEntity>() 
+            {
+                DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarMenus.Value.GetOrCreate(lite), a => a.Name),
+                IsAuthorized = lite =>
                 {
                     var entity = ToolbarMenus.Value.GetOrCreate(lite);
                     return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
-                },
-                lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarMenus.Value.GetOrCreate(lite), a => a.Name));
+                }
+            }.Register();
 
-            RegisterContentConfig<ToolbarSwitcherEntity>(
-               lite =>
-               {
-                   var entity = ToolbarSwitchers.Value.GetOrCreate(lite);
-                   return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
-               },
-             lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarSwitchers.Value.GetOrCreate(lite), a => a.Name));
+            new ToolbarContentConfig<ToolbarSwitcherEntity>
+            {
+                DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarSwitchers.Value.GetOrCreate(lite), a => a.Name),
+                IsAuthorized = lite =>
+                {
+                    var entity = ToolbarSwitchers.Value.GetOrCreate(lite);
+                    return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
+                }
+            }.Register();
 
-
-            RegisterContentConfig<ToolbarEntity>(
-                lite =>
+            new ToolbarContentConfig<ToolbarEntity> 
+            {
+                DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(Toolbars.Value.GetOrCreate(lite), a => a.Name),
+                IsAuthorized = lite =>
                 {
                     ToolbarEntity entity = Toolbars.Value.GetOrCreate(lite);
                     return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
-                },
-                lite => PropertyRouteTranslationLogic.TranslatedField(Toolbars.Value.GetOrCreate(lite), a => a.Name));
-            
-            RegisterContentConfig<QueryEntity>(
-              lite => IsQueryAllowed(lite),
-              lite => QueryUtils.GetNiceName(QueryLogic.QueryNames.GetOrThrow(lite.ToString()!)));
+                }
+            }.Register();
 
-            RegisterContentConfig<PermissionSymbol>(
-                lite => PermissionAuthLogic.IsAuthorized(SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!)),
-                lite => SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!).NiceToString());
+            new ToolbarContentConfig<QueryEntity>
+            {
+                DefaultLabel = lite => QueryUtils.GetNiceName(QueryLogic.QueryNames.GetOrThrow(lite.ToString()!)),
+                IsAuthorized = lite => IsQueryAllowed(lite),
+                GetRelatedQuery = lite => lite.RetrieveFromCache()
+            }.Register();
+
+            new ToolbarContentConfig<PermissionSymbol>
+            {
+                DefaultLabel = lite => SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!).NiceToString(),
+                IsAuthorized = lite => PermissionAuthLogic.IsAuthorized(SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!)),
+            }.Register();
 
             GetContentConfig<PermissionSymbol>().CustomResponses = lite =>
             {
@@ -311,18 +321,38 @@ public static class ToolbarLogic
         };
     }
 
+    public static ToolbarResponse? GetToolbarMenuResponse(Lite<ToolbarMenuEntity> tm)
+    {
+        var toolbarMenu = ToolbarMenus.Value.GetOrThrow(tm);
+
+        var responses = ToResponseList(PropertyRouteTranslationLogic.TranslatedMList(toolbarMenu, c => c.Elements).ToList());
+
+        if (responses.Count == 0)
+            return null;
+
+        return new ToolbarResponse
+        {
+            type = ToolbarElementType.Header,
+            content = Lite.ToLite<ToolbarMenuEntity>(toolbarMenu),
+            label = PropertyRouteTranslationLogic.TranslatedField((ToolbarMenuEntity)toolbarMenu, a => a.Name),
+            elements = responses,
+        };
+    }
+
     private static List<ToolbarResponse> ToResponseList<TE>(List<TranslatableElement<TE>> elements)
         where TE : ToolbarElementEmbedded
     {
         var result = elements.GroupWhen(a=>a.Value.Type != ToolbarElementType.ExtraIcon, BeforeFirstKey.Skip).SelectMany(gr => ToResponse(gr) ?? Enumerable.Empty<ToolbarResponse>()).NotNull().ToList();
 
         retry:
+
         var extraDividers = result.Where((a, i) => a.type == ToolbarElementType.Divider && (
             i == 0 ||
             result[i - 1].type == ToolbarElementType.Divider ||
             i == result.Count
         )).ToList();
         result.RemoveAll(extraDividers.Contains);
+
         var extraHeaders = result.Where((a, i) => IsPureHeader(a) && (
             i == result.Count - 1 ||
             IsPureHeader(result[i + 1]) || 
@@ -342,13 +372,14 @@ public static class ToolbarLogic
         return tr.type == ToolbarElementType.Header && tr.content == null && string.IsNullOrEmpty(tr.url);
     }
 
-    private static IEnumerable<ToolbarResponse>? ToResponse<T>(IGrouping<TranslatableElement<T>, TranslatableElement<T>> gr)
+    private static IEnumerable<ToolbarResponse>? 
+        ToResponse<T>(IGrouping<TranslatableElement<T>, TranslatableElement<T>> gr)
         where T: ToolbarElementEmbedded
     {
         var transElement = gr.Key;
         var element = gr.Key.Value;
 
-        IContentConfig? config = null;
+        IToolbarContentConfig? config = null;
         if (element.Content != null)
         {
             config = ContentConfigDictionary.GetOrThrow(element.Content.EntityType);
@@ -378,6 +409,7 @@ public static class ToolbarLogic
             label = transElement.TranslatedElement(a => a.Label!).DefaultToNull() ?? config?.DefaultLabel(element.Content!),
             iconName = element.IconName.DefaultToNull() ?? config?.DefaultIconName(element.Content!),
             iconColor = element.IconColor.DefaultToNull() ?? config?.DefaultIconColor(element.Content!),
+            queryKey = config?.GetRelatedQuery(element.Content!)?.Key,
             showCount = element.ShowCount,
             autoRefreshPeriod = element.AutoRefreshPeriod,
             openInPopup = element.OpenInPopup,
@@ -386,7 +418,7 @@ public static class ToolbarLogic
             extraIcons = gr.IsEmpty() ? null : gr.Select(extra =>
             {
                 var extraElement = extra.Value;
-                IContentConfig? config = null;
+                IToolbarContentConfig? config = null;
                 if (extraElement.Content != null)
                 {
                     config = ContentConfigDictionary.GetOrThrow(extraElement.Content.EntityType);
@@ -407,6 +439,7 @@ public static class ToolbarLogic
                     label = transElement.TranslatedElement(a => a.Label!).DefaultToNull() ?? config?.DefaultLabel(extraElement.Content!),
                     iconName = extraElement.IconName.DefaultToNull() ?? config?.DefaultIconName(extraElement.Content!),
                     iconColor = extraElement.IconColor.DefaultToNull() ?? config?.DefaultIconColor(extraElement.Content!),
+                    queryKey = config?.GetRelatedQuery(element.Content!)?.Key,
                     showCount = extraElement.ShowCount,
                     autoRefreshPeriod = extraElement.AutoRefreshPeriod,
                     openInPopup = extraElement.OpenInPopup,
@@ -466,61 +499,20 @@ public static class ToolbarLogic
         return TypeLogic.GetCleanName(type);
     }
 
-    public static void RegisterContentConfig<T>(Func<Lite<T>, bool> isAuthorized, Func<Lite<T>, string> defaultLabel, Func<Lite<T>, string?>? defaultIconName = null, Func<Lite<T>, string?>? defaultIconColor = null) 
+    public static void Register<T>(this ToolbarContentConfig<T> content) 
         where T : Entity
     {
-        ContentConfigDictionary.Add(typeof(T), new ContentConfig<T>(isAuthorized, defaultLabel, defaultIconName, defaultIconColor));
+        ContentConfigDictionary.Add(typeof(T), content);
     }
 
-    public static ContentConfig<T> GetContentConfig<T>() where T: Entity
+    public static ToolbarContentConfig<T> GetContentConfig<T>() where T: Entity
     {
-        return (ContentConfig<T>)ContentConfigDictionary.GetOrThrow(typeof(T));
+        return (ToolbarContentConfig<T>)ContentConfigDictionary.GetOrThrow(typeof(T));
     }
 
-    static Dictionary<Type, IContentConfig> ContentConfigDictionary = new Dictionary<Type, IContentConfig>();
+    static Dictionary<Type, IToolbarContentConfig> ContentConfigDictionary = new Dictionary<Type, IToolbarContentConfig>();
 
-    public interface IContentConfig
-    {
-        bool IsAuhorized(Lite<Entity> lite);
-        string DefaultLabel(Lite<Entity> lite);
-        string? DefaultIconName(Lite<Entity> lite);
-        string? DefaultIconColor(Lite<Entity> lite);
 
-        List<ToolbarResponse>? CustomResponses(Lite<Entity> lite);
-    }
-
-    public class ContentConfig<T> : IContentConfig where T : Entity
-    {
-        public Func<Lite<T>, bool> IsAuthorized;
-        public Func<Lite<T>, string> DefaultLabel;
-        public Func<Lite<T>, string?>? DefaultIconName;
-        public Func<Lite<T>, string?>? DefaultIconColor;
-        public Func<Lite<T>, List<ToolbarResponse>?>? CustomResponses;
-
-        public ContentConfig(Func<Lite<T>, bool> isAuthorized, Func<Lite<T>, string> defaultLabel, Func<Lite<T>, string?>? defaultIconName = null, Func<Lite<T>, string?>? defaultIconColor = null)
-        {
-            IsAuthorized = isAuthorized;
-            DefaultLabel = defaultLabel;
-            DefaultIconName = defaultIconName;
-            DefaultIconColor = defaultIconColor;
-        }
-
-        bool IContentConfig.IsAuhorized(Lite<Entity> lite) => IsAuthorized((Lite<T>)lite);
-        string IContentConfig.DefaultLabel(Lite<Entity> lite) => DefaultLabel((Lite<T>)lite);
-        string? IContentConfig.DefaultIconName(Lite<Entity> lite) => DefaultIconName?.Invoke((Lite<T>)lite);
-        string? IContentConfig.DefaultIconColor(Lite<Entity> lite) => DefaultIconColor?.Invoke((Lite<T>)lite);
-        List<ToolbarResponse>? IContentConfig.CustomResponses(Lite<Entity> lite)
-        {
-            foreach (var item in CustomResponses.GetInvocationListTyped())
-            {
-                var resp = item.Invoke((Lite<T>)lite);
-                if (resp != null)
-                    return resp;
-            }
-
-            return null;
-        }
-    }
 
     static bool IsQueryAllowed(Lite<QueryEntity> query)
     {
@@ -559,6 +551,8 @@ public class ToolbarResponse : ToolbarResponseBase
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? entityType;
 
+
+
     public override string ToString() => $"{type} {label} {content} {url}";
 }
 
@@ -584,7 +578,48 @@ public class ToolbarResponseBase
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool autoSelect;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool withEntity;
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? queryKey; //For authorization by selected entity (queryAllowedInContext)
 
     public override string ToString() => $"{type} {label} {content} {url}";
 
+}
+
+public interface IToolbarContentConfig
+{
+    bool IsAuhorized(Lite<Entity> lite);
+    string DefaultLabel(Lite<Entity> lite);
+    string? DefaultIconName(Lite<Entity> lite);
+    string? DefaultIconColor(Lite<Entity> lite);
+
+    List<ToolbarResponse>? CustomResponses(Lite<Entity> lite);
+
+    QueryEntity? GetRelatedQuery(Lite<Entity> lite);
+}
+
+public class ToolbarContentConfig<T> : IToolbarContentConfig where T : Entity
+{
+    public required Func<Lite<T>, bool> IsAuthorized;
+    public required Func<Lite<T>, string> DefaultLabel;
+    public Func<Lite<T>, string?>? DefaultIconName;
+    public Func<Lite<T>, string?>? DefaultIconColor;
+    public Func<Lite<T>, List<ToolbarResponse>?>? CustomResponses;
+    public Func<Lite<T>, QueryEntity?>? GetRelatedQuery;
+
+    bool IToolbarContentConfig.IsAuhorized(Lite<Entity> lite) => IsAuthorized((Lite<T>)lite);
+    string IToolbarContentConfig.DefaultLabel(Lite<Entity> lite) => DefaultLabel((Lite<T>)lite);
+    string? IToolbarContentConfig.DefaultIconName(Lite<Entity> lite) => DefaultIconName?.Invoke((Lite<T>)lite);
+    string? IToolbarContentConfig.DefaultIconColor(Lite<Entity> lite) => DefaultIconColor?.Invoke((Lite<T>)lite);
+    QueryEntity? IToolbarContentConfig.GetRelatedQuery(Lite<Entity> lite) => GetRelatedQuery?.Invoke((Lite<T>)lite);
+
+    List<ToolbarResponse>? IToolbarContentConfig.CustomResponses(Lite<Entity> lite)
+    {
+        foreach (var item in CustomResponses.GetInvocationListTyped())
+        {
+            var resp = item.Invoke((Lite<T>)lite);
+            if (resp != null)
+                return resp;
+        }
+
+        return null;
+    }
 }
