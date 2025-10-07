@@ -151,7 +151,7 @@ public class UniqueKeyException : ApplicationException
             {
                 var properties = (from f in t.Fields.Values
                                   let cols = f.Field.Columns()
-                                  where cols.Any() && cols.All(c => index.Columns.Contains(c))
+                                  where cols.Any() && cols.Any(c => index.Columns.Contains(c))
                                   select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
 
                 if (properties.IsEmpty())

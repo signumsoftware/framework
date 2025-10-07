@@ -239,7 +239,7 @@ public static class Administrator
     {
         var view = Schema.Current.View<T>();
 
-        IColumn[] columns = IndexKeyColumns.Split(view, fields);
+        IColumn[] columns = IndexKeyColumns.Split(view, fields).SelectMany(a => a.columns).ToArray();
 
         var index = new TableIndex(view, columns) { Unique = unique };
 

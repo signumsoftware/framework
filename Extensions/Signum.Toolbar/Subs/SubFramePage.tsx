@@ -173,45 +173,17 @@ export default function SubFramePage(): React.ReactElement {
 
       var packEntity = (pack ?? s.pack) as EntityPack<Entity>;
 
-      const replaceRoute = !packEntity.entity.isNew && entity.isNew;
-
-      var forcedViewName = typeof reloadComponent == "string" ? reloadComponent : undefined;
-
-      var currentViewName = QueryString.parse(location.search).viewName;
-
-      var newRoute = is(packEntity.entity, entity) && (forcedViewName ?? currentViewName) == currentViewName ? null :
-        packEntity.entity.isNew ? Navigator.createRoute(packEntity.entity.Type, forcedViewName ?? currentViewName) :
-          Navigator.navigateRoute(packEntity.entity, forcedViewName ?? currentViewName);
-
       if (reloadComponent) {
         setState(undefined)
           .then(() => loadComponent(packEntity, reloadComponent == true ? undefined : reloadComponent))
           .then(gc => {
             if (mounted.current) {
-              setPack(packEntity, gc).then(() => {
-                if (newRoute) {
-                  if (replaceRoute)
-                    AppContext.navigate(newRoute, { replace: true });
-                  else
-                    AppContext.navigate(newRoute);
-                }
-
-                callback && callback();
-              });
+              setPack(packEntity, gc).then(() => callback && callback());
             }
           });
       }
       else {
-        setPack(packEntity, { getComponent: s.getComponent }).then(() => {
-          if (newRoute) {
-            if (replaceRoute)
-              AppContext.navigate(newRoute, { replace : true });
-            else
-              AppContext.navigate(newRoute);
-          }
-
-          callback && callback();
-        });
+        setPack(packEntity, { getComponent: s.getComponent }).then(() => callback && callback());
       }
     },
     onClose: () => onClose(),
