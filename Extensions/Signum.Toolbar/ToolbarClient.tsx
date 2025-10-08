@@ -58,6 +58,10 @@ export namespace ToolbarClient {
     export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any> | null> {
       return ajaxGet({ url: `/api/toolbar/current/${location}` });
     }
+
+    export function getToolbarMenu(menu: Lite<ToolbarMenuEntity>): Promise<ToolbarResponse<any> | null> {
+      return ajaxGet({ url: `/api/toolbarMenu/${menu.id}` });
+    }
   }
  
 }
@@ -77,4 +81,5 @@ export interface ToolbarResponse<T extends Entity> {
   withEntity?: boolean;
   elements?: Array<ToolbarResponse<any>>;
   extraIcons?: Array<ToolbarResponse<any>>;
+  queryKey?: string;
 }

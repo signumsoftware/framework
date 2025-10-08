@@ -45,6 +45,8 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
     this.typeahead = React.useRef<TypeaheadController>(null);
     React.useEffect(() => {
       const p = this.props;
+     
+
       if (p.autocomplete) {
         var entity = p.ctx.value;
 
@@ -84,8 +86,12 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
 
   overrideProps(p: EntityLineProps<V>, overridenProps: EntityLineProps<V>): void {
     super.overrideProps(p, overridenProps);
-    if (p.autocomplete === undefined && p.type) {
-      p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary,  p.ctx, p.create!, p.showType);
+    if (p.type) {
+      if (p.showType == undefined)
+        p.showType = p.type.name.contains(",");
+
+      if (p.autocomplete === undefined)
+        p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary, p.ctx, p.create!, p.showType);
     }
   }
 

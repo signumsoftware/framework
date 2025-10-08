@@ -12,10 +12,10 @@ public class UserADMixin : MixinEntity
     {
     }
 
-    [UniqueIndex(AllowMultipleNulls = true)]
+    [UniqueIndex]
     public Guid? OID { get; set; } //Azure authentication
 
-    [UniqueIndex(AllowMultipleNulls = true)]
+    [UniqueIndex]
     public string? SID { get; set; } //Windows Authentication
 
     protected override string? PropertyValidation(PropertyInfo pi)

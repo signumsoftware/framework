@@ -13,7 +13,6 @@ using Signum.UserAssets.QueryTokens;
 using Signum.ViewLog;
 using System.Collections.Frozen;
 using System.Linq.Expressions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Signum.UserQueries;
 
@@ -65,9 +64,17 @@ public static class UserQueryLogic
                 sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(UserQueryEntity));
 
                 ToolbarLogic.RegisterDelete<UserQueryEntity>(sb, uq => uq.Query);
-                ToolbarLogic.RegisterContentConfig<UserQueryEntity>(
-                    lite => { var uq = UserQueries.Value.GetOrCreate(lite); return ToolbarLogic.InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true); },
-                    lite => PropertyRouteTranslationLogic.TranslatedField(UserQueries.Value.GetOrCreate(lite), a => a.DisplayName));
+
+                new ToolbarContentConfig<UserQueryEntity>
+                {
+                    DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(UserQueries.Value.GetOrCreate(lite), a => a.DisplayName),
+                    IsAuthorized = lite =>
+                    {
+                        var uq = UserQueries.Value.GetOrCreate(lite); 
+                        return ToolbarLogic.InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true);
+                    },
+                    GetRelatedQuery = lite => lite.RetrieveUserQuery().Query,
+                }.Register();
             });
 
             sb.Schema.WhenIncluded<CachedQueryEntity>(() =>

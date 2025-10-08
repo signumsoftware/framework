@@ -10,6 +10,7 @@ import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
 import * as Files from '../Signum.Files/Signum.Files'
 import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
+import * as Toolbar from '../Signum.Toolbar/Signum.Toolbar'
 
 
 export const CachedQueryEntity: Type<CachedQueryEntity> = new Type<CachedQueryEntity>("CachedQuery");
@@ -160,13 +161,6 @@ export interface LinkElementEmbedded extends Entities.EmbeddedEntity {
   opensInNewTab: boolean;
 }
 
-export const LinkListPartEntity: Type<LinkListPartEntity> = new Type<LinkListPartEntity>("LinkListPart");
-export interface LinkListPartEntity extends Entities.Entity, IPartEntity {
-  Type: "LinkListPart";
-  links: Entities.MList<LinkElementEmbedded>;
-  requiresTitle: boolean;
-}
-
 export const PanelPartEmbedded: Type<PanelPartEmbedded> = new Type<PanelPartEmbedded>("PanelPartEmbedded");
 export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   Type: "PanelPartEmbedded";
@@ -216,5 +210,12 @@ export interface TokenEquivalenceGroupEntity extends Entities.Entity {
   dashboard: Entities.Lite<DashboardEntity>;
   interactionGroup: InteractionGroup | null;
   tokenEquivalences: Entities.MList<TokenEquivalenceEmbedded>;
+}
+
+export const ToolbarPartEntity: Type<ToolbarPartEntity> = new Type<ToolbarPartEntity>("ToolbarPart");
+export interface ToolbarPartEntity extends Entities.Entity, IPartEntity {
+  Type: "ToolbarPart";
+  toolbarMenu: Entities.Lite<Toolbar.ToolbarMenuEntity>;
+  requiresTitle: boolean;
 }
 

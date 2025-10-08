@@ -15,6 +15,8 @@ public static class QueryLogic
     static ResetLazy<FrozenDictionary<object, QueryEntity>> queryNameToEntityLazy = null!;
     public static FrozenDictionary<object, QueryEntity> QueryNameToEntity => queryNameToEntityLazy.Value;
 
+    static ResetLazy<FrozenDictionary<Lite<QueryEntity>, QueryEntity>> liteToEntityLazy = null!;
+
     public static DynamicQueryContainer Queries { get; } = new DynamicQueryContainer();
     public static ExpressionContainer Expressions { get; } = new ExpressionContainer();
 
@@ -101,6 +103,10 @@ public static class QueryLogic
                     kvp => kvp.Key,
                     (q, kvp) => KeyValuePair.Create(kvp.Value, q),
                     "caching " + nameof(QueryEntity)).ToFrozenDictionaryEx(),
+                new InvalidateWith(typeof(QueryEntity)),
+                Schema.Current.InvalidateMetadata);
+
+            liteToEntityLazy = sb.GlobalLazy(() => queryNameToEntityLazy.Value.Values.ToFrozenDictionaryEx(a => a.ToLite()),
                 new InvalidateWith(typeof(QueryEntity)),
                 Schema.Current.InvalidateMetadata);
 
@@ -202,6 +208,11 @@ public static class QueryLogic
     public static QueryEntity GetQueryEntity(object queryName)
     {
         return QueryNameToEntity.GetOrThrow(queryName, "QueryName {0} not found on the database");
+    }
+
+    public static QueryEntity RetrieveFromCache(this Lite<QueryEntity> query)
+    {
+        return liteToEntityLazy.Value.GetOrThrow(query);
     }
 
 

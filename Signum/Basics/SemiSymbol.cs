@@ -53,7 +53,7 @@ public abstract class SemiSymbol : Entity
         internal set { fieldInfo = value; }
     }
 
-    [UniqueIndex(AllowMultipleNulls = true)]
+    [UniqueIndex]
     [StringLengthValidator(Min = 3, Max = 200)]
     public string? Key { get; set; }
 

@@ -11,8 +11,6 @@ public sealed class IndexAttribute : Attribute
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public sealed class UniqueIndexAttribute : Attribute
 {
-    public bool AllowMultipleNulls { get; set; }
-
     public bool AvoidAttachToUniqueIndexes { get; set; }
 }
 
