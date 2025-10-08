@@ -392,11 +392,11 @@ public class SchemaBuilder
 
 
     public HashSet<(Type type, string method)> LoadedModules = new HashSet<(Type type, string method)>();
-    public bool NotDefined(MethodBase? methodBase)
+    public bool AlreadyDefined(MethodBase? methodBase)
     {
         this.Tracer.Switch(methodBase!.DeclaringType!.Name);
 
-        return LoadedModules.Add((type: methodBase.DeclaringType, method: methodBase.Name));
+        return !LoadedModules.Add((type: methodBase.DeclaringType, method: methodBase.Name));
     }
 
     public void AssertDefined(MethodBase methodBase)
