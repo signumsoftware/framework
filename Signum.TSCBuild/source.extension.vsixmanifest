@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="Signum.TSCBuild.7b6cb8f6-75e3-46b0-9b92-34347dd4f1c0" Version="1.0.1" Language="en-US" Publisher="Signum Software" />
+        <Identity Id="Signum.TSCBuild.7b6cb8f6-75e3-46b0-9b92-34347dd4f1c0" Version="1.0.2" Language="en-US" Publisher="Signum Software" />
         <DisplayName>Signum.TSCBuild</DisplayName>
         <Description xml:space="preserve">Adds a "Build TypeScript" context menu to each .csproj in Solution Explorer, which runs tsc -b using the tsconfig.json in the same project.
 Calling tsc once is much faster thant running Microsoft.TypeScript.MSBuild nuget for each project, making it usefull for solutions structured with 'vertical modules' (such as the Signum Framework), where many reusable projects contain both C# and TypeScript code.

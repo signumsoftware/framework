@@ -11,6 +11,7 @@ using System.IO;
 using System.Text;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Threading;
+using System.Linq;
 
 namespace Signum.TSCBuild
 {
@@ -195,13 +196,32 @@ namespace Signum.TSCBuild
                 return;
             }
 
-            string yarnPath = @"C:\\Program Files (x86)\\Yarn\\bin\\yarn.cmd";
-            if (!System.IO.File.Exists(yarnPath))
+            var paths = new[] {
+                // Yarn global installs
+                @"C:\Program Files (x86)\Yarn\bin\yarn.cmd",
+                @"C:\Program Files\Yarn\bin\yarn.cmd",
+                @"C:\Program Files\nodejs\yarn.cmd",
+                // Yarn installed via npm (global)
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\Roaming\npm\yarn.cmd"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\Local\pmpm\yarn.cmd"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\Roaming\pmpm\yarn.cmd"),
+
+                // Node.js global installs
+                @"C:\Program Files\nodejs\npm.cmd",
+                // Node.js installed via nvm (Node Version Manager)
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\Roaming\nvm\nodejs\npm.cmd"),
+            };
+
+            var bestPath = paths.FirstOrDefault(p => File.Exists(p));
+            if (bestPath == null)
             {
                 statusBar?.Animation(0, ref icon);
                 statusBar?.Progress(ref cookie, 0, "", 0, 0);
                 statusBar?.SetText("");
-                pane.OutputStringThreadSafe("Could not find yarn.cmd at the expected location. Please ensure Yarn is installed.\n");
+                pane.OutputStringThreadSafe($@"Could not find yarn.cmd or npm.cmd the expected location:
+{string.Join("\n", paths.Select(a => "* " + a))}
+Please ensure Yarn or NPM are installed.
+");
                 VsShellUtilities.ShowMessageBox(
                     this.package,
                     "Could not find yarn.cmd at the expected location. Please ensure Yarn is installed.",
@@ -218,7 +238,7 @@ namespace Signum.TSCBuild
             {
                 StartInfo = new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = yarnPath,
+                    FileName = bestPath,
                     Arguments = $"tsc -b {projectDir}/tsconfig.json -v",
                     WorkingDirectory = projectDir,
                     RedirectStandardOutput = true,

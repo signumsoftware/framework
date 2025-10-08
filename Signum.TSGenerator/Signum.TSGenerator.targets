@@ -46,7 +46,7 @@
 	<Target Name="TSC_BuildAll" Condition="'$(TSC_Build)' == 'true'">
 		<Message Text="Executing 'yarn tsc --build' (all projects NEW21312!)" Importance="high" />
 		<Exec
-		  Command="yarn tsc -b $(MSBuildProjectDirectory)\tsconfig.json --pretty false"
+		  Command="yarn tsc -b $(MSBuildProjectDirectory)/tsconfig.json --pretty false"
 		  ConsoleToMSBuild="true"
 		  IgnoreExitCode="true">
 			<Output TaskParameter="ConsoleOutput" ItemName="TscOutput" />
