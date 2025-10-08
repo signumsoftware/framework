@@ -212,9 +212,15 @@ public static class WorkflowLogic
 
             ToolbarLogic.RegisterDelete<WorkflowEntity>(sb);
 
-            ToolbarLogic.RegisterContentConfig<WorkflowEntity>(
-              lite => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite); return ToolbarLogic.InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); },
-                lite => PropertyRouteTranslationLogic.TranslatedField(WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite).Workflow, a => a.Name));
+            new ToolbarContentConfig<WorkflowEntity>
+            {
+                DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite).Workflow, a => a.Name),
+                IsAuthorized = lite =>
+                {
+                    var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite);
+                    return ToolbarLogic.InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser();
+                }
+            }.Register();
 
             sb.Include<WorkflowEntity>()
                 .WithConstruct(WorkflowOperation.Create)
