@@ -12,141 +12,141 @@ public static class MusicLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<AlbumEntity>()
+            .WithExpressionFrom((IAuthorEntity au) => au.Albums())
+            .WithQuery(() => a => new
+            {
+                Entity = a,
+                a.Id,
+                a.Name,
+                a.Author,
+                a.Label,
+                a.Year
+            });
+        AlbumGraph.Register();
+
+
+
+        sb.Include<NoteWithDateEntity>()
+            .WithSave(NoteWithDateOperation.Save)
+            .WithQuery(() => a => new
+            {
+                Entity = a,
+                a.Id,
+                a.Title,
+                a.Target,
+                a.CreationTime,
+            });
+
+        if (Connector.Current is SqlServerConnector ss && ss.SupportsFullTextSearch || Connector.Current is PostgreSqlConnector)
+            sb.AddFullTextIndex<NoteWithDateEntity>(a => new { a.Title, a.Text });
+
+        sb.Include<ConfigEntity>()
+            .WithSave(ConfigOperation.Save);
+
+        MinimumExtensions.IncludeFunction(sb.Schema.Assets);
+        sb.Include<ArtistEntity>()
+            .WithSave(ArtistOperation.Save)
+            .WithVirtualMList(a => a.Nominations, n => (Lite<ArtistEntity>)n.Author)
+            .WithQuery(() => a => new
+            {
+                Entity = a,
+                a.Id,
+                a.Name,
+                a.IsMale,
+                a.Sex,
+                a.Dead,
+                a.LastAward,
+            });
+
+        new Graph<ArtistEntity>.Execute(ArtistOperation.AssignPersonalAward)
         {
-            sb.Include<AlbumEntity>()
-                .WithExpressionFrom((IAuthorEntity au) => au.Albums())
-                .WithQuery(() => a => new
-                {
-                    Entity = a,
-                    a.Id,
-                    a.Name,
-                    a.Author,
-                    a.Label,
-                    a.Year
-                });
-            AlbumGraph.Register();
+            CanExecute = a => a.LastAward != null ? "Artist already has an award" : null,
+            Execute = (a, para) => a.LastAward = new PersonalAwardEntity() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }.Execute(AwardOperation.Save)
+        }.Register();
 
-
-
-            sb.Include<NoteWithDateEntity>()
-                .WithSave(NoteWithDateOperation.Save)
-                .WithQuery(() => a => new
-                {
-                    Entity = a,
-                    a.Id,
-                    a.Title,
-                    a.Target,
-                    a.CreationTime,
-                });
-
-            if (Connector.Current is SqlServerConnector ss && ss.SupportsFullTextSearch || Connector.Current is PostgreSqlConnector)
-                sb.AddFullTextIndex<NoteWithDateEntity>(a => new { a.Title, a.Text });
-
-            sb.Include<ConfigEntity>()
-                .WithSave(ConfigOperation.Save);
-
-            MinimumExtensions.IncludeFunction(sb.Schema.Assets);
-            sb.Include<ArtistEntity>()
-                .WithSave(ArtistOperation.Save)
-                .WithVirtualMList(a => a.Nominations, n => (Lite<ArtistEntity>)n.Author)
-                .WithQuery(() => a => new
-                {
-                    Entity = a,
-                    a.Id,
-                    a.Name,
-                    a.IsMale,
-                    a.Sex,
-                    a.Dead,
-                    a.LastAward,
-                });
-
-            new Graph<ArtistEntity>.Execute(ArtistOperation.AssignPersonalAward)
+        sb.Include<BandEntity>()
+            .WithQuery(() => a => new
             {
-                CanExecute = a => a.LastAward != null ? "Artist already has an award" : null,
-                Execute = (a, para) => a.LastAward = new PersonalAwardEntity() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }.Execute(AwardOperation.Save)
-            }.Register();
+                Entity = a,
+                a.Id,
+                a.Name,
+                a.LastAward,
+            });
 
-            sb.Include<BandEntity>()
-                .WithQuery(() => a => new
-                {
-                    Entity = a,
-                    a.Id,
-                    a.Name,
-                    a.LastAward,
-                });
-
-            new Graph<BandEntity>.Execute(BandOperation.Save)
+        new Graph<BandEntity>.Execute(BandOperation.Save)
+        {
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (b, _) =>
             {
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (b, _) =>
+                using (OperationLogic.AllowSave<ArtistEntity>())
                 {
-                    using (OperationLogic.AllowSave<ArtistEntity>())
-                    {
-                        b.Save();
-                    }
+                    b.Save();
                 }
-            }.Register();
+            }
+        }.Register();
 
-            sb.Include<LabelEntity>()
-                .WithSave(LabelOperation.Save)
-                .WithQuery(() => a => new
-                {
-                    Entity = a,
-                    a.Id,
-                    a.Name,
-                });
-
-
-            sb.Include<FolderEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name
-                });
-
-            RegisterAwards(sb);
-
-            QueryLogic.Queries.Register(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, description, cancellationToken) =>
+        sb.Include<LabelEntity>()
+            .WithSave(LabelOperation.Save)
+            .WithQuery(() => a => new
             {
-                var one = await (from a in Database.Query<ArtistEntity>()
-                                 select new
-                                 {
-                                     Entity = (IAuthorEntity)a,
-                                     a.Id,
-                                     Type = "Artist",
-                                     a.Name,
-                                     Lonely = a.Lonely(),
-                                     a.LastAward
-                                 })
-                               .ToDQueryable(description)
-                               .AllQueryOperationsAsync(request, cancellationToken);
+                Entity = a,
+                a.Id,
+                a.Name,
+            });
 
-                var two = await (from a in Database.Query<BandEntity>()
-                                 select new
-                                 {
-                                     Entity = (IAuthorEntity)a,
-                                     a.Id,
-                                     Type = "Band",
-                                     a.Name,
-                                     Lonely = a.Lonely(),
-                                     a.LastAward
-                                 })
-                               .ToDQueryable(description)
-                               .AllQueryOperationsAsync(request, cancellationToken);
 
-                return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
+        sb.Include<FolderEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Name
+            });
 
-            })
-                .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll)
-                .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((ArtistEntity a) => a.Id), PropertyRoute.Construct((BandEntity a) => a.Id)),
-                entityImplementations: Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
+        RegisterAwards(sb);
 
-            Validator.PropertyValidator((NoteWithDateEntity n) => n.Title)
-                .IsApplicableValidator<NotNullValidatorAttribute>(n => Corruption.Strict);
-        }
+        QueryLogic.Queries.Register(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, description, cancellationToken) =>
+        {
+            var one = await (from a in Database.Query<ArtistEntity>()
+                             select new
+                             {
+                                 Entity = (IAuthorEntity)a,
+                                 a.Id,
+                                 Type = "Artist",
+                                 a.Name,
+                                 Lonely = a.Lonely(),
+                                 a.LastAward
+                             })
+                           .ToDQueryable(description)
+                           .AllQueryOperationsAsync(request, cancellationToken);
+
+            var two = await (from a in Database.Query<BandEntity>()
+                             select new
+                             {
+                                 Entity = (IAuthorEntity)a,
+                                 a.Id,
+                                 Type = "Band",
+                                 a.Name,
+                                 Lonely = a.Lonely(),
+                                 a.LastAward
+                             })
+                           .ToDQueryable(description)
+                           .AllQueryOperationsAsync(request, cancellationToken);
+
+            return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
+
+        })
+            .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll)
+            .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((ArtistEntity a) => a.Id), PropertyRoute.Construct((BandEntity a) => a.Id)),
+            entityImplementations: Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
+
+        Validator.PropertyValidator((NoteWithDateEntity n) => n.Title)
+            .IsApplicableValidator<NotNullValidatorAttribute>(n => Corruption.Strict);
     }
 
     private static void RegisterAwards(SchemaBuilder sb)

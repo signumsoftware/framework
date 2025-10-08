@@ -9,88 +9,86 @@ public static class ResetPasswordRequestLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<ResetPasswordRequestEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.RequestDate,
+                e.Code,
+                e.User,
+                e.User.Email
+            });
+
+        AuthLogic.OnDeactivateUser = u =>
         {
+            var config = EmailLogic.Configuration;
+            var request = ResetPasswordRequestLogic.ResetPasswordRequest(u);
+            var url = $"{config.UrlLeft}/auth/resetPassword?code={request.Code}";
 
-            sb.Include<ResetPasswordRequestEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.RequestDate,
-                    e.Code,
-                    e.User,
-                    e.User.Email
-                });
+            var mail = new UserLockedMail(u, url);
+            mail.SendMailAsync();
+        };
 
+        EmailLogic.AssertStarted(sb);
 
-            AuthLogic.OnDeactivateUser = u =>
+        EmailModelLogic.RegisterEmailModel<ResetPasswordRequestEmail>(() => new EmailTemplateEntity
+        {
+            Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
             {
-                var config = EmailLogic.Configuration;
-                var request = ResetPasswordRequestLogic.ResetPasswordRequest(u);
-                var url = $"{config.UrlLeft}/auth/resetPassword?code={request.Code}";
+                Text =
+                    "<p>{0}</p>".FormatWith(ResetPasswordMessage.YouRecentlyRequestedANewPassword.NiceToString()) +
+                    "<p>{0} @[User.UserName]</p>".FormatWith(ResetPasswordMessage.YourUsernameIs.NiceToString()) +
+                    "<p>{0}</p>".FormatWith(ResetPasswordMessage.YouCanResetYourPasswordByFollowingTheLinkBelow
+                        .NiceToString()) +
+                    "<p><a href=\"@[m:Url]\">@[m:Url]</a></p>",
+                Subject = ResetPasswordMessage.ResetPasswordRequestSubject.NiceToString()
+            }).ToMList()
+        });
 
-                var mail = new UserLockedMail(u, url);
-                mail.SendMailAsync();
-            };
-
-            EmailLogic.AssertStarted(sb);
-
-            EmailModelLogic.RegisterEmailModel<ResetPasswordRequestEmail>(() => new EmailTemplateEntity
+        EmailModelLogic.RegisterEmailModel<UserLockedMail>(() => new EmailTemplateEntity
+        {
+            Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
             {
-                Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
-                {
-                    Text =
-                        "<p>{0}</p>".FormatWith(ResetPasswordMessage.YouRecentlyRequestedANewPassword.NiceToString()) +
-                        "<p>{0} @[User.UserName]</p>".FormatWith(ResetPasswordMessage.YourUsernameIs.NiceToString()) +
-                        "<p>{0}</p>".FormatWith(ResetPasswordMessage.YouCanResetYourPasswordByFollowingTheLinkBelow
-                            .NiceToString()) +
-                        "<p><a href=\"@[m:Url]\">@[m:Url]</a></p>",
-                    Subject = ResetPasswordMessage.ResetPasswordRequestSubject.NiceToString()
-                }).ToMList()
-            });
+                Text =
+                    "<p>{0}</p>".FormatWith(ResetPasswordMessage.YourAccountHasBeenLockedDueToSeveralFailedLogins.NiceToString()) +
+                    "<p>{0}</p>".FormatWith(ResetPasswordMessage.YouCanResetYourPasswordByFollowingTheLinkBelow.NiceToString()) +
+                    "<p><a href=\"@[m:Url]\">@[m:Url]</a></p>",
+                Subject = ResetPasswordMessage.YourAccountHasBeenLocked.NiceToString()
+            }).ToMList()
+        });
 
-            EmailModelLogic.RegisterEmailModel<UserLockedMail>(() => new EmailTemplateEntity
+        new Graph<ResetPasswordRequestEntity>.Execute(ResetPasswordRequestOperation.Execute)
+        {
+            CanBeNew = false,
+            CanBeModified = false,
+            CanExecute = (e) => e.IsValid ? null : ResetPasswordMessage.YourResetPasswordRequestHasExpired.NiceToString(),
+            Execute = (e, args) =>
             {
-                Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
+                string password = args.GetArg<string>();
+                e.Used = true;
+                var user = e.User;
+
+                var error = UserEntity.OnValidatePassword(password);
+                if (error != null)
+                    throw new ApplicationException(error);
+
+                if (user.State == UserState.Deactivated)
                 {
-                    Text =
-                        "<p>{0}</p>".FormatWith(ResetPasswordMessage.YourAccountHasBeenLockedDueToSeveralFailedLogins.NiceToString()) +
-                        "<p>{0}</p>".FormatWith(ResetPasswordMessage.YouCanResetYourPasswordByFollowingTheLinkBelow.NiceToString()) +
-                        "<p><a href=\"@[m:Url]\">@[m:Url]</a></p>",
-                    Subject = ResetPasswordMessage.YourAccountHasBeenLocked.NiceToString()
-                }).ToMList()
-            });
-
-            new Graph<ResetPasswordRequestEntity>.Execute(ResetPasswordRequestOperation.Execute)
-            {
-                CanBeNew = false,
-                CanBeModified = false,
-                CanExecute = (e) => e.IsValid ? null : ResetPasswordMessage.YourResetPasswordRequestHasExpired.NiceToString(),
-                Execute = (e, args) =>
-                {
-                    string password = args.GetArg<string>();
-                    e.Used = true;
-                    var user = e.User;
-
-                    var error = UserEntity.OnValidatePassword(password);
-                    if (error != null)
-                        throw new ApplicationException(error);
-
-                    if (user.State == UserState.Deactivated)
-                    {
-                        user.Execute(UserOperation.Reactivate);
-                    }
-
-                    user.PasswordHash = PasswordEncoding.EncodePassword(user.UserName, password);
-                    user.LoginFailedCounter = 0;
-                    using (AuthLogic.Disable())
-                    {
-                        user.Execute(UserOperation.Save);
-                    }
+                    user.Execute(UserOperation.Reactivate);
                 }
-            }.Register();
-        }
+
+                user.PasswordHash = PasswordEncoding.EncodePassword(user.UserName, password);
+                user.LoginFailedCounter = 0;
+                using (AuthLogic.Disable())
+                {
+                    user.Execute(UserOperation.Save);
+                }
+            }
+        }.Register();
     }
 
     public static ResetPasswordRequestEntity ResetPasswordRequestExecute(string code, string password)

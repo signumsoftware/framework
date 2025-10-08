@@ -7,10 +7,10 @@ public static class DisableLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
-        }
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
     }
 
     private static void Schema_SchemaCompleted()

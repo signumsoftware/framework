@@ -14,35 +14,35 @@ public static class FilePathEmbeddedLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        FileTypeLogic.Start(sb);
+
+        QueryUtils.RegisterOrderAdapter((FilePathEmbedded e) => e.FileLength);
+
+        FilePathEmbedded.OnPreSaving += fpe =>
         {
-            FileTypeLogic.Start(sb);
-
-            QueryUtils.RegisterOrderAdapter((FilePathEmbedded e) => e.FileLength);
-
-            FilePathEmbedded.OnPreSaving += fpe =>
+            if (fpe.Suffix == null && fpe.BinaryFile != null)
             {
-                if (fpe.Suffix == null && fpe.BinaryFile != null)
+                if (SyncFileSave)
+                    fpe.SaveFile();
+                else
                 {
-                    if (SyncFileSave)
-                        fpe.SaveFile();
-                    else
+                    var task = fpe.SaveFileAsync();
+                    Transaction.PreRealCommit += data =>
                     {
-                        var task = fpe.SaveFileAsync();
-                        Transaction.PreRealCommit += data =>
-                        {
-                            //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
-                            var a = fpe; //For debugging
-                            task.WaitSafe();
-                            fpe.CleanBinaryFile();
-                        };
-                    }
+                        //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
+                        var a = fpe; //For debugging
+                        task.WaitSafe();
+                        fpe.CleanBinaryFile();
+                    };
                 }
-            };
+            }
+        };
 
 
-            sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
-        }
+        sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
     }
 
 

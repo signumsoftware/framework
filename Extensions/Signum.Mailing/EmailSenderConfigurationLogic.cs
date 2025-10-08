@@ -16,51 +16,51 @@ public static class EmailSenderConfigurationLogic
     {
         sb.Settings.AssertImplementedBy((EmailSenderConfigurationEntity o) => o.Service, typeof(SmtpEmailServiceEntity));
 
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            if (encryptPassword != null)
-                EncryptPassword = encryptPassword;
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            if (decryptPassword != null)
-                DecryptPassword = decryptPassword;
+        if (encryptPassword != null)
+            EncryptPassword = encryptPassword;
 
-            sb.Include<EmailSenderConfigurationEntity>()
-                .WithDeletePart(a => a.Service, handleOnSaving: esc => true)
-                .WithQuery(() => s => new
-                {
-                    Entity = s,
-                    s.Id,
-                    s.Name,
-                    s.Service
-                });
-            
-            EmailSenderCache = sb.GlobalLazy(() => Database.Query<EmailSenderConfigurationEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
-                new InvalidateWith(typeof(EmailSenderConfigurationEntity)));
+        if (decryptPassword != null)
+            DecryptPassword = decryptPassword;
 
-            new Graph<EmailSenderConfigurationEntity>.Execute(EmailSenderConfigurationOperation.Save)
+        sb.Include<EmailSenderConfigurationEntity>()
+            .WithDeletePart(a => a.Service, handleOnSaving: esc => true)
+            .WithQuery(() => s => new
             {
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (sc, _) => {
+                Entity = s,
+                s.Id,
+                s.Name,
+                s.Service
+            });
+
+        EmailSenderCache = sb.GlobalLazy(() => Database.Query<EmailSenderConfigurationEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
+            new InvalidateWith(typeof(EmailSenderConfigurationEntity)));
+
+        new Graph<EmailSenderConfigurationEntity>.Execute(EmailSenderConfigurationOperation.Save)
+        {
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (sc, _) => {
 
 
-                    var smtps = sc.Service as SmtpEmailServiceEntity;
-                    if (smtps?.Network?.NewPassword!=null)
-                    {
-                        smtps.Network.Password= EmailSenderConfigurationLogic.EncryptPassword(smtps.Network.NewPassword);
-                        smtps.Network.NewPassword = null;
-                    }
+                var smtps = sc.Service as SmtpEmailServiceEntity;
+                if (smtps?.Network?.NewPassword!=null)
+                {
+                    smtps.Network.Password= EmailSenderConfigurationLogic.EncryptPassword(smtps.Network.NewPassword);
+                    smtps.Network.NewPassword = null;
+                }
 
-                },
-            }.Register();
+            },
+        }.Register();
 
-            new Graph<EmailSenderConfigurationEntity>.ConstructFrom<EmailSenderConfigurationEntity>(EmailSenderConfigurationOperation.Clone)
-            { 
-                Construct = (sc, _) => sc.Clone()
-            
-            }.Register();
+        new Graph<EmailSenderConfigurationEntity>.ConstructFrom<EmailSenderConfigurationEntity>(EmailSenderConfigurationOperation.Clone)
+        { 
+            Construct = (sc, _) => sc.Clone()
 
-        }
+        }.Register();
+
     }
 
     public static SmtpClient GenerateSmtpClient(this Lite<EmailSenderConfigurationEntity> config)

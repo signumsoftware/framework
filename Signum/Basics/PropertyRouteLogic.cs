@@ -15,40 +15,40 @@ public static class PropertyRouteLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Include<PropertyRouteEntity>()
-                .WithUniqueIndex(p => new { p.Path, p.RootType })
-                .WithQuery(() => p => new
-                {
-                    Entity = p,
-                    p.Id,
-                    p.Path,
-                    p.RootType
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Schema.Synchronizing += SynchronizeProperties;
-
-            Properties = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().AgGroupToDictionary(a => a.RootType, gr => gr.ToFrozenDictionaryEx(a => a.Path)).ToFrozenDictionaryEx(),
-                new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
-
-            PropertyRouteEntity.ToPropertyRouteFunc = ToPropertyRouteImplementation;
-
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += PropertyRouteLogic_PreDeleteSqlSync;
-
-            if (sb.WebServerBuilder != null)
+        sb.Include<PropertyRouteEntity>()
+            .WithUniqueIndex(p => new { p.Path, p.RootType })
+            .WithQuery(() => p => new
             {
-                SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((PropertyRouteEntity wc) =>
+                Entity = p,
+                p.Id,
+                p.Path,
+                p.RootType
+            });
+
+        sb.Schema.Synchronizing += SynchronizeProperties;
+
+        Properties = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().AgGroupToDictionary(a => a.RootType, gr => gr.ToFrozenDictionaryEx(a => a.Path)).ToFrozenDictionaryEx(),
+            new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
+
+        PropertyRouteEntity.ToPropertyRouteFunc = ToPropertyRouteImplementation;
+
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += PropertyRouteLogic_PreDeleteSqlSync;
+
+        if (sb.WebServerBuilder != null)
+        {
+            SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((PropertyRouteEntity wc) =>
+            {
+                var route = PropertyRouteLogic.TryGetPropertyRouteEntity(wc.RootType, wc.Path);
+                if (route != null)
                 {
-                    var route = PropertyRouteLogic.TryGetPropertyRouteEntity(wc.RootType, wc.Path);
-                    if (route != null)
-                    {
-                        wc.SetId(route.Id);
-                        wc.SetIsNew(false);
-                        wc.SetCleanModified(false);
-                    }
-                });
-            }
+                    wc.SetId(route.Id);
+                    wc.SetIsNew(false);
+                    wc.SetCleanModified(false);
+                }
+            });
         }
     }
 

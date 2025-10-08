@@ -21,45 +21,45 @@ public static class DynamicValidationLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<DynamicValidationEntity>()
-                .WithSave(DynamicValidationOperation.Save)
-                .WithDelete(DynamicValidationOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.EntityType,
-                    e.SubEntity,
-                    Script = e.Eval.Script.Etc(75),
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            new Graph<DynamicValidationEntity>.ConstructFrom<DynamicValidationEntity>(DynamicValidationOperation.Clone)
+        sb.Include<DynamicValidationEntity>()
+            .WithSave(DynamicValidationOperation.Save)
+            .WithDelete(DynamicValidationOperation.Delete)
+            .WithQuery(() => e => new
             {
-                Construct = (dv, _) => new DynamicValidationEntity()
-                {
-                    Name = dv.Name,
-                    EntityType = dv.EntityType,
-                    SubEntity = dv.SubEntity,
-                    Eval = new DynamicValidationEval() { Script = dv.Eval.Script },
-                }
-            }.Register();
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.EntityType,
+                e.SubEntity,
+                Script = e.Eval.Script.Etc(75),
+            });
+
+        new Graph<DynamicValidationEntity>.ConstructFrom<DynamicValidationEntity>(DynamicValidationOperation.Clone)
+        {
+            Construct = (dv, _) => new DynamicValidationEntity()
+            {
+                Name = dv.Name,
+                EntityType = dv.EntityType,
+                SubEntity = dv.SubEntity,
+                Eval = new DynamicValidationEval() { Script = dv.Eval.Script },
+            }
+        }.Register();
 
 
-            DynamicValidations = sb.GlobalLazy(() => Database.Query<DynamicValidationEntity>()
-                    .SelectCatch(dv => new DynamicValidationPair(dv.SubEntity?.ToPropertyRoute() ?? PropertyRoute.Root(TypeLogic.EntityToType.GetOrThrow(dv.EntityType)), dv))
-                    .GroupToFrozenDictionary(a => a.PropertyRoute.Type),
-            new InvalidateWith(typeof(DynamicValidationEntity)));
+        DynamicValidations = sb.GlobalLazy(() => Database.Query<DynamicValidationEntity>()
+                .SelectCatch(dv => new DynamicValidationPair(dv.SubEntity?.ToPropertyRoute() ?? PropertyRoute.Root(TypeLogic.EntityToType.GetOrThrow(dv.EntityType)), dv))
+                .GroupToFrozenDictionary(a => a.PropertyRoute.Type),
+        new InvalidateWith(typeof(DynamicValidationEntity)));
 
-            DynamicValidationEntity.GetMainType = dve => dve.SubEntity?.ToPropertyRoute().Type ?? TypeLogic.EntityToType.GetOrThrow(dve.EntityType);
+        DynamicValidationEntity.GetMainType = dve => dve.SubEntity?.ToPropertyRoute().Type ?? TypeLogic.EntityToType.GetOrThrow(dve.EntityType);
 
-            sb.Schema.Initializing += () => { initialized = true; };
+        sb.Schema.Initializing += () => { initialized = true; };
 
-            Validator.GlobalValidation += DynamicValidation;
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicValidationEntity>().Where(dv => dv.EntityType.Is(type)));
-        }
+        Validator.GlobalValidation += DynamicValidation;
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicValidationEntity>().Where(dv => dv.EntityType.Is(type)));
     }
     static bool initialized = false;
 

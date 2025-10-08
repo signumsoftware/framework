@@ -57,67 +57,67 @@ public static class QueryLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        QueryEntity.GetEntityImplementations = query => Queries.GetEntityImplementations(query.ToQueryName());
+        var schema = Schema.Current;
+        FilterCondition.ToLowerString = token =>
         {
-            QueryEntity.GetEntityImplementations = query => Queries.GetEntityImplementations(query.ToQueryName());
-            var schema = Schema.Current;
-            FilterCondition.ToLowerString = token =>
+            if (!schema.Settings.IsPostgres)
+                return false;
+
+            var pr = token?.GetPropertyRoute();
+
+            var dbType = pr == null ? null : schema.Settings.FieldAttribute<DbTypeAttribute>(pr);
+
+            return dbType == null || !dbType.CollationPostgres_AvoidToLower;
+        };
+
+        // QueryManagers = queryManagers;
+        sb.Schema.Initializing += () =>
+        {
+            queryNamesLazy.Load();
+
+            queryNameToEntityLazy.Load();
+        };
+
+        sb.Include<QueryEntity>()
+            .WithQuery(() => q => new
             {
-                if (!schema.Settings.IsPostgres)
-                    return false;
+                Entity = q,
+                q.Key,
+            });
 
-                var pr = token?.GetPropertyRoute();
+        sb.Schema.Synchronizing += SynchronizeQueries;
+        sb.Schema.Generating += Schema_Generating;
 
-                var dbType = pr == null ? null : schema.Settings.FieldAttribute<DbTypeAttribute>(pr);
+        queryNamesLazy = sb.GlobalLazy(() => CreateQueryNames(),
+            new InvalidateWith(typeof(QueryEntity)),
+            Schema.Current.InvalidateMetadata);
 
-                return dbType == null || !dbType.CollationPostgres_AvoidToLower;
-            };
+        queryNameToEntityLazy = sb.GlobalLazy(() =>
+            EnumerableExtensions.JoinRelaxed(
+                Database.Query<QueryEntity>().ToList(),
+                QueryNames,
+                q => q.Key,
+                kvp => kvp.Key,
+                (q, kvp) => KeyValuePair.Create(kvp.Value, q),
+                "caching " + nameof(QueryEntity)).ToFrozenDictionaryEx(),
+            new InvalidateWith(typeof(QueryEntity)),
+            Schema.Current.InvalidateMetadata);
 
-            // QueryManagers = queryManagers;
-            sb.Schema.Initializing += () =>
+        liteToEntityLazy = sb.GlobalLazy(() => queryNameToEntityLazy.Value.Values.ToFrozenDictionaryEx(a => a.ToLite()),
+            new InvalidateWith(typeof(QueryEntity)),
+            Schema.Current.InvalidateMetadata);
+
+        sb.Schema.SchemaCompleted += () =>
+        {
+            if (Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
             {
-                queryNamesLazy.Load();
-
-                queryNameToEntityLazy.Load();
-            };
-
-            sb.Include<QueryEntity>()
-                .WithQuery(() => q => new
-                {
-                    Entity = q,
-                    q.Key,
-                });
-
-            sb.Schema.Synchronizing += SynchronizeQueries;
-            sb.Schema.Generating += Schema_Generating;
-
-            queryNamesLazy = sb.GlobalLazy(() => CreateQueryNames(),
-                new InvalidateWith(typeof(QueryEntity)),
-                Schema.Current.InvalidateMetadata);
-
-            queryNameToEntityLazy = sb.GlobalLazy(() =>
-                EnumerableExtensions.JoinRelaxed(
-                    Database.Query<QueryEntity>().ToList(),
-                    QueryNames,
-                    q => q.Key,
-                    kvp => kvp.Key,
-                    (q, kvp) => KeyValuePair.Create(kvp.Value, q),
-                    "caching " + nameof(QueryEntity)).ToFrozenDictionaryEx(),
-                new InvalidateWith(typeof(QueryEntity)),
-                Schema.Current.InvalidateMetadata);
-
-            liteToEntityLazy = sb.GlobalLazy(() => queryNameToEntityLazy.Value.Values.ToFrozenDictionaryEx(a => a.ToLite()),
-                new InvalidateWith(typeof(QueryEntity)),
-                Schema.Current.InvalidateMetadata);
-
-            sb.Schema.SchemaCompleted += () =>
-            {
-                if (Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
-                {
-                    QueryTimeSeriesLogic.Start(sb);
-                }
-            };
-        }
+                QueryTimeSeriesLogic.Start(sb);
+            }
+        };
     }
 
     public static object ToQueryName(this QueryEntity query)

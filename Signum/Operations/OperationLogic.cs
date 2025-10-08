@@ -83,50 +83,50 @@ public static class OperationLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Include<OperationLogEntity>()
-                .WithQuery(() => lo => new
-                {
-                    Entity = lo,
-                    lo.Id,
-                    lo.Target,
-                    lo.Operation,
-                    lo.User,
-                    lo.Start,
-                    lo.End,
-                    lo.Exception
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            SymbolLogic<OperationSymbol>.Start(sb, () => RegisteredOperations);
+        sb.Include<OperationLogEntity>()
+            .WithQuery(() => lo => new
+            {
+                Entity = lo,
+                lo.Id,
+                lo.Target,
+                lo.Operation,
+                lo.User,
+                lo.Start,
+                lo.End,
+                lo.Exception
+            });
 
-            sb.Include<OperationSymbol>()
-                .WithQuery(() => os => new
-                {
-                    Entity = os,
-                    os.Id,
-                    os.Key
-                });
+        SymbolLogic<OperationSymbol>.Start(sb, () => RegisteredOperations);
 
-            QueryLogic.Expressions.Register((OperationSymbol o) => o.Logs(), OperationMessage.Logs);
-            QueryLogic.Expressions.Register((Entity o) => o.OperationLogs(), () => typeof(OperationLogEntity).NicePluralName());
-            QueryLogic.Expressions.Register((Entity o) => o.LastOperationLog(), OperationMessage.LastOperationLog);
+        sb.Include<OperationSymbol>()
+            .WithQuery(() => os => new
+            {
+                Entity = os,
+                os.Id,
+                os.Key
+            });
+
+        QueryLogic.Expressions.Register((OperationSymbol o) => o.Logs(), OperationMessage.Logs);
+        QueryLogic.Expressions.Register((Entity o) => o.OperationLogs(), () => typeof(OperationLogEntity).NicePluralName());
+        QueryLogic.Expressions.Register((Entity o) => o.LastOperationLog(), OperationMessage.LastOperationLog);
 
 
-            sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
+        sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
 
-            sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += Operation_PreDeleteSqlSync;
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
+        sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += Operation_PreDeleteSqlSync;
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
 
-            sb.Schema.SchemaCompleted += OperationLogic_Initializing;
-            sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema);
+        sb.Schema.SchemaCompleted += OperationLogic_Initializing;
+        sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema);
 
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+        ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
-            OperationsContainerToken.GetEligibleTypeOperations = (entityType) => OperationsToken_GetEligibleTypeOperations(entityType);
-            OperationToken.IsAllowedExtension = (operationSymbol, entityType) => OperationToken_IsAllowedExtension(operationSymbol, entityType);
-            OperationToken.BuildExtension = (entityType, operationSymbol, parentExpression) => OperationToken_BuildExpression(entityType, operationSymbol, parentExpression);
-        }
+        OperationsContainerToken.GetEligibleTypeOperations = (entityType) => OperationsToken_GetEligibleTypeOperations(entityType);
+        OperationToken.IsAllowedExtension = (operationSymbol, entityType) => OperationToken_IsAllowedExtension(operationSymbol, entityType);
+        OperationToken.BuildExtension = (entityType, operationSymbol, parentExpression) => OperationToken_BuildExpression(entityType, operationSymbol, parentExpression);
     }
 
     private static IEnumerable<OperationSymbol> OperationsToken_GetEligibleTypeOperations(Type entityType)

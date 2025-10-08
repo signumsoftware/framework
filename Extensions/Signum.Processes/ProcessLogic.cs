@@ -49,81 +49,81 @@ public static class ProcessLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Include<ProcessAlgorithmSymbol>()
-                .WithQuery(() => pa => new
-                {
-                    Entity = pa,
-                    pa.Id,
-                    pa.Key
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<ProcessEntity>()
-                .WithQuery(() => p => new
-                {
-                    Entity = p,
-                    p.Id,
-                    p.Algorithm,
-                    p.Data,
-                    p.State,
-                    p.MachineName,
-                    p.ApplicationName,
-                    p.CreationDate,
-                    p.PlannedDate,
-                    p.CancelationDate,
-                    p.QueuedDate,
-                    p.ExecutionStart,
-                    p.ExecutionEnd,
-                    p.SuspendDate,
-                    p.ExceptionDate,
-                });
-
-            sb.Include<ProcessExceptionLineEntity>()
-                .WithQuery(() => p => new
-                {
-                    Entity = p,
-                    p.Process,
-                    p.Line,
-                    ((PackageLineEntity)p.Line!.Entity).Target,
-                    ((PackageLineEntity)p.Line!.Entity).Result,
-                    p.ElementInfo,
-                    p.Exception,
-                });
-
-            if (CacheLogic.ServerBroadcast != null)
+        sb.Include<ProcessAlgorithmSymbol>()
+            .WithQuery(() => pa => new
             {
-                CacheLogic.ServerBroadcast.Receive += (method, args) =>
-                {
-                    if (method == "ProcessChanged")
-                        ProcessRunner.WakeUp("ServerBroadcast Notification", null);
-                };
-            }
+                Entity = pa,
+                pa.Id,
+                pa.Key
+            });
 
-            PermissionLogic.RegisterPermissions(ProcessPermission.ViewProcessPanel);
+        sb.Include<ProcessEntity>()
+            .WithQuery(() => p => new
+            {
+                Entity = p,
+                p.Id,
+                p.Algorithm,
+                p.Data,
+                p.State,
+                p.MachineName,
+                p.ApplicationName,
+                p.CreationDate,
+                p.PlannedDate,
+                p.CancelationDate,
+                p.QueuedDate,
+                p.ExecutionStart,
+                p.ExecutionEnd,
+                p.SuspendDate,
+                p.ExceptionDate,
+            });
 
-            SymbolLogic<ProcessAlgorithmSymbol>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
+        sb.Include<ProcessExceptionLineEntity>()
+            .WithQuery(() => p => new
+            {
+                Entity = p,
+                p.Process,
+                p.Line,
+                ((PackageLineEntity)p.Line!.Entity).Target,
+                ((PackageLineEntity)p.Line!.Entity).Result,
+                p.ElementInfo,
+                p.Exception,
+            });
 
-            OperationLogic.AssertStarted(sb);
-
-            ProcessGraph.Register();
-
-            QueryLogic.Expressions.Register((ProcessAlgorithmSymbol p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
-            QueryLogic.Expressions.Register((ProcessAlgorithmSymbol p) => p.LastProcess(), ProcessMessage.LastProcess);
-
-            QueryLogic.Expressions.Register((IProcessDataEntity p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
-            QueryLogic.Expressions.Register((IProcessDataEntity p) => p.LastProcess(), ProcessMessage.LastProcess);
-
-            QueryLogic.Expressions.Register((ProcessEntity p) => p.ExceptionLines(), ProcessMessage.ExceptionLines);
-            QueryLogic.Expressions.Register((PackageLineEntity p) => p.ExceptionLines(), ProcessMessage.ExceptionLines);
-
-            PropertyAuthLogic.SetMaxAutomaticUpgrade(PropertyRoute.Construct((ProcessEntity p) => p.User), PropertyAllowed.Read);
-
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
-
-            sb.Schema.EntityEvents<ProcessAlgorithmSymbol>().PreDeleteSqlSync += SimpleTaskLogic_PreDeleteSqlSync;
-
+        if (CacheLogic.ServerBroadcast != null)
+        {
+            CacheLogic.ServerBroadcast.Receive += (method, args) =>
+            {
+                if (method == "ProcessChanged")
+                    ProcessRunner.WakeUp("ServerBroadcast Notification", null);
+            };
         }
+
+        PermissionLogic.RegisterPermissions(ProcessPermission.ViewProcessPanel);
+
+        SymbolLogic<ProcessAlgorithmSymbol>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
+
+        OperationLogic.AssertStarted(sb);
+
+        ProcessGraph.Register();
+
+        QueryLogic.Expressions.Register((ProcessAlgorithmSymbol p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
+        QueryLogic.Expressions.Register((ProcessAlgorithmSymbol p) => p.LastProcess(), ProcessMessage.LastProcess);
+
+        QueryLogic.Expressions.Register((IProcessDataEntity p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
+        QueryLogic.Expressions.Register((IProcessDataEntity p) => p.LastProcess(), ProcessMessage.LastProcess);
+
+        QueryLogic.Expressions.Register((ProcessEntity p) => p.ExceptionLines(), ProcessMessage.ExceptionLines);
+        QueryLogic.Expressions.Register((PackageLineEntity p) => p.ExceptionLines(), ProcessMessage.ExceptionLines);
+
+        PropertyAuthLogic.SetMaxAutomaticUpgrade(PropertyRoute.Construct((ProcessEntity p) => p.User), PropertyAllowed.Read);
+
+        ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+        sb.Schema.EntityEvents<ProcessAlgorithmSymbol>().PreDeleteSqlSync += SimpleTaskLogic_PreDeleteSqlSync;
+
     }
 
     internal static void WakeupExecuteInThisMachine(Dictionary<string, object> dic)

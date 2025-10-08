@@ -9,22 +9,22 @@ public static class ChartLogic
 {
     public static void Start(SchemaBuilder sb, bool googleMapsChartScripts, string[]? svgMapUrls = null)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        QueryLogic.Start(sb);
+
+        PermissionLogic.RegisterTypes(typeof(ChartPermission));
+
+        ColorPaletteLogic.Start(sb);
+        ChartScriptLogic.Start(sb, googleMapsChartScripts, svgMapUrls);
+        UserChartLogic.Start(sb);
+
+        if (sb.WebServerBuilder != null)
         {
-            QueryLogic.Start(sb);
-
-            PermissionLogic.RegisterTypes(typeof(ChartPermission));
-
-            ColorPaletteLogic.Start(sb);
-            ChartScriptLogic.Start(sb, googleMapsChartScripts, svgMapUrls);
-            UserChartLogic.Start(sb);
-
-            if (sb.WebServerBuilder != null)
-            {
-                ChartServer.Start(sb.WebServerBuilder);
-                OmniboxParser.Generators.Add(new ChartOmniboxResultGenerator());
-                OmniboxParser.Generators.Add(new UserChartOmniboxResultGenerator(UserChartLogic.Autocomplete));
-            }
+            ChartServer.Start(sb.WebServerBuilder);
+            OmniboxParser.Generators.Add(new ChartOmniboxResultGenerator());
+            OmniboxParser.Generators.Add(new UserChartOmniboxResultGenerator(UserChartLogic.Autocomplete));
         }
     }
 

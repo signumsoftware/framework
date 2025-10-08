@@ -195,252 +195,252 @@ public static class WorkflowLogic
 
     public static void Start(SchemaBuilder sb, Func<WorkflowConfigurationEmbedded> getConfiguration)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        PermissionLogic.RegisterPermissions(WorkflowPermission.ViewWorkflowPanel);
+        PermissionLogic.RegisterPermissions(WorkflowPermission.ViewCaseFlow);
+        PermissionLogic.RegisterPermissions(WorkflowPermission.WorkflowToolbarMenu);
+
+        WorkflowLogic.getConfiguration = getConfiguration;
+
+        UserAssetsImporter.Register<WorkflowEntity>("Workflow", WorkflowOperation.Save);
+        UserAssetsImporter.Register<WorkflowScriptEntity>("WorkflowScript", WorkflowScriptOperation.Save);
+        UserAssetsImporter.Register<WorkflowTimerConditionEntity>("WorkflowTimerCondition", WorkflowTimerConditionOperation.Save);
+        UserAssetsImporter.Register<WorkflowConditionEntity>("WorkflowCondition", WorkflowConditionOperation.Save);
+        UserAssetsImporter.Register<WorkflowActionEntity>("WorkflowAction", WorkflowActionOperation.Save);
+        UserAssetsImporter.Register<WorkflowScriptRetryStrategyEntity>("WorkflowScriptRetryStrategy", WorkflowScriptRetryStrategyOperation.Save);
+
+        ToolbarLogic.RegisterDelete<WorkflowEntity>(sb);
+
+        new ToolbarContentConfig<WorkflowEntity>
         {
-            PermissionLogic.RegisterPermissions(WorkflowPermission.ViewWorkflowPanel);
-            PermissionLogic.RegisterPermissions(WorkflowPermission.ViewCaseFlow);
-            PermissionLogic.RegisterPermissions(WorkflowPermission.WorkflowToolbarMenu);
-
-            WorkflowLogic.getConfiguration = getConfiguration;
-
-            UserAssetsImporter.Register<WorkflowEntity>("Workflow", WorkflowOperation.Save);
-            UserAssetsImporter.Register<WorkflowScriptEntity>("WorkflowScript", WorkflowScriptOperation.Save);
-            UserAssetsImporter.Register<WorkflowTimerConditionEntity>("WorkflowTimerCondition", WorkflowTimerConditionOperation.Save);
-            UserAssetsImporter.Register<WorkflowConditionEntity>("WorkflowCondition", WorkflowConditionOperation.Save);
-            UserAssetsImporter.Register<WorkflowActionEntity>("WorkflowAction", WorkflowActionOperation.Save);
-            UserAssetsImporter.Register<WorkflowScriptRetryStrategyEntity>("WorkflowScriptRetryStrategy", WorkflowScriptRetryStrategyOperation.Save);
-
-            ToolbarLogic.RegisterDelete<WorkflowEntity>(sb);
-
-            new ToolbarContentConfig<WorkflowEntity>
+            DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite).Workflow, a => a.Name),
+            IsAuthorized = lite =>
             {
-                DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite).Workflow, a => a.Name),
-                IsAuthorized = lite =>
+                var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite);
+                return ToolbarLogic.InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser();
+            }
+        }.Register();
+
+        sb.Include<WorkflowEntity>()
+            .WithConstruct(WorkflowOperation.Create)
+            .WithQuery(() => DynamicQueryCore.Auto(
+            from e in Database.Query<WorkflowEntity>()
+            select new
+            {
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.MainEntityType,
+                HasExpired = e.HasExpired(),
+                e.ExpirationDate,
+            })
+            .ColumnDisplayName(a => a.HasExpired, () => WorkflowMessage.HasExpired.NiceToString()))
+            .WithExpressionFrom((CaseActivityEntity ca) => ca.Workflow());
+
+        WorkflowGraph.Register();
+        QueryLogic.Expressions.Register((WorkflowEntity wf) => wf.WorkflowStartEvent());
+        QueryLogic.Expressions.Register((WorkflowEntity wf) => wf.HasExpired(), WorkflowMessage.HasExpired);
+        sb.AddIndex((WorkflowEntity wf) => wf.ExpirationDate);
+
+        EvalLogic.GetCustomErrors += GetCustomErrors;
+
+        Workflows = sb.GlobalLazy(() => Database.Query<WorkflowEntity>().ToFrozenDictionary(a => a.ToLite()),
+            new InvalidateWith(typeof(WorkflowEntity)));
+
+
+        sb.Include<WorkflowPoolEntity>()
+            .WithUniqueIndex(wp => new { wp.Workflow, wp.Name })
+            .WithSave(WorkflowPoolOperation.Save)
+            .WithDelete(WorkflowPoolOperation.Delete)
+            .WithExpressionFrom((WorkflowEntity p) => p.WorkflowPools())
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.BpmnElementId,
+                e.Workflow,
+            });
+
+        sb.Include<WorkflowLaneEntity>()
+            .WithUniqueIndex(wp => new { wp.Pool, wp.Name })
+            .WithSave(WorkflowLaneOperation.Save)
+            .WithDelete(WorkflowLaneOperation.Delete)
+            .WithExpressionFrom((WorkflowPoolEntity p) => p.WorkflowLanes())
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.BpmnElementId,
+                e.Pool,
+                e.Pool.Workflow,
+            });
+
+        sb.Include<WorkflowActivityEntity>()
+            .WithUniqueIndex(w => new { w.Lane, w.Name })
+            .WithSave(WorkflowActivityOperation.Save)
+            .WithDelete(WorkflowActivityOperation.Delete)
+            .WithExpressionFrom((WorkflowEntity p) => p.WorkflowActivities())
+            .WithExpressionFrom((WorkflowLaneEntity p) => p.WorkflowActivities())
+            .WithVirtualMList(wa => wa.BoundaryTimers, e => e.BoundaryOf, WorkflowEventOperation.Save, WorkflowEventOperation.Delete)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.BpmnElementId,
+                e.Comments,
+                e.Lane,
+                e.Lane.Pool.Workflow,
+            });
+
+        sb.Include<WorkflowEventEntity>()
+            .WithExpressionFrom((WorkflowEntity p) => p.WorkflowEvents())
+            .WithExpressionFrom((WorkflowLaneEntity p) => p.WorkflowEvents())
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Type,
+                e.Name,
+                e.BpmnElementId,
+                e.Lane,
+                e.Lane.Pool.Workflow,
+                e.RunRepeatedly,
+                e.DecisionOptionName,
+            });
+
+        AuthLogic.HasRuleOverridesEvent += role => Database.Query<WorkflowLaneEntity>().Any(a => a.Actors.Contains(role));
+
+
+        new Graph<WorkflowEventEntity>.Execute(WorkflowEventOperation.Save)
+        {
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (e, _) =>
+            {
+                if (e.Timer == null && e.Type.IsTimer())
+                    throw new InvalidOperationException(ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(Entity.NicePropertyName(() => e.Timer), Entity.NicePropertyName(() => e.Type), e.Type.NiceToString()));
+
+                if (e.Timer != null && !e.Type.IsTimer())
+                    throw new InvalidOperationException(ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(Entity.NicePropertyName(() => e.Timer), Entity.NicePropertyName(() => e.Type), e.Type.NiceToString()));
+
+                if (e.BoundaryOf == null && e.Type.IsBoundaryTimer())
+                    throw new InvalidOperationException(ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(Entity.NicePropertyName(() => e.BoundaryOf), Entity.NicePropertyName(() => e.Type), e.Type.NiceToString()));
+
+                if (e.BoundaryOf != null && !e.Type.IsBoundaryTimer())
+                    throw new InvalidOperationException(ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(Entity.NicePropertyName(() => e.BoundaryOf), Entity.NicePropertyName(() => e.Type), e.Type.NiceToString()));
+
+                e.Save();
+            },
+        }.Register();
+
+        new Graph<WorkflowEventEntity>.Delete(WorkflowEventOperation.Delete)
+        {
+            Delete = (e, _) =>
+            {
+
+                if (e.Type.IsScheduledStart())
                 {
-                    var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite);
-                    return ToolbarLogic.InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser();
+                    var scheduled = e.ScheduledTask();
+                    if (scheduled != null)
+                        WorkflowEventTaskLogic.DeleteWorkflowEventScheduledTask(scheduled);
                 }
-            }.Register();
 
-            sb.Include<WorkflowEntity>()
-                .WithConstruct(WorkflowOperation.Create)
-                .WithQuery(() => DynamicQueryCore.Auto(
-                from e in Database.Query<WorkflowEntity>()
-                select new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.MainEntityType,
-                    HasExpired = e.HasExpired(),
-                    e.ExpirationDate,
-                })
-                .ColumnDisplayName(a => a.HasExpired, () => WorkflowMessage.HasExpired.NiceToString()))
-                .WithExpressionFrom((CaseActivityEntity ca) => ca.Workflow());
+                e.Delete();
+            },
+        }.Register();
 
-            WorkflowGraph.Register();
-            QueryLogic.Expressions.Register((WorkflowEntity wf) => wf.WorkflowStartEvent());
-            QueryLogic.Expressions.Register((WorkflowEntity wf) => wf.HasExpired(), WorkflowMessage.HasExpired);
-            sb.AddIndex((WorkflowEntity wf) => wf.ExpirationDate);
-
-            EvalLogic.GetCustomErrors += GetCustomErrors;
-
-            Workflows = sb.GlobalLazy(() => Database.Query<WorkflowEntity>().ToFrozenDictionary(a => a.ToLite()),
-                new InvalidateWith(typeof(WorkflowEntity)));
-
-
-            sb.Include<WorkflowPoolEntity>()
-                .WithUniqueIndex(wp => new { wp.Workflow, wp.Name })
-                .WithSave(WorkflowPoolOperation.Save)
-                .WithDelete(WorkflowPoolOperation.Delete)
-                .WithExpressionFrom((WorkflowEntity p) => p.WorkflowPools())
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.BpmnElementId,
-                    e.Workflow,
-                });
-
-            sb.Include<WorkflowLaneEntity>()
-                .WithUniqueIndex(wp => new { wp.Pool, wp.Name })
-                .WithSave(WorkflowLaneOperation.Save)
-                .WithDelete(WorkflowLaneOperation.Delete)
-                .WithExpressionFrom((WorkflowPoolEntity p) => p.WorkflowLanes())
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.BpmnElementId,
-                    e.Pool,
-                    e.Pool.Workflow,
-                });
-
-            sb.Include<WorkflowActivityEntity>()
-                .WithUniqueIndex(w => new { w.Lane, w.Name })
-                .WithSave(WorkflowActivityOperation.Save)
-                .WithDelete(WorkflowActivityOperation.Delete)
-                .WithExpressionFrom((WorkflowEntity p) => p.WorkflowActivities())
-                .WithExpressionFrom((WorkflowLaneEntity p) => p.WorkflowActivities())
-                .WithVirtualMList(wa => wa.BoundaryTimers, e => e.BoundaryOf, WorkflowEventOperation.Save, WorkflowEventOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.BpmnElementId,
-                    e.Comments,
-                    e.Lane,
-                    e.Lane.Pool.Workflow,
-                });
-
-            sb.Include<WorkflowEventEntity>()
-                .WithExpressionFrom((WorkflowEntity p) => p.WorkflowEvents())
-                .WithExpressionFrom((WorkflowLaneEntity p) => p.WorkflowEvents())
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Type,
-                    e.Name,
-                    e.BpmnElementId,
-                    e.Lane,
-                    e.Lane.Pool.Workflow,
-                    e.RunRepeatedly,
-                    e.DecisionOptionName,
-                });
-
-            AuthLogic.HasRuleOverridesEvent += role => Database.Query<WorkflowLaneEntity>().Any(a => a.Actors.Contains(role));
-
-
-            new Graph<WorkflowEventEntity>.Execute(WorkflowEventOperation.Save)
+        sb.Include<WorkflowGatewayEntity>()
+            .WithSave(WorkflowGatewayOperation.Save)
+            .WithDelete(WorkflowGatewayOperation.Delete)
+            .WithExpressionFrom((WorkflowEntity p) => p.WorkflowGateways())
+            .WithExpressionFrom((WorkflowLaneEntity p) => p.WorkflowGateways())
+            .WithQuery(() => e => new
             {
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (e, _) =>
-                {
-                    if (e.Timer == null && e.Type.IsTimer())
-                        throw new InvalidOperationException(ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(Entity.NicePropertyName(() => e.Timer), Entity.NicePropertyName(() => e.Type), e.Type.NiceToString()));
+                Entity = e,
+                e.Id,
+                e.Type,
+                e.Name,
+                e.BpmnElementId,
+                e.Lane,
+                e.Lane.Pool.Workflow,
+            });
 
-                    if (e.Timer != null && !e.Type.IsTimer())
-                        throw new InvalidOperationException(ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(Entity.NicePropertyName(() => e.Timer), Entity.NicePropertyName(() => e.Type), e.Type.NiceToString()));
-
-                    if (e.BoundaryOf == null && e.Type.IsBoundaryTimer())
-                        throw new InvalidOperationException(ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(Entity.NicePropertyName(() => e.BoundaryOf), Entity.NicePropertyName(() => e.Type), e.Type.NiceToString()));
-
-                    if (e.BoundaryOf != null && !e.Type.IsBoundaryTimer())
-                        throw new InvalidOperationException(ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(Entity.NicePropertyName(() => e.BoundaryOf), Entity.NicePropertyName(() => e.Type), e.Type.NiceToString()));
-
-                    e.Save();
-                },
-            }.Register();
-
-            new Graph<WorkflowEventEntity>.Delete(WorkflowEventOperation.Delete)
+        sb.Include<WorkflowConnectionEntity>()
+            .WithSave(WorkflowConnectionOperation.Save)
+            .WithDelete(WorkflowConnectionOperation.Delete)
+            .WithExpressionFrom((WorkflowEntity p) => p.WorkflowConnections())
+            .WithExpressionFrom((WorkflowEntity p) => p.WorkflowMessageConnections(), null!)
+            .WithExpressionFrom((WorkflowPoolEntity p) => p.WorkflowConnections())
+            .WithExpressionFrom((IWorkflowNodeEntity p) => p.NextConnections(), null!)
+            .WithExpressionFrom((IWorkflowNodeEntity p) => p.PreviousConnections(), null!)
+            .WithQuery(() => e => new
             {
-                Delete = (e, _) =>
-                {
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.BpmnElementId,
+                e.From,
+                e.To,
+            });
 
-                    if (e.Type.IsScheduledStart())
+        WorkflowEventTaskEntity.GetWorkflowEntity = lite => WorkflowGraphLazy.Value.GetOrThrow(lite).Workflow;
+
+        WorkflowGraphLazy = sb.GlobalLazy(() =>
+        {
+            using (new EntityCache())
+            {
+                var events = Database.RetrieveAll<WorkflowEventEntity>().GroupToDictionary(a => a.Lane.Pool.Workflow.ToLite());
+                var gateways = Database.RetrieveAll<WorkflowGatewayEntity>().GroupToDictionary(a => a.Lane.Pool.Workflow.ToLite());
+                var activities = Database.RetrieveAll<WorkflowActivityEntity>().GroupToDictionary(a => a.Lane.Pool.Workflow.ToLite());
+                var connections = Database.RetrieveAll<WorkflowConnectionEntity>().GroupToDictionary(a => a.From.Lane.Pool.Workflow.ToLite());
+
+                var result = Database.RetrieveAll<WorkflowEntity>().ToFrozenDictionary(workflow => workflow.ToLite(), workflow =>
+                {
+                    var w = workflow.ToLite();
+                    var nodeGraph = new WorkflowNodeGraph
                     {
-                        var scheduled = e.ScheduledTask();
-                        if (scheduled != null)
-                            WorkflowEventTaskLogic.DeleteWorkflowEventScheduledTask(scheduled);
-                    }
+                        Workflow = workflow,
+                        Events = events.TryGetC(w).EmptyIfNull().ToDictionary(e => e.ToLite()),
+                        Gateways = gateways.TryGetC(w).EmptyIfNull().ToDictionary(g => g.ToLite()),
+                        Activities = activities.TryGetC(w).EmptyIfNull().ToDictionary(a => a.ToLite()),
+                        Connections = connections.TryGetC(w).EmptyIfNull().ToDictionary(c => c.ToLite()),
+                    };
 
-                    e.Delete();
-                },
-            }.Register();
-
-            sb.Include<WorkflowGatewayEntity>()
-                .WithSave(WorkflowGatewayOperation.Save)
-                .WithDelete(WorkflowGatewayOperation.Delete)
-                .WithExpressionFrom((WorkflowEntity p) => p.WorkflowGateways())
-                .WithExpressionFrom((WorkflowLaneEntity p) => p.WorkflowGateways())
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Type,
-                    e.Name,
-                    e.BpmnElementId,
-                    e.Lane,
-                    e.Lane.Pool.Workflow,
+                    nodeGraph.FillGraphs();
+                    return nodeGraph;
                 });
 
-            sb.Include<WorkflowConnectionEntity>()
-                .WithSave(WorkflowConnectionOperation.Save)
-                .WithDelete(WorkflowConnectionOperation.Delete)
-                .WithExpressionFrom((WorkflowEntity p) => p.WorkflowConnections())
-                .WithExpressionFrom((WorkflowEntity p) => p.WorkflowMessageConnections(), null!)
-                .WithExpressionFrom((WorkflowPoolEntity p) => p.WorkflowConnections())
-                .WithExpressionFrom((IWorkflowNodeEntity p) => p.NextConnections(), null!)
-                .WithExpressionFrom((IWorkflowNodeEntity p) => p.PreviousConnections(), null!)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.BpmnElementId,
-                    e.From,
-                    e.To,
-                });
+                return result;
+            }
+        }, new InvalidateWith(typeof(WorkflowConnectionEntity)));
+        WorkflowGraphLazy.OnReset += (e, args) => EvalLogic.OnInvalidated?.Invoke();
 
-            WorkflowEventTaskEntity.GetWorkflowEntity = lite => WorkflowGraphLazy.Value.GetOrThrow(lite).Workflow;
-
-            WorkflowGraphLazy = sb.GlobalLazy(() =>
+        Validator.PropertyValidator((WorkflowConnectionEntity c) => c.Condition).StaticPropertyValidation = (e, pi) =>
+        {
+            if (e.Condition != null && e.From != null)
             {
-                using (new EntityCache())
-                {
-                    var events = Database.RetrieveAll<WorkflowEventEntity>().GroupToDictionary(a => a.Lane.Pool.Workflow.ToLite());
-                    var gateways = Database.RetrieveAll<WorkflowGatewayEntity>().GroupToDictionary(a => a.Lane.Pool.Workflow.ToLite());
-                    var activities = Database.RetrieveAll<WorkflowActivityEntity>().GroupToDictionary(a => a.Lane.Pool.Workflow.ToLite());
-                    var connections = Database.RetrieveAll<WorkflowConnectionEntity>().GroupToDictionary(a => a.From.Lane.Pool.Workflow.ToLite());
+                var conditionType = (e.Condition.EntityOrNull ?? Conditions.Value.GetOrThrow(e.Condition)).MainEntityType;
+                var workflowType = e.From.Lane.Pool.Workflow.MainEntityType;
 
-                    var result = Database.RetrieveAll<WorkflowEntity>().ToFrozenDictionary(workflow => workflow.ToLite(), workflow =>
-                    {
-                        var w = workflow.ToLite();
-                        var nodeGraph = new WorkflowNodeGraph
-                        {
-                            Workflow = workflow,
-                            Events = events.TryGetC(w).EmptyIfNull().ToDictionary(e => e.ToLite()),
-                            Gateways = gateways.TryGetC(w).EmptyIfNull().ToDictionary(g => g.ToLite()),
-                            Activities = activities.TryGetC(w).EmptyIfNull().ToDictionary(a => a.ToLite()),
-                            Connections = connections.TryGetC(w).EmptyIfNull().ToDictionary(c => c.ToLite()),
-                        };
+                if (!conditionType.Is(workflowType))
+                    return WorkflowMessage.Condition0IsDefinedFor1Not2.NiceToString(conditionType, workflowType);
+            }
 
-                        nodeGraph.FillGraphs();
-                        return nodeGraph;
-                    });
+            return null;
+        };
 
-                    return result;
-                }
-            }, new InvalidateWith(typeof(WorkflowConnectionEntity)));
-            WorkflowGraphLazy.OnReset += (e, args) => EvalLogic.OnInvalidated?.Invoke();
+        StartWorkflowConditions(sb);
 
-            Validator.PropertyValidator((WorkflowConnectionEntity c) => c.Condition).StaticPropertyValidation = (e, pi) =>
-            {
-                if (e.Condition != null && e.From != null)
-                {
-                    var conditionType = (e.Condition.EntityOrNull ?? Conditions.Value.GetOrThrow(e.Condition)).MainEntityType;
-                    var workflowType = e.From.Lane.Pool.Workflow.MainEntityType;
+        StartWorkflowTimerConditions(sb);
 
-                    if (!conditionType.Is(workflowType))
-                        return WorkflowMessage.Condition0IsDefinedFor1Not2.NiceToString(conditionType, workflowType);
-                }
+        StartWorkflowActions(sb);
 
-                return null;
-            };
-
-            StartWorkflowConditions(sb);
-
-            StartWorkflowTimerConditions(sb);
-
-            StartWorkflowActions(sb);
-
-            StartWorkflowScript(sb);
-        }
+        StartWorkflowScript(sb);
     }
 
     public static void RegisterTranslatableRoutes()

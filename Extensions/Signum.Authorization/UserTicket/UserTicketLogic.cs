@@ -9,26 +9,26 @@ public static class UserTicketLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            IsStarted = true;
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            AuthLogic.AssertStarted(sb);
-            sb.Include<UserTicketEntity>()
-                .WithQuery(() => ut => new
-                {
-                    Entity = ut,
-                    ut.Id,
-                    ut.User,
-                    ut.Ticket,
-                    ut.ConnectionDate,
-                    ut.Device,
-                });
+        IsStarted = true;
 
-            QueryLogic.Expressions.Register((UserEntity u) => u.UserTickets(), () => typeof(UserTicketEntity).NicePluralName());
+        AuthLogic.AssertStarted(sb);
+        sb.Include<UserTicketEntity>()
+            .WithQuery(() => ut => new
+            {
+                Entity = ut,
+                ut.Id,
+                ut.User,
+                ut.Ticket,
+                ut.ConnectionDate,
+                ut.Device,
+            });
 
-            sb.Schema.EntityEvents<UserEntity>().Saving += UserTicketLogic_Saving;
-        }
+        QueryLogic.Expressions.Register((UserEntity u) => u.UserTickets(), () => typeof(UserTicketEntity).NicePluralName());
+
+        sb.Schema.EntityEvents<UserEntity>().Saving += UserTicketLogic_Saving;
     }
 
     static void UserTicketLogic_Saving(UserEntity user)

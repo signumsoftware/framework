@@ -56,33 +56,33 @@ public static class CacheLogic
         if (sb.WebServerBuilder != null)
             CacheServer.Start(sb.WebServerBuilder);
         
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        PermissionLogic.RegisterTypes(typeof(CachePermission));
+
+        sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
+
+        if (withSqlDependency == true && !Connector.Current.SupportsSqlDependency)
+            throw new InvalidOperationException("Sql Dependency is not supported by the current connection");
+
+        WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency;
+
+        if (serverBroadcast != null && WithSqlDependency)
+            throw new InvalidOperationException("cacheInvalidator is only necessary if SqlDependency is not enabled");
+
+        ServerBroadcast = serverBroadcast;
+        if(ServerBroadcast != null)
         {
-            PermissionLogic.RegisterTypes(typeof(CachePermission));
-
-            sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
-
-            if (withSqlDependency == true && !Connector.Current.SupportsSqlDependency)
-                throw new InvalidOperationException("Sql Dependency is not supported by the current connection");
-
-            WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency;
-
-            if (serverBroadcast != null && WithSqlDependency)
-                throw new InvalidOperationException("cacheInvalidator is only necessary if SqlDependency is not enabled");
-
-            ServerBroadcast = serverBroadcast;
-            if(ServerBroadcast != null)
-            {
-                ServerBroadcast!.Receive += ServerBroadcast_Receive;
-                sb.Schema.BeforeDatabaseAccess += () => ServerBroadcast!.StartIfNecessary();
-            }
-
-            sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
-            sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
-            sb.Schema.OnInvalidateCache += () => CacheLogic.ForceReset();
-
-            GlobalLazy.OnResetAll += systemLog => CacheLogic.ForceReset(systemLog);
+            ServerBroadcast!.Receive += ServerBroadcast_Receive;
+            sb.Schema.BeforeDatabaseAccess += () => ServerBroadcast!.StartIfNecessary();
         }
+
+        sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
+        sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
+        sb.Schema.OnInvalidateCache += () => CacheLogic.ForceReset();
+
+        GlobalLazy.OnResetAll += systemLog => CacheLogic.ForceReset(systemLog);
     }
 
     static void Schema_SchemaCompleted(SchemaBuilder sb)

@@ -36,110 +36,110 @@ public static class DashboardLogic
     {
 
 
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        PermissionLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
+
+
+        UserAssetsImporter.Register<DashboardEntity>("Dashboard", DashboardOperation.Save);
+
+        PartNames.AddRange(new Dictionary<string, Type>
         {
-            PermissionLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
+            {"ToolbarPart", typeof(ToolbarPartEntity)},
+            {"ImagePart", typeof(ImagePartEntity)},
+            {"SeparatorPart", typeof(SeparatorPartEntity)},
+            {"HealthCheckPart", typeof(HealthCheckPartEntity)},
+            {"TextPart", typeof(TextPartEntity)},
+            {"CustomPart", typeof(CustomPartEntity)},
+        });
 
-            
-            UserAssetsImporter.Register<DashboardEntity>("Dashboard", DashboardOperation.Save);
 
-            PartNames.AddRange(new Dictionary<string, Type>
+        AuthLogic.HasRuleOverridesEvent += role => Database.Query<DashboardEntity>().Any(a => a.Owner.Is(role));
+
+        SchedulerLogic.ExecuteTask.Register((DashboardEntity db, ScheduledTaskContext ctx) =>
+        {
+            db.Execute(DashboardOperation.RegenerateCachedQueries);
+            return null;
+        });
+
+        sb.Include<DashboardEntity>()
+            .WithLiteModel(d => new DashboardLiteModel { DisplayName = d.DisplayName, HideQuickLink = d.HideQuickLink })
+            .WithVirtualMList(a => a.TokenEquivalencesGroups, e => e.Dashboard)
+            .WithQuery(() => cp => new
             {
-                {"ToolbarPart", typeof(ToolbarPartEntity)},
-                {"ImagePart", typeof(ImagePartEntity)},
-                {"SeparatorPart", typeof(SeparatorPartEntity)},
-                {"HealthCheckPart", typeof(HealthCheckPartEntity)},
-                {"TextPart", typeof(TextPartEntity)},
-                {"CustomPart", typeof(CustomPartEntity)},
+                Entity = cp,
+                cp.Id,
+                cp.DisplayName,
+                cp.EntityType,
+                cp.Owner,
+                cp.DashboardPriority,
             });
 
+        sb.Schema.EntityEvents<DashboardEntity>().Retrieved += DashboardLogic_Retrieved;
 
-            AuthLogic.HasRuleOverridesEvent += role => Database.Query<DashboardEntity>().Any(a => a.Owner.Is(role));
+        sb.Schema.WhenIncluded<ToolbarEntity>(() =>
+        {
+            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(DashboardEntity));
 
-            SchedulerLogic.ExecuteTask.Register((DashboardEntity db, ScheduledTaskContext ctx) =>
+            ToolbarLogic.RegisterDelete<DashboardEntity>(sb);
+
+            new ToolbarContentConfig<DashboardEntity>
             {
-                db.Execute(DashboardOperation.RegenerateCachedQueries);
-                return null;
-            });
-
-            sb.Include<DashboardEntity>()
-                .WithLiteModel(d => new DashboardLiteModel { DisplayName = d.DisplayName, HideQuickLink = d.HideQuickLink })
-                .WithVirtualMList(a => a.TokenEquivalencesGroups, e => e.Dashboard)
-                .WithQuery(() => cp => new
-                {
-                    Entity = cp,
-                    cp.Id,
-                    cp.DisplayName,
-                    cp.EntityType,
-                    cp.Owner,
-                    cp.DashboardPriority,
-                });
-
-            sb.Schema.EntityEvents<DashboardEntity>().Retrieved += DashboardLogic_Retrieved;
-
-            sb.Schema.WhenIncluded<ToolbarEntity>(() =>
-            {
-                sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(DashboardEntity));
-
-                ToolbarLogic.RegisterDelete<DashboardEntity>(sb);
-
-                new ToolbarContentConfig<DashboardEntity>
-                {
-                    DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(Dashboards.Value.GetOrCreate(lite), a => a.DisplayName),
-                    IsAuthorized = lite => ToolbarLogic.InMemoryFilter(Dashboards.Value.GetOrCreate(lite)),
-                    DefaultIconColor = lite => Dashboards.Value.GetOrCreate(lite).IconColor,
-                    DefaultIconName = lite => Dashboards.Value.GetOrCreate(lite).IconName,
-                }.Register();
-            });
+                DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(Dashboards.Value.GetOrCreate(lite), a => a.DisplayName),
+                IsAuthorized = lite => ToolbarLogic.InMemoryFilter(Dashboards.Value.GetOrCreate(lite)),
+                DefaultIconColor = lite => Dashboards.Value.GetOrCreate(lite).IconColor,
+                DefaultIconName = lite => Dashboards.Value.GetOrCreate(lite).IconName,
+            }.Register();
+        });
 
 
-            if (cachedQueryAlgorithm != null)
-            {
-                FileTypeLogic.Register(CachedQueryFileType.CachedQuery, cachedQueryAlgorithm);
+        if (cachedQueryAlgorithm != null)
+        {
+            FileTypeLogic.Register(CachedQueryFileType.CachedQuery, cachedQueryAlgorithm);
 
-                sb.Include<CachedQueryEntity>()
-                    .WithExpressionFrom((DashboardEntity d) => d.CachedQueries())
-                      .WithQuery(() => e => new
-                      {
-                          Entity = e,
-                          e.Id,
-                          e.CreationDate,
-                          e.NumColumns,
-                          e.NumRows,
-                          e.QueryDuration,
-                          e.UploadDuration,
-                          e.File,
-                          UserAssetsCount = e.UserAssets.Count,
-                          e.Dashboard,
-                      });
-            }
+            sb.Include<CachedQueryEntity>()
+                .WithExpressionFrom((DashboardEntity d) => d.CachedQueries())
+                  .WithQuery(() => e => new
+                  {
+                      Entity = e,
+                      e.Id,
+                      e.CreationDate,
+                      e.NumColumns,
+                      e.NumRows,
+                      e.QueryDuration,
+                      e.UploadDuration,
+                      e.File,
+                      UserAssetsCount = e.UserAssets.Count,
+                      e.Dashboard,
+                  });
+        }
 
-            sb.Schema.EntityEvents<DashboardEntity>().PreUnsafeDelete += query =>
-            {
-                query.SelectMany(d => d.CachedQueries()).UnsafeDelete();
-                return null;
-            };
+        sb.Schema.EntityEvents<DashboardEntity>().PreUnsafeDelete += query =>
+        {
+            query.SelectMany(d => d.CachedQueries()).UnsafeDelete();
+            return null;
+        };
 
-            DashboardGraph.Register(cachedQueryAlgorithm != null);
+        DashboardGraph.Register(cachedQueryAlgorithm != null);
 
 
-            Dashboards = sb.GlobalLazy(() => Database.Query<DashboardEntity>().ToFrozenDictionary(a => a.ToLite()),
-                new InvalidateWith(typeof(DashboardEntity)));
+        Dashboards = sb.GlobalLazy(() => Database.Query<DashboardEntity>().ToFrozenDictionary(a => a.ToLite()),
+            new InvalidateWith(typeof(DashboardEntity)));
 
-            if (cachedQueryAlgorithm != null)
-                CachedQueriesCache = sb.GlobalLazy(() => Database.Query<CachedQueryEntity>().GroupToDictionary(a => a.Dashboard).ToFrozenDictionary(),
-                    new InvalidateWith(typeof(CachedQueryEntity)));
+        if (cachedQueryAlgorithm != null)
+            CachedQueriesCache = sb.GlobalLazy(() => Database.Query<CachedQueryEntity>().GroupToDictionary(a => a.Dashboard).ToFrozenDictionary(),
+                new InvalidateWith(typeof(CachedQueryEntity)));
 
-            DashboardsByType = sb.GlobalLazy(() => Dashboards.Value.Values.Where(a => a.EntityType != null)
-            .SelectCatch(d => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(d.EntityType!.Id), d.ToLite()))
-            .GroupToDictionary().ToFrozenDictionary(),
-                new InvalidateWith(typeof(DashboardEntity)));
+        DashboardsByType = sb.GlobalLazy(() => Dashboards.Value.Values.Where(a => a.EntityType != null)
+        .SelectCatch(d => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(d.EntityType!.Id), d.ToLite()))
+        .GroupToDictionary().ToFrozenDictionary(),
+            new InvalidateWith(typeof(DashboardEntity)));
 
-            if (sb.WebServerBuilder != null)
-            {
-                DashboardServer.Start(sb.WebServerBuilder);
-                OmniboxParser.Generators.Add(new DashboardOmniboxResultGenerator(DashboardLogic.Autocomplete));
-            }
+        if (sb.WebServerBuilder != null)
+        {
+            DashboardServer.Start(sb.WebServerBuilder);
+            OmniboxParser.Generators.Add(new DashboardOmniboxResultGenerator(DashboardLogic.Autocomplete));
         }
     }
 

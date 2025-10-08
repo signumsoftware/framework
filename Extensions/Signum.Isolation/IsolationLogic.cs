@@ -17,59 +17,59 @@ public static class IsolationLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        ExecutionMode.OnSetIsolation += entity =>
         {
-            ExecutionMode.OnSetIsolation += entity =>
-            {
-                var iso = entity.TryIsolation();
+            var iso = entity.TryIsolation();
 
-                if (iso == null)
-                    return null;
-
-                return IsolationEntity.Override(iso);
-            };
-
-            sb.Include<IsolationEntity>()
-                .WithSave(IsolationOperation.Save)
-                .WithQuery(() => iso => new
-                {
-                    Entity = iso,
-                    iso.Id,
-                    iso.Name
-                });
-
-
-            UserWithClaims.FillClaims += (userWithClaims, user) =>
-            {
-                userWithClaims.Claims["Isolation"] = ((Entity)user).TryIsolation();
-            };
-
-            Schema.Current.AttachToUniqueFilter += entity =>
-            {
-                var type = entity.GetType();
-                var hasIsolationMixin = MixinDeclarations.IsDeclared(type, typeof(IsolationMixin));
-
-                return hasIsolationMixin == false ? null :
-                    e => e.Mixin<IsolationMixin>().Isolation.Is(entity.Mixin<IsolationMixin>().Isolation);
-            };
-
-            sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;
-            sb.Schema.SchemaCompleted += AssertIsolationStrategies;
-            OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
-
-            Isolations = sb.GlobalLazy(() => Database.RetrieveAllLite<IsolationEntity>(),
-                new InvalidateWith(typeof(IsolationEntity)));
-
-
-            Validator.OverridePropertyValidator((IsolationMixin m) => m.Isolation).StaticPropertyValidation += (mi, pi) =>
-            {
-                if (strategies.GetOrThrow(mi.MainEntity.GetType()) == IsolationStrategy.Isolated && mi.Isolation == null)
-                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
-
+            if (iso == null)
                 return null;
-            };
-            IsStarted = true;
-        }
+
+            return IsolationEntity.Override(iso);
+        };
+
+        sb.Include<IsolationEntity>()
+            .WithSave(IsolationOperation.Save)
+            .WithQuery(() => iso => new
+            {
+                Entity = iso,
+                iso.Id,
+                iso.Name
+            });
+
+
+        UserWithClaims.FillClaims += (userWithClaims, user) =>
+        {
+            userWithClaims.Claims["Isolation"] = ((Entity)user).TryIsolation();
+        };
+
+        Schema.Current.AttachToUniqueFilter += entity =>
+        {
+            var type = entity.GetType();
+            var hasIsolationMixin = MixinDeclarations.IsDeclared(type, typeof(IsolationMixin));
+
+            return hasIsolationMixin == false ? null :
+                e => e.Mixin<IsolationMixin>().Isolation.Is(entity.Mixin<IsolationMixin>().Isolation);
+        };
+
+        sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;
+        sb.Schema.SchemaCompleted += AssertIsolationStrategies;
+        OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
+
+        Isolations = sb.GlobalLazy(() => Database.RetrieveAllLite<IsolationEntity>(),
+            new InvalidateWith(typeof(IsolationEntity)));
+
+
+        Validator.OverridePropertyValidator((IsolationMixin m) => m.Isolation).StaticPropertyValidation += (mi, pi) =>
+        {
+            if (strategies.GetOrThrow(mi.MainEntity.GetType()) == IsolationStrategy.Isolated && mi.Isolation == null)
+                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+            return null;
+        };
+        IsStarted = true;
     }
 
     static IDisposable? OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity? entity, object?[]? args)
