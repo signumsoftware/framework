@@ -103,6 +103,7 @@ export namespace WorkflowClient {
     EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ token: WorkflowActivityEntity.token(e => e.entity.subWorkflow), operation: "DistinctTo", value: null }] });
     EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
     EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
+    EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowEventTaskEntity });
 
     Navigator.addSettings(new EntitySettings(TimeSpanEmbedded, e => import('./Workflow/TimeSpan')));
     Constructor.registerConstructor(TimeSpanEmbedded, () => TimeSpanEmbedded.New({ days: 0, hours: 0, minutes: 0, seconds: 0 }));
@@ -141,6 +142,11 @@ export namespace WorkflowClient {
       { token: t.append(p => p.entity.eval.script), type: "Code" },
     ]);
 
+    EvalClient.Options.registerDynamicPanelSearch(WorkflowEventTaskEntity, t => [
+      { token: t.append(p => p.entity.event.entity!.name), type: "Text" },
+      { token: t.append(p => p.entity.condition!.script), type: "Code" },
+      { token: t.append(p => p.entity.action!.script), type: "Code" },
+    ]);
 
     QuickLinkClient.registerQuickLink(CaseActivityEntity, new QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), ctx => {
       API.fetchCaseFlowPack(ctx.lite)
