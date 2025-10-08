@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -668,10 +669,21 @@ public static class StringExtensions
 
     public static string Indent(this string str, int numChars)
     {
-        if (numChars >= 0)
+        if (numChars > 0)
             return str.Indent(new string(' ', numChars)); // Call the string overload
+        else if (numChars < 0)
+            return Unindent(str, -numChars);
+        return str;
+    }
 
-        return Unindent(str, -numChars);
+    public static string Indent(this string str, int numChars, char indentChar)
+    {
+        if (numChars > 0)
+            return Indent(str, new string(indentChar, numChars));
+        else if (numChars < 0)
+            return Unindent(str, -numChars, indentChar);
+
+        return str;
     }
 
     public static string Indent(this string str, string space)
@@ -699,7 +711,7 @@ public static class StringExtensions
     }
 
 
-    public static string Unindent(this string str, int removeSpaces)
+    public static string Unindent(this string str, int removeSpaces, char indentChar = ' ')
     {
         var sb = new System.Text.StringBuilder(str.Length);
         int i = 0;
@@ -709,7 +721,7 @@ public static class StringExtensions
             if (atLineStart)
             {
                 int removed = 0;
-                while (removed < removeSpaces && i < str.Length && str[i] == ' ')
+                while (removed < removeSpaces && i < str.Length && str[i] == indentChar)
                 {
                     i++;
                     removed++;
@@ -722,12 +734,6 @@ public static class StringExtensions
                 sb.Append(c);
                 if (c == '\n')
                     atLineStart = true;
-                else if (c == '\r' && i + 1 < str.Length && str[i + 1] == '\n')
-                {
-                    sb.Append('\n');
-                    i++;
-                    atLineStart = true;
-                }
                 i++;
             }
         }

@@ -19,7 +19,7 @@ class Upgrade_20251008_NotDefinedToAlreadyDefined : CodeUpgradeBase
                         return;
 
                     {body.Unindent(4)}
-                    """
+                    """;
                 }
             );
         });
