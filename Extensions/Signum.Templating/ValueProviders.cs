@@ -1,6 +1,8 @@
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 using Signum.DynamicQuery.Tokens;
 using Signum.UserAssets;
+using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System.Collections;
 using System.Globalization;
@@ -167,6 +169,8 @@ public abstract class ValueProviderBase
                 return new GlobalValueProvider(token, tp) { Variable = variable };
             case "d":
                 return new DateValueProvider(token, tp) { Variable = variable };
+            case "n":
+                return new NiceNameValueProvider(token, tp.ModelType, tp) { Variable = variable };
             default:
                 tp.AddError(false, $"{type} is not a recognized value provider (q:Query, t:Translate, m:Model, g:Global or just blank)");
                 return null;
@@ -679,6 +683,70 @@ public class ModelValueProvider : ValueProviderBase
     public override bool Equals(object? obj) => obj is ModelValueProvider mvp && Equals(mvp.fieldOrPropertyChain, fieldOrPropertyChain);
 }
 
+/// <summary>
+/// like @[n:Message]
+/// </summary>
+public class NiceNameValueProvider : ValueProviderBase
+{
+    string? fieldOrMessageChain;
+    PropertyInfo? messageProperty;
+    string? memberName;
+
+    public NiceNameValueProvider(string fieldOrMessageChain, Type? modelType, ITemplateParser tp)
+    {
+        var parts = fieldOrMessageChain.Split(".");
+        this.fieldOrMessageChain = fieldOrMessageChain;
+
+        var messageProperty = modelType?.GetProperty(parts[0]);
+        if (messageProperty == null)
+        {
+            tp.AddError(false, TemplateTokenMessage.ImpossibleToAccess0BecauseTheTemplateHAsNo1.NiceToString(fieldOrMessageChain, "Model"));
+            return;
+        }
+        this.messageProperty = messageProperty;
+        this.memberName = parts[1];
+    }
+
+    public override object? GetValue(TemplateParameters p)
+    {
+        var model = p.GetModel();
+        if (this.messageProperty == null || this.memberName == null || model == null) return null;
+
+        try
+        {
+            var messageType = (Type?)messageProperty.GetValue(model);
+            if (messageType == null) return null;
+
+            var member = (MemberInfo?)messageType.GetProperty(memberName) ?? messageType.GetField(memberName);
+            if (member == null) return null;
+            
+            object? value = member is PropertyInfo pi ? pi.GetValue(null) : ((FieldInfo)member).GetValue(null);
+            return value is Enum ev ? ev.NiceToString() : value?.ToString();
+        }
+        catch (Exception ex)
+        {
+            return $"Error getting {fieldOrMessageChain}: {ex.Message}";
+        }
+    }
+
+    public override void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
+    {
+        sb.Append("n:");
+        sb.Append(fieldOrMessageChain);
+    }
+
+    public override Type? Type => typeof(string);
+
+    public override string? Format => null;
+
+    public override bool Equals(object? obj) => obj is NiceNameValueProvider nvp && Equals(nvp.fieldOrMessageChain, fieldOrMessageChain);
+
+    public override int GetHashCode() => fieldOrMessageChain?.GetHashCode() ?? 0;
+
+    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText) {}
+
+    public override void FillQueryTokens(List<QueryToken> list, bool forForeach) {}
+}
 
 /// <summary>
 /// like @[g:Now]
