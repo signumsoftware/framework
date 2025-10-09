@@ -657,52 +657,49 @@ public class DynamicTypeLogicGenerator
             sb.AppendLine("using {0};".FormatWith(item));
 
         sb.AppendLine();
-        sb.AppendLine($"namespace {Namespace}");
-        sb.AppendLine($"{{");
+        sb.AppendLine($"namespace {Namespace};");
 
         var complexFields = Def.QueryFields.EmptyIfNull().Select(a => GetComplexQueryField(a)).NotNull().ToList();
         var complexNotTranslated = complexFields.Where(a => AlreadyTranslated?.TryGetC(a) == null).ToList();
         if (complexNotTranslated.Any())
         {
-            sb.AppendLine($"    public enum CodeGenQuery{TypeName}Message");
-            sb.AppendLine($"    {{");
+            sb.AppendLine($"public enum CodeGenQuery{TypeName}Message");
+            sb.AppendLine($"{{");
             foreach (var item in complexNotTranslated)
-                sb.AppendLine($"        " + item + ",");
-            sb.AppendLine($"    }}");
+                sb.AppendLine($"    " + item + ",");
+            sb.AppendLine($"}}");
         }
 
-        sb.AppendLine($"    public static class {TypeName}Logic");
+        sb.AppendLine($"public static class {TypeName}Logic");
+        sb.AppendLine($"{{");
+        sb.AppendLine($"    public static void Start(SchemaBuilder sb)");
         sb.AppendLine($"    {{");
-        sb.AppendLine($"        public static void Start(SchemaBuilder sb)");
-        sb.AppendLine($"        {{");
-        sb.AppendLine($"            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))");
-        sb.AppendLine($"            {{");
+        sb.AppendLine($"        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))");
+        sb.AppendLine($"            return;");
 
         if (BaseType == DynamicBaseType.Entity)
         {
-            sb.AppendLine(GetInclude().Indent(16));
+            sb.AppendLine(GetInclude().Indent(8));
         }
 
         if (Def.CustomStartCode != null)
-            sb.AppendLine(Def.CustomStartCode.Code.Indent(16));
+            sb.AppendLine(Def.CustomStartCode.Code.Indent(8));
 
         if (BaseType == DynamicBaseType.Entity)
         {
             if (complexFields.HasItems())
-                sb.AppendLine(RegisterComplexQuery(complexFields).Indent(16));
+                sb.AppendLine(RegisterComplexQuery(complexFields).Indent(8));
 
             var complexOperations = RegisterComplexOperations();
             if (complexOperations != null)
-                sb.AppendLine(complexOperations.Indent(16));
+                sb.AppendLine(complexOperations.Indent(8));
         }
 
-        sb.AppendLine($"            }}");
-        sb.AppendLine($"        }}");
+        sb.AppendLine($"    }}");
 
         if (Def.CustomLogicMembers != null)
-            sb.AppendLine(Def.CustomLogicMembers.Code.Indent(8));
+            sb.AppendLine(Def.CustomLogicMembers.Code.Indent(4));
 
-        sb.AppendLine($"    }}");
         sb.AppendLine($"}}");
 
         return sb.ToString();
