@@ -206,7 +206,7 @@ export function TranslatedInstance(p: { ins: TranslatedInstanceClient.Translated
                         <td className="leftCell">{c}</td>
                         <td className="monospaceCell">
                           {p.currentCulture == null || p.currentCulture == c ?
-                            <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={pair?.translatedText ?? ""}
+                            <TextArea style={{ height: "24px", width: "90%" }} autoResize={true} minHeight="24px" value={pair?.translatedText ?? ""}
                               onChange={handleChange}
                               onBlur={handleChange} /> :
 
