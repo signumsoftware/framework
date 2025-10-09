@@ -22,127 +22,127 @@ public static class PackageLogic
 
     public static void Start(SchemaBuilder sb, bool packages, bool packageOperations)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        ProcessLogic.AssertStarted(sb);
+
+        sb.Settings.AssertImplementedBy((ProcessExceptionLineEntity pel) => pel.Line, typeof(PackageLineEntity));
+
+        sb.Include<PackageLineEntity>()
+            .WithQuery(() => pl => new
+            {
+                Entity = pl,
+                pl.Package,
+                pl.Id,
+                pl.Target,
+                pl.Result,
+                pl.FinishTime,
+            });
+
+        QueryLogic.Queries.Register(PackageQuery.PackageLineLastProcess, () =>
+            from pl in Database.Query<PackageLineEntity>()
+            let p = pl.Package.Entity.LastProcess()
+            select new
+            {
+                Entity = pl,
+                pl.Package,
+                pl.Id,
+                pl.Target,
+                pl.Result,
+                pl.FinishTime,
+                LastProcess = p,
+                Exception = pl.Exception(p),
+            });
+
+
+        QueryLogic.Expressions.Register((PackageEntity p) => p.Lines(), ProcessMessage.Lines);
+
+        if(packages || packageOperations)
         {
-            ProcessLogic.AssertStarted(sb);
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += typeEntity =>
+            {
+                var targetLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => pl.Target.GetType().ToTypeEntity().Is(typeEntity)));
+                var resultLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => pl.Result!.Entity.GetType().ToTypeEntity().Is(typeEntity)));
+                return SqlPreCommand.Combine(Spacing.Simple, targetLines, resultLines);
+            };
+        }
 
-            sb.Settings.AssertImplementedBy((ProcessExceptionLineEntity pel) => pel.Line, typeof(PackageLineEntity));
 
-            sb.Include<PackageLineEntity>()
-                .WithQuery(() => pl => new
+
+        if (packages)
+        {
+            sb.Settings.AssertImplementedBy((PackageLineEntity pl) => pl.Package, typeof(PackageEntity));
+            sb.Settings.AssertImplementedBy((ProcessEntity pe) => pe.Data, typeof(PackageEntity));
+
+            sb.Include<PackageEntity>()
+                .WithQuery(() => pk => new
                 {
-                    Entity = pl,
-                    pl.Package,
-                    pl.Id,
-                    pl.Target,
-                    pl.Result,
-                    pl.FinishTime,
+                    Entity = pk,
+                    pk.Id,
+                    pk.Name,
                 });
 
-            QueryLogic.Queries.Register(PackageQuery.PackageLineLastProcess, () =>
-                from pl in Database.Query<PackageLineEntity>()
-                let p = pl.Package.Entity.LastProcess()
+            QueryLogic.Queries.Register(PackageQuery.PackageLastProcess, () =>
+                from pk in Database.Query<PackageEntity>()
+                let pe = pk.LastProcess()
                 select new
                 {
-                    Entity = pl,
-                    pl.Package,
-                    pl.Id,
-                    pl.Target,
-                    pl.Result,
-                    pl.FinishTime,
-                    LastProcess = p,
-                    Exception = pl.Exception(p),
+                    Entity = pk,
+                    pk.Id,
+                    pk.Name,
+                    NumLines = pk.Lines().Count(),
+                    LastProcess = pe,
+                    NumErrors = pk.Lines().Count(l => l.Exception(pe) != null),
                 });
-            
-            
-            QueryLogic.Expressions.Register((PackageEntity p) => p.Lines(), ProcessMessage.Lines);
 
-            if(packages || packageOperations)
-            {
-                sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += typeEntity =>
-                {
-                    var targetLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => pl.Target.GetType().ToTypeEntity().Is(typeEntity)));
-                    var resultLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => pl.Result!.Entity.GetType().ToTypeEntity().Is(typeEntity)));
-                    return SqlPreCommand.Combine(Spacing.Simple, targetLines, resultLines);
-                };
-            }
-        
-
-
-            if (packages)
-            {
-                sb.Settings.AssertImplementedBy((PackageLineEntity pl) => pl.Package, typeof(PackageEntity));
-                sb.Settings.AssertImplementedBy((ProcessEntity pe) => pe.Data, typeof(PackageEntity));
-
-                sb.Include<PackageEntity>()
-                    .WithQuery(() => pk => new
-                    {
-                        Entity = pk,
-                        pk.Id,
-                        pk.Name,
-                    });
-
-                QueryLogic.Queries.Register(PackageQuery.PackageLastProcess, () =>
-                    from pk in Database.Query<PackageEntity>()
-                    let pe = pk.LastProcess()
-                    select new
-                    {
-                        Entity = pk,
-                        pk.Id,
-                        pk.Name,
-                        NumLines = pk.Lines().Count(),
-                        LastProcess = pe,
-                        NumErrors = pk.Lines().Count(l => l.Exception(pe) != null),
-                    });
-
-                ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages<PackageEntity>;
-            }
-
-            if (packageOperations)
-            {
-                sb.Settings.AssertImplementedBy((PackageLineEntity pl) => pl.Package, typeof(PackageOperationEntity));
-                sb.Settings.AssertImplementedBy((ProcessEntity pe) => pe.Data, typeof(PackageOperationEntity));
-
-                sb.Include<PackageOperationEntity>()
-                      .WithQuery(() => pk => new
-                      {
-                          Entity = pk,
-                          pk.Id,
-                          pk.Name,
-                          pk.Operation,
-                      });
-
-                QueryLogic.Queries.Register(PackageQuery.PackageOperationLastProcess, () =>
-                    from p in Database.Query<PackageOperationEntity>()
-                    let pe = p.LastProcess()
-                    select new
-                    {
-                        Entity = p,
-                        p.Id,
-                        p.Name,
-                        p.Operation,
-                        NumLines = p.Lines().Count(),
-                        LastProcess = pe,
-                        NumErrors = p.Lines().Count(l => l.Exception(pe) != null),
-                    });
-
-                ProcessLogic.Register(PackageOperationProcess.PackageOperation, new PackageOperationAlgorithm());
-                ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages<PackageOperationEntity>;
-
-                sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += operation =>
-                {
-                    if (!Administrator.ExistsTable<PackageOperationEntity>() || !Database.Query<PackageOperationEntity>().Any(a => a.Operation.Is(operation)))
-                        return null;
-
-                    var processExceptionLine = Administrator.UnsafeDeletePreCommand(Database.Query<ProcessExceptionLineEntity>().Where(pel => ((PackageOperationEntity)pel.Process.Entity.Data!).Operation.Is(operation)));
-                    var process = Administrator.UnsafeDeletePreCommand(Database.Query<ProcessEntity>().Where(p => ((PackageOperationEntity)p.Data!).Operation.Is(operation)));
-                    var packageLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => ((PackageOperationEntity)pl.Package.Entity).Operation.Is(operation)));
-                    var packageOperation = Administrator.UnsafeDeletePreCommand(Database.Query<PackageOperationEntity>().Where(po => po.Operation.Is(operation)));
-                    return SqlPreCommand.Combine(Spacing.Simple, processExceptionLine, process, packageLines, packageOperation);
-                };
-            }
-
+            ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages<PackageEntity>;
         }
+
+        if (packageOperations)
+        {
+            sb.Settings.AssertImplementedBy((PackageLineEntity pl) => pl.Package, typeof(PackageOperationEntity));
+            sb.Settings.AssertImplementedBy((ProcessEntity pe) => pe.Data, typeof(PackageOperationEntity));
+
+            sb.Include<PackageOperationEntity>()
+                  .WithQuery(() => pk => new
+                  {
+                      Entity = pk,
+                      pk.Id,
+                      pk.Name,
+                      pk.Operation,
+                  });
+
+            QueryLogic.Queries.Register(PackageQuery.PackageOperationLastProcess, () =>
+                from p in Database.Query<PackageOperationEntity>()
+                let pe = p.LastProcess()
+                select new
+                {
+                    Entity = p,
+                    p.Id,
+                    p.Name,
+                    p.Operation,
+                    NumLines = p.Lines().Count(),
+                    LastProcess = pe,
+                    NumErrors = p.Lines().Count(l => l.Exception(pe) != null),
+                });
+
+            ProcessLogic.Register(PackageOperationProcess.PackageOperation, new PackageOperationAlgorithm());
+            ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages<PackageOperationEntity>;
+
+            sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += operation =>
+            {
+                if (!Administrator.ExistsTable<PackageOperationEntity>() || !Database.Query<PackageOperationEntity>().Any(a => a.Operation.Is(operation)))
+                    return null;
+
+                var processExceptionLine = Administrator.UnsafeDeletePreCommand(Database.Query<ProcessExceptionLineEntity>().Where(pel => ((PackageOperationEntity)pel.Process.Entity.Data!).Operation.Is(operation)));
+                var process = Administrator.UnsafeDeletePreCommand(Database.Query<ProcessEntity>().Where(p => ((PackageOperationEntity)p.Data!).Operation.Is(operation)));
+                var packageLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => ((PackageOperationEntity)pl.Package.Entity).Operation.Is(operation)));
+                var packageOperation = Administrator.UnsafeDeletePreCommand(Database.Query<PackageOperationEntity>().Where(po => po.Operation.Is(operation)));
+                return SqlPreCommand.Combine(Spacing.Simple, processExceptionLine, process, packageLines, packageOperation);
+            };
+        }
+
     }
 
     public static void ExceptionLogic_DeletePackages<T>(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token) where T : PackageEntity

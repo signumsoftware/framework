@@ -88,6 +88,7 @@ export interface SearchControlLoadedProps {
   hideButtonBar: boolean;
   hideFullScreenButton: boolean;
   showHeader: boolean | "PinnedFilters";
+  avoidTableFooterContainer: boolean;
   pinnedFilterVisible?: (fop: FilterOptionParsed) => boolean;
   showBarExtension: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
@@ -569,7 +570,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
 
-        <div className="sf-table-footer-container  my-3 p-3 pb-1 bg-body rounded shadow-sm">
+        <div className={p.avoidTableFooterContainer ? undefined : "sf-table-footer-container  my-3 p-3 pb-1 bg-body rounded shadow-sm"}>
           {p.showHeader == true && !p.largeToolbarButtons && this.renderToolBar()}
           {this.state.isMobile == true && this.state.viewMode == "Mobile" ? this.renderMobile() :
             <>
@@ -924,7 +925,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         <Dropdown
           show={this.state.isSelectOpen}
           onToggle={this.handleSelectedToggle}>
-          <Dropdown.Toggle id="selectedButton" variant="light" className="sf-query-button sf-tm-selected ms-2" disabled={this.state.selectedRows!.length == 0}>
+          <Dropdown.Toggle id="selectedButton" title={SearchMessage.OperationsForSelectedElements.niceToString()} variant="light" className="sf-query-button sf-tm-selected ms-2" disabled={this.state.selectedRows!.length == 0}>
             {title}
           </Dropdown.Toggle>
           <Dropdown.Menu>
@@ -1240,7 +1241,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               onKeyDown={this.handleMenuFilterKeyDown}
               onChange={this.handleMenuFilterChange} />
           </AutoFocus>}
-        {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+          <div style={{ position:"relative", maxHeight: "calc(100vh - 400px)", overflow: "auto" }}>
+            {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+          </div>
       </ContextMenu>
     );
   }
@@ -1850,6 +1853,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         c.cellFormatter.formatter(getRowValue(fctx.row, c.resultIndex), fctx, c);
   }
 
+  rowRefs: React.RefObject<HTMLTableRowElement | null>[] = [];
+
   renderRows(): React.ReactNode {
     const columnOptions = this.getVisibleColumn();
     const columnsCount = columnOptions.length +
@@ -1858,46 +1863,44 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const resultTable = this.state.resultTable;
     if (!resultTable) {
-      if (this.props.findOptions.pagination.mode == "All" && this.props.showFooter)
-        return <tr><td colSpan={columnsCount} className="text-danger">{SearchMessage.ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton.niceToString()}</td></tr>;
+      if (this.props.findOptions.pagination.mode === "All" && this.props.showFooter)
+        return <tr tabIndex={0}><td colSpan={columnsCount} className="text-danger">{SearchMessage.ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton.niceToString()}</td></tr>;
 
-      return <tr><td colSpan={columnsCount}>{JavascriptMessage.searchForResults.niceToString()}</td></tr>;
+      return <tr tabIndex={0}><td colSpan={columnsCount}>{JavascriptMessage.searchForResults.niceToString()}</td></tr>;
     }
 
     var noResultsElement = this.getNoResultsElement();
     if (noResultsElement != null)
-      return <tr><td colSpan={columnsCount}>{noResultsElement}</td></tr>;
+      return <tr tabIndex={0}><td colSpan={columnsCount}>{noResultsElement}</td></tr>;
 
     const entityFormatter = this.getEntityFormatter();
     const columns = this.getVisibleColumnsWithFormatter();
-
     var anyCombineEquals = columns.some(a => a.column.combineRows != null);
+
+    // Row refs für Fokus-Handling erstellen
+    this.rowRefs = resultTable.rows.map(() => React.createRef<HTMLTableRowElement>());
 
     return resultTable.rows.map((row, i, rows) => {
       const mark = this.getMarkedRow(row);
-      const markClassName = mark?.status == "Success" ? "sf-entity-ctxmenu-success" :
-        mark?.status == "Warning" ? "sf-row-warning" :
-          mark?.status == "Error" ? "sf-row-danger" :
-            mark?.status == "Muted" ? "text-muted" :
+      const markClassName = mark?.status === "Success" ? "sf-entity-ctxmenu-success" :
+        mark?.status === "Warning" ? "sf-row-warning" :
+          mark?.status === "Error" ? "sf-row-danger" :
+            mark?.status === "Muted" ? "text-muted" :
               undefined;
 
-
       const selected = this.state.selectedRows?.contains(row);
-
       var ra = this.getRowAttributes(row);
 
       function equals(a: unknown, b: unknown) {
-
         return a === b || is(a as any, b as any, false, false);
       }
 
       function calculateRowSpan(getVal: (row: ResultRow) => unknown): number | undefined {
         const value = getVal(row);
-        let rowSpan = 1
+        let rowSpan = 1;
         while (i + rowSpan < rows.length && equals(getVal(rows[rowSpan + i]), value))
           rowSpan++;
-
-        return rowSpan == 1 ? undefined : rowSpan;
+        return rowSpan === 1 ? undefined : rowSpan;
       }
 
       var fctx: Finder.CellFormatterContext = {
@@ -1910,39 +1913,55 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       };
 
       var tr = (
-        <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
+        <tr
+          key={i}
+          tabIndex={0}
+          ref={this.rowRefs[i]}
+          data-row-index={i}
+          data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
+          onKeyDown={e => {
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              this.rowRefs[i + 1]?.current?.focus();
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              this.rowRefs[i - 1]?.current?.focus();
+            }
+          }}
           {...ra}
-          className={classes(markClassName, ra?.className, selected && "sf-row-selected")}>
+          className={classes(markClassName, ra?.className, selected && "sf-row-selected")}
+        >
           {this.props.allowSelection &&
             <td className="centered-cell">
               {this.props.selectionFormatter ? this.props.selectionFormatter(this, row, i) :
-                <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={e => this.handleChecked(e, i)} data-index={i} />}
+                <input type="checkbox"
+                  className="sf-td-selection form-check-input"
+                  checked={this.state.selectedRows!.contains(row)}
+                  onChange={e => this.handleChecked(e, i)}
+                  data-index={i} />}
             </td>
           }
 
           {this.hasEntityColumn() &&
-            (
-              anyCombineEquals && i != 0 && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
-                <td className={entityFormatter.cellClass} rowSpan={anyCombineEquals ? calculateRowSpan(row => row.entity) : undefined}>
-                  {entityFormatter.formatter(fctx)}
-                </td>
+            (anyCombineEquals && i !== 0 && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
+              <td className={entityFormatter.cellClass} rowSpan={anyCombineEquals ? calculateRowSpan(row => row.entity) : undefined}>
+                {entityFormatter.formatter(fctx)}
+              </td>
             )
           }
 
-          {
-            columns.map((c, j) =>
-              i != 0 && c.column.combineRows == "EqualValue" && equals(getRowValue(resultTable.rows[i - 1], c.resultIndex), getRowValue(row, c.resultIndex)) ? null :
-                i != 0 && c.column.combineRows == "EqualEntity" && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
-                  <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
-                    rowSpan={
-                      c.column.combineRows == "EqualValue" ? calculateRowSpan(row => getRowValue(row, c.resultIndex)) :
-                        c.column.combineRows == "EqualEntity" ? calculateRowSpan(row => row.entity) :
-                          undefined}>
-                    {this.getColumnElement(fctx, c)}
-                  </td>
-            )
-          }
+          {columns.map((c, j) =>
+            i !== 0 && c.column.combineRows === "EqualValue" && equals(getRowValue(resultTable.rows[i - 1], c.resultIndex), getRowValue(row, c.resultIndex)) ? null :
+              i !== 0 && c.column.combineRows === "EqualEntity" && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
+                <td tabIndex={0} key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
+                  rowSpan={
+                    c.column.combineRows === "EqualValue" ? calculateRowSpan(row => getRowValue(row, c.resultIndex)) :
+                      c.column.combineRows === "EqualEntity" ? calculateRowSpan(row => row.entity) :
+                        undefined}>
+                  {this.getColumnElement(fctx, c)}
+                </td>
+          )}
         </tr>
       );
 
@@ -1952,14 +1971,18 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       return (
         <OverlayTrigger
-          overlay={<Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"} style={{ "--bs-tooltip-max-width": "100%" } as any}>
-            {message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
-          </Tooltip>}>
+          overlay={
+            <Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"} style={{ "--bs-tooltip-max-width": "100%" } as any}>
+              {message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
+            </Tooltip>
+          }
+        >
           {tr}
         </OverlayTrigger>
       );
     });
   }
+
 
   getRowMarketIcon(row: ResultRow, rowIndex: number): React.ReactElement | undefined {
     const mark = this.getMarkedRow(row);
@@ -2312,11 +2335,11 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
 
   return (
     <Dropdown as={ButtonGroup} title={SearchMessage.Filters.niceToString()}>
-      <Button variant="tertiary" className="sf-filter-button" active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
+      <Button variant="tertiary" className="sf-filter-button" aria-label={SearchMessage.Filters.niceToString()} active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
         <FontAwesomeIcon icon="filter" /> {activeFilters == 0 ? null : activeFilters}
       </Button>
-      <Dropdown.Toggle variant="tertiary" split className="px-2"></Dropdown.Toggle>
-      <Dropdown.Menu>
+      <Dropdown.Toggle variant="tertiary" split className="px-2" aria-label={SearchMessage.FilterTypeSelection.niceToString()}></Dropdown.Toggle>
+      <Dropdown.Menu aria-label={SearchMessage.FilterMenu.niceToString()}>
         <Dropdown.Item data-key={("Simple" satisfies SearchControlFilterMode)} active={filterMode == 'Simple'} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
         <Dropdown.Item data-key={("Advanced" satisfies SearchControlFilterMode)} active={filterMode == 'Advanced'} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>
         <Dropdown.Item data-key={("Pinned" satisfies SearchControlFilterMode)} active={filterMode == 'Pinned'} onClick={e => p.sc.handleChangeFiltermode('Pinned')} ><span className="me-2" style={{ visibility: filterMode != 'Pinned' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.FilterDesigner.niceToString()}</Dropdown.Item>

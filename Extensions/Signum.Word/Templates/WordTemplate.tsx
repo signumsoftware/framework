@@ -145,7 +145,7 @@ export function UserQueryTemplateButton(p: { qd: QueryDescription }): React.JSX.
 }
 
 function renderWidgetButton(text: React.ReactElement, getCode: () => Promise<string | undefined>) {
-  return <button className="btn btn-light btn-sm sf-button"
+  return <button className="btn btn-tertiary btn-sm sf-button"
 
     onClick={() =>
       getCode()

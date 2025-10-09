@@ -21,11 +21,13 @@ export interface AutocompleteConfig<T> {
   isCompatible(item: unknown, type: string): item is T;
   getSortByString(item: T): string
   abort(): void;
+  getNotFoundMessage(): React.ReactNode;
 }
 
 export interface AutocompleteConfigOptions {
   itemsDelay?: number;
   minLength?: number;
+  notFoundMessage?: React.ReactNode;
 }
 
 export interface LiteAutocomplateConfigOptions extends AutocompleteConfigOptions {
@@ -43,6 +45,7 @@ export function isResultRow(a: any): a is ResultRow {
 
 export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteConfig<Lite<T> | AutocompleteConstructor<T>>{
   requiresInitialLoad?: boolean;
+  notFoundMessage?: React.ReactNode;
   showType?: boolean;
 
   constructor(
@@ -55,6 +58,10 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
   minLength?: number | undefined;
 
   abortableRequest: AbortableRequest<string, (Lite<T> | AutocompleteConstructor<T>)[]> = new AbortableRequest((signal, subStr: string) => this.getItemsFunction(signal, subStr));
+
+  getNotFoundMessage(): React.ReactNode | undefined {
+    return this.notFoundMessage;
+  }
 
   getItemsDelay(): number | undefined {
     return this.itemsDelay;
@@ -187,10 +194,10 @@ export async function getLitesWithSubStr(fo: FindOptions, subStr: string, signal
 
 
 interface FindOptionsAutocompleteConfigOptions extends AutocompleteConfigOptions {
-  getAutocompleteConstructor?: (str: string, foundRows: ResultRow[]) => AutocompleteConstructor<Entity>[],
-  count?: number,
-  requiresInitialLoad?: boolean,
-  showType?: boolean,
+  getAutocompleteConstructor?: (str: string, foundRows: ResultRow[]) => AutocompleteConstructor<Entity>[];
+  count?: number;
+  requiresInitialLoad?: boolean;
+  showType?: boolean;
   customRenderItem?: (row: ResultRow, table: ResultTable, hl: TextHighlighter) => React.ReactNode;
 }
 
@@ -203,6 +210,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
   customRenderItem?: (row: ResultRow, table: ResultTable, hl: TextHighlighter) => React.ReactNode;
   itemsDelay?: number;
   minLength?: number;
+  notFoundMessage?: React.ReactNode;
 
   constructor(
     findOptions: FindOptions | ((subStr: string) => FindOptions),
@@ -211,6 +219,10 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     this.findOptions = findOptions;
 
     Dic.assign(this, options);
+  }
+
+  getNotFoundMessage(): React.ReactNode  {
+    return this.notFoundMessage;
   }
 
   getItemsDelay(): number | undefined {
@@ -446,6 +458,10 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
       ...acc.filter(item => !isAutocompleteConstructor(item)).slice(0, this.limit),
       ...acc.filter(item => isAutocompleteConstructor(item))
     ];
+  }
+
+  getNotFoundMessage(): React.ReactNode {
+    return undefined;
   }
 
   getItemsDelay(): number | undefined {

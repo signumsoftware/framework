@@ -18,7 +18,7 @@ import { Dic, classes } from '@framework/Globals';
 import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage, ToolbarSwitcherEntity } from '../Signum.Toolbar';
 import DropdownList from "react-widgets-up/DropdownList";
 import { getNiceTypeName } from '../../../Signum/React/Operations/MultiPropertySetter';
-import { Binding, getTypeInfo, getTypeName, newLite } from '../../../Signum/React/Reflection';
+import { Binding, getTypeInfo, getTypeName, newLite, queryAllowedInContext } from '../../../Signum/React/Reflection';
 import { Finder } from '../../../Signum/React/Finder';
 import Toolbar from '../Templates/Toolbar';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
@@ -308,7 +308,7 @@ function isExternalLink(url: string) {
   return url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName)
 }
 
-function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }) {
+function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.ReactElement {
 
   const title = p.response.label || getToString(p.response.content);
   const icon = ToolbarConfig.coloredIcon(parseIcon(p.response.iconName), p.response.iconColor);
@@ -351,7 +351,7 @@ function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: Too
       <ul>
         <ToolbarNavItem title={title} extraIcons={renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)} onClick={e => handleShowClick(e)}
           icon={
-            <div style={{ display: 'inline-block', position: 'relative' }}>
+            <div style={{ position: 'relative' }}>
               <div className="nav-arrow-icon" style={{ position: 'absolute' }}>
                 <FontAwesomeIcon icon={show ? "chevron-down" : "chevron-right"} className="icon" />
               </div>
@@ -371,7 +371,7 @@ function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: Too
   );
 }
 
-function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.ReactNode {
+export function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.ReactNode {
   const entityType = p.response.entityType;
   if (entityType)
     return <ToolbarMenuItemsEntityType response={p.response} ctx={p.ctx} selectedEntity={p.selectedEntity} />
@@ -452,9 +452,64 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
           {renderExtraIcons(p.response.extraIcons, p.ctx, selEntityRef.current ?? p.selectedEntity)}
         </Nav.Item>
       )}
-      {p.response.elements!.filter(sr => Boolean(sr.withEntity) == Boolean(selEntityRef.current)).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity))}
+      {selEntityRef.current ?
+        simplifyForEntity(p.response.elements!.filter(sr => sr.withEntity), selEntityRef.current).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity)) :
+        p.response.elements!.filter(sr => !sr.withEntity).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity))
+      }
     </>
   );
+}
+
+function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<Entity>): ToolbarResponse<any>[] {
+  var result = resp
+    .map(tr => {
+
+      if (tr.queryKey != null && !queryAllowedInContext(tr.queryKey, selectedEntity))
+        return null;
+
+      if (tr.elements && tr.elements.length > 0) {
+        const inner = simplifyForEntity(tr.elements, selectedEntity);
+        if (inner.length == 0)
+          return null;
+
+        tr = { ...tr, elements: inner };
+      }
+
+      if (tr.extraIcons && tr.extraIcons.length > 0) {
+        const extraIcons = simplifyForEntity(tr.extraIcons, selectedEntity);
+
+        tr = { ...tr, extraIcons };
+      }
+
+      return tr;
+    }).notNull();
+
+  while (true) {
+    var extraDividers = result.filter((a, i) => a.type == "Divider" && (
+      i == 0 ||
+      result[i - 1].type == "Divider" ||
+      i == result.length - 1
+    ));
+
+    extraDividers.forEach(ed => result.remove(ed));
+
+    function isPureHeader(tr: ToolbarResponse<any>): boolean {
+      return tr.type == "Header" && !tr.content && !tr.url;
+    }
+
+    var extraHeaders = result.filter((a, i) => isPureHeader(a) && (
+      i == result.length - 1 ||
+      isPureHeader(result[i + 1]) ||
+      result[i + 1].type == "Divider" ||
+      result[i + 1].type == "Header" && ToolbarMenuEntity.isLite(result[i + 1].content)
+    ));
+    extraHeaders.forEach(eh => result.remove(eh));
+
+    if (extraDividers.length == 0 && extraHeaders.length == 0)
+      break;
+  }
+
+  return result; 
 }
 
 function containsResponse(r: ToolbarResponse<any>, active: ToolbarResponse<any>): boolean {
@@ -533,7 +588,6 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
                         value={selectedOption ?? null}
                         onChange={val => val && handleSetShow(val, null)}
                         placeholder={title}
-                        renderOption={opt => renderDropDownOptions(opt.value)}
                         disabled={false} />
           {renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)}
         </Nav.Item>
@@ -553,8 +607,8 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
 export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
   return (
     <li className="nav-item d-flex">
-      <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100">
-        {p.icon}
+      <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100" >
+        <div>{p.icon}</div>
         <span className={"nav-item-text"}>
           {p.title}
           {p.isExternalLink && <FontAwesomeIcon icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}

@@ -16,298 +16,298 @@ public static class AzureADLogic
 
     public static void Start(SchemaBuilder sb, bool adGroupsAndQueries, bool deactivateUsersTask)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        MixinDeclarations.AssertDeclared(typeof(UserEntity), typeof(UserADMixin));
+
+        PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
+            
+        As.ReplaceExpression((UserEntity u) => u.EmailOwnerData, u => new EmailOwnerData
         {
-            MixinDeclarations.AssertDeclared(typeof(UserEntity), typeof(UserADMixin));
+            Owner = u.ToLite(),
+            CultureInfo = u.CultureInfo,
+            DisplayName = u.UserName,
+            Email = u.Email,
+            AzureUserId = u.Mixin<UserADMixin>().OID
+        });
 
-            PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
-                
-            As.ReplaceExpression((UserEntity u) => u.EmailOwnerData, u => new EmailOwnerData
-            {
-                Owner = u.ToLite(),
-                CultureInfo = u.CultureInfo,
-                DisplayName = u.UserName,
-                Email = u.Email,
-                AzureUserId = u.Mixin<UserADMixin>().OID
-            });
+        UserWithClaims.FillClaims += (userWithClaims, user) =>
+        {
+            var mixin = ((UserEntity)user).Mixin<UserADMixin>();
+            userWithClaims.Claims["OID"] = mixin.OID;
+            userWithClaims.Claims["SID"] = mixin.SID;
+        };
 
-            UserWithClaims.FillClaims += (userWithClaims, user) =>
-            {
-                var mixin = ((UserEntity)user).Mixin<UserADMixin>();
-                userWithClaims.Claims["OID"] = mixin.OID;
-                userWithClaims.Claims["SID"] = mixin.SID;
-            };
+        Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
+        {
+            UserName = u.UserName,
+            ToStringValue = u.ToString(),
+            OID = u.Mixin<UserADMixin>().OID,
+            SID = u.Mixin<UserADMixin>().SID,
+        });
 
-            Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
+        if (deactivateUsersTask)
+        {
+            SimpleTaskLogic.Register(ActiveDirectoryTask.DeactivateUsers, stc =>
             {
-                UserName = u.UserName,
-                ToStringValue = u.ToString(),
-                OID = u.Mixin<UserADMixin>().OID,
-                SID = u.Mixin<UserADMixin>().SID,
-            });
+                var list = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID != null).ToList();
 
-            if (deactivateUsersTask)
-            {
-                SimpleTaskLogic.Register(ActiveDirectoryTask.DeactivateUsers, stc =>
+                var tokenCredential = GetTokenCredential();
+                GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
+                stc.ForeachWriting(list.Chunk(10), gr => gr.Length + " user(s)...", gr =>
                 {
-                    var list = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID != null).ToList();
+                    var filter = gr.Select(a => "id eq '" + a.Mixin<UserADMixin>().OID + "'").Combined(FilterGroupOperation.Or);
+                    var users = graphClient.Users.GetAsync(r =>
+                    {
+                        r.QueryParameters.Select = new[] { "id", "accountEnabled" };
+                        r.QueryParameters.Filter = filter;
+                    }).Result;
 
+                    var isEnabledDictionary = users!.Value!.ToDictionary(a => Guid.Parse(a.Id!), a => a.AccountEnabled!.Value);
+
+                    foreach (var u in gr)
+                    {
+                        if (u.State == UserState.Active && isEnabledDictionary.TryGetS(u.Mixin<UserADMixin>().OID!.Value) != true)
+                        {
+                            stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.Mixin<UserADMixin>().OID} has been deactivated in Azure AD");
+                            u.Execute(UserOperation.AutoDeactivate);
+                        }
+
+                        if (u.State == UserState.AutoDeactivate && isEnabledDictionary.TryGetS(u.Mixin<UserADMixin>().OID!.Value) == true)
+                        {
+                            stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.Mixin<UserADMixin>().OID} has been reactivated in Azure AD");
+                            u.Execute(UserOperation.Reactivate);
+                        }
+                    }
+                });
+
+                return null;
+            });
+        }
+
+        if (adGroupsAndQueries)
+        {
+
+            sb.Include<ADGroupEntity>()
+                .WithQuery(() => e => new
+                {
+                    Entity = e,
+                    e.Id,
+                    e.DisplayName
+                });
+
+            Schema.Current.OnMetadataInvalidated += () => ADGroupsCache.Clear();
+
+            new Graph<ADGroupEntity>.Execute(ADGroupOperation.Save)
+            {
+                CanBeNew = true,
+                CanBeModified = true,
+                Execute = (e, _) =>
+                {
+                    if (e.IsNew && e.IdOrNull != null)
+                        Administrator.SaveDisableIdentity(e);
+                },
+            }.Register();
+
+            new Graph<ADGroupEntity>.Delete(ADGroupOperation.Delete)
+            {
+                Delete = (e, _) => e.Delete(),
+            }.Register();
+
+            QueryLogic.Queries.Register(AzureADQuery.ActiveDirectoryUsers, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
+            {
+                using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryUsers"))
+                {
                     var tokenCredential = GetTokenCredential();
                     GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
-                    stc.ForeachWriting(list.Chunk(10), gr => gr.Length + " user(s)...", gr =>
+
+                    var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "InGroup" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
+
+                    UserCollectionResponse response;
+                    try
                     {
-                        var filter = gr.Select(a => "id eq '" + a.Mixin<UserADMixin>().OID + "'").Combined(FilterGroupOperation.Or);
-                        var users = graphClient.Users.GetAsync(r =>
+                        var converter = new MicrosoftGraphQueryConverter();
+
+                        if (inGroup?.Value is Lite<ADGroupEntity> group)
                         {
-                            r.QueryParameters.Select = new[] { "id", "accountEnabled" };
-                            r.QueryParameters.Filter = filter;
-                        }).Result;
-
-                        var isEnabledDictionary = users!.Value!.ToDictionary(a => Guid.Parse(a.Id!), a => a.AccountEnabled!.Value);
-
-                        foreach (var u in gr)
-                        {
-                            if (u.State == UserState.Active && isEnabledDictionary.TryGetS(u.Mixin<UserADMixin>().OID!.Value) != true)
+                            response = (await graphClient.Groups[group.Id.ToString()].TransitiveMembers.GraphUser.GetAsync(req =>
                             {
-                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.Mixin<UserADMixin>().OID} has been deactivated in Azure AD");
-                                u.Execute(UserOperation.AutoDeactivate);
-                            }
-
-                            if (u.State == UserState.AutoDeactivate && isEnabledDictionary.TryGetS(u.Mixin<UserADMixin>().OID!.Value) == true)
-                            {
-                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.Mixin<UserADMixin>().OID} has been reactivated in Azure AD");
-                                u.Execute(UserOperation.Reactivate);
-                            }
+                                req.QueryParameters.Filter = converter.GetFilters(request.Filters);
+                                req.QueryParameters.Search = converter.GetSearch(request.Filters);
+                                req.QueryParameters.Select = converter.GetSelect(request.Columns);
+                                req.QueryParameters.Orderby = converter.GetOrderBy(request.Orders);
+                                req.QueryParameters.Top = converter.GetTop(request.Pagination);
+                                req.QueryParameters.Count = true;
+                                req.Headers.Add("ConsistencyLevel", "eventual");
+                            }))!;
                         }
-                    });
-
-                    return null;
-                });
-            }
-
-            if (adGroupsAndQueries)
-            {
-
-                sb.Include<ADGroupEntity>()
-                    .WithQuery(() => e => new
-                    {
-                        Entity = e,
-                        e.Id,
-                        e.DisplayName
-                    });
-
-                Schema.Current.OnMetadataInvalidated += () => ADGroupsCache.Clear();
-
-                new Graph<ADGroupEntity>.Execute(ADGroupOperation.Save)
-                {
-                    CanBeNew = true,
-                    CanBeModified = true,
-                    Execute = (e, _) =>
-                    {
-                        if (e.IsNew && e.IdOrNull != null)
-                            Administrator.SaveDisableIdentity(e);
-                    },
-                }.Register();
-
-                new Graph<ADGroupEntity>.Delete(ADGroupOperation.Delete)
-                {
-                    Delete = (e, _) => e.Delete(),
-                }.Register();
-
-                QueryLogic.Queries.Register(AzureADQuery.ActiveDirectoryUsers, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
-                {
-                    using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryUsers"))
-                    {
-                        var tokenCredential = GetTokenCredential();
-                        GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
-
-                        var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "InGroup" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
-
-                        UserCollectionResponse response;
-                        try
+                        else
                         {
-                            var converter = new MicrosoftGraphQueryConverter();
-
-                            if (inGroup?.Value is Lite<ADGroupEntity> group)
+                            response = (await graphClient.Users.GetAsync(req =>
                             {
-                                response = (await graphClient.Groups[group.Id.ToString()].TransitiveMembers.GraphUser.GetAsync(req =>
-                                {
-                                    req.QueryParameters.Filter = converter.GetFilters(request.Filters);
-                                    req.QueryParameters.Search = converter.GetSearch(request.Filters);
-                                    req.QueryParameters.Select = converter.GetSelect(request.Columns);
-                                    req.QueryParameters.Orderby = converter.GetOrderBy(request.Orders);
-                                    req.QueryParameters.Top = converter.GetTop(request.Pagination);
-                                    req.QueryParameters.Count = true;
-                                    req.Headers.Add("ConsistencyLevel", "eventual");
-                                }))!;
-                            }
-                            else
-                            {
-                                response = (await graphClient.Users.GetAsync(req =>
-                                {
-                                    req.QueryParameters.Filter = converter.GetFilters(request.Filters);
-                                    req.QueryParameters.Search = converter.GetSearch(request.Filters);
-                                    req.QueryParameters.Select = converter.GetSelect(request.Columns);
-                                    req.QueryParameters.Orderby = converter.GetOrderBy(request.Orders);
-                                    req.QueryParameters.Top = converter.GetTop(request.Pagination);
-                                    req.QueryParameters.Count = true;
-                                    req.Headers.Add("ConsistencyLevel", "eventual");
-                                }))!;
-                            }
+                                req.QueryParameters.Filter = converter.GetFilters(request.Filters);
+                                req.QueryParameters.Search = converter.GetSearch(request.Filters);
+                                req.QueryParameters.Select = converter.GetSelect(request.Columns);
+                                req.QueryParameters.Orderby = converter.GetOrderBy(request.Orders);
+                                req.QueryParameters.Top = converter.GetTop(request.Pagination);
+                                req.QueryParameters.Count = true;
+                                req.Headers.Add("ConsistencyLevel", "eventual");
+                            }))!;
                         }
-                        catch (ODataError e)
-                        {
-                            throw new ODataException(e);
-                        }
-
-                        var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
-
-                        return response.Value!.Skip(skip).Select(u => new
-                        {
-                            Entity = (Lite<Entities.Entity>?)null,
-                            u.Id,
-                            u.DisplayName,
-                            u.UserPrincipalName,
-                            u.Mail,
-                            u.GivenName,
-                            u.Surname,
-                            u.JobTitle,
-                            u.Department,
-                            u.OfficeLocation,
-                            u.EmployeeType,
-                            OnPremisesExtensionAttributes = u.OnPremisesExtensionAttributes?.Let(ea => new OnPremisesExtensionAttributesModel
-                            {
-                                ExtensionAttribute1 = ea.ExtensionAttribute1,
-                                ExtensionAttribute2 = ea.ExtensionAttribute2,
-                                ExtensionAttribute3 = ea.ExtensionAttribute3,
-                                ExtensionAttribute4 = ea.ExtensionAttribute4,
-                                ExtensionAttribute5 = ea.ExtensionAttribute5,
-                                ExtensionAttribute6 = ea.ExtensionAttribute6,
-                                ExtensionAttribute7 = ea.ExtensionAttribute7,
-                                ExtensionAttribute8 = ea.ExtensionAttribute8,
-                                ExtensionAttribute9 = ea.ExtensionAttribute9,
-                                ExtensionAttribute10 = ea.ExtensionAttribute10,
-                                ExtensionAttribute11 = ea.ExtensionAttribute11,
-                                ExtensionAttribute12 = ea.ExtensionAttribute12,
-                                ExtensionAttribute13 = ea.ExtensionAttribute13,
-                                ExtensionAttribute14 = ea.ExtensionAttribute14,
-                                ExtensionAttribute15 = ea.ExtensionAttribute15,
-                            }),
-                            u.OnPremisesImmutableId,
-                            u.CompanyName,
-                            u.CreationType,
-                            u.AccountEnabled,
-                            InGroup = (Lite<ADGroupEntity>?)null,
-                        }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount((int?)response.OdataCount);
                     }
-                })
-               .Column(a => a.Entity, c => c.Implementations = Implementations.By())
-               .ColumnDisplayName(a => a.Id, () => ActiveDirectoryMessage.Id.NiceToString())
-               .ColumnDisplayName(a => a.DisplayName, () => ActiveDirectoryMessage.DisplayName.NiceToString())
-               .ColumnDisplayName(a => a.Mail, () => ActiveDirectoryMessage.Mail.NiceToString())
-               .ColumnDisplayName(a => a.GivenName, () => ActiveDirectoryMessage.GivenName.NiceToString())
-               .ColumnDisplayName(a => a.Surname, () => ActiveDirectoryMessage.Surname.NiceToString())
-               .ColumnDisplayName(a => a.JobTitle, () => ActiveDirectoryMessage.JobTitle.NiceToString())
-               .ColumnDisplayName(a => a.OnPremisesExtensionAttributes, () => ActiveDirectoryMessage.OnPremisesExtensionAttributes.NiceToString())
-               .ColumnDisplayName(a => a.OnPremisesImmutableId, () => ActiveDirectoryMessage.OnPremisesImmutableId.NiceToString())
-               .ColumnDisplayName(a => a.CompanyName, () => ActiveDirectoryMessage.CompanyName.NiceToString())
-               .ColumnDisplayName(a => a.AccountEnabled, () => ActiveDirectoryMessage.AccountEnabled.NiceToString())
-               .Column(a => a.InGroup, c => { c.Implementations = Implementations.By(typeof(ADGroupEntity)); c.OverrideDisplayName = () => ActiveDirectoryMessage.InGroup.NiceToString(); })
-               ,
-               Implementations.By());
-
-                QueryLogic.Queries.Register(AzureADQuery.ActiveDirectoryGroups, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
-                {
-                    using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryGroups"))
+                    catch (ODataError e)
                     {
-                        var tokenCredential = GetTokenCredential();
-                        GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
-
-                        var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "HasUser" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
-
-
-                        GroupCollectionResponse response;
-                        try
-                        {
-                            var converter = new MicrosoftGraphQueryConverter();
-                            if (inGroup?.Value is Lite<UserEntity> user)
-                            {
-                                var oid = user.InDB(a => a.Mixin<UserADMixin>().OID);
-                                if (oid == null)
-                                    throw new InvalidOperationException($"User {user} has no OID");
-
-                                response = (await graphClient.Users[oid.ToString()].TransitiveMemberOf.GraphGroup.GetAsync(req =>
-                                {
-                                    req.QueryParameters.Filter = converter.GetFilters(request.Filters);
-                                    req.QueryParameters.Search = converter.GetSearch(request.Filters);
-                                    req.QueryParameters.Select = converter.GetSelect(request.Columns);
-                                    req.QueryParameters.Orderby = converter.GetOrderBy(request.Orders);
-                                    req.QueryParameters.Top = converter.GetTop(request.Pagination);
-                                    req.QueryParameters.Count = true;
-                                    req.Headers.Add("ConsistencyLevel", "eventual");
-                                }))!;
-                            }
-                            else
-                            {
-                                response = (await graphClient.Groups.GetAsync(req =>
-                                {
-                                    req.QueryParameters.Filter = converter.GetFilters(request.Filters);
-                                    req.QueryParameters.Search = converter.GetSearch(request.Filters);
-                                    req.QueryParameters.Select = converter.GetSelect(request.Columns);
-                                    req.QueryParameters.Orderby = converter.GetOrderBy(request.Orders);
-                                    req.QueryParameters.Top = converter.GetTop(request.Pagination);
-                                    req.QueryParameters.Count = true;
-                                    req.Headers.Add("ConsistencyLevel", "eventual");
-                                }))!;
-                            }
-                        }
-                        catch (ODataError e)
-                        {
-                            throw new ODataException(e);
-                        }
-
-                        var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
-
-                        return response.Value!.Skip(skip).Select(u => new
-                        {
-                            Entity = (Lite<Entities.Entity>?)null,
-                            u.Id,
-                            u.DisplayName,
-                            u.Description,
-                            u.SecurityEnabled,
-                            u.Visibility,
-                            HasUser = (Lite<UserEntity>?)null,
-                        }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount((int?)response.OdataCount);
+                        throw new ODataException(e);
                     }
-                })
-                .Column(a => a.Entity, c => c.Implementations = Implementations.By())
-                .ColumnDisplayName(a => a.Id, () => ActiveDirectoryMessage.Id.NiceToString())
-                .ColumnDisplayName(a => a.DisplayName, () => ActiveDirectoryMessage.DisplayName.NiceToString())
-                .ColumnDisplayName(a => a.Description, () => ActiveDirectoryMessage.Description.NiceToString())
-                .ColumnDisplayName(a => a.SecurityEnabled, () => ActiveDirectoryMessage.SecurityEnabled.NiceToString())
-                .ColumnDisplayName(a => a.Visibility, () => ActiveDirectoryMessage.Visibility.NiceToString())
-                .Column(a => a.HasUser, c => { c.Implementations = Implementations.By(typeof(UserEntity)); c.OverrideDisplayName = () => ActiveDirectoryMessage.HasUser.NiceToString(); })
-                ,
-                Implementations.By());
 
-                if (sb.WebServerBuilder != null)
-                {
-                    ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
-                    ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () =>  
-						QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryGroups, false) ||
-                    	QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryUsers, false));
+                    var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
+
+                    return response.Value!.Skip(skip).Select(u => new
+                    {
+                        Entity = (Lite<Entities.Entity>?)null,
+                        u.Id,
+                        u.DisplayName,
+                        u.UserPrincipalName,
+                        u.Mail,
+                        u.GivenName,
+                        u.Surname,
+                        u.JobTitle,
+                        u.Department,
+                        u.OfficeLocation,
+                        u.EmployeeType,
+                        OnPremisesExtensionAttributes = u.OnPremisesExtensionAttributes?.Let(ea => new OnPremisesExtensionAttributesModel
+                        {
+                            ExtensionAttribute1 = ea.ExtensionAttribute1,
+                            ExtensionAttribute2 = ea.ExtensionAttribute2,
+                            ExtensionAttribute3 = ea.ExtensionAttribute3,
+                            ExtensionAttribute4 = ea.ExtensionAttribute4,
+                            ExtensionAttribute5 = ea.ExtensionAttribute5,
+                            ExtensionAttribute6 = ea.ExtensionAttribute6,
+                            ExtensionAttribute7 = ea.ExtensionAttribute7,
+                            ExtensionAttribute8 = ea.ExtensionAttribute8,
+                            ExtensionAttribute9 = ea.ExtensionAttribute9,
+                            ExtensionAttribute10 = ea.ExtensionAttribute10,
+                            ExtensionAttribute11 = ea.ExtensionAttribute11,
+                            ExtensionAttribute12 = ea.ExtensionAttribute12,
+                            ExtensionAttribute13 = ea.ExtensionAttribute13,
+                            ExtensionAttribute14 = ea.ExtensionAttribute14,
+                            ExtensionAttribute15 = ea.ExtensionAttribute15,
+                        }),
+                        u.OnPremisesImmutableId,
+                        u.CompanyName,
+                        u.CreationType,
+                        u.AccountEnabled,
+                        InGroup = (Lite<ADGroupEntity>?)null,
+                    }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount((int?)response.OdataCount);
                 }
-            }
-            else
+            })
+           .Column(a => a.Entity, c => c.Implementations = Implementations.By())
+           .ColumnDisplayName(a => a.Id, () => ActiveDirectoryMessage.Id.NiceToString())
+           .ColumnDisplayName(a => a.DisplayName, () => ActiveDirectoryMessage.DisplayName.NiceToString())
+           .ColumnDisplayName(a => a.Mail, () => ActiveDirectoryMessage.Mail.NiceToString())
+           .ColumnDisplayName(a => a.GivenName, () => ActiveDirectoryMessage.GivenName.NiceToString())
+           .ColumnDisplayName(a => a.Surname, () => ActiveDirectoryMessage.Surname.NiceToString())
+           .ColumnDisplayName(a => a.JobTitle, () => ActiveDirectoryMessage.JobTitle.NiceToString())
+           .ColumnDisplayName(a => a.OnPremisesExtensionAttributes, () => ActiveDirectoryMessage.OnPremisesExtensionAttributes.NiceToString())
+           .ColumnDisplayName(a => a.OnPremisesImmutableId, () => ActiveDirectoryMessage.OnPremisesImmutableId.NiceToString())
+           .ColumnDisplayName(a => a.CompanyName, () => ActiveDirectoryMessage.CompanyName.NiceToString())
+           .ColumnDisplayName(a => a.AccountEnabled, () => ActiveDirectoryMessage.AccountEnabled.NiceToString())
+           .Column(a => a.InGroup, c => { c.Implementations = Implementations.By(typeof(ADGroupEntity)); c.OverrideDisplayName = () => ActiveDirectoryMessage.InGroup.NiceToString(); })
+           ,
+           Implementations.By());
+
+            QueryLogic.Queries.Register(AzureADQuery.ActiveDirectoryGroups, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
             {
-                if (sb.WebServerBuilder != null)
+                using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryGroups"))
                 {
-                    ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
-                    ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => false);
-                }
-            }
+                    var tokenCredential = GetTokenCredential();
+                    GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
 
+                    var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "HasUser" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
+
+
+                    GroupCollectionResponse response;
+                    try
+                    {
+                        var converter = new MicrosoftGraphQueryConverter();
+                        if (inGroup?.Value is Lite<UserEntity> user)
+                        {
+                            var oid = user.InDB(a => a.Mixin<UserADMixin>().OID);
+                            if (oid == null)
+                                throw new InvalidOperationException($"User {user} has no OID");
+
+                            response = (await graphClient.Users[oid.ToString()].TransitiveMemberOf.GraphGroup.GetAsync(req =>
+                            {
+                                req.QueryParameters.Filter = converter.GetFilters(request.Filters);
+                                req.QueryParameters.Search = converter.GetSearch(request.Filters);
+                                req.QueryParameters.Select = converter.GetSelect(request.Columns);
+                                req.QueryParameters.Orderby = converter.GetOrderBy(request.Orders);
+                                req.QueryParameters.Top = converter.GetTop(request.Pagination);
+                                req.QueryParameters.Count = true;
+                                req.Headers.Add("ConsistencyLevel", "eventual");
+                            }))!;
+                        }
+                        else
+                        {
+                            response = (await graphClient.Groups.GetAsync(req =>
+                            {
+                                req.QueryParameters.Filter = converter.GetFilters(request.Filters);
+                                req.QueryParameters.Search = converter.GetSearch(request.Filters);
+                                req.QueryParameters.Select = converter.GetSelect(request.Columns);
+                                req.QueryParameters.Orderby = converter.GetOrderBy(request.Orders);
+                                req.QueryParameters.Top = converter.GetTop(request.Pagination);
+                                req.QueryParameters.Count = true;
+                                req.Headers.Add("ConsistencyLevel", "eventual");
+                            }))!;
+                        }
+                    }
+                    catch (ODataError e)
+                    {
+                        throw new ODataException(e);
+                    }
+
+                    var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
+
+                    return response.Value!.Skip(skip).Select(u => new
+                    {
+                        Entity = (Lite<Entities.Entity>?)null,
+                        u.Id,
+                        u.DisplayName,
+                        u.Description,
+                        u.SecurityEnabled,
+                        u.Visibility,
+                        HasUser = (Lite<UserEntity>?)null,
+                    }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount((int?)response.OdataCount);
+                }
+            })
+            .Column(a => a.Entity, c => c.Implementations = Implementations.By())
+            .ColumnDisplayName(a => a.Id, () => ActiveDirectoryMessage.Id.NiceToString())
+            .ColumnDisplayName(a => a.DisplayName, () => ActiveDirectoryMessage.DisplayName.NiceToString())
+            .ColumnDisplayName(a => a.Description, () => ActiveDirectoryMessage.Description.NiceToString())
+            .ColumnDisplayName(a => a.SecurityEnabled, () => ActiveDirectoryMessage.SecurityEnabled.NiceToString())
+            .ColumnDisplayName(a => a.Visibility, () => ActiveDirectoryMessage.Visibility.NiceToString())
+            .Column(a => a.HasUser, c => { c.Implementations = Implementations.By(typeof(UserEntity)); c.OverrideDisplayName = () => ActiveDirectoryMessage.HasUser.NiceToString(); })
+            ,
+            Implementations.By());
+
+            if (sb.WebServerBuilder != null)
+            {
+                ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
+                ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () =>  
+        						QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryGroups, false) ||
+                	QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryUsers, false));
+            }
         }
+        else
+        {
+            if (sb.WebServerBuilder != null)
+            {
+                ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
+                ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => false);
+            }
+        }
+
     }
 
 

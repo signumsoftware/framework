@@ -22,18 +22,18 @@ public static class DynamicLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            TypeHelpLogic.Start(sb);
-            PermissionLogic.RegisterPermissions(DynamicPanelPermission.RestartApplication);
-            DynamicLogic.GetCodeFiles += GetCodeGenStarter;
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
-            EvalLogic.Namespaces.Add(CodeGenNamespace);
-            EvalLogic.GetCodeGenAssemblyPath = () => CodeGenAssemblyPath;
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            if (sb.WebServerBuilder != null)
-                DynamicServer.Start(sb.WebServerBuilder);
-        }
+        TypeHelpLogic.Start(sb);
+        PermissionLogic.RegisterPermissions(DynamicPanelPermission.RestartApplication);
+        DynamicLogic.GetCodeFiles += GetCodeGenStarter;
+        AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
+        EvalLogic.Namespaces.Add(CodeGenNamespace);
+        EvalLogic.GetCodeGenAssemblyPath = () => CodeGenAssemblyPath;
+
+        if (sb.WebServerBuilder != null)
+            DynamicServer.Start(sb.WebServerBuilder);
     }
 
     private static Assembly AssemblyResolveHandler(object? sender, ResolveEventArgs args)

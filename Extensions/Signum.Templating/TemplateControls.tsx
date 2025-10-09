@@ -25,7 +25,7 @@ export default function TemplateControls(p: TemplateControlsProps): React.JSX.El
   }, [p.queryKey])
 
   function renderButton(text: string, canClick: string | undefined, buildPattern: (key: string) => string) {
-    return <input type="button" disabled={!!canClick} className="btn btn-light btn-sm sf-button"
+    return <input type="button" disabled={!!canClick} className="btn btn-tertiary btn-sm sf-button"
       title={canClick} value={text}
       onClick={() => AutoLineModal.show({
         type: { name: "string" },

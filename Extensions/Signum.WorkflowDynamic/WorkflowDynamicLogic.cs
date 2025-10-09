@@ -12,49 +12,49 @@ public static class WorkflowDynamicLogic
   
     public static void Start(SchemaBuilder sb, params Type[] registerExpressionsFor)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.AssertDefined(ReflectionTools.GetMethodInfo(() => WorkflowLogic.Start(null!, null!)));
+
+        sb.Schema.WhenIncluded<DynamicTypeEntity>(() =>
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => WorkflowLogic.Start(null!, null!)));
-
-            sb.Schema.WhenIncluded<DynamicTypeEntity>(() =>
+            new Graph<DynamicTypeEntity>.Execute(DynamicTypeWorkflowOperation.FixCaseDescriptions)
             {
-                new Graph<DynamicTypeEntity>.Execute(DynamicTypeWorkflowOperation.FixCaseDescriptions)
+                Execute = (e, _) =>
                 {
-                    Execute = (e, _) =>
-                    {
-                        var type = TypeLogic.GetType(e.TypeName);
-                        giFixCaseDescriptions.GetInvoker(type)();
-                    },
-                }.Register();
-            });
+                    var type = TypeLogic.GetType(e.TypeName);
+                    giFixCaseDescriptions.GetInvoker(type)();
+                },
+            }.Register();
+        });
 
-            sb.Schema.WhenIncluded<DynamicViewEntity>(() =>
+        sb.Schema.WhenIncluded<DynamicViewEntity>(() =>
+        {
+            Validator.PropertyValidator((WorkflowActivityEntity a) => a.ViewNameProps).StaticPropertyValidation = (wam, pi) =>
             {
-                Validator.PropertyValidator((WorkflowActivityEntity a) => a.ViewNameProps).StaticPropertyValidation = (wam, pi) =>
+                if (wam.ViewName.HasText())
                 {
-                    if (wam.ViewName.HasText())
-                    {
-                        var dv = DynamicViewEntity.TryGetDynamicView(wam.Lane.Pool.Workflow.MainEntityType.ToType(), wam.ViewName);
-                        if (dv != null)
-                            return ValidateViewNameProps(dv, wam.ViewNameProps);
-                    }
+                    var dv = DynamicViewEntity.TryGetDynamicView(wam.Lane.Pool.Workflow.MainEntityType.ToType(), wam.ViewName);
+                    if (dv != null)
+                        return ValidateViewNameProps(dv, wam.ViewNameProps);
+                }
 
-                    return null;
-                };
+                return null;
+            };
 
-                Validator.PropertyValidator((WorkflowActivityModel a) => a.ViewNameProps).StaticPropertyValidation = (wam, pi) =>
+            Validator.PropertyValidator((WorkflowActivityModel a) => a.ViewNameProps).StaticPropertyValidation = (wam, pi) =>
+             {
+                 if (wam.ViewName.HasText() && wam.Workflow != null)
                  {
-                     if (wam.ViewName.HasText() && wam.Workflow != null)
-                     {
-                         var dv = DynamicViewEntity.TryGetDynamicView(wam.Workflow.MainEntityType.ToType(), wam.ViewName);
-                         if (dv != null)
-                             return ValidateViewNameProps(dv, wam.ViewNameProps);
-                     }
-                    
-                     return null;
-                 };
-            });
-        }
+                     var dv = DynamicViewEntity.TryGetDynamicView(wam.Workflow.MainEntityType.ToType(), wam.ViewName);
+                     if (dv != null)
+                         return ValidateViewNameProps(dv, wam.ViewNameProps);
+                 }
+                
+                 return null;
+             };
+        });
     }
 
     static readonly GenericInvoker<Action> giFixCaseDescriptions = new(() => FixCaseDescriptions<Entity>());

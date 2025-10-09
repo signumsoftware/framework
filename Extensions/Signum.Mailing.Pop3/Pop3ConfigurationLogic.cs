@@ -22,44 +22,44 @@ public static class Pop3ConfigurationLogic
 
     public static void Start(SchemaBuilder sb, Func<EmailReceptionConfigurationEntity, IPop3Client> getPop3Client, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        GetPop3Client = getPop3Client;
+
+        if (encryptPassword != null)
+            EncryptPassword = encryptPassword;
+
+        if (decryptPassword != null)
+            DecryptPassword = decryptPassword;
+
+        sb.Settings.AssertImplementedBy((EmailReceptionConfigurationEntity e) => e.Service, typeof(Pop3EmailReceptionServiceEntity));
+
+
+
+        EmailReceptionLogic.EmailReceptionServices.Register(new Func<Pop3EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, ScheduledTaskContext, EmailReceptionEntity>(ReceiveEmails));
+
+        if (sb.WebServerBuilder != null)
         {
-            GetPop3Client = getPop3Client;
-
-            if (encryptPassword != null)
-                EncryptPassword = encryptPassword;
-
-            if (decryptPassword != null)
-                DecryptPassword = decryptPassword;
-
-            sb.Settings.AssertImplementedBy((EmailReceptionConfigurationEntity e) => e.Service, typeof(Pop3EmailReceptionServiceEntity));
-
-
-
-            EmailReceptionLogic.EmailReceptionServices.Register(new Func<Pop3EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, ScheduledTaskContext, EmailReceptionEntity>(ReceiveEmails));
-
-            if (sb.WebServerBuilder != null)
+            var piPassword = ReflectionTools.GetPropertyInfo((Pop3EmailReceptionServiceEntity e) => e.Password);
+            var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(Pop3EmailReceptionServiceEntity));
+            pcs.GetOrThrow("password").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { };
+            pcs.Remove("newPassword"); /* Pop3EmailReceptionServiceEntity already has NewPassword property */
+            pcs.Add("newPassword", new PropertyConverter
             {
-                var piPassword = ReflectionTools.GetPropertyInfo((Pop3EmailReceptionServiceEntity e) => e.Password);
-                var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(Pop3EmailReceptionServiceEntity));
-                pcs.GetOrThrow("password").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { };
-                pcs.Remove("newPassword"); /* Pop3EmailReceptionServiceEntity already has NewPassword property */
-                pcs.Add("newPassword", new PropertyConverter
+                AvoidValidate = true,
+                CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
+                CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
                 {
-                    AvoidValidate = true,
-                    CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
-                    CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
-                    {
-                        var sm = EntityJsonContext.CurrentSerializationPath!.CurrentSerializationMetadata();
+                    var sm = EntityJsonContext.CurrentSerializationPath!.CurrentSerializationMetadata();
 
-                        ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity, sm);
+                    ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity, sm);
 
-                        var password = reader.GetString()!;
+                    var password = reader.GetString()!;
 
-                        ((Pop3EmailReceptionServiceEntity)ctx.Entity).Password = Pop3ConfigurationLogic.EncryptPassword(password);
-                    }
-                });
-            }
+                    ((Pop3EmailReceptionServiceEntity)ctx.Entity).Password = Pop3ConfigurationLogic.EncryptPassword(password);
+                }
+            });
         }
     }
 

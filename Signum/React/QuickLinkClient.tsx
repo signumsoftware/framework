@@ -331,7 +331,7 @@ export abstract class QuickLink<T extends Entity> {
     icon: "star",
     text: links => links.length.toString(),
     title: () => QuickLinkMessage.Quicklinks.niceToString(),
-    color: "light"
+    color: "tertiary"
   };
 
   constructor(options?: QuickLinkOptions<T>) {

@@ -5,16 +5,16 @@ public static class CalendarDayLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<CalendarDayEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Date,
-                });
-        }
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<CalendarDayEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Date,
+            });
     }
 
     public static void CreateDays(DateOnly startDate, DateOnly endDate)

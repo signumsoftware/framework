@@ -101,6 +101,7 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChange
         deps={deps}
         findOptions={findOptions}
         showHeader={"PinnedFilters"}
+        avoidTableFooterContainer={true}
         pinnedFilterVisible={fop => fop.dashboardBehaviour == null}
         showFooter={part.showFooter}
         allowSelection={part.allowSelection}

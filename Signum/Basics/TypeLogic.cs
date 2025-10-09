@@ -40,38 +40,38 @@ public static class TypeLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        Schema schema = Schema.Current;
+
+        sb.Include<TypeEntity>()
+          .WithQuery(() => t => new
+          {
+              Entity = t,
+              t.Id,
+              t.TableName,
+              t.CleanName,
+              t.ClassName,
+              t.Namespace,
+          });
+
+        schema.SchemaCompleted += () =>
         {
-            Schema schema = Schema.Current;
+            var attributes = schema.Tables.Keys.Select(t => KeyValuePair.Create(t, t.GetCustomAttribute<EntityKindAttribute>(true))).ToList();
 
-            sb.Include<TypeEntity>()
-              .WithQuery(() => t => new
-              {
-                  Entity = t,
-                  t.Id,
-                  t.TableName,
-                  t.CleanName,
-                  t.ClassName,
-                  t.Namespace,
-              });
+            var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".FormatWith(a.Key.Name), "\n");
 
-            schema.SchemaCompleted += () =>
-            {
-                var attributes = schema.Tables.Keys.Select(t => KeyValuePair.Create(t, t.GetCustomAttribute<EntityKindAttribute>(true))).ToList();
+            if (errors.HasText())
+                throw new InvalidOperationException(errors);
+        };
 
-                var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".FormatWith(a.Key.Name), "\n");
+        schema.Initializing += () =>
+        {
+            schema.typeCachesLazy.Load();
+        };
 
-                if (errors.HasText())
-                    throw new InvalidOperationException(errors);
-            };
-
-            schema.Initializing += () =>
-            {
-                schema.typeCachesLazy.Load();
-            };
-
-            schema.typeCachesLazy = sb.GlobalLazy(() => new TypeCaches(schema), new InvalidateWith(typeof(TypeEntity)), Schema.Current.InvalidateMetadata);
-        }
+        schema.typeCachesLazy = sb.GlobalLazy(() => new TypeCaches(schema), new InvalidateWith(typeof(TypeEntity)), Schema.Current.InvalidateMetadata);
     }
 
     public static Type ToType(this TypeEntity typeEntity)

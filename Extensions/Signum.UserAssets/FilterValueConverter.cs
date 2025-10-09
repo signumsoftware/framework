@@ -108,7 +108,7 @@ public static class FilterValueConverter
         if (ReflectionTools.TryParse(expression, targetType, CultureInfo.InvariantCulture, out var result))
             return new Result<object?>.Success(result);
         else
-            return new Result<object?>.Error("Invalid format");
+            return new Result<object?>.Error($"Impossible to parse expression '${expression}' to ${targetType}");
     }
 
     public static Result<Type> IsValidExpression(string? expression, Type targetType, bool isList, Type? currentEntityType)
@@ -157,7 +157,7 @@ public static class FilterValueConverter
         if (ReflectionTools.TryParse(expression, targetType, CultureInfo.InvariantCulture, out var result))
             return new Result<Type>.Success(result?.GetType() ?? targetType);
         else
-            return new Result<Type>.Error("Invalid format");
+            return new Result<Type>.Error($"Impossible to parse expression '${expression}' to ${targetType}");
     }
 
     public static FilterOperation ParseOperation(string operationString)

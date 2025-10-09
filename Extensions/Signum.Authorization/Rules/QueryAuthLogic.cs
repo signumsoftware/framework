@@ -18,29 +18,29 @@ public static class QueryAuthLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        AuthLogic.AssertStarted(sb);
+        QueryLogic.Start(sb);
+
+        QueryLogic.Queries.AllowQuery += new Func<object, bool, bool>(dqm_AllowQuery);
+
+        sb.Include<RuleQueryEntity>()
+            .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
+
+        cache = new QueryCache(sb);
+
+        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
         {
-            AuthLogic.AssertStarted(sb);
-            QueryLogic.Start(sb);
+            Database.Query<RuleQueryEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+            return null;
+        };
 
-            QueryLogic.Queries.AllowQuery += new Func<object, bool, bool>(dqm_AllowQuery);
-
-            sb.Include<RuleQueryEntity>()
-                .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
-
-            cache = new QueryCache(sb);
-
-            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
-            {
-                Database.Query<RuleQueryEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
-                return null;
-            };
-
-            AuthLogic.ExportToXml += cache.ExportXml;
-            AuthLogic.ImportFromXml += cache.ImportXml;
-            AuthLogic.HasRuleOverridesEvent += cache.HasRealOverrides;
-            sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += AuthCache_PreDeleteSqlSync;
-        }
+        AuthLogic.ExportToXml += cache.ExportXml;
+        AuthLogic.ImportFromXml += cache.ImportXml;
+        AuthLogic.HasRuleOverridesEvent += cache.HasRealOverrides;
+        sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += AuthCache_PreDeleteSqlSync;
     }
 
   

@@ -32,6 +32,8 @@ export default function ProgressBar(p: ProgressBarProps): React.ReactElement {
     (message ? message : undefined)
   ].filter(a => a != null).join(" - ");
 
+  const breakpoint = 30 / 100;
+
   return (
     <div
       {...p.containerHtmlAttributes}
@@ -50,9 +52,9 @@ export default function ProgressBar(p: ProgressBarProps): React.ReactElement {
         aria-valuemin={value == null ? undefined : 0}
         aria-valuemax={value == null ? undefined : 100}
         style={{ width: value == null ? "100%" : (value * 100) + "%", userSelect: "none", ...p.progressHtmlAttributes?.style }}>
-        {value && value * 100 >= 30 ? <span>{fullMessage}</span> : null}
+        {value != null && value > breakpoint ? <span>{fullMessage}</span> : null}
       </div>
-      {value && value * 100 < 30 ? <span style={{ marginLeft: 5}}>{fullMessage}</span> : null}
+      {value != null && value < breakpoint ? <span style={{ marginLeft: 5 }}>{fullMessage}</span> : null}
     </div>
   );
 }

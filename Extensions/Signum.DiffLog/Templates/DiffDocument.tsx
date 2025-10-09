@@ -82,16 +82,18 @@ export function DiffDocumentSimple(p: { first: string, second: string, margin?: 
   return (
     <pre className="m-0">{indices.map((ix, i) => {
       if (typeof ix == "object")
-        return [<span key={i} style={{ backgroundColor: "#DDD" }}><span> ----- {ix.numLines} Lines Removed ----- </span><br /></span>];
+        return [<span key={i} style={{ backgroundColor: "var(--sf-diff-info)" }}><span> ----- {ix.numLines} Lines Removed ----- </span><br /></span>];
 
       var line = linesDiff[ix];
 
-      var color = line.lineChange.added ? "#CEF3CE" : line.lineChange.removed ? "#FFD1D1" : undefined;
+      var color =
+        line.lineChange.added ? "var(--sf-diff-added-light)" :
+        line.lineChange.removed ? "var(--sf-diff-removed-light)" : undefined;
 
       if (line.wordChanges) {
         return (<span key={i} style={{ backgroundColor: color }}>
           {line.wordChanges.map((c, j) => {
-            var changeColor = c.added ? "#72F272" : c.removed ? "#FF8B8B" : undefined;
+            var changeColor = c.added ? "var(--sf-diff-added)" : c.removed ? "var(--sf-diff-removed)" : undefined;
             return <span key={j} style={{ backgroundColor: changeColor }}>{c.value}</span>;
           })}
         </span>);

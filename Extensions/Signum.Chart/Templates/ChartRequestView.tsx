@@ -209,7 +209,7 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
       </div>
       <div className="sf-query-button-bar btn-toolbar my-2 bg-body rounded shadow-sm p-2">
         <button
-          className={classes("sf-query-button btn", showChartSettings && "active", "btn-light")}
+          className={classes("sf-query-button btn", showChartSettings && "active", "btn-tertiary")}
           onClick={() => { setShowChartSettings(!showChartSettings); }}
           title={titleLabels ? showChartSettings ? ChartMessage.HideChartSettings.niceToString() : ChartMessage.ShowChartSettings.niceToString() : undefined}>
           <FontAwesomeIcon icon="sliders" />
@@ -219,7 +219,7 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
           chartRequest: cr,
           chartRequestView: { chartRequest: cr, userChart: p.userChart, onChange: p.onChange, hideFiltersAndSettings: handleHideFiltersAndSettings }
         }).map((a, i) => React.cloneElement(a, { key: i }))}
-        <button className="btn btn-light" onMouseUp={handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {ChartMessage.ListView.niceToString()}</button>
+        <button className="btn btn-tertiary" onMouseUp={handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {ChartMessage.ListView.niceToString()}</button>
       </div>
       <div className="sf-chart-tab-container">
         <Tabs id="chartResultTabs" key={showChartSettings + ""}>

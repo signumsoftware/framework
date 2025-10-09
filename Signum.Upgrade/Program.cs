@@ -1,3 +1,4 @@
+using Signum.CodeGeneration;
 using Signum.Utilities;
 using System;
 
@@ -20,8 +21,9 @@ class Program
         Console.Write("  RootFolder = "); SafeConsole.WriteLineColor(ConsoleColor.DarkGray, uctx.RootFolder);
         Console.Write("  ApplicationName = "); SafeConsole.WriteLineColor(ConsoleColor.DarkGray, uctx.ApplicationName);
 
+        //SolutionRenamer.RenameSolution(uctx);
 
-        //UpgradeContext.DefaultIgnoreDirectories = UpgradeContext.DefaultIgnoreDirectories.Where(a => a != "Framework").ToArray();
+        UpgradeContext.DefaultIgnoreDirectories = UpgradeContext.DefaultIgnoreDirectories.Where(a => a != "Framework").ToArray();
 
         new CodeUpgradeRunner(autoDiscover: true).Run(uctx);
     }

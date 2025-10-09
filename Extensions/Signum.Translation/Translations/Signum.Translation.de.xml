@@ -1,5 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="MatchTranslatedInstances" Description="Übersetzte Instanzen abgleichen">
+    <Member Name="ByInstanceID" Description="Nach Instanz-ID" />
+    <Member Name="ByOriginalText" Description="Nach Originaltext" />
+  </Type>
   <Type Name="TranslatedInstanceEntity" Description="Übersetzte Instanz" PluralDescription="Übersetzen Instanzen" Gender="f">
     <Member Name="Culture" Description="Kultur" />
     <Member Name="Instance" Description="Instanz" />

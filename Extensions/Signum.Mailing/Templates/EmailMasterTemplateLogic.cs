@@ -15,30 +15,30 @@ public static class EmailMasterTemplateLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<EmailMasterTemplateEntity>()
-                .WithQuery(() => t => new
-                {
-                    Entity = t,
-                    t.Id,
-                    t.Name,
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            EmailMasterTemplateGraph.Register();
-            Validator.PropertyValidator<EmailMasterTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
+        sb.Include<EmailMasterTemplateEntity>()
+            .WithQuery(() => t => new
             {
-                var dc = EmailLogic.Configuration.DefaultCulture;
-                
-                if (!et.Messages.Any(m => m.CultureInfo != null && dc.Name.StartsWith(m.CultureInfo.Name)))
-                    return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(CultureInfoLogic.EntityToCultureInfo.Value.Keys.Where(c => dc.Name.StartsWith(c.Name)).CommaOr(a => a.EnglishName));
+                Entity = t,
+                t.Id,
+                t.Name,
+            });
 
-                return null;
-            };
+        EmailMasterTemplateGraph.Register();
+        Validator.PropertyValidator<EmailMasterTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
+        {
+            var dc = EmailLogic.Configuration.DefaultCulture;
+            
+            if (!et.Messages.Any(m => m.CultureInfo != null && dc.Name.StartsWith(m.CultureInfo.Name)))
+                return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(CultureInfoLogic.EntityToCultureInfo.Value.Keys.Where(c => dc.Name.StartsWith(c.Name)).CommaOr(a => a.EnglishName));
 
-            UserAssetsImporter.Register<EmailMasterTemplateEntity>("EmailMasterTemplate", EmailMasterTemplateOperation.Save);
+            return null;
+        };
 
-        }
+        UserAssetsImporter.Register<EmailMasterTemplateEntity>("EmailMasterTemplate", EmailMasterTemplateOperation.Save);
+
     }
 
     class EmailMasterTemplateGraph : Graph<EmailMasterTemplateEntity>

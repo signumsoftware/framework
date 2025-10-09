@@ -8,30 +8,30 @@ public static class ExcelLogic
 {
     public static void Start(SchemaBuilder sb, bool excelReport)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        PermissionLogic.RegisterTypes(typeof(ExcelPermission));
+
+        if (excelReport)
         {
-            PermissionLogic.RegisterTypes(typeof(ExcelPermission));
-            
-            if (excelReport)
-            {
-                QueryLogic.Start(sb);
+            QueryLogic.Start(sb);
 
-                sb.Include<ExcelReportEntity>()
-                    .WithSave(ExcelReportOperation.Save)
-                    .WithDelete(ExcelReportOperation.Delete)
-                    .WithQuery(() => s => new
-                    {
-                        Entity = s,
-                        s.Id,
-                        s.Query,
-                        s.File.FileName,
-                        s.DisplayName,
-                    });
-            }
-
-            if (sb.WebServerBuilder != null)
-                ExcelServer.Start(sb.WebServerBuilder);
+            sb.Include<ExcelReportEntity>()
+                .WithSave(ExcelReportOperation.Save)
+                .WithDelete(ExcelReportOperation.Delete)
+                .WithQuery(() => s => new
+                {
+                    Entity = s,
+                    s.Id,
+                    s.Query,
+                    s.File.FileName,
+                    s.DisplayName,
+                });
         }
+
+        if (sb.WebServerBuilder != null)
+            ExcelServer.Start(sb.WebServerBuilder);
     }
   
 

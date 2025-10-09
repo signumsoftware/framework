@@ -45,6 +45,8 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
     this.typeahead = React.useRef<TypeaheadController>(null);
     React.useEffect(() => {
       const p = this.props;
+     
+
       if (p.autocomplete) {
         var entity = p.ctx.value;
 
@@ -84,8 +86,12 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
 
   overrideProps(p: EntityLineProps<V>, overridenProps: EntityLineProps<V>): void {
     super.overrideProps(p, overridenProps);
-    if (p.autocomplete === undefined && p.type) {
-      p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary,  p.ctx, p.create!, p.showType);
+    if (p.type) {
+      if (p.showType == undefined)
+        p.showType = p.type.name.contains(",");
+
+      if (p.autocomplete === undefined)
+        p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary, p.ctx, p.create!, p.showType);
     }
   }
 
@@ -136,11 +142,11 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
     const buttons = (
       <>
         {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
-        {!hasValue && !p.avoidViewButton && c.renderCreateButton(true)}
-        {!hasValue && c.renderFindButton(true)}
-        {hasValue && !p.avoidViewButton && c.renderViewButton(true)}
-        {hasValue && c.renderRemoveButton(true)}
-        {c.renderPasteButton(true)}
+        {!hasValue && !p.avoidViewButton && c.renderCreateButton(true, undefined, false)}
+        {!hasValue && c.renderFindButton(true, false)}
+        {hasValue && !p.avoidViewButton && c.renderViewButton(true, false)}
+        {hasValue && c.renderRemoveButton(true, false)}
+        {c.renderPasteButton(true, false)}
         {c.props.extraButtons && c.props.extraButtons(c)}
       </>
     );
@@ -185,6 +191,11 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
     function renderAutoComplete(inputId: string, renderInput?: (input: React.ReactElement) => React.ReactElement) {
 
       const ctx = p.ctx;
+      const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
+      var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+      if (!isLabelVisible && p.label) {
+        ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
+      }
 
       var ac = p.autocomplete;
 
@@ -200,6 +211,7 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
             className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass),
             placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined,
             onPaste: p.paste == false ? undefined : handleOnPaste,
+            ...ariaAtts,
             ...p.inputAttributes
           }}
           getItems={query => ac!.getItems(query)}
@@ -211,6 +223,7 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
           itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
           onSelect={c.handleOnSelect}
           renderInput={renderInput}
+          noResultsMessage={p.autocomplete?.getNotFoundMessage()}
         />
       );
     }

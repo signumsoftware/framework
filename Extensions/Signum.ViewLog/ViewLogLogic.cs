@@ -24,38 +24,38 @@ public static class ViewLogLogic
 
     public static void Start(SchemaBuilder sb, HashSet<Type> registerExpression)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            IsStarted = true;
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<ViewLogEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Target,
-                    e.ViewAction,
-                    e.User,
-                    e.Duration,
-                    e.StartDate,
-                    e.EndDate,
-                });
+        IsStarted = true;
 
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
-
-            var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity) => entity.ViewLogs());
-            var expLast = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity) => entity.ViewLogMyLast());
-
-            foreach (var t in registerExpression)
+        sb.Include<ViewLogEntity>()
+            .WithQuery(() => e => new
             {
-                QueryLogic.Expressions.Register(new ExtensionInfo(t, exp, exp.Body.Type, "ViewLogs", () => typeof(ViewLogEntity).NicePluralName()));
-                QueryLogic.Expressions.Register(new ExtensionInfo(t, expLast, expLast.Body.Type, "LastViewLog", () => ViewLogMessage.ViewLogMyLast.NiceToString()));
-            }
+                Entity = e,
+                e.Id,
+                e.Target,
+                e.ViewAction,
+                e.User,
+                e.Duration,
+                e.StartDate,
+                e.EndDate,
+            });
 
-            QueryLogic.Queries.QueryExecuted += Current_QueryExecuted;
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
-            ExecutionMode.OnApiRetrieved += ExecutionMode_OnApiRetrieved;
+        ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+        var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity) => entity.ViewLogs());
+        var expLast = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity) => entity.ViewLogMyLast());
+
+        foreach (var t in registerExpression)
+        {
+            QueryLogic.Expressions.Register(new ExtensionInfo(t, exp, exp.Body.Type, "ViewLogs", () => typeof(ViewLogEntity).NicePluralName()));
+            QueryLogic.Expressions.Register(new ExtensionInfo(t, expLast, expLast.Body.Type, "LastViewLog", () => ViewLogMessage.ViewLogMyLast.NiceToString()));
         }
+
+        QueryLogic.Queries.QueryExecuted += Current_QueryExecuted;
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
+        ExecutionMode.OnApiRetrieved += ExecutionMode_OnApiRetrieved;
     }
 
     private static IDisposable? ExecutionMode_OnApiRetrieved(Lite<Entity> entity, string viewAction)

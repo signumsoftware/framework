@@ -13,25 +13,25 @@ public static class PropertyRouteTranslationLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Schema.SchemaCompleted += () =>
         {
-            sb.Schema.SchemaCompleted += () =>
+            var s = Schema.Current;
+
+            var prs = (from t in s.Tables.Keys
+                       from pr in PropertyRoute.GenerateRoutes(t)
+                       where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string) &&
+                       s.Settings.FieldAttribute<TranslatableAttribute>(pr) != null &&
+                       s.Settings.FieldAttribute<IgnoreAttribute>(pr) == null
+                       select KeyValuePair.Create(pr, s.Settings.FieldAttribute<TranslatableAttribute>(pr)!.TranslatableRouteType)).ToList();
+
+            foreach (var kvp in prs)
             {
-                var s = Schema.Current;
-
-                var prs = (from t in s.Tables.Keys
-                           from pr in PropertyRoute.GenerateRoutes(t)
-                           where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string) &&
-                           s.Settings.FieldAttribute<TranslatableAttribute>(pr) != null &&
-                           s.Settings.FieldAttribute<IgnoreAttribute>(pr) == null
-                           select KeyValuePair.Create(pr, s.Settings.FieldAttribute<TranslatableAttribute>(pr)!.TranslatableRouteType)).ToList();
-
-                foreach (var kvp in prs)
-                {
-                    RegisterRoute(kvp.Key, kvp.Value);
-                }
-            };
-        }
+                RegisterRoute(kvp.Key, kvp.Value);
+            }
+        };
     }
 
 
@@ -130,6 +130,9 @@ public static class PropertyRouteTranslationLogic
     }
 
 
+    static Expression<Func<Lite<Entity>, PropertyRoute, string?, string?>> TranslatedFieldSimpleExpression = 
+        (Lite<Entity> lite, PropertyRoute route, string? fallbackString) => TranslatedFieldExpression!.Evaluate(lite, route, null, fallbackString);
+    [ExpressionField("TranslatedFieldSimpleExpression")]
     [return: NotNullIfNotNull("fallbackString")]
     public static string? TranslatedField(this Lite<Entity> lite, PropertyRoute route, string? fallbackString)
     {
@@ -137,15 +140,16 @@ public static class PropertyRouteTranslationLogic
     }
 
 
-    public static Func<Lite<Entity>, PropertyRoute, PrimaryKey?, string?, string?> TranslatedFieldFunc = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) => fallbackString;
-    public static Expression<Func<Lite<Entity>, PropertyRoute, PrimaryKey?, string?, string?>> TranslatedFieldExpression = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) => fallbackString;
-
+    public static Func<Lite<Entity>, PropertyRoute, PrimaryKey?, string?, string?> TranslatedFieldFunc = 
+        (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) => fallbackString;
+    public static Expression<Func<Lite<Entity>, PropertyRoute, PrimaryKey?, string?, string?>> TranslatedFieldExpression = 
+        (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) => fallbackString;
 
     public static MethodInfo miTranslatedField = ReflectionTools.GetMethodInfo(() => TranslatedField((Lite<Entity>)null!, (PropertyRoute)null!, (PrimaryKey?)null, (string?)null));
 
     [return: NotNullIfNotNull("fallbackString")]
     [ExpressionField("TranslatedFieldExpression")]
-    public static string? TranslatedField(Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString)
+    public static string? TranslatedField(this Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString)
     {
         return TranslatedFieldFunc(lite, route, rowId, fallbackString);
     }

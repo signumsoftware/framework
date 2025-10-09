@@ -520,7 +520,19 @@ export class ContextualOperationContext<T extends Entity> {
     return ContextualOperations.defaultContextualOperationClick(this, ...args);
   }
 
-  constructor(operationInfo: OperationInfo, context: ContextualItemsContext<T>, cos: ContextualOperationSettings<T> | undefined, eos?: EntityOperationSettings<T>) {
+  constructor(operationInfo: OperationInfo, context: ContextualItemsContext<T>) {
+
+    let cos: ContextualOperationSettings<T> | undefined = undefined;
+    let eos: EntityOperationSettings<T> | undefined = undefined;
+    if (operationInfo.operationType == "ConstructorFromMany") {
+      cos = Operations.getSettings(operationInfo.key) as ContextualOperationSettings<T> | undefined;
+    }
+    else {
+      eos = Operations.getSettings(operationInfo.key) as EntityOperationSettings<T> | undefined;
+      cos = eos == undefined ? undefined :
+        context.lites.length == 1 ? eos.contextual : eos.contextualFromMany
+    }
+
     this.operationInfo = operationInfo;
     this.context = context;
     this.settings = cos;

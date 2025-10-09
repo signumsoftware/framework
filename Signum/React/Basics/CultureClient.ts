@@ -28,6 +28,7 @@ export namespace CultureClient {
     const previousCulture = currentCulture;
     API.setCurrentCulture(newCulture)
       .then(() => loadCurrentCulture())
+      .then(() => document.documentElement.setAttribute("lang", currentCulture.name ?? "en"))
       .then(() => reloadTypes())
       .then(() => AppContext.resetUI())
       .then(() => onCultureChanged(toLite(previousCulture), newCulture));

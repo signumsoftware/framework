@@ -24,58 +24,58 @@ public static class WhatsNewLogic
         IFileTypeAlgorithm previewFileTypeAlgorithm,
         IFileTypeAlgorithm attachmentsFileTypeAlgorithm)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<WhatsNewEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Status,
-                    e.Name,
-                    e.CreationDate,
-                    e.Related
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<WhatsNewLogEntity>()
-               .WithExpressionFrom((WhatsNewEntity wn) => wn.WhatsNewLogs())
-               .WithDelete(WhatsNewLogOperation.Delete)
-               .WithQuery(() => e => new
-               {
-                   Entity = e,
-                   e.Id,
-                   e.ReadOn,
-                   e.User,
-                   e.WhatsNew,
-               });
-
-            QueryLogic.Expressions.Register((WhatsNewEntity wn) => wn.IsRead(), WhatsNewMessage.IsRead);
-
-            sb.Schema.EntityEvents<WhatsNewEntity>().PreUnsafeDelete += WhatsNewLogic_PreUnsafeDelete;
-
-            WhatsNews = sb.GlobalLazy(() => Database.Query<WhatsNewEntity>().ToFrozenDictionary(a => a.ToLite()),
-                new InvalidateWith(typeof(WhatsNewEntity)));
-
-            FileTypeLogic.Register(WhatsNewFileType.WhatsNewAttachmentFileType, previewFileTypeAlgorithm);
-            FileTypeLogic.Register(WhatsNewFileType.WhatsNewPreviewFileType, attachmentsFileTypeAlgorithm);
-
-            Validator.PropertyValidator((WhatsNewEntity wn) => wn.Messages).StaticPropertyValidation += (WhatsNewEntity wn, PropertyInfo pi) =>
+        sb.Include<WhatsNewEntity>()
+            .WithQuery(() => e => new
             {
-                var ci = Schema.Current.ForceCultureInfo;
-                var defaultCulture = ci == null ? "en" : ci.IsNeutralCulture ? ci.Name : ci.Parent.Name;
-                if (!wn.Messages.Any(m => m.Culture.Name == defaultCulture))
-                {
-                    return WhatsNewMessage._0ContiansNoVersionForCulture1.NiceToString(pi.NiceName(), defaultCulture);
-                }
-                return null;
-            };
+                Entity = e,
+                e.Id,
+                e.Status,
+                e.Name,
+                e.CreationDate,
+                e.Related
+            });
 
-            RegisterRelatedConfig<QueryEntity>(lite => IsQueryAllowed(lite));
+        sb.Include<WhatsNewLogEntity>()
+           .WithExpressionFrom((WhatsNewEntity wn) => wn.WhatsNewLogs())
+           .WithDelete(WhatsNewLogOperation.Delete)
+           .WithQuery(() => e => new
+           {
+               Entity = e,
+               e.Id,
+               e.ReadOn,
+               e.User,
+               e.WhatsNew,
+           });
 
-            RegisterRelatedConfig<PermissionSymbol>(lite => PermissionAuthLogic.IsAuthorized(SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!)));
+        QueryLogic.Expressions.Register((WhatsNewEntity wn) => wn.IsRead(), WhatsNewMessage.IsRead);
 
-            WhatsNewGraph.Register();
-        }
+        sb.Schema.EntityEvents<WhatsNewEntity>().PreUnsafeDelete += WhatsNewLogic_PreUnsafeDelete;
+
+        WhatsNews = sb.GlobalLazy(() => Database.Query<WhatsNewEntity>().ToFrozenDictionary(a => a.ToLite()),
+            new InvalidateWith(typeof(WhatsNewEntity)));
+
+        FileTypeLogic.Register(WhatsNewFileType.WhatsNewAttachmentFileType, previewFileTypeAlgorithm);
+        FileTypeLogic.Register(WhatsNewFileType.WhatsNewPreviewFileType, attachmentsFileTypeAlgorithm);
+
+        Validator.PropertyValidator((WhatsNewEntity wn) => wn.Messages).StaticPropertyValidation += (WhatsNewEntity wn, PropertyInfo pi) =>
+        {
+            var ci = Schema.Current.ForceCultureInfo;
+            var defaultCulture = ci == null ? "en" : ci.IsNeutralCulture ? ci.Name : ci.Parent.Name;
+            if (!wn.Messages.Any(m => m.Culture.Name == defaultCulture))
+            {
+                return WhatsNewMessage._0ContiansNoVersionForCulture1.NiceToString(pi.NiceName(), defaultCulture);
+            }
+            return null;
+        };
+
+        RegisterRelatedConfig<QueryEntity>(lite => IsQueryAllowed(lite));
+
+        RegisterRelatedConfig<PermissionSymbol>(lite => PermissionAuthLogic.IsAuthorized(SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!)));
+
+        WhatsNewGraph.Register();
     }
 
     private static IDisposable? WhatsNewLogic_PreUnsafeDelete(IQueryable<WhatsNewEntity> query)

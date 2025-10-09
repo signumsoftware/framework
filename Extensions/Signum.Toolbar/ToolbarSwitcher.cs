@@ -30,6 +30,7 @@ public class ToolbarSwitcherEntity : Entity, IToolbarEntity, IUserAssetEntity
         return new XElement("ToolbarSwitcher",
             new XAttribute("Guid", Guid),
             new XAttribute("Name", Name),
+            Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             new XElement("Options", Options.Select(p => p.ToXml(ctx))));
     }
         
@@ -37,6 +38,7 @@ public class ToolbarSwitcherEntity : Entity, IToolbarEntity, IUserAssetEntity
     {
         Name = element.Attribute("Name")!.Value;
         Options.Synchronize(element.Element("Options")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+        Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, tm => tm.Owner));
     }
 
 

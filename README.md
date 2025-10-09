@@ -55,6 +55,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
 
+* [2025.09.01 Dark Mode, ThemeSelector and shadow panels 🌙☀️](https://github.com/signumsoftware/framework/commit/91eda3e81d898d7c8412b4d54022128cbba7efab#commitcomment-167592981)
 * [2025.08.22 Webpack -> Vite, React 19, React Router 7.7 and react-widgets-up](https://github.com/signumsoftware/framework/commit/f9aacfc47447c435e3708e86b92538238ca5c9b0#commitcomment-164464873)
 * 2025.07.21 Improvements in charting (translations, scales) ChartColumnType
 * 2025.07.16 Nicer Dashboards

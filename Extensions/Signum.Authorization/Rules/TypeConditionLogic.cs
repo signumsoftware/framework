@@ -64,10 +64,10 @@ public static class TypeConditionLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            SymbolLogic<TypeConditionSymbol>.Start(sb, () => infos.SelectMany(a => a.Value.Keys).ToHashSet());
-        }
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        SymbolLogic<TypeConditionSymbol>.Start(sb, () => infos.SelectMany(a => a.Value.Keys).ToHashSet());
     }
 
     public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, bool replace = false)

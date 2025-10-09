@@ -94,6 +94,7 @@ export namespace HelpMessage {
   export const Edit: MessageKey = new MessageKey("HelpMessage", "Edit");
   export const Close: MessageKey = new MessageKey("HelpMessage", "Close");
   export const ViewMore: MessageKey = new MessageKey("HelpMessage", "ViewMore");
+  export const JumpToViewMore: MessageKey = new MessageKey("HelpMessage", "JumpToViewMore");
 }
 
 export namespace HelpPermissions {
@@ -158,7 +159,7 @@ export const OperationHelpEmbedded: Type<OperationHelpEmbedded> = new Type<Opera
 export interface OperationHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "OperationHelpEmbedded";
   operation: Operations.OperationSymbol;
-  info: string;
+  info: string | null;
   description: string | null;
 }
 
@@ -175,8 +176,8 @@ export interface QueryColumnHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryColumnHelpEmbedded";
   columnName: string;
   description: string | null;
-  niceName: string;
-  info: string;
+  niceName: string | null;
+  info: string | null;
 }
 
 export const QueryHelpEntity: Type<QueryHelpEntity> = new Type<QueryHelpEntity>("QueryHelp");
@@ -184,7 +185,7 @@ export interface QueryHelpEntity extends Entities.Entity, IHelpImageTarget {
   Type: "QueryHelp";
   query: Basics.QueryEntity;
   culture: Basics.CultureInfoEntity;
-  info: string;
+  info: string | null;
   description: string | null;
   columns: Entities.MList<QueryColumnHelpEmbedded>;
   isEmpty: boolean;

@@ -23,69 +23,69 @@ public static class TranslatedInstanceLogic
 
     public static void Start(SchemaBuilder sb, Func<CultureInfo> defaultCulture)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            PropertyRouteTranslationLogic.Start(sb);
-            sb.Include<TranslatedInstanceEntity>()
-                //.WithDelete(TranslatedInstanceOperation.Delete)
-                .WithUniqueIndex(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId })
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Culture,
-                    e.PropertyRoute,
-                    e.PropertyRoute.RootType,
-                    e.Instance,
-                    e.RowId,
-                    e.TranslatedText,
-                    e.OriginalText,
-                });
-            getDefaultCulture = defaultCulture ?? throw new ArgumentNullException(nameof(defaultCulture));
-            
-            LocalizationCache = sb.GlobalLazy(() =>
-                Database.Query<TranslatedInstanceEntity>()
-                .ToList()
-                .AgGroupToDictionary(a => a.Culture.ToCultureInfo(),
-                gr2 => gr2.GroupBy(a => a.PropertyRoute)
-                    .SelectMany(gr =>
-                    {
-                        PropertyRoute pr = gr.Key.ToPropertyRoute();
 
-                        PropertyRoute? mListRoute = pr.GetMListItemsRoute();
-                        if (mListRoute == null)
-                            return gr.Select(ti => KeyValuePair.Create(new LocalizedInstanceKey(pr, ti.Instance, null), ti));
-
-                        Type type = ((FieldMList)Schema.Current.Field(mListRoute.Parent!)).TableMList.PrimaryKey.Type;
-
-                        return gr.Select(ti => KeyValuePair.Create(new LocalizedInstanceKey(pr, ti.Instance, new PrimaryKey((IComparable)ReflectionTools.Parse(ti.RowId!, type)!)), ti));
-
-                    }).ToFrozenDictionaryEx())
-                .ToFrozenDictionaryEx()
-                    , new InvalidateWith(typeof(TranslatedInstanceEntity)));
-
-            PropertyRouteTranslationLogic.TranslatedFieldFunc = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) =>
+        PropertyRouteTranslationLogic.Start(sb);
+        sb.Include<TranslatedInstanceEntity>()
+            //.WithDelete(TranslatedInstanceOperation.Delete)
+            .WithUniqueIndex(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId })
+            .WithQuery(() => e => new
             {
-                var result = GetTranslatedInstance(lite, route, rowId);
+                Entity = e,
+                e.Id,
+                e.Culture,
+                e.PropertyRoute,
+                e.PropertyRoute.RootType,
+                e.Instance,
+                e.RowId,
+                e.TranslatedText,
+                e.OriginalText,
+            });
+        getDefaultCulture = defaultCulture ?? throw new ArgumentNullException(nameof(defaultCulture));
 
-                if (result != null && (fallbackString == null || result.OriginalText.Replace("\r", "").Replace("\n", "") == fallbackString.Replace("\r", "").Replace("\n", "")))
-                    return result.TranslatedText;
-
-                return fallbackString;
-            };
-
-            PropertyRouteTranslationLogic.TranslatedFieldExpression = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) =>
-                
+        LocalizationCache = sb.GlobalLazy(() =>
             Database.Query<TranslatedInstanceEntity>()
-                .Where(a => a.Instance.Is(lite) && a.PropertyRoute.Is(route.ToPropertyRouteEntity()) &&
-                (rowId == null ? a.RowId == null : a.RowId == rowId.ToString()) &&
-                (a.Culture.Is(CultureInfo.CurrentUICulture.TryGetCultureInfoEntity()) || !CultureInfo.CurrentUICulture.IsNeutralCulture && a.Culture.Is(CultureInfo.CurrentUICulture.Parent.TryGetCultureInfoEntity()))
-                ).OrderByDescending(a => a.Culture.Name.Length)
-                .FirstOrDefault()!.TranslatedText ?? fallbackString;
+            .ToList()
+            .AgGroupToDictionary(a => a.Culture.ToCultureInfo(),
+            gr2 => gr2.GroupBy(a => a.PropertyRoute)
+                .SelectMany(gr =>
+                {
+                    PropertyRoute pr = gr.Key.ToPropertyRoute();
 
-            PropertyRouteTranslationLogic.IsActivated = true;
-        }
+                    PropertyRoute? mListRoute = pr.GetMListItemsRoute();
+                    if (mListRoute == null)
+                        return gr.Select(ti => KeyValuePair.Create(new LocalizedInstanceKey(pr, ti.Instance, null), ti));
+
+                    Type type = ((FieldMList)Schema.Current.Field(mListRoute.Parent!)).TableMList.PrimaryKey.Type;
+
+                    return gr.Select(ti => KeyValuePair.Create(new LocalizedInstanceKey(pr, ti.Instance, new PrimaryKey((IComparable)ReflectionTools.Parse(ti.RowId!, type)!)), ti));
+
+                }).ToFrozenDictionaryEx())
+            .ToFrozenDictionaryEx()
+                , new InvalidateWith(typeof(TranslatedInstanceEntity)));
+
+        PropertyRouteTranslationLogic.TranslatedFieldFunc = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) =>
+        {
+            var result = GetTranslatedInstance(lite, route, rowId);
+
+            if (result != null && (fallbackString == null || result.OriginalText.Replace("\r", "").Replace("\n", "") == fallbackString.Replace("\r", "").Replace("\n", "")))
+                return result.TranslatedText;
+
+            return fallbackString;
+        };
+
+        PropertyRouteTranslationLogic.TranslatedFieldExpression = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) =>
+            
+        Database.Query<TranslatedInstanceEntity>()
+            .Where(a => a.Instance.Is(lite) && a.PropertyRoute.Is(route.ToPropertyRouteEntity()) &&
+            (rowId == null ? a.RowId == null : a.RowId == rowId.ToString()) &&
+            (a.Culture.Is(CultureInfo.CurrentUICulture.TryGetCultureInfoEntity()) || !CultureInfo.CurrentUICulture.IsNeutralCulture && a.Culture.Is(CultureInfo.CurrentUICulture.Parent.TryGetCultureInfoEntity()))
+            ).OrderByDescending(a => a.Culture.Name.Length)
+            .FirstOrDefault()!.TranslatedText ?? fallbackString;
+
+        PropertyRouteTranslationLogic.IsActivated = true;
     }
 
 
@@ -459,11 +459,12 @@ public static class TranslatedInstanceLogic
         var records = PlainExcelGenerator.ReadPlainExcel(stream, cellValues => new TranslationRecord
         {
             Culture = culture,
-            Key = new LocalizedInstanceKey(PropertyRoute.Parse(type, cellValues[1]),
-                Lite.Parse<Entity>(cellValues[0]),
-                cellValues[2].DefaultToNull()?.Let(s => PrimaryKey.Parse(s, type))),
-            OriginalText = cellValues[3],
-            TranslatedText = cellValues[4]
+            Key = new LocalizedInstanceKey(
+                route: PropertyRoute.Parse(type, cellValues[1]!),
+                instance: Lite.Parse<Entity>(cellValues[0]!)!,
+                rowId: cellValues[2].DefaultToNull()?.Let(s => PrimaryKey.Parse(s, type))),
+            OriginalText = cellValues[3]!,
+            TranslatedText = cellValues[4]!
         });
 
         if (mode == MatchTranslatedInstances.ByInstanceID)
@@ -584,7 +585,14 @@ public static class TranslatedInstanceLogic
             .ToDictionary();
 
         Dictionary<LocalizedInstanceKey, List<TranslatedInstanceEntity>> databaseTranslations =
-            TranslationsForType(type, c).SelectMany(ci => ci.Value).GroupToDictionary(a => a.Key, a => a.Value);
+            Database.Query<TranslatedInstanceEntity>()
+            .Where(a => a.PropertyRoute.RootType.Is(type.ToTypeEntity()) && (c == null || a.Culture.Is(c.ToCultureInfoEntity())))
+            .ToList()
+            .GroupToDictionary(a =>
+            {
+                var pr = a.PropertyRoute.ToPropertyRoute();
+                return new LocalizedInstanceKey(pr, a.Instance, a.RowId == null ? null : PrimaryKey.Parse(a.RowId.ToString(), pr));
+            });
 
         Dictionary<(PropertyRoute route, string originalText), List<(Lite<Entity> instance, PrimaryKey? rowId)>> currentInstances =
             FromEntities(type)
@@ -810,6 +818,7 @@ public class TranslatedTypeSummary
     public required TranslatedSummaryState? State;
 }
 
+[InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
 public enum MatchTranslatedInstances
 {
     //Export and import happend in the same DB (stable Ids)
