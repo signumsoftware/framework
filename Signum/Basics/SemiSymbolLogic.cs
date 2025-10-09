@@ -22,7 +22,7 @@ public static class SemiSymbolLogic<T>
 
     public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSemiSymbols)
     {
-        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(typeof(SemiSymbolLogic<T>).GetMethod("Start")))
             return;
 
         sb.Include<T>();

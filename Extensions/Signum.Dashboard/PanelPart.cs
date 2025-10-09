@@ -204,7 +204,9 @@ public class ToolbarMenuPartEntity : Entity, IPartEntity
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        ToolbarMenu = ((ToolbarMenuEntity)ctx.GetEntity(Guid.Parse(element.Attribute(nameof(ToolbarMenu))!.Value))).ToLite();
+        var menu = (ToolbarMenuEntity)ctx.GetEntity(Guid.Parse(element.Attribute(nameof(ToolbarMenu))!.Value));
+
+        ToolbarMenu = menu.ToLite(menu.IsNew);
     }
 }
 
