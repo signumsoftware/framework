@@ -43,7 +43,7 @@ public static class EntityButtonContainerExtensions
 
     public static bool OperationEnabled(this IEntityButtonContainer container, OperationSymbol symbol)
     {
-        return container.OperationButton(symbol).Find().GetDomProperty("disabled") == null;
+        return !container.OperationButton(symbol).Find().IsDomDisabled();
     }
 
     public static bool OperationEnabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
@@ -54,7 +54,7 @@ public static class EntityButtonContainerExtensions
 
     public static bool OperationDisabled(this IEntityButtonContainer container, OperationSymbol symbol)
     {
-        return container.OperationButton(symbol).Find().GetDomProperty("disabled") != null;
+        return container.OperationButton(symbol).Find().IsDomDisabled();
     }
 
     public static bool OperationDisabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)

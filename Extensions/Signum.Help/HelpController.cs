@@ -61,7 +61,8 @@ public class HelpController : ControllerBase
     public AppendixHelpEntity Appendix(string? uniqueName)
     {
         HelpPermissions.ViewHelp.AssertAuthorized();
-        if (!uniqueName.HasText())
+
+        if (string.IsNullOrWhiteSpace(uniqueName))
             return new AppendixHelpEntity
             {
                 Culture = HelpLogic.GetCulture().ToCultureInfoEntity() 
@@ -82,8 +83,9 @@ public class HelpController : ControllerBase
     [HttpGet("api/help/type/{cleanName}")]
     public TypeHelpEntity Type(string cleanName)
     {
-        HelpPermissions.ViewHelp.AssertAuthorized();
-        var help = HelpLogic.GetTypeHelp(TypeLogic.GetType(cleanName));
+        //HelpPermissions.ViewHelp.AssertAuthorized();
+        var type = TypeLogic.GetType(cleanName);
+        var help = HelpLogic.GetTypeHelp(type);
         help.AssertAllowed();
         return help.GetEntity();
     }

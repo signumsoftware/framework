@@ -364,11 +364,11 @@ public sealed class PrimaryKeyAttribute : DbTypeAttribute
         }
     }
 
-    public PrimaryKeyAttribute(Type type)
+    public PrimaryKeyAttribute(Type type, bool identityBehaviour = true)
     {
         this.Type = type;
         this.Identity = type != typeof(Guid);
-        this.IdentityBehaviour = true;
+        this.IdentityBehaviour = identityBehaviour;
     }
 }
 

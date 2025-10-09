@@ -19,6 +19,7 @@ public abstract class BaseLineProxy
 
     public abstract void SetValueUntyped(object? value);
     public abstract object? GetValueUntyped();
+    public abstract bool IsReadonly();
 
     public static BaseLineProxy AutoLine(IWebElement element, PropertyRoute route)
     {
@@ -74,7 +75,10 @@ public abstract class BaseLineProxy
                 return new EntityLineProxy(element, route);
             }
 
-            if(type.IsEmbeddedEntity())
+            if (type.IsEntity())
+                return new EntityLineProxy(element, route);
+
+            if (type.IsEmbeddedEntity())
                 return new EntityDetailProxy(element, route);
 
             if (type.IsEnum)
