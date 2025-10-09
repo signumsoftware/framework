@@ -261,9 +261,11 @@ public static class EmailTemplateLogic
         }
     }
 
+    public static Func<Lite<EmailTemplateEntity>, EmailTemplateEntity> GetEmailTemplate = liteTemplate => EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
+    
     public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null, CultureInfo? cultureInfo = null)
     {
-        EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
+        EmailTemplateEntity template = GetEmailTemplate(liteTemplate);
 
         return CreateEmailMessage(template, modifiableEntity, ref model, cultureInfo);
     }
