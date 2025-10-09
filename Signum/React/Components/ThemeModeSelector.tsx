@@ -60,7 +60,7 @@ export function ThemeModeSelector(p: { onSetMode?: (mode: "dark" | "light") => v
       <NavDropdown
         title={
           <>
-            <FontAwesomeIcon icon={ICONS[bootstrapMode]} /> {(bootstrapMode.firstUpper())}
+            <FontAwesomeIcon icon={ICONS[bootstrapMode]} title={(bootstrapMode.firstUpper())} />
           </>
         }
       >
