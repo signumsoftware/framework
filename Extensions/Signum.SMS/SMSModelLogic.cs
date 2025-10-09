@@ -73,50 +73,50 @@ public static class SMSModelLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Schema.Generating += Schema_Generating;
+        sb.Schema.Synchronizing += Schema_Synchronizing;
+        sb.Include<SMSModelEntity>()
+            .WithQuery(() => model => new
+            {
+                Entity = model,
+                model.Id,
+                model.FullClassName,
+            });
+
+
+        new Graph<SMSTemplateEntity>.ConstructFrom<SMSModelEntity>(SMSTemplateOperation.CreateSMSTemplateFromModel)
         {
-            sb.Schema.Generating += Schema_Generating;
-            sb.Schema.Synchronizing += Schema_Synchronizing;
-            sb.Include<SMSModelEntity>()
-                .WithQuery(() => model => new
-                {
-                    Entity = model,
-                    model.Id,
-                    model.FullClassName,
-                });
+            Construct = (model, _) => CreateDefaultTemplate(model)
+        }.Register();
+
+        SMSModelToTemplates = sb.GlobalLazy(() => (
+            from et in Database.Query<SMSTemplateEntity>()
+            where et.Model != null
+            select KeyValuePair.Create(et.Model!.ToLite(), et))
+            .GroupToFrozenDictionary(),
+            new InvalidateWith(typeof(SMSTemplateEntity), typeof(SMSModelEntity)));
+
+        typeToEntity = sb.GlobalLazy(() =>
+        {
+            var dbModels = Database.RetrieveAll<SMSModelEntity>();
+            return EnumerableExtensions.JoinRelaxed(
+                dbModels,
+                registeredModels.Keys,
+                entity => entity.FullClassName,
+                type => type.FullName!,
+                (entity, type) => KeyValuePair.Create(type, entity),
+                "caching " + nameof(SMSModelEntity))
+                .ToFrozenDictionary();
+        }, new InvalidateWith(typeof(SMSModelEntity)));
 
 
-            new Graph<SMSTemplateEntity>.ConstructFrom<SMSModelEntity>(SMSTemplateOperation.CreateSMSTemplateFromModel)
-            {
-                Construct = (model, _) => CreateDefaultTemplate(model)
-            }.Register();
+        sb.Schema.Initializing += () => typeToEntity.Load();
 
-            SMSModelToTemplates = sb.GlobalLazy(() => (
-                from et in Database.Query<SMSTemplateEntity>()
-                where et.Model != null
-                select KeyValuePair.Create(et.Model!.ToLite(), et))
-                .GroupToFrozenDictionary(),
-                new InvalidateWith(typeof(SMSTemplateEntity), typeof(SMSModelEntity)));
-
-            typeToEntity = sb.GlobalLazy(() =>
-            {
-                var dbModels = Database.RetrieveAll<SMSModelEntity>();
-                return EnumerableExtensions.JoinRelaxed(
-                    dbModels,
-                    registeredModels.Keys,
-                    entity => entity.FullClassName,
-                    type => type.FullName!,
-                    (entity, type) => KeyValuePair.Create(type, entity),
-                    "caching " + nameof(SMSModelEntity))
-                    .ToFrozenDictionary();
-            }, new InvalidateWith(typeof(SMSModelEntity)));
-
-
-            sb.Schema.Initializing += () => typeToEntity.Load();
-
-            entityToType = sb.GlobalLazy(() => typeToEntity.Value.Inverse().ToFrozenDictionary(),
-                new InvalidateWith(typeof(SMSModelEntity)));
-        }
+        entityToType = sb.GlobalLazy(() => typeToEntity.Value.Inverse().ToFrozenDictionary(),
+            new InvalidateWith(typeof(SMSModelEntity)));
     }
 
     static readonly string SMSModelReplacementKey = "SMSModel";

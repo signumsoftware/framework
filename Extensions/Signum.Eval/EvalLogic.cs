@@ -108,15 +108,15 @@ public static class EvalLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            PermissionLogic.RegisterPermissions(EvalPanelPermission.ViewDynamicPanel);
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            if(sb.WebServerBuilder != null)
-            {
-                ReflectionServer.RegisterLike(typeof(EvalPanelPermission), () => EvalPanelPermission.ViewDynamicPanel.IsAuthorized());
-            }    
-        }
+        PermissionLogic.RegisterPermissions(EvalPanelPermission.ViewDynamicPanel);
+
+        if(sb.WebServerBuilder != null)
+        {
+            ReflectionServer.RegisterLike(typeof(EvalPanelPermission), () => EvalPanelPermission.ViewDynamicPanel.IsAuthorized());
+        }    
     }
 }
 

@@ -14,20 +14,20 @@ public static class ProfilerLogic
 
     public static void Start(SchemaBuilder sb, bool timeTracker, bool heavyProfiler, bool overrideSessionTimeout)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            if (timeTracker)
-                PermissionLogic.RegisterPermissions(ProfilerPermission.ViewTimeTracker);
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            if (heavyProfiler)
-                PermissionLogic.RegisterPermissions(ProfilerPermission.ViewHeavyProfiler);
+        if (timeTracker)
+            PermissionLogic.RegisterPermissions(ProfilerPermission.ViewTimeTracker);
 
-            if (overrideSessionTimeout)
-                PermissionLogic.RegisterPermissions(ProfilerPermission.OverrideSessionTimeout);
+        if (heavyProfiler)
+            PermissionLogic.RegisterPermissions(ProfilerPermission.ViewHeavyProfiler);
 
-            if (sb.WebServerBuilder != null)
-                ProfilerServer.Start(sb.WebServerBuilder);
-        }
+        if (overrideSessionTimeout)
+            PermissionLogic.RegisterPermissions(ProfilerPermission.OverrideSessionTimeout);
+
+        if (sb.WebServerBuilder != null)
+            ProfilerServer.Start(sb.WebServerBuilder);
     }
 
     public static void ProfilerEntries(List<HeavyProfilerEntry> entries)

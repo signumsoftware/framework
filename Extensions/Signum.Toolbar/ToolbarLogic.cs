@@ -18,140 +18,140 @@ public static class ToolbarLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+
+        sb.Include<ToolbarEntity>()
+            .WithSave(ToolbarOperation.Save)
+            .WithDelete(ToolbarOperation.Delete)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.Owner,
+                e.Priority
+            });
+
+        sb.Schema.EntityEvents<ToolbarEntity>().Saving += IToolbar_Saving;
+        sb.Schema.EntityEvents<ToolbarMenuEntity>().Saving += IToolbar_Saving;
+        sb.Schema.EntityEvents<ToolbarSwitcherEntity>().Saving += IToolbar_Saving;
+
+        sb.Include<ToolbarMenuEntity>()
+            .WithSave(ToolbarMenuOperation.Save)
+            .WithDelete(ToolbarMenuOperation.Delete)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.Owner,
+                e.EntityType,
+            });
+
+
+        sb.Include<ToolbarSwitcherEntity>()
+              .WithSave(ToolbarSwitcherOperation.Save)
+              .WithDelete(ToolbarSwitcherOperation.Delete)
+              .WithQuery(() => e => new
+              {
+                  Entity = e,
+                  e.Id,
+                  e.Name,
+                  e.Owner,
+              });
+         
+        sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(QueryEntity));
+        sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(PermissionSymbol));
+        sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(ToolbarEntity));
+        sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(ToolbarMenuEntity));
+        sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(ToolbarSwitcherEntity));
+
+        AuthLogic.HasRuleOverridesEvent += role =>
+            Database.Query<ToolbarEntity>().Any(a => a.Owner.Is(role)) ||
+            Database.Query<ToolbarMenuEntity>().Any(a => a.Owner.Is(role));
+
+        UserAssetsImporter.Register("Toolbar", ToolbarOperation.Save);
+        UserAssetsImporter.Register("ToolbarMenu", ToolbarMenuOperation.Save);
+        UserAssetsImporter.Register("ToolbarSwitcher", ToolbarSwitcherOperation.Save);
+
+        Toolbars = sb.GlobalLazy(() => Database.Query<ToolbarEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
+            new InvalidateWith(typeof(ToolbarEntity)));
+
+        ToolbarMenus = sb.GlobalLazy(() => Database.Query<ToolbarMenuEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
+           new InvalidateWith(typeof(ToolbarMenuEntity)));
+
+        ToolbarSwitchers = sb.GlobalLazy(() => Database.Query<ToolbarSwitcherEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
+            new InvalidateWith(typeof(ToolbarSwitcherEntity)));
+
+        RegisterDelete<PermissionSymbol>(sb);
+        RegisterDelete<QueryEntity>(sb);
+        RegisterDelete<ToolbarMenuEntity>(sb);
+        RegisterDelete<ToolbarSwitcherEntity>(sb);
+
+        new ToolbarContentConfig<ToolbarMenuEntity>() 
         {
-            
-            sb.Include<ToolbarEntity>()
-                .WithSave(ToolbarOperation.Save)
-                .WithDelete(ToolbarOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.Owner,
-                    e.Priority
-                });
-
-            sb.Schema.EntityEvents<ToolbarEntity>().Saving += IToolbar_Saving;
-            sb.Schema.EntityEvents<ToolbarMenuEntity>().Saving += IToolbar_Saving;
-            sb.Schema.EntityEvents<ToolbarSwitcherEntity>().Saving += IToolbar_Saving;
-
-            sb.Include<ToolbarMenuEntity>()
-                .WithSave(ToolbarMenuOperation.Save)
-                .WithDelete(ToolbarMenuOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.Owner,
-                    e.EntityType,
-                });
-
-
-            sb.Include<ToolbarSwitcherEntity>()
-                  .WithSave(ToolbarSwitcherOperation.Save)
-                  .WithDelete(ToolbarSwitcherOperation.Delete)
-                  .WithQuery(() => e => new
-                  {
-                      Entity = e,
-                      e.Id,
-                      e.Name,
-                      e.Owner,
-                  });
-             
-            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(QueryEntity));
-            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(PermissionSymbol));
-            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(ToolbarEntity));
-            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(ToolbarMenuEntity));
-            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(ToolbarSwitcherEntity));
-
-            AuthLogic.HasRuleOverridesEvent += role =>
-                Database.Query<ToolbarEntity>().Any(a => a.Owner.Is(role)) ||
-                Database.Query<ToolbarMenuEntity>().Any(a => a.Owner.Is(role));
-
-            UserAssetsImporter.Register("Toolbar", ToolbarOperation.Save);
-            UserAssetsImporter.Register("ToolbarMenu", ToolbarMenuOperation.Save);
-            UserAssetsImporter.Register("ToolbarSwitcher", ToolbarSwitcherOperation.Save);
-
-            Toolbars = sb.GlobalLazy(() => Database.Query<ToolbarEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
-                new InvalidateWith(typeof(ToolbarEntity)));
-
-            ToolbarMenus = sb.GlobalLazy(() => Database.Query<ToolbarMenuEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
-               new InvalidateWith(typeof(ToolbarMenuEntity)));
-
-            ToolbarSwitchers = sb.GlobalLazy(() => Database.Query<ToolbarSwitcherEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
-                new InvalidateWith(typeof(ToolbarSwitcherEntity)));
-
-            RegisterDelete<PermissionSymbol>(sb);
-            RegisterDelete<QueryEntity>(sb);
-            RegisterDelete<ToolbarMenuEntity>(sb);
-            RegisterDelete<ToolbarSwitcherEntity>(sb);
-
-            new ToolbarContentConfig<ToolbarMenuEntity>() 
+            DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarMenus.Value.GetOrCreate(lite), a => a.Name),
+            IsAuthorized = lite =>
             {
-                DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarMenus.Value.GetOrCreate(lite), a => a.Name),
-                IsAuthorized = lite =>
-                {
-                    var entity = ToolbarMenus.Value.GetOrCreate(lite);
-                    return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
-                }
-            }.Register();
+                var entity = ToolbarMenus.Value.GetOrCreate(lite);
+                return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
+            }
+        }.Register();
 
-            new ToolbarContentConfig<ToolbarSwitcherEntity>
+        new ToolbarContentConfig<ToolbarSwitcherEntity>
+        {
+            DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarSwitchers.Value.GetOrCreate(lite), a => a.Name),
+            IsAuthorized = lite =>
             {
-                DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarSwitchers.Value.GetOrCreate(lite), a => a.Name),
-                IsAuthorized = lite =>
-                {
-                    var entity = ToolbarSwitchers.Value.GetOrCreate(lite);
-                    return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
-                }
-            }.Register();
+                var entity = ToolbarSwitchers.Value.GetOrCreate(lite);
+                return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
+            }
+        }.Register();
 
-            new ToolbarContentConfig<ToolbarEntity> 
+        new ToolbarContentConfig<ToolbarEntity> 
+        {
+            DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(Toolbars.Value.GetOrCreate(lite), a => a.Name),
+            IsAuthorized = lite =>
             {
-                DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(Toolbars.Value.GetOrCreate(lite), a => a.Name),
-                IsAuthorized = lite =>
-                {
-                    ToolbarEntity entity = Toolbars.Value.GetOrCreate(lite);
-                    return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
-                }
-            }.Register();
+                ToolbarEntity entity = Toolbars.Value.GetOrCreate(lite);
+                return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
+            }
+        }.Register();
 
-            new ToolbarContentConfig<QueryEntity>
-            {
-                DefaultLabel = lite => QueryUtils.GetNiceName(QueryLogic.QueryNames.GetOrThrow(lite.ToString()!)),
-                IsAuthorized = lite => IsQueryAllowed(lite),
-                GetRelatedQuery = lite => lite.RetrieveFromCache()
-            }.Register();
+        new ToolbarContentConfig<QueryEntity>
+        {
+            DefaultLabel = lite => QueryUtils.GetNiceName(QueryLogic.QueryNames.GetOrThrow(lite.ToString()!)),
+            IsAuthorized = lite => IsQueryAllowed(lite),
+            GetRelatedQuery = lite => lite.RetrieveFromCache()
+        }.Register();
 
-            new ToolbarContentConfig<PermissionSymbol>
-            {
-                DefaultLabel = lite => SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!).NiceToString(),
-                IsAuthorized = lite => PermissionAuthLogic.IsAuthorized(SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!)),
-            }.Register();
+        new ToolbarContentConfig<PermissionSymbol>
+        {
+            DefaultLabel = lite => SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!).NiceToString(),
+            IsAuthorized = lite => PermissionAuthLogic.IsAuthorized(SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!)),
+        }.Register();
 
-            GetContentConfig<PermissionSymbol>().CustomResponses = lite =>
-            {
-                var action = CustomPermissionResponse.TryGetC(lite.Retrieve());
+        GetContentConfig<PermissionSymbol>().CustomResponses = lite =>
+        {
+            var action = CustomPermissionResponse.TryGetC(lite.Retrieve());
 
-                if (action != null)
-                    return action();
+            if (action != null)
+                return action();
 
-                return null;
-            };
+            return null;
+        };
 
-            //    { typeof(QueryEntity), a => IsQueryAllowed((Lite<QueryEntity>)a) },
-            //{ typeof(PermissionSymbol), a => PermissionAuthLogic.IsAuthorized((PermissionSymbol)a.RetrieveAndRemember()) },
-            //{ typeof(UserQueryEntity), a => ,
-            //{ typeof(UserChartEntity), a => { var uc = UserChartLogic.UserCharts.Value.GetOrCreate((Lite<UserChartEntity>)a); return InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true); } },
-            //{ typeof(DashboardEntity), a => InMemoryFilter(DashboardLogic.Dashboards.Value.GetOrCreate((Lite<DashboardEntity>)a)) },
-            //{ typeof(WorkflowEntity), a => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate((Lite<WorkflowEntity>)a); return InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); } },
+        //    { typeof(QueryEntity), a => IsQueryAllowed((Lite<QueryEntity>)a) },
+        //{ typeof(PermissionSymbol), a => PermissionAuthLogic.IsAuthorized((PermissionSymbol)a.RetrieveAndRemember()) },
+        //{ typeof(UserQueryEntity), a => ,
+        //{ typeof(UserChartEntity), a => { var uc = UserChartLogic.UserCharts.Value.GetOrCreate((Lite<UserChartEntity>)a); return InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true); } },
+        //{ typeof(DashboardEntity), a => InMemoryFilter(DashboardLogic.Dashboards.Value.GetOrCreate((Lite<DashboardEntity>)a)) },
+        //{ typeof(WorkflowEntity), a => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate((Lite<WorkflowEntity>)a); return InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); } },
 
 
 
-        }
     }
 
 

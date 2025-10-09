@@ -31,59 +31,59 @@ public static class DisconnectedLogic
 
     public static void Start(SchemaBuilder sb, long serverSeed = 1000000000)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            ServerSeed = serverSeed;
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<DisconnectedMachineEntity>()
-                .WithQuery(() => dm => new
-                {
-                    Entity = dm,
-                    dm.MachineName,
-                    dm.State,
-                    dm.SeedMin,
-                    dm.SeedMax,
-                });
+        ServerSeed = serverSeed;
 
-            sb.Include<DisconnectedExportEntity>()
-                .WithQuery(() => dm => new
-                {
-                    Entity = dm,
-                    dm.CreationDate,
-                    dm.Machine,
-                    dm.State,
-                    dm.Total,
-                    dm.Exception,
-                });
+        sb.Include<DisconnectedMachineEntity>()
+            .WithQuery(() => dm => new
+            {
+                Entity = dm,
+                dm.MachineName,
+                dm.State,
+                dm.SeedMin,
+                dm.SeedMax,
+            });
 
-            sb.Include<DisconnectedImportEntity>()
-                .WithQuery(() => dm => new
-                {
-                    Entity = dm,
-                    dm.CreationDate,
-                    dm.Machine,
-                    dm.State,
-                    dm.Total,
-                    dm.Exception,
-                });
-            
-            QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Imports(), DisconnectedMessage.Imports);
-            QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Exports(), DisconnectedMessage.Exports);
+        sb.Include<DisconnectedExportEntity>()
+            .WithQuery(() => dm => new
+            {
+                Entity = dm,
+                dm.CreationDate,
+                dm.Machine,
+                dm.State,
+                dm.Total,
+                dm.Exception,
+            });
 
-            MachineGraph.Register();
+        sb.Include<DisconnectedImportEntity>()
+            .WithQuery(() => dm => new
+            {
+                Entity = dm,
+                dm.CreationDate,
+                dm.Machine,
+                dm.State,
+                dm.Total,
+                dm.Exception,
+            });
 
-            sb.Schema.SchemaCompleted += AssertDisconnectedStrategies;
+        QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Imports(), DisconnectedMessage.Imports);
+        QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Exports(), DisconnectedMessage.Exports);
 
-            sb.Schema.Synchronizing += Schema_Synchronizing;
-            sb.Schema.Generating += Schema_Generating;
+        MachineGraph.Register();
 
-            sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<Entity>(EntityEventsGlobal_Saving);
+        sb.Schema.SchemaCompleted += AssertDisconnectedStrategies;
 
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync);
+        sb.Schema.Synchronizing += Schema_Synchronizing;
+        sb.Schema.Generating += Schema_Generating;
 
-            Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMin).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: true);
-            Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMax).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: false);
-        }
+        sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<Entity>(EntityEventsGlobal_Saving);
+
+        sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync);
+
+        Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMin).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: true);
+        Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMax).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: false);
     }
 
     private static SqlPreCommand? Schema_Generating()

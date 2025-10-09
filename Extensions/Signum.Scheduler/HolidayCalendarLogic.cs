@@ -16,77 +16,77 @@ public static class HolidayCalendarLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<HolidayCalendarEntity>()
+            .WithUniqueIndex(hc => hc.IsDefault, hc => hc.IsDefault)
+            .WithQuery(() => st => new
+            {
+                Entity = st,
+                st.Id,
+                st.Name,
+                st.IsDefault,
+                Holidays = st.Holidays.Count,
+            });
+
+        HolidayCalendarsByLite = sb.GlobalLazy(() => Database.Query<HolidayCalendarEntity>().ToFrozenDictionary(hc => hc.ToLite()), 
+            new InvalidateWith(typeof(HolidayCalendarEntity)));
+
+        DefaultHolidayCalendar = sb.GlobalLazy(() => HolidayCalendarsByLite.Value.Values.SingleOrDefault(hc => hc.IsDefault), 
+            new InvalidateWith(typeof(HolidayCalendarEntity)));
+
+        new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.Save)
         {
-            sb.Include<HolidayCalendarEntity>()
-                .WithUniqueIndex(hc => hc.IsDefault, hc => hc.IsDefault)
-                .WithQuery(() => st => new
-                {
-                    Entity = st,
-                    st.Id,
-                    st.Name,
-                    st.IsDefault,
-                    Holidays = st.Holidays.Count,
-                });
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (c, _) => { },
+        }.Register();
 
-            HolidayCalendarsByLite = sb.GlobalLazy(() => Database.Query<HolidayCalendarEntity>().ToFrozenDictionary(hc => hc.ToLite()), 
-                new InvalidateWith(typeof(HolidayCalendarEntity)));
-
-            DefaultHolidayCalendar = sb.GlobalLazy(() => HolidayCalendarsByLite.Value.Values.SingleOrDefault(hc => hc.IsDefault), 
-                new InvalidateWith(typeof(HolidayCalendarEntity)));
-
-            new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.Save)
+        new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.ImportPublicHolidays)
+        {
+            CanExecute = (e) => e.FromYear.HasValue && e.ToYear.HasValue && e.CountryCode.HasText() ? null :
+                HolidayCalendarMessage.ForImport01and2ShouldBeSet.NiceToString(
+                    Entity.NicePropertyName(()=> e.FromYear),
+                    Entity.NicePropertyName(()=> e.ToYear),
+                    Entity.NicePropertyName(()=> e.CountryCode)
+                ),
+            Execute = (e, _) =>
             {
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (c, _) => { },
-            }.Register();
-
-            new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.ImportPublicHolidays)
-            {
-                CanExecute = (e) => e.FromYear.HasValue && e.ToYear.HasValue && e.CountryCode.HasText() ? null :
-                    HolidayCalendarMessage.ForImport01and2ShouldBeSet.NiceToString(
-                        Entity.NicePropertyName(()=> e.FromYear),
-                        Entity.NicePropertyName(()=> e.ToYear),
-                        Entity.NicePropertyName(()=> e.CountryCode)
-                    ),
-                Execute = (e, _) =>
+                for (int i = e.FromYear!.Value; i <= e.ToYear!.Value; i++)
                 {
-                    for (int i = e.FromYear!.Value; i <= e.ToYear!.Value; i++)
+                    string url = $"https://date.nager.at/api/v3/PublicHolidays/{i}/{e.CountryCode}";
+
+                    using var client = new HttpClient();
+                    var json = client.GetStringAsync(url).Result;
+
+                    var holidays = JsonSerializer.Deserialize<List<NagerHoliday>>(json, new JsonSerializerOptions
                     {
-                        string url = $"https://date.nager.at/api/v3/PublicHolidays/{i}/{e.CountryCode}";
+                        PropertyNameCaseInsensitive = true
+                    })!;
 
-                        using var client = new HttpClient();
-                        var json = client.GetStringAsync(url).Result;
+                    foreach (var h in holidays.Where(h => h.Global || h.Counties.Contains(e.SubDivisionCode)))
+                    {
+                        var existing = e.Holidays.FirstOrDefault(a => a.Date == h.Date);
 
-                        var holidays = JsonSerializer.Deserialize<List<NagerHoliday>>(json, new JsonSerializerOptions
+                        if (existing == null)
                         {
-                            PropertyNameCaseInsensitive = true
-                        })!;
-
-                        foreach (var h in holidays.Where(h => h.Global || h.Counties.Contains(e.SubDivisionCode)))
-                        {
-                            var existing = e.Holidays.FirstOrDefault(a => a.Date == h.Date);
-
-                            if (existing == null)
+                            e.Holidays.Add(new HolidayEmbedded
                             {
-                                e.Holidays.Add(new HolidayEmbedded
-                                {
-                                    Date = h.Date,
-                                    Name = h.LocalName,
-                                });
-                            }
+                                Date = h.Date,
+                                Name = h.LocalName,
+                            });
                         }
                     }
-                    e.Save();
-                },
-            }.Register();
+                }
+                e.Save();
+            },
+        }.Register();
 
-            new Graph<HolidayCalendarEntity>.Delete(HolidayCalendarOperation.Delete)
-            {
-                Delete = (c, _) => { c.Delete(); },
-            }.Register();
-        }
+        new Graph<HolidayCalendarEntity>.Delete(HolidayCalendarOperation.Delete)
+        {
+            Delete = (c, _) => { c.Delete(); },
+        }.Register();
     }
 
     public static List<string>? GetCountries()

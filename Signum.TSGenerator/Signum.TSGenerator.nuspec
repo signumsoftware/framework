@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Signum.TSGenerator</id>
-    <version>9.2.0</version>
+    <version>9.2.1</version>
     <title>TypeScript generator for Signum Framework applications</title>
     <authors>Olmo del Corral</authors>
     <license type="expression">MIT</license>

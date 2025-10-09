@@ -38,113 +38,113 @@ public static class HelpLogic
 
     public static void Start(SchemaBuilder sb, IFileTypeAlgorithm helpImagesAlgorithm)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Include<TypeHelpEntity>()
-                .WithUniqueIndex(e => new { e.Type, e.Culture })
-                .WithUniqueIndexMList(e => e.Properties, mle => new { mle.Parent, mle.Element.Property })
-                .WithUniqueIndexMList(e => e.Operations, mle => new { mle.Parent, mle.Element.Operation })
-                .WithSave(TypeHelpOperation.Save, (t, _ ) => InlineImagesLogic.SynchronizeInlineImages(t))
-                .WithDelete(TypeHelpOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Type,
-                    Description = e.Description.Try(d => d.Etc(100))
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-
-
-            sb.Include<NamespaceHelpEntity>()
-                .WithUniqueIndex(e => new { e.Name, e.Culture })
-                .WithSave(NamespaceHelpOperation.Save, (n, _ ) => InlineImagesLogic.SynchronizeInlineImages(n))
-                .WithDelete(NamespaceHelpOperation.Delete)
-                .WithQuery(() => n => new
-                {
-                    Entity = n,
-                    n.Id,
-                    n.Name,
-                    n.Culture,
-                    Description = n.Description.Try(d => d.Etc(100))
-                });
-
-            sb.Include<AppendixHelpEntity>()
-                .WithUniqueIndex(e => new { e.UniqueName, e.Culture })
-                .WithSave(AppendixHelpOperation.Save, (a, _) => InlineImagesLogic.SynchronizeInlineImages(a))
-                .WithDelete(AppendixHelpOperation.Delete)
-                .WithQuery(() => a => new
-                {
-                    Entity = a,
-                    a.Id,
-                    a.UniqueName,
-                    a.Culture,
-                    a.Title,
-                    Description = a.Description.Try(d => d.Etc(100))
-                });
-
-            sb.Include<QueryHelpEntity>()
-                .WithUniqueIndex(e => new { e.Query, e.Culture })
-                .WithUniqueIndexMList(e => e.Columns, mle => new { mle.Parent, mle.Element.ColumnName })
-                .WithSave(QueryHelpOperation.Save)
-                .WithDelete(QueryHelpOperation.Delete)
-                .WithQuery(() => q => new
-                {
-                    Entity = q,
-                    q.Id,
-                    q.Query,
-                    q.Culture,
-                    Description = q.Description.Try(d => d.Etc(100))
-                });
-
-            sb.Include<HelpImageEntity>()
-                .WithQuery(() => q => new
-                {
-                    Entity = q,
-                    q.Id,
-                    q.CreationDate,
-                    q.File,
-                    q.Target,
-                });
-
-            sb.Schema.EntityEvents<AppendixHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
-            sb.Schema.EntityEvents<NamespaceHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
-            sb.Schema.EntityEvents<TypeHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
-            sb.Schema.EntityEvents<QueryHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
-            FileTypeLogic.Register(HelpImageFileType.Image, helpImagesAlgorithm);
-
-            sb.Schema.Synchronizing += Schema_Synchronizing;
-
-            sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += operation =>
-                Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Operations, Database.MListQuery((TypeHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation.Is(operation)));
-
-            sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += property =>
-                Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Properties, Database.MListQuery((TypeHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property.Is(property)));
-
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type =>
-                Administrator.UnsafeDeletePreCommand(Database.Query<TypeHelpEntity>().Where(e => e.Type.Is(type)));
-
-            sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += query =>
-                Administrator.UnsafeDeletePreCommand(Database.Query<QueryHelpEntity>().Where(e => e.Query.Is(query)));
-
-            Types = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>(),
-             invalidateWith: new InvalidateWith(typeof(TypeHelpEntity)));
-
-            Namespaces = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>(),
-                invalidateWith: new InvalidateWith(typeof(NamespaceHelpEntity)));
-
-            Appendices = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelpEntity>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelpEntity>>(),
-                invalidateWith: new InvalidateWith(typeof(AppendixHelpEntity)));
-
-            Queries = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>(),
-               invalidateWith: new InvalidateWith(typeof(QueryHelpEntity)));
-
-            PermissionLogic.RegisterPermissions(HelpPermissions.ViewHelp);
-
-            if(sb.WebServerBuilder != null)
+        sb.Include<TypeHelpEntity>()
+            .WithUniqueIndex(e => new { e.Type, e.Culture })
+            .WithUniqueIndexMList(e => e.Properties, mle => new { mle.Parent, mle.Element.Property })
+            .WithUniqueIndexMList(e => e.Operations, mle => new { mle.Parent, mle.Element.Operation })
+            .WithSave(TypeHelpOperation.Save, (t, _ ) => InlineImagesLogic.SynchronizeInlineImages(t))
+            .WithDelete(TypeHelpOperation.Delete)
+            .WithQuery(() => e => new
             {
-                OmniboxParser.Generators.Add(new HelpModuleOmniboxResultGenerator());
-            }
+                Entity = e,
+                e.Id,
+                e.Type,
+                Description = e.Description.Try(d => d.Etc(100))
+            });
+
+
+
+        sb.Include<NamespaceHelpEntity>()
+            .WithUniqueIndex(e => new { e.Name, e.Culture })
+            .WithSave(NamespaceHelpOperation.Save, (n, _ ) => InlineImagesLogic.SynchronizeInlineImages(n))
+            .WithDelete(NamespaceHelpOperation.Delete)
+            .WithQuery(() => n => new
+            {
+                Entity = n,
+                n.Id,
+                n.Name,
+                n.Culture,
+                Description = n.Description.Try(d => d.Etc(100))
+            });
+
+        sb.Include<AppendixHelpEntity>()
+            .WithUniqueIndex(e => new { e.UniqueName, e.Culture })
+            .WithSave(AppendixHelpOperation.Save, (a, _) => InlineImagesLogic.SynchronizeInlineImages(a))
+            .WithDelete(AppendixHelpOperation.Delete)
+            .WithQuery(() => a => new
+            {
+                Entity = a,
+                a.Id,
+                a.UniqueName,
+                a.Culture,
+                a.Title,
+                Description = a.Description.Try(d => d.Etc(100))
+            });
+
+        sb.Include<QueryHelpEntity>()
+            .WithUniqueIndex(e => new { e.Query, e.Culture })
+            .WithUniqueIndexMList(e => e.Columns, mle => new { mle.Parent, mle.Element.ColumnName })
+            .WithSave(QueryHelpOperation.Save)
+            .WithDelete(QueryHelpOperation.Delete)
+            .WithQuery(() => q => new
+            {
+                Entity = q,
+                q.Id,
+                q.Query,
+                q.Culture,
+                Description = q.Description.Try(d => d.Etc(100))
+            });
+
+        sb.Include<HelpImageEntity>()
+            .WithQuery(() => q => new
+            {
+                Entity = q,
+                q.Id,
+                q.CreationDate,
+                q.File,
+                q.Target,
+            });
+
+        sb.Schema.EntityEvents<AppendixHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
+        sb.Schema.EntityEvents<NamespaceHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
+        sb.Schema.EntityEvents<TypeHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
+        sb.Schema.EntityEvents<QueryHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
+        FileTypeLogic.Register(HelpImageFileType.Image, helpImagesAlgorithm);
+
+        sb.Schema.Synchronizing += Schema_Synchronizing;
+
+        sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += operation =>
+            Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Operations, Database.MListQuery((TypeHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation.Is(operation)));
+
+        sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += property =>
+            Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Properties, Database.MListQuery((TypeHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property.Is(property)));
+
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type =>
+            Administrator.UnsafeDeletePreCommand(Database.Query<TypeHelpEntity>().Where(e => e.Type.Is(type)));
+
+        sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += query =>
+            Administrator.UnsafeDeletePreCommand(Database.Query<QueryHelpEntity>().Where(e => e.Query.Is(query)));
+
+        Types = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>(),
+         invalidateWith: new InvalidateWith(typeof(TypeHelpEntity)));
+
+        Namespaces = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>(),
+            invalidateWith: new InvalidateWith(typeof(NamespaceHelpEntity)));
+
+        Appendices = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelpEntity>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelpEntity>>(),
+            invalidateWith: new InvalidateWith(typeof(AppendixHelpEntity)));
+
+        Queries = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>(),
+           invalidateWith: new InvalidateWith(typeof(QueryHelpEntity)));
+
+        PermissionLogic.RegisterPermissions(HelpPermissions.ViewHelp);
+
+        if(sb.WebServerBuilder != null)
+        {
+            OmniboxParser.Generators.Add(new HelpModuleOmniboxResultGenerator());
         }
     }
 

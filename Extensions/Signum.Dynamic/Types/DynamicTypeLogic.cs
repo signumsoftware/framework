@@ -12,24 +12,24 @@ public static class DynamicTypeLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<DynamicTypeEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.TypeName,
-                    e.BaseType,
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<DynamicTypeEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.TypeName,
+                e.BaseType,
+            });
 
 
 
-            DynamicTypeGraph.Register();
-            DynamicLogic.GetCodeFiles += GetCodeFiles;
-            DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
-            EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicTypeEntity));
-        }
+        DynamicTypeGraph.Register();
+        DynamicLogic.GetCodeFiles += GetCodeFiles;
+        DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
+        EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicTypeEntity));
     }
 
     public class DynamicTypeGraph : Graph<DynamicTypeEntity>

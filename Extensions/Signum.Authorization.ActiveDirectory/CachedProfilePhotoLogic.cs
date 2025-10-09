@@ -18,27 +18,27 @@ public static class CachedProfilePhotoLogic
 
     public static void Start(SchemaBuilder sb, IFileTypeAlgorithm algorithm)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            IsStarted = true;
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<CachedProfilePhotoEntity>()
-                .WithDelete(CachedProfilePhotoOperation.Delete)
-                .WithExpressionFrom((UserEntity u) => u.CachedProfilePhotos())
-                .WithUniqueIndex(u => new { u.User, u.Size })
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.CreationDate,
-                    e.InvalidationDate,
-                    e.Size,
-                    e.User,
-                    e.Photo,
-                });
+        IsStarted = true;
 
-            FileTypeLogic.Register(AuthADFileType.CachedProfilePhoto, algorithm);
-        }
+        sb.Include<CachedProfilePhotoEntity>()
+            .WithDelete(CachedProfilePhotoOperation.Delete)
+            .WithExpressionFrom((UserEntity u) => u.CachedProfilePhotos())
+            .WithUniqueIndex(u => new { u.User, u.Size })
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.CreationDate,
+                e.InvalidationDate,
+                e.Size,
+                e.User,
+                e.Photo,
+            });
+
+        FileTypeLogic.Register(AuthADFileType.CachedProfilePhoto, algorithm);
     }
 
     public static Func<CachedProfilePhotoEntity, DateTime> CalculateInvalidationDate = p => p.Photo == null ? Clock.Now.AddDays(7) : Clock.Now.AddMonths(1);

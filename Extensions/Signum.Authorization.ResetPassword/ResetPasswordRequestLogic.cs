@@ -9,7 +9,7 @@ public static class ResetPasswordRequestLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (!sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
             return;
 
         sb.Include<ResetPasswordRequestEntity>()
@@ -22,7 +22,6 @@ public static class ResetPasswordRequestLogic
                 e.User,
                 e.User.Email
             });
-
 
         AuthLogic.OnDeactivateUser = u =>
         {
