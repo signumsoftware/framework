@@ -291,8 +291,8 @@ export function EntityTable<V extends ModifiableEntity, RS>(props: EntityTablePr
               {
                 showCreateRow && <tr>
                   <td colSpan={1 + p.columns!.length} className={isEmpty ? "border-0" : undefined}>
-                    {typeof p.createAsLink == "function" ? p.createAsLink(c) :
-                      <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
+                      {typeof p.createAsLink == "function" ? p.createAsLink(c) :
+                        <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
                         className="sf-line-button sf-create"
                         onClick={c.handleCreateClick}>
                         <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
@@ -371,7 +371,7 @@ export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRow
       onKeyDown={p.onKeyDown && (e => p.onKeyDown!(rowHandle, e))}
       className={classes(drag?.dropClass, rowAtts?.className)}
     >
-      {p.firstColumnVisible && <td>
+      {p.firstColumnVisible && <td style={{ verticalAlign: "middle" }}>
         <div className="item-group">
           {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
           {p.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
@@ -400,7 +400,7 @@ export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRow
       </td>}      
       {p.columns.map((c, i) => {
 
-        var td = <td key={i} {...c.cellHtmlAttributes && c.cellHtmlAttributes(ctx, rowHandle, rowState)}>{getTemplate(c)}</td>;
+        var td = <td style={{ verticalAlign: "middle" }} key={i} {...c.cellHtmlAttributes && c.cellHtmlAttributes(ctx, rowHandle, rowState)}>{getTemplate(c)}</td>;
 
         var mc = c.mergeCells as ((a: any) => any) | undefined
 
