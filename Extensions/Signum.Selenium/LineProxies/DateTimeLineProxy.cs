@@ -36,13 +36,7 @@ public class DateTimeLineProxy : BaseLineProxy
         return strValue == null ? null : (IFormattable?)ReflectionTools.Parse(strValue, this.Route.Type);
     }
 
-    public bool IsReadonly()
-    {
-        var element = InputReadonlyLocator.TryFind();
-
-        return element != null;
-    }
-
     public override object? GetValueUntyped() => this.GetValue();
     public override void SetValueUntyped(object? value) => SetValue((IFormattable?)value);
+    public override bool IsReadonly() => InputReadonlyLocator.TryFind() != null;
 }

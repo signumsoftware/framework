@@ -68,15 +68,8 @@ public class EntityLineProxy : EntityBaseProxy
         return EntityInfoInternal(null);
     }
 
-    public bool IsReadonly()
+    public override bool IsReadonly()
     {
-        return Element.TryFindElement(By.CssSelector(".form-control[readonly]")) != null;
+        return Element.TryFindElement(By.CssSelector(".form-control[readonly]")) != null || this.Element.IsDomDisabled() || this.Element.IsDomReadonly();
     }
-
-    public bool IsDisabled()
-    {
-        return this.Element.GetDomProperty("disabled") == "true";
-    }
-
-
 }
