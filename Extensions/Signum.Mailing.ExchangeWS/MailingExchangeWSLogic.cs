@@ -3,7 +3,7 @@ using Signum.Mailing;
 
 namespace Signum.Mailing.ExchangeWS;
 
-public static class MailingMicrosoftGraphLogic
+public static class MailingExchangeWSLogic
 {
     public static void Start(SchemaBuilder sb)
     {
