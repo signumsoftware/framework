@@ -212,9 +212,9 @@ export interface TokenEquivalenceGroupEntity extends Entities.Entity {
   tokenEquivalences: Entities.MList<TokenEquivalenceEmbedded>;
 }
 
-export const ToolbarPartEntity: Type<ToolbarPartEntity> = new Type<ToolbarPartEntity>("ToolbarPart");
-export interface ToolbarPartEntity extends Entities.Entity, IPartEntity {
-  Type: "ToolbarPart";
+export const ToolbarMenuPartEntity: Type<ToolbarMenuPartEntity> = new Type<ToolbarMenuPartEntity>("ToolbarMenuPart");
+export interface ToolbarMenuPartEntity extends Entities.Entity, IPartEntity {
+  Type: "ToolbarMenuPart";
   toolbarMenu: Entities.Lite<Toolbar.ToolbarMenuEntity>;
   requiresTitle: boolean;
 }
