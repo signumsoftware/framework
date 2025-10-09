@@ -504,7 +504,7 @@ public class DynamicTypeCodeGenerator
         {
             case UniqueIndex.No: break;
             case UniqueIndex.Yes: atts.Add("UniqueIndex"); break;
-            case UniqueIndex.YesAllowNull: atts.Add("UniqueIndex(AllowMultipleNulls = true)"); break;
+            case UniqueIndex.YesAllowNull: atts.Add("UniqueIndex"); break;
         }
 
         if (property.IsMList != null)

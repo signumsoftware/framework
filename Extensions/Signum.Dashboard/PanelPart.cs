@@ -47,7 +47,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
 
     [BindParent]
     [ImplementedBy(
-        typeof(ToolbarPartEntity),
+        typeof(ToolbarMenuPartEntity),
         typeof(ImagePartEntity),
         typeof(SeparatorPartEntity),
         typeof(TextPartEntity),
@@ -173,7 +173,7 @@ public enum InteractionGroup
 
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
-public class ToolbarPartEntity : Entity, IPartEntity
+public class ToolbarMenuPartEntity : Entity, IPartEntity
 {
     public Lite<ToolbarMenuEntity> ToolbarMenu { get; set; }
 
@@ -189,7 +189,7 @@ public class ToolbarPartEntity : Entity, IPartEntity
 
     public IPartEntity Clone()
     {
-        return new ToolbarPartEntity
+        return new ToolbarMenuPartEntity
         {
             ToolbarMenu = this.ToolbarMenu,
         };

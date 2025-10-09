@@ -46,7 +46,7 @@ public static class DashboardLogic
 
         PartNames.AddRange(new Dictionary<string, Type>
         {
-            {"ToolbarPart", typeof(ToolbarPartEntity)},
+            {"ToolbarPart", typeof(ToolbarMenuPartEntity)},
             {"ImagePart", typeof(ImagePartEntity)},
             {"SeparatorPart", typeof(SeparatorPartEntity)},
             {"HealthCheckPart", typeof(HealthCheckPartEntity)},
@@ -425,7 +425,7 @@ public static class DashboardLogic
             teg => teg.GetParentEntity<DashboardEntity>().InCondition(typeCondition));
 
         RegisterTypeConditionForPart<TextPartEntity>(typeCondition);
-        RegisterTypeConditionForPart<ToolbarPartEntity>(typeCondition);
+        RegisterTypeConditionForPart<ToolbarMenuPartEntity>(typeCondition);
         RegisterTypeConditionForPart<SeparatorPartEntity>(typeCondition);
         RegisterTypeConditionForPart<HealthCheckPartEntity>(typeCondition);
         RegisterTypeConditionForPart<CustomPartEntity>(typeCondition);

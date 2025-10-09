@@ -40,17 +40,17 @@ class Upgrade_20251007_WithUniqueIndex : CodeUpgradeBase
             );
 
             cf.Replace(
-                new Regex(@"\[UniqueIndex\s*\(\s*AllowMultipleNulls\s*=\s*true\s*\)"),
-                "[UniqueIndex"
+                new Regex(@"UniqueIndex\s*\(\s*AllowMultipleNulls\s*=\s*true\s*\)"),
+                "UniqueIndex"
             );
 
             cf.Replace(
-                new Regex(@"\[UniqueIndex\s*\(\s*AllowMultipleNulls\s*=\s*true\s*,\s*"),
-                "[UniqueIndex("
+                new Regex(@"UniqueIndex\s*\(\s*AllowMultipleNulls\s*=\s*true\s*,\s*"),
+                "UniqueIndex("
             );
 
             cf.Replace(
-                new Regex(@"(?<main>\[UniqueIndex\s*\([^)]+),\s*AllowMultipleNulls\s*=\s*true\s*\)"),
+                new Regex(@"(?<main>UniqueIndex\s*\([^)]+),\s*AllowMultipleNulls\s*=\s*true\s*\)"),
                 m => $"{m.Groups["main"].Value})"
             );
         });

@@ -13,10 +13,11 @@ import { getTypeInfos, getTypeName, PseudoType, Type, TypeInfo } from '@framewor
 import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import {
-  DashboardPermission, DashboardEntity, ToolbarPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded,
+  DashboardPermission, DashboardEntity, IPartEntity, DashboardMessage, PanelPartEmbedded,
   CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity, DashboardLiteModel,
   HealthCheckPartEntity, CustomPartEntity,
-  TextPartEntity
+  TextPartEntity,
+  ToolbarMenuPartEntity
 } from './Signum.Dashboard'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
@@ -51,9 +52,9 @@ export namespace DashboardClient {
     defaultTitle?: (elenent: T) => string;
     withPanel?: (element: T, entity: Lite<Entity> | undefined) => boolean;
     getQueryNames?: (element: T) => QueryEntity[];
-    handleTitleClick?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.MutableRefObject<any>, e: React.MouseEvent<any>) => void;
-    handleEditClick?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.MutableRefObject<any>, e: React.MouseEvent<any>) => Promise<boolean>;
-    customTitleButtons?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.MutableRefObject<any>) => React.ReactNode;
+    handleTitleClick?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.RefObject<any>, e: React.MouseEvent<any>) => void;
+    handleEditClick?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.RefObject<any>, e: React.MouseEvent<any>) => Promise<boolean>;
+    customTitleButtons?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.RefObject<any>) => React.ReactNode;
   }
 
 
@@ -74,7 +75,7 @@ export namespace DashboardClient {
 
     Navigator.addSettings(new EntitySettings(CustomPartEntity, e => import('./Admin/CustomPart')));
     Navigator.addSettings(new EntitySettings(TextPartEntity, e => import('./Admin/TextPart')));
-    Navigator.addSettings(new EntitySettings(ToolbarPartEntity, e => import('./Admin/ToolbarPart')));
+    Navigator.addSettings(new EntitySettings(ToolbarMenuPartEntity, e => import('./Admin/ToolbarMenuPart')));
     Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
     Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
     Navigator.addSettings(new EntitySettings(HealthCheckPartEntity, e => import('./Admin/HealthCheckPart')));
@@ -103,8 +104,8 @@ export namespace DashboardClient {
       withPanel: () => false,
     });
 
-    registerRenderer(ToolbarPartEntity, {
-      component: () => import('./View/ToolbarPart').then(a => a.default),
+    registerRenderer(ToolbarMenuPartEntity, {
+      component: () => import('./View/ToolbarMenuPart').then(a => a.default),
       icon: () => ({ icon: "list", iconColor: "#B9770E" })
     });
 
@@ -239,7 +240,7 @@ export namespace DashboardClient {
     frame: EntityFrame;
   }
 
-  export function DashboardWidget(p: DashboardWidgetProps): React.FunctionComponentElement<{
+  export function DashboardWidget(p: DashboardWidgetProps): React.ReactElement<{
     dashboard: DashboardEntity;
     cachedQueries: {
       [userAssetKey: string]: Promise<CachedQueryJS>;
