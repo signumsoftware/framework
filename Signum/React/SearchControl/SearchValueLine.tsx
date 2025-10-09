@@ -141,14 +141,14 @@ const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & Re
 
   const value = svRef.current?.value;
   const find = value != undefined && (p.findButton ?? isQuery) &&
-    <a href="#" className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
+    <a style={{ display: "flex", alignItems: "center" }} href="#" className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
       onClick={svRef.current!.handleClick}
       title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
       {EntityBaseController.getFindIcon()}
     </a>;
   
   const create = !p.ctx.frame?.currentDate && (p.create == true || p.create == "ifNull" && value === null) &&
-    <a href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
+    <a style={{ display: "flex", alignItems: "center" }} href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
       title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
       {EntityBaseController.getCreateIcon()}
