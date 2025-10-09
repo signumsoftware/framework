@@ -40,7 +40,7 @@ public static class SymbolLogic<T>
 
     public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSymbols)
     {
-        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(typeof(SymbolLogic<T>).GetMethod("Start")))
             return;
 
         sb.Include<T>()
