@@ -147,7 +147,7 @@ class EmailMessageBuilder
         if (message.SubjectParsedNode == null)
         {
             var subject = message.Subject
-                .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Split(new[] { "\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Select(l => l.Trim())
                 .ToString(" ");
 

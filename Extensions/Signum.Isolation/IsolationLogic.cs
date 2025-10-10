@@ -108,15 +108,15 @@ public static class IsolationLogic
             a => a,
             (a, b) => 0);
 
-        var extra = result.Extra.OrderBy(a => a.Namespace).ThenBy(a => a.Name).ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".FormatWith(t.Name), "\r\n");
+        var extra = result.Extra.OrderBy(a => a.Namespace).ThenBy(a => a.Name).ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".FormatWith(t.Name), "\n");
 
-        var lacking = result.Missing.GroupBy(a => a.Namespace).OrderBy(gr => gr.Key).ToString(gr => "  //{0}\r\n".FormatWith(gr.Key) +
-            gr.ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".FormatWith(t.Name), "\r\n"), "\r\n\r\n");
+        var lacking = result.Missing.GroupBy(a => a.Namespace).OrderBy(gr => gr.Key).ToString(gr => "  //{0}\n".FormatWith(gr.Key) +
+            gr.ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".FormatWith(t.Name), "\n"), "\n\n");
 
         if (extra.HasText() || lacking.HasText())
-            throw new InvalidOperationException("IsolationLogic's strategies are not synchronized with the Schema.\r\n" +
-                    (extra.HasText() ? ("Remove something like:\r\n" + extra + "\r\n\r\n") : null) +
-                    (lacking.HasText() ? ("Add something like:\r\n" + lacking + "\r\n\r\n") : null));
+            throw new InvalidOperationException("IsolationLogic's strategies are not synchronized with the Schema.\n" +
+                    (extra.HasText() ? ("Remove something like:\n" + extra + "\n\n") : null) +
+                    (lacking.HasText() ? ("Add something like:\n" + lacking + "\n\n") : null));
 
         foreach (var item in strategies.Where(kvp => kvp.Value == IsolationStrategy.Isolated || kvp.Value == IsolationStrategy.Optional))
         {

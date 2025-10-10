@@ -267,7 +267,7 @@ modules.Finder.getOrAddSettings("${p.cleanName}") /*: QuerySettings*/
   );
 
   function handleModulesClick(key: string) {
-    var text = [clientModules[key], modules[key]].filter(a => a).join("\r\n\r\n");
+    var text = [clientModules[key], modules[key]].filter(a => a).join("\n\n");
     if (text == "")
       return;
     AutoLineModal.show({

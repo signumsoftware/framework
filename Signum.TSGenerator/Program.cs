@@ -159,7 +159,7 @@ public static class Program
 
     private static string GetUpToDateContent(string intermediateAssembly, List<string> t4Files)
     {
-        return string.Join("\r\n", new[] { intermediateAssembly }.Concat(t4Files.OrderBy(a => a))
+        return string.Join("\n", new[] { intermediateAssembly }.Concat(t4Files.OrderBy(a => a))
                      .Select(f => File.GetLastWriteTimeUtc(f).ToString("o") + " " + Path.GetFileName(f))
                     .ToList()
                 );
