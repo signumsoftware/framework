@@ -1257,7 +1257,7 @@ public static class CaseActivityLogic
                         .Where(ca => ca != null)
                         .Select(ca => new { ca!.DoneBy, ca!.Note })
                         .ToList()
-                        .Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
+                        .Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\n");
 
                     decompositionCaseActivity.Note = lastActivitiesNotes;
                     ExecuteStep(decompositionCaseActivity, DoneType.Recompose, null, null);

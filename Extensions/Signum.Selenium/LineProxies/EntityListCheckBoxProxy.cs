@@ -11,6 +11,7 @@ public class EntityListCheckBoxProxy : EntityBaseProxy
 
     public override object? GetValueUntyped() => throw new NotImplementedException();
     public override void SetValueUntyped(object? value) => throw new NotImplementedException();
+    public override bool IsReadonly() => throw new NotImplementedException();
 
     public WebElementLocator CheckBoxElement(Lite<Entity> lite)
     {

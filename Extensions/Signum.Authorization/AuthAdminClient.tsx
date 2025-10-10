@@ -151,7 +151,7 @@ export namespace AuthAdminClient {
         isVisible: AppContext.isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null
       }));
 
-      getAllTypes().forEach(t => {
+      const fixTypes = () => getAllTypes().forEach(t => {
         if (t.kind == "Entity") {
           if ((t as any).typeAllowed) {
             t.minTypeAllowed = (t as any).typeAllowed;
@@ -174,6 +174,9 @@ export namespace AuthAdminClient {
           });
         }
       });
+
+      fixTypes();
+      onReloadTypesActions.push(() => fixTypes());
   
       getAllTypes().filter(a => a.queryAuditors != null)
         .forEach(t => {

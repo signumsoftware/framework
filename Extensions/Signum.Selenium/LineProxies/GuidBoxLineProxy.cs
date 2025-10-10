@@ -34,10 +34,10 @@ public class GuidBoxLineProxy : BaseLineProxy
         return null;
     }
 
-    public bool IsReadonly()
+    public override bool IsReadonly()
     {
         var element = InputLocator.Find();
 
-        return element.HasClass("readonly") || element.HasClass("form-control-plaintext") || element.GetDomProperty("readonly") != null;
+        return element.HasClass("readonly") || element.HasClass("form-control-plaintext") || element.IsDomDisabled() || element.IsDomReadonly();
     }
 }

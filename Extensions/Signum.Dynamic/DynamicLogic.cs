@@ -118,7 +118,7 @@ public static class DynamicLogic
                     if (cr.Errors.Count == 0)
                         CodeGenAssemblyPath = cr.OutputAssembly;
                     else
-                        errors.Add("Errors compiling  dynamic assembly:\r\n" + cr.Errors.ToString("\r\n").Indent(4));
+                        errors.Add("Errors compiling  dynamic assembly:\n" + cr.Errors.ToString("\n").Indent(4));
                 }
             }
 
@@ -130,11 +130,11 @@ public static class DynamicLogic
                 if (cr.Errors.Count == 0)
                     CodeGenControllerAssemblyPath = cr.OutputAssembly;
                 else
-                    errors.Add("Errors compiling  dynamic api controller assembly:\r\n" + cr.Errors.ToString("\r\n").Indent(4));
+                    errors.Add("Errors compiling  dynamic api controller assembly:\n" + cr.Errors.ToString("\n").Indent(4));
             }
 
             if (errors.Any())
-                throw new InvalidOperationException(errors.ToString("\r\n"));
+                throw new InvalidOperationException(errors.ToString("\n"));
         }
         catch (Exception e)
         {

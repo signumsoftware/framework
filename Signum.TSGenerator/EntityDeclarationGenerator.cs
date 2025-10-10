@@ -216,7 +216,7 @@ static class EntityDeclarationGenerator
         }
 
 
-        return sb.ToString().Replace("\r\n", "\n");
+        return sb.ToString().Replace("\n", "\n");
 
     }
 

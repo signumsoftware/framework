@@ -106,7 +106,7 @@ export class CodeContext {
       .map(a => a!)
       .groupsOf(120, a => a.length)
       .map(gr => gr.join(" "))
-      .join("    \r\n");
+      .join("    \n");
 
     if (children?.length) {
       var childrenString = children.join("\n").indent(4);
@@ -505,7 +505,7 @@ export function asFunction(thisObject: React.Component<any, any>, expression: Ex
   try {
     return evalWithScope.call(thisObject, code, globalModules, props, locals);
   } catch (e) {
-    throw new Error("Syntax in '" + getFieldName() + "':\r\n" + code + "\r\n" + (e as Error).message);
+    throw new Error("Syntax in '" + getFieldName() + "':\n" + code + "\n" + (e as Error).message);
   }
 }
 
@@ -525,7 +525,7 @@ export function asFieldFunction(field: string): (e: ModifiableEntity) => any {
   try {
     return eval(code);
   } catch (e) {
-    throw new Error("Syntax in '" + fixedRoute + "':\r\n" + code + "\r\n" + (e as Error).message);
+    throw new Error("Syntax in '" + fixedRoute + "':\n" + code + "\n" + (e as Error).message);
   }
 }
 
@@ -549,7 +549,7 @@ export function evaluateUntyped(dn: DesignerNode<BaseNode>, parentCtx: TypeConte
   try {
     return f(parentCtx);
   } catch (e) {
-    throw new Error("Eval '" + getFieldName() + "':\r\n" + (e as Error).message);
+    throw new Error("Eval '" + getFieldName() + "':\n" + (e as Error).message);
   }
 }
 
@@ -558,7 +558,7 @@ export function evaluateAndValidate<F, T>(dn: DesignerNode<BaseNode>, parentCtx:
 
   var error = validate(result);
   if (error)
-    throw new Error("Result '" + Binding.getSingleMember(fieldAccessor) + "':\r\n" + error);
+    throw new Error("Result '" + Binding.getSingleMember(fieldAccessor) + "':\n" + error);
 
   if (result == null)
     return undefined;
@@ -834,7 +834,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { sh
       {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).autoComplete)} type="boolean" defaultValue={null} exampleExpression={"new modules.AutoCompleteConfig.LiteAutocompleteConfig((signal, subStr) => [Custom API call here ...], /*requiresInitialLoad:*/ false, /*showType:*/ false)"} />}
       <FindOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.findOptions)} avoidSuggestion={true} />
       {options.filterRows && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => (n as EntityListBaseNode).filterRows)} type={null} defaultValue={null} exampleExpression={"ctxs => ctxs.filter(ctx => ctx.value.code != null)"} />}
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \n() => locals.forceUpdate()"} />
     </div>
   );
 }

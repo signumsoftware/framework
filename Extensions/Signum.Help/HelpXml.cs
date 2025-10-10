@@ -191,7 +191,7 @@ public static class HelpXml
                       {
                           Culture = ci,
                           Name = element.Attribute(_Name)!.Value,
-                          Title = element.Attribute(_Title)!.Value,
+                          Title = element.Attribute(_Title)?.Value,
                           Description = element.Element(_Description)?.Value
                       }.Save();
 
@@ -212,7 +212,7 @@ public static class HelpXml
                   {
                       XElement element = ParseXML(n);
 
-                      o.Title = element.Attribute(_Title)!.Value;
+                      o.Title = element.Attribute(_Title)?.Value;
                       o.Description = element.Element(_Description)?.Value;
 
                       if (GraphExplorer.IsGraphModified(o))
@@ -295,10 +295,11 @@ public static class HelpXml
                   createNew: (k, n) =>
                   {
                       XElement element = ParseXML(n);
+                      var qn = QueryLogic.ToQueryName(k.Before(".help"));
                       var queryHelp = new QueryHelpEntity
                       {
                           Culture = ci,
-                          Query = QueryLogic.GetQueryEntity(k),
+                          Query = QueryLogic.GetQueryEntity(qn),
                       };
 
                       ImportXml(queryHelp, element);
@@ -460,7 +461,7 @@ public static class HelpXml
 
                 foreach (var item in opers.Elements(_Operation))
                 {
-                    string name = item.Attribute(_Name)!.Value;
+                    string name = item.Attribute(_Key)!.Value;
                     var operation = SelectInteractive(name, operations, "operations for {0}".FormatWith(typeEntity.ClassName));
 
                     if (operation == null)

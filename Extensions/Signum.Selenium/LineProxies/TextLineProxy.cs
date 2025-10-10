@@ -31,11 +31,11 @@ public abstract class TextBoxBaseLineProxy : BaseLineProxy
         return /*textLine.GetDomAttribute("data-value") ??*/ textLine.GetDomProperty("value")!;
     }
 
-    public bool IsReadonly()
+    public override bool IsReadonly()
     {
         var element = InputLocator.Find();
 
-        return element.HasClass("readonly") || element.HasClass("form-control-plaintext") || element.GetDomAttribute("readonly") != null || element.GetDomProperty("readonly") != null;
+        return element.HasClass("readonly") || element.HasClass("form-control-plaintext") || element.IsDomDisabled() || element.IsDomReadonly();
     }
 }
 

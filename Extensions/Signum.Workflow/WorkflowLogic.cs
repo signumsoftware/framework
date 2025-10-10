@@ -144,7 +144,7 @@ public static class WorkflowLogic
 
             var errors = issues.Where(a => a.Type == WorkflowIssueType.Error);
             if (errors.HasItems())
-                throw new ApplicationException("Errors in Workflow '" + workflow + "':\r\n" + errors.ToString("\r\n").Indent(4));
+                throw new ApplicationException("Errors in Workflow '" + workflow + "':\n" + errors.ToString("\n").Indent(4));
 
             return graph;
         }
@@ -720,10 +720,10 @@ public static class WorkflowLogic
         var errors = queryable.Select(a => new { Connection = a.ToLite(), From = a.From.ToLite(), To = a.To.ToLite(), Workflow = a.From.Lane.Pool.Workflow.ToLite() }).ToList();
 
         var formattedErrors = errors.GroupBy(a => a.Workflow).ToString(gr => $"Workflow '{gr.Key}':" +
-              gr.ToString(a => $"Connection {a.Connection!.Id} ({a.Connection}): {a.From} -> {a.To}", "\r\n").Indent(4),
-            "\r\n\r\n").Indent(4);
+              gr.ToString(a => $"Connection {a.Connection!.Id} ({a.Connection}): {a.From} -> {a.To}", "\n").Indent(4),
+            "\n\n").Indent(4);
 
-        throw new ApplicationException($"Impossible to {operation.Symbol.Key.After('.')} '{entity}' because is used in some connections: \r\n" + formattedErrors);
+        throw new ApplicationException($"Impossible to {operation.Symbol.Key.After('.')} '{entity}' because is used in some connections: \n" + formattedErrors);
     }
 
     private static void ThrowConnectionError<T>(IQueryable<T> queryable, Entity entity, IOperationSymbolContainer operation)
@@ -735,10 +735,10 @@ public static class WorkflowLogic
         var errors = queryable.Select(a => new { Entity = a.ToLite(), Workflow = a.Lane.Pool.Workflow.ToLite() }).ToList();
 
         var formattedErrors = errors.GroupBy(a => a.Workflow).ToString(gr => $"Workflow '{gr.Key}':" +
-              gr.ToString(a => $"{typeof(T).NiceName()} {a.Entity}", "\r\n").Indent(4),
-            "\r\n\r\n").Indent(4);
+              gr.ToString(a => $"{typeof(T).NiceName()} {a.Entity}", "\n").Indent(4),
+            "\n\n").Indent(4);
 
-        throw new ApplicationException($"Impossible to {operation.Symbol.Key.After('.')} '{entity}' because is used in some {typeof(T).NicePluralName()}: \r\n" + formattedErrors);
+        throw new ApplicationException($"Impossible to {operation.Symbol.Key.After('.')} '{entity}' because is used in some {typeof(T).NicePluralName()}: \n" + formattedErrors);
     }
 
     public class WorkflowGraph : Graph<WorkflowEntity>
