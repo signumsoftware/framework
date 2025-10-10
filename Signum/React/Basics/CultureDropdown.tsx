@@ -8,7 +8,7 @@ import { useAPI } from '../Hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconName } from '@fortawesome/fontawesome-svg-core';
 
-export default function CultureDropdown(p: { fullName?: boolean }): React.ReactElement | null {
+export default function CultureDropdown(p: { fullName?: boolean; isMobile?: boolean }): React.ReactElement | null {
 
   var cultures = useAPI(signal => CultureClient.getCultures(false), []);
 
@@ -20,9 +20,11 @@ export default function CultureDropdown(p: { fullName?: boolean }): React.ReactE
   function handleSelect(c: Lite<CultureInfoEntity>) {
     CultureClient.changeCurrentCulture(c);
   }
-
+  const dropdownTitle = p.isMobile
+    ? <FontAwesomeIcon icon={"globe"} />
+    : (p.fullName ? current.nativeName : simplifyName(current.nativeName));
   return (
-    <NavDropdown data-culture={current.name} title={p.fullName ? current.nativeName : simplifyName(current.nativeName)} className="sf-culture-dropdown">
+    <NavDropdown data-culture={current.name} title={dropdownTitle} className="sf-culture-dropdown">
       {Dic.map(cultures, (name, c, i) =>
         <NavDropdown.Item key={i} data-culture={name} active={is(c, current)} onClick={() => handleSelect(c)}>
           {p.fullName ? getToString(c) : simplifyName(getToString(c)!)}

@@ -11,7 +11,7 @@ const MIN_SCALE = 0.8; // 2 levels smaller
 const MAX_SCALE = 1.5; // 5 levels larger
 const STEP = 0.1;
 
-export function FontSizeSelector(): JSX.Element {
+export function FontSizeSelector({ isMobile }: { isMobile: boolean }): JSX.Element {
   const getDefaultScale = (): number => {
     const stored = localStorage.getItem(FONT_SCALE_STORAGE_KEY);
     return stored ? parseFloat(stored) : DEFAULT_SCALE;
@@ -27,10 +27,9 @@ export function FontSizeSelector(): JSX.Element {
   const increaseFont = () => setScale(prev => Math.min(prev + STEP, MAX_SCALE));
   const decreaseFont = () => setScale(prev => Math.max(prev - STEP, MIN_SCALE));
   const resetFont = () => setScale(DEFAULT_SCALE);
-
   return (
     <NavDropdown
-      title={"Schriftgröße"}
+      title={isMobile ? <FontAwesomeIcon icon={"font"} /> : "Schriftgröße" }
       id="nav-fontsize-dropdown"
       align="end"
     >
