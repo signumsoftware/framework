@@ -150,16 +150,19 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
 
     if (matches)
       return { prio: 1, inferredEntity: entityType && id ? newLite(entityType, id) : undefined };
+
+    return null;
+  } else {
+
+    if (!r.content)
+      return null;
+
+    var config = ToolbarClient.getConfig(r);
+    if (!config)
+      return null;
+
+    return config.isCompatibleWithUrlPrio(r, location, query);
   }
-
-  if (!r.content)
-    return null;
-
-  var config = ToolbarClient.getConfig(r);
-  if (!config)
-    return null;
-
-  return config.isCompatibleWithUrlPrio(r, location, query);
 }
 
 
@@ -602,7 +605,12 @@ export function ToolbarNavItem(p: { title: string | undefined, active?: boolean,
 }
 
 export function isActive(active: InferActiveResponse | null, res: ToolbarResponse<any>, selectedEntity: Lite<Entity> | null): boolean {
-  return active != null && active.response == res && (active.menuWithEntity == null || is(active.menuWithEntity.entity, selectedEntity));
+
+  function isSame(a: ToolbarResponse<any>, b: ToolbarResponse<any>) {
+    return a == b || a.content == b.content && a.url == b.url; //simplifyForEntity clones responses
+  }
+
+  return active != null && isSame(active.response, res) && (active.menuWithEntity == null || is(active.menuWithEntity.entity, selectedEntity));
 }
 
 export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null): React.ReactElement | undefined {

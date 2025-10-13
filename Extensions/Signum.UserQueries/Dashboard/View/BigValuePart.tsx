@@ -1,20 +1,17 @@
-
 import * as React from 'react'
 import { FindOptions, QueryToken } from '@framework/FindOptions'
-import { getQueryKey, getQueryNiceName } from '@framework/Reflection'
+import { getQueryKey } from '@framework/Reflection'
 import { JavascriptMessage, toLite, liteKey, translated } from '@framework/Signum.Entities'
-import { SearchControl, SearchControlHandler, SearchValue, SearchValueController } from '@framework/Search'
+import { SearchValue, SearchValueController } from '@framework/Search'
 import { UserQueryClient } from '../../UserQueryClient'
 import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Finder } from '@framework/Finder'
 import { useAPI, useVersion } from '@framework/Hooks'
-import { DashboardClient, PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
-import { FullscreenComponent } from '@framework/Components/FullscreenComponent'
+import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 import { parseIcon } from '@framework/Components/IconTypeahead'
-import { CachedQueryJS, executeQueryCached, executeQueryValueCached } from '../../../Signum.Dashboard/CachedQueryExecutor'
 import { DashboardPinnedFilters } from '../../../Signum.Dashboard/View/DashboardFilterController'
-import { BigValuePartEntity, UserQueryEntity, UserQueryPartEntity } from '../../Signum.UserQueries'
+import { BigValuePartEntity, UserQueryEntity } from '../../Signum.UserQueries'
 import { UserAssetClient } from '../../../Signum.UserAssets/UserAssetClient'
 
 export interface UserQueryPartHandler {
@@ -88,7 +85,7 @@ interface BigValueBadgeProps {
   findOptions: FindOptions;
   clickable: boolean;
   valueToken: QueryToken | null;
-  text?: string;
+  text?: React.ReactNode;
   iconName?: string;
   iconColor?: string;
   titleColor?: string | null;
@@ -121,14 +118,15 @@ export function BigValueSearchCounter(p: BigValueBadgeProps): React.JSX.Element 
               />
               {/*customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}*/}
             </h3>
-            <h3 className="medium">{p.text}</h3>
+            
 
           </div>
           <div className="right"> 
             {p.iconName &&
-              <FontAwesomeIcon icon={parseIcon(p.iconName)!} color={p.iconColor} size="3x" />}
+              <FontAwesomeIcon icon={parseIcon(p.iconName)!} color={p.iconColor} size="2x" />}
           </div>
         </div>
+        <h3 className="medium">{p.text}</h3>
       </div>
     </div>
   );
