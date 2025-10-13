@@ -4,9 +4,8 @@ using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 using System.IO;
-using System.Threading;
 
-namespace Signum.Files.FileTypeAlgorithms;
+namespace Signum.Files.AzureBlobs;
 
 public enum BlobAction
 {
@@ -180,9 +179,6 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
     {
         blobClient.Upload(new MemoryStream(binaryFile), httpHeaders: blobHeaders);
     }
-
-    
-
 
     //Initial exceptions (like connection string problems) should happen synchronously
     public virtual /*async*/ Task SaveFileAsync(IFilePath fp, CancellationToken cancellationToken = default)
@@ -420,8 +416,6 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
         blobClient.SetHttpHeaders(headers);
     }
-
-
 
     public readonly static Dictionary<string, string> ContentTypesDict = new Dictionary<string, string>()
     {
