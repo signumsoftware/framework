@@ -439,7 +439,7 @@ public static class HelpLogic
 
         if (exceptions.Any())
             throw new InvalidOperationException("Error Parsing XML Help Files: " + exceptions.ToString(e => "{0} ({1}:{2}): {3}".FormatWith(
-             e.filename, e.exception.LineNumber, e.exception.LinePosition, e.Item1.Message), "\r\n").Indent(3));
+             e.filename, e.exception.LineNumber, e.exception.LinePosition, e.Item1.Message), "\n").Indent(3));
 
         return document;
     }

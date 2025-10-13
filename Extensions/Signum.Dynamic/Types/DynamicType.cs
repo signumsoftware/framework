@@ -60,7 +60,7 @@ public class DynamicTypeEntity : Entity
             return def.Properties
                 .Where(p => p.Name.HasText() && !IdentifierValidatorAttribute.PascalAscii.IsMatch(p.Name))
                 .Select(p => ValidationMessage._0DoesNotHaveAValid1IdentifierFormat.NiceToString(p.Name, IdentifierType.PascalAscii))
-                .ToString("\r\n")
+                .ToString("\n")
                 .DefaultToNull();
         }
         return base.PropertyValidation(pi);

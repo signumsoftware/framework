@@ -35,7 +35,7 @@ public static class DynamicCSSOverrideLogic
 
 @{
    ...
-var cssOverride = String.Join("\r\n", DynamicCSSOverrideLogic.Cached.Value.Select(a => a.Script)); <====*
+var cssOverride = String.Join("\n", DynamicCSSOverrideLogic.Cached.Value.Select(a => a.Script)); <====*
 <!doctype html>
 <html>
 <head>

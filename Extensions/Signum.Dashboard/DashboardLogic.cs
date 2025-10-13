@@ -55,6 +55,9 @@ public static class DashboardLogic
         });
 
 
+        DashboardLogic.OnGetCachedQueryDefinition.Register((ToolbarMenuPartEntity vuql, PanelPartEmbedded pp) => Enumerable.Empty<CachedQueryDefinition>());
+
+
         AuthLogic.HasRuleOverridesEvent += role => Database.Query<DashboardEntity>().Any(a => a.Owner.Is(role));
 
         SchedulerLogic.ExecuteTask.Register((DashboardEntity db, ScheduledTaskContext ctx) =>
@@ -81,7 +84,7 @@ public static class DashboardLogic
         sb.Schema.WhenIncluded<ToolbarEntity>(() =>
         {
             sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(DashboardEntity));
-
+            
             ToolbarLogic.RegisterDelete<DashboardEntity>(sb);
 
             new ToolbarContentConfig<DashboardEntity>

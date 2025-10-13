@@ -731,7 +731,7 @@ public class DynamicTypeLogicGenerator
 
             sb.AppendLine($@"    .WithQuery(() => e => new 
 {{ 
-{lines.ToString(",\r\n").Indent(8)}
+{lines.ToString(",\n").Indent(8)}
 }})");
         }
 
@@ -767,9 +767,9 @@ public class DynamicTypeLogicGenerator
 from e in Database.Query<{TypeName}Entity>()
 select new
 {{
-{lines.ToString(",\r\n").Indent(8)}
+{lines.ToString(",\n").Indent(8)}
 }})
-{complexQueryFields.Select(f => $".ColumnDisplayName(a => a.{f}, {AlreadyTranslated?.TryGetC(f) ?? $"CodeGenQuery{TypeName}Message.{f}"})").ToString("\r\n").Indent(4)}
+{complexQueryFields.Select(f => $".ColumnDisplayName(a => a.{f}, {AlreadyTranslated?.TryGetC(f) ?? $"CodeGenQuery{TypeName}Message.{f}"})").ToString("\n").Indent(4)}
 {complexQueryFields.Where(f => Formatted?.TryGetS(f) != null).Select(f =>
         {
             var fu = Formatted?.TryGetS(f);
@@ -778,7 +778,7 @@ select new
             var unitText = fu != null && fu.Value.Unit.HasText() ? $"c.Unit = \"{fu.Value.Unit}\";" : "";
 
             return $".Column(a => a.{f}, c => {{ {formatText} {unitText} }})";
-        }).ToString("\r\n").Indent(4)}
+        }).ToString("\n").Indent(4)}
 );");
 
         sb.AppendLine();
@@ -796,14 +796,14 @@ select new
             if (IsTreeEntity)
             {
                 sb.AppendLine("Graph<{0}Entity>.Construct.Untyped(TreeOperation.CreateRoot).Do(g => ".FormatWith(TypeName));
-                sb.AppendLine("    g.Construct = (args) => {\r\n" + operationConstruct.Indent(8) + "\r\n}");
+                sb.AppendLine("    g.Construct = (args) => {\n" + operationConstruct.Indent(8) + "\n}");
                 sb.AppendLine(").Register(replace: true);");
             }
             else
             {
                 sb.AppendLine("new Graph<{0}Entity>.Construct({0}Operation.Create)".FormatWith(TypeName));
                 sb.AppendLine("{");
-                sb.AppendLine("    Construct = (args) => {\r\n" + operationConstruct.Indent(8) + "\r\n}");
+                sb.AppendLine("    Construct = (args) => {\n" + operationConstruct.Indent(8) + "\n}");
                 sb.AppendLine("}.Register();");
             }
         }
@@ -821,7 +821,7 @@ select new
 
             sb.AppendLine("    CanBeNew = true,");
             sb.AppendLine("    CanBeModified = true,");
-            sb.AppendLine("    Execute = (e, args) => {\r\n" + operationExecute?.Indent(8) + "\r\n}");
+            sb.AppendLine("    Execute = (e, args) => {\n" + operationExecute?.Indent(8) + "\n}");
             sb.AppendLine("}." + (IsTreeEntity ? "Register(replace: true)" : "Register()") + ";");
         }
 
@@ -836,7 +836,7 @@ select new
             if (!string.IsNullOrWhiteSpace(operationCanDelete))
                 sb.AppendLine($"    CanDelete = e => {operationCanDelete},");
 
-            sb.AppendLine("    Delete = (e, args) => {\r\n" + operationDelete.DefaultText("e.Delete();").Indent(8) + "\r\n}");
+            sb.AppendLine("    Delete = (e, args) => {\n" + operationDelete.DefaultText("e.Delete();").Indent(8) + "\n}");
             sb.AppendLine("}." + (IsTreeEntity ? "Register(replace: true)" : "Register()") + ";");
         }
 
@@ -851,7 +851,7 @@ select new
             if (!string.IsNullOrWhiteSpace(operationCanClone))
                 sb.AppendLine($"    CanConstruct = e => {operationCanClone},");
 
-            sb.AppendLine("    Construct = (e, args) => {\r\n" + operationClone.DefaultText($"return new {TypeName}Entity();").Indent(8) + "\r\n}");
+            sb.AppendLine("    Construct = (e, args) => {\n" + operationClone.DefaultText($"return new {TypeName}Entity();").Indent(8) + "\n}");
             sb.AppendLine("}." + (IsTreeEntity ? "Register(replace: true)" : "Register()") + ";");
         }
 

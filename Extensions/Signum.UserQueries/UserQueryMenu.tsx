@@ -23,6 +23,7 @@ import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { useForceUpdate } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryColumnEmbedded, QueryFilterEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries'
 import FramePage from '@framework/Frames/FramePage'
+import { AuthAdminClient } from '../Signum.Authorization/AuthAdminClient'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -245,9 +246,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     var stoOrder = (fo.groupResults ? SubTokensOptions.CanAggregate : 0) | SubTokensOptions.CanElement | SubTokensOptions.CanSnippet;
     var stoSummary = SubTokensOptions.CanAggregate | SubTokensOptions.CanElement;
 
+    
     return UserQueryEntity.New({
       query: qe,
-      owner: AppContext.currentUser && toLite(AppContext.currentUser),
+      owner: UserQueryEntity.typeInfo().minTypeAllowed != "None" ? null :  AppContext.currentUser && toLite(AppContext.currentUser),
       groupResults: fo.groupResults,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       includeDefaultFilters: fo.includeDefaultFilters,

@@ -31,9 +31,9 @@ public static class DynamicViewLogic
         {
             Construct = (_) => new DynamicViewEntity()
             {
-                Locals = "{\r\n" +
-                "  const forceUpdate = modules.Hooks.useForceUpdate();\r\n" +
-                "  return { forceUpdate };\r\n" +
+                Locals = "{\n" +
+                "  const forceUpdate = modules.Hooks.useForceUpdate();\n" +
+                "  return { forceUpdate };\n" +
                 "}",
             },
         }.Register();

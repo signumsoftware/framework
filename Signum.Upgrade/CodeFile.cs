@@ -399,7 +399,7 @@ public class CodeFile
 
     public void ProcessLines(Func<List<string>, bool> process)
     {
-        var separator = this.Content.Contains("\r\n") ? "\r\n" : "\n";
+        var separator = this.Content.Contains("\n") ? "\n" : "\n";
         var lines = Regex.Split(this.Content, "\r?\n").ToList();
 
         if (process(lines))
@@ -619,7 +619,7 @@ public class CodeFile
         {
             elem.Attribute("Version")!.Value = version;
 
-            this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\r\n", "\n");
+            this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\n", "\n");
         }
     }
 
@@ -640,7 +640,7 @@ public class CodeFile
         {
             eleme.Remove();
 
-            this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\r\n", "\n");
+            this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\n", "\n");
         }
     }
 
@@ -657,7 +657,7 @@ public class CodeFile
             new XAttribute("Include", version)
         ));
 
-        this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\r\n", "\n");
+        this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\n", "\n");
 
     }
 

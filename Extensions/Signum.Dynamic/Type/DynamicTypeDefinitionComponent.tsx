@@ -274,13 +274,13 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
                     title="Clone"
                     onCreate={() => ({
                       construct:
-                        "// NOTE: This sample code is only for simple properties\r\n" +
-                        "// MList/Embedded/Mixin properties were ignored if exists\r\n" +
-                        "return new " + dt.typeName + "Entity\r\n{\r\n" +
+                        "// NOTE: This sample code is only for simple properties\n" +
+                        "// MList/Embedded/Mixin properties were ignored if exists\n" +
+                        "return new " + dt.typeName + "Entity\n{\n" +
                         def.properties
                           .filter(p => !p.isMList && !isEmbedded(p.type))
-                          .map(p => "    " + p.name + " = e." + p.name).join(", \r\n") +
-                        "\r\n};"
+                          .map(p => "    " + p.name + " = e." + p.name).join(", \n") +
+                        "\n};"
                     })}
                     renderContent={oc =>
                       <div>
@@ -1032,9 +1032,9 @@ function fetchPropertyType(p: DynamicProperty, dc: DynamicTypeDesignContext) {
 }
 
 function getConstructor(typeName: string, definition: DynamicTypeDefinition) {
-    return "return new " + typeName + "Entity()\r\n{\r\n" +
-      definition.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
-      "\r\n};"
+    return "return new " + typeName + "Entity()\n{\n" +
+      definition.properties.map(p => "    " + p.name + " = null").join(", \n") +
+      "\n};"
 }
 
 export interface PropertyComponentProps {

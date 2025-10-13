@@ -199,7 +199,7 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
 
             result.onExecuteSuccess = pack => {
               Operations.notifySuccess();
-              frameRef.current!.onClose(pack);
+              frameRef.current!.onClose?.(pack);
               return Promise.resolve();
             };
 
