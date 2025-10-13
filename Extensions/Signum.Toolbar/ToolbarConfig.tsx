@@ -27,8 +27,8 @@ export abstract class ToolbarConfig<T extends Entity> {
     );
   }
 
-  async selectSubEntityForUrl(element: ToolbarResponse<T>, entity: Lite<Entity> | null): Promise<Lite<Entity> | null> {
-    return null;
+  async selectSubEntityForUrl(element: ToolbarResponse<T>, entity: Lite<Entity> | null): Promise<Lite<Entity> | undefined> {
+    return undefined;
   }
 
   abstract getDefaultIcon(): IconProp;

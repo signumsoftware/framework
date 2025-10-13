@@ -37,16 +37,16 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     return "rectangle-list";
   }
 
-  async selectSubEntityForUrl(element: ToolbarResponse<UserQueryEntity>, entity: Lite<Entity> | null): Promise<Lite<Entity> | null> {
+  async selectSubEntityForUrl(element: ToolbarResponse<UserQueryEntity>, entity: Lite<Entity> | null): Promise<Lite<Entity> | undefined> {
     const uq = await Navigator.API.fetch(element.content!);
     const fo = await UserQueryClient.Converter.toFindOptions(uq, entity ?? undefined);
     const lites = await Finder.fetchLites({ queryName: fo.queryName, filterOptions: fo.filterOptions });
-    const onlyType = lites.map(a => a.EntityType).firstOrNull();
-    if (onlyType == null)
-      return null;
+    if (lites.length == 0) {
+      return await Finder.find(fo);
+    }
 
-    const lite = await SelectorModal.chooseLite(onlyType, lites);
-    return lite ?? null; 
+    const onlyType = lites.map(a => a.EntityType).distinctBy(a => a).single();
+    return await SelectorModal.chooseLite(onlyType, lites);
   }
 
   override handleNavigateClick(e: React.MouseEvent<any> | undefined, res: ToolbarResponse<UserQueryEntity>, selectedEntity: Lite<Entity> | null): void {
