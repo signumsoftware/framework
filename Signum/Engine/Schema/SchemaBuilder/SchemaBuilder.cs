@@ -58,7 +58,7 @@ public class SchemaBuilder
     }
 
 
-    public void AddUniqueIndex<T>(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null) where T : Entity
+    public void AddUniqueIndex<T>(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null, bool onlyOneNull_SqlServerOnly = false) where T : Entity
     {
         var table = Schema.Table<T>();
 
@@ -67,7 +67,19 @@ public class SchemaBuilder
         var includedColumns = includeFields == null ? null : IndexKeyColumns.Split(table, includeFields).SelectMany(a => a.columns).ToArray();
         var globalWhere = where == null ? null : IndexWhereExpressionVisitor.GetIndexWhere(where, table);
 
-        AddMultiUniqueIndex(table, pairs, includedColumns, globalWhere);
+        if (onlyOneNull_SqlServerOnly)
+        {
+            if (Settings.IsPostgres)
+                throw new InvalidOperationException("onlyOneNull_SqlServerOnly is not supported in Postgres");
+
+            var index = AddUniqueIndex(table, pairs.SelectMany(a => a.columns).ToArray());
+            index.IncludeColumns = includedColumns;
+            index.Where = globalWhere;
+        }
+        else
+        {
+            AddMultiUniqueIndex(table, pairs, includedColumns, globalWhere);
+        }
     }
 
     private void AddMultiUniqueIndex(ITable table, (Field? field, IColumn[] columns)[] columnBlocks, IColumn[]? includedColumns, string? globalWhere)
@@ -107,7 +119,9 @@ public class SchemaBuilder
                 }
                 else
                 {
-                    var filter = c.columns.Where(a => a.Nullable != IsNullable.No).ToString(a => $"{a.Name.SqlEscape(isPostgres)} IS NOT NULL", " AND ");
+                    var filter = c.columns.Where(a => a.Nullable != IsNullable.No).ToString(a =>
+                    a.Type == typeof(string) ? $"{a.Name.SqlEscape(isPostgres)} IS NOT NULL AND {a.Name.SqlEscape(isPostgres)} <> ''" :
+                    $"{a.Name.SqlEscape(isPostgres)} IS NOT NULL", " AND ");
                     Recursive(i + 1, [.. prevColumns, .. c.columns], " AND ".Combine(prevWhere, filter));
                 }
             }
