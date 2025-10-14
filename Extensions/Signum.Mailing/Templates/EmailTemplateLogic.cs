@@ -390,7 +390,7 @@ public static class EmailTemplateLogic
 
             SqlPreCommand DeleteTemplate()
             {
-                return table.DeleteSqlSync(et, e => e.Name == et.Name);
+                return table.DeleteSqlSync(et, e => e.Guid == et.Guid).TransactionBlock($"EmailTemplate Guid = {et.Guid}")!;
             }
 
             SqlPreCommand? RegenerateTemplate()
