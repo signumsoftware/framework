@@ -29,7 +29,7 @@ public class CRLFChecker
             @"Framework\Extensions\Signum.Toolbar\package.json"
         };
 
-        if (stableFiles.Any(f => File.ReadAllText(Path.Combine(root, f)).Contains("\n")))
+        if (stableFiles.Any(f => File.ReadAllText(Path.Combine(root, f)).Contains("\r\n")))
         {   
             Console.WriteLine("Looks like your working directory still has some CRLF files");
 
