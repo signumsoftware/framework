@@ -116,6 +116,7 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         {
             if (WeakFileReference)
                 return;
+
             var client = GetClient(fp);
             var bucket = GetBucketName(fp);
             var key = CalculateKey(fp);
@@ -148,6 +149,7 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         {
             if (WeakFileReference)
                 return Task.CompletedTask;
+
             var client = GetClient(fp);
             var bucket = GetBucketName(fp);
             var key = CalculateKey(fp);
@@ -173,6 +175,17 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         }
     }
 
+    public void MoveFile(IFilePath ofp, IFilePath nfp, bool createTargetFolder)
+    {
+        using (HeavyProfiler.Log("S3 MoveFile", () => ofp.FileName))
+        {
+            if (WeakFileReference)
+                return;
+
+            throw new NotImplementedException();
+        }
+    }
+
     public void DeleteFiles(IEnumerable<IFilePath> files)
     {
         foreach (var f in files)
@@ -185,6 +198,9 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
     public void DeleteFilesIfExist(IEnumerable<IFilePath> files)
     {
+        if (WeakFileReference)
+            return;
+
         foreach (var f in files)
         {
             var client = GetClient(f);
@@ -290,11 +306,5 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             multipartUploadIds.Remove(key);
     }
 
-    public void MoveFile(IFilePath ofp, IFilePath nfp, bool createTargetFolder)
-    {
-        // Not implemented for S3
-        throw new NotImplementedException();
-    }
-
-    // Add more methods as needed (e.g., multipart upload, update metadata, etc.)
+   
 }
