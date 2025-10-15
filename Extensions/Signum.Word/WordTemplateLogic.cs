@@ -491,7 +491,7 @@ public static class WordTemplateLogic
                 return SqlPreCommand.Combine(Spacing.Simple,
                     Schema.Current.Table<WordTemplateEntity>().DeleteSqlSync(wt, wt => wt.Name == wt.Name),
                     Schema.Current.Table<FileEntity>().DeleteSqlSync(file, f => f.Hash == file.Hash)
-                )!;
+                )?.TransactionBlock($"WordTemplate Guid = {wt.Guid}")!;
             }
 
             SqlPreCommand? RegenerateTemplateAndFile()

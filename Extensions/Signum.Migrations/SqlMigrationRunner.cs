@@ -255,7 +255,7 @@ public class SqlMigrationRunner
                 {
                     Draw(migrations, mi);
 
-                    Execute(mi);
+                    Execute(mi, autoRun);
                 }
 
                 ResetCache();
@@ -282,7 +282,7 @@ public class SqlMigrationRunner
         Schema.Current.InvalidateMetadata();
     }
 
-    private static void Execute(MigrationInfo mi)
+    private static void Execute(MigrationInfo mi, bool autoRun)
     {
         string? title = mi.Version + (mi.Comment.HasText() ? " ({0})".FormatWith(mi.Comment) : null);
         string text = File.ReadAllText(mi.FileName!, Encoding.UTF8);
@@ -293,7 +293,7 @@ public class SqlMigrationRunner
 
             var script = text.Replace(DatabaseNameReplacement, databaseName);
 
-            SqlPreCommandExtensions.ExecuteScript(title, script);
+            SqlPreCommandExtensions.ExecuteScript(title, script, autoRun);
 
             MigrationLogic.EnsureMigrationTable<SqlMigrationEntity>();
 
