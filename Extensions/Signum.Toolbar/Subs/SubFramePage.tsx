@@ -124,13 +124,6 @@ export default function SubFramePage(): React.ReactElement {
     return await SubsClient.getSubEntityPack(parentLite, cti.name);
   }
 
-  function onClose() {
-    if (Finder.isFindable(params.parenttype!, true))
-      AppContext.navigate(Finder.findOptionsPath({ queryName: params.parenttype! }));
-    else
-      AppContext.navigate("/");
-  }
-
   function setComponent(c: React.Component | null) {
     if (c && entityComponent.current != c) {
       entityComponent.current = c;
@@ -186,7 +179,6 @@ export default function SubFramePage(): React.ReactElement {
         setPack(packEntity, { getComponent: s.getComponent }).then(() => callback && callback());
       }
     },
-    onClose: () => onClose(),
     revalidate: () => validationErrors.current && validationErrors.current.forceUpdate(),
     setError: (ms, initialPrefix) => {
       GraphExplorer.setModelState(entity, ms, initialPrefix || "");

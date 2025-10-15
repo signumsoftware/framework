@@ -82,7 +82,7 @@ export namespace EntityOperations {
         eoc.onExecuteSuccess = pack => {
           Operations.notifySuccess();
           Navigator.raiseEntityChanged(pack.entity);
-          eoc.frame.onClose(pack);
+          eoc.frame.onClose?.(pack);
           return Promise.resolve(undefined);
         };
         return eoc.click();

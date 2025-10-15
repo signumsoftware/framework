@@ -59,8 +59,8 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
         EnsureDirectory(fp);
 
-        File.Create(fp.FullPhysicalPath()!);
-        File.Create(fp.FullPhysicalPath()! + Uploading);
+        using var f = File.Create(fp.FullPhysicalPath()!);
+        using var f2 = File.Create(fp.FullPhysicalPath()! + Uploading);
 
         return Task.CompletedTask;
     }
@@ -70,8 +70,8 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         if (!File.Exists(fp.FullPhysicalPath() + Uploading))
             throw new InvalidOperationException("File is not currently uploading!: " + fp.FullPhysicalPath());
 
-        using (var file = File.OpenWrite(fp.FullPhysicalPath()!))
-            await chunk.CopyToAsync(file);
+        using (var file = File.Open(fp.FullPhysicalPath()!, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+            await chunk.CopyToAsync(file, token);
 
         var hash = CryptorEngine.CalculateMD5Hash(chunk);
 
@@ -89,17 +89,11 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         var hashList = chunks.ToString(c => c.PartialHash, "\n");
 
         fp.Hash = (CryptorEngine.CalculateMD5Hash(Encoding.UTF8.GetBytes(hashList)));
-        fp.FileLength = (fi!.Length);
+        fp.FileLength = fi!.Length;
 
         File.Delete(fp.FullPhysicalPath() + Uploading);
 
         return Task.CompletedTask;
-    }
-
-
-    public Task FinishUpload(IFilePath fp, List<ChunkInfo> chunks)
-    {
-        throw new NotImplementedException();
     }
 
     public virtual Task SaveFileAsync(IFilePath fp, CancellationToken token = default)

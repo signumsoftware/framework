@@ -683,45 +683,97 @@ public class ModelValueProvider : ValueProviderBase
     public override bool Equals(object? obj) => obj is ModelValueProvider mvp && Equals(mvp.fieldOrPropertyChain, fieldOrPropertyChain);
 }
 
+[System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+public sealed class ExportNiceNamesAttribute : Attribute
+{
+    public Type Type;
+    public string Alias;
+    public ExportNiceNamesAttribute(Type type, string? alias = null)
+    {
+        this.Type = type;
+        this.Alias = alias ?? type.Name;
+    }
+}
+
 /// <summary>
 /// like @[n:Message]
 /// </summary>
 public class NiceNameValueProvider : ValueProviderBase
 {
-    string? fieldOrMessageChain;
-    PropertyInfo? messageProperty;
-    string? memberName;
+    string fieldOrMessageChain; 
+    MemberInfo? lastMember;
 
     public NiceNameValueProvider(string fieldOrMessageChain, Type? modelType, ITemplateParser tp)
     {
-        var parts = fieldOrMessageChain.Split(".");
         this.fieldOrMessageChain = fieldOrMessageChain;
-
-        var messageProperty = modelType?.GetProperty(parts[0]);
-        if (messageProperty == null)
+        var parts = fieldOrMessageChain.Split(".");
+        if (modelType == null)
         {
             tp.AddError(false, TemplateTokenMessage.ImpossibleToAccess0BecauseTheTemplateHAsNo1.NiceToString(fieldOrMessageChain, "Model"));
             return;
         }
-        this.messageProperty = messageProperty;
-        this.memberName = parts[1];
+
+        var initialMember =
+            (MemberInfo?)modelType.GetProperty(parts[0]) ??
+            (MemberInfo?)modelType.GetField(parts[0]);
+
+        var initialType = initialMember switch
+        {
+            PropertyInfo pi => pi.PropertyType,
+            FieldInfo fi => fi.FieldType,
+            _ => modelType.GetCustomAttributes<ExportNiceNamesAttribute>().SingleOrDefault(a => a.Alias == parts[0])?.Type
+        };
+
+        if(initialType == null)
+        {
+            tp.AddError(false, $"Type '{{0}}' does not have a property or field with name '{{1}}', or an {nameof(ExportNiceNamesAttribute)} with Alias '{{1}}'".FormatWith(modelType.Name, parts[0]));
+            return;
+        }
+
+        if(parts.Length == 1 && initialMember != null)
+        {
+            tp.AddError(false, "Part '{0}' is not translatable, try accesing inner properties".FormatWith(parts[0]));
+            return;
+        }
+
+        MemberInfo currentMember = initialType;
+        foreach (var p in parts.Skip(1))
+        {
+            var currentType = currentMember switch
+            {
+                PropertyInfo pi => pi.PropertyType,
+                FieldInfo fi => fi.FieldType,
+                TypeInfo ti => ti,
+                _ => throw new UnexpectedValueException(currentMember)
+            };
+
+            var nextMember =
+                 (MemberInfo?)currentType.GetProperty(p, BindingFlags.Public | BindingFlags.Instance) ??
+                 (MemberInfo?)currentType.GetField(p, BindingFlags.Public | BindingFlags.Static);
+
+            if (nextMember == null)
+            {
+                tp.AddError(false, "Type '{0}' does not have a property/field with name '{1}'".FormatWith(currentType.Name, p));
+                return;
+            }
+
+            currentMember = nextMember;
+        }
+
+        lastMember = currentMember;
     }
 
     public override object? GetValue(TemplateParameters p)
     {
-        var model = p.GetModel();
-        if (this.messageProperty == null || this.memberName == null || model == null) return null;
-
         try
         {
-            var messageType = (Type?)messageProperty.GetValue(model);
-            if (messageType == null) return null;
-
-            var member = (MemberInfo?)messageType.GetProperty(memberName) ?? messageType.GetField(memberName);
-            if (member == null) return null;
-            
-            object? value = member is PropertyInfo pi ? pi.GetValue(null) : ((FieldInfo)member).GetValue(null);
-            return value is Enum ev ? ev.NiceToString() : value?.ToString();
+            return lastMember switch
+            {
+                FieldInfo fi when fi.IsStatic => ((Enum)fi.GetValue(null)!).NiceToString(),
+                PropertyInfo pi => pi.NiceName(),
+                TypeInfo ti => ti.NiceName(),
+                _ => throw new UnexpectedValueException(lastMember)
+            };
         }
         catch (Exception ex)
         {

@@ -4,9 +4,8 @@ using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 using System.IO;
-using System.Threading;
 
-namespace Signum.Files.FileTypeAlgorithms;
+namespace Signum.Files.AzureBlobs;
 
 public enum BlobAction
 {
@@ -181,9 +180,6 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         blobClient.Upload(new MemoryStream(binaryFile), httpHeaders: blobHeaders);
     }
 
-    
-
-
     //Initial exceptions (like connection string problems) should happen synchronously
     public virtual /*async*/ Task SaveFileAsync(IFilePath fp, CancellationToken cancellationToken = default)
     {
@@ -302,6 +298,11 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
                 var blockClient = client.GetBlockBlobClient(fp.Suffix);
 
                 var info = await blockClient.CommitBlockListAsync(chunks.Select(a => a.BlockId).ToList());
+
+                var properties = await blockClient.GetPropertiesAsync(cancellationToken: token);
+                var hashList = chunks.ToString(c => c.PartialHash, "\n");
+                fp.FileLength = properties.Value.ContentLength;
+                fp.Hash = CryptorEngine.CalculateMD5Hash(Encoding.UTF8.GetBytes(hashList));
             }
             catch (Exception ex)
             {
@@ -420,8 +421,6 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
         blobClient.SetHttpHeaders(headers);
     }
-
-
 
     public readonly static Dictionary<string, string> ContentTypesDict = new Dictionary<string, string>()
     {

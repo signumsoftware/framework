@@ -84,12 +84,12 @@ public static class PropertyRouteLogic
                     dicShould,
                     dicCurr,
                     createNew: null,
-                    removeOld: (path, c) => table.DeleteSqlSync(c, p => p.RootType.CleanName == cleanName && p.Path == c.Path),
+                    removeOld: (path, c) => table.DeleteSqlSync(c, p => p.RootType.CleanName == cleanName && p.Path == c.Path)?.TransactionBlock($"PropertyRoute Type = {c.RootType.CleanName} Path = {c.Path}"),
                     mergeBoth: (path, s, c) =>
                     {
                         var originalPathName = c.Path;
                         c.Path = s.Path;
-                        return table.UpdateSqlSync(c, p => p.RootType.CleanName == cleanName && p.Path == originalPathName);
+                        return table.UpdateSqlSync(c, p => p.RootType.CleanName == cleanName && p.Path == originalPathName)?.TransactionBlock($"PropertyRoute Type = {c.RootType.CleanName} Path = {c.Path}");
                     })
                 );
     }

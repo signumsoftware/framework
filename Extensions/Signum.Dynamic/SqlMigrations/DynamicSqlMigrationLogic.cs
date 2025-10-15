@@ -128,7 +128,7 @@ public static class DynamicSqlMigrationLogic
 
                     using (var tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
                     {
-                        SqlPreCommandExtensions.ExecuteScript(title, e.Script);
+                        SqlPreCommandExtensions.ExecuteScript(title, e.Script, autoRun: true);
                         tr.Commit();
                     }
                 }
