@@ -110,7 +110,6 @@ function WhatsNewDropdownImp() {
         {countResult && countResult.numWhatsNews > 0 && <span className="badge bg-danger badge-pill sf-news-badge">{countResult.numWhatsNews}</span>}
       </button>
       {isOpen && <div className="sf-news-toasts mt-2" ref={divRef} style={{
-        backgroundColor: "rgba(var(--bs-white-rgb), 0.7)",
         backdropFilter: "blur(10px)",
         transition: "transform .4s ease" }}>
         {newsInOrder == null ? <Toast> <Toast.Body>{JavascriptMessage.loading.niceToString()}</Toast.Body></Toast> :
@@ -132,7 +131,7 @@ function WhatsNewDropdownImp() {
             }
             <Toast>
               <Toast.Body style={{ textAlign: "center" }}>
-                <a style={{ cursor: "pointer", color: "var(--bs-primary)" }}  onClick={() => handleClickAll()}>{WhatsNewMessage.AllMyNews.niceToString()}</a>
+                <a role="button" tabIndex={0} style={{ cursor: "pointer", color: "var(--bs-primary)" }}  onClick={() => handleClickAll()}>{WhatsNewMessage.AllMyNews.niceToString()}</a>
               </Toast.Body>
             </Toast>
           </>
@@ -168,20 +167,26 @@ export function WhatsNewToast(p: { whatsnew: WhatsNewClient.WhatsNewShort, onClo
   }
 
   return (
-    <Toast onClose={() => p.onClose([p.whatsnew])} className={p.className}>
-      <Toast.Header>
-        <strong className="me-auto">{p.whatsnew.title} {!Navigator.isReadOnly(WhatsNewEntity) && <small style={{ color: "var(--bs-danger)" }}>{(p.whatsnew.status == "Draft") ? p.whatsnew.status : undefined}</small>}</strong>
+    <Toast onClose={() => p.onClose([p.whatsnew])} className={p.className} aria-atomic={true}>
+      <Toast.Header closeLabel={WhatsNewMessage.Close0WhatsNew.niceToString(p.whatsnew.title)}>
+        <strong className="me-auto" role="heading" aria-level={3}>{p.whatsnew.title} {!Navigator.isReadOnly(WhatsNewEntity) && <small style={{ color: "var(--bs-danger)" }}>{(p.whatsnew.status == "Draft") ? p.whatsnew.status : undefined}</small>}</strong>
         <small>{DateTime.fromISO(p.whatsnew.creationDate!).toRelative()}</small>
       </Toast.Header>
       <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
         <img onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e) }}
           alt={p.whatsnew.title}
+          role="presentation"
           src={AppContext.toAbsoluteUrl("/api/whatsnew/previewPicture/" + p.whatsnew.whatsNew.id)}
           style={{ maxHeight: "30vh", cursor: "pointer", maxWidth: "10vw", margin: "0px 0px 0px 10px" }}
         />
         <HtmlViewer text={HTMLSubstring(p.whatsnew.description)} />
         <br />
-        <Link onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e) }} to={"/newspage/" + p.whatsnew.whatsNew.id}>{WhatsNewMessage.ReadFurther.niceToString()}</Link>
+        <Link
+          onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e) }}
+          to={"/newspage/" + p.whatsnew.whatsNew.id}
+          aria-label={WhatsNewMessage.ReadFurther.niceToString()}>
+            {WhatsNewMessage.ReadFurther.niceToString()}
+        </Link>
       </Toast.Body>
     </Toast>
   );
