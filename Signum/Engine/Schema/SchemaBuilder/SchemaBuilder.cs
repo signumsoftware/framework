@@ -1,7 +1,10 @@
-using Signum.Utilities.Reflection;
-using Signum.Engine.Linq;
-using Signum.Utilities.DataStructures;
 using Signum.API;
+using Signum.DynamicQuery;
+using Signum.Engine.Linq;
+using Signum.Engine.Sync;
+using Signum.Utilities.DataStructures;
+using Signum.Utilities.Reflection;
+using System.Collections.Immutable;
 using System.IO;
 using System.Security.AccessControl;
 
@@ -55,23 +58,76 @@ public class SchemaBuilder
     }
 
 
-    public TableIndex AddUniqueIndex<T>(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null) where T : Entity
+    public void AddUniqueIndex<T>(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null, bool onlyOneNull_SqlServerOnly = false) where T : Entity
     {
         var table = Schema.Table<T>();
 
-        IColumn[] columns = IndexKeyColumns.Split(table, fields);
+        var pairs = IndexKeyColumns.Split(table, fields)!;
 
-        var index = AddUniqueIndex(table, columns);
+        var includedColumns = includeFields == null ? null : IndexKeyColumns.Split(table, includeFields).SelectMany(a => a.columns).ToArray();
+        var globalWhere = where == null ? null : IndexWhereExpressionVisitor.GetIndexWhere(where, table);
 
-        if (where != null)
-            index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
-
-        if (includeFields != null)
+        if (onlyOneNull_SqlServerOnly)
         {
-            index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
+            if (Settings.IsPostgres)
+                throw new InvalidOperationException("onlyOneNull_SqlServerOnly is not supported in Postgres");
+
+            var index = AddUniqueIndex(table, pairs.SelectMany(a => a.columns).ToArray());
+            index.IncludeColumns = includedColumns;
+            index.Where = globalWhere;
+        }
+        else
+        {
+            AddMultiUniqueIndex(table, pairs, includedColumns, globalWhere);
+        }
+    }
+
+    private void AddMultiUniqueIndex(ITable table, (Field? field, IColumn[] columns)[] columnBlocks, IColumn[]? includedColumns, string? globalWhere)
+    {
+        var isPostgres = Settings.IsPostgres;
+        void Recursive(int i, IColumn[] prevColumns, string prevWhere)
+        {
+            if (columnBlocks.Length == i)
+            {
+                var index = AddUniqueIndex(table, prevColumns);
+                index.IncludeColumns = includedColumns;
+                index.Where = " AND ".Combine(prevWhere, globalWhere);
+            }
+            else
+            {
+                var c = columnBlocks[i];
+                if (c.field is FieldImplementedBy fib)
+                {
+                    foreach (var imp in fib.ImplementationColumns)
+                    {
+                        var filter = imp.Value.Nullable == IsNullable.No ? null :
+                            $"{imp.Value.Name.SqlEscape(isPostgres)} IS NOT NULL";
+
+                        Recursive(i + 1, [.. prevColumns, imp.Value], " AND ".Combine(prevWhere, filter));
+                    }
+                }
+
+                else if (c.field is FieldImplementedByAll fiba)
+                {
+                    foreach (var imp in fiba.IdColumns)
+                    {
+                        var filter = imp.Value.Nullable == IsNullable.No ? null :
+                            $"({fiba.TypeColumn.Name.SqlEscape(isPostgres)} IS NOT NULL AND {imp.Value.Name.SqlEscape(isPostgres)} IS NOT NULL)";
+
+                        Recursive(i + 1, [.. prevColumns, fiba.TypeColumn, imp.Value], " AND ".Combine(prevWhere, filter));
+                    }
+                }
+                else
+                {
+                    var filter = c.columns.Where(a => a.Nullable != IsNullable.No).ToString(a =>
+                    a.Type == typeof(string) ? $"{a.Name.SqlEscape(isPostgres)} IS NOT NULL AND {a.Name.SqlEscape(isPostgres)} <> ''" :
+                    $"{a.Name.SqlEscape(isPostgres)} IS NOT NULL", " AND ");
+                    Recursive(i + 1, [.. prevColumns, .. c.columns], " AND ".Combine(prevWhere, filter));
+                }
+            }
         }
 
-        return index;
+        Recursive(0, [], "");
     }
 
     public TableIndex AddIndex<T>(Expression<Func<T, object?>> fields,
@@ -80,7 +136,7 @@ public class SchemaBuilder
     {
         var table = Schema.Table<T>();
 
-        IColumn[] columns = IndexKeyColumns.Split(table, fields);
+        IColumn[] columns = IndexKeyColumns.Split(table, fields).SelectMany(a=>a.columns).ToArray();
 
         var index = new TableIndex(table, columns);
 
@@ -89,7 +145,7 @@ public class SchemaBuilder
 
         if (includeFields != null)
         {
-            index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
+            index.IncludeColumns = IndexKeyColumns.Split(table, includeFields).SelectMany(a => a.columns).ToArray();
         }
 
         AddIndex(index);
@@ -101,12 +157,12 @@ public class SchemaBuilder
     {
         var table = Schema.Table<T>();
 
-        IColumn[] columns = IndexKeyColumns.Split(table, fields);
+        IColumn[] columns = IndexKeyColumns.Split(table, fields).SelectMany(a => a.columns).ToArray();
 
         return AddFullTextIndex(table, columns, customize);
     }
 
-    public TableIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
+    public void AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
         Expression<Func<MListElement<T, V>, object>> fields,
         Expression<Func<MListElement<T, V>, bool>>? where = null,
         Expression<Func<MListElement<T, V>, object>>? includeFields = null)
@@ -114,19 +170,13 @@ public class SchemaBuilder
     {
         TableMList table = ((FieldMList)Schema.FindField(Schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).TableMList;
 
-        IColumn[] columns = IndexKeyColumns.Split(table, fields);
+        var columns = IndexKeyColumns.Split(table, fields);
 
-        var index = AddUniqueIndex(table, columns);
+        var includedColumns = includeFields == null ? null : IndexKeyColumns.Split(table, includeFields).SelectMany(a => a.columns).ToArray();
 
-        if (where != null)
-            index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
+        var globalWhere = where == null ? null : IndexWhereExpressionVisitor.GetIndexWhere(where, table);
 
-        if (includeFields != null)
-        {
-            index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
-        }
-
-        return index;
+        AddMultiUniqueIndex(table, columns, includedColumns, globalWhere);
     }
 
     public TableIndex AddIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
@@ -137,7 +187,7 @@ public class SchemaBuilder
     {
         TableMList table = ((FieldMList)Schema.FindField(Schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).TableMList;
 
-        IColumn[] columns = IndexKeyColumns.Split(table, fields);
+        IColumn[] columns = IndexKeyColumns.Split(table, fields).SelectMany(a => a.columns).ToArray();
 
         var index = AddIndex(table, columns);
 
@@ -146,7 +196,7 @@ public class SchemaBuilder
 
         if (includeFields != null)
         {
-            index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
+            index.IncludeColumns = IndexKeyColumns.Split(table, includeFields).SelectMany(a => a.columns).ToArray();
         }
 
         return index;
@@ -158,14 +208,14 @@ public class SchemaBuilder
     {
         TableMList table = ((FieldMList)Schema.FindField(Schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).TableMList;
 
-        IColumn[] columns = IndexKeyColumns.Split(table, fields);
+        IColumn[] columns = IndexKeyColumns.Split(table, fields).SelectMany(a => a.columns).ToArray();
 
         return AddFullTextIndex(table, columns, customize);
     }
 
     public FullTextTableIndex AddFullTextIndex(ITable table, Field[] fields, Action<FullTextTableIndex>? customize)
     {
-        return AddFullTextIndex(table, TableIndex.GetColumnsFromFields(fields), customize);
+        return AddFullTextIndex(table, fields.SelectMany(f => TableIndex.GetColumnsFromField(f)).ToArray(), customize);
     }
 
     public FullTextTableIndex AddFullTextIndex(ITable table, IColumn[] columns, Action<FullTextTableIndex>? customize)
@@ -182,11 +232,17 @@ public class SchemaBuilder
         return index;
     }
 
-    public TableIndex AddUniqueIndex(ITable table, Field[] fields)
+    public void AddUniqueIndex(ITable table, Field[] fields)
     {
-        var index = new TableIndex(table, TableIndex.GetColumnsFromFields(fields)) { Unique = true };
+        var dic = fields.ToDictionary(f => f, f => TableIndex.GetColumnsFromField(f));
+
+
+
+
+
+        var index = new TableIndex(table, dic.SelectMany(f => f.Value).ToArray()) { Unique = true };
         AddIndex(index);
-        return index;
+
     }
 
     public TableIndex AddUniqueIndex(ITable table, IColumn[] columns)
@@ -198,7 +254,7 @@ public class SchemaBuilder
 
     public TableIndex AddIndex(ITable table, Field[] fields)
     {
-        var index = new TableIndex(table, TableIndex.GetColumnsFromFields(fields));
+        var index = new TableIndex(table, fields.SelectMany(f => TableIndex.GetColumnsFromField(f)).ToArray());
         AddIndex(index);
         return index;
     }
@@ -350,11 +406,11 @@ public class SchemaBuilder
 
 
     public HashSet<(Type type, string method)> LoadedModules = new HashSet<(Type type, string method)>();
-    public bool NotDefined(MethodBase? methodBase)
+    public bool AlreadyDefined(MethodBase? methodBase)
     {
         this.Tracer.Switch(methodBase!.DeclaringType!.Name);
 
-        return LoadedModules.Add((type: methodBase.DeclaringType, method: methodBase.Name));
+        return !LoadedModules.Add((type: methodBase.DeclaringType, method: methodBase.Name));
     }
 
     public void AssertDefined(MethodBase methodBase)
@@ -781,7 +837,7 @@ public class SchemaBuilder
 
         var isLite = route.Type.IsLite();
 
-        var implementations = types.ToDictionary(t => t, t =>
+        var implementations = types.ToDictionaryEx(t => t, t =>
         {
             var rt = Include(t, route);
 
@@ -792,7 +848,7 @@ public class SchemaBuilder
                 Nullable = nullable,
                 AvoidForeignKey = avoidForeignKey,
             };
-        });
+        }, "Implementations for " + route);
 
         return new FieldImplementedBy(route, implementations)
         {
@@ -801,7 +857,10 @@ public class SchemaBuilder
             AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null
         }.Do(f =>
         {
-            f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route));
+            foreach (var impColumn in f.ImplementationColumns.Values)
+            {
+                impColumn.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route), impColumn);
+            }
             f.Index = f.GenerateIndex(table, Settings.FieldAttribute<IndexAttribute>(route));
         });
     }

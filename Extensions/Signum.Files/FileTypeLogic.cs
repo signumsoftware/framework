@@ -19,16 +19,16 @@ public static class FileTypeLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            SymbolLogic<FileTypeSymbol>.Start(sb,() => FileTypes.Keys.ToHashSet());
-            sb.Include<FileTypeSymbol>()
-                .WithQuery(() => f => new
-                {
-                    Entity = f,
-                    f.Key
-                });
-        }
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        SymbolLogic<FileTypeSymbol>.Start(sb,() => FileTypes.Keys.ToHashSet());
+        sb.Include<FileTypeSymbol>()
+            .WithQuery(() => f => new
+            {
+                Entity = f,
+                f.Key
+            });
     }
 
     public static IFileTypeAlgorithm GetAlgorithm(this FileTypeSymbol fileType)

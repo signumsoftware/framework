@@ -10,83 +10,83 @@ public static class DynamicViewLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<DynamicViewEntity>()
+            .WithUniqueIndex(a => new { a.ViewName, a.EntityType })
+            .WithSave(DynamicViewOperation.Save)
+            .WithDelete(DynamicViewOperation.Delete)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.ViewName,
+                e.EntityType,
+            });
+
+        DynamicViewEntity.TryGetDynamicView = (type, name) => DynamicViews.Value.TryGetC(type)?.TryGetC(name);
+
+        new Graph<DynamicViewEntity>.Construct(DynamicViewOperation.Create)
         {
-            sb.Include<DynamicViewEntity>()
-                .WithUniqueIndex(a => new { a.ViewName, a.EntityType })
-                .WithSave(DynamicViewOperation.Save)
-                .WithDelete(DynamicViewOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.ViewName,
-                    e.EntityType,
-                });
-
-            DynamicViewEntity.TryGetDynamicView = (type, name) => DynamicViews.Value.TryGetC(type)?.TryGetC(name);
-
-            new Graph<DynamicViewEntity>.Construct(DynamicViewOperation.Create)
+            Construct = (_) => new DynamicViewEntity()
             {
-                Construct = (_) => new DynamicViewEntity()
-                {
-                    Locals = "{\r\n" +
-                    "  const forceUpdate = modules.Hooks.useForceUpdate();\r\n" +
-                    "  return { forceUpdate };\r\n" +
-                    "}",
-                },
-            }.Register();
+                Locals = "{\n" +
+                "  const forceUpdate = modules.Hooks.useForceUpdate();\n" +
+                "  return { forceUpdate };\n" +
+                "}",
+            },
+        }.Register();
 
-            new Graph<DynamicViewEntity>.ConstructFrom<DynamicViewEntity>(DynamicViewOperation.Clone)
+        new Graph<DynamicViewEntity>.ConstructFrom<DynamicViewEntity>(DynamicViewOperation.Clone)
+        {
+            Construct = (e, _) => new DynamicViewEntity()
             {
-                Construct = (e, _) => new DynamicViewEntity()
-                {
-                    ViewName = "",
-                    EntityType = e.EntityType,
-                    ViewContent = e.ViewContent,
-                    Props = e.Props.Select(a => new DynamicViewPropEmbedded() { Name = a.Name, Type = a.Type }).ToMList(),
-                    Locals = e.Locals,
-                },
-            }.Register();
+                ViewName = "",
+                EntityType = e.EntityType,
+                ViewContent = e.ViewContent,
+                Props = e.Props.Select(a => new DynamicViewPropEmbedded() { Name = a.Name, Type = a.Type }).ToMList(),
+                Locals = e.Locals,
+            },
+        }.Register();
 
-            DynamicViews = sb.GlobalLazy(() =>
-                Database.Query<DynamicViewEntity>().SelectCatch(dv => new { Type = dv.EntityType.ToType(), dv })
-                .AgGroupToDictionary(a => a.Type!, gr => gr.Select(a => a.dv!).ToFrozenDictionaryEx(a => a.ViewName)).ToFrozenDictionary(),
-                new InvalidateWith(typeof(DynamicViewEntity)));
+        DynamicViews = sb.GlobalLazy(() =>
+            Database.Query<DynamicViewEntity>().SelectCatch(dv => new { Type = dv.EntityType.ToType(), dv })
+            .AgGroupToDictionary(a => a.Type!, gr => gr.Select(a => a.dv!).ToFrozenDictionaryEx(a => a.ViewName)).ToFrozenDictionary(),
+            new InvalidateWith(typeof(DynamicViewEntity)));
 
-            sb.Include<DynamicViewSelectorEntity>()
-                .WithSave(DynamicViewSelectorOperation.Save)
-                .WithDelete(DynamicViewSelectorOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.EntityType,
-                });
+        sb.Include<DynamicViewSelectorEntity>()
+            .WithSave(DynamicViewSelectorOperation.Save)
+            .WithDelete(DynamicViewSelectorOperation.Delete)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.EntityType,
+            });
 
-            DynamicViewSelectors = sb.GlobalLazy(() =>
-                Database.Query<DynamicViewSelectorEntity>().SelectCatch(dvs => KeyValuePair.Create(dvs.EntityType.ToType(), dvs)).ToFrozenDictionaryEx(),
-                new InvalidateWith(typeof(DynamicViewSelectorEntity)));
+        DynamicViewSelectors = sb.GlobalLazy(() =>
+            Database.Query<DynamicViewSelectorEntity>().SelectCatch(dvs => KeyValuePair.Create(dvs.EntityType.ToType(), dvs)).ToFrozenDictionaryEx(),
+            new InvalidateWith(typeof(DynamicViewSelectorEntity)));
 
-            sb.Include<DynamicViewOverrideEntity>()
-               .WithSave(DynamicViewOverrideOperation.Save)
-               .WithDelete(DynamicViewOverrideOperation.Delete)
-               .WithQuery(() => e => new
-               {
-                   Entity = e,
-                   e.Id,
-                   e.EntityType,
-                   e.ViewName,
-               });
+        sb.Include<DynamicViewOverrideEntity>()
+           .WithSave(DynamicViewOverrideOperation.Save)
+           .WithDelete(DynamicViewOverrideOperation.Delete)
+           .WithQuery(() => e => new
+           {
+               Entity = e,
+               e.Id,
+               e.EntityType,
+               e.ViewName,
+           });
 
-            DynamicViewOverrides = sb.GlobalLazy(() =>
-             Database.Query<DynamicViewOverrideEntity>().SelectCatch(dvo => KeyValuePair.Create(dvo.EntityType.ToType(), dvo)).GroupToFrozenDictionary(kvp => kvp.Key, kvp => kvp.Value),
-             new InvalidateWith(typeof(DynamicViewOverrideEntity)));
+        DynamicViewOverrides = sb.GlobalLazy(() =>
+         Database.Query<DynamicViewOverrideEntity>().SelectCatch(dvo => KeyValuePair.Create(dvo.EntityType.ToType(), dvo)).GroupToFrozenDictionary(kvp => kvp.Key, kvp => kvp.Value),
+         new InvalidateWith(typeof(DynamicViewOverrideEntity)));
 
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicViewEntity>().Where(dv => dv.EntityType.Is(type)));
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicViewOverrideEntity>().Where(dvo => dvo.EntityType.Is(type)));
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicViewSelectorEntity>().Where(dvs => dvs.EntityType.Is(type)));
-        }
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicViewEntity>().Where(dv => dv.EntityType.Is(type)));
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicViewOverrideEntity>().Where(dvo => dvo.EntityType.Is(type)));
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicViewSelectorEntity>().Where(dvs => dvs.EntityType.Is(type)));
     }
 
     public static List<SuggestedFindOptions> GetSuggestedFindOptions(Type type)

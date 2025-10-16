@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "isolatedDeclarations": true,
+    "sourceMap": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "composite": true,
+    "strict": true,
+    "declarationMap": true,
+    "lib": [
+      "ESNext",
+      "dom"
+    ]
+  }
+}

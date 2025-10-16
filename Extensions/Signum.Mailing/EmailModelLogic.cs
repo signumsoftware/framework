@@ -142,52 +142,52 @@ public static class EmailModelLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Schema.Generating += Schema_Generating;
+        sb.Schema.Synchronizing += Schema_Synchronizing;
+        sb.Include<EmailModelEntity>()
+            .WithQuery(() => se => new
+            {
+                Entity = se,
+                se.Id,
+                se.FullClassName,
+            });
+
+        UserAssetsImporter.Register<EmailTemplateEntity>("EmailTemplate", EmailTemplateOperation.Save);
+
+
+        new Graph<EmailTemplateEntity>.ConstructFrom<EmailModelEntity>(EmailTemplateOperation.CreateEmailTemplateFromModel)
         {
-            sb.Schema.Generating += Schema_Generating;
-            sb.Schema.Synchronizing += Schema_Synchronizing;
-            sb.Include<EmailModelEntity>()
-                .WithQuery(() => se => new
-                {
-                    Entity = se,
-                    se.Id,
-                    se.FullClassName,
-                });
+            Construct = (se, _) => CreateDefaultTemplateInternal(se)
+        }.Register();
 
-            UserAssetsImporter.Register<EmailTemplateEntity>("EmailTemplate", EmailTemplateOperation.Save);
+        EmailModelToTemplates = sb.GlobalLazy(() => (
+            from et in Database.Query<EmailTemplateEntity>()
+            where et.Model != null
+            select new { se = et.Model, et })
+            .GroupToDictionary(pair => pair.se.ToLite(), pair => pair.et).ToFrozenDictionary(), 
+            new InvalidateWith(typeof(EmailModelEntity), typeof(EmailTemplateEntity)));
 
-
-            new Graph<EmailTemplateEntity>.ConstructFrom<EmailModelEntity>(EmailTemplateOperation.CreateEmailTemplateFromModel)
-            {
-                Construct = (se, _) => CreateDefaultTemplateInternal(se)
-            }.Register();
-
-            EmailModelToTemplates = sb.GlobalLazy(() => (
-                from et in Database.Query<EmailTemplateEntity>()
-                where et.Model != null
-                select new { se = et.Model, et })
-                .GroupToDictionary(pair => pair.se.ToLite(), pair => pair.et).ToFrozenDictionary(), 
-                new InvalidateWith(typeof(EmailModelEntity), typeof(EmailTemplateEntity)));
-
-            TypeToEntity = sb.GlobalLazy(() =>
-            {
-                var dbModels = Database.RetrieveAll<EmailModelEntity>();
-                return EnumerableExtensions.JoinRelaxed(
-                    dbModels,
-                    registeredModels.Keys,
-                    entity => entity.FullClassName,
-                    type => type.FullName!,
-                    (entity, type) => KeyValuePair.Create(type, entity),
-                    "caching " + nameof(EmailModelEntity))
-                    .ToFrozenDictionaryEx();
-            }, new InvalidateWith(typeof(EmailModelEntity)));
+        TypeToEntity = sb.GlobalLazy(() =>
+        {
+            var dbModels = Database.RetrieveAll<EmailModelEntity>();
+            return EnumerableExtensions.JoinRelaxed(
+                dbModels,
+                registeredModels.Keys,
+                entity => entity.FullClassName,
+                type => type.FullName!,
+                (entity, type) => KeyValuePair.Create(type, entity),
+                "caching " + nameof(EmailModelEntity))
+                .ToFrozenDictionaryEx();
+        }, new InvalidateWith(typeof(EmailModelEntity)));
 
 
-            sb.Schema.Initializing += () => TypeToEntity.Load();
+        sb.Schema.Initializing += () => TypeToEntity.Load();
 
-            EntityToType = sb.GlobalLazy(() => TypeToEntity.Value.Inverse().ToFrozenDictionaryEx(),
-                new InvalidateWith(typeof(EmailModelEntity)));
-        }
+        EntityToType = sb.GlobalLazy(() => TypeToEntity.Value.Inverse().ToFrozenDictionaryEx(),
+            new InvalidateWith(typeof(EmailModelEntity)));
     }
 
     static readonly string EmailModelReplacementKey = "EmailModel";

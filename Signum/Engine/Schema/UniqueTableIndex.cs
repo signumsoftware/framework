@@ -15,15 +15,12 @@ public class TableIndex
 
     public string? Where { get; set; }
 
-    public static IColumn[] GetColumnsFromFields(params Field[] fields)
+    public static IColumn[] GetColumnsFromField(Field field)
     {
-        if (fields == null || fields.IsEmpty())
-            throw new InvalidOperationException("No fields");
-
-        if (fields.Any(f => f is FieldEmbedded || f is FieldMixin))
+        if (field is FieldEmbedded or FieldMixin)
             throw new InvalidOperationException("Embedded fields not supported for indexes");
 
-        return fields.SelectMany(f => f.Columns()).ToArray();
+        return field.Columns().ToArray();
     }
 
     public TableIndex(ITable table, params IColumn[] columns)
@@ -248,8 +245,7 @@ public enum FullTextIndexChangeTracking
 
 public class IndexKeyColumns
 {
-
-    public static IColumn[] Split(IFieldFinder finder, LambdaExpression columns)
+    public static (Field? field, IColumn[] columns)[] Split(IFieldFinder finder, LambdaExpression columns)
     {
         if (columns == null)
             throw new ArgumentNullException(nameof(columns));
@@ -257,18 +253,17 @@ public class IndexKeyColumns
         if (columns.Body.NodeType == ExpressionType.New)
         {
             var resultColumns = (from a in ((NewExpression)columns.Body).Arguments
-                from c in GetColumns(finder, Expression.Lambda(Expression.Convert(a, typeof(object)), columns.Parameters))
-                select c);
-            
+                                 select GetColumns(finder, Expression.Lambda(Expression.Convert(a, typeof(object)), columns.Parameters)));
+
             return resultColumns.ToArray();
         }
-        
-        return GetColumns(finder, columns);
+
+        return [GetColumns(finder, columns)];
     }
 
     static string[] ignoreMembers = new string[] { "ToLite", "ToLiteFat" };
 
-    static IColumn[] GetColumns(IFieldFinder finder, LambdaExpression field)
+    static (Field? field, IColumn[] columns) GetColumns(IFieldFinder finder, LambdaExpression field)
     {
         var body = field.Body;
 
@@ -291,11 +286,11 @@ public class IndexKeyColumns
             if (members.Length == 1)
             {
                 if (sv.PostgresSysPeriodColumnName != null)
-                    return [table.Columns[sv.PostgresSysPeriodColumnName!]];
-                else return [
+                    return (null, [table.Columns[sv.PostgresSysPeriodColumnName!]]);
+                else return (null, [
                     table.Columns[sv.StartColumnName!],
                     table.Columns[sv.EndColumnName!]
-                ];
+                ]);
             }else
             {
                 var columnName = members[1].Name switch
@@ -305,7 +300,7 @@ public class IndexKeyColumns
                     string other => throw new UnexpectedValueException(other)
                 };
 
-                return [table.Columns[columnName]];
+                return (null, [table.Columns[columnName]]);
             }
         }
 
@@ -317,12 +312,14 @@ public class IndexKeyColumns
             if (ib == null)
                 throw new InvalidOperationException("Casting only supported for {0}".FormatWith(typeof(FieldImplementedBy).Name));
 
-            return (from ic in ib.ImplementationColumns
-                    where type.IsAssignableFrom(ic.Key)
-                    select (IColumn)ic.Value).ToArray();
+            var columns = (from ic in ib.ImplementationColumns
+                           where type.IsAssignableFrom(ic.Key)
+                           select (IColumn)ic.Value).ToArray();
+
+            return (ib, columns);
         }
 
-        return TableIndex.GetColumnsFromFields(f);
+        return (f, TableIndex.GetColumnsFromField(f));
     }
 
     static Type? RemoveCasting(ref Expression body)
@@ -474,12 +471,15 @@ public class IndexWhereExpressionVisitor : ExpressionVisitor
     }
 
 
-    public static string IsNull(Field field, bool equals, bool isPostgres)
+    public static string? IsNull(Field field, bool equals, bool isPostgres)
     {
         string isNull = equals ? "{0} IS NULL" : "{0} IS NOT NULL";
 
         if (field is IColumn col)
         {
+            if (col.Nullable == IsNullable.No)
+                return null;
+
             string result = isNull.FormatWith(col.Name.SqlEscape(isPostgres));
 
             if (!col.DbType.IsString())
@@ -490,24 +490,33 @@ public class IndexWhereExpressionVisitor : ExpressionVisitor
         }
         else if (field is FieldImplementedBy ib)
         {
+            if (ib.ImplementationColumns.Count == 0)
+                return equals ? "TRUE" : "FALSE";
+
+            if (ib.ImplementationColumns.Values.Only()?.Nullable == IsNullable.No)
+                return null;
+
             return ib.ImplementationColumns.Values.ToString(ic => isNull.FormatWith(ic.Name.SqlEscape(isPostgres)), equals ? " AND " : " OR ");
         }
         else if (field is FieldImplementedByAll iba)
         {
-            return iba.IdColumns.Values.PreAnd((IColumn)iba.TypeColumn).ToString(ic => isNull.FormatWith(ic.Name), equals ? " AND " : " OR ");
+            if(iba.TypeColumn.Nullable == IsNullable.No) 
+                return null;
+
+            return isNull.FormatWith(iba.TypeColumn);
         }
         else if (field is FieldEmbedded fe)
         {
             if (fe.HasValue == null)
-                throw new NotSupportedException("{0} is not nullable".FormatWith(field));
+                return null;
 
-            return fe.HasValue.Name.SqlEscape(isPostgres) + " = 1";
+            return fe.HasValue.Name.SqlEscape(isPostgres) + (equals ? "<> 1" : " = 1");
         }
 
         throw new NotSupportedException(isNull.FormatWith(field.GetType()));
     }
 
-    static string Equals(Field field, object value, bool equals, bool isPostgres)
+    static string? Equals(Field field, object value, bool equals, bool isPostgres)
     {
         if (value == null)
         {

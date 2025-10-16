@@ -14,6 +14,7 @@ public class EntityTabRepeaterProxy : EntityBaseProxy
 
     public override object? GetValueUntyped() => throw new NotImplementedException();
     public override void SetValueUntyped(object? value) => throw new NotImplementedException();
+    public override bool IsReadonly() => throw new NotImplementedException();
 
     public WebElementLocator Tab(int index) => new WebElementLocator(this.Element, By.CssSelector($".nav-tabs .nav-item .nav-link[data-rr-ui-event-key=\"{index}\"]"));
     public WebElementLocator ElementPanel() => new WebElementLocator(this.Element, By.CssSelector($".sf-repeater-element.active"));

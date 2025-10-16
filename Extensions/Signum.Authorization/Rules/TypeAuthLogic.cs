@@ -18,52 +18,52 @@ public static partial class TypeAuthLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        TypeLogic.AssertStarted(sb);
+        AuthLogic.AssertStarted(sb);
+        TypeConditionLogic.Start(sb);
+
+        sb.Schema.EntityEventsGlobal.Saving += Schema_Saving; //because we need Modifications propagated
+        sb.Schema.EntityEventsGlobal.Retrieved += EntityEventsGlobal_Retrieved;
+        sb.Schema.IsAllowedCallback += Schema_IsAllowedCallback;
+
+        sb.Schema.SchemaCompleted += () =>
         {
-            TypeLogic.AssertStarted(sb);
-            AuthLogic.AssertStarted(sb);
-            TypeConditionLogic.Start(sb);
-
-            sb.Schema.EntityEventsGlobal.Saving += Schema_Saving; //because we need Modifications propagated
-            sb.Schema.EntityEventsGlobal.Retrieved += EntityEventsGlobal_Retrieved;
-            sb.Schema.IsAllowedCallback += Schema_IsAllowedCallback;
-
-            sb.Schema.SchemaCompleted += () =>
+            foreach (var type in TypeConditionLogic.Types)
             {
-                foreach (var type in TypeConditionLogic.Types)
-                {
-                    miRegister.GetInvoker(type)(Schema.Current);
-                }
-            };
+                miRegister.GetInvoker(type)(Schema.Current);
+            }
+        };
 
 
-            sb.Schema.EntityEventsGlobal.PreUnsafeDelete += query =>
-            {
-                return OnIsWriting(query.ElementType);
-            };
+        sb.Schema.EntityEventsGlobal.PreUnsafeDelete += query =>
+        {
+            return OnIsWriting(query.ElementType);
+        };
 
-            sb.Include<RuleTypeEntity>()
-                .WithUniqueIndex(rt => new { rt.Resource, rt.Role })
-                .WithVirtualMList(rt => rt.ConditionRules, c => c.RuleType);
+        sb.Include<RuleTypeEntity>()
+            .WithUniqueIndex(rt => new { rt.Resource, rt.Role })
+            .WithVirtualMList(rt => rt.ConditionRules, c => c.RuleType);
 
-            cache = new TypeCache(sb);
+        cache = new TypeCache(sb);
 
-            sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RuleTypeConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleType.Entity.Resource, rtc => rtc.RuleType.Entity.Role);
-            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleTypeEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(t)));
-            sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RuleTypeConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
-            
-            Validator.PropertyValidator((RuleTypeEntity r) => r.ConditionRules).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
-            
-   
+        sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RuleTypeConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleType.Entity.Resource, rtc => rtc.RuleType.Entity.Role);
+        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleTypeEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(t)));
+        sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RuleTypeConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
+
+        Validator.PropertyValidator((RuleTypeEntity r) => r.ConditionRules).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
 
 
-            AuthLogic.ExportToXml += cache.ExportXml;
-            AuthLogic.ImportFromXml += cache.ImportXml;
 
-            AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
-            TypeConditionLogic.RegisterCompile(UserTypeCondition.DeactivatedUsers, (UserEntity u) => u.State == UserState.Deactivated);
-        }
+
+        AuthLogic.ExportToXml += cache.ExportXml;
+        AuthLogic.ImportFromXml += cache.ImportXml;
+
+        AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
+        TypeConditionLogic.RegisterCompile(UserTypeCondition.DeactivatedUsers, (UserEntity u) => u.State == UserState.Deactivated);
     }
 
     static string? TypeAuthCache_StaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)

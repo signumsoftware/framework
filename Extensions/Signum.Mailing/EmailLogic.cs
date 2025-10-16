@@ -41,73 +41,73 @@ public static class EmailLogic
         Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,
         IFileTypeAlgorithm? attachment = null)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        FilePathEmbeddedLogic.AssertStarted(sb);
+        CultureInfoLogic.AssertStarted(sb);
+        EmailLogic.getConfiguration = getConfiguration;
+        EmailTemplateLogic.Start(sb, getEmailSenderConfiguration);
+        if (sb.Settings.ImplementedBy((EmailTemplateEntity e) => e.Attachments.First(), typeof(ImageAttachmentEntity)))
+            ImageAttachmentLogic.Start(sb);
+
+        if (sb.Settings.ImplementedBy((EmailTemplateEntity e) => e.Attachments.First(), typeof(FileTokenAttachmentEntity)))
+            FileTokenAttachmentLogic.Start(sb);
+
+        TemplatingLogic.Start(sb);
+        EmailSenderConfigurationLogic.Start(sb);
+        if (attachment != null)
+            FileTypeLogic.Register(EmailFileType.Attachment, attachment);
+
+        sb.Include<EmailMessageEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.State,
+                e.Subject,
+                e.Template,
+                e.Sent,
+                e.Target,
+                e.SentBy,
+                e.Exception,
+            });
+
+        if (CacheLogic.ServerBroadcast != null)
         {
-            FilePathEmbeddedLogic.AssertStarted(sb);
-            CultureInfoLogic.AssertStarted(sb);
-            EmailLogic.getConfiguration = getConfiguration;
-            EmailTemplateLogic.Start(sb, getEmailSenderConfiguration);
-            if (sb.Settings.ImplementedBy((EmailTemplateEntity e) => e.Attachments.First(), typeof(ImageAttachmentEntity)))
-                ImageAttachmentLogic.Start(sb);
-
-            if (sb.Settings.ImplementedBy((EmailTemplateEntity e) => e.Attachments.First(), typeof(FileTokenAttachmentEntity)))
-                FileTokenAttachmentLogic.Start(sb);
-
-            TemplatingLogic.Start(sb);
-            EmailSenderConfigurationLogic.Start(sb);
-            if (attachment != null)
-                FileTypeLogic.Register(EmailFileType.Attachment, attachment);
-
-            sb.Include<EmailMessageEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.State,
-                    e.Subject,
-                    e.Template,
-                    e.Sent,
-                    e.Target,
-                    e.SentBy,
-                    e.Exception,
-                });
-
-            if (CacheLogic.ServerBroadcast != null)
+            CacheLogic.ServerBroadcast.Receive += (method, args) =>
             {
-                CacheLogic.ServerBroadcast.Receive += (method, args) =>
-                {
-                    if (method == "EmailReadyToSend")
-                        AsyncEmailSender.WakeUp("ServerBroadcast Notification", null);
-                };
-            }
-
-            PermissionLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
-
-            EmailLogic.getEmailSenderConfiguration = getEmailSenderConfiguration;
-
-            EmailSenders.Register((SmtpEmailServiceEntity s, EmailSenderConfigurationEntity c) => new SmtpSender(c, s));
-
-            EmailGraph.Register();
-
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
-
-            if (sb.WebServerBuilder != null)
-                MailingServer.Start(sb.WebServerBuilder);
-
-            sb.Schema.SchemaCompleted += () =>
-            {
-                var pr = PropertyRoute.Construct((EmailSenderConfigurationEntity s) => s.Service);
-
-                var implementations = sb.Schema.FindImplementations(PropertyRoute.Construct((EmailSenderConfigurationEntity s) => s.Service));
-
-                var notOverriden = implementations.Types.Except(EmailSenders.OverridenTypes);
-
-                if (notOverriden.Any())
-                {
-                    throw new InvalidOperationException($"The property {pr} is implemented by {notOverriden.CommaAnd(a => a.TypeName())} but has not been registered in EmailLogic.EmailSenders. Maybe you forgot to call something like {notOverriden.CommaAnd(a => a.TypeName().Replace("Entity", "Logic.Start(sb)"))}?");
-                }
+                if (method == "EmailReadyToSend")
+                    AsyncEmailSender.WakeUp("ServerBroadcast Notification", null);
             };
         }
+
+        PermissionLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
+
+        EmailLogic.getEmailSenderConfiguration = getEmailSenderConfiguration;
+
+        EmailSenders.Register((SmtpEmailServiceEntity s, EmailSenderConfigurationEntity c) => new SmtpSender(c, s));
+
+        EmailGraph.Register();
+
+        ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+        if (sb.WebServerBuilder != null)
+            MailingServer.Start(sb.WebServerBuilder);
+
+        sb.Schema.SchemaCompleted += () =>
+        {
+            var pr = PropertyRoute.Construct((EmailSenderConfigurationEntity s) => s.Service);
+
+            var implementations = sb.Schema.FindImplementations(PropertyRoute.Construct((EmailSenderConfigurationEntity s) => s.Service));
+
+            var notOverriden = implementations.Types.Except(EmailSenders.OverridenTypes);
+
+            if (notOverriden.Any())
+            {
+                throw new InvalidOperationException($"The property {pr} is implemented by {notOverriden.CommaAnd(a => a.TypeName())} but has not been registered in EmailLogic.EmailSenders. Maybe you forgot to call something like {notOverriden.CommaAnd(a => a.TypeName().Replace("Entity", "Logic.Start(sb)"))}?");
+            }
+        };
     }
 
     internal static void WakeupReadyToSendInThisMachine(Dictionary<string, object> dic)

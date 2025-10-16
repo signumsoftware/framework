@@ -16,36 +16,36 @@ public static class TypeHelpLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        AvailableEmbeddedEntities = sb.GlobalLazy(() =>
         {
-            AvailableEmbeddedEntities = sb.GlobalLazy(() =>
-            {
-                var namespaces = EvalLogic.GetNamespaces().ToHashSet();
-                return EvalLogic.AssemblyTypes
-                .Select(t => t.Assembly)
-                .Distinct()
-                .SelectMany(a => a.GetTypes())
-                .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
-                .ToFrozenSet();
+            var namespaces = EvalLogic.GetNamespaces().ToHashSet();
+            return EvalLogic.AssemblyTypes
+            .Select(t => t.Assembly)
+            .Distinct()
+            .SelectMany(a => a.GetTypes())
+            .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
+            .ToFrozenSet();
 
-            }, new InvalidateWith());
+        }, new InvalidateWith());
 
-            AvailableModelEntities = sb.GlobalLazy(() =>
-            {
-                var namespaces = EvalLogic.GetNamespaces().ToHashSet();
-                return EvalLogic.AssemblyTypes
-                .Select(t => t.Assembly)
-                .Distinct()
-                .SelectMany(a => a.GetTypes())
-                .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
-                .ToFrozenSet();
+        AvailableModelEntities = sb.GlobalLazy(() =>
+        {
+            var namespaces = EvalLogic.GetNamespaces().ToHashSet();
+            return EvalLogic.AssemblyTypes
+            .Select(t => t.Assembly)
+            .Distinct()
+            .SelectMany(a => a.GetTypes())
+            .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
+            .ToFrozenSet();
 
-            }, new InvalidateWith());
+        }, new InvalidateWith());
 
-            if (sb.WebServerBuilder != null)
-            {
-                ReflectionServer.RegisterLike(typeof(TypeHelpMessage), () => UserHolder.Current != null);
-            }
+        if (sb.WebServerBuilder != null)
+        {
+            ReflectionServer.RegisterLike(typeof(TypeHelpMessage), () => UserHolder.Current != null);
         }
     }
 }

@@ -19,42 +19,42 @@ public static class OperationAuthLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        AuthLogic.AssertStarted(sb);
+        OperationLogic.AssertStarted(sb);
+
+        OperationLogic.AllowOperation += OperationLogic_AllowOperation;
+
+        sb.Include<RuleOperationEntity>()
+            .WithUniqueIndex(rt => new { rt.Resource.Operation, rt.Resource.Type, rt.Role })
+            .WithVirtualMList(rt => rt.ConditionRules, c => c.RuleOperation);            
+
+        cache = new OperationCache(sb);
+
+        TypeConditionsPerType = sb.GlobalLazy(() => new ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>(),
+            new InvalidateWith(typeof(RuleOperationEntity), typeof(RuleOperationConditionEntity)));
+
+        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
         {
-            AuthLogic.AssertStarted(sb);
-            OperationLogic.AssertStarted(sb);
+            Database.Query<RuleOperationEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+            return null;
+        };
 
-            OperationLogic.AllowOperation += OperationLogic_AllowOperation;
+        AuthLogic.ExportToXml += cache.ExportXml;
+        AuthLogic.ImportFromXml += cache.ImportXml;
 
-            sb.Include<RuleOperationEntity>()
-                .WithUniqueIndex(rt => new { rt.Resource.Operation, rt.Resource.Type, rt.Role })
-                .WithVirtualMList(rt => rt.ConditionRules, c => c.RuleOperation);            
+        AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
 
-            cache = new OperationCache(sb);
-
-            TypeConditionsPerType = sb.GlobalLazy(() => new ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>(),
-                new InvalidateWith(typeof(RuleOperationEntity), typeof(RuleOperationConditionEntity)));
-
-            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
-            {
-                Database.Query<RuleOperationEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
-                return null;
-            };
-
-            AuthLogic.ExportToXml += cache.ExportXml;
-            AuthLogic.ImportFromXml += cache.ImportXml;
-
-            AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
-
-            sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RuleOperationConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleOperation.Entity.Resource.Type, rtc => rtc.RuleOperation.Entity.Role);
-            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleOperationEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
-            sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += op => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleOperationEntity>().Where(a => a.Resource.Operation.Is(op)));
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleOperationEntity>().Where(a => a.Resource.Type.Is(t)));
-            sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RuleOperationConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
+        sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RuleOperationConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleOperation.Entity.Resource.Type, rtc => rtc.RuleOperation.Entity.Role);
+        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleOperationEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
+        sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += op => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleOperationEntity>().Where(a => a.Resource.Operation.Is(op)));
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleOperationEntity>().Where(a => a.Resource.Type.Is(t)));
+        sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RuleOperationConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
 
 
-            TypeAuthLogic.HasTypeConditionInOperations = RequiresTypeConditionForOperations;
-        }
+        TypeAuthLogic.HasTypeConditionInOperations = RequiresTypeConditionForOperations;
     }
 
     static ResetLazy<ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>> TypeConditionsPerType;

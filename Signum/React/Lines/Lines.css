@@ -586,6 +586,10 @@ input[type=checkbox].form-control-xs {
 .input-group>.form-control-plaintext {
     padding-right: 5px;
 }
+.form-control-plaintext {
+    display: flex;
+    align-items: center;
+}
 
 .form-group.form-group-sm {
     margin-bottom: 6px;

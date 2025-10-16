@@ -73,68 +73,68 @@ public static class EmailTemplateLogic
 
     public static void Start(SchemaBuilder sb, Func<EmailTemplateEntity, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity?>? getSmtpConfiguration)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        CultureInfoLogic.AssertStarted(sb);
+
+        GetSmtpConfiguration = getSmtpConfiguration;
+
+        sb.Include<EmailTemplateEntity>()
+            .WithQuery(() => t => new
+            {
+                Entity = t,
+                t.Id,
+                t.Name,
+                t.Query,
+                t.Model,
+            });
+
+
+            
+
+        EmailTemplatesLazy = sb.GlobalLazy(() =>
+        Database.Query<EmailTemplateEntity>().ToFrozenDictionaryEx(et => et.ToLite())
+        , new InvalidateWith(typeof(EmailTemplateEntity)));
+
+        TemplatesByQueryName = sb.GlobalLazy(() =>
         {
-            CultureInfoLogic.AssertStarted(sb);
+            return EmailTemplatesLazy.Value.Values.Where(a => a.Query != null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToDictionary().ToFrozenDictionary();
+        }, new InvalidateWith(typeof(EmailTemplateEntity)));
 
-            GetSmtpConfiguration = getSmtpConfiguration;
+        EmailModelLogic.Start(sb);
+        EmailMasterTemplateLogic.Start(sb);
 
-            sb.Include<EmailTemplateEntity>()
-                .WithQuery(() => t => new
-                {
-                    Entity = t,
-                    t.Id,
-                    t.Name,
-                    t.Query,
-                    t.Model,
-                });
+        sb.Schema.EntityEvents<EmailTemplateEntity>().PreSaving += new PreSavingEventHandler<EmailTemplateEntity>(EmailTemplate_PreSaving);
+        sb.Schema.EntityEvents<EmailTemplateEntity>().Retrieved += EmailTemplateLogic_Retrieved;
 
+        Validator.OverridePropertyValidator((EmailTemplateMessageEmbedded m) => m.Text).StaticPropertyValidation +=
+            EmailTemplateMessageText_StaticPropertyValidation;
 
-                
+        Validator.OverridePropertyValidator((EmailTemplateMessageEmbedded m) => m.Subject).StaticPropertyValidation +=
+            EmailTemplateMessageSubject_StaticPropertyValidation;
 
-            EmailTemplatesLazy = sb.GlobalLazy(() =>
-            Database.Query<EmailTemplateEntity>().ToFrozenDictionaryEx(et => et.ToLite())
-            , new InvalidateWith(typeof(EmailTemplateEntity)));
+        EmailTemplateGraph.Register();
 
-            TemplatesByQueryName = sb.GlobalLazy(() =>
-            {
-                return EmailTemplatesLazy.Value.Values.Where(a => a.Query != null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToDictionary().ToFrozenDictionary();
-            }, new InvalidateWith(typeof(EmailTemplateEntity)));
+        GlobalValueProvider.RegisterGlobalVariable("UrlLeft", _ => EmailLogic.Configuration.UrlLeft);
+        GlobalValueProvider.RegisterGlobalVariable("Now", _ => Clock.Now);
+        GlobalValueProvider.RegisterGlobalVariable("Today", _ => Clock.Now.Date, "d");
+        GlobalValueProvider.RegisterGlobalVariable("CurrentUser", _ => UserEntity.Current.Retrieve(), "d");
 
-            EmailModelLogic.Start(sb);
-            EmailMasterTemplateLogic.Start(sb);
+        sb.Schema.Synchronizing += Schema_Synchronizing_Tokens;
+        sb.Schema.Synchronizing += Schema_Synchronizing_DefaultTemplates;
 
-            sb.Schema.EntityEvents<EmailTemplateEntity>().PreSaving += new PreSavingEventHandler<EmailTemplateEntity>(EmailTemplate_PreSaving);
-            sb.Schema.EntityEvents<EmailTemplateEntity>().Retrieved += EmailTemplateLogic_Retrieved;
+        sb.Schema.EntityEvents<EmailModelEntity>().PreDeleteSqlSync += EmailTemplateLogic_PreDeleteSqlSync;
 
-            Validator.OverridePropertyValidator((EmailTemplateMessageEmbedded m) => m.Text).StaticPropertyValidation +=
-                EmailTemplateMessageText_StaticPropertyValidation;
+        Validator.PropertyValidator<EmailTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
+        {
+            var dc = EmailLogic.Configuration.DefaultCulture;
 
-            Validator.OverridePropertyValidator((EmailTemplateMessageEmbedded m) => m.Subject).StaticPropertyValidation +=
-                EmailTemplateMessageSubject_StaticPropertyValidation;
+            if (!et.Messages.Any(m => m.CultureInfo != null && dc.Name.StartsWith(m.CultureInfo.Name)))
+                return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(CultureInfoLogic.EntityToCultureInfo.Value.Keys.Where(c => dc.Name.StartsWith(c.Name)).CommaOr(a => a.EnglishName));
 
-            EmailTemplateGraph.Register();
-
-            GlobalValueProvider.RegisterGlobalVariable("UrlLeft", _ => EmailLogic.Configuration.UrlLeft);
-            GlobalValueProvider.RegisterGlobalVariable("Now", _ => Clock.Now);
-            GlobalValueProvider.RegisterGlobalVariable("Today", _ => Clock.Now.Date, "d");
-            GlobalValueProvider.RegisterGlobalVariable("CurrentUser", _ => UserEntity.Current.Retrieve(), "d");
-
-            sb.Schema.Synchronizing += Schema_Synchronizing_Tokens;
-            sb.Schema.Synchronizing += Schema_Synchronizing_DefaultTemplates;
-
-            sb.Schema.EntityEvents<EmailModelEntity>().PreDeleteSqlSync += EmailTemplateLogic_PreDeleteSqlSync;
-
-            Validator.PropertyValidator<EmailTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
-            {
-                var dc = EmailLogic.Configuration.DefaultCulture;
-
-                if (!et.Messages.Any(m => m.CultureInfo != null && dc.Name.StartsWith(m.CultureInfo.Name)))
-                    return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(CultureInfoLogic.EntityToCultureInfo.Value.Keys.Where(c => dc.Name.StartsWith(c.Name)).CommaOr(a => a.EnglishName));
-
-                return null;
-            };
-        }
+            return null;
+        };
     }
 
     static SqlPreCommand? EmailTemplateLogic_PreDeleteSqlSync(EmailModelEntity entityModel)
@@ -390,7 +390,7 @@ public static class EmailTemplateLogic
 
             SqlPreCommand DeleteTemplate()
             {
-                return table.DeleteSqlSync(et, e => e.Name == et.Name);
+                return table.DeleteSqlSync(et, e => e.Guid == et.Guid).TransactionBlock($"EmailTemplate Guid = {et.Guid}")!;
             }
 
             SqlPreCommand? RegenerateTemplate()

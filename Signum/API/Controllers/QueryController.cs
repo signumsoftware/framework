@@ -134,12 +134,14 @@ public class QueryController : ControllerBase
     }
 
     [HttpGet("api/query/queryContexts")]
-    public Dictionary<string/*queryKey*/, Dictionary<string /*contect typeName*/, List<PrimaryKey>>> GetQueryContexts()
+    public Dictionary<string/*queryKey*/, Dictionary<string /*context typeName*/, List<object>>> GetQueryContexts()
     {
         var context = (from qn in QueryLogic.Queries.GetAllowedQueryNames(false)
-                       let dic = QueryLogic.Queries.GetAllowedContexts(qn)?.ToDictionaryEx(kvp => TypeLogic.GetCleanName(kvp.Key), kvp => kvp.Value.Select(a => a.Id).ToList())
+                       let dic = QueryLogic.Queries.GetAllowedContexts(qn)
                        where dic != null
-                       select KeyValuePair.Create(QueryUtils.GetKey(qn), dic)).ToDictionaryEx();
+                       select KeyValuePair.Create(QueryUtils.GetKey(qn), 
+                            dic.ToDictionaryEx(kvp => TypeLogic.GetCleanName(kvp.Key), kvp => kvp.Value.Select(a => (object)a.Id.Object).ToList())))
+                       .ToDictionaryEx();
 
         return context;
     }

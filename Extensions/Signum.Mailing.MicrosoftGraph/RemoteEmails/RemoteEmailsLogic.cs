@@ -36,123 +36,123 @@ public static class RemoteEmailsLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        PermissionLogic.RegisterTypes(typeof(RemoteEmailMessagePermission));
+
+        FilterValueConverter.SpecificConverters.Add(new RemoteEmailFolderConverter());
+
+        QueryLogic.Queries.Register(RemoteEmailMessageQuery.RemoteEmailMessages, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
         {
-            PermissionLogic.RegisterTypes(typeof(RemoteEmailMessagePermission));
-
-            FilterValueConverter.SpecificConverters.Add(new RemoteEmailFolderConverter());
-
-            QueryLogic.Queries.Register(RemoteEmailMessageQuery.RemoteEmailMessages, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
+            using (HeavyProfiler.Log("Microsoft Graph", () => "EmailMessage"))
             {
-                using (HeavyProfiler.Log("Microsoft Graph", () => "EmailMessage"))
+                var tokenCredential = AzureADLogic.GetTokenCredential();
+
+                RemoteEmailsLogic.AuthorizeQueryRequest(request);
+
+                GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
+
+                var userFilter = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "User" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
+                Microsoft.Graph.Models.MessageCollectionResponse response;
+                Lite<UserEntity>? user = userFilter?.Value as Lite<UserEntity>;
+                Dictionary<string, RemoteEmailFolderModel> mailFolders = null!; 
+                try
                 {
-                    var tokenCredential = AzureADLogic.GetTokenCredential();
 
-                    RemoteEmailsLogic.AuthorizeQueryRequest(request);
+                    var (filters, orders) = FixFiltersAndOrders(request.Filters.ToList(), request.Orders.ToList());
 
-                    GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
-
-                    var userFilter = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "User" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
-                    Microsoft.Graph.Models.MessageCollectionResponse response;
-                    Lite<UserEntity>? user = userFilter?.Value as Lite<UserEntity>;
-                    Dictionary<string, RemoteEmailFolderModel> mailFolders = null!; 
-                    try
+                    if (user != null)
                     {
-
-                        var (filters, orders) = FixFiltersAndOrders(request.Filters.ToList(), request.Orders.ToList());
-
-                        if (user != null)
+                        if (HasMailbox(user))
                         {
-                            if (HasMailbox(user))
+                            var oid = ((UserLiteModel)user.Model!).OID;
+                            response = (await graphClient.Users[oid.ToString()].Messages.GetAsync(req =>
                             {
-                                var oid = ((UserLiteModel)user.Model!).OID;
-                                response = (await graphClient.Users[oid.ToString()].Messages.GetAsync(req =>
-                                {
-                                    req.QueryParameters.Filter = Converter.GetFilters(filters);
-                                    req.QueryParameters.Search = Converter.GetSearch(filters);
-                                    req.QueryParameters.Select = Converter.GetSelect(request.Columns.Where(c => InMSGRaph(c.Token)));
-                                    req.QueryParameters.Orderby = Converter.GetOrderBy(orders.Where(c => InMSGRaph(c.Token)));
-                                    req.QueryParameters.Expand = Converter.GetExpand(request.Columns.Where(c => InMSGRaph(c.Token)));
-                                    req.QueryParameters.Top = Converter.GetTop(request.Pagination);
-                                    req.QueryParameters.Count = true;
-                                    req.Headers.Add("ConsistencyLevel", "eventual");
-                                    req.Headers.Add("Prefer", "IdType='ImmutableId'");
-                                }))!;
+                                req.QueryParameters.Filter = Converter.GetFilters(filters);
+                                req.QueryParameters.Search = Converter.GetSearch(filters);
+                                req.QueryParameters.Select = Converter.GetSelect(request.Columns.Where(c => InMSGRaph(c.Token)));
+                                req.QueryParameters.Orderby = Converter.GetOrderBy(orders.Where(c => InMSGRaph(c.Token)));
+                                req.QueryParameters.Expand = Converter.GetExpand(request.Columns.Where(c => InMSGRaph(c.Token)));
+                                req.QueryParameters.Top = Converter.GetTop(request.Pagination);
+                                req.QueryParameters.Count = true;
+                                req.Headers.Add("ConsistencyLevel", "eventual");
+                                req.Headers.Add("Prefer", "IdType='ImmutableId'");
+                            }))!;
 
-                                var folders = (await graphClient.Users[oid.ToString()].MailFolders.GetAsync(req =>
-                                {
-                                    req.QueryParameters.Select = new[] { "displayName" };
-                                    req.QueryParameters.Top = 100;
-                                    req.QueryParameters.IncludeHiddenFolders = "true";
-                                }))!;
-
-                    
-
-                                mailFolders = folders.Value!.ToDictionary(a => a.Id!, a => new RemoteEmailFolderModel { FolderId = a.Id!, DisplayName = a.DisplayName! });
-                            }
-                            else
+                            var folders = (await graphClient.Users[oid.ToString()].MailFolders.GetAsync(req =>
                             {
-                                response = new Microsoft.Graph.Models.MessageCollectionResponse { Value = new List<Microsoft.Graph.Models.Message>(), OdataCount = 0 };
-                            }
+                                req.QueryParameters.Select = new[] { "displayName" };
+                                req.QueryParameters.Top = 100;
+                                req.QueryParameters.IncludeHiddenFolders = "true";
+                            }))!;
+
+                
+
+                            mailFolders = folders.Value!.ToDictionary(a => a.Id!, a => new RemoteEmailFolderModel { FolderId = a.Id!, DisplayName = a.DisplayName! });
                         }
                         else
                         {
                             response = new Microsoft.Graph.Models.MessageCollectionResponse { Value = new List<Microsoft.Graph.Models.Message>(), OdataCount = 0 };
                         }
                     }
-                    catch (ODataError e)
+                    else
                     {
-                        throw new ODataException(e);
+                        response = new Microsoft.Graph.Models.MessageCollectionResponse { Value = new List<Microsoft.Graph.Models.Message>(), OdataCount = 0 };
                     }
-
-                    var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
-
-       
-                    var list = response.Value!.Skip(skip).Select(u => new
-                    {
-                        Entity = (Lite<UserEntity>?)null,/*Lie*/
-                        Id = u.Id,
-                        u.Subject,
-                        From = u.From == null ? null : ToRecipientEmbedded(u.From),
-                        ToRecipients = u.ToRecipients?.ToString(a => a.EmailAddress!.Name, ", "),
-                        u.CreatedDateTime,
-                        u.ReceivedDateTime,
-                        u.SentDateTime,
-                        u.LastModifiedDateTime,
-                        u.IsRead,
-                        u.IsDraft,
-                        u.HasAttachments,
-                        Folder = u.ParentFolderId == null ? null : mailFolders.TryGetC(u.ParentFolderId) ?? new RemoteEmailFolderModel
-                        {
-                            FolderId = u.ParentFolderId,
-                            DisplayName = "Unknown"
-                        },
-                        WellKnownFolderName = (string?)null,
-                        User = user,
-                        Extension0 = Converter.GetExtension(u, 0),
-                        Extension1 = Converter.GetExtension(u, 1),
-                        Extension2 = Converter.GetExtension(u, 2),
-                        Extension3 = Converter.GetExtension(u, 3),
-                    });
-
-                    return list.ToDEnumerable(queryDescription).Select(request.Columns).OrderBy(request.Orders).WithCount((int?)response.OdataCount);
                 }
-            })
-            .Column(a => a.Entity, c => c.Implementations = Implementations.By())
-            .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.Id))
-            .ColumnProperyRoutes(a => a.Subject, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.Subject))
-            .ColumnProperyRoutes(a => a.CreatedDateTime, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.CreatedDateTime))
-            .ColumnProperyRoutes(a => a.ReceivedDateTime, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.ReceivedDateTime))
-            .ColumnProperyRoutes(a => a.SentDateTime, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.SentDateTime))
-            .ColumnProperyRoutes(a => a.LastModifiedDateTime, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.LastModifiedDateTime))
-            .ColumnProperyRoutes(a => a.From, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.From))
-            .ColumnProperyRoutes(a => a.User, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.User)),
-            Implementations.By(typeof(UserEntity)) /*Lie*/);
+                catch (ODataError e)
+                {
+                    throw new ODataException(e);
+                }
 
-            if(sb.WebServerBuilder != null)
-            {
-                ReflectionServer.RegisterLike(typeof(RemoteEmailMessageQuery), () => QueryLogic.Queries.QueryAllowed(RemoteEmailMessageQuery.RemoteEmailMessages, false));
+                var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
+
+           
+                var list = response.Value!.Skip(skip).Select(u => new
+                {
+                    Entity = (Lite<UserEntity>?)null,/*Lie*/
+                    Id = u.Id,
+                    u.Subject,
+                    From = u.From == null ? null : ToRecipientEmbedded(u.From),
+                    ToRecipients = u.ToRecipients?.ToString(a => a.EmailAddress!.Name, ", "),
+                    u.CreatedDateTime,
+                    u.ReceivedDateTime,
+                    u.SentDateTime,
+                    u.LastModifiedDateTime,
+                    u.IsRead,
+                    u.IsDraft,
+                    u.HasAttachments,
+                    Folder = u.ParentFolderId == null ? null : mailFolders.TryGetC(u.ParentFolderId) ?? new RemoteEmailFolderModel
+                    {
+                        FolderId = u.ParentFolderId,
+                        DisplayName = "Unknown"
+                    },
+                    WellKnownFolderName = (string?)null,
+                    User = user,
+                    Extension0 = Converter.GetExtension(u, 0),
+                    Extension1 = Converter.GetExtension(u, 1),
+                    Extension2 = Converter.GetExtension(u, 2),
+                    Extension3 = Converter.GetExtension(u, 3),
+                });
+
+                return list.ToDEnumerable(queryDescription).Select(request.Columns).OrderBy(request.Orders).WithCount((int?)response.OdataCount);
             }
+        })
+        .Column(a => a.Entity, c => c.Implementations = Implementations.By())
+        .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.Id))
+        .ColumnProperyRoutes(a => a.Subject, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.Subject))
+        .ColumnProperyRoutes(a => a.CreatedDateTime, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.CreatedDateTime))
+        .ColumnProperyRoutes(a => a.ReceivedDateTime, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.ReceivedDateTime))
+        .ColumnProperyRoutes(a => a.SentDateTime, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.SentDateTime))
+        .ColumnProperyRoutes(a => a.LastModifiedDateTime, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.LastModifiedDateTime))
+        .ColumnProperyRoutes(a => a.From, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.From))
+        .ColumnProperyRoutes(a => a.User, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.User)),
+        Implementations.By(typeof(UserEntity)) /*Lie*/);
+
+        if(sb.WebServerBuilder != null)
+        {
+            ReflectionServer.RegisterLike(typeof(RemoteEmailMessageQuery), () => QueryLogic.Queries.QueryAllowed(RemoteEmailMessageQuery.RemoteEmailMessages, false));
         }
     }
 

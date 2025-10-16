@@ -17,59 +17,59 @@ public static class IsolationLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        ExecutionMode.OnSetIsolation += entity =>
         {
-            ExecutionMode.OnSetIsolation += entity =>
-            {
-                var iso = entity.TryIsolation();
+            var iso = entity.TryIsolation();
 
-                if (iso == null)
-                    return null;
-
-                return IsolationEntity.Override(iso);
-            };
-
-            sb.Include<IsolationEntity>()
-                .WithSave(IsolationOperation.Save)
-                .WithQuery(() => iso => new
-                {
-                    Entity = iso,
-                    iso.Id,
-                    iso.Name
-                });
-
-
-            UserWithClaims.FillClaims += (userWithClaims, user) =>
-            {
-                userWithClaims.Claims["Isolation"] = ((Entity)user).TryIsolation();
-            };
-
-            Schema.Current.AttachToUniqueFilter += entity =>
-            {
-                var type = entity.GetType();
-                var hasIsolationMixin = MixinDeclarations.IsDeclared(type, typeof(IsolationMixin));
-
-                return hasIsolationMixin == false ? null :
-                    e => e.Mixin<IsolationMixin>().Isolation.Is(entity.Mixin<IsolationMixin>().Isolation);
-            };
-
-            sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;
-            sb.Schema.SchemaCompleted += AssertIsolationStrategies;
-            OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
-
-            Isolations = sb.GlobalLazy(() => Database.RetrieveAllLite<IsolationEntity>(),
-                new InvalidateWith(typeof(IsolationEntity)));
-
-
-            Validator.OverridePropertyValidator((IsolationMixin m) => m.Isolation).StaticPropertyValidation += (mi, pi) =>
-            {
-                if (strategies.GetOrThrow(mi.MainEntity.GetType()) == IsolationStrategy.Isolated && mi.Isolation == null)
-                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
-
+            if (iso == null)
                 return null;
-            };
-            IsStarted = true;
-        }
+
+            return IsolationEntity.Override(iso);
+        };
+
+        sb.Include<IsolationEntity>()
+            .WithSave(IsolationOperation.Save)
+            .WithQuery(() => iso => new
+            {
+                Entity = iso,
+                iso.Id,
+                iso.Name
+            });
+
+
+        UserWithClaims.FillClaims += (userWithClaims, user) =>
+        {
+            userWithClaims.Claims["Isolation"] = ((Entity)user).TryIsolation();
+        };
+
+        Schema.Current.AttachToUniqueFilter += entity =>
+        {
+            var type = entity.GetType();
+            var hasIsolationMixin = MixinDeclarations.IsDeclared(type, typeof(IsolationMixin));
+
+            return hasIsolationMixin == false ? null :
+                e => e.Mixin<IsolationMixin>().Isolation.Is(entity.Mixin<IsolationMixin>().Isolation);
+        };
+
+        sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;
+        sb.Schema.SchemaCompleted += AssertIsolationStrategies;
+        OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
+
+        Isolations = sb.GlobalLazy(() => Database.RetrieveAllLite<IsolationEntity>(),
+            new InvalidateWith(typeof(IsolationEntity)));
+
+
+        Validator.OverridePropertyValidator((IsolationMixin m) => m.Isolation).StaticPropertyValidation += (mi, pi) =>
+        {
+            if (strategies.GetOrThrow(mi.MainEntity.GetType()) == IsolationStrategy.Isolated && mi.Isolation == null)
+                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+            return null;
+        };
+        IsStarted = true;
     }
 
     static IDisposable? OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity? entity, object?[]? args)
@@ -108,15 +108,15 @@ public static class IsolationLogic
             a => a,
             (a, b) => 0);
 
-        var extra = result.Extra.OrderBy(a => a.Namespace).ThenBy(a => a.Name).ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".FormatWith(t.Name), "\r\n");
+        var extra = result.Extra.OrderBy(a => a.Namespace).ThenBy(a => a.Name).ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".FormatWith(t.Name), "\n");
 
-        var lacking = result.Missing.GroupBy(a => a.Namespace).OrderBy(gr => gr.Key).ToString(gr => "  //{0}\r\n".FormatWith(gr.Key) +
-            gr.ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".FormatWith(t.Name), "\r\n"), "\r\n\r\n");
+        var lacking = result.Missing.GroupBy(a => a.Namespace).OrderBy(gr => gr.Key).ToString(gr => "  //{0}\n".FormatWith(gr.Key) +
+            gr.ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".FormatWith(t.Name), "\n"), "\n\n");
 
         if (extra.HasText() || lacking.HasText())
-            throw new InvalidOperationException("IsolationLogic's strategies are not synchronized with the Schema.\r\n" +
-                    (extra.HasText() ? ("Remove something like:\r\n" + extra + "\r\n\r\n") : null) +
-                    (lacking.HasText() ? ("Add something like:\r\n" + lacking + "\r\n\r\n") : null));
+            throw new InvalidOperationException("IsolationLogic's strategies are not synchronized with the Schema.\n" +
+                    (extra.HasText() ? ("Remove something like:\n" + extra + "\n\n") : null) +
+                    (lacking.HasText() ? ("Add something like:\n" + lacking + "\n\n") : null));
 
         foreach (var item in strategies.Where(kvp => kvp.Value == IsolationStrategy.Isolated || kvp.Value == IsolationStrategy.Optional))
         {

@@ -40,53 +40,53 @@ public static class SymbolLogic<T>
 
     public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSymbols)
     {
-        if (sb.NotDefined(typeof(SymbolLogic<T>).GetMethod("Start")))
+        if (sb.AlreadyDefined(typeof(SymbolLogic<T>).GetMethod("Start")))
+            return;
+
+        sb.Include<T>()
+            .WithQuery(() => t => new
+            {
+                Entity = t,
+                t.Id,
+                t.Key
+            });
+
+        SymbolLogic.OnLoadAll += () => lazy.Load();
+        SymbolLogic.OnGetSymbolContainer += () => SymbolLogic<T>.getSymbols().Select(a => a.FieldInfo.DeclaringType!).Distinct();
+        sb.Schema.Initializing += () => lazy.Load();
+        sb.Schema.Synchronizing += Schema_Synchronizing;
+        sb.Schema.Generating += Schema_Generating;
+        sb.Schema.EntityEvents<T>().Saved += SymbolLogic_Saved;
+
+        SymbolLogic<T>.getSymbols = getSymbols;
+        lazy = sb.GlobalLazy(() =>
         {
-            sb.Include<T>()
-                .WithQuery(() => t => new
-                {
-                    Entity = t,
-                    t.Id,
-                    t.Key
-                });
-
-            SymbolLogic.OnLoadAll += () => lazy.Load();
-            SymbolLogic.OnGetSymbolContainer += () => SymbolLogic<T>.getSymbols().Select(a => a.FieldInfo.DeclaringType!).Distinct();
-            sb.Schema.Initializing += () => lazy.Load();
-            sb.Schema.Synchronizing += Schema_Synchronizing;
-            sb.Schema.Generating += Schema_Generating;
-            sb.Schema.EntityEvents<T>().Saved += SymbolLogic_Saved;
-
-            SymbolLogic<T>.getSymbols = getSymbols;
-            lazy = sb.GlobalLazy(() =>
+            using (AvoidCache())
             {
-                using (AvoidCache())
-                {
-                    var current = Database.RetrieveAll<T>();
+                var current = Database.RetrieveAll<T>();
 
-                    var result = EnumerableExtensions.JoinRelaxed(
-                        current,
-                        getSymbols(),
-                        c => c.Key,
-                        s => s.Key,
-                        (c, s) => s.SetId(c.Id),
-                        "caching " + typeof(T).Name);
+                var result = EnumerableExtensions.JoinRelaxed(
+                    current,
+                    getSymbols(),
+                    c => c.Key,
+                    s => s.Key,
+                    (c, s) => s.SetId(c.Id),
+                    "caching " + typeof(T).Name);
 
-                    Symbol.SetSymbolIds<T>(current.ToDictionary(a => a.Key, a => a.Id));
-                    return result.ToFrozenDictionaryEx(a => a.Key);
-                }
-            },
-            new InvalidateWith(typeof(T)),
-            Schema.Current.InvalidateMetadata);
+                Symbol.SetSymbolIds<T>(current.ToDictionary(a => a.Key, a => a.Id));
+                return result.ToFrozenDictionaryEx(a => a.Key);
+            }
+        },
+        new InvalidateWith(typeof(T)),
+        Schema.Current.InvalidateMetadata);
 
-            sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
-            Symbol.CallRetrieved += (ss) =>
-            {
-                if (ss is T t)
-                    if (t.Key != null && t.FieldInfo == null)
-                        SymbolLogic_Retrieved(t, new PostRetrievingContext());
-            };
-        }
+        sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
+        Symbol.CallRetrieved += (ss) =>
+        {
+            if (ss is T t)
+                if (t.Key != null && t.FieldInfo == null)
+                    SymbolLogic_Retrieved(t, new PostRetrievingContext());
+        };
     }
 
     private static void SymbolLogic_Saved(T ident, SavedEventArgs args)

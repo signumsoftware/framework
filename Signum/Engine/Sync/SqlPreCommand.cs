@@ -139,7 +139,7 @@ public static class SqlPreCommandExtensions
             var script = File.ReadAllText(fileName);
             using (var tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
             {
-                ExecuteScript("script", script);
+                ExecuteScript("script", script, autoRun: false); 
                 tr.Commit();
             }
         }
@@ -150,7 +150,7 @@ public static class SqlPreCommandExtensions
                 if (SafeConsole.Ask("Execute without transaction?"))
                 {
                     var script = File.ReadAllText(fileName);
-                    ExecuteScript("script", script);
+                    ExecuteScript("script", script, autoRun: false);
                     return;
                 }
                 else
@@ -225,7 +225,7 @@ public static class SqlPreCommandExtensions
     }
 
 
-    public static void ExecuteScript(string title, string script)
+    public static void ExecuteScript(string title, string script, bool autoRun)
     {
         using (Connector.CommandTimeoutScope(Connector.ScopeTimeout ?? DefaultScriptTimeout))
         {
@@ -313,7 +313,7 @@ public static class SqlPreCommandExtensions
                         var pgE = ex as PostgresException ?? ex.InnerException as PostgresException;
 
 
-                        var answer = allYes ? "yes" : SafeConsole.Ask("Continue anyway?", new[] { "yes", "no", "all yes", sqlE != null || pgE != null ? "+ exception details" : null }.NotNull().ToArray());
+                        var answer = autoRun || allYes ? "yes" : SafeConsole.Ask("Continue anyway?", new[] { "yes", "no", "all yes", sqlE != null || pgE != null ? "+ exception details" : null }.NotNull().ToArray());
                         if (answer == "+ exception details")
                         {
                             PrintExceptionLine(kvp.Value, ex, sqlE, pgE);

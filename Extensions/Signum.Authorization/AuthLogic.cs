@@ -77,82 +77,82 @@ public static class AuthLogic
 
     public static void Start(SchemaBuilder sb, string? systemUserName, string? anonymousUserName)
     {   
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        SystemUserName = systemUserName;
+        AnonymousUserName = anonymousUserName;
+
+        RoleEntity.RetrieveFromCache = r => RolesByLite.Value.GetOrThrow(r);
+
+        UserWithClaims.FillClaims += (userWithClaims, user) =>
         {
-            SystemUserName = systemUserName;
-            AnonymousUserName = anonymousUserName;
+            userWithClaims.Claims["Role"] = ((UserEntity)user).Role;
+            userWithClaims.Claims["Culture"] = ((UserEntity)user).CultureInfo?.Name;
+        };
 
-            RoleEntity.RetrieveFromCache = r => RolesByLite.Value.GetOrThrow(r);
+        CultureInfoLogic.AssertStarted(sb);
+        RecentlyUsersDisabled = sb.GlobalLazy(() => Database.Query<UserEntity>().Where(u => u.DisabledOn != null && AuthTokenServer.GetTokenLimitDate() < u.DisabledOn).Select(a => a.ToLite()).ToHashSet(),
+         new InvalidateWith(null));
 
-            UserWithClaims.FillClaims += (userWithClaims, user) =>
+        sb.Include<UserEntity>()
+          .WithExpressionFrom((RoleEntity r) => r.Users())
+           .WithIndex(a => new { a.DisabledOn })
+          .WithQuery(() => e => new
+          {
+              Entity = e,
+              e.Id,
+              e.UserName,
+              e.Email,
+              e.Role,
+              e.State,
+              e.CultureInfo,
+          });
+
+        QueryLogic.Expressions.Register((RoleEntity r) => r.UsedByRoles(), AuthAdminMessage.UsedByRoles);
+
+        sb.Include<RoleEntity>()
+            .WithSave(RoleOperation.Save)
+            .WithDelete(RoleOperation.Delete)
+            .WithQuery(() => r => new
             {
-                userWithClaims.Claims["Role"] = ((UserEntity)user).Role;
-                userWithClaims.Claims["Culture"] = ((UserEntity)user).CultureInfo?.Name;
-            };
+                Entity = r,
+                r.Id,
+                r.Name,
+                r.Description,
+            });
 
-            CultureInfoLogic.AssertStarted(sb);
-            RecentlyUsersDisabled = sb.GlobalLazy(() => Database.Query<UserEntity>().Where(u => u.DisabledOn != null && AuthTokenServer.GetTokenLimitDate() < u.DisabledOn).Select(a => a.ToLite()).ToHashSet(),
-             new InvalidateWith(null));
+        RolesByLite = sb.GlobalLazy(() => Database./*Query*/RetrieveAll<RoleEntity>().ToFrozenDictionaryEx(a => a.ToLite()), new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
+        rolesByName = sb.GlobalLazy(() => RolesByLite.Value.Keys.ToFrozenDictionaryEx(a => a.ToString()!), new InvalidateWith(typeof(RoleEntity)));
+        rolesGraph = sb.GlobalLazy(() => CacheRoles(RolesByLite.Value), new InvalidateWith(typeof(RoleEntity)));
+        rolesInverse = sb.GlobalLazy(() => rolesGraph.Value.Inverse(), new InvalidateWith(typeof(RoleEntity)));
+        mergeStrategies = sb.GlobalLazy(() =>
+        {
+            var strategies = Database.Query<RoleEntity>().Select(r => KeyValuePair.Create(r.ToLite(), r.MergeStrategy)).ToDictionary();
 
-            sb.Include<UserEntity>()
-              .WithExpressionFrom((RoleEntity r) => r.Users())
-               .WithIndex(a => new { a.DisabledOn })
-              .WithQuery(() => e => new
-              {
-                  Entity = e,
-                  e.Id,
-                  e.UserName,
-                  e.Email,
-                  e.Role,
-                  e.State,
-                  e.CultureInfo,
-              });
+            var graph = rolesGraph.Value;
 
-            QueryLogic.Expressions.Register((RoleEntity r) => r.UsedByRoles(), AuthAdminMessage.UsedByRoles);
+            Dictionary<Lite<RoleEntity>, RoleData> result = new Dictionary<Lite<RoleEntity>, RoleData>();
+            foreach (var r in graph.CompilationOrder())
+            {
+                var strat = strategies.GetOrThrow(r);
 
-            sb.Include<RoleEntity>()
-                .WithSave(RoleOperation.Save)
-                .WithDelete(RoleOperation.Delete)
-                .WithQuery(() => r => new
+                var baseValues = graph.RelatedTo(r).Select(r2 => result[r2].DefaultAllowed);
+
+                result.Add(r, new RoleData
                 {
-                    Entity = r,
-                    r.Id,
-                    r.Name,
-                    r.Description,
+                    MergeStrategy = strat,
+                    DefaultAllowed = strat == MergeStrategy.Union ? baseValues.Any(a => a) : baseValues.All(a => a)
                 });
+            }
 
-            RolesByLite = sb.GlobalLazy(() => Database./*Query*/RetrieveAll<RoleEntity>().ToFrozenDictionaryEx(a => a.ToLite()), new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
-            rolesByName = sb.GlobalLazy(() => RolesByLite.Value.Keys.ToFrozenDictionaryEx(a => a.ToString()!), new InvalidateWith(typeof(RoleEntity)));
-            rolesGraph = sb.GlobalLazy(() => CacheRoles(RolesByLite.Value), new InvalidateWith(typeof(RoleEntity)));
-            rolesInverse = sb.GlobalLazy(() => rolesGraph.Value.Inverse(), new InvalidateWith(typeof(RoleEntity)));
-            mergeStrategies = sb.GlobalLazy(() =>
-            {
-                var strategies = Database.Query<RoleEntity>().Select(r => KeyValuePair.Create(r.ToLite(), r.MergeStrategy)).ToDictionary();
+            return result.ToFrozenDictionary();
+        }, new InvalidateWith(typeof(RoleEntity)));
 
-                var graph = rolesGraph.Value;
-
-                Dictionary<Lite<RoleEntity>, RoleData> result = new Dictionary<Lite<RoleEntity>, RoleData>();
-                foreach (var r in graph.CompilationOrder())
-                {
-                    var strat = strategies.GetOrThrow(r);
-
-                    var baseValues = graph.RelatedTo(r).Select(r2 => result[r2].DefaultAllowed);
-
-                    result.Add(r, new RoleData
-                    {
-                        MergeStrategy = strat,
-                        DefaultAllowed = strat == MergeStrategy.Union ? baseValues.Any(a => a) : baseValues.All(a => a)
-                    });
-                }
-
-                return result.ToFrozenDictionary();
-            }, new InvalidateWith(typeof(RoleEntity)));
-
-            sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
-            UserGraph.Register();
+        sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
+        UserGraph.Register();
 
 
-        }
     }
 
     public static Lite<RoleEntity> GetOrCreateTrivialMergeRole(List<Lite<RoleEntity>> roles, Dictionary<string, Lite<RoleEntity>>? newRoles = null)

@@ -25,12 +25,12 @@ public static class PermissionLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Include<PermissionSymbol>();
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            SymbolLogic<PermissionSymbol>.Start(sb, () => RegisteredPermission.ToHashSet());
-        }
+        sb.Include<PermissionSymbol>();
+
+        SymbolLogic<PermissionSymbol>.Start(sb, () => RegisteredPermission.ToHashSet());
     }
 
     public static void RegisterTypes(params Type[] types)

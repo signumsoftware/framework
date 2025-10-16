@@ -10,7 +10,7 @@ public class QueryHelpEntity : Entity, IHelpImageTarget
     public CultureInfoEntity Culture { get; set; }
 
     [Ignore]
-    public string Info { get; set; }
+    public string? Info { get; set; }
 
     [StringLengthValidator(MultiLine = true)]
     public string? Description { get; set; }
@@ -33,7 +33,7 @@ public class QueryHelpEntity : Entity, IHelpImageTarget
     }
 
     [AutoExpressionField]
-    public override string ToString() => As.Expression(() => Query.ToString());
+    public override string ToString() => As.Expression(() => (IsNew ? "" : Query.ToString()));
 
     bool IHelpImageTarget.ForeachHtmlField(Func<string, string> processHtml)
     {
@@ -72,10 +72,10 @@ public class QueryColumnHelpEmbedded : EmbeddedEntity
     public string? Description { get; set; }
 
     [Ignore]
-    public string NiceName { get; set; }
+    public string? NiceName { get; set; }
 
     [Ignore]
-    public string Info { get; set; }
+    public string? Info { get; set; }
 
     public override string ToString()
     {

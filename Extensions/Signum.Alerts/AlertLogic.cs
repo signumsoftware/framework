@@ -46,66 +46,66 @@ public static class AlertLogic
 
     public static void Start(SchemaBuilder sb, params Type[] registerExpressionsFor)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<AlertEntity>()
+            .WithQuery(() => a => new
+            {
+                Entity = a,
+                a.Id,
+                a.AlertDate,
+                a.AlertType,
+                a.State,
+                a.Title,
+                Text = a.Text!.Etc(100),
+                a.Target,
+                a.LinkTarget,
+                a.Recipient,
+                a.CreationDate,
+                a.CreatedBy,
+                a.AttendedDate,
+                a.AttendedBy,
+            });
+
+        AlertGraph.Register();
+
+        As.ReplaceExpression((AlertEntity a) => a.Text, a => a.TextField.HasText() ? a.TextField : a.AlertType.GetText());
+
+        Schema.Current.EntityEvents<AlertEntity>().Retrieved += (a, ctx) =>
         {
-            sb.Include<AlertEntity>()
-                .WithQuery(() => a => new
-                {
-                    Entity = a,
-                    a.Id,
-                    a.AlertDate,
-                    a.AlertType,
-                    a.State,
-                    a.Title,
-                    Text = a.Text!.Etc(100),
-                    a.Target,
-                    a.LinkTarget,
-                    a.Recipient,
-                    a.CreationDate,
-                    a.CreatedBy,
-                    a.AttendedDate,
-                    a.AttendedBy,
-                });
+            a.TextFromAlertType = a.AlertType?.GetText();
+        };
 
-            AlertGraph.Register();
-
-            As.ReplaceExpression((AlertEntity a) => a.Text, a => a.TextField.HasText() ? a.TextField : a.AlertType.GetText());
-
-            Schema.Current.EntityEvents<AlertEntity>().Retrieved += (a, ctx) =>
+        sb.Include<AlertTypeSymbol>()
+            .WithSave(AlertTypeOperation.Save)
+            .WithDelete(AlertTypeOperation.Delete)
+            .WithQuery(() => t => new
             {
-                a.TextFromAlertType = a.AlertType?.GetText();
-            };
+                Entity = t,
+                t.Id,
+                t.Name,
+                t.Key,
+            });
 
-            sb.Include<AlertTypeSymbol>()
-                .WithSave(AlertTypeOperation.Save)
-                .WithDelete(AlertTypeOperation.Delete)
-                .WithQuery(() => t => new
-                {
-                    Entity = t,
-                    t.Id,
-                    t.Name,
-                    t.Key,
-                });
+        SemiSymbolLogic<AlertTypeSymbol>.Start(sb, () => SystemAlertTypes.Keys);
 
-            SemiSymbolLogic<AlertTypeSymbol>.Start(sb, () => SystemAlertTypes.Keys);
-
-            if (registerExpressionsFor != null)
+        if (registerExpressionsFor != null)
+        {
+            var alerts = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Alerts());
+            var myActiveAlerts = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.MyActiveAlerts());
+            foreach (var type in registerExpressionsFor)
             {
-                var alerts = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Alerts());
-                var myActiveAlerts = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.MyActiveAlerts());
-                foreach (var type in registerExpressionsFor)
-                {
-                    QueryLogic.Expressions.Register(new ExtensionInfo(type, alerts, alerts.Body.Type, "Alerts", () => typeof(AlertEntity).NicePluralName()));
-                    QueryLogic.Expressions.Register(new ExtensionInfo(type, myActiveAlerts, myActiveAlerts.Body.Type, "MyActiveAlerts", () => AlertMessage.MyActiveAlerts.NiceToString()));
-                }
+                QueryLogic.Expressions.Register(new ExtensionInfo(type, alerts, alerts.Body.Type, "Alerts", () => typeof(AlertEntity).NicePluralName()));
+                QueryLogic.Expressions.Register(new ExtensionInfo(type, myActiveAlerts, myActiveAlerts.Body.Type, "MyActiveAlerts", () => AlertMessage.MyActiveAlerts.NiceToString()));
             }
-            
-
-            Started = true;
-
-            if (sb.WebServerBuilder != null)
-                AlertsServer.Start(sb.WebServerBuilder);
         }
+
+
+        Started = true;
+
+        if (sb.WebServerBuilder != null)
+            AlertsServer.Start(sb.WebServerBuilder);
     }
 
     public static void RegisterAlertNotificationMail(SchemaBuilder sb)

@@ -516,4 +516,16 @@ public static class SeleniumExtensions
     {
         return new WebElementLocator(element, locator);
     }
+
+    public static bool IsDomDisabled(this IWebElement element)
+    {
+        var disabled = element.GetDomProperty("disabled")?.ToLower() ?? element.GetDomAttribute("disabled")?.ToLower();
+        return disabled != null && disabled == "true";
+    }
+
+    public static bool IsDomReadonly(this IWebElement element)
+    {
+        var _readonly = element.GetDomProperty("readonly")?.ToLower() ?? element.GetDomAttribute("readonly")?.ToLower();
+        return _readonly != null && _readonly == "true";
+    }
 }

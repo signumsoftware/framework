@@ -19,6 +19,7 @@ public class TimeLineProxy : BaseLineProxy
 
     public override object? GetValueUntyped() => this.GetValue();
     public override void SetValueUntyped(object? value) => this.SetValue((IFormattable?)value);
+    public override bool IsReadonly() => InputLocator.Find().Let(e => e.IsDomDisabled() || e.IsDomReadonly());
 
     public void SetValue(IFormattable? value, string? format = null)
     {

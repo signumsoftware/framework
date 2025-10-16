@@ -49,121 +49,121 @@ public static class WordTemplateLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        TemplatingLogic.Start(sb);
+
+        sb.Include<WordTemplateEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.Query,
+                e.Culture,
+                e.Template!.Entity.FileName
+            });
+
+        new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.Save)
         {
-            TemplatingLogic.Start(sb);
-
-            sb.Include<WordTemplateEntity>()
-                .WithQuery(() => e => new
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (wt, _) => {
+                if (!wt.IsNew)
                 {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.Query,
-                    e.Culture,
-                    e.Template!.Entity.FileName
-                });
-
-            new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.Save)
-            {
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (wt, _) => {
-                    if (!wt.IsNew)
-                    {
-                        var oldFile = wt.InDB(t => t.Template);
-                        if (oldFile != null && !wt.Template.Is(oldFile))
-                            Transaction.PreRealCommit += dic => oldFile.Delete();
-                    }
-                },
-            }.Register();
-            
-            new Graph<WordTemplateEntity>.Delete(WordTemplateOperation.Delete)
-            {
-                Delete = (e, _) => e.Delete(),
-            }.Register();
-
-            sb.Schema.EntityEvents<WordTemplateEntity>().Retrieved += WordTemplateLogic_Retrieved;
-
-            UserAssetsImporter.Register<WordTemplateEntity>("WordTemplate", WordTemplateOperation.Save);
-            PermissionLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
-
-            WordModelLogic.Start(sb);
-
-            SymbolLogic<WordTransformerSymbol>.Start(sb, () => Transformers.Keys.ToHashSet());
-            SymbolLogic<WordConverterSymbol>.Start(sb, () => Converters.Keys.ToHashSet());
-
-            sb.Include<WordTransformerSymbol>()
-                .WithQuery(() => f => new
-                {
-                    Entity = f,
-                    f.Key
-                });
-
-            sb.Include<WordConverterSymbol>()
-                .WithQuery(() => f => new
-                {
-                    Entity = f,
-                    f.Key
-                });
-
-
-            sb.Schema.EntityEvents<WordModelEntity>().PreDeleteSqlSync += e =>
-                Administrator.UnsafeDeletePreCommand(Database.Query<WordTemplateEntity>()
-                    .Where(a => a.Model.Is(e)));
-
-            ToDataTableProviders.Add("Model", new ModelDataTableProvider());
-            ToDataTableProviders.Add("UserQuery", new UserQueryDataTableProvider());
-            ToDataTableProviders.Add("UserChart", new UserChartDataTableProvider());
-
-            QueryLogic.Expressions.Register((WordModelEntity e) => e.WordTemplates(), () => typeof(WordTemplateEntity).NiceName());
-
-            
-            new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.CreateWordReport)
-            {
-                ForReadonlyEntity = true,
-                CanExecute = et =>
-                {
-                    if (et.Model != null && WordModelLogic.RequiresExtraParameters(et.Model))
-                        return WordTemplateMessage._01RequiresExtraParameters.NiceToString(typeof(WordModelEntity).NiceName(), et.Model);
-
-                    return null;
-                },
-                Execute = (et, args) =>
-                {
-                    throw new InvalidOperationException("UI-only operation");
+                    var oldFile = wt.InDB(t => t.Template);
+                    if (oldFile != null && !wt.Template.Is(oldFile))
+                        Transaction.PreRealCommit += dic => oldFile.Delete();
                 }
-            }.Register();
+            },
+        }.Register();
 
-            WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
-               .ToFrozenDictionaryEx(et => et.ToLite()), new InvalidateWith(typeof(WordTemplateEntity)));
+        new Graph<WordTemplateEntity>.Delete(WordTemplateOperation.Delete)
+        {
+            Delete = (e, _) => e.Delete(),
+        }.Register();
 
+        sb.Schema.EntityEvents<WordTemplateEntity>().Retrieved += WordTemplateLogic_Retrieved;
 
+        UserAssetsImporter.Register<WordTemplateEntity>("WordTemplate", WordTemplateOperation.Save);
+        PermissionLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
 
-            TemplatesByQueryName = sb.GlobalLazy(() =>
+        WordModelLogic.Start(sb);
+
+        SymbolLogic<WordTransformerSymbol>.Start(sb, () => Transformers.Keys.ToHashSet());
+        SymbolLogic<WordConverterSymbol>.Start(sb, () => Converters.Keys.ToHashSet());
+
+        sb.Include<WordTransformerSymbol>()
+            .WithQuery(() => f => new
             {
-                return WordTemplatesLazy.Value.Values.Where(a => a.Query != null).SelectCatch(w => KeyValuePair.Create(w.Query!.ToQueryName(), w)).GroupToDictionary().ToFrozenDictionaryEx();
-            }, new InvalidateWith(typeof(WordTemplateEntity)));
+                Entity = f,
+                f.Key
+            });
 
-            TemplatesByEntityType = sb.GlobalLazy(() =>
+        sb.Include<WordConverterSymbol>()
+            .WithQuery(() => f => new
             {
-                return (from pair in WordTemplatesLazy.Value.Values.Where(a => a.Query != null)
-                        .SelectCatch(wr => new { wr, imp = QueryLogic.Queries.GetEntityImplementations(wr.Query!.ToQueryName()) })
-                        where !pair.imp.IsByAll
-                        from t in pair.imp.Types
-                        select KeyValuePair.Create(t, pair.wr))
-                        .GroupToDictionary()
-                        .ToFrozenDictionaryEx();
-            }, new InvalidateWith(typeof(WordTemplateEntity)));
+                Entity = f,
+                f.Key
+            });
 
-            Schema.Current.Synchronizing += Schema_Synchronize_Tokens;
 
-            Validator.PropertyValidator((WordTemplateEntity e) => e.Template).StaticPropertyValidation += ValidateTemplate;
-            Validator.PropertyValidator((WordTemplateEntity e) => e.FileName).StaticPropertyValidation += ValidateFileName;
+        sb.Schema.EntityEvents<WordModelEntity>().PreDeleteSqlSync += e =>
+            Administrator.UnsafeDeletePreCommand(Database.Query<WordTemplateEntity>()
+                .Where(a => a.Model.Is(e)));
 
-            if (sb.WebServerBuilder != null)
-                WordServer.Start(sb.WebServerBuilder);
-        }
+        ToDataTableProviders.Add("Model", new ModelDataTableProvider());
+        ToDataTableProviders.Add("UserQuery", new UserQueryDataTableProvider());
+        ToDataTableProviders.Add("UserChart", new UserChartDataTableProvider());
+
+        QueryLogic.Expressions.Register((WordModelEntity e) => e.WordTemplates(), () => typeof(WordTemplateEntity).NiceName());
+
+
+        new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.CreateWordReport)
+        {
+            ForReadonlyEntity = true,
+            CanExecute = et =>
+            {
+                if (et.Model != null && WordModelLogic.RequiresExtraParameters(et.Model))
+                    return WordTemplateMessage._01RequiresExtraParameters.NiceToString(typeof(WordModelEntity).NiceName(), et.Model);
+
+                return null;
+            },
+            Execute = (et, args) =>
+            {
+                throw new InvalidOperationException("UI-only operation");
+            }
+        }.Register();
+
+        WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
+           .ToFrozenDictionaryEx(et => et.ToLite()), new InvalidateWith(typeof(WordTemplateEntity)));
+
+
+
+        TemplatesByQueryName = sb.GlobalLazy(() =>
+        {
+            return WordTemplatesLazy.Value.Values.Where(a => a.Query != null).SelectCatch(w => KeyValuePair.Create(w.Query!.ToQueryName(), w)).GroupToDictionary().ToFrozenDictionaryEx();
+        }, new InvalidateWith(typeof(WordTemplateEntity)));
+
+        TemplatesByEntityType = sb.GlobalLazy(() =>
+        {
+            return (from pair in WordTemplatesLazy.Value.Values.Where(a => a.Query != null)
+                    .SelectCatch(wr => new { wr, imp = QueryLogic.Queries.GetEntityImplementations(wr.Query!.ToQueryName()) })
+                    where !pair.imp.IsByAll
+                    from t in pair.imp.Types
+                    select KeyValuePair.Create(t, pair.wr))
+                    .GroupToDictionary()
+                    .ToFrozenDictionaryEx();
+        }, new InvalidateWith(typeof(WordTemplateEntity)));
+
+        Schema.Current.Synchronizing += Schema_Synchronize_Tokens;
+
+        Validator.PropertyValidator((WordTemplateEntity e) => e.Template).StaticPropertyValidation += ValidateTemplate;
+        Validator.PropertyValidator((WordTemplateEntity e) => e.FileName).StaticPropertyValidation += ValidateFileName;
+
+        if (sb.WebServerBuilder != null)
+            WordServer.Start(sb.WebServerBuilder);
     }
 
     private static void WordTemplateLogic_Retrieved(WordTemplateEntity template, PostRetrievingContext ctx)
@@ -491,7 +491,7 @@ public static class WordTemplateLogic
                 return SqlPreCommand.Combine(Spacing.Simple,
                     Schema.Current.Table<WordTemplateEntity>().DeleteSqlSync(wt, wt => wt.Name == wt.Name),
                     Schema.Current.Table<FileEntity>().DeleteSqlSync(file, f => f.Hash == file.Hash)
-                )!;
+                )?.TransactionBlock($"WordTemplate Guid = {wt.Guid}")!;
             }
 
             SqlPreCommand? RegenerateTemplateAndFile()

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -74,7 +75,7 @@ public static class StringExtensions
 
     public static string[] Lines(this string str)
     {
-        return str.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        return str.Split(new[] { "\n", "\n" }, StringSplitOptions.None);
     }
 
     static InvalidOperationException NotFound(string str, char separator)
@@ -668,12 +669,21 @@ public static class StringExtensions
 
     public static string Indent(this string str, int numChars)
     {
-        return Indent(str, new string(' ', numChars));
+        if (numChars > 0)
+            return str.Indent(new string(' ', numChars)); // Call the string overload
+        else if (numChars < 0)
+            return Unindent(str, -numChars);
+        return str;
     }
 
     public static string Indent(this string str, int numChars, char indentChar)
     {
-        return Indent(str, new string(indentChar, numChars));
+        if (numChars > 0)
+            return Indent(str, new string(indentChar, numChars));
+        else if (numChars < 0)
+            return Unindent(str, -numChars, indentChar);
+
+        return str;
     }
 
     public static string Indent(this string str, string space)
@@ -697,6 +707,36 @@ public static class StringExtensions
             }
         }
 
+        return sb.ToString();
+    }
+
+
+    public static string Unindent(this string str, int removeSpaces, char indentChar = ' ')
+    {
+        var sb = new System.Text.StringBuilder(str.Length);
+        int i = 0;
+        bool atLineStart = true;
+        while (i < str.Length)
+        {
+            if (atLineStart)
+            {
+                int removed = 0;
+                while (removed < removeSpaces && i < str.Length && str[i] == indentChar)
+                {
+                    i++;
+                    removed++;
+                }
+                atLineStart = false;
+            }
+            if (i < str.Length)
+            {
+                char c = str[i];
+                sb.Append(c);
+                if (c == '\n')
+                    atLineStart = true;
+                i++;
+            }
+        }
         return sb.ToString();
     }
 

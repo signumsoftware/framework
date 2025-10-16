@@ -21,43 +21,43 @@ public static class PropertyAuthLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        AuthLogic.AssertStarted(sb);
+        PropertyRouteLogic.Start(sb);
+
+        sb.Include<RulePropertyEntity>()
+            .WithUniqueIndex(rt => new { rt.Resource, rt.Role })
+            .WithVirtualMList(rt => rt.ConditionRules, c => c.RuleProperty);
+
+        cache = new PropertyCache(sb);
+
+        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
         {
-            AuthLogic.AssertStarted(sb);
-            PropertyRouteLogic.Start(sb);
+            Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+            return null;
+        };
 
-            sb.Include<RulePropertyEntity>()
-                .WithUniqueIndex(rt => new { rt.Resource, rt.Role })
-                .WithVirtualMList(rt => rt.ConditionRules, c => c.RuleProperty);
-
-            cache = new PropertyCache(sb);
-
-            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
-            {
-                Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
-                return null;
-            };
-
-            PropertyRoute.SetIsAllowedCallback(pp => pp.CanBeAllowedFor(PropertyAllowed.Read));
+        PropertyRoute.SetIsAllowedCallback(pp => pp.CanBeAllowedFor(PropertyAllowed.Read));
 
 
-            TypeConditionsPerType = sb.GlobalLazy(() => new ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>(),
-                new InvalidateWith(typeof(RulePropertyEntity), typeof(RulePropertyConditionEntity)));
+        TypeConditionsPerType = sb.GlobalLazy(() => new ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>(),
+            new InvalidateWith(typeof(RulePropertyEntity), typeof(RulePropertyConditionEntity)));
 
-            AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
+        AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
 
-            sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RulePropertyConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleProperty.Entity.Resource.RootType, rtc => rtc.RuleProperty.Entity.Role);
-            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
-            sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RulePropertyEntity>().Where(a => a.Resource.Is(t)));
-            sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RulePropertyConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
+        sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RulePropertyConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleProperty.Entity.Resource.RootType, rtc => rtc.RuleProperty.Entity.Role);
+        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
+        sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RulePropertyEntity>().Where(a => a.Resource.Is(t)));
+        sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RulePropertyConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
 
-            QueryToken.IsValueHidden = QueryToken_IsValueHidden;
-            TypeAuthLogic.HasTypeConditionInProperties = RequiresTypeConditionForProperties;
+        QueryToken.IsValueHidden = QueryToken_IsValueHidden;
+        TypeAuthLogic.HasTypeConditionInProperties = RequiresTypeConditionForProperties;
 
 
-            AuthLogic.ExportToXml += cache.ExportXml;
-            AuthLogic.ImportFromXml += cache.ImportXml;
-        }
+        AuthLogic.ExportToXml += cache.ExportXml;
+        AuthLogic.ImportFromXml += cache.ImportXml;
     }
 
     static Expression? QueryToken_IsValueHidden(QueryToken expression, BuildExpressionContext context)

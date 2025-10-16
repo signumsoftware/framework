@@ -91,7 +91,7 @@ export function CheckEvalsStep(): React.JSX.Element {
   var ctx = new StyleContext(undefined, {});
   return (
     <div>
-      {EvalClient.Options.checkEvalFindOptions.map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={autoStart} />)}
+      {EvalClient.Options.checkEvalFindOptions.orderBy(fo => fo.queryName).map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={autoStart} />)}
       <button className="btn btn-success" onClick={handleOnClick}><FontAwesomeIcon icon="arrows-rotate" /> Refresh all</button>
     </div>
   );

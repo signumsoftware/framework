@@ -283,20 +283,24 @@ public static class PlainExcelGenerator
 
             return data.Descendants<Row>().Skip(1).Select(r =>
             {
-
                 var cells = r.Descendants<Cell>().ToList();
 
-                var max = cells.Max(c => c.GetExcelColumnIndex()!.Value);
-
-                var cellsArray = new string?[max];
-
-                foreach (var cell in cells)
+                if (cells.Any(a => a.CellReference == null))
                 {
-                    var index = cell.GetExcelColumnIndex()!.Value;
-                    cellsArray[index - 1] = document.GetCellValue(cell);
+                    var cellsArray = cells.Select(c => document.GetCellValue(c)).ToArray();
+                    return selector(cellsArray);
                 }
-
-                return selector(cellsArray);
+                else
+                {
+                    var max = cells.Max(c => c.GetExcelColumnIndex()!.Value);
+                    var cellsArray = new string?[max];
+                    foreach (var cell in cells)
+                    {
+                        var index = cell.GetExcelColumnIndex()!.Value;
+                        cellsArray[index - 1] = document.GetCellValue(cell);
+                    }
+                    return selector(cellsArray);
+                }
             }).ToList();
         }
     }

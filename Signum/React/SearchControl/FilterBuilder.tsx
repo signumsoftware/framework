@@ -733,7 +733,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps): React.ReactEleme
     var value = binding.getValue() ?? "Always";
     return (
       <Dropdown>
-        <Dropdown.Toggle variant="light" id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className="px-1"
+        <Dropdown.Toggle variant="tertiary" id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className="px-1"
           title={StyleContext.default.titleLabels ? title : undefined}>
           {PinnedFilterActive.niceToString(value)}
         </Dropdown.Toggle>
