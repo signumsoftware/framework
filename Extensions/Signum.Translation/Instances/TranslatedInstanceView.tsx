@@ -16,6 +16,7 @@ import { KeyNames } from '@framework/Components'
 import { useTitle } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 import { getToString } from '@framework/Signum.Entities'
+import { AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 
 export default function TranslationInstanceView(): React.JSX.Element {
   const params = useParams() as { type: string; culture?: string; };
@@ -87,7 +88,7 @@ export default function TranslationInstanceView(): React.JSX.Element {
         <h2><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
         <TranslateSearchBox setFilter={setFilter} filter={filter ?? ""} />
         {culture == null && <label style={{ float: 'right' }}>
-          <input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} /> Only neutral cultures
+          <input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} /> {TranslationMessage.OnlyNeutralCultures.niceToString()}
         </label>
         }
         <em> {TranslationMessage.PressSearchForResults.niceToString()}</em>
@@ -118,7 +119,7 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
       <input type="text" className="form-control"
         placeholder={TranslationMessage.Search.niceToString()} value={tmpFilter} onChange={e => setTmpFilter(e.currentTarget.value)} onKeyDown={handleKeyDown} />
       <button className="btn btn-tertiary" type="submit" title={TranslationMessage.Search.niceToString()}>
-        <FontAwesomeIcon icon="magnifying-glass" />
+        <FontAwesomeIcon aria-hidden="true" icon="magnifying-glass" />
       </button>
     </form>
   );
@@ -128,9 +129,9 @@ export function TranslatedInstances(p: { data: TranslatedInstanceClient.Translat
 
 
   return (
-    <table id="results" style={{ width: "100%", margin: "0px" }} className="st">
+    <div id="results">
       {p.data.instances.map(ins => <TranslatedInstance ins={ins} cultures={p.cultures} currentCulture={p.currentCulture} data={p.data} />)}
-    </table>
+    </div>
   );
 }
 
@@ -140,7 +141,11 @@ export function TranslatedInstance(p: { ins: TranslatedInstanceClient.Translated
   const forceUpdate = useForceUpdate();
 
   return (
-    <React.Fragment key={ins.lite.id}>
+    <AccessibleTable
+      caption={TranslationMessage.TranslationsOverview.niceToString()}
+      className="table st"
+      multiselectable={false}
+      key={ins.lite.id}>
       <thead>
         <tr>
           <th className="leftCell">{TranslationMessage.Instance.niceToString()}</th>
@@ -149,84 +154,81 @@ export function TranslatedInstance(p: { ins: TranslatedInstanceClient.Translated
       </thead>
       <tbody>
         {
-          Dic.getKeys(ins.master).map(entry => {
-            var propertyRoute = entry.tryBefore(";") ?? entry;
-            var propertyString = !entry.contains(";") ? entry : entry.before(";").replace("/", "[" + entry.after(";") + "].");
+          Dic.getKeys(ins.master).flatMap(entry => {
+            const propertyRoute = entry.tryBefore(";") ?? entry;
+            const propertyString = !entry.contains(";") ? entry : entry.before(";").replace("/", "[" + entry.after(";") + "].");
 
-            var trans = ins.translations[entry];
+            let trans = ins.translations[entry];
+            const isHtml = p.data.routes[propertyRoute] === "Html";
 
-            var isHtml = p.data.routes[propertyRoute] == "Html";
+            const rows: React.ReactElement[] = [
+              <tr key={`${entry}-header`}>
+                <th className="leftCell">{TranslationMessage.Property.niceToString()}</th>
+                <th>{propertyString}</th>
+              </tr>,
+              <tr key={`${entry}-master`}>
+                <td className="leftCell"><em>{p.data.masterCulture}</em></td>
+                <td className="monospaceCell">
+                  {isHtml ? <pre>{ins.master[entry]}</pre> : ins.master[entry]}
+                </td>
+              </tr>
+            ];
 
-            return (
-              <React.Fragment key={entry}>
-                <tr>
-                  <th className="leftCell">{TranslationMessage.Property.niceToString()}</th>
-                  <th>{propertyString}</th>
-                </tr>
-                <tr>
-                  <td className="leftCell"><em>{p.data.masterCulture}</em></td>
+            p.cultures.forEach(c => {
+              const pair = trans && trans[c];
+
+              function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+                if (!pair) {
+                  if (!trans)
+                    trans = ins.translations[entry] = {};
+
+                  trans[c] = {
+                    originalText: ins.master[entry],
+                    newText: ins.master[entry],
+                    translatedText: e.currentTarget.value
+                  };
+                } else {
+                  pair.translatedText = e.currentTarget.value;
+                }
+                forceUpdate();
+              }
+
+              if (pair && pair.originalText != null && pair.newText != null && pair.originalText !== pair.newText) {
+                rows.push(
+                  <tr key={`${entry}-${c}-diff`}>
+                    <td className="leftCell">{c} Diff</td>
+                    <td className="monospaceCell">
+                      <pre><DiffDocumentSimple first={pair.originalText} second={pair.newText} /></pre>
+                    </td>
+                  </tr>
+                );
+              }
+
+              rows.push(
+                <tr key={`${entry}-${c}`}>
+                  <td className="leftCell">{c}</td>
                   <td className="monospaceCell">
-                    {isHtml ?
-                      <pre>{ins.master[entry]}</pre> :
-                      ins.master[entry]
-                    }
+                    {p.currentCulture == null || p.currentCulture === c ? (
+                      <TextArea
+                        style={{ height: "24px", width: "90%" }}
+                        minHeight="24px"
+                        value={pair?.translatedText ?? ""}
+                        onChange={handleChange}
+                        onBlur={handleChange}
+                      />
+                    ) : (
+                      pair && (isHtml ? <pre>{pair.translatedText}</pre> : pair.translatedText)
+                    )}
                   </td>
                 </tr>
-                {p.cultures.map(c => {
+              );
+            });
 
-                  var pair = trans && trans[c];
-
-                  function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
-                    if (!pair) {
-                      if (!trans)
-                        trans = ins.translations[entry] = {};
-
-                      trans[c] = {
-                        originalText: ins.master[entry],
-                        newText: ins.master[entry],
-                        translatedText: e.currentTarget.value
-                      };
-                    } else {
-                      pair.translatedText = e.currentTarget.value;
-                    }
-                    forceUpdate();
-                  }
-
-                  return (
-                    <React.Fragment key={c}>
-                      {pair != null && pair.originalText != null && pair.newText != null &&
-                        pair.originalText != pair.newText && <tr>
-                        <td className="leftCell">{c} Diff</td>
-                          <td className="monospaceCell">
-                            <pre><DiffDocumentSimple first={pair.originalText} second={pair.newText} /></pre>
-                        </td>
-                      </tr>
-                      }
-                      <tr>
-                        <td className="leftCell">{c}</td>
-                        <td className="monospaceCell">
-                          {p.currentCulture == null || p.currentCulture == c ?
-                            <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={pair?.translatedText ?? ""}
-                              onChange={handleChange}
-                              onBlur={handleChange} /> :
-
-                            pair && (
-                              isHtml ?
-                                <pre>{pair.translatedText}</pre> :
-                                pair.translatedText)
-                          }
-                        </td>
-                      </tr>
-                    </React.Fragment>
-                  );
-                })}
-              </React.Fragment>
-            );
-
+            return rows;
           })
         }
       </tbody>
-    </React.Fragment>
-    
+
+    </AccessibleTable>
     );
 }

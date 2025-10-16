@@ -36,6 +36,9 @@ export namespace UserAssetMessage {
   export const SameSelectionForAllConflictsOf0: MessageKey = new MessageKey("UserAssetMessage", "SameSelectionForAllConflictsOf0");
   export const _0IsNotFilterable: MessageKey = new MessageKey("UserAssetMessage", "_0IsNotFilterable");
   export const TheFilterOperation0isNotCompatibleWith1: MessageKey = new MessageKey("UserAssetMessage", "TheFilterOperation0isNotCompatibleWith1");
+  export const UserAssetLines: MessageKey = new MessageKey("UserAssetMessage", "UserAssetLines");
+  export const Import: MessageKey = new MessageKey("UserAssetMessage", "Import");
+  export const AssumeIs: MessageKey = new MessageKey("UserAssetMessage", "AssumeIs");
 }
 
 export namespace UserAssetPermission {

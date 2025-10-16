@@ -34,8 +34,6 @@ public static class DashboardLogic
 
     public static void Start(SchemaBuilder sb, IFileTypeAlgorithm? cachedQueryAlgorithm)
     {
-
-
         if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
             return;
 

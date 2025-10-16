@@ -298,6 +298,11 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
                 var blockClient = client.GetBlockBlobClient(fp.Suffix);
 
                 var info = await blockClient.CommitBlockListAsync(chunks.Select(a => a.BlockId).ToList());
+
+                var properties = await blockClient.GetPropertiesAsync(cancellationToken: token);
+                var hashList = chunks.ToString(c => c.PartialHash, "\n");
+                fp.FileLength = properties.Value.ContentLength;
+                fp.Hash = CryptorEngine.CalculateMD5Hash(Encoding.UTF8.GetBytes(hashList));
             }
             catch (Exception ex)
             {
