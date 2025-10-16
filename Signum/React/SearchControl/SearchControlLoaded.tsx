@@ -570,7 +570,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
 
-        <div className={p.avoidTableFooterContainer ? undefined : "sf-table-footer-container  my-3 p-3 pb-1 bg-body rounded shadow-sm"}>
+        <div className={p.avoidTableFooterContainer ? undefined : "sf-table-footer-container my-3 p-3 pb-1 bg-body rounded shadow-sm"}>
           {p.showHeader == true && !p.largeToolbarButtons && this.renderToolBar()}
           {this.state.isMobile == true && this.state.viewMode == "Mobile" ? this.renderMobile() :
             <>
@@ -585,7 +585,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               <div ref={d => { this.containerDiv = d; }}
                 className="sf-scroll-table-container table-responsive"
                 style={{ maxHeight: this.props.maxResultsHeight }}>
-                <table className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
+                <table aria-multiselectable="true" role="grid" className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
+                  <caption>{this.createCaption()}</caption>
                   <thead>
                     {this.renderHeaders()}
                   </thead>
@@ -839,6 +840,16 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const gender = tis.first().gender;
 
     return SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
+  }
+
+  createCaption(): string {
+
+    const tis = this.entityColumnTypeInfos();
+
+    const types = tis.map(ti => ti.niceName).join(", ");
+    const gender = tis.first().gender;
+
+    return SearchMessage._0ResultTable.niceToString().forGenderAndNumber(gender).formatWith(types);
   }
 
   getSelectedEntities(): Lite<Entity>[] {
@@ -1518,15 +1529,16 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     return (
       <tr>
-        {this.props.allowSelection && <th className="sf-small-column sf-th-selection">
+        {this.props.allowSelection && <th  scope="col" className="sf-small-column sf-th-selection">
           {this.props.allowSelection == true &&
-            <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+            <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
           }
         </th>
         }
         {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
         {visibleColumns.map(({ column: co, cellFormatter, columnIndex: i }) =>
           <th key={i}
+            scope="col"
             draggable={true}
             className={classes(
               cellFormatter?.fillWidth == false ? "sf-small-column" : undefined,
@@ -1554,11 +1566,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 co.token?.fullKey == QueryTokenString.timeSeries.token ? <span>
                   <FontAwesomeIcon icon="clock" className="me-1"
                     color={"gray"}
+                    role="img"
+                    aria-label={SystemTimeMode.niceToString("TimeSeries")}
                     title={SystemTimeMode.niceToString("TimeSeries")} />
                 </span> :
                   this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" ? <span>
                     <FontAwesomeIcon icon="key" className="me-1"
                       color={rootKeys.contains(co) ? "gray" : "lightgray"}
+                      role="img"
+                      aria-label={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()}
                       title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()} />
                   </span> : null
               }
@@ -1915,6 +1931,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       var tr = (
         <tr
           key={i}
+          aria-describedby={`result_row_${i}_tooltip`}
+          aria-selected={selected}
           tabIndex={0}
           ref={this.rowRefs[i]}
           data-row-index={i}
@@ -1939,6 +1957,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                   className="sf-td-selection form-check-input"
                   checked={this.state.selectedRows!.contains(row)}
                   onChange={e => this.handleChecked(e, i)}
+                  aria-label={`Select row ${i + 1}`}
                   data-index={i} />}
             </td>
           }
@@ -1972,7 +1991,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return (
         <OverlayTrigger
           overlay={
-            <Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"} style={{ "--bs-tooltip-max-width": "100%" } as any}>
+            <Tooltip role="tooltip" placement="bottom" id={"result_row_" + i + "_tooltip"} style={{ "--bs-tooltip-max-width": "100%" } as any}>
               {message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
             </Tooltip>
           }

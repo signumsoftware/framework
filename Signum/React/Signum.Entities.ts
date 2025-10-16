@@ -746,6 +746,9 @@ export namespace SearchMessage {
   export const OperationsForSelectedElements: MessageKey = new MessageKey("SearchMessage", "OperationsForSelectedElements");
   export const PaginationMode: MessageKey = new MessageKey("SearchMessage", "PaginationMode");
   export const NumberOfElementsForPagination: MessageKey = new MessageKey("SearchMessage", "NumberOfElementsForPagination");
+  export const SelectAllResults: MessageKey = new MessageKey("SearchMessage", "SelectAllResults");
+  export const _0ResultTable: MessageKey = new MessageKey("SearchMessage", "_0ResultTable");
+  export const SelectRow0_: MessageKey = new MessageKey("SearchMessage", "SelectRow0_");
 }
 
 export namespace SelectorMessage {

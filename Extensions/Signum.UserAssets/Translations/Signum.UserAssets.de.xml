@@ -50,7 +50,9 @@
   </Type>
   <Type Name="UserAssetMessage">
     <Member Name="_0IsNotFilterable" Description="{0} ist nicht filterbar" />
+    <Member Name="AssumeIs" Description="Angenommen" />
     <Member Name="ExportToXml" Description="In xml exportieren" />
+    <Member Name="Import" Description="Importieren" />
     <Member Name="ImportPreview" Description="Importvorschau" />
     <Member Name="ImportUserAssets" Description="Benutzer-Assets importieren" />
     <Member Name="LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase" Description="Sieht so aus, als ob einige Entitäten in {0} in dieser Datenbank nicht existieren oder eine andere Bedeutung haben ..." />
@@ -59,6 +61,7 @@
     <Member Name="SelectTheXmlFileWithTheUserAssetsThatYouWantToImport" Description="Wählen Sie die XML-Datei mit den Benutzer-Assets, die Sie importieren möchten" />
     <Member Name="SucessfullyImported" Description="Erfolgreich importiert" />
     <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="Die Filteroperation {0} ist nicht kompatibel mit {1}" />
+    <Member Name="UserAssetLines" Description="Benutzer-Asset-Linien" />
   </Type>
   <Type Name="UserAssetPermission">
     <Member Name="UserAssetsToXML" Description="Benutzer-Assets in XML" />

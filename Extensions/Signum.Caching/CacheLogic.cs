@@ -13,6 +13,7 @@ using Signum.API;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using DocumentFormat.OpenXml.Office2013.Drawing.Chart;
+using Signum.Caching;
 
 namespace Signum.Cache;
 
@@ -60,6 +61,7 @@ public static class CacheLogic
             return;
 
         PermissionLogic.RegisterTypes(typeof(CachePermission));
+	   ReflectionServer.RegisterLike(typeof(CacheMessage), () => true);
 
         sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
 
