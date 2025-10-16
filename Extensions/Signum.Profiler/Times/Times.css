@@ -60,3 +60,31 @@
     color: var(--bs-secondary-text);
     font-weight: bold;
 }
+
+
+/*Inner Table*/
+.stat-table {
+    display: block;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    padding: 2px 0;
+}
+
+.stat-cell {
+    padding: 0 8px;
+}
+
+.stat-cell.label {
+    flex: 0 0 100px;
+    font-weight: 600;
+    text-align: end;
+}
+
+.stat-cell.leftBorder {
+    flex: 1 1 auto;
+    padding-left: 12px;
+    white-space: nowrap;
+}

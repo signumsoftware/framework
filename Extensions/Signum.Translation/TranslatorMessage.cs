@@ -90,6 +90,27 @@ public enum TranslationMessage
 
     [Description("Are you sure to continue auto translation all assemblies for {0} without revision?")]
     AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision,
+
+
+    TranslationStatus,
+    Singular,
+    Plural,
+    PluralDescription,
+    Description,
+    Gender,
+    Culture,
+
+    TranslationsOverview,
+    InstanceRouteConflictsOverview,
+    [Description("Translation for {0}")]
+    TranslationFor0_,
+    OnlyNeutralCultures,
+    [Description("from {0} using {1}")]
+    From0using1_,
+    [Description("Select a .xlsx file with the translations")]
+    SelectAxlsxFileWithTheTranslations,
+    [Description("No routes marked for translation. Consider using ")]
+    NoRoutesMarkedForTranslationConsiderUsing
 }
 
 public enum TranslationJavascriptMessage

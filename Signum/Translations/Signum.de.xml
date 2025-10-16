@@ -636,6 +636,7 @@
     <Member Name="_0FiltersCollapsed" Description="{0} filter zusammengeklappt" />
     <Member Name="_0GroupWith1_N" Description="{0} Gruppe[n] mit {1}" />
     <Member Name="_0Results_N" Description="{0} Ergebnis[se]." />
+    <Member Name="_0ResultTable" Description="{0} Ergebnistabelle" />
     <Member Name="_0Rows_N" Description="{0} Zeile[n]" />
     <Member Name="AddAndGroup" Description="AND-Gruppe hinzufügen" />
     <Member Name="AddColumn" Description="Spalte hinzufügen" />
@@ -716,6 +717,8 @@
     <Member Name="ReturnNewEntity" Description="Neue Entität zurückgeben?" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="Search" Description="Suche" />
+    <Member Name="SelectAllResults" Description="Alle Ergebnisse auswählen" />
+    <Member Name="SelectRow0_" Description="Zeile {0} auswählen" />
     <Member Name="ShowHiddenColumns" Description="Ausgeblendete Spalten anzeigen" />
     <Member Name="ShowMore" Description="Mehr anzeigen" />
     <Member Name="SimpleFilters" Description="Einfache Filter" />
