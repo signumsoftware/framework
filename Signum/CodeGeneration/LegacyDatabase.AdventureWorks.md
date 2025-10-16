@@ -9,15 +9,15 @@
 
 We're glad to announce that this two limitations have been solved, making it much easier to use Signum Framework with legacy applications.
 
-* Many new [field attributes](.../Signum.Entities/FieldAttributes.md) have been added to customize the translation from entities to database (like `TableNameAttribute`, `ColumnNameAttribute`, `BackReferenceColumnNameAttribute`, `TicksColumnAttribute`... ).
+* Many new [field attributes](../Signum/Entities/FieldAttributes.md) have been added to customize the translation from entities to database (like `TableNameAttribute`, `ColumnNameAttribute`, `BackReferenceColumnNameAttribute`, `TicksColumnAttribute`... ).
 
-* Using [PrimaryKey](.../Signum.Entities/PrimaryKey.md) and [PrimaryKeyAttribute](../Signum.Entities/FieldAttributes.md) we can change the type of the PrimaryKey to `int`, `long`, `Guid` or any other `IComparable`, even if the `Id` column is defined in the base `Entity` class.
+* Using [PrimaryKey](../Signum/Entities/PrimaryKey.md) and [PrimaryKeyAttribute](../Signum/Entities/FieldAttributes.md) we can change the type of the PrimaryKey to `int`, `long`, `Guid` or any other `IComparable`, even if the `Id` column is defined in the base `Entity` class.
 
 * The new [EntityCodeGenerator](EntityCodeGenerator.md) is able to generate entities from almost any legacy database using the previous attributes. 
 
-* Finally [LogicCodeGenerator](LogicCodeGenerator.md), [WebCodeGenerator](WebCodeGenerator.md) and [WindowsCodeGenerator](WindowsCodeGenerator.md) can be used to remove the redundant parts of creating Logic files and Web and Windows views and Client files. 
+* Finally [LogicCodeGenerator](LogicCodeGenerator.md), [ReactCodeGenerator](ReactCodeGenerator.md) can be used to remove the redundant parts of creating Logic files and React views and Client files. 
 
-This new features does not sacrifice the experience for greenfield projects, instead they have a positive impact, allowing you to auto-generate Logic, Windows and Web from the hand-made entities. 
+This new features does not sacrifice the experience for greenfield projects, instead they have a positive impact, allowing you to auto-generate Logic and React from the hand-made entities. 
 
 The end result is being able to create a full Signum Framework application in a mater of minutes (Ok, maybe some hours...) from the database. Of course you'll have to invest time writing the interesting business logic and polishing the user interface, but a lot of redundant code will be made for you automatically.  
 
