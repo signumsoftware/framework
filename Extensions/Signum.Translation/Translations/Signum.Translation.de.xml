@@ -32,11 +32,16 @@
     <Member Name="BackToSyncAssembly0" Description="Zurück zur Synchronisierung der Assembly {0}" />
     <Member Name="BackToTranslationStatus" Description="Zurück zum Übersetzungsstatus" />
     <Member Name="CodeTranslations" Description="Code-Übersetzungen" />
+    <Member Name="Culture" Description="Sprache" />
+    <Member Name="Description" Description="Beschreibung" />
     <Member Name="Download" Description="Herunterladen" />
     <Member Name="DownloadSync" Description="Sync herunterladen" />
     <Member Name="DownloadView" Description="Ansicht herunterladen" />
     <Member Name="Edit" Description="bearbeiten" />
+    <Member Name="From0using1_" Description="von {0} mit {1}" />
+    <Member Name="Gender" Description="Geschlecht" />
     <Member Name="Instance" Description="Instanz" />
+    <Member Name="InstanceRouteConflictsOverview" Description="Übersicht über Instanz-Routenkonflikte" />
     <Member Name="InstanceTranslations" Description="Instanz-Übersetzungen" />
     <Member Name="Member" Description="Mitglied" />
     <Member Name="Namespace" Description="Namespace" />
@@ -44,16 +49,25 @@
     <Member Name="NewTypes" Description="Neue Typen" />
     <Member Name="None" Description="keine" />
     <Member Name="NoResultsFound" Description="Keine Ergebnisse gefunden" />
+    <Member Name="NoRoutesMarkedForTranslationConsiderUsing" Description="Keine Routen für die Übersetzung markiert. Erwägen Sie die Verwendung von" />
     <Member Name="NothingToTranslate" Description="Nichts zu übersetzen" />
     <Member Name="NothingToTranslateIn0" Description="Nichts zu übersetzen in {0}" />
+    <Member Name="OnlyNeutralCultures" Description="Nur neutrale Sprachen" />
+    <Member Name="Plural" Description="Plural" />
+    <Member Name="PluralDescription" Description="Beschreibung im Plural" />
     <Member Name="PressSearchForResults" Description="Drücken Sie Suchen für Ergebnisse..." />
     <Member Name="Property" Description="Eigenschaft" />
     <Member Name="RepeatedCultures0" Description="Wiederholte Kulturen {0}" />
     <Member Name="Save" Description="Speichern" />
     <Member Name="Search" Description="Suchen" />
+    <Member Name="SelectAxlsxFileWithTheTranslations" Description="Wählen Sie eine .xlsx Datei mit den Übersetzungen aus" />
+    <Member Name="Singular" Description="Singular" />
     <Member Name="Sync" Description="sync" />
     <Member Name="Synchronize0In1" Description="Synchronisieren {0} in {1} " />
     <Member Name="ThisFieldIsTranslatable" Description="Dieses Feld ist übersetzbar" />
+    <Member Name="TranslationFor0_" Description="Übersetzung für {0}" />
+    <Member Name="TranslationsOverview" Description="Übersetzungensübersicht" />
+    <Member Name="TranslationStatus" Description="Übersetzungsstand" />
     <Member Name="Type" Description="Typ" />
     <Member Name="View" Description="view" />
     <Member Name="View0In1" Description="Anzeige {0} in {1}" />

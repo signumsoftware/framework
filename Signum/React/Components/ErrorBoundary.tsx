@@ -27,12 +27,27 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   render(): React.ReactElement {
     if (this.state.error || this.state.info) {
+
+      function normalizeStack(error: Error) {
+        if (!error.stack) return '';
+        const lines = error.stack.split('\n');
+        const first = lines[0];
+        const startsWithMessage = first.startsWith(`${error.name}: ${error.message}`);
+        return startsWithMessage ? lines.slice(1).join('\n') : error.stack;
+      }
+
       return (
         <div className="alert alert-danger" role="alert">
           <h2>Error in rendering</h2>
-          {this.state.error && <pre><code>{this.state.error.stack}</code></pre>}
+          <p>
+            <strong>{this.state.error?.name ?? "ERROR"}: </strong>
+            {this.state.error?.message}
+          </p>
 
-          <h4>Component Stack</h4>
+          <h4 className="mb-1">Stack Trace</h4>
+          {this.state.error && <pre><code>{normalizeStack(this.state.error)}</code></pre>}
+
+          <h4 className="mb-1">Component Stack</h4>
           {this.state.info && <pre><code>{this.state.info.componentStack}</code></pre>}
         </div>
       );

@@ -49,7 +49,7 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
 
   return (
     <div className={classes("small-user-profile-photo", p.className)}>
-      {url && !imageError ? <img src={url} style={{ maxWidth: `${size}px`, maxHeight: `${size}px` }} onError={(e) => setImageError(true)} title={getToString(p.user)} /> :
+      {url && !imageError ? <img src={url} style={{ maxWidth: `${size}px`, maxHeight: `${size}px` }} alt={getToString(p.user)} onError={(e) => setImageError(true)} title={getToString(p.user)} /> :
         p.fallback ?? <UserCircle user = {p.user } />}
     </div>
   );

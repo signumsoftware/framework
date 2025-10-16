@@ -13,6 +13,8 @@ import { toNumberFormat } from '@framework/Reflection';
 import { isDurationKey } from '@framework/Lines/TimeLine';
 import { Color } from '@framework/Basics/Color';
 import { getToString } from '@framework/Signum.Entities';
+import { TimeMessage } from '../Signum.Profiler';
+import { WCAGRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable';
 
 
 export default function TimesPage(): React.JSX.Element {
@@ -25,21 +27,21 @@ export default function TimesPage(): React.JSX.Element {
   }
 
   if (times == undefined)
-    return <h3>Times (loading...)</h3>;
+    return <h3>{TimeMessage.TimesLoading.niceToString()}</h3>;
 
   return (
     <div>
-      <h3 className="display-6">Times</h3>
+      <h3 className="display-6">{TimeMessage.Times.niceToString()}</h3>
       <div className="btn-toolbar">
-        <button onClick={() => reloadTimes()} className="btn btn-tertiary">Reload</button>
-        <button onClick={handleClear} className="btn btn-warning">Clear</button>
+        <button onClick={() => reloadTimes()} className="btn btn-tertiary">{TimeMessage.Reload.niceToString()}</button>
+        <button onClick={handleClear} className="btn btn-warning">{TimeMessage.Clear.niceToString()}</button>
       </div>
       <br />
       <Tabs id="timeMachineTabs">
-        <Tab eventKey="bars" title="Bars">
+        <Tab eventKey="bars" title={TimeMessage.Bars.niceToString()}>
           <TimesBars times={times} />
         </Tab>
-        <Tab eventKey="table" title="Table">
+        <Tab eventKey="table" title={TimeMessage.Table.niceToString()}>
           <TimesTable times={times} />
         </Tab>
       </Tabs>
@@ -85,8 +87,35 @@ function TimesBars({ times }: { times: ProfilerClient.TimeTrackerEntry[] }) {
     );
   }
 
+  function drawLineRowDiv(label: string, time: ProfilerClient.TimeTrackerTime, className: string) {
+    if (!time) return null;
+
+    return (
+      <div className="stat-row" key={label}>
+        <div className="stat-cell label">{label}</div>
+        <div
+          className="stat-cell leftBorder"
+          title={`${time.date} (${DateTime.fromISO(time.date).toRelative()})
+${time.url}
+${getToString(time.user)}`}
+        >
+          <span
+            className={className}
+            style={{ width: (time.duration * ratio) + "px", marginTop: "8px" }}
+          ></span>
+          &nbsp;{formatMilis(time.duration)} ({DateTime.fromISO(time.date).toRelative()})
+        </div>
+      </div>
+    );
+  }
+
+
+
   return (
-    <table className="table">
+    <AccessibleTable
+      caption={TimeMessage.TimesOverview.niceToString()}
+      className="table"
+      multiselectable={false}>
       <tbody>
         {
           times.orderByDescending(a => a.totalDuration).map((pair, i) =>
@@ -97,30 +126,32 @@ function TimesBars({ times }: { times: ProfilerClient.TimeTrackerEntry[] }) {
                   {pair.identifier.tryAfter(' ') != undefined && <span className="sf-tt-entityname"> {pair.identifier.after(' ')} </span>}
                 </div>
                 <div>
-                  <span className="numTimes">Executed {pair.count} {pair.count == 1 ? "time" : "times"} Total {formatMilis(pair.totalDuration)}</span>
+                  <span className="numTimes">{TimeMessage.Executed.niceToString()} {pair.count} {pair.count == 1 ? "time" : "times"} {TimeMessage.Total.niceToString()} {formatMilis(pair.totalDuration)}</span>
                 </div>
                 <div className="sum" style={{ width: (100 * pair.totalDuration / maxTotal) + "%"}}></div>
               </td>
               <td>
-                <table>
-                  {drawLineRow("Last", pair.last, "last")}
-                  {drawLineRow("Max", pair.max, "max")}
-                  {pair.max2 && drawLineRow("Max 2", pair.max2, "max")}
-                  {pair.max3 &&drawLineRow("Max 3", pair.max3, "max")}
-                  <tr>
-                    <td>Average</td>
-                    <td className="leftBorder">
-                      <span className="med" style={{ width: (pair.averageDuration * ratio) + "px", marginTop: "8px"  }}></span> {formatMilis(pair.averageDuration)}
-                  </td>
-                  </tr>
-                  {drawLineRow("Min", pair.min, "min")}
+                <div className="stat-table" role="group" aria-label={TimeMessage.TimeStatistics.niceToString()}>
+                  {drawLineRowDiv("Last", pair.last, "last")}
+                  {drawLineRowDiv("Max", pair.max, "max")}
+                  {pair.max2 && drawLineRowDiv("Max 2", pair.max2, "max")}
+                  {pair.max3 && drawLineRowDiv("Max 3", pair.max3, "max")}
 
-                </table>
+                  <div className="stat-row">
+                    <div className="stat-cell label">{TimeMessage.Average.niceToString()}</div>
+                    <div className="stat-cell leftBorder">
+                      <span className="med" style={{ width: (pair.averageDuration * ratio) + "px", marginTop: "8px" }}></span>
+                      &nbsp;{formatMilis(pair.averageDuration)}
+                    </div>
+                  </div>
+
+                  {drawLineRowDiv("Min", pair.min, "min")}
+                </div>
               </td>
             </tr>
           )}
       </tbody>
-    </table>
+    </AccessibleTable>
   );
 }
 
@@ -142,57 +173,77 @@ function TimesTable({ times }: { times: ProfilerClient.TimeTrackerEntry[] }) {
 
   var nf = toNumberFormat("C0");
 
-  function getTimeCell(time?: ProfilerClient.TimeTrackerTime) {
-    if (time == null)
-      return <td></td>;
+  function GetTimeRow(p: { pair: ProfilerClient.TimeTrackerEntry, i: number }) {
+    const pair = p.pair;
 
     return (
-      <td style={{ textAlign: "right", background: getColorMax(time.duration / max.duration) }}
-        title={`${time.date} (${DateTime.fromISO(time.date).toRelative()})
-      ${time.url}
-      ${getToString(time.user)}
-      `}
-      >{nf.format(time.duration)} ms</td>
+      <WCAGRow style={{ background: "#FFFFFF" }} key={p.i}>
+        <td>
+          <span className="processName"> {pair.identifier.tryBefore(' ') ?? pair.identifier}</span>
+        </td>
+        <td>
+          {pair.identifier.tryAfter(' ') && <span className="sf-tt-entityname">{pair.identifier.tryAfter(' ')}</span>}
+        </td>
+        <td style={{ textAlign: "end", background: getColorCount(pair.count / max.count) }}>{pair.count}</td>
+        {pair.min == null ? <td>{TimeMessage.NoDuration.niceToString()}</td> : <td style={{ textAlign: "right", background: getColorMax(pair.min.duration / max.duration) }}
+          title={`${pair.min.date} (${DateTime.fromISO(pair.min.date).toRelative()})
+          ${pair.min.url}
+          ${getToString(pair.min.user)}`}>{nf.format(pair.min.duration)} ms
+        </td>}
+        <td style={{ textAlign: "end", background: getColorMax(pair.averageDuration / max.duration) }}>{pair.count}</td>
+        {pair.max3 == null ? <td>{TimeMessage.NoDuration.niceToString()}</td> : <td style={{ textAlign: "right", background: getColorMax(pair.max3.duration / max.duration) }}
+          title={`${pair.max3.date} (${DateTime.fromISO(pair.max3.date).toRelative()})
+          ${pair.max3.url}
+          ${getToString(pair.max3.user)}`}>{nf.format(pair.max3.duration)} ms
+        </td>}
+
+        {pair.max2 == null ? <td>{TimeMessage.NoDuration.niceToString()}</td> : <td style={{ textAlign: "right", background: getColorMax(pair.max2.duration / max.duration) }}
+          title={`${pair.max2.date} (${DateTime.fromISO(pair.max2.date).toRelative()})
+          ${pair.max2.url}
+          ${getToString(pair.max2.user)}`}>{nf.format(pair.max2.duration)} ms
+        </td>}
+
+        {pair.max == null ? <td>{TimeMessage.NoDuration.niceToString()}</td> : <td style={{ textAlign: "right", background: getColorMax(pair.max.duration / max.duration) }}
+          title={`${pair.max.date} (${DateTime.fromISO(pair.max.date).toRelative()})
+          ${pair.max.url}
+          ${getToString(pair.max.user)}`}>{nf.format(pair.max.duration)} ms
+        </td>}
+
+        {pair.last == null ? <td>{TimeMessage.NoDuration.niceToString()}</td> : <td style={{ textAlign: "right", background: getColorMax(pair.last.duration / max.duration) }}
+          title={`${pair.last.date} (${DateTime.fromISO(pair.last.date).toRelative()})
+          ${pair.last.url}
+          ${getToString(pair.last.user)}`}>{nf.format(pair.last.duration)} ms
+        </td>}
+        <td style={{ textAlign: "end", background: getColorTotal(pair.totalDuration / max.totalDuration) }}>{nf.format(pair.totalDuration)} ms</td>
+      </WCAGRow>
     );
   }
 
+
   return (
-    <table className="table table-nonfluid">
+    <AccessibleTable
+      caption={TimeMessage.TimesOverview.niceToString()}
+      className="table table-nonfluid"
+      mapCustomComponents={new Map([[GetTimeRow, "tr"]])}
+      multiselectable={false}>
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Entity</th>
-          <th>Count</th>
-          <th>Min</th>
-          <th>Average</th>
-          <th>Max 3</th>
-          <th>Max 2</th>
-          <th>Max</th>
-          <th>Last</th>
-          <th>Total</th>
+          <th>{TimeMessage.Name.niceToString()}</th>
+          <th>{TimeMessage.Entity.niceToString()}</th>
+          <th>{TimeMessage.Count.niceToString()}</th>
+          <th>{TimeMessage.Min.niceToString()}</th>
+          <th>{TimeMessage.Average.niceToString()}</th>
+          <th>{`${TimeMessage.Max.niceToString()} 3`}</th>
+          <th>{`${TimeMessage.Max.niceToString()} 2`}</th>
+          <th>{TimeMessage.Max.niceToString()}</th>
+          <th>{TimeMessage.Last.niceToString()}</th>
+          <th>{TimeMessage.Total.niceToString()}</th>
         </tr>
       </thead>
       <tbody>
-        {times.orderByDescending(a => a.totalDuration).map((pair, i) =>
-          <tr style={{ background: "#FFFFFF" }} key={i}>
-            <td>
-              <span className="processName"> {pair.identifier.tryBefore(' ') ?? pair.identifier}</span>
-            </td>
-            <td>
-              {pair.identifier.tryAfter(' ') && <span className="sf-tt-entityname">{pair.identifier.tryAfter(' ')}</span>}
-            </td>
-            <td style={{ textAlign: "end", background: getColorCount(pair.count / max.count) }}>{pair.count}</td>
-            {getTimeCell(pair.min)}
-            <td style={{ textAlign: "end", background: getColorMax(pair.averageDuration / max.duration) }}>{pair.count}</td>
-            {getTimeCell(pair.max3)}
-            {getTimeCell(pair.max2)}
-            {getTimeCell(pair.max)}
-            {getTimeCell(pair.last)}
-            <td style={{ textAlign: "end", background: getColorTotal(pair.totalDuration / max.totalDuration) }}>{nf.format(pair.totalDuration)} ms</td>
-          </tr>
-        )}
+        {times.orderByDescending(a => a.totalDuration).map((pair, i) => <GetTimeRow pair={pair} i={i} />)}
       </tbody>
-    </table>
+    </AccessibleTable>
   );
 }
 
