@@ -35,14 +35,14 @@ You can also use `[AutoExpressionField]` on static extension methods to encapsul
 public static class CustomerLogic
 {
     [AutoExpressionField]
-    public static IQueryable<OrderEntity> RecentOrders(this CustomerEntity c) =>
+    public static IQueryable<OrderEntity> Orders(this CustomerEntity c) =>
         As.Expression(() => Database.Query<OrderEntity>()
-            .Where(o => o.Customer.Is(c) && o.OrderDate > DateTime.Now.AddMonths(-1)));
+            .Where(o => o.Customer.Is(c));
 }
 ```
 * TIP: Use `expressionMethod` or `expressionMethodQuery` snippet to save some keystrokes.
 
-- You can now use `customer.RecentOrders()` in LINQ queries, and it will be translated to SQL, or in-memory when working with loaded entities.
+- You can now use  `customer.Orders()` inside your LINQ queries or directly from a loaded entity.
 - If you want to expose this method in the UI (e.g., SearchControl, charts, templates), you need to register it as described below.
 
 - 
@@ -50,14 +50,55 @@ public static class CustomerLogic
 
  While properties in entities are automatically discovered, methods in static classes need to be registered to be available in the UI (e.g., SearchControl, charts, templates). To do this, register the expression using:
 
-```csharp
-QueryLogic.Expressions.Register((ProductEntity e) => e.RecentOrders());
+
+ ```csharp
+  sb.Include<CustomerEntity>()
+    .WithExpression(c => c.Orders());
+ ```
+
+ This will add a new option in the `SearchControl` for `CustomerEntity` for the method to be used as a query token in the UI.
+
+ Since `Orders` will be used in the UI it needs to be translated. In this simple case it uses the `NicePluralName` of the target type (e.g. if the UI is in spanish will be "Pedidos"). 
+
+ Other cases might require a custom name, for eaxmple: 
+
+ ```csharp
+public static class CustomerLogic
+{
+    [AutoExpressionField]
+    public static IQueryable<OrderEntity> RecentOrders(this CustomerEntity c) =>
+        As.Expression(() => c.Orders().Where(o => o.OrderDate > DateTime.Now.AddMonths(-1)));
+}
 ```
 
-This enables the property or method to be used as a query token in the UI and other dynamic query scenarios.
+Could be registered doing:  
 
-More information on registering expressions can be found in the [Query Expressions documentation](./DynamicQueries.md). 
----
+```csharp
+  sb.Include<CustomerEntity>()
+    .WithExpression(c => c.RecentOrders(), OrdersMessage.RecentOrders);
+```
+
+
+Internally, WithExpression uses `QueryLogic.Expressions.Register` to register the expression.
+
+### Overloads
+
+The main overloads for registering expressions are:
+
+```csharp
+public ExtensionInfo Register<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string>? niceName = null)
+public ExtensionInfo Register<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Enum niceName)
+public ExtensionInfo Register<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key, bool replace = false)
+```
+
+- The first overload is the most common and lets you optionally specify a display name.
+- The second overload allows using an enum for the display name.
+- The third overload gives you control over the key and replacement behavior.
+
+Typically, you only need the first overload for most scenarios.
+
+You can further customize the metadata of the registered expression using the returned `ExtensionInfo` object.
+
 
 ## Advanced: ExpressionField Attribute
 Internally, `[AutoExpressionField]` pattern is translated by  `Signum.MSBuildTask` to using the `[ExpressionField]` attribute and a generated static expression field.
@@ -94,3 +135,4 @@ public class OrderEntity : Entity
     public string CustomerName => this.Customer.RetrieveFromCache().Name; // Used in-memory, 
 }
 ```
+

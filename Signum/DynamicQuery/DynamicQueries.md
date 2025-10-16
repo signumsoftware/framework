@@ -210,44 +210,6 @@ QueryLogic.Queries.Register(typeof(CustomerEntity), () => DynamicQuery.Manual((Q
 
 Manual queries do not inherit metadata automatically. All metadata must be set using `ColumnPropertyRoutes`, which provides the necessary information for display names, formats, units, and authorization.
 
-## Registering Expressions
-
-Suppose you want to expose a reusable query fragment for related territories:
-
-```csharp
-public static class RegionLogic
-{
-    [AutoExpressionField]
-    public static IQueryable<TerritoryEntity> Territories(this RegionEntity r) =>
-        As.Expression(() => Database.Query<TerritoryEntity>().Where(a => a.Region.Is(r)));
-}
-```
-
-Now, you can use `region.Territories()` in LINQ queries, and it will be translated to SQL. To make this method available in the UI (e.g., SearchControl), register it with:
-
-```csharp
-QueryLogic.Expressions.Register((RegionEntity r) => r.Territories());
-```
-
-`QueryLogic.Expressions.Register` makes your expression method or property available as a query token in the `SearchControl` for filters, columns, or extensions (charts, word/email templates, etc.).
-
-### Overloads
-
-The main overloads for registering expressions are:
-
-```csharp
-public ExtensionInfo Register<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string>? niceName = null)
-public ExtensionInfo Register<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Enum niceName)
-public ExtensionInfo Register<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key, bool replace = false)
-```
-
-- The first overload is the most common and lets you optionally specify a display name.
-- The second overload allows using an enum for the display name.
-- The third overload gives you control over the key and replacement behavior.
-
-Typically, you only need the first overload for most scenarios.
-
-You can further customize the metadata of the registered expression using the returned `ExtensionInfo` object.
 
 ## Executing Queries (Advanced)
 
