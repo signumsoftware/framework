@@ -212,56 +212,42 @@ Manual queries do not inherit metadata automatically. All metadata must be set u
 
 ## Registering Expressions
 
-Another main use of `QueryLogic` is to call `Expressions.Register`, which makes your `expressionMethod` available as a query token in the `SearchControl` for filters, columns, or extensions (charts, word/email templates, etc.).
-
-Overloads:
+Suppose you want to expose a reusable query fragment for related territories:
 
 ```csharp
-public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty)
-public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName)
-public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key)
-public ExtensionInfo RegisterExpression(ExtensionInfo extension)
-
-public class ExtensionInfo
+public static class RegionLogic
 {
-   public ExtensionInfo(Type sourceType, LambdaExpression lambda, Type type, string key, Func<string> niceName)
+    [AutoExpressionField]
+    public static IQueryable<TerritoryEntity> Territories(this RegionEntity r) =>
+        As.Expression(() => Database.Query<TerritoryEntity>().Where(a => a.Region.Is(r)));
 }
 ```
 
-Typically, you only need the first two overloads.
-
-Suppose you have an `expressionMethod`:
+Now, you can use `region.Territories()` in LINQ queries, and it will be translated to SQL. To make this method available in the UI (e.g., SearchControl), register it with:
 
 ```csharp
-static Expression<Func<RegionEntity, IQueryable<TerritoryEntity>>> TerritoriesExpression =
-    r => Database.Query<TerritoryEntity>().Where(a => a.Region.Is(r));
-public static IQueryable<TerritoryEntity> Territories(this RegionEntity r)
-{
-    return TerritoriesExpression.Evaluate(r);
-}
+QueryLogic.Expressions.Register((RegionEntity r) => r.Territories());
 ```
 
-This allows you to write:
+`QueryLogic.Expressions.Register` makes your expression method or property available as a query token in the `SearchControl` for filters, columns, or extensions (charts, word/email templates, etc.).
+
+### Overloads
+
+The main overloads for registering expressions are:
 
 ```csharp
-Database.Query<RegionEntity>().Where(r => !r.Territories().Any()).UnsafeDelete();
+public ExtensionInfo Register<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string>? niceName = null)
+public ExtensionInfo Register<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Enum niceName)
+public ExtensionInfo Register<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key, bool replace = false)
 ```
 
-But without `QueryLogic.Expression.Register`, the user cannot use `Territories` in the `SearchControl`. To register it:
+- The first overload is the most common and lets you optionally specify a display name.
+- The second overload allows using an enum for the display name.
+- The third overload gives you control over the key and replacement behavior.
 
-```csharp
-// In TerritoryLogic.Start
-QueryLogic.Expression.Register((RegionEntity r) => r.Territories());
-```
+Typically, you only need the first overload for most scenarios.
 
-This registers a new expression with key `"Territories"` on `RegionEntity`, returning an `IQueryable<TerritoryEntity>`.
-
-By default, the `NiceName` will be `"Territories"`, regardless of user `CultureInfo`. To localize it, reuse the `NicePluralName` of `TerritoryEntity`:
-
-```csharp
-// In TerritoryLogic.Start
-QueryLogic.Expression.Register((RegionEntity r) => r.Territories(), () => typeof(TerritoryEntity).NiceName());
-```
+You can further customize the metadata of the registered expression using the returned `ExtensionInfo` object.
 
 ## Executing Queries (Advanced)
 
@@ -278,13 +264,12 @@ public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
 - `QueryDescription`: Returns all registered metadata for a query, filtered and localized for the user.
 - `ResultTable`: Represents a result for the `SearchControl`, similar to a `DataTable` but can contain complex types like `Lite<T>`.
 - `QueryRequest`: Contains the `Columns`, `Filters`, `Orders`, and `Pagination` requested by the `SearchControl`.
-- `QueryGroupRequest`: Contains the `Columns`, `Filters`, and `Orders` for controls with `GroupBy` capabilities (e.g., charting).
 
 Many of these objects use the concept of a `QueryToken`.
 
 ## QueryToken (Advanced)
 
-A `QueryToken` is a chain of identifiers used as filters or columns in a query. When the user explores tables using DropDownList in the `SearchControl`, they are building a `QueryToken`.
+A `QueryToken` is a chain of identifiers used as filters or columns in a query. When the user explores tables using a sequence of DropDownList in the `SearchControl`, they are building a `QueryToken`.
 
 There are several types of `QueryToken`, such as `ColumnToken`, `EntityPropertyToken`, `CountToken`, and `AggregateToken`, all with a `Parent` property forming a chain.
 
