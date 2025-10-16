@@ -15,43 +15,78 @@ import './ChangeLog.css'
 
 
 export default function ChangeLogViewer(p: { extraInformation?: string }): React.ReactElement {
-  var hasUser = AppContext.currentUser != null;
+  const hasUser = AppContext.currentUser != null;
 
-  var [lastDateString, reloadLastDate] = useAPIWithReload(() => !hasUser ? null : ChangeLogClient.API.getLastDate(), [hasUser], { avoidReset: true });
-  var logs = useAPI(() => !hasUser ? null : ChangeLogClient.getChangeLogs(), [hasUser]);
+  const [lastDateString, reloadLastDate] = useAPIWithReload(
+    () => (!hasUser ? null : ChangeLogClient.API.getLastDate()),
+    [hasUser],
+    { avoidReset: true }
+  );
+
+  const logs = useAPI(() => (!hasUser ? null : ChangeLogClient.getChangeLogs()), [hasUser]);
+
+  const triggerRef = React.useRef<HTMLAnchorElement | null>(null);
 
   if (!hasUser || logs == null)
     return <VersionInfo extraInformation={p.extraInformation} />;
 
-  var lastDate = lastDateString ? DateTime.fromISO(lastDateString) : null;
+  const lastDate = lastDateString ? DateTime.fromISO(lastDateString) : null;
 
-  var countLogs = logs.filter(l => !lastDate ? true : DateTime.fromISO(l.deployDate) > lastDate).length;
+  const countLogs = logs.filter(l => !lastDate ? true : DateTime.fromISO(l.deployDate) > lastDate).length;
+
+  async function handleOpenChangeLogs(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+
+    await MessageModal.show({
+      title: ChangeLogMessage.ChangeLogs.niceToString(),
+      size: 'md',
+      message: <ShowLogs logs={logs!} lastDate={lastDate} />,
+      buttons: "ok",
+      autoFocusonTitle: true,
+    });
+
+
+    if (triggerRef.current) {
+      triggerRef.current.focus();
+    }
+
+    await ChangeLogClient.API.updateLastDate();
+    reloadLastDate();
+  }
 
   return (
     <OverlayTrigger
-      placement={"bottom-end"}
+      placement="bottom-end"
       overlay={
-        <Tooltip id={`tooltip-buildId`}>
+        <Tooltip id="tooltip-buildId">
           <VersionInfoTooltip extraInformation={p.extraInformation} />
         </Tooltip>
-      }>
-      <a href="#" className="sf-pointer nav-link" onClick={async e => {
-        e.preventDefault();
-        await MessageModal.show({
-          title: "Change logs",
-          size: 'md',
-          message: <ShowLogs logs={logs!} lastDate={lastDate} />,
-          buttons: "ok"
-        });
-
-        await ChangeLogClient.API.updateLastDate();
-        reloadLastDate();
-      }}>
-        <FontAwesomeIcon icon="circle-info" />
+      }
+    >
+      <a
+        href="#"
+        ref={triggerRef}
+        className="sf-pointer nav-link"
+        role="button"
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        onClick={handleOpenChangeLogs}
+        onKeyDown={e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleOpenChangeLogs(e as any);
+          }
+        }}
+      >
+        <FontAwesomeIcon icon="circle-info" aria-hidden="true" />
         <span className="sr-only">{ConnectionMessage.VersionInfo.niceToString()}</span>
-        {countLogs > 0 && <span className="badge text-bg-info badge-pill sf-change-log-badge">{countLogs}</span>}
+        {countLogs > 0 && (
+          <span className="badge text-bg-info badge-pill sf-change-log-badge">
+            {countLogs}
+          </span>
+        )}
       </a>
-  </OverlayTrigger>
+    </OverlayTrigger>
   );
 }
 
@@ -59,22 +94,78 @@ function ShowLogs(p: { logs: ChangeLogClient.ChangeItem[], lastDate: DateTime | 
 
   const [seeMore, setSeeMore] = React.useState(2);
 
-  var logsByDate = p.logs.orderByDescending(l => l.deployDate).groupBy(l => l.deployDate);
-  var filterdLogs = logsByDate.slice(0, seeMore);
+  const logsByDate = p.logs.orderByDescending(l => l.deployDate).groupBy(l => l.deployDate);
+  const filterdLogs = logsByDate.slice(0, seeMore);
+
+  const firstNewItemRef = React.useRef<HTMLLIElement | null>(null);
+
+  const handleSeeMore = React.useCallback(() => {
+    setSeeMore(prev => prev + 2);
+  }, []);
 
   return (
-    <div>
-      {filterdLogs.map(gr =>
-        <div key={gr.key}>
-          {p.lastDate == null || p.lastDate < DateTime.fromISO(gr.key) ? <strong title={"Deployed on " + gr.key}>{gr.key}</strong> : <span>{gr.key}</span>}
+    <div role="region" aria-label={ChangeLogMessage.ChangeLogEntries.niceToString()}>
+      {filterdLogs.map((gr, groupIndex) => {
+        const deployedDate = DateTime.fromISO(gr.key);
+        const isNew = p.lastDate == null || p.lastDate < deployedDate;
 
-          <ul className="mb-2 p-0" key={gr.key}>
-            {gr.elements.flatMap(e => Array.isArray(e.changeLog) ? e.changeLog.map(cl => ({ module: e.module, implDate: e.implDate, changeLog: cl, })) : [{ module: e.module, implDate: e.implDate, changeLog: e.changeLog }])
-              .map((a, i) => <li className="ms-5 pb-1" key={i}><strong title={"Implemented on " + a.implDate}><samp>{a.module}{" > "}</samp></strong>{a.changeLog}</li>)}
-          </ul>
-        </div>
+        return (
+          <section key={gr.key} aria-labelledby={`deployed-${gr.key}`}>
+            <h3 id={`deployed-${gr.key}`}>
+              <time dateTime={gr.key} title={ChangeLogMessage.DeployedOn0.niceToString(gr.key)}>
+                {isNew ? <strong>{gr.key}</strong> : gr.key}
+              </time>
+            </h3>
+
+            <ul className="mb-2 p-0" role="list">
+              {gr.elements.flatMap(e =>
+                Array.isArray(e.changeLog)
+                  ? e.changeLog.map(cl => ({
+                    module: e.module,
+                    implDate: e.implDate,
+                    changeLog: cl,
+                  }))
+                  : [{ module: e.module, implDate: e.implDate, changeLog: e.changeLog }]
+              ).map((a, i) => {
+                const isFirstNew = groupIndex === seeMore - 2 && i === 0; //first entry when see more is clicked
+
+                return (
+                  <li
+                    ref={isFirstNew ? firstNewItemRef : null}
+                    className="ms-5 pb-1"
+                    key={i}
+                    tabIndex={0}
+                    role="article"
+                    aria-label={ChangeLogMessage._0ImplementedOn1WithFollowingChanges2.niceToString(a.module, a.implDate, a.changeLog)}>
+                    <strong>
+                      <samp>{a.module} &gt; </samp>
+                    </strong>
+                    <span>{a.changeLog}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        );
+      })}
+
+      {logsByDate && logsByDate.length > seeMore && (
+        <button
+          type="button"
+          style={{
+            display: "block",
+            background: "none",
+            border: "none",
+            color: "#007bff",
+            textDecoration: "underline",
+            cursor: "pointer"
+          }}
+          onClick={handleSeeMore}
+          aria-label={ChangeLogMessage.SeeMoreChangeLogEntries.niceToString()}
+        >
+          {ChangeLogMessage.SeeMore.niceToString()}
+        </button>
       )}
-      {logsByDate && logsByDate?.length > seeMore && <a href="#" style={{ display: "block" }} onClick={() => setSeeMore(a => a + 2)}>{ChangeLogMessage.SeeMore.niceToString()}</a>}
     </div>
   );
 }

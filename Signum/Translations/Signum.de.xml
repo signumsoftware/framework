@@ -18,7 +18,12 @@
     <Member Name="Today" Description="Heute" />
   </Type>
   <Type Name="ChangeLogMessage">
+    <Member Name="_0ImplementedOn1WithFollowingChanges2" Description="{0}, implementiert am {1} mit folgenden Änderungen: {2}" />
+    <Member Name="ChangeLogEntries" Description="Änderungsprotokolleinträge" />
+    <Member Name="ChangeLogs" Description="Änderungsprotokolle" />
+    <Member Name="DeployedOn0" Description="Bereitgestellt am {0}" />
     <Member Name="SeeMore" Description="mehr sehen ..." />
+    <Member Name="SeeMoreChangeLogEntries" Description="Weitere Einträge im Änderungsprotokoll anzeigen" />
     <Member Name="ThereIsNotAnyNewChangesFrom0" Description="Es gibt keine neuen Änderungen von {0}" />
   </Type>
   <Type Name="ChangeLogViewLogEntity" Description="Change-Log Ansichtsprotokoll" PluralDescription="Change-Log Ansichtsprotokolle" Gender="n">

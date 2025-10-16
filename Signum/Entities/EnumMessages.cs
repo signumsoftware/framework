@@ -707,6 +707,7 @@ public enum ContainerToggleMessage
     Expand,
 }
 
+[AllowUnauthenticated]
 public enum LayoutMessage
 {
     JumpToMainContent,
