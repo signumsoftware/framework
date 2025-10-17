@@ -118,7 +118,8 @@ export function WCAGRow({ focusCells = true, focusHeader = false, sectionType = 
     const renderedChildren = React.Children.toArray(td.props.children)
       .filter(child => child !== "" && child !== null && child !== undefined);
     const isEmptyCell = renderedChildren.length === 0; // needed for condinional rendering
-
+    console.log(isEmptyCell);
+    console.log(renderedChildren);
     if (type == "th" && isEmptyCell)
       handleStructureError("tbody > th should always contain content", td);
 

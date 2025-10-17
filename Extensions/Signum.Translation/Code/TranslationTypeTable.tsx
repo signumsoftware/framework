@@ -236,35 +236,41 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
 
   const pronoms = p.result.cultures[loc.culture].pronoms ?? [];
 
+  function safeCell(content: React.ReactNode) {
+    if (content === null || content === undefined || content === false)
+      return <span aria-hidden="true">&nbsp;</span>;
+    return content;
+  }
+
   return (
     <WCAGRow>
       <th className="leftCell">{loc.culture}</th>
       <th className="smallCell monospaceCell">
-        {type.hasGender && pronoms.length > 0 && (edit ?
+        {safeCell(type.hasGender && pronoms.length > 0 && (edit ?
           <select value={td.gender ?? ""} onChange={(e) => { td.gender = e.currentTarget.value; forceUpdate(); }} className={!td.gender && Boolean(td.description) ? "sf-mandatory" : undefined}>
             {initialElementIf(!td.gender).concat(
               pronoms.map(a => <option key={a.gender} value={a.gender}>{a.singular}</option>))}
           </select> :
-          (pronoms.filter(a => a.gender == td.gender).map(a => a.singular).singleOrNull()))
-        }
+          (pronoms.filter(a => a.gender == td.gender).map(a => a.singular).singleOrNull())
+        ))}
       </th>
       <th className="monospaceCell">
-        {edit ? renderEdit() : td.description
+        {safeCell(edit ? renderEdit() : td.description)
         }
       </th>
       <th className="smallCell">
-        {type.hasPluralDescription && type.hasGender &&
-          pronoms.filter(a => a.gender == td.gender).map(a => a.plural).singleOrNull()
+        {safeCell(type.hasPluralDescription && type.hasGender &&
+          pronoms.filter(a => a.gender == td.gender).map(a => a.plural).singleOrNull())
         }
       </th>
       <th className="monospaceCell">
         {
-          type.hasPluralDescription && (edit ?
+          safeCell(type.hasPluralDescription && (edit ?
             <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.pluralDescription ?? ""}
               className={!td.pluralDescription && Boolean(td.description) ? "sf-mandatory" : undefined}
               onChange={e => { td.pluralDescription = e.currentTarget.value; forceUpdate(); }}
               onBlur={e => { td.pluralDescription = TranslationMember.normalizeString(e.currentTarget.value); forceUpdate(); }} /> :
-            td.pluralDescription)
+            td.pluralDescription))
         }
       </th>
     </WCAGRow>
