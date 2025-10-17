@@ -40,6 +40,7 @@ interface FrameModalProps<T extends ModifiableEntity> extends IModalProps<T | un
   modalSize?: BsSize;
   createNew?: () => Promise<EntityPack<T> | undefined>;
   ref?: React.Ref<IHandleKeyboard>
+  innerRef?: React.Ref<IHandleKeyboard>
 }
 
 let modalCount = 0;
@@ -66,12 +67,11 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
 
   const forceUpdate = useForceUpdate();
 
-  React.useImperativeHandle(p.ref, () => ({
+  React.useImperativeHandle(p.innerRef, () => ({
     handleKeyDown(e: KeyboardEvent) {
       buttonBar.current && buttonBar.current.handleKeyDown(e);
     }
   }));
-
   const typeName = getTypeName(p.entityOrPack);
   const typeInfo = tryGetTypeInfo(typeName);
 
