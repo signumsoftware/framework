@@ -326,8 +326,8 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
                     }
                     catch (Azure.RequestFailedException ex) when (ex.ErrorCode == "ContainerAlreadyExists")
                     {
-                        // The error message "The specified container already exists" suggests that there is a concurrency issue at play
-                        // Ignore it and continue, since the container exists which is what we wanted anyway
+                        // Ignore concurrency: container exists
+                        blobContainerAlreadyCreated = client.Name;
                     }
                 }
             }

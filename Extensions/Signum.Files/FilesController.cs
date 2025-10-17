@@ -134,6 +134,7 @@ public class FilesController : ControllerBase
         IFilePath fpe = CreateEmptyFile(type, fileType, fileName, suffix);
         using MemoryStream ms = new MemoryStream();
         await Request.Body.CopyToAsync(ms);
+        ms.Position = 0;
         var chunkInfo = await algorithm.UploadChunk(fpe, chunkIndex, ms, uploadId, token);
         return chunkInfo;
     }
