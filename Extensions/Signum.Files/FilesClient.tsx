@@ -194,6 +194,10 @@ export namespace FilesClient {
     export function finishUpload(request: FinishUploadRequest): Promise<FinishUploadResponse> {
       return ajaxPost({ url: "/api/files/finishUpload" }, request);
     }
+
+    export function abortUpload(request: AbortUploadRequest): Promise<AbortUploadResponse> {
+      return ajaxPost({ url: "/api/files/abortUpload" }, request);
+    }
   }
 
   export interface ChunkInfo {
@@ -234,6 +238,19 @@ export namespace FilesClient {
     fileLength: number;
     hash: string;
     fullWebPath?: string;
+  }
+
+  export interface AbortUploadRequest {
+    fileTypeKey: string;
+    fileName: string;
+    suffix: string;
+    type: string;
+    uploadId?: string;
+  }
+
+  export interface AbortUploadResponse {
+    success: boolean;
+    message?: string;
   }
   
 }

@@ -89,7 +89,16 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
     public Task AbortUpload(IFilePath fp, string? uploadId = null, CancellationToken token = default)
     {
-        // No-op for local files
+        // Remove the temporary ".uploading" file if it exists
+        var uploadingPath = fp.FullPhysicalPath() + Uploading;
+        if (File.Exists(uploadingPath))
+            File.Delete(uploadingPath);
+
+        // Optionally, remove the partially uploaded file as well
+        var filePath = fp.FullPhysicalPath();
+        if (File.Exists(filePath))
+            File.Delete(filePath);
+
         return Task.CompletedTask;
     }
 

@@ -194,6 +194,6 @@ public class FilesController : ControllerBase
         public string FileName { get; set; }
         public string Suffix { get; set; }
         public string Type { get; set; }
-        public string UploadId { get; set; }
+        public string? UploadId { get; set; }
     }
 }
