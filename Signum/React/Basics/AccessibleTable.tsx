@@ -12,6 +12,19 @@ interface AccessibleTableProps extends React.TableHTMLAttributes<HTMLTableElemen
   mapCustomComponents?: Map<React.JSXElementConstructor<any>, string>
 }
 
+/**
+ * AccessibleTable
+ * ----------------
+ * A WCAG-compliant table component that enhances native HTML tables
+ * with keyboard navigation, accessibility roles, and proper semantic structure.
+ * 
+ * It automatically validates that table markup follows WCAG and ARIA guidelines:
+ * - Only `thead`, `tbody`, and `tfoot` as sections
+ * - Only `tr` inside sections
+ * - Only `td` or `th` inside rows
+ * 
+ * It also applies appropriate ARIA roles and focus behavior for better accessibility.
+ */
 export function AccessibleTable({
   caption,
   tableRole = "grid",
@@ -22,6 +35,10 @@ export function AccessibleTable({
   ...rest
 }: AccessibleTableProps): JSX.Element {
 
+  /**
+   * Enhances a given table section (`thead`, `tbody`, or `tfoot`)
+   * by wrapping each `<tr>` in a WCAGRow component for accessibility handling.
+   */
   function enhanceSection(
     section: React.ReactElement<React.HTMLAttributes<HTMLTableSectionElement>>,
     sectionType: SectionType
@@ -43,6 +60,10 @@ export function AccessibleTable({
     return React.cloneElement(section, { children: enhancedRows });
   }
 
+  /**
+   * Recursively enhances all children of the table to ensure that
+   * sections are validated and processed via `enhanceSection`.
+   */
   function enhanceChildren(node: React.ReactNode): React.ReactNode {
     return React.Children.map(node, (child) => {
 
@@ -72,11 +93,19 @@ export function AccessibleTable({
   );
 }
 
+/**
+ * Throws a descriptive error when the expected table structure is invalid.
+ * Helps enforce strict accessibility and semantic correctness.
+ */
 function handleStructureError(message: string, node: React.ReactNode) {
-
   throw new Error(`[AccessibleTable] Structure error: ${message} instead of ${React.isValidElement(node) ? node.type : typeof node}`);
 }
 
+/**
+ * Determines the HTML-equivalent type of a React element.
+ * If a custom component is used (e.g., wrapped table cell),
+ * it looks up its corresponding tag name from `mapCustomComponents`.
+ */
 function getType(node: React.ReactNode, mapCustomComponents: Map<React.JSXElementConstructor<any>, string> | undefined): string | null {
   if (!React.isValidElement(node))
     return null;
@@ -98,8 +127,23 @@ interface WCAGRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
   mapCustomComponents?: Map<React.JSXElementConstructor<any>, string>,
   tableRole?: TableRole
 }
+
+/**
+ * WCAGRow
+ * --------
+ * Enhances a single table row (`<tr>`) by applying:
+ * - Correct ARIA roles (`row`, `gridcell`, `columnheader`, `rowheader`)
+ * - TabIndex handling for keyboard navigation
+ * - Automatic error detection for invalid or empty header cells
+ * 
+ * Supports both header (`thead`) and body (`tbody`) contexts.
+ */
 export function WCAGRow({ focusCells = true, focusHeader = false, sectionType = "tbody", mapCustomComponents, children, tableRole = "grid", ...rest }: WCAGRowProps): React.ReactElement {
 
+  /**
+   * Enhances a header cell (<th>) in a `thead` section.
+   * Applies appropriate ARIA roles and keyboard focusability.
+   */
   function enhanceHeaderCell(
     th: React.ReactElement<React.ThHTMLAttributes<HTMLTableCellElement>>
   ): React.ReactElement {
@@ -109,7 +153,11 @@ export function WCAGRow({ focusCells = true, focusHeader = false, sectionType = 
       tabIndex: focusHeader ? 0 : -1,
     } as React.ThHTMLAttributes<HTMLTableCellElement>);
   }
-
+  
+  /**
+   * Enhances a data cell (<td>) or header cell (<th>) in the table body.
+   * Ensures every header has content and applies fallback text to empty cells.
+   */
   function enhanceCell(
     td: React.ReactElement<React.TdHTMLAttributes<HTMLTableCellElement> | React.ThHTMLAttributes<HTMLTableCellElement>>
   ): React.ReactElement {
@@ -129,7 +177,6 @@ export function WCAGRow({ focusCells = true, focusHeader = false, sectionType = 
         tabIndex: focusCells ? 0 : -1,
       } as React.ThHTMLAttributes<HTMLTableCellElement>);
 
-
     return React.cloneElement(td, {
       role: (tableRole) ? undefined : "gridcell",
       tabIndex: focusCells ? 0 : -1,
@@ -138,8 +185,6 @@ export function WCAGRow({ focusCells = true, focusHeader = false, sectionType = 
         : td.props.children
     } as React.TdHTMLAttributes<HTMLTableCellElement>);
   }
-
-
 
   const childrenArray = React.Children.toArray(children);
   const enhancedCells = childrenArray.map((child) => {
@@ -161,6 +206,9 @@ export function WCAGRow({ focusCells = true, focusHeader = false, sectionType = 
     }
   });
 
+  /**
+   * Enables keyboard navigation between rows using ArrowUp and ArrowDown keys.
+   */
   function handleKeyDown(e: React.KeyboardEvent<HTMLTableRowElement>) {
 
     const currentRow = e.currentTarget;
