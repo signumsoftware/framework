@@ -170,20 +170,18 @@ export function toFileEntity(file: File, o: { accept?: string, maxSizeInBytes?: 
 
     } else {
       const type = getTypeName(o.type);
-
       const fileEntity = New(o.type) as ModifiableEntity & IFilePath;
       fileEntity.fileName = file.name;
       fileEntity.fileType = o.fileType;
       fileEntity.__uploadingOffset = 0;
       fileEntity.fileLength = file.size;
       FilesClient.API.startUpload({ fileName: file.name, fileTypeKey: o.fileType!.key, type: type })
-        .then(suffix => {
+        .then(({ suffix, uploadId }) => {
           fileEntity.suffix = suffix;
-
           const abortController = new AbortController();
-          o.asyncOptions?.onStart(fileEntity, abortController)
+          o.asyncOptions!.onStart(fileEntity, abortController)
 
-          uploadChunksAsync(fileEntity, file, abortController.signal, o.asyncOptions!)
+          uploadChunksAsync(fileEntity, file, abortController.signal, o.asyncOptions!, uploadId)
 
           resolve(fileEntity);
         });
@@ -191,8 +189,7 @@ export function toFileEntity(file: File, o: { accept?: string, maxSizeInBytes?: 
   });
 }
 
-
-async function uploadChunksAsync(fileEntity: IFilePath & ModifiableEntity, file: File, signal: AbortSignal, options: AsyncUploadOptions): Promise<void> {
+async function uploadChunksAsync(fileEntity: IFilePath & ModifiableEntity, file: File, signal: AbortSignal, options: AsyncUploadOptions, uploadId?: string): Promise<void> {
   try {
     let chunkIndex = 0;
     var chunks: FilesClient.ChunkInfo[] = [];
@@ -206,6 +203,7 @@ async function uploadChunksAsync(fileEntity: IFilePath & ModifiableEntity, file:
         suffix: fileEntity.suffix!,
         fileTypeKey: fileEntity.fileType!.key,
         chunkIndex: chunkIndex,
+        uploadId: uploadId,
       }, signal);
       chunks.push(ci);
       fileEntity.__uploadingOffset! += chunk.size;
@@ -220,6 +218,7 @@ async function uploadChunksAsync(fileEntity: IFilePath & ModifiableEntity, file:
       suffix: fileEntity.suffix!,
       fileTypeKey: fileEntity.fileType!.key,
       type: fileEntity.Type,
+      uploadId: uploadId,
     });
 
     delete fileEntity.__uploadingOffset;
@@ -232,6 +231,9 @@ async function uploadChunksAsync(fileEntity: IFilePath & ModifiableEntity, file:
     options.onError(fileEntity, error);
   }
 }
+
+
+
 
 
 

@@ -183,7 +183,7 @@ export namespace FilesClient {
 
 
   export namespace API {
-    export function startUpload(request: StartUploadRequest): Promise<string> {
+    export function startUpload(request: StartUploadRequest): Promise<StartUploadResponse> {
       return ajaxPost({ url: `/api/files/startUpload` }, request);
     }
 
@@ -201,29 +201,36 @@ export namespace FilesClient {
     blockId: string;
   }
 
-  interface StartUploadRequest {
+  export interface StartUploadRequest {
     fileTypeKey: string;
     fileName: string;
     type: string;
   }
 
-  interface UploadChunkQuery {
+  export interface StartUploadResponse {
+    suffix: string;
+    uploadId?: string;
+  }
+
+  export interface UploadChunkQuery {
     fileTypeKey: string;
     fileName: string;
     suffix: string;
     type: string;
     chunkIndex: number;
+    uploadId?: string;
   }
 
-  interface FinishUploadRequest {
+  export interface FinishUploadRequest {
     fileTypeKey: string;
     fileName: string;
     suffix: string;
     type: string;
     chunks: ChunkInfo[];
+    uploadId?: string;
   }
 
-  interface FinishUploadResponse {
+  export interface FinishUploadResponse {
     fileLength: number;
     hash: string;
     fullWebPath?: string;

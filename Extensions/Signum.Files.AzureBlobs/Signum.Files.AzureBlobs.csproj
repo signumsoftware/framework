@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFramework>net9.0</TargetFramework>
-	  <Nullable>enable</Nullable>
-	  <WarningsAsErrors>nullable</WarningsAsErrors>
-	  <OutputType>Library</OutputType>
-	  <NoWarn>8618</NoWarn>
+      <TargetFramework>net9.0</TargetFramework>
+      <Nullable>enable</Nullable>
+      <WarningsAsErrors>nullable</WarningsAsErrors>
+      <OutputType>Library</OutputType>
+      <NoWarn>8618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,11 +13,11 @@
     <PackageReference Include="Npgsql" Version="9.0.4" />
   </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
-		<ProjectReference Include="..\..\Signum\Signum.csproj" />
-		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
-		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
+        <ProjectReference Include="..\..\Signum\Signum.csproj" />
+        <ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
+        <ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
+    </ItemGroup>
 
 </Project>
