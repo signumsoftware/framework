@@ -26,6 +26,7 @@ import { useController } from "./useController";
 import { isEmpty } from "./Utils/editorState";
 import { formatCode, formatHeading, formatList, formatQuote } from "./Utils/format";
 import { $findMatchingParent, isHeadingActive, isListActive, isQuoteActive } from "./Utils/node";
+import { useForceUpdate } from "../../Signum/React/Hooks";
 
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
@@ -69,6 +70,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
     ...props }: HtmlEditorProps,
   ref?: React.Ref<HtmlEditorController>
 ) {
+  const forceUpdate = useForceUpdate();
   const id = React.useMemo(() => createUid(), []);
   const editableId = "editable_" + id;
   const { controller, nodes, builtinComponents } = useController({
@@ -133,7 +135,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
           }
           ErrorBoundary={LexicalErrorBoundary}
         />
-        <EditorRefPlugin editorRef={controller.setRefs} />
+        <EditorRefPlugin editorRef={comp => { controller.setRefs(comp); if (comp) forceUpdate(); }} />
         {builtinComponents.map(({ component: Component, props }) => <Component key={Component.name} {...props} />)}
       </LexicalComposer>
     </div>
