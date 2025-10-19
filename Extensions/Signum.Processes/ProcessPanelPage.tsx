@@ -1,7 +1,7 @@
 import * as React from 'react'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { ProcessClient } from './ProcessClient'
-import { ProcessEntity } from './Signum.Processes'
+import { ProcessEntity, ProcessMessage } from './Signum.Processes'
 import { SearchControl } from '@framework/Search';
 import { useAPIWithReload, useInterval } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
@@ -12,6 +12,7 @@ import { FrameMessage } from '../../Signum/React/Signum.Entities';
 import { Overlay, Tooltip } from "react-bootstrap";
 import * as AppContext from '@framework/AppContext';
 import { CopyHealthCheckButton } from '@framework/Components/CopyHealthCheckButton';
+import { AccessibleTable } from '../../Signum/React/Basics/AccessibleTable';
 
 export default function ProcessPanelPage(): React.JSX.Element {
 
@@ -36,59 +37,61 @@ export default function ProcessPanelPage(): React.JSX.Element {
     ProcessClient.API.start().then(() => reloadState());
   }
 
-
   if (state == undefined)
-    return <h2>ProcesLogic state (loading...) </h2>;
+    return <h2>{ProcessMessage.ProcessLogicStateLoading.niceToString()}</h2>;
 
   const s = state;
   const url = window.location;
 
   return (
     <div>
-      <div className='d-flex align-items-center'><h2 className="display-6"><FontAwesomeIcon icon={"gears"} /> Process Panel <CopyHealthCheckButton
+      <div className='d-flex align-items-center'><h2 className="display-6"><FontAwesomeIcon aria-hidden="true" icon={"gears"} /> {ProcessMessage.ProcessPanel.niceToString()} <CopyHealthCheckButton
         name={url.hostname + " Process Runner"}
         healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/processes/healthCheck')}
         clickUrl={url.href}
       /></h2></div>
       <div className="btn-toolbar mt-3">
-        <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
-        <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
+        <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon aria-hidden="true" icon="play" /> {ProcessMessage.Start.niceToString()}</button>
+        <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon aria-hidden="true" icon="stop" /> {ProcessMessage.Stop.niceToString()}</button>
       </div >
       <div id="processMainDiv">
-        State: <strong>
+        {ProcessMessage.State.niceToString()}: <strong>
           {s.running ?
-            <span style={{ color: "green" }}> RUNNING </span> :
-            <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
+            <span style={{ color: "green" }}> {ProcessMessage.Running.niceToString()} </span> :
+            <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> {ProcessMessage.Stopped.niceToString()} </span>
           }</strong>
-        <a className="ms-2" href={AppContext.toAbsoluteUrl("/api/processes/simpleStatus")} target="_blank">SimpleStatus</a>
+        <a className="ms-2" href={AppContext.toAbsoluteUrl("/api/processes/simpleStatus")} target="_blank">{ProcessMessage.SimpleStatus.niceToString()}</a>
         <br />
-        JustMyProcesses: {s.justMyProcesses.toString()}
+        {ProcessMessage.JustMyProcesses.niceToString()}: {s.justMyProcesses.toString()}
         <br />
-        MachineName: {s.machineName}
+        {ProcessMessage.MachineName.niceToString()}: {s.machineName}
         <br />
-        ApplicatonName: {s.applicationName}
+        {ProcessMessage.ApplicationName.niceToString()}: {s.applicationName}
         <br />
-        MaxDegreeOfParallelism: {s.maxDegreeOfParallelism}
+        {ProcessMessage.MaxDegreeOfParallelism.niceToString()}: {s.maxDegreeOfParallelism}
         <br />
-        InitialDelayMilliseconds: {s.initialDelayMilliseconds}
+        {ProcessMessage.InitialDelayMilliseconds.niceToString()}: {s.initialDelayMilliseconds}
         <br />
-        NextPlannedExecution: {s.nextPlannedExecution ?? "-None-"}
+        {ProcessMessage.NextPlannedExecution.niceToString()}: {s.nextPlannedExecution ?? ProcessMessage.None.niceToString() }
         <br />
-        <table className="table">
+        <AccessibleTable
+          caption={ProcessMessage.ExecutingProcesses.niceToString()}
+          className="table"
+          multiselectable={false}>
           <thead>
             <tr>
-              <th>Process</th>
-              <th>State</th>
-              <th style={{ minWidth: "30%" }}>Progress</th>
-              <th>MachineName</th>
-              <th>ApplicationName</th>
-              <th>IsCancellationRequested</th>
+              <th>{ProcessMessage.Process.niceToString()}</th>
+              <th>{ProcessMessage.State.niceToString()}</th>
+              <th style={{ minWidth: "30%" }}>{ProcessMessage.Progress.niceToString()}</th>
+              <th>{ProcessMessage.MachineName.niceToString()}</th>
+              <th>{ProcessMessage.ApplicationName.niceToString()}</th>
+              <th>{ProcessMessage.IsCancellationRequest.niceToString()}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td colSpan={6}>
-                <b> {s.executing.length} processes executing in {s.machineName} / {s.applicationName}</b>
+                <b>{ProcessMessage._0ProcessesExcecutingIn1_2.niceToString(s.executing.length, s.machineName, s.applicationName)}</b>
               </td>
             </tr>
             {s.executing.map((item, i) =>
@@ -102,10 +105,9 @@ export default function ProcessPanelPage(): React.JSX.Element {
               </tr>
             )}
           </tbody>
-        </table>
-
+        </AccessibleTable>
         <br />
-        <h2>Latest Processes</h2>
+        <h2>{ProcessMessage.LatestProcesses.niceToString()}</h2>
         <SearchControl findOptions={{
           queryName: ProcessEntity,
           orderOptions: [{ token: ProcessEntity.token(e => e.creationDate), orderType: "Descending" }],

@@ -6,6 +6,8 @@ import { CacheClient } from './CacheClient'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { SearchControl } from '@framework/Search'
 import { ExceptionEntity } from '@framework/Signum.Basics'
+import { CacheMessage } from './Signum.Caching'
+import { WCAGRow, AccessibleTable } from '../../Signum/React/Basics/AccessibleTable'
 
 export default function CacheStatisticsPage(): React.JSX.Element {
 
@@ -26,38 +28,38 @@ export default function CacheStatisticsPage(): React.JSX.Element {
   if (state == null)
     return (
       <div>
-        <h2>Loading...</h2>
+        <h2>{CacheMessage.Loading.niceToString()}...</h2>
       </div>
     );
 
 
   return (
     <div>
-      <h2>Cache Statistics</h2>
+      <h2>{CacheMessage.CacheStatistics.niceToString()}</h2>
       <div className="btn-toolbar">
-        {state.isEnabled == true && <button onClick={handleDisabled} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-danger)" }}>Disable</button>}
-        {state.isEnabled == false && <button onClick={handleEnabled} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-success)" }}>Enabled</button>}
-        {<button onClick={handleClear} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-primary)" }}>Clear</button>}
+        {state.isEnabled == true && <button onClick={handleDisabled} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-danger)" }}>{CacheMessage.Disable.niceToString()}</button>}
+        {state.isEnabled == false && <button onClick={handleEnabled} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-success)" }}>{CacheMessage.Enable.niceToString()}</button>}
+        {<button onClick={handleClear} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-primary)" }}>{CacheMessage.Clear.niceToString()}</button>}
       </div >
       <div className="m-2">
-        <strong>Server Broadcast:</strong> <code>{state.serverBroadcast}</code>
+        <strong>{CacheMessage.ServerBroadcast.niceToString()}:</strong> <code>{state.serverBroadcast}</code>
         <br />
-        <strong>SqlDependency:</strong> <code>{state.sqlDependency.toString()}</code>
+        <strong>{CacheMessage.SqlDependency.niceToString()}:</strong> <code>{state.sqlDependency.toString()}</code>
         <br />
       </div>
       <Tabs id="tabs">
         {state.tables &&
-          <Tab title="Tables" eventKey="table">
+          <Tab title={CacheMessage.Tables.niceToString()} eventKey="table">
             {renderTables(state)}
           </Tab>}
         {state.lazies &&
-          <Tab title="Lazies" eventKey="lazy">
+          <Tab title={CacheMessage.Lazies.niceToString()} eventKey="lazy">
             {renderLazies(state)}
           </Tab>
         }
 
         {state.serverBroadcast &&
-          <Tab title="Invalidation Exceptions" eventKey="exceptions">
+          <Tab title={CacheMessage.InvalidationExceptions.niceToString()} eventKey="exceptions">
             <SearchControl findOptions={{
               queryName: ExceptionEntity,
               filterOptions: [
@@ -72,14 +74,17 @@ export default function CacheStatisticsPage(): React.JSX.Element {
 
   function renderLazies(state: CacheClient.CacheState) {
     return (
-      <table className="table table-sm">
+      <AccessibleTable
+        caption={CacheMessage.LazyStats.niceToString()}
+        className="table table-sm"
+        multiselectable={false}>
         <thead>
           <tr>
-            <th>Type</th>
-            <th>Hits</th>
-            <th>Invalidations</th>
-            <th>Loads</th>
-            <th>LoadTime</th>
+            <th>{CacheMessage.Type.niceToString()}</th>
+            <th>{CacheMessage.Hits.niceToString()}</th>
+            <th>{CacheMessage.Invalidations.niceToString()}</th>
+            <th>{CacheMessage.Loads.niceToString()}</th>
+            <th>{CacheMessage.LoadTime.niceToString()}</th>
           </tr>
         </thead>
         <tbody>
@@ -91,32 +96,37 @@ export default function CacheStatisticsPage(): React.JSX.Element {
             <td> {lazy.sumLoadTime} </td>
           </tr>)}
         </tbody>
-      </table>);
+        </AccessibleTable>);
   }
 
   function renderTables(state: CacheClient.CacheState) {
 
     return (
-      <table className="table table-sm">
+      <AccessibleTable
+        caption={CacheMessage.TableStats.niceToString()}
+        className="table table-sm"
+        mapCustomComponents={new Map([[RenderTree, "tr"]])}
+        multiselectable={false}>
         <thead>
           <tr>
-            <th>Table</th>
-            <th>Type</th>
-            <th>Count</th>
-            <th>Hits</th>
-            <th>Invalidations</th>
-            <th>Loads</th>
-            <th>LoadTime</th>
+            <th>{CacheMessage.Table.niceToString()}</th>
+            <th>{CacheMessage.Type.niceToString()}</th>
+            <th>{CacheMessage.Count.niceToString()}</th>
+            <th>{CacheMessage.Hits.niceToString()}</th>
+            <th>{CacheMessage.Invalidations.niceToString()}</th>
+            <th>{CacheMessage.Loads.niceToString()}</th>
+            <th>{CacheMessage.LoadTime.niceToString()}</th>
           </tr>
         </thead>
         <tbody>
-          {state.tables.map(m => renderTree(m, 0))}
+          {state.tables.map(m => <RenderTree table={m} depth={0} />)}
         </tbody>
-      </table>);
+      </AccessibleTable>);
   }
 
-
-  function renderTree(table: CacheClient.CacheTableStats, depth: number): React.ReactNode {
+  function RenderTree(p: { table: CacheClient.CacheTableStats, depth: number }): React.JSX.Element {
+    const table = p.table;
+    const depth = p.depth;
 
     const opacity =
       depth == 0 ? 1 :
@@ -125,18 +135,18 @@ export default function CacheStatisticsPage(): React.JSX.Element {
             depth == 3 ? .4 : .3;
 
     return (
-      <React.Fragment key={table.tableName}>
-        <tr style={{ opacity: opacity }} key={table.tableName}>
+      <>
+        <WCAGRow style={{ opacity: opacity }} key={table.tableName}>
           <td> {Array.repeat(depth, " → ").join("") + table.tableName}</td >
           <td> {table.typeName} </td>
-          <td> {table.count != undefined ? table.count.toString() : "-- not loaded --"} </td>
+          <td> {table.count != undefined ? table.count.toString() : `-- ${CacheMessage.NotLoaded.niceToString()} --`} </td>
           <td> {table.hits} </td>
           <td> {table.invalidations}</td>
           <td> {table.loads}</td>
           <td> {table.sumLoadTime} </td>
-        </tr>
-        {table.subTables && table.subTables.map(st => renderTree(st, depth + 1))}
-      </React.Fragment>
+        </WCAGRow>
+        {table.subTables && table.subTables.map(st => <RenderTree table={st} depth={depth+1} />)}
+      </>
     );
   }
 }

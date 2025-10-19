@@ -34,6 +34,7 @@ import { OperationSymbol } from '@framework/Signum.Operations'
 import { QueryEntity } from '@framework/Signum.Basics'
 import { KeyNames } from '@framework/Components'
 import { useForceUpdate } from '@framework/Hooks'
+import { WCAGRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 
 export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<TypeRulePack>, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
 
@@ -135,15 +136,16 @@ export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
     return false;
   };
 
-
   return (
     <div>
       <div className="form-compact">
         <EntityLine ctx={ctx.subCtx(f => f.role)} />
         <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
       </div>
-
-      <table className="table table-sm sf-auth-rules">
+      <AccessibleTable
+        caption={AuthAdminMessage.TypePermissionOverview.niceToString()}
+        mapCustomComponents={new Map([[TypeRow, "tr"]])}
+        className="table table-sm sf-auth-rules">
         <thead>
           <tr>
             <th>
@@ -188,8 +190,7 @@ export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
               </>)
           }
         </tbody>
-      </table>
-
+      </AccessibleTable>
     </div>
   );
 }
@@ -348,8 +349,8 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
 
     return (
 
-      <a onClick={onClick} title={allowed}>
-        <FontAwesomeIcon icon={icon}
+      <a onClick={onClick} role="button" aria-label={allowed} title={allowed}>
+        <FontAwesomeIcon aria-hidden="true" icon={icon}
           className="sf-auth-link"
           color={allowed == "Invalidated" ? "gray" :
             allowed == "All" ? "green" :
@@ -362,17 +363,17 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
   let fallback = Binding.create(rule.allowed, a => a.fallback);
   return (
     <>
-      <tr key={rule.resource.namespace + "." + rule.resource.className} className={classes("sf-auth-type", rule.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
+      <WCAGRow key={rule.resource.namespace + "." + rule.resource.className} className={classes("sf-auth-type", rule.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
         <td>
           {conditions.length > 1 || conditions.length == 1 && rule.allowed.conditionRules.length == 0 ?
-            <a className="sf-condition-icon" href="#" title={AuthAdminMessage.AddCondition.niceToString()} onClick={async e => {
+            <a className="sf-condition-icon" role="button" href="#" title={AuthAdminMessage.AddCondition.niceToString()} onClick={async e => {
               e.preventDefault();
               await addConditionClick(TypeAllowed, conditions, rule.allowed, rule.resource);
               p.updateFrame();
             }}>
-              <FontAwesomeIcon icon="circle-plus" className="me-2" />
+              <FontAwesomeIcon aria-hidden="true" icon="circle-plus" className="me-2" />
             </a> :
-            <FontAwesomeIcon icon="circle" className="sf-placeholder-icon me-2"></FontAwesomeIcon>
+            <FontAwesomeIcon aria-hidden="true" icon="circle" className="sf-placeholder-icon me-2"></FontAwesomeIcon>
           }
           {typeInfo.niceName}
           {typeInfo.entityData && <small className="ms-1" title={typeInfo.entityData}>{typeInfo.entityData[0]}</small>}
@@ -412,27 +413,27 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
             m => rule.queries = m.rules.every(a => a.element.allowed == "None") ? "None" :
               m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
         </td>}
-      </tr>
+      </WCAGRow>
       {rule.allowed.conditionRules.map(mle => mle.element).map((cr, i) => {
         let b = Binding.create(cr, ca => ca.allowed);
 
         var drag = rule.allowed.conditionRules.length > 1 ? getConfig(i) : null;
 
         return (
-          <tr key={rule.resource.namespace + "." + rule.resource.className + "_" + cr.typeConditions.map(c => c.element.id).join("_")}
+          <WCAGRow key={rule.resource.namespace + "." + rule.resource.className + "_" + cr.typeConditions.map(c => c.element.id).join("_")}
             className={classes("sf-auth-condition", drag?.dropClass)}
             onDragEnter={drag?.onDragOver}
             onDragOver={drag?.onDragOver}
             onDrop={drag?.onDrop}
           >
             <td>
-              <a className="sf-condition-icon me-1 ms-3" href="#" title={AuthAdminMessage.RemoveCondition.niceToString()} onClick={e => {
+              <a className="sf-condition-icon me-1 ms-3" role="button" href="#" title={AuthAdminMessage.RemoveCondition.niceToString()} aria-label={AuthAdminMessage.RemoveCondition.niceToString()} onClick={e => {
                 e.preventDefault();
                 handleRemoveConditionClick(rule.allowed, cr);
               }}>
-                <FontAwesomeIcon icon="circle-minus" title={AuthAdminMessage.RemoveCondition.niceToString()} />
+                <FontAwesomeIcon aria-hidden="true" icon="circle-minus" title={AuthAdminMessage.RemoveCondition.niceToString()} />
               </a>
-              {drag && <a className="sf-condition-icon me-1" href="#" title={drag.title}
+              {drag && <a className="sf-condition-icon me-1" role="button" aria-label={drag.title} href="#" title={drag.title}
                 onClick={e => { e.preventDefault(); e.stopPropagation(); }}
                 draggable={true}
                 onKeyDown={drag.onKeyDown}
@@ -474,7 +475,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
             </td>}
             <td style={{ textAlign: "center" }} colSpan={1 + Number(AuthAdminClient.properties) + Number(AuthAdminClient.operations) + Number(AuthAdminClient.queries)}>
             </td>
-          </tr>
+          </WCAGRow>
         );
       })}
     </>

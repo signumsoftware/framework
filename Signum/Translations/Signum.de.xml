@@ -18,7 +18,12 @@
     <Member Name="Today" Description="Heute" />
   </Type>
   <Type Name="ChangeLogMessage">
+    <Member Name="_0ImplementedOn1WithFollowingChanges2" Description="{0}, implementiert am {1} mit folgenden Änderungen: {2}" />
+    <Member Name="ChangeLogEntries" Description="Änderungsprotokolleinträge" />
+    <Member Name="ChangeLogs" Description="Änderungsprotokolle" />
+    <Member Name="DeployedOn0" Description="Bereitgestellt am {0}" />
     <Member Name="SeeMore" Description="mehr sehen ..." />
+    <Member Name="SeeMoreChangeLogEntries" Description="Weitere Einträge im Änderungsprotokoll anzeigen" />
     <Member Name="ThereIsNotAnyNewChangesFrom0" Description="Es gibt keine neuen Änderungen von {0}" />
   </Type>
   <Type Name="ChangeLogViewLogEntity" Description="Change-Log Ansichtsprotokoll" PluralDescription="Change-Log Ansichtsprotokolle" Gender="n">
@@ -636,6 +641,7 @@
     <Member Name="_0FiltersCollapsed" Description="{0} filter zusammengeklappt" />
     <Member Name="_0GroupWith1_N" Description="{0} Gruppe[n] mit {1}" />
     <Member Name="_0Results_N" Description="{0} Ergebnis[se]." />
+    <Member Name="_0ResultTable" Description="{0} Ergebnistabelle" />
     <Member Name="_0Rows_N" Description="{0} Zeile[n]" />
     <Member Name="AddAndGroup" Description="AND-Gruppe hinzufügen" />
     <Member Name="AddColumn" Description="Spalte hinzufügen" />
@@ -716,6 +722,8 @@
     <Member Name="ReturnNewEntity" Description="Neue Entität zurückgeben?" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="Search" Description="Suche" />
+    <Member Name="SelectAllResults" Description="Alle Ergebnisse auswählen" />
+    <Member Name="SelectRow0_" Description="Zeile {0} auswählen" />
     <Member Name="ShowHiddenColumns" Description="Ausgeblendete Spalten anzeigen" />
     <Member Name="ShowMore" Description="Mehr anzeigen" />
     <Member Name="SimpleFilters" Description="Einfache Filter" />

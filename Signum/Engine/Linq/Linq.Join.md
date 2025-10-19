@@ -1,4 +1,4 @@
-﻿## LINQ `Join` differences
+﻿# LINQ `Join` differences
 
 We tried to make Linq to Signum as easy for the user as possible. One cool feature of Linq in general is that it provides a unified model for querying in memory objects and the database (sometimes, the hardest part is to know where you are).
 
@@ -9,7 +9,6 @@ Let's see how Linq to Sql/Entity Framework does joins first:
 #### OUTER JOIN in LINQ to Objects / Linq to SQL
 
 In Linq there are two kind of joins, Join and GroupJoin:
-
 
 ```C#
 //Given two sequences (outer & inner) mix them by a common key and using resultSelector combines each possible pair. 
@@ -109,4 +108,3 @@ Returns all the bugs in `b1` and `b2`, with matching pairs if exists or `null` i
 from b1 in Database.Query<BugEntity>().DefaultIfEmpty() 
 join b2 in Database.Query<BugEntity>().DefaultIfEmpty() on b.Start equals c.Date 
 select new { b1, b2 }
-````

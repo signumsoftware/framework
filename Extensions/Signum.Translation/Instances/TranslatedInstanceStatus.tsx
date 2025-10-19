@@ -13,6 +13,8 @@ import { Operations } from '@framework/Operations'
 import MessageModal from '@framework/Modals/MessageModal'
 import { CultureClient } from '@framework/Basics/CultureClient'
 import SelectorModal from '../../../Signum/React/SelectorModal'
+import { AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
+import { TranslationTypeDescription } from '../Code/TranslationTypeTable'
 
 export default function TranslationCodeStatus(): React.JSX.Element {
 
@@ -47,7 +49,7 @@ export default function TranslationCodeStatus(): React.JSX.Element {
         <div className="btn-toolbar">
           <input key={fileVer} type="file" onChange={handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
         </div>
-        <small>Select a .xlsx file with the translations</small>
+        <small>{TranslationMessage.SelectAxlsxFileWithTheTranslations.niceToString()}</small>
       </div>
     );
   }
@@ -56,7 +58,7 @@ export default function TranslationCodeStatus(): React.JSX.Element {
     <div>
       <h2>{TranslationMessage.InstanceTranslations.niceToString()}</h2>
       {result == undefined ? <p><strong>{JavascriptMessage.loading.niceToString()}</strong></p> :
-        result.length == 0 ? <p>No routes marked for translation. Consider using <code>TranslatedInstanceLogic.AddRoute()</code></p> :
+        result.length == 0 ? <p>{TranslationMessage.NoRoutesMarkedForTranslationConsiderUsing.niceToString()} <code>TranslatedInstanceLogic.AddRoute()</code></p> :
           <TranslationTable result={result} onRefreshView={reload} />}
       {result && result.length > 0 && renderFileInput()}
     </div>
@@ -77,16 +79,19 @@ function TranslationTable({ result, onRefreshView }: { result: TranslatedInstanc
     cultures = cultures.filter(a => !onlyNeutral || !a.contains("-"));
 
   return (
-    <table className="st">
+    <AccessibleTable
+      caption={TranslationMessage.TranslationsOverview.niceToString()}
+      className="table st"
+      multiselectable={false}>
       <thead>
         <tr>
-          <th><label><input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} /> Only Neutral Cultures</label></th>
+          <th><label><input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} /> {TranslationMessage.OnlyNeutralCultures.niceToString()}</label></th>
           <th> {TranslationMessage.All.niceToString()} </th>
           {cultures.map(culture =>
             <th key={culture}>
               <span>{culture}</span>
               {result.some(r => !r.isDefaultCulture && r.culture == culture && r.state != "Completed") &&
-                <a href="#" className={classes("auto-translate-all", culture, "ms-2")} onClick={e => handleAutoTranslateClick(e, null, culture)}>{TranslationMessage.AutoSync.niceToString()}</a>}
+                <a href="#" role="button" className={classes("auto-translate-all", culture, "ms-2")} onClick={e => handleAutoTranslateClick(e, null, culture)}>{TranslationMessage.AutoSync.niceToString()}</a>}
             </th>)}
         </tr>
       </thead>
@@ -112,14 +117,14 @@ function TranslationTable({ result, onRefreshView }: { result: TranslatedInstanc
               return (
                 <td key={culture}>
                   <Link to={`/translatedInstance/view/${type}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
-                  <a href="#" className="ms-2" onClick={e => { e.preventDefault(); TranslatedInstanceClient.API.downloadView(type, culture); }}><FontAwesomeIcon icon="download" /></a>
+                  <a href="#" role="button" className="ms-2" onClick={e => { e.preventDefault(); TranslatedInstanceClient.API.downloadView(type, culture); }}><FontAwesomeIcon aria-hidden="true" icon="download" /></a>
                   <br />
                   <Link to={`/translatedInstance/sync/${type}/${culture}`} className={"status-" + typeSummary.state}>{TranslationMessage.Sync.niceToString()}</Link>
-                  <a href="#" className={classes("status-" + typeSummary.state, "ms-2")} onClick={e => { e.preventDefault(); TranslatedInstanceClient.API.downloadSync(type, culture); }}><FontAwesomeIcon icon="download" /></a>
+                  <a href="#" role="button" className={classes("status-" + typeSummary.state, "ms-2")} onClick={e => { e.preventDefault(); TranslatedInstanceClient.API.downloadSync(type, culture); }}><FontAwesomeIcon aria-hidden="true" icon="download" /></a>
                   {typeSummary.state != "Completed" &&
                     <>
                       <br />
-                      <a href="#" className={classes("auto-translate", "status-" + typeSummary.state)} onClick={e => handleAutoTranslateClick(e, type, culture)}>{TranslationMessage.AutoSync.niceToString()}</a>
+                      <a href="#" role="button"className={classes("auto-translate", "status-" + typeSummary.state)} onClick={e => handleAutoTranslateClick(e, type, culture)}>{TranslationMessage.AutoSync.niceToString()}</a>
                     </>}
                 </td>
               );
@@ -127,7 +132,7 @@ function TranslationTable({ result, onRefreshView }: { result: TranslatedInstanc
           </tr>
         )}
       </tbody>
-    </table>
+    </AccessibleTable>
   );
 
   function handleAutoTranslateClick(e: React.MouseEvent<any>, type: string | null, culture: string) {

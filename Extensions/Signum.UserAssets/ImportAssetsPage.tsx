@@ -12,6 +12,7 @@ import { EntityLink } from '@framework/Search'
 import { getToString, is, liteKey, liteKeyLong, MList } from '@framework/Signum.Entities'
 import SelectorModal from '@framework/SelectorModal'
 import MessageModal from '@framework/Modals/MessageModal'
+import { AccessibleTable } from '../../Signum/React/Basics/AccessibleTable'
 
 export default function ImportAssetsPage(): React.JSX.Element {
 
@@ -93,7 +94,10 @@ export default function ImportAssetsPage(): React.JSX.Element {
 
     return (
       <div>
-        <table className="table">
+        <AccessibleTable
+          caption={UserAssetMessage.UserAssetLines.niceToString()}
+          className="table"
+          multiselectable={false}>
           <thead>
             <tr>
               <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.type)} </th>
@@ -107,58 +111,78 @@ export default function ImportAssetsPage(): React.JSX.Element {
 
           <tbody>
             {
-              mlistItemContext(tc.subCtx(a => a.lines))!.map((mlec, i) => {
+              mlistItemContext(tc.subCtx(a => a.lines))!.flatMap((mlec, i) => {
+                const ea = mlec.value;
 
-                var ea = mlec.value;
-
-                return (
-                  <React.Fragment key={i}>
-                    <tr key={ea.type!.cleanName}>
-                      <td> {getTypeInfo(ea.type!.cleanName).niceName} </td>
-                      <td> {ea.text}</td>
-                      <td> {ea.entityType? getTypeInfo(ea.entityType!.cleanName)?.niceName:""}</td>
-                      <td> {EntityAction.niceToString(ea.action!)} </td>
-                      <td>
-                        {ea.action == "Different" &&
-                          <input type="checkbox" className="form-check-input" checked={ea.overrideEntity} onChange={e => {
-                            ea.overrideEntity = (e.currentTarget as HTMLInputElement).checked;
+                const mainRow = (
+                  <tr key={`${ea.type!.cleanName}-${i}`}>
+                    <td>{getTypeInfo(ea.type!.cleanName).niceName}</td>
+                    <td>{ea.text}</td>
+                    <td>{ea.entityType ? getTypeInfo(ea.entityType!.cleanName)?.niceName : ""}</td>
+                    <td>{EntityAction.niceToString(ea.action!)}</td>
+                    <td>
+                      {ea.action == "Different" && (
+                        <input
+                          type="checkbox"
+                          aria-label={EntityAction.niceToString(ea.action!)}
+                          className="form-check-input"
+                          checked={ea.overrideEntity}
+                          onChange={e => {
+                            ea.overrideEntity = e.currentTarget.checked;
                             ea.modified = true;
                             forceUpdate();
-                          }}></input>
-                        }
-                      </td>
-                      <td> {ea.customResolution && <a href="#" onClick={e => {
-                        e.preventDefault();
-                        Navigator.view(ea.customResolution!)
-                          .then(cr => {
-                            if (cr != null) {
-                              ea.customResolution = cr;
-                              ea.modified = true;
-                            }
-                          });
-                      }}>{getToString(ea.customResolution)}</a>}</td>
-                    </tr>
-                    {ea.liteConflicts.length > 0 && <tr>
-                      <td colSpan={1}></td>
-                      <td colSpan={4}>
-                        {UserAssetMessage.LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase.niceToString().formatHtml(<strong>{ea.text}</strong>)}
-                        <EntityTable avoidFieldSet ctx={mlec.subCtx(a => a.liteConflicts)} create={false} remove={false} move={false}
-                          columns={[
-                            { property: a => a.propertyRoute, template: ctx => <code>{ctx.value.propertyRoute}</code> },
-                            { property: a => a.from, template: ctx => <code>{liteKeyLong(ctx.value.from)}</code> },
-                            { property: a => a.to, template: ctx => <EntityLineSameType ctx={ctx} onChange={() => handleChangeConflict(ctx.value)} /> }
-                          ]}
-                        />
-                      </td>
-                    </tr>}
-                  </React.Fragment>
+                          }}/>
+                      )}
+                    </td>
+                    <td>
+                      {ea.customResolution && (
+                        <a
+                          role="button"
+                          href="#"
+                          onClick={e => {
+                            e.preventDefault();
+                            Navigator.view(ea.customResolution!).then(cr => {
+                              if (cr != null) {
+                                ea.customResolution = cr;
+                                ea.modified = true;
+                              }
+                            });
+                          }}>
+                          {getToString(ea.customResolution)}
+                        </a>
+                      )}
+                    </td>
+                  </tr>
                 );
-              }
-              )
+
+                const conflictRows = ea.liteConflicts.length > 0 ? [
+                  <tr key={`${ea.type!.cleanName}-${i}-conflict`}>
+                    <td colSpan={1}></td>
+                    <td colSpan={4}>
+                      {UserAssetMessage.LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase
+                        .niceToString().formatHtml(<strong>{ea.text}</strong>)}
+                      <EntityTable
+                        avoidFieldSet
+                        ctx={mlec.subCtx(a => a.liteConflicts)}
+                        create={false}
+                        remove={false}
+                        move={false}
+                        columns={[
+                          { property: a => a.propertyRoute, template: ctx => <code>{ctx.value.propertyRoute}</code> },
+                          { property: a => a.from, template: ctx => <code>{liteKeyLong(ctx.value.from)}</code> },
+                          { property: a => a.to, template: ctx => <EntityLineSameType ctx={ctx} onChange={() => handleChangeConflict(ctx.value)} /> }
+                        ]}
+                      />
+                    </td>
+                  </tr>
+                ] : [];
+
+                return [mainRow, ...conflictRows];
+              })
             }
           </tbody>
-        </table>
-        <button onClick={handleImport} className="btn btn-info"><FontAwesomeIcon icon="cloud-arrow-up" /> Import</button>
+        </AccessibleTable>
+        <button onClick={handleImport} className="btn btn-info"><FontAwesomeIcon aria-hidden="true" icon="cloud-arrow-up" />{UserAssetMessage.Import.niceToString()}</button>
       </div>
     );
   }
@@ -194,5 +218,5 @@ function EntityLineSameType(p: { ctx: TypeContext<LiteConflictEmbedded>, onChang
       { isLite: true, name: IsByAll }
 
   return <EntityLine ctx={p.ctx.subCtx(a => a.to)} type={type} onChange={p.onChange}
-    helpText={!validPrType && !avoidLastType && <span><a href="#" onClick={e => { e.preventDefault(); setAvoidLastType(true) }}><FontAwesomeIcon icon="xmark" /></a> Assume is <code>{p.ctx.value.from.EntityType}</code></span >} />;
+    helpText={!validPrType && !avoidLastType && <span><a href="#" onClick={e => { e.preventDefault(); setAvoidLastType(true) }}><FontAwesomeIcon icon="xmark" /></a> {UserAssetMessage.AssumeIs.niceToString()} <code>{p.ctx.value.from.EntityType}</code></span >} />;
 }
