@@ -173,3 +173,11 @@ text.sf-initial-message {
     display: flex;
     flex-direction: column;
 }
+
+
+line.y-line,
+line.x-key-line-group,
+line.y-tick,
+line.x-key-tick {
+    stroke: var(--bs-border-color);
+}

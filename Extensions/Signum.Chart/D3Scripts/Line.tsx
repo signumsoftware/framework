@@ -192,7 +192,7 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, hasHorizontalSc
                   opacity={active == false ? .5 : undefined}
                   stroke={active == true ? "var(--bs-body-color)" : color}
                   strokeWidth={active == true ? 3 : circleStroke}
-                  fill="white"
+                  fill="var(--bs-body-bg)"
                   r={circleRadius}
                   onClick={e => onDrillDown(row, e)}
                   cursor="pointer"
