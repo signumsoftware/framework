@@ -96,7 +96,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
       {p.hideEditButton != true && !Navigator.isReadOnly(DashboardEntity) &&
         <div className="d-flex flex-row-reverse m-1">
           <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(p.dashboard)} title={DashboardMessage.Edit.niceToString()}>
-            <FontAwesomeIcon icon="pen-to-square" />
+            <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" />
           </Link>
         </div>}
       <div>
@@ -235,7 +235,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
 
   const title = !icon ? titleText :
     <span>
-      <FontAwesomeIcon icon={fallbackIcon(icon)} color={iconColor ?? undefined} className="me-1" />{titleText}
+      <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} color={iconColor ?? undefined} className="me-1" />{titleText}
     </span>;
 
   var dashboardFilter = p.dashboardController?.filters.get(p.ctx.value);
@@ -268,8 +268,8 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
           {renderer.customTitleButtons?.(content, lite, customDataRef)}
           {
             renderer.handleEditClick &&
-            <a className="sf-pointer sf-hide" onClick={e => { e.preventDefault(); renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }} title={DashboardMessage.Edit.niceToString()}>
-              <FontAwesomeIcon icon="pen-to-square" className="me-1" />
+            <a role="button" tabIndex={0} className="sf-pointer sf-hide" onClick={e => { e.preventDefault(); renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }} title={DashboardMessage.Edit.niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" className="me-1" />
             </a>
           }
         </div>

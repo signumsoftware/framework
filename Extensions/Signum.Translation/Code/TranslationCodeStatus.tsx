@@ -65,7 +65,7 @@ function TranslationTable({ result, onRefreshView }: { result: TranslationClient
                 return (
                   <td key={culture}>
                     <Link role="button" to={`/translation/view/${encodeDots(assembly)}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
-                    {fileStatus.status != "None" && <a href="#" className="ms-2" onClick={e => { e.preventDefault(); TranslationClient.API.download(assembly, culture).then(r => saveFile(r)); }} title={TranslationMessage.Download.niceToString()}>{<FontAwesomeIcon aria-hidden="true" icon="download" />}</a>}
+                    {fileStatus.status != "None" && <a href="#" role="button" className="ms-2" onClick={e => { e.preventDefault(); TranslationClient.API.download(assembly, culture).then(r => saveFile(r)); }} title={TranslationMessage.Download.niceToString()}>{<FontAwesomeIcon aria-hidden="true" icon="download" />}</a>}
                     <br />
                     {
                       !fileStatus.isDefault &&

@@ -25,8 +25,8 @@ export default function CopyLiteButton(p: CopyLiteButtonProps): React.ReactEleme
 
   return (
     <span className={p.className}>
-      <a ref={link} className="btn btn-sm btn-tertiary sf-pointer mx-1" onClick={handleCopyLiteButton} title={NormalControlMessage.CopyEntityTypeAndIdForAutocomplete.niceToString()} >
-        <FontAwesomeIcon icon="copy" color="gray" />
+      <a role="button" tabIndex={0} ref={link} className="btn btn-sm btn-tertiary sf-pointer mx-1" onClick={handleCopyLiteButton} title={NormalControlMessage.CopyEntityTypeAndIdForAutocomplete.niceToString()} >
+        <FontAwesomeIcon aria-hidden={true} icon="copy" color="gray" />
       </a>
       <Overlay target={link.current} show={showTooltip} placement="bottom">
         <Tooltip>

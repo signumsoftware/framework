@@ -81,13 +81,13 @@ export default function HeavyList(): React.JSX.Element {
       <br />
       <div className="btn-toolbar" style={{ float: "right" }}>
         <input key={fileVer} type="file" className="form-control" onChange={handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
-        <button onClick={handleUpload} className="btn btn-info" disabled={!fileToUpload}><FontAwesomeIcon icon="cloud-arrow-up" /> Upload</button>
+        <button onClick={handleUpload} className="btn btn-info" disabled={!fileToUpload}><FontAwesomeIcon aria-hidden={true} icon="cloud-arrow-up" /> Upload</button>
       </div>
       <div className="btn-toolbar">
         <button className={classes("btn btn-tertiary", enabled ? "btn-outline-danger" : "btn-tertiary")} onClick={() => handleSetEnabled(!enabled)}><FontAwesomeIcon icon={["fas", "circle"]} /> Record</button>
-        <button onClick={handleUpdate} className="btn btn-tertiary"><FontAwesomeIcon icon="refresh" /> Update</button>
-        <button onClick={handleClear} className="btn btn-tertiary"><FontAwesomeIcon icon="trash" /> Clear</button>
-        <button onClick={handleDownload} className="btn btn-tertiary btn-outline-info"><FontAwesomeIcon icon="cloud-arrow-down" /> Download</button>
+        <button onClick={handleUpdate} className="btn btn-tertiary"><FontAwesomeIcon aria-hidden={true} icon="refresh" /> Update</button>
+        <button onClick={handleClear} className="btn btn-tertiary"><FontAwesomeIcon aria-hidden={true} icon="trash" /> Clear</button>
+        <button onClick={handleDownload} className="btn btn-tertiary btn-outline-info"><FontAwesomeIcon aria-hidden={true} icon="cloud-arrow-down" /> Download</button>
       </div>
       <label>
         <input type="checkbox" className="form-check-input me-1" checked={ignoreProfilerHeavyEntries} onChange={e => setIgnoreProfilerHeavyEntries(e.currentTarget.checked)} />

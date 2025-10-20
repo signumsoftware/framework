@@ -70,7 +70,7 @@ export function ThemeModeSelector(p: { onSetMode?: (mode: "dark" | "light") => v
             active={bootstrapMode === theme}
             onClick={() => setBootstrapMode(theme)}
           >
-            <FontAwesomeIcon icon={ICONS[theme]} className="me-2" />
+            <FontAwesomeIcon aria-hidden={true} icon={ICONS[theme]} className="me-2" />
             {(theme.firstUpper())}
           </NavDropdown.Item>
         ))}

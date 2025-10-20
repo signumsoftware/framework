@@ -133,10 +133,13 @@ export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { 
         {
           <tr className="sf-property-create">
             <td colSpan={4}>
-              <a href="#" title={StyleContext.default.titleLabels ? addElement : undefined}
+              <a href="#"
+                title={StyleContext.default.titleLabels ? addElement : undefined}
                 className="sf-line-button sf-create sf-create-condition"
+                role="button"
+                tabIndex={0}
                 onClick={e => handleNewPropertySetter(e)}>
-                <FontAwesomeIcon icon="plus" className="sf-create me-1" />{addElement}
+                <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create me-1" />{addElement}
               </a>
             </td>
           </tr>
@@ -271,10 +274,13 @@ export function PropertySetterComponent(p: PropertySetterComponentProps): React.
     <>
       <tr className="sf-property-setter">
         <td>
-          {<a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+          {<a href="#"
+            title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
             className="sf-line-button sf-remove"
+            role="button"
+            tabIndex={0}
             onClick={handleDeleteSetter}>
-            <FontAwesomeIcon icon="xmark" />
+            <FontAwesomeIcon aria-hidden={true} icon="xmark" />
           </a>}
         </td>
         <td>

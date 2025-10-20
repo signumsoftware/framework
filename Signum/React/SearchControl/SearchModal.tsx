@@ -162,8 +162,13 @@ function SearchModal(p: SearchModalProps): React.ReactElement {
           {p.title}
           &nbsp;
         </span>
-        <a className="sf-popup-fullscreen" href="#" onClick={(e) => { e.preventDefault(); searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e); } }>
-          <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()} />
+        <a className="sf-popup-fullscreen"
+          href="#"
+          role="button"
+          tabIndex={0}
+          title={FrameMessage.Fullscreen.niceToString()}
+          onClick={(e) => { e.preventDefault(); searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e); }}>
+          <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
         </a>
         {p.message && <>
           <br />

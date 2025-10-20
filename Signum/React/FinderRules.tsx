@@ -504,11 +504,13 @@ export function initEntityFormatRules(): Finder.EntityFormatRule[] {
       isApplicable: sc => sc?.state.resultFindOptions?.groupResults == true,
       formatter: new Finder.EntityFormatter(({ row, columns, searchControl: sc }) =>
         <a href="#"
+          role="button"
+          tabIndex={0}
           className="sf-line-button sf-view"
           onClick={e => { e.preventDefault(); sc!.openRowGroup(row, e); }}
         >
           <span title={JavascriptMessage.ShowGroup.niceToString()}>
-            <FontAwesomeIcon icon="layer-group" />
+            <FontAwesomeIcon aria-hidden={true} icon="layer-group" />
           </span>
         </a>, "centered-cell")
     },
@@ -778,8 +780,10 @@ export function MultiValue(p: MultiValueProps): React.ReactElement {
                 {!p.readOnly &&
                   <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
                     className="sf-line-button sf-remove"
-                    onClick={e => handleDeleteValue(e, i)}>
-                    <FontAwesomeIcon icon="xmark" />
+                    onClick={e => handleDeleteValue(e, i)}
+                    role="button"
+                    tabIndex={0}>
+                    <FontAwesomeIcon aria-hidden={true} icon="xmark" />
                   </a>}
               </td>
               <td>
@@ -799,8 +803,10 @@ export function MultiValue(p: MultiValueProps): React.ReactElement {
             {!p.readOnly &&
               <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddValue.niceToString() : undefined}
                 className="sf-line-button sf-create"
-                onClick={handleAddValue}>
-                <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
+                onClick={handleAddValue}
+                role="button"
+                tabIndex={0}>
+                <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
               </a>}
           </td>
         </tr>
@@ -890,7 +896,7 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
   "ComplexCondition": {
     icon: <span>OR</span>,
     title: "Full-Text Search Syntax",
-    url: <a href="https://learn.microsoft.com/en-us/sql/relational-databases/search/query-with-full-text-search" target="_blank">Microsoft Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    url: <a href="https://learn.microsoft.com/en-us/sql/relational-databases/search/query-with-full-text-search" target="_blank">Microsoft Docs <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>,
     examples: [
       "banana AND strawberry",
       "banana OR strawberry",
@@ -904,7 +910,7 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
   "TsQuery": {
     icon: <span>&</span>,
     title: "Full-Text Search to_tsquery Syntax",
-    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>,
     examples: [
       "banana & strawberry",
       "banana | strawberry",
@@ -918,7 +924,7 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
   "TsQuery_Plain": {
     icon: <FontAwesomeIcon icon="quote-left" />,
     title: "Full-Text Search to_simpletsquery Syntax",
-    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>,
     examples: [
       "banana strawberry",
       "\"banana strawberry\" <3>",
@@ -927,7 +933,7 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
   "TsQuery_Phrase": {
     icon: <FontAwesomeIcon icon="text" />,
     title: "Full-Text Search plainto_tsquery Syntax",
-    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>,
     examples: [
       "banana strawberry",
     ]
@@ -935,7 +941,7 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
   "TsQuery_WebSearch": {
     icon: <FontAwesomeIcon icon="globe" />,
     title: "Full-Text Search to_tsquery Syntax",
-    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>,
     examples: [
       "banana strawberry",
       "banana OR strawberry",

@@ -50,10 +50,11 @@ export namespace QuickLinkClient {
     return (<a className={classes("badge badge-pill sf-quicklinks", "text-bg-" + quickLink.color)}
       title={StyleContext.default.titleLabels ? quickLink.text() : undefined}
       role="button"
+      tabIndex={0}
       href="#"
       data-toggle="dropdown"
       onClick={e => { e.preventDefault(); quickLink.handleClick({ lite: p.lite, lites: [p.lite] }, e); }}>
-      {quickLink.icon && <FontAwesomeIcon icon={quickLink.icon} color={quickLink.color ? undefined : quickLink.iconColor} />}
+      {quickLink.icon && <FontAwesomeIcon aria-hidden={true} icon={quickLink.icon} color={quickLink.color ? undefined : quickLink.iconColor} />}
       {quickLink.icon && "\u00A0"}
       {quickLink.text()}
     </a>)
@@ -230,10 +231,11 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.ReactElement | n
                 className={classes("badge badge-pill sf-quicklinks", "text-bg-" + first.color)}
                 title={StyleContext.default.titleLabels ? gr.elements[0].text() : undefined}
                 role="button"
+                tabIndex={0}
                 href="#"
                 data-toggle="dropdown"
                 onClick={e => { e.preventDefault(); first.handleClick(p.qlc, e); }}>
-                {first.icon && <FontAwesomeIcon icon={first.icon} color={first.color ? undefined : first.iconColor} />}
+                {first.icon && <FontAwesomeIcon aria-hidden={true} icon={first.icon} color={first.color ? undefined : first.iconColor} />}
                 {first.icon && "\u00A0"}
                 {first.text()}
               </a>
@@ -248,7 +250,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.ReactElement | n
                   title={QuickLinkMessage.Quicklinks.niceToString()}
                   badgeColor={dd.color}
                   content={<>
-                    {dd.icon && <FontAwesomeIcon icon={dd.icon} />}
+                    {dd.icon && <FontAwesomeIcon aria-hidden={true} icon={dd.icon} />}
                     {dd.icon && "\u00A0"}
                     {dd.text(gr.elements)}
                   </>} />
@@ -357,7 +359,7 @@ export abstract class QuickLink<T extends Entity> {
       return undefined;
 
     return (
-      <FontAwesomeIcon icon={this.icon} className="icon" color={this.iconColor} />
+      <FontAwesomeIcon aria-hidden={true} icon={this.icon} className="icon" color={this.iconColor} />
     );
   }
 }

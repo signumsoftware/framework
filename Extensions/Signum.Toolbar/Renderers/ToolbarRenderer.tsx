@@ -70,7 +70,7 @@ export default function ToolbarRenderer(p: {
     <div className={"sidebar-inner"}>
       <div className={"close-sidebar"}
         onClick={() => p.onAutoClose && p.onAutoClose()}>
-        <FontAwesomeIcon icon={"angles-left"} aria-label="Close" />
+        <FontAwesomeIcon aria-hidden={true} icon={"angles-left"} aria-label="Close" />
       </div>
 
       <ul>
@@ -595,7 +595,7 @@ export function ToolbarNavItem(p: { title: string | undefined, active?: boolean,
         <div>{p.icon}</div>
         <span className={"nav-item-text"}>
           {p.title}
-          {p.isExternalLink && <FontAwesomeIcon icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}
+          {p.isExternalLink && <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}
         </span>
         {p.extraIcons}
         <div className={"nav-item-float"}>{p.title}</div>

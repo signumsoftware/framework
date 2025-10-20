@@ -33,7 +33,7 @@ export function HtmlEditorButton(p: {
         onClick={p.onClick}
         title={p.title}
       >
-        {p.content ?? <FontAwesomeIcon icon={p.icon!} />}
+        {p.content ?? <FontAwesomeIcon aria-hidden={true} icon={p.icon!} />}
       </button>
     </div>
   );

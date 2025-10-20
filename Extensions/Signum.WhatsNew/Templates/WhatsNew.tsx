@@ -29,7 +29,7 @@ export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }): React
         if (icon == null)
           return ti.niceName;
 
-        return <><FontAwesomeIcon icon={icon.icon} color={icon.iconColor} /><span className="ms-2">{ti.niceName}</span></>;
+        return <><FontAwesomeIcon aria-hidden={true} icon={icon.icon} color={icon.iconColor} /><span className="ms-2">{ti.niceName}</span></>;
       }
     });
   }

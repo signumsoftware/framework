@@ -145,7 +145,7 @@ export namespace WordClient {
           ({
             fullText: getToString(wt),
             menu: <Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)} >
-              <FontAwesomeIcon icon={"file-word"} className="icon" />
+              <FontAwesomeIcon aria-hidden={true} icon={"file-word"} className="icon" />
               {getToString(wt)}
             </Dropdown.Item >
           } as ContextualMenuItem)

@@ -106,14 +106,14 @@ export function FileUploader(p: FileUploaderProps): React.JSX.Element {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}>
           <div className={classes("sf-upload btn btn-tertiary", p.buttonCss,)}>
-            <FontAwesomeIcon icon="upload" className="me-2" />
+            <FontAwesomeIcon aria-hidden={true} icon="upload" className="me-2" />
             {FileMessage.SelectFile.niceToString()}
             <input type='file' accept={p.accept} onChange={handleFileChange} multiple={p.multiple} />
           </div>
           &nbsp;{p.dragAndDropMessage ?? FileMessage.OrDragAFileHere.niceToString()}
         </div> :
           <div className={classes("sf-upload btn btn-tertiary", p.buttonCss)}>
-            <FontAwesomeIcon icon="upload" className="me-1" />
+            <FontAwesomeIcon aria-hidden={true} icon="upload" className="me-1" />
             {FileMessage.SelectFile.niceToString()}
             <input type='file' accept={p.accept} onChange={handleFileChange} multiple={p.multiple} />
           </div>

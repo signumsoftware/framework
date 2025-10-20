@@ -37,7 +37,7 @@ export abstract class ToolbarConfig<T extends Entity> {
     if (!icon)
       return null;
 
-    return <FontAwesomeIcon icon={fallbackIcon(icon)} className={"icon"} color={color} />;
+    return <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} className={"icon"} color={color} />;
   }
 
   getCounter(element: ToolbarResponse<T>, entity: Lite<Entity> | null): React.ReactElement | undefined {
