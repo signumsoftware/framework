@@ -74,7 +74,7 @@ public class FilePathEntity : Entity, IFile, IFilePath
     [AutoExpressionField]
     public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize());
 
-    [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
+    [StringLengthValidator(Min = 3, Max = 1024), NotNullValidator(DisabledInModelBinder = true)]
     public string Suffix { get; set; }
 
     public FileTypeSymbol FileType { get; internal set; }
