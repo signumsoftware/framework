@@ -155,7 +155,7 @@ function MessageModal(p: MessageModalProps): React.ReactElement {
   function renderTitle() {
     var icon = getIcon();
 
-    var iconSpan = icon && <FontAwesomeIcon icon={icon} />;
+    var iconSpan = icon && <FontAwesomeIcon aria-hidden={true} icon={icon} />;
 
     const titleRef = React.useRef<HTMLHeadingElement>(null);
 

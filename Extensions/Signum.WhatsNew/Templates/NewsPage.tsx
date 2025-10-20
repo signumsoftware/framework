@@ -27,7 +27,7 @@ export default function NewsPage(): React.JSX.Element {
   return (
     <div key={whatsnew.whatsNew.id} style={{ position: "relative", margin: "10px", }}>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <Link to={"/news/"} role="button" style={{ textDecoration: "none" }}> <FontAwesomeIcon aria-hidden={true} icon={"angles-left"} /> {WhatsNewMessage.BackToOverview.niceToString()}</Link>
+        <Link to={"/news/"} style={{ textDecoration: "none" }}> <FontAwesomeIcon aria-hidden={true} icon={"angles-left"} /> {WhatsNewMessage.BackToOverview.niceToString()}</Link>
         {!Navigator.isReadOnly(WhatsNewEntity) && <small className="ms-2 lead"><EntityLink role="button" lite={whatsnew.whatsNew} onNavigated={() => setRefreshValue(a => a + 1)}><FontAwesomeIcon aria-hidden={true} icon="pen-to-square" title={EntityControlMessage.Edit.niceToString()} /></EntityLink></small>}
       </div>
 

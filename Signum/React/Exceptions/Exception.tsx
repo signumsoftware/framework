@@ -84,7 +84,7 @@ export function FormatJson(p: { code: string | undefined | null }): React.ReactE
   return (
     <div>
       <button className={classes("btn btn-sm btn-tertiary", formatJson && "active")} onClick={() => setFormatJson(!formatJson)}>
-        <FontAwesomeIcon icon="code" /> Format JSON 
+        <FontAwesomeIcon aria-hidden={true} icon="code" /> Format JSON 
       </button>
       <pre style={{ whiteSpace: "pre-wrap" }}>
         <code>{formatJson ? formattedJson : p.code}</code>

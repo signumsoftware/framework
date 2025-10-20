@@ -245,7 +245,7 @@ function UploadProgress(p: { file: IFilePath }) {
   return (
     <div>
       <div>
-        {abortController && <a href="#" className="sf-line-button sf-remove" onClick={e => { e.preventDefault(); abortController.abort(); }}><FontAwesomeIcon icon="xmark" /></a>}
+        {abortController && <a href="#" className="sf-line-button sf-remove" onClick={e => { e.preventDefault(); abortController.abort(); }}><FontAwesomeIcon aria-hidden={true} icon="xmark" /></a>}
         <small>{FileMessage.Uploading01.niceToString(p.file.fileName, toComputerSize(p.file.fileLength))}</small>
       </div>
       <ProgressBar color={abortController?.signal.aborted ? "warning" : undefined} value={(p.file.__uploadingOffset == null ? null : p.file.__uploadingOffset / p.file.fileLength)} />

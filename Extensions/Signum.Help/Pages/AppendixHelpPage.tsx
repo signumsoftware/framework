@@ -69,7 +69,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, 
       });
   }
 
-  return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon icon="save" /> {oi.niceName}</button>;
+  return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon aria-hidden={true} icon="save" /> {oi.niceName}</button>;
 }
 
 function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
@@ -96,5 +96,5 @@ function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
     });
   }
 
-  return <button className="btn btn-danger ms-4" onClick={onClick}><FontAwesomeIcon icon="trash" /> {getOperationInfo(AppendixHelpOperation.Delete, AppendixHelpEntity).niceName}</button>;
+  return <button className="btn btn-danger ms-4" onClick={onClick}><FontAwesomeIcon aria-hidden={true} icon="trash" /> {getOperationInfo(AppendixHelpOperation.Delete, AppendixHelpEntity).niceName}</button>;
 }

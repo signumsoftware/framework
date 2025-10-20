@@ -20,7 +20,7 @@ export default function CopyLinkButton(p: CopyLinkButtonProps): React.ReactEleme
       className={p.className}
       title={NormalControlMessage.CopyEntityUrl.niceToString()}
     >
-      <FontAwesomeIcon icon="link" color="gray" />
+      <FontAwesomeIcon aria-hidden={true} icon="link" color="gray" />
     </CopyButton>
   );
 }

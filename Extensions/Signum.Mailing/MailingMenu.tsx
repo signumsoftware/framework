@@ -35,7 +35,7 @@ export default function MailingMenu(p : MailingMenuProps): React.JSX.Element | n
   if (!emailTemplates || !emailTemplates.length)
     return null;
 
-  const label = <span><FontAwesomeIcon icon="envelope" /> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
+  const label = <span><FontAwesomeIcon aria-hidden={true} icon="envelope" /> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
 
   return (
     <DropdownButton id="mailingDropDown" variant="light" className="sf-mailing-dropdown" title={label}>

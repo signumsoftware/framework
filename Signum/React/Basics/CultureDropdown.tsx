@@ -20,9 +20,13 @@ export default function CultureDropdown(p: { fullName?: boolean; isMobile?: bool
   function handleSelect(c: Lite<CultureInfoEntity>) {
     CultureClient.changeCurrentCulture(c);
   }
+  function fullName() {
+    return (p.fullName ? current.nativeName : simplifyName(current.nativeName));
+  }
+
   const dropdownTitle = p.isMobile
-    ? <FontAwesomeIcon icon={"globe"} />
-    : (p.fullName ? current.nativeName : simplifyName(current.nativeName));
+    ? <FontAwesomeIcon icon={"globe"} title={fullName()} aria-label={fullName()} />
+    : fullName();
   return (
     <NavDropdown data-culture={current.name} title={dropdownTitle} className="sf-culture-dropdown">
       {Dic.map(cultures, (name, c, i) =>
@@ -75,7 +79,7 @@ export function CultureDropdownMenuItem(props: {
       <div className={"dropdown-item"}
         style={{ cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center" }}
         onClick={() => setShow(!show)}>
-        <FontAwesomeIcon icon="globe" fixedWidth className="me-2" /> <span style={{ width: "100%" }}>{props.label || CultureInfoEntity.niceName()}</span> <FontAwesomeIcon icon={getChevronIcon()} />
+        <FontAwesomeIcon icon="globe" aria-hidden={true} className="me-2" /> <span style={{ width: "100%" }}>{props.label || CultureInfoEntity.niceName()}</span> <FontAwesomeIcon aria-hidden={true} icon={getChevronIcon()} />
       </div>
       <div style={{ display: show ? "block" : "none" }}>
         {Dic.map(cultures, (name, c, i) =>

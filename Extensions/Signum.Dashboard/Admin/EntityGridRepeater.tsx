@@ -304,9 +304,9 @@ export function EntityGridItem(p : EntityGridItemProps): React.JSX.Element{
         onDragStart={p.onTitleDragStart}
         onDragEnd={p.onTitleDragEnd} >
         {p.onRemove &&
-          <a href="#" className="sf-line-button sf-remove float-end" onClick={p.onRemove}
+          <a href="#" role="button" className="sf-line-button sf-remove float-end" onClick={p.onRemove}
               title={EntityControlMessage.Remove.niceToString()}>
-              <FontAwesomeIcon icon="xmark" />
+              <FontAwesomeIcon aria-hidden={true} icon="xmark" />
             </a>
           }
         {p.title}

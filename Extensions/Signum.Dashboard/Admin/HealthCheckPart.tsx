@@ -18,11 +18,13 @@ export default function HealthCheckPart(p: { ctx: TypeContext<HealthCheckPartEnt
         <div>
           <a href="#" title={c.props.ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
             className="sf-line-button sf-create"
+            role="button"
             onClick={c.handleCreateClick}>
             <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
           </a>
 
           <a href="#"
+            role="button"
             className="sf-line-button sf-create ms-4"
             onClick={async e => {
 
@@ -37,7 +39,7 @@ export default function HealthCheckPart(p: { ctx: TypeContext<HealthCheckPartEnt
               ctx.value.items.push(newItem);
               forceUpdate();
             }}>
-            <FontAwesomeIcon icon="heart-pulse" color="gray" /> Paste Health Check Link
+            <FontAwesomeIcon aria-hidden={true} icon="heart-pulse" color="gray" /> Paste Health Check Link
           </a>
         </div>
 

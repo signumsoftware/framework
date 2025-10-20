@@ -335,8 +335,8 @@ export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo
   var title = SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
 
   return (
-    <a onClick={e => { e.preventDefault(); p.onClick(tis, qd); }} href="#" className="btn btn-sm btn-tertiary sf-create me-2" title={title}>
-      <FontAwesomeIcon icon={"plus"} /> {title}
+    <a onClick={e => { e.preventDefault(); p.onClick(tis, qd); }} href="#" role="button" className="btn btn-sm btn-tertiary sf-create me-2" title={title}>
+      <FontAwesomeIcon aria-hidden={true} icon={"plus"} /> {title}
     </a>
   );
 }
@@ -366,7 +366,7 @@ export function DashboardTitle(p: { dashboard: DashboardEntity }): React.JSX.Ele
 
   return (
     <div className="dashboard-title">
-      <FontAwesomeIcon icon={icon} color={p.dashboard.iconColor ?? undefined} />
+      <FontAwesomeIcon aria-hidden={true} icon={icon} color={p.dashboard.iconColor ?? undefined} />
       &nbsp;{title}
     </div>
   );

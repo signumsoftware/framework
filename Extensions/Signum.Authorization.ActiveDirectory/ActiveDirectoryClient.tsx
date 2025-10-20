@@ -90,7 +90,7 @@ export namespace ActiveDirectoryClient {
                 var promise = AutoLineModal.show({
                   type: { name: "string" },
                   modalSize: "md",
-                  title: <><FontAwesomeIcon icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
+                  title: <><FontAwesomeIcon aria-hidden={true} icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
                   label: UserADMessage.NameOrEmail.niceToString(),
                   initialValue: search
                 }) as Promise<string>;

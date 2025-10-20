@@ -204,7 +204,7 @@ export namespace UserQueryClient {
           ({
             fullText: getToString(uq),
             menu: <Dropdown.Item data-user-query={uq.id} onClick={() => handleGroupMenuClick(uq, resFO, resTable, cic)} >
-              <FontAwesomeIcon icon={"rectangle-list"} className="icon" color="dodgerblue" />
+              <FontAwesomeIcon aria-hidden={true} icon={"rectangle-list"} className="icon" color="dodgerblue" />
               {getToString(uq)}
             </Dropdown.Item>
           } as ContextualMenuItem)
