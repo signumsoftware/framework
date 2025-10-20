@@ -1,8 +1,9 @@
-using System.Collections.ObjectModel;
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Entities;
 
@@ -671,6 +672,9 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
             this.innerList.Sort(a => a.OldIndex!.Value);
     }
 
+   
+
+
     public void SyncMList<N, K>(IEnumerable<N> newList, Func<T, K> keySelectorOld, Func<N, K> keySelectorNew, Func<T?, N, T> assign)
         where K : notnull
     {
@@ -868,6 +872,23 @@ public static class MListExtensions
     public static MList<T> ToMList<T>(this IEnumerable<T> collection)
     {
         return new MList<T>(collection);
+    }
+
+    //Sync elements assuming both mlist and newList have no duplucates
+    public static void SyncMList<T>(this MList<T> mlist, IEnumerable<T> newList)
+       where T : notnull
+    {
+        newList.ToDictionaryEx(a => a); //To fail fast and not on next iteration
+        var innerList = ((IMListPrivate<T>)mlist).InnerList;
+        var alreadyDic = innerList.ToDictionaryEx(a => a.Element);
+        innerList.Clear();
+        innerList.AddRange(newList.Select(e =>
+        {
+            if (alreadyDic.TryGetValue(e, out var already))
+                return already;
+            else
+                return new MList<T>.RowIdElement(e);
+        }));
     }
 }
 
