@@ -73,7 +73,7 @@ export default function ColumnsBuilder(p: ColumnsBuilderProps): React.ReactEleme
                   <a title={StyleContext.default.titleLabels ? SearchMessage.AddColumn.niceToString() : undefined}
                     className="sf-line-button sf-create"
                     onClick={handlerNewColumn}>
-                    <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddColumn.niceToString()}
+                    <FontAwesomeIcon icon="plus" aria-hidden="true" className="sf-create" />&nbsp;{SearchMessage.AddColumn.niceToString()}
                   </a>
                 </td>
               </tr>

@@ -59,6 +59,14 @@ export namespace AuthAdminMessage {
   export const SecondRule: MessageKey = new MessageKey("AuthAdminMessage", "SecondRule");
   export const ThirdRule: MessageKey = new MessageKey("AuthAdminMessage", "ThirdRule");
   export const NthRule: MessageKey = new MessageKey("AuthAdminMessage", "NthRule");
+  export const TypePermissionOverview: MessageKey = new MessageKey("AuthAdminMessage", "TypePermissionOverview");
+  export const PropertyRuleOverview: MessageKey = new MessageKey("AuthAdminMessage", "PropertyRuleOverview");
+  export const CopyFrom: MessageKey = new MessageKey("AuthAdminMessage", "CopyFrom");
+  export const TypeConditions: MessageKey = new MessageKey("AuthAdminMessage", "TypeConditions");
+  export const PermissionRulesOverview: MessageKey = new MessageKey("AuthAdminMessage", "PermissionRulesOverview");
+  export const PermissionOverriden: MessageKey = new MessageKey("AuthAdminMessage", "PermissionOverriden");
+  export const AuthRuleOverview: MessageKey = new MessageKey("AuthAdminMessage", "AuthRuleOverview");
+  export const QueryPermissionsOverview: MessageKey = new MessageKey("AuthAdminMessage", "QueryPermissionsOverview");
 }
 
 export const AuthThumbnail: EnumType<AuthThumbnail> = new EnumType<AuthThumbnail>("AuthThumbnail");

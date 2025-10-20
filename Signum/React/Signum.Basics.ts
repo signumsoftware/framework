@@ -22,6 +22,11 @@ export type BootstrapStyle =
 export namespace ChangeLogMessage {
   export const ThereIsNotAnyNewChangesFrom0: MessageKey = new MessageKey("ChangeLogMessage", "ThereIsNotAnyNewChangesFrom0");
   export const SeeMore: MessageKey = new MessageKey("ChangeLogMessage", "SeeMore");
+  export const SeeMoreChangeLogEntries: MessageKey = new MessageKey("ChangeLogMessage", "SeeMoreChangeLogEntries");
+  export const ChangeLogs: MessageKey = new MessageKey("ChangeLogMessage", "ChangeLogs");
+  export const DeployedOn0: MessageKey = new MessageKey("ChangeLogMessage", "DeployedOn0");
+  export const _0ImplementedOn1WithFollowingChanges2: MessageKey = new MessageKey("ChangeLogMessage", "_0ImplementedOn1WithFollowingChanges2");
+  export const ChangeLogEntries: MessageKey = new MessageKey("ChangeLogMessage", "ChangeLogEntries");
 }
 
 export const ChangeLogViewLogEntity: Type<ChangeLogViewLogEntity> = new Type<ChangeLogViewLogEntity>("ChangeLogViewLog");

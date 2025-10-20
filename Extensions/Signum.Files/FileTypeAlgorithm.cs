@@ -53,28 +53,22 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     }
 
     static readonly string Uploading = ".uploading";
-    public Task StartUpload(IFilePath fp)
+    public Task<string?> StartUpload(IFilePath fp, CancellationToken token = default)
     {
         CalculateSufixWithRenames(fp);
-
         EnsureDirectory(fp);
-
         using var f = File.Create(fp.FullPhysicalPath()!);
         using var f2 = File.Create(fp.FullPhysicalPath()! + Uploading);
-
-        return Task.CompletedTask;
+        return Task.FromResult<string?>(null);
     }
 
-    public async Task<ChunkInfo> UploadChunk(IFilePath fp, int chunkIndex, MemoryStream chunk, CancellationToken token = default)
+    public async Task<ChunkInfo> UploadChunk(IFilePath fp, int chunkIndex, MemoryStream chunk, string? uploadId = null, CancellationToken token = default)
     {
         if (!File.Exists(fp.FullPhysicalPath() + Uploading))
             throw new InvalidOperationException("File is not currently uploading!: " + fp.FullPhysicalPath());
-
         using (var file = File.Open(fp.FullPhysicalPath()!, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
             await chunk.CopyToAsync(file, token);
-
         var hash = CryptorEngine.CalculateMD5Hash(chunk);
-
         return new ChunkInfo
         {
             PartialHash = hash,
@@ -82,19 +76,32 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         };
     }
 
-    public Task FinishUpload(IFilePath fp, List<ChunkInfo> chunks, CancellationToken token = default)
+    public Task FinishUpload(IFilePath fp, List<ChunkInfo> chunks, string? uploadId = null, CancellationToken token = default)
     {
         var fi = new FileInfo(fp.FullPhysicalPath()!);
-
         var hashList = chunks.ToString(c => c.PartialHash, "\n");
-
         fp.Hash = (CryptorEngine.CalculateMD5Hash(Encoding.UTF8.GetBytes(hashList)));
         fp.FileLength = fi!.Length;
 
         File.Delete(fp.FullPhysicalPath() + Uploading);
+        return Task.CompletedTask;
+    }
+
+    public Task AbortUpload(IFilePath fp, string? uploadId = null, CancellationToken token = default)
+    {
+        // Remove the temporary ".uploading" file if it exists
+        var uploadingPath = fp.FullPhysicalPath() + Uploading;
+        if (File.Exists(uploadingPath))
+            File.Delete(uploadingPath);
+
+        // Optionally, remove the partially uploaded file as well
+        var filePath = fp.FullPhysicalPath();
+        if (File.Exists(filePath))
+            File.Delete(filePath);
 
         return Task.CompletedTask;
     }
+
 
     public virtual Task SaveFileAsync(IFilePath fp, CancellationToken token = default)
     {
@@ -292,7 +299,5 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         using (HeavyProfiler.Log("ReadAllText", () => fullPhysicalPath))
             return File.ReadAllText(fullPhysicalPath);
     }
-
-
 }
 

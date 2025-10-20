@@ -18,6 +18,7 @@ import { useTitle } from '@framework/AppContext'
 import { TranslationMember, initialElementIf } from '../Code/TranslationTypeTable'
 import { getToString, Lite } from '@framework/Signum.Entities'
 import { CultureInfoEntity } from '@framework/Signum.Basics'
+import { WCAGRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 
 
 
@@ -42,7 +43,7 @@ export default function TranslatedInstanceSync(): React.JSX.Element {
     return (
       <div>
         <TranslatedInstances data={result} currentCulture={params.culture} cultures={cultures} />
-        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary mt-2" onClick={handleSave} disabled={isLocked} />
+        <input type="submit" aria-label={TranslationMessage.Save.niceToString()} value={TranslationMessage.Save.niceToString()} className="btn btn-primary mt-2" onClick={handleSave} disabled={isLocked} />
       </div>
     );
   }
@@ -123,9 +124,9 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
   return (
     <form onSubmit={handleSearch} className="input-group">
       <input type="text" className="form-control"
-        placeholder={TranslationMessage.Search.niceToString()} value={tmpFilter} onChange={e => setTmpFilter(e.currentTarget.value)} onKeyDown={handleKeyDown} />
+        aria-label={TranslationMessage.Search.niceToString()} placeholder={TranslationMessage.Search.niceToString()} value={tmpFilter} onChange={e => setTmpFilter(e.currentTarget.value)} onKeyDown={handleKeyDown} />
       <button className="btn btn-tertiary" type="submit" title={TranslationMessage.Search.niceToString()}>
-        <FontAwesomeIcon icon="magnifying-glass" />
+        <FontAwesomeIcon role="img" icon="magnifying-glass" />
       </button>
     </form>
   );
@@ -133,61 +134,69 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
 
 export function TranslatedInstances(p: { data: TranslatedInstanceClient.TypeInstancesChanges, cultures: { [culture: string]: Lite<CultureInfoEntity> }, currentCulture: string }): React.JSX.Element {
 
+  function getPropertyString(routeAndRowId: string) {
+    return !routeAndRowId.contains(";") ? routeAndRowId : routeAndRowId.before(";").replace("/", "[" + routeAndRowId.after(";") + "].");
+
+
+  }
   return (
-    <table id="results" style={{ width: "100%", margin: "0px" }} className="st">
+    <>
       {p.data.instances.map(ins =>
         <React.Fragment key={ins.instance.id}>
-          <thead>
-            <tr>
-              <th className="leftCell">{TranslationMessage.Instance.niceToString()}</th>
-              <th className="titleCell"><EntityLink lite={ins.instance} /></th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              Dic.getKeys(ins.routeConflicts).map(routeAndRowId => {
-                var propertyRoute = routeAndRowId.tryBefore(";") ?? routeAndRowId;
-                var propertyString = !routeAndRowId.contains(";") ? routeAndRowId : routeAndRowId.before(";").replace("/", "[" + routeAndRowId.after(";") + "].");
-
-                var propChange = ins.routeConflicts[routeAndRowId];
-
-                var isHtml = p.data.routes[propertyRoute] == "Html";
-
-
-                return (
-                  <React.Fragment key={routeAndRowId}>
-                    <tr>
+          <AccessibleTable
+            caption={TranslationMessage.TranslationsOverview.niceToString()}
+            className="table st"
+            mapCustomComponents={new Map([[WCAGRow, "tr"]])}
+            multiselectable={false}
+            id="results"
+            style={{ width: "100%", margin: "0px" }}>
+            <thead>
+              <tr>
+                <th className="leftCell">{TranslationMessage.Instance.niceToString()}</th>
+                <th className="titleCell"><EntityLink lite={ins.instance} /></th>
+              </tr>
+            </thead>
+              <tbody>
+                {Dic.getKeys(ins.routeConflicts).flatMap(routeAndRowId => {
+                  const mainRow = (
+                    <tr key={routeAndRowId + "-main"}>
                       <th className="leftCell">{TranslationMessage.Property.niceToString()}</th>
-                      <th>{propertyString}</th>
+                      <th>{getPropertyString(routeAndRowId)}</th>
                     </tr>
-                    {Dic.getKeys(propChange.support).map(c => {
-                      var rc = propChange.support[c];
-                      return (
-                        <tr key={c}>
-                          <td className="leftCell">{c}</td>
-                          <td className="monospaceCell">
-                            {rc.oldOriginal == null || rc.original == null || rc.oldOriginal == rc.original ?
-                              <pre className="mb-0">{rc.original}</pre> :
-                              <DiffDocumentSimple first={rc.oldOriginal} second={rc.original} />
-                            }
-                          </td>
-                        </tr>
-                      );
-                    })}
-                    <tr>
+                  );
+
+                  const supportRows = Dic.getKeys(ins.routeConflicts[routeAndRowId].support).map(c => {
+                    const rc = ins.routeConflicts[routeAndRowId].support[c];
+                    return (
+                      <tr key={routeAndRowId + "-" + c}>
+                        <td className="leftCell">{c}</td>
+                        <td className="monospaceCell">
+                          {rc.oldOriginal == null || rc.original == null || rc.oldOriginal == rc.original
+                            ? <pre className="mb-0">{rc.original}</pre>
+                            : <DiffDocumentSimple first={rc.oldOriginal} second={rc.original} />
+                          }
+                        </td>
+                      </tr>
+                    );
+                  });
+
+                  const translationRow = (
+                    <tr key={routeAndRowId + "-translation"}>
                       <td className="leftCell">{p.currentCulture}</td>
                       <td className="monospaceCell">
-                        <TranslationProperty property={propChange} />
+                        <TranslationProperty property={ins.routeConflicts[routeAndRowId]} />
                       </td>
                     </tr>
-                  </React.Fragment>
-                );
-              })
-            }
-          </tbody>
-        </React.Fragment>
-      )}
-    </table>
+                  );
+
+                  return [mainRow, ...supportRows, translationRow];
+                })}
+            
+            </tbody>
+          </AccessibleTable>
+      </React.Fragment>
+    )}
+  </>
   );
 }
 
@@ -223,23 +232,39 @@ export function TranslationProperty({ property }: { property: TranslatedInstance
     .flatMap(([c, rc]) => rc.automaticTranslations.map(at => ({ culture: c, text: at.text, translatorName: at.translatorName }))
       .concat(rc.oldTranslation ? [{ culture: c, text: rc.oldTranslation, translatorName: "Previous translation" }] : [])
   );
-
-  if (translations.length == 0 || avoidCombo)
-    return (
-      <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={property.translatedText ?? ""}
+  return (translations.length === 0 || avoidCombo) ? <>
+    <label className="sr-only" htmlFor={`translatedText-${property.translatedText}`}> {TranslationMessage.Description.niceToString()}</label>
+    <TextArea
+        id={`translatedText-${property.translatedText}`}
+        aria-label={TranslationMessage.Description.niceToString()}
+        style={{ height: "24px", width: "90%" }}
+        minHeight="24px"
+        value={property.translatedText ?? ""}
         onChange={e => { property.translatedText = e.currentTarget.value; forceUpdate(); }}
         onBlur={handleOnChange}
-        innerRef={handleOnTextArea} />
-    );
-
-  return (
+        innerRef={handleOnTextArea}
+       />
+     </>
+   : 
     <span>
-      <select value={property.translatedText ?? ""} onChange={handleOnChange} onKeyDown={handleKeyDown}>
+      <label className="sr-only" htmlFor={`translationSelect-${property.translatedText}`}>
+        {TranslationMessage.Description.niceToString()}
+      </label>
+      <select
+        id={`translationSelect-${property.translatedText}`}
+        aria-label={TranslationMessage.Description.niceToString()}
+        value={property.translatedText ?? ""}
+        onChange={handleOnChange}
+        onKeyDown={handleKeyDown}>
         {initialElementIf(property.translatedText == undefined).concat(
-          translations.map(a => <option key={a.culture + a.translatorName} title={`from '${a.culture}' using ${a.translatorName}`} value={a.text}>{a.text}</option>))}
+          translations.map(a =>
+              <option key={a.culture + a.translatorName} title={TranslationMessage.From0using1_.niceToString(a.culture, a.translatorName)} value={a.text}>
+              {a.text}
+            </option>
+          )
+        )}
       </select>
         &nbsp;
-      <a href="#" onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</a>
+        <a href="#" role="button" onClick={handleAvoidCombo} aria-label={TranslationMessage.Edit.niceToString()}>{TranslationMessage.Edit.niceToString()}</a>
     </span>
-  );
 }
