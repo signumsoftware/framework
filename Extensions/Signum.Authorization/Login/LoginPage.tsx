@@ -155,7 +155,7 @@ export function LoginForm(p: { ctx: LoginContext }): React.JSX.Element {
         <div className="col-md-6 offset-md-3">
           <button type="submit" id="login" className="btn btn-success" disabled={p.ctx.loading != null}>
             {p.ctx.loading == "password" ?
-              <FontAwesomeIcon aria-hidden={true} icon="gear" fixedWidth style={{ fontSize: "larger" }} spin /> : < FontAwesomeIcon aria-hidden={true} icon="right-to-bracket" />}
+              <FontAwesomeIcon aria-hidden={true} icon="gear" className="fa-fw" style={{ fontSize: "larger" }} spin /> : < FontAwesomeIcon aria-hidden={true} icon="right-to-bracket" />}
             &nbsp;
             {p.ctx.loading == "password" ? JavascriptMessage.loading.niceToString() : AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}
           </button>
