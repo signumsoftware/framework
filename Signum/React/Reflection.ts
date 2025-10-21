@@ -6,6 +6,7 @@ import { MList } from "./Signum.Entities";
 import * as AppContext from './AppContext';
 import { QueryString } from './QueryString';
 import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationSymbol } from './Signum.Operations';
+import { AsLite } from './Lines/EntityBase';
 
 export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
 
@@ -1633,24 +1634,24 @@ export class QueryTokenString<T> {
     return new QueryTokenString(this.token + ".NotAny");
   }
 
-  separatedByComma(): QueryTokenString<ArrayElement<T>> {
+  separatedByComma(): QueryTokenString<AsLite<T>[]> {
     return new QueryTokenString(this.token + ".SeparatedByComma");
   }
 
-  separatedByCommaDistinct(): QueryTokenString<ArrayElement<T>> {
+  separatedByCommaDistinct(): QueryTokenString<AsLite<T>[]> {
     return new QueryTokenString(this.token + ".SeparatedByCommaDistinct");
   }
 
-  separatedByNewLine(): QueryTokenString<ArrayElement<T>> {
+  separatedByNewLine(): QueryTokenString<AsLite<T>[]> {
     return new QueryTokenString(this.token + ".SeparatedByNewLine");
   }
 
-  separatedByNewLineDistinct(): QueryTokenString<ArrayElement<T>> {
+  separatedByNewLineDistinct(): QueryTokenString<AsLite<T>[]> {
     return new QueryTokenString(this.token + ".SeparatedByNewLineDistinct");
   }
 
-  nested(): QueryTokenString<ArrayElement<T>> {
-    return new QueryTokenString<ArrayElement<T>>(this.token + ".Nested");
+  nested(): QueryTokenString<AsLite<T>[]> {
+    return new QueryTokenString<AsLite<T>[]>(this.token + ".Nested");
   }
 
   //only for typed results

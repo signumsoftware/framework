@@ -81,7 +81,7 @@ export function EntityRepeater<V extends ModifiableEntity | Lite<Entity>>(props:
             htmlAttributes={p.elementHtmlAttributes ? (() => p.elementHtmlAttributes!(mlec)) : undefined}
             getComponent={p.getComponent}
             getViewPromise={p.getViewPromise}
-            title={showType ? <TypeBadge entity={mlec.value} /> : undefined} />))
+            title={<>{p.getTitle?.(mlec)} { showType ? <TypeBadge entity={mlec.value} /> : undefined}</>)
         }
         {
           p.createAsLink && p.create && !readOnly &&
