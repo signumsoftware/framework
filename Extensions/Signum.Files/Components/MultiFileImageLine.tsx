@@ -111,7 +111,7 @@ export function MultiFileImageLine<V extends ModifiableEntity /*& IFile*/ | Lite
                   <a href="#" title={EntityControlMessage.Remove.niceToString()}
                     className="sf-line-button sf-remove"
                     onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
-                    <FontAwesomeIcon icon="xmark" />
+                    <FontAwesomeIcon aria-hidden={true} icon="xmark" />
                   </a>}
               </div>
             )

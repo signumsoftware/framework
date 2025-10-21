@@ -41,7 +41,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
       size: "def" as any,
       buttonDisplay: ti => {
         var icon = DashboardClient.icon(ti);
-        return <><FontAwesomeIcon icon={icon.icon} color={icon.iconColor} /><span className="ms-2">{ti.niceName}</span></>;
+        return <><FontAwesomeIcon aria-hidden={true} icon={icon.icon} color={icon.iconColor} /><span className="ms-2">{ti.niceName}</span></>;
       }
     })
       .then(ti => {

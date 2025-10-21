@@ -29,7 +29,7 @@ export function FontSizeSelector({ isMobile }: { isMobile: boolean }): JSX.Eleme
   const resetFont = () => setScale(DEFAULT_SCALE);
   return (
     <NavDropdown
-      title={isMobile ? <FontAwesomeIcon icon={"font"} /> : "Schriftgröße" }
+      title={isMobile ? <FontAwesomeIcon icon={"font"} title="Schriftgröße" aria-label="Schriftgröße" /> : "Schriftgröße" }
       id="nav-fontsize-dropdown"
       align="end"
     >
@@ -42,7 +42,7 @@ export function FontSizeSelector({ isMobile }: { isMobile: boolean }): JSX.Eleme
           aria-label={"Schrift verkleinern"}
           disabled={scale <= MIN_SCALE}
         >
-          <FontAwesomeIcon icon={faMinus} />
+          <FontAwesomeIcon aria-hidden={true} icon={faMinus} />
         </Button>
         <Button
           variant="outline-secondary"
@@ -52,7 +52,7 @@ export function FontSizeSelector({ isMobile }: { isMobile: boolean }): JSX.Eleme
           aria-label={"Schriftgröße zurücksetzen"}
           disabled={scale === DEFAULT_SCALE}
         >
-          <FontAwesomeIcon icon={faRotateRight} />
+          <FontAwesomeIcon aria-hidden={true} icon={faRotateRight} />
         </Button>
         <Button
           variant="outline-primary"
@@ -62,7 +62,7 @@ export function FontSizeSelector({ isMobile }: { isMobile: boolean }): JSX.Eleme
           aria-label={"Schrift vergrößern"}
           disabled={scale >= MAX_SCALE}
         >
-          <FontAwesomeIcon icon={faPlus} />
+          <FontAwesomeIcon aria-hidden={true} icon={faPlus} />
         </Button>
       </div>
     </NavDropdown>

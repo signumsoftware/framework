@@ -121,7 +121,7 @@ export namespace ProcessClient {
 
       return [{
         fullText: this.operationInfo.niceName, menu: <ContextualOperations.OperationMenuItem coc={this}
-          extraButtons={<span className="process-contextual-icon" onClick={processOnClick} ><FontAwesomeIcon icon="gear" title={ProcessMessage.ProcessSettings.niceToString()} /></span>} /> } as ContextualMenuItem];  
+          extraButtons={<span className="process-contextual-icon" onClick={processOnClick} title={ProcessMessage.ProcessSettings.niceToString()} ><FontAwesomeIcon aria-hidden={true} icon="gear"/></span>} /> } as ContextualMenuItem];  
     };
   }
   

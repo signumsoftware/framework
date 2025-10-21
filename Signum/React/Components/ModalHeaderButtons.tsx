@@ -78,8 +78,8 @@ export function ModalFooterButtons(p: ModalFooterButtonsProps): React.ReactEleme
   function renderButton(text: string, mip?: ModalIconProps) {
     if (mip?.icon) {
       switch (mip.iconAlign) {
-        case "right": return (<span>{text} <FontAwesomeIcon icon={mip.icon} fixedWidth /></span>);
-        default: return (<span><FontAwesomeIcon icon={mip.icon} fixedWidth /> {text}</span>);
+        case "right": return (<span>{text} <FontAwesomeIcon aria-hidden={true} icon={mip.icon} className="fa-fw" /></span>);
+        default: return (<span><FontAwesomeIcon aria-hidden={true} icon={mip.icon} className="fa-fw" /> {text}</span>);
       }
     }
     else

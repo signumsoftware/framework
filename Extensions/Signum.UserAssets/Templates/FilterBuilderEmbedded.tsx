@@ -293,10 +293,10 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps): React.JS
   }, [p.ctx.value]);
 
   function getSwitchModelButton(isValue: boolean): React.ReactElement<any> {
-    return (<a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text", p.ctx.readOnly  && "disabled")}
+    return (<a href="#" role="button" className={classes("sf-line-button", "sf-remove", "btn input-group-text", p.ctx.readOnly  && "disabled")}
       onClick={e => { e.preventDefault(); liteRef.current = isValue ? undefined : null; forceUpdate() }}
       title={isValue ? UserAssetQueryMessage.SwitchToExpression.niceToString() : UserAssetQueryMessage.SwitchToValue.niceToString()}>
-      <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
+      <FontAwesomeIcon aria-hidden={true} icon={[isValue ? "far" : "fas", "pen-to-square"]} />
     </a>)
   }
 
@@ -349,7 +349,7 @@ export function AutoLineOrExpression(p: ValueLineOrExpressionProps): React.JSX.E
 
   function getSwitchModelButton(isValue: boolean) : React.ReactElement<any> {
     return (
-      <a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text")}
+      <a href="#" role="button" className={classes("sf-line-button", "sf-remove", "btn input-group-text")}
         onClick={e => {
           e.preventDefault();
           if (p.filterType == "DateTime")
@@ -362,7 +362,7 @@ export function AutoLineOrExpression(p: ValueLineOrExpressionProps): React.JSX.E
           foceUpdate();
         }}
         title={isValue ? UserAssetQueryMessage.SwitchToExpression.niceToString() : UserAssetQueryMessage.SwitchToValue.niceToString()}>
-        <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
+        <FontAwesomeIcon aria-hidden={true} icon={[isValue ? "far" : "fas", "pen-to-square"]} />
       </a>
     );
   }

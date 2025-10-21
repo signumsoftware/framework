@@ -18,7 +18,7 @@ export default function CopyLiteButton(p: CopyLiteButtonProps): React.ReactEleme
       className={p.className}
       title={NormalControlMessage.CopyEntityTypeAndIdForAutocomplete.niceToString()}
     >
-      <FontAwesomeIcon icon="copy" color="gray" />
+      <FontAwesomeIcon aria-hidden={true} icon="copy" color="gray" />
     </CopyButton>
   );
 }

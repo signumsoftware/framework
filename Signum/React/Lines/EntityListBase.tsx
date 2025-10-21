@@ -132,10 +132,13 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "input-group-text" : undefined)}
+      <a href="#"
+        className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "input-group-text" : undefined)}
         onClick={e => { e.preventDefault(); this.moveUp(index); }}
+        role="button"
+        tabIndex={0}
         title={this.props.ctx.titleLabels ? (orientation == "v" ? EntityControlMessage.MoveUp : (isRtl() ? EntityControlMessage.MoveRight : EntityControlMessage.MoveLeft)).niceToString() : undefined}>
-        <FontAwesomeIcon icon={orientation == "v" ? "chevron-up" : (isRtl() ? "chevron-right" : "chevron-left")} />
+        <FontAwesomeIcon aria-hidden={true} icon={orientation == "v" ? "chevron-up" : (isRtl() ? "chevron-right" : "chevron-left")} />
       </a>
     );
   }
@@ -151,10 +154,13 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "input-group-text" : undefined)}
+      <a href="#"
+        className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "input-group-text" : undefined)}
         onClick={e => { e.preventDefault(); this.moveDown(index); }}
+        role="button"
+        tabIndex={0}
         title={this.props.ctx.titleLabels ? (orientation == "v" ? EntityControlMessage.MoveDown : (isRtl() ? EntityControlMessage.MoveLeft : EntityControlMessage.MoveRight)).niceToString() : undefined}>
-        <FontAwesomeIcon icon={orientation == "v" ? "chevron-down" : (isRtl() ? "chevron-left" : "chevron-right")} />
+        <FontAwesomeIcon aria-hidden={true} icon={orientation == "v" ? "chevron-down" : (isRtl() ? "chevron-left" : "chevron-right")} />
       </a>
     );
   }

@@ -31,7 +31,7 @@ export default function ProfilePhoto(p: { user: UserEntity, size: number }): Rea
   var iconSize = p.size >= 250 ? "10x" : `${Math.ceil(p.size / 25)}x`;
   return (
     <div className="user-profile-photo align-items-center d-flex justify-content-center" style={{ width: `${p.size}px`, height: `${p.size}px`, borderColor: !url ? color : undefined }}>
-      {!url ? <FontAwesomeIcon icon="user" size={iconSize as any} color={color} /> :
+      {!url ? <FontAwesomeIcon role="img" icon="user" size={iconSize as any} color={color} /> :
         <img src={url} style={{ maxWidth: `${p.size - 3}px`, maxHeight: `${p.size - 3}px` }} onError={() => setImageError(true)} title={getToString(p.user)} />}
     </div>
   );
@@ -50,7 +50,7 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
   return (
     <div className={classes("small-user-profile-photo", p.className)}>
       {url && !imageError ? <img src={url} style={{ maxWidth: `${size}px`, maxHeight: `${size}px` }} alt={getToString(p.user)} onError={(e) => setImageError(true)} title={getToString(p.user)} /> :
-        p.fallback ?? <UserCircle user = {p.user } />}
+        p.fallback ?? <UserCircle user={p.user } />}
     </div>
   );
 }

@@ -112,7 +112,7 @@ export function VisualTipIcon(p: {
           }
         }}
       >
-        <FontAwesomeIcon icon="question-circle" />
+        <FontAwesomeIcon aria-hidden={true} icon="question-circle" />
       </button>
     </OverlayTrigger>
   );

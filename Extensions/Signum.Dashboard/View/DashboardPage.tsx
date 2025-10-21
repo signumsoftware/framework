@@ -53,7 +53,7 @@ export default function DashboardPage(): React.JSX.Element {
                   <h3>
                     <span className="display-6">{getToString(entity)}</span>
                     {Navigator.isViewable({ entity: entity, canExecute: {} } as EntityPack<Entity>) &&
-                      <Link className="display-6 ms-2" to={Navigator.navigateRoute(entity)}><FontAwesomeIcon icon="external-link" /></Link>
+                      <Link className="display-6 ms-2" to={Navigator.navigateRoute(entity)}><FontAwesomeIcon aria-hidden={true} icon="external-link" /></Link>
                     }
                     <small className="ms-1 sf-type-nice-name text-muted"> - {Navigator.getTypeSubTitle(entity, undefined)}</small>
                   </h3>
@@ -67,11 +67,11 @@ export default function DashboardPage(): React.JSX.Element {
             <div className="ms-auto">
               {dashboardWithQueries.cachedQueries.length ? <span className="mx-4" title={DashboardMessage.ForPerformanceReasonsThisDashboardMayShowOutdatedInformation.niceToString() + "\n" +
                 DashboardMessage.LasUpdateWasOn0.niceToString(DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS))}>
-                <FontAwesomeIcon icon="clock-rotate-left" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
+                <FontAwesomeIcon aria-hidden={true} icon="clock-rotate-left" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
               </span> : null}
               {dashboard.parts.some(a => a.element.interactionGroup != null) && <HelpIcon />}
               <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)} title={DashboardMessage.Edit.niceToString()}>
-                <FontAwesomeIcon icon="pen-to-square" />
+                <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" />
               </Link>
             </div>
           }

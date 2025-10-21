@@ -145,7 +145,7 @@ function SubPropertiesCollapse({ node, cleanName, onChange, hash }: { node: Tree
     <>
       <div className="row mb-2">
         <span className="col-sm-9 offset-sm-3 lead" style={{ cursor: "pointer" }} onClick={() => setOpen(!open)}>
-          <FontAwesomeIcon icon={open ? "chevron-down" : "chevron-right"} /> {pr.member!.niceName} ({getNiceTypeName(pr.member!.type)})
+          <FontAwesomeIcon aria-hidden={true} icon={open ? "chevron-down" : "chevron-right"} /> {pr.member!.niceName} ({getNiceTypeName(pr.member!.type)})
         </span>
       </div>
       <Collapse in={open}>
@@ -185,10 +185,10 @@ function QueryBlock({ ctx, cleanName, onChange, hash }: { ctx: TypeContext<Query
       <div className={classes("row mb-2 shortcut-container", id == hash && "sf-target")} id={id}>
         <div className="col-sm-9 offset-sm-3">
           <span className="lead" style={{ cursor: "pointer" }}  onClick={() => setOpen(!open)} >
-            <FontAwesomeIcon icon={open ? "chevron-down" : "chevron-right"} /> {getQueryNiceName(ctx.value.query.key)}
+            <FontAwesomeIcon aria-hidden={true} icon={open ? "chevron-down" : "chevron-right"} /> {getQueryNiceName(ctx.value.query.key)}
           </span>
           {" "}
-          {Finder.isFindable(ctx.value.query.key, true) && <a href={AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: ctx.value.query.key }))} target="_blank"><FontAwesomeIcon icon="arrow-up-right-from-square" /></a>}
+          {Finder.isFindable(ctx.value.query.key, true) && <a href={AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: ctx.value.query.key }))} target="_blank"><FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>}
           {" "}
           <Shortcut text={`[q:${ctx.value.query.key}]`} />
           <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
@@ -233,7 +233,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
       });
   }
 
-  return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon icon="save" /> {getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
+  return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon aria-hidden={true} icon="save" /> {getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
 }
 
 export function Shortcut(p: { text: string; }): React.JSX.Element {

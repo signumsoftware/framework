@@ -231,7 +231,7 @@ export namespace ContextualOperations {
         style={{ pointerEvents: "initial" }}
         data-operation={coc.operationInfo.key}
         className={color && !disabled ? "text-" + color : undefined}>
-        {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
+        {icon ? <FontAwesomeIcon aria-hidden={true} icon={icon} className="fa-fw icon" color={iconColor} /> :
           color ? <span className={classes("icon", "empty-icon")}></span> : undefined}
         {text}
         {extraButtons}

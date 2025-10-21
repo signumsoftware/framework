@@ -29,7 +29,7 @@ export function ColorRadio(p : ColorRadioProps): React.JSX.Element{
       onClick={e => { e.preventDefault(); !p.readOnly && p.onClicked(e); }}
       className={classes("sf-auth-chooser", p.readOnly && "sf-not-allowed")}
       style={{ color: p.checked ? p.color : "var(--bs-secondary-text)" }}>
-      <FontAwesomeIcon icon={p.icon ?? ["far", (p.checked ? "circle-dot" : "circle")]!} />
+      <FontAwesomeIcon aria-hidden={true} icon={p.icon ?? ["far", (p.checked ? "circle-dot" : "circle")]!} />
     </a>
   );
 }

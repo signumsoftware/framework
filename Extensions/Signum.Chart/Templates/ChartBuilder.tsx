@@ -115,7 +115,7 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
             }} 
           />
           Time machine
-          <FontAwesomeIcon className='mx-1' icon='clock-rotate-left' />
+          <FontAwesomeIcon aria-hidden={true} className='mx-1' icon='clock-rotate-left' />
         </label>
         {chart.chartTimeSeries && <ChartTimeSeries chartTimeSeries={chart.chartTimeSeries} chartBase={p.ctx.value} onChange={handleOnRedraw}/>}
       </div>}
