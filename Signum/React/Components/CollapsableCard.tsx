@@ -69,9 +69,9 @@ export default function CollapsableCard(p: CollapsableCardProps): React.ReactEle
           <span
             className={"float-end"}
             style={{ cursor: "pointer" }}            
-            onClick={e => setIsOpen(!isOpen, e)}>
-            <FontAwesomeIcon icon={isOpen ? (p.collapseIcon ?? "chevron-up") : (p.expandIcon ?? "chevron-down")}
-              title={isOpen ? CollapsableCardMessage.Collapse.niceToString() : CollapsableCardMessage.Expand.niceToString()} />
+            onClick={e => setIsOpen(!isOpen, e)}
+            title={isOpen ? CollapsableCardMessage.Collapse.niceToString() : CollapsableCardMessage.Expand.niceToString()}>
+            <FontAwesomeIcon aria-hidden={true} icon={isOpen ? (p.collapseIcon ?? "chevron-up") : (p.expandIcon ?? "chevron-down")} />
           </span>
         }
         {p.header}

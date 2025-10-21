@@ -41,7 +41,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
       size: "def" as any,
       buttonDisplay: ti => {
         var icon = DashboardClient.icon(ti);
-        return <><FontAwesomeIcon icon={icon.icon} color={icon.iconColor} /><span className="ms-2">{ti.niceName}</span></>;
+        return <><FontAwesomeIcon aria-hidden={true} icon={icon.icon} color={icon.iconColor} /><span className="ms-2">{ti.niceName}</span></>;
       }
     })
       .then(ti => {
@@ -99,7 +99,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
               </div>
               <div className="col-sm-6">
                 <EnumLine ctx={tcs.subCtx(pp => pp.interactionGroup)} valueHtmlAttributes={avoidDrag}
-                  onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
+                  onRenderDropDownListItem={(io) => <span className="sf-dot-container"><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
               </div>
             </div>
 
@@ -199,7 +199,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
           <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "xs" })} avoidFieldSet getComponent={ctxGr => 
             <div>
               <EnumLine ctx={ctxGr.subCtx(pp => pp.interactionGroup)}
-                onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
+                onRenderDropDownListItem={(io) => <span className="sf-dot-container"><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
               <EntityTable ctx={ctxGr.subCtx(p => p.tokenEquivalences)} avoidFieldSet columns={[
                 {
                   property: p => p.query,

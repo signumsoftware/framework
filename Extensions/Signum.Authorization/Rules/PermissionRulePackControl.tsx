@@ -12,6 +12,7 @@ import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { GraphExplorer } from '@framework/Reflection'
 import { RoleEntity } from '../Signum.Authorization'
+import { AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 
 export default function PermissionRulesPackControl(p: { ctx: TypeContext<PermissionRulePack>, innerRef: React.Ref<IRenderButtons> }): React.JSX.Element {
 
@@ -97,12 +98,21 @@ export default function PermissionRulesPackControl(p: { ctx: TypeContext<Permiss
         <EntityLine ctx={ctx.subCtx(f => f.role)} />
         <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
       </div>
-      <table className="table table-sm sf-auth-rules">
+      <AccessibleTable
+        caption={AuthAdminMessage.PermissionRulesOverview.niceToString()}
+        className="table table-sm sf-auth-rules">
         <thead>
           <tr>
             <th>
               <div style={{ marginBottom: "-2px" }}>
-                <input type="text" className="form-control form-control-sm" id="filter" placeholder="Permission-!overriden" value={filter} onChange={handleSetFilter} />
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  id="filter"
+                  placeholder={AuthAdminMessage.PermissionOverriden.niceToString()}
+                  value={filter}
+                  onChange={handleSetFilter}
+                />
               </div>
             </th>
             <th style={{ textAlign: "center" }}>
@@ -120,28 +130,27 @@ export default function PermissionRulesPackControl(p: { ctx: TypeContext<Permiss
           {ctx.mlistItemCtxs(a => a.rules)
             .filter(a => isMatch(a.value))
             .orderBy(a => a.value.resource.key).map((c, i) =>
-            <tr key={i}>
-              <td>
-                {c.value.resource.key}
-              </td>
-              <td style={{ textAlign: "center" }}>
-                {renderRadio(c.value, true, "green")}
-              </td>
-              <td style={{ textAlign: "center" }}>
-                {renderRadio(c.value, false, "red")}
-              </td>
-              <td style={{ textAlign: "center" }}>
+              <tr key={i}>
+                <td>
+                  {c.value.resource.key}
+                </td>
+                <td style={{ textAlign: "center" }}>
+                  {renderRadio(c.value, true, "green")}
+                </td>
+                <td style={{ textAlign: "center" }}>
+                  {renderRadio(c.value, false, "red")}
+                </td>
+                <td style={{ textAlign: "center" }}>
                   <GrayCheckbox readOnly={ctx.readOnly} checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
-                  c.value.allowed = c.value.allowedBase;
-                  ctx.value.modified = true;
-                  updateFrame();
-                }} />
-              </td>
-            </tr>
-          )}
+                    c.value.allowed = c.value.allowedBase;
+                    ctx.value.modified = true;
+                    updateFrame();
+                  }} />
+                </td>
+              </tr>
+            )}
         </tbody>
-      </table>
-
+      </AccessibleTable>
     </div>
   );
 

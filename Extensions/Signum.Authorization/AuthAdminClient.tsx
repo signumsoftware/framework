@@ -128,7 +128,7 @@ export namespace AuthAdminClient {
         order: -1,
         button: <button className="btn btn-info"
           onClick={e => { e.preventDefault(); API.downloadAuthRules(); }}>
-          <FontAwesomeIcon icon="download" /> Download AuthRules.xml
+          <FontAwesomeIcon aria-hidden={true} icon="download" /> Download AuthRules.xml
         </button>
       }]
     });

@@ -1,5 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="CacheMessage">
+    <Member Name="CacheStatistics" Description="Cache-Statistiken" />
+    <Member Name="Clear" Description="Löschen" />
+    <Member Name="Count" Description="Anzahl" />
+    <Member Name="Disable" Description="Deaktivieren" />
+    <Member Name="Enable" Description="Aktivieren" />
+    <Member Name="Hits" Description="Treffer" />
+    <Member Name="InvalidationExceptions" Description="Ungültigkeitsausnahme" />
+    <Member Name="Invalidations" Description="Ungültigkeiten" />
+    <Member Name="Lazies" Description="Lazies" />
+    <Member Name="LazyStats" Description="Lazy Statistiken" />
+    <Member Name="Loading" Description="Laden" />
+    <Member Name="Loads" Description="Lädt" />
+    <Member Name="LoadTime" Description="Ladezeit" />
+    <Member Name="NotLoaded" Description="Nicht geladen" />
+    <Member Name="ServerBroadcast" Description="Server-Broadcast" />
+    <Member Name="SqlDependency" Description="SQL-Abhängigkeit" />
+    <Member Name="Table" Description="Tabelle" />
+    <Member Name="Tables" Description="Tabellen" />
+    <Member Name="TableStats" Description="Tabellenstatistiken" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
   <Type Name="CachePermission">
     <Member Name="InvalidateCache" Description="Cache ungültig" />
     <Member Name="ViewCache" Description="Cache sehen" />

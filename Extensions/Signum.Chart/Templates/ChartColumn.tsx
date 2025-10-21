@@ -149,7 +149,21 @@ export function ChartColumn(p: ChartColumnProps): React.JSX.Element {
           }} title={getTitle(sc.columnType, ctx.value.token?.token)}>
             {ChartColumnType.niceToString(sc.columnType)}
           </span>
-          <a className={classes("sf-chart-token-config-trigger", numParameters > 0 && ctx.value.token && "fw-bold")} onClick={handleExpanded}>{ChartMessage.ToggleInfo.niceToString()} {numParameters > 0 && ctx.value.token && <span>({numParameters})</span>} </a>
+          <a
+            role="button"
+            tabIndex={0}
+            title={ChartMessage.ToggleInfo.niceToString()}
+            aria-label={ChartMessage.ToggleInfo.niceToString()}
+            className={classes("sf-chart-token-config-trigger", numParameters > 0 && ctx.value.token && "fw-bold")}
+            onClick={handleExpanded}
+            onKeyDown={e => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleExpanded();
+              }
+            }}>
+            {ChartMessage.ToggleInfo.niceToString()} {numParameters > 0 && ctx.value.token && <span>({numParameters})</span>}
+          </a>
         </td>
       </tr>
       {expanded && <tr className="sf-chart-token-config">

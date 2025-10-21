@@ -6,6 +6,7 @@ import { TranslationMessage } from '../Signum.Translation'
 import "../Translation.css"
 import { encodeDots, decodeDots } from './TranslationCodeStatus'
 import { useAPI } from '@framework/Hooks'
+import { AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 
 export default function TranslationCodeSyncNamespaces(): React.JSX.Element {
   const params = useParams() as { culture: string; assembly: string; };
@@ -20,7 +21,9 @@ export default function TranslationCodeSyncNamespaces(): React.JSX.Element {
       return <strong>{JavascriptMessage.loading.niceToString()}</strong>;
 
     return (
-      <table className="st">
+      <AccessibleTable
+        caption={`${TranslationMessage.Namespace.niceToString()} / ${TranslationMessage.NewTranslations.niceToString()}`}
+        className="st table">
         <thead>
           <tr>
             <th> {TranslationMessage.Namespace.niceToString()} </th>
@@ -51,7 +54,7 @@ export default function TranslationCodeSyncNamespaces(): React.JSX.Element {
             </tr>
           )}
         </tbody>
-      </table>
+      </AccessibleTable>
     );
   }
   if (result?.length == 0) {

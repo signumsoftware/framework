@@ -1,4 +1,8 @@
-﻿
+
+using Signum.Utilities.ExpressionTrees;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace Signum.Utilities;
 
 /// <summary>
@@ -43,6 +47,14 @@ public static class PageExtensions
     {
         var list = source.Skip((currentPage - 1) * elementsPerPage).Take(elementsPerPage).ToList();
         var count = source.Count();
+
+        return new Page<T>(count, currentPage, elementsPerPage, list);
+    }
+
+    public async static Task<Page<T>> PaginateAsync<T>(this IQueryable<T> source, int elementsPerPage, int currentPage, CancellationToken token)
+    {
+        var list = await source.Skip((currentPage - 1) * elementsPerPage).Take(elementsPerPage).ToListAsync();
+        var count = await source.CountAsync();
 
         return new Page<T>(count, currentPage, elementsPerPage, list);
     }

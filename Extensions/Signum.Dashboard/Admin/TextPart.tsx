@@ -61,8 +61,8 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
           <AutoLine ctx={ctx.subCtx(s => s.textPartType)} onChange={() => forceUpdate()} />
         </div>
         <div className="col-sm-4">
-          {p.ctx.value.textPartType == "Markdown" ? <a href="#" onClick={e => { e.preventDefault(); setIsPreview(!isPreview); }} >
-            <FontAwesomeIcon icon={isPreview ? "edit" : "eye"} className="me-1" />{isPreview ? "Edit" : "Preview"}
+          {p.ctx.value.textPartType == "Markdown" ? <a href="#" role="button" onClick={e => { e.preventDefault(); setIsPreview(!isPreview); }} >
+            <FontAwesomeIcon aria-hidden={true} icon={isPreview ? "edit" : "eye"} className="me-1" />{isPreview ? "Edit" : "Preview"}
           </a> : null}
         </div>
       </div>

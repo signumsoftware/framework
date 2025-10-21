@@ -217,8 +217,8 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
       <Tab title={<span>
         {hasPrevious ? TimeMachineMessage.UIDifferences.niceToString() : TimeMachineMessage.UISnapshot.niceToString()}
         <span className="ms-2">
-          <FontAwesomeIcon icon="eye" color="lightblue" />
-          {hasPrevious && <FontAwesomeIcon icon="circle" transform="shrink-10 left-25 up-5" color="red" />}
+          <FontAwesomeIcon aria-hidden={true} icon="eye" color="lightblue" />
+          {hasPrevious && <FontAwesomeIcon aria-hidden={true} icon="circle" transform="shrink-10 left-25 up-5" color="red" />}
         </span>
       </span>}
         key={"ui"} eventKey={"ui"}>
@@ -231,10 +231,10 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
       </Tab>
       <Tab title={hasPrevious ?
         <span>{TimeMachineMessage.DataDifferences.niceToString()}
-          <FontAwesomeIcon icon="plus" color="green" transform="up-5 right-7" />
-          <FontAwesomeIcon icon="minus" color="red" transform="down-5 left-7" />
+          <FontAwesomeIcon aria-hidden={true} icon="plus" color="green" transform="up-5 right-7" />
+          <FontAwesomeIcon aria-hidden={true} icon="minus" color="red" transform="down-5 left-7" />
         </span> : <span>{TimeMachineMessage.DataSnapshot.niceToString()}
-          <FontAwesomeIcon className="ms-2" icon="align-left" color="lightblue" />
+          <FontAwesomeIcon aria-hidden={true} className="ms-2" icon="align-left" color="lightblue" />
         </span>}
         key={"data"} eventKey={"data"}>
         <DiffEntityVersion previous={previous} current={current} />

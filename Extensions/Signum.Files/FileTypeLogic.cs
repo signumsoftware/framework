@@ -44,9 +44,10 @@ public interface IFileTypeAlgorithm
     void SaveFile(IFilePath fp);
     Task SaveFileAsync(IFilePath fp, CancellationToken token = default);
 
-    Task StartUpload(IFilePath fpe);
-    Task<ChunkInfo> UploadChunk(IFilePath fp, int chunkIndex, MemoryStream chunk, CancellationToken token = default);
-    Task FinishUpload(IFilePath fp, List<ChunkInfo> chunks, CancellationToken token = default);
+    Task<string?> StartUpload(IFilePath fp, CancellationToken token = default);
+    Task<ChunkInfo> UploadChunk(IFilePath fp, int chunkIndex, MemoryStream chunk, string? uploadId = null, CancellationToken token = default);
+    Task FinishUpload(IFilePath fp, List<ChunkInfo> chunks, string? uploadId = null, CancellationToken token = default);
+    Task AbortUpload(IFilePath fp, string? uploadId = null, CancellationToken token = default);
 
     void ValidateFile(IFilePath fp);
     void DeleteFiles(IEnumerable<IFilePath> files);

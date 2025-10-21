@@ -292,10 +292,13 @@ export function EntityTable<V extends ModifiableEntity, RS>(props: EntityTablePr
                 showCreateRow && <tr>
                   <td colSpan={1 + p.columns!.length} className={isEmpty ? "border-0" : undefined}>
                       {typeof p.createAsLink == "function" ? p.createAsLink(c) :
-                        <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
-                        className="sf-line-button sf-create"
-                        onClick={c.handleCreateClick}>
-                        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
+                        <a href="#"
+                          title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
+                          className="sf-line-button sf-create"
+                          role="button"
+                          tabIndex={0}
+                          onClick={c.handleCreateClick}>
+                          <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create" />&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
                       </a>}
                   </td>
                 </tr>

@@ -1,8 +1,46 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="ProfilerMessage">
+    <Member Name="AdditionalData" Description="Zusätzliche Daten" />
+    <Member Name="AsyncStack" Description="Asynchroner Stack" />
+    <Member Name="Download" Description="Herunterladen" />
+    <Member Name="Entry0_" Description="Eintrag {0}" />
+    <Member Name="Entry0Loading" Description="Eintrag {0} (Laden...)" />
+    <Member Name="FileLine" Description="Dateizeile" />
+    <Member Name="HeavyProfiler" Description="Heavy Profiler" />
+    <Member Name="Method" Description="Methode" />
+    <Member Name="Namespace" Description="Namespace" />
+    <Member Name="NoStackTrace" Description="Kein StackTrace" />
+    <Member Name="Role" Description="Rolle" />
+    <Member Name="StackTrace" Description="StackTrace" />
+    <Member Name="StackTraceOverview" Description="StackTrace Übersicht" />
+    <Member Name="Time" Description="Zeit" />
+    <Member Name="Type" Description="Typ" />
+    <Member Name="Update" Description="Aktualisieren" />
+  </Type>
   <Type Name="ProfilerPermission">
     <Member Name="OverrideSessionTimeout" Description="Session-Zeitüberschreitung überschreiben" />
     <Member Name="ViewHeavyProfiler" Description="Heavy Profiler anzeigen" />
     <Member Name="ViewTimeTracker" Description="Zeiterfassung anzeigen" />
+  </Type>
+  <Type Name="TimeMessage">
+    <Member Name="Average" Description="Durchschnitt" />
+    <Member Name="Bars" Description="Bars" />
+    <Member Name="Clear" Description="Löschen" />
+    <Member Name="Count" Description="Anzahl" />
+    <Member Name="Entity" Description="Entität" />
+    <Member Name="Executed" Description="Ausgeführt" />
+    <Member Name="Last" Description="Zuletzt" />
+    <Member Name="Max" Description="Max" />
+    <Member Name="Min" Description="Min" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="NoDuration" Description="Keine Dauer" />
+    <Member Name="Reload" Description="Neu laden" />
+    <Member Name="Table" Description="Tabelle" />
+    <Member Name="Times" Description="Zeiten" />
+    <Member Name="TimesLoading" Description="Zeiten (Laden...)" />
+    <Member Name="TimesOverview" Description="Zeitübersicht" />
+    <Member Name="TimeStatistics" Description="Zeitstatistiken" />
+    <Member Name="Total" Description="Gesamt" />
   </Type>
 </Translations>

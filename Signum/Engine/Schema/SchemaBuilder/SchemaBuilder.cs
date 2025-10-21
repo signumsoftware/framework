@@ -837,7 +837,7 @@ public class SchemaBuilder
 
         var isLite = route.Type.IsLite();
 
-        var implementations = types.ToDictionary(t => t, t =>
+        var implementations = types.ToDictionaryEx(t => t, t =>
         {
             var rt = Include(t, route);
 
@@ -848,7 +848,7 @@ public class SchemaBuilder
                 Nullable = nullable,
                 AvoidForeignKey = avoidForeignKey,
             };
-        });
+        }, "Implementations for " + route);
 
         return new FieldImplementedBy(route, implementations)
         {

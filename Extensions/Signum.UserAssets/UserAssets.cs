@@ -74,6 +74,9 @@ public enum UserAssetMessage
     _0IsNotFilterable,
     [Description("The Filter Operation {0} is not compatible with {1}")]
     TheFilterOperation0isNotCompatibleWith1,
+    UserAssetLines,
+    Import,
+    AssumeIs,
 }
 
 [AutoInit]

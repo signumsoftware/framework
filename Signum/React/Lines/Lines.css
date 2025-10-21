@@ -492,11 +492,11 @@ input[type=checkbox].form-control-xs {
     background-color: var(--bs-body-bg);
 }
 
-.form-group :not(label)>.form-check-input {
+.form-group :not(label):not(.form-check) > .form-check-input {
     margin-top: 0.5em;
 }
 
-.form-group.form-group-xs :not(label)>.form-check-input {
+.form-group.form-group-xs :not(label):not(.form-check) > .form-check-input {
     margin-top: 0.25em;
 }
 

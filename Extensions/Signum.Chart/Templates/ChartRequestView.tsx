@@ -172,8 +172,8 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
     <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
       <h2>
         <span className="sf-entity-title">{getQueryNiceName(cr.queryKey)}</span>&nbsp;
-        <a className="sf-popup-fullscreen" href="#" onClick={handleOnFullScreen} >
-          <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()}/>
+        <a className="sf-popup-fullscreen" href="#" role="button" title={FrameMessage.Fullscreen.niceToString()} aria-label={FrameMessage.Fullscreen.niceToString()} onClick={handleOnFullScreen} >
+          <FontAwesomeIcon icon="up-right-from-square" aria-hidden={true} />
         </a>
       </h2 >
       <ValidationErrors entity={cr} prefix="chartRequest" />
@@ -212,14 +212,14 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
           className={classes("sf-query-button btn", showChartSettings && "active", "btn-tertiary")}
           onClick={() => { setShowChartSettings(!showChartSettings); }}
           title={titleLabels ? showChartSettings ? ChartMessage.HideChartSettings.niceToString() : ChartMessage.ShowChartSettings.niceToString() : undefined}>
-          <FontAwesomeIcon icon="sliders" />
+          <FontAwesomeIcon aria-hidden={true} icon="sliders" />
         </button>
         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
         {ChartClient.ButtonBarChart.getButtonBarElements({
           chartRequest: cr,
           chartRequestView: { chartRequest: cr, userChart: p.userChart, onChange: p.onChange, hideFiltersAndSettings: handleHideFiltersAndSettings }
         }).map((a, i) => React.cloneElement(a, { key: i }))}
-        <button className="btn btn-tertiary" onMouseUp={handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {ChartMessage.ListView.niceToString()}</button>
+        <button className="btn btn-tertiary" onMouseUp={handleExplore} ><FontAwesomeIcon aria-hidden={true} icon="magnifying-glass" /> &nbsp; {ChartMessage.ListView.niceToString()}</button>
       </div>
       <div className="sf-chart-tab-container">
         <Tabs id="chartResultTabs" key={showChartSettings + ""}>

@@ -10,6 +10,7 @@ import "./AuthAdmin.css"
 import { useForceUpdate } from '@framework/Hooks';
 import { getToString } from '@framework/Signum.Entities';
 import { QueryEntity } from '@framework/Signum.Basics'
+import { AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 
 export default function QueryRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<QueryRulePack>, innerRef: React.Ref<IRenderButtons> }): React.JSX.Element {
 
@@ -52,7 +53,10 @@ export default function QueryRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
         <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
         <EntityLine ctx={ctx.subCtx(f => f.type)} />
       </div>
-      <table className="table table-sm sf-auth-rules">
+      <AccessibleTable
+        caption={AuthAdminMessage.QueryPermissionsOverview.niceToString()}
+        className="table table-sm sf-auth-rules "
+        multiselectable={false}>
         <thead>
           <tr>
             <th>
@@ -98,8 +102,7 @@ export default function QueryRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
           )
           }
         </tbody>
-      </table>
-
+      </AccessibleTable>
     </div>
   );
 

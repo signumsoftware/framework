@@ -104,12 +104,16 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
           onSelect={handleSelect}
           renderInput={input => <div className="input-group input-group-sm" style={{ position: "initial" }}>
             <button className="btn input-group-text" disabled={!canBack()}              
-              onClick={e => handleGoHistory(e, historyIndex - 1)} type="button">
-              <FontAwesomeIcon icon="circle-arrow-left" title={TypeHelpMessage.Previous.niceToString()}/>
+              onClick={e => handleGoHistory(e, historyIndex - 1)} type="button"
+              title={TypeHelpMessage.Previous.niceToString()}
+              aria-label={TypeHelpMessage.Previous.niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} icon="circle-arrow-left"/>
             </button>
             <button className="btn input-group-text" disabled={!canForth()}              
-              onClick={e => handleGoHistory(e, historyIndex + 1)} type="button">
-              <FontAwesomeIcon icon="circle-arrow-right" title={TypeHelpMessage.Next.niceToString()}/>
+              onClick={e => handleGoHistory(e, historyIndex + 1)} type="button"
+              title={TypeHelpMessage.Next.niceToString()}
+              aria-label={TypeHelpMessage.Next.niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} icon="circle-arrow-right" />
             </button>
             {input}
             <div className="input-group-text" style={{ color: "white", backgroundColor: p.mode == "CSharp" ? "#007e01" : "#017acc" }}>
