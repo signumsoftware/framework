@@ -13,7 +13,7 @@ import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
 import { Entity, getToString, Lite, parseLite } from '@framework/Signum.Entities'
 import { parseIcon } from '@framework/Components/IconTypeahead'
-import { urlVariables } from '../UrlVariables';
+import { ToolbarUrl } from '../ToolbarUrl';
 import { Dic, classes } from '@framework/Globals';
 import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage, ToolbarSwitcherEntity } from '../Signum.Toolbar';
 import DropdownList from "react-widgets-up/DropdownList";
@@ -224,7 +224,8 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
       if (res.url) {
         const config = res.content && ToolbarClient.getConfig(res);
         return (
-          <ToolbarNavItem key={key} title={res.label} isExternalLink={isExternalLink(res.url)}
+          <ToolbarNavItem key={key} title={res.label} isExternalLink={ToolbarUrl.isExternalLink(res.url)
+      }
             extraIcons={renderExtraIcons(res.extraIcons, ctx, selectedEntity)}
             active={isActive(ctx.active, res, selectedEntity)} icon={<>
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
@@ -273,32 +274,22 @@ function responseClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Li
 async function linkClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Lite<Entity> | null, e: React.MouseEvent | undefined, ctx: ToolbarContext) {
 
   let url = r.url!;
-  if (url.contains(":type2") || url.contains(":id2") || url.contains(":key2")) {
+  if (ToolbarUrl.hasSubEntity(url)) {
     const config = r.content && ToolbarClient.getConfig(r);
     const subEntity = config && await config.selectSubEntityForUrl(r, selectedEntity);
     if (subEntity == null)
       return;
 
-    url = url
-      .replaceAll(":id2", subEntity.id!.toString())
-      .replace(":type2", subEntity.EntityType)
-      .replace(":key2", liteKey(subEntity))
-      .replace(":toStr2", getToString(subEntity));
+    url = ToolbarUrl.replaceSubEntity(url, subEntity)
   }
 
-  Dic.getKeys(urlVariables).forEach(v => {
-    url = url.replaceAll(v, urlVariables[v]());
-  });
+  url = ToolbarUrl.replaceVariables(url)
 
   if (selectedEntity)
-    url = url
-      .replaceAll(":id", selectedEntity.id!.toString())
-      .replace(":type", selectedEntity.EntityType)
-      .replace(":key", liteKey(selectedEntity))
-      .replace(":toStr", getToString(selectedEntity));
+    url = ToolbarUrl.replaceEntity(url, selectedEntity)
 
-  if (isExternalLink(url))
-    window.open(AppContext.toAbsoluteUrl(url));
+  if (ToolbarUrl.isExternalLink(url))
+    window.open(url);
   else
     AppContext.pushOrOpenInTab(url, e);
 
@@ -307,9 +298,7 @@ async function linkClick(r: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: 
     ctx.onAutoClose();
 }
 
-function isExternalLink(url: string) {
-  return url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName)
-}
+
 
 function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.ReactElement {
 
@@ -621,27 +610,11 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
     {extraIcons?.map((ei, i) => {
 
       if (ei.url) {
-        return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i} onClick={e => {
-          e.preventDefault();
-          e.stopPropagation();
-
-          let url = ei.url!;
-          var isExternalLink = url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName);
-          Dic.getKeys(urlVariables).forEach(v => {
-            url = url.replaceAll(v, urlVariables[v]());
-          });
-
-          if (isExternalLink)
-            window.open(AppContext.toAbsoluteUrl(url));
-          else
-            AppContext.pushOrOpenInTab(url, e);
-
-          if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
-            ctx.onAutoClose();
-
-        }}>{ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}</button>;
+        return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i}
+          onClick={e => linkClick(ei, selectedEntity, e, ctx)}>
+          {ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}
+        </button>;
       }
-
 
       var config = ToolbarClient.getConfig(ei);
       if (config == null) {

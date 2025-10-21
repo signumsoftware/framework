@@ -13,6 +13,13 @@ import { parseIcon } from '@framework/Components/IconTypeahead'
 import { DashboardPinnedFilters } from '../../../Signum.Dashboard/View/DashboardFilterController'
 import { BigValuePartEntity, UserQueryEntity } from '../../Signum.UserQueries'
 import { UserAssetClient } from '../../../Signum.UserAssets/UserAssetClient'
+import { BigValueClient } from '../../BigValueClient'
+import * as AppContext from "@framework/AppContext"
+import { toAbsoluteUrl } from '@framework/AppContext'
+import { ToolbarUrl } from '../../../Signum.Toolbar/ToolbarUrl'
+import { ToolbarClient } from '../../../Signum.Toolbar/ToolbarClient'
+import { selectSubEntity } from '../../UserQueryToolbarConfig'
+
 
 export interface UserQueryPartHandler {
   findOptions: FindOptions;
@@ -67,15 +74,51 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
     refresh: updateVersion,
   });
 
+  
+
   return <BigValueSearchCounter
     clickable={p.content.userQuery != null}
     findOptions={foExpanded}
     valueToken={valueToken}
-    text={translated(p.partEmbedded, a => a.title) || (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName)}
+    //text={translated(p.partEmbedded, a => a.title) || (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName)}
+    text={
+      p.content.customMessageName ? BigValueClient.registerCustomMessage(p.content.customMessageName, { content: p.content, entity: p.entity })
+        : (translated(p.partEmbedded, a => a.title) ||
+          (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))
+    }
     iconName={p.partEmbedded.iconName ?? undefined}
     iconColor={p.partEmbedded.iconColor ?? undefined}
     deps={[...p.deps ?? [], version]}
     customColor={p.partEmbedded.customColor}
+    customOnClick={!p.content.navigate ? undefined :
+      async e => {
+        if (p.content.customUrl) {
+          let url = p.content.customUrl;
+
+          if (ToolbarUrl.hasSubEntity(url)) {
+
+            if (p.content.userQuery == null)
+              throw new Error("SubEntity (:id2, :type2, :key2) can only be used when a UserQuery is defined");
+
+            const subEntity = await selectSubEntity(p.content.userQuery, p.entity);
+            if (subEntity == null)
+              return;
+
+            url = ToolbarUrl.replaceSubEntity(url, subEntity)
+          }
+
+          url = ToolbarUrl.replaceVariables(url)
+
+          if (p.entity)
+            url = ToolbarUrl.replaceEntity(url, p.entity)
+
+          if (ToolbarUrl.isExternalLink(url))
+            window.open(url);
+          else
+            AppContext.pushOrOpenInTab(url, e);
+        }
+      }
+    }
     titleColor={p.partEmbedded.titleColor}
     userQuery={p.content.userQuery}
   />;
@@ -91,6 +134,7 @@ interface BigValueBadgeProps {
   titleColor?: string | null;
   deps?: React.DependencyList;
   //cachedQuery?: Promise<CachedQueryJS>;
+  customOnClick?: (e: React.MouseEvent) => void;
   customColor: string | null;
   userQuery: UserQueryEntity | null;
 }
@@ -105,7 +149,10 @@ export function BigValueSearchCounter(p: BigValueBadgeProps): React.JSX.Element 
       backgroundColor: p.customColor ?? undefined,
       color: Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "var(--bs-body-color)"
       }}>
-      <div className={classes("card-body")} onClick={p.clickable ? (e => vsc.current!.handleClick(e)) : undefined} style={{
+      <div className={classes("card-body")}
+        onClick={p.clickable ? (e => p.customOnClick ? p.customOnClick(e) : vsc.current!.handleClick(e)) : undefined}
+        
+        style={{
         cursor: p.clickable ? "pointer" : undefined,
         color: p.titleColor ?? (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "var(--bs-body-color)")
       }}>
