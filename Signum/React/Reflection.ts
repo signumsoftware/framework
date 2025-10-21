@@ -1,32 +1,13 @@
-import {
-  DateTime,
-  DateTimeFormatOptions,
-  Duration,
-  DurationObjectUnits,
-  Settings,
-} from "luxon";
+import { DateTime, Duration } from "luxon";
 import { Dic, softCast } from "./Globals";
-import type {
-  ModifiableEntity,
-  Entity,
-  Lite,
-  MListElement,
-  ModelState,
-  MixinEntity,
-  ModelEntity,
-} from "./Signum.Entities"; //ONLY TYPES or Cyclic problems in Webpack!
+import type { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity, ModelEntity } from "./Signum.Entities"; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet, ThrowErrorFilter } from "./Services";
 import { MList } from "./Signum.Entities";
 import * as AppContext from "./AppContext";
 import { QueryString } from "./QueryString";
-import {
-  ConstructSymbol_From,
-  ConstructSymbol_FromMany,
-  ConstructSymbol_Simple,
-  DeleteSymbol,
-  ExecuteSymbol,
-  OperationSymbol,
-} from "./Signum.Operations";
+import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationSymbol } from "./Signum.Operations";
+
+import type { AsLite } from "./Lines/EntityBase";
 
 export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
   const ti = tryGetTypeInfo(enumTypeName);
