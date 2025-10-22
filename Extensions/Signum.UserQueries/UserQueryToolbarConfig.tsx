@@ -38,15 +38,8 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
   }
 
   async selectSubEntityForUrl(element: ToolbarResponse<UserQueryEntity>, entity: Lite<Entity> | null): Promise<Lite<Entity> | undefined> {
-    const uq = await Navigator.API.fetch(element.content!);
-    const fo = await UserQueryClient.Converter.toFindOptions(uq, entity ?? undefined);
-    const lites = await Finder.fetchLites({ queryName: fo.queryName, filterOptions: fo.filterOptions });
-    if (lites.length == 0) {
-      return await Finder.find(fo);
-    }
-
-    const onlyType = lites.map(a => a.EntityType).distinctBy(a => a).single();
-    return await SelectorModal.chooseLite(onlyType, lites);
+    const userQuery = await Navigator.API.fetch(element.content!);
+    return selectSubEntity(userQuery, entity ?? undefined);
   }
 
   override handleNavigateClick(e: React.MouseEvent<any> | undefined, res: ToolbarResponse<UserQueryEntity>, selectedEntity: Lite<Entity> | null): void {
@@ -72,6 +65,18 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
   }
 }
 
+
+export async function selectSubEntity(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<Lite<Entity> | undefined> {
+
+  const fo = await UserQueryClient.Converter.toFindOptions(uq, entity ?? undefined);
+  const lites = await Finder.fetchLites({ queryName: fo.queryName, filterOptions: fo.filterOptions });
+  if (lites.length == 0) {
+    return await Finder.find(fo);
+  }
+
+  const onlyType = lites.map(a => a.EntityType).distinctBy(a => a).single();
+  return await SelectorModal.chooseLite(onlyType, lites);
+}
 
 interface CountUserQueryIconProps {
   userQuery: Lite<UserQueryEntity>;

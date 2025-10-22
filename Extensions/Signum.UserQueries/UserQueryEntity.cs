@@ -365,7 +365,6 @@ public class ValueUserQueryElementEmbedded : EmbeddedEntity
     }
 }
 
-
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class BigValuePartEntity : Entity, IPartParseDataEntity
 {
@@ -375,11 +374,20 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
 
     public bool RequiresTitle => false;
 
+    public string? CustomBigValue { get; set; }
+
+    public bool Navigate { get; set; }
+
+    public string? CustomUrl { get; set; }
+
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("BigValuePart",
            UserQuery == null ? null : new XAttribute(nameof(UserQuery), ctx.Include(UserQuery)),
-           ValueToken == null ? null : new XAttribute(nameof(ValueToken), ValueToken.Token.FullKey())
+           ValueToken == null ? null : new XAttribute(nameof(ValueToken), ValueToken.Token.FullKey()),
+           CustomBigValue == null ? null : new XAttribute(nameof(CustomBigValue), CustomBigValue),
+           !Navigate ? null: new XAttribute(nameof(Navigate), Navigate),
+           CustomUrl == null ? null : new XAttribute(nameof(CustomUrl), CustomUrl)
            );
     }
 
@@ -388,6 +396,9 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
         var uq = element.Attribute(nameof(UserQuery))?.Value;
         UserQuery = uq == null ? null : (UserQueryEntity)ctx.GetEntity(Guid.Parse(uq));
         ValueToken = element.Attribute(nameof(ValueToken))?.Let(t => new QueryTokenEmbedded(t.Value));
+        CustomBigValue = element.Attribute(nameof(CustomBigValue))?.Value;
+        Navigate = element.Attribute(nameof(Navigate))?.Value.ToBool() ?? false;
+        CustomUrl = element.Attribute(nameof(CustomUrl))?.Value;
     }
 
     public void ParseData(DashboardEntity dashboardEntity)
@@ -410,6 +421,7 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
     {
         ValueToken = ValueToken,
         UserQuery = UserQuery,
+        CustomBigValue = CustomBigValue
     };
 
     protected override string? PropertyValidation(PropertyInfo pi)

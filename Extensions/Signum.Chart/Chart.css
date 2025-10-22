@@ -184,4 +184,10 @@ text.sf-initial-message {
     text-align: inherit;
     cursor: pointer;
     display: inline-block;
+
+line.y-line,
+line.x-key-line-group,
+line.y-tick,
+line.x-key-tick {
+    stroke: var(--bs-border-color);
 }
