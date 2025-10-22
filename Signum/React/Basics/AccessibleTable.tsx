@@ -46,7 +46,7 @@ export function AccessibleTable({
     const enhancedRows = React.Children.map(section.props.children, (child) => {
 
       const type = getType(child, mapCustomComponents);
-      if (type !== "tr") {
+      if (type !== "tr" && type !== React.Fragment.toString()) {
         handleStructureError(sectionType, child);
         return child;
       }
@@ -109,6 +109,9 @@ function handleStructureError(message: string, node: React.ReactNode) {
 function getType(node: React.ReactNode, mapCustomComponents: Map<React.JSXElementConstructor<any>, string> | undefined): string | null {
   if (!React.isValidElement(node))
     return null;
+
+  if (node.type == React.Fragment)
+    return React.Fragment.toString();
 
   if (typeof node.type == "string")
     return node.type;
