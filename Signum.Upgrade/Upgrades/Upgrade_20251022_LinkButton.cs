@@ -8,16 +8,19 @@ class Upgrade_20251022_LinkButton : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        var ahrefPattern = new Regex(@"<a\s+href\s*=\s*""#""\s*(.*?)>(.*?)</a>");
+        var ahrefPattern = new Regex(
+            @"<a\s+([^>]*?)href\s*=\s*""#""([^>]*)>(.*?)</a>",
+            RegexOptions.Singleline
+        );
 
         uctx.ForeachCodeFile("*.tsx", file =>
         {
             file.Replace(ahrefPattern, g =>
             {
                 var a = g.Value.Replace("<a", "<LinkButton").Replace("</a>", "</LinkButton>");
-                a = a.Replace("href=\"#\"", "");
-                a = a.Replace("role=\"button\"", "");
-                a = a.Replace("e.preventDefault();", "");
+                a = Regex.Replace(a, @"\s+href=""#""", "");
+                a = Regex.Replace(a, @"\s+role=""button""", "");
+                a = Regex.Replace(a, @"\s+e.preventDefault\(\);?", "");
                 return a;
             });
         });
