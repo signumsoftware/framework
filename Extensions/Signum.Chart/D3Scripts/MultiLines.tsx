@@ -182,7 +182,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
                       opacity={active == false ? .5 : undefined}
                       stroke={active == true ? "var(--bs-body-color)" : s.color || color(s.key)}
                       strokeWidth={active == true ? 3 : circleStroke}
-                      fill="white"
+                      fill="var(--bs-body-bg)"
                       transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(getX(r)!, -y(pv.value)!)}
                       r={circleRadius}
                       shapeRendering="initial"

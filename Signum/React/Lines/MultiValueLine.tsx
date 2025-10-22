@@ -145,7 +145,7 @@ export function MultiValueLineElement(props: MultiValueLineElementProps): React.
 
 
   return (
-    <div style={{ display: "flex", alignItems: "center", marginBottom: "2px" }}>
+    <div className="sf-multi-value-element">
       {!mctx.readOnly &&
         <a href="#"
           title={mctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}

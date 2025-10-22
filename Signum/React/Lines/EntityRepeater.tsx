@@ -72,7 +72,7 @@ export function EntityRepeater<V extends ModifiableEntity | Lite<Entity>>(props:
       <div className="sf-repater-elements">
         {
           c.getMListItemContext(ctx).map((mlec, i) =>
-          (<EntityRepeaterElement<V> key={c.keyGenerator.getKey(mlec.value)}
+          <EntityRepeaterElement<V> key={c.keyGenerator.getKey(mlec.value)}
             onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
             ctx={mlec}
             move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
@@ -81,8 +81,9 @@ export function EntityRepeater<V extends ModifiableEntity | Lite<Entity>>(props:
             htmlAttributes={p.elementHtmlAttributes ? (() => p.elementHtmlAttributes!(mlec)) : undefined}
             getComponent={p.getComponent}
             getViewPromise={p.getViewPromise}
-            title={showType ? <TypeBadge entity={mlec.value} /> : undefined} />))
-        }
+            title={<>{p.getTitle?.(mlec)}{showType && p.getTitle && '\xa0'}{showType ? <TypeBadge entity={mlec.value} /> : undefined}</>}
+            />
+        )}
         {
           p.createAsLink && p.create && !readOnly &&
           (typeof p.createAsLink == "function" ? p.createAsLink(c) :
