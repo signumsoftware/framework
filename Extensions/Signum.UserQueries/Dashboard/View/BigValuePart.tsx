@@ -7,7 +7,7 @@ import { UserQueryClient } from '../../UserQueryClient'
 import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Finder } from '@framework/Finder'
-import { useAPI, useVersion } from '@framework/Hooks'
+import { useAPI, useForceUpdate, useVersion } from '@framework/Hooks'
 import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 import { parseIcon } from '@framework/Components/IconTypeahead'
 import { DashboardPinnedFilters } from '../../../Signum.Dashboard/View/DashboardFilterController'
@@ -61,6 +61,13 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
       filterOptions: [{ token: "Entity", value: p.entity }]
     };
 
+
+
+
+  const vsc = React.useRef<SearchValueController>(null);
+  const forceUpdate = useForceUpdate();
+
+
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
@@ -74,107 +81,83 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
     refresh: updateVersion,
   });
 
-  
+  const clickable = p.content.userQuery != null;
+  const customColor = p.partEmbedded.customColor;
 
-  return <BigValueSearchCounter
-    clickable={p.content.userQuery != null}
-    findOptions={foExpanded}
-    valueToken={valueToken}
-    //text={translated(p.partEmbedded, a => a.title) || (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName)}
-    text={
-      p.content.customMessageName ? BigValueClient.registerCustomMessage(p.content.customMessageName, { content: p.content, entity: p.entity })
-        : (translated(p.partEmbedded, a => a.title) ||
-          (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))
-    }
-    iconName={p.partEmbedded.iconName ?? undefined}
-    iconColor={p.partEmbedded.iconColor ?? undefined}
-    deps={[...p.deps ?? [], version]}
-    customColor={p.partEmbedded.customColor}
-    customOnClick={!p.content.navigate ? undefined :
-      async e => {
-        if (p.content.customUrl) {
-          let url = p.content.customUrl;
+  async function handleNavigate(e: React.MouseEvent) {
+    if (p.content.customUrl) {
+      let url = p.content.customUrl;
 
-          if (ToolbarUrl.hasSubEntity(url)) {
+      if (ToolbarUrl.hasSubEntity(url)) {
 
-            if (p.content.userQuery == null)
-              throw new Error("SubEntity (:id2, :type2, :key2) can only be used when a UserQuery is defined");
+        if (p.content.userQuery == null)
+          throw new Error("SubEntity (:id2, :type2, :key2) can only be used when a UserQuery is defined");
 
-            const subEntity = await selectSubEntity(p.content.userQuery, p.entity);
-            if (subEntity == null)
-              return;
+        const subEntity = await selectSubEntity(p.content.userQuery, p.entity);
+        if (subEntity == null)
+          return;
 
-            url = ToolbarUrl.replaceSubEntity(url, subEntity)
-          }
-
-          url = ToolbarUrl.replaceVariables(url)
-
-          if (p.entity)
-            url = ToolbarUrl.replaceEntity(url, p.entity)
-
-          if (ToolbarUrl.isExternalLink(url))
-            window.open(url);
-          else
-            AppContext.pushOrOpenInTab(url, e);
-        }
+        url = ToolbarUrl.replaceSubEntity(url, subEntity)
       }
+
+      url = ToolbarUrl.replaceVariables(url)
+
+      if (p.entity)
+        url = ToolbarUrl.replaceEntity(url, p.entity)
+
+      if (ToolbarUrl.isExternalLink(url))
+        window.open(url);
+      else
+        AppContext.pushOrOpenInTab(url, e);
+    } else {
+      const url = await UserQueryClient.getUserQueryUrl(p.content.userQuery!, p.entity);
+      AppContext.navigate(url);
+
     }
-    titleColor={p.partEmbedded.titleColor}
-    userQuery={p.content.userQuery}
-  />;
-}
+  }
 
-interface BigValueBadgeProps {
-  findOptions: FindOptions;
-  clickable: boolean;
-  valueToken: QueryToken | null;
-  text?: React.ReactNode;
-  iconName?: string;
-  iconColor?: string;
-  titleColor?: string | null;
-  deps?: React.DependencyList;
-  //cachedQuery?: Promise<CachedQueryJS>;
-  customOnClick?: (e: React.MouseEvent) => void;
-  customColor: string | null;
-  userQuery: UserQueryEntity | null;
-}
-
-export function BigValueSearchCounter(p: BigValueBadgeProps): React.JSX.Element {
-
-  const vsc = React.useRef<SearchValueController>(null);
+  var custom = p.content.customBigValue ? BigValueClient.renderCustomBigValue(p.content.customBigValue, { content: p.content, entity: p.entity, value: vsc.current?.value }) : null; 
 
   return (
     <div className={classes("card", "border-tertiary shadow-sm mb-3 w-100", "o-hidden")}
       style={{
-      backgroundColor: p.customColor ?? undefined,
-      color: Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "var(--bs-body-color)"
+        backgroundColor: customColor ?? undefined,
+        color: Boolean(customColor) ? getColorContrasColorBWByHex(customColor!) : "var(--bs-body-color)"
       }}>
       <div className={classes("card-body")}
-        onClick={p.clickable ? (e => p.customOnClick ? p.customOnClick(e) : vsc.current!.handleClick(e)) : undefined}
-        
+        onClick={clickable ? (p.content.navigate ? handleNavigate : e => vsc.current!.handleClick(e)) : undefined}
+
         style={{
-        cursor: p.clickable ? "pointer" : undefined,
-        color: p.titleColor ?? (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "var(--bs-body-color)")
-      }}>
+          cursor: clickable ? "pointer" : undefined,
+          color: p.partEmbedded.titleColor ?? (Boolean(customColor) ? getColorContrasColorBWByHex(customColor!) : "var(--bs-body-color)")
+        }}>
         <div className="dashboard-flex">
           <div className="left">
             <h3>
-              <SearchValue ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
-                searchControlProps={{ extraOptions: { userQuery: toLite(p.userQuery) } }}
-                valueToken={p.valueToken ?? undefined}
+              <SearchValue ref={vsc} findOptions={foExpanded} isLink={false} isBadge={false} deps={p.deps}
+                onValueChange={forceUpdate}
+                onInitialValueLoaded={forceUpdate}
+                searchControlProps={{ extraOptions: { userQuery: toLite(p.content.userQuery) } }}
+                valueToken={valueToken ?? undefined}
+                onRender={custom?.value == null ? undefined : v => custom?.value}
               />
               {/*customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}*/}
             </h3>
-            
 
           </div>
-          <div className="right"> 
-            {p.iconName &&
-              <FontAwesomeIcon icon={parseIcon(p.iconName)!} color={p.iconColor} size="2x" />}
+          <div className="right">
+            {p.partEmbedded.iconName &&
+              <FontAwesomeIcon icon={parseIcon(p.partEmbedded.iconName)!} color={p.partEmbedded.iconColor ?? undefined} size="2x" />}
           </div>
         </div>
-        <h3 className="medium">{p.text}</h3>
+        <h3 className="medium">{
+          custom?.message ?? (translated(p.partEmbedded, a => a.title) ||
+              (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))
+
+        }</h3>
       </div>
     </div>
   );
+
+ 
 }

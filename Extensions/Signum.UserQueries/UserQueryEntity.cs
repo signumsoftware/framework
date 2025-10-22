@@ -374,7 +374,7 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
 
     public bool RequiresTitle => false;
 
-    public string? CustomMessageName { get; set; }
+    public string? CustomBigValue { get; set; }
 
     public bool Navigate { get; set; }
 
@@ -385,7 +385,7 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
         return new XElement("BigValuePart",
            UserQuery == null ? null : new XAttribute(nameof(UserQuery), ctx.Include(UserQuery)),
            ValueToken == null ? null : new XAttribute(nameof(ValueToken), ValueToken.Token.FullKey()),
-           CustomMessageName == null ? null : new XAttribute(nameof(CustomMessageName), CustomMessageName),
+           CustomBigValue == null ? null : new XAttribute(nameof(CustomBigValue), CustomBigValue),
            !Navigate ? null: new XAttribute(nameof(Navigate), Navigate),
            CustomUrl == null ? null : new XAttribute(nameof(CustomUrl), CustomUrl)
            );
@@ -396,7 +396,7 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
         var uq = element.Attribute(nameof(UserQuery))?.Value;
         UserQuery = uq == null ? null : (UserQueryEntity)ctx.GetEntity(Guid.Parse(uq));
         ValueToken = element.Attribute(nameof(ValueToken))?.Let(t => new QueryTokenEmbedded(t.Value));
-        CustomMessageName = element.Attribute(nameof(CustomMessageName))?.Value;
+        CustomBigValue = element.Attribute(nameof(CustomBigValue))?.Value;
         Navigate = element.Attribute(nameof(Navigate))?.Value.ToBool() ?? false;
         CustomUrl = element.Attribute(nameof(CustomUrl))?.Value;
     }
@@ -421,7 +421,7 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
     {
         ValueToken = ValueToken,
         UserQuery = UserQuery,
-        CustomMessageName = CustomMessageName
+        CustomBigValue = CustomBigValue
     };
 
     protected override string? PropertyValidation(PropertyInfo pi)

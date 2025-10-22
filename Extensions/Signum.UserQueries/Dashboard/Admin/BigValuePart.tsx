@@ -11,7 +11,7 @@ import { BigValueClient } from '../../BigValueClient';
 export default function BigValuePart(p: { ctx: TypeContext<BigValuePartEntity> }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ formGroupStyle: "Basic" });
   const forceUpdate = useForceUpdate();
-  const entityType = ctx.findParent(DashboardEntity)?.entityType;
+  const entityType = ctx.findParent(DashboardEntity)?.entityType?.model as string;
   return (
     <div >
       <EntityLine ctx={ctx.subCtx(p => p.userQuery)} create={false} onChange={() => {
@@ -20,11 +20,11 @@ export default function BigValuePart(p: { ctx: TypeContext<BigValuePartEntity> }
       }} />
       {
         ctx.value.userQuery ? <QueryTokenEmbeddedBuilder ctx={ctx.subCtx(a => a.valueToken)} queryKey={ctx.value.userQuery.query.key} subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} /> :
-          entityType ? <QueryTokenEmbeddedBuilder ctx={ctx.subCtx(a => a.valueToken)} queryKey={entityType.model as string} subTokenOptions={0 as SubTokensOptions} /> : 
+          entityType ? <QueryTokenEmbeddedBuilder ctx={ctx.subCtx(a => a.valueToken)} queryKey={entityType} subTokenOptions={0 as SubTokensOptions} /> : 
           null
       }
       <EnumLine
-        ctx={ctx.subCtx(a => a.customMessageName)}
+        ctx={ctx.subCtx(a => a.customBigValue)}
         optionItems={BigValueClient.getKeys(entityType)}
         lineType="ComboBoxText"
       />

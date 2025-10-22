@@ -42,7 +42,7 @@ export interface SearchValueProps {
   deps?: React.DependencyList;
   searchControlProps?: Partial<SearchControlProps>;
   modalSize?: BsSize;
-  onRender?: (value: any | undefined, vsc: SearchValueController) => React.ReactElement | null | undefined | false;
+  onRender?: (value: any | undefined, vsc: SearchValueController) => React.ReactNode;
   htmlAttributes?: React.AllHTMLAttributes<HTMLElement>,
   customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | null, signal: AbortSignal) => Promise<any>,
   avoidRenderTimeMachineIcon?: boolean;
@@ -55,7 +55,7 @@ export interface SearchValueController {
   value: unknown | undefined;
   queryDescription: QueryDescription | undefined;
   hasHistoryChanges: boolean | undefined;
-  renderValue(): React.ReactElement | string | null;
+  renderValue(): React.ReactNode;
   refreshValue: () => void;
   handleClick: (e: React.MouseEvent<any>) => void;
 }
@@ -72,7 +72,7 @@ function getQueryRequestValue(fo: FindOptionsParsed, valueToken?: string | Query
 }
 
 const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefAttributes<SearchValueController>> =
-  React.forwardRef(function SearchValue(p: SearchValueProps, ref: React.Ref<SearchValueController>): React.ReactElement | null {
+  React.forwardRef(function SearchValue(p: SearchValueProps, ref: React.Ref<SearchValueController>): React.ReactNode | null {
 
     const fo = p.findOptions;
 
@@ -330,7 +330,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
         .then(() => { updateVersion(); p.onExplored && p.onExplored(); });
     }
 
-    function renderValue(): React.ReactElement | string | null {
+    function renderValue(): React.ReactNode {
 
       if (value === undefined)
         return "…";
