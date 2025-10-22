@@ -420,9 +420,9 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
       return undefined;
 
     return (
-      <a className="sf-popup-fullscreen sf-pointer" role="button" tabIndex={0} href="#" onClick={handlePopupFullScreen} title={FrameMessage.Fullscreen.niceToString()}>
+      <LinkButton className="sf-popup-fullscreen sf-pointer" tabIndex={0} onClick={handlePopupFullScreen} title={FrameMessage.Fullscreen.niceToString()}>
         <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
-      </a>
+      </LinkButton>
     );
   }
 

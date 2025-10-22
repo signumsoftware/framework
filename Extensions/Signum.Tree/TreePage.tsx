@@ -37,9 +37,9 @@ export default function TreePage(): React.JSX.Element {
       <h2>
         <span className="sf-entity-title">{ti.nicePluralName}</span>
         &nbsp;
-        <a className="sf-popup-fullscreen" href="#" title={FrameMessage.Fullscreen.niceToString()} onClick={e => treeViewRef.current!.handleFullScreenClick(e)}>
+        <LinkButton className="sf-popup-fullscreen" title={FrameMessage.Fullscreen.niceToString()} onClick={e => treeViewRef.current!.handleFullScreenClick(e)}>
           <span className="fa fa-external-link"></span>
-        </a>
+        </LinkButton>
       </h2>
       <TreeViewer ref={treeViewRef}
         treeOptions={to}

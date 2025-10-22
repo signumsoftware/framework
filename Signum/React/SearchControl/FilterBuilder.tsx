@@ -122,13 +122,12 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
                 <th className="ps-0">
                   <div className="d-flex">
                     {!p.readOnly && p.filterOptions.length > 0 &&
-                      <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteAllFilter.niceToString() : undefined}
+                      <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.DeleteAllFilter.niceToString() : undefined}
                         className="sf-line-button sf-remove sf-remove-filter-icon"
-                        role="button"
                         tabIndex={0}
                         onClick={handleDeleteAllFilters}>
                         <FontAwesomeIcon aria-hidden={true} icon="xmark" />
-                      </a>}
+                      </LinkButton>}
                     {SearchMessage.Field.niceToString()}
                   </div>
                 </th>
@@ -174,28 +173,25 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
                 <tr className="sf-filter-create">
                   <td colSpan={4}>
                     {p.queryDescription && <VisualTipIcon visualTip={SearchVisualTip.FilterHelp} content={props => <FilterHelp queryDescription={p.queryDescription} injected={props} />} />}
-                    <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
+                    <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
                       className="sf-line-button sf-create sf-create-condition"
-                      role="button"
                       tabIndex={0}
                       onClick={e => handlerNewFilter(e, false)}>
                       <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create me-1" />{SearchMessage.AddFilter.niceToString()}
-                    </a>
-                    <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddOrGroup.niceToString() : undefined}
+                    </LinkButton>
+                    <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.AddOrGroup.niceToString() : undefined}
                       className="sf-line-button sf-create sf-create-group ms-3"
-                      role="button"
                       tabIndex={0}
                       onClick={e => handlerNewFilter(e, true)}>
                       <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create me-1" />{SearchMessage.AddOrGroup.niceToString()}
-                    </a>
+                    </LinkButton>
 
-                    {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.EditPinnedFilters.niceToString() : undefined}
+                    {p.showPinnedFiltersOptionsButton && <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.EditPinnedFilters.niceToString() : undefined}
                       className="sf-line-button ms-3"
-                      role="button"
                       tabIndex={0}
-                      onClick={e => { e.preventDefault(); setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
+                      onClick={e => { setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
                       <FontAwesomeIcon aria-hidden={true} color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "pen-to-square"]} className="me-1" />{SearchMessage.EditPinnedFilters.niceToString()}
-                    </a>
+                    </LinkButton>
                     }
                   </td>
                 </tr>
@@ -421,17 +417,17 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
       {!p.readOnly &&
         <tr className="sf-filter-create">
           <td colSpan={4} style={{ paddingLeft: paddingLeftNext }}>
-            <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
+            <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={e => handlerNewFilter(e, false)}>
               <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
-            </a>
+            </LinkButton>
 
-            <a href="#" title={StyleContext.default.titleLabels ? (p.filterGroup.groupOperation == "And" ? SearchMessage.AddOrGroup.niceToString() : SearchMessage.AddAndGroup.niceToString()) : undefined}
+            <LinkButton title={StyleContext.default.titleLabels ? (p.filterGroup.groupOperation == "And" ? SearchMessage.AddOrGroup.niceToString() : SearchMessage.AddAndGroup.niceToString()) : undefined}
               className="sf-line-button sf-create ms-3"
               onClick={e => handlerNewFilter(e, true)}>
               <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.filterGroup.groupOperation == "And" ? SearchMessage.AddOrGroup.niceToString() : SearchMessage.AddAndGroup.niceToString()}
-            </a>
+            </LinkButton>
           </td>
         </tr>
       }

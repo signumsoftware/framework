@@ -64,9 +64,8 @@ export namespace TranslatedInstanceClient {
     var ctx = p.controller.props.ctx.tryFindRootEntity();
   
     return (
-      <a href="#" role="button" className={classes("sf-line-button sf-view", "btn input-group-text", "sf-translate-button")}
+      <LinkButton className={classes("sf-line-button sf-view", "btn input-group-text", "sf-translate-button")}
         onClick={e => {
-          e.preventDefault();
   
           const url =
             ctx == null ? `/translatedInstance/status/` :
@@ -77,7 +76,7 @@ export namespace TranslatedInstanceClient {
         }}
         title={p.controller.props.ctx.titleLabels ? TranslationMessage.ThisFieldIsTranslatable.niceToString() : undefined}>
         <FontAwesomeIcon aria-hidden={true} icon="language" />
-      </a>
+      </LinkButton>
     );
   }
   

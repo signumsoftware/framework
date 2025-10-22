@@ -233,8 +233,7 @@ export function ChartPaletteLink(p: ChartPaletteLinkProps): React.JSX.Element {
         <span className={p.ctx.formControlPlainTextClass}>
           {JavascriptMessage.loading.niceToString()}
         </span> :
-        <a href="#" className={p.ctx.formControlPlainTextClass} onClick={async e => {
-          e.preventDefault();
+        <LinkButton className={p.ctx.formControlPlainTextClass} onClick={async e => {
           if (palette)
             await Navigator.view(palette.lite);
           else {
@@ -247,7 +246,7 @@ export function ChartPaletteLink(p: ChartPaletteLinkProps): React.JSX.Element {
           reload();
         }}>
           {palette ? ChartMessage.ViewPalette.niceToString() : ChartMessage.CreatePalette.niceToString()}
-        </a>
+        </LinkButton>
       }
     </FormGroup>    
   );

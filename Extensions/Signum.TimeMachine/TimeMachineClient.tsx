@@ -82,13 +82,13 @@ export namespace TimeMachineClient {
   
           if (sc?.state.resultFindOptions?.groupResults) {
             return (
-              <a href="#" role="button" className="sf-line-button sf-view" onClick={e => { e.preventDefault(); sc!.openRowGroup(row, e); }}
+              <LinkButton className="sf-line-button sf-view" onClick={e => { sc!.openRowGroup(row, e); }}
                 style={{ whiteSpace: "nowrap", opacity: deleted ? .5 : undefined }} >
                 <span title={JavascriptMessage.ShowGroup.niceToString()}>
                   <FontAwesomeIcon aria-hidden={true} icon="layer-group" />
                 </span>
                 {icon}
-              </a>
+              </LinkButton>
             );
           }
   

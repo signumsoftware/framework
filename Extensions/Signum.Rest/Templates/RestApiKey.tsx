@@ -26,10 +26,10 @@ export default function RestApiKeyComponent(p : { ctx: TypeContext<RestApiKeyEnt
       <EntityLine ctx={ctx.subCtx(e => e.user)} />
       <TextBoxLine ctx={ctx.subCtx(e => e.apiKey)}
         extraButtons={vl =>
-          <a href="#" className={classes("sf-line-button", "sf-view", "btn input-group-text")}            
+          <LinkButton className={classes("sf-line-button", "sf-view", "btn input-group-text")}            
             onClick={generateApiKey}>
             <FontAwesomeIcon icon="key" title={RestApiKeyMessage.GenerateApiKey.niceToString()}/>
-          </a>} />
+          </LinkButton>} />
     </div>
   );
 }

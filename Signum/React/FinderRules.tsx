@@ -503,16 +503,15 @@ export function initEntityFormatRules(): Finder.EntityFormatRule[] {
       name: "View",
       isApplicable: sc => sc?.state.resultFindOptions?.groupResults == true,
       formatter: new Finder.EntityFormatter(({ row, columns, searchControl: sc }) =>
-        <a href="#"
-          role="button"
+        <LinkButton
           tabIndex={0}
           className="sf-line-button sf-view"
-          onClick={e => { e.preventDefault(); sc!.openRowGroup(row, e); }}
+          onClick={e => { sc!.openRowGroup(row, e); }}
         >
           <span title={JavascriptMessage.ShowGroup.niceToString()}>
             <FontAwesomeIcon aria-hidden={true} icon="layer-group" />
           </span>
-        </a>, "centered-cell")
+        </LinkButton>, "centered-cell")
     },
   ]
 }
@@ -778,13 +777,12 @@ export function MultiValue(p: MultiValueProps): React.ReactElement {
             <tr key={i}>
               <td>
                 {!p.readOnly &&
-                  <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+                  <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
                     className="sf-line-button sf-remove"
                     onClick={e => handleDeleteValue(e, i)}
-                    role="button"
                     tabIndex={0}>
                     <FontAwesomeIcon aria-hidden={true} icon="xmark" />
-                  </a>}
+                  </LinkButton>}
               </td>
               <td>
                 {
@@ -801,13 +799,12 @@ export function MultiValue(p: MultiValueProps): React.ReactElement {
         <tr >
           <td colSpan={4}>
             {!p.readOnly &&
-              <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddValue.niceToString() : undefined}
+              <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.AddValue.niceToString() : undefined}
                 className="sf-line-button sf-create"
                 onClick={handleAddValue}
-                role="button"
                 tabIndex={0}>
                 <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
-              </a>}
+              </LinkButton>}
           </td>
         </tr>
       </tbody>

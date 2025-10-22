@@ -104,11 +104,11 @@ export namespace RemoteEmailsClient {
       },
       entityFormatter: new Finder.EntityFormatter(ctx => {
         return (
-          <a href="#" onClick={async e => openMessage(ctx.row, ctx.searchControl!)}>
+          <LinkButton onClick={async e => openMessage(ctx.row, ctx.searchControl!)}>
             <span title={SearchMessage.View.niceToString()}>
               {EntityBaseController.getViewIcon()}
             </span>
-          </a>
+          </LinkButton>
         );
   
       }),

@@ -52,7 +52,7 @@ export default function DynamicPanelPage(): React.JSX.Element {
         startErrors?.length ?
           <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
             <FontAwesomeIcon icon="triangle-exclamation" />
-            {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <a href="#" onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</a>.
+            {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <LinkButton onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</LinkButton>.
         </div> :
           <div role="alert" className="alert alert-success">
             <FontAwesomeIcon icon="circle-check" />
@@ -237,8 +237,8 @@ export function CompileStep(p: DynamicCompileStepProps): React.JSX.Element {
 
 
       <br />
-      {<a href="#" className="sf-button btn btn-warning" onClick={handleCheck}>Check</a>}&nbsp;
-      {<a href="#" className="sf-button btn btn-success" onClick={handleCompile}>Compile</a>}
+      {<LinkButton className="sf-button btn btn-warning" onClick={handleCheck}>Check</LinkButton>}&nbsp;
+      {<LinkButton className="sf-button btn btn-success" onClick={handleCompile}>Compile</LinkButton>}
       {compilationErrors && renderCompileResult(compilationErrors)}
     </div>
   );
@@ -306,7 +306,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps): React.JSX.El
     <div>
       {
         AppContext.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
-        <a href="#" className="sf-button btn btn-danger" onClick={handleRestartApplication}>Restart Server Application</a>
+        <LinkButton className="sf-button btn btn-danger" onClick={handleRestartApplication}>Restart Server Application</LinkButton>
       }
       {p.startErrors && p.startErrors.map((e, i) => <ErrorBlock key={i} error={e} />)}
     </div>
@@ -330,7 +330,7 @@ export function ErrorBlock(p: { error: WebApiHttpError }): React.JSX.Element {
         {textDanger(he.exceptionMessage)}
       </div >
       <div>
-        <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
+        <LinkButton onClick={handleShowStackTrace}>StackTrace</LinkButton>
         {showDetails && <pre>{he.stackTrace}</pre>}
       </div>
     </div>
@@ -355,7 +355,7 @@ export function RefreshClientsStep(): React.JSX.Element {
   return (
     <div>
       <p>Now you need to refresh the clients manually (i.e. pressing F5).</p>
-      <a href="#" className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</a>
+      <LinkButton className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</LinkButton>
     </div>
   );
 }

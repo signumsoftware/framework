@@ -35,9 +35,9 @@ export function FullscreenComponent(p: FullscreenComponentProps): React.ReactEle
         {p.children(isFullScreen)}
       </div>
       <div style={{ display: "flex", flexDirection: "column", marginLeft: "5px" }}>
-        <a onClick={handleExpandToggle} role="button" tabIndex={0} href="#" className="sf-chart-mini-icon" title={isFullScreen ? EntityControlMessage.Minimize.niceToString() : EntityControlMessage.Maximize.niceToString()}  >
+        <LinkButton onClick={handleExpandToggle} tabIndex={0} className="sf-chart-mini-icon" title={isFullScreen ? EntityControlMessage.Minimize.niceToString() : EntityControlMessage.Maximize.niceToString()}  >
           <FontAwesomeIcon aria-hidden={true} icon={isFullScreen ? "compress" : "expand"} />
-        </a>
+        </LinkButton>
         {p.onReload &&
           <a onClick={e => { e.preventDefault(); p.onReload!(e); }} role="button" tabIndex={0} href="#" className="sf-chart-mini-icon" title={EntityControlMessage.Reload.niceToString()} >
             <FontAwesomeIcon aria-hidden={true} icon={"arrow-rotate-right"} />

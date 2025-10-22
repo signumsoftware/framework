@@ -274,9 +274,9 @@ export namespace AzureADClient {
     return (
       <div className="row mt-2">
         <div className="col-md-6 offset-md-3">
-          <a href="#" className={ctx.loading != null ? "disabled" : undefined} onClick={e => { e.preventDefault(); signIn(ctx, false); }}>
+          <LinkButton className={ctx.loading != null ? "disabled" : undefined} onClick={e => { signIn(ctx, false); }}>
             <img src={MicrosoftSignIn.iconUrl} alt={LoginAuthMessage.SignInWithMicrosoft.niceToString()} title={LoginAuthMessage.SignInWithMicrosoft.niceToString()} />
-          </a>
+          </LinkButton>
         </div>
       </div>
     );

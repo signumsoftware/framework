@@ -268,11 +268,11 @@ export function NullableCheckBox(p : NullableCheckBoxProps): React.JSX.Element {
   }
 
     return (
-    <a href="#" onClick={handleClick}>
+    <LinkButton onClick={handleClick}>
       <FontAwesomeIcon icon={getIcon()} className={getClass()} />
         {" "}
       {p.label}
-      </a>
+      </LinkButton>
     );
   }
 
@@ -368,11 +368,11 @@ export function CollapsableTypeHelp(p: { initialTypeName?: string }): React.JSX.
 
     return (
       <div>
-      <a href="#" onClick={handleHelpClick} className="design-help-button">
+      <LinkButton onClick={handleHelpClick} className="design-help-button">
         {open ?
             DynamicViewMessage.HideHelp.niceToString() :
             DynamicViewMessage.ShowHelp.niceToString()}
-        </a>
+        </LinkButton>
       {open &&
           <TypeHelpComponent
           initialType={p.initialTypeName}

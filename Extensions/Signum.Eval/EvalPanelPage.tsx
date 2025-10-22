@@ -186,7 +186,7 @@ export function RefreshClientsStep(): React.JSX.Element {
   return (
     <div>
       <p>Now you need to refresh the clients manually (i.e. pressing F5).</p>
-      <a href="#" className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</a>
+      <LinkButton className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</LinkButton>
     </div>
   );
 }

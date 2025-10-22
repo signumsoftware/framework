@@ -59,10 +59,10 @@ function TreeModal(p : TreeModalProps): React.JSX.Element {
       <ModalHeaderButtons onClose={handleCancelClicked}>
         <span className="sf-entity-title"> {p.title ?? getTypeInfo(p.treeOptions.typeName).nicePluralName}</span>
         &nbsp;
-        <a className="sf-popup-fullscreen" href="#" title={FrameMessage.Fullscreen.niceToString()} onClick={(e) => treeViewRef.current
+        <LinkButton className="sf-popup-fullscreen" title={FrameMessage.Fullscreen.niceToString()} onClick={(e) => treeViewRef.current
           && treeViewRef.current.handleFullScreenClick(e)}>
           <span className="fa fa-external-link"></span>
-        </a>
+        </LinkButton>
       </ModalHeaderButtons>
 
       <div className="modal-body">

@@ -107,18 +107,18 @@ export function FindOptionsLine(p : FindOptionsLineProps): React.JSX.Element {
         </label>
         <div>
           {fo ? <div>
-          <a href="#" onClick={handleView}>{getDescription(fo)}</a>
+          <LinkButton onClick={handleView}>{getDescription(fo)}</LinkButton>
             {" "}
-            <a href="#" className={classes("sf-line-button", "sf-remove")}
+            <LinkButton className={classes("sf-line-button", "sf-remove")}
             onClick={handleRemove}
               title={EntityControlMessage.Remove.niceToString()}>
               <FontAwesomeIcon icon="xmark" />
-            </a></div> :
-            <a href="#" title={EntityControlMessage.Create.niceToString()}
+            </LinkButton></div> :
+            <LinkButton title={EntityControlMessage.Create.niceToString()}
               className="sf-line-button sf-create"
             onClick={handleCreate}>
               <FontAwesomeIcon icon="plus" className="sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
-            </a>}
+            </LinkButton>}
         </div>
       </div>
     );
@@ -278,11 +278,11 @@ export function QueryKeyLine(p: { queryKey: string | undefined, label: string; o
         <span className="form-control btn-light sf-entity-line-entity">
           {p.queryKey}
         </span>
-        <a href="#" className={classes("sf-line-button", "sf-remove btn btn-light")}
+        <LinkButton className={classes("sf-line-button", "sf-remove btn btn-light")}
           onClick={() => p.onChange(undefined)}
           title={EntityControlMessage.Remove.niceToString()}>
           <FontAwesomeIcon icon="xmark" />
-        </a>
+        </LinkButton>
       </div>
     );
   }
@@ -399,23 +399,23 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
 
   renderButtons(index: number) {
     return (<div className="item-group">
-      <a href="#" className={classes("sf-line-button", "sf-remove")}
+      <LinkButton className={classes("sf-line-button", "sf-remove")}
         onClick={e => this.handleOnRemove(e, index)}
         title={EntityControlMessage.Remove.niceToString()}>
         <FontAwesomeIcon icon="xmark" />
-      </a>
+      </LinkButton>
 
-      <a href="#" className={classes("sf-line-button", "move-up")}
+      <LinkButton className={classes("sf-line-button", "move-up")}
         onClick={e => this.handleOnMoveUp(e, index)}
         title={EntityControlMessage.MoveUp.niceToString()}>
         <FontAwesomeIcon icon="chevron-up" />
-      </a>
+      </LinkButton>
 
-      <a href="#" className={classes("sf-line-button", "move-down")}
+      <LinkButton className={classes("sf-line-button", "move-down")}
         onClick={e => this.handleOnMoveDown(e, index)}
         title={EntityControlMessage.MoveDown.niceToString()}>
         <FontAwesomeIcon icon="chevron-down" />
-      </a>
+      </LinkButton>
     </div>);
   }
 

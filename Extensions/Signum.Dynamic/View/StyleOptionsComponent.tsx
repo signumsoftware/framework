@@ -66,21 +66,21 @@ export function StyleOptionsLine(p : StyleOptionsLineProps): React.JSX.Element {
         {renderMember(val)}
 
         {val && " "}
-        {val && <a href="#" className={classes("sf-line-button", "sf-remove")}
+        {val && <LinkButton className={classes("sf-line-button", "sf-remove")}
           onClick={handleRemove}
           title={EntityControlMessage.Remove.niceToString()}>
           <FontAwesomeIcon icon="xmark" />
-        </a>}
+        </LinkButton>}
       </label>
       <div>
         {val ?
-          <a href="#" onClick={handleView}><pre style={{ padding: "0px", border: "none", color: "blue" }}>{getDescription(val)}</pre></a>
+          <LinkButton onClick={handleView}><pre style={{ padding: "0px", border: "none", color: "blue" }}>{getDescription(val)}</pre></LinkButton>
           :
-          <a href="#" title={EntityControlMessage.Create.niceToString()}
+          <LinkButton title={EntityControlMessage.Create.niceToString()}
             className="sf-line-button sf-create"
             onClick={handleCreate}>
             <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
-          </a>}
+          </LinkButton>}
       </div>
     </div>
   );

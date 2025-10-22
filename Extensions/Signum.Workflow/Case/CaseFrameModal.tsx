@@ -166,9 +166,9 @@ export const CaseFrameModal: React.ForwardRefExoticComponent<CaseFrameModalProps
       return null;
 
     return (
-      <a href="#" className="sf-popup-fullscreen" onClick={handlePopupFullScreen} > 
+      <LinkButton className="sf-popup-fullscreen" onClick={handlePopupFullScreen} > 
         <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()}/>
-      </a>
+      </LinkButton>
     );
   }
 

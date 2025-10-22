@@ -141,7 +141,7 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
             { property: a => a.nullHandling, template: colCtx => isInputOutput(colCtx.value.usage) && <AutoLine ctx={colCtx.subCtx(a => a.nullHandling)} /> },
           ]} />
 
-          {ctx.value.query && <a href="#" onClick={handlePreviewSubQuery}>{PredictorMessage.Preview.niceToString()}</a>}
+          {ctx.value.query && <LinkButton onClick={handlePreviewSubQuery}>{PredictorMessage.Preview.niceToString()}</LinkButton>}
         </div>}
     </div>
   );

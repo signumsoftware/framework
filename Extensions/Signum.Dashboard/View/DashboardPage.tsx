@@ -98,7 +98,7 @@ export function HelpIcon(): React.JSX.Element {
 
   return (
     <OverlayTrigger trigger={["hover", "focus"]} placement="bottom-start" overlay={popover} >
-      <a href="#" className="mx-2"><FontAwesomeIcon icon="gamepad" title="syntax" className="me-1" />Interactive Dashboard</a>
+      <LinkButton className="mx-2"><FontAwesomeIcon icon="gamepad" title="syntax" className="me-1" />Interactive Dashboard</LinkButton>
     </OverlayTrigger>
   );
 

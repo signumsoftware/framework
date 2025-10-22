@@ -40,12 +40,11 @@ function LoginPage(): React.JSX.Element {
       {LoginPage.showLoginForm == "initially_not" && showLoginForm == false &&
         <div className="row">
           <div className="col-md-6 offset-md-3 mt-2">
-            <a href="#" className="ms-1" id="sf-show-login-form" onClick={e => {
-              e.preventDefault();
+            <LinkButton className="ms-1" id="sf-show-login-form" onClick={e => {
               setShowLoginForm(true);
             }}>
               {LoginAuthMessage.ShowLoginForm.niceToString()}
-            </a>
+            </LinkButton>
           </div>
         </div>
       }

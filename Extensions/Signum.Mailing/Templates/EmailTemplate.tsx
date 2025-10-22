@@ -263,11 +263,11 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
           </div>
          }
         <br />
-        {p.messageFormat == 'HtmlComplex' && <a href="#" onClick={handlePreviewClick}>
+        {p.messageFormat == 'HtmlComplex' && <LinkButton onClick={handlePreviewClick}>
           {showPreview ?
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}
-        </a>}
+        </LinkButton>}
         {showPreview && <IFrameRenderer style={{ width: "100%", minHeight: "800px" }} html={ec.value.text} />}
       </div>
     </div>

@@ -80,7 +80,7 @@ export default function ColumnEditor(p: ColumnEditorProps): React.ReactElement {
               </div>
             </div>
 
-            {!showMore && <a href="#" onClick={e => { e.preventDefault(); setShowMore(true); }}>{SearchMessage.ShowMore.niceToString()}</a>}
+            {!showMore && <LinkButton onClick={e => { setShowMore(true); }}>{SearchMessage.ShowMore.niceToString()}</LinkButton>}
           </div>
 
 

@@ -24,7 +24,7 @@ export default function WorkflowPanelPage(): React.JSX.Element {
           <WorkflowScriptRunnerTab />
         </Tab>
         <Tab title="Timers" eventKey="timers">
-          <a href="#" className="sf-button btn btn-link" onClick={e => { e.preventDefault(); window.open(AppContext.toAbsoluteUrl("/scheduler/view")); }}>Open Scheduler Panel</a>
+          <LinkButton className="sf-button btn btn-link" onClick={e => { window.open(AppContext.toAbsoluteUrl("/scheduler/view")); }}>Open Scheduler Panel</LinkButton>
         </Tab>
       </Tabs>
     </div>

@@ -70,7 +70,7 @@ function ToolbarIconButton({ tr }: { tr: ToolbarResponse<any> }) {
 
   if (tr.elements && tr.elements.length > 0) {
     return (
-      <a href="#" onClick={e => { e.preventDefault(); ToolbarMainModalModal.show(tr); }}>
+      <LinkButton onClick={e => { ToolbarMainModalModal.show(tr); }}>
         <div className="card toolbar-card">
           <div className="card-img-top" style={{ fontSize: "60px" }}>
             {ToolbarConfig.coloredIcon(parseIcon(tr.iconName), tr.iconColor)}
@@ -79,14 +79,14 @@ function ToolbarIconButton({ tr }: { tr: ToolbarResponse<any> }) {
             <h5 className="card-title">{tr.label ?? getToString(tr.content!)}</h5>
           </div>
         </div>
-      </a>
+      </LinkButton>
     );
   }
 
 
   if (tr.url) {
     return (
-      <a href="#" onMouseDown={e => { e.preventDefault(); AppContext.pushOrOpenInTab(tr.url!, e); }}>
+      <LinkButton onMouseDown={e => { AppContext.pushOrOpenInTab(tr.url!, e); }}>
         <div className="card toolbar-card">
           <div className="card-img-top" style={{ fontSize: "60px" }}>
             {ToolbarConfig.coloredIcon(parseIcon(tr.iconName), tr.iconColor)}
@@ -95,7 +95,7 @@ function ToolbarIconButton({ tr }: { tr: ToolbarResponse<any> }) {
             <h5 className="card-title">{tr.label}</h5>
           </div>
         </div>
-      </a>
+      </LinkButton>
     );
   }
 
@@ -108,7 +108,7 @@ function ToolbarIconButton({ tr }: { tr: ToolbarResponse<any> }) {
     );
 
   return (
-    <a href="#" onMouseDown={e => { e.preventDefault(); config.handleNavigateClick(e, tr, null); }}>
+    <LinkButton onMouseDown={e => { config.handleNavigateClick(e, tr, null); }}>
       <div className="card toolbar-card">
         <div className="card-img-top" style={{ fontSize: "60px" }}>
           {config.getIcon(tr, null)}
@@ -117,7 +117,7 @@ function ToolbarIconButton({ tr }: { tr: ToolbarResponse<any> }) {
           <h5 className="card-title">{tr.label}</h5>
         </div>
       </div>
-    </a>
+    </LinkButton>
   );
 }
 

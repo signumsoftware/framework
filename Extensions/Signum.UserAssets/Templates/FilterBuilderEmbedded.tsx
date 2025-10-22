@@ -293,11 +293,11 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps): React.JS
   }, [p.ctx.value]);
 
   function getSwitchModelButton(isValue: boolean): React.ReactElement<any> {
-    return (<a href="#" role="button" className={classes("sf-line-button", "sf-remove", "btn input-group-text", p.ctx.readOnly  && "disabled")}
-      onClick={e => { e.preventDefault(); liteRef.current = isValue ? undefined : null; forceUpdate() }}
+    return (<LinkButton className={classes("sf-line-button", "sf-remove", "btn input-group-text", p.ctx.readOnly  && "disabled")}
+      onClick={e => { liteRef.current = isValue ? undefined : null; forceUpdate() }}
       title={isValue ? UserAssetQueryMessage.SwitchToExpression.niceToString() : UserAssetQueryMessage.SwitchToValue.niceToString()}>
       <FontAwesomeIcon aria-hidden={true} icon={[isValue ? "far" : "fas", "pen-to-square"]} />
-    </a>)
+    </LinkButton>)
   }
 
   if (liteRef.current === undefined)
@@ -349,9 +349,8 @@ export function AutoLineOrExpression(p: ValueLineOrExpressionProps): React.JSX.E
 
   function getSwitchModelButton(isValue: boolean) : React.ReactElement<any> {
     return (
-      <a href="#" role="button" className={classes("sf-line-button", "sf-remove", "btn input-group-text")}
+      <LinkButton className={classes("sf-line-button", "sf-remove", "btn input-group-text")}
         onClick={e => {
-          e.preventDefault();
           if (p.filterType == "DateTime")
             p.ctx.value = "yyyy/mm/dd hh:mm:ss";
 
@@ -363,7 +362,7 @@ export function AutoLineOrExpression(p: ValueLineOrExpressionProps): React.JSX.E
         }}
         title={isValue ? UserAssetQueryMessage.SwitchToExpression.niceToString() : UserAssetQueryMessage.SwitchToValue.niceToString()}>
         <FontAwesomeIcon aria-hidden={true} icon={[isValue ? "far" : "fas", "pen-to-square"]} />
-      </a>
+      </LinkButton>
     );
   }
   if (valueRef.current === undefined)

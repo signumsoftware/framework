@@ -141,25 +141,25 @@ const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & Re
 
   const value = svRef.current?.value;
   const find = value != undefined && (p.findButton ?? isQuery) &&
-    <a style={{ display: "flex", alignItems: "center" }} href="#" className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
+    <LinkButton style={{ display: "flex", alignItems: "center" }} className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
       onClick={svRef.current!.handleClick}
       title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
       {EntityBaseController.getFindIcon()}
-    </a>;
+    </LinkButton>;
   
   const create = !p.ctx.frame?.currentDate && (p.create == true || p.create == "ifNull" && value === null) &&
-    <a style={{ display: "flex", alignItems: "center" }} href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
+    <LinkButton style={{ display: "flex", alignItems: "center" }} className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
       title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
       {EntityBaseController.getCreateIcon()}
-    </a>;
+    </LinkButton>;
 
   const view = value != undefined && (p.viewEntityButton ?? (isLite(value) && Navigator.isViewable(value.EntityType))) &&
-    <a href="#" className={classes("sf-line-button sf-view", isFormControl ? "btn input-group-text" : undefined)}
+    <LinkButton className={classes("sf-line-button sf-view", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleViewEntityClick}
       title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
       {EntityBaseController.getViewIcon()}
-    </a>
+    </LinkButton>
 
   let extra = svRef.current && p.extraButtons && p.extraButtons(svRef.current);
 

@@ -115,7 +115,7 @@ export namespace EvalClient {
       return (
         <div>
           {React.createElement("pre", undefined, ...lines.map(line => makeLine(mark(line, searchParts.length - 1))))}
-          <a href="#" className="text-muted" onClick={e => { e.preventDefault(); setShowAll(false) }}>Show less</a>
+          <LinkButton className="text-muted" onClick={e => { setShowAll(false) }}>Show less</LinkButton>
         </div>
       );
     }
@@ -133,7 +133,7 @@ export namespace EvalClient {
             React.createElement("pre", undefined, ...result.map(n => typeof n == "number" ? makeLine(mark(lines[n], searchParts.length - 1)) :
               makeLine(` ----- ${n.numLines} Lines Removed ----- `)
             ))}
-          <a href="#" className="text-muted" onClick={e => { e.preventDefault(); setShowAll(true) }}>Show all</a>
+          <LinkButton className="text-muted" onClick={e => { setShowAll(true) }}>Show all</LinkButton>
         </div>
       );
     }

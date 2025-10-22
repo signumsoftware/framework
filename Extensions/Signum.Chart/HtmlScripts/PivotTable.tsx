@@ -482,7 +482,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     let multiVal: MultiNum |undefined ;
 
-    const link = (p.gor == null || style == null || style.showAggregateValues == false) ? null : <a href="#" onClick={e => handleNumberClick(e)}>{cellFormatter(multiVal ??= sumValue(p.gor))}</a>;
+    const link = (p.gor == null || style == null || style.showAggregateValues == false) ? null : <LinkButton onClick={e => handleNumberClick(e)}>{cellFormatter(multiVal ??= sumValue(p.gor))}</LinkButton>;
 
     var color =
       p.isSummary == 4 ? "rgb(228, 228, 228)" :
@@ -531,7 +531,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       };
     }
 
-    var createLink = p.style?.showCreateButton && isCreable && <a className="sf-create-cell" href="#" onClick={handleCreateClick}>{EntityBaseController.getCreateIcon()}</a>;
+    var createLink = p.style?.showCreateButton && isCreable && <LinkButton className="sf-create-cell" onClick={handleCreateClick}>{EntityBaseController.getCreateIcon()}</LinkButton>;
 
     function handleCreateClick(e: React.MouseEvent) {
       e.preventDefault()
@@ -580,7 +580,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     var etcTitle = style && style.maxTextLength ? title.etc(style.maxTextLength) : title;
 
     var titleElement = isLite(lite) ?
-      <a href="#" onClick={handleLiteClick} title={title}>{etcTitle}</a> :
+      <LinkButton onClick={handleLiteClick} title={title}>{etcTitle}</LinkButton> :
       <span title={title}>{etcTitle}</span>
 
     if (style?.cssStyleDiv)

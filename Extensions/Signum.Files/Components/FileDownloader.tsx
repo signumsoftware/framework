@@ -143,14 +143,13 @@ export function FileDownloader(p: FileDownloaderProps): React.JSX.Element {
         {children}
       </a>
       {p.download == "ViewOrSave" && enabled &&
-        <a href="#"
+        <LinkButton
           className="sf-view sf-line-button"          
           onClick={e => {
-            e.preventDefault();
             handleOnClick(e, true);
           }}>
           <FontAwesomeIcon className="ms-1 sf-pointer" icon={"download"} title={EntityControlMessage.Download.niceToString()}/>
-        </a>
+        </LinkButton>
       }
     </div>
   );

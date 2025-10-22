@@ -246,7 +246,7 @@ export function RenderServiceMessageDefault(p: { error: ServiceError }): React.R
       {ErrorModalOptions.preferPreFormated(p.error) ? <pre style={{ whiteSpace: "pre-wrap" }}>{p.error.httpError.exceptionMessage}</pre> : textDanger(p.error.httpError.exceptionMessage)}
       {p.error.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
         <div>
-          <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
+          <LinkButton onClick={handleShowStackTrace}>StackTrace</LinkButton>
           {showDetails && <pre>{p.error.httpError.stackTrace}</pre>}
         </div>}
     </div>
@@ -267,7 +267,7 @@ export function RenderExternalServiceMessageDefault(p: { error: ExternalServiceE
       {textDanger(p.error.message)}
       {p.error.additionalInfo && ErrorModalOptions.isExceptionViewable() &&
         <div>
-          <a href="#" onClick={handleShowDetails}>StackTrace</a>
+          <LinkButton onClick={handleShowDetails}>StackTrace</LinkButton>
           {showDetails && <pre>{p.error.additionalInfo}</pre>}
         </div>}
     </div>

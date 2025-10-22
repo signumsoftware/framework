@@ -1829,14 +1829,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       else
         return SearchMessage.NoResultsFoundInPage01.niceToString().formatHtml(
           resFO.pagination.currentPage,
-          <a href="#" onClick={e => {
-            e.preventDefault();
+          <LinkButton onClick={e => {
             this.handlePagination({
               mode: "Paginate",
               elementsPerPage: resFO.pagination.elementsPerPage,
               currentPage: 1
             });
-          }}>{SearchMessage.GoBackToPageOne.niceToString()}</a>
+          }}>{SearchMessage.GoBackToPageOne.niceToString()}</LinkButton>
         );
     }
 

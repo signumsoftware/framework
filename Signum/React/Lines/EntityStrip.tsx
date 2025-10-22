@@ -336,12 +336,11 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
   function removeIcon() {
     return p.onRemove &&
       <span>
-        <a className="sf-line-button sf-remove"
+        <LinkButton className="sf-line-button sf-remove"
           onClick={p.onRemove}
-          href="#"
           title={p.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
           {EntityBaseController.getRemoveIcon()}
-        </a>
+        </LinkButton>
       </span>
   }
 

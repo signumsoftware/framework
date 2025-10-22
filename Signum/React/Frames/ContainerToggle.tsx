@@ -30,9 +30,9 @@ export default function ContainerToggleComponent(p: { children: React.ReactNode 
 
   return (
     <div className={classes(fluid ? "container-fluid" : "container", "mt-3", "sf-page-container")}>
-      <a className="expand-window d-none d-md-block" role="button" tabIndex={0} onClick={handleExpandToggle} href="#" title={(fluid ? ContainerToggleMessage.Compress : ContainerToggleMessage.Expand).niceToString()}>
+      <LinkButton className="expand-window d-none d-md-block" tabIndex={0} onClick={handleExpandToggle} title={(fluid ? ContainerToggleMessage.Compress : ContainerToggleMessage.Expand).niceToString()}>
         <FontAwesomeIcon aria-hidden={true} icon={fluid ? "compress" : "expand"} />
-      </a>
+      </LinkButton>
       <ErrorBoundary deps={[location.pathname + location.search]}>
         {React.Children.map(p.children, c => c && React.cloneElement(c as React.ReactElement))}
       </ErrorBoundary>

@@ -86,16 +86,16 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
     <span>
       {getToString(p.data.workflowActivity)}
       &nbsp;
-      <a href="#" onClick={handleRemarksClick} className={classes(
+      <LinkButton onClick={handleRemarksClick} className={classes(
         "case-icon",
         !remarks && "case-icon-ghost")}        
       >
         <FontAwesomeIcon icon={remarks ? "comment-dots" : ["far", "comment"]} title={CaseNotificationEntity.nicePropertyName(a => a.remarks)}/>
-      </a>
+      </LinkButton>
       {alerts > 0 && " "}
-      {alerts > 0 && <a href="#" onClick={handleAlertsClick} style={{ color: "orange" }} >
+      {alerts > 0 && <LinkButton onClick={handleAlertsClick} style={{ color: "orange" }} >
         <FontAwesomeIcon icon={"bell"} aria-hidden={true} title={AlertEntity.nicePluralName()}/>
-      </a>}
+      </LinkButton>}
       &nbsp;
       <InlineCaseTags case={p.data.case} defaultTags={tags} wrap />
     </span>

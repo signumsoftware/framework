@@ -91,7 +91,7 @@ function TranslationTable({ result, onRefreshView }: { result: TranslatedInstanc
             <th key={culture}>
               <span>{culture}</span>
               {result.some(r => !r.isDefaultCulture && r.culture == culture && r.state != "Completed") &&
-                <a href="#" role="button" className={classes("auto-translate-all", culture, "ms-2")} onClick={e => handleAutoTranslateClick(e, null, culture)}>{TranslationMessage.AutoSync.niceToString()}</a>}
+                <LinkButton className={classes("auto-translate-all", culture, "ms-2")} onClick={e => handleAutoTranslateClick(e, null, culture)}>{TranslationMessage.AutoSync.niceToString()}</LinkButton>}
             </th>)}
         </tr>
       </thead>
@@ -117,14 +117,14 @@ function TranslationTable({ result, onRefreshView }: { result: TranslatedInstanc
               return (
                 <td key={culture}>
                   <Link to={`/translatedInstance/view/${type}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
-                  <a href="#" role="button" className="ms-2" onClick={e => { e.preventDefault(); TranslatedInstanceClient.API.downloadView(type, culture); }}><FontAwesomeIcon aria-hidden="true" icon="download" /></a>
+                  <LinkButton className="ms-2" onClick={e => { TranslatedInstanceClient.API.downloadView(type, culture); }}><FontAwesomeIcon aria-hidden="true" icon="download" /></LinkButton>
                   <br />
                   <Link to={`/translatedInstance/sync/${type}/${culture}`} className={"status-" + typeSummary.state}>{TranslationMessage.Sync.niceToString()}</Link>
-                  <a href="#" role="button" className={classes("status-" + typeSummary.state, "ms-2")} onClick={e => { e.preventDefault(); TranslatedInstanceClient.API.downloadSync(type, culture); }}><FontAwesomeIcon aria-hidden="true" icon="download" /></a>
+                  <LinkButton className={classes("status-" + typeSummary.state, "ms-2")} onClick={e => { TranslatedInstanceClient.API.downloadSync(type, culture); }}><FontAwesomeIcon aria-hidden="true" icon="download" /></LinkButton>
                   {typeSummary.state != "Completed" &&
                     <>
                       <br />
-                      <a href="#" role="button"className={classes("auto-translate", "status-" + typeSummary.state)} onClick={e => handleAutoTranslateClick(e, type, culture)}>{TranslationMessage.AutoSync.niceToString()}</a>
+                      <LinkButtonclassName={classes("auto-translate", "status-" + typeSummary.state)} onClick={e => handleAutoTranslateClick(e, type, culture)}>{TranslationMessage.AutoSync.niceToString()}</LinkButton>
                     </>}
                 </td>
               );

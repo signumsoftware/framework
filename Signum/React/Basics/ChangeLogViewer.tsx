@@ -63,17 +63,14 @@ export default function ChangeLogViewer(p: { extraInformation?: string }): React
         </Tooltip>
       }
     >
-      <a
-        href="#"
+      <LinkButton
         ref={triggerRef}
         className="sf-pointer nav-link"
-        role="button"
         aria-haspopup="dialog"
         aria-expanded="false"
         onClick={handleOpenChangeLogs}
         onKeyDown={e => {
           if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
             handleOpenChangeLogs(e as any);
           }
         }}
@@ -85,7 +82,7 @@ export default function ChangeLogViewer(p: { extraInformation?: string }): React
             {countLogs}
           </span>
         )}
-      </a>
+      </LinkButton>
     </OverlayTrigger>
   );
 }

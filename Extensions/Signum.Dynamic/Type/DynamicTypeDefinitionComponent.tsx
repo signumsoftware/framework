@@ -976,23 +976,23 @@ export function PropertyRepeaterComponent(p: PropertyRepeaterComponentProps): Re
       <div>
 
         <span className="item-group">
-          <a href="#" className={classes("sf-line-button", "sf-remove")}
+          <LinkButton className={classes("sf-line-button", "sf-remove")}
             onClick={e => handleOnRemove(e, i)}
             title={EntityControlMessage.Remove.niceToString()}>
             <FontAwesomeIcon icon="xmark" />
-          </a>
+          </LinkButton>
 
-          <a href="#" className={classes("sf-line-button", "move-up")}
+          <LinkButton className={classes("sf-line-button", "move-up")}
             onClick={e => handleOnMoveUp(e, i)}
             title={EntityControlMessage.MoveUp.niceToString()}>
             <FontAwesomeIcon icon="chevron-up" />
-          </a>
+          </LinkButton>
 
-          <a href="#" className={classes("sf-line-button", "move-down")}
+          <LinkButton className={classes("sf-line-button", "move-down")}
             onClick={e => handleOnMoveDown(e, i)}
             title={EntityControlMessage.MoveDown.niceToString()}>
             <FontAwesomeIcon icon="chevron-down" />
-          </a>
+          </LinkButton>
         </span>
         {" " + (p._propertyType_ ?? "") + " " + p.name}
       </div>
@@ -1014,11 +1014,11 @@ export function PropertyRepeaterComponent(p: PropertyRepeaterComponentProps): Re
             </CollapsableCard>)
         }
       </div>
-      <a href="#" title="Create Property"
+      <LinkButton title="Create Property"
         className="sf-line-button sf-create"
         onClick={handleCreateClick}>
         <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Property
-              </a>
+              </LinkButton>
     </div>
   );
 }
@@ -1259,23 +1259,23 @@ export function ComboBoxRepeaterComponent(p: ComboBoxRepeaterComponentProps): Re
       <tr key={i}>
         <td>
           <span className="item-group">
-            <a href="#" className={classes("sf-line-button", "sf-remove")}
+            <LinkButton className={classes("sf-line-button", "sf-remove")}
               onClick={e => handleOnRemove(e, i)}
               title={EntityControlMessage.Remove.niceToString()}>
               <FontAwesomeIcon icon="xmark" />
-            </a>
+            </LinkButton>
 
-            <a href="#" className={classes("sf-line-button", "move-up")}
+            <LinkButton className={classes("sf-line-button", "move-up")}
               onClick={e => handleOnMoveUp(e, i)}
               title={EntityControlMessage.MoveUp.niceToString()}>
               <FontAwesomeIcon icon="chevron-up" />
-            </a>
+            </LinkButton>
 
-            <a href="#" className={classes("sf-line-button", "move-down")}
+            <LinkButton className={classes("sf-line-button", "move-down")}
               onClick={e => handleOnMoveDown(e, i)}
               title={EntityControlMessage.MoveDown.niceToString()}>
               <FontAwesomeIcon icon="chevron-down" />
-            </a>
+            </LinkButton>
           </span>
         </td>
         <td className="rw-widget-sm">
@@ -1295,11 +1295,11 @@ export function ComboBoxRepeaterComponent(p: ComboBoxRepeaterComponentProps): Re
           }
           <tr>
             <td colSpan={2}>
-              <a href="#" title="Create Query Column"
+              <LinkButton title="Create Query Column"
                 className="sf-line-button sf-create"
                 onClick={handleCreateClick}>
                 <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Query Column
-                              </a>
+                              </LinkButton>
             </td>
           </tr>
         </tbody>
@@ -1347,11 +1347,11 @@ export function ValidatorRepeaterComponent(p: ValidatorRepeaterComponentProps): 
     return (
       <div>
         <span className="item-group">
-          <a href="#" className={classes("sf-line-button", "sf-remove")}
+          <LinkButton className={classes("sf-line-button", "sf-remove")}
             onClick={e => handleOnRemove(e, i)}
             title={EntityControlMessage.Remove.niceToString()}>
             <FontAwesomeIcon icon="xmark" />
-          </a>
+          </LinkButton>
         </span>
         {" "}
         {val.type}
@@ -1374,11 +1374,11 @@ export function ValidatorRepeaterComponent(p: ValidatorRepeaterComponentProps): 
             )
           }
         </div>
-        <a href="#" title="Create Validator"
+        <LinkButton title="Create Validator"
           className="sf-line-button sf-create"
         onClick={handleCreateClick}>
           <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Validator
-                </a>
+                </LinkButton>
       </div>
     );
   }

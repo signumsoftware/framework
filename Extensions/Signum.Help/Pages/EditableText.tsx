@@ -30,9 +30,9 @@ export function EditableTextComponent({ ctx, defaultText, onChange, defaultEdita
           defaultText ? <span>{defaultText}</span> :
             <span className="sf-no-text">[{ctx.niceName()}]</span>)
       }
-      {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active")} onClick={e => { e.preventDefault(); setEditable(!editable); }}>
+      {!ctx.readOnly && <LinkButton className={classes("sf-edit-button", editable && "active")} onClick={e => { setEditable(!editable); }}>
         <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
-      </a>}
+      </LinkButton>}
     </span>
   );
 }
@@ -48,9 +48,9 @@ export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEdita
 
       {editable ? <HelpHtmlEditor binding={ctx.binding} /> : <HtmlViewer text={ctx.value} /> }
 
-      {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active", ctx.value && "block")} onClick={e => { e.preventDefault(); setEditable(!editable); }}>
+      {!ctx.readOnly && <LinkButton className={classes("sf-edit-button", editable && "active", ctx.value && "block")} onClick={e => { setEditable(!editable); }}>
         <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
-      </a>}
+      </LinkButton>}
     </div>
   );
 }

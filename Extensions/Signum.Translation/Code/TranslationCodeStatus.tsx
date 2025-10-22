@@ -49,7 +49,7 @@ function TranslationTable({ result, onRefreshView }: { result: TranslationClient
               <th key={culture}>
                 {culture}
                 {result.some(r => !r.isDefault && r.culture == culture && r.status != "Completed") &&
-                  <a href="#" role="button" className={classes("auto-translate-all", culture, "ms-2")} onClick={e => handleAutoTranslateClick(e, null, culture)}>{TranslationMessage.AutoSync.niceToString()}</a>}
+                  <LinkButton className={classes("auto-translate-all", culture, "ms-2")} onClick={e => handleAutoTranslateClick(e, null, culture)}>{TranslationMessage.AutoSync.niceToString()}</LinkButton>}
               </th>)}
           </tr>
         </thead>
@@ -65,7 +65,7 @@ function TranslationTable({ result, onRefreshView }: { result: TranslationClient
                 return (
                   <td key={culture}>
                     <Link role="button" to={`/translation/view/${encodeDots(assembly)}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
-                    {fileStatus.status != "None" && <a href="#" role="button" className="ms-2" onClick={e => { e.preventDefault(); TranslationClient.API.download(assembly, culture).then(r => saveFile(r)); }} title={TranslationMessage.Download.niceToString()}>{<FontAwesomeIcon aria-hidden="true" icon="download" />}</a>}
+                    {fileStatus.status != "None" && <LinkButton className="ms-2" onClick={e => { TranslationClient.API.download(assembly, culture).then(r => saveFile(r)); }} title={TranslationMessage.Download.niceToString()}>{<FontAwesomeIcon aria-hidden="true" icon="download" />}</LinkButton>}
                     <br />
                     {
                       !fileStatus.isDefault &&
@@ -77,7 +77,7 @@ function TranslationTable({ result, onRefreshView }: { result: TranslationClient
                       fileStatus.status != "Completed" && !fileStatus.isDefault &&
                       <>
                         <br />
-                        <a href="#" role="button" className={classes("auto-translate", "status-" + fileStatus.status)} onClick={e => handleAutoTranslateClick(e, assembly, culture)}>{TranslationMessage.AutoSync.niceToString()}</a>
+                        <LinkButton className={classes("auto-translate", "status-" + fileStatus.status)} onClick={e => handleAutoTranslateClick(e, assembly, culture)}>{TranslationMessage.AutoSync.niceToString()}</LinkButton>
                       </>
                     }
                   </td>

@@ -302,10 +302,10 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
 
     if (p.isLink) {
       return (
-        <a id={p.id} className={className} onClick={handleClick} href="#" style={p.customStyle} {...htmlAttrs}>
+        <LinkButton id={p.id} className={className} onClick={handleClick} style={p.customStyle} {...htmlAttrs}>
           {!p.avoidRenderTimeMachineIcon && renderTimeMachineIcon(controller.hasHistoryChanges, `translate(-100%, -80%)`)}
           {renderValue()}
-        </a>
+        </LinkButton>
       );
     }
 

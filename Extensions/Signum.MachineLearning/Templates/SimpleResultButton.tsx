@@ -53,10 +53,10 @@ export default function SimpleResultButton(p : SimpleResultButtonProps): React.J
 
   return (
     <div>
-      <a href="#" className="btn btn-sm btn-info" onClick={handleOnClick} >
+      <LinkButton className="btn btn-sm btn-info" onClick={handleOnClick} >
         <FontAwesomeIcon icon="chart-line" />&nbsp;
         {is(col.element.encoding, DefaultColumnEncodings.OneHot) ? "Confusion matrix" : "Regression Scatterplot"}
-      </a>
+      </LinkButton>
     </div>
   );
 }

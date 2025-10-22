@@ -219,9 +219,9 @@ export function PaginationComponent(p: PaginationComponentProps): React.ReactEle
         {
           mode != undefined ?
             <span className="page-link">{text}</span> :
-            <a href="#" className="page-link" onClick={e => handlePageClicked(e, page)}>
+            <LinkButton className="page-link" onClick={e => handlePageClicked(e, page)}>
               {text}
-            </a>
+            </LinkButton>
         }
       </li>
     );

@@ -32,7 +32,7 @@ export const VersionChangedAlert: {
     <div className={classes("alert alert-warning", "version-alert", (p.blink ?? true) && "blink")} style={{ textAlign: "center" }}>
       <FontAwesomeIcon icon="rotate" aria-hidden={true} />&nbsp;
       {ConnectionMessage.ANewVersionHasJustBeenDeployedSaveChangesAnd0.niceToString()
-        .formatHtml(<a href="#" role="button" tabIndex={0} onClick={handleRefresh}>{ConnectionMessage.Refresh.niceToString()}</a>)}
+        .formatHtml(<LinkButton tabIndex={0} onClick={handleRefresh}>{ConnectionMessage.Refresh.niceToString()}</LinkButton>)}
     </div>
   );
 }

@@ -121,7 +121,7 @@ export function TranslationMember({ type, member, loc, edit }: { type: Translati
             translatedMembers.map(a => <option key={a.culture + a.translatorName} title={`from '${a.culture}' using ${a.translatorName}`} value={a.text}>{a.text}</option>))}
         </select>
         &nbsp;
-                <a href="#" onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</a>
+                <LinkButton onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</LinkButton>
       </span>
     );
   }
@@ -226,7 +226,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
             translatedTypes.map(a => <option key={a.culture + a.translatorName} title={`from '${a.culture}' using ${a.translatorName}`} value={a.singular}>{a.singular}</option>))}
         </select>
         &nbsp;
-                <a href="#" onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</a>
+                <LinkButton onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</LinkButton>
       </span>
     );
   }

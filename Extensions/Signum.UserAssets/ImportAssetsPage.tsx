@@ -136,11 +136,8 @@ export default function ImportAssetsPage(): React.JSX.Element {
                     </td>
                     <td>
                       {ea.customResolution && (
-                        <a
-                          role="button"
-                          href="#"
+                        <LinkButton
                           onClick={e => {
-                            e.preventDefault();
                             Navigator.view(ea.customResolution!).then(cr => {
                               if (cr != null) {
                                 ea.customResolution = cr;
@@ -149,7 +146,7 @@ export default function ImportAssetsPage(): React.JSX.Element {
                             });
                           }}>
                           {getToString(ea.customResolution)}
-                        </a>
+                        </LinkButton>
                       )}
                     </td>
                   </tr>
@@ -218,5 +215,5 @@ function EntityLineSameType(p: { ctx: TypeContext<LiteConflictEmbedded>, onChang
       { isLite: true, name: IsByAll }
 
   return <EntityLine ctx={p.ctx.subCtx(a => a.to)} type={type} onChange={p.onChange}
-    helpText={!validPrType && !avoidLastType && <span><a href="#" onClick={e => { e.preventDefault(); setAvoidLastType(true) }}><FontAwesomeIcon icon="xmark" /></a> {UserAssetMessage.AssumeIs.niceToString()} <code>{p.ctx.value.from.EntityType}</code></span >} />;
+    helpText={!validPrType && !avoidLastType && <span><LinkButton onClick={e => { setAvoidLastType(true) }}><FontAwesomeIcon icon="xmark" /></LinkButton> {UserAssetMessage.AssumeIs.niceToString()} <code>{p.ctx.value.from.EntityType}</code></span >} />;
 }

@@ -94,11 +94,11 @@ export function EmailMessageComponent(p: EmailMessageComponentProps): React.JSX.
     <div className="sf-email-template-message">
       <div>
         <br />
-        <a href="#" onClick={handlePreviewClick}>
+        <LinkButton onClick={handlePreviewClick}>
           {showPreview ?
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}
-        </a>
+        </LinkButton>
         {showPreview && <IFrameRenderer style={{ width: "100%", height: "800px" }} html={ec.value.body.text} />}
       </div>
     </div>

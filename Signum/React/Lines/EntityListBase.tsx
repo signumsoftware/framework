@@ -100,11 +100,11 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-create", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-create", btn ? "input-group-text" : undefined)}
         onClick={this.handleCreateClick}
         title={this.props.ctx.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() : undefined}>
         {EntityBaseController.getCreateIcon()}
-      </a>
+      </LinkButton>
     );
   }
 
@@ -113,11 +113,11 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
         onClick={this.handleFindClick}
         title={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
         {EntityBaseController.getFindIcon()}
-      </a>
+      </LinkButton>
     );
   }
 
@@ -132,14 +132,13 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       return undefined;
 
     return (
-      <a href="#"
+      <LinkButton
         className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "input-group-text" : undefined)}
-        onClick={e => { e.preventDefault(); this.moveUp(index); }}
-        role="button"
+        onClick={e => { this.moveUp(index); }}
         tabIndex={0}
         title={this.props.ctx.titleLabels ? (orientation == "v" ? EntityControlMessage.MoveUp : (isRtl() ? EntityControlMessage.MoveRight : EntityControlMessage.MoveLeft)).niceToString() : undefined}>
         <FontAwesomeIcon aria-hidden={true} icon={orientation == "v" ? "chevron-up" : (isRtl() ? "chevron-right" : "chevron-left")} />
-      </a>
+      </LinkButton>
     );
   }
 
@@ -154,14 +153,13 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       return undefined;
 
     return (
-      <a href="#"
+      <LinkButton
         className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "input-group-text" : undefined)}
-        onClick={e => { e.preventDefault(); this.moveDown(index); }}
-        role="button"
+        onClick={e => { this.moveDown(index); }}
         tabIndex={0}
         title={this.props.ctx.titleLabels ? (orientation == "v" ? EntityControlMessage.MoveDown : (isRtl() ? EntityControlMessage.MoveLeft : EntityControlMessage.MoveRight)).niceToString() : undefined}>
         <FontAwesomeIcon aria-hidden={true} icon={orientation == "v" ? "chevron-down" : (isRtl() ? "chevron-left" : "chevron-right")} />
-      </a>
+      </LinkButton>
     );
   }
 
@@ -359,11 +357,11 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-paste", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-paste", btn ? "input-group-text" : undefined)}
         onClick={this.handlePasteClick}
         title={EntityControlMessage.Paste.niceToString()}>
         {EntityBaseController.getPasteIcon()}
-      </a>
+      </LinkButton>
     );
   }
 

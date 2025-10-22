@@ -203,7 +203,7 @@ export const Predictor: React.ForwardRefExoticComponent<{ ctx: TypeContext<Predi
                     { property: a => a.encoding },
                     { property: a => a.nullHandling },
                   ]} />
-                  {ctxmq.value.query && <a href="#" onClick={handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</a>}
+                  {ctxmq.value.query && <LinkButton onClick={handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</LinkButton>}
                 </div>}
 
               </fieldset>

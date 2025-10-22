@@ -145,13 +145,11 @@ export function ColumnHelp(p: { queryDescription: QueryDescription, injected: Ov
 export function LearnMoreAboutFieldExpressions(p: { expanded: boolean, onSetExpanded: (a: any) => void, showAny: boolean }): React.ReactElement {
   return (
     <div className="mb-2">
-      <a href="#"
-        role="button"
+      <LinkButton
         tabIndex={0}
         onClick={e => {
-        e.preventDefault();
         p.onSetExpanded(!p.expanded);
-        }}><FontAwesomeIcon aria-hidden={true} icon={p.expanded ? "chevron-up" : "chevron-down"} /> {FieldExpressionMessage.LearnMoreAboutFieldExpressions.niceToString()}</a>
+        }}><FontAwesomeIcon aria-hidden={true} icon={p.expanded ? "chevron-up" : "chevron-down"} /> {FieldExpressionMessage.LearnMoreAboutFieldExpressions.niceToString()}</LinkButton>
       {p.expanded == true && <div className="ms-4">
         <div className="my-2">{FieldExpressionMessage.YouCanNavigateDatabaseRelationshipsByContinuingTheExpressionWithMoreItems.niceToString()}</div>
         <ul>

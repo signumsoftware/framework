@@ -53,11 +53,11 @@ export default function InlineCaseTags(p: InlineCaseTagsProps): React.JSX.Elemen
   }
 
   return (
-    <a href="#" onClick={handleTagsClick} className={classes("case-icon", tags.length == 0 && !p.avoidHideIcon && "case-icon-ghost")} style={{ flexWrap: p.wrap ? "wrap" : undefined }}>
+    <LinkButton onClick={handleTagsClick} className={classes("case-icon", tags.length == 0 && !p.avoidHideIcon && "case-icon-ghost")} style={{ flexWrap: p.wrap ? "wrap" : undefined }}>
       {
         tags.length == 0 ? <FontAwesomeIcon icon={"tags"} title={CaseMessage.SetTags.niceToString()}/> :
           tags.map((t, i) => <Tag key={i} tag={t} />)
       }
-    </a>
+    </LinkButton>
   );
 }

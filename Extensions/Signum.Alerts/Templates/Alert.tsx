@@ -45,7 +45,7 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }): React.JSX.E
             {() => <div style={{ whiteSpace: "pre-wrap" }}>
                 {AlertsClient.format(ctx.value.textField || ctx.value.textFromAlertType || "", ctx.value)}
                 <br />
-                <a href="#" className="text-muted" onClick={e => { e.preventDefault(); setEdit(true) }}>Edit</a>
+                <LinkButton className="text-muted" onClick={e => { setEdit(true) }}>Edit</LinkButton>
               </div>}
           </FormGroup>
           

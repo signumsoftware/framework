@@ -55,11 +55,11 @@ export function UserHelpComponent(p : UserHelpProps): React.JSX.Element {
 
   return (
     <div style={{ marginTop: "10px" }}>
-      <a href="#" onClick={handleHelpClick} className="case-help-button">
+      <LinkButton onClick={handleHelpClick} className="case-help-button">
         {open ?
           CaseActivityMessage.HideHelp.niceToString() :
           CaseActivityMessage.ShowHelp.niceToString()}
-      </a>
+      </LinkButton>
       {open &&
         <div dangerouslySetInnerHTML={{ __html: p.activity.userHelp! }} />}
     </div>

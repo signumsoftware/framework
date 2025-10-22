@@ -15,8 +15,8 @@ export default function CaseFlowButton(p: CaseFlowButtonProps): React.JSX.Elemen
   }
 
   return (
-    <a href="#" className="btn btn-info btn-xs px-2" onClick={handleClick}>
+    <LinkButton className="btn btn-info btn-xs px-2" onClick={handleClick}>
       <FontAwesomeIcon icon="shuffle" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
-    </a>
+    </LinkButton>
   );
 }

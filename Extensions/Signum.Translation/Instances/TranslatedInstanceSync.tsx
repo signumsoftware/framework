@@ -265,6 +265,6 @@ export function TranslationProperty({ property }: { property: TranslatedInstance
         )}
       </select>
         &nbsp;
-        <a href="#" role="button" onClick={handleAvoidCombo} aria-label={TranslationMessage.Edit.niceToString()}>{TranslationMessage.Edit.niceToString()}</a>
+        <LinkButton onClick={handleAvoidCombo} aria-label={TranslationMessage.Edit.niceToString()}>{TranslationMessage.Edit.niceToString()}</LinkButton>
     </span>
 }

@@ -82,9 +82,9 @@ export function HelpIcon(p: { ctx: TypeContext<any>; typeHelp?: TypeHelpEntity }
       overlay={popover}
       onEntered={handleEntered}
     >
-      <a href="#" role="button" tabIndex={0} onClick={e => e.preventDefault()} className="ms-1 sf-help-button" title={HelpMessage.Help.niceToString()}>
+      <LinkButton tabIndex={0} onClick={e =>} className="ms-1 sf-help-button" title={HelpMessage.Help.niceToString()}>
         <FontAwesomeIcon aria-hidden={true} icon="circle-question" />
-      </a>
+      </LinkButton>
     </OverlayTrigger>
   );
 }

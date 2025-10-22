@@ -366,13 +366,12 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
       <WCAGRow key={rule.resource.namespace + "." + rule.resource.className} className={classes("sf-auth-type", rule.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
         <td>
           {conditions.length > 1 || conditions.length == 1 && rule.allowed.conditionRules.length == 0 ?
-            <a className="sf-condition-icon" role="button" href="#" title={AuthAdminMessage.AddCondition.niceToString()} onClick={async e => {
-              e.preventDefault();
+            <LinkButton className="sf-condition-icon" title={AuthAdminMessage.AddCondition.niceToString()} onClick={async e => {
               await addConditionClick(TypeAllowed, conditions, rule.allowed, rule.resource);
               p.updateFrame();
             }}>
               <FontAwesomeIcon aria-hidden="true" icon="circle-plus" className="me-2" />
-            </a> :
+            </LinkButton> :
             <FontAwesomeIcon aria-hidden="true" icon="circle" className="sf-placeholder-icon me-2"></FontAwesomeIcon>
           }
           {typeInfo.niceName}
@@ -427,21 +426,20 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
             onDrop={drag?.onDrop}
           >
             <td>
-              <a className="sf-condition-icon me-1 ms-3" role="button" href="#" title={AuthAdminMessage.RemoveCondition.niceToString()} aria-label={AuthAdminMessage.RemoveCondition.niceToString()} onClick={e => {
-                e.preventDefault();
+              <LinkButton className="sf-condition-icon me-1 ms-3" title={AuthAdminMessage.RemoveCondition.niceToString()} aria-label={AuthAdminMessage.RemoveCondition.niceToString()} onClick={e => {
                 handleRemoveConditionClick(rule.allowed, cr);
               }}>
                 <FontAwesomeIcon aria-hidden="true" icon="circle-minus" title={AuthAdminMessage.RemoveCondition.niceToString()} />
-              </a>
-              {drag && <a className="sf-condition-icon me-1" role="button" aria-label={drag.title} href="#" title={drag.title}
-                onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+              </LinkButton>
+              {drag && <LinkButton className="sf-condition-icon me-1" aria-label={drag.title} title={drag.title}
+                onClick={e => { e.stopPropagation(); }}
                 draggable={true}
                 onKeyDown={drag.onKeyDown}
                 onDragStart={drag.onDragStart}
                 onDragEnd={drag.onDragEnd}
               >
                 {EntityBaseController.getMoveIcon()}
-              </a>}
+              </LinkButton>}
               {cr.typeConditions.map((tc, j) => <>
                 <small className="mx-1" key={j}>{getToString(tc.element).after(".")}</small>
                 {j < cr.typeConditions.length - 1 ? <small className="and" key={j + "$"}>&</small> : null}

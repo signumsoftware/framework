@@ -56,11 +56,11 @@ export function EmailTemplateMessageComponent(p : EmailMasterTemplateMessageComp
           <HtmlCodeMirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />
         </div>
         <br />
-        <a href="#" onClick={handlePreviewClick}>
+        <LinkButton onClick={handlePreviewClick}>
           {showPreview ?
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}
-        </a>
+        </LinkButton>
         {showPreview && <IFrameRenderer style={{ width: "100%", minHeight: "800px" }} html={ec.value.text} />}
       </div>
     </div>
