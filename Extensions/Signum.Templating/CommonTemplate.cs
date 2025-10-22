@@ -11,7 +11,7 @@ namespace Signum.Templating;
 
 public static class TemplateUtils
 {
-    public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<expr>((\[[^\[\]]+\])|([^\[\]]+))+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
+    public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<expr>(?>[^\[\]]+|\[(?<open>)|\](?<-open>))*(?(open)(?!))?)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
 
     public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>((?<type>[\w]):)?.+?)(?<operation>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]]+)");
 

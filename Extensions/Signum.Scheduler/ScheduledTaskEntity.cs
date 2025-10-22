@@ -1,4 +1,5 @@
 using Signum.Utilities.Reflection;
+using System.ComponentModel;
 
 namespace Signum.Scheduler;
 
@@ -66,4 +67,35 @@ public static class SchedulerPermission
 
 public interface ITaskEntity : IEntity
 {
+}
+
+public enum ScheduledTaskMessage
+{
+    State,
+    InitialDelayMilliseconds,
+    SchedulerMargin,
+    MachineName,
+    ApplicationName,
+    NextExecution,
+    InMemoryQueue,
+    RunningTasks,
+    AvailableTasks,
+    Rule,
+    NextDate,
+    ScheduledTask,
+    [Description("RUNNING")]
+    Running,
+    [Description("STOPPED")]
+    Stopped,
+    None,
+    SimpleStatus,
+    ThereIsNoActiveScheduledTask,
+    ThereAreNoTasksRunning,
+    SchedulerTaskLog,
+    StartTime,
+    Remarks,
+    Cancel,
+    SchedulePanel,
+    Start,
+    Stop,
 }

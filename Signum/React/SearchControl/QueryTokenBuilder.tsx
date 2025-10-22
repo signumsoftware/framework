@@ -178,7 +178,7 @@ export function QueryTokenPart(p: QueryTokenPartProps): React.ReactElement | nul
       {p.selectedToken || p.parentToken == null || p.defaultOpen ?
         <DropdownList
           disabled={p.readOnly}
-          selectIcon={open && doAutoExpand ? <FontAwesomeIcon icon="magnifying-glass" /> : undefined}
+          selectIcon={open && doAutoExpand ? <FontAwesomeIcon aria-hidden={true} icon="magnifying-glass" /> : undefined}
           onToggle={isOpen => setOpen(isOpen)}
           filter={(item, searchTerm, idx) => item != null && searchTerm.toLowerCase().split(" ").filter(a => a != "").every(part => parentsUntil(item, p.parentToken).some(t => t.key.toLowerCase().contains(part) || t.toStr.toLowerCase().contains(part)))}
           autoComplete="off"
@@ -195,7 +195,7 @@ export function QueryTokenPart(p: QueryTokenPartProps): React.ReactElement | nul
           defaultOpen={p.defaultOpen}
           busy={!p.readOnly && subTokens == undefined}
         /> : <button className="btn btn-sm sf-query-token-plus" onClick={e => { e.preventDefault(); p.setLastTokenChange(p.parentToken!.fullKey); }}>
-          <FontAwesomeIcon icon="plus" />
+          <FontAwesomeIcon aria-hidden={true} icon="plus" />
         </button>}
     </div>
     //</ParentTokenContext.Provider>

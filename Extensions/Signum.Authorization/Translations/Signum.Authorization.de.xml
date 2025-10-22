@@ -17,20 +17,26 @@
     <Member Name="_0RulesFor1" Description="{0} Regeln für {1}" />
     <Member Name="AddCondition" Description="Bedingung hinzufügen" />
     <Member Name="Allow" Description="Erlauben" />
+    <Member Name="AuthRuleOverview" Description="Übersciht der Auth-Regeln" />
     <Member Name="CanNotBeModified" Description="Kann nicht geändert werden" />
     <Member Name="CanNotBeModifiedBecauseIsInCondition0" Description="Kann nicht geändert werden, da es die Bedingung {0} erfüllt" />
     <Member Name="CanNotBeModifiedBecauseIsNotInCondition0" Description="Kann nicht geändert werden, da es die Bedingung {0} nicht erfüllt" />
     <Member Name="CanNotBeReadBecauseIsInCondition0" Description="Kann nicht gelesen werden, da es die Bedingung {0} erfüllt" />
     <Member Name="CanNotBeReadBecauseIsNotInCondition0" Description="Kann nicht gelesen werden, da es die Bedingung {0} nicht erfüllt" />
     <Member Name="Check" Description="Aktivieren" />
+    <Member Name="CopyFrom" Description="Kopieren von" />
     <Member Name="Deny" Description="Verweigern" />
     <Member Name="Fallback" Description="Fallback" />
     <Member Name="Filter" Description="Filter" />
     <Member Name="FirstRule" Description="1. Regel" />
     <Member Name="NthRule" Description="{0}. Regel" />
     <Member Name="Overriden" Description="Überschrieben" />
+    <Member Name="PermissionOverriden" Description="Permission-!overriden" />
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
+    <Member Name="PermissionRulesOverview" Description="Übersicht über Berechtigungsregeln" />
     <Member Name="PleaseSaveChangesFirst" Description="Bitte erst Änderungen speichern" />
+    <Member Name="PropertyRuleOverview" Description="Übersicht über die Eigenschaftsregeln" />
+    <Member Name="QueryPermissionsOverview" Description="Abfrage-Berechtigungen Übersicht" />
     <Member Name="RemoveCondition" Description="Bedingung entfernen" />
     <Member Name="RepeatedTypeCondition" Description="Wiederholte Typbedingungen" />
     <Member Name="ResetChanges" Description="Zurücksetzen von Änderungen" />
@@ -46,6 +52,8 @@
     <Member Name="ThereAre0TypeConditionsDefinedFor1" Description="Es sind {0} Typbedingungen für {1} definiert." />
     <Member Name="TheUserStateMustBeDisabled" Description="Der Benutzerstatus muss deaktiviert werden." />
     <Member Name="ThirdRule" Description="3. Regel" />
+    <Member Name="TypeConditions" Description="Typbedingungen" />
+    <Member Name="TypePermissionOverview" Description="Übersicht über Typberechtigungen" />
     <Member Name="TypeRules" Description="Typregeln" />
     <Member Name="Uncheck" Description="Deaktivieren" />
     <Member Name="UsedByRoles" Description="Verwendet von Rollen" />

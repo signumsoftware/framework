@@ -27,8 +27,8 @@ export abstract class ToolbarConfig<T extends Entity> {
     );
   }
 
-  async selectSubEntityForUrl(element: ToolbarResponse<T>, entity: Lite<Entity> | null): Promise<Lite<Entity> | null> {
-    return null;
+  async selectSubEntityForUrl(element: ToolbarResponse<T>, entity: Lite<Entity> | null): Promise<Lite<Entity> | undefined> {
+    return undefined;
   }
 
   abstract getDefaultIcon(): IconProp;
@@ -37,7 +37,7 @@ export abstract class ToolbarConfig<T extends Entity> {
     if (!icon)
       return null;
 
-    return <FontAwesomeIcon icon={fallbackIcon(icon)} className={"icon"} color={color} />;
+    return <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} className={"icon"} color={color} />;
   }
 
   getCounter(element: ToolbarResponse<T>, entity: Lite<Entity> | null): React.ReactElement | undefined {

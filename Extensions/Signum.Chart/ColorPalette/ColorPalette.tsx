@@ -115,7 +115,7 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
           extraButtons={() => <a href="#" className={classes("sf-line-button", "sf-create")}
             title={ColorPaletteMessage.FillAutomatically.niceToString()}
             onClick={handleMagicWand}>
-            <FontAwesomeIcon icon="wand-magic-sparkles" />
+            <FontAwesomeIcon aria-hidden={true} icon="wand-magic-sparkles" />
           </a>}
           columns={[
             {
@@ -161,12 +161,12 @@ function ColorSelector(p: { ctx: TypeContext<string>, colors: string[] | null })
 
   function getSwitchModelButton(): React.ReactElement<any> {
     return (
-      <a href="#" className={classes("sf-line-button", "sf-find", "btn input-group-text")}        
+      <a href="#" role="button" tabIndex={0} className={classes("sf-line-button", "sf-find", "btn input-group-text")}        
         onClick={e => {
           e.preventDefault();
           setCustom(!custom);
         }}>
-        <FontAwesomeIcon icon={custom ? "palette" : "list"}
+        <FontAwesomeIcon aria-hidden={true} icon={custom ? "palette" : "list"}
         title={custom ? ColorPaletteMessage.ShowPalette.niceToString() : ColorPaletteMessage.ShowList.niceToString()} />
       </a>
     );

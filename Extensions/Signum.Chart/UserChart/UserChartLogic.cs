@@ -346,7 +346,7 @@ public static class UserChartLogic
                                     switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, " {0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                                     {
                                         case FixTokenResult.Nothing: break;
-                                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                                        case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                                         case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
                                         case FixTokenResult.SkipEntity: return null;
                                         case FixTokenResult.Fix: item.Token = token; break;
@@ -370,7 +370,7 @@ public static class UserChartLogic
                                 switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, " " + item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
                                 {
                                     case FixTokenResult.Nothing: break;
-                                    case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                                    case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                                     case FixTokenResult.RemoveToken: item.Token = null; break;
                                     case FixTokenResult.SkipEntity: return null;
                                     case FixTokenResult.Fix: item.Token = token; break;
@@ -390,7 +390,7 @@ public static class UserChartLogic
                     switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), entityType))
                     {
                         case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                        case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                         case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: item.ValueString = val; goto retry;
@@ -409,7 +409,7 @@ public static class UserChartLogic
                     switch (FixParameter(item, ref val))
                     {
                         case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                        case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                         case FixTokenResult.RemoveToken: uc.Parameters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: { item.Value = val; goto retry; }
@@ -442,7 +442,7 @@ public static class UserChartLogic
                             return null;
 
                         if (answer == "d")
-                            return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                            return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid)?.TransactionBlock($"UserChart Guid = {uc.Guid}");
                     }
                 }
             }
@@ -450,6 +450,11 @@ public static class UserChartLogic
             {
                 return new SqlPreCommandSimple("-- Exception on {0}\n{1}".FormatWith(uc.BaseToString(), e.Message.Indent(2, '-')));
             }
+        }
+
+        static SqlPreCommand? DeleteSQl(Table table, UserChartEntity uc)
+        {
+            return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid)?.TransactionBlock($"UserChart Guid = {uc.Guid}");
         }
     }
 

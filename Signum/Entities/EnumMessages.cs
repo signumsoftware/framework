@@ -367,6 +367,12 @@ public enum SearchMessage
 
     PaginationMode,
     NumberOfElementsForPagination,
+
+    SelectAllResults,
+    [Description("{0} Result Table")]
+    _0ResultTable,
+    [Description("Select row {0}")]
+    SelectRow0_,
 }
 
 public enum SearchHelpMessage
@@ -707,6 +713,7 @@ public enum ContainerToggleMessage
     Expand,
 }
 
+[AllowUnauthenticated]
 public enum LayoutMessage
 {
     JumpToMainContent,

@@ -5,29 +5,28 @@ import { Dic } from '@framework/Globals'
 import TextArea from '@framework/Components/TextArea';
 import { useForceUpdate } from '@framework/Hooks';
 import { KeyNames } from '@framework/Components';
+import { WCAGRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable';
 
 export function TranslationTypeTable(p: { type: TranslationClient.LocalizableType, result: TranslationClient.AssemblyResult, currentCulture: string }): React.JSX.Element{
 
-  function renderMembers(type: TranslationClient.LocalizableType): React.ReactElement<any>[] {
+  function RenderMembers(p: { type: TranslationClient.LocalizableType }): React.ReactElement<any>[] {
 
     const members = Dic.getKeys(Dic.getValues(type.cultures).first().members);
 
     return members.flatMap(me =>
-      [<tr key={me}>
+      [<WCAGRow key={me}>
         <th className="leftCell">
           {TranslationMessage.Member.niceToString()}
         </th>
         <th colSpan={4}>
           {me}
         </th>
-      </tr>]
+      </WCAGRow>]
         .concat(Dic.getValues(type.cultures).filter(loc => loc.members[me] != null).map(loc =>
           <TranslationMember key={me + "-" + loc.culture} type={type} loc={loc} edit={editCulture(loc)} member={loc.members[me]} />
         ))
     );
-
   }
-
   function editCulture(loc: TranslationClient.LocalizedType) {
     return p.currentCulture == undefined || p.currentCulture == loc.culture;
   }
@@ -35,7 +34,13 @@ export function TranslationTypeTable(p: { type: TranslationClient.LocalizableTyp
   let { type, result } = p;
 
   return (
-    <table style={{ width: "100%", margin: "10px 0" }} className="st" key={type.type}>
+    <AccessibleTable
+      caption={TranslationMessage.TranslationsOverview.niceToString()}
+      className="table st"
+      mapCustomComponents={new Map<React.JSXElementConstructor<any>, string>([[TranslationTypeDescription, "tr"], [RenderMembers, "tr"]])}
+      multiselectable={false}
+      key={type.type}
+      style={{ width: "100%", margin: "10px 0" }}>
       <thead>
         <tr>
           <th className="leftCell"> {TranslationMessage.Type.niceToString()} </th>
@@ -47,15 +52,17 @@ export function TranslationTypeTable(p: { type: TranslationClient.LocalizableTyp
                 type.hasGender ? "Gender" : undefined,
                 type.hasMembers ? "Members" : undefined
               ].filter(a => !!a).join(" / ")} )
-                      </th>
+          </th>
         </tr>
       </thead>
       <tbody>
-        {type.hasDescription && Dic.getValues(type.cultures).filter(loc => loc.typeDescription)
-          .map(loc => <TranslationTypeDescription key={loc.culture} edit={editCulture(loc)} loc={loc} result={result} type={type} />)}
-        {type.hasMembers && renderMembers(type)}
+        {Dic.getValues(type.cultures).filter(loc => type.hasDescription && loc.typeDescription)
+          .map(loc => (
+            <TranslationTypeDescription key={loc.culture} edit={editCulture(loc)} loc={loc} result={result} type={type} />
+          ))}
+        <RenderMembers type={type} />
       </tbody>
-    </table>
+    </AccessibleTable>
   );
 }
 
@@ -69,12 +76,12 @@ export function TranslationMember({ type, member, loc, edit }: { type: Translati
   }, [avoidCombo]);
 
   return (
-    <tr >
+    <WCAGRow>
       <td className="leftCell">{loc.culture}</td>
       <td colSpan={4} className="monospaceCell">
         {edit ? renderEdit() : member.description}
       </td>
-    </tr>
+    </WCAGRow>
   );
 
 
@@ -137,7 +144,7 @@ export interface TranslationTypeDescriptionProps {
   result: TranslationClient.AssemblyResult
 };
 
-export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): React.JSX.Element {
+export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): React.ReactElement {
 
   const [avoidCombo, setAvoidCombo] = React.useState(false);
 
@@ -229,38 +236,44 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
 
   const pronoms = p.result.cultures[loc.culture].pronoms ?? [];
 
+  function safeCell(content: React.ReactNode) {
+    if (content === null || content === undefined || content === false)
+      return <span aria-hidden="true">&nbsp;</span>;
+    return content;
+  }
+
   return (
-    <tr>
+    <WCAGRow>
       <th className="leftCell">{loc.culture}</th>
       <th className="smallCell monospaceCell">
-        {type.hasGender && pronoms.length > 0 && (edit ?
+        {safeCell(type.hasGender && pronoms.length > 0 && (edit ?
           <select value={td.gender ?? ""} onChange={(e) => { td.gender = e.currentTarget.value; forceUpdate(); }} className={!td.gender && Boolean(td.description) ? "sf-mandatory" : undefined}>
             {initialElementIf(!td.gender).concat(
               pronoms.map(a => <option key={a.gender} value={a.gender}>{a.singular}</option>))}
           </select> :
-          (pronoms.filter(a => a.gender == td.gender).map(a => a.singular).singleOrNull()))
-        }
+          (pronoms.filter(a => a.gender == td.gender).map(a => a.singular).singleOrNull())
+        ))}
       </th>
       <th className="monospaceCell">
-        {edit ? renderEdit() : td.description
+        {safeCell(edit ? renderEdit() : td.description)
         }
       </th>
       <th className="smallCell">
-        {type.hasPluralDescription && type.hasGender &&
-          pronoms.filter(a => a.gender == td.gender).map(a => a.plural).singleOrNull()
+        {safeCell(type.hasPluralDescription && type.hasGender &&
+          pronoms.filter(a => a.gender == td.gender).map(a => a.plural).singleOrNull())
         }
       </th>
       <th className="monospaceCell">
         {
-          type.hasPluralDescription && (edit ?
+          safeCell(type.hasPluralDescription && (edit ?
             <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.pluralDescription ?? ""}
               className={!td.pluralDescription && Boolean(td.description) ? "sf-mandatory" : undefined}
               onChange={e => { td.pluralDescription = e.currentTarget.value; forceUpdate(); }}
               onBlur={e => { td.pluralDescription = TranslationMember.normalizeString(e.currentTarget.value); forceUpdate(); }} /> :
-            td.pluralDescription)
+            td.pluralDescription))
         }
       </th>
-    </tr>
+    </WCAGRow>
   );
 }
 

@@ -492,11 +492,11 @@ input[type=checkbox].form-control-xs {
     background-color: var(--bs-body-bg);
 }
 
-.form-group :not(label)>.form-check-input {
+.form-group :not(label):not(.form-check) > .form-check-input {
     margin-top: 0.5em;
 }
 
-.form-group.form-group-xs :not(label)>.form-check-input {
+.form-group.form-group-xs :not(label):not(.form-check) > .form-check-input {
     margin-top: 0.25em;
 }
 
@@ -752,10 +752,21 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     padding: 8px;
 }
 
-.btn.input-group-text {
-    background: var(--bs-tertiary-bg);
-    border: var(--bs-border-width) solid var(--bs-border-color);
+.sf-multi-value-element {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2px;
+    margin-bottom: 2px;
 }
+
+    .sf-multi-value-element :last-child{
+        flex-grow: 1;
+    }
+
+    .btn.input-group-text {
+        background: var(--bs-tertiary-bg);
+        border: var(--bs-border-width) solid var(--bs-border-color);
+    }
 
 :root, [data-bs-theme=dark] {
     --rw-widget-color: var(--bs-body-color);

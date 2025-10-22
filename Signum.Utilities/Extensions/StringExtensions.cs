@@ -75,7 +75,7 @@ public static class StringExtensions
 
     public static string[] Lines(this string str)
     {
-        return str.Split(new[] { "\n", "\n" }, StringSplitOptions.None);
+        return str.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
     }
 
     static InvalidOperationException NotFound(string str, char separator)

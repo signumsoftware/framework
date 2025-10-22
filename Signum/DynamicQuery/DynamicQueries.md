@@ -1,30 +1,87 @@
 ﻿## Dynamic Queries
 
-The Dynamic query system is a layer, on top of the LINQ provider, that allows a more dynamic manipulation of queries at run-time. 
+The Dynamic Query system is a layer built on top of the Signum LINQ provider, enabling dynamic manipulation of queries at runtime.
 
-This system is not meant to be used directly from client code, but used as a service from the Windows or Web `SearchControl`, `CounSearchControl`, or Email, Reporting and Chart module.
-
+This system is not intended for direct use in client code. Instead, it is consumed as a service by components such as the Windows or Web `SearchControl`, `SearchValue`, and modules for Email, Reporting, Charting, etc...
 
 ## QueryLogic
 
-The `QueryLogic` is the main facade of the dynamic query system. 
+`QueryLogic` is the main entry point for the dynamic query system. It is responsible for:
+- Registering queries
+- Registering expressions
+- Executing various types of `QueryRequest`
 
-This class is responsible of: 
-* Registering queries 
-* Registering expressions 
-* Execute the different flavors of `QueryRequest`.
+## Registering Queries
 
-## Registering queries
+The recommended way to register queries in Signum Framework is using the fluent `WithQuery` style inside your static logic registration method:
 
-`.Queries.Register` method is used to add a query to the pool of queries that will be available to the `SearchControl` in the user interface. This queries will only be the starting point, since the `SearchControl` is able to change order, add filters and add or remove columns.
-
-```C#
-    public void Register<T>(object queryName, Func<IQueryable<T>> lazyQuery, Implementations? entityImplementations = null)
+```csharp
+public static void Start(SchemaBuilder sb)
+{
+    if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+    {
+        sb.Include<OrderEntity>()
+            .WithQuery(o => new
+            {
+                Entity = o,
+                o.Id,
+                o.State,
+                o.Customer,
+                o.Employee,
+                o.OrderDate,
+                o.RequiredDate,
+                o.ShipAddress,
+                o.ShipVia,
+            });
+    }
+}
 ```
 
-Example in `OrderLogic.Start`: 
+**Explanation:**
+- `sb.Include<OrderEntity>()` registers the entity and returns a `FluentInclude<OrderEntity>`.
+- `.WithQuery(...)` registers the main query for the entity, using a LINQ projection.
+- You can chain other methods like `.WithUniqueIndex`, `.WithSave`, `.WithDelete`, etc., to keep all logic for the entity together.
+- This style is concise, readable, and encourages grouping all entity logic in one place.
 
-```C#
+---
+
+Alternatively, you can use the more general `Register` method, which is still supported and useful for more complex scenarios or advanced manual queries:
+
+```csharp
+public void Register<T>(object queryName, Func<IQueryable<T>> lazyQuery, Implementations? entityImplementations = null)
+```
+
+Example:
+
+```csharp
+QueryLogic.Queries.Register(typeof(OrderEntity), () =>
+    from o in Database.Query<OrderEntity>()
+    select new
+    {
+        Entity = o,
+        o.Id,
+        o.State,
+        o.Customer,
+        o.Employee,
+        o.OrderDate,
+        o.RequiredDate,
+        o.ShipAddress,
+        o.ShipVia,
+    });
+```
+
+`QueryLogic.Queries.Register` is more verbose but clearly expresses the main point: an IQueryable is registered with a query name (object). It also allows you to customize the metadata using overloads or by returning a DynamicQueryCore (see below for examples).
+
+For more advanced scenarios, you can use overloads that accept a `DynamicQueryCore<T>` and chain metadata overrides as needed.
+
+## Registering Named Queries
+
+Named queries allow you to register queries using an enum as a key (instead of `typeof(T)`) for alternative views of the same entity or custom joins.
+
+Example:
+
+```csharp
+// Default query for OrderEntity
 QueryLogic.Queries.Register(typeof(OrderEntity), () =>
     from o in Database.Query<OrderEntity>()
     select new
@@ -40,6 +97,7 @@ QueryLogic.Queries.Register(typeof(OrderEntity), () =>
         o.ShipVia,
     });
 
+// Named query for OrderEntity (alternative view)
 QueryLogic.Queries.Register(OrderQuery.OrderLines, () =>
     from o in Database.Query<OrderEntity>()
     from od in o.Details
@@ -55,31 +113,27 @@ QueryLogic.Queries.Register(OrderQuery.OrderLines, () =>
     });
 ```
 
-Some interesting points: 
-
-* **QueryName**: This object is the key that will be used to access the query. By convention, the default query for a entity of type `T` will be `typeof(T)`, but enums can also be used for alternative non-default views. 
-* **Lazy init**: Instead of a `IQueryable<T>`, `RegisterQuery` requires a `Func<IQueryable<T>>`. The only reason is to avoid creating thousands of expression trees every time the application starts, but the lambda will be called just once. 
-* **Entity property**: The first property, `Entity`, is mandatory and represents the entity that will be 'behind' each row in the result. The one that will be opened when double-click / view button and the one that will receive the contextual operations. 
-* **Lite is optional**: While calling `ToLite` has important performance consequences when using the LINQ provider directly, here the registered queries will be always manipulated by `QueryLogic.Queries`, and one of this changes is adding `ToLite` to every column of type entity automatically.
+While named queries are supported, they should be reserved for exceptional cases where you need special joins or filters that cannot be achieved by configuring the SearchControl. Most projections and views should be handled by customizing the SearchControl with filters, orders, and columns. Prefer keeping your queries simple and use named queries only when necessary.
 
 ### Metadata
-Additionally, the query will be processed not only to be translated to the database, also to get some metadata. This metadata is used to inherit some information from the property/ies used in each column expression:
 
-* **Localized names** that will be used in the headers.
-* **Implementations** to allow smarter filters.
-* **Unit** and **Format** to show the results properly.
-* The **PropertyRoute** itself to allow removing any unauthorized column. 
+Queries are processed not only for translation to the database, but also to extract metadata, such as:
 
-This meta-data can be overriden using a different variation of `QueryLogic.Queries.Register`:
+- **Localized names** for column headers
+- **Implementations** for smarter filters
+- **Unit** and **Format** for proper display
+- The **PropertyRoute** for authorization and column removal
 
-```C#
+You can override this metadata using a different overload:
+
+```csharp
 public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
 ```
 
-And using `Column` method (or `ColumnDisplayName`) to override each column meta-data like this:
+And use the `Column` or `ColumnDisplayName` methods to override column metadata:
 
-```C#
-QueryLogic.Queries.Register(typeof(OrderEntity), () =>DynamicQueryCore.Auto(
+```csharp
+QueryLogic.Queries.Register(typeof(OrderEntity), () => DynamicQueryCore.Auto(
     from o in Database.Query<OrderEntity>()
     select new
     {
@@ -90,26 +144,21 @@ QueryLogic.Queries.Register(typeof(OrderEntity), () =>DynamicQueryCore.Auto(
         o.Employee,
         o.OrderDate,
         Lines = o.Details.Count
-    }).ColumnDisplayName(a => a.Lines, () => OrderMessage.Lines.NiceToString());
+    }).ColumnDisplayName(a => a.Lines, () => OrderMessage.Lines.NiceToString()));
 ```
 
-### Manual queries (Advanced)
-So far we have seen how to use `RegisterQuery` to create a automatic dynamic queries. This types of queries are super-concise and inherit as much as they can from your entities. 
+### Manual Queries (Advanced)
 
-Sometimes you need more fine-grained control over how the query is executed. The typical scenario is concatenating rows from two different tables in the same result. 
+For advanced scenarios, such as combining rows from multiple tables, use `RegisterQuery` with `DynamicQuery.Manual`:
 
-In this case we use `RegisterQuery` in combination of `DynamicQuery.Manual`.
-
-```C#
+```csharp
 public static ManualDynamicQueryCore<T> Manual<T>(Func<QueryRequest, QueryDescription, DEnumerableCount<T>> execute)
 ```
 
-`DynamicQuery.Manual` gives you complete control to return the results that you want from a `QueryRequest` from the user and a `QueryDefinition` required to create a `DQueryable`. 
+Example:
 
-Example: 
-
-```C#
-QueryLogic.Queries.Register(typeof(CustomerEntity), () => DynamicQuery.Manual((QueryRequest request, QueryDescription descriptions) =>
+```csharp
+QueryLogic.Queries.Register(typeof(CustomerEntity), () => DynamicQuery.Manual((QueryRequest request, QueryDescription description) =>
 {
     var persons = Database.Query<PersonEntity>().Select(p => new
     {
@@ -119,7 +168,7 @@ QueryLogic.Queries.Register(typeof(CustomerEntity), () => DynamicQuery.Manual((Q
         p.Address,
         p.Phone,
         p.Fax
-    }).ToDQueryable(descriptions).AllQueryOperations(request);
+    }).ToDQueryable(description).AllQueryOperations(request);
 
     var companies = Database.Query<CompanyEntity>().Select(p => new
     {
@@ -129,118 +178,61 @@ QueryLogic.Queries.Register(typeof(CustomerEntity), () => DynamicQuery.Manual((Q
         p.Address,
         p.Phone,
         p.Fax
-    }).ToDQueryable(descriptions).AllQueryOperations(request);
+    }).ToDQueryable(description).AllQueryOperations(request);
 
     return persons.Concat(companies)
         .OrderBy(request.Orders)
         .TryPaginate(request.Pagination);
 
 })
-.ColumnProperyRoutes(a => a.Id, 
-    PropertyRoute.Construct((PersonEntity comp) => comp.Id), 
-    PropertyRoute.Construct((CompanyEntity p) => p.Id))
-.ColumnProperyRoutes(a => a.Name, 
-    PropertyRoute.Construct((PersonEntity comp) => comp.FirstName), 
-    PropertyRoute.Construct((PersonEntity comp) => comp.LastName), 
-    PropertyRoute.Construct((CompanyEntity p) => p.CompanyName))
-.ColumnProperyRoutes(a => a.Address, 
-    PropertyRoute.Construct((PersonEntity comp) => comp.Address), 
-    PropertyRoute.Construct((PersonEntity comp) => comp.Address))
-.ColumnProperyRoutes(a => a.Phone, 
-    PropertyRoute.Construct((PersonEntity comp) => comp.Phone), 
-    PropertyRoute.Construct((CompanyEntity p) => p.Phone))
-.ColumnProperyRoutes(a => a.Fax, 
-    PropertyRoute.Construct((PersonEntity comp) => comp.Fax), 
-    PropertyRoute.Construct((CompanyEntity p) => p.Fax))
-, entityImplementations: Implementations.By(typeof(PersonEntity), typeof(CompanyEntity)));
+.ColumnPropertyRoutes(a => a.Id, 
+    PropertyRoute.Construct((PersonEntity p) => p.Id), 
+    PropertyRoute.Construct((CompanyEntity c) => c.Id))
+.ColumnPropertyRoutes(a => a.Name, 
+    PropertyRoute.Construct((PersonEntity p) => p.FirstName), 
+    PropertyRoute.Construct((PersonEntity p) => p.LastName), 
+    PropertyRoute.Construct((CompanyEntity c) => c.CompanyName))
+.ColumnPropertyRoutes(a => a.Address, 
+    PropertyRoute.Construct((PersonEntity p) => p.Address), 
+    PropertyRoute.Construct((CompanyEntity c) => c.Address))
+.ColumnPropertyRoutes(a => a.Phone, 
+    PropertyRoute.Construct((PersonEntity p) => p.Phone), 
+    PropertyRoute.Construct((CompanyEntity c) => c.Phone))
+.ColumnPropertyRoutes(a => a.Fax, 
+    PropertyRoute.Construct((PersonEntity p) => p.Fax), 
+    PropertyRoute.Construct((CompanyEntity c) => c.Fax)),
+    entityImplementations: Implementations.By(typeof(PersonEntity), typeof(CompanyEntity)));
 ```
 
-Using `ToDQueryable` we get a dynamic query (`DQueryable<T>`) that can be manipulated using the dynamic versions of `Select`, `SelectMany`, `Where`, `OrderBy`, `Unique`, `TryTake` and `TryPaginate`. Most of the time you just need to execute all the operations requested by the `SearchControl` using `AllQueryOperations` method.
+`ToDQueryable` returns a dynamic query (`DQueryable<T>`) that supports dynamic versions of `Select`, `SelectMany`, `Where`, `OrderBy`, `Unique`, `TryTake`, and `TryPaginate`. Usually, you just need to call `AllQueryOperations(request)` to apply all requested operations.
 
-> `DQueryable<T>` is generic, but the type T doesn't change after executing any operation (like `Select`), instead, the generic type is only used to make the compiler ensure that two manual queries have the exact same column when using `Concat` (in this case `persons` and  `companies`).
+> Note: `DQueryable<T>` is generic, but the type parameter is only used to ensure that manual queries have matching columns when using `Concat`.
 
-Finally, note how manual queries have no way to inherit the matadata, and all this information has to be manually set using `ColumnProperyRoutes`, and from there, the columns now where to get the `NiceName`, `Format`, `Unit` and athorization. 
+Manual queries do not inherit metadata automatically. All metadata must be set using `ColumnPropertyRoutes`, which provides the necessary information for display names, formats, units, and authorization.
 
 
+## Executing Queries (Advanced)
 
-## Registering expressions
+`QueryLogic.Queries` provides several methods used by `SearchControl`, `SearchValue`, etc. You typically do not need to use these directly unless doing internal plumbing.
 
-The other main usage of `QueryLogic` is to call `Expressions.Register`, that let any of our `expressionMethod` to be available for the user as a query token that he can use in the `SearchControl` for adding filters, columns or use it in any other extension (chart, word and email templates, etc...).
-
-There are many overloads: 
-
-```C#
-public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty)
-public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName)
-public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key)
-public ExtensionInfo RegisterExpression(ExtensionInfo extension)
-
-public class ExtensionInfo
-{
-   public ExtensionInfo(Type sourceType, LambdaExpression lambda, Type type, string key, Func<string> niceName)
-}
+```csharp
+public QueryDescription QueryDescription(object queryName)
+public ResultTable ExecuteQuery(QueryRequest request)
+public int ExecuteQueryCount(QueryCountRequest request)
+public ResultTable ExecuteGroupQuery(QueryGroupRequest request)
+public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
 ```
 
-Typically you only need to use the two first ones, and all the information is taken from there.
+- `QueryDescription`: Returns all registered metadata for a query, filtered and localized for the user.
+- `ResultTable`: Represents a result for the `SearchControl`, similar to a `DataTable` but can contain complex types like `Lite<T>`.
+- `QueryRequest`: Contains the `Columns`, `Filters`, `Orders`, and `Pagination` requested by the `SearchControl`.
 
-Let's suppose that we have an `expressionMethod` like this one: 
-
-```C#
-static Expression<Func<RegionEntity, IQueryable<TerritoryEntity>>> TerritoriesExpression =
-    r => Database.Query<TerritoryEntity>().Where(a => a.Region.Is(r));
-public static IQueryable<TerritoryEntity> Territories(this RegionEntity r)
-{
-    return TerritoriesExpression.Evaluate(r);
-}
-```
-
-This `expressionMethod` let's us simplify queries like this one: 
-
-```C#
-Database.Query<RegionEntity>().Where(r => !r.Territories().Any()).UnsafeDelete();
-```
-
-But `Territories` is a concept that is only available for programmers, without `QueryLogic.Expression.Register` the user is not able to take advantage of it in the SearchControl. Let's do it then: 
-
-```C#
-//In TerritoryLogic.Start
-QueryLogic.Expression.Register((RegionEntity r) => r.Territories());
-```
-
-Now, the a new expression with key `"Territories"` has been registered on `RegionEntity` and returns an `IQueryable<TerritoryEntity>`. 
-
-Unfortunately, the `NiceName` will always be `"Territories"`, independently of the user `CultureInfo` (logic assembly and arbitrary methods are not localized).
-
-Let's fix that re-using the `NicePluralName` of `TerritoryEntity`: 
-
-```C#
-//In TerritoryLogic.Start
-QueryLogic.Expression.Register((RegionEntity r) => r.Territories(), () => typeof(TerritoryEntity).NiceName());
-```
-
-## Executing queries (Advanced)
-
-`QueryLogic.Queries` also has a bunch of method that are used as a service by the `SearchControl`, `CountSearchControl`, etc... You shoudn't need to know about them if you're not doing internal plumbing.
-
-```C#
-   public QueryDescription QueryDescription(object queryName)
-   public ResultTable ExecuteQuery(QueryRequest request)
-   public int ExecuteQueryCount(QueryCountRequest request)
-   public ResultTable ExecuteGroupQuery(QueryGroupRequest request)
-   public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
-```
-
-* `QueryDescription`: Returns all the registered metadata of a query to configure the `SearchControl`, already filtered and localized for a particular user. 
-* `ResultTable`: Represents a result that will be shown in the `SearchControl`. Think of it as a `DataTable` that can also contains complex types, like `Lite<T>`. 
-* `QueryRequest`: Contains the `Columns`, `Filters`, `Orders`, and `Pagination` requested by the `SearchControl` when pressing search.   
-* `QueryGroupRequest`: Contains the `Columns`, `Filters`, `Orders` requested by a control with `GroupBy` capabilities (like charting).
-
-Additionally, many of this objects make use of the concept of `QueryToken`.
+Many of these objects use the concept of a `QueryToken`.
 
 ## QueryToken (Advanced)
 
-A `QueryToken` is a chain of identifiers that can be used as a filter, or be added as a column in query. When the user explores the tables using a sequence of ComboBoxes in the `SearchControl`, he is ultimately creating a `QueryToken`.
+A `QueryToken` is a chain of identifiers used as filters or columns in a query. When the user explores tables using a sequence of DropDownList in the `SearchControl`, they are building a `QueryToken`.
 
-There are many different types of `QueryToken`,  like `ColumnToken`, `EntityPropertyToken`, `CountToken`, `AggregateToken`,... all with a `Parent` property creating a chain.   
+There are several types of `QueryToken`, such as `ColumnToken`, `EntityPropertyToken`, `CountToken`, and `AggregateToken`, all with a `Parent` property forming a chain.
 
-`QueryToken` can be parsed using `QueryUtils.Parse` and ultimately can be converted to a `System.Expression` that can be used in the LINQ provider.  
+`QueryToken` can be parsed using `QueryUtils.Parse` and ultimately converted to a `System.Expression` for use in the LINQ provider.

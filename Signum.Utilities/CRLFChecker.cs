@@ -33,7 +33,7 @@ public class CRLFChecker
         {   
             Console.WriteLine("Looks like your working directory still has some CRLF files");
 
-            if (SafeConsole.Ask("Do you want to fix it by executing some git commans?"))
+            if (SafeConsole.Ask("Do you want to fix it by executing some git commands?"))
             {
                 if (SafeConsole.Ask("Your working directory will be overriden!! Have you commited all your code?"))
                 {

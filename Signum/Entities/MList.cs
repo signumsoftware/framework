@@ -1,8 +1,10 @@
-using System.Collections.ObjectModel;
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Entities;
 
@@ -12,6 +14,23 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
     public bool IsNew
     {
         get { return this.innerList.All(a => a.RowId == null); }
+    }
+
+    public class RowIdElementComparer : IEqualityComparer<RowIdElement>
+    {
+        public static RowIdElementComparer Instance = new RowIdElementComparer();
+        public bool Equals(RowIdElement x, RowIdElement y)
+        {
+            return x.RowId == y.RowId && object.Equals(x.Element, y.Element);
+        }
+
+        public int GetHashCode([DisallowNull] RowIdElement obj)
+        {
+            int hash = 17;
+            hash = hash * 23 + (obj.RowId.HasValue ? obj.RowId.Value.GetHashCode() : 0);
+            hash = hash * 23 + (obj.Element != null ? obj.Element.GetHashCode() : 0);
+            return hash;
+        }
     }
 
     public struct RowIdElement : IEquatable<RowIdElement>, IComparable<RowIdElement>
@@ -671,6 +690,9 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
             this.innerList.Sort(a => a.OldIndex!.Value);
     }
 
+   
+
+
     public void SyncMList<N, K>(IEnumerable<N> newList, Func<T, K> keySelectorOld, Func<N, K> keySelectorNew, Func<T?, N, T> assign)
         where K : notnull
     {
@@ -678,7 +700,7 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
         newList.ToDictionaryEx(a => keySelectorNew(a)); //To fail fast and not on next iteration
         var alreadyDic = this.innerList.ToDictionaryEx(a => keySelectorOld(a.Element));
 
-        this.innerList = newList.Select(e =>
+        var newInnerList = newList.Select(e =>
         {
             var key = keySelectorNew(e);
             if (alreadyDic.TryGetValue(key, out var already))
@@ -692,6 +714,32 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
                 return new RowIdElement(created);
             }
         }).ToList();
+
+
+        if (!newInnerList.SequenceEqual(innerList))
+        {
+            this.innerList = newInnerList;
+            this.SetSelfModified();
+        }
+    }
+
+    public void SyncMList(IEnumerable<T> newList)
+    {
+        newList.ToDictionaryEx(a => (object)a!); //To fail fast and not on next iteration
+        var alreadyDic = this.innerList.ToDictionaryEx(a => (object)a.Element!);
+        var newInnerList = newList.Select(e =>
+        {
+            if (alreadyDic.TryGetValue((object)e!, out var already))
+                return already;
+            else
+                return new MList<T>.RowIdElement(e);
+        }).ToList();
+
+        if (!newInnerList.SequenceEqual(innerList))
+        {
+            this.innerList = newInnerList;
+            this.SetSelfModified();
+        }
     }
 
     public void SyncMListDuplicates<N, K>(IEnumerable<N> newList, Func<T, K> keySelectorOld, Func<N, K> keySelectorNew, Func<T?, N, T> assign)

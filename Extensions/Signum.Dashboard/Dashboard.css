@@ -33,7 +33,6 @@
 
 .sf-grid-element .card {
     margin-bottom: 0px;
-    overflow-x: hidden;
 }
 
 .sf-grid-element .card-header {
@@ -74,9 +73,9 @@
     background-color: var(--bs-light);
 }
 
-.sf-dragging .separator-row.sf-over {
-    background-color: var(--bs-secondary-bg-subtle);
-}
+    .sf-dragging .separator-row.sf-over {
+        background-color: var(--bs-tertiary-color);
+    }
 
 .separator-row {
     height: 20px;
@@ -97,7 +96,7 @@ div.row-control-panel {
 }*/
 
 .sf-hide:not(:hover) {
-    color: var(--bs-secondary);
+    color: var(--bs-secondary-color);
     opacity: .3;
     transition: opacity 200ms, color 200ms;
 }
@@ -147,6 +146,13 @@ div.row-control-panel {
 
 .sf-filter-pill .btn-close:hover {
     opacity: 1
+}
+
+.sf-dot-container {
+    display: inline-flex;
+    vertical-align: middle;
+    white-space: nowrap;
+    align-items: center;
 }
 
 .sf-dot {

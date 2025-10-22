@@ -145,12 +145,15 @@ export function MultiValueLineElement(props: MultiValueLineElementProps): React.
 
 
   return (
-    <div style={{ display: "flex", alignItems: "center", marginBottom: "2px" }}>
+    <div className="sf-multi-value-element">
       {!mctx.readOnly &&
-        <a href="#" title={mctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+        <a href="#"
+          title={mctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
           className="sf-line-button sf-remove"
+          role="button"
+          tabIndex={0}
           onClick={props.onRemove}>
-          <FontAwesomeIcon icon="xmark" />
+          <FontAwesomeIcon aria-hidden={true} icon="xmark" />
         </a>
       }
       {React.cloneElement(props.onRenderItem({ ctx: mctx, mandatory: true })!)}

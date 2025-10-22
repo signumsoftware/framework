@@ -459,7 +459,7 @@ public static class UserQueryLogic
                                 switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, options, " " + ord.OrderType.ToString(), allowRemoveToken: true, allowReCreate: false))
                                 {
                                     case FixTokenResult.Nothing: break;
-                                    case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
+                                    case FixTokenResult.DeleteEntity: return DeleteSql(table, uq);
                                     case FixTokenResult.RemoveToken: uq.Orders.Remove(ord); break;
                                     case FixTokenResult.SkipEntity: return null;
                                     case FixTokenResult.Fix: ord.Token = token; break;
@@ -480,7 +480,7 @@ public static class UserQueryLogic
                     switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), entityType))
                     {
                         case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
+                        case FixTokenResult.DeleteEntity: return DeleteSql(table, uq);
                         case FixTokenResult.RemoveToken: uq.Filters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: item.ValueString = val; goto retry;
@@ -507,7 +507,7 @@ public static class UserQueryLogic
                         switch (QueryTokenSynchronizer.FixValue(new Replacements(), typeof(DateTime), ref date, allowRemoveToken: false, isList: false, null))
                         {
                             case FixTokenResult.Nothing: break;
-                            case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
+                            case FixTokenResult.DeleteEntity: return DeleteSql(table, uq);
                             case FixTokenResult.SkipEntity: return null;
                             case FixTokenResult.Fix: uq.SystemTime.StartDate = date; goto retry;
                         }
@@ -522,7 +522,7 @@ public static class UserQueryLogic
                         switch (QueryTokenSynchronizer.FixValue(new Replacements(), typeof(DateTime), ref date, allowRemoveToken: false, isList: false, null))
                         {
                             case FixTokenResult.Nothing: break;
-                            case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
+                            case FixTokenResult.DeleteEntity: return DeleteSql(table, uq);
                             case FixTokenResult.SkipEntity: return null;
                             case FixTokenResult.Fix: uq.SystemTime.EndDate = date; goto retry;
                         }
@@ -538,6 +538,11 @@ public static class UserQueryLogic
         {
             SafeConsole.WriteLineColor(ConsoleColor.Red, e.GetType().Name + ": " + e.Message);
             return new SqlPreCommandSimple("-- Exception on {0}\n{1}".FormatWith(uq.BaseToString(), e.Message.Indent(2, '-')));
+        }
+
+        static SqlPreCommand? DeleteSql(Table table, UserQueryEntity uq)
+        {
+            return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid)?.TransactionBlock($"UserQuery Guid = {uq.Guid}");
         }
     }
 

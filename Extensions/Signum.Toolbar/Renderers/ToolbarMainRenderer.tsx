@@ -56,7 +56,7 @@ function CollapsableBlock({ r }: { r: ToolbarResponse<any> }) {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <div>
-      <h4 style={{ cursor: "pointer" }} onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}><FontAwesomeIcon icon={isOpen ? "chevron-down" : "chevron-right"} /> {r.label ?? getToString(r.content!)}</h4>
+      <h4 style={{ cursor: "pointer" }} onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}><FontAwesomeIcon aria-hidden={true} icon={isOpen ? "chevron-down" : "chevron-right"} /> {r.label ?? getToString(r.content!)}</h4>
       <Collapse in={isOpen}>
         <div>
           <ToolbarMainRendererPrivate response={r} />

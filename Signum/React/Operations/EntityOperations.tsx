@@ -82,7 +82,7 @@ export namespace EntityOperations {
         eoc.onExecuteSuccess = pack => {
           Operations.notifySuccess();
           Navigator.raiseEntityChanged(pack.entity);
-          eoc.frame.onClose(pack);
+          eoc.frame.onClose?.(pack);
           return Promise.resolve(undefined);
         };
         return eoc.click();
@@ -116,8 +116,8 @@ export namespace EntityOperations {
   export function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?: "start" | "end"): string | React.ReactElement {
     if (icon) {
       switch (iconAlign) {
-        case "end": return (<span>{text}<FontAwesomeIcon icon={icon} color={iconColor} fixedWidth className="ms-2" /></span>);
-        default: return (<span><FontAwesomeIcon icon={icon} color={iconColor} fixedWidth className="me-2" />{text}</span>);
+        case "end": return (<span>{text}<FontAwesomeIcon aria-hidden={true} icon={icon} color={iconColor} className="fa-fw ms-2" /></span>);
+        default: return (<span><FontAwesomeIcon aria-hidden={true} icon={icon} color={iconColor} className="fa-fw me-2" />{text}</span>);
       }
     }
     else {
@@ -415,7 +415,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
               className={classes("dropdown-toggle-split px-1", disabled ? "disabled" : undefined, aos.classes)}
               onClick={() => aos.onClick(eoc)}
               title={aos.text + (aos.keyboardShortcut ? (" (" + Operations.getShortcutToString(aos.keyboardShortcut) + ")") : "")}>
-              <small><FontAwesomeIcon icon={aos.icon!} color={aos.iconColor} fixedWidth /></small>
+              <small><FontAwesomeIcon aria-hidden={true} icon={aos.icon!} color={aos.iconColor} className="fa-fw" /></small>
             </Button>
           )}
         </div>

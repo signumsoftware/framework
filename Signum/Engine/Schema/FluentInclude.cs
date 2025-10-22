@@ -11,9 +11,9 @@ public class FluentInclude<T> where T : Entity
         SchemaBuilder = schemaBuilder;
     }
 
-    public FluentInclude<T> WithUniqueIndex(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null)
+    public FluentInclude<T> WithUniqueIndex(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null, bool onlyOneNull_SqlServerOnly = false)
     {
-        this.SchemaBuilder.AddUniqueIndex<T>(fields, where, includeFields);
+        this.SchemaBuilder.AddUniqueIndex<T>(fields, where, includeFields, onlyOneNull_SqlServerOnly);
         return this;
     }
 

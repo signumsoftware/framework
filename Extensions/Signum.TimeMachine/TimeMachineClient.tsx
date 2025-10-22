@@ -73,19 +73,19 @@ export namespace TimeMachineClient {
                     TimeMachineMessage.ThisVersionDidNotChange.niceToString();
   
               icon = <span className="ms-2" title={title + (fop.systemTime.mode == "Between" ? (" " + TimeMachineMessage.BetweenThisTimeRange.niceToString()) : "")}>
-                {created && <FontAwesomeIcon icon="plus" color={TimeMachineColors.created} />}
-                {deleted && <FontAwesomeIcon icon="minus" color={TimeMachineColors.removed} className={created ? "ms-1" : undefined} />}
-                {!created && !deleted && fop.systemTime.mode == "Between" && <FontAwesomeIcon icon="equals" color={TimeMachineColors.noChange} />}
+                {created && <FontAwesomeIcon aria-hidden={true} icon="plus" color={TimeMachineColors.created} />}
+                {deleted && <FontAwesomeIcon aria-hidden={true} icon="minus" color={TimeMachineColors.removed} className={created ? "ms-1" : undefined} />}
+                {!created && !deleted && fop.systemTime.mode == "Between" && <FontAwesomeIcon aria-hidden={true} icon="equals" color={TimeMachineColors.noChange} />}
               </span>;
             }
           }
   
           if (sc?.state.resultFindOptions?.groupResults) {
             return (
-              <a href="#" className="sf-line-button sf-view" onClick={e => { e.preventDefault(); sc!.openRowGroup(row, e); }}
+              <a href="#" role="button" className="sf-line-button sf-view" onClick={e => { e.preventDefault(); sc!.openRowGroup(row, e); }}
                 style={{ whiteSpace: "nowrap", opacity: deleted ? .5 : undefined }} >
                 <span title={JavascriptMessage.ShowGroup.niceToString()}>
-                  <FontAwesomeIcon icon="layer-group" />
+                  <FontAwesomeIcon aria-hidden={true} icon="layer-group" />
                 </span>
                 {icon}
               </a>

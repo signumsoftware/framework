@@ -140,8 +140,8 @@ export default function SchemaMapPage(): React.JSX.Element | null {
               {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
             </span>
             &nbsp;
-            <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#" >
-              <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()}/>
+            <a id="sfFullScreen" role="button" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#" >
+              <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()}/>
             </a>
           </div>
         </div>

@@ -38,8 +38,6 @@ export interface FileLineProps<V extends ModifiableEntity/* & IFile */ | Lite</*
 
 
 export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*IFile &*/ Entity> | null> extends EntityBaseController<FileLineProps<V>, V> {
-
-  abortController?: AbortController;
   executeWhenFinished?: OperationInfo;
 
   overrideProps(p: FileLineProps<V>, overridenProps: FileLineProps<V>): void {
@@ -88,13 +86,11 @@ export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*
 
       return ({
         chunkSizeMB: 5,
-        onStart: (file, ac) => {
-          this.abortController = ac;
+        onStart: (file) => {
           this.forceUpdate();
         }, 
         onProgress: (file) => this.forceUpdate(),
         onFinished: (file) => {
-          this.abortController = undefined;
           this.forceUpdate();
 
           if (this.executeWhenFinished) {
@@ -103,7 +99,6 @@ export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*
           }
         },
         onError: (file, error) => {
-          this.abortController = undefined;
           this.setValue(null!);
           throw error;
         },
@@ -162,7 +157,7 @@ export const FileLine: <V extends ModifiableEntity /* & IFile */ | Lite</*IFile 
               const pair = tryGetSaveOperation();
               
               return <>
-                <UploadProgress file={fp} abortController={c.abortController} />
+                <UploadProgress file={fp} />
                 {pair && <small><Form.Check checked={c.executeWhenFinished == pair.oi}
                   label={FileMessage.SaveThe0WhenFinished.niceToString().forGenderAndNumber(pair.ti.gender).formatHtml(<strong>{pair.ti.niceName}</strong>)} onChange={e => {
                   c.executeWhenFinished = e.currentTarget.checked ? pair.oi : undefined;
@@ -245,14 +240,15 @@ export const FileLine: <V extends ModifiableEntity /* & IFile */ | Lite</*IFile 
   }, (prev, next) => FileLineController.propEquals(prev, next));
 
 
-function UploadProgress(p: { file: IFilePath, abortController?: AbortController }) {
+function UploadProgress(p: { file: IFilePath }) {
+  const abortController = p.file.__abortController;
   return (
     <div>
       <div>
-        {p.abortController && <a href="#" className="sf-line-button sf-remove" onClick={e => { e.preventDefault(); p.abortController!.abort(); }}><FontAwesomeIcon icon="xmark" /></a>}
+        {abortController && <a href="#" className="sf-line-button sf-remove" onClick={e => { e.preventDefault(); abortController.abort(); }}><FontAwesomeIcon aria-hidden={true} icon="xmark" /></a>}
         <small>{FileMessage.Uploading01.niceToString(p.file.fileName, toComputerSize(p.file.fileLength))}</small>
       </div>
-      <ProgressBar color={p.abortController?.signal.aborted ? "warning" : undefined} value={(p.file.__uploadingOffset == null ? null : p.file.__uploadingOffset / p.file.fileLength)} />
+      <ProgressBar color={abortController?.signal.aborted ? "warning" : undefined} value={(p.file.__uploadingOffset == null ? null : p.file.__uploadingOffset / p.file.fileLength)} />
     </div>
   );
 }
