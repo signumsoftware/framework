@@ -18,6 +18,7 @@ import { getLambdaMembers } from '@framework/Reflection';
 import { TranslatedSummaryState, MatchTranslatedInstances } from './Signum.Translation.Instances';
 import { TranslatableRouteType } from '@framework/Signum.Basics';
 import { TextAreaLineProps } from '../../Signum/React/Lines/TextAreaLine';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 export namespace TranslatedInstanceClient {
   

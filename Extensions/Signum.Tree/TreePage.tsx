@@ -10,6 +10,7 @@ import { QueryString } from '@framework/QueryString'
 import { FrameMessage } from '@framework/Signum.Entities'
 import { TreeClient, TreeOptions } from './TreeClient'
 import { useTitle } from '@framework/AppContext'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 
 export default function TreePage(): React.JSX.Element {

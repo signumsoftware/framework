@@ -13,6 +13,7 @@ import { Entity, EntityControlMessage, Lite, newMListElement, toLite } from '@fr
 import { EntityLink } from '@framework/Search';
 import { ColorPaletteClient, ColorScheme } from './ColorPaletteClient';
 import { ColorPaletteEntity, ColorPaletteMessage, SpecificColorEmbedded } from './Signum.Chart.ColorPalette';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }): React.JSX.Element {
   const ctx = p.ctx;
@@ -33,8 +34,6 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
 
 
   async function handleMagicWand(e: React.MouseEvent) {
-
-    e.preventDefault();
 
     if (ti == null)
       return;
@@ -161,12 +160,12 @@ function ColorSelector(p: { ctx: TypeContext<string>, colors: string[] | null })
 
   function getSwitchModelButton(): React.ReactElement<any> {
     return (
-      <LinkButton tabIndex={0} className={classes("sf-line-button", "sf-find", "btn input-group-text")}        
+      <LinkButton className={classes("sf-line-button", "sf-find", "btn input-group-text")} 
+        title={custom ? ColorPaletteMessage.ShowPalette.niceToString() : ColorPaletteMessage.ShowList.niceToString()}
         onClick={e => {
           setCustom(!custom);
         }}>
-        <FontAwesomeIcon aria-hidden={true} icon={custom ? "palette" : "list"}
-        title={custom ? ColorPaletteMessage.ShowPalette.niceToString() : ColorPaletteMessage.ShowList.niceToString()} />
+        <FontAwesomeIcon aria-hidden={true} icon={custom ? "palette" : "list"} />
       </LinkButton>
     );
   }

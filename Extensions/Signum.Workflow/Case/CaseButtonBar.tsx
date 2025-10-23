@@ -7,6 +7,7 @@ import { AutoLine } from '@framework/Lines'
 import { EntityPack, getToString } from '@framework/Signum.Entities'
 import { ButtonBar } from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, CaseActivityMessage, WorkflowActivityEntity } from '../Signum.Workflow'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface CaseButtonBarProps {
   frame: EntityFrame;
@@ -49,13 +50,12 @@ export function UserHelpComponent(p : UserHelpProps): React.JSX.Element {
   var [open, setOpen] = React.useState(false);
 
   function handleHelpClick(e: React.MouseEvent<any>) {
-    e.preventDefault();
     setOpen(!open);
   }
 
   return (
     <div style={{ marginTop: "10px" }}>
-      <LinkButton onClick={handleHelpClick} className="case-help-button">
+      <LinkButton title={undefined} onClick={handleHelpClick} className="case-help-button">
         {open ?
           CaseActivityMessage.HideHelp.niceToString() :
           CaseActivityMessage.ShowHelp.niceToString()}

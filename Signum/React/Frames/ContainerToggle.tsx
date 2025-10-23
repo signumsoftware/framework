@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useUpdatedRef } from '../Hooks';
 import { useLocation } from 'react-router';
 import { ContainerToggleMessage } from '../Signum.Entities';
+import { LinkButton } from '../Basics/LinkButton';
 
 export default function ContainerToggleComponent(p: { children: React.ReactNode }): React.ReactElement {
 

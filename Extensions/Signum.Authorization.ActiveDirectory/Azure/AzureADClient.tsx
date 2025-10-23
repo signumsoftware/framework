@@ -12,6 +12,7 @@ import MessageModal, { MessageModalHandler } from "@framework/Modals/MessageModa
 import { AuthError } from "@azure/msal-browser";
 import ErrorModal from "../../../Signum/React/Modals/ErrorModal";
 import { JavascriptMessage } from "@framework/Signum.Entities";
+import { LinkButton } from "@framework/Basics/LinkButton";
 
 export namespace AzureADClient {
 
@@ -274,8 +275,8 @@ export namespace AzureADClient {
     return (
       <div className="row mt-2">
         <div className="col-md-6 offset-md-3">
-          <LinkButton className={ctx.loading != null ? "disabled" : undefined} onClick={e => { signIn(ctx, false); }}>
-            <img src={MicrosoftSignIn.iconUrl} alt={LoginAuthMessage.SignInWithMicrosoft.niceToString()} title={LoginAuthMessage.SignInWithMicrosoft.niceToString()} />
+          <LinkButton title={LoginAuthMessage.SignInWithMicrosoft.niceToString()} className={ctx.loading != null ? "disabled" : undefined} onClick={e => { signIn(ctx, false); }}>
+            <img src={MicrosoftSignIn.iconUrl} alt={LoginAuthMessage.SignInWithMicrosoft.niceToString()} />
           </LinkButton>
         </div>
       </div>

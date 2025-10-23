@@ -11,6 +11,7 @@ import { useController } from './LineBase'
 import { TypeBadge } from './AutoCompleteConfig'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface EntityRepeaterProps<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseProps<V> {
   createAsLink?: boolean | ((er: EntityRepeaterController<V>) => React.ReactElement);

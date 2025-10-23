@@ -33,6 +33,7 @@ import { AutoLine } from "./Lines/AutoLine";
 import { EnumLine } from "./Lines/EnumLine";
 import { KeyNames } from "./Components";
 import QueryTokenBuilder from "./SearchControl/QueryTokenBuilder";
+import { LinkButton } from "./Basics/LinkButton";
 
 
 export function isMultiline(pr?: PropertyRoute): boolean {
@@ -504,13 +505,10 @@ export function initEntityFormatRules(): Finder.EntityFormatRule[] {
       isApplicable: sc => sc?.state.resultFindOptions?.groupResults == true,
       formatter: new Finder.EntityFormatter(({ row, columns, searchControl: sc }) =>
         <LinkButton
-          tabIndex={0}
+          title={JavascriptMessage.ShowGroup.niceToString()}
           className="sf-line-button sf-view"
-          onClick={e => { sc!.openRowGroup(row, e); }}
-        >
-          <span title={JavascriptMessage.ShowGroup.niceToString()}>
-            <FontAwesomeIcon aria-hidden={true} icon="layer-group" />
-          </span>
+          onClick={e => { sc!.openRowGroup(row, e); }}>
+          <FontAwesomeIcon aria-hidden={true} icon="layer-group" />
         </LinkButton>, "centered-cell")
     },
   ]

@@ -12,6 +12,7 @@ import { useSize } from '@framework/Hooks'
 import { useExpand } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 import { ClientColorProvider, IRelationInfo, ITableInfo, MListRelationInfo, SchemaMapInfo, getAllProviders } from './ClientColorProvider'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 
 interface ParsedQueryString {
@@ -95,7 +96,6 @@ export default function SchemaMapPage(): React.JSX.Element | null {
   }
 
   function handleFullscreenClick(e: React.MouseEvent<any>) {
-    e.preventDefault();
 
     const tables = schemaInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
       .toObject(a => a.tableName, a =>
@@ -140,8 +140,8 @@ export default function SchemaMapPage(): React.JSX.Element | null {
               {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
             </span>
             &nbsp;
-            <LinkButton id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} >
-              <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()}/>
+            <LinkButton title={FrameMessage.Fullscreen.niceToString()} id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} >
+              <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
             </LinkButton>
           </div>
         </div>

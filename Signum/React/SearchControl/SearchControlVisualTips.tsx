@@ -14,6 +14,7 @@ import { FilterOperation, QueryDescription } from "../FindOptions";
 import { getNiceTypeName } from "../Operations/MultiPropertySetter";
 import SearchControl from "./SearchControl";
 import { Finder } from "../Finder";
+import { LinkButton } from "../Basics/LinkButton";
 
 export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInjectedProps }): React.ReactElement {
   var sc = p.sc;
@@ -146,7 +147,7 @@ export function LearnMoreAboutFieldExpressions(p: { expanded: boolean, onSetExpa
   return (
     <div className="mb-2">
       <LinkButton
-        tabIndex={0}
+        title={undefined}
         onClick={e => {
         p.onSetExpanded(!p.expanded);
         }}><FontAwesomeIcon aria-hidden={true} icon={p.expanded ? "chevron-up" : "chevron-down"} /> {FieldExpressionMessage.LearnMoreAboutFieldExpressions.niceToString()}</LinkButton>

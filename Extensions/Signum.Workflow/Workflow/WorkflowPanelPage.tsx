@@ -46,12 +46,10 @@ export function WorkflowScriptRunnerTab(p: {}): React.JSX.Element {
   }, [tick]);
 
   function handleStop(e: React.MouseEvent<any>) {
-    e.preventDefault();
     WorkflowClient.API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
-    e.preventDefault();
     WorkflowClient.API.start().then(() => reloadState());
   }
 

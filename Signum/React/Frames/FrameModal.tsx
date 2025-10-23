@@ -22,6 +22,7 @@ import { Modal } from 'react-bootstrap'
 import { ModalFooterButtons, ModalHeaderButtons } from '../Components/ModalHeaderButtons'
 import WidgetEmbedded from './WidgetEmbedded'
 import SaveChangesModal from '../Modals/SaveChangesModal';
+import { LinkButton } from '../Basics/LinkButton';
 
 interface FrameModalProps<T extends ModifiableEntity> extends IModalProps<T | undefined> {
   title?: React.ReactNode | null;

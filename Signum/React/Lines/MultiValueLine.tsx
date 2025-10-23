@@ -8,6 +8,7 @@ import { EntityBaseController } from "./EntityBase";
 import { LineBaseProps, LineBaseController, useController, genericMemo } from "./LineBase";
 import { KeyGenerator } from "../Globals";
 import { MListElementBinding } from "../Reflection";
+import { LinkButton } from "../Basics/LinkButton";
 
 interface MultiValueLineProps<V> extends LineBaseProps<MList<V>> {
   onRenderItem?: (p: AutoLineProps) => React.ReactElement;
@@ -150,7 +151,6 @@ export function MultiValueLineElement(props: MultiValueLineElementProps): React.
         <LinkButton
           title={mctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
           className="sf-line-button sf-remove"
-          tabIndex={0}
           onClick={props.onRemove}>
           <FontAwesomeIcon aria-hidden={true} icon="xmark" />
         </LinkButton>

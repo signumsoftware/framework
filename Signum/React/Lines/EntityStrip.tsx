@@ -15,6 +15,7 @@ import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
 import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { LinkButton } from '../Basics/LinkButton'
 
 
 export interface EntityStripProps<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseProps<V> {

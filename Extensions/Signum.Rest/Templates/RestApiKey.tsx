@@ -5,6 +5,7 @@ import { TypeContext, AutoLine, EntityLine, TextBoxLine } from "@framework/Lines
 import { classes } from "@framework/Globals";
 import { RestApiKeyClient } from "../RestApiKeyClient";
 import { useForceUpdate } from '@framework/Hooks';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 export default function RestApiKeyComponent(p : { ctx: TypeContext<RestApiKeyEntity> }): React.JSX.Element {
 
@@ -26,9 +27,10 @@ export default function RestApiKeyComponent(p : { ctx: TypeContext<RestApiKeyEnt
       <EntityLine ctx={ctx.subCtx(e => e.user)} />
       <TextBoxLine ctx={ctx.subCtx(e => e.apiKey)}
         extraButtons={vl =>
-          <LinkButton className={classes("sf-line-button", "sf-view", "btn input-group-text")}            
+          <LinkButton className={classes("sf-line-button", "sf-view", "btn input-group-text")}
+            title={RestApiKeyMessage.GenerateApiKey.niceToString()}
             onClick={generateApiKey}>
-            <FontAwesomeIcon icon="key" title={RestApiKeyMessage.GenerateApiKey.niceToString()}/>
+            <FontAwesomeIcon icon="key" />
           </LinkButton>} />
     </div>
   );

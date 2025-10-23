@@ -35,6 +35,7 @@ import { QueryEntity } from '@framework/Signum.Basics'
 import { KeyNames } from '@framework/Components'
 import { useForceUpdate } from '@framework/Hooks'
 import { WCAGRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<TypeRulePack>, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
 

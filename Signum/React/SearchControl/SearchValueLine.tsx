@@ -16,6 +16,7 @@ import { EntityBaseController } from '../Lines/EntityBase'
 import SelectorModal from '../SelectorModal'
 import { useForceUpdate } from '../Hooks'
 import { toAbsoluteUrl } from '../AppContext'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface SearchValueLineProps {
   ctx: StyleContext;

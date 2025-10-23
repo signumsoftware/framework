@@ -20,6 +20,7 @@ import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded, UserAssetQueryMessage } from '../Signum.UserAssets.Queries'
 import { MultiValue } from '@framework/FinderRules'
 import { HeaderType } from '@framework/Lines/GroupHeader'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface FilterBuilderEmbeddedProps {
   ctx: TypeContext<MList<QueryFilterEmbedded>>;

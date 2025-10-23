@@ -9,6 +9,7 @@ import Tag from './Tag'
 import { WorkflowClient } from '../WorkflowClient'
 
 import "./Tag.css"
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export interface InlineCaseTagsProps {
   case: Lite<CaseEntity>;
@@ -32,7 +33,6 @@ export default function InlineCaseTags(p: InlineCaseTagsProps): React.JSX.Elemen
   }, [p.case, ...p.defaultTags ?? []]);
 
   function handleTagsClick(e: React.MouseEvent<any>) {
-    e.preventDefault();
 
     var model = CaseTagsModel.New({
       caseTags: tags.map(m => newMListElement(m)),

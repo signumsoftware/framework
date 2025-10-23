@@ -226,5 +226,5 @@ export function WCAGRow({ focusCells = true, focusHeader = false, sectionType = 
     }
   }
 
-  return React.cloneElement(<tr role={!tableRole ? "row" : undefined} tabIndex={0} onKeyDown={handleKeyDown}></ tr>, undefined, enhancedCells);
+  return React.cloneElement(<tr role={!tableRole ? "row" : undefined} onKeyDown={handleKeyDown}></ tr>, undefined, enhancedCells);
 }

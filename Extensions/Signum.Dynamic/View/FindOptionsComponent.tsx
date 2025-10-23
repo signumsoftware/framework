@@ -19,6 +19,7 @@ import { TypeInfo } from '@framework/Reflection';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { DynamicViewMessage } from '../Signum.Dynamic.Views'
 import { QueryDescription, QueryToken, SubTokensOptions, getFilterOperations } from '@framework/FindOptions'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface FindOptionsLineProps {
   binding: Binding<FindOptionsExpr | undefined>;
@@ -36,13 +37,11 @@ export function FindOptionsLine(p : FindOptionsLineProps): React.JSX.Element {
   }
 
   function handleRemove(e: React.MouseEvent<any>) {
-    e.preventDefault();
     p.binding.deleteValue();
     p.dn.context.refreshView();
   }
 
   function handleCreate(e: React.MouseEvent<any>) {
-    e.preventDefault();
     const route = p.dn.route;
     const ti = route?.typeReferenceInfo();
 
@@ -62,7 +61,6 @@ export function FindOptionsLine(p : FindOptionsLineProps): React.JSX.Element {
   }
 
   function handleView(e: React.MouseEvent<any>) {
-    e.preventDefault();
     var fo = JSON.parse(JSON.stringify(p.binding.getValue())) as FindOptionsExpr;
     modifyFindOptions(fo);
   }
@@ -107,7 +105,7 @@ export function FindOptionsLine(p : FindOptionsLineProps): React.JSX.Element {
         </label>
         <div>
           {fo ? <div>
-          <LinkButton onClick={handleView}>{getDescription(fo)}</LinkButton>
+            <LinkButton title={undefined} onClick={handleView}>{getDescription(fo)}</LinkButton>
             {" "}
             <LinkButton className={classes("sf-line-button", "sf-remove")}
             onClick={handleRemove}
@@ -362,7 +360,6 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
 
 
   handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
-    event.preventDefault();
     var array = this.props.binding.getValue()!;
     array.removeAt(index);
     if (array.length == 0)
@@ -372,14 +369,12 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
   }
 
   handleOnMoveUp = (event: React.MouseEvent<any>, index: number) => {
-    event.preventDefault();
     const list = this.props.binding.getValue()!;
     list.moveUp(index);
     this.props.refreshView();
   }
 
   handleOnMoveDown = (event: React.MouseEvent<any>, index: number) => {
-    event.preventDefault();
     const list = this.props.binding.getValue()!;
     list.moveDown(index);
     this.props.refreshView();

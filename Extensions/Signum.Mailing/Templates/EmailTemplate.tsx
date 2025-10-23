@@ -17,6 +17,7 @@ import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor'
 import { EmailMessageFormat, EmailTemplateEntity, EmailTemplateFromEmbedded, EmailTemplateMessage, EmailTemplateMessageEmbedded, EmailTemplateRecipientEmbedded, EmailTemplateViewMessage } from '../Signum.Mailing.Templates'
 import { QueryOrderEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 import { ValidationMessage } from '../../../Signum/React/Signum.Entities.Validation'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -263,7 +264,7 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
           </div>
          }
         <br />
-        {p.messageFormat == 'HtmlComplex' && <LinkButton onClick={handlePreviewClick}>
+        {p.messageFormat == 'HtmlComplex' && <LinkButton title={undefined} onClick={handlePreviewClick}>
           {showPreview ?
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}

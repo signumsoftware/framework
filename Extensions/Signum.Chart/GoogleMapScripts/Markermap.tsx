@@ -128,7 +128,6 @@ export function MarkermapChartImp({ data, parameters, onDrillDown, memo }: Chart
           if (infoColumn) {
 
             marker.addListener("click", (e: any) => {
-              e.preventDefault;          
 
               var html = 
                 infoColumn!.getValueNiceName(r) +

@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { EntityControlMessage, newMListElement } from '@framework/Signum.Entities'
 import { useForceUpdate } from '../../../Signum/React/Hooks'
 import ErrorModal from '@framework/Modals/ErrorModal'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function HealthCheckPart(p: { ctx: TypeContext<HealthCheckPartEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -23,6 +24,7 @@ export default function HealthCheckPart(p: { ctx: TypeContext<HealthCheckPartEnt
           </LinkButton>
 
           <LinkButton
+            title={undefined}
             className="sf-line-button sf-create ms-4"
             onClick={async e => {
               var clipboard = await navigator.clipboard.readText();

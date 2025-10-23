@@ -9,6 +9,7 @@ import { FilterOption } from "@framework/FindOptions";
 import { Modal } from 'react-bootstrap';
 import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 import { useForceUpdate } from '@framework/Hooks'
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 interface TreeModalProps extends  IModalProps<TreeNode | undefined> {
   treeOptions: TreeOptions;

@@ -29,6 +29,7 @@ import Validators = DynamicTypeClient.Validators;
 import DynamicProperty = DynamicTypeClient.DynamicProperty;
 import DynamicTypeDefinition = DynamicTypeClient.DynamicTypeDefinition;
 import { JSX } from 'react'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export interface DynamicTypeDesignContext {
   refreshView: () => void;
@@ -901,8 +902,6 @@ export function PropertyRepeaterComponent(p: PropertyRepeaterComponentProps): Re
   }
 
   function handleOnRemove(event: React.MouseEvent<any>, index: number) {
-    event.preventDefault();
-    event.stopPropagation();
     var old = p.properties[index];
     p.properties.removeAt(index);
 
@@ -916,8 +915,6 @@ export function PropertyRepeaterComponent(p: PropertyRepeaterComponentProps): Re
   }
 
   function handleOnMoveUp(event: React.MouseEvent<any>, index: number) {
-    event.preventDefault();
-    event.stopPropagation();
     const newIndex = p.properties.moveUp(index);
     if (newIndex != index) {
       if (index == currentEventKey)
@@ -930,8 +927,6 @@ export function PropertyRepeaterComponent(p: PropertyRepeaterComponentProps): Re
   }
 
   function handleOnMoveDown(event: React.MouseEvent<any>, index: number) {
-    event.preventDefault();
-    event.stopPropagation();
     const newIndex = p.properties.moveDown(index);
 
     if (newIndex != index) {
@@ -1227,28 +1222,21 @@ export function ComboBoxRepeaterComponent(p: ComboBoxRepeaterComponentProps): Re
   }
 
   function handleCreateClick(event: React.SyntheticEvent<any>) {
-    event.preventDefault();
     p.list.push("");
     forceUpdate();
   }
 
   function handleOnRemove(event: React.MouseEvent<any>, index: number) {
-    event.preventDefault();
-    event.stopPropagation();
     p.list.removeAt(index);
     forceUpdate();
   }
 
   function handleOnMoveUp(event: React.MouseEvent<any>, index: number) {
-    event.preventDefault();
-    event.stopPropagation();
     p.list.moveUp(index);
     forceUpdate();
   }
 
   function handleOnMoveDown(event: React.MouseEvent<any>, index: number) {
-    event.preventDefault();
-    event.stopPropagation();
     p.list.moveDown(index);
     forceUpdate();
   }
@@ -1315,7 +1303,6 @@ export interface ValidatorRepeaterComponentProps {
 
 export function ValidatorRepeaterComponent(p: ValidatorRepeaterComponentProps): React.JSX.Element {
   function handleOnRemove(event: React.MouseEvent<any>, index: number) {
-    event.preventDefault();
     var list = p.property.validators!;
     list.removeAt(index);
     if (list.length == 0)

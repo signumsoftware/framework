@@ -35,6 +35,7 @@ import DashboardToolbarConfig from './DashboardToolbarConfig';
 import DashboardOmniboxProvider from './DashboardOmniboxProvider';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 import { parseIcon } from '@framework/Components/IconTypeahead';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 export namespace DashboardClient {
 
@@ -335,9 +336,9 @@ export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo
   var title = SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
 
   return (
-    <a onClick={e => { e.preventDefault(); p.onClick(tis, qd); }} href="#" role="button" className="btn btn-sm btn-tertiary sf-create me-2" title={title}>
+    <LinkButton onClick={e => { p.onClick(tis, qd); }} className="btn btn-sm btn-tertiary sf-create me-2" title={undefined}>
       <FontAwesomeIcon aria-hidden={true} icon={"plus"} /> {title}
-    </a>
+    </LinkButton>
   );
 }
 

@@ -16,6 +16,7 @@ import { EntityBaseController } from '@framework/Lines'
 import { Aprox, AsEntity } from '@framework/Lines/EntityBase'
 import { FilesClient } from '../FilesClient'
 import { JSX } from 'react/jsx-runtime'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export { FileTypeSymbol };
 

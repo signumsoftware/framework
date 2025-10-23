@@ -5,6 +5,7 @@ import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
 import { genericMemo, useController } from './LineBase';
 import { classes } from '../Globals';
 import { EntityBaseController } from './EntityBase';
+import { LinkButton } from '../Basics/LinkButton';
 
 export interface EntityListProps<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseProps<V> {
   size?: number;

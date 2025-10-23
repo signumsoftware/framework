@@ -16,6 +16,7 @@ import { Dropdown } from 'react-bootstrap'
 import DropdownToggle from 'react-bootstrap/DropdownToggle'
 import { BsColor } from './Components'
 import { registerManualSubTokens } from './SearchControl/QueryTokenBuilder'
+import { LinkButton } from './Basics/LinkButton'
 
 export namespace QuickLinkClient {
 
@@ -49,7 +50,6 @@ export namespace QuickLinkClient {
       return null
     return (<LinkButton className={classes("badge badge-pill sf-quicklinks", "text-bg-" + quickLink.color)}
       title={StyleContext.default.titleLabels ? quickLink.text() : undefined}
-      tabIndex={0}
       data-toggle="dropdown"
       onClick={e => { quickLink.handleClick({ lite: p.lite, lites: [p.lite] }, e); }}>
       {quickLink.icon && <FontAwesomeIcon aria-hidden={true} icon={quickLink.icon} color={quickLink.color ? undefined : quickLink.iconColor} />}
@@ -228,8 +228,6 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.ReactElement | n
               <LinkButton key={i}
                 className={classes("badge badge-pill sf-quicklinks", "text-bg-" + first.color)}
                 title={StyleContext.default.titleLabels ? gr.elements[0].text() : undefined}
-                tabIndex={0}
-                data-toggle="dropdown"
                 onClick={e => { first.handleClick(p.qlc, e); }}>
                 {first.icon && <FontAwesomeIcon aria-hidden={true} icon={first.icon} color={first.color ? undefined : first.iconColor} />}
                 {first.icon && "\u00A0"}

@@ -11,6 +11,7 @@ import "./operationMap.css"
 import { useAPI, useSize } from '@framework/Hooks'
 import { useExpand } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 
 interface ParsedQueryString {
@@ -66,7 +67,6 @@ export default function OperationMapPage(): React.JSX.Element | null {
   const { size, setContainer } = useSize();
 
   function handleFullscreenClick(e: React.MouseEvent<any>) {
-    e.preventDefault();
 
     const tables = operationMapInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
       .toObject(a => a.key, a =>

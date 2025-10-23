@@ -8,6 +8,7 @@ import { DesignerNode, isExpression } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import { StyleOptionsExpression, formGroupStyle, formSize } from './StyleOptionsExpression'
 import { useForceUpdate } from '@framework/Hooks'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface StyleOptionsLineProps {
   binding: Binding<StyleOptionsExpression | undefined>;
@@ -23,18 +24,15 @@ export function StyleOptionsLine(p : StyleOptionsLineProps): React.JSX.Element {
   }
 
   function handleRemove(e: React.MouseEvent<any>) {
-    e.preventDefault();
     p.binding.deleteValue();
     p.dn.context.refreshView();
   }
 
   function handleCreate(e: React.MouseEvent<any>) {
-    e.preventDefault();
     modifyExpression({} as StyleOptionsExpression);
   }
 
   function handleView(e: React.MouseEvent<any>) {
-    e.preventDefault();
     var hae = JSON.parse(JSON.stringify(p.binding.getValue())) as StyleOptionsExpression;
     modifyExpression(hae);
   }
@@ -74,7 +72,9 @@ export function StyleOptionsLine(p : StyleOptionsLineProps): React.JSX.Element {
       </label>
       <div>
         {val ?
-          <LinkButton onClick={handleView}><pre style={{ padding: "0px", border: "none", color: "blue" }}>{getDescription(val)}</pre></LinkButton>
+          <LinkButton title={undefined} onClick={handleView}><pre style={{ padding: "0px", border: "none", color: "blue" }}>
+            {getDescription(val)}</pre>
+          </LinkButton>
           :
           <LinkButton title={EntityControlMessage.Create.niceToString()}
             className="sf-line-button sf-create"

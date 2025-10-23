@@ -9,6 +9,7 @@ import BpmnModelerComponent from '../Bpmn/BpmnModelerComponent'
 import MessageModal from "@framework/Modals/MessageModal";
 import CollapsableCard from '@framework/Components/CollapsableCard';
 import { BsColor } from '@framework/Components';
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface WorkflowProps {
   ctx: TypeContext<WorkflowEntity>;
@@ -70,7 +71,6 @@ export const Workflow: React.ForwardRefExoticComponent<WorkflowProps & React.Ref
   } as WorkflowHandle), [bpmnModelerComponentRef.current, workflowState]);
 
   function handleHighlightClick(e: React.MouseEvent<HTMLAnchorElement>, issue: WorkflowClient.API.WorkflowIssue) {
-    e.preventDefault();
     if (bpmnModelerComponentRef)
       bpmnModelerComponentRef.current!.focusElement(issue.bpmnElementId);
   }

@@ -9,6 +9,7 @@ import { BaseNode } from './Nodes'
 import { HtmlAttributesExpression } from './HtmlAttributesExpression'
 import { Typeahead } from '@framework/Components';
 import { useForceUpdate } from '@framework/Hooks'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface HtmlAttributesLineProps {
   binding: Binding<HtmlAttributesExpression | undefined>;
@@ -24,18 +25,15 @@ export function HtmlAttributesLine(p: HtmlAttributesLineProps): React.JSX.Elemen
   }
 
   function handleRemove(e: React.MouseEvent<any>) {
-    e.preventDefault();
     p.binding.deleteValue();
     p.dn.context.refreshView();
   }
 
   function handleCreate(e: React.MouseEvent<any>) {
-    e.preventDefault();
     modifyExpression({} as HtmlAttributesExpression);
   }
 
   function handleView(e: React.MouseEvent<any>) {
-    e.preventDefault();
     var hae = JSON.parse(JSON.stringify(p.binding.getValue())) as HtmlAttributesExpression;
     modifyExpression(hae);
   }
@@ -95,7 +93,9 @@ export function HtmlAttributesLine(p: HtmlAttributesLineProps): React.JSX.Elemen
       </label>
       <div>
         {val ?
-          <LinkButton onClick={handleView}><pre style={{ padding: "0px", border: "none" }}>{getDescription(val)}</pre></LinkButton>
+          <LinkButton title={undefined} onClick={handleView}>
+            <pre style={{ padding: "0px", border: "none" }}>{getDescription(val)}</pre>
+          </LinkButton>
           :
           <LinkButton title={EntityControlMessage.Create.niceToString()}
             className="sf-line-button sf-create"
@@ -174,7 +174,6 @@ export function ExpressionOrValueStrip(p: ExpressionOrValueStripProps): React.JS
   const forceUpdate = useForceUpdate();
 
   function handleOnRemove(e: React.MouseEvent<any>, key: string) {
-    e.preventDefault();
     delete p.object[key];
     forceUpdate();
   }

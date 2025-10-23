@@ -12,6 +12,7 @@ import { LineBaseController, LineBaseProps, tasks } from './LineBase'
 import { getTypeInfo, IsByAll, PropertyRoute, tryGetTypeInfos } from '../Reflection'
 import { isRtl, toAbsoluteUrl } from '../AppContext'
 import { KeyNames } from '../Components'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface EntityListBaseProps<V extends ModifiableEntity | Lite<Entity>> extends LineBaseProps<MList<V>> {
   view?: boolean | ((item: NoInfer<V>) => boolean);

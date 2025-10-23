@@ -16,6 +16,7 @@ import { Finder } from '@framework/Finder';
 import { JavascriptMessage, getToString, SearchMessage } from '@framework/Signum.Entities';
 import { IModalProps, openModal } from '@framework/Modals';
 import { parseIcon } from '@framework/Components/IconTypeahead'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export interface ToolbarMainRendererProps {
 }
@@ -56,7 +57,9 @@ function CollapsableBlock({ r }: { r: ToolbarResponse<any> }) {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <div>
-      <h4 style={{ cursor: "pointer" }} onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}><FontAwesomeIcon aria-hidden={true} icon={isOpen ? "chevron-down" : "chevron-right"} /> {r.label ?? getToString(r.content!)}</h4>
+      <h4>
+        <LinkButton title={undefined} onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}><FontAwesomeIcon aria-hidden icon={isOpen ? "chevron-down" : "chevron-right"} /> {r.label ?? getToString(r.content!)}</LinkButton>
+      </h4>
       <Collapse in={isOpen}>
         <div>
           <ToolbarMainRendererPrivate response={r} />
@@ -70,7 +73,8 @@ function ToolbarIconButton({ tr }: { tr: ToolbarResponse<any> }) {
 
   if (tr.elements && tr.elements.length > 0) {
     return (
-      <LinkButton onClick={e => { ToolbarMainModalModal.show(tr); }}>
+      <LinkButton
+        title={undefined} onClick={e => { ToolbarMainModalModal.show(tr); }}>
         <div className="card toolbar-card">
           <div className="card-img-top" style={{ fontSize: "60px" }}>
             {ToolbarConfig.coloredIcon(parseIcon(tr.iconName), tr.iconColor)}
@@ -86,7 +90,8 @@ function ToolbarIconButton({ tr }: { tr: ToolbarResponse<any> }) {
 
   if (tr.url) {
     return (
-      <LinkButton onMouseDown={e => { AppContext.pushOrOpenInTab(tr.url!, e); }}>
+      <LinkButton
+        title={undefined} onMouseDown={e => { AppContext.pushOrOpenInTab(tr.url!, e); }}>
         <div className="card toolbar-card">
           <div className="card-img-top" style={{ fontSize: "60px" }}>
             {ToolbarConfig.coloredIcon(parseIcon(tr.iconName), tr.iconColor)}
@@ -108,7 +113,7 @@ function ToolbarIconButton({ tr }: { tr: ToolbarResponse<any> }) {
     );
 
   return (
-    <LinkButton onMouseDown={e => { config.handleNavigateClick(e, tr, null); }}>
+    <LinkButton title={undefined} onMouseDown={e => { config.handleNavigateClick(e, tr, null); }}>
       <div className="card toolbar-card">
         <div className="card-img-top" style={{ fontSize: "60px" }}>
           {config.getIcon(tr, null)}

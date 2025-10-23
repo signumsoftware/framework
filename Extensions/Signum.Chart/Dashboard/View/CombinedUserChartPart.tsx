@@ -162,7 +162,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
             lastChartRequest={c.chartRequest!}
             resultTable={c.result.resultTable!}
             onOrderChanged={() => c.makeQuery!()}
-            onReload={e => { e.preventDefault(); c.makeQuery!(); }}
+            onReload={e => { c.makeQuery!(); }}
           />) :
         <ChartRendererCombined
           infos={infos.map(c => ({ userChart: toLite(c.userChart, true), chartRequest: c.chartRequest!, data: c.result?.chartTable, chartScript: c.chartScript!, memo: c.memo }))}

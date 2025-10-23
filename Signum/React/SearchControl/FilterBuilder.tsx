@@ -23,6 +23,7 @@ import { VisualTipIcon } from '../Basics/VisualTipIcon'
 import { SearchVisualTip } from '../Signum.Basics'
 import { FilterHelp } from './SearchControlVisualTips'
 import { GroupHeader, HeaderType } from '../Lines/GroupHeader'
+import { LinkButton } from '../Basics/LinkButton'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -181,14 +182,12 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
                     </LinkButton>
                     <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.AddOrGroup.niceToString() : undefined}
                       className="sf-line-button sf-create sf-create-group ms-3"
-                      tabIndex={0}
                       onClick={e => handlerNewFilter(e, true)}>
                       <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create me-1" />{SearchMessage.AddOrGroup.niceToString()}
                     </LinkButton>
 
                     {p.showPinnedFiltersOptionsButton && <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.EditPinnedFilters.niceToString() : undefined}
                       className="sf-line-button ms-3"
-                      tabIndex={0}
                       onClick={e => { setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
                       <FontAwesomeIcon aria-hidden={true} color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "pen-to-square"]} className="me-1" />{SearchMessage.EditPinnedFilters.niceToString()}
                     </LinkButton>
@@ -586,7 +585,6 @@ export function FilterConditionComponent(p: FilterConditionComponentProps): Reac
             <a href={!readOnly ? "#" : undefined} title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
               className={classes("sf-line-button sf-remove sf-remove-filter-icon", readOnly && "disabled")}
               role="button"
-              tabIndex={0}
               onClick={!readOnly ? handleDeleteFilter : undefined}>
               <FontAwesomeIcon aria-hidden={true} icon="xmark" />
             </a>

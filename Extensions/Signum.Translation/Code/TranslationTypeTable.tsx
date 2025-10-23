@@ -6,6 +6,7 @@ import TextArea from '@framework/Components/TextArea';
 import { useForceUpdate } from '@framework/Hooks';
 import { KeyNames } from '@framework/Components';
 import { WCAGRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 export function TranslationTypeTable(p: { type: TranslationClient.LocalizableType, result: TranslationClient.AssemblyResult, currentCulture: string }): React.JSX.Element{
 
@@ -121,7 +122,7 @@ export function TranslationMember({ type, member, loc, edit }: { type: Translati
             translatedMembers.map(a => <option key={a.culture + a.translatorName} title={`from '${a.culture}' using ${a.translatorName}`} value={a.text}>{a.text}</option>))}
         </select>
         &nbsp;
-                <LinkButton onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</LinkButton>
+        <LinkButton title={undefined} onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</LinkButton>
       </span>
     );
   }
@@ -194,7 +195,6 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
   }, [avoidCombo]);
 
   function handleAvoidCombo(e: React.FormEvent<any>) {
-    e.preventDefault();
     setAvoidCombo(true);
   }
 
@@ -210,8 +210,6 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
     const { loc } = p;
     const td = loc.typeDescription!;
 
-   
-
     if (!translatedTypes.length || avoidCombo)
       return (
         <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.description ?? ""}
@@ -226,7 +224,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
             translatedTypes.map(a => <option key={a.culture + a.translatorName} title={`from '${a.culture}' using ${a.translatorName}`} value={a.singular}>{a.singular}</option>))}
         </select>
         &nbsp;
-                <LinkButton onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</LinkButton>
+        <LinkButton title={undefined} onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</LinkButton>
       </span>
     );
   }

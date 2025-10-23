@@ -15,6 +15,7 @@ import { useForceUpdate } from '../Hooks'
 import { AccordionEventKey } from 'react-bootstrap/esm/AccordionContext'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface EntityAccordionProps<V extends ModifiableEntity> extends EntityListBaseProps<V> {
   createAsLink?: boolean | ((er: EntityAccordionController<V>) => React.ReactElement);

@@ -5,6 +5,7 @@ import { FormGroup } from '@framework/Lines/FormGroup'
 import { TypeContext } from '@framework/TypeContext'
 import { classes } from '@framework/Globals'
 import { useForceUpdate } from '@framework/Hooks'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boolean, mandatory: boolean }): React.JSX.Element {
 
@@ -33,9 +34,9 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
   if (!isOpen) {
     return (
       <FormGroup label={LoginAuthMessage.NewPassword.niceToString()} ctx={p.ctx}>
-        {() => <a role="button" tabIndex={0} className="btn btn-tertiary btn-sm" onClick={() => setIsOpen(true)}>
+        {() => <LinkButton title={undefined} className="btn btn-tertiary btn-sm" onClick={() => setIsOpen(true)}>
           <FontAwesomeIcon aria-hidden={true} icon="key" /> {LoginAuthMessage.ChangePassword.niceToString()}
-        </a>}
+        </LinkButton>}
       </FormGroup>
     );
   }

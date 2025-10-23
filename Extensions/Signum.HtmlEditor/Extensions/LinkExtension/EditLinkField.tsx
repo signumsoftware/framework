@@ -1,3 +1,4 @@
+import { LinkButton } from "@framework/Basics/LinkButton";
 import { classes } from "@framework/Globals";
 import { useForceUpdate } from "@framework/Hooks";
 import { EntityBaseController, TextBoxLine } from "@framework/Lines";
