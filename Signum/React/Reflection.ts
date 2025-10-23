@@ -1967,24 +1967,24 @@ export class QueryTokenString<T> {
     return new QueryTokenString(this.token + ".NotAny");
   }
 
-  separatedByComma(): QueryTokenString<AsLite<T>[]> {
+  separatedByComma(): QueryTokenString<ArrayElement<T>> {
     return new QueryTokenString(this.token + ".SeparatedByComma");
   }
 
-  separatedByCommaDistinct(): QueryTokenString<AsLite<T>[]> {
+  separatedByCommaDistinct(): QueryTokenString<ArrayElement<T>> {
     return new QueryTokenString(this.token + ".SeparatedByCommaDistinct");
   }
 
-  separatedByNewLine(): QueryTokenString<AsLite<T>[]> {
+  separatedByNewLine(): QueryTokenString<ArrayElement<T>> {
     return new QueryTokenString(this.token + ".SeparatedByNewLine");
   }
 
-  separatedByNewLineDistinct(): QueryTokenString<AsLite<T>[]> {
+  separatedByNewLineDistinct(): QueryTokenString<ArrayElement<T>> {
     return new QueryTokenString(this.token + ".SeparatedByNewLineDistinct");
   }
 
-  nested(): QueryTokenString<AsLite<T>[]> {
-    return new QueryTokenString<AsLite<T>[]>(this.token + ".Nested");
+  nested(): QueryTokenString<ArrayElement<T>> {
+    return new QueryTokenString<ArrayElement<T>>(this.token + ".Nested");
   }
 
   //only for typed results
