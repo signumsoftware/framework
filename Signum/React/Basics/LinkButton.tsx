@@ -9,7 +9,7 @@ export function LinkButton({ title, ref, onClick, children, ...rest }:
     e);
 
   return (
-    <a role="button" href="#" tabIndex={0} aria-label={title} title={title} ref={ref} {...rest}
+    <a role="button" href="#" aria-label={title} title={title} ref={ref} {...rest}
       onClick={e => { e.preventDefault(); onClick?.(e) }}>
       {newChildren}
     </a>

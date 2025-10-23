@@ -52,7 +52,7 @@ export function AccessibleTable({
       }
       const element = child as React.ReactElement<React.HTMLAttributes<HTMLTableRowElement>>;
       if (element.type == "tr")
-        return React.createElement(ARow, { focusCells, focusHeader: multiselectable, sectionType, tableRole, ...element.props });
+        return React.createElement(AccessibleRow, { focusCells, focusHeader: multiselectable, sectionType, tableRole, ...element.props });
 
       return child;
     });
@@ -141,7 +141,7 @@ interface WCAGRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
  * 
  * Supports both header (`thead`) and body (`tbody`) contexts.
  */
-export function ARow({ focusCells = true, focusHeader = false, sectionType = "tbody", mapCustomComponents, children, tableRole = "grid", ...rest }: WCAGRowProps): React.ReactElement {
+export function AccessibleRow({ focusCells = true, focusHeader = false, sectionType = "tbody", mapCustomComponents, children, tableRole = "grid", ...rest }: WCAGRowProps): React.ReactElement {
 
   /**
    * Enhances a header cell (<th>) in a `thead` section.

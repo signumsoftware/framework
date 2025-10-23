@@ -34,7 +34,7 @@ import { OperationSymbol } from '@framework/Signum.Operations'
 import { QueryEntity } from '@framework/Signum.Basics'
 import { KeyNames } from '@framework/Components'
 import { useForceUpdate } from '@framework/Hooks'
-import { ARow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
+import { AccessibleRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<TypeRulePack>, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
@@ -183,9 +183,9 @@ export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
             .filter((n, i) => isMatch(n.value))
             .groupBy(a => a.value.resource.namespace).orderBy(a => a.key).map(gr =>
               <>
-                <ARow key={gr.key} className="sf-auth-namespace">
+                <AccessibleRow key={gr.key} className="sf-auth-namespace">
                   <td colSpan={10}><b>{gr.key}</b></td>
-                </ARow>
+                </AccessibleRow>
                 {gr.elements.orderBy(a => a.value.resource.className)
                   .map(c => <TypeRow tctx={c} role={ctx.value.role} updateFrame={updateFrame} />)}
               </>)
@@ -364,7 +364,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
   let fallback = Binding.create(rule.allowed, a => a.fallback);
   return (
     <>
-      <ARow key={rule.resource.namespace + "." + rule.resource.className} className={classes("sf-auth-type", rule.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
+      <AccessibleRow key={rule.resource.namespace + "." + rule.resource.className} className={classes("sf-auth-type", rule.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
         <td>
           {conditions.length > 1 || conditions.length == 1 && rule.allowed.conditionRules.length == 0 ?
             <LinkButton className="sf-condition-icon" title={AuthAdminMessage.AddCondition.niceToString()} onClick={async e => {
@@ -413,14 +413,14 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
             m => rule.queries = m.rules.every(a => a.element.allowed == "None") ? "None" :
               m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
         </td>}
-      </ARow>
+      </AccessibleRow>
       {rule.allowed.conditionRules.map(mle => mle.element).map((cr, i) => {
         let b = Binding.create(cr, ca => ca.allowed);
 
         var drag = rule.allowed.conditionRules.length > 1 ? getConfig(i) : null;
 
         return (
-          <ARow key={rule.resource.namespace + "." + rule.resource.className + "_" + cr.typeConditions.map(c => c.element.id).join("_")}
+          <AccessibleRow key={rule.resource.namespace + "." + rule.resource.className + "_" + cr.typeConditions.map(c => c.element.id).join("_")}
             className={classes("sf-auth-condition", drag?.dropClass)}
             onDragEnter={drag?.onDragOver}
             onDragOver={drag?.onDragOver}
@@ -476,7 +476,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
             </td>}
             <td style={{ textAlign: "center" }} colSpan={1 + Number(AuthAdminClient.properties) + Number(AuthAdminClient.operations) + Number(AuthAdminClient.queries)}>
             </td>
-          </ARow>
+          </AccessibleRow>
         );
       })}
     </>

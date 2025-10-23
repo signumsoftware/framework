@@ -18,7 +18,7 @@ import { useTitle } from '@framework/AppContext'
 import { TranslationMember, initialElementIf } from '../Code/TranslationTypeTable'
 import { getToString, Lite } from '@framework/Signum.Entities'
 import { CultureInfoEntity } from '@framework/Signum.Basics'
-import { WCAGRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
+import { AccessibleRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function TranslatedInstanceSync(): React.JSX.Element {
@@ -145,7 +145,7 @@ export function TranslatedInstances(p: { data: TranslatedInstanceClient.TypeInst
           <AccessibleTable
             caption={TranslationMessage.TranslationsOverview.niceToString()}
             className="table st"
-            mapCustomComponents={new Map([[WCAGRow, "tr"]])}
+            mapCustomComponents={new Map([[AccessibleRow, "tr"]])}
             multiselectable={false}
             id="results"
             style={{ width: "100%", margin: "0px" }}>

@@ -12,7 +12,7 @@ import { OperationSymbol } from '@framework/Signum.Operations'
 import { Binding, getOperationInfo, GraphExplorer } from '@framework/Reflection'
 import { useDragAndDrop } from './TypeRulePackControl'
 import SelectorModal from '../../../Signum/React/SelectorModal';
-import { ARow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
+import { AccessibleRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 
 
 
@@ -201,7 +201,7 @@ function OperationRow(p: { tctx: TypeContext<OperationAllowedRule>, updateFrame:
   }
 
   return (
-    <ARow>
+    <AccessibleRow>
       <td>
         {getToString(p.tctx.value.resource.operation)}
       </td>
@@ -220,7 +220,7 @@ function OperationRow(p: { tctx: TypeContext<OperationAllowedRule>, updateFrame:
           p.updateFrame();
         }} />
       </td>
-    </ARow>
+    </AccessibleRow>
   )
 }
 
