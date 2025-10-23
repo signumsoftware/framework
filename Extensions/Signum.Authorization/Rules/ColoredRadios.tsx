@@ -19,6 +19,7 @@ export function ColorRadio(p : ColorRadioProps): React.JSX.Element{
   return (
     <LinkButton
       title={p.title}
+      role="radio"
       onKeyDown={e => {
         if (!p.readOnly && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
@@ -39,7 +40,6 @@ export function GrayCheckbox(p : { checked: boolean, onUnchecked: () => void, re
       className={classes("sf-auth-checkbox", p.readOnly && "sf-not-allowed")}  
       role="checkbox"
       aria-checked={p.checked}
-      tabIndex={p.readOnly ? -1 : 0}
       onKeyDown={e => {
         if (!p.readOnly && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
