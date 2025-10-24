@@ -82,8 +82,8 @@ public class S3Configuration
             if (!endpoint.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) && Port != null) 
                 endpoint = (Port == 433 ? "https://" : "http://") + Endpoint; //OpenShift OBC exposes BUCKET_HOST and BUCKET_PORT nativiely
             
-            config.ServiceURL = Endpoint;
-            config.UseHttp = Endpoint.StartsWith("http://", StringComparison.OrdinalIgnoreCase);
+            config.ServiceURL = endpoint;
+            config.UseHttp = endpoint.StartsWith("http://", StringComparison.OrdinalIgnoreCase);
         }
         else if (!string.IsNullOrEmpty(Region))
         {
