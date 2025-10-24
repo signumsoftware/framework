@@ -21,10 +21,9 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     public IAmazonS3 Client { get; private set; }
     
     //Bucket mode
-    public Func<IFilePath, string>? GetBucketName { get; private set; }
     //SubDirectory mode
     public string? SharedBucketName { get; set; }
-    public Func<IFilePath, string>? GetSubDirectory { get; private set; }
+    public Func<IFilePath, string>? GetBucketNameOrSubDirectory { get; private set; }
     
     public Func<S3WebDownload> WebDownload { get; set; } = () => S3WebDownload.None;
     public Func<IFilePath, string> CalculateKey { get; set; } = SuffixGenerators.Safe.YearMonth_Guid_Filename;
@@ -39,19 +38,13 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     // Optional: rename algorithm to avoid collisions
     public Func<string, int, string>? RenameAlgorithm { get; set; } = null; // FileTypeAlgorithm.DefaultRenameAlgorithm;
 
-    public S3FileTypeAlgorithm(IAmazonS3 client, string sharedBucketName, Func<IFilePath, string> getSubDirectory)
+    public S3FileTypeAlgorithm(IAmazonS3 client, string? sharedBucketName, Func<IFilePath, string> getBucketNameOrSubDirectory)
     {
         this.Client = client;
         this.SharedBucketName = sharedBucketName;
-        this.GetSubDirectory = getSubDirectory;
+        this.GetBucketNameOrSubDirectory = getBucketNameOrSubDirectory;
     }
 
-    public S3FileTypeAlgorithm(IAmazonS3 client, Func<IFilePath, string> getBucketName)
-    {
-        this.Client = client;
-        this.GetBucketName = getBucketName;
-        this.CreateBucketIfNotExists = true;
-    }
 
     public string? GetFullPhysicalPath(IFilePath efp) => null;
 
@@ -61,12 +54,12 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         if (SharedBucketName.HasText())
         {
             var bucket = SharedBucketName;
-            var key = this.GetSubDirectory!(fp) + "/" + fp.Suffix;
+            var key = this.GetBucketNameOrSubDirectory!(fp) + "/" + fp.Suffix;
             return (bucket, key);
         }
         else
         {
-            var bucket = this.GetBucketName!(fp);
+            var bucket = this.GetBucketNameOrSubDirectory!(fp);
             var key = fp.Suffix;
             return (bucket, key);
 
@@ -300,8 +293,8 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     {
         using (HeavyProfiler.LogNoStackTrace("CalculateKeyWithRenames"))
         {
-            bucket = SharedBucketName ?? GetBucketName!(fp);
-            var directory = SharedBucketName != null ? this.GetSubDirectory!(fp) + "/" : "";
+            bucket = SharedBucketName ?? GetBucketNameOrSubDirectory!(fp);
+            var directory = SharedBucketName != null ? this.GetBucketNameOrSubDirectory!(fp) + "/" : "";
             EnsureBucketExists(bucket);
 
             string key = CalculateKey(fp).Replace("\\", "/");
