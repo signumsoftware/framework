@@ -26,7 +26,6 @@ export interface EntityStripProps<V extends ModifiableEntity | Lite<Entity>> ext
   showType?: boolean;
   onItemHtmlAttributes?: (item: NoInfer<V>) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   onItemContainerHtmlAttributes?: (item: NoInfer<V>) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  avoidDuplicates?: boolean;
   groupElementsBy?: (e: V) => string;
   renderGroupTitle?: (key: string, i?: number) => React.ReactElement;
   inputAttributes?: React.InputHTMLAttributes<HTMLInputElement>;
@@ -70,12 +69,12 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
 
     }
 
-    function withAvoidDuplicates(fo: FindOptions,  typeName: string): FindOptions {
+    function withAvoidDuplicates(fo: FindOptions, typeName: string): FindOptions {
 
       const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
 
       return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible, frozen: true }] };
-      }
+    }
   }
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {

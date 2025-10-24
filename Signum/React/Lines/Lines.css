@@ -489,7 +489,6 @@ input[type=checkbox].form-control-xs {
 .form-control-xs .rw-widget-picker,
 .rw-widget-xs .rw-widget-picker {
     min-height: 24px;
-    background-color: var(--bs-body-bg);
 }
 
 .form-group :not(label):not(.form-check) > .form-check-input {
@@ -776,6 +775,8 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     --rw-btn-active-bg: var(--bs-border-color);
     --rw-input-color: var(--bs-body-color);
     --rw-input-bg: var(--bs-body-bg);
+    --rw-input-disabled-bg: var(--bs-secondary-bg);
+    --rw-input-disabled-border-color: var(--bs-border-color);
     --rw-bg: var(--bs-body-bg);
     /*repeat*/
     --rw-input-border-color: var(--rw-widget-border-color);
