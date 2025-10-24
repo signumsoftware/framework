@@ -576,7 +576,15 @@ internal class QueryBinder : ExpressionVisitor
         if (expression.NodeType == ExpressionType.Convert && (expression.Type.IsInstantiationOf(typeof(IGrouping<,>)) ||
                                                               expression.Type.IsInstantiationOf(typeof(IEnumerable<>)) ||
                                                               expression.Type.IsInstantiationOf(typeof(IQueryable<>))))
-            expression = ((UnaryExpression)expression).Operand;
+            return ((UnaryExpression)expression).Operand;
+
+        if(expression is MethodCallExpression mc &&
+           (mc.Method.Name is "AsQueryable" or "AsEnumerable" or "ToList" or "ToArray") &&
+           (mc.Method.DeclaringType == typeof(Queryable) || mc.Method.DeclaringType == typeof(Enumerable)))
+        {
+            expression = mc.Arguments[0];
+        }
+
         return expression;
     }
 
