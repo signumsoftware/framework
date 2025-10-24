@@ -9,6 +9,7 @@ import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import "./TypeHelpComponent.css"
 import { useAPI } from '@framework/Hooks'
 import { TypeHelpMessage } from './Signum.Eval.TypeHelp'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface TypeHelpComponentProps {
   initialType?: string;
@@ -224,10 +225,10 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
     if (cleanType != null)
       return (
         <span>
-          <a href="#" className={"sf-member-" + (isTypeEnum(type) ? "enum" : "class")}
-            onClick={(e) => { e.preventDefault(); goTo(cleanType); }}>
+          <LinkButton title={undefined} className={"sf-member-" + (isTypeEnum(type) ? "enum" : "class")}
+            onClick={(e) => { goTo(cleanType); }}>
             {type}
-          </a>
+          </LinkButton>
         </span>
       );
 

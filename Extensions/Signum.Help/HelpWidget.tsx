@@ -12,6 +12,7 @@ import { TypeContext } from '@framework/Lines';
 import { HtmlViewer } from './Pages/EditableText';
 import './HelpWidget.css';
 import { classes } from '@framework/Globals';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 export interface HelpWidgetProps {
   wc: WidgetContext<Entity>
@@ -82,9 +83,9 @@ export function HelpIcon(p: { ctx: TypeContext<any>; typeHelp?: TypeHelpEntity }
       overlay={popover}
       onEntered={handleEntered}
     >
-      <a href="#" role="button" tabIndex={0} onClick={e => e.preventDefault()} className="ms-1 sf-help-button" title={HelpMessage.Help.niceToString()}>
+      <LinkButton onClick={e => { }} className="ms-1 sf-help-button" title={HelpMessage.Help.niceToString()}>
         <FontAwesomeIcon aria-hidden={true} icon="circle-question" />
-      </a>
+      </LinkButton>
     </OverlayTrigger>
   );
 }

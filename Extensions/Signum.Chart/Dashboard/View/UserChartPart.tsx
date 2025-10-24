@@ -143,7 +143,6 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   }
 
   function handleReload(e?: React.MouseEvent<any>) {
-    e?.preventDefault();
     reloadQuery();
   }
 

@@ -16,6 +16,7 @@ import { EvalPanelPermission } from './Signum.Eval';
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export namespace EvalClient {
   
@@ -115,7 +116,7 @@ export namespace EvalClient {
       return (
         <div>
           {React.createElement("pre", undefined, ...lines.map(line => makeLine(mark(line, searchParts.length - 1))))}
-          <a href="#" className="text-muted" onClick={e => { e.preventDefault(); setShowAll(false) }}>Show less</a>
+          <LinkButton title={undefined} className="text-muted" onClick={e => { setShowAll(false) }}>Show less</LinkButton>
         </div>
       );
     }
@@ -133,7 +134,7 @@ export namespace EvalClient {
             React.createElement("pre", undefined, ...result.map(n => typeof n == "number" ? makeLine(mark(lines[n], searchParts.length - 1)) :
               makeLine(` ----- ${n.numLines} Lines Removed ----- `)
             ))}
-          <a href="#" className="text-muted" onClick={e => { e.preventDefault(); setShowAll(true) }}>Show all</a>
+          <LinkButton title={undefined} className="text-muted" onClick={e => { setShowAll(true) }}>Show all</LinkButton>
         </div>
       );
     }

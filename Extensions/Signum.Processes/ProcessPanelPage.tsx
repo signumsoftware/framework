@@ -28,12 +28,10 @@ export default function ProcessPanelPage(): React.JSX.Element {
   useTitle("Process Runner");
 
   function handleStop(e: React.MouseEvent<any>) {
-    e.preventDefault();
     ProcessClient.API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
-    e.preventDefault();
     ProcessClient.API.start().then(() => reloadState());
   }
 

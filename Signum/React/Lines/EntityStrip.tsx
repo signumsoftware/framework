@@ -15,6 +15,7 @@ import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
 import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { LinkButton } from '../Basics/LinkButton'
 
 
 export interface EntityStripProps<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseProps<V> {
@@ -336,12 +337,11 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
   function removeIcon() {
     return p.onRemove &&
       <span>
-        <a className="sf-line-button sf-remove"
+        <LinkButton className="sf-line-button sf-remove"
           onClick={p.onRemove}
-          href="#"
           title={p.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
           {EntityBaseController.getRemoveIcon()}
-        </a>
+        </LinkButton>
       </span>
   }
 

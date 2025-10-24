@@ -16,6 +16,7 @@ import { EntityBaseController } from '@framework/Lines'
 import { Aprox, AsEntity } from '@framework/Lines/EntityBase'
 import { FilesClient } from '../FilesClient'
 import { JSX } from 'react/jsx-runtime'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export { FileTypeSymbol };
 
@@ -101,11 +102,11 @@ export class MultiFileLineController<V extends ModifiableEntity /*& IFile*/ | Li
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-view", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-view", btn ? "input-group-text" : undefined)}
         onClick={e => this.handleViewElement(e, index)}
         title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
         {EntityBaseController.getViewIcon()}
-      </a>
+      </LinkButton>
     );
 
   }
@@ -144,21 +145,21 @@ export function MultiFileLine<V extends ModifiableEntity /*& IFile*/ | Lite</*IF
                   className={classes(drag?.dropClass)}
                 >
                   <td className="item-group">
-                    {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+                    {drag && <LinkButton className={classes("sf-line-button", "sf-move")} onClick={e => { e.stopPropagation(); }}
                       draggable={true}
                       onKeyDown={drag.onKeyDown}
                       onDragStart={drag.onDragStart}
                       onDragEnd={drag.onDragEnd}
                       title={drag.title}>
                       {EntityBaseController.getMoveIcon()}
-                    </a>}
+                    </LinkButton>}
 
                     {!p.ctx.readOnly &&
-                      <a href="#" title={EntityControlMessage.Remove.niceToString()}
+                      <LinkButton title={EntityControlMessage.Remove.niceToString()}
                         className="sf-line-button sf-remove"
-                        onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
+                        onClick={e => { c.handleDeleteValue(mlec.index!); }}>
                         <FontAwesomeIcon aria-hidden={true} icon="xmark" />
-                      </a>}
+                      </LinkButton>}
                   </td>
                   <td style={{ width: "100%" }}>
                     {p.getComponent ? p.getComponent(mlec as TypeContext<AsEntity<V>>) :

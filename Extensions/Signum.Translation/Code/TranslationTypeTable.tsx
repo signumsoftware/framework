@@ -5,7 +5,8 @@ import { Dic } from '@framework/Globals'
 import TextArea from '@framework/Components/TextArea';
 import { useForceUpdate } from '@framework/Hooks';
 import { KeyNames } from '@framework/Components';
-import { WCAGRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable';
+import { AccessibleRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 export function TranslationTypeTable(p: { type: TranslationClient.LocalizableType, result: TranslationClient.AssemblyResult, currentCulture: string }): React.JSX.Element{
 
@@ -14,14 +15,14 @@ export function TranslationTypeTable(p: { type: TranslationClient.LocalizableTyp
     const members = Dic.getKeys(Dic.getValues(type.cultures).first().members);
 
     return members.flatMap(me =>
-      [<WCAGRow key={me}>
+      [<AccessibleRow key={me}>
         <th className="leftCell">
           {TranslationMessage.Member.niceToString()}
         </th>
         <th colSpan={4}>
           {me}
         </th>
-      </WCAGRow>]
+      </AccessibleRow>]
         .concat(Dic.getValues(type.cultures).filter(loc => loc.members[me] != null).map(loc =>
           <TranslationMember key={me + "-" + loc.culture} type={type} loc={loc} edit={editCulture(loc)} member={loc.members[me]} />
         ))
@@ -76,12 +77,12 @@ export function TranslationMember({ type, member, loc, edit }: { type: Translati
   }, [avoidCombo]);
 
   return (
-    <WCAGRow>
+    <AccessibleRow>
       <td className="leftCell">{loc.culture}</td>
       <td colSpan={4} className="monospaceCell">
         {edit ? renderEdit() : member.description}
       </td>
-    </WCAGRow>
+    </AccessibleRow>
   );
 
 
@@ -121,7 +122,7 @@ export function TranslationMember({ type, member, loc, edit }: { type: Translati
             translatedMembers.map(a => <option key={a.culture + a.translatorName} title={`from '${a.culture}' using ${a.translatorName}`} value={a.text}>{a.text}</option>))}
         </select>
         &nbsp;
-                <a href="#" onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</a>
+        <LinkButton title={undefined} onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</LinkButton>
       </span>
     );
   }
@@ -194,7 +195,6 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
   }, [avoidCombo]);
 
   function handleAvoidCombo(e: React.FormEvent<any>) {
-    e.preventDefault();
     setAvoidCombo(true);
   }
 
@@ -210,8 +210,6 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
     const { loc } = p;
     const td = loc.typeDescription!;
 
-   
-
     if (!translatedTypes.length || avoidCombo)
       return (
         <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.description ?? ""}
@@ -226,7 +224,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
             translatedTypes.map(a => <option key={a.culture + a.translatorName} title={`from '${a.culture}' using ${a.translatorName}`} value={a.singular}>{a.singular}</option>))}
         </select>
         &nbsp;
-                <a href="#" onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</a>
+        <LinkButton title={undefined} onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</LinkButton>
       </span>
     );
   }
@@ -243,7 +241,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
   }
 
   return (
-    <WCAGRow>
+    <AccessibleRow>
       <th className="leftCell">{loc.culture}</th>
       <th className="smallCell monospaceCell">
         {safeCell(type.hasGender && pronoms.length > 0 && (edit ?
@@ -273,7 +271,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
             td.pluralDescription))
         }
       </th>
-    </WCAGRow>
+    </AccessibleRow>
   );
 }
 

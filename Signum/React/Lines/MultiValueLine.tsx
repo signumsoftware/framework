@@ -8,6 +8,7 @@ import { EntityBaseController } from "./EntityBase";
 import { LineBaseProps, LineBaseController, useController, genericMemo } from "./LineBase";
 import { KeyGenerator } from "../Globals";
 import { MListElementBinding } from "../Reflection";
+import { LinkButton } from "../Basics/LinkButton";
 
 interface MultiValueLineProps<V> extends LineBaseProps<MList<V>> {
   onRenderItem?: (p: AutoLineProps) => React.ReactElement;
@@ -122,11 +123,11 @@ export const MultiValueLine: <V>(props: MultiValueLineProps<V>) => React.ReactNo
             }
           </div>
           {!p.ctx.readOnly &&
-            <a href="#" title={p.ctx.titleLabels ? p.addValueText ?? SearchMessage.AddValue.niceToString() : undefined}
+            <LinkButton title={p.ctx.titleLabels ? p.addValueText ?? SearchMessage.AddValue.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={c.handleAddValue}>
               {EntityBaseController.getCreateIcon()}&nbsp;{p.addValueText ?? SearchMessage.AddValue.niceToString()}
-            </a>}
+            </LinkButton>}
 
         </>}
       </FormGroup>
@@ -147,14 +148,12 @@ export function MultiValueLineElement(props: MultiValueLineElementProps): React.
   return (
     <div className="sf-multi-value-element">
       {!mctx.readOnly &&
-        <a href="#"
+        <LinkButton
           title={mctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
           className="sf-line-button sf-remove"
-          role="button"
-          tabIndex={0}
           onClick={props.onRemove}>
           <FontAwesomeIcon aria-hidden={true} icon="xmark" />
-        </a>
+        </LinkButton>
       }
       {React.cloneElement(props.onRenderItem({ ctx: mctx, mandatory: true })!)}
     </div>

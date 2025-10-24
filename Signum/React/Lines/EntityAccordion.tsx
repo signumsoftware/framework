@@ -15,6 +15,7 @@ import { useForceUpdate } from '../Hooks'
 import { AccordionEventKey } from 'react-bootstrap/esm/AccordionContext'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface EntityAccordionProps<V extends ModifiableEntity> extends EntityListBaseProps<V> {
   createAsLink?: boolean | ((er: EntityAccordionController<V>) => React.ReactElement);
@@ -146,11 +147,11 @@ export function EntityAccordion<V extends ModifiableEntity>(props: EntityAccordi
         {
           p.createAsLink && p.create && !readOnly &&
           (typeof p.createAsLink == "function" ? p.createAsLink(c) :
-            <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
+            <LinkButton title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={c.handleCreateClick}>
               {EntityBaseController.getCreateIcon()}&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
-            </a>)
+            </LinkButton>)
         }
       </Accordion>
     );
@@ -221,22 +222,22 @@ export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getCom
       <Accordion.Header {...EntityBaseController.entityHtmlAttributes(ctx.value)} {...headerHtmlAttributes}>
         <div className="d-flex align-items-center flex-grow-1">
           {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
-          {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
+          {onRemove && <LinkButton className={classes("sf-line-button", "sf-remove")}
             onClick={onRemove}
             title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
             {EntityBaseController.getRemoveIcon()}
-          </a>}
+          </LinkButton>}
           &nbsp;
           {move?.renderMoveUp()}
           {move?.renderMoveDown()}
-          {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); } }
+          {drag && <LinkButton className={classes("sf-line-button", "sf-move")} onClick={e => { e.stopPropagation(); } }
             draggable={true}
             onDragStart={drag.onDragStart}
             onDragEnd={drag.onDragEnd}
             onKeyDown={drag.onKeyDown}
             title={drag.title}>
             {EntityBaseController.getMoveIcon()}
-          </a>}
+          </LinkButton>}
           {itemExtraButtons && itemExtraButtons()}
           {'\xa0'}
           {getTitle ? getTitle(ctx) : getToString(ctx.value)}

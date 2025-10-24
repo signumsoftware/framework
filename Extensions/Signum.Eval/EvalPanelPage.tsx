@@ -21,6 +21,7 @@ import { useForceUpdate, useAPI, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { assertPermissionAuthorized } from '@framework/AppContext'
 import { EvalPanelMessage, EvalPanelPermission } from './Signum.Eval'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 
 type DynamicPanelTab = "search" | "checkEvals";
@@ -84,7 +85,6 @@ export function CheckEvalsStep(): React.JSX.Element {
   const [autoStart, setAutoStart] = React.useState<number | undefined>(undefined);
 
   function handleOnClick(e: React.MouseEvent<any>) {
-    e.preventDefault();
     setAutoStart((autoStart ?? 0) + 1);
   }
 
@@ -148,10 +148,10 @@ export function CheckEvalType(p: CheckEvalTypeProps): React.JSX.Element {
         {
           state == "loading" ?
             <FontAwesomeIcon icon="arrows-rotate" spin={true} /> :
-            <span onClick={e => { e.preventDefault(); loadData(p); }} style={{ cursor: "pointer" }} ><FontAwesomeIcon aria-hidden={true} icon="arrows-rotate" className="sf-line-button" title={EvalPanelMessage.OpenErrors.niceToString()} /></span>
+            <LinkButton onClick={e => { loadData(p); }} title={EvalPanelMessage.OpenErrors.niceToString()}><FontAwesomeIcon icon="arrows-rotate" className="sf-line-button" /></LinkButton>
         }
         {
-          state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon aria-hidden={true} icon="triangle-exclamation" /> Exception checking {getQueryNiceName(p.findOptions.queryName)}</span> :
+          state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon aria-hidden icon="triangle-exclamation" /> Exception checking {getQueryNiceName(p.findOptions.queryName)}</span> :
             errors && errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{errors.length}</strong> {errors.length == 1 ? "Error" : "Errors"} found</span> :
               errors && errors?.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
                 undefined
@@ -179,14 +179,13 @@ export function CheckEvalType(p: CheckEvalTypeProps): React.JSX.Element {
 
 export function RefreshClientsStep(): React.JSX.Element {
   function handleRefreshClient(e: React.MouseEvent<any>) {
-    e.preventDefault();
     window.location.reload();
   }
 
   return (
     <div>
       <p>Now you need to refresh the clients manually (i.e. pressing F5).</p>
-      <a href="#" className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</a>
+      <LinkButton title={undefined} className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</LinkButton>
     </div>
   );
 }

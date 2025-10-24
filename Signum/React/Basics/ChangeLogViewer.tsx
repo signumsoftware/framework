@@ -11,6 +11,7 @@ import { ConnectionMessage, JavascriptMessage } from "../Signum.Entities";
 import { OverlayTrigger, Tooltip, Button } from "react-bootstrap";
 import { VersionInfo, VersionInfoTooltip } from "../Frames/VersionChangedAlert";
 import './ChangeLog.css'
+import { LinkButton } from "./LinkButton";
 
 
 
@@ -35,7 +36,6 @@ export default function ChangeLogViewer(p: { extraInformation?: string }): React
   const countLogs = logs.filter(l => !lastDate ? true : DateTime.fromISO(l.deployDate) > lastDate).length;
 
   async function handleOpenChangeLogs(e: React.MouseEvent<HTMLAnchorElement>) {
-    e.preventDefault();
 
     await MessageModal.show({
       title: ChangeLogMessage.ChangeLogs.niceToString(),
@@ -63,11 +63,10 @@ export default function ChangeLogViewer(p: { extraInformation?: string }): React
         </Tooltip>
       }
     >
-      <a
-        href="#"
+      <LinkButton
+        title={undefined}
         ref={triggerRef}
         className="sf-pointer nav-link"
-        role="button"
         aria-haspopup="dialog"
         aria-expanded="false"
         onClick={handleOpenChangeLogs}
@@ -85,7 +84,7 @@ export default function ChangeLogViewer(p: { extraInformation?: string }): React
             {countLogs}
           </span>
         )}
-      </a>
+      </LinkButton>
     </OverlayTrigger>
   );
 }

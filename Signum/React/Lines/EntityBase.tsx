@@ -1,20 +1,18 @@
 import * as React from 'react'
-import { Dic, classes } from '../Globals'
+import { classes } from '../Globals'
 import { Navigator, ViewPromise } from '../Navigator'
 import { Constructor } from '../Constructor'
 import { Finder } from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
-import { PropertyRoute, tryGetTypeInfos, TypeInfo, IsByAll, TypeReference, getTypeInfo, getTypeInfos, Type } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage, toLite, parseLiteList, getToString, isLite } from '../Signum.Entities'
+import { PropertyRoute, tryGetTypeInfos, TypeInfo, IsByAll, TypeReference, getTypeInfo, getTypeInfos } from '../Reflection'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, entityInfo, SelectorMessage, toLite, parseLiteList, getToString, isLite } from '../Signum.Entities'
 import { LineBaseController, LineBaseProps } from './LineBase'
 import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Basics";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FindOptionsAutocompleteConfig } from './AutoCompleteConfig'
-import { FilterOption } from '../Search'
 import { toAbsoluteUrl } from '../AppContext'
-import { To } from 'react-router'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface EntityBaseProps<V extends ModifiableEntity | Lite<Entity> | null> extends LineBaseProps<V> {
   view?: boolean;
@@ -208,11 +206,11 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     if (!this.props.view)
       return undefined;
     return (
-      <a href="#" className={classes("sf-line-button", "sf-view", btn ?  "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-view", btn ?  "input-group-text" : undefined)}
         onClick={this.handleViewClick}
-        aria-label={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() + " " + this.props.label : undefined}>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() + " " + this.props.label : undefined}>
         {EntityBaseController.getViewIcon()}
-      </a>
+      </LinkButton>
     );
   }
 
@@ -329,11 +327,11 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-create", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-create", btn ? "input-group-text" : undefined)}
         onClick={this.handleCreateClick}
-        aria-label={this.props.ctx.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() + " " + this.props.label : undefined}>
+        title={this.props.ctx.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() + " " + this.props.label : undefined}>
         {EntityBaseController.getCreateIcon()}
-      </a>
+      </LinkButton>
     );
   }
 
@@ -342,11 +340,11 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-paste", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-paste", btn ? "input-group-text" : undefined)}
         onClick={this.handlePasteClick}
-        aria-label={EntityControlMessage.Paste.niceToString()}>
+        title={EntityControlMessage.Paste.niceToString()}>
         {EntityBaseController.getPasteIcon()}
-      </a>
+      </LinkButton>
     );
   }
 
@@ -399,11 +397,11 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
         onClick={this.handleFindClick}
-        aria-label={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() + " " + this.props.label : undefined}>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() + " " + this.props.label : undefined}>
         {EntityBaseController.getFindIcon()}
-      </a>
+      </LinkButton>
     );
   }
 
@@ -425,11 +423,11 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
         onClick={this.handleRemoveClick}
-        aria-label={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() + "" + this.props.label : undefined}>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() + "" + this.props.label : undefined}>
         {EntityBaseController.getRemoveIcon()}
-      </a>
+      </LinkButton>
     );
   }
 }

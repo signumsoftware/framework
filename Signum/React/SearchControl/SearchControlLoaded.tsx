@@ -42,6 +42,7 @@ import { VisualTipIcon } from '../Basics/VisualTipIcon'
 import { SearchVisualTip, TypeEntity } from '../Signum.Basics'
 import { KeyNames } from '../Components'
 import { CollectionMessage } from '../Signum.External'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface ColumnParsed {
   column: ColumnOptionParsed;
@@ -1252,9 +1253,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               onKeyDown={this.handleMenuFilterKeyDown}
               onChange={this.handleMenuFilterChange} />
           </AutoFocus>}
-          <div style={{ position:"relative", maxHeight: "calc(100vh - 400px)", overflow: "auto" }}>
-            {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
-          </div>
+        <div style={{ position: "relative", maxHeight: "calc(100vh - 400px)", overflow: "auto" }}>
+          {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+        </div>
       </ContextMenu>
     );
   }
@@ -1529,7 +1530,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     return (
       <tr>
-        {this.props.allowSelection && <th  scope="col" className="sf-small-column sf-th-selection">
+        {this.props.allowSelection && <th scope="col" className="sf-small-column sf-th-selection">
           {this.props.allowSelection == true &&
             <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
           }
@@ -1829,14 +1830,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       else
         return SearchMessage.NoResultsFoundInPage01.niceToString().formatHtml(
           resFO.pagination.currentPage,
-          <a href="#" onClick={e => {
-            e.preventDefault();
+          <LinkButton title={undefined} onClick={e => {
             this.handlePagination({
               mode: "Paginate",
               elementsPerPage: resFO.pagination.elementsPerPage,
               currentPage: 1
             });
-          }}>{SearchMessage.GoBackToPageOne.niceToString()}</a>
+          }}>
+            {SearchMessage.GoBackToPageOne.niceToString()}
+          </LinkButton>
         );
     }
 
@@ -1933,7 +1935,6 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           key={i}
           aria-describedby={`result_row_${i}_tooltip`}
           aria-selected={selected}
-          tabIndex={0}
           ref={this.rowRefs[i]}
           data-row-index={i}
           data-entity={row.entity && liteKey(row.entity)}
@@ -1973,7 +1974,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           {columns.map((c, j) =>
             i !== 0 && c.column.combineRows === "EqualValue" && equals(getRowValue(resultTable.rows[i - 1], c.resultIndex), getRowValue(row, c.resultIndex)) ? null :
               i !== 0 && c.column.combineRows === "EqualEntity" && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
-                <td tabIndex={0} key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
+                <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
                   rowSpan={
                     c.column.combineRows === "EqualValue" ? calculateRowSpan(row => getRowValue(row, c.resultIndex)) :
                       c.column.combineRows === "EqualEntity" ? calculateRowSpan(row => row.entity) :

@@ -4,6 +4,7 @@ import { toNumberFormat } from '@framework/Reflection';
 import { Change, diffLines, diffWords } from 'diff';
 import { softCast } from '@framework/Globals';
 import { NumberBox, isNumberKey } from '@framework/Lines/NumberLine';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 
 export interface LineOrWordsChange {
@@ -29,7 +30,7 @@ export function DiffDocument(p: { first: string, second: string }): React.JSX.El
           <div className="alert alert-warning mt-2" role="alert">
             The two strings are too big ({formatter.format(p.first.length)} ch. and {formatter.format(p.second.length)} ch.) and could freeze your browser...
             <br />
-            <a href="#" className="btn btn-sm btn-warning mt-3" onClick={e => { e.preventDefault(); setForce(true); }}>Try anyway!</a>
+            <LinkButton title={undefined} className="btn btn-sm btn-warning mt-3" onClick={e => { setForce(true); }}>Try anyway!</LinkButton>
           </div> :
           <DiffDocumentSimple first={p.first} second={p.second} margin={margin} />
         }

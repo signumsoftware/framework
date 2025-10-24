@@ -11,6 +11,7 @@ import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { useAPI, useMounted } from '../Hooks'
 import { genericMemo, useController } from './LineBase'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { LinkButton } from '../Basics/LinkButton'
 
 
 export interface EntityLineProps<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseProps<V> {
@@ -242,12 +243,12 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
 
       if (p.view && !p.avoidLink) {
         return (
-          <a ref={e => setLinkOrSpan(e)}
-            href="#" onClick={c.handleViewClick}
+          <LinkButton ref={e => setLinkOrSpan(e)}
+            onClick={c.handleViewClick}
             className={classes(p.ctx.formControlClass, "sf-entity-line-entity")}
             title={p.ctx.titleLabels ? getToString(value) : undefined} {...p.itemHtmlAttributes}>
             {str}
-          </a>
+          </LinkButton>
         );
       } else {
         return (

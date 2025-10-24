@@ -5,6 +5,7 @@ import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
 import { genericMemo, useController } from './LineBase';
 import { classes } from '../Globals';
 import { EntityBaseController } from './EntityBase';
+import { LinkButton } from '../Basics/LinkButton';
 
 export interface EntityListProps<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseProps<V> {
   size?: number;
@@ -75,11 +76,11 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-view", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-view", btn ? "input-group-text" : undefined)}
         onClick={this.handleViewClick}
         title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
         {EntityBaseController.getViewIcon()}
-      </a>
+      </LinkButton>
     );
   }
 
@@ -88,11 +89,11 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
         onClick={this.handleRemoveClick}
         title={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
         {EntityBaseController.getRemoveIcon()}
-      </a>
+      </LinkButton>
     );
   }
 

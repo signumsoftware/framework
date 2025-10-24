@@ -12,7 +12,7 @@ import { restoreSelection, sanitizeUrl, validateUrl } from "./helper";
 
 type LinkButtonProps = { controller: HtmlEditorController; }
 
-export default function LinkButton({ controller }: LinkButtonProps): React.ReactNode {
+export default function ToolbarLinkButton({ controller }: LinkButtonProps): React.ReactNode {
   const { editor, editorState } = controller;
 
   const isActive = React.useMemo(() => {

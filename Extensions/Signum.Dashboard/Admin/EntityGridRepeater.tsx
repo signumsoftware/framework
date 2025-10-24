@@ -8,6 +8,7 @@ import { EntityListBaseProps, EntityListBaseController } from '@framework/Lines/
 import { isModifiableEntity } from '@framework/Signum.Entities';
 import { useController } from '@framework/Lines/LineBase';
 import { Aprox, AsEntity } from '@framework/Lines/EntityBase';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 
 export interface IGridEntity {
@@ -41,7 +42,7 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
     super.init(p);
     [this.drag, this.setDrag] = React.useState<EntityGridRepaterDragging<V> | undefined>(undefined);
   }
-  
+
   getDefaultProps(state: EntityGridRepeaterProps<V>): void {
     super.getDefaultProps(state);
     state.viewOnCreate = false;
@@ -97,14 +98,14 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
     const list = this.props.ctx.value!.map(a => a.element as ModifiableEntity & IGridEntity);
 
     const c = this.drag!.currentItem;
-    
+
     list.filter(a => a != c && a.row >= row).forEach(a => { a.row++; a.modified = true; });
-    
+
     c.row = row;
     c.startColumn = 0;
     c.columns = 12;
     c.modified = true;
-    
+
     if (!list.find(a => a == c)) {
       this.props.ctx.value!.push({ rowId: null, element: c });
       this.setValue(this.props.ctx.value);
@@ -292,41 +293,41 @@ export interface EntityGridItemProps {
 }
 
 
-export function EntityGridItem(p : EntityGridItemProps): React.JSX.Element{
+export function EntityGridItem(p: EntityGridItemProps): React.JSX.Element {
   var style = p.customColor == null ? "light" : "customColor";
 
-    return (
-      <div className={classes("card", "shadow-sm")}>
-        <div className={classes("card-header",
-          style != "customColor" && ("bg-" + style)
-        )} style={{ backgroundColor: p.customColor ?? undefined}}
+  return (
+    <div className={classes("card", "shadow-sm")}>
+      <div className={classes("card-header",
+        style != "customColor" && ("bg-" + style)
+      )} style={{ backgroundColor: p.customColor ?? undefined }}
         draggable={!!p.onTitleDragStart}
         onDragStart={p.onTitleDragStart}
         onDragEnd={p.onTitleDragEnd} >
         {p.onRemove &&
-          <a href="#" role="button" className="sf-line-button sf-remove float-end" onClick={p.onRemove}
-              title={EntityControlMessage.Remove.niceToString()}>
-              <FontAwesomeIcon aria-hidden={true} icon="xmark" />
-            </a>
-          }
+          <LinkButton className="sf-line-button sf-remove float-end" onClick={p.onRemove}
+            title={EntityControlMessage.Remove.niceToString()}>
+            <FontAwesomeIcon aria-hidden={true} icon="xmark" />
+          </LinkButton>
+        }
         {p.title}
-        </div>
-        <div className="card-body">
-        {p.children}
-        </div>
-      {p.onResizerDragStart &&
-          <div className="sf-leftHandle" draggable={true}
-          onDragStart={e => p.onResizerDragStart!("left", e)}>
-          </div>
-        }
-      {p.onResizerDragStart &&
-          <div className="sf-rightHandle" draggable={true}
-          onDragStart={e => p.onResizerDragStart!("right", e)}>
-          </div>
-        }
       </div>
-    );
+      <div className="card-body">
+        {p.children}
+      </div>
+      {p.onResizerDragStart &&
+        <div className="sf-leftHandle" draggable={true}
+          onDragStart={e => p.onResizerDragStart!("left", e)}>
+        </div>
+      }
+      {p.onResizerDragStart &&
+        <div className="sf-rightHandle" draggable={true}
+          onDragStart={e => p.onResizerDragStart!("right", e)}>
+        </div>
+      }
+    </div>
+  );
 
-  }
+}
 
 

@@ -11,6 +11,7 @@ import { useController } from './LineBase'
 import { TypeBadge } from './AutoCompleteConfig'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface EntityRepeaterProps<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseProps<V> {
   createAsLink?: boolean | ((er: EntityRepeaterController<V>) => React.ReactElement);
@@ -87,11 +88,11 @@ export function EntityRepeater<V extends ModifiableEntity | Lite<Entity>>(props:
         {
           p.createAsLink && p.create && !readOnly &&
           (typeof p.createAsLink == "function" ? p.createAsLink(c) :
-            <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
+            <LinkButton title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={c.handleCreateClick}>
               {EntityBaseController.getCreateIcon()}&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
-            </a>)
+            </LinkButton>)
         }
       </div>
     );
@@ -128,22 +129,22 @@ export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>
         {(onRemove || move || drag || itemExtraButtons || title) &&
           <legend>
             <div className="item-group">
-              {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
+              {onRemove && <LinkButton className={classes("sf-line-button", "sf-remove")}
                 onClick={onRemove}
                 title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
                 {EntityBaseController.getTrashIcon()}
-              </a>}
+              </LinkButton>}
               &nbsp;
               {move?.renderMoveUp()}
               {move?.renderMoveDown()}
-              {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+              {drag && <LinkButton className={classes("sf-line-button", "sf-move")} onClick={e => { e.stopPropagation(); }}
                 draggable={true}
                 onDragStart={drag.onDragStart}
                 onDragEnd={drag.onDragEnd}
                 onKeyDown={drag.onKeyDown}
                 title={drag.title}>
                 {EntityBaseController.getMoveIcon()}
-              </a>}
+              </LinkButton>}
               {itemExtraButtons && itemExtraButtons()}
               {title && '\xa0'}
               {title}

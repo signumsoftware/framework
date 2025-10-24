@@ -402,6 +402,12 @@ public static class VirtualMList
     {
         return new MList<T>(elements.Select(line => new MList<T>.RowIdElement(line, line.Id, null)));
     }
+
+    public static MList<Lite<T>> ToVirtualMList<T>(this IEnumerable<Lite<T>> elements)
+        where T : Entity
+    {
+        return new MList<Lite<T>>(elements.Select(line => new MList<Lite<T>>.RowIdElement(line, line.Id, null)));
+    }
 }
 
 public class VirtualMListInfo

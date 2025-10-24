@@ -98,6 +98,7 @@ export namespace DashboardMessage {
   export const AltClickToOpenResultsInAModalWindow: MessageKey = new MessageKey("DashboardMessage", "AltClickToOpenResultsInAModalWindow");
   export const CopyHealthCheckDashboardData: MessageKey = new MessageKey("DashboardMessage", "CopyHealthCheckDashboardData");
   export const _0CanOnlyBeUserInA1With2: MessageKey = new MessageKey("DashboardMessage", "_0CanOnlyBeUserInA1With2");
+  export const InteractiveDashboard: MessageKey = new MessageKey("DashboardMessage", "InteractiveDashboard");
 }
 
 export namespace DashboardOperation {
