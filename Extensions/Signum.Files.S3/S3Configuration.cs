@@ -55,6 +55,8 @@ public class S3Configuration
     /// </summary>
     public string? SharedBucketName { get; set; }
 
+    public bool? CreateBucket { get; set; }
+
     /// <summary>
     /// Creates a configured AmazonS3Client based on this configuration.
     /// </summary>
