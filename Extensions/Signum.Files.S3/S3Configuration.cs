@@ -31,6 +31,11 @@ public class S3Configuration
     public string? SecretKey { get; set; }
 
     /// <summary>
+    /// Port
+    /// </summary>
+    public int? Port { get; set; }
+
+    /// <summary>
     /// AWS Session Token (optional)
     /// </summary>
     public string? SessionToken { get; set; }
@@ -70,8 +75,13 @@ public class S3Configuration
             ForcePathStyle = ForcePathStyle,
         };
 
+
         if (!string.IsNullOrEmpty(Endpoint))
         {
+            var endpoint = Endpoint;
+            if (!endpoint.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) && Port != null) 
+                endpoint = (Port == 433 ? "https://" : "http://") + Endpoint; //OpenShift OBC exposes BUCKET_HOST and BUCKET_PORT nativiely
+            
             config.ServiceURL = Endpoint;
             config.UseHttp = Endpoint.StartsWith("http://", StringComparison.OrdinalIgnoreCase);
         }
