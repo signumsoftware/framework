@@ -187,7 +187,7 @@ export namespace DashboardClient {
       }
     ));
 
-    GlobalVariables.set('UserName', () => AuthClient.currentUser().userName);
+    GlobalVariables.set('UserName', () => getToString(AuthClient.currentUser()));
     GlobalVariables.set('UserGreeting', () => {
       var hour = DateTime.now().hour;
       if (hour < 5) return DashboardVariableMessage.GoodNight.niceToString();
