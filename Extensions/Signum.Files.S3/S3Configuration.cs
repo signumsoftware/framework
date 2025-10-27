@@ -31,6 +31,11 @@ public class S3Configuration
     public string? SecretKey { get; set; }
 
     /// <summary>
+    /// Port
+    /// </summary>
+    public int? Port { get; set; }
+
+    /// <summary>
     /// AWS Session Token (optional)
     /// </summary>
     public string? SessionToken { get; set; }
@@ -49,6 +54,8 @@ public class S3Configuration
     /// Used for multi-tenant scenarios to share a single bucket name, like OBD
     /// </summary>
     public string? SharedBucketName { get; set; }
+
+    public bool? CreateBucket { get; set; }
 
     /// <summary>
     /// Creates a configured AmazonS3Client based on this configuration.
@@ -70,10 +77,15 @@ public class S3Configuration
             ForcePathStyle = ForcePathStyle,
         };
 
+
         if (!string.IsNullOrEmpty(Endpoint))
         {
-            config.ServiceURL = Endpoint;
-            config.UseHttp = Endpoint.StartsWith("http://", StringComparison.OrdinalIgnoreCase);
+            var endpoint = Endpoint;
+            if (!endpoint.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) && Port != null) 
+                endpoint = (Port == 433 ? "https://" : "http://") + Endpoint; //OpenShift OBC exposes BUCKET_HOST and BUCKET_PORT nativiely
+            
+            config.ServiceURL = endpoint;
+            config.UseHttp = endpoint.StartsWith("http://", StringComparison.OrdinalIgnoreCase);
         }
         else if (!string.IsNullOrEmpty(Region))
         {
