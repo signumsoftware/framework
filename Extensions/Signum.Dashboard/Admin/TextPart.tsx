@@ -33,7 +33,7 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
       return (<AutoLine ctx={ctx.subCtx(s => s.textContent)} />)
 
     if (p.ctx.value.textPartType == "HTML")
-      return (<HtmlEditor binding={Binding.create(ctx.value, e => e.textContent)} />)
+      return (<HtmlEditor binding={Binding.create(ctx.value, e => e.textContent)}  />)
 
     return (<AutoLine ctx={ctx.subCtx(s => s.textContent)} />)
   }

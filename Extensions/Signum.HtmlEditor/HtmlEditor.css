@@ -81,10 +81,10 @@
     margin: 0 0.5em;
 }
 
-.sf-html-editor {
-  p, ol, ul {
+.sf-html-editor p,
+.sf-html-editor ol,
+.sf-html-editor ul {
     margin-bottom: 0.5em;
-  }
 }
 
 .sf-html-editor blockquote {
