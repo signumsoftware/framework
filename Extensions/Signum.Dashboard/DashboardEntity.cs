@@ -358,6 +358,14 @@ public enum DashboardMessage
     InteractiveDashboard,
 }
 
+public enum DashboardVariableMessage
+{
+    GoodMorning,
+    GoodAfternoon,
+    GoodEvening,
+    GoodNight,
+}
+
 public enum DashboardEmbedededInEntity
 {
     None,

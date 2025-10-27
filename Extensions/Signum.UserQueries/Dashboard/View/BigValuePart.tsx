@@ -8,7 +8,6 @@ import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globa
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Finder } from '@framework/Finder'
 import { useAPI, useForceUpdate, useVersion } from '@framework/Hooks'
-import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 import { parseIcon } from '@framework/Components/IconTypeahead'
 import { DashboardPinnedFilters } from '../../../Signum.Dashboard/View/DashboardFilterController'
 import { BigValuePartEntity, UserQueryEntity } from '../../Signum.UserQueries'
@@ -19,6 +18,7 @@ import { toAbsoluteUrl } from '@framework/AppContext'
 import { ToolbarUrl } from '../../../Signum.Toolbar/ToolbarUrl'
 import { ToolbarClient } from '../../../Signum.Toolbar/ToolbarClient'
 import { selectSubEntity } from '../../UserQueryToolbarConfig'
+import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 
 
 export interface UserQueryPartHandler {

@@ -428,9 +428,28 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
     {
         if(pi.Name == nameof(ValueToken))
         {
-            if (UserQuery == null && this.GetDashboard().EntityType == null)
+            if (ValueToken != null && UserQuery == null && this.GetDashboard().EntityType == null)
                 return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
         }
+
+        if(this.GetDashboard().EntityType == null)
+        {
+            if (pi.Name == nameof(UserQuery))
+            {
+                if (UserQuery == null)
+                    return ValidationMessage._0IsNotSet.NiceToString(NicePropertyName(() => UserQuery));
+            }
+        }
+        else
+        {
+            if (pi.Name == nameof(UserQuery) || pi.Name == nameof(ValueToken))
+            {
+                if (UserQuery == null && ValueToken == null)
+                    return ValidationMessage._0Or1ShouldBeSet.NiceToString(NicePropertyName(() => UserQuery), NicePropertyName(() => ValueToken));
+            }
+        }
+
+       
 
         return base.PropertyValidation(pi);
     }
