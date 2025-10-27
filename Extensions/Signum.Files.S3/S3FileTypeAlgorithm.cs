@@ -19,7 +19,12 @@ public enum S3WebDownload
 public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 {
     public IAmazonS3 Client { get; private set; }
-    public Func<IFilePath, string> GetBucketName { get; private set; }
+    
+    //Bucket mode
+    //SubDirectory mode
+    public string? SharedBucketName { get; set; }
+    public Func<IFilePath, string>? GetBucketNameOrSubDirectory { get; private set; }
+    
     public Func<S3WebDownload> WebDownload { get; set; } = () => S3WebDownload.None;
     public Func<IFilePath, string> CalculateKey { get; set; } = SuffixGenerators.Safe.YearMonth_Guid_Filename;
     public bool WeakFileReference { get; set; }
@@ -33,22 +38,40 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     // Optional: rename algorithm to avoid collisions
     public Func<string, int, string>? RenameAlgorithm { get; set; } = null; // FileTypeAlgorithm.DefaultRenameAlgorithm;
 
-    public S3FileTypeAlgorithm(IAmazonS3 client, Func<IFilePath, string> getBucketName)
+    public S3FileTypeAlgorithm(IAmazonS3 client, string? sharedBucketName, Func<IFilePath, string> getBucketNameOrSubDirectory)
     {
         this.Client = client;
-        this.GetBucketName = getBucketName;
+        this.SharedBucketName = sharedBucketName;
+        this.GetBucketNameOrSubDirectory = getBucketNameOrSubDirectory;
     }
+
 
     public string? GetFullPhysicalPath(IFilePath efp) => null;
 
-    public string? GetFullWebPath(IFilePath efp)
+
+    public (string bucket, string key) GetBucketAndKey(IFilePath fp)
+    {
+        if (SharedBucketName.HasText())
+        {
+            var bucket = SharedBucketName;
+            var key = this.GetBucketNameOrSubDirectory!(fp) + "/" + fp.Suffix;
+            return (bucket, key);
+        }
+        else
+        {
+            var bucket = this.GetBucketNameOrSubDirectory!(fp);
+            var key = fp.Suffix;
+            return (bucket, key);
+
+        }
+    }
+
+    public string? GetFullWebPath(IFilePath fp)
     {
         if (WebDownload() == S3WebDownload.None)
             return null;
 
-        var bucket = GetBucketName(efp);
-        var key = efp.Suffix;
-
+        var (bucket, key) = this.GetBucketAndKey(fp);
         if (WebDownload() == S3WebDownload.PreSignedUrl)
         {
             var request = new GetPreSignedUrlRequest
@@ -91,38 +114,22 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         {
             try
             {
-                var exists = AmazonS3Util.DoesS3BucketExistV2Async(Client, bucket).Result;
+                var exists = AmazonS3Util.DoesS3BucketExistV2Async(Client, bucket).ResultSafe();
                 if (!exists)
                 {
                     Client.PutBucketAsync(new PutBucketRequest { BucketName = bucket }).WaitSafe();
+                    lastCreatedBucket = bucket;
                 }
             }
             catch (AmazonS3Exception as3) when (as3.ErrorCode == "BucketAlreadyOwnedByYou" || as3.ErrorCode == "BucketAlreadyExists")
             {
                 // ignore
-            }
-            finally
-            {
                 lastCreatedBucket = bucket;
             }
         }
     }
 
-    private bool ExistsObject(string bucket, string key)
-    {
-        using (HeavyProfiler.Log("S3 ExistsObject", () => key))
-        {
-            try
-            {
-                Client.GetObjectMetadataAsync(bucket, key).WaitSafe();
-                return true;
-            }
-            catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
-            {
-                return false;
-            }
-        }
-    }
+
 
     public Stream OpenRead(IFilePath fp)
     {
@@ -130,8 +137,8 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         {
             try
             {
-                var bucket = GetBucketName(fp);
-                var key = fp.Suffix;
+
+                var (bucket, key) = this.GetBucketAndKey(fp);
                 var response = Client.GetObjectAsync(bucket, key).Result;
                 return response.ResponseStream;
             }
@@ -169,13 +176,13 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             if (WeakFileReference)
                 return;
 
-            fp.Suffix = CalculateKeyWithRenames(fp, out string bucket);
+            var (bucket, key) = CalculateKeyWithRenames(fp);
             try
             {
                 var putRequest = new PutObjectRequest
                 {
                     BucketName = bucket,
-                    Key = fp.Suffix,
+                    Key = key,
                     InputStream = new MemoryStream(fp.BinaryFile),
                     ContentType = FileTypeContentTypes.ContentTypes.TryGet(Path.GetExtension(fp.FileName).ToLowerInvariant(), "application/octet-stream"),
                     AutoCloseStream = true
@@ -186,6 +193,7 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             catch (Exception ex)
             {
                 ex.Data.Add("Suffix", fp.Suffix);
+                ex.Data.Add("Key", key);
                 ex.Data.Add("BucketName", bucket);
                 throw;
             }
@@ -199,13 +207,13 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             if (WeakFileReference)
                 return Task.CompletedTask;
 
-            fp.Suffix = CalculateKeyWithRenames(fp, out var bucket);
+            var (bucket, key) = CalculateKeyWithRenames(fp);
             try
             {
                 var putRequest = new PutObjectRequest
                 {
                     BucketName = bucket,
-                    Key = fp.Suffix,
+                    Key = key,
                     InputStream = new MemoryStream(fp.BinaryFile),
                     ContentType = FileTypeContentTypes.ContentTypes.TryGet(Path.GetExtension(fp.FileName).ToLowerInvariant(), "application/octet-stream"),
                     AutoCloseStream = true
@@ -215,6 +223,7 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             catch (Exception ex)
             {
                 ex.Data.Add("Suffix", fp.Suffix);
+                ex.Data.Add("Key", key);
                 ex.Data.Add("BucketName", bucket);
                 throw;
             }
@@ -236,8 +245,8 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     {
         foreach (var f in files)
         {
-            var bucket = GetBucketName(f);
-            Client.DeleteObjectAsync(bucket, f.Suffix).Wait();
+            var (bucket, key) = GetBucketAndKey(f);
+            Client.DeleteObjectAsync(bucket, key).Wait();
         }
     }
 
@@ -248,29 +257,30 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
         foreach (var f in files)
         {
-            var bucket = GetBucketName(f);
-            try { Client.DeleteObjectAsync(bucket, f.Suffix).Wait(); } catch { }
+            var (bucket, key) = GetBucketAndKey(f);
+            try { Client.DeleteObjectAsync(bucket, key).Wait(); } catch { }
         }
     }
 
     public async Task<string?> StartUpload(IFilePath fp, CancellationToken token = default)
     {
-        fp.Suffix = CalculateKeyWithRenames(fp, out var bucket);
+        var (bucket, key) = CalculateKeyWithRenames(fp);
         var request = new InitiateMultipartUploadRequest
         {
             BucketName = bucket,
-            Key = fp.Suffix,
+            Key = key,
             ContentType = FileTypeContentTypes.ContentTypes.TryGet(Path.GetExtension(fp.FileName).ToLowerInvariant(), "application/octet-stream")
         };
         var response = await Client.InitiateMultipartUploadAsync(request, token);
         return response.UploadId;
     }
 
-    private string CalculateKeyWithRenames(IFilePath fp, out string bucket)
+    private (string bucket, string key) CalculateKeyWithRenames(IFilePath fp)
     {
         using (HeavyProfiler.LogNoStackTrace("CalculateKeyWithRenames"))
         {
-            bucket = GetBucketName(fp);
+            string bucket = SharedBucketName ?? GetBucketNameOrSubDirectory!(fp);
+            var directory = SharedBucketName != null ? this.GetBucketNameOrSubDirectory!(fp) + "/" : "";
             EnsureBucketExists(bucket);
 
             string key = CalculateKey(fp).Replace("\\", "/");
@@ -279,21 +289,36 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             if (RenameAlgorithm != null)
             {
                 int i = 2;
-                while (ExistsObject(bucket, fp.Suffix))
+                while (ExistsObject(bucket, directory + fp.Suffix))
                 {
                     fp.Suffix = RenameAlgorithm(key, i).Replace("\\", "/");
                     i++;
                 }
             }
 
-            return fp.Suffix;
+            return (bucket, directory + fp.Suffix);
+        }
+    }
+
+    bool ExistsObject(string bucket, string key)
+    {
+        using (HeavyProfiler.Log("S3 ExistsObject", () => key))
+        {
+            try
+            {
+                Client.GetObjectMetadataAsync(bucket, key).WaitSafe();
+                return true;
+            }
+            catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                return false;
+            }
         }
     }
 
     public async Task<ChunkInfo> UploadChunk(IFilePath fp, int chunkIndex, MemoryStream chunk, string? uploadId = null, CancellationToken token = default)
     {
-        var bucket = GetBucketName(fp);
-        var key = fp.Suffix;
+        var (bucket, key) = GetBucketAndKey(fp);
         if (uploadId == null)
             throw new ArgumentNullException("uploadId");
         
@@ -318,7 +343,7 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
     public async Task FinishUpload(IFilePath fp, List<ChunkInfo> chunks, string? uploadId = null, CancellationToken token = default)
     {
-        var bucket = GetBucketName(fp);
+        var (bucket, key) = GetBucketAndKey(fp);
 
         if (uploadId == null)
             throw new ArgumentNullException("uploadId");
@@ -327,7 +352,7 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         var completeRequest = new CompleteMultipartUploadRequest
         {
             BucketName = bucket,
-            Key = fp.Suffix,
+            Key = key,
             UploadId = uploadId!,
             PartETags = partETags
         };
@@ -336,7 +361,7 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
     public async Task AbortUpload(IFilePath fp, string? uploadId = null, CancellationToken token = default)
     {
-        var bucket = GetBucketName(fp);
+        var (bucket, key) = GetBucketAndKey(fp);
 
         if (uploadId == null)
             throw new ArgumentNullException("uploadId");

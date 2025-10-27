@@ -55,7 +55,7 @@ export function EntityRepeater<V extends ModifiableEntity | Lite<Entity>>(props:
 
   function renderButtons() {
     const buttons = (
-      <span className="float-end">
+      <span>
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {p.createAsLink == false && c.renderCreateButton(false, p.createMessage)}
         {c.renderFindButton(false)}

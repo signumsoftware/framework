@@ -25,7 +25,7 @@ export namespace BigValueClient {
   }
 
   export function renderCustomBigValue(messageName: string, ctx: CustomMessageContext<Entity>): { message?: React.ReactNode, value?: React.ReactNode } {
-    var cm = customBigValues[ctx.entity?.EntityType ?? "global"][messageName];
+    var cm = customBigValues[ctx.entity?.EntityType ?? "global"]?.[messageName];
     if (cm == null)
       return {
         message: <span className="text-danger">No CustomMessage {messageName} registered for {ctx.entity?.EntityType ?? "global"}</span >

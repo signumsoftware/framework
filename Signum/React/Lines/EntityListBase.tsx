@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes, Dic, KeyGenerator } from '../Globals'
-import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList, is, liteKey, toLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList, is, liteKey, toLite, isEntity } from '../Signum.Entities'
 import { Finder } from '../Finder'
 import { Navigator, ViewPromise } from '../Navigator'
 import { Constructor } from '../Constructor'
@@ -32,6 +32,7 @@ export interface EntityListBaseProps<V extends ModifiableEntity | Lite<Entity>> 
   onMove?: (list: NoInfer<MList<V>>, oldIndex: number, newIndex: IndexWithOffset) => void;
   findOptions?: FindOptions;
   findOptionsDictionary?: { [typeName: string]: FindOptions };
+  avoidDuplicates?: boolean;
 
   liteToString?: (e: AsEntity<V>) => string;
 
@@ -81,9 +82,36 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
   }
 
 
-  overrideProps(p: P, overridenProps: P): void {
 
+  overrideProps(p: P, overridenProps: P): void {
     super.overrideProps(p, overridenProps);
+    debugger;
+    if (p.type) {
+      var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;
+      if (avoidDuplicates) {
+        var types = tryGetTypeInfos(p.type).notNull();
+        if (types.length == 0)
+          return;
+
+        if (types.length == 1) {
+          var tn = types.single().name;
+          p.findOptions = withAvoidDuplicates(p.findOptions ?? Navigator.entitySettings[tn]?.defaultFindOptions ?? { queryName: tn }, tn);
+        }
+        else {
+          p.findOptionsDictionary = types.toObject(a => a.name, a => withAvoidDuplicates(p.findOptionsDictionary?.[a.name] ?? Navigator.entitySettings[a.name]?.defaultFindOptions ?? { queryName: a.name }, a.name));
+        }
+      }
+    }
+
+    function withAvoidDuplicates(fo: FindOptions, typeName: string): FindOptions {
+
+      const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
+
+      return {
+        ...fo,
+        filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible, frozen: true }]
+      };
+    }
   }
 
 
