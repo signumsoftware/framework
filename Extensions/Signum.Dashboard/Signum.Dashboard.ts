@@ -112,6 +112,13 @@ export namespace DashboardPermission {
   export const ViewDashboard : Basics.PermissionSymbol = registerSymbol("Permission", "DashboardPermission.ViewDashboard");
 }
 
+export namespace DashboardVariableMessage {
+  export const GoodMorning: MessageKey = new MessageKey("DashboardVariableMessage", "GoodMorning");
+  export const GoodAfternoon: MessageKey = new MessageKey("DashboardVariableMessage", "GoodAfternoon");
+  export const GoodEvening: MessageKey = new MessageKey("DashboardVariableMessage", "GoodEvening");
+  export const GoodNight: MessageKey = new MessageKey("DashboardVariableMessage", "GoodNight");
+}
+
 export const HealthCheckElementEmbedded: Type<HealthCheckElementEmbedded> = new Type<HealthCheckElementEmbedded>("HealthCheckElementEmbedded");
 export interface HealthCheckElementEmbedded extends Entities.EmbeddedEntity {
   Type: "HealthCheckElementEmbedded";

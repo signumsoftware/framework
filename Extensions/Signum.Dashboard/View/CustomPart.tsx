@@ -11,19 +11,12 @@ import { softCast } from '../../../Signum/React/Globals';
 export default function CustomPart(p: PanelPartContentProps<CustomPartEntity>): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
-  if (p.entity == null)
-    return (
-      <div className="alert alert-danger" role="alert">
-        {DashboardMessage._0CanOnlyBeUserInA1With2.niceToString(CustomPartEntity.niceName(), DashboardEntity.niceName(), DashboardEntity.nicePropertyName(a => a.entityType))}
-      </div>
-    );
-
-  const cpr = DashboardClient.Options.customPartRenderers[p.entity.EntityType][p.content.customPartName];
+  const cpr = DashboardClient.Options.getCustomPartRenderer(p.entity?.EntityType)?.[p.content.customPartName];
 
   if (!cpr)
     return (
       <div className="alert alert-danger" role="alert">
-        No renderer for <code>{p.entity.EntityType}</code> with name <code>{p.content.customPartName}</code> registered in <code>DashboardClient.Options.customPartRenderers</code>
+        No renderer for <code>{p.entity?.EntityType ?? "global"}</code> with name <code>{p.content.customPartName}</code> registered in <code>DashboardClient.Options.customPartRenderers</code>
       </div>
     );
 

@@ -48,7 +48,7 @@
     border: 0;
     vertical-align: bottom;
     height: 30px;
-    width: 30px;
+    /*width: 30px;*/
     line-height: 10px;
     font-weight: bold;
 }
