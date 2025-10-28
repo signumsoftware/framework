@@ -76,6 +76,9 @@ export namespace AzureADClient {
     const confB2C = config!.azureB2C!;
     const userFlow = b2c_UserFlow ? confB2C[b2c_UserFlow]! : (confB2C.signInSignUp_UserFlow || confB2C.signIn_UserFlow!);
 
+    if (userFlow.startsWith("http"))
+      return userFlow;
+
     const tenantName = confB2C.tenantName;
     return `https://${tenantName}.b2clogin.com/${tenantName}.onmicrosoft.com/${userFlow}`;
   }
