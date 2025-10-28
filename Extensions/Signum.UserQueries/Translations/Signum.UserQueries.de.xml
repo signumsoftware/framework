@@ -6,6 +6,9 @@
     <Member Name="None" Description="Nichts" />
   </Type>
   <Type Name="BigValuePartEntity" Description="Große-Wert-teil" Gender="m">
+    <Member Name="CustomBigValue" Description="Benutzerdefinierter großer Wert" />
+    <Member Name="CustomUrl" Description="Benutzerdefinierte URL" />
+    <Member Name="Navigate" Description="Navigieren" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
     <Member Name="ValueToken" Description="Wert-Token" />

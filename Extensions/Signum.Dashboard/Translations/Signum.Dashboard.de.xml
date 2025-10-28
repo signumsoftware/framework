@@ -62,6 +62,7 @@
     <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="Titel muss angegeben werden für {0}" />
     <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="ForPerformanceReasonsThisDashboardMayShowOutdatedInformation" Description="Aus Leistungsgründen kann dieses Dashboard veraltete Informationen anzeigen" />
+    <Member Name="InteractiveDashboard" Description="Interaktives Dashboard" />
     <Member Name="LasUpdateWasOn0" Description="Die letzte Aktualisierung erfolgte am {0}" />
     <Member Name="Part0IsTooLarge" Description="Teil {0} ist zu groß" />
     <Member Name="Part0OverlapsWith1" Description="Teil {0} überschneidet sich mit {1}" />
@@ -77,6 +78,12 @@
   </Type>
   <Type Name="DashboardPermission">
     <Member Name="ViewDashboard" Description="Dashboard anzeigen" />
+  </Type>
+  <Type Name="DashboardVariableMessage">
+    <Member Name="GoodAfternoon" Description="Guten Tag" />
+    <Member Name="GoodEvening" Description="Guten Abend" />
+    <Member Name="GoodMorning" Description="Guten Morgen" />
+    <Member Name="GoodNight" Description="Gute Nacht" />
   </Type>
   <Type Name="HealthCheckElementEmbedded" Description="Element der Gesundheitskontrolle">
     <Member Name="CheckURL" Description="URL prüfen" />
@@ -110,10 +117,6 @@
     <Member Name="Label" Description="Etikett" />
     <Member Name="Link" Description="Link" />
     <Member Name="OpensInNewTab" Description="Öffnet in neuem Tab" />
-  </Type>
-  <Type Name="LinkListPartEntity" Description="Linklisten Teil" PluralDescription="Linklisten Teilen" Gender="n">
-    <Member Name="Links" Description="Links" />
-    <Member Name="RequiresTitle" Description="Erfordert Titel" />
   </Type>
   <Type Name="PanelPartEmbedded" Description="Dashboardteil">
     <Member Name="Columns" Description="Spalten" />
@@ -149,5 +152,9 @@
     <Member Name="Dashboard" Description="Dashboard" />
     <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
     <Member Name="TokenEquivalences" Description="Token-Äquivalenzen" />
+  </Type>
+  <Type Name="ToolbarMenuPartEntity" Description="Menübereich Symbolleiste" PluralDescription="Menüteile der Symbolleiste" Gender="m">
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="ToolbarMenu" Description="Toolbar-Menü" />
   </Type>
 </Translations>
