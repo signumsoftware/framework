@@ -11,8 +11,9 @@ public static class InlineImagesLogic
     public static IQueryable<HelpImageEntity> Images(this IHelpImageTarget e) =>
         As.Expression(() => Database.Query<HelpImageEntity>().Where(a => a.Target.Is(e)));
 
-    public static Regex ImgRegex = new Regex(@"<img *(?<atts>.*) */>");
-    public static Regex AttRegex = new Regex(@"(?<key>[\w\-]+) *= *""(?<value>[^""]+)""");
+    
+    public static Regex ImgRegex = new Regex(@"<img\s*(?<atts>[^>]*?)\s*/?>", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled); 
+    public static Regex AttRegex = new Regex(@"(?<key>[\w\-]+)\s*=\s*(?:(?:""(?<value>[^""]*)"")|(?:'(?<value>[^']*)'))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public static bool SynchronizeInlineImages(IHelpImageTarget entity)
     {
