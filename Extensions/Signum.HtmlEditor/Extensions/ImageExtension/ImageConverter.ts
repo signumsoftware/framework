@@ -4,7 +4,7 @@ export interface ImageInfoBase {
 }
 
 export abstract class ImageConverter<T extends object> {
-  static key: string; // must be overridden
+  //static key: string; // must be overridden
   abstract uploadData(blob: Blob): Promise<T>;
   abstract renderImage(val: T): React.ReactElement;
   abstract toElement(val: T): HTMLElement | undefined;

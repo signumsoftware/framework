@@ -1,15 +1,19 @@
 import { ImageConverter, ImageInfoBase } from "./Extensions/ImageExtension/ImageConverter";
+export namespace HtmlEditorClient {
 
-const registry = new Map<string, new () => ImageConverter<any>>();
+  type ConverterClass<T extends ImageInfoBase> = { new(): ImageConverter<T> }/* & { key: string }*/;
+  const ImageConverterRegistry = new Map<string, new () => ImageConverter<any>>();
 
-export function registerImageConverter(cls: ConverterClass<any>): void {
-  registry.set(cls.key, cls);
-}
+  export function registerImageConverter(cls: ConverterClass<any>): void {
+    ImageConverterRegistry.set(cls.name.toLowerCase(), cls);
+  }
 
-export function getImageConverter<T extends ImageInfoBase>(key: string): ImageConverter<T> {
-  const ctor = registry.get(key);
-  if (!ctor) throw new Error(`Converter not registered: ${key}`);
-  return new ctor();
+  export function getImageConverter<T extends ImageInfoBase>(key: string): ImageConverter<T> {
+    const ctor = ImageConverterRegistry.get(key.toLowerCase());
+    if (!ctor) throw new Error(`Converter not registered: ${key}`);
+    return new ctor();
+  }
+
 }
 
 

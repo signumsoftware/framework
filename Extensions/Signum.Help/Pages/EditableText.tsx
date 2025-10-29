@@ -104,7 +104,7 @@ export interface ImageInfo extends ImageInfoBase {
 
 export class InlineImageConverter implements ImageConverter<ImageInfo>{
 
-  static key = "help-image-inline"; 
+  //static key = "help-image-inline"; 
 
   pr: PropertyRoute;
   constructor() {
@@ -116,7 +116,7 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
     if (val.binaryFile) {
       img.setAttribute("data-binary-file", val.binaryFile);
       img.setAttribute("data-file-name", val.fileName || "");
-      img.setAttribute("data-converter-key", InlineImageConverter.key);
+      img.setAttribute("data-converter-key", InlineImageConverter.name);
       return img;
     }
 
@@ -135,7 +135,7 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
           maxSizeInBytes: this.pr.member!.defaultFileTypeInfo!.maxSizeInBytes ?? undefined
       });
       return ({
-          converterKey: InlineImageConverter.key,
+          converterKey: InlineImageConverter.name,
           binaryFile: att.binaryFile ?? undefined,
           fileName: att.fileName ?? undefined
       });
@@ -170,7 +170,7 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
   fromElement(element: HTMLDivElement): ImageInfo | undefined {
     if (element.tagName == "IMG") {
       return {
-        converterKey: InlineImageConverter.key,
+        converterKey: InlineImageConverter.name,
         binaryFile: element.dataset["binaryFile"],
         fileName: element.dataset["fileName"],
         inlineImageId: element.dataset["helpImageId"],

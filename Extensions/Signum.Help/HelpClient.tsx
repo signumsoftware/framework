@@ -17,7 +17,7 @@ import { Entity, isEntity } from '@framework/Signum.Entities';
 import { tasks } from '@framework/Lines';
 import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
-import { registerImageConverter } from '../Signum.HtmlEditor/HtmlEditorClient';
+import { HtmlEditorClient } from '../Signum.HtmlEditor/HtmlEditorClient';
 import { InlineImageConverter } from './Pages/EditableText';
 
 export namespace HelpClient {
@@ -37,7 +37,7 @@ export namespace HelpClient {
 
     tasks.push(taskHelpIcon);
 
-    registerImageConverter(InlineImageConverter);
+    HtmlEditorClient.registerImageConverter(InlineImageConverter);
 
   }
 

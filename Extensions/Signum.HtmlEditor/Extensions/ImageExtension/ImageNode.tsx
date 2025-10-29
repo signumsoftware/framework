@@ -1,6 +1,6 @@
 import { $applyNodeReplacement, DecoratorNode, DOMConversion, DOMConversionMap, DOMConversionOutput, DOMExportOutput, NodeKey } from "lexical";
 import { ImageConverter, ImageInfoBase } from "./ImageConverter";
-import { getImageConverter } from "../../HtmlEditorClient";
+import { HtmlEditorClient } from "../../HtmlEditorClient";
 
 export class ImageNode<T extends ImageInfoBase> extends DecoratorNode < JSX.Element > {
   constructor(private fileInfo: T, private imageConverter: ImageConverter<T>, key?: NodeKey) {
@@ -53,7 +53,7 @@ export class ImageNode<T extends ImageInfoBase> extends DecoratorNode < JSX.Elem
           priority: 1,
           conversion: (element: HTMLElement) => {
             try {
-              const converter = getImageConverter<any>(converterKey);
+              const converter = HtmlEditorClient.getImageConverter<any>(converterKey);
               const info = converter.fromElement(element);
               if (!info) return null;
               return { node: new ImageNode<any>(info, converter) };
