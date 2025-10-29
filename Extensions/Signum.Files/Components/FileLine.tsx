@@ -4,7 +4,7 @@ import { classes, Dic } from '@framework/Globals'
 import { TypeContext } from '@framework/TypeContext'
 import { OperationInfo, Type, getOperationInfo, getSymbol, getTypeInfo, tryGetOperationInfo, tryGetTypeInfo } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, getToString } from '@framework/Signum.Entities'
+import { ModifiableEntity, Lite, Entity, getToString, EntityControlMessage } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol, IFilePath, FileMessage } from '../Signum.Files'
 import { EntityBaseProps, EntityBaseController, Aprox } from '@framework/Lines/EntityBase'
 import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour, toComputerSize } from './FileDownloader'
@@ -18,6 +18,7 @@ import { FontAwesomeIcon } from '@framework/Lines'
 import { EntityOperationContext, Operations } from '@framework/Operations'
 import { getNiceTypeName } from '@framework/Operations/MultiPropertySetter'
 import { JSX } from 'react/jsx-runtime'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export { FileTypeSymbol };
 
@@ -245,7 +246,7 @@ function UploadProgress(p: { file: IFilePath }) {
   return (
     <div>
       <div>
-        {abortController && <a href="#" className="sf-line-button sf-remove" onClick={e => { e.preventDefault(); abortController.abort(); }}><FontAwesomeIcon aria-hidden={true} icon="xmark" /></a>}
+        {abortController && <LinkButton title={EntityControlMessage.Remove.niceToString()} className="sf-line-button sf-remove" onClick={e => { abortController.abort(); }}><FontAwesomeIcon icon="xmark" /></LinkButton>}
         <small>{FileMessage.Uploading01.niceToString(p.file.fileName, toComputerSize(p.file.fileLength))}</small>
       </div>
       <ProgressBar color={abortController?.signal.aborted ? "warning" : undefined} value={(p.file.__uploadingOffset == null ? null : p.file.__uploadingOffset / p.file.fileLength)} />

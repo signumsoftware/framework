@@ -14,7 +14,7 @@ export default function BigValuePart(p: { ctx: TypeContext<BigValuePartEntity> }
   const entityType = ctx.findParent(DashboardEntity)?.entityType?.model as string;
   return (
     <div >
-      <EntityLine ctx={ctx.subCtx(p => p.userQuery)} create={false} onChange={() => {
+      <EntityLine ctx={ctx.subCtx(p => p.userQuery)} mandatory={entityType ? "warning" : true} create={false} onChange={() => {
         ctx.value.valueToken = null;
         ctx.findParentCtx(DashboardEntity).frame!.entityComponent!.forceUpdate();
       }} />

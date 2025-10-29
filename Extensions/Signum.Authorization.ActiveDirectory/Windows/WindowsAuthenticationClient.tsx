@@ -61,7 +61,7 @@ export namespace WindowsAuthenticationClient {
     return (
       <div className="row mt-2">
         <div className="col-md-6 offset-md-3">
-          <button onClick={e => { e.preventDefault(); onClick(); }} className="btn btn-info">
+          <button onClick={e => { onClick(); }} className="btn btn-info">
             <FontAwesomeIcon aria-hidden={true} icon={["fab", "windows"]} /> {LoginAuthMessage.LoginWithWindowsUser.niceToString()}
           </button>
         </div>

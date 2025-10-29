@@ -11,6 +11,7 @@ import "./operationMap.css"
 import { useAPI, useSize } from '@framework/Hooks'
 import { useExpand } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 
 interface ParsedQueryString {
@@ -66,7 +67,6 @@ export default function OperationMapPage(): React.JSX.Element | null {
   const { size, setContainer } = useSize();
 
   function handleFullscreenClick(e: React.MouseEvent<any>) {
-    e.preventDefault();
 
     const tables = operationMapInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
       .toObject(a => a.key, a =>
@@ -98,9 +98,9 @@ export default function OperationMapPage(): React.JSX.Element | null {
               {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
             </span>
             &nbsp;
-            <a id="sfFullScreen" role="button" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#" title={FrameMessage.Fullscreen.niceToString()}>
+            <LinkButton id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} title={FrameMessage.Fullscreen.niceToString()}>
               <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
-            </a>
+            </LinkButton>
           </div>
         </div>
       </div>

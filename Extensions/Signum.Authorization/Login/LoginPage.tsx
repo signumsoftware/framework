@@ -1,15 +1,14 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Link } from 'react-router-dom'
 import { classes } from '@framework/Globals'
 import { ModelState, JavascriptMessage } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Authorization'
 import { AuthClient } from '../AuthClient'
-import MessageModal from '@framework/Modals/MessageModal'
 import * as AppContext from '@framework/AppContext'
 import { QueryString } from "@framework/QueryString"
 import "./Login.css"
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export interface LoginContext {
   loading: string | undefined;
@@ -40,12 +39,11 @@ function LoginPage(): React.JSX.Element {
       {LoginPage.showLoginForm == "initially_not" && showLoginForm == false &&
         <div className="row">
           <div className="col-md-6 offset-md-3 mt-2">
-            <a href="#" className="ms-1" id="sf-show-login-form" onClick={e => {
-              e.preventDefault();
+            <LinkButton title={undefined} className="ms-1" id="sf-show-login-form" onClick={e => {
               setShowLoginForm(true);
             }}>
               {LoginAuthMessage.ShowLoginForm.niceToString()}
-            </a>
+            </LinkButton>
           </div>
         </div>
       }

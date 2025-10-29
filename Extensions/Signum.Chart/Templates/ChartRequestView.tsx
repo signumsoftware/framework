@@ -25,6 +25,7 @@ import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart';
 import ChartTimeSeries from './ChartTimeSeries';
 import { DateTime } from 'luxon';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 interface ChartRequestViewProps {
   chartRequest: ChartRequestModel;
@@ -134,7 +135,6 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
   }
 
   function handleOnFullScreen(e: React.MouseEvent<any>) {
-    e.preventDefault();
     ChartClient.Encoder.chartPathPromise(p.chartRequest)
       .then(path => AppContext.navigate(path));
   }
@@ -172,9 +172,9 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
     <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
       <h2>
         <span className="sf-entity-title">{getQueryNiceName(cr.queryKey)}</span>&nbsp;
-        <a className="sf-popup-fullscreen" href="#" role="button" title={FrameMessage.Fullscreen.niceToString()} aria-label={FrameMessage.Fullscreen.niceToString()} onClick={handleOnFullScreen} >
+        <LinkButton className="sf-popup-fullscreen" title={FrameMessage.Fullscreen.niceToString()} aria-label={FrameMessage.Fullscreen.niceToString()} onClick={handleOnFullScreen} >
           <FontAwesomeIcon icon="up-right-from-square" aria-hidden={true} />
-        </a>
+        </LinkButton>
       </h2 >
       <ValidationErrors entity={cr} prefix="chartRequest" />
       <div>

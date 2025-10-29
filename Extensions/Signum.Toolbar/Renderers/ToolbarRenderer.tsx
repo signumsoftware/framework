@@ -623,8 +623,6 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
       else {
 
         return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i} onClick={e => {
-          e.preventDefault();
-          e.stopPropagation();
           config!.handleNavigateClick(e, ei, selectedEntity);
 
           if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))

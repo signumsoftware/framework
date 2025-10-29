@@ -1,20 +1,18 @@
 import * as React from 'react'
-import { Dic, classes } from '../Globals'
+import { classes } from '../Globals'
 import { Navigator, ViewPromise } from '../Navigator'
 import { Constructor } from '../Constructor'
 import { Finder } from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
-import { PropertyRoute, tryGetTypeInfos, TypeInfo, IsByAll, TypeReference, getTypeInfo, getTypeInfos, Type } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage, toLite, parseLiteList, getToString, isLite } from '../Signum.Entities'
+import { PropertyRoute, tryGetTypeInfos, TypeInfo, IsByAll, TypeReference, getTypeInfo, getTypeInfos } from '../Reflection'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, entityInfo, SelectorMessage, toLite, parseLiteList, getToString, isLite } from '../Signum.Entities'
 import { LineBaseController, LineBaseProps } from './LineBase'
 import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Basics";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FindOptionsAutocompleteConfig } from './AutoCompleteConfig'
-import { FilterOption } from '../Search'
 import { toAbsoluteUrl } from '../AppContext'
-import { To } from 'react-router'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface EntityBaseProps<V extends ModifiableEntity | Lite<Entity> | null> extends LineBaseProps<V> {
   view?: boolean;
@@ -59,27 +57,13 @@ export type AsLite<T> = NoInfer<
 
 export class EntityBaseController<P extends EntityBaseProps<V>, V extends ModifiableEntity | Lite<Entity> | null> extends LineBaseController<P, V>{
 
-  static getCreateIcon = (isInformativ: boolean = true): React.ReactElement => (
-    <FontAwesomeIcon icon="plus"{...(isInformativ ? { title: EntityControlMessage.Create.niceToString() } : { "aria-hidden": true, focusable: false, role: "img" })}/>
-  );
-  static getFindIcon = (isInformativ: boolean = true): React.ReactElement => (
-    <FontAwesomeIcon icon="magnifying-glass"{...(isInformativ ? { title: EntityControlMessage.Find.niceToString() } : { "aria-hidden": true, focusable: false, role: "img" })} />
-  );
-  static getRemoveIcon = (isInformativ: boolean = true): React.ReactElement => (
-    <FontAwesomeIcon icon="xmark"{...(isInformativ ? { title: EntityControlMessage.Remove.niceToString() } : { "aria-hidden": true, focusable: false, role: "img" })} />
-  );
-  static getTrashIcon = (isInformativ: boolean = true): React.ReactElement => (
-    <FontAwesomeIcon icon="trash-can"{...(isInformativ ? { title: EntityControlMessage.Remove.niceToString() } : { "aria-hidden": true, focusable: false, role: "img" })} />
-  );
-  static getViewIcon = (isInformativ: boolean = true): React.ReactElement => (
-    <FontAwesomeIcon icon="arrow-right"{...(isInformativ ? { title: EntityControlMessage.View.niceToString() } : { "aria-hidden": true, focusable: false, role: "img" })} />
-  );
-  static getMoveIcon = (isInformativ: boolean = true): React.ReactElement => (
-    <FontAwesomeIcon icon="bars"{...(isInformativ ? { title: EntityControlMessage.Move.niceToString() } : { "aria-hidden": true, focusable: false, role: "img" })} />
-  );
-  static getPasteIcon = (isInformativ: boolean = true): React.ReactElement => (
-    <FontAwesomeIcon icon="clipboard"{...(isInformativ ? { title: EntityControlMessage.Paste.niceToString() } : { "aria-hidden": true, focusable: false, role: "img" })} />
-  );
+  static getCreateIcon = (): React.ReactElement => <FontAwesomeIcon icon="plus" aria-hidden />;
+  static getFindIcon = (): React.ReactElement => <FontAwesomeIcon icon="magnifying-glass" aria-hidden />;
+  static getRemoveIcon = (): React.ReactElement => <FontAwesomeIcon icon="xmark" aria-hidden />;
+  static getTrashIcon = (): React.ReactElement => <FontAwesomeIcon icon="trash-can" aria-hidden />;
+  static getViewIcon = (): React.ReactElement => <FontAwesomeIcon icon="arrow-right" aria-hidden />;
+  static getMoveIcon = (): React.ReactElement => <FontAwesomeIcon icon="bars" aria-hidden />;
+  static getPasteIcon = (): React.ReactElement => <FontAwesomeIcon icon="clipboard" aria-hidden />;
 
   static hasChildrens(element: React.ReactElement): any {
      
@@ -217,16 +201,16 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     }
   }
 
-  renderViewButton(btn: boolean, iconIsInformative: boolean = true): React.ReactElement | undefined {
+  renderViewButton(btn: boolean): React.ReactElement | undefined {
 
     if (!this.props.view)
       return undefined;
     return (
-      <a href="#" className={classes("sf-line-button", "sf-view", btn ?  "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-view", btn ?  "input-group-text" : undefined)}
         onClick={this.handleViewClick}
-        aria-label={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() + " " + this.props.label : undefined}>
-        {EntityBaseController.getViewIcon(iconIsInformative)}
-      </a>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() + " " + this.props.label : undefined}>
+        {EntityBaseController.getViewIcon()}
+      </LinkButton>
     );
   }
 
@@ -338,29 +322,29 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       .then(text => this.paste(text));
   }
 
-  renderCreateButton(btn: boolean, createMessage?: string, iconIsInformative: boolean = true): React.ReactElement | undefined {
+  renderCreateButton(btn: boolean, createMessage?: string): React.ReactElement | undefined {
     if (!this.props.create || this.props.ctx.readOnly)
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-create", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-create", btn ? "input-group-text" : undefined)}
         onClick={this.handleCreateClick}
-        aria-label={this.props.ctx.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() + " " + this.props.label : undefined}>
-        {EntityBaseController.getCreateIcon(iconIsInformative)}
-      </a>
+        title={this.props.ctx.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() + " " + this.props.label : undefined}>
+        {EntityBaseController.getCreateIcon()}
+      </LinkButton>
     );
   }
 
-  renderPasteButton(btn: boolean, iconIsInformative: boolean = true): React.ReactElement | undefined {
+  renderPasteButton(btn: boolean): React.ReactElement | undefined {
     if (!this.props.paste || this.props.ctx.readOnly)
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-paste", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-paste", btn ? "input-group-text" : undefined)}
         onClick={this.handlePasteClick}
-        aria-label={EntityControlMessage.Paste.niceToString()}>
-        {EntityBaseController.getPasteIcon(iconIsInformative)}
-      </a>
+        title={EntityControlMessage.Paste.niceToString()}>
+        {EntityBaseController.getPasteIcon()}
+      </LinkButton>
     );
   }
 
@@ -408,16 +392,16 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     }
   }
 
-  renderFindButton(btn: boolean, iconIsInformative: boolean = true): React.ReactElement | undefined {
+  renderFindButton(btn: boolean): React.ReactElement | undefined {
     if (!this.props.find || this.props.ctx.readOnly)
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
         onClick={this.handleFindClick}
-        aria-label={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() + " " + this.props.label : undefined}>
-        {EntityBaseController.getFindIcon(iconIsInformative)}
-      </a>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() + " " + this.props.label : undefined}>
+        {EntityBaseController.getFindIcon()}
+      </LinkButton>
     );
   }
 
@@ -434,16 +418,16 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       });
   };
 
-  renderRemoveButton(btn: boolean, iconIsInformative: boolean = true): React.ReactElement | undefined {
+  renderRemoveButton(btn: boolean): React.ReactElement | undefined {
     if (!this.props.remove || this.props.ctx.readOnly)
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
         onClick={this.handleRemoveClick}
-        aria-label={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() + "" + this.props.label : undefined}>
-        {EntityBaseController.getRemoveIcon(iconIsInformative)}
-      </a>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() + "" + this.props.label : undefined}>
+        {EntityBaseController.getRemoveIcon()}
+      </LinkButton>
     );
   }
 }

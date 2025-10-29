@@ -7,7 +7,7 @@ import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { SearchControl } from '@framework/Search'
 import { ExceptionEntity } from '@framework/Signum.Basics'
 import { CacheMessage } from './Signum.Caching'
-import { WCAGRow, AccessibleTable } from '../../Signum/React/Basics/AccessibleTable'
+import { AccessibleRow, AccessibleTable } from '../../Signum/React/Basics/AccessibleTable'
 
 export default function CacheStatisticsPage(): React.JSX.Element {
 
@@ -136,7 +136,7 @@ export default function CacheStatisticsPage(): React.JSX.Element {
 
     return (
       <>
-        <WCAGRow style={{ opacity: opacity }} key={table.tableName}>
+        <AccessibleRow style={{ opacity: opacity }} key={table.tableName}>
           <td> {Array.repeat(depth, " → ").join("") + table.tableName}</td >
           <td> {table.typeName} </td>
           <td> {table.count != undefined ? table.count.toString() : `-- ${CacheMessage.NotLoaded.niceToString()} --`} </td>
@@ -144,7 +144,7 @@ export default function CacheStatisticsPage(): React.JSX.Element {
           <td> {table.invalidations}</td>
           <td> {table.loads}</td>
           <td> {table.sumLoadTime} </td>
-        </WCAGRow>
+        </AccessibleRow>
         {table.subTables && table.subTables.map(st => <RenderTree table={st} depth={depth+1} />)}
       </>
     );

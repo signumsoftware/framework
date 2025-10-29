@@ -5,6 +5,7 @@ import { ResultTable, Pagination, PaginationMode, PaginateMath } from '../FindOp
 import { SearchMessage } from '../Signum.Entities'
 import { toNumberFormat } from '../Reflection'
 import "./PaginationSelector.css"
+import { LinkButton } from '../Basics/LinkButton'
 
 interface PaginationSelectorProps {
   resultTable?: ResultTable;
@@ -32,7 +33,7 @@ export function PaginationSelector(p: PaginationSelectorProps): React.ReactEleme
 
     const pagination = p.pagination;
 
-    var numberFormat = toNumberFormat("0") 
+    var numberFormat = toNumberFormat("0")
 
     switch (pagination.mode) {
 
@@ -72,7 +73,7 @@ export function PaginationSelector(p: PaginationSelectorProps): React.ReactEleme
     }
   }
 
-  function handleMode(e: React.ChangeEvent<HTMLSelectElement>){
+  function handleMode(e: React.ChangeEvent<HTMLSelectElement>) {
 
     const mode = e.currentTarget.value as any as PaginationMode
 
@@ -108,37 +109,37 @@ export function PaginationSelector(p: PaginationSelectorProps): React.ReactEleme
 
     return (
       <div className="sf-pagination-center">
-          {(p.pagination.mode == "All" ? SearchMessage.PaginationAll_0Elements :
-            p.pagination.mode == "Firsts" ? SearchMessage.PaginationFirst_01Elements :
-              SearchMessage.PaginationPages_0Of01lements)
-            .niceToString().formatHtml(
+        {(p.pagination.mode == "All" ? SearchMessage.PaginationAll_0Elements :
+          p.pagination.mode == "Firsts" ? SearchMessage.PaginationFirst_01Elements :
+            SearchMessage.PaginationPages_0Of01lements)
+          .niceToString().formatHtml(
 
-              <select
-                value={p.pagination.mode}
-                onChange={handleMode}
-                className="form-select form-select-xs w-auto sf-pagination-mode mx-1"
-                aria-label={SearchMessage.PaginationMode.niceToString()}
-                aria-required="false"
-                aria-readonly="false"
-                aria-disabled="false">
-                {PaginationSelector.onGetPaginationModes().map(mode =>
-                    <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
-                </select>,
+            <select
+              value={p.pagination.mode}
+              onChange={handleMode}
+              className="form-select form-select-xs w-auto sf-pagination-mode mx-1"
+              aria-label={SearchMessage.PaginationMode.niceToString()}
+              aria-required="false"
+              aria-readonly="false"
+              aria-disabled="false">
+              {PaginationSelector.onGetPaginationModes().map(mode =>
+                <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
+            </select>,
 
-                p.pagination.mode != "All" &&
-                <select
-                    value={p.pagination.elementsPerPage!.toString()}
-                    onChange={handleElementsPerPage}
-                    className="form-select form-select-xs w-auto sf-elements-per-page mx-1"
-                    aria-label={SearchMessage.NumberOfElementsForPagination.niceToString()}
-                    aria-required="false"
-                    aria-readonly="false"
-                    aria-disabled="false">
-                  {PaginationSelector.onGetPaginationSizes().map(elem =>
-                    <option key={elem} value={elem.toString()}>{elem}</option>)}
-                </select>
-              )
-          }
+            p.pagination.mode != "All" &&
+            <select
+              value={p.pagination.elementsPerPage!.toString()}
+              onChange={handleElementsPerPage}
+              className="form-select form-select-xs w-auto sf-elements-per-page mx-1"
+              aria-label={SearchMessage.NumberOfElementsForPagination.niceToString()}
+              aria-required="false"
+              aria-readonly="false"
+              aria-disabled="false">
+              {PaginationSelector.onGetPaginationSizes().map(elem =>
+                <option key={elem} value={elem.toString()}>{elem}</option>)}
+            </select>
+          )
+        }
       </div>
     );
   }
@@ -219,9 +220,9 @@ export function PaginationComponent(p: PaginationComponentProps): React.ReactEle
         {
           mode != undefined ?
             <span className="page-link">{text}</span> :
-            <a href="#" className="page-link" onClick={e => handlePageClicked(e, page)}>
+            <LinkButton title={undefined} className="page-link" onClick={e => handlePageClicked(e, page)}>
               {text}
-            </a>
+            </LinkButton>
         }
       </li>
     );

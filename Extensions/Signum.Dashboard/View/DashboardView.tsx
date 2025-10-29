@@ -14,6 +14,7 @@ import { DashboardController } from './DashboardFilterController'
 import { CachedQueryJS } from '../CachedQueryExecutor'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder'
 import { Navigator } from '@framework/Navigator'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, embedded?: boolean, deps?: React.DependencyList; reload: () => void; hideEditButton?: boolean }): React.JSX.Element {
 
@@ -251,11 +252,11 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
       >
 
         {renderer.handleTitleClick == undefined ? title :
-          <a className="sf-pointer"
+          <LinkButton title={undefined} className="sf-pointer"
             style={{ color: part.titleColor ?? (part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined), textDecoration: "none" }}
-            onClick={e => { e.preventDefault(); renderer.handleTitleClick!(content, lite, customDataRef, e); }}>
+            onClick={e => { renderer.handleTitleClick!(content, lite, customDataRef, e); }}>
           {title}
-          </a>
+          </LinkButton>
         }
         {
           dashboardFilter && <span className="badge bg-tertiary text-dark border ms-2 sf-filter-pill">
@@ -268,9 +269,9 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
           {renderer.customTitleButtons?.(content, lite, customDataRef)}
           {
             renderer.handleEditClick &&
-            <a role="button" tabIndex={0} className="sf-pointer sf-hide" onClick={e => { e.preventDefault(); renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }} title={DashboardMessage.Edit.niceToString()}>
+            <LinkButton className="sf-pointer sf-hide" onClick={e => { renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }} title={DashboardMessage.Edit.niceToString()}>
               <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" className="me-1" />
-            </a>
+            </LinkButton>
           }
         </div>
       </div>

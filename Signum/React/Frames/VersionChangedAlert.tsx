@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './VersionChangedAlert.css'
 import { useForceUpdate } from '../Hooks';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { LinkButton } from '../Basics/LinkButton';
 
 export const VersionChangedAlert: {
   (p: { blink?: boolean }): React.ReactElement | null;
@@ -32,7 +33,7 @@ export const VersionChangedAlert: {
     <div className={classes("alert alert-warning", "version-alert", (p.blink ?? true) && "blink")} style={{ textAlign: "center" }}>
       <FontAwesomeIcon icon="rotate" aria-hidden={true} />&nbsp;
       {ConnectionMessage.ANewVersionHasJustBeenDeployedSaveChangesAnd0.niceToString()
-        .formatHtml(<a href="#" role="button" tabIndex={0} onClick={handleRefresh}>{ConnectionMessage.Refresh.niceToString()}</a>)}
+        .formatHtml(<LinkButton title={undefined} onClick={handleRefresh}>{ConnectionMessage.Refresh.niceToString()}</LinkButton>)}
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { KeyNames } from '../Components'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
 import { AutoLine } from './AutoLine'
+import { LinkButton } from '../Basics/LinkButton'
 
 
 export interface EntityTableProps<V extends ModifiableEntity, RS> extends EntityListBaseProps<V> {
@@ -292,14 +293,13 @@ export function EntityTable<V extends ModifiableEntity, RS>(props: EntityTablePr
                 showCreateRow && <tr>
                   <td colSpan={1 + p.columns!.length} className={isEmpty ? "border-0" : undefined}>
                       {typeof p.createAsLink == "function" ? p.createAsLink(c) :
-                        <a href="#"
+                        <LinkButton
                           title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
                           className="sf-line-button sf-create"
-                          role="button"
                           tabIndex={0}
                           onClick={c.handleCreateClick}>
                           <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create" />&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
-                      </a>}
+                      </LinkButton>}
                   </td>
                 </tr>
               }
@@ -377,27 +377,27 @@ export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRow
       {p.firstColumnVisible && <td style={{ verticalAlign: "middle" }}>
         <div className="item-group">
           {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
-          {p.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
+          {p.onRemove && <LinkButton className={classes("sf-line-button", "sf-remove")}
             onClick={p.onRemove}
             title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
             {EntityBaseController.getRemoveIcon()}
-          </a>}
+          </LinkButton>}
           &nbsp;
-          {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+          {drag && <LinkButton className={classes("sf-line-button", "sf-move")} onClick={e => { e.stopPropagation(); }}
             draggable={true}
             onKeyDown={drag.onKeyDown}
             onDragStart={drag.onDragStart}
             onDragEnd={drag.onDragEnd}
             title={drag.title}>
             {EntityBaseController.getMoveIcon()}
-          </a>}
+          </LinkButton>}
           {p.move?.renderMoveUp()}
           {p.move?.renderMoveDown()}
-          {p.onView && <a href="#" className={classes("sf-line-button", "sf-view")}
+          {p.onView && <LinkButton className={classes("sf-line-button", "sf-view")}
             onClick={p.onView}
             title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
             {EntityBaseController.getViewIcon()}
-          </a>}
+          </LinkButton>}
           {p.afterView?.(p.ctx, rowHandle, rowState)}
         </div>
       </td>}      

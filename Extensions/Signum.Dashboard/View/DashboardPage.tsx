@@ -14,6 +14,7 @@ import { DashboardClient } from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 import { OverlayTrigger, Popover } from "react-bootstrap";
 import { useTitle } from '@framework/AppContext'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function DashboardPage(): React.JSX.Element {
   const location = useLocation();
@@ -98,7 +99,7 @@ export function HelpIcon(): React.JSX.Element {
 
   return (
     <OverlayTrigger trigger={["hover", "focus"]} placement="bottom-start" overlay={popover} >
-      <a href="#" className="mx-2"><FontAwesomeIcon icon="gamepad" title="syntax" className="me-1" />Interactive Dashboard</a>
+      <LinkButton className="mx-2" title={undefined}><FontAwesomeIcon icon="gamepad" title="syntax" className="me-1" />{DashboardMessage.InteractiveDashboard.niceToString()}</LinkButton>
     </OverlayTrigger>
   );
 

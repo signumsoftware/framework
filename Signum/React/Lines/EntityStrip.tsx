@@ -15,6 +15,7 @@ import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
 import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { LinkButton } from '../Basics/LinkButton'
 
 
 export interface EntityStripProps<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseProps<V> {
@@ -25,7 +26,6 @@ export interface EntityStripProps<V extends ModifiableEntity | Lite<Entity>> ext
   showType?: boolean;
   onItemHtmlAttributes?: (item: NoInfer<V>) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   onItemContainerHtmlAttributes?: (item: NoInfer<V>) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  avoidDuplicates?: boolean;
   groupElementsBy?: (e: V) => string;
   renderGroupTitle?: (key: string, i?: number) => React.ReactElement;
   inputAttributes?: React.InputHTMLAttributes<HTMLInputElement>;
@@ -69,12 +69,12 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
 
     }
 
-    function withAvoidDuplicates(fo: FindOptions,  typeName: string): FindOptions {
+    function withAvoidDuplicates(fo: FindOptions, typeName: string): FindOptions {
 
       const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
 
       return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible, frozen: true }] };
-      }
+    }
   }
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
@@ -336,12 +336,11 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
   function removeIcon() {
     return p.onRemove &&
       <span>
-        <a className="sf-line-button sf-remove"
+        <LinkButton className="sf-line-button sf-remove"
           onClick={p.onRemove}
-          href="#"
           title={p.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
           {EntityBaseController.getRemoveIcon()}
-        </a>
+        </LinkButton>
       </span>
   }
 

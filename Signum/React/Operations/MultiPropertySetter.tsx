@@ -24,6 +24,7 @@ import { CollectionMessage } from '../Signum.External'
 import { EnumLine } from '../Lines/EnumLine'
 import { AutoLine } from '../Lines/AutoLine'
 import SelectorModal from '../SelectorModal'
+import { LinkButton } from '../Basics/LinkButton'
 
 
 interface MultiPropertySetterModalProps extends IModalProps<boolean | undefined> {
@@ -133,14 +134,12 @@ export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { 
         {
           <tr className="sf-property-create">
             <td colSpan={4}>
-              <a href="#"
+              <LinkButton
                 title={StyleContext.default.titleLabels ? addElement : undefined}
                 className="sf-line-button sf-create sf-create-condition"
-                role="button"
-                tabIndex={0}
                 onClick={e => handleNewPropertySetter(e)}>
                 <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create me-1" />{addElement}
-              </a>
+              </LinkButton>
             </td>
           </tr>
         }
@@ -274,14 +273,12 @@ export function PropertySetterComponent(p: PropertySetterComponentProps): React.
     <>
       <tr className="sf-property-setter">
         <td>
-          {<a href="#"
+          {<LinkButton
             title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
             className="sf-line-button sf-remove"
-            role="button"
-            tabIndex={0}
             onClick={handleDeleteSetter}>
             <FontAwesomeIcon aria-hidden={true} icon="xmark" />
-          </a>}
+          </LinkButton>}
         </td>
         <td>
           <div className="rw-widget-xs">

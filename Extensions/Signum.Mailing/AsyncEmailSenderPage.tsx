@@ -25,12 +25,10 @@ export default function AsyncEmailSenderPage(): React.JSX.Element {
   }, [tick]);
 
   function handleStop(e: React.MouseEvent<any>) {
-    e.preventDefault();
     MailingClient.API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
-    e.preventDefault();
     MailingClient.API.start().then(() => reloadState());
   }
 

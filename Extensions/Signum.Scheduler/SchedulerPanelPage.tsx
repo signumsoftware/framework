@@ -33,12 +33,10 @@ export default function SchedulerPanelPage(): React.JSX.Element {
  
 
   function handleStop(e: React.MouseEvent<any>) {
-    e.preventDefault();
     SchedulerClient.API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
-    e.preventDefault();
     SchedulerClient.API.start().then(() => reloadState());
   }
 

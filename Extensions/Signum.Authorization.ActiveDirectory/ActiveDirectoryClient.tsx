@@ -86,7 +86,6 @@ export namespace ActiveDirectoryClient {
             order: -1,
             button: <button className="btn btn-info ms-2"
               onClick={e => {
-                e.preventDefault();
                 var promise = AutoLineModal.show({
                   type: { name: "string" },
                   modalSize: "md",

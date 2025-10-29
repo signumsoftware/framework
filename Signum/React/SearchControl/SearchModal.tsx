@@ -14,6 +14,7 @@ import SearchControlLoaded from './SearchControlLoaded';
 import MessageModal from '../Modals/MessageModal';
 import { BsSize } from '../Components';
 import { DomUtils } from '../Globals';
+import { LinkButton } from '../Basics/LinkButton';
 
 interface SearchModalProps extends IModalProps<{ rows: ResultRow[], searchControl: SearchControlLoaded } | undefined> {
   findOptions: FindOptions;
@@ -162,14 +163,11 @@ function SearchModal(p: SearchModalProps): React.ReactElement {
           {p.title}
           &nbsp;
         </span>
-        <a className="sf-popup-fullscreen"
-          href="#"
-          role="button"
-          tabIndex={0}
+        <LinkButton className="sf-popup-fullscreen"
           title={FrameMessage.Fullscreen.niceToString()}
-          onClick={(e) => { e.preventDefault(); searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e); }}>
+          onClick={(e) => { searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e); }}>
           <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
-        </a>
+        </LinkButton>
         {p.message && <>
           <br />
           <small className="sf-type-nice-name text-muted"> {p.message}</small>

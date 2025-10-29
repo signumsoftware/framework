@@ -10,6 +10,7 @@ import "./Files.css"
 import { QueryString } from '@framework/QueryString'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { TypeContext } from '@framework/Lines'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export type DownloadBehaviour = "SaveAs" | "View" | "ViewOrSave" | "None";
 
@@ -143,14 +144,14 @@ export function FileDownloader(p: FileDownloaderProps): React.JSX.Element {
         {children}
       </a>
       {p.download == "ViewOrSave" && enabled &&
-        <a href="#"
-          className="sf-view sf-line-button"          
+        <LinkButton 
+          title={EntityControlMessage.Download.niceToString()}
+          className="sf-view sf-line-button ms-1"          
           onClick={e => {
-            e.preventDefault();
             handleOnClick(e, true);
           }}>
-          <FontAwesomeIcon className="ms-1 sf-pointer" icon={"download"} title={EntityControlMessage.Download.niceToString()}/>
-        </a>
+          <FontAwesomeIcon icon={"download"}/>
+        </LinkButton>
       }
     </div>
   );
@@ -203,14 +204,12 @@ export function downloadFile(file: IFilePath & ModifiableEntity): Promise<Respon
 
 export function downloadUrl(e: React.MouseEvent<any>, url: string): void {
 
-  e.preventDefault();
   Services.ajaxGetRaw({ url: url })
     .then(resp => Services.saveFile(resp));
 };
 
 export function viewUrl(e: React.MouseEvent<any>, url: string): void {
 
-  e.preventDefault();
   const win = window.open();
   if (!win)
     return;
@@ -225,7 +224,6 @@ export function viewUrl(e: React.MouseEvent<any>, url: string): void {
 }
 
 function downloadBase64(e: React.MouseEvent<any>, binaryFile: string, fileName: string) {
-  e.preventDefault();
 
   const blob = Services.b64toBlob(binaryFile);
 
@@ -233,7 +231,6 @@ function downloadBase64(e: React.MouseEvent<any>, binaryFile: string, fileName: 
 };
 
 function viewBase64(e: React.MouseEvent<any>, binaryFile: string, fileName: string) {
-  e.preventDefault();
 
   const info = FilesClient.extensionInfo[fileName.tryAfterLast(".")?.toLocaleLowerCase()!];
 

@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { EntityControlMessage, newMListElement } from '@framework/Signum.Entities'
 import { useForceUpdate } from '../../../Signum/React/Hooks'
 import ErrorModal from '@framework/Modals/ErrorModal'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function HealthCheckPart(p: { ctx: TypeContext<HealthCheckPartEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -16,19 +17,16 @@ export default function HealthCheckPart(p: { ctx: TypeContext<HealthCheckPartEnt
     <div>
       <EntityTable ctx={ctx.subCtx(p => p.items)} avoidFieldSet="h6" createAsLink={c =>
         <div>
-          <a href="#" title={c.props.ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
+          <LinkButton title={c.props.ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
             className="sf-line-button sf-create"
-            role="button"
             onClick={c.handleCreateClick}>
             <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
-          </a>
+          </LinkButton>
 
-          <a href="#"
-            role="button"
+          <LinkButton
+            title={undefined}
             className="sf-line-button sf-create ms-4"
             onClick={async e => {
-
-              e.preventDefault();
               var clipboard = await navigator.clipboard.readText();
               var data = clipboard.split('$#$');
               if (data.length != 3) {
@@ -40,7 +38,7 @@ export default function HealthCheckPart(p: { ctx: TypeContext<HealthCheckPartEnt
               forceUpdate();
             }}>
             <FontAwesomeIcon aria-hidden={true} icon="heart-pulse" color="gray" /> Paste Health Check Link
-          </a>
+          </LinkButton>
         </div>
 
       } />

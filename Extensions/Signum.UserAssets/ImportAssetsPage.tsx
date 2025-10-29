@@ -9,10 +9,11 @@ import { useForceUpdate } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 import { ChangeEvent, EntityLine, EntityTable, PropertyRoute, AutoLine } from '@framework/Lines'
 import { EntityLink } from '@framework/Search'
-import { getToString, is, liteKey, liteKeyLong, MList } from '@framework/Signum.Entities'
+import { EntityControlMessage, getToString, is, liteKey, liteKeyLong, MList } from '@framework/Signum.Entities'
 import SelectorModal from '@framework/SelectorModal'
 import MessageModal from '@framework/Modals/MessageModal'
 import { AccessibleTable } from '../../Signum/React/Basics/AccessibleTable'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function ImportAssetsPage(): React.JSX.Element {
 
@@ -136,11 +137,9 @@ export default function ImportAssetsPage(): React.JSX.Element {
                     </td>
                     <td>
                       {ea.customResolution && (
-                        <a
-                          role="button"
-                          href="#"
+                        <LinkButton
+                          title={undefined}
                           onClick={e => {
-                            e.preventDefault();
                             Navigator.view(ea.customResolution!).then(cr => {
                               if (cr != null) {
                                 ea.customResolution = cr;
@@ -149,7 +148,7 @@ export default function ImportAssetsPage(): React.JSX.Element {
                             });
                           }}>
                           {getToString(ea.customResolution)}
-                        </a>
+                        </LinkButton>
                       )}
                     </td>
                   </tr>
@@ -218,5 +217,6 @@ function EntityLineSameType(p: { ctx: TypeContext<LiteConflictEmbedded>, onChang
       { isLite: true, name: IsByAll }
 
   return <EntityLine ctx={p.ctx.subCtx(a => a.to)} type={type} onChange={p.onChange}
-    helpText={!validPrType && !avoidLastType && <span><a href="#" onClick={e => { e.preventDefault(); setAvoidLastType(true) }}><FontAwesomeIcon icon="xmark" /></a> {UserAssetMessage.AssumeIs.niceToString()} <code>{p.ctx.value.from.EntityType}</code></span >} />;
+    helpText={!validPrType && !avoidLastType && <span><LinkButton title={EntityControlMessage.Remove.niceToString()} onClick={e => { setAvoidLastType(true) }}>
+    <FontAwesomeIcon icon="xmark" /></LinkButton> {UserAssetMessage.AssumeIs.niceToString()} <code>{p.ctx.value.from.EntityType}</code></span >} />;
 }

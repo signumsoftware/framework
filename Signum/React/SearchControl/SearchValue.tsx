@@ -16,6 +16,7 @@ import { TypeBadge } from '../Lines/AutoCompleteConfig'
 import { toAbsoluteUrl } from '../AppContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { TimeMachineColors } from '../Lines/TimeMachineIcon'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface SearchValueProps {
   ctx?: StyleContext;
@@ -302,10 +303,10 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
 
     if (p.isLink) {
       return (
-        <a id={p.id} className={className} onClick={handleClick} href="#" style={p.customStyle} {...htmlAttrs}>
+        <LinkButton id={p.id} title={undefined} className={className} onClick={handleClick} style={p.customStyle} {...htmlAttrs}>
           {!p.avoidRenderTimeMachineIcon && renderTimeMachineIcon(controller.hasHistoryChanges, `translate(-100%, -80%)`)}
           {renderValue()}
-        </a>
+        </LinkButton>
       );
     }
 

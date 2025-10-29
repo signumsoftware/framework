@@ -4,6 +4,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import "./AuthAdmin.css"
 import { classes } from '@framework/Globals';
 import { AuthAdminMessage } from './Signum.Authorization.Rules';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 interface ColorRadioProps {
   checked: boolean;
@@ -16,21 +17,20 @@ interface ColorRadioProps {
 
 export function ColorRadio(p : ColorRadioProps): React.JSX.Element{
   return (
-    <a
+    <LinkButton
       title={p.title}
-      role="button"
-      tabIndex={0}
+      role="radio"
       onKeyDown={e => {
         if (!p.readOnly && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
           p.onClicked(e as any);
         }
       }}
-      onClick={e => { e.preventDefault(); !p.readOnly && p.onClicked(e); }}
+      onClick={e => { !p.readOnly && p.onClicked(e); }}
       className={classes("sf-auth-chooser", p.readOnly && "sf-not-allowed")}
       style={{ color: p.checked ? p.color : "var(--bs-secondary-text)" }}>
       <FontAwesomeIcon aria-hidden={true} icon={p.icon ?? ["far", (p.checked ? "circle-dot" : "circle")]!} />
-    </a>
+    </LinkButton>
   );
 }
 
@@ -40,7 +40,6 @@ export function GrayCheckbox(p : { checked: boolean, onUnchecked: () => void, re
       className={classes("sf-auth-checkbox", p.readOnly && "sf-not-allowed")}  
       role="checkbox"
       aria-checked={p.checked}
-      tabIndex={p.readOnly ? -1 : 0}
       onKeyDown={e => {
         if (!p.readOnly && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();

@@ -119,12 +119,10 @@ export namespace UserQueryClient {
       getQueryNames: c => [c.userQuery?.query].notNull(),
       handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
         (c, e, cdRef, ev) => {
-          ev.preventDefault();
           return Navigator.view(c.userQuery!).then(uq => Boolean(uq));
         },
       handleTitleClick:
         (c, e, cdRef, ev) => {
-          ev.preventDefault();
           ev.persist();
           const handler = cdRef.current as UserQueryPartHandler;
           AppContext.pushOrOpenInTab(Finder.findOptionsPath(handler.findOptions, { userQuery: liteKey(toLite(c.userQuery!)) }), ev);
