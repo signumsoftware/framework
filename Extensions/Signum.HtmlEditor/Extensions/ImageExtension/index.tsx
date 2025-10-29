@@ -1,10 +1,10 @@
 import { $getRoot, LexicalEditor } from "lexical";
 import { HtmlEditorController } from "../../HtmlEditorController";
 import { HtmlEditorExtension, LexicalConfigNode, OptionalCallback } from "../types";
-import { ImageConverter } from "./ImageConverter";
+import { ImageConverter, ImageInfoBase } from "./ImageConverter";
 import { $createImageNode, ImageNode } from "./ImageNode";
 
-export class ImageExtension<T extends object = {}> implements HtmlEditorExtension {
+export class ImageExtension<T extends ImageInfoBase> implements HtmlEditorExtension {
   constructor(public imageConverter: ImageConverter<T>) {}
 
   registerExtension(controller: HtmlEditorController): OptionalCallback {
@@ -49,26 +49,38 @@ export class ImageExtension<T extends object = {}> implements HtmlEditorExtensio
   
   }
 
-  async insertImageNodes(files: FileList, editor: LexicalEditor, imageConverter: ImageConverter<T>): Promise<void> {
-    const uploadPromises = Array.from(files).filter(file => file.type.startsWith("image/")).map(file => {
-      try {
-        return imageConverter.uploadData(file)
-      } catch (error) {
-        console.error("Image uploade failed.", error)
-        return null;
+  async insertImageNodes<T extends ImageInfoBase>(
+    files: FileList,
+    editor: LexicalEditor,
+    imageConverter: ImageConverter<T>
+  ): Promise<void> {
+
+    const uploadPromises: Promise<T>[] = Array.from(files)
+      .filter(file => file.type.startsWith("image/"))
+      .map(async (file) => {
+        try {
+          return await imageConverter.uploadData(file);
+        } catch (error) {
+          console.error("Image upload failed.", error);
+          throw error;
+        }
+      });
+
+    const uploadedFiles = await Promise.allSettled(uploadPromises);
+    const successfulFiles: T[] = uploadedFiles
+      .filter((r): r is PromiseFulfilledResult<Awaited<T>> => r.status === "fulfilled")
+      .map(r => r.value);
+
+    if (!successfulFiles.length) return;
+
+    editor.update(() => {
+      for (const file of successfulFiles) {
+        const imageNode = $createImageNode(file, imageConverter);
+        $getRoot().append(imageNode);
       }
     });
-  
-    const uploadedFiles = (await Promise.all(uploadPromises)).filter(v => v !== null);
-    if(!uploadedFiles.length) return;
-  
-    editor.update(() => {
-      uploadedFiles.forEach(file => {
-        const imageNode = $createImageNode(file, imageConverter);
-          $getRoot().append(imageNode);
-      })
-    });
   }
+
 
   replaceImagePlaceholders(controller: HtmlEditorController): void {
     const attachments = (() => {
@@ -96,8 +108,8 @@ export class ImageExtension<T extends object = {}> implements HtmlEditorExtensio
           
           if(node.getType() === "text" && isImagePlaceholderRegex(text)) {
             const attachmentId = extractAttachmentId(text);
-            if(attachmentId && !attachments.includes(attachmentId)) return;
-            node.replace($createImageNode({ attachmentId } as object, this.imageConverter));
+            if (attachmentId && !attachments.includes(attachmentId)) return;
+            node.replace($createImageNode({ attachmentId } as ImageInfoBase, this.imageConverter));
             hasUpdatedNodes = true;
           }
       });

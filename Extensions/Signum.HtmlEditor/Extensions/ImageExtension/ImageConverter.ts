@@ -1,7 +1,12 @@
+export interface ImageInfoBase {
+  converterKey: string;
+  attachmentId?: string;
+}
 
-export interface ImageConverter<T extends object> {
-  uploadData(blob: Blob): Promise<T>;
-  renderImage(val: T): React.ReactElement;
-  toElement(val: T): HTMLElement | undefined;
-  fromElement(val: HTMLElement): T | undefined;
+export abstract class ImageConverter<T extends object> {
+  static key: string; // must be overridden
+  abstract uploadData(blob: Blob): Promise<T>;
+  abstract renderImage(val: T): React.ReactElement;
+  abstract toElement(val: T): HTMLElement | undefined;
+  abstract fromElement(val: HTMLElement): T | undefined;
 }
