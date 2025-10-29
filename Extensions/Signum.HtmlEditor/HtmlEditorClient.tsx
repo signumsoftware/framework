@@ -1,4 +1,3 @@
-import { ImageConverter, ImageInfoBase } from "./Extensions/ImageExtension/ImageConverter";
 export namespace HtmlEditorClient {
 
   type ConverterClass<T extends ImageInfoBase> = { new(): ImageConverter<T> }/* & { key: string }*/;
@@ -16,4 +15,16 @@ export namespace HtmlEditorClient {
 
 }
 
+export interface ImageInfoBase {
+  converterKey: string;
+  attachmentId?: string;
+}
 
+export abstract class ImageConverter<T extends object> {
+  //key removed and class name is used as key
+  //static key: string; // must be overridden
+  abstract uploadData(blob: Blob): Promise<T>;
+  abstract renderImage(val: T): React.ReactElement;
+  abstract toElement(val: T): HTMLElement | undefined;
+  abstract fromElement(val: HTMLElement): T | undefined;
+}

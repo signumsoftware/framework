@@ -14,7 +14,7 @@ import { FileImage } from '../../Signum.Files/Components/FileImage';
 import { toFileEntity } from '../../Signum.Files/Components/FileUploader';
 import { ListExtension } from '../../Signum.HtmlEditor/Extensions/ListExtension';
 import { BasicCommandsExtensions } from '../../Signum.HtmlEditor/Extensions/BasicCommandsExtension';
-import { ImageConverter, ImageInfoBase } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
+import { ImageConverter, ImageInfoBase } from '../../Signum.HtmlEditor/HtmlEditorClient';
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
 import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
 

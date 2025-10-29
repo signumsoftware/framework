@@ -1,6 +1,5 @@
 import { $applyNodeReplacement, DecoratorNode, DOMConversion, DOMConversionMap, DOMConversionOutput, DOMExportOutput, NodeKey } from "lexical";
-import { ImageConverter, ImageInfoBase } from "./ImageConverter";
-import { HtmlEditorClient } from "../../HtmlEditorClient";
+import { HtmlEditorClient, ImageInfoBase, ImageConverter } from "../../HtmlEditorClient";
 
 export class ImageNode<T extends ImageInfoBase> extends DecoratorNode < JSX.Element > {
   constructor(private fileInfo: T, private imageConverter: ImageConverter<T>, key?: NodeKey) {

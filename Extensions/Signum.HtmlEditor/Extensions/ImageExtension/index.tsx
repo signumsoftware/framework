@@ -1,7 +1,7 @@
 import { $getRoot, LexicalEditor } from "lexical";
 import { HtmlEditorController } from "../../HtmlEditorController";
 import { HtmlEditorExtension, LexicalConfigNode, OptionalCallback } from "../types";
-import { ImageConverter, ImageInfoBase } from "./ImageConverter";
+import { ImageConverter, ImageInfoBase } from "../../HtmlEditorClient";
 import { $createImageNode, ImageNode } from "./ImageNode";
 
 export class ImageExtension<T extends ImageInfoBase> implements HtmlEditorExtension {
