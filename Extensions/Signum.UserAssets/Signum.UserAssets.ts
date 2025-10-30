@@ -39,6 +39,8 @@ export namespace UserAssetMessage {
   export const UserAssetLines: MessageKey = new MessageKey("UserAssetMessage", "UserAssetLines");
   export const Import: MessageKey = new MessageKey("UserAssetMessage", "Import");
   export const AssumeIs: MessageKey = new MessageKey("UserAssetMessage", "AssumeIs");
+  export const UsedBy: MessageKey = new MessageKey("UserAssetMessage", "UsedBy");
+  export const Advanced: MessageKey = new MessageKey("UserAssetMessage", "Advanced");
 }
 
 export namespace UserAssetPermission {

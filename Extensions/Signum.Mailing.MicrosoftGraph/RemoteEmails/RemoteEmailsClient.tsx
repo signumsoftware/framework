@@ -18,6 +18,7 @@ import RemoteEmailPopover from './RemoteEmailPopover'
 import { FolderLine } from './FolderLine'
 import { ModelConverterSymbol } from '../../Signum.Templating/Signum.Templating'
 import { getTypeInfo } from '@framework/Reflection'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export namespace RemoteEmailsClient {
   
@@ -104,11 +105,9 @@ export namespace RemoteEmailsClient {
       },
       entityFormatter: new Finder.EntityFormatter(ctx => {
         return (
-          <a href="#" onClick={async e => openMessage(ctx.row, ctx.searchControl!)}>
-            <span title={SearchMessage.View.niceToString()}>
-              {EntityBaseController.getViewIcon()}
-            </span>
-          </a>
+          <LinkButton title={SearchMessage.View.niceToString()} onClick={async e => openMessage(ctx.row, ctx.searchControl!)}>
+            {EntityBaseController.getViewIcon()}
+          </LinkButton>
         );
   
       }),

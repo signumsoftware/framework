@@ -86,11 +86,10 @@ export namespace ActiveDirectoryClient {
             order: -1,
             button: <button className="btn btn-info ms-2"
               onClick={e => {
-                e.preventDefault();
                 var promise = AutoLineModal.show({
                   type: { name: "string" },
                   modalSize: "md",
-                  title: <><FontAwesomeIcon icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
+                  title: <><FontAwesomeIcon aria-hidden={true} icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
                   label: UserADMessage.NameOrEmail.niceToString(),
                   initialValue: search
                 }) as Promise<string>;

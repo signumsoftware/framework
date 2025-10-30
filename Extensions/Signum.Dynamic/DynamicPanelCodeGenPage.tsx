@@ -17,8 +17,7 @@ import { QueryString } from '@framework/QueryString'
 import { EvalPanelPermission } from '../Signum.Eval/Signum.Eval'
 import { CheckEvalsStep, SearchPanel } from '../Signum.Eval/EvalPanelPage'
 import { EvalClient } from '../Signum.Eval/EvalClient'
-
-
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 type DynamicPanelTab = "search" | "compile" | "restartServerApp" | "migrations" | "checkEvals" | "refreshClients";
 
@@ -52,7 +51,7 @@ export default function DynamicPanelPage(): React.JSX.Element {
         startErrors?.length ?
           <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
             <FontAwesomeIcon icon="triangle-exclamation" />
-            {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <a href="#" onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</a>.
+            {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <LinkButton title={undefined} onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</LinkButton>.
         </div> :
           <div role="alert" className="alert alert-success">
             <FontAwesomeIcon icon="circle-check" />
@@ -108,7 +107,6 @@ export function CompileStep(p: DynamicCompileStepProps): React.JSX.Element {
 
 
   function handleCompile(e: React.MouseEvent<any>) {
-    e.preventDefault();
     DynamicClient.API.compile()
       .then(errors => {
         setSelectedErrorIndex(undefined);
@@ -118,7 +116,6 @@ export function CompileStep(p: DynamicCompileStepProps): React.JSX.Element {
   }
 
   function handleCheck(e: React.MouseEvent<any>) {
-    e.preventDefault();
     DynamicClient.API.getCompilationErrors()
       .then(errors => {
         setSelectedErrorIndex(undefined);
@@ -237,8 +234,8 @@ export function CompileStep(p: DynamicCompileStepProps): React.JSX.Element {
 
 
       <br />
-      {<a href="#" className="sf-button btn btn-warning" onClick={handleCheck}>Check</a>}&nbsp;
-      {<a href="#" className="sf-button btn btn-success" onClick={handleCompile}>Compile</a>}
+      {<LinkButton title={undefined} className="sf-button btn btn-warning" onClick={handleCheck}>Check</LinkButton>}&nbsp;
+      {<LinkButton title={undefined} className="sf-button btn btn-success" onClick={handleCompile}>Compile</LinkButton>}
       {compilationErrors && renderCompileResult(compilationErrors)}
     </div>
   );
@@ -256,7 +253,6 @@ export function RestartServerAppStep(p: RestartServerAppStepProps): React.JSX.El
   const forceUpdate = useForceUpdate();
 
   function handleRestartApplication(e: React.MouseEvent<any>) {
-    e.preventDefault();
 
     DynamicClient.API.restartServer()
       .then(() => {
@@ -306,7 +302,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps): React.JSX.El
     <div>
       {
         AppContext.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
-        <a href="#" className="sf-button btn btn-danger" onClick={handleRestartApplication}>Restart Server Application</a>
+        <LinkButton className="sf-button btn btn-danger" title={undefined} onClick={handleRestartApplication}>Restart Server Application</LinkButton>
       }
       {p.startErrors && p.startErrors.map((e, i) => <ErrorBlock key={i} error={e} />)}
     </div>
@@ -318,7 +314,6 @@ export function ErrorBlock(p: { error: WebApiHttpError }): React.JSX.Element {
   const [showDetails, setShowDetails] = React.useState(false)
 
   function handleShowStackTrace(e: React.MouseEvent<any>) {
-    e.preventDefault();
     setShowDetails(!showDetails);
   }
 
@@ -330,7 +325,7 @@ export function ErrorBlock(p: { error: WebApiHttpError }): React.JSX.Element {
         {textDanger(he.exceptionMessage)}
       </div >
       <div>
-        <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
+        <LinkButton title={undefined} onClick={handleShowStackTrace}>StackTrace</LinkButton>
         {showDetails && <pre>{he.stackTrace}</pre>}
       </div>
     </div>
@@ -348,14 +343,13 @@ function textDanger(message: string | null | undefined): React.ReactNode | null 
 
 export function RefreshClientsStep(): React.JSX.Element {
   function handleRefreshClient(e: React.MouseEvent<any>) {
-    e.preventDefault();
     window.location.reload();
   }
 
   return (
     <div>
       <p>Now you need to refresh the clients manually (i.e. pressing F5).</p>
-      <a href="#" className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</a>
+      <LinkButton title={undefined} className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</LinkButton>
     </div>
   );
 }

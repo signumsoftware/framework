@@ -2,6 +2,7 @@ import * as React from 'react'
 import "./FullscreenComponent.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityControlMessage } from '../Signum.Entities';
+import { LinkButton } from '../Basics/LinkButton';
 
 
 interface FullscreenComponentProps {
@@ -14,7 +15,6 @@ export function FullscreenComponent(p: FullscreenComponentProps): React.ReactEle
   const [isFullScreen, setIsFullScreen] = React.useState(false);
 
   function handleExpandToggle(e: React.MouseEvent<any>) {
-    e.preventDefault();
     setIsFullScreen(!isFullScreen);
   }
 
@@ -35,13 +35,13 @@ export function FullscreenComponent(p: FullscreenComponentProps): React.ReactEle
         {p.children(isFullScreen)}
       </div>
       <div style={{ display: "flex", flexDirection: "column", marginLeft: "5px" }}>
-        <a onClick={handleExpandToggle} href="#" className="sf-chart-mini-icon" title={isFullScreen ? EntityControlMessage.Minimize.niceToString() : EntityControlMessage.Maximize.niceToString()}  >
-          <FontAwesomeIcon icon={isFullScreen ? "compress" : "expand"} />
-        </a>
+        <LinkButton onClick={handleExpandToggle} tabIndex={0} className="sf-chart-mini-icon" title={isFullScreen ? EntityControlMessage.Minimize.niceToString() : EntityControlMessage.Maximize.niceToString()}  >
+          <FontAwesomeIcon aria-hidden={true} icon={isFullScreen ? "compress" : "expand"} />
+        </LinkButton>
         {p.onReload &&
-          <a onClick={e => { e.preventDefault();  p.onReload!(e); }} href="#" className="sf-chart-mini-icon" title={EntityControlMessage.Reload.niceToString()} >
-            <FontAwesomeIcon icon={"arrow-rotate-right"} />
-          </a>
+          <LinkButton onClick={e => { p.onReload!(e); }} className="sf-chart-mini-icon" title={EntityControlMessage.Reload.niceToString()} >
+            <FontAwesomeIcon aria-hidden={true} icon={"arrow-rotate-right"} />
+          </LinkButton>
         }
       </div>
 

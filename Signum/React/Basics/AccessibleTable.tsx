@@ -12,6 +12,19 @@ interface AccessibleTableProps extends React.TableHTMLAttributes<HTMLTableElemen
   mapCustomComponents?: Map<React.JSXElementConstructor<any>, string>
 }
 
+/**
+ * AccessibleTable
+ * ----------------
+ * A WCAG-compliant table component that enhances native HTML tables
+ * with keyboard navigation, accessibility roles, and proper semantic structure.
+ * 
+ * It automatically validates that table markup follows WCAG and ARIA guidelines:
+ * - Only `thead`, `tbody`, and `tfoot` as sections
+ * - Only `tr` inside sections
+ * - Only `td` or `th` inside rows
+ * 
+ * It also applies appropriate ARIA roles and focus behavior for better accessibility.
+ */
 export function AccessibleTable({
   caption,
   tableRole = "grid",
@@ -22,6 +35,10 @@ export function AccessibleTable({
   ...rest
 }: AccessibleTableProps): JSX.Element {
 
+  /**
+   * Enhances a given table section (`thead`, `tbody`, or `tfoot`)
+   * by wrapping each `<tr>` in a WCAGRow component for accessibility handling.
+   */
   function enhanceSection(
     section: React.ReactElement<React.HTMLAttributes<HTMLTableSectionElement>>,
     sectionType: SectionType
@@ -29,13 +46,13 @@ export function AccessibleTable({
     const enhancedRows = React.Children.map(section.props.children, (child) => {
 
       const type = getType(child, mapCustomComponents);
-      if (type !== "tr") {
+      if (type !== "tr" && type !== React.Fragment.toString()) {
         handleStructureError(sectionType, child);
         return child;
       }
       const element = child as React.ReactElement<React.HTMLAttributes<HTMLTableRowElement>>;
       if (element.type == "tr")
-        return React.createElement(WCAGRow, { focusCells, focusHeader: multiselectable, sectionType, tableRole, ...element.props });
+        return React.createElement(AccessibleRow, { focusCells, focusHeader: multiselectable, sectionType, tableRole, ...element.props });
 
       return child;
     });
@@ -43,6 +60,10 @@ export function AccessibleTable({
     return React.cloneElement(section, { children: enhancedRows });
   }
 
+  /**
+   * Recursively enhances all children of the table to ensure that
+   * sections are validated and processed via `enhanceSection`.
+   */
   function enhanceChildren(node: React.ReactNode): React.ReactNode {
     return React.Children.map(node, (child) => {
 
@@ -72,14 +93,25 @@ export function AccessibleTable({
   );
 }
 
+/**
+ * Throws a descriptive error when the expected table structure is invalid.
+ * Helps enforce strict accessibility and semantic correctness.
+ */
 function handleStructureError(message: string, node: React.ReactNode) {
-
   throw new Error(`[AccessibleTable] Structure error: ${message} instead of ${React.isValidElement(node) ? node.type : typeof node}`);
 }
 
+/**
+ * Determines the HTML-equivalent type of a React element.
+ * If a custom component is used (e.g., wrapped table cell),
+ * it looks up its corresponding tag name from `mapCustomComponents`.
+ */
 function getType(node: React.ReactNode, mapCustomComponents: Map<React.JSXElementConstructor<any>, string> | undefined): string | null {
   if (!React.isValidElement(node))
     return null;
+
+  if (node.type == React.Fragment)
+    return React.Fragment.toString();
 
   if (typeof node.type == "string")
     return node.type;
@@ -98,8 +130,23 @@ interface WCAGRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
   mapCustomComponents?: Map<React.JSXElementConstructor<any>, string>,
   tableRole?: TableRole
 }
-export function WCAGRow({ focusCells = true, focusHeader = false, sectionType = "tbody", mapCustomComponents, children, tableRole = "grid", ...rest }: WCAGRowProps): React.ReactElement {
 
+/**
+ * WCAGRow
+ * --------
+ * Enhances a single table row (`<tr>`) by applying:
+ * - Correct ARIA roles (`row`, `gridcell`, `columnheader`, `rowheader`)
+ * - TabIndex handling for keyboard navigation
+ * - Automatic error detection for invalid or empty header cells
+ * 
+ * Supports both header (`thead`) and body (`tbody`) contexts.
+ */
+export function AccessibleRow({ focusCells = true, focusHeader = false, sectionType = "tbody", mapCustomComponents, children, tableRole = "grid", ...rest }: WCAGRowProps): React.ReactElement {
+
+  /**
+   * Enhances a header cell (<th>) in a `thead` section.
+   * Applies appropriate ARIA roles and keyboard focusability.
+   */
   function enhanceHeaderCell(
     th: React.ReactElement<React.ThHTMLAttributes<HTMLTableCellElement>>
   ): React.ReactElement {
@@ -109,7 +156,11 @@ export function WCAGRow({ focusCells = true, focusHeader = false, sectionType = 
       tabIndex: focusHeader ? 0 : -1,
     } as React.ThHTMLAttributes<HTMLTableCellElement>);
   }
-
+  
+  /**
+   * Enhances a data cell (<td>) or header cell (<th>) in the table body.
+   * Ensures every header has content and applies fallback text to empty cells.
+   */
   function enhanceCell(
     td: React.ReactElement<React.TdHTMLAttributes<HTMLTableCellElement> | React.ThHTMLAttributes<HTMLTableCellElement>>
   ): React.ReactElement {
@@ -129,7 +180,6 @@ export function WCAGRow({ focusCells = true, focusHeader = false, sectionType = 
         tabIndex: focusCells ? 0 : -1,
       } as React.ThHTMLAttributes<HTMLTableCellElement>);
 
-
     return React.cloneElement(td, {
       role: (tableRole) ? undefined : "gridcell",
       tabIndex: focusCells ? 0 : -1,
@@ -138,8 +188,6 @@ export function WCAGRow({ focusCells = true, focusHeader = false, sectionType = 
         : td.props.children
     } as React.TdHTMLAttributes<HTMLTableCellElement>);
   }
-
-
 
   const childrenArray = React.Children.toArray(children);
   const enhancedCells = childrenArray.map((child) => {
@@ -161,19 +209,64 @@ export function WCAGRow({ focusCells = true, focusHeader = false, sectionType = 
     }
   });
 
+  /**
+   * Enables keyboard navigation between rows using ArrowUp and ArrowDown keys.
+   */
   function handleKeyDown(e: React.KeyboardEvent<HTMLTableRowElement>) {
+    function getIndexOfCell(row: HTMLTableRowElement, cell: HTMLTableCellElement) {
+      
+      // Compute the visual column index of the current cell
+      let colIndex = 0;
+      for (const c of Array.from(row.cells)) {
+        if (c === cell) break;
+        colIndex += c.colSpan || 1;
+      }
+      return colIndex;
+    }
 
-    const currentRow = e.currentTarget;
-    if (e.key === "ArrowDown") {
+    function getCellAtIndex(targetRow: HTMLTableRowElement, colIndex: number): HTMLTableCellElement | null {
+      if (targetRow == null || targetRow.tagName !== "TR")
+        return null;
+
+      let cc = 0;
+      for (const c of Array.from(targetRow.cells)) {
+        const span = c.colSpan || 1;
+        if (cc <= colIndex && colIndex < cc + span) {
+          return (c as HTMLTableCellElement);
+        }
+        cc += span;
+      }
+
+      return Array.from(targetRow.cells).last();
+    };
+
+    if (e.key === "ArrowDown" || e.key == "ArrowUp") {
       e.preventDefault();
-      const nextRow = currentRow.nextElementSibling as HTMLTableRowElement | null;
-      nextRow?.focus();
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      const prevRow = currentRow.previousElementSibling as HTMLTableRowElement | null;
-      prevRow?.focus();
+      const cell = (e.target as HTMLElement).closest("td,th") as HTMLTableCellElement;
+      if (cell == null)
+        return;
+
+      const row = cell.parentElement as HTMLTableRowElement;
+      if (row.tagName !== "TR")
+        return;
+
+      const index = getIndexOfCell(row, cell);
+      var nextCell = e.key === "ArrowDown" ?
+        getCellAtIndex(row.nextElementSibling as HTMLTableRowElement ?? row.parentElement?.nextElementSibling?.firstChild as HTMLTableRowElement, index) :
+        getCellAtIndex(row.previousElementSibling as HTMLTableRowElement ?? row.parentElement?.previousElementSibling?.lastChild as HTMLTableRowElement, index);
+
+      nextCell?.focus();
+    }
+
+    if (e.key == "ArrowLeft" || e.key == "ArrowRight") {
+      const cell = (e.target as HTMLElement).closest("td,th") as HTMLTableCellElement;
+      const nextCell = e.key == "ArrowLeft" ?
+        cell.previousElementSibling as HTMLTableCellElement :
+        cell.nextElementSibling as HTMLTableCellElement;
+
+      nextCell?.focus();
     }
   }
 
-  return React.cloneElement(<tr role={!tableRole ? "row" : undefined} tabIndex={0} onKeyDown={handleKeyDown}></ tr>, undefined, enhancedCells);
+  return React.cloneElement(<tr role={!tableRole ? "row" : undefined} onKeyDown={handleKeyDown} {...rest}></ tr>, undefined, enhancedCells);
 }

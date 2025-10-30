@@ -12,6 +12,7 @@ import { AlertEntity } from '../../Signum.Alerts/Signum.Alerts'
 import InlineCaseTags from './InlineCaseTags'
 import { useAPI } from '@framework/Hooks'
 import { TextAreaLine } from '../../../Signum/React/Lines'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export interface ActivityWithRemarks {
   workflowActivity: Lite<WorkflowActivityEntity>;
@@ -63,7 +64,6 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
   }
 
   function handleRemarksClick(e: React.MouseEvent<any>) {
-    e.preventDefault();
 
     AutoLineModal.show({
       type: { name: "string" },
@@ -86,16 +86,16 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
     <span>
       {getToString(p.data.workflowActivity)}
       &nbsp;
-      <a href="#" onClick={handleRemarksClick} className={classes(
+      <LinkButton onClick={handleRemarksClick} title={CaseNotificationEntity.nicePropertyName(a => a.remarks)} className={classes(
         "case-icon",
         !remarks && "case-icon-ghost")}        
       >
-        <FontAwesomeIcon icon={remarks ? "comment-dots" : ["far", "comment"]} title={CaseNotificationEntity.nicePropertyName(a => a.remarks)}/>
-      </a>
+        <FontAwesomeIcon icon={remarks ? "comment-dots" : ["far", "comment"]} />
+      </LinkButton>
       {alerts > 0 && " "}
-      {alerts > 0 && <a href="#" onClick={handleAlertsClick} style={{ color: "orange" }} >
-        <FontAwesomeIcon icon={"bell"} aria-hidden={true} title={AlertEntity.nicePluralName()}/>
-      </a>}
+      {alerts > 0 && <LinkButton title={AlertEntity.nicePluralName()} onClick={handleAlertsClick} style={{ color: "orange" }} >
+        <FontAwesomeIcon icon={"bell"} aria-hidden={true}/>
+      </LinkButton>}
       &nbsp;
       <InlineCaseTags case={p.data.case} defaultTags={tags} wrap />
     </span>

@@ -66,14 +66,14 @@ function LoginDropdown(p: {
     >
       {pv && (
         <NavDropdown.Item id="sf-auth-profile" onClick={handleProfileClick}>
-          <FontAwesomeIcon icon="user-pen" fixedWidth className="me-2" />{" "}
+          <FontAwesomeIcon aria-hidden={true} icon="user-pen" className="fa-fw me-2" />{" "}
           {LoginAuthMessage.MyProfile.niceToString()}
         </NavDropdown.Item>
       )}
       {cpv && (
         <LinkContainer to="/auth/changePassword">
           <NavDropdown.Item>
-            <FontAwesomeIcon icon="key" fixedWidth className="me-2" />{" "}
+            <FontAwesomeIcon aria-hidden={true} icon="key" className="fa-fw me-2" />{" "}
             {LoginAuthMessage.ChangePassword.niceToString()}
           </NavDropdown.Item>
         </LinkContainer>
@@ -83,7 +83,7 @@ function LoginDropdown(p: {
       {suv && (
         <LinkContainer to="/auth/login">
           <NavDropdown.Item>
-            <FontAwesomeIcon icon="user-group" className="me-2" />{" "}
+            <FontAwesomeIcon aria-hidden={true} icon="user-group" className="me-2" />{" "}
             {LoginAuthMessage.SwitchUser.niceToString()}
           </NavDropdown.Item>
         </LinkContainer>
@@ -91,8 +91,8 @@ function LoginDropdown(p: {
       <NavDropdown.Item id="sf-auth-logout" onClick={() => AuthClient.logout()}>
         <FontAwesomeIcon
           icon="right-from-bracket"
-          fixedWidth
-          className="me-2"
+          aria-hidden={true}
+          className="fa-fw me-2"
         />{" "}
         {LoginAuthMessage.Logout.niceToString()}
       </NavDropdown.Item>

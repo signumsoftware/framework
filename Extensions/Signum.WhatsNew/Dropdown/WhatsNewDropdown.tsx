@@ -102,10 +102,13 @@ function WhatsNewDropdownImp() {
 
   return (
     <>
-      <button className="nav-link sf-bell-container" onClick={handleOnToggle} style={{ border: 0, backgroundColor: 'var(--bs-transparent)' }}>
-        <FontAwesomeIcon icon="bullhorn"
+      <button
+        className="nav-link sf-bell-container"
+        onClick={handleOnToggle}
+        style={{ border: 0, backgroundColor: 'var(--bs-transparent)' }}
+        title={(countResult ? WhatsNewEntity.niceCount(countResult.numWhatsNews) : WhatsNewEntity.nicePluralName())}      >
+        <FontAwesomeIcon aria-hidden={true} icon="bullhorn"
           className={classes("sf-newspaper", isOpen && "open", countResult && countResult.numWhatsNews > 0 && "active")}
-          title={(countResult ? WhatsNewEntity.niceCount(countResult.numWhatsNews) : WhatsNewEntity.nicePluralName())}
         />
         {countResult && countResult.numWhatsNews > 0 && <span className="badge bg-danger badge-pill sf-news-badge">{countResult.numWhatsNews}</span>}
       </button>

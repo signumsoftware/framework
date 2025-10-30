@@ -706,7 +706,17 @@ public static class SchemaSynchronizer
 
     private static SqlPreCommand ForHistoryTable(SqlPreCommand sqlCommand, ITable tab)
     {
-        return sqlCommand.Replace(new Regex(@$"\b{Regex.Escape(tab.Name.ToString())}\b"), m => tab.SystemVersioned!.TableName.ToString());
+        string escaped = Regex.Escape(tab.Name.ToString())!;
+
+        if (!escaped.StartsWith("\""))
+            escaped = @"\b" + escaped;
+
+        if (!escaped.EndsWith("\""))
+            escaped = escaped + @"\b";
+
+        var regex = new Regex(escaped);
+
+        return sqlCommand.Replace(regex, m => tab.SystemVersioned!.TableName.ToString());
     }
 
     private static SqlPreCommand? UpdateForeignKeyTypeChanged(SqlBuilder sqlBuilder, ITable tab, DiffTable dif, IColumn tabCol, DiffColumn difCol, Func<ObjectName, ObjectName> changeName, Dictionary<ObjectName, Dictionary<string, string>> preRenameColumnsList)

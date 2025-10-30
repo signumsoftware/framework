@@ -40,9 +40,9 @@ public static class UserChartLogic
             {
                 Entity = uq,
                 uq.Id,
+                uq.DisplayName,
                 uq.Query,
                 uq.EntityType,
-                uq.DisplayName,
                 uq.ChartScript,
                 uq.Owner,
             });

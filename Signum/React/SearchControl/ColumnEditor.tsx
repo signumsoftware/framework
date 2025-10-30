@@ -10,6 +10,7 @@ import { VisualTipIcon } from '../Basics/VisualTipIcon';
 import { SearchVisualTip } from '../Signum.Basics';
 import { ColumnHelp, FilterHelp } from './SearchControlVisualTips';
 import { getNiceTypeName } from '../Operations/MultiPropertySetter';
+import { LinkButton } from '../Basics/LinkButton';
 
 interface ColumnEditorProps {
   columnOption: ColumnOptionParsed
@@ -79,8 +80,8 @@ export default function ColumnEditor(p: ColumnEditorProps): React.ReactElement {
                   readOnly={false} />
               </div>
             </div>
-
-            {!showMore && <a href="#" onClick={e => { e.preventDefault(); setShowMore(true); }}>{SearchMessage.ShowMore.niceToString()}</a>}
+            
+            {!showMore && <LinkButton title={undefined} onClick={e => { setShowMore(true); }}>{SearchMessage.ShowMore.niceToString()}</LinkButton>}
           </div>
 
 

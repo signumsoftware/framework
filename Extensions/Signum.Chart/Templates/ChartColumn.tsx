@@ -14,6 +14,7 @@ import { ColumnParameters, Parameters } from './ChartBuilder'
 import { IChartBase } from '../UserChart/Signum.Chart.UserChart'
 import { ColorPaletteEntity } from '../ColorPalette/Signum.Chart.ColorPalette'
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export interface ChartColumnProps {
   ctx: TypeContext<ChartColumnEmbedded>;
@@ -149,7 +150,18 @@ export function ChartColumn(p: ChartColumnProps): React.JSX.Element {
           }} title={getTitle(sc.columnType, ctx.value.token?.token)}>
             {ChartColumnType.niceToString(sc.columnType)}
           </span>
-          <a className={classes("sf-chart-token-config-trigger", numParameters > 0 && ctx.value.token && "fw-bold")} onClick={handleExpanded}>{ChartMessage.ToggleInfo.niceToString()} {numParameters > 0 && ctx.value.token && <span>({numParameters})</span>} </a>
+          <LinkButton
+            title={undefined}
+            className={classes("sf-chart-token-config-trigger", numParameters > 0 && ctx.value.token && "fw-bold")}
+            onClick={handleExpanded}
+            onKeyDown={e => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleExpanded();
+              }
+            }}>
+            {ChartMessage.ToggleInfo.niceToString()} {numParameters > 0 && ctx.value.token && <span>({numParameters})</span>}
+          </LinkButton>
         </td>
       </tr>
       {expanded && <tr className="sf-chart-token-config">
@@ -219,8 +231,7 @@ export function ChartPaletteLink(p: ChartPaletteLinkProps): React.JSX.Element {
         <span className={p.ctx.formControlPlainTextClass}>
           {JavascriptMessage.loading.niceToString()}
         </span> :
-        <a href="#" className={p.ctx.formControlPlainTextClass} onClick={async e => {
-          e.preventDefault();
+        <LinkButton title={undefined} className={p.ctx.formControlPlainTextClass} onClick={async e => {
           if (palette)
             await Navigator.view(palette.lite);
           else {
@@ -233,7 +244,7 @@ export function ChartPaletteLink(p: ChartPaletteLinkProps): React.JSX.Element {
           reload();
         }}>
           {palette ? ChartMessage.ViewPalette.niceToString() : ChartMessage.CreatePalette.niceToString()}
-        </a>
+        </LinkButton>
       }
     </FormGroup>    
   );

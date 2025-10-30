@@ -12,7 +12,7 @@ import { is } from '@framework/Signum.Entities';
 import { useDragAndDrop } from './TypeRulePackControl';
 import { GraphExplorer } from '@framework/Reflection';
 import SelectorModal from '../../../Signum/React/SelectorModal';
-import { AccessibleTable, WCAGRow } from '../../../Signum/React/Basics/AccessibleTable';
+import { AccessibleTable, AccessibleRow } from '../../../Signum/React/Basics/AccessibleTable';
 
 export default function PropertyRulesPackControl({ ctx, initialTypeConditions, innerRef }: { ctx: TypeContext<PropertyRulePack>, initialTypeConditions: TypeConditionSymbol[] | undefined, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
 
@@ -180,7 +180,7 @@ function PropertyRow(p: { tctx: TypeContext<PropertyAllowedRule>, updateFrame: (
   }
 
   return (
-    <WCAGRow>
+    <AccessibleRow>
       <td>
         {p.tctx.value.resource.path}
       </td>
@@ -199,7 +199,7 @@ function PropertyRow(p: { tctx: TypeContext<PropertyAllowedRule>, updateFrame: (
           p.updateFrame();
         }} />
       </td>
-    </WCAGRow>
+    </AccessibleRow>
   )
 }
 

@@ -26,6 +26,8 @@ export interface IFilePath extends IFile
   fullWebPath?: string | null;
   fileLength: number;
   __uploadingOffset?: number;
+  __abortController?: AbortController;
+  __uploadId?: string;
 }
 
 export interface FilePathEntity extends IFilePath { }

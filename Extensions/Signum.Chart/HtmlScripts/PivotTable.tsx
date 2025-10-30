@@ -8,12 +8,13 @@ import { Dic, softCast } from '@framework/Globals';
 import InitialMessage from '../D3Scripts/Components/InitialMessage';
 import { Color } from '@framework/Basics/Color';
 import './PivotTable.css'
-import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
+import { isLite, Lite, Entity, BooleanEnum, EntityControlMessage } from '@framework/Signum.Entities';
 import { FilterOptionParsed } from '@framework/Search';
 import { QueryToken, FilterConditionOptionParsed, isFilterCondition } from '@framework/FindOptions';
 import { EntityBaseController } from '@framework/Lines';
 import { QueryTokenMessage } from '@framework/Signum.DynamicQuery.Tokens';
 import { ChartParameter } from '../Signum.Chart';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 interface RowDictionary {
   [key: string]: { value: unknown, dicOrRows: RowDictionary | ChartRow[] };
@@ -462,7 +463,6 @@ export default function renderPivotTable({ data, width, height, parameters, load
     var style = p.style ?? gr?.style;
 
     function handleNumberClick(e: React.MouseEvent<HTMLAnchorElement>) {
-      e.preventDefault();
 
       if (Array.isArray(p.gor) && p.gor.length == 1 && p.gor[0].entity != null) {
         Navigator.view(p.gor[0].entity as Lite<Entity>)
@@ -482,7 +482,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     let multiVal: MultiNum |undefined ;
 
-    const link = (p.gor == null || style == null || style.showAggregateValues == false) ? null : <a href="#" onClick={e => handleNumberClick(e)}>{cellFormatter(multiVal ??= sumValue(p.gor))}</a>;
+    const link = (p.gor == null || style == null || style.showAggregateValues == false) ? null : <LinkButton title={undefined} onClick={e => handleNumberClick(e)}>{cellFormatter(multiVal ??= sumValue(p.gor))}</LinkButton>;
 
     var color =
       p.isSummary == 4 ? "rgb(228, 228, 228)" :
@@ -531,10 +531,11 @@ export default function renderPivotTable({ data, width, height, parameters, load
       };
     }
 
-    var createLink = p.style?.showCreateButton && isCreable && <a className="sf-create-cell" href="#" onClick={handleCreateClick}>{EntityBaseController.getCreateIcon()}</a>;
+    var createLink = p.style?.showCreateButton && isCreable && <LinkButton title={EntityControlMessage.Create.niceToString()} className="sf-create-cell" onClick={handleCreateClick}>
+      {EntityBaseController.getCreateIcon()}
+    </LinkButton>;
 
     function handleCreateClick(e: React.MouseEvent) {
-      e.preventDefault()
       var filters = p.filters ?? gr?.getFilters(true);
 
       if (filters == null)
@@ -572,7 +573,6 @@ export default function renderPivotTable({ data, width, height, parameters, load
     }
 
     function handleLiteClick(e: React.MouseEvent) {
-      e.preventDefault();
       Navigator.view(lite as Lite<Entity>)
         .then(() => onReload && onReload());
     }
@@ -580,7 +580,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     var etcTitle = style && style.maxTextLength ? title.etc(style.maxTextLength) : title;
 
     var titleElement = isLite(lite) ?
-      <a href="#" onClick={handleLiteClick} title={title}>{etcTitle}</a> :
+      <LinkButton onClick={handleLiteClick} title={title}>{etcTitle}</LinkButton> :
       <span title={title}>{etcTitle}</span>
 
     if (style?.cssStyleDiv)

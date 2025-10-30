@@ -23,6 +23,7 @@ import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
 import { useAPI, useForceUpdate, useInterval } from '@framework/Hooks'
 import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export const Predictor: React.ForwardRefExoticComponent<{ ctx: TypeContext<PredictorEntity> } & React.RefAttributes<IRenderButtons>> =
   React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<PredictorEntity> }, ref: React.Ref<IRenderButtons>): React.ReactElement {
@@ -130,7 +131,6 @@ export const Predictor: React.ForwardRefExoticComponent<{ ctx: TypeContext<Predi
     }
 
     function handlePreviewMainQuery(e: React.MouseEvent<any>) {
-      e.preventDefault();
       var mq = p.mainQuery;
 
       var canAggregate = mq.groupResults ? SubTokensOptions.CanAggregate : 0;
@@ -203,7 +203,7 @@ export const Predictor: React.ForwardRefExoticComponent<{ ctx: TypeContext<Predi
                     { property: a => a.encoding },
                     { property: a => a.nullHandling },
                   ]} />
-                  {ctxmq.value.query && <a href="#" onClick={handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</a>}
+                  {ctxmq.value.query && <LinkButton title={undefined} onClick={handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</LinkButton>}
                 </div>}
 
               </fieldset>

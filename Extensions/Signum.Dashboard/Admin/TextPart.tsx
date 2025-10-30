@@ -9,6 +9,7 @@ import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor'
 import { ErrorBoundary } from '@framework/Components/ErrorBoundary';
 import { ReadonlyBinding } from '@framework/Lines'
 import { useForceUpdate } from '../../../Signum/React/Hooks';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
@@ -32,7 +33,7 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
       return (<AutoLine ctx={ctx.subCtx(s => s.textContent)} />)
 
     if (p.ctx.value.textPartType == "HTML")
-      return (<HtmlEditor binding={Binding.create(ctx.value, e => e.textContent)} />)
+      return (<HtmlEditor binding={Binding.create(ctx.value, e => e.textContent)}  />)
 
     return (<AutoLine ctx={ctx.subCtx(s => s.textContent)} />)
   }
@@ -61,9 +62,9 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
           <AutoLine ctx={ctx.subCtx(s => s.textPartType)} onChange={() => forceUpdate()} />
         </div>
         <div className="col-sm-4">
-          {p.ctx.value.textPartType == "Markdown" ? <a href="#" onClick={e => { e.preventDefault(); setIsPreview(!isPreview); }} >
-            <FontAwesomeIcon icon={isPreview ? "edit" : "eye"} className="me-1" />{isPreview ? "Edit" : "Preview"}
-          </a> : null}
+          {p.ctx.value.textPartType == "Markdown" ? <LinkButton title={undefined} onClick={e => { setIsPreview(!isPreview); }}>
+            <FontAwesomeIcon aria-hidden icon={isPreview ? "edit" : "eye"} className="me-1" />{isPreview ? "Edit" : "Preview"}
+          </LinkButton> : null}
         </div>
       </div>
       <div className="form-inline">

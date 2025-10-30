@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
+    <OutputType>Library</OutputType>
+    <NoWarn>8618</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" Version="3.7.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
+    <ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
+    <ProjectReference Include="..\..\Signum\Signum.csproj" />
+    <ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
+  </ItemGroup>
+
+</Project>

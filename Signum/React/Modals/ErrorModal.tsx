@@ -11,6 +11,7 @@ import { newLite } from '../Reflection';
 import { Modal } from 'react-bootstrap';
 import MessageModal from './MessageModal';
 import { namespace } from 'd3';
+import { LinkButton } from '../Basics/LinkButton';
 
 //http://codepen.io/m-e-conroy/pen/ALsdF
 interface ErrorModalProps extends Modals.IModalProps<undefined> {
@@ -73,14 +74,14 @@ const ErrorModal: {
 
   function renderTitle(e: any) {
     return (
-      <span><FontAwesomeIcon icon="triangle-exclamation" /> Error </span>
+      <span><FontAwesomeIcon aria-hidden={true} icon="triangle-exclamation" /> Error </span>
     );
   }
 
   function renderServiceTitle(se: ServiceError) {
     return (
       <span>
-        <FontAwesomeIcon icon={se.defaultIcon} />&nbsp; <span>{se.httpError.exceptionType}</span>
+        <FontAwesomeIcon aria-hidden={true} icon={se.defaultIcon} />&nbsp; <span>{se.httpError.exceptionType}</span>
         {se.httpError.exceptionId && <span>({
           ErrorModalOptions.isExceptionViewable() ?
             <Link to={ErrorModalOptions.getExceptionUrl(se.httpError.exceptionId!)!}>{se.httpError.exceptionId}</Link> :
@@ -103,7 +104,7 @@ const ErrorModal: {
   function renderValidationTitle(ve: ValidationError) {
     return (
       <span>
-        <FontAwesomeIcon icon="triangle-exclamation" /> {FrameMessage.ThereAreErrors.niceToString()}
+        <FontAwesomeIcon aria-hidden={true} icon="triangle-exclamation" /> {FrameMessage.ThereAreErrors.niceToString()}
       </span>
     );
   }
@@ -212,8 +213,8 @@ ErrorModal.showErrorModal = (error: any, beforeOkClicked?: ()=> Promise<void>): 
       message:
         <div>
           {ConnectionMessage.ANewVersionHasJustBeenDeployedConsiderReload.niceToString()}&nbsp;
-          <button className="btn btn-warning"  onClick={e => { e.preventDefault(); window.location.reload(); }}>
-            <FontAwesomeIcon icon="rotate" title={EntityControlMessage.Reload.niceToString()}/>
+          <button className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(); }} title={EntityControlMessage.Reload.niceToString()}>
+            <FontAwesomeIcon aria-hidden={true} icon="rotate" />
           </button>
         </div>,
       buttons: "cancel",
@@ -246,7 +247,7 @@ export function RenderServiceMessageDefault(p: { error: ServiceError }): React.R
       {ErrorModalOptions.preferPreFormated(p.error) ? <pre style={{ whiteSpace: "pre-wrap" }}>{p.error.httpError.exceptionMessage}</pre> : textDanger(p.error.httpError.exceptionMessage)}
       {p.error.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
         <div>
-          <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
+          <LinkButton title={undefined} onClick={handleShowStackTrace}>StackTrace</LinkButton>
           {showDetails && <pre>{p.error.httpError.stackTrace}</pre>}
         </div>}
     </div>
@@ -267,7 +268,7 @@ export function RenderExternalServiceMessageDefault(p: { error: ExternalServiceE
       {textDanger(p.error.message)}
       {p.error.additionalInfo && ErrorModalOptions.isExceptionViewable() &&
         <div>
-          <a href="#" onClick={handleShowDetails}>StackTrace</a>
+          <LinkButton title={undefined} onClick={handleShowDetails}>StackTrace</LinkButton>
           {showDetails && <pre>{p.error.additionalInfo}</pre>}
         </div>}
     </div>

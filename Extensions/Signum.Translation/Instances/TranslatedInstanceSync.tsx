@@ -18,9 +18,8 @@ import { useTitle } from '@framework/AppContext'
 import { TranslationMember, initialElementIf } from '../Code/TranslationTypeTable'
 import { getToString, Lite } from '@framework/Signum.Entities'
 import { CultureInfoEntity } from '@framework/Signum.Basics'
-import { WCAGRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
-
-
+import { AccessibleRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function TranslatedInstanceSync(): React.JSX.Element {
   const params = useParams() as { type: string; culture: string; };
@@ -89,7 +88,7 @@ export default function TranslatedInstanceSync(): React.JSX.Element {
         {result && result.totalInstances == 0 && <Link to={`/translatedInstance/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
         </Link>}
-        
+
       </div>
     );
   }
@@ -146,7 +145,7 @@ export function TranslatedInstances(p: { data: TranslatedInstanceClient.TypeInst
           <AccessibleTable
             caption={TranslationMessage.TranslationsOverview.niceToString()}
             className="table st"
-            mapCustomComponents={new Map([[WCAGRow, "tr"]])}
+            mapCustomComponents={new Map([[AccessibleRow, "tr"]])}
             multiselectable={false}
             id="results"
             style={{ width: "100%", margin: "0px" }}>
@@ -156,47 +155,47 @@ export function TranslatedInstances(p: { data: TranslatedInstanceClient.TypeInst
                 <th className="titleCell"><EntityLink lite={ins.instance} /></th>
               </tr>
             </thead>
-              <tbody>
-                {Dic.getKeys(ins.routeConflicts).flatMap(routeAndRowId => {
-                  const mainRow = (
-                    <tr key={routeAndRowId + "-main"}>
-                      <th className="leftCell">{TranslationMessage.Property.niceToString()}</th>
-                      <th>{getPropertyString(routeAndRowId)}</th>
-                    </tr>
-                  );
+            <tbody>
+              {Dic.getKeys(ins.routeConflicts).flatMap(routeAndRowId => {
+                const mainRow = (
+                  <tr key={routeAndRowId + "-main"}>
+                    <th className="leftCell">{TranslationMessage.Property.niceToString()}</th>
+                    <th>{getPropertyString(routeAndRowId)}</th>
+                  </tr>
+                );
 
-                  const supportRows = Dic.getKeys(ins.routeConflicts[routeAndRowId].support).map(c => {
-                    const rc = ins.routeConflicts[routeAndRowId].support[c];
-                    return (
-                      <tr key={routeAndRowId + "-" + c}>
-                        <td className="leftCell">{c}</td>
-                        <td className="monospaceCell">
-                          {rc.oldOriginal == null || rc.original == null || rc.oldOriginal == rc.original
-                            ? <pre className="mb-0">{rc.original}</pre>
-                            : <DiffDocumentSimple first={rc.oldOriginal} second={rc.original} />
-                          }
-                        </td>
-                      </tr>
-                    );
-                  });
-
-                  const translationRow = (
-                    <tr key={routeAndRowId + "-translation"}>
-                      <td className="leftCell">{p.currentCulture}</td>
+                const supportRows = Dic.getKeys(ins.routeConflicts[routeAndRowId].support).map(c => {
+                  const rc = ins.routeConflicts[routeAndRowId].support[c];
+                  return (
+                    <tr key={routeAndRowId + "-" + c}>
+                      <td className="leftCell">{c}</td>
                       <td className="monospaceCell">
-                        <TranslationProperty property={ins.routeConflicts[routeAndRowId]} />
+                        {rc.oldOriginal == null || rc.original == null || rc.oldOriginal == rc.original
+                          ? <pre className="mb-0">{rc.original}</pre>
+                          : <DiffDocumentSimple first={rc.oldOriginal} second={rc.original} />
+                        }
                       </td>
                     </tr>
                   );
+                });
 
-                  return [mainRow, ...supportRows, translationRow];
-                })}
-            
+                const translationRow = (
+                  <tr key={routeAndRowId + "-translation"}>
+                    <td className="leftCell">{p.currentCulture}</td>
+                    <td className="monospaceCell">
+                      <TranslationProperty property={ins.routeConflicts[routeAndRowId]} />
+                    </td>
+                  </tr>
+                );
+
+                return [mainRow, ...supportRows, translationRow];
+              })}
+
             </tbody>
           </AccessibleTable>
-      </React.Fragment>
-    )}
-  </>
+        </React.Fragment>
+      )}
+    </>
   );
 }
 
@@ -217,7 +216,6 @@ export function TranslationProperty({ property }: { property: TranslatedInstance
   }
 
   function handleAvoidCombo(e: React.FormEvent<any>) {
-    e.preventDefault();
     setAvoidCombo(true);
   }
 
@@ -231,21 +229,21 @@ export function TranslationProperty({ property }: { property: TranslatedInstance
   var translations = Object.entries(property.support)
     .flatMap(([c, rc]) => rc.automaticTranslations.map(at => ({ culture: c, text: at.text, translatorName: at.translatorName }))
       .concat(rc.oldTranslation ? [{ culture: c, text: rc.oldTranslation, translatorName: "Previous translation" }] : [])
-  );
+    );
   return (translations.length === 0 || avoidCombo) ? <>
     <label className="sr-only" htmlFor={`translatedText-${property.translatedText}`}> {TranslationMessage.Description.niceToString()}</label>
     <TextArea
-        id={`translatedText-${property.translatedText}`}
-        aria-label={TranslationMessage.Description.niceToString()}
-        style={{ height: "24px", width: "90%" }}
-        minHeight="24px"
-        value={property.translatedText ?? ""}
-        onChange={e => { property.translatedText = e.currentTarget.value; forceUpdate(); }}
-        onBlur={handleOnChange}
-        innerRef={handleOnTextArea}
-       />
-     </>
-   : 
+      id={`translatedText-${property.translatedText}`}
+      aria-label={TranslationMessage.Description.niceToString()}
+      style={{ height: "24px", width: "90%" }}
+      minHeight="24px"
+      value={property.translatedText ?? ""}
+      onChange={e => { property.translatedText = e.currentTarget.value; forceUpdate(); }}
+      onBlur={handleOnChange}
+      innerRef={handleOnTextArea}
+    />
+  </>
+    :
     <span>
       <label className="sr-only" htmlFor={`translationSelect-${property.translatedText}`}>
         {TranslationMessage.Description.niceToString()}
@@ -258,13 +256,13 @@ export function TranslationProperty({ property }: { property: TranslatedInstance
         onKeyDown={handleKeyDown}>
         {initialElementIf(property.translatedText == undefined).concat(
           translations.map(a =>
-              <option key={a.culture + a.translatorName} title={TranslationMessage.From0using1_.niceToString(a.culture, a.translatorName)} value={a.text}>
+            <option key={a.culture + a.translatorName} title={TranslationMessage.From0using1_.niceToString(a.culture, a.translatorName)} value={a.text}>
               {a.text}
             </option>
           )
         )}
       </select>
-        &nbsp;
-        <a href="#" role="button" onClick={handleAvoidCombo} aria-label={TranslationMessage.Edit.niceToString()}>{TranslationMessage.Edit.niceToString()}</a>
+      &nbsp;
+      <LinkButton title={undefined} onClick={handleAvoidCombo} aria-label={TranslationMessage.Edit.niceToString()}>{TranslationMessage.Edit.niceToString()}</LinkButton>
     </span>
 }

@@ -16,6 +16,7 @@ import { Dropdown } from 'react-bootstrap'
 import DropdownToggle from 'react-bootstrap/DropdownToggle'
 import { BsColor } from './Components'
 import { registerManualSubTokens } from './SearchControl/QueryTokenBuilder'
+import { LinkButton } from './Basics/LinkButton'
 
 export namespace QuickLinkClient {
 
@@ -47,16 +48,14 @@ export namespace QuickLinkClient {
 
     if (!quickLink)
       return null
-    return (<a className={classes("badge badge-pill sf-quicklinks", "text-bg-" + quickLink.color)}
+    return (<LinkButton className={classes("badge badge-pill sf-quicklinks", "text-bg-" + quickLink.color)}
       title={StyleContext.default.titleLabels ? quickLink.text() : undefined}
-      role="button"
-      href="#"
       data-toggle="dropdown"
-      onClick={e => { e.preventDefault(); quickLink.handleClick({ lite: p.lite, lites: [p.lite] }, e); }}>
-      {quickLink.icon && <FontAwesomeIcon icon={quickLink.icon} color={quickLink.color ? undefined : quickLink.iconColor} />}
+      onClick={e => { quickLink.handleClick({ lite: p.lite, lites: [p.lite] }, e); }}>
+      {quickLink.icon && <FontAwesomeIcon aria-hidden={true} icon={quickLink.icon} color={quickLink.color ? undefined : quickLink.iconColor} />}
       {quickLink.icon && "\u00A0"}
       {quickLink.text()}
-    </a>)
+    </LinkButton>)
   }
 
   export function clearQuickLinks(): void {
@@ -226,17 +225,14 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.ReactElement | n
 
           if (first.group == null)
             return (
-              <a key={i}
+              <LinkButton key={i}
                 className={classes("badge badge-pill sf-quicklinks", "text-bg-" + first.color)}
                 title={StyleContext.default.titleLabels ? gr.elements[0].text() : undefined}
-                role="button"
-                href="#"
-                data-toggle="dropdown"
-                onClick={e => { e.preventDefault(); first.handleClick(p.qlc, e); }}>
-                {first.icon && <FontAwesomeIcon icon={first.icon} color={first.color ? undefined : first.iconColor} />}
+                onClick={e => { first.handleClick(p.qlc, e); }}>
+                {first.icon && <FontAwesomeIcon aria-hidden={true} icon={first.icon} color={first.color ? undefined : first.iconColor} />}
                 {first.icon && "\u00A0"}
                 {first.text()}
-              </a>
+              </LinkButton>
             );
 
           else {
@@ -248,7 +244,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.ReactElement | n
                   title={QuickLinkMessage.Quicklinks.niceToString()}
                   badgeColor={dd.color}
                   content={<>
-                    {dd.icon && <FontAwesomeIcon icon={dd.icon} />}
+                    {dd.icon && <FontAwesomeIcon aria-hidden={true} icon={dd.icon} />}
                     {dd.icon && "\u00A0"}
                     {dd.text(gr.elements)}
                   </>} />
@@ -277,16 +273,14 @@ const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: Re
 
 
   return (
-    <a
+    <LinkButton
       ref={ref}
       className={classes("badge badge-pill sf-quicklinks", "text-bg-" + p.badgeColor)}
       title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
-      role="button"
-      href="#"
       data-toggle="dropdown"
-      onClick={e => { e.preventDefault(); p.onClick!(e); }}>
+      onClick={e => { p.onClick!(e); }}>
       {p.content}
-    </a>
+    </LinkButton>
   );
 });
 
@@ -357,7 +351,7 @@ export abstract class QuickLink<T extends Entity> {
       return undefined;
 
     return (
-      <FontAwesomeIcon icon={this.icon} className="icon" color={this.iconColor} />
+      <FontAwesomeIcon aria-hidden={true} icon={this.icon} className="icon" color={this.iconColor} />
     );
   }
 }

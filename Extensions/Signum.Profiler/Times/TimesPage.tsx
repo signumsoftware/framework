@@ -14,7 +14,7 @@ import { isDurationKey } from '@framework/Lines/TimeLine';
 import { Color } from '@framework/Basics/Color';
 import { getToString } from '@framework/Signum.Entities';
 import { TimeMessage } from '../Signum.Profiler';
-import { WCAGRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable';
+import { AccessibleRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable';
 
 
 export default function TimesPage(): React.JSX.Element {
@@ -177,7 +177,7 @@ function TimesTable({ times }: { times: ProfilerClient.TimeTrackerEntry[] }) {
     const pair = p.pair;
 
     return (
-      <WCAGRow style={{ background: "#FFFFFF" }} key={p.i}>
+      <AccessibleRow style={{ background: "#FFFFFF" }} key={p.i}>
         <td>
           <span className="processName"> {pair.identifier.tryBefore(' ') ?? pair.identifier}</span>
         </td>
@@ -215,7 +215,7 @@ function TimesTable({ times }: { times: ProfilerClient.TimeTrackerEntry[] }) {
           ${getToString(pair.last.user)}`}>{nf.format(pair.last.duration)} ms
         </td>}
         <td style={{ textAlign: "end", background: getColorTotal(pair.totalDuration / max.totalDuration) }}>{nf.format(pair.totalDuration)} ms</td>
-      </WCAGRow>
+      </AccessibleRow>
     );
   }
 

@@ -28,7 +28,7 @@ export interface FileUploaderProps {
 
 export interface AsyncUploadOptions {
   chunkSizeMB: number;
-  onStart: (file: IFilePath & ModifiableEntity, abortController: AbortController) => void;
+  onStart: (file: IFilePath & ModifiableEntity) => void;
   onProgress: (file: IFilePath & ModifiableEntity) => void;
   onFinished: (file: IFilePath & ModifiableEntity) => void;
   onError: (file: IFilePath & ModifiableEntity, error: unknown) => void;
@@ -95,8 +95,6 @@ export function FileUploader(p: FileUploaderProps): React.JSX.Element {
     setErrors(errors => [...errors, newError]);
   }
 
-
-
   return (
     <div {...p.divHtmlAttributes}>
       {isLoading ? <div className="sf-file-drop">{JavascriptMessage.loading.niceToString()}</div> :
@@ -106,14 +104,14 @@ export function FileUploader(p: FileUploaderProps): React.JSX.Element {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}>
           <div className={classes("sf-upload btn btn-tertiary", p.buttonCss,)}>
-            <FontAwesomeIcon icon="upload" className="me-2" />
+            <FontAwesomeIcon aria-hidden={true} icon="upload" className="me-2" />
             {FileMessage.SelectFile.niceToString()}
             <input type='file' accept={p.accept} onChange={handleFileChange} multiple={p.multiple} />
           </div>
           &nbsp;{p.dragAndDropMessage ?? FileMessage.OrDragAFileHere.niceToString()}
         </div> :
           <div className={classes("sf-upload btn btn-tertiary", p.buttonCss)}>
-            <FontAwesomeIcon icon="upload" className="me-1" />
+            <FontAwesomeIcon aria-hidden={true} icon="upload" className="me-1" />
             {FileMessage.SelectFile.niceToString()}
             <input type='file' accept={p.accept} onChange={handleFileChange} multiple={p.multiple} />
           </div>
@@ -132,8 +130,6 @@ export function FileUploader(p: FileUploaderProps): React.JSX.Element {
 
 
 export function toFileEntity(file: File, o: { accept?: string, maxSizeInBytes?: number, fileType?: FileTypeSymbol, type: PseudoType, asyncOptions?: AsyncUploadOptions }): Promise<ModifiableEntity & IFile> {
-
-
   return new Promise((resolve, reject) => {
     if (file.type && o.accept) {
       if (!o.accept.split(',').some(accept => file.type.startsWith(accept.replace("*", "")))) {
@@ -169,21 +165,26 @@ export function toFileEntity(file: File, o: { accept?: string, maxSizeInBytes?: 
       fileReader.readAsDataURL(file);
 
     } else {
-      const type = getTypeName(o.type);
 
+      const type = getTypeName(o.type);
       const fileEntity = New(o.type) as ModifiableEntity & IFilePath;
       fileEntity.fileName = file.name;
       fileEntity.fileType = o.fileType;
       fileEntity.__uploadingOffset = 0;
       fileEntity.fileLength = file.size;
       FilesClient.API.startUpload({ fileName: file.name, fileTypeKey: o.fileType!.key, type: type })
-        .then(suffix => {
+        .then(({ suffix, uploadId }) => {
           fileEntity.suffix = suffix;
+          fileEntity.__abortController = new AbortController();
+          fileEntity.__uploadId = uploadId;
+          let finished = false;
 
-          const abortController = new AbortController();
-          o.asyncOptions?.onStart(fileEntity, abortController)
+          // Provide an abort function to the UI via onStart
+          o.asyncOptions!.onStart(fileEntity);
 
-          uploadChunksAsync(fileEntity, file, abortController.signal, o.asyncOptions!)
+          uploadChunksAsync(fileEntity, file, o.asyncOptions!)
+            .then(() => { finished = true; })
+            .catch(() => { finished = true; });
 
           resolve(fileEntity);
         });
@@ -191,8 +192,11 @@ export function toFileEntity(file: File, o: { accept?: string, maxSizeInBytes?: 
   });
 }
 
-
-async function uploadChunksAsync(fileEntity: IFilePath & ModifiableEntity, file: File, signal: AbortSignal, options: AsyncUploadOptions): Promise<void> {
+async function uploadChunksAsync(
+  fileEntity: IFilePath & ModifiableEntity,
+  file: File,
+  options: AsyncUploadOptions,
+): Promise<void> {
   try {
     let chunkIndex = 0;
     var chunks: FilesClient.ChunkInfo[] = [];
@@ -206,7 +210,8 @@ async function uploadChunksAsync(fileEntity: IFilePath & ModifiableEntity, file:
         suffix: fileEntity.suffix!,
         fileTypeKey: fileEntity.fileType!.key,
         chunkIndex: chunkIndex,
-      }, signal);
+        uploadId: fileEntity.__uploadId,
+      }, fileEntity.__abortController!.signal);
       chunks.push(ci);
       fileEntity.__uploadingOffset! += chunk.size;
       chunkIndex++;
@@ -220,18 +225,44 @@ async function uploadChunksAsync(fileEntity: IFilePath & ModifiableEntity, file:
       suffix: fileEntity.suffix!,
       fileTypeKey: fileEntity.fileType!.key,
       type: fileEntity.Type,
+      uploadId: fileEntity.__uploadId,
     });
 
     delete fileEntity.__uploadingOffset;
+    delete fileEntity.__abortController;
+    delete fileEntity.__uploadId;
     fileEntity.hash = result.hash;
     fileEntity.fullWebPath = result.fullWebPath;
 
     options.onFinished(fileEntity);
 
   } catch (error) {
+    // If aborted, call abortUpload
+    if (fileEntity.__abortController && fileEntity.__abortController.signal.aborted) {
+      await FilesClient.API.abortUpload({
+        fileName: fileEntity.fileName!,
+        fileTypeKey: fileEntity.fileType!.key,
+        suffix: fileEntity.suffix!,
+        type: fileEntity.Type,
+        uploadId: fileEntity.__uploadId,
+      });
+    }
     options.onError(fileEntity, error);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

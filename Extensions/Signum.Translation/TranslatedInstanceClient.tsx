@@ -18,6 +18,7 @@ import { getLambdaMembers } from '@framework/Reflection';
 import { TranslatedSummaryState, MatchTranslatedInstances } from './Signum.Translation.Instances';
 import { TranslatableRouteType } from '@framework/Signum.Basics';
 import { TextAreaLineProps } from '../../Signum/React/Lines/TextAreaLine';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 export namespace TranslatedInstanceClient {
   
@@ -64,9 +65,8 @@ export namespace TranslatedInstanceClient {
     var ctx = p.controller.props.ctx.tryFindRootEntity();
   
     return (
-      <a href="#" className={classes("sf-line-button sf-view", "btn input-group-text", "sf-translate-button")}
+      <LinkButton className={classes("sf-line-button sf-view", "btn input-group-text", "sf-translate-button")}
         onClick={e => {
-          e.preventDefault();
   
           const url =
             ctx == null ? `/translatedInstance/status/` :
@@ -76,8 +76,8 @@ export namespace TranslatedInstanceClient {
           window.open(AppContext.toAbsoluteUrl(url));
         }}
         title={p.controller.props.ctx.titleLabels ? TranslationMessage.ThisFieldIsTranslatable.niceToString() : undefined}>
-        <FontAwesomeIcon icon="language" />
-      </a>
+        <FontAwesomeIcon aria-hidden={true} icon="language" />
+      </LinkButton>
     );
   }
   

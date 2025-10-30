@@ -21,7 +21,7 @@ export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, m
 
   return (
     <div className="sf-search-message alert alert-warning">
-      <FontAwesomeIcon icon="triangle-exclamation" />&nbsp;{message}
+      <FontAwesomeIcon aria-hidden={true} icon="triangle-exclamation" />&nbsp;{message}
     </div>
   );
 }

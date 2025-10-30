@@ -19,6 +19,7 @@ import { TypeInfo } from '@framework/Reflection';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { DynamicViewMessage } from '../Signum.Dynamic.Views'
 import { QueryDescription, QueryToken, SubTokensOptions, getFilterOperations } from '@framework/FindOptions'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface FindOptionsLineProps {
   binding: Binding<FindOptionsExpr | undefined>;
@@ -36,13 +37,11 @@ export function FindOptionsLine(p : FindOptionsLineProps): React.JSX.Element {
   }
 
   function handleRemove(e: React.MouseEvent<any>) {
-    e.preventDefault();
     p.binding.deleteValue();
     p.dn.context.refreshView();
   }
 
   function handleCreate(e: React.MouseEvent<any>) {
-    e.preventDefault();
     const route = p.dn.route;
     const ti = route?.typeReferenceInfo();
 
@@ -62,7 +61,6 @@ export function FindOptionsLine(p : FindOptionsLineProps): React.JSX.Element {
   }
 
   function handleView(e: React.MouseEvent<any>) {
-    e.preventDefault();
     var fo = JSON.parse(JSON.stringify(p.binding.getValue())) as FindOptionsExpr;
     modifyFindOptions(fo);
   }
@@ -107,18 +105,18 @@ export function FindOptionsLine(p : FindOptionsLineProps): React.JSX.Element {
         </label>
         <div>
           {fo ? <div>
-          <a href="#" onClick={handleView}>{getDescription(fo)}</a>
+            <LinkButton title={undefined} onClick={handleView}>{getDescription(fo)}</LinkButton>
             {" "}
-            <a href="#" className={classes("sf-line-button", "sf-remove")}
+            <LinkButton className={classes("sf-line-button", "sf-remove")}
             onClick={handleRemove}
               title={EntityControlMessage.Remove.niceToString()}>
               <FontAwesomeIcon icon="xmark" />
-            </a></div> :
-            <a href="#" title={EntityControlMessage.Create.niceToString()}
+            </LinkButton></div> :
+            <LinkButton title={EntityControlMessage.Create.niceToString()}
               className="sf-line-button sf-create"
             onClick={handleCreate}>
               <FontAwesomeIcon icon="plus" className="sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
-            </a>}
+            </LinkButton>}
         </div>
       </div>
     );
@@ -278,11 +276,11 @@ export function QueryKeyLine(p: { queryKey: string | undefined, label: string; o
         <span className="form-control btn-light sf-entity-line-entity">
           {p.queryKey}
         </span>
-        <a href="#" className={classes("sf-line-button", "sf-remove btn btn-light")}
+        <LinkButton className={classes("sf-line-button", "sf-remove btn btn-light")}
           onClick={() => p.onChange(undefined)}
           title={EntityControlMessage.Remove.niceToString()}>
           <FontAwesomeIcon icon="xmark" />
-        </a>
+        </LinkButton>
       </div>
     );
   }
@@ -362,7 +360,6 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
 
 
   handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
-    event.preventDefault();
     var array = this.props.binding.getValue()!;
     array.removeAt(index);
     if (array.length == 0)
@@ -372,14 +369,12 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
   }
 
   handleOnMoveUp = (event: React.MouseEvent<any>, index: number) => {
-    event.preventDefault();
     const list = this.props.binding.getValue()!;
     list.moveUp(index);
     this.props.refreshView();
   }
 
   handleOnMoveDown = (event: React.MouseEvent<any>, index: number) => {
-    event.preventDefault();
     const list = this.props.binding.getValue()!;
     list.moveDown(index);
     this.props.refreshView();
@@ -399,23 +394,23 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
 
   renderButtons(index: number) {
     return (<div className="item-group">
-      <a href="#" className={classes("sf-line-button", "sf-remove")}
+      <LinkButton className={classes("sf-line-button", "sf-remove")}
         onClick={e => this.handleOnRemove(e, index)}
         title={EntityControlMessage.Remove.niceToString()}>
         <FontAwesomeIcon icon="xmark" />
-      </a>
+      </LinkButton>
 
-      <a href="#" className={classes("sf-line-button", "move-up")}
+      <LinkButton className={classes("sf-line-button", "move-up")}
         onClick={e => this.handleOnMoveUp(e, index)}
         title={EntityControlMessage.MoveUp.niceToString()}>
         <FontAwesomeIcon icon="chevron-up" />
-      </a>
+      </LinkButton>
 
-      <a href="#" className={classes("sf-line-button", "move-down")}
+      <LinkButton className={classes("sf-line-button", "move-down")}
         onClick={e => this.handleOnMoveDown(e, index)}
         title={EntityControlMessage.MoveDown.niceToString()}>
         <FontAwesomeIcon icon="chevron-down" />
-      </a>
+      </LinkButton>
     </div>);
   }
 

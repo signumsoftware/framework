@@ -12,6 +12,7 @@ import MessageModal, { MessageModalHandler } from "@framework/Modals/MessageModa
 import { AuthError } from "@azure/msal-browser";
 import ErrorModal from "../../../Signum/React/Modals/ErrorModal";
 import { JavascriptMessage } from "@framework/Signum.Entities";
+import { LinkButton } from "@framework/Basics/LinkButton";
 
 export namespace AzureADClient {
 
@@ -74,6 +75,9 @@ export namespace AzureADClient {
 
     const confB2C = config!.azureB2C!;
     const userFlow = b2c_UserFlow ? confB2C[b2c_UserFlow]! : (confB2C.signInSignUp_UserFlow || confB2C.signIn_UserFlow!);
+
+    if (userFlow.startsWith("http"))
+      return userFlow;
 
     const tenantName = confB2C.tenantName;
     return `https://${tenantName}.b2clogin.com/${tenantName}.onmicrosoft.com/${userFlow}`;
@@ -274,9 +278,9 @@ export namespace AzureADClient {
     return (
       <div className="row mt-2">
         <div className="col-md-6 offset-md-3">
-          <a href="#" className={ctx.loading != null ? "disabled" : undefined} onClick={e => { e.preventDefault(); signIn(ctx, false); }}>
-            <img src={MicrosoftSignIn.iconUrl} alt={LoginAuthMessage.SignInWithMicrosoft.niceToString()} title={LoginAuthMessage.SignInWithMicrosoft.niceToString()} />
-          </a>
+          <LinkButton title={LoginAuthMessage.SignInWithMicrosoft.niceToString()} className={ctx.loading != null ? "disabled" : undefined} onClick={e => { signIn(ctx, false); }}>
+            <img src={MicrosoftSignIn.iconUrl} alt={LoginAuthMessage.SignInWithMicrosoft.niceToString()} />
+          </LinkButton>
         </div>
       </div>
     );

@@ -112,7 +112,6 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
   }
 
   handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
-    e.preventDefault();
     var searchPad = this.viewer.get<any>("searchPad");
     searchPad.toggle();
   }
@@ -123,7 +122,6 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
   }
 
   handleZoomClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
-    e.preventDefault();
     this.resetZoom();
   }
 

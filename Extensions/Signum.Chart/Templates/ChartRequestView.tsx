@@ -25,6 +25,7 @@ import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart';
 import ChartTimeSeries from './ChartTimeSeries';
 import { DateTime } from 'luxon';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 interface ChartRequestViewProps {
   chartRequest: ChartRequestModel;
@@ -134,7 +135,6 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
   }
 
   function handleOnFullScreen(e: React.MouseEvent<any>) {
-    e.preventDefault();
     ChartClient.Encoder.chartPathPromise(p.chartRequest)
       .then(path => AppContext.navigate(path));
   }
@@ -172,9 +172,9 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
     <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
       <h2>
         <span className="sf-entity-title">{getQueryNiceName(cr.queryKey)}</span>&nbsp;
-        <a className="sf-popup-fullscreen" href="#" onClick={handleOnFullScreen} >
-          <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()}/>
-        </a>
+        <LinkButton className="sf-popup-fullscreen" title={FrameMessage.Fullscreen.niceToString()} aria-label={FrameMessage.Fullscreen.niceToString()} onClick={handleOnFullScreen} >
+          <FontAwesomeIcon icon="up-right-from-square" aria-hidden={true} />
+        </LinkButton>
       </h2 >
       <ValidationErrors entity={cr} prefix="chartRequest" />
       <div>
@@ -212,14 +212,14 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
           className={classes("sf-query-button btn", showChartSettings && "active", "btn-tertiary")}
           onClick={() => { setShowChartSettings(!showChartSettings); }}
           title={titleLabels ? showChartSettings ? ChartMessage.HideChartSettings.niceToString() : ChartMessage.ShowChartSettings.niceToString() : undefined}>
-          <FontAwesomeIcon icon="sliders" />
+          <FontAwesomeIcon aria-hidden={true} icon="sliders" />
         </button>
         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
         {ChartClient.ButtonBarChart.getButtonBarElements({
           chartRequest: cr,
           chartRequestView: { chartRequest: cr, userChart: p.userChart, onChange: p.onChange, hideFiltersAndSettings: handleHideFiltersAndSettings }
         }).map((a, i) => React.cloneElement(a, { key: i }))}
-        <button className="btn btn-tertiary" onMouseUp={handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {ChartMessage.ListView.niceToString()}</button>
+        <button className="btn btn-tertiary" onMouseUp={handleExplore} ><FontAwesomeIcon aria-hidden={true} icon="magnifying-glass" /> &nbsp; {ChartMessage.ListView.niceToString()}</button>
       </div>
       <div className="sf-chart-tab-container">
         <Tabs id="chartResultTabs" key={showChartSettings + ""}>

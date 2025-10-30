@@ -23,6 +23,7 @@ import { VisualTipIcon } from '../Basics/VisualTipIcon'
 import { SearchVisualTip } from '../Signum.Basics'
 import { FilterHelp } from './SearchControlVisualTips'
 import { GroupHeader, HeaderType } from '../Lines/GroupHeader'
+import { LinkButton } from '../Basics/LinkButton'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -122,11 +123,12 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
                 <th className="ps-0">
                   <div className="d-flex">
                     {!p.readOnly && p.filterOptions.length > 0 &&
-                      <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteAllFilter.niceToString() : undefined}
+                      <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.DeleteAllFilter.niceToString() : undefined}
                         className="sf-line-button sf-remove sf-remove-filter-icon"
+                        tabIndex={0}
                         onClick={handleDeleteAllFilters}>
-                        <FontAwesomeIcon icon="xmark" />
-                      </a>}
+                        <FontAwesomeIcon aria-hidden={true} icon="xmark" />
+                      </LinkButton>}
                     {SearchMessage.Field.niceToString()}
                   </div>
                 </th>
@@ -172,22 +174,23 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
                 <tr className="sf-filter-create">
                   <td colSpan={4}>
                     {p.queryDescription && <VisualTipIcon visualTip={SearchVisualTip.FilterHelp} content={props => <FilterHelp queryDescription={p.queryDescription} injected={props} />} />}
-                    <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
+                    <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
                       className="sf-line-button sf-create sf-create-condition"
+                      tabIndex={0}
                       onClick={e => handlerNewFilter(e, false)}>
-                      <FontAwesomeIcon icon="plus" className="sf-create me-1" />{SearchMessage.AddFilter.niceToString()}
-                    </a>
-                    <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddOrGroup.niceToString() : undefined}
+                      <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create me-1" />{SearchMessage.AddFilter.niceToString()}
+                    </LinkButton>
+                    <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.AddOrGroup.niceToString() : undefined}
                       className="sf-line-button sf-create sf-create-group ms-3"
                       onClick={e => handlerNewFilter(e, true)}>
-                      <FontAwesomeIcon icon="plus" className="sf-create me-1" />{SearchMessage.AddOrGroup.niceToString()}
-                    </a>
+                      <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create me-1" />{SearchMessage.AddOrGroup.niceToString()}
+                    </LinkButton>
 
-                    {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.EditPinnedFilters.niceToString() : undefined}
+                    {p.showPinnedFiltersOptionsButton && <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.EditPinnedFilters.niceToString() : undefined}
                       className="sf-line-button ms-3"
-                      onClick={e => { e.preventDefault(); setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
-                      <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "pen-to-square"]} className="me-1" />{SearchMessage.EditPinnedFilters.niceToString()}
-                    </a>
+                      onClick={e => { setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
+                      <FontAwesomeIcon aria-hidden={true} color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "pen-to-square"]} className="me-1" />{SearchMessage.EditPinnedFilters.niceToString()}
+                    </LinkButton>
                     }
                   </td>
                 </tr>
@@ -328,8 +331,11 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
           <div className="d-flex">
             <a href={!readOnly ? "#" : undefined}
               className={classes("sf-line-button sf-remove sf-remove-filter-icon", readOnly && "disabled")}
+              role="button"
+              tabIndex={0}
+              title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
               onClick={!readOnly ? handleDeleteFilter : undefined}>
-              <FontAwesomeIcon icon="xmark" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined} />
+              <FontAwesomeIcon aria-hidden={true} icon="xmark" />
             </a>
 
             <div className="align-items-center d-flex">
@@ -368,7 +374,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
                 fixDashboardBehaviour(fg);
                 changeFilter();
               }} disabled={p.readOnly}>
-              <FontAwesomeIcon color="orange" icon={"thumbtack"} rotation={fg.pinned ? undefined : 90} style={{ minWidth: 15 }} />
+              <FontAwesomeIcon aria-hidden={true} color="orange" icon={"thumbtack"} rotation={fg.pinned ? undefined : 90} style={{ minWidth: 15 }} />
             </button>
           }
         </td>
@@ -410,17 +416,17 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
       {!p.readOnly &&
         <tr className="sf-filter-create">
           <td colSpan={4} style={{ paddingLeft: paddingLeftNext }}>
-            <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
+            <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={e => handlerNewFilter(e, false)}>
               <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
-            </a>
+            </LinkButton>
 
-            <a href="#" title={StyleContext.default.titleLabels ? (p.filterGroup.groupOperation == "And" ? SearchMessage.AddOrGroup.niceToString() : SearchMessage.AddAndGroup.niceToString()) : undefined}
+            <LinkButton title={StyleContext.default.titleLabels ? (p.filterGroup.groupOperation == "And" ? SearchMessage.AddOrGroup.niceToString() : SearchMessage.AddAndGroup.niceToString()) : undefined}
               className="sf-line-button sf-create ms-3"
               onClick={e => handlerNewFilter(e, true)}>
               <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.filterGroup.groupOperation == "And" ? SearchMessage.AddOrGroup.niceToString() : SearchMessage.AddAndGroup.niceToString()}
-            </a>
+            </LinkButton>
           </td>
         </tr>
       }
@@ -578,8 +584,9 @@ export function FilterConditionComponent(p: FilterConditionComponentProps): Reac
           <div className="d-flex">
             <a href={!readOnly ? "#" : undefined} title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
               className={classes("sf-line-button sf-remove sf-remove-filter-icon", readOnly && "disabled")}
+              role="button"
               onClick={!readOnly ? handleDeleteFilter : undefined}>
-              <FontAwesomeIcon icon="xmark" />
+              <FontAwesomeIcon aria-hidden={true} icon="xmark" />
             </a>
             <div className="rw-widget-xs">
               <QueryTokenBuilder
@@ -611,8 +618,9 @@ export function FilterConditionComponent(p: FilterConditionComponentProps): Reac
               fixDashboardBehaviour(f);
               changeFilter();
             }}
-              disabled={p.readOnly}>
-              <FontAwesomeIcon color="orange" icon={"thumbtack"} rotation={f.pinned ? undefined : 90} title={(f.pinned ? SearchMessage.PinFilter : SearchMessage.UnpinFilter).niceToString()} style={{ minWidth: 15 }} />
+              disabled={p.readOnly}
+              title={(f.pinned ? SearchMessage.PinFilter : SearchMessage.UnpinFilter).niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} color="orange" icon={"thumbtack"} rotation={f.pinned ? undefined : 90} style={{ minWidth: 15 }} />
             </button>
             }
           </td>
@@ -755,7 +763,7 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
     <Dropdown>
       <Dropdown.Toggle variant={p.filter.dashboardBehaviour ? "info" : "tertiary"} id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className={classes("px-1", p.filter.dashboardBehaviour ? "text-light" : "text-info")}
         title={StyleContext.default.titleLabels ? "Behaviour of the filter when used inside of a Dashboard" : undefined}>
-        {<FontAwesomeIcon icon="gauge" className={classes("icon", p.filter.dashboardBehaviour ? "text-light" : "text-info")} />}{p.filter.dashboardBehaviour ? " " + DashboardBehaviour.niceToString(p.filter.dashboardBehaviour) : ""}
+        {<FontAwesomeIcon aria-hidden={true} icon="gauge" className={classes("icon", p.filter.dashboardBehaviour ? "text-light" : "text-info")} />}{p.filter.dashboardBehaviour ? " " + DashboardBehaviour.niceToString(p.filter.dashboardBehaviour) : ""}
       </Dropdown.Toggle>
 
       <Dropdown.Menu>

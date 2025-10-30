@@ -127,8 +127,8 @@ export namespace AuthAdminClient {
       extraButtons: scl => [AppContext.isPermissionAuthorized(BasicPermission.AdminRules) && {
         order: -1,
         button: <button className="btn btn-info"
-          onClick={e => { e.preventDefault(); API.downloadAuthRules(); }}>
-          <FontAwesomeIcon icon="download" /> Download AuthRules.xml
+          onClick={e => { API.downloadAuthRules(); }}>
+          <FontAwesomeIcon aria-hidden={true} icon="download" /> Download AuthRules.xml
         </button>
       }]
     });

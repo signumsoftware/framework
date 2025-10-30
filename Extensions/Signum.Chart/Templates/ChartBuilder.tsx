@@ -115,7 +115,7 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
             }} 
           />
           Time machine
-          <FontAwesomeIcon className='mx-1' icon='clock-rotate-left' />
+          <FontAwesomeIcon aria-hidden={true} className='mx-1' icon='clock-rotate-left' />
         </label>
         {chart.chartTimeSeries && <ChartTimeSeries chartTimeSeries={chart.chartTimeSeries} chartBase={p.ctx.value} onChange={handleOnRedraw}/>}
       </div>}
@@ -123,10 +123,16 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
       <div className="col-lg-2">
         <div className="sf-chart-type bg-body rounded shadow-sm border-0 p-2">
           <h6 className="mb-3">{ChartMessage.ChartType.niceToString()}</h6>
-            {chartScripts?.map((cs, i) =>
-              <div key={i} className={chartTypeImgClass(cs)} title={cs.symbol.key.after(".")} onClick={() => handleChartScriptOnClick(cs)}>
+          {chartScripts?.map((cs, i) =>
+            <button
+              key={i}
+              type="button"
+              className={`sf-chart-button ${chartTypeImgClass(cs)}`}
+              title={cs.symbol.key.after(".")}
+              onClick={() => handleChartScriptOnClick(cs)}>
+              
                 <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} alt={cs.icon.fileName} />
-              </div>)}
+              </button>)}
             <NumberLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="xs" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger fw-bold" : undefined }} />
         </div>
       </div >

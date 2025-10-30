@@ -8,15 +8,15 @@ import { HelpImageEntity, HelpMessage } from '../Signum.Help';
 import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor';
 import { ErrorBoundary } from '@framework/Components';
 import { FilePathEmbedded, FileTypeSymbol } from '../../Signum.Files/Signum.Files';
-import { FilesClient } from '../../Signum.Files/FilesClient';
+import type { FilesClient } from '../../Signum.Files/FilesClient';
 import { IBinding, getSymbol } from '@framework/Reflection';
 import { FileImage } from '../../Signum.Files/Components/FileImage';
 import { toFileEntity } from '../../Signum.Files/Components/FileUploader';
-import { ListExtension } from '../../Signum.HtmlEditor/Extensions/ListExtension';
-import { BasicCommandsExtensions } from '../../Signum.HtmlEditor/Extensions/BasicCommandsExtension';
 import { ImageConverter } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
 import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
+import { LinkButton } from '@framework/Basics/LinkButton';
+
 
 export function EditableTextComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
   var [editable, setEditable] = React.useState(defaultEditable || false);
@@ -30,9 +30,9 @@ export function EditableTextComponent({ ctx, defaultText, onChange, defaultEdita
           defaultText ? <span>{defaultText}</span> :
             <span className="sf-no-text">[{ctx.niceName()}]</span>)
       }
-      {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active")} onClick={e => { e.preventDefault(); setEditable(!editable); }}>
-        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
-      </a>}
+      {!ctx.readOnly && <LinkButton className={classes("sf-edit-button", editable && "active")} title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} onClick={e => { setEditable(!editable); }}>
+        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2"  /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
+      </LinkButton>}
     </span>
   );
 }
@@ -48,9 +48,9 @@ export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEdita
 
       {editable ? <HelpHtmlEditor binding={ctx.binding} /> : <HtmlViewer text={ctx.value} /> }
 
-      {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active", ctx.value && "block")} onClick={e => { e.preventDefault(); setEditable(!editable); }}>
-        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
-      </a>}
+      {!ctx.readOnly && <LinkButton title={undefined} className={classes("sf-edit-button", editable && "active", ctx.value && "block")} onClick={e => { setEditable(!editable); }}>
+        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" aria-aria-hidden /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
+      </LinkButton>}
     </div>
   );
 }

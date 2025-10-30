@@ -22,6 +22,7 @@ import { Modal } from 'react-bootstrap'
 import { ModalFooterButtons, ModalHeaderButtons } from '../Components/ModalHeaderButtons'
 import WidgetEmbedded from './WidgetEmbedded'
 import SaveChangesModal from '../Modals/SaveChangesModal';
+import { LinkButton } from '../Basics/LinkButton';
 
 interface FrameModalProps<T extends ModifiableEntity> extends IModalProps<T | undefined> {
   title?: React.ReactNode | null;
@@ -40,6 +41,7 @@ interface FrameModalProps<T extends ModifiableEntity> extends IModalProps<T | un
   modalSize?: BsSize;
   createNew?: () => Promise<EntityPack<T> | undefined>;
   ref?: React.Ref<IHandleKeyboard>
+  innerRef?: React.Ref<IHandleKeyboard>
 }
 
 let modalCount = 0;
@@ -66,12 +68,11 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
 
   const forceUpdate = useForceUpdate();
 
-  React.useImperativeHandle(p.ref, () => ({
+  React.useImperativeHandle(p.innerRef, () => ({
     handleKeyDown(e: KeyboardEvent) {
       buttonBar.current && buttonBar.current.handleKeyDown(e);
     }
   }));
-
   const typeName = getTypeName(p.entityOrPack);
   const typeInfo = tryGetTypeInfo(typeName);
 
@@ -420,9 +421,9 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
       return undefined;
 
     return (
-      <a className="sf-popup-fullscreen sf-pointer" href="#" onClick={handlePopupFullScreen} title={FrameMessage.Fullscreen.niceToString()}>
-        <FontAwesomeIcon icon="up-right-from-square" />
-      </a>
+      <LinkButton className="sf-popup-fullscreen sf-pointer" tabIndex={0} onClick={handlePopupFullScreen} title={FrameMessage.Fullscreen.niceToString()}>
+        <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
+      </LinkButton>
     );
   }
 

@@ -57,7 +57,7 @@ function SaveChangesModal(p: SaveChangesModalProps): React.ReactElement {
             className="btn btn-secondary sf-close-button sf-no-button"
             onClick={() => handleButtonClicked("loseChanges")}
             name="no">
-            <FontAwesomeIcon icon={"arrow-rotate-left"} />&nbsp;{SaveChangesMessage.LoseChanges.niceToString()}
+            <FontAwesomeIcon aria-hidden={true} icon={"arrow-rotate-left"} />&nbsp;{SaveChangesMessage.LoseChanges.niceToString()}
           </button>
           <button
             className="btn btn-secondary sf-close-button sf-cancel-button"

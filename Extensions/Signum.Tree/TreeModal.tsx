@@ -9,6 +9,7 @@ import { FilterOption } from "@framework/FindOptions";
 import { Modal } from 'react-bootstrap';
 import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 import { useForceUpdate } from '@framework/Hooks'
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 interface TreeModalProps extends  IModalProps<TreeNode | undefined> {
   treeOptions: TreeOptions;
@@ -59,10 +60,10 @@ function TreeModal(p : TreeModalProps): React.JSX.Element {
       <ModalHeaderButtons onClose={handleCancelClicked}>
         <span className="sf-entity-title"> {p.title ?? getTypeInfo(p.treeOptions.typeName).nicePluralName}</span>
         &nbsp;
-        <a className="sf-popup-fullscreen" href="#" title={FrameMessage.Fullscreen.niceToString()} onClick={(e) => treeViewRef.current
+        <LinkButton className="sf-popup-fullscreen" title={FrameMessage.Fullscreen.niceToString()} onClick={(e) => treeViewRef.current
           && treeViewRef.current.handleFullScreenClick(e)}>
           <span className="fa fa-external-link"></span>
-        </a>
+        </LinkButton>
       </ModalHeaderButtons>
 
       <div className="modal-body">
