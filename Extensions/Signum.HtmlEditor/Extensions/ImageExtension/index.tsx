@@ -11,27 +11,49 @@ export class ImageExtension<T extends ImageInfoBase> implements HtmlEditorExtens
     const abortController = new AbortController();
     const element = controller.editableElement;
 
-    if(!element) return;
+    if (!element) return;
+
+    element.addEventListener("dragenter", (event) => {
+      if (!controller.editor.isEditable()) {
+        event.dataTransfer!.dropEffect = "none";
+      }
+      else {
+        event.dataTransfer!.dropEffect = "copy";
+      }
+    }, { signal: abortController.signal });
 
     element.addEventListener("dragover", (event) => {
-      event.preventDefault(); 
+      event.preventDefault();
+
+      if (!controller.editor.isEditable()) {
+        event.dataTransfer!.dropEffect = "none";
+        return;
+      }
+
+      event.dataTransfer!.dropEffect = "copy";
     }, { signal: abortController.signal });
 
     element.addEventListener("drop", (event) => {
-      event.preventDefault();
-      const files = event.dataTransfer?.files;
+      if (!controller.editor.isEditable())
+        return;
 
-      if(!files?.length) return;
+      event.preventDefault();
+
+      const files = event.dataTransfer?.files;
+      if (!files?.length) return;
+
       this.insertImageNodes(files, controller.editor, this.imageConverter);
     }, { signal: abortController.signal });
 
     element.addEventListener("paste", (event) => {
+      if (!controller.editor.isEditable()) return;
       const files = event.clipboardData?.files;
-      
-      if(!files?.length) return;
+      if (!files?.length) return;
+
       event.preventDefault();
       this.insertImageNodes(files, controller.editor, this.imageConverter);
     }, { signal: abortController.signal });
+
 
     const unsubscribeUpdateListener = controller.editor.registerUpdateListener(() => {
       if(!controller.editor || !this.imageConverter) return;
