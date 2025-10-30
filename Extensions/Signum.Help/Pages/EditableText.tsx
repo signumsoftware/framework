@@ -38,38 +38,39 @@ export function EditableTextComponent({ ctx, defaultText, onChange, defaultEdita
 }
   
 
-export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element{
+export function EditableHtmlComponent({ ctx, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
 
-  var [editable, setEditable] = React.useState(defaultEditable || false);
-  var forceUpdate = useForceUpdate();
+  const [editable, setEditable] = React.useState(defaultEditable || false);
 
   return (
     <div className="sf-edit-container">
-
-      {editable ? <HelpHtmlEditor binding={ctx.binding} /> : <HtmlViewer text={ctx.value} /> }
-
-      {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active", ctx.value && "block")} onClick={e => { e.preventDefault(); setEditable(!editable); }}>
-        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
-      </a>}
+      <HelpHtmlEditor binding={ctx.binding} readOnly={ctx.readOnly || !editable} />
+      {!ctx.readOnly && (
+        <a href="#" className={classes("sf-edit-button", editable && "active", ctx.value && "block")}
+          onClick={e => { e.preventDefault(); setEditable(ed => !ed); }}>
+          <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2"
+            title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
+        </a>
+      )}
     </div>
   );
 }
 
-export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined> }): React.JSX.Element {
-
+export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined>; readOnly?: boolean }): React.JSX.Element {
   return (
     <ErrorBoundary>
       <HtmlEditor
         binding={p.binding}
+        readOnly={p.readOnly}
         plugins={[
           new LinkExtension(),
           new BasicCommandsExtensions(),
           new ImageExtension(new InlineImageConverter())
-        ]} />
+        ]}
+      />
     </ErrorBoundary>
   );
 }
-
 
 export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?: React.HTMLAttributes<HTMLDivElement>; }): React.JSX.Element | null {
 
