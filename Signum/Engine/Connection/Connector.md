@@ -1,58 +1,88 @@
-## Connector
+# Connector
 
-[Database](../Database.md) and [Administrator](../Administrator.md) are static classes, and you usually save, retrieve and query objects with a certain level of ignorance of how the database looks ([Schema](../Schema.md)), or where it is physically located (connection string). 
+A **Connector** in Signum Framework is a connection factory that encapsulates the `Schema` and the `connectionString` required to access a specific database. The connector is typically configured globally for the application, but can be temporarily overridden for the current thread within a region of code. This enables flexible database access and transaction management, while keeping configuration centralized and consistent.
 
-Not having to pass the connectionString and the `Schema` as a parameter all the time doesn't mean that you don't have the flexibility to change it when you think it is necessary. In order to change the connection in a block of your code just use `Connector.Override`.
+The connector also holds a `Version` property (such as `SqlServerVersion` or `PostgresVersion`) that determines which features the underlying RDBMS supports. This allows Signum to adapt its behavior and enable or disable features based on the database version.
 
+Most operations in Signum use the globally configured connector, but you can override it for advanced scenarios such as multi-database loading, or testing. The override is thread-local and scoped, ensuring that changes do not affect other threads or requests.
 
-### Connector class
-You can think in a Connector class like the container that has all the information to access a specific database in a DBMS:
+For ecample [Database](../Database.md) and [Administrator](../Administrator.md) are static classes used to save, retrieve, and query objects, without needing to know the database structure ([Schema](../Schema.md)) or physical location (connection string).
 
-* The `connectionString`.
-* The `Schema`.
+If you need to change the connection for a block of code, use `Connector.Override`.
 
-Internally, Connection class is also the only gateway to access the database, it's not intended to be used by client code. [Executor](Executor.md) static class is what should be used if you want low-level ADO.Net access through the current connection. 
+## Connector Class
 
-You can also think of Connector class as a abstract factory of Connections: 
+The `Connector` base class defines common properties and methods for all database connectors:
 
-* **Connector:** abstract base class, 
-	* **SqConnector:** The only supported implementation, works with Microsoft SQL Server. Contains:
-		* `ConnectionString`: The connection string that will be used to create the connection. 
-		* `CommandTimeout`: Default timeout, optional.
-		* `IsolationLevel`: Default IsolationLevel, optional.
-	* **SqlCeConnector:** incomplete prototype
-	* ... maybe more in the future?
+- `Schema`: The database schema.
+- `ConnectionString`: The connection string for the database.
+- `Version`: The database version, used to determine feature support.
+- `CommandTimeout`: Optional default timeout for commands.
+- `ParameterBuilder`: Abstract property for creating database parameters.
+- `IsolationLevel`: Transaction isolation level.
+- `SqlBuilder`: SQL builder for the current connector.
+- Methods for connection management, transaction save/rollback, bulk operations, and error handling (as abstract or virtual).
 
-### Connector.Default and Connector.Override
+## Derived Connectors
 
-Typically, you application has just one main `Connector` and is set using `Connector.Default`. 
+### SqlServerConnector
+Implements Microsoft SQL Server support:
+- Detects and exposes `SqlServerVersion`.
+- Enables/disables features based on SQL Server version (snapshot isolation, SQL dependency, partitioning, etc.).
+- Handles SQL Server error codes and bulk copy logic.
+- Overrides properties and methods for SQL Server specifics (e.g., max name length, schema cleaning).
 
-`Connector.Default = new SqlConnector(connectionString, sb.Schema);`
+### PostgreSqlConnector
+Implements PostgreSQL support:
+- Detects and exposes `PostgresVersion`.
+- Enables/disables features based on PostgreSQL version (extensions, type reload, binary bulk import, etc.).
+- Handles PostgreSQL error codes and script splitting.
+- Overrides properties and methods for PostgreSQL specifics (e.g., max name length, extension management).
 
-`Connector` class has a static `Override` method that returns a `IDisposable` and let you switch `Connector.Current` to be something different to `Connector.Default` in a region of code. 
+## Usage
 
-```C#
-public static IDisposable Override(Connector connection)
+Set the main connector:
+```csharp
+Connector.Default = new SqlServerConnector(connectionString, schema, version);
+// or
+Connector.Default = new PostgreSqlConnector(connectionString, schema, version);
 ```
 
-**Note:** It's uncommon to use more than one `Connector` using Signum.Engine for something different that simple loading scenarios. Don't expect every module to work as expected using a non-default `Connector`. 
-
-### Connector.CommandTimeoutScope
-
-`Connector` class has a static `CommandTimeoutScope` method that returns a `IDisposable` and let you override the default `CommandTimeout` in a region of code.
-
-```C#
-public static IDisposable CommandTimeoutScope(int? timeoutMilliseconds)
-```
-
-Example: 
-
-```C#
-using(Connector.CommandTimeoutScope(3 * 60 * 1000)) // 3 mins
+Temporarily override the connector:
+```csharp
+using (Connector.Override(newConnector))
 {
-   // slow query here
+    // Code using newConnector
 }
 ```
+
+Override the command timeout:
+```csharp
+using (Connector.CommandTimeoutScope(3 * 60)) // 3 minutes
+{
+    // Slow query here
+}
+```
+
+## Related Classes
+- [Database](../Database.md): Main facade for entity operations
+- [Administrator](../Administrator.md): Schema and administrative operations
+- [Executor](Executor.md): Low-level ADO.NET access
+- [Schema](../Schema.md): Database schema
+
+## API Reference
+- `public static Connector Default { get; set; }`
+- `public static Connector Current { get; }`
+- `public static IDisposable Override(Connector connector)`
+- `public static IDisposable CommandTimeoutScope(int? timeoutSeconds)`
+- `public Schema Schema { get; }`
+- `public IsolationLevel IsolationLevel { get; set; }`
+- `public string ConnectionString { get; protected set; }`
+- `public int? CommandTimeout { get; set; }`
+- `public abstract ParameterBuilder ParameterBuilder { get; protected set; }`
+- `public Version Version { get; } // or SqlServerVersion/PostgresVersion in derived classes`
+
+See [Connector.cs](Connector.cs), [SqlServerConnector.cs](SqlServerConnector.cs), and [PostgreSqlConnector.cs](PostgreSqlConnector.cs) for more details.
 
 
 
