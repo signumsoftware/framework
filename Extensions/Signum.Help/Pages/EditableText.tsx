@@ -104,26 +104,33 @@ export interface ImageInfo extends ImageInfoBase {
 
 export class InlineImageConverter implements ImageConverter<ImageInfo>{
 
-  //static key = "help-image-inline"; 
-
   pr: PropertyRoute;
   constructor() {
     this.pr = HelpImageEntity.propertyRouteAssert(a => a.file);;
   }
 
-  toElement(val: ImageInfo): HTMLElement | undefined {
-    const img = document.createElement("img");
-    if (val.binaryFile) {
-      img.setAttribute("data-binary-file", val.binaryFile);
-      img.setAttribute("data-file-name", val.fileName || "");
-      img.setAttribute("data-converter-key", InlineImageConverter.name);
-      return img;
+  fromElement(element: HTMLDivElement): ImageInfo | undefined {
+    if (element.tagName == "IMG") {
+      return {
+        binaryFile: element.dataset["binaryFile"],
+        inlineImageId: element.dataset["helpImageId"],
+        fileName: element.dataset["fileName"],
+        converterKey: InlineImageConverter.name,
+      };
     }
 
-    if (val.inlineImageId) {
-      img.setAttribute("data-attachment-id", val.inlineImageId);
-      return img;
-    }
+    return undefined;
+  }
+
+  toElement(val: ImageInfo): HTMLElement | undefined {
+    const img = document.createElement("img");
+
+    val.binaryFile && img.setAttribute("data-binary-file", val.binaryFile);
+    val.inlineImageId && img.setAttribute("data-help-image-id", val.inlineImageId);
+
+    img.setAttribute("data-file-name", val.fileName || "");
+    img.setAttribute("data-converter-key", InlineImageConverter.name);
+    return img;
   }
 
   async uploadData(blob: Blob): Promise<ImageInfo> {
@@ -157,7 +164,7 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
     return <FileImage file={fp} />;
   }
 
-  toHtml(val: ImageInfo): string | undefined {
+/*  toHtml(val: ImageInfo): string | undefined {
     if (val.binaryFile)
       return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" />`;
 
@@ -165,18 +172,6 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
       return `<img data-help-image-id="${val.inlineImageId}" />`;
 
     return undefined;
-  }
+  }*/
 
-  fromElement(element: HTMLDivElement): ImageInfo | undefined {
-    if (element.tagName == "IMG") {
-      return {
-        converterKey: InlineImageConverter.name,
-        binaryFile: element.dataset["binaryFile"],
-        fileName: element.dataset["fileName"],
-        inlineImageId: element.dataset["helpImageId"],
-      };
-    }
-
-    return undefined;
-  }
 }
