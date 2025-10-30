@@ -21,10 +21,7 @@ import { getNiceTypeName } from '@framework/Operations/MultiPropertySetter'
 
 export default function TypeHelpPage(): React.JSX.Element {
   const params = useParams() as { cleanName: string };
-
   var hash = useHash();
-
-
 
   var cleanName = params.cleanName;
   var [typeHelp, reloadTypeHelp] = useAPIWithReload(() => HelpClient.API.type(cleanName), [cleanName]);
@@ -38,7 +35,6 @@ export default function TypeHelpPage(): React.JSX.Element {
       elem.scrollIntoView({ block: "center" });
 
   }, [hash, typeHelp]);
-
 
   useTitle(HelpMessage.Help.niceToString() +
     (namespaceHelp && (" > " + namespaceHelp.title)) +

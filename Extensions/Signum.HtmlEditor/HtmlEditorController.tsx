@@ -43,9 +43,8 @@ export class HtmlEditorController {
     this.plugins = p.plugins ?? [];
     this.editableElement = document.getElementById(p.editableId);
 
-    [this.overrideToolbar, this.setOverrideToolbar] = React.useState<
-      React.ReactElement | undefined
-    >(undefined);
+    [this.overrideToolbar, this.setOverrideToolbar] =
+      React.useState<React.ReactElement | undefined>(undefined);
 
     React.useEffect(() => {
       if (p.initiallyFocused) {
@@ -60,13 +59,13 @@ export class HtmlEditorController {
 
     const newValue = this.binding.getValue();
     React.useEffect(() => {
-      if(!this.editor) return;
+      if (!this.editor)
+        return;
 
       if (this.lastSavedString && this.lastSavedString.str === newValue) {
         this.lastSavedString = undefined;
         return;
       }
-
       
       const newState = this.converter.$convertFromText(this.editor, newValue ||'');
        
@@ -91,11 +90,11 @@ export class HtmlEditorController {
       (editor: LexicalEditor | null) => {
         this.editor = editor!;
         if (p.innerRef) {
-          if (typeof p.innerRef == "function") p.innerRef(editor);
-          else
-            (
-              p.innerRef as React.MutableRefObject<LexicalEditor | null>
-            ).current = editor;
+          if (typeof p.innerRef == "function") {
+            p.innerRef(editor);
+          } else {
+            (p.innerRef as React.MutableRefObject<LexicalEditor | null>).current = editor;
+          }
         }
       },
       [p.innerRef]
@@ -119,7 +118,8 @@ export class HtmlEditorController {
       .map((p) => p.getToolbarButtons?.(this))
       .notNull();
 
-    if (buttons.length == 0) return null;
+    if (buttons.length == 0)
+      return null;
 
     return React.createElement(
       React.Fragment,
