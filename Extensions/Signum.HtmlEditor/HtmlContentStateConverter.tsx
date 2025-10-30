@@ -22,7 +22,7 @@ export class HtmlContentStateConverter implements ITextConverter {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
 
-      createImagePlaceholders(doc);
+      //createImagePlaceholders(doc); //its purpose is unknown, corrupts saved inline images
       const nodes = $generateNodesFromDOM(editor, doc);
       $getRoot().clear().select();
       $getSelection()?.insertNodes(nodes);
