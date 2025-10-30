@@ -61,12 +61,8 @@ Command:
    ```
    **Note:** The null-propagating operator (`?.`) is still not supported in expression trees (such as those used by the Signum LINQ provider), until then you will need to use `!.` with explicit casts.
 
-### Best Practices
+## Summary
+- The null-propagating operator (`?.`) is not supported in expression trees, use (`!.`) instead. In Signum LINQ queries the behavioud is the same (`LEFT OUTER JOIN`). 
+- If an expression using `!.` returns a value type (`int`, `decimal`, `DateTime`...) you need to explicitly cast to the nullable version to *make place* for the `null` value, otherwise you will get a `FieldReaderException`.
 
-- Use nullable value types (`int?`) when projecting from relationships that may be `null`.
-- Use explicit casts to nullable types in LINQ queries; do not use the null-propagating operator (`?.`) in expression trees.
-- Filter out unwanted `null` results when necessary.
-
-C# now enforces nullability more strictly, helping you avoid mismatches. Learn to handle `FieldReaderException` by adjusting your queries as shown above.
-
-
+The current status is confusing... but is the only alternative we have given the state of the C# compiler. More infor [here](https://github.com/dotnet/csharplang/discussions/158).
