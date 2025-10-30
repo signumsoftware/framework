@@ -1,11 +1,11 @@
 import { $applyNodeReplacement, DecoratorNode, DOMExportOutput, NodeKey } from "lexical";
-import { ImageConverter } from "./ImageConverter";
+import { ImageConverter, ImageInfo } from "./ImageConverter";
 import { ReactElement, JSXElementConstructor } from "react";
 
-export class ImageNode<T extends object = {}> extends DecoratorNode<React.ReactElement> {
-  constructor(private fileInfo: T, private imageConverter: ImageConverter<T>, key?: NodeKey) {
+export class ImageNode extends DecoratorNode<React.ReactElement> {
+  constructor(private imageInfo: ImageInfo, private imageConverter: ImageConverter, key?: NodeKey) {
     super(key);
-    this.fileInfo = fileInfo;
+    this.imageInfo = imageInfo;
     this.imageConverter = imageConverter;
   }
 
@@ -14,7 +14,7 @@ export class ImageNode<T extends object = {}> extends DecoratorNode<React.ReactE
   }
 
   static clone(node: ImageNode): ImageNode {
-    return new ImageNode(node.fileInfo, node.imageConverter, node.__key);
+    return new ImageNode(node.imageInfo, node.imageConverter, node.__key);
   }
 
   createDOM(): HTMLElement {
@@ -26,24 +26,24 @@ export class ImageNode<T extends object = {}> extends DecoratorNode<React.ReactE
   }
 
   decorate(): ReactElement {
-    return this.imageConverter.renderImage(this.fileInfo);
+    return this.imageConverter.renderImage(this.imageInfo);
   }
 
   exportJSON(): any {
     return {
       type: "image",
-      uploadedFile: this.fileInfo,
+      uploadedFile: this.imageInfo,
       imageConverter: this.imageConverter,
       version: 1
     }
   }
 
   exportDOM(): DOMExportOutput {
-    const element =  this.imageConverter.toElement(this.fileInfo) ?? null;
+    const element =  this.imageConverter.toElement(this.imageInfo) ?? null;
     return { element: element };
   }
 }
 
-export function $createImageNode<T extends object = {}>(uploadedFile: T, imageConverter: ImageConverter<T>): ImageNode<T>{
+export function $createImageNode(uploadedFile: ImageInfo, imageConverter: ImageConverter): ImageNode {
   return $applyNodeReplacement(new ImageNode(uploadedFile, imageConverter));
 }

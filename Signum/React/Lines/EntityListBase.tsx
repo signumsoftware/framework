@@ -85,7 +85,6 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
 
   overrideProps(p: P, overridenProps: P): void {
     super.overrideProps(p, overridenProps);
-    debugger;
     if (p.type) {
       var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;
       if (avoidDuplicates) {
