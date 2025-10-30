@@ -85,7 +85,7 @@ export default function TypeHelpPage(): React.JSX.Element {
         <Shortcut text={`[t:${cleanName}]`} />
         <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={typeHelp.info} />
       </div>
-      <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} defaultEditable={typeHelp.isNew} onChange={forceUpdate} />
+      <EditableHtmlComponent key={"__type_help_main_editor__"} ctx={ctx.subCtx(a => a.description)} defaultEditable={typeHelp.isNew} onChange={forceUpdate} />
 
       <h2 className="display-6">{ctx.niceName(a => a.properties)}</h2>
       <dl className="row">
