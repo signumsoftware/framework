@@ -13,7 +13,6 @@ export interface CollapsableCardProps {
   collapsable?: boolean;
   isOpen?: boolean;
   toggle?: (isOpen: boolean, e: React.MouseEvent) => void;
-  cardId?: string | number;
   expandIcon?: IconProp;
   collapseIcon?: IconProp;
   cardStyle?: CardStyle;
@@ -22,6 +21,7 @@ export interface CollapsableCardProps {
   size?: "sm" | "xs";
   children?: React.ReactNode;
 }
+
 interface CardStyle {
   border?: BsColor;
   text?: BsColor;
@@ -36,10 +36,6 @@ function cardStyleClasses(style?: CardStyle) {
   )
 }
 
-export interface CollapsableCardState {
-  isOpen: boolean,
-  isRTL: boolean;
-}
 
 function isControlled(p: CollapsableCardProps): [boolean, (isOpen: boolean, e: React.MouseEvent) => void] {
   if ((p.isOpen != null) && (p.toggle == null))
@@ -68,7 +64,7 @@ export default function CollapsableCard(p: CollapsableCardProps): React.ReactEle
         {collapsable &&
           <span
             className={"float-end"}
-            style={{ cursor: "pointer" }}            
+            style={{ cursor: "pointer" }}
             onClick={e => setIsOpen(!isOpen, e)}
             title={isOpen ? CollapsableCardMessage.Collapse.niceToString() : CollapsableCardMessage.Expand.niceToString()}>
             <FontAwesomeIcon aria-hidden={true} icon={isOpen ? (p.collapseIcon ?? "chevron-up") : (p.expandIcon ?? "chevron-down")} />
