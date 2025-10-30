@@ -41,10 +41,11 @@ export function EditableTextComponent({ ctx, defaultText, onChange, defaultEdita
 export function EditableHtmlComponent({ ctx, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
 
   const [editable, setEditable] = React.useState(defaultEditable || false);
+  const readOnly = ctx.readOnly || !editable
 
   return (
-    <div className="sf-edit-container">
-      <HelpHtmlEditor binding={ctx.binding} readOnly={ctx.readOnly || !editable} />
+    <div className={classes("sf-edit-container", readOnly && "html-viewer")} >
+      <HelpHtmlEditor binding={ctx.binding} readOnly={readOnly} />
       {!ctx.readOnly && (
         <a href="#" className={classes("sf-edit-button", editable && "active", ctx.value && "block")}
           onClick={e => { e.preventDefault(); setEditable(ed => !ed); }}>
