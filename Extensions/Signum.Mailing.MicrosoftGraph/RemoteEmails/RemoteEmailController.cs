@@ -1,20 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Basics;
-using Signum.Mailing.Templates;
 using Signum.API.Filters;
-using Signum.Basics;
-using Signum.API;
 using Signum.Authorization;
 using Signum.Mailing.MicrosoftGraph.RemoteEmails;
-using Azure.Core;
 using Microsoft.Graph;
-using Signum.Authorization.ActiveDirectory;
-using System.Security.Cryptography;
 using Microsoft.Graph.Models;
-using DocumentFormat.OpenXml.Drawing;
-using Signum.Authorization.ActiveDirectory.Azure;
-using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Graph.Models.ODataErrors;
+using Signum.Authorization.AzureAD;
 
 namespace Signum.Mailing;
 
@@ -24,14 +15,13 @@ public class RemoteEmailController : ControllerBase
     [HttpGet("api/remoteEmail/{oid}/{messageId}/")]
     public async Task<RemoteEmailMessageModel> GetRemoteEmail([FromRoute] Guid oid, [FromRoute] string messageId)
     {
-
         try
         {
             var tokenCredential = AzureADLogic.GetTokenCredential();
 
             GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
 
-            var user = Database.Query<UserEntity>().Where(a => a.Mixin<UserADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
+            var user = Database.Query<UserEntity>().Where(a => a.Mixin<UserAzureADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
 
             var message = (await graphClient.Users[oid.ToString()].Messages[messageId].GetAsync(req =>
             {
@@ -88,7 +78,7 @@ public class RemoteEmailController : ControllerBase
 
         GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
 
-        var user = Database.Query<UserEntity>().Where(a => a.Mixin<UserADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
+        var user = Database.Query<UserEntity>().Where(a => a.Mixin<UserAzureADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
 
         var folders = (await graphClient.Users[oid.ToString()].MailFolders.GetAsync(req =>
         {

@@ -4,9 +4,9 @@ using Signum.Utilities.Reflection;
 using Signum.API;
 using Signum.DynamicQuery.Tokens;
 using Microsoft.Graph.Models.ODataErrors;
-using Signum.Authorization.ActiveDirectory.Azure;
 using Microsoft.Graph.Models;
 using Signum.UserAssets;
+using Signum.Authorization.AzureAD;
 
 namespace Signum.Mailing.MicrosoftGraph.RemoteEmails;
 

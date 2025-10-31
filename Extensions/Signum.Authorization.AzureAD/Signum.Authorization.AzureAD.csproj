@@ -32,8 +32,4 @@
 		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Windows\" />
-	</ItemGroup>
-
 </Project>

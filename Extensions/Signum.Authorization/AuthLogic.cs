@@ -964,12 +964,6 @@ public static class AuthLogic
 
 
 
-
-public interface ICustomAuthorizer
-{
-    UserEntity Login(string userName, string password, out string authenticationType);
-}
-
 public class InvalidRoleGraphException : Exception
 {
     public InvalidRoleGraphException() { }
