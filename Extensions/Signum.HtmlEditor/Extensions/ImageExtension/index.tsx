@@ -5,14 +5,14 @@ import {
   LexicalConfigNode,
   OptionalCallback,
 } from "../types";
-import { ImageConverter } from "./ImageConverter";
+import { ImageConverter, ImageInfo } from "./ImageConverter";
 import { $createImageNode, ImageNode } from "./ImageNode";
 
-export class ImageExtension<T extends object = {}>
+export class ImageExtension
   implements HtmlEditorExtension
 {
   name = "ImageExtension";
-  constructor(public imageConverter: ImageConverter<T>) {}
+  constructor(public imageConverter: ImageConverter) {}
 
   registerExtension(controller: HtmlEditorController): OptionalCallback {
     const abortController = new AbortController();
@@ -72,7 +72,7 @@ export class ImageExtension<T extends object = {}>
   async insertImageNodes(
     files: FileList,
     editor: LexicalEditor,
-    imageConverter: ImageConverter<T>
+    imageConverter: ImageConverter
   ): Promise<void> {
     const uploadPromises = Array.from(files)
       .filter((file) => file.type.startsWith("image/"))
@@ -99,16 +99,16 @@ export class ImageExtension<T extends object = {}>
   }
 
   replaceImagePlaceholders(controller: HtmlEditorController): void {
-    const attachments = (() => {
-      const value = controller.binding.getValue();
-      if (value)
-        return [...value.matchAll(/data-attachment-id="(\d+)"/g)].map(
-          (m) => m[1]
-        );
-      return [];
-    })();
+    //const attachments = (() => {
+    //  const value = controller.binding.getValue();
+    //  if (value)
+    //    return [...value.matchAll(/data-attachment-id="(\d+)"/g)].map(
+    //      (m) => m[1]
+    //    );
+    //  return [];
+    //})();
 
-    if (!attachments.length) return;
+    //if (!attachments.length) return;
 
     const editorState = controller.editor.getEditorState();
     let hasUpdatedNodes = false;
@@ -125,9 +125,9 @@ export class ImageExtension<T extends object = {}>
           if (match) {
             const before = text.slice(0, match.index!);
             const after = text.slice(match.index! + match[0].length);
-            const attachmentId = match[1];
+            const imageId = match[1];
 
-            const imageNode = $createImageNode({ attachmentId } as object, this.imageConverter);
+            const imageNode = $createImageNode({ imageId: imageId } as ImageInfo, this.imageConverter);
 
             // Replace the text node with the image node
             const replaced = node.replace(imageNode);
@@ -146,13 +146,10 @@ export class ImageExtension<T extends object = {}>
   }
 }
 
-export const IMAGE_PLACEHOLDER_REGEX: RegExp = /\[IMAGE_(\d+)\]/;
-
-export function extractAttachmentId(text: string): string | null {
-  const match = text.match(IMAGE_PLACEHOLDER_REGEX);
-  return match ? match[1] : null;
-}
+export const IMAGE_PLACEHOLDER_REGEX: RegExp = /\[IMAGE_([^\]]+)\]/;
 
 export function isImagePlaceholderRegex(text: string): boolean {
-  return IMAGE_PLACEHOLDER_REGEX.test(text);
+  var result = IMAGE_PLACEHOLDER_REGEX.test(text);
+
+  return result;
 }

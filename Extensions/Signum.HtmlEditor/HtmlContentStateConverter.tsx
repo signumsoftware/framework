@@ -7,22 +7,24 @@ export interface ITextConverter {
 }
 
 export class HtmlContentStateConverter implements ITextConverter {
-  $convertToText(
-    editor: LexicalEditor
-  ): ReturnType<ITextConverter["$convertToText"]> {
+
+  constructor(public dataImageIdAttribute: string | undefined) /*"data-attachment-id"*/ {
+
+  }
+
+  $convertToText(editor: LexicalEditor): string {
     return editor.read(() => fixListHTML($generateHtmlFromNodes(editor)));
   }
 
-  $convertFromText(
-    editor: LexicalEditor,
-    html: string
-  ): ReturnType<ITextConverter["$convertFromText"]> {
+  $convertFromText(editor: LexicalEditor, html: string): EditorState {
 
     editor.update(() => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
 
-      createImagePlaceholders(doc);
+      if (this.dataImageIdAttribute)
+        createImagePlaceholders(doc, this.dataImageIdAttribute);
+
       const nodes = $generateNodesFromDOM(editor, doc);
       $getRoot().clear().select();
       $getSelection()?.insertNodes(nodes);
@@ -33,12 +35,13 @@ export class HtmlContentStateConverter implements ITextConverter {
   }
 }
 
-function createImagePlaceholders(doc: Document) {
+function createImagePlaceholders(doc: Document, dataImageIdAttribute : string) {
   const imgElements = doc.querySelectorAll("img");
   for (let i = 0; i < imgElements.length; i++) {
     const img = imgElements[i];
-    const attachmentId = img.getAttribute("data-attachment-id");
-    if (!attachmentId) continue;
+    const attachmentId = img.getAttribute(dataImageIdAttribute);
+    if (!attachmentId)
+      continue;
 
     const placeholderText = `[IMAGE_${attachmentId}]`;
     img.replaceWith(document.createTextNode(placeholderText));

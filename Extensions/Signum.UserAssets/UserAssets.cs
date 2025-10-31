@@ -77,6 +77,8 @@ public enum UserAssetMessage
     UserAssetLines,
     Import,
     AssumeIs,
+    UsedBy,
+    Advanced,
 }
 
 [AutoInit]
