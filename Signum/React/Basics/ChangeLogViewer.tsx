@@ -160,8 +160,7 @@ function ShowLogs(p: { logs: ChangeLogClient.ChangeItem[], lastDate: DateTime | 
             cursor: "pointer"
           }}
           onClick={handleSeeMore}
-          aria-label={ChangeLogMessage.SeeMoreChangeLogEntries.niceToString()}
-        >
+          aria-label={ChangeLogMessage.SeeMoreChangeLogEntries.niceToString()}>
           {ChangeLogMessage.SeeMore.niceToString()}
         </button>
       )}

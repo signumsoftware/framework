@@ -99,6 +99,8 @@ export namespace DashboardMessage {
   export const CopyHealthCheckDashboardData: MessageKey = new MessageKey("DashboardMessage", "CopyHealthCheckDashboardData");
   export const _0CanOnlyBeUserInA1With2: MessageKey = new MessageKey("DashboardMessage", "_0CanOnlyBeUserInA1With2");
   export const InteractiveDashboard: MessageKey = new MessageKey("DashboardMessage", "InteractiveDashboard");
+  export const SelectIcon: MessageKey = new MessageKey("DashboardMessage", "SelectIcon");
+  export const Close: MessageKey = new MessageKey("DashboardMessage", "Close");
 }
 
 export namespace DashboardOperation {

@@ -688,7 +688,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       {
         order: -3,
-        button: <button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger" : "border-primary text-primary"))}
+        button: <button type="button" className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger" : "border-primary text-primary"))}
           onClick={this.handleSearchClick} title={changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()} >
           <FontAwesomeIcon aria-hidden={true} icon={changesExpected ? "magnifying-glass" : "refresh"} />{changesExpected && <span className="d-none d-sm-inline ms-1">{SearchMessage.Search.niceToString()}</span>}
         </button>
@@ -716,13 +716,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       ...(this.props.hideButtonBar ? [] : rightButtonBarElements),
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
-        button: <button className="btn btn-tertiary" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
+        button: <button type="button" className="btn btn-tertiary" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
           <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
         </button>
       },
 
       this.state.isMobile == true && this.getMobileOptions(this.props.findOptions).showSwitchViewModesButton && {
-        button: <button className="btn btn-tertiary" onClick={this.handleViewModeClick} title={SearchMessage.SwitchViewMode.niceToString()}>
+        button: <button type="button" className="btn btn-tertiary" onClick={this.handleViewModeClick} title={SearchMessage.SwitchViewMode.niceToString()}>
           <FontAwesomeIcon aria-hidden={true} icon={this.state.viewMode == "Mobile" ? "desktop" : "mobile-alt"} />
         </button>
       }
@@ -2355,7 +2355,7 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
 
   return (
     <Dropdown as={ButtonGroup} title={SearchMessage.Filters.niceToString()}>
-      <Button variant="tertiary" className="sf-filter-button" aria-label={SearchMessage.Filters.niceToString()} active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
+      <Button type="button" variant="tertiary" className="sf-filter-button" aria-label={SearchMessage.Filters.niceToString()} active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
         <FontAwesomeIcon aria-hidden={true} icon="filter" /> {activeFilters == 0 ? null : activeFilters}
       </Button>
       <Dropdown.Toggle variant="tertiary" split className="px-2" aria-label={SearchMessage.FilterTypeSelection.niceToString()}></Dropdown.Toggle>

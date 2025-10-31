@@ -429,6 +429,7 @@ export namespace EntityControlMessage {
   export const Minimize: MessageKey = new MessageKey("EntityControlMessage", "Minimize");
   export const _0Characters: MessageKey = new MessageKey("EntityControlMessage", "_0Characters");
   export const _0CharactersRemaining: MessageKey = new MessageKey("EntityControlMessage", "_0CharactersRemaining");
+  export const Close: MessageKey = new MessageKey("EntityControlMessage", "Close");
 }
 
 export namespace FrameMessage {
@@ -440,9 +441,32 @@ export namespace FrameMessage {
   export const Main: MessageKey = new MessageKey("FrameMessage", "Main");
 }
 
+export namespace HeavyProfilerMessage {
+  export const HeavyProfilerLoading: MessageKey = new MessageKey("HeavyProfilerMessage", "HeavyProfilerLoading");
+  export const HeavyProfiler: MessageKey = new MessageKey("HeavyProfilerMessage", "HeavyProfiler");
+  export const Upload: MessageKey = new MessageKey("HeavyProfilerMessage", "Upload");
+  export const Record: MessageKey = new MessageKey("HeavyProfilerMessage", "Record");
+  export const Update: MessageKey = new MessageKey("HeavyProfilerMessage", "Update");
+  export const Clear: MessageKey = new MessageKey("HeavyProfilerMessage", "Clear");
+  export const Download: MessageKey = new MessageKey("HeavyProfilerMessage", "Download");
+  export const IgnoreHeavyProfilerEntries: MessageKey = new MessageKey("HeavyProfilerMessage", "IgnoreHeavyProfilerEntries");
+  export const UploadPreviousRunsToComparePerformance: MessageKey = new MessageKey("HeavyProfilerMessage", "UploadPreviousRunsToComparePerformance");
+  export const EnableTheProfilerWithTheDebuggerWith0AndSaveTheResultsWith1: MessageKey = new MessageKey("HeavyProfilerMessage", "EnableTheProfilerWithTheDebuggerWith0AndSaveTheResultsWith1");
+  export const Entries: MessageKey = new MessageKey("HeavyProfilerMessage", "Entries");
+}
+
 export namespace HtmlEditorMessage {
   export const Hyperlink: MessageKey = new MessageKey("HtmlEditorMessage", "Hyperlink");
   export const EnterYourUrlHere: MessageKey = new MessageKey("HtmlEditorMessage", "EnterYourUrlHere");
+  export const Bold: MessageKey = new MessageKey("HtmlEditorMessage", "Bold");
+  export const Italic: MessageKey = new MessageKey("HtmlEditorMessage", "Italic");
+  export const Underline: MessageKey = new MessageKey("HtmlEditorMessage", "Underline");
+  export const Headings: MessageKey = new MessageKey("HtmlEditorMessage", "Headings");
+  export const UnorderedList: MessageKey = new MessageKey("HtmlEditorMessage", "UnorderedList");
+  export const OrderedList: MessageKey = new MessageKey("HtmlEditorMessage", "OrderedList");
+  export const Quote: MessageKey = new MessageKey("HtmlEditorMessage", "Quote");
+  export const CodeBlock: MessageKey = new MessageKey("HtmlEditorMessage", "CodeBlock");
+  export const Code: MessageKey = new MessageKey("HtmlEditorMessage", "Code");
 }
 
 export interface ImmutableEntity extends Entity {
@@ -749,6 +773,7 @@ export namespace SearchMessage {
   export const SelectAllResults: MessageKey = new MessageKey("SearchMessage", "SelectAllResults");
   export const _0ResultTable: MessageKey = new MessageKey("SearchMessage", "_0ResultTable");
   export const SelectRow0_: MessageKey = new MessageKey("SearchMessage", "SelectRow0_");
+  export const Enter: MessageKey = new MessageKey("SearchMessage", "Enter");
 }
 
 export namespace SelectorMessage {
@@ -771,6 +796,11 @@ export namespace SelectorMessage {
 export namespace SynchronizerMessage {
   export const EndOfSyncScript: MessageKey = new MessageKey("SynchronizerMessage", "EndOfSyncScript");
   export const StartOfSyncScriptGeneratedOn0: MessageKey = new MessageKey("SynchronizerMessage", "StartOfSyncScriptGeneratedOn0");
+}
+
+export namespace TemplateMessage {
+  export const Template: MessageKey = new MessageKey("TemplateMessage", "Template");
+  export const CopyToClipboard: MessageKey = new MessageKey("TemplateMessage", "CopyToClipboard");
 }
 
 export namespace VoidEnumMessage {

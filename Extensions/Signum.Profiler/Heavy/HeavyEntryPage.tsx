@@ -57,8 +57,8 @@ export default function HeavyEntry(): React.JSX.Element {
           <tr>
             <td colSpan={2}>
               <div className="btn-toolbar">
-                <button onClick={handleDownload} className="btn btn-info">{ProfilerMessage.Download.niceToString()}</button>
-                {!current.isFinished && <button onClick={() => reloadEntries()} className="btn btn-tertiary">{ProfilerMessage.Update.niceToString()}</button>}
+                <button type="button" onClick={handleDownload} className="btn btn-info">{ProfilerMessage.Download.niceToString()}</button>
+                {!current.isFinished && <button type="button" onClick={() => reloadEntries()} className="btn btn-tertiary">{ProfilerMessage.Update.niceToString()}</button>}
               </div>
             </td>
           </tr>

@@ -97,7 +97,14 @@ public enum LoginAuthMessage
 
 
     [Description("Invalid token date {0}")]
-    InvalidTokenDate0
+    InvalidTokenDate0,
+
+    [Description("Sign up with Azure B2C")]
+    SignUpWithAzureB2C,
+    [Description("Sign in with Azure B2C")]
+    SignInWithAzureB2C,
+    [Description("Login with Azure B2C")]
+    LoginWithAzureB2C,
 }
 
 [AllowUnauthenticated]

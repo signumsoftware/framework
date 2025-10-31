@@ -52,7 +52,7 @@ function SyncTable({ result, onSave, currentCulture }: { result: TranslationClie
     <div>
       {Dic.getValues(result.types)
         .map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={currentCulture} />)}
-      <button className="btn btn-primary" onClick={onSave}>{TranslationMessage.Save.niceToString()}</button>
+      <button type="button" className="btn btn-primary" onClick={onSave}>{TranslationMessage.Save.niceToString()}</button>
     </div>
   );
 }

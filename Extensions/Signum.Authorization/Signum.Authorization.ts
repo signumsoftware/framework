@@ -79,6 +79,9 @@ export namespace LoginAuthMessage {
   export const LoginWith0: MessageKey = new MessageKey("LoginAuthMessage", "LoginWith0");
   export const SignInWithMicrosoft: MessageKey = new MessageKey("LoginAuthMessage", "SignInWithMicrosoft");
   export const InvalidTokenDate0: MessageKey = new MessageKey("LoginAuthMessage", "InvalidTokenDate0");
+  export const SignUpWithAzureB2C: MessageKey = new MessageKey("LoginAuthMessage", "SignUpWithAzureB2C");
+  export const SignInWithAzureB2C: MessageKey = new MessageKey("LoginAuthMessage", "SignInWithAzureB2C");
+  export const LoginWithAzureB2C: MessageKey = new MessageKey("LoginAuthMessage", "LoginWithAzureB2C");
 }
 
 export const MergeStrategy: EnumType<MergeStrategy> = new EnumType<MergeStrategy>("MergeStrategy");

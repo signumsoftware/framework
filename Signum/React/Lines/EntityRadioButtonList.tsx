@@ -171,6 +171,7 @@ export function EntityRadioButtonListSelect<V extends Lite<Entity> | Entity | nu
         <input type="radio" style={{ marginLeft: "10px" }}
           checked={is(value, row.entity)}
           onClick={e => c.handleOnChange(row.entity as AsLite<V>)}
+          aria-disabled={p.ctx.readOnly}
           disabled={p.ctx.readOnly}/>
         &nbsp;
         {c.props.onRenderItem ? c.props.onRenderItem(row.entity as AsLite<V>) : <span>{getToString(row.entity) ?? p.nullPlaceHolder ?? " - "}</span>}

@@ -13,6 +13,7 @@ import { useDragAndDrop } from './TypeRulePackControl';
 import { GraphExplorer } from '@framework/Reflection';
 import SelectorModal from '../../../Signum/React/SelectorModal';
 import { AccessibleTable, AccessibleRow } from '../../../Signum/React/Basics/AccessibleTable';
+import { LinkButton } from '../../../Signum/React/Basics/LinkButton';
 
 export default function PropertyRulesPackControl({ ctx, initialTypeConditions, innerRef }: { ctx: TypeContext<PropertyRulePack>, initialTypeConditions: TypeConditionSymbol[] | undefined, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
 
@@ -43,8 +44,8 @@ export default function PropertyRulesPackControl({ ctx, initialTypeConditions, i
     const hasChanges = GraphExplorer.hasChanges(bc.pack.entity); 
 
     return [
-      { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
-      { button: <Button variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> }
+      { button: <Button type="button" variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
+      { button: <Button type="button" variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> }
     ];
   }
 
@@ -133,13 +134,13 @@ export default function PropertyRulesPackControl({ ctx, initialTypeConditions, i
               {PropertyRouteEntity.niceName()}
             </th>
             <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleHeaderClick(e, "Write")}>{PropertyAllowed.niceToString("Write")}</a>
+              <LinkButton title={undefined} onClick={e => handleHeaderClick(e, "Write")} style={{ color: "inherit" }}>{PropertyAllowed.niceToString("Write")}</LinkButton>
             </th>
             <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleHeaderClick(e, "Read")}>{PropertyAllowed.niceToString("Read")}</a>
+              <LinkButton title={undefined} onClick={e => handleHeaderClick(e, "Read")} style={{ color: "inherit" }}>{PropertyAllowed.niceToString("Read")}</LinkButton>
             </th>
             <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleHeaderClick(e, "None")}>{PropertyAllowed.niceToString("None")}</a>
+              <LinkButton title={undefined} onClick={e => handleHeaderClick(e, "None")} style={{ color: "inherit" }}>{PropertyAllowed.niceToString("None")}</LinkButton>
             </th>
             <th style={{ textAlign: "center" }}>
               {AuthAdminMessage.Overriden.niceToString()}

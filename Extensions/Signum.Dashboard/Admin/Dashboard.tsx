@@ -5,7 +5,7 @@ import { EntityLine, RenderEntity, EntityDetail, EntityRepeater, EntityTable, En
 import { tryGetTypeInfos, New, getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { TypeContext } from '@framework/TypeContext'
-import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, CacheQueryConfigurationEmbedded, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, TokenEquivalenceEmbedded } from '../Signum.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, CacheQueryConfigurationEmbedded, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, TokenEquivalenceEmbedded, DashboardMessage } from '../Signum.Dashboard'
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 import { DashboardClient } from "../DashboardClient";
 import { fallbackIcon, iconToString, parseIcon } from "@framework/Components/IconTypeahead";
@@ -78,7 +78,10 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
       <div>
         <div className="d-flex">
           {icon && <div className="mx-2">
-            <FontAwesomeIcon icon={fallbackIcon(icon)} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag as any}
+            <button
+              type="button"
+              style={{ background: "none", border: "none", padding: 0 }}
+              aria-label={DashboardMessage.SelectIcon.niceToString()}
               onClick={() => selectIcon(tc).then(a => {
                 if (a) {
                   tc.value.iconName = a.iconName;
@@ -87,7 +90,9 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
                   tc.value.modified = true;
                   forceUpdate();
                 }
-              })} />
+              })}>
+              <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag as any} />
+            </button>
           </div>}
           <div style={{ flexGrow: 1 }} className="me-2">
 
@@ -137,16 +142,21 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
             <AutoLine ctx={ctx.subCtx(cp => cp.displayName)}
               helpText={<div className="d-flex">
                 {icon && <div className="mx-2">
-                  <FontAwesomeIcon icon={icon} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "25px", cursor: "pointer" }}
+                  <button
+                    type="button"
+                    style={{ background: "none", border: "none", padding: 0 }}
+                    aria-label={DashboardMessage.SelectIcon.niceToString()}
                     onClick={() => selectIcon(ctx).then(a => {
-                      if (a) {
-                        ctx.value.iconName = a.iconName;
-                        ctx.value.iconColor = a.iconColor;
-                        ctx.value.titleColor = (a as DashboardEntity).titleColor;
-                        ctx.value.modified = true;
-                        forceUpdate();
-                      }
-                    })} />
+                        if (a) {
+                          ctx.value.iconName = a.iconName;
+                          ctx.value.iconColor = a.iconColor;
+                          ctx.value.titleColor = (a as DashboardEntity).titleColor;
+                          ctx.value.modified = true;
+                          forceUpdate();
+                        }
+                      })}>
+                    <FontAwesomeIcon aria-hidden={true} icon={icon} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} />
+                  </button>
                 </div>}
                 <CheckboxLine ctx={ctx.subCtx(cp => cp.hideDisplayName)} inlineCheckbox />
               </div>} />

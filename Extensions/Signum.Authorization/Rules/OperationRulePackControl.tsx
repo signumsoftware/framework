@@ -13,6 +13,7 @@ import { Binding, getOperationInfo, GraphExplorer } from '@framework/Reflection'
 import { useDragAndDrop } from './TypeRulePackControl'
 import SelectorModal from '../../../Signum/React/SelectorModal';
 import { AccessibleRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
+import { LinkButton } from '../../../Signum/React/Basics/LinkButton'
 
 
 
@@ -43,8 +44,8 @@ export default function OperationRulePackControl({ ctx, initialTypeConditions, i
     const hasChanges = GraphExplorer.hasChanges(bc.pack.entity);
 
     return [
-      { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
-      { button: <Button variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> }
+      { button: <Button type="button" variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
+      { button: <Button type="button" variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> }
     ];
   }
 
@@ -94,7 +95,7 @@ export default function OperationRulePackControl({ ctx, initialTypeConditions, i
                 </select>
 
                 {ctx.value.availableTypeConditions.length > 1 &&
-                  <button className="btn btn-xs btn-primary mx-1" onClick={e => {
+                  <button type="button" className="btn btn-xs btn-primary mx-1" onClick={e => {
                     var options = ["Fallback", ...ctx.value.availableTypeConditions.map(a => a.map(a => a.key).join(" & "))]
                       .filter(o => o != (typeConditions?.map(a => a.key).join(" & ") ?? "Fallback"))
                       .map(o => o.tryAfter(".") ?? o);
@@ -158,13 +159,13 @@ function OperationTable(p: {
             {OperationSymbol.niceName()}
           </th>
           <th style={{ textAlign: "center" }}>
-            <a onClick={e => handleHeaderClick(e, "Allow")}>{OperationAllowed.niceToString("Allow")}</a>
+            <LinkButton title={undefined} onClick={e => handleHeaderClick(e, "Allow")} style={{ color: "inherit" }}>{OperationAllowed.niceToString("Allow")}</LinkButton>
           </th>
           <th style={{ textAlign: "center" }}>
-            <a onClick={e => handleHeaderClick(e, "DBOnly")}>{OperationAllowed.niceToString("DBOnly")}</a>
+            <LinkButton title={undefined} onClick={e => handleHeaderClick(e, "DBOnly")} style={{ color: "inherit" }}>{OperationAllowed.niceToString("DBOnly")}</LinkButton>
           </th>
           <th style={{ textAlign: "center" }}>
-            <a onClick={e => handleHeaderClick(e, "None")}>{OperationAllowed.niceToString("None")}</a>
+            <LinkButton title={undefined} onClick={e => handleHeaderClick(e, "None")} style={{ color: "inherit" }}>{OperationAllowed.niceToString("None")}</LinkButton>
           </th>
           <th style={{ textAlign: "center" }}>
             {AuthAdminMessage.Overriden.niceToString()}

@@ -33,8 +33,8 @@ export default function TimesPage(): React.JSX.Element {
     <div>
       <h3 className="display-6">{TimeMessage.Times.niceToString()}</h3>
       <div className="btn-toolbar">
-        <button onClick={() => reloadTimes()} className="btn btn-tertiary">{TimeMessage.Reload.niceToString()}</button>
-        <button onClick={handleClear} className="btn btn-warning">{TimeMessage.Clear.niceToString()}</button>
+        <button type="button" onClick={() => reloadTimes()} className="btn btn-tertiary">{TimeMessage.Reload.niceToString()}</button>
+        <button type="button" onClick={handleClear} className="btn btn-warning">{TimeMessage.Clear.niceToString()}</button>
       </div>
       <br />
       <Tabs id="timeMachineTabs">

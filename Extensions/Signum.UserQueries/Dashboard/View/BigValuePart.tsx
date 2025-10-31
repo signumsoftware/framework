@@ -118,19 +118,9 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
 
   var custom = p.content.customBigValue ? BigValueClient.renderCustomBigValue(p.content.customBigValue, { content: p.content, entity: p.entity, value: vsc.current?.value }) : null; 
 
-  return (
-    <div className={classes("card", "border-tertiary shadow-sm mb-3 w-100", "o-hidden")}
-      style={{
-        backgroundColor: customColor ?? undefined,
-        color: Boolean(customColor) ? getColorContrasColorBWByHex(customColor!) : "var(--bs-body-color)"
-      }}>
-      <div className={classes("card-body")}
-        onClick={clickable ? (p.content.navigate ? handleNavigate : e => vsc.current!.handleClick(e)) : undefined}
-
-        style={{
-          cursor: clickable ? "pointer" : undefined,
-          color: p.partEmbedded.titleColor ?? (Boolean(customColor) ? getColorContrasColorBWByHex(customColor!) : "var(--bs-body-color)")
-        }}>
+  function renderCardContent() {
+    return (
+      <>
         <div className="dashboard-flex">
           <div className="left">
             <h3>
@@ -147,15 +137,45 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
           </div>
           <div className="right">
             {p.partEmbedded.iconName &&
-              <FontAwesomeIcon icon={parseIcon(p.partEmbedded.iconName)!} color={p.partEmbedded.iconColor ?? undefined} size="2x" />}
+              <FontAwesomeIcon role="img" icon={parseIcon(p.partEmbedded.iconName)!} color={p.partEmbedded.iconColor ?? undefined} size="2x" />}
           </div>
         </div>
         <h3 className="medium">{
           custom?.message ?? (translated(p.partEmbedded, a => a.title) ||
-              (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))
+            (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))
 
         }</h3>
-      </div>
+      </>
+    );
+  }
+
+  return (
+    <div className={classes("card", "border-tertiary shadow-sm mb-3 w-100", "o-hidden")}
+      style={{
+        backgroundColor: customColor ?? undefined,
+        color: Boolean(customColor) ? getColorContrasColorBWByHex(customColor!) : "var(--bs-body-color)"
+      }}>
+      {clickable ? (
+        <button
+          type="button"
+          onClick={p.content.navigate ? handleNavigate : e => vsc.current!.handleClick(e)}
+          className="card-body border-0 bg-transparent text-start w-100"
+          style={{
+            backgroundColor: customColor ?? undefined,
+            color: p.partEmbedded.titleColor ?? (customColor ? getColorContrasColorBWByHex(customColor!) : "var(--bs-body-color)"),
+          }}>
+          {renderCardContent()}
+        </button>
+      ) : (
+        <div
+          className="card-body"
+          style={{
+            backgroundColor: customColor ?? undefined,
+            color: p.partEmbedded.titleColor ?? (customColor ? getColorContrasColorBWByHex(customColor!) : "var(--bs-body-color)"),
+          }}>
+          {renderCardContent()}
+        </div>
+      )}
     </div>
   );
 
