@@ -19,9 +19,13 @@ import { EntityOperations, OperationButton } from '@framework/Operations/EntityO
 import { EntityOperationContext } from '@framework/Operations';
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
 import { SubTokensOptions } from '@framework/FindOptions';
+import { ToolbarEntity, ToolbarMenuEntity } from '../../Signum.Toolbar/Signum.Toolbar';
+import CollapsableCard from '@framework/Components/CollapsableCard';
+import { UserAssetMessage } from '../../Signum.UserAssets/Signum.UserAssets';
 
 export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
+  const ctx4 = p.ctx.subCtx({ labelColumns: 4 })
   function handleEntityTypeChange() {
     if (!p.ctx.value.entityType)
       p.ctx.value.embeddedInEntity = null;
@@ -108,7 +112,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
               </div>
             </div>
 
-            
+
           </div>
         </div>
       </div>
@@ -129,76 +133,85 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
   return (
     <div>
       <div>
+        <EntityLine ctx={ctx.subCtx(cp => cp.owner)} create={false} />
+        <AutoLine ctx={ctx.subCtx(cp => cp.displayName)}
+          helpText={<div className="d-flex">
+            {icon && <div className="mx-2">
+              <FontAwesomeIcon icon={icon} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "25px", cursor: "pointer" }}
+                onClick={() => selectIcon(ctx).then(a => {
+                  if (a) {
+                    ctx.value.iconName = a.iconName;
+                    ctx.value.iconColor = a.iconColor;
+                    ctx.value.titleColor = (a as DashboardEntity).titleColor;
+                    ctx.value.modified = true;
+                    forceUpdate();
+                  }
+                })} />
+            </div>}
+            <CheckboxLine ctx={ctx.subCtx(cp => cp.hideDisplayName)} inlineCheckbox />
+          </div>} />
+
+
         <div className="row">
           <div className="col-sm-8">
-            <EntityLine ctx={ctx.subCtx(cp => cp.owner)} create={false} />
-          </div>
-          <div className="col-sm-4">
-            <NumberLine ctx={ctxLabel5.subCtx(cp => cp.dashboardPriority)} />
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-sm-8">
-            <AutoLine ctx={ctx.subCtx(cp => cp.displayName)}
-              helpText={<div className="d-flex">
-                {icon && <div className="mx-2">
-                  <button
-                    type="button"
-                    style={{ background: "none", border: "none", padding: 0 }}
-                    aria-label={DashboardMessage.SelectIcon.niceToString()}
-                    onClick={() => selectIcon(ctx).then(a => {
-                        if (a) {
-                          ctx.value.iconName = a.iconName;
-                          ctx.value.iconColor = a.iconColor;
-                          ctx.value.titleColor = (a as DashboardEntity).titleColor;
-                          ctx.value.modified = true;
-                          forceUpdate();
-                        }
-                      })}>
-                    <FontAwesomeIcon aria-hidden={true} icon={icon} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} />
-                  </button>
-                </div>}
-                <CheckboxLine ctx={ctx.subCtx(cp => cp.hideDisplayName)} inlineCheckbox />
-              </div>} />
-          </div>
-          <div className="col-sm-4">
-            <AutoLine ctx={ctxLabel5.subCtx(cp => cp.autoRefreshPeriod)} />
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-sm-8">
-            <EntityLine ctx={ctx.subCtx(cp => cp.entityType)} onChange={handleEntityTypeChange}
-              helpText={ctx.value.entityType && <CheckboxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox /> }
+            <EntityLine ctx={ctx.subCtx(cp => cp.entityType)} onChange={handleEntityTypeChange} labelColumns={3}
+              helpText={ctx.value.entityType && <CheckboxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
             />
           </div>
           {ctx.value.entityType && <div className="col-sm-4">
             <AutoLine ctx={ctxLabel5.subCtx(f => f.embeddedInEntity)} />
           </div>}
         </div>
+
+        <CollapsableCard header={UserAssetMessage.Advanced.niceToString()} size="xs">
+
+          <div className="row">
+            <div className="col-sm-3 pt-3">
+              <NumberLine ctx={ctxBasic.subCtx(cp => cp.dashboardPriority)} />
+              <AutoLine ctx={ctxBasic.subCtx(cp => cp.autoRefreshPeriod)} />
+            </div>
+            {!ctx.value.isNew && <div className="col-sm-3">
+              <h5 className="mt-3">{UserAssetMessage.UsedBy.niceToString()}</h5>
+              <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarMenuEntity, filterOptions: [{ token: ToolbarMenuEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
+              <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarEntity, filterOptions: [{ token: ToolbarEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
+            </div>
+            }
+            <div className="col-sm-6">
+
+              <EntityDetail ctx={ctxBasic.subCtx(cp => cp.cacheQueryConfiguration)} avoidFieldSet="h5"
+                onChange={forceUpdate}
+                onCreate={() => Promise.resolve(CacheQueryConfigurationEmbedded.New({ timeoutForQueries: 5 * 60, maxRows: 1000 * 1000 }))}
+                getComponent={ectx =>
+                  <div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <AutoLine ctx={ectx.subCtx(cp => cp.timeoutForQueries)} />
+                      </div>
+                      <div className="col-sm-4">
+                        <AutoLine ctx={ectx.subCtx(cp => cp.maxRows)} />
+                      </div>
+                      <div className="col-sm-4">
+                        <AutoLine ctx={ectx.subCtx(cp => cp.autoRegenerateWhenOlderThan)} />
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        {!ctx.value.isNew && <SearchValueLine ctx={ectx} findOptions={{ queryName: CachedQueryEntity, filterOptions: [{ token: CachedQueryEntity.token(a => a.dashboard), value: ctxBasic.value }] }} />}
+                      </div>
+                      <div className="col-sm-4 pt-4">
+                        {!ctx.value.isNew && <OperationButton eoc={EntityOperationContext.fromTypeContext(ctx, DashboardOperation.RegenerateCachedQueries)} hideOnCanExecute className="w-100" />}
+                      </div>
+                    </div>
+                  </div>} />
+            </div>
+          </div>
+
+        </CollapsableCard>
       </div>
 
-      <EntityDetail ctx={ctxBasic.subCtx(cp => cp.cacheQueryConfiguration)}
-        onChange={forceUpdate}
-        onCreate={() => Promise.resolve(CacheQueryConfigurationEmbedded.New({ timeoutForQueries: 5 * 60, maxRows: 1000 * 1000 }))}
-        getComponent={ectx => <div className="row">
-          <div className="col-sm-2">
-            <AutoLine ctx={ectx.subCtx(cp => cp.timeoutForQueries)} />
-          </div>
-          <div className="col-sm-2">
-            <AutoLine ctx={ectx.subCtx(cp => cp.maxRows)} />
-          </div>
-          <div className="col-sm-2">
-            <AutoLine ctx={ectx.subCtx(cp => cp.autoRegenerateWhenOlderThan)} />
-          </div>
-          <div className="col-sm-2">
-            {!ctx.value.isNew && <SearchValueLine ctx={ectx} findOptions={{ queryName: CachedQueryEntity, filterOptions: [{ token: CachedQueryEntity.token(a => a.dashboard), value: ctxBasic.value }] }} />}
-          </div>
-          <div className="col-sm-3 pt-4">
-            {!ctx.value.isNew && <OperationButton eoc={EntityOperationContext.fromTypeContext(ctx, DashboardOperation.RegenerateCachedQueries)} hideOnCanExecute className="w-100" />}
-          </div>
-        </div>} />
 
-      <Tabs id={ctxBasic.getUniqueId("tabs")}>
+
+      <Tabs id={ctxBasic.getUniqueId("tabs")} className="mt-3">
         <Tab title={ctxBasic.niceName(a => a.parts)} eventKey="parts">
           <CheckboxLine ctx={ctxBasic.subCtx(cp => cp.combineSimilarRows)} inlineCheckbox={true} />
           <div className="sf-dashboard-admin">
@@ -206,7 +219,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
           </div>
         </Tab>
         <Tab title={ctxBasic.niceName(a => a.tokenEquivalencesGroups)} eventKey="equivalences">
-          <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "xs" })} avoidFieldSet getComponent={ctxGr => 
+          <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "xs" })} avoidFieldSet getComponent={ctxGr =>
             <div>
               <EnumLine ctx={ctxGr.subCtx(pp => pp.interactionGroup)}
                 onRenderDropDownListItem={(io) => <span className="sf-dot-container"><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
@@ -225,10 +238,10 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
               ]}
               />
             </div>
-          }/>
+          } />
         </Tab>
 
-        </Tabs>
+      </Tabs>
     </div>
   );
 

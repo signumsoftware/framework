@@ -7,7 +7,8 @@ export const useRegisterExtensions = (
   extensions: HtmlEditorExtension[] = []
 ): void => {
   React.useEffect(() => {
-    if (!controller?.editor) return;
+    if (!controller?.editor)
+      return;
 
     const unsubscribeFns = extensions
       .flatMap((plugin) => [plugin.registerExtension?.(controller)])

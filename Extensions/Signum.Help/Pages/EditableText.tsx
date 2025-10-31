@@ -12,7 +12,7 @@ import type { FilesClient } from '../../Signum.Files/FilesClient';
 import { IBinding, getSymbol } from '@framework/Reflection';
 import { FileImage } from '../../Signum.Files/Components/FileImage';
 import { toFileEntity } from '../../Signum.Files/Components/FileUploader';
-import { ImageConverter } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
+import { ImageConverter, ImageInfo } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
 import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
 import { LinkButton } from '@framework/Basics/LinkButton';
@@ -94,14 +94,11 @@ export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?
   );
 }
 
-export interface ImageInfo {
-  inlineImageId?: string;
-  binaryFile?: string;
-  fileName?: string;
-}
 
-export class InlineImageConverter implements ImageConverter<ImageInfo>{
 
+export class InlineImageConverter implements ImageConverter{
+
+  dataImageIdAttribute = "data-help-image-id";
   pr: PropertyRoute;
   constructor() {
     this.pr = HelpImageEntity.propertyRouteAssert(a => a.file);;
@@ -115,8 +112,8 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
       return img;
     }
 
-    if (val.inlineImageId) {
-      img.setAttribute("data-attachment-id", val.inlineImageId);
+    if (val.imageId) {
+      img.setAttribute("data-help-image-id", val.imageId);
       return img;
     }
   }
@@ -138,7 +135,7 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
   renderImage(info: ImageInfo): React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> {
     var fp = FilePathEmbedded.New({
       binaryFile: info.binaryFile,
-      entityId: info.inlineImageId,
+      entityId: info.imageId,
       mListRowId: null,
       fileType: getSymbol(FileTypeSymbol, this.pr.member!.defaultFileTypeInfo!.key),
       rootType: this.pr.findRootType().name,
@@ -155,8 +152,8 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
     if (val.binaryFile)
       return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" />`;
 
-    if (val.inlineImageId)
-      return `<img data-help-image-id="${val.inlineImageId}" />`;
+    if (val.imageId)
+      return `<img data-help-image-id="${val.imageId}" />`;
 
     return undefined;
   }
@@ -166,7 +163,7 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
       return {
         binaryFile: element.dataset["binaryFile"],
         fileName: element.dataset["fileName"],
-        inlineImageId: element.dataset["helpImageId"],
+        imageId: element.dataset["helpImageId"],
       };
     }
 

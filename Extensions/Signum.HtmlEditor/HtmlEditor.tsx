@@ -116,6 +116,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
         <RichTextPlugin
           contentEditable={
             <ContentEditable
+              ref={controller.setContentEditableRef}
               id={editableId}
               className="public-DraftEditor-content"
               onFocus={(event: React.FocusEvent) => {
@@ -130,7 +131,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
           placeholder={Boolean(placeholder) ? <div className="sf-html-editor-placeholder">{placeholder}</div> : undefined}
           ErrorBoundary={LexicalErrorBoundary}
         />
-        <EditorRefPlugin editorRef={controller.setRefs} />
+        <EditorRefPlugin editorRef={controller.setEditorRef} />
         <HistoryPlugin />
         {builtinComponents.map(({ component: Component, props }) => <Component key={Component.name} {...props} />)}
       </LexicalComposer>

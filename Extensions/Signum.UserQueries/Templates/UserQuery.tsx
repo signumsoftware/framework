@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { HealthCheckConditionEmbedded, SystemTimeEmbedded, UserQueryEntity, UserQueryMessage } from '../Signum.UserQueries'
+import { BigValuePartEntity, HealthCheckConditionEmbedded, SystemTimeEmbedded, UserQueryEntity, UserQueryMessage, UserQueryPartEntity } from '../Signum.UserQueries'
 import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip, CheckboxLine, TextBoxLine, EntityDetail, EnumLine, NumberLine } from '@framework/Lines'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
@@ -13,6 +13,11 @@ import { SearchMessage, getToString, toLite } from '@framework/Signum.Entities'
 import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 import { CopyHealthCheckButton } from '@framework/Components/CopyHealthCheckButton'
 import { UserQueryClient } from '../UserQueryClient'
+import { ToolbarEntity, ToolbarMenuEntity } from '../../Signum.Toolbar/Signum.Toolbar'
+import { DashboardEntity } from '../../Signum.Dashboard/Signum.Dashboard'
+import { SearchValueLine } from '@framework/Search'
+import { UserAssetMessage } from '../../Signum.UserAssets/Signum.UserAssets'
+import CollapsableCard from '@framework/Components/CollapsableCard'
 
 const CurrentEntityKey = "[CurrentEntity]";
 
@@ -61,29 +66,51 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
                 {p.ctx.value.entityType && <CheckboxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
               </div>
             } />
+        <div className="row"> 
+          <div className="offset-sm-2 col-sm-10">
 
+          <CollapsableCard header={UserAssetMessage.Advanced.niceToString()} size="xs">
+              <div className="row mt-2 mb-2">
+                <div className="col-sm-6">
+                  <AutoLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
+                    helpText={UserQueryMessage.MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0.niceToString(UserQueryEntity.niceName(), query?.key)} />
+                  <AutoLine ctx={ctx4.subCtx(e => e.refreshMode)} />
+                  <EntityStrip ctx={ctx4.subCtx(e => e.customDrilldowns)}
+                    findOptions={getCustomDrilldownsFindOptions()}
+                    avoidDuplicates={true}
+                    vertical={true}
+                    iconStart={true} />
+                </div>
 
-
-          <div className="row">
-            <div className="col-sm-6">
-              <AutoLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
-                helpText={UserQueryMessage.MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0.niceToString(UserQueryEntity.niceName(), query?.key)} />
-
-            </div>
-            <div className="col-sm-6">
-              <AutoLine ctx={ctx4.subCtx(e => e.refreshMode)} />
-              <EntityStrip ctx={ctx4.subCtx(e => e.customDrilldowns)}
-                findOptions={getCustomDrilldownsFindOptions()}
-                avoidDuplicates={true}
-                vertical={true}
-                iconStart={true} />
-            </div>
+                <div className="col-sm-6">
+                  {!ctx.value.isNew &&
+                    <div>
+                      <h5 className="mt-0">{UserAssetMessage.UsedBy.niceToString()}</h5>
+                      <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarMenuEntity, filterOptions: [{ token: ToolbarMenuEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
+                      <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarEntity, filterOptions: [{ token: ToolbarEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
+                      <SearchValueLine ctx={ctx4} findOptions={{
+                        queryName: DashboardEntity,
+                        filterOptions: [
+                          {
+                            token: DashboardEntity.token(a => a.entity.parts).any(), groupOperation: "Or",
+                            filters: [
+                              { token: DashboardEntity.token(a => a.entity.parts).any().append(a => a.content).cast(BigValuePartEntity).append(a => a.userQuery), value: ctx.value },
+                              { token: DashboardEntity.token(a => a.entity.parts).any().append(a => a.content).cast(UserQueryPartEntity).append(a => a.userQuery), value: ctx.value },
+                            ]
+                          }
+                        ]
+                      }} />
+                    </div>
+                  }
+                </div>
+              </div>
+            </CollapsableCard>
           </div>
-
-        <div>
-          <h5 className="d-inline-block">
-            <CheckboxLine ctx={ctx4.subCtx(e => e.groupResults)} onChange={handleOnGroupResultsChange} inlineCheckbox="block" formSize="lg" />
-          </h5>
+        </div>
+          <div>
+            <h4 className="d-inline-block">
+              <CheckboxLine ctx={ctx4.subCtx(e => e.groupResults)} onChange={handleOnGroupResultsChange} inlineCheckbox="block" formSize="lg" />
+            </h4>
 
             <div className="my-2">
               <h4>{ctx.niceName(a => a.filters)}</h4>
@@ -97,86 +124,86 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
               </div>
             </div>
 
-          <div className="my-2">
-            <h4>{ctx.niceName(a => a.columns)}</h4>
-            <div className="ms-3">
-              <AutoLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
+            <div className="my-2">
+              <h4>{ctx.niceName(a => a.columns)}</h4>
+              <div className="ms-3">
+                <AutoLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
 
-              <EntityTable ctx={ctxxs.subCtx(e => e.columns)} avoidFieldSet columns={[
-                {
-                  property: a => a.token,
-                  template: (ctx, row) =>
-                    <div>
-                      <QueryTokenEmbeddedBuilder
-                        ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
-                        queryKey={p.ctx.value.query!.key}
-                        onTokenChanged={() => { ctx.value.summaryToken = null; ctx.value.modified = true; row.forceUpdate(); }}
-                        subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | (canAggregate ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual) | canTimeSeries} />
+                <EntityTable ctx={ctxxs.subCtx(e => e.columns)} avoidFieldSet columns={[
+                  {
+                    property: a => a.token,
+                    template: (ctx, row) =>
+                      <div>
+                        <QueryTokenEmbeddedBuilder
+                          ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
+                          queryKey={p.ctx.value.query!.key}
+                          onTokenChanged={() => { ctx.value.summaryToken = null; ctx.value.modified = true; row.forceUpdate(); }}
+                          subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | (canAggregate ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual) | canTimeSeries} />
 
-                      <div className="d-flex">
-                        <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
-                          <input type="checkbox" className="form-check-input" disabled={ctx.value.token == null} checked={ctx.value.summaryToken != null} onChange={() => {
-                            ctx.value.summaryToken = ctx.value.summaryToken == null ? QueryTokenEmbedded.New(ctx.value.token) : null;
-                            ctx.value.modified = true;
-                            row.forceUpdate();
-                          }} /> {SearchMessage.SummaryHeader.niceToString()}
-                        </label>
-                        <div className="flex-grow-1">
-                          {ctx.value.summaryToken &&
-                            <QueryTokenEmbeddedBuilder
-                              ctx={ctx.subCtx(a => a.summaryToken, { formGroupStyle: "SrOnly" })}
-                              queryKey={p.ctx.value.query!.key}
-                              subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
-                          }
+                        <div className="d-flex">
+                          <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
+                            <input type="checkbox" className="form-check-input" disabled={ctx.value.token == null} checked={ctx.value.summaryToken != null} onChange={() => {
+                              ctx.value.summaryToken = ctx.value.summaryToken == null ? QueryTokenEmbedded.New(ctx.value.token) : null;
+                              ctx.value.modified = true;
+                              row.forceUpdate();
+                            }} /> {SearchMessage.SummaryHeader.niceToString()}
+                          </label>
+                          <div className="flex-grow-1">
+                            {ctx.value.summaryToken &&
+                              <QueryTokenEmbeddedBuilder
+                                ctx={ctx.subCtx(a => a.summaryToken, { formGroupStyle: "SrOnly" })}
+                                queryKey={p.ctx.value.query!.key}
+                                subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
+                            }
+                          </div>
                         </div>
                       </div>
-                    </div>
-                },
-                {
-                  property: a => a.displayName,
-                  template: (ctx, row) => <TextBoxLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
-                    helpText={
-                      <div>
-                        <AutoLine ctx={ctx.subCtx(a => a.combineRows)} readOnly={ctx.value.hiddenColumn} />
-                        <CheckboxLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox="block" onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; ctx.value.combineRows = null; row.forceUpdate(); }} />
-                      </div>
-                    }
-                  />
-                },
-              ]} />
+                  },
+                  {
+                    property: a => a.displayName,
+                    template: (ctx, row) => <TextBoxLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
+                      helpText={
+                        <div>
+                          <AutoLine ctx={ctx.subCtx(a => a.combineRows)} readOnly={ctx.value.hiddenColumn} />
+                          <CheckboxLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox="block" onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; ctx.value.combineRows = null; row.forceUpdate(); }} />
+                        </div>
+                      }
+                    />
+                  },
+                ]} />
 
+              </div>
+            </div>
+
+            <div className="my-4">
+              <h4>{ctx.niceName(a => a.orders)}</h4>
+              <div className="ms-3">
+                <EntityTable ctx={ctxxs.subCtx(e => e.orders)} avoidFieldSet columns={[
+                  {
+                    property: a => a.token,
+                    template: ctx => <QueryTokenEmbeddedBuilder
+                      ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
+                      queryKey={p.ctx.value.query!.key}
+                      subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate | canTimeSeries} />
+                  },
+                  { property: a => a.orderType }
+                ]} />
+              </div>
             </div>
           </div>
 
           <div className="my-4">
-            <h4>{ctx.niceName(a => a.orders)}</h4>
-            <div className="ms-3">
-              <EntityTable ctx={ctxxs.subCtx(e => e.orders)} avoidFieldSet columns={[
-                {
-                  property: a => a.token,
-                  template: ctx => <QueryTokenEmbeddedBuilder
-                    ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
-                    queryKey={p.ctx.value.query!.key}
-                    subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate | canTimeSeries} />
-                },
-                { property: a => a.orderType }
-              ]} />
+            <h5>{UserQueryMessage.Pagination.niceToString()}</h5>
+
+            <div className=" ms-3 row">
+              <div className="col-sm-6">
+                <AutoLine ctx={ctxxs.subCtx(e => e.paginationMode, { labelColumns: { sm: 4 } })} formGroupStyle="Basic" />
+              </div>
+              <div className="col-sm-6">
+                <AutoLine ctx={ctxxs.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } })} formGroupStyle="Basic" />
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="my-4">
-          <h5>{UserQueryMessage.Pagination.niceToString()}</h5>
-
-          <div className=" ms-3 row">
-            <div className="col-sm-6">
-              <AutoLine ctx={ctxxs.subCtx(e => e.paginationMode, { labelColumns: { sm: 4 } })} formGroupStyle="Basic" />
-            </div>
-            <div className="col-sm-6">
-              <AutoLine ctx={ctxxs.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } })} formGroupStyle="Basic" />
-            </div>
-          </div>
-        </div>
 
           {(hasSystemTime || ctx.value.systemTime) && <EntityDetail ctx={ctx.subCtx(a => a.systemTime)} avoidFieldSet="h5"
             getComponent={st => <SystemTime ctx={st} />} />}
@@ -194,8 +221,9 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
                 <HealthCondition ctx={hcctx.subCtx(a => a.failWhen)} color="var(--bs-danger-bg-subtle)" queryNiceName={getQueryNiceName(qd.queryKey)} />
                 <HealthCondition ctx={hcctx.subCtx(a => a.degradedWhen)} color="var(--bs-warning-bg-subtle)" queryNiceName={getQueryNiceName(qd.queryKey)} />
               </div>} />
-        </div>)
-      }
+        </div>)}
+
+
     </div>
   );
 

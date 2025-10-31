@@ -355,13 +355,15 @@ public static class QueryUtils
             return token.SubTokensInternal(options);
     }
 
+    public static readonly Regex SplitRegex = new Regex(@"(?<!\[[^\]]*)\.(?![^\[]*\])");
+
     public static QueryToken Parse(string tokenString, QueryDescription qd, SubTokensOptions options)
     {
         if (string.IsNullOrEmpty(tokenString))
             throw new ArgumentNullException(nameof(tokenString));
 
         //Dot not inside of brackets
-        string[] parts = Regex.Split(tokenString, @"(?<!\[[^\]]*)\.(?![^\[]*\])");
+        string[] parts = SplitRegex.Split(tokenString);
 
         string firstPart = parts.FirstEx();
 
@@ -385,7 +387,7 @@ public static class QueryUtils
             return null;
 
         //https://stackoverflow.com/questions/35418597/split-string-on-the-dot-characters-that-are-not-inside-of-brackets
-        string[] parts = Regex.Split(tokenString, @"\.(?!([^[]*\]|[^(]*\)))");
+        string[] parts = SplitRegex.Split(tokenString);
 
         string firstPart = parts.FirstEx();
 

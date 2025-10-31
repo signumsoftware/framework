@@ -24,8 +24,6 @@ export default function TypeHelpPage(): React.JSX.Element {
 
   var hash = useHash();
 
-
-
   var cleanName = params.cleanName;
   var [typeHelp, reloadTypeHelp] = useAPIWithReload(() => HelpClient.API.type(cleanName), [cleanName]);
   var namespaceHelp = useAPI(() => !typeHelp ? Promise.resolve(undefined) : HelpClient.API.namespace(typeHelp.type.namespace), [typeHelp]);

@@ -13,7 +13,6 @@ export interface CollapsableCardProps {
   collapsable?: boolean;
   isOpen?: boolean;
   toggle?: (isOpen: boolean, e: React.MouseEvent) => void;
-  cardId?: string | number;
   expandIcon?: IconProp;
   collapseIcon?: IconProp;
   cardStyle?: CardStyle;
@@ -22,6 +21,7 @@ export interface CollapsableCardProps {
   size?: "sm" | "xs";
   children?: React.ReactNode;
 }
+
 interface CardStyle {
   border?: BsColor;
   text?: BsColor;
@@ -36,10 +36,6 @@ function cardStyleClasses(style?: CardStyle) {
   )
 }
 
-export interface CollapsableCardState {
-  isOpen: boolean,
-  isRTL: boolean;
-}
 
 function isControlled(p: CollapsableCardProps): [boolean, (isOpen: boolean, e: React.MouseEvent) => void] {
   if ((p.isOpen != null) && (p.toggle == null))

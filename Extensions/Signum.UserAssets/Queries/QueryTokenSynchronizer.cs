@@ -32,8 +32,8 @@ public static class QueryTokenSynchronizer
     {
         List<QueryToken> tokenList = newToken.Follow(a => a.Parent).Reverse().ToList();
 
-        string[] oldParts = oldTokenString.Split('.');
-        string[] newParts = newToken.FullKey().Split('.');
+        string[] oldParts = QueryUtils.SplitRegex.Split(oldTokenString);
+        string[] newParts = QueryUtils.SplitRegex.Split(newToken.FullKey());
 
         List<string> oldPartsList = oldParts.ToList();
         List<string> newPartsList = newParts.ToList();
@@ -80,7 +80,7 @@ public static class QueryTokenSynchronizer
 
     static bool TryParseRemember(Replacements replacements, string tokenString, QueryDescription qd, SubTokensOptions options, out QueryToken? result)
     {
-        string[] parts = tokenString.Split('.');
+        string[] parts = QueryUtils.SplitRegex.Split(tokenString);
 
         result = null;
         for (int i = 0; i < parts.Length; i++)
@@ -139,7 +139,7 @@ public static class QueryTokenSynchronizer
                 if (old == null)
                     return false;
 
-                var subParts = dic[old].Let(s => s.HasText() ? s.Split('.') : new string[0]);
+                var subParts = dic[old].Let(s => s.HasText() ? QueryUtils.SplitRegex.Split(s) : new string[0]);
 
                 for (int j = 0; j < subParts.Length; j++)
                 {
@@ -153,7 +153,7 @@ public static class QueryTokenSynchronizer
                     result = subNewResult;
                 }
 
-                i += (old == "" ? 0 : old.Split('.').Length) - 1;
+                i += (old == "" ? 0 : QueryUtils.SplitRegex.Split(old).Length) - 1;
             }
         }
 
@@ -333,7 +333,6 @@ public static class QueryTokenSynchronizer
 
     public static FixTokenResult FixToken(Replacements replacements, string original, out QueryToken? token, QueryDescription qd, SubTokensOptions options, string? remainingText, bool allowRemoveToken, bool allowReGenerate)
     {
-        string[] parts = original.Split('.');
 
         if (TryParseRemember(replacements, original, qd, options, out QueryToken? current))
         {
