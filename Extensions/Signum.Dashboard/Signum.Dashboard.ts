@@ -10,6 +10,7 @@ import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
 import * as Files from '../Signum.Files/Signum.Files'
 import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
+import * as Toolbar from '../Signum.Toolbar/Signum.Toolbar'
 
 
 export const CachedQueryEntity: Type<CachedQueryEntity> = new Type<CachedQueryEntity>("CachedQuery");
@@ -35,6 +36,13 @@ export interface CacheQueryConfigurationEmbedded extends Entities.EmbeddedEntity
   timeoutForQueries: number;
   maxRows: number;
   autoRegenerateWhenOlderThan: number | null;
+}
+
+export const CustomPartEntity: Type<CustomPartEntity> = new Type<CustomPartEntity>("CustomPart");
+export interface CustomPartEntity extends Entities.Entity, IPartEntity {
+  Type: "CustomPart";
+  requiresTitle: boolean;
+  customPartName: string;
 }
 
 export const DashboardEmbedededInEntity: EnumType<DashboardEmbedededInEntity> = new EnumType<DashboardEmbedededInEntity>("DashboardEmbedededInEntity");
@@ -89,6 +97,8 @@ export namespace DashboardMessage {
   export const CtrlClickToFilterByMultipleElements: MessageKey = new MessageKey("DashboardMessage", "CtrlClickToFilterByMultipleElements");
   export const AltClickToOpenResultsInAModalWindow: MessageKey = new MessageKey("DashboardMessage", "AltClickToOpenResultsInAModalWindow");
   export const CopyHealthCheckDashboardData: MessageKey = new MessageKey("DashboardMessage", "CopyHealthCheckDashboardData");
+  export const _0CanOnlyBeUserInA1With2: MessageKey = new MessageKey("DashboardMessage", "_0CanOnlyBeUserInA1With2");
+  export const InteractiveDashboard: MessageKey = new MessageKey("DashboardMessage", "InteractiveDashboard");
 }
 
 export namespace DashboardOperation {
@@ -100,6 +110,13 @@ export namespace DashboardOperation {
 
 export namespace DashboardPermission {
   export const ViewDashboard : Basics.PermissionSymbol = registerSymbol("Permission", "DashboardPermission.ViewDashboard");
+}
+
+export namespace DashboardVariableMessage {
+  export const GoodMorning: MessageKey = new MessageKey("DashboardVariableMessage", "GoodMorning");
+  export const GoodAfternoon: MessageKey = new MessageKey("DashboardVariableMessage", "GoodAfternoon");
+  export const GoodEvening: MessageKey = new MessageKey("DashboardVariableMessage", "GoodEvening");
+  export const GoodNight: MessageKey = new MessageKey("DashboardVariableMessage", "GoodNight");
 }
 
 export const HealthCheckElementEmbedded: Type<HealthCheckElementEmbedded> = new Type<HealthCheckElementEmbedded>("HealthCheckElementEmbedded");
@@ -152,13 +169,6 @@ export interface LinkElementEmbedded extends Entities.EmbeddedEntity {
   opensInNewTab: boolean;
 }
 
-export const LinkListPartEntity: Type<LinkListPartEntity> = new Type<LinkListPartEntity>("LinkListPart");
-export interface LinkListPartEntity extends Entities.Entity, IPartEntity {
-  Type: "LinkListPart";
-  links: Entities.MList<LinkElementEmbedded>;
-  requiresTitle: boolean;
-}
-
 export const PanelPartEmbedded: Type<PanelPartEmbedded> = new Type<PanelPartEmbedded>("PanelPartEmbedded");
 export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   Type: "PanelPartEmbedded";
@@ -208,5 +218,12 @@ export interface TokenEquivalenceGroupEntity extends Entities.Entity {
   dashboard: Entities.Lite<DashboardEntity>;
   interactionGroup: InteractionGroup | null;
   tokenEquivalences: Entities.MList<TokenEquivalenceEmbedded>;
+}
+
+export const ToolbarMenuPartEntity: Type<ToolbarMenuPartEntity> = new Type<ToolbarMenuPartEntity>("ToolbarMenuPart");
+export interface ToolbarMenuPartEntity extends Entities.Entity, IPartEntity {
+  Type: "ToolbarMenuPart";
+  toolbarMenu: Entities.Lite<Toolbar.ToolbarMenuEntity>;
+  requiresTitle: boolean;
 }
 

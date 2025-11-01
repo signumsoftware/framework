@@ -24,135 +24,143 @@ public static class UserChartLogic
     
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        UserAssetsImporter.Register<UserChartEntity>("UserChart", UserChartOperation.Save);
+
+        sb.Schema.Synchronizing += Schema_Synchronizing;
+
+        sb.Include<UserChartEntity>()
+            .WithExpressionTo((UserChartEntity d) => d.CachedQueries())
+            .WithLiteModel(uq => new UserChartLiteModel { DisplayName = uq.DisplayName, Query = uq.Query, HideQuickLink = uq.HideQuickLink })
+            .WithSave(UserChartOperation.Save)
+            .WithDelete(UserChartOperation.Delete)
+            .WithQuery(() => uq => new
+            {
+                Entity = uq,
+                uq.Id,
+                uq.DisplayName,
+                uq.Query,
+                uq.EntityType,
+                uq.ChartScript,
+                uq.Owner,
+            });
+
+        sb.Schema.WhenIncluded<ToolbarEntity>(() =>
         {
-            UserAssetsImporter.Register<UserChartEntity>("UserChart", UserChartOperation.Save);
+            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(UserChartEntity));
 
-            sb.Schema.Synchronizing += Schema_Synchronizing;
+            ToolbarLogic.RegisterDelete<UserChartEntity>(sb, uq => uq.Query);
 
-            sb.Include<UserChartEntity>()
-                .WithExpressionTo((UserChartEntity d) => d.CachedQueries())
-                .WithLiteModel(uq => new UserChartLiteModel { DisplayName = uq.DisplayName, Query = uq.Query, HideQuickLink = uq.HideQuickLink })
-                .WithSave(UserChartOperation.Save)
-                .WithDelete(UserChartOperation.Delete)
-                .WithQuery(() => uq => new
-                {
-                    Entity = uq,
-                    uq.Id,
-                    uq.Query,
-                    uq.EntityType,
-                    uq.DisplayName,
-                    uq.ChartScript,
-                    uq.Owner,
-                });
-
-            sb.Schema.WhenIncluded<ToolbarEntity>(() =>
+            new ToolbarContentConfig<UserChartEntity>
             {
-                sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(UserChartEntity));
+                DefaultLabel = lite => PropertyRouteTranslationLogic.TranslatedField(UserCharts.Value.GetOrCreate(lite), a => a.DisplayName),
+                IsAuthorized = lite =>
+                {
+                    var uc = UserCharts.Value.GetOrCreate(lite);
+                    return ToolbarLogic.InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true);
+                },
+                GetRelatedQuery = lite => lite.RetrieveUserChart().Query,
+            }.Register();
+        });
 
-                ToolbarLogic.RegisterDelete<UserChartEntity>(sb, uq => uq.Query);
-                ToolbarLogic.RegisterContentConfig<UserChartEntity>(
-                    lite => { var uc = UserCharts.Value.GetOrCreate(lite); return ToolbarLogic.InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true); },
-                    lite => PropertyRouteTranslationLogic.TranslatedField(UserCharts.Value.GetOrCreate(lite), a => a.DisplayName));
+        sb.Schema.WhenIncluded<CachedQueryEntity>(() =>
+        {
+            sb.Schema.Settings.AssertImplementedBy((CachedQueryEntity c) => c.UserAssets.First(), typeof(UserChartEntity));
+        });
+
+        sb.Schema.WhenIncluded<DashboardEntity>(() =>
+        {
+            
+            sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Parts.First().Content, typeof(UserChartPartEntity));
+
+            DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
+            {
+                {"UserChartPart", typeof(UserChartPartEntity)},
             });
 
-            sb.Schema.WhenIncluded<CachedQueryEntity>(() =>
+            DashboardLogic.OnGetCachedQueryDefinition.Register((UserChartPartEntity ucp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(ucp.UserChart.ToChartRequest().ToQueryRequest(), ucp.UserChart.Filters.GetDashboardPinnedFilterTokens(), pp, ucp.UserChart, ucp.IsQueryCached, canWriteFilters: true) });
+
+            sb.Schema.EntityEvents<UserChartEntity>().PreUnsafeDelete += query =>
             {
-                sb.Schema.Settings.AssertImplementedBy((CachedQueryEntity c) => c.UserAssets.First(), typeof(UserChartEntity));
+                Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((UserChartPartEntity)mle.Element.Content).UserChart)).UnsafeDeleteMList();
+                Database.Query<UserChartPartEntity>().Where(uqp => query.Contains(uqp.UserChart)).UnsafeDelete();
+
+                return null;
+            };
+
+            sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += q =>
+            {
+                var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart.Query.Is(q)));
+                var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserChartPartEntity>().Where(uqp => uqp.UserChart.Query.Is(q)));
+                return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
+            };
+
+            sb.Schema.EntityEvents<UserChartEntity>().PreDeleteSqlSync += uc =>
+            {
+                var mlistElems = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
+                    .Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart.Is(uc)));
+
+                var parts = Administrator.UnsafeDeletePreCommand(Database.Query<UserChartPartEntity>()
+                    .Where(ucp => ucp.UserChart.Is(uc)));
+
+                return SqlPreCommand.Combine(Spacing.Simple, mlistElems, parts);
+            };
+            
+            sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Parts.First().Content, typeof(CombinedUserChartPartEntity));
+
+            DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
+            {
+                {"CombinedUserChartPart", typeof(CombinedUserChartPartEntity)},
             });
 
-            sb.Schema.WhenIncluded<DashboardEntity>(() =>
+            DashboardLogic.OnGetCachedQueryDefinition.Register((CombinedUserChartPartEntity cucp, PanelPartEmbedded pp) => cucp.UserCharts.Select(uc => new CachedQueryDefinition(uc.UserChart.ToChartRequest().ToQueryRequest(), uc.UserChart.Filters.GetDashboardPinnedFilterTokens(), pp, uc.UserChart, uc.IsQueryCached, canWriteFilters: false)));
+
+
+            sb.Schema.EntityEvents<UserChartEntity>().PreUnsafeDelete += query =>
             {
-                
-                sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Parts.First().Content, typeof(UserChartPartEntity));
+                Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => query.Contains(mle.Element.UserChart)).UnsafeDeleteMList();
 
-                DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
-                {
-                    {"UserChartPart", typeof(UserChartPartEntity)},
-                });
+                return null;
+            };
 
-                DashboardLogic.OnGetCachedQueryDefinition.Register((UserChartPartEntity ucp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(ucp.UserChart.ToChartRequest().ToQueryRequest(), ucp.UserChart.Filters.GetDashboardPinnedFilterTokens(), pp, ucp.UserChart, ucp.IsQueryCached, canWriteFilters: true) });
+            sb.Schema.EntityEvents<UserChartEntity>().PreDeleteSqlSync += uc =>
+            {
+                var mlistElems2 = Administrator.UnsafeDeletePreCommandMList((CombinedUserChartPartEntity e) => e.UserCharts,
+                        Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => mle.Element.UserChart.Is(uc)));
 
-                sb.Schema.EntityEvents<UserChartEntity>().PreUnsafeDelete += query =>
-                {
-                    Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((UserChartPartEntity)mle.Element.Content).UserChart)).UnsafeDeleteMList();
-                    Database.Query<UserChartPartEntity>().Where(uqp => query.Contains(uqp.UserChart)).UnsafeDelete();
+                return SqlPreCommand.Combine(Spacing.Simple, mlistElems2);
+            };
 
-                    return null;
-                };
-
-                sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += q =>
-                {
-                    var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart.Query.Is(q)));
-                    var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserChartPartEntity>().Where(uqp => uqp.UserChart.Query.Is(q)));
-                    return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
-                };
-
-                sb.Schema.EntityEvents<UserChartEntity>().PreDeleteSqlSync += uc =>
-                {
-                    var mlistElems = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
-                        .Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart.Is(uc)));
-
-                    var parts = Administrator.UnsafeDeletePreCommand(Database.Query<UserChartPartEntity>()
-                        .Where(ucp => ucp.UserChart.Is(uc)));
-
-                    return SqlPreCommand.Combine(Spacing.Simple, mlistElems, parts);
-                };
-                
-                sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Parts.First().Content, typeof(CombinedUserChartPartEntity));
-
-                DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
-                {
-                    {"CombinedUserChartPart", typeof(CombinedUserChartPartEntity)},
-                });
-
-                DashboardLogic.OnGetCachedQueryDefinition.Register((CombinedUserChartPartEntity cucp, PanelPartEmbedded pp) => cucp.UserCharts.Select(uc => new CachedQueryDefinition(uc.UserChart.ToChartRequest().ToQueryRequest(), uc.UserChart.Filters.GetDashboardPinnedFilterTokens(), pp, uc.UserChart, uc.IsQueryCached, canWriteFilters: false)));
+            sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += query =>
+            {
+                var parts = Administrator.UnsafeDeletePreCommandMList((CombinedUserChartPartEntity e) => e.UserCharts,
+                        Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => mle.Element.UserChart.Query.Is(query)));
+                return SqlPreCommand.Combine(Spacing.Simple, parts);
+            };
+            
+        });
 
 
-                sb.Schema.EntityEvents<UserChartEntity>().PreUnsafeDelete += query =>
-                {
-                    Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => query.Contains(mle.Element.UserChart)).UnsafeDeleteMList();
+        AuthLogic.HasRuleOverridesEvent += role => Database.Query<UserChartEntity>().Any(a => a.Owner.Is(role));
 
-                    return null;
-                };
+        sb.Schema.EntityEvents<UserChartEntity>().Retrieved += ChartLogic_Retrieved;
 
-                sb.Schema.EntityEvents<UserChartEntity>().PreDeleteSqlSync += uc =>
-                {
-                    var mlistElems2 = Administrator.UnsafeDeletePreCommandMList((CombinedUserChartPartEntity e) => e.UserCharts,
-                            Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => mle.Element.UserChart.Is(uc)));
-
-                    return SqlPreCommand.Combine(Spacing.Simple, mlistElems2);
-                };
-
-                sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += query =>
-                {
-                    var parts = Administrator.UnsafeDeletePreCommandMList((CombinedUserChartPartEntity e) => e.UserCharts,
-                            Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => mle.Element.UserChart.Query.Is(query)));
-                    return SqlPreCommand.Combine(Spacing.Simple, parts);
-                };
-                
-            });
+        sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += e =>
+          Administrator.UnsafeDeletePreCommand(Database.Query<UserChartEntity>().Where(a => a.Query.Is(e)));
 
 
-            AuthLogic.HasRuleOverridesEvent += role => Database.Query<UserChartEntity>().Any(a => a.Owner.Is(role));
+        UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
+            new InvalidateWith(typeof(UserChartEntity)));
 
-            sb.Schema.EntityEvents<UserChartEntity>().Retrieved += ChartLogic_Retrieved;
+        UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).SelectCatch(uc => KeyValuePair.Create(uc.Query.ToQueryName(), uc.ToLite())).GroupToDictionary().ToFrozenDictionary(),
+            new InvalidateWith(typeof(UserChartEntity)));
 
-            sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += e =>
-              Administrator.UnsafeDeletePreCommand(Database.Query<UserChartEntity>().Where(a => a.Query.Is(e)));
-
-
-            UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
-                new InvalidateWith(typeof(UserChartEntity)));
-
-            UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).SelectCatch(uc => KeyValuePair.Create(uc.Query.ToQueryName(), uc.ToLite())).GroupToDictionary().ToFrozenDictionary(),
-                new InvalidateWith(typeof(UserChartEntity)));
-
-            UserChartsByType = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null)
-            .SelectCatch(a => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(a.EntityType!.Id), a.ToLite()))
-            .GroupToDictionary().ToFrozenDictionary(),
-                new InvalidateWith(typeof(UserChartEntity)));
-        }
+        UserChartsByType = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null)
+        .SelectCatch(a => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(a.EntityType!.Id), a.ToLite()))
+        .GroupToDictionary().ToFrozenDictionary(),
+            new InvalidateWith(typeof(UserChartEntity)));
     }
 
     public static UserChartEntity ParseData(this UserChartEntity userChart)
@@ -338,7 +346,7 @@ public static class UserChartLogic
                                     switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, " {0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                                     {
                                         case FixTokenResult.Nothing: break;
-                                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                                        case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                                         case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
                                         case FixTokenResult.SkipEntity: return null;
                                         case FixTokenResult.Fix: item.Token = token; break;
@@ -359,10 +367,10 @@ public static class UserChartLogic
                                     continue;
 
                                 QueryTokenEmbedded token = item.Token;
-                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, " " + item.ScriptColumn.GetDisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, " " + item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
                                 {
                                     case FixTokenResult.Nothing: break;
-                                    case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                                    case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                                     case FixTokenResult.RemoveToken: item.Token = null; break;
                                     case FixTokenResult.SkipEntity: return null;
                                     case FixTokenResult.Fix: item.Token = token; break;
@@ -382,7 +390,7 @@ public static class UserChartLogic
                     switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), entityType))
                     {
                         case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                        case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                         case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: item.ValueString = val; goto retry;
@@ -401,7 +409,7 @@ public static class UserChartLogic
                     switch (FixParameter(item, ref val))
                     {
                         case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                        case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                         case FixTokenResult.RemoveToken: uc.Parameters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: { item.Value = val; goto retry; }
@@ -434,7 +442,7 @@ public static class UserChartLogic
                             return null;
 
                         if (answer == "d")
-                            return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                            return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid)?.TransactionBlock($"UserChart Guid = {uc.Guid}");
                     }
                 }
             }
@@ -442,6 +450,11 @@ public static class UserChartLogic
             {
                 return new SqlPreCommandSimple("-- Exception on {0}\n{1}".FormatWith(uc.BaseToString(), e.Message.Indent(2, '-')));
             }
+        }
+
+        static SqlPreCommand? DeleteSQl(Table table, UserChartEntity uc)
+        {
+            return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid)?.TransactionBlock($"UserChart Guid = {uc.Guid}");
         }
     }
 

@@ -11,7 +11,7 @@ export namespace RestClient {
   export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(RestLogEntity, e => import('./Templates/RestLog')));
   }
-  
+
   export namespace API {
   
     export function replayRestLog(restLogID: string | number, host: string) : Promise<string> {

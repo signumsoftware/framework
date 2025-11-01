@@ -124,12 +124,12 @@ export namespace WhatsNewClient {
     }
   
     abstract getDefaultIcon(): IconColor;
-  
-    static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactChild | null {
+
+    static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactNode | null {
       if (!icon)
         return null;
   
-      return <FontAwesomeIcon icon={icon} className={"icon"} color={color} />;
+      return <FontAwesomeIcon aria-hidden={true} icon={icon} className={"icon"} color={color} />;
     }
   }
   

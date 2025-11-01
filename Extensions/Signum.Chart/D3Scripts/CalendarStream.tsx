@@ -240,9 +240,9 @@ export function CalendarYear({ year, rules, rowByDate, width, height, onDrillDow
               <rect
                 className="sf-transition hover-target"
                 opacity={active == false ? .5 : undefined}
-                stroke={active == true ? "black" : "#ccc"}
+                stroke={active == true ? "var(--bs-body-color)" : "#ccc"}
                 strokeWidth={active == true ? 2 : undefined}
-                fill={r == undefined || initialLoad ? "#fff" : color(r)}
+                fill={r == undefined || initialLoad ? "transparent" : color(r)}
                 width={cellSize}
                 height={cellSize}
                 x={day(d) * cellSize}

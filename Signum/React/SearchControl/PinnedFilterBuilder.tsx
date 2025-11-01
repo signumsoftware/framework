@@ -21,7 +21,7 @@ interface PinnedFilterBuilderProps {
   extraSmall?: boolean;
   showGrid?: boolean;
 }
-export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.JSX.Element | null {
+export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.ReactElement | null {
 
   const timeoutWriteText = React.useRef<number | null>(null);
 
@@ -50,15 +50,19 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.
     maxColumns == 6 ? 2 :
       1;
 
+  var grid = <div className="row sf-rule">
+    {Array.range(0, 12).map(i =>
+      <div className="col-sm-1" key={i}>
+        <div className="sf-rule-item" >Col {i}</div>
+      </div>
+    )}
+  </div>;
+
   return (
     <div onKeyUp={handleFiltersKeyUp}>
-      <div className={p.extraSmall ? "" : "mt-3 mb-3"}>
+      <div className={p.extraSmall ? "" : "sf-pinned-filters"}>
         {
-          p.showGrid && <div className="row">
-            {Array.range(0, maxColumns).map((a, i) => <div key={i} className={classes(bsBase == null ? "col-sm" : "col-sm-" + bsBase)}>
-              <div className="bg-light px-2"> Col {a}</div>
-            </div>)}
-          </div>
+          p.showGrid && grid
         }
         {
           Array.range(0, maxRows).map((r, i) => {
@@ -83,7 +87,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.
                   var error = cellPinned.some(a => a.pinned?.colSpan != null && a.pinned?.colSpan <= 0)
                     || hiddenColumns.contains(c);
 
-                  return (<div key={j} className={classes("col-sm-" + (bsBase * colSpan), error && "border-danger", p.showGrid && "border border-1 rounded-0")}>
+                  return (<div key={j} className={classes("col-sm-" + (bsBase * colSpan), error && "border-danger")}>
                     {cellPinned.map((f, i) => <div key={i} className={f == p.highlightFilter ? "sf-filter-highlight" : undefined}>{renderValue(f, i == 0 && !allCheckBox)}</div>)}
                   </div>
                   );
@@ -92,11 +96,16 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.
             );
           })
         }
+
+        {
+          p.showGrid && grid
+        }
+
       </div>
 
       {p.showSearchButton &&
         <button className={classes("sf-query-button sf-search btn btn-primary")} onClick={() => p.onSearch && p.onSearch()} title="Enter">
-          <FontAwesomeIcon icon={"magnifying-glass"} />&nbsp;{SearchMessage.Search.niceToString()}
+          <FontAwesomeIcon aria-hidden={true} icon={"magnifying-glass"} />&nbsp;{SearchMessage.Search.niceToString()}
         </button>}
 
     </div>

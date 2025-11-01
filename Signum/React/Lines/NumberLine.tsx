@@ -1,9 +1,8 @@
 import * as React from 'react'
 import { DateTime, Duration } from 'luxon'
-import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, classes } from '../Globals'
 import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat, numberLimits } from '../Reflection'
-import { LineBaseController, LineBaseProps, setRefProp, tasks, useController, useInitiallyFocused } from '../Lines/LineBase'
+import { genericMemo, LineBaseController, LineBaseProps, setRefProp, tasks, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
@@ -17,21 +16,22 @@ export interface NumberLineProps extends ValueBaseProps<number | null> {
   incrementWithArrow?: boolean | number;
   minValue?: number | null;
   maxValue?: number | null;
+  ref?: React.Ref<NumberLineController>;
 }
 
 export class NumberLineController extends ValueBaseController<NumberLineProps, number | null>{
 }
 
-export const NumberLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<NumberLineProps & React.RefAttributes<NumberLineController>>> =
-  React.memo(React.forwardRef(function NumberLine(props: NumberLineProps, ref: React.Ref<NumberLineController>) {
+export const NumberLine: (props: NumberLineProps) => React.ReactNode | null =
+  genericMemo(function NumberLine(props: NumberLineProps) {
 
-  const c = useController(NumberLineController, props, ref);
+  const c = useController(NumberLineController, props);
 
   if (c.isHidden)
     return null;
 
   return numericTextBox(c, c.props.type!.name == "decimal" ? isDecimalKey :  isNumberKey);
-}), (prev, next) => {
+}, (prev, next) => {
   if (next.extraButtons || prev.extraButtons)
     return false;
 
@@ -43,14 +43,24 @@ function numericTextBox(c: NumberLineController, validateKey: (e: React.Keyboard
   const p = c.props
 
   const numberFormat = toNumberFormat(p.format);
+
+  const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
+  var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+  if (!isLabelVisible && p.label) {
+    ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
+  }
+
+  var htmlAtts = c.props.valueHtmlAttributes;
+  var mergedHtmlReadOnly = { ...htmlAtts, ...ariaAtts };
+
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
   if (p.ctx.readOnly)
     return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => c.withItemGroup(
-          <FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} ctx={p.ctx} className="numeric" innerRef={c.setRefs}>
+          <FormControlReadonly id={inputId} htmlAttributes={mergedHtmlReadOnly} ctx={p.ctx} className="numeric" innerRef={c.setRefs}>
             {p.ctx.value == null ? "" : numberFormat.format(p.ctx.value)}
           </FormControlReadonly>)}
       </FormGroup>
@@ -77,17 +87,18 @@ function numericTextBox(c: NumberLineController, validateKey: (e: React.Keyboard
     onKeyDown: (c.props.incrementWithArrow || c.props.incrementWithArrow == undefined ) ? handleKeyDown : undefined,
     ...c.props.valueHtmlAttributes
   } as React.AllHTMLAttributes<any>;
+  var mergedHtml = { ...htmlAttributes, ...ariaAtts };
 
   const limits = numberLimits[p.type?.name!];
 
   return (
-    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+    <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
       {inputId => c.withItemGroup(
         <NumberBox
           id={inputId}
           minValue={p.minValue != undefined ? p.minValue : limits?.min}
           maxValue={p.maxValue != undefined ? p.maxValue : limits?.max}
-          htmlAttributes={htmlAttributes}
+          htmlAttributes={mergedHtml}
           value={p.ctx.value}
           onChange={handleOnChange}
           formControlClass={classes(p.ctx.formControlClass, c.mandatoryClass)}
@@ -132,7 +143,7 @@ function getLocaleSeparators(locale: string) {
 }
 
 
-export function NumberBox(p: NumberBoxProps): React.JSX.Element {
+export function NumberBox(p: NumberBoxProps): React.ReactElement {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 

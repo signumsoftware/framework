@@ -124,6 +124,16 @@ public static class Administrator
 
     public static void NewDatabase()
     {
+        if (!CleanDatabase())
+            return;
+
+        Console.Write("Generating new database...");
+        ExecuteGenerationScript();
+        Console.WriteLine("Done.");
+    }
+
+    public static bool CleanDatabase()
+    {
         var databaseName = Connector.Current.DatabaseName();
         if (Connector.Current.HasTables())
         {
@@ -134,7 +144,7 @@ public static class Administrator
             {
                 Console.WriteLine($"Wrong name. No changes where made");
                 Console.WriteLine();
-                return;
+                return false;
             }
         }
 
@@ -142,10 +152,7 @@ public static class Administrator
         using (Connector.CommandTimeoutScope(5 * 60))
             CleanAllDatabases();
         Console.WriteLine("Done.");
-
-        Console.Write("Generating new database...");
-        ExecuteGenerationScript();
-        Console.WriteLine("Done.");
+        return true;
     }
 
     public static Func<bool> AvoidSimpleSynchronize = () => false;
@@ -232,7 +239,7 @@ public static class Administrator
     {
         var view = Schema.Current.View<T>();
 
-        IColumn[] columns = IndexKeyColumns.Split(view, fields);
+        IColumn[] columns = IndexKeyColumns.Split(view, fields).SelectMany(a => a.columns).ToArray();
 
         var index = new TableIndex(view, columns) { Unique = unique };
 
@@ -827,7 +834,7 @@ public static class Administrator
             return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2};".FormatWith(table.Name, column.Name, id.VariableName));
 
         var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", id, column);
-        return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}:".FormatWith(table.Name, column.Name, param.ParameterName), new List<DbParameter> { param });
+        return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2};".FormatWith(table.Name, column.Name, param.ParameterName), new List<DbParameter> { param });
     }
 
 
@@ -846,38 +853,65 @@ public static class Administrator
     }
 
 
-    public static IDisposable DisableHistoryTable<T>(bool includeMList = true)
+    public static IDisposable? DisableHistoryTable<T>(bool includeMList = true)
         where T : Entity
     {
         return DisableHistoryTable(typeof(T), includeMList);
     }
        
-    public static IDisposable DisableHistoryTable( Type type, bool includeMList = true)
+    public static IDisposable? DisableHistoryTable( Type type, bool includeMList = true)
     {
         var builder = new SqlBuilder(Connector.Current);
         var table = Schema.Current.Table(type);
         var mlist = table.TablesMList().ToArray();
-        Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(table.Name));
-        Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(table));
-        if (includeMList)
-            foreach (var item in mlist)
-            {
-                Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(item.Name));
-                Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(item));
-            }
 
-        return new Disposable(() =>
+        if (Connector.Current is PostgreSqlConnector)
         {
+            Executor.ExecuteNonQuery(builder.DisableVersionningTrigger(table.Name));
             if (includeMList)
                 foreach (var item in mlist)
                 {
-                    Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(item));
-                    Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(item));
+                    Executor.ExecuteNonQuery(builder.DisableVersionningTrigger(item.Name));
                 }
 
-            Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(table));
-            Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(table));
-        });
+            return new Disposable(() =>
+            {
+                if (includeMList)
+                    foreach (var item in mlist)
+                    {
+                        Executor.ExecuteNonQuery(builder.EnableVersionningTrigger(item.Name));
+                    }
+
+                Executor.ExecuteNonQuery(builder.EnableVersionningTrigger(table.Name));
+            });
+        }
+        else
+        {
+
+        
+            Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(table.Name));
+            Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(table));
+            if (includeMList)
+                foreach (var item in mlist)
+                {
+                    Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(item.Name));
+                    Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(item));
+                }
+
+            return new Disposable(() =>
+            {
+                if (includeMList)
+                    foreach (var item in mlist)
+                    {
+                        Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(item));
+                        Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(item));
+                    }
+
+                Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(table));
+                Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(table));
+            });
+
+        }
     }
 
     public static IDisposable WithSnapshotOrTempalateDatabase(string? templateName = null)

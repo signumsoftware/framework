@@ -1,6 +1,5 @@
 import * as React from "react";
-import { To, NavigateOptions, useOutletContext } from "react-router";
-import type { Router } from "@remix-run/router";
+import { To, NavigateOptions, useOutletContext, DataRouter } from "react-router";
 import { IUserEntity } from "./Signum.Security";
 import { PermissionSymbol } from "./Signum.Basics";
 import { Dic, classes, } from './Globals';
@@ -20,8 +19,8 @@ export function setCurrentUser(user: IUserEntity | undefined): void {
   currentUser = user;
 }
 
-export let _internalRouter: Router;
-export function setRouter(r: Router): void {
+export let _internalRouter: DataRouter;
+export function setRouter(r: DataRouter): void {
   _internalRouter = r
 }
 
@@ -68,14 +67,21 @@ export function isPermissionAuthorized(permission: PermissionSymbol | string): b
 export function navigate(to: To | number, options?: NavigateOptions): void
 export function navigate(to: To | number, options?: NavigateOptions): void
 export function navigate(to: To | number, options?: NavigateOptions): void {
+
+  if (typeof to == "string" && Boolean(window.__baseName) && to.startsWith(window.__baseName))
+    to = to.after(window.__baseName);
+
   if (typeof to == "number")
     _internalRouter.navigate(to);
-  else if (typeof to == "string")
-    _internalRouter.navigate(toAbsoluteUrl(to), options);
-  else if (typeof to == "object")
-    _internalRouter.navigate({ ...to, pathname: to.pathname && toAbsoluteUrl(to.pathname) }, options);
   else
-    throw new Error("Unexpected argument type: to");
+    _internalRouter.navigate(to, options);
+
+  //else if (typeof to == "string")
+  //  _internalRouter.navigate(toAbsoluteUrl(to), options);
+  //else if (typeof to == "object")
+  //  _internalRouter.navigate({ ...to, pathname: to.pathname && toAbsoluteUrl(to.pathname) }, options);
+  //else
+  //  throw new Error("Unexpected argument type: to");
 };
 
 
@@ -138,17 +144,17 @@ export function useExpand(): void {
 
 }
 
-export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.KeyboardEvent<any>): void {
-  if ((e as React.MouseEvent<any>).button == 2)
+export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.KeyboardEvent<any> | undefined): void {
+  if (e && (e as React.MouseEvent<any>).button == 2)
     return;
 
-  e.preventDefault();
-  if (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)
+  e?.preventDefault();
+  if (e && (e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
     window.open(toAbsoluteUrl(path));
   else if (path.startsWith("http"))
     window.location.href = path;
   else
-    navigate(path);
+    navigate(toAbsoluteUrl(path));
 }
 
 export function toAbsoluteUrl(appRelativeUrl: string): string {

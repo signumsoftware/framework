@@ -14,7 +14,7 @@ interface ProgressBarProps {
   progressHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
 }
 
-export default function ProgressBar(p: ProgressBarProps): React.JSX.Element {
+export default function ProgressBar(p: ProgressBarProps): React.ReactElement {
   let { value, showPercentageInMessage, message, color, striped, animated } = p;
 
   if (striped == null)
@@ -31,6 +31,8 @@ export default function ProgressBar(p: ProgressBarProps): React.JSX.Element {
     (value == null || showPercentageInMessage === false ? undefined : numberFormat.format(value)),
     (message ? message : undefined)
   ].filter(a => a != null).join(" - ");
+
+  const breakpoint = 30 / 100;
 
   return (
     <div
@@ -50,8 +52,9 @@ export default function ProgressBar(p: ProgressBarProps): React.JSX.Element {
         aria-valuemin={value == null ? undefined : 0}
         aria-valuemax={value == null ? undefined : 100}
         style={{ width: value == null ? "100%" : (value * 100) + "%", userSelect: "none", ...p.progressHtmlAttributes?.style }}>
-        <span>{fullMessage}</span>
+        {value != null && value > breakpoint ? <span>{fullMessage}</span> : null}
       </div>
+      {value != null && value < breakpoint ? <span style={{ marginLeft: 5 }}>{fullMessage}</span> : null}
     </div>
   );
 }

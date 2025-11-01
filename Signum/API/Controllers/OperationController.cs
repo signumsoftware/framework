@@ -1,13 +1,17 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
 using Signum.API.Filters;
+using Signum.API.Json;
+using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System.Collections;
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 using static Signum.API.Controllers.OperationController;
-using Signum.API.Json;
-using Microsoft.AspNetCore.Mvc.Filters;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Signum.API.Controllers;
 
@@ -79,7 +83,9 @@ public class OperationController : ControllerBase
     }
 
     [HttpPost("api/operation/executeLiteWithProgress/{operationKey}"), ProfilerActionSplitter("operationKey")]
-    public IAsyncEnumerable<ProgressStep<EntityPackTS>> ExecuteLiteWithProgress(string operationKey, [Required, FromBody] LiteOperationRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProgressStep<EntityPackTS>))]
+    [Produces("application/x-ndjson")]
+    public Task ExecuteLiteWithProgress(string operationKey, [Required, FromBody] LiteOperationRequest request, CancellationToken cancellationToken)
     {
         var e = request.lite.Retrieve();
         var op = request.GetOperationSymbol(operationKey, e);
@@ -88,7 +94,7 @@ public class OperationController : ControllerBase
         {
             var entity = OperationLogic.ServiceExecute(e, op, request.ParseArgs(op).EmptyIfNull().And(pp).ToArray());
             return SignumServer.GetEntityPack(entity);
-        }, ControllerContext, cancellationToken);
+        }, cancellationToken);
     }
 
     [HttpPost("api/operation/deleteEntity/{operationKey}"), ProfilerActionSplitter("operationKey")]
@@ -204,7 +210,9 @@ public class OperationController : ControllerBase
     }
 
     [HttpPost("api/operation/constructFromMultiple/{operationKey}"), ProfilerActionSplitter("operationKey")]
-    public IAsyncEnumerable<OperationResult> ConstructFromMultiple(string operationKey, [Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(OperationResult))]
+    [Produces("application/x-ndjson")]
+    public Task ConstructFromMultiple(string operationKey, [Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
         return ForeachMultiple(request.Lites, async lite =>
         {
@@ -218,7 +226,9 @@ public class OperationController : ControllerBase
 
 
     [HttpPost("api/operation/executeMultiple/{operationKey}"), ProfilerActionSplitter("operationKey")]
-    public IAsyncEnumerable<OperationResult> ExecuteMultiple(string operationKey, [Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(OperationResult))]
+    [Produces("application/x-ndjson")]
+    public Task ExecuteMultiple(string operationKey, [Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
         return ForeachMultiple(request.Lites, async lite =>
         {
@@ -232,7 +242,9 @@ public class OperationController : ControllerBase
 
 
     [HttpPost("api/operation/deleteMultiple/{operationKey}"), ProfilerActionSplitter("operationKey")]
-    public IAsyncEnumerable<OperationResult> DeleteMultiple(string operationKey, [Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(OperationResult))]
+    [Produces("application/x-ndjson")]
+    public Task DeleteMultiple(string operationKey, [Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
         return ForeachMultiple(request.Lites, async lite =>
         {
@@ -257,12 +269,22 @@ public class OperationController : ControllerBase
 
     }
 
-    async static IAsyncEnumerable<OperationResult> ForeachMultiple(IEnumerable<Lite<Entity>> lites, Func<Lite<Entity>, Task> action, [EnumeratorCancellation]CancellationToken cancellationToken)
+    async Task ForeachMultiple(IEnumerable<Lite<Entity>> lites, Func<Lite<Entity>, Task> action, CancellationToken cancellationToken)
     {
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = false,
+            IncludeFields = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
+
+        options.Converters.AddRange(SignumServer.JsonSerializerOptions.Converters);
+
+        var context = this.HttpContext;
         foreach (var lite in lites.Distinct())
         {
             if (cancellationToken.IsCancellationRequested)
-                yield break;
+                return;
 
             string? error = null;
             try
@@ -275,7 +297,13 @@ public class OperationController : ControllerBase
                 e.LogException();
                 error = e.Message;
             }
-            yield return new OperationResult(lite) { Error = error };
+
+            var json = JsonSerializer.Serialize(new OperationResult(lite) { Error = error }, options);
+            if (json.Contains("\n"))
+                throw new InvalidOperationException("\n in Json object found!");
+
+            await context.Response.WriteAsync(json + "\n");
+            await context.Response.Body.FlushAsync();
         }
     }
 
@@ -292,11 +320,14 @@ public class OperationController : ControllerBase
         public HttpError? Error;
     }
 
-    async static IAsyncEnumerable<ProgressStep<T>> WithProgressProxy<T>(Func<ProgressProxy, T> action, ActionContext context, [EnumeratorCancellation] CancellationToken cancellationToken)
+    async Task WithProgressProxy<T>(Func<ProgressProxy, T> action, CancellationToken cancellationToken)
     {
         EventWaitHandle handle = new EventWaitHandle(false, EventResetMode.AutoReset);
 
         ProgressStep<T>? lastProgress = null;
+
+        var context = this.ControllerContext;
+        var httpContext = this.HttpContext;
 
         var task = Task.Run(() =>
         {
@@ -337,6 +368,16 @@ public class OperationController : ControllerBase
             }
         });
 
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = false,
+            IncludeFields = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
+
+
+        options.Converters.AddRange(SignumServer.JsonSerializerOptions.Converters);
+
         while (await handle.WaitOneAsync(CancellationToken.None))
         {
             var lp = lastProgress;
@@ -344,7 +385,13 @@ public class OperationController : ControllerBase
                 break;
             else
             {
-                yield return lp;
+                var json = JsonSerializer.Serialize(lp, options);
+                if (json.Contains("\n"))
+                    throw new InvalidOperationException("\n in Json object found!");
+
+                await httpContext.Response.WriteAsync(json + "\n");
+                await httpContext.Response.Body.FlushAsync();
+
                 if (lp.IsFinished)
                     break;
             }

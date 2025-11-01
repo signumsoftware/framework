@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes, Dic, KeyGenerator } from '../Globals'
-import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList, is, liteKey, toLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList, is, liteKey, toLite, isEntity } from '../Signum.Entities'
 import { Finder } from '../Finder'
 import { Navigator, ViewPromise } from '../Navigator'
 import { Constructor } from '../Constructor'
@@ -12,6 +12,7 @@ import { LineBaseController, LineBaseProps, tasks } from './LineBase'
 import { getTypeInfo, IsByAll, PropertyRoute, tryGetTypeInfos } from '../Reflection'
 import { isRtl, toAbsoluteUrl } from '../AppContext'
 import { KeyNames } from '../Components'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface EntityListBaseProps<V extends ModifiableEntity | Lite<Entity>> extends LineBaseProps<MList<V>> {
   view?: boolean | ((item: NoInfer<V>) => boolean);
@@ -31,6 +32,7 @@ export interface EntityListBaseProps<V extends ModifiableEntity | Lite<Entity>> 
   onMove?: (list: NoInfer<MList<V>>, oldIndex: number, newIndex: IndexWithOffset) => void;
   findOptions?: FindOptions;
   findOptionsDictionary?: { [typeName: string]: FindOptions };
+  avoidDuplicates?: boolean;
 
   liteToString?: (e: AsEntity<V>) => string;
 
@@ -80,9 +82,35 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
   }
 
 
-  overrideProps(p: P, overridenProps: P): void {
 
+  overrideProps(p: P, overridenProps: P): void {
     super.overrideProps(p, overridenProps);
+    if (p.type) {
+      var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;
+      if (avoidDuplicates) {
+        var types = tryGetTypeInfos(p.type).notNull();
+        if (types.length == 0)
+          return;
+
+        if (types.length == 1) {
+          var tn = types.single().name;
+          p.findOptions = withAvoidDuplicates(p.findOptions ?? Navigator.entitySettings[tn]?.defaultFindOptions ?? { queryName: tn }, tn);
+        }
+        else {
+          p.findOptionsDictionary = types.toObject(a => a.name, a => withAvoidDuplicates(p.findOptionsDictionary?.[a.name] ?? Navigator.entitySettings[a.name]?.defaultFindOptions ?? { queryName: a.name }, a.name));
+        }
+      }
+    }
+
+    function withAvoidDuplicates(fo: FindOptions, typeName: string): FindOptions {
+
+      const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
+
+      return {
+        ...fo,
+        filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible, frozen: true }]
+      };
+    }
   }
 
 
@@ -95,29 +123,29 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     return rows;
   }
 
-  renderCreateButton(btn: boolean, createMessage?: string): React.JSX.Element | undefined {
+  renderCreateButton(btn: boolean, createMessage?: string): React.ReactElement | undefined {
     if (!this.props.create || this.props.ctx.readOnly)
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-create", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-create", btn ? "input-group-text" : undefined)}
         onClick={this.handleCreateClick}
         title={this.props.ctx.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() : undefined}>
         {EntityBaseController.getCreateIcon()}
-      </a>
+      </LinkButton>
     );
   }
 
-  renderFindButton(btn: boolean): React.JSX.Element | undefined {
+  renderFindButton(btn: boolean): React.ReactElement | undefined {
     if (!this.props.find || this.props.ctx.readOnly)
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
         onClick={this.handleFindClick}
         title={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
         {EntityBaseController.getFindIcon()}
-      </a>
+      </LinkButton>
     );
   }
 
@@ -127,16 +155,18 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     this.setValue(list);
   }
 
-  renderMoveUp(btn: boolean, index: number, orientation: "h" | "v"): React.JSX.Element | undefined {
+  renderMoveUp(btn: boolean, index: number, orientation: "h" | "v"): React.ReactElement | undefined {
     if (!this.canMove(this.props.ctx.value[index].element) || this.props.ctx.readOnly)
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "input-group-text" : undefined)}
-        onClick={e => { e.preventDefault(); this.moveUp(index); }}
+      <LinkButton
+        className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "input-group-text" : undefined)}
+        onClick={e => { this.moveUp(index); }}
+        tabIndex={0}
         title={this.props.ctx.titleLabels ? (orientation == "v" ? EntityControlMessage.MoveUp : (isRtl() ? EntityControlMessage.MoveRight : EntityControlMessage.MoveLeft)).niceToString() : undefined}>
-        <FontAwesomeIcon icon={orientation == "v" ? "chevron-up" : (isRtl() ? "chevron-right" : "chevron-left")} />
-      </a>
+        <FontAwesomeIcon aria-hidden={true} icon={orientation == "v" ? "chevron-up" : (isRtl() ? "chevron-right" : "chevron-left")} />
+      </LinkButton>
     );
   }
 
@@ -146,16 +176,18 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     this.setValue(list);
   }
 
-  renderMoveDown(btn: boolean, index: number, orientation: "h" | "v"): React.JSX.Element | undefined {
+  renderMoveDown(btn: boolean, index: number, orientation: "h" | "v"): React.ReactElement | undefined {
     if (!this.canMove(this.props.ctx.value[index].element) || this.props.ctx.readOnly)
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "input-group-text" : undefined)}
-        onClick={e => { e.preventDefault(); this.moveDown(index); }}
+      <LinkButton
+        className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "input-group-text" : undefined)}
+        onClick={e => { this.moveDown(index); }}
+        tabIndex={0}
         title={this.props.ctx.titleLabels ? (orientation == "v" ? EntityControlMessage.MoveDown : (isRtl() ? EntityControlMessage.MoveLeft : EntityControlMessage.MoveRight)).niceToString() : undefined}>
-        <FontAwesomeIcon icon={orientation == "v" ? "chevron-down" : (isRtl() ? "chevron-left" : "chevron-right")} />
-      </a>
+        <FontAwesomeIcon aria-hidden={true} icon={orientation == "v" ? "chevron-down" : (isRtl() ? "chevron-left" : "chevron-right")} />
+      </LinkButton>
     );
   }
 
@@ -348,16 +380,16 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     this.setValue(list);
   }
 
-  renderPasteButton(btn: boolean): React.JSX.Element | undefined {
+  renderPasteButton(btn: boolean): React.ReactElement | undefined {
     if (!this.props.paste || this.props.ctx.readOnly)
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-paste", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-paste", btn ? "input-group-text" : undefined)}
         onClick={this.handlePasteClick}
         title={EntityControlMessage.Paste.niceToString()}>
         {EntityBaseController.getPasteIcon()}
-      </a>
+      </LinkButton>
     );
   }
 
@@ -529,8 +561,8 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
 
   getMoveConfig(btn: boolean, index: number, orientation: "h" | "v") {
     return {
-      renderMoveUp: (): React.JSX.Element => this.renderMoveUp(false, index, orientation)!,
-      renderMoveDown: (): React.JSX.Element | undefined => this.renderMoveDown(false, index, orientation)
+      renderMoveUp: (): React.ReactElement => this.renderMoveUp(false, index, orientation)!,
+      renderMoveDown: (): React.ReactElement | undefined => this.renderMoveDown(false, index, orientation)
     }
   }
 
@@ -642,8 +674,8 @@ export interface DragConfig {
 }
 
 export interface MoveConfig {
-  renderMoveUp: () => (JSX.Element | undefined);
-  renderMoveDown: () => (JSX.Element | undefined);
+  renderMoveUp: () => (React.ReactElement | undefined);
+  renderMoveDown: () => (React.ReactElement | undefined);
 }
 
 

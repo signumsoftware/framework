@@ -7,8 +7,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useUpdatedRef } from '../Hooks';
 import { useLocation } from 'react-router';
 import { ContainerToggleMessage } from '../Signum.Entities';
+import { LinkButton } from '../Basics/LinkButton';
 
-export default function ContainerToggleComponent(p: { children: React.ReactNode }): React.JSX.Element {
+export default function ContainerToggleComponent(p: { children: React.ReactNode }): React.ReactElement {
 
   const [fluid, setFluid] = React.useState(false);
   const fluidRef = useUpdatedRef(fluid);
@@ -30,9 +31,9 @@ export default function ContainerToggleComponent(p: { children: React.ReactNode 
 
   return (
     <div className={classes(fluid ? "container-fluid" : "container", "mt-3", "sf-page-container")}>
-      <a className="expand-window d-none d-md-block" onClick={handleExpandToggle} href="#" >
-        <FontAwesomeIcon icon={fluid ? "compress" : "expand"} title={(fluid ? ContainerToggleMessage.Compress : ContainerToggleMessage.Expand).niceToString()} />
-      </a>
+      <LinkButton className="expand-window d-none d-md-block" tabIndex={0} onClick={handleExpandToggle} title={(fluid ? ContainerToggleMessage.Compress : ContainerToggleMessage.Expand).niceToString()}>
+        <FontAwesomeIcon aria-hidden={true} icon={fluid ? "compress" : "expand"} />
+      </LinkButton>
       <ErrorBoundary deps={[location.pathname + location.search]}>
         {React.Children.map(p.children, c => c && React.cloneElement(c as React.ReactElement))}
       </ErrorBoundary>

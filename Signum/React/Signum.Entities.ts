@@ -499,6 +499,10 @@ export namespace JavascriptMessage {
   export const Date: MessageKey = new MessageKey("JavascriptMessage", "Date");
 }
 
+export namespace LayoutMessage {
+  export const JumpToMainContent: MessageKey = new MessageKey("LayoutMessage", "JumpToMainContent");
+}
+
 export namespace LiteMessage {
   export const IdNotValid: MessageKey = new MessageKey("LiteMessage", "IdNotValid");
   export const InvalidFormat: MessageKey = new MessageKey("LiteMessage", "InvalidFormat");
@@ -580,6 +584,62 @@ export namespace SaveChangesMessage {
   export const ThereAreChanges: MessageKey = new MessageKey("SaveChangesMessage", "ThereAreChanges");
   export const YoureTryingToCloseAnEntityWithChanges: MessageKey = new MessageKey("SaveChangesMessage", "YoureTryingToCloseAnEntityWithChanges");
   export const LoseChanges: MessageKey = new MessageKey("SaveChangesMessage", "LoseChanges");
+}
+
+export namespace SearchHelpMessage {
+  export const SearchHelp: MessageKey = new MessageKey("SearchHelpMessage", "SearchHelp");
+  export const SearchControl: MessageKey = new MessageKey("SearchHelpMessage", "SearchControl");
+  export const The0IsVeryPowerfulButCanBeIntimidatingTakeSomeTimeToLearnHowToUseItWillBeWorthIt: MessageKey = new MessageKey("SearchHelpMessage", "The0IsVeryPowerfulButCanBeIntimidatingTakeSomeTimeToLearnHowToUseItWillBeWorthIt");
+  export const TheBasics: MessageKey = new MessageKey("SearchHelpMessage", "TheBasics");
+  export const CurrentlyWeAreInTheQuery0YouCanOpenA1ByClickingThe2IconOrDoing3InTheRowButNotInALink: MessageKey = new MessageKey("SearchHelpMessage", "CurrentlyWeAreInTheQuery0YouCanOpenA1ByClickingThe2IconOrDoing3InTheRowButNotInALink");
+  export const CurrentlyWeAreInTheQuery0GroupedBy1YouCanOpenAGroupByClickingThe2IconOrDoing3InTheRowButNotInALink: MessageKey = new MessageKey("SearchHelpMessage", "CurrentlyWeAreInTheQuery0GroupedBy1YouCanOpenAGroupByClickingThe2IconOrDoing3InTheRowButNotInALink");
+  export const DoubleClick: MessageKey = new MessageKey("SearchHelpMessage", "DoubleClick");
+  export const GroupedBy: MessageKey = new MessageKey("SearchHelpMessage", "GroupedBy");
+  export const Doing0InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK: MessageKey = new MessageKey("SearchHelpMessage", "Doing0InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK");
+  export const YouCanUseThePreparedFiltersOnTheTopToQuicklyFindThe0YouAreLookingFor: MessageKey = new MessageKey("SearchHelpMessage", "YouCanUseThePreparedFiltersOnTheTopToQuicklyFindThe0YouAreLookingFor");
+  export const OrderingResults: MessageKey = new MessageKey("SearchHelpMessage", "OrderingResults");
+  export const YouCanOrderResultsByClickingInAColumnHeaderDefaultOrderingIs0AndByClickingAgainItChangesTo1YouCanOrderByMoreThanOneColumnIfYouKeep2DownWhenClickingOnTheColumnsHeader: MessageKey = new MessageKey("SearchHelpMessage", "YouCanOrderResultsByClickingInAColumnHeaderDefaultOrderingIs0AndByClickingAgainItChangesTo1YouCanOrderByMoreThanOneColumnIfYouKeep2DownWhenClickingOnTheColumnsHeader");
+  export const Ascending: MessageKey = new MessageKey("SearchHelpMessage", "Ascending");
+  export const Descending: MessageKey = new MessageKey("SearchHelpMessage", "Descending");
+  export const Shift: MessageKey = new MessageKey("SearchHelpMessage", "Shift");
+  export const ChangeColumns: MessageKey = new MessageKey("SearchHelpMessage", "ChangeColumns");
+  export const YouAreNotLimitedToTheColumnsYouSeeTheDefaultColumnsCanBeChangedBy0InAColumnHeaderAndThenSelect123: MessageKey = new MessageKey("SearchHelpMessage", "YouAreNotLimitedToTheColumnsYouSeeTheDefaultColumnsCanBeChangedBy0InAColumnHeaderAndThenSelect123");
+  export const RightClicking: MessageKey = new MessageKey("SearchHelpMessage", "RightClicking");
+  export const RightClick: MessageKey = new MessageKey("SearchHelpMessage", "RightClick");
+  export const InsertColumn: MessageKey = new MessageKey("SearchHelpMessage", "InsertColumn");
+  export const EditColumn: MessageKey = new MessageKey("SearchHelpMessage", "EditColumn");
+  export const RemoveColumn: MessageKey = new MessageKey("SearchHelpMessage", "RemoveColumn");
+  export const YouCanAlso0TheColumnsByDraggingAndDroppingThemToAnotherPosition: MessageKey = new MessageKey("SearchHelpMessage", "YouCanAlso0TheColumnsByDraggingAndDroppingThemToAnotherPosition");
+  export const Rearrange: MessageKey = new MessageKey("SearchHelpMessage", "Rearrange");
+  export const WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumnDependingWhereYou0: MessageKey = new MessageKey("SearchHelpMessage", "WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumnDependingWhereYou0");
+  export const ClickOnThe0ButtonToOpenTheAdvancedFiltersThisWillAllowYouCreateComplexFiltersManuallyBySelectingThe1OfTheEntityOrARelatedEntitiesAComparison2AndA3ToCompare: MessageKey = new MessageKey("SearchHelpMessage", "ClickOnThe0ButtonToOpenTheAdvancedFiltersThisWillAllowYouCreateComplexFiltersManuallyBySelectingThe1OfTheEntityOrARelatedEntitiesAComparison2AndA3ToCompare");
+  export const TrickYouCan0OnA1AndChoose2ToQuicklyFilterByThisColumnEvenMoreYouCan3ToFilterByThis4Directly: MessageKey = new MessageKey("SearchHelpMessage", "TrickYouCan0OnA1AndChoose2ToQuicklyFilterByThisColumnEvenMoreYouCan3ToFilterByThis4Directly");
+  export const ColumnHeader: MessageKey = new MessageKey("SearchHelpMessage", "ColumnHeader");
+  export const GroupingResultsByOneOrMoreColumn: MessageKey = new MessageKey("SearchHelpMessage", "GroupingResultsByOneOrMoreColumn");
+  export const YouCanGroupResultsBy0InAColumnHeaderAndSelecting1AllTheColumnsWillDisappearExceptTheSelectedOneAndAnAggregationColumnTypically2: MessageKey = new MessageKey("SearchHelpMessage", "YouCanGroupResultsBy0InAColumnHeaderAndSelecting1AllTheColumnsWillDisappearExceptTheSelectedOneAndAnAggregationColumnTypically2");
+  export const GroupByThisColumn: MessageKey = new MessageKey("SearchHelpMessage", "GroupByThisColumn");
+  export const GroupHelp: MessageKey = new MessageKey("SearchHelpMessage", "GroupHelp");
+  export const AnyNewColumnShouldEitherBeAnAggregate0OrItWillBeConsideredANewGroupKey1: MessageKey = new MessageKey("SearchHelpMessage", "AnyNewColumnShouldEitherBeAnAggregate0OrItWillBeConsideredANewGroupKey1");
+  export const OnceGroupingYouCanFilterNormallyOrUsingAggregatesAsTheField0: MessageKey = new MessageKey("SearchHelpMessage", "OnceGroupingYouCanFilterNormallyOrUsingAggregatesAsTheField0");
+  export const InSql: MessageKey = new MessageKey("SearchHelpMessage", "InSql");
+  export const FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1: MessageKey = new MessageKey("SearchHelpMessage", "FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1");
+  export const RestoreDefaultColumns: MessageKey = new MessageKey("SearchHelpMessage", "RestoreDefaultColumns");
+  export const AQueryExpressionCouldBeAnyFieldOfThe: MessageKey = new MessageKey("SearchHelpMessage", "AQueryExpressionCouldBeAnyFieldOfThe");
+  export const Like: MessageKey = new MessageKey("SearchHelpMessage", "Like");
+  export const OrAnyOtherFieldThatYouSeeInThe: MessageKey = new MessageKey("SearchHelpMessage", "OrAnyOtherFieldThatYouSeeInThe");
+  export const WhenYouClick: MessageKey = new MessageKey("SearchHelpMessage", "WhenYouClick");
+  export const IconOrAnyRelatedEntity: MessageKey = new MessageKey("SearchHelpMessage", "IconOrAnyRelatedEntity");
+  export const AQueryExpressionCouldBeAnyColumnOfThe: MessageKey = new MessageKey("SearchHelpMessage", "AQueryExpressionCouldBeAnyColumnOfThe");
+  export const OrAnyOtherFieldThatYouSeeInTheProjectWhenYouClick: MessageKey = new MessageKey("SearchHelpMessage", "OrAnyOtherFieldThatYouSeeInTheProjectWhenYouClick");
+  export const TheOperationThatWillBeUsedToCompareThe: MessageKey = new MessageKey("SearchHelpMessage", "TheOperationThatWillBeUsedToCompareThe");
+  export const WithThe: MessageKey = new MessageKey("SearchHelpMessage", "WithThe");
+  export const EqualsDistinctGreaterThan: MessageKey = new MessageKey("SearchHelpMessage", "EqualsDistinctGreaterThan");
+  export const Etc: MessageKey = new MessageKey("SearchHelpMessage", "Etc");
+  export const TheValueThatWillBeComparedWithThe: MessageKey = new MessageKey("SearchHelpMessage", "TheValueThatWillBeComparedWithThe");
+  export const TypicallyHasTheSameTypeAsTheFieldButSomeOperatorsLike: MessageKey = new MessageKey("SearchHelpMessage", "TypicallyHasTheSameTypeAsTheFieldButSomeOperatorsLike");
+  export const AllowToSelectMultipleValues: MessageKey = new MessageKey("SearchHelpMessage", "AllowToSelectMultipleValues");
+  export const YouAreEditingAColumnLetMeExplainWhatEachFieldDoes: MessageKey = new MessageKey("SearchHelpMessage", "YouAreEditingAColumnLetMeExplainWhatEachFieldDoes");
+  export const CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup: MessageKey = new MessageKey("SearchHelpMessage", "CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup");
 }
 
 export namespace SearchMessage {
@@ -678,62 +738,17 @@ export namespace SearchMessage {
   export const FilterDesigner: MessageKey = new MessageKey("SearchMessage", "FilterDesigner");
   export const TimeMachine: MessageKey = new MessageKey("SearchMessage", "TimeMachine");
   export const Options: MessageKey = new MessageKey("SearchMessage", "Options");
-  export const SearchHelp: MessageKey = new MessageKey("SearchMessage", "SearchHelp");
-  export const SearchControl: MessageKey = new MessageKey("SearchMessage", "SearchControl");
-  export const The0IsVeryPowerfulButCanBeIntimidatingTakeSomeTimeToLearnHowToUseItWillBeWorthIt: MessageKey = new MessageKey("SearchMessage", "The0IsVeryPowerfulButCanBeIntimidatingTakeSomeTimeToLearnHowToUseItWillBeWorthIt");
-  export const TheBasics: MessageKey = new MessageKey("SearchMessage", "TheBasics");
-  export const CurrentlyWeAreInTheQuery0YouCanOpenA1ByClickingThe2IconOrDoing3InTheRowButNotInALink: MessageKey = new MessageKey("SearchMessage", "CurrentlyWeAreInTheQuery0YouCanOpenA1ByClickingThe2IconOrDoing3InTheRowButNotInALink");
-  export const CurrentlyWeAreInTheQuery0GroupedBy1YouCanOpenAGroupByClickingThe2IconOrDoing3InTheRowButNotInALink: MessageKey = new MessageKey("SearchMessage", "CurrentlyWeAreInTheQuery0GroupedBy1YouCanOpenAGroupByClickingThe2IconOrDoing3InTheRowButNotInALink");
-  export const DoubleClick: MessageKey = new MessageKey("SearchMessage", "DoubleClick");
-  export const GroupedBy: MessageKey = new MessageKey("SearchMessage", "GroupedBy");
-  export const Doing0InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK: MessageKey = new MessageKey("SearchMessage", "Doing0InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK");
-  export const YouCanUseThePreparedFiltersOnTheTopToQuicklyFindThe0YouAreLookingFor: MessageKey = new MessageKey("SearchMessage", "YouCanUseThePreparedFiltersOnTheTopToQuicklyFindThe0YouAreLookingFor");
-  export const OrderingResults: MessageKey = new MessageKey("SearchMessage", "OrderingResults");
-  export const YouCanOrderResultsByClickingInAColumnHeaderDefaultOrderingIs0AndByClickingAgainItChangesTo1YouCanOrderByMoreThanOneColumnIfYouKeep2DownWhenClickingOnTheColumnsHeader: MessageKey = new MessageKey("SearchMessage", "YouCanOrderResultsByClickingInAColumnHeaderDefaultOrderingIs0AndByClickingAgainItChangesTo1YouCanOrderByMoreThanOneColumnIfYouKeep2DownWhenClickingOnTheColumnsHeader");
-  export const Ascending: MessageKey = new MessageKey("SearchMessage", "Ascending");
-  export const Descending: MessageKey = new MessageKey("SearchMessage", "Descending");
-  export const Shift: MessageKey = new MessageKey("SearchMessage", "Shift");
-  export const ChangeColumns: MessageKey = new MessageKey("SearchMessage", "ChangeColumns");
-  export const YouAreNotLimitedToTheColumnsYouSeeTheDefaultColumnsCanBeChangedBy0InAColumnHeaderAndThenSelect123: MessageKey = new MessageKey("SearchMessage", "YouAreNotLimitedToTheColumnsYouSeeTheDefaultColumnsCanBeChangedBy0InAColumnHeaderAndThenSelect123");
-  export const RightClicking: MessageKey = new MessageKey("SearchMessage", "RightClicking");
-  export const RightClick: MessageKey = new MessageKey("SearchMessage", "RightClick");
-  export const InsertColumn: MessageKey = new MessageKey("SearchMessage", "InsertColumn");
-  export const EditColumn: MessageKey = new MessageKey("SearchMessage", "EditColumn");
-  export const RemoveColumn: MessageKey = new MessageKey("SearchMessage", "RemoveColumn");
-  export const YouCanAlso0TheColumnsByDraggingAndDroppingThemToAnotherPosition: MessageKey = new MessageKey("SearchMessage", "YouCanAlso0TheColumnsByDraggingAndDroppingThemToAnotherPosition");
-  export const Rearrange: MessageKey = new MessageKey("SearchMessage", "Rearrange");
-  export const WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumnDependingWhereYou0: MessageKey = new MessageKey("SearchMessage", "WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumnDependingWhereYou0");
-  export const ClickOnThe0ButtonToOpenTheAdvancedFiltersThisWillAllowYouCreateComplexFiltersManuallyBySelectingThe1OfTheEntityOrARelatedEntitiesAComparison2AndA3ToCompare: MessageKey = new MessageKey("SearchMessage", "ClickOnThe0ButtonToOpenTheAdvancedFiltersThisWillAllowYouCreateComplexFiltersManuallyBySelectingThe1OfTheEntityOrARelatedEntitiesAComparison2AndA3ToCompare");
-  export const TrickYouCan0OnA1AndChoose2ToQuicklyFilterByThisColumnEvenMoreYouCan3ToFilterByThis4Directly: MessageKey = new MessageKey("SearchMessage", "TrickYouCan0OnA1AndChoose2ToQuicklyFilterByThisColumnEvenMoreYouCan3ToFilterByThis4Directly");
-  export const ColumnHeader: MessageKey = new MessageKey("SearchMessage", "ColumnHeader");
-  export const GroupingResultsByOneOrMoreColumn: MessageKey = new MessageKey("SearchMessage", "GroupingResultsByOneOrMoreColumn");
-  export const YouCanGroupResultsBy0InAColumnHeaderAndSelecting1AllTheColumnsWillDisappearExceptTheSelectedOneAndAnAggregationColumnTypically2: MessageKey = new MessageKey("SearchMessage", "YouCanGroupResultsBy0InAColumnHeaderAndSelecting1AllTheColumnsWillDisappearExceptTheSelectedOneAndAnAggregationColumnTypically2");
-  export const GroupByThisColumn: MessageKey = new MessageKey("SearchMessage", "GroupByThisColumn");
-  export const GroupHelp: MessageKey = new MessageKey("SearchMessage", "GroupHelp");
-  export const AnyNewColumnShouldEitherBeAnAggregate0OrItWillBeConsideredANewGroupKey1: MessageKey = new MessageKey("SearchMessage", "AnyNewColumnShouldEitherBeAnAggregate0OrItWillBeConsideredANewGroupKey1");
-  export const OnceGroupingYouCanFilterNormallyOrUsingAggregatesAsTheField0: MessageKey = new MessageKey("SearchMessage", "OnceGroupingYouCanFilterNormallyOrUsingAggregatesAsTheField0");
-  export const InSql: MessageKey = new MessageKey("SearchMessage", "InSql");
-  export const FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1: MessageKey = new MessageKey("SearchMessage", "FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1");
-  export const RestoreDefaultColumns: MessageKey = new MessageKey("SearchMessage", "RestoreDefaultColumns");
-  export const AQueryExpressionCouldBeAnyFieldOfThe: MessageKey = new MessageKey("SearchMessage", "AQueryExpressionCouldBeAnyFieldOfThe");
-  export const Like: MessageKey = new MessageKey("SearchMessage", "Like");
-  export const OrAnyOtherFieldThatYouSeeInThe: MessageKey = new MessageKey("SearchMessage", "OrAnyOtherFieldThatYouSeeInThe");
-  export const WhenYouClick: MessageKey = new MessageKey("SearchMessage", "WhenYouClick");
-  export const IconOrAnyRelatedEntity: MessageKey = new MessageKey("SearchMessage", "IconOrAnyRelatedEntity");
-  export const AQueryExpressionCouldBeAnyColumnOfThe: MessageKey = new MessageKey("SearchMessage", "AQueryExpressionCouldBeAnyColumnOfThe");
-  export const OrAnyOtherFieldThatYouSeeInTheProjectWhenYouClick: MessageKey = new MessageKey("SearchMessage", "OrAnyOtherFieldThatYouSeeInTheProjectWhenYouClick");
-  export const TheOperationThatWillBeUsedToCompareThe: MessageKey = new MessageKey("SearchMessage", "TheOperationThatWillBeUsedToCompareThe");
-  export const WithThe: MessageKey = new MessageKey("SearchMessage", "WithThe");
-  export const EqualsDistinctGreaterThan: MessageKey = new MessageKey("SearchMessage", "EqualsDistinctGreaterThan");
-  export const Etc: MessageKey = new MessageKey("SearchMessage", "Etc");
-  export const TheValueThatWillBeComparedWithThe: MessageKey = new MessageKey("SearchMessage", "TheValueThatWillBeComparedWithThe");
-  export const TypicallyHasTheSameTypeAsTheFieldButSomeOperatorsLike: MessageKey = new MessageKey("SearchMessage", "TypicallyHasTheSameTypeAsTheFieldButSomeOperatorsLike");
-  export const AllowToSelectMultipleValues: MessageKey = new MessageKey("SearchMessage", "AllowToSelectMultipleValues");
-  export const YouAreEditingAColumnLetMeExplainWhatEachFieldDoes: MessageKey = new MessageKey("SearchMessage", "YouAreEditingAColumnLetMeExplainWhatEachFieldDoes");
-  export const CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup: MessageKey = new MessageKey("SearchMessage", "CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup");
   export const YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages: MessageKey = new MessageKey("SearchMessage", "YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages");
   export const CurrentPage: MessageKey = new MessageKey("SearchMessage", "CurrentPage");
   export const AllPages: MessageKey = new MessageKey("SearchMessage", "AllPages");
+  export const FilterTypeSelection: MessageKey = new MessageKey("SearchMessage", "FilterTypeSelection");
+  export const FilterMenu: MessageKey = new MessageKey("SearchMessage", "FilterMenu");
+  export const OperationsForSelectedElements: MessageKey = new MessageKey("SearchMessage", "OperationsForSelectedElements");
+  export const PaginationMode: MessageKey = new MessageKey("SearchMessage", "PaginationMode");
+  export const NumberOfElementsForPagination: MessageKey = new MessageKey("SearchMessage", "NumberOfElementsForPagination");
+  export const SelectAllResults: MessageKey = new MessageKey("SearchMessage", "SelectAllResults");
+  export const _0ResultTable: MessageKey = new MessageKey("SearchMessage", "_0ResultTable");
+  export const SelectRow0_: MessageKey = new MessageKey("SearchMessage", "SelectRow0_");
 }
 
 export namespace SelectorMessage {

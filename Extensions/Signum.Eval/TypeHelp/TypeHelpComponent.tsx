@@ -9,6 +9,7 @@ import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import "./TypeHelpComponent.css"
 import { useAPI } from '@framework/Hooks'
 import { TypeHelpMessage } from './Signum.Eval.TypeHelp'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface TypeHelpComponentProps {
   initialType?: string;
@@ -104,12 +105,16 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
           onSelect={handleSelect}
           renderInput={input => <div className="input-group input-group-sm" style={{ position: "initial" }}>
             <button className="btn input-group-text" disabled={!canBack()}              
-              onClick={e => handleGoHistory(e, historyIndex - 1)} type="button">
-              <FontAwesomeIcon icon="circle-arrow-left" title={TypeHelpMessage.Previous.niceToString()}/>
+              onClick={e => handleGoHistory(e, historyIndex - 1)} type="button"
+              title={TypeHelpMessage.Previous.niceToString()}
+              aria-label={TypeHelpMessage.Previous.niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} icon="circle-arrow-left"/>
             </button>
             <button className="btn input-group-text" disabled={!canForth()}              
-              onClick={e => handleGoHistory(e, historyIndex + 1)} type="button">
-              <FontAwesomeIcon icon="circle-arrow-right" title={TypeHelpMessage.Next.niceToString()}/>
+              onClick={e => handleGoHistory(e, historyIndex + 1)} type="button"
+              title={TypeHelpMessage.Next.niceToString()}
+              aria-label={TypeHelpMessage.Next.niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} icon="circle-arrow-right" />
             </button>
             {input}
             <div className="input-group-text" style={{ color: "white", backgroundColor: p.mode == "CSharp" ? "#007e01" : "#017acc" }}>
@@ -152,7 +157,7 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
     setContextMenuPosition(getMouseEventPosition(e));
   }
 
-  function renderMember(h: TypeHelpClient.TypeHelp, m: TypeHelpClient.TypeMemberHelp, index: number): React.ReactChild {
+  function renderMember(h: TypeHelpClient.TypeHelp, m: TypeHelpClient.TypeMemberHelp, index: number): React.ReactNode {
 
     var className = "sf-member-name";
     var onClick: React.MouseEventHandler<any> | undefined;
@@ -189,7 +194,7 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
     );
   }
 
-  function renderType(type: string, cleanType?: string | null): React.ReactChild {
+  function renderType(type: string, cleanType?: string | null): React.ReactNode {
 
     var startIndex = type.indexOf("<");
     var endIndex = type.lastIndexOf(">");
@@ -220,10 +225,10 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
     if (cleanType != null)
       return (
         <span>
-          <a href="#" className={"sf-member-" + (isTypeEnum(type) ? "enum" : "class")}
-            onClick={(e) => { e.preventDefault(); goTo(cleanType); }}>
+          <LinkButton title={undefined} className={"sf-member-" + (isTypeEnum(type) ? "enum" : "class")}
+            onClick={(e) => { goTo(cleanType); }}>
             {type}
-          </a>
+          </LinkButton>
         </span>
       );
 

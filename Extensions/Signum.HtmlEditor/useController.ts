@@ -18,6 +18,7 @@ import { HtmlEditorProps } from "./HtmlEditor";
 import { HtmlEditorController } from "./HtmlEditorController";
 import { useRegisterExtensions } from "./useRegisterExtensions";
 import { useRegisterKeybindings } from "./useRegisterKeybindings";
+import { ImageExtension } from "./Extensions/ImageExtension";
 
 type ControllerProps = {
   binding: IBinding<string | null | undefined>;
@@ -28,7 +29,7 @@ type ControllerProps = {
   innerRef?: React.Ref<LexicalEditor>;
   plugins?: HtmlEditorExtension[];
   initiallyFocused?: boolean | number;
-  handleKeybindings?: HtmlEditorProps['handleKeybindings'];
+  handleKeybindings?: HtmlEditorProps["handleKeybindings"];
 };
 
 type ControllerReturnType = {
@@ -46,10 +47,10 @@ export const useController = ({
   plugins,
   initiallyFocused,
   handleKeybindings,
-  editableId
+  editableId,
 }: ControllerProps): ControllerReturnType => {
   const controller = React.useMemo(() => new HtmlEditorController(), []);
-  const textConverter = converter ?? new HtmlContentStateConverter();
+  const textConverter = converter ?? new HtmlContentStateConverter(plugins?.firstOrNull(a => a instanceof ImageExtension)?.imageConverter.dataImageIdAttribute);
 
   const extensions: HtmlEditorExtension[] = React.useMemo(() => {
     const defaultPlugins = [
@@ -63,7 +64,10 @@ export const useController = ({
       return defaultPlugins;
     }
 
-    return [...defaultPlugins, ...plugins];
+    const result = [...defaultPlugins, ...plugins];
+    result.toObject((a) => a.name); // To throw if there are duplicates
+
+    return result;
   }, [plugins, controller]);
 
   React.useEffect(() => {
@@ -84,7 +88,7 @@ export const useController = ({
     innerRef,
     initiallyFocused,
     plugins: extensions,
-    editableId
+    editableId,
   });
 
   const nodes = React.useMemo(() => {

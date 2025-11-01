@@ -4,19 +4,21 @@ import { classes, Dic } from '@framework/Globals'
 import { TypeContext } from '@framework/TypeContext'
 import { OperationInfo, Type, getOperationInfo, getSymbol, getTypeInfo, tryGetOperationInfo, tryGetTypeInfo } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, getToString } from '@framework/Signum.Entities'
+import { ModifiableEntity, Lite, Entity, getToString, EntityControlMessage } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol, IFilePath, FileMessage } from '../Signum.Files'
 import { EntityBaseProps, EntityBaseController, Aprox } from '@framework/Lines/EntityBase'
 import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour, toComputerSize } from './FileDownloader'
 import { FileUploader, AsyncUploadOptions } from './FileUploader'
 
 import "./Files.css"
-import { genericForwardRefWithMemo, useController } from '@framework/Lines/LineBase'
+import { genericMemo, useController } from '@framework/Lines/LineBase'
 import { FilesClient } from '../FilesClient'
 import ProgressBar from '@framework/Components/ProgressBar'
 import { FontAwesomeIcon } from '@framework/Lines'
 import { EntityOperationContext, Operations } from '@framework/Operations'
 import { getNiceTypeName } from '@framework/Operations/MultiPropertySetter'
+import { JSX } from 'react/jsx-runtime'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export { FileTypeSymbol };
 
@@ -32,12 +34,11 @@ export interface FileLineProps<V extends ModifiableEntity/* & IFile */ | Lite</*
   asyncUpload?: boolean;
   getFileFromElement?: (actx: NoInfer<V>) => ModifiableEntity & IFile | Lite<IFile & Entity>;
   createElementFromFile?: (file: ModifiableEntity & IFile) => Promise<NoInfer<V> | undefined>;
+  ref?: React.Ref<FileLineController<V>>
 }
 
 
 export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*IFile &*/ Entity> | null> extends EntityBaseController<FileLineProps<V>, V> {
-
-  abortController?: AbortController;
   executeWhenFinished?: OperationInfo;
 
   overrideProps(p: FileLineProps<V>, overridenProps: FileLineProps<V>): void {
@@ -86,13 +87,11 @@ export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*
 
       return ({
         chunkSizeMB: 5,
-        onStart: (file, ac) => {
-          this.abortController = ac;
+        onStart: (file) => {
           this.forceUpdate();
         }, 
         onProgress: (file) => this.forceUpdate(),
         onFinished: (file) => {
-          this.abortController = undefined;
           this.forceUpdate();
 
           if (this.executeWhenFinished) {
@@ -101,7 +100,6 @@ export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*
           }
         },
         onError: (file, error) => {
-          this.abortController = undefined;
           this.setValue(null!);
           throw error;
         },
@@ -110,9 +108,9 @@ export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*
   }
 }
 
-export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile & */Entity> | null>(props: FileLineProps<V> & React.RefAttributes<FileLineController<V>>) => React.ReactNode | null =
-  genericForwardRefWithMemo(function FileLine<V extends ModifiableEntity/* & IFile */ | Lite</*IFile &*/ Entity> | null>(props: FileLineProps<V>, ref: React.Ref<FileLineController<V>>) {
-    const c = useController(FileLineController, props, ref);
+export const FileLine: <V extends ModifiableEntity /* & IFile */ | Lite</*IFile &*/ Entity> | null>(props: FileLineProps<V>) => React.ReactNode | null =
+  genericMemo(function FileLine<V extends ModifiableEntity/* & IFile */ | Lite</*IFile &*/ Entity> | null>(props: FileLineProps<V>) {
+    const c = useController<FileLineController<V>, FileLineProps<V>, V>(FileLineController, props);
     const p = c.props;
 
     if (c.isHidden)
@@ -160,7 +158,7 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
               const pair = tryGetSaveOperation();
               
               return <>
-                <UploadProgress file={fp} abortController={c.abortController} />
+                <UploadProgress file={fp} />
                 {pair && <small><Form.Check checked={c.executeWhenFinished == pair.oi}
                   label={FileMessage.SaveThe0WhenFinished.niceToString().forGenderAndNumber(pair.ti.gender).formatHtml(<strong>{pair.ti.niceName}</strong>)} onChange={e => {
                   c.executeWhenFinished = e.currentTarget.checked ? pair.oi : undefined;
@@ -243,14 +241,15 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
   }, (prev, next) => FileLineController.propEquals(prev, next));
 
 
-function UploadProgress(p: { file: IFilePath, abortController?: AbortController }) {
+function UploadProgress(p: { file: IFilePath }) {
+  const abortController = p.file.__abortController;
   return (
     <div>
       <div>
-        {p.abortController && <a href="#" className="sf-line-button sf-remove" onClick={e => { e.preventDefault(); p.abortController!.abort(); }}><FontAwesomeIcon icon="xmark" /></a>}
+        {abortController && <LinkButton title={EntityControlMessage.Remove.niceToString()} className="sf-line-button sf-remove" onClick={e => { abortController.abort(); }}><FontAwesomeIcon icon="xmark" /></LinkButton>}
         <small>{FileMessage.Uploading01.niceToString(p.file.fileName, toComputerSize(p.file.fileLength))}</small>
       </div>
-      <ProgressBar color={p.abortController?.signal.aborted ? "warning" : undefined} value={(p.file.__uploadingOffset == null ? null : p.file.__uploadingOffset / p.file.fileLength)} />
+      <ProgressBar color={abortController?.signal.aborted ? "warning" : undefined} value={(p.file.__uploadingOffset == null ? null : p.file.__uploadingOffset / p.file.fileLength)} />
     </div>
   );
 }

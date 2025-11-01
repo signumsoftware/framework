@@ -87,6 +87,9 @@ public static class SignumServer
 
     public static void Start(WebServerBuilder wsb)
     {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         Schema.Current.ApplicationName = wsb.MachineName ?? wsb.WebApplication.Environment.ContentRootPath;
 
         ReflectionServer.Start();
@@ -222,4 +225,10 @@ public class WebServerBuilder
     public required string? MachineName { get; set; }
     public required string AuthTokenEncryptionKey { get; set; }
     public required CultureInfo DefaultCulture { get; set; }
+
+    public HashSet<(Type type, string method)> LoadedModules = new HashSet<(Type type, string method)>();
+    public bool AlreadyDefined(MethodBase? methodBase)
+    {
+        return !LoadedModules.Add((type: methodBase!.DeclaringType!, method: methodBase!.Name));
+    }
 }

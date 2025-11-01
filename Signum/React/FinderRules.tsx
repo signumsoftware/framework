@@ -33,6 +33,7 @@ import { AutoLine } from "./Lines/AutoLine";
 import { EnumLine } from "./Lines/EnumLine";
 import { KeyNames } from "./Components";
 import QueryTokenBuilder from "./SearchControl/QueryTokenBuilder";
+import { LinkButton } from "./Basics/LinkButton";
 
 
 export function isMultiline(pr?: PropertyRoute): boolean {
@@ -503,14 +504,12 @@ export function initEntityFormatRules(): Finder.EntityFormatRule[] {
       name: "View",
       isApplicable: sc => sc?.state.resultFindOptions?.groupResults == true,
       formatter: new Finder.EntityFormatter(({ row, columns, searchControl: sc }) =>
-        <a href="#"
+        <LinkButton
+          title={JavascriptMessage.ShowGroup.niceToString()}
           className="sf-line-button sf-view"
-          onClick={e => { e.preventDefault(); sc!.openRowGroup(row, e); }}
-        >
-          <span title={JavascriptMessage.ShowGroup.niceToString()}>
-            <FontAwesomeIcon icon="layer-group" />
-          </span>
-        </a>, "centered-cell")
+          onClick={e => { sc!.openRowGroup(row, e); }}>
+          <FontAwesomeIcon aria-hidden={true} icon="layer-group" />
+        </LinkButton>, "centered-cell")
     },
   ]
 }
@@ -750,7 +749,7 @@ export interface MultiValueProps {
   onChange: () => void;
 }
 
-export function MultiValue(p: MultiValueProps): React.JSX.Element {
+export function MultiValue(p: MultiValueProps): React.ReactElement {
 
   const forceUpdate = useForceUpdate();
 
@@ -776,11 +775,12 @@ export function MultiValue(p: MultiValueProps): React.JSX.Element {
             <tr key={i}>
               <td>
                 {!p.readOnly &&
-                  <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+                  <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
                     className="sf-line-button sf-remove"
-                    onClick={e => handleDeleteValue(e, i)}>
-                    <FontAwesomeIcon icon="xmark" />
-                  </a>}
+                    onClick={e => handleDeleteValue(e, i)}
+                    tabIndex={0}>
+                    <FontAwesomeIcon aria-hidden={true} icon="xmark" />
+                  </LinkButton>}
               </td>
               <td>
                 {
@@ -797,11 +797,12 @@ export function MultiValue(p: MultiValueProps): React.JSX.Element {
         <tr >
           <td colSpan={4}>
             {!p.readOnly &&
-              <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddValue.niceToString() : undefined}
+              <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.AddValue.niceToString() : undefined}
                 className="sf-line-button sf-create"
-                onClick={handleAddValue}>
-                <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
-              </a>}
+                onClick={handleAddValue}
+                tabIndex={0}>
+                <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
+              </LinkButton>}
           </td>
         </tr>
       </tbody>
@@ -810,7 +811,7 @@ export function MultiValue(p: MultiValueProps): React.JSX.Element {
 }
 
 
-export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type: string, onChange: () => void, vertical?: boolean }): React.JSX.Element {
+export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type: string, onChange: () => void, vertical?: boolean }): React.ReactElement {
   const mListEntity = React.useRef<MList<Lite<Entity>>>([]);
 
 
@@ -829,7 +830,7 @@ export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type
 
 
 
-export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: FilterOperation | null, onChange: () => void, label?: string }): React.JSX.Element {
+export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: FilterOperation | null, onChange: () => void, label?: string }): React.ReactElement {
   return <TextAreaLine ctx={p.ctx}
     type={{ name: "string" }}
     label={p.label}
@@ -852,7 +853,7 @@ export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: F
   />
 }
 
-export function ComplexConditionSyntax(p: { fo: FilterOperation }): React.JSX.Element | null {
+export function ComplexConditionSyntax(p: { fo: FilterOperation }): React.ReactElement | null {
   var help = FullTextSearchHelps[p.fo];
 
   if (help == null)
@@ -890,7 +891,7 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
   "ComplexCondition": {
     icon: <span>OR</span>,
     title: "Full-Text Search Syntax",
-    url: <a href="https://learn.microsoft.com/en-us/sql/relational-databases/search/query-with-full-text-search" target="_blank">Microsoft Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    url: <a href="https://learn.microsoft.com/en-us/sql/relational-databases/search/query-with-full-text-search" target="_blank">Microsoft Docs <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>,
     examples: [
       "banana AND strawberry",
       "banana OR strawberry",
@@ -904,7 +905,7 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
   "TsQuery": {
     icon: <span>&</span>,
     title: "Full-Text Search to_tsquery Syntax",
-    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>,
     examples: [
       "banana & strawberry",
       "banana | strawberry",
@@ -918,7 +919,7 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
   "TsQuery_Plain": {
     icon: <FontAwesomeIcon icon="quote-left" />,
     title: "Full-Text Search to_simpletsquery Syntax",
-    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>,
     examples: [
       "banana strawberry",
       "\"banana strawberry\" <3>",
@@ -927,7 +928,7 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
   "TsQuery_Phrase": {
     icon: <FontAwesomeIcon icon="text" />,
     title: "Full-Text Search plainto_tsquery Syntax",
-    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>,
     examples: [
       "banana strawberry",
     ]
@@ -935,7 +936,7 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
   "TsQuery_WebSearch": {
     icon: <FontAwesomeIcon icon="globe" />,
     title: "Full-Text Search to_tsquery Syntax",
-    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>,
+    url: <a href="https://www.postgresql.org/docs/current/textsearch-controls.html" target="_blank">PostgreSQL Docs <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>,
     examples: [
       "banana strawberry",
       "banana OR strawberry",

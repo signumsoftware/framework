@@ -6,9 +6,12 @@ namespace Signum.Scheduler;
 
 public static class SchedulerServer
 {
-    public static void Start(IApplicationBuilder app, IHostApplicationLifetime lifetime)
+    public static void Start(WebServerBuilder wsb)
     {
-        lifetime.ApplicationStopping.Register(() =>
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
+        wsb.WebApplication.Lifetime.ApplicationStopping.Register(() =>
         {
             if (ScheduleTaskRunner.Running)
                 ScheduleTaskRunner.StopScheduledTasks();

@@ -16,9 +16,9 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
     return this.coloredIcon("arrow-circle-right", "#BCDEFF");
   }
 
-  renderItem(result: EntityOmniboxResult): React.ReactChild[] {
+  renderItem(result: EntityOmniboxResult): React.ReactNode[] {
 
-    const array: React.ReactChild[] = [];
+    const array: React.ReactNode[] = [];
 
     array.push(this.icon());
 

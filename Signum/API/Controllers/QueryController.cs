@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.API.Json;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection.Metadata;
+using Signum.DynamicQuery;
 
 namespace Signum.API.Controllers;
 
@@ -63,23 +64,15 @@ public class QueryController : ControllerBase
         var qn = QueryLogic.ToQueryName(request.queryKey);
         var qd = QueryLogic.Queries.QueryDescription(qn);
 
-        var tokens = request.tokens.Select(tr => QueryUtils.Parse(tr.token, qd, tr.options)).ToList();
+        var tokens = request.tokens.Select(token => QueryUtils.Parse(token, qd, SubTokensOptions.All)).ToList();
 
-        return tokens.Select(qt => new QueryTokenTS(qt, recursive: true)).ToList();
-    }
-
-    public class TokenRequest
-    {
-        public required string token;
-        public SubTokensOptions options;
-
-        public override string ToString() => $"{token} ({options})";
+        return tokens.Select(qt => new QueryTokenTS(qt, withParents: true)).ToList();
     }
 
     public class ParseTokensRequest
     {
         public required string queryKey;
-        public required List<TokenRequest> tokens;
+        public required List<string> tokens;
     }
 
     [HttpPost("api/query/subTokens")]
@@ -88,19 +81,17 @@ public class QueryController : ControllerBase
         var qn = QueryLogic.ToQueryName(request.queryKey);
         var qd = QueryLogic.Queries.QueryDescription(qn);
 
-        var token = request.token == null ? null: QueryUtils.Parse(request.token, qd, request.options);
+        var token = request.token == null ? null: QueryUtils.Parse(request.token, qd, SubTokensOptions.All);
 
+        var tokens = QueryUtils.SubTokens(token, qd, SubTokensOptions.All);
 
-        var tokens = QueryUtils.SubTokens(token, qd, request.options);
-
-        return tokens.Select(qt => new QueryTokenTS(qt, recursive: false)).ToList();
+        return tokens.Select(qt => QueryTokenTS.WithAutoExpand(qt, qd)).ToList();
     }
 
     public class SubTokensRequest
     {
         public required string queryKey;
         public string? token;
-        public SubTokensOptions options;
     }
 
     [HttpPost("api/query/executeQuery/{queryKey}"), ProfilerActionSplitter("queryKey")]
@@ -141,6 +132,19 @@ public class QueryController : ControllerBase
             return qvr.ValueToken!.GetPropertyRoute()!;
         }
     }
+
+    [HttpGet("api/query/queryContexts")]
+    public Dictionary<string/*queryKey*/, Dictionary<string /*context typeName*/, List<object>>> GetQueryContexts()
+    {
+        var context = (from qn in QueryLogic.Queries.GetAllowedQueryNames(false)
+                       let dic = QueryLogic.Queries.GetAllowedContexts(qn)
+                       where dic != null
+                       select KeyValuePair.Create(QueryUtils.GetKey(qn), 
+                            dic.ToDictionaryEx(kvp => TypeLogic.GetCleanName(kvp.Key), kvp => kvp.Value.Select(a => (object)a.Id.Object).ToList())))
+                       .ToDictionaryEx();
+
+        return context;
+    }
 }
 
 
@@ -148,12 +152,23 @@ public class QueryController : ControllerBase
 public class QueryDescriptionTS
 {
     public string queryKey;
-    public Dictionary<string, ColumnDescriptionTS> columns;
+    public Dictionary<string, QueryTokenTS> columns;
 
-    public QueryDescriptionTS(QueryDescription queryDescription)
+    public QueryDescriptionTS(QueryDescription qd)
     {
-        this.queryKey = QueryUtils.GetKey(queryDescription.QueryName);
-        this.columns = queryDescription.Columns.ToDictionary(a => a.Name, a => new ColumnDescriptionTS(a, queryDescription.QueryName));
+        this.queryKey = QueryUtils.GetKey(qd.QueryName);
+        columns = new Dictionary<string, QueryTokenTS>();
+        var count = new AggregateToken(AggregateFunction.Count, qd.QueryName);
+        this.columns.Add(count.Key, QueryTokenTS.WithAutoExpand(count, qd));
+
+        var timeSeries = new TimeSeriesToken(qd.QueryName);
+        this.columns.Add(timeSeries.Key, QueryTokenTS.WithAutoExpand(timeSeries, qd));
+
+        this.columns.AddRange(qd.Columns, a => a.Name, cd =>
+        {
+            var token = new ColumnToken(cd, qd.QueryName);
+            return QueryTokenTS.WithAutoExpand(token, qd);
+        });
 
         foreach (var action in AddExtension.GetInvocationListTyped())
         {
@@ -167,51 +182,11 @@ public class QueryDescriptionTS
     public static Action<QueryDescriptionTS>? AddExtension;
 }
 
-public class ColumnDescriptionTS
-{
-    public string name;
-    public TypeReferenceTS type;
-    public string typeColor;
-    public string niceTypeName;
-    public FilterType? filterType;
-    public string? unit;
-    public string? format;
-    public string displayName;
-    public bool isGroupable;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool hasOrderAdapter;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool preferEquals;
-    public string? propertyRoute;
-
-    public ColumnDescriptionTS(ColumnDescription a, object queryName)
-    {
-        var token = new ColumnToken(a, queryName);
-
-        this.name = a.Name;
-        this.type = new TypeReferenceTS(a.Type, a.Implementations);
-        this.filterType = QueryUtils.TryGetFilterType(a.Type);
-        this.typeColor = token.TypeColor;
-        this.niceTypeName = token.NiceTypeName;
-        this.isGroupable = token.IsGroupable;
-        this.hasOrderAdapter = QueryUtils.OrderAdapters.Any(a => a(token) != null);
-        this.preferEquals = token.Type == typeof(string) &&
-            token.GetPropertyRoute() is PropertyRoute pr &&
-            typeof(Entity).IsAssignableFrom(pr.RootType) &&
-            Schema.Current.HasSomeIndex(pr);
-        this.unit = UnitAttribute.GetTranslation(a.Unit);
-        this.format = a.Format;
-        this.displayName = a.DisplayName;
-        this.propertyRoute = token.GetPropertyRoute()?.ToString();
-    }
-}
-
 public class QueryTokenTS
 {
-
     QueryTokenTS() { }
     [SetsRequiredMembers]
-    public QueryTokenTS(QueryToken qt, bool recursive)
+    public QueryTokenTS(QueryToken qt, bool withParents)
     {
         this.toStr = qt.ToString();
         this.niceName = qt.NiceName();
@@ -221,10 +196,11 @@ public class QueryTokenTS
         this.filterType = QueryUtils.TryGetFilterType(qt.Type);
         this.format = qt.Format;
         this.unit = UnitAttribute.GetTranslation(qt.Unit);
-        this.typeColor = qt.TypeColor;
         this.niceTypeName = qt.NiceTypeName;
         this.queryTokenType = GetQueryTokenType(qt);
         this.isGroupable = qt.IsGroupable;
+        this.autoExpand = qt.AutoExpand;
+        this.hideInAutoExpand = qt.HideInAutoExpand;
         this.hasOrderAdapter = QueryUtils.OrderAdapters.Any(a => a(qt) != null);
         this.tsVectorFor = qt is PgTsVectorColumnToken tsqt ? tsqt.GetColumnsRoutes().Select(a => a.ToString()).ToList() : null;
 
@@ -234,8 +210,17 @@ public class QueryTokenTS
             Schema.Current.HasSomeIndex(pr);
 
         this.propertyRoute = qt.GetPropertyRoute()?.ToString();
-        if (recursive && qt.Parent != null)
-            this.parent = new QueryTokenTS(qt.Parent, recursive);
+        if (withParents && qt.Parent != null)
+            this.parent = new QueryTokenTS(qt.Parent, withParents);
+    }
+
+    public static QueryTokenTS WithAutoExpand(QueryToken qt, QueryDescription qd)
+    {
+        var qt2 = new QueryTokenTS(qt, withParents: false);
+        if (qt.AutoExpand)
+            qt2.subTokens = QueryUtils.SubTokens(qt, qd, SubTokensOptions.All).Select(st => WithAutoExpand(st, qd)).ToDictionaryEx(a => a.key);
+
+        return qt2;
     }
 
     private static QueryTokenType? GetQueryTokenType(QueryToken qt)
@@ -255,25 +240,37 @@ public class QueryTokenTS
         if (qt is CollectionToArrayToken)
             return QueryTokenType.ToArray;
 
-        if (qt is OperationsToken)
-            return QueryTokenType.Operation;
+        if (qt is OperationsContainerToken)
+            return QueryTokenType.OperationContainer;
         
         if (qt is ManualContainerToken or ManualToken)
             return QueryTokenType.Manual;
-        
+
+        if (qt is StringSnippetToken)
+            return QueryTokenType.Snippet;
+
+        if (qt is TimeSeriesToken)
+            return QueryTokenType.TimeSeries;
+
+        if (qt is IndexerContainerToken)
+            return QueryTokenType.IndexerContainer;
+
         return null;
     }
 
+    public required string fullKey;
+    public required string key;
     public required string toStr;
     public required string niceName;
-    public required string key;
-    public required string fullKey;
-    public required string typeColor;
     public required string niceTypeName;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public QueryTokenType? queryTokenType;
     public required TypeReferenceTS type;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public FilterType? filterType;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? format;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? unit;
     public bool isGroupable;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
@@ -282,8 +279,17 @@ public class QueryTokenTS
     public bool preferEquals;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public IReadOnlyList<string>? tsVectorFor;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public QueryTokenTS? parent;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? propertyRoute;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool autoExpand;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool hideInAutoExpand;
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, QueryTokenTS>? subTokens;
 }
 
 public enum QueryTokenType
@@ -291,8 +297,11 @@ public enum QueryTokenType
     Aggregate,
     Element,
     AnyOrAll,
-    Operation,
+    OperationContainer,
     ToArray,
     Manual,
-    Nested
+    Nested,
+    Snippet,
+    TimeSeries,
+    IndexerContainer,
 }

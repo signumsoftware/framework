@@ -24,6 +24,8 @@ public abstract class ManualContainerToken : QueryToken
 
     }
 
+    public override bool HideInAutoExpand => true;
+
     public override string ToString()
     {
         return GetTokenKey();

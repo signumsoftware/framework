@@ -9,7 +9,7 @@
 .sf-profiler-chart .shape-before
 {
     opacity: 0.3;
-    fill: white;
+    fill: var(--bs-body-color);
 }
 .sf-profiler-chart .label
 {

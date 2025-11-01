@@ -157,6 +157,8 @@ export namespace QueryTokenMessage {
   export const SnippetOf0: MessageKey = new MessageKey("QueryTokenMessage", "SnippetOf0");
   export const PartitionId: MessageKey = new MessageKey("QueryTokenMessage", "PartitionId");
   export const Nested: MessageKey = new MessageKey("QueryTokenMessage", "Nested");
+  export const IndexerContainer: MessageKey = new MessageKey("QueryTokenMessage", "IndexerContainer");
+  export const Operations: MessageKey = new MessageKey("QueryTokenMessage", "Operations");
 }
 
 export const RoundingType: EnumType<RoundingType> = new EnumType<RoundingType>("RoundingType");

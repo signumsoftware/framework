@@ -8,7 +8,7 @@ import { useAPI } from '../Hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconName } from '@fortawesome/fontawesome-svg-core';
 
-export default function CultureDropdown(p: { fullName?: boolean }): React.JSX.Element | null {
+export default function CultureDropdown(p: { fullName?: boolean; isMobile?: boolean }): React.ReactElement | null {
 
   var cultures = useAPI(signal => CultureClient.getCultures(false), []);
 
@@ -20,11 +20,17 @@ export default function CultureDropdown(p: { fullName?: boolean }): React.JSX.El
   function handleSelect(c: Lite<CultureInfoEntity>) {
     CultureClient.changeCurrentCulture(c);
   }
+  function fullName() {
+    return (p.fullName ? current.nativeName : simplifyName(current.nativeName));
+  }
 
+  const dropdownTitle = p.isMobile
+    ? <FontAwesomeIcon icon={"globe"} title={fullName()} aria-label={fullName()} />
+    : fullName();
   return (
-    <NavDropdown data-culture={current.name} title={p.fullName ? current.nativeName : simplifyName(current.nativeName)} className="sf-culture-dropdown">
+    <NavDropdown data-culture={current.name} title={dropdownTitle} className="sf-culture-dropdown">
       {Dic.map(cultures, (name, c, i) =>
-        <NavDropdown.Item key={i} data-culture={name} disabled={is(c, current)} onClick={() => handleSelect(c)}>
+        <NavDropdown.Item key={i} data-culture={name} active={is(c, current)} onClick={() => handleSelect(c)}>
           {p.fullName ? getToString(c) : simplifyName(getToString(c)!)}
         </NavDropdown.Item>
       )}
@@ -45,7 +51,7 @@ export function CultureDropdownMenuItem(props: {
       close: IconName;
     }
   }
-}): React.JSX.Element | null {
+}): React.ReactElement | null {
   var [show, setShow] = React.useState(false);
 
   var cultures = useAPI(signal => CultureClient.getCultures(false), []);
@@ -73,11 +79,11 @@ export function CultureDropdownMenuItem(props: {
       <div className={"dropdown-item"}
         style={{ cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center" }}
         onClick={() => setShow(!show)}>
-        <FontAwesomeIcon icon="globe" fixedWidth className="me-2" /> <span style={{ width: "100%" }}>{props.label || CultureInfoEntity.niceName()}</span> <FontAwesomeIcon icon={getChevronIcon()} />
+        <FontAwesomeIcon icon="globe" aria-hidden={true} className="me-2" /> <span style={{ width: "100%" }}>{props.label || CultureInfoEntity.niceName()}</span> <FontAwesomeIcon aria-hidden={true} icon={getChevronIcon()} />
       </div>
       <div style={{ display: show ? "block" : "none" }}>
         {Dic.map(cultures, (name, c, i) =>
-          <NavDropdown.Item key={i} data-culture={name} disabled={is(c, current)} onClick={() => handleSelect(c)}>
+          <NavDropdown.Item key={i} data-culture={name} active={is(c, current)} onClick={() => handleSelect(c)}>
             {props.fullName ? getToString(c) : simplifyName(getToString(c)!)}
           </NavDropdown.Item>
         )}

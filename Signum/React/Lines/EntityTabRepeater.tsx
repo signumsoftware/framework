@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { classes } from '../Globals'
 import { TypeContext, mlistItemContext } from '../TypeContext'
-import { ModifiableEntity, Lite, Entity, MListElement, EntityControlMessage, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MListElement, EntityControlMessage, getToString, MList } from '../Signum.Entities'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 import { newMListElement } from '../Signum.Entities';
@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from '../Lines';
 import { EntityTableProps } from './EntityTable'
 import { Tabs, Tab } from 'react-bootstrap'
-import { genericForwardRef, useController } from './LineBase'
+import { useController } from './LineBase'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
 
@@ -22,6 +22,7 @@ export interface EntityTabRepeaterProps<V extends ModifiableEntity> extends Enti
   extraTabs?: (c: EntityTabRepeaterController<V>) => React.ReactNode;
   selectedIndex?: number;
   onSelectTab?: (newIndex: number) => void;
+  ref?: React.Ref<EntityTabRepeaterController<V>>
 }
 
 
@@ -83,8 +84,8 @@ export class EntityTabRepeaterController<V extends ModifiableEntity> extends Ent
 
 }
 
-export const EntityTabRepeater: <V extends ModifiableEntity>(props: EntityTabRepeaterProps<V> & React.RefAttributes<EntityTabRepeaterController<V>>) => React.ReactNode | null = genericForwardRef(function EntityTabRepeater<V extends ModifiableEntity>(props: EntityTabRepeaterProps<V>, ref: React.Ref<EntityTabRepeaterController<V>>) {
-  const c = useController(EntityTabRepeaterController, props, ref);
+export function EntityTabRepeater<V extends ModifiableEntity>(props: EntityTabRepeaterProps<V>): React.JSX.Element | null {
+  const c = useController<EntityTabRepeaterController<V>, EntityTabRepeaterProps<V>, MList<V>>(EntityTabRepeaterController, props);
   const p = c.props;
 
   const ctx = p.ctx!;
@@ -129,7 +130,7 @@ export const EntityTabRepeater: <V extends ModifiableEntity>(props: EntityTabRep
     return (
       <Tabs activeKey={c.selectedIndex || 0} onSelect={handleSelectTab} id={ctx.prefix + "_tab"} transition={false} mountOnEnter unmountOnExit>
         {
-          c.getMListItemContext(ctx).map((mlec, i): React.JSX.Element => {
+          c.getMListItemContext(ctx).map((mlec, i): React.ReactElement => {
 
             if (mlec.binding == null && mlec.previousVersion) {
               return (
@@ -191,7 +192,7 @@ export const EntityTabRepeater: <V extends ModifiableEntity>(props: EntityTabRep
       </Tabs>
     );
   }
-});
+}
 
 function coerce(index: number, length: number): number {
   if (length <= index)

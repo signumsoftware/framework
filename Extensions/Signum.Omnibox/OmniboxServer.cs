@@ -6,8 +6,11 @@ namespace Signum.Omnibox;
 
 public static class OmniboxServer
 {
-    public static void Start(IApplicationBuilder app, params IOmniboxResultGenerator[] generators)
+    public static void Start(WebServerBuilder wsb, params IOmniboxResultGenerator[] generators)
     {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         QueryTokenJsonConverter.GetQueryTokenTS = qt => new QueryTokenTS(qt, true);
         QueryNameJsonConverter.GetQueryKey = qn => QueryUtils.GetKey(qn);
 

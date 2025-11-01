@@ -143,8 +143,7 @@ public class SchemaSettings
     AttributeCollection CreateFieldAttributeCollection(PropertyRoute route)
     {
         var fieldAttributes = route.FieldInfo!.GetCustomAttributes(false).Cast<Attribute>();
-        var fieldAttributesInProperty = route.PropertyInfo == null ? Enumerable.Empty<Attribute>() :
-           route.PropertyInfo.GetCustomAttributes(false).Cast<Attribute>().Where(a => AttributeCollection.IsCompatibleWith(a, AttributeTargets.Field));
+        var fieldAttributesInProperty = route.PropertyInfo == null ? Enumerable.Empty<Attribute>() : route.PropertyInfo.GetCustomAttributes(false).Cast<Attribute>();
         return new AttributeCollection(AttributeTargets.Field, fieldAttributes.Concat(fieldAttributesInProperty).ToList(), () => AssertNotIncluded(route.RootType));
     }
 
@@ -275,7 +274,7 @@ public class SchemaSettings
 
         if (imp.IsByAll || !imp.Types.Contains(typeToImplement))
             throw new InvalidOperationException("Route {0} is not ImplementedBy {1}".FormatWith(route, typeToImplement.Name) +
-                "\n" +
+                "\n\n" +
                 Implementations.ConsiderMessage(route, imp.Types.And(typeToImplement).ToString(t => $"typeof({t.TypeName()})", ", ")));
     }
 

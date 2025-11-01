@@ -106,7 +106,7 @@ export default function renderBubbleplot({ data, width, height, parameters, load
               onClick={e => onDrillDown(r, e)}
             >
               <circle className="shape sf-transition hover-target"
-                stroke={active == true ? "black" : keyColumn.getValueColor(r) ?? color(r)}
+                stroke={active == true ? "var(--bs-body-color)" : keyColumn.getValueColor(r) ?? color(r)}
                 strokeWidth={3} fill={keyColumn.getValueColor(r) ?? color(r)}
                 fillOpacity={parseFloat(parameters["FillOpacity"])}
                 shapeRendering="initial"

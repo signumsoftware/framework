@@ -16,8 +16,11 @@ namespace Signum.Translation;
 public class TranslationServer
 {
 
-    public static void Start(IApplicationBuilder app)
-    {        
+    public static void Start(WebServerBuilder wsb)
+    {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         ReflectionServer.RegisterLike(typeof(TranslationMessage), () => TranslationPermission.TranslateCode.IsAuthorized() || TranslationPermission.TranslateInstances.IsAuthorized());
 
         ReflectionServer.PropertyRouteExtension += (mi, pr) =>
@@ -30,54 +33,54 @@ public class TranslationServer
             return mi;
         };
 
-        var pairs = PropertyRouteTranslationLogic.TranslateableRoutes.Values.SelectMany(a => a.Keys)
-            .Select(pr => (type: pr.Parent!.Type, prop: pr.PropertyInfo!))
-            .Distinct()
-            .ToList();
-
-        foreach (var (type, prop) in pairs)
+        Schema.Current.BeforeDatabaseAccess += () =>
         {
-            var converters = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(type);
+            var pairs = PropertyRouteTranslationLogic.TranslateableRoutes.Values.SelectMany(a => a.Keys)
+                 .Select(pr => (type: pr.Parent!.Type, prop: pr.PropertyInfo!))
+                 .Distinct()
+                 .ToList();
 
-            converters.Add(prop.Name.FirstLower() + "_translated", new PropertyConverter()
+            foreach (var (type, prop) in pairs)
             {
-                AvoidValidate = true,
-                CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
+                var converters = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(type);
+
+                converters.Add(prop.Name.FirstLower() + "_translated", new PropertyConverter()
                 {
-                    var pr = ctx.ParentPropertyRoute.Add(prop);
+                    AvoidValidate = true,
+                    CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
+                    {
+                        var pr = ctx.ParentPropertyRoute.Add(prop);
 
-                    if (PropertyRouteTranslationLogic.RouteType(pr) == null)
-                        return;
+                        if (PropertyRouteTranslationLogic.RouteType(pr) == null)
+                            return;
 
-                    var discard = reader.GetString();
-                },
-                CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) =>
-                {
-                    var pr = ctx.ParentPropertyRoute.Add(prop);
+                        var discard = reader.GetString();
+                    },
+                    CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) =>
+                    {
+                        var pr = ctx.ParentPropertyRoute.Add(prop);
 
-                    if (PropertyRouteTranslationLogic.RouteType(pr) == null)
-                        return;
+                        if (PropertyRouteTranslationLogic.RouteType(pr) == null)
+                            return;
 
-                    var hastMList = pr.GetMListItemsRoute() != null;
+                        var hastMList = pr.GetMListItemsRoute() != null;
 
-                    var path = EntityJsonContext.CurrentSerializationPath;
+                        var path = EntityJsonContext.CurrentSerializationPath;
 
-                    var entity = ctx.Entity as Entity ?? (Entity?)path?.CurrentRootEntity();
+                        var entity = ctx.Entity as Entity ?? (Entity?)path?.CurrentRootEntity();
 
-                    var rowId = hastMList ? path?.CurrentRowId() : null;
+                        var rowId = hastMList ? path?.CurrentRowId() : null;
 
-                    writer.WritePropertyName(ctx.LowerCaseName);
+                        writer.WritePropertyName(ctx.LowerCaseName);
 
-                    var value = entity == null || entity.IsNew || hastMList && rowId == null /*UserQuery apply changes*/ ? null :
-                    PropertyRouteTranslationLogic.TranslatedField(entity.ToLite(), pr, rowId, null!);
+                        var value = entity == null || entity.IsNew || hastMList && rowId == null /*UserQuery apply changes*/ ? null :
+                        PropertyRouteTranslationLogic.TranslatedField(entity.ToLite(), pr, rowId, null!);
 
-                    writer.WriteStringValue(value);
-                }
-            });
-
-           
-
-        }
+                        writer.WriteStringValue(value);
+                    }
+                });
+            }
+        };
     }
 
 

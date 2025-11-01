@@ -30,7 +30,7 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
   const ctx4 = ctx.subCtx({ labelColumns: 4 });
   const ctx2 = ctx.subCtx({ labelColumns: 2 });
   const ctx6 = ctx.subCtx({ labelColumns: 6 });
-  const bgColor = (ctx4.value.iconColor && ctx4.value.iconColor.toLowerCase() == "white" ? "black" : undefined);
+  const bgColor = (ctx4.value.iconColor && ctx4.value.iconColor.toLowerCase() == "var(--bs-body-bg)" ? "var(--bs-body-color)" : undefined);
 
   var content = ctx2.value.content;
 

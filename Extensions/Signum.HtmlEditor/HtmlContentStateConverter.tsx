@@ -7,22 +7,24 @@ export interface ITextConverter {
 }
 
 export class HtmlContentStateConverter implements ITextConverter {
-  $convertToText(
-    editor: LexicalEditor
-  ): ReturnType<ITextConverter["$convertToText"]> {
-    return editor.read(() => $generateHtmlFromNodes(editor));
+
+  constructor(public dataImageIdAttribute: string | undefined) /*"data-attachment-id"*/ {
+
   }
-  
-  $convertFromText(
-    editor: LexicalEditor,
-    html: string
-  ): ReturnType<ITextConverter["$convertFromText"]> {
+
+  $convertToText(editor: LexicalEditor): string {
+    return editor.read(() => fixListHTML($generateHtmlFromNodes(editor)));
+  }
+
+  $convertFromText(editor: LexicalEditor, html: string): EditorState {
 
     editor.update(() => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
 
-      createImagePlaceholders(doc);
+      if (this.dataImageIdAttribute)
+        createImagePlaceholders(doc, this.dataImageIdAttribute);
+
       const nodes = $generateNodesFromDOM(editor, doc);
       $getRoot().clear().select();
       $getSelection()?.insertNodes(nodes);
@@ -33,14 +35,60 @@ export class HtmlContentStateConverter implements ITextConverter {
   }
 }
 
-function createImagePlaceholders(doc: Document) {
+function createImagePlaceholders(doc: Document, dataImageIdAttribute : string) {
   const imgElements = doc.querySelectorAll("img");
-  for(let i = 0; i < imgElements.length; i++) {
+  for (let i = 0; i < imgElements.length; i++) {
     const img = imgElements[i];
-    const attachmentId = img.getAttribute("data-attachment-id");
-    if(!attachmentId) continue;
+    const attachmentId = img.getAttribute(dataImageIdAttribute);
+    if (!attachmentId)
+      continue;
 
     const placeholderText = `[IMAGE_${attachmentId}]`;
     img.replaceWith(document.createTextNode(placeholderText));
   }
 }
+
+function fixListHTML(html: string): string {
+  // Remove `value="..."` from OL elements
+  html = html.replace(/\svalue="\d+"/g, '');
+
+  const container = document.createElement('div');
+  container.innerHTML = html;
+
+  function fixBrokenNestedLists(element: HTMLElement): void {
+    const listTags = ['ol', 'ul'];
+
+    for (const tag of listTags) {
+      const listElements = Array.from(element.querySelectorAll(tag));
+
+      for (const list of listElements) {
+        const children = Array.from(list.children);
+
+        for (let i = 0; i < children.length; i++) {
+          const child = children[i];
+
+          if (
+            child.tagName === 'LI' &&
+            child.children.length === 1 &&
+            (child.firstElementChild?.tagName === 'OL' || child.firstElementChild?.tagName === 'UL')
+          ) {
+            const prevLi = child.previousElementSibling;
+
+            if (prevLi?.tagName === 'LI') {
+              const nestedList = child.firstElementChild as HTMLOListElement | HTMLUListElement;
+              prevLi.appendChild(nestedList);
+              child.remove();
+              i--;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  fixBrokenNestedLists(container);
+
+  return container.innerHTML;
+}
+
+

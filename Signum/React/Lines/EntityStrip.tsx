@@ -3,18 +3,19 @@ import { classes, Dic } from '../Globals'
 import { Navigator } from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList, MList } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
 import { AutocompleteConfig, TypeBadge } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Aprox, EntityBaseController, NN } from './EntityBase';
-import { genericForwardRef, LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
+import { LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
 import { getTypeInfo, getTypeInfos, getTypeName, QueryTokenString, tryGetTypeInfos } from '../Reflection'
 import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
 import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { LinkButton } from '../Basics/LinkButton'
 
 
 export interface EntityStripProps<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseProps<V> {
@@ -25,14 +26,15 @@ export interface EntityStripProps<V extends ModifiableEntity | Lite<Entity>> ext
   showType?: boolean;
   onItemHtmlAttributes?: (item: NoInfer<V>) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   onItemContainerHtmlAttributes?: (item: NoInfer<V>) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  avoidDuplicates?: boolean;
   groupElementsBy?: (e: V) => string;
   renderGroupTitle?: (key: string, i?: number) => React.ReactElement;
+  inputAttributes?: React.InputHTMLAttributes<HTMLInputElement>;
+  ref?: React.Ref<EntityStripController<V>>
 }
 
 export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseController<EntityStripProps<V>, V> {
 
-  typeahead!: React.RefObject<TypeaheadController>;
+  typeahead!: React.RefObject<TypeaheadController | null>;
 
   overrideProps(p: EntityStripProps<V>, overridenProps: EntityStripProps<V>): void {
     super.overrideProps(p, overridenProps);
@@ -67,12 +69,12 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
 
     }
 
-    function withAvoidDuplicates(fo: FindOptions,  typeName: string): FindOptions {
+    function withAvoidDuplicates(fo: FindOptions, typeName: string): FindOptions {
 
       const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
 
       return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible, frozen: true }] };
-      }
+    }
   }
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
@@ -85,13 +87,18 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
   }
 }
 
-export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V> & React.RefAttributes<EntityStripController<V>>) => React.ReactNode | null = genericForwardRef(function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V>, ref: React.Ref<EntityStripController<V>>) {
-  const c = useController(EntityStripController, props, ref);
+export function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V>): React.JSX.Element | null {
+  const c = useController<EntityStripController<V>, EntityStripProps<V>, MList<V>>(EntityStripController, props);
   const p = c.props;
 
   if (c.isHidden)
     return null;
 
+  const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
+  var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+  if (!isLabelVisible && p.label) {
+    ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
+  }
 
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
@@ -102,7 +109,8 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={helpText}
       helpTextOnTop={helpTextOnTop}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
+      ariaAttributes={ariaAtts}>
       {inputId => <div className="sf-entity-strip sf-control-container">
         {p.groupElementsBy == undefined ?
           <ul id={inputId} className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
@@ -122,12 +130,12 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
             {renderLastElement()}
           </>
         }
-    
+
       </div>}
     </FormGroup>
   );
 
-  function renderElement(mlec: TypeContext<V>, index: number): JSX.Element {
+  function renderElement(mlec: TypeContext<V>, index: number): React.ReactElement {
     return <EntityStripElement<V> key={index}
       ctx={mlec}
       iconStart={p.iconStart}
@@ -181,7 +189,7 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
     const lites = parseLiteList(text);
     if (lites.length == 0)
       return;
-    
+
     e.preventDefault();
     c.paste(text)?.then(() => {
       c.typeahead.current?.writeInInput("");
@@ -199,7 +207,12 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
 
     return (
       <Typeahead ref={c.typeahead}
-        inputAttrs={{ className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString(), onPaste: p.paste == false ? undefined : handleOnPaste }}
+        inputAttrs={{
+          className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass),
+          placeholder: EntityControlMessage.Add.niceToString(),
+          onPaste: p.paste == false ? undefined : handleOnPaste,
+          ...p.inputAttributes
+        }}
         getItems={q => ac!.getItems(q)}
         itemsDelay={ac.getItemsDelay()}
         renderItem={(e, hl) => ac!.renderItem(e, hl)}
@@ -209,7 +222,7 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
       />
     );
   }
-});
+}
 
 export interface EntityStripElementProps<V extends ModifiableEntity | Lite<Entity>> {
   iconStart?: boolean;
@@ -226,14 +239,14 @@ export interface EntityStripElementProps<V extends ModifiableEntity | Lite<Entit
   vertical?: boolean;
 }
 
-export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p: EntityStripElementProps<V>): React.JSX.Element {
+export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p: EntityStripElementProps<V>): React.ReactElement {
   var currentEntityRef = React.useRef<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
   const forceUpdate = useForceUpdate();
 
   if (p.ctx.binding == null && p.ctx.previousVersion) {
     return (
-      <li className="sf-strip-element" >
-        <div style={{ padding: 0, minHeight: p.vertical ? 10 : 12, minWidth: p.vertical ? undefined : 30, backgroundColor: "#ff000021" }}>
+      <li className="sf-strip-element" title={getToString(p.ctx.value)} >
+        <div style={{ padding: 0, minHeight: p.vertical ? 10 : 12, minWidth: p.vertical ? undefined : 30, backgroundColor: "var(--bs-danger-bg-subtle)" }}>
           {p.vertical ? getTimeMachineIcon({ ctx: p.ctx, translateX: "-90%", translateY: "-10%" }) : getTimeMachineIcon({ ctx: p.ctx, translateX: "-80%", translateY: "-60%" })}
         </div>
       </li>
@@ -295,6 +308,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
 
   return (
     <li className={classes("sf-strip-element", containerHtmlAttributes?.className, drag?.dropClass)}
+      title={getToString(p.ctx.value)}
       {...EntityBaseController.entityHtmlAttributes(p.ctx.value)}
       {...containerHtmlAttributes}>
       <div className="sf-strip-dropable"
@@ -322,12 +336,11 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
   function removeIcon() {
     return p.onRemove &&
       <span>
-        <a className="sf-line-button sf-remove"
+        <LinkButton className="sf-line-button sf-remove"
           onClick={p.onRemove}
-          href="#"
           title={p.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
           {EntityBaseController.getRemoveIcon()}
-        </a>
+        </LinkButton>
       </span>
   }
 
@@ -344,7 +357,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
 }
 
 //tasks.push(taskSetAvoidDuplicates);
-//export function taskSetAvoidDuplicates(lineBase: LineBaseController<any>, state: LineBaseProps): React.JSX.Element {
+//export function taskSetAvoidDuplicates(lineBase: LineBaseController<any>, state: LineBaseProps): React.ReactElement {
 //  if (lineBase instanceof EntityStripController &&
 //    (state as EntityStripProps).avoidDuplicates == undefined &&
 //    state.ctx.propertyRoute &&

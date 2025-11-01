@@ -17,6 +17,8 @@ public class AggregateToken : QueryToken
     QueryToken? parent;
     public override QueryToken? Parent => parent;
 
+    public override bool HideInAutoExpand => Parent != null;
+
     public AggregateToken(AggregateFunction function, object queryName)
     {
         if (function != AggregateFunction.Count)
@@ -205,12 +207,6 @@ public class AggregateToken : QueryToken
             return new AggregateToken(AggregateFunction, this.queryName!);
         else
             return new AggregateToken(AggregateFunction, Parent.Clone(), this.FilterOperation, this.Value, this.Distinct);
-    }
-
-
-    public override string TypeColor
-    {
-        get { return "#0000FF"; }
     }
 }
 

@@ -9,6 +9,6 @@
   "resolutions": {
   },
   "dependencies": {
-    "react-markdown": "9.0.1"
+    "react-markdown": "10.1.0"
   }
 }

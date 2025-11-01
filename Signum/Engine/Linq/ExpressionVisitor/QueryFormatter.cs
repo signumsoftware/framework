@@ -242,9 +242,9 @@ internal class QueryFormatter : DbExpressionVisitor
             this.Visit(exp.Expression);
 
             if (exp.OrderType == OrderType.Ascending)
-                sb.Append(isPostgres ? " NULLS FIRST" : "");
+                sb.Append("");
             else
-                sb.Append(isPostgres ? " DESC NULLS LAST" : " DESC");
+                sb.Append(" DESC");
         }
         sb.Append(')');
         return rowNumber;
@@ -550,9 +550,9 @@ internal class QueryFormatter : DbExpressionVisitor
             }
             this.Visit(exp.Expression);
             if (exp.OrderType == OrderType.Ascending)
-                sb.Append(isPostgres ? " NULLS FIRST" : "");
+                sb.Append("");
             else
-                sb.Append(isPostgres ? " DESC NULLS LAST" : " DESC");
+                sb.Append(" DESC");
         }
     }
 
@@ -641,7 +641,7 @@ internal class QueryFormatter : DbExpressionVisitor
             if (sqlFunction.Arguments[1] is SqlConstantExpression ce)
                 sb.Append((string)ce.Value!);
         }
-        else if (sqlFunction.SqlFunction == SqlFunction.AtTimeZone.ToString())
+        else if (sqlFunction.SqlFunction == (isPostgres ? SqlFunction.AtTimeZone.ToString().ToLower() : SqlFunction.AtTimeZone.ToString()))
         {
             this.Visit(sqlFunction.Object);
             sb.Append(" AT TIME ZONE ");
@@ -904,6 +904,7 @@ internal class QueryFormatter : DbExpressionVisitor
                 sb.Append("WHERE ");
                 Visit(delete.Where);
             }
+            sb.Append(";");
             return delete;
         }
     }
@@ -938,6 +939,7 @@ internal class QueryFormatter : DbExpressionVisitor
                 sb.Append("WHERE ");
                 Visit(update.Where);
             }
+            sb.Append(";");
             return update;
         }
     }
@@ -982,6 +984,7 @@ internal class QueryFormatter : DbExpressionVisitor
             sb.Append(" FROM ");
             VisitSource(insertSelect.Source);
 
+            sb.Append(";");
             return insertSelect;
         }
     }
@@ -1006,6 +1009,9 @@ internal class QueryFormatter : DbExpressionVisitor
 
             return new Disposable(() =>
             {
+                if (sb[sb.Length - 1] == ';')
+                    sb.Remove(sb.Length - 1, 1);
+
                 this.AppendNewLine(Indentation.Same);
                 sb.Append("RETURNING 1");
                 this.AppendNewLine(Indentation.Outer);
@@ -1023,7 +1029,7 @@ internal class QueryFormatter : DbExpressionVisitor
             CommandExpression command = cea.Commands[i];
             if (i > 0)
             {
-                sb.Append(';');
+                //sb.Append(';');
                 this.AppendNewLine(Indentation.Same);
             }
             this.Visit(command);
@@ -1121,7 +1127,6 @@ internal class QueryFormatter : DbExpressionVisitor
     {
         throw InvalidSqlExpression(nex);
     }
-
 
 
     protected override Expression VisitNewArray(NewArrayExpression na)

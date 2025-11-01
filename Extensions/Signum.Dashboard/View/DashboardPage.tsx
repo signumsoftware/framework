@@ -13,6 +13,8 @@ import { QueryString } from '@framework/QueryString'
 import { DashboardClient } from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 import { OverlayTrigger, Popover } from "react-bootstrap";
+import { useTitle } from '@framework/AppContext'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function DashboardPage(): React.JSX.Element {
   const location = useLocation();
@@ -37,37 +39,44 @@ export default function DashboardPage(): React.JSX.Element {
 
   var cachedQueries = React.useMemo(() => DashboardClient.toCachedQueries(dashboardWithQueries), [dashboardWithQueries]);
 
+  useTitle(entity ? getToString(entity) : getToString(dashboard));
+
+
   return (
-    <div>
-      {!dashboard ? <h2 className="display-5">{JavascriptMessage.loading.niceToString()}</h2> :
+    <div className="sf-dashboard-page">
+    
+      {!dashboard ? <h2 className="display-6"><span>{JavascriptMessage.loading.niceToString()}</span></h2> :
         <div className="d-flex">
-          {<h2 className="display-5">{DashboardClient.Options.customTitle(dashboard)}</h2>}
+        <div>
+            {entityKey ?
+              <div>
+                {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
+                  <h3>
+                    <span className="display-6">{getToString(entity)}</span>
+                    {Navigator.isViewable({ entity: entity, canExecute: {} } as EntityPack<Entity>) &&
+                      <Link className="display-6 ms-2" to={Navigator.navigateRoute(entity)}><FontAwesomeIcon aria-hidden={true} icon="external-link" /></Link>
+                    }
+                    <small className="ms-1 sf-type-nice-name text-muted"> - {Navigator.getTypeSubTitle(entity, undefined)}</small>
+                  </h3>
+                }
+                <h4 className="display-7">{DashboardClient.Options.customTitle(dashboard)}</h4>
+              </div> :
+              <h3 className="display-6">{DashboardClient.Options.customTitle(dashboard)}</h3>
+            }
+          </div>
           {!Navigator.isReadOnly(DashboardEntity) &&
             <div className="ms-auto">
               {dashboardWithQueries.cachedQueries.length ? <span className="mx-4" title={DashboardMessage.ForPerformanceReasonsThisDashboardMayShowOutdatedInformation.niceToString() + "\n" +
                 DashboardMessage.LasUpdateWasOn0.niceToString(DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS))}>
-                <FontAwesomeIcon icon="clock-rotate-left" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
+                <FontAwesomeIcon aria-hidden={true} icon="clock-rotate-left" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
               </span> : null}
               {dashboard.parts.some(a => a.element.interactionGroup != null) && <HelpIcon />}
-              <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="pen-to-square" />&nbsp;{DashboardMessage.Edit.niceToString()}</Link>
+              <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)} title={DashboardMessage.Edit.niceToString()}>
+                <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" />
+              </Link>
             </div>
           }
         </div>}
-
-      {entityKey &&
-        <div>
-          {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
-            <h3>
-              {Navigator.isViewable({ entity: entity, canExecute: {} } as EntityPack<Entity>) ?
-                <Link className="display-6" to={Navigator.navigateRoute(entity)}>{getToString(entity)}</Link> :
-                <span className="display-6">{getToString(entity)}</span>
-              }
-              &nbsp;
-            <small className="sf-type-nice-name">{Navigator.getTypeSubTitle(entity, undefined)}</small>
-            </h3>
-          }
-        </div>
-      }
 
       {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} cachedQueries={cachedQueries!} entity={entity || undefined} deps={[refreshCounter, entity]} reload={reloadDashboard} hideEditButton={true} />}
     </div>
@@ -89,8 +98,8 @@ export function HelpIcon(): React.JSX.Element {
   );
 
   return (
-    <OverlayTrigger trigger="hover" placement="bottom-start" overlay={popover} >
-      <a href="#" className="mx-2"><FontAwesomeIcon icon="gamepad" title="syntax" className="me-1" />Interactive Dashboard</a>
+    <OverlayTrigger trigger={["hover", "focus"]} placement="bottom-start" overlay={popover} >
+      <LinkButton className="mx-2" title={undefined}><FontAwesomeIcon icon="gamepad" title="syntax" className="me-1" />{DashboardMessage.InteractiveDashboard.niceToString()}</LinkButton>
     </OverlayTrigger>
   );
 

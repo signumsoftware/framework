@@ -151,7 +151,6 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
   handleFullScreenClick = (ev: React.MouseEvent<any>): void => {
 
-    ev.preventDefault();
 
     const path = this.getCurrentUrl();
 
@@ -326,7 +325,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
               onKeyDown={this.handleMenuFilterKeyDown}
               onChange={this.handleMenuFilterChange} />
           </AutoFocus>}
-        {this.renderMenuItems().map((mi, i) => React.cloneElement((mi as SearchableMenuItem).menu ?? mi, { key: i }))}
+          <div style={{ position:"relative", maxHeight: "calc(100vh - 400px)", overflowY: "auto" }}>
+            {this.renderMenuItems().map((mi, i) => React.cloneElement((mi as SearchableMenuItem).menu ?? mi, { key: i }))}
+          </div>
       </ContextMenu>
     );
   }

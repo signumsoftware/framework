@@ -26,12 +26,14 @@ public class CsvTest
         Assert.Equal(str, result.ToString(a => a.ToString(","), "\n"));
     }
 
+#pragma warning disable CS0649 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     class Person
     {
         public int? Id;
         public string? Name;
     }
 
+#pragma warning restore CS0649 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     [Fact]
     public void SimpleCsv()
     {

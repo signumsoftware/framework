@@ -19,7 +19,7 @@ interface SaveChangesModalProps extends IModalProps<SaveChangesResult | undefine
   eocs: EntityOperationContext<any>[];
 }
 
-function SaveChangesModal(p: SaveChangesModalProps): React.JSX.Element {
+function SaveChangesModal(p: SaveChangesModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
 
@@ -57,7 +57,7 @@ function SaveChangesModal(p: SaveChangesModalProps): React.JSX.Element {
             className="btn btn-secondary sf-close-button sf-no-button"
             onClick={() => handleButtonClicked("loseChanges")}
             name="no">
-            <FontAwesomeIcon icon={"arrow-rotate-left"} />&nbsp;{SaveChangesMessage.LoseChanges.niceToString()}
+            <FontAwesomeIcon aria-hidden={true} icon={"arrow-rotate-left"} />&nbsp;{SaveChangesMessage.LoseChanges.niceToString()}
           </button>
           <button
             className="btn btn-secondary sf-close-button sf-cancel-button"

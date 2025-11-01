@@ -16,18 +16,19 @@ import { EntityBaseController } from '../Lines/EntityBase'
 import SelectorModal from '../SelectorModal'
 import { useForceUpdate } from '../Hooks'
 import { toAbsoluteUrl } from '../AppContext'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface SearchValueLineProps {
   ctx: StyleContext;
   findOptions?: FindOptions | Lite<Entity> | Entity;
   valueToken?: string | QueryTokenString<any>;
   multipleValues?: { vertical?: boolean, showType?: boolean };
-  label?: React.ReactChild | (() => React.ReactChild);
+  label?: React.ReactNode | (() => React.ReactNode);
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
-  unit?: React.ReactChild;
+  unit?: React.ReactNode;
   format?: string;
   formGroupHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
-  helpText?: (vscc: SearchValueController) => React.ReactChild | undefined;
+  helpText?: (vscc: SearchValueController) => React.ReactNode | undefined;
   initialValue?: any;
   isLink?: boolean;
   isBadge?: boolean | "MoreThanZero";
@@ -61,7 +62,7 @@ export interface SearchValueLineController {
 const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & React.RefAttributes<SearchValueLineController>> =
   React.forwardRef(function SearchValueLine(p: SearchValueLineProps, ref?: React.Ref<SearchValueLineController>) {
 
-  var svRef = React.useRef<SearchValueController | null>();
+  var svRef = React.useRef<SearchValueController>(null);
 
   React.useImperativeHandle(ref, () => ({
     searchValue: svRef.current,
@@ -141,25 +142,25 @@ const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & Re
 
   const value = svRef.current?.value;
   const find = value != undefined && (p.findButton ?? isQuery) &&
-    <a href="#" className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
+    <LinkButton style={{ display: "flex", alignItems: "center" }} className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
       onClick={svRef.current!.handleClick}
       title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
       {EntityBaseController.getFindIcon()}
-    </a>;
+    </LinkButton>;
   
   const create = !p.ctx.frame?.currentDate && (p.create == true || p.create == "ifNull" && value === null) &&
-    <a href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
+    <LinkButton style={{ display: "flex", alignItems: "center" }} className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
       title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
       {EntityBaseController.getCreateIcon()}
-    </a>;
+    </LinkButton>;
 
   const view = value != undefined && (p.viewEntityButton ?? (isLite(value) && Navigator.isViewable(value.EntityType))) &&
-    <a href="#" className={classes("sf-line-button sf-view", isFormControl ? "btn input-group-text" : undefined)}
+    <LinkButton className={classes("sf-line-button sf-view", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleViewEntityClick}
       title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
       {EntityBaseController.getViewIcon()}
-    </a>
+    </LinkButton>
 
   let extra = svRef.current && p.extraButtons && p.extraButtons(svRef.current);
 

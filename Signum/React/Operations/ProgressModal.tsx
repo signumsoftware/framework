@@ -18,7 +18,7 @@ interface ProgressModalProps<T> extends IModalProps<Operations.API.ProgressStep<
   makeRequest: () => Promise<Response>;
 }
 
-export function ProgressModal<T>(p: ProgressModalProps<T>): React.JSX.Element {
+export function ProgressModal<T>(p: ProgressModalProps<T>): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();
@@ -90,7 +90,7 @@ export function ProgressModal<T>(p: ProgressModalProps<T>): React.JSX.Element {
       {p.options.showCloseWarningMessage &&
         <div className="modal-footer">
           <small className="text-muted">{OperationMessage.ClosingThisModalOrBrowserTabWillCancelTheOperation.niceToString()}</small>
-          <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+          <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
             {JavascriptMessage.cancel.niceToString()}
           </button>
         </div>

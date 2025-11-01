@@ -11,7 +11,7 @@ import { MultiValueLine } from '../Lines/MultiValueLine';
 import { Operations } from '../Operations';
 import { useForceUpdate } from '../Hooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { DropdownList } from 'react-widgets'
+import { DropdownList } from 'react-widgets-up'
 import { QueryTokenMessage } from '../Signum.DynamicQuery.Tokens'
 import { Finder } from '../Finder'
 import { openModal, IModalProps } from '../Modals'
@@ -24,6 +24,7 @@ import { CollectionMessage } from '../Signum.External'
 import { EnumLine } from '../Lines/EnumLine'
 import { AutoLine } from '../Lines/AutoLine'
 import SelectorModal from '../SelectorModal'
+import { LinkButton } from '../Basics/LinkButton'
 
 
 interface MultiPropertySetterModalProps extends IModalProps<boolean | undefined> {
@@ -34,7 +35,7 @@ interface MultiPropertySetterModalProps extends IModalProps<boolean | undefined>
   mandatory: boolean;
 }
 
-export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): React.JSX.Element {
+export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
   const answerRef = React.useRef<boolean | undefined>(undefined);
@@ -76,7 +77,7 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): Reac
         <button className="btn btn-primary sf-entity-button sf-ok-button" disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} onClick={handleOkClicked}>
           {JavascriptMessage.ok.niceToString()}
         </button>
-        <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+        <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
           {JavascriptMessage.cancel.niceToString()}
         </button>
       </div>
@@ -95,7 +96,7 @@ export namespace MultiPropertySetterModal {
   };
 }
 
-export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { root: PropertyRoute, setters: Operations.API.PropertySetter[], isPredicate: boolean, onChange: () => void }): React.JSX.Element {
+export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { root: PropertyRoute, setters: Operations.API.PropertySetter[], isPredicate: boolean, onChange: () => void }): React.ReactElement {
 
   function handleNewPropertySetter(e: React.MouseEvent) {
     e.preventDefault();
@@ -133,11 +134,12 @@ export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { 
         {
           <tr className="sf-property-create">
             <td colSpan={4}>
-              <a href="#" title={StyleContext.default.titleLabels ? addElement : undefined}
+              <LinkButton
+                title={StyleContext.default.titleLabels ? addElement : undefined}
                 className="sf-line-button sf-create sf-create-condition"
                 onClick={e => handleNewPropertySetter(e)}>
-                <FontAwesomeIcon icon="plus" className="sf-create me-1" />{addElement}
-              </a>
+                <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create me-1" />{addElement}
+              </LinkButton>
             </td>
           </tr>
         }
@@ -188,7 +190,7 @@ export interface PropertySetterComponentProps {
 }
 
 
-export function PropertySetterComponent(p: PropertySetterComponentProps): React.JSX.Element {
+export function PropertySetterComponent(p: PropertySetterComponentProps): React.ReactElement {
 
   const forceUpdate = useForceUpdate();
 
@@ -271,11 +273,12 @@ export function PropertySetterComponent(p: PropertySetterComponentProps): React.
     <>
       <tr className="sf-property-setter">
         <td>
-          {<a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+          {<LinkButton
+            title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
             className="sf-line-button sf-remove"
             onClick={handleDeleteSetter}>
-            <FontAwesomeIcon icon="xmark" />
-          </a>}
+            <FontAwesomeIcon aria-hidden={true} icon="xmark" />
+          </LinkButton>}
         </td>
         <td>
           <div className="rw-widget-xs">
@@ -382,7 +385,7 @@ interface PropertySelectorProps {
   onPropertyChanged: (newProperty: PropertyRoute | undefined) => void;
 }
 
-export default function PropertySelector(p: PropertySelectorProps): React.JSX.Element {
+export default function PropertySelector(p: PropertySelectorProps): React.ReactElement {
   var lastTokenChanged = React.useRef<string | undefined>(undefined);
 
   var rootList = p.root.allParents();
@@ -412,7 +415,7 @@ interface PropertyPartProps {
   defaultOpen: boolean;
 }
 
-export function PropertyPart(p: PropertyPartProps): React.JSX.Element | null {
+export function PropertyPart(p: PropertyPartProps): React.ReactElement | null {
 
   if (p.parentRoute.propertyRouteType != "Mixin") {
     var tr = p.parentRoute.typeReference();
@@ -458,7 +461,7 @@ export function PropertyPart(p: PropertyPartProps): React.JSX.Element | null {
   }
 }
 
-export function PropertyItem(p: { item: MemberInfo | null }): React.JSX.Element | null {
+export function PropertyItem(p: { item: MemberInfo | null }): React.ReactElement | null {
 
   const item = p.item;
 
@@ -474,7 +477,7 @@ export function PropertyItem(p: { item: MemberInfo | null }): React.JSX.Element 
   );
 }
 
-export function PropertyItemOptional(p: { item: MemberInfo | null }): React.JSX.Element {
+export function PropertyItemOptional(p: { item: MemberInfo | null }): React.ReactElement {
 
   const item = p.item;
 

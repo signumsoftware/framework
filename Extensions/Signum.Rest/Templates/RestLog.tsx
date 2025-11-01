@@ -2,23 +2,19 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { RestLogEntity } from '../Signum.Rest'
 import { TypeContext, AutoLine, EntityLine, EntityRepeater, EntityTable } from "@framework/Lines";
-import { } from "@framework/ConfigureReactWidgets";
 import { RestClient } from '../RestClient'
 import { DiffDocument } from '../../Signum.DiffLog/Templates/DiffDocument';
 import * as AppContext from '@framework/AppContext'
 import { Tab, Tabs, Button } from 'react-bootstrap';
 import { FormatJson } from '@framework/Exceptions/Exception';
 
-export interface RestLogState {
-  replayResult?: string,
-  newURL: string
-}
+
 
 function newUrl(rl: RestLogEntity) {
-  const prefix = AppContext.toAbsoluteUrl("");
+  const prefix = AppContext.toAbsoluteUrl("/");
   const suffix = rl.url;
   const queryParams = rl.queryString.map(mle => `${mle.element.key}=${mle.element.value}`).join("&");
-  return `${location.protocol}//${location.hostname}:${location.port}${prefix}${rl.url}?${queryParams}`;
+  return `${location.protocol}//${location.hostname}${location.port && ":"}${location.port}${prefix.beforeLast("/")}${rl.url}?${queryParams}`;
 }
 
 export default function RestLog(p: { ctx: TypeContext<RestLogEntity> }): React.JSX.Element {
@@ -28,7 +24,7 @@ export default function RestLog(p: { ctx: TypeContext<RestLogEntity> }): React.J
   const ctx = p.ctx;
   const ctx4 = ctx.subCtx({ labelColumns: 4 });
 
-  const newURL = newUrl(p.ctx.value);
+  const [replayUrl, setReplayUrl] = React.useState<string>(() => newUrl(p.ctx.value));
 
   return (
     <div>
@@ -72,11 +68,11 @@ export default function RestLog(p: { ctx: TypeContext<RestLogEntity> }): React.J
       {
         ctx.value.allowReplay &&
         <div className="row mt-2">
-          <div className="col-sm-10">
-            <input type="text" className="form-control" value={newURL} onChange={e => setReplayResult(e.currentTarget.value)} />
+            <div className="col-sm-10">
+              <input type="text" className="form-control" value={replayUrl} onChange={e => setReplayUrl(e.currentTarget.value)} />
           </div>
           <div className="col-sm-2">
-            <Button variant="info" onClick={() => { RestClient.API.replayRestLog(ctx.value.id!, encodeURIComponent(newURL)).then(d => setReplayResult(d)) }}>Replay</Button>
+              <Button variant="info" onClick={() => { RestClient.API.replayRestLog(ctx.value.id!, encodeURIComponent(replayUrl)).then(d => setReplayResult(d)) }}>Replay</Button>
           </div>
         </div>
       }

@@ -10,10 +10,8 @@ import { ErrorBoundary } from '@framework/Components';
 import { WhatsNewEntity } from '../Signum.WhatsNew';
 import { ImageModal } from '../../Signum.Files/Components/ImageModal';
 import { LexicalEditor } from "lexical";
-import { BasicCommandsExtensions } from '../../Signum.HtmlEditor/Extensions/BasicCommandsExtension';
-import { ImageConverter } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
+import { ImageConverter, ImageInfo } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
-import { ListExtension } from '../../Signum.HtmlEditor/Extensions/ListExtension';
 import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
 
 export default function WhatsNewHtmlEditor(p: {
@@ -26,7 +24,6 @@ export default function WhatsNewHtmlEditor(p: {
     <ErrorBoundary>
       <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} plugins={[
         new LinkExtension(),
-        new BasicCommandsExtensions(),
         new ImageExtension(new AttachmentImageConverter())
       ]} />
     </ErrorBoundary>
@@ -42,7 +39,6 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
       <ErrorBoundary>
         <HtmlEditor readOnly binding={binding} small plugins={[
           new LinkExtension(),
-          new BasicCommandsExtensions(),
           new ImageExtension(new AttachmentImageConverter())
         ]} />
       </ErrorBoundary>
@@ -50,14 +46,10 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
   );
 }
 
-export interface ImageInfo {
-  attachmentId?: string;
-  binaryFile?: string;
-  fileName?: string;
-}
 
-export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
-
+export class AttachmentImageConverter implements ImageConverter{
+  
+  dataImageIdAttribute = "data-attachment-id";
   pr: PropertyRoute;
   constructor() {
     this.pr = WhatsNewEntity.propertyRouteAssert(a => a.attachment);

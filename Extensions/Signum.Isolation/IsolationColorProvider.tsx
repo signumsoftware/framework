@@ -5,10 +5,10 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
   return [
     {
       name: "isolation",
-      getFill: t => t.extra["isolation"] == undefined ? "white" :
-        t.extra["isolation"] == "Isolated" ? "#CC0099" :
-          t.extra["isolation"] == "Optional" ? "#9966FF" :
-            t.extra["isolation"] == "None" ? "#00CCFF" : "black",
+      getFill: t => t.extra["isolation"] == undefined ? "var(--bs-body-bg)" :
+        t.extra["isolation"] == "Isolated" ? "var(--bs-pink)" :
+          t.extra["isolation"] == "Optional" ? "var(--bs-indigo)" :
+            t.extra["isolation"] == "None" ? "var(--bs-cyan)" : "var(--bs-body-color)",
       getTooltip: t => t.extra["isolation"] == undefined ? undefined : t.extra["isolation"]
     }
   ];

@@ -19,6 +19,71 @@ public abstract class QueryToken : IEquatable<QueryToken>
     public abstract Type Type { get; }
     public virtual DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
     public abstract string Key { get; }
+    bool? autoExpand; 
+    public bool AutoExpand 
+    {
+
+        get
+        {
+            return autoExpand ??= CalculateAutoExpand();
+        }
+    }
+
+    public virtual bool HideInAutoExpand => false;
+
+    private bool CalculateAutoExpand()
+    {
+        if (!AutoExpandInternal)
+            return false;
+
+        for (var p = this.Parent; p != null; p = p.Parent)
+        {
+            if (!p.AutoExpand)
+                break;
+
+            if (p.Type == this.Type)
+                return false;
+        }
+
+        return true;
+    }
+
+    protected virtual bool AutoExpandInternal
+    {
+        get
+        {
+            var pr = this.GetPropertyRoute();
+            var attr = pr != null && pr.PropertyRouteType is PropertyRouteType.FieldOrProperty  or PropertyRouteType.MListItems ? 
+                Schema.Current.Settings.FieldAttribute<AutoExpandSubTokensAttribute>(pr) : 
+                null;
+
+            if (attr != null)
+                return attr.AutoExpand;
+
+
+            var t = this.Type;
+            if (t.IsEmbeddedEntity())
+                return true;
+
+            if (t.IsMList())
+                return true;
+
+            if (t.IsEntity() || t.IsLite())
+            {
+                var imps = this.GetImplementations();
+                if (imps == null || imps.Value.IsByAll)
+                    return false;
+
+                if (imps.Value.Types.Count() != 1)
+                    return true;
+
+                return false;
+            }
+
+            return false;
+        }
+    }
+       
 
     public virtual bool IsGroupable
     {
@@ -166,9 +231,6 @@ public abstract class QueryToken : IEquatable<QueryToken>
         var result = CachedSubTokensOverride(options).TryGetC(key);
 
         if (result == null)
-            result = QueryLogic.Expressions.GetExtensionsWithParameterTokens(this).SingleOrDefaultEx(a => a.Key == key);
-
-        if (result == null)
             return null;
 
         string? allowed = result.IsAllowed();
@@ -181,7 +243,6 @@ public abstract class QueryToken : IEquatable<QueryToken>
     public List<QueryToken> SubTokensInternal(SubTokensOptions options)
     {
         return CachedSubTokensOverride(options).Values
-            .Concat(QueryLogic.Expressions.GetExtensionsWithParameterTokens(this))
             .Where(t => t.IsAllowed() == null)
             .OrderByDescending(a => a.Priority)
             .ThenBy(a => a.ToString())
@@ -190,6 +251,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     Dictionary<string, QueryToken> CachedSubTokensOverride(SubTokensOptions options)
     {
+        if (this.AvoidCacheSubTokens)
+            return this.SubTokensOverride(options).ToDictionary(a => a.Key);
+
         return subTokensOverrideCache.GetOrAdd((this, options), (tup) =>
         {
             var dictionary = tup.token.SubTokensOverride(tup.options).ToDictionaryEx(a => a.Key, "subtokens for " + Key);
@@ -200,6 +264,11 @@ public abstract class QueryToken : IEquatable<QueryToken>
                 {
                     dictionary.Add(item.Key, item);
                 }
+            }
+
+            foreach (var item in QueryLogic.Expressions.GetExtensionsWithParameterTokens(this))
+            {
+                dictionary.Add(item.Key, item);
             }
 
             return dictionary;
@@ -255,7 +324,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
                     pid ? EntityPropertyToken.PartitionIdProperty(this) : null,
                     sv ? new SystemTimeToken(this, SystemTimeProperty.SystemValidFrom): null,
                     sv  ? new SystemTimeToken(this, SystemTimeProperty.SystemValidTo): null,
-                    (options & SubTokensOptions.CanOperation) != 0 ? new OperationsToken(this) : null,
+                    (options & SubTokensOptions.CanOperation) != 0 ? new OperationsContainerToken(this) : null,
                     (options & SubTokensOptions.CanManual) != 0 ? new QuickLinksToken(this) : null,
                 }
                 .NotNull()
@@ -573,29 +642,6 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return FullKey().GetHashCode() ^ QueryName.GetHashCode();
     }
 
-    public virtual string TypeColor
-    {
-        get
-        {
-            if (IsCollection(Type))
-                return "#CE6700";
-
-            return QueryUtils.TryGetFilterType(Type) switch
-            {
-                FilterType.Integer or
-                FilterType.Decimal or
-                FilterType.String or
-                FilterType.Guid or
-                FilterType.Boolean => "#000000",
-                FilterType.DateTime => "#5100A1",
-                FilterType.Time => "#9956db",
-                FilterType.Enum => "#800046",
-                FilterType.Lite => "#2B91AF",
-                FilterType.Embedded => "#156F8A",
-                _ => "#7D7D7D",
-            };
-        }
-    }
 
     public virtual string NiceTypeName
     {
@@ -611,6 +657,8 @@ public abstract class QueryToken : IEquatable<QueryToken>
             return GetNiceTypeName(Type, GetImplementations());
         }
     }
+
+    public virtual bool AvoidCacheSubTokens => false;
 
     protected internal virtual Implementations? GetElementImplementations()
     {
@@ -630,8 +678,10 @@ public abstract class QueryToken : IEquatable<QueryToken>
     {
         if (type == typeof(CellOperationDTO))
             return QueryTokenMessage.CellOperation.NiceToString();
-        if (type == typeof(OperationsToken))
+        if (type == typeof(OperationsContainerToken))
             return QueryTokenMessage.ContainerOfCellOperations.NiceToString();
+        if (type == typeof(IndexerContainerToken))
+            return QueryTokenMessage.IndexerContainer.NiceToString();
         switch (QueryUtils.TryGetFilterType(type))
         {
             case FilterType.Integer: return QueryTokenMessage.Number.NiceToString();
@@ -857,6 +907,8 @@ public enum QueryTokenMessage
     SnippetOf0,
     PartitionId,
     Nested,
+    IndexerContainer,
+    Operations,
 }
 
 //The order of the elemens matters!

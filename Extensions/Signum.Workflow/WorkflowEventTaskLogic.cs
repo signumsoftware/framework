@@ -21,138 +21,138 @@ public static class WorkflowEventTaskLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        var ib = sb.Schema.Settings.FieldAttribute<ImplementedByAttribute>(PropertyRoute.Construct((ScheduledTaskEntity e) => e.Rule))!;
+        sb.Schema.Settings.FieldAttributes((WorkflowEventTaskModel a) => a.Rule).Replace(new ImplementedByAttribute(ib.ImplementedTypes));
+
+        sb.Include<WorkflowEventTaskEntity>()
+            .WithDelete(WorkflowEventTaskOperation.Delete)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Workflow,
+                e.TriggeredOn,
+                e.Event,
+            });
+
+        new Graph<WorkflowEventTaskEntity>.Execute(WorkflowEventTaskOperation.Save)
         {
-            var ib = sb.Schema.Settings.FieldAttribute<ImplementedByAttribute>(PropertyRoute.Construct((ScheduledTaskEntity e) => e.Rule))!;
-            sb.Schema.Settings.FieldAttributes((WorkflowEventTaskModel a) => a.Rule).Replace(new ImplementedByAttribute(ib.ImplementedTypes));
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (e, _) => {
 
-            sb.Include<WorkflowEventTaskEntity>()
-                .WithDelete(WorkflowEventTaskOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Workflow,
-                    e.TriggeredOn,
-                    e.Event,
-                });
+                if (e.TriggeredOn == TriggeredOn.Always)
+                    e.Condition = null;
 
-            new Graph<WorkflowEventTaskEntity>.Execute(WorkflowEventTaskOperation.Save)
+                e.Save();
+            },
+        }.Register();
+
+        sb.Schema.EntityEvents<WorkflowEventTaskEntity>().PreUnsafeDelete += tasks =>
+        {
+            tasks.SelectMany(a => a.ConditionResults()).UnsafeDelete();
+            return null;
+        };
+
+        ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+        sb.Include<WorkflowEventTaskConditionResultEntity>()
+            .WithQuery(() => e => new
             {
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (e, _) => {
+                Entity = e,
+                e.Id,
+                e.CreationDate,
+                e.WorkflowEventTask,
+                e.Result,
+            });
 
-                    if (e.TriggeredOn == TriggeredOn.Always)
-                        e.Condition = null;
+        SchedulerLogic.ExecuteTask.Register((WorkflowEventTaskEntity wet, ScheduledTaskContext ctx) => ExecuteTask(wet));
+        sb.AddIndex((WorkflowEventTaskConditionResultEntity e) => e.CreationDate);
 
-                    e.Save();
-                },
-            }.Register();
-
-            sb.Schema.EntityEvents<WorkflowEventTaskEntity>().PreUnsafeDelete += tasks =>
-            {
-                tasks.SelectMany(a => a.ConditionResults()).UnsafeDelete();
+        WorkflowEventTaskModel.GetModel = (@event) =>
+        {
+            if (!@event.Type.IsScheduledStart())
                 return null;
-            };
 
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+            var schedule = @event.ScheduledTask();
+            var task = (schedule?.Task as WorkflowEventTaskEntity);
+            var triggeredOn = task?.TriggeredOn ?? TriggeredOn.Always;
 
-            sb.Include<WorkflowEventTaskConditionResultEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.CreationDate,
-                    e.WorkflowEventTask,
-                    e.Result,
-                });
-
-            SchedulerLogic.ExecuteTask.Register((WorkflowEventTaskEntity wet, ScheduledTaskContext ctx) => ExecuteTask(wet));
-            sb.AddIndex((WorkflowEventTaskConditionResultEntity e) => e.CreationDate);
-
-            WorkflowEventTaskModel.GetModel = (@event) =>
+            return new WorkflowEventTaskModel
             {
-                if (!@event.Type.IsScheduledStart())
-                    return null;
-
-                var schedule = @event.ScheduledTask();
-                var task = (schedule?.Task as WorkflowEventTaskEntity);
-                var triggeredOn = task?.TriggeredOn ?? TriggeredOn.Always;
-
-                return new WorkflowEventTaskModel
-                {
-                    Suspended = schedule?.Suspended ?? true,
-                    Rule = schedule?.Rule,
-                    TriggeredOn = triggeredOn,
-                    Condition = triggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { Script = task!.Condition!.Script },
-                    Action = new WorkflowEventTaskActionEval() { Script = task?.Action!.Script ?? "" }
-                };
+                Suspended = schedule?.Suspended ?? true,
+                Rule = schedule?.Rule,
+                TriggeredOn = triggeredOn,
+                Condition = triggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { Script = task!.Condition!.Script },
+                Action = new WorkflowEventTaskActionEval() { Script = task?.Action!.Script ?? "" }
             };
+        };
 
-            WorkflowEventTaskModel.ApplyModel = (@event, model) =>
+        WorkflowEventTaskModel.ApplyModel = (@event, model) =>
+        {
+            var schedule = @event.IsNew ? null : @event.ScheduledTask();
+
+            if (!@event.Type.IsScheduledStart())
             {
-                var schedule = @event.IsNew ? null : @event.ScheduledTask();
-
-                if (!@event.Type.IsScheduledStart())
-                {
-                    if (schedule != null)
-                        DeleteWorkflowEventScheduledTask(schedule);
-                    return;
-                }
-
-                if (model == null)
-                    throw new ArgumentNullException(nameof(model));
-                
                 if (schedule != null)
+                    DeleteWorkflowEventScheduledTask(schedule);
+                return;
+            }
+
+            if (model == null)
+                throw new ArgumentNullException(nameof(model));
+            
+            if (schedule != null)
+            {
+                var task = (WorkflowEventTaskEntity)schedule.Task;
+                schedule.Suspended = model.Suspended;
+                if (!object.ReferenceEquals(schedule.Rule, model.Rule))
                 {
-                    var task = (WorkflowEventTaskEntity)schedule.Task;
-                    schedule.Suspended = model.Suspended;
-                    if (!object.ReferenceEquals(schedule.Rule, model.Rule))
-                    {
-                        schedule.Rule = null!;
-                        schedule.Rule = model.Rule!;
-                    }
-                    task.TriggeredOn = model.TriggeredOn;
-
-
-                    if (model.TriggeredOn == TriggeredOn.Always)
-                        task.Condition = null;
-                    else
-                    {
-                        if (task.Condition == null)
-                            task.Condition = new WorkflowEventTaskConditionEval();
-                        task.Condition.Script = model.Condition!.Script;
-                    };
-
-                    task.Action!.Script = model.Action!.Script;
-                    if (GraphExplorer.IsGraphModified(schedule))
-                    {
-                        task.Execute(WorkflowEventTaskOperation.Save);
-                        schedule.Execute(ScheduledTaskOperation.Save);
-                    }
+                    schedule.Rule = null!;
+                    schedule.Rule = model.Rule!;
                 }
+                task.TriggeredOn = model.TriggeredOn;
+
+
+                if (model.TriggeredOn == TriggeredOn.Always)
+                    task.Condition = null;
                 else
                 {
-                    var newTask = new WorkflowEventTaskEntity()
-                    {
-                        Workflow = @event.Lane.Pool.Workflow.ToLite(),
-                        Event = @event.ToLite(),
-                        TriggeredOn = model.TriggeredOn,
-                        Condition = model.TriggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { Script = model.Condition!.Script },
-                        Action = new WorkflowEventTaskActionEval() { Script = model.Action!.Script },
-                    }.Execute(WorkflowEventTaskOperation.Save);
+                    if (task.Condition == null)
+                        task.Condition = new WorkflowEventTaskConditionEval();
+                    task.Condition.Script = model.Condition!.Script;
+                };
 
-                    schedule = new ScheduledTaskEntity
-                    {
-                        Suspended = model.Suspended,
-                        Rule = model.Rule!,
-                        Task = newTask,
-                        User = AuthLogic.SystemUser!.ToLite(),
-                    }.Execute(ScheduledTaskOperation.Save);
+                task.Action!.Script = model.Action!.Script;
+                if (GraphExplorer.IsGraphModified(schedule))
+                {
+                    task.Execute(WorkflowEventTaskOperation.Save);
+                    schedule.Execute(ScheduledTaskOperation.Save);
                 }
-            };
-        }
+            }
+            else
+            {
+                var newTask = new WorkflowEventTaskEntity()
+                {
+                    Workflow = @event.Lane.Pool.Workflow.ToLite(),
+                    Event = @event.ToLite(),
+                    TriggeredOn = model.TriggeredOn,
+                    Condition = model.TriggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { Script = model.Condition!.Script },
+                    Action = new WorkflowEventTaskActionEval() { Script = model.Action!.Script },
+                }.Execute(WorkflowEventTaskOperation.Save);
+
+                schedule = new ScheduledTaskEntity
+                {
+                    Suspended = model.Suspended,
+                    Rule = model.Rule!,
+                    Task = newTask,
+                    User = AuthLogic.SystemUser!.ToLite(),
+                }.Execute(ScheduledTaskOperation.Save);
+            }
+        };
     }
 
     internal static void CloneScheduledTasks(WorkflowEventEntity oldEvent, WorkflowEventEntity newEvent)

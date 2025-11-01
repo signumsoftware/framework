@@ -16,7 +16,7 @@ export interface IconTypeaheadLineProps {
   extraButtons?: () => React.ReactNode;
 }
 
-export function IconTypeaheadLine(p : IconTypeaheadLineProps): React.JSX.Element{
+export function IconTypeaheadLine(p : IconTypeaheadLineProps): React.ReactElement{
   const forceUpdate = useForceUpdate();
   function handleChange(newIcon: string | undefined | null) {
     p.ctx.value = newIcon;
@@ -106,7 +106,7 @@ function toSortPrefix(family: CssStyleClass | IconStyle | IconPrefix): IconPrefi
   };
 }
 
-export function IconTypeahead(p: IconTypeaheadProps): React.JSX.Element {
+export function IconTypeahead(p: IconTypeaheadProps): React.ReactElement {
   const forceUpdate = useForceUpdate();
 
   var parsedIcon = parseIcon(p.icon);
@@ -170,7 +170,7 @@ export function IconTypeahead(p: IconTypeaheadProps): React.JSX.Element {
 
     return (
       <span>
-        {icon && <FontAwesomeIcon icon={icon} className="icon" style={{ width: "12px", height: "12px" }} />}
+        {icon && <FontAwesomeIcon aria-hidden={true} icon={icon} className="icon" style={{ width: "12px", height: "12px" }} />}
         {hl.highlight(item as string)}
       </span>
     );

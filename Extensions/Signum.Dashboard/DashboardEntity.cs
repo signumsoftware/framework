@@ -351,6 +351,19 @@ public enum DashboardMessage
     AltClickToOpenResultsInAModalWindow,
 
     CopyHealthCheckDashboardData,
+
+    [Description("{0} can only be used in a {1} with {2}")]
+    _0CanOnlyBeUserInA1With2,
+
+    InteractiveDashboard,
+}
+
+public enum DashboardVariableMessage
+{
+    GoodMorning,
+    GoodAfternoon,
+    GoodEvening,
+    GoodNight,
 }
 
 public enum DashboardEmbedededInEntity

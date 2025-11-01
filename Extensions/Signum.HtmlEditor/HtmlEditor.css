@@ -1,10 +1,12 @@
 ﻿.sf-html-editor {
     box-sizing: border-box;
-    border: 1px solid #ddd;
+    border: 1px solid var(--bs-border-color);
     cursor: text;
     padding: 16px;
     border-radius: 2px;
-    box-shadow: inset 0px 1px 4px -3px #ABABAB;
+    box-shadow: inset 0px 1px 4px -3px var(--bs-box-shadow);
+    position:relative;
+    background: var(--bs-body-bg);
 }
 
 .sf-html-editor .DraftEditor-root {
@@ -15,10 +17,19 @@
     min-height: 140px;
     padding: 0 10px;
     outline: 0;
+    /*background: var(--bs-body-bg);*/
+}
+
+.sf-html-editor-placeholder {
+    color: var(--bs-secondary-color);
+    position: absolute;
+    font-size: small;
+    top: 40px;
+    left: 30px;
 }
 
 .sf-draft-toolbar {
-    border: 1px solid #ddd;
+    border: 1px solid var(--bs-border-color);
     border-radius: 2px;
     z-index: 2;
     box-sizing: border-box;
@@ -26,7 +37,7 @@
     margin-left: -17px;
     margin-right: -17px;
     margin-bottom: 7px;
-    background: #fbfbfb;
+    background: var(--bs-secondary-bg);
 }
 
 .sf-draft-button-wrapper {
@@ -35,52 +46,52 @@
 
 .sf-draft-button {
     background: none;
-    color: #888;
+    color: var(--bs-secondary-color);
     border: 0;
     vertical-align: bottom;
     height: 30px;
-    width: 30px;
+    /*width: 30px;*/
     line-height: 10px;
     font-weight: bold;
 }
 
 .sf-draft-button svg {
-    fill: #888;
+    fill: var(--bs-secondary-color);
 }
 
 .sf-draft-button:hover,
 .draft-button:focus {
-    background: #f3f3f3;
+    background: var(--bs-secondary-bg-subtle);
     outline: 0;
 }
 
 .sf-draft-button.sf-draft-active {
-    background-color: #ddd;
-    color: #555;
+    background-color: var(--bs-secondary-bg-subtle);
+    color: var(--bs-secondary-color);
 }
 
 .sf-draft-button.sf-draft-active:hover,
 .sf-draft-button.sf-draft-active:focus {
-    background-color: #ccc;
-    color: #444;
+    background-color: var(--bs-secondary-bg-subtle);
+    color: var(--bs-secondary-color);
 }
 
 .sf-html-separator {
     display: inline-block;
-    border-right: 1px solid #ddd;
+    border-right: 1px solid var(--bs-border-color);
     height: 24px;
     margin: 0 0.5em;
 }
 
-.sf-html-editor {
-  p, ol, ul {
+.sf-html-editor p,
+.sf-html-editor ol,
+.sf-html-editor ul {
     margin-bottom: 0.5em;
-  }
 }
 
 .sf-html-editor blockquote {
     margin: 0 0 1rem 0;
-    border-left: 4px solid #ddd;
+    border-left: 4px solid var(--bs-border-color);
     padding-left: 10px;
     margin-block-end: 0px;
 }
@@ -97,11 +108,12 @@
 
 .sf-html-editor.small-mode .public-DraftEditor-content {
     min-height: 50px;
+    /*background: var(--bs-body-bg);*/
 }
 
 .sf-html-editor .public-DraftStyleDefault-pre {
     font-size: initial;
-    background: #eee;
+    background: var(--bs-body-bg-subtle);
     padding: 10px;
 }
 
@@ -133,12 +145,12 @@
 
 .sf-html-editor .text-code {
     font-family: Menlo, Consolas, Monaco, monospace;
-    color: #555;
+    color: var(--bs-secondary-color);
 }
 
 .sf-html-editor .code-block {
-    color: #555;
-    background-color: rgb(240, 242, 245);
+    color: var(--bs-secondary-color);
+    background-color: var(--bs-body-bg-subtle);
     font-family: Menlo, Consolas, Monaco, monospace;
     display: block;
     padding: 8px 8px 8px 52px;
@@ -155,47 +167,47 @@
 .sf-html-editor .code-block:before {
     content: attr(data-gutter);
     position: absolute;
-    background-color: #eee;
+    background-color: var(--bs-body-bg-subtle);
     left: 0;
     top: 0;
-    border-right: 1px solid #ccc;
+    border-right: 1px solid var(--bs-border-color);
     padding: 8px;
-    color: #777;
+    color: var(--bs-secondary-color);
     white-space: pre-wrap;
     text-align: right;
     min-width: 25px;
 }
 
 .sf-html-editor .code-token-attr {
-    color: #07a;
+    color: var(--bs-primary);
 }
 
 .sf-html-editor .code-token-function {
-    color: #dd4a68;
+    color: var(--bs-danger);
 }
 
 .sf-html-editor .code-token-property {
-    color: #905;
+    color: var(--bs-info);
 }
 
 .sf-html-editor .code-token-selector {
-    color: #690;
+    color: var(--bs-success);
 }
 
 .sf-html-editor .code-token-comment {
-    color: slategray;
+    color: var(--bs-secondary-color);
 }
 
 .sf-html-editor .code-token-operator {
-    color: #9a6e3a;
+    color: var(--bs-warning);
 }
 
 .sf-html-editor .code-token-variable {
-    color: #e90;
+    color: var(--bs-orange, var(--bs-warning));
 }
 
 .sf-html-editor .code-token-punctuation {
-    color: #999;
+    color: var(--bs-body-color);
 }
 
 .html-viewer .sf-html-editor {

@@ -1,9 +1,11 @@
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Signum.Toolbar;
 using Signum.UserAssets;
-using System.Xml.Linq;
 using Signum.Utilities.DataStructures;
 using System.ComponentModel;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 
 namespace Signum.Dashboard;
 
@@ -31,6 +33,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
     public int Row { get; set; }
 
+
     [NumberBetweenValidator(0, 11)]
     public int StartColumn { get; set; }
 
@@ -44,9 +47,10 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
 
     [BindParent]
     [ImplementedBy(
-        typeof(LinkListPartEntity),
+        typeof(ToolbarMenuPartEntity),
         typeof(ImagePartEntity),
         typeof(SeparatorPartEntity),
+        typeof(TextPartEntity),
         typeof(HealthCheckPartEntity))]
     public IPartEntity Content { get; set; }
 
@@ -169,39 +173,40 @@ public enum InteractionGroup
 
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
-public class LinkListPartEntity : Entity, IPartEntity
+public class ToolbarMenuPartEntity : Entity, IPartEntity
 {
-
-    public MList<LinkElementEmbedded> Links { get; set; } = new MList<LinkElementEmbedded>();
+    public Lite<ToolbarMenuEntity> ToolbarMenu { get; set; }
 
     public override string ToString()
     {
-        return "{0} {1}".FormatWith(Links.Count, typeof(LinkElementEmbedded).NicePluralName());
+        return ToolbarMenu?.ToString() ?? typeof(ToolbarMenuEntity).NiceName();
     }
 
     public bool RequiresTitle
     {
-        get { return true; }
+        get { return false; }
     }
 
     public IPartEntity Clone()
     {
-        return new LinkListPartEntity
+        return new ToolbarMenuPartEntity
         {
-            Links = this.Links.Select(e => e.Clone()).ToMList(),
+            ToolbarMenu = this.ToolbarMenu,
         };
     }
 
     public XElement ToXml(IToXmlContext ctx)
     {
-        return new XElement("LinkListPart",
-            Links.Select(lin => lin.ToXml(ctx)));
+        return new XElement("ToolbarPart",
+            new XAttribute(nameof(ToolbarMenu), ctx.Include(ToolbarMenu))
+            );
     }
-
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        Links.Synchronize(element.Elements().ToList(), (le, x) => le.FromXml(x));
+        var menu = (ToolbarMenuEntity)ctx.GetEntity(Guid.Parse(element.Attribute(nameof(ToolbarMenu))!.Value));
+
+        ToolbarMenu = menu.ToLite(menu.IsNew);
     }
 }
 
@@ -263,7 +268,7 @@ public class ImagePartEntity : Entity, IPartEntity
 
     public XElement ToXml(IToXmlContext ctx)
     {
-        return new XElement("UserQueryPart",
+        return new XElement("ImagePart",
             new XAttribute("ImageSrcContent", ImageSrcContent),
             new XAttribute("ClickActionURL", ClickActionURL!)
             );
@@ -298,12 +303,12 @@ public class SeparatorPartEntity : Entity, IPartEntity
 
     public XElement ToXml(IToXmlContext ctx)
     {
-        throw new NotImplementedException();
+        return new XElement("SeparatorPart", Title == null ? null : new XAttribute("Title", Title));;
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        throw new NotImplementedException();
+        this.Title = element.Attribute("Title")?.Value;
     }
 }
 
@@ -398,18 +403,22 @@ public class TextPartEntity : Entity, IPartEntity
     {
         return new TextPartEntity
         {
-            TextContent = this.TextContent
+            TextContent = this.TextContent,
+            TextPartType = this.TextPartType
         };
     }
 
     public XElement ToXml(IToXmlContext ctx)
     {
-        throw new NotImplementedException();
+        return new XElement("TextPart",
+            new XAttribute("TextContent", TextContent!),
+            new XAttribute("TextPartType", TextPartType));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        throw new NotImplementedException();
+        TextContent = element.Attribute("TextContent")!.Value;
+        TextPartType = Enum.Parse<TextPartType>(element.Attribute("TextPartType")!.Value);
     }
 }
 

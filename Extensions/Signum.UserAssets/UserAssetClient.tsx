@@ -6,7 +6,8 @@ import { Entity, getToString, Lite, liteKey, MList, ModelEntity, parseLite, toLi
 import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 import {
   FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed,
-  FilterGroupOption, FilterConditionOption, PinnedFilter, toPinnedFilterParsed, FindOptions, FindOptionsParsed, isFilterGroup
+  FilterGroupOption, FilterConditionOption, PinnedFilter, toPinnedFilterParsed, FindOptions, FindOptionsParsed, isFilterGroup,
+  QueryDescription
 } from '@framework/FindOptions'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission } from './Signum.UserAssets'
@@ -54,16 +55,18 @@ export namespace UserAssetClient {
   }
   
   export function toQueryTokenEmbedded(token: QueryToken): QueryTokenEmbedded {
+
     return QueryTokenEmbedded.New({
       token: token,
       tokenString: token.fullKey,
     });
   }
-  
+
   export function getToken(token: QueryTokenEmbedded): QueryToken {
     if (token.parseException)
       throw new Error(token.parseException);
-  
+
+
     return token.token!;
   }
   

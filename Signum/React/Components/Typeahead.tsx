@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { classes, softCast } from '../Globals'
+import { classes, Dic, softCast } from '../Globals'
 import { Dropdown } from 'react-bootstrap';
 import DropdownMenu from 'react-bootstrap/DropdownMenu';
 import { useStateWithPromise } from '../Hooks';
@@ -16,11 +16,12 @@ export interface TypeaheadProps {
   renderItem?: (item: unknown, highlighter: TextHighlighter) => React.ReactNode;
   isDisabled?: (item: unknown) => boolean;
   isHeader?: (item: unknown) => boolean;
+  itemTitle?: (item: unknown, highlighter: TextHighlighter) => string | undefined;
   onSelect?: (item: unknown, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
   scrollHeight?: number;
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
   itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLElement>;
-  noResultsMessage?: string;
+  noResultsMessage?: React.ReactNode;
   renderInput?: (input: React.ReactElement) => React.ReactElement;
   inputId?: string;
 }
@@ -63,7 +64,15 @@ export class TypeaheadController {
       };
     }, []);
 
-    this.props = props;
+    this.props = {
+      itemsDelay: 200,
+      minLength: 1,
+      renderItem: (item, highlighter) => highlighter.highlight(item as string),
+      onSelect: (elem, event) => (elem as string),
+      scrollHeight: 0,
+      noResultsMessage: " - No results -",
+      ...Dic.simplify(props)
+    };
   }
 
   setInput = (input: HTMLInputElement | null | undefined): void => {
@@ -147,43 +156,44 @@ export class TypeaheadController {
     if (!this.shown)
       return;
 
-    switch (e.keyCode) {
-      case 9: // tab
-      case 13: // enter
-      case 27: // escape
+    switch (e.key) {
+      case "Tab":
+      case "Enter":
+      case "Escape":
         e.preventDefault();
         break;
 
-      case 38: // up arrow
-        {
-          e.preventDefault();
-          const newIndex = ((this.selectedIndex ?? 0) - 1 + this.items!.length) % this.items!.length;
-          this.setSelectedIndex(newIndex);
-          break;
-        }
-      case 40: // down arrow
-        {
-          e.preventDefault();
-          const newIndex = ((this.selectedIndex ?? 0) + 1) % this.items!.length;
-          this.setSelectedIndex(newIndex);
-          break;
-        }
+      case "ArrowUp": {
+        e.preventDefault();
+        const newIndex =
+          ((this.selectedIndex ?? 0) - 1 + this.items!.length) % this.items!.length;
+        this.setSelectedIndex(newIndex);
+        break;
+      }
+
+      case "ArrowDown": {
+        e.preventDefault();
+        const newIndex =
+          ((this.selectedIndex ?? 0) + 1) % this.items!.length;
+        this.setSelectedIndex(newIndex);
+        break;
+      }
     }
 
     e.stopPropagation();
   }
 
   handleKeyUp = (e: React.KeyboardEvent<any>): void => {
-    switch (e.keyCode) {
-      case 40: // down arrow
-      case 38: // up arrow
-      case 16: // shift
-      case 17: // ctrl
-      case 18: // alt
+    switch (e.key) {
+      case "ArrowDown":
+      case "ArrowUp":
+      case "Shift":
+      case "Control":
+      case "Alt":
         break;
 
-      case 9: // tab
-      case 13: // enter
+      case "Tab":
+      case "Enter":
         if (this.selectedIndex == undefined || !this.shown)
           return;
 
@@ -193,7 +203,7 @@ export class TypeaheadController {
         this.select(e);
         break;
 
-      case 27: // escape
+      case "Escape":
         if (!this.shown)
           return;
         this.setShown(false);
@@ -264,34 +274,28 @@ export const Typeahead: React.ForwardRefExoticComponent<TypeaheadProps & React.R
       <Dropdown.Menu align={controller.rtl ? "end" : undefined} className="typeahead">
         {
           !items ? null :
-            items.length == 0 ? <div className="no-results dropdown-item disabled"><small>{p.noResultsMessage}</small></div> :
-              items!.map((item, i) =>
-                p.isHeader?.(item) ? <div key={i} className="dropdown-header"  {...p.itemAttrs && p.itemAttrs(item)}>{p.renderItem!(item, highlighter)}</div> : 
-                  p.isDisabled?.(item) ? <div key={i} className="dropdown-item disabled" {...p.itemAttrs && p.itemAttrs(item)}>{p.renderItem!(item, highlighter)}</div> :
-                <button key={i}
-                className={classes("dropdown-item", i == controller.selectedIndex ? "active" : undefined)}
-                onMouseEnter={e => controller.handleElementMouseEnter(e, i)}
-                onMouseLeave={e => controller.handleElementMouseLeave(e, i)}
-                onMouseUp={e => controller.handleMenuMouseUp(e, i)}
-                {...p.itemAttrs && p.itemAttrs(item)}>
-                {p.renderItem!(item, highlighter)}
-              </button>)
+            items.length == 0 ? <div className="no-results dropdown-item disabled"><small style={{ pointerEvents: "stroke" }} title={typeof p.noResultsMessage == "string" ? p.noResultsMessage : undefined}>{p.noResultsMessage}</small></div> :
+              items!.map((item, i) => {
+                var title = p.itemTitle?.(item, highlighter);
+
+                return p.isHeader?.(item) ? <div key={i} className="dropdown-header" title={title} {...p.itemAttrs && p.itemAttrs(item)}>{p.renderItem!(item, highlighter)}</div> :
+                  p.isDisabled?.(item) ? <div key={i} className="dropdown-item disabled" title={title} {...p.itemAttrs && p.itemAttrs(item)}>{p.renderItem!(item, highlighter)}</div> :
+                    <button key={i}
+                      className={classes("dropdown-item", i == controller.selectedIndex ? "active" : undefined)}
+                      onMouseEnter={e => controller.handleElementMouseEnter(e, i)}
+                      onMouseLeave={e => controller.handleElementMouseLeave(e, i)}
+                      onMouseUp={e => controller.handleMenuMouseUp(e, i)}
+                      title={title}
+                      {...p.itemAttrs && p.itemAttrs(item)}>
+                      {p.renderItem!(item, highlighter)}
+                    </button>
+              })
         }
       </Dropdown.Menu>
     );
   }
 });
 
-Typeahead.defaultProps = {
-  getItems: undefined as any,
-  itemsDelay: 200,
-  minLength: 1,
-  renderItem: (item, highlighter) => highlighter.highlight(item as string),
-  onSelect: (elem, event) => (elem as string),
-  scrollHeight: 0,
-
-  noResultsMessage: " - No results -",
-} as TypeaheadProps;
 
 
 export namespace TypeaheadOptions {

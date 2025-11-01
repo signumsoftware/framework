@@ -9,34 +9,34 @@ public static class DynamicApiLogic
     public static bool IsStarted = false;
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<DynamicApiEntity>()
-                .WithSave(DynamicApiOperation.Save)
-                .WithDelete(DynamicApiOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    Script = e.Eval.Script.Etc(50),
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            new Graph<DynamicApiEntity>.ConstructFrom<DynamicApiEntity>(DynamicApiOperation.Clone)
+        sb.Include<DynamicApiEntity>()
+            .WithSave(DynamicApiOperation.Save)
+            .WithDelete(DynamicApiOperation.Delete)
+            .WithQuery(() => e => new
             {
-                Construct = (e, _) =>
-                {
-                    return new DynamicApiEntity
-                    {
-                        Name = e.Name + "_2",
-                        Eval = new DynamicApiEval() { Script = e.Eval.Script },
-                    };
-                }
-            }.Register();
+                Entity = e,
+                e.Id,
+                e.Name,
+                Script = e.Eval.Script.Etc(50),
+            });
 
-            EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicApiEntity));
-            IsStarted = true;
-        }
+        new Graph<DynamicApiEntity>.ConstructFrom<DynamicApiEntity>(DynamicApiOperation.Clone)
+        {
+            Construct = (e, _) =>
+            {
+                return new DynamicApiEntity
+                {
+                    Name = e.Name + "_2",
+                    Eval = new DynamicApiEval() { Script = e.Eval.Script },
+                };
+            }
+        }.Register();
+
+        EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicApiEntity));
+        IsStarted = true;
     }
 
     public static List<CodeFile> GetCodeFiles()

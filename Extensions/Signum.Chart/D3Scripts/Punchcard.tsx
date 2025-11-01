@@ -114,7 +114,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
   var shape = parameters["Shape"];
   var innerSize = null
   if (innerSizeColumn != null) {
-    innerSize = scaleFor(innerSizeColumn, data.rows.map(innerSizeColumn.getValue), 0, 100, parameters["OpacityScale"])
+    innerSize = scaleFor(innerSizeColumn, data.rows.map(innerSizeColumn.getValue), 0, 100, "ZeroMax")
   }
 
   var scaleTransform = initialLoad ? scale(0, 0) : scale(1, 1);
@@ -186,8 +186,8 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
       className:"punch sf-transition hover-target",
       shapeRendering: "initial",
       fillOpacity: fillOpacity(r),
-      fill: color == null ? (parameters["FillColor"] ?? 'black') : color(colorColumn!.getValue(r)),
-      stroke: detector?.(r) == true ? "black" :  parameters["StrokeColor"] ?? (color == null ? 'black' : color(colorColumn!.getValue(r))),
+      fill: color == null ? (parameters["FillColor"] ?? 'var(--bs-body-color)') : color(colorColumn!.getValue(r)),
+      stroke: detector?.(r) == true ? "var(--bs-body-color)" :  parameters["StrokeColor"] ?? (color == null ? 'var(--bs-body-color)' : color(colorColumn!.getValue(r))),
       strokeWidth: parameters["StrokeWidth"],
       strokeOpacity: (opacity != null ? opacity(opacityColumn!.getValue(r)) : 1)
     }));
@@ -207,7 +207,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
         className: "punch-inner sf-transition",
         shapeRendering: "initial",
         fillOpacity: fillOpacity(r),
-        fill: parameters["InnerFillColor"] ?? 'black'
+        fill: parameters["InnerFillColor"] ?? 'var(--bs-body-color)'
       })
     );
 

@@ -241,7 +241,7 @@ public class ExportManager
             var result = Database.Query<T>().Where(strategy.UploadSubset!)
                 .Where(a => a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine != null)
                 .Select(a => "{0} locked in {1}".FormatWith(a.Id, a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine!.Entity.MachineName))
-                .ToString("\r\n");
+                .ToString("\n");
 
             if (result.HasText())
                 stats.MListElementsLite(_ => _.Copies).Where(a => a.Element.Type.Is(typeof(T).ToTypeEntity())).UnsafeUpdateMList()
@@ -373,21 +373,21 @@ SELECT {3}
         {
             if (table is Table)
             {
-                command += "\r\nWHERE [table].Id in ({0})".FormatWith(filter.Sql);
+                command += "\nWHERE [table].Id in ({0})".FormatWith(filter.Sql);
             }
             else
             {
                 TableMList rt = (TableMList)table;
                 command +=
-                    "\r\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".FormatWith(rt.BackReference.ReferenceTable.Name, rt.BackReference.Name.SqlEscape(isPostgres)) +
-                    "\r\nWHERE [masterTable].Id in ({0})".FormatWith(filter.Sql);
+                    "\nJOIN {0} [masterTable] on [table].{1} = [masterTable].Id".FormatWith(rt.BackReference.ReferenceTable.Name, rt.BackReference.Name.SqlEscape(isPostgres)) +
+                    "\nWHERE [masterTable].Id in ({0})".FormatWith(filter.Sql);
             }
         }
 
         string fullCommand = !table.PrimaryKey.Identity ? command :
-            ("SET IDENTITY_INSERT {0} ON\r\n".FormatWith(newTableName) +
-            command + "\r\n" +
-            "SET IDENTITY_INSERT {0} OFF\r\n".FormatWith(newTableName));
+            ("SET IDENTITY_INSERT {0} ON\n".FormatWith(newTableName) +
+            command + "\n" +
+            "SET IDENTITY_INSERT {0} OFF\n".FormatWith(newTableName));
 
         return Executor.ExecuteNonQuery(fullCommand, filter?.Parameters);
     }

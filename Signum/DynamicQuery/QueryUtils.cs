@@ -257,7 +257,7 @@ public static class QueryUtils
                 return agg;
         }
 
-        if (options.HasFlag(SubTokensOptions.CanTimeSeries) && key == TimeSeriesToken.KeyText)
+        if (options.HasFlag(SubTokensOptions.CanTimeSeries) && key == TimeSeriesToken.KeyText && token == null)
             return new TimeSeriesToken(qd.QueryName);
 
         return null;
@@ -270,7 +270,7 @@ public static class QueryUtils
         if (options.HasFlag(SubTokensOptions.CanAggregate))
             result.InsertRange(0, AggregateTokens(token, qd));
 
-        if (options.HasFlag(SubTokensOptions.CanTimeSeries))
+        if (options.HasFlag(SubTokensOptions.CanTimeSeries) && token == null)
             result.Insert(0, new TimeSeriesToken(qd.QueryName));
 
         return result;
@@ -347,39 +347,15 @@ public static class QueryUtils
         }
     }
 
-    public static Func<bool>? MergeEntityColumns = null;
     static List<QueryToken> SubTokensBasic(QueryToken? token, QueryDescription qd, SubTokensOptions options)
     {
         if (token == null)
-        {
-            if (MergeEntityColumns != null && !MergeEntityColumns())
-                return qd.Columns.Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToList();
-
-            var dictonary = qd.Columns.Where(a => !a.IsEntity).Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToDictionary(t => t.Key);
-
-            var entity = new ColumnToken(qd.Columns.SingleEx(a => a.IsEntity), qd.QueryName);
-
-            dictonary.Add(entity.Key, entity);
-
-            foreach (var item in entity.SubTokensInternal(options).OrderByDescending(a=>a.Priority).ThenBy(a => a.ToString()))
-            {
-                if (!dictonary.ContainsKey(item.Key))
-                {
-                    dictonary.Add(item.Key, item);
-                }
-            }
-
-            return dictonary.Values.ToList();
-
-        }
+            return qd.Columns.Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToList();
         else
             return token.SubTokensInternal(options);
     }
 
-    public static bool IsColumnToken(string tokenString)
-    {
-        return !tokenString.Contains('.') && tokenString != "Entity";
-    }
+    public static readonly Regex SplitRegex = new Regex(@"(?<!\[[^\]]*)\.(?![^\[]*\])");
 
     public static QueryToken Parse(string tokenString, QueryDescription qd, SubTokensOptions options)
     {
@@ -387,19 +363,19 @@ public static class QueryUtils
             throw new ArgumentNullException(nameof(tokenString));
 
         //Dot not inside of brackets
-        string[] parts = Regex.Split(tokenString, @"(?<!\[[^\]]*)\.(?![^\[]*\])");
+        string[] parts = SplitRegex.Split(tokenString);
 
         string firstPart = parts.FirstEx();
 
         QueryToken? result = SubToken(null, qd, options, firstPart);
 
         if (result == null)
-            throw new FormatException("Column {0} not found on query {1}".FormatWith(firstPart, QueryUtils.GetKey(qd.QueryName)));
+            throw new FormatException("Column '{0}' not found on query {1}".FormatWith(firstPart, QueryUtils.GetKey(qd.QueryName)));
 
         foreach (var part in parts.Skip(1))
         {
             var newResult = SubToken(result, qd, options, part);
-            result = newResult ?? throw new FormatException("Token with key '{0}' not found on {1} of query {2}".FormatWith(part, result.FullKey(), QueryUtils.GetKey(qd.QueryName)));
+            result = newResult ?? throw new FormatException("Token with key '{0}' not found on token '{1}' of query {2}".FormatWith(part, result.FullKey(), QueryUtils.GetKey(qd.QueryName)));
         }
 
         return result;
@@ -411,7 +387,7 @@ public static class QueryUtils
             return null;
 
         //https://stackoverflow.com/questions/35418597/split-string-on-the-dot-characters-that-are-not-inside-of-brackets
-        string[] parts = Regex.Split(tokenString, @"\.(?!([^[]*\]|[^(]*\)))");
+        string[] parts = SplitRegex.Split(tokenString);
 
         string firstPart = parts.FirstEx();
 
@@ -439,7 +415,7 @@ public static class QueryUtils
         if (token.Type != typeof(string) && token.Type != typeof(NpgsqlTsVector) && token.Type.ElementType() != null)
             return "You can not filter by collections, continue the sequence";
 
-        if (token is OperationsToken or OperationToken or ManualContainerToken or ManualToken)
+        if (token is OperationsContainerToken or OperationToken or ManualContainerToken or ManualToken or IndexerContainerToken)
             return $"{token} is not a valid filter";
 
         return null;
@@ -460,10 +436,26 @@ public static class QueryUtils
                 CollectionAnyAllType.NotAny.NiceToString(),
                 CollectionAnyAllType.NotAll.NiceToString());
 
-        if (token is OperationsToken or ManualContainerToken or PgTsVectorColumnToken)
+        if (token is OperationsContainerToken or ManualContainerToken or PgTsVectorColumnToken or IndexerContainerToken)
             return $"{token} is not a valid column";
 
         return null;
+    }
+
+    public static void RegisterOrderAdapter<T, V>(Expression<Func<T, V>> orderByMember)
+    {
+        OrderAdapters.Add(qt =>
+        {
+            if (qt.Type != typeof(T))
+                return null;
+
+            return ctx =>
+            {
+                var exp = qt.BuildExpression(ctx);
+
+                return Expression.Invoke(orderByMember, exp);
+            };
+        });
     }
 
     public static List<Func<QueryToken, Func<BuildExpressionContext, Expression>?>> OrderAdapters = 
@@ -506,7 +498,7 @@ public static class QueryUtils
                 CollectionAnyAllType.NotAny.NiceToString(),
                 CollectionAnyAllType.NotAll.NiceToString());
 
-        if (token is OperationsToken or OperationToken or ManualContainerToken or ManualToken)
+        if (token is OperationsContainerToken or OperationToken or ManualContainerToken or ManualToken or IndexerContainerToken)
             return $"{token} is not a valid order";
 
         return null;
@@ -684,4 +676,9 @@ public enum SubTokensOptions
     CanManual = 64,
     CanTimeSeries = 128,
     CanNested = 256,
+
+
+    All = CanAggregate | CanAnyAll | CanElement | 
+        CanOperation | CanToArray | CanSnippet | 
+        CanManual | CanTimeSeries | CanNested,
 }

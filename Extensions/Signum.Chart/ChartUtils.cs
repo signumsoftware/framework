@@ -23,14 +23,14 @@ public static class ChartUtils
     {
         switch (QueryUtils.TryGetFilterType(token.Type))
         {
-            case FilterType.Lite: return ChartColumnType.Lite;
+            case FilterType.Lite: return ChartColumnType.Entity;
             case FilterType.Boolean:
             case FilterType.Enum: return ChartColumnType.Enum;
             case FilterType.String:
             case FilterType.Guid: return ChartColumnType.String;
-            case FilterType.Integer: return ChartColumnType.Integer;
-            case FilterType.Decimal: return token.IsGroupable ? ChartColumnType.RealGroupable : ChartColumnType.Real;
-            case FilterType.DateTime: return token.IsGroupable ? ChartColumnType.DateOnly : ChartColumnType.DateTime;
+            case FilterType.Integer: return ChartColumnType.Number;
+            case FilterType.Decimal: return token.IsGroupable ? ChartColumnType.RoundedNumber : ChartColumnType.DecimalNumber;
+            case FilterType.DateTime: return token.IsGroupable ? ChartColumnType.Date : ChartColumnType.DateTime;
             case FilterType.Time: return ChartColumnType.Time;
         }
 
@@ -169,6 +169,7 @@ public enum ChartMessage
     [Description("{0} can only be created from the search window")]
     _0CanOnlyBeCreatedFromTheSearchWindow,
     Chart,
+    ChartType,
     [Description("Chart")]
     ChartToken,
     [Description("Chart settings")]
@@ -225,11 +226,17 @@ public enum ChartMessage
     HideChartSettings,
     [Description("Query result reached max rows ({0})")]
     QueryResultReachedMaxRows0,
-    ListView, 
+    ListView,
+    [Description("The selected token should be a {0}")]
+    TheSelectedTokenShouldBeA0,
+
+    [Description("The selected token should be either:")]
+    TheSelectedTokenShouldBeEither
 }
 
 
-public enum ChartParameterMessage
+[InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
+public enum ChartParameter
 {
     CompleteValues,
     Scale,

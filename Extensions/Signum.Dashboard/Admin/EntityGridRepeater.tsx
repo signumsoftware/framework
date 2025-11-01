@@ -3,11 +3,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as _fontawesome_svg_core from '@fortawesome/fontawesome-svg-core'; //throwaway reference to avoid error the inferred type cannot be named without a reference -> https://github.com/microsoft/TypeScript/issues/5938
 import { classes } from '@framework/Globals'
 import { TypeContext } from '@framework/TypeContext'
-import { ModifiableEntity, EntityControlMessage, newMListElement } from '@framework/Signum.Entities'
+import { ModifiableEntity, EntityControlMessage, newMListElement, MList } from '@framework/Signum.Entities'
 import { EntityListBaseProps, EntityListBaseController } from '@framework/Lines/EntityListBase'
 import { isModifiableEntity } from '@framework/Signum.Entities';
-import { genericForwardRef, useController } from '@framework/Lines/LineBase';
+import { useController } from '@framework/Lines/LineBase';
 import { Aprox, AsEntity } from '@framework/Lines/EntityBase';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 
 export interface IGridEntity {
@@ -20,6 +21,7 @@ export interface EntityGridRepeaterProps<V extends ModifiableEntity & IGridEntit
   createAsLink?: boolean;
   /*move?: boolean;*/
   resize?: boolean;
+  ref?: React.Ref<EntityGridRepeaterController<V>>
 }
 
 export interface EntityGridRepaterDragging<V extends ModifiableEntity & IGridEntity> {
@@ -40,7 +42,7 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
     super.init(p);
     [this.drag, this.setDrag] = React.useState<EntityGridRepaterDragging<V> | undefined>(undefined);
   }
-  
+
   getDefaultProps(state: EntityGridRepeaterProps<V>): void {
     super.getDefaultProps(state);
     state.viewOnCreate = false;
@@ -96,14 +98,14 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
     const list = this.props.ctx.value!.map(a => a.element as ModifiableEntity & IGridEntity);
 
     const c = this.drag!.currentItem;
-    
+
     list.filter(a => a != c && a.row >= row).forEach(a => { a.row++; a.modified = true; });
-    
+
     c.row = row;
     c.startColumn = 0;
     c.columns = 12;
     c.modified = true;
-    
+
     if (!list.find(a => a == c)) {
       this.props.ctx.value!.push({ rowId: null, element: c });
       this.setValue(this.props.ctx.value);
@@ -202,8 +204,8 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
 }
 
 
-export const EntityGridRepeater: <V extends ModifiableEntity & IGridEntity>(props: EntityGridRepeaterProps<V> & React.RefAttributes<EntityGridRepeaterController<V>>) => React.ReactNode | null = genericForwardRef(function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(props: EntityGridRepeaterProps<V>, ref: React.Ref<EntityGridRepeaterController<V>>) {
-  const c = useController(EntityGridRepeaterController, props, ref)
+export function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(props: EntityGridRepeaterProps<V>): React.JSX.Element | null {
+  const c = useController<EntityGridRepeaterController<V>, EntityGridRepeaterProps<V>, MList<V>>(EntityGridRepeaterController, props);
   const p = c.props;
 
   if (c.isHidden)
@@ -222,10 +224,10 @@ export const EntityGridRepeater: <V extends ModifiableEntity & IGridEntity>(prop
           </span>
         </div>
       </legend>
-      <div className="row rule">
+      <div className="row sf-rule">
         {Array.range(0, 12).map(i =>
           <div className="col-sm-1" key={i}>
-            <div className="ruleItem" />
+            <div className="sf-rule-item">Col {i}</div>
           </div>
         )}
       </div>
@@ -278,9 +280,7 @@ export const EntityGridRepeater: <V extends ModifiableEntity & IGridEntity>(prop
         onDrop={e => c.handleRowDrop(e, rowIndex)} />
     );
   }
-});
-
-
+}
 
 export interface EntityGridItemProps {
   title?: React.ReactElement<any>;
@@ -293,41 +293,41 @@ export interface EntityGridItemProps {
 }
 
 
-export function EntityGridItem(p : EntityGridItemProps): React.JSX.Element{
+export function EntityGridItem(p: EntityGridItemProps): React.JSX.Element {
   var style = p.customColor == null ? "light" : "customColor";
 
-    return (
-      <div className={classes("card", "shadow-sm")}>
-        <div className={classes("card-header",
-          style != "customColor" && ("bg-" + style)
-        )} style={{ backgroundColor: p.customColor ?? undefined}}
+  return (
+    <div className={classes("card", "shadow-sm")}>
+      <div className={classes("card-header",
+        style != "customColor" && ("bg-" + style)
+      )} style={{ backgroundColor: p.customColor ?? undefined }}
         draggable={!!p.onTitleDragStart}
         onDragStart={p.onTitleDragStart}
         onDragEnd={p.onTitleDragEnd} >
         {p.onRemove &&
-          <a href="#" className="sf-line-button sf-remove float-end" onClick={p.onRemove}
-              title={EntityControlMessage.Remove.niceToString()}>
-              <FontAwesomeIcon icon="xmark" />
-            </a>
-          }
+          <LinkButton className="sf-line-button sf-remove float-end" onClick={p.onRemove}
+            title={EntityControlMessage.Remove.niceToString()}>
+            <FontAwesomeIcon aria-hidden={true} icon="xmark" />
+          </LinkButton>
+        }
         {p.title}
-        </div>
-        <div className="card-body">
-        {p.children}
-        </div>
-      {p.onResizerDragStart &&
-          <div className="sf-leftHandle" draggable={true}
-          onDragStart={e => p.onResizerDragStart!("left", e)}>
-          </div>
-        }
-      {p.onResizerDragStart &&
-          <div className="sf-rightHandle" draggable={true}
-          onDragStart={e => p.onResizerDragStart!("right", e)}>
-          </div>
-        }
       </div>
-    );
+      <div className="card-body">
+        {p.children}
+      </div>
+      {p.onResizerDragStart &&
+        <div className="sf-leftHandle" draggable={true}
+          onDragStart={e => p.onResizerDragStart!("left", e)}>
+        </div>
+      }
+      {p.onResizerDragStart &&
+        <div className="sf-rightHandle" draggable={true}
+          onDragStart={e => p.onResizerDragStart!("right", e)}>
+        </div>
+      }
+    </div>
+  );
 
-  }
+}
 
 

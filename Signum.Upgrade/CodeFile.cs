@@ -1,16 +1,11 @@
-using LibGit2Sharp;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http.Headers;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Signum.Upgrade;
 
@@ -199,7 +194,7 @@ public class CodeFile
         });
     }
 
-    internal static string GetIndent(string v)
+    public static string GetIndent(string v)
     {
         return Regex.Match(v, @"^\s*").Value;
     }
@@ -246,8 +241,8 @@ public class CodeFile
     public void ReplaceBetweenExcluded(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, Func<string, string> getText) =>
          ReplaceBetween(new(fromLine, +1), new(toLine, -1), getText);
 
-    /// <param name="fromLine">Not included</param>
-    /// <param name="toLine">Not included</param>
+    /// <param name="fromLine">Included</param>
+    /// <param name="toLine">Included</param>
     public void ReplaceBetweenIncluded(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, Func<string, string> getText) =>
        ReplaceBetween(new(fromLine, +0), toLine: new(toLine, -0), getText);
 
@@ -404,7 +399,7 @@ public class CodeFile
 
     public void ProcessLines(Func<List<string>, bool> process)
     {
-        var separator = this.Content.Contains("\r\n") ? "\r\n" : "\n";
+        var separator = this.Content.Contains("\n") ? "\n" : "\n";
         var lines = Regex.Split(this.Content, "\r?\n").ToList();
 
         if (process(lines))
@@ -560,6 +555,45 @@ public class CodeFile
         });
     }
 
+    public void AddNpmPackage(string packageName, string version, bool devDependencies = false)
+    {
+        AssertExtension(".json");
+
+        ProcessLines(lines =>
+        {
+            var dependencies = devDependencies ? @"""devDependencies""": @"""dependencies""";
+
+            var pos = lines.FindIndex(a => a.Contains(dependencies));
+            
+            if (pos == -1)
+            {
+                Warning(@$"Unable to find a line with {dependencies} to remove it");
+                return false;
+            }
+            var indent = GetIndent(lines[pos]);
+            if (lines[pos].TrimEnd().EndsWith("},"))
+            {
+                lines[pos] = lines[pos].Before("},");
+                lines.Insert(pos + 1, indent + "},");
+            }
+
+            var postEnd = lines.FindIndex(pos, a => a.Contains("},"));
+
+
+            if (
+            !lines[postEnd - 1].TrimEnd().EndsWith(",") &&
+            !lines[postEnd - 1].TrimEnd().EndsWith("{")
+            )
+            {
+                lines[postEnd - 1] += ",";
+            }
+
+            lines.Insert(postEnd, indent + $@"  ""{packageName}"": ""{version}""");
+
+            return true;
+        });
+    }
+
     public void UpdateNugetReferences(string xmlSnippets)
     {
         foreach (var line in xmlSnippets.Lines().Where(a => a.HasText()))
@@ -585,7 +619,7 @@ public class CodeFile
         {
             elem.Attribute("Version")!.Value = version;
 
-            this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\r\n", "\n");
+            this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\n", "\n");
         }
     }
 
@@ -606,7 +640,7 @@ public class CodeFile
         {
             eleme.Remove();
 
-            this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\r\n", "\n");
+            this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\n", "\n");
         }
     }
 
@@ -623,7 +657,7 @@ public class CodeFile
             new XAttribute("Include", version)
         ));
 
-        this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\r\n", "\n");
+        this.Content = doc.ToString(SaveOptions.DisableFormatting).Replace("\n", "\n");
 
     }
 
@@ -727,6 +761,64 @@ public class CodeFile
     internal void MoveFile(string newFilePath)
     {
         this.newFilePath = newFilePath;
+    }
+
+    public void ReplaceBlock(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, Func<string, string, string, string> getText)
+    {
+        ProcessLines(lines =>
+        {
+            var fromIdx = lines.FindIndex(fromLine.Compile());
+            if (fromIdx == -1)
+            {
+                Warning($"Unable to find a line where {fromLine} to start block replacement");
+                return false;
+            }
+            var fromIndent = GetIndent(lines[fromIdx]);
+
+            var toLineFunc = toLine.Compile();
+
+            var toIdx = lines.FindIndex(fromIdx, s => GetIndent(s) == fromIndent && toLineFunc(s));
+            if (toIdx == -1)
+            {
+                Warning($"Unable to find a line where {toLine} to end block replacement with the same indentation as fromLine");
+                return false;
+            }
+
+            // Collect initialLines
+            var initialLines = new List<string> { lines[fromIdx] };
+            int i = fromIdx + 1;
+            while (i < toIdx && GetIndent(lines[i]) == fromIndent)
+            {
+                initialLines.Add(lines[i]);
+                i++;
+            }
+
+            // Collect endLines
+            var endLines = new List<string> { lines[toIdx] };
+            int j = toIdx - 1;
+            while (j >= i && GetIndent(lines[j]) == fromIndent)
+            {
+                endLines.Insert(0, lines[j]);
+                j--;
+            }
+
+            // Collect body
+            var body = new List<string>();
+            for (int k = i; k <= j; k++)
+                body.Add(lines[k]);
+
+            string Unindent(List<string> list)
+            {
+                return list.Select(a => a.StartsWith(fromIndent) ? a.Substring(fromIndent.Length) : a).ToString("\n");
+            }
+
+            // Replace block
+            lines.RemoveRange(fromIdx, toIdx - fromIdx + 1);
+            var replacement = getText(Unindent(initialLines), Unindent(body), Unindent(endLines));
+            if (replacement.HasText())
+                lines.InsertRange(fromIdx, replacement.Lines().Select(a => IndentAndReplace(a, fromIndent)));
+            return true;
+        });
     }
 }
 

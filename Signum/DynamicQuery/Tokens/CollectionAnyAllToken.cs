@@ -21,6 +21,10 @@ public class CollectionAnyAllToken : QueryToken
         this.CollectionAnyAllType = type;
     }
 
+    protected override bool AutoExpandInternal => false;
+
+    public override bool HideInAutoExpand => true;
+
 
     public override Type Type
     {
@@ -127,11 +131,6 @@ public class CollectionAnyAllToken : QueryToken
     internal Expression CreateExpression(ParameterExpression parameter)
     {
         return parameter.BuildLite().Nullify();
-    }
-
-    public override string TypeColor
-    {
-        get { return "#0000FF"; }
     }
 
     static readonly MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null!)).GetGenericMethodDefinition();

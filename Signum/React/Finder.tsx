@@ -9,11 +9,16 @@ import { ajaxGet, ajaxPost } from './Services';
 import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed,
-  QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
-  ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
+  QueryToken, ColumnOption, ColumnOptionParsed, Pagination,
+  ResultTable, ResultRow, OrderOption, SubTokensOptions, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
   FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption,
   FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement,
-  toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, hasManual
+  toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, hasManual,
+  hasSnippet,
+  hasNested,
+  hasTimeSeries,
+  QueryDescriptionDTO,
+  QueryTokenWithoutParent
 } from './FindOptions';
 
 import { FilterOperation, FilterGroupOperation, PinnedFilterActive } from './Signum.DynamicQuery';
@@ -50,6 +55,7 @@ import * as FinderRules from "./FinderRules";
 import { Operations } from "./Operations";
 import ProgressBar from "./Components/ProgressBar";
 import Notify, { NotifyOptions } from "./Frames/Notify";
+import Exception from "./Exceptions/Exception";
 
 
 export namespace Finder {
@@ -112,16 +118,16 @@ export namespace Finder {
     return querySettings[getQueryKey(queryName)] ?? (querySettings[getQueryKey(queryName)] = { queryName: queryName });
   }
 
-  export const isFindableEvent: Array<(queryKey: string, fullScreen: boolean) => boolean> = [];
+  export const isFindableEvent: Array<(queryKey: string, fullScreen: boolean, context?: Lite<Entity>) => boolean> = [];
 
-  export function isFindable(queryName: PseudoType | QueryKey, fullScreen: boolean): boolean {
+  export function isFindable(queryName: PseudoType | QueryKey, fullScreen: boolean, context?: Lite<Entity>): boolean {
 
     if (!isQueryDefined(queryName))
       return false;
 
     const queryKey = getQueryKey(queryName);
 
-    return isFindableEvent.every(f => f(queryKey, fullScreen));
+    return isFindableEvent.every(f => f(queryKey, fullScreen, context));
   }
 
   export function find<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;
@@ -364,26 +370,34 @@ export namespace Finder {
     return Dic.simplify(result)!;
   }
 
-  export function mergeColumns(columnDescriptions: ColumnDescription[], mode: ColumnOptionsMode, columnOptions: ColumnOption[]): ColumnOption[] {
+  export function getDefaultColumns(qd: QueryDescription): QueryToken[] {
+    return Dic.getValues(qd.columns)
+      .filter(a => a.fullKey != "Entity" && a.queryTokenType != "Aggregate" && a.queryTokenType != "TimeSeries");
+
+  }
+
+  export function mergeColumns(qd: QueryDescription, mode: ColumnOptionsMode, columnOptions: ColumnOption[]): ColumnOption[] {
+
+    var columns = getDefaultColumns(qd);
 
     switch (mode) {
       case "Add":
-        return columnDescriptions.filter(cd => cd.name != "Entity").map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption)
+        return columns.map(cd => softCast<ColumnOption>({ token: cd.fullKey }))
           .concat(columnOptions);
 
       case "InsertStart":
         return columnOptions
-          .concat(columnDescriptions.filter(cd => cd.name != "Entity").map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption));
+          .concat(columns.map(cd => softCast<ColumnOption>({ token: cd.fullKey })));
 
       case "Remove":
-        return columnDescriptions.filter(cd => cd.name != "Entity" && !columnOptions.some(a => a.token == cd.name))
-          .map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption);
+        return columns.filter(cd => !columnOptions.some(a => a.token == cd.fullKey))
+          .map(cd => softCast<ColumnOption>({ token: cd.fullKey }));
 
       case "ReplaceAll":
         return columnOptions;
 
       case "ReplaceOrAdd": {
-        var original = columnDescriptions.filter(cd => cd.name != "Entity").map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption);
+        var original = columns.map(cd => softCast<ColumnOption>({ token: cd.fullKey }));
         columnOptions.forEach(toReplaceOrAdd => {
           var index = original.findIndex(co => co.token.toString() == toReplaceOrAdd.token.toString());
           if (index != -1)
@@ -397,10 +411,10 @@ export namespace Finder {
     }
   }
 
-  export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescription[]): { mode: ColumnOptionsMode; columns: ColumnOption[] } {
+  export function smartColumns(current: ColumnOptionParsed[], qd: QueryDescription): { mode: ColumnOptionsMode; columns: ColumnOption[] } {
 
-    const similar = (c: ColumnOptionParsed, d: ColumnDescription) =>
-      c.token!.fullKey == d.name && (c.displayName == d.displayName) && c.summaryToken == null && c.combineRows == null && !c.hiddenColumn;
+    const similar = (c: ColumnOptionParsed, d: QueryToken) =>
+      c.token!.fullKey == d.fullKey && (c.displayName == d.niceName) && c.summaryToken == null && c.combineRows == null && !c.hiddenColumn;
 
     const toColumnOption = (c: ColumnOptionParsed) => ({
       token: c.token!.fullKey,
@@ -410,8 +424,7 @@ export namespace Finder {
       hiddenColumn: c.hiddenColumn,
     }) as ColumnOption;
 
-
-    ideal = ideal.filter(a => a.name != "Entity");
+    var ideal = Finder.getDefaultColumns(qd);
 
     current = current.filter(a => a.token != null);
 
@@ -422,7 +435,7 @@ export namespace Finder {
       };
     }
 
-    if (ideal.every((idl, i) => i < current.length && current[i].token!.fullKey == idl.name)) {
+    if (ideal.every((idl, i) => i < current.length && current[i].token!.fullKey == idl.fullKey)) {
 
       var replacements = current.filter((curr, i) => i < ideal.length && !similar(curr, ideal[i])).map(c => toColumnOption(c));
       var additions = current.slice(ideal.length).map(c => toColumnOption(c));
@@ -441,7 +454,7 @@ export namespace Finder {
         if (j < current.length && similar(current[j], ideal[i]))
           j++;
         else
-          toRemove.push({ token: ideal[i].name, });
+          toRemove.push({ token: ideal[i].fullKey, });
       }
 
       if (toRemove.length + current.length == ideal.length && toRemove.length < current.length) {
@@ -473,10 +486,10 @@ export namespace Finder {
     const completer = new TokenCompleter(qd);
     var sto = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (groupResults ? SubTokensOptions.CanAggregate : 0);
 
-    fos.notNull().forEach(fo => completer.requestFilter(fo, sto));
+    fos.notNull().forEach(fo => completer.requestFilter(fo));
 
     return completer.finished()
-      .then(() => fos.notNull().map(fo => completer.toFilterOptionParsed(fo)))
+      .then(() => fos.notNull().map(fo => completer.toFilterOptionParsed(fo, sto)))
       .then(filters => parseFilterValues(filters).then(() => filters));
   }
 
@@ -486,11 +499,11 @@ export namespace Finder {
 
     const completer = new TokenCompleter(qd);
     var sto = SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | (groupResults ? SubTokensOptions.CanAggregate : 0);
-    orderOptions.notNull().forEach(a => completer.request(a.token.toString(), sto));
+    orderOptions.notNull().forEach(a => completer.request(a.token.toString()));
 
     return completer.finished()
       .then(() => orderOptions.notNull().map(oo => ({
-        token: completer.get(oo.token.toString()),
+        token: completer.get(oo.token.toString(), sto),
         orderType: oo.orderType ?? "Ascending",
       }) as OrderOptionParsed));
   }
@@ -499,16 +512,22 @@ export namespace Finder {
 
     const completer = new TokenCompleter(qd);
     var sto = SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | (groupResults ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
-    columnOptions.forEach(a => completer.request(a.token.toString(), sto));
+    columnOptions.forEach(a => completer.request(a.token.toString()));
+    columnOptions.filter(a => a.summaryToken != null).forEach(a => completer.request(a.summaryToken!.toString()));
 
     return completer.finished()
-      .then(() => columnOptions.map(co => ({
-        token: completer.get(co.token.toString()),
-        displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
-        summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
-        combineEquals: co.combineRows,
-        hiddenColumn: co.hiddenColumn,
-      }) as ColumnOptionParsed));
+      .then(() => columnOptions.map(co => {
+
+        const token = completer.get(co.token.toString(), sto);
+
+        return ({
+          token: token,
+          displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? token.niceName,
+          summaryToken: co.summaryToken && completer.get(co.summaryToken.toString(), SubTokensOptions.CanAggregate),
+          combineEquals: co.combineRows,
+          hiddenColumn: co.hiddenColumn,
+        }) as ColumnOptionParsed
+      }));
   }
 
 
@@ -619,7 +638,7 @@ export namespace Finder {
 
   export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): FindOptions {
 
-    const pair = smartColumns(fo.columnOptions, Dic.getValues(qd.columns));
+    const pair = smartColumns(fo.columnOptions, qd);
 
     const qs = getSettings(fo.queryKey);
 
@@ -784,7 +803,7 @@ export namespace Finder {
   export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): Promise<FindOptionsParsed> {
     const fo = autoRemoveTrivialColumns(findOptions);
 
-    fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode ?? "Add", fo.columnOptions?.notNull() ?? []);
+    fo.columnOptions = mergeColumns(qd, fo.columnOptionsMode ?? "Add", fo.columnOptions?.notNull() ?? []);
 
     var qs: QuerySettings | undefined = querySettings[qd.queryKey];
     const tis = tryGetTypeInfos(qd.columns["Entity"].type);
@@ -813,14 +832,14 @@ export namespace Finder {
 
 
     if (fo.filterOptions)
-      fo.filterOptions.notNull().forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate | canTimeSeries));
+      fo.filterOptions.notNull().forEach(fo => completer.requestFilter(fo));
 
     if (fo.orderOptions)
-      fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate | canTimeSeries));
+      fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString()));
 
     if (fo.columnOptions) {
-      fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation | canTimeSeries));
-      fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
+      fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString()));
+      fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString()));
     }
 
     return completer.finished().then(() => {
@@ -831,20 +850,25 @@ export namespace Finder {
         pagination: fixPagination(fo.pagination != null ? fo.pagination : qs?.pagination ?? Options.defaultPagination),
         systemTime: fo.systemTime && fixSystemTime(fo.systemTime),
 
-        columnOptions: (fo.columnOptions?.notNull() ?? []).map(co => ({
-          token: completer.get(co.token.toString()),
-          displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
-          summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
-          hiddenColumn: co.hiddenColumn,
-          combineRows: co.combineRows,
-        }) as ColumnOptionParsed),
+        columnOptions: (fo.columnOptions?.notNull() ?? []).map(co => {
+
+          const token = completer.get(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation | canTimeSeries);
+
+          return softCast<ColumnOptionParsed>({
+            token: token,
+            displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? token.niceName,
+            summaryToken: co.summaryToken ? completer.get(co.summaryToken.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate) : undefined,
+            hiddenColumn: co.hiddenColumn,
+            combineRows: co.combineRows,
+          });
+        }),
 
         orderOptions: (fo.orderOptions?.notNull() ?? []).map(oo => ({
-          token: completer.get(oo.token.toString()),
+          token: completer.get(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate | canTimeSeries),
           orderType: oo.orderType,
         }) as OrderOptionParsed),
 
-        filterOptions: (fo.filterOptions?.notNull() ?? []).map(fo => completer.toFilterOptionParsed(fo)),
+        filterOptions: (fo.filterOptions?.notNull() ?? []).map(fo => completer.toFilterOptionParsed(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate | canTimeSeries)),
       };
 
       return parseFilterValues(result.filterOptions)
@@ -853,11 +877,11 @@ export namespace Finder {
   }
 
   function fixPagination(p: Pagination): Pagination {
-      return {
-        mode: p.mode,
-        elementsPerPage: p.mode == "All" ? undefined : p.elementsPerPage == null || p.elementsPerPage < 0 ? 20 : p.elementsPerPage,  
-        currentPage: p.mode != "Paginate" ? undefined : p.currentPage == null || p.currentPage < 0 ? 1 : p.currentPage,  
-      };
+    return {
+      mode: p.mode,
+      elementsPerPage: p.mode == "All" ? undefined : p.elementsPerPage == null || p.elementsPerPage < 0 ? 20 : p.elementsPerPage,
+      currentPage: p.mode != "Paginate" ? undefined : p.currentPage == null || p.currentPage < 0 ? 1 : p.currentPage,
+    };
   }
 
   function fixSystemTime(p: SystemTime): SystemTime {
@@ -1217,124 +1241,234 @@ export namespace Finder {
 
     return getQueryDescription(getQueryKey(queryName)).then(qd => {
       const completer = new TokenCompleter(qd);
-      const result = completer.request(token, subTokenOptions);
-      return completer.finished().then(() => completer.get(token));
+      const result = completer.request(token);
+      return completer.finished().then(() => completer.get(token, subTokenOptions));
     });
   }
 
   export class TokenCompleter {
 
-    static globalCache: {
-      [queryKey: string]: {
-        [fullKey: string]: QueryToken
+
+    static globalCache: Map<string, Map<string, { token: QueryToken, subTokens?: string[] }>>
+      = new Map<string, Map<string, { token: QueryToken, subTokens?: string[] }>>();
+
+    queryCache: Map<string, { token: QueryToken, subTokens?: string[] }>;
+
+    tokensToRequest: Set<string> = new Set<string>();
+
+    constructor(public qd: QueryDescription) {
+
+      var cache = TokenCompleter.globalCache.get(qd.queryKey);
+      if (cache == null) {
+        cache = new Map<string, { token: QueryToken, subTokens?: string[] }>();
+        TokenCompleter.globalCache.set(qd.queryKey, cache);
       }
-    } = {};
 
-    queryCache: {
-      [fullKey: string]: QueryToken
-    };
-
-    tokensToRequest: {
-      [fullKey: string]: (
-        {
-          options: SubTokensOptions,
-          token?: QueryToken,
-        })
-    } = {};
-
-    constructor(public queryDescription: QueryDescription) {
-      this.queryCache = (TokenCompleter.globalCache[queryDescription.queryKey] ??= {});
+      this.queryCache = cache;
     }
 
-    requestFilter(fo: FilterOption, options: SubTokensOptions): void {
+    requestFilter(fo: FilterOption): void {
 
       if (isFilterGroup(fo)) {
-        fo.token && this.request(fo.token.toString(), options);
+        fo.token && this.request(fo.token.toString());
 
-        fo.filters.notNull().forEach(f => this.requestFilter(f, options));
+        fo.filters.notNull().forEach(f => this.requestFilter(f));
       } else {
 
-        this.request(fo.token.toString(), options);
+        this.request(fo.token.toString());
       }
     }
 
-    request(fullKey: string, options: SubTokensOptions): void {
+    request(fullKey: string): void {
 
-      if (this.isSimple(fullKey))
+      var token = this.queryCache.get(fullKey);
+      if (token)
         return;
 
-      var token = this.queryCache[fullKey];
-      if (token) {
-        if (hasAggregate(token) && (options & SubTokensOptions.CanAggregate) == 0)
-          throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (aggregates not allowed)`);
-
-        if (hasAnyOrAll(token) && (options & SubTokensOptions.CanAnyAll) == 0)
-          throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Any/All not allowed)`);
-
-        if (hasElement(token) && (options & SubTokensOptions.CanElement) == 0)
-          throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Element not allowed)`);
-
-        if (hasOperation(token) && (options & SubTokensOptions.CanOperation) == 0)
-          throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Operation not allowed)`);
-
-        if (hasToArray(token) && (options & SubTokensOptions.CanToArray) == 0)
-          throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (ToArray not allowed)`);
-
-        if (hasManual(token) && (options & SubTokensOptions.CanManual) == 0)
-          throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Manual not allowed)`);
-
-        return;
-      }
-
-      if (this.tokensToRequest[fullKey])
-        return;
-
-      this.tokensToRequest[fullKey] = {
-        options: options
-      };
-    }
-
-    isSimple(fullKey: string): boolean {
-      return !fullKey.contains(".") && fullKey != QueryTokenString.count.token && fullKey != QueryTokenString.timeSeries.token;
+      this.tokensToRequest.add(fullKey);
     }
 
     finished(): Promise<void> {
 
-      const tokens = Dic.map(this.tokensToRequest, (token, val) => ({ token: token, options: val.options }));
-
-      if (tokens.length == 0)
+      if (this.tokensToRequest.size == 0)
         return Promise.resolve(undefined);
 
-      return API.parseTokens(this.queryDescription.queryKey, tokens).then(parsedTokens => {
+      return TokenCompleter.API_parseTokens(this.qd.queryKey, Array.from(this.tokensToRequest)).then(parsedTokens => {
         parsedTokens.forEach(t => {
-          this.tokensToRequest[t.fullKey].token = t;
-          if (!this.queryCache[t.fullKey])
-            this.queryCache[t.fullKey] = t;
+          this.addToCache(t);
         });
       });
     }
 
+    addToCache(dto: QueryTokenWithoutParent | QueryToken, parentToken?: QueryToken): QueryToken {
 
-    get(fullKey: string): QueryToken {
-      if (this.isSimple(fullKey)) {
-        const cd = this.queryDescription.columns[fullKey];
+      let cached = this.queryCache.get(dto.fullKey);
+      if (cached == null) {
 
-        if (cd == undefined)
-          throw new Error(`No column with name '${fullKey}' found in query '${this.queryDescription.queryKey}'.\nMaybe use '${(fullKey ? ("Entity." + fullKey) : "Entity")}'`);
+        parentToken ??= (dto.parent != null ? this.addToCache(dto.parent as QueryToken) : undefined)
 
-        return toQueryToken(cd);
+        function getParent(token: string) {
+          if (token.endsWith("]"))
+            return token.beforeLast("[").beforeLast(".");
+
+          return token.tryBeforeLast(".");
+        }
+
+
+        if (parentToken == null) {
+          if (getParent(dto.fullKey) != null)
+            throw new Error(`Token with key '${dto.fullKey}' on query '${this.qd.queryKey}' has no parent, but it is not a root token`);
+        } else {
+          if (parentToken.fullKey != getParent(dto.fullKey))
+            throw new Error("Invalid parent");
+        }
+
+        const { subTokens, parent, ...rest } = dto as QueryTokenWithoutParent;
+        const token = rest as Writable<QueryToken>;
+        token.parent = parentToken;
+        token.__isCached__ = true;
+        //if (token.fullKey == "Locked")
+        //  console.log(token);
+        Object.freeze(token);
+        cached = { token: token as QueryToken, subTokens: undefined };
+        this.queryCache.set(dto.fullKey, cached);
       }
 
-      if (this.queryCache[fullKey]) {
-        return this.queryCache[fullKey];
+      if (cached.token.parent == null && dto.parent != null)
+        (cached.token as any).parent = this.addToCache(dto.parent as QueryToken);
+
+      const subTokens = (dto as QueryTokenWithoutParent).subTokens;
+      if (subTokens != null && (cached.subTokens == null)) {
+        cached.subTokens = Dic.map(subTokens, (key, st) => this.addToCache(st, cached.token).fullKey);
       }
 
-      return this.tokensToRequest[fullKey].token!;
+      return cached.token;
     }
 
-    toFilterOptionParsed(fo: FilterOption): FilterOptionParsed {
+
+    get(fullKey: string, options: SubTokensOptions): QueryToken {
+      var token = this.queryCache.get(fullKey)?.token;
+
+      if (!token)
+        throw new Error(`Token with key '${fullKey}' not found on query '${this.qd.queryKey}`);
+
+      if ((options & SubTokensOptions.CanAggregate) == 0 && hasAggregate(token))
+        throw new Error(`Token with key '${fullKey}' on query '${this.qd.queryKey} not valid (aggregates not allowed)`);
+
+      if ((options & SubTokensOptions.CanAnyAll) == 0 && hasAnyOrAll(token))
+        throw new Error(`Token with key '${fullKey}' on query '${this.qd.queryKey} not valid (Any/All not allowed)`);
+
+      if ((options & SubTokensOptions.CanElement) == 0 && hasElement(token))
+        throw new Error(`Token with key '${fullKey}' on query '${this.qd.queryKey} not valid (Element not allowed)`);
+
+      if ((options & SubTokensOptions.CanOperation) == 0 && hasOperation(token))
+        throw new Error(`Token with key '${fullKey}' on query '${this.qd.queryKey} not valid (Operation not allowed)`);
+
+      if ((options & SubTokensOptions.CanToArray) == 0 && hasToArray(token))
+        throw new Error(`Token with key '${fullKey}' on query '${this.qd.queryKey} not valid (ToArray not allowed)`);
+
+      if ((options & SubTokensOptions.CanSnippet) == 0 && hasSnippet(token))
+        throw new Error(`Token with key '${fullKey}' on query '${this.qd.queryKey} not valid (Snippet not allowed)`);
+
+      if ((options & SubTokensOptions.CanManual) == 0 && hasManual(token))
+        throw new Error(`Token with key '${fullKey}' on query '${this.qd.queryKey} not valid (Manual not allowed)`);
+
+      if ((options & SubTokensOptions.CanNested) == 0 && hasNested(token))
+        throw new Error(`Token with key '${fullKey}' on query '${this.qd.queryKey} not valid (Nested not allowed)`);
+
+      if ((options & SubTokensOptions.CanTimeSeries) == 0 && hasTimeSeries(token))
+        throw new Error(`Token with key '${fullKey}' on query '${this.qd.queryKey} not valid (TimeSeries not allowed)`);
+
+      return token;
+    }
+
+    async getSubTokens(parentToken: QueryToken | undefined, options: SubTokensOptions, autoExpand: boolean): Promise<QueryToken[]> {
+
+      let candidates = parentToken == null ? Dic.getValues(this.qd.columns) :
+        await this.getSubTokensInternal(parentToken);
+
+      if (autoExpand) {
+
+        const autoExpandToken = (cached: { token: QueryToken, subTokens?: string[] }): QueryToken[] => {
+          if (cached.token.autoExpand) {
+
+            return [cached.token, ...cached.subTokens!.flatMap(fullKey => autoExpandToken(this.queryCache.get(fullKey)!))];
+          }
+
+          return [cached.token];
+        }
+
+        candidates = candidates.flatMap(t => autoExpandToken(this.queryCache.get(t.fullKey)!))
+          .orderBy(a => a.parent == parentToken ? 0 : 1);
+      }
+
+      candidates = candidates.filter(t => {
+
+        if (t.hideInAutoExpand && t.parent?.fullKey != parentToken?.fullKey)
+          return false;
+
+        if ((options & SubTokensOptions.CanAggregate) == 0 && hasAggregate(t))
+          return false;
+
+        if ((options & SubTokensOptions.CanAnyAll) == 0 && hasAnyOrAll(t))
+          return false;
+
+        if ((options & SubTokensOptions.CanElement) == 0 && hasElement(t))
+          return false;
+
+        if ((options & SubTokensOptions.CanOperation) == 0 && hasOperation(t))
+          return false;
+
+        if ((options & SubTokensOptions.CanToArray) == 0 && hasToArray(t))
+          return false;
+
+        if ((options & SubTokensOptions.CanSnippet) == 0 && hasSnippet(t))
+          return false;
+
+        if ((options & SubTokensOptions.CanManual) == 0 && hasManual(t))
+          return false;
+
+        if ((options & SubTokensOptions.CanNested) == 0 && hasNested(t))
+          return false;
+
+        if ((options & SubTokensOptions.CanTimeSeries) == 0 && hasTimeSeries(t))
+          return false;
+
+        return true;
+      });
+
+      return candidates;
+
+    }
+
+    async getSubTokensInternal(parentToken: QueryToken): Promise<QueryToken[]> {
+
+      var cached = this.queryCache.get(parentToken.fullKey);
+
+      if (cached == null) {
+        this.addToCache(parentToken);
+
+        cached = this.queryCache.get(parentToken.fullKey)!;
+      }
+
+      //if (cached?.token != parentToken)
+      //  throw new Error(`Token '${parentToken.fullKey}' is not the same instance as in the cache`);
+
+      if (cached.subTokens != null)
+        return cached.subTokens.map(fullKey => this.queryCache.get(fullKey)?.token!);
+
+      var st = await TokenCompleter.API_getSubTokens(this.qd.queryKey, parentToken.fullKey);
+
+      var subTokens = st.map(st => this.addToCache(st, cached?.token));
+
+      cached.subTokens = subTokens.map(a => a.fullKey);
+
+      return subTokens;
+    }
+
+    toFilterOptionParsed(fo: FilterOption, options: SubTokensOptions): FilterOptionParsed {
       if (isFilterGroup(fo)) {
-        const token = fo.token && this.get(fo.token.toString())
+        const token = fo.token && this.get(fo.token.toString(), options)
 
         return ({
           token: token,
@@ -1342,14 +1476,14 @@ export namespace Finder {
           value: fo.value,
           pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
           dashboardBehaviour: fo.dashboardBehaviour,
-          filters: fo.filters.notNull().map(f => this.toFilterOptionParsed(f)),
+          filters: fo.filters.notNull().map(f => this.toFilterOptionParsed(f, options)),
           frozen: fo.frozen || false,
           expanded: false,
         } as FilterGroupOptionParsed);
       }
       else {
 
-        const token = this.get(fo.token.toString());
+        const token = this.get(fo.token.toString(), options);
 
         return ({
           token: token,
@@ -1361,6 +1495,14 @@ export namespace Finder {
           dashboardBehaviour: fo.dashboardBehaviour,
         } as FilterConditionOptionParsed);
       }
+    }
+
+    private static API_parseTokens(queryKey: string, tokens: string[]): Promise<QueryToken[]> {
+      return ajaxPost({ url: "/api/query/parseTokens" }, { queryKey, tokens });
+    }
+
+    private static API_getSubTokens(queryKey: string, token: string): Promise<QueryTokenWithoutParent[]> {
+      return ajaxPost({ url: "/api/query/subTokens" }, { queryKey, token: token });
     }
   }
 
@@ -1485,21 +1627,31 @@ export namespace Finder {
   }
 
   function clearQueryDescriptionCache() {
-    queryDescriptionCache = {};
-    TokenCompleter.globalCache = {};
+    queryDescriptionCache.clear();
+    TokenCompleter.globalCache.clear();
   }
 
-  let queryDescriptionCache: { [queryKey: string]: Promise<QueryDescription> } = {};
+  let queryDescriptionCache = new Map<string, Promise<QueryDescription>>;
   export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
     const queryKey = getQueryKey(queryName);
 
-    if (!queryDescriptionCache[queryKey]) {
-      queryDescriptionCache[queryKey] = API.fetchQueryDescription(queryKey).then(qd => {
-        return Dic.deepFreeze(qd);
-      });
+    if (!queryDescriptionCache.has(queryKey)) {
+      queryDescriptionCache.set(queryKey, API.fetchQueryDescription(queryKey).then(dto => {
+
+        const qd: QueryDescription = {
+          queryKey: dto.queryKey,
+          columns: {}
+        };
+
+        const completed = new TokenCompleter(qd);
+
+        qd.columns = Dic.mapObject(dto.columns, (key, token) => completed.addToCache(token));
+
+        return Object.freeze(qd);
+      }));
     }
 
-    return queryDescriptionCache[queryKey];
+    return queryDescriptionCache.get(queryKey)!;
   }
 
   export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R> | string): Promise<AddToLite<R> | null> {
@@ -1612,7 +1764,7 @@ export namespace Finder {
     );
   }
 
-  
+
   export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined {
     var fo2: FindOptions | null = fo && {
       pagination: { mode: "All" },
@@ -1787,7 +1939,7 @@ export namespace Finder {
 
   export namespace API {
 
-    export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
+    export function fetchQueryDescription(queryKey: string): Promise<QueryDescriptionDTO> {
       return ajaxGet({ url: "/api/query/description/" + queryKey });
     }
 
@@ -1807,8 +1959,8 @@ export namespace Finder {
       {
         let dt = DateTime.fromISO(st.startDate!);
         while (dt < endDate) {
-          dt = dt.plus({ [st.timeSeriesUnit!.toLowerCase()]: st.timeSeriesStep });
           dates.push(dt.toISO()!);
+          dt = dt.plus({ [st.timeSeriesUnit!.toLowerCase()]: st.timeSeriesStep });
         }
       }
 
@@ -1817,7 +1969,7 @@ export namespace Finder {
         type: "loading",
         priority: 10,
       };
-     
+
 
       for (var i = 0; i < dates.length; i++) {
 
@@ -1901,28 +2053,11 @@ export namespace Finder {
       return ajaxGet({ url: "/api/query/findLiteLike?" + QueryString.stringify({ ...request }), signal });
     }
 
+
     export interface AutocompleteRequest {
       types: string;
       subString: string;
       count: number;
-    }
-
-    export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
-      return ajaxPost({ url: "/api/query/parseTokens" }, { queryKey, tokens });
-    }
-
-    export function getSubTokens(queryKey: string, token: QueryToken | undefined, options: SubTokensOptions): Promise<QueryToken[]> {
-      return ajaxPost<QueryToken[]>({ url: "/api/query/subTokens" }, { queryKey, token: token == undefined ? undefined : token.fullKey, options }).then(list => {
-
-        if (token == undefined) {
-          const entity = list.filter(a => a.key == "Entity").single();
-
-          list.filter(a => a.fullKey.startsWith("Entity.")).forEach(t => t.parent = entity);
-        } else {
-          list.forEach(t => t.parent = token);
-        }
-        return list;
-      });
     }
   }
 
@@ -2323,3 +2458,7 @@ export namespace Finder {
   }
 
 }
+
+type Writable<T> = {
+  -readonly [P in keyof T]: T[P];
+};

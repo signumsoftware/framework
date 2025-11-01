@@ -271,7 +271,7 @@ public static class PlainExcelGenerator
         return 10;
     }
 
-    public static List<T> ReadPlainExcel<T>(Stream stream, Func<string[], T> selector)
+    public static List<T> ReadPlainExcel<T>(Stream stream, Func<string?[], T> selector)
     {
         using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, false))
         {
@@ -281,7 +281,27 @@ public static class PlainExcelGenerator
 
             var data = worksheetPart.Worksheet.Descendants<SheetData>().Single();
 
-            return data.Descendants<Row>().Skip(1).Select(r => selector(r.Descendants<Cell>().Select(c => document.GetCellValue(c)!).ToArray())).ToList();
+            return data.Descendants<Row>().Skip(1).Select(r =>
+            {
+                var cells = r.Descendants<Cell>().ToList();
+
+                if (cells.Any(a => a.CellReference == null))
+                {
+                    var cellsArray = cells.Select(c => document.GetCellValue(c)).ToArray();
+                    return selector(cellsArray);
+                }
+                else
+                {
+                    var max = cells.Max(c => c.GetExcelColumnIndex()!.Value);
+                    var cellsArray = new string?[max];
+                    foreach (var cell in cells)
+                    {
+                        var index = cell.GetExcelColumnIndex()!.Value;
+                        cellsArray[index - 1] = document.GetCellValue(cell);
+                    }
+                    return selector(cellsArray);
+                }
+            }).ToList();
         }
     }
 

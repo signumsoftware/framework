@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTypeInfo, PseudoType, QueryKey } from './Reflection'
 import { classes, Dic, toPromise } from './Globals'
-import { FindOptions, ManualCellDto, ManualToken, QueryToken, toQueryToken } from './FindOptions'
+import { FindOptions, ManualCellDto, ManualToken, QueryToken } from './FindOptions'
 import { Finder } from './Finder'
 import * as AppContext from './AppContext'
 import { Navigator } from './Navigator'
@@ -16,6 +16,7 @@ import { Dropdown } from 'react-bootstrap'
 import DropdownToggle from 'react-bootstrap/DropdownToggle'
 import { BsColor } from './Components'
 import { registerManualSubTokens } from './SearchControl/QueryTokenBuilder'
+import { LinkButton } from './Basics/LinkButton'
 
 export namespace QuickLinkClient {
 
@@ -47,16 +48,14 @@ export namespace QuickLinkClient {
 
     if (!quickLink)
       return null
-    return (<a className={classes("badge badge-pill sf-quicklinks", "bg-" + quickLink.color, quickLink.color == "light" ? undefined : "text-white")}
+    return (<LinkButton className={classes("badge badge-pill sf-quicklinks", "text-bg-" + quickLink.color)}
       title={StyleContext.default.titleLabels ? quickLink.text() : undefined}
-      role="button"
-      href="#"
       data-toggle="dropdown"
-      onClick={e => { e.preventDefault(); quickLink.handleClick({ lite: p.lite, lites: [p.lite] }, e); }}>
-      {quickLink.icon && <FontAwesomeIcon icon={quickLink.icon} color={quickLink.color ? undefined : quickLink.iconColor} />}
+      onClick={e => { quickLink.handleClick({ lite: p.lite, lites: [p.lite] }, e); }}>
+      {quickLink.icon && <FontAwesomeIcon aria-hidden={true} icon={quickLink.icon} color={quickLink.color ? undefined : quickLink.iconColor} />}
       {quickLink.icon && "\u00A0"}
       {quickLink.text()}
-    </a>)
+    </LinkButton>)
   }
 
   export function clearQuickLinks(): void {
@@ -205,7 +204,7 @@ export interface QuickLinkWidgetProps {
 }
 
 
-export function QuickLinkWidget(p: QuickLinkWidgetProps): React.JSX.Element | null {
+export function QuickLinkWidget(p: QuickLinkWidgetProps): React.ReactElement | null {
 
   const links = useAPI(signal => QuickLinkClient.getQuickLinks(p.qlc), [liteKey(p.qlc.lite)], { avoidReset: true });
 
@@ -226,17 +225,14 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.JSX.Element | nu
 
           if (first.group == null)
             return (
-              <a key={i}
-                className={classes("badge badge-pill sf-quicklinks", "bg-" + first.color, first.color == "light" ? undefined : "text-white")}
+              <LinkButton key={i}
+                className={classes("badge badge-pill sf-quicklinks", "text-bg-" + first.color)}
                 title={StyleContext.default.titleLabels ? gr.elements[0].text() : undefined}
-                role="button"
-                href="#"
-                data-toggle="dropdown"
-                onClick={e => { e.preventDefault(); first.handleClick(p.qlc, e); }}>
-                {first.icon && <FontAwesomeIcon icon={first.icon} color={first.color ? undefined : first.iconColor} />}
+                onClick={e => { first.handleClick(p.qlc, e); }}>
+                {first.icon && <FontAwesomeIcon aria-hidden={true} icon={first.icon} color={first.color ? undefined : first.iconColor} />}
                 {first.icon && "\u00A0"}
                 {first.text()}
-              </a>
+              </LinkButton>
             );
 
           else {
@@ -248,7 +244,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.JSX.Element | nu
                   title={QuickLinkMessage.Quicklinks.niceToString()}
                   badgeColor={dd.color}
                   content={<>
-                    {dd.icon && <FontAwesomeIcon icon={dd.icon} />}
+                    {dd.icon && <FontAwesomeIcon aria-hidden={true} icon={dd.icon} />}
                     {dd.icon && "\u00A0"}
                     {dd.text(gr.elements)}
                   </>} />
@@ -275,19 +271,16 @@ export interface QuickLinkContext<T extends Entity> {
 
 const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeColor: BsColor }, ref: React.Ref<HTMLAnchorElement>) {
 
-  var textColor = p.badgeColor == "warning" || p.badgeColor == "info" || p.badgeColor == "light" ? "text-dark" : undefined;
 
   return (
-    <a
+    <LinkButton
       ref={ref}
-      className={classes("badge badge-pill sf-quicklinks", "btn-" + p.badgeColor, textColor)}
+      className={classes("badge badge-pill sf-quicklinks", "text-bg-" + p.badgeColor)}
       title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
-      role="button"
-      href="#"
       data-toggle="dropdown"
-      onClick={e => { e.preventDefault(); p.onClick!(e); }}>
+      onClick={e => { p.onClick!(e); }}>
       {p.content}
-    </a>
+    </LinkButton>
   );
 });
 
@@ -332,7 +325,7 @@ export abstract class QuickLink<T extends Entity> {
     icon: "star",
     text: links => links.length.toString(),
     title: () => QuickLinkMessage.Quicklinks.niceToString(),
-    color: "light"
+    color: "tertiary"
   };
 
   constructor(options?: QuickLinkOptions<T>) {
@@ -343,7 +336,7 @@ export abstract class QuickLink<T extends Entity> {
       this.group = QuickLink.defaultGroup;
   }
 
-  toDropDownItem(ctx: QuickLinkContext<T>): React.JSX.Element {
+  toDropDownItem(ctx: QuickLinkContext<T>): React.ReactElement {
     return (
       <Dropdown.Item data-key={this.key} className="sf-quick-link" onClick={e => this.handleClick(ctx, e)}>
         {this.renderIcon()}&nbsp;{this.text()}
@@ -353,12 +346,12 @@ export abstract class QuickLink<T extends Entity> {
 
   abstract handleClick(ctx: QuickLinkContext<T>, e: React.MouseEvent<any>): void;
 
-  renderIcon(): React.JSX.Element | undefined {
+  renderIcon(): React.ReactElement | undefined {
     if (this.icon == undefined)
       return undefined;
 
     return (
-      <FontAwesomeIcon icon={this.icon} className="icon" color={this.iconColor} />
+      <FontAwesomeIcon aria-hidden={true} icon={this.icon} className="icon" color={this.iconColor} />
     );
   }
 }

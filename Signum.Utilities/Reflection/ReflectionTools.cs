@@ -437,10 +437,10 @@ public static class ReflectionTools
         //{ typeof(SqlGeometry), str => SqlGeometry.Parse(str) },
     };
 
-    public static T Parse<T>(string value, CultureInfo culture)
+    public static T Parse<T>(string? value, CultureInfo culture)
     {
         if (typeof(T) == typeof(string))
-            return (T)(object)value;
+            return (T)(object)value!;
 
         if (value == null || value == "")
             return (T)(object?)null!;
@@ -887,7 +887,7 @@ public static class ReflectionTools
         byte[] bytes = new byte[2048];
         using (FileStream file = new FileStream(assembly.Location, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         {
-            file.Read(bytes, 0, bytes.Length);
+            file.ReadExactly(bytes, 0, bytes.Length);
         }
         int headerPos = BitConverter.ToInt32(bytes, peHeaderOffset);
         int secondsSince1970 = BitConverter.ToInt32(bytes, headerPos + linkerTimestampOffset);

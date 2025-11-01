@@ -64,7 +64,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }): Reac
           }
         }}>
           <span title={DiffLogMessage.NavigatesToThePreviousOperationLog.niceToString()}>
-             <FontAwesomeIcon icon="circle-arrow-left" />
+             <FontAwesomeIcon aria-hidden={true} icon="circle-arrow-left" />
             &nbsp;
             {DiffLogMessage.PreviousLog.niceToString()}
           </span>
@@ -78,7 +78,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }): Reac
     return (
       <Tab eventKey="prev" disabled title={
           <span title={DiffLogMessage.NavigatesToThePreviousOperationLog.niceToString()}>
-            <FontAwesomeIcon icon="circle-arrow-left" />
+            <FontAwesomeIcon aria-hidden={true} icon="circle-arrow-left" />
             &nbsp;
             {DiffLogMessage.PreviousLog.niceToString()}
           </span>
@@ -94,8 +94,8 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }): Reac
 
     const title = (
       <span title={DiffLogMessage.DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState.niceToString()}>
-        <FontAwesomeIcon icon="backward-fast" className={`colorIcon red ${eq ? "mini" : ""}`} />
-        <FontAwesomeIcon icon="backward-step" className={`colorIcon green ${eq ? "mini" : ""}`} />
+        <FontAwesomeIcon aria-hidden={true} icon="backward-fast" className={`colorIcon red ${eq ? "mini" : ""}`} />
+        <FontAwesomeIcon aria-hidden={true} icon="backward-step" className={`colorIcon green ${eq ? "mini" : ""}`} />
       </span>
     );
 
@@ -110,8 +110,8 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }): Reac
 
     const title = (
       <span title={DiffLogMessage.DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState.niceToString()}>
-        <FontAwesomeIcon icon="backward-fast" className={`colorIcon gray`} />
-        <FontAwesomeIcon icon="backward-step" className={`colorIcon gray`} />
+        <FontAwesomeIcon aria-hidden={true} icon="backward-fast" className={`colorIcon gray`} />
+        <FontAwesomeIcon aria-hidden={true} icon="backward-step" className={`colorIcon gray`} />
       </span>
     );
 
@@ -135,8 +135,8 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }): Reac
 
     const title = (
       <span title={DiffLogMessage.DifferenceBetweenInitialStateAndFinalState.niceToString()}>
-        <FontAwesomeIcon icon="backward-step" className={`colorIcon red ${eq ? "mini" : ""}`} />
-        <FontAwesomeIcon icon="forward-step" className={`colorIcon green ${eq ? "mini" : ""}`} />
+        <FontAwesomeIcon aria-hidden={true} icon="backward-step" className={`colorIcon red ${eq ? "mini" : ""}`} />
+        <FontAwesomeIcon aria-hidden={true} icon="forward-step" className={`colorIcon green ${eq ? "mini" : ""}`} />
       </span>
     );
 
@@ -161,8 +161,8 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }): Reac
     const title = (
       <span title={DiffLogMessage.DifferenceBetweenFinalStateAndTheInitialStateOfNextLog.niceToString()}>
 
-        <FontAwesomeIcon icon="forward-step" className={`colorIcon red ${eq ? "mini" : ""}`} />
-        <FontAwesomeIcon icon="forward-fast" className={`colorIcon green ${eq ? "mini" : ""}`} />
+        <FontAwesomeIcon aria-hidden={true} icon="forward-step" className={`colorIcon red ${eq ? "mini" : ""}`} />
+        <FontAwesomeIcon aria-hidden={true} icon="forward-fast" className={`colorIcon green ${eq ? "mini" : ""}`} />
       </span>
     );
 
@@ -185,7 +185,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }): Reac
           <span title={DiffLogMessage.NavigatesToTheNextOperationLog.niceToString()}>
             {DiffLogMessage.NextLog.niceToString()}
             &nbsp;
-              <FontAwesomeIcon icon="circle-arrow-right" />
+              <FontAwesomeIcon aria-hidden={true} icon="circle-arrow-right" />
           </span>
         </LinkContainer> as any}>
       </Tab>
@@ -202,7 +202,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }): Reac
           <span title={DiffLogMessage.NavigatesToTheCurrentEntity.niceToString()}>
             {DiffLogMessage.CurrentEntity.niceToString()}
             &nbsp;
-            <FontAwesomeIcon icon="up-right-from-square" />
+            <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
           </span>
         </LinkContainer> as any}>
       </Tab>

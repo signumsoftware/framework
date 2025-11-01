@@ -32,8 +32,8 @@ export class CustomRenderer extends BpmnRenderer {
     if (ct && ct != "Normal")
       result.style.setProperty('stroke',
         ct == "Jump" ? "blue" :
-          ct == "ScriptException" ? "magenta" :
-            ct == "Decision" && ds ? (bootstrapStyleToColor[ds] ?? "black") :
+          ct == "ScriptException" ? "var(--bs-magenta)" :
+            ct == "Decision" && ds ? (bootstrapStyleToColor[ds] ?? "var(--bs-body-color)") :
               "gray");
 
     return result;

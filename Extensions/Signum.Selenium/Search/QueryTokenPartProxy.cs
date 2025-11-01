@@ -12,7 +12,7 @@ public class QueryTokenPartProxy
         this.Element = element;
     }
 
-    public void Select(string? key)
+    public void Select(string? fullKey)
     {
         if (!this.Element.IsElementVisible(By.ClassName("rw-popup-container")))
         {
@@ -21,7 +21,7 @@ public class QueryTokenPartProxy
 
         var dropdownContainer = this.Element.WaitElementVisible(By.ClassName("rw-popup-container"));
         
-        var tokenSelector = key.HasText() ? $"[data-token='{key}']" : ":not([data-token])";
+        var tokenSelector = fullKey.HasText() ? $"[data-full-token='{fullKey}']" : ":not([0])";
 
         var optionElement = dropdownContainer.WaitElementVisible(By.CssSelector($"div > span{tokenSelector}"));
         optionElement.SafeClick();

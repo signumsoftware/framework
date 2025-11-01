@@ -1176,7 +1176,7 @@ export class ViewPromise<T extends ModifiableEntity> {
             return result;
           } else {
             var newFunc = ViewPromise.surroundFunctionComponent(component as React.FunctionComponent<{ ctx: TypeContext<T> }>, vos)
-            return React.createElement(newFunc, result.props);
+            return React.createElement(newFunc, result.props as any);
           }
         };
       }));

@@ -11,7 +11,6 @@ import { getQueryKey, getEnumInfo, QueryTokenString, tryGetTypeInfos, timeToStri
 import {
   FilterOption, OrderOption, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions, withoutPinned, SystemTime
 } from '@framework/FindOptions'
-import { AuthClient } from '../Signum.Authorization/AuthClient'
 import ChartButton from './ChartButton'
 import { ChartRequestViewHandle } from './Templates/ChartRequestView'
 import { UserChartClient } from './UserChart/UserChartClient'
@@ -27,10 +26,8 @@ import { Dic, softCast } from '@framework/Globals';
 import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
 import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
 import { UserQueryEntity } from '../Signum.UserQueries/Signum.UserQueries';
-import { ChartColumnEmbedded, ChartColumnType, ChartParameterEmbedded, ChartParameterType, ChartPermission, ChartRequestModel, ChartScriptSymbol, ChartTimeSeriesEmbedded, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SpecialParameterType, SvgMapsChartScript } from './Signum.Chart';
+import { ChartColumnEmbedded, ChartColumnType, ChartParameterEmbedded, ChartParameter, ChartParameterType, ChartPermission, ChartRequestModel, ChartScriptSymbol, ChartTimeSeriesEmbedded, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SpecialParameterType, SvgMapsChartScript } from './Signum.Chart';
 import { IChartBase, UserChartEntity } from './UserChart/Signum.Chart.UserChart';
-import { UserChartPartHandler } from './Dashboard/View/UserChartPart';
-import SelectorModal from '@framework/SelectorModal';
 import { CachedQueryJS, getAllFilterTokens, getCachedResultTable } from '../Signum.Dashboard/CachedQueryExecutor';
 import { UserQueryClient } from '../Signum.UserQueries/UserQueryClient';
 import { OnDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded';
@@ -292,7 +289,7 @@ export namespace ChartClient {
     displayName: string;
     columnIndex?: number;
     type: ChartParameterType;
-    valueDefinition: NumberInterval | EnumValueList | StringValue | SpecialParameter | null;
+    valueDefinition: NumberInterval | EnumValueList | StringValue | SpecialParameter | Scala | null;
   }
   
   export interface NumberInterval {
@@ -304,15 +301,16 @@ export namespace ChartClient {
   export interface SpecialParameter {
     specialParameterType: SpecialParameterType; 
   }
+
+  export interface Scala {
+    standardScalas: Record<string, ChartColumnType | null>;
+    custom: boolean;
+  }
   
-  export interface EnumValueList extends Array<EnumValue> {
+  export interface EnumValueList extends Array<string> {
   
   }
   
-  export interface EnumValue {
-    name: string;
-    typeFilter?: ChartColumnType;
-  }
   
   export interface StringValue {
     defaultValue: string;
@@ -387,30 +385,29 @@ export namespace ChartClient {
   
   
     switch (ct) {
-  
-      case "Groupable": return [
-        "RealGroupable",
-        "Integer",
-        "DateOnly",
+
+      case "AnyGroupKey": return softCast<ChartColumnType[]>([
+        "RoundedNumber",
+        "Number",
+        "Date",
         "String",
-        "Lite",
+        "Entity",
         "Enum"
-      ].contains(type);
-  
-      case "Magnitude": return [
-        "Integer",
-        "Real",
-        "RealGroupable"
-      ].contains(type);
-  
-      case "Positionable": return [
-        "Integer",
-        "Real",
-        "RealGroupable",
-        "DateOnly",
+      ]).contains(type);
+
+      case "AnyNumber": return softCast<ChartColumnType[]>([
+        "Number",
+        "DecimalNumber",
+        "RoundedNumber"
+      ]).contains(type);
+
+      case "AnyNumberDateTime": return softCast<ChartColumnType[]>([
+        "Number",
+        "DecimalNumber",
+        "Date",
         "DateTime",
         "Time"
-      ].contains(type);
+      ]).contains(type);
     }
   
     return false;
@@ -419,14 +416,14 @@ export namespace ChartClient {
   export function getChartColumnType(token: QueryToken): ChartColumnType | undefined {
   
     switch (token.filterType) {
-      case "Lite": return "Lite";
+      case "Lite": return "Entity";
       case "Boolean":
       case "Enum": return "Enum";
       case "String":
       case "Guid": return "String";
-      case "Integer": return "Integer";
-      case "Decimal": return token.isGroupable ? "RealGroupable" : "Real";
-      case "DateTime": return token.isGroupable ? "DateOnly" : "DateTime";
+      case "Integer": return "Number";
+      case "Decimal": return token.isGroupable ? "RoundedNumber" : "DecimalNumber";
+      case "DateTime": return token.isGroupable ? "Date" : "DateTime";
       case "Time": return "Time";
     }
   
@@ -481,7 +478,7 @@ export namespace ChartClient {
   function isValidParameterValue(value: string | null | undefined, scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) : boolean{
   
     switch (scriptParameter.type) {
-      case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).some(a => a.name == value);
+      case "Enum": return (scriptParameter.valueDefinition as EnumValueList).some(a => a == value);
       case "Number": return !isNaN(parseFloat(value!));
       case "String": return true;
       case "Special": {
@@ -491,16 +488,26 @@ export namespace ChartClient {
           case "ColorInterpolate": return value != null && getColorInterpolation(value) != null;
           default: throw new Error("Unexpected parameter type " + specialParameterType);
         }
-  
       }
-      default: throw new Error("Unexpected parameter type");
+      case "Scala":
+        const standardScalas = (scriptParameter.valueDefinition as Scala).standardScalas;
+        if (value && (standardScalas as Object).hasOwnProperty(value))
+          return true;
+
+        if (value?.contains("..."))
+          return !isNaN(parseFloat(value.before("..."))) && !isNaN(parseFloat(value.after("...")));
+
+        return false;
+
+      default:
+        throw new Error("Unexpected parameter type");
     }
   
   }
   
   export function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined): string {
     switch (scriptParameter.type) {
-      case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
+      case "Enum": return (scriptParameter.valueDefinition as EnumValueList).first();
       case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue?.toString();
       case "String": return (scriptParameter.valueDefinition as StringValue).defaultValue?.toString();
       case "Special": {
@@ -510,6 +517,10 @@ export namespace ChartClient {
           case "ColorInterpolate": return Dic.getKeys(colorInterpolators)[0];
           default: throw new Error("Unexpected parameter type " + specialParameterType);
         }
+      }
+      case "Scala": {
+        const scala = scriptParameter.valueDefinition as Scala;
+        return Object.entries(scala.standardScalas).filter(([key, value]) => value == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, value)).first()[0];
       }
       default: throw new Error("Unexpected parameter type");
     }
@@ -693,18 +704,14 @@ export namespace ChartClient {
           const ts = Decoder.decodeTimeSeries(query);
   
           const fos = Finder.Decoder.decodeFilters(query);
-          fos.forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate| (ts ? SubTokensOptions.CanTimeSeries : 0)));
-  
-          const oos = Finder.Decoder.decodeOrders(query);
-          oos.forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
-  
+          fos.forEach(fo => completer.requestFilter(fo));
 
           const cols = Decoder.decodeColumns(query);
-          cols.map(a => a.element.token).filter(te => te != undefined).forEach(te => completer.request(te!.tokenString!, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | (ts ? SubTokensOptions.CanTimeSeries : 0)));
+          cols.map(a => a.element.token).filter(te => te != undefined).forEach(te => completer.request(te!.tokenString!));
   
           return completer.finished().then(() => {
   
-            cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.tokenString));
+            cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.tokenString, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | (ts ? SubTokensOptions.CanTimeSeries : 0)));
   
             var cr = query.script == undefined ? scripts.first("ChartScript") :
               scripts
@@ -715,7 +722,7 @@ export namespace ChartClient {
               chartScript: cr.symbol,
               maxRows: query.maxRows == "null" ? null : query.maxRows || Decoder.DefaultMaxRows,
               queryKey: getQueryKey(queryName),
-              filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
+              filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate | (ts ? SubTokensOptions.CanTimeSeries : 0))),
               columns: cols,
               parameters: Decoder.decodeParameters(query),
               chartTimeSeries: ts,
@@ -755,8 +762,8 @@ export namespace ChartClient {
             token: Boolean(token) ? QueryTokenEmbedded.New({
               tokenString: token,
             }) : undefined,
-            orderByType: order == null ? null : (order.charAt(order.length -1) == "A" ? "Ascending" : "Descending"),
-            orderByIndex: order == null ? null : (parseInt(order.substr(0, order.length - 1))),
+            orderByType: order == null ? null : (order.charAt(order.length - 1) == "A" ? "Ascending" : "Descending"),
+            orderByIndex: order == null ? null : (parseInt(order.slice(0, -1))),
             format: unscapeTildes(format),
             displayName: unscapeTildes(displayName),
           })
@@ -816,20 +823,6 @@ export namespace ChartClient {
       };
     }
   
-    export function toChartColumnType(token: QueryToken): ChartColumnType | null {
-      switch (token.filterType) {
-        case "Lite": return "Lite";
-        case "Boolean":
-        case "Enum": return "Enum";
-        case "String":
-        case "Guid": return "String";
-        case "Integer": return "Integer";
-        case "Decimal": return token.isGroupable ? "RealGroupable" : "Real";
-        case "DateTime": return token.isGroupable ? "DateOnly" : "DateTime";
-        case "Time": return "Time";
-        default: return null;
-      }
-    }
   
     export function getKey(token: QueryToken): ((val: unknown) => string) {
   
@@ -913,7 +906,7 @@ export namespace ChartClient {
       if ((token.filterType == "Decimal" || token.filterType == "Integer"))
         return v => {
           var number = v as number | null;
-          var format = chartColumn.format || (token.key == "Sum" ? "0.#K" : undefined) || token.format || "0";
+          var format = chartColumn.format || (token.key == "Sum" ? "K1" : undefined) || token.format || "0";
           var numFormat = toNumberFormat(format);
           return number == null ? String(null) : numFormat.format(number);
         };
@@ -921,14 +914,14 @@ export namespace ChartClient {
       return v => String(v);
     }
   
-    export function getParameterWithDefault(request: ChartRequestModel, chartScript: ChartScript): { [parameter: string]: string } {
+    export function getParameterWithDefault(request: ChartRequestModel, chartScript: ChartScript): Record<ChartParameter, string> {
   
       var defaultValues = chartScript.parameterGroups.flatMap(g => g.parameters).toObject(a => a.name, a => {
         var col = a.columnIndex == null ? null : request.columns[a.columnIndex];
         return defaultParameterValue(a, col?.element && col.element.token && col.element.token.token);
       });
-  
-      return request.parameters.toObject(a => a.element.name!, a => a.element.value ?? defaultValues[a.element.name!])
+
+      return request.parameters.toObject(a => a.element.name as ChartParameter, a => a.element.value ?? defaultValues[a.element.name!]) as Record<ChartParameter, string>;
     }
   
     export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript, palettes: { [type: string]: ColorPaletteClient.ColorPalette | null }): ExecuteChartResult {
@@ -952,7 +945,7 @@ export namespace ChartClient {
           displayName: scriptCol.displayName,
           title: (mle.element.displayName || token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
           token: token,
-          type: token && toChartColumnType(token),
+          type: (token && getChartColumnType(token)) ?? null,
           orderByIndex: mle.element.orderByIndex,
           orderByType: mle.element.orderByType,
           getKey: key,
@@ -975,7 +968,7 @@ export namespace ChartClient {
           displayName: "Entity",
           title: "",
           token: undefined,
-          type: "Lite",
+          type: "Entity",
           getKey: key,
           getNiceName: niceName,
           getColor: color,
@@ -1064,7 +1057,7 @@ export namespace ChartClient {
 
 export interface ChartScriptProps {
   data?: ChartTable;
-  parameters: { [name: string]: string },
+  parameters: Record<ChartParameter, string>,
   loading: boolean;
   onDrillDown: (row: ChartRow, e: React.MouseEvent<any> | MouseEvent) => void;
   onReload: (() => void) | undefined;

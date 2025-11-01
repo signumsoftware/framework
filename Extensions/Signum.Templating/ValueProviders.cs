@@ -1,6 +1,8 @@
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 using Signum.DynamicQuery.Tokens;
 using Signum.UserAssets;
+using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System.Collections;
 using System.Globalization;
@@ -167,6 +169,8 @@ public abstract class ValueProviderBase
                 return new GlobalValueProvider(token, tp) { Variable = variable };
             case "d":
                 return new DateValueProvider(token, tp) { Variable = variable };
+            case "n":
+                return new NiceNameValueProvider(token, tp.ModelType, tp) { Variable = variable };
             default:
                 tp.AddError(false, $"{type} is not a recognized value provider (q:Query, t:Translate, m:Model, g:Global or just blank)");
                 return null;
@@ -679,6 +683,122 @@ public class ModelValueProvider : ValueProviderBase
     public override bool Equals(object? obj) => obj is ModelValueProvider mvp && Equals(mvp.fieldOrPropertyChain, fieldOrPropertyChain);
 }
 
+[System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+public sealed class ExportNiceNamesAttribute : Attribute
+{
+    public Type Type;
+    public string Alias;
+    public ExportNiceNamesAttribute(Type type, string? alias = null)
+    {
+        this.Type = type;
+        this.Alias = alias ?? type.Name;
+    }
+}
+
+/// <summary>
+/// like @[n:Message]
+/// </summary>
+public class NiceNameValueProvider : ValueProviderBase
+{
+    string fieldOrMessageChain; 
+    MemberInfo? lastMember;
+
+    public NiceNameValueProvider(string fieldOrMessageChain, Type? modelType, ITemplateParser tp)
+    {
+        this.fieldOrMessageChain = fieldOrMessageChain;
+        var parts = fieldOrMessageChain.Split(".");
+        if (modelType == null)
+        {
+            tp.AddError(false, TemplateTokenMessage.ImpossibleToAccess0BecauseTheTemplateHAsNo1.NiceToString(fieldOrMessageChain, "Model"));
+            return;
+        }
+
+        var initialMember =
+            (MemberInfo?)modelType.GetProperty(parts[0]) ??
+            (MemberInfo?)modelType.GetField(parts[0]);
+
+        var initialType = initialMember switch
+        {
+            PropertyInfo pi => pi.PropertyType,
+            FieldInfo fi => fi.FieldType,
+            _ => modelType.GetCustomAttributes<ExportNiceNamesAttribute>().SingleOrDefault(a => a.Alias == parts[0])?.Type
+        };
+
+        if(initialType == null)
+        {
+            tp.AddError(false, $"Type '{{0}}' does not have a property or field with name '{{1}}', or an {nameof(ExportNiceNamesAttribute)} with Alias '{{1}}'".FormatWith(modelType.Name, parts[0]));
+            return;
+        }
+
+        if(parts.Length == 1 && initialMember != null)
+        {
+            tp.AddError(false, "Part '{0}' is not translatable, try accesing inner properties".FormatWith(parts[0]));
+            return;
+        }
+
+        MemberInfo currentMember = initialType;
+        foreach (var p in parts.Skip(1))
+        {
+            var currentType = currentMember switch
+            {
+                PropertyInfo pi => pi.PropertyType,
+                FieldInfo fi => fi.FieldType,
+                TypeInfo ti => ti,
+                _ => throw new UnexpectedValueException(currentMember)
+            };
+
+            var nextMember =
+                 (MemberInfo?)currentType.GetProperty(p, BindingFlags.Public | BindingFlags.Instance) ??
+                 (MemberInfo?)currentType.GetField(p, BindingFlags.Public | BindingFlags.Static);
+
+            if (nextMember == null)
+            {
+                tp.AddError(false, "Type '{0}' does not have a property/field with name '{1}'".FormatWith(currentType.Name, p));
+                return;
+            }
+
+            currentMember = nextMember;
+        }
+
+        lastMember = currentMember;
+    }
+
+    public override object? GetValue(TemplateParameters p)
+    {
+        try
+        {
+            return lastMember switch
+            {
+                FieldInfo fi when fi.IsStatic => ((Enum)fi.GetValue(null)!).NiceToString(),
+                PropertyInfo pi => pi.NiceName(),
+                TypeInfo ti => ti.NiceName(),
+                _ => throw new UnexpectedValueException(lastMember)
+            };
+        }
+        catch (Exception ex)
+        {
+            return $"Error getting {fieldOrMessageChain}: {ex.Message}";
+        }
+    }
+
+    public override void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
+    {
+        sb.Append("n:");
+        sb.Append(fieldOrMessageChain);
+    }
+
+    public override Type? Type => typeof(string);
+
+    public override string? Format => null;
+
+    public override bool Equals(object? obj) => obj is NiceNameValueProvider nvp && Equals(nvp.fieldOrMessageChain, fieldOrMessageChain);
+
+    public override int GetHashCode() => fieldOrMessageChain?.GetHashCode() ?? 0;
+
+    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText) {}
+
+    public override void FillQueryTokens(List<QueryToken> list, bool forForeach) {}
+}
 
 /// <summary>
 /// like @[g:Now]

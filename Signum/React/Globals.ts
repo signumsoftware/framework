@@ -1,6 +1,12 @@
 
 declare global {
 
+  namespace JSX {
+    // Fallback to React's JSX namespace
+    interface Element extends React.JSX.Element { }
+    interface IntrinsicElements extends React.JSX.IntrinsicElements { }
+  }
+
   interface RegExpConstructor {
     escape(s: string): string;
   }
@@ -129,7 +135,6 @@ declare global {
     forGenderAndNumber(this: string, number: number): string;
     forGenderAndNumber(this: string, gender: string | undefined): string;
     forGenderAndNumber(this: string, gender: any, number?: number): string;
-    replaceAll(this: string, from: string, to: string): string;
     indent(this: string, numChars: number): string;
     between(this: string, separator: string): string;
     between(this: string, firstSeparator: string, secondSeparator: string): string;
@@ -883,10 +888,6 @@ export function softCast<T>(val: T): T {
   return val;
 }
 
-String.prototype.replaceAll = function (this: string, from: string, to: string) {
-  return this.split(from).join(to)
-};
-
 String.prototype.indent = function (this: string, numChars: number) {
   const indent = " ".repeat(numChars);
   return this.split("\n").map(a => indent + a).join("\n");
@@ -1163,6 +1164,9 @@ export module Dic {
     dic[key] = value;
   }
 
+  export function simplify<T extends {}>(a: T): T;
+  export function simplify<T extends {}>(a: undefined): undefined;
+  export function simplify<T extends {}>(a: T | undefined): T | undefined;
   export function simplify<T extends {}>(a: T | undefined): T | undefined{
     if (a == null)
       return a;

@@ -23,8 +23,7 @@ public class EntityPropertyToken : QueryToken
 
     QueryToken parent;
     public override QueryToken? Parent => parent;
-
-
+    
     internal EntityPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr)
     {
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));

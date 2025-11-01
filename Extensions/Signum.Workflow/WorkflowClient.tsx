@@ -290,7 +290,7 @@ export namespace WorkflowClient {
       onClick: eoc => executeCaseActivity(eoc, eoc => {
         eoc.onExecuteSuccess = pack => {
           Operations.notifySuccess();
-          eoc.frame.onClose(pack);
+          eoc.frame.onClose!(pack);
           Navigator.raiseEntityChanged(pack.entity);
           return Promise.resolve();
         }
@@ -314,7 +314,7 @@ export namespace WorkflowClient {
       onClick: eoc => executeCaseActivity(eoc, eoc => {
         eoc.onExecuteSuccess = async pack => {
           Operations.notifySuccess();
-          eoc.frame.onClose(pack);
+          eoc.frame.onClose!(pack);
           Navigator.raiseEntityChanged(pack.entity);
         }
         return getWorkflowFreeJump(eoc.entity.case.workflow)
@@ -680,7 +680,7 @@ export namespace WorkflowClient {
 
       return Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
         .then(pack => {
-          eoc.frame.onClose();
+          eoc.frame.onClose!();
           Navigator.raiseEntityChanged(pack.entity);
           return Operations.notifySuccess();
         })

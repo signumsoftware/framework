@@ -43,4 +43,16 @@
     <Member Name="Minutes" Description="Minuten" />
     <Member Name="Seconds" Description="Sekunden" />
   </Type>
+  <Type Name="NumberUnitsMessage">
+    <Member Name="Billion" Description="B" />
+    <Member Name="Million" Description="M" />
+    <Member Name="Nonillion" Description="Nein" />
+    <Member Name="Octillion" Description="Oc" />
+    <Member Name="Quadrillion" Description="Q" />
+    <Member Name="Quintillion" Description="Qi" />
+    <Member Name="Septillion" Description="Sp" />
+    <Member Name="Sextillion" Description="Sx" />
+    <Member Name="Thousand" Description="K" />
+    <Member Name="Trillion" Description="T" />
+  </Type>
 </Translations>

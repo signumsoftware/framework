@@ -1,4 +1,7 @@
+using Microsoft.SqlServer.Server;
 using Signum.Engine.Maps;
+using Signum.Engine.Sync.Postgres;
+using Signum.Entities.TsVector;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections;
@@ -6,10 +9,7 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.SqlServer.Server;
-using Signum.Engine.Sync.Postgres;
-using Signum.Entities.TsVector;
-using static Signum.Entities.SystemTime;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Signum.Engine.Linq;
 
@@ -577,7 +577,15 @@ internal class QueryBinder : ExpressionVisitor
         if (expression.NodeType == ExpressionType.Convert && (expression.Type.IsInstantiationOf(typeof(IGrouping<,>)) ||
                                                               expression.Type.IsInstantiationOf(typeof(IEnumerable<>)) ||
                                                               expression.Type.IsInstantiationOf(typeof(IQueryable<>))))
-            expression = ((UnaryExpression)expression).Operand;
+            return ((UnaryExpression)expression).Operand;
+
+        if(expression is MethodCallExpression mc &&
+           (mc.Method.Name is "AsQueryable" or "AsEnumerable" or "ToList" or "ToArray") &&
+           (mc.Method.DeclaringType == typeof(Queryable) || mc.Method.DeclaringType == typeof(Enumerable)))
+        {
+            expression = mc.Arguments[0];
+        }
+
         return expression;
     }
 
@@ -2237,6 +2245,13 @@ internal class QueryBinder : ExpressionVisitor
         }
     }
 
+    static MList<T> ConcatMList<T>(MList<T> first, MList<T> second)
+    {
+        throw new NotImplementedException();
+    }
+
+    static readonly MethodInfo miConcatMList = ReflectionTools.GetMethodInfo(() => ConcatMList((MList<int>)null!, (MList<int>)null!)).GetGenericMethodDefinition();
+
     private Expression CombineImplementations(ICombineStrategy strategy, Dictionary<Type, Expression> expressions, Type returnType)
     {
         if (expressions.All(e => e.Value is LiteReferenceExpression))
@@ -2333,7 +2348,11 @@ internal class QueryBinder : ExpressionVisitor
         }
 
         if (expressions.Any(e => e.Value is MListExpression))
-            throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
+        {
+            //Doesn't really work yet, but delays the exception when using a Mixin<T> has an MList but is not used in the query
+            return expressions.Values.Aggregate((a, b) => Expression.Call(
+                miConcatMList.MakeGenericMethod(a.Type.ElementType()!), a, b)); 
+        }
 
         if (expressions.Any(e => e.Value is AdditionalFieldExpression))
             return strategy.CombineValues(expressions, returnType);
@@ -2712,7 +2731,8 @@ internal class QueryBinder : ExpressionVisitor
                 {
                     var toUpdateParam = setter.PropertyExpression.Parameters.Single();
                     map.Add(toUpdateParam, toUpdate);
-                    colExpression = Visit(setter.PropertyExpression.Body);
+                    var cleanedProperty = DbQueryProvider.Clean(setter.PropertyExpression.Body, true, null);
+                    colExpression = Visit(cleanedProperty!);
                     map.Remove(toUpdateParam);
                 }
                 catch (CurrentSourceNotFoundException e)
@@ -2959,8 +2979,28 @@ internal class QueryBinder : ExpressionVisitor
 
             return ids.PreAnd(AssignColumn(colIba.TypeId.TypeColumn.Value, expIba.TypeId.TypeColumn.Value)).ToArray();
         }
+        else if (colExpression is IntervalExpression interval && interval.PostgresRange != null)
+        {
+            if(expression is IntervalExpression expInterval && expInterval.PostgresRange != null)
+            {
+                return new[] { AssignColumn(interval.PostgresRange, expInterval.PostgresRange) };
+            }
+            else if(expression is NewExpression newExpr && newExpr.Type.IsInstantiationOf(typeof(NullableInterval<>)))
+            {
+                var elemType = newExpr.Type.GetGenericArguments().SingleEx();
 
-        throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".FormatWith(colExpression.Type.TypeName(), expression.ToString()));
+                var constructor = interval.PostgresRange.Type.GetConstructor([elemType, elemType])!;
+
+                var tz = Expression.New(constructor,
+                    newExpr.Arguments[0].UnNullify(),
+                    newExpr.Arguments[1].UnNullify()
+                    );
+
+                return new[] { AssignColumn(interval.PostgresRange, tz) };
+            }        
+        }
+
+        throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".FormatWith(colExpression, expression.ToString()));
     }
 
     static ColumnAssignment AssignColumn(Expression column, Expression expression)

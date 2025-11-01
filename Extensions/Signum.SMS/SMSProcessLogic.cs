@@ -8,47 +8,47 @@ public static class SMSProcessLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<SMSSendPackageEntity>();
+        sb.Include<SMSUpdatePackageEntity>();
+        SMSLogic.AssertStarted(sb);
+        ProcessLogic.AssertStarted(sb);
+        ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
+        ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgorithm());
+        SimpleTaskLogic.Register(SMSMessageTask.UpdateSMSStatus, ctx => UpdateAllSentSMS()?.ToLite());
+
+        new Graph<ProcessEntity>.ConstructFromMany<SMSMessageEntity>(SMSMessageOperation.CreateUpdateStatusPackage)
         {
-            sb.Include<SMSSendPackageEntity>();
-            sb.Include<SMSUpdatePackageEntity>();
-            SMSLogic.AssertStarted(sb);
-            ProcessLogic.AssertStarted(sb);
-            ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
-            ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgorithm());
-            SimpleTaskLogic.Register(SMSMessageTask.UpdateSMSStatus, ctx => UpdateAllSentSMS()?.ToLite());
+            Construct = (messages, _) => UpdateMessages(messages.RetrieveList())
+        }.Register();
 
-            new Graph<ProcessEntity>.ConstructFromMany<SMSMessageEntity>(SMSMessageOperation.CreateUpdateStatusPackage)
+        QueryLogic.Queries.Register(typeof(SMSSendPackageEntity), () =>
+            from e in Database.Query<SMSSendPackageEntity>()
+            let p = e.LastProcess()
+            select new
             {
-                Construct = (messages, _) => UpdateMessages(messages.RetrieveList())
-            }.Register();
+                Entity = e,
+                e.Id,
+                e.Name,
+                NumLines = e.SMSMessages().Count(),
+                LastProcess = p,
+                NumErrors = e.SMSMessages().Count(s => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(s)) != null),
+            });
 
-            QueryLogic.Queries.Register(typeof(SMSSendPackageEntity), () =>
-                from e in Database.Query<SMSSendPackageEntity>()
-                let p = e.LastProcess()
-                select new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    NumLines = e.SMSMessages().Count(),
-                    LastProcess = p,
-                    NumErrors = e.SMSMessages().Count(s => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(s)) != null),
-                });
-
-            QueryLogic.Queries.Register(typeof(SMSUpdatePackageEntity), () =>
-                from e in Database.Query<SMSUpdatePackageEntity>()
-                let p = e.LastProcess()
-                select new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    NumLines = e.SMSMessages().Count(),
-                    LastProcess = p,
-                    NumErrors = e.SMSMessages().Count(s => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(s)) != null),
-                });
-        }
+        QueryLogic.Queries.Register(typeof(SMSUpdatePackageEntity), () =>
+            from e in Database.Query<SMSUpdatePackageEntity>()
+            let p = e.LastProcess()
+            select new
+            {
+                Entity = e,
+                e.Id,
+                e.Name,
+                NumLines = e.SMSMessages().Count(),
+                LastProcess = p,
+                NumErrors = e.SMSMessages().Count(s => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(s)) != null),
+            });
     }
 
     public static void RegisterSMSOwnerData<T>(Expression<Func<T, SMSOwnerData>> phoneExpression) where T : Entity

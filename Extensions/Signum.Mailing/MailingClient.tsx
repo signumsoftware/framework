@@ -179,7 +179,7 @@ export namespace MailingClient {
           ({
             fullText: getToString(et),
             menu: <Dropdown.Item data-operation={et.EntityType} onClick={() => handleMenuClick(et, ctx)}>
-              <FontAwesomeIcon icon="envelope" className="icon" />
+              <FontAwesomeIcon aria-hidden={true} icon="envelope" className="icon" />
               {getToString(et)}
             </Dropdown.Item>
           } as ContextualMenuItem)

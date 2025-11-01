@@ -4,6 +4,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
 using System.Data;
+using System.Data.SqlTypes;
 using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Sync;
@@ -58,7 +59,7 @@ public static class SchemaSynchronizer
             }
         }
 
-        HashSet<SchemaName> databaseSchemas = Schema.Current.Settings.IsPostgres ?
+        Dictionary<SchemaName, DiffSchema> databaseSchemas = Schema.Current.Settings.IsPostgres ?
             PostgresCatalogSchema.GetSchemaNames(s.DatabaseNames()) :
             SysTablesSchema.GetSchemaNames(s.DatabaseNames());
 
@@ -173,20 +174,28 @@ public static class SchemaSynchronizer
                  );
 
             SqlPreCommand? createPartitionSchema = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
-                  modelPartitionSchemas!,
-                  databasePartitionSchemas!,
-                  createNew: (a, newPS) => sqlBuilder.CreateSqlPartitionScheme(newPS, a.db),
-                removeOld: null,
-                mergeBoth: null
+                 modelPartitionSchemas!,
+                 databasePartitionSchemas!,
+                 createNew: (a, newPS) => sqlBuilder.CreateSqlPartitionScheme(newPS, a.db),
+                 removeOld: null,
+                 mergeBoth: null
                 );
 
             SqlPreCommand? createSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas", Spacing.Double,
                 modelSchemas.ToDictionary(a => a.ToString()),
-                databaseSchemas.ToDictionary(a => a.ToString()),
+                databaseSchemas.SelectDictionary(sn => sn.ToString(), diff => diff),
                 createNew: (_, newSN) => sqlBuilder.CreateSchema(newSN),
                 removeOld: null,
-                mergeBoth: (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : sqlBuilder.CreateSchema(newSN)
-                );
+                mergeBoth: (_, newSN, diffSN) =>
+                {
+                    if (!newSN.Equals(diffSN.Name))
+                        return sqlBuilder.CreateSchema(newSN);
+
+                    var changeOwner = sqlBuilder.IsPostgres && s.ExecuteAs != null && diffSN.Owner != null && s.ExecuteAs != diffSN.Owner ? 
+                        sqlBuilder.AlterSchemaChangeOwner(diffSN.Name, s.ExecuteAs) : null;
+
+                    return changeOwner;
+                });
 
             //use database without replacements to just remove indexes
             SqlPreCommand? dropStatistics =
@@ -318,17 +327,20 @@ public static class SchemaSynchronizer
                     createNew: (tn, tab) => SqlPreCommand.Combine(Spacing.Double,
                         sqlBuilder.CreateTableSql(tab)
                     ),
-                    removeOld: (tn, dif) => sqlBuilder.DropTable(dif),
+                    removeOld: (tn, dif) => sqlBuilder.DropTable(dif, sqlBuilder.IsPostgres),
                     mergeBoth: (tn, tab, dif) =>
                     {
                         var rename = !object.Equals(dif.Name, tab.Name) ? sqlBuilder.RenameOrMove(dif, tab, tab.Name, forHistoryTable: false) : null;
+
+                        var changeOWner = sqlBuilder.IsPostgres && s.ExecuteAs != null && dif.Owner != null && s.ExecuteAs != dif.Owner ?
+                             sqlBuilder.AlterTableChangeOwner(tab.Name, s.ExecuteAs) : null;
 
                         bool disableEnableSystemVersioning = false;
 
                         var disableSystemVersioning = !sqlBuilder.IsPostgres && dif.TemporalType != SysTableTemporalType.None &&
                         (tab.SystemVersioned == null ||
                         !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName!.ToString()), tab.SystemVersioned.TableName.ToString()) && !DifferentDatabase(tab.Name, dif.Name) ||
-                        (disableEnableSystemVersioning = StrongColumnChanges(tab, dif))) ?
+                        (disableEnableSystemVersioning = StrongColumnChanges(tab, dif))) && !sqlBuilder.IsPostgres ?
                         sqlBuilder.AlterTableDisableSystemVersioning(tab.Name).Do(a => a.GoAfter = true) :
                         null;
 
@@ -485,17 +497,17 @@ public static class SchemaSynchronizer
                             }
                         }
 
-                        delayedAddSystemVersioning.Add(SqlPreCommand.Combine(Spacing.Simple, addPeriod, addSystemVersioning));
+                        delayedAddSystemVersioning.Add(SqlPreCommand.Combine(Spacing.Simple, columnsHistory, addPeriod, addSystemVersioning));
 
                         return SqlPreCommand.Combine(Spacing.Simple,
                             rename,
+                            changeOWner,
                             disableSystemVersioning,
                             dropPeriod,
                             dropPrimaryKey,
                             disconnectFromPartition,
                             combinedAddPeriod,
                             columns,
-                            columnsHistory,
                             createPrimaryKey);
                     });
 
@@ -626,9 +638,6 @@ public static class SchemaSynchronizer
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
                             mix.GetIndexName(tab.SystemVersioned!.TableName) != dix.IndexName ? sqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.GetIndexName(tab.SystemVersioned!.TableName)) : null);
 
-
-
-
                     return SqlPreCommand.Combine(Spacing.Simple, indices);
                 });
 
@@ -636,10 +645,10 @@ public static class SchemaSynchronizer
 
             SqlPreCommand? dropSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas", Spacing.Double,
                 modelSchemas.ToDictionary(a => a.ToString()),
-                databaseSchemas.ToDictionary(a => a.ToString()),
+                databaseSchemas.SelectDictionary(sn => sn.ToString(), diff => diff),
                 createNew: null,
-                removeOld: (_, oldSN) => DropSchema(oldSN) ? sqlBuilder.DropSchema(oldSN) : null,
-                mergeBoth: (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : sqlBuilder.DropSchema(oldSN)
+                removeOld: (_, diffSN) => DropSchema(diffSN.Name) ? sqlBuilder.DropSchema(diffSN.Name) : null,
+                mergeBoth: (_, newSN, diffSN) => newSN.Equals(diffSN.Name) ? null : sqlBuilder.DropSchema(diffSN.Name)
              );
 
             SqlPreCommand? dropPartitionSchema = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
@@ -697,7 +706,17 @@ public static class SchemaSynchronizer
 
     private static SqlPreCommand ForHistoryTable(SqlPreCommand sqlCommand, ITable tab)
     {
-        return sqlCommand.Replace(new Regex(@$"\b{Regex.Escape(tab.Name.ToString())}\b"), m => tab.SystemVersioned!.TableName.ToString());
+        string escaped = Regex.Escape(tab.Name.ToString())!;
+
+        if (!escaped.StartsWith("\""))
+            escaped = @"\b" + escaped;
+
+        if (!escaped.EndsWith("\""))
+            escaped = escaped + @"\b";
+
+        var regex = new Regex(escaped);
+
+        return sqlCommand.Replace(regex, m => tab.SystemVersioned!.TableName.ToString());
     }
 
     private static SqlPreCommand? UpdateForeignKeyTypeChanged(SqlBuilder sqlBuilder, ITable tab, DiffTable dif, IColumn tabCol, DiffColumn difCol, Func<ObjectName, ObjectName> changeName, Dictionary<ObjectName, Dictionary<string, string>> preRenameColumnsList)
@@ -848,7 +867,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
         var defaultValue =
             column.DbType.IsNumber() ? "0" :
             column.DbType.IsString() ? "''" :
-            column.DbType.IsDate() ? "GetDate()" :
+            column.DbType.IsDate() ? (Schema.Current.Settings.IsPostgres ?  "now()" : "GetDate()") :
             column.DbType.IsGuid() ? "'00000000-0000-0000-0000-000000000000'" :
             "?";
 
@@ -885,10 +904,10 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             column.DbType.IsBoolean() ? (Schema.Current.Settings.IsPostgres ? "false" : "0") :
             column.DbType.IsNumber() ? "0" :
             column.DbType.IsString() ? "''" :
-            column.DbType.IsDate() ? "GetDate()" :
+            column.DbType.IsDate() ? (Schema.Current.Settings.IsPostgres ? "now()" : "GetDate()") :
             column.DbType.IsGuid() ? "NEWID()" :
         column.DbType.IsTime() ? "'00:00'" :
-        column.DbType.HasPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), 'infinity', '[)')" :
+        column.DbType.HasPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), NULL, '[)')" :
             "?");
 
         string defaultValue = rep.Interactive ? SafeConsole.AskString($"Default value for '{table.Name.Name}.{column.Name}'? ([Enter] for {typeDefault} or 'force' if there are no {(forNewColumn ? "rows" : "nulls")}) ", stringValidator: str => null) : "";

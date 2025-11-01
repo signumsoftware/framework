@@ -10,6 +10,9 @@ public static class CultureServer
 {
     public static void Start(WebServerBuilder wsb)
     {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         SignumCultureSelectorFilter.GetCurrentCulture = (context) =>
         {
             // 1 cookie (temporary)

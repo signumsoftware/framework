@@ -8,7 +8,7 @@ import { FilterOptionParsed } from '../Search';
 import { CollectionMessage } from '../Signum.External';
 import { ValidationMessage } from '../Signum.Entities.Validation';
 
-export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, mainType: TypeReference }): React.JSX.Element | null {
+export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, mainType: TypeReference }): React.ReactElement | null {
 
   const tokens = multiplyResultTokens(p.findOptions);
 
@@ -21,7 +21,7 @@ export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, m
 
   return (
     <div className="sf-search-message alert alert-warning">
-      <FontAwesomeIcon icon="triangle-exclamation" />&nbsp;{message}
+      <FontAwesomeIcon aria-hidden={true} icon="triangle-exclamation" />&nbsp;{message}
     </div>
   );
 }

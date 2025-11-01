@@ -2,13 +2,13 @@ import * as React from 'react'
 import { classes } from '@framework/Globals';
 import { ChartClient, ChartRow, ChartScriptProps, ChartTable } from '../../ChartClient';
 import { useThrottle, useSize, areEqualDeps } from '@framework/Hooks';
-import { ChartRequestModel } from '../../Signum.Chart';
+import { ChartParameter, ChartRequestModel } from '../../Signum.Chart';
 import { DashboardFilter } from '../../../Signum.Dashboard/View/DashboardFilterController';
 
 export interface ReactChartProps {
   chartRequest: ChartRequestModel,
   data?: ChartTable;
-  parameters: { [parameter: string]: string }; 
+  parameters: Record<ChartParameter, string>; 
   loading: boolean;
   sizeDeps?: React.DependencyList;
   onReload: (() => void) | undefined;

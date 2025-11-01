@@ -6,7 +6,7 @@ import { JavascriptMessage } from '@framework/Signum.Entities';
 import { TimeSeriesUnit } from '../../../Signum/React/Signum.DynamicQuery';
 import { isNumberKey, NumberBox } from '../../../Signum/React/Lines/NumberLine';
 import { AggregateFunction, QueryTokenDateMessage } from '../../../Signum/React/Signum.DynamicQuery.Tokens';
-import { DateTimePicker } from 'react-widgets';
+import { DateTimePicker } from 'react-widgets-up';
 import { classes } from '../../../Signum/React/Globals';
 import { useAPI, useForceUpdate } from '../../../Signum/React/Hooks';
 import { ChartRequestModel, ChartTimeSeriesEmbedded } from '../Signum.Chart';
@@ -84,7 +84,7 @@ export default function ChartTimeSeries(p: { chartTimeSeries: ChartTimeSeriesEmb
   }
 
   return (
-    <div className={classes("sf-system-time-editor", "alert alert-primary mb-0")}>
+    <div className={classes("sf-system-time-editor", "alert alert-primary")}>
       <span>Time series</span>
       <span className="ms-2 d-flex">{QueryTokenDateMessage.Every01.niceToString().formatHtml(renderTimeSerieStep(), renderTimeSeriesUnit())}</span>
       {renderDateTime("startDate")}

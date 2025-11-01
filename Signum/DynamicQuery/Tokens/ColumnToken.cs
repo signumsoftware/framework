@@ -1,3 +1,5 @@
+using Signum.Engine.Maps;
+
 namespace Signum.DynamicQuery.Tokens;
 
 public class ColumnToken : QueryToken
@@ -18,6 +20,8 @@ public class ColumnToken : QueryToken
         this.column = column ?? throw new ArgumentNullException(nameof(column));
         this.queryName = queryName ?? throw new ArgumentNullException(nameof(queryName));
     }
+
+    protected override bool AutoExpandInternal => Column.IsEntity || base.AutoExpandInternal;
 
     public override string Key
     {
@@ -184,6 +188,8 @@ public class ColumnToken : QueryToken
         return null;
     }
 
+   
+
     public override string NiceName()
     {
         return Column.DisplayName;
@@ -192,16 +198,5 @@ public class ColumnToken : QueryToken
     public override QueryToken Clone()
     {
         return new ColumnToken(Column, queryName);
-    }
-
-    public override string TypeColor
-    {
-        get
-        {
-            if (Column.IsEntity)
-                return "#2B78AF";
-
-            return base.TypeColor;
-        }
     }
 }

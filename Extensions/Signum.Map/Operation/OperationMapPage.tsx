@@ -11,6 +11,7 @@ import "./operationMap.css"
 import { useAPI, useSize } from '@framework/Hooks'
 import { useExpand } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 
 interface ParsedQueryString {
@@ -66,7 +67,6 @@ export default function OperationMapPage(): React.JSX.Element | null {
   const { size, setContainer } = useSize();
 
   function handleFullscreenClick(e: React.MouseEvent<any>) {
-    e.preventDefault();
 
     const tables = operationMapInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
       .toObject(a => a.key, a =>
@@ -98,9 +98,9 @@ export default function OperationMapPage(): React.JSX.Element | null {
               {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
             </span>
             &nbsp;
-            <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#" >
-              <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()} />
-            </a>
+            <LinkButton id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} title={FrameMessage.Fullscreen.niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
+            </LinkButton>
           </div>
         </div>
       </div>
@@ -204,7 +204,7 @@ export function OperationMapRenderer(p: OperationMapRendererProps): React.JSX.El
 
 
   return (
-    <div id="map" style={{ backgroundColor: "transparent", width: "100%", height: p.height + "px" }}>
+    <div id="map" style={{ backgroundColor: "var(--bs-transparent)", width: "100%", height: p.height + "px" }}>
       <svg id="svgMap" ref={svgRef}>
         <defs>
           <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">

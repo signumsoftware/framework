@@ -30,7 +30,7 @@ import UserQueryOmniboxProvider from './UserQueryOmniboxProvider';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace UserQueryClient {
-  
+    
   export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.UserQueries", () => import("./Changelog"));
@@ -55,27 +55,34 @@ export namespace UserQueryClient {
     if (AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
       QuickLinkClient.registerGlobalQuickLink(entityType =>
         API.forEntityType(entityType)
-          .then(uqs => uqs.map(uq => new QuickLinkAction(liteKey(uq), () => getToString(uq), ctx => window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`)), {
+          .then(uqs => uqs.map(uq => new QuickLinkAction(liteKey(uq), () => getToString(uq), async ctx => {
+            const uqe = await Navigator.API.fetch(uq);
+            const url = await getUserQueryUrl(uqe, ctx.lite);
+            window.open(url);
+          }, {
             icon: "rectangle-list", iconColor: "dodgerblue", color: "info",
             onlyForToken: (uq.model as UserQueryLiteModel).hideQuickLink
           })))
       );
   
-    QuickLinkClient.registerQuickLink(UserQueryEntity, new QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(), ctx => {
-      Navigator.API.fetchAndRemember(ctx.lite!)
-        .then(uq => {
-          if (uq.entityType == undefined)
-            window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}`));
-          else
-            Navigator.API.fetch(uq.entityType)
-              .then(t => Finder.find({ queryName: t.cleanName }))
-              .then(lite => {
-                if (!lite)
-                  return;
-  
-                window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(lite)}`));
-              });
-        })
+    QuickLinkClient.registerQuickLink(UserQueryEntity, new QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(), async ctx => {
+      const uq = await Navigator.API.fetchAndRemember(ctx.lite!);
+      if (uq) {
+        if (uq.entityType == undefined) {
+          const url = await getUserQueryUrl(uq);
+          window.open(AppContext.toAbsoluteUrl(url));
+        }
+        else {
+
+          var t = await Navigator.API.fetch(uq.entityType);
+          var lite = await Finder.find({ queryName: t.cleanName });
+          if (lite == null)
+            return;
+
+          const url = await getUserQueryUrl(uq, lite);
+          window.open(AppContext.toAbsoluteUrl(url));
+        }
+      }  
     },
       {
         isVisible: AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info"
@@ -99,25 +106,23 @@ export namespace UserQueryClient {
   
     DashboardClient.registerRenderer(ValueUserQueryListPartEntity, {
       component: () => import('./Dashboard/View/ValueUserQueryListPart').then(a => a.default),
-      defaultIcon: () => ({ icon: ["fas", "list"], iconColor: "#21618C" }),
+      icon: () => ({ icon: ["fas", "list"], iconColor: "#21618C" }),
       getQueryNames: p => p.userQueries.map(a => a.element.userQuery?.query).notNull(),
     });
   
     DashboardClient.registerRenderer(UserQueryPartEntity, {
       waitForInvalidation: true,
       component: () => import('./Dashboard/View/UserQueryPart').then((a: any) => a.default),
-      defaultIcon: () => ({ icon: "rectangle-list", iconColor: "#2E86C1" }),
+      icon: () => ({ icon: "rectangle-list", iconColor: "#2E86C1" }),
       defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
       withPanel: c => true,
       getQueryNames: c => [c.userQuery?.query].notNull(),
       handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
         (c, e, cdRef, ev) => {
-          ev.preventDefault();
           return Navigator.view(c.userQuery!).then(uq => Boolean(uq));
         },
       handleTitleClick:
         (c, e, cdRef, ev) => {
-          ev.preventDefault();
           ev.persist();
           const handler = cdRef.current as UserQueryPartHandler;
           AppContext.pushOrOpenInTab(Finder.findOptionsPath(handler.findOptions, { userQuery: liteKey(toLite(c.userQuery!)) }), ev);
@@ -144,14 +149,26 @@ export namespace UserQueryClient {
     DashboardClient.registerRenderer(BigValuePartEntity, {
       waitForInvalidation: true,
       component: () => import('./Dashboard/View/BigValuePart').then((a: any) => a.default),
-      defaultIcon: () => ({ icon: "circle", iconColor: "#2E86C1" }),
+      icon: () => ({ icon: "circle", iconColor: "#2E86C1" }),
       defaultTitle: c => (c.userQuery ? translated(c.userQuery, uc => uc.displayName) : c.valueToken?.token?.niceName ?? ""),
       withPanel: c => false,
       getQueryNames: c => [c.userQuery?.query].notNull(),
     });
   }
+
+  export function getUserQueryUrl(uq: UserQueryEntity, entity?: Lite<Entity>) : Promise<string> {
+    if (uq.refreshMode == "Manual")
+      return Promise.resolve(UserQueryClient.userQueryUrl(toLite(uq), entity));
+
+    return UserQueryClient.Converter.toFindOptions(uq, entity)
+      .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(toLite(uq)), entity: entity ? liteKey(entity) : undefined }));
+  }
   
-  export function userQueryUrl(uq: Lite<UserQueryEntity>): any {
+  export function userQueryUrl(uq: Lite<UserQueryEntity>, entity?: Lite<Entity>): string {
+
+    if (entity)
+      return `/userQuery/${uq.id}/${liteKey(entity)}`;
+
     return `/userQuery/${uq.id}`;
   }
   
@@ -185,7 +202,7 @@ export namespace UserQueryClient {
           ({
             fullText: getToString(uq),
             menu: <Dropdown.Item data-user-query={uq.id} onClick={() => handleGroupMenuClick(uq, resFO, resTable, cic)} >
-              <FontAwesomeIcon icon={"rectangle-list"} className="icon" color="dodgerblue" />
+              <FontAwesomeIcon aria-hidden={true} icon={"rectangle-list"} className="icon" color="dodgerblue" />
               {getToString(uq)}
             </Dropdown.Item>
           } as ContextualMenuItem)
@@ -294,7 +311,7 @@ export namespace UserQueryClient {
   export namespace Converter {
   
     export async function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
-  
+
       var query = uq.query!;
   
       var fo = { queryName: query.key, groupResults: uq.groupResults } as FindOptions;

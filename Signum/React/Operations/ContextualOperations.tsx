@@ -32,19 +32,7 @@ export namespace ContextualOperations {
     const ti = getTypeInfo(types[0].key);
     const contexts = Operations.operationInfos(ti)
       .filter(oi => Operations.isEntityOperation(oi.operationType) || oi.operationType == "ConstructorFromMany")
-      .map(oi => {
-
-        if (oi.operationType == "ConstructorFromMany") {
-          const cos = Operations.getSettings(oi.key) as ContextualOperationSettings<Entity> | undefined;
-          return new ContextualOperationContext<Entity>(oi, ctx, cos);
-        } else {
-          const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
-          const cos = eos == undefined ? undefined :
-            ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
-          const coc = new ContextualOperationContext<Entity>(oi, ctx, cos, eos);
-          return coc;
-        }
-      })
+      .map(oi =>  new ContextualOperationContext<Entity>(oi, ctx))
       .filter(coc => coc.isVisibleInContextualMenu())
       .map(coc => coc!)
       .orderBy(coc => coc.settings && coc.settings.order);
@@ -209,10 +197,10 @@ export namespace ContextualOperations {
   }
 
   export const OperationMenuItem: {
-    (p: OperationMenuItemProps): React.JSX.Element;
+    (p: OperationMenuItemProps): React.ReactElement;
     getText: (coc: ContextualOperationContext<any>) => React.ReactNode;
     simplifyName: (niceName: string) => string;
-  } = function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps): React.JSX.Element {
+  } = function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps): React.ReactElement {
     const text = children ?? OperationMenuItem.getText(coc);
 
     const eos = coc.entityOperationSettings;
@@ -243,7 +231,7 @@ export namespace ContextualOperations {
         style={{ pointerEvents: "initial" }}
         data-operation={coc.operationInfo.key}
         className={color && !disabled ? "text-" + color : undefined}>
-        {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
+        {icon ? <FontAwesomeIcon aria-hidden={true} icon={icon} className="fa-fw icon" color={iconColor} /> :
           color ? <span className={classes("icon", "empty-icon")}></span> : undefined}
         {text}
         {extraButtons}

@@ -85,17 +85,15 @@ export namespace UserChartClient {
     DashboardClient.registerRenderer(UserChartPartEntity, {
       waitForInvalidation: true,
       component: () => import('../Dashboard/View/UserChartPart').then(a => a.default),
-      defaultIcon: () => ({ icon: "chart-bar", iconColor: "#6C3483" }),
+      icon: () => ({ icon: "chart-bar", iconColor: "#6C3483" }),
       defaultTitle: c => translated(c.userChart, uc => uc.displayName),
       getQueryNames: c => [c.userChart?.query].notNull(),
       handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
         (c, e, cdRef, ev) => {
-          ev.preventDefault();
           return Navigator.view(c.userChart!).then(e => Boolean(e));
         },
       handleTitleClick: !AppContext.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
         (p, e, cdRef, ev) => {
-          ev.preventDefault();
           ev.persist();
           const handler = cdRef.current as UserChartPartHandler;
           ChartClient.Encoder.chartPathPromise(handler.chartRequest!, toLite(p.userChart!))
@@ -118,11 +116,10 @@ export namespace UserChartClient {
   
     DashboardClient.registerRenderer(CombinedUserChartPartEntity, {
       component: () => import('../Dashboard/View/CombinedUserChartPart').then(a => a.default),
-      defaultIcon: () => ({ icon: "chart-line", iconColor: "#8E44AD" }),
+      icon: () => ({ icon: "chart-line", iconColor: "#8E44AD" }),
       getQueryNames: c => c.userCharts.map(a => a.element.userChart?.query).notNull(),
       handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
         (c, e, cdRef, ev) => {
-          ev.preventDefault();
           return SelectorModal.chooseElement(c.userCharts.map(a => a.element), {
             buttonDisplay: a => a.userChart.displayName ?? "",
             buttonName: a => a.userChart.id!.toString(),
@@ -134,7 +131,6 @@ export namespace UserChartClient {
         },
       handleTitleClick: !AppContext.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
         (c, e, cdRef, ev) => {
-          ev.preventDefault();
           ev.persist();
           SelectorModal.chooseElement(c.userCharts.map(a => a.element), {
             buttonDisplay: a => a.userChart.displayName ?? "",

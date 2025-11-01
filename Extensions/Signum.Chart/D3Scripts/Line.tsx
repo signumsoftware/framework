@@ -190,9 +190,9 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, hasHorizontalSc
                   transform={translate(getX(r)!, -y(valueColumn.getValue(r))!)}
                   className="point sf-transition hover-target"
                   opacity={active == false ? .5 : undefined}
-                  stroke={active == true ? "black" : color}
+                  stroke={active == true ? "var(--bs-body-color)" : color}
                   strokeWidth={active == true ? 3 : circleStroke}
-                  fill="white"
+                  fill="var(--bs-body-bg)"
                   r={circleRadius}
                   onClick={e => onDrillDown(row, e)}
                   cursor="pointer"

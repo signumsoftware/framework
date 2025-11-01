@@ -23,6 +23,9 @@ public class CollectionToArrayToken : QueryToken
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
     }
 
+    protected override bool AutoExpandInternal => false;
+    public override bool HideInAutoExpand => true;
+
     public override Type Type
     {
         get { return elementType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); }
@@ -125,11 +128,6 @@ public class CollectionToArrayToken : QueryToken
         throw new InvalidOperationException("ToArrayToken should have a replacement at this stage");
     }
 
-
-    public override string TypeColor
-    {
-        get { return "#0000FF"; }
-    }
 
     public static int MaxToArrayValues = 100;
 

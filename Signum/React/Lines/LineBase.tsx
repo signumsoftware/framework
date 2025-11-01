@@ -32,10 +32,10 @@ export interface LineBaseProps<V = unknown> extends StyleOptions {
   mandatory?: boolean | "warning";
 }
 
-export function useController<C extends LineBaseController<P, V>, P extends LineBaseProps<V>, V>(controllerType: new () => C, props: P, ref: React.Ref<C>): C {
+export function useController<C extends LineBaseController<P, V>, P extends LineBaseProps<V> & { ref?: React.Ref<C> }, V>(controllerType: new () => C, props: P): C {
   var controller = React.useMemo<C>(() => new controllerType(), []);
   controller.init(props);
-  React.useImperativeHandle(ref, () => controller, []);
+  React.useImperativeHandle(props.ref, () => controller, []);
   return controller;
 }
 
@@ -145,8 +145,29 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
   baseHtmlAttributes(): React.HTMLAttributes<any> {
     return {
       'data-property-path': this.props.ctx.propertyPath,
-      'data-changes': this.changes
+      'data-changes': this.changes,
     } as any;
+  }
+
+  baseAriaAttributes(): React.AriaAttributes {
+    const p = this.props;
+
+    const ids: string[] = [];
+    if (p.helpText) ids.push(this.props.ctx.getUniqueId("help"));
+    if (this.getError()) ids.push(this.props.ctx.getUniqueId("error"));
+
+    return {
+      "aria-readonly": p.ctx.readOnly || undefined,
+      "aria-describedby": ids.length ? ids.join(" ") : undefined
+    };
+  }
+
+  extendedAriaAttributes(): React.AriaAttributes {
+    return {
+      ...this.baseAriaAttributes(),
+      "aria-required": this.mandatoryClass ? true : this.props.mandatory ? true : false,
+      "aria-invalid": !!this.getError() || undefined
+    };
   }
 
 
@@ -179,7 +200,7 @@ export function setRefProp(propRef: React.Ref<HTMLElement> | undefined, node: HT
   }
 }
 
-export function useInitiallyFocused(initiallyFocused: boolean | number | undefined, inputElement: React.RefObject<HTMLElement>): void {
+export function useInitiallyFocused(initiallyFocused: boolean | number | undefined, inputElement: React.RefObject<HTMLElement | null>): void {
   React.useEffect(() => {
     if (initiallyFocused) {
       window.setTimeout(() => {
@@ -197,19 +218,9 @@ export function useInitiallyFocused(initiallyFocused: boolean | number | undefin
   }, []);
 }
 
-
-export function genericForwardRef<T, P = {}>(render: (props: P, ref: React.Ref<T>) => React.ReactNode | null): (props: P & React.RefAttributes<T>) => React.ReactNode | null {
-  return React.forwardRef(render as any) as any;
+export function genericMemo<T, P = {}>(render: (props: P) => React.ReactNode | null, propsAreEqual?: (prevProps: P, nextProps: P) => boolean): (props: P) => React.ReactNode | null {
+  return React.memo(render, propsAreEqual) as any;
 }
-
-export function genericForwardRefWithMemo<T, P = {}>(render: (props: P, ref: React.Ref<T>) => React.ReactNode | null, propsAreEqual?: (prevProps: P, nextProps: P) => boolean): (props: P & React.RefAttributes<T>) => React.ReactNode | null {
-  return React.memo(React.forwardRef(render as any), propsAreEqual as any) as any;
-}
-
-
-
-
-
 
 export const tasks: ((lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps, originalProps: LineBaseProps) => void)[] = [];
 

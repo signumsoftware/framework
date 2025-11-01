@@ -106,7 +106,7 @@ public class ExpressionFieldAnalyzer : DiagnosticAnalyzer
         }
         catch (Exception e)
         {
-            throw new Exception(context.SemanticModel.SyntaxTree.FilePath + "\r\n" + e.Message + "\r\n" + e.StackTrace);
+            throw new Exception(context.SemanticModel.SyntaxTree.FilePath + "\n" + e.Message + "\n" + e.StackTrace);
         }
     }
 

@@ -9,5 +9,13 @@ public class ToolbarController : ControllerBase
     {
         return ToolbarLogic.GetCurrentToolbarResponse(location);
     }
+
+    [HttpGet("api/toolbarMenu/{menuId}")]
+    public ToolbarResponse? ToolbarMenu(string menuId)
+    { 
+        var tm = Lite.ParsePrimaryKey<ToolbarMenuEntity>(menuId);
+
+        return ToolbarLogic.GetToolbarMenuResponse(tm);
+    }
 }
 

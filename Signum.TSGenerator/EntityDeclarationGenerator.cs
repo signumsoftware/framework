@@ -216,7 +216,7 @@ static class EntityDeclarationGenerator
         }
 
 
-        return sb.ToString().Replace("\r\n", "\n");
+        return sb.ToString().Replace("\n", "\n");
 
     }
 
@@ -724,7 +724,7 @@ static class EntityDeclarationGenerator
 
         for (int i = 1; ; i++)
         {
-            foreach (var item in nameParts.Reverse())
+            foreach (var item in nameParts.AsEnumerable().Reverse())
             {
                 var candidate = item + (i == 1 ? "" : i.ToString());
                 if (!list.Contains(candidate))

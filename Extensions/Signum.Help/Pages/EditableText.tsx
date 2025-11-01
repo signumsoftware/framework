@@ -8,15 +8,15 @@ import { HelpImageEntity, HelpMessage } from '../Signum.Help';
 import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor';
 import { ErrorBoundary } from '@framework/Components';
 import { FilePathEmbedded, FileTypeSymbol } from '../../Signum.Files/Signum.Files';
-import { FilesClient } from '../../Signum.Files/FilesClient';
+import type { FilesClient } from '../../Signum.Files/FilesClient';
 import { IBinding, getSymbol } from '@framework/Reflection';
 import { FileImage } from '../../Signum.Files/Components/FileImage';
 import { toFileEntity } from '../../Signum.Files/Components/FileUploader';
-import { ListExtension } from '../../Signum.HtmlEditor/Extensions/ListExtension';
-import { BasicCommandsExtensions } from '../../Signum.HtmlEditor/Extensions/BasicCommandsExtension';
-import { ImageConverter } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
+import { ImageConverter, ImageInfo } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
 import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
+import { LinkButton } from '@framework/Basics/LinkButton';
+
 
 export function EditableTextComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
   var [editable, setEditable] = React.useState(defaultEditable || false);
@@ -30,9 +30,9 @@ export function EditableTextComponent({ ctx, defaultText, onChange, defaultEdita
           defaultText ? <span>{defaultText}</span> :
             <span className="sf-no-text">[{ctx.niceName()}]</span>)
       }
-      {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active")} onClick={e => { e.preventDefault(); setEditable(!editable); }}>
-        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
-      </a>}
+      {!ctx.readOnly && <LinkButton className={classes("sf-edit-button", editable && "active")} title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} onClick={e => { setEditable(!editable); }}>
+        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2"  /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
+      </LinkButton>}
     </span>
   );
 }
@@ -48,9 +48,9 @@ export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEdita
 
       {editable ? <HelpHtmlEditor binding={ctx.binding} /> : <HtmlViewer text={ctx.value} /> }
 
-      {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active", ctx.value && "block")} onClick={e => { e.preventDefault(); setEditable(!editable); }}>
-        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
-      </a>}
+      {!ctx.readOnly && <LinkButton title={undefined} className={classes("sf-edit-button", editable && "active", ctx.value && "block")} onClick={e => { setEditable(!editable); }}>
+        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" aria-aria-hidden /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
+      </LinkButton>}
     </div>
   );
 }
@@ -63,7 +63,6 @@ export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined>
         binding={p.binding}
         plugins={[
           new LinkExtension(),
-          new BasicCommandsExtensions(),
           new ImageExtension(new InlineImageConverter())
         ]} />
     </ErrorBoundary>
@@ -88,7 +87,6 @@ export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?
           small
           plugins={[
             new LinkExtension(),
-            new BasicCommandsExtensions(),
             new ImageExtension(new InlineImageConverter())
           ]} />
       </ErrorBoundary>
@@ -96,14 +94,11 @@ export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?
   );
 }
 
-export interface ImageInfo {
-  inlineImageId?: string;
-  binaryFile?: string;
-  fileName?: string;
-}
 
-export class InlineImageConverter implements ImageConverter<ImageInfo>{
 
+export class InlineImageConverter implements ImageConverter{
+
+  dataImageIdAttribute = "data-help-image-id";
   pr: PropertyRoute;
   constructor() {
     this.pr = HelpImageEntity.propertyRouteAssert(a => a.file);;
@@ -117,8 +112,8 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
       return img;
     }
 
-    if (val.inlineImageId) {
-      img.setAttribute("data-attachment-id", val.inlineImageId);
+    if (val.imageId) {
+      img.setAttribute("data-help-image-id", val.imageId);
       return img;
     }
   }
@@ -140,7 +135,7 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
   renderImage(info: ImageInfo): React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> {
     var fp = FilePathEmbedded.New({
       binaryFile: info.binaryFile,
-      entityId: info.inlineImageId,
+      entityId: info.imageId,
       mListRowId: null,
       fileType: getSymbol(FileTypeSymbol, this.pr.member!.defaultFileTypeInfo!.key),
       rootType: this.pr.findRootType().name,
@@ -157,8 +152,8 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
     if (val.binaryFile)
       return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" />`;
 
-    if (val.inlineImageId)
-      return `<img data-help-image-id="${val.inlineImageId}" />`;
+    if (val.imageId)
+      return `<img data-help-image-id="${val.imageId}" />`;
 
     return undefined;
   }
@@ -168,7 +163,7 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
       return {
         binaryFile: element.dataset["binaryFile"],
         fileName: element.dataset["fileName"],
-        inlineImageId: element.dataset["helpImageId"],
+        imageId: element.dataset["helpImageId"],
       };
     }
 

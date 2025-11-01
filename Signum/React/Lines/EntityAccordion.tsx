@@ -8,13 +8,14 @@ import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig }
 import { RenderEntity } from './RenderEntity'
 import { newMListElement } from '../Signum.Entities';
 import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
-import { genericForwardRef, useController } from './LineBase'
+import { useController } from './LineBase'
 import { TypeBadge } from './AutoCompleteConfig'
 import { Accordion } from 'react-bootstrap'
 import { useForceUpdate } from '../Hooks'
 import { AccordionEventKey } from 'react-bootstrap/esm/AccordionContext'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface EntityAccordionProps<V extends ModifiableEntity> extends EntityListBaseProps<V> {
   createAsLink?: boolean | ((er: EntityAccordionController<V>) => React.ReactElement);
@@ -27,6 +28,7 @@ export interface EntityAccordionProps<V extends ModifiableEntity> extends Entity
   initialSelectedIndex?: number | null;
   selectedIndex?: number | null;
   onSelectTab?: (newIndex: number | null) => void;
+  ref?: React.Ref<EntityAccordionController<V>>
 }
 
 function isControlled(p: EntityAccordionProps<any>) {
@@ -83,8 +85,8 @@ export class EntityAccordionController<V extends ModifiableEntity> extends Entit
 }
 
 
-export const EntityAccordion: <V extends ModifiableEntity>(props: EntityAccordionProps<V> & React.RefAttributes<EntityAccordionController<V>>) => React.ReactNode | null = genericForwardRef(function EntityAccordion<V extends ModifiableEntity>(props: EntityAccordionProps<V>, ref: React.Ref<EntityAccordionController<V>>) {
-  var c = useController(EntityAccordionController<V>, props, ref);
+export function EntityAccordion<V extends ModifiableEntity>(props: EntityAccordionProps<V>): React.JSX.Element | null {
+  var c = useController(EntityAccordionController<V>, props);
   var p = c.props;
 
   if (c.isHidden)
@@ -127,7 +129,7 @@ export const EntityAccordion: <V extends ModifiableEntity>(props: EntityAccordio
     return (
       <Accordion className="sf-accordion-elements" activeKey={c.selectedIndex?.toString()} onSelect={handleSelectTab}>
         {
-          c.getMListItemContext(ctx).map((mlec, i): React.JSX.Element => (
+          c.getMListItemContext(ctx).map((mlec, i): React.ReactElement => (
             <EntityAccordionElement<V> key={i}
               onSelectTab={() => handleSelectTab(mlec.index!.toString())}
               onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
@@ -145,17 +147,16 @@ export const EntityAccordion: <V extends ModifiableEntity>(props: EntityAccordio
         {
           p.createAsLink && p.create && !readOnly &&
           (typeof p.createAsLink == "function" ? p.createAsLink(c) :
-            <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
+            <LinkButton title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={c.handleCreateClick}>
               {EntityBaseController.getCreateIcon()}&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
-            </a>)
+            </LinkButton>)
         }
       </Accordion>
     );
   }
-});
-
+}
 
 export interface EntityAccordionElementProps<V extends ModifiableEntity> {
   ctx: TypeContext<V>;
@@ -172,7 +173,7 @@ export interface EntityAccordionElementProps<V extends ModifiableEntity> {
   headerHtmlAttributes?: React.HTMLAttributes<any>;
 }
 
-export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes, headerHtmlAttributes, onSelectTab }: EntityAccordionElementProps<V>): React.JSX.Element
+export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes, headerHtmlAttributes, onSelectTab }: EntityAccordionElementProps<V>): React.ReactElement
 {
 
   const forceUpdate = useForceUpdate();
@@ -198,7 +199,7 @@ export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getCom
       <Accordion.Item {...htmlAttributes} className={classes(drag?.dropClass, "sf-accordion-element")} eventKey="removed" title={EntityControlMessage.Removed0.niceToString()}>
         <h2 className="accordion-header bg-danger">
           <Accordion.Button>
-            <div className="d-flex align-items-center flex-grow-1" style={{ backgroundColor: "#ff000021" }}>
+            <div className="d-flex align-items-center flex-grow-1" style={{ backgroundColor: "var(--bs-danger-bg-subtle)" }}>
               {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
             </div>
           </Accordion.Button>
@@ -221,22 +222,22 @@ export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getCom
       <Accordion.Header {...EntityBaseController.entityHtmlAttributes(ctx.value)} {...headerHtmlAttributes}>
         <div className="d-flex align-items-center flex-grow-1">
           {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
-          {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
+          {onRemove && <LinkButton className={classes("sf-line-button", "sf-remove")}
             onClick={onRemove}
             title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
             {EntityBaseController.getRemoveIcon()}
-          </a>}
+          </LinkButton>}
           &nbsp;
           {move?.renderMoveUp()}
           {move?.renderMoveDown()}
-          {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); } }
+          {drag && <LinkButton className={classes("sf-line-button", "sf-move")} onClick={e => { e.stopPropagation(); } }
             draggable={true}
             onDragStart={drag.onDragStart}
             onDragEnd={drag.onDragEnd}
             onKeyDown={drag.onKeyDown}
             title={drag.title}>
             {EntityBaseController.getMoveIcon()}
-          </a>}
+          </LinkButton>}
           {itemExtraButtons && itemExtraButtons()}
           {'\xa0'}
           {getTitle ? getTitle(ctx) : getToString(ctx.value)}

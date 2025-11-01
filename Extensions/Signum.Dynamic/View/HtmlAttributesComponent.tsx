@@ -9,6 +9,7 @@ import { BaseNode } from './Nodes'
 import { HtmlAttributesExpression } from './HtmlAttributesExpression'
 import { Typeahead } from '@framework/Components';
 import { useForceUpdate } from '@framework/Hooks'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface HtmlAttributesLineProps {
   binding: Binding<HtmlAttributesExpression | undefined>;
@@ -24,18 +25,15 @@ export function HtmlAttributesLine(p: HtmlAttributesLineProps): React.JSX.Elemen
   }
 
   function handleRemove(e: React.MouseEvent<any>) {
-    e.preventDefault();
     p.binding.deleteValue();
     p.dn.context.refreshView();
   }
 
   function handleCreate(e: React.MouseEvent<any>) {
-    e.preventDefault();
     modifyExpression({} as HtmlAttributesExpression);
   }
 
   function handleView(e: React.MouseEvent<any>) {
-    e.preventDefault();
     var hae = JSON.parse(JSON.stringify(p.binding.getValue())) as HtmlAttributesExpression;
     modifyExpression(hae);
   }
@@ -87,21 +85,23 @@ export function HtmlAttributesLine(p: HtmlAttributesLineProps): React.JSX.Elemen
         {renderMember(val)}
 
         {val && " "}
-        {val && <a href="#" className={classes("sf-line-button", "sf-remove")}
+        {val && <LinkButton className={classes("sf-line-button", "sf-remove")}
           onClick={handleRemove}
           title={EntityControlMessage.Remove.niceToString()}>
           <FontAwesomeIcon icon="xmark" />
-        </a>}
+        </LinkButton>}
       </label>
       <div>
         {val ?
-          <a href="#" onClick={handleView}><pre style={{ padding: "0px", border: "none" }}>{getDescription(val)}</pre></a>
+          <LinkButton title={undefined} onClick={handleView}>
+            <pre style={{ padding: "0px", border: "none" }}>{getDescription(val)}</pre>
+          </LinkButton>
           :
-          <a href="#" title={EntityControlMessage.Create.niceToString()}
+          <LinkButton title={EntityControlMessage.Create.niceToString()}
             className="sf-line-button sf-create"
             onClick={handleCreate}>
             <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
-          </a>}
+          </LinkButton>}
       </div>
     </div>
   );
@@ -174,7 +174,6 @@ export function ExpressionOrValueStrip(p: ExpressionOrValueStripProps): React.JS
   const forceUpdate = useForceUpdate();
 
   function handleOnRemove(e: React.MouseEvent<any>, key: string) {
-    e.preventDefault();
     delete p.object[key];
     forceUpdate();
   }
@@ -185,11 +184,11 @@ export function ExpressionOrValueStrip(p: ExpressionOrValueStripProps): React.JS
       <ul className="expression-list">
         {
           Dic.getKeys(p.object).filter(p.filterKey).map(key => <li key={key}>
-            <a href="#" className="sf-line-button sf-remove"
+            <LinkButton className="sf-line-button sf-remove"
               onClick={e => handleOnRemove(e, key)}
               title={EntityControlMessage.Remove.niceToString()}>
               <FontAwesomeIcon icon="xmark" />
-            </a>
+            </LinkButton>
             <ExpressionOrValueComponent dn={p.dn} refreshView={() => forceUpdate()}
               binding={new Binding(p.object, key)} type="string" defaultValue={null} avoidDelete={true} />
           </li>)

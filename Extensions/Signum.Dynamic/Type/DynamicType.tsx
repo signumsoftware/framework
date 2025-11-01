@@ -11,6 +11,7 @@ import SelectorModal from '@framework/SelectorModal'
 import { DynamicTypeClient } from '../DynamicTypeClient'
 import { DynamicTypeDefinitionComponent, PropertyRepeaterComponent } from './DynamicTypeDefinitionComponent'
 import { DynamicTypeEntity } from '../Signum.Dynamic.Types'
+import { JSX } from 'react'
 
 interface DynamicTypeComponentProps {
   ctx: TypeContext<DynamicTypeEntity>;

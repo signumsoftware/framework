@@ -39,125 +39,125 @@ public static class EmailReceptionLogic
 
     public static void Start(SchemaBuilder sb, Func<EmailReceptionConfigurationEntity, EmailReceptionEntity> getPop3Client, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-          
-            MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailReceptionMixin));
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<EmailReceptionConfigurationEntity>()
-                .WithQuery(() => s => new
-                {
-                    Entity = s,
-                    s.Id,
-                    s.Active,
-                    s.Service, 
-                });
 
-            sb.Include<EmailReceptionEntity>();
-            sb.Include<EmailReceptionExceptionEntity>();
+        MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailReceptionMixin));
 
-            sb.Include<EmailMessageEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.From,
-                    e.Subject,
-                    e.Template,
-                    e.State,
-                    e.Sent,
-                    SentDate = (DateTime?)e.Mixin<EmailReceptionMixin>().ReceptionInfo!.SentDate,
-                    e.Exception,
-                });
-
-            QueryLogic.Queries.Register(typeof(EmailReceptionEntity), () => DynamicQueryCore.Auto(
-            from s in Database.Query<EmailReceptionEntity>()
-            select new
+        sb.Include<EmailReceptionConfigurationEntity>()
+            .WithQuery(() => s => new
             {
                 Entity = s,
                 s.Id,
-                s.EmailReceptionConfiguration,
-                s.StartDate,
-                s.EndDate,
-                s.NewEmails,
-                EmailMessages = s.EmailMessages().Count(),
-                Exceptions = s.Exceptions().Count(),
-                s.Exception,
-            })
-            .ColumnDisplayName(a => a.EmailMessages, () => typeof(EmailMessageEntity).NicePluralName())
-            .ColumnDisplayName(a => a.Exceptions, () => typeof(ExceptionEntity).NicePluralName()));
-
-            QueryLogic.Expressions.Register((EmailReceptionConfigurationEntity c) => c.Receptions(), () => typeof(EmailReceptionEntity).NicePluralName());
-            QueryLogic.Expressions.Register((EmailReceptionEntity r) => r.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
-            QueryLogic.Expressions.Register((EmailReceptionEntity r) => r.Exceptions(), () => typeof(ExceptionEntity).NicePluralName());
-            QueryLogic.Expressions.Register((EmailReceptionEntity r) => r.Duration(), () => typeof(TimeSpan).NiceName());
-            QueryLogic.Expressions.Register((ExceptionEntity r) => r.Pop3Reception(), () => typeof(EmailReceptionEntity).NiceName());
-
-            new Graph<EmailReceptionConfigurationEntity>.Execute(EmailReceptionConfigurationOperation.Save)
-            {
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (e, _) => { }
-            }.Register();
-
-            new Graph<EmailReceptionEntity>.ConstructFrom<EmailReceptionConfigurationEntity>(EmailReceptionConfigurationOperation.ReceiveEmails)
-            {
-                CanBeNew = true,
-                CanBeModified = true,
-                Construct = (e, args) =>
-                {
-                    using (var tr = Transaction.None())
-                    {
-                        ScheduledTaskLogEntity stl = new ScheduledTaskLogEntity
-                        {
-                            Task = EmailReceptionAction.ReceiveAllActiveEmailConfigurations,
-                            //ScheduledTask = scheduledTask,
-                            StartTime = Clock.Now,
-                            MachineName = Schema.Current.MachineName,
-                            ApplicationName = Schema.Current.ApplicationName,
-                            User = UserEntity.Current,
-                        };
-                        var ctx = new ScheduledTaskContext(stl);
-
-
-
-
-                        EmailReceptionEntity result = ReceiveEmails( e, ctx);
-                        return tr.Commit(result);
-                    }
-                }
-            }.Register();
-
-            SchedulerLogic.ExecuteTask.Register((EmailReceptionConfigurationEntity conf, ScheduledTaskContext ctx) => ReceiveEmails(conf,ctx).ToLite());
-
-            SimpleTaskLogic.Register(EmailReceptionAction.ReceiveAllActiveEmailConfigurations, (ScheduledTaskContext ctx) =>
-            {
-                if (!EmailLogic.Configuration.ReciveEmails)
-                    throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");
-
-                foreach (var item in Database.Query<EmailReceptionConfigurationEntity>().Where(a => a.Active).ToList())
-                {
-                    ctx.CancellationToken.ThrowIfCancellationRequested();
-                    ReceiveEmails(item, ctx);
-                }
-
-                return null;
+                s.Active,
+                s.Service, 
             });
 
-            sb.Schema.SchemaCompleted += () =>
+        sb.Include<EmailReceptionEntity>();
+        sb.Include<EmailReceptionExceptionEntity>();
+
+        sb.Include<EmailMessageEntity>()
+            .WithQuery(() => e => new
             {
-                var pr = PropertyRoute.Construct((EmailReceptionConfigurationEntity s) => s.Service);
+                Entity = e,
+                e.Id,
+                e.From,
+                e.Subject,
+                e.Template,
+                e.State,
+                e.Sent,
+                SentDate = (DateTime?)e.Mixin<EmailReceptionMixin>().ReceptionInfo!.SentDate,
+                e.Exception,
+            });
 
-                var implementations = sb.Schema.FindImplementations(PropertyRoute.Construct((EmailReceptionConfigurationEntity s) => s.Service));
+        QueryLogic.Queries.Register(typeof(EmailReceptionEntity), () => DynamicQueryCore.Auto(
+        from s in Database.Query<EmailReceptionEntity>()
+        select new
+        {
+            Entity = s,
+            s.Id,
+            s.EmailReceptionConfiguration,
+            s.StartDate,
+            s.EndDate,
+            s.NewEmails,
+            EmailMessages = s.EmailMessages().Count(),
+            Exceptions = s.Exceptions().Count(),
+            s.Exception,
+        })
+        .ColumnDisplayName(a => a.EmailMessages, () => typeof(EmailMessageEntity).NicePluralName())
+        .ColumnDisplayName(a => a.Exceptions, () => typeof(ExceptionEntity).NicePluralName()));
 
-                var notOverriden = implementations.Types.Except(EmailReceptionServices.OverridenTypes);
+        QueryLogic.Expressions.Register((EmailReceptionConfigurationEntity c) => c.Receptions(), () => typeof(EmailReceptionEntity).NicePluralName());
+        QueryLogic.Expressions.Register((EmailReceptionEntity r) => r.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
+        QueryLogic.Expressions.Register((EmailReceptionEntity r) => r.Exceptions(), () => typeof(ExceptionEntity).NicePluralName());
+        QueryLogic.Expressions.Register((EmailReceptionEntity r) => r.Duration(), () => typeof(TimeSpan).NiceName());
+        QueryLogic.Expressions.Register((ExceptionEntity r) => r.Pop3Reception(), () => typeof(EmailReceptionEntity).NiceName());
 
-                if (notOverriden.Any())
+        new Graph<EmailReceptionConfigurationEntity>.Execute(EmailReceptionConfigurationOperation.Save)
+        {
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (e, _) => { }
+        }.Register();
+
+        new Graph<EmailReceptionEntity>.ConstructFrom<EmailReceptionConfigurationEntity>(EmailReceptionConfigurationOperation.ReceiveEmails)
+        {
+            CanBeNew = true,
+            CanBeModified = true,
+            Construct = (e, args) =>
+            {
+                using (var tr = Transaction.None())
                 {
-                    throw new InvalidOperationException($"The property {pr} is implemented by {notOverriden.CommaAnd(a => a.TypeName())} but has not been registered in EmailReceptionLogic.EmailSenders. Maybe you forgot to call something like {notOverriden.CommaAnd(a => a.TypeName().Replace("Entity", "Logic.Start(sb)"))}?");
+                    ScheduledTaskLogEntity stl = new ScheduledTaskLogEntity
+                    {
+                        Task = EmailReceptionAction.ReceiveAllActiveEmailConfigurations,
+                        //ScheduledTask = scheduledTask,
+                        StartTime = Clock.Now,
+                        MachineName = Schema.Current.MachineName,
+                        ApplicationName = Schema.Current.ApplicationName,
+                        User = UserEntity.Current,
+                    };
+                    var ctx = new ScheduledTaskContext(stl);
+
+
+
+
+                    EmailReceptionEntity result = ReceiveEmails( e, ctx);
+                    return tr.Commit(result);
                 }
-            };
-        }
+            }
+        }.Register();
+
+        SchedulerLogic.ExecuteTask.Register((EmailReceptionConfigurationEntity conf, ScheduledTaskContext ctx) => ReceiveEmails(conf,ctx).ToLite());
+
+        SimpleTaskLogic.Register(EmailReceptionAction.ReceiveAllActiveEmailConfigurations, (ScheduledTaskContext ctx) =>
+        {
+            if (!EmailLogic.Configuration.ReciveEmails)
+                throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");
+
+            foreach (var item in Database.Query<EmailReceptionConfigurationEntity>().Where(a => a.Active).ToList())
+            {
+                ctx.CancellationToken.ThrowIfCancellationRequested();
+                ReceiveEmails(item, ctx);
+            }
+
+            return null;
+        });
+
+        sb.Schema.SchemaCompleted += () =>
+        {
+            var pr = PropertyRoute.Construct((EmailReceptionConfigurationEntity s) => s.Service);
+
+            var implementations = sb.Schema.FindImplementations(PropertyRoute.Construct((EmailReceptionConfigurationEntity s) => s.Service));
+
+            var notOverriden = implementations.Types.Except(EmailReceptionServices.OverridenTypes);
+
+            if (notOverriden.Any())
+            {
+                throw new InvalidOperationException($"The property {pr} is implemented by {notOverriden.CommaAnd(a => a.TypeName())} but has not been registered in EmailReceptionLogic.EmailSenders. Maybe you forgot to call something like {notOverriden.CommaAnd(a => a.TypeName().Replace("Entity", "Logic.Start(sb)"))}?");
+            }
+        };
 
         IsStarted = true;
     }

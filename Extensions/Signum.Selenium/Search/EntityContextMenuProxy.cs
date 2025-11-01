@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Vml.Office;
 using OpenQA.Selenium;
 using Signum.Processes;
 
@@ -5,7 +6,7 @@ namespace Signum.Selenium;
 
 public class EntityContextMenuProxy
 {
-    ResultTableProxy ResultTable;
+    public ResultTableProxy ResultTable;
     public IWebElement Element { get; private set; }
     public EntityContextMenuProxy(ResultTableProxy resultTable, IWebElement element)
     {
@@ -26,75 +27,68 @@ public class EntityContextMenuProxy
         return new SearchModalProxy(popup);
     }
 
-    public void ExecuteClick<T>(ExecuteSymbol<T> executeSymbol, bool consumeConfirmation = false, bool shouldDisapear = false, bool scrollTo = false)
+    public void ExecuteClick<T>(ExecuteSymbol<T> executeSymbol, bool consumeConfirmation = false, bool shouldDisapear = false, Func<EntityContextMenuProxy, Action>? customCheck = null, bool scrollTo = false)
         where T : Entity
     {
-        var lites = ResultTable.SelectedEntities();
+        var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheck(shouldDisapear);
 
         Operation(executeSymbol).WaitVisible(scrollTo).SafeClick();
         if (consumeConfirmation)
             this.ResultTable.Selenium.ConsumeAlert();
 
-        if (shouldDisapear)
-            ResultTable.WaitNoVisible(lites);
-        else
-            ResultTable.WaitSuccess(lites);
+        check();
     }
 
-    public FrameModalProxy<T> ConstructFrom<F, T>(ConstructSymbol<T>.From<F> constructSymbol, bool shouldDisapear = false, bool scrollTo = false)
+    public FrameModalProxy<T> ConstructFrom<F, T>(ConstructSymbol<T>.From<F> constructSymbol, bool shouldDisapear = false, Func<EntityContextMenuProxy, Action>? customCheck = null, bool scrollTo = false)
         where F : Entity
         where T : Entity
     {
-        var lites = ResultTable.SelectedEntities();
+        var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheck(shouldDisapear);
 
         var modal = Operation(constructSymbol).WaitVisible(scrollTo).CaptureOnClick();
 
         var result = new FrameModalProxy<T>(modal);
-        result.Disposing += okPressed =>
-        {
-            if (shouldDisapear)
-                ResultTable.WaitNoVisible(lites);
-            else
-                ResultTable.WaitSuccess(lites);
-        };
+        result.Disposing += okPressed => check();
 
         return result;
     }
 
-    public void DeleteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = true, bool shouldDisapear = true, bool scrollTo = false)
+    public void DeleteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = true, bool shouldDisapear = true, Func<EntityContextMenuProxy, Action>? customCheck = null, bool scrollTo = false)
     {
-        var lites = ResultTable.SelectedEntities();
+        var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheck(shouldDisapear);
 
         Operation(symbolContainer).WaitVisible(scrollTo).Click();
         if (consumeConfirmation)
             ResultTable.Selenium.ConsumeAlert();
 
-        if (shouldDisapear)
-            ResultTable.WaitNoVisible(lites);
-        else
-            ResultTable.WaitSuccess(lites);
+        check();
     }
 
+    Action GetShouldDisappearCheck(bool shouldDisapear)
+    {
+        var reslectedEntites = ResultTable.SelectedEntities();
 
-    public FrameModalProxy<T> ConstructFromMany<F, T>(ConstructSymbol<T>.FromMany<F> symbolContainer, bool shouldDisapear = true, Action<List<Lite<IEntity>>, ResultTableProxy>? customCheck = null, bool scrollTo = false)
+        return () =>
+        {
+            if (shouldDisapear)
+                ResultTable.WaitNoVisible(reslectedEntites);
+            else
+                ResultTable.WaitSuccess(reslectedEntites);
+        };
+    }
+
+    public FrameModalProxy<T> ConstructFromMany<F, T>(ConstructSymbol<T>.FromMany<F> symbolContainer, bool shouldDisapear = true, Func<EntityContextMenuProxy, Action>? customCheck = null, bool scrollTo = false)
         where F : Entity
         where T : Entity
     {
-        var lites = ResultTable.SelectedEntities();
+
+        Action check = customCheck != null ? customCheck(this) : GetShouldDisappearCheck(shouldDisapear);
 
         var modal = Operation(symbolContainer).WaitVisible(scrollTo).CaptureOnClick();
 
         return new FrameModalProxy<T>(modal)
         {
-            Disposing = a =>
-            {
-                if (customCheck != null)
-                    customCheck(lites, ResultTable);
-                else if (shouldDisapear)
-                    ResultTable.WaitNoVisible(lites);
-                else
-                    ResultTable.WaitSuccess(lites);
-            }
+            Disposing = a => check()
         };
     }
 

@@ -14,46 +14,35 @@ public static class FilePathEmbeddedLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        FileTypeLogic.Start(sb);
+
+        QueryUtils.RegisterOrderAdapter((FilePathEmbedded e) => e.FileLength);
+
+        FilePathEmbedded.OnPreSaving += fpe =>
         {
-            FileTypeLogic.Start(sb);
-
-            QueryUtils.OrderAdapters.Add(qt =>
+            if (fpe.Suffix == null && fpe.BinaryFile != null)
             {
-                if (qt.Type != typeof(FilePathEmbedded))
-                    return null;
-
-                return ctx =>
+                if (SyncFileSave)
+                    fpe.SaveFile();
+                else
                 {
-                    var exp = qt.BuildExpression(ctx);
-
-                    return Expression.Property(exp, nameof(FilePathEmbedded.FileName));
-                };
-            });
-
-            FilePathEmbedded.OnPreSaving += fpe =>
-            {
-                if (fpe.Suffix == null && fpe.BinaryFile != null)
-                {
-                    if (SyncFileSave)
-                        fpe.SaveFile();
-                    else
+                    var task = fpe.SaveFileAsync();
+                    Transaction.PreRealCommit += data =>
                     {
-                        var task = fpe.SaveFileAsync();
-                        Transaction.PreRealCommit += data =>
-                        {
-                            //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
-                            var a = fpe; //For debugging
-                            task.WaitSafe();
-                            fpe.CleanBinaryFile();
-                        };
-                    }
+                        //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
+                        var a = fpe; //For debugging
+                        task.WaitSafe();
+                        fpe.CleanBinaryFile();
+                    };
                 }
-            };
+            }
+        };
 
 
-            sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
-        }
+        sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
     }
 
 
@@ -225,6 +214,21 @@ public static class FilePathEmbeddedLogic
         Transaction.PostRealCommit += dic =>
         {
             fpe.FileType.GetAlgorithm().DeleteFiles(new List<IFilePath> { fpe });
+        };
+    }
+
+    public static void TryDeleteFileOnCommit(this FilePathEmbedded fpe, Action<Exception> onError)
+    {
+        Transaction.PostRealCommit += dic =>
+        {
+            try
+            {
+                fpe.FileType.GetAlgorithm().DeleteFiles(new List<IFilePath> { fpe });
+            }
+            catch (Exception e)
+            {
+                onError(e);
+            }
         };
     }
 }

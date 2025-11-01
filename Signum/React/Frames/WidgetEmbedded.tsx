@@ -22,14 +22,14 @@ function toTab(e: EmbeddedWidget) {
   );
 }
 
-export function addAdditionalTabs(frame: EntityFrame | undefined): React.JSX.Element[] | undefined {
+export function addAdditionalTabs(frame: EntityFrame | undefined): React.ReactElement[] | undefined {
   if (frame === undefined || frame.tabs === undefined)
     return undefined;
 
   return frame.tabs.map(e => toTab(e)); 
 }
 
-function WidgetEmbedded(p: WidgetEmbeddedProps): React.JSX.Element {
+function WidgetEmbedded(p: WidgetEmbeddedProps): React.ReactElement {
  
   const widgets = onEmbeddedWidgets.map(a => a(p.widgetContext)).filter(a => a !== undefined).map(a => a!).flatMap(a => a);
 
@@ -64,7 +64,7 @@ function WidgetEmbedded(p: WidgetEmbeddedProps): React.JSX.Element {
 }
 
 namespace WidgetEmbedded {
-  export function customPanel(ew: EmbeddedWidget): React.JSX.Element {
+  export function customPanel(ew: EmbeddedWidget): React.ReactElement {
     return (
       <fieldset>
         <legend>{ew.title}</legend >

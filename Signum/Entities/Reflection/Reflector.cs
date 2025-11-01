@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Routing;
+using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
@@ -397,11 +399,22 @@ public static class Reflector
         }
     }
 
+    public static string? GetUnit(PropertyRoute pr)
+    {
+        if (pr.PropertyRouteType == PropertyRouteType.Root)
+            return null;
+
+        return Schema.Current.Settings.FieldAttribute<UnitAttribute>(pr.SimplifyToProperty())?.UnitName;
+    }
+
     public static string? FormatString(PropertyRoute route)
     {
+        if (route.PropertyRouteType == PropertyRouteType.Root)
+            return null;
+
         PropertyRoute simpleRoute = route.SimplifyToProperty();
 
-        FormatAttribute? format = simpleRoute.PropertyInfo!.GetCustomAttribute<FormatAttribute>();
+        FormatAttribute? format = Schema.Current.Settings.FieldAttribute<FormatAttribute>(simpleRoute);
         if (format != null)
             return format.Format;
 
@@ -485,4 +498,6 @@ public static class Reflector
     {
         return FrameMessage.New0_G.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NiceName());
     }
+
+   
 }

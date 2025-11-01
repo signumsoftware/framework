@@ -212,23 +212,77 @@ export enum SubTokensOptions {
 }
 
 export interface QueryToken {
-  toStr: string;
-  niceName: string;
-  key: string;
-  format?: string;
-  unit?: string;
-  type: TypeReference;
-  typeColor: string;
-  niceTypeName: string;
-  isGroupable: boolean;
-  hasOrderAdapter?: boolean;
-  tsVectorFor?: string[];
-  preferEquals?: boolean;
-  filterType?: FilterType;
-  fullKey: string;
-  queryTokenType?: QueryTokenType;
-  parent?: QueryToken;
-  propertyRoute?: string;
+  readonly toStr: string;
+  readonly niceName: string;
+  readonly key: string;
+  readonly format?: string;
+  readonly unit?: string;
+  readonly type: TypeReference;
+  readonly niceTypeName: string;
+  readonly isGroupable: boolean;
+  readonly hasOrderAdapter?: boolean;
+  readonly tsVectorFor?: string[];
+  readonly preferEquals?: boolean;
+  readonly filterType?: FilterType;
+  readonly autoExpand?: boolean;
+  readonly hideInAutoExpand?: boolean;
+  readonly fullKey: string;
+  readonly queryTokenType?: QueryTokenType;
+  readonly parent?: QueryToken;
+  readonly propertyRoute?: string;
+  readonly __isCached__?: true;
+}
+
+export function getQueryTokenColor(token: QueryToken) : string {
+  switch (token.queryTokenType) {
+    case "Aggregate":
+    case "AnyOrAll":
+    case "Element":
+    case "ToArray":
+    case "Nested":
+      return "var(--qt-keyword)" /*#0000FF*/;
+
+    case "IndexerContainer":
+    case "Manual":
+    case "OperationContainer":
+    case "Snippet":
+    case "TimeSeries":
+      return "var(--qt-exotic)"; /*#7D7D7D */
+  }
+
+  if (token.type.isCollection)
+    return "var(--qt-collection)"; /*#CE6700*/
+
+
+  if (token.parent == null && token.key == "Entity")
+    return "var(--qt-main-entity)" /*#2B78AF*/;
+
+  switch (token.filterType) {
+    case "Integer":
+    case "Decimal":
+    case "String":
+    case "Guid":
+    case "Boolean":
+      return "var(--qt-value)"; //"var(--bs-body-color)"
+
+    case "DateTime":
+      return "var(--qt-date)" /*#5100A1*/;
+    case "Time":
+      return "var(--qt-time)" /*#9956db*/;
+    case "Enum":
+      return "var(--qt-enum)" /*#800046*/;
+    case "Lite":
+      return "var(--qt-lite)" /* #2B91AF*/;
+    case "Embedded":
+      return "var(--qt-embedded)" /* #156F8A*/;
+    default:
+      return "var(--qt-exotic)" /*  #7D7D7D */;
+  }
+}
+
+export interface QueryTokenWithoutParent extends Omit<QueryToken,  | "parent"> {
+  subTokens?: { [name: string]: QueryTokenWithoutParent };
+  parent: "fake";
 }
 
 export interface ManualToken { 
@@ -263,16 +317,16 @@ export function tokenStartsWith(token: QueryToken | QueryTokenString<any> | stri
   return token == tokenStart || token.startsWith(tokenStart + ".");
 }
 
-export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll" | "Operation"  | "ToArray" | "Manual";
+export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll" | "OperationContainer" | "ToArray" | "Manual" | "Nested" | "Snippet" | "TimeSeries" | "IndexerContainer";
 
-export function hasAnyOrAll(token: QueryToken | undefined): boolean {
+export function hasAnyOrAll(token: QueryToken | undefined, recursive: boolean = true): boolean {
   if (token == undefined)
     return false;
 
   if (token.queryTokenType == "AnyOrAll")
     return true;
 
-  return hasAnyOrAll(token.parent);
+  return recursive && hasAnyOrAll(token.parent);
 }
 
 export function hasAny(token: QueryToken | undefined): boolean {
@@ -296,7 +350,7 @@ export function hasAggregate(token: QueryToken | undefined): boolean {
   if (token.queryTokenType == "Aggregate")
     return true;
 
-  return hasAggregate(token.parent);
+  return false;
 }
 
 export function hasElement(token: QueryToken | undefined): boolean {
@@ -313,10 +367,10 @@ export function hasOperation(token: QueryToken | undefined): boolean {
   if (token == undefined)
     return false;
 
-  if (token.queryTokenType == "Operation")
+  if (token.queryTokenType == "OperationContainer")
     return true;
 
-  return hasOperation(token.parent);
+  return false;
 }
 
 export function hasManual(token: QueryToken | undefined): boolean {
@@ -326,7 +380,37 @@ export function hasManual(token: QueryToken | undefined): boolean {
   if (token.queryTokenType == "Manual")
     return true;
 
-  return hasManual(token.parent);
+  return false;
+}
+
+export function hasNested(token: QueryToken | undefined): boolean {
+  if (token == undefined)
+    return false;
+
+  if (token.queryTokenType == "Nested")
+    return true;
+
+  return hasNested(token.parent);
+}
+
+export function hasTimeSeries(token: QueryToken | undefined): boolean {
+  if (token == undefined)
+    return false;
+
+  if (token.queryTokenType == "TimeSeries")
+    return true;
+
+  return hasTimeSeries(token.parent);
+}
+
+export function hasSnippet(token: QueryToken | undefined): boolean {
+  if (token == undefined)
+    return false;
+
+  if (token.queryTokenType == "Snippet")
+    return true;
+
+  return false;
 }
 
 export function hasToArray(token: QueryToken | undefined): QueryToken | undefined {
@@ -423,27 +507,7 @@ export function getTokenParents(token: QueryToken | null | undefined): QueryToke
   return result;
 }
 
-export function toQueryToken(cd: ColumnDescription): QueryToken {
-  return {
-    toStr: cd.displayName,
-    niceName: cd.displayName,
-    key: cd.name,
-    fullKey: cd.name,
-    unit: cd.unit,
-    format: cd.format,
-    type: cd.type,
-    typeColor: cd.typeColor,
-    niceTypeName: cd.niceTypeName,
-    filterType: cd.filterType,
-    isGroupable: cd.isGroupable,
-    hasOrderAdapter: cd.hasOrderAdapter,
-    preferEquals: cd.preferEquals,
-    propertyRoute: cd.propertyRoute
-  };
-}
-
 export type FilterRequest = FilterConditionRequest | FilterGroupRequest;
-
 
 export interface FilterGroupRequest {
   groupOperation: FilterGroupOperation;
@@ -525,7 +589,7 @@ export interface SystemTime {
 
 }
 
-export module PaginateMath {
+export namespace PaginateMath {
   export function startElementIndex(p: Pagination): number {
     return (p.elementsPerPage! * (p.currentPage! - 1)) + 1;
   }
@@ -544,28 +608,16 @@ export module PaginateMath {
 }
 
 
-
-
-
 export interface QueryDescription {
   queryKey: string;
-  columns: { [name: string]: ColumnDescription };
+  columns: { [name: string]: QueryToken };
 }
 
-export interface ColumnDescription {
-  name: string;
-  type: TypeReference;
-  filterType: FilterType;
-  typeColor: string;
-  niceTypeName: string;
-  unit?: string;
-  format?: string;
-  displayName: string;
-  isGroupable: boolean;
-  hasOrderAdapter?: boolean;
-  preferEquals?: boolean;
-  propertyRoute?: string;
+export interface QueryDescriptionDTO {
+  queryKey: string;
+  columns: { [name: string]: QueryTokenWithoutParent };
 }
+
 
 export function isList(fo: FilterOperation): boolean {
   return fo == "IsIn" ||

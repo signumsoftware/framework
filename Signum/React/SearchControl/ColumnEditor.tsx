@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { classes } from '../Globals';
-import { ColumnOptionParsed, QueryDescription, QueryToken, SubTokensOptions } from '../FindOptions'
+import { ColumnOption, ColumnOptionParsed, QueryDescription, QueryToken, SubTokensOptions } from '../FindOptions'
 import { SearchMessage } from '../Signum.Entities'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { StyleContext } from '../Lines';
@@ -10,6 +10,7 @@ import { VisualTipIcon } from '../Basics/VisualTipIcon';
 import { SearchVisualTip } from '../Signum.Basics';
 import { ColumnHelp, FilterHelp } from './SearchControlVisualTips';
 import { getNiceTypeName } from '../Operations/MultiPropertySetter';
+import { LinkButton } from '../Basics/LinkButton';
 
 interface ColumnEditorProps {
   columnOption: ColumnOptionParsed
@@ -19,7 +20,7 @@ interface ColumnEditorProps {
   close: () => void;
 }
 
-export default function ColumnEditor(p: ColumnEditorProps): React.JSX.Element {
+export default function ColumnEditor(p: ColumnEditorProps): React.ReactElement {
 
   function handleSummaryTokenChanged(newToken: QueryToken | undefined) {
     p.columnOption.summaryToken = newToken;
@@ -50,9 +51,7 @@ export default function ColumnEditor(p: ColumnEditorProps): React.JSX.Element {
 
   const co = p.columnOption;
 
-  const isCollection = co.token && co.token.type.isCollection;
-  const isInvalid = co.token && (co.token.queryTokenType == "Operation" || co.token.queryTokenType == "Manual");
-
+  const tokenError = columnError(co.token);
 
   const [showMore, setShowMore] = React.useState<boolean>(false);
 
@@ -61,18 +60,15 @@ export default function ColumnEditor(p: ColumnEditorProps): React.JSX.Element {
       setShowMore(true);
   }, [co.summaryToken, co.displayName != co.token?.niceName, co.combineRows]);
 
-  const summaryNotAggregate = co.summaryToken != null && co.summaryToken.queryTokenType != "Aggregate";
+  const summaryError = columnSummaryError(co.summaryToken);
 
   return (
-    <div className="sf-column-editor">
-
+    <div className={classes("sf-column-editor", tokenError && "error")}>
 
       <div className="row">
         <div className={showMore ? "col-sm-7" : "col-sm-11" }>
 
-          <div className="d-flex" title={!StyleContext.default.titleLabels ? undefined :
-            isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() :
-              isInvalid ? SearchMessage.InvalidColumnExpression.niceToString() : undefined}>
+          <div className="d-flex" title={!StyleContext.default.titleLabels ? undefined : tokenError}>
             <label className="col-form-label col-form-label-xs me-2 fw-bold">{SearchMessage.ColumnField.niceToString()}</label>
             <div className="flex-grow-1">
               <div className="rw-widget-xs">
@@ -84,13 +80,13 @@ export default function ColumnEditor(p: ColumnEditorProps): React.JSX.Element {
                   readOnly={false} />
               </div>
             </div>
-
-            {!showMore && <a href="#" onClick={e => { e.preventDefault(); setShowMore(true); }}>{SearchMessage.ShowMore.niceToString()}</a>}
+            
+            {!showMore && <LinkButton title={undefined} onClick={e => { setShowMore(true); }}>{SearchMessage.ShowMore.niceToString()}</LinkButton>}
           </div>
 
 
-          {showMore && < div className={classes("d-flex", co.summaryToken && summaryNotAggregate ? "error" : undefined)}
-            title={StyleContext.default.titleLabels && summaryNotAggregate ? SearchMessage.SummaryHeaderMustBeAnAggregate.niceToString() : undefined}>
+          {showMore && < div className={classes("d-flex", summaryError ? "error" : undefined)}
+            title={StyleContext.default.titleLabels ? summaryError : undefined}>
             <label className="col-form-label col-form-label-xs me-2">
               <input type="checkbox" disabled={co.token == null} className="form-check-input me-2" checked={co.summaryToken != null} onChange={handleSummaryCheck} />
               {SearchMessage.SummaryHeader.niceToString()} (Ʃ)
@@ -143,5 +139,26 @@ export default function ColumnEditor(p: ColumnEditorProps): React.JSX.Element {
   );
 }
 
+export function columnError(token?: QueryToken | undefined): string | undefined {
+  if (token == null)
+    return undefined;
 
+  if (token.type.isCollection)
+    return SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString();
+
+  if (token.queryTokenType == "OperationContainer" || token.queryTokenType == "Manual" || token.queryTokenType == "IndexerContainer")
+    return SearchMessage.InvalidColumnExpression.niceToString();
+    
+  return undefined;
+}
+
+export function columnSummaryError(summaryToken: QueryToken | undefined): string | undefined {
+  if (summaryToken == null)
+    return undefined;
+
+  if (summaryToken.queryTokenType != "Aggregate")
+    return SearchMessage.SummaryHeaderMustBeAnAggregate.niceToString();
+
+  return undefined;
+}
 

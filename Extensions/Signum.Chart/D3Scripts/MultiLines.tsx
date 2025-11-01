@@ -66,7 +66,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
     .domain(keyValues.map(v => keyColumn.getKey(v)))
     .range([0, xRule.size('content')]);
 
-  var allValues = pivot.rows.flatMap(r => pivot.columns.map(function (c) { return r.values[c.key]?.value; }));
+  var allValues = pivot.rows.flatMap(r => pivot.columns.map(c => r.values[c.key]?.value));
 
   var y = scaleFor(valueColumn0, allValues, 0, yRule.size('content'), parameters["VerticalScale"]);
 
@@ -180,9 +180,9 @@ export default function renderMultiLines({ data, width, height, parameters, load
                   <g className="hover-group" key={key}>
                     <circle className="point sf-transition hover-target"
                       opacity={active == false ? .5 : undefined}
-                      stroke={active == true ? "black" : s.color || color(s.key)}
+                      stroke={active == true ? "var(--bs-body-color)" : s.color || color(s.key)}
                       strokeWidth={active == true ? 3 : circleStroke}
-                      fill="white"
+                      fill="var(--bs-body-bg)"
                       transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(getX(r)!, -y(pv.value)!)}
                       r={circleRadius}
                       shapeRendering="initial"

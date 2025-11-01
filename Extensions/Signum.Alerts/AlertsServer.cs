@@ -14,11 +14,14 @@ public static class AlertsServer
 
     public static IHubContext<AlertsHub, IAlertsClient> AlertsHub { get; private set; }
 
-    public static void Start(WebApplication app)
+    public static void Start(WebServerBuilder wsb)
     {
-        app.MapHub<AlertsHub>("/api/alertshub");
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
+        wsb.WebApplication.MapHub<AlertsHub>("/api/alertshub");
         Connections = new ConnectionMapping<Lite<IUserEntity>>();
-        AlertsHub = app.Services.GetService<IHubContext<AlertsHub, IAlertsClient>>()!;
+        AlertsHub = wsb.WebApplication.Services.GetService<IHubContext<AlertsHub, IAlertsClient>>()!;
 
         var alertEvents = Schema.Current.EntityEvents<AlertEntity>();
 

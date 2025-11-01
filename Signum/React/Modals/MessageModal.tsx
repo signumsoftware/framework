@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Modals.css"
 import { BsSize } from '../Components';
 import { Modal } from 'react-bootstrap';
+import { AutoFocus } from '../Components/AutoFocus';
 
 export type MessageModalStyle = "success" | "info" | "warning" | "error";
 
@@ -34,11 +35,12 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
   size?: BsSize;
   shouldSelect?: boolean;
   additionalDialogClassName?: string;
-  modalRef?: React.RefObject<MessageModalHandler>; //For closing the modal imperatively
+  modalRef?: React.RefObject<MessageModalHandler | null>; //For closing the modal imperatively
+  autoFocusonTitle?: boolean;
 }
 
 
-function MessageModal(p: MessageModalProps): React.JSX.Element {
+function MessageModal(p: MessageModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
 
@@ -95,7 +97,7 @@ function MessageModal(p: MessageModalProps): React.JSX.Element {
     return (
       <button
         {...htmlAtts}
-        ref={res == 'yes' || res == 'ok' ? setFocus : undefined}
+        ref={((res == 'yes' || res == 'ok') && !p.autoFocusonTitle) ? setFocus : undefined}
         className={classes(htmlAtts?.className, baseButtonClass)}
         onClick={() => {
           if (p.onButtonClicked)
@@ -153,10 +155,18 @@ function MessageModal(p: MessageModalProps): React.JSX.Element {
   function renderTitle() {
     var icon = getIcon();
 
-    var iconSpan = icon && <FontAwesomeIcon icon={icon} />;
+    var iconSpan = icon && <FontAwesomeIcon aria-hidden={true} icon={icon} />;
+
+    const titleRef = React.useRef<HTMLHeadingElement>(null);
+
+    React.useEffect(() => {
+      if (p.autoFocusonTitle && titleRef.current) {
+        setTimeout(() => titleRef.current?.focus(), 200);
+      }
+    }, [p.autoFocusonTitle]);  
 
     return (
-      <h5 className="modal-title">
+      <h5 ref={titleRef} tabIndex={0} className="modal-title">
         {iconSpan}{iconSpan && <span>&nbsp;&nbsp;</span>}{p.title}
       </h5>
     );

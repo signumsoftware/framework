@@ -10,8 +10,11 @@ namespace Signum.Rest;
 
 public static class RestApiKeyServer
 {
-    public static void Start(IApplicationBuilder app)
+    public static void Start(WebServerBuilder app)
     {
+        if (app.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         SignumAuthenticationFilter.Authenticators.Insert(0, ApiKeyAuthenticator);
     }
 

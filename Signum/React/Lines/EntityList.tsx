@@ -1,13 +1,15 @@
 import * as React from 'react'
-import { ModifiableEntity, Lite, Entity, is, getToString, EntityControlMessage } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, is, getToString, EntityControlMessage, MList } from '../Signum.Entities'
 import { FormGroup } from './FormGroup'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
-import { genericForwardRef, useController } from './LineBase';
+import { genericMemo, useController } from './LineBase';
 import { classes } from '../Globals';
 import { EntityBaseController } from './EntityBase';
+import { LinkButton } from '../Basics/LinkButton';
 
 export interface EntityListProps<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseProps<V> {
   size?: number;
+  ref?: React.Ref<EntityListController<V>>;
 }
 
 export class EntityListController<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseController<EntityListProps<V>, V>
@@ -68,30 +70,30 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
       });
   };
 
-  renderViewButton(btn: boolean, item: V): React.JSX.Element | undefined {
+  renderViewButton(btn: boolean, item: V): React.ReactElement | undefined {
 
     if (!this.canView(item))
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-view", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-view", btn ? "input-group-text" : undefined)}
         onClick={this.handleViewClick}
         title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
         {EntityBaseController.getViewIcon()}
-      </a>
+      </LinkButton>
     );
   }
 
-  renderRemoveButton(btn: boolean, item: V): React.JSX.Element | undefined {
+  renderRemoveButton(btn: boolean, item: V): React.ReactElement | undefined {
     if (!this.canRemove(item))
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
+      <LinkButton className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
         onClick={this.handleRemoveClick}
         title={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
         {EntityBaseController.getRemoveIcon()}
-      </a>
+      </LinkButton>
     );
   }
 
@@ -146,8 +148,9 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
 }
 
 
-export const EntityList: <V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V> & React.RefAttributes<EntityListController<V>>) => React.ReactNode | null = genericForwardRef(function EntityList<V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V>, ref: React.Ref<EntityListController<V>>) {
-  const c = useController(EntityListController, props, ref);
+export const EntityList: <V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V>) => React.ReactNode | null =
+  genericMemo(function EntityList<V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V>) {
+  const c = useController<EntityListController<V>, EntityListProps<V>, MList<V>>(EntityListController, props);
   const p = c.props;
   const list = p.ctx.value!;
 

@@ -24,11 +24,11 @@ export namespace DisabledClient {
     Operations.addSettings(new EntityOperationSettings(DisableOperation.Enabled, {
       contextual: {
         icon: "arrow-up",
-        iconColor: "black",
+        iconColor: "var(--bs-body-color)",
       },
       contextualFromMany: {
         icon: "arrow-up",
-        iconColor: "black",
+        iconColor: "var(--bs-body-color)",
       },
     }));
   

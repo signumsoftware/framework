@@ -34,7 +34,7 @@ function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest, da
 
   var svgBox = useAPI(() => fetch(AppContext.toAbsoluteUrl(svgUrl)).then(r => r.text()).then(svgText => ({ svgText })), [svgUrl]);
 
-  var refOnDrillDown = React.useRef<(attr: string) => void>();
+  var refOnDrillDown = React.useRef<(attr: string) => void>(undefined);
 
   React.useEffect(() => {
     if (svgBox) {
@@ -140,7 +140,7 @@ function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest, da
           elem.removeAttribute("stroke-width");
 
         if (active)
-          elem.setAttribute("stroke", "black");
+          elem.setAttribute("stroke", "var(--bs-body-color)");
         else if (strokeColor)
           elem.setAttribute("stroke", strokeColor);
         else

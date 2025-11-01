@@ -1,20 +1,19 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Link } from 'react-router-dom'
 import { classes } from '@framework/Globals'
 import { ModelState, JavascriptMessage } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Authorization'
 import { AuthClient } from '../AuthClient'
-import MessageModal from '@framework/Modals/MessageModal'
 import * as AppContext from '@framework/AppContext'
 import { QueryString } from "@framework/QueryString"
 import "./Login.css"
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export interface LoginContext {
   loading: string | undefined;
   setLoading: (loading: string | undefined) => void;
-  userName?: React.RefObject<HTMLInputElement>;
+  userNameRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 function LoginPage(): React.JSX.Element {
@@ -40,12 +39,11 @@ function LoginPage(): React.JSX.Element {
       {LoginPage.showLoginForm == "initially_not" && showLoginForm == false &&
         <div className="row">
           <div className="col-md-6 offset-md-3 mt-2">
-            <a href="#" className="ms-1" id="sf-show-login-form" onClick={e => {
-              e.preventDefault();
+            <LinkButton title={undefined} className="ms-1" id="sf-show-login-form" onClick={e => {
               setShowLoginForm(true);
             }}>
               {LoginAuthMessage.ShowLoginForm.niceToString()}
-            </a>
+            </LinkButton>
           </div>
         </div>
       }
@@ -65,7 +63,7 @@ export default LoginPage;
 
 export function LoginForm(p: { ctx: LoginContext }): React.JSX.Element {
   const userName = React.useRef<HTMLInputElement>(null);
-  p.ctx.userName = userName;
+  p.ctx.userNameRef = userName;
   const password = React.useRef<HTMLInputElement>(null);
   const rememberMe = React.useRef<HTMLInputElement>(null);
   const [modelState, setModelState] = React.useState<ModelState | undefined>(undefined);
@@ -121,7 +119,7 @@ export function LoginForm(p: { ctx: LoginContext }): React.JSX.Element {
           <div className={classes("form-group mb-3", error("userName") && "has-error")}>
             <label className="sr-only" htmlFor="userName">{LoginPage.usernameLabel()}</label>
             <div className="input-group mb-2 mr-sm-2 mb-sm-0">
-              <div className="input-group-text"><FontAwesomeIcon icon="user" style={{ width: "16px" }} /></div>
+              <div className="input-group-text"><FontAwesomeIcon aria-hidden={true} icon="user" style={{ width: "16px" }} /></div>
               <input type="text" className="form-control" id="userName" autoComplete="username" ref={userName} placeholder={LoginPage.usernameLabel()} disabled={p.ctx.loading != null} />
             </div>
             {error("userName") && <span className="help-block text-danger">{error("userName")}</span>}
@@ -133,7 +131,7 @@ export function LoginForm(p: { ctx: LoginContext }): React.JSX.Element {
           <div className={classes("form-group mb-3", error("password") && "has-error")}>
             <label className="sr-only" htmlFor="password">{LoginAuthMessage.Password.niceToString()}</label>
             <div className="input-group mb-2 mr-sm-2 mb-sm-0">
-              <div className="input-group-text"><FontAwesomeIcon icon="key" style={{ width: "16px" }} /></div>
+              <div className="input-group-text"><FontAwesomeIcon aria-hidden={true} icon="key" style={{ width: "16px" }} /></div>
               <input ref={password} type="password" name="password" className="form-control" id="password" autoComplete="current-password" placeholder={LoginAuthMessage.Password.niceToString()} disabled={p.ctx.loading != null} />
             </div>
             {error("password") && <span className="help-block text-danger">{error("password")}</span>}
@@ -155,7 +153,7 @@ export function LoginForm(p: { ctx: LoginContext }): React.JSX.Element {
         <div className="col-md-6 offset-md-3">
           <button type="submit" id="login" className="btn btn-success" disabled={p.ctx.loading != null}>
             {p.ctx.loading == "password" ?
-              <FontAwesomeIcon icon="gear" fixedWidth style={{ fontSize: "larger" }} spin /> : < FontAwesomeIcon icon="right-to-bracket" />}
+              <FontAwesomeIcon aria-hidden={true} icon="gear" className="fa-fw" style={{ fontSize: "larger" }} spin /> : < FontAwesomeIcon aria-hidden={true} icon="right-to-bracket" />}
             &nbsp;
             {p.ctx.loading == "password" ? JavascriptMessage.loading.niceToString() : AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}
           </button>

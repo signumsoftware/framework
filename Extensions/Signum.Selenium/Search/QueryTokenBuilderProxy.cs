@@ -28,7 +28,7 @@ public class QueryTokenBuilderProxy
 
             var qt = new QueryTokenPartProxy(TokenElement(i).WaitVisible());
 
-            qt.Select(parts[i]);
+            qt.Select(parts.Take(i + 1).ToString("."));
         }
 
         //Selenium.Wait(() =>

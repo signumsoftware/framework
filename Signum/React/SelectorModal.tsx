@@ -19,7 +19,7 @@ interface SelectorModalProps extends IModalProps<any> {
   renderGroup?: (groupKey: string) => React.ReactNode;
 }
 
-function SelectorModal(p: SelectorModalProps): React.JSX.Element {
+function SelectorModal(p: SelectorModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
   const [selectedItems, setSelectedItems] = React.useState<unknown[]>([]);
@@ -97,7 +97,7 @@ function SelectorModal(p: SelectorModalProps): React.JSX.Element {
                       {" "}{o.displayName}
                     </label> :
                     <button key={i} type="button" onClick={() => handleButtonClicked(o.value)} name={o.name}
-                      className={"sf-chooser-button sf-close-button btn btn-light"} >
+                      className={"sf-chooser-button sf-close-button btn btn-tertiary"} >
                       {o.displayName}
                     </button>)
                 }

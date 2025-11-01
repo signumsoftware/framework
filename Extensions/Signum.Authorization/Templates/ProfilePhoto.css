@@ -1,6 +1,6 @@
 ﻿.user-profile-photo {
-    border: 3px solid white;
-    box-shadow: 1px 1px 12px #d5d5d5;
+    border: 3px solid var(--profile-photo-border, var(--bs-light));
+    box-shadow: 1px 1px 12px var(--profile-photo-shadow, rgba(0, 0, 0, 0.2));
     border-radius: 50% !important;
 }
 

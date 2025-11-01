@@ -106,14 +106,24 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         return new SqlPreCommandSimple($"DROP TRIGGER {triggerName} ON {tableName};");
     }
 
+    public SqlPreCommandSimple DisableVersionningTrigger(ObjectName tableName)
+    {
+        return new SqlPreCommandSimple($"ALTER TABLE {tableName} DISABLE TRIGGER versioning_trigger;");
+    }
 
-    public SqlPreCommand DropTable(DiffTable diffTable)
+    public SqlPreCommandSimple EnableVersionningTrigger(ObjectName tableName)
+    {
+        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ENABLE TRIGGER versioning_trigger;");
+    }
+
+
+    public SqlPreCommand DropTable(DiffTable diffTable, bool isPostgres)
     {
         if (diffTable.TemporalTableName == null)
             return DropTable(diffTable.Name);
 
         return SqlPreCommand.Combine(Spacing.Simple,
-            AlterTableDisableSystemVersioning(diffTable.Name),
+            isPostgres ? null : AlterTableDisableSystemVersioning(diffTable.Name),
             DropTable(diffTable.Name)
         )!;
     }
@@ -450,7 +460,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         var primaryKey = uniqueIndex.Table.Columns.Values.Where(a => a.PrimaryKey).Only();
 
         if (primaryKey == null)
-            throw new InvalidOperationException("No primary key found"); ;
+            throw new InvalidOperationException("No primary key found");
 
         var oldTableName = rep.Apply(Replacements.KeyTablesInverse, uniqueIndex.Table.Name.ToString());
 
@@ -523,27 +533,21 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
 
     private SqlPreCommand RemoveDuplicates(TableIndex uniqueIndex, IColumn primaryKey, string columns, bool commentedOut)
     {
-        if (isPostgres) //Postgress doesn't have min on uuid
-        {
-            return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
-WHERE {primaryKey.Name} NOT IN
-(
-    SELECT DISTINCT ON ({columns}) {primaryKey.Name}
-    FROM {uniqueIndex.Table.Name}
-    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
-){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)};".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
-        }
-        else
-        {
-            return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
-WHERE {primaryKey.Name} NOT IN
-(
-    SELECT MIN({primaryKey.Name})
-    FROM {uniqueIndex.Table.Name}
-    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
-    GROUP BY {columns}
-){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)};".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
-        }
+        //Postgress doesn't have min on uuid
+        var minId = isPostgres && primaryKey.Type == typeof(Guid) ? $"MIN({primaryKey.Name}::text)::uuid" : $"MIN({primaryKey.Name})";
+
+        return new SqlPreCommandSimple($"""
+            DELETE FROM {uniqueIndex.Table.Name}
+            WHERE {primaryKey.Name} NOT IN
+            (
+                SELECT {minId}
+                FROM {uniqueIndex.Table.Name}
+                {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
+                GROUP BY {columns}
+            ){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)};
+            """
+            .Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
+
     }
 
     public SqlPreCommand CreateIndexBasic(TableIndex index, bool forHistoryTable)
@@ -699,7 +703,7 @@ WHERE {primaryKey.Name} NOT IN
         return SqlPreCommand.Combine(Spacing.Simple,
           CreateTableSql(newTable, newTableName, avoidSystemVersioning: true, forHistoryTable: forHistoryTable),
           MoveRows(oldTable.Name, newTableName, newTable.Columns.Keys, identityInsert: newTable.Columns.Values.Any(c => c.PrimaryKey && c.Identity) && !forHistoryTable),
-          DropTable(oldTable))!;
+          DropTable(oldTable, isPostgres))!;
     }
 
     public SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames, bool identityInsert = false)
@@ -914,5 +918,13 @@ CREATE PARTITION SCHEME {partScheme.Name.SqlEscape(isPostgres)}
             new SqlPreCommandSimple($"""DROP PARTITION SCHEME {partSchema.SchemeName.SqlEscape(isPostgres: false)}"""));
     }
 
+    internal SqlPreCommandSimple AlterTableChangeOwner(ObjectName name, string executeAs)
+    {
+        return new SqlPreCommandSimple($"ALTER TABLE {name} OWNER TO {executeAs};");
+    }
 
+    internal SqlPreCommandSimple AlterSchemaChangeOwner(SchemaName name, string executeAs)
+    {
+        return new SqlPreCommandSimple($"ALTER SCHEMA {name} OWNER TO {executeAs};");
+    }
 }

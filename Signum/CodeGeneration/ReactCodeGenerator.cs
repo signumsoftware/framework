@@ -424,7 +424,7 @@ public class ReactCodeGenerator
 
 
         sb.AppendLine();
-        sb.AppendLine("export default function {0}(p: {{ ctx: TypeContext<{1}> }}): React.JSX.Element {{".FormatWith(GetComponentName(type), type.Name));
+        sb.AppendLine("export default function {0}(p: {{ ctx: TypeContext<{1}> }}): React.ReactElement {{".FormatWith(GetComponentName(type), type.Name));
         sb.AppendLine("");
         sb.AppendLine("  var ctx = p.ctx;");
         sb.AppendLine("  return (");

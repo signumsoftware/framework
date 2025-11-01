@@ -1,27 +1,43 @@
-﻿.colorIcon {
-    color: black;
+﻿:root {
+    --sf-diff-removed-light: rgb(255, 209, 209);
+    --sf-diff-removed: rgb(255, 139, 139);
+    --sf-diff-added-light: #CEF3CE;
+    --sf-diff-added: #72F272;
+    --sf-diff-info: #DDD;
+}
+
+[data-bs-theme=dark] {
+    --sf-diff-removed-light: rgb(149 0 0);
+    --sf-diff-removed: rgb(243 0 0);
+    --sf-diff-added-light: #005f00;
+    --sf-diff-added: #008900;
+    --sf-diff-info: #515151;
+}
+
+.colorIcon {
+    color: var(--bs-body-color);
     padding: 2px;
     margin: 0 2px;
 }
 
     .colorIcon.red {
-        background: #FF8B8B;
+        background: var(--sf-diff-removed);
     }
 
     .colorIcon.mini.red {
-        background: #FFD1D1;
+        background: var(--sf-diff-removed-light);
     }
 
     .colorIcon.green {
-        background: #72F272;
+        background: var(--sf-diff-added);
     }
 
     .colorIcon.mini.green {
-        background: #CEF3CE;
+        background: var(--sf-diff-added-light);
     }
 
     .colorIcon.gray {
-        background: lightgray;
+        background: var(--bs-secondary-bg);
     }
 
 .nav-tabs > li.linkTab > a:hover {

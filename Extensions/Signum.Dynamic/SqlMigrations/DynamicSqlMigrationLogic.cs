@@ -19,138 +19,138 @@ public static class DynamicSqlMigrationLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<DynamicRenameEntity>()
+              .WithQuery(() => e => new
+              {
+                  Entity = e,
+                  e.Id,
+                  e.CreationDate,
+                  e.ReplacementKey,
+                  e.OldName,
+                  e.NewName,
+                  IsApplied = e.IsApplied(),
+              });
+
+        sb.Include<DynamicSqlMigrationEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.CreationDate,
+                e.CreatedBy,
+                e.ExecutionDate,
+                e.ExecutedBy,
+                e.Comment,
+            });
+
+        new Graph<DynamicSqlMigrationEntity>.Construct(DynamicSqlMigrationOperation.Create)
         {
-            sb.Include<DynamicRenameEntity>()
-                  .WithQuery(() => e => new
-                  {
-                      Entity = e,
-                      e.Id,
-                      e.CreationDate,
-                      e.ReplacementKey,
-                      e.OldName,
-                      e.NewName,
-                      IsApplied = e.IsApplied(),
-                  });
-
-            sb.Include<DynamicSqlMigrationEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.CreationDate,
-                    e.CreatedBy,
-                    e.ExecutionDate,
-                    e.ExecutedBy,
-                    e.Comment,
-                });
-
-            new Graph<DynamicSqlMigrationEntity>.Construct(DynamicSqlMigrationOperation.Create)
+            Construct = args =>
             {
-                Construct = args =>
+                if (DynamicLogic.CodeGenError != null)
+                    throw new InvalidOperationException(DynamicSqlMigrationMessage.PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer.NiceToString());
+
+                var old = Replacements.AutoReplacement;
+
+                var lastRenames = Database.Query<DynamicRenameEntity>()
+                .Where(a => !a.IsApplied())
+                .OrderBy(a => a.CreationDate)
+                .ToList();
+
+                try
                 {
-                    if (DynamicLogic.CodeGenError != null)
-                        throw new InvalidOperationException(DynamicSqlMigrationMessage.PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer.NiceToString());
-
-                    var old = Replacements.AutoReplacement;
-
-                    var lastRenames = Database.Query<DynamicRenameEntity>()
-                    .Where(a => !a.IsApplied())
-                    .OrderBy(a => a.CreationDate)
-                    .ToList();
-
-                    try
-                    {
-                        if (Replacements.AutoReplacement == null)
-                            Replacements.AutoReplacement = ctx =>
-                            {
-                                var currentName =
-                                ctx.ReplacementKey.StartsWith(Replacements.KeyEnumsForTable("")) ? AutoReplacementEnums(ctx) :
-                                ctx.ReplacementKey.StartsWith(PropertyRouteLogic.PropertiesFor.FormatWith("")) ? DynamicAutoReplacementsProperties(ctx, lastRenames) :
-                                ctx.ReplacementKey.StartsWith(Replacements.KeyColumnsForTable("")) ? DynamicAutoReplacementsColumns(ctx, lastRenames) :
-                                ctx.ReplacementKey == Replacements.KeyTables ? DynamicAutoReplacementsSimple(ctx, lastRenames, Replacements.KeyTables) :
-                                ctx.ReplacementKey == typeof(OperationSymbol).Name ? DynamicAutoReplacementsOperations(ctx, lastRenames) :
-                                ctx.ReplacementKey == QueryLogic.QueriesKey ? DynamicAutoReplacementsSimple(ctx, lastRenames, DynamicTypeLogic.TypeNameKey) :
-                                DynamicAutoReplacementsSimple(ctx, lastRenames, ctx.ReplacementKey);
-
-                                if (currentName != null)
-                                    return new Replacements.Selection(ctx.OldValue, currentName);
-
-                                return new Replacements.Selection(ctx.OldValue, null);
-                            };
-
-                        var script = Schema.Current.SynchronizationScript(interactive: false, replaceDatabaseName: SqlMigrationRunner.DatabaseNameReplacement);
-
-                        return new DynamicSqlMigrationEntity
+                    if (Replacements.AutoReplacement == null)
+                        Replacements.AutoReplacement = ctx =>
                         {
-                            CreationDate = Clock.Now,
-                            CreatedBy = UserEntity.Current,
-                            Script = script?.ToString() ?? "",
+                            var currentName =
+                            ctx.ReplacementKey.StartsWith(Replacements.KeyEnumsForTable("")) ? AutoReplacementEnums(ctx) :
+                            ctx.ReplacementKey.StartsWith(PropertyRouteLogic.PropertiesFor.FormatWith("")) ? DynamicAutoReplacementsProperties(ctx, lastRenames) :
+                            ctx.ReplacementKey.StartsWith(Replacements.KeyColumnsForTable("")) ? DynamicAutoReplacementsColumns(ctx, lastRenames) :
+                            ctx.ReplacementKey == Replacements.KeyTables ? DynamicAutoReplacementsSimple(ctx, lastRenames, Replacements.KeyTables) :
+                            ctx.ReplacementKey == typeof(OperationSymbol).Name ? DynamicAutoReplacementsOperations(ctx, lastRenames) :
+                            ctx.ReplacementKey == QueryLogic.QueriesKey ? DynamicAutoReplacementsSimple(ctx, lastRenames, DynamicTypeLogic.TypeNameKey) :
+                            DynamicAutoReplacementsSimple(ctx, lastRenames, ctx.ReplacementKey);
+
+                            if (currentName != null)
+                                return new Replacements.Selection(ctx.OldValue, currentName);
+
+                            return new Replacements.Selection(ctx.OldValue, null);
                         };
-                    }
-                    finally
+
+                    var script = Schema.Current.SynchronizationScript(interactive: false, replaceDatabaseName: SqlMigrationRunner.DatabaseNameReplacement);
+
+                    return new DynamicSqlMigrationEntity
                     {
-                        Replacements.AutoReplacement = old;
-                    }
+                        CreationDate = Clock.Now,
+                        CreatedBy = UserEntity.Current,
+                        Script = script?.ToString() ?? "",
+                    };
                 }
-            }.Register();
-
-            new Graph<DynamicSqlMigrationEntity>.Execute(DynamicSqlMigrationOperation.Save)
-            {
-                CanExecute = a => a.ExecutionDate == null ? null : DynamicSqlMigrationMessage.TheMigrationIsAlreadyExecuted.NiceToString(),
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (e, _) => { }
-            }.Register();
-
-            new Graph<DynamicSqlMigrationEntity>.Execute(DynamicSqlMigrationOperation.Execute)
-            {
-                CanExecute = a => a.ExecutionDate == null ? null : DynamicSqlMigrationMessage.TheMigrationIsAlreadyExecuted.NiceToString(),
-
-                Execute = (e, _) =>
+                finally
                 {
+                    Replacements.AutoReplacement = old;
+                }
+            }
+        }.Register();
 
-                    if (CurrentLog != null)
-                        throw new InvalidOperationException("There is already a migration running");
+        new Graph<DynamicSqlMigrationEntity>.Execute(DynamicSqlMigrationOperation.Save)
+        {
+            CanExecute = a => a.ExecutionDate == null ? null : DynamicSqlMigrationMessage.TheMigrationIsAlreadyExecuted.NiceToString(),
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (e, _) => { }
+        }.Register();
 
-                    e.ExecutionDate = Clock.Now;
-                    e.ExecutedBy = UserEntity.Current;
+        new Graph<DynamicSqlMigrationEntity>.Execute(DynamicSqlMigrationOperation.Execute)
+        {
+            CanExecute = a => a.ExecutionDate == null ? null : DynamicSqlMigrationMessage.TheMigrationIsAlreadyExecuted.NiceToString(),
 
-                    var oldOut = Console.Out;
-                    try
+            Execute = (e, _) =>
+            {
+
+                if (CurrentLog != null)
+                    throw new InvalidOperationException("There is already a migration running");
+
+                e.ExecutionDate = Clock.Now;
+                e.ExecutedBy = UserEntity.Current;
+
+                var oldOut = Console.Out;
+                try
+                {
+                    CurrentLog = new StringBuilder();
+                    LastLog = null;
+                    Console.SetOut(new SynchronizedStringWriter(CurrentLog!));
+
+                    string title = e.CreationDate + (e.Comment.HasText() ? " ({0})".FormatWith(e.Comment) : null);
+
+                    using (var tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
                     {
-                        CurrentLog = new StringBuilder();
-                        LastLog = null;
-                        Console.SetOut(new SynchronizedStringWriter(CurrentLog!));
-
-                        string title = e.CreationDate + (e.Comment.HasText() ? " ({0})".FormatWith(e.Comment) : null);
-
-                        using (var tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
-                        {
-                            SqlPreCommandExtensions.ExecuteScript(title, e.Script);
-                            tr.Commit();
-                        }
-                    }
-                    catch (ExecuteSqlScriptException ex)
-                    {
-                        ex.InnerException!.PreserveStackTrace();
-                        throw ex.InnerException!;
-                    }
-                    finally
-                    {
-                        LastLog = CurrentLog?.ToString();
-                        CurrentLog = null;
-                        Console.SetOut(oldOut);
+                        SqlPreCommandExtensions.ExecuteScript(title, e.Script, autoRun: true);
+                        tr.Commit();
                     }
                 }
-            }.Register();
+                catch (ExecuteSqlScriptException ex)
+                {
+                    ex.InnerException!.PreserveStackTrace();
+                    throw ex.InnerException!;
+                }
+                finally
+                {
+                    LastLog = CurrentLog?.ToString();
+                    CurrentLog = null;
+                    Console.SetOut(oldOut);
+                }
+            }
+        }.Register();
 
-            new Graph<DynamicSqlMigrationEntity>.Delete(DynamicSqlMigrationOperation.Delete)
-            {
-                CanDelete = a => a.ExecutionDate == null ? null : DynamicSqlMigrationMessage.TheMigrationIsAlreadyExecuted.NiceToString(),
-                Delete = (e, _) => { e.Delete(); }
-            }.Register();
-        }
+        new Graph<DynamicSqlMigrationEntity>.Delete(DynamicSqlMigrationOperation.Delete)
+        {
+            CanDelete = a => a.ExecutionDate == null ? null : DynamicSqlMigrationMessage.TheMigrationIsAlreadyExecuted.NiceToString(),
+            Delete = (e, _) => { e.Delete(); }
+        }.Register();
 
     }
 

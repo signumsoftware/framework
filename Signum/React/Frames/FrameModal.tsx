@@ -22,7 +22,7 @@ import { Modal } from 'react-bootstrap'
 import { ModalFooterButtons, ModalHeaderButtons } from '../Components/ModalHeaderButtons'
 import WidgetEmbedded from './WidgetEmbedded'
 import SaveChangesModal from '../Modals/SaveChangesModal';
-import { genericForwardRef } from '../Lines/LineBase';
+import { LinkButton } from '../Basics/LinkButton';
 
 interface FrameModalProps<T extends ModifiableEntity> extends IModalProps<T | undefined> {
   title?: React.ReactNode | null;
@@ -40,6 +40,8 @@ interface FrameModalProps<T extends ModifiableEntity> extends IModalProps<T | un
   readOnly?: boolean;
   modalSize?: BsSize;
   createNew?: () => Promise<EntityPack<T> | undefined>;
+  ref?: React.Ref<IHandleKeyboard>
+  innerRef?: React.Ref<IHandleKeyboard>
 }
 
 let modalCount = 0;
@@ -52,7 +54,7 @@ interface FrameModalState<T extends ModifiableEntity> {
   executing?: boolean;
 }
 
-export const FrameModal: <T extends ModifiableEntity>(props: FrameModalProps<T> & React.RefAttributes<IHandleKeyboard>) => React.ReactNode | null = genericForwardRef(function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>, ref: React.Ref<IHandleKeyboard>) {
+export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): React.JSX.Element {
 
   const [state, setState] = useStateWithPromise<FrameModalState<T> | undefined>(undefined);
   const [show, setShow] = React.useState(true);
@@ -66,12 +68,11 @@ export const FrameModal: <T extends ModifiableEntity>(props: FrameModalProps<T> 
 
   const forceUpdate = useForceUpdate();
 
-  React.useImperativeHandle(ref, () => ({
+  React.useImperativeHandle(p.innerRef, () => ({
     handleKeyDown(e: KeyboardEvent) {
       buttonBar.current && buttonBar.current.handleKeyDown(e);
     }
   }));
-
   const typeName = getTypeName(p.entityOrPack);
   const typeInfo = tryGetTypeInfo(typeName);
 
@@ -199,7 +200,7 @@ export const FrameModal: <T extends ModifiableEntity>(props: FrameModalProps<T> 
 
             result.onExecuteSuccess = pack => {
               Operations.notifySuccess();
-              frameRef.current!.onClose(pack);
+              frameRef.current!.onClose?.(pack);
               return Promise.resolve();
             };
 
@@ -340,11 +341,11 @@ export const FrameModal: <T extends ModifiableEntity>(props: FrameModalProps<T> 
 
   function setComponent(c: React.Component | null) {
     if (c && entityComponent.current != c) {
-      (entityComponent as React.MutableRefObject<React.Component>).current = c;
+      (entityComponent as React.RefObject<React.Component | null>).current = c;
       forceUpdate();
     }
   }
-});
+}
 
 const FrameModalEx = FrameModal;
 
@@ -378,7 +379,7 @@ export namespace FrameModalManager {
 
 export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPromise }: {
   pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, subTitle?: React.ReactNode | null, widgets: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | ViewPromise<ModifiableEntity>);
-}): React.JSX.Element {
+}): React.ReactElement {
 
   if (!pack)
     return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
@@ -420,9 +421,9 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
       return undefined;
 
     return (
-      <a className="sf-popup-fullscreen sf-pointer" href="#" onClick={handlePopupFullScreen} title={FrameMessage.Fullscreen.niceToString()}>
-        <FontAwesomeIcon icon="up-right-from-square" />
-      </a>
+      <LinkButton className="sf-popup-fullscreen sf-pointer" tabIndex={0} onClick={handlePopupFullScreen} title={FrameMessage.Fullscreen.niceToString()}>
+        <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
+      </LinkButton>
     );
   }
 

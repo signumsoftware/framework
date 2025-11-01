@@ -1,21 +1,25 @@
-
 import * as React from 'react'
 import { FindOptions, QueryToken } from '@framework/FindOptions'
-import { getQueryKey, getQueryNiceName } from '@framework/Reflection'
+import { getQueryKey } from '@framework/Reflection'
 import { JavascriptMessage, toLite, liteKey, translated } from '@framework/Signum.Entities'
-import { SearchControl, SearchControlHandler, SearchValue, SearchValueController } from '@framework/Search'
+import { SearchValue, SearchValueController } from '@framework/Search'
 import { UserQueryClient } from '../../UserQueryClient'
 import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Finder } from '@framework/Finder'
-import { useAPI, useVersion } from '@framework/Hooks'
-import { DashboardClient, PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
-import { FullscreenComponent } from '@framework/Components/FullscreenComponent'
+import { useAPI, useForceUpdate, useVersion } from '@framework/Hooks'
 import { parseIcon } from '@framework/Components/IconTypeahead'
-import { CachedQueryJS, executeQueryCached, executeQueryValueCached } from '../../../Signum.Dashboard/CachedQueryExecutor'
 import { DashboardPinnedFilters } from '../../../Signum.Dashboard/View/DashboardFilterController'
-import { BigValuePartEntity, UserQueryEntity, UserQueryPartEntity } from '../../Signum.UserQueries'
+import { BigValuePartEntity, UserQueryEntity } from '../../Signum.UserQueries'
 import { UserAssetClient } from '../../../Signum.UserAssets/UserAssetClient'
+import { BigValueClient } from '../../BigValueClient'
+import * as AppContext from "@framework/AppContext"
+import { toAbsoluteUrl } from '@framework/AppContext'
+import { ToolbarUrl } from '../../../Signum.Toolbar/ToolbarUrl'
+import { ToolbarClient } from '../../../Signum.Toolbar/ToolbarClient'
+import { selectSubEntity } from '../../UserQueryToolbarConfig'
+import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
+
 
 export interface UserQueryPartHandler {
   findOptions: FindOptions;
@@ -57,6 +61,13 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
       filterOptions: [{ token: "Entity", value: p.entity }]
     };
 
+
+
+
+  const vsc = React.useRef<SearchValueController>(null);
+  const forceUpdate = useForceUpdate();
+
+
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
@@ -70,65 +81,83 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
     refresh: updateVersion,
   });
 
-  return <BigValueSearchCounter
-    findOptions={foExpanded}
-    valueToken={valueToken}
-    text={translated(p.partEmbedded, a => a.title) || (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName)}
-    iconName={p.partEmbedded.iconName ?? undefined}
-    iconColor={p.partEmbedded.iconColor ?? undefined}
-    deps={[...p.deps ?? [], version]}
-    customColor={p.partEmbedded.customColor}
-    titleColor={p.partEmbedded.titleColor}
-    userQuery={p.content.userQuery}
-  />;
-}
+  const clickable = p.content.userQuery != null;
+  const customColor = p.partEmbedded.customColor;
 
-interface BigValueBadgeProps {
-  findOptions: FindOptions;
-  valueToken: QueryToken | null;
-  text?: string;
-  iconName?: string;
-  iconColor?: string;
-  titleColor?: string | null;
-  deps?: React.DependencyList;
-  //cachedQuery?: Promise<CachedQueryJS>;
-  customColor: string | null;
-  userQuery: UserQueryEntity | null;
-}
+  async function handleNavigate(e: React.MouseEvent) {
+    if (p.content.customUrl) {
+      let url = p.content.customUrl;
 
-export function BigValueSearchCounter(p: BigValueBadgeProps): React.JSX.Element {
+      if (ToolbarUrl.hasSubEntity(url)) {
 
-  const vsc = React.useRef<SearchValueController>(null);
+        if (p.content.userQuery == null)
+          throw new Error("SubEntity (:id2, :type2, :key2) can only be used when a UserQuery is defined");
+
+        const subEntity = await selectSubEntity(p.content.userQuery, p.entity);
+        if (subEntity == null)
+          return;
+
+        url = ToolbarUrl.replaceSubEntity(url, subEntity)
+      }
+
+      url = ToolbarUrl.replaceVariables(url)
+
+      if (p.entity)
+        url = ToolbarUrl.replaceEntity(url, p.entity)
+
+      if (ToolbarUrl.isExternalLink(url))
+        window.open(url);
+      else
+        AppContext.pushOrOpenInTab(url, e);
+    } else {
+      const url = await UserQueryClient.getUserQueryUrl(p.content.userQuery!, p.entity);
+      AppContext.navigate(url);
+
+    }
+  }
+
+  var custom = p.content.customBigValue ? BigValueClient.renderCustomBigValue(p.content.customBigValue, { content: p.content, entity: p.entity, value: vsc.current?.value }) : null; 
 
   return (
-    <div className={classes("card", !p.customColor && "bg-ligth", "o-hidden")}
+    <div className={classes("card", "border-tertiary shadow-sm mb-3 w-100", "o-hidden")}
       style={{
-      backgroundColor: p.customColor ?? undefined,
-      color: Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black"
-    }}>
-      <div className={classes("card-body")} onClick={e => vsc.current!.handleClick(e)} style={{
-        cursor: "pointer",
-        color: p.titleColor ?? (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black")
+        backgroundColor: customColor ?? undefined,
+        color: Boolean(customColor) ? getColorContrasColorBWByHex(customColor!) : "var(--bs-body-color)"
       }}>
-        <div className="row">
-          <div className="col-lg-3">
-            {p.iconName &&
-              <FontAwesomeIcon icon={parseIcon(p.iconName)!} color={p.iconColor} size="4x" />}
-          </div>
-          <div className={classes("col-lg-9 flip", "text-end")}>
+      <div className={classes("card-body")}
+        onClick={clickable ? (p.content.navigate ? handleNavigate : e => vsc.current!.handleClick(e)) : undefined}
+
+        style={{
+          cursor: clickable ? "pointer" : undefined,
+          color: p.partEmbedded.titleColor ?? (Boolean(customColor) ? getColorContrasColorBWByHex(customColor!) : "var(--bs-body-color)")
+        }}>
+        <div className="dashboard-flex">
+          <div className="left">
             <h3>
-              <SearchValue ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
-                searchControlProps={{ extraOptions: { userQuery: toLite(p.userQuery) } }}
-                valueToken={p.valueToken ?? undefined}
+              <SearchValue ref={vsc} findOptions={foExpanded} isLink={false} isBadge={false} deps={p.deps}
+                onValueChange={forceUpdate}
+                onInitialValueLoaded={forceUpdate}
+                searchControlProps={{ extraOptions: { userQuery: toLite(p.content.userQuery) } }}
+                valueToken={valueToken ?? undefined}
+                onRender={custom?.value == null ? undefined : v => custom?.value}
               />
-                {/*customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}*/}
+              {/*customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}*/}
             </h3>
+
+          </div>
+          <div className="right">
+            {p.partEmbedded.iconName &&
+              <FontAwesomeIcon icon={parseIcon(p.partEmbedded.iconName)!} color={p.partEmbedded.iconColor ?? undefined} size="2x" />}
           </div>
         </div>
-        <div className={classes("flip", "text-end")}>
-          <h6 className="large">{p.text}</h6>
-        </div>
+        <h3 className="medium">{
+          custom?.message ?? (translated(p.partEmbedded, a => a.title) ||
+              (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))
+
+        }</h3>
       </div>
     </div>
   );
+
+ 
 }

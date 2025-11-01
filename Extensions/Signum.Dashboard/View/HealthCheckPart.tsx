@@ -15,13 +15,13 @@ import DashboardPage from './DashboardPage';
 
 export default function HealthCheckPart(p: PanelPartContentProps<HealthCheckPartEntity>): React.JSX.Element {
   const part = p.partEmbedded;
-  const defaultIcon = DashboardClient.partRenderers[HealthCheckPartEntity.typeName].defaultIcon?.();
+  const defaultIcon = DashboardClient.partRenderers[HealthCheckPartEntity.typeName].icon?.();
   const icon = parseIcon(part.iconName) ?? defaultIcon?.icon;
   const iconColor = part.iconColor ?? defaultIcon?.iconColor;
 
   const title = !icon ? part.title :
     <span>
-      <FontAwesomeIcon icon={fallbackIcon(icon)} color={iconColor} className="me-1" />{part.title}
+      <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} color={iconColor} className="me-1" />{part.title}
     </span>;
 
   return (
@@ -92,7 +92,7 @@ function HealthCheckElement(p: { element: HealthCheckElementEmbedded }) {
       window.open(path);
     }}>
       <span className='position-absolute top-0 end-0 me-1 mt-1'>
-        <FontAwesomeIcon icon={data == null ? "hourglass-start" :
+        <FontAwesomeIcon aria-hidden={true} icon={data == null ? "hourglass-start" :
           "error" in data ? 'link-slash' :
             data.result.status == "Healthy" ? (data.result.description == "Disabled" ? "circle" : "circle-check") :
               data.result.status == "Degraded" ? "circle-down" :

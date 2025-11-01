@@ -8,23 +8,23 @@ public static class DynamicCSSOverrideLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<DynamicCSSOverrideEntity>()
-               .WithSave(DynamicCSSOverrideOperation.Save)
-               .WithDelete(DynamicCSSOverrideOperation.Delete)
-               .WithQuery(() => e => new
-               {
-                   Entity = e,
-                   e.Id,
-                   e.Name,
-                   Script = e.Script.Etc(100),
-               });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            Cached = sb.GlobalLazy(() =>
-             Database.Query<DynamicCSSOverrideEntity>().Where(a => !a.Mixin<DisabledMixin>().IsDisabled).ToList(),
-             new InvalidateWith(typeof(DynamicCSSOverrideEntity)));
-        }
+        sb.Include<DynamicCSSOverrideEntity>()
+           .WithSave(DynamicCSSOverrideOperation.Save)
+           .WithDelete(DynamicCSSOverrideOperation.Delete)
+           .WithQuery(() => e => new
+           {
+               Entity = e,
+               e.Id,
+               e.Name,
+               Script = e.Script.Etc(100),
+           });
+
+        Cached = sb.GlobalLazy(() =>
+         Database.Query<DynamicCSSOverrideEntity>().Where(a => !a.Mixin<DisabledMixin>().IsDisabled).ToList(),
+         new InvalidateWith(typeof(DynamicCSSOverrideEntity)));
     }
 }
 
@@ -35,7 +35,7 @@ public static class DynamicCSSOverrideLogic
 
 @{
    ...
-var cssOverride = String.Join("\r\n", DynamicCSSOverrideLogic.Cached.Value.Select(a => a.Script)); <====*
+var cssOverride = String.Join("\n", DynamicCSSOverrideLogic.Cached.Value.Select(a => a.Script)); <====*
 <!doctype html>
 <html>
 <head>

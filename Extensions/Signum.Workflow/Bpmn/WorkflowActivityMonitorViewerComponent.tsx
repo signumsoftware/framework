@@ -112,7 +112,6 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
   }
 
   handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
-    e.preventDefault();
     var searchPad = this.viewer.get<any>("searchPad");
     searchPad.toggle();
   }
@@ -123,7 +122,6 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
   }
 
   handleZoomClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
-    e.preventDefault();
     this.resetZoom();
   }
 
@@ -135,7 +133,7 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
           <button className="btn btn-default" onClick={this.handleZoomClick}>{WorkflowActivityMonitorMessage.ResetZoom.niceToString()}</button>
           <button className="btn btn-default" onClick={this.handleSearchClick}>{WorkflowActivityMonitorMessage.Find.niceToString()}</button>
         </div>
-        <div style={{ border: "1px solid lightgray" }} ref={de => this.divArea = de!} />
+        <div style={{ border: "1px solid lightgray" }} ref={de => { this.divArea = de! }} />
       </div>
     );
   }

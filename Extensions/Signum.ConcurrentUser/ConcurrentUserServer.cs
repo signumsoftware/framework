@@ -15,12 +15,15 @@ public static class ConcurrentUserServer
 
     public static IHubContext<ConcurrentUserHub, IConcurrentUserClient> ConcurrentUserHub { get; private set; } = null!;
 
-    public static void Start(WebApplication app)
+    public static void Start(WebServerBuilder wsb)
     {
+        if (wsb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
         ReflectionServer.RegisterLike(typeof(ConcurrentUserMessage), () => true);
 
-        app.MapHub<ConcurrentUserHub>("/api/concurrentUserHub");
-        ConcurrentUserHub = app.Services.GetService<IHubContext<ConcurrentUserHub, IConcurrentUserClient>>()!;
+        wsb.WebApplication.MapHub<ConcurrentUserHub>("/api/concurrentUserHub");
+        ConcurrentUserHub = wsb.WebApplication.Services.GetService<IHubContext<ConcurrentUserHub, IConcurrentUserClient>>()!;
 
         var s = Schema.Current;
         Schema.Current.SchemaCompleted += () =>
@@ -124,7 +127,7 @@ More info: https://docs.microsoft.com/en-us/iis/troubleshoot/request-restriction
         {
             try
             {
-                ConcurrentUserHub.Clients.Group(kvp.Key.Key()).EntitySaved(kvp.Value.ToString());
+                ConcurrentUserHub.Clients.Group(kvp.Key.Key()).EntitySaved(kvp.Key.Key(), kvp.Value.ToString());
             }
             catch (Exception ex)
             {

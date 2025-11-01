@@ -156,7 +156,7 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
     dashboardFilter?: DashboardFilter,
     chartRequest: ChartRequestModel,
     onDrillDown: (row: ChartRow, e: MouseEvent | React.MouseEvent<any, MouseEvent>) => void
-  }): JSX.Element {
+  }): React.JSX.Element {
 
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
@@ -172,7 +172,7 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
             <circle className="shape sf-transition hover-target"
               cx={x(horizontalColumn.getValue(r))!}
               cy={-y(verticalColumn.getValue(r))!}
-              stroke={active == true ? "black" : colorKeyColumn.getValueColor(r) ?? color(r)}
+              stroke={active == true ? "var(--bs-body-color)" : colorKeyColumn.getValueColor(r) ?? color(r)}
               strokeWidth={active == true ? 3 : undefined}
               fill={colorKeyColumn.getValueColor(r) ?? color(r)}
               shapeRendering="initial"
@@ -254,7 +254,7 @@ function CanvasScatterplot(p: {
 
   var cRef = React.useRef<HTMLCanvasElement>(null);
   var vcRef = React.useRef<HTMLCanvasElement>(null);
-  var colorDataRef = React.useRef<{ [key: string]: ChartRow }>();
+  var colorDataRef = React.useRef<{ [key: string]: ChartRow }>({});
 
   React.useEffect(() => {
 
@@ -266,15 +266,15 @@ function CanvasScatterplot(p: {
 
     const ctx = c.getContext("2d")!;
     const vctx = vc.getContext("2d")!;
-    var colorToData: { [key: string]: ChartRow } = colorDataRef.current = {};
+    var colorToData: { [key: string]: ChartRow } = colorDataRef.current;
     ctx.clearRect(0, 0, w, h);
     vctx.clearRect(0, 0, w, h);
     data.rows.forEach((r, i) => {
 
       var c = colorKeyColumn.getValueColor(r) ?? color(r);
 
-      ctx.fillStyle = c ?? "black";
-      ctx.strokeStyle = c ?? "black";
+      ctx.fillStyle = c ?? "var(--bs-body-color)";
+      ctx.strokeStyle = c ?? "var(--bs-body-color)";
       var vColor = getVirtualColor(i);
       vctx.fillStyle = vColor;
       vctx.strokeStyle = vColor;

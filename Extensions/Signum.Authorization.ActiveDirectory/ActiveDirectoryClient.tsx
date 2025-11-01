@@ -70,7 +70,7 @@ export namespace ActiveDirectoryClient {
 
       Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) && str.length > 2 ? ({
         type: UserEntity,
-        customElement: <em><FontAwesomeIcon icon="address-book" />&nbsp;{UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(<strong>{str}</strong>)}</em>,
+        customElement: <em><FontAwesomeIcon icon="address-book" title={UserADMessage.Find0InActiveDirectory.niceToString()} />&nbsp;{UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(<strong>{str}</strong>)}</em>,
         onClick: () => importADUser(str),
       }) : null;
 
@@ -86,11 +86,10 @@ export namespace ActiveDirectoryClient {
             order: -1,
             button: <button className="btn btn-info ms-2"
               onClick={e => {
-                e.preventDefault();
                 var promise = AutoLineModal.show({
                   type: { name: "string" },
                   modalSize: "md",
-                  title: <><FontAwesomeIcon icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
+                  title: <><FontAwesomeIcon aria-hidden={true} icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
                   label: UserADMessage.NameOrEmail.niceToString(),
                   initialValue: search
                 }) as Promise<string>;
@@ -100,7 +99,7 @@ export namespace ActiveDirectoryClient {
                   .then(u => u && ctx.searchControl.handleCreated(u));
 
               }}>
-              <FontAwesomeIcon icon="user-plus" /> {!search ? UserADMessage.FindInActiveDirectory.niceToString() : UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(search == null ? UserEntity.niceName() : <strong>{search}</strong>)}
+              <FontAwesomeIcon icon="user-plus" title={!search ? UserADMessage.FindInActiveDirectory.niceToString() : UserADMessage.Find0InActiveDirectory.niceToString()} /> {!search ? UserADMessage.FindInActiveDirectory.niceToString() : UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(search == null ? UserEntity.niceName() : <strong>{search}</strong>)}
             </button>
           }
         );

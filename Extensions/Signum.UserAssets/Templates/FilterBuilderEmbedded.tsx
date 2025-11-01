@@ -20,6 +20,7 @@ import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded, UserAssetQueryMessage } from '../Signum.UserAssets.Queries'
 import { MultiValue } from '@framework/FinderRules'
 import { HeaderType } from '@framework/Lines/GroupHeader'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface FilterBuilderEmbeddedProps {
   ctx: TypeContext<MList<QueryFilterEmbedded>>;
@@ -50,7 +51,10 @@ export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.
           isGroup: true,
           indentation: indent,
           groupOperation: fo.groupOperation,
-          token: fo.token && QueryTokenEmbedded.New({ token: fo.token, tokenString: fo.token.fullKey }),
+          token: fo.token && QueryTokenEmbedded.New({
+            token: fo.token,
+            tokenString: fo.token.fullKey
+          }),
           valueString: fo.value,
           pinned: !fo.pinned ? undefined : toPinnedQueryFilterEmbedded(fo.pinned),
           dashboardBehaviour: fo.dashboardBehaviour,
@@ -67,7 +71,10 @@ export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.
         }
 
         ctx.value.push(newMListElement(QueryFilterEmbedded.New({
-          token: fo.token && QueryTokenEmbedded.New({ token: fo.token, tokenString: fo.token.fullKey }),
+          token: fo.token && QueryTokenEmbedded.New({
+            tokenString: fo.token.fullKey,
+            token: fo.token,
+          }),
           operation: fo.operation,
           valueString: fo.value,
           indentation: indent,
@@ -176,7 +183,7 @@ export namespace FilterBuilderEmbedded {
 
     allFilters.forEach(mle => {
       if (mle.element.token && mle.element.token.tokenString)
-        completer.request(mle.element.token.tokenString, subTokenOptions);
+        completer.request(mle.element.token.tokenString);
     });
 
     await completer.finished();
@@ -190,7 +197,7 @@ export namespace FilterBuilderEmbedded {
           const pinned = gr.key.pinned;
 
           const filterCondition: FilterConditionOptionParsed = {
-            token: completer.get(gr.key.token!.tokenString),
+            token: completer.get(gr.key.token!.tokenString, subTokenOptions),
             operation: gr.key.operation ?? "EqualTo",
             value: gr.key.valueString,
             frozen: false,
@@ -205,7 +212,7 @@ export namespace FilterBuilderEmbedded {
           const pinned = gr.key.pinned;
 
           const filterGroup: FilterGroupOptionParsed = {
-            token: gr.key.token ? completer.get(gr.key.token.tokenString) : undefined,
+            token: gr.key.token ? completer.get(gr.key.token.tokenString, subTokenOptions) : undefined,
             groupOperation: gr.key.groupOperation!,
             filters: toFilterList(gr.elements, indent + 1),
             value: gr.key.valueString ?? undefined,
@@ -287,11 +294,11 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps): React.JS
   }, [p.ctx.value]);
 
   function getSwitchModelButton(isValue: boolean): React.ReactElement<any> {
-    return (<a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text", p.ctx.readOnly  && "disabled")}
-      onClick={e => { e.preventDefault(); liteRef.current = isValue ? undefined : null; forceUpdate() }}
+    return (<LinkButton className={classes("sf-line-button", "sf-remove", "btn input-group-text", p.ctx.readOnly  && "disabled")}
+      onClick={e => { liteRef.current = isValue ? undefined : null; forceUpdate() }}
       title={isValue ? UserAssetQueryMessage.SwitchToExpression.niceToString() : UserAssetQueryMessage.SwitchToValue.niceToString()}>
-      <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
-    </a>)
+      <FontAwesomeIcon aria-hidden={true} icon={[isValue ? "far" : "fas", "pen-to-square"]} />
+    </LinkButton>)
   }
 
   if (liteRef.current === undefined)
@@ -343,9 +350,8 @@ export function AutoLineOrExpression(p: ValueLineOrExpressionProps): React.JSX.E
 
   function getSwitchModelButton(isValue: boolean) : React.ReactElement<any> {
     return (
-      <a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text")}
+      <LinkButton className={classes("sf-line-button", "sf-remove", "btn input-group-text")}
         onClick={e => {
-          e.preventDefault();
           if (p.filterType == "DateTime")
             p.ctx.value = "yyyy/mm/dd hh:mm:ss";
 
@@ -356,8 +362,8 @@ export function AutoLineOrExpression(p: ValueLineOrExpressionProps): React.JSX.E
           foceUpdate();
         }}
         title={isValue ? UserAssetQueryMessage.SwitchToExpression.niceToString() : UserAssetQueryMessage.SwitchToValue.niceToString()}>
-        <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
-      </a>
+        <FontAwesomeIcon aria-hidden={true} icon={[isValue ? "far" : "fas", "pen-to-square"]} />
+      </LinkButton>
     );
   }
   if (valueRef.current === undefined)

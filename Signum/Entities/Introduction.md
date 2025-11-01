@@ -123,7 +123,7 @@ Some things to notice:
 
 * The property `SerialNumber`, as any other, uses `Set` method to make the assignment. This is useful for [Change Tracking](ChangeTracking.md). 
 
-* The property `SerialNumber` has a `StringLengthValidatorAttribute` to enforce that the string is non null and between 10 and 12 characters. See more about [Validation](Valiation.md).
+* The property `SerialNumber` has a `StringLengthValidatorAttribute` to enforce that the string is non null and between 10 and 12 characters. See more about [Validation](Validation.md).
 
 * The `Processor` field and property have the type `ProcessorEntity`. A foreign key to the `ProcessorEntity`'s table will be created in the database. 
 
@@ -133,7 +133,7 @@ Some things to notice:
 
 * You can have more than one memory module in a computer. Entities uses `MList<T>` to model One-to-Many and Many-to-Many relationships. Know more in [MList](MList.md).
 
-* A computer can be in four states defined in a `enum`. Enums don't have the flexibility to change at run-time, but when logic depends on them they can be very convenient. Signum Entities have friction-free support for [Enums](Enums.md). 
+* A computer can be in four states defined in a `enum`. Enums don't have the flexibility to change at run-time, but when logic depends on them they can be very convenient. Signum Entities have friction-free support for [Enums](EnumEntity.md). 
 
 * The framework needs to know the `ToString` representation of any entity and usually stores this value in a `ToStr` column when saving. In this case however `ToString` has been defined using a **Expression**, and is smart enough to save the redundant column in this case. 
 
@@ -175,7 +175,7 @@ As you can see, the table `ComputerEntity` is quite similar to the entity itself
 * `SerialNumber` is `NOT NULL` and has length 12, determined by the field attributes. 
 * `idProcessor` is a foreign keys to `ProcessorEntity`. Is nullable because is a reference type and the framework tries to reduce type mismatch. 
 * Similarly, `idBrand` is a foreign key to `ComputerBrandEntity`. `Lite<T>` has no effect at the database level.
-* The field `drive` is represented in to columns:  `idDrive_HardDisk` and `idDrive_SolidStateDrive`, following the directives of `ImplmentedByAttribute`. See more about Inheritance. 
+* The field `drive` is represented in to columns:  `idDrive_HardDisk` and `idDrive_SolidStateDrive`, following the directives of `ImplentedByAttribute`. See more about Inheritance. 
 * There's no column to represent the `memoryModules` because is a `MList<MemoryModuleEntity>`, instead a table is created: 
 
 ```SQL
@@ -214,4 +214,3 @@ INSERT ComputerState (Id, ToStr)
 
 INSERT ComputerState (Id, ToStr)
  VALUES (3, 'Sold')
-```

@@ -70,17 +70,15 @@ export namespace TreeClient {
 
     DashboardClient.registerRenderer(UserTreePartEntity, {
       component: () => import('./Dashboard/View/UserTreePart').then((a: any) => a.default),
-      defaultIcon: () => ({ icon: ["far", "network-wired"], iconColor: "#B7950B" }),
+      icon: () => ({ icon: ["far", "network-wired"], iconColor: "#B7950B" }),
       withPanel: c => true,
       getQueryNames: c => [c.userQuery?.query].notNull(),
       handleEditClick: !Navigator.isViewable(UserTreePartEntity) || Navigator.isReadOnly(UserTreePartEntity) ? undefined :
         (c, e, cdRef, ev) => {
-          ev.preventDefault();
           return Navigator.view(c.userQuery!).then(uq => Boolean(uq));
         },
       handleTitleClick:
         (c, e, cdRef, ev) => {
-          ev.preventDefault();
           ev.persist();
           UserQueryClient.Converter.toFindOptions(c.userQuery!, e)
             .then(cr => AppContext.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(c.userQuery!)) }), ev))

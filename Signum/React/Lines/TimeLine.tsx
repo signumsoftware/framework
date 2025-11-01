@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { classes } from '../Globals';
 import { timeToString, timePlaceholder, toLuxonDurationFormat } from '../Reflection';
-import { LineBaseController, genericForwardRef, useController } from '../Lines/LineBase';
+import { genericMemo, LineBaseController, useController } from '../Lines/LineBase';
 import { FormGroup } from '../Lines/FormGroup';
 import { FormControlReadonly } from '../Lines/FormControlReadonly';
 import { ValueBaseController, ValueBaseProps } from './ValueBase';
@@ -9,7 +9,7 @@ import { Duration } from 'luxon';
 import { isNumberKey } from './NumberLine';
 
 export interface TimeLineProps extends ValueBaseProps<string | null> {
-
+  ref?: React.Ref<TimeLineController>
 }
 
 export class TimeLineController extends ValueBaseController<TimeLineProps, string | null> {
@@ -20,24 +20,33 @@ export class TimeLineController extends ValueBaseController<TimeLineProps, strin
 }
 
 
-export const TimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<TimeLineProps & React.RefAttributes<TimeLineController>>> =
-  React.memo(React.forwardRef(function TimeLine(props: TimeLineProps, ref: React.Ref<TimeLineController>) {
+export const TimeLine: (props: TimeLineProps) => React.ReactNode | null =
+  genericMemo(function TimeLine(props: TimeLineProps) {
 
-    const c = useController(TimeLineController, props, ref);
+    const c = useController(TimeLineController, props);
 
     if (c.isHidden)
       return null;
 
     const p = c.props;
 
+    const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
+    var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+    if (!isLabelVisible && p.label) {
+      ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
+    }
+
+    var htmlAtts = c.props.valueHtmlAttributes;
+    var mergedHtmlReadOnly = { ...htmlAtts, ...ariaAtts };
+
     const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
     const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
     if (p.ctx.readOnly) {
       return (
-        <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+        <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
           {inputId => c.withItemGroup(
-            <FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} ctx={p.ctx} className={classes(c.props.valueHtmlAttributes?.className, "numeric")} innerRef={c.setRefs}>
+            <FormControlReadonly id={inputId} htmlAttributes={mergedHtmlReadOnly} ctx={p.ctx} className={classes(c.props.valueHtmlAttributes?.className, "numeric")} innerRef={c.setRefs}>
               {timeToString(p.ctx.value, p.format)}
             </FormControlReadonly>
           )}
@@ -53,6 +62,7 @@ export const TimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent
       placeholder: c.getPlaceholder(),
       ...c.props.valueHtmlAttributes
     } as React.AllHTMLAttributes<any>;
+    var mergedHtml = { ...htmlAttributes, ...ariaAtts };
 
     const durationFormat = toLuxonDurationFormat(p.format) ?? "hh:mm:ss";
 
@@ -60,9 +70,9 @@ export const TimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent
       htmlAttributes.placeholder = timePlaceholder(durationFormat);
 
     return (
-      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => c.withItemGroup(
-          <TimeTextBox htmlAttributes={htmlAttributes}
+          <TimeTextBox htmlAttributes={mergedHtml}
             id={inputId}
             value={p.ctx.value}
             onChange={handleOnChange}
@@ -73,7 +83,7 @@ export const TimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent
         )}
       </FormGroup>
     );
-  }), (prev, next) => {
+  }, (prev, next) => {
     return LineBaseController.propEquals(prev, next);
   });
 
@@ -90,7 +100,7 @@ export interface TimeTextBoxProps {
   id?: string;
 }
 
-export function TimeTextBox(p: TimeTextBoxProps): React.JSX.Element {
+export function TimeTextBox(p: TimeTextBoxProps): React.ReactElement {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 

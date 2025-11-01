@@ -2,7 +2,7 @@ import * as React from 'react';
 import { classes } from '../Globals';
 
 export type HeaderType = "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "display-1" | "display-2" | "display-3" | "display-4" | "display-5" | "display-6" | "display-7" | "lead";   
-export function Title(p: { children: React.ReactNode, type: HeaderType }): React.JSX.Element {
+export function Title(p: { children: React.ReactNode, type: HeaderType }): React.ReactElement {
 
   var ElementType =
     p.type == "lead" ? "p" as const :
@@ -20,9 +20,11 @@ export function GroupHeader(p: {
   buttons?: React.ReactNode;
   avoidFieldSet?: boolean | HeaderType;
   children: React.ReactNode;
-  className?: string
-  htmlAttributes?: React.HTMLAttributes<HTMLDivElement>
-}): React.JSX.Element {
+  className?: string;
+  htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
+  fieldsetClassName?: string
+  fieldsetHtmlAttributes?: React.HTMLAttributes<HTMLFieldSetElement>
+}): React.ReactElement {
 
   if (p.avoidFieldSet) {
 
@@ -35,7 +37,7 @@ export function GroupHeader(p: {
   }
 
   return (
-    <fieldset>
+    <fieldset className={p.fieldsetClassName} {...p.fieldsetHtmlAttributes}>
       {(p.label || p.labelIcon || p.buttons) && < legend >
         <div>
           <span>{p.label}{p.labelIcon}</span>

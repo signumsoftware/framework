@@ -43,8 +43,9 @@ public static class HelpLogic
 
     public static void Start(SchemaBuilder sb, IFileTypeAlgorithm helpImagesAlgorithm)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
             sb.Include<TypeHelpEntity>()
                 .WithUniqueIndex(e => new { e.Type, e.Culture })
                 .WithUniqueIndexMList(e => e.Properties, mle => new { mle.Parent, mle.Element.Property })
@@ -151,7 +152,6 @@ public static class HelpLogic
                 OmniboxParser.Generators.Add(new HelpModuleOmniboxResultGenerator());
             }
         }
-    }
 
     public static NamespaceHelp GetNamespaceHelp(string @namespace) => CachedNamespacesHelp().GetOrThrow(@namespace).SingleOrDefaultEx(a => a.DBEntity == null || IsApplicableNamespace(a.DBEntity)) ?? new NamespaceHelp(@namespace, GetCulture(), null, AllTypes().Where(a => a.Namespace == @namespace).ToArray());
     public static IEnumerable<NamespaceHelp> GetNamespaceHelps() => CachedNamespacesHelp().Values.SelectMany(a => a).Select(a => GetNamespaceHelp(a.Namespace)).Where(a => a.IsAllowed() == null);
@@ -439,7 +439,7 @@ public static class HelpLogic
 
         if (exceptions.Any())
             throw new InvalidOperationException("Error Parsing XML Help Files: " + exceptions.ToString(e => "{0} ({1}:{2}): {3}".FormatWith(
-             e.filename, e.exception.LineNumber, e.exception.LinePosition, e.Item1.Message), "\r\n").Indent(3));
+             e.filename, e.exception.LineNumber, e.exception.LinePosition, e.Item1.Message), "\n").Indent(3));
 
         return document;
     }

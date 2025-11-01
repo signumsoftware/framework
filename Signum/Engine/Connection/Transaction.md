@@ -1,51 +1,41 @@
 ﻿# Transaction
 
-Transaction class is used to handle transactions in a clean and easy nestable way. 
+The `Transaction` class in Signum handles database transactions in a clean, nestable, and implicit way. It is inspired by Microsoft's [TransactionScope](https://learn.microsoft.com/en-us/dotnet/api/system.transactions.transactionscope) from the client code perspective: transactions are managed implicitly via `using` statements.
 
-It uses the same strategy as Microsoft's [TransactionScope](http://msdn.microsoft.com/es-es/library/system.transactions.transactionscope.aspx) from the client code point of view: Implicit transaction in the call stack defined by `using` statements.
+However, the internal implementation differs to better support Signum's needs, including nested and silent transactions, savepoints, and test scenarios.
 
-Internally, however, it has some differences, let's take a look.
+## How to Use
 
-## How to use it
+Suppose you have code like this:
 
-Imagine we have some code like this: 
-
-
-```C#
+```csharp
 private static void FixBugs()
 {
-   var wrongBugs = from b in Database.Query<BugEntity>()
-                   where b.Status == Status.Fixed && !b.End.HasValue
-                   select b.ToLite();
-   
-   foreach (var lazyBug in wrongBugs)
-   {
-      BugEntity bug = lazyBug.Retrieve(); 
-      bug.Description += "- Fix it!";
-      bug.Save(); 
-   }
+    var wrongBugs = from b in Database.Query<BugEntity>()
+                    where b.Status == Status.Fixed && !b.End.HasValue
+                    select b.ToLite();
+    
+    foreach (var lazyBug in wrongBugs)
+    {
+        BugEntity bug = lazyBug.Retrieve();
+        bug.Description += "- Fix it!";
+        bug.Save();
+    }
 }
-``` 
+```
 
-This simple code contains a lot of intensive work with the database: the query, retrieving each Bug, and saving it. Currently all of these are independent operations, so we could have some problems: 
+This code performs several database operations independently. If an exception occurs midway, you may end up with partial changes. Also, concurrency issues may arise if data changes between the query and retrieval.
 
-* If some exception is thrown in the middle of the process we end up having some bugs fixed and some remaing. This could have some problems, like duplicating - Fix It! for some bugs once you re-run the process.
-* It could take some time from the time the query gets executed, to the moment the `BugEntity` is actually retrieved (we are using lite objects). Someone could have modified the Bug in the meantime. 
+In Signum, every atomic operation (query, retrieve, save) is transactional by default. However, to group multiple operations into a single transaction, wrap them in a `Transaction` block:
 
-In `Signum.Engine`, every atomic operation, like retrieving an object, executing a query, or saving an object graph is transactional by default.
-
-Sometimes, however, you want to glue together operations in the same transaction, so you have a consistent view of the database (not influenced by concurrency) and you don't commit partial modifications if something goes wrong in the middle. 
-
-This is as easy as surrounding the code with a `using` Transaction block, like this: 
-
-```C#
+```csharp
 private static void FixBugs()
 {
-    using (Transaction tr = new Transaction())
+    using (var tr = new Transaction())
     {
         var wrongBugs = from b in Database.Query<BugEntity>()
                         where b.Status == Status.Fixed && !b.End.HasValue
-                        select b.ToLazy();
+                        select b.ToLite();
 
         foreach (var lazyBug in wrongBugs)
         {
@@ -59,215 +49,149 @@ private static void FixBugs()
 }
 ```
 
-What we do here is creating a transaction, do our work, and at the end call `Commit` on it. When the transaction is disposed, if it hasn't been committed, it gets roll backed automatically, so the code gets much more simple to read.
+Here, all operations are part of the same transaction. If `Commit()` is not called, the transaction is rolled back on dispose. This ensures consistency and prevents partial updates.
 
-**Note:** `IDisposable` pattern doesn't get notified for exceptions, that's why Commit is necessary.
+**Note:** The `IDisposable` pattern does not detect exceptions, so you must call `Commit()` explicitly.
 
-The nice thing is that all the code inside (i.e.: `Query`, `Retrieve`, `Save`) doesn't need to take a `Transaction tr` as a parameter, because transactions are handled implicitly.
+Transactions are handled implicitly; you do not need to pass the transaction object to inner methods. You can also nest transactions:
 
-Also, if you call FixBigs from a method like this: 
-
-```C#
+```csharp
 private static void FixTheWorld()
 {
-    FixBugs();
-
-    FixCustomers();
-
-    FixDevelopers();
-}
-```
-
-We can also glue together all the inner transactions creating a new, wider one: 
-
-```C#
-private static void FixTheWorld()
-{
-    using (Transaction tr = new Transaction())
+    using (var tr = new Transaction())
     {
         FixBugs();
-
         FixCustomers();
-
         FixDevelopers();
-
         tr.Commit();
     }
 }
 ```
 
-The end result is that the inner transactions now become silent and the outer transaction is the only one taking effect, without you having to change anything the methods, so the code is much easier to compose. 
+Inner transactions become silent (faked) if an outer transaction exists. Only the outermost transaction actually commits or rolls back.
 
 ## Types of Transactions
 
 ### `new Transaction()`
-Creates a new Transaction using the default `IsolationLevel` if it's the first transaction (parent), otherwise creates a faked transaction that does not commit, but can force roll-back of the parent transaction. 
+Creates a new transaction. If it's the first (outermost) transaction, it creates a real transaction. Otherwise, it creates a silent (faked) transaction that can force a rollback but not commit independently.
 
-Use this transaction to ensure that some operations will be consistent, but let the caller embed you in a wider transaction. 
-
-```C#
-using(Transaction tr1 = new Transaction())
+```csharp
+using (var tr1 = new Transaction())
 {
-   using(Transaction tr2 = new Transaction()) //This transaction is silent
-   {
-    
-       tr2.Commit(); //But has to be commited
-   }
-
-   tr1.Commit();
+    using (var tr2 = new Transaction()) // tr2 is silent
+    {
+        tr2.Commit(); // Required, but only tr1 actually commits
+    }
+    tr1.Commit();
 }
 ```
 
-### `ForceNew`
-Creates a new independent Transaction with the provided `IsolationLevel`, even if there's a parent transaction, except if the parent transaction is a `Test` transaction. 
+### `Transaction.ForceNew()`
+Creates a new, independent transaction, even if a parent transaction exists (unless in a test transaction). Changes in the parent transaction are not visible until committed.
 
-Once inside a `ForceNew` transaction, you won't be able to see changes not commited by any transaction, **included** the parent transaction. 
-
-```C#
-using(Transaction tr1 = new Transaction())
+```csharp
+using (var tr1 = new Transaction())
 {
-   ProjectEntity proj = new ProjectEntity { Name = "New project" }.Save();
-
-   using(Transaction tr2 = Transaction.ForceNew()) //Independent transaction
-   {
-       Database.Exists(proj); //returns false because tr1 is not commited
-    
-       tr2.Commit();
-   }
-
-   tr1.Commit();
+    var proj = new ProjectEntity { Name = "New project" }.Save();
+    using (var tr2 = Transaction.ForceNew()) // Independent transaction
+    {
+        Database.Exists(proj); // false, tr1 not committed
+        tr2.Commit();
+    }
+    tr1.Commit();
 }
 ```
 
-Independent transactions are usually used to process entities independently in long-running processes, in `catch` blocks of a `try-catch` statements, or to fill global cache of shared objects. 
+Use for independent processing, error handling, or global cache updates.
 
-### `Test`
-Test transactions can be used to domesticate `ForceNew` transactions, keeping them embedded in the parent transaction. 
+### `Transaction.Test()`
+Creates a test transaction. Any `ForceNew` transaction inside a test transaction becomes silent, so all changes can be rolled back together. Useful for testing long-running processes.
 
-Usually to test long-running processes and still be able to rollback the changes. 
-
-```C#
-using(Transaction tr1 = Transaction.Test())
+```csharp
+using (var tr1 = Transaction.Test())
 {
-   ProjectEntity proj = new ProjectEntity { Name = "New project" }.Save();
-
-   using(Transaction tr2 = Transaction.ForceNew()) //silent transaction
-   {
-       Database.Exists(proj); //returns true because tr2 is not silent
-    
-       tr2.Commit();
-   }
-
-   tr1.Commit();
+    var proj = new ProjectEntity { Name = "New project" }.Save();
+    using (var tr2 = Transaction.ForceNew()) // Silent in test
+    {
+        Database.Exists(proj); // true
+        tr2.Commit();
+    }
+    tr1.Commit();
 }
 ```
 
+### `Transaction.NamedSavePoint(string name)`
+Creates a named savepoint using SQL savepoints. Allows rolling back to a specific point within a transaction.
 
-### `NamedSavePoint`
-
-Uses `SqlTransaction.Save` and `SqlTransaction.Rollback` to save and rollback to certain transaction points. 
-
-```C#
-using(Transaction tr1 = new Transaction())
+```csharp
+using (var tr1 = new Transaction())
 {
-   ProjectEntity proj = new ProjectEntity { Name = "New project" }.Save();
-   try
-   {
-      using(Transaction tr2 = Transaction.NamedSavePoint("Risky")) //named transaction
-      {
-          proj.Delete(); 
-
-          throw Exception();
-       
-          tr2.Commit();
-      }
-   }
-   catch(Exception e)
-   {
-      
-   }
-
-   tr1.Commit(); //proj will be created and not deleted
+    var proj = new ProjectEntity { Name = "New project" }.Save();
+    try
+    {
+        using (var tr2 = Transaction.NamedSavePoint("Risky"))
+        {
+            proj.Delete();
+            throw new Exception();
+            tr2.Commit();
+        }
+    }
+    catch (Exception)
+    {
+        // tr2 is rolled back, proj is not deleted
+    }
+    tr1.Commit();
 }
 ```
 
-Usefull in some complicated business logic that contain some optional operations that need to be rollbacked independently. 
+Useful for complex business logic with optional, independently rollbackable operations.
 
-### `None` 
-Special type of transaction to avoid creating `SqlTransactions` for any inner `Transaction` (like atomic framework operations). Could be usefull to improve performance doing some micro-optimizations. Profile first!
+### `Transaction.None()`
+Disables SQL transactions for the scope, so inner operations are not wrapped in a transaction. Use only for micro-optimizations after profiling.
 
-```C#
-using(Transaction tr1 = Transaction.None())
+```csharp
+using (var tr1 = Transaction.None())
 {
-   // The 3 necessary INSERT commands will not be embedded in the same transaction
-   BugEntity proj = new BugEntity
-   { 
-      Description = "New Bug",
-      Fixer = new DeveloperEntity { Name = "New Developer"  }
-      Project = new ProjectEntity { Name = "New project"  }
-   }.Save(); 
-  
-   tr1.Commit();
+    var proj = new BugEntity
+    {
+        Description = "New Bug",
+        Fixer = new DeveloperEntity { Name = "New Developer" },
+        Project = new ProjectEntity { Name = "New project" }
+    }.Save();
+    tr1.Commit();
 }
 ```
 
-## `Commit` and `Commit(value)`
+## Commit and Commit(value)
 
-Calling `Commit` method is necessary before the transaction is disposed, or will be roll-backed. 
+You must call `Commit()` before disposing the transaction, or it will be rolled back. 
 
-This restriction can make your code uglier if you need to return values. 
+If you need to return a value after committing, use the overload that accepts (and returns) the desired value:
 
-```C#
+```csharp
 int OpenResult()
 {
-   using(Transaction tr = new Transaction())
-   { 
-      Database.Query<BugEntity>()
-      .Where(b => b.Status == Status.Open && b.Start < DateTime.Today.AddMonth(-6))
-      .UnsafeUpdate()
-      .Set(b =>b.Status, b => Status.Rejected)
-      .Execute();
+    using (var tr = new Transaction())
+    {
+        Database.Query<BugEntity>()
+            .Where(b => b.Status == Status.Open && b.Start < DateTime.Today.AddMonths(-6))
+            .UnsafeUpdate()
+            .Set(b => b.Status, b => Status.Rejected)
+            .Execute();
 
-      return Database.Query<BugEntity>().Count(b=> b.Status == Status.Open);  //UPS!! Commit unreachable
+        var opened = Database.Query<BugEntity>().Count(b => b.Status == Status.Open);
 
-      tr.Commit()
-   }
+        return tr.Commit(opened); //commit and return
+    }
 }
 ```
 
-In order to aliviate the problem, an overload of `Commit` allows to get and return any value: 
+## Static Helpers and Events
 
-```C#
-int OpenResult()
-{
-   using(Transaction tr = new Transaction())
-   { 
-      Database.Query<BugEntity>()
-      .Where(b => b.Status == Status.Open && b.Start < DateTime.Today.AddMonth(-6))
-      .UnsafeUpdate()
-      .Set(b =>b.Status, b => Status.Rejected)
-      .Execute();
+The following are static events and properties that internally access the current transaction instance. 
 
-      return tr.Commit(Database.Query<BugEntity>().Count(b=> b.Status == Status.Open));
-   }
-}
-```
-
-Nothing magic here, just a little bit more convenient.
-
-
-## Transaction static events
-
-There are three useful static events in `Transaction` class: 
-
-### Transaction.PreRealCommit
-
-Invoked just before the current real transaction is about to be committed. Convenient to assert post-conditions that the database has to satisfy when the transaction is commited, but could not be the case during the transaction. 
-
-### Transaction.PostRealCommit
-
-Invoked just after the current real transaction is committed. Convenient to invalidate caches.  
-
-### Transaction.Rolledback
-
-Invoked just after the current real transaction is rolled-back. Also convenient to invalidate caches.  
+- `Transaction.PreRealCommit`: Invoked just before the real transaction is committed. Useful for asserting post-conditions.
+- `Transaction.PostRealCommit`: Invoked just after the real transaction is committed. Useful for cache invalidation.
+- `Transaction.Rolledback`: Invoked after a real transaction is rolled back. Also useful for cache invalidation.
+- `Transaction.UserData`: Dictionary for storing custom data in the current transaction.
+- `Transaction.CurrentConnection` / `Transaction.CurrentTransaction`: Access the current connection or transaction.

@@ -22,18 +22,18 @@ public static class DynamicLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            TypeHelpLogic.Start(sb);
-            PermissionLogic.RegisterPermissions(DynamicPanelPermission.RestartApplication);
-            DynamicLogic.GetCodeFiles += GetCodeGenStarter;
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
-            EvalLogic.Namespaces.Add(CodeGenNamespace);
-            EvalLogic.GetCodeGenAssemblyPath = () => CodeGenAssemblyPath;
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            if (sb.WebServerBuilder != null)
-                DynamicServer.Start(sb.WebServerBuilder.WebApplication);
-        }
+        TypeHelpLogic.Start(sb);
+        PermissionLogic.RegisterPermissions(DynamicPanelPermission.RestartApplication);
+        DynamicLogic.GetCodeFiles += GetCodeGenStarter;
+        AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
+        EvalLogic.Namespaces.Add(CodeGenNamespace);
+        EvalLogic.GetCodeGenAssemblyPath = () => CodeGenAssemblyPath;
+
+        if (sb.WebServerBuilder != null)
+            DynamicServer.Start(sb.WebServerBuilder);
     }
 
     private static Assembly AssemblyResolveHandler(object? sender, ResolveEventArgs args)
@@ -118,7 +118,7 @@ public static class DynamicLogic
                     if (cr.Errors.Count == 0)
                         CodeGenAssemblyPath = cr.OutputAssembly;
                     else
-                        errors.Add("Errors compiling  dynamic assembly:\r\n" + cr.Errors.ToString("\r\n").Indent(4));
+                        errors.Add("Errors compiling  dynamic assembly:\n" + cr.Errors.ToString("\n").Indent(4));
                 }
             }
 
@@ -130,11 +130,11 @@ public static class DynamicLogic
                 if (cr.Errors.Count == 0)
                     CodeGenControllerAssemblyPath = cr.OutputAssembly;
                 else
-                    errors.Add("Errors compiling  dynamic api controller assembly:\r\n" + cr.Errors.ToString("\r\n").Indent(4));
+                    errors.Add("Errors compiling  dynamic api controller assembly:\n" + cr.Errors.ToString("\n").Indent(4));
             }
 
             if (errors.Any())
-                throw new InvalidOperationException(errors.ToString("\r\n"));
+                throw new InvalidOperationException(errors.ToString("\n"));
         }
         catch (Exception e)
         {
@@ -148,8 +148,11 @@ public static class DynamicLogic
         if (e == null)
             return;
 
-        if (Administrator.ExistsTable<ExceptionEntity>())
-            e.LogException();
+        Schema.Current.Initializing += () =>
+        {
+            if (Administrator.ExistsTable<ExceptionEntity>())
+                e.LogException();
+        };
 
         Console.WriteLine();
         SafeConsole.WriteLineColor(ConsoleColor.Red, "IMPORTANT!: Starting without Dynamic Entities.");

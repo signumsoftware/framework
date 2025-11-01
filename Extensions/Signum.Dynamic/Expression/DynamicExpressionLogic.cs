@@ -9,81 +9,81 @@ public static class DynamicExpressionLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<DynamicExpressionEntity>()
+            .WithUniqueIndex(a => new { a.FromType, a.Name })
+            .WithSave(DynamicExpressionOperation.Save)
+            .WithDelete(DynamicExpressionOperation.Delete)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.ReturnType,
+                e.FromType,
+            });
+
+        new Graph<DynamicExpressionEntity>.ConstructFrom<DynamicExpressionEntity>(DynamicExpressionOperation.Clone)
         {
-            sb.Include<DynamicExpressionEntity>()
-                .WithUniqueIndex(a => new { a.FromType, a.Name })
-                .WithSave(DynamicExpressionOperation.Save)
-                .WithDelete(DynamicExpressionOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.ReturnType,
-                    e.FromType,
-                });
-
-            new Graph<DynamicExpressionEntity>.ConstructFrom<DynamicExpressionEntity>(DynamicExpressionOperation.Clone)
+            Construct = (e, _) =>
             {
-                Construct = (e, _) =>
+                return new DynamicExpressionEntity
                 {
-                    return new DynamicExpressionEntity
-                    {
-                        Name = e.Name + "_2",
-                        ReturnType = e.ReturnType,
-                        FromType = e.FromType,
-                        Body = e.Body,
-                    };
-                }
-            }.Register();
+                    Name = e.Name + "_2",
+                    ReturnType = e.ReturnType,
+                    FromType = e.FromType,
+                    Body = e.Body,
+                };
+            }
+        }.Register();
 
-            DynamicLogic.GetCodeFiles += GetCodeFiles;
-            DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
-            EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicExpressionEntity));
+        DynamicLogic.GetCodeFiles += GetCodeFiles;
+        DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
+        EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicExpressionEntity));
 
-            DynamicTypeLogic.GetAlreadyTranslatedExpressions = () =>
+        DynamicTypeLogic.GetAlreadyTranslatedExpressions = () =>
+        {
+            var cacheOldDisabled = CacheLogic.GloballyDisabled;
+            CacheLogic.GloballyDisabled = true;
+            try
             {
-                var cacheOldDisabled = CacheLogic.GloballyDisabled;
-                CacheLogic.GloballyDisabled = true;
-                try
-                {
-                    if (!Administrator.ExistsTable<DynamicExpressionEntity>())
-                        return new Dictionary<string, Dictionary<string, string>>();
+                if (!Administrator.ExistsTable<DynamicExpressionEntity>())
+                    return new Dictionary<string, Dictionary<string, string>>();
 
-                    using (ExecutionMode.Global())
-                        return Database.Query<DynamicExpressionEntity>()
-                        .Where(a => a.Translation == DynamicExpressionTranslation.TranslateExpressionName)
-                        .AgGroupToDictionary(a => a.FromType, gr => gr.ToDictionary(a => a.Name, a => "CodeGenExpressionMessage." + a.Name));
-                }
-                finally
-                {
-                    CacheLogic.GloballyDisabled = cacheOldDisabled;
-                }
-            };
-
-            DynamicTypeLogic.GetFormattedExpressions = () =>
+                using (ExecutionMode.Global())
+                    return Database.Query<DynamicExpressionEntity>()
+                    .Where(a => a.Translation == DynamicExpressionTranslation.TranslateExpressionName)
+                    .AgGroupToDictionary(a => a.FromType, gr => gr.ToDictionary(a => a.Name, a => "CodeGenExpressionMessage." + a.Name));
+            }
+            finally
             {
-                var cacheOldDisabled = CacheLogic.GloballyDisabled;
-                CacheLogic.GloballyDisabled = true;
-                try
-                {
-                    if (!Administrator.ExistsTable<DynamicExpressionEntity>())
-                        return new Dictionary<string, Dictionary<string, FormatUnit>>();
+                CacheLogic.GloballyDisabled = cacheOldDisabled;
+            }
+        };
 
-                    using (ExecutionMode.Global())
-                        return Database.Query<DynamicExpressionEntity>()
-                        .Where(a => a.Format != null || a.Unit != null)
-                        .AgGroupToDictionary(a => a.FromType!, gr => gr.ToDictionary(a => a.Name!, a => new FormatUnit(a.Format, a.Unit)));
-                }
-                finally
-                {
-                    CacheLogic.GloballyDisabled = cacheOldDisabled;
-                }
-            };
+        DynamicTypeLogic.GetFormattedExpressions = () =>
+        {
+            var cacheOldDisabled = CacheLogic.GloballyDisabled;
+            CacheLogic.GloballyDisabled = true;
+            try
+            {
+                if (!Administrator.ExistsTable<DynamicExpressionEntity>())
+                    return new Dictionary<string, Dictionary<string, FormatUnit>>();
 
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicExpressionEntity>().Where(de => de.FromType == ((TypeEntity)type).ClassName));
-        }
+                using (ExecutionMode.Global())
+                    return Database.Query<DynamicExpressionEntity>()
+                    .Where(a => a.Format != null || a.Unit != null)
+                    .AgGroupToDictionary(a => a.FromType!, gr => gr.ToDictionary(a => a.Name!, a => new FormatUnit(a.Format, a.Unit)));
+            }
+            finally
+            {
+                CacheLogic.GloballyDisabled = cacheOldDisabled;
+            }
+        };
+
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicExpressionEntity>().Where(de => de.FromType == ((TypeEntity)type).ClassName));
     }
 
 
