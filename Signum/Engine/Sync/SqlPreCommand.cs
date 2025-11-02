@@ -745,3 +745,63 @@ public class SqlPreCommandConcat : SqlPreCommand
     }
 }
 
+public class SqlPreCommand_WithHistory : SqlPreCommand
+{
+    public SqlPreCommand? Normal;
+    public SqlPreCommand? History;
+
+    public SqlPreCommand_WithHistory(SqlPreCommand? normal, SqlPreCommand? history)
+    {
+        Normal = normal;
+        History = history;
+    }
+
+    public override bool HasNoTransaction => throw new NotImplementedException();
+
+    public override bool GoBefore { get; set; }
+    public override bool GoAfter { get; set; }
+
+    protected internal override int NumParameters => throw new NotImplementedException();
+
+    public override SqlPreCommand Clone() => throw new NotImplementedException();
+
+    public override IEnumerable<SqlPreCommandSimple> Leaves() => throw new NotImplementedException();
+
+    public override SqlPreCommand Replace(Regex regex, MatchEvaluator matchEvaluator)  => throw new NotImplementedException();
+
+    protected internal override void PlainSql(StringBuilder sb) => throw new NotImplementedException();
+
+    public static SqlPreCommand? ForNormal(SqlPreCommand? command)
+    {
+        if (command is null)
+            return null;
+
+        if (command is SqlPreCommandSimple s)
+            return s;
+
+        if (command is SqlPreCommandConcat c)
+            return new SqlPreCommandConcat(c.Spacing, c.Commands.Select(ForNormal).NotNull().ToArray());
+
+        if (command is SqlPreCommand_WithHistory h)
+            return h.Normal;
+
+        throw new UnexpectedValueException(command);
+    }
+
+    public static SqlPreCommand? ForHistory(SqlPreCommand? command)
+    {
+        if (command is null)
+            return null;
+
+        if (command is SqlPreCommandSimple s)
+            return s;
+
+        if (command is SqlPreCommandConcat c)
+            return c.Commands.Select(ForHistory).Combine(c.Spacing);
+
+        if (command is SqlPreCommand_WithHistory h)
+            return h.History;
+
+        throw new UnexpectedValueException(command);
+    }
+}
