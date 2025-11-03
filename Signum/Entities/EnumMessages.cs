@@ -736,3 +736,12 @@ public enum FontSizeMessage
     ResetFontSize,
     IncreaseFontSize,
 }
+
+[AllowUnauthenticated]
+public enum FontSizeMessage
+{
+    FontSize,
+    ReduceFontSize,
+    ResetFontSize,
+    IncreaseFontSize,
+}

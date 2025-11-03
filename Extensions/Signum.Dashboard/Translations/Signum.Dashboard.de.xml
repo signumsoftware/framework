@@ -56,6 +56,7 @@
     <Member Name="_0Is1InstedOf2In3" Description="{0} ist {1} (statt {2}) in {3}" />
     <Member Name="AltClickToOpenResultsInAModalWindow" Description="[Alt] + Klicken, um die Ergebnisse in einem modalen Fenster zu öffnen" />
     <Member Name="CLickInOneChartToFilterInTheOthers" Description="Klicken Sie in ein Diagramm, um in den anderen zu filtern" />
+    <Member Name="Close" Description="Schließen" />
     <Member Name="CopyHealthCheckDashboardData" Description="Kopieren von Daten aus dem Health Check Dashboard" />
     <Member Name="CreateNewPart" Description="Neues Teil erstellen" />
     <Member Name="CtrlClickToFilterByMultipleElements" Description="[Strg] + Klicken, um nach mehreren Elementen zu filtern" />
@@ -68,6 +69,7 @@
     <Member Name="Part0OverlapsWith1" Description="Teil {0} überschneidet sich mit {1}" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="RowsSelected" Description="Zeile(n) ausgewählt" />
+    <Member Name="SelectIcon" Description="Symbol auswählen" />
     <Member Name="TheUserQuery0HasNoColumnWithSummaryHeader" Description="Die Benutzerabfrage '{0}' hat keine Spalte mit Zusammenfassungskopfzeile" />
   </Type>
   <Type Name="DashboardOperation">
