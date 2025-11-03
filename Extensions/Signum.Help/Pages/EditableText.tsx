@@ -45,14 +45,11 @@ export function EditableHtmlComponent({ ctx, onChange, defaultEditable }: { ctx:
 
   return (
     <div className={classes("sf-edit-container", readOnly && "html-viewer")} >
+      
       <HelpHtmlEditor binding={ctx.binding} readOnly={readOnly} />
-      {!ctx.readOnly && (
-        <a href="#" className={classes("sf-edit-button", editable && "active", ctx.value && "block")}
-          onClick={e => { e.preventDefault(); setEditable(ed => !ed); }}>
-          <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2"
-            title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
-        </a>
-      )}
+      {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active", ctx.value && "block")} onClick={e => { e.preventDefault(); setEditable(!editable); }}>
+        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
+      </a>}
     </div>
   );
 }
@@ -111,19 +108,6 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
     this.pr = HelpImageEntity.propertyRouteAssert(a => a.file);;
   }
 
-  fromElement(element: HTMLDivElement): ImageInfo | undefined {
-    if (element.tagName == "IMG") {
-      return {
-        binaryFile: element.dataset["binaryFile"],
-        inlineImageId: element.dataset["helpImageId"],
-        fileName: element.dataset["fileName"],
-        converterKey: InlineImageConverter.name,
-      };
-    }
-
-    return undefined;
-  }
-
   toElement(val: ImageInfo): HTMLElement | undefined {
     const img = document.createElement("img");
 
@@ -135,19 +119,19 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
     return img;
   }
 
-  async uploadData(blob: Blob): Promise<ImageInfo> {
+  uploadData(blob: Blob): Promise<ImageInfo> {
     var file = blob instanceof File ? blob :
       new File([blob], "pastedImage." + blob.type.after("/"));
 
-    const att = await toFileEntity(file, {
-          type: FilePathEmbedded, accept: "image/*",
-          maxSizeInBytes: this.pr.member!.defaultFileTypeInfo!.maxSizeInBytes ?? undefined
-      });
-      return ({
-          converterKey: InlineImageConverter.name,
-          binaryFile: att.binaryFile ?? undefined,
-          fileName: att.fileName ?? undefined
-      });
+    return toFileEntity(file, {
+      type: FilePathEmbedded, accept: "image/*",
+      maxSizeInBytes: this.pr.member!.defaultFileTypeInfo!.maxSizeInBytes ?? undefined
+    })
+      .then(att => ({
+        binaryFile: att.binaryFile ?? undefined,
+        fileName: att.fileName ?? undefined,
+        converterKey: InlineImageConverter.name,
+      }));
   }
 
   renderImage(info: ImageInfo): React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> {
@@ -166,7 +150,7 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
     return <FileImage file={fp} />;
   }
 
-/*  toHtml(val: ImageInfo): string | undefined {
+  toHtml(val: ImageInfo): string | undefined {
     if (val.binaryFile)
       return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" />`;
 
@@ -174,6 +158,18 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
       return `<img data-help-image-id="${val.inlineImageId}" />`;
 
     return undefined;
-  }*/
+  }
 
+  fromElement(element: HTMLDivElement): ImageInfo | undefined {
+    if (element.tagName == "IMG") {
+      return {
+        binaryFile: element.dataset["binaryFile"],
+        fileName: element.dataset["fileName"],
+        inlineImageId: element.dataset["helpImageId"],
+        converterKey: InlineImageConverter.name,
+      };
+    }
+
+    return undefined;
+  }
 }
