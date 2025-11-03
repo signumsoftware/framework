@@ -39,7 +39,6 @@ export class ImageExtension
         return;
       }
 
-        this.insertImageNodes(files, controller.editor, this.imageConverter);
       event.dataTransfer!.dropEffect = "copy";
     }, { signal: abortController.signal });
 
@@ -47,12 +46,12 @@ export class ImageExtension
       if (!controller.editor.isEditable())
         return;
 
-        this.insertImageNodes(files, controller.editor, this.imageConverter);
       event.preventDefault();
 
       const files = event.dataTransfer?.files;
       if (!files?.length) return;
 
+      this.insertImageNodes(files, controller, this.imageConverter);
     }, { signal: abortController.signal });
 
     element.addEventListener("paste", (event) => {
@@ -61,6 +60,7 @@ export class ImageExtension
       if (!files?.length) return;
 
       event.preventDefault();
+      this.insertImageNodes(files, controller, this.imageConverter);
     }, { signal: abortController.signal });
 
     return () => {
@@ -74,7 +74,7 @@ export class ImageExtension
 
   async insertImageNodes(
     files: FileList,
-    editor: LexicalEditor,
+    controller: HtmlEditorController,
     imageConverter: ImageConverter
   ): Promise<void> {
 
@@ -96,10 +96,13 @@ export class ImageExtension
 
     if (!successfulFiles.length) return;
 
+    controller.editor.update(() => {
       for (const file of successfulFiles) {
         const imageNode = $createImageNode(file, imageConverter);
         $getRoot().append(imageNode);
       }
     });
 
+    controller.saveHtml(); //onBlur is not reliable
+    }
 }
