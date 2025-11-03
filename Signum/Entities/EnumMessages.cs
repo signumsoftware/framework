@@ -757,3 +757,12 @@ public enum TemplateMessage
     [Description("Copy to clipboard: Ctrl+C, ESC")]
     CopyToClipboard,
 }
+
+[AllowUnauthenticated]
+public enum FontSizeMessage
+{
+    FontSize,
+    ReduceFontSize,
+    ResetFontSize,
+    IncreaseFontSize,
+}

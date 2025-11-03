@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { NavDropdown, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faMinus, faRotateRight, faTextHeight } from "@fortawesome/free-solid-svg-icons";
-import { FontSizeMessage } from "../Signum.Basics";
+import { FontSizeMessage } from "../Signum.Entities";
 
 export const FONT_SCALE_STORAGE_KEY = "bootstrap-font-scale";
 

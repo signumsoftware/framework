@@ -432,6 +432,13 @@ export namespace EntityControlMessage {
   export const Close: MessageKey = new MessageKey("EntityControlMessage", "Close");
 }
 
+export namespace FontSizeMessage {
+  export const FontSize: MessageKey = new MessageKey("FontSizeMessage", "FontSize");
+  export const ReduceFontSize: MessageKey = new MessageKey("FontSizeMessage", "ReduceFontSize");
+  export const ResetFontSize: MessageKey = new MessageKey("FontSizeMessage", "ResetFontSize");
+  export const IncreaseFontSize: MessageKey = new MessageKey("FontSizeMessage", "IncreaseFontSize");
+}
+
 export namespace FrameMessage {
   export const New0_G: MessageKey = new MessageKey("FrameMessage", "New0_G");
   export const Copied: MessageKey = new MessageKey("FrameMessage", "Copied");
