@@ -1,6 +1,7 @@
-import { $applyNodeReplacement, DecoratorNode, DOMExportOutput, NodeKey } from "lexical";
+import { $applyNodeReplacement, DecoratorNode, DOMConversion, DOMConversionMap, DOMConversionOutput, DOMExportOutput, NodeKey } from "lexical";
 import { ImageConverter, ImageInfo } from "./ImageConverter";
 import { ReactElement, JSXElementConstructor } from "react";
+import { HtmlEditorClient } from "../../HtmlEditorClient";
 
 export class ImageNode extends DecoratorNode<React.ReactElement> {
   constructor(private imageInfo: ImageInfo, private imageConverter: ImageConverter, key?: NodeKey) {
@@ -42,6 +43,34 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
     const element =  this.imageConverter.toElement(this.imageInfo) ?? null;
     return { element: element };
   }
+
+  static importDOM(): DOMConversionMap | null {
+    return {
+      img: (domNode: HTMLElement) => {
+        const converterKey = domNode.dataset["converterKey"];
+        if (!converterKey) return null;
+
+        return {
+          priority: 1,
+          conversion: (element: HTMLElement) => {
+            try {
+              const converter = HtmlEditorClient.getImageConverter(converterKey);
+              const info = converter.fromElement(element);
+              if (!info) return null;
+              return { node: new ImageNode(info, converter) };
+            } catch {
+              return null;
+            }
+          },
+        };
+      },
+    };
+  }
+
+    static importJSON(serializedNode: any): ImageNode {
+    return new ImageNode(serializedNode.src, serializedNode.altText);
+  }
+
 }
 
 export function $createImageNode(uploadedFile: ImageInfo, imageConverter: ImageConverter): ImageNode {
