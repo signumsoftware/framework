@@ -788,7 +788,15 @@ public static class SchemaSynchronizer
         var isPostgres = sqlBuilder.IsPostgres;
 
         if (!NeedsDefaultValue(table, column, forHistory: false) || avoidDefault)
-            return sqlBuilder.AlterTableAddColumn(table, column);
+        {
+            if (!withHistory)
+                return sqlBuilder.AlterTableAddColumn(table, column);
+
+            return new SqlPreCommand_WithHistory(
+                normal: sqlBuilder.AlterTableAddColumn(table, column),
+                history: sqlBuilder.AlterTableAddColumn(table, column, forHistory: true)
+            );
+        }
 
         if (column.Nullable == IsNullable.Forced)
         {
