@@ -38,29 +38,29 @@ export function EditableTextComponent({ ctx, defaultText, onChange, defaultEdita
 }
   
 
-export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element{
+export function EditableHtmlComponent({ ctx, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
 
-  var [editable, setEditable] = React.useState(defaultEditable || false);
-  var forceUpdate = useForceUpdate();
+  const [editable, setEditable] = React.useState(defaultEditable || false);
+  const readOnly = ctx.readOnly || !editable
 
   return (
-    <div className="sf-edit-container">
-
-      {editable ? <HelpHtmlEditor binding={ctx.binding} /> : <HtmlViewer text={ctx.value} /> }
+    <div className={classes("sf-edit-container", readOnly && "html-viewer")} >
+      
+      <HelpHtmlEditor binding={ctx.binding} readOnly={readOnly} />
 
       {!ctx.readOnly && <LinkButton title={undefined} className={classes("sf-edit-button", editable && "active", ctx.value && "block")} onClick={e => { setEditable(!editable); }}>
-        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" aria-aria-hidden /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
+        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" aria-hidden /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
       </LinkButton>}
     </div>
   );
 }
 
-export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined> }): React.JSX.Element {
-
+export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined>; readOnly?: boolean }): React.JSX.Element {
   return (
     <ErrorBoundary>
       <HtmlEditor
         binding={p.binding}
+        readOnly={p.readOnly}
         plugins={[
           new LinkExtension(),
           new ImageExtension(new InlineImageConverter())
@@ -68,7 +68,6 @@ export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined>
     </ErrorBoundary>
   );
 }
-
 
 export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?: React.HTMLAttributes<HTMLDivElement>; }): React.JSX.Element | null {
 
