@@ -17,6 +17,8 @@ import { Entity, isEntity } from '@framework/Signum.Entities';
 import { tasks } from '@framework/Lines';
 import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
+import { HtmlEditorClient } from '../Signum.HtmlEditor/HtmlEditorClient';
+import { InlineImageConverter } from './Pages/EditableText';
 
 export namespace HelpClient {
 
@@ -34,6 +36,8 @@ export namespace HelpClient {
     onWidgets.push(wc => AppContext.isPermissionAuthorized(HelpPermissions.ViewHelp) && isEntity(wc.ctx.value) ? <HelpWidget wc={wc as WidgetContext<Entity>} /> : undefined);
 
     tasks.push(taskHelpIcon);
+
+    HtmlEditorClient.registerImageConverter(InlineImageConverter);
 
   }
 
