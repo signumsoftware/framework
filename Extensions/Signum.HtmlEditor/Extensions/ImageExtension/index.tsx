@@ -77,27 +77,29 @@ export class ImageExtension
     editor: LexicalEditor,
     imageConverter: ImageConverter
   ): Promise<void> {
-    const uploadPromises = Array.from(files)
-      .filter((file) => file.type.startsWith("image/"))
-      .map((file) => {
+
+    const uploadPromises: Promise<ImageInfo>[] = Array.from(files)
+      .filter(file => file.type.startsWith("image/"))
+      .map(async (file) => {
         try {
-          return imageConverter.uploadData(file);
+          return await imageConverter.uploadData(file);
         } catch (error) {
-          console.error("Image uploade failed.", error);
-          return null;
+          console.error("Image upload failed.", error);
+          throw error;
         }
       });
 
-    const uploadedFiles = (await Promise.all(uploadPromises)).filter(
-      (v) => v !== null
-    );
-    if (!uploadedFiles.length) return;
+    const uploadedFiles = await Promise.allSettled(uploadPromises);
+    const successfulFiles: ImageInfo[] = uploadedFiles
+      .filter((r): r is PromiseFulfilledResult<Awaited<ImageInfo>> => r.status === "fulfilled")
+      .map(r => r.value);
 
-    editor.update(() => {
-      uploadedFiles.forEach((file) => {
+    if (!successfulFiles.length) return;
+
+      for (const file of successfulFiles) {
         const imageNode = $createImageNode(file, imageConverter);
         $getRoot().append(imageNode);
-      });
+      }
     });
 
 }
