@@ -20,38 +20,48 @@ export class ImageExtension
 
     if (!element) return;
 
+    element.addEventListener("dragenter", (event) => {
+      if (!controller.editor.isEditable()) {
+        event.dataTransfer!.dropEffect = "none";
+      }
+      else {
+        event.dataTransfer!.dropEffect = "copy";
+      }
+    }, { signal: abortController.signal });
+
     element.addEventListener(
       "dragover",
       (event) => {
         event.preventDefault();
-      },
-      { signal: abortController.signal }
-    );
 
-    element.addEventListener(
-      "drop",
-      (event) => {
-        event.preventDefault();
-        const files = event.dataTransfer?.files;
+      if (!controller.editor.isEditable()) {
+        event.dataTransfer!.dropEffect = "none";
+        return;
+      }
 
-        if (!files?.length) return;
         this.insertImageNodes(files, controller.editor, this.imageConverter);
-      },
-      { signal: abortController.signal }
-    );
+      event.dataTransfer!.dropEffect = "copy";
+    }, { signal: abortController.signal });
 
-    element.addEventListener(
-      "paste",
-      (event) => {
-        const files = event.clipboardData?.files;
+    element.addEventListener("drop", (event) => {
+      if (!controller.editor.isEditable())
+        return;
 
-        if (!files?.length) return;
-        event.preventDefault();
         this.insertImageNodes(files, controller.editor, this.imageConverter);
-      },
-      { signal: abortController.signal }
-    );
+      event.preventDefault();
 
+      const files = event.dataTransfer?.files;
+      if (!files?.length) return;
+
+    }, { signal: abortController.signal });
+
+    element.addEventListener("paste", (event) => {
+      if (!controller.editor.isEditable()) return;
+      const files = event.clipboardData?.files;
+      if (!files?.length) return;
+
+      event.preventDefault();
+    }, { signal: abortController.signal });
 
     return () => {
       abortController.abort();
