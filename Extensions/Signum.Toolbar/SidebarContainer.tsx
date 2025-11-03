@@ -3,8 +3,9 @@ import { ErrorBoundary } from '@framework/Components';
 import "./Sidebar.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals';
-import { EntityControlMessage, LayoutMessage } from '@framework/Signum.Entities';
+import { EntityControlMessage } from '@framework/Signum.Entities';
 import { LinkButton } from '../../Signum/React/Basics/LinkButton';
+import { LayoutMessage } from './Signum.Toolbar';
 
 export type SidebarMode = "Wide" | "Narrow" | "Hidden";   
 

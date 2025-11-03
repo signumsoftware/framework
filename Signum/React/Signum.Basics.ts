@@ -137,13 +137,6 @@ export type ExceptionOrigin =
   "Backend_DotNet" |
   "Frontend_React";
 
-export namespace FontSizeMessage {
-  export const FontSize: MessageKey = new MessageKey("FontSizeMessage", "FontSize");
-  export const ReduceFontSize: MessageKey = new MessageKey("FontSizeMessage", "ReduceFontSize");
-  export const ResetFontSize: MessageKey = new MessageKey("FontSizeMessage", "ResetFontSize");
-  export const IncreaseFontSize: MessageKey = new MessageKey("FontSizeMessage", "IncreaseFontSize");
-}
-
 export interface IEmailOwnerEntity extends Entities.Entity {
 }
 
