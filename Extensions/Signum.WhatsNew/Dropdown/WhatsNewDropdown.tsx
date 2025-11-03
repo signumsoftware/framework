@@ -16,6 +16,7 @@ import MessageModal from '@framework/Modals/MessageModal'
 import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage, WhatsNewOperation, WhatsNewState } from '../Signum.WhatsNew'
 import * as AppContext from "@framework/AppContext"
 import { HtmlViewer } from '../Templates/WhatsNewHtmlEditor'
+import { LinkButton } from '../../../Signum/React/Basics/LinkButton'
 
 export default function WhatsNewDropdown(): React.JSX.Element | null {
 
@@ -134,7 +135,7 @@ function WhatsNewDropdownImp() {
             }
             <Toast>
               <Toast.Body style={{ textAlign: "center" }}>
-                <a role="button" tabIndex={0} style={{ cursor: "pointer", color: "var(--bs-primary)" }}  onClick={() => handleClickAll()}>{WhatsNewMessage.AllMyNews.niceToString()}</a>
+                <LinkButton title={undefined} style={{ color: "var(--bs-primary)" }}  onClick={() => handleClickAll()}>{WhatsNewMessage.AllMyNews.niceToString()}</LinkButton>
               </Toast.Body>
             </Toast>
           </>
@@ -176,12 +177,22 @@ export function WhatsNewToast(p: { whatsnew: WhatsNewClient.WhatsNewShort, onClo
         <small>{DateTime.fromISO(p.whatsnew.creationDate!).toRelative()}</small>
       </Toast.Header>
       <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
-        <img onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e) }}
-          alt={p.whatsnew.title}
-          role="presentation"
-          src={AppContext.toAbsoluteUrl("/api/whatsnew/previewPicture/" + p.whatsnew.whatsNew.id)}
-          style={{ maxHeight: "30vh", cursor: "pointer", maxWidth: "10vw", margin: "0px 0px 0px 10px" }}
-        />
+        <Link
+          to={"/newspage/" + p.whatsnew.whatsNew.id}
+          onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e); }}
+          aria-label={`${p.whatsnew.title} – ${WhatsNewMessage.ReadFurther.niceToString()}`}
+          style={{ display: "inline-block", maxWidth: "10vw", marginLeft: 10 }}>
+          <img
+            src={AppContext.toAbsoluteUrl("/api/whatsnew/previewPicture/" + p.whatsnew.whatsNew.id)}
+            alt={p.whatsnew.title}
+            style={{
+              maxHeight: "30vh",
+              maxWidth: "100%",
+              borderRadius: 4,
+              display: "block",
+            }}
+          />
+        </Link>
         <HtmlViewer text={HTMLSubstring(p.whatsnew.description)} />
         <br />
         <Link

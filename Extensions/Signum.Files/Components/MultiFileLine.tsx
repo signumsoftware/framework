@@ -203,7 +203,7 @@ export function MultiFileLine<V extends ModifiableEntity /*& IFile*/ | Lite</*IF
                     fileDropCssClass={c.mandatoryClass ?? undefined}
                     divHtmlAttributes={{ className: "sf-file-line-new" }}
                   /> :
-                  <button className="btn btn-link p-0 ms-3 sf-line-button sf-create" onClick={() => c.setForceShowUploader(true)}>{FileMessage.AddMoreFiles.niceToString()}</button>
+                  <button type="button" className="btn btn-link p-0 ms-3 sf-line-button sf-create" onClick={() => c.setForceShowUploader(true)}>{FileMessage.AddMoreFiles.niceToString()}</button>
               }
             </td>
           </tr>

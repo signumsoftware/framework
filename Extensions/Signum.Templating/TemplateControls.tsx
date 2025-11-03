@@ -7,6 +7,7 @@ import { useAPI } from '@framework/Hooks'
 import { Finder } from '@framework/Finder'
 import { getTypeInfos, TypeReference } from '@framework/Reflection'
 import { ajaxGet } from '@framework/Services'
+import { TemplateMessage } from '../../Signum/React/Signum.Entities'
 
 export interface TemplateControlsProps {
   queryKey: string | null | undefined;
@@ -31,8 +32,8 @@ export default function TemplateControls(p: TemplateControlsProps): React.JSX.El
         type: { name: "string" },
         initialValue: buildPattern(
           currentToken.type == 'Query' ? (currentToken.token ? currentToken.token.fullKey : "") : (currentToken.expression ? ("g:" + currentToken.expression.key) : "")),
-        title: "Template",
-        message: "Copy to clipboard: Ctrl+C, ESC",
+        title: TemplateMessage.Template.niceToString(),
+        message: TemplateMessage.CopyToClipboard.niceToString() ,
       })} />
   }
   

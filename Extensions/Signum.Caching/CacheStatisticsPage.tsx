@@ -37,9 +37,9 @@ export default function CacheStatisticsPage(): React.JSX.Element {
     <div>
       <h2>{CacheMessage.CacheStatistics.niceToString()}</h2>
       <div className="btn-toolbar">
-        {state.isEnabled == true && <button onClick={handleDisabled} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-danger)" }}>{CacheMessage.Disable.niceToString()}</button>}
-        {state.isEnabled == false && <button onClick={handleEnabled} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-success)" }}>{CacheMessage.Enable.niceToString()}</button>}
-        {<button onClick={handleClear} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-primary)" }}>{CacheMessage.Clear.niceToString()}</button>}
+        {state.isEnabled == true && <button type="button" onClick={handleDisabled} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-danger)" }}>{CacheMessage.Disable.niceToString()}</button>}
+        {state.isEnabled == false && <button type="button" onClick={handleEnabled} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-success)" }}>{CacheMessage.Enable.niceToString()}</button>}
+        {<button type="button" onClick={handleClear} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-primary)" }}>{CacheMessage.Clear.niceToString()}</button>}
       </div >
       <div className="m-2">
         <strong>{CacheMessage.ServerBroadcast.niceToString()}:</strong> <code>{state.serverBroadcast}</code>

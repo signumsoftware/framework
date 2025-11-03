@@ -681,7 +681,7 @@ public static class Administrator
              ParentColumn = parentTable.Columns().SingleEx(c => c.column_id == ifk.ForeignKeyColumns().SingleEx().parent_column_id).name,
          }).ToList());
 
-        foreignKeys.ForEach(fk => sqlBuilder.AlterTableDropConstraint(fk.ParentTable!, fk.Name).ExecuteLeaves());
+        foreignKeys.ForEach(fk => sqlBuilder.AlterTableDropConstraint(fk.ParentTable!, fk.Name)?.ExecuteLeaves());
 
         return new Disposable(() =>
         {

@@ -227,6 +227,7 @@ export namespace ContextualOperations {
     const item = (
       <Dropdown.Item
         onClick={disabled ? undefined : handleOnClick}
+        aria-disabled={disabled}
         disabled={disabled}
         style={{ pointerEvents: "initial" }}
         data-operation={coc.operationInfo.key}

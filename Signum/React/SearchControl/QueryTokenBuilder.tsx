@@ -47,7 +47,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps): React.Reac
 
   return (
     <div className={classes("sf-query-token-builder", p.className)} onKeyDown={handleKeyDown} data-token={p.queryToken?.fullKey}>
-      {initialIndex != 0 && <button onClick={handleExpandButton} className="btn btn-sm sf-prefix-btn">…</button>}
+      {initialIndex != 0 && <button type="button" onClick={handleExpandButton} className="btn btn-sm sf-prefix-btn">…</button>}
       {qd && tokenList.map((a, i) => {
         if (i < initialIndex)
           return null;
@@ -194,7 +194,7 @@ export function QueryTokenPart(p: QueryTokenPartProps): React.ReactElement | nul
           renderListItem={a => <QueryTokenListItem item={a.item} ancestor={p.parentToken} />}
           defaultOpen={p.defaultOpen}
           busy={!p.readOnly && subTokens == undefined}
-        /> : <button className="btn btn-sm sf-query-token-plus" onClick={e => { e.preventDefault(); p.setLastTokenChange(p.parentToken!.fullKey); }}>
+        /> : <button type="button" className="btn btn-sm sf-query-token-plus" onClick={e => { e.preventDefault(); p.setLastTokenChange(p.parentToken!.fullKey); }}>
           <FontAwesomeIcon aria-hidden={true} icon="plus" />
         </button>}
     </div>
