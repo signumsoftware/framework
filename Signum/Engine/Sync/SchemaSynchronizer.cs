@@ -367,7 +367,6 @@ public static class SchemaSynchronizer
 
                             createNew: (cn, tabCol) =>
                             {
-
                                 var result = SqlPreCommand.Combine(Spacing.Simple,
                                     tabCol.PrimaryKey && dif.PrimaryKeyName != null ? sqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
                                     AlterTableAddColumnDefault(sqlBuilder, tab, tabCol, replacements,
@@ -445,7 +444,7 @@ public static class SchemaSynchronizer
 
                                     return SqlPreCommand.Combine(Spacing.Simple,
 
-                                        difCol.Name == tabCol.Name ? null : sqlBuilder.RenameColumn(tab.Name, difCol.Name, tabCol.Name),
+                                        difCol.Name == tabCol.Name ? null : sqlBuilder.RenameColumn(tab, difCol.Name, tabCol.Name, withHistory),
 
                                         (!columnEquals || !defaultEquals) && difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropDefaultConstaint(tab.Name, difCol) : null,
                                         (!columnEquals || !checkEquals) && difCol.CheckConstraint != null ? sqlBuilder.AlterTableDropConstraint(tab.Name, difCol.CheckConstraint.Name) : null,
@@ -469,10 +468,9 @@ public static class SchemaSynchronizer
                         );
 
                         var columns = SqlPreCommand_WithHistory.ForNormal(columnBoth);
-                        var columnsHistory = SqlPreCommand_WithHistory.ForHistory(columnBoth);
+                        var columnsHistory = withHistory ? SqlPreCommand_WithHistory.ForHistory(columnBoth) : null;
 
                         var createPrimaryKey = modelPK != null && (diffPK == null || !diffPK.IndexEquals(dif, modelPK, sqlBuilder.IsPostgres)) ? sqlBuilder.CreateIndex(modelPK, null) : null;
-
 
                         var addPeriod = !sqlBuilder.IsPostgres && tab.SystemVersioned != null &&
                             (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned) || DifferentDatabase(tab.Name, dif.Name)) ?
@@ -833,7 +831,17 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
         {
             var defaultValue = GetDefaultValue(table, column, rep, forNewColumn: true, forceDefaultValue: forceDefaultValue);
             if (defaultValue == "force")
+            {
+                if(withHistory)
+                {
+                    return new SqlPreCommand_WithHistory(
+                        normal: sqlBuilder.AlterTableAddColumn(table, column),
+                        history: sqlBuilder.AlterTableAddColumn(table, column, forHistory: true)
+                        );
+                }
+
                 return sqlBuilder.AlterTableAddColumn(table, column);
+            }
 
             if (column is FieldEmbedded.EmbeddedHasValueColumn hv && (defaultValue == (isPostgres ? "false" :"0")))
                 hasValueFalse.Add(hv);

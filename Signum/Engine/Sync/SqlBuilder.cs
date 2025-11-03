@@ -201,7 +201,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1};".FormatWith(tableName, columnName.SqlEscape(isPostgres)));
     }
 
-    public SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, DefaultConstraint? tempDefault = null, bool forHistory = false) => AlterTableAddColumn(table.Name, column, tempDefault, forHistory);
+    public SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, DefaultConstraint? tempDefault = null, bool forHistory = false) => AlterTableAddColumn(forHistory ? table.SystemVersioned!.TableName : table.Name, column, tempDefault, forHistory);
     public SqlPreCommand AlterTableAddColumn(ObjectName tableName, IColumn column, DefaultConstraint? tempDefault = null, bool forHistory = false)
     {
         return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(tableName, ColumnLine(column, tempDefault ?? GetDefaultConstaint(tableName, column), checkConst: null, isChange: false, forHistoryTable: forHistory)));
@@ -753,6 +753,19 @@ FROM {1} as [table];".FormatWith(
             return new SqlPreCommandSimple($"ALTER TABLE {oldName} SET SCHEMA {schemaName.Name.SqlEscape(IsPostgres)};");
 
         return new SqlPreCommandSimple("ALTER SCHEMA {0} TRANSFER {1};".FormatWith(schemaName.Name.SqlEscape(isPostgres), oldName));
+    }
+
+    public SqlPreCommand RenameColumn(ITable table, string oldName, string newName, bool withHistory)
+    {
+        var normal = RenameColumn(table.Name, oldName, newName);
+
+        if (!withHistory)
+            return normal;
+     
+        return new SqlPreCommand_WithHistory(
+            normal: normal,
+            history: RenameColumn(table.SystemVersioned!.TableName, oldName, newName)
+        );
     }
 
     public SqlPreCommand RenameColumn(ObjectName tableName, string oldName, string newName)
