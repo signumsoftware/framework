@@ -1,5 +1,6 @@
 
 export interface ImageConverter {
+  //converterKey: string; converter class name used as key
   dataImageIdAttribute?: string;
   uploadData(blob: Blob): Promise<ImageInfo>;
   renderImage(val: ImageInfo): React.ReactElement;
@@ -8,6 +9,7 @@ export interface ImageConverter {
 }
 
 export interface ImageInfo {
+  converterKey: string;
   imageId?: string;
   binaryFile?: string;
   fileName?: string;

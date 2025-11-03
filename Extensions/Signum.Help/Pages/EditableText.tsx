@@ -106,16 +106,13 @@ export class InlineImageConverter implements ImageConverter{
 
   toElement(val: ImageInfo): HTMLElement | undefined {
     const img = document.createElement("img");
-    if (val.binaryFile) {
-      img.setAttribute("data-binary-file", val.binaryFile);
-      img.setAttribute("data-file-name", val.fileName || "");
-      return img;
-    }
 
-    if (val.imageId) {
-      img.setAttribute("data-help-image-id", val.imageId);
-      return img;
-    }
+    val.binaryFile && img.setAttribute("data-binary-file", val.binaryFile);
+    img.setAttribute("data-file-name", val.fileName || "");
+    val.imageId && img.setAttribute("data-help-image-id", val.imageId);
+    
+    img.setAttribute("data-converter-key", InlineImageConverter.name);
+    return img;
   }
 
   uploadData(blob: Blob): Promise<ImageInfo> {
@@ -128,7 +125,8 @@ export class InlineImageConverter implements ImageConverter{
     })
       .then(att => ({
         binaryFile: att.binaryFile ?? undefined,
-        fileName: att.fileName ?? undefined
+        fileName: att.fileName ?? undefined,
+        converterKey: InlineImageConverter.name,
       }));
   }
 
@@ -164,6 +162,7 @@ export class InlineImageConverter implements ImageConverter{
         binaryFile: element.dataset["binaryFile"],
         fileName: element.dataset["fileName"],
         imageId: element.dataset["helpImageId"],
+        converterKey: InlineImageConverter.name,
       };
     }
 
