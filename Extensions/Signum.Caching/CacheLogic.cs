@@ -61,7 +61,7 @@ public static class CacheLogic
             return;
 
         PermissionLogic.RegisterTypes(typeof(CachePermission));
-	   ReflectionServer.RegisterLike(typeof(CacheMessage), () => true);
+	    ReflectionServer.RegisterLike(typeof(CacheMessage), () => true);
 
         sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
 

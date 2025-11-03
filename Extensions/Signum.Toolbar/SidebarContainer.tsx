@@ -3,7 +3,9 @@ import { ErrorBoundary } from '@framework/Components';
 import "./Sidebar.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals';
-import { EntityControlMessage, LayoutMessage } from '@framework/Signum.Entities';
+import { EntityControlMessage } from '@framework/Signum.Entities';
+import { LinkButton } from '../../Signum/React/Basics/LinkButton';
+import { LayoutMessage } from './Signum.Toolbar';
 
 export type SidebarMode = "Wide" | "Narrow" | "Hidden";   
 
@@ -50,7 +52,7 @@ export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element{
 
 export function SidebarToggleItem(p: { isMobile: boolean, simpleMode?: boolean, mode: SidebarMode, setMode: (mode: SidebarMode) => void }): React.JSX.Element {
   return (
-    <a className={classes("main-sidebar-button", "nav-link", "main-sidebar-button-" + p.mode.toLowerCase())} onClick={(ev) => {
+    <LinkButton title={EntityControlMessage.ToggleSideBar.niceToString()} className={classes("main-sidebar-button", "nav-link", "main-sidebar-button-" + p.mode.toLowerCase())} onClick={(ev) => {
       window.dispatchEvent(new CustomEvent("sidebarMove"));
       switch (p.mode) {
         case "Hidden": p.setMode("Wide"); break;
@@ -64,6 +66,6 @@ export function SidebarToggleItem(p: { isMobile: boolean, simpleMode?: boolean, 
         <FontAwesomeIcon icon={"bars"} style={{ transition: "all 400ms", width: p.mode == "Hidden" ? "15px" : "0.1px" }} title={EntityControlMessage.ToggleSideBar.niceToString()} />
         {!p.simpleMode && <FontAwesomeIcon icon={"angles-right"} style={{ transition: "all 400ms", width: p.mode == "Narrow" ? "15px" : "0.1px" }} title={EntityControlMessage.ToggleSideBar.niceToString()} />}
       </div>
-    </a>
+    </LinkButton>
   );
 }

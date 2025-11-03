@@ -2,7 +2,7 @@ import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
 import { Operations } from '../Operations';
 import { Modal, ProgressBar } from 'react-bootstrap';
-import { Entity, JavascriptMessage, Lite, liteKey, OperationMessage } from '../Signum.Entities';
+import { Entity, EntityControlMessage, JavascriptMessage, Lite, liteKey, OperationMessage } from '../Signum.Entities';
 import { useForceUpdate, useThrottle } from '../Hooks';
 import { getTypeInfo, OperationInfo } from '../Reflection';
 import { useState } from 'react';
@@ -73,7 +73,7 @@ export function ProgressModal<T>(p: ProgressModalProps<T>): React.ReactElement {
     <Modal show={show} className="message-modal" backdrop="static" onExited={handleOnExited}>
       <div className="modal-header">
         <h5 className="modal-title">{p.options.title}</h5>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked} />
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label={EntityControlMessage.Close.niceToString()} onClick={handleCancelClicked} />
       </div>
       <div className="modal-body">
         <p>{p.options.message}</p>
@@ -90,7 +90,7 @@ export function ProgressModal<T>(p: ProgressModalProps<T>): React.ReactElement {
       {p.options.showCloseWarningMessage &&
         <div className="modal-footer">
           <small className="text-muted">{OperationMessage.ClosingThisModalOrBrowserTabWillCancelTheOperation.niceToString()}</small>
-          <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+          <button type="button" className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
             {JavascriptMessage.cancel.niceToString()}
           </button>
         </div>

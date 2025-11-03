@@ -159,7 +159,8 @@ public enum EntityControlMessage
     [Description("{0} character[s]")]
     _0Characters,
     [Description("{0} character[s] remaining")]
-    _0CharactersRemaining
+    _0CharactersRemaining,
+    Close
 }
 
 public enum HtmlEditorMessage
@@ -168,6 +169,18 @@ public enum HtmlEditorMessage
     Hyperlink,
     [Description("Enter your url here...")]
     EnterYourUrlHere,
+    [Description("Bold (Ctrl + B)")]
+    Bold,
+    [Description("Italic (Ctrl + I)")]
+    Italic,
+    [Description("Underline (Ctrl + U)")]
+    Underline,
+    Headings,
+    UnorderedList,
+    OrderedList,
+    Quote,
+    CodeBlock,
+    Code,
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
@@ -373,6 +386,7 @@ public enum SearchMessage
     _0ResultTable,
     [Description("Select row {0}")]
     SelectRow0_,
+    Enter,
 }
 
 public enum SearchHelpMessage
@@ -713,8 +727,21 @@ public enum ContainerToggleMessage
     Expand,
 }
 
+
 [AllowUnauthenticated]
-public enum LayoutMessage
+public enum FontSizeMessage
 {
-    JumpToMainContent,
+    FontSize,
+    ReduceFontSize,
+    ResetFontSize,
+    IncreaseFontSize,
+}
+
+[AllowUnauthenticated]
+public enum FontSizeMessage
+{
+    FontSize,
+    ReduceFontSize,
+    ResetFontSize,
+    IncreaseFontSize,
 }

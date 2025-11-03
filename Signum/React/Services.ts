@@ -1,7 +1,7 @@
-import { ModelState, isEntity, ModelEntity } from './Signum.Entities'
-import { GraphExplorer } from './Reflection'
+import { DateTime } from 'luxon';
 import { toAbsoluteUrl } from './AppContext';
-import luxon, { DateTime } from 'luxon';
+import { GraphExplorer } from './Reflection';
+import { ModelEntity, ModelState } from './Signum.Entities';
 
 export interface AjaxOptions {
   url: string;
@@ -47,12 +47,35 @@ export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
   });
 }
 
+export function ajaxPostWithoutContentType<T>(options: AjaxOptions, data: any): Promise<T> {
+  if (!options.avoidGraphExplorer) {
+    GraphExplorer.propagateAll(data);
+  }
+
+  return wrapRequest(options, () => {
+    const headers = {
+      'Accept': 'application/json',
+      ...options.headers
+    } as any;
+
+    return fetch(toAbsoluteUrl(options.url), {
+      method: "POST",
+      credentials: options.credentials || "same-origin",
+      headers: headers,
+      mode: options.mode,
+      cache: options.cache || 'no-store',
+      body: data,
+      signal: options.signal
+    } as RequestInit);
+  }).then(res => res.text())
+    .then(text => text.length ? JSON.parse(text) : null);
+}
+
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
   return ajaxPostRaw(options, data)
     .then(res => res.text())
     .then(text => text.length ? JSON.parse(text) : null);
 }
-
 
 export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> {
   if (!options.avoidGraphExplorer) {
@@ -153,7 +176,7 @@ export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Respon
 }
 
 export namespace RetryFilter {
-  export function retryFilter(makeCall: () => Promise<Response>): Promise<Response>{
+  export function retryFilter(makeCall: () => Promise<Response>): Promise<Response> {
     return makeCall();
   }
 }
@@ -182,7 +205,7 @@ export namespace VersionFilter {
         latestVersion = ver;
         initialBuildTime = buildTime!;
       }
-     
+
       if (latestVersion != ver) {
         if (buildTime && initialBuildTime && DateTime.fromISO(buildTime) > DateTime.fromISO(initialBuildTime)) {
           latestVersion = ver;
@@ -314,7 +337,7 @@ export function b64toBlob(b64Data: string, contentType: string = "", sliceSize =
     var byteArray = new Uint8Array(byteNumbers);
 
     byteArrays.push(byteArray);
-  } 
+  }
 
   var blob = new Blob(byteArrays, { type: contentType });
   return blob;

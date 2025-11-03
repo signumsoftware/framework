@@ -429,6 +429,14 @@ export namespace EntityControlMessage {
   export const Minimize: MessageKey = new MessageKey("EntityControlMessage", "Minimize");
   export const _0Characters: MessageKey = new MessageKey("EntityControlMessage", "_0Characters");
   export const _0CharactersRemaining: MessageKey = new MessageKey("EntityControlMessage", "_0CharactersRemaining");
+  export const Close: MessageKey = new MessageKey("EntityControlMessage", "Close");
+}
+
+export namespace FontSizeMessage {
+  export const FontSize: MessageKey = new MessageKey("FontSizeMessage", "FontSize");
+  export const ReduceFontSize: MessageKey = new MessageKey("FontSizeMessage", "ReduceFontSize");
+  export const ResetFontSize: MessageKey = new MessageKey("FontSizeMessage", "ResetFontSize");
+  export const IncreaseFontSize: MessageKey = new MessageKey("FontSizeMessage", "IncreaseFontSize");
 }
 
 export namespace FrameMessage {
@@ -443,6 +451,15 @@ export namespace FrameMessage {
 export namespace HtmlEditorMessage {
   export const Hyperlink: MessageKey = new MessageKey("HtmlEditorMessage", "Hyperlink");
   export const EnterYourUrlHere: MessageKey = new MessageKey("HtmlEditorMessage", "EnterYourUrlHere");
+  export const Bold: MessageKey = new MessageKey("HtmlEditorMessage", "Bold");
+  export const Italic: MessageKey = new MessageKey("HtmlEditorMessage", "Italic");
+  export const Underline: MessageKey = new MessageKey("HtmlEditorMessage", "Underline");
+  export const Headings: MessageKey = new MessageKey("HtmlEditorMessage", "Headings");
+  export const UnorderedList: MessageKey = new MessageKey("HtmlEditorMessage", "UnorderedList");
+  export const OrderedList: MessageKey = new MessageKey("HtmlEditorMessage", "OrderedList");
+  export const Quote: MessageKey = new MessageKey("HtmlEditorMessage", "Quote");
+  export const CodeBlock: MessageKey = new MessageKey("HtmlEditorMessage", "CodeBlock");
+  export const Code: MessageKey = new MessageKey("HtmlEditorMessage", "Code");
 }
 
 export interface ImmutableEntity extends Entity {
@@ -497,10 +514,6 @@ export namespace JavascriptMessage {
   export const showPeriod: MessageKey = new MessageKey("JavascriptMessage", "showPeriod");
   export const showPreviousOperation: MessageKey = new MessageKey("JavascriptMessage", "showPreviousOperation");
   export const Date: MessageKey = new MessageKey("JavascriptMessage", "Date");
-}
-
-export namespace LayoutMessage {
-  export const JumpToMainContent: MessageKey = new MessageKey("LayoutMessage", "JumpToMainContent");
 }
 
 export namespace LiteMessage {
@@ -749,6 +762,7 @@ export namespace SearchMessage {
   export const SelectAllResults: MessageKey = new MessageKey("SearchMessage", "SelectAllResults");
   export const _0ResultTable: MessageKey = new MessageKey("SearchMessage", "_0ResultTable");
   export const SelectRow0_: MessageKey = new MessageKey("SearchMessage", "SelectRow0_");
+  export const Enter: MessageKey = new MessageKey("SearchMessage", "Enter");
 }
 
 export namespace SelectorMessage {

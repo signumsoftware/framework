@@ -93,10 +93,10 @@ function AutoLineModal(p: AutoLineModalProps): React.ReactElement {
         </p>}
       </div>
       <div className="modal-footer">
-        <button disabled={disabled || error != null} className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClick} ref={btnOkRef}>
+        <button type="button" aria-disabled={disabled || error != null} disabled={disabled || error != null} className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClick} ref={btnOkRef}>
           {JavascriptMessage.ok.niceToString()}
         </button>
-        <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+        <button type="button" className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
           {JavascriptMessage.cancel.niceToString()}
         </button>
       </div>
