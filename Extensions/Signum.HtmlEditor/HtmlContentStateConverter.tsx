@@ -22,9 +22,6 @@ export class HtmlContentStateConverter implements ITextConverter {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
 
-      if (this.dataImageIdAttribute)
-        createImagePlaceholders(doc, this.dataImageIdAttribute);
-
       const nodes = $generateNodesFromDOM(editor, doc);
       $getRoot().clear().select();
       $getSelection()?.insertNodes(nodes);
@@ -32,19 +29,6 @@ export class HtmlContentStateConverter implements ITextConverter {
     }, { discrete: true })
 
     return editor.getEditorState();
-  }
-}
-
-function createImagePlaceholders(doc: Document, dataImageIdAttribute : string) {
-  const imgElements = doc.querySelectorAll("img");
-  for (let i = 0; i < imgElements.length; i++) {
-    const img = imgElements[i];
-    const attachmentId = img.getAttribute(dataImageIdAttribute);
-    if (!attachmentId)
-      continue;
-
-    const placeholderText = `[IMAGE_${attachmentId}]`;
-    img.replaceWith(document.createTextNode(placeholderText));
   }
 }
 

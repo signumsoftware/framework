@@ -52,16 +52,9 @@ export class ImageExtension
       { signal: abortController.signal }
     );
 
-    const unsubscribeUpdateListener = controller.editor.registerUpdateListener(
-      () => {
-        if (!controller.editor || !this.imageConverter) return;
-        this.replaceImagePlaceholders(controller);
-      }
-    );
 
     return () => {
       abortController.abort();
-      unsubscribeUpdateListener();
     };
   }
 
@@ -96,60 +89,5 @@ export class ImageExtension
         $getRoot().append(imageNode);
       });
     });
-  }
 
-  replaceImagePlaceholders(controller: HtmlEditorController): void {
-    //const attachments = (() => {
-    //  const value = controller.binding.getValue();
-    //  if (value)
-    //    return [...value.matchAll(/data-attachment-id="(\d+)"/g)].map(
-    //      (m) => m[1]
-    //    );
-    //  return [];
-    //})();
-
-    //if (!attachments.length) return;
-
-    const editorState = controller.editor.getEditorState();
-    let hasUpdatedNodes = false;
-
-    controller.editor.update(() => {
-      const nodes = Array.from(editorState._nodeMap.values());
-      if (!nodes.some((v) => isImagePlaceholderRegex(v.getTextContent())))
-        return;
-      nodes.forEach((node) => {
-        if (node.getType() === "text") {
-          const text = node.getTextContent();
-          const match = text.match(IMAGE_PLACEHOLDER_REGEX);
-
-          if (match) {
-            const before = text.slice(0, match.index!);
-            const after = text.slice(match.index! + match[0].length);
-            const imageId = match[1];
-
-            const imageNode = $createImageNode({ imageId: imageId } as ImageInfo, this.imageConverter);
-
-            // Replace the text node with the image node
-            const replaced = node.replace(imageNode);
-
-            // Insert neighbors around the image
-            if (before) replaced.insertBefore($createTextNode(before));
-            if (after) replaced.insertAfter($createTextNode(after));
-
-            hasUpdatedNodes = true;
-          }
-        }
-      });
-    }, { discrete: true });
-
-    if (hasUpdatedNodes) controller.saveHtml();
-  }
-}
-
-export const IMAGE_PLACEHOLDER_REGEX: RegExp = /\[IMAGE_([^\]]+)\]/;
-
-export function isImagePlaceholderRegex(text: string): boolean {
-  var result = IMAGE_PLACEHOLDER_REGEX.test(text);
-
-  return result;
 }
