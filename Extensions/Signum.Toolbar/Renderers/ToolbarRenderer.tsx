@@ -108,7 +108,7 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
 
       const value = currentSegments[i];
 
-      if (value === pattern)
+      if (value.toLowerCase() === pattern.toLowerCase())
         return true;
 
       if (pattern.contains(":id") || pattern.contains(":type") || pattern.contains(":key") || pattern.contains(":toStr") ||
@@ -139,7 +139,7 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
         if (match.groups?.type)
           type = match!.groups?.type;
 
-        if (type != null && type != entityType)
+        if (type != null && type.toLowerCase() != entityType?.toLowerCase())
           return false;
 
         return true;
