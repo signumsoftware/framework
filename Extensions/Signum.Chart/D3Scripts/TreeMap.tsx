@@ -6,6 +6,7 @@ import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Comp
 import { Folder, isFolder, Root, isRoot, stratifyTokens } from './Components/Stratify';
 import TextEllipsis from './Components/TextEllipsis';
 import InitialMessage from './Components/InitialMessage';
+import { ChartMessage } from '../Signum.Chart';
 
 
 export default function renderTreeMap({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -89,7 +90,11 @@ export default function renderTreeMap({ data, width, height, parameters, loading
   var format = d3.format(",d");
 
   return (
-    <svg direction="ltr" width={width} height={height} >
+    <svg direction="ltr"
+      width={width}
+      height={height}
+      role="img">
+      <title id="treeMapChartTitle">{ChartMessage.TreemapChart0Per1.niceToString(valueColumn.title, keyColumn.title)}</title>
       {nodes.map((d, i) => {
         const active = activeDetector?.(isFolder(d.data) ? ({ c2: d.data.folder }) : d.data);
 
@@ -102,7 +107,11 @@ export default function renderTreeMap({ data, width, height, parameters, loading
               fill={parentColumn!.getColor(d.data.folder) ?? folderColor!(d.data.folder)}
               stroke={active == true ? "var(--bs-body-color)" : undefined}
               strokeWidth={active == true ? 3 : undefined}
-              onClick={e => onDrillDown({ c2: (d.data as Folder).folder }, e)} cursor="pointer">
+              onClick={e => onDrillDown({ c2: (d.data as Folder).folder }, e)}
+              cursor="pointer"
+              role="button"
+              tabIndex={0}
+              focusable={true}>
               <title>
                 {parentColumn!.getNiceName(d.data.folder)}: {format(size.invert(d.value!))}
               </title>
@@ -118,7 +127,10 @@ export default function renderTreeMap({ data, width, height, parameters, loading
               stroke={active == true ? "var(--bs-body-color)" : undefined}
               strokeWidth={active == true ? 3 : undefined}
               onClick={e => onDrillDown(d.data as ChartRow, e)}
-              cursor="pointer">
+              cursor="pointer"
+              role="button"
+              tabIndex={0}
+              focusable={true}>
               <title>
                 {keyColumn.getValueNiceName(d.data) + ': ' + valueColumn.getValueNiceName(d.data)}
               </title>
@@ -130,7 +142,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
               dominantBaseline="middle"
               dx={nodeWidth(d) / 2}
               dy={nodeHeight(d) / 2 + (showNumber ? -6 : 0)}
-              onClick={e => onDrillDown(d.data as ChartRow, e)} cursor="pointer">
+              onClick={e => onDrillDown(d.data as ChartRow, e)}>
               {keyColumn.getValueNiceName(d.data as ChartRow)}
               <title>
                 {keyColumn.getValueNiceName(d.data as ChartRow) + ': ' + valueColumn.getValueNiceName(d.data as ChartRow)}
@@ -147,7 +159,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
               fontWeight="bold"
               dx={nodeWidth(d) / 2}
               dy={nodeHeight(d) / 2 + 6}
-              onClick={e => onDrillDown(d.data as ChartRow, e)} cursor="pointer">
+              onClick={e => onDrillDown(d.data as ChartRow, e)}>
               {valueColumn.getValueNiceName(d.data as ChartRow)}
             </TextEllipsis>
           }

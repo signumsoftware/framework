@@ -237,7 +237,15 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props): React.JS
     return (
       <svg height={height + "px"} width={width}>
         {filteredData.map(d =>
-          <g className="entry" data-key={d.fullIndex} key={d.fullIndex} onClick={e => handleOnClick(e, d)} onDoubleClick={e => setMinMax(resetZoom(d))}>
+          <g className="entry" data-key={d.fullIndex} key={d.fullIndex} role="button" tabIndex={0} cursor="pointer" focusable={true}
+            onClick={e => handleOnClick(e, d)}
+            onKeyDown={e => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                (onclick as any)?.(e);
+              }
+            }}
+            onDoubleClick={e => setMinMax(resetZoom(d))}>
             <rect className="shape"
               y={y(getDepth(d))}
               x={x(Math.max(min, d.beforeStart))}

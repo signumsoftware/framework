@@ -10,6 +10,7 @@ import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
+import { ChartMessage } from '../Signum.Chart';
 
 
 export default function renderMultiColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -81,7 +82,8 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="multiColumnsChartTitle">{ChartMessage.MultiColumnsChart0Per1.niceToString(pivot.title, keyColumn.title)}</title>
       <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
       <g opacity={dashboardFilter ? .5 : undefined}>
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} />
@@ -123,7 +125,15 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
                   width={xSubscale.bandwidth()}
                   height={height}
                   onClick={e => onDrillDown(row.rowClick, e)}
-                  cursor="pointer">
+                  role="button"
+                  tabIndex={0}
+                  cursor="pointer"
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      (onclick as any)?.(e);
+                    }
+                  }}>
                   <title>
                     {row.valueTitle}
                   </title>
@@ -134,6 +144,15 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
                     transform={translate((xSubscale.bandwidth() / 2) + labelInterMagin, height / 2) + rotate(-90)}
                     maxWidth={height}
                     onClick={e => onDrillDown(row.rowClick, e)}
+                    role="button"
+                    tabIndex={0}
+                    cursor="pointer"
+                    onKeyDown={e => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        (onclick as any)?.(e);
+                      }
+                    }}
                     opacity={parameters["NumberOpacity"]}
                     fill={parameters["NumberColor"]}
                     dominantBaseline="middle"

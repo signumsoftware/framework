@@ -8,6 +8,7 @@ import { XKeyTicks, YKeyTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import { ChartMessage } from '../Signum.Chart';
 
 
 export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -214,7 +215,8 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
   const detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="punchcardChartTitle">{ChartMessage.PunchcardChart0Per1.niceToString(verticalColumn.title, horizontalColumn.title)}</title>
       <XKeyTicks keyColumn={horizontalColumn} keyValues={horizontalKeys} xRule={xRule} yRule={yRule} x={x} showLines={x.bandwidth() > 5} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)}/>
       <YKeyTicks keyColumn={verticalColumn} keyValues={verticalKeys} xRule={xRule} yRule={yRule} y={y} showLines={y.bandwidth() > 5} showLabels={true} isActive={detector && (val => detector!({ c1: val }))} onDrillDown={(v, e) => onDrillDown({ c1: v }, e)}/>
       <g className="punch-panel" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content') - y.bandwidth() / 2)}>
@@ -226,6 +228,9 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
             return (
               <g key={horizontalColumn.getValueKey(r) + "-" + verticalColumn.getValueKey(r)} className="chart-groups sf-transition hover-group"
                 cursor="pointer"
+                role="button"
+                tabIndex={0}
+                focusable={true}
                 opacity={active == false ? .5 : undefined}
                 onClick={e => onDrillDown(r, e)}>
                 {mainShape?.renderer(r)}
