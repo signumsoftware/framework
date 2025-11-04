@@ -298,6 +298,7 @@ public static class SchemaSynchronizer
 
             HashSet<FieldEmbedded.EmbeddedHasValueColumn> hasValueFalse = new HashSet<FieldEmbedded.EmbeddedHasValueColumn>();
 
+            List<SqlPreCommand?> delayedHistoryColumns = new List<SqlPreCommand?>();
             List<SqlPreCommand?> delayedUpdatesHistory = new List<SqlPreCommand?>();
             List<SqlPreCommand?> delayedUpdatesFks = new List<SqlPreCommand?>();
             List<SqlPreCommand?> delayedDrops = new List<SqlPreCommand?>();
@@ -469,8 +470,13 @@ public static class SchemaSynchronizer
 
                         var columns = SqlPreCommand_WithHistory.ForNormal(columnBoth);
                         var columnsHistory = withHistory ? SqlPreCommand_WithHistory.ForHistory(columnBoth) : null;
+                        if (columnsHistory != null)
+                        {
+                            delayedHistoryColumns.Add(columnsHistory);
+                        }
 
                         var createPrimaryKey = modelPK != null && (diffPK == null || !diffPK.IndexEquals(dif, modelPK, sqlBuilder.IsPostgres)) ? sqlBuilder.CreateIndex(modelPK, null) : null;
+
 
                         var addPeriod = !sqlBuilder.IsPostgres && tab.SystemVersioned != null &&
                             (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned) || DifferentDatabase(tab.Name, dif.Name)) ?
@@ -510,8 +516,7 @@ public static class SchemaSynchronizer
                             disconnectFromPartition,
                             combinedAddPeriod,
                             columns,
-                            createPrimaryKey,
-                            columnsHistory);
+                            createPrimaryKey);
                     });
 
 
@@ -689,7 +694,7 @@ public static class SchemaSynchronizer
                 dropIndices, dropIndicesHistory,
                 dropForeignKeys,
 
-                tables, historyTables,
+                tables, historyTables, delayedHistoryColumns.Combine(Spacing.Double),
                 versioningTriggers,
                 delayedUpdatesHistory.Combine(Spacing.Double),
                 delayedUpdatesFks.Combine(Spacing.Double),
@@ -788,7 +793,15 @@ public static class SchemaSynchronizer
         var isPostgres = sqlBuilder.IsPostgres;
 
         if (!NeedsDefaultValue(table, column, forHistory: false) || avoidDefault)
-            return sqlBuilder.AlterTableAddColumn(table, column);
+        {
+            if (!withHistory)
+                return sqlBuilder.AlterTableAddColumn(table, column);
+
+            return new SqlPreCommand_WithHistory(
+                normal: sqlBuilder.AlterTableAddColumn(table, column),
+                history: sqlBuilder.AlterTableAddColumn(table, column, forHistory: true)
+            );
+        }
 
         if (column.Nullable == IsNullable.Forced)
         {
@@ -855,19 +868,26 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             var result = SqlPreCommand.Combine(Spacing.Simple,
                 sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
                 column.ComputedColumn != null || column.GetGeneratedAlwaysType() != GeneratedAlwaysType.None ? null :
-                sqlBuilder.IsPostgres ?
-                    sqlBuilder.AlterTableAlterColumnDropDefault(table.Name, column.Name) :
-                    sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name))!;
+                sqlBuilder.AlterTableDropDefaultConstaint(table.Name, column.Name, tempDefault.Name)
+                );
 
-            if(withHistory && column is FieldPrimaryKey)
+            if(withHistory)
             {
+                if (column is FieldPrimaryKey)
+                    return new SqlPreCommand_WithHistory(
+                        normal: result,
+                        history: AlterTableAddColumnDefaultZero(sqlBuilder, table, column, forHistory: true)
+                        );
+
                 return new SqlPreCommand_WithHistory(
                     normal: result,
-                    history: AlterTableAddColumnDefaultZero(sqlBuilder, table, column, forHistory: true)
-                    );
+                    history: SqlPreCommand.Combine(Spacing.Simple,
+                        sqlBuilder.AlterTableAddColumn(table.SystemVersioned!.TableName, column, tempDefault, forHistory: true),
+                        sqlBuilder.AlterTableDropDefaultConstaint(table.SystemVersioned!.TableName, column.Name, tempDefault.Name)
+                ));
             }
 
-            return result;
+            return result!;
         }
     }
 

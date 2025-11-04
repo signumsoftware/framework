@@ -448,20 +448,6 @@ export namespace FrameMessage {
   export const Main: MessageKey = new MessageKey("FrameMessage", "Main");
 }
 
-export namespace HeavyProfilerMessage {
-  export const HeavyProfilerLoading: MessageKey = new MessageKey("HeavyProfilerMessage", "HeavyProfilerLoading");
-  export const HeavyProfiler: MessageKey = new MessageKey("HeavyProfilerMessage", "HeavyProfiler");
-  export const Upload: MessageKey = new MessageKey("HeavyProfilerMessage", "Upload");
-  export const Record: MessageKey = new MessageKey("HeavyProfilerMessage", "Record");
-  export const Update: MessageKey = new MessageKey("HeavyProfilerMessage", "Update");
-  export const Clear: MessageKey = new MessageKey("HeavyProfilerMessage", "Clear");
-  export const Download: MessageKey = new MessageKey("HeavyProfilerMessage", "Download");
-  export const IgnoreHeavyProfilerEntries: MessageKey = new MessageKey("HeavyProfilerMessage", "IgnoreHeavyProfilerEntries");
-  export const UploadPreviousRunsToComparePerformance: MessageKey = new MessageKey("HeavyProfilerMessage", "UploadPreviousRunsToComparePerformance");
-  export const EnableTheProfilerWithTheDebuggerWith0AndSaveTheResultsWith1: MessageKey = new MessageKey("HeavyProfilerMessage", "EnableTheProfilerWithTheDebuggerWith0AndSaveTheResultsWith1");
-  export const Entries: MessageKey = new MessageKey("HeavyProfilerMessage", "Entries");
-}
-
 export namespace HtmlEditorMessage {
   export const Hyperlink: MessageKey = new MessageKey("HtmlEditorMessage", "Hyperlink");
   export const EnterYourUrlHere: MessageKey = new MessageKey("HtmlEditorMessage", "EnterYourUrlHere");
@@ -528,10 +514,6 @@ export namespace JavascriptMessage {
   export const showPeriod: MessageKey = new MessageKey("JavascriptMessage", "showPeriod");
   export const showPreviousOperation: MessageKey = new MessageKey("JavascriptMessage", "showPreviousOperation");
   export const Date: MessageKey = new MessageKey("JavascriptMessage", "Date");
-}
-
-export namespace LayoutMessage {
-  export const JumpToMainContent: MessageKey = new MessageKey("LayoutMessage", "JumpToMainContent");
 }
 
 export namespace LiteMessage {
@@ -803,11 +785,6 @@ export namespace SelectorMessage {
 export namespace SynchronizerMessage {
   export const EndOfSyncScript: MessageKey = new MessageKey("SynchronizerMessage", "EndOfSyncScript");
   export const StartOfSyncScriptGeneratedOn0: MessageKey = new MessageKey("SynchronizerMessage", "StartOfSyncScriptGeneratedOn0");
-}
-
-export namespace TemplateMessage {
-  export const Template: MessageKey = new MessageKey("TemplateMessage", "Template");
-  export const CopyToClipboard: MessageKey = new MessageKey("TemplateMessage", "CopyToClipboard");
 }
 
 export namespace VoidEnumMessage {

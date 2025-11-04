@@ -144,7 +144,7 @@ export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
         <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
       </div>
       <AccessibleTable
-        caption={AuthAdminMessage.TypePermissionOverview.niceToString()}
+        aria-label={AuthAdminMessage.TypePermissionOverview.niceToString()}
         mapCustomComponents={new Map([[TypeRow, "tr"]])}
         className="table table-sm sf-auth-rules">
         <thead>

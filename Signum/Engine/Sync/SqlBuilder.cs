@@ -624,17 +624,14 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
             constraintName.SqlEscape(isPostgres)));
     }
 
-    public SqlPreCommand AlterTableDropDefaultConstaint(ObjectName tableName, DiffColumn column)
+    public SqlPreCommand AlterTableDropDefaultConstaint(ObjectName tableName, DiffColumn column) => 
+        AlterTableDropDefaultConstaint(tableName, column.Name, column.DefaultConstraint!.Name!);
+    public SqlPreCommand AlterTableDropDefaultConstaint(ObjectName tableName, string columnName, string constraintName)
     {
         if (isPostgres)
-            return AlterTableAlterColumnDropDefault(tableName, column.Name);
+            return new SqlPreCommandSimple($"ALTER TABLE {tableName} ALTER COLUMN {columnName.SqlEscape(isPostgres)} DROP DEFAULT;");
         else
-            return AlterTableDropConstraint(tableName, column.DefaultConstraint!.Name!)!;
-    }
-
-    public SqlPreCommand AlterTableAlterColumnDropDefault(ObjectName tableName, string columnName)
-    {
-        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ALTER COLUMN {columnName.SqlEscape(isPostgres)} DROP DEFAULT;");
+            return AlterTableDropConstraint(tableName, constraintName)!;
     }
 
     public SqlPreCommandSimple AlterTableAddDefaultConstraint(ObjectName tableName, DefaultConstraint defCons)

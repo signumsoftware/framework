@@ -75,7 +75,7 @@ export default function CacheStatisticsPage(): React.JSX.Element {
   function renderLazies(state: CacheClient.CacheState) {
     return (
       <AccessibleTable
-        caption={CacheMessage.LazyStats.niceToString()}
+        aria-label={CacheMessage.LazyStats.niceToString()}
         className="table table-sm"
         multiselectable={false}>
         <thead>
@@ -103,7 +103,7 @@ export default function CacheStatisticsPage(): React.JSX.Element {
 
     return (
       <AccessibleTable
-        caption={CacheMessage.TableStats.niceToString()}
+        aria-label={CacheMessage.TableStats.niceToString()}
         className="table table-sm"
         mapCustomComponents={new Map([[RenderTree, "tr"]])}
         multiselectable={false}>

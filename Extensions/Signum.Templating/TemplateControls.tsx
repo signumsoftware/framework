@@ -1,13 +1,12 @@
 import * as React from 'react'
 import { SubTokensOptions, QueryToken, hasAnyOrAll, FindOptions } from '@framework/FindOptions'
-import { TemplateTokenMessage } from './Signum.Templating'
+import { TemplateMessage, TemplateTokenMessage } from './Signum.Templating'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
 import AutoLineModal from '@framework/AutoLineModal'
 import { useAPI } from '@framework/Hooks'
 import { Finder } from '@framework/Finder'
 import { getTypeInfos, TypeReference } from '@framework/Reflection'
 import { ajaxGet } from '@framework/Services'
-import { TemplateMessage } from '../../Signum/React/Signum.Entities'
 
 export interface TemplateControlsProps {
   queryKey: string | null | undefined;

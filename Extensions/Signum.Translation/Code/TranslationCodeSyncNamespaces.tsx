@@ -22,7 +22,7 @@ export default function TranslationCodeSyncNamespaces(): React.JSX.Element {
 
     return (
       <AccessibleTable
-        caption={`${TranslationMessage.Namespace.niceToString()} / ${TranslationMessage.NewTranslations.niceToString()}`}
+        aria-label={`${TranslationMessage.Namespace.niceToString()} / ${TranslationMessage.NewTranslations.niceToString()}`}
         className="st table">
         <thead>
           <tr>

@@ -728,37 +728,6 @@ public enum ContainerToggleMessage
 }
 
 [AllowUnauthenticated]
-public enum LayoutMessage
-{
-    JumpToMainContent,
-}
-
-public enum HeavyProfilerMessage
-{
-    [Description("Heavy Profiler (loading...)")]
-    HeavyProfilerLoading,
-    HeavyProfiler,
-    Upload,
-    Record,
-    Update,
-    Clear,
-    Download,
-    IgnoreHeavyProfilerEntries,
-    [Description("Upload previous runs to compare performance.")]
-    UploadPreviousRunsToComparePerformance,
-    [Description("Enable the profiler with the debugger with {0} and save the results with {1}")]
-    EnableTheProfilerWithTheDebuggerWith0AndSaveTheResultsWith1,
-    Entries,
-}
-
-public enum TemplateMessage
-{
-    Template,
-    [Description("Copy to clipboard: Ctrl+C, ESC")]
-    CopyToClipboard,
-}
-
-[AllowUnauthenticated]
 public enum FontSizeMessage
 {
     FontSize,

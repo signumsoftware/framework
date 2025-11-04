@@ -111,7 +111,7 @@ function InMemoryQueue({ queue, onReload }: { queue: SchedulerClient.SchedulerIt
       <h4>{ScheduledTaskMessage.InMemoryQueue.niceToString()}</h4>
       {queue.length === 0 ? <p> -- {ScheduledTaskMessage.ThereIsNoActiveScheduledTask.niceToString()} -- </p> :
         <AccessibleTable
-          caption={ScheduledTaskMessage.InMemoryQueue.niceToString()}
+          aria-label={ScheduledTaskMessage.InMemoryQueue.niceToString()}
           className="sf-search-results sf-stats-table">
           <thead>
             <tr>
@@ -149,7 +149,7 @@ function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerClien
       <h4>{ScheduledTaskMessage.RunningTasks.niceToString()}</h4>
       {runningTasks.length === 0 ? <p> -- {ScheduledTaskMessage.ThereAreNoTasksRunning.niceToString()} --</p> :
       <AccessibleTable
-          caption={ScheduledTaskMessage.RunningTasks.niceToString()}
+          aria-label={ScheduledTaskMessage.RunningTasks.niceToString()}
           className="sf-search-results sf-stats-table">
           <thead>
             <tr>

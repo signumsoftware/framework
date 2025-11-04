@@ -43,6 +43,7 @@ import { SearchVisualTip, TypeEntity } from '../Signum.Basics'
 import { KeyNames } from '../Components'
 import { CollectionMessage } from '../Signum.External'
 import { LinkButton } from '../Basics/LinkButton'
+import { AccessibleTable } from '../Basics/AccessibleTable'
 
 export interface ColumnParsed {
   column: ColumnOptionParsed;
@@ -586,8 +587,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               <div ref={d => { this.containerDiv = d; }}
                 className="sf-scroll-table-container table-responsive"
                 style={{ maxHeight: this.props.maxResultsHeight }}>
-                <table aria-multiselectable="true" role="grid" className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
-                  <caption>{this.createCaption()}</caption>
+                <table aria-multiselectable="true" role="grid"
+                  aria-label={this.createCaption()}
+                  className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
+                  {AccessibleTable.ariaLabelAsCaption && <caption>{this.createCaption()}</caption>}
                   <thead>
                     {this.renderHeaders()}
                   </thead>

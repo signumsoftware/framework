@@ -36,7 +36,7 @@ export function TranslationTypeTable(p: { type: TranslationClient.LocalizableTyp
 
   return (
     <AccessibleTable
-      caption={TranslationMessage.TranslationsOverview.niceToString()}
+      aria-label={TranslationMessage.TranslationsOverview.niceToString()}
       className="table st"
       mapCustomComponents={new Map<React.JSXElementConstructor<any>, string>([[TranslationTypeDescription, "tr"], [RenderMembers, "tr"]])}
       multiselectable={false}

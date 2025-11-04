@@ -7,7 +7,7 @@ import "./Profiler.css"
 import { useAPIWithReload, useInterval, useSize } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 import { classes } from '@framework/Globals'
-import { HeavyProfilerMessage } from '../../../Signum/React/Signum.Entities'
+import { HeavyProfilerMessage } from '../Signum.Profiler'
 
 export default function HeavyList(): React.JSX.Element {
 

@@ -5,7 +5,7 @@ type SectionType = "tbody" | "thead" | "tfoot";
 type TableRole = "grid" | "table" | "treegrid";
 
 interface AccessibleTableProps extends React.TableHTMLAttributes<HTMLTableElement> {
-  caption: string;
+  "aria-label": string;
   tableRole?: TableRole;
   multiselectable?: boolean;
   focusCells?: boolean;
@@ -26,7 +26,7 @@ interface AccessibleTableProps extends React.TableHTMLAttributes<HTMLTableElemen
  * It also applies appropriate ARIA roles and focus behavior for better accessibility.
  */
 export function AccessibleTable({
-  caption,
+  "aria-label": ariaLabel,
   tableRole = "grid",
   children,
   multiselectable = true,
@@ -85,12 +85,17 @@ export function AccessibleTable({
   return (
     <table
       role={tableRole}
+      aria-label={ariaLabel}
       aria-multiselectable={`${multiselectable ? "true" : "false"}`}
       {...rest}>
-      <caption>{caption}</caption>
+      {AccessibleTable.ariaLabelAsCaption && <caption>{ariaLabel}</caption>}
       {enhancedChildren}
     </table>
   );
+}
+
+export namespace AccessibleTable {
+  export let ariaLabelAsCaption = false;
 }
 
 /**

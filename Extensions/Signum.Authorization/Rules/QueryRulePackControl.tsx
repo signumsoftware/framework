@@ -55,7 +55,7 @@ export default function QueryRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
         <EntityLine ctx={ctx.subCtx(f => f.type)} />
       </div>
       <AccessibleTable
-        caption={AuthAdminMessage.QueryPermissionsOverview.niceToString()}
+        aria-label={AuthAdminMessage.QueryPermissionsOverview.niceToString()}
         className="table table-sm sf-auth-rules "
         multiselectable={false}>
         <thead>

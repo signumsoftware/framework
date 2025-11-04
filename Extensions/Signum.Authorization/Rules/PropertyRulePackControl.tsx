@@ -124,7 +124,7 @@ export default function PropertyRulesPackControl({ ctx, initialTypeConditions, i
         </FormGroup>
       </div>
       <AccessibleTable
-        caption={AuthAdminMessage.PropertyRuleOverview.niceToString()}
+        aria-label={AuthAdminMessage.PropertyRuleOverview.niceToString()}
         className="table table-sm sf-auth-rules "
         mapCustomComponents={new Map([[PropertyRow, "tr"]])}
         multiselectable={false}>

@@ -143,7 +143,7 @@ export function TranslatedInstances(p: { data: TranslatedInstanceClient.TypeInst
       {p.data.instances.map(ins =>
         <React.Fragment key={ins.instance.id}>
           <AccessibleTable
-            caption={TranslationMessage.TranslationsOverview.niceToString()}
+            aria-label={TranslationMessage.TranslationsOverview.niceToString()}
             className="table st"
             mapCustomComponents={new Map([[AccessibleRow, "tr"]])}
             multiselectable={false}

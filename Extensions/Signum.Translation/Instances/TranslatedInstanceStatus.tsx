@@ -81,7 +81,7 @@ function TranslationTable({ result, onRefreshView }: { result: TranslatedInstanc
 
   return (
     <AccessibleTable
-      caption={TranslationMessage.TranslationsOverview.niceToString()}
+      aria-label={TranslationMessage.TranslationsOverview.niceToString()}
       className="table st"
       multiselectable={false}>
       <thead>
