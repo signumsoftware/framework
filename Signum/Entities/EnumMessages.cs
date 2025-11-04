@@ -727,16 +727,6 @@ public enum ContainerToggleMessage
     Expand,
 }
 
-
-[AllowUnauthenticated]
-public enum FontSizeMessage
-{
-    FontSize,
-    ReduceFontSize,
-    ResetFontSize,
-    IncreaseFontSize,
-}
-
 [AllowUnauthenticated]
 public enum FontSizeMessage
 {
