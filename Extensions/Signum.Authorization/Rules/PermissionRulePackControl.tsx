@@ -99,7 +99,7 @@ export default function PermissionRulesPackControl(p: { ctx: TypeContext<Permiss
         <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
       </div>
       <AccessibleTable
-        caption={AuthAdminMessage.PermissionRulesOverview.niceToString()}
+        aria-label={AuthAdminMessage.PermissionRulesOverview.niceToString()}
         className="table table-sm sf-auth-rules">
         <thead>
           <tr>

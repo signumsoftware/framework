@@ -73,7 +73,7 @@ export default function ProcessPanelPage(): React.JSX.Element {
         {ProcessMessage.NextPlannedExecution.niceToString()}: {s.nextPlannedExecution ?? ProcessMessage.None.niceToString() }
         <br />
         <AccessibleTable
-          caption={ProcessMessage.ExecutingProcesses.niceToString()}
+          aria-label={ProcessMessage.ExecutingProcesses.niceToString()}
           className="table"
           multiselectable={false}>
           <thead>

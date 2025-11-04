@@ -40,7 +40,7 @@ function TranslationTable({ result, onRefreshView }: { result: TranslationClient
 
   return (
     <AccessibleTable
-      caption={TranslationMessage.TranslationStatus.niceToString()}
+      aria-label={TranslationMessage.TranslationStatus.niceToString()}
       className="st table">
       <thead>
         <tr>

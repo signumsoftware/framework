@@ -113,7 +113,7 @@ ${getToString(time.user)}`}
 
   return (
     <AccessibleTable
-      caption={TimeMessage.TimesOverview.niceToString()}
+      aria-label={TimeMessage.TimesOverview.niceToString()}
       className="table"
       multiselectable={false}>
       <tbody>
@@ -222,7 +222,7 @@ function TimesTable({ times }: { times: ProfilerClient.TimeTrackerEntry[] }) {
 
   return (
     <AccessibleTable
-      caption={TimeMessage.TimesOverview.niceToString()}
+      aria-label={TimeMessage.TimesOverview.niceToString()}
       className="table table-nonfluid"
       mapCustomComponents={new Map([[GetTimeRow, "tr"]])}
       multiselectable={false}>

@@ -42,7 +42,7 @@ export default function HeavyEntry(): React.JSX.Element {
       {entries && <HeavyProfilerDetailsD3 entries={entries} selected={current} asyncDepth={asyncDepth} />}
       <br />
       <AccessibleTable
-        caption={ProfilerMessage.HeavyProfiler.niceToString()}
+        aria-label={ProfilerMessage.HeavyProfiler.niceToString()}
         className="table table-nonfluid"
         multiselectable={false}>
         <tbody>
@@ -83,7 +83,7 @@ export function StackFrameTable(p: { stackTrace: ProfilerClient.StackTraceTS[] }
 
   return (
     <AccessibleTable
-      caption={ProfilerMessage.StackTraceOverview.niceToString()}
+      aria-label={ProfilerMessage.StackTraceOverview.niceToString()}
       className="table table-sm"
       multiselectable={false}>
       <thead>

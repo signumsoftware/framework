@@ -149,7 +149,7 @@ function OperationTable(p: {
 
   return (
     <AccessibleTable
-      caption={AuthAdminMessage.AuthRuleOverview.niceToString()}
+      aria-label={AuthAdminMessage.AuthRuleOverview.niceToString()}
       className="table table-sm sf-auth-rules"
       mapCustomComponents={new Map([[OperationRow, "tr"]])}
       multiselectable={false}>

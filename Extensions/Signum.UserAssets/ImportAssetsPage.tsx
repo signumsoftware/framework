@@ -96,7 +96,7 @@ export default function ImportAssetsPage(): React.JSX.Element {
     return (
       <div>
         <AccessibleTable
-          caption={UserAssetMessage.UserAssetLines.niceToString()}
+          aria-label={UserAssetMessage.UserAssetLines.niceToString()}
           className="table"
           multiselectable={false}>
           <thead>

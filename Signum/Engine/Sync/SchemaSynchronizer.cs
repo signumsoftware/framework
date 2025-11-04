@@ -298,6 +298,7 @@ public static class SchemaSynchronizer
 
             HashSet<FieldEmbedded.EmbeddedHasValueColumn> hasValueFalse = new HashSet<FieldEmbedded.EmbeddedHasValueColumn>();
 
+            List<SqlPreCommand?> delayedHistoryColumns = new List<SqlPreCommand?>();
             List<SqlPreCommand?> delayedUpdatesHistory = new List<SqlPreCommand?>();
             List<SqlPreCommand?> delayedUpdatesFks = new List<SqlPreCommand?>();
             List<SqlPreCommand?> delayedDrops = new List<SqlPreCommand?>();
@@ -469,8 +470,13 @@ public static class SchemaSynchronizer
 
                         var columns = SqlPreCommand_WithHistory.ForNormal(columnBoth);
                         var columnsHistory = withHistory ? SqlPreCommand_WithHistory.ForHistory(columnBoth) : null;
+                        if (columnsHistory != null)
+                        {
+                            delayedHistoryColumns.Add(columnsHistory);
+                        }
 
                         var createPrimaryKey = modelPK != null && (diffPK == null || !diffPK.IndexEquals(dif, modelPK, sqlBuilder.IsPostgres)) ? sqlBuilder.CreateIndex(modelPK, null) : null;
+
 
                         var addPeriod = !sqlBuilder.IsPostgres && tab.SystemVersioned != null &&
                             (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned) || DifferentDatabase(tab.Name, dif.Name)) ?
@@ -510,8 +516,7 @@ public static class SchemaSynchronizer
                             disconnectFromPartition,
                             combinedAddPeriod,
                             columns,
-                            createPrimaryKey,
-                            columnsHistory);
+                            createPrimaryKey);
                     });
 
 
@@ -689,7 +694,7 @@ public static class SchemaSynchronizer
                 dropIndices, dropIndicesHistory,
                 dropForeignKeys,
 
-                tables, historyTables,
+                tables, historyTables, delayedHistoryColumns.Combine(Spacing.Double),
                 versioningTriggers,
                 delayedUpdatesHistory.Combine(Spacing.Double),
                 delayedUpdatesFks.Combine(Spacing.Double),
