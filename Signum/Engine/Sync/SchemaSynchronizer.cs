@@ -863,19 +863,26 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             var result = SqlPreCommand.Combine(Spacing.Simple,
                 sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
                 column.ComputedColumn != null || column.GetGeneratedAlwaysType() != GeneratedAlwaysType.None ? null :
-                sqlBuilder.IsPostgres ?
-                    sqlBuilder.AlterTableAlterColumnDropDefault(table.Name, column.Name) :
-                    sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name))!;
+                sqlBuilder.AlterTableDropDefaultConstaint(table.Name, column.Name, tempDefault.Name)
+                );
 
-            if(withHistory && column is FieldPrimaryKey)
+            if(withHistory)
             {
+                if (column is FieldPrimaryKey)
+                    return new SqlPreCommand_WithHistory(
+                        normal: result,
+                        history: AlterTableAddColumnDefaultZero(sqlBuilder, table, column, forHistory: true)
+                        );
+
                 return new SqlPreCommand_WithHistory(
                     normal: result,
-                    history: AlterTableAddColumnDefaultZero(sqlBuilder, table, column, forHistory: true)
-                    );
+                    history: SqlPreCommand.Combine(Spacing.Simple,
+                        sqlBuilder.AlterTableAddColumn(table.SystemVersioned!.TableName, column, tempDefault, forHistory: true),
+                        sqlBuilder.AlterTableDropDefaultConstaint(table.SystemVersioned!.TableName, column.Name, tempDefault.Name)
+                ));
             }
 
-            return result;
+            return result!;
         }
     }
 
