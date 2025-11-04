@@ -803,7 +803,7 @@ public static class StringExtensions
                 stringBuilder.Append(c);
         }
 
-        return stringBuilder.ToString().Normalize(NormalizationForm.FormC).ToUpper();
+        return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
     }
 
     static readonly string[] abbreviations = new[] { "Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
