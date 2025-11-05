@@ -5,14 +5,13 @@ import {
   LexicalConfigNode,
   OptionalCallback,
 } from "../types";
-import { ImageConverter, ImageInfo } from "./ImageConverter";
-import { $createImageNode, ImageNode } from "./ImageNode";
+import { ImageHandlerBase, ImageInfo } from "./ImageHandlerBase";
+import { $createImageNode, ImageNodeBase } from "./ImageNodeBase";
 
-export class ImageExtension
-  implements HtmlEditorExtension
-{
+export class ImageExtension implements HtmlEditorExtension {
+
   name = "ImageExtension";
-  constructor(public imageConverter: ImageConverter) {}
+  constructor(public nodeType: typeof ImageNodeBase) {}
 
   registerExtension(controller: HtmlEditorController): OptionalCallback {
     const abortController = new AbortController();
@@ -51,7 +50,7 @@ export class ImageExtension
       const files = event.dataTransfer?.files;
       if (!files?.length) return;
 
-      this.insertImageNodes(files, controller, this.imageConverter);
+      this.insertImageNodes(files, controller, this.nodeType.converter);
     }, { signal: abortController.signal });
 
     element.addEventListener("paste", (event) => {
@@ -60,7 +59,7 @@ export class ImageExtension
       if (!files?.length) return;
 
       event.preventDefault();
-      this.insertImageNodes(files, controller, this.imageConverter);
+      this.insertImageNodes(files, controller, this.nodeType.converter);
     }, { signal: abortController.signal });
 
     return () => {
@@ -69,20 +68,20 @@ export class ImageExtension
   }
 
   getNodes(): LexicalConfigNode {
-    return [ImageNode];
+    return [this.nodeType];
   }
 
   async insertImageNodes(
     files: FileList,
     controller: HtmlEditorController,
-    imageConverter: ImageConverter
+    handler: ImageHandlerBase
   ): Promise<void> {
 
     const uploadPromises: Promise<ImageInfo>[] = Array.from(files)
       .filter(file => file.type.startsWith("image/"))
       .map(async (file) => {
         try {
-          return await imageConverter.uploadData(file);
+          return await handler.uploadData(file);
         } catch (error) {
           console.error("Image upload failed.", error);
           throw error;
@@ -98,7 +97,7 @@ export class ImageExtension
 
     controller.editor.update(() => {
       for (const file of successfulFiles) {
-        const imageNode = $createImageNode(file, imageConverter);
+        const imageNode = $createImageNode(file, this.nodeType);
         $getRoot().append(imageNode);
       }
     });

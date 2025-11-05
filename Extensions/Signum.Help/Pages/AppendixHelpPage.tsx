@@ -10,7 +10,7 @@ import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation, AppendixHelpE
 import { getOperationInfo, getTypeInfo, GraphExplorer, symbolNiceName, tryGetOperationInfo } from '@framework/Reflection';
 import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from '@framework/Signum.Entities';
 import { TypeContext } from '@framework/Lines';
-import { EditableTextComponent, EditableHtmlComponent } from './EditableText';
+import { EditableTextComponent, EditableHtmlComponent } from '../Editor/Editable';
 import MessageModal from '@framework/Modals/MessageModal';
 import { classes } from '@framework/Globals';
 import { useTitle } from '@framework/AppContext'

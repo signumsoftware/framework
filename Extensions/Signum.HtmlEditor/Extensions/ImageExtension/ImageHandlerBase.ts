@@ -1,7 +1,7 @@
+import { ImageNodeBase } from "./ImageNodeBase";
 
-export interface ImageConverter {
-  //converterKey: string; converter class name used as key
-  dataImageIdAttribute?: string;
+export interface ImageHandlerBase {
+  getNodeType(): typeof ImageNodeBase;
   uploadData(blob: Blob): Promise<ImageInfo>;
   renderImage(val: ImageInfo): React.ReactElement;
   toElement(val: ImageInfo): HTMLElement | undefined;
