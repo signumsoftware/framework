@@ -9,7 +9,6 @@ export interface ImageHandlerBase {
 }
 
 export interface ImageInfo {
-  converterKey: string;
   imageId?: string;
   binaryFile?: string;
   fileName?: string;

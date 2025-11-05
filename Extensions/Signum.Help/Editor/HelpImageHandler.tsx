@@ -21,8 +21,7 @@ export class HelpImageHandler implements ImageHandlerBase {
     val.binaryFile && img.setAttribute("data-binary-file", val.binaryFile);
     img.setAttribute("data-file-name", val.fileName || "");
     val.imageId && img.setAttribute("data-help-image-id", val.imageId);
-    
-    img.setAttribute("data-converter-key", HelpImageHandler.name);
+
     return img;
   }
 
@@ -37,7 +36,6 @@ export class HelpImageHandler implements ImageHandlerBase {
       .then(att => ({
         binaryFile: att.binaryFile ?? undefined,
         fileName: att.fileName ?? undefined,
-        converterKey: HelpImageHandler.name,
       }));
   }
 
@@ -73,7 +71,6 @@ export class HelpImageHandler implements ImageHandlerBase {
         binaryFile: element.dataset["binaryFile"],
         fileName: element.dataset["fileName"],
         imageId: element.dataset["helpImageId"],
-        converterKey: HelpImageHandler.name,
       };
     }
 
