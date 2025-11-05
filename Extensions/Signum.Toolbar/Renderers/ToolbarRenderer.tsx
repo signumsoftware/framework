@@ -341,14 +341,14 @@ function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: Too
   return (
     <li>
       <ul>
-        <ToolbarNavItem title={title} extraIcons={renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)} onClick={e => handleShowClick(e)}
+        <ToolbarNavItem title={title} extraIcons={renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)} isGroup={true} onClick={e => handleShowClick(e)}
           icon={
             <div style={{ position: 'relative' }}>
               <div className="nav-arrow-icon" style={{ position: 'absolute' }}>
                 <FontAwesomeIcon icon={show ? "chevron-down" : "chevron-right"} className="icon" />
               </div>
               <div className="nav-icon-with-arrow">
-                {icon ?? <div className="icon" />}
+                {icon}
               </div>
             </div>
           }
@@ -577,17 +577,17 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   );
 }
 
-export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
+export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, isGroup?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
   return (
     <li className="nav-item d-flex">
       <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100" >
         <div>{p.icon}</div>
-        <span className={"nav-item-text"}>
+        <span className={classes("nav-item-text", p.isGroup && "nav-item-group")}>
           {p.title}
           {p.isExternalLink && <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}
         </span>
         {p.extraIcons}
-        <div className={"nav-item-float"}>{p.title}</div>
+        <div className={classes("nav-item-float", p.isGroup && "nav-item-group")}>{p.title}</div>
       </Nav.Link>
     </li>
   );
