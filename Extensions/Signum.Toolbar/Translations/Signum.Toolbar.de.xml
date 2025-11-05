@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="LayoutMessage">
+    <Member Name="JumpToMainContent" Description="Zum Hauptinhalt springen" />
+  </Type>
   <Type Name="ShowCount" Description="Anzahl anzeigen">
     <Member Name="Always" Description="Immer" />
     <Member Name="MoreThan0" Description="Mehr als 0" />
