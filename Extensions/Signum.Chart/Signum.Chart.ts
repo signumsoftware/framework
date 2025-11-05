@@ -159,6 +159,24 @@ export namespace ChartMessage {
   export const ListView: MessageKey = new MessageKey("ChartMessage", "ListView");
   export const TheSelectedTokenShouldBeA0: MessageKey = new MessageKey("ChartMessage", "TheSelectedTokenShouldBeA0");
   export const TheSelectedTokenShouldBeEither: MessageKey = new MessageKey("ChartMessage", "TheSelectedTokenShouldBeEither");
+  export const BarChart0Per1: MessageKey = new MessageKey("ChartMessage", "BarChart0Per1");
+  export const ColumnChart0Per1: MessageKey = new MessageKey("ChartMessage", "ColumnChart0Per1");
+  export const PieChart0Per1: MessageKey = new MessageKey("ChartMessage", "PieChart0Per1");
+  export const BubblePackChart0Per1: MessageKey = new MessageKey("ChartMessage", "BubblePackChart0Per1");
+  export const PunchcardChart0Per1: MessageKey = new MessageKey("ChartMessage", "PunchcardChart0Per1");
+  export const TreemapChart0Per1: MessageKey = new MessageKey("ChartMessage", "TreemapChart0Per1");
+  export const LineChart0Per1: MessageKey = new MessageKey("ChartMessage", "LineChart0Per1");
+  export const BubbleplotChart0Of1For2Per3: MessageKey = new MessageKey("ChartMessage", "BubbleplotChart0Of1For2Per3");
+  export const MultiBarsChart0Per1: MessageKey = new MessageKey("ChartMessage", "MultiBarsChart0Per1");
+  export const MultiColumnsChart0Per1: MessageKey = new MessageKey("ChartMessage", "MultiColumnsChart0Per1");
+  export const ParallelCoordinatesChart0For1: MessageKey = new MessageKey("ChartMessage", "ParallelCoordinatesChart0For1");
+  export const CommaSeperatedJoinAnd: MessageKey = new MessageKey("ChartMessage", "CommaSeperatedJoinAnd");
+  export const ScatterplotChart0Per1For2: MessageKey = new MessageKey("ChartMessage", "ScatterplotChart0Per1For2");
+  export const StackedBarsChart0For1SortedBy2: MessageKey = new MessageKey("ChartMessage", "StackedBarsChart0For1SortedBy2");
+  export const StackedColumnsChart0For1SortedBy2: MessageKey = new MessageKey("ChartMessage", "StackedColumnsChart0For1SortedBy2");
+  export const StackedLinesChart0For1SortedBy2: MessageKey = new MessageKey("ChartMessage", "StackedLinesChart0For1SortedBy2");
+  export const CalenderStreamChart0Of1SortedBy2: MessageKey = new MessageKey("ChartMessage", "CalenderStreamChart0Of1SortedBy2");
+  export const MultiLineChart0Of1By2: MessageKey = new MessageKey("ChartMessage", "MultiLineChart0Of1By2");
 }
 
 export const ChartParameter: EnumType<ChartParameter> = new EnumType<ChartParameter>("ChartParameter");

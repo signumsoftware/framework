@@ -11,6 +11,7 @@ import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
+import { ChartMessage } from '../Signum.Chart';
 
 
 export default function renderMultiBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -73,7 +74,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
   var columnsInOrder = pivot.columns.orderBy(a => a.key);
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
   var color = ChartUtils.colorCategory(parameters, columnsInOrder.map(s => s.key), memo);
-
+  console.log(pivot);
   var ySubscale = d3.scaleBand()
     .domain(pivot.columns.map(s => s.key))
     .range([interMagin, y.bandwidth() - interMagin]);
@@ -81,7 +82,8 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="multiBarsChartTitle">{ChartMessage.MultiBarsChart0Per1.niceToString(pivot.title, keyColumn.title)}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} x={x} />
       </g>
@@ -124,7 +126,15 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
                     height={ySubscale.bandwidth()}
                     width={width}
                     onClick={e => onDrillDown(row.rowClick, e)}
-                    cursor="pointer">
+                    role="button"
+                    tabIndex={0}
+                    cursor="pointer"
+                    onKeyDown={e => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        (onclick as any)?.(e);
+                      }
+                    }}>
                     <title>
                       {row.valueTitle}
                     </title>
@@ -135,6 +145,15 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
                       maxWidth={width}
                       transform={translate(width / 2, (ySubscale.bandwidth() / 2) + interMagin)}
                       onClick={e => onDrillDown(row.rowClick, e)}
+                      role="button"
+                      tabIndex={0}
+                      cursor="pointer"
+                      onKeyDown={e => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          (onclick as any)?.(e);
+                        }
+                      }}
                       opacity={parameters["NumberOpacity"]}
                       fill={parameters["NumberColor"]}
                       dominantBaseline="middle"

@@ -11,6 +11,7 @@ import TextEllipsis from './Components/TextEllipsis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
+import { ChartMessage } from '../Signum.Chart';
 
 
 export default function renderStackedBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -56,6 +57,7 @@ export default function renderStackedBars({ data, width, height, parameters, loa
 
   var c = data.columns;
   var keyColumn = c.c0 as ChartColumn<unknown>;
+  var splitColumn = c.c1 as ChartColumn<unknown>;
   var valueColumn0 = c.c2 as ChartColumn<number>;
 
   var pValueAsPercent = parameters.ValueAsPercent;
@@ -107,7 +109,8 @@ export default function renderStackedBars({ data, width, height, parameters, loa
   const bandMargin = y.bandwidth() > 20 ? 2 : y.bandwidth() > 10 ? 1 : 0;
 
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="stackedBarsChartTitle">{ChartMessage.StackedBarsChart0For1SortedBy2.niceToString(valueColumn0.title, keyColumn.title, splitColumn.title)}</title>  
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} x={x} format={format} />
       </g>
@@ -139,7 +142,15 @@ export default function renderStackedBars({ data, width, height, parameters, loa
                   height={y.bandwidth() - bandMargin * 2}
                   width={x(r[1])! - x(r[0])!}
                   onClick={e => onDrillDown(row.rowClick, e)}
-                  cursor="pointer">
+                  role="button"
+                  tabIndex={0}
+                  cursor="pointer"
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      (onclick as any)?.(e);
+                    }
+                  }}>
                   <title>
                     {row.valueTitle}
                   </title>
