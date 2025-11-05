@@ -8,7 +8,8 @@ import { XAxis, YAxis } from './Components/Axis';
 import TextEllipsis from './Components/TextEllipsis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
-import { ChartMessage } from '../Signum.Chart';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, dashboardFilter, chartRequest }: ChartScriptProps): React.ReactElement<any> {
@@ -88,9 +89,16 @@ export default function renderBubbleplot({ data, width, height, parameters, load
 
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
+  var aggregateColumns: ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
+    [keyColumn, horizontalColumn, verticalColumn].filter(cn => cn != undefined).filter(a => a.token && a.token.queryTokenType == "Aggregate")
+
+  var titleMessage = (aggregateColumns.length != 0) ?
+    ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.Bubbleplot), getQueryNiceName(chartRequest.queryKey), keyColumns.map(cn => cn.title).join(", "), aggregateColumns.map(cn => cn.title).join(", ")) :
+    ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Bubbleplot), getQueryNiceName(chartRequest.queryKey), keyColumns.map(cn => cn.title).join(", "));
+
   return (
     <svg direction="ltr" width={width} height={height} role="img">
-      <title id="bubbleplotChartTitle">{ChartMessage.BubbleplotChart0Of1For2Per3.niceToString(sizeColumn.title, keyColumn.title, horizontalColumn.title, verticalColumn.title)}</title>
+      <title id="bubbleplotChartTitle">{titleMessage}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />

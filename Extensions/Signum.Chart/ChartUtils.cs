@@ -233,43 +233,10 @@ public enum ChartMessage
     [Description("The selected token should be either:")]
     TheSelectedTokenShouldBeEither,
 
-    [Description("Bar chart: {0} per {1}")]
-    BarChart0Per1,
-    [Description("Column chart: {0} per {1}")]
-    ColumnChart0Per1,
-    [Description("Pie chart: {0} per {1}")]
-    PieChart0Per1,
-    [Description("BubblePack chart: {0} per {1}")]
-    BubblePackChart0Per1,
-    [Description("Punchcard chart: {0} per {1}")]
-    PunchcardChart0Per1,
-    [Description("Treemap chart: {0} per {1}")]
-    TreemapChart0Per1,
-    [Description("Line chart: {0} per {1}")]
-    LineChart0Per1,
-
-    [Description("Bubbleplot chart: {0} of {1} for {2} per {3}")]
-    BubbleplotChart0Of1For2Per3,
-    [Description("MultiBar chart: {0} per {1}")]
-    MultiBarsChart0Per1,
-    [Description("MultiColumn chart: {0} per {1}")]
-    MultiColumnsChart0Per1,
-    [Description("ParallelCoordinate chart: {0} for {1}")]
-    ParallelCoordinatesChart0For1,
-    [Description("and")]
-    CommaSeperatedJoinAnd,
-    [Description("Scatterplot chart: {0} per {1} for {2}")]
-    ScatterplotChart0Per1For2,
-    [Description("StackedBars chart: {0} per {1} sorted by {2}")]
-    StackedBarsChart0For1SortedBy2,
-    [Description("StackedColumns chart: {0} per {1} sorted by {2}")]
-    StackedColumnsChart0For1SortedBy2,
-    [Description("StackedLines chart: {0} per {1} sorted by {2}")]
-    StackedLinesChart0For1SortedBy2,
-    [Description("CalendarStream chart: {0} of {1} sorted by {2}")]
-    CalenderStreamChart0Of1SortedBy2,
-    [Description("MultiLine chart: {0} of {1} per {2}")]
-    MultiLineChart0Of1By2,
+    [Description("{0} of {1}: {2}")]
+    _0Of1_2,
+    [Description("{0} of {1}: {2} per {3}")]
+    _0Of1_2Per3,
 }
 
 

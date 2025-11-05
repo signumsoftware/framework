@@ -9,7 +9,8 @@ import Legend from './Components/Legend';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
-import { ChartMessage } from '../Signum.Chart';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderStackedLines({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -52,7 +53,6 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
   var c = data.columns;
   var keyColumn = c.c0 as ChartColumn<unknown>;
-  var splitColumn = c.c1 as ChartColumn<unknown>;
   var valueColumn0 = c.c2 as ChartColumn<number>;
 
   var pValueAsPercent = parameters.ValueAsPercent;
@@ -119,7 +119,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
   return (
     <svg direction="ltr" width={width} height={height} role="img">
-      <title id="stackedLinesChartTitle">{ChartMessage.StackedBarsChart0For1SortedBy2.niceToString(valueColumn0.title, keyColumn.title, splitColumn.title)}</title>  
+      <title id="stackedLinesChartTitle">{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.StackedLines), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>  
       {hasHorizontalScale ?
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={keyColumn as ChartColumn<number>} x={x as d3.ScaleContinuousNumeric<number, number>} /> :
         <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x as d3.ScaleBand<string>} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />

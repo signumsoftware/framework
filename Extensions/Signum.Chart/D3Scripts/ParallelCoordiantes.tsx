@@ -7,7 +7,8 @@ import { Dic } from '@framework/Globals';
 import { XKeyTicks } from './Components/Ticks';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
-import { ChartMessage, ChartParameter } from '../Signum.Chart';
+import { ChartMessage, ChartParameter, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 interface ColumnWithScales {
   column: ChartColumn<number>;
@@ -87,9 +88,20 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
   var selectedColumn = cords.firstOrNull(a => a.column.name == selectedColumnName) || cords.first();
 
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
+
+  var keyColumns: ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
+    [data.columns.c1, data.columns.c2, data.columns.c3, data.columns.c4, data.columns.c5, data.columns.c6, data.columns.c7, data.columns.c8].filter(cn => cn != undefined).filter(a => a.token && a.token.queryTokenType != "Aggregate")
+
+  var aggregateColumns: ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
+    [data.columns.c1, data.columns.c2, data.columns.c3, data.columns.c4, data.columns.c5, data.columns.c6, data.columns.c7, data.columns.c8].filter(cn => cn != undefined).filter(a => a.token && a.token.queryTokenType == "Aggregate")
+
+  var titleMessage = (aggregateColumns.length != 0) ?
+    ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.ParallelCoordinates), getQueryNiceName(chartRequest.queryKey), keyColumns.map(cn => cn.title).join(", "), aggregateColumns.map(cn => cn.title).join(", ")) :
+    ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.ParallelCoordinates), getQueryNiceName(chartRequest.queryKey), keyColumns.map(cn => cn.title).join(", "));
+
   return (
     <svg direction="ltr" width={width} height={height} role="img">
-      <title id="parallelCoodinatesChartTitle">{ChartMessage.ParallelCoordinatesChart0For1.niceToString(cords.map(c => c.column.title).join(` ${ChartMessage.CommaSeperatedJoinAnd.niceToString()} `), keyColumn.title)}</title>
+      <title id="parallelCoodinatesChartTitle">{titleMessage}</title>
       <g className="x-tick" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content'))}>
         {cords.map(d => <line key={d.column.name} className="x-tick sf-transition"
           transform={translate(x(d.column.name)!, 0)}

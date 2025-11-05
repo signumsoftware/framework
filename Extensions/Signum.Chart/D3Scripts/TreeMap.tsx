@@ -6,7 +6,8 @@ import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Comp
 import { Folder, isFolder, Root, isRoot, stratifyTokens } from './Components/Stratify';
 import TextEllipsis from './Components/TextEllipsis';
 import InitialMessage from './Components/InitialMessage';
-import { ChartMessage } from '../Signum.Chart';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderTreeMap({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -94,7 +95,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
       width={width}
       height={height}
       role="img">
-      <title id="treeMapChartTitle">{ChartMessage.TreemapChart0Per1.niceToString(valueColumn.title, keyColumn.title)}</title>
+      <title id="treeMapChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Treemap), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       {nodes.map((d, i) => {
         const active = activeDetector?.(isFolder(d.data) ? ({ c2: d.data.folder }) : d.data);
 

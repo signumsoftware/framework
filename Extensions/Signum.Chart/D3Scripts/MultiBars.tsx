@@ -11,7 +11,8 @@ import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
-import { ChartMessage } from '../Signum.Chart';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderMultiBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -74,7 +75,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
   var columnsInOrder = pivot.columns.orderBy(a => a.key);
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
   var color = ChartUtils.colorCategory(parameters, columnsInOrder.map(s => s.key), memo);
-  console.log(pivot);
+
   var ySubscale = d3.scaleBand()
     .domain(pivot.columns.map(s => s.key))
     .range([interMagin, y.bandwidth() - interMagin]);
@@ -83,7 +84,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
 
   return (
     <svg direction="ltr" width={width} height={height} role="img">
-      <title id="multiBarsChartTitle">{ChartMessage.MultiBarsChart0Per1.niceToString(pivot.title, keyColumn.title)}</title>
+      <title id="multiBarsChartTitle">{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.MultiBars), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} x={x} />
       </g>

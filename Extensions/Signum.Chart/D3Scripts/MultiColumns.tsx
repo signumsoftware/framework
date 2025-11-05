@@ -10,7 +10,8 @@ import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
-import { ChartMessage } from '../Signum.Chart';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderMultiColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -83,7 +84,7 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
 
   return (
     <svg direction="ltr" width={width} height={height} role="img">
-      <title id="multiColumnsChartTitle">{ChartMessage.MultiColumnsChart0Per1.niceToString(pivot.title, keyColumn.title)}</title>
+      <title id="multiColumnsChartTitle">{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.MultiColumns), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>
       <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
       <g opacity={dashboardFilter ? .5 : undefined}>
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} />
