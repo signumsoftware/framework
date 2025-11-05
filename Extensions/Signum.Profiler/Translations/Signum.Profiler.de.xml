@@ -1,5 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="HeavyProfilerMessage">
+    <Member Name="Clear" Description="Löschen" />
+    <Member Name="Download" Description="Herunterladen" />
+    <Member Name="EnableTheProfilerWithTheDebuggerWith0AndSaveTheResultsWith1" Description="Aktivieren Sie den Profiler mit dem Debugger mit {0}, und speichern Sie die Ergebnisse mit {1}" />
+    <Member Name="Entries" Description="Einträge" />
+    <Member Name="HeavyProfiler" Description="Schwerer Profiler" />
+    <Member Name="HeavyProfilerLoading" Description="Schwerer Profiler (wird geladen...)" />
+    <Member Name="IgnoreHeavyProfilerEntries" Description="Schwere Profiler-Einträge ignorieren" />
+    <Member Name="Record" Description="Datensatz" />
+    <Member Name="Update" Description="Aktualisieren" />
+    <Member Name="Upload" Description="Hochladen" />
+    <Member Name="UploadPreviousRunsToComparePerformance" Description="Laden Sie frühere Läufe hoch, um die Leistung zu vergleichen." />
+  </Type>
   <Type Name="ProfilerMessage">
     <Member Name="AdditionalData" Description="Zusätzliche Daten" />
     <Member Name="AsyncStack" Description="Asynchroner Stack" />

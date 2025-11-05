@@ -24,8 +24,6 @@ export default function TypeHelpPage(): React.JSX.Element {
 
   var hash = useHash();
 
-
-
   var cleanName = params.cleanName;
   var [typeHelp, reloadTypeHelp] = useAPIWithReload(() => HelpClient.API.type(cleanName), [cleanName]);
   var namespaceHelp = useAPI(() => !typeHelp ? Promise.resolve(undefined) : HelpClient.API.namespace(typeHelp.type.namespace), [typeHelp]);
@@ -144,10 +142,15 @@ function SubPropertiesCollapse({ node, cleanName, onChange, hash }: { node: Tree
   return (
     <>
       <div className="row mb-2">
-        <span className="col-sm-9 offset-sm-3 lead" style={{ cursor: "pointer" }} onClick={() => setOpen(!open)}>
-          <FontAwesomeIcon aria-hidden={true} icon={open ? "chevron-down" : "chevron-right"} /> {pr.member!.niceName} ({getNiceTypeName(pr.member!.type)})
-        </span>
+        <button
+          type="button"
+          className="col-sm-9 offset-sm-3 lead border-0 bg-transparent text-start"
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}>
+          <FontAwesomeIcon aria-hidden="true" icon={open ? "chevron-down" : "chevron-right"}/> {pr.member!.niceName} ({getNiceTypeName(pr.member!.type)})
+        </button>
       </div>
+
       <Collapse in={open}>
         <dl className="row ms-4">
           {open && node.children.map(n => <PropertyLine key={n.value.pr.propertyPath()} node={n} cleanName={cleanName} onChange={onChange} hash={hash} />)}
@@ -184,9 +187,13 @@ function QueryBlock({ ctx, cleanName, onChange, hash }: { ctx: TypeContext<Query
     <>
       <div className={classes("row mb-2 shortcut-container", id == hash && "sf-target")} id={id}>
         <div className="col-sm-9 offset-sm-3">
-          <span className="lead" style={{ cursor: "pointer" }}  onClick={() => setOpen(!open)} >
-            <FontAwesomeIcon aria-hidden={true} icon={open ? "chevron-down" : "chevron-right"} /> {getQueryNiceName(ctx.value.query.key)}
-          </span>
+          <button
+            type="button"
+            className="lead border-0 bg-transparent"
+            onClick={() => setOpen(!open)}
+            aria-expanded={open}>
+            <FontAwesomeIcon aria-hidden="true" icon={open ? "chevron-down" : "chevron-right"} /> {getQueryNiceName(ctx.value.query.key)}
+          </button>
           {" "}
           {Finder.isFindable(ctx.value.query.key, true) && <a href={AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: ctx.value.query.key }))} target="_blank"><FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>}
           {" "}
@@ -233,7 +240,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
       });
   }
 
-  return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon aria-hidden={true} icon="save" /> {getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
+  return <button type="button" className="btn btn-primary" onClick={onClick}><FontAwesomeIcon aria-hidden={true} icon="save" /> {getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
 }
 
 export function Shortcut(p: { text: string; }): React.JSX.Element {

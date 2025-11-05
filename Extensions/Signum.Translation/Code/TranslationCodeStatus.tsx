@@ -40,8 +40,8 @@ function TranslationTable({ result, onRefreshView }: { result: TranslationClient
 
   return (
     <AccessibleTable
-      caption={TranslationMessage.TranslationStatus.niceToString()}
-      className="st table">
+      aria-label={TranslationMessage.TranslationStatus.niceToString()}
+      className="st">
       <thead>
         <tr>
           <th><label><input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} />{TranslationMessage.OnlyNeutralCultures.niceToString()}</label></th>

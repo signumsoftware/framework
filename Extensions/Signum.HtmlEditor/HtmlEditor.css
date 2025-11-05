@@ -6,6 +6,7 @@
     border-radius: 2px;
     box-shadow: inset 0px 1px 4px -3px var(--bs-box-shadow);
     position:relative;
+    background: var(--bs-body-bg);
 }
 
 .sf-html-editor .DraftEditor-root {
@@ -16,6 +17,7 @@
     min-height: 140px;
     padding: 0 10px;
     outline: 0;
+    /*background: var(--bs-body-bg);*/
 }
 
 .sf-html-editor-placeholder {
@@ -26,17 +28,17 @@
     left: 30px;
 }
 
-    .sf-draft-toolbar {
-        border: 1px solid var(--bs-border-color);
-        border-radius: 2px;
-        z-index: 2;
-        box-sizing: border-box;
-        margin-top: -17px;
-        margin-left: -17px;
-        margin-right: -17px;
-        margin-bottom: 7px;
-        background: var(--bs-body-bg);
-    }
+.sf-draft-toolbar {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 2px;
+    z-index: 2;
+    box-sizing: border-box;
+    margin-top: -17px;
+    margin-left: -17px;
+    margin-right: -17px;
+    margin-bottom: 7px;
+    background: var(--bs-secondary-bg);
+}
 
 .sf-draft-button-wrapper {
     display: inline-block;
@@ -106,6 +108,7 @@
 
 .sf-html-editor.small-mode .public-DraftEditor-content {
     min-height: 50px;
+    /*background: var(--bs-body-bg);*/
 }
 
 .sf-html-editor .public-DraftStyleDefault-pre {

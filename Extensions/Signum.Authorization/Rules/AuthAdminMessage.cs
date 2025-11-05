@@ -100,4 +100,7 @@ public enum AuthAdminMessage
     PermissionOverriden,
     AuthRuleOverview,
     QueryPermissionsOverview,
+
+    [Description("Download AuthRules.xml")]
+    DownloadAuthRules,
 }

@@ -9,6 +9,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
 import TextEllipsis from './Components/TextEllipsis';
+import { ChartMessage } from '../Signum.Chart';
 
 
 export default function renderBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -76,7 +77,12 @@ export default function renderBars({ data, width, height, parameters, loading, o
   const bandMargin = y.bandwidth() > 20 ? 2 : 0;
 
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg
+      direction="ltr"
+      width={width}
+      height={height}
+      role="img">
+      <title id="barChartTitle">{ChartMessage.BarChart0Per1.niceToString(valueColumn.title, keyColumn.title)}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} x={x} />
       </g>
@@ -121,7 +127,16 @@ export default function renderBars({ data, width, height, parameters, loading, o
                 height={y.bandwidth() - bandMargin * 2}
                 fill={keyColumn.getValueColor(row) ?? color(key)}
                 onClick={e => onDrillDown(row!, e)}
-                cursor="pointer">
+                role="button"
+                tabIndex={0}
+                focusable={true}
+                cursor="pointer"
+                onKeyDown={e => {
+                  if (e.key === "Enter" || e.key === " ") {
+                   e.preventDefault();
+                  (onclick as any)?.(e);
+                  }
+                }}>
                 <title>
                   {keyColumn.getValueNiceName(row) + ': ' + valueColumn.getValueNiceName(row)}
                 </title>
@@ -131,14 +146,14 @@ export default function renderBars({ data, width, height, parameters, loading, o
                 (isMargin ?
                   <g className="y-label" transform={translate(marginx, y.bandwidth() / 2)}>
                     <TextEllipsis
-                      maxWidth={xRule.size('labels')}
-                      className="y-label sf-transition"
-                      fill={(keyColumn.getColor(k) ?? color(key))}
-                      dominantBaseline="middle"
-                      textAnchor="end"
-                      fontWeight="bold"
-                      onClick={e => onDrillDown({ c0: k }, e)}
-                      cursor="pointer">
+                    maxWidth={xRule.size('labels')}
+                    className="y-label sf-transition"
+                    fill={(keyColumn.getColor(k) ?? color(key))}
+                    dominantBaseline="middle"
+                    textAnchor="end"
+                    fontWeight="bold"
+                    onClick={e => onDrillDown({ c0: k }, e)}
+                    aria-label={keyColumn.getNiceName(k)}                  >
                       {keyColumn.getNiceName(k)}
                     </TextEllipsis>)
                   </g> :
@@ -151,8 +166,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
                         fill={(keyColumn.getColor(k) ?? color(key))}
                         dominantBaseline="middle"
                         fontWeight="bold"
-                        onClick={e => onDrillDown({ c0: k }, e)}
-                        cursor="pointer">
+                        onClick={e => onDrillDown({ c0: k }, e)}>
                         {keyColumn.getNiceName(k)}
                       </TextEllipsis>
                     </g> : null
@@ -168,8 +182,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
                     opacity={parameters["NumberOpacity"]}
                     textAnchor="middle"
                     fontWeight="bold"
-                    onClick={e => onDrillDown(row!, e)}
-                    cursor="pointer">
+                    onClick={e => onDrillDown(row!, e)}>
                     {valueColumn.getValueNiceName(row)}
                   </TextIfFits>
                 </g>

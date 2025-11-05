@@ -85,7 +85,6 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
 
   overrideProps(p: P, overridenProps: P): void {
     super.overrideProps(p, overridenProps);
-    debugger;
     if (p.type) {
       var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;
       if (avoidDuplicates) {
@@ -137,14 +136,14 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     );
   }
 
-  renderFindButton(btn: boolean): React.ReactElement | undefined {
+  renderFindButton(btn: boolean, findMessage?: string): React.ReactElement | undefined {
     if (!this.props.find || this.props.ctx.readOnly)
       return undefined;
 
     return (
       <LinkButton className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
         onClick={this.handleFindClick}
-        title={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
+        title={this.props.ctx.titleLabels ? findMessage ?? EntityControlMessage.Find.niceToString() : undefined}>
         {EntityBaseController.getFindIcon()}
       </LinkButton>
     );

@@ -1214,11 +1214,11 @@ public partial class FieldImplementedByAll : Field, IFieldReference
 
     public Dictionary<Type/*PrimaryKeyType*/, ImplementedByAllIdColumn> IdColumns { get; set; }
 
-    public ImplementationColumn TypeColumn { get; set; }
+    public ImplementedByAllTypeColumn TypeColumn { get; set; }
 
     public Dictionary<Type, Type>? CustomLiteModelTypes;
 
-    public FieldImplementedByAll(PropertyRoute route, IEnumerable<ImplementedByAllIdColumn> columnIds, ImplementationColumn columnType) : base(route)
+    public FieldImplementedByAll(PropertyRoute route, IEnumerable<ImplementedByAllIdColumn> columnIds, ImplementedByAllTypeColumn columnType) : base(route)
     {
         this.IdColumns = columnIds.ToDictionaryEx(a => a.Type.UnNullify());
         this.TypeColumn = columnType;
@@ -1301,8 +1301,10 @@ public partial class ImplementationColumn : IColumn
 
     public TableIndex? UniqueIndex { get; internal set; }
 
-    public ImplementationColumn(string name, Table referenceTable)
+    public string PreName { get; }
+    public ImplementationColumn(string name, Table referenceTable, string preName)
     {
+        PreName = preName;
         Name = name;
         ReferenceTable = referenceTable;
     }
@@ -1334,9 +1336,11 @@ public partial class ImplementedByAllIdColumn : IColumn
     ComputedColumn? IColumn.ComputedColumn => null;
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
-    public ImplementedByAllIdColumn(string name, Type type, AbstractDbType dbType)
+    public string PreName { get; }
+    public ImplementedByAllIdColumn(string name, Type type, AbstractDbType dbType, string preName)
     {
-        Name = name;
+        this.Name = name;
+        this.PreName = preName;
         this.DbType = dbType;
         this.Type = type;
     }
@@ -1344,6 +1348,14 @@ public partial class ImplementedByAllIdColumn : IColumn
     public override string ToString()
     {
         return this.Name;
+    }
+}
+
+public partial class ImplementedByAllTypeColumn :ImplementationColumn
+{
+    public ImplementedByAllTypeColumn(string name, Table referenceTable, string preName)
+        : base(name, referenceTable, preName)
+    {
     }
 }
 

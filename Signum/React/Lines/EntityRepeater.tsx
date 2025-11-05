@@ -128,7 +128,7 @@ export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>
         {...EntityBaseController.entityHtmlAttributes(ctx.value)}>
         {(onRemove || move || drag || itemExtraButtons || title) &&
           <legend>
-            <div className="item-group">
+            <div className="d-flex">
               {onRemove && <LinkButton className={classes("sf-line-button", "sf-remove")}
                 onClick={onRemove}
                 title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>

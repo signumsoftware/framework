@@ -73,23 +73,31 @@ public static class DQueryable
     }
 
 
-    public static Task<DEnumerableCount<T>> AllQueryOperationsAsync<T>(this DQueryable<T> query, QueryRequest request, CancellationToken token)
+    public static Task<DEnumerableCount<T>> AllQueryOperationsAsync<T>(this DQueryable<T> query, QueryRequest request, CancellationToken token, bool includeOrdersInSelect = false)
     {
+        var selectColumn = request.Columns.Select(a => a.Token).ToHashSet();
+        if (includeOrdersInSelect)
+            selectColumn.AddRange(request.Orders.Select(a => a.Token));
+
         return query
             .SelectMany(request.Multiplications(), request.FullTextTableFilters())
             .Where(request.Filters)
             .OrderBy(request.Orders, request.Pagination)
-            .Select(request.Columns.Select(a => a.Token).ToHashSet())
+            .Select(selectColumn)
             .TryPaginateAsync(request.Pagination, request.SystemTime, token);
     }
 
-    public static DEnumerableCount<T> AllQueryOperations<T>(this DQueryable<T> query, QueryRequest request)
+    public static DEnumerableCount<T> AllQueryOperations<T>(this DQueryable<T> query, QueryRequest request, bool includeOrdersInSelect = false)
     {
+        var selectColumn = request.Columns.Select(a => a.Token).ToHashSet();
+        if (includeOrdersInSelect)
+            selectColumn.AddRange(request.Orders.Select(a => a.Token));
+
         return query
             .SelectMany(request.Multiplications(), request.FullTextTableFilters())
             .Where(request.Filters)
             .OrderBy(request.Orders, request.Pagination)
-            .Select(request.Columns.Select(a => a.Token).ToHashSet())
+            .Select(selectColumn)
             .TryPaginate(request.Pagination, request.SystemTime);
     }
 

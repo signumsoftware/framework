@@ -13,7 +13,6 @@ export interface CollapsableCardProps {
   collapsable?: boolean;
   isOpen?: boolean;
   toggle?: (isOpen: boolean, e: React.MouseEvent) => void;
-  cardId?: string | number;
   expandIcon?: IconProp;
   collapseIcon?: IconProp;
   cardStyle?: CardStyle;
@@ -22,6 +21,7 @@ export interface CollapsableCardProps {
   size?: "sm" | "xs";
   children?: React.ReactNode;
 }
+
 interface CardStyle {
   border?: BsColor;
   text?: BsColor;
@@ -36,10 +36,6 @@ function cardStyleClasses(style?: CardStyle) {
   )
 }
 
-export interface CollapsableCardState {
-  isOpen: boolean,
-  isRTL: boolean;
-}
 
 function isControlled(p: CollapsableCardProps): [boolean, (isOpen: boolean, e: React.MouseEvent) => void] {
   if ((p.isOpen != null) && (p.toggle == null))
@@ -66,14 +62,18 @@ export default function CollapsableCard(p: CollapsableCardProps): React.ReactEle
     <div className={classes("card", cardStyleClasses(p.cardStyle), p.size && ("card-" + p.size))}>
       <div className={classes("card-header", cardStyleClasses(p.headerStyle))} style={{ cursor: "pointer" }} onClick={collapsable ? e => setIsOpen(!isOpen, e) : undefined}>
         {collapsable &&
-          <span
-            className={"float-end"}
-            style={{ cursor: "pointer" }}            
+          <button
+            type="button"
+            className="float-end border-0 bg-transparent p-0"
             onClick={e => setIsOpen(!isOpen, e)}
-            title={isOpen ? CollapsableCardMessage.Collapse.niceToString() : CollapsableCardMessage.Expand.niceToString()}>
-            <FontAwesomeIcon aria-hidden={true} icon={isOpen ? (p.collapseIcon ?? "chevron-up") : (p.expandIcon ?? "chevron-down")} />
-          </span>
+            title={isOpen ? CollapsableCardMessage.Collapse.niceToString() : CollapsableCardMessage.Expand.niceToString()}
+            aria-label={isOpen ? CollapsableCardMessage.Collapse.niceToString() : CollapsableCardMessage.Expand.niceToString()}
+            aria-expanded={isOpen}>
+            <FontAwesomeIcon aria-hidden={true} icon={isOpen ? (p.collapseIcon ?? "chevron-up") : (p.expandIcon ?? "chevron-down")}
+            />
+          </button>
         }
+
         {p.header}
       </div>
       <Collapse in={isOpen}>

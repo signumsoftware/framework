@@ -329,14 +329,12 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
       >
         <td style={{ paddingLeft: paddingLeft }} colSpan={2}>
           <div className="d-flex">
-            <a href={!readOnly ? "#" : undefined}
+            <LinkButton href={!readOnly ? "#" : undefined}
               className={classes("sf-line-button sf-remove sf-remove-filter-icon", readOnly && "disabled")}
-              role="button"
-              tabIndex={0}
               title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
               onClick={!readOnly ? handleDeleteFilter : undefined}>
               <FontAwesomeIcon aria-hidden={true} icon="xmark" />
-            </a>
+            </LinkButton>
 
             <div className="align-items-center d-flex">
               <select className="form-select form-select-xs sf-group-selector fw-bold me-2 w-auto" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
@@ -367,13 +365,17 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
         </td>
         <td>
           {p.showPinnedFiltersOptions &&
-            <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")}
+            <button
+              className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")}
+              type="button"
               title={fg.pinned ? SearchMessage.UnpinFilter.niceToString() : SearchMessage.PinFilter.niceToString()}
               onClick={e => {
                 fg.pinned = fg.pinned ? undefined : {};
                 fixDashboardBehaviour(fg);
                 changeFilter();
-              }} disabled={p.readOnly}>
+              }}
+              aria-disabled={p.readOnly}
+              disabled={p.readOnly}>
               <FontAwesomeIcon aria-hidden={true} color="orange" icon={"thumbtack"} rotation={fg.pinned ? undefined : 90} style={{ minWidth: 15 }} />
             </button>
           }
@@ -582,12 +584,11 @@ export function FilterConditionComponent(p: FilterConditionComponentProps): Reac
       >
         <td style={{ paddingLeft: (25 * p.level) }}>
           <div className="d-flex">
-            <a href={!readOnly ? "#" : undefined} title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+            <LinkButton href={!readOnly ? "#" : undefined} title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
               className={classes("sf-line-button sf-remove sf-remove-filter-icon", readOnly && "disabled")}
-              role="button"
               onClick={!readOnly ? handleDeleteFilter : undefined}>
               <FontAwesomeIcon aria-hidden={true} icon="xmark" />
-            </a>
+            </LinkButton>
             <div className="rw-widget-xs">
               <QueryTokenBuilder
                 prefixQueryToken={p.prefixToken}

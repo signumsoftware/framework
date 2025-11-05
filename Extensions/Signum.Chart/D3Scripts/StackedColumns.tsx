@@ -11,6 +11,7 @@ import TextEllipsis from './Components/TextEllipsis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
+import { ChartMessage } from '../Signum.Chart';
 
 
 export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -56,13 +57,13 @@ export default function renderStackedColumns({ data, width, height, parameters, 
 
   var c = data.columns;
   var keyColumn = c.c0 as ChartColumn<unknown>;
+  var splitColumn = c.c1 as ChartColumn<unknown>;
   var valueColumn0 = c.c2 as ChartColumn<number>;
   var pValueAsPercent = parameters.ValueAsPercent;
 
   var pivot = c.c1 == null ?
     toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
     groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
-
 
   var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn0));
 
@@ -104,7 +105,8 @@ export default function renderStackedColumns({ data, width, height, parameters, 
   const bandMargin = x.bandwidth() > 20 ? 2 : x.bandwidth() > 10 ? 1 : 0;
 
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="stackedColumnsChartTitle">{ChartMessage.StackedColumnsChart0For1SortedBy2.niceToString(valueColumn0.title, keyColumn.title, splitColumn.title)}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XTitle xRule={xRule} yRule={yRule} keyColumn={keyColumn} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} format={format} />
@@ -133,7 +135,15 @@ export default function renderStackedColumns({ data, width, height, parameters, 
                 width={x.bandwidth() - bandMargin * 2}
                 height={y(r[1])! - y(r[0])!}
                 onClick={e => onDrillDown(row.rowClick, e)}
-                cursor="pointer">
+                role="button"
+                tabIndex={0}
+                cursor="pointer"
+                onKeyDown={e => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    (onclick as any)?.(e);
+                  }
+                }}>
                 <title>
                   {row.valueTitle}
                 </title>

@@ -102,7 +102,7 @@ export const Workflow: React.ForwardRefExoticComponent<WorkflowProps & React.Ref
                   <FontAwesomeIcon icon="circle-xmark" className="text-danger me-1" /> :
                   <FontAwesomeIcon icon="triangle-exclamation" className="text-warning me-1" />}
 
-                {issue.bpmnElementId && <span className="me-1">(in <LinkButton onClick={e => handleHighlightClick(e, issue)}>{issue.bpmnElementId}</LinkButton>)</span>}
+                {issue.bpmnElementId && <span className="me-1">(in <LinkButton title={undefined} onClick={e => handleHighlightClick(e, issue)}>{issue.bpmnElementId}</LinkButton>)</span>}
                 {issue.message}
 
               </li>

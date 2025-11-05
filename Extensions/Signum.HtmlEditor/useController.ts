@@ -18,6 +18,7 @@ import { HtmlEditorProps } from "./HtmlEditor";
 import { HtmlEditorController } from "./HtmlEditorController";
 import { useRegisterExtensions } from "./useRegisterExtensions";
 import { useRegisterKeybindings } from "./useRegisterKeybindings";
+import { ImageExtension } from "./Extensions/ImageExtension";
 
 type ControllerProps = {
   binding: IBinding<string | null | undefined>;
@@ -49,7 +50,7 @@ export const useController = ({
   editableId,
 }: ControllerProps): ControllerReturnType => {
   const controller = React.useMemo(() => new HtmlEditorController(), []);
-  const textConverter = converter ?? new HtmlContentStateConverter();
+  const textConverter = converter ?? new HtmlContentStateConverter(plugins?.firstOrNull(a => a instanceof ImageExtension)?.imageConverter.dataImageIdAttribute);
 
   const extensions: HtmlEditorExtension[] = React.useMemo(() => {
     const defaultPlugins = [

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Dic, areEqual, classes } from '../Globals'
 import { tryGetTypeInfos, TypeReference, TypeInfo, tryGetTypeInfo, getTypeName, Binding, getTypeInfos, IsByAll, getTypeInfo, MemberInfo, OperationInfo, isNumberType } from '../Reflection'
-import { ModifiableEntity, SearchMessage, JavascriptMessage, Lite, Entity, OperationMessage } from '../Signum.Entities'
+import { ModifiableEntity, SearchMessage, JavascriptMessage, Lite, Entity, OperationMessage, EntityControlMessage } from '../Signum.Entities'
 import { Navigator } from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
 import { EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute, StyleContext } from '../Lines'
@@ -58,7 +58,7 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): Reac
     <Modal onHide={handleCancelClicked} show={show} className="message-modal" size="xl" onExited={handleOnExited}>
       <div className="modal-header">
         <h5 className="modal-title">{OperationMessage.BulkModifications.niceToString()}</h5>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}/>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label={EntityControlMessage.Close.niceToString()} onClick={handleCancelClicked}/>
       </div>
       <div className="modal-body">
         <ErrorBoundary>
@@ -74,7 +74,7 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): Reac
             )}
         </p>
         <br />
-        <button className="btn btn-primary sf-entity-button sf-ok-button" disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} onClick={handleOkClicked}>
+        <button className="btn btn-primary sf-entity-button sf-ok-button" aria-disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} onClick={handleOkClicked}>
           {JavascriptMessage.ok.niceToString()}
         </button>
         <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>

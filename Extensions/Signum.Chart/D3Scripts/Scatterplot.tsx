@@ -7,7 +7,7 @@ import { YScaleTicks, XScaleTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
-import { ChartRequestModel } from '../Signum.Chart';
+import { ChartMessage, ChartRequestModel } from '../Signum.Chart';
 import { DashboardFilter } from '../../Signum.Dashboard/View/DashboardFilterController';
 
 
@@ -87,7 +87,8 @@ export default function renderScatterplot({ data, width, height, parameters, loa
 
   return (
     <>
-      <svg direction="ltr" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height} role="img">
+        <title id="scatterplotlCoodinatesChartTitle">{ChartMessage.ScatterplotChart0Per1For2.niceToString(horizontalColumn.title, verticalColumn.title, keyColumn.title)}</title>
         <g opacity={dashboardFilter ? .5 : undefined}>
           <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
           <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
@@ -178,7 +179,15 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
               shapeRendering="initial"
               r={pointSize}
               onClick={e => onDrillDown(r, e)}
-              cursor="pointer">
+              role="button"
+              tabIndex={0}
+              cursor="pointer"
+              onKeyDown={e => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  (onclick as any)?.(e);
+                }
+              }}>
               <title>
                 {colorKeyColumn.getValueNiceName(r) +
                   ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
@@ -202,8 +211,15 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
           strokeWidth={pointSize}
           fill={colorKeyColumn.getValueColor(r) ?? color(r)}
           shapeRendering="initial"
-          onClick={e => onDrillDown(r, e)}
-          cursor="pointer" />
+          onClick={e => onDrillDown(r, e)} role="button"
+          tabIndex={0}
+          cursor="pointer"
+          onKeyDown={e => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              (onclick as any)?.(e);
+            }
+          }} />
         <circle className="shape sf-transition"
           cx={x(horizontalColumn.getValue(r))}
           cy={-y(verticalColumn.getValue(r))}
@@ -212,7 +228,15 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
           shapeRendering="initial"
           r={pointSize}
           onClick={e => onDrillDown(r, e)}
-          cursor="pointer" />
+          role="button"
+          tabIndex={0}
+          cursor="pointer"
+          onKeyDown={e => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              (onclick as any)?.(e);
+            }
+          }}/>
         <circle className="shape sf-transition"
           cx={x((horizontalColumn2 ?? horizontalColumn).getValue(r))}
           cy={-y((verticalColumn2 ?? verticalColumn).getValue(r))}
@@ -221,7 +245,15 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
           shapeRendering="initial"
           r={pointSize}
           onClick={e => onDrillDown(r, e)}
-          cursor="pointer" />
+          role="button"
+          tabIndex={0}
+          cursor="pointer"
+          onKeyDown={e => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              (onclick as any)?.(e);
+            }
+          }} />
         <title>
           {colorKeyColumn.getValueNiceName(r) +
             ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +

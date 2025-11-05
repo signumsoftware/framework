@@ -71,6 +71,7 @@ export default function ColumnsBuilder(p: ColumnsBuilderProps): React.ReactEleme
               <tr tabIndex={0}>
                 <td colSpan={4}>
                   <a title={StyleContext.default.titleLabels ? SearchMessage.AddColumn.niceToString() : undefined}
+                    aria-label={StyleContext.default.titleLabels ? SearchMessage.AddColumn.niceToString() : undefined}
                     className="sf-line-button sf-create"
                     role="button"
                     tabIndex={0}
@@ -126,6 +127,7 @@ export function ColumnComponent(p: ColumnComponentProps): React.ReactElement {
       <td>
         {!readonly &&
           <a title={StyleContext.default.titleLabels ? JavascriptMessage.removeColumn.niceToString() : undefined}
+            aria-label={StyleContext.default.titleLabels ? JavascriptMessage.removeColumn.niceToString() : undefined}
             className="sf-line-button sf-remove"
             onClick={handleDeleteColumn}
             role="button"

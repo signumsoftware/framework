@@ -42,7 +42,7 @@ export default function HeavyEntry(): React.JSX.Element {
       {entries && <HeavyProfilerDetailsD3 entries={entries} selected={current} asyncDepth={asyncDepth} />}
       <br />
       <AccessibleTable
-        caption={ProfilerMessage.HeavyProfiler.niceToString()}
+        aria-label={ProfilerMessage.HeavyProfiler.niceToString()}
         className="table table-nonfluid"
         multiselectable={false}>
         <tbody>
@@ -57,8 +57,8 @@ export default function HeavyEntry(): React.JSX.Element {
           <tr>
             <td colSpan={2}>
               <div className="btn-toolbar">
-                <button onClick={handleDownload} className="btn btn-info">{ProfilerMessage.Download.niceToString()}</button>
-                {!current.isFinished && <button onClick={() => reloadEntries()} className="btn btn-tertiary">{ProfilerMessage.Update.niceToString()}</button>}
+                <button type="button" onClick={handleDownload} className="btn btn-info">{ProfilerMessage.Download.niceToString()}</button>
+                {!current.isFinished && <button type="button" onClick={() => reloadEntries()} className="btn btn-tertiary">{ProfilerMessage.Update.niceToString()}</button>}
               </div>
             </td>
           </tr>
@@ -83,7 +83,7 @@ export function StackFrameTable(p: { stackTrace: ProfilerClient.StackTraceTS[] }
 
   return (
     <AccessibleTable
-      caption={ProfilerMessage.StackTraceOverview.niceToString()}
+      aria-label={ProfilerMessage.StackTraceOverview.niceToString()}
       className="table table-sm"
       multiselectable={false}>
       <thead>
@@ -237,7 +237,15 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props): React.JS
     return (
       <svg height={height + "px"} width={width}>
         {filteredData.map(d =>
-          <g className="entry" data-key={d.fullIndex} key={d.fullIndex} onClick={e => handleOnClick(e, d)} onDoubleClick={e => setMinMax(resetZoom(d))}>
+          <g className="entry" data-key={d.fullIndex} key={d.fullIndex} role="button" tabIndex={0} cursor="pointer" focusable={true}
+            onClick={e => handleOnClick(e, d)}
+            onKeyDown={e => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                (onclick as any)?.(e);
+              }
+            }}
+            onDoubleClick={e => setMinMax(resetZoom(d))}>
             <rect className="shape"
               y={y(getDepth(d))}
               x={x(Math.max(min, d.beforeStart))}

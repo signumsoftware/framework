@@ -356,6 +356,8 @@ public enum DashboardMessage
     _0CanOnlyBeUserInA1With2,
 
     InteractiveDashboard,
+    SelectIcon,
+    Close,
 }
 
 public enum DashboardVariableMessage

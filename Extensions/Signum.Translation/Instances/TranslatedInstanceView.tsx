@@ -142,7 +142,7 @@ export function TranslatedInstance(p: { ins: TranslatedInstanceClient.Translated
 
   return (
     <AccessibleTable
-      caption={TranslationMessage.TranslationsOverview.niceToString()}
+      aria-label={TranslationMessage.TranslationsOverview.niceToString()}
       className="table st"
       multiselectable={false}
       key={ins.lite.id}>

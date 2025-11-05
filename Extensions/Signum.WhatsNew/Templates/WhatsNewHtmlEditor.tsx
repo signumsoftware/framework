@@ -10,10 +10,8 @@ import { ErrorBoundary } from '@framework/Components';
 import { WhatsNewEntity } from '../Signum.WhatsNew';
 import { ImageModal } from '../../Signum.Files/Components/ImageModal';
 import { LexicalEditor } from "lexical";
-import { BasicCommandsExtensions } from '../../Signum.HtmlEditor/Extensions/BasicCommandsExtension';
-import { ImageConverter } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
+import { ImageConverter, ImageInfo } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
-import { ListExtension } from '../../Signum.HtmlEditor/Extensions/ListExtension';
 import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
 
 export default function WhatsNewHtmlEditor(p: {
@@ -48,14 +46,10 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
   );
 }
 
-export interface ImageInfo {
-  attachmentId?: string;
-  binaryFile?: string;
-  fileName?: string;
-}
 
-export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
-
+export class AttachmentImageConverter implements ImageConverter{
+  
+  dataImageIdAttribute = "data-attachment-id";
   pr: PropertyRoute;
   constructor() {
     this.pr = WhatsNewEntity.propertyRouteAssert(a => a.attachment);
@@ -69,8 +63,8 @@ export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
       return img;
     }
 
-    if (val.attachmentId) {
-      img.setAttribute("data-attachment-id", val.attachmentId);
+    if (val.imageId) {
+      img.setAttribute("data-attachment-id", val.imageId);
       return img;
     }
   }
@@ -92,7 +86,7 @@ export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
   renderImage(info: ImageInfo): React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> {
     var fp = FilePathEmbedded.New({
       binaryFile: info.binaryFile,
-      entityId: info.attachmentId,
+      entityId: info.imageId,
       mListRowId: null,
       fileType: getSymbol(FileTypeSymbol, this.pr.member!.defaultFileTypeInfo!.key),
       rootType: this.pr.findRootType().name,
@@ -110,8 +104,8 @@ export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
     if (val.binaryFile)
       return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" />`;
 
-    if (val.attachmentId)
-      return `<img data-attachment-id="${val.attachmentId}" />`;
+    if (val.imageId)
+      return `<img data-attachment-id="${val.imageId}" />`;
 
     return undefined;
   }
@@ -121,7 +115,7 @@ export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
       return {
         binaryFile: element.dataset["binaryFile"],
         fileName: element.dataset["fileName"],
-        attachmentId: element.dataset["attachmentId"],
+        imageId: element.dataset["attachmentId"],
       };
     }
 

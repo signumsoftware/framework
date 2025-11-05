@@ -7,7 +7,7 @@ import { Dic } from '@framework/Globals';
 import { XKeyTicks } from './Components/Ticks';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
-import { ChartParameter } from '../Signum.Chart';
+import { ChartMessage, ChartParameter } from '../Signum.Chart';
 
 interface ColumnWithScales {
   column: ChartColumn<number>;
@@ -87,9 +87,9 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
   var selectedColumn = cords.firstOrNull(a => a.column.name == selectedColumnName) || cords.first();
 
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
-
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="parallelCoodinatesChartTitle">{ChartMessage.ParallelCoordinatesChart0For1.niceToString(cords.map(c => c.column.title).join(` ${ChartMessage.CommaSeperatedJoinAnd.niceToString()} `), keyColumn.title)}</title>
       <g className="x-tick" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content'))}>
         {cords.map(d => <line key={d.column.name} className="x-tick sf-transition"
           transform={translate(x(d.column.name)!, 0)}
@@ -146,7 +146,15 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
               stroke={active == true ? "var(--bs-body-color)" : selectedColumn.colorScale(r)}
               shapeRendering="initial"
               onClick={e => onDrillDown(r, e)}
+              role="button"
+              tabIndex={0}
               cursor="pointer"
+              onKeyDown={e => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  (onclick as any)?.(e);
+                }
+              }}
               d={line(cords.map(c => ({ col: c, row: r })))!}>
               <title>
                 {keyColumn.getValueNiceName(r) + "\n" +
@@ -166,6 +174,15 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
           stroke="#ccc"
           fill={selectedColumn.column.name != d.column.name ? '#ccc' : '#000'}
           fillOpacity=".2"
+          role="button"
+          tabIndex={0}
+          cursor="pointer"
+          onKeyDown={e => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              (onclick as any)?.(e);
+            }
+          }}
           onClick={e => setSelectedColumnName(d.column.name)} />)}
       </g>
 

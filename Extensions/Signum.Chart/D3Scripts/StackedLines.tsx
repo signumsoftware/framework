@@ -9,6 +9,7 @@ import Legend from './Components/Legend';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import { ChartMessage } from '../Signum.Chart';
 
 
 export default function renderStackedLines({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -51,6 +52,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
   var c = data.columns;
   var keyColumn = c.c0 as ChartColumn<unknown>;
+  var splitColumn = c.c1 as ChartColumn<unknown>;
   var valueColumn0 = c.c2 as ChartColumn<number>;
 
   var pValueAsPercent = parameters.ValueAsPercent;
@@ -116,8 +118,8 @@ export default function renderStackedLines({ data, width, height, parameters, lo
   var bw = hasHorizontalScale ? 0 : (x as d3.ScaleBand<string>).bandwidth();
 
   return (
-    <svg direction="ltr" width={width} height={height}>
-      
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="stackedLinesChartTitle">{ChartMessage.StackedBarsChart0For1SortedBy2.niceToString(valueColumn0.title, keyColumn.title, splitColumn.title)}</title>  
       {hasHorizontalScale ?
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={keyColumn as ChartColumn<number>} x={x as d3.ScaleContinuousNumeric<number, number>} /> :
         <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x as d3.ScaleBand<string>} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
@@ -162,7 +164,15 @@ export default function renderStackedLines({ data, width, height, parameters, lo
                   fill={active == true ? "var(--bs-body-color)" : colorByKey[s.key] ?? color(s.key)}
                   height={y(v[1])! - y(v[0])!}
                   onClick={e => onDrillDown(row.rowClick, e)}
-                  cursor="pointer">
+                  role="button"
+                  tabIndex={0}
+                  cursor="pointer"
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      (onclick as any)?.(e);
+                    }
+                  }}>
                   <title>
                     {row.valueTitle}
                   </title>

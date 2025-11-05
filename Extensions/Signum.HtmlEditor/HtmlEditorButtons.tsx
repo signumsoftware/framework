@@ -30,6 +30,7 @@ export function HtmlEditorButton(p: {
     >
       <button
         className={classes("sf-draft-button", p.isActive && "sf-draft-active ")}
+        type="button"
         onClick={p.onClick}
         title={p.title}
       >

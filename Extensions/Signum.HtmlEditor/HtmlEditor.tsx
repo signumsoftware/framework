@@ -27,6 +27,7 @@ import { useController } from "./useController";
 import { isEmpty } from "./Utils/editorState";
 import { formatCode, formatHeading, formatList, formatQuote } from "./Utils/format";
 import { $findMatchingParent, isHeadingActive, isListActive, isQuoteActive } from "./Utils/node";
+import { HtmlEditorMessage } from "../../Signum/React/Signum.Entities";
 
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
@@ -115,6 +116,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
         <RichTextPlugin
           contentEditable={
             <ContentEditable
+              ref={controller.setContentEditableRef}
               id={editableId}
               className="public-DraftEditor-content"
               onFocus={(event: React.FocusEvent) => {
@@ -129,7 +131,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
           placeholder={Boolean(placeholder) ? <div className="sf-html-editor-placeholder">{placeholder}</div> : undefined}
           ErrorBoundary={LexicalErrorBoundary}
         />
-        <EditorRefPlugin editorRef={controller.setRefs} />
+        <EditorRefPlugin editorRef={controller.setEditorRef} />
         <HistoryPlugin />
         {builtinComponents.map(({ component: Component, props }) => <Component key={Component.name} {...props} />)}
       </LexicalComposer>
@@ -141,20 +143,20 @@ export default HtmlEditor;
 
 const defaultToolbarButtons = (c: HtmlEditorController) => (
   <div className="sf-draft-toolbar">
-    <InlineStyleButton controller={c} style="bold" icon="bold" title="Bold (Ctrl + B)" />
-    <InlineStyleButton controller={c} style="italic" icon="italic" title="Italic (Ctrl + I)" />
-    <InlineStyleButton controller={c} style="underline" icon="underline" title="Underline (Ctrl + U)" />
-    <InlineStyleButton controller={c} style="code" icon="code" title="Code" />
+    <InlineStyleButton controller={c} style="bold" icon="bold" title={HtmlEditorMessage.Bold.niceToString()} aria-label={HtmlEditorMessage.Bold.niceToString()} />
+    <InlineStyleButton controller={c} style="italic" icon="italic" title={HtmlEditorMessage.Italic.niceToString()} aria-label={HtmlEditorMessage.Italic.niceToString()} />
+    <InlineStyleButton controller={c} style="underline" icon="underline" title={HtmlEditorMessage.Underline.niceToString()} aria-label={HtmlEditorMessage.Underline.niceToString()} />
+    <InlineStyleButton controller={c} style="code" icon="code" title={HtmlEditorMessage.Code.niceToString()} aria-label={HtmlEditorMessage.Code.niceToString()} />
     <Separator />
-    <SubMenuButton controller={c} title="Headings..." icon="heading">
+    <SubMenuButton controller={c} title={HtmlEditorMessage.Headings.niceToString()} aria-label={HtmlEditorMessage.Headings.niceToString()} icon="heading">
       <BlockStyleButton controller={c} blockType="h1" content="H1" isActiveFn={isHeadingActive} onClick={(editor) => formatHeading(editor, "h1")} />
       <BlockStyleButton controller={c} blockType="h2" content="H2" isActiveFn={isHeadingActive} onClick={(editor) => formatHeading(editor, "h2")} />
       <BlockStyleButton controller={c} blockType="h3" content="H3" isActiveFn={isHeadingActive} onClick={(editor) => formatHeading(editor, "h3")} />
     </SubMenuButton>
-    <BlockStyleButton controller={c} blockType="ul" icon="list-ul" title="Unordered list" isActiveFn={isListActive} onClick={(editor) => formatList(editor, "ul")} />
-    <BlockStyleButton controller={c} blockType="ol" icon="list-ol" title="Ordered list" isActiveFn={isListActive} onClick={(editor) => formatList(editor, "ol")} />
-    <BlockStyleButton controller={c} blockType="blockquote" icon="quote-right" title="Quote" isActiveFn={isQuoteActive} onClick={formatQuote} />
-    <BlockStyleButton controller={c} blockType="code-block" icon="file-code" title="Code Block" isActiveFn={(selection) => !!$findMatchingParent(selection.anchor.getNode(), node => $isCodeNode(node))} onClick={formatCode} />
+    <BlockStyleButton controller={c} blockType="ul" icon="list-ul" title={HtmlEditorMessage.UnorderedList.niceToString()} aria-label={HtmlEditorMessage.UnorderedList.niceToString()} isActiveFn={isListActive} onClick={(editor) => formatList(editor, "ul")} />
+    <BlockStyleButton controller={c} blockType="ol" icon="list-ol" title={HtmlEditorMessage.OrderedList.niceToString()} aria-label={HtmlEditorMessage.OrderedList.niceToString()} isActiveFn={isListActive} onClick={(editor) => formatList(editor, "ol")} />
+    <BlockStyleButton controller={c} blockType="blockquote" icon="quote-right" title={HtmlEditorMessage.Quote.niceToString()} aria-label={HtmlEditorMessage.Quote.niceToString()} isActiveFn={isQuoteActive} onClick={formatQuote} />
+    <BlockStyleButton controller={c} blockType="code-block" icon="file-code" title={HtmlEditorMessage.CodeBlock.niceToString()} aria-label={HtmlEditorMessage.CodeBlock.niceToString()} isActiveFn={(selection) => !!$findMatchingParent(selection.anchor.getNode(), node => $isCodeNode(node))} onClick={formatCode} />
     {c.extraButtons()}
   </div>
 );

@@ -8,6 +8,7 @@ import { XAxis, YAxis } from './Components/Axis';
 import TextEllipsis from './Components/TextEllipsis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import { ChartMessage } from '../Signum.Chart';
 
 
 export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, dashboardFilter, chartRequest }: ChartScriptProps): React.ReactElement<any> {
@@ -88,7 +89,8 @@ export default function renderBubbleplot({ data, width, height, parameters, load
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="bubbleplotChartTitle">{ChartMessage.BubbleplotChart0Of1For2Per3.niceToString(sizeColumn.title, keyColumn.title, horizontalColumn.title, verticalColumn.title)}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
@@ -102,7 +104,15 @@ export default function renderBubbleplot({ data, width, height, parameters, load
               className="shape-serie sf-transition hover-group"
               opacity={active == false ? .5 : undefined}
               transform={translate(x(horizontalColumn.getValue(r))!, -y(verticalColumn.getValue(r))!) + (initialLoad ? scale(0, 0) : scale(1, 1))}
+              role="button"
+              tabIndex={0}
               cursor="pointer"
+              onKeyDown={e => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  (onclick as any)?.(e);
+                }
+              }}
               onClick={e => onDrillDown(r, e)}
             >
               <circle className="shape sf-transition hover-target"

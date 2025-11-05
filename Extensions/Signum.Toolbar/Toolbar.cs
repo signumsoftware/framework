@@ -289,3 +289,9 @@ public enum ToolbarMessage
     No0Selected,
     ShowTogether,
 }
+
+[AllowUnauthenticated]
+public enum LayoutMessage
+{
+    JumpToMainContent,
+}

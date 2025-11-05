@@ -76,11 +76,15 @@ export function CultureDropdownMenuItem(props: {
 
   return (
     <div>
-      <div className={"dropdown-item"}
-        style={{ cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center" }}
-        onClick={() => setShow(!show)}>
-        <FontAwesomeIcon icon="globe" aria-hidden={true} className="me-2" /> <span style={{ width: "100%" }}>{props.label || CultureInfoEntity.niceName()}</span> <FontAwesomeIcon aria-hidden={true} icon={getChevronIcon()} />
-      </div>
+      <button
+        type="button"
+        className="dropdown-item d-flex align-items-center"
+        onClick={() => setShow(!show)}
+        aria-expanded={show}
+        aria-haspopup="true"
+        style={{ userSelect: "none", width: "100%" }}>
+        <FontAwesomeIcon icon="globe" aria-hidden={true} className="me-2" /><span className="flex-grow-1">{props.label || CultureInfoEntity.niceName()}</span><FontAwesomeIcon aria-hidden={true} icon={getChevronIcon()} />
+      </button>
       <div style={{ display: show ? "block" : "none" }}>
         {Dic.map(cultures, (name, c, i) =>
           <NavDropdown.Item key={i} data-culture={name} active={is(c, current)} onClick={() => handleSelect(c)}>

@@ -110,7 +110,7 @@ export function renderCombinedLinesAndColumns({ infos, width, height, initialLoa
   const colCount = infos.filter(a => a.chartRequest.chartScript.key == D3ChartScript.Columns.key).length;  
   let colIndex = 0;
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
 
       <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} showLines={x.bandwidth() > 5} />
       <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={yScales[0]!} />
