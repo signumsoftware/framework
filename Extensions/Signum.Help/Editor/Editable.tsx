@@ -14,7 +14,7 @@ import { LinkButton } from '@framework/Basics/LinkButton';
 import { HelpImageNode } from './HelpImageNode';
 
 
-export function EditableTextComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
+export function EditableText({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
   var [editable, setEditable] = React.useState(defaultEditable || false);
   var forceUpdate = useForceUpdate();
 
@@ -34,7 +34,7 @@ export function EditableTextComponent({ ctx, defaultText, onChange, defaultEdita
 }
   
 
-export function EditableHtmlComponent({ ctx, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
+export function EditableHtml({ ctx, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
 
   const [editable, setEditable] = React.useState(defaultEditable || false);
   const readOnly = ctx.readOnly || !editable
