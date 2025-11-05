@@ -7,8 +7,9 @@ import { YScaleTicks, XScaleTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
-import { ChartMessage, ChartRequestModel } from '../Signum.Chart';
+import { ChartMessage, ChartRequestModel, D3ChartScript } from '../Signum.Chart';
 import { DashboardFilter } from '../../Signum.Dashboard/View/DashboardFilterController';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -85,10 +86,16 @@ export default function renderScatterplot({ data, width, height, parameters, loa
   var keyColumns: ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
     [keyColumn, horizontalColumn, verticalColumn].filter(a => a.token && a.token.queryTokenType != "Aggregate")
 
+  var aggregateColumns: ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
+    [keyColumn, horizontalColumn, verticalColumn, horizontalColumn2, verticalColumn2].filter(cn => cn != undefined).filter(a => a.token && a.token.queryTokenType == "Aggregate")
+
+  var titleMessage = (aggregateColumns.length != 0) ?
+    ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.Scatterplot), getQueryNiceName(chartRequest.queryKey), keyColumns.map(cn => cn.title).join(", "), aggregateColumns.map(cn => cn.title).join(", ")) :
+    ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Scatterplot), getQueryNiceName(chartRequest.queryKey), keyColumns.map(cn => cn.title).join(", "));
   return (
     <>
       <svg direction="ltr" width={width} height={height} role="img">
-        <title id="scatterplotlCoodinatesChartTitle">{ChartMessage.ScatterplotChart0Per1For2.niceToString(horizontalColumn.title, verticalColumn.title, keyColumn.title)}</title>
+        <title id="scatterplotlCoodinatesChartTitle">{titleMessage}</title>
         <g opacity={dashboardFilter ? .5 : undefined}>
           <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
           <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />

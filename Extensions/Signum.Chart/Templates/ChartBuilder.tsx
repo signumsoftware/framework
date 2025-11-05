@@ -13,7 +13,7 @@ import { IChartBase } from '../UserChart/Signum.Chart.UserChart'
 import { EnumLine, FormGroup, NumberLine, TextBoxLine, TextBoxLineProps } from '@framework/Lines'
 import { EnumLineProps, OptionItem } from '@framework/Lines/EnumLine'
 import { Finder } from '@framework/Finder'
-import { getTypeInfos, toNumberFormat } from '@framework/Reflection'
+import { getTypeInfos, symbolNiceName, toNumberFormat } from '@framework/Reflection'
 import { QueryDescription } from '@framework/FindOptions'
 import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -121,46 +121,57 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
       </div>}
     <div className="row sf-chart-builder gx-2">
       <div className="col-lg-2">
-        <div className="sf-chart-type bg-body rounded shadow-sm border-0 p-2">
-          <h6 className="mb-3">{ChartMessage.ChartType.niceToString()}</h6>
-          {chartScripts?.map((cs, i) =>
-            <button
-              key={i}
-              type="button"
-              className={`sf-chart-button ${chartTypeImgClass(cs)}`}
-              title={cs.symbol.key.after(".")}
-              onClick={() => handleChartScriptOnClick(cs)}>
+        <div className="sf-chart-type card bg-body rounded shadow-sm border-0 p-2">
+          <div className="card-header">
+            <h6 className="mb-3 card-title" style={{ backgroundColor: "inherit" }}>{ChartMessage.ChartType.niceToString()}</h6>
+          </div>
+          <div className="card-body">
+            {chartScripts?.map((cs, i) =>
+              <button
+                key={i}
+                type="button"
+                className={`sf-chart-button ${chartTypeImgClass(cs)}`}
+                style={{ background:"inherit", border:"inherit" }}
+                title={symbolNiceName(cs.symbol)}
+                onClick={() => handleChartScriptOnClick(cs)}>
               
-                <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} alt={cs.icon.fileName} />
+                  <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} alt={cs.icon.fileName} />
               </button>)}
+          </div>
+          <div className="card-body">
             <NumberLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="xs" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger fw-bold" : undefined }} />
+          </div>
         </div>
       </div >
       <div className="col-lg-10">
-        <div className="sf-chart-tokens bg-body rounded shadow-sm border-0 p-2">
-            <h6>{ChartMessage.ChartSettings.niceToString()}</h6>
+        <div className="sf-chart-tokens card bg-body rounded shadow-sm border-0 p-2">
+          <div className="card-header" style={{ backgroundColor: "inherit" }}>
+            <h6 className="mb-3 card-title">{ChartMessage.ChartSettings.niceToString()}</h6>
+          </div>
           <div>
-            <table className="table table-borderless" style={{ marginBottom: "-1px" }}>
-              <thead>
-                <tr>
-                  <th className="sf-chart-token-narrow">
-                    {ChartMessage.Dimension.niceToString()}
-                  </th>
-                  <th className="sf-chart-token-wide">
-                    Token
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+            <div className="card-body">
+              <table className="table table-borderless" style={{ marginBottom: "-1px" }}>
+                <thead>
+                  <tr>
+                    <th className="sf-chart-token-narrow">
+                      {ChartMessage.Dimension.niceToString()}
+                    </th>
+                    <th className="sf-chart-token-wide">
+                      Token
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
                 
-                {chartScript && mlistItemContext(p.ctx.subCtx(c => c.columns, { formSize: "xs" })).map((ctx, i) =>
-                  <ChartColumn chartBase={chart} chartScript={chartScript} ctx={ctx} key={"C" + i} scriptColumn={chartScript!.columns[i]}
-                  queryKey={p.queryKey} onTokenChange={() => handleTokenChange(ctx.value)}
-                  onRedraw={handleOnRedraw}
-                  onOrderChanged={handleOrderChart} columnIndex={i} parameterDic={parameterDic} />)
-                }
-              </tbody>
-            </table>
+                  {chartScript && mlistItemContext(p.ctx.subCtx(c => c.columns, { formSize: "xs" })).map((ctx, i) =>
+                    <ChartColumn chartBase={chart} chartScript={chartScript} ctx={ctx} key={"C" + i} scriptColumn={chartScript!.columns[i]}
+                    queryKey={p.queryKey} onTokenChange={() => handleTokenChange(ctx.value)}
+                    onRedraw={handleOnRedraw}
+                    onOrderChanged={handleOrderChart} columnIndex={i} parameterDic={parameterDic} />)
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
         {chartScript && <Parameters chart={p.ctx.value} chartScript={chartScript} parameterDic={parameterDic} onRedraw={handleOnRedraw} />}

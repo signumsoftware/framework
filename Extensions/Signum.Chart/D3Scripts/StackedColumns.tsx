@@ -11,7 +11,8 @@ import TextEllipsis from './Components/TextEllipsis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
-import { ChartMessage } from '../Signum.Chart';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -57,7 +58,6 @@ export default function renderStackedColumns({ data, width, height, parameters, 
 
   var c = data.columns;
   var keyColumn = c.c0 as ChartColumn<unknown>;
-  var splitColumn = c.c1 as ChartColumn<unknown>;
   var valueColumn0 = c.c2 as ChartColumn<number>;
   var pValueAsPercent = parameters.ValueAsPercent;
 
@@ -106,7 +106,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
 
   return (
     <svg direction="ltr" width={width} height={height} role="img">
-      <title id="stackedColumnsChartTitle">{ChartMessage.StackedColumnsChart0For1SortedBy2.niceToString(valueColumn0.title, keyColumn.title, splitColumn.title)}</title>
+      <title id="stackedColumnsChartTitle">{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.StackedColumns), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XTitle xRule={xRule} yRule={yRule} keyColumn={keyColumn} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} format={format} />

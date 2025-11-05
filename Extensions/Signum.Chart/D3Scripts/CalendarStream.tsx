@@ -7,8 +7,9 @@ import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Comp
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import { MemoRepository } from './Components/ReactChart';
-import { ChartMessage, ChartRequestModel } from '../Signum.Chart';
+import { ChartMessage, ChartRequestModel, D3ChartScript } from '../Signum.Chart';
 import { DashboardFilter } from '../../Signum.Dashboard/View/DashboardFilterController';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderCalendarStream({ data, width, height, parameters, loading, onDrillDown, initialLoad, dashboardFilter, chartRequest }: ChartScriptProps): React.ReactElement<any> {
@@ -116,7 +117,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
 
   return (
     <svg direction="ltr" width={width} height={height} role="img">
-      <title id="calendarStreamChartTitle">{ChartMessage.CalenderStreamChart0Of1SortedBy2.niceToString(valueColumn.title, chartRequest.queryKey.toString(), dateColumn.title)}</title>
+      <title id="calendarStreamChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.CalendarStream), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, dateColumn.title].join(", "))}</title>
       <g transform={translate(xRule.start("content"), yRule.start("content"))}>
         {years.map((yr, i) => <CalendarYear key={yr}
           transform={rules == vertical ?

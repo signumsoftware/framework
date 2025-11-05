@@ -9,7 +9,8 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
 import TextEllipsis from './Components/TextEllipsis';
-import { ChartMessage } from '../Signum.Chart';
+import { ChartMessage, ChartScriptSymbol, D3ChartScript } from '../Signum.Chart';
+import { getQueryNiceName, symbolNiceName } from '@framework/Reflection';
 
 
 export default function renderBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -82,7 +83,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
       width={width}
       height={height}
       role="img">
-      <title id="barChartTitle">{ChartMessage.BarChart0Per1.niceToString(valueColumn.title, keyColumn.title)}</title>
+      <title id="barChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Bars), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} x={x} />
       </g>

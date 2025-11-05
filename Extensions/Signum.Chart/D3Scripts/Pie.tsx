@@ -6,9 +6,9 @@ import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Comp
 import InitialMessage from './Components/InitialMessage';
 import { TextRectangle } from './StackedLines';
 import TextEllipsis from './Components/TextEllipsis';
-import { toNumberFormat } from '@framework/Reflection';
+import { getQueryNiceName, symbolNiceName, toNumberFormat } from '@framework/Reflection';
 import { Color } from '../../../Signum/React/Basics/Color';
-import { ChartMessage } from '../Signum.Chart';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
 
 export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
 
@@ -54,7 +54,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
   var numFormat = toNumberFormat('0.#K');
   return (
     <svg direction="ltr" width={width} height={height} role="img">
-      <title id="pieChartTitle">{ChartMessage.PieChart0Per1.niceToString(valueColumn.title, keyColumn.title)}</title>
+      <title id="pieChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Pie), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       <g className="shape" transform={translate(width / 2, height / 2)}>
         {orderedPie.map(slice => {
           var active = detector?.(slice.data);

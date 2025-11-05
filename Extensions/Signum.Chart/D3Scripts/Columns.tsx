@@ -10,7 +10,8 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import type { ChartScriptHorizontalProps } from './Line';
 import TextIfFits from './Components/TextIfFits';
-import { ChartMessage } from '../Signum.Chart';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -76,7 +77,7 @@ export default function renderColumns({ data, width, height, parameters, loading
       width={width}
       height={height}
       role="img">
-      <title id="columnChartTitle">{ChartMessage.ColumnChart0Per1.niceToString(valueColumn.title, keyColumn.title)}</title>
+      <title id="columnChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Columns), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XTitle xRule={xRule} yRule={yRule} keyColumn={keyColumn} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
