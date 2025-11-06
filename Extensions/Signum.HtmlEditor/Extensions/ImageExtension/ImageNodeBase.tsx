@@ -2,6 +2,7 @@ import { $applyNodeReplacement, DecoratorNode, DOMConversion, DOMConversionMap, 
 import { ImageHandlerBase, ImageInfo } from "./ImageHandlerBase";
 import { ReactElement } from "react";
 
+//take this class as an abstract class. It should be inherited by specific getType, clone, importJSON methods
 export class ImageNodeBase extends DecoratorNode<React.ReactElement> {
 
   static dataImageIdAttribute: string;
@@ -12,17 +13,8 @@ export class ImageNodeBase extends DecoratorNode<React.ReactElement> {
     return (this.constructor as typeof ImageNodeBase).converter;
   }
 
-  constructor(private imageInfo: ImageInfo, key?: NodeKey) {
+  constructor(public imageInfo: ImageInfo, key?: NodeKey) {
     super(key);
-    this.imageInfo = imageInfo;
-  }
-
-  static getType(): string {
-    return "image";
-  }
-
-  static clone(node: ImageNodeBase): ImageNodeBase {
-    return new ImageNodeBase(node.imageInfo, node.__key);
   }
 
   createDOM(): HTMLElement {
@@ -67,10 +59,6 @@ export class ImageNodeBase extends DecoratorNode<React.ReactElement> {
         };
       },
     };
-  }
-
-  static importJSON(serializedNode: any): ImageNodeBase {
-    return new ImageNodeBase(serializedNode.src, serializedNode.altText);
   }
 
 }
