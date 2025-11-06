@@ -218,6 +218,18 @@ export function AccessibleRow({ focusCells = true, focusHeader = false, sectionT
    * Enables keyboard navigation between rows using ArrowUp and ArrowDown keys.
    */
   function handleKeyDown(e: React.KeyboardEvent<HTMLTableRowElement>) {
+
+    const target = e.target as HTMLElement;
+    const tag = target.tagName.toLowerCase();
+    const isFormElement =
+      tag === "input" ||
+      tag === "textarea" ||
+      tag === "select" ||
+      target.isContentEditable;
+
+    if (isFormElement)
+      return;
+
     function getIndexOfCell(row: HTMLTableRowElement, cell: HTMLTableCellElement) {
       
       // Compute the visual column index of the current cell
@@ -244,6 +256,10 @@ export function AccessibleRow({ focusCells = true, focusHeader = false, sectionT
 
       return Array.from(targetRow.cells).last();
     };
+
+    if (e.defaultPrevented || e.isPropagationStopped()) return;
+
+
 
     if (e.key === "ArrowDown" || e.key == "ArrowUp") {
       e.preventDefault();
