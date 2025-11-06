@@ -2,14 +2,15 @@ import { $applyNodeReplacement, DecoratorNode, DOMConversion, DOMConversionMap, 
 import { ImageHandlerBase, ImageInfo } from "./ImageHandlerBase";
 import { ReactElement } from "react";
 
-//take this class as an abstract class. It should be inherited by specific getType, clone, importJSON methods
+// Pseudo-abstract base class.
+// Should be subclassed by concrete nodes that implement getType, clone, and importJSON.
 export class ImageNodeBase extends DecoratorNode<React.ReactElement> {
 
   static dataImageIdAttribute: string;
    
   static converter: ImageHandlerBase;
 
-  getConverter(): ImageHandlerBase {
+  getHandler(): ImageHandlerBase {
     return (this.constructor as typeof ImageNodeBase).converter;
   }
 
@@ -26,7 +27,7 @@ export class ImageNodeBase extends DecoratorNode<React.ReactElement> {
   }
 
   decorate(): ReactElement {
-    return this.getConverter().renderImage(this.imageInfo);
+    return this.getHandler().renderImage(this.imageInfo);
   }
 
   exportJSON(): any {
@@ -38,7 +39,7 @@ export class ImageNodeBase extends DecoratorNode<React.ReactElement> {
   }
 
   exportDOM(): DOMExportOutput {
-    const element =  this.getConverter().toElement(this.imageInfo) ?? null;
+    const element =  this.getHandler().toElement(this.imageInfo) ?? null;
     return { element: element };
   }
 
