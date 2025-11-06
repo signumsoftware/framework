@@ -143,7 +143,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
           sc.setState({ refreshMode: userQuery.refreshMode });
           sc.handleChangeFiltermode(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions) ? 'Simple' : "Advanced", false, true);
           setCurrentUserQuery(uq, translated(userQuery, a => a.displayName));
-          setCurrentEntity(undefined);
+          //setCurrentEntity(undefined);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
           }
