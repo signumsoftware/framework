@@ -1,3 +1,4 @@
+import { SerializedLexicalNode } from "lexical";
 import { ImageNodeBase } from "./ImageNodeBase";
 
 export interface ImageHandlerBase {
@@ -8,7 +9,7 @@ export interface ImageHandlerBase {
   fromElement(val: HTMLElement): ImageInfo | undefined;
 }
 
-export interface ImageInfo {
+export interface ImageInfo extends Partial<SerializedLexicalNode>{
   imageId?: string;
   binaryFile?: string;
   fileName?: string;
