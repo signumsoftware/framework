@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useLocation, Location } from 'react-router'
-import { is, liteKey } from '@framework/Signum.Entities'
+import { is } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import { ToolbarClient, ToolbarResponse } from '../ToolbarClient'
 import { ToolbarConfig, ToolbarContext, InferActiveResponse } from "../ToolbarConfig";
@@ -8,21 +8,17 @@ import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useAPI, useUpdatedRef, useWindowEvent, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
+import { useAPI, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
-import { Entity, getToString, Lite, parseLite } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite } from '@framework/Signum.Entities'
 import { parseIcon } from '@framework/Components/IconTypeahead'
 import { ToolbarUrl } from '../ToolbarUrl';
-import { Dic, classes } from '@framework/Globals';
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage, ToolbarSwitcherEntity } from '../Signum.Toolbar';
-import DropdownList from "react-widgets-up/DropdownList";
-import { getNiceTypeName } from '../../../Signum/React/Operations/MultiPropertySetter';
-import { Binding, getTypeInfo, getTypeName, newLite, queryAllowedInContext } from '../../../Signum/React/Reflection';
+import { classes } from '@framework/Globals';
+import { LayoutMessage, ToolbarEntity, ToolbarMenuEntity,  ToolbarSwitcherEntity } from '../Signum.Toolbar';
+import { Binding, getTypeInfo, newLite, queryAllowedInContext } from '../../../Signum/React/Reflection';
 import { Finder } from '../../../Signum/React/Finder';
-import Toolbar from '../Templates/Toolbar';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
-import { getDropdownMenuPlacement } from 'react-bootstrap/esm/DropdownMenu'
 import { RightCaretDropdown } from './RightCaretDropdown'
 
 
@@ -430,7 +426,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
         <Nav.Item title={ti.niceName} className="d-flex mx-2 mb-2">
           <div style={{ width: "100%" }}>
             <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false}
-              inputAttributes={{ placeholder: ToolbarMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
+              inputAttributes={{ placeholder: LayoutMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
               onChange={e => handleSelect(e.originalEvent)} create={false} formGroupStyle="SrOnly" />
           </div>
           {renderExtraIcons(p.response.extraIcons, p.ctx, selEntityRef.current ?? p.selectedEntity)}
