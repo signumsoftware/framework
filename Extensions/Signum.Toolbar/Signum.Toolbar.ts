@@ -88,6 +88,7 @@ export namespace ToolbarMessage {
   export const If0Selected: MessageKey = new MessageKey("ToolbarMessage", "If0Selected");
   export const No0Selected: MessageKey = new MessageKey("ToolbarMessage", "No0Selected");
   export const ShowTogether: MessageKey = new MessageKey("ToolbarMessage", "ShowTogether");
+  export const SelectA0_G: MessageKey = new MessageKey("ToolbarMessage", "SelectA0_G");
 }
 
 export namespace ToolbarOperation {

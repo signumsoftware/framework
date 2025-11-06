@@ -47,7 +47,7 @@ export default function ToolbarRenderer(p: {
     if (responseRef.current) {
 
       var newActive = inferActive(responseRef.current, location, query);
-      setActive(newActive ?? null);
+      setActive(newActive);
     }
   }
 
@@ -398,7 +398,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
       if (!is(active.menuWithEntity.entity, selEntityRef.current))
         setSelectedEntity(active.menuWithEntity.entity);
     }
-    else
+    else if (active != null)
       setSelectedEntity(null);
 
   }, [active?.menuWithEntity, p.response]);
@@ -423,22 +423,14 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
   }
 
   const ctx = new TypeContext<Lite<Entity> | null>(undefined, undefined, undefined, new Binding(selEntityRef, "current"));
+  var ti = getTypeInfo(entityType);
   return (
     <>
       {entityType && (
-        <Nav.Item title={getTypeInfo(entityType).niceName} className="d-flex mx-2 mb-2">
-          {/* <DropdownList
-            value={selectedEntity}
-            dataKey={((e: Lite<Entity>) => e && e.id) as any}
-            textField={((e: Lite<Entity>) => e && getToString(e)) as any}
-            onChange={(e, m) => handleSelect(e, m.originalEvent!)}
-            data={[null, ...entities ?? []]}
-            renderValue={a => renderEntity(a.item)}
-            renderListItem={a => renderEntity(a.item)}
-            title={ctx.niceName(a => a.workLogReminder)}
-          /> */}
+        <Nav.Item title={ti.niceName} className="d-flex mx-2 mb-2">
           <div style={{ width: "100%" }}>
             <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false}
+              inputAttributes={{ placeholder: ToolbarMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
               onChange={e => handleSelect(e.originalEvent)} create={false} formGroupStyle="SrOnly" />
           </div>
           {renderExtraIcons(p.response.extraIcons, p.ctx, selEntityRef.current ?? p.selectedEntity)}
