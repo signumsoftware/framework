@@ -9,7 +9,7 @@ export class HelpImageNode extends ImageNodeBase {
   }
 
   static getType(): string {
-    return "image";
+    return "help-image";
   }
 
   static clone(node: HelpImageNode): HelpImageNode {
