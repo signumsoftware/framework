@@ -59,7 +59,7 @@
     <Member Name="If0Selected" Description="Wenn {0} ausgewählt" />
     <Member Name="No0Selected" Description="Keine {0} ausgewählt" />
     <Member Name="RecursionDetected" Description="Rekursion erkannt" />
-    <Member Name="SelectA0_G" Description="[m:ein|f:eine|n:ein] {0} auswählen" />
+    <Member Name="SelectA0_G" Description="Wählen Sie [m:ein|f:eine|n:ein] {0} aus" />
     <Member Name="ShowTogether" Description="Gemeinsam anzeigen" />
   </Type>
   <Type Name="ToolbarOperation">
