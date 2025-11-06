@@ -603,7 +603,7 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
 
       if (ei.url) {
         return <button type="button" className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i}
-          onClick={e => linkClick(ei, selectedEntity, e, ctx)}>
+          onClick={e => { e.stopPropagation(); linkClick(ei, selectedEntity, e, ctx); } }>
           {ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}
         </button>;
       }
@@ -615,6 +615,7 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
       else {
 
         return <button type="button" className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i} onClick={e => {
+          e.stopPropagation();
           config!.handleNavigateClick(e, ei, selectedEntity);
 
           if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
