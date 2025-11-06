@@ -192,7 +192,7 @@ export namespace ContextualOperations {
     extraButtons?: React.ReactNode;
     children?: React.ReactNode;
     color?: BsColor;
-    icon?: IconProp;
+    icon?: IconProp | React.ReactElement;
     iconColor?: string;
   }
 
@@ -232,7 +232,7 @@ export namespace ContextualOperations {
         style={{ pointerEvents: "initial" }}
         data-operation={coc.operationInfo.key}
         className={color && !disabled ? "text-" + color : undefined}>
-        {icon ? <FontAwesomeIcon aria-hidden={true} icon={icon} className="fa-fw icon" color={iconColor} /> :
+        {icon ? (React.isValidElement(icon) ? icon:  <FontAwesomeIcon aria-hidden={true} icon={icon} className="fa-fw icon" color={iconColor} />) :
           color ? <span className={classes("icon", "empty-icon")}></span> : undefined}
         {text}
         {extraButtons}
