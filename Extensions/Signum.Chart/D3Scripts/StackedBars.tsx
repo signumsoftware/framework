@@ -11,6 +11,8 @@ import TextEllipsis from './Components/TextEllipsis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderStackedBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -107,7 +109,8 @@ export default function renderStackedBars({ data, width, height, parameters, loa
   const bandMargin = y.bandwidth() > 20 ? 2 : y.bandwidth() > 10 ? 1 : 0;
 
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="stackedBarsChartTitle">{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.StackedBars), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>  
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} x={x} format={format} />
       </g>
@@ -139,7 +142,15 @@ export default function renderStackedBars({ data, width, height, parameters, loa
                   height={y.bandwidth() - bandMargin * 2}
                   width={x(r[1])! - x(r[0])!}
                   onClick={e => onDrillDown(row.rowClick, e)}
-                  cursor="pointer">
+                  role="button"
+                  tabIndex={0}
+                  cursor="pointer"
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      (onclick as any)?.(e);
+                    }
+                  }}>
                   <title>
                     {row.valueTitle}
                   </title>

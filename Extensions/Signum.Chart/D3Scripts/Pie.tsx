@@ -6,8 +6,9 @@ import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Comp
 import InitialMessage from './Components/InitialMessage';
 import { TextRectangle } from './StackedLines';
 import TextEllipsis from './Components/TextEllipsis';
-import { toNumberFormat } from '@framework/Reflection';
+import { getQueryNiceName, symbolNiceName, toNumberFormat } from '@framework/Reflection';
 import { Color } from '../../../Signum/React/Basics/Color';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
 
 export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
 
@@ -52,7 +53,8 @@ export default function renderPie({ data, width, height, parameters, loading, on
   var orderedPie = pie(data.rows).orderBy(s => keyColumn.getValueKey(s.data));
   var numFormat = toNumberFormat('0.#K');
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="pieChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Pie), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       <g className="shape" transform={translate(width / 2, height / 2)}>
         {orderedPie.map(slice => {
           var active = detector?.(slice.data);
@@ -77,7 +79,16 @@ export default function renderPie({ data, width, height, parameters, loading, on
                 transform={initialLoad ? scale(0, 0) : scale(1, 1)}
                 fill={sliceColor}
                 shapeRendering="initial"
-                onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
+                role="button"
+                tabIndex={0}
+                cursor="pointer"
+                onKeyDown={(e: React.KeyboardEvent<SVGRectElement>) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    (onclick as any)?.(e);
+                  }
+                }}
+                onClick={e => onDrillDown(slice.data, e)}>
               </path>
               <SliceText value={pValue == 'OnArc' ? valueText : undefined} percent={pPercent == 'OnArc' ? percentText : undefined} slice={slice} innerRadius={rInner} outerRadius={outerRadious} color={textColor} />
               <g key={slice.index} className="color-legend">
@@ -94,10 +105,10 @@ export default function renderPie({ data, width, height, parameters, loading, on
                   fontWeight={active == true ? "bold" : undefined}
                   fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
                   value={((slice.endAngle - slice.startAngle) < (Math.PI / 64)) ? '' : concatValuePercent(pValue == 'OnLabel' ? valueText : undefined, pPercent == "OnLabel" ? percentText : undefined)}
-                  onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
+                  onClick={e => onDrillDown(slice.data, e)}>
                   {((slice.endAngle - slice.startAngle) < (Math.PI / 64)) ? '' : keyColumn.getValueNiceName(slice.data)}
                 </TextValueRectangle>}
-              SliceText</g>
+              </g>
             </g>
           );
         })}
@@ -122,7 +133,7 @@ export interface TextValueRectangleProps extends React.SVGProps<SVGTextElement> 
   value?: string;
 }
 
-export function TextValueRectangle({ rectangleAtts, children, value, rectMaxWidth, isRight, ...atts }: TextValueRectangleProps): React.JSX.Element {
+export function TextValueRectangle({ rectangleAtts, children, value, rectMaxWidth, isRight, onClick, ...atts }: TextValueRectangleProps): React.JSX.Element {
 
   const txt = React.useRef<SVGTextElement>(null);
   const val = React.useRef<SVGTextElement>(null);
@@ -168,9 +179,23 @@ export function TextValueRectangle({ rectangleAtts, children, value, rectMaxWidt
 
   }, [getString(children), value, rectMaxWidth]);
 
+  const interactive = typeof onClick === "function";
+  const accessibilityPropsOnClick = interactive
+    ? {
+      role: "button",
+      tabIndex: 0,
+      cursor: "pointer",
+      onKeyDown: (e: React.KeyboardEvent<SVGTextElement>) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          (onClick as any)?.(e);
+        }
+      },
+    }
+    : {};
 
   return (
-    <g transform={atts.transform}>
+    <g transform={atts.transform} {...accessibilityPropsOnClick}>
       <rect ref={rect} {...rectangleAtts} height={20} transform={translate(0, 0)} />
       <text ref={txt} {...atts} transform={translate(!isRight && valWidth ? -valWidth : 0, 0)} >
         {children ?? ""}

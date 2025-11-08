@@ -15,6 +15,10 @@
     display: none;
 }
 
+.nav-item-text.nav-item-group{
+    font-weight: bold;
+}
+
 .sf-toolbar-count-container {
     position: relative;
     display: inline;

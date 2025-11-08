@@ -26,6 +26,7 @@
     <Member Name="Check" Description="Aktivieren" />
     <Member Name="CopyFrom" Description="Kopieren von" />
     <Member Name="Deny" Description="Verweigern" />
+    <Member Name="DownloadAuthRules" Description="AuthRules.xml herunterladen" />
     <Member Name="Fallback" Description="Fallback" />
     <Member Name="Filter" Description="Filter" />
     <Member Name="FirstRule" Description="1. Regel" />
@@ -119,6 +120,7 @@
     <Member Name="InvalidUsernameOrPassword" Description="Ungültiger Benutzername oder Kennwort" />
     <Member Name="Login" Description="Login" />
     <Member Name="LoginWith0" Description="Login mit {0}" />
+    <Member Name="LoginWithAzureB2C" Description="Anmelden mit Azure B2C" />
     <Member Name="LoginWithWindowsUser" Description="Anmelden mit Windows-Benutzer" />
     <Member Name="Logout" Description="Logout" />
     <Member Name="LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication" Description="Sieht so aus, als ob Ihr Windows-Benutzer diese Anwendung nicht verwenden darf, der Browser keine Identitätsinformationen bereitstellt oder der Server nicht richtig konfiguriert ist." />
@@ -136,7 +138,9 @@
     <Member Name="RequestAccepted" Description="Anfrage angenommen" />
     <Member Name="SendEmail" Description="E-Mail senden" />
     <Member Name="ShowLoginForm" Description="Anmeldeformular anzeigen" />
+    <Member Name="SignInWithAzureB2C" Description="Anmelden mit Azure B2C" />
     <Member Name="SignInWithMicrosoft" Description="Mit Microsoft anmelden" />
+    <Member Name="SignUpWithAzureB2C" Description="Registrieren mit Azure B2C" />
     <Member Name="Success" Description="Erfolg" />
     <Member Name="SwitchUser" Description="Benutzer wechseln" />
     <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="Das Kennwort muss mindestens {0} Zeichen enthalten." />

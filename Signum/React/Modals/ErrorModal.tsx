@@ -55,7 +55,7 @@ const ErrorModal: {
                   renderTitle(e)
           }
         </h5>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked} />
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label={EntityControlMessage.Close.niceToString()} onClick={handleCloseClicked} />
       </div>
 
       <div className="modal-body">
@@ -213,7 +213,7 @@ ErrorModal.showErrorModal = (error: any, beforeOkClicked?: ()=> Promise<void>): 
       message:
         <div>
           {ConnectionMessage.ANewVersionHasJustBeenDeployedConsiderReload.niceToString()}&nbsp;
-          <button className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(); }} title={EntityControlMessage.Reload.niceToString()}>
+          <button type="button" className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(); }} title={EntityControlMessage.Reload.niceToString()}>
             <FontAwesomeIcon aria-hidden={true} icon="rotate" />
           </button>
         </div>,

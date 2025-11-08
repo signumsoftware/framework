@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { NavDropdown, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faMinus, faRotateRight, faTextHeight } from "@fortawesome/free-solid-svg-icons";
+import { FontSizeMessage } from "../Signum.Entities";
 
 export const FONT_SCALE_STORAGE_KEY = "bootstrap-font-scale";
 
@@ -29,37 +30,40 @@ export function FontSizeSelector({ isMobile }: { isMobile: boolean }): JSX.Eleme
   const resetFont = () => setScale(DEFAULT_SCALE);
   return (
     <NavDropdown
-      title={isMobile ? <FontAwesomeIcon icon={"font"} title="Schriftgröße" aria-label="Schriftgröße" /> : "Schriftgröße" }
+      title={isMobile ? <FontAwesomeIcon icon={"font"} title={FontSizeMessage.FontSize.niceToString()} aria-label={FontSizeMessage.FontSize.niceToString()} /> : FontSizeMessage.FontSize.niceToString()}
       id="nav-fontsize-dropdown"
       align="end"
     >
       <div className="d-flex justify-content-between align-items-center px-3 py-1" style={{ minWidth: "130px" }}>
         <Button
+          type="button"
           variant="outline-primary"
           size="sm"
           onClick={decreaseFont}
-          title={"Schrift verkleinern"}
-          aria-label={"Schrift verkleinern"}
+          title={FontSizeMessage.ReduceFontSize.niceToString()}
+          aria-label={FontSizeMessage.ReduceFontSize.niceToString()}
           disabled={scale <= MIN_SCALE}
         >
           <FontAwesomeIcon aria-hidden={true} icon={faMinus} />
         </Button>
         <Button
+          type="button"
           variant="outline-secondary"
           size="sm"
           onClick={resetFont}
-          title={"Schriftgröße zurücksetzen"}
-          aria-label={"Schriftgröße zurücksetzen"}
+          title={FontSizeMessage.ResetFontSize.niceToString()}
+          aria-label={FontSizeMessage.ResetFontSize.niceToString()}
           disabled={scale === DEFAULT_SCALE}
         >
           <FontAwesomeIcon aria-hidden={true} icon={faRotateRight} />
         </Button>
         <Button
+          type="button"
           variant="outline-primary"
           size="sm"
           onClick={increaseFont}
-          title={"Schrift vergrößern"}
-          aria-label={"Schrift vergrößern"}
+          title={FontSizeMessage.IncreaseFontSize.niceToString()}
+          aria-label={FontSizeMessage.IncreaseFontSize.niceToString()}
           disabled={scale >= MAX_SCALE}
         >
           <FontAwesomeIcon aria-hidden={true} icon={faPlus} />

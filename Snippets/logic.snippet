@@ -28,18 +28,18 @@
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<$entityName$Entity>()
-                .WithSave($entityName$Operation.Save)
-                .WithDelete($entityName$Operation.Delete)
-                .WithQuery(() => $entityParam$ => new
-                {
-                    Entity = $entityParam$,
-                    $entityParam$.Id,
-                    $entityParam$.$end$
-                });
-        }
+        if (sb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+		    return;
+        
+        sb.Include<$entityName$Entity>()
+            .WithSave($entityName$Operation.Save)
+            .WithDelete($entityName$Operation.Delete)
+            .WithQuery(() => $entityParam$ => new
+            {
+                Entity = $entityParam$,
+                $entityParam$.Id,
+                $entityParam$.$end$
+            });
     }
 }]]>
       </Code>

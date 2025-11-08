@@ -7,6 +7,20 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 
 
+export namespace HeavyProfilerMessage {
+  export const HeavyProfilerLoading: MessageKey = new MessageKey("HeavyProfilerMessage", "HeavyProfilerLoading");
+  export const HeavyProfiler: MessageKey = new MessageKey("HeavyProfilerMessage", "HeavyProfiler");
+  export const Upload: MessageKey = new MessageKey("HeavyProfilerMessage", "Upload");
+  export const Record: MessageKey = new MessageKey("HeavyProfilerMessage", "Record");
+  export const Update: MessageKey = new MessageKey("HeavyProfilerMessage", "Update");
+  export const Clear: MessageKey = new MessageKey("HeavyProfilerMessage", "Clear");
+  export const Download: MessageKey = new MessageKey("HeavyProfilerMessage", "Download");
+  export const IgnoreHeavyProfilerEntries: MessageKey = new MessageKey("HeavyProfilerMessage", "IgnoreHeavyProfilerEntries");
+  export const UploadPreviousRunsToComparePerformance: MessageKey = new MessageKey("HeavyProfilerMessage", "UploadPreviousRunsToComparePerformance");
+  export const EnableTheProfilerWithTheDebuggerWith0AndSaveTheResultsWith1: MessageKey = new MessageKey("HeavyProfilerMessage", "EnableTheProfilerWithTheDebuggerWith0AndSaveTheResultsWith1");
+  export const Entries: MessageKey = new MessageKey("HeavyProfilerMessage", "Entries");
+}
+
 export namespace ProfilerMessage {
   export const HeavyProfiler: MessageKey = new MessageKey("ProfilerMessage", "HeavyProfiler");
   export const Entry0Loading: MessageKey = new MessageKey("ProfilerMessage", "Entry0Loading");

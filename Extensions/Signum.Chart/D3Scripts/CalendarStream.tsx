@@ -7,8 +7,9 @@ import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Comp
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import { MemoRepository } from './Components/ReactChart';
-import { ChartRequestModel } from '../Signum.Chart';
+import { ChartMessage, ChartRequestModel, D3ChartScript } from '../Signum.Chart';
 import { DashboardFilter } from '../../Signum.Dashboard/View/DashboardFilterController';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderCalendarStream({ data, width, height, parameters, loading, onDrillDown, initialLoad, dashboardFilter, chartRequest }: ChartScriptProps): React.ReactElement<any> {
@@ -115,8 +116,8 @@ export default function renderCalendarStream({ data, width, height, parameters, 
 
 
   return (
-    <svg direction="ltr" width={width} height={height}>
-
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="calendarStreamChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.CalendarStream), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, dateColumn.title].join(", "))}</title>
       <g transform={translate(xRule.start("content"), yRule.start("content"))}>
         {years.map((yr, i) => <CalendarYear key={yr}
           transform={rules == vertical ?
@@ -235,26 +236,52 @@ export function CalendarYear({ year, rules, rowByDate, width, height, onDrillDow
         {d3.utcDays(new Date(Date.UTC(year, 0, 1)), new Date(Date.UTC(year + 1, 0, 1))).map(d => {
           const r: ChartRow | undefined = rowByDate[cleanDate(d)];
           const active = r && detector?.(r);
-          return (
-            <g className="hover-group" key={d.toISOString()}>
-              <rect
-                className="sf-transition hover-target"
-                opacity={active == false ? .5 : undefined}
-                stroke={active == true ? "var(--bs-body-color)" : "#ccc"}
-                strokeWidth={active == true ? 2 : undefined}
-                fill={r == undefined || initialLoad ? "transparent" : color(r)}
-                width={cellSize}
-                height={cellSize}
-                x={day(d) * cellSize}
-                y={week(d) * cellSize}
-                cursor="pointer"
-                onClick={e => r == undefined ? null : onDrillDown(r, e)}>
-                <title>
-                  {dateFormat(d) + (r == undefined ? "" : ("(" + valueColumn.getValueNiceName(r) + ")"))}
-                </title>
-              </rect>
-            </g>
-          )
+          return (r == undefined) ?
+            (
+              <g className="hover-group" key={d.toISOString()}>
+                <rect
+                  className="sf-transition hover-target"
+                  stroke={active == true ? "var(--bs-body-color)" : "#ccc"}
+                  fill={"transparent"}
+                  width={cellSize}
+                  height={cellSize}
+                  x={day(d) * cellSize}
+                  y={week(d) * cellSize}>
+                  <title>
+                    {dateFormat(d)}
+                  </title>
+                </rect>
+              </g>
+            )
+            :
+            (
+              <g className="hover-group" key={d.toISOString()}>
+                <rect
+                  className="sf-transition hover-target"
+                  opacity={active == false ? .5 : undefined}
+                  stroke={active == true ? "var(--bs-body-color)" : "#ccc"}
+                  strokeWidth={active == true ? 2 : undefined}
+                  fill={initialLoad ? "transparent" : color(r)}
+                  width={cellSize}
+                  height={cellSize}
+                  x={day(d) * cellSize}
+                  y={week(d) * cellSize}
+                  role="button"
+                  tabIndex={0}
+                  cursor="pointer"
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      (onclick as any)?.(e);
+                    }
+                  }}
+                  onClick={e => onDrillDown(r, e)}>
+                  <title>
+                    {dateFormat(d) + ("(" + valueColumn.getValueNiceName(r) + ")")}
+                  </title>
+                </rect>
+              </g>
+            );
         })}
       </g>
 

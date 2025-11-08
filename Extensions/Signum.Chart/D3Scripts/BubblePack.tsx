@@ -6,6 +6,8 @@ import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Comp
 import { Folder, isFolder, Root, isRoot, stratifyTokens } from './Components/Stratify';
 import TextEllipsis from './Components/TextEllipsis';
 import InitialMessage from './Components/InitialMessage';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderBubblePack({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, dashboardFilter, chartRequest }: ChartScriptProps): React.ReactElement<any> {
@@ -77,13 +79,14 @@ export default function renderBubblePack({ data, width, height, parameters, load
   var numberSizeLimit = parseInt(parameters["NumberSizeLimit"]);
 
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="bubblePackChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.BubblePack), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       {
         nodes.orderByDescending(a => a.r).map(d => {
           const active = activeDetector?.(isFolder(d.data) ? ({ c2: d.data.folder }) : d.data);
           return (
             <g key={getNodeKey(d)} className="node sf-transition hover-group" transform={translate(d.x, d.y) + (initialLoad ? scale(0, 0) : scale(1, 1))} cursor="pointer"
-              onClick={e => isFolder(d.data) ? onDrillDown({ c2: d.data.folder }, e) : onDrillDown(d.data, e)}>
+              onClick={e => isFolder(d.data) ? onDrillDown({ c2: d.data.folder }, e) : onDrillDown(d.data, e)} role="button" tabIndex={0} focusable={true}>
               <circle className="sf-transition hover-target" shapeRendering="initial" r={d.r}
                 opacity={active == false ? .5 : undefined}
                 fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}

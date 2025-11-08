@@ -5,7 +5,7 @@ type SectionType = "tbody" | "thead" | "tfoot";
 type TableRole = "grid" | "table" | "treegrid";
 
 interface AccessibleTableProps extends React.TableHTMLAttributes<HTMLTableElement> {
-  caption: string;
+  "aria-label": string;
   tableRole?: TableRole;
   multiselectable?: boolean;
   focusCells?: boolean;
@@ -26,7 +26,7 @@ interface AccessibleTableProps extends React.TableHTMLAttributes<HTMLTableElemen
  * It also applies appropriate ARIA roles and focus behavior for better accessibility.
  */
 export function AccessibleTable({
-  caption,
+  "aria-label": ariaLabel,
   tableRole = "grid",
   children,
   multiselectable = true,
@@ -85,12 +85,17 @@ export function AccessibleTable({
   return (
     <table
       role={tableRole}
+      aria-label={ariaLabel}
       aria-multiselectable={`${multiselectable ? "true" : "false"}`}
       {...rest}>
-      <caption>{caption}</caption>
+      {AccessibleTable.ariaLabelAsCaption && <caption>{ariaLabel}</caption>}
       {enhancedChildren}
     </table>
   );
+}
+
+export namespace AccessibleTable {
+  export let ariaLabelAsCaption = false;
 }
 
 /**
@@ -213,6 +218,18 @@ export function AccessibleRow({ focusCells = true, focusHeader = false, sectionT
    * Enables keyboard navigation between rows using ArrowUp and ArrowDown keys.
    */
   function handleKeyDown(e: React.KeyboardEvent<HTMLTableRowElement>) {
+
+    const target = e.target as HTMLElement;
+    const tag = target.tagName.toLowerCase();
+    const isFormElement =
+      tag === "input" ||
+      tag === "textarea" ||
+      tag === "select" ||
+      target.isContentEditable;
+
+    if (isFormElement)
+      return;
+
     function getIndexOfCell(row: HTMLTableRowElement, cell: HTMLTableCellElement) {
       
       // Compute the visual column index of the current cell
@@ -239,6 +256,10 @@ export function AccessibleRow({ focusCells = true, focusHeader = false, sectionT
 
       return Array.from(targetRow.cells).last();
     };
+
+    if (e.defaultPrevented || e.isPropagationStopped()) return;
+
+
 
     if (e.key === "ArrowDown" || e.key == "ArrowUp") {
       e.preventDefault();

@@ -63,8 +63,8 @@ export class AttachmentImageConverter implements ImageConverter{
       return img;
     }
 
-    if (val.attachmentId) {
-      img.setAttribute("data-attachment-id", val.attachmentId);
+    if (val.imageId) {
+      img.setAttribute("data-attachment-id", val.imageId);
       return img;
     }
   }
@@ -86,7 +86,7 @@ export class AttachmentImageConverter implements ImageConverter{
   renderImage(info: ImageInfo): React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> {
     var fp = FilePathEmbedded.New({
       binaryFile: info.binaryFile,
-      entityId: info.attachmentId,
+      entityId: info.imageId,
       mListRowId: null,
       fileType: getSymbol(FileTypeSymbol, this.pr.member!.defaultFileTypeInfo!.key),
       rootType: this.pr.findRootType().name,
@@ -104,8 +104,8 @@ export class AttachmentImageConverter implements ImageConverter{
     if (val.binaryFile)
       return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" />`;
 
-    if (val.attachmentId)
-      return `<img data-attachment-id="${val.attachmentId}" />`;
+    if (val.imageId)
+      return `<img data-attachment-id="${val.imageId}" />`;
 
     return undefined;
   }
@@ -115,7 +115,7 @@ export class AttachmentImageConverter implements ImageConverter{
       return {
         binaryFile: element.dataset["binaryFile"],
         fileName: element.dataset["fileName"],
-        attachmentId: element.dataset["attachmentId"],
+        imageId: element.dataset["attachmentId"],
       };
     }
 

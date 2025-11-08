@@ -39,14 +39,14 @@ export default function DynamicPanelSimplePage(): React.JSX.Element {
 
   return (
     <div>
-      <h2>Dynamic Panel</h2>
+      <h2>{EvalPanelMessage.DynamicPanel.niceToString()}</h2>
    
       <Tabs activeKey={step ?? "search"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={handleSelect}>
-        <Tab eventKey="search" title="Search">
+        <Tab eventKey="search" title={EvalPanelMessage.Search.niceToString()}>
           <SearchPanel />
         </Tab>
      
-        <Tab eventKey="checkEvals" title={"Check Evals"}>
+        <Tab eventKey="checkEvals" title={EvalPanelMessage.CheckEvals.niceToString()}>
           <CheckEvalsStep />
         </Tab>
 
@@ -92,7 +92,7 @@ export function CheckEvalsStep(): React.JSX.Element {
   return (
     <div>
       {EvalClient.Options.checkEvalFindOptions.orderBy(fo => fo.queryName).map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={autoStart} />)}
-      <button className="btn btn-success" onClick={handleOnClick}><FontAwesomeIcon aria-hidden={true} icon="arrows-rotate" /> Refresh all</button>
+      <button type="button" className="btn btn-success" onClick={handleOnClick}><FontAwesomeIcon aria-hidden={true} icon="arrows-rotate" /> {EvalPanelMessage.RefreshAll.niceToString()}</button>
     </div>
   );
 }
@@ -151,9 +151,9 @@ export function CheckEvalType(p: CheckEvalTypeProps): React.JSX.Element {
             <LinkButton onClick={e => { loadData(p); }} title={EvalPanelMessage.OpenErrors.niceToString()}><FontAwesomeIcon icon="arrows-rotate" className="sf-line-button" /></LinkButton>
         }
         {
-          state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon aria-hidden icon="triangle-exclamation" /> Exception checking {getQueryNiceName(p.findOptions.queryName)}</span> :
-            errors && errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{errors.length}</strong> {errors.length == 1 ? "Error" : "Errors"} found</span> :
-              errors && errors?.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
+          state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon aria-hidden icon="triangle-exclamation" /> {EvalPanelMessage.ExceptionChecking0_.niceToString(getQueryNiceName(p.findOptions.queryName))}</span> :
+            errors && errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{errors.length}</strong> {EvalPanelMessage._0Found.niceToString(errors.length == 1 ? "Error" : "Errors")}</span> :
+              errors && errors?.length == 0 ? <span className="mini-alert alert-success" role="alert">{EvalPanelMessage.NoErrorsFound.niceToString()}</span> :
                 undefined
         }
         {
@@ -184,8 +184,8 @@ export function RefreshClientsStep(): React.JSX.Element {
 
   return (
     <div>
-      <p>Now you need to refresh the clients manually (i.e. pressing F5).</p>
-      <LinkButton title={undefined} className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</LinkButton>
+      <p>{EvalPanelMessage.YouNeedToRefreshManually.niceToString()}</p>
+      <LinkButton title={undefined} className="sf-button btn btn-warning" onClick={handleRefreshClient}>{EvalPanelMessage.RefreshThisClient.niceToString()}</LinkButton>
     </div>
   );
 }

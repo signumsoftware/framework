@@ -8,6 +8,8 @@ import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import { MemoRepository } from './Components/ReactChart';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 export default function renderLine({ data, width, height, parameters, loading, chartRequest, onDrillDown, initialLoad, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
 
@@ -64,6 +66,7 @@ export default function renderLine({ data, width, height, parameters, loading, c
 
   return (
     <svg direction="ltr" width={width} height={height}>
+      <title id="lineChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Line), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       {hasHorizontalScale ?
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={keyColumn as ChartColumn<number>} x={x as d3.ScaleContinuousNumeric<number, number>} /> :
         <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x as d3.ScaleBand<string>} showLines={(x as d3.ScaleBand<string>).bandwidth() > 5}
@@ -165,7 +168,14 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, hasHorizontalSc
                 fill="#fff"
                 fillOpacity={0}
                 stroke="none"
+                role="button"
                 cursor="pointer"
+                onKeyDown={e => {
+                  if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                    (onclick as any)?.(e);
+                  }
+                }}
                 r={circleRadiusHover}
                 onClick={e => onDrillDown(r, e)}>
                 <title>
@@ -195,7 +205,15 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, hasHorizontalSc
                   fill="var(--bs-body-bg)"
                   r={circleRadius}
                   onClick={e => onDrillDown(row, e)}
+                  role="button"
+                  tabIndex={0}
                   cursor="pointer"
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      (onclick as any)?.(e);
+                    }
+                  }}
                   shapeRendering="initial">
                   <title>
                     {keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r)}
@@ -210,7 +228,15 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, hasHorizontalSc
                       opacity={active == false ? .5 : active == true ? 1 : numberOpacity}
                       textAnchor="middle"
                       onClick={e => onDrillDown(r, e)}
-                      cursor="pointer"
+                        role="button"
+                        tabIndex={0}
+                        cursor="pointer"
+                        onKeyDown={e => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            (onclick as any)?.(e);
+                          }
+                        }}
                       shapeRendering="initial">
                       {valueColumn.getValueNiceName(r)}
                     </text>)

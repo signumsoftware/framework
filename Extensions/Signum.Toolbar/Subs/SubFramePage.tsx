@@ -179,6 +179,7 @@ export default function SubFramePage(): React.ReactElement {
         setPack(packEntity, { getComponent: s.getComponent }).then(() => callback && callback());
       }
     },
+    onClose: () => AppContext.navigate(Navigator.navigateRoute(newLite(pti.name, params.parentid!))),
     revalidate: () => validationErrors.current && validationErrors.current.forceUpdate(),
     setError: (ms, initialPrefix) => {
       GraphExplorer.setModelState(entity, ms, initialPrefix || "");

@@ -49,8 +49,8 @@ export default function ProcessPanelPage(): React.JSX.Element {
         clickUrl={url.href}
       /></h2></div>
       <div className="btn-toolbar mt-3">
-        <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon aria-hidden="true" icon="play" /> {ProcessMessage.Start.niceToString()}</button>
-        <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon aria-hidden="true" icon="stop" /> {ProcessMessage.Stop.niceToString()}</button>
+        <button type="button" className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon aria-hidden="true" icon="play" /> {ProcessMessage.Start.niceToString()}</button>
+        <button type="button" className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon aria-hidden="true" icon="stop" /> {ProcessMessage.Stop.niceToString()}</button>
       </div >
       <div id="processMainDiv">
         {ProcessMessage.State.niceToString()}: <strong>
@@ -73,7 +73,7 @@ export default function ProcessPanelPage(): React.JSX.Element {
         {ProcessMessage.NextPlannedExecution.niceToString()}: {s.nextPlannedExecution ?? ProcessMessage.None.niceToString() }
         <br />
         <AccessibleTable
-          caption={ProcessMessage.ExecutingProcesses.niceToString()}
+          aria-label={ProcessMessage.ExecutingProcesses.niceToString()}
           className="table"
           multiselectable={false}>
           <thead>

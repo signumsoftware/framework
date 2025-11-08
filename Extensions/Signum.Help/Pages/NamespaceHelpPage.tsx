@@ -66,5 +66,5 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<NamespaceHelpEntity>,
       }));
   }
 
-  return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon aria-hidden={true} icon="save" /> {oi.niceName}</button>;
+  return <button type="button" className="btn btn-primary" onClick={onClick}><FontAwesomeIcon aria-hidden={true} icon="save" /> {oi.niceName}</button>;
 }

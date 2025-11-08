@@ -261,7 +261,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
         {
           dashboardFilter && <span className="badge bg-tertiary text-dark border ms-2 sf-filter-pill">
             {dashboardFilter.rows.length} {DashboardMessage.RowsSelected.niceToString().forGenderAndNumber(dashboardFilter.rows.length)}
-            <button type="button" aria-label="Close" className="btn-close" onClick={handleClearFilter}/>
+            <button type="button" aria-label={DashboardMessage.Close.niceToString()} className="btn-close" onClick={handleClearFilter} />
           </span>
         }
 
