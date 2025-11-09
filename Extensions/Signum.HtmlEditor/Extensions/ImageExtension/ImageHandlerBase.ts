@@ -1,13 +1,15 @@
+import { SerializedLexicalNode } from "lexical";
+import { ImageNodeBase } from "./ImageNodeBase";
 
-export interface ImageConverter {
-  dataImageIdAttribute?: string;
+export interface ImageHandlerBase {
+  getNodeType(): typeof ImageNodeBase;
   uploadData(blob: Blob): Promise<ImageInfo>;
   renderImage(val: ImageInfo): React.ReactElement;
   toElement(val: ImageInfo): HTMLElement | undefined;
   fromElement(val: HTMLElement): ImageInfo | undefined;
 }
 
-export interface ImageInfo {
+export interface ImageInfo extends Partial<SerializedLexicalNode>{
   imageId?: string;
   binaryFile?: string;
   fileName?: string;
