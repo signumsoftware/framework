@@ -14,26 +14,6 @@ import { LinkButton } from '@framework/Basics/LinkButton';
 import { HelpImageNode } from './HelpImageNode';
 
 
-export function EditableText({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
-  var [editable, setEditable] = React.useState(defaultEditable || false);
-  var forceUpdate = useForceUpdate();
-
-  return (
-    <span className="sf-edit-container">
-      {
-        (editable ? <TextAreaLine ctx={ctx} formGroupStyle="SrOnly" onChange={() => { forceUpdate(); onChange && onChange(); }} placeholderLabels={false} valueHtmlAttributes={{ placeholder: defaultText || ctx.niceName() }} formGroupHtmlAttributes={{ style: { display: "inline-block" } }} /> : 
-        ctx.value ? <span>{ctx.value}</span> :
-          defaultText ? <span>{defaultText}</span> :
-            <span className="sf-no-text">[{ctx.niceName()}]</span>)
-      }
-      {!ctx.readOnly && <LinkButton className={classes("sf-edit-button", editable && "active")} title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} onClick={e => { setEditable(!editable); }}>
-        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2"  /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
-      </LinkButton>}
-    </span>
-  );
-}
-  
-
 export function EditableHtml({ ctx, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
 
   const [editable, setEditable] = React.useState(defaultEditable || false);
@@ -41,8 +21,8 @@ export function EditableHtml({ ctx, onChange, defaultEditable }: { ctx: TypeCont
 
   return (
     <div className={classes("sf-edit-container", readOnly && "html-viewer")} >
-      
-      <HelpHtmlEditor binding={ctx.binding} readOnly={readOnly} />
+
+      {editable ? <HelpHtmlEditor binding={ctx.binding} /> : <HtmlViewer text={ctx.value} />}
 
       {!ctx.readOnly && <LinkButton title={undefined} className={classes("sf-edit-button", editable && "active", ctx.value && "block")} onClick={e => { setEditable(!editable); }}>
         <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" aria-hidden /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}

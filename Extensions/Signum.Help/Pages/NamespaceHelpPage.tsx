@@ -9,7 +9,8 @@ import { getTypeInfo, GraphExplorer, symbolNiceName, tryGetOperationInfo, tryGet
 import { JavascriptMessage, Entity } from '@framework/Signum.Entities';
 import { Operations } from '@framework/Operations';
 import { TypeContext } from '@framework/Lines';
-import { EditableHtml, EditableText } from '../Editor/Editable';
+import { EditableText } from '../Editor/EditableText';
+import { EditableHtml } from '../Editor/EditableHtml';
 import { useTitle } from '@framework/AppContext';
 import { classes } from '@framework/Globals';
 import { Shortcut } from './TypeHelpPage'

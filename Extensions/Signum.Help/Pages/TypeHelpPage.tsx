@@ -12,7 +12,7 @@ import { HelpMessage, AppendixHelpEntity, TypeHelpEntity, TypeHelpOperation, Pro
 import { getTypeInfo, getQueryNiceName, getOperationInfo, tryGetOperationInfo } from '@framework/Reflection';
 import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities';
 import { TypeContext, PropertyRoute } from '@framework/Lines';
-import { EditableHtml, HtmlViewer } from '../Editor/Editable';
+import { EditableHtml, HtmlViewer } from '../Editor/EditableHtml';
 import { classes } from '@framework/Globals';
 import { mlistItemContext } from '@framework/TypeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
