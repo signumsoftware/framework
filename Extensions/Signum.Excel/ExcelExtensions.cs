@@ -400,4 +400,50 @@ public static class ExcelExtensions
         return null; // Not a valid date
     }
 
+    static int ColumnNameToIndex(string columnName)
+    {
+        int index = 0;
+        foreach (char c in columnName.ToUpper())
+            index = index * 26 + (c - 'A' + 1);
+        return index;
+    }
+
+    public static Cell? GetCell(this WorksheetPart worksheetPart, string address)
+    {
+        uint rowIndex = uint.Parse(new string(address.Where(char.IsDigit).ToArray()));
+        var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>()!;
+        var row = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex?.Value == rowIndex);
+        if (row == null)
+            return null;
+
+        string columnName = new string(address.Where(char.IsLetter).ToArray());
+        return row.GetCell(columnName);
+    }
+
+    public static Cell? GetCell(this Row row, string columnName)
+    {
+        int targetColIndex = ColumnNameToIndex(columnName);
+
+        int currentColIndex = 1;
+        foreach (var cell in row.Elements<Cell>())
+        {
+            int colIndex;
+            if (cell.CellReference != null)
+            {
+                string cellCol = new string(cell.CellReference.Value!.Where(char.IsLetter).ToArray());
+                colIndex = ColumnNameToIndex(cellCol);
+            }
+            else
+            {
+                colIndex = currentColIndex;
+            }
+
+            if (colIndex == targetColIndex)
+                return cell;
+
+            currentColIndex = colIndex + 1;
+        }
+
+        return null;
+    }
 }
