@@ -1025,13 +1025,17 @@ interface QueryContexts {
 
 export let queryContexts: QueryContexts | undefined;
 export function queryAllowedInContext(
-  queryKey: string,
+  query: PseudoType | QueryKey,
   context: Lite<Entity>
 ): boolean {
+
+  var queryKey = getQueryKey(query);
+
   var list = queryContexts?.[queryKey]?.[context.EntityType];
 
   return list == null || list.contains(context.id!);
 }
+
 export function reloadQueryContexts(): Promise<void> {
   return ajaxGet<QueryContexts>({ url: "/api/query/queryContexts" }).then(
     (qc) => {
