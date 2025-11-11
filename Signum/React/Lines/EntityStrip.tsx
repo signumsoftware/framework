@@ -345,7 +345,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
   }
 
   //function dragIcon() {
-  //  return drag && <span className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+  //  return drag && <span className={classes("sf-line-button", "sf-move", drag.dropClass)} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
   //    draggable={true}
   //    onDragStart={drag.onDragStart}
   //    onDragEnd={drag.onDragEnd}
@@ -358,9 +358,9 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
   function dragIcon() {
     return (
       drag && (
-        <button
-          type="button"
-          className={classes("sf-line-button", "sf-move")}
+        <a
+          href="#"
+          className={classes("sf-line-button", "sf-move", drag.dropClass)}
           onClick={e => {
             e.preventDefault();
             e.stopPropagation();
@@ -372,7 +372,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
           title={drag.title}
           aria-label={drag.title}>
           {EntityBaseController.getMoveIcon()}
-        </button>
+        </a>
       )
     );
   }
