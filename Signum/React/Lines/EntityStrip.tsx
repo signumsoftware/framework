@@ -358,21 +358,18 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
   function dragIcon() {
     return (
       drag && (
-        <a
-          href="#"
+        <LinkButton
           className={classes("sf-line-button", "sf-move", drag.dropClass)}
           onClick={e => {
-            e.preventDefault();
             e.stopPropagation();
           }}
           draggable={true}
           onDragStart={drag.onDragStart}
           onDragEnd={drag.onDragEnd}
           onKeyDown={drag.onKeyDown}
-          title={drag.title}
-          aria-label={drag.title}>
+          title={drag.title}>
           {EntityBaseController.getMoveIcon()}
-        </a>
+        </LinkButton>
       )
     );
   }
