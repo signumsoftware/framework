@@ -170,12 +170,12 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
   const canTimeSeries = cr.chartTimeSeries != null ? SubTokensOptions.CanTimeSeries : 0;
   return (
     <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-      <h2>
+      <h1 className="h2">
         <span className="sf-entity-title">{getQueryNiceName(cr.queryKey)}</span>&nbsp;
         <LinkButton className="sf-popup-fullscreen" title={FrameMessage.Fullscreen.niceToString()} aria-label={FrameMessage.Fullscreen.niceToString()} onClick={handleOnFullScreen} >
           <FontAwesomeIcon icon="up-right-from-square" aria-hidden={true} />
         </LinkButton>
-      </h2 >
+      </h1 >
       <ValidationErrors entity={cr} prefix="chartRequest" />
       <div>
         {showChartSettings ?

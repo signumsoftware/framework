@@ -74,7 +74,7 @@ function AutoLineModal(p: AutoLineModalProps): React.ReactElement {
   return (
     <Modal size={p.options.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
       <div className="modal-header">
-        <h5 className="modal-title">{title ?? member?.niceName ?? SelectorMessage.ChooseAValue.niceToString()}</h5>
+        <h1 className="modal-title h5">{title ?? member?.niceName ?? SelectorMessage.ChooseAValue.niceToString()}</h1>
         <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked} />
       </div>
       <div className="modal-body" onKeyUp={(member && member.isMultiline || p.options.doNotCloseByEnter) ? undefined : handleFiltersKeyUp}>

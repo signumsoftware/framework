@@ -102,10 +102,10 @@ export class AttachmentImageConverter implements ImageConverter{
   toHtml(val: ImageInfo): string | undefined {
 
     if (val.binaryFile)
-      return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" />`;
+      return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" alt="" />`;
 
     if (val.imageId)
-      return `<img data-attachment-id="${val.imageId}" />`;
+      return `<img data-attachment-id="${val.imageId}" alt="" />`;
 
     return undefined;
   }

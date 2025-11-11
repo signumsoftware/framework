@@ -45,23 +45,23 @@ export default function DashboardPage(): React.JSX.Element {
   return (
     <div className="sf-dashboard-page">
     
-      {!dashboard ? <h2 className="display-6"><span>{JavascriptMessage.loading.niceToString()}</span></h2> :
+      {!dashboard ? <h1 className="display-6 h2"><span>{JavascriptMessage.loading.niceToString()}</span></h1> :
         <div className="d-flex">
         <div>
             {entityKey ?
               <div>
-                {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
-                  <h3>
+                {!entity ? <h1 className="h3">{JavascriptMessage.loading.niceToString()}</h1> :
+                  <h1 className="h3">
                     <span className="display-6">{getToString(entity)}</span>
                     {Navigator.isViewable({ entity: entity, canExecute: {} } as EntityPack<Entity>) &&
                       <Link className="display-6 ms-2" to={Navigator.navigateRoute(entity)}><FontAwesomeIcon aria-hidden={true} icon="external-link" /></Link>
                     }
                     <small className="ms-1 sf-type-nice-name text-muted"> - {Navigator.getTypeSubTitle(entity, undefined)}</small>
-                  </h3>
+                  </h1>
                 }
-                <h4 className="display-7">{DashboardClient.Options.customTitle(dashboard)}</h4>
+                <h2 className="display-7 h4">{DashboardClient.Options.customTitle(dashboard)}</h2>
               </div> :
-              <h3 className="display-6">{DashboardClient.Options.customTitle(dashboard)}</h3>
+              <h1 className="display-6 h3">{DashboardClient.Options.customTitle(dashboard)}</h1>
             }
           </div>
           {!Navigator.isReadOnly(DashboardEntity) &&

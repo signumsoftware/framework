@@ -57,7 +57,7 @@ export default function TranslationCodeStatus(): React.JSX.Element {
 
   return (
     <div>
-      <h2>{TranslationMessage.InstanceTranslations.niceToString()}</h2>
+      <h1 className="h2">{TranslationMessage.InstanceTranslations.niceToString()}</h1>
       {result == undefined ? <p><strong>{JavascriptMessage.loading.niceToString()}</strong></p> :
         result.length == 0 ? <p>{TranslationMessage.NoRoutesMarkedForTranslationConsiderUsing.niceToString()} <code>TranslatedInstanceLogic.AddRoute()</code></p> :
           <TranslationTable result={result} onRefreshView={reload} />}

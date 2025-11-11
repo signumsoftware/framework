@@ -36,7 +36,7 @@ export default function TranslationCodeSync(): React.JSX.Element {
 
   return (
     <div>
-      <h2><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h2>
+      <h1 className="h2"><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h1>
       <br />
       {result && result.totalTypes > 0 && <SyncTable result={result} onSave={handleSave} currentCulture={culture} />}
       {result && result.totalTypes == 0 && <Link to={`/translation/syncNamespaces/${encodeDots(assembly)}/${culture}`}>

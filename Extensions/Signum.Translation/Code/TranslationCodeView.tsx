@@ -56,7 +56,7 @@ export default function TranslationCodeView(): React.JSX.Element {
 
   return (
     <div>
-      <h2><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h2>
+      <h1 className="h2"><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h1>
       <TranslateSearchBox setFilter={setFilter} filter={filter} />
       <em> {TranslationMessage.PressSearchForResults.niceToString()}</em>
       <br />

@@ -201,7 +201,7 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
       </GroupHeader>
 
       {showPinnedFiltersOptions && !p.avoidPreview && <div className="mb-3">
-        <h4 className="lead ms-2 mb-0">Preview</h4>
+        <h1 className="lead ms-2 mb-0 h4">Preview</h1>
         <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} highlightFilter={highlightFilter} showGrid={true} />
       </div>
       }

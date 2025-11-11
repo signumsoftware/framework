@@ -38,16 +38,16 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
       return (
         <div className="alert alert-danger" role="alert">
-          <h2>Error in rendering</h2>
+          <h1 className="h2">Error in rendering</h1>
           <p>
             <strong>{this.state.error?.name ?? "ERROR"}: </strong>
             {this.state.error?.message}
           </p>
 
-          <h4 className="mb-1">Stack Trace</h4>
+          <h2 className="mb-1 h4">Stack Trace</h2>
           {this.state.error && <pre><code>{normalizeStack(this.state.error)}</code></pre>}
 
-          <h4 className="mb-1">Component Stack</h4>
+          <h2 className="mb-1 h4">Component Stack</h2>
           {this.state.info && <pre><code>{this.state.info.componentStack}</code></pre>}
         </div>
       );

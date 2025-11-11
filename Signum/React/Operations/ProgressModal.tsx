@@ -72,7 +72,7 @@ export function ProgressModal<T>(p: ProgressModalProps<T>): React.ReactElement {
   return (
     <Modal show={show} className="message-modal" backdrop="static" onExited={handleOnExited}>
       <div className="modal-header">
-        <h5 className="modal-title">{p.options.title}</h5>
+        <h1 className="modal-title h5">{p.options.title}</h1>
         <button type="button" className="btn-close" data-dismiss="modal" aria-label={EntityControlMessage.Close.niceToString()} onClick={handleCancelClicked} />
       </div>
       <div className="modal-body">

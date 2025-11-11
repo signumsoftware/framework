@@ -36,7 +36,7 @@ export default function TimeMachinePage(): React.JSX.Element {
   }, [params.type, params.id])
 
   if (lite == undefined)
-    return <h4><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h4>;
+    return <h1 className="h4"><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h1>;
 
   return (<TimeMachine lite={lite} />);
 }
@@ -88,7 +88,7 @@ export function TimeMachine(p: { lite: Lite<Entity>, isModal?: boolean }): React
 
   return (
     <div>
-      {!p.isModal && <h4>
+      {!p.isModal && <h1 className="h4">
         <span className="display-5">{TimeMachineMessage.TimeMachine.niceToString()}</span>
         <br />
         <small className="sf-type-nice-name">
@@ -96,9 +96,9 @@ export function TimeMachine(p: { lite: Lite<Entity>, isModal?: boolean }): React
           &nbsp;<span style={{ color: "#aaa" }}>{getToString(p.lite)}</span>
         </small>
         <br />
-      </h4>}
+      </h1>}
 
-      <h5>{TimeMachineMessage.AllVersions.niceToString()}</h5>
+      <h2 className="h5">{TimeMachineMessage.AllVersions.niceToString()}</h2>
       {
         queryDescription && <SearchControl ref={searchControl} findOptions={{
           queryName: p.lite.EntityType,
@@ -155,7 +155,7 @@ export function RenderEntityVersion(p: RenderEntityVersionProps): React.JSX.Elem
   console.log(pair);
 
   if (pair === undefined)
-    return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
+    return <h1 className="h3">{JavascriptMessage.loading.niceToString()}</h1>;
 
   var ctx = TypeContext.root(pair.curr.entity, { readOnly: true });
 
@@ -183,7 +183,7 @@ export function DiffEntityVersion(p: DiffEntityVersionProps): React.JSX.Element 
   }, [p.current, p.previous], { avoidReset: true });
 
   if (pair === undefined)
-    return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
+    return <h1 className="h3">{JavascriptMessage.loading.niceToString()}</h1>;
 
   if (pair.prev == null)
     return <pre>{pair.curr.dump}</pre>;
@@ -264,13 +264,13 @@ export function TimeMachineModal(p: TimeMachineModalProps): React.JSX.Element {
   return (
     <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
       <div className="modal-header">
-        <h4>
+        <h1 className="h4">
           <span className="display-5">{TimeMachineMessage.TimeMachine.niceToString()}</span>
           <br />
           <small className="sf-type-nice-name">
             <span style={{ color: "#aaa" }}>{getToString(p.lite)}</span>
           </small>
-        </h4>
+        </h1>
         <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked} />
       </div>
       <div className="modal-body">
@@ -306,7 +306,7 @@ export function TimeMachineCompareModal(p: TimeMachineModalCompareProps): React.
   return (
     <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
       <div className="modal-header">
-        <h5 className="modal-title">{TimeMachineMessage.CompareVersions.niceToString()}</h5>
+        <h1 className="modal-title h5">{TimeMachineMessage.CompareVersions.niceToString()}</h1>
         <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked} />
       </div>
       <div className="modal-body">

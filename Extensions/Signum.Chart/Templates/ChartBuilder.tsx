@@ -123,7 +123,7 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
       <div className="col-lg-2">
         <div className="sf-chart-type card bg-body rounded shadow-sm border-0 p-2">
           <div className="card-header">
-            <h6 className="mb-3 card-title" style={{ backgroundColor: "inherit" }}>{ChartMessage.ChartType.niceToString()}</h6>
+            <h2 className="mb-3 card-title h6" style={{ backgroundColor: "inherit" }}>{ChartMessage.ChartType.niceToString()}</h2>
           </div>
           <div className="card-body">
             {chartScripts?.map((cs, i) =>
@@ -146,7 +146,7 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
       <div className="col-lg-10">
         <div className="sf-chart-tokens card bg-body rounded shadow-sm border-0 p-2">
           <div className="card-header" style={{ backgroundColor: "inherit" }}>
-            <h6 className="mb-3 card-title">{ChartMessage.ChartSettings.niceToString()}</h6>
+            <h2 className="mb-3 card-title h6">{ChartMessage.ChartSettings.niceToString()}</h2>
           </div>
           <div>
             <div className="card-body">

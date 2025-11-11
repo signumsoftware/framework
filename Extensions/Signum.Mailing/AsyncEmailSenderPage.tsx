@@ -33,18 +33,18 @@ export default function AsyncEmailSenderPage(): React.JSX.Element {
   }
 
   if (state == undefined)
-    return <h2>AsyncEmailSender state (loading...) </h2>;
+    return <h1 className="h2">AsyncEmailSender state (loading...) </h1>;
 
   const s = state;
   const url = window.location;
 
   return (
     <div>
-      <h2 className="display-6"><FontAwesomeIcon icon={"envelopes-bulk"} /> AsyncEmailSender <CopyHealthCheckButton
+      <h1 className="display-6 h2"><FontAwesomeIcon icon={"envelopes-bulk"} /> AsyncEmailSender <CopyHealthCheckButton
         name={url.hostname + " Async Email Sender"}
         healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/asyncEmailSender/healthCheck')}
         clickUrl={url.href}
-      /></h2>
+      /></h1>
       <div className="btn-toolbar mt-3">
         <button type="button" className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon aria-hidden={true} icon="play" /> Start</button>
         <button type="button" className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon aria-hidden={true} icon="stop" /> Stop</button>
