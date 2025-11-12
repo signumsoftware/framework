@@ -81,7 +81,7 @@ export default function ChangePasswordPage(): React.JSX.Element {
       <div className="row">
         <div className="col-md-6 offset-md-3">
           <form onSubmit={(e) => handleSubmit(e)} className="w-100">
-            <h2 className="sf-entity-title">{LoginAuthMessage.ChangePassword.niceToString()}</h2>
+            <h1 className="sf-entity-title h2">{LoginAuthMessage.ChangePassword.niceToString()}</h1>
             <p>{LoginAuthMessage.EnterActualPasswordAndNewOne.niceToString()}</p>
             <div className={classes("form-group form-group-sm", error("oldPassword") && "has-error")}>
               <label className="col-form-label col-form-label-sm">{LoginAuthMessage.CurrentPassword.niceToString()}</label>

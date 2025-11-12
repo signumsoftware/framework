@@ -36,21 +36,21 @@ export default function ProcessPanelPage(): React.JSX.Element {
   }
 
   if (state == undefined)
-    return <h2>{ProcessMessage.ProcessLogicStateLoading.niceToString()}</h2>;
+    return <h1 className="h2">{ProcessMessage.ProcessLogicStateLoading.niceToString()}</h1>;
 
   const s = state;
   const url = window.location;
 
   return (
     <div>
-      <div className='d-flex align-items-center'><h2 className="display-6"><FontAwesomeIcon aria-hidden="true" icon={"gears"} /> {ProcessMessage.ProcessPanel.niceToString()} <CopyHealthCheckButton
+      <div className='d-flex align-items-center'><h1 className="display-6 h2"><FontAwesomeIcon aria-hidden="true" icon={"gears"} /> {ProcessMessage.ProcessPanel.niceToString()} <CopyHealthCheckButton
         name={url.hostname + " Process Runner"}
         healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/processes/healthCheck')}
         clickUrl={url.href}
-      /></h2></div>
+      /></h1></div>
       <div className="btn-toolbar mt-3">
-        <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon aria-hidden="true" icon="play" /> {ProcessMessage.Start.niceToString()}</button>
-        <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon aria-hidden="true" icon="stop" /> {ProcessMessage.Stop.niceToString()}</button>
+        <button type="button" className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon aria-hidden="true" icon="play" /> {ProcessMessage.Start.niceToString()}</button>
+        <button type="button" className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon aria-hidden="true" icon="stop" /> {ProcessMessage.Stop.niceToString()}</button>
       </div >
       <div id="processMainDiv">
         {ProcessMessage.State.niceToString()}: <strong>
@@ -73,7 +73,7 @@ export default function ProcessPanelPage(): React.JSX.Element {
         {ProcessMessage.NextPlannedExecution.niceToString()}: {s.nextPlannedExecution ?? ProcessMessage.None.niceToString() }
         <br />
         <AccessibleTable
-          caption={ProcessMessage.ExecutingProcesses.niceToString()}
+          aria-label={ProcessMessage.ExecutingProcesses.niceToString()}
           className="table"
           multiselectable={false}>
           <thead>

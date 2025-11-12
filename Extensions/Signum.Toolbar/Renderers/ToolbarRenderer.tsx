@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useLocation, Location } from 'react-router'
-import { is, liteKey } from '@framework/Signum.Entities'
+import { is } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import { ToolbarClient, ToolbarResponse } from '../ToolbarClient'
 import { ToolbarConfig, ToolbarContext, InferActiveResponse } from "../ToolbarConfig";
@@ -8,21 +8,17 @@ import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useAPI, useUpdatedRef, useWindowEvent, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
+import { useAPI, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
-import { Entity, getToString, Lite, parseLite } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite } from '@framework/Signum.Entities'
 import { parseIcon } from '@framework/Components/IconTypeahead'
 import { ToolbarUrl } from '../ToolbarUrl';
-import { Dic, classes } from '@framework/Globals';
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage, ToolbarSwitcherEntity } from '../Signum.Toolbar';
-import DropdownList from "react-widgets-up/DropdownList";
-import { getNiceTypeName } from '../../../Signum/React/Operations/MultiPropertySetter';
-import { Binding, getTypeInfo, getTypeName, newLite, queryAllowedInContext } from '../../../Signum/React/Reflection';
+import { classes } from '@framework/Globals';
+import { LayoutMessage, ToolbarEntity, ToolbarMenuEntity,  ToolbarSwitcherEntity } from '../Signum.Toolbar';
+import { Binding, getTypeInfo, newLite, queryAllowedInContext } from '../../../Signum/React/Reflection';
 import { Finder } from '../../../Signum/React/Finder';
-import Toolbar from '../Templates/Toolbar';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
-import { getDropdownMenuPlacement } from 'react-bootstrap/esm/DropdownMenu'
 import { RightCaretDropdown } from './RightCaretDropdown'
 
 
@@ -47,7 +43,7 @@ export default function ToolbarRenderer(p: {
     if (responseRef.current) {
 
       var newActive = inferActive(responseRef.current, location, query);
-      setActive(newActive ?? null);
+      setActive(newActive);
     }
   }
 
@@ -108,7 +104,7 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
 
       const value = currentSegments[i];
 
-      if (value === pattern)
+      if (value.toLowerCase() === pattern.toLowerCase())
         return true;
 
       if (pattern.contains(":id") || pattern.contains(":type") || pattern.contains(":key") || pattern.contains(":toStr") ||
@@ -139,7 +135,7 @@ export function isCompatibleWithUrl(r: ToolbarResponse<any>, location: Location,
         if (match.groups?.type)
           type = match!.groups?.type;
 
-        if (type != null && type != entityType)
+        if (type != null && type.toLowerCase() != entityType?.toLowerCase())
           return false;
 
         return true;
@@ -341,14 +337,14 @@ function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: Too
   return (
     <li>
       <ul>
-        <ToolbarNavItem title={title} extraIcons={renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)} onClick={e => handleShowClick(e)}
+        <ToolbarNavItem title={title} extraIcons={renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)} isGroup={true} onClick={e => handleShowClick(e)}
           icon={
             <div style={{ position: 'relative' }}>
               <div className="nav-arrow-icon" style={{ position: 'absolute' }}>
                 <FontAwesomeIcon icon={show ? "chevron-down" : "chevron-right"} className="icon" />
               </div>
               <div className="nav-icon-with-arrow">
-                {icon ?? <div className="icon" />}
+                {icon}
               </div>
             </div>
           }
@@ -398,7 +394,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
       if (!is(active.menuWithEntity.entity, selEntityRef.current))
         setSelectedEntity(active.menuWithEntity.entity);
     }
-    else
+    else if (active != null)
       setSelectedEntity(null);
 
   }, [active?.menuWithEntity, p.response]);
@@ -423,22 +419,14 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
   }
 
   const ctx = new TypeContext<Lite<Entity> | null>(undefined, undefined, undefined, new Binding(selEntityRef, "current"));
+  var ti = getTypeInfo(entityType);
   return (
     <>
       {entityType && (
-        <Nav.Item title={getTypeInfo(entityType).niceName} className="d-flex mx-2 mb-2">
-          {/* <DropdownList
-            value={selectedEntity}
-            dataKey={((e: Lite<Entity>) => e && e.id) as any}
-            textField={((e: Lite<Entity>) => e && getToString(e)) as any}
-            onChange={(e, m) => handleSelect(e, m.originalEvent!)}
-            data={[null, ...entities ?? []]}
-            renderValue={a => renderEntity(a.item)}
-            renderListItem={a => renderEntity(a.item)}
-            title={ctx.niceName(a => a.workLogReminder)}
-          /> */}
+        <Nav.Item title={ti.niceName} className="d-flex mx-2 mb-2">
           <div style={{ width: "100%" }}>
             <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false}
+              inputAttributes={{ placeholder: LayoutMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
               onChange={e => handleSelect(e.originalEvent)} create={false} formGroupStyle="SrOnly" />
           </div>
           {renderExtraIcons(p.response.extraIcons, p.ctx, selEntityRef.current ?? p.selectedEntity)}
@@ -577,17 +565,17 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   );
 }
 
-export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
+export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, isGroup?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
   return (
     <li className="nav-item d-flex">
       <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100" >
         <div>{p.icon}</div>
-        <span className={"nav-item-text"}>
+        <span className={classes("nav-item-text", p.isGroup && "nav-item-group")}>
           {p.title}
           {p.isExternalLink && <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}
         </span>
         {p.extraIcons}
-        <div className={"nav-item-float"}>{p.title}</div>
+        <div className={classes("nav-item-float", p.isGroup && "nav-item-group")}>{p.title}</div>
       </Nav.Link>
     </li>
   );
@@ -610,8 +598,8 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
     {extraIcons?.map((ei, i) => {
 
       if (ei.url) {
-        return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i}
-          onClick={e => linkClick(ei, selectedEntity, e, ctx)}>
+        return <button type="button" className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i}
+          onClick={e => { e.stopPropagation(); linkClick(ei, selectedEntity, e, ctx); } }>
           {ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}
         </button>;
       }
@@ -622,7 +610,8 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
       }
       else {
 
-        return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i} onClick={e => {
+        return <button type="button" className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i} onClick={e => {
+          e.stopPropagation();
           config!.handleNavigateClick(e, ei, selectedEntity);
 
           if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))

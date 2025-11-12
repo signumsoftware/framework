@@ -778,6 +778,8 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     --rw-input-disabled-bg: var(--bs-secondary-bg);
     --rw-input-disabled-border-color: var(--bs-border-color);
     --rw-bg: var(--bs-body-bg);
+    --rw-multiselect-tag-bg: var(--bs-body-bg);
+    --rw-multiselect-tag-border-color: var(--bs-border-color);
     /*repeat*/
     --rw-input-border-color: var(--rw-widget-border-color);
     --rw-input-addon-border-color: var(--rw-input-border-color);

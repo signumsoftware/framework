@@ -31,18 +31,18 @@ export default function HeavyEntry(): React.JSX.Element {
   useTitle("Heavy Profiler > Entry " + index);
 
   if (entries == undefined)
-    return <h3 className="display-6"><Link to="/profiler/heavy">{ProfilerMessage.HeavyProfiler.niceToString()}</Link> {">"} {ProfilerMessage.Entry0Loading.niceToString(index)}</h3>;
+    return <h1 className="display-6 h3"><Link to="/profiler/heavy">{ProfilerMessage.HeavyProfiler.niceToString()}</Link> {">"} {ProfilerMessage.Entry0Loading.niceToString(index)}</h1>;
 
   let current = entries.filter(a => a.fullIndex == params.selectedIndex).single();
   return (
     <div>
-      <h2 className="display-6"><Link to="/profiler/heavy">{ProfilerMessage.HeavyProfiler.niceToString()}</Link> {">"} {ProfilerMessage.Entry0_.niceToString(index)}</h2>
+      <h1 className="display-6 h2"><Link to="/profiler/heavy">{ProfilerMessage.HeavyProfiler.niceToString()}</Link> {">"} {ProfilerMessage.Entry0_.niceToString(index)}</h1>
       <label><input type="checkbox" className="form-check-input" checked={asyncDepth} onChange={a => setAsyncDepth(a.currentTarget.checked)} />{ProfilerMessage.AsyncStack.niceToString()}</label>
       <br />
       {entries && <HeavyProfilerDetailsD3 entries={entries} selected={current} asyncDepth={asyncDepth} />}
       <br />
       <AccessibleTable
-        caption={ProfilerMessage.HeavyProfiler.niceToString()}
+        aria-label={ProfilerMessage.HeavyProfiler.niceToString()}
         className="table table-nonfluid"
         multiselectable={false}>
         <tbody>
@@ -57,18 +57,18 @@ export default function HeavyEntry(): React.JSX.Element {
           <tr>
             <td colSpan={2}>
               <div className="btn-toolbar">
-                <button onClick={handleDownload} className="btn btn-info">{ProfilerMessage.Download.niceToString()}</button>
-                {!current.isFinished && <button onClick={() => reloadEntries()} className="btn btn-tertiary">{ProfilerMessage.Update.niceToString()}</button>}
+                <button type="button" onClick={handleDownload} className="btn btn-info">{ProfilerMessage.Download.niceToString()}</button>
+                {!current.isFinished && <button type="button" onClick={() => reloadEntries()} className="btn btn-tertiary">{ProfilerMessage.Update.niceToString()}</button>}
               </div>
             </td>
           </tr>
         </tbody>
       </AccessibleTable>
       <br />
-      <h3>{ProfilerMessage.AdditionalData.niceToString()}</h3>
+      <h2 className="h3">{ProfilerMessage.AdditionalData.niceToString()}</h2>
       <pre style={{ maxWidth: "1000px", overflowY: "scroll" }}><code>{current.additionalData}</code></pre>
       <br />
-      <h3>{ProfilerMessage.StackTrace.niceToString()}</h3>
+      <h2 className="h3">{ProfilerMessage.StackTrace.niceToString()}</h2>
       {
         stackTrace == undefined ? <span>{ProfilerMessage.NoStackTrace.niceToString()}</span> :
           <StackFrameTable stackTrace={stackTrace} />
@@ -83,7 +83,7 @@ export function StackFrameTable(p: { stackTrace: ProfilerClient.StackTraceTS[] }
 
   return (
     <AccessibleTable
-      caption={ProfilerMessage.StackTraceOverview.niceToString()}
+      aria-label={ProfilerMessage.StackTraceOverview.niceToString()}
       className="table table-sm"
       multiselectable={false}>
       <thead>
@@ -237,7 +237,15 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props): React.JS
     return (
       <svg height={height + "px"} width={width}>
         {filteredData.map(d =>
-          <g className="entry" data-key={d.fullIndex} key={d.fullIndex} onClick={e => handleOnClick(e, d)} onDoubleClick={e => setMinMax(resetZoom(d))}>
+          <g className="entry" data-key={d.fullIndex} key={d.fullIndex} role="button" tabIndex={0} cursor="pointer" focusable={true}
+            onClick={e => handleOnClick(e, d)}
+            onKeyDown={e => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                (onclick as any)?.(e);
+              }
+            }}
+            onDoubleClick={e => setMinMax(resetZoom(d))}>
             <rect className="shape"
               y={y(getDepth(d))}
               x={x(Math.max(min, d.beforeStart))}

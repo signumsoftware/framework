@@ -344,16 +344,36 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
       </span>
   }
 
+  //function dragIcon() {
+  //  return drag && <span className={classes("sf-line-button", "sf-move", drag.dropClass)} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+  //    draggable={true}
+  //    onDragStart={drag.onDragStart}
+  //    onDragEnd={drag.onDragEnd}
+  //    onKeyDown={drag.onKeyDown}
+  //    title={drag.title}>
+  //    {EntityBaseController.getMoveIcon()}
+  //  </span>;
+  //}
+
   function dragIcon() {
-    return drag && <span className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
-      draggable={true}
-      onDragStart={drag.onDragStart}
-      onDragEnd={drag.onDragEnd}
-      onKeyDown={drag.onKeyDown}
-      title={drag.title}>
-      {EntityBaseController.getMoveIcon()}
-    </span>;
+    return (
+      drag && (
+        <LinkButton
+          className={classes("sf-line-button", "sf-move", drag.dropClass)}
+          onClick={e => {
+            e.stopPropagation();
+          }}
+          draggable={true}
+          onDragStart={drag.onDragStart}
+          onDragEnd={drag.onDragEnd}
+          onKeyDown={drag.onKeyDown}
+          title={drag.title}>
+          {EntityBaseController.getMoveIcon()}
+        </LinkButton>
+      )
+    );
   }
+
 }
 
 //tasks.push(taskSetAvoidDuplicates);

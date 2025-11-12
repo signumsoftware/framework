@@ -171,6 +171,7 @@
     <Member Name="Add" Description="hinzufügen..." />
     <Member Name="Added" Description="Hinzugefügt" />
     <Member Name="Changed" Description="Geändert" />
+    <Member Name="Close" Description="Schließen" />
     <Member Name="Collapse" Description="Einklappen" />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="Detail" Description="Detail" />
@@ -296,6 +297,12 @@
     <Member Name="TsQuery_Plain" Description="tsquery (einfach)" />
     <Member Name="TsQuery_WebSearch" Description="tsquery (Websuche)" />
   </Type>
+  <Type Name="FontSizeMessage">
+    <Member Name="FontSize" Description="Schriftgröße" />
+    <Member Name="IncreaseFontSize" Description="Schriftgröße vergrößern" />
+    <Member Name="ReduceFontSize" Description="Schriftgröße verkleinern" />
+    <Member Name="ResetFontSize" Description="Schriftgröße zurücksetzen" />
+  </Type>
   <Type Name="FrameMessage">
     <Member Name="Copied" Description="Kopiert" />
     <Member Name="CopyToClipboard" Description="In Zwischenablage kopieren" />
@@ -304,9 +311,31 @@
     <Member Name="New0_G" Description="Neu[m:er|f:e|n:es] {0}" />
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
   </Type>
+  <Type Name="HeavyProfilerMessage">
+    <Member Name="Clear" Description="Löschen" />
+    <Member Name="Download" Description="Herunterladen" />
+    <Member Name="EnableTheProfilerWithTheDebuggerWith0AndSaveTheResultsWith1" Description="Aktivieren Sie den Profiler mit dem Debugger mit {0} und speichern Sie die Ergebnisse mit {1}" />
+    <Member Name="Entries" Description="Einträge" />
+    <Member Name="HeavyProfiler" Description="Heavy Profiler" />
+    <Member Name="HeavyProfilerLoading" Description="Heavy Profiler (Laden...)" />
+    <Member Name="IgnoreHeavyProfilerEntries" Description="Heavy Profiler-Einträge ignorieren" />
+    <Member Name="Record" Description="Aufzeichnen" />
+    <Member Name="Update" Description="Aktualisieren" />
+    <Member Name="Upload" Description="Hochladen" />
+    <Member Name="UploadPreviousRunsToComparePerformance" Description="Laden Sie frühere Durchläufe hoch, um die Leistung zu vergleichen." />
+  </Type>
   <Type Name="HtmlEditorMessage">
+    <Member Name="Bold" Description="Fettgedruck (Strg + B)" />
+    <Member Name="Code" Description="Code" />
+    <Member Name="CodeBlock" Description="Code-Block" />
     <Member Name="EnterYourUrlHere" Description="Geben Sie hier Ihre URL ein..." />
+    <Member Name="Headings" Description="Überschriften" />
     <Member Name="Hyperlink" Description="Hyperlink" />
+    <Member Name="Italic" Description="Kursiv (Strg + I)" />
+    <Member Name="OrderedList" Description="Geordnete Liste" />
+    <Member Name="Quote" Description="Zitat" />
+    <Member Name="Underline" Description="Unterstrichen (Strg + U)" />
+    <Member Name="UnorderedList" Description="Ungeordnete Liste" />
   </Type>
   <Type Name="IEntity">
     <Member Name="Id" Description="Id" />
@@ -668,6 +697,7 @@
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="DoYouWantToSelectTheNew01_G" Description="Möchten Sie [m:den neuen|f:die neue|n:das neue] {0} ({1}) übernehmen?" />
     <Member Name="EditPinnedFilters" Description="Angeheftete Filter bearbeiten" />
+    <Member Name="Enter" Description="Eingabe" />
     <Member Name="Equal0" Description="Gleich {0}" />
     <Member Name="Field" Description="Feld" />
     <Member Name="FilterDesigner" Description="Filter-Designer" />
@@ -803,6 +833,10 @@
   <Type Name="SystemTimeProperty">
     <Member Name="SystemValidFrom" Description="System gültig von" />
     <Member Name="SystemValidTo" Description="System gültig bis" />
+  </Type>
+  <Type Name="TemplateMessage">
+    <Member Name="CopyToClipboard" Description="In die Zwischenablage kopieren: Strg+C, ESC" />
+    <Member Name="Template" Description="Vorlage" />
   </Type>
   <Type Name="TimeSeriesUnit">
     <Member Name="Day" Description="Tag" />

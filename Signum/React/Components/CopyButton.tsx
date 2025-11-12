@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Overlay, Tooltip } from 'react-bootstrap';
 import { FrameMessage } from '../Signum.Entities';
+import { LinkButton } from '../Basics/LinkButton';
 
 interface CopyButtonProps {
   getText: () => string;
@@ -37,9 +38,9 @@ export default function CopyButton(p: CopyButtonProps): React.ReactElement | nul
 
   return (
     <span className={p.className}>
-      <a ref={link} className="btn btn-sm btn-tertiary sf-pointer mx-1" onClick={handleCopy} title={p.title}>
+      <LinkButton ref={link} className="btn btn-sm btn-tertiary sf-pointer mx-1" onClick={handleCopy} title={p.title}>
         {p.children}
-      </a>
+      </LinkButton>
       <Overlay target={link.current} show={showTooltip} placement="bottom">
         <Tooltip>
           {FrameMessage.Copied.niceToString()}

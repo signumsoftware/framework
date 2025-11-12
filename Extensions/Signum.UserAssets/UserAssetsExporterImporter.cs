@@ -52,8 +52,8 @@ public static class UserAssetsExporter
 
         XDocument doc = new(
             new XDeclaration("1.0", "UTF8", "yes"),
-            new XElement("Entities",
-                ctx.elements.OrderBy(a => a.Value.Name.ToString()).ThenBy(a=>a.Key).Select(a => a.Value)));
+            new XElement("Entities", 
+                ctx.elements.Values));
 
 
         if (PreExport != null)

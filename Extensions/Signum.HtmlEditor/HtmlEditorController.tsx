@@ -65,21 +65,22 @@ export class HtmlEditorController {
         this.lastSavedString = undefined;
         return;
       }
-
-      
-      const newState = this.converter.$convertFromText(this.editor, newValue ||'');
-       
+     
       queueMicrotask(() => {
-        if(newState.isEmpty()) {
+        const newState = this.converter.$convertFromText(this.editor, newValue || '');
+
+        if (newState.isEmpty()) {
           this.editor.update(() => {
             $getRoot().clear();
-          })
+          });
         } else {
           this.editor.setEditorState(newState);
         }
+
         const htmlString = this.converter.$convertToText(this.editor);
         this.initialEditorContent = htmlString;
-      })
+      });
+
     }, [newValue, this.editor]);
 
     React.useEffect(() => {

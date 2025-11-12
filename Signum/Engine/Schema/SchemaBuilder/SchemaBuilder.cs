@@ -2,10 +2,12 @@ using Signum.API;
 using Signum.DynamicQuery;
 using Signum.Engine.Linq;
 using Signum.Engine.Sync;
+using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Security.AccessControl;
 
 namespace Signum.Engine.Maps;
@@ -842,7 +844,7 @@ public class SchemaBuilder
             var rt = Include(t, route);
 
             string impName = FixNameLength(name.Add(Idiomatic(TypeLogic.GetCleanName(t))).ToString());
-            return new ImplementationColumn(impName, referenceTable: rt)
+            return new ImplementationColumn(impName, referenceTable: rt, preName: name.ToString())
             {
                 CustomLiteModelType = !isLite ? null : Settings.FieldAttributes(route)?.OfType<LiteModelAttribute>().SingleOrDefaultEx(a => a.ForEntityType == t)?.LiteModelType,
                 Nullable = nullable,
@@ -879,13 +881,16 @@ public class SchemaBuilder
         if(primaryKeyTypes.Count() > 1 && nullable == IsNullable.No)
             nullable = IsNullable.Forced;
 
-        var columns = Settings.ImplementedByAllPrimaryKeyTypes.Select(t => new ImplementedByAllIdColumn(FixNameLength(preName.Add(Idiomatic(t.Name)).ToString()), nullable.ToBool() ? t.Nullify() : t, Settings.DefaultSqlType(t))
+        var columns = Settings.ImplementedByAllPrimaryKeyTypes.Select(t => new ImplementedByAllIdColumn(
+            FixNameLength(preName.Add(Idiomatic(t.Name)).ToString()),
+            type: nullable.ToBool() ? t.Nullify() : t, Settings.DefaultSqlType(t), 
+            preName.ToString())
         {
             Nullable = nullable,
             Size = t == typeof(string) ? Settings.ImplementedByAllStringSize : null,
         });
 
-        var columnType = new ImplementationColumn(FixNameLength(preName.Add(Idiomatic("Type")).ToString()), Include(typeof(TypeEntity), route))
+        var columnType = new ImplementedByAllTypeColumn(FixNameLength(preName.Add(Idiomatic("Type")).ToString()), Include(typeof(TypeEntity), route), preName.ToString())
         {
             Nullable = nullable,
             AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,

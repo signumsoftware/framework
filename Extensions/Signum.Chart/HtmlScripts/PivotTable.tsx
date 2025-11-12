@@ -258,7 +258,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   if (data == null)
     return (
-      <svg direction="ltr" width={width} height={height}>
+      <svg direction="ltr" width={width} height={height} role="img">
         <InitialMessage data={data} x={width / 2} y={height / 2} loading={loading} />
       </svg>
     );

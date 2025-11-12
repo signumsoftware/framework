@@ -820,7 +820,12 @@ END $$;"); ;
                 return update;
 
             if (Schema.Current.Settings.IsPostgres)
-                return PostgresDoBlock(entity.Id.VariableName!, declare, update!);
+            {
+                return new SqlPreCommandPostgresDoBlock(
+                    declarations: [declare],
+                    body: SqlPreCommand.Combine(Spacing.Simple, AssertNotNull(entity.Id.VariableName!), update)!
+                ).SimplifyNested();
+            }
             else
                 return SqlPreCommand.Combine(Spacing.Simple, declare, update);
         }
@@ -839,7 +844,12 @@ END $$;"); ;
             return script;
 
         if (Schema.Current.Settings.IsPostgres)
-            return PostgresDoBlock(entity.Id.VariableName!, declare, script!);
+        {
+            return new SqlPreCommandPostgresDoBlock(
+                declarations: [declare],
+                body: SqlPreCommand.Combine(Spacing.Simple, AssertNotNull(entity.Id.VariableName!), script)!
+            ).SimplifyNested();
+        }
         else
             return SqlPreCommand.Combine(Spacing.Simple, declare, script);
     }

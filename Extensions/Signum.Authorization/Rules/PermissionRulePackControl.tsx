@@ -21,9 +21,9 @@ export default function PermissionRulesPackControl(p: { ctx: TypeContext<Permiss
     const hasChanges = GraphExplorer.hasChanges(bc.pack.entity); 
 
     return [
-      { button: <Button variant="primary" disabled={!hasChanges || p.ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
-      { button: <Button variant="warning" disabled={!hasChanges || p.ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
-      { button: <Button variant="info" disabled={hasChanges} onClick={() => handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
+      { button: <Button type="button" variant="primary" disabled={!hasChanges || p.ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
+      { button: <Button type="button" variant="warning" disabled={!hasChanges || p.ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
+      { button: <Button type="button" variant="info" disabled={hasChanges} onClick={() => handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
     ];
   }
 
@@ -99,7 +99,7 @@ export default function PermissionRulesPackControl(p: { ctx: TypeContext<Permiss
         <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
       </div>
       <AccessibleTable
-        caption={AuthAdminMessage.PermissionRulesOverview.niceToString()}
+        aria-label={AuthAdminMessage.PermissionRulesOverview.niceToString()}
         className="table table-sm sf-auth-rules">
         <thead>
           <tr>

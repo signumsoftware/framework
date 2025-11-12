@@ -27,14 +27,14 @@ export default function TimesPage(): React.JSX.Element {
   }
 
   if (times == undefined)
-    return <h3>{TimeMessage.TimesLoading.niceToString()}</h3>;
+    return <h1 className="h3">{TimeMessage.TimesLoading.niceToString()}</h1>;
 
   return (
     <div>
-      <h3 className="display-6">{TimeMessage.Times.niceToString()}</h3>
+      <h1 className="display-6 h3">{TimeMessage.Times.niceToString()}</h1>
       <div className="btn-toolbar">
-        <button onClick={() => reloadTimes()} className="btn btn-tertiary">{TimeMessage.Reload.niceToString()}</button>
-        <button onClick={handleClear} className="btn btn-warning">{TimeMessage.Clear.niceToString()}</button>
+        <button type="button" onClick={() => reloadTimes()} className="btn btn-tertiary">{TimeMessage.Reload.niceToString()}</button>
+        <button type="button" onClick={handleClear} className="btn btn-warning">{TimeMessage.Clear.niceToString()}</button>
       </div>
       <br />
       <Tabs id="timeMachineTabs">
@@ -113,7 +113,7 @@ ${getToString(time.user)}`}
 
   return (
     <AccessibleTable
-      caption={TimeMessage.TimesOverview.niceToString()}
+      aria-label={TimeMessage.TimesOverview.niceToString()}
       className="table"
       multiselectable={false}>
       <tbody>
@@ -222,7 +222,7 @@ function TimesTable({ times }: { times: ProfilerClient.TimeTrackerEntry[] }) {
 
   return (
     <AccessibleTable
-      caption={TimeMessage.TimesOverview.niceToString()}
+      aria-label={TimeMessage.TimesOverview.niceToString()}
       className="table table-nonfluid"
       mapCustomComponents={new Map([[GetTimeRow, "tr"]])}
       multiselectable={false}>

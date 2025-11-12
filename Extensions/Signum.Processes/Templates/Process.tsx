@@ -52,7 +52,7 @@ export default function Process({ ctx }: { ctx: TypeContext<ProcessEntity> }): R
 
       <EntityLine ctx={ctx3.subCtx(f => f.exception)} hideIfNull={true} readOnly={true} labelColumns={2} />
 
-      <h4>{ctx.niceName(a => a.progress)}</h4>
+      <h2 className="h4">{ctx.niceName(a => a.progress)}</h2>
 
       <ProcessProgressBar state={ctx.value.state} status={ctx.value.status} progress={ctx.value.progress} />
 

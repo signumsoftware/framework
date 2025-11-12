@@ -19,7 +19,7 @@ export default function TranslationCodeStatus(): React.JSX.Element {
 
   return (
     <div>
-      <h2>{TranslationMessage.CodeTranslations.niceToString()}</h2>
+      <h1 className="h2">{TranslationMessage.CodeTranslations.niceToString()}</h1>
       {result == undefined ? <strong>{JavascriptMessage.loading.niceToString()}</strong> :
         <TranslationTable result={result} onRefreshView={reloadResult} />}
     </div>
@@ -40,8 +40,8 @@ function TranslationTable({ result, onRefreshView }: { result: TranslationClient
 
   return (
     <AccessibleTable
-      caption={TranslationMessage.TranslationStatus.niceToString()}
-      className="st table">
+      aria-label={TranslationMessage.TranslationStatus.niceToString()}
+      className="st">
       <thead>
         <tr>
           <th><label><input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} />{TranslationMessage.OnlyNeutralCultures.niceToString()}</label></th>

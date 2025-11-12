@@ -50,7 +50,7 @@ export const useController = ({
   editableId,
 }: ControllerProps): ControllerReturnType => {
   const controller = React.useMemo(() => new HtmlEditorController(), []);
-  const textConverter = converter ?? new HtmlContentStateConverter(plugins?.firstOrNull(a => a instanceof ImageExtension)?.imageConverter.dataImageIdAttribute);
+  const textConverter = converter ?? new HtmlContentStateConverter(plugins?.firstOrNull(a => a instanceof ImageExtension)?.nodeType.dataImageIdAttribute);
 
   const extensions: HtmlEditorExtension[] = React.useMemo(() => {
     const defaultPlugins = [

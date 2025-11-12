@@ -85,7 +85,7 @@ export default function TranslationInstanceView(): React.JSX.Element {
   return (
     <div>
       <div className="mb-2">
-        <h2><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
+        <h1 className="h2"><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h1>
         <TranslateSearchBox setFilter={setFilter} filter={filter ?? ""} />
         {culture == null && <label style={{ float: 'right' }}>
           <input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} /> {TranslationMessage.OnlyNeutralCultures.niceToString()}
@@ -142,7 +142,7 @@ export function TranslatedInstance(p: { ins: TranslatedInstanceClient.Translated
 
   return (
     <AccessibleTable
-      caption={TranslationMessage.TranslationsOverview.niceToString()}
+      aria-label={TranslationMessage.TranslationsOverview.niceToString()}
       className="table st"
       multiselectable={false}
       key={ins.lite.id}>

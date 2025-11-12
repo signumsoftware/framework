@@ -297,13 +297,13 @@ export namespace AzureADAuthenticator {
           <div className="col-md-6 offset-md-3">
             <div className='hstack'>
               <div className=''>
-                <button className={classes("btn btn-secondary me-2", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADAuthenticator.signIn(ctx, true, 'signIn_UserFlow'); }}>
-                  {"Sign in with Azure B2C"}
+                <button type="button" className={classes("btn btn-secondary me-2", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADAuthenticator.signIn(ctx, true, 'signIn_UserFlow'); }}>
+                  {LoginAuthMessage.SignInWithAzureB2C.niceToString()}
                 </button>
               </div>
               <div className=''>
-                <button className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADAuthenticator.signIn(ctx, true, 'signUp_UserFlow'); }}>
-                  {"Sign up with Azure B2C"}
+                <button type="button" className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADAuthenticator.signIn(ctx, true, 'signUp_UserFlow'); }}>
+                  {LoginAuthMessage.SignUpWithAzureB2C.niceToString()}
                 </button>
               </div>
             </div>
@@ -315,8 +315,8 @@ export namespace AzureADAuthenticator {
     return (
       <div className="row mt-4">
         <div className="col-md-6 offset-md-3">
-          <button className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADAuthenticator.signIn(ctx, true); }}>
-            {"Login with Azure B2C"}
+          <button type="button" className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADAuthenticator.signIn(ctx, true); }}>
+            {LoginAuthMessage.LoginWithAzureB2C.niceToString()}
           </button>
         </div>
       </div>

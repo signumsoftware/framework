@@ -10,6 +10,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Diagnostics.Metrics;
 using Npgsql.PostgresTypes;
 using System.Runtime.CompilerServices;
+using Microsoft.Identity.Client;
 
 namespace Signum.Engine.Sync;
 
@@ -745,3 +746,160 @@ public class SqlPreCommandConcat : SqlPreCommand
     }
 }
 
+
+
+public class SqlPreCommandPostgresDoBlock : SqlPreCommand
+{
+    public override bool HasNoTransaction => false;
+
+    public override bool GoBefore { get; set; }
+    public override bool GoAfter { get; set; }
+
+    public SqlPreCommand[] Declarations { get; }
+    public SqlPreCommand Body { get; }
+
+    public SqlPreCommandPostgresDoBlock(SqlPreCommand[] declarations, SqlPreCommand body)
+    {
+        Declarations = declarations;
+        Body = body;
+    }
+
+    protected internal override int NumParameters
+    {
+        get { return Declarations.Sum(a=>a.NumParameters) + Body.NumParameters; }
+    }
+
+    public override SqlPreCommand Clone()
+    {
+        return new SqlPreCommandPostgresDoBlock(
+            Declarations.Select(c => c.Clone()).ToArray(),
+            Body.Clone());
+    }
+
+    public SqlPreCommandSimple ToSqlPreCommandSimple()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("DO $$");
+        sb.AppendLine("DECLARE");
+        foreach (var decl in Declarations)
+        {
+            sb.AppendLine(decl.PlainSql().Indent(4));
+        }
+        sb.AppendLine("BEGIN");
+        sb.AppendLine(Body.PlainSql().Indent(4));
+        sb.AppendLine("END $$;");
+        return new SqlPreCommandSimple(sb.ToString());
+    }
+
+    public override SqlPreCommand Replace(Regex regex, MatchEvaluator matchEvaluator)
+    {
+        return new SqlPreCommandPostgresDoBlock(
+            Declarations.Select(c => c.Replace(regex, matchEvaluator)).ToArray(),
+            Body.Replace(regex, matchEvaluator));
+    }
+
+    protected internal override void PlainSql(StringBuilder sb)
+    {
+        ToSqlPreCommandSimple().PlainSql(sb);
+    }
+
+    public override IEnumerable<SqlPreCommandSimple> Leaves()
+    {
+        return [this.ToSqlPreCommandSimple()];
+    }
+
+    public SqlPreCommandPostgresDoBlock SimplifyNested()
+    {
+        var newDeclarations = Declarations.ToList();
+
+        var newBody = Simplify(Body);
+
+        SqlPreCommand Simplify(SqlPreCommand exp)
+        {
+            if (exp is SqlPreCommandPostgresDoBlock pgDo)
+            {
+                newDeclarations.AddRange(pgDo.Declarations);
+                return Simplify(pgDo.Body);
+            }
+            else if (exp is SqlPreCommandConcat concat)
+            {
+                var simplifiedCommands = concat.Commands.Select(Simplify).ToArray();
+                if (simplifiedCommands.SequenceEqual(concat.Commands))
+                    return exp;
+
+                return new SqlPreCommandConcat(concat.Spacing, simplifiedCommands);
+            }
+            else if (exp is SqlPreCommandSimple simple)
+                return exp;
+            else 
+                throw new UnexpectedValueException(exp);
+        }
+
+        if (newBody == Body)
+            return this;
+
+        return new SqlPreCommandPostgresDoBlock(newDeclarations.ToArray(), newBody);
+    }
+}
+
+
+public class SqlPreCommand_WithHistory : SqlPreCommand
+{
+    public SqlPreCommand? Normal;
+    public SqlPreCommand? History;
+
+    public SqlPreCommand_WithHistory(SqlPreCommand? normal, SqlPreCommand? history)
+    {
+        Normal = normal;
+        History = history;
+    }
+
+    public override bool HasNoTransaction => throw new NotImplementedException();
+
+    public override bool GoBefore { get; set; }
+    public override bool GoAfter { get; set; }
+
+    protected internal override int NumParameters => throw new NotImplementedException();
+
+    public override SqlPreCommand Clone() => throw new NotImplementedException();
+
+    public override IEnumerable<SqlPreCommandSimple> Leaves() => throw new NotImplementedException();
+
+    public override SqlPreCommand Replace(Regex regex, MatchEvaluator matchEvaluator)  => throw new NotImplementedException();
+
+    protected internal override void PlainSql(StringBuilder sb) => throw new NotImplementedException();
+
+    public static SqlPreCommand? ForNormal(SqlPreCommand? command)
+    {
+        if (command is null)
+            return null;
+
+        if (command is SqlPreCommandSimple s)
+            return s;
+
+        if (command is SqlPreCommandConcat c)
+            return new SqlPreCommandConcat(c.Spacing, c.Commands.Select(ForNormal).NotNull().ToArray());
+
+        if (command is SqlPreCommand_WithHistory h)
+            return h.Normal;
+
+        throw new UnexpectedValueException(command);
+    }
+
+    public static SqlPreCommand? ForHistory(SqlPreCommand? command)
+    {
+        if (command is null)
+            return null;
+
+        if (command is SqlPreCommandSimple s)
+            return s;
+
+        if (command is SqlPreCommandConcat c)
+            return c.Commands.Select(ForHistory).Combine(c.Spacing);
+
+        if (command is SqlPreCommand_WithHistory h)
+            return h.History;
+
+        throw new UnexpectedValueException(command);
+    }
+}

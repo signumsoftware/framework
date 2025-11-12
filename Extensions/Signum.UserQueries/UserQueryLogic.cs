@@ -361,6 +361,9 @@ public static class UserQueryLogic
         if (!replacements.Interactive)
             return null;
 
+        QueryLogic.AssertLoaded();
+        TypeLogic.AssertLoaded();
+
         var list = Database.Query<UserQueryEntity>().ToList();
 
         var table = Schema.Current.Table(typeof(UserQueryEntity));

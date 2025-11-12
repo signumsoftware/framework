@@ -53,7 +53,7 @@ export default function HolidayCalendar(p: { ctx: TypeContext<HolidayCalendarEnt
         </div>
       </div>
       <div>
-        <h4>{ctx.niceName(a => a.holidays)}</h4>
+        <h2 className="h4">{ctx.niceName(a => a.holidays)}</h2>
         <Tabs>
           {years.map(y =>
             <Tab eventKey={y ?? "none"} title={y == null ? "All" : y}>

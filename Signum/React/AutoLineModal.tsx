@@ -74,7 +74,7 @@ function AutoLineModal(p: AutoLineModalProps): React.ReactElement {
   return (
     <Modal size={p.options.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
       <div className="modal-header">
-        <h5 className="modal-title">{title ?? member?.niceName ?? SelectorMessage.ChooseAValue.niceToString()}</h5>
+        <h1 className="modal-title h5">{title ?? member?.niceName ?? SelectorMessage.ChooseAValue.niceToString()}</h1>
         <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked} />
       </div>
       <div className="modal-body" onKeyUp={(member && member.isMultiline || p.options.doNotCloseByEnter) ? undefined : handleFiltersKeyUp}>
@@ -93,10 +93,10 @@ function AutoLineModal(p: AutoLineModalProps): React.ReactElement {
         </p>}
       </div>
       <div className="modal-footer">
-        <button disabled={disabled || error != null} className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClick} ref={btnOkRef}>
+        <button type="button" aria-disabled={disabled || error != null} disabled={disabled || error != null} className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClick} ref={btnOkRef}>
           {JavascriptMessage.ok.niceToString()}
         </button>
-        <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+        <button type="button" className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
           {JavascriptMessage.cancel.niceToString()}
         </button>
       </div>

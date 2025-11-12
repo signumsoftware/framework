@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { HelpMessage, TypeHelpEntity } from './Signum.Help';
 import { useAPI } from '@framework/Hooks';
 import { TypeContext } from '@framework/Lines';
-import { HtmlViewer } from './Pages/EditableText';
+import { HtmlViewer } from './Editor/EditableHtml';
 import './HelpWidget.css';
 import { classes } from '@framework/Globals';
 import { LinkButton } from '@framework/Basics/LinkButton';

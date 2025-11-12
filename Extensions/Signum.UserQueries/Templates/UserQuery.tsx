@@ -85,7 +85,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
                 <div className="col-sm-6">
                   {!ctx.value.isNew &&
                     <div>
-                      <h5 className="mt-0">{UserAssetMessage.UsedBy.niceToString()}</h5>
+                      <h3 className="mt-0 h5">{UserAssetMessage.UsedBy.niceToString()}</h3>
                       <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarMenuEntity, filterOptions: [{ token: ToolbarMenuEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
                       <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarEntity, filterOptions: [{ token: ToolbarEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
                       <SearchValueLine ctx={ctx4} findOptions={{
@@ -108,12 +108,12 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
           </div>
         </div>
           <div>
-            <h4 className="d-inline-block">
+            <h2 className="d-inline-block h4">
               <CheckboxLine ctx={ctx4.subCtx(e => e.groupResults)} onChange={handleOnGroupResultsChange} inlineCheckbox="block" formSize="lg" />
-            </h4>
+            </h2>
 
             <div className="my-2">
-              <h4>{ctx.niceName(a => a.filters)}</h4>
+              <h2 className="h4">{ctx.niceName(a => a.filters)}</h2>
               <div className="ms-3">
                 <AutoLine ctx={ctxxs.subCtx(e => e.includeDefaultFilters)} valueColumns={4} />
                 <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
@@ -125,7 +125,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
             </div>
 
             <div className="my-2">
-              <h4>{ctx.niceName(a => a.columns)}</h4>
+              <h2 className="h4">{ctx.niceName(a => a.columns)}</h2>
               <div className="ms-3">
                 <AutoLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
 
@@ -176,7 +176,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
             </div>
 
             <div className="my-4">
-              <h4>{ctx.niceName(a => a.orders)}</h4>
+              <h2 className="h4">{ctx.niceName(a => a.orders)}</h2>
               <div className="ms-3">
                 <EntityTable ctx={ctxxs.subCtx(e => e.orders)} avoidFieldSet columns={[
                   {
@@ -193,7 +193,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
           </div>
 
           <div className="my-4">
-            <h5>{UserQueryMessage.Pagination.niceToString()}</h5>
+            <h3 className="h5">{UserQueryMessage.Pagination.niceToString()}</h3>
 
             <div className=" ms-3 row">
               <div className="col-sm-6">

@@ -192,7 +192,7 @@ export namespace ContextualOperations {
     extraButtons?: React.ReactNode;
     children?: React.ReactNode;
     color?: BsColor;
-    icon?: IconProp;
+    icon?: IconProp | React.ReactElement;
     iconColor?: string;
   }
 
@@ -227,11 +227,12 @@ export namespace ContextualOperations {
     const item = (
       <Dropdown.Item
         onClick={disabled ? undefined : handleOnClick}
+        aria-disabled={disabled}
         disabled={disabled}
         style={{ pointerEvents: "initial" }}
         data-operation={coc.operationInfo.key}
         className={color && !disabled ? "text-" + color : undefined}>
-        {icon ? <FontAwesomeIcon aria-hidden={true} icon={icon} className="fa-fw icon" color={iconColor} /> :
+        {icon ? (React.isValidElement(icon) ? icon:  <FontAwesomeIcon aria-hidden={true} icon={icon} className="fa-fw icon" color={iconColor} />) :
           color ? <span className={classes("icon", "empty-icon")}></span> : undefined}
         {text}
         {extraButtons}

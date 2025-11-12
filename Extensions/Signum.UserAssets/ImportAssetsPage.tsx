@@ -96,7 +96,7 @@ export default function ImportAssetsPage(): React.JSX.Element {
     return (
       <div>
         <AccessibleTable
-          caption={UserAssetMessage.UserAssetLines.niceToString()}
+          aria-label={UserAssetMessage.UserAssetLines.niceToString()}
           className="table"
           multiselectable={false}>
           <thead>
@@ -194,7 +194,7 @@ export default function ImportAssetsPage(): React.JSX.Element {
 
   return (
     <div>
-      <h2>{UserAssetMessage.ImportUserAssets.niceToString()}</h2>
+      <h1 className="h2">{UserAssetMessage.ImportUserAssets.niceToString()}</h1>
       <br />
       {success && renderSuccess()}
       {model ? renderModel() :

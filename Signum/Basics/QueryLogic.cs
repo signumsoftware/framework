@@ -55,6 +55,11 @@ public static class QueryLogic
         sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(sb)));
     }
 
+    public static void AssertLoaded()
+    {
+        var a = QueryLogic.QueryNameToEntity;
+    }
+
     public static void Start(SchemaBuilder sb)
     {
         if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))

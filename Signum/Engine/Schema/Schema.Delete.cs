@@ -32,9 +32,25 @@ public partial class Table
                 .FormatWith(Name, this.PrimaryKey.Name.SqlEscape(isPostgres), variableOrId, comment ?? entity.ToString()));
 
         if (isPostgres && declaration != null)
-            return PostgresDoBlock(entity.Id.VariableName!, declaration, SqlPreCommand.Combine(Spacing.Simple, pre, collections, virtualMList, main)!);
+        {
+            SqlPreCommandSimple ifStatement = AssertNotNull(entity.Id.VariableName!);
+
+            var block = new SqlPreCommandPostgresDoBlock(
+                declarations: [declaration],
+                body: SqlPreCommand.Combine(Spacing.Simple, ifStatement, pre, collections, virtualMList, main)!
+                );
+
+            return block.SimplifyNested();
+        }
 
         return SqlPreCommand.Combine(Spacing.Simple, declaration, pre, collections, virtualMList, main)!;
+    }
+
+    private static SqlPreCommandSimple AssertNotNull(string variableName)
+    {
+        return new SqlPreCommandSimple(@$"IF {variableName} IS NULL THEN 
+    RAISE EXCEPTION 'Not found';
+END IF;");
     }
 
     static GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand?>> giDeleteVirtualMListSync = new GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand?>>(
@@ -79,20 +95,5 @@ public partial class Table
 
         return result;
     }
-
-    private SqlPreCommandSimple PostgresDoBlock(string variableName, SqlPreCommandSimple declaration, SqlPreCommand block)
-    {
-        return new SqlPreCommandSimple(@$"DO $$
-DECLARE 
-{declaration.PlainSql().Indent(4)}
-BEGIN
-IF {variableName} IS NULL THEN 
-    RAISE EXCEPTION 'Not found';
-END IF; 
-{block.PlainSql().Indent(4)}
-END $$;");
-    }
-
-
 
 }

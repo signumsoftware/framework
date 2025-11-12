@@ -12,7 +12,7 @@ import { HelpMessage, AppendixHelpEntity, TypeHelpEntity, TypeHelpOperation, Pro
 import { getTypeInfo, getQueryNiceName, getOperationInfo, tryGetOperationInfo } from '@framework/Reflection';
 import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities';
 import { TypeContext, PropertyRoute } from '@framework/Lines';
-import { EditableHtmlComponent, HtmlViewer } from './EditableText';
+import { EditableHtml, HtmlViewer } from '../Editor/EditableHtml';
 import { classes } from '@framework/Globals';
 import { mlistItemContext } from '@framework/TypeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -83,7 +83,7 @@ export default function TypeHelpPage(): React.JSX.Element {
         <Shortcut text={`[t:${cleanName}]`} />
         <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={typeHelp.info} />
       </div>
-      <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} defaultEditable={typeHelp.isNew} onChange={forceUpdate} />
+      <EditableHtml key={"__type_help_main_editor__"} ctx={ctx.subCtx(a => a.description)} defaultEditable={typeHelp.isNew} onChange={forceUpdate} />
 
       <h2 className="display-6">{ctx.niceName(a => a.properties)}</h2>
       <dl className="row">
@@ -126,7 +126,7 @@ function PropertyLine({ node, cleanName, onChange, hash }: { node: TreeNode<{ ct
       <dd className="col-sm-9">
         <span className="info">
           <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={node.value.ctx.value.info} />
-          <EditableHtmlComponent ctx={node.value.ctx.subCtx(a => a.description)} onChange={onChange} />
+          <EditableHtml ctx={node.value.ctx.subCtx(a => a.description)} onChange={onChange} />
         </span>
       </dd>
       {node.children.length > 0 && <div className="col-sm-12">
@@ -142,10 +142,15 @@ function SubPropertiesCollapse({ node, cleanName, onChange, hash }: { node: Tree
   return (
     <>
       <div className="row mb-2">
-        <span className="col-sm-9 offset-sm-3 lead" style={{ cursor: "pointer" }} onClick={() => setOpen(!open)}>
-          <FontAwesomeIcon aria-hidden={true} icon={open ? "chevron-down" : "chevron-right"} /> {pr.member!.niceName} ({getNiceTypeName(pr.member!.type)})
-        </span>
+        <button
+          type="button"
+          className="col-sm-9 offset-sm-3 lead border-0 bg-transparent text-start"
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}>
+          <FontAwesomeIcon aria-hidden="true" icon={open ? "chevron-down" : "chevron-right"}/> {pr.member!.niceName} ({getNiceTypeName(pr.member!.type)})
+        </button>
       </div>
+
       <Collapse in={open}>
         <dl className="row ms-4">
           {open && node.children.map(n => <PropertyLine key={n.value.pr.propertyPath()} node={n} cleanName={cleanName} onChange={onChange} hash={hash} />)}
@@ -168,7 +173,7 @@ function OperationLine({ ctx, cleanName, onChange, hash }: { ctx: TypeContext<Op
       <dd className="col-sm-9">
         <span className="info">
           <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={ctx.value.info} />
-          <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
+          <EditableHtml ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
         </span>
       </dd>
     </>
@@ -182,14 +187,18 @@ function QueryBlock({ ctx, cleanName, onChange, hash }: { ctx: TypeContext<Query
     <>
       <div className={classes("row mb-2 shortcut-container", id == hash && "sf-target")} id={id}>
         <div className="col-sm-9 offset-sm-3">
-          <span className="lead" style={{ cursor: "pointer" }}  onClick={() => setOpen(!open)} >
-            <FontAwesomeIcon aria-hidden={true} icon={open ? "chevron-down" : "chevron-right"} /> {getQueryNiceName(ctx.value.query.key)}
-          </span>
+          <button
+            type="button"
+            className="lead border-0 bg-transparent"
+            onClick={() => setOpen(!open)}
+            aria-expanded={open}>
+            <FontAwesomeIcon aria-hidden="true" icon={open ? "chevron-down" : "chevron-right"} /> {getQueryNiceName(ctx.value.query.key)}
+          </button>
           {" "}
           {Finder.isFindable(ctx.value.query.key, true) && <a href={AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: ctx.value.query.key }))} target="_blank"><FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>}
           {" "}
           <Shortcut text={`[q:${ctx.value.query.key}]`} />
-          <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
+          <EditableHtml ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
         </div>
       </div>
       <Collapse in={open}>
@@ -210,7 +219,7 @@ function QueryColumnLine({ ctx, cleanName, onChange }: { ctx: TypeContext<QueryC
       <dd className="col-sm-9">
         <span className="info">
           <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={ctx.value.info} />
-          <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
+          <EditableHtml ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
         </span>
       </dd>
     </>
@@ -231,7 +240,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
       });
   }
 
-  return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon aria-hidden={true} icon="save" /> {getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
+  return <button type="button" className="btn btn-primary" onClick={onClick}><FontAwesomeIcon aria-hidden={true} icon="save" /> {getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
 }
 
 export function Shortcut(p: { text: string; }): React.JSX.Element {

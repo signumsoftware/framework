@@ -91,6 +91,8 @@
     <Member Name="_0IsKeyBut1IsAnAggregate" Description="{0} ist Schlüssel, aber {1} ist ein Aggregat" />
     <Member Name="_0IsNot1" Description="{0} ist nicht {1}" />
     <Member Name="_0IsNotOptional" Description="{0} ist nicht optional" />
+    <Member Name="_0Of1_2" Description="{0} von {1}: {2}" />
+    <Member Name="_0Of1_2Per3" Description="{0} von {1}: {2} per {3}" />
     <Member Name="_0ShouldBeAnAggregate" Description="{0} sollte ein Aggregat" />
     <Member Name="_0ShouldBeNull" Description="{0} sollte null sein" />
     <Member Name="_0ShouldBeSet" Description="{0} sollte festgesetzt werden" />

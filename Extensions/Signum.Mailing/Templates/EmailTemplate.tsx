@@ -44,7 +44,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
               <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => forceUpdate()}
                 onCreate={() => Promise.resolve(EmailTemplateFromEmbedded.New({ whenNone: "ThrowException", whenMany: "SplitMessages" }))}
                 getComponent={fctx => <EmailTemplateFrom ctx={fctx} query={p.ctx.value.query} />} />
-              <h5 className="text-muted">{ecXs.niceName(s => s.recipients)}</h5>
+              <h3 className="text-muted h5">{ecXs.niceName(s => s.recipients)}</h3>
               <EntityAccordion avoidFieldSet ctx={ecXs.subCtx(s => s.recipients)}
                 getTitle={(ctx: TypeContext<EmailTemplateRecipientEmbedded>) => <span>
                   {ctx.value.kind && <strong className="me-1">{ctx.value.kind}:</strong>}

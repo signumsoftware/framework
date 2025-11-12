@@ -1,5 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="LayoutMessage">
+    <Member Name="JumpToMainContent" Description="Zum Hauptinhalt springen" />
+	<Member Name="SelectA0_G" Description="Wählen Sie [m:ein|f:eine|n:ein] {0} aus" />
+  </Type>
   <Type Name="ShowCount" Description="Anzahl anzeigen">
     <Member Name="Always" Description="Immer" />
     <Member Name="MoreThan0" Description="Mehr als 0" />
@@ -56,6 +60,7 @@
     <Member Name="If0Selected" Description="Wenn {0} ausgewählt" />
     <Member Name="No0Selected" Description="Keine {0} ausgewählt" />
     <Member Name="RecursionDetected" Description="Rekursion erkannt" />
+
     <Member Name="ShowTogether" Description="Gemeinsam anzeigen" />
   </Type>
   <Type Name="ToolbarOperation">

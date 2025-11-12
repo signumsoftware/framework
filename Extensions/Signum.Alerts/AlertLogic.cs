@@ -1,14 +1,15 @@
-using Signum.Utilities.Reflection;
 using Microsoft.AspNetCore.Html;
-using System.Text.RegularExpressions;
-using Signum.Mailing;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
-using Signum.UserAssets;
+using Signum.Engine.Sync;
+using Signum.Mailing;
+using Signum.Mailing.Package;
 using Signum.Mailing.Templates;
 using Signum.Scheduler;
 using Signum.Templating;
-using Signum.Mailing.Package;
+using Signum.UserAssets;
+using Signum.Utilities.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Signum.Alerts;
 
@@ -89,6 +90,8 @@ public static class AlertLogic
             });
 
         SemiSymbolLogic<AlertTypeSymbol>.Start(sb, () => SystemAlertTypes.Keys);
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
+        sb.Schema.EntityEvents<AlertTypeSymbol>().PreDeleteSqlSync += AlertType_PreDeleteSqlSync;
 
         if (registerExpressionsFor != null)
         {
@@ -106,6 +109,42 @@ public static class AlertLogic
 
         if (sb.WebServerBuilder != null)
             AlertsServer.Start(sb.WebServerBuilder);
+    }
+
+    static SqlPreCommand? AlertType_PreDeleteSqlSync(AlertTypeSymbol alertType)
+    {
+        if (Administrator.ExistsTable<AlertEntity>() && Database.Query<AlertEntity>().Any(a => a.AlertType.Is(alertType)))
+        {
+            var table = Schema.Current.Table<AlertEntity>();
+            var column = (IColumn)(FieldReference)Schema.Current.Field((AlertEntity a) => a.AlertType);
+            return Administrator.DeleteWhereScript(table, column, alertType.Id);
+        }
+
+        return null;
+    }
+
+    static SqlPreCommand? Type_PreDeleteSqlSync(TypeEntity type)
+    {
+        return SqlPreCommand.Combine(Spacing.Simple,
+            Type_PreDeleteSqlSync(type, a => a.Target),
+            Type_PreDeleteSqlSync(type, a => a.LinkTarget),
+            Type_PreDeleteSqlSync(type, a => a.GroupTarget)
+        );
+    }
+
+    static SqlPreCommand? Type_PreDeleteSqlSync(TypeEntity type, Expression<Func<AlertEntity, Lite<Entity>?>> ibaField)
+    {
+        if (Administrator.ExistsTable<AlertEntity>() && Database.Query<AlertEntity>().Any(a => ibaField.Evaluate(a)!.EntityType.ToTypeEntity().Is(type)))
+        {
+            var table = Schema.Current.Table<AlertEntity>();
+            var column = (IColumn)((FieldImplementedByAll)Schema.Current.Field(ibaField)).TypeColumn;
+            if (SafeConsole.Ask($"Delete {table.Name} with {column.Name} of type {type}?"))
+            { 
+                return Administrator.DeleteWhereScript(table, column, type.Id);
+            }
+        }
+
+        return null;
     }
 
     public static void RegisterAlertNotificationMail(SchemaBuilder sb)

@@ -132,17 +132,15 @@ export function FileDownloader(p: FileDownloaderProps): React.JSX.Element {
 
   return (
     <div {...p.htmlAttributes}>
-      <a
+      <LinkButton
         href={!enabled ? undefined :  "#"}
         onClick={!enabled ? undefined : e => {
-          e.preventDefault();
           handleOnClick(e, download == "SaveAs" || download == "ViewOrSave" && !(info?.browserView));
         }}
         title={toStr ?? undefined}
-        target="_blank"
-      >
+        target="_blank">
         {children}
-      </a>
+      </LinkButton>
       {p.download == "ViewOrSave" && enabled &&
         <LinkButton 
           title={EntityControlMessage.Download.niceToString()}
