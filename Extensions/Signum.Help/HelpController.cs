@@ -44,7 +44,7 @@ public class HelpController : ControllerBase
     }
 
     [HttpPost("api/help/saveNamespace")]
-    public void SaveNamespace([Required][FromBody]NamespaceHelpEntity entity)
+    public void SaveNamespace([Required][FromBody] NamespaceHelpEntity entity)
     {
         HelpPermissions.ViewHelp.AssertAuthorized();
 
@@ -91,7 +91,7 @@ public class HelpController : ControllerBase
     }
 
     [HttpPost("api/help/saveType")]
-    public void SaveType([Required][FromBody]TypeHelpEntity entity)
+    public void SaveType([Required][FromBody] TypeHelpEntity entity)
     {
         HelpPermissions.ViewHelp.AssertAuthorized();
         
