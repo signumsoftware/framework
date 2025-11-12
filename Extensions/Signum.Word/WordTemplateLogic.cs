@@ -542,7 +542,7 @@ public static class WordTemplateLogic
                 var oldHash = file.Hash;
                 try
                 {
-                    var sc = new TemplateSynchronizationContext(replacements, sd, qd, wt.Model?.ToType());
+                    var sc = new TemplateSynchronizationContext(wt, replacements, sd, qd, wt.Model?.ToType());
 
                     var bytes = wt.ProcessOpenXmlPackage(document =>
                     {
@@ -651,7 +651,7 @@ public static class WordTemplateLogic
                 try
                 {
 
-                    var sc = new TemplateSynchronizationContext(replacements, sd, qd, wt.Model?.ToType());
+                    var sc = new TemplateSynchronizationContext(wt, replacements, sd, qd, wt.Model?.ToType());
 
                     wt.FileName = TextTemplateParser.Synchronize(wt.FileName, sc);
 

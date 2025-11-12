@@ -496,7 +496,7 @@ public static class EmailTemplateLogic
 
                     foreach (var item in et.Messages)
                     {
-                        var sc = new TemplateSynchronizationContext(replacements, sd, qd, et.Model?.ToType());
+                        var sc = new TemplateSynchronizationContext(et, replacements, sd, qd, et.Model?.ToType());
 
                         item.Subject = TextTemplateParser.Synchronize(item.Subject, sc);
                         item.Text = TextTemplateParser.Synchronize(item.Text, sc);
