@@ -364,6 +364,9 @@ public static class EmailTemplateLogic
         if (AvoidSynchronizeTokens)
             return null;
 
+        QueryLogic.AssertLoaded();
+        TypeLogic.AssertLoaded();
+
         var dc = EmailLogic.Configuration.DefaultCulture; // To avoid many exceptions
 
         StringDistance sd = new StringDistance();

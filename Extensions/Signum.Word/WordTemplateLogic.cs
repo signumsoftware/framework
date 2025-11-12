@@ -85,6 +85,7 @@ public static class WordTemplateLogic
         }.Register();
 
         sb.Schema.EntityEvents<WordTemplateEntity>().Retrieved += WordTemplateLogic_Retrieved;
+        sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += WordTemplateLogic_PreDeleteSqlSync;
 
         UserAssetsImporter.Register<WordTemplateEntity>("WordTemplate", WordTemplateOperation.Save);
         PermissionLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
@@ -164,6 +165,14 @@ public static class WordTemplateLogic
 
         if (sb.WebServerBuilder != null)
             WordServer.Start(sb.WebServerBuilder);
+    }
+
+    private static SqlPreCommand? WordTemplateLogic_PreDeleteSqlSync(QueryEntity query)
+    {
+        var delete = Administrator.UnsafeDeletePreCommand(Database.Query<WordTemplateEntity>().Where(a => a.Query.Is(query)));
+        if(delete != null && SafeConsole.Ask($"Delete WordTemplates for query {query}?"))
+            return delete;
+        return null;
     }
 
     private static void WordTemplateLogic_Retrieved(WordTemplateEntity template, PostRetrievingContext ctx)
@@ -456,6 +465,9 @@ public static class WordTemplateLogic
     {
         if (AvoidSynchronize)
             return null;
+
+        QueryLogic.AssertLoaded();
+        TypeLogic.AssertLoaded();
 
         StringDistance sd = new StringDistance();
 

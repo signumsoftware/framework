@@ -308,6 +308,9 @@ public static class UserChartLogic
         if (!replacements.Interactive)
             return null;
 
+        QueryLogic.AssertLoaded();
+        TypeLogic.AssertLoaded();
+
         var list = Database.Query<UserChartEntity>().ToList();
 
         var table = Schema.Current.Table(typeof(UserChartEntity));

@@ -228,6 +228,11 @@ public static class TypeLogic
     {
         return TypeToName.TryGetC(type);
     }
+
+    public static void AssertLoaded()
+    {
+        var a = TypeToId.Values;
+    }
 }
 
 internal class TypeCaches

@@ -118,6 +118,7 @@ public static class OperationLogic
 
         sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += Operation_PreDeleteSqlSync;
         sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync_Origin;
 
         sb.Schema.SchemaCompleted += OperationLogic_Initializing;
         sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema);
@@ -276,6 +277,18 @@ Consider the following options:
         var table = Schema.Current.Table<OperationLogEntity>();
         var column = (IColumn)((FieldImplementedByAll)Schema.Current.Field((OperationLogEntity ol) => ol.Target)).TypeColumn;
         return Administrator.DeleteWhereScript(table, column, type.Id);
+    }
+
+    static SqlPreCommand? Type_PreDeleteSqlSync_Origin(TypeEntity type)
+    {
+        if (Administrator.ExistsTable<OperationLogEntity>() && Database.Query<OperationLogEntity>().Any(a => a.Origin != null && a.Origin.EntityType.ToTypeEntity().Is(type)))
+        {
+            var table = Schema.Current.Table<OperationLogEntity>();
+            var column = (IColumn)((FieldImplementedByAll)Schema.Current.Field((OperationLogEntity ol) => ol.Origin)).TypeColumn;
+            return Administrator.DeleteWhereScript(table, column, type.Id);
+        }
+
+        return null;
     }
 
     static void EntityEventsGlobal_Saving(Entity ident)
