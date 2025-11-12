@@ -13,7 +13,6 @@ import { LexicalEditor } from "lexical";
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
 import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
 import { ImageHandlerBase, ImageInfo } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageHandlerBase';
-import { ImageNodeBase } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageNodeBase';
 
 export default function WhatsNewHtmlEditor(p: {
   binding: Binding<string | undefined | null>;
@@ -23,9 +22,9 @@ export default function WhatsNewHtmlEditor(p: {
 
   return (
     <ErrorBoundary>
-      <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} plugins={[
+      <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} extensions={[
         new LinkExtension(),
-        new ImageExtension(WhatsNewImageNode)
+        new ImageExtension(new WhatsNewImageHandler())
       ]} />
     </ErrorBoundary>
   );
@@ -38,9 +37,9 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
   return (
     <div className="html-viewer" >
       <ErrorBoundary>
-        <HtmlEditor readOnly binding={binding} small plugins={[
+        <HtmlEditor readOnly binding={binding} small extensions={[
           new LinkExtension(),
-          new ImageExtension(WhatsNewImageNode)
+          new ImageExtension(new WhatsNewImageHandler())
         ]} />
       </ErrorBoundary>
     </div>
@@ -48,8 +47,8 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
 }
 
 
-export class WhatsNewImageHandler implements ImageHandlerBase{
-  
+export class WhatsNewImageHandler implements ImageHandlerBase {
+
   pr: PropertyRoute;
   constructor() {
     this.pr = WhatsNewEntity.propertyRouteAssert(a => a.attachment);
@@ -122,24 +121,3 @@ export class WhatsNewImageHandler implements ImageHandlerBase{
     return undefined;
   }
 }
-
-export class WhatsNewImageNode extends ImageNodeBase {
-
-  static {
-    this.converter = new WhatsNewImageHandler();
-    this.dataImageIdAttribute = "data-attachment-id";
-  }
-
-  static getType(): string {
-    return "whatsnew-image";
-  }
-
-  static clone(node: WhatsNewImageNode): WhatsNewImageNode {
-    return new WhatsNewImageNode(node.imageInfo, node.__key);
-  }
-
-  static importJSON(serializedNode: ImageInfo): WhatsNewImageNode {
-    return new WhatsNewImageNode(serializedNode);
-  }
-}
-

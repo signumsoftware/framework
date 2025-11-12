@@ -1,5 +1,6 @@
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
-import { $getRoot, $getSelection, $setSelection, EditorState, LexicalEditor } from "lexical";
+import { $getRoot, $getSelection, $setSelection, EditorState, LexicalEditor, LexicalNode } from "lexical";
+import { ImageNode } from "./Extensions/ImageExtension/ImageNode";
 
 export interface ITextConverter {
   $convertToText(editor: LexicalEditor): string;
@@ -8,7 +9,7 @@ export interface ITextConverter {
 
 export class HtmlContentStateConverter implements ITextConverter {
 
-  constructor(public dataImageIdAttribute: string | undefined) /*"data-attachment-id"*/ {
+  constructor() {
 
   }
 
@@ -21,8 +22,13 @@ export class HtmlContentStateConverter implements ITextConverter {
     editor.update(() => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
-
-      const nodes = $generateNodesFromDOM(editor, doc);
+      let nodes: LexicalNode[];
+      try {
+        ImageNode.currentHandler = editor.imageHandler;
+        nodes = $generateNodesFromDOM(editor, doc);
+      } finally {
+        ImageNode.currentHandler = undefined;
+      }
       $getRoot().clear().select();
       $getSelection()?.insertNodes(nodes);
       $setSelection(null);

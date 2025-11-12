@@ -1,4 +1,3 @@
-import { ImageNodeBase } from "../../Signum.HtmlEditor/Extensions/ImageExtension/ImageNodeBase";
 import { ImageHandlerBase, ImageInfo } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageHandlerBase';
 import { PropertyRoute } from "@framework/Lines";
 import { getSymbol } from "@framework/Reflection";
@@ -21,18 +20,19 @@ export class HelpImageHandler implements ImageHandlerBase {
     return img;
   }
 
-  uploadData(blob: Blob): Promise<ImageInfo> {
+  async uploadData(blob: Blob): Promise<ImageInfo> {
     var file = blob instanceof File ? blob :
       new File([blob], "pastedImage." + blob.type.after("/"));
 
-    return toFileEntity(file, {
+    const att = await toFileEntity(file, {
       type: FilePathEmbedded, accept: "image/*",
       maxSizeInBytes: this.pr.member!.defaultFileTypeInfo!.maxSizeInBytes ?? undefined
-    })
-      .then(att => ({
-        binaryFile: att.binaryFile ?? undefined,
-        fileName: att.fileName ?? undefined,
-      }));
+    });
+
+    return ({
+      binaryFile: att.binaryFile ?? undefined,
+      fileName: att.fileName ?? undefined,
+    });
   }
 
   renderImage(info: ImageInfo): React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> {
@@ -61,25 +61,5 @@ export class HelpImageHandler implements ImageHandlerBase {
     }
 
     return undefined;
-  }
-}
-
-
-export class HelpImageNode extends ImageNodeBase {
-  static {
-    this.converter = new HelpImageHandler();
-    this.dataImageIdAttribute = "data-help-image-id";
-  }
-
-  static getType(): string {
-    return "help-image";
-  }
-
-  static clone(node: HelpImageNode): HelpImageNode {
-    return new HelpImageNode(node.imageInfo, node.__key);
-  }
-
-  static importJSON(serializedNode: ImageInfo): HelpImageNode {
-    return new HelpImageNode(serializedNode );
   }
 }

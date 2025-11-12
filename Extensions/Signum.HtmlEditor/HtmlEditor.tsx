@@ -1,7 +1,7 @@
-import { classes } from "@framework/Globals";
+import { classes, softCast } from "@framework/Globals";
 import { IBinding } from "@framework/Reflection";
 import { $isCodeNode } from "@lexical/code";
-import { InitialConfigType, LexicalComposer } from "@lexical/react/LexicalComposer";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { EditorRefPlugin } from "@lexical/react/LexicalEditorRefPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
@@ -28,6 +28,7 @@ import { isEmpty } from "./Utils/editorState";
 import { formatCode, formatHeading, formatList, formatQuote } from "./Utils/format";
 import { $findMatchingParent, isHeadingActive, isListActive, isQuoteActive } from "./Utils/node";
 import { HtmlEditorMessage } from "../../Signum/React/Signum.Entities";
+import { ImageExtension } from "./Extensions/ImageExtension";
 
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
@@ -36,7 +37,7 @@ export interface HtmlEditorProps {
   mandatory?: boolean | "warning";
   converter?: ITextConverter;
   innerRef?: React.Ref<LexicalEditor>;
-  plugins?: HtmlEditorExtension[];
+  extensions?: HtmlEditorExtension[];
   handleKeybindings?: (event: KeyboardEvent) => boolean;
   toolbarButtons?: (c: HtmlEditorController) => React.ReactNode;
   placeholder?: React.ReactNode;
@@ -56,7 +57,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
     converter,
     innerRef,
     toolbarButtons,
-    plugins,
+    extensions,
     htmlAttributes,
     mandatory,
     initiallyFocused,
@@ -67,14 +68,14 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
 ) {
   const id = React.useMemo(() => createUid(), []);
   const editableId = "editable_" + id;
-  const { controller, nodes, builtinComponents } = useController({
+  const { controller, nodes, builtinPlugins } = useController({
     binding,
     readOnly,
     small,
     converter,
     innerRef,
     initiallyFocused,
-    plugins,
+    extensions,
     handleKeybindings,
     editableId
   });
@@ -82,6 +83,8 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
   React.useImperativeHandle(ref, () => controller, [controller]);
 
   const error = binding.getError();
+
+  const imageHandler = extensions?.filter(a => a instanceof ImageExtension ? a.imageHandler : null).notNull().singleOrNull() == null;
 
   return (
     <div
@@ -104,7 +107,9 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
           nodes: [HeadingNode, QuoteNode, ...nodes!],
           theme: LexicalTheme,
           onError: (error) => console.error(error),
-          editable: !readOnly
+          editable: !readOnly,
+          // @ts-ignore
+          imageHandler: imageHandler
         }}
       >
         {
@@ -133,7 +138,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
         />
         <EditorRefPlugin editorRef={controller.setEditorRef} />
         <HistoryPlugin />
-        {builtinComponents.map(({ component: Component, props }) => <Component key={Component.name} {...props} />)}
+        {...builtinPlugins.map((a, i) => React.cloneElement(a, { key: i }))}
       </LexicalComposer>
     </div>
   );
@@ -160,3 +165,4 @@ const defaultToolbarButtons = (c: HtmlEditorController) => (
     {c.extraButtons()}
   </div>
 );
+
