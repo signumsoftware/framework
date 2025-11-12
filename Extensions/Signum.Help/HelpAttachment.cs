@@ -18,6 +18,7 @@ public class HelpImageEntity : Entity
 
 public interface IHelpEntity : IEntity
 {
+    public CultureInfoEntity Culture { get; set; }
     bool ForeachHtmlField(Func<string, string> processHtml);
 }
 

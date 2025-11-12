@@ -834,7 +834,78 @@ public static class HelpXml
         }
     }
 
-    public static byte[] ExportAllToZip()
+    public static void Export(List<IHelpEntity> entities, string directoryName)
+    {
+        if (entities == null || entities.Count == 0)
+            throw new InvalidOperationException("No entities to export");
+
+        var groupedByCulture = entities
+            .GroupBy(e => e.Culture)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        bool? replace = null;
+        bool? delete = null;
+
+        var imageGroups = Database.Query<HelpImageEntity>()
+                            .Where(hi => entities.Any(t => hi.Target.Is(t)))
+                            .GroupToDictionary(a => a.Target);
+
+        foreach (var (cultureEntity, list) in groupedByCulture)
+        {
+            var ci = cultureEntity.ToCultureInfo();
+            var cultureDir = FS.Path.Combine(directoryName, ci.Name);
+
+            var typeHelps = list.OfType<TypeHelpEntity>().ToList();
+            if (typeHelps.Any())
+            {
+                ExportFolder(ref replace, ref delete, FS.Path.Combine(cultureDir, TypesDirectory),
+                    typeHelps,
+                    th => $"{RemoveInvalid(th.Type.CleanName)}.help",
+                    th => EntityXml.ToXDocument(th),
+                    th => imageGroups.TryGetC(th.ToLite()));
+            }
+
+            var namespaceHelps = list.OfType<NamespaceHelpEntity>().ToList();
+            if (namespaceHelps.Any())
+            {
+                ExportFolder(ref replace, ref delete, FS.Path.Combine(cultureDir, NamespacesDirectory),
+                    namespaceHelps,
+                    nh => $"{RemoveInvalid(nh.Name)}.help",
+                    nh => NamespaceXml.ToXDocument(nh),
+                    nh => imageGroups.TryGetC(nh.ToLite()));
+            }
+
+            var appendixHelps = list.OfType<AppendixHelpEntity>().ToList();
+            if (appendixHelps.Any())
+            {
+                ExportFolder(ref replace, ref delete, FS.Path.Combine(cultureDir, AppendicesDirectory),
+                    appendixHelps,
+                    ah => $"{RemoveInvalid(ah.UniqueName)}.help",
+                    ah => AppendixXml.ToXDocument(ah),
+                    ah => imageGroups.TryGetC(ah.ToLite()));
+            }
+
+            var queryHelps = list.OfType<QueryHelpEntity>().ToList();
+            if (queryHelps.Any())
+            {
+                ExportFolder(ref replace, ref delete, FS.Path.Combine(cultureDir, QueriesDirectory),
+                    queryHelps,
+                    qh => $"{RemoveInvalid(qh.Query.Key)}.help",
+                    qh => QueryXml.ToXDocument(qh),
+                    qh => imageGroups.TryGetC(qh.ToLite()));
+            }
+        }
+    }
+
+    public static byte[] ExportToZipBytes(List<IHelpEntity> entities)
+    {
+        using var zip = new ZipBuilderScope("Help");
+        Export(entities, "");
+        var bytes = zip.GetAllBytes();
+        return bytes;
+    }
+
+    public static byte[] ExportAllToZipBytes()
     {
         using var zip = new ZipBuilderScope("Help");
         ExportAll("");
@@ -842,9 +913,9 @@ public static class HelpXml
         return bytes;
     }
 
-    public static void ExportAllToZip(string filePath)
+    public static void ExportAllToZipFile(string filePath)
     {
-        var bytes = ExportAllToZip();
+        var bytes = ExportAllToZipBytes();
         FS.File.WriteAllBytes(filePath, bytes);//uses Real FileSystem
     }
 
@@ -863,7 +934,7 @@ public static class HelpXml
         {
             case "": return;
             case "e": ExportAll(directoryName); break;
-            case "ez": ExportAllToZip(@"..\..\..\Help.zip"); break;
+            case "ez": ExportAllToZipFile(@"..\..\..\Help.zip"); break;
             case "i": ImportAll(directoryName); break;
             default:
                 goto retry;

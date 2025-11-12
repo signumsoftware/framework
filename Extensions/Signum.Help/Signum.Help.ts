@@ -95,11 +95,12 @@ export namespace HelpMessage {
   export const Close: MessageKey = new MessageKey("HelpMessage", "Close");
   export const ViewMore: MessageKey = new MessageKey("HelpMessage", "ViewMore");
   export const JumpToViewMore: MessageKey = new MessageKey("HelpMessage", "JumpToViewMore");
+  export const ExportAsZip: MessageKey = new MessageKey("HelpMessage", "ExportAsZip");
 }
 
 export namespace HelpPermissions {
   export const ViewHelp : Basics.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.ViewHelp");
-  export const DownloadHelp : Basics.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.DownloadHelp");
+  export const ExportHelp : Basics.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.ExportHelp");
 }
 
 export namespace HelpSearchMessage {
@@ -139,6 +140,7 @@ export namespace HelpSyntaxMessage {
 }
 
 export interface IHelpEntity extends Entities.Entity {
+  culture: Basics.CultureInfoEntity;
 }
 
 export const NamespaceHelpEntity: Type<NamespaceHelpEntity> = new Type<NamespaceHelpEntity>("NamespaceHelp");
