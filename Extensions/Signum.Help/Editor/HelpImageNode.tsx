@@ -51,16 +51,6 @@ export class HelpImageHandler implements ImageHandlerBase {
     return <FileImage file={fp} />;
   }
 
-  toHtml(val: ImageInfo): string | undefined {
-    if (val.binaryFile)
-      return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" />`;
-
-    if (val.imageId)
-      return `<img data-help-image-id="${val.imageId}" />`;
-
-    return undefined;
-  }
-
   fromElement(element: HTMLDivElement): ImageInfo | undefined {
     if (element.tagName == "IMG") {
       return {

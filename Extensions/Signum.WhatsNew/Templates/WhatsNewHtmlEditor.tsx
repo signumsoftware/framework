@@ -10,9 +10,10 @@ import { ErrorBoundary } from '@framework/Components';
 import { WhatsNewEntity } from '../Signum.WhatsNew';
 import { ImageModal } from '../../Signum.Files/Components/ImageModal';
 import { LexicalEditor } from "lexical";
-import { ImageConverter, ImageInfo } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
 import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
+import { ImageHandlerBase, ImageInfo } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageHandlerBase';
+import { ImageNodeBase } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageNodeBase';
 
 export default function WhatsNewHtmlEditor(p: {
   binding: Binding<string | undefined | null>;
@@ -24,7 +25,7 @@ export default function WhatsNewHtmlEditor(p: {
     <ErrorBoundary>
       <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} plugins={[
         new LinkExtension(),
-        new ImageExtension(new AttachmentImageConverter())
+        new ImageExtension(WhatsNewImageNode)
       ]} />
     </ErrorBoundary>
   );
@@ -39,7 +40,7 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
       <ErrorBoundary>
         <HtmlEditor readOnly binding={binding} small plugins={[
           new LinkExtension(),
-          new ImageExtension(new AttachmentImageConverter())
+          new ImageExtension(WhatsNewImageNode)
         ]} />
       </ErrorBoundary>
     </div>
@@ -47,9 +48,8 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
 }
 
 
-export class AttachmentImageConverter implements ImageConverter{
+export class WhatsNewImageHandler implements ImageHandlerBase{
   
-  dataImageIdAttribute = "data-attachment-id";
   pr: PropertyRoute;
   constructor() {
     this.pr = WhatsNewEntity.propertyRouteAssert(a => a.attachment);
@@ -122,3 +122,24 @@ export class AttachmentImageConverter implements ImageConverter{
     return undefined;
   }
 }
+
+export class WhatsNewImageNode extends ImageNodeBase {
+
+  static {
+    this.converter = new WhatsNewImageHandler();
+    this.dataImageIdAttribute = "data-attachment-id";
+  }
+
+  static getType(): string {
+    return "whatsnew-image";
+  }
+
+  static clone(node: WhatsNewImageNode): WhatsNewImageNode {
+    return new WhatsNewImageNode(node.imageInfo, node.__key);
+  }
+
+  static importJSON(serializedNode: ImageInfo): WhatsNewImageNode {
+    return new WhatsNewImageNode(serializedNode);
+  }
+}
+
