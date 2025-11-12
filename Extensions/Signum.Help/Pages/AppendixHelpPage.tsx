@@ -10,7 +10,8 @@ import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation, AppendixHelpE
 import { getOperationInfo, getTypeInfo, GraphExplorer, symbolNiceName, tryGetOperationInfo } from '@framework/Reflection';
 import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from '@framework/Signum.Entities';
 import { TypeContext } from '@framework/Lines';
-import { EditableTextComponent, EditableHtmlComponent } from './EditableText';
+import { EditableText } from '../Editor/EditableText';
+import { EditableHtml } from '../Editor/EditableHtml';
 import MessageModal from '@framework/Modals/MessageModal';
 import { classes } from '@framework/Globals';
 import { useTitle } from '@framework/AppContext'
@@ -33,19 +34,19 @@ export default function AppendixHelpHelp(): React.JSX.Element {
       <h1 className="display-6"><Link to={HelpClient.Urls.indexUrl()}>
         {HelpMessage.Help.niceToString()}</Link>
         {" > "}
-        <EditableTextComponent ctx={ctx.subCtx(a => a.title, { formSize: "lg" })} onChange={() => { ctx.value.isNew && (ctx.value.uniqueName = ctx.value.title.replace(/[^a-zA-Z0-9]/g, "")); forceUpdate(); }} defaultEditable={appendix.isNew} />
+        <EditableText ctx={ctx.subCtx(a => a.title, { formSize: "lg" })} onChange={() => { ctx.value.isNew && (ctx.value.uniqueName = ctx.value.title.replace(/[^a-zA-Z0-9]/g, "")); forceUpdate(); }} defaultEditable={appendix.isNew} />
         <small className="ms-5 text-muted display-7">({ctx.value.culture.englishName})</small>
       </h1>
 
       <div className={classes("mb-2 shortcut-container")}>
         <div>
           <strong className="me-2">{ctx.niceName(a => a.uniqueName)}</strong>
-          <EditableTextComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
+          <EditableText ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
         </div>
         <Shortcut text={`[a:${ctx.value.uniqueName}]`} />
       </div>
 
-      <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
+      <EditableHtml ctx={ctx.subCtx(a => a.description)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <div className={classes("btn-toolbar", "sf-button-bar", "mt-4")}>
         <SaveButton ctx={ctx} onSuccess={() => ctx.value.isNew ? AppContext.navigate(HelpClient.Urls.appendixUrl(ctx.value.uniqueName)) : reloadAppendix()} />
         <DeleteButton ctx={ctx} />

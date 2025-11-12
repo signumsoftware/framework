@@ -12,7 +12,7 @@ import { HelpMessage, AppendixHelpEntity, TypeHelpEntity, TypeHelpOperation, Pro
 import { getTypeInfo, getQueryNiceName, getOperationInfo, tryGetOperationInfo } from '@framework/Reflection';
 import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities';
 import { TypeContext, PropertyRoute } from '@framework/Lines';
-import { EditableHtmlComponent, HtmlViewer } from './EditableText';
+import { EditableHtml, HtmlViewer } from '../Editor/EditableHtml';
 import { classes } from '@framework/Globals';
 import { mlistItemContext } from '@framework/TypeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -83,7 +83,7 @@ export default function TypeHelpPage(): React.JSX.Element {
         <Shortcut text={`[t:${cleanName}]`} />
         <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={typeHelp.info} />
       </div>
-      <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} defaultEditable={typeHelp.isNew} onChange={forceUpdate} />
+      <EditableHtml key={"__type_help_main_editor__"} ctx={ctx.subCtx(a => a.description)} defaultEditable={typeHelp.isNew} onChange={forceUpdate} />
 
       <h2 className="display-6">{ctx.niceName(a => a.properties)}</h2>
       <dl className="row">
@@ -126,7 +126,7 @@ function PropertyLine({ node, cleanName, onChange, hash }: { node: TreeNode<{ ct
       <dd className="col-sm-9">
         <span className="info">
           <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={node.value.ctx.value.info} />
-          <EditableHtmlComponent ctx={node.value.ctx.subCtx(a => a.description)} onChange={onChange} />
+          <EditableHtml ctx={node.value.ctx.subCtx(a => a.description)} onChange={onChange} />
         </span>
       </dd>
       {node.children.length > 0 && <div className="col-sm-12">
@@ -173,7 +173,7 @@ function OperationLine({ ctx, cleanName, onChange, hash }: { ctx: TypeContext<Op
       <dd className="col-sm-9">
         <span className="info">
           <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={ctx.value.info} />
-          <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
+          <EditableHtml ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
         </span>
       </dd>
     </>
@@ -198,7 +198,7 @@ function QueryBlock({ ctx, cleanName, onChange, hash }: { ctx: TypeContext<Query
           {Finder.isFindable(ctx.value.query.key, true) && <a href={AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: ctx.value.query.key }))} target="_blank"><FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" /></a>}
           {" "}
           <Shortcut text={`[q:${ctx.value.query.key}]`} />
-          <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
+          <EditableHtml ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
         </div>
       </div>
       <Collapse in={open}>
@@ -219,7 +219,7 @@ function QueryColumnLine({ ctx, cleanName, onChange }: { ctx: TypeContext<QueryC
       <dd className="col-sm-9">
         <span className="info">
           <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={ctx.value.info} />
-          <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
+          <EditableHtml ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
         </span>
       </dd>
     </>

@@ -80,9 +80,9 @@ public static class InlineImagesLogic
                 {
                     Dictionary<string, string> atts = GetTagAttributes(m);
 
-                    if (atts.TryGetValue("date-hash", out var hash))
+                    if (atts.TryGetValue("data-hash", out var hash))
                     {
-                        atts.Remove("date-hash");
+                        atts.Remove("data-hash");
                         atts.Add("data-help-image-id", hashToHelpImageId.GetOrThrow(hash).ToString());
                     }
 

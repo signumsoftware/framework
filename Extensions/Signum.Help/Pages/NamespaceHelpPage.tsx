@@ -9,7 +9,8 @@ import { getTypeInfo, GraphExplorer, symbolNiceName, tryGetOperationInfo, tryGet
 import { JavascriptMessage, Entity } from '@framework/Signum.Entities';
 import { Operations } from '@framework/Operations';
 import { TypeContext } from '@framework/Lines';
-import { EditableHtmlComponent, EditableTextComponent } from './EditableText';
+import { EditableText } from '../Editor/EditableText';
+import { EditableHtml } from '../Editor/EditableHtml';
 import { useTitle } from '@framework/AppContext';
 import { classes } from '@framework/Globals';
 import { Shortcut } from './TypeHelpPage'
@@ -33,13 +34,13 @@ export default function NamespaceHelpPage(): React.JSX.Element {
         <h1 className="display-6"><Link to={HelpClient.Urls.indexUrl()}>
           {HelpMessage.Help.niceToString()}</Link>
           {" > "}
-          <EditableTextComponent ctx={ctx.subCtx(a => a.title, { formSize: "lg" })} defaultText={namespace.title} onChange={forceUpdate} />
+          <EditableText ctx={ctx.subCtx(a => a.title, { formSize: "lg" })} defaultText={namespace.title} onChange={forceUpdate} />
           <small className="ms-5 text-muted display-7">({ctx.value.culture.englishName})</small>
         </h1>
         <Shortcut text={`[n:${ctx.value.name}]`} />
       </div>
 
-      <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={forceUpdate} />
+      <EditableHtml ctx={ctx.subCtx(a => a.description)} onChange={forceUpdate} />
       <div className={classes("btn-toolbar", "sf-button-bar", "mt-4")}>
         {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={() => reloadNamespace()} />}
       </div>
