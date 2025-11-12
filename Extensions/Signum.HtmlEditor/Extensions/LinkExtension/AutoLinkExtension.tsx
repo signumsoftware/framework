@@ -12,7 +12,6 @@ import {
 import { HtmlEditorController } from "../../HtmlEditorController";
 import { $findMatchingParent } from "../../Utils/node";
 import {
-  ComponentAndProps,
   HtmlEditorExtension,
   LexicalConfigNode,
   OptionalCallback,
@@ -39,8 +38,8 @@ const MATCHERS: LinkMatcher[] = [
 export class AutoLinkExtension implements HtmlEditorExtension {
   name = "AutoLinkExtension";
 
-  getBuiltInComponent(): ComponentAndProps<typeof AutoLinkPlugin> {
-    return { component: AutoLinkPlugin, props: { matchers: MATCHERS } };
+  getBuiltPlugin(): JSX.Element {
+    return <AutoLinkPlugin matchers={MATCHERS} />;
   }
 
   getNodes(): LexicalConfigNode {

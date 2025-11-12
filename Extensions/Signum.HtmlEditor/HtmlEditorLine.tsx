@@ -56,7 +56,7 @@ export default function HtmlEditorLine({
                 readOnly={ctx.readOnly}
                 binding={ctx.binding}
                 ref={htmlEditorRef}
-                plugins={p.plugins}
+                extensions={p.extensions}
                 {...p}
                 onEditorBlur={(e, controller) => {
                   forceUpdate();

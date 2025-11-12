@@ -11,7 +11,7 @@ import { IBinding, getSymbol } from '@framework/Reflection';
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
 import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
 import { LinkButton } from '@framework/Basics/LinkButton';
-import { HelpImageNode } from './HelpImageNode';
+import { HelpImageHandler } from './HelpImageNode';
 
 
 export function EditableHtml({ ctx, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
@@ -37,9 +37,9 @@ export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined>
       <HtmlEditor
         binding={p.binding}
         readOnly={p.readOnly}
-        plugins={[
+        extensions={[
           new LinkExtension(),
-          new ImageExtension(HelpImageNode)
+          new ImageExtension(new HelpImageHandler())
         ]} />
     </ErrorBoundary>
   );
@@ -60,9 +60,9 @@ export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?
           binding={binding as any}
           htmlAttributes={p.htmlAttributes}
           small
-          plugins={[
+          extensions={[
             new LinkExtension(),
-            new ImageExtension(HelpImageNode)
+            new ImageExtension(new HelpImageHandler())
           ]} />
       </ErrorBoundary>
     </div>
