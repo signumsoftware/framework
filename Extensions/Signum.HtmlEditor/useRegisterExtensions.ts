@@ -11,7 +11,7 @@ export const useRegisterExtensions = (
       return;
 
     const unsubscribeFns = extensions
-      .flatMap((plugin) => [plugin.registerExtension?.(controller)])
+      .flatMap((e) => [e.registerExtension?.(controller)])
       .notNull();
 
     return () => unsubscribeFns.forEach((fn) => fn());

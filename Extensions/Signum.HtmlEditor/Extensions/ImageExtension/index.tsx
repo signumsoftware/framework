@@ -17,7 +17,11 @@ export class ImageExtension implements HtmlEditorExtension {
     const abortController = new AbortController();
     const element = controller.editableElement;
 
-    if (!element) return;
+    if (!element)
+      return;
+
+    if (controller.editor && controller.editor.imageHandler != this.imageHandler)
+      controller.editor.imageHandler = this.imageHandler;
 
     element.addEventListener("dragenter", (event) => {
       if (!controller.editor.isEditable()) {
