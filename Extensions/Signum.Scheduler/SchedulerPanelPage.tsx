@@ -42,7 +42,7 @@ export default function SchedulerPanelPage(): React.JSX.Element {
 
   
   if (state == undefined)
-    return <h2 className="display-6">SchedulerLogic state (loading...) </h2>;
+    return <h1 className="display-6 h2">SchedulerLogic state (loading...) </h1>;
 
   const s = state;
 
@@ -51,11 +51,11 @@ export default function SchedulerPanelPage(): React.JSX.Element {
 
   return (
     <div>
-      <h2 className="display-6"><FontAwesomeIcon aria-hidden="true" icon="clock" />  {ScheduledTaskMessage.SchedulePanel.niceToString()} <CopyHealthCheckButton
+      <h1 className="display-6 h2"><FontAwesomeIcon aria-hidden="true" icon="clock" />  {ScheduledTaskMessage.SchedulePanel.niceToString()} <CopyHealthCheckButton
         name={url.hostname + " Scheduler Task Runner"}
         healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/scheduler/healthCheck')}
         clickUrl={url.href}
-      /></h2>
+      /></h1>
       <div className="btn-toolbar">
         <button type="button" className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon aria-hidden="true" icon="play" />  {ScheduledTaskMessage.Start.niceToString()}</button>
         <button type="button" className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon aria-hidden="true" icon="stop" />  {ScheduledTaskMessage.Stop.niceToString()}</button>
@@ -81,19 +81,19 @@ export default function SchedulerPanelPage(): React.JSX.Element {
         <InMemoryQueue queue={s.queue} onReload={reloadState} />
         <RunningTasks runningTasks={s.runningTask} onReload={reloadState} />
 
-        <h4>{ScheduledTaskMessage.AvailableTasks.niceToString()}</h4>
+        <h2 className="h4">{ScheduledTaskMessage.AvailableTasks.niceToString()}</h2>
         <div>
           {getTypeInfos(ScheduledTaskEntity.memberInfo(a => a.task).type).map(t =>
             <SearchValueLine key={t.name} ctx={ctx} findOptions={{ queryName: t.name }} onExplored={reloadState} />)}
         </div>
-        <h4>{ScheduledTaskEntity.niceName()}</h4>
+        <h2 className="h4">{ScheduledTaskEntity.niceName()}</h2>
         <SearchControl
           findOptions={{
             queryName: ScheduledTaskEntity,
             pagination: { elementsPerPage: 10, mode: "Firsts" }
           }} />
 
-        <h4>{ScheduledTaskLogEntity.niceName()}</h4>
+        <h2 className="h4">{ScheduledTaskLogEntity.niceName()}</h2>
         <SearchControl
           findOptions={{
             queryName: ScheduledTaskLogEntity,
@@ -108,7 +108,7 @@ export default function SchedulerPanelPage(): React.JSX.Element {
 function InMemoryQueue({ queue, onReload }: { queue: SchedulerClient.SchedulerItemState[], onReload: () => void }) {
   return (
     <div>
-      <h4>{ScheduledTaskMessage.InMemoryQueue.niceToString()}</h4>
+      <h2 className="h4">{ScheduledTaskMessage.InMemoryQueue.niceToString()}</h2>
       {queue.length === 0 ? <p> -- {ScheduledTaskMessage.ThereIsNoActiveScheduledTask.niceToString()} -- </p> :
         <AccessibleTable
           aria-label={ScheduledTaskMessage.InMemoryQueue.niceToString()}
@@ -146,7 +146,7 @@ function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerClien
 
   return (
     <div>
-      <h4>{ScheduledTaskMessage.RunningTasks.niceToString()}</h4>
+      <h2 className="h4">{ScheduledTaskMessage.RunningTasks.niceToString()}</h2>
       {runningTasks.length === 0 ? <p> -- {ScheduledTaskMessage.ThereAreNoTasksRunning.niceToString()} --</p> :
       <AccessibleTable
           aria-label={ScheduledTaskMessage.RunningTasks.niceToString()}

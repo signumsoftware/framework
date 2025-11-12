@@ -29,9 +29,9 @@ export function ModalHeaderButtons(p: ModalHeaderButtonsProps): React.ReactEleme
   return (
     <div className={classes("modal-header align-items-start", p.stickyHeader && "sf-sticky-header")} {...p.htmlAttributes } >
       {p.closeBeforeTitle && close}
-      <h4 className="modal-title" >
+      <h1 className="modal-title h4" >
         {p.children}
-      </h4>
+      </h1>
       {!p.closeBeforeTitle && close}
     </div>
   );
@@ -53,9 +53,9 @@ export function ModalFooterButtons(p: ModalFooterButtonsProps): React.ReactEleme
 
   return (
     <div className="modal-footer" {...p.htmlAttributes}>
-      <h4 className="modal-title" >
+      <h1 className="modal-title h4" >
         {p.children}
-      </h4>
+      </h1>
       {(p.onCancel || p.onOk) &&
         <div className="btn-toolbar" style={{ flexWrap: "nowrap" }}>
           {p.onOk && <button

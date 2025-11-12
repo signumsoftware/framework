@@ -110,11 +110,11 @@ function ShowLogs(p: { logs: ChangeLogClient.ChangeItem[], lastDate: DateTime | 
 
         return (
           <section key={gr.key} aria-labelledby={`deployed-${gr.key}`}>
-            <h3 id={`deployed-${gr.key}`}>
+            <h2 className="h3" id={`deployed-${gr.key}`}>
               <time dateTime={gr.key} title={ChangeLogMessage.DeployedOn0.niceToString(gr.key)}>
                 {isNew ? <strong>{gr.key}</strong> : gr.key}
               </time>
-            </h3>
+            </h2>
 
             <ul className="mb-2 p-0" role="list">
               {gr.elements.flatMap(e =>

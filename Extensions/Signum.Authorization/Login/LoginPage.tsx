@@ -31,7 +31,7 @@ function LoginPage(): React.JSX.Element {
     <div className="container sf-login-page">
       <div className="row">
         <div className="col-md-6 offset-md-3">
-          <h2 className="sf-entity-title">{AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}</h2>
+          <h1 className="sf-entity-title h2">{AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}</h1>
         </div>
       </div>
       {showLoginForm && <LoginForm ctx={ctx} />}

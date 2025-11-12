@@ -130,7 +130,7 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
   function renderHelp(h: TypeHelpClient.TypeHelp) {
     return (
       <div>
-        <h4 className="mb-1 mt-2">{h.type}</h4>
+        <h1 className="mb-1 mt-2 h4">{h.type}</h1>
 
         <ul className="sf-members" style={{ paddingLeft: "0px" }}>
           {h.members.map((m, i) => renderMember(h, m, i))}
@@ -243,8 +243,8 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
   return (
     <div className="sf-type-help">
       {renderHeader()}
-      {help == undefined ? <h4>Loading {currentType()}…</h4> :
-        help == false ? <h4>Not found {currentType()}</h4> :
+      {help == undefined ? <h1 className="h4">Loading {currentType()}…</h1> :
+        help == false ? <h1 className="h4">Not found {currentType()}</h1> :
           renderHelp(help)}
       {renderContextualMenu && renderContextualMenu()}
     </div>

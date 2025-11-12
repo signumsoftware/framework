@@ -140,11 +140,11 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
               <FontAwesomeIcon role="img" icon={parseIcon(p.partEmbedded.iconName)!} color={p.partEmbedded.iconColor ?? undefined} size="2x" />}
           </div>
         </div>
-        <h3 className="medium">{
+        <h2 className="medium h3">{
           custom?.message ?? (translated(p.partEmbedded, a => a.title) ||
             (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))
 
-        }</h3>
+        }</h2>
       </>
     );
   }

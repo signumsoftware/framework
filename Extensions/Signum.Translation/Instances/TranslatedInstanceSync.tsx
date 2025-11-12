@@ -82,7 +82,7 @@ export default function TranslatedInstanceSync(): React.JSX.Element {
     return (
       <div>
         <div className="mb-2">
-          <h2> {TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName)}</h2>
+          <h1 className="h2"> {TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName)}</h1>
         </div>
         {deletedTranslations}
         {result && result.totalInstances == 0 && <Link to={`/translatedInstance/status`}>
@@ -96,7 +96,7 @@ export default function TranslatedInstanceSync(): React.JSX.Element {
   return (
     <div>
       <div className="mb-2">
-        <h2><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
+        <h1 className="h2"><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h1>
       </div>
       {deletedTranslations}
       {result && result.totalInstances > 0 && renderTable()}

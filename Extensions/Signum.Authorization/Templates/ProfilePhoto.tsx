@@ -32,7 +32,7 @@ export default function ProfilePhoto(p: { user: UserEntity, size: number }): Rea
   return (
     <div className="user-profile-photo align-items-center d-flex justify-content-center" style={{ width: `${p.size}px`, height: `${p.size}px`, borderColor: !url ? color : undefined }}>
       {!url ? <FontAwesomeIcon role="img" icon="user" size={iconSize as any} color={color} /> :
-        <img src={url} style={{ maxWidth: `${p.size - 3}px`, maxHeight: `${p.size - 3}px` }} onError={() => setImageError(true)} title={getToString(p.user)} />}
+        <img src={url} style={{ maxWidth: `${p.size - 3}px`, maxHeight: `${p.size - 3}px` }} alt={getToString(p.user)} onError={() => setImageError(true)} title={getToString(p.user)} />}
     </div>
   );
 }
