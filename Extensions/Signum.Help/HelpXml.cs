@@ -180,7 +180,7 @@ public static class HelpXml
             bool? deleteTemp = deleteAll;
 
             Synchronizer.SynchronizeReplacing(rep, "Namespace", 
-                  newDictionary: files.EmptyIfNull().ToDictionaryEx(o => FS.Path.GetFileName(o)),
+                  newDictionary: files.EmptyIfNull().ToDictionaryEx(o => FS.Path.GetFileNameWithoutExtension(o)),
                   oldDictionary: current.ToDictionaryEx(n => n.Name),
                   createNew: (k, n) =>
                   {
@@ -289,7 +289,7 @@ public static class HelpXml
             bool? deleteTemp = deleteAll;
 
             Synchronizer.SynchronizeReplacing(rep, "Queries",
-                  newDictionary: files.EmptyIfNull().ToDictionaryEx(o => FS.Path.GetFileName(o)),
+                  newDictionary: files.EmptyIfNull().ToDictionaryEx(o => FS.Path.GetFileNameWithoutExtension(o)),
                   oldDictionary: current.ToDictionaryEx(n => n.Query.Key),
                   createNew: (k, n) =>
                   {
