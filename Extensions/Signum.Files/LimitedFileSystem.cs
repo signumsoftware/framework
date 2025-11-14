@@ -1,6 +1,5 @@
 using System.IO;
 using System.IO.Compression;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Signum.Files;
 

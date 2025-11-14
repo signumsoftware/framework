@@ -586,7 +586,7 @@ public static class HelpXml
     {
 
         var imageDir = FS.Path.Combine(FS.Path.GetDirectoryName(filePath)!, FS.Path.GetFileNameWithoutExtension(filePath));
-        var newImages = FS.Directory.Exists(imageDir) ? FS.Directory.GetFiles(imageDir) : null;
+        var newImages = FS.Directory.Exists(imageDir) ? FS.Directory.GetFiles(imageDir, "*") : null;
 
         Synchronizer.Synchronize(
               newDictionary: newImages.EmptyIfNull().ToDictionaryEx(n => FS.Path.GetFileName(n)),
@@ -662,7 +662,7 @@ public static class HelpXml
         cultures.AddRange(Database.Query<TypeHelpEntity>().Select(a => a.Culture).Distinct().ToList().Select(c => c.ToCultureInfo()));
         cultures.AddRange(Database.Query<QueryHelpEntity>().Select(a => a.Culture).Distinct().ToList().Select(c => c.ToCultureInfo()));
         if (FS.Directory.Exists(directoryName))
-            cultures.AddRange(FS.DirectoryInfo.New(directoryName).GetDirectories().Select(c => CultureInfo.GetCultureInfo(c.Name)));
+            cultures.AddRange(FS.Directory.GetDirectories(directoryName).Select(c => CultureInfo.GetCultureInfo(c.Name)));
         return cultures;
     }
 
@@ -899,16 +899,18 @@ public static class HelpXml
 
     public static byte[] ExportToZipBytes(List<IHelpEntity> entities)
     {
-        using var zip = new ZipBuilderScope("Help");
-        Export(entities, "");
+        using var zip = new ZipBuilder("Help");
+        using (new FS(zip))
+            Export(entities, "");
         var bytes = zip.GetAllBytes();
         return bytes;
     }
 
     public static byte[] ExportAllToZipBytes()
     {
-        using var zip = new ZipBuilderScope("Help");
-        ExportAll("");
+        using var zip = new ZipBuilder("Help");
+        using (new FS(zip))
+            ExportAll("");
         var bytes = zip.GetAllBytes();
         return bytes;
     }
@@ -928,7 +930,7 @@ public static class HelpXml
     public static void ImportExportHelp(string directoryName)
     {
     retry:
-        Console.WriteLine("You want to export (e) or import (i) Help? (nothing to exit)");
+        Console.WriteLine("You want to export (e) export as Zip (ez) or import (i) Help? (nothing to exit)");
 
         switch (Console.ReadLine()!.ToLower())
         {
