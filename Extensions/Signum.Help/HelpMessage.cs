@@ -84,6 +84,7 @@ public enum HelpMessage
     Close,
     ViewMore,
     JumpToViewMore,
+    ExportAsZip,
 }
 
 public enum HelpKindMessage

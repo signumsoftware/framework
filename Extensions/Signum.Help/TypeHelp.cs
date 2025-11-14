@@ -3,7 +3,7 @@ using Signum.Basics;
 namespace Signum.Help;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class TypeHelpEntity : Entity, IHelpImageTarget
+public class TypeHelpEntity : Entity, IHelpEntity
 {   
     public TypeEntity Type { get; set; }
 
@@ -40,7 +40,7 @@ public class TypeHelpEntity : Entity, IHelpImageTarget
         return base.PropertyValidation(pi);
     }
 
-    bool IHelpImageTarget.ForeachHtmlField(Func<string, string> processHtml)
+    bool IHelpEntity.ForeachHtmlField(Func<string, string> processHtml)
     {
         bool changed = false;
         if (Description != null)

@@ -98,5 +98,5 @@ public class HelpModuleOmniboxResult : OmniboxResult
 public static class HelpPermissions
 {
     public static PermissionSymbol ViewHelp;
-    public static PermissionSymbol DownloadHelp;
+    public static PermissionSymbol ExportHelp;
 }

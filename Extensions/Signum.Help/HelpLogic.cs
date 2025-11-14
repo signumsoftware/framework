@@ -146,6 +146,7 @@ public static class HelpLogic
                invalidateWith: new InvalidateWith(typeof(QueryHelpEntity)));
 
             PermissionLogic.RegisterPermissions(HelpPermissions.ViewHelp);
+            PermissionLogic.RegisterPermissions(HelpPermissions.ExportHelp);
 
             if(sb.WebServerBuilder != null)
             {

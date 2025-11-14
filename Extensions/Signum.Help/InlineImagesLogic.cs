@@ -8,12 +8,12 @@ public static class InlineImagesLogic
 {
 
     [AutoExpressionField]
-    public static IQueryable<HelpImageEntity> Images(this IHelpImageTarget e) =>
+    public static IQueryable<HelpImageEntity> Images(this IHelpEntity e) =>
         As.Expression(() => Database.Query<HelpImageEntity>().Where(a => a.Target.Is(e)));
 
     public static Regex ImgRegex = new Regex(@"<img(\s+(?<key>[\w\-]+)\s*=\s*""(?<value>[^""]+)"")+\s*/?>");
 
-    public static bool SynchronizeInlineImages(IHelpImageTarget entity)
+    public static bool SynchronizeInlineImages(IHelpEntity entity)
     {
         using (OperationLogic.AllowSave<HelpImageEntity>())
         {
