@@ -1,64 +1,79 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
-
-using IFileSystem = System.IO.Abstractions.IFileSystem;
 
 namespace Signum.Files;
 
-public abstract class FileSystemScope : IDisposable
+public class FileSystemScope : IDisposable
 {
-    private static readonly Variable<IFileSystem?> current = Statics.ThreadVariable<IFileSystem?>("currentHelpXmlFileSystem");
-    protected static IFileSystem Current => current.Value ?? new FileSystem();
-    private readonly IFileSystem? _previous;
+    private static readonly Variable<ILimitedFileSystem> current = Statics.ThreadVariable<ILimitedFileSystem>("currentLimitedFileSystem");
+    
+    private static RealLimitedFileSystem realFS = new();
+    protected static ILimitedFileSystem Current => current.Value ?? realFS;
 
-    protected FileSystemScope(IFileSystem fs)
+    public FileSystemScope(ILimitedFileSystem fs)
     {
-        _previous = current.Value;
         current.Value = fs;
     }
 
-    public void Dispose() => current.Value = _previous; //todo: set to null as always Real FS should be default?
-
-    public static System.IO.Abstractions.IFile File => Current.File;
-    public static IDirectory Directory => Current.Directory;
-    public static IDirectoryInfoFactory DirectoryInfo => Current.DirectoryInfo;
-    public static IPath Path => Current.Path;
-}
-
-/// <summary>
-/// Provides a disposable in-memory file system scope that captures all file operations 
-/// into a virtual structure and builds a ZIP archive on demand. 
-/// <para>Intended for use around export routines such as <c>HelpXml.ExportAll()</c>, allowing them to 
-/// write outputs a Zip directly from RAM without touching disk or altering existing export logic.</para>
-/// </summary>
-
-/// <param name="root">The root folder for entries within the ZIP archive.</param>
-public sealed class ZipBuilderScope(string root) : FileSystemScope(new MockFileSystem())
-{
-    private readonly string root = root.TrimEnd('/', '\\');
-
-    public byte[] GetAllBytes()
+    void IDisposable.Dispose()
     {
-        var mockFS = (MockFileSystem)Current;
-        using var ms = new MemoryStream();
-        using var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true);
-        var files = Directory.GetFiles(".", "*", SearchOption.AllDirectories);
-        foreach (var sourceFile in files)
-        {
-            var destFile = Path.GetRelativePath(mockFS.AllDrives.First(), sourceFile); //relative to drive root
-            destFile = destFile.Replace(Path.DirectorySeparatorChar, '/'); // normalize dir seperator for Zip
-            destFile = $"{root}/{destFile}";
-            var destEntry = zip.CreateEntry(destFile);
-
-            using var destStream = destEntry.Open();
-            using var source = File.OpenRead(sourceFile);
-            source.CopyTo(destStream);
-        }
-        zip.Dispose();
-
-        return ms.ToArray();
+        current.Value = realFS;
     }
+
+    #region Directory
+
+    public static class Directory
+    { 
+        public static bool Exists(string path) => Current.DirectoryExists(path);
+        public static string[] GetFiles(string path) => Current.GetFiles(path, "*");
+        public static string[] GetFiles(string path, string searchPattern) => Current.GetFiles(path, searchPattern);
+        public static DirectoryInfo CreateDirectory(string path) => Current.CreateDirectory(path);
+        public static DirectoryInfo[] GetDirectories(string path) => Current.GetDirectories(path);
+        public static void Delete(string path, bool recursive) => Current.DeleteDirectory(path, recursive);
+    
+    }
+    #endregion
+
+
+    #region File
+
+    public static class File
+    {
+        public static Stream OpenWrite(string path) => Current.FileOpenWrite(path);
+
+        public static void WriteAllBytes(string path, byte[] bytes) => Current.FileWriteAllBytes(path, bytes);
+
+        public static byte[] ReadAllBytes(string path) => Current.FileReadAllBytes(path);
+
+        public static void Delete(string path) => Current.FileDelete(path);
+    }
+    #endregion
+
+    #region Path methods (Always call corresponding methods from System.IO.Paths)
+
+    public static class Path
+    {
+
+        // Path methods always call corresponding methods from System.IO.Path
+
+        [return: NotNullIfNotNull(nameof(path))]
+        public static string? GetFileNameWithoutExtension(string? path) => System.IO.Path.GetFileNameWithoutExtension(path);
+
+        [return: NotNullIfNotNull(nameof(path))]
+        public static string? GetFileName(string? path) => System.IO.Path.GetFileName(path);
+
+        public static string Combine(string path1, string path2) => System.IO.Path.Combine(path1, path2);
+
+        public static string Combine(string path1, string path2, string path3) => System.IO.Path.Combine(path1, path2, path3);
+
+        public static string? GetDirectoryName(string? path) => System.IO.Path.GetDirectoryName(path);
+
+        public static char[] GetInvalidPathChars() => System.IO.Path.GetInvalidPathChars();
+    }
+    #endregion
+
 }
+
+
 
