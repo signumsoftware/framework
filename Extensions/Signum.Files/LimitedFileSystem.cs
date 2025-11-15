@@ -46,24 +46,14 @@ public class RealLimitedFileSystem : ILimitedFileSystem
 
 public abstract class ZipFileSystem
 {
-    protected readonly string root;
+    protected readonly string root; //No trailing slash
 
     protected static string SlashFix(string path) => path.Replace(Path.DirectorySeparatorChar, '/');
     protected string Absolute(string path) => root.HasText() ? $"{root}/{path}" : path;
-    protected static Regex GetPatternRegex(string basePath, string searchPattern)
-    {
-        basePath = Regex.Escape(SlashFix(basePath).TrimEnd('/', '\\') + '/');
-        searchPattern = Regex.Escape(searchPattern)
-                                .Replace(@"\*", ".*")
-                                .Replace(@"\?", ".");
-
-        return new Regex($"^{basePath}{searchPattern}$", RegexOptions.IgnoreCase);
-    }
 
     public ZipFileSystem(string root)
     {
-        if (root.HasText())
-            this.root = SlashFix(root).TrimEnd('/', '\\') + '/';
+        this.root = root.HasText() ? SlashFix(root).TrimEnd('/', '\\') : "";
     }
 
     protected sealed class StreamWithCallback(Stream inner, Action<Stream> onClose) : Stream
@@ -141,9 +131,9 @@ public class ZipBuilder(string root) : ZipFileSystem(root), ILimitedFileSystem, 
     //Bypassed operationss
     bool ILimitedFileSystem.DirectoryExists(string path) => false;
     DirectoryInfo ILimitedFileSystem.CreateDirectory(string path) => new(Absolute(SlashFix(path)));
-    DirectoryInfo[] ILimitedFileSystem.GetDirectories(string path) => [];
 
     // Unsupported operations
+    DirectoryInfo[] ILimitedFileSystem.GetDirectories(string path) => throw new NotSupportedException();
     void ILimitedFileSystem.DeleteDirectory(string path, bool recursive) => throw new NotSupportedException();
     string[] ILimitedFileSystem.GetFiles(string path, string searchPattern) => [];
     byte[] ILimitedFileSystem.FileReadAllBytes(string path) => throw new NotSupportedException();
@@ -154,16 +144,31 @@ public class ZipBuilder(string root) : ZipFileSystem(root), ILimitedFileSystem, 
 public sealed class ZipLoader : ZipFileSystem, ILimitedFileSystem, IDisposable
 {
     private readonly ZipArchive zip;
-    private readonly string[] entriesPath;
+    private readonly string[] entriesPath; //No trailing slash
+
+    private static string SlashEnd(string path) => path.HasText() ? SlashFix(path).TrimEnd('/', '\\') + '/' : "";
+
+    private static Regex GetPatternRegex(string basePath, string searchPattern)
+    {
+        basePath = Regex.Escape(SlashFix(basePath).TrimEnd('/', '\\') + '/');
+        searchPattern = Regex.Escape(searchPattern)
+                                .Replace(@"\*", ".*")
+                                .Replace(@"\?", ".");
+
+        return new Regex($"^{basePath}{searchPattern}$", RegexOptions.IgnoreCase);
+    }
 
     public ZipLoader(byte[] bytes, string root) : base(root)
     {
         zip = new(new MemoryStream(bytes), ZipArchiveMode.Read);
 
-        entriesPath = zip.Entries
-                  .Select(e => SlashFix(e.FullName))
-                  .Where(f => f.StartsWith(root, StringComparison.OrdinalIgnoreCase))
-                  .ToArray();
+        entriesPath = (
+            from e in zip.Entries
+            let f = SlashFix(e.FullName).TrimEnd('/', '\\')
+            where f.StartsWith(SlashEnd(root), StringComparison.OrdinalIgnoreCase)
+            select f
+            )
+            .ToArray();
     }
 
     public ZipLoader(string zipFile, string root) : this(File.ReadAllBytes(zipFile), root) { }
@@ -178,9 +183,8 @@ public sealed class ZipLoader : ZipFileSystem, ILimitedFileSystem, IDisposable
 
     byte[] ILimitedFileSystem.FileReadAllBytes(string path) 
     {
-        var entry = zip.Entries.FirstOrDefault(e => e.FullName.Equals(SlashFix(path), StringComparison.OrdinalIgnoreCase));
-        if (entry == null)
-            throw new FileNotFoundException($"File '{path}' not found in zip.");
+        var entry = zip.Entries.FirstOrDefault(e => e.FullName.Equals(SlashFix(path), StringComparison.OrdinalIgnoreCase)) 
+            ?? throw new FileNotFoundException($"File '{path}' not found in zip.");
 
         using var entryStream = entry.Open();
         using var ms = new MemoryStream();
@@ -195,12 +199,12 @@ public sealed class ZipLoader : ZipFileSystem, ILimitedFileSystem, IDisposable
 
     DirectoryInfo[] ILimitedFileSystem.GetDirectories(string path)
     {
-        var prefixPath = path.TrimEnd('/') + "/";
+        path = SlashEnd(path);
 
         var dirs = (
             from entry in entriesPath
-            where entry.StartsWith(prefixPath, StringComparison.OrdinalIgnoreCase)
-            let remainder = entry[prefixPath.Length..]
+            where entry.StartsWith(path, StringComparison.OrdinalIgnoreCase)
+            let remainder = entry[path.Length..]
             where remainder.Contains('/')
             select remainder[..remainder.IndexOf('/')]
             )
