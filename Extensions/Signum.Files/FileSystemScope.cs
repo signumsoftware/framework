@@ -46,6 +46,8 @@ public class FileSystemScope : IDisposable
 
         public static byte[] ReadAllBytes(string path) => Current.FileReadAllBytes(path);
 
+        public static Stream OpenRead(string path) => Current.FileOpenRead(path);
+
         public static void Delete(string path) => Current.FileDelete(path);
     }
     #endregion

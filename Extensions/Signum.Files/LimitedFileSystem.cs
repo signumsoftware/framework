@@ -1,95 +1,72 @@
 using System.IO;
 using System.IO.Compression;
+using System.Text.RegularExpressions;
 
 namespace Signum.Files;
 
-public interface ILimitedFileSystem : IDisposable
+public interface ILimitedFileSystem
 {
-    DirectoryInfo CreateDirectory(string path);
     bool DirectoryExists(string path);
-    string[] GetFiles(string path, string searchPattern);
+    DirectoryInfo CreateDirectory(string path);
     DirectoryInfo[] GetDirectories(string path);
     void DeleteDirectory(string path, bool recursive);
+
+    string[] GetFiles(string path, string searchPattern);
     Stream FileOpenWrite(string path);
     void FileWriteAllBytes(string path, byte[] bytes);
     byte[] FileReadAllBytes(string path);
+    Stream FileOpenRead(string path);
     void FileDelete(string path);
 
 }
 
 public class RealLimitedFileSystem : ILimitedFileSystem
 {
-    public DirectoryInfo CreateDirectory(string path) => Directory.CreateDirectory(path);
+    bool ILimitedFileSystem.DirectoryExists(string path) => Directory.Exists(path);
 
-    public void DeleteDirectory(string path, bool recursive) => Directory.Delete(path, recursive);
+    DirectoryInfo ILimitedFileSystem.CreateDirectory(string path) => Directory.CreateDirectory(path);
 
-    public bool DirectoryExists(string path) => Directory.Exists(path);
+    DirectoryInfo[] ILimitedFileSystem.GetDirectories(string path) => new DirectoryInfo(path).GetDirectories();
 
-    public Stream FileOpenWrite(string path) => File.OpenWrite(path);
+    void ILimitedFileSystem.DeleteDirectory(string path, bool recursive) => Directory.Delete(path, recursive);
 
-    public void FileWriteAllBytes(string path, byte[] bytes) => File.WriteAllBytes(path, bytes);
+    string[] ILimitedFileSystem.GetFiles(string path, string searchPattern) => Directory.GetFiles(path, searchPattern);
 
-    public byte[] FileReadAllBytes(string path) => File.ReadAllBytes(path);
+    Stream ILimitedFileSystem.FileOpenWrite(string path) => File.OpenWrite(path);
+    
+    void ILimitedFileSystem.FileWriteAllBytes(string path, byte[] bytes) => File.WriteAllBytes(path, bytes);
 
-    public void FileDelete(string path) => File.Delete(path);
+    byte[] ILimitedFileSystem.FileReadAllBytes(string path) => File.ReadAllBytes(path);
 
-    public DirectoryInfo[] GetDirectories(string path) => new DirectoryInfo(path).GetDirectories();
+    Stream ILimitedFileSystem.FileOpenRead(string path) => File.OpenRead(path);
 
-    public string[] GetFiles(string path, string searchPattern) => Directory.GetFiles(path, searchPattern);
+    void ILimitedFileSystem.FileDelete(string path) => File.Delete(path);
 
-    void IDisposable.Dispose()
-    {
-        //nothing to dispose
-    }
 }
 
-public class ZipBuilder(string root) : ILimitedFileSystem
+public abstract class ZipFileSystem
 {
-    private readonly string root = root.TrimEnd('/', '\\');
+    protected readonly string root;
 
-    // key: normalized path, value: bytes
-    private readonly Dictionary<string, byte[]> files = [];
-
-    private string Normalize(string path) =>
-        $"{root}/{path.Replace(Path.DirectorySeparatorChar, '/')}";
-
-    public Stream FileOpenWrite(string path)
+    protected static string SlashFix(string path) => path.Replace(Path.DirectorySeparatorChar, '/');
+    protected string Absolute(string path) => root.HasText() ? $"{root}/{path}" : path;
+    protected static Regex GetPatternRegex(string basePath, string searchPattern)
     {
-        path = Normalize(path);
+        basePath = Regex.Escape(SlashFix(basePath).TrimEnd('/', '\\') + '/');
+        searchPattern = Regex.Escape(searchPattern)
+                                .Replace(@"\*", ".*")
+                                .Replace(@"\?", ".");
 
-        var ms = new MemoryStream();
-
-        return new StreamWithCallback(ms, s =>
-        {
-            s.Position = 0;
-            files[path] = ((MemoryStream)s).ToArray();
-        });
+        return new Regex($"^{basePath}{searchPattern}$", RegexOptions.IgnoreCase);
     }
 
-    public void FileWriteAllBytes(string path, byte[] bytes)
+    public ZipFileSystem(string root)
     {
-        path = Normalize(path);
-        files[path] = bytes;
+        if (root.HasText())
+            this.root = SlashFix(root).TrimEnd('/', '\\') + '/';
     }
 
-    public byte[] GetAllBytes()
-    {
-        using var output = new MemoryStream();
-        using (var zip = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
-        {
-            foreach (var kvp in files)
-            {
-                var entry = zip.CreateEntry(kvp.Key, CompressionLevel.Optimal);
-
-                using var entryStream = entry.Open();
-                entryStream.Write(kvp.Value, 0, kvp.Value.Length);
-            }
-        }
-
-        return output.ToArray();
-    }
-
-    private sealed class StreamWithCallback(Stream inner, Action<Stream> onClose) : Stream
+    protected sealed class StreamWithCallback(Stream inner, Action<Stream> onClose) : Stream
     {
         private readonly Stream inner = inner;
         private readonly Action<Stream> onClose = onClose;
@@ -115,19 +92,144 @@ public class ZipBuilder(string root) : ILimitedFileSystem
         public override void Write(byte[] buffer, int offset, int count) => inner.Write(buffer, offset, count);
     }
 
-    public void Dispose()
+}
+
+public class ZipBuilder(string root) : ZipFileSystem(root), ILimitedFileSystem, IDisposable
+{
+    // key: normalized path, value: bytes
+    private readonly Dictionary<string, byte[]> files = [];
+
+    public Stream FileOpenWrite(string path)
     {
-        // nothing to dispose
+        path = Absolute(SlashFix(path));
+        var ms = new MemoryStream();
+        return new StreamWithCallback(ms, s =>
+        {
+            s.Position = 0;
+            files[path] = ((MemoryStream)s).ToArray();
+        });
+    }
+
+    public void FileWriteAllBytes(string path, byte[] bytes)
+    {
+        path = Absolute(SlashFix(path));
+        files[path] = bytes;
+    }
+
+    public byte[] GetAllBytes()
+    {
+        using var output = new MemoryStream();
+        using (var zip = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
+        {
+            foreach (var kvp in files)
+            {
+                var entry = zip.CreateEntry(kvp.Key, CompressionLevel.Optimal);
+
+                using var entryStream = entry.Open();
+                entryStream.Write(kvp.Value, 0, kvp.Value.Length);
+            }
+        }
+
+        return output.ToArray();
+    }
+
+    void IDisposable.Dispose()
+    {
+        //for now nothing to dispose
+    }
+
+    //Bypassed operationss
+    bool ILimitedFileSystem.DirectoryExists(string path) => false;
+    DirectoryInfo ILimitedFileSystem.CreateDirectory(string path) => new(Absolute(SlashFix(path)));
+    DirectoryInfo[] ILimitedFileSystem.GetDirectories(string path) => [];
+
+    // Unsupported operations
+    void ILimitedFileSystem.DeleteDirectory(string path, bool recursive) => throw new NotSupportedException();
+    string[] ILimitedFileSystem.GetFiles(string path, string searchPattern) => [];
+    byte[] ILimitedFileSystem.FileReadAllBytes(string path) => throw new NotSupportedException();
+    Stream ILimitedFileSystem.FileOpenRead(string path) => throw new NotSupportedException();
+    void ILimitedFileSystem.FileDelete(string path) => throw new NotSupportedException();
+}
+
+public sealed class ZipLoader : ZipFileSystem, ILimitedFileSystem, IDisposable
+{
+    private readonly ZipArchive zip;
+    private readonly string[] entriesPath;
+
+    public ZipLoader(byte[] bytes, string root) : base(root)
+    {
+        zip = new(new MemoryStream(bytes), ZipArchiveMode.Read);
+
+        entriesPath = zip.Entries
+                  .Select(e => SlashFix(e.FullName))
+                  .Where(f => f.StartsWith(root, StringComparison.OrdinalIgnoreCase))
+                  .ToArray();
+    }
+
+    public ZipLoader(string zipFile, string root) : this(File.ReadAllBytes(zipFile), root) { }
+
+    Stream ILimitedFileSystem.FileOpenRead(string path)
+    {
+        var entry = zip.GetEntry(SlashFix(path))
+            ?? throw new FileNotFoundException(path);
+
+        return entry.Open();
+    }
+
+    byte[] ILimitedFileSystem.FileReadAllBytes(string path) 
+    {
+        var entry = zip.Entries.FirstOrDefault(e => e.FullName.Equals(SlashFix(path), StringComparison.OrdinalIgnoreCase));
+        if (entry == null)
+            throw new FileNotFoundException($"File '{path}' not found in zip.");
+
+        using var entryStream = entry.Open();
+        using var ms = new MemoryStream();
+        entryStream.CopyTo(ms);
+        return ms.ToArray();
+    }
+
+    bool ILimitedFileSystem.DirectoryExists(string path)
+    {
+        return entriesPath.Any(e => e.StartsWith(Absolute(SlashFix(path)), StringComparison.OrdinalIgnoreCase));
+    }
+
+    DirectoryInfo[] ILimitedFileSystem.GetDirectories(string path)
+    {
+        var prefixPath = path.TrimEnd('/') + "/";
+
+        var dirs = (
+            from entry in entriesPath
+            where entry.StartsWith(prefixPath, StringComparison.OrdinalIgnoreCase)
+            let remainder = entry[prefixPath.Length..]
+            where remainder.Contains('/')
+            select remainder[..remainder.IndexOf('/')]
+            )
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        return dirs
+                .Select(f => new DirectoryInfo(f))
+                .ToArray();
+    }
+
+    string[] ILimitedFileSystem.GetFiles(string path, string searchPattern)
+    {
+        var regex = GetPatternRegex(Absolute(path), searchPattern);
+
+        return entriesPath
+                .Where(f => regex.IsMatch(f))
+                .ToArray();
+    }
+
+    void IDisposable.Dispose()
+    {
+        zip.Dispose();
     }
 
     // Unsupported operations
-    public DirectoryInfo CreateDirectory(string path) => new(Normalize(path));
-    public void DeleteDirectory(string path, bool recursive) => throw new NotSupportedException();
-    public bool DirectoryExists(string path) => false;
-    public DirectoryInfo[] GetDirectories(string path) => [];
-    public string[] GetFiles(string path, string searchPattern) => [];
-    public byte[] FileReadAllBytes(string path) => throw new NotSupportedException();
-    public void FileDelete(string path) => throw new NotSupportedException();
-
+    DirectoryInfo ILimitedFileSystem.CreateDirectory(string path) => throw new NotSupportedException();
+    void ILimitedFileSystem.DeleteDirectory(string path, bool recursive) => throw new NotSupportedException();
+    void ILimitedFileSystem.FileDelete(string path) => throw new NotSupportedException();
+    Stream ILimitedFileSystem.FileOpenWrite(string path) => throw new NotSupportedException();
+    void ILimitedFileSystem.FileWriteAllBytes(string path, byte[] bytes) => throw new NotSupportedException();
 }
 
