@@ -47,7 +47,7 @@ public static class HelpXml
 
             XElement ParseXML(string path)
             {
-                XDocument doc = XDocument.Load(path);
+                XDocument doc = LoadXml(path);
                 XElement element = doc.Element(_Appendix)!;
 
                 var uniqueName = element.Attribute(_Name)!.Value;
@@ -67,7 +67,7 @@ public static class HelpXml
             Synchronizer.SynchronizeReplacing(rep, "Appendix",
                   newDictionary: files.EmptyIfNull().ToDictionaryEx(o => FS.Path.GetFileNameWithoutExtension(o)),
                   oldDictionary: current.ToDictionaryEx(n => n.UniqueName),
-                  createNew: (k, n) =>
+                  createNew: (_, n) =>
                   {
                       XElement element = ParseXML(n);
 
@@ -163,7 +163,7 @@ public static class HelpXml
 
             XElement ParseXML(string path)
             {
-                XDocument doc = XDocument.Load(path);
+                XDocument doc = LoadXml(path);
                 XElement element = doc.Element(_Namespace)!;
 
                 var uniqueName = element.Attribute(_Name)!.Value;
@@ -182,7 +182,7 @@ public static class HelpXml
             Synchronizer.SynchronizeReplacing(rep, "Namespace", 
                   newDictionary: files.EmptyIfNull().ToDictionaryEx(o => FS.Path.GetFileNameWithoutExtension(o)),
                   oldDictionary: current.ToDictionaryEx(n => n.Name),
-                  createNew: (k, n) =>
+                  createNew: (_, n) =>
                   {
                       XElement element = ParseXML(n);
 
@@ -272,7 +272,7 @@ public static class HelpXml
 
             XElement ParseXML(string path)
             {
-                XDocument doc = XDocument.Load(path);
+                XDocument doc = LoadXml(path);
                 XElement element = doc.Element(_Query)!;
 
                 var queryKey = element.Attribute(_Key)!.Value;
@@ -294,7 +294,7 @@ public static class HelpXml
                   createNew: (k, n) =>
                   {
                       XElement element = ParseXML(n);
-                      var qn = QueryLogic.ToQueryName(k.Before(".help"));
+                      var qn = QueryLogic.ToQueryName(k);
                       var queryHelp = new QueryHelpEntity
                       {
                           Culture = ci,
@@ -511,7 +511,7 @@ public static class HelpXml
 
             XElement ParseXML(string path)
             {
-                XDocument doc = XDocument.Load(path);
+                XDocument doc = LoadXml(path);
                 XElement element = doc.Element(_Entity)!;
 
                 var uniqueName = element.Attribute(_CleanName)!.Value;
@@ -530,7 +530,7 @@ public static class HelpXml
             Synchronizer.SynchronizeReplacing(rep, "Types",
                   newDictionary: files.EmptyIfNull().ToDictionaryEx(o => FS.Path.GetFileNameWithoutExtension(o)),
                   oldDictionary: current.ToDictionaryEx(n => n.Type.CleanName),
-                  createNew: (k, path) =>
+                  createNew: (_, path) =>
                   {
                       XElement element = ParseXML(path);
                       var cleanName = element.Attribute(_CleanName)!.Value;
@@ -704,6 +704,14 @@ public static class HelpXml
     {
         using var stream = FS.File.OpenWrite(fileName);
         doc.Save(stream);
+    }
+
+    private static XDocument LoadXml(string fileName)
+    {
+        using var stream = FS.File.OpenRead(fileName);
+        XDocument doc = XDocument.Load(stream);
+        
+        return doc;
     }
 
     public static void ExportFolder<T>(ref bool? replace, ref bool? delete, string folder, List<T> should,  Func<T, string> fileName, Func<T, XDocument> toXML, Func<T, List<HelpImageEntity>?> getImages)
@@ -899,7 +907,7 @@ public static class HelpXml
 
     public static byte[] ExportToZipBytes(List<IHelpEntity> entities)
     {
-        using var zip = new ZipBuilder("Help");
+        var zip = new ZipBuilder("Help");
         using (new FS(zip))
             Export(entities, "");
         var bytes = zip.GetAllBytes();
@@ -908,11 +916,18 @@ public static class HelpXml
 
     public static byte[] ExportAllToZipBytes()
     {
-        using var zip = new ZipBuilder("Help");
+        var zip = new ZipBuilder("");
         using (new FS(zip))
-            ExportAll("");
+            ExportAll("Help");
         var bytes = zip.GetAllBytes();
         return bytes;
+    }
+
+    public static void ImportAllFromZip()
+    {
+        var zip = new ZipLoader(@"..\..\..\Help.zip", "");
+        using (new FS(zip))
+            ImportAll("Help");
     }
 
     public static void ExportAllToZipFile(string filePath)
@@ -930,7 +945,7 @@ public static class HelpXml
     public static void ImportExportHelp(string directoryName)
     {
     retry:
-        Console.WriteLine("You want to export (e) export as Zip (ez) or import (i) Help? (nothing to exit)");
+        Console.WriteLine("You want to export (e), import (i), export ZIP (ez), or import ZIP (iz)? (nothing to exit)");
 
         switch (Console.ReadLine()!.ToLower())
         {
@@ -938,6 +953,7 @@ public static class HelpXml
             case "e": ExportAll(directoryName); break;
             case "ez": ExportAllToZipFile(@"..\..\..\Help.zip"); break;
             case "i": ImportAll(directoryName); break;
+            case "iz": ImportAllFromZip(); break;
             default:
                 goto retry;
         }
