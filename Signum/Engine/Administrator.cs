@@ -914,7 +914,7 @@ public static class Administrator
         }
     }
 
-    public static IDisposable WithSnapshotOrTempalateDatabase(string? templateName = null)
+    public static IDisposable WithSnapshotOrTemplateDatabase(string? templateName = null)
     {
         var dbName = Connector.Current.DatabaseName();
         templateName ??= dbName + "_Template";
