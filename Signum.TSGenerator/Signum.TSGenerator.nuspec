@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Signum.TSGenerator</id>
-    <version>9.2.1</version>
+    <version>10.0.1</version>
     <title>TypeScript generator for Signum Framework applications</title>
     <authors>Olmo del Corral</authors>
     <license type="expression">MIT</license>
@@ -11,14 +11,14 @@
     <icon>SignumLogo.png</icon>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>For every file 'SomeEntitiesNamespace.t4s' in your project generates a 'SomeEntitiesNamespace.ts' with all you C# Entities, Queries, Messages, Operations, etc..</description>
-    <copyright>Copyright 2024</copyright>
+    <copyright>Copyright 2025</copyright>
     <tags>signum msbuild typescript csharp linq react</tags>
   </metadata>
   <files>
     <file src="SignumLogo.png" target="" />
     <file src="bin\**\*.*" target="lib" exclude="bin\**\*.*" />
-    <file src="bin\Release\net9.0\*.dll" target="build" />
-    <file src="bin\Release\net9.0\*.json" target="build" />
+    <file src="bin\Release\net10.0\*.dll" target="build" />
+    <file src="bin\Release\net10.0\*.json" target="build" />
     <file src="Signum.TSGenerator.targets" target="build" />
   </files>
 </package>
