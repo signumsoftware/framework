@@ -157,7 +157,7 @@ public class HelpController : ControllerBase
     [HttpPost("api/help/import")]
     public void Import([Required, FromBody] FileUpload file)
     {
-        HelpXml.ImportFromZip(file.content);
+        HelpXml.ForceImportFromZip(file.content);
     }
 
     public class FileUpload
