@@ -90,6 +90,10 @@ public enum HelpMessage
     ViewMore,
     JumpToViewMore,
     ExportAsZip,
+    Import,
+    SucessfullyImported,
+    ImportHelpContentsFromZipFile,
+    SelectTheZipFileWithTheHelpContentsThatYouWantToImport
 }
 
 public enum HelpKindMessage

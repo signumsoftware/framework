@@ -33,6 +33,8 @@ export namespace HelpClient {
     options.routes.push({ path: "/help/type/:cleanName", element: <ImportComponent onImport={() => import("./Pages/TypeHelpPage")} /> });
     options.routes.push({ path: "/help/appendix/:uniqueName?", element: <ImportComponent onImport={() => import("./Pages/AppendixHelpPage")} /> });
 
+    options.routes.push({ path: "/help/import", element: <ImportComponent onImport={() => import("./Pages/ImportHelpPage")} /> });
+
     onWidgets.push(wc => AppContext.isPermissionAuthorized(HelpPermissions.ViewHelp) && isEntity(wc.ctx.value) ? <HelpWidget wc={wc as WidgetContext<Entity>} /> : undefined);
 
     tasks.push(taskHelpIcon);
@@ -148,7 +150,17 @@ export namespace HelpClient {
       ajaxPostRaw({ url: "/api/help/export" }, entity)
         .then(resp => saveFile(resp));
     }
-  
+
+    export interface FileUpload {
+      fileName: string;
+      content: string;
+    }
+
+    export function importByForce(request: FileUpload): Promise<void> {
+      return ajaxPost({ url: "/api/help/import" }, request);
+    }
+
+
 
   }
 

@@ -153,6 +153,19 @@ public class HelpController : ControllerBase
 
         return MimeMapping.GetFileStreamResult(new MemoryStream(bytes), fileName);
     }
+
+    [HttpPost("api/help/import")]
+    public void Import([Required, FromBody] FileUpload file)
+    {
+        HelpXml.ImportFromZip(file.content);
+    }
+
+    public class FileUpload
+    {
+        public string fileName;
+        public byte[] content;
+    }
+
 }
 
 public class HelpIndexTS

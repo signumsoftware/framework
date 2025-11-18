@@ -96,6 +96,10 @@ export namespace HelpMessage {
   export const ViewMore: MessageKey = new MessageKey("HelpMessage", "ViewMore");
   export const JumpToViewMore: MessageKey = new MessageKey("HelpMessage", "JumpToViewMore");
   export const ExportAsZip: MessageKey = new MessageKey("HelpMessage", "ExportAsZip");
+  export const Import: MessageKey = new MessageKey("HelpMessage", "Import");
+  export const SucessfullyImported: MessageKey = new MessageKey("HelpMessage", "SucessfullyImported");
+  export const ImportHelpContentsFromZipFile: MessageKey = new MessageKey("HelpMessage", "ImportHelpContentsFromZipFile");
+  export const SelectTheZipFileWithTheHelpContentsThatYouWantToImport: MessageKey = new MessageKey("HelpMessage", "SelectTheZipFileWithTheHelpContentsThatYouWantToImport");
 }
 
 export namespace HelpPermissions {
