@@ -1,8 +1,10 @@
+using DocumentFormat.OpenXml.Vml.Office;
 using Signum.API;
 using Signum.Engine.Sync;
 using Signum.Files;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -14,6 +16,7 @@ public static class HelpXml
     {
         public string Type { get; set; }
         public string Key { get; set; }
+        public CultureInfo Culture { get; set; }
         public FileContent Xml { get; set; }
         public FileContent[] Images { get; set; }
     }
@@ -63,6 +66,7 @@ public static class HelpXml
             {
                 Type = type,
                 Key = key,
+                Culture = entity.Culture.ToCultureInfo(),
                 Xml = new FileContent($"{key}.help", ToXDocument(entity).ToBytes()),
                 Images = GetImageContents(entity)
             }; 
@@ -180,6 +184,7 @@ public static class HelpXml
             {
                 Type = type,
                 Key = key,
+                Culture = entity.Culture.ToCultureInfo(),
                 Xml = new FileContent($"{key}.help", ToXDocument(entity).ToBytes()),
                 Images = GetImageContents(entity)
             };
@@ -315,6 +320,7 @@ public static class HelpXml
             {
                 Type = type,
                 Key = key,
+                Culture = entity.Culture.ToCultureInfo(),
                 Xml = new FileContent($"{key}.help", ToXDocument(entity).ToBytes()),
                 Images = GetImageContents(entity)
             };
@@ -487,6 +493,7 @@ public static class HelpXml
             {
                 Type = type,
                 Key = key,
+                Culture = entity.Culture.ToCultureInfo(),
                 Xml = new FileContent($"{key}.help", ToXDocument(entity).ToBytes()),
                 Images = GetImageContents(entity)
             };
@@ -845,6 +852,51 @@ public static class HelpXml
         replace = replaceLocal;
     }
 
+    public static void ExportAllToZipFile(string zipFile)
+    {
+        List<IHelpEntity> all  = 
+        [.. Database.Query<AppendixHelpEntity>().Select(a => a),        
+         .. Database.Query<NamespaceHelpEntity>().Select(a => a),
+         .. Database.Query<TypeHelpEntity>().Select(a => a),
+         .. Database.Query<QueryHelpEntity>().Select(a => a)];
+
+        var bytes = ExportToZipBytes(all, "Help");
+        File.WriteAllBytes(zipFile, bytes);
+    }
+
+    private static void WriteToZip(ZipArchive zip, FileContent content, string path)
+    {
+        var fileName = Path.Combine(path, content.FileName).Replace(Path.DirectorySeparatorChar, '/');
+        var entry = zip.CreateEntry(fileName);
+        using var entryStream = entry.Open();
+        entryStream.Write(content.Bytes, 0, content.Bytes.Length);
+    }
+
+    public static byte[] ExportToZipBytes(List<IHelpEntity> entities, string root)
+    {
+        var contents = entities.Select(e => e.ToHelpContent());
+
+        using var output = new MemoryStream();
+        using (var zip = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
+        {
+            foreach (var help in contents)
+            {
+                var typePath = Path.Combine(root, help.Culture.Name, help.Type);
+
+                WriteToZip(zip, help.Xml, typePath);
+
+                foreach (var img in help.Images)
+                {
+                    var imgPath = Path.Combine(typePath, help.Key);
+                    WriteToZip(zip, img, imgPath);
+                }
+            }
+        }
+
+        var bytes = output.ToArray();
+        return bytes;
+    }
+
     #endregion Export methods
 
     private static void ImportAll(string directoryName)
@@ -910,6 +962,7 @@ public static class HelpXml
         {
             case "": return;
             case "e": ExportAll(path); break;
+            case "ez": ExportAllToZipFile(@"..\..\..\Help.zip"); break;
             case "i": ImportAll(path); break;
             default:
                 goto retry;
