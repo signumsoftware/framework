@@ -19,7 +19,7 @@ public class DashboardController : ControllerBase
         return result?.ToLite();
     }
 
-    static object lockKey = new object();
+    static Lock lockKey = new ();
 
     [HttpPost("api/dashboard/get")]
     public DashboardWithCachedQueries GetDashboard([FromBody]Lite<DashboardEntity> dashboard)

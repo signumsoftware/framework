@@ -5,7 +5,7 @@ namespace Signum.Utilities.Synchronization;
 
 public class TreadSafeEnumerator<T>: IEnumerable<T>, IEnumerator<T>
 {
-    object key = new object();
+    Lock key = new ();
     IEnumerator<T> enumerator;
     
     volatile bool moveNext = true;

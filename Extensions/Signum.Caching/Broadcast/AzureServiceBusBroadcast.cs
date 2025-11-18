@@ -47,7 +47,7 @@ public class AzureServiceBusBroadcast : IServerBroadcast, IAsyncDisposable
         }, EntityJsonContext.FullJsonSerializerOptions))).Wait();
     }
 
-    public object syncLock = new object();
+    public Lock syncLock = new ();
 
     public void StartIfNecessary()
     {
