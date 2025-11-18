@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 using Signum.API.Filters;
 using Signum.Basics;
+using Signum.UserAssets;
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using System.IO;
 
 namespace Signum.Help;
 
@@ -136,6 +138,20 @@ public class HelpController : ControllerBase
             tr.Commit();
         }
 
+    }
+
+    [HttpPost("api/help/export")]
+    public FileStreamResult Export([Required, FromBody] Lite<IHelpEntity>[] lites)
+    {
+        HelpPermissions.ExportHelp.AssertAuthorized();
+        
+        var bytes = HelpXml.ExportToZipBytes(lites.RetrieveList().ToList(), "Help");
+
+        var typeName = lites.Select(a => a.EntityType).Distinct().SingleEx().ToTypeEntity().CleanName;
+        var Ids = lites.ToString(a => a.Id.ToString(), "_");
+        var fileName = $"{typeName}{Ids}.zip";
+
+        return MimeMapping.GetFileStreamResult(new MemoryStream(bytes), fileName);
     }
 }
 
