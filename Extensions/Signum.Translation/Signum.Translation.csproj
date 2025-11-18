@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework> 
 		<Nullable>enable</Nullable>
 		<WarningsAsErrors>nullable</WarningsAsErrors>
 		<OutputType>Library</OutputType>
@@ -14,9 +14,9 @@
 	<ItemGroup>
 		
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
-		<PackageReference Include="Signum.MSBuildTask" Version="9.0.0" />
-		<PackageReference Include="Signum.TSGenerator" Version="9.2.1" />
-		<PackageReference Include="DeepL.net" Version="1.15.0" />
+		<PackageReference Include="Signum.MSBuildTask" Version="10.0.0" />
+		<PackageReference Include="Signum.TSGenerator" Version="10.0.1" />
+		<PackageReference Include="DeepL.net" Version="1.17.0" />
 	</ItemGroup>
 
 	<ItemGroup>
