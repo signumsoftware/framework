@@ -15,13 +15,6 @@ public class HelpImageEntity : Entity
     public FilePathEmbedded File { get; set; }
 }
 
-
-public interface IHelpEntity : IEntity
-{
-    bool ForeachHtmlField(Func<string, string> processHtml);
-}
-
-
 [AutoInit]
 public static class HelpImageFileType
 {

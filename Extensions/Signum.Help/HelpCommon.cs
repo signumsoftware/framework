@@ -2,6 +2,11 @@ using System.ComponentModel;
 
 namespace Signum.Help;
 
+public interface IHelpEntity : IEntity
+{
+    bool ForeachHtmlField(Func<string, string> processHtml);
+}
+
 public enum HelpMessage
 {
     [Description("{0} is a {1}")]
