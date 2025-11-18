@@ -7,7 +7,7 @@ namespace Signum.Help;
 public class HelpImageEntity : Entity
 {
     [ImplementedBy(typeof(AppendixHelpEntity), typeof(NamespaceHelpEntity), typeof(QueryHelpEntity), typeof(TypeHelpEntity))]
-    public Lite<IHelpImageTarget> Target { get; set; }
+    public Lite<IHelpEntity> Target { get; set; }
 
     public DateTime CreationDate { get; set; } = Clock.Now;
 
@@ -16,7 +16,7 @@ public class HelpImageEntity : Entity
 }
 
 
-public interface IHelpImageTarget : IEntity
+public interface IHelpEntity : IEntity
 {
     bool ForeachHtmlField(Func<string, string> processHtml);
 }

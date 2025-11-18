@@ -38,7 +38,7 @@ public static class HelpXml
         }
 
 
-        internal static void LoadDirectory(string directory, CultureInfoEntity ci, Dictionary<Lite<IHelpImageTarget>, List<HelpImageEntity>> images, 
+        internal static void LoadDirectory(string directory, CultureInfoEntity ci, Dictionary<Lite<IHelpEntity>, List<HelpImageEntity>> images, 
             Replacements rep, ref bool? deleteAll)
         {
             SafeConsole.WriteLineColor(ConsoleColor.White, $" Appendix");
@@ -153,7 +153,7 @@ public static class HelpXml
             return result;
         }
 
-        internal static void LoadDirectory(string directory, CultureInfoEntity ci, Dictionary<Lite<IHelpImageTarget>, List<HelpImageEntity>> images, 
+        internal static void LoadDirectory(string directory, CultureInfoEntity ci, Dictionary<Lite<IHelpEntity>, List<HelpImageEntity>> images, 
             Replacements rep, ref bool? deleteAll)
         {
             SafeConsole.WriteLineColor(ConsoleColor.White, $" Namespace");
@@ -262,7 +262,7 @@ public static class HelpXml
                    );
         }
 
-        internal static void LoadDirectory(string directory, CultureInfoEntity ci, Dictionary<Lite<IHelpImageTarget>, List<HelpImageEntity>> images, 
+        internal static void LoadDirectory(string directory, CultureInfoEntity ci, Dictionary<Lite<IHelpEntity>, List<HelpImageEntity>> images, 
             Replacements rep, ref bool? deleteAll)
         {
             SafeConsole.WriteLineColor(ConsoleColor.White, $" Query");
@@ -498,7 +498,7 @@ public static class HelpXml
         }
 
 
-        internal static void LoadDirectory(string directory, CultureInfoEntity ci, Dictionary<Lite<IHelpImageTarget>, List<HelpImageEntity>> images, 
+        internal static void LoadDirectory(string directory, CultureInfoEntity ci, Dictionary<Lite<IHelpEntity>, List<HelpImageEntity>> images, 
             Replacements rep, ref bool? deleteAll)
         {
             SafeConsole.WriteLineColor(ConsoleColor.White, $" Entity");
@@ -594,7 +594,7 @@ public static class HelpXml
               {
                   Administrator.SaveDisableIdentity(new HelpImageEntity
                   {
-                      Target = ((IHelpImageTarget)entity).ToLite(),
+                      Target = ((IHelpEntity)entity).ToLite(),
                       File = new FilePathEmbedded(HelpImageFileType.Image, Path.GetFileName(n).After("."), File.ReadAllBytes(n))
                   }.SetId(Guid.Parse(Path.GetFileName(n).Before("."))));
                   SafeConsole.WriteColor(ConsoleColor.Green, '.');
