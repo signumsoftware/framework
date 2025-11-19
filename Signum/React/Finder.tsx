@@ -1252,13 +1252,21 @@ export namespace Finder {
       .filter(fo => !isFilterGroup(fo) && (fo.operation == null || fo.operation == "EqualTo") && !fo.token.toString().contains(".") && fo.pinned == null && fo.value != null)
       .map(fo => ({ token: fo.token }) as ColumnOption);
   }
-  export function parseSingleToken(queryName: PseudoType | QueryKey, token: string, subTokenOptions: SubTokensOptions): Promise<QueryToken> {
+  export async function parseSingleToken(queryName: PseudoType | QueryKey, token: string | QueryTokenString<any>, subTokenOptions: SubTokensOptions): Promise<QueryToken> {
 
-    return getQueryDescription(getQueryKey(queryName)).then(qd => {
-      const completer = new TokenCompleter(qd);
-      const result = completer.request(token);
-      return completer.finished().then(() => completer.get(token, subTokenOptions));
-    });
+    var qd = await getQueryDescription(getQueryKey(queryName));
+    const completer = new TokenCompleter(qd);
+    const result = completer.request(token.toString());
+    await completer.finished();
+    return completer.get(token.toString(), subTokenOptions);
+  }
+
+  export async function parseTokens(queryName: PseudoType | QueryKey, tokens: (string | QueryTokenString<any>)[], subTokenOptions: SubTokensOptions): Promise<QueryToken[]> {
+    var qd = await getQueryDescription(getQueryKey(queryName));
+    const completer = new TokenCompleter(qd);
+    tokens.forEach(token => completer.request(token.toString()));  
+    await completer.finished();
+    return tokens.map(token => completer.get(token.toString(), subTokenOptions));
   }
 
   export class TokenCompleter {
