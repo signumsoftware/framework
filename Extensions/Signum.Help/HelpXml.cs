@@ -73,7 +73,7 @@ public static class HelpXml
 
                 bool? deleteTemp = deleteAll;
 
-                Synchronizer.SynchronizeReplacing(rep, "Appendix",
+                Synchronizer.SynchronizeReplacing(rep, null, /*"Appendix", //Temporarily passing null for Help Direct Import (without Preview)*/
                       newDictionary: kv.Value.ToDictionaryEx(c => c.Key),
                       oldDictionary: current.ToDictionaryEx(n => n.UniqueName),
                       createNew: (k, n) =>
@@ -221,7 +221,7 @@ public static class HelpXml
 
                 bool? deleteTemp = deleteAll;
 
-                Synchronizer.SynchronizeReplacing(rep, "Namespace",
+                Synchronizer.SynchronizeReplacing(rep, null, /*"Namespace", Temporarily passing null for Help Direct Import(without Preview)*/
                       newDictionary: kv.Value.ToDictionaryEx(c => c.Key),
                       oldDictionary: current.ToDictionaryEx(n => n.Name),
                       createNew: (k, n) =>
@@ -349,7 +349,7 @@ public static class HelpXml
 
                 bool? deleteTemp = deleteAll;
 
-                Synchronizer.SynchronizeReplacing(rep, "Queries",
+                Synchronizer.SynchronizeReplacing(rep, null, /*"Queries", Temporarily passing null for Help Direct Import(without Preview)*/
                       newDictionary: kv.Value.ToDictionaryEx(c => c.Key),
                       oldDictionary: current.ToDictionaryEx(n => n.Query.Key),
                       createNew: (k, n) =>
@@ -605,7 +605,7 @@ public static class HelpXml
 
                 bool? deleteTemp = deleteAll;
 
-                Synchronizer.SynchronizeReplacing(rep, "TypeHelps",
+                Synchronizer.SynchronizeReplacing(rep, null,/* "TypeHelps",  Temporarily passing null for Help Direct Import (without Preview)*/
                       newDictionary: kv.Value.ToDictionaryEx(c => c.Key),
                       oldDictionary: current.ToDictionaryEx(n => n.Type.CleanName),
                       createNew: (k, n) =>
@@ -624,7 +624,7 @@ public static class HelpXml
                           ImportType(typeHelp, element);
                           typeHelp.Execute(TypeHelpOperation.Save);
 
-                          SafeConsole.WriteColor(ConsoleColor.Green, "  " + typeHelp.Type.ClassName);
+                          SafeConsole.WriteColor(ConsoleColor.Green, "  " + typeHelp.Type.CleanName);
                           ImportImages(typeHelp, n);
                           Console.WriteLine();
                       },
