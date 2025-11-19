@@ -1,4 +1,5 @@
 using Signum.API;
+using Signum.Authorization;
 using Signum.Engine.Sync;
 using Signum.Files;
 using System.Globalization;
@@ -516,7 +517,7 @@ public static class HelpXml
                       {
                           XElement element = ParseXML(n);
 
-                          var qn = QueryLogic.ToQueryName(k.Before(".help"));
+                          var qn = QueryLogic.ToQueryName(k);
                           var queryHelp = new QueryHelpEntity
                           {
                               Culture = ci,
@@ -1241,7 +1242,7 @@ public static class HelpXml
 
     #endregion Export methods
 
-    private static void ImportAll(string directoryName)
+    private static void ImportAll_old(string directoryName)
     {
         var images = Database.Query<HelpImageEntity>().GroupToDictionary(a => a.Target);
 
@@ -1263,10 +1264,51 @@ public static class HelpXml
         }
     }
 
-    private static void ImportWithOverrideNotDelete(List<HelpContent> contents)
+    private static void ImportAll(string path)
+    { 
+        var contents = LoadContentsFromDisk(path);
+        ImportContents(contents);
+    }
+
+    private static List<HelpContent> LoadContentsFromDisk(string rootPath)
+    {
+        var helpContents = new List<HelpContent>();
+
+        foreach (var helpFile in Directory.EnumerateFiles(rootPath, "*.help", SearchOption.AllDirectories))
+        {
+            var relativePath = Path.GetRelativePath(rootPath, helpFile);
+            var parts = relativePath.Split(Path.DirectorySeparatorChar);
+
+            if (parts.Length != 3) continue;
+
+            var culture = new CultureInfo(parts[0]);
+            var type = parts[1];
+            var key = Path.GetFileNameWithoutExtension(parts[2]);
+
+            var xml = new FileContent(Path.GetFileName(helpFile), File.ReadAllBytes(helpFile));
+
+            var imageDir = Path.Combine(rootPath, culture.Name, type, key);
+            var images = Directory.Exists(imageDir)
+                ? [.. Directory.GetFiles(imageDir).Select(path => new FileContent(Path.GetFileName(path), File.ReadAllBytes(path)))]
+                : Array.Empty<FileContent>();
+
+            helpContents.Add(new HelpContent
+            {
+                Type = type,
+                Key = key,
+                Culture = culture,
+                Xml = xml,
+                Images = images
+            });
+        }
+
+        return helpContents;
+    }
+
+    private static void ImportContents(List<HelpContent> contents, bool? initialDeleteAll = null)
     {
         Replacements rep = [];
-        bool? deleteAll = false;
+        bool? deleteAll = initialDeleteAll;
 
         var importers = new Dictionary<string, Action<List<HelpContent>>>
         {
@@ -1290,7 +1332,7 @@ public static class HelpXml
     public static void ForceImportFromZip(byte[] zipFile)
     {
         var contents = LoadContentsFromZip(zipFile);
-        ImportWithOverrideNotDelete(contents);
+        ImportContents(contents, initialDeleteAll: false);
     }
 
     private static List<HelpContent> LoadContentsFromZip(byte[] zipFile)
@@ -1414,7 +1456,8 @@ public static class HelpXml
 
     public static void ImportExportHelp()
     {
-        ImportExportHelp(@"..\..\..\Help");
+        using (UserHolder.UserSession(AuthLogic.SystemUser!))
+            ImportExportHelp(@"..\..\..\Help");
     }
 
     public static void ImportExportHelp(string path)
