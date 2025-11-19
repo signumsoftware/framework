@@ -690,8 +690,9 @@ public static class PostgressOperator
     public static string Contains = "@>";
     public static string IsContained = "<@";
     public static string Matches = "@@";
+    public static string Minus = "-";
 
-    public static string[] All = new[] { Overlap, Contains, IsContained, Matches };
+    public static string[] All = new[] { Overlap, Contains, IsContained, Matches, Minus };
 }
 
 internal enum SqlEnums

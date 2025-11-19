@@ -796,26 +796,44 @@ internal class DbExpressionNominator : DbExpressionVisitor
         if (innerProjection || !Has(exprStart) || !Has(exprEnd))
             return null;
 
-        var dateType = new[] { start.Type.UnNullify(), end.Type.UnNullify() }.Distinct().SingleEx(); 
 
         if (isPostgres)
         {
-            var age = new SqlFunctionExpression(dateType, null, PostgresFunction.age.ToString(), new[] { exprStart, exprEnd });
-
-            static SqlFunctionExpression Extract( SqlEnums part, Expression period)
+            static SqlFunctionExpression Extract(SqlEnums part, Expression period)
             {
                 return PostgresFunction.EXTRACT.CallExpression<int>(new SqlLiteralExpression(part), period);
             }
 
-            if (unit == SqlEnums.month)
-                return Add(Expression.Add(Extract(SqlEnums.year, age), Expression.Multiply(Extract(SqlEnums.month, age), new SqlConstantExpression(12, typeof(int)))));
-            else if (unit == SqlEnums.year)
-                return Add(Extract(SqlEnums.year, age));
+            if (unit == SqlEnums.day)
+            {
+                if (exprEnd.Type.UnNullify() == typeof(DateOnly))
+                {
+                    var days = new SqlFunctionExpression(typeof(int), null, PostgressOperator.Minus.ToString(), new[] { exprEnd, exprStart });
+                    return Add(days);
+                }
+                else
+                {
+                    var interval = new SqlFunctionExpression(typeof(TimeSpan), null, PostgressOperator.Minus.ToString(), new[] { exprEnd, exprStart });
+                    return Add(Extract(SqlEnums.day, interval));
+                }
+            }
             else
+            {
+                var age = new SqlFunctionExpression(typeof(TimeSpan), null, PostgresFunction.age.ToString(), new[] { exprStart, exprEnd });
+
+                if (unit == SqlEnums.month)
+                    return Add(Expression.Add(Extract(SqlEnums.year, age), Expression.Multiply(Extract(SqlEnums.month, age), new SqlConstantExpression(12, typeof(int)))));
+                if (unit == SqlEnums.year)
+                    return Add(Extract(SqlEnums.year, age));
+
                 throw new UnexpectedValueException(unit);
+            }
         }
         else
         {
+            var dateType = new[] { start.Type.UnNullify(), end.Type.UnNullify() }.Distinct().SingleEx();
+
+
             var datePart = new SqlLiteralExpression(unit);
 
             var diff = new SqlFunctionExpression(typeof(int), null, SqlFunction.DATEDIFF.ToString(),

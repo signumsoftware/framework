@@ -1,6 +1,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Types;
 using Signum.Engine.Maps;
+using Signum.Utilities;
 using System.Diagnostics;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -235,13 +236,19 @@ public class SqlFunctionsTest
     }
 
     [Fact]
-    public void DateDiffFunctionsTo()
+    public void DateTimeDiffFunctionsTo()
     {
-        Dump((NoteWithDateEntity n) => n.CreationTime.YearsTo(n.CreationTime).InSql());
+        Dump((NoteWithDateEntity n) => n.CreationTime.DaysTo(n.CreationTime).InSql());
         Dump((NoteWithDateEntity n) => n.CreationTime.MonthsTo(n.CreationTime).InSql());
+        Dump((NoteWithDateEntity n) => n.CreationTime.YearsTo(n.CreationTime).InSql());
+    }
 
-        Dump((NoteWithDateEntity n) => n.CreationTime.YearsTo(n.CreationTime).InSql());
-        Dump((NoteWithDateEntity n) => n.CreationTime.MonthsTo(n.CreationTime).InSql());
+    [Fact]
+    public void DateOnlyDiffFunctionsTo()
+    {
+        Dump((NoteWithDateEntity n) => n.CreationDate.DaysTo(n.CreationDate).InSql());
+        Dump((NoteWithDateEntity n) => n.CreationDate.MonthsTo(n.CreationDate).InSql());
+        Dump((NoteWithDateEntity n) => n.CreationDate.YearsTo(n.CreationDate).InSql());
     }
 
     [Fact]
