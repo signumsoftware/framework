@@ -107,18 +107,24 @@ public static class Synchronizer
 
     public static void SynchronizeReplacing<N, O>(
       Replacements replacements,
-      string replacementsKey,
+      string? replacementsKey,
       Dictionary<string, N> newDictionary,
       Dictionary<string, O> oldDictionary,
       Action<string, N>? createNew,
       Action<string, O>? removeOld,
       Action<string, N, O>? merge)
     {
-        replacements.AskForReplacements(
-            oldDictionary.Keys.ToHashSet(),
-            newDictionary.Keys.ToHashSet(), replacementsKey);
+        var repOldDictionary = oldDictionary;
 
-        var repOldDictionary = replacements.ApplyReplacementsToOld(oldDictionary, replacementsKey);
+        if (replacementsKey != null)
+        {
+            replacements.AskForReplacements(
+                oldDictionary.Keys.ToHashSet(),
+                newDictionary.Keys.ToHashSet(),
+                replacementsKey);
+
+            repOldDictionary = replacements.ApplyReplacementsToOld(oldDictionary, replacementsKey);
+        }
 
         HashSet<string> set = new HashSet<string>();
         set.UnionWith(repOldDictionary.Keys);
