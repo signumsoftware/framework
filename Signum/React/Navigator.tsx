@@ -2,7 +2,7 @@ import * as React from "react"
 import { RouteObject } from 'react-router'
 import { Dic, classes, softCast, } from './Globals';
 import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
-import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity, EnumEntity } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity, EnumEntity, SearchMessage } from './Signum.Entities';
 import { TypeEntity, ExceptionEntity } from './Signum.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo, EnumType } from './Reflection';
 import { ButtonBarElement, ButtonsContext, EntityFrame, TypeContext } from './TypeContext';
@@ -105,7 +105,7 @@ export namespace Navigator {
       const typeInfo = getTypeInfo(entity.Type);
 
       if (entity.isNew)
-        return FrameMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
+        return null;
 
       return defaultRenderSubTitle(typeInfo, entity);
     }
@@ -219,6 +219,17 @@ export namespace Navigator {
     var es = entitySettings[entity.Type];
     if (es != null && es.renderEntity != null) {
       return es.renderEntity(entity, new TextHighlighter(undefined));
+    }
+
+    if (entity.isNew) {
+      var ti = tryGetTypeInfo(entity.Type);
+
+      if (ti) {
+        if (isTypeModel(entity.Type))
+          return ti.niceName!;
+
+        return FrameMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
+      }
     }
 
     return getToString(entity);
