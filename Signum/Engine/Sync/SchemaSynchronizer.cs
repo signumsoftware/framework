@@ -134,7 +134,7 @@ public static class SchemaSynchronizer
         });
 
       
-        var pkUpdater = new PrimaryKeyUpdater(isPostgres, databaseTables, modelTables);
+        var pkUpdater = new PrimaryKeyUpdater(isPostgres, modelTables);
 
 
         var tableReplacements = replacements.TryGetC(Replacements.KeyTables);
