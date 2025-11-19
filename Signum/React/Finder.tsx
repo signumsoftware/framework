@@ -996,13 +996,28 @@ export namespace Finder {
     });
   }
 
-  export function getQueryValue(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], valueToken?: string, multipleValues?: boolean): Promise<any> {
+  export function useQueryValue<T = number>(queryName: PseudoType | QueryKey | null, filterOptions: (FilterOption | null | undefined)[], valueToken?: QueryTokenString<T> | string, multipleValues?: boolean, extraDeps?: React.DependencyList): T | null | undefined {
+
+    var query = {};
+    Encoder.encodeFilters(filterOptions);
+
+    return useAPI(() => !queryName ?  null : getQueryValue(queryName, filterOptions, valueToken, multipleValues),
+      [
+        queryName && getQueryKey(queryName),
+        QueryString.stringify(query),
+        valueToken?.toString(),
+        multipleValues,
+        ...(extraDeps ?? [])
+      ]);
+  }
+
+  export function getQueryValue<T = number>(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], valueToken?: QueryTokenString<T> | string, multipleValues?: boolean): Promise<T> {
     return getQueryDescription(queryName).then(qd => {
-      return parseFilterOptions(filterOptions, false, qd).then(fops => {
+      return parseFilterOptions(filterOptions ?? [], false, qd).then(fops => {
 
         let filters = toFilterRequests(fops);
 
-        return API.queryValue({ queryKey: qd.queryKey, filters, valueToken, multipleValues });
+        return API.queryValue({ queryKey: qd.queryKey, filters, valueToken: valueToken?.toString(), multipleValues });
       });
     });
   }
