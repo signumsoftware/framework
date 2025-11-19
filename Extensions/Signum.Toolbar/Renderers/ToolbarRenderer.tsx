@@ -542,7 +542,7 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   return (
     <li>
       <ul>
-        <Nav.Item title={title} className="d-flex mx-2 mb-2">
+        <Nav.Item title={title} className="d-flex mb-2">
           {icon}
           <RightCaretDropdown
             options={options}

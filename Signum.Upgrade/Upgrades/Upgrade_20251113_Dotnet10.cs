@@ -38,5 +38,16 @@ class Upgrade_20251113_Dotnet10 : CodeUpgradeBase
                 <PackageReference Include="xunit.v3" Version="3.2.0" />
                 """);
         });
+
+        uctx.ChangeCodeFile(@"Southwind.Server/Dockerfile", file =>
+        {
+            file.Replace("aspnet:9.0", "aspnet:10.0");
+            file.Replace("sdk:9.0", "sdk:10.0");
+        });
+
+        uctx.ForeachCodeFile(@"deploy*.ps1", file =>
+        {
+            file.Replace("net9.0", "net10.0");
+        });
     }
 }
