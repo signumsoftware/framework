@@ -432,7 +432,8 @@ public static class HelpXml
                 foreach (var item in cols.Elements(_Column))
                 {
                     string? name = item.Attribute(_Name)!.Value;
-                    name = SelectInteractive(name, queryColumns, "columns of {0}".FormatWith(entity.Query));
+
+                    name = queryColumns.TryGetC(name); //SelectInteractive(name, queryColumns, "columns of {0}".FormatWith(entity.Query));
 
                     if (name == null)
                         continue;
@@ -524,7 +525,7 @@ public static class HelpXml
                 {
                     string name = item.Attribute(_Name)!.Value;
 
-                    var property = SelectInteractive(name, properties, "properties for {0}".FormatWith(typeEntity.ClassName));
+                    var property = properties.TryGetC(name); // SelectInteractive(name, properties, "properties for {0}".FormatWith(typeEntity.ClassName));
                     if (property == null)
                         continue;
 
@@ -552,7 +553,8 @@ public static class HelpXml
                 foreach (var item in opers.Elements(_Operation))
                 {
                     string name = item.Attribute(_Key)!.Value;
-                    var operation = SelectInteractive(name, operations, "operations for {0}".FormatWith(typeEntity.ClassName));
+
+                    var operation = operations.TryGetC(name); //SelectInteractive(name, operations, "operations for {0}".FormatWith(typeEntity.ClassName));
 
                     if (operation == null)
                         continue;
