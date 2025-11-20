@@ -198,7 +198,7 @@ export namespace HelpClient {
   }
 
 
-  export module Urls {
+  export namespace Urls {
     export function indexUrl() {
       return "/help";
     }

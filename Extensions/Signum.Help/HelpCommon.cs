@@ -91,9 +91,12 @@ public enum HelpMessage
     JumpToViewMore,
     ExportAsZip,
     Import,
-    SucessfullyImported,
+    SuccessfullyImported,
+    ImportError,
     ImportHelpContentsFromZipFile,
-    SelectTheZipFileWithTheHelpContentsThatYouWantToImport
+    SelectTheZIPFileWithTheHelpContentsThatYouWantToImport,
+    ChooseZIPFile,
+    SelectedFile,
 }
 
 public enum HelpKindMessage

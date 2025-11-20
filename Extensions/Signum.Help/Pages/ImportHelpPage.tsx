@@ -14,11 +14,14 @@ import { AccessibleTable } from '@framework/Basics/AccessibleTable'
 import { LinkButton } from '@framework/Basics/LinkButton'
 import { HelpClient } from '../HelpClient'
 import { HelpMessage } from '../Signum.Help'
+import { ErrorBoundary } from '../../../Signum/React/Components'
+import Exception from '../../../Signum/React/Exceptions/Exception'
 
 export default function ImportAssetsPage(): React.JSX.Element {
 
   const [file, setFile] = React.useState<HelpClient.API.FileUpload | undefined>(undefined);
-//  const [model, setModel] = React.useState<UserAssetPreviewModel | undefined>(undefined);
+  //  const [model, setModel] = React.useState<UserAssetPreviewModel | undefined>(undefined);
+  const [lastImported, setLastImported] = React.useState<string | undefined>(undefined);
   const [success, setSuccess] = React.useState<boolean | undefined>(undefined);
   const [fileVer, setFileVer] = React.useState<number>(0);
 
@@ -29,6 +32,7 @@ export default function ImportAssetsPage(): React.JSX.Element {
   function renderFileInput() {
 
     function handleInputChange(e: React.FormEvent<any>) {
+      setSuccess(undefined);
       let f = (e.currentTarget as HTMLInputElement).files![0];
       let fileReader = new FileReader();
       fileReader.onerror = e => { window.setTimeout(() => { throw (e as any).error; }, 0); };
@@ -46,11 +50,23 @@ export default function ImportAssetsPage(): React.JSX.Element {
     }
 
     return (
-      <div>
+      <div className="mb-3">
         <div className="btn-toolbar">
-          <input key={fileVer} type="file" onChange={handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
+          <input
+            key={fileVer}
+            type="file"
+            id="fileUpload"
+            onChange={handleInputChange}
+            className="d-none"
+          />
+          <label htmlFor="fileUpload" className="btn btn-info">
+            <FontAwesomeIcon icon="folder-open" className="me-2" />
+            {HelpMessage.ChooseZIPFile.niceToString()}
+          </label>
         </div>
-        <small>{HelpMessage.SelectTheZipFileWithTheHelpContentsThatYouWantToImport.niceToString()}</small>
+        <small className="text-muted">
+          {HelpMessage.SelectTheZIPFileWithTheHelpContentsThatYouWantToImport.niceToString()}
+        </small>
       </div>
     );
   }
@@ -58,11 +74,17 @@ export default function ImportAssetsPage(): React.JSX.Element {
   function renderModel() {
 
     function handleImport() {
+      setLastImported(undefined);
+
       HelpClient.API.importByForce(file!)
         .then(model => {
           setSuccess(true);
           //setModel(undefined);
+          setLastImported(file?.fileName);
           setFile(undefined);
+        }, reason => {
+          setFile(undefined);
+          throw reason;
         });
     }
 
@@ -89,6 +111,7 @@ export default function ImportAssetsPage(): React.JSX.Element {
     }*/
 
     //const tc = TypeContext.root(model!, { formSize: "xs" });
+    const fileSizeMB = file && (new Blob([file.content]).size / (1024 * 1024)).toFixed(2);
 
     return (
       <div>
@@ -178,14 +201,23 @@ export default function ImportAssetsPage(): React.JSX.Element {
             }
           </tbody>
         </AccessibleTable>*/}
-        <button onClick={handleImport} className="btn btn-info"><FontAwesomeIcon aria-hidden="true" icon="cloud-arrow-up" />{HelpMessage.Import.niceToString()}</button>
+        <div className="alert alert-secondary d-flex align-items-center" role="alert">
+          <FontAwesomeIcon icon="file" className="me-2" />
+          <div className="text-muted">
+            <strong>{HelpMessage.SelectedFile.niceToString()}:</strong> {file?.fileName} ({fileSizeMB} MB)
+          </div>
+        </div>
+        <button onClick={handleImport} className="btn btn-primary"><FontAwesomeIcon aria-hidden="true" icon="cloud-arrow-up" className="me-2"/>{HelpMessage.Import.niceToString()}</button>
       </div>
     );
   }
 
   function renderSuccess() {
     return (
-      <div className="alert alert-success" role="alert">{HelpMessage.SucessfullyImported.niceToString()}</div>
+      <div className="alert alert-success d-flex align-items-center" role="alert">
+        <FontAwesomeIcon icon="circle-check" className="me-2" />
+        <div><strong>{lastImported}</strong> {HelpMessage.SuccessfullyImported.niceToString()}</div>
+      </div>
     );
   }
 
@@ -194,9 +226,11 @@ export default function ImportAssetsPage(): React.JSX.Element {
       <h1 className="h2">{HelpMessage.ImportHelpContentsFromZipFile.niceToString()}</h1>
       <br />
       {success && renderSuccess()}
-      {file ? renderModel() :
-        renderFileInput()
-      }
+      <ErrorBoundary>
+        {file ? renderModel() :
+          renderFileInput()
+        }
+      </ErrorBoundary>
     </div>
   );
 }
