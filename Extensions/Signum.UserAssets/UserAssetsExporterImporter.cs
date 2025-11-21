@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualBasic;
 using Signum.Authorization;
 using Signum.Utilities.Reflection;
@@ -190,6 +191,7 @@ public static class UserAssetsImporter
             if (newLite == null || lite.ToString() != newLite.ToString() || lite.Id != newLite.Id)
             {
                 this.liteConflicts.GetOrCreate(userAsset.Guid)[(lite, route)] = newLite;
+                return newLite;
             }
 
             return lite;
