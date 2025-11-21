@@ -216,7 +216,7 @@ export namespace Operations {
     export function getAlternatives<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T>[] | undefined {
       if (Defaults.isSave(eoc.operationInfo)) {
         return [
-          eoc.frame.onClose ? EntityOperations.andClose(eoc) : undefined,
+          eoc.frame.hideAndClose ? undefined : EntityOperations.andClose(eoc),
           EntityOperations.andNew(eoc)
         ].notNull()
       }
@@ -826,7 +826,7 @@ export class EntityOperationContext<T extends Entity> {
 
   onDeleteSuccess?: () => Promise<void> | undefined;
   onDeleteSuccess_Default = (): void => {
-    this.frame.onClose?.();
+    this.frame.onClose();
     Navigator.raiseEntityChanged(this.entity.Type);
     Operations.notifySuccess();
   }
