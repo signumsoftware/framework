@@ -65,7 +65,7 @@ Whenever there are big changes worth to mention, we typicaly write it in the rel
 * 2025.05.25 Adopt LF (\n) as new-line separator for all file types (.ts, .tsx, .cs, etc...) using `.gitattributes`
 * 2025.04.01 Switch `Signum.HtmlEditor` from draft.js (deprecated) to lexical (great work @fwo-bechtle!)
 * 2025.03.03 MList tables have _ separating main table name from MList by default (dbo.Order_Details) 
-* 2024.11.16 DotNet 9
+* 2024.11.16 .Net 9
 * [2024.10.28 CSV Performance Improvements?](https://github.com/signumsoftware/framework/commit/e17aeb8df452dfd8289586ccb0135019ad92de38#commitcomment-150176560)
 * [2024.08.19 Time Machine in Charting! ⏲📈](https://github.com/signumsoftware/framework/commit/4a7cc1097f8e862b47d2dfd61216082b1c171be0)
 * [2024.07.02 Isolated Declarations](https://github.com/signumsoftware/framework/commit/bf08a77c430dd133b8eca50d502a14b91224267a)
