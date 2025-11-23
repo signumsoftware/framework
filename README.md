@@ -54,6 +54,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2025.11.23 .Net 10](https://github.com/signumsoftware/framework/commit/fcb69ddcec43ea5c3fe5d096dc5368df293f7fd6#commitcomment-171171659)
 * [2025.10.01 TypeScript Compilation Performance and Signum.TSCBuild](https://github.com/signumsoftware/framework/commit/5d740e37effc19469b097f9ce763f5560e4a1d7a#commitcomment-167686513)
 * [2025.09.22 Toolbar Improvements 🛠️](https://github.com/signumsoftware/framework/commit/d9a168aae9d9a59f6416652c270a444b9d160c1e#commitcomment-167596454)
 * [2025.09.01 Dark Mode, ThemeSelector and shadow panels 🌙☀️](https://github.com/signumsoftware/framework/commit/91eda3e81d898d7c8412b4d54022128cbba7efab#commitcomment-167592981)
