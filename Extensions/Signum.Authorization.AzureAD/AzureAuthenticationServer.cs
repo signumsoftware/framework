@@ -12,7 +12,7 @@ namespace Signum.Authorization.AzureAD;
 
 public class AzureADAuthenticationServer
 {
-    public static bool LoginAzureADAuthentication(ActionContext ac, LoginWithAzureADRequest request, string? adVariant, bool throwErrors)
+    public static bool LoginAzureADAuthentication(ActionContext ac, LoginWithAzureADRequest request, string adVariant, bool throwErrors)
     {
         using (AuthLogic.Disable())
         {

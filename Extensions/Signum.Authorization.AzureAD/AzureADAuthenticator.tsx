@@ -69,7 +69,6 @@ export namespace AzureADAuthenticator {
     var msalConfig: msal.Configuration = {
       auth: {
         clientId: config?.applicationId!, //This is your client ID
-        //authority: config?.azureB2C ? getAzureB2C_Authority(config.azureB2C.signInSignUp_UserFlow!) : ("https://login.microsoftonline.com/" + config?.tenantId)!, //This is your tenant info
         redirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
         postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
       },
@@ -87,7 +86,7 @@ export namespace AzureADAuthenticator {
     return new msal.PublicClientApplication(msalConfig);
   }
 
-  export type B2C_UserFlows = "signInSignUp_UserFlow" | "signIn_UserFlow" | "signUp_UserFlow" | "resetPassword_UserFlow";
+  export type B2C_UserFlows = "signInSignUp_UserFlow" | "signIn_UserFlow" | "signUp_UserFlow" | "resetPassword_UserFlow" | "editProfile_UserFlow";
 
   export function getAuthority(config: AzureADConfig, b2c_UserFlow?: B2C_UserFlows): string {
     if (config.type == "AzureAD")
@@ -210,12 +209,7 @@ export namespace AzureADAuthenticator {
     if (location.search.contains("avoidAD"))
       return Promise.resolve(undefined);
 
-    
-    // var ai = getCurrentMsalAccount();
-    
-    // if (!ai)
-    //   return Promise.resolve(undefined);
-    
+   
     let account = localStorage.getItem('msalAccount');
     
     if (!account)
@@ -409,6 +403,7 @@ export interface AzureADConfig {
   signInSignUp_UserFlow: string;
   signIn_UserFlow?: string;
   signUp_UserFlow?: string;
+  editProfile_UserFlow?: string;
   resetPassword_UserFlow?: string;
   scopes: string[];
 }

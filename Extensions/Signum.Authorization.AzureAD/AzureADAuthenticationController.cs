@@ -11,7 +11,7 @@ namespace Signum.Authorization.AzureAD;
 public class AzureADAuthenticationController : ControllerBase
 {
     [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
-    public LoginResponse? LoginWithAzureAD([FromBody, Required] LoginWithAzureADRequest request,[FromQuery]string? adVariant = null, [FromQuery] bool throwErrors = true)
+    public LoginResponse? LoginWithAzureAD([FromBody, Required] LoginWithAzureADRequest request,[FromQuery]string adVariant, [FromQuery] bool throwErrors = true)
     {
         if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, request, adVariant, throwErrors))
             return null;
