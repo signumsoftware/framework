@@ -116,6 +116,7 @@ export namespace AzureADAuthenticator {
     try {
       const authResult = await msalClient.loginPopup({
         scopes: config.scopes,
+        prompt: "select_account",
         authority: getAuthority(config, b2c_UserFlow),
       });
       setMsalAccount(authResult.account!.username, adVariant);
