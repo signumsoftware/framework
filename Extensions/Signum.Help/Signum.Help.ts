@@ -192,8 +192,7 @@ export const ImportAction: EnumType<ImportAction> = new EnumType<ImportAction>("
 export type ImportAction =
   "NoChange" |
   "Create" |
-  "Update" |
-  "Remove";
+  "Update";
 
 export const ImportStatus: EnumType<ImportStatus> = new EnumType<ImportStatus>("ImportStatus");
 export type ImportStatus =

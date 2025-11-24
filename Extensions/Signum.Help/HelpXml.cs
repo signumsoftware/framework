@@ -21,7 +21,7 @@ public static class HelpXml
         public FileContent[] Images { get; set; }
         public Lite<IHelpEntity>? ExistingEntity { get; set; }
         public ImportAction? Action { get; set; }
-        public bool Appply { get; set; } = false;
+        public bool Apply { get; set; } = false;
         public ImportStatus Status { get; set; } = ImportStatus.NoChange;
         public string? ImportError { get; set; }
 
@@ -59,8 +59,8 @@ public static class HelpXml
     {
         Preview,
         ApplyPreview,
-        ApplyDirectly,
-        Interactive
+        Interactive,
+        //ApplyDirectly
     }
 
     private static FileContent[] GetImageContents(IHelpEntity entity) =>
@@ -85,17 +85,6 @@ public static class HelpXml
         ImportContent(refContent, mode, ImportAction.Create, () => action());
     }
 
-    private static void ImportDelete(ImportExecutionMode mode, IHelpEntity entity, 
-        List<HelpContent> outList, Func<ImportStatus> action)
-    {
-        var content = entity.ToHelpContent(false);
-        content.Action = ImportAction.Remove;
-
-        ImportContent(content, mode, ImportAction.Remove, () => action());
-
-        outList.Add(content);
-    }
-
     private static void ImportUpdate(HelpContent refContent, IHelpEntity entity, ImportExecutionMode mode, 
         Func<bool> modified, Func<ImportStatus> action)
     {
@@ -117,13 +106,6 @@ public static class HelpXml
             content.ExistingEntity = entity?.ToLite();
             return;
         }
-
-        if (mode == ImportExecutionMode.ApplyDirectly)
-        {
-            Run();
-            return;
-        }
-
         // Interactive or ApplyReivew mode
         if (importAction == ImportAction.NoChange)
         {
@@ -131,7 +113,7 @@ public static class HelpXml
             return;
         }
 
-        if (!content.Appply)
+        if (!content.Apply)
         {
             content.Status = ImportStatus.Skipped;
             SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"{content} skipped");
@@ -213,16 +195,14 @@ public static class HelpXml
                             return ImportStatus.Applied;
                         }),
                     removeOld: (k, o) =>
-                        ImportDelete(mode, o, contents, () =>
                         {
-                            if (SafeConsole.Ask(ref deleteTemp, $"Delete Appendix {o.UniqueName} in {o.Culture}?"))
+                            if (mode == ImportExecutionMode.Interactive && 
+                                SafeConsole.Ask(ref deleteTemp, $"Delete Appendix {o.UniqueName} in {o.Culture}?"))
                             {
                                 o.Delete(AppendixHelpOperation.Delete);
                                 SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.UniqueName);
-                                return ImportStatus.Applied;
                             }
-                            return ImportStatus.Failed;
-                        }),
+                        },
                     merge: (k, n, o) =>
                         ImportUpdate(n, o, mode, modified: () =>
                         {
@@ -373,17 +353,14 @@ public static class HelpXml
                               return ImportStatus.Applied;
                           }),
                       removeOld: (k, o) =>
-                          ImportDelete(mode, o, contents, () =>
                           {
-                              if (SafeConsole.Ask(ref deleteTemp, $"Delete Namespace {o.Name} in {o.Culture}?"))
+                              if (mode == ImportExecutionMode.Interactive && 
+                                SafeConsole.Ask(ref deleteTemp, $"Delete Namespace {o.Name} in {o.Culture}?"))
                               {
                                   o.Delete(NamespaceHelpOperation.Delete);
                                   SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.Name);
-                                  return ImportStatus.Applied;
                               }
-
-                              return ImportStatus.Skipped;
-                          }),
+                          },
                       merge: (k, n, o) =>
                           ImportUpdate(n, o, mode, modified: () =>
                           {
@@ -518,16 +495,14 @@ public static class HelpXml
                               return ImportStatus.Applied;
                           }),
                       removeOld: (k, o) =>
-                          ImportDelete(mode, o, contents, () =>
                           {
-                                if (SafeConsole.Ask(ref deleteTemp, $"Delete Query {o.Query.Key} in {o.Culture}?"))
+                              if (mode == ImportExecutionMode.Interactive &&
+                                    SafeConsole.Ask(ref deleteTemp, $"Delete Query {o.Query.Key} in {o.Culture}?"))
                               {
                                   o.Delete(QueryHelpOperation.Delete);
                                   SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.Query.Key);
-                                  return ImportStatus.Applied;
                               }
-                              return ImportStatus.Failed;
-                          }),
+                          },
                       merge: (k, n, o) =>
                           ImportUpdate(n, o, mode, modified: () =>
                           {
@@ -803,16 +778,14 @@ public static class HelpXml
                               return ImportStatus.Applied;
                           }),
                       removeOld: (k, o) =>
-                          ImportDelete(mode, o, contents, () =>
                           {
-                              if (SafeConsole.Ask(ref deleteTemp, $"Delete Entity {o.Type.ClassName} in {o.Culture}?"))
+                              if (mode == ImportExecutionMode.Interactive && 
+                                SafeConsole.Ask(ref deleteTemp, $"Delete Entity {o.Type.ClassName} in {o.Culture}?"))
                               {
                                   o.Delete(TypeHelpOperation.Delete);
                                   SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.Type.ClassName);
-                                  return ImportStatus.Applied;
                               }
-                              return ImportStatus.Failed;
-                          }),
+                          },
                       merge: (k, n, o) =>
                           ImportUpdate(n, o, mode, modified: () =>
                           {
@@ -1205,7 +1178,7 @@ public static class HelpXml
         {
             var line = model.Lines.SingleEx(l => l.Culture.ToCultureInfo().Equals(c.Culture) && l.Type.Is(c.Type) && l.Key == c.Key);
             c.Action = line.Action;
-            c.Appply = line.Apply == true;
+            c.Apply = line.Apply == true;
 
         });
 
@@ -1299,12 +1272,6 @@ public static class HelpXml
         }
 
         return [.. helpContents.Values];
-    }
-
-    public static void ForceImportFromZip(byte[] zipFile)
-    {
-        var contents = LoadContentsFromZip(zipFile);
-        ImportContents(ref contents, ImportExecutionMode.ApplyDirectly, initialDeleteAll: false);
     }
 
     public static void ImportFromZip(string zipFile)

@@ -67,7 +67,7 @@ public enum ImportAction
     NoChange,
     Create,
     Update,
-    Remove
+//    Remove
 }
 
 public enum HelpMessage
