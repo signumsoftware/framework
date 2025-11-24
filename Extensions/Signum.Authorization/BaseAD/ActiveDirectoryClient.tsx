@@ -11,11 +11,11 @@ import { Lite } from '@framework/Signum.Entities';
 import SelectorModal from '@framework/SelectorModal';
 import { QueryString } from '@framework/QueryString';
 import * as AppContext from "@framework/AppContext"
-import { ActiveDirectoryPermission, UserADMessage } from '../Signum.Authorization.ADGroups';
+import { ActiveDirectoryPermission, UserADMessage } from '../Signum.Authorization.BaseAD';
 
 export namespace ActiveDirectoryClient {
 
-  export function start(options: { routes: RouteObject[], adGroups: boolean, inviteUsers: boolean, profilePhotos: boolean | "cached"; }): void {
+  export function start(options: { routes: RouteObject[], inviteUsers: boolean }): void {
 
     if (options.inviteUsers) {
 

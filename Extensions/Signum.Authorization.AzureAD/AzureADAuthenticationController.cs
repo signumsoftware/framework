@@ -11,9 +11,9 @@ namespace Signum.Authorization.AzureAD;
 public class AzureADAuthenticationController : ControllerBase
 {
     [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
-    public LoginResponse? LoginWithAzureAD([FromBody, Required] LoginWithAzureADRequest request,[FromQuery]bool azureB2C = false, [FromQuery] bool throwErrors = true)
+    public LoginResponse? LoginWithAzureAD([FromBody, Required] LoginWithAzureADRequest request,[FromQuery]string adVariant, [FromQuery] bool throwErrors = true)
     {
-        if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, request, azureB2C, throwErrors))
+        if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, request, adVariant, throwErrors))
             return null;
 
         var user = UserEntity.Current.Retrieve();
