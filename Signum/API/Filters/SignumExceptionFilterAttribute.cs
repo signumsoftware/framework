@@ -177,7 +177,7 @@ public class HttpError
 public class SignumInitializeFilterAttribute : IAsyncResourceFilter
 {
     public static Action InitializeDatabase = () => throw new InvalidOperationException("SignumInitializeFilterAttribute.InitializeDatabase should be set in Startup");
-    static object lockKey = new();
+    static Lock lockKey = new();
     public bool Initialized = false;
 
     public Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)

@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ADGroupEntity" Description="AD-Gruppe">
+    <Member Name="DisplayName" Description="Anzeigename" />
+  </Type>
+  <Type Name="ADGroupOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="AuthADFileType">
+    <Member Name="CachedProfilePhoto" Description="Zwischengespeichertes Profilfoto" />
+  </Type>
+  <Type Name="AzureADConfigurationEmbedded" Description="Azure AD configuration">
+    <Member Name="ApplicationID" Description="Application (client) ID" />
+    <Member Name="AzureB2C" Description="Azure B2C" />
+    <Member Name="ClientSecret" Description="Client Secret Value" />
+    <Member Name="DirectoryID" Description="Directory (tenant) ID" />
+    <Member Name="LoginWithAzureAD" Description="Login mit Azure AD" />
+    <Member Name="UseDelegatedPermission" Description="Use delegated permission" />
+  </Type>
+  <Type Name="AzureADQuery">
+    <Member Name="ActiveDirectoryGroups" Description="Active Directory-Gruppen" />
+    <Member Name="ActiveDirectoryUsers" Description="Active Directory-Nutzer" />
+  </Type>
+  <Type Name="AzureADTask">
+    <Member Name="DeactivateUsers" Description="Benutzer deaktivieren" />
+  </Type>
+  <Type Name="AzureB2CEmbedded" Description="Azure B2C">
+    <Member Name="LoginWithAzureB2C" Description="Login mit Azure B2C" />
+    <Member Name="ResetPassword_UserFlow" Description="ResetPassword UserFlow" />
+    <Member Name="SignIn_UserFlow" Description="SignIn UserFlow" />
+    <Member Name="SignInSignUp_UserFlow" Description="SignInSignUp UserFlow" />
+    <Member Name="SignUp_UserFlow" Description="SignUp UserFlow" />
+    <Member Name="TenantName" Description="Name des Mieters" />
+  </Type>
+  <Type Name="CachedProfilePhotoEntity" Description="zwischengespeicherte Profilfoto" PluralDescription="zwischengespeicherte Profilfotos" Gender="n">
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="InvalidationDate" Description="Datum der Ungültigkeit" />
+    <Member Name="Photo" Description="Foto" />
+    <Member Name="Size" Description="Größe" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="CachedProfilePhotoOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="OnPremisesExtensionAttributesModel" Description="On-Premises-Erweiterungsattribute">
+    <Member Name="ExtensionAttribute1" Description="Erweiterungsattribut1" />
+    <Member Name="ExtensionAttribute10" Description="Erweiterungsattribut10" />
+    <Member Name="ExtensionAttribute11" Description="Erweiterungsattribut11" />
+    <Member Name="ExtensionAttribute12" Description="Erweiterungsattribut12" />
+    <Member Name="ExtensionAttribute13" Description="Erweiterungsattribut13" />
+    <Member Name="ExtensionAttribute14" Description="Erweiterungsattribut14" />
+    <Member Name="ExtensionAttribute15" Description="Erweiterungsattribut15" />
+    <Member Name="ExtensionAttribute2" Description="Erweiterungsattribut2" />
+    <Member Name="ExtensionAttribute3" Description="Erweiterungsattribut3" />
+    <Member Name="ExtensionAttribute4" Description="Erweiterungsattribut4" />
+    <Member Name="ExtensionAttribute5" Description="Erweiterungsattribut5" />
+    <Member Name="ExtensionAttribute6" Description="Erweiterungsattribut6" />
+    <Member Name="ExtensionAttribute7" Description="Erweiterungsattribut7" />
+    <Member Name="ExtensionAttribute8" Description="Erweiterungsattribut8" />
+    <Member Name="ExtensionAttribute9" Description="Erweiterungsattribut9" />
+  </Type>
+  <Type Name="UserAzureADMixin">
+    <Member Name="OID" Description="OID" />
+  </Type>
+  <Type Name="UserOIDMessage">
+    <Member Name="TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet" Description="Der Benutzer ist {0} mit Active Directory verbunden und kann kein lokales Passwort festlegen" />
+  </Type>
+</Translations>

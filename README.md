@@ -54,6 +54,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2025.11.23 .Net 10](https://github.com/signumsoftware/framework/commit/fcb69ddcec43ea5c3fe5d096dc5368df293f7fd6#commitcomment-171171659)
 * [2025.10.01 TypeScript Compilation Performance and Signum.TSCBuild](https://github.com/signumsoftware/framework/commit/5d740e37effc19469b097f9ce763f5560e4a1d7a#commitcomment-167686513)
 * [2025.09.22 Toolbar Improvements 🛠️](https://github.com/signumsoftware/framework/commit/d9a168aae9d9a59f6416652c270a444b9d160c1e#commitcomment-167596454)
 * [2025.09.01 Dark Mode, ThemeSelector and shadow panels 🌙☀️](https://github.com/signumsoftware/framework/commit/91eda3e81d898d7c8412b4d54022128cbba7efab#commitcomment-167592981)
@@ -64,7 +65,7 @@ Whenever there are big changes worth to mention, we typicaly write it in the rel
 * 2025.05.25 Adopt LF (\n) as new-line separator for all file types (.ts, .tsx, .cs, etc...) using `.gitattributes`
 * 2025.04.01 Switch `Signum.HtmlEditor` from draft.js (deprecated) to lexical (great work @fwo-bechtle!)
 * 2025.03.03 MList tables have _ separating main table name from MList by default (dbo.Order_Details) 
-* 2024.11.16 DotNet 9
+* 2024.11.16 .Net 9
 * [2024.10.28 CSV Performance Improvements?](https://github.com/signumsoftware/framework/commit/e17aeb8df452dfd8289586ccb0135019ad92de38#commitcomment-150176560)
 * [2024.08.19 Time Machine in Charting! ⏲📈](https://github.com/signumsoftware/framework/commit/4a7cc1097f8e862b47d2dfd61216082b1c171be0)
 * [2024.07.02 Isolated Declarations](https://github.com/signumsoftware/framework/commit/bf08a77c430dd133b8eca50d502a14b91224267a)

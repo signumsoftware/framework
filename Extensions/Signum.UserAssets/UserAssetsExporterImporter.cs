@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualBasic;
 using Signum.Authorization;
 using Signum.Utilities.Reflection;
 using System.IO;
@@ -189,6 +191,7 @@ public static class UserAssetsImporter
             if (newLite == null || lite.ToString() != newLite.ToString() || lite.Id != newLite.Id)
             {
                 this.liteConflicts.GetOrCreate(userAsset.Guid)[(lite, route)] = newLite;
+                return newLite;
             }
 
             return lite;
@@ -350,7 +353,38 @@ public static class UserAssetsImporter
 
     public static void ImportAll(byte[] document)
     {
-        Import(document, Preview(document));
+        var preview = Preview(document);
+        foreach (var item in preview.Lines)
+        {
+            var color = item.Action switch
+            {
+                EntityAction.New => ConsoleColor.Green,
+                EntityAction.Identical => ConsoleColor.DarkGray,
+                EntityAction.Different => ConsoleColor.Yellow,
+                _ => throw new UnexpectedValueException(item.Action)
+            };
+
+            SafeConsole.WriteLineColor(color, $"{item.Action.ToString().ToUpperInvariant()} {item.Type}: {item.Text}" + (item.EntityType == null ? null : $"({item.EntityType})"));
+            foreach (var lc in item.LiteConflicts)
+            {
+                lc.To = giFindAlternative.GetInvoker(lc.From.EntityType)(lc.From);
+                Console.Write($" LiteConflict: {lc.From.KeyLong()} -> ");
+
+                if (lc.To == null)
+                    SafeConsole.WriteLineColor(ConsoleColor.Red, "Not found");
+                else
+                    SafeConsole.WriteLineColor(ConsoleColor.Green, lc.To.KeyLong());
+            }
+        }
+        Import(document, preview);
+    }
+
+    static GenericInvoker<Func<Lite<Entity>, Lite<Entity>?>> giFindAlternative =
+        new (lite => FindAlternative<Entity>(lite));
+    static Lite<T>? FindAlternative<T>(Lite<T> from)
+        where T : Entity
+    {
+        return Database.Query<T>().Where(a => a.ToString() == from.ToString()).Select(a => a.ToLite()).SingleOrDefault();
     }
 
     public static void Import(byte[] document, UserAssetPreviewModel preview)

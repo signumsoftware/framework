@@ -394,10 +394,11 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
       if (!is(active.menuWithEntity.entity, selEntityRef.current))
         setSelectedEntity(active.menuWithEntity.entity);
     }
-    else if (active != null)
+    //else if (active != null)
+    else if (active && !active.menuWithEntity)
       setSelectedEntity(null);
 
-  }, [active?.menuWithEntity, p.response]);
+  }, [active, p.response]);
 
   React.useEffect(() => {
 
@@ -507,20 +508,28 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
     return p.response.elements?.onlyOrNull(a => a.content!.id!.toString() == sel);
   });
 
+  //function handleSetShow(value: ToolbarResponse<any>, e: React.SyntheticEvent | null) {
+  //  localStorage.setItem(key, value.content!.id!.toString());
+
+  //  setSelectedOption(value);
+
+  //  if (value && e) {
+  //    var autoSelect = value.elements?.firstOrNull(a => a.autoSelect && !a.withEntity);
+  //    if (autoSelect) {
+  //      responseClick(autoSelect, p.selectedEntity, e, p.ctx);
+  //    }
+
+  //  }
+  //}
   function handleSetShow(value: ToolbarResponse<any>, e: React.SyntheticEvent | null) {
     localStorage.setItem(key, value.content!.id!.toString());
-
     setSelectedOption(value);
 
-    if (value && e) {
-      var autoSelect = value.elements?.firstOrNull(a => a.autoSelect && !a.withEntity);
-      if (autoSelect) {
-        responseClick(autoSelect, p.selectedEntity, e, p.ctx);
-      }
-
+    var autoSelect = value.elements?.firstOrNull(a => a.autoSelect && !a.withEntity);
+    if (autoSelect) {
+      responseClick(autoSelect, null, undefined, p.ctx);
     }
   }
-
 
   React.useEffect(() => {
 
@@ -542,7 +551,7 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   return (
     <li>
       <ul>
-        <Nav.Item title={title} className="d-flex mx-2 mb-2">
+        <Nav.Item title={title} className="d-flex mb-2">
           {icon}
           <RightCaretDropdown
             options={options}

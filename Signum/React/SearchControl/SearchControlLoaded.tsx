@@ -91,6 +91,7 @@ export interface SearchControlLoadedProps {
   hideFullScreenButton: boolean;
   showHeader: boolean | "PinnedFilters";
   avoidTableFooterContainer: boolean;
+  avoidGroupByMessage: boolean;
   pinnedFilterVisible?: (fop: FilterOptionParsed) => boolean;
   showBarExtension: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
@@ -569,7 +570,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         {p.showHeader == "PinnedFilters" && (sfb ?? this.renderPinnedFilters())}
         {p.showHeader == true && p.largeToolbarButtons && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
-        {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
+        {p.showHeader == true && fo.groupResults && !p.avoidGroupByMessage && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
 
         <div className={p.avoidTableFooterContainer ? undefined : "sf-table-footer-container my-3 p-3 pb-1 bg-body rounded shadow-sm"}>

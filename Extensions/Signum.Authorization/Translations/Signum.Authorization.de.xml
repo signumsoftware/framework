@@ -1,5 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="ActiveDirectoryMessage">
+    <Member Name="AccountEnabled" Description="Konto aktiviert" />
+    <Member Name="CompanyName" Description="Firmenname" />
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="GivenName" Description="Vorname" />
+    <Member Name="HasUser" Description="Hat Benutzer" />
+    <Member Name="Id" Description="Id" />
+    <Member Name="InGroup" Description="In der Gruppe" />
+    <Member Name="JobTitle" Description="Berufsbezeichnung" />
+    <Member Name="Mail" Description="E-Mail" />
+    <Member Name="OnlyActiveUsers" Description="Nur aktive Nutzer" />
+    <Member Name="OnPremisesExtensionAttributes" Description="On-Premises-Erweiterungsattribute" />
+    <Member Name="OnPremisesImmutableId" Description="On-premises unveränderliches Id" />
+    <Member Name="SecurityEnabled" Description="Sicherheit aktiviert" />
+    <Member Name="Surname" Description="Nachname" />
+    <Member Name="Visibility" Description="Sichtbarkeit" />
+  </Type>
+  <Type Name="ActiveDirectoryPermission">
+    <Member Name="InviteUsersFromAD" Description="Benutzer aus AD einladen" />
+  </Type>
   <Type Name="AllowedRule`2">
     <Member Name="Allowed" Description="Erlaubt" />
     <Member Name="AllowedBase" Description="Base erlaubt" />
@@ -83,6 +104,9 @@
     <Member Name="RefreshAnyTokenPreviousTo" Description="Aktualisieren Sie alle Token bis zu" />
     <Member Name="RefreshTokenEvery" Description="Aktualisieren Sie jeden Token" />
   </Type>
+  <Type Name="BaseADConfigurationEmbedded">
+    <Member Name="AutoCreateUsers" Description="Benutzer automatisch erstellen" />
+  </Type>
   <Type Name="BaseRulePack`1">
     <Member Name="Role" Description="Rolle" />
     <Member Name="Rules" Description="Regeln" />
@@ -121,13 +145,10 @@
     <Member Name="Login" Description="Login" />
     <Member Name="LoginWith0" Description="Login mit {0}" />
     <Member Name="LoginWithAzureB2C" Description="Anmelden mit Azure B2C" />
-    <Member Name="LoginWithWindowsUser" Description="Anmelden mit Windows-Benutzer" />
     <Member Name="Logout" Description="Logout" />
-    <Member Name="LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication" Description="Sieht so aus, als ob Ihr Windows-Benutzer diese Anwendung nicht verwenden darf, der Browser keine Identitätsinformationen bereitstellt oder der Server nicht richtig konfiguriert ist." />
     <Member Name="MyProfile" Description="Mein Profil" />
     <Member Name="NewPassword" Description="Neues Passwort" />
     <Member Name="NotUserLogged" Description="Kein angemeldeter Benutzer" />
-    <Member Name="NoWindowsUserFound" Description="Kein Windows-Benutzer gefunden" />
     <Member Name="Password" Description="Passwort" />
     <Member Name="PasswordChanged" Description="Passwort geändert" />
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="Das Passwort wurde erfolgreich geändert" />
@@ -202,6 +223,9 @@
     <Member Name="IsTrivialMerge" Description="Ist triviale Zusammenführung" />
     <Member Name="MergeStrategy" Description="Zusammenführstrategie" />
     <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="RoleMappingEmbedded">
+    <Member Name="Role" Description="Rolle" />
   </Type>
   <Type Name="RoleOperation">
     <Member Name="Delete" Description="Löschen" />

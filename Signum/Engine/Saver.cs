@@ -23,7 +23,6 @@ internal static class Saver
             DirectedGraph<Modifiable> modifiables = PreSaving(() => GraphExplorer.FromRoots(entities));
 
             HashSet<Entity> wasNew = modifiables.OfType<Entity>().Where(a => a.IsNew).ToHashSet(ReferenceEqualityComparer<Entity>.Default);
-            HashSet<Entity> wasSelfModified = modifiables.OfType<Entity>().Where(a => a.Modified == ModifiedState.SelfModified).ToHashSet(ReferenceEqualityComparer<Entity>.Default);
 
             log.Switch("Integrity");
 
@@ -41,6 +40,8 @@ internal static class Saver
             log.Switch("Graph");
 
             GraphExplorer.PropagateModifications(modifiables.Inverse());
+            
+            HashSet<Entity> wasModified = modifiables.OfType<Entity>().Where(a => a.IsGraphModified).ToHashSet(ReferenceEqualityComparer<Entity>.Default);
 
             //colapsa modifiables (collections and embeddeds) keeping indentifiables only
             DirectedGraph<Entity> identifiables = GraphExplorer.ColapseIdentifiables(modifiables);
@@ -70,7 +71,7 @@ internal static class Saver
                 {
                     IsRoot = entities.Contains(node),
                     WasNew = wasNew.Contains(node),
-                    WasSelfModified = wasSelfModified.Contains(node),
+                    WasModified = wasModified.Contains(node),
                 });
         }
     }
