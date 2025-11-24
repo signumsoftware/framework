@@ -1,4 +1,7 @@
 
+
+using Signum.Authorization.BaseAD;
+
 namespace Signum.Authorization;
 
 public interface ICustomAuthorizer
@@ -12,6 +15,7 @@ public interface ICustomAuthorizer
 
 public interface IAutoCreateUserContext
 {
+    public BaseADConfigurationEmbedded Config { get; }
     public string UserName { get; }
     public string? EmailAddress { get; }
     public string FirstName { get; }

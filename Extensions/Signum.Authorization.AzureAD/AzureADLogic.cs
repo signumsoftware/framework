@@ -7,9 +7,9 @@ using System.IO;
 using Signum.API;
 using Microsoft.Graph.Models.ODataErrors;
 using Signum.Utilities.Synchronization;
-using Signum.Authorization.ADGroups;
 using Signum.Authorization.AzureAD.ADGroup;
 using Signum.Authorization.AzureAD.Authorizer;
+using Signum.Authorization.BaseAD;
 
 namespace Signum.Authorization.AzureAD;
 
@@ -419,9 +419,9 @@ public static class AzureADLogic
     public static UserEntity CreateUserFromAD(ActiveDirectoryUser adUser)
     {
         var adAuthorizer = (AzureADAuthorizer)AuthLogic.Authorizer!;
-        var config = adAuthorizer.GetConfig();
+        var config = adAuthorizer.GetConfig(null);
 
-        var acuCtx = GetMicrosoftGraphContext(adUser);
+        var acuCtx = GetMicrosoftGraphContext(adUser, config!);
 
         using (Security.ExecutionMode.Global())
         {
@@ -448,13 +448,13 @@ public static class AzureADLogic
         }
     }
 
-    private static MicrosoftGraphCreateUserContext GetMicrosoftGraphContext(ActiveDirectoryUser adUser)
+    private static MicrosoftGraphCreateUserContext GetMicrosoftGraphContext(ActiveDirectoryUser adUser, AzureADConfigurationEmbedded config)
     {
         var tokenCredential = GetTokenCredential();
         GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
         var msGraphUser = graphClient.Users[adUser.ObjectID.ToString()].GetAsync().Result;
 
-        return new MicrosoftGraphCreateUserContext(msGraphUser!);
+        return new MicrosoftGraphCreateUserContext(msGraphUser!, config);
     }
 
 
@@ -488,7 +488,10 @@ public record SimpleGroup(Guid Id, string? DisplayName);
 
 public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
 {
-    public MicrosoftGraphCreateUserContext(User user)
+    AzureADConfigurationEmbedded Config { get; }
+    BaseADConfigurationEmbedded IAutoCreateUserContext.Config => Config;
+
+    public MicrosoftGraphCreateUserContext(User user, AzureADConfigurationEmbedded config)
     {
         User = user;
     }
@@ -504,6 +507,7 @@ public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
     public Guid? OID => Guid.Parse(User.Id!);
 
     public string? SID => null;
+
 }
 
 
