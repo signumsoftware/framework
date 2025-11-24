@@ -353,21 +353,57 @@ public static class VirtualMList
 
         var param = mListField.Parameters.SingleEx();
 
-        var newBody = SafeAccess(param, (MemberExpression)body, body);
+        var newBody = BuildNullSafeChain(param, body);
 
         return Expression.Lambda<Func<T, MList<L>>>(newBody, mListField.Parameters.Single()).Compile();
     }
 
-    private static Expression SafeAccess(ParameterExpression param, MemberExpression member, Expression acum)
-    {
-        if (member.Expression == param)
-            return acum;
+    //a.Prop1
+    // a.Prop1
+    //a.Mixin<Bla>().Prop
+    // a.Mixin<Bla>().Prop
+    //a.Prop1.Prop2 
+    // a.Prop1 == null ? null : a.Prop1.Prop2
+    //a.Prop1.Mixin<Bla>().Prop2 
+    // a.Prop1 == null ? null : a.Prop1.Mixin<Bla>().Prop2
 
-        return SafeAccess(param,
-            member: (MemberExpression)member.Expression!,
-            acum: Expression.Condition(Expression.Equal(member.Expression!, Expression.Constant(null, member.Expression!.Type)), Expression.Constant(null, acum.Type), acum)
-            );
+    private static Expression BuildNullSafeChain(ParameterExpression param, Expression expression)
+    {
+        Expression acum = expression;
+
+        while (true)
+        {
+            var parent = expression switch
+            {
+                MemberExpression m => m.Expression!,
+                MethodCallExpression call when IsMixinCall(call) => call.Object!,
+                _ => throw new UnexpectedValueException(expression.ToStringIndented())
+            };
+
+            if (parent is ParameterExpression p2 && p2 == param)
+                break;
+
+            var isOptional = parent is MemberExpression;
+
+            if (isOptional)
+            {
+                acum = Expression.Condition(
+                   Expression.Equal(parent!, Expression.Constant(null, parent!.Type)),
+                   Expression.Constant(null, acum.Type),
+                   acum);
+            }
+
+            expression = parent;
+        }
+
+        return acum;
     }
+
+    private static bool IsMixinCall(MethodCallExpression call) =>
+        call.Method.Name == "Mixin"
+        && call.Method.IsGenericMethod
+        && call.Object != null
+        && call.Arguments.Count == 0;
 
     public static Action<L, Lite<T>>? CreateBackreferenceSetter<T, L>(Expression<Func<L, Lite<T>?>> getBackReference)
         where T : Entity
