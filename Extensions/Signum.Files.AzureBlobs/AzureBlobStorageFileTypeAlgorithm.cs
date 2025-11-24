@@ -445,17 +445,14 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
                 var tags = tagsResponse.Value.Tags;
                 if (tags.TryGetValue("Malware Scanning scan result", out var status))
                 {
-                    if (status == "No threats found")
+                    switch (status)
                     {
-                        return;
-                    }
-                    else if (status == "Malicious")
-                    {
-                        throw new InvalidOperationException($"The file '{fileName}' contains a threat detected by Windows Defender.");
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"The file '{fileName}' has an unexpected status. Status: {status}");
+                        case "No threats found":
+                            return;
+                        case "Malicious":
+                            throw new InvalidOperationException($"The file '{fileName}' contains a threat detected by Windows Defender.");
+                        default:
+                            throw new InvalidOperationException($"The file '{fileName}' has an unexpected status. Status: {status}");
                     }
                 }
                 await Task.Delay(pollInterval, token);
