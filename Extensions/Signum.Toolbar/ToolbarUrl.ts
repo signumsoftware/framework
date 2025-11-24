@@ -20,7 +20,7 @@ export namespace ToolbarUrl {
       .replaceAll(":id", selectedEntity.id!.toString())
       .replace(":type", selectedEntity.EntityType)
       .replace(":key", liteKey(selectedEntity))
-      .replace(":toStr", getToString(selectedEntity))
+      .replace(":toStr", getToString(selectedEntity).replace(/[^a-zA-Z0-9-_]/g, ''))
     return url
   }
 
@@ -33,7 +33,7 @@ export namespace ToolbarUrl {
       .replaceAll(":id2", subEntity.id!.toString())
       .replace(":type2", subEntity.EntityType)
       .replace(":key2", liteKey(subEntity))
-      .replace(":toStr2", getToString(subEntity))
+      .replace(":toStr2", getToString(subEntity).replace(/[^a-zA-Z0-9-_]/g, ''))
     return url
   }
 
