@@ -449,10 +449,10 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
                     {
                         case "No threats found":
                             return;
-                        case "Malicious":
-                            throw new InvalidOperationException($"The file '{fileName}' contains a threat detected by Windows Defender.");
+                        case "Malicious":                            
+                            throw new MicrosoftDefenderMaliciousFileFoundException(fileName);
                         default:
-                            throw new InvalidOperationException($"The file '{fileName}' has an unexpected status. Status: {status}");
+                            throw new MicrosoftDefenderNonRecognizedFileResultException(fileName);
                     }
                 }
                 await Task.Delay(pollInterval, token);
@@ -479,4 +479,20 @@ public class AzureDefenderPollingOptions
 {
     public TimeSpan TotalWaitTime { get; set; } = TimeSpan.FromMinutes(5);
     public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(3);
+}
+
+public sealed class MicrosoftDefenderMaliciousFileFoundException : Exception
+{
+    public MicrosoftDefenderMaliciousFileFoundException(string fileName)
+        : base(FileMessage.File0ContainsAThreatBy1.NiceToString(fileName, "Microsoft Defender"))
+    {
+    }
+}
+
+public sealed class MicrosoftDefenderNonRecognizedFileResultException : Exception
+{
+    public MicrosoftDefenderNonRecognizedFileResultException(string fileName)
+        : base(FileMessage.File0ScanResultNotRecognizedBy1.NiceToString(fileName, "Microsoft Defender"))
+    {
+    }
 }
