@@ -452,7 +452,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
                         case "Malicious":                            
                             throw new MicrosoftDefenderMaliciousFileFoundException(fileName);
                         default:
-                            throw new MicrosoftDefenderNonRecognizedFileResultException(fileName);
+                            throw new UnexpectedValueException(status);
                     }
                 }
                 await Task.Delay(pollInterval, token);
@@ -485,14 +485,6 @@ public sealed class MicrosoftDefenderMaliciousFileFoundException : Exception
 {
     public MicrosoftDefenderMaliciousFileFoundException(string fileName)
         : base(FileMessage.File0ContainsAThreatBy1.NiceToString(fileName, "Microsoft Defender"))
-    {
-    }
-}
-
-public sealed class MicrosoftDefenderNonRecognizedFileResultException : Exception
-{
-    public MicrosoftDefenderNonRecognizedFileResultException(string fileName)
-        : base(FileMessage.File0ScanResultNotRecognizedBy1.NiceToString(fileName, "Microsoft Defender"))
     {
     }
 }

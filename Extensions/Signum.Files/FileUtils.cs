@@ -69,7 +69,4 @@ public enum FileMessage
 
     [Description("The file '{0}' contains a threat detected by {1}.")]
     File0ContainsAThreatBy1,
-
-    [Description("The file '{0}' scan result is not recognized by {1}.")]
-    File0ScanResultNotRecognizedBy1,
 }
