@@ -14,15 +14,58 @@ public static class HelpXml
 {
     public class HelpContent
     {
-        public string Type { get; set; }
+        public TypeEntity Type { get; set; }
         public string Key { get; set; }
         public CultureInfo Culture { get; set; }
         public FileContent Xml { get; set; }
         public FileContent[] Images { get; set; }
+        public Lite<IHelpEntity>? ExistingEntity { get; set; }
+        public ImportAction? Action { get; set; }
+        public bool Appply { get; set; } = false;
+        public ImportStatus Status { get; set; } = ImportStatus.NoChange;
+        public string? ImportError { get; set; }
+
+        public HelpImportPreviewLineEmbedded ToPreviewLine()
+        {
+            return new HelpImportPreviewLineEmbedded
+            {
+                Type = this.Type,
+                Key = this.Key,
+                Culture = this.Culture.ToCultureInfoEntity(),
+                Text = this.ToString(),
+                ExitingEntity = this.ExistingEntity,
+                Action = this.Action!.Value,
+                Apply = this.Action!.Value == ImportAction.Create,
+            };
+        }
+
+        public HelpImportReportLineEmbedded ToReportLine()
+        {
+            return new HelpImportReportLineEmbedded
+            {
+                Type = this.Type,
+                Key = this.Key,
+                Culture = this.Culture.ToCultureInfoEntity(),
+                Text = this.ToString(),
+                ExitingEntity = this.ExistingEntity,
+                Action = this.Action!.Value,
+                Status = this.Status,
+                ActionError = this.ImportError
+            };
+        }
+    }
+
+    public enum ImportExecutionMode
+    {
+        Preview,
+        ApplyPreview,
+        ApplyDirectly,
+        Interactive
     }
 
     private static FileContent[] GetImageContents(IHelpEntity entity) =>
-        [.. Database.Query<HelpImageEntity>().Where(a => a.Target.Is(entity)).Select(i => new FileContent(i.Id + "." + i.File.FileName, i.File.GetByteArray()))];
+        [.. Database.Query<HelpImageEntity>().Where(a => a.Target.Is(entity))
+            .Select(i => new FileContent(i.Id + "." + i.File.FileName, i.File.GetByteArray()))];
 
     private static byte[] ToBytes(this XDocument doc)
     {
@@ -34,6 +77,82 @@ public static class HelpXml
     private static string RemoveInvalid(string name)
     {
         return Regex.Replace(name, "[" + Regex.Escape(new string(Path.GetInvalidPathChars())) + "]", "");
+    }
+
+
+    private static void ImportCreate(HelpContent refContent, ImportExecutionMode mode, Func<ImportStatus> action)
+    {
+        ImportContent(refContent, mode, ImportAction.Create, () => action());
+    }
+
+    private static void ImportDelete(ImportExecutionMode mode, IHelpEntity entity, 
+        List<HelpContent> outList, Func<ImportStatus> action)
+    {
+        var content = entity.ToHelpContent(false);
+        content.Action = ImportAction.Remove;
+
+        ImportContent(content, mode, ImportAction.Remove, () => action());
+
+        outList.Add(content);
+    }
+
+    private static void ImportUpdate(HelpContent refContent, IHelpEntity entity, ImportExecutionMode mode, 
+        Func<bool> modified, Func<ImportStatus> action)
+    {
+        ImportContent(refContent, mode, 
+            modified() ? ImportAction.Update : ImportAction.NoChange, 
+            () => action(), entity);
+    }
+
+    private static void ImportContent(
+        HelpContent content,
+        ImportExecutionMode mode,
+        ImportAction importAction,
+        Func<ImportStatus> executeAction,
+        IHelpEntity? entity = null)
+    {
+        if (mode == ImportExecutionMode.Preview)
+        {
+            content.Action = importAction;
+            content.ExistingEntity = entity?.ToLite();
+            return;
+        }
+
+        if (mode == ImportExecutionMode.ApplyDirectly)
+        {
+            Run();
+            return;
+        }
+
+        // Interactive or ApplyReivew mode
+        if (importAction == ImportAction.NoChange)
+        {
+            content.Status = ImportStatus.NoChange;
+            return;
+        }
+
+        if (!content.Appply)
+        {
+            content.Status = ImportStatus.Skipped;
+            SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"{content} skipped");
+            return;
+        }
+
+        Run();
+        return;
+
+        void Run()
+        {
+            try
+            {
+                content.Status = executeAction();
+            }
+            catch (Exception ex)
+            {
+                content.Status = ImportStatus.Failed;
+                content.ImportError = ex.Message;
+            }
+        }
     }
 
     public static class AppendixXml
@@ -55,17 +174,16 @@ public static class HelpXml
                        entity.Description.HasText() ? new XElement(_Description, entity.Description) : null!
                    )
                 );
-        }
+          }
 
-        public static void Import(List<HelpContent> contents, Replacements rep, ref bool? deleteAll)
+        public static void Import(List<HelpContent> contents, Replacements rep, ImportExecutionMode mode, ref bool? deleteAll)
         { 
-            if (contents.Any(c => c.Type != AppendicesDirectory))
+            if (contents.Any(c => c.Type.ToType() != typeof(AppendixHelpEntity)))
                 throw new InvalidOperationException("Some contents are not of type Appendix");
 
             SafeConsole.WriteLineColor(ConsoleColor.White, $" Appendix");
-
             var groups = contents.GroupToDictionary(c => c.Culture);
-
+            
             foreach (var kv in groups)
             {
                 var ci = kv.Key.ToCultureInfoEntity();
@@ -73,69 +191,80 @@ public static class HelpXml
 
                 bool? deleteTemp = deleteAll;
 
-                Synchronizer.SynchronizeReplacing(rep, null, /*"Appendix", //Temporarily passing null for Help Direct Import (without Preview)*/
-                      newDictionary: kv.Value.ToDictionaryEx(c => c.Key),
-                      oldDictionary: current.ToDictionaryEx(n => n.UniqueName),
-                      createNew: (k, n) =>
-                      {
-                          XElement element = ParseXML(n);
+                Synchronizer.SynchronizeReplacing(rep, mode == ImportExecutionMode.Interactive ? "Appendix" : null,
+                    newDictionary: kv.Value.ToDictionaryEx(c => c.Key),
+                    oldDictionary: current.ToDictionaryEx(n => n.UniqueName),
+                    createNew: (k, n) =>
+                        ImportCreate(n, mode, () =>
+                        {
+                            XElement element = ParseXML(n);
+                            var ah = new AppendixHelpEntity
+                            {
+                                Culture = ci,
+                                UniqueName = element.Attribute(_Name)!.Value,
+                                Title = element.Attribute(_Title)!.Value,
+                                Description = element.Element(_Description)?.Value
+                            }.Execute(AppendixHelpOperation.Save);
+                            SafeConsole.WriteColor(ConsoleColor.Green, "  " + ah.UniqueName);
 
-                          var ah = new AppendixHelpEntity
-                          {
-                              Culture = ci,
-                              UniqueName = element.Attribute(_Name)!.Value,
-                              Title = element.Attribute(_Title)!.Value,
-                              Description = element.Element(_Description)?.Value
-                          }.Execute(AppendixHelpOperation.Save);
+                            ImportImages(ah, n);
+                            Console.WriteLine();
 
-                          SafeConsole.WriteColor(ConsoleColor.Green, "  " + ah.UniqueName);
-                          ImportImages(ah, n);
-                          Console.WriteLine();
-                      },
-                      removeOld: (k, o) =>
-                      {
-                          if (SafeConsole.Ask(ref deleteTemp, $"Delete Appendix {o.UniqueName} in {o.Culture}?"))
-                          {
-                              o.Delete(AppendixHelpOperation.Delete);
-                              SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.UniqueName);
-                          }
-                      },
-                      merge: (k, n, o) =>
-                      {
-                          XElement element = ParseXML(n);
+                            return ImportStatus.Applied;
+                        }),
+                    removeOld: (k, o) =>
+                        ImportDelete(mode, o, contents, () =>
+                        {
+                            if (SafeConsole.Ask(ref deleteTemp, $"Delete Appendix {o.UniqueName} in {o.Culture}?"))
+                            {
+                                o.Delete(AppendixHelpOperation.Delete);
+                                SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.UniqueName);
+                                return ImportStatus.Applied;
+                            }
+                            return ImportStatus.Failed;
+                        }),
+                    merge: (k, n, o) =>
+                        ImportUpdate(n, o, mode, modified: () =>
+                        {
+                            XElement element = ParseXML(n);
 
-                          o.Title = element.Attribute(_Title)!.Value;
-                          o.Description = element.Element(_Description)?.Value;
+                            o.Title = element.Attribute(_Title)!.Value;
+                            o.Description = element.Element(_Description)?.Value;
 
-                          if (GraphExplorer.IsGraphModified(o))
-                          {
-                              o.Execute(AppendixHelpOperation.Save);
-                              SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + o.UniqueName);
-                          }
-                          else
-                          {
-                              SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + o.UniqueName);
-                          }
+                            if (GraphExplorer.IsGraphModified(o))
+                                return true;
+                            else
+                            {
+                                SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + o.UniqueName);
+                                return false;
+                            }
 
-                          ImportImages(o, n);
-                          Console.WriteLine();
-                      });
+                        }, action: () =>
+                        {
+                            o.Execute(AppendixHelpOperation.Save);
+                            SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + o.UniqueName);
+
+                            ImportImages(o, n);
+                            Console.WriteLine();
+
+                            return ImportStatus.Applied;
+                        })
+                );
                 deleteAll = deleteTemp;
             }
         }
 
-        public static HelpContent ToHelpContent(AppendixHelpEntity entity)
+        public static HelpContent ToHelpContent(AppendixHelpEntity entity, bool blobs)
         {
             var key = RemoveInvalid(entity.UniqueName);
-            var type = AppendicesDirectory;
 
             return new HelpContent
             {
-                Type = type,
+                Type = entity.GetType().ToTypeEntity(),
                 Key = key,
                 Culture = entity.Culture.ToCultureInfo(),
-                Xml = new FileContent($"{key}.help", ToXDocument(entity).ToBytes()),
-                Images = GetImageContents(entity)
+                Xml = new FileContent($"{key}.help", blobs ? ToXDocument(entity).ToBytes() : []),
+                Images = blobs ? GetImageContents(entity) : []
             }; 
         }
 
@@ -178,18 +307,17 @@ public static class HelpXml
                 );
         }
 
-        public static HelpContent ToHelpContent(NamespaceHelpEntity entity)
+        public static HelpContent ToHelpContent(NamespaceHelpEntity entity, bool blobs)
         {
             var key = RemoveInvalid(entity.Name);
-            var type = NamespacesDirectory;
 
             return new HelpContent
             {
-                Type = type,
+                Type = entity.GetType().ToTypeEntity(),
                 Key = key,
                 Culture = entity.Culture.ToCultureInfo(),
-                Xml = new FileContent($"{key}.help", ToXDocument(entity).ToBytes()),
-                Images = GetImageContents(entity)
+                Xml = new FileContent($"{key}.help", blobs ? ToXDocument(entity).ToBytes() : []),
+                Images = blobs ? [] : GetImageContents(entity)
             };
         }
 
@@ -205,9 +333,10 @@ public static class HelpXml
             return result;
         }
 
-        public static void Import(List<HelpContent> contents, Replacements rep, ref bool? deleteAll)
+        public static void Import(List<HelpContent> contents, Replacements rep, 
+            ImportExecutionMode mode, ref bool? deleteAll)
         {
-            if (contents.Any(c => c.Type != NamespacesDirectory))
+            if (contents.Any(c => c.Type.ToType() != typeof(NamespaceHelpEntity)))
                 throw new InvalidOperationException("Some contents are not of type Namespace");
 
             SafeConsole.WriteLineColor(ConsoleColor.White, $" Namespace");
@@ -221,53 +350,67 @@ public static class HelpXml
 
                 bool? deleteTemp = deleteAll;
 
-                Synchronizer.SynchronizeReplacing(rep, null, /*"Namespace", Temporarily passing null for Help Direct Import(without Preview)*/
+                Synchronizer.SynchronizeReplacing(rep, mode == ImportExecutionMode.Interactive ? "Namespace" : null,
                       newDictionary: kv.Value.ToDictionaryEx(c => c.Key),
                       oldDictionary: current.ToDictionaryEx(n => n.Name),
-                      createNew: (k, n) =>
-                      {
-                          XElement element = ParseXML(n);
-
-                          var nh = new NamespaceHelpEntity
+                      createNew: (k, n) => 
+                      ImportCreate(n, mode, () =>
                           {
-                              Culture = ci,
-                              Name = element.Attribute(_Name)!.Value,
-                              Title = element.Attribute(_Title)?.Value,
-                              Description = element.Element(_Description)?.Value
-                          }.Execute(NamespaceHelpOperation.Save);
+                              XElement element = ParseXML(n);
 
-                          SafeConsole.WriteColor(ConsoleColor.Green, "  " + nh.Name);
-                          ImportImages(nh, n);
-                          Console.WriteLine();
-                      },
+                              var nh = new NamespaceHelpEntity
+                              {
+                                  Culture = ci,
+                                  Name = element.Attribute(_Name)!.Value,
+                                  Title = element.Attribute(_Title)?.Value,
+                                  Description = element.Element(_Description)?.Value
+                              }.Execute(NamespaceHelpOperation.Save);
+                              SafeConsole.WriteColor(ConsoleColor.Green, "  " + nh.Name);
+                              
+                              ImportImages(nh, n);                              
+                              Console.WriteLine();
+
+                              return ImportStatus.Applied;
+                          }),
                       removeOld: (k, o) =>
-                      {
-                          if (SafeConsole.Ask(ref deleteTemp, $"Delete Namespace {o.Name} in {o.Culture}?"))
+                          ImportDelete(mode, o, contents, () =>
                           {
-                              o.Delete(NamespaceHelpOperation.Delete);
-                              SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.Name);
-                          }
-                      },
+                              if (SafeConsole.Ask(ref deleteTemp, $"Delete Namespace {o.Name} in {o.Culture}?"))
+                              {
+                                  o.Delete(NamespaceHelpOperation.Delete);
+                                  SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.Name);
+                                  return ImportStatus.Applied;
+                              }
+
+                              return ImportStatus.Skipped;
+                          }),
                       merge: (k, n, o) =>
-                      {
-                          XElement element = ParseXML(n);
+                          ImportUpdate(n, o, mode, modified: () =>
+                          {
+                              XElement element = ParseXML(n);
 
-                          o.Title = element.Attribute(_Title)?.Value;
-                          o.Description = element.Element(_Description)?.Value;
+                              o.Title = element.Attribute(_Title)?.Value;
+                              o.Description = element.Element(_Description)?.Value;
 
-                          if (GraphExplorer.IsGraphModified(o))
+                              if (GraphExplorer.IsGraphModified(o))
+                                  return true;
+                              else
+                              {
+                                  SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + o.Name);
+                                  return false;
+                              }
+
+                          }, action: () =>
                           {
                               o.Execute(NamespaceHelpOperation.Save);
                               SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + o.Name);
-                          }
-                          else
-                          {
-                              SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + o.Name);
-                          }
 
-                          ImportImages(o, n);
-                          Console.WriteLine();
-                      });
+                              ImportImages(o, n);
+                              Console.WriteLine();
+
+                              return ImportStatus.Applied;
+                          })
+                );
                 deleteAll = deleteTemp;
             }
         }
@@ -318,24 +461,24 @@ public static class HelpXml
                    );
         }
 
-        public static HelpContent ToHelpContent(QueryHelpEntity entity)
+        public static HelpContent ToHelpContent(QueryHelpEntity entity, bool blobs)
         {
             var key = RemoveInvalid(entity.Query.Key);
-            var type = QueriesDirectory;
 
             return new HelpContent
             {
-                Type = type,
+                Type = entity.GetType().ToTypeEntity(),
                 Key = key,
                 Culture = entity.Culture.ToCultureInfo(),
-                Xml = new FileContent($"{key}.help", ToXDocument(entity).ToBytes()),
-                Images = GetImageContents(entity)
+                Xml = new FileContent($"{key}.help", blobs ? ToXDocument(entity).ToBytes() : []),
+                Images = blobs ? GetImageContents(entity) : []
             };
         }
 
-        public static void Import(List<HelpContent> contents, Replacements rep, ref bool? deleteAll)
+        public static void Import(List<HelpContent> contents, Replacements rep, 
+            ImportExecutionMode mode, ref bool? deleteAll)
         {
-            if (contents.Any(c => c.Type != QueriesDirectory))
+            if (contents.Any(c => c.Type.ToType() != typeof(QueryHelpEntity)))
                 throw new InvalidOperationException("Some contents are not of type Query");
 
             SafeConsole.WriteLineColor(ConsoleColor.White, $" Query");
@@ -349,56 +492,70 @@ public static class HelpXml
 
                 bool? deleteTemp = deleteAll;
 
-                Synchronizer.SynchronizeReplacing(rep, null, /*"Queries", Temporarily passing null for Help Direct Import(without Preview)*/
+                Synchronizer.SynchronizeReplacing(rep, mode == ImportExecutionMode.Interactive ? "Queries" : null,
                       newDictionary: kv.Value.ToDictionaryEx(c => c.Key),
                       oldDictionary: current.ToDictionaryEx(n => n.Query.Key),
                       createNew: (k, n) =>
-                      {
-                          XElement element = ParseXML(n);
-
-                          var qn = QueryLogic.ToQueryName(k);
-                          var queryHelp = new QueryHelpEntity
+                          ImportCreate(n, mode, () =>
                           {
-                              Culture = ci,
-                              Query = QueryLogic.GetQueryEntity(qn),
-                          };
+                                XElement element = ParseXML(n);
 
-                          ImportXml(queryHelp, element);
-                          queryHelp.Execute(QueryHelpOperation.Save);
+                              var qn = QueryLogic.ToQueryName(k);
+                              if (qn == null)
+                                  return ImportStatus.Failed;
+                              var queryHelp = new QueryHelpEntity
+                              {
+                                  Culture = ci,
+                                  Query = QueryLogic.GetQueryEntity(qn),
+                              };
 
-                          SafeConsole.WriteColor(ConsoleColor.Green, "  " + queryHelp.Query.Key);
-                          ImportImages(queryHelp, n);
-                          Console.WriteLine();
-                      },
+                              ImportXml(queryHelp, element, mode);
+                              queryHelp.Execute(QueryHelpOperation.Save);
+
+                              SafeConsole.WriteColor(ConsoleColor.Green, "  " + queryHelp.Query.Key);
+                              ImportImages(queryHelp, n);
+                              Console.WriteLine();
+                              return ImportStatus.Applied;
+                          }),
                       removeOld: (k, o) =>
-                      {
-                          if (SafeConsole.Ask(ref deleteTemp, $"Delete Query {o.Query.Key} in {o.Culture}?"))
+                          ImportDelete(mode, o, contents, () =>
                           {
-                              o.Delete(QueryHelpOperation.Delete);
-                              SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.Query.Key);
-                          }
-                      },
+                                if (SafeConsole.Ask(ref deleteTemp, $"Delete Query {o.Query.Key} in {o.Culture}?"))
+                              {
+                                  o.Delete(QueryHelpOperation.Delete);
+                                  SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.Query.Key);
+                                  return ImportStatus.Applied;
+                              }
+                              return ImportStatus.Failed;
+                          }),
                       merge: (k, n, o) =>
-                      {
-                          XElement element = ParseXML(n);
+                          ImportUpdate(n, o, mode, modified: () =>
+                          {
+                              XElement element = ParseXML(n);
 
-                          o.Culture = ci;
-                          o.Description = element.Element(_Description)?.Value;
-                          ImportXml(o, element);
+                              o.Culture = ci;
+                              o.Description = element.Element(_Description)?.Value;
+                              ImportXml(o, element, mode);
 
-                          if (GraphExplorer.IsGraphModified(o))
+                              if (GraphExplorer.IsGraphModified(o))
+                                  return true;
+                              else
+                              {
+                                  SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + o.Query.Key);
+                                  return false;
+                              }
+
+                          }, action: () =>
                           {
                               o.Execute(QueryHelpOperation.Save);
                               SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + o.Query.Key);
-                          }
-                          else
-                          {
-                              SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + o.Query.Key);
-                          }
 
-                          ImportImages(o, n);
-                          Console.WriteLine();
-                      });
+                              ImportImages(o, n);
+                              Console.WriteLine();
+
+                              return ImportStatus.Applied;
+                          })
+                );
                 deleteAll = deleteTemp;
             }
         }
@@ -420,7 +577,7 @@ public static class HelpXml
             return element;
         }
 
-        private static void ImportXml(QueryHelpEntity entity, XElement element)
+        private static void ImportXml(QueryHelpEntity entity, XElement element, ImportExecutionMode mode)
         {
             entity.Description = element.Element(_Description)?.Value;
 
@@ -433,7 +590,9 @@ public static class HelpXml
                 {
                     string? name = item.Attribute(_Name)!.Value;
 
-                    name = queryColumns.TryGetC(name); //SelectInteractive(name, queryColumns, "columns of {0}".FormatWith(entity.Query));
+                    name = mode == ImportExecutionMode.Interactive ?
+                         SelectInteractive(name, queryColumns, "columns of {0}".FormatWith(entity.Query)) :
+                         queryColumns.TryGetC(name);
 
                     if (name == null)
                         continue;
@@ -496,22 +655,21 @@ public static class HelpXml
                );
         }
 
-        public static HelpContent ToHelpContent(TypeHelpEntity entity)
+        public static HelpContent ToHelpContent(TypeHelpEntity entity, bool blobs)
         {
             var key = RemoveInvalid(entity.Type.CleanName);
-            var type = TypesDirectory;
 
             return new HelpContent
             {
-                Type = type,
+                Type = entity.GetType().ToTypeEntity(),
                 Key = key,
                 Culture = entity.Culture.ToCultureInfo(),
-                Xml = new FileContent($"{key}.help", ToXDocument(entity).ToBytes()),
-                Images = GetImageContents(entity)
+                Xml = new FileContent($"{key}.help", blobs ? ToXDocument(entity).ToBytes() : []),
+                Images = blobs ? GetImageContents(entity) : []
             };
         }
 
-        private static void ImportType(TypeHelpEntity entity, XElement element)
+        private static void ImportType(TypeHelpEntity entity, XElement element, ImportExecutionMode mode)
         {
             entity.Description = element.Element(_Description)?.Value;
 
@@ -525,7 +683,10 @@ public static class HelpXml
                 {
                     string name = item.Attribute(_Name)!.Value;
 
-                    var property = properties.TryGetC(name); // SelectInteractive(name, properties, "properties for {0}".FormatWith(typeEntity.ClassName));
+                    var property = mode == ImportExecutionMode.Interactive ?
+                        SelectInteractive(name, properties, "properties for {0}".FormatWith(typeEntity.ClassName)) :
+                        properties.TryGetC(name);
+
                     if (property == null)
                         continue;
 
@@ -554,7 +715,9 @@ public static class HelpXml
                 {
                     string name = item.Attribute(_Key)!.Value;
 
-                    var operation = operations.TryGetC(name); //SelectInteractive(name, operations, "operations for {0}".FormatWith(typeEntity.ClassName));
+                    var operation = mode == ImportExecutionMode.Interactive ? 
+                        SelectInteractive(name, operations, "operations for {0}".FormatWith(typeEntity.ClassName)):
+                        operations.TryGetC(name); 
 
                     if (operation == null)
                         continue;
@@ -589,9 +752,10 @@ public static class HelpXml
             return result;
         }
 
-        public static void Import(List<HelpContent> contents, Replacements rep, ref bool? deleteAll)
+        public static void Import(List<HelpContent> contents, Replacements rep,
+            ImportExecutionMode mode, ref bool? deleteAll)
         {
-            if (contents.Any(c => c.Type != TypesDirectory))
+            if (contents.Any(c => c.Type.ToType() != typeof(TypeHelpEntity)))
                 throw new InvalidOperationException("Some contents are not of type Entity");
 
             SafeConsole.WriteLineColor(ConsoleColor.White, $" Entity");
@@ -607,56 +771,73 @@ public static class HelpXml
 
                 bool? deleteTemp = deleteAll;
 
-                Synchronizer.SynchronizeReplacing(rep, null,/* "TypeHelps",  Temporarily passing null for Help Direct Import (without Preview)*/
+                Synchronizer.SynchronizeReplacing(rep, mode == ImportExecutionMode.Interactive ? "TypeHelps" : null,
                       newDictionary: kv.Value.ToDictionaryEx(c => c.Key),
                       oldDictionary: current.ToDictionaryEx(n => n.Type.CleanName),
                       createNew: (k, n) =>
-                      {
-                          XElement element = ParseXML(n);
-
-                          var cleanName = element.Attribute(_CleanName)!.Value;
-                          var typeEntity = typesByFullName.GetOrThrow(cleanName);
-
-                          var typeHelp = new TypeHelpEntity
+                          ImportCreate(n, mode, () =>
                           {
-                              Culture = ci,
-                              Type = typeEntity.ToTypeEntity(),
-                          };
+                              XElement element = ParseXML(n);
 
-                          ImportType(typeHelp, element);
-                          typeHelp.Execute(TypeHelpOperation.Save);
+                              var cleanName = element.Attribute(_CleanName)!.Value;
+                              var typeEntity = typesByFullName.TryGetC(cleanName);
+                              if (typeEntity == null)
+                              {
+                                  n.ImportError = $"Entity type '{cleanName}' not found.";
+                                  return ImportStatus.Failed;                                  
+                              }
 
-                          SafeConsole.WriteColor(ConsoleColor.Green, "  " + typeHelp.Type.CleanName);
-                          ImportImages(typeHelp, n);
-                          Console.WriteLine();
-                      },
-                      removeOld: (k, o) =>
-                      {
-                          if (SafeConsole.Ask(ref deleteTemp, $"Delete Entity {o.Type.ClassName} in {o.Culture}?"))
-                          {
-                              o.Delete(TypeHelpOperation.Delete);
-                              SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.Type.ClassName);
-                          }
-                      },
-                      merge: (k, n, typeHelp) =>
-                      {
-                          XElement element = ParseXML(n);
+                              var typeHelp = new TypeHelpEntity
+                              {
+                                  Culture = ci,
+                                  Type = typeEntity.ToTypeEntity(),
+                              };
 
-                          ImportType(typeHelp, element);
-
-                          if (GraphExplorer.IsGraphModified(typeHelp))
-                          {
+                              ImportType(typeHelp, element, mode);
                               typeHelp.Execute(TypeHelpOperation.Save);
-                              SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + typeHelp.Type.ClassName);
-                          }
-                          else
-                          {
-                              SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + typeHelp.Type.ClassName);
-                          }
 
-                          ImportImages(typeHelp, n);
-                          Console.WriteLine();
-                      });
+                              SafeConsole.WriteColor(ConsoleColor.Green, "  " + typeHelp.Type.CleanName);
+                              ImportImages(typeHelp, n);
+                              Console.WriteLine();
+
+                              return ImportStatus.Applied;
+                          }),
+                      removeOld: (k, o) =>
+                          ImportDelete(mode, o, contents, () =>
+                          {
+                              if (SafeConsole.Ask(ref deleteTemp, $"Delete Entity {o.Type.ClassName} in {o.Culture}?"))
+                              {
+                                  o.Delete(TypeHelpOperation.Delete);
+                                  SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.Type.ClassName);
+                                  return ImportStatus.Applied;
+                              }
+                              return ImportStatus.Failed;
+                          }),
+                      merge: (k, n, o) =>
+                          ImportUpdate(n, o, mode, modified: () =>
+                          {
+                              XElement element = ParseXML(n);
+
+                              ImportType(o, element, mode);
+
+                              if (GraphExplorer.IsGraphModified(o))
+                                  return true;
+                              else
+                              {
+                                  SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + o.Type.ClassName);
+                                  return false;
+                              }
+
+                          }, action: () =>
+                          {
+                              o.Execute(TypeHelpOperation.Save);
+                              SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + o.Type.ClassName);
+
+                              ImportImages(o, n);
+                              Console.WriteLine();
+                              return ImportStatus.Applied;
+                          })
+                );
                 deleteAll = deleteTemp;
             }
         }
@@ -700,20 +881,47 @@ public static class HelpXml
         return dictionary.GetOrThrow(selected);
 
     }
-    private static HelpContent ToHelpContent(this IHelpEntity entity) => entity switch
+
+    private static HelpContent ToHelpContent(this IHelpEntity entity, bool blobs) => entity switch
     {
-        AppendixHelpEntity e => AppendixXml.ToHelpContent(e),
-        NamespaceHelpEntity e => NamespaceXml.ToHelpContent(e),
-        TypeHelpEntity e => EntityXml.ToHelpContent(e),
-        QueryHelpEntity e => QueryXml.ToHelpContent(e),
+        AppendixHelpEntity e => AppendixXml.ToHelpContent(e, blobs),
+        NamespaceHelpEntity e => NamespaceXml.ToHelpContent(e, blobs),
+        TypeHelpEntity e => EntityXml.ToHelpContent(e, blobs),
+        QueryHelpEntity e => QueryXml.ToHelpContent(e, blobs),
         _ => throw new NotSupportedException()
     };
 
-    public static string TypesDirectory = "Types";
+    private static void ImportImages(IHelpEntity entity, HelpContent content)
+    {
+        var oldImages = Database.Query<HelpImageEntity>().Where(a => a.Target.Is(entity)).ToList();
+
+        Synchronizer.Synchronize(
+              newDictionary: content.Images.ToDictionaryEx(i => i.FileName),
+              oldDictionary: oldImages.EmptyIfNull().ToDictionaryEx(o => o.Id + "." + o.File.FileName),
+              createNew: (k, n) =>
+              {
+                  Administrator.SaveDisableIdentity(new HelpImageEntity
+                  {
+                      Target = (entity).ToLite(),
+                      File = new FilePathEmbedded(HelpImageFileType.Image, n.FileName.After("."), n.Bytes)
+                  }.SetId(Guid.Parse(n.FileName.Before("."))));
+                  SafeConsole.WriteColor(ConsoleColor.Green, '.');
+              },
+              removeOld: (k, o) =>
+              {
+                  o.Delete();
+                  SafeConsole.WriteColor(ConsoleColor.Red, '.');
+              },
+              merge: (k, n, o) =>
+              {
+              });
+    }
+
+/*    public static string TypesDirectory = "Types";
     public static string QueriesDirectory = "Query";
     public static string OperationsDirectory = "Operation";
     public static string NamespacesDirectory = "Namespace";
-    public static string AppendicesDirectory = "Appendix";
+    public static string AppendicesDirectory = "Appendix";*/
 
     #region Export methods
 
@@ -749,16 +957,16 @@ public static class HelpXml
         var cie = ci.ToCultureInfoEntity();
 
         Export(ref replace, ref delete, Path.Combine(path, ci.Name),
-            [.. Database.Query<AppendixHelpEntity>().Where(e => e.Culture.Is(cie)).Select(a => a.ToHelpContent())]);
+            [.. Database.Query<AppendixHelpEntity>().Where(e => e.Culture.Is(cie)).Select(a => a.ToHelpContent(true))]);
 
         Export(ref replace, ref delete, Path.Combine(path, ci.Name),
-            [.. Database.Query<NamespaceHelpEntity>().Where(e => e.Culture.Is(cie)).Select(a => a.ToHelpContent())]);
+            [.. Database.Query<NamespaceHelpEntity>().Where(e => e.Culture.Is(cie)).Select(a => a.ToHelpContent(true))]);
 
         Export(ref replace, ref delete, Path.Combine(path, ci.Name),
-            [.. Database.Query<TypeHelpEntity>().Where(e => e.Culture.Is(cie)).Select(a => a.ToHelpContent())]);
+            [.. Database.Query<TypeHelpEntity>().Where(e => e.Culture.Is(cie)).Select(a => a.ToHelpContent(true))]);
 
         Export(ref replace, ref delete, Path.Combine(path, ci.Name),
-            [.. Database.Query<QueryHelpEntity>().Where(e => e.Culture.Is(cie)).Select(a => a.ToHelpContent())]);
+            [.. Database.Query<QueryHelpEntity>().Where(e => e.Culture.Is(cie)).Select(a => a.ToHelpContent(true))]);
 
     }
 
@@ -784,13 +992,13 @@ public static class HelpXml
         var deleteLocal = delete;
         var replaceLocal = replace;
 
-        var typeDirectory = should.Select(c => c.Type).Distinct().SingleEx(() => "Distinct HelpContent.Type");
+        var typeDirectory = should.Select(c => c.Type.CleanName.Before("Help")).Distinct().SingleEx(() => "Distinct HelpContent.Type");
 
         var fullPath = Path.Combine(rootPath, typeDirectory);
 
         SafeConsole.WriteLineColor(ConsoleColor.Gray, "Exporting to " + fullPath);
 
-        Synchronizer.Synchronize(
+         Synchronizer.Synchronize(
              newDictionary: should.ToDictionary(c => c.Key),
              oldDictionary: !Directory.Exists(fullPath) ? new() : Directory.GetFiles(fullPath, "*.help").ToDictionary(a => Path.GetFileNameWithoutExtension(a)),
              createNew: (key, content) =>
@@ -805,10 +1013,11 @@ public static class HelpXml
              },
              removeOld: (key, fullName) =>
              {
-                 if (SafeConsole.Ask(ref deleteLocal, "Delete {0}?".FormatWith(key)))
+                 var fileName = Path.GetRelativePath(rootPath, fullName);
+                 if (SafeConsole.Ask(ref deleteLocal, "Delete {0}?".FormatWith(fileName)))
                  {
                      File.Delete(fullName);
-                     SafeConsole.WriteLineColor(ConsoleColor.Red, " Deleted " + key);
+                     SafeConsole.WriteLineColor(ConsoleColor.Red, " Deleted " + fileName);
 
                      var imgDirectory = Path.Combine(fullPath, key);
                      if (Directory.Exists(imgDirectory))
@@ -870,7 +1079,7 @@ public static class HelpXml
         replace = replaceLocal;
     }
 
-    public static void ExportAllToZipFile(string zipFile)
+    public static void ExportAllToZip(string zipFile)
     {
         List<IHelpEntity> all  = 
         [.. Database.Query<AppendixHelpEntity>().Select(a => a),        
@@ -892,14 +1101,14 @@ public static class HelpXml
 
     public static byte[] ExportToZipBytes(List<IHelpEntity> entities, string root)
     {
-        var contents = entities.Select(e => e.ToHelpContent());
+        var contents = entities.Select(e => e.ToHelpContent(true));
 
         using var output = new MemoryStream();
         using (var zip = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
         {
             foreach (var help in contents)
             {
-                var typePath = Path.Combine(root, help.Culture.Name, help.Type);
+                var typePath = Path.Combine(root, help.Culture.Name, help.Type.CleanName);
 
                 WriteToZip(zip, help.Xml, typePath);
 
@@ -917,10 +1126,10 @@ public static class HelpXml
 
     #endregion Export methods
 
-    private static void ImportAll(string path)
+    public static void ImportAll(string path)
     { 
         var contents = LoadContentsFromDisk(path);
-        ImportContents(contents);
+        ImportContents(ref contents, ImportExecutionMode.Interactive);
     }
 
     private static List<HelpContent> LoadContentsFromDisk(string rootPath)
@@ -935,12 +1144,14 @@ public static class HelpXml
             if (parts.Length != 3) continue;
 
             var culture = new CultureInfo(parts[0]);
-            var type = parts[1];
+            var typeFolder = parts[1];
+            var typeCleanName = $"{typeFolder}Help";
+            var type = TypeLogic.GetType(typeCleanName).ToTypeEntity();
             var key = Path.GetFileNameWithoutExtension(parts[2]);
 
             var xml = new FileContent(Path.GetFileName(helpFile), File.ReadAllBytes(helpFile));
 
-            var imageDir = Path.Combine(rootPath, culture.Name, type, key);
+            var imageDir = Path.Combine(rootPath, culture.Name, typeFolder, key);
             var images = Directory.Exists(imageDir)
                 ? [.. Directory.GetFiles(imageDir).Select(path => new FileContent(Path.GetFileName(path), File.ReadAllBytes(path)))]
                 : Array.Empty<FileContent>();
@@ -958,40 +1169,75 @@ public static class HelpXml
         return helpContents;
     }
 
-    private static void ImportContents(List<HelpContent> contents, bool? initialDeleteAll = null)
+    private static void ImportContents(ref List<HelpContent> contents, ImportExecutionMode mode, 
+        bool? initialDeleteAll = null)
     {
         Replacements rep = [];
         bool? deleteAll = initialDeleteAll;
 
-        var importers = new Dictionary<string, Action<List<HelpContent>>>
+        var importers = new Dictionary<Type, Action<List<HelpContent>>>
         {
-            [AppendicesDirectory] = contents => AppendixXml.Import(contents, rep, ref deleteAll),
-            [NamespacesDirectory] = contents => NamespaceXml.Import(contents, rep, ref deleteAll),
-            [TypesDirectory] = contents => EntityXml.Import(contents, rep, ref deleteAll),
-            [QueriesDirectory] = contents => QueryXml.Import(contents, rep, ref deleteAll),
+            [typeof(AppendixHelpEntity)] = contents => AppendixXml.Import(contents, rep, mode, ref deleteAll),
+            [typeof(NamespaceHelpEntity)] = contents => NamespaceXml.Import(contents, rep, mode, ref deleteAll),
+            [typeof(TypeHelpEntity)] = contents => EntityXml.Import(contents, rep, mode, ref deleteAll),
+            [typeof(QueryHelpEntity)] = contents => QueryXml.Import(contents, rep, mode, ref deleteAll),
         };
 
         var types = contents.GroupToDictionary(c => c.Type);
+        List<HelpContent> result = [];
 
         foreach (var type in types)
         {
-            if (!importers.TryGetValue(type.Key, out var import))
+            if (!importers.TryGetValue(type.Key.ToType(), out var import))
                 throw new InvalidOperationException($"Unknown HelpContent Type: {type.Key}");
 
             import(type.Value);
+
+            result.AddRange(type.Value);
         }
+        contents = result;
     }
 
-    public static void ForceImportFromZip(byte[] zipFile)
+    public static HelpImportReportModel ImportFromZip(byte[] zipFile, HelpImportPreviewModel model)
+    { 
+        var contents = LoadContentsFromZip(zipFile);
+        contents.ForEach(c =>
+        {
+            var line = model.Lines.SingleEx(l => l.Culture.ToCultureInfo().Equals(c.Culture) && l.Type.Is(c.Type) && l.Key == c.Key);
+            c.Action = line.Action;
+            c.Appply = line.Apply == true;
+
+        });
+
+        ImportContents(ref contents, ImportExecutionMode.ApplyPreview, initialDeleteAll: false);
+
+        var lines = contents.Select(c => c.ToReportLine()).ToMList();
+
+        return new HelpImportReportModel
+        {
+            Lines = lines
+        };
+
+    }
+
+    public static HelpImportPreviewModel ImportPreviewFromZip(byte[] zipFile)
     {
         var contents = LoadContentsFromZip(zipFile);
-        ImportContents(contents, initialDeleteAll: false);
+        
+        ImportContents(ref contents, ImportExecutionMode.Preview, initialDeleteAll: false);
+        
+        var lines = contents.Select(c => c.ToPreviewLine()).ToMList();
+
+        return new HelpImportPreviewModel
+        {
+            Lines = lines
+        };
     }
 
     private static List<HelpContent> LoadContentsFromZip(byte[] zipFile)
     {
-        using var output = new MemoryStream(zipFile);
-        using var zip = new ZipArchive(output, ZipArchiveMode.Read, leaveOpen: true);
+        using var input = new MemoryStream(zipFile);
+        using var zip = new ZipArchive(input, ZipArchiveMode.Read, leaveOpen: true);
 
         var helpContents = new Dictionary<string, HelpContent>(StringComparer.OrdinalIgnoreCase);
 
@@ -1003,12 +1249,13 @@ public static class HelpXml
             if (parts.Length < 4 || !parts[0].Equals("Help", StringComparison.OrdinalIgnoreCase)) continue;
 
             var culture = new CultureInfo(parts[1]);
-            var type = parts[2];
+            var typeCleanName = $"{parts[2]}Help";
+            var type = TypeLogic.GetType(typeCleanName).ToTypeEntity();
 
             if (entry.Name.EndsWith(".help", StringComparison.OrdinalIgnoreCase))
             {
                 var key = Path.GetFileNameWithoutExtension(entry.Name);
-                var contentKey = $"{culture.Name}/{type}/{key}";
+                var contentKey = $"{culture.Name}/{typeCleanName}/{key}";
 
                 using var stream = entry.Open();
                 using var ms = new MemoryStream();
@@ -1035,9 +1282,10 @@ public static class HelpXml
             if (parts.Length != 5) continue;
 
             var culture = parts[1];
-            var type = parts[2];
+            var typeCleanName = $"{parts[2]}Help";
+            var type = TypeLogic.GetType(typeCleanName).ToTypeEntity();
             var key = parts[3];
-            var contentKey = $"{culture}/{type}/{key}";
+            var contentKey = $"{culture}/{typeCleanName}/{key}";
 
             if (!helpContents.TryGetValue(contentKey, out var helpContent))
                 throw new FileNotFoundException($"Help xml file (.help) for image folder: '{contentKey}' not found.");
@@ -1053,33 +1301,21 @@ public static class HelpXml
         return [.. helpContents.Values];
     }
 
-    private static void ImportImages(IHelpEntity entity, HelpContent content)
+    public static void ForceImportFromZip(byte[] zipFile)
     {
-        var oldImages = Database.Query<HelpImageEntity>().Where(a => a.Target.Is(entity)).ToList();
-
-        Synchronizer.Synchronize(
-              newDictionary: content.Images.ToDictionaryEx(i => i.FileName), 
-              oldDictionary: oldImages.EmptyIfNull().ToDictionaryEx(o => o.Id + "." + o.File.FileName),
-              createNew: (k, n) =>
-              {
-                  Administrator.SaveDisableIdentity(new HelpImageEntity
-                  {
-                      Target = (entity).ToLite(),
-                      File = new FilePathEmbedded(HelpImageFileType.Image, n.FileName.After("."), n.Bytes)
-                  }.SetId(Guid.Parse(n.FileName.Before("."))));
-                  SafeConsole.WriteColor(ConsoleColor.Green, '.');
-              },
-              removeOld: (k, o) =>
-              {
-                  o.Delete();
-                  SafeConsole.WriteColor(ConsoleColor.Red, '.');
-              },
-              merge: (k, n, o) =>
-              {
-              });
+        var contents = LoadContentsFromZip(zipFile);
+        ImportContents(ref contents, ImportExecutionMode.ApplyDirectly, initialDeleteAll: false);
     }
 
-    public static void ImportExportHelp()
+    public static void ImportFromZip(string zipFile)
+    {
+        using var ms = new FileStream(zipFile, FileMode.Open);
+        var contents = LoadContentsFromZip(ms.ReadAllBytes());
+
+        ImportContents(ref contents, ImportExecutionMode.Interactive, initialDeleteAll: false);
+    }
+
+    public static void ImportExportHelpMenu()
     {
         using (UserHolder.UserSession(AuthLogic.SystemUser!))
             ImportExportHelp(@"..\..\..\Help");
@@ -1094,18 +1330,12 @@ public static class HelpXml
         {
             case "": return;
             case "e": ExportAll(path); break;
-            case "ez": ExportAllToZipFile(@"..\..\..\Help.zip"); break;
             case "i": ImportAll(path); break;
+            case "ez": ExportAllToZip(@"..\..\..\Help.zip"); break;
+            case "iz": ImportFromZip(@"..\..\..\Help.zip"); break;
             default:
                 goto retry;
         }
     }
 }
 
-public enum ImportAction
-{
-    Skipped,
-    NoChanges,
-    Updated,
-    Inserted,
-}

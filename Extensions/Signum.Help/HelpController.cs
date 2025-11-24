@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Signum.API.Filters;
 using Signum.Basics;
+using Signum.Files;
 using Signum.UserAssets;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
@@ -154,16 +155,16 @@ public class HelpController : ControllerBase
         return MimeMapping.GetFileStreamResult(new MemoryStream(bytes), fileName);
     }
 
-    [HttpPost("api/help/import")]
-    public void Import([Required, FromBody] FileUpload file)
+    [HttpPost("api/help/importPreview")]
+    public HelpImportPreviewModel ImportPreview([Required, FromBody] FileUpload file)
     {
-        HelpXml.ForceImportFromZip(file.content);
+        return HelpXml.ImportPreviewFromZip(file.content);
     }
 
-    public class FileUpload
+    [HttpPost("api/help/applyImport")]
+    public HelpImportReportModel ApplyImport([Required, FromBody] FileUploadWithModel<HelpImportPreviewModel> fileModel)
     {
-        public string fileName;
-        public byte[] content;
+        return HelpXml.ImportFromZip(fileModel.file.content, fileModel.model);
     }
 
 }

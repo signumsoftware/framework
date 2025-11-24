@@ -8,7 +8,7 @@ import { PropertyRoute, PseudoType, QueryKey, getQueryKey, getTypeName, getTypeI
 import { ImportComponent } from '@framework/ImportComponent'
 import "./Help.css"
 import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
-import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity, QueryHelpEntity, HelpPermissions, IHelpEntity, HelpMessage } from './Signum.Help';
+import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity, QueryHelpEntity, HelpPermissions, IHelpEntity, HelpMessage, HelpImportPreviewModel, HelpImportReportModel } from './Signum.Help';
 import { QueryString } from '@framework/QueryString';
 import { OmniboxClient } from '../Signum.Omnibox/OmniboxClient';
 import HelpOmniboxProvider from './HelpOmniboxProvider';
@@ -156,8 +156,12 @@ export namespace HelpClient {
       content: string;
     }
 
-    export function importByForce(request: FileUpload): Promise<void> {
-      return ajaxPost({ url: "/api/help/import" }, request);
+    export function importPreview(file: FileUpload): Promise<HelpImportPreviewModel> {
+      return ajaxPost({ url: "/api/help/importPreview" }, file);
+    }
+
+    export function applyImport(file: FileUpload, model: HelpImportPreviewModel): Promise<HelpImportReportModel> {
+      return ajaxPost({ url: "/api/help/applyImport" }, { file, model });
     }
 
 

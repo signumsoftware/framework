@@ -35,6 +35,41 @@ export namespace HelpImageFileType {
   export const Image : Files.FileTypeSymbol = registerSymbol("FileType", "HelpImageFileType.Image");
 }
 
+export interface HelpImportLineBase extends Entities.EmbeddedEntity {
+  type: Basics.TypeEntity;
+  key: string;
+  culture: Basics.CultureInfoEntity;
+  text: string | null;
+  action: ImportAction;
+  exitingEntity: Entities.Lite<IHelpEntity> | null;
+}
+
+export const HelpImportPreviewLineEmbedded: Type<HelpImportPreviewLineEmbedded> = new Type<HelpImportPreviewLineEmbedded>("HelpImportPreviewLineEmbedded");
+export interface HelpImportPreviewLineEmbedded extends HelpImportLineBase {
+  Type: "HelpImportPreviewLineEmbedded";
+  apply: boolean | null;
+  applyVisible: boolean;
+}
+
+export const HelpImportPreviewModel: Type<HelpImportPreviewModel> = new Type<HelpImportPreviewModel>("HelpImportPreviewModel");
+export interface HelpImportPreviewModel extends Entities.ModelEntity {
+  Type: "HelpImportPreviewModel";
+  lines: Entities.MList<HelpImportPreviewLineEmbedded>;
+}
+
+export const HelpImportReportLineEmbedded: Type<HelpImportReportLineEmbedded> = new Type<HelpImportReportLineEmbedded>("HelpImportReportLineEmbedded");
+export interface HelpImportReportLineEmbedded extends HelpImportLineBase {
+  Type: "HelpImportReportLineEmbedded";
+  status: ImportStatus;
+  actionError: string | null;
+}
+
+export const HelpImportReportModel: Type<HelpImportReportModel> = new Type<HelpImportReportModel>("HelpImportReportModel");
+export interface HelpImportReportModel extends Entities.ModelEntity {
+  Type: "HelpImportReportModel";
+  lines: Entities.MList<HelpImportReportLineEmbedded>;
+}
+
 export namespace HelpKindMessage {
   export const HisMainFunctionIsTo0: MessageKey = new MessageKey("HelpKindMessage", "HisMainFunctionIsTo0");
   export const RelateOtherEntities: MessageKey = new MessageKey("HelpKindMessage", "RelateOtherEntities");
@@ -97,12 +132,16 @@ export namespace HelpMessage {
   export const JumpToViewMore: MessageKey = new MessageKey("HelpMessage", "JumpToViewMore");
   export const ExportAsZip: MessageKey = new MessageKey("HelpMessage", "ExportAsZip");
   export const Import: MessageKey = new MessageKey("HelpMessage", "Import");
-  export const SuccessfullyImported: MessageKey = new MessageKey("HelpMessage", "SuccessfullyImported");
+  export const ImportCompletedSuccessfully: MessageKey = new MessageKey("HelpMessage", "ImportCompletedSuccessfully");
+  export const ImportCompletedWithErrors: MessageKey = new MessageKey("HelpMessage", "ImportCompletedWithErrors");
+  export const ImportReport: MessageKey = new MessageKey("HelpMessage", "ImportReport");
   export const ImportError: MessageKey = new MessageKey("HelpMessage", "ImportError");
   export const ImportHelpContentsFromZipFile: MessageKey = new MessageKey("HelpMessage", "ImportHelpContentsFromZipFile");
   export const SelectTheZIPFileWithTheHelpContentsThatYouWantToImport: MessageKey = new MessageKey("HelpMessage", "SelectTheZIPFileWithTheHelpContentsThatYouWantToImport");
   export const ChooseZIPFile: MessageKey = new MessageKey("HelpMessage", "ChooseZIPFile");
   export const SelectedFile: MessageKey = new MessageKey("HelpMessage", "SelectedFile");
+  export const HelpZipContents: MessageKey = new MessageKey("HelpMessage", "HelpZipContents");
+  export const NewKey: MessageKey = new MessageKey("HelpMessage", "NewKey");
 }
 
 export namespace HelpPermissions {
@@ -148,6 +187,20 @@ export namespace HelpSyntaxMessage {
 
 export interface IHelpEntity extends Entities.Entity {
 }
+
+export const ImportAction: EnumType<ImportAction> = new EnumType<ImportAction>("ImportAction");
+export type ImportAction =
+  "NoChange" |
+  "Create" |
+  "Update" |
+  "Remove";
+
+export const ImportStatus: EnumType<ImportStatus> = new EnumType<ImportStatus>("ImportStatus");
+export type ImportStatus =
+  "NoChange" |
+  "Applied" |
+  "Failed" |
+  "Skipped";
 
 export const NamespaceHelpEntity: Type<NamespaceHelpEntity> = new Type<NamespaceHelpEntity>("NamespaceHelp");
 export interface NamespaceHelpEntity extends Entities.Entity, IHelpEntity {
