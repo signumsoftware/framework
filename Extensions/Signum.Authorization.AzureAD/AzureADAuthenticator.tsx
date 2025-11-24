@@ -23,7 +23,7 @@ export namespace AzureADAuthenticator {
   */
   //override if needed
   export namespace Options {
-    export let getAzureADConfig = function (adVariant: string = "default"): AzureADConfig | undefined {
+    export let getAzureADConfig = function (adVariant: string): AzureADConfig | undefined {
       return window.__azureADConfig;
     }
   }
@@ -53,17 +53,18 @@ export namespace AzureADAuthenticator {
     };
 
     LoginPage.showLoginForm = "initially_not";
+
+    var config = getCurrentADConfig();
+
+    currentMsalClient = config ? getMsalClient(config) : null;
+
     AuthClient.authenticators.push(loginWithAzureADSilent);
 
   }
 
-  let currentMsalClient: msal.PublicClientApplication | null = null;;
-  function getMsalClient(adVariant: string): msal.PublicClientApplication {
+  let currentMsalClient: msal.PublicClientApplication | null = null;
+  function getMsalClient(config: AzureADConfig): msal.PublicClientApplication {
 
-    var config = Options.getAzureADConfig(adVariant);
-    
-    if (config == null)
-      throw new Error(`No AzureAD configuration found for variant '${adVariant}'`);
 
     var msalConfig: msal.Configuration = {
       auth: {
@@ -104,19 +105,22 @@ export namespace AzureADAuthenticator {
     throw new Error("Unexpected AzureAD type");
   }
 
-  export async function signIn(ctx: LoginContext, adVariant: string, b2c_UserFlow?: B2C_UserFlows): Promise<void> {
+  export async function signIn(ctx: LoginContext, adVariant: string, b2c_UserFlow?: B2C_UserFlows, e?: React.MouseEvent): Promise<void> {
+
+    e?.preventDefault();
+
     ctx.setLoading(adVariant);
 
     const config = Options.getAzureADConfig(adVariant)!;
 
-    let msalClient = getMsalClient(adVariant);
+    let newClient = getMsalClient(config);
 
-    (msalClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
+    (newClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
 
     try {
-      const authResult = await msalClient.loginPopup({
+      const authResult = await newClient.loginPopup({
         scopes: config.scopes,
-        prompt: "select_account",
+        prompt: e?.shiftKey || e?.altKey ?  "select_account" : undefined,
         authority: getAuthority(config, b2c_UserFlow),
       });
       setMsalAccount(authResult.account!.username, adVariant);
@@ -125,6 +129,7 @@ export namespace AzureADAuthenticator {
       if (loginResponse == null)
         throw new Error("User " + authResult.account?.username + " not found in the database");
 
+      currentMsalClient = newClient;
       AuthClient.setAuthToken(loginResponse!.token, loginResponse!.authenticationType);
       AuthClient.setCurrentUser(loginResponse!.userEntity);
       AuthClient.Options.onLogin();
@@ -170,13 +175,13 @@ export namespace AzureADAuthenticator {
 
     async function handleResetPAsswordClick(adVariant: string): Promise<void> {
       const config = Options.getAzureADConfig(adVariant)!;
-      let msalClient = getMsalClient(adVariant);
+      let newClient = getMsalClient(config);
 
       try {
 
-        (msalClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
+        (newClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
 
-        const resetPasswordResult = await msalClient.loginPopup({
+        const resetPasswordResult = await newClient.loginPopup({
           scopes: config?.scopes,
           authority: getAuthority(config, "resetPassword_UserFlow"),
         });
@@ -206,14 +211,22 @@ export namespace AzureADAuthenticator {
       return Promise.resolve(undefined);
 
     
-    var ai = getCurrentMsalAccount();
+    // var ai = getCurrentMsalAccount();
     
-    if (!ai)
-      return Promise.resolve(undefined);
+    // if (!ai)
+    //   return Promise.resolve(undefined);
+    
+    let account = localStorage.getItem('msalAccount');
+    
+    if (!account)
+      return undefined;
     
     var adVariant = getCurrentADVariant() ?? "default";
     var config = getCurrentADConfig()!;
-    var newClient = getMsalClient(adVariant);
+    var newClient = getMsalClient(config);
+
+    var ai = newClient.getAccountByUsername(account) ?? undefined;
+
     var userRequest: msal.SilentRequest = {
       scopes: config.scopes, 
       account: ai,
@@ -237,6 +250,7 @@ export namespace AzureADAuthenticator {
   }
 
   export function cleantMsalAccount(): void {
+
     localStorage.removeItem("msalAccount");
     localStorage.removeItem("msalAdVariant");
   }
@@ -307,7 +321,8 @@ export namespace AzureADAuthenticator {
         authority: getAuthority(config),
         account: account
       });
-
+      currentMsalClient.setActiveAccount(null);
+      currentMsalClient = null;
       AzureADAuthenticator.cleantMsalAccount();
     }
   }
@@ -332,7 +347,7 @@ export function MicrosoftSignIn({ ctx, adVariant = "default" }: { ctx: LoginCont
     <div className="row mt-2">
       <div className="col-md-6 offset-md-3">
         <LinkButton title={LoginAuthMessage.SignInWithMicrosoft.niceToString()} className={ctx.loading != null ? "disabled" : undefined}
-          onClick={e => { AzureADAuthenticator.signIn(ctx, adVariant); }}>
+          onClick={e => { AzureADAuthenticator.signIn(ctx, adVariant, undefined, e); }}>
           <img src={MicrosoftSignIn.iconUrl} alt={LoginAuthMessage.SignInWithMicrosoft.niceToString()} />
         </LinkButton>
       </div>
@@ -352,13 +367,13 @@ export function AzureB2CSignIn({ ctx, adVariant = "default" }: { ctx: LoginConte
           <div className='hstack'>
             <div className=''>
               <button type="button" className={classes("btn btn-secondary me-2", ctx.loading != null ? "disabled" : undefined)}
-                onClick={e => { AzureADAuthenticator.signIn(ctx, adVariant, 'signIn_UserFlow'); }}>
+                onClick={e => { AzureADAuthenticator.signIn(ctx, adVariant, 'signIn_UserFlow', e); }}>
                 {LoginAuthMessage.SignInWithAzureB2C.niceToString()}
               </button>
             </div>
             <div className=''>
               <button type="button" className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)}
-                onClick={e => { AzureADAuthenticator.signIn(ctx, adVariant, 'signUp_UserFlow'); }}>
+                onClick={e => { AzureADAuthenticator.signIn(ctx, adVariant, 'signUp_UserFlow', e); }}>
                 {LoginAuthMessage.SignUpWithAzureB2C.niceToString()}
                 </button>
             </div>
@@ -371,7 +386,7 @@ export function AzureB2CSignIn({ ctx, adVariant = "default" }: { ctx: LoginConte
   return (
     <div className="row mt-4">
       <div className="col-md-6 offset-md-3">
-        <button type="button" className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADAuthenticator.signIn(ctx, adVariant ?? null); }}>
+        <button type="button" className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADAuthenticator.signIn(ctx, adVariant ?? null, undefined, e); }}>
           {LoginAuthMessage.LoginWithAzureB2C.niceToString()}
         </button>
       </div>
