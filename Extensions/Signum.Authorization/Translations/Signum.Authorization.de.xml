@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="ActiveDirectoryAuthorizerMessage">
+    <Member Name="ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication" Description="Active Directory-Benutzer '{0}' ist nicht mit einem Benutzer in dieser Anwendung verknüpft." />
+  </Type>
   <Type Name="ActiveDirectoryMessage">
     <Member Name="AccountEnabled" Description="Konto aktiviert" />
     <Member Name="CompanyName" Description="Firmenname" />
@@ -104,8 +107,12 @@
     <Member Name="RefreshAnyTokenPreviousTo" Description="Aktualisieren Sie alle Token bis zu" />
     <Member Name="RefreshTokenEvery" Description="Aktualisieren Sie jeden Token" />
   </Type>
-  <Type Name="BaseADConfigurationEmbedded">
+  <Type Name="BaseADConfigurationEmbedded" Description="Basis-AD-Konfiguration">
+    <Member Name="AllowMatchUsersBySimpleUserName" Description="Benutzer nach einfachem Benutzernamen zuordnen" />
     <Member Name="AutoCreateUsers" Description="Benutzer automatisch erstellen" />
+    <Member Name="AutoUpdateUsers" Description="Benutzer automatisch aktualisieren" />
+    <Member Name="DefaultRole" Description="Standardrolle" />
+    <Member Name="RoleMapping" Description="Rollenabbildung" />
   </Type>
   <Type Name="BaseRulePack`1">
     <Member Name="Role" Description="Rolle" />
@@ -224,7 +231,8 @@
     <Member Name="MergeStrategy" Description="Zusammenführstrategie" />
     <Member Name="Name" Description="Name" />
   </Type>
-  <Type Name="RoleMappingEmbedded">
+  <Type Name="RoleMappingEmbedded" Description="Rollenabbildung">
+    <Member Name="ADNameOrGuid" Description="AD-Name oder Führer" />
     <Member Name="Role" Description="Rolle" />
   </Type>
   <Type Name="RoleOperation">
@@ -304,6 +312,14 @@
   </Type>
   <Type Name="TypeConditionSymbol" Description="Typbedingung" />
   <Type Name="TypeRulePack" Description="Typregelpack" />
+  <Type Name="UserADMessage">
+    <Member Name="Find0InActiveDirectory" Description="Finden Sie '{0}' im Active Directory" />
+    <Member Name="FindInActiveDirectory" Description="Im Active Directory finden" />
+    <Member Name="NameOrEmail" Description="Name oder E-Mail" />
+    <Member Name="NoUserContaining0FoundInActiveDirectory" Description="Kein Benutzer mit '{0}' findet sich in Active Directory" />
+    <Member Name="PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport" Description="Bitte wählen Sie den Benutzer aus Active Directory aus, den Sie importieren möchten" />
+    <Member Name="SelectActiveDirectoryUser" Description="Active Directory-Benutzer auswählen" />
+  </Type>
   <Type Name="UserEntity" Description="Benutzer" Gender="m">
     <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="DisabledOn" Description="Deaktiviert auf" />
