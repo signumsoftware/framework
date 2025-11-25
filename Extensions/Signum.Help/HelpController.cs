@@ -146,10 +146,10 @@ public class HelpController : ControllerBase
     {
         HelpPermissions.ExportHelp.AssertAuthorized();
         
-        var bytes = HelpXml.ExportToZipBytes(lites.RetrieveList().ToList(), "Help");
+        var bytes = HelpXml.ExportToZipBytes([.. lites.RetrieveList()], "Help");
 
         var typeName = lites.Select(a => a.EntityType).Distinct().SingleEx().ToTypeEntity().CleanName;
-        var Ids = lites.ToString(a => a.Id.ToString(), "_");
+        var Ids = lites.ToString(a => a.Id.ToString().Truncate(5), "_");
         var fileName = $"{typeName}{Ids}.zip";
 
         return MimeMapping.GetFileStreamResult(new MemoryStream(bytes), fileName);
