@@ -965,9 +965,9 @@ public static class HelpXml
         var deleteLocal = delete;
         var replaceLocal = replace;
 
-        var typeDirectory = should.Select(c => c.Type.CleanName.Before("Help")).Distinct().SingleEx(() => "Distinct HelpContent.Type");
+        var typeFolder = should.Select(c => c.Type.CleanName.Before("Help")).Distinct().SingleEx(() => "Distinct HelpContent.Type");
 
-        var fullPath = Path.Combine(rootPath, typeDirectory);
+        var fullPath = Path.Combine(rootPath, typeFolder);
 
         SafeConsole.WriteLineColor(ConsoleColor.Gray, "Exporting to " + fullPath);
 
@@ -1081,7 +1081,8 @@ public static class HelpXml
         {
             foreach (var help in contents)
             {
-                var typePath = Path.Combine(root, help.Culture.Name, help.Type.CleanName);
+                var typeFolder = help.Type.CleanName.Before("Help");
+                var typePath = Path.Combine(root, help.Culture.Name, typeFolder);
 
                 WriteToZip(zip, help.Xml, typePath);
 
