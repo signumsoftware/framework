@@ -5,7 +5,7 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Operations from '../../Signum/React/Signum.Operations'
-import * as ADGroups from '../Signum.Authorization/Signum.Authorization.ADGroups'
+import * as BaseAD from '../Signum.Authorization/Signum.Authorization.BaseAD'
 import * as Authorization from '../Signum.Authorization/Signum.Authorization'
 import * as Files from '../Signum.Files/Signum.Files'
 import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
@@ -16,11 +16,17 @@ export namespace AuthADFileType {
 }
 
 export const AzureADConfigurationEmbedded: Type<AzureADConfigurationEmbedded> = new Type<AzureADConfigurationEmbedded>("AzureADConfigurationEmbedded");
-export interface AzureADConfigurationEmbedded extends ADGroups.BaseADConfigurationEmbedded {
-  loginWithAzureAD: boolean;
+export interface AzureADConfigurationEmbedded extends BaseAD.BaseADConfigurationEmbedded {
+  enabled: boolean;
+  type: AzureADType;
   applicationID: string /*Guid*/;
   directoryID: string /*Guid*/;
-  azureB2C: AzureB2CEmbedded | null;
+  tenantName: string | null;
+  signInSignUp_UserFlow: string | null;
+  signIn_UserFlow: string | null;
+  signUp_UserFlow: string | null;
+  editProfile_UserFlow: string | null;
+  resetPassword_UserFlow: string | null;
   clientSecret: string | null;
   useDelegatedPermission: boolean;
 }
@@ -34,16 +40,11 @@ export namespace AzureADTask {
   export const DeactivateUsers : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "AzureADTask.DeactivateUsers");
 }
 
-export const AzureB2CEmbedded: Type<AzureB2CEmbedded> = new Type<AzureB2CEmbedded>("AzureB2CEmbedded");
-export interface AzureB2CEmbedded extends Entities.EmbeddedEntity {
-  Type: "AzureB2CEmbedded";
-  loginWithAzureB2C: boolean;
-  tenantName: string;
-  signInSignUp_UserFlow: string | null;
-  signIn_UserFlow: string | null;
-  signUp_UserFlow: string | null;
-  resetPassword_UserFlow: string | null;
-}
+export const AzureADType: EnumType<AzureADType> = new EnumType<AzureADType>("AzureADType");
+export type AzureADType =
+  "AzureAD" |
+  "B2C" |
+  "ExternalID";
 
 export const CachedProfilePhotoEntity: Type<CachedProfilePhotoEntity> = new Type<CachedProfilePhotoEntity>("CachedProfilePhoto");
 export interface CachedProfilePhotoEntity extends Entities.Entity {

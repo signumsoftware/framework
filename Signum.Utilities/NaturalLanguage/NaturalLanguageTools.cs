@@ -188,15 +188,23 @@ public static class NaturalLanguageTools
         if (i == 0)
             return CharKind.StartOfSentence;
 
+        if (!char.IsLetter(pascalStr[i]))
+        {
+            if (char.IsLetter(pascalStr[i - 1]))
+                return CharKind.StartOfWord;
+
+            return CharKind.Lowecase;
+        }
+
         if (!char.IsUpper(pascalStr[i]))
             return CharKind.Lowecase;
 
-        if (i + 1 == pascalStr.Length)
+        if (i + 1 == pascalStr.Length || !char.IsLetter(pascalStr[i + 1]))
         {
-            if (char.IsUpper(pascalStr[i - 1]))
-                return CharKind.Abbreviation;
+            if (char.IsUpper(pascalStr[i - 1])) //AX|
+                return CharKind.Abbreviation; 
 
-            return CharKind.StartOfWord;
+            return CharKind.StartOfAbbreviation;  //aX|
         }
 
         if (char.IsLower(pascalStr[i + 1]))

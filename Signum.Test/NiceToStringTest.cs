@@ -13,6 +13,7 @@ public enum EnumPruebas
     YouAreFromONU,
     ILoveYou,
     YoYTu,
+    B2C,
 }
 
 public class NiceToStringTest
@@ -20,6 +21,7 @@ public class NiceToStringTest
     [Fact]
     public void EnumToStr()
     {
+        Assert.Equal("B 2 C", EnumPruebas.B2C.ToString().SpacePascal());
         Assert.Equal("Test",         EnumPruebas.Test.NiceToString());
         Assert.Equal("Test!",        EnumPruebas.Test2.NiceToString());
         Assert.Equal("My test",      EnumPruebas.MyTest.NiceToString());

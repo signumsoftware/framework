@@ -52,7 +52,7 @@ function LoginPage(): React.JSX.Element {
 }
 
 namespace LoginPage {
-  export let customLoginButtons: ((ctx: LoginContext) => React.ReactElement<any>) | null = null;
+  export let customLoginButtons: ((ctx: LoginContext) => React.ReactNode) | null = null;
   export let showLoginForm: "yes" | "no" | "initially_not" = "yes";
   export let usernameLabel: () => string = () => LoginAuthMessage.Username.niceToString();
   export let resetPasswordControl = () => null as null | React.ReactElement;

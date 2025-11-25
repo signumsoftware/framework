@@ -3,6 +3,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
+using Signum.Utilities.Synchronization;
 using System.IO;
 
 namespace Signum.Files.AzureBlobs;
@@ -34,6 +35,8 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
     public Func<string, int, string>? RenameAlgorithm { get; set; } = null; // FileTypeAlgorithm.DefaultRenameAlgorithm;
 
     public Func<IFilePath, BlobAction> GetBlobAction { get; set; } = (IFilePath ifp) => BlobAction.Download;
+
+    public Func<IFilePath, AzureDefenderPollingOptions?>? AzureDefenderPolling;
 
     public AzureBlobStorageFileTypeAlgorithm(Func<IFilePath, BlobContainerClient> getClient, bool directDownload = false)
     {
@@ -162,7 +165,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
             {
                 var blobHeaders = GetBlobHttpHeaders(fp, this.GetBlobAction(fp));
                 var blobClient = client.GetBlobClient(fp.Suffix);
-                SaveFileInAzure(blobClient, blobHeaders, fp.BinaryFile);
+                SaveFileInAzure(blobClient, blobHeaders, fp.BinaryFile, this.AzureDefenderPolling?.Invoke(fp));
                 fp.CleanBinaryFile();
             }
             catch (Exception ex)
@@ -175,9 +178,13 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         }
     }
 
-    static void SaveFileInAzure(BlobClient blobClient, BlobHttpHeaders blobHeaders, byte[] binaryFile)
+    static void SaveFileInAzure(BlobClient blobClient, BlobHttpHeaders blobHeaders, byte[] binaryFile, AzureDefenderPollingOptions? azureDefenderPollingOptions)
     {
         blobClient.Upload(new MemoryStream(binaryFile), httpHeaders: blobHeaders);
+        if (azureDefenderPollingOptions != null)
+        {
+            CheckBlobStorageFileForWindowsDefenderLogs(blobClient, azureDefenderPollingOptions, CancellationToken.None).WaitSafe();
+        }
     }
 
     //Initial exceptions (like connection string problems) should happen synchronously
@@ -198,7 +205,8 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
                 var binaryFile = fp.BinaryFile;
                 //fp.CleanBinaryFile(); at the end of transaction
-                return SaveFileInAzureAsync(blobClient, binaryFile, headers, fp.Suffix, cancellationToken);
+                var azureDefenderPollingOptions = this.AzureDefenderPolling?.Invoke(fp);
+                return SaveFileInAzureAsync(blobClient, binaryFile, headers, fp.Suffix, azureDefenderPollingOptions, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -210,11 +218,15 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         }
     }
 
-    static async Task SaveFileInAzureAsync(BlobClient blobClient, byte[] binaryFile, BlobHttpHeaders headers, string suffixForException, CancellationToken cancellationToken)
+    static async Task SaveFileInAzureAsync(BlobClient blobClient, byte[] binaryFile, BlobHttpHeaders headers, string suffixForException, AzureDefenderPollingOptions? azureDefenderPollingOptions, CancellationToken cancellationToken)
     {
         try
         {
             await blobClient.UploadAsync(new MemoryStream(binaryFile), httpHeaders: headers, cancellationToken: cancellationToken);
+            if (azureDefenderPollingOptions != null)
+            {
+                await CheckBlobStorageFileForWindowsDefenderLogs(blobClient, azureDefenderPollingOptions, cancellationToken);
+            }
         }
         catch (Exception ex)
         {
@@ -294,7 +306,6 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
                 var hashList = chunks.ToString(c => c.PartialHash, "\n");
                 fp.FileLength = properties.Value.ContentLength;
                 fp.Hash = CryptorEngine.CalculateMD5Hash(Encoding.UTF8.GetBytes(hashList));
-                
             }
             catch (Exception ex)
             {
@@ -419,6 +430,41 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         blobClient.SetHttpHeaders(headers);
     }
 
+    static async Task CheckBlobStorageFileForWindowsDefenderLogs(BlobClient blobClient, AzureDefenderPollingOptions options, CancellationToken token)
+    {
+        try
+        {
+            var pollTime = options.TotalWaitTime;
+            var pollInterval = options.PollInterval;
+            var fileName = Path.GetFileName(blobClient.Name);
+
+            while (pollTime > TimeSpan.Zero)
+            {
+                pollTime -= pollInterval;
+                var tagsResponse = await blobClient.GetTagsAsync();
+                var tags = tagsResponse.Value.Tags;
+                if (tags.TryGetValue("Malware Scanning scan result", out var status))
+                {
+                    switch (status)
+                    {
+                        case "No threats found":
+                            return;
+                        case "Malicious":                            
+                            throw new MicrosoftDefenderMaliciousFileFoundException(fileName);
+                        default:
+                            throw new UnexpectedValueException(status);
+                    }
+                }
+                await Task.Delay(pollInterval, token);
+            }
+        }
+        catch
+        {
+            // remove potentially malicious file
+            await blobClient.DeleteIfExistsAsync();
+            throw;
+        }
+    }
 }
 
 public static class BlobExtensions
@@ -426,5 +472,19 @@ public static class BlobExtensions
     public static bool ExistsBlob(this BlobContainerClient client, string blobName)
     {
         return client.GetBlobs(prefix: blobName.BeforeLast("/") ?? "").Any(b => b.Name == blobName);
+    }
+}
+
+public class AzureDefenderPollingOptions
+{
+    public TimeSpan TotalWaitTime { get; set; } = TimeSpan.FromMinutes(5);
+    public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(3);
+}
+
+public sealed class MicrosoftDefenderMaliciousFileFoundException : Exception
+{
+    public MicrosoftDefenderMaliciousFileFoundException(string fileName)
+        : base(FileMessage.File0ContainsAThreatBy1.NiceToString(fileName, "Microsoft Defender"))
+    {
     }
 }

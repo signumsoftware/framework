@@ -7,10 +7,10 @@ using System.Runtime.InteropServices.Marshalling;
 namespace Signum.Authorization.AzureAD.Authorizer;
 
 public class AzureADAuthorizer : ICustomAuthorizer
-{
-    public Func<AzureADConfigurationEmbedded?> GetConfig;
+{ 
+    public Func<string? /*adVariant*/, AzureADConfigurationEmbedded?> GetConfig;
 
-    public AzureADAuthorizer(Func<AzureADConfigurationEmbedded?> getConfig)
+    public AzureADAuthorizer(Func<string?, AzureADConfigurationEmbedded?> getConfig)
     {
         GetConfig = getConfig;
     }
@@ -58,8 +58,7 @@ public class AzureADAuthorizer : ICustomAuthorizer
 
     public virtual Lite<RoleEntity>? GetRole(IAutoCreateUserContext ctx, bool throwIfNull)
     {
-
-        var config = GetConfig();
+        var config = (AzureADConfigurationEmbedded)ctx.Config;
 
         if (ctx.OID != null && config != null)
         {
