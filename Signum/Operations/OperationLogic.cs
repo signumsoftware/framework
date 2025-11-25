@@ -441,7 +441,7 @@ Consider the following options:
     public static Dictionary<string, object>? MultiCanExecuteState => multiCanExecuteState.Value;
     public static bool IsMultiCanExecute => multiCanExecuteState.Value != null;
 
-    public static Dictionary<OperationSymbol, string> ServiceCanExecute(Entity entity)
+    public static Dictionary<OperationSymbol, string?> ServiceCanExecute(Entity entity)
     {
         try
         {
