@@ -10,7 +10,7 @@ using System.Xml.Linq;
 
 namespace Signum.Help;
 
-public static class HelpXml
+public static class HelpExportImport
 {
     public class HelpContent
     {

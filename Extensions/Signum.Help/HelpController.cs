@@ -146,7 +146,7 @@ public class HelpController : ControllerBase
     {
         HelpPermissions.ExportHelp.AssertAuthorized();
         
-        var bytes = HelpXml.ExportToZipBytes([.. lites.RetrieveList()], "Help");
+        var bytes = HelpExportImport.ExportToZipBytes([.. lites.RetrieveList()], "Help");
 
         var typeName = lites.Select(a => a.EntityType).Distinct().SingleEx().ToTypeEntity().CleanName;
         var Ids = lites.ToString(a => a.Id.ToString().Truncate(5), "_");
@@ -158,13 +158,13 @@ public class HelpController : ControllerBase
     [HttpPost("api/help/importPreview")]
     public HelpImportPreviewModel ImportPreview([Required, FromBody] FileUpload file)
     {
-        return HelpXml.ImportPreviewFromZip(file.content);
+        return HelpExportImport.ImportPreviewFromZip(file.content);
     }
 
     [HttpPost("api/help/applyImport")]
     public HelpImportReportModel ApplyImport([Required, FromBody] FileUploadWithModel<HelpImportPreviewModel> fileModel)
     {
-        return HelpXml.ImportFromZip(fileModel.file.content, fileModel.model);
+        return HelpExportImport.ImportFromZip(fileModel.file.content, fileModel.model);
     }
 
 }

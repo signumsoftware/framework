@@ -91,7 +91,7 @@ export default function ImportHelpPage(): React.JSX.Element {
     const fileSizeMB = file && (new Blob([file.content]).size / (1024 * 1024)).toFixed(2);
 
     function applyHeaderClick(): void {
-      model?.lines.forEach(l => { l.element.apply = l.element.action != 'NoChange' && l.element.action != 'Remove' });
+      model?.lines.forEach(l => { l.element.apply = l.element.action != 'NoChange' });
       forceUpdate();
     }
 
