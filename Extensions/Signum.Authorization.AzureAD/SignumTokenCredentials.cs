@@ -30,7 +30,7 @@ public static class SignumTokenCredentials
         if (OverridenTokenCredential.Value is var ap && ap != null)
             return ap;
 
-        var config = AuthLogic.Authorizer is AzureADAuthorizer ada ? ada.GetConfig() :
+        var config = AuthLogic.Authorizer is AzureADAuthorizer ada ? ada.GetConfig(null) :
             throw new InvalidOperationException("AuthLogic.Authorizer is not an ActiveDirectoryAuthorizer");
 
         var azureAD = config ?? throw new InvalidOperationException("AzureAD not set");

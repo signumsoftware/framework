@@ -505,7 +505,7 @@ export interface EntityFrame<T extends ModifiableEntity = ModifiableEntity> {
   onReload: (pack?: EntityPack<T>, reloadComponent?: boolean | string | ViewPromise<T>, callback?: () => void) => void;
   setError: (modelState: ModelState, initialPrefix?: string) => void;
   revalidate: () => void;
-  onClose?: (pack?: EntityPack<T>) => void;
+  onClose: (pack?: EntityPack<T>) => void;
   refreshCount: number;
   allowExchangeEntity: boolean;
 
@@ -517,6 +517,8 @@ export interface EntityFrame<T extends ModifiableEntity = ModifiableEntity> {
 
   currentDate?: string;
   previousDate?: string;
+
+  hideAndClose?: boolean;
 }
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {

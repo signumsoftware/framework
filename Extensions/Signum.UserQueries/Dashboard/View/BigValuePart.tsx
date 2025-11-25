@@ -81,7 +81,8 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
     refresh: updateVersion,
   });
 
-  const clickable = p.content.userQuery != null;
+  //const clickable = p.content.userQuery != null;
+  const clickable = p.content.userQuery != null && (p.content.isClickable ?? true)
   const customColor = p.partEmbedded.customColor;
 
   async function handleNavigate(e: React.MouseEvent) {

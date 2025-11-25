@@ -12,36 +12,25 @@ namespace Signum.Authorization.AzureAD;
 
 public class AzureADAuthenticationServer
 {
-    public static bool LoginAzureADAuthentication(ActionContext ac, LoginWithAzureADRequest request, bool azureB2C, bool throwErrors)
+    public static bool LoginAzureADAuthentication(ActionContext ac, LoginWithAzureADRequest request, string adVariant, bool throwErrors)
     {
         using (AuthLogic.Disable())
         {
             try
             {
                 var ada = (AzureADAuthorizer)AuthLogic.Authorizer!;
-                var config = ada.GetConfig();
-                if (config == null)
+                var config = ada.GetConfig(adVariant);
+                if (config == null || !config.Enabled)
                     return false;
 
-                AzureClaimsAutoCreateUserContext ctx;
-                if (azureB2C)
+                var principal = ValidateToken(request.idToken, config, out var jwtSecurityToken);
+                AzureClaimsAutoCreateUserContext ctx = config.Type switch
                 {
-                    if (config.AzureB2C?.LoginWithAzureB2C != true)
-                        return false;
-
-                    var principal = ValidateToken(request.idToken, azureB2C, out var jwtSecurityToken);
-
-                    ctx = new AzureB2CClaimsAutoCreateUserContext(principal, request.accessToken);
-                }
-                else
-                {
-                    if (config.LoginWithAzureAD != true)
-                        return false;
-
-                    var principal = ValidateToken(request.idToken, azureB2C, out var jwtSecurityToken);
-
-                    ctx = new AzureClaimsAutoCreateUserContext(principal, request.accessToken);
-                }
+                    AzureADType.AzureAD => new AzureClaimsAutoCreateUserContext(principal, request.accessToken, config),
+                    AzureADType.B2C => new AzureB2CClaimsAutoCreateUserContext(principal, request.accessToken, config),
+                    AzureADType.ExternalID => new AzureExternalIDAutoCreateUserContext(principal, request.accessToken, config),
+                    _ => throw new UnexpectedValueException($"Unexpected AzureADType {config.Type}")
+                };
 
                 UserEntity? user = Database.Query<UserEntity>().SingleOrDefault(a => a.Mixin<UserAzureADMixin>().OID == ctx.OID);
 
@@ -88,18 +77,14 @@ public class AzureADAuthenticationServer
     public static Func<IEnumerable<string>>? ExtraValidAudiences;
 
     //https://stackoverflow.com/questions/39866513/how-to-validate-azure-ad-security-token
-    public static ClaimsPrincipal ValidateToken(string jwt, bool azureB2C, out JwtSecurityToken jwtSecurityToken)
+    public static ClaimsPrincipal ValidateToken(string jwt, AzureADConfigurationEmbedded config, out JwtSecurityToken jwtSecurityToken)
     {
-        var config = ((AzureADAuthorizer)AuthLogic.Authorizer!).GetConfig();
-
-        string stsDiscoveryEndpoint = !azureB2C ? "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration" :
-            $"https://{config!.AzureB2C!.TenantName}.b2clogin.com/{config!.AzureB2C.TenantName}.onmicrosoft.com/{config!.AzureB2C.GetDefaultSignInFlow()}/v2.0/.well-known/openid-configuration?p={config!.AzureB2C.GetDefaultSignInFlow()}";
+        string stsDiscoveryEndpoint = config.GetDiscoveryEndpoint();
 
         var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(stsDiscoveryEndpoint, new OpenIdConnectConfigurationRetriever());
         OpenIdConnectConfiguration c = configManager.GetConfigurationAsync().Result;
 
-        var issuer = !azureB2C ? $"https://login.microsoftonline.com/{config!.DirectoryID}/v2.0" :
-            c.Issuer;
+        var issuer = config.Type == AzureADType.AzureAD? $"https://login.microsoftonline.com/{config!.DirectoryID}/v2.0" : c.Issuer;
 
         TokenValidationParameters validationParameters = new TokenValidationParameters
         {
@@ -120,5 +105,6 @@ public class AzureADAuthenticationServer
         return result;
     }
 
+  
 }
 

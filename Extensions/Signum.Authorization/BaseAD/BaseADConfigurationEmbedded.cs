@@ -1,4 +1,4 @@
-namespace Signum.Authorization.ADGroups;
+namespace Signum.Authorization.BaseAD;
 
 public class BaseADConfigurationEmbedded : EmbeddedEntity
 {

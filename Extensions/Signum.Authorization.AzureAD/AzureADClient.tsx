@@ -7,13 +7,13 @@ import { Lite, SearchMessage, tryGetMixin } from '@framework/Signum.Entities';
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
 import * as AppContext from "@framework/AppContext"
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
-import { ActiveDirectoryMessage } from '../Signum.Authorization/Signum.Authorization.ADGroups';
 import { ADGroupEntity } from './Signum.Authorization.AzureAD.ADGroup';
 import * as User from '../Signum.Authorization/Templates/User';
 import { UserEntity, UserLiteModel } from '../Signum.Authorization/Signum.Authorization';
 import * as ProfilePhoto from '../Signum.Authorization/Templates/ProfilePhoto';
 import { ResultRow } from '@framework/FindOptions';
 import { AzureADConfigurationEmbedded, AzureADQuery, UserAzureADMixin } from './Signum.Authorization.AzureAD';
+import { ActiveDirectoryMessage } from '../Signum.Authorization/Signum.Authorization.BaseAD';
 
 
 export namespace AzureADClient {

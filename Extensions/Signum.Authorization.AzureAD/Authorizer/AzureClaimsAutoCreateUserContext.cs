@@ -1,3 +1,4 @@
+using Signum.Authorization.BaseAD;
 using System.Security.Claims;
 
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -5,6 +6,18 @@ namespace Signum.Authorization.AzureAD.Authorizer;
 
 public class AzureClaimsAutoCreateUserContext : IAutoCreateUserContext
 {
+    public string AccessToken { get; }
+
+    AzureADConfigurationEmbedded Config { get; }
+    BaseADConfigurationEmbedded IAutoCreateUserContext.Config => Config;
+
+    public AzureClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal, string accessToken, AzureADConfigurationEmbedded config)
+    {
+        ClaimsPrincipal = claimsPrincipal;
+        AccessToken = accessToken;
+        this.Config = config;
+    }
+
     public ClaimsPrincipal ClaimsPrincipal { get; private set; }
 
     public string GetClaim(string type) => ClaimsPrincipal.Claims.SingleEx(a => a.Type == type).Value;
@@ -51,12 +64,31 @@ public class AzureClaimsAutoCreateUserContext : IAutoCreateUserContext
                 name.TryAfter(" ")?.Trim() ??  "Unknown";
         }
     }
+}
 
 
-    public string AccessToken; 
-    public AzureClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal, string accessToken)
+public class AzureExternalIDAutoCreateUserContext : AzureClaimsAutoCreateUserContext
+{
+    public AzureExternalIDAutoCreateUserContext(ClaimsPrincipal claimsPrincipal, string accessToken, AzureADConfigurationEmbedded config) : base(claimsPrincipal, accessToken, config)
     {
-        ClaimsPrincipal = claimsPrincipal;
-        AccessToken = accessToken;
     }
 }
+
+public class AzureB2CClaimsAutoCreateUserContext : AzureClaimsAutoCreateUserContext
+{
+
+    public override string UserName => GetClaim("emails");
+    public override string? EmailAddress => GetClaim("emails");
+
+    public override string? FullName => TryGetClaim("name") ?? " ".Combine(FirstName, LastName);
+    public override string FirstName => GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname");
+    public override string LastName => GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname");
+
+    public override Guid? OID => Guid.Parse(GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"));
+
+    public AzureB2CClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal, string accessToken, AzureADConfigurationEmbedded config) : base(claimsPrincipal, accessToken, config)
+    {
+    }
+}
+
+
