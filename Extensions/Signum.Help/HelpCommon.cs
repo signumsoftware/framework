@@ -66,7 +66,7 @@ public enum ImportAction
 {
     NoChange,
     Create,
-    Update,
+    Override,
 //    Remove
 }
 
@@ -163,7 +163,8 @@ public enum HelpMessage
     ChooseZIPFile,
     SelectedFile,
     HelpZipContents,
-    NewKey
+    NewKey,
+    ActionStatus
 }
 
 public enum HelpKindMessage

@@ -142,6 +142,7 @@ export namespace HelpMessage {
   export const SelectedFile: MessageKey = new MessageKey("HelpMessage", "SelectedFile");
   export const HelpZipContents: MessageKey = new MessageKey("HelpMessage", "HelpZipContents");
   export const NewKey: MessageKey = new MessageKey("HelpMessage", "NewKey");
+  export const ActionStatus: MessageKey = new MessageKey("HelpMessage", "ActionStatus");
 }
 
 export namespace HelpPermissions {
@@ -192,7 +193,7 @@ export const ImportAction: EnumType<ImportAction> = new EnumType<ImportAction>("
 export type ImportAction =
   "NoChange" |
   "Create" |
-  "Update";
+  "Override";
 
 export const ImportStatus: EnumType<ImportStatus> = new EnumType<ImportStatus>("ImportStatus");
 export type ImportStatus =

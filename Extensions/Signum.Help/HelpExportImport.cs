@@ -89,7 +89,7 @@ public static class HelpExportImport
         Func<bool> modified, Func<ImportStatus> action)
     {
         ImportContent(refContent, mode, 
-            modified() ? ImportAction.Update : ImportAction.NoChange, 
+            modified() ? ImportAction.Override : ImportAction.NoChange, 
             () => action(), entity);
     }
 

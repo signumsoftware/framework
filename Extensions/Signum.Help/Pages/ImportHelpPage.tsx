@@ -70,7 +70,7 @@ export default function ImportHelpPage(): React.JSX.Element {
     );
   }
 
-  function renderModel() {
+  function renderPreview() {
 
     function handleImport() {
       setLastImported(undefined);
@@ -85,6 +85,12 @@ export default function ImportHelpPage(): React.JSX.Element {
         }, reason => {
           throw reason;
         });
+    }
+
+    const actionIcon: Record<ImportAction, FontAwesomeIconProps> = {
+      Create: { icon: "plus-square", color: "green" },
+      Override: { icon: "pen-square", color: "orange" },
+      NoChange: { icon: "equals", color: "gray" }
     }
 
     const tc = TypeContext.root(model!, { formSize: "xs" });
@@ -121,7 +127,7 @@ export default function ImportHelpPage(): React.JSX.Element {
                     <td>{getTypeInfo(ea.type!.cleanName).niceName}</td>
                     <td>{`${ea.culture.nativeName} (${ea.culture.name})`}</td>
                     <td>{ea.exitingEntity ? <EntityLink lite={ea.exitingEntity} ></EntityLink> : ea.key}</td>
-                    <td className="">{ImportAction.niceToString(ea.action!)}</td>
+                    <td><FontAwesomeIcon {...actionIcon[ea.action]} className="me-2" size="lg" /> {ImportAction.niceToString(ea.action!)}</td>
                     <td>
                       {ea.applyVisible && (
                         <input
@@ -158,7 +164,7 @@ export default function ImportHelpPage(): React.JSX.Element {
     const statusIcon: Record<ImportStatus, FontAwesomeIconProps> = {
       Applied: { icon: "check-square", color: "green" },
       Failed: { icon: "warning", color: "darkorange" },
-      Skipped: { icon: "angles-right", color: "gray" },
+      Skipped: { icon: "ban", color: "gray" },
       NoChange: { icon: "equals", color: "gray" }  
     }
 
@@ -183,8 +189,7 @@ export default function ImportHelpPage(): React.JSX.Element {
                 <th> {HelpImportReportModel.nicePropertyName(a => a.lines![0].element.type)} </th>
                 <th> {HelpImportReportModel.nicePropertyName(a => a.lines![0].element.culture)} </th>
                 <th> {`${HelpImportReportModel.nicePropertyName(a => a.lines![0].element.exitingEntity)}/${HelpMessage.NewKey.niceToString()}`} </th>
-                <th> {HelpImportReportModel.nicePropertyName(a => a.lines![0].element.action)} </th>
-                <th> {HelpImportReportModel.nicePropertyName(a => a.lines![0].element.status)} </th>
+                <th> {HelpMessage.ActionStatus.niceToString()} </th>
                 <th> {JavascriptMessage.error.niceToString()} </th>
               </tr>
             </thead>
@@ -198,9 +203,8 @@ export default function ImportHelpPage(): React.JSX.Element {
                       <td>{getTypeInfo(ea.type!.cleanName).niceName}</td>
                       <td>{`${ea.culture.nativeName} (${ea.culture.name})`}</td>
                       <td>{ea.exitingEntity ? <EntityLink lite={ea.exitingEntity} ></EntityLink> : ea.key}</td>
-                      <td className="">{ImportAction.niceToString(ea.action!)}</td>
-                      <td className=""><FontAwesomeIcon {...statusIcon[ea.status]} className="me-2" /> {ImportStatus.niceToString(ea.status!)}</td>
-                      <td className="">{ea.actionError!}</td>
+                      <td><FontAwesomeIcon {...statusIcon[ea.status]} className="me-2" size="lg" title={ImportStatus.niceToString(ea.status!)} />{ImportAction.niceToString(ea.action!)}</td>
+                      <td>{ea.actionError!}</td>
                    </tr>
                   );
                 })
@@ -218,7 +222,7 @@ export default function ImportHelpPage(): React.JSX.Element {
       <br />
       {imported && renderReport()}
       <ErrorBoundary>
-        {model ? renderModel() :
+        {model ? renderPreview() :
           renderFileInput()
         }
       </ErrorBoundary>
