@@ -30,6 +30,7 @@ export default function BigValuePart(p: { ctx: TypeContext<BigValuePartEntity> }
       />
       <CheckboxLine ctx={ctx.subCtx(a => a.navigate)} onChange={forceUpdate} inlineCheckbox="block" />
       {ctx.value.navigate && <AutoLine ctx={ctx.subCtx(a => a.customUrl)} />}
+      <CheckboxLine ctx={ctx.subCtx(a => a.isClickable)} inlineCheckbox="block" />
     </div>
   );
 }

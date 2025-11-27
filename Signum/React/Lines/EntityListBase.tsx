@@ -93,18 +93,20 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
           return;
 
         if (types.length == 1) {
-          var tn = types.single().name;
-          p.findOptions = withAvoidDuplicates(p.findOptions ?? Navigator.entitySettings[tn]?.defaultFindOptions ?? { queryName: tn }, tn);
+          var type = types.single();
+          if (type.queryDefined) {
+            p.findOptions = withAvoidDuplicates(p.findOptions ?? Navigator.entitySettings[type.name]?.defaultFindOptions ?? { queryName: type.name }, type.name);
+          }
         }
         else {
-          p.findOptionsDictionary = types.toObject(a => a.name, a => withAvoidDuplicates(p.findOptionsDictionary?.[a.name] ?? Navigator.entitySettings[a.name]?.defaultFindOptions ?? { queryName: a.name }, a.name));
+          p.findOptionsDictionary = types.filter(a => a.queryDefined).toObject(a => a.name, a => withAvoidDuplicates(p.findOptionsDictionary?.[a.name] ?? Navigator.entitySettings[a.name]?.defaultFindOptions ?? { queryName: a.name }, a.name));
         }
       }
     }
 
     function withAvoidDuplicates(fo: FindOptions, typeName: string): FindOptions {
 
-      const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
+      const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? (!e.entity?.isNew) && e.EntityType == typeName : isEntity(e) ? !e.isNew && e.Type == typeName : null).notNull();
 
       return {
         ...fo,

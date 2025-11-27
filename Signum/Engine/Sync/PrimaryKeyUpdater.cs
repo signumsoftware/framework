@@ -15,18 +15,15 @@ internal class PrimaryKeyUpdater
 
 
     private bool isPostgres;
-    private Dictionary<string, DiffTable> databaseTables;
-    private Dictionary<string, ITable> modelTables;
     private Dictionary<ITable, Dictionary<string, List<IColumn>>> ibas;
 
     private Table type_Table;
     private IColumn type_Id;
     private IColumn type_TableName;
 
-    public PrimaryKeyUpdater(bool isPostgres, Dictionary<string, DiffTable> databaseTables, Dictionary<string, ITable> modelTables)
+    public PrimaryKeyUpdater(bool isPostgres, Dictionary<string, ITable> modelTables)
     {
         this.isPostgres = isPostgres;
-        this.databaseTables = databaseTables;
         this.ibas = (from t in modelTables.Values
                      select new
                      {

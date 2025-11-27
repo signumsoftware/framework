@@ -1,9 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using Microsoft.AspNetCore.Http;
 using Signum.API.Filters;
-using Signum.Authorization.ADGroups;
+using Signum.Authorization.BaseAD;
 
 namespace Signum.Authorization.AzureAD.ADGroup;
 

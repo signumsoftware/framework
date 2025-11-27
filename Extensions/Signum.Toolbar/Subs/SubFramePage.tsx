@@ -187,7 +187,8 @@ export default function SubFramePage(): React.ReactElement {
     },
     refreshCount: state.refreshCount,
     allowExchangeEntity: true,
-    prefix: "framePage"
+    prefix: "framePage",
+    hideAndClose: true,
   };
 
 

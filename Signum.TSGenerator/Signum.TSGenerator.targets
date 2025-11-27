@@ -1,10 +1,5 @@
 ﻿<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<Target Name="GenerateSignumTS">
-		<WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
-		<Exec command="dotnet &quot;$(MSBuildThisFileDirectory)Signum.TSGenerator.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot; &quot;$(BaseIntermediateOutputPath)SignumContent.txt&quot;" ConsoleToMSBuild="true">
-			<Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
-		</Exec>
-	</Target>
+	
 
 	<!-- Without Microsoft.TypeScript.MSBuild Nuget  -->
 	<PropertyGroup Condition="'$(CompileTypeScriptDependsOn)' == ''">
@@ -15,36 +10,15 @@
 		</BuildDependsOn>
 	</PropertyGroup>
 
-	<!-- With Microsoft.TypeScript.MSBuild Nuget  -->
-	<PropertyGroup Condition="'$(CompileTypeScriptDependsOn)' != ''">
-		<CompileTypeScriptDependsOn>
-			GenerateSignumTS;
-			StartTypescript;
-			$(CompileTypeScriptDependsOn);
-		</CompileTypeScriptDependsOn>
-		<CompileDependsOn>
-			$([MSBuild]::Unescape($(CompileDependsOn.Replace("CompileTypeScriptWithTSConfig;", ""))))
-		</CompileDependsOn>
-		<BuildDependsOn>
-			FixProjectLastWriteTime;
-			CleanCompilerDependsOn;
-			$(BuildDependsOn);
-			CompileTypeScriptWithTSConfig;
-			EndTypescript;
-			TSC_BuildAll;
-		</BuildDependsOn>
-	</PropertyGroup>
-
-	<Target Name="CleanCompilerDependsOn">
-		<PropertyGroup>
-			<CompileDependsOn>
-				$([MSBuild]::Unescape($(CompileDependsOn.Replace("CompileTypeScriptWithTSConfig;", ""))))
-			</CompileDependsOn>
-		</PropertyGroup>
+	<Target Name="GenerateSignumTS">
+		<WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
+		<Exec command="dotnet &quot;$(MSBuildThisFileDirectory)Signum.TSGenerator.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot; &quot;$(BaseIntermediateOutputPath)SignumContent.txt&quot;" ConsoleToMSBuild="true">
+			<Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
+		</Exec>
 	</Target>
 
 	<Target Name="TSC_BuildAll" Condition="'$(TSC_Build)' == 'true'">
-		<Message Text="Executing 'yarn tsc --build' (all projects NEW21312!)" Importance="high" />
+		<Message Text="Executing 'yarn tsc --build'" Importance="high" />
 		<Exec
 		  Command="yarn tsc -b $(MSBuildProjectDirectory)/tsconfig.json --pretty false"
 		  ConsoleToMSBuild="true"
@@ -54,52 +28,5 @@
 
 		<Message Text="%(TscOutput.Identity)" Importance="high" />
 	</Target>
-
-	<Target Name="StartTypescript" Condition="'$(TypeScriptCompileBlocked)' == 'false'">
-		<Message Text="TypeScript Compiler Starting $(MSBuildProjectFile)" Importance="high" />
-	</Target>
-	<Target Name="EndTypescript" Condition="'$(TypeScriptCompileBlocked)' == 'false'">
-		<Message Text="TypeScript Compiler Finished $(MSBuildProjectFile)" Importance="high" />
-	</Target>
-
-	<Target Name="FixProjectLastWriteTime">
-		<SetProjectLastWriteTime FileList="@(TypeScriptCompile)" ProjectFile="$(MSBuildProjectFile)"/>
-	</Target>
-
-	<UsingTask TaskName="SetProjectLastWriteTime"
-			       TaskFactory="RoslynCodeTaskFactory"
-    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
-
-		<ParameterGroup>
-			<FileList ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
-			<ProjectFile ParameterType="System.String" Required="true" />
-		</ParameterGroup>
-		<Task>
-			<Using Namespace="System" />
-			<Code Type="Fragment" Language="cs">
-				<![CDATA[
-			var maxDate = DateTime.MinValue;
-			
-			foreach(var file in FileList)
-            {
-				var date = DateTime.Parse(file.GetMetadata("ModifiedTime"));
-                if(date > maxDate)
-                {
-				    maxDate = date; 
-                }
-            }
-			
-			DateTime cacheTimeStamp = File.GetLastWriteTime(ProjectFile);
-			
-			if(maxDate > cacheTimeStamp)
-			{
-			    File.SetLastWriteTime(ProjectFile, maxDate);
-				Log.LogMessage(MessageImportance.High, "Changing LastWriteTime of {0} to {1} (latest TypeScriptCompile)", ProjectFile, maxDate);
-			}
-          ]]>
-			</Code>
-		</Task>
-	</UsingTask>
-
 
 </Project>

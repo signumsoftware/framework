@@ -300,7 +300,7 @@ public static class CacheLogic
     }
 
 
-    readonly static object startKeyLock = new object();
+    readonly static Lock startKeyLock = new();
     public static void StartSqlDependencyAndEnableBrocker()
     {
         if (!WithSqlDependency)

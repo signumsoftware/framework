@@ -134,7 +134,7 @@ public static class SchemaSynchronizer
         });
 
       
-        var pkUpdater = new PrimaryKeyUpdater(isPostgres, databaseTables, modelTables);
+        var pkUpdater = new PrimaryKeyUpdater(isPostgres, modelTables);
 
 
         var tableReplacements = replacements.TryGetC(Replacements.KeyTables);
@@ -792,7 +792,7 @@ public static class SchemaSynchronizer
     {
         var isPostgres = sqlBuilder.IsPostgres;
 
-        if (!NeedsDefaultValue(table, column, forHistory: false) || avoidDefault)
+        static SqlPreCommand AddColumnWithHistory(SqlBuilder sqlBuilder, ITable table, IColumn column, bool withHistory)
         {
             if (!withHistory)
                 return sqlBuilder.AlterTableAddColumn(table, column);
@@ -803,16 +803,26 @@ public static class SchemaSynchronizer
             );
         }
 
+
+        if (!NeedsDefaultValue(table, column, forHistory: false) || avoidDefault)
+        {
+            return AddColumnWithHistory(sqlBuilder, table, column, withHistory);
+        }
+
         if (column.Nullable == IsNullable.Forced)
         {
             var hasValueColumn = table.GetHasValueColumn(column);
 
             if (hasValueColumn != null && hasValueFalse.Contains(hasValueColumn))
-                return sqlBuilder.AlterTableAddColumn(table, column);
+            {
+                return AddColumnWithHistory(sqlBuilder, table, column, withHistory);
+            }
 
             var defaultValue = GetDefaultValue(table, column, rep, forNewColumn: true, forceDefaultValue: forceDefaultValue);
             if (defaultValue == "force")
-                return sqlBuilder.AlterTableAddColumn(table, column);
+            {
+                return AddColumnWithHistory(sqlBuilder, table, column, withHistory);
+            }
 
             var where = hasValueColumn != null ? $"{hasValueColumn.Name.SqlEscape(isPostgres)} = {(isPostgres ? "TRUE" : 1)}" : "??";
 
@@ -828,6 +838,9 @@ WHERE {where};"))!;
                 columnName: column.Name,
                 name: "DF_TEMP_" + column.Name,
                 quotedDefinition: sqlBuilder.Quote(column.DbType, "0"));
+
+            if (withHistory)
+                throw new NotImplementedException();
 
             return SqlPreCommand.Combine(Spacing.Simple,
                sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
@@ -845,15 +858,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             var defaultValue = GetDefaultValue(table, column, rep, forNewColumn: true, forceDefaultValue: forceDefaultValue);
             if (defaultValue == "force")
             {
-                if(withHistory)
-                {
-                    return new SqlPreCommand_WithHistory(
-                        normal: sqlBuilder.AlterTableAddColumn(table, column),
-                        history: sqlBuilder.AlterTableAddColumn(table, column, forHistory: true)
-                        );
-                }
-
-                return sqlBuilder.AlterTableAddColumn(table, column);
+                return AddColumnWithHistory(sqlBuilder, table, column, withHistory);
             }
 
             if (column is FieldEmbedded.EmbeddedHasValueColumn hv && (defaultValue == (isPostgres ? "false" :"0")))
@@ -889,6 +894,8 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
 
             return result!;
         }
+
+      
     }
 
     private static SqlPreCommand AlterTableAddColumnDefaultZero(SqlBuilder sqlBuilder, ITable table, IColumn column, bool forHistory = false)

@@ -46,6 +46,22 @@ public class ExpressionCleaner : ExpressionVisitor
 
 	protected override Expression VisitMethodCall(MethodCallExpression m)
 	{
+        if (m.Method.DeclaringType == typeof(MemoryExtensions) && m.Method.Name is nameof(MemoryExtensions.Contains))
+        {
+            var col = m.Arguments[0];
+            if (col is MethodCallExpression conv && conv.Method.Name == "op_Implicit"  && conv.Type.IsInstantiationOf(typeof(ReadOnlySpan<>)))
+            {
+                var operand = Visit(conv.Arguments.Single());
+                var otherArguments = m.Arguments.Skip(1).Select(a => Visit(a)).ToList();
+
+                var miEnumerable = typeof(Enumerable).GetMethods(BindingFlags.Public | BindingFlags.Static)
+                    .Where(mr => mr.Name == nameof(Enumerable.Contains) && mr.GetParameters().Length == otherArguments.Count + 1)
+                    .SingleEx();
+
+                return Expression.Call(miEnumerable.MakeGenericMethod(m.Method.GetGenericArguments()), [operand, .. otherArguments]);
+            }
+        }
+
         MethodCallExpression expr = (MethodCallExpression)base.VisitMethodCall(m);
 
         Expression? binded =  BindMethodExpression(expr, false);
