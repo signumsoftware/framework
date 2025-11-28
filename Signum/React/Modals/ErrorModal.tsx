@@ -55,7 +55,7 @@ const ErrorModal: {
                   renderTitle(e)
           }
         </h1>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label={EntityControlMessage.Close.niceToString()} onClick={handleCloseClicked} />
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label={JavascriptMessage.Close.niceToString()} onClick={handleCloseClicked} />
       </div>
 
       <div className="modal-body">

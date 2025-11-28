@@ -7,7 +7,7 @@ using DocumentFormat.OpenXml.Vml.Office;
 using Signum.Engine.Sync;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Signum.Authorization.WindowsAD.Authorizer;
-using Signum.Authorization.ADGroups;
+using Signum.Authorization.BaseAD;
 
 namespace Signum.Authorization.WindowsAD;
 
@@ -18,6 +18,8 @@ public static class WindowsADLogic
     {
         if (sb.AlreadyDefined(MethodBase.GetCurrentMethod()))
             return;
+
+        ReflectionServer.RegisterLike(typeof(WindowsADTask), () => Schema.Current.IsAllowed(typeof(ScheduledTaskEntity), true) == null);
 
         PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
 
@@ -221,7 +223,7 @@ public static class WindowsADLogic
 
             UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(pc, userPc.SamAccountName);
 
-            var acuCtx = new DirectoryServiceAutoCreateUserContext(pc, userPc.SamAccountName, userPc.UserPrincipalName, userPrincipal);
+            var acuCtx = new DirectoryServiceAutoCreateUserContext(config, pc, userPc.SamAccountName, userPc.UserPrincipalName, userPrincipal);
 
             using (ExecutionMode.Global())
             using (var tr = new Transaction())

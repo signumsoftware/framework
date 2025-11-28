@@ -34,6 +34,7 @@ public class UserWindowsADMixin : MixinEntity
     }
 }
 
+[AllowUnauthenticated]
 public enum WindowsADMessage
 {
     [Description("The user {0} is connected to Active Directory and can not have a local password set")]
