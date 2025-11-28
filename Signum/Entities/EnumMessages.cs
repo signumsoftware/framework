@@ -666,6 +666,7 @@ public enum JavascriptMessage
 
     [Description("Date")]
     Date,
+    Close,
 }
 
 //https://github.com/jquense/react-widgets/blob/5d4985c6dac0df34b86c7d8ad311ff97066977ab/packages/react-widgets/src/messages.tsx#L35

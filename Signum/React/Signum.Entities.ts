@@ -514,6 +514,7 @@ export namespace JavascriptMessage {
   export const showPeriod: MessageKey = new MessageKey("JavascriptMessage", "showPeriod");
   export const showPreviousOperation: MessageKey = new MessageKey("JavascriptMessage", "showPreviousOperation");
   export const Date: MessageKey = new MessageKey("JavascriptMessage", "Date");
+  export const Close: MessageKey = new MessageKey("JavascriptMessage", "Close");
 }
 
 export namespace LiteMessage {
