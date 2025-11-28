@@ -3,7 +3,7 @@ using System.Security.Principal;
 using System.DirectoryServices.AccountManagement;
 using Signum.Utilities.Reflection;
 using Signum.Authorization.WindowsAD.Authorizer;
-using Signum.Authorization.ADGroups;
+
 
 namespace Signum.Authorization.WindowsAD;
 
@@ -79,7 +79,7 @@ public class WindowsADServer
 
                             if (user == null)
                             {
-                                user = ada.OnCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, userName));
+                                user = ada.OnCreateUser(new DirectoryServiceAutoCreateUserContext(config, pc, localName, userName));
                             }
                         }
                     }
@@ -92,7 +92,7 @@ public class WindowsADServer
                         {
                             using (PrincipalContext pc = GetPrincipalContext(config))
                             {
-                                ada.UpdateUser(user, new DirectoryServiceAutoCreateUserContext(pc, localName, userName));
+                                ada.UpdateUser(user, new DirectoryServiceAutoCreateUserContext(config, pc, localName, userName));
                             }
                         }
                     }

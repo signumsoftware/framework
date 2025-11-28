@@ -1,4 +1,5 @@
-using Signum.Authorization.ADGroups;
+
+using Signum.Authorization.BaseAD;
 using System.DirectoryServices.AccountManagement;
 
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -47,7 +48,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
                         {
                             var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
 
-                            var dsacuCtx = new DirectoryServiceAutoCreateUserContext(pc, localName, identityValue: userName);
+                            var dsacuCtx = new DirectoryServiceAutoCreateUserContext(config, pc, localName, identityValue: userName);
                             
                             var sid = dsacuCtx.GetUserPrincipal().Sid;
 
