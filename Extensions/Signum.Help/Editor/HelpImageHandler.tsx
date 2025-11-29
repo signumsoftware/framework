@@ -11,9 +11,13 @@ import { ImageNodeBase } from "../../Signum.HtmlEditor/Extensions/ImageExtension
 
 export class HelpImageHandler implements ImageHandlerBase {
 
-  pr: PropertyRoute = HelpImageEntity.propertyRouteAssert(a => a.file);
+  private _pr?: PropertyRoute;
 
-  getNodeType(): typeof ImageNodeBase {return HelpImageNode}
+  get pr(): PropertyRoute {
+    return this._pr ??= HelpImageEntity.propertyRouteAssert(a => a.file)
+  }
+
+  getNodeType(): typeof ImageNodeBase { return HelpImageNode }
 
   toElement(val: ImageInfo): HTMLElement | undefined {
     const img = document.createElement("img");
@@ -31,7 +35,7 @@ export class HelpImageHandler implements ImageHandlerBase {
 
     return toFileEntity(file, {
       type: FilePathEmbedded, accept: "image/*",
-      maxSizeInBytes: this.pr.member!.defaultFileTypeInfo!.maxSizeInBytes ?? undefined
+      maxSizeInBytes: this.pr?.member!.defaultFileTypeInfo!.maxSizeInBytes ?? undefined
     })
       .then(att => ({
         binaryFile: att.binaryFile ?? undefined,
@@ -44,9 +48,9 @@ export class HelpImageHandler implements ImageHandlerBase {
       binaryFile: info.binaryFile,
       entityId: info.imageId,
       mListRowId: null,
-      fileType: getSymbol(FileTypeSymbol, this.pr.member!.defaultFileTypeInfo!.key),
-      rootType: this.pr.findRootType().name,
-      propertyRoute: this.pr.propertyPath()
+      fileType: this.pr && getSymbol(FileTypeSymbol, this.pr.member!.defaultFileTypeInfo!.key),
+      rootType: this.pr && this.pr.findRootType().name,
+      propertyRoute: this.pr && this.pr.propertyPath()
     });
 
     if (fp.entityId == null && fp.binaryFile == null)
