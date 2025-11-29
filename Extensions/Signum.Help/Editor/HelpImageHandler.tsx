@@ -11,9 +11,13 @@ import { ImageNodeBase } from "../../Signum.HtmlEditor/Extensions/ImageExtension
 
 export class HelpImageHandler implements ImageHandlerBase {
 
-  pr: PropertyRoute = HelpImageEntity.propertyRouteAssert(a => a.file);
+  private _pr?: PropertyRoute;
 
-  getNodeType(): typeof ImageNodeBase {return HelpImageNode}
+  get pr(): PropertyRoute {
+    return this._pr ??= HelpImageEntity.propertyRouteAssert(a => a.file)
+  }
+
+  getNodeType(): typeof ImageNodeBase { return HelpImageNode }
 
   toElement(val: ImageInfo): HTMLElement | undefined {
     const img = document.createElement("img");
