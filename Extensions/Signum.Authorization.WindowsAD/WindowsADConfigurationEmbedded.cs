@@ -1,4 +1,4 @@
-using Signum.Authorization.ADGroups;
+using Signum.Authorization.BaseAD;
 
 namespace Signum.Authorization.WindowsAD;
 

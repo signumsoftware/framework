@@ -90,7 +90,7 @@ public class OperationController : ControllerBase
         var e = request.lite.Retrieve();
         var op = request.GetOperationSymbol(operationKey, e);
 
-        return WithProgressProxy(pp =>
+        return this.WithProgressProxy(pp =>
         {
             var entity = OperationLogic.ServiceExecute(e, op, request.ParseArgs(op).EmptyIfNull().And(pp).ToArray());
             return SignumServer.GetEntityPack(entity);
@@ -320,86 +320,6 @@ public class OperationController : ControllerBase
         public HttpError? Error;
     }
 
-    async Task WithProgressProxy<T>(Func<ProgressProxy, T> action, CancellationToken cancellationToken)
-    {
-        EventWaitHandle handle = new EventWaitHandle(false, EventResetMode.AutoReset);
-
-        ProgressStep<T>? lastProgress = null;
-
-        var context = this.ControllerContext;
-        var httpContext = this.HttpContext;
-
-        var task = Task.Run(() =>
-        {
-            ProgressProxy pp = new ProgressProxy(cancellationToken);
-
-            pp.Changed += (sender, p) =>
-            {
-                lastProgress = new ProgressStep<T>
-                {
-                    CurrentTask = pp.CurrentTask,
-                    Max = pp.Max,
-                    Min = pp.Min,
-                    Position = pp.Position,
-                };
-                handle.Set();
-            };
-
-            try
-            {
-                var result = action(pp);
-                lastProgress = new ProgressStep<T>
-                {
-                    IsFinished = true,
-                    Result = result,
-                };
-                handle.Set();
-            }
-            catch(Exception ex)
-            {
-                SignumExceptionFilterAttribute.LogException(ex, context).Wait();
-                var error = SignumExceptionFilterAttribute.CustomHttpErrorFactory(new ResourceExecutedContext(context, []) { Exception = ex });
-                lastProgress = new ProgressStep<T>
-                {
-                    IsFinished = true,
-                    Error = error
-                };
-                handle.Set();
-            }
-        });
-
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = false,
-            IncludeFields = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        };
-
-
-        options.Converters.AddRange(SignumServer.JsonSerializerOptions.Converters);
-
-        while (await handle.WaitOneAsync(CancellationToken.None))
-        {
-            var lp = lastProgress;
-            if (lp == null) //Exception
-                break;
-            else
-            {
-                var json = JsonSerializer.Serialize(lp, options);
-                if (json.Contains("\n"))
-                    throw new InvalidOperationException("\n in Json object found!");
-
-                await httpContext.Response.WriteAsync(json + "\n");
-                await httpContext.Response.Body.FlushAsync();
-
-                if (lp.IsFinished)
-                    break;
-            }
-        }
-
-        //await task; //avoid throwing the exception
-    }
-
 
 
     public class MultiOperationRequest : BaseOperationRequest
@@ -616,5 +536,88 @@ internal static class MultiSetter
 
         var objClean = ReflectionTools.ChangeType(objRaw, pr.Type);
         return objClean;
+    }
+}
+
+public static class ControllerProgressExtension
+{
+    public static async Task WithProgressProxy<T>(this ControllerBase controller,   Func<ProgressProxy, T> action, CancellationToken cancellationToken)
+    {
+        EventWaitHandle handle = new EventWaitHandle(false, EventResetMode.AutoReset);
+
+        ProgressStep<T>? lastProgress = null;
+
+        var context = controller.ControllerContext;
+        var httpContext = controller.HttpContext;
+
+        var task = Task.Run(() =>
+        {
+            ProgressProxy pp = new ProgressProxy(cancellationToken);
+
+            pp.Changed += (sender, p) =>
+            {
+                lastProgress = new ProgressStep<T>
+                {
+                    CurrentTask = pp.CurrentTask,
+                    Max = pp.Max,
+                    Min = pp.Min,
+                    Position = pp.Position,
+                };
+                handle.Set();
+            };
+
+            try
+            {
+                var result = action(pp);
+                lastProgress = new ProgressStep<T>
+                {
+                    IsFinished = true,
+                    Result = result,
+                };
+                handle.Set();
+            }
+            catch (Exception ex)
+            {
+                SignumExceptionFilterAttribute.LogException(ex, context).Wait();
+                var error = SignumExceptionFilterAttribute.CustomHttpErrorFactory(new ResourceExecutedContext(context, []) { Exception = ex });
+                lastProgress = new ProgressStep<T>
+                {
+                    IsFinished = true,
+                    Error = error
+                };
+                handle.Set();
+            }
+        });
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = false,
+            IncludeFields = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
+
+
+        options.Converters.AddRange(SignumServer.JsonSerializerOptions.Converters);
+
+        while (await handle.WaitOneAsync(CancellationToken.None))
+        {
+            var lp = lastProgress;
+            if (lp == null) //Exception
+                break;
+            else
+            {
+                var json = JsonSerializer.Serialize(lp, options);
+                if (json.Contains("\n"))
+                    throw new InvalidOperationException("\n in Json object found!");
+
+                await httpContext.Response.WriteAsync(json + "\n");
+                await httpContext.Response.Body.FlushAsync();
+
+                if (lp.IsFinished)
+                    break;
+            }
+        }
+
+        //await task; //avoid throwing the exception
     }
 }
