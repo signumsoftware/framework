@@ -20,7 +20,7 @@ import * as ProfilePhoto from '../Signum.Authorization/Templates/ProfilePhoto';
 import { UserWindowsADMixin, WindowsADConfigurationEmbedded } from './Signum.Authorization.WindowsAD';
 
 
-export namespace AzureADClient {
+export namespace WindowsADClient {
   export function start(options: { routes: RouteObject[], profilePhotos: boolean; }): void {
     ChangeLogClient.registerChangeLogModule("Signum.Authentication.WindowsAD", () => import("./Changelog"));
 

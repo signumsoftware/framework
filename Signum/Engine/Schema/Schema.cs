@@ -779,6 +779,9 @@ public class Schema : IImplementationsFinder
         }
     }
 
+    public Implementations FindImplementations<T, S>(Expression<Func<T, S>> lambda)
+        where T : IRootEntity => FindImplementations(PropertyRoute.Construct(lambda));
+
     public Implementations FindImplementations(PropertyRoute route)
     {
         if (route.PropertyRouteType == PropertyRouteType.LiteEntity)
