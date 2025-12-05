@@ -279,10 +279,80 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
 
   }, [p.ctx.value]);
 
-  const toStr =
-    p.onRenderItem ? p.onRenderItem(p.ctx.value) :
-      currentEntityRef.current?.item ? p.autoComplete!.renderItem(currentEntityRef.current.item, new TextHighlighter(undefined)) :
-        getToStr();
+  /**
+  * Bestimmt die beste Textfarbe (Weiß oder Schwarz) für eine gegebene HEX-Hintergrundfarbe 
+  * basierend auf dem WCAG 2.x Kontrastverhältnis.
+  *
+  * @param hexColor Die Hintergrundfarbe im HEX-Format.
+  * @returns Die kontrastreichere Textfarbe ('#fff' oder '#000').
+  */
+  function getContrastingTextColor(hexColor: string): '#fff' | '#000' {
+
+    /**
+     * Konvertiert einen sRGB-Farbwert (0-255) in eine lineare RGB-Komponente (0-1).
+     * @param srgb Die 8-Bit-Farbkomponente (0-255).
+     * @returns Die lineare RGB-Komponente.
+     */
+    const toLinearRgb = (srgb: number): number => {
+      const srgbNorm = srgb / 255;
+      return srgbNorm <= 0.04045 ? srgbNorm / 12.9 : Math.pow((srgbNorm + 0.055) / 1.055, 2.4);
+    };
+
+    /**
+     * Berechnet die relative Luminanz (Helligkeit) nach WCAG 2.x für eine RGB-Farbe.
+     * @param r Rot-Wert (0-255).
+     * @param g Grün-Wert (0-255).
+     * @param b Blau-Wert (0-255).
+     * @returns Relative Luminanz (0-1).
+     */
+    const getRelativeLuminance = (r: number, g: number, b: number): number => {
+      const R = toLinearRgb(r);
+      const G = toLinearRgb(g);
+      const B = toLinearRgb(b);
+
+      // Luminanz-Formel L = 0.2126 * R + 0.7152 * G + 0.0722 * B
+      return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+    };
+
+    /**
+     * Berechnet das WCAG-Kontrastverhältnis zwischen zwei Luminanzen.
+     * @param l1 Luminanz der ersten Farbe.
+     * @param l2 Luminanz der zweiten Farbe.
+     * @returns Kontrastverhältnis (1 bis 21).
+     */
+    const getContrastRatio = (l1: number, l2: number): number => {
+      const L1 = Math.max(l1, l2); // Die hellere Farbe
+      const L2 = Math.min(l1, l2); // Die dunklere Farbe
+      // Formel: (L1 + 0.05) / (L2 + 0.05)
+      return (L1 + 0.05) / (L2 + 0.05);
+    };
+
+    // luminance of background
+    const backgroundLuminance = getRelativeLuminance(parseInt(hexColor.slice(1, 3), 16), parseInt(hexColor.slice(3, 5), 16), parseInt(hexColor.slice(5, 7), 16));
+
+    return getContrastRatio(backgroundLuminance, 1) >= getContrastRatio(backgroundLuminance, 0) ? '#fff' : '#000';
+  }
+
+   const toStr =
+    p.onRenderItem ? p.onRenderItem(p.ctx.value) : currentEntityRef.current?.item ? (() => {
+        const rendered = p.autoComplete!.renderItem(currentEntityRef.current.item,new TextHighlighter(undefined));
+        type ElementWithStyle = React.ReactElement<{ style?: React.CSSProperties }>;
+        const hasStyleProps = (x: unknown): x is ElementWithStyle => React.isValidElement(x);
+
+        if (hasStyleProps(rendered)) {
+          const color = "color" in currentEntityRef.current.entity ? (currentEntityRef.current.entity as any).color : undefined;
+          return React.cloneElement(rendered, {
+            style: {
+              ...(rendered.props.style ?? {}),
+              color: getContrastingTextColor(color ?? "#f8f9fa"),
+            }
+          });
+        }
+
+        return rendered;
+      })() : getToStr();
+
+
 
   function getToStr() {
     const toStr = getToString(p.ctx.value);

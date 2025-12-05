@@ -639,7 +639,7 @@ public static class AuthLogic
 
         Dictionary<string, XElement> rolesXml = doc.Root!.Element("Roles")!.Elements("Role").ToDictionary(x => x.Attribute("Name")!.Value);
 
-        Dictionary<string, RoleEntity> rolesDic = Database.Query<RoleEntity>().Where(a => !a.IsTrivialMerge).ToDictionary(a => a.ToString());
+        Dictionary<string, RoleEntity> rolesDic = AuthLogic.RolesInOrder(includeTrivialMerge: false).Reverse().Select(r => AuthLogic.RolesByLite.Value.GetOrThrow(r)).ToDictionary(a => a.ToString());
         Replacements replacements = new Replacements { Interactive = interactive }; 
         replacements.AskForReplacements(rolesDic.Keys.ToHashSet(), rolesXml.Keys.ToHashSet(), "Roles");
         rolesDic = replacements.ApplyReplacementsToOld(rolesDic, "Roles");

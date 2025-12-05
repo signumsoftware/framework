@@ -538,13 +538,30 @@ public class FieldReader
     {
         LastOrdinal = ordinal;
         LastMethodName = nameof(GetTimeOnly);
+
         switch (typeCodes[ordinal])
         {
             case tcTimeOnly:
                 return ReflectionTools.ChangeType<TimeOnly>(reader.GetValue(ordinal));
             case tcTimeSpan:
                 if (isPostgres)
-                    return TimeOnly.FromTimeSpan(((NpgsqlDataReader)reader).GetTimeSpan(ordinal));
+                {
+                    var val = ((NpgsqlDataReader)reader).GetValue(ordinal);
+
+                    if (val == DBNull.Value)
+                        return default;
+
+                    // Npgsql 10 returns TimeOnly directly
+                    if (val is TimeOnly to)
+                        return to;
+
+                    // (Optional safety: for rare cases when PG returns TimeSpan)
+                    if (val is TimeSpan ts)
+                        return TimeOnly.FromTimeSpan(ts);
+
+                    throw new InvalidOperationException(
+                        $"Unexpected PostgreSQL time type: {val.GetType().FullName}");
+                }
                 else
                     return TimeOnly.FromTimeSpan(((SqlDataReader)reader).GetTimeSpan(ordinal));
             default:
@@ -556,13 +573,30 @@ public class FieldReader
     {
         LastOrdinal = ordinal;
         LastMethodName = nameof(GetNullableTimeOnly);
-        if (reader.IsDBNull(ordinal))
-        {
-            return null;
-        }
-        return GetTimeOnly(ordinal);
-    }
 
+        if (reader.IsDBNull(ordinal))
+            return null;
+
+        // PostgreSQL branch (Npgsql 10)
+        if (isPostgres)
+        {
+            var val = ((NpgsqlDataReader)reader).GetValue(ordinal);
+
+            // Npgsql 10 returns TimeOnly directly
+            if (val is TimeOnly to)
+                return to;
+
+            // Rare case: if returned as TimeSpan
+            if (val is TimeSpan ts)
+                return TimeOnly.FromTimeSpan(ts);
+
+            throw new InvalidOperationException(
+                $"Unexpected PostgreSQL time type: {val.GetType().FullName}");
+        }
+
+        // SQL Server branch
+        return TimeOnly.FromTimeSpan(((SqlDataReader)reader).GetTimeSpan(ordinal));
+    }
 
     public Guid GetGuid(int ordinal)
     {
