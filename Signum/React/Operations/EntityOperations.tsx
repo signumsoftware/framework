@@ -9,12 +9,8 @@ import { ValidationError } from '../Services';
 import { Operations, EntityOperationSettings, EntityOperationContext, EntityOperationGroup, AlternativeOperationSetting } from '../Operations'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { Constructor } from "../Constructor"
 import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip, ButtonGroup } from "react-bootstrap";
 import { BsColor } from "../Components";
-import { FunctionalAdapter } from "../Modals";
-import {  } from "../Finder";
-import { faDigitalOcean } from "@fortawesome/free-brands-svg-icons";
 
 export namespace EntityOperations {
   export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined> | undefined {
