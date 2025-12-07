@@ -10,23 +10,33 @@
 		</BuildDependsOn>
 	</PropertyGroup>
 
-	<Target Name="GenerateSignumTS">
+	<Target Name="GenerateSignumTS" Condition="'$(TSGeneratorDisabled)' != 'true'">
 		<WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
 		<Exec command="dotnet &quot;$(MSBuildThisFileDirectory)Signum.TSGenerator.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot; &quot;$(BaseIntermediateOutputPath)SignumContent.txt&quot;" ConsoleToMSBuild="true">
 			<Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
 		</Exec>
 	</Target>
 
-	<Target Name="TSC_BuildAll" Condition="'$(TSC_Build)' == 'true'">
-		<Message Text="Executing 'yarn tsc --build'" Importance="high" />
-		<Exec
+	<Target Name="TSC_BuildAll">
+		<!-- Run yarn tsc when TSC_Build == 'true' -->
+		<Message Condition="'$(TSC_Build)' == 'true'" 
+				 Text="Executing 'yarn tsc --build'" Importance="high" />
+		<Exec Condition="'$(TSC_Build)' == 'true'"
 		  Command="yarn tsc -b $(MSBuildProjectDirectory)/tsconfig.json --pretty false"
 		  ConsoleToMSBuild="true"
 		  IgnoreExitCode="true">
 			<Output TaskParameter="ConsoleOutput" ItemName="TscOutput" />
 		</Exec>
 
-		<Message Text="%(TscOutput.Identity)" Importance="high" />
+		<!-- Run yarn tsgo when TSC_Build == 'tsgo' -->
+		<Message Condition="'$(TSC_Build)' == 'tsgo'" 
+				 Text="Executing 'yarn tsgo --build'" Importance="high" />
+		<Exec Condition="'$(TSC_Build)' == 'tsgo'"
+		  Command="yarn tsgo -b $(MSBuildProjectDirectory)/tsconfig.json --pretty false"
+		  ConsoleToMSBuild="true"
+		  IgnoreExitCode="true">
+			<Output TaskParameter="ConsoleOutput" ItemName="TscOutput" />
+		</Exec>
 	</Target>
 
 </Project>
