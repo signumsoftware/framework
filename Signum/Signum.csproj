@@ -7,15 +7,11 @@
 		<OutputType>Library</OutputType>
 		<NoWarn>8618</NoWarn>
 		<UserSecretsId>4236b9c6-a674-4f4f-8ce6-6a591967257e</UserSecretsId>
+		<TSGeneratorDisabled>false</TSGeneratorDisabled>
 	</PropertyGroup>
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
-
-	<Target Name="PrintStartupDir" BeforeTargets="Build">
-		<Message Text="MSBuildStartupDirectory = $(MSBuildStartupDirectory)" Importance="High" />
-	</Target>
-
 
 	<ItemGroup>
 	  <TypeScriptCompile Remove="node_modules\**" />

@@ -48,6 +48,7 @@ namespace Signum.TSCBuild
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             await Signum.TSCBuild.CompileTypeScript.InitializeAsync(this);
+            await Signum.TSCBuild.RunTSGenerator.InitializeAsync(this);
         }
 
         #endregion
