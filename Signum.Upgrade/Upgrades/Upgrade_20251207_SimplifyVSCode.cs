@@ -16,10 +16,10 @@ class Upgrade_20251207_SimplifyVSCode : CodeUpgradeBase
 
         uctx.ChangeCodeFile("Southwind.Server/appsettings.json", file =>
         {
-            file.Replace(
+            file.ReplaceLine(a => a.Contains(
                 """
                 "Default": "Warning"
-                """,
+                """),
                 """
                 "Default": "Information",
                 "Microsoft.AspNetCore": "Warning"
@@ -127,7 +127,7 @@ class Upgrade_20251207_SimplifyVSCode : CodeUpgradeBase
                         "request": "attach"
                     }
                 ]
-            }           
+            }
             """.Replace("Southwind", uctx.ApplicationName);
         });
 
@@ -201,14 +201,36 @@ class Upgrade_20251207_SimplifyVSCode : CodeUpgradeBase
                 file.Content = """
             {
                 "files.exclude": {
+                    "**/.git": true,
                     "**/bin": true,
                     "**/obj": true,
-                    "**/node_modules": true
+                    "**/node_modules": true,
+                    "**/ts_out": true,
                 },
                 "editor.formatOnSave": true,
                 "editor.defaultFormatter": "esbenp.prettier-vscode",
                 "typescript.tsdk": "node_modules/typescript/lib",
-                "typescript.enablePromptUseWorkspaceTsdk": true
+                "typescript.enablePromptUseWorkspaceTsdk": true,
+                "[javascript]": {
+                    "editor.tabSize": 2,
+                    "editor.insertSpaces": true
+                },
+                "[typescript]": {
+                    "editor.tabSize": 2,
+                    "editor.insertSpaces": true
+                },
+                "[javascriptreact]": {
+                    "editor.tabSize": 2,
+                    "editor.insertSpaces": true
+                },
+                "[typescriptreact]": {
+                    "editor.tabSize": 2,
+                    "editor.insertSpaces": true
+                },
+                "[css]": {
+                    "editor.tabSize": 2,
+                    "editor.insertSpaces": true
+                }
             }
             """.Replace("Southwind", uctx.ApplicationName);
 
