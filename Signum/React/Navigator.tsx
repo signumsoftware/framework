@@ -605,7 +605,11 @@ export namespace Navigator {
 
     if (entity) {
       const es = entitySettings[typeName];
-      if (es != null && es.isViewableFunction && !es.isViewableFunction(entity, options))
+
+      if (es != null && isLite(entity) && es.isViewableLite && !es.isViewableLite(entity, options))
+        return false;
+
+      if (es != null && isEntityPack(entity) && es.isViewableEntityPack && !es.isViewableEntityPack(entity, options))
         return false;
     }
 
@@ -1003,7 +1007,8 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isCreable?: EntityWhen;
   isFindable?: boolean;
   isViewable?: EntityWhen;
-  isViewableFunction?: (entity: EntityPack<T> | Lite<T>, options: IsViewableOptions | undefined) => boolean;
+  isViewableLite?: (lite: Lite<T & Entity>, options: Navigator.IsViewableOptions | undefined) => boolean;
+  isViewableEntityPack?: (entityPack: EntityPack<T>, options: Navigator.IsViewableOptions | undefined) => boolean;
   isReadOnly?: boolean;
   avoidPopup?: boolean;
   supportsAdditionalTabs?: boolean;
@@ -1072,7 +1077,8 @@ export class EntitySettings<T extends ModifiableEntity> {
   isCreable?: EntityWhen;
   isFindable?: boolean;
   isViewable?: EntityWhen;
-  isViewableFunction?: (entity: EntityPack<ModifiableEntity> | Lite<Entity>, options: IsViewableOptions | undefined) => boolean;
+  isViewableLite?: (lite: Lite<T & Entity>, options: Navigator.IsViewableOptions | undefined) => boolean;
+  isViewableEntityPack?: (entityPack: EntityPack<T>, options: Navigator.IsViewableOptions | undefined) => boolean;
   isReadOnly?: boolean;
   avoidPopup!: boolean;
   supportsAdditionalTabs?: boolean;
