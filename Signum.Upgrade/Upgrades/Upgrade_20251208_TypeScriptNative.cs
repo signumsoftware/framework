@@ -20,7 +20,7 @@ class Upgrade_20251208_TypeScriptNativePreview : CodeUpgradeBase
                 """);
         });
 
-        uctx.ChangeCodeFile("Southwind.Server/Southwind.Server.json", file =>
+        uctx.ChangeCodeFile("Southwind.Server/Southwind.Server.csproj", file =>
         {
             file.ReplaceLine(a => a.Contains("TSC_Build"), """
                 "<TSC_Build>tsgo</TSC_Build>",

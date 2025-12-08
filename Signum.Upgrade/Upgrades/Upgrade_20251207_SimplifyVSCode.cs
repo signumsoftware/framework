@@ -207,10 +207,8 @@ class Upgrade_20251207_SimplifyVSCode : CodeUpgradeBase
                     "**/node_modules": true,
                     "**/ts_out": true,
                 },
+                "editor.detectIndentation": false,
                 "editor.formatOnSave": true,
-                "editor.defaultFormatter": "esbenp.prettier-vscode",
-                "typescript.tsdk": "node_modules/typescript/lib",
-                "typescript.enablePromptUseWorkspaceTsdk": true,
                 "[javascript]": {
                     "editor.tabSize": 2,
                     "editor.insertSpaces": true
