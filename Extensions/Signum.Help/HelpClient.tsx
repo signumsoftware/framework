@@ -1,19 +1,22 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { ajaxGet, ajaxPost } from '@framework/Services';
+import { Type } from '@framework/Reflection'
+import { ajaxGet, ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import * as AppContext from '@framework/AppContext'
 import { OperationSymbol } from '@framework/Signum.Operations'
 import { PropertyRoute, PseudoType, QueryKey, getQueryKey, getTypeName, getTypeInfo, getAllTypes, getQueryInfo, tryGetTypeInfo } from '@framework/Reflection'
 import { ImportComponent } from '@framework/ImportComponent'
 import "./Help.css"
-import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity, HelpPermissions } from './Signum.Help';
+import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
+import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity, QueryHelpEntity, HelpPermissions, IHelpEntity, HelpMessage, HelpImportPreviewModel, HelpImportReportModel } from './Signum.Help';
 import { QueryString } from '@framework/QueryString';
 import { OmniboxClient } from '../Signum.Omnibox/OmniboxClient';
 import HelpOmniboxProvider from './HelpOmniboxProvider';
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { CultureInfoEntity } from '@framework/Signum.Basics';
 import { WidgetContext, onWidgets } from '@framework/Frames/Widgets';
 import { HelpIcon, HelpWidget } from './HelpWidget';
-import { Entity, isEntity } from '@framework/Signum.Entities';
+import { Entity, isEntity, Lite } from '@framework/Signum.Entities';
 import { tasks } from '@framework/Lines';
 import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
@@ -26,16 +29,41 @@ export namespace HelpClient {
 
     OmniboxClient.registerProvider(new HelpOmniboxProvider());
 
+    OmniboxSpecialAction.registerSpecialAction({
+      allowed: () => AppContext.isPermissionAuthorized(HelpPermissions.ExportHelp),
+      key: "ImportHelp",
+      onClick: () => Promise.resolve("/help/import")
+    });
+
     options.routes.push({ path: "/help", element: <ImportComponent onImport={() => import("./Pages/HelpIndexPage")} /> });
     options.routes.push({ path: "/help/namespace/:namespace", element: <ImportComponent onImport={() => import("./Pages/NamespaceHelpPage")} /> });
     options.routes.push({ path: "/help/type/:cleanName", element: <ImportComponent onImport={() => import("./Pages/TypeHelpPage")} /> });
     options.routes.push({ path: "/help/appendix/:uniqueName?", element: <ImportComponent onImport={() => import("./Pages/AppendixHelpPage")} /> });
 
+    options.routes.push({ path: "/help/import", element: <ImportComponent onImport={() => import("./Pages/ImportHelpPage")} /> });
+
     onWidgets.push(wc => AppContext.isPermissionAuthorized(HelpPermissions.ViewHelp) && isEntity(wc.ctx.value) ? <HelpWidget wc={wc as WidgetContext<Entity>} /> : undefined);
 
     tasks.push(taskHelpIcon);
 
+    registerExportLink(TypeHelpEntity);
+    registerExportLink(NamespaceHelpEntity); 
+    registerExportLink(AppendixHelpEntity); 
+    registerExportLink(QueryHelpEntity); 
+
   }
+
+    export function registerExportLink(type: Type<IHelpEntity>): void {
+    if (AppContext.isPermissionAuthorized(HelpPermissions.ExportHelp))
+      QuickLinkClient.registerQuickLink(type,
+        new QuickLinkAction(HelpMessage.ExportAsZip.name, () => HelpMessage.ExportAsZip.niceToString(), ctx => API.exportHelpEntities(ctx.lites), {
+          allowsMultiple: true,
+          iconColor: "#FCAE25",
+          icon: "file-code"
+        }));
+    }
+  
+
 
   export function taskHelpIcon(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) : void {
     if (state.labelIcon === undefined &&
@@ -124,6 +152,27 @@ export namespace HelpClient {
     export function saveAppendix(appendix: AppendixHelpEntity): Promise<void> {
       return ajaxPost({ url: "/api/help/saveAppendix" }, appendix);
     }
+
+    export function exportHelpEntities(entity: Lite<IHelpEntity>[]): void {
+      ajaxPostRaw({ url: "/api/help/export" }, entity)
+        .then(resp => saveFile(resp));
+    }
+
+    export interface FileUpload {
+      fileName: string;
+      content: string;
+    }
+
+    export function importPreview(file: FileUpload): Promise<HelpImportPreviewModel> {
+      return ajaxPost({ url: "/api/help/importPreview" }, file);
+    }
+
+    export function applyImport(file: FileUpload, model: HelpImportPreviewModel): Promise<HelpImportReportModel> {
+      return ajaxPost({ url: "/api/help/applyImport" }, { file, model });
+    }
+
+
+
   }
 
   export interface HelpIndexTS {
@@ -160,7 +209,7 @@ export namespace HelpClient {
   }
 
 
-  export module Urls {
+  export namespace Urls {
     export function indexUrl() {
       return "/help";
     }
