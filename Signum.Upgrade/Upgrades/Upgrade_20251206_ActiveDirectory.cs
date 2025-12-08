@@ -49,12 +49,12 @@ class Upgrade_20251206_ActiveDirectory : CodeUpgradeBase
             uctx.ChangeCodeFile("Southwind.Server/Index.cshtml", file =>
             {
                 file.Replace(
-                    "var __azureADConfig = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.AzureAD?.ToAzureADConfigTS());",
-                    "var __azureADConfig = @Json.Serialize(Starter.Configuration.Value.AzureAD?.ToAzureADConfigTS());");
+                    "ActiveDirectory.AzureAD?.ToAzureADConfigTS());",
+                    "AzureAD?.ToAzureADConfigTS());");
 
                 file.Replace(
-                    "var __azureADConfig = @Json.Serialize(Starter.Configuration.Value.AzureAD?.ToAzureADConfigTS());",
-                    "var __azureADConfig = @Json.Serialize(Starter.Configuration.Value.AzureAD?.ToAzureADConfigTS(null));");
+                    "AzureAD?.ToAzureADConfigTS());",
+                    "AzureAD?.ToAzureADConfigTS(null));");
             });
         }
 
@@ -83,6 +83,11 @@ class Upgrade_20251206_ActiveDirectory : CodeUpgradeBase
         });
 
         uctx.ChangeCodeFile("Southwind/MainAdmin.tsx", file =>
+        {
+            file.Replace("ActiveDirectory", adType);
+        });
+
+        uctx.ChangeCodeFile("Southwind/MainPublic.tsx", file =>
         {
             file.Replace("ActiveDirectory", adType);
             file.Replace(adType + "Client", adType + "Authenticator");
