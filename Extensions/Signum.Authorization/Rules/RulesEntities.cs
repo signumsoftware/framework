@@ -295,6 +295,7 @@ public static class TypeAllowedExtensions
 }
 
 [InTypeScript(true)]
+[AllowUnauthenticated]
 [DescriptionOptions(DescriptionOptions.Members)]
 public enum TypeAllowedBasic
 {
