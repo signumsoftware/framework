@@ -56,11 +56,15 @@ public static class ReflectionServer
         EntityAssemblies.GetOrCreate(type.Assembly).Add(type.Namespace!);
     }
 
-    public static void RegisterLike(Type exampleType, Func<bool> allowed)
+    public static void RegisterLike(Type exampleType, Func<bool> allowed, bool overrideRegistration = false)
     {
         TypesByName.Reset();
         EntityAssemblies.GetOrCreate(exampleType.Assembly).Add(exampleType.Namespace!);
-        OverrideIsNamespaceAllowed.Add(exampleType.Namespace!, allowed);
+
+        if (overrideRegistration)
+            OverrideIsNamespaceAllowed[exampleType.Namespace!] = allowed;
+        else
+            OverrideIsNamespaceAllowed.Add(exampleType.Namespace!, allowed);
     }
 
     internal static void Start()

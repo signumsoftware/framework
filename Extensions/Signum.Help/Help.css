@@ -1,5 +1,15 @@
-﻿ul.responsive-columns {
-    column-width: 360px;
+﻿.import-preview .row-selected {
+  --bs-table-bg: var(--bs-primary-bg-subtle);
+  --bs-table-color: var(--bs-body-color);
+}
+
+.import-preview .no-change {
+  opacity: 0.4;
+  font-style: italic;
+}
+
+ul.responsive-columns {
+  column-width: 360px;
 }
 
 ul.responsive-columns>li {
