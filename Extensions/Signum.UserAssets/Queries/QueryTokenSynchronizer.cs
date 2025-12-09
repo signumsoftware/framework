@@ -40,10 +40,10 @@ public static class QueryTokenSynchronizer
 
         Func<string, string?> rep = str =>
         {
-            if (Replacements.AutoReplacement == null)
+            if (Replacements.GlobalAutoReplacement == null)
                 return null;
 
-            Replacements.Selection? sel = Replacements.AutoReplacement(new Replacements.AutoReplacementContext("QueryToken", oldValue: str, newValues: null));
+            Replacements.Selection? sel = Replacements.GlobalAutoReplacement(new Replacements.AutoReplacementContext("QueryToken", oldValue: str, newValues: null));
 
             if (sel == null || sel.Value.NewValue == null)
                 return null;
@@ -106,9 +106,9 @@ public static class QueryTokenSynchronizer
                 }
 
 
-                if (Replacements.AutoReplacement != null)
+                if (Replacements.GlobalAutoReplacement != null)
                 {
-                    Replacements.Selection? sel = Replacements.AutoReplacement(new Replacements.AutoReplacementContext(
+                    Replacements.Selection? sel = Replacements.GlobalAutoReplacement(new Replacements.AutoReplacementContext(
                         replacementKey: "QueryToken",
                         oldValue: part,
                         newValues: result.SubTokens(qd, options).Select(a => a.Key).ToList()));
@@ -217,9 +217,9 @@ public static class QueryTokenSynchronizer
             }
         }
 
-        if (Replacements.AutoReplacement != null)
+        if (Replacements.GlobalAutoReplacement != null)
         {
-            Replacements.Selection? sel = Replacements.AutoReplacement(new Replacements.AutoReplacementContext(replacementKey: "FixValue", oldValue: valueString!, newValues: null));
+            Replacements.Selection? sel = Replacements.GlobalAutoReplacement(new Replacements.AutoReplacementContext(replacementKey: "FixValue", oldValue: valueString!, newValues: null));
 
             if (sel != null && sel.Value.NewValue != null)
             {
@@ -260,9 +260,9 @@ public static class QueryTokenSynchronizer
     {
         return replacements.GetOrCreate("cleanNames").GetOrCreate(type, () =>
         {
-            if (Replacements.AutoReplacement != null)
+            if (Replacements.GlobalAutoReplacement != null)
             {
-                Replacements.Selection? sel = Replacements.AutoReplacement(new Replacements.AutoReplacementContext(replacementKey: "FixValue.Type", oldValue: type, newValues: null));
+                Replacements.Selection? sel = Replacements.GlobalAutoReplacement(new Replacements.AutoReplacementContext(replacementKey: "FixValue.Type", oldValue: type, newValues: null));
 
                 if (sel != null && sel.Value.NewValue != null)
                     return sel.Value.NewValue;
