@@ -58,6 +58,41 @@ public static class SchemaSynchronizer
             }
         }
 
+
+
+        {
+            var normalTables = databaseTables.Values.Where(a => a.TemporalTableName != null || a.InferredTemporalTableName != null).ToDictionary(a => a.TemporalTableName ?? a.InferredTemporalTableName!).ToDictionary();
+            var historyTables = databaseTablesHistory.Values.ToDictionary(a => a.Name);
+
+            
+            var fixes = normalTables.JoinDictionary(historyTables, (tn, norT, hisT) =>
+            {
+                var columnChanges = Synchronizer.SynchronizeScript(
+                          Spacing.Simple,
+                          norT.Columns,
+                          hisT.Columns,
+
+                          createNew: (cn, norCol) => sqlBuilder.AlterTableAddDiffColumn(hisT.Name, norCol),
+                          removeOld: (cn, hisCol) => sqlBuilder.AlterTableDropColumn(hisT.Name, hisCol.Name),
+                          mergeBoth: (cn, norCol, difCol) =>
+                          {
+                              if(norCol.Nullable != difCol.Nullable || 
+                                 !norCol.DbType.Equals(difCol.DbType))
+                              {
+                                  return sqlBuilder.AlterTableAlterDiffColumn(hisT.Name, norCol);
+                              }
+
+                              return null;
+                          }
+                      );
+
+                if(columnChanges!= null)
+                    SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Fixing history table {hisT.Name} to match normal table {norT.Name}");
+                
+                return columnChanges;
+            });
+        }
+
         Dictionary<SchemaName, DiffSchema> databaseSchemas = Schema.Current.Settings.IsPostgres ?
             PostgresCatalogSchema.GetSchemaNames(s.DatabaseNames()) :
             SysTablesSchema.GetSchemaNames(s.DatabaseNames());

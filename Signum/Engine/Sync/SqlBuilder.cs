@@ -207,6 +207,16 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(tableName, ColumnLine(column, tempDefault ?? GetDefaultConstaint(tableName, column), checkConst: null, isChange: false, forHistoryTable: forHistory)));
     }
 
+    public SqlPreCommand AlterTableAddDiffColumn(ObjectName tableName, DiffColumn column)
+    {
+        return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(tableName, ColumnLineForHistory(column)));
+    }
+
+    public SqlPreCommand AlterTableAlterDiffColumn(ObjectName tableName, DiffColumn column)
+    {
+        return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(tableName, ColumnLineForHistory(column)));
+    }
+
     public SqlPreCommand AlterTableAlterColumn(ITable tab, IColumn tabCol, DiffColumn difCol, bool withHistory)
     {
         if (withHistory)
@@ -302,6 +312,19 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
             generatedAlways != null ? null : c.Nullable.ToBool() ? "NULL" : "NOT NULL",
             generatedAlways != null ? null: defaultConstraint,
             generatedAlways != null ? null: checkConstraint
+            );
+    }
+
+    public string ColumnLineForHistory(DiffColumn c)
+    {
+        string fullType = GetColumnType(c);
+
+
+        return $" ".Combine(
+            c.Name.SqlEscape(isPostgres),
+            fullType,
+            c.Collation != null ? "COLLATE " + c.Collation : null,
+            c.Nullable ? "NULL" : "NOT NULL"
             );
     }
 
