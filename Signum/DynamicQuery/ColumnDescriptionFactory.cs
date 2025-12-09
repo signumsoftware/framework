@@ -49,7 +49,7 @@ public class ColumnDescriptionFactory
                 Format = br == null ? null : Reflector.FormatString(br);
                 Unit = br == null ? null : Reflector.GetUnit(br);
                 if (Implementations == null)
-                    Implementations = propertyRoutes.FirstEx().TryGetImplementations();
+                    Implementations = Signum.Entities.Implementations.Combine(propertyRoutes.Select(a => a.TryGetImplementations()));
                 processedType = null;
             }
         }
