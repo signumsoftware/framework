@@ -37,14 +37,14 @@ public class CodeFile
     public string Content
     {
         get { ReadIfNecessary(); return _content!; }
-        set { _content = value; }
+        set { ReadIfNecessary(); _content = value; }
     }
 
     Encoding? encoding;
 
     private void ReadIfNecessary()
     {
-        if (_content == null)
+        if (_content == null && File.Exists(Path.Combine(Uctx.RootFolder, FilePath)))
         {
             var bytes = File.ReadAllBytes(Path.Combine(Uctx.RootFolder, FilePath));
             encoding = GetEncoding(FilePath, bytes);

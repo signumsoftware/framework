@@ -7,6 +7,7 @@ using Signum.API.Controllers;
 using Signum.API;
 using Signum.API.Filters;
 using Signum.DynamicQuery;
+using Signum.Files;
 
 namespace Signum.UserAssets;
 
@@ -222,20 +223,9 @@ public class UserAssetController : ControllerBase
     }
 
     [HttpPost("api/userAssets/import")]
-    public void Import([Required, FromBody]FileUploadWithModel file)
+    public void Import([Required, FromBody] FileUploadWithModel<UserAssetPreviewModel> file)
     {
         UserAssetsImporter.Import(file.file.content, file.model);
     }
 
-    public class FileUpload
-    {
-        public string fileName;
-        public byte[] content;
-    }
-
-    public class FileUploadWithModel
-    {
-        public FileUpload file;
-        public UserAssetPreviewModel model;
-    }
 }

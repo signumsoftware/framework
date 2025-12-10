@@ -4,7 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
-import * as ADGroups from '../Signum.Authorization/Signum.Authorization.ADGroups'
+import * as BaseAD from '../Signum.Authorization/Signum.Authorization.BaseAD'
 import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
 
 
@@ -15,7 +15,7 @@ export interface UserWindowsADMixin extends Entities.MixinEntity {
 }
 
 export const WindowsADConfigurationEmbedded: Type<WindowsADConfigurationEmbedded> = new Type<WindowsADConfigurationEmbedded>("WindowsADConfigurationEmbedded");
-export interface WindowsADConfigurationEmbedded extends ADGroups.BaseADConfigurationEmbedded {
+export interface WindowsADConfigurationEmbedded extends BaseAD.BaseADConfigurationEmbedded {
   loginWithWindowsAuthenticator: boolean;
   loginWithActiveDirectoryRegistry: boolean;
   domainName: string | null;

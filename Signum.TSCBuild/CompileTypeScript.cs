@@ -157,46 +157,65 @@ namespace Signum.TSCBuild
             }
         }
 
+        // Helper: find the closest ancestor node_modules folder starting at startDir
+        private string FindClosestNodeModules(string startDir)
+        {
+            var dir = startDir;
+            while (!string.IsNullOrEmpty(dir))
+            {
+                var nm = Path.Combine(dir, "node_modules");
+                if (Directory.Exists(nm))
+                {
+                    if (File.Exists(Path.Combine(dir, "yarn.lock")) || File.Exists(Path.Combine(dir, "package-lock.json")))
+                        return nm;
+                }
+                dir = Path.GetDirectoryName(dir);
+            }
+            return null;
+        }
+
         private async Task BuildTypeScriptAsync(string projectFile)
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            // Clear previous TypeScript errors before each build
-            errorListProvider.Tasks.Clear();
-
-            // Show status bar animation, message, and progress
-            IVsStatusbar statusBar = await ServiceProvider.GetServiceAsync(typeof(SVsStatusbar)) as IVsStatusbar;
-            object icon = (short)5;
-            statusBar?.SetText("Compiling TypeScript...");
-            statusBar?.Animation(1, ref icon); // 1 = start
-            uint cookie = 0;
-            //statusBar?.Progress(ref cookie, 1, "Compiling TypeScript...", 10, 100); // 10%
-
-            // Get output pane and activate
-            var pane = await GetTypeScriptOutputPaneAsync();
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            pane.Activate(); // Ensure pane is activated before any output
-            pane.OutputStringThreadSafe("--- TypeScript build started ---\n");
-
-            string projectDir = System.IO.Path.GetDirectoryName(projectFile);
-            string tsconfigPath = System.IO.Path.Combine(projectDir, "tsconfig.json");
-            if (!System.IO.File.Exists(tsconfigPath))
+            try
             {
-                statusBar?.Animation(0, ref icon);
-                statusBar?.Progress(ref cookie, 0, "", 0, 0);
-                statusBar?.SetText("");
-                pane.OutputStringThreadSafe("No tsconfig.json found in the project directory.\n");
-                VsShellUtilities.ShowMessageBox(
-                    this.package,
-                    "No tsconfig.json found in the project directory.",
-                    "Build TypeScript",
-                    OLEMSGICON.OLEMSGICON_CRITICAL,
-                    OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                return;
-            }
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            var paths = new[] {
+                // Clear previous TypeScript errors before each build
+                errorListProvider.Tasks.Clear();
+
+                // Show status bar animation, message, and progress
+                IVsStatusbar statusBar = await ServiceProvider.GetServiceAsync(typeof(SVsStatusbar)) as IVsStatusbar;
+                object icon = (short)5;
+                statusBar?.SetText("Compiling TypeScript...");
+                statusBar?.Animation(1, ref icon); // 1 = start
+                uint cookie = 0;
+                //statusBar?.Progress(ref cookie, 1, "Compiling TypeScript...", 10, 100); // 10%
+
+                // Get output pane and activate
+                var pane = await GetTypeScriptOutputPaneAsync();
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                pane.Activate(); // Ensure pane is activated before any output
+                pane.OutputStringThreadSafe("--- TypeScript build started ---\n");
+
+                string projectDir = System.IO.Path.GetDirectoryName(projectFile);
+                string tsconfigPath = System.IO.Path.Combine(projectDir, "tsconfig.json");
+                if (!System.IO.File.Exists(tsconfigPath))
+                {
+                    statusBar?.Animation(0, ref icon);
+                    statusBar?.Progress(ref cookie, 0, "", 0, 0);
+                    statusBar?.SetText("");
+                    pane.OutputStringThreadSafe("No tsconfig.json found in the project directory.\n");
+                    VsShellUtilities.ShowMessageBox(
+                        this.package,
+                        "No tsconfig.json found in the project directory.",
+                        "Build TypeScript",
+                        OLEMSGICON.OLEMSGICON_CRITICAL,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    return;
+                }
+
+                var paths = new[] {
                 // Yarn global installs
                 @"C:\Program Files (x86)\Yarn\bin\yarn.cmd",
                 @"C:\Program Files\Yarn\bin\yarn.cmd",
@@ -212,139 +231,176 @@ namespace Signum.TSCBuild
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\Roaming\nvm\nodejs\npm.cmd"),
             };
 
-            var bestPath = paths.FirstOrDefault(p => File.Exists(p));
-            if (bestPath == null)
-            {
-                statusBar?.Animation(0, ref icon);
-                statusBar?.Progress(ref cookie, 0, "", 0, 0);
-                statusBar?.SetText("");
-                pane.OutputStringThreadSafe($@"Could not find yarn.cmd or npm.cmd the expected location:
+                var bestPath = paths.FirstOrDefault(p => File.Exists(p));
+                if (bestPath == null)
+                {
+                    statusBar?.Animation(0, ref icon);
+                    statusBar?.Progress(ref cookie, 0, "", 0, 0);
+                    statusBar?.SetText("");
+                    pane.OutputStringThreadSafe($@"Could not find yarn.cmd or npm.cmd the expected location:
 {string.Join("\n", paths.Select(a => "* " + a))}
 Please ensure Yarn or NPM are installed.
 ");
-                VsShellUtilities.ShowMessageBox(
-                    this.package,
-                    "Could not find yarn.cmd at the expected location. Please ensure Yarn is installed.",
-                    "Build TypeScript",
-                    OLEMSGICON.OLEMSGICON_CRITICAL,
-                    OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                return;
-            }
-
-            statusBar?.Progress(ref cookie, 1, "Compiling TypeScript...", (uint)10, (uint)50);
-
-            var process = new System.Diagnostics.Process
-            {
-                StartInfo = new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = bestPath,
-                    Arguments = $"tsc -b {projectDir}/tsconfig.json -v",
-                    WorkingDirectory = projectDir,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                },
-                EnableRaisingEvents = true
-            };
-
-            StringBuilder sb = new StringBuilder();
-            var tcs = new TaskCompletionSource<bool>();
-
-            process.OutputDataReceived += (s, e) =>
-            {
-                if (e.Data != null)
-                {
-                    ThreadHelper.JoinableTaskFactory.Run(async () =>
-                    {
-                        pane.OutputStringThreadSafe(e.Data + "\n");
-                        sb.AppendLine(e.Data);
-
-
-                        foreach (var line in e.Data.Split('\n'))
-                        {
-                            if (line.Contains("is up to date because") ||
-                                line.Contains("is out of date because"))
-                            {
-                                if (totalProjects == null)
-                                {
-                                    var lines = sb.ToString().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                                    ParseProjectsInBuild(new List<string>(lines));
-                                    completedProjects = 0;
-                                    statusBar?.Progress(ref cookie, 1, "Compiling TypeScript...", (uint)completedProjects, (uint)totalProjects);
-                                }
-
-                                if (lastBuildingProject != null)
-                                {
-                                    completedProjects++;
-                                    lastBuildingProject = null;
-                                    statusBar?.Progress(ref cookie, 1, "Compiling TypeScript...", (uint)completedProjects, (uint)totalProjects);
-                                }
-
-                                if (line.Contains("is up to date because"))
-                                {
-                                    completedProjects++;
-                                    statusBar?.Progress(ref cookie, 1, "Compiling TypeScript...", (uint)completedProjects, (uint)totalProjects);
-                                }
-                            }
-
-                            var buildingMatch = System.Text.RegularExpressions.Regex.Match(line, @"Building project '(.+?)'");
-                            if (buildingMatch.Success)
-                            {
-                                // Increment for previous project (if not first)
-
-                                lastBuildingProject = buildingMatch.Groups[1].Value.Replace('\\', '/');
-                                // Show relative path if possible
-                                string relPath = lastBuildingProject;
-                                if (relPath.StartsWith(projectDir, StringComparison.OrdinalIgnoreCase))
-                                    relPath = relPath.Substring(projectDir.Length).TrimStart('\\', '/');
-                                statusBar?.SetText($"Building {relPath}");
-                            }
-                        }
-                    });
-                   
+                    VsShellUtilities.ShowMessageBox(
+                        this.package,
+                        "Could not find yarn.cmd at the expected location. Please ensure Yarn is installed.",
+                        "Build TypeScript",
+                        OLEMSGICON.OLEMSGICON_CRITICAL,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    return;
                 }
-            };
-            process.ErrorDataReceived += (s, e) =>
-            {
-                if (e.Data != null)
-                    ThreadHelper.JoinableTaskFactory.Run(() => { pane.OutputStringThreadSafe(e.Data + "\n"); return Task.CompletedTask; });
-            };
-            process.Exited += (s, e) =>
-            {
-                tcs.TrySetResult(true);
-            };
 
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
 
-            await tcs.Task; // Wait for process to exit (non-blocking)
 
-            pane.OutputStringThreadSafe("--- TypeScript build finished ---\n");
+                statusBar?.Progress(ref cookie, 1, "Compiling TypeScript...", (uint)10, (uint)50);
 
-            ShowTypeScriptErrorsInErrorList(projectDir, sb.ToString()); // Errors will be shown as before
+                // Decide which tool to invoke (always call yarn/npm CLI as before)
+                string toolName = "tsc"; // default
+                var nodeModules = FindClosestNodeModules(projectDir);
+                if (nodeModules != null)
+                {
+                    if (Directory.Exists(Path.Combine(nodeModules, "typescript")))
+                        toolName = "tsc";
+                    else if (Directory.Exists(Path.Combine(nodeModules, "@typescript", "native-preview")))
+                        toolName = "tsgo";
+                }
 
-            // Stop status bar animation and update message and progress
-            statusBar?.Animation(0, ref icon); // 0 = stop
-            statusBar?.Progress(ref cookie, 1, "Compiling TypeScript...", (uint)totalProjects, (uint)totalProjects); // 100%
-            statusBar?.Progress(ref cookie, 0, "", 0, 0); // remove progress bar
-            if (process.ExitCode == 0)
-                statusBar?.SetText("TypeScript compilation succeeded.");
-            else
-                statusBar?.SetText("TypeScript compilation failed.");
+                var process = new System.Diagnostics.Process
+                {
+                    StartInfo = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = bestPath,
+                        Arguments = $"{toolName} -b \"{projectDir}/tsconfig.json\" -v",
+                        WorkingDirectory = projectDir,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    },
+                    EnableRaisingEvents = true
+                };
 
-            if (process.ExitCode != 0)
-            {
-                VsShellUtilities.ShowMessageBox(
-                    this.package,
-                    "TypeScript build failed. See Error List and Output window for details.",
-                    "Build TypeScript Error",
-                    OLEMSGICON.OLEMSGICON_CRITICAL,
-                    OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                StringBuilder sb = new StringBuilder();
+                var tcs = new TaskCompletionSource<bool>();
+
+                process.OutputDataReceived += (s, e) =>
+                {
+                    try
+                    {
+                        if (e.Data != null)
+                        {
+                            ThreadHelper.JoinableTaskFactory.Run(async () =>
+                            {
+                                pane.OutputStringThreadSafe(e.Data + "\n");
+                                sb.AppendLine(e.Data);
+
+
+                                foreach (var line in e.Data.Split('\n'))
+                                {
+                                    if (line.Contains("is up to date because") ||
+                                        line.Contains("is out of date because"))
+                                    {
+                                        if (totalProjects == null)
+                                        {
+                                            var lines = sb.ToString().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                                            ParseProjectsInBuild(new List<string>(lines));
+                                            completedProjects = 0;
+                                            statusBar?.Progress(ref cookie, 1, "Compiling TypeScript...", (uint)completedProjects, (uint)totalProjects);
+                                        }
+
+                                        if (lastBuildingProject != null)
+                                        {
+                                            completedProjects++;
+                                            lastBuildingProject = null;
+                                            statusBar?.Progress(ref cookie, 1, "Compiling TypeScript...", (uint)completedProjects, (uint)totalProjects);
+                                        }
+
+                                        if (line.Contains("is up to date because"))
+                                        {
+                                            completedProjects++;
+                                            statusBar?.Progress(ref cookie, 1, "Compiling TypeScript...", (uint)completedProjects, (uint)totalProjects);
+                                        }
+                                    }
+
+                                    var buildingMatch = System.Text.RegularExpressions.Regex.Match(line, @"Building project '(.+?)'");
+                                    if (buildingMatch.Success)
+                                    {
+                                        // Increment for previous project (if not first)
+
+                                        lastBuildingProject = buildingMatch.Groups[1].Value.Replace('\\', '/');
+                                        // Show relative path if possible
+                                        string relPath = lastBuildingProject;
+                                        if (relPath.StartsWith(projectDir, StringComparison.OrdinalIgnoreCase))
+                                            relPath = relPath.Substring(projectDir.Length).TrimStart('\\', '/');
+                                        statusBar?.SetText($"Building {relPath}");
+                                    }
+                                }
+                            });
+
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ShowError(ex);
+                    }
+                };
+                process.ErrorDataReceived += (s, e) =>
+                {
+                    if (e.Data != null)
+                        ThreadHelper.JoinableTaskFactory.Run(() => { pane.OutputStringThreadSafe(e.Data + "\n"); return Task.CompletedTask; });
+                };
+                process.Exited += (s, e) =>
+                {
+                    tcs.TrySetResult(true);
+                };
+
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                await tcs.Task; // Wait for process to exit (non-blocking)
+
+                pane.OutputStringThreadSafe("--- TypeScript build finished ---\n");
+
+                ShowTypeScriptErrorsInErrorList(projectDir, sb.ToString()); // Errors will be shown as before
+
+                // Stop status bar animation and update message and progress
+                statusBar?.Animation(0, ref icon); // 0 = stop
+                statusBar?.Progress(ref cookie, 0, "", 0, 0); // remove progress bar
+                if (process.ExitCode == 0)
+                    statusBar?.SetText("TypeScript compilation succeeded.");
+                else
+                    statusBar?.SetText("TypeScript compilation failed.");
+
+                if (process.ExitCode != 0)
+                {
+                    VsShellUtilities.ShowMessageBox(
+                        this.package,
+                        "TypeScript build failed. See Error List and Output window for details.",
+                        "Build TypeScript Error",
+                        OLEMSGICON.OLEMSGICON_CRITICAL,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                }
             }
+            catch (Exception ex)
+            {
+                ShowError(ex);
+            }
+        }
+
+        private void ShowError(Exception ex)
+        {
+            VsShellUtilities.ShowMessageBox(
+                this.package,
+                $@"An error occurred during TypeScript build: {ex.Message}
+                    StackTrace: 
+                    {ex.StackTrace}",
+                "Build TypeScript Error",
+                OLEMSGICON.OLEMSGICON_CRITICAL,
+                OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
         }
 
         private void ShowTypeScriptErrorsInErrorList(string projectDirectory, string tscOutput)

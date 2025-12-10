@@ -21,6 +21,19 @@ class Program
         Console.Write("  RootFolder = "); SafeConsole.WriteLineColor(ConsoleColor.DarkGray, uctx.RootFolder);
         Console.Write("  ApplicationName = "); SafeConsole.WriteLineColor(ConsoleColor.DarkGray, uctx.ApplicationName);
 
+
+        uctx.ChangeCodeFile("SignumUpgrade.tsx", file =>
+        {
+            if (file.Content.Contains("202304261"))
+            {
+                file.Replace("202304261", "20230426_1");
+                file.Replace("202304263", "20230426_3");
+                file.Replace("202304264", "20230426_4");
+
+                SafeConsole.WriteLineColor(ConsoleColor.Green, "    Updated SignumUpgrade.tsx to 20230426_1, 20230426_3, 20230426_4, you need to commit again");
+            }
+        });
+
         //SolutionRenamer.RenameSolution(uctx);
 
         //UpgradeContext.DefaultIgnoreDirectories = UpgradeContext.DefaultIgnoreDirectories.Where(a => a != "Framework").ToArray();

@@ -1,5 +1,5 @@
 using Signum.API.Filters;
-using Signum.Authorization.ADGroups;
+using Signum.Authorization.BaseAD;
 using System.DirectoryServices.AccountManagement;
 
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -48,7 +48,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
                         {
                             var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
 
-                            var dsacuCtx = new DirectoryServiceAutoCreateUserContext(pc, localName, identityValue: userName);
+                            var dsacuCtx = new DirectoryServiceAutoCreateUserContext(config, pc, localName, identityValue: userName);
                             
                             var sid = dsacuCtx.GetUserPrincipal().Sid;
 
@@ -62,7 +62,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
                                 if (user.State == UserState.Deactivated)
                                     throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
 
-                                AuthLogic.OnUserLogingIn(user);
+                                AuthLogic.OnUserLogingIn(user, nameof(LoginWithActiveDirectoryRegistry));
                                 return user;
                             }
                             else
@@ -75,7 +75,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
                                 if (user.State == UserState.Deactivated)
                                     throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
 
-                                AuthLogic.OnUserLogingIn(user);
+                                AuthLogic.OnUserLogingIn(user, nameof(LoginWithActiveDirectoryRegistry));
                                 return user;
                             }
                         }

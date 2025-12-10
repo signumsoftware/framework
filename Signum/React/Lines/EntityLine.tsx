@@ -143,7 +143,7 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
     const buttons = (
       <>
         {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
-        {!hasValue && !p.avoidViewButton && c.renderCreateButton(true, undefined)}
+        {!hasValue && !p.avoidCreateButton && c.renderCreateButton(true, undefined)}
         {!hasValue && c.renderFindButton(true)}
         {hasValue && !p.avoidViewButton && c.renderViewButton(true)}
         {hasValue && c.renderRemoveButton(true)}
