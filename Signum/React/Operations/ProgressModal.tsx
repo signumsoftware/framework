@@ -10,6 +10,7 @@ import { softCast } from '../Globals';
 import { jsonObjectStream } from './jsonObjectStream';
 import { ServiceError } from '../Services';
 import MessageModal from '../Modals/MessageModal';
+import ErrorModal from '../Modals/ErrorModal';
 
 
 interface ProgressModalProps<T> extends IModalProps<Operations.API.ProgressStep<T> | undefined> {
@@ -41,9 +42,9 @@ export function ProgressModal<T>(p: ProgressModalProps<T>): React.ReactElement {
   }
 
   React.useEffect(() => {
-    consumeReader().finally(() => {
-      setShow(false);
-    })
+    consumeReader()
+      .then(() => setShow(false),
+        e => ErrorModal.showErrorModal(e).then(() => setShow(false)));
   }, [])
 
   async function handleCancelClicked() {
