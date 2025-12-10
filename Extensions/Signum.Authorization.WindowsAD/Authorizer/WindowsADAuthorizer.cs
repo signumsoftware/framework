@@ -1,3 +1,4 @@
+using Signum.API.Filters;
 using Signum.Authorization.ADGroups;
 using System.DirectoryServices.AccountManagement;
 
@@ -188,6 +189,9 @@ public class WindowsADAuthorizer : ICustomAuthorizer
 
         if (ctx.EmailAddress.HasText())
             user.Email = ctx.EmailAddress;
+
+        if (user.CultureInfo == null && SignumCurrentContextFilter.CurrentContext is { } cc)
+            user.CultureInfo = CultureServer.InferUserCulture(cc.HttpContext);
     }
 
     public virtual void UpdateUser(UserEntity user, IAutoCreateUserContext ctx)
