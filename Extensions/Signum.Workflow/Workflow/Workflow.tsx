@@ -46,8 +46,8 @@ export const Workflow: React.ForwardRefExoticComponent<WorkflowProps & React.Ref
   React.useEffect(() => {
     const w = p.ctx.value;
     if (w.isNew) {
-      // @ts-ignore Cannot find name 'require'.
-      require(["raw-loader!./InitialWorkflow.xml"], (xml) => {
+      // @ts-ignore
+      import("./InitialWorkflow.xml?raw").then((xml) => {
         updateState(WorkflowModel.New({
           diagramXml: xml.default,
           entities: [],

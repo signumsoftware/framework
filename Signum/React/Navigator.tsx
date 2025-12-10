@@ -556,7 +556,7 @@ export namespace Navigator {
     }
   }
 
-  export const isViewableEvent: Array<(typeName: string, entityPack: EntityPack<ModifiableEntity> | undefined, options: IsViewableOptions | undefined) => boolean> = [];
+  export const isViewableEvent: Array<(typeName: string, entityPack: EntityPack<ModifiableEntity> | Lite<Entity> | undefined, options: IsViewableOptions | undefined) => boolean> = [];
 
   export interface IsViewableOptions {
     customComponent?: boolean;
@@ -583,17 +583,40 @@ export namespace Navigator {
     return "close";
   }
 
-  export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, options?: IsViewableOptions): boolean {
+  export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity> | Lite<Entity>, options?: IsViewableOptions): boolean {
 
-    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
+    const entity =
+      isEntityPack(typeOrEntity) ? typeOrEntity :
+        isLite(typeOrEntity) ? typeOrEntity :
+          undefined;
 
-    const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
+    const typeName =
+      isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type :
+        isLite(typeOrEntity) ? typeOrEntity.EntityType :
+          getTypeName(typeOrEntity as PseudoType);
 
-    const baseTypeName = checkFlag(typeIsViewable(typeName, options?.isEmbedded), options?.isSearch == "main");
+    const typeViewable = checkFlag(typeIsViewable(typeName, options?.isEmbedded), options?.isSearch == "main");
+    if (!typeViewable)
+      return false;
 
     const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
+    if (!hasView)
+      return false;
 
-    return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack, options));
+    if (entity) {
+      const es = entitySettings[typeName];
+
+      if (es != null && isLite(entity) && es.isViewableLite && !es.isViewableLite(entity, options))
+        return false;
+
+      if (es != null && isEntityPack(entity) && es.isViewableEntityPack && !es.isViewableEntityPack(entity, options))
+        return false;
+    }
+
+    if (!isViewableEvent.every(f => f(typeName, entity, options)))
+      return false;
+
+    return true;
   }
 
   function typeIsViewable(typeName: string, isEmbedded: boolean | undefined): EntityWhen {
@@ -984,6 +1007,8 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isCreable?: EntityWhen;
   isFindable?: boolean;
   isViewable?: EntityWhen;
+  isViewableLite?: (lite: Lite<T & Entity>, options: Navigator.IsViewableOptions | undefined) => boolean;
+  isViewableEntityPack?: (entityPack: EntityPack<T>, options: Navigator.IsViewableOptions | undefined) => boolean;
   isReadOnly?: boolean;
   avoidPopup?: boolean;
   supportsAdditionalTabs?: boolean;
@@ -1052,6 +1077,8 @@ export class EntitySettings<T extends ModifiableEntity> {
   isCreable?: EntityWhen;
   isFindable?: boolean;
   isViewable?: EntityWhen;
+  isViewableLite?: (lite: Lite<T & Entity>, options: Navigator.IsViewableOptions | undefined) => boolean;
+  isViewableEntityPack?: (entityPack: EntityPack<T>, options: Navigator.IsViewableOptions | undefined) => boolean;
   isReadOnly?: boolean;
   avoidPopup!: boolean;
   supportsAdditionalTabs?: boolean;

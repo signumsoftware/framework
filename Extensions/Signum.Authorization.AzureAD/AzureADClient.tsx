@@ -14,6 +14,7 @@ import * as ProfilePhoto from '../Signum.Authorization/Templates/ProfilePhoto';
 import { ResultRow } from '@framework/FindOptions';
 import { AzureADConfigurationEmbedded, AzureADQuery, UserAzureADMixin } from './Signum.Authorization.AzureAD';
 import { ActiveDirectoryMessage } from '../Signum.Authorization/Signum.Authorization.BaseAD';
+import { ActiveDirectoryClient } from '../Signum.Authorization/BaseAD/ActiveDirectoryClient';
 
 
 export namespace AzureADClient {
@@ -120,6 +121,15 @@ export namespace AzureADClient {
     });
   }
 
+  export function toActiveDirectoryUser(row: ResultRow, scl: SearchControlLoaded): ActiveDirectoryClient.ActiveDirectoryUser {
+    const columns = scl.state.resultTable!.columns;
+    return ({
+      displayName: row.columns[columns.indexOf("DisplayName")],
+      jobTitle: row.columns[columns.indexOf("JobTitle")],
+      objectID: row.columns[columns.indexOf("Id")],
+      upn: row.columns[columns.indexOf("UserPrincipalName")],
+    });
+  }
 
   export namespace API {
 
