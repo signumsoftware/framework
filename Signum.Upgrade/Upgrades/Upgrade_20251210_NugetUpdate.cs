@@ -4,7 +4,7 @@ namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20251210_NugetUpdate : CodeUpgradeBase
 {
-    public override string Description => "Enable TypeScript Native Preview";
+    public override string Description => "Nuget Update";
 
     public override void Execute(UpgradeContext uctx)
     {
