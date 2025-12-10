@@ -165,7 +165,7 @@ public static class AuthLogic
     {
         if(user.CultureInfo == null && SignumCurrentContextFilter.CurrentContext is { } cc)
         {
-            using (AuthLogic.Disable())
+            using (Disable())
             using (OperationLogic.AllowSave<UserEntity>())
             {
                 user.CultureInfo = CultureServer.InferUserCulture(cc.HttpContext);

@@ -27,7 +27,7 @@ public static class CultureServer
                 return ciUser;
 
             //3 HttpRequest.AcceptLanguage
-            CultureInfo? ciRequest = GetCultureFromAccepLanguage(context.HttpContext);
+            CultureInfo? ciRequest = GetCultureFromAcceptedLanguage(context.HttpContext);
             if (ciRequest != null)
                 return ciRequest;
 
@@ -37,7 +37,7 @@ public static class CultureServer
 
     public static bool PreferNeutralCultureForUsers = false;
 
-    public static CultureInfo? GetCultureFromAccepLanguage(HttpContext httpContext)
+    public static CultureInfo? GetCultureFromAcceptedLanguage(HttpContext httpContext)
     {
         var acceptedLanguages = httpContext.Request.GetTypedHeaders().AcceptLanguage;
         foreach (var lang in acceptedLanguages.Select(l => l.Value))
@@ -71,7 +71,7 @@ public static class CultureServer
 
     public static CultureInfoEntity? InferUserCulture(HttpContext httpContext)
     {
-        return (CultureServer.GetCultureFromLanguageCookie(httpContext) ?? CultureServer.GetCultureFromAccepLanguage(httpContext))?.TryGetCultureInfoEntity();
+        return (GetCultureFromLanguageCookie(httpContext) ?? GetCultureFromAcceptedLanguage(httpContext))?.TryGetCultureInfoEntity();
     }
 
 }
