@@ -140,7 +140,7 @@ internal class OrderByRewriter : DbExpressionVisitor
             AppendKeys();
 
             orderings = gatheredOrderings;
-            gatheredOrderings = null;
+            //gatheredOrderings = null; Orders could still be usefull to the parent in a CROSS APPLY (SELECT TOP X)
         }
 
         if (AreEqual(select.OrderBy, orderings) && !select.IsReverse && newColumns == null)

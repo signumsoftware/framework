@@ -58,6 +58,9 @@ public static class SchemaSynchronizer
             }
         }
 
+
+     
+
         Dictionary<SchemaName, DiffSchema> databaseSchemas = Schema.Current.Settings.IsPostgres ?
             PostgresCatalogSchema.GetSchemaNames(s.DatabaseNames()) :
             SysTablesSchema.GetSchemaNames(s.DatabaseNames());
@@ -295,6 +298,43 @@ public static class SchemaSynchronizer
                          null),
                     dif.MultiForeignKeys.Select(fk => sqlBuilder.AlterTableDropConstraint(dif.Name, fk.Name)).Combine(Spacing.Simple))
             );
+
+            SqlPreCommand? historyFixes;
+            {
+                var normalTables = databaseTables.Values.Where(a => a.TemporalTableName != null || a.InferredTemporalTableName != null).ToDictionary(a => a.TemporalTableName ?? a.InferredTemporalTableName!).ToDictionary();
+                var hisTables = databaseTablesHistory.Values.ToDictionary(a => a.Name);
+
+                var fixes = normalTables.JoinDictionary(hisTables, (tn, norT, hisT) =>
+                {
+                    var columnChanges = Synchronizer.SynchronizeScriptReplacing(replacements, "HistoryColumns:" + tn,
+                              Spacing.Simple,
+                              norT.Columns,
+                              hisT.Columns,
+                              createNew: (cn, norCol) => sqlBuilder.AlterTableAddDiffColumn(hisT.Name, norCol),
+                              removeOld: (cn, hisCol) => sqlBuilder.AlterTableDropColumn(hisT.Name, hisCol.Name),
+                              mergeBoth: (cn, norCol, hisCol) =>
+                              {
+                                  var rename = !object.Equals(norCol.Name, hisCol.Name) ? sqlBuilder.RenameColumn(hisT.Name, hisCol.Name, norCol.Name) : null;
+
+                                  var alterColumn = norCol.Nullable != hisCol.Nullable ||
+                                     !norCol.DbType.Equals(hisCol.DbType) ||
+                                     !norCol.SizeEquals(hisCol) ?
+                                      sqlBuilder.AlterTableAlterDiffColumn(hisT.Name, norCol, hisCol) : null;
+
+                                  return new[] { rename, alterColumn }.Combine(Spacing.Simple);
+                              }
+                          );
+
+
+                    return columnChanges;
+                });
+
+                if (fixes.Any(a => a.Value != null))
+                    SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Fixing inconsistent history tables:\n{fixes.Where(a => a.Value != null).ToString(a => " * " + a.Key, "\n")}");
+
+                historyFixes = fixes.Values.NotNull().Combine(Spacing.Double);
+            }
+
 
             HashSet<FieldEmbedded.EmbeddedHasValueColumn> hasValueFalse = new HashSet<FieldEmbedded.EmbeddedHasValueColumn>();
 
@@ -697,6 +737,8 @@ public static class SchemaSynchronizer
                 );
 
             return SqlPreCommand.Combine(Spacing.Triple,
+                
+
                 preRenameColumns,
                 createFullTextCatallogs,
                 createPartitionFunction,
@@ -707,6 +749,7 @@ public static class SchemaSynchronizer
                 dropIndices, dropIndicesHistory,
                 dropForeignKeys,
 
+                historyFixes,
                 tables, historyTables, delayedHistoryColumns.Combine(Spacing.Double),
                 versioningTriggers,
                 delayedUpdatesHistory.Combine(Spacing.Double),

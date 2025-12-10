@@ -7,6 +7,13 @@
     box-shadow: inset 0px 1px 4px -3px var(--bs-box-shadow);
     position: relative;
 }
+    .sf-html-editor.read-only {
+        background: var(--bs-secondary-bg) !important;
+    }
+
+    .sf-html-editor:not(.read-only) {
+        background: var(--bs-body-bg);
+    }
 
     .sf-html-editor:has([contenteditable="true"]) {
         background: var(--bs-body-bg);

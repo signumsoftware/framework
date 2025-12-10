@@ -207,6 +207,25 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(tableName, ColumnLine(column, tempDefault ?? GetDefaultConstaint(tableName, column), checkConst: null, isChange: false, forHistoryTable: forHistory)));
     }
 
+    public SqlPreCommand AlterTableAddDiffColumn(ObjectName tableName, DiffColumn column)
+    {
+        return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(tableName, ColumnLineForHistory(column)));
+    }
+
+    public SqlPreCommand AlterTableAlterDiffColumn(ObjectName tableName, DiffColumn column, DiffColumn his)
+    {
+        if (!IsPostgres)
+            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(tableName, ColumnLineForHistory(column)));
+        else
+            return new[]
+            {
+                 !column.DbType.Equals(his.DbType) || column.Collation != his.Collation || !column.SizeEquals(his) ?
+                 new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2};".FormatWith(tableName, column.Name.SqlEscape(isPostgres),  GetColumnType(column) + (column.Collation != null ? " COLLATE " + column.Collation : null))) : null,
+                 his.Nullable && !column.Nullable ? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} SET NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
+                 !his.Nullable && column.Nullable ? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
+             }.Combine(Spacing.Simple) ?? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} -- UNEXPECTED COLUMN CHANGE!!".FormatWith(tableName, column.Name.SqlEscape(isPostgres)));
+    }
+
     public SqlPreCommand AlterTableAlterColumn(ITable tab, IColumn tabCol, DiffColumn difCol, bool withHistory)
     {
         if (withHistory)
@@ -305,6 +324,19 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
             );
     }
 
+    public string ColumnLineForHistory(DiffColumn c)
+    {
+        string fullType = GetColumnType(c);
+
+
+        return $" ".Combine(
+            c.Name.SqlEscape(isPostgres),
+            fullType,
+            c.Collation != null ? "COLLATE " + c.Collation : null,
+            c.Nullable ? "NULL" : "NOT NULL"
+            );
+    }
+
     public string GetColumnType(IColumn c)
     {
         return c.UserDefinedTypeName ?? c.DbType.ToString(IsPostgres) + GetSizePrecisionScale(c);
@@ -312,7 +344,14 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
 
     public string GetColumnType(DiffColumn c)
     {
-        return c.UserTypeName ?? c.DbType.ToString(IsPostgres) /*+ GetSizeScale(Math.Max(c.Length, c.Precision), c.Scale)*/;
+
+        return (c.UserTypeName ?? c.DbType.ToString(IsPostgres)) + GetSizePrecisionScale(c);
+    }
+
+    public string GetSizePrecisionScale(DiffColumn c)
+    {
+        var isDecimal = isPostgres ? c.DbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.Numeric : c.DbType.SqlServer == SqlDbType.Decimal;
+        return GetSizePrecisionScale(c.Length == -1 ? null : c.Length, isDecimal ? (byte)c.Precision : null, isDecimal ? (byte)c.Scale : null, isDecimal);
     }
 
     public string GetSizePrecisionScale(IColumn c)

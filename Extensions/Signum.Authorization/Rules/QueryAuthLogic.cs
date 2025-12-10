@@ -36,7 +36,7 @@ public static class QueryAuthLogic
         AuthLogic.ImportFromXml += cache.ImportXml;
         AuthLogic.HasRuleOverridesEvent += cache.HasRealOverrides;
         sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += query => Administrator.DeleteWhereScript((RuleQueryEntity rt) => rt.Resource, query);
-        sb.Schema.EntityEvents<RoleEntity>().PreDeleteSqlSync += role => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleQueryEntity>().Where(a => a.Role.Is(role)));
+        sb.Schema.EntityEvents<RoleEntity>().PreDeleteSqlSync += role => Administrator.UnsafeDeletePreCommand(Database.Query<RuleQueryEntity>().Where(a => a.Role.Is(role)));
         sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleQueryEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
     }
 

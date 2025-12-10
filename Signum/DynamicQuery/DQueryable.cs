@@ -73,10 +73,10 @@ public static class DQueryable
     }
 
 
-    public static Task<DEnumerableCount<T>> AllQueryOperationsAsync<T>(this DQueryable<T> query, QueryRequest request, CancellationToken token, bool includeOrdersInSelect = false)
+    public static Task<DEnumerableCount<T>> AllQueryOperationsAsync<T>(this DQueryable<T> query, QueryRequest request, CancellationToken token, bool forConcat)
     {
         var selectColumn = request.Columns.Select(a => a.Token).ToHashSet();
-        if (includeOrdersInSelect)
+        if (forConcat)
             selectColumn.AddRange(request.Orders.Select(a => a.Token));
 
         return query
@@ -84,13 +84,16 @@ public static class DQueryable
             .Where(request.Filters)
             .OrderBy(request.Orders, request.Pagination)
             .Select(selectColumn)
-            .TryPaginateAsync(request.Pagination, request.SystemTime, token);
+            .TryPaginateAsync(forConcat ? request.Pagination.ToBigPage() : request.Pagination, request.SystemTime, token);
+
+
     }
 
-    public static DEnumerableCount<T> AllQueryOperations<T>(this DQueryable<T> query, QueryRequest request, bool includeOrdersInSelect = false)
+
+    public static DEnumerableCount<T> AllQueryOperations<T>(this DQueryable<T> query, QueryRequest request, bool forCombine)
     {
         var selectColumn = request.Columns.Select(a => a.Token).ToHashSet();
-        if (includeOrdersInSelect)
+        if (forCombine)
             selectColumn.AddRange(request.Orders.Select(a => a.Token));
 
         return query
@@ -98,7 +101,7 @@ public static class DQueryable
             .Where(request.Filters)
             .OrderBy(request.Orders, request.Pagination)
             .Select(selectColumn)
-            .TryPaginate(request.Pagination, request.SystemTime);
+            .TryPaginate(forCombine ? request.Pagination.ToBigPage() : request.Pagination, request.SystemTime);
     }
 
     #endregion
