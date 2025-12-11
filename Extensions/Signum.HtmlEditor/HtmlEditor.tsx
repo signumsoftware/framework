@@ -95,6 +95,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
       {...htmlAttributes}
       className={classes(
         "sf-html-editor",
+        controller.readOnly && "read-only",
         mandatory &&
         isEmpty(controller.editorState) &&
         (mandatory == "warning" ? "sf-mandatory-warning" : "sf-mandatory"),

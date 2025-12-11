@@ -8,7 +8,9 @@ import { HelpImageEntity } from "../Signum.Help";
 
 export class HelpImageHandler implements ImageHandlerBase {
 
-  pr: PropertyRoute = HelpImageEntity.propertyRouteAssert(a => a.file);
+  get pr(): PropertyRoute {
+    return HelpImageEntity.propertyRouteAssert(a => a.file);
+  }
 
   toElement(val: ImageInfo): HTMLElement | undefined {
     const img = document.createElement("img");

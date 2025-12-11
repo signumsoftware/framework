@@ -1,4 +1,4 @@
-
+using Signum.API.Filters;
 using Signum.Authorization.BaseAD;
 using System.DirectoryServices.AccountManagement;
 
@@ -62,7 +62,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
                                 if (user.State == UserState.Deactivated)
                                     throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
 
-                                AuthLogic.OnUserLogingIn(user);
+                                AuthLogic.OnUserLogingIn(user, nameof(LoginWithActiveDirectoryRegistry));
                                 return user;
                             }
                             else
@@ -75,7 +75,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
                                 if (user.State == UserState.Deactivated)
                                     throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
 
-                                AuthLogic.OnUserLogingIn(user);
+                                AuthLogic.OnUserLogingIn(user, nameof(LoginWithActiveDirectoryRegistry));
                                 return user;
                             }
                         }
@@ -189,6 +189,9 @@ public class WindowsADAuthorizer : ICustomAuthorizer
 
         if (ctx.EmailAddress.HasText())
             user.Email = ctx.EmailAddress;
+
+        if (user.CultureInfo == null && SignumCurrentContextFilter.CurrentContext is { } cc)
+            user.CultureInfo = CultureServer.InferUserCulture(cc.HttpContext);
     }
 
     public virtual void UpdateUser(UserEntity user, IAutoCreateUserContext ctx)

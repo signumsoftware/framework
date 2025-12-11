@@ -268,12 +268,12 @@ export namespace EntityOperations {
 
     if (eoc.operationInfo.operationType == "Delete")
       return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(
-        <strong>{getToString(eoc.entity)} ({getTypeInfo(eoc.entity.Type).niceName} {eoc.entity.id})</strong>
+        <strong>{getToString(eoc.entity)} ({OperationMessage.As.niceToString()} {getTypeInfo(eoc.entity.Type).niceName} {eoc.entity.id})</strong>
       );
     else
       return OperationMessage.PleaseConfirmYouWouldLikeTo01.niceToString().formatHtml(
         <strong>{eoc.operationInfo.niceName}</strong>,
-        <strong>{getToString(eoc.entity)} ({getTypeInfo(eoc.entity.Type).niceName} {eoc.entity.id})</strong>
+        <strong>{getToString(eoc.entity)} ({OperationMessage.As.niceToString()} {getTypeInfo(eoc.entity.Type).niceName} {eoc.entity.id})</strong>
       );
 
   }

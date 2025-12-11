@@ -7,6 +7,13 @@
     box-shadow: inset 0px 1px 4px -3px var(--bs-box-shadow);
     position: relative;
 }
+    .sf-html-editor.read-only {
+        background: var(--bs-secondary-bg);
+    }
+
+    .sf-html-editor:not(.read-only) {
+        background: var(--bs-body-bg);
+    }
 
     .sf-html-editor:has([contenteditable="true"]) {
         background: var(--bs-body-bg);
@@ -225,4 +232,8 @@
     .html-viewer .sf-html-editor .public-DraftEditor-content {
         padding: 0px;
         min-height: initial;
+    }
+
+    .html-viewer .sf-html-editor.read-only{
+        background: unset;
     }

@@ -648,6 +648,13 @@ public class DiffColumn
                 throw new NotImplementedException("Unexpected SqlDbType");
         }
     }
+
+    internal bool SizeEquals(DiffColumn hisCol)
+    {
+        return Precision == hisCol.Precision ||
+                Scale == hisCol.Scale ||
+                Length == hisCol.Length;
+    }
 }
 
 public class DiffCheckConstraint

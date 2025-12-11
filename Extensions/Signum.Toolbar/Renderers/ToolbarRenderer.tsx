@@ -413,7 +413,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
   function handleSelect(e: React.SyntheticEvent | undefined) {
 
     forceUpdate();
-    var autoSelect = p.response.elements?.firstOrNull(a => a.autoSelect && a.withEntity == Boolean(selEntityRef.current));
+    var autoSelect = p.response.elements?.firstOrNull(a => a.autoSelect && Boolean(a.withEntity) == Boolean(selEntityRef.current));
     if (autoSelect) {
       responseClick(autoSelect, selEntityRef.current, e, p.ctx);
     }

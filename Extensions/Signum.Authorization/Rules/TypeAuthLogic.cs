@@ -51,6 +51,7 @@ public static partial class TypeAuthLogic
 
         sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RuleTypeConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleType.Entity.Resource, rtc => rtc.RuleType.Entity.Role);
         sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleTypeEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
+        sb.Schema.EntityEvents<RoleEntity>().PreDeleteSqlSync += role => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleTypeEntity>().Where(a => a.Role.Is(role)));
         sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(t)));
         sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RuleTypeConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
 

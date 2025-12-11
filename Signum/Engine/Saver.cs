@@ -23,7 +23,6 @@ internal static class Saver
             DirectedGraph<Modifiable> modifiables = PreSaving(() => GraphExplorer.FromRoots(entities));
 
             HashSet<Entity> wasNew = modifiables.OfType<Entity>().Where(a => a.IsNew).ToHashSet(ReferenceEqualityComparer<Entity>.Default);
-
             log.Switch("Integrity");
 
             var error = GraphExplorer.FullIntegrityCheck(modifiables);

@@ -176,10 +176,10 @@ export namespace ContextualOperations {
         }
         else {
             var lite = coc.context.lites.single();
-            if (coc.operationInfo.operationType == "Delete")
-                return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{getToString(lite)} ({getTypeInfo(lite.EntityType).niceName} {lite.id})</strong>);
+          if (coc.operationInfo.operationType == "Delete")
+            return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong> {getToString(lite)} ({OperationMessage.As.niceToString()} {getTypeInfo(lite.EntityType).niceName} {lite.id})</strong>);
             else
-                return OperationMessage.PleaseConfirmYouWouldLikeTo01.niceToString().formatHtml(<strong>{coc.operationInfo.niceName}</strong>, <strong>{getToString(lite)} ({getTypeInfo(lite.EntityType).niceName} {lite.id})</strong>);
+            return OperationMessage.PleaseConfirmYouWouldLikeTo01.niceToString().formatHtml(<strong>{coc.operationInfo.niceName}</strong>, <strong>{getToString(lite)} ({OperationMessage.As.niceToString()} {getTypeInfo(lite.EntityType).niceName} {lite.id})</strong>);
 
         }
     }
