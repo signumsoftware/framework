@@ -674,7 +674,7 @@
     <Member Name="CombineRowsWith" Description="Kombinieren von Zeilen mit" />
     <Member Name="Copy" Description="Kopieren" />
     <Member Name="Create" Description="Erstellen" />
-    <Member Name="CreateNew0_G" Description="Neu {0} erstellen" />
+    <Member Name="CreateNew0_G" Description="Neu[m:en|f:e|n:es] {0} erstellen" />
     <Member Name="CurrentPage" Description="Aktuelle Seite" />
     <Member Name="DeleteAllFilter" Description="Alle Filter löschen" />
     <Member Name="DeleteFilter" Description="Filter löschen" />
