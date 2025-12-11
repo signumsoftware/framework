@@ -29,6 +29,8 @@ public enum OperationMessage
     Confirm,
     [Description("Please confirm you would like to delete {0} from the system")]
     PleaseConfirmYouWouldLikeToDelete0FromTheSystem,
+    [Description("as")]
+    As,
 
     [Description("Please confirm you would like to {0} {1}")]
     PleaseConfirmYouWouldLikeTo01,
