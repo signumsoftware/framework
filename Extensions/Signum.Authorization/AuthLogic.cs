@@ -695,13 +695,17 @@ public static class AuthLogic
                     if (interactive)
                     {
                         if (SafeConsole.Ask($"Delete role '{role}' from the database?"))
-                            return table.DeleteSqlSync(role, r => r.Name == role.Name);
+                            return new[]{
+                                Administrator.UnsafeDeletePreCommandMList((RoleEntity e) => e.InheritsFrom, Database.MListQuery((RoleEntity e) => e.InheritsFrom).Where(r => r.Element.Entity.Name == role.Name)),
+                                table.DeleteSqlSync(role, r => r.Name == role.Name)
+                            }.Combine(Spacing.Simple);
                         else
                             return null;
                     }
                     else
                     {
                         Console.WriteLine("Deleted:" + role.ToString());
+                        Database.MListQuery((RoleEntity e) => e.InheritsFrom).Where(r => r.Element.Is(role)).UnsafeDeleteMList();
                         role.Delete();
                         return null;
                     }
