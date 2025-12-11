@@ -332,11 +332,11 @@ public static class UserChartLogic
         {
             try
             {
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(uc.Query.ToQueryName());
+
                 if (uc.Filters.Any(a => a.Token?.ParseException != null) ||
                    uc.Columns.Any(a => a.Token?.ParseException != null))
                 {
-                    QueryDescription qd = QueryLogic.Queries.QueryDescription(uc.Query.ToQueryName());
-
                     if (uc.Filters.Any())
                     {
                         using (DelayedConsole.Delay(() => Console.WriteLine(" Filters:")))
@@ -397,6 +397,20 @@ public static class UserChartLogic
                         case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: item.ValueString = val; goto retry;
+                        case FixTokenResult.FixTokenInstead:
+
+                            QueryTokenEmbedded token = item.Token;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, 
+                                " {0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false, forceChange: true))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
+                                case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: item.Token = token; break;
+                                default: break;
+                            }
+                            break;
                     }
                 }
 

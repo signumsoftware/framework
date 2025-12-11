@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Signum.API;
+using Signum.API.Filters;
 using Signum.Authorization.AuthToken;
 using Signum.Authorization.Rules;
 using Signum.Entities;
@@ -8,6 +9,7 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections.Frozen;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using static Signum.Engine.Sync.Replacements;
 
@@ -15,7 +17,7 @@ namespace Signum.Authorization;
 
 public static class AuthLogic
 {
-    public static event Action<UserEntity>? UserLogingIn;
+    public static event Action<UserEntity, string/*loginMethod*/>? UserLogingIn;
     public static ICustomAuthorizer? Authorizer;
 
     public static ResetLazy<HashSet<Lite<UserEntity>>> RecentlyUsersDisabled;
@@ -84,6 +86,8 @@ public static class AuthLogic
 
         SystemUserName = systemUserName;
         AnonymousUserName = anonymousUserName;
+
+        UserLogingIn += OnLogin_UpdateUserCulture;
 
         RoleEntity.RetrieveFromCache = r => RolesByLite.Value.GetOrThrow(r);
 
@@ -155,6 +159,20 @@ public static class AuthLogic
         UserGraph.Register();
 
 
+    }
+
+    private static void OnLogin_UpdateUserCulture(UserEntity user, string loginMethod)
+    {
+        if(user.CultureInfo == null && SignumCurrentContextFilter.CurrentContext is { } cc)
+        {
+            using (Disable())
+            using (OperationLogic.AllowSave<UserEntity>())
+            {
+                user.CultureInfo = CultureServer.InferUserCulture(cc.HttpContext);
+                UserHolder.Current = new UserWithClaims(user);
+                user.Save();
+            }
+        }
     }
 
     public static Lite<RoleEntity> GetOrCreateTrivialMergeRole(List<Lite<RoleEntity>> roles, Dictionary<string, Lite<RoleEntity>>? newRoles = null)
@@ -383,7 +401,7 @@ public static class AuthLogic
         {
             UserEntity user = RetrieveUser(username, passwordHashes);
 
-            OnUserLogingIn(user);
+            OnUserLogingIn(user, nameof(Login));
 
             authenticationType = "database";
 
@@ -391,9 +409,9 @@ public static class AuthLogic
         }
     }
 
-    public static void OnUserLogingIn(UserEntity user)
+    public static void OnUserLogingIn(UserEntity user, string loginMethod)
     {
-        UserLogingIn?.Invoke(user);
+        UserLogingIn?.Invoke(user, loginMethod);
     }
 
     public static Action<UserEntity>? OnDeactivateUser;
@@ -677,13 +695,17 @@ public static class AuthLogic
                     if (interactive)
                     {
                         if (SafeConsole.Ask($"Delete role '{role}' from the database?"))
-                            return table.DeleteSqlSync(role, r => r.Name == role.Name);
+                            return new[]{
+                                Administrator.UnsafeDeletePreCommandMList((RoleEntity e) => e.InheritsFrom, Database.MListQuery((RoleEntity e) => e.InheritsFrom).Where(r => r.Element.Entity.Name == role.Name)),
+                                table.DeleteSqlSync(role, r => r.Name == role.Name)
+                            }.Combine(Spacing.Simple);
                         else
                             return null;
                     }
                     else
                     {
                         Console.WriteLine("Deleted:" + role.ToString());
+                        Database.MListQuery((RoleEntity e) => e.InheritsFrom).Where(r => r.Element.Is(role)).UnsafeDeleteMList();
                         role.Delete();
                         return null;
                     }

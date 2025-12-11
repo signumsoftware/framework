@@ -1,4 +1,5 @@
 using DocumentFormat.OpenXml.Spreadsheet;
+using Signum.API.Filters;
 using Signum.Authorization.AzureAD;
 using System.DirectoryServices.AccountManagement;
 using System.Runtime.InteropServices.Marshalling;
@@ -134,6 +135,9 @@ public class AzureADAuthorizer : ICustomAuthorizer
 
         if (ctx.EmailAddress.HasText())
             user.Email = ctx.EmailAddress;
+
+        if (user.CultureInfo == null && SignumCurrentContextFilter.CurrentContext is { } cc)
+            user.CultureInfo = CultureServer.InferUserCulture(cc.HttpContext);
     }
 
     public virtual void UpdateUser(UserEntity user, IAutoCreateUserContext ctx)

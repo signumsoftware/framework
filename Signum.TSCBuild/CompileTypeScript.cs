@@ -215,41 +215,6 @@ namespace Signum.TSCBuild
                     return;
                 }
 
-                var paths = new[] {
-                // Yarn global installs
-                @"C:\Program Files (x86)\Yarn\bin\yarn.cmd",
-                @"C:\Program Files\Yarn\bin\yarn.cmd",
-                @"C:\Program Files\nodejs\yarn.cmd",
-                // Yarn installed via npm (global)
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\Roaming\npm\yarn.cmd"),
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\Local\pmpm\yarn.cmd"),
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\Roaming\pmpm\yarn.cmd"),
-
-                // Node.js global installs
-                @"C:\Program Files\nodejs\npm.cmd",
-                // Node.js installed via nvm (Node Version Manager)
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\Roaming\nvm\nodejs\npm.cmd"),
-            };
-
-                var bestPath = paths.FirstOrDefault(p => File.Exists(p));
-                if (bestPath == null)
-                {
-                    statusBar?.Animation(0, ref icon);
-                    statusBar?.Progress(ref cookie, 0, "", 0, 0);
-                    statusBar?.SetText("");
-                    pane.OutputStringThreadSafe($@"Could not find yarn.cmd or npm.cmd the expected location:
-{string.Join("\n", paths.Select(a => "* " + a))}
-Please ensure Yarn or NPM are installed.
-");
-                    VsShellUtilities.ShowMessageBox(
-                        this.package,
-                        "Could not find yarn.cmd at the expected location. Please ensure Yarn is installed.",
-                        "Build TypeScript",
-                        OLEMSGICON.OLEMSGICON_CRITICAL,
-                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                    return;
-                }
 
 
 
@@ -266,11 +231,67 @@ Please ensure Yarn or NPM are installed.
                         toolName = "tsgo";
                 }
 
+                // Try to locate yarn using `where yarn`, fall back to common locations, else run via cmd.exe so shell resolves it
+                string resolvedYarn = null;
+                Exception yarnException = null;
+                try
+                {
+                    var whereProc = new System.Diagnostics.Process
+                    {
+                        StartInfo = new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "cmd.exe",
+                            Arguments = "/C where yarn",
+                            RedirectStandardOutput = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        }
+                    };
+                    whereProc.Start();
+                    string whereOut = whereProc.StandardOutput.ReadToEnd();
+                    whereProc.WaitForExit(2000);
+                    var first = whereOut.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault(a => a.EndsWith("yarn.cmd"));
+                    if (!string.IsNullOrEmpty(first) && File.Exists(first))
+                        resolvedYarn = first;
+                }
+                catch(Exception e)
+                {
+                    yarnException = e;
+                }
+
+                if (resolvedYarn == null)
+                {
+                    var commonPaths = new[] {
+                        // Yarn global installs
+                        @"C:\\Program Files (x86)\\Yarn\\bin\\yarn.cmd",
+                        @"C:\\Program Files\\Yarn\\bin\\yarn.cmd",
+                        @"C:\\Program Files\\nodejs\\yarn.cmd",
+                        // Yarn installed via npm (global)
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\\Roaming\\npm\\yarn.cmd"),
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\\Local\\pmpm\\yarn.cmd"),
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\\Roaming\\pmpm\\yarn.cmd"),
+                    };
+                    resolvedYarn = commonPaths.FirstOrDefault(p => File.Exists(p));
+                }
+
+                if(resolvedYarn == null)
+                {
+                    VsShellUtilities.ShowMessageBox(
+                     this.package,
+                     "Unable to find yarn" + 
+                     yarnException == null ? "" : 
+                     "\nException: "  + yarnException.Message ,
+                     "Build TypeScript",
+                     OLEMSGICON.OLEMSGICON_CRITICAL,
+                     OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                     OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    return;
+                }
                 var process = new System.Diagnostics.Process
                 {
                     StartInfo = new System.Diagnostics.ProcessStartInfo
                     {
-                        FileName = bestPath,
+                        FileName = resolvedYarn,
                         Arguments = $"{toolName} -b \"{projectDir}/tsconfig.json\" -v",
                         WorkingDirectory = projectDir,
                         RedirectStandardOutput = true,
@@ -355,7 +376,23 @@ Please ensure Yarn or NPM are installed.
                     tcs.TrySetResult(true);
                 };
 
-                process.Start();
+                try
+                {
+                    process.Start();
+                }
+                catch (Exception ex)
+                {
+                    pane.OutputStringThreadSafe($"Failed to start yarn {toolName} ('{resolvedYarn}') : {ex.Message}\n");
+                    VsShellUtilities.ShowMessageBox(
+                        this.package,
+                        "Could not start yarn. Ensure Yarn is installed and available on PATH or in a common location.",
+                        "Build TypeScript",
+                        OLEMSGICON.OLEMSGICON_CRITICAL,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    return;
+                }
+
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
 

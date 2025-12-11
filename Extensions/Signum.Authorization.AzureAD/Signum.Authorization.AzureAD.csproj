@@ -15,7 +15,7 @@
 
 	<ItemGroup>
 		
-		<PackageReference Include="System.DirectoryServices" Version="10.0.0" />
+		<PackageReference Include="System.DirectoryServices" Version="10.0.1" />
 		<PackageReference Include="System.DirectoryServices.AccountManagement" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Graph" Version="5.98.0" />
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
