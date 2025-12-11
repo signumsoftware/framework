@@ -311,19 +311,6 @@
     <Member Name="New0_G" Description="Neu[m:er|f:e|n:es] {0}" />
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
   </Type>
-  <Type Name="HeavyProfilerMessage">
-    <Member Name="Clear" Description="Löschen" />
-    <Member Name="Download" Description="Herunterladen" />
-    <Member Name="EnableTheProfilerWithTheDebuggerWith0AndSaveTheResultsWith1" Description="Aktivieren Sie den Profiler mit dem Debugger mit {0} und speichern Sie die Ergebnisse mit {1}" />
-    <Member Name="Entries" Description="Einträge" />
-    <Member Name="HeavyProfiler" Description="Heavy Profiler" />
-    <Member Name="HeavyProfilerLoading" Description="Heavy Profiler (Laden...)" />
-    <Member Name="IgnoreHeavyProfilerEntries" Description="Heavy Profiler-Einträge ignorieren" />
-    <Member Name="Record" Description="Aufzeichnen" />
-    <Member Name="Update" Description="Aktualisieren" />
-    <Member Name="Upload" Description="Hochladen" />
-    <Member Name="UploadPreviousRunsToComparePerformance" Description="Laden Sie frühere Durchläufe hoch, um die Leistung zu vergleichen." />
-  </Type>
   <Type Name="HtmlEditorMessage">
     <Member Name="Bold" Description="Fettgedruck (Strg + B)" />
     <Member Name="Code" Description="Code" />
@@ -350,6 +337,7 @@
     <Member Name="cancel" Description="Abbrechen" />
     <Member Name="chooseAType" Description="Wählen Sie einen Typ" />
     <Member Name="chooseAValue" Description="Wählen Sie einen Wert" />
+    <Member Name="Close" Description="Schließen" />
     <Member Name="create" Description="Erstellen" />
     <Member Name="Date" Description="Datum" />
     <Member Name="deactivateTimeMachine" Description="Zeitmaschine deaktivieren" />
@@ -392,9 +380,6 @@
     <Member Name="showRecords" Description="Datensätze anzeigen" />
     <Member Name="ungroupResults" Description="Resultate der Gruppierung aufheben" />
     <Member Name="view" Description="Ansicht" />
-  </Type>
-  <Type Name="LayoutMessage">
-    <Member Name="JumpToMainContent" Description="Zum Hauptinhalt springen" />
   </Type>
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="ID ungültig" />
@@ -689,7 +674,7 @@
     <Member Name="CombineRowsWith" Description="Kombinieren von Zeilen mit" />
     <Member Name="Copy" Description="Kopieren" />
     <Member Name="Create" Description="Erstellen" />
-    <Member Name="CreateNew0_G" Description="Neu[m:en|f:e|n:es] {0} erstellen" />
+    <Member Name="CreateNew0_G" Description="Neu {0} erstellen" />
     <Member Name="CurrentPage" Description="Aktuelle Seite" />
     <Member Name="DeleteAllFilter" Description="Alle Filter löschen" />
     <Member Name="DeleteFilter" Description="Filter löschen" />
@@ -833,10 +818,6 @@
   <Type Name="SystemTimeProperty">
     <Member Name="SystemValidFrom" Description="System gültig von" />
     <Member Name="SystemValidTo" Description="System gültig bis" />
-  </Type>
-  <Type Name="TemplateMessage">
-    <Member Name="CopyToClipboard" Description="In die Zwischenablage kopieren: Strg+C, ESC" />
-    <Member Name="Template" Description="Vorlage" />
   </Type>
   <Type Name="TimeSeriesUnit">
     <Member Name="Day" Description="Tag" />
