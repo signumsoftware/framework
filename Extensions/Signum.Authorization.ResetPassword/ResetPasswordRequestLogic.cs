@@ -65,7 +65,7 @@ public static class ResetPasswordRequestLogic
         {
             CanBeNew = false,
             CanBeModified = false,
-            CanExecute = (e) => e.IsValid ? null : ResetPasswordMessage.YourResetPasswordRequestHasExpired.NiceToString(),
+            CanExecute = (e) => e.Validate(),
             Execute = (e, args) =>
             {
                 string password = args.GetArg<string>();
@@ -102,8 +102,9 @@ public static class ResetPasswordRequestLogic
             if (rpr == null)
                 throw new ApplicationException(ResetPasswordMessage.TheCodeOfYourLinkIsIncorrect.NiceToString());
 
-            if (!rpr.IsValid)
-                throw new ApplicationException(ResetPasswordMessage.TheCodeOfYourLinkHasAlreadyBeenUsed.NiceToString());
+            var error = rpr.Validate();
+            if (error.HasText())
+                throw new ApplicationException(error);
 
 			RemoveOtherRequests(rpr);
             

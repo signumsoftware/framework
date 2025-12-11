@@ -1,4 +1,3 @@
-
 using System.IO;
 using Signum.Utilities.Reflection;
 using System.Text.RegularExpressions;
@@ -206,7 +205,11 @@ public static class Csv
                         m = regex.Match(csvLine);
                         if (m.Length > 0)
                         {
-                            t = ReadObject<T>(m, members, parsers);
+                            // Use the custom builder if it's available.
+                            if (options?.Constructor != null)
+                                t = options.Constructor(m);
+                            else
+                                t = ReadObject<T>(m, members, parsers);
                         }
                     }
                     catch (Exception e)
