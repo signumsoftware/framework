@@ -8,7 +8,7 @@
     position: relative;
 }
     .sf-html-editor.read-only {
-        background: var(--bs-secondary-bg) !important;
+        background: var(--bs-secondary-bg);
     }
 
     .sf-html-editor:not(.read-only) {
@@ -232,4 +232,8 @@
     .html-viewer .sf-html-editor .public-DraftEditor-content {
         padding: 0px;
         min-height: initial;
+    }
+
+    .html-viewer .sf-html-editor.read-only{
+        background: unset;
     }
