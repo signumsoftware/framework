@@ -85,7 +85,7 @@ public static class CachedProfilePhotoLogic
                     var user = Database.Query<UserEntity>().Where(u => u.Mixin<UserAzureADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
                     result = new CachedProfilePhotoEntity
                     {
-                        Photo = stream == null ? null : new FilePathEmbedded(AuthADFileType.CachedProfilePhoto, oid.ToString() + "x" + size + ".jpg", stream.ReadAllBytes()),
+                        Photo = bytes == null ? null : new FilePathEmbedded(AuthADFileType.CachedProfilePhoto, oid.ToString() + "x" + size + ".jpg", bytes),
                         User = user,
                         Size = size,
                     };
