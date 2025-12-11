@@ -695,14 +695,43 @@ public static class AuthLogic
                     if (interactive)
                     {
                         if (SafeConsole.Ask($"Delete role '{role}' from the database?"))
-                            return table.DeleteSqlSync(role, r => r.Name == role.Name);
+                            return new[]{
+                                Administrator.UnsafeDeletePreCommandMList((RoleEntity e) => e.InheritsFrom, Database.MListQuery((RoleEntity e) => e.InheritsFrom).Where(r => r.Element.Entity.Name == role.Name)),
+                                table.DeleteSqlSync(role, r => r.Name == role.Name)
+                            }.Combine(Spacing.Simple);
                         else
                             return null;
                     }
                     else
                     {
-                        Console.WriteLine("Deleted:" + role.ToString());
+                        if (Database.Query<UserEntity>().Where(u => u.Role.Is(role)).Any())
+                        {
+                            var alternative = role.InheritsFrom.FirstOrDefault()?.Retrieve() ??
+                            Database.Query<RoleEntity>().FirstOrDefault(a => !a.IsTrivialMerge && a.MergeStrategy == MergeStrategy.Union && a.InheritsFrom.Count == 0) /*Min User*/ ??
+                            throw new InvalidOperationException($"Unable to find alternative role for {role} to move the users to");
+
+                            var updated = Database.Query<UserEntity>().Where(u => u.Role.Is(role)).UnsafeUpdate(a => a.Role, a => alternative.ToLite());
+
+                            Console.WriteLine($"Moved {updated} users from role {role} to {alternative}");
+                        }
+
+                        foreach (var tm in Database.Query<RoleEntity>().Where(a=>a.IsTrivialMerge && a.InheritsFrom.Contains(role.ToLite())))
+                        {
+                            var alternative = AuthLogic.GetOrCreateTrivialMergeRole(tm.InheritsFrom.Where(a => !a.Is(role)).ToList());
+
+                            if (Database.Query<UserEntity>().Where(u => u.Role.Is(tm)).Any())
+                            {
+                                var updated = Database.Query<UserEntity>().Where(u => u.Role.Is(tm)).UnsafeUpdate(a => a.Role, a => alternative);
+                                Console.WriteLine($"Moved {updated} users from role {tm} to {alternative}");
+                            }
+
+                            tm.Delete();
+                            Console.WriteLine("Deleted:" + tm.ToString());
+                        }
+
+                        Database.MListQuery((RoleEntity e) => e.InheritsFrom).Where(r => r.Element.Is(role)).UnsafeDeleteMList();
                         role.Delete();
+                        Console.WriteLine("Deleted:" + role.ToString());
                         return null;
                     }
                 },
