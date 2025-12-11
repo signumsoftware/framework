@@ -1,11 +1,5 @@
-using LibGit2Sharp;
 using Signum.Utilities;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Signum.Upgrade.Upgrades;
 
@@ -27,7 +21,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
 
             var servicesBody = startup.GetMethodBody(l => l.Contains("ConfigureServices(IServiceCollection services)"));
 
-            if(servicesBody.Contains("services.AddSwaggerGen(c =>"))
+            if (servicesBody.Contains("services.AddSwaggerGen(c =>"))
             {
                 var swagger = startup.Content.Between("services.AddSwaggerGen(c =>", @"}); //Swagger Services");
 
@@ -50,7 +44,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
 
                 uctx.CreateCodeFile($"{uctx.ApplicationName}/SwaggerConfig.cs", sweagerContent);
 
-                servicesBody = 
+                servicesBody =
                     servicesBody.Before("services.AddSwaggerGen(c =>") +
                     "        SwaggerConfig.ConfigureSwaggerService(builder); \n\n" +
                     servicesBody.After("}); //Swagger Services");
@@ -63,7 +57,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
             var programContent = """
             var builder = WebApplication.CreateBuilder(args);
 
-            """ + 
+            """ +
                 servicesBody.Replace("services", "builder.Services") +
                 "\r\n" +
                 "        var app = builder.Build(); \r\n\r\n" +
@@ -85,7 +79,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                 "    }\n\n" +
                 startup.GetLinesBetween(
                     new(l => l.Contains("class NoAPIContraint : IRouteConstraint"), 0),
-                    new(l => l.Contains("}"), 0) { SameIdentation = true}) + "\n";
+                    new(l => l.Contains("}"), 0) { SameIdentation = true }) + "\n";
 
 
             program.ReplaceBetween(
@@ -142,7 +136,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                 return true;
 
             });
-            
+
 
             starter.ReplaceLine(l => l.Contains("SchemaBuilder sb = new CustomSchemaBuilder"),
                 @"SchemaBuilder sb = new CustomSchemaBuilder { LogDatabaseName = logDatabase, Tracer = initial, WebServerBuilder = wsb };");
@@ -185,7 +179,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                     "WorkflowLogicStarter.Start(sb, () => Configuration.Value.Workflow);");
 
             //starter.InsertAfterFirstLine(l => l.Contains(@"}//3"), """
-            
+
             //if (wsb != null)
             //    ReflectionServer.RegisterLike(typeof(RegisterUserModel), () => true);
             //""");
@@ -258,7 +252,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                 "Signum.Caching/CacheClient");
 
             main.RemoveAllLines(a => a.Contains("import") && (a.Contains("ToolbarConfig") || a.Contains("ToolbarMenuConfig")));
-            main.ReplaceBetweenIncluded(a => a.Contains("ToolbarClient.start("), a => a.Contains(");"), 
+            main.ReplaceBetweenIncluded(a => a.Contains("ToolbarClient.start("), a => a.Contains(");"),
                 "ToolbarClient.start({ routes });");
 
             main.RemoveAllLines(a => a.Contains("import") && a.Contains("OmniboxProvider"));

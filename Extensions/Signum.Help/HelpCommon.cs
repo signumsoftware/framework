@@ -1,6 +1,74 @@
 using System.ComponentModel;
+using System.Globalization;
 
 namespace Signum.Help;
+
+public interface IHelpEntity : IEntity
+{
+    bool ForeachHtmlField(Func<string, string> processHtml);
+}
+
+public abstract class HelpImportLineBase : EmbeddedEntity
+{
+    public TypeEntity Type { get; set; }
+
+    public string Key { get; set; }
+
+    public CultureInfoEntity Culture { get; set; }
+
+    public string? Text { get; set; }
+
+    public ImportAction Action { get; set; }
+
+    [ImplementedByAll()]
+    public Lite<IHelpEntity>? ExitingEntity { get; set; }
+
+}
+
+public class HelpImportPreviewLineEmbedded : HelpImportLineBase
+{
+    [Description("Apply?")]
+    public bool? Apply { get; set; }
+
+    public bool ApplyVisible
+    {
+        get { return Action != ImportAction.NoChange; }
+    }
+
+    public override string ToString() => $"{Type} {Key} {Action}";
+}
+
+public class HelpImportReportLineEmbedded : HelpImportLineBase
+{
+    public ImportStatus Status { get; set; }
+    public string? ActionError { get; set; }
+}
+
+public class HelpImportPreviewModel : ModelEntity
+{
+    public MList<HelpImportPreviewLineEmbedded> Lines { get; set; } = [];
+}
+
+public class HelpImportReportModel : ModelEntity
+{
+    public MList<HelpImportReportLineEmbedded> Lines { get; set; } = [];
+}
+
+public enum ImportStatus
+{ 
+    NoChange,
+    Applied,
+    Failed,
+    Skipped
+}
+
+public enum ImportAction
+{
+    NoChange,
+    Create,
+    Override,
+//    Remove
+}
 
 public enum HelpMessage
 {
@@ -84,6 +152,19 @@ public enum HelpMessage
     Close,
     ViewMore,
     JumpToViewMore,
+    ExportAsZip,
+    Import,
+    ImportCompletedSuccessfully,
+    ImportCompletedWithErrors,
+    ImportReport,
+    ImportError,
+    ImportHelpContentsFromZipFile,
+    SelectTheZIPFileWithTheHelpContentsThatYouWantToImport,
+    ChooseZIPFile,
+    SelectedFile,
+    HelpZipContents,
+    NewKey,
+    ActionStatus
 }
 
 public enum HelpKindMessage

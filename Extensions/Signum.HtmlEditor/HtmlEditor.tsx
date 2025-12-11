@@ -27,6 +27,7 @@ import { useController } from "./useController";
 import { isEmpty } from "./Utils/editorState";
 import { formatCode, formatHeading, formatList, formatQuote } from "./Utils/format";
 import { $findMatchingParent, isHeadingActive, isListActive, isQuoteActive } from "./Utils/node";
+import { useForceUpdate } from "../../Signum/React/Hooks";
 import { HtmlEditorMessage } from "../../Signum/React/Signum.Entities";
 import { ImageExtension } from "./Extensions/ImageExtension";
 
@@ -66,6 +67,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
     ...props }: HtmlEditorProps,
   ref?: React.Ref<HtmlEditorController>
 ) {
+  const forceUpdate = useForceUpdate();
   const id = React.useMemo(() => createUid(), []);
   const editableId = "editable_" + id;
   const { controller, nodes, builtinPlugins } = useController({
@@ -136,7 +138,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
           placeholder={Boolean(placeholder) ? <div className="sf-html-editor-placeholder">{placeholder}</div> : undefined}
           ErrorBoundary={LexicalErrorBoundary}
         />
-        <EditorRefPlugin editorRef={controller.setEditorRef} />
+        <EditorRefPlugin editorRef={comp => { controller.setEditorRef(comp); if (comp) forceUpdate(); }} />
         <HistoryPlugin />
         {...builtinPlugins.map((a, i) => React.cloneElement(a, { key: i }))}
       </LexicalComposer>
