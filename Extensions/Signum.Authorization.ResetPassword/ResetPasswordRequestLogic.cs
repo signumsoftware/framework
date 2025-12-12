@@ -74,7 +74,7 @@ public static class ResetPasswordRequestLogic
 
                 var error = UserEntity.OnValidatePassword(password);
                 if (error != null)
-                    throw new ApplicationException(error);
+                    throw new ResetPasswordException(error);
 
                 if (user.State == UserState.Deactivated)
                 {
@@ -100,11 +100,11 @@ public static class ResetPasswordRequestLogic
                  .SingleOrDefaultEx();
 
             if (rpr == null)
-                throw new ApplicationException(ResetPasswordMessage.TheCodeOfYourLinkIsIncorrect.NiceToString());
+                throw new ResetPasswordException(ResetPasswordMessage.TheCodeOfYourLinkIsIncorrect.NiceToString());
 
             var error = rpr.Validate();
             if (error.HasText())
-                throw new ApplicationException(error);
+                throw new ResetPasswordException(error);
 
 			RemoveOtherRequests(rpr);
             
