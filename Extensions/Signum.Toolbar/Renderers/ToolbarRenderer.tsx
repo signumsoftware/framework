@@ -374,12 +374,20 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
 
   const entityType = p.response.entityType!;
   const selEntityRef = React.useRef<Lite<Entity> | null>(null);
+  const previousResponseRef = React.useRef<ToolbarResponse<ToolbarMenuEntity> | null>(null);
   const forceUpdate = useForceUpdate();
 
   function setSelectedEntity(entity: Lite<Entity> | null) {
     selEntityRef.current = entity;
     forceUpdate();
   }
+
+  React.useEffect(() => {
+    if (previousResponseRef.current && !is(previousResponseRef.current.content, p.response.content)) {
+      setSelectedEntity(null);
+    }
+    previousResponseRef.current = p.response;
+  }, [p.response]);
 
 
   const entities = useAPI(() => Finder.API.fetchAllLites({ types: entityType }), [entityType]);
@@ -394,12 +402,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
       if (!is(active.menuWithEntity.entity, selEntityRef.current))
         setSelectedEntity(active.menuWithEntity.entity);
     }
-    //else if (active != null)
-    else if (active && !active.menuWithEntity)
-      setSelectedEntity(null);
-
   }, [active, p.response]);
-
   React.useEffect(() => {
 
     if (selEntityRef.current && !selEntityRef.current.model && entities) {
@@ -530,7 +533,6 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
       responseClick(autoSelect, null, undefined, p.ctx);
     }
   }
-
   React.useEffect(() => {
 
     if (p.ctx.active) {
