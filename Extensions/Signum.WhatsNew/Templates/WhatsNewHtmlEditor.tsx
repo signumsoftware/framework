@@ -49,9 +49,8 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
 
 export class WhatsNewImageHandler implements ImageHandlerBase {
 
-  pr: PropertyRoute;
-  constructor() {
-    this.pr = WhatsNewEntity.propertyRouteAssert(a => a.attachment);
+  get pr(): PropertyRoute {
+    return WhatsNewEntity.propertyRouteAssert(a => a.attachment);
   }
 
   toElement(val: ImageInfo): HTMLElement | undefined {

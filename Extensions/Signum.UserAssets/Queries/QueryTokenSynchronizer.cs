@@ -40,10 +40,10 @@ public static class QueryTokenSynchronizer
 
         Func<string, string?> rep = str =>
         {
-            if (Replacements.AutoReplacement == null)
+            if (Replacements.GlobalAutoReplacement == null)
                 return null;
 
-            Replacements.Selection? sel = Replacements.AutoReplacement(new Replacements.AutoReplacementContext("QueryToken", oldValue: str, newValues: null));
+            Replacements.Selection? sel = Replacements.GlobalAutoReplacement(new Replacements.AutoReplacementContext("QueryToken", oldValue: str, newValues: null));
 
             if (sel == null || sel.Value.NewValue == null)
                 return null;
@@ -106,9 +106,9 @@ public static class QueryTokenSynchronizer
                 }
 
 
-                if (Replacements.AutoReplacement != null)
+                if (Replacements.GlobalAutoReplacement != null)
                 {
-                    Replacements.Selection? sel = Replacements.AutoReplacement(new Replacements.AutoReplacementContext(
+                    Replacements.Selection? sel = Replacements.GlobalAutoReplacement(new Replacements.AutoReplacementContext(
                         replacementKey: "QueryToken",
                         oldValue: part,
                         newValues: result.SubTokens(qd, options).Select(a => a.Key).ToList()));
@@ -217,9 +217,9 @@ public static class QueryTokenSynchronizer
             }
         }
 
-        if (Replacements.AutoReplacement != null)
+        if (Replacements.GlobalAutoReplacement != null)
         {
-            Replacements.Selection? sel = Replacements.AutoReplacement(new Replacements.AutoReplacementContext(replacementKey: "FixValue", oldValue: valueString!, newValues: null));
+            Replacements.Selection? sel = Replacements.GlobalAutoReplacement(new Replacements.AutoReplacementContext(replacementKey: "FixValue", oldValue: valueString!, newValues: null));
 
             if (sel != null && sel.Value.NewValue != null)
             {
@@ -233,6 +233,7 @@ public static class QueryTokenSynchronizer
         if (allowRemoveToken)
             SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "- r: Remove token");
         SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
+        SafeConsole.WriteLineColor(ConsoleColor.Blue, "- t: Fix Token Instead");
         SafeConsole.WriteLineColor(ConsoleColor.Green, "- freeText: New value");
 
         string answer = Console.ReadLine()!;
@@ -248,6 +249,9 @@ public static class QueryTokenSynchronizer
         if (allowRemoveToken && a == "r")
             return FixTokenResult.RemoveToken;
 
+        if (a == "t")
+            return FixTokenResult.FixTokenInstead;
+
         if (a == "d")
             return FixTokenResult.DeleteEntity;
 
@@ -260,9 +264,9 @@ public static class QueryTokenSynchronizer
     {
         return replacements.GetOrCreate("cleanNames").GetOrCreate(type, () =>
         {
-            if (Replacements.AutoReplacement != null)
+            if (Replacements.GlobalAutoReplacement != null)
             {
-                Replacements.Selection? sel = Replacements.AutoReplacement(new Replacements.AutoReplacementContext(replacementKey: "FixValue.Type", oldValue: type, newValues: null));
+                Replacements.Selection? sel = Replacements.GlobalAutoReplacement(new Replacements.AutoReplacementContext(replacementKey: "FixValue.Type", oldValue: type, newValues: null));
 
                 if (sel != null && sel.Value.NewValue != null)
                     return sel.Value.NewValue;
@@ -313,16 +317,16 @@ public static class QueryTokenSynchronizer
         });
     }
 
-    public static FixTokenResult FixToken(Replacements replacements, ref QueryTokenEmbedded token, QueryDescription qd, SubTokensOptions options, string? remainingText, bool allowRemoveToken, bool allowReCreate)
+    public static FixTokenResult FixToken(Replacements replacements, ref QueryTokenEmbedded token, QueryDescription qd, SubTokensOptions options, string? remainingText, bool allowRemoveToken, bool allowReCreate, bool forceChange = false)
     {
         var t = token;
         using (DelayedConsole.Delay(() => { SafeConsole.WriteColor(t.ParseException == null ? ConsoleColor.Gray : ConsoleColor.Red, "  " + t.TokenString); Console.WriteLine(" " + remainingText); }))
         {
-            if (token.ParseException == null)
+            if (token.ParseException == null && !forceChange)
                 return FixTokenResult.Nothing;
 
             DelayedConsole.Flush();
-            FixTokenResult result = FixToken(replacements, token.TokenString, out QueryToken? resultToken, qd, options, remainingText, allowRemoveToken, allowReCreate);
+            FixTokenResult result = FixToken(replacements, token.TokenString, out QueryToken? resultToken, qd, options, remainingText, allowRemoveToken, allowReCreate, forceChange);
 
             if (result == FixTokenResult.Fix)
                 token = new QueryTokenEmbedded(resultToken!);
@@ -331,9 +335,8 @@ public static class QueryTokenSynchronizer
         }
     }
 
-    public static FixTokenResult FixToken(Replacements replacements, string original, out QueryToken? token, QueryDescription qd, SubTokensOptions options, string? remainingText, bool allowRemoveToken, bool allowReGenerate)
+    public static FixTokenResult FixToken(Replacements replacements, string original, out QueryToken? token, QueryDescription qd, SubTokensOptions options, string? remainingText, bool allowRemoveToken, bool allowReGenerate, bool forceChange = false)
     {
-
         if (TryParseRemember(replacements, original, qd, options, out QueryToken? current))
         {
             if (current!.FullKey() != original)
@@ -344,7 +347,8 @@ public static class QueryTokenSynchronizer
             }
             Console.WriteLine(remainingText);
             token = current;
-            return FixTokenResult.Fix;
+            if (!forceChange)
+                return FixTokenResult.Fix;
         }
 
         while (true)
@@ -542,4 +546,5 @@ public enum FixTokenResult
     DeleteEntity,
     SkipEntity,
     RegenerateEntity,
+    FixTokenInstead,
 }

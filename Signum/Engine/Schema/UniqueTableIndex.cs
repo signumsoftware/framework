@@ -356,7 +356,7 @@ public class IndexWhereExpressionVisitor : ExpressionVisitor
     {
         IndexWhereExpressionVisitor visitor = new IndexWhereExpressionVisitor(rootFiender);
 
-        var newLambda = (LambdaExpression)ExpressionCleaner.Clean(lambda)!;
+        var newLambda = (LambdaExpression)ExpressionEvaluator.PartialEval(lambda);
 
         visitor.Visit(newLambda.Body);
 

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Signum.API;
@@ -16,29 +17,32 @@ public static class CultureServer
         SignumCultureSelectorFilter.GetCurrentCulture = (context) =>
         {
             // 1 cookie (temporary)
-            var lang = ReadLanguageCookie(context);
-            if (lang != null)
-                return CultureInfo.GetCultureInfo(lang);
+            var ciCookie = GetCultureFromLanguageCookie(context.HttpContext);
+            if (ciCookie != null)
+                return ciCookie;
 
             // 2 user preference
-            if (UserHolder.CurrentUserCulture is { } ci)
-                return ci;
+            var ciUser = UserHolder.CurrentUserCulture;
+            if (ciUser != null )
+                return ciUser;
 
-            //3 requestCulture or default
-            CultureInfo? ciRequest = GetCultureRequest(context);
+            //3 HttpRequest.AcceptLanguage
+            CultureInfo? ciRequest = GetCultureFromAcceptedLanguage(context.HttpContext);
             if (ciRequest != null)
                 return ciRequest;
 
-            return wsb.DefaultCulture; //Translation
+            return wsb.DefaultCulture; //4 default
         };
     }
 
-    public static CultureInfo? GetCultureRequest(ActionContext actionContext)
+    public static bool PreferNeutralCultureForUsers = false;
+
+    public static CultureInfo? GetCultureFromAcceptedLanguage(HttpContext httpContext)
     {
-        var acceptedLanguages = actionContext.HttpContext.Request.GetTypedHeaders().AcceptLanguage;
+        var acceptedLanguages = httpContext.Request.GetTypedHeaders().AcceptLanguage;
         foreach (var lang in acceptedLanguages.Select(l => l.Value))
         {
-            var culture = CultureInfoLogic.ApplicationCultures(isNeutral: false).FirstOrDefault(ci => ci.Name == lang);
+            var culture = CultureInfoLogic.ApplicationCultures(isNeutral: PreferNeutralCultureForUsers).FirstOrDefault(ci => ci.Name == lang);
 
             if (culture != null)
                 return culture;
@@ -46,7 +50,7 @@ public static class CultureServer
             string? cleanLang = lang.Value.TryBefore('-') ?? lang.Value;
             if (cleanLang != null)
             {
-                culture = CultureInfoLogic.ApplicationCultures(isNeutral: false).FirstOrDefault(ci => ci.Name.StartsWith(cleanLang));
+                culture = CultureInfoLogic.ApplicationCultures(isNeutral: PreferNeutralCultureForUsers).FirstOrDefault(ci => ci.Name.StartsWith(cleanLang));
 
                 if (culture != null)
                     return culture;
@@ -55,9 +59,19 @@ public static class CultureServer
         return null;
     }
 
-    public static string? ReadLanguageCookie(ActionContext ac)
+    public static CultureInfo? GetCultureFromLanguageCookie(HttpContext httpContext)
     {
-        return ac.HttpContext.Request.Cookies.TryGetValue("language", out string? value) ? value : null;
+        var lang = httpContext.Request.Cookies.TryGetValue("language", out string? value) ? value : null;
+
+        if(lang != null)
+            return CultureInfo.GetCultureInfo(lang);
+
+        return null;
+    }
+
+    public static CultureInfoEntity? InferUserCulture(HttpContext httpContext)
+    {
+        return (GetCultureFromLanguageCookie(httpContext) ?? GetCultureFromAcceptedLanguage(httpContext))?.TryGetCultureInfoEntity();
     }
 
 }

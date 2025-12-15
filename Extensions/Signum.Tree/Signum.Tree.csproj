@@ -15,8 +15,7 @@
 		
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
 		<PackageReference Include="Signum.MSBuildTask" Version="10.0.0" />
-		<PackageReference Include="Signum.TSGenerator" Version="10.0.1" />
-		<PackageReference Include="Microsoft.SqlServer.Types" Version="160.1000.6" />
+		<PackageReference Include="Signum.TSGenerator" Version="10.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>

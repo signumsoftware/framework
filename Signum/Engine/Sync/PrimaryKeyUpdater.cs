@@ -84,7 +84,7 @@ internal class PrimaryKeyUpdater
     }
 
 
-    public SqlPreCommandSimple? UpdateFKToAnotherTable(ObjectName tn, DiffColumn difCol, IColumn tabCol, Func<ObjectName, ObjectName> changeName)
+    public SqlPreCommand? UpdateFKToAnotherTable(ObjectName tn, DiffColumn difCol, IColumn tabCol, Func<ObjectName, ObjectName> changeName, bool withHistory)
     {
         if (difCol.ForeignKey == null || tabCol.ReferenceTable == null || tabCol.AvoidForeignKey)
             return null;
@@ -109,6 +109,9 @@ internal class PrimaryKeyUpdater
 
         var message = @$"-- Column {tn}.{tabCol.Name} was referencing {oldFk} but now references {newFk}. An update is needed?";
         result.AlterSql(message + "\n" + result.Sql);
+        if (withHistory)
+            return new SqlPreCommand_WithHistory(normal: result, history: null);
+
         return result;
     }
 

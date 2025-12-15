@@ -212,6 +212,7 @@ export function TranslatedInstance(p: { ins: TranslatedInstanceClient.Translated
                       <TextArea
                         style={{ height: "24px", width: "90%" }}
                         minHeight="24px"
+						autoResize={true}
                         value={pair?.translatedText ?? ""}
                         onChange={handleChange}
                         onBlur={handleChange}

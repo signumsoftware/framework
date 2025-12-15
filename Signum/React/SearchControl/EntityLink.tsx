@@ -25,7 +25,7 @@ export default function EntityLink(p: EntityLinkProps): React.ReactElement {
 
   const settings = Navigator.getSettings(p.lite.EntityType);
 
-  if (!Navigator.isViewable(lite.EntityType, { isSearch: p.inSearch }))
+  if (!Navigator.isViewable(lite, { isSearch: p.inSearch }))
     return <span data-entity={liteKey(lite)} className={settings?.allowWrapEntityLink ? undefined : "try-no-wrap"}>{p.children ?? Navigator.renderLite(lite)}</span>;
 
 
