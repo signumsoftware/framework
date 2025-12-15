@@ -31,26 +31,45 @@ public partial class Table
         var main = new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}; --{3}"
                 .FormatWith(Name, this.PrimaryKey.Name.SqlEscape(isPostgres), variableOrId, comment ?? entity.ToString()));
 
-        if (isPostgres && declaration != null)
+
+        if(declaration != null)
         {
-            SqlPreCommandSimple ifStatement = AssertNotNull(entity.Id.VariableName!);
+            SqlPreCommandSimple ifStatement = AssertNotNull(entity.Id.VariableName!, this.Name.Name, isPostgres);
+            if (isPostgres)
+            {
+                var block = new SqlPreCommandPostgresDoBlock(
+                    declarations: [declaration],
+                    body: SqlPreCommand.Combine(Spacing.Simple, ifStatement, pre, collections, virtualMList, main)!
+                    );
 
-            var block = new SqlPreCommandPostgresDoBlock(
-                declarations: [declaration],
-                body: SqlPreCommand.Combine(Spacing.Simple, ifStatement, pre, collections, virtualMList, main)!
-                );
+                return block.SimplifyNested();
+            }
+            else
+            {
 
-            return block.SimplifyNested();
+                return SqlPreCommand.Combine(Spacing.Simple, declaration, ifStatement, pre, collections, virtualMList, main)!;
+            }
         }
 
-        return SqlPreCommand.Combine(Spacing.Simple, declaration, pre, collections, virtualMList, main)!;
+        return SqlPreCommand.Combine(Spacing.Simple, pre, collections, virtualMList, main)!;
     }
 
-    private static SqlPreCommandSimple AssertNotNull(string variableName)
+    private static SqlPreCommandSimple AssertNotNull(string variableName, string typeName, bool isPostgres)
     {
-        return new SqlPreCommandSimple(@$"IF {variableName} IS NULL THEN 
-    RAISE EXCEPTION 'Not found';
+        if (isPostgres)
+        {
+            return new SqlPreCommandSimple(@$"IF {variableName} IS NULL THEN 
+    RAISE EXCEPTION '{typeName} not found';
 END IF;");
+        }else
+        {
+            return new SqlPreCommandSimple(@$"IF({variableName} IS NULL)
+BEGIN
+	RAISERROR('{typeName} not found!', 11, 1);
+	RETURN;
+END;");
+        }
+
     }
 
     static GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand?>> giDeleteVirtualMListSync = new GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand?>>(
@@ -91,7 +110,7 @@ END IF;");
 
         var result = Schema.Current.Settings.IsPostgres ?
         new SqlPreCommandSimple(@$"{variableName} {columnType} = ({queryCommandString});") :
-        new SqlPreCommandSimple($"DECLARE {variableName} {columnType} = COALESCE(({queryCommandString}), CAST('{typeof(T).TypeName()} not found!' as {columnType}));");
+        new SqlPreCommandSimple($"DECLARE {variableName} {columnType} = ({queryCommandString});");
 
         return result;
     }

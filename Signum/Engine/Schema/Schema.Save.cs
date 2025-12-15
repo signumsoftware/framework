@@ -819,15 +819,19 @@ END $$;"); ;
             if (declare == null)
                 return update;
 
-            if (Schema.Current.Settings.IsPostgres)
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            var ifStatement = AssertNotNull(entity.Id.VariableName!, this.Name.Name, isPostgres);
+            if (isPostgres)
             {
                 return new SqlPreCommandPostgresDoBlock(
                     declarations: [declare],
-                    body: SqlPreCommand.Combine(Spacing.Simple, AssertNotNull(entity.Id.VariableName!), update)!
+                    body: SqlPreCommand.Combine(Spacing.Simple, ifStatement, update)!
                 ).SimplifyNested();
             }
             else
-                return SqlPreCommand.Combine(Spacing.Simple, declare, update);
+            {
+                return SqlPreCommand.Combine(Spacing.Simple, declare, ifStatement, update);
+            }
         }
 
         var vmis = VirtualMList.RegisteredVirtualMLists.TryGetC(this.Type);
