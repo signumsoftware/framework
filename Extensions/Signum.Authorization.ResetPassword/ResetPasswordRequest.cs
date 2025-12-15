@@ -70,3 +70,10 @@ public enum ResetPasswordMessage
     TheCodeOfYourLinkHasAlreadyBeenUsed,
     IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword,
 }
+
+public class ResetPasswordException : Exception
+{
+    public ResetPasswordException() { }
+    public ResetPasswordException(string? message) : base(message) { }
+    public ResetPasswordException(string? message, Exception inner) : base(message, inner) { }
+}
