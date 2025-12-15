@@ -12,6 +12,7 @@ import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity, QueryHelpEntit
 import { QueryString } from '@framework/QueryString';
 import { OmniboxClient } from '../Signum.Omnibox/OmniboxClient';
 import HelpOmniboxProvider from './HelpOmniboxProvider';
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { CultureInfoEntity } from '@framework/Signum.Basics';
 import { WidgetContext, onWidgets } from '@framework/Frames/Widgets';
 import { HelpIcon, HelpWidget } from './HelpWidget';
@@ -27,6 +28,12 @@ export namespace HelpClient {
     ChangeLogClient.registerChangeLogModule("Signum.Help", () => import("./Changelog"));
 
     OmniboxClient.registerProvider(new HelpOmniboxProvider());
+
+    OmniboxSpecialAction.registerSpecialAction({
+      allowed: () => AppContext.isPermissionAuthorized(HelpPermissions.ExportHelp),
+      key: "ImportHelp",
+      onClick: () => Promise.resolve("/help/import")
+    });
 
     options.routes.push({ path: "/help", element: <ImportComponent onImport={() => import("./Pages/HelpIndexPage")} /> });
     options.routes.push({ path: "/help/namespace/:namespace", element: <ImportComponent onImport={() => import("./Pages/NamespaceHelpPage")} /> });
