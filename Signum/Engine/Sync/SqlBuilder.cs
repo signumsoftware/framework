@@ -499,7 +499,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
             {
                 var pg = ftindex.Postgres;
 
-                return new SqlPreCommandSimple($"CREATE INDEX {ftindex.IndexName} ON {ftindex.Table} USING GIN ({pg.TsVectorColumnName.SqlEscape(true)});");
+                return new SqlPreCommandSimple($"CREATE INDEX {ftindex.IndexName} ON {ftindex.Table.Name} USING GIN ({pg.TsVectorColumnName.SqlEscape(true)});");
             }
         }
         else
