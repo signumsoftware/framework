@@ -58,6 +58,15 @@ public class ResetPasswordController : ControllerBase
         return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
     }
 
+    [HttpPost("api/auth/requestNewLink"), SignumAllowAnonymous]
+    public void RequestNewLink([Required, FromBody] string code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+            throw new ApplicationException(ResetPasswordMessage.TheCodeOfYourLinkIsIncorrect.NiceToString());
+
+        ResetPasswordRequestLogic.RequestNewLink(code);
+    }
+
     private BadRequestObjectResult ModelError(string field, string error)
     {
         ModelState.AddModelError(field, error);
