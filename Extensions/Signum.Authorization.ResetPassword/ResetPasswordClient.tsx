@@ -30,10 +30,14 @@ export namespace ResetPasswordClient {
       return ajaxPost({ url: "/api/auth/forgotPasswordEmail" }, request);
     }
   
-    export function resetPassword(request: ResetPasswordRequest): Promise<AuthClient.API.LoginResponse > {
+    export function resetPassword(request: ResetPasswordRequest): Promise<AuthClient.API.LoginResponse> {
       return ajaxPost({ url: "/api/auth/resetPassword" }, request);
     }
   
+    export function requestNewLink(code: string): Promise<void> {
+      return ajaxPost({ url: "/api/auth/requestNewLink" }, code);
+    }
+
   export interface ResetPasswordRequest {
     code: string;
     newPassword: string;

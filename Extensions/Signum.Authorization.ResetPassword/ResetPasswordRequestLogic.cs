@@ -116,6 +116,21 @@ public static class ResetPasswordRequestLogic
         }
     }
 
+    public static void RequestNewLink(string code)
+    {
+        using (AuthLogic.Disable())
+        {
+            var rpr = Database.Query<ResetPasswordRequestEntity>()
+                 .Where(r => r.Code == code)
+                 .SingleOrDefaultEx();
+
+            if (rpr == null)
+                throw new ResetPasswordException(ResetPasswordMessage.TheCodeOfYourLinkIsIncorrect.NiceToString());
+
+            SendResetPasswordRequestEmail(rpr.User.Email!);
+        }
+    }
+
     public static void SendResetPasswordRequestEmail(string email)
     {
         try
@@ -213,7 +228,7 @@ public static class ResetPasswordRequestLogic
       .Execute();
     }
 
-    private static void CancelResetPasswordReques(UserEntity user)
+    private static void CancelResetPasswordRequests(UserEntity user)
     {
         Database.Query<ResetPasswordRequestEntity>()
             .Where(r => r.User.Is(user) && r.IsValid)
