@@ -430,8 +430,8 @@ public static class AzureADLogic
                 var user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserAzureADMixin>().OID == acuCtx.OID);
                 if (user == null)
                 {
-                    user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == acuCtx.UserName) ??
-                           (acuCtx.UserName.Contains("@") && config!.AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == acuCtx.UserName || a.UserName == acuCtx.UserName.Before("@")) : null);
+                    user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName.ToLower() == acuCtx.UserName.ToLower()) ??
+                           (acuCtx.UserName.Contains("@") && config!.AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == acuCtx.UserName || a.UserName.ToLower() == acuCtx.UserName.Before("@").ToLower()) : null);
                 }
 
                 if (user != null)
