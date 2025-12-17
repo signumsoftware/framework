@@ -10,6 +10,7 @@ import { softCast } from '../Globals';
 import { jsonObjectStream } from './jsonObjectStream';
 import { CollectionMessage } from '../Signum.External';
 import { OperationSymbol } from '../Signum.Operations';
+import ErrorModal from '../Modals/ErrorModal';
 
 
 interface MultiOperationProgressModalProps extends IModalProps<Operations.API.ErrorReport> {
@@ -45,10 +46,10 @@ export function MultiOperationProgressModal(p: MultiOperationProgressModalProps)
     p.lites.map(a => a.EntityType).distinctBy(a => a).map(a => p.lites.length == 1 ? getTypeInfo(a).niceName : getTypeInfo(a).nicePluralName).joinComma(CollectionMessage.And.niceToString()), [p.lites]);
 
   React.useEffect(() => {
-    consumeReader().finally(() => {
-      setShow(false);
-    })
-  }, [])
+    consumeReader()
+      .then(() => setShow(false),
+        e => ErrorModal.showErrorModal(e).then(() => setShow(false)));
+  }, []);
 
   function handleCancelClicked() {
     p.abortController.abort();
@@ -66,7 +67,7 @@ export function MultiOperationProgressModal(p: MultiOperationProgressModalProps)
         <h5 className="modal-title">{
           p.operation.operationType == "Delete" ? OperationMessage.Deleting.niceToString() :
             p.operation.operationType == "ConstructorFrom" ? p.operation.niceName :
-            OperationMessage.Executing0.niceToString(p.operation.niceName)}</h5>
+              OperationMessage.Executing0.niceToString(p.operation.niceName)}</h5>
         <button type="button" className="btn-close" data-dismiss="modal" aria-label={EntityControlMessage.Close.niceToString()} onClick={handleCancelClicked} />
       </div>
       <div className="modal-body">
@@ -74,7 +75,7 @@ export function MultiOperationProgressModal(p: MultiOperationProgressModalProps)
         {operationResultsRef.current.length == 0 && oldReuestStarted ?
           <ProgressBar now={100} variant="info" animated striped key={1} /> :
           <ProgressBar min={0} max={p.lites.length} now={operationResultsRef.current.length}
-            label={`[${operationResultsRef.current.length}/${p.lites.length}]`} key={2}/>
+            label={`[${operationResultsRef.current.length}/${p.lites.length}]`} key={2} />
         }
         {errors.length > 0 && <p className="text-danger">{OperationMessage._0Errors.niceToString().forGenderAndNumber(errors.length).formatHtml(<strong>{errors.length}</strong>)}</p>}
 

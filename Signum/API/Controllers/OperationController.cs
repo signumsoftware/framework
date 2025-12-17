@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
 using Microsoft.Extensions.Logging;
 using Signum.API.Filters;
 using Signum.API.Json;
@@ -214,14 +215,14 @@ public class OperationController : ControllerBase
     [Produces("application/x-ndjson")]
     public Task ConstructFromMultiple(string operationKey, [Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
-        return ForeachMultiple(request.Lites, async lite =>
+        return ForeachNDJson(request.Lites, cancellationToken, async lite =>
         {
             var entity = await lite.RetrieveAsync(cancellationToken);
             if (request.Setters.HasItems())
                 MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()), null);
             var op = request.GetOperationSymbol(operationKey, entity.GetType());
             OperationLogic.ServiceConstructFrom(entity, op, request.ParseArgs(op));
-        }, cancellationToken);
+        });
     }
 
 
@@ -230,14 +231,14 @@ public class OperationController : ControllerBase
     [Produces("application/x-ndjson")]
     public Task ExecuteMultiple(string operationKey, [Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
-        return ForeachMultiple(request.Lites, async lite =>
+        return ForeachNDJson(request.Lites, cancellationToken, async lite =>
         {
             var entity = await lite.RetrieveAsync(cancellationToken);
             if (request.Setters.HasItems())
                 MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()), null);
             var op = request.GetOperationSymbol(operationKey, entity.GetType());
             OperationLogic.ServiceExecute(entity, op, request.ParseArgs(op));
-        }, cancellationToken);
+        });
     }
 
 
@@ -246,7 +247,7 @@ public class OperationController : ControllerBase
     [Produces("application/x-ndjson")]
     public Task DeleteMultiple(string operationKey, [Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
-        return ForeachMultiple(request.Lites, async lite =>
+        return ForeachNDJson(request.Lites, cancellationToken, async lite =>
         {
             var entity = await lite.RetrieveAsync(cancellationToken);
             if (request.Setters.HasItems())
@@ -254,7 +255,7 @@ public class OperationController : ControllerBase
 
             var op = request.GetOperationSymbol(operationKey, entity.GetType());
             OperationLogic.ServiceDelete(entity, op, request.ParseArgs(op));
-        }, cancellationToken);
+        });
     }
 
     public class OperationResult
@@ -269,43 +270,22 @@ public class OperationController : ControllerBase
 
     }
 
-    async Task ForeachMultiple(IEnumerable<Lite<Entity>> lites, Func<Lite<Entity>, Task> action, CancellationToken cancellationToken)
-    {
-        var options = new JsonSerializerOptions
+    public Task ForeachNDJson(IEnumerable<Lite<Entity>> lites, CancellationToken cancellationToken, Func<Lite<Entity>, Task> action) =>
+        this.ForeachNDJson(lites, cancellationToken, async lite =>
         {
-            WriteIndented = false,
-            IncludeFields = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        };
-
-        options.Converters.AddRange(SignumServer.JsonSerializerOptions.Converters);
-
-        var context = this.HttpContext;
-        foreach (var lite in lites.Distinct())
-        {
-            if (cancellationToken.IsCancellationRequested)
-                return;
-
-            string? error = null;
             try
             {
                 await action(lite);
+                return new OperationResult(lite);
             }
             catch (Exception e)
             {
                 e.Data["lite"] = lite;
                 e.LogException();
-                error = e.Message;
+                return new OperationResult(lite) { Error = e.Message };
             }
+        });
 
-            var json = JsonSerializer.Serialize(new OperationResult(lite) { Error = error }, options);
-            if (json.Contains("\n"))
-                throw new InvalidOperationException("\n in Json object found!");
-
-            await context.Response.WriteAsync(json + "\n");
-            await context.Response.Body.FlushAsync();
-        }
-    }
 
     public class ProgressStep<T>
     {
@@ -319,8 +299,6 @@ public class OperationController : ControllerBase
         public T? Result;
         public HttpError? Error;
     }
-
-
 
     public class MultiOperationRequest : BaseOperationRequest
     {
@@ -619,5 +597,33 @@ public static class ControllerProgressExtension
         }
 
         //await task; //avoid throwing the exception
+    }
+
+    public static async Task ForeachNDJson<T, TResult>(this ControllerBase controller, IEnumerable<T> lites, CancellationToken cancellationToken, Func<T, Task<TResult>> action)
+    {
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = false,
+            IncludeFields = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
+
+        options.Converters.AddRange(SignumServer.JsonSerializerOptions.Converters);
+
+        var context = controller.HttpContext;
+        foreach (var lite in lites.Distinct())
+        {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            var s = await action(lite);
+
+            var json = JsonSerializer.Serialize(s, options);
+            if (json.Contains("\n"))
+                throw new InvalidOperationException("\n in Json object found!");
+
+            await context.Response.WriteAsync(json + "\n");
+            await context.Response.Body.FlushAsync();
+        }
     }
 }

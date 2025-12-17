@@ -16,7 +16,7 @@ import { ProgressModal, ProgressModalOptions } from "./Operations/ProgressModal"
 import { QuickLinkClient, QuickLinkExplore } from "./QuickLinkClient";
 import { getOperationInfo, getQueryKey, getTypeInfo, getTypeName, GraphExplorer, OperationInfo, OperationType, QueryTokenString, Type, TypeInfo } from './Reflection';
 import { SearchControlLoaded } from "./Search";
-import * as ContexualItems from './SearchControl/ContextualItems';
+import * as ContextualItems from './SearchControl/ContextualItems';
 import { ContextualItemsContext, ContextualMenuItem } from './SearchControl/ContextualItems';
 import { ajaxPost, ajaxPostRaw, WebApiHttpError } from './Services';
 import { FilterOperation } from "./Signum.DynamicQuery";
@@ -35,7 +35,7 @@ export namespace Operations {
 
   export function start(): void {
     ButtonBarManager.onButtonBarRender.push(EntityOperations.getEntityOperationButtons);
-    ContexualItems.onContextualItems.push(ContextualOperations.getOperationsContextualItems);
+    ContextualItems.onContextualItems.push(ContextualOperations.getOperationsContextualItems);
 
     AppContext.clearSettingsActions.push(clearOperationSettings);
 
@@ -318,12 +318,12 @@ export namespace Operations {
     }
 
     export interface ErrorReport {
-      errors: { [liteKey: string]: string; }
+      errors: { [liteKey: string]: string | undefined; }
     }
 
     export interface OperationResult {
       entity: Lite<Entity>;
-      error: string;
+      error?: string;
     }
 
     export interface ProgressStep<T> {
