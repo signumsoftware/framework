@@ -374,12 +374,20 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
 
   const entityType = p.response.entityType!;
   const selEntityRef = React.useRef<Lite<Entity> | null>(null);
+  const previousResponseRef = React.useRef<ToolbarResponse<ToolbarMenuEntity> | null>(null);
   const forceUpdate = useForceUpdate();
 
   function setSelectedEntity(entity: Lite<Entity> | null) {
     selEntityRef.current = entity;
     forceUpdate();
   }
+
+  React.useEffect(() => {
+    if (previousResponseRef.current && !is(previousResponseRef.current.content, p.response.content)) {
+      setSelectedEntity(null);
+    }
+    previousResponseRef.current = p.response;
+  }, [p.response]);
 
 
   const entities = useAPI(() => Finder.API.fetchAllLites({ types: entityType }), [entityType]);
@@ -394,12 +402,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
       if (!is(active.menuWithEntity.entity, selEntityRef.current))
         setSelectedEntity(active.menuWithEntity.entity);
     }
-    //else if (active != null)
-    else if (active && !active.menuWithEntity)
-      setSelectedEntity(null);
-
   }, [active, p.response]);
-
   React.useEffect(() => {
 
     if (selEntityRef.current && !selEntityRef.current.model && entities) {
@@ -508,19 +511,17 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
     return p.response.elements?.onlyOrNull(a => a.content!.id!.toString() == sel);
   });
 
-  //function handleSetShow(value: ToolbarResponse<any>, e: React.SyntheticEvent | null) {
-  //  localStorage.setItem(key, value.content!.id!.toString());
+  React.useEffect(() => {
 
-  //  setSelectedOption(value);
+    if (p.ctx.active) {
+      const menu = p.response.elements?.firstOrNull(e => containsResponse(e, p.ctx.active!.response!));
+      if (menu && menu !== selectedOption) {
+        setSelectedOption(menu);
+        localStorage.setItem(key, menu.content!.id!.toString());
+      }
+    }
+  }, [p.ctx.active, p.response.elements]);
 
-  //  if (value && e) {
-  //    var autoSelect = value.elements?.firstOrNull(a => a.autoSelect && !a.withEntity);
-  //    if (autoSelect) {
-  //      responseClick(autoSelect, p.selectedEntity, e, p.ctx);
-  //    }
-
-  //  }
-  //}
   function handleSetShow(value: ToolbarResponse<any>, e: React.SyntheticEvent | null) {
     localStorage.setItem(key, value.content!.id!.toString());
     setSelectedOption(value);
@@ -530,15 +531,6 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
       responseClick(autoSelect, null, undefined, p.ctx);
     }
   }
-
-  React.useEffect(() => {
-
-    if (p.ctx.active) {
-      const menu = p.response.elements?.firstOrNull(e => containsResponse(e, p.ctx.active!.response!));
-      if (menu != null && menu != selectedOption)
-        handleSetShow(menu, null);
-    }
-  }, [p.ctx.active]);
 
   const icon = ToolbarConfig.coloredIcon(parseIcon(p.response.iconName), p.response.iconColor);
   const title = p.response.label || getToString(p.response.content);

@@ -40,17 +40,29 @@ internal class PgTsVectorColumnToken : QueryToken
 
     public override string ToString() => column.Name;
 
-    static MethodInfo miGetTsVectorColumna = ReflectionTools.GetMethodInfo(() => TsVectorExtensions.GetTsVectorColumn(null!, ""));
+    static MethodInfo miGetTsVectorColumn = ReflectionTools.GetMethodInfo(() => TsVectorExtensions.GetTsVectorColumn(null!, ""));
+    static MethodInfo miGetTsVectorColumnMList = ReflectionTools.GetMethodInfo(() => TsVectorExtensions.GetTsVectorColumn<Entity, string>(null!, "")).GetGenericMethodDefinition()!;
 
     public override string NiceTypeName => $"TsVector ({GetColumnsRoutes().ToString(a => a.PropertyString(), ", ")})";
 
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
-        var exp = this.parent.BuildExpression(context);
+        if (this.parent is CollectionElementToken cet)
+        {
+            var ept = MListElementPropertyToken.AsMListEntityProperty(cet.Parent!);
+            var baseExpression = context.Replacements.GetOrThrow(parent).RawExpression;
+            var mi = miGetTsVectorColumnMList.MakeGenericMethod(baseExpression.Type.GetGenericArguments());
 
-        var entity = exp.ExtractEntity(false);
+            return Expression.Call(null, mi, baseExpression, Expression.Constant(this.column.Name));
+        }
+        else
+        {
+            var exp = this.parent.BuildExpression(context);
 
-        return Expression.Call(null, miGetTsVectorColumna, entity, Expression.Constant(this.column.Name));
+            var entity = exp.ExtractEntity(false);
+
+            return Expression.Call(null, miGetTsVectorColumn, entity, Expression.Constant(this.column.Name));
+        }
     }
 
     protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)

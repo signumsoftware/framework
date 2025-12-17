@@ -135,12 +135,22 @@ internal class OrderByRewriter : DbExpressionVisitor
 
         ReadOnlyCollection<OrderExpression>? orderings = null;
 
-        if (isOuterMost && !IsCountSumOrAvg(select) || select.Top != null)
+        if (isOuterMost && !IsCountSumOrAvg(select))
         {
             AppendKeys();
 
             orderings = gatheredOrderings;
-            //gatheredOrderings = null; Orders could still be usefull to the parent in a CROSS APPLY (SELECT TOP X)
+
+            gatheredOrderings = null;
+        }
+        else if (select.Top != null)
+        {
+            AppendKeys();
+
+            orderings = gatheredOrderings;
+
+            if (IsOne(select.Top))
+                gatheredOrderings = null; //Orders could still be usefull to the parent in a CROSS APPLY (SELECT TOP X)
         }
 
         if (AreEqual(select.OrderBy, orderings) && !select.IsReverse && newColumns == null)
@@ -148,6 +158,17 @@ internal class OrderByRewriter : DbExpressionVisitor
 
         return new SelectExpression(select.Alias, select.IsDistinct, select.Top, (IEnumerable<ColumnDeclaration>?)newColumns ?? select.Columns,
             select.From, select.Where, orderings, select.GroupBy, select.SelectOptions & ~SelectOptions.Reverse);
+    }
+
+    bool IsOne(Expression top)
+    {
+        if (top is SqlConstantExpression sc)
+            return ((int)sc.Value!) == 1;
+
+        if (top is ConstantExpression c)
+            return ((int)c.Value!) == 1;
+
+        return false;
     }
 
     protected internal override Expression VisitRowNumber(RowNumberExpression rowNumber)

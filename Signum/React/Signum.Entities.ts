@@ -544,6 +544,7 @@ export namespace OperationMessage {
   export const Operation01IsNotAuthorized: MessageKey = new MessageKey("OperationMessage", "Operation01IsNotAuthorized");
   export const Confirm: MessageKey = new MessageKey("OperationMessage", "Confirm");
   export const PleaseConfirmYouWouldLikeToDelete0FromTheSystem: MessageKey = new MessageKey("OperationMessage", "PleaseConfirmYouWouldLikeToDelete0FromTheSystem");
+  export const As: MessageKey = new MessageKey("OperationMessage", "As");
   export const PleaseConfirmYouWouldLikeTo01: MessageKey = new MessageKey("OperationMessage", "PleaseConfirmYouWouldLikeTo01");
   export const TheOperation0DidNotReturnAnEntity: MessageKey = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
   export const Logs: MessageKey = new MessageKey("OperationMessage", "Logs");

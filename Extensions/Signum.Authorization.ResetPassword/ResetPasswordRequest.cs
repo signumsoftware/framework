@@ -15,11 +15,28 @@ public class ResetPasswordRequestEntity : Entity
 
     public bool Used { get; set; }
 
-    private static Expression<Func<ResetPasswordRequestEntity, bool>> IsValidExpression = r =>
-        !r.Used && Clock.Now < r.RequestDate.AddHours(2);
+    private static Expression<Func<ResetPasswordRequestEntity, bool>> IsValidExpression = r => 
+        !r.Used && !r.IsExpired;
 
     [ExpressionField(nameof(IsValidExpression))]
     public bool IsValid => IsValidExpression.Evaluate(this);
+
+    private static Expression<Func<ResetPasswordRequestEntity, bool>> IsExpiredExpression = r => 
+        Clock.Now >= r.RequestDate.AddHours(2);
+
+    [ExpressionField(nameof(IsExpiredExpression))]
+    public bool IsExpired => IsExpiredExpression.Evaluate(this);
+
+    public string? Validate()
+    {
+        if (this.IsValid)
+            return null;
+
+        if (this.Used)
+            return $"{ResetPasswordMessage.TheCodeOfYourLinkHasAlreadyBeenUsed.NiceToString()}. {ResetPasswordAuthMessage.PleaseConsiderRequestingANewLink.NiceToString()}";
+
+        return $"{ResetPasswordMessage.YourResetPasswordRequestHasExpired.NiceToString()}. {ResetPasswordAuthMessage.PleaseConsiderRequestingANewLink.NiceToString()}";
+    }
 }
 
 [AutoInit]
@@ -27,7 +44,6 @@ public static class ResetPasswordRequestOperation
 {
     public static readonly ExecuteSymbol<ResetPasswordRequestEntity> Execute;
 }
-
 
 public enum ResetPasswordMessage
 {
@@ -52,4 +68,19 @@ public enum ResetPasswordMessage
     TheCodeOfYourLinkIsIncorrect,
     TheCodeOfYourLinkHasAlreadyBeenUsed,
     IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword,
+}
+
+[AllowUnauthenticated]
+public enum ResetPasswordAuthMessage
+{
+    PleaseConsiderRequestingANewLink,
+    RequestNewLink,
+    NewLinkToResetPasswordHasBeenSentSuccessfully,
+}
+
+public class ResetPasswordException : Exception
+{
+    public ResetPasswordException() { }
+    public ResetPasswordException(string? message) : base(message) { }
+    public ResetPasswordException(string? message, Exception inner) : base(message, inner) { }
 }

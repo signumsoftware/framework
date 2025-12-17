@@ -21,7 +21,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
         if (AuthLogic.TryRetrieveUser(userName, passwordHashes) != null)
             return AuthLogic.Login(userName, passwordHashes, out authenticationType); //Database is faster than Active Directory
 
-        UserEntity? user = LoginWithActiveDirectoryRegistry(userName, password);
+        UserEntity? user = LoginWithWindowsADRegistry(userName, password);
         if (user != null)
         {
             authenticationType = "adRegistry";
@@ -31,7 +31,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
         return AuthLogic.Login(userName, passwordHashes, out authenticationType);
     }
 
-    public virtual UserEntity? LoginWithActiveDirectoryRegistry(string userName, string password)
+    public virtual UserEntity? LoginWithWindowsADRegistry(string userName, string password)
     {
         using (AuthLogic.Disable())
         {
@@ -62,7 +62,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
                                 if (user.State == UserState.Deactivated)
                                     throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
 
-                                AuthLogic.OnUserLogingIn(user, nameof(LoginWithActiveDirectoryRegistry));
+                                AuthLogic.OnUserLogingIn(user, nameof(LoginWithWindowsADRegistry));
                                 return user;
                             }
                             else
@@ -75,7 +75,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
                                 if (user.State == UserState.Deactivated)
                                     throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
 
-                                AuthLogic.OnUserLogingIn(user, nameof(LoginWithActiveDirectoryRegistry));
+                                AuthLogic.OnUserLogingIn(user, nameof(LoginWithWindowsADRegistry));
                                 return user;
                             }
                         }

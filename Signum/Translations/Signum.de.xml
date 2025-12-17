@@ -411,6 +411,7 @@
     <Member Name="_0Errors" Description="{0} Fehler" />
     <Member Name="AddSetter" Description="Setter hinzufügen" />
     <Member Name="AreYouSureYouWantToCancelTheOperation" Description="Sind Sie sicher, dass Sie die Operation abbrechen wollen?" />
+    <Member Name="As" Description="als" />
     <Member Name="BulkModifications" Description="Massenänderungen" />
     <Member Name="CancelOperation" Description="Operation abbrechen?" />
     <Member Name="ClosingThisModalOrBrowserTabWillCancelTheOperation" Description="Durch Schließen dieses Modals (oder der Browser-Registerkarte!) wird der Vorgang auf dem Server abgebrochen." />

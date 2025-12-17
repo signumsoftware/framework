@@ -159,12 +159,12 @@ function getDefaultConfirmMessage(coc: CellOperationContext<Entity>) {
 
   if (coc.operationInfo.operationType == "Delete")
     return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(
-      <strong>{getToString(coc.lite)} ({getTypeInfo(coc.lite.EntityType).niceName} {coc.lite.id})</strong>
+      <strong>{getToString(coc.lite)} ({OperationMessage.As.niceToString()} {getTypeInfo(coc.lite.EntityType).niceName} {coc.lite.id})</strong>
     );
   else
     return OperationMessage.PleaseConfirmYouWouldLikeTo01.niceToString().formatHtml(
       <strong>{coc.operationInfo.niceName}</strong>,
-      <strong>{getToString(coc.lite)} ({getTypeInfo(coc.lite.EntityType).niceName} {coc.lite.id})</strong>
+      <strong>{getToString(coc.lite)} ({OperationMessage.As.niceToString()} {getTypeInfo(coc.lite.EntityType).niceName} {coc.lite.id})</strong>
     );
 
 }
