@@ -155,6 +155,14 @@ public class HelpController : ControllerBase
         return MimeMapping.GetFileStreamResult(new MemoryStream(bytes), fileName);
     }
 
+    [HttpGet("api/help/getImageId")]
+    [ResponseCache(Duration = 90 * 24 * 60 * 60)]
+    public ActionResult<string> GetImageId([Required, FromQuery] Guid guid)
+    {
+        var id = HelpLogic.GetImageId(guid);
+        return id is null ? NotFound() : id.Value.ToString();
+    }
+
     [HttpPost("api/help/importPreview")]
     public HelpImportPreviewModel ImportPreview([Required, FromBody] FileUpload file)
     {

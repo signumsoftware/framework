@@ -171,6 +171,9 @@ export namespace HelpClient {
       return ajaxPost({ url: "/api/help/applyImport" }, { file, model });
     }
 
+    export function getImageId(guid: string): Promise<string> {
+      return ajaxGet({ url: `/api/help/getImageId?guid=${guid}`, cache: 'default' as RequestCache });
+    }
 
 
   }
