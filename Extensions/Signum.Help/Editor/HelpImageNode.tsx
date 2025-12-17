@@ -4,8 +4,8 @@ import { ImageInfo } from '../../Signum.HtmlEditor/Extensions/ImageExtension/Ima
 
 export class HelpImageNode extends ImageNodeBase {
   static {
-    this.converter = new HelpImageHandler();
     this.dataImageIdAttribute = "data-help-image-id";
+    this.handler = new HelpImageHandler();
   }
 
   static getType(): string {
