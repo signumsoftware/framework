@@ -68,11 +68,12 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
     public string? GetFullWebPath(IFilePath fp)
     {
-        if (WebDownload() == S3WebDownload.None)
+        var s3download = WebDownload();
+        if (s3download == S3WebDownload.None)
             return null;
 
         var (bucket, key) = this.GetBucketAndKey(fp);
-        if (WebDownload() == S3WebDownload.PreSignedUrl)
+        if (s3download == S3WebDownload.PreSignedUrl)
         {
             var request = new GetPreSignedUrlRequest
             {
@@ -84,22 +85,28 @@ public class S3FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             var result = Client.GetPreSignedURL(request);
             if (Client.Config.UseHttp && result.StartsWith("https:"))
                 return "http:" + result.After("https:");
+            return result;
+
         }
-
-        // Public URL logic
-        var config = Client.Config as AmazonS3Config;
-        var endpoint = config?.ServiceURL?.TrimEnd('/');
-
-        if (!string.IsNullOrEmpty(endpoint))
+        else if (s3download == S3WebDownload.DirectUrl)
         {
-            // Path-style: http(s)://endpoint/bucket/key
-            return $"{endpoint}/{bucket}/{key}";
+            // Public URL logic
+            var config = Client.Config as AmazonS3Config;
+            var endpoint = config?.ServiceURL?.TrimEnd('/');
+
+            if (!string.IsNullOrEmpty(endpoint))
+            {
+                // Path-style: http(s)://endpoint/bucket/key
+                return $"{endpoint}/{bucket}/{key}";
+            }
+            else
+            {
+                // Default AWS virtual-hosted–style: https://bucket.s3.amazonaws.com/key
+                return $"https://{bucket}.s3.amazonaws.com/{key}";
+            }
         }
         else
-        {
-            // Default AWS virtual-hosted–style: https://bucket.s3.amazonaws.com/key
-            return $"https://{bucket}.s3.amazonaws.com/{key}";
-        }
+            throw new UnexpectedValueException(s3download);
     }
 
     void EnsureBucketExists(string bucket)
