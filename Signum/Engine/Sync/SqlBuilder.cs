@@ -273,10 +273,10 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
     public class DefaultConstraint
     {
         public string ColumnName;
-        public string Name;
+        public string? Name;
         public string QuotedDefinition;
 
-        public DefaultConstraint(string columnName, string name, string quotedDefinition)
+        public DefaultConstraint(string columnName, string? name, string quotedDefinition)
         {
             ColumnName = columnName;
             Name = name;
@@ -685,14 +685,22 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
             constraintName.SqlEscape(isPostgres)));
     }
 
-    public SqlPreCommand AlterTableDropDefaultConstaint(ObjectName tableName, DiffColumn column) => 
-        AlterTableDropDefaultConstaint(tableName, column.Name, column.DefaultConstraint!.Name!);
-    public SqlPreCommand AlterTableDropDefaultConstaint(ObjectName tableName, string columnName, string constraintName)
+    public SqlPreCommand AlterTableDropDefaultConstaint(ITable tableName, DiffColumn column, bool withHistory)
+    {
+        if (!withHistory)
+            return AlterTableDropDefaultConstaint(tableName.Name, column.Name, column.DefaultConstraint!.Name!);
+
+        return new SqlPreCommand_WithHistory(
+            normal: AlterTableDropDefaultConstaint(tableName.Name, column.Name, column.DefaultConstraint!.Name!),
+            history: AlterTableDropDefaultConstaint(tableName.SystemVersioned!.TableName, column.Name, column.DefaultConstraint!.Name!)
+        );
+    }
+    public SqlPreCommand AlterTableDropDefaultConstaint(ObjectName tableName, string columnName, string? constraintName)
     {
         if (isPostgres)
             return new SqlPreCommandSimple($"ALTER TABLE {tableName} ALTER COLUMN {columnName.SqlEscape(isPostgres)} DROP DEFAULT;");
         else
-            return AlterTableDropConstraint(tableName, constraintName)!;
+            return AlterTableDropConstraint(tableName, constraintName!)!;
     }
 
     public SqlPreCommandSimple AlterTableAddDefaultConstraint(ObjectName tableName, DefaultConstraint defCons)
@@ -700,7 +708,7 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
         if (isPostgres)
             return new SqlPreCommandSimple($"ALTER TABLE {tableName} ALTER COLUMN {defCons.ColumnName.SqlEscape(IsPostgres)} SET DEFAULT {defCons.QuotedDefinition};");
         else
-            return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {defCons.Name.SqlEscape(IsPostgres)} DEFAULT {defCons.QuotedDefinition} FOR {defCons.ColumnName.SqlEscape(IsPostgres)};");
+            return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {defCons.Name!.SqlEscape(IsPostgres)} DEFAULT {defCons.QuotedDefinition} FOR {defCons.ColumnName.SqlEscape(IsPostgres)};");
     }
 
     public SqlPreCommandSimple AlterTableAddCheckConstraint(ObjectName tableName, CheckConstraint checkCons)

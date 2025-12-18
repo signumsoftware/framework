@@ -314,6 +314,9 @@ public static class SchemaSynchronizer
                               removeOld: (cn, hisCol) => sqlBuilder.AlterTableDropColumn(hisT.Name, hisCol.Name),
                               mergeBoth: (cn, norCol, hisCol) =>
                               {
+                                  var dropDefault = hisCol.DefaultConstraint != null ?
+                                   sqlBuilder.AlterTableDropDefaultConstaint(hisT.Name, hisCol.Name, hisCol.DefaultConstraint?.Name) : null;
+
                                   var rename = !object.Equals(norCol.Name, hisCol.Name) ? sqlBuilder.RenameColumn(hisT.Name, hisCol.Name, norCol.Name) : null;
 
                                   var alterColumn = norCol.Nullable != hisCol.Nullable ||
@@ -321,7 +324,7 @@ public static class SchemaSynchronizer
                                      !norCol.SizeEquals(hisCol) ?
                                       sqlBuilder.AlterTableAlterDiffColumn(hisT.Name, norCol, hisCol) : null;
 
-                                  return new[] { rename, alterColumn }.Combine(Spacing.Simple);
+                                  return new[] { dropDefault, rename, alterColumn }.Combine(Spacing.Simple);
                               }
                           );
 
@@ -460,7 +463,7 @@ public static class SchemaSynchronizer
                                     var dropColumn = sqlBuilder.AlterTableDropColumn(tab, difCol.Name, withHistory);
 
                                     delayedDrops.Add(SqlPreCommand.Combine(Spacing.Simple,
-                                        difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropDefaultConstaint(tab.Name, difCol) : null,
+                                        difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropDefaultConstaint(tab, difCol, false) : null,
                                         SqlPreCommand_WithHistory.ForNormal(dropColumn),
                                         SqlPreCommand_WithHistory.ForHistory(dropColumn)
                                     ));
@@ -489,7 +492,7 @@ public static class SchemaSynchronizer
 
                                         difCol.Name == tabCol.Name ? null : sqlBuilder.RenameColumn(tab, difCol.Name, tabCol.Name, withHistory),
 
-                                        (!columnEquals || !defaultEquals) && difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropDefaultConstaint(tab.Name, difCol) : null,
+                                        (!columnEquals || !defaultEquals) && difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropDefaultConstaint(tab, difCol, withHistory) : null,
                                         (!columnEquals || !checkEquals) && difCol.CheckConstraint != null ? sqlBuilder.AlterTableDropConstraint(tab.Name, difCol.CheckConstraint.Name) : null,
 
                                         columnEquals ?
