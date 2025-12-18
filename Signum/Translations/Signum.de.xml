@@ -898,6 +898,7 @@
     <Member Name="BeInThePast" Description="in der Vergangenheit sein" />
     <Member Name="BeNotNull" Description="nicht null sein" />
     <Member Name="EachRowRepresentsAGroupOf0WithSame1" Description="Jede Zeile steht für eine Gruppe von {0} mit demselben {1}" />
+    <Member Name="Either0Or1ShouldBeSet" Description="Es sollte entweder {0} oder {1} gesetzt werden." />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Have0Decimals" Description="{0} Dezimalstellen haben" />
     <Member Name="HaveANumberOfElements01" Description="eine Nummer von Elementen {0} {1} haben" />
