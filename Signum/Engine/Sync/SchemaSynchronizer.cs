@@ -905,7 +905,7 @@ WHERE {where};"))!;
 
             return SqlPreCommand.Combine(Spacing.Simple,
                sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
-               sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name)?.Do(a => a.GoAfter = true),
+               sqlBuilder.AlterTableDropDefaultConstaint(table.Name, column.Name, tempDefault.Name)?.Do(a => a.GoAfter = true),
                table is TableMList tm ?
                new SqlPreCommandSimple($@"UPDATE mle SET
     {column.Name.SqlEscape(isPostgres)} = e.{tm.BackReference.ReferenceTable.PartitionId?.Name.SqlEscape(sqlBuilder.IsPostgres) ?? " -- ??"}
@@ -981,7 +981,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
 
         return SqlPreCommand.Combine(Spacing.Simple,
             sqlBuilder.AlterTableAddColumn(tableName, column, tempDefault, forHistory),
-            sqlBuilder.AlterTableDropConstraint(tableName, tempDefault.Name))!;
+            sqlBuilder.AlterTableDropDefaultConstaint(tableName, column.Name, tempDefault.Name))!;
     }
 
     private static bool NeedsDefaultValue(ITable table, IColumn column, bool forHistory)
