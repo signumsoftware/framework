@@ -27,9 +27,7 @@ class Upgrade_20251218_DockerfileFix : CodeUpgradeBase
             file.InsertAfterFirstLine(a => a.Contains($"COPY [\"{uctx.ApplicationName}/{uctx.ApplicationName}.csproj\", \"{uctx.ApplicationName}/\"]"),
                 $"COPY [\"{uctx.ApplicationName}/{uctx.ApplicationName}.json\", \"{uctx.ApplicationName}/\"]");
 
-            file.ReplaceBetween(
-                new ReplaceBetweenOption(a => a.Contains("WORKDIR /app"), +1),
-                new ReplaceBetweenOption(a => a.Contains("COPY --from=publish /app/publish ."), -1),
+            file.InsertBeforeFirstLine(a => a.Contains("COPY --from=publish /app/publish ."),
                 """
                 RUN apt-get update && \
                     apt-get install -y libgdiplus libfontconfig1 libgssapi-krb5-2 && \
