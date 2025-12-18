@@ -45,7 +45,7 @@ export function ProgressModal<T>(p: ProgressModalProps<T>): React.ReactElement {
     consumeReader()
       .then(() => setShow(false),
         e => ErrorModal.showErrorModal(e).then(() => setShow(false)));
-  }, [])
+  }, []);
 
   async function handleCancelClicked() {
 
@@ -78,7 +78,7 @@ export function ProgressModal<T>(p: ProgressModalProps<T>): React.ReactElement {
       </div>
       <div className="modal-body">
         <p>{p.options.message}</p>
-        {step == undefined || step.position == null || step.position == -1|| step.max == null || step.min == null ?
+        {step == undefined || step.position == null || step.position == -1 || step.max == null || step.min == null ?
           <ProgressBar now={100} variant="info" animated={oldRequestStarted} striped={oldRequestStarted} key={1} /> :
           <ProgressBar min={step.min ?? 0} max={step.max ?? 100} now={step.position ?? 0}
             label={step.min != 0 ?

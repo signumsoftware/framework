@@ -33,9 +33,9 @@ public class ResetPasswordRequestEntity : Entity
             return null;
 
         if (this.Used)
-            return ResetPasswordMessage.TheCodeOfYourLinkHasAlreadyBeenUsed.NiceToString();
+            return $"{ResetPasswordMessage.TheCodeOfYourLinkHasAlreadyBeenUsed.NiceToString()}. {ResetPasswordAuthMessage.PleaseConsiderRequestingANewLink.NiceToString()}";
 
-        return ResetPasswordMessage.YourResetPasswordRequestHasExpired.NiceToString();
+        return $"{ResetPasswordMessage.YourResetPasswordRequestHasExpired.NiceToString()}. {ResetPasswordAuthMessage.PleaseConsiderRequestingANewLink.NiceToString()}";
     }
 }
 
@@ -44,7 +44,6 @@ public static class ResetPasswordRequestOperation
 {
     public static readonly ExecuteSymbol<ResetPasswordRequestEntity> Execute;
 }
-
 
 public enum ResetPasswordMessage
 {
@@ -69,6 +68,14 @@ public enum ResetPasswordMessage
     TheCodeOfYourLinkIsIncorrect,
     TheCodeOfYourLinkHasAlreadyBeenUsed,
     IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword,
+}
+
+[AllowUnauthenticated]
+public enum ResetPasswordAuthMessage
+{
+    PleaseConsiderRequestingANewLink,
+    RequestNewLink,
+    NewLinkToResetPasswordHasBeenSentSuccessfully,
 }
 
 public class ResetPasswordException : Exception
