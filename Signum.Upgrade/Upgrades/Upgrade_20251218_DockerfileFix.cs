@@ -25,7 +25,7 @@ class Upgrade_20251218_DockerfileFix : CodeUpgradeBase
                 );
 
             file.InsertAfterFirstLine(a => a.Contains($"COPY [\"{uctx.ApplicationName}/{uctx.ApplicationName}.csproj\", \"{uctx.ApplicationName}/\"]"),
-                $"COPY [\"{uctx.ApplicationName}/{uctx.ApplicationName}.json\", \"{uctx.ApplicationName}/\"]");
+                $"COPY [\"{uctx.ApplicationName}/package.json\", \"{uctx.ApplicationName}/\"]");
 
             file.InsertBeforeFirstLine(a => a.Contains("COPY --from=publish /app/publish ."),
                 """
