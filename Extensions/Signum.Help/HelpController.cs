@@ -1,10 +1,9 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using Signum.API.Filters;
-using Signum.Basics;
 using Signum.Files;
-using Signum.UserAssets;
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 using System.IO;
 
 namespace Signum.Help;
@@ -156,9 +155,14 @@ public class HelpController : ControllerBase
     }
 
     [HttpGet("api/help/getImageId")]
-    [ResponseCache(Duration = 90 * 24 * 60 * 60)]
     public ActionResult<string> GetImageId([Required, FromQuery] Guid guid)
     {
+        Response.GetTypedHeaders().CacheControl = new CacheControlHeaderValue
+        {
+            Public = true,
+            MaxAge = TimeSpan.FromDays(365),
+        };
+
         var id = HelpLogic.GetImageId(guid);
         return id is null ? NotFound() : id.Value.ToString();
     }
