@@ -51,14 +51,35 @@
     <Member Name="Process" Description="Prozess" />
   </Type>
   <Type Name="ProcessMessage">
+    <Member Name="_0ProcessesExcecutingIn1_2" Description="{0} Prozesse, die in {1} / {2} ausgeführt werden" />
+    <Member Name="ApplicationName" Description="Anwendungsname" />
     <Member Name="ExceptionLines" Description="Ausnahmezeilen" />
+    <Member Name="ExecutingProcesses" Description="Ausführen von Prozessen" />
+    <Member Name="InitialDelayMilliseconds" Description="Anfangsverzögerung in Millisekunden" />
+    <Member Name="IsCancellationRequest" Description="Ist eine Abbruchsanfrage" />
+    <Member Name="JustMyProcesses" Description="Nur meine Prozesse" />
     <Member Name="LastProcess" Description="Letzter Prozess" />
+    <Member Name="LatestProcesses" Description="Letzte Prozesse" />
     <Member Name="Lines" Description="Linien" />
+    <Member Name="MachineName" Description="Maschinenname" />
+    <Member Name="MaxDegreeOfParallelism" Description="Maximaler Grad an Parallelität" />
+    <Member Name="NextPlannedExecution" Description="Nächste geplante Ausführung" />
+    <Member Name="None" Description="Keine" />
     <Member Name="OnlyActive" Description="Nur aktive" />
+    <Member Name="Process" Description="Prozess" />
     <Member Name="Process0IsNotRunningAnymore" Description="Prozess {0} wird nicht mehr ausgeführt" />
+    <Member Name="ProcessLogicStateLoading" Description="ProzessLogik-Zustand (laden...) " />
+    <Member Name="ProcessPanel" Description="Prozess-Panel" />
     <Member Name="ProcessSettings" Description="Prozess-Einstellungen" />
     <Member Name="ProcessStartIsGreaterThanProcessEnd" Description="Prozessstart ist größer als Prozessende" />
     <Member Name="ProcessStartIsNullButProcessEndIsNot" Description="Prozessstart ist null aber Prozessende nicht" />
+    <Member Name="Progress" Description="Fortschritt" />
+    <Member Name="Running" Description="LAUFEND" />
+    <Member Name="SimpleStatus" Description="Einfacher Status" />
+    <Member Name="Start" Description="Start" />
+    <Member Name="State" Description="Zustand" />
+    <Member Name="Stop" Description="Stopp" />
+    <Member Name="Stopped" Description="ANGEHALTEN" />
     <Member Name="SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway" Description="Aussetzen ist der sicherere Weg, um einen laufenden Prozess zu stoppen. Trotzdem Abbrechen?" />
   </Type>
   <Type Name="ProcessOperation">

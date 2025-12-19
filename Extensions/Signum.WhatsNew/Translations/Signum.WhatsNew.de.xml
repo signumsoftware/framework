@@ -25,11 +25,13 @@
     <Member Name="_0ContiansNoVersionForCulture1" Description="{0} enthält keine Version für Kultur '{1}'" />
     <Member Name="AllMyNews" Description="Alle meine Neuigkeiten" />
     <Member Name="BackToOverview" Description="Zurück zur Übersicht" />
+    <Member Name="Close0WhatsNew" Description="Neuigkeit {0} schließen" />
     <Member Name="CloseAll" Description="Alle schließen" />
     <Member Name="Downloads" Description="Downloads" />
     <Member Name="IsRead" Description="Ist gelesen" />
     <Member Name="Language" Description="Sprache" />
     <Member Name="MyActiveNews" Description="Meine aktiven News" />
+    <Member Name="New" Description="NEU" />
     <Member Name="NewNews" Description="Neuigkeiten" />
     <Member Name="News" Description="Neuigkeiten" />
     <Member Name="NewsPage" Description="News-Seite" />

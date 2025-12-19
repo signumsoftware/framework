@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { DateTime } from 'luxon'
 import { RouteObject } from 'react-router'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet, ajaxPost } from '@framework/Services';
@@ -17,7 +18,8 @@ import {
   CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity, DashboardLiteModel,
   HealthCheckPartEntity, CustomPartEntity,
   TextPartEntity,
-  ToolbarMenuPartEntity
+  ToolbarMenuPartEntity,
+  DashboardVariableMessage
 } from './Signum.Dashboard'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
@@ -35,6 +37,7 @@ import DashboardToolbarConfig from './DashboardToolbarConfig';
 import DashboardOmniboxProvider from './DashboardOmniboxProvider';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 import { parseIcon } from '@framework/Components/IconTypeahead';
+import { LinkButton } from '@framework/Basics/LinkButton';
 
 export namespace DashboardClient {
 
@@ -184,9 +187,16 @@ export namespace DashboardClient {
       }
     ));
 
-    GlobalVariables.set('UserName', () => AuthClient.currentUser().userName);
-  };
-
+    GlobalVariables.set('UserName', () => getToString(AuthClient.currentUser()));
+    GlobalVariables.set('UserGreeting', () => {
+      var hour = DateTime.now().hour;
+      if (hour < 5) return DashboardVariableMessage.GoodNight.niceToString();
+      if (hour < 12) return DashboardVariableMessage.GoodMorning.niceToString();
+      if (hour < 17) return DashboardVariableMessage.GoodAfternoon.niceToString();
+      if (hour < 21) return DashboardVariableMessage.GoodEvening.niceToString();
+      return DashboardVariableMessage.GoodNight.niceToString();
+    });
+  }
 
   export function home(): Promise<Lite<DashboardEntity> | null> {
     if (!Navigator.isViewable(DashboardEntity))
@@ -286,8 +296,12 @@ export namespace DashboardClient {
 
     export const customPartRenderers: Record<string /*typeName*/, Record<string /*customPartName*/, CustomPartRenderer>> = {};
 
-    export function registerCustomPartRenderer<T extends Entity>(type: Type<T>, customPartName: string, renderer: () => Promise<{ default: React.ComponentType<CustomPartProps<T>> }>, opts?: { withPanel?: boolean }): void {
-      const dic = customPartRenderers[type.typeName] ??= {};
+    export function getCustomPartRenderer<T extends Entity>(typeName: string | undefined): Record<string, CustomPartRenderer> | undefined {
+      return customPartRenderers[typeName ?? "global"];
+    }
+
+    export function registerCustomPartRenderer<T extends Entity = Entity>(type: Type<T> | null, customPartName: string, renderer: () => Promise<{ default: React.ComponentType<CustomPartProps<T>> }>, opts?: { withPanel?: boolean }): void {
+      const dic = customPartRenderers[type?.typeName ?? "global"] ??= {};
       dic[customPartName] = {
         renderer: renderer as () => Promise<{ default: React.ComponentType<CustomPartProps<Entity>> }>,
         withPanel: opts?.withPanel ?? true,
@@ -305,7 +319,7 @@ export interface CustomPartProps<T extends Entity> {
 
   partEmbedded: PanelPartEmbedded;
   content: CustomPartEntity;
-  entity: Lite<T>;
+  entity?: Lite<T>;
   dashboardController: DashboardController;
 }
 
@@ -335,9 +349,9 @@ export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo
   var title = SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
 
   return (
-    <a onClick={e => { e.preventDefault(); p.onClick(tis, qd); }} href="#" className="btn btn-sm btn-tertiary sf-create me-2" title={title}>
-      <FontAwesomeIcon icon={"plus"} /> {title}
-    </a>
+    <LinkButton onClick={e => { p.onClick(tis, qd); }} className="btn btn-sm btn-tertiary sf-create me-2" title={undefined}>
+      <FontAwesomeIcon aria-hidden={true} icon={"plus"} /> {title}
+    </LinkButton>
   );
 }
 
@@ -366,10 +380,8 @@ export function DashboardTitle(p: { dashboard: DashboardEntity }): React.JSX.Ele
 
   return (
     <div className="dashboard-title">
-      <FontAwesomeIcon icon={icon} color={p.dashboard.iconColor ?? undefined} />
+      <FontAwesomeIcon aria-hidden={true} icon={icon} color={p.dashboard.iconColor ?? undefined} />
       &nbsp;{title}
     </div>
   );
 }
-
-

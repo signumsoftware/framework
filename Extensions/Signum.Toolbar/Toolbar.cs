@@ -288,4 +288,13 @@ public enum ToolbarMessage
     [Description("No {0} selected")]
     No0Selected,
     ShowTogether,
+
+}
+
+[AllowUnauthenticated]
+public enum LayoutMessage
+{
+    JumpToMainContent,
+    [Description("Select a {0}")]
+    SelectA0_G,
 }

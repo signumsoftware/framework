@@ -88,6 +88,34 @@ export namespace ScheduledTaskLogOperation {
   export const CancelRunningTask : Operations.ExecuteSymbol<ScheduledTaskLogEntity> = registerSymbol("Operation", "ScheduledTaskLogOperation.CancelRunningTask");
 }
 
+export namespace ScheduledTaskMessage {
+  export const State: MessageKey = new MessageKey("ScheduledTaskMessage", "State");
+  export const InitialDelayMilliseconds: MessageKey = new MessageKey("ScheduledTaskMessage", "InitialDelayMilliseconds");
+  export const SchedulerMargin: MessageKey = new MessageKey("ScheduledTaskMessage", "SchedulerMargin");
+  export const MachineName: MessageKey = new MessageKey("ScheduledTaskMessage", "MachineName");
+  export const ApplicationName: MessageKey = new MessageKey("ScheduledTaskMessage", "ApplicationName");
+  export const NextExecution: MessageKey = new MessageKey("ScheduledTaskMessage", "NextExecution");
+  export const InMemoryQueue: MessageKey = new MessageKey("ScheduledTaskMessage", "InMemoryQueue");
+  export const RunningTasks: MessageKey = new MessageKey("ScheduledTaskMessage", "RunningTasks");
+  export const AvailableTasks: MessageKey = new MessageKey("ScheduledTaskMessage", "AvailableTasks");
+  export const Rule: MessageKey = new MessageKey("ScheduledTaskMessage", "Rule");
+  export const NextDate: MessageKey = new MessageKey("ScheduledTaskMessage", "NextDate");
+  export const ScheduledTask: MessageKey = new MessageKey("ScheduledTaskMessage", "ScheduledTask");
+  export const Running: MessageKey = new MessageKey("ScheduledTaskMessage", "Running");
+  export const Stopped: MessageKey = new MessageKey("ScheduledTaskMessage", "Stopped");
+  export const None: MessageKey = new MessageKey("ScheduledTaskMessage", "None");
+  export const SimpleStatus: MessageKey = new MessageKey("ScheduledTaskMessage", "SimpleStatus");
+  export const ThereIsNoActiveScheduledTask: MessageKey = new MessageKey("ScheduledTaskMessage", "ThereIsNoActiveScheduledTask");
+  export const ThereAreNoTasksRunning: MessageKey = new MessageKey("ScheduledTaskMessage", "ThereAreNoTasksRunning");
+  export const SchedulerTaskLog: MessageKey = new MessageKey("ScheduledTaskMessage", "SchedulerTaskLog");
+  export const StartTime: MessageKey = new MessageKey("ScheduledTaskMessage", "StartTime");
+  export const Remarks: MessageKey = new MessageKey("ScheduledTaskMessage", "Remarks");
+  export const Cancel: MessageKey = new MessageKey("ScheduledTaskMessage", "Cancel");
+  export const SchedulePanel: MessageKey = new MessageKey("ScheduledTaskMessage", "SchedulePanel");
+  export const Start: MessageKey = new MessageKey("ScheduledTaskMessage", "Start");
+  export const Stop: MessageKey = new MessageKey("ScheduledTaskMessage", "Stop");
+}
+
 export namespace ScheduledTaskOperation {
   export const Save : Operations.ExecuteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Save");
   export const Delete : Operations.DeleteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Delete");

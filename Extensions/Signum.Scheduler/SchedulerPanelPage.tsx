@@ -7,7 +7,7 @@ import EntityLink from '@framework/SearchControl/EntityLink'
 import { Operations } from '@framework/Operations'
 import { tryGetTypeInfos, getTypeInfos } from '@framework/Reflection'
 import { SchedulerClient } from './SchedulerClient'
-import { ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduledTaskLogOperation } from './Signum.Scheduler'
+import { ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduledTaskLogOperation, ScheduledTaskMessage } from './Signum.Scheduler'
 import { Lite } from "@framework/Signum.Entities";
 import { StyleContext } from "@framework/Lines";
 import { useAPIWithReload, useInterval } from '@framework/Hooks'
@@ -16,6 +16,7 @@ import { classes } from '@framework/Globals'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as AppContext from '@framework/AppContext';
 import { CopyHealthCheckButton } from '@framework/Components/CopyHealthCheckButton'
+import { AccessibleTable } from '../../Signum/React/Basics/AccessibleTable'
 
 
 export default function SchedulerPanelPage(): React.JSX.Element {
@@ -32,18 +33,16 @@ export default function SchedulerPanelPage(): React.JSX.Element {
  
 
   function handleStop(e: React.MouseEvent<any>) {
-    e.preventDefault();
     SchedulerClient.API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
-    e.preventDefault();
     SchedulerClient.API.start().then(() => reloadState());
   }
 
   
   if (state == undefined)
-    return <h2 className="display-6">SchedulerLogic state (loading...) </h2>;
+    return <h1 className="display-6 h2">SchedulerLogic state (loading...) </h1>;
 
   const s = state;
 
@@ -52,49 +51,49 @@ export default function SchedulerPanelPage(): React.JSX.Element {
 
   return (
     <div>
-      <h2 className="display-6"><FontAwesomeIcon icon="clock" /> Scheduler Panel <CopyHealthCheckButton
+      <h1 className="display-6 h2"><FontAwesomeIcon aria-hidden="true" icon="clock" />  {ScheduledTaskMessage.SchedulePanel.niceToString()} <CopyHealthCheckButton
         name={url.hostname + " Scheduler Task Runner"}
         healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/scheduler/healthCheck')}
         clickUrl={url.href}
-      /></h2>
+      /></h1>
       <div className="btn-toolbar">
-        <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
-        <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" :  "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
+        <button type="button" className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon aria-hidden="true" icon="play" />  {ScheduledTaskMessage.Start.niceToString()}</button>
+        <button type="button" className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon aria-hidden="true" icon="stop" />  {ScheduledTaskMessage.Stop.niceToString()}</button>
       </div >
       <div id="processMainDiv">
-        State: <strong>
+        {ScheduledTaskMessage.State.niceToString()}: <strong>
           {s.running ?
-            <span style={{ color: "green" }}> RUNNING </span> :
-            <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
+            <span style={{ color: "green" }}> {ScheduledTaskMessage.Running.niceToString()} </span> :
+            <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> {ScheduledTaskMessage.Stopped.niceToString()} </span>
           }</strong>
-        <a className="ms-2" href={toAbsoluteUrl("/api/scheduler/healthCheck")} target="_blank">SimpleStatus</a>
+        <a className="ms-2" href={toAbsoluteUrl("/api/scheduler/healthCheck")} target="_blank">{ScheduledTaskMessage.SimpleStatus.niceToString()}</a>
         <br />
-        InitialDelayMilliseconds: {s.initialDelayMilliseconds}
+        {ScheduledTaskMessage.InitialDelayMilliseconds.niceToString()}: {s.initialDelayMilliseconds}
         <br />
-        SchedulerMargin: {s.schedulerMargin}
+        {ScheduledTaskMessage.SchedulerMargin.niceToString()}: {s.schedulerMargin}
         <br />
-        MachineName: {s.machineName}
+        {ScheduledTaskMessage.MachineName.niceToString()}: {s.machineName}
         <br />
-        ApplicatonName: {s.applicationName}
+        {ScheduledTaskMessage.ApplicationName.niceToString()}: {s.applicationName}
         <br />
-        NextExecution: {s.nextExecution} ({s.nextExecution == undefined ? "-None-" : DateTime.fromISO(s.nextExecution).toRelative()})
+        {ScheduledTaskMessage.NextExecution.niceToString()}: {s.nextExecution} ({s.nextExecution == undefined ? ScheduledTaskMessage.None.niceToString() : DateTime.fromISO(s.nextExecution).toRelative()})
         <br />
         <InMemoryQueue queue={s.queue} onReload={reloadState} />
         <RunningTasks runningTasks={s.runningTask} onReload={reloadState} />
 
-        <h4>Available Tasks</h4>
+        <h2 className="h4">{ScheduledTaskMessage.AvailableTasks.niceToString()}</h2>
         <div>
           {getTypeInfos(ScheduledTaskEntity.memberInfo(a => a.task).type).map(t =>
             <SearchValueLine key={t.name} ctx={ctx} findOptions={{ queryName: t.name }} onExplored={reloadState} />)}
         </div>
-        <h4>{ScheduledTaskEntity.niceName()}</h4>
+        <h2 className="h4">{ScheduledTaskEntity.niceName()}</h2>
         <SearchControl
           findOptions={{
             queryName: ScheduledTaskEntity,
             pagination: { elementsPerPage: 10, mode: "Firsts" }
           }} />
 
-        <h4>{ScheduledTaskLogEntity.niceName()}</h4>
+        <h2 className="h4">{ScheduledTaskLogEntity.niceName()}</h2>
         <SearchControl
           findOptions={{
             queryName: ScheduledTaskLogEntity,
@@ -106,17 +105,19 @@ export default function SchedulerPanelPage(): React.JSX.Element {
   );
 }
 
-function InMemoryQueue({ queue, onReload }: { queue: SchedulerClient.SchedulerItemState[], onReload : ()=> void }) {
+function InMemoryQueue({ queue, onReload }: { queue: SchedulerClient.SchedulerItemState[], onReload: () => void }) {
   return (
     <div>
-      <h4>In Memory Queue</h4>
-      {queue.length == 0 ? <p> -- There is no active ScheduledTask -- </p> :
-        <table className="sf-search-results sf-stats-table">
+      <h2 className="h4">{ScheduledTaskMessage.InMemoryQueue.niceToString()}</h2>
+      {queue.length === 0 ? <p> -- {ScheduledTaskMessage.ThereIsNoActiveScheduledTask.niceToString()} -- </p> :
+        <AccessibleTable
+          aria-label={ScheduledTaskMessage.InMemoryQueue.niceToString()}
+          className="sf-search-results sf-stats-table">
           <thead>
             <tr>
-              <th>ScheduledTask</th>
-              <th>Rule</th>
-              <th>NextDate</th>
+              <th>{ScheduledTaskMessage.ScheduledTask.niceToString()}</th>
+              <th>{ScheduledTaskMessage.Rule.niceToString()}</th>
+              <th>{ScheduledTaskMessage.NextDate.niceToString()}</th>
             </tr>
           </thead>
           <tbody>
@@ -125,13 +126,14 @@ function InMemoryQueue({ queue, onReload }: { queue: SchedulerClient.SchedulerIt
                 <td><EntityLink lite={item.scheduledTask} inSearch="main" onNavigated={onReload} /></td>
                 <td>{item.rule} </td>
                 <td>{item.nextDate} ({DateTime.fromISO(item.nextDate).toRelative()})</td>
-              </tr>)
-            }
+              </tr>)}
           </tbody>
-        </table>}
+        </AccessibleTable>
+      }
     </div>
   );
 }
+
 
 function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerClient.SchedulerRunningTaskState[], onReload: () => void }) {
 
@@ -144,15 +146,17 @@ function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerClien
 
   return (
     <div>
-      <h4>Running Tasks</h4>
-      {runningTasks.length == 0 ? <p> -- There are not tasks running --</p> :
-        <table className="sf-search-results sf-stats-table">
+      <h2 className="h4">{ScheduledTaskMessage.RunningTasks.niceToString()}</h2>
+      {runningTasks.length === 0 ? <p> -- {ScheduledTaskMessage.ThereAreNoTasksRunning.niceToString()} --</p> :
+      <AccessibleTable
+          aria-label={ScheduledTaskMessage.RunningTasks.niceToString()}
+          className="sf-search-results sf-stats-table">
           <thead>
             <tr>
-              <th>SchedulerTaskLog</th>
-              <th>StartTime</th>
-              <th>Remarks</th>
-              <th>Cancel</th>
+              <th>{ScheduledTaskMessage.SchedulerTaskLog.niceToString()}</th>
+              <th>{ScheduledTaskMessage.StartTime.niceToString()}</th>
+              <th>{ScheduledTaskMessage.Remarks.niceToString()}</th>
+              <th>{ScheduledTaskMessage.Cancel.niceToString()}</th>
             </tr>
           </thead>
           <tbody>
@@ -161,14 +165,14 @@ function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerClien
                 <td><EntityLink lite={item.schedulerTaskLog} inSearch="main" onNavigated={onReload} /></td>
                 <td>{item.startTime} ({DateTime.fromISO(item.startTime).toRelative()})</td>
                 <td><pre>{item.remarks}</pre></td>
-                <td><button className="btn btn-tertiary btn-xs btn-danger" type="button" onClick={e => handleCancelClick(e, item.schedulerTaskLog)}>Cancel</button></td>
-              </tr>)
-            }
+                <td><button className="btn btn-tertiary btn-xs btn-danger" type="button" onClick={e => handleCancelClick(e, item.schedulerTaskLog)}>{ScheduledTaskMessage.Cancel.niceToString()}</button></td>
+              </tr>)}
           </tbody>
-        </table>
+        </AccessibleTable>
       }
     </div>
   );
+
 }
 
 

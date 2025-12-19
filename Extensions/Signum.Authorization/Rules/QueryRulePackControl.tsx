@@ -10,6 +10,8 @@ import "./AuthAdmin.css"
 import { useForceUpdate } from '@framework/Hooks';
 import { getToString } from '@framework/Signum.Entities';
 import { QueryEntity } from '@framework/Signum.Basics'
+import { AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
+import { LinkButton } from '../../../Signum/React/Basics/LinkButton'
 
 export default function QueryRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<QueryRulePack>, innerRef: React.Ref<IRenderButtons> }): React.JSX.Element {
 
@@ -29,7 +31,7 @@ export default function QueryRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
 
   function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
     return [
-      { button: <Button variant="primary" disabled={ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
+      { button: <Button type="button" variant="primary" disabled={ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
     ];
   }
 
@@ -52,20 +54,23 @@ export default function QueryRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
         <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
         <EntityLine ctx={ctx.subCtx(f => f.type)} />
       </div>
-      <table className="table table-sm sf-auth-rules">
+      <AccessibleTable
+        aria-label={AuthAdminMessage.QueryPermissionsOverview.niceToString()}
+        className="table table-sm sf-auth-rules "
+        multiselectable={false}>
         <thead>
           <tr>
             <th>
               {QueryEntity.niceName()}
             </th>
             <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleHeaderClick(e, "Allow")}>{QueryAllowed.niceToString("Allow")}</a>
+              <LinkButton title={undefined} onClick={e => handleHeaderClick(e, "Allow")} style={{ color: "inherit" }}>{QueryAllowed.niceToString("Allow")}</LinkButton>
             </th>
             <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleHeaderClick(e, "EmbeddedOnly")}>{QueryAllowed.niceToString("EmbeddedOnly")}</a>
+              <LinkButton title={undefined} onClick={e => handleHeaderClick(e, "EmbeddedOnly")} style={{ color: "inherit" }}>{QueryAllowed.niceToString("EmbeddedOnly")}</LinkButton>
             </th>
             <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleHeaderClick(e, "None")}>{QueryAllowed.niceToString("None")}</a>
+              <LinkButton title={undefined} onClick={e => handleHeaderClick(e, "None")} style={{ color: "inherit" }}>{QueryAllowed.niceToString("None")}</LinkButton>
             </th>
             <th style={{ textAlign: "center" }}>
               {AuthAdminMessage.Overriden.niceToString()}
@@ -98,8 +103,7 @@ export default function QueryRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
           )
           }
         </tbody>
-      </table>
-
+      </AccessibleTable>
     </div>
   );
 

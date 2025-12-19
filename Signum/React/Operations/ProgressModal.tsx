@@ -2,7 +2,7 @@ import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
 import { Operations } from '../Operations';
 import { Modal, ProgressBar } from 'react-bootstrap';
-import { Entity, JavascriptMessage, Lite, liteKey, OperationMessage } from '../Signum.Entities';
+import { Entity, EntityControlMessage, JavascriptMessage, Lite, liteKey, OperationMessage } from '../Signum.Entities';
 import { useForceUpdate, useThrottle } from '../Hooks';
 import { getTypeInfo, OperationInfo } from '../Reflection';
 import { useState } from 'react';
@@ -10,6 +10,7 @@ import { softCast } from '../Globals';
 import { jsonObjectStream } from './jsonObjectStream';
 import { ServiceError } from '../Services';
 import MessageModal from '../Modals/MessageModal';
+import ErrorModal from '../Modals/ErrorModal';
 
 
 interface ProgressModalProps<T> extends IModalProps<Operations.API.ProgressStep<T> | undefined> {
@@ -41,10 +42,10 @@ export function ProgressModal<T>(p: ProgressModalProps<T>): React.ReactElement {
   }
 
   React.useEffect(() => {
-    consumeReader().finally(() => {
-      setShow(false);
-    })
-  }, [])
+    consumeReader()
+      .then(() => setShow(false),
+        e => ErrorModal.showErrorModal(e).then(() => setShow(false)));
+  }, []);
 
   async function handleCancelClicked() {
 
@@ -72,12 +73,12 @@ export function ProgressModal<T>(p: ProgressModalProps<T>): React.ReactElement {
   return (
     <Modal show={show} className="message-modal" backdrop="static" onExited={handleOnExited}>
       <div className="modal-header">
-        <h5 className="modal-title">{p.options.title}</h5>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked} />
+        <h1 className="modal-title h5">{p.options.title}</h1>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label={EntityControlMessage.Close.niceToString()} onClick={handleCancelClicked} />
       </div>
       <div className="modal-body">
         <p>{p.options.message}</p>
-        {step == undefined || step.position == null || step.position == -1|| step.max == null || step.min == null ?
+        {step == undefined || step.position == null || step.position == -1 || step.max == null || step.min == null ?
           <ProgressBar now={100} variant="info" animated={oldRequestStarted} striped={oldRequestStarted} key={1} /> :
           <ProgressBar min={step.min ?? 0} max={step.max ?? 100} now={step.position ?? 0}
             label={step.min != 0 ?
@@ -90,7 +91,7 @@ export function ProgressModal<T>(p: ProgressModalProps<T>): React.ReactElement {
       {p.options.showCloseWarningMessage &&
         <div className="modal-footer">
           <small className="text-muted">{OperationMessage.ClosingThisModalOrBrowserTabWillCancelTheOperation.niceToString()}</small>
-          <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+          <button type="button" className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
             {JavascriptMessage.cancel.niceToString()}
           </button>
         </div>

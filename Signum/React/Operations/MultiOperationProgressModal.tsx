@@ -2,7 +2,7 @@ import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
 import { Operations } from '../Operations';
 import { Modal, ProgressBar } from 'react-bootstrap';
-import { Entity, JavascriptMessage, Lite, liteKey, OperationMessage } from '../Signum.Entities';
+import { Entity, EntityControlMessage, JavascriptMessage, Lite, liteKey, OperationMessage } from '../Signum.Entities';
 import { useForceUpdate, useThrottle } from '../Hooks';
 import { getOperationInfo, getTypeInfo, OperationInfo } from '../Reflection';
 import { useState } from 'react';
@@ -10,6 +10,7 @@ import { softCast } from '../Globals';
 import { jsonObjectStream } from './jsonObjectStream';
 import { CollectionMessage } from '../Signum.External';
 import { OperationSymbol } from '../Signum.Operations';
+import ErrorModal from '../Modals/ErrorModal';
 
 
 interface MultiOperationProgressModalProps extends IModalProps<Operations.API.ErrorReport> {
@@ -45,10 +46,10 @@ export function MultiOperationProgressModal(p: MultiOperationProgressModalProps)
     p.lites.map(a => a.EntityType).distinctBy(a => a).map(a => p.lites.length == 1 ? getTypeInfo(a).niceName : getTypeInfo(a).nicePluralName).joinComma(CollectionMessage.And.niceToString()), [p.lites]);
 
   React.useEffect(() => {
-    consumeReader().finally(() => {
-      setShow(false);
-    })
-  }, [])
+    consumeReader()
+      .then(() => setShow(false),
+        e => ErrorModal.showErrorModal(e).then(() => setShow(false)));
+  }, []);
 
   function handleCancelClicked() {
     p.abortController.abort();
@@ -66,21 +67,21 @@ export function MultiOperationProgressModal(p: MultiOperationProgressModalProps)
         <h5 className="modal-title">{
           p.operation.operationType == "Delete" ? OperationMessage.Deleting.niceToString() :
             p.operation.operationType == "ConstructorFrom" ? p.operation.niceName :
-            OperationMessage.Executing0.niceToString(p.operation.niceName)}</h5>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked} />
+              OperationMessage.Executing0.niceToString(p.operation.niceName)}</h5>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label={EntityControlMessage.Close.niceToString()} onClick={handleCancelClicked} />
       </div>
       <div className="modal-body">
         <p><strong>{p.lites.length}</strong> {typeNiceName}</p>
         {operationResultsRef.current.length == 0 && oldReuestStarted ?
           <ProgressBar now={100} variant="info" animated striped key={1} /> :
           <ProgressBar min={0} max={p.lites.length} now={operationResultsRef.current.length}
-            label={`[${operationResultsRef.current.length}/${p.lites.length}]`} key={2}/>
+            label={`[${operationResultsRef.current.length}/${p.lites.length}]`} key={2} />
         }
         {errors.length > 0 && <p className="text-danger">{OperationMessage._0Errors.niceToString().forGenderAndNumber(errors.length).formatHtml(<strong>{errors.length}</strong>)}</p>}
 
       </div>
       <div className="modal-footer">
-        <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+        <button type="button" className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
           {JavascriptMessage.cancel.niceToString()}
         </button>
       </div>

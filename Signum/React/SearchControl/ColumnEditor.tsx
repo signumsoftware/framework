@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { classes } from '../Globals';
 import { ColumnOption, ColumnOptionParsed, QueryDescription, QueryToken, SubTokensOptions } from '../FindOptions'
-import { SearchMessage } from '../Signum.Entities'
+import { EntityControlMessage, SearchMessage } from '../Signum.Entities'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { StyleContext } from '../Lines';
 import { CombineRows } from '../Signum.DynamicQuery';
@@ -10,6 +10,7 @@ import { VisualTipIcon } from '../Basics/VisualTipIcon';
 import { SearchVisualTip } from '../Signum.Basics';
 import { ColumnHelp, FilterHelp } from './SearchControlVisualTips';
 import { getNiceTypeName } from '../Operations/MultiPropertySetter';
+import { LinkButton } from '../Basics/LinkButton';
 
 interface ColumnEditorProps {
   columnOption: ColumnOptionParsed
@@ -79,8 +80,8 @@ export default function ColumnEditor(p: ColumnEditorProps): React.ReactElement {
                   readOnly={false} />
               </div>
             </div>
-
-            {!showMore && <a href="#" onClick={e => { e.preventDefault(); setShowMore(true); }}>{SearchMessage.ShowMore.niceToString()}</a>}
+            
+            {!showMore && <LinkButton title={undefined} onClick={e => { setShowMore(true); }}>{SearchMessage.ShowMore.niceToString()}</LinkButton>}
           </div>
 
 
@@ -128,12 +129,10 @@ export default function ColumnEditor(p: ColumnEditorProps): React.ReactElement {
         }
 
         <div className="col-sm-1">
-          <button type="button" className="btn-close float-end" aria-label="Close" onClick={p.close} />
+          <button type="button" className="btn-close float-end" aria-label={EntityControlMessage.Close.niceToString()} onClick={p.close} />
           <VisualTipIcon visualTip={SearchVisualTip.ColumnHelp} content={props => <ColumnHelp queryDescription={p.queryDescription} injected={props} />} />
         </div>
-      
       </div>
-
     </div >
   );
 }

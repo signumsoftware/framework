@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './VersionChangedAlert.css'
 import { useForceUpdate } from '../Hooks';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { LinkButton } from '../Basics/LinkButton';
 
 export const VersionChangedAlert: {
   (p: { blink?: boolean }): React.ReactElement | null;
@@ -30,9 +31,9 @@ export const VersionChangedAlert: {
 
   return (
     <div className={classes("alert alert-warning", "version-alert", (p.blink ?? true) && "blink")} style={{ textAlign: "center" }}>
-      <FontAwesomeIcon icon="rotate" aria-hidden="true" />&nbsp;
-                {ConnectionMessage.ANewVersionHasJustBeenDeployedSaveChangesAnd0.niceToString()
-        .formatHtml(<a href="#" onClick={handleRefresh}>{ConnectionMessage.Refresh.niceToString()}</a>)}
+      <FontAwesomeIcon icon="rotate" aria-hidden={true} />&nbsp;
+      {ConnectionMessage.ANewVersionHasJustBeenDeployedSaveChangesAnd0.niceToString()
+        .formatHtml(<LinkButton title={undefined} onClick={handleRefresh}>{ConnectionMessage.Refresh.niceToString()}</LinkButton>)}
     </div>
   );
 }
@@ -50,7 +51,7 @@ export function VersionInfo(p: { extraInformation?: string }): React.ReactElemen
           </Tooltip>
         }>
         <div>
-          <FontAwesomeIcon icon="circle-info" className="sf-version-info"/>
+          <FontAwesomeIcon aria-hidden={true} icon="circle-info" className="sf-version-info"/>
           <span className="sr-only">{ConnectionMessage.VersionInfo.niceToString()}</span>
         </div>
       </OverlayTrigger>

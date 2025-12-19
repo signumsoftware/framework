@@ -10,11 +10,9 @@ import { ErrorBoundary } from '@framework/Components';
 import { WhatsNewEntity } from '../Signum.WhatsNew';
 import { ImageModal } from '../../Signum.Files/Components/ImageModal';
 import { LexicalEditor } from "lexical";
-import { BasicCommandsExtensions } from '../../Signum.HtmlEditor/Extensions/BasicCommandsExtension';
-import { ImageConverter } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
-import { ListExtension } from '../../Signum.HtmlEditor/Extensions/ListExtension';
 import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
+import { ImageHandlerBase, ImageInfo } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageHandlerBase';
 
 export default function WhatsNewHtmlEditor(p: {
   binding: Binding<string | undefined | null>;
@@ -24,9 +22,9 @@ export default function WhatsNewHtmlEditor(p: {
 
   return (
     <ErrorBoundary>
-      <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} plugins={[
+      <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} extensions={[
         new LinkExtension(),
-        new ImageExtension(new AttachmentImageConverter())
+        new ImageExtension(new WhatsNewImageHandler())
       ]} />
     </ErrorBoundary>
   );
@@ -39,26 +37,20 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
   return (
     <div className="html-viewer" >
       <ErrorBoundary>
-        <HtmlEditor readOnly binding={binding} small plugins={[
+        <HtmlEditor readOnly binding={binding} small extensions={[
           new LinkExtension(),
-          new ImageExtension(new AttachmentImageConverter())
+          new ImageExtension(new WhatsNewImageHandler())
         ]} />
       </ErrorBoundary>
     </div>
   );
 }
 
-export interface ImageInfo {
-  attachmentId?: string;
-  binaryFile?: string;
-  fileName?: string;
-}
 
-export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
+export class WhatsNewImageHandler implements ImageHandlerBase {
 
-  pr: PropertyRoute;
-  constructor() {
-    this.pr = WhatsNewEntity.propertyRouteAssert(a => a.attachment);
+  get pr(): PropertyRoute {
+    return WhatsNewEntity.propertyRouteAssert(a => a.attachment);
   }
 
   toElement(val: ImageInfo): HTMLElement | undefined {
@@ -69,8 +61,8 @@ export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
       return img;
     }
 
-    if (val.attachmentId) {
-      img.setAttribute("data-attachment-id", val.attachmentId);
+    if (val.imageId) {
+      img.setAttribute("data-attachment-id", val.imageId);
       return img;
     }
   }
@@ -92,7 +84,7 @@ export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
   renderImage(info: ImageInfo): React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> {
     var fp = FilePathEmbedded.New({
       binaryFile: info.binaryFile,
-      entityId: info.attachmentId,
+      entityId: info.imageId,
       mListRowId: null,
       fileType: getSymbol(FileTypeSymbol, this.pr.member!.defaultFileTypeInfo!.key),
       rootType: this.pr.findRootType().name,
@@ -108,10 +100,10 @@ export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
   toHtml(val: ImageInfo): string | undefined {
 
     if (val.binaryFile)
-      return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" />`;
+      return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" alt="" />`;
 
-    if (val.attachmentId)
-      return `<img data-attachment-id="${val.attachmentId}" />`;
+    if (val.imageId)
+      return `<img data-attachment-id="${val.imageId}" alt="" />`;
 
     return undefined;
   }
@@ -121,7 +113,7 @@ export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
       return {
         binaryFile: element.dataset["binaryFile"],
         fileName: element.dataset["fileName"],
-        attachmentId: element.dataset["attachmentId"],
+        imageId: element.dataset["attachmentId"],
       };
     }
 

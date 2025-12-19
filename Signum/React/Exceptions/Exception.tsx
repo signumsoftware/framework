@@ -33,7 +33,7 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }): Rea
       </div>
       <AutoLine ctx={ctx.subCtx(f => f.requestUrl)} />
       <AutoLine ctx={ctx.subCtx(f => f.urlReferer)} />
-      <h3 style={{ color: "rgb(139, 0, 0)" }}>{ctx.value.exceptionType} <small>(HResult = {ctx.value.hResult})</small></h3>
+      <div className="h3" style={{ color: "rgb(139, 0, 0)" }}>{ctx.value.exceptionType} <small>(HResult = {ctx.value.hResult})</small></div>
 
       <pre style={{ whiteSpace: "pre-wrap" }}><code>{ctx.value.exceptionMessage}</code></pre>
     
@@ -84,7 +84,7 @@ export function FormatJson(p: { code: string | undefined | null }): React.ReactE
   return (
     <div>
       <button className={classes("btn btn-sm btn-tertiary", formatJson && "active")} onClick={() => setFormatJson(!formatJson)}>
-        <FontAwesomeIcon icon="code" /> Format JSON 
+        <FontAwesomeIcon aria-hidden={true} icon="code" /> Format JSON 
       </button>
       <pre style={{ whiteSpace: "pre-wrap" }}>
         <code>{formatJson ? formattedJson : p.code}</code>

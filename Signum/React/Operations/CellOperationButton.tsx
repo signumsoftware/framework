@@ -23,7 +23,7 @@ export interface CellOperationProps extends ButtonProps {
   className?: string;
   children?: React.ReactNode;
   color?: BsColor;
-  icon?: IconProp;
+  icon?: IconProp | React.ReactElement;
   iconColor?: string;
   iconAlign?: "start" | "end";
   outline?: boolean;
@@ -72,6 +72,7 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
     {...props}
     key="button"
     size="sm"
+    type="button"
     title={coc.operationInfo.niceName}
     className={classes(disabled ? "disabled" : undefined, props?.className, coc.settings && coc.settings.classes, "text-nowrap")}
     onClick={disabled ? undefined : onlySingleClick}
@@ -158,12 +159,12 @@ function getDefaultConfirmMessage(coc: CellOperationContext<Entity>) {
 
   if (coc.operationInfo.operationType == "Delete")
     return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(
-      <strong>{getToString(coc.lite)} ({getTypeInfo(coc.lite.EntityType).niceName} {coc.lite.id})</strong>
+      <strong>{getToString(coc.lite)} ({OperationMessage.As.niceToString()} {getTypeInfo(coc.lite.EntityType).niceName} {coc.lite.id})</strong>
     );
   else
     return OperationMessage.PleaseConfirmYouWouldLikeTo01.niceToString().formatHtml(
       <strong>{coc.operationInfo.niceName}</strong>,
-      <strong>{getToString(coc.lite)} ({getTypeInfo(coc.lite.EntityType).niceName} {coc.lite.id})</strong>
+      <strong>{getToString(coc.lite)} ({OperationMessage.As.niceToString()} {getTypeInfo(coc.lite.EntityType).niceName} {coc.lite.id})</strong>
     );
 
 }
@@ -214,7 +215,7 @@ export function defaultCellOperationClick(coc: CellOperationContext<any>, ...arg
 }
 
 
-export function coalesceIcon(icon: IconProp | undefined, icon2: IconProp | undefined): IconProp | undefined{ //Till the error is fixed
+export function coalesceIcon(icon: IconProp | React.ReactElement | undefined, icon2: IconProp | React.ReactElement | undefined): IconProp | React.ReactElement | undefined{ //Till the error is fixed
 
   if (icon === null)
     return undefined;

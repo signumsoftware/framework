@@ -12,7 +12,8 @@ namespace Signum.Entities;
 
 public interface IModifiableEntity : INotifyPropertyChanged
 {
-
+    M Mixin<M>() where M : MixinEntity;
+    M? TryMixin<M>() where M : MixinEntity;
 }
 
 

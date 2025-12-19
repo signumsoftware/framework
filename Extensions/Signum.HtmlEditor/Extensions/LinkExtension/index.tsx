@@ -10,7 +10,6 @@ import React from "react";
 import { HtmlEditorController } from "../../HtmlEditorController";
 import { $findMatchingParent } from "../../Utils/node";
 import {
-  ComponentAndProps,
   HtmlEditorExtension,
   LexicalConfigNode,
   OptionalCallback,
@@ -26,11 +25,8 @@ export class LinkExtension implements HtmlEditorExtension {
     return <ToolbarLinkButton controller={controller} />;
   }
 
-  getBuiltInComponent(): ComponentAndProps<typeof LinkPlugin> {
-    return {
-      component: LinkPlugin,
-      props: { attributes: { target: "_blank" }, validateUrl: validateUrl },
-    };
+  getBuiltInComponent(): React.ReactElement {
+    return <LinkPlugin attributes={{ target: "_blank" }} validateUrl={validateUrl} />;
   }
 
   getNodes(): LexicalConfigNode {

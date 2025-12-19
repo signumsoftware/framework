@@ -75,12 +75,10 @@ export namespace TreeClient {
       getQueryNames: c => [c.userQuery?.query].notNull(),
       handleEditClick: !Navigator.isViewable(UserTreePartEntity) || Navigator.isReadOnly(UserTreePartEntity) ? undefined :
         (c, e, cdRef, ev) => {
-          ev.preventDefault();
           return Navigator.view(c.userQuery!).then(uq => Boolean(uq));
         },
       handleTitleClick:
         (c, e, cdRef, ev) => {
-          ev.preventDefault();
           ev.persist();
           UserQueryClient.Converter.toFindOptions(c.userQuery!, e)
             .then(cr => AppContext.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(c.userQuery!)) }), ev))

@@ -14,6 +14,7 @@ import { DashboardController } from './DashboardFilterController'
 import { CachedQueryJS } from '../CachedQueryExecutor'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder'
 import { Navigator } from '@framework/Navigator'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, embedded?: boolean, deps?: React.DependencyList; reload: () => void; hideEditButton?: boolean }): React.JSX.Element {
 
@@ -96,7 +97,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
       {p.hideEditButton != true && !Navigator.isReadOnly(DashboardEntity) &&
         <div className="d-flex flex-row-reverse m-1">
           <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(p.dashboard)} title={DashboardMessage.Edit.niceToString()}>
-            <FontAwesomeIcon icon="pen-to-square" />
+            <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" />
           </Link>
         </div>}
       <div>
@@ -235,7 +236,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
 
   const title = !icon ? titleText :
     <span>
-      <FontAwesomeIcon icon={fallbackIcon(icon)} color={iconColor ?? undefined} className="me-1" />{titleText}
+      <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} color={iconColor ?? undefined} className="me-1" />{titleText}
     </span>;
 
   var dashboardFilter = p.dashboardController?.filters.get(p.ctx.value);
@@ -245,22 +246,22 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
   }
 
   return (
-    <div className={classes("card", !part.customColor && "border-tertiary", "shadow-sm", "mb-4")} style={{ flex: p.flex ? 1 : undefined, overflow: "hidden" }}>
+    <div className={classes("card", !part.customColor && "border-tertiary", "shadow-sm", "mb-4")} style={{ flex: p.flex ? 1 : undefined,/* overflow: "hidden"*/ }}>
       <div className={classes("card-header fw-bold", "sf-show-hover", "d-flex", !part.customColor)}
         style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined}}
       >
 
         {renderer.handleTitleClick == undefined ? title :
-          <a className="sf-pointer"
+          <LinkButton title={undefined} className="sf-pointer"
             style={{ color: part.titleColor ?? (part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined), textDecoration: "none" }}
-            onClick={e => { e.preventDefault(); renderer.handleTitleClick!(content, lite, customDataRef, e); }}>
+            onClick={e => { renderer.handleTitleClick!(content, lite, customDataRef, e); }}>
           {title}
-          </a>
+          </LinkButton>
         }
         {
           dashboardFilter && <span className="badge bg-tertiary text-dark border ms-2 sf-filter-pill">
             {dashboardFilter.rows.length} {DashboardMessage.RowsSelected.niceToString().forGenderAndNumber(dashboardFilter.rows.length)}
-            <button type="button" aria-label="Close" className="btn-close" onClick={handleClearFilter}/>
+            <button type="button" aria-label={DashboardMessage.Close.niceToString()} className="btn-close" onClick={handleClearFilter} />
           </span>
         }
 
@@ -268,9 +269,9 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
           {renderer.customTitleButtons?.(content, lite, customDataRef)}
           {
             renderer.handleEditClick &&
-            <a className="sf-pointer sf-hide" onClick={e => { e.preventDefault(); renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }} title={DashboardMessage.Edit.niceToString()}>
-              <FontAwesomeIcon icon="pen-to-square" className="me-1" />
-            </a>
+            <LinkButton className="sf-pointer sf-hide" onClick={e => { renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }} title={DashboardMessage.Edit.niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" className="me-1" />
+            </LinkButton>
           }
         </div>
       </div>

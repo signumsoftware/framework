@@ -123,7 +123,7 @@ public static class MusicLogic
                                  a.LastAward
                              })
                            .ToDQueryable(description)
-                           .AllQueryOperationsAsync(request, cancellationToken);
+                           .AllQueryOperationsAsync(request, cancellationToken, forConcat: true);
 
             var two = await (from a in Database.Query<BandEntity>()
                              select new
@@ -136,7 +136,7 @@ public static class MusicLogic
                                  a.LastAward
                              })
                            .ToDQueryable(description)
-                           .AllQueryOperationsAsync(request, cancellationToken);
+                           .AllQueryOperationsAsync(request, cancellationToken, forConcat: true);
 
             return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
 

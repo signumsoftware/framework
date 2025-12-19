@@ -405,12 +405,7 @@ public class DiffColumn
         if (p == null)
             return null;
 
-        while (
-            p.StartsWith("(") && p.EndsWith(")") ||
-            p.StartsWith("'") && p.EndsWith("'"))
-            p = p.Substring(1, p.Length - 2);
-
-        return p.ToLower();
+        return p.Replace("(", "").Replace(")", "").Replace("'", "").ToLower();
     }
 
     public DiffColumn Clone()
@@ -647,6 +642,13 @@ public class DiffColumn
             default:
                 throw new NotImplementedException("Unexpected SqlDbType");
         }
+    }
+
+    internal bool SizeEquals(DiffColumn hisCol)
+    {
+        return Precision == hisCol.Precision ||
+                Scale == hisCol.Scale ||
+                Length == hisCol.Length;
     }
 }
 

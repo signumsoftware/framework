@@ -24,6 +24,10 @@ export interface BigValuePartEntity extends Entities.Entity, Dashboard.IPartPars
   valueToken: Queries.QueryTokenEmbedded | null;
   userQuery: UserQueryEntity | null;
   requiresTitle: boolean;
+  customBigValue: string | null;
+  navigate: boolean;
+  customUrl: string | null;
+  isClickable: boolean | null;
 }
 
 export const HealthCheckConditionEmbedded: Type<HealthCheckConditionEmbedded> = new Type<HealthCheckConditionEmbedded>("HealthCheckConditionEmbedded");

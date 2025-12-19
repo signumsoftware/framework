@@ -88,5 +88,19 @@ public enum AuthAdminMessage
     [Description("3rd Rule")]
     ThirdRule,
     [Description("{0}th Rule")]
-    NthRule
+    NthRule,
+
+
+    TypePermissionOverview,
+    PropertyRuleOverview,
+    CopyFrom,
+    TypeConditions,
+    PermissionRulesOverview,
+    [Description("Permission-!overriden")]
+    PermissionOverriden,
+    AuthRuleOverview,
+    QueryPermissionsOverview,
+
+    [Description("Download AuthRules.xml")]
+    DownloadAuthRules,
 }

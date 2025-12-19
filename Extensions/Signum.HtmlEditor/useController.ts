@@ -6,7 +6,6 @@ import { CodeBlockExtension } from "./Extensions/CodeBlockExtension";
 import { ListExtension } from "./Extensions/ListExtension";
 import { OnChangeExtension } from "./Extensions/OnChangeExtension";
 import {
-  ComponentAndProps,
   HtmlEditorExtension,
   LexicalConfigNode,
 } from "./Extensions/types";
@@ -18,6 +17,7 @@ import { HtmlEditorProps } from "./HtmlEditor";
 import { HtmlEditorController } from "./HtmlEditorController";
 import { useRegisterExtensions } from "./useRegisterExtensions";
 import { useRegisterKeybindings } from "./useRegisterKeybindings";
+import { ImageExtension } from "./Extensions/ImageExtension";
 
 type ControllerProps = {
   binding: IBinding<string | null | undefined>;
@@ -26,7 +26,7 @@ type ControllerProps = {
   small?: boolean;
   converter?: ITextConverter;
   innerRef?: React.Ref<LexicalEditor>;
-  plugins?: HtmlEditorExtension[];
+  extensions?: HtmlEditorExtension[];
   initiallyFocused?: boolean | number;
   handleKeybindings?: HtmlEditorProps["handleKeybindings"];
 };
@@ -34,7 +34,7 @@ type ControllerProps = {
 type ControllerReturnType = {
   controller: HtmlEditorController;
   nodes: LexicalConfigNode;
-  builtinComponents: ComponentAndProps[];
+  builtinPlugins: React.ReactElement[];
 };
 
 export const useController = ({
@@ -43,7 +43,7 @@ export const useController = ({
   small,
   converter,
   innerRef,
-  plugins,
+  extensions,
   initiallyFocused,
   handleKeybindings,
   editableId,
@@ -51,23 +51,23 @@ export const useController = ({
   const controller = React.useMemo(() => new HtmlEditorController(), []);
   const textConverter = converter ?? new HtmlContentStateConverter();
 
-  const extensions: HtmlEditorExtension[] = React.useMemo(() => {
-    const defaultPlugins = [
+  const finalExtension: HtmlEditorExtension[] = React.useMemo(() => {
+    const defaultExtensions = [
       new BasicCommandsExtensions(),
       new ListExtension(),
       new OnChangeExtension(),
       new CodeBlockExtension(),
     ];
 
-    if (!plugins) {
-      return defaultPlugins;
+    if (!extensions) {
+      return defaultExtensions;
     }
 
-    const result = [...defaultPlugins, ...plugins];
+    const result = [...defaultExtensions, ...extensions];
     result.toObject((a) => a.name); // To throw if there are duplicates
 
     return result;
-  }, [plugins, controller]);
+  }, [extensions, controller]);
 
   React.useEffect(() => {
     if (!controller.editor) return;
@@ -86,17 +86,17 @@ export const useController = ({
     converter: textConverter,
     innerRef,
     initiallyFocused,
-    plugins: extensions,
+    extensions,
     editableId,
   });
 
   const nodes = React.useMemo(() => {
-    return extensions.flatMap((plugin) => plugin.getNodes?.() ?? []);
+    return finalExtension.flatMap((e) => e.getNodes?.() ?? []);
   }, [extensions]);
 
-  const builtinComponents = React.useMemo(() => {
-    return extensions.map((plugin) => plugin.getBuiltInComponent?.()).notNull();
+  const builtinPlugins = React.useMemo(() => {
+    return finalExtension.map((e) => e.getBuiltPlugin?.()).notNull();
   }, [extensions]);
 
-  return { controller, nodes, builtinComponents };
+  return { controller, nodes, builtinPlugins };
 };

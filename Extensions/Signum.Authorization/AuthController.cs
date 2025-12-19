@@ -82,6 +82,8 @@ public class AuthController : ControllerBase
 
         var token = AuthTokenServer.CreateToken(user);
 
+        AuthLogic.OnUserLogingIn(user, nameof(Relogin));
+
         return new LoginResponse { userEntity = user, token = token, authenticationType = "relogin" };
     }
 
@@ -93,11 +95,11 @@ public class AuthController : ControllerBase
 
         var user = UserEntity.Current.Retrieve();
 
+        AuthLogic.OnUserLogingIn(user, nameof(LoginFromCookie));
+
         var token = AuthTokenServer.CreateToken(user);
         return new LoginResponse { userEntity = user, token = token, authenticationType = "cookie" };
     }
-
-
 
     [HttpGet("api/auth/currentUser")]
     public UserEntity? GetCurrentUser()

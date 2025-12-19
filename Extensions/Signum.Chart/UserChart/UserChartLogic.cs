@@ -40,9 +40,9 @@ public static class UserChartLogic
             {
                 Entity = uq,
                 uq.Id,
+                uq.DisplayName,
                 uq.Query,
                 uq.EntityType,
-                uq.DisplayName,
                 uq.ChartScript,
                 uq.Owner,
             });
@@ -308,6 +308,9 @@ public static class UserChartLogic
         if (!replacements.Interactive)
             return null;
 
+        QueryLogic.AssertLoaded();
+        TypeLogic.AssertLoaded();
+
         var list = Database.Query<UserChartEntity>().ToList();
 
         var table = Schema.Current.Table(typeof(UserChartEntity));
@@ -329,11 +332,11 @@ public static class UserChartLogic
         {
             try
             {
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(uc.Query.ToQueryName());
+
                 if (uc.Filters.Any(a => a.Token?.ParseException != null) ||
                    uc.Columns.Any(a => a.Token?.ParseException != null))
                 {
-                    QueryDescription qd = QueryLogic.Queries.QueryDescription(uc.Query.ToQueryName());
-
                     if (uc.Filters.Any())
                     {
                         using (DelayedConsole.Delay(() => Console.WriteLine(" Filters:")))
@@ -346,7 +349,7 @@ public static class UserChartLogic
                                     switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, " {0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                                     {
                                         case FixTokenResult.Nothing: break;
-                                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                                        case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                                         case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
                                         case FixTokenResult.SkipEntity: return null;
                                         case FixTokenResult.Fix: item.Token = token; break;
@@ -370,7 +373,7 @@ public static class UserChartLogic
                                 switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, " " + item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
                                 {
                                     case FixTokenResult.Nothing: break;
-                                    case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                                    case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                                     case FixTokenResult.RemoveToken: item.Token = null; break;
                                     case FixTokenResult.SkipEntity: return null;
                                     case FixTokenResult.Fix: item.Token = token; break;
@@ -390,10 +393,24 @@ public static class UserChartLogic
                     switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), entityType))
                     {
                         case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                        case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                         case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: item.ValueString = val; goto retry;
+                        case FixTokenResult.FixTokenInstead:
+
+                            QueryTokenEmbedded token = item.Token;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, 
+                                " {0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false, forceChange: true))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
+                                case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: item.Token = token; break;
+                                default: break;
+                            }
+                            break;
                     }
                 }
 
@@ -409,7 +426,7 @@ public static class UserChartLogic
                     switch (FixParameter(item, ref val))
                     {
                         case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                        case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                         case FixTokenResult.RemoveToken: uc.Parameters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: { item.Value = val; goto retry; }
@@ -442,7 +459,7 @@ public static class UserChartLogic
                             return null;
 
                         if (answer == "d")
-                            return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                            return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid)?.TransactionBlock($"UserChart Guid = {uc.Guid}");
                     }
                 }
             }
@@ -450,6 +467,11 @@ public static class UserChartLogic
             {
                 return new SqlPreCommandSimple("-- Exception on {0}\n{1}".FormatWith(uc.BaseToString(), e.Message.Indent(2, '-')));
             }
+        }
+
+        static SqlPreCommand? DeleteSQl(Table table, UserChartEntity uc)
+        {
+            return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid)?.TransactionBlock($"UserChart Guid = {uc.Guid}");
         }
     }
 

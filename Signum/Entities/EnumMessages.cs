@@ -29,6 +29,8 @@ public enum OperationMessage
     Confirm,
     [Description("Please confirm you would like to delete {0} from the system")]
     PleaseConfirmYouWouldLikeToDelete0FromTheSystem,
+    [Description("as")]
+    As,
 
     [Description("Please confirm you would like to {0} {1}")]
     PleaseConfirmYouWouldLikeTo01,
@@ -159,7 +161,8 @@ public enum EntityControlMessage
     [Description("{0} character[s]")]
     _0Characters,
     [Description("{0} character[s] remaining")]
-    _0CharactersRemaining
+    _0CharactersRemaining,
+    Close
 }
 
 public enum HtmlEditorMessage
@@ -168,6 +171,18 @@ public enum HtmlEditorMessage
     Hyperlink,
     [Description("Enter your url here...")]
     EnterYourUrlHere,
+    [Description("Bold (Ctrl + B)")]
+    Bold,
+    [Description("Italic (Ctrl + I)")]
+    Italic,
+    [Description("Underline (Ctrl + U)")]
+    Underline,
+    Headings,
+    UnorderedList,
+    OrderedList,
+    Quote,
+    CodeBlock,
+    Code,
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
@@ -367,6 +382,13 @@ public enum SearchMessage
 
     PaginationMode,
     NumberOfElementsForPagination,
+
+    SelectAllResults,
+    [Description("{0} Result Table")]
+    _0ResultTable,
+    [Description("Select row {0}")]
+    SelectRow0_,
+    Enter,
 }
 
 public enum SearchHelpMessage
@@ -646,6 +668,7 @@ public enum JavascriptMessage
 
     [Description("Date")]
     Date,
+    Close,
 }
 
 //https://github.com/jquense/react-widgets/blob/5d4985c6dac0df34b86c7d8ad311ff97066977ab/packages/react-widgets/src/messages.tsx#L35
@@ -707,7 +730,11 @@ public enum ContainerToggleMessage
     Expand,
 }
 
-public enum LayoutMessage
+[AllowUnauthenticated]
+public enum FontSizeMessage
 {
-    JumpToMainContent,
+    FontSize,
+    ReduceFontSize,
+    ResetFontSize,
+    IncreaseFontSize,
 }

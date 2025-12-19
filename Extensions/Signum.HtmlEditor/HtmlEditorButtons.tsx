@@ -30,10 +30,11 @@ export function HtmlEditorButton(p: {
     >
       <button
         className={classes("sf-draft-button", p.isActive && "sf-draft-active ")}
+        type="button"
         onClick={p.onClick}
         title={p.title}
       >
-        {p.content ?? <FontAwesomeIcon icon={p.icon!} />}
+        {p.content ?? <FontAwesomeIcon aria-hidden={true} icon={p.icon!} />}
       </button>
     </div>
   );

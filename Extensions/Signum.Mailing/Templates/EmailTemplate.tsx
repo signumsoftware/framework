@@ -17,6 +17,7 @@ import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor'
 import { EmailMessageFormat, EmailTemplateEntity, EmailTemplateFromEmbedded, EmailTemplateMessage, EmailTemplateMessageEmbedded, EmailTemplateRecipientEmbedded, EmailTemplateViewMessage } from '../Signum.Mailing.Templates'
 import { QueryOrderEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 import { ValidationMessage } from '../../../Signum/React/Signum.Entities.Validation'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -43,7 +44,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
               <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => forceUpdate()}
                 onCreate={() => Promise.resolve(EmailTemplateFromEmbedded.New({ whenNone: "ThrowException", whenMany: "SplitMessages" }))}
                 getComponent={fctx => <EmailTemplateFrom ctx={fctx} query={p.ctx.value.query} />} />
-              <h5 className="text-muted">{ecXs.niceName(s => s.recipients)}</h5>
+              <h3 className="text-muted h5">{ecXs.niceName(s => s.recipients)}</h3>
               <EntityAccordion avoidFieldSet ctx={ecXs.subCtx(s => s.recipients)}
                 getTitle={(ctx: TypeContext<EmailTemplateRecipientEmbedded>) => <span>
                   {ctx.value.kind && <strong className="me-1">{ctx.value.kind}:</strong>}
@@ -263,11 +264,11 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
           </div>
          }
         <br />
-        {p.messageFormat == 'HtmlComplex' && <a href="#" onClick={handlePreviewClick}>
+        {p.messageFormat == 'HtmlComplex' && <LinkButton title={undefined} onClick={handlePreviewClick}>
           {showPreview ?
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}
-        </a>}
+        </LinkButton>}
         {showPreview && <IFrameRenderer style={{ width: "100%", minHeight: "800px" }} html={ec.value.text} />}
       </div>
     </div>

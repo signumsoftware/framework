@@ -14,6 +14,7 @@ import { DashboardClient } from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 import { OverlayTrigger, Popover } from "react-bootstrap";
 import { useTitle } from '@framework/AppContext'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function DashboardPage(): React.JSX.Element {
   const location = useLocation();
@@ -44,34 +45,34 @@ export default function DashboardPage(): React.JSX.Element {
   return (
     <div className="sf-dashboard-page">
     
-      {!dashboard ? <h2 className="display-6"><span>{JavascriptMessage.loading.niceToString()}</span></h2> :
+      {!dashboard ? <h1 className="display-6 h2"><span>{JavascriptMessage.loading.niceToString()}</span></h1> :
         <div className="d-flex">
         <div>
             {entityKey ?
               <div>
-                {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
-                  <h3>
+                {!entity ? <h1 className="h3">{JavascriptMessage.loading.niceToString()}</h1> :
+                  <h1 className="h3">
                     <span className="display-6">{getToString(entity)}</span>
                     {Navigator.isViewable({ entity: entity, canExecute: {} } as EntityPack<Entity>) &&
-                      <Link className="display-6 ms-2" to={Navigator.navigateRoute(entity)}><FontAwesomeIcon icon="external-link" /></Link>
+                      <Link className="display-6 ms-2" to={Navigator.navigateRoute(entity)}><FontAwesomeIcon aria-hidden={true} icon="external-link" /></Link>
                     }
                     <small className="ms-1 sf-type-nice-name text-muted"> - {Navigator.getTypeSubTitle(entity, undefined)}</small>
-                  </h3>
+                  </h1>
                 }
-                <h4 className="display-7">{DashboardClient.Options.customTitle(dashboard)}</h4>
+                <h2 className="display-7 h4">{DashboardClient.Options.customTitle(dashboard)}</h2>
               </div> :
-              <h3 className="display-6">{DashboardClient.Options.customTitle(dashboard)}</h3>
+              <h1 className="display-6 h3">{DashboardClient.Options.customTitle(dashboard)}</h1>
             }
           </div>
           {!Navigator.isReadOnly(DashboardEntity) &&
             <div className="ms-auto">
               {dashboardWithQueries.cachedQueries.length ? <span className="mx-4" title={DashboardMessage.ForPerformanceReasonsThisDashboardMayShowOutdatedInformation.niceToString() + "\n" +
                 DashboardMessage.LasUpdateWasOn0.niceToString(DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS))}>
-                <FontAwesomeIcon icon="clock-rotate-left" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
+                <FontAwesomeIcon aria-hidden={true} icon="clock-rotate-left" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
               </span> : null}
               {dashboard.parts.some(a => a.element.interactionGroup != null) && <HelpIcon />}
               <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)} title={DashboardMessage.Edit.niceToString()}>
-                <FontAwesomeIcon icon="pen-to-square" />
+                <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" />
               </Link>
             </div>
           }
@@ -98,7 +99,7 @@ export function HelpIcon(): React.JSX.Element {
 
   return (
     <OverlayTrigger trigger={["hover", "focus"]} placement="bottom-start" overlay={popover} >
-      <a href="#" className="mx-2"><FontAwesomeIcon icon="gamepad" title="syntax" className="me-1" />Interactive Dashboard</a>
+      <LinkButton className="mx-2" title={undefined}><FontAwesomeIcon icon="gamepad" title="syntax" className="me-1" />{DashboardMessage.InteractiveDashboard.niceToString()}</LinkButton>
     </OverlayTrigger>
   );
 

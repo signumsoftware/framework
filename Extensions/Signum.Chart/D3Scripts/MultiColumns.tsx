@@ -10,6 +10,8 @@ import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderMultiColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -81,7 +83,8 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="multiColumnsChartTitle">{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.MultiColumns), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>
       <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
       <g opacity={dashboardFilter ? .5 : undefined}>
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} />
@@ -123,7 +126,15 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
                   width={xSubscale.bandwidth()}
                   height={height}
                   onClick={e => onDrillDown(row.rowClick, e)}
-                  cursor="pointer">
+                  role="button"
+                  tabIndex={0}
+                  cursor="pointer"
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      (onclick as any)?.(e);
+                    }
+                  }}>
                   <title>
                     {row.valueTitle}
                   </title>
@@ -134,6 +145,15 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
                     transform={translate((xSubscale.bandwidth() / 2) + labelInterMagin, height / 2) + rotate(-90)}
                     maxWidth={height}
                     onClick={e => onDrillDown(row.rowClick, e)}
+                    role="button"
+                    tabIndex={0}
+                    cursor="pointer"
+                    onKeyDown={e => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        (onclick as any)?.(e);
+                      }
+                    }}
                     opacity={parameters["NumberOpacity"]}
                     fill={parameters["NumberColor"]}
                     dominantBaseline="middle"

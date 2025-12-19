@@ -68,13 +68,13 @@ function SearchPage(): React.ReactElement {
   var qs = Finder.getSettings(fo.queryName);
   return (
     <div id="divSearchPage" className="sf-search-page">
-      <h3 className="display-6 sf-query-title">
+      <h1 className="display-6 sf-query-title h3">
         <span>{getQueryNiceName(fo.queryName)}</span>
         {searchControl.current?.searchControlLoaded?.pageSubTitle && <>
           <small className="sf-type-nice-name text-muted"> - {searchControl.current?.searchControlLoaded?.pageSubTitle}</small>
         </>
         }
-      </h3>
+      </h1>
       {qd && <SearchControl ref={setSearchControl}
         defaultIncludeDefaultFilters={true}
         findOptions={fo}

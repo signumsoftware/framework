@@ -9,6 +9,7 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Signum.Engine.Linq;
 
@@ -576,7 +577,15 @@ internal class QueryBinder : ExpressionVisitor
         if (expression.NodeType == ExpressionType.Convert && (expression.Type.IsInstantiationOf(typeof(IGrouping<,>)) ||
                                                               expression.Type.IsInstantiationOf(typeof(IEnumerable<>)) ||
                                                               expression.Type.IsInstantiationOf(typeof(IQueryable<>))))
-            expression = ((UnaryExpression)expression).Operand;
+            return ((UnaryExpression)expression).Operand;
+
+        if(expression is MethodCallExpression mc &&
+           (mc.Method.Name is "AsQueryable" or "AsEnumerable" or "ToList" or "ToArray") &&
+           (mc.Method.DeclaringType == typeof(Queryable) || mc.Method.DeclaringType == typeof(Enumerable)))
+        {
+            expression = mc.Arguments[0];
+        }
+
         return expression;
     }
 
@@ -2236,6 +2245,13 @@ internal class QueryBinder : ExpressionVisitor
         }
     }
 
+    static MList<T> ConcatMList<T>(MList<T> first, MList<T> second)
+    {
+        throw new NotImplementedException();
+    }
+
+    static readonly MethodInfo miConcatMList = ReflectionTools.GetMethodInfo(() => ConcatMList((MList<int>)null!, (MList<int>)null!)).GetGenericMethodDefinition();
+
     private Expression CombineImplementations(ICombineStrategy strategy, Dictionary<Type, Expression> expressions, Type returnType)
     {
         if (expressions.All(e => e.Value is LiteReferenceExpression))
@@ -2332,7 +2348,11 @@ internal class QueryBinder : ExpressionVisitor
         }
 
         if (expressions.Any(e => e.Value is MListExpression))
-            throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
+        {
+            //Doesn't really work yet, but delays the exception when using a Mixin<T> has an MList but is not used in the query
+            return expressions.Values.Aggregate((a, b) => Expression.Call(
+                miConcatMList.MakeGenericMethod(a.Type.ElementType()!), a, b)); 
+        }
 
         if (expressions.Any(e => e.Value is AdditionalFieldExpression))
             return strategy.CombineValues(expressions, returnType);

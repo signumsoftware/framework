@@ -64,9 +64,9 @@ export function ImportExcelProgressModal(p: ImportExcelProgressModalProps): Reac
   return (
     <Modal show={show} className="message-modal" backdrop="static" onExited={handleOnExited}>
       <div className="modal-header">
-        <h5 className="modal-title">
+        <h1 className="modal-title h5">
           {ImportFromExcelMessage.Importing0.niceToString(p.typeInfo.nicePluralName)}
-        </h5>
+        </h1>
         <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked} />
       </div>
       <div className="modal-body">
@@ -80,7 +80,7 @@ export function ImportExcelProgressModal(p: ImportExcelProgressModalProps): Reac
 
       </div>
       <div className="modal-footer">
-        <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+        <button type="button" className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
           {JavascriptMessage.cancel.niceToString()}
         </button>
       </div>

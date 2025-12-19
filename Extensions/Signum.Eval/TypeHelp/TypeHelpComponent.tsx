@@ -9,6 +9,7 @@ import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import "./TypeHelpComponent.css"
 import { useAPI } from '@framework/Hooks'
 import { TypeHelpMessage } from './Signum.Eval.TypeHelp'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface TypeHelpComponentProps {
   initialType?: string;
@@ -104,12 +105,16 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
           onSelect={handleSelect}
           renderInput={input => <div className="input-group input-group-sm" style={{ position: "initial" }}>
             <button className="btn input-group-text" disabled={!canBack()}              
-              onClick={e => handleGoHistory(e, historyIndex - 1)} type="button">
-              <FontAwesomeIcon icon="circle-arrow-left" title={TypeHelpMessage.Previous.niceToString()}/>
+              onClick={e => handleGoHistory(e, historyIndex - 1)} type="button"
+              title={TypeHelpMessage.Previous.niceToString()}
+              aria-label={TypeHelpMessage.Previous.niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} icon="circle-arrow-left"/>
             </button>
             <button className="btn input-group-text" disabled={!canForth()}              
-              onClick={e => handleGoHistory(e, historyIndex + 1)} type="button">
-              <FontAwesomeIcon icon="circle-arrow-right" title={TypeHelpMessage.Next.niceToString()}/>
+              onClick={e => handleGoHistory(e, historyIndex + 1)} type="button"
+              title={TypeHelpMessage.Next.niceToString()}
+              aria-label={TypeHelpMessage.Next.niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} icon="circle-arrow-right" />
             </button>
             {input}
             <div className="input-group-text" style={{ color: "white", backgroundColor: p.mode == "CSharp" ? "#007e01" : "#017acc" }}>
@@ -125,7 +130,7 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
   function renderHelp(h: TypeHelpClient.TypeHelp) {
     return (
       <div>
-        <h4 className="mb-1 mt-2">{h.type}</h4>
+        <h1 className="mb-1 mt-2 h4">{h.type}</h1>
 
         <ul className="sf-members" style={{ paddingLeft: "0px" }}>
           {h.members.map((m, i) => renderMember(h, m, i))}
@@ -220,10 +225,10 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
     if (cleanType != null)
       return (
         <span>
-          <a href="#" className={"sf-member-" + (isTypeEnum(type) ? "enum" : "class")}
-            onClick={(e) => { e.preventDefault(); goTo(cleanType); }}>
+          <LinkButton title={undefined} className={"sf-member-" + (isTypeEnum(type) ? "enum" : "class")}
+            onClick={(e) => { goTo(cleanType); }}>
             {type}
-          </a>
+          </LinkButton>
         </span>
       );
 
@@ -238,8 +243,8 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
   return (
     <div className="sf-type-help">
       {renderHeader()}
-      {help == undefined ? <h4>Loading {currentType()}…</h4> :
-        help == false ? <h4>Not found {currentType()}</h4> :
+      {help == undefined ? <h1 className="h4">Loading {currentType()}…</h1> :
+        help == false ? <h1 className="h4">Not found {currentType()}</h1> :
           renderHelp(help)}
       {renderContextualMenu && renderContextualMenu()}
     </div>

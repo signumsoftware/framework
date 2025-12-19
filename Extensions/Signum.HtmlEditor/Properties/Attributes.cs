@@ -1,2 +1,2 @@
-﻿[assembly: DefaultAssemblyCulture("en")]
+//[assembly: DefaultAssemblyCulture("en")]
 [assembly: AssemblySchemaName("htmlEditor")]

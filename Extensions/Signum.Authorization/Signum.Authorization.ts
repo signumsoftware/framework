@@ -48,9 +48,6 @@ export namespace LoginAuthMessage {
   export const RememberMe: MessageKey = new MessageKey("LoginAuthMessage", "RememberMe");
   export const IHaveForgottenMyPassword: MessageKey = new MessageKey("LoginAuthMessage", "IHaveForgottenMyPassword");
   export const ShowLoginForm: MessageKey = new MessageKey("LoginAuthMessage", "ShowLoginForm");
-  export const LoginWithWindowsUser: MessageKey = new MessageKey("LoginAuthMessage", "LoginWithWindowsUser");
-  export const NoWindowsUserFound: MessageKey = new MessageKey("LoginAuthMessage", "NoWindowsUserFound");
-  export const LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication: MessageKey = new MessageKey("LoginAuthMessage", "LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication");
   export const IForgotMyPassword: MessageKey = new MessageKey("LoginAuthMessage", "IForgotMyPassword");
   export const EnterYourUserEmail: MessageKey = new MessageKey("LoginAuthMessage", "EnterYourUserEmail");
   export const SendEmail: MessageKey = new MessageKey("LoginAuthMessage", "SendEmail");
@@ -79,6 +76,9 @@ export namespace LoginAuthMessage {
   export const LoginWith0: MessageKey = new MessageKey("LoginAuthMessage", "LoginWith0");
   export const SignInWithMicrosoft: MessageKey = new MessageKey("LoginAuthMessage", "SignInWithMicrosoft");
   export const InvalidTokenDate0: MessageKey = new MessageKey("LoginAuthMessage", "InvalidTokenDate0");
+  export const SignUpWithAzureB2C: MessageKey = new MessageKey("LoginAuthMessage", "SignUpWithAzureB2C");
+  export const SignInWithAzureB2C: MessageKey = new MessageKey("LoginAuthMessage", "SignInWithAzureB2C");
+  export const LoginWithAzureB2C: MessageKey = new MessageKey("LoginAuthMessage", "LoginWithAzureB2C");
 }
 
 export const MergeStrategy: EnumType<MergeStrategy> = new EnumType<MergeStrategy>("MergeStrategy");

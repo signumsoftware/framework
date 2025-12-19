@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '../Modals';
 import { Finder } from '../Finder';
 import { FindOptions, FindMode, ResultRow, ModalFindOptions, ModalFindOptionsMany, FindOptionsParsed, ResultTable } from '../FindOptions'
-import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo } from '../Reflection'
+import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo, tryGetTypeInfo } from '../Reflection'
 import SearchControl, { SearchControlProps, SearchControlHandler } from './SearchControl'
 import { AutoFocus } from '../Components/AutoFocus';
 import { Entity, EntityPack, FrameMessage, getToString, isEntityPack, isLite, Lite, ModifiableEntity, SearchMessage, toLite, is } from '../Signum.Entities';
@@ -14,6 +14,7 @@ import SearchControlLoaded from './SearchControlLoaded';
 import MessageModal from '../Modals/MessageModal';
 import { BsSize } from '../Components';
 import { DomUtils } from '../Globals';
+import { LinkButton } from '../Basics/LinkButton';
 
 interface SearchModalProps extends IModalProps<{ rows: ResultRow[], searchControl: SearchControlLoaded } | undefined> {
   findOptions: FindOptions;
@@ -162,9 +163,11 @@ function SearchModal(p: SearchModalProps): React.ReactElement {
           {p.title}
           &nbsp;
         </span>
-        <a className="sf-popup-fullscreen" href="#" onClick={(e) => { e.preventDefault(); searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e); } }>
-          <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()} />
-        </a>
+        <LinkButton className="sf-popup-fullscreen"
+          title={FrameMessage.Fullscreen.niceToString()}
+          onClick={(e) => { searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e); }}>
+          <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
+        </LinkButton>
         {p.message && <>
           <br />
           <small className="sf-type-nice-name text-muted"> {p.message}</small>
@@ -252,7 +255,7 @@ export default SearchModal;
 
 export function defaultSelectMessage(queryName: PseudoType | QueryKey, plural: boolean, forProperty?: string): string {
 
-  var type = queryName instanceof QueryKey ? null : getTypeInfo(queryName);
+  var type = queryName instanceof QueryKey ? null : tryGetTypeInfo(queryName);
 
   if (plural) {
     return type ?

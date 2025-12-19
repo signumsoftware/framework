@@ -136,14 +136,13 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   if (resultOrError?.error) {
     return (
       <div>
-        <h4>Error!</h4>
+        <h1 className="h4">Error!</h1>
         {renderError(resultOrError.error)}
       </div>
     );
   }
 
   function handleReload(e?: React.MouseEvent<any>) {
-    e?.preventDefault();
     reloadQuery();
   }
 

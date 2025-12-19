@@ -42,6 +42,8 @@ import { VisualTipIcon } from '../Basics/VisualTipIcon'
 import { SearchVisualTip, TypeEntity } from '../Signum.Basics'
 import { KeyNames } from '../Components'
 import { CollectionMessage } from '../Signum.External'
+import { LinkButton } from '../Basics/LinkButton'
+import { AccessibleTable } from '../Basics/AccessibleTable'
 
 export interface ColumnParsed {
   column: ColumnOptionParsed;
@@ -89,6 +91,7 @@ export interface SearchControlLoadedProps {
   hideFullScreenButton: boolean;
   showHeader: boolean | "PinnedFilters";
   avoidTableFooterContainer: boolean;
+  avoidGroupByMessage: boolean;
   pinnedFilterVisible?: (fop: FilterOptionParsed) => boolean;
   showBarExtension: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
@@ -567,10 +570,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         {p.showHeader == "PinnedFilters" && (sfb ?? this.renderPinnedFilters())}
         {p.showHeader == true && p.largeToolbarButtons && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
-        {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
+        {p.showHeader == true && fo.groupResults && !p.avoidGroupByMessage && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
 
-        <div className={p.avoidTableFooterContainer ? undefined : "sf-table-footer-container  my-3 p-3 pb-1 bg-body rounded shadow-sm"}>
+        <div className={p.avoidTableFooterContainer ? undefined : "sf-table-footer-container my-3 p-3 pb-1 bg-body rounded shadow-sm"}>
           {p.showHeader == true && !p.largeToolbarButtons && this.renderToolBar()}
           {this.state.isMobile == true && this.state.viewMode == "Mobile" ? this.renderMobile() :
             <>
@@ -585,7 +588,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               <div ref={d => { this.containerDiv = d; }}
                 className="sf-scroll-table-container table-responsive"
                 style={{ maxHeight: this.props.maxResultsHeight }}>
-                <table className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
+                <table aria-multiselectable="true" role="grid"
+                  aria-label={this.createCaption()}
+                  className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
+                  {AccessibleTable.ariaLabelAsCaption && <caption>{this.createCaption()}</caption>}
                   <thead>
                     {this.renderHeaders()}
                   </thead>
@@ -686,9 +692,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       {
         order: -3,
-        button: <button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger" : "border-primary text-primary"))}
+        button: <button type="button" className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger" : "border-primary text-primary"))}
           onClick={this.handleSearchClick} title={changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()} >
-          <FontAwesomeIcon icon={changesExpected ? "magnifying-glass" : "refresh"} />{changesExpected && <span className="d-none d-sm-inline ms-1">{SearchMessage.Search.niceToString()}</span>}
+          <FontAwesomeIcon aria-hidden={true} icon={changesExpected ? "magnifying-glass" : "refresh"} />{changesExpected && <span className="d-none d-sm-inline ms-1">{SearchMessage.Search.niceToString()}</span>}
         </button>
       },
 
@@ -697,7 +703,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       p.create && !this.props.ctx?.frame?.currentDate && {
         order: -2,
         button: <button className={classes("btn ", p.createButtonClass ?? "btn-tertiary")} title={titleLabels ? this.createTitle() : undefined} onClick={this.handleCreate}>
-          <FontAwesomeIcon icon="plus" className="sf-create" /><span className="d-none d-sm-inline ms-1">{this.createTitle()}</span>
+          <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create" /><span className="d-none d-sm-inline ms-1">{this.createTitle()}</span>
         </button>
       },
 
@@ -714,14 +720,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       ...(this.props.hideButtonBar ? [] : rightButtonBarElements),
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
-        button: <button className="btn btn-tertiary" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
-          <FontAwesomeIcon icon="up-right-from-square" />
+        button: <button type="button" className="btn btn-tertiary" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
+          <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
         </button>
       },
 
       this.state.isMobile == true && this.getMobileOptions(this.props.findOptions).showSwitchViewModesButton && {
-        button: <button className="btn btn-tertiary" onClick={this.handleViewModeClick}>
-          <FontAwesomeIcon icon={this.state.viewMode == "Mobile" ? "desktop" : "mobile-alt"} title={SearchMessage.SwitchViewMode.niceToString()} />
+        button: <button type="button" className="btn btn-tertiary" onClick={this.handleViewModeClick} title={SearchMessage.SwitchViewMode.niceToString()}>
+          <FontAwesomeIcon aria-hidden={true} icon={this.state.viewMode == "Mobile" ? "desktop" : "mobile-alt"} />
         </button>
       }
     ] as (ButtonBarElement | null | false | undefined)[])
@@ -839,6 +845,16 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const gender = tis.first().gender;
 
     return SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
+  }
+
+  createCaption(): string {
+
+    const tis = this.entityColumnTypeInfos();
+
+    const types = tis.map(ti => ti.niceName).join(", ");
+    const gender = tis.first().gender;
+
+    return SearchMessage._0ResultTable.niceToString().forGenderAndNumber(gender).formatWith(types);
   }
 
   getSelectedEntities(): Lite<Entity>[] {
@@ -1195,11 +1211,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
         if (this.state.showHiddenColumns) {
           menuItems.push(<Dropdown.Item className="sf-hide-hidden-columns" onClick={() => this.setState({ showHiddenColumns: undefined })}>
-            <FontAwesomeIcon icon="eye-slash" color="#21618C" />&nbsp;{SearchMessage.HideHiddenColumns.niceToString()}
+            <FontAwesomeIcon aria-hidden={true} icon="eye-slash" color="#21618C" />&nbsp;{SearchMessage.HideHiddenColumns.niceToString()}
           </Dropdown.Item>);
         } else {
           menuItems.push(<Dropdown.Item className="sf-show-hidden-columns" onClick={() => this.setState({ showHiddenColumns: true })}>
-            <FontAwesomeIcon icon="eye" color="#21618C" />&nbsp;{SearchMessage.ShowHiddenColumns.niceToString()}
+            <FontAwesomeIcon aria-hidden={true} icon="eye" color="#21618C" />&nbsp;{SearchMessage.ShowHiddenColumns.niceToString()}
           </Dropdown.Item>);
         }
       }
@@ -1210,7 +1226,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if (renderEntityMenuItems) {
 
       menuItems.push(<Dropdown.Item className="sf-paste-menu-item" onClick={() => this.handleCopyClick()}>
-        <FontAwesomeIcon icon="copy" className="icon" color="#21618C" />&nbsp;{SearchMessage.Copy.niceToString()}
+        <FontAwesomeIcon aria-hidden={true} icon="copy" className="icon" color="#21618C" />&nbsp;{SearchMessage.Copy.niceToString()}
       </Dropdown.Item>);
 
       if (menuPack == undefined) {
@@ -1241,9 +1257,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               onKeyDown={this.handleMenuFilterKeyDown}
               onChange={this.handleMenuFilterChange} />
           </AutoFocus>}
-          <div style={{ position:"relative", maxHeight: "calc(100vh - 400px)", overflow: "auto" }}>
-            {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
-          </div>
+        <div style={{ position: "relative", maxHeight: "calc(100vh - 400px)", overflow: "auto" }}>
+          {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+        </div>
       </ContextMenu>
     );
   }
@@ -1518,15 +1534,16 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     return (
       <tr>
-        {this.props.allowSelection && <th className="sf-small-column sf-th-selection">
+        {this.props.allowSelection && <th scope="col" className="sf-small-column sf-th-selection">
           {this.props.allowSelection == true &&
-            <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+            <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
           }
         </th>
         }
         {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
         {visibleColumns.map(({ column: co, cellFormatter, columnIndex: i }) =>
           <th key={i}
+            scope="col"
             draggable={true}
             className={classes(
               cellFormatter?.fillWidth == false ? "sf-small-column" : undefined,
@@ -1554,11 +1571,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 co.token?.fullKey == QueryTokenString.timeSeries.token ? <span>
                   <FontAwesomeIcon icon="clock" className="me-1"
                     color={"gray"}
+                    role="img"
+                    aria-label={SystemTimeMode.niceToString("TimeSeries")}
                     title={SystemTimeMode.niceToString("TimeSeries")} />
                 </span> :
                   this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" ? <span>
                     <FontAwesomeIcon icon="key" className="me-1"
                       color={rootKeys.contains(co) ? "gray" : "lightgray"}
+                      role="img"
+                      aria-label={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()}
                       title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()} />
                   </span> : null
               }
@@ -1813,14 +1834,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       else
         return SearchMessage.NoResultsFoundInPage01.niceToString().formatHtml(
           resFO.pagination.currentPage,
-          <a href="#" onClick={e => {
-            e.preventDefault();
+          <LinkButton title={undefined} onClick={e => {
             this.handlePagination({
               mode: "Paginate",
               elementsPerPage: resFO.pagination.elementsPerPage,
               currentPage: 1
             });
-          }}>{SearchMessage.GoBackToPageOne.niceToString()}</a>
+          }}>
+            {SearchMessage.GoBackToPageOne.niceToString()}
+          </LinkButton>
         );
     }
 
@@ -1915,7 +1937,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       var tr = (
         <tr
           key={i}
-          tabIndex={0}
+          aria-describedby={`result_row_${i}_tooltip`}
+          aria-selected={selected}
           ref={this.rowRefs[i]}
           data-row-index={i}
           data-entity={row.entity && liteKey(row.entity)}
@@ -1939,6 +1962,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                   className="sf-td-selection form-check-input"
                   checked={this.state.selectedRows!.contains(row)}
                   onChange={e => this.handleChecked(e, i)}
+                  aria-label={`Select row ${i + 1}`}
                   data-index={i} />}
             </td>
           }
@@ -1954,7 +1978,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           {columns.map((c, j) =>
             i !== 0 && c.column.combineRows === "EqualValue" && equals(getRowValue(resultTable.rows[i - 1], c.resultIndex), getRowValue(row, c.resultIndex)) ? null :
               i !== 0 && c.column.combineRows === "EqualEntity" && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
-                <td tabIndex={0} key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
+                <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
                   rowSpan={
                     c.column.combineRows === "EqualValue" ? calculateRowSpan(row => getRowValue(row, c.resultIndex)) :
                       c.column.combineRows === "EqualEntity" ? calculateRowSpan(row => row.entity) :
@@ -1972,7 +1996,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return (
         <OverlayTrigger
           overlay={
-            <Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"} style={{ "--bs-tooltip-max-width": "100%" } as any}>
+            <Tooltip role="tooltip" placement="bottom" id={"result_row_" + i + "_tooltip"} style={{ "--bs-tooltip-max-width": "100%" } as any}>
               {message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
             </Tooltip>
           }
@@ -2230,50 +2254,50 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
 export function getResotreDefaultColumnsIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
-    <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="var(--bs-body-color)" />
+    <FontAwesomeIcon aria-hidden={true} icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon aria-hidden={true} icon="rotate-left" transform="shrink-4 up-8 right-8" color="var(--bs-body-color)" />
   </span>
 }
 
 export function getGroupByThisColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
-    <FontAwesomeIcon icon={["fas", "layer-group"]} transform="shrink-3 up-8 right-8" color="var(--bs-cyan)" />
+    <FontAwesomeIcon aria-hidden={true} icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon aria-hidden={true} icon={["fas", "layer-group"]} transform="shrink-3 up-8 right-8" color="var(--bs-cyan)" />
   </span>
 }
 
 export function getRemoveOtherColumns(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
-    <FontAwesomeIcon icon="remove" transform="shrink-4 up-8 right-8" color="var(--bs-body-color)" />
+    <FontAwesomeIcon aria-hidden={true} icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon aria-hidden={true} icon="remove" transform="shrink-4 up-8 right-8" color="var(--bs-body-color)" />
   </span>
 }
 
 export function getRemoveColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
-    <FontAwesomeIcon icon={["fas", "square-xmark"]} transform="shrink-3 up-8 right-8" color="var(--bs-danger)" />
+    <FontAwesomeIcon aria-hidden={true} icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon aria-hidden={true} icon={["fas", "square-xmark"]} transform="shrink-3 up-8 right-8" color="var(--bs-danger)" />
   </span>
 }
 
 export function getEditColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
-    <FontAwesomeIcon icon={["fas", "square-pen"]} transform="shrink-3 up-8 right-8" color="var(--bs-orange)" />
+    <FontAwesomeIcon aria-hidden={true} icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon aria-hidden={true} icon={["fas", "square-pen"]} transform="shrink-3 up-8 right-8" color="var(--bs-orange)" />
   </span>
 }
 
 export function getInsertColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
-    <FontAwesomeIcon icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="var(--bs-success)" />
+    <FontAwesomeIcon aria-hidden={true} icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon aria-hidden={true} icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="var(--bs-success)" />
   </span>
 }
 
 export function getAddFilterIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
-    <FontAwesomeIcon icon="filter" transform="left-2" color="var(--bs-secondary-color)" />
-    <FontAwesomeIcon icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="var(--bs-blue)" />
+    <FontAwesomeIcon aria-hidden={true} icon="filter" transform="left-2" color="var(--bs-secondary-color)" />
+    <FontAwesomeIcon aria-hidden={true} icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="var(--bs-blue)" />
   </span>
 }
 
@@ -2335,16 +2359,16 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
 
   return (
     <Dropdown as={ButtonGroup} title={SearchMessage.Filters.niceToString()}>
-      <Button variant="tertiary" className="sf-filter-button" aria-label={SearchMessage.Filters.niceToString()} active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
-        <FontAwesomeIcon icon="filter" /> {activeFilters == 0 ? null : activeFilters}
+      <Button type="button" variant="tertiary" className="sf-filter-button" aria-label={SearchMessage.Filters.niceToString()} active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
+        <FontAwesomeIcon aria-hidden={true} icon="filter" /> {activeFilters == 0 ? null : activeFilters}
       </Button>
       <Dropdown.Toggle variant="tertiary" split className="px-2" aria-label={SearchMessage.FilterTypeSelection.niceToString()}></Dropdown.Toggle>
       <Dropdown.Menu aria-label={SearchMessage.FilterMenu.niceToString()}>
-        <Dropdown.Item data-key={("Simple" satisfies SearchControlFilterMode)} active={filterMode == 'Simple'} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
-        <Dropdown.Item data-key={("Advanced" satisfies SearchControlFilterMode)} active={filterMode == 'Advanced'} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>
-        <Dropdown.Item data-key={("Pinned" satisfies SearchControlFilterMode)} active={filterMode == 'Pinned'} onClick={e => p.sc.handleChangeFiltermode('Pinned')} ><span className="me-2" style={{ visibility: filterMode != 'Pinned' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.FilterDesigner.niceToString()}</Dropdown.Item>
+        <Dropdown.Item data-key={("Simple" satisfies SearchControlFilterMode)} active={filterMode == 'Simple'} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
+        <Dropdown.Item data-key={("Advanced" satisfies SearchControlFilterMode)} active={filterMode == 'Advanced'} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>
+        <Dropdown.Item data-key={("Pinned" satisfies SearchControlFilterMode)} active={filterMode == 'Pinned'} onClick={e => p.sc.handleChangeFiltermode('Pinned')} ><span className="me-2" style={{ visibility: filterMode != 'Pinned' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.FilterDesigner.niceToString()}</Dropdown.Item>
         {props.showSystemTimeButton && <Dropdown.Divider />}
-        {props.showSystemTimeButton && <Dropdown.Item onClick={p.sc.handleSystemTimeClick} ><span className="me-2" style={{ visibility: p.sc.props.findOptions.systemTime == null ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.TimeMachine.niceToString()}</Dropdown.Item>}
+        {props.showSystemTimeButton && <Dropdown.Item onClick={p.sc.handleSystemTimeClick} ><span className="me-2" style={{ visibility: p.sc.props.findOptions.systemTime == null ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.TimeMachine.niceToString()}</Dropdown.Item>}
       </Dropdown.Menu>
     </Dropdown>
   );

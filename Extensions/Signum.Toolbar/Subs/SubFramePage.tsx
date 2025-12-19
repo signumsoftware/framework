@@ -179,6 +179,7 @@ export default function SubFramePage(): React.ReactElement {
         setPack(packEntity, { getComponent: s.getComponent }).then(() => callback && callback());
       }
     },
+    onClose: () => AppContext.navigate(Navigator.navigateRoute(newLite(pti.name, params.parentid!))),
     revalidate: () => validationErrors.current && validationErrors.current.forceUpdate(),
     setError: (ms, initialPrefix) => {
       GraphExplorer.setModelState(entity, ms, initialPrefix || "");
@@ -186,7 +187,8 @@ export default function SubFramePage(): React.ReactElement {
     },
     refreshCount: state.refreshCount,
     allowExchangeEntity: true,
-    prefix: "framePage"
+    prefix: "framePage",
+    hideAndClose: true,
   };
 
 
@@ -223,7 +225,7 @@ export default function SubFramePage(): React.ReactElement {
   function renderTitle() {
 
     if (!state)
-      return <h3 className="display-6 sf-entity-title">{JavascriptMessage.loading.niceToString()}</h3>;
+      return <h1 className="display-6 sf-entity-title h3">{JavascriptMessage.loading.niceToString()}</h1>;
 
     const entity = state.pack.entity;
     const title = Navigator.renderEntity(entity); 
@@ -231,7 +233,7 @@ export default function SubFramePage(): React.ReactElement {
     const widgets = renderWidgets(wc, settings?.stickyHeader);
 
     return (
-      <h4 className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")} >
+      <h1 className={classes("border-bottom pb-3 mb-2 h4", settings?.stickyHeader && "sf-sticky-header")} >
         {title && <>
           <span className="sf-entity-title">{title}</span>&nbsp;
         </>
@@ -243,7 +245,7 @@ export default function SubFramePage(): React.ReactElement {
             <br />
           </div>
         }
-      </h4>
+      </h1>
     );
   }
 }

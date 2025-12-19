@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, Dic } from '@framework/Globals'
 import { Finder } from '@framework/Finder'
-import {PropertyRoute, Binding } from '@framework/Reflection'
+import { PropertyRoute, Binding } from '@framework/Reflection'
 import { Expression, DesignerNode } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
@@ -16,6 +16,7 @@ import { ModalFooterButtons, ModalHeaderButtons } from '@framework/Components/Mo
 import { ModulesHelp } from './ModulesHelp';
 import { DynamicViewMessage } from '../Signum.Dynamic.Views'
 import { TextAreaLine } from '@framework/Lines'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export interface ExpressionOrValueProps {
   binding: Binding<any>;
@@ -35,7 +36,7 @@ interface ExpressionOrValueComponentHandle {
   updateValue(value: string | boolean | null | undefined): void;
 }
 
-export function ExpressionOrValueComponent(p : ExpressionOrValueProps): React.JSX.Element {
+export function ExpressionOrValueComponent(p: ExpressionOrValueProps): React.JSX.Element {
   function updateValue(value: string | boolean | null | undefined) {
 
     var parsedValue = p.type != "number" ? value : (parseFloat(value as string) ?? null);
@@ -110,8 +111,8 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps): React.JS
     if (p.options) {
       if (typeof p.options == "function")
         return (
-            <Typeahead
-              inputAttrs={{ className: "form-control form-control-xs sf-entity-autocomplete" }}
+          <Typeahead
+            inputAttrs={{ className: "form-control form-control-xs sf-entity-autocomplete" }}
             getItems={handleGetItems}
             onSelect={handleTypeaheadSelect} />
         );
@@ -174,7 +175,7 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps): React.JS
 
   const expr = value instanceof Object && (value as Object).hasOwnProperty("__code__") ? value as Expression<any> : null;
 
-  const expressionIcon = p.allowsExpression != false && <span className={classes("formula", expr && "active")} onClick={handleToggleExpression}  ><FontAwesomeIcon icon="calculator" title={DynamicViewMessage.UseExpression.niceToString()}/></span>;
+  const expressionIcon = p.allowsExpression != false && <span className={classes("formula", expr && "active")} onClick={handleToggleExpression}  ><FontAwesomeIcon icon="calculator" title={DynamicViewMessage.UseExpression.niceToString()} /></span>;
 
 
   if (!expr && p.type == "boolean") {
@@ -191,7 +192,7 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps): React.JS
           />
         </label>
       </div>
-    );
+      );
     } else {
       return (
         <div>
@@ -241,7 +242,7 @@ interface NullableCheckBoxProps {
   onChange: (newValue: boolean | undefined) => void;
 }
 
-export function NullableCheckBox(p : NullableCheckBoxProps): React.JSX.Element {
+export function NullableCheckBox(p: NullableCheckBoxProps): React.JSX.Element {
   function getIcon() {
     switch (p.value) {
       case true: return "check";
@@ -259,7 +260,6 @@ export function NullableCheckBox(p : NullableCheckBoxProps): React.JSX.Element {
   }
 
   function handleClick(e: React.MouseEvent<any>) {
-    e.preventDefault();
     switch (p.value) {
       case true: p.onChange(false); break;
       case false: p.onChange(undefined); break;
@@ -267,21 +267,21 @@ export function NullableCheckBox(p : NullableCheckBoxProps): React.JSX.Element {
     }
   }
 
-    return (
-    <a href="#" onClick={handleClick}>
+  return (
+    <LinkButton title={undefined} onClick={handleClick}>
       <FontAwesomeIcon icon={getIcon()} className={getClass()} />
-        {" "}
+      {" "}
       {p.label}
-      </a>
-    );
-  }
+    </LinkButton>
+  );
+}
 
 export interface FieldComponentProps {
   dn: DesignerNode<BaseNode>,
   binding: Binding<string | undefined>,
 }
 
-export function FieldComponent(p : FieldComponentProps): React.JSX.Element {
+export function FieldComponent(p: FieldComponentProps): React.JSX.Element {
   function handleChange(e: React.ChangeEvent<any>) {
     var sender = (e.currentTarget as HTMLSelectElement);
 
@@ -308,7 +308,7 @@ export function FieldComponent(p : FieldComponentProps): React.JSX.Element {
       {Dic.getKeys(subMembers).filter(k => subMembers[k].name != "Id").map((name, i) =>
         <option key={i} value={name}>{name}</option>)
       })
-        </select>);
+    </select>);
   }
   var p = p;
   var value = p.binding.getValue();
@@ -325,23 +325,23 @@ export function FieldComponent(p : FieldComponentProps): React.JSX.Element {
   );
 }
 
-export function DynamicViewInspector(p : { selectedNode?: DesignerNode<BaseNode> }): React.JSX.Element {
+export function DynamicViewInspector(p: { selectedNode?: DesignerNode<BaseNode> }): React.JSX.Element {
   const sn = p.selectedNode;
 
-    if (!sn)
-      return <h4>{DynamicViewMessage.SelectANodeFirst.niceToString()}</h4>;
+  if (!sn)
+    return <h4>{DynamicViewMessage.SelectANodeFirst.niceToString()}</h4>;
 
-    const error = NodeUtils.validate(sn, undefined);
+  const error = NodeUtils.validate(sn, undefined);
 
-    return (<div className="form-sm ">
-      <h4>
-        {sn.node.kind}
-        {sn.route && <small> ({Finder.getTypeNiceName(sn.route.typeReference())})</small>}
-      </h4>
-      {error && <div className="alert alert-danger">{error}</div>}
-      {NodeUtils.renderDesigner(sn)}
-    </div>);
-  }
+  return (<div className="form-sm ">
+    <h4>
+      {sn.node.kind}
+      {sn.route && <small> ({Finder.getTypeNiceName(sn.route.typeReference())})</small>}
+    </h4>
+    {error && <div className="alert alert-danger">{error}</div>}
+    {NodeUtils.renderDesigner(sn)}
+  </div>);
+}
 
 
 export function CollapsableTypeHelp(p: { initialTypeName?: string }): React.JSX.Element {
@@ -360,27 +360,27 @@ export function CollapsableTypeHelp(p: { initialTypeName?: string }): React.JSX.
     AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "TypeScript"),
-      customComponent: p => <TextAreaLine {...p}/>,
+      customComponent: p => <TextAreaLine {...p} />,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
     });
   }
 
-    return (
-      <div>
-      <a href="#" onClick={handleHelpClick} className="design-help-button">
+  return (
+    <div>
+      <LinkButton title={undefined} onClick={handleHelpClick} className="design-help-button">
         {open ?
-            DynamicViewMessage.HideHelp.niceToString() :
-            DynamicViewMessage.ShowHelp.niceToString()}
-        </a>
+          DynamicViewMessage.HideHelp.niceToString() :
+          DynamicViewMessage.ShowHelp.niceToString()}
+      </LinkButton>
       {open &&
-          <TypeHelpComponent
+        <TypeHelpComponent
           initialType={p.initialTypeName}
-            mode="TypeScript"
+          mode="TypeScript"
           onMemberClick={handleTypeHelpClick} />}
-      </div>
-    );
-  }
+    </div>
+  );
+}
 
 interface DesignerModalProps extends IModalProps<boolean | undefined> {
   title: React.ReactNode;
@@ -405,21 +405,21 @@ export function DesignerModal(p: DesignerModalProps): React.JSX.Element {
     p.onExited!(okClicked.current);
   }
 
-    return (
+  return (
     <Modal size="lg" onHide={handleCancelClicked} show={show} onExited={handleOnExited} className="sf-selector-modal">
-        <ModalHeaderButtons>
+      <ModalHeaderButtons>
         {p.title}
-        </ModalHeaderButtons>
-        <div className="modal-body">
+      </ModalHeaderButtons>
+      <div className="modal-body">
         {p.mainComponent()}
-        </div>
-        <ModalFooterButtons
-          onOk={handleOkClicked}
-          onCancel={handleCancelClicked}>
-        </ModalFooterButtons>
-      </Modal>
-    );
-  }
+      </div>
+      <ModalFooterButtons
+        onOk={handleOkClicked}
+        onCancel={handleCancelClicked}>
+      </ModalFooterButtons>
+    </Modal>
+  );
+}
 
 export namespace DesignerModal {
   export function show(title: React.ReactNode, mainComponent: () => React.ReactElement<any>): Promise<boolean | undefined> {
@@ -431,8 +431,8 @@ export function PropsHelp(p: { node: DesignerNode<BaseNode> }): React.JSX.Elemen
 
   return (
     <DropdownButton id="props_help_dropdown" variant="success" size={"xs" as any} title={DynamicViewMessage.PropsHelp.niceToString()}>
-        {Dic.map(p.node.context.propTypes, (name, typeName, i) =>
-          <Dropdown.Item style={{ paddingTop: "0", paddingBottom: "0" }} key={i} onClick={() => handlePropsClick(name)}>{name}: {typeName}</Dropdown.Item>)}
+      {Dic.map(p.node.context.propTypes, (name, typeName, i) =>
+        <Dropdown.Item style={{ paddingTop: "0", paddingBottom: "0" }} key={i} onClick={() => handlePropsClick(name)}>{name}: {typeName}</Dropdown.Item>)}
     </DropdownButton>
   );
 
@@ -441,7 +441,7 @@ export function PropsHelp(p: { node: DesignerNode<BaseNode> }): React.JSX.Elemen
     AutoLineModal.show({
       type: { name: "string" },
       initialValue: `props.${val}`,
-      customComponent:  a => <TextAreaLine {...a}/>,
+      customComponent: a => <TextAreaLine {...a} />,
       title: `${DynamicViewMessage.PropsHelp.niceToString()}.${val}`,
       message: "Copy to clipboard: Ctrl+C, ESC",
       valueHtmlAttributes: { style: { height: "200px" } },

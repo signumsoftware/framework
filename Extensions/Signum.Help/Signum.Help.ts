@@ -10,7 +10,7 @@ import * as Files from '../Signum.Files/Signum.Files'
 
 
 export const AppendixHelpEntity: Type<AppendixHelpEntity> = new Type<AppendixHelpEntity>("AppendixHelp");
-export interface AppendixHelpEntity extends Entities.Entity, IHelpImageTarget {
+export interface AppendixHelpEntity extends Entities.Entity, IHelpEntity {
   Type: "AppendixHelp";
   uniqueName: string;
   culture: Basics.CultureInfoEntity;
@@ -26,13 +26,48 @@ export namespace AppendixHelpOperation {
 export const HelpImageEntity: Type<HelpImageEntity> = new Type<HelpImageEntity>("HelpImage");
 export interface HelpImageEntity extends Entities.Entity {
   Type: "HelpImage";
-  target: Entities.Lite<IHelpImageTarget>;
+  target: Entities.Lite<IHelpEntity>;
   creationDate: string /*DateTime*/;
   file: Files.FilePathEmbedded;
 }
 
 export namespace HelpImageFileType {
   export const Image : Files.FileTypeSymbol = registerSymbol("FileType", "HelpImageFileType.Image");
+}
+
+export interface HelpImportLineBase extends Entities.EmbeddedEntity {
+  type: Basics.TypeEntity;
+  key: string;
+  culture: Basics.CultureInfoEntity;
+  text: string | null;
+  action: ImportAction;
+  exitingEntity: Entities.Lite<IHelpEntity> | null;
+}
+
+export const HelpImportPreviewLineEmbedded: Type<HelpImportPreviewLineEmbedded> = new Type<HelpImportPreviewLineEmbedded>("HelpImportPreviewLineEmbedded");
+export interface HelpImportPreviewLineEmbedded extends HelpImportLineBase {
+  Type: "HelpImportPreviewLineEmbedded";
+  apply: boolean | null;
+  applyVisible: boolean;
+}
+
+export const HelpImportPreviewModel: Type<HelpImportPreviewModel> = new Type<HelpImportPreviewModel>("HelpImportPreviewModel");
+export interface HelpImportPreviewModel extends Entities.ModelEntity {
+  Type: "HelpImportPreviewModel";
+  lines: Entities.MList<HelpImportPreviewLineEmbedded>;
+}
+
+export const HelpImportReportLineEmbedded: Type<HelpImportReportLineEmbedded> = new Type<HelpImportReportLineEmbedded>("HelpImportReportLineEmbedded");
+export interface HelpImportReportLineEmbedded extends HelpImportLineBase {
+  Type: "HelpImportReportLineEmbedded";
+  status: ImportStatus;
+  actionError: string | null;
+}
+
+export const HelpImportReportModel: Type<HelpImportReportModel> = new Type<HelpImportReportModel>("HelpImportReportModel");
+export interface HelpImportReportModel extends Entities.ModelEntity {
+  Type: "HelpImportReportModel";
+  lines: Entities.MList<HelpImportReportLineEmbedded>;
 }
 
 export namespace HelpKindMessage {
@@ -95,11 +130,24 @@ export namespace HelpMessage {
   export const Close: MessageKey = new MessageKey("HelpMessage", "Close");
   export const ViewMore: MessageKey = new MessageKey("HelpMessage", "ViewMore");
   export const JumpToViewMore: MessageKey = new MessageKey("HelpMessage", "JumpToViewMore");
+  export const ExportAsZip: MessageKey = new MessageKey("HelpMessage", "ExportAsZip");
+  export const Import: MessageKey = new MessageKey("HelpMessage", "Import");
+  export const ImportCompletedSuccessfully: MessageKey = new MessageKey("HelpMessage", "ImportCompletedSuccessfully");
+  export const ImportCompletedWithErrors: MessageKey = new MessageKey("HelpMessage", "ImportCompletedWithErrors");
+  export const ImportReport: MessageKey = new MessageKey("HelpMessage", "ImportReport");
+  export const ImportError: MessageKey = new MessageKey("HelpMessage", "ImportError");
+  export const ImportHelpContentsFromZipFile: MessageKey = new MessageKey("HelpMessage", "ImportHelpContentsFromZipFile");
+  export const SelectTheZIPFileWithTheHelpContentsThatYouWantToImport: MessageKey = new MessageKey("HelpMessage", "SelectTheZIPFileWithTheHelpContentsThatYouWantToImport");
+  export const ChooseZIPFile: MessageKey = new MessageKey("HelpMessage", "ChooseZIPFile");
+  export const SelectedFile: MessageKey = new MessageKey("HelpMessage", "SelectedFile");
+  export const HelpZipContents: MessageKey = new MessageKey("HelpMessage", "HelpZipContents");
+  export const NewKey: MessageKey = new MessageKey("HelpMessage", "NewKey");
+  export const ActionStatus: MessageKey = new MessageKey("HelpMessage", "ActionStatus");
 }
 
 export namespace HelpPermissions {
   export const ViewHelp : Basics.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.ViewHelp");
-  export const DownloadHelp : Basics.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.DownloadHelp");
+  export const ExportHelp : Basics.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.ExportHelp");
 }
 
 export namespace HelpSearchMessage {
@@ -138,11 +186,24 @@ export namespace HelpSyntaxMessage {
   export const TranslateFrom: MessageKey = new MessageKey("HelpSyntaxMessage", "TranslateFrom");
 }
 
-export interface IHelpImageTarget extends Entities.Entity {
+export interface IHelpEntity extends Entities.Entity {
 }
 
+export const ImportAction: EnumType<ImportAction> = new EnumType<ImportAction>("ImportAction");
+export type ImportAction =
+  "NoChange" |
+  "Create" |
+  "Override";
+
+export const ImportStatus: EnumType<ImportStatus> = new EnumType<ImportStatus>("ImportStatus");
+export type ImportStatus =
+  "NoChange" |
+  "Applied" |
+  "Failed" |
+  "Skipped";
+
 export const NamespaceHelpEntity: Type<NamespaceHelpEntity> = new Type<NamespaceHelpEntity>("NamespaceHelp");
-export interface NamespaceHelpEntity extends Entities.Entity, IHelpImageTarget {
+export interface NamespaceHelpEntity extends Entities.Entity, IHelpEntity {
   Type: "NamespaceHelp";
   name: string;
   culture: Basics.CultureInfoEntity;
@@ -181,7 +242,7 @@ export interface QueryColumnHelpEmbedded extends Entities.EmbeddedEntity {
 }
 
 export const QueryHelpEntity: Type<QueryHelpEntity> = new Type<QueryHelpEntity>("QueryHelp");
-export interface QueryHelpEntity extends Entities.Entity, IHelpImageTarget {
+export interface QueryHelpEntity extends Entities.Entity, IHelpEntity {
   Type: "QueryHelp";
   query: Basics.QueryEntity;
   culture: Basics.CultureInfoEntity;
@@ -197,7 +258,7 @@ export namespace QueryHelpOperation {
 }
 
 export const TypeHelpEntity: Type<TypeHelpEntity> = new Type<TypeHelpEntity>("TypeHelp");
-export interface TypeHelpEntity extends Entities.Entity, IHelpImageTarget {
+export interface TypeHelpEntity extends Entities.Entity, IHelpEntity {
   Type: "TypeHelp";
   type: Basics.TypeEntity;
   culture: Basics.CultureInfoEntity;

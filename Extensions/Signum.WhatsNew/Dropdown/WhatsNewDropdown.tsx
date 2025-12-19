@@ -16,6 +16,7 @@ import MessageModal from '@framework/Modals/MessageModal'
 import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage, WhatsNewOperation, WhatsNewState } from '../Signum.WhatsNew'
 import * as AppContext from "@framework/AppContext"
 import { HtmlViewer } from '../Templates/WhatsNewHtmlEditor'
+import { LinkButton } from '../../../Signum/React/Basics/LinkButton'
 
 export default function WhatsNewDropdown(): React.JSX.Element | null {
 
@@ -102,15 +103,17 @@ function WhatsNewDropdownImp() {
 
   return (
     <>
-      <button className="nav-link sf-bell-container" onClick={handleOnToggle} style={{ border: 0, backgroundColor: 'var(--bs-transparent)' }}>
-        <FontAwesomeIcon icon="bullhorn"
+      <button
+        className="nav-link sf-bell-container"
+        onClick={handleOnToggle}
+        style={{ border: 0, backgroundColor: 'var(--bs-transparent)' }}
+        title={(countResult ? WhatsNewEntity.niceCount(countResult.numWhatsNews) : WhatsNewEntity.nicePluralName())}      >
+        <FontAwesomeIcon aria-hidden={true} icon="bullhorn"
           className={classes("sf-newspaper", isOpen && "open", countResult && countResult.numWhatsNews > 0 && "active")}
-          title={(countResult ? WhatsNewEntity.niceCount(countResult.numWhatsNews) : WhatsNewEntity.nicePluralName())}
         />
         {countResult && countResult.numWhatsNews > 0 && <span className="badge bg-danger badge-pill sf-news-badge">{countResult.numWhatsNews}</span>}
       </button>
       {isOpen && <div className="sf-news-toasts mt-2" ref={divRef} style={{
-        backgroundColor: "rgba(var(--bs-white-rgb), 0.7)",
         backdropFilter: "blur(10px)",
         transition: "transform .4s ease" }}>
         {newsInOrder == null ? <Toast> <Toast.Body>{JavascriptMessage.loading.niceToString()}</Toast.Body></Toast> :
@@ -132,7 +135,7 @@ function WhatsNewDropdownImp() {
             }
             <Toast>
               <Toast.Body style={{ textAlign: "center" }}>
-                <a style={{ cursor: "pointer", color: "var(--bs-primary)" }}  onClick={() => handleClickAll()}>{WhatsNewMessage.AllMyNews.niceToString()}</a>
+                <LinkButton title={undefined} style={{ color: "var(--bs-primary)" }}  onClick={() => handleClickAll()}>{WhatsNewMessage.AllMyNews.niceToString()}</LinkButton>
               </Toast.Body>
             </Toast>
           </>
@@ -168,20 +171,36 @@ export function WhatsNewToast(p: { whatsnew: WhatsNewClient.WhatsNewShort, onClo
   }
 
   return (
-    <Toast onClose={() => p.onClose([p.whatsnew])} className={p.className}>
-      <Toast.Header>
-        <strong className="me-auto">{p.whatsnew.title} {!Navigator.isReadOnly(WhatsNewEntity) && <small style={{ color: "var(--bs-danger)" }}>{(p.whatsnew.status == "Draft") ? p.whatsnew.status : undefined}</small>}</strong>
+    <Toast onClose={() => p.onClose([p.whatsnew])} className={p.className} aria-atomic={true}>
+      <Toast.Header closeLabel={WhatsNewMessage.Close0WhatsNew.niceToString(p.whatsnew.title)}>
+        <strong className="me-auto" role="heading" aria-level={3}>{p.whatsnew.title} {!Navigator.isReadOnly(WhatsNewEntity) && <small style={{ color: "var(--bs-danger)" }}>{(p.whatsnew.status == "Draft") ? p.whatsnew.status : undefined}</small>}</strong>
         <small>{DateTime.fromISO(p.whatsnew.creationDate!).toRelative()}</small>
       </Toast.Header>
       <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
-        <img onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e) }}
-          alt={p.whatsnew.title}
-          src={AppContext.toAbsoluteUrl("/api/whatsnew/previewPicture/" + p.whatsnew.whatsNew.id)}
-          style={{ maxHeight: "30vh", cursor: "pointer", maxWidth: "10vw", margin: "0px 0px 0px 10px" }}
-        />
+        <Link
+          to={"/newspage/" + p.whatsnew.whatsNew.id}
+          onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e); }}
+          aria-label={`${p.whatsnew.title} – ${WhatsNewMessage.ReadFurther.niceToString()}`}
+          style={{ display: "inline-block", maxWidth: "10vw", marginLeft: 10 }}>
+          <img
+            src={AppContext.toAbsoluteUrl("/api/whatsnew/previewPicture/" + p.whatsnew.whatsNew.id)}
+            alt={p.whatsnew.title}
+            style={{
+              maxHeight: "30vh",
+              maxWidth: "100%",
+              borderRadius: 4,
+              display: "block",
+            }}
+          />
+        </Link>
         <HtmlViewer text={HTMLSubstring(p.whatsnew.description)} />
         <br />
-        <Link onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e) }} to={"/newspage/" + p.whatsnew.whatsNew.id}>{WhatsNewMessage.ReadFurther.niceToString()}</Link>
+        <Link
+          onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e) }}
+          to={"/newspage/" + p.whatsnew.whatsNew.id}
+          aria-label={WhatsNewMessage.ReadFurther.niceToString()}>
+            {WhatsNewMessage.ReadFurther.niceToString()}
+        </Link>
       </Toast.Body>
     </Toast>
   );

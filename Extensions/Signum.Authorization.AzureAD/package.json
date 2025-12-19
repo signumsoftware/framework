@@ -1,0 +1,15 @@
+{
+  "name": "signum-authorization-azuread",
+  "version": "1.0.0",
+  "description": "Resable modules to use on top of Signum Framework",
+  "repository": "",
+  "keywords": [],
+  "author": "Signum Software",
+  "license": "MIT",
+  "resolutions": {
+  },
+  "dependencies": {
+    "@azure/msal-browser": "2.32.2",
+    "@microsoft/microsoft-graph-client": "3.0.7"
+  }
+}

@@ -22,6 +22,19 @@ public interface IFile
     string FileName { get; set; }
 }
 
+public class FileUpload
+{
+    public string fileName;
+    public byte[] content;
+}
+
+public class FileUploadWithModel<T>
+    where T : ModelEntity
+{
+    public FileUpload file;
+    public T model;
+}
+
 public enum FileMessage
 {
     [Description("Download File")]
@@ -65,5 +78,8 @@ public enum FileMessage
     SaveThe0WhenFinished,
 
     [Description("Add more files")]
-    AddMoreFiles
+    AddMoreFiles,
+
+    [Description("The file '{0}' contains a threat detected by {1}.")]
+    File0ContainsAThreatBy1,
 }

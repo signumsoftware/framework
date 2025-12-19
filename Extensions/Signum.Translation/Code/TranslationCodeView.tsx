@@ -56,7 +56,7 @@ export default function TranslationCodeView(): React.JSX.Element {
 
   return (
     <div>
-      <h2><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h2>
+      <h1 className="h2"><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h1>
       <TranslateSearchBox setFilter={setFilter} filter={filter} />
       <em> {TranslationMessage.PressSearchForResults.niceToString()}</em>
       <br />
@@ -79,7 +79,7 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
       <input type="text" className="form-control"
         placeholder={TranslationMessage.Search.niceToString()} value={tmpFilter} onChange={e => setTmpFilter(e.currentTarget.value)} />
       <button className="btn btn-tertiary" type="submit" title={TranslationMessage.Search.niceToString()}>
-        <FontAwesomeIcon icon="magnifying-glass" />
+        <FontAwesomeIcon aria-hidden={true} icon="magnifying-glass" />
       </button>
     </form>
   );

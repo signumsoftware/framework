@@ -91,6 +91,7 @@ public static class EmailLogic
         EmailGraph.Register();
 
         ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+        sb.Schema.EntityEvents<FileTypeSymbol>().PreDeleteSqlSync += EmailLogic_PreDeleteSqlSync;
 
         if (sb.WebServerBuilder != null)
             MailingServer.Start(sb.WebServerBuilder);
@@ -108,6 +109,19 @@ public static class EmailLogic
                 throw new InvalidOperationException($"The property {pr} is implemented by {notOverriden.CommaAnd(a => a.TypeName())} but has not been registered in EmailLogic.EmailSenders. Maybe you forgot to call something like {notOverriden.CommaAnd(a => a.TypeName().Replace("Entity", "Logic.Start(sb)"))}?");
             }
         };
+    }
+
+    private static Engine.Sync.SqlPreCommand? EmailLogic_PreDeleteSqlSync(FileTypeSymbol arg)
+    {
+        var table = Schema.Current.TableMList((EmailMessageEntity e) => e.Attachments);
+
+        var result = Administrator.UnsafeDeletePreCommandMList((EmailMessageEntity e) => e.Attachments, Database.MListQuery((EmailMessageEntity e) => e.Attachments).Where(mle => mle.Element.File.FileType.Is(arg)));
+        
+        if (result != null && SafeConsole.Ask($"Some rows in {table.Name} are using {arg}. Delete them?"))
+            return result;
+
+        return null;
+    
     }
 
     internal static void WakeupReadyToSendInThisMachine(Dictionary<string, object> dic)

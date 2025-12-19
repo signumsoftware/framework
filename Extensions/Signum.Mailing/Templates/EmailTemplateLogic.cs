@@ -261,9 +261,11 @@ public static class EmailTemplateLogic
         }
     }
 
+    public static Func<Lite<EmailTemplateEntity>, EmailTemplateEntity> GetEmailTemplate = liteTemplate => EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
+    
     public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null, CultureInfo? cultureInfo = null)
     {
-        EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
+        EmailTemplateEntity template = GetEmailTemplate(liteTemplate);
 
         return CreateEmailMessage(template, modifiableEntity, ref model, cultureInfo);
     }
@@ -364,6 +366,9 @@ public static class EmailTemplateLogic
         if (AvoidSynchronizeTokens)
             return null;
 
+        QueryLogic.AssertLoaded();
+        TypeLogic.AssertLoaded();
+
         var dc = EmailLogic.Configuration.DefaultCulture; // To avoid many exceptions
 
         StringDistance sd = new StringDistance();
@@ -390,7 +395,7 @@ public static class EmailTemplateLogic
 
             SqlPreCommand DeleteTemplate()
             {
-                return table.DeleteSqlSync(et, e => e.Name == et.Name);
+                return table.DeleteSqlSync(et, e => e.Guid == et.Guid).TransactionBlock($"EmailTemplate Guid = {et.Guid}")!;
             }
 
             SqlPreCommand? RegenerateTemplate()
@@ -493,7 +498,7 @@ public static class EmailTemplateLogic
 
                     foreach (var item in et.Messages)
                     {
-                        var sc = new TemplateSynchronizationContext(replacements, sd, qd, et.Model?.ToType());
+                        var sc = new TemplateSynchronizationContext(et, replacements, sd, qd, et.Model?.ToType());
 
                         item.Subject = TextTemplateParser.Synchronize(item.Subject, sc);
                         item.Text = TextTemplateParser.Synchronize(item.Text, sc);

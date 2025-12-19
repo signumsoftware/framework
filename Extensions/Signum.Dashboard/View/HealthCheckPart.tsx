@@ -21,12 +21,12 @@ export default function HealthCheckPart(p: PanelPartContentProps<HealthCheckPart
 
   const title = !icon ? part.title :
     <span>
-      <FontAwesomeIcon icon={fallbackIcon(icon)} color={iconColor} className="me-1" />{part.title}
+      <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} color={iconColor} className="me-1" />{part.title}
     </span>;
 
   return (
     <div className="my-3">
-      <h5 style={{ color: p.partEmbedded.titleColor ?? undefined }} >{title}</h5>
+      <h2 className="h5" style={{ color: p.partEmbedded.titleColor ?? undefined }} >{title}</h2>
       <div className="d-flex flex-wrap">
         {
           p.content.items.map(mle => mle.element).map((le, i) => <HealthCheckElement key={i} element={le} />)
@@ -92,7 +92,7 @@ function HealthCheckElement(p: { element: HealthCheckElementEmbedded }) {
       window.open(path);
     }}>
       <span className='position-absolute top-0 end-0 me-1 mt-1'>
-        <FontAwesomeIcon icon={data == null ? "hourglass-start" :
+        <FontAwesomeIcon aria-hidden={true} icon={data == null ? "hourglass-start" :
           "error" in data ? 'link-slash' :
             data.result.status == "Healthy" ? (data.result.description == "Disabled" ? "circle" : "circle-check") :
               data.result.status == "Degraded" ? "circle-down" :

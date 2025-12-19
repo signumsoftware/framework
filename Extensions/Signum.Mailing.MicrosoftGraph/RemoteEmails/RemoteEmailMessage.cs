@@ -1,4 +1,5 @@
 using Signum.Authorization;
+using System.ComponentModel;
 
 namespace Signum.Mailing.MicrosoftGraph.RemoteEmails;
 
@@ -22,6 +23,9 @@ public class RemoteEmailMessageModel : ModelEntity
     public MList<RecipientEmbedded> BccRecipients { get; set; } = new MList<RecipientEmbedded>();
 
     public MList<RemoteAttachmentEmbedded> Attachments { get; set; } = new MList<RemoteAttachmentEmbedded>();
+
+    public RemoteEmailFolderModel? Folder { get; set; }
+    public MList<string> Categories { get; set; } = new MList<string>();
 
     public DateTimeOffset? CreatedDateTime { get; set; }
     public DateTimeOffset? LastModifiedDateTime { get; set; }
@@ -49,15 +53,23 @@ public class RemoteEmailMessageModel : ModelEntity
     public override string ToString() => As.Expression(() => Subject);
 }
 
-public enum RemoteEmailMessage
+public enum RemoteEmailMessageMessage
 {
-    NotAuthorizedToViewEmailsFromOtherUsers
-}
-
-[AutoInit]
-public static class RemoteEmailMessagePermission
-{
-    public static PermissionSymbol ViewEmailMessagesFromOtherUsers;
+    UserFilterNotFound,
+    [Description("User {0} has not mailbox")]
+    User0HasNoMailbox,
+    Deleting,
+    Delete,
+    Moving,
+    Move,
+    AddCategory,
+    RemoveCategory,
+    ChangingCategories,
+    Messages,
+    Message,
+    SelectAFolder,
+    [Description("Please confirm you would like to delete {0} from Outlook")]
+    PleaseConfirmYouWouldLikeToDelete0FromOutlook,
 }
 
 public enum RemoteEmailMessageQuery

@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework> 
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+		<OutputType>Library</OutputType>
+		<NoWarn>8618</NoWarn>
+	</PropertyGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		
+		<PackageReference Include="System.DirectoryServices" Version="10.0.0" />
+		<PackageReference Include="System.DirectoryServices.AccountManagement" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Graph" Version="5.96.0" />
+		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
+		<PackageReference Include="Signum.MSBuildTask" Version="10.0.0" />
+		<PackageReference Include="Signum.TSGenerator" Version="10.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
+		<ProjectReference Include="..\..\Signum\Signum.csproj" />
+		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
+		<ProjectReference Include="..\Signum.Mailing\Signum.Mailing.csproj" />
+		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
+		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -752,11 +752,15 @@ interface QueryContexts {
 }
 
 export let queryContexts: QueryContexts | undefined;
-export function queryAllowedInContext(queryKey: string, context: Lite<Entity>): boolean  {
+export function queryAllowedInContext(query: PseudoType | QueryKey, context: Lite<Entity>): boolean {
+
+  var queryKey = getQueryKey(query);
+
   var list = queryContexts?.[queryKey]?.[context.EntityType];
 
   return list == null || list.contains(context.id!);
 }
+
 export function reloadQueryContexts(): Promise<void> {
   return ajaxGet<QueryContexts>({ url: "/api/query/queryContexts" }).then(qc => {
     queryContexts = qc;
@@ -1353,7 +1357,6 @@ export type Anonymous<T extends ModifiableEntity> = T & {
 export class Type<T extends ModifiableEntity> implements IType {
 
 
-
   constructor(
     public typeName: string) { }
 
@@ -1700,12 +1703,20 @@ export class QueryTokenString<T> {
     return new QueryTokenString<string>(this.token + "." + column);
   }
 
-  operation(os: OperationSymbol): string { //operation tokens are leaf
-    return this.token + ".[Operations]." + os.key.replace(".", "#");
+  operation(os: OperationSymbol): QueryTokenString<string> {
+    return new QueryTokenString<string>(this.token + ".[Operations]." + os.key.replace(".", "#"));
   }
 
-  indexer(prefix: string, key: string): string {
-    return this.token + ".[" + prefix + "].[" + key + "]";
+  translated(): QueryTokenString<string> {
+    return new QueryTokenString<string>(this.token + ".Translated");
+  }
+
+  indexer<S>(prefix: string, key: string): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".[" + prefix + "].[" + key + "]");
+  }
+
+  mlistElementProperty(property: "RowId" | "RowOrder" | "RowPartitionId"): QueryTokenString<string | number> {
+    return new QueryTokenString<string | number>(this.token + "." + property);
   }
 }
 

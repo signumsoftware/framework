@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ActiveDirectoryAuthorizerMessage">
+    <Member Name="ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication" Description="El usuario de Active Directory '{0}' no está asociado con un usuario de esta aplicación." />
+  </Type>
+  <Type Name="ActiveDirectoryConfigurationEmbedded" Description="Configuración de Active Directory">
+    <Member Name="AllowMatchUsersBySimpleUserName" Description="Permitir emparejar usuarios por nombre de usuario simple" />
+    <Member Name="AutoCreateUsers" Description="Crear usuarios automáticamente" />
+    <Member Name="AutoUpdateUsers" Description="Auto actualizar usuarios" />
+    <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
+    <Member Name="Azure_ClientSecret" Description="Azure Client Secret ID" />
+    <Member Name="Azure_DirectoryID" Description="Azure Directory (tenant) ID" />
+    <Member Name="DefaultRole" Description="Rol predeterminado" />
+    <Member Name="DirectoryRegistry_Password" Description="Contraseña de Registro de directorio" />
+    <Member Name="DirectoryRegistry_Username" Description="Nombre de usuario de Registro de directorio" />
+    <Member Name="DomainName" Description="Nombre de dominio" />
+    <Member Name="LoginWithActiveDirectoryRegistry" Description="Inicie sesión con el registro de Active Directory" />
+    <Member Name="LoginWithAzureAD" Description="Inicie sesión con Azure AD" />
+    <Member Name="LoginWithWindowsAuthenticator" Description="Inicie sesión con Windows Authenticator" />
+    <Member Name="RoleMapping" Description="Asignación de roles" />
+  </Type>
+  <Type Name="ActiveDirectoryMessage">
+    <Member Name="AccountEnabled" Description="Cuenta habilitada" />
+    <Member Name="CompanyName" Description="Nombre de la emprea" />
+    <Member Name="Description" Description="Descripción" />
+    <Member Name="DisplayName" Description="Nombre para mostrar" />
+    <Member Name="GivenName" Description="Nombre" />
+    <Member Name="HasUser" Description="Tiene usuario" />
+    <Member Name="Id" Description="Id" />
+    <Member Name="InGroup" Description="En el grupo" />
+    <Member Name="JobTitle" Description="Cargo" />
+    <Member Name="Mail" Description="Correo" />
+    <Member Name="OnlyActiveUsers" Description="Sólo usuarios activos" />
+    <Member Name="OnPremisesImmutableId" Description="" />
+    <Member Name="SecurityEnabled" Description="Seguridad habilitada" />
+    <Member Name="Surname" Description="Apellidos" />
+    <Member Name="Visibility" Description="Visibilidad" />
+  </Type>
+  <Type Name="RoleMappingEmbedded" Description="Asignación de roles">
+    <Member Name="ADNameOrGuid" Description="Nombre AD o GUID" />
+    <Member Name="Role" Description="Rol" />
+  </Type>
+  <Type Name="UserADMessage">
+    <Member Name="Find0InActiveDirectory" Description="Buscar '{0}' en Active Directory" />
+    <Member Name="FindInActiveDirectory" Description="Buscar en Active Directory" />
+    <Member Name="NameOrEmail" Description="Nombre o email" />
+    <Member Name="NoUserContaining0FoundInActiveDirectory" Description="No se ha encontrado un usuario que contenga '{0}' en Active Directory" />
+    <Member Name="PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport" Description="Por favor, seleccione el usuario de Active Directory que desea importar" />
+    <Member Name="SelectActiveDirectoryUser" Description="Seleccionar usuario de Active Directory" />
+  </Type>
+  <Type Name="UserADMixin">
+    <Member Name="OID" Description="OID" />
+    <Member Name="SID" Description="SID" />
+  </Type>
+  <Type Name="UserADQuery">
+    <Member Name="ActiveDirectoryGroups" Description="Grupos de Active Directory" />
+    <Member Name="ActiveDirectoryUsers" Description="Usuarios de Active Directory" />
+  </Type>
+  <Type Name="UserOIDMessage">
+    <Member Name="TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet" Description="El usuario {0} está conectado a Active Directory y no puede tener una contraseña local" />
+  </Type>
+</Translations>

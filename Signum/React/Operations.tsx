@@ -16,7 +16,7 @@ import { ProgressModal, ProgressModalOptions } from "./Operations/ProgressModal"
 import { QuickLinkClient, QuickLinkExplore } from "./QuickLinkClient";
 import { getOperationInfo, getQueryKey, getTypeInfo, getTypeName, GraphExplorer, OperationInfo, OperationType, QueryTokenString, Type, TypeInfo } from './Reflection';
 import { SearchControlLoaded } from "./Search";
-import * as ContexualItems from './SearchControl/ContextualItems';
+import * as ContextualItems from './SearchControl/ContextualItems';
 import { ContextualItemsContext, ContextualMenuItem } from './SearchControl/ContextualItems';
 import { ajaxPost, ajaxPostRaw, WebApiHttpError } from './Services';
 import { FilterOperation } from "./Signum.DynamicQuery";
@@ -35,7 +35,7 @@ export namespace Operations {
 
   export function start(): void {
     ButtonBarManager.onButtonBarRender.push(EntityOperations.getEntityOperationButtons);
-    ContexualItems.onContextualItems.push(ContextualOperations.getOperationsContextualItems);
+    ContextualItems.onContextualItems.push(ContextualOperations.getOperationsContextualItems);
 
     AppContext.clearSettingsActions.push(clearOperationSettings);
 
@@ -216,7 +216,7 @@ export namespace Operations {
     export function getAlternatives<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T>[] | undefined {
       if (Defaults.isSave(eoc.operationInfo)) {
         return [
-          eoc.frame.onClose ? EntityOperations.andClose(eoc) : undefined,
+          eoc.frame.hideAndClose ? undefined : EntityOperations.andClose(eoc),
           EntityOperations.andNew(eoc)
         ].notNull()
       }
@@ -318,12 +318,12 @@ export namespace Operations {
     }
 
     export interface ErrorReport {
-      errors: { [liteKey: string]: string; }
+      errors: { [liteKey: string]: string | undefined; }
     }
 
     export interface OperationResult {
       entity: Lite<Entity>;
-      error: string;
+      error?: string;
     }
 
     export interface ProgressStep<T> {
@@ -474,7 +474,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
   onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
   color?: BsColor;
-  icon?: IconProp;
+  icon?: IconProp | React.ReactElement;
   iconColor?: string;
   order?: number;
 
@@ -495,7 +495,7 @@ export interface ContextualOperationOptions<T extends Entity> {
   createMenuItems?: (eoc: ContextualOperationContext<T>) => ContextualMenuItem[];
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
   color?: BsColor;
-  icon?: IconProp;
+  icon?: IconProp | React.ReactElement;
   iconColor?: string;
   order?: number;
 }
@@ -509,7 +509,7 @@ export class ContextualOperationContext<T extends Entity> {
   canExecute?: string;
   isReadonly?: boolean;
   color?: BsColor;
-  icon?: IconProp;
+  icon?: IconProp | React.ReactElement;
 
   progressModalOptions?: Operations.API.OperationWithProgressOptions;
   event?: React.MouseEvent<any>;
@@ -641,7 +641,7 @@ export class CellOperationSettings<T extends Entity> extends OperationSettings {
   hideOnCanExecute?: boolean;
   //showOnReadOnly?: boolean;
   color?: BsColor;
-  icon?: IconProp;
+  icon?: IconProp | React.ReactElement;
   iconColor?: string;
   iconAlign?: "start" | "end";
   outline?: boolean;
@@ -664,7 +664,7 @@ export interface CellOperationOptions<T extends Entity> {
   hideOnCanExecute?: boolean;
   //showOnReadOnly?: boolean;
   color?: BsColor;
-  icon?: IconProp;
+  icon?: IconProp | React.ReactElement;
   iconColor?: string;
   iconAlign?: "start" | "end";
   outline?: boolean;
@@ -689,7 +689,7 @@ export class CellOperationContext<T extends Entity> {
 
   text?: string;
   color?: BsColor;
-  icon?: IconProp;
+  icon?: IconProp | React.ReactElement;
   iconColor?: string;
   iconAlign?: "start" | "end";
   outline?: boolean;
@@ -826,13 +826,13 @@ export class EntityOperationContext<T extends Entity> {
 
   onDeleteSuccess?: () => Promise<void> | undefined;
   onDeleteSuccess_Default = (): void => {
-    this.frame.onClose?.();
+    this.frame.onClose();
     Navigator.raiseEntityChanged(this.entity.Type);
     Operations.notifySuccess();
   }
 
   color?: BsColor;
-  icon?: IconProp;
+  icon?: IconProp | React.ReactElement;
   outline?: boolean;
   group?: EntityOperationGroup;
   keyboardShortcut?: KeyboardShortcut;
@@ -945,7 +945,7 @@ export interface AlternativeOperationSetting<T extends Entity> {
   text: string;
   color?: BsColor;
   classes?: string;
-  icon?: IconProp;
+  icon?: IconProp | React.ReactElement;
   iconAlign?: "start" | "end";
   iconColor?: string;
   isVisible?: boolean;
@@ -978,7 +978,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   color?: BsColor;
   outline?: boolean;
   classes?: string;
-  icon?: IconProp;
+  icon?: IconProp | React.ReactElement;
   iconAlign?: "start" | "end";
   iconColor?: string;
   alternatives?: (ctx: EntityOperationContext<T>) => AlternativeOperationSetting<T>[];
@@ -1016,7 +1016,7 @@ export interface EntityOperationOptions<T extends Entity> {
   color?: BsColor;
   outline?: boolean;
   classes?: string;
-  icon?: IconProp;
+  icon?: IconProp | React.ReactElement;
   iconAlign?: "start" | "end";
   iconColor?: string;
   keyboardShortcut?: KeyboardShortcut | null;

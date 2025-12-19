@@ -104,8 +104,8 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.
       </div>
 
       {p.showSearchButton &&
-        <button className={classes("sf-query-button sf-search btn btn-primary")} onClick={() => p.onSearch && p.onSearch()} title="Enter">
-          <FontAwesomeIcon icon={"magnifying-glass"} />&nbsp;{SearchMessage.Search.niceToString()}
+        <button className={classes("sf-query-button sf-search btn btn-primary")} onClick={() => p.onSearch && p.onSearch()} title={SearchMessage.Enter.niceToString()}>
+          <FontAwesomeIcon aria-hidden={true} icon={"magnifying-glass"} />&nbsp;{SearchMessage.Search.niceToString()}
         </button>}
 
     </div>

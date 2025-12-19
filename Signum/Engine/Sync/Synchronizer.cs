@@ -107,18 +107,24 @@ public static class Synchronizer
 
     public static void SynchronizeReplacing<N, O>(
       Replacements replacements,
-      string replacementsKey,
+      string? replacementsKey,
       Dictionary<string, N> newDictionary,
       Dictionary<string, O> oldDictionary,
       Action<string, N>? createNew,
       Action<string, O>? removeOld,
       Action<string, N, O>? merge)
     {
-        replacements.AskForReplacements(
-            oldDictionary.Keys.ToHashSet(),
-            newDictionary.Keys.ToHashSet(), replacementsKey);
+        var repOldDictionary = oldDictionary;
 
-        var repOldDictionary = replacements.ApplyReplacementsToOld(oldDictionary, replacementsKey);
+        if (replacementsKey != null)
+        {
+            replacements.AskForReplacements(
+                oldDictionary.Keys.ToHashSet(),
+                newDictionary.Keys.ToHashSet(),
+                replacementsKey);
+
+            repOldDictionary = replacements.ApplyReplacementsToOld(oldDictionary, replacementsKey);
+        }
 
         HashSet<string> set = new HashSet<string>();
         set.UnionWith(repOldDictionary.Keys);
@@ -373,15 +379,17 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
         }
     }
 
-    public static Func<AutoReplacementContext, Selection?>? AutoReplacement;
+    public static Func<AutoReplacementContext, Selection?>? GlobalAutoReplacement;
+    public Func<AutoReplacementContext, Selection?>? AutoReplacement;
     public static Action<string, string, string?>? ResponseRecorder;//  replacementsKey,oldValue,newValue
 
     //public static Dictionary<String, Replacements.Selection>? cases ;
-    public static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive, ref bool alwaysNoRename)
+    public Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive, ref bool alwaysNoRename)
     {
-        if (AutoReplacement != null)
+        var autoReplacement = AutoReplacement ?? GlobalAutoReplacement;
+        if (autoReplacement != null)
         {
-            Selection? selection = AutoReplacement(new AutoReplacementContext(replacementsKey, oldValue, newValues));
+            Selection? selection = autoReplacement(new AutoReplacementContext(replacementsKey, oldValue, newValues));
             if (selection != null)
             {
                 SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "AutoReplacement:");

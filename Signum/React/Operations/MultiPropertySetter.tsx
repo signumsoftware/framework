@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Dic, areEqual, classes } from '../Globals'
 import { tryGetTypeInfos, TypeReference, TypeInfo, tryGetTypeInfo, getTypeName, Binding, getTypeInfos, IsByAll, getTypeInfo, MemberInfo, OperationInfo, isNumberType } from '../Reflection'
-import { ModifiableEntity, SearchMessage, JavascriptMessage, Lite, Entity, OperationMessage } from '../Signum.Entities'
+import { ModifiableEntity, SearchMessage, JavascriptMessage, Lite, Entity, OperationMessage, EntityControlMessage } from '../Signum.Entities'
 import { Navigator } from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
 import { EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute, StyleContext } from '../Lines'
@@ -24,6 +24,7 @@ import { CollectionMessage } from '../Signum.External'
 import { EnumLine } from '../Lines/EnumLine'
 import { AutoLine } from '../Lines/AutoLine'
 import SelectorModal from '../SelectorModal'
+import { LinkButton } from '../Basics/LinkButton'
 
 
 interface MultiPropertySetterModalProps extends IModalProps<boolean | undefined> {
@@ -56,8 +57,8 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): Reac
   return (
     <Modal onHide={handleCancelClicked} show={show} className="message-modal" size="xl" onExited={handleOnExited}>
       <div className="modal-header">
-        <h5 className="modal-title">{OperationMessage.BulkModifications.niceToString()}</h5>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}/>
+        <h1 className="modal-title h5">{OperationMessage.BulkModifications.niceToString()}</h1>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label={EntityControlMessage.Close.niceToString()} onClick={handleCancelClicked}/>
       </div>
       <div className="modal-body">
         <ErrorBoundary>
@@ -73,7 +74,7 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): Reac
             )}
         </p>
         <br />
-        <button className="btn btn-primary sf-entity-button sf-ok-button" disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} onClick={handleOkClicked}>
+        <button className="btn btn-primary sf-entity-button sf-ok-button" aria-disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} onClick={handleOkClicked}>
           {JavascriptMessage.ok.niceToString()}
         </button>
         <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
@@ -133,11 +134,12 @@ export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { 
         {
           <tr className="sf-property-create">
             <td colSpan={4}>
-              <a href="#" title={StyleContext.default.titleLabels ? addElement : undefined}
+              <LinkButton
+                title={StyleContext.default.titleLabels ? addElement : undefined}
                 className="sf-line-button sf-create sf-create-condition"
                 onClick={e => handleNewPropertySetter(e)}>
-                <FontAwesomeIcon icon="plus" className="sf-create me-1" />{addElement}
-              </a>
+                <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create me-1" />{addElement}
+              </LinkButton>
             </td>
           </tr>
         }
@@ -271,11 +273,12 @@ export function PropertySetterComponent(p: PropertySetterComponentProps): React.
     <>
       <tr className="sf-property-setter">
         <td>
-          {<a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+          {<LinkButton
+            title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
             className="sf-line-button sf-remove"
             onClick={handleDeleteSetter}>
-            <FontAwesomeIcon icon="xmark" />
-          </a>}
+            <FontAwesomeIcon aria-hidden={true} icon="xmark" />
+          </LinkButton>}
         </td>
         <td>
           <div className="rw-widget-xs">
@@ -308,12 +311,12 @@ export function PropertySetterComponent(p: PropertySetterComponentProps): React.
             <>
               {p.setter.property && p.setter.operation && showValue(p.setter.operation) && renderValue()}
               {subRoot && p.setter.operation && showPredicate(p.setter.operation) && pr && <div>
-                <h5>{OperationMessage.Condition.niceToString()}</h5>
+                <h2 className="h5">{OperationMessage.Condition.niceToString()}</h2>
                 <MultiPropertySetter onChange={p.onSetterChanged} setters={p.setter.predicate!} isPredicate={true} root={subRoot} />
               </div>
               }
               {subRoot && p.setter.operation && showSetters(p.setter.operation) && pr && <div>
-                <h5>{OperationMessage.Setters.niceToString()}</h5>
+                <h2 className="h5">{OperationMessage.Setters.niceToString()}</h2>
                 <MultiPropertySetter onChange={p.onSetterChanged} setters={p.setter.setters!} isPredicate={false} root={subRoot} />
               </div>
               }

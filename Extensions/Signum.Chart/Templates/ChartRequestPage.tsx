@@ -53,9 +53,9 @@ export default function ChartRequestPage(): React.JSX.Element | null {
 
   return (
     <div style={{ display: "flex" }}>
-      {pair == null ? <h2>
+      {pair == null ? <h1 className="h2">
         <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>
-      </h2 > :
+      </h1 > :
         <ChartRequestView
           chartRequest={pair.chartRequest}
           userChart={pair.userChart}

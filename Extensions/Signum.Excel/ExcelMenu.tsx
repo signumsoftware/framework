@@ -65,7 +65,7 @@ export default function ExcelMenu(p: ExcelMenuProps): React.JSX.Element {
       .then(() => reloadExcelReports());
   }
 
-  const label = <span><FontAwesomeIcon icon={"file-excel"} />{p.searchControl.props.largeToolbarButtons == true ? <span className="d-none d-sm-inline">{" " + ExcelMessage.ExcelReport.niceToString()}</span> : undefined}</span>;
+  const label = <span><FontAwesomeIcon aria-hidden={true} icon={"file-excel"} />{p.searchControl.props.largeToolbarButtons == true ? <span className="d-none d-sm-inline">{" " + ExcelMessage.ExcelReport.niceToString()}</span> : undefined}</span>;
 
   if (p.plainExcel && !p.excelReport && !p.importFromExcel)
     return <button className={"sf-query-button sf-search btn btn-tertiary"} title={ExcelMessage.ExcelReport.niceToString() } onClick={handlePlainExcel}>{label} </button>;
@@ -77,8 +77,8 @@ export default function ExcelMenu(p: ExcelMenuProps): React.JSX.Element {
       </Dropdown.Toggle>
       <Dropdown.Menu>
         {...addDropdownDividers([
-          p.plainExcel && <Dropdown.Item onClick={handlePlainExcel} ><span><FontAwesomeIcon icon={"file-excel"} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>,
-          p.importFromExcel && isPermissionAuthorized(ExcelPermission.ImportFromExcel) && <Dropdown.Item onClick={handleImportFromExcel} ><span><FontAwesomeIcon icon={"file-excel"} />&nbsp; {ImportFromExcelMessage.ImportFromExcel.niceToString()}</span></Dropdown.Item>,
+          p.plainExcel && <Dropdown.Item onClick={handlePlainExcel} ><span><FontAwesomeIcon aria-hidden={true} icon={"file-excel"} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>,
+          p.importFromExcel && isPermissionAuthorized(ExcelPermission.ImportFromExcel) && <Dropdown.Item onClick={handleImportFromExcel} ><span><FontAwesomeIcon aria-hidden={true} icon={"file-excel"} />&nbsp; {ImportFromExcelMessage.ImportFromExcel.niceToString()}</span></Dropdown.Item>,
           p.excelReport && addDropdownDividers([
             excelReports?.map((uq, i) =>
             <Dropdown.Item key={i}
@@ -87,8 +87,8 @@ export default function ExcelMenu(p: ExcelMenuProps): React.JSX.Element {
               </Dropdown.Item>),
             ExcelReportEntity.tryOperationInfo(ExcelReportOperation.Save) &&
             [
-              <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon icon={"magnifying-glass"} className="me-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>,
-              <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={"plus"} className="me-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>,
+              <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon aria-hidden={true} icon={"magnifying-glass"} className="me-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>,
+              <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon aria-hidden={true} icon={"plus"} className="me-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>,
             ]
           ])
         ]) }

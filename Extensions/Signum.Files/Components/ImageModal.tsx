@@ -30,9 +30,9 @@ export function ImageModal(p: ImageModalProps): React.JSX.Element {
   return (
     <Modal onHide={handleCancelClicked} show={showImage} className="message-modal" size="xl" onExited={handleOnExited}>
       <div className="modal-header">
-        <h4 className="modal-title">
+        <h1 className="modal-title h4">
           {p.title || p.file.fileName}
-        </h4>
+        </h1>
         <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}/>
       </div>
       <div className="modal-body">

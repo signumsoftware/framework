@@ -34,8 +34,6 @@ public static class DashboardLogic
 
     public static void Start(SchemaBuilder sb, IFileTypeAlgorithm? cachedQueryAlgorithm)
     {
-
-
         if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
             return;
 
@@ -321,7 +319,8 @@ public static class DashboardLogic
     {
         PropertyRouteTranslationLogic.RegisterRoute((DashboardEntity d) => d.DisplayName);
         PropertyRouteTranslationLogic.RegisterRoute((DashboardEntity d) => d.Parts[0].Title);
-        PropertyRouteTranslationLogic.RegisterRoute((TextPartEntity tp) => tp.TextContent);
+        if (Schema.Current.Tables.ContainsKey(typeof(TextPartEntity)))
+            PropertyRouteTranslationLogic.RegisterRoute((TextPartEntity tp) => tp.TextContent);
     }
 
     public static List<DashboardEntity> GetEmbeddedDashboards(Type entityType)

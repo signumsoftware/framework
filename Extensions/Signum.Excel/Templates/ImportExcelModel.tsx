@@ -81,8 +81,8 @@ export default function ImportExcel(p: { ctx: TypeContext<ImportExcelModel>, sea
 
       <FileLine ctx={ctx.subCtx(f => f.excelFile)} />
 
-      <button className="btn btn-xs btn-info" onClick={handlePlainExcelForImport}>
-        <FontAwesomeIcon icon="download" /> {ImportFromExcelMessage.DownloadTemplate.niceToString()}
+      <button type="button" className="btn btn-xs btn-info" onClick={handlePlainExcelForImport}>
+        <FontAwesomeIcon aria-hidden={true} icon="download" /> {ImportFromExcelMessage.DownloadTemplate.niceToString()}
       </button>
     </div>
   );

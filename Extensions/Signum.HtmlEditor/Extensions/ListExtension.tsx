@@ -18,7 +18,6 @@ import {
 import { HtmlEditorController } from "../HtmlEditorController";
 import { $findMatchingParent, isListActive } from "../Utils/node";
 import {
-  ComponentAndProps,
   HtmlEditorExtension,
   LexicalConfigNode,
   OptionalCallback,
@@ -29,8 +28,8 @@ const MAX_INDENT_LEVEL = 6;
 export class ListExtension implements HtmlEditorExtension {
   name = "ListExtension";
 
-  getBuiltInComponent(): ComponentAndProps {
-    return { component: ListPlugin };
+  getBuiltPlugin(): React.ReactElement {
+    return <ListPlugin />;
   }
 
   getNodes(): LexicalConfigNode {
