@@ -127,7 +127,7 @@ public class AzureADAuthorizer : ICustomAuthorizer
         if (ctx.OID != null)
         {
             user.Mixin<UserAzureADMixin>().OID = ctx.OID;
-            if (!UserAzureADMixin.AllowPasswordForActiveDirectoryUsers)
+            if (!UserAzureADMixin.AllowPasswordForAzureADUsers)
                 user.PasswordHash = null;
         }
 
