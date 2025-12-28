@@ -102,7 +102,15 @@ public class SqlServerConnector : Connector
         this.ConnectionString = connectionString;
         this.ParameterBuilder = new SqlParameterBuilder();
 
-        this.Version = version;
+        this.Version = version;  
+
+        if(connectionString.Contains("Connection Timeout")) 
+        {
+            var builder = new SqlConnectionStringBuilder(connectionString);
+            if (builder.ConnectTimeout > 0)
+                this.CommandTimeout = builder.ConnectTimeout;
+        }
+
     }
 
     public int? CommandTimeout { get; set; } = null;
