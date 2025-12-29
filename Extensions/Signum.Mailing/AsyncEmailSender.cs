@@ -209,7 +209,7 @@ public static class AsyncEmailSender
 
         queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
             m.State == EmailMessageState.ReadyToSend &&
-            m.CreationDate  < Clock.Now &&
+            m.CreationDate  < Clock.Now.AddSeconds(-4) &&
             (firstDate == null ? true : m.CreationDate >= firstDate)).UnsafeUpdate()
                 .Set(m => m.ProcessIdentifier, m => processIdentifier)
                 .Set(m => m.State, m => EmailMessageState.RecruitedForSending)
