@@ -138,7 +138,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     Navigator.API.fetch(uq).then(userQuery => {
       const sc = p.searchControl;
       const oldFindOptions = sc.props.findOptions;
-      UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, sc.props.extraOptions?.entity, sc.props.defaultIncudeDefaultFilters)
+      UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, currentEntity ?? sc.props.extraOptions?.entity, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
           sc.setState({ refreshMode: userQuery.refreshMode });
           sc.handleChangeFiltermode(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions) ? 'Simple' : "Advanced", false, true);
