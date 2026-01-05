@@ -473,3 +473,53 @@
     .sidebar-nav.narrow .nav-item-header svg {
         display: none;
     }
+
+    .sf-sidebar-shell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.sf-sidebar-shell > .sidebar {
+    width: 100%;
+    min-width: 0;
+}
+
+.sf-sidebar-shell.resizable {
+    padding-right: 8px;
+}
+
+.sf-sidebar-resize-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 100%;
+    cursor: ew-resize;
+    touch-action: none;
+    z-index: 20;
+}
+
+.sf-sidebar-resize-handle:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+body.sf-sidebar-resizing {
+    user-select: none;
+    cursor: ew-resize;
+}
+
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+}
+
+.skip-link:focus {
+    top: 0;
+    left: 0;
+    z-index: 2000;
+    padding: 6px 10px;
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+}

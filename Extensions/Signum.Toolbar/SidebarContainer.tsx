@@ -17,24 +17,125 @@ interface SidebarContainerProps {
 }
 
 export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element{
+  const sidebarShellRef = React.useRef<HTMLDivElement | null>(null);
+
+  const sidebarWidthStorageKey = "signum-toolbar-sidebar-width";
+
+  const [sidebarWidth, setSidebarWidth] = React.useState<number | null>(() => {
+    const str = localStorage.getItem(sidebarWidthStorageKey);
+    if (str == null)
+      return null;
+
+    const n = Number(str);
+    return Number.isFinite(n) ? n : null;
+  });
+
+  const minSidebarWidthRef = React.useRef<number | null>(null);
+  const maxSidebarWidthRef = React.useRef<number | null>(null);
+
+  const isResizable = !p.isMobile && p.mode === "Wide";
+
+  React.useLayoutEffect(() => {
+    if (!isResizable)
+      return;
+
+    const nav = sidebarShellRef.current?.querySelector<HTMLElement>(".sidebar.sidebar-nav");
+    if (nav) {
+      nav.style.width = "100%";
+      nav.style.minWidth = "0";
+    }
+  }, [isResizable]);
+
+  React.useLayoutEffect(() => {
+    if (!isResizable)
+      return;
+
+    if (minSidebarWidthRef.current != null)
+      return;
+
+    const el = sidebarShellRef.current;
+    if (!el)
+      return;
+
+    const current = Math.round(el.getBoundingClientRect().width);
+    minSidebarWidthRef.current = current;
+    maxSidebarWidthRef.current = current * 2;
+
+    if (sidebarWidth == null) {
+      setSidebarWidth(current);
+      localStorage.setItem(sidebarWidthStorageKey, current.toString());
+    }
+  }, [isResizable, sidebarWidth]);
+
+  function clampSidebarWidth(width: number): number {
+    const min = minSidebarWidthRef.current ?? width;
+    const max = maxSidebarWidthRef.current ?? width;
+    return Math.max(min, Math.min(max, width));
+  }
+
+  function handleResizePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (!isResizable)
+      return;
+
+    const el = sidebarShellRef.current;
+    if (!el)
+      return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const startX = e.clientX;
+    const startWidth = Math.round(el.getBoundingClientRect().width);
+    const pointerId = e.pointerId;
+
+    (e.currentTarget as HTMLDivElement).setPointerCapture(pointerId);
+    document.body.classList.add("sf-sidebar-resizing");
+
+    function onMove(ev: PointerEvent) {
+      if (ev.pointerId !== pointerId)
+        return;
+
+      const newWidth = clampSidebarWidth(startWidth + (ev.clientX - startX));
+      setSidebarWidth(newWidth);
+      localStorage.setItem(sidebarWidthStorageKey, newWidth.toString());
+    }
+
+    function cleanup(ev?: PointerEvent) {
+      if (ev && ev.pointerId !== pointerId)
+        return;
+
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", cleanup);
+      window.removeEventListener("pointercancel", cleanup);
+      document.body.classList.remove("sf-sidebar-resizing");
+    }
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", cleanup);
+    window.addEventListener("pointercancel", cleanup);
+  }
+
   function renderSideBar() {
     return (
-      <nav
-        className={classes("sidebar sidebar-nav", p.mode.firstLower(), p.isMobile && "mobile")}
-        role="navigation">
-        <a
-          href="#maincontent"
-          className="skip-link"
-          onClick={(e) => {
-            e.preventDefault();
-            const el = document.getElementById("maincontent");
-            if (el) {
-              el.focus();
-            }
-          }}
-        >{LayoutMessage.JumpToMainContent.niceToString()}</a>
-        {p.sidebarContent}
-      </nav>
+      <div className={classes("sf-sidebar-shell", isResizable && "resizable")} ref={sidebarShellRef} style={isResizable && sidebarWidth != null ? { width: sidebarWidth, minWidth: sidebarWidth } : undefined}>
+        {isResizable && <div className="sf-sidebar-resize-handle" onPointerDown={handleResizePointerDown} role="separator" aria-orientation="vertical" aria-label="Resize sidebar" />}
+        <nav
+          className={classes("sidebar sidebar-nav", p.mode.firstLower(), p.isMobile && "mobile")}
+          role="navigation">
+          <a
+            href="#maincontent"
+            className="skip-link"
+            onClick={(e) => {
+              e.preventDefault();
+              const el = document.getElementById("maincontent");
+              if (el) {
+                el.focus();
+              }
+            }}
+          >{LayoutMessage.JumpToMainContent.niceToString()}</a>
+          {p.sidebarContent}
+        </nav>
+      </div>
     );
   }
 
