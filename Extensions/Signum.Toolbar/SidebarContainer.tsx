@@ -1,13 +1,14 @@
-import * as React from 'react';
+import * as React from 'react'
 import { ErrorBoundary } from '@framework/Components';
-import "./Sidebar.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import "./Sidebar.css"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals';
 import { EntityControlMessage } from '@framework/Signum.Entities';
-import { LinkButton } from '../../Signum/React/Basics/LinkButton';
 import { LayoutMessage } from './Signum.Toolbar';
+import { LinkButton } from '../../Signum/React/Basics/LinkButton';
 
 export type SidebarMode = "Wide" | "Narrow" | "Hidden";
+
 interface SidebarContainerProps {
   mode: SidebarMode;
   isMobile: boolean;
@@ -15,59 +16,71 @@ interface SidebarContainerProps {
   children: React.ReactNode;
 }
 
-const DEFAULT_WIDTH = 250;
-const MIN_WIDTH = 250;
-const MAX_WIDTH = 600;
-
 export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element {
-
-  const [width, setWidth] = React.useState<number>(() => {
-    const stored = localStorage.getItem("sidebar-width");
-    return stored ? Number(stored) : DEFAULT_WIDTH;
-  });
+  const sidebarRef = React.useRef<HTMLDivElement>(null);
+  const isResizing = React.useRef(false);
 
   React.useEffect(() => {
-    localStorage.setItem("sidebar-width", String(width));
-  }, [width]);
-
-  const prevMode = React.useRef<SidebarMode | null>(null);
-
-  React.useEffect(() => {
-    const wasCollapsed =
-      prevMode.current === "Hidden" || prevMode.current === "Narrow";
-    if (p.mode === "Wide" && wasCollapsed) {
-      setWidth(DEFAULT_WIDTH);
+    // Whenever sidebar mode becomes Wide on desktop, reset width to 250px
+    if (p.mode === "Wide" && !p.isMobile) {
+      document.documentElement.style.setProperty("--sidebar-width", `250px`);
     }
-    prevMode.current = p.mode;
-  }, [p.mode]);
-  function renderSideBar() {
-    const isResizable = p.mode === "Wide" && !p.isMobile;
+  }, [p.mode, p.isMobile]);
+  React.useEffect(() => {
+    function onMouseMove(e: MouseEvent) {
+      if (!isResizing.current || !sidebarRef.current) return;
+      const MIN_WIDTH = 250;
+      const MAX_WIDTH = 600;
+      const newWidth = Math.min(Math.max(e.clientX, MIN_WIDTH), MAX_WIDTH);
+      document.documentElement.style.setProperty(
+        "--sidebar-width",
+        `${newWidth}px`
+      );
+    }
 
+    function onMouseUp() {
+      isResizing.current = false;
+      document.body.classList.remove("sidebar-resizing");
+    }
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
+  function startResize() {
+    isResizing.current = true;
+    document.body.classList.add("sidebar-resizing");
+  }
+
+  function renderSideBar() {
     return (
       <nav
+        ref={sidebarRef}
         className={classes(
           "sidebar sidebar-nav",
           p.mode.firstLower(),
           p.isMobile && "mobile"
         )}
-        style={isResizable ? { width, minWidth: width } : undefined}
         role="navigation"
       >
-        <a
-          href="#maincontent"
-          className="skip-link"
-          onClick={(e) => {
-            e.preventDefault();
-            document.getElementById("maincontent")?.focus();
-          }}
-        >
-          {LayoutMessage.JumpToMainContent.niceToString()}
-        </a>
         {p.sidebarContent}
-        {isResizable && <SidebarResizeHandle onResize={setWidth} />}
+
+        {/* Resize handle (desktop + wide only) */}
+        {!p.isMobile && p.mode === "Wide" && (
+          <div
+            className="sidebar-resizer"
+            onMouseDown={startResize}
+          />
+        )}
       </nav>
     );
   }
+
   return (
     <div className="sidebar-container">
       {p.sidebarContent && renderSideBar()}
@@ -77,74 +90,23 @@ export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element {
     </div>
   );
 }
-export function SidebarToggleItem(p: {
-  isMobile: boolean;
-  simpleMode?: boolean;
-  mode: SidebarMode;
-  setMode: (mode: SidebarMode) => void;
-}): React.JSX.Element {
 
+export function SidebarToggleItem(p: { isMobile: boolean, simpleMode?: boolean, mode: SidebarMode, setMode: (mode: SidebarMode) => void }): React.JSX.Element {
   return (
-    <LinkButton
-      title={EntityControlMessage.ToggleSideBar.niceToString()}
-      className={classes(
-        "main-sidebar-button",
-        "nav-link",
-        "main-sidebar-button-" + p.mode.toLowerCase()
-      )}
-      onClick={() => {
-        window.dispatchEvent(new CustomEvent("sidebarMove"));
-        switch (p.mode) {
-          case "Hidden": p.setMode("Wide"); break;
-          case "Narrow": p.setMode("Wide"); break;
-          case "Wide":
-          default:
-            p.setMode(p.isMobile || p.simpleMode ? "Hidden" : "Narrow");
-        }
-      }}
-    >
+    <LinkButton title={EntityControlMessage.ToggleSideBar.niceToString()} className={classes("main-sidebar-button", "nav-link", "main-sidebar-button-" + p.mode.toLowerCase())} onClick={(ev) => {
+      window.dispatchEvent(new CustomEvent("sidebarMove"));
+      switch (p.mode) {
+        case "Hidden": p.setMode("Wide"); break;
+        case "Narrow": p.setMode("Wide"); break;
+        case "Wide":
+        default: p.setMode(p.isMobile || p.simpleMode ? "Hidden" : "Narrow"); break;
+      }
+    }}>
       <div style={{ display: "flex", height: "100%", alignItems: "center" }}>
-        <FontAwesomeIcon icon={"angles-left"} style={{ width: p.mode === "Wide" ? 15 : 0 }} />
-        <FontAwesomeIcon icon={"bars"} style={{ width: p.mode === "Hidden" ? 15 : 0 }} />
-        {!p.simpleMode && (
-          <FontAwesomeIcon icon={"angles-right"} style={{ width: p.mode === "Narrow" ? 15 : 0 }} />
-        )}
+        <FontAwesomeIcon icon={"angles-left"} style={{ transition: "all 400ms", width: p.mode == "Wide" ? "15px" : "0.1px" }} title={EntityControlMessage.ToggleSideBar.niceToString()} />
+        <FontAwesomeIcon icon={"bars"} style={{ transition: "all 400ms", width: p.mode == "Hidden" ? "15px" : "0.1px" }} title={EntityControlMessage.ToggleSideBar.niceToString()} />
+        {!p.simpleMode && <FontAwesomeIcon icon={"angles-right"} style={{ transition: "all 400ms", width: p.mode == "Narrow" ? "15px" : "0.1px" }} title={EntityControlMessage.ToggleSideBar.niceToString()} />}
       </div>
     </LinkButton>
-  );
-}
-function SidebarResizeHandle(p: { onResize: (width: number) => void }) {
-  const sidebarLeft = React.useRef(0);
-  function onMouseDown(e: React.MouseEvent) {
-    const sidebar = e.currentTarget.parentElement as HTMLElement;
-    const rect = sidebar.getBoundingClientRect();
-    sidebarLeft.current = rect.left;
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
-    document.body.classList.add("sidebar-resizing");
-    e.preventDefault();
-  }
-  function onMouseMove(e: MouseEvent) {
-    const rawWidth = e.clientX - sidebarLeft.current;
-
-    const nextWidth = Math.min(
-      MAX_WIDTH,
-      Math.max(MIN_WIDTH, rawWidth)
-    );
-
-    p.onResize(nextWidth);
-  }
-  function onMouseUp() {
-    document.removeEventListener("mousemove", onMouseMove);
-    document.removeEventListener("mouseup", onMouseUp);
-    document.body.classList.remove("sidebar-resizing");
-  }
-
-  return (
-    <div
-      className="sidebar-resize-handle"
-      onMouseDown={onMouseDown}
-      aria-hidden="true"
-    />
   );
 }
