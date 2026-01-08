@@ -474,52 +474,53 @@
         display: none;
     }
 
-    .sf-sidebar-shell {
+/* Only visible in wide + desktop */
+.sidebar.sidebar-nav.wide:not(.mobile) {
     position: relative;
-    display: flex;
-    flex-direction: column;
 }
 
-.sf-sidebar-shell > .sidebar {
-    width: 100%;
-    min-width: 0;
-}
-
-.sf-sidebar-shell.resizable {
-    padding-right: 8px;
-}
-
-.sf-sidebar-resize-handle {
+/* Drag handle */
+.sidebar-resize-handle {
     position: absolute;
     top: 0;
-    right: 0;
-    width: 8px;
+    right: 0px;
+    width: 6px;
     height: 100%;
     cursor: ew-resize;
-    touch-action: none;
+    background: transparent;
     z-index: 20;
 }
 
-.sf-sidebar-resize-handle:hover {
-    background: rgba(0, 0, 0, 0.08);
+    /* Optional: subtle hover feedback without visual lag */
+    .sidebar-resize-handle::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 2px;
+        width: 2px;
+        height: 100%;
+        background: var(--bs-border-color);
+        opacity: 0;
+        transition: opacity 120ms;
+    }
+
+    .sidebar-resize-handle:hover::after {
+        opacity: 0.4;
+    }
+
+/* Disable transitions while resizing (CRITICAL) */
+body.sidebar-resizing .sidebar {
+    transition: none !important;
 }
 
-body.sf-sidebar-resizing {
-    user-select: none;
-    cursor: ew-resize;
-}
 
-.skip-link {
-    position: absolute;
-    top: -40px;
-    left: 0;
+.sidebar-resize-handle:hover,
+.sidebar-resize-handle:active {
+    background: transparent;
 }
-
-.skip-link:focus {
-    top: 0;
-    left: 0;
-    z-index: 2000;
-    padding: 6px 10px;
-    background: var(--bs-body-bg);
-    border: 1px solid var(--bs-border-color);
+/* While resizing: cursor follows mouse everywhere */
+body.sidebar-resizing,
+body.sidebar-resizing * {
+    cursor: ew-resize !important;
+    user-select: none !important;
 }
