@@ -101,7 +101,7 @@ public static class ExcelExtensions
         result.Worksheet = sheet;
         sheet.Save();
 
-        workbookPart.Workbook.Sheets!.Append(
+        workbookPart.Workbook!.Sheets!.Append(
             new Sheet
             {
                 Name = name,
@@ -116,7 +116,7 @@ public static class ExcelExtensions
     {
         WorkbookPart wbPart = document.WorkbookPart!;
 
-        Sheet? theSheet = wbPart.Workbook.Descendants<Sheet>().
+        Sheet? theSheet = wbPart.Workbook!.Descendants<Sheet>().
           Where(s => s.Id == sheetId).FirstOrDefault();
 
         if (theSheet == null)
@@ -189,7 +189,7 @@ public static class ExcelExtensions
             // Just return the index that you found in the cell.
             // Otherwise, look up the correct text in the table.
             if (stringTable != null)
-                return stringTable.SharedStringTable.ElementAt(int.Parse(value)).InnerText;
+                return stringTable.SharedStringTable!.ElementAt(int.Parse(value)).InnerText;
         }
         else if (theCell.DataType.Value == CellValues.Boolean)
         {
@@ -244,7 +244,7 @@ public static class ExcelExtensions
         if (stylesPart == null)
             return null;
 
-        var cellFormat = stylesPart.Stylesheet.CellFormats?.ElementAt((int)cell.StyleIndex.Value) as CellFormat;
+        var cellFormat = stylesPart.Stylesheet!.CellFormats?.ElementAt((int)cell.StyleIndex.Value) as CellFormat;
 
         if (cellFormat?.FillId != null)
         {
@@ -277,7 +277,7 @@ public static class ExcelExtensions
         else if (color.Indexed != null)
         {
             // Color is an indexed color
-            var indexedColors = stylesPart.Stylesheet.Colors!.IndexedColors!;
+            var indexedColors = stylesPart.Stylesheet!.Colors!.IndexedColors!;
             var rgbColor = indexedColors.ElementAt((int)color.Indexed.Value) as RgbColor;
             return ColorTranslator.FromHtml("#" + rgbColor!.Rgb);
         }
@@ -315,7 +315,7 @@ public static class ExcelExtensions
     {
         WorkbookPart wbPart = document.WorkbookPart!;
 
-        Sheet? theSheet = wbPart.Workbook.Descendants<Sheet>().
+        Sheet? theSheet = wbPart.Workbook!.Descendants<Sheet>().
           Where(s => s.Id == sheetId).FirstOrDefault();
 
         if (theSheet == null)
@@ -331,7 +331,7 @@ public static class ExcelExtensions
     {
         WorkbookPart wbPart = document.WorkbookPart!;
 
-        Sheet? theSheet = wbPart.Workbook.Descendants<Sheet>().
+        Sheet? theSheet = wbPart.Workbook!.Descendants<Sheet>().
           Where(s => s.Id == sheetId).FirstOrDefault();
 
         if (theSheet == null)
@@ -347,7 +347,7 @@ public static class ExcelExtensions
     {
         WorkbookPart wbPart = document.WorkbookPart!;
 
-        Sheet? sheet = wbPart.Workbook.Descendants<Sheet>().
+        Sheet? sheet = wbPart.Workbook!.Descendants<Sheet>().
           Where(s => s.Name == sheetName).FirstOrDefault();
 
         if (sheet == null)
@@ -370,7 +370,7 @@ public static class ExcelExtensions
             return false;
 
         var styleIndex = (int)cell.StyleIndex.Value;
-        var cellFormat = stylesPart.Stylesheet.CellFormats?.ElementAt(styleIndex) as CellFormat;
+        var cellFormat = stylesPart.Stylesheet!.CellFormats?.ElementAt(styleIndex) as CellFormat;
 
         if (cellFormat == null)
             return false;
@@ -411,7 +411,7 @@ public static class ExcelExtensions
     public static Cell? GetCell(this WorksheetPart worksheetPart, string address)
     {
         uint rowIndex = uint.Parse(new string(address.Where(char.IsDigit).ToArray()));
-        var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>()!;
+        var sheetData = worksheetPart.Worksheet!.GetFirstChild<SheetData>()!;
         var row = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex?.Value == rowIndex);
         if (row == null)
             return null;
