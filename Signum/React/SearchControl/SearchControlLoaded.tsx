@@ -851,10 +851,20 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const tis = this.entityColumnTypeInfos();
 
-    const types = tis.map(ti => ti.niceName).join(", ");
-    const gender = tis.first().gender;
+    if (tis.length > 0) {
+      const types = tis.map(ti => ti.niceName).join(", ");
+      const gender = tis.first().gender;
 
-    return SearchMessage._0ResultTable.niceToString().forGenderAndNumber(gender).formatWith(types);
+      return SearchMessage._0ResultTable.niceToString().forGenderAndNumber(gender).formatWith(types);
+    }
+    else {
+      //Fallback
+      const pqd = this.props.queryDescription.queryKey;
+      if (pqd != "")
+        return SearchMessage._0ResultTable.niceToString(pqd);
+      else
+        return "";
+    }
   }
 
   getSelectedEntities(): Lite<Entity>[] {
