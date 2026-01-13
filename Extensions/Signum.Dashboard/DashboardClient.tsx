@@ -38,6 +38,8 @@ import DashboardOmniboxProvider from './DashboardOmniboxProvider';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 import { parseIcon } from '@framework/Components/IconTypeahead';
 import { LinkButton } from '@framework/Basics/LinkButton';
+import { ToolbarMenuEntity, ToolbarSwitcherEntity } from '../Signum.Toolbar/Signum.Toolbar';
+import { FindOptions, SearchValueLine } from '@framework/Search';
 
 export namespace DashboardClient {
 
@@ -85,6 +87,12 @@ export namespace DashboardClient {
 
     ToolbarClient.registerConfig(new DashboardToolbarConfig());
     OmniboxClient.registerProvider(new DashboardOmniboxProvider());
+
+    if (ToolbarMenuPartEntity.tryTypeInfo())
+      Navigator.getSettings(ToolbarMenuEntity)?.overrideView(vr => {
+        vr.insertAfterElement(SearchValueLine, a => (a.props.findOptions as FindOptions).queryName === ToolbarSwitcherEntity, a => [<SearchValueLine ctx={vr.ctx.subCtx({ labelColumns: 4 })}
+          findOptions={{ queryName: DashboardEntity, filterOptions: [{ token: DashboardEntity.token(a => a.entity.parts).any().append(a => a.content).cast(ToolbarMenuPartEntity).append(a => a.toolbarMenu), value: vr.ctx.value }] }} />]);
+      });
 
     Operations.addSettings(new EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
       isVisible: () => false,
