@@ -198,13 +198,15 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
 
           if (result instanceof EntityOperationContext) {
 
-            result.onExecuteSuccess = pack => {
-              Operations.notifySuccess();
-              frameRef.current!.onClose?.(pack);
-              return Promise.resolve();
-            };
+            frame.execute(() => {
+              result.onExecuteSuccess = pack => {
+                Operations.notifySuccess();
+                frameRef.current!.onClose?.(pack);
+                return Promise.resolve();
+              };
 
-            result.defaultClick();
+              return result.defaultClick();
+            });
           }
         });
     }
