@@ -99,7 +99,7 @@ public static partial class TextTemplateParser
 
         public override void Synchronize(TemplateSynchronizationContext sc)
         {
-            ValueProvider!.Synchronize(sc, "@declare");
+            ValueProvider!.Synchronize(sc, "@declare", false);
         }
     }
 
@@ -144,7 +144,7 @@ public static partial class TextTemplateParser
 
         public override void Synchronize(TemplateSynchronizationContext sc)
         {
-            ValueProvider!.Synchronize(sc, IsRaw ? "@raw[]" : "@[]");
+            ValueProvider!.Synchronize(sc, IsRaw ? "@raw[]" : "@[]", false);
         }
     }
 
@@ -286,7 +286,7 @@ public static partial class TextTemplateParser
         {
             using (sc.NewScope())
             {
-                ValueProvider!.Synchronize(sc, "@foreach[]");
+                ValueProvider!.Synchronize(sc, "@foreach[]", false);
 
                 using (sc.NewScope())
                 {

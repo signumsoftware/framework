@@ -902,7 +902,7 @@ export namespace Finder {
           fo2.pinned == null &&
           !isFilterGroup(fo2) &&
           similarToken(fo.token?.toString(), fo2.token?.toString()) &&
-          (fo.operation ?? "EqualsTo") == (fo2.operation ?? "EqualsTo") &&
+          (fo.operation ?? FilterOperation.value("EqualTo")) == (fo2.operation ?? FilterOperation.value("EqualTo")) &&
           (fo.pinned?.active == "Always" || fo2.value != null));
 
         if (fo2 != null) {

@@ -1,5 +1,7 @@
 using Signum.DynamicQuery.Tokens;
+using Signum.Engine.Sync;
 using Signum.UserAssets;
+using Signum.UserAssets.QueryTokens;
 using Signum.Utilities.DataStructures;
 using System.Collections;
 
@@ -220,10 +222,37 @@ public class ConditionCompare : ConditionBase
 
     public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
     {
-        this.ValueProvider!.Synchronize(sc, remainingText);
+        this.ValueProvider!.Synchronize(sc, remainingText, false);
 
         if (Operation != null)
-            sc.SynchronizeValue(this.ValueProvider!.Type!, ref Value, Operation.Value.IsList(), null);
+        {
+        retry:
+            string? val = Value;
+            FixTokenResult result = QueryTokenSynchronizer.FixValue(sc.Replacements, this.ValueProvider!.Type!, ref val, allowRemoveToken: false, isList: Operation.Value.IsList(), fixInstead: true, null);
+            switch (result)
+            {
+                case FixTokenResult.Fix:
+                case FixTokenResult.Nothing:
+                    Value = val;
+                    break;
+                case FixTokenResult.SkipEntity:
+                case FixTokenResult.RemoveToken:
+                    throw new TemplateSyncException(result);
+                case FixTokenResult.FixTokenInstead:
+                    {
+                        this.ValueProvider!.Synchronize(sc, remainingText, forceChange: false);
+                        goto retry;
+                    }
+                case FixTokenResult.FixOperationInstead:
+                    {
+                        var newOperation = SafeConsole.AskMultiLine($"New filter operation for: {ValueProvider.ToString()} {Operation} {Value}?", EnumEntity.GetValues(typeof(FilterOperation)).Select(a => a.ToString()).ToArray());
+                        if (newOperation != null)
+                            Operation = Enum.Parse<FilterOperation>(newOperation);
+                        goto retry;
+                    }
+            }
+
+        }
     }
 
     public override void Declare(ScopedDictionary<string, ValueProviderBase> variables)

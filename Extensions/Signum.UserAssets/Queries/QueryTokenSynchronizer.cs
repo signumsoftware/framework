@@ -170,7 +170,7 @@ public static class QueryTokenSynchronizer
         return "tokens-Type-" + type.CleanType().FullName;
     }
 
-    public static FixTokenResult FixValue(Replacements replacements, Type targetType, ref string? valueString, bool allowRemoveToken, bool isList, Type? currentEntityType)
+    public static FixTokenResult FixValue(Replacements replacements, Type targetType, ref string? valueString, bool allowRemoveToken, bool isList, bool fixInstead, Type? currentEntityType)
     {
         var res = FilterValueConverter.IsValidExpression(valueString, targetType, isList, currentEntityType);
 
@@ -185,9 +185,13 @@ public static class QueryTokenSynchronizer
             foreach (var str in valueString.Split('|'))
             {
                 string? s = str;
-                var result = FixValue(replacements, targetType, ref s, allowRemoveToken, false, currentEntityType);
+                var result = FixValue(replacements, targetType, ref s, allowRemoveToken, isList: false, fixInstead, currentEntityType);
 
-                if (result == FixTokenResult.DeleteEntity || result == FixTokenResult.SkipEntity || result == FixTokenResult.RemoveToken)
+                if (result == FixTokenResult.DeleteEntity || 
+                    result == FixTokenResult.SkipEntity || 
+                    result == FixTokenResult.RemoveToken || 
+                    result == FixTokenResult.FixTokenInstead || 
+                    result == FixTokenResult.FixOperationInstead)
                     return result;
 
                 changes.Add(s);
@@ -233,7 +237,11 @@ public static class QueryTokenSynchronizer
         if (allowRemoveToken)
             SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "- r: Remove token");
         SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
-        SafeConsole.WriteLineColor(ConsoleColor.Blue, "- t: Fix Token Instead");
+        if (fixInstead)
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.Blue, "- t: Fix Token Instead");
+            SafeConsole.WriteLineColor(ConsoleColor.Cyan, "- o: Fix Operation Instead");
+        }
         SafeConsole.WriteLineColor(ConsoleColor.Green, "- freeText: New value");
 
         string answer = Console.ReadLine()!;
@@ -249,8 +257,15 @@ public static class QueryTokenSynchronizer
         if (allowRemoveToken && a == "r")
             return FixTokenResult.RemoveToken;
 
-        if (a == "t")
-            return FixTokenResult.FixTokenInstead;
+
+        if (fixInstead)
+        {
+            if (a == "t")
+                return FixTokenResult.FixTokenInstead;
+
+            if (a == "o")
+                return FixTokenResult.FixOperationInstead;
+        }
 
         if (a == "d")
             return FixTokenResult.DeleteEntity;
@@ -547,4 +562,5 @@ public enum FixTokenResult
     SkipEntity,
     RegenerateEntity,
     FixTokenInstead,
+    FixOperationInstead,
 }

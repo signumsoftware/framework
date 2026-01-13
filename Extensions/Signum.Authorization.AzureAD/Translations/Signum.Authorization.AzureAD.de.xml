@@ -12,10 +12,16 @@
   </Type>
   <Type Name="AzureADConfigurationEmbedded" Description="Azure AD configuration">
     <Member Name="ApplicationID" Description="Application (client) ID" />
-    <Member Name="AzureB2C" Description="Azure B2C" />
     <Member Name="ClientSecret" Description="Client Secret Value" />
     <Member Name="DirectoryID" Description="Directory (tenant) ID" />
-    <Member Name="LoginWithAzureAD" Description="Login mit Azure AD" />
+    <Member Name="EditProfile_UserFlow" Description="EditProfile UserFlow" />
+    <Member Name="Enabled" Description="Aktiviert" />
+    <Member Name="ResetPassword_UserFlow" Description="ResetPassword UserFlow" />
+    <Member Name="SignIn_UserFlow" Description="SignIn UserFlow" />
+    <Member Name="SignInSignUp_UserFlow" Description="SignInSignUp UserFlow" />
+    <Member Name="SignUp_UserFlow" Description="SignUp UserFlow" />
+    <Member Name="TenantName" Description="Name des Mieters" />
+    <Member Name="Type" Description="Typ" />
     <Member Name="UseDelegatedPermission" Description="Use delegated permission" />
   </Type>
   <Type Name="AzureADQuery">
@@ -25,13 +31,10 @@
   <Type Name="AzureADTask">
     <Member Name="DeactivateUsers" Description="Benutzer deaktivieren" />
   </Type>
-  <Type Name="AzureB2CEmbedded" Description="Azure B2C">
-    <Member Name="LoginWithAzureB2C" Description="Login mit Azure B2C" />
-    <Member Name="ResetPassword_UserFlow" Description="ResetPassword UserFlow" />
-    <Member Name="SignIn_UserFlow" Description="SignIn UserFlow" />
-    <Member Name="SignInSignUp_UserFlow" Description="SignInSignUp UserFlow" />
-    <Member Name="SignUp_UserFlow" Description="SignUp UserFlow" />
-    <Member Name="TenantName" Description="Name des Mieters" />
+  <Type Name="AzureADType" Description="Azure AD type">
+    <Member Name="AzureAD" Description="Azure AD" />
+    <Member Name="B2C" Description="B 2 C" />
+    <Member Name="ExternalID" Description="Externe ID" />
   </Type>
   <Type Name="CachedProfilePhotoEntity" Description="zwischengespeicherte Profilfoto" PluralDescription="zwischengespeicherte Profilfotos" Gender="n">
     <Member Name="CreationDate" Description="Erstellungsdatum" />

@@ -439,7 +439,7 @@ public static class ToolbarLogic
                     label = transElement.TranslatedElement(a => a.Label!).DefaultToNull() ?? config?.DefaultLabel(extraElement.Content!),
                     iconName = extraElement.IconName.DefaultToNull() ?? config?.DefaultIconName(extraElement.Content!),
                     iconColor = extraElement.IconColor.DefaultToNull() ?? config?.DefaultIconColor(extraElement.Content!),
-                    queryKey = config?.GetRelatedQuery(element.Content!)?.Key,
+                    queryKey = config?.GetRelatedQuery(extraElement.Content!)?.Key,
                     showCount = extraElement.ShowCount,
                     autoRefreshPeriod = extraElement.AutoRefreshPeriod,
                     openInPopup = extraElement.OpenInPopup,
