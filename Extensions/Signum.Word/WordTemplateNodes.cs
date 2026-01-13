@@ -447,7 +447,7 @@ public class TokenNode : BaseNode
 
     public override void Synchronize(TemplateSynchronizationContext sc)
     {
-        ValueProvider.Synchronize(sc, "@");
+        ValueProvider.Synchronize(sc, "@", false);
 
         ValueProvider.Declare(sc.Variables);
     }
@@ -511,7 +511,7 @@ public class DeclareNode : BaseNode
 
     public override void Synchronize(TemplateSynchronizationContext sc)
     {
-        ValueProvider.Synchronize(sc, "@declare");
+        ValueProvider.Synchronize(sc, "@declare", false);
     }
 }
 
@@ -764,7 +764,7 @@ public class ForeachNode : BlockContainerNode
     {
         using (sc.NewScope())
         {
-            ValueProvider.Synchronize(sc, "@foreach");
+            ValueProvider.Synchronize(sc, "@foreach", false);
 
             using (sc.NewScope())
             {

@@ -34,11 +34,11 @@ public static class PlainExcelGenerator
             WorkbookPart workbookPart = document.WorkbookPart!;
                                         
             WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
-            Worksheet worksheet = worksheetPart.Worksheet;
+            Worksheet worksheet = worksheetPart.Worksheet!;
 
             CellBuilder = new CellBuilder()
             {
-                CellFormatCount = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet.CellFormats!.Count!,
+                CellFormatCount = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet!.CellFormats!.Count!,
                 DefaultStyles = new Dictionary<DefaultStyle, UInt32Value>
                 {
                     { DefaultStyle.Title, worksheet.FindCell("A1").StyleIndex! },
@@ -104,7 +104,7 @@ public static class PlainExcelGenerator
             Dictionary<DynamicQuery.Column, (DefaultStyle defaultStyle, UInt32Value styleIndex)> styleIndexes =
                 request.Columns.ToDictionary(c => c, c => CellBuilder.GetDefaultStyleAndIndex(c));
 
-            var ss = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet;
+            var ss = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet!;
             {
                 var maxIndex = ss.NumberingFormats!.ChildElements.Cast<NumberingFormat>()
                     .Max(f => (uint)f.NumberFormatId!) + 1;
@@ -156,7 +156,7 @@ public static class PlainExcelGenerator
                 }).ToRow()
             }.ToSheetDataWithIndexes());
 
-            workbookPart.Workbook.Save();
+            workbookPart.Workbook!.Save();
         }
     }
 
@@ -167,7 +167,7 @@ public static class PlainExcelGenerator
         if (stylesheet == null)
         {
             workbookPart.AddNewPart<WorkbookStylesPart>().Stylesheet = new Stylesheet();
-            stylesheet = workbookPart.WorkbookStylesPart!.Stylesheet;
+            stylesheet = workbookPart.WorkbookStylesPart!.Stylesheet!;
 
             stylesheet.Fonts = new Fonts(new Font());
             stylesheet.Fills = new Fills(new Fill());
@@ -251,7 +251,7 @@ public static class PlainExcelGenerator
                         select CellBuilder.Cell(c.Getter!(r), template, forImport)).ToRow()
             }.ToSheetDataWithIndexes());
 
-            workbookPart.Workbook.Save();
+            workbookPart.Workbook!.Save();
         }
     }
 
@@ -279,7 +279,7 @@ public static class PlainExcelGenerator
 
             WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
 
-            var data = worksheetPart.Worksheet.Descendants<SheetData>().Single();
+            var data = worksheetPart.Worksheet!.Descendants<SheetData>().Single();
 
             return data.Descendants<Row>().Skip(1).Select(r =>
             {

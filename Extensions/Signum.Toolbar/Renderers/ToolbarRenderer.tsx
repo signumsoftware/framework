@@ -373,13 +373,28 @@ export function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntit
 function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.ReactNode {
 
   const entityType = p.response.entityType!;
+  const selEntityStorageKey = "toolbar-menuitems-entitytype-" + p.response.content!.id + "-" + entityType;
+
   const selEntityRef = React.useRef<Lite<Entity> | null>(null);
   const previousResponseRef = React.useRef<ToolbarResponse<ToolbarMenuEntity> | null>(null);
   const forceUpdate = useForceUpdate();
 
   function setSelectedEntity(entity: Lite<Entity> | null) {
     selEntityRef.current = entity;
+
+    if (entity)
+      localStorage.setItem(selEntityStorageKey, entity.id!.toString());
+    else
+      localStorage.removeItem(selEntityStorageKey);
+
     forceUpdate();
+  }
+
+  class RefBinding extends Binding<Lite<Entity> | null> {
+    override setValue(val: Lite<Entity> | null): void {
+      setSelectedEntity(val);
+      super.setValue(val);
+    }
   }
 
   React.useEffect(() => {
@@ -391,6 +406,22 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
 
 
   const entities = useAPI(() => Finder.API.fetchAllLites({ types: entityType }), [entityType]);
+
+  React.useEffect(() => {
+    if (!entities)
+      return;
+
+    if (selEntityRef.current)
+      return;
+
+    const savedId = localStorage.getItem(selEntityStorageKey);
+    if (!savedId)
+      return;
+
+    const only = entities.onlyOrNull(a => a.id!.toString() == savedId);
+    if (only != null)
+      setSelectedEntity(only);
+  }, [entities]);
 
   const active = p.ctx.active;
 
@@ -422,7 +453,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
     }
   }
 
-  const ctx = new TypeContext<Lite<Entity> | null>(undefined, undefined, undefined, new Binding(selEntityRef, "current"));
+  const ctx = new TypeContext<Lite<Entity> | null>(undefined, undefined, undefined, new RefBinding(selEntityRef, "current"));
   var ti = getTypeInfo(entityType);
   return (
     <>

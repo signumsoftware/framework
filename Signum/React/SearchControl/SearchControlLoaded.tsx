@@ -850,11 +850,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   createCaption(): string {
 
     const tis = this.entityColumnTypeInfos();
-
-    const types = tis.map(ti => ti.niceName).join(", ");
-    const gender = tis.first().gender;
-
-    return SearchMessage._0ResultTable.niceToString().forGenderAndNumber(gender).formatWith(types);
+    if (tis.length > 0) {
+      const types = tis.map(ti => ti.niceName).join(", ");
+      return SearchMessage._0ResultTable.niceToString().formatWith(types);
+    }
+    else {
+      const nn = getQueryNiceName(this.props.queryDescription.queryKey);
+      return SearchMessage._0ResultTable.niceToString(nn);
+    }
   }
 
   getSelectedEntities(): Lite<Entity>[] {

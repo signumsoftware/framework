@@ -53,46 +53,38 @@ public static class DynamicSqlMigrationLogic
                 if (DynamicLogic.CodeGenError != null)
                     throw new InvalidOperationException(DynamicSqlMigrationMessage.PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer.NiceToString());
 
-                var old = Replacements.AutoReplacement;
+                var old = Replacements.GlobalAutoReplacement;
 
                 var lastRenames = Database.Query<DynamicRenameEntity>()
                 .Where(a => !a.IsApplied())
                 .OrderBy(a => a.CreationDate)
                 .ToList();
 
-                try
+                Func<Replacements.AutoReplacementContext, Replacements.Selection?>? autoReplacement = ctx =>
                 {
-                    if (Replacements.AutoReplacement == null)
-                        Replacements.AutoReplacement = ctx =>
-                        {
-                            var currentName =
-                            ctx.ReplacementKey.StartsWith(Replacements.KeyEnumsForTable("")) ? AutoReplacementEnums(ctx) :
-                            ctx.ReplacementKey.StartsWith(PropertyRouteLogic.PropertiesFor.FormatWith("")) ? DynamicAutoReplacementsProperties(ctx, lastRenames) :
-                            ctx.ReplacementKey.StartsWith(Replacements.KeyColumnsForTable("")) ? DynamicAutoReplacementsColumns(ctx, lastRenames) :
-                            ctx.ReplacementKey == Replacements.KeyTables ? DynamicAutoReplacementsSimple(ctx, lastRenames, Replacements.KeyTables) :
-                            ctx.ReplacementKey == typeof(OperationSymbol).Name ? DynamicAutoReplacementsOperations(ctx, lastRenames) :
-                            ctx.ReplacementKey == QueryLogic.QueriesKey ? DynamicAutoReplacementsSimple(ctx, lastRenames, DynamicTypeLogic.TypeNameKey) :
-                            DynamicAutoReplacementsSimple(ctx, lastRenames, ctx.ReplacementKey);
+                    var currentName =
+                    ctx.ReplacementKey.StartsWith(Replacements.KeyEnumsForTable("")) ? AutoReplacementEnums(ctx) :
+                    ctx.ReplacementKey.StartsWith(PropertyRouteLogic.PropertiesFor.FormatWith("")) ? DynamicAutoReplacementsProperties(ctx, lastRenames) :
+                    ctx.ReplacementKey.StartsWith(Replacements.KeyColumnsForTable("")) ? DynamicAutoReplacementsColumns(ctx, lastRenames) :
+                    ctx.ReplacementKey == Replacements.KeyTables ? DynamicAutoReplacementsSimple(ctx, lastRenames, Replacements.KeyTables) :
+                    ctx.ReplacementKey == typeof(OperationSymbol).Name ? DynamicAutoReplacementsOperations(ctx, lastRenames) :
+                    ctx.ReplacementKey == QueryLogic.QueriesKey ? DynamicAutoReplacementsSimple(ctx, lastRenames, DynamicTypeLogic.TypeNameKey) :
+                    DynamicAutoReplacementsSimple(ctx, lastRenames, ctx.ReplacementKey);
 
-                            if (currentName != null)
-                                return new Replacements.Selection(ctx.OldValue, currentName);
+                    if (currentName != null)
+                        return new Replacements.Selection(ctx.OldValue, currentName);
 
-                            return new Replacements.Selection(ctx.OldValue, null);
-                        };
+                    return new Replacements.Selection(ctx.OldValue, null);
+                };
 
-                    var script = Schema.Current.SynchronizationScript(interactive: false, replaceDatabaseName: SqlMigrationRunner.DatabaseNameReplacement);
+                var script = Schema.Current.SynchronizationScript(interactive: false, replaceDatabaseName: SqlMigrationRunner.DatabaseNameReplacement, autoReplacement: autoReplacement);
 
-                    return new DynamicSqlMigrationEntity
-                    {
-                        CreationDate = Clock.Now,
-                        CreatedBy = UserEntity.Current,
-                        Script = script?.ToString() ?? "",
-                    };
-                }
-                finally
+                return new DynamicSqlMigrationEntity
                 {
-                    Replacements.AutoReplacement = old;
-                }
+                    CreationDate = Clock.Now,
+                    CreatedBy = UserEntity.Current,
+                    Script = script?.ToString() ?? "",
+                };
             }
         }.Register();
 

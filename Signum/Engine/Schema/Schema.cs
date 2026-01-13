@@ -1,12 +1,13 @@
-using Signum.Engine.Linq;
-using Signum.Utilities.DataStructures;
-using System.Collections.Concurrent;
-using System.Globalization;
-using Signum.Engine.Sync;
 using Microsoft.SqlServer.Types;
 using NpgsqlTypes;
+using Signum.Engine.Linq;
+using Signum.Engine.Sync;
+using Signum.Utilities.DataStructures;
+using System.Collections.Concurrent;
 using System.Data;
+using System.Globalization;
 using static Signum.Engine.Maps.FullTextTableIndex;
+using static Signum.Engine.Sync.Replacements;
 
 namespace Signum.Engine.Maps;
 
@@ -416,7 +417,7 @@ public class Schema : IImplementationsFinder
     }
 
     public event Func<Replacements, SqlPreCommand?> Synchronizing;
-    public SqlPreCommand? SynchronizationScript(bool interactive = true, bool schemaOnly = false, string? replaceDatabaseName = null)
+    public SqlPreCommand? SynchronizationScript(bool interactive = true, bool schemaOnly = false, string? replaceDatabaseName = null, Func<AutoReplacementContext, Selection?>? autoReplacement = null)
     {
         OnBeforeDatabaseAccess();
 
@@ -430,7 +431,8 @@ public class Schema : IImplementationsFinder
             {
                 Interactive = interactive,
                 ReplaceDatabaseName = replaceDatabaseName,
-                SchemaOnly = schemaOnly
+                SchemaOnly = schemaOnly,
+                AutoReplacement = autoReplacement,
             };
             SqlPreCommand? command = Synchronizing
                 .GetInvocationListTyped()

@@ -157,7 +157,7 @@ public static class FilterValueConverter
         if (ReflectionTools.TryParse(expression, targetType, CultureInfo.InvariantCulture, out var result))
             return new Result<Type>.Success(result?.GetType() ?? targetType);
         else
-            return new Result<Type>.Error($"Impossible to parse expression '${expression}' to ${targetType}");
+            return new Result<Type>.Error($"Impossible to parse expression '{expression}' to {targetType.TypeName()}");
     }
 
     public static FilterOperation ParseOperation(string operationString)
