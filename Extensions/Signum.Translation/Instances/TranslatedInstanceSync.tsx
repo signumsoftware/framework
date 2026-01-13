@@ -13,6 +13,7 @@ import { EntityLink } from '@framework/Search'
 import { DiffDocumentSimple } from '../../Signum.DiffLog/Templates/DiffDocument'
 import TextArea from '@framework/Components/TextArea'
 import { KeyNames } from '@framework/Components'
+import "../../Signum.DiffLog/Templates/DiffLog.css"
 import { getTypeInfo } from '@framework/Reflection'
 import { useTitle } from '@framework/AppContext'
 import { TranslationMember, initialElementIf } from '../Code/TranslationTypeTable'
