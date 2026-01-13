@@ -65,11 +65,15 @@ export function GlobalModalContainer(): React.DetailedReactHTMLElement<{
         forceUpdatePromise();
         return modals.length;
       },
-      popModal: async index => {
-        if (index != modals.length)
-          throw new Error("Unexpected index");
-        modals.pop();
-        await forceUpdatePromise();
+      popModal: index => {
+        if (index != modals.length) {
+          console.error(`Trying to close modal ${index} of ${modals.length}`);
+          return new Promise(resolve => { }); //Never
+        }
+        else {
+          modals.pop();
+          return forceUpdatePromise();
+        }
       },
       getCount: () => modals.length
     };
