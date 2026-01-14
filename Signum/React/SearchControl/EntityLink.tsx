@@ -20,15 +20,16 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
   shy?: boolean
 }
 
-export default function EntityLink(p: EntityLinkProps): React.ReactElement {
+export default function EntityLink(p: EntityLinkProps): React.ReactElement | null {
 
   const { lite, inSearch, children, onNavigated, getViewPromise, inPlaceNavigation, shy, ...htmlAtts } = p;
 
   const settings = Navigator.getSettings(p.lite.EntityType);
 
-  if (!Navigator.isViewable(lite, { isSearch: p.inSearch })) {
+  if (!Navigator.isViewable(lite, { isSearch: p.inSearch })){
     if (p.hideIfNotViable)
       return null;
+
     return <span data-entity={liteKey(lite)} className={settings?.allowWrapEntityLink ? undefined : "try-no-wrap"}>{p.children ?? Navigator.renderLite(lite)}</span>;
   }
 
