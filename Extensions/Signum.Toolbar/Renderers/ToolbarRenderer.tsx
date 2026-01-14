@@ -307,6 +307,11 @@ function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: Too
 
   function handleShowClick(e: React.MouseEvent | null) {
 
+    if (e?.altKey && p.response.content && Navigator.isViewable(p.response.content)) {
+      Navigator.view(p.response.content!);
+      return;
+    }
+
     var value = !show;
 
     if (value)
@@ -554,6 +559,12 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   }, [p.ctx.active, p.response.elements]);
 
   function handleSetShow(value: ToolbarResponse<any>, e: React.SyntheticEvent | null) {
+
+    if (e && (e as React.MouseEvent).altKey && value.content && Navigator.isViewable(value.content)) {
+      Navigator.view(value.content!);
+      return;
+    }
+
     localStorage.setItem(key, value.content!.id!.toString());
     setSelectedOption(value);
 
@@ -579,7 +590,7 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
           <RightCaretDropdown
             options={options}
             value={selectedOption ?? null}
-            onChange={val => val && handleSetShow(val, null)}
+            onChange={(val, e) => val && handleSetShow(val, e)}
             placeholder={title}
             disabled={false} />
           {renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)}
