@@ -59,7 +59,7 @@ table.sf-search-results > tbody > tr > td {
     vertical-align: middle;
 }
 
-table.sf-search-results.sf-row-view > tbody > tr > td,
+table.sf-search-results.sf-row-view > tbody > tr:not(.sf-row-no-view) > td,
 div.sf-search-results.sf-row-view div.row-container {
     cursor: pointer;
 }

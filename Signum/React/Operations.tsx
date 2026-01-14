@@ -574,6 +574,9 @@ export class ContextualOperationContext<T extends Entity> {
     if (oi.operationType == "ConstructorFrom" && this.context.lites.length > 1 && !oi.resultIsSaved)
       return false;
 
+    if (Navigator.someNonViewable(this.context.lites))
+      return false;
+
     const eos = this.entityOperationSettings;
     if (eos) {
       if (eos.isVisible != null) //If you override isVisible in EntityOperationsettings you have to override in ContextualOperationSettings too
