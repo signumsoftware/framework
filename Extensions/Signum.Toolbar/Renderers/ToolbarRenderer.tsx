@@ -465,7 +465,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
       {entityType && (
         <Nav.Item title={ti.niceName} className="d-flex mx-2 mb-2">
           <div style={{ width: "100%" }}>
-            <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false}
+            <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false} mandatory="warning"
               inputAttributes={{ placeholder: LayoutMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
               onChange={e => handleSelect(e.originalEvent)} create={false} formGroupStyle="SrOnly" />
           </div>
