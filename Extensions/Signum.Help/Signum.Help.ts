@@ -29,6 +29,7 @@ export interface HelpImageEntity extends Entities.Entity {
   target: Entities.Lite<IHelpEntity>;
   creationDate: string /*DateTime*/;
   file: Files.FilePathEmbedded;
+  guid: string /*Guid*/;
 }
 
 export namespace HelpImageFileType {
@@ -143,6 +144,7 @@ export namespace HelpMessage {
   export const HelpZipContents: MessageKey = new MessageKey("HelpMessage", "HelpZipContents");
   export const NewKey: MessageKey = new MessageKey("HelpMessage", "NewKey");
   export const ActionStatus: MessageKey = new MessageKey("HelpMessage", "ActionStatus");
+  export const LoadingImage: MessageKey = new MessageKey("HelpMessage", "LoadingImage");
 }
 
 export namespace HelpPermissions {

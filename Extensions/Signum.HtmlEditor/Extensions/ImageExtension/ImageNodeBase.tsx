@@ -8,10 +8,10 @@ export class ImageNodeBase extends DecoratorNode<React.ReactElement> {
 
   static dataImageIdAttribute: string;
    
-  static converter: ImageHandlerBase;
+  static handler: ImageHandlerBase;
 
   getHandler(): ImageHandlerBase {
-    return (this.constructor as typeof ImageNodeBase).converter;
+    return (this.constructor as typeof ImageNodeBase).handler;
   }
 
   constructor(public imageInfo: ImageInfo, key?: NodeKey) {
@@ -50,7 +50,7 @@ export class ImageNodeBase extends DecoratorNode<React.ReactElement> {
           priority: 1,
           conversion: (element: HTMLElement) => {
             try {
-              const info = this.converter.fromElement(element);
+              const info = this.handler.fromElement(element);
               if (!info) return null;
               return { node: new this(info) };
             } catch {
