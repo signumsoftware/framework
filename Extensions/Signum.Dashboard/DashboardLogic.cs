@@ -405,14 +405,14 @@ public static class DashboardLogic
     }
 
     public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) => 
-        RegisterTypeCondition(sb, typeCondition, typeof(UserEntity), uq => uq.Owner.Is(UserEntity.Current));
+        RegisterTypeCondition(sb, typeCondition, typeof(UserEntity), d => d.Owner.Is(UserEntity.Current));
 
     public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
-        RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
+        RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), d => d.Owner == null || AuthLogic.CurrentRoles().Contains(d.Owner));
 
     public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<DashboardEntity, bool>> conditionExpression)
     {
-        sb.Schema.Settings.AssertImplementedBy((DashboardEntity uq) => uq.Owner, ownerType);
+        sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Owner, ownerType);
 
         TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition, conditionExpression);
 
