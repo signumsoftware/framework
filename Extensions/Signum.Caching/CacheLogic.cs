@@ -163,11 +163,18 @@ public static class CacheLogic
         }
         else
         {
-            var list = CacheLogic.semiControllers.GetOrThrow(type);
-            foreach (var sc in list)
+            // Could be null when notifying an entity not cached but inverseDependencies, example:
+            // Master -> Lite (Transactional) -> Lite (Transactional)
+            // Cached  <-  Semi Cached            Not Cached at all but invalidated
+            //         <-------------------------
+            var list = CacheLogic.semiControllers.TryGetC(type);
+            if (list != null)
             {
-                sc.ResetAll(forceReset: false);
-                sc.controller.NotifyInvalidated();
+                foreach (var sc in list)
+                {
+                    sc.ResetAll(forceReset: false);
+                    sc.controller.NotifyInvalidated();
+                }
             }
         }
     }

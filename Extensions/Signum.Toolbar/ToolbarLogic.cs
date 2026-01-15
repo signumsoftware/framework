@@ -196,6 +196,17 @@ public static class ToolbarLogic
     public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
         RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), owner => owner == null || AuthLogic.CurrentRoles().Contains(owner));
 
+    public static void RegisterAllowedTypeTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
+        RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), owner => GetAllowedTypes().Contains(owner));
+
+
+    public static Dictionary<Type, Func<bool>> AllowedTypes = new Dictionary<Type, Func<bool>>();
+
+    public static HashSet<Lite<TypeEntity>> GetAllowedTypes()
+    {
+        return AllowedTypes.Where(a => a.Value()).Select(a => a.Key.ToTypeEntity().ToLite()).ToHashSet();
+    }
+
     public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<Lite<IEntity>?, bool>> isAllowed)
     {
         sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, ownerType);

@@ -491,6 +491,7 @@ export function initEntityFormatRules(): Finder.EntityFormatRule[] {
       formatter: new Finder.EntityFormatter(({ row, columns, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: "main" }) ? undefined :
         <EntityLink lite={row.entity}
           inSearch="main"
+          hideIfNotViable
           onNavigated={sc?.handleOnNavigated}
           getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
           inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">

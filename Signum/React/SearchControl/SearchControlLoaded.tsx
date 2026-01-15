@@ -1745,7 +1745,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if (this.props.view) {
       var lite = row.entity!;
 
-      if (!lite || !Navigator.isViewable(lite.EntityType, { isSearch: "main" }))
+      if (!lite || !Navigator.isViewable(lite, { isSearch: "main" }))
         return;
 
       e.preventDefault();
@@ -1956,7 +1956,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             }
           }}
           {...ra}
-          className={classes(markClassName, ra?.className, selected && "sf-row-selected")}
+          className={classes(markClassName, ra?.className, selected && "sf-row-selected", (!row.entity || Navigator.entitySettings[row.entity.EntityType]?.isViewableLite?.(row.entity, { isSearch: "main" }) === false) ? "sf-row-no-view" : null)}
         >
           {this.props.allowSelection &&
             <td className="centered-cell">
