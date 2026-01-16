@@ -761,6 +761,10 @@ export function queryAllowedInContext(query: PseudoType | QueryKey, context: Lit
   return list == null || list.contains(context.id!);
 }
 
+export function typeAllowedInContext(type: PseudoType, context: Lite<Entity>) {
+  return tryGetTypeInfo(type) && queryAllowedInContext(type, context);
+}
+
 export function reloadQueryContexts(): Promise<void> {
   return ajaxGet<QueryContexts>({ url: "/api/query/queryContexts" }).then(qc => {
     queryContexts = qc;
