@@ -878,7 +878,7 @@ export namespace Navigator {
     }).notNull();
   }
 
-  export function someNonViewable(lites: Lite<Entity>[]) {
+  export function someNonViewable(lites: Lite<Entity>[]) : boolean {
     return lites.groupBy(a => a.EntityType).some(gr => {
       var isViewable = Navigator.entitySettings[gr.key]?.isViewableLite;
       return isViewable && gr.elements.some(lite => !isViewable!(lite, { isSearch: "main" }))
