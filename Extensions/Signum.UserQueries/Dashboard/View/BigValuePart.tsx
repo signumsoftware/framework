@@ -26,11 +26,11 @@ export interface UserQueryPartHandler {
   refresh: () => void;
 }
 
-export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity>): React.JSX.Element {
+export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity>): React.JSX.Element | null {
 
   let fo = useAPI<"not-findable" | null | FindOptions>(signal => p.content.userQuery == null ? null :
-    !Finder.isFindable(p.content.userQuery.query.key) ? "not-findable":
-    UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity && liteKey(p.entity)]);
+    !Finder.isFindable(p.content.userQuery.query.key, false) ? "not-findable" :
+      UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity && liteKey(p.entity)]);
 
   let valueToken = p.content.valueToken && UserAssetClient.getToken(p.content.valueToken);
 
@@ -39,13 +39,14 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
   React.useEffect(() => {
 
     if (fo && typeof fo == "object") {
+      const foObj = fo;
       var dashboardPinnedFilters = fo.filterOptions?.filter(a => a?.dashboardBehaviour == "PromoteToDasboardPinnedFilter") ?? [];
 
       if (dashboardPinnedFilters.length) {
         Finder.getQueryDescription(fo.queryName)
-          .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, fo!.groupResults ?? false, qd))
+          .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, foObj.groupResults ?? false, qd))
           .then(fops => {
-            p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops));
+            p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(foObj.queryName), fops));
             p.dashboardController.registerInvalidations(p.partEmbedded, () => updateVersion());
           });
       } else {
