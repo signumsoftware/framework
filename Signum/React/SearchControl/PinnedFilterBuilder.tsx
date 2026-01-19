@@ -155,7 +155,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.
       timeoutWriteText.current = window.setTimeout(() => {
         p.onFiltersChanged && p.onFiltersChanged(p.filterOptions, avoidSearch);
         timeoutWriteText.current = null;
-      }, 200);
+      }, 400);
 
     } else {
       p.onFiltersChanged && p.onFiltersChanged(p.filterOptions, avoidSearch);
