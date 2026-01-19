@@ -28,7 +28,9 @@ export interface UserQueryPartHandler {
 
 export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity>): React.JSX.Element {
 
-  let fo = useAPI(signal => p.content.userQuery == null ? null : UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity && liteKey(p.entity)]);
+  let fo = useAPI<"not-findable" | null | FindOptions>(signal => p.content.userQuery == null ? null :
+    !Finder.isFindable(p.content.userQuery.query.key) ? "not-findable":
+    UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity && liteKey(p.entity)]);
 
   let valueToken = p.content.valueToken && UserAssetClient.getToken(p.content.valueToken);
 
@@ -36,7 +38,7 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
 
   React.useEffect(() => {
 
-    if (fo) {
+    if (fo && typeof fo == "object") {
       var dashboardPinnedFilters = fo.filterOptions?.filter(a => a?.dashboardBehaviour == "PromoteToDasboardPinnedFilter") ?? [];
 
       if (dashboardPinnedFilters.length) {
@@ -53,7 +55,7 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
     }
   }, [fo, p.partEmbedded]);
 
-  const cachedQuery = p.content.userQuery && p.cachedQueries[liteKey(toLite(p.content.userQuery))];
+  //const cachedQuery = p.content.userQuery && p.cachedQueries[liteKey(toLite(p.content.userQuery))];
 
   if (p.content.userQuery == null)
     fo = {
@@ -61,15 +63,15 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
       filterOptions: [{ token: "Entity", value: p.entity }]
     };
 
-
-
-
   const vsc = React.useRef<SearchValueController>(null);
   const forceUpdate = useForceUpdate();
 
 
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
+
+  if (fo == "not-findable")
+    return null;
 
   if (p.dashboardController.isLoading)
     return <span>{JavascriptMessage.loading.niceToString()}...</span>;
