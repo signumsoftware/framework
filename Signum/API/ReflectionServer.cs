@@ -408,8 +408,30 @@ public static class ReflectionServer
 
         return t.Name;
     }
+
+   
+    //Query Context are entities that couold influence the query visibility
+    //Example: query TaskEntity is visible depending of the Lite<ProjectEntity> context
+    public static Dictionary<Type /*DomainType*/, Func<Type, Dictionary<Lite<Entity> /*Domain*/, DomainAccess>?>> AllowedDomains = [];
+
+    public static Dictionary<Type /*DomainType*/, Dictionary<Lite<Entity> /*Domain*/, DomainAccess>>? GetAllowedDomains(Type entityType)
+    {
+        if (AllowedDomains == null)
+            return null;
+
+        var dic = AllowedDomains.ToDictionary(a => a.Key, a => a.Value(entityType)).Where(a => a.Value != null).ToDictionary();
+        if (dic.IsEmpty())
+            return null;
+
+        return dic!;
+    }
 }
 
+public enum DomainAccess
+{
+    Read,
+    Write
+}
 
 public class TypeInfoTS
 {
