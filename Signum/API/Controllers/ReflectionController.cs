@@ -1,12 +1,11 @@
-using Signum.API.Filters;
 using Microsoft.AspNetCore.Http;
-using Signum.Engine.Maps;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Http.Extensions;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using Signum.API.Filters;
+using Signum.Engine.Maps;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
-using Signum.Engine.Linq;
+
 
 namespace Signum.API.Controllers;
 
@@ -41,6 +40,31 @@ public class ReflectionController : ControllerBase
         return EnumEntity.GetValues(type).ToDictionary(a => a.ToString(), a => EnumEntity.FromEnumUntyped(a));
     }
 
+
+    [HttpGet("api/reflection/typeInDomains")]
+    public Dictionary<string/*entityType*/, Dictionary<string /*domain type*/, ReadWriteIds>> GetTypeInDomain()
+    {
+        Schema s = Schema.Current;
+        var context = (from entityType in TypeLogic.TypeToEntity.Keys
+                       where s.IsAllowed(entityType, true) == null
+                       let dic = ReflectionServer.GetAllowedDomains(entityType)
+                       where dic != null
+                       select KeyValuePair.Create(TypeLogic.GetCleanName(entityType),
+                            dic.ToDictionaryEx(kvp => TypeLogic.GetCleanName(kvp.Key), kvp => new ReadWriteIds
+                            {
+                                Read = kvp.Value.Where(a=>a.Value == DomainAccess.Read).Select(a => (object)a.Key.Id.Object).ToList(),
+                                Write = kvp.Value.Where(a=>a.Value == DomainAccess.Write).Select(a => (object)a.Key.Id.Object).ToList(),
+                            })))
+                       .ToDictionaryEx();
+
+        return context;
+    }
+
+    public class ReadWriteIds
+    {
+        public List<object> Read { get; set; } = new List<object>();
+        public List<object> Write { get; set; } = new List<object>();
+    }
 
     [HttpPost("api/registerClientError"), ValidateModelFilter, SignumAllowAnonymous]
     public void ClientError([Required, FromBody] ClientErrorModel error)

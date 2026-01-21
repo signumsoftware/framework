@@ -12,7 +12,7 @@ export interface RightCaretDropdownOption<T> {
 interface RightCaretDropdownProps<T> {
   options: RightCaretDropdownOption<T>[];
   value: T | null;
-  onChange: (value: T) => void;
+  onChange: (value: T, e: React.MouseEvent) => void;
   disabled?: boolean;
   placeholder?: string;
 }
@@ -43,7 +43,7 @@ export function RightCaretDropdown<T>({
         {options.map((opt, idx) => (
           <Dropdown.Item
             key={idx}
-            onClick={() => onChange(opt.value)}
+            onClick={e => onChange(opt.value, e)}
             className="switcher-item"
             active={opt.value === value}
             title={opt.label}

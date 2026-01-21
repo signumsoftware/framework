@@ -273,23 +273,16 @@ public static class UserChartLogic
         return cr;
     }
 
-    public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+    public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) => 
+        RegisterTypeCondition(sb, typeCondition, typeof(UserEntity), uq => uq.Owner.Is(UserEntity.Current));
+
+    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) => 
+        RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), uq => uq.Owner == null || AuthLogic.CurrentRoles().Contains(uq.Owner));
+
+    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<UserChartEntity, bool>> conditionExpression)
     {
-        sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(UserEntity));
+        sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, ownerType);
 
-        RegisterTypeCondition(typeCondition, uq => uq.Owner.Is(UserEntity.Current));
-    }
-
-
-    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
-    {
-        sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(RoleEntity));
-
-        RegisterTypeCondition(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
-    }
-
-    public static void RegisterTypeCondition(TypeConditionSymbol typeCondition, Expression<Func<UserChartEntity, bool>> conditionExpression)
-    {
         TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, conditionExpression);
 
         DashboardLogic.RegisterTypeConditionForPart<UserChartPartEntity>(typeCondition);
@@ -390,7 +383,7 @@ public static class UserChartLogic
                 {
                 retry:
                     string? val = item.ValueString;
-                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), entityType))
+                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), fixInstead: true, entityType))
                     {
                         case FixTokenResult.Nothing: break;
                         case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
@@ -400,17 +393,25 @@ public static class UserChartLogic
                         case FixTokenResult.FixTokenInstead:
 
                             QueryTokenEmbedded token = item.Token;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, 
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate,
                                 " {0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false, forceChange: true))
                             {
                                 case FixTokenResult.Nothing: break;
                                 case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                                 case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
                                 case FixTokenResult.SkipEntity: return null;
-                                case FixTokenResult.Fix: item.Token = token; break;
+                                case FixTokenResult.Fix:
+                                    item.Token = token;
+                                    goto retry;
                                 default: break;
                             }
                             break;
+
+                        case FixTokenResult.FixOperationInstead:
+                            var newOperation = SafeConsole.AskMultiLine($"New filter operation for: {item.Token} {item.Operation} {item.ValueString}?", EnumEntity.GetValues(typeof(FilterOperation)).Select(a => a.ToString()).ToArray());
+                            if (newOperation != null)
+                                item.Operation = Enum.Parse<FilterOperation>(newOperation);
+                            goto retry;
                     }
                 }
 

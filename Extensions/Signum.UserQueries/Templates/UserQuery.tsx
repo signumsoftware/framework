@@ -56,7 +56,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
 
       {query &&
         (<div>
-          <EntityLine ctx={ctx.subCtx(e => e.entityType)} readOnly={ctx.value.appendFilters} onChange={() => forceUpdate()}
+        <EntityLine ctx={ctx.subCtx(e => e.entityType)} readOnly={ctx.value.appendFilters || undefined} onChange={() => forceUpdate()}
             helpText={
               <div>
                 {UserQueryMessage.MakesThe0AvailableAsAQuickLinkOf1.niceToString(UserQueryEntity.niceName(), ctx.value.entityType ? getToString(ctx.value.entityType) : UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))}
@@ -72,7 +72,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
           <CollapsableCard header={UserAssetMessage.Advanced.niceToString()} size="xs">
               <div className="row mt-2 mb-2">
                 <div className="col-sm-6">
-                  <AutoLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
+                  <AutoLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null || undefined} onChange={() => forceUpdate()}
                     helpText={UserQueryMessage.MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0.niceToString(UserQueryEntity.niceName(), query?.key)} />
                   <AutoLine ctx={ctx4.subCtx(e => e.refreshMode)} />
                   <EntityStrip ctx={ctx4.subCtx(e => e.customDrilldowns)}
@@ -142,7 +142,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
 
                         <div className="d-flex">
                           <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
-                            <input type="checkbox" className="form-check-input" disabled={ctx.value.token == null} checked={ctx.value.summaryToken != null} onChange={() => {
+                            <input type="checkbox" className="form-check-input" disabled={ctx.value.token == null || ctx.readOnly} checked={ctx.value.summaryToken != null} onChange={() => {
                               ctx.value.summaryToken = ctx.value.summaryToken == null ? QueryTokenEmbedded.New(ctx.value.token) : null;
                               ctx.value.modified = true;
                               row.forceUpdate();
@@ -161,10 +161,10 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
                   },
                   {
                     property: a => a.displayName,
-                    template: (ctx, row) => <TextBoxLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
+                    template: (ctx, row) => <TextBoxLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn || undefined} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
                       helpText={
                         <div>
-                          <AutoLine ctx={ctx.subCtx(a => a.combineRows)} readOnly={ctx.value.hiddenColumn} />
+                          <AutoLine ctx={ctx.subCtx(a => a.combineRows)} readOnly={ctx.value.hiddenColumn || undefined} />
                           <CheckboxLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox="block" onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; ctx.value.combineRows = null; row.forceUpdate(); }} />
                         </div>
                       }

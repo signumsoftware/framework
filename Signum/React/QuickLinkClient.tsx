@@ -119,6 +119,9 @@ export namespace QuickLinkClient {
         if (!ql.allowsMultiple && ctx.lites.length > 1)
           return null;
 
+        if (Navigator.someNonViewable(ctx.lites))
+          return null;
+
         if (ql.isVisible == true || ql.isVisible == undefined)
           return Promise.resolve(ql);
 

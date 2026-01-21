@@ -471,7 +471,7 @@ public static class BlobExtensions
 {
     public static bool ExistsBlob(this BlobContainerClient client, string blobName)
     {
-        return client.GetBlobs(prefix: blobName.BeforeLast("/") ?? "").Any(b => b.Name == blobName);
+        return client.GetBlobs(new GetBlobsOptions { Prefix = blobName.BeforeLast("/") ?? "" }).Any(b => b.Name == blobName);
     }
 }
 

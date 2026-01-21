@@ -101,7 +101,7 @@ public class ImporterFromExcel
 
             WorksheetPart worksheetPart = document.GetWorksheetPartBySheetName("Sheet1");
 
-            var data = worksheetPart.Worksheet.Descendants<SheetData>().Single();
+            var data = worksheetPart.Worksheet!.Descendants<SheetData>().Single();
 
 
             var headerRow = data.Descendants<Row>().ElementAt(1);

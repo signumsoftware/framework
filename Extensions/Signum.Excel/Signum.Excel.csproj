@@ -24,7 +24,7 @@
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
 		<PackageReference Include="Signum.MSBuildTask" Version="10.0.0" />
 		<PackageReference Include="Signum.TSGenerator" Version="10.0.3" />
-		<PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
+		<PackageReference Include="DocumentFormat.OpenXml" Version="3.4.1" />
 	</ItemGroup>
 
 	<ItemGroup>

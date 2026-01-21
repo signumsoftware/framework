@@ -13,6 +13,7 @@ using Signum.UserAssets.QueryTokens;
 using Signum.ViewLog;
 using System.Collections.Frozen;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 namespace Signum.UserQueries;
 
@@ -334,21 +335,15 @@ public static class UserQueryLogic
     }
 
     public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
-    {
-        sb.Schema.Settings.AssertImplementedBy((UserQueryEntity uq) => uq.Owner, typeof(UserEntity));
-
-        RegisterTypeCondition(typeCondition, uq => uq.Owner.Is(UserEntity.Current));
-    }
+        => RegisterTypeCondition(sb, typeCondition, typeof(UserEntity), uq => uq.Owner.Is(UserEntity.Current));
 
     public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
-    {
-        sb.Schema.Settings.AssertImplementedBy((UserQueryEntity uq) => uq.Owner, typeof(RoleEntity));
+        => RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), uq => uq.Owner == null || AuthLogic.CurrentRoles().Contains(uq.Owner));
 
-        RegisterTypeCondition(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
-    }
-
-    public static void RegisterTypeCondition(TypeConditionSymbol typeCondition, Expression<Func<UserQueryEntity, bool>> condition)
+    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<UserQueryEntity, bool>> condition)
     {
+        sb.Schema.Settings.AssertImplementedBy((UserQueryEntity uq) => uq.Owner, ownerType);
+
         TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition, condition);
 
         DashboardLogic.RegisterTypeConditionForPart<ValueUserQueryListPartEntity>(typeCondition);
@@ -383,12 +378,13 @@ public static class UserQueryLogic
             using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + uq.Query.Key)))
             {
 
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
+                
                 if (uq.Filters.Any(a => a.Token?.ParseException != null) ||
                    uq.Columns.Any(a => a.Token?.ParseException != null) ||
                    uq.Orders.Any(a => a.Token.ParseException != null))
                 {
 
-                    QueryDescription qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
 
                     var options = uq.GroupResults ? (SubTokensOptions.CanElement | SubTokensOptions.CanAggregate) : SubTokensOptions.CanElement;
 
@@ -480,13 +476,35 @@ public static class UserQueryLogic
                 {
                     retry:
                     string? val = item.ValueString;
-                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), entityType))
+                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), fixInstead: true, entityType))
                     {
                         case FixTokenResult.Nothing: break;
                         case FixTokenResult.DeleteEntity: return DeleteSql(table, uq);
                         case FixTokenResult.RemoveToken: uq.Filters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: item.ValueString = val; goto retry;
+                        case FixTokenResult.FixTokenInstead:
+
+                            QueryTokenEmbedded token = item.Token;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate,
+                                " {0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false, forceChange: true))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return DeleteSql(table, uq);
+                                case FixTokenResult.RemoveToken: uq.Filters.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: 
+                                    item.Token = token;
+                                    goto retry;
+                                default: break;
+                            }
+                            break;
+
+                        case FixTokenResult.FixOperationInstead:
+                            var newOperation = SafeConsole.AskMultiLine($"New filter operation for: {item.Token} {item.Operation} {item.ValueString}?", EnumEntity.GetValues(typeof(FilterOperation)).Select(a => a.ToString()).ToArray());
+                            if (newOperation != null)
+                                item.Operation = Enum.Parse<FilterOperation>(newOperation);
+                            goto retry;
                     }
                 }
 
@@ -507,7 +525,7 @@ public static class UserQueryLogic
                     {
                     retry:
                         var date = uq.SystemTime.StartDate;
-                        switch (QueryTokenSynchronizer.FixValue(new Replacements(), typeof(DateTime), ref date, allowRemoveToken: false, isList: false, null))
+                        switch (QueryTokenSynchronizer.FixValue(new Replacements(), typeof(DateTime), ref date, allowRemoveToken: false, isList: false, fixInstead: false, null))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return DeleteSql(table, uq);
@@ -522,7 +540,7 @@ public static class UserQueryLogic
                     {
                     retry:
                         var date = uq.SystemTime.EndDate;
-                        switch (QueryTokenSynchronizer.FixValue(new Replacements(), typeof(DateTime), ref date, allowRemoveToken: false, isList: false, null))
+                        switch (QueryTokenSynchronizer.FixValue(new Replacements(), typeof(DateTime), ref date, allowRemoveToken: false, isList: false, fixInstead: false, null))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return DeleteSql(table, uq);
