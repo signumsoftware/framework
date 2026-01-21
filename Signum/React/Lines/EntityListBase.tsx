@@ -57,14 +57,14 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
   dropBorderIndex!: IndexWithOffset | undefined;
   setDropBorderIndex!: React.Dispatch<IndexWithOffset | undefined>;
 
-  init(p: P): void {
+  override init(p: P): void {
     super.init(p);
     [this.dragIndex, this.setDragIndex] = React.useState<number | undefined>(undefined);
     [this.dropBorderIndex, this.setDropBorderIndex] = React.useState<IndexWithOffset | undefined>(undefined);
   }
 
   keyGenerator: KeyGenerator = new KeyGenerator();
-  getDefaultProps(state: P): void {
+  override getDefaultProps(state: P): void {
     if (state.type) {
       const type = state.type;
 
@@ -83,7 +83,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
 
 
 
-  overrideProps(p: P, overridenProps: P): void {
+  override overrideProps(p: P, overridenProps: P): void {
     super.overrideProps(p, overridenProps);
     if (p.type) {
       var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;

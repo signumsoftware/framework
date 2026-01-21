@@ -40,7 +40,7 @@ export class EntityTabRepeaterController<V extends ModifiableEntity> extends Ent
   setSelectedIndex!: (index: number) => void;
   initialIsControlled!: boolean;
 
-  init(p: EntityTabRepeaterProps<V>): void {
+  override init(p: EntityTabRepeaterProps<V>): void {
     super.init(p);
 
     this.initialIsControlled = React.useMemo(() => isControlled(p), []);
@@ -56,13 +56,13 @@ export class EntityTabRepeaterController<V extends ModifiableEntity> extends Ent
     }
   }
 
-  getDefaultProps(p: EntityTabRepeaterProps<V>): void {
+  override getDefaultProps(p: EntityTabRepeaterProps<V>): void {
     super.getDefaultProps(p);
     p.createAsLink = true;
     p.viewOnCreate = false;
   }
 
-  removeElement(mle: MListElement<V>): void {
+  override removeElement(mle: MListElement<V>): void {
     const list = this.props.ctx.value!;
     let deleteIndex = list.indexOf(mle);
 
@@ -71,7 +71,7 @@ export class EntityTabRepeaterController<V extends ModifiableEntity> extends Ent
     this.setValue(list);
   }
 
-  addElement(entityOrLite: V): void {
+  override addElement(entityOrLite: V): void {
 
     if (isLite(entityOrLite) != (this.props.type!.isLite || false))
       throw new Error("entityOrLite should be already converted");

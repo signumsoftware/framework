@@ -26,7 +26,7 @@ export interface EntityRadioButtonListProps<V extends Entity | Lite<Entity> | nu
 
 export class EntityRadioButtonListController<V extends Entity | Lite<Entity> | null> extends EntityBaseController<EntityRadioButtonListProps<V>, V> {
 
-  getDefaultProps(state: EntityRadioButtonListProps<V>): void {
+  override getDefaultProps(state: EntityRadioButtonListProps<V>): void {
     super.getDefaultProps(state);
 
     if (state.ctx.value == null)

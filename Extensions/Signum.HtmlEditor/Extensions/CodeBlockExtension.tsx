@@ -10,14 +10,14 @@ import {
   OptionalCallback,
 } from "./types";
 
-export class CodeBlockExtension implements HtmlEditorExtension {
-  name = "CodeBlockExtension";
+export class CodeBlockExtension extends HtmlEditorExtension {
+  override name = "CodeBlockExtension";
 
-  registerExtension(controller: HtmlEditorController): OptionalCallback {
+  override registerExtension(controller: HtmlEditorController): OptionalCallback {
     return registerCodeHighlighting(controller.editor);
   }
 
-  getNodes(): LexicalConfigNode {
+  override getNodes(): LexicalConfigNode {
     return [CodeNode, CodeHighlightNode];
   }
 }

@@ -24,7 +24,7 @@ export interface DateTimeLineProps extends ValueBaseProps<string | null> {
 }
 
 export class DateTimeLineController extends ValueBaseController<DateTimeLineProps, string | null>{
-  init(p: DateTimeLineProps): void {
+  override init(p: DateTimeLineProps): void {
     super.init(p);
     this.assertType("DateTimeLine", ["DateOnly", "DateTime","DateTimeOffset"]);
   }

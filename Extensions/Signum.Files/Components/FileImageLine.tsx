@@ -33,7 +33,7 @@ export interface FileImageLineProps<V extends ModifiableEntity & IFile | Lite<IF
 
 export class FileImageLineController<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null> extends EntityBaseController<FileImageLineProps<V>, V> {
 
-  getDefaultProps(state: FileImageLineProps<V>): void {
+  override getDefaultProps(state: FileImageLineProps<V>): void {
 
     super.getDefaultProps(state);
 

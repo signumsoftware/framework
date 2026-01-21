@@ -93,7 +93,7 @@ export function formatLink(editor: LexicalEditor, url?: string): void {
     if (!$isRangeSelection(selection)) return;
     
     const anchorNode = selection.anchor.getNode();
-    const text = anchorNode.getTextContent();
+    const text = selection.getTextContent();
 
     const active = !!$findMatchingParent(anchorNode, node => $isLinkNode(node));
 
@@ -101,6 +101,6 @@ export function formatLink(editor: LexicalEditor, url?: string): void {
       selection.insertText(url);
     }
 
-    editor.dispatchCommand(TOGGLE_LINK_COMMAND, active ? null : url || null);
+    editor.dispatchCommand(TOGGLE_LINK_COMMAND, active ? null : (url ?? null));
   });
 }

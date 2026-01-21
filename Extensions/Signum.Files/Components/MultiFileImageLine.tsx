@@ -39,7 +39,7 @@ interface MultiFileImageLineProps<V extends ModifiableEntity/* & IFile*/ | Lite<
 
 export class MultiFileImageLineController<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile & */Entity>> extends EntityListBaseController<MultiFileImageLineProps<V>, V> {
 
-  overrideProps(p: MultiFileImageLineProps<V>, overridenProps: MultiFileImageLineProps<V>): void {
+  override overrideProps(p: MultiFileImageLineProps<V>, overridenProps: MultiFileImageLineProps<V>): void {
     super.overrideProps(p, overridenProps);
 
     let pr = p.ctx.propertyRoute;
