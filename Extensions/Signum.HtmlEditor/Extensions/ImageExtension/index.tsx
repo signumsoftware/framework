@@ -50,7 +50,7 @@ export class ImageExtension implements HtmlEditorExtension {
       const files = event.dataTransfer?.files;
       if (!files?.length) return;
 
-      this.insertImageNodes(files, controller, this.nodeType.converter);
+      this.insertImageNodes(files, controller, this.nodeType.handler);
     }, { signal: abortController.signal });
 
     element.addEventListener("paste", (event) => {
@@ -59,7 +59,7 @@ export class ImageExtension implements HtmlEditorExtension {
       if (!files?.length) return;
 
       event.preventDefault();
-      this.insertImageNodes(files, controller, this.nodeType.converter);
+      this.insertImageNodes(files, controller, this.nodeType.handler);
     }, { signal: abortController.signal });
 
     return () => {
