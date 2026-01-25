@@ -25,18 +25,18 @@ import {
 
 const MAX_INDENT_LEVEL = 6;
 
-export class ListExtension implements HtmlEditorExtension {
-  name = "ListExtension";
+export class ListExtension extends HtmlEditorExtension {
+override name = "ListExtension";
 
-  getBuiltPlugin(): React.ReactElement {
-    return <ListPlugin />;
-  }
+override getBuiltPlugin(): React.ReactElement {
+  return <ListPlugin />;
+}
 
-  getNodes(): LexicalConfigNode {
-    return [ListNode, ListItemNode];
-  }
+override getNodes(): LexicalConfigNode {
+  return [ListNode, ListItemNode];
+}
 
-  registerExtension(controller: HtmlEditorController): OptionalCallback {
+override registerExtension(controller: HtmlEditorController): OptionalCallback {
     const unsubscribeSpaceCommand = controller.editor.registerCommand(
       KEY_SPACE_COMMAND,
       () => {

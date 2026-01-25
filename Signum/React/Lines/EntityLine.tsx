@@ -37,7 +37,7 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
   focusNext!: React.RefObject<boolean>;
   typeahead!: React.RefObject<TypeaheadController | null>;
 
-  init(pro: EntityLineProps<V>): void {
+  override init(pro: EntityLineProps<V>): void {
     super.init(pro);
 
     [this.currentItem, this.setCurrentItem] = React.useState<ItemPair | undefined>();
@@ -85,7 +85,7 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
 
   }
 
-  overrideProps(p: EntityLineProps<V>, overridenProps: EntityLineProps<V>): void {
+  override overrideProps(p: EntityLineProps<V>, overridenProps: EntityLineProps<V>): void {
     super.overrideProps(p, overridenProps);
     if (p.type) {
       if (p.showType == undefined)
@@ -96,7 +96,7 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
     }
   }
 
-  setValue(val: any, event?: React.SyntheticEvent): void {
+  override setValue(val: any, event?: React.SyntheticEvent): void {
     if (val != null)
       this.focusNext.current = true;
 

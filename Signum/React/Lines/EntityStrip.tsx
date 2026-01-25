@@ -36,7 +36,7 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
 
   typeahead!: React.RefObject<TypeaheadController | null>;
 
-  overrideProps(p: EntityStripProps<V>, overridenProps: EntityStripProps<V>): void {
+  override overrideProps(p: EntityStripProps<V>, overridenProps: EntityStripProps<V>): void {
     super.overrideProps(p, overridenProps);
     this.typeahead = React.useRef<TypeaheadController>(null);
 

@@ -16,7 +16,7 @@ import { parseIcon } from '@framework/Components/IconTypeahead'
 import { ToolbarUrl } from '../ToolbarUrl';
 import { classes } from '@framework/Globals';
 import { LayoutMessage, ToolbarEntity, ToolbarMenuEntity,  ToolbarSwitcherEntity } from '../Signum.Toolbar';
-import { Binding, getTypeInfo, newLite, queryAllowedInContext } from '../../../Signum/React/Reflection';
+import { Binding, getTypeInfo, newLite, typeAllowedInDomain } from '../../../Signum/React/Reflection';
 import { Finder } from '../../../Signum/React/Finder';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
 import { RightCaretDropdown } from './RightCaretDropdown'
@@ -307,6 +307,11 @@ function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: Too
 
   function handleShowClick(e: React.MouseEvent | null) {
 
+    if (e?.altKey && p.response.content && Navigator.isViewable(p.response.content)) {
+      Navigator.view(p.response.content!);
+      return;
+    }
+
     var value = !show;
 
     if (value)
@@ -460,7 +465,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
       {entityType && (
         <Nav.Item title={ti.niceName} className="d-flex mx-2 mb-2">
           <div style={{ width: "100%" }}>
-            <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false}
+            <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false} mandatory="warning"
               inputAttributes={{ placeholder: LayoutMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
               onChange={e => handleSelect(e.originalEvent)} create={false} formGroupStyle="SrOnly" />
           </div>
@@ -479,7 +484,7 @@ function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<En
   var result = resp
     .map(tr => {
 
-      if (tr.queryKey != null && !queryAllowedInContext(tr.queryKey, selectedEntity))
+      if (tr.queryKey != null && !typeAllowedInDomain(tr.queryKey, selectedEntity))
         return null;
 
       if (tr.elements && tr.elements.length > 0) {
@@ -554,6 +559,12 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   }, [p.ctx.active, p.response.elements]);
 
   function handleSetShow(value: ToolbarResponse<any>, e: React.SyntheticEvent | null) {
+
+    if (e && (e as React.MouseEvent).altKey && value.content && Navigator.isViewable(value.content)) {
+      Navigator.view(value.content!);
+      return;
+    }
+
     localStorage.setItem(key, value.content!.id!.toString());
     setSelectedOption(value);
 
@@ -579,7 +590,7 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
           <RightCaretDropdown
             options={options}
             value={selectedOption ?? null}
-            onChange={val => val && handleSetShow(val, null)}
+            onChange={(val, e) => val && handleSetShow(val, e)}
             placeholder={title}
             disabled={false} />
           {renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)}

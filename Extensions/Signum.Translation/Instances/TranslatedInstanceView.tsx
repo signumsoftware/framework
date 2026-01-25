@@ -11,6 +11,7 @@ import "../Translation.css"
 import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Hooks'
 import { EntityLink } from '@framework/Search'
 import { DiffDocumentSimple } from '../../Signum.DiffLog/Templates/DiffDocument'
+import "../../Signum.DiffLog/Templates/DiffLog.css"
 import TextArea from '@framework/Components/TextArea'
 import { KeyNames } from '@framework/Components'
 import { useTitle } from '@framework/AppContext'

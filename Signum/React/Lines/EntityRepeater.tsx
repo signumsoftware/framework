@@ -25,7 +25,7 @@ export interface EntityRepeaterProps<V extends ModifiableEntity | Lite<Entity>> 
 
 export class EntityRepeaterController<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseController<EntityRepeaterProps<V>, V> {
 
-  getDefaultProps(p: EntityRepeaterProps<V>): void {
+  override getDefaultProps(p: EntityRepeaterProps<V>): void {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.createAsLink = true;
