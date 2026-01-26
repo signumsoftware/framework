@@ -1,8 +1,8 @@
 import { InitialConfigType } from "@lexical/react/LexicalComposer";
 import { HtmlEditorController } from "../HtmlEditorController";
 
-export interface HtmlEditorExtension {
-  name: string;
+export abstract class HtmlEditorExtension {
+  abstract name: string;
   getToolbarButtons?(controller: HtmlEditorController): React.ReactNode;
   registerExtension?(controller: HtmlEditorController): OptionalCallback;
   getNodes?(): LexicalConfigNode;

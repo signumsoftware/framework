@@ -13,8 +13,8 @@ import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
 import {
   PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo, getAllTypes, Type,
-  QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol, reloadQueryContexts,
-  queryAllowedInContext, onReloadTypesActions
+  QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol, reloadTypesInDomains,
+  typeAllowedInDomain, onReloadTypesActions
 } from '@framework/Reflection'
 import {
   PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission,
@@ -224,7 +224,7 @@ export namespace AuthAdminClient {
       Navigator.addSettings(new EntitySettings(QueryRulePack, e => import('./Rules/QueryRulePackControl')));
 
       if (options.queries == "queryContext")
-        reloadQueryContexts(); //fire and forget
+        reloadTypesInDomains(); //fire and forget
     }
   
     if (options.permissions) {
@@ -293,7 +293,7 @@ export namespace AuthAdminClient {
     var result = allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
 
     if (queries == "queryContext" && context != null)
-      return result && queryAllowedInContext(queryKey, context);
+      return result && typeAllowedInDomain(queryKey, context);
 
     return result;
   }

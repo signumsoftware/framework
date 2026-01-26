@@ -55,6 +55,13 @@ ul.responsive-columns>li {
     cursor: pointer;
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .sf-target {
+        background-color: transparent;
+        animation: none;
+    }
+}
+
 .sf-target {
     animation: target-fade 1s;
 }

@@ -59,7 +59,7 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
   tfoot!: React.RefObject<HTMLTableSectionElement | null>;
   recentlyCreated!: React.RefObject<Lite<Entity> | ModifiableEntity | null>;
 
-  init(p: EntityTableProps<V, RS>): void {
+  override init(p: EntityTableProps<V, RS>): void {
     super.init(p);
     this.containerDiv = React.useRef<HTMLDivElement>(null);
     this.thead = React.useRef<HTMLTableSectionElement>(null);
@@ -74,7 +74,7 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
     }, []);
   }
 
-  getDefaultProps(p: EntityTableProps<V, RS>): void {
+  override getDefaultProps(p: EntityTableProps<V, RS>): void {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.view = false;
@@ -82,7 +82,7 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
     p.findAsLink = true;
   }
 
-  overrideProps(state: EntityTableProps<V, RS>, overridenProps: EntityTableProps<V, RS>): void {
+  override overrideProps(state: EntityTableProps<V, RS>, overridenProps: EntityTableProps<V, RS>): void {
     super.overrideProps(state, overridenProps);
 
     if (state.ctx.propertyRoute) {

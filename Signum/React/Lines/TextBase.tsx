@@ -10,7 +10,7 @@ export interface TextBaseProps<V = any> extends ValueBaseProps<V> {
 export class TextBaseController<T extends TextBaseProps<V>, V> extends ValueBaseController<T, V> {
 
   tempValueRef!: React.RefObject<V | null>;
-  init(p: T): void {
+  override init(p: T): void {
     super.init(p);
     this.tempValueRef = React.useRef<V>(null);
   }

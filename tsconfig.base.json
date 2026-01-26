@@ -10,6 +10,7 @@
     "incremental": true,
     "composite": true,
     "strict": true,
+    "noImplicitOverride": true,
     "declarationMap": true,
     "lib": [
       "ESNext",

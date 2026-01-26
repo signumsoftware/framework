@@ -491,6 +491,7 @@ export function initEntityFormatRules(): Finder.EntityFormatRule[] {
       formatter: new Finder.EntityFormatter(({ row, columns, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: "main" }) ? undefined :
         <EntityLink lite={row.entity}
           inSearch="main"
+          hideIfNotViable
           onNavigated={sc?.handleOnNavigated}
           getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
           inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
@@ -645,7 +646,7 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
     },
     {
       name: "Lite_LowPopulation",
-      applicable: (f, ffc) => isFilterCondition(f) && f.token?.filterType == "Lite" && getTypeInfos(f.token!.type).every(ti => ti.isLowPopulation),
+      applicable: (f, ffc) => isFilterCondition(f) && f.token?.filterType == "Lite" && tryGetTypeInfos(f.token!.type).every(ti => ti == null || ti.isLowPopulation),
       renderValue: (f, ffc) => {
         return <EntityCombo ctx={ffc.ctx} type={f.token!.type} create={false} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
       }

@@ -45,7 +45,7 @@ export class EntityAccordionController<V extends ModifiableEntity> extends Entit
   setSelectedIndex!: (index: number | null) => void;
   initialIsControlled!: boolean;
 
-  init(p: EntityAccordionProps<V>): void {
+  override init(p: EntityAccordionProps<V>): void {
     super.init(p);
 
     this.initialIsControlled = React.useMemo(() => isControlled(p), []);
@@ -66,13 +66,13 @@ export class EntityAccordionController<V extends ModifiableEntity> extends Entit
     }, [p.initialSelectedIndex]);
   }
 
-  getDefaultProps(p: EntityAccordionProps<V>): void {
+  override getDefaultProps(p: EntityAccordionProps<V>): void {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.createAsLink = true;
   }
 
-  addElement(entityOrLite: V): void {
+  override addElement(entityOrLite: V): void {
 
     if (isLite(entityOrLite) != (this.props.type!.isLite || false))
       throw new Error("entityOrLite should be already converted");
