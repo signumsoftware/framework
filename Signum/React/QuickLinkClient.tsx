@@ -221,7 +221,10 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.ReactElement | n
 
   return (
     <>
-      {!links ? [] : links.filter(a => a.group !== undefined).orderBy(a => a.order)
+      {!links ? [] : links
+        .slice().reverse()
+        .filter(a => a.group !== undefined)
+        .orderBy(a => a.order)
         .groupBy(a => a.group?.name ?? a.key)
         .map((gr, i) => {
           var first = gr.elements[0];
