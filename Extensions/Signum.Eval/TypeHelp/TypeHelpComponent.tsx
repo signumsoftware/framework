@@ -57,7 +57,7 @@ function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
       return null;
 
     let menu = p.renderContextMenu(selected);
-    return (menu && <ContextMenu position={contextMenuPosition!} onHide={handleContextOnHide}>
+    return (menu && <ContextMenu position={contextMenuPosition!} onHide={handleContextOnHide} itemsCount={React.Children.count(menu.props.children.length)}>
       {menu.props.children}
     </ContextMenu>)
   }
