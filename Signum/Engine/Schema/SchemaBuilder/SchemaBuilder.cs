@@ -819,7 +819,8 @@ public class SchemaBuilder
             f.Index = f.GenerateIndex(table, Settings.FieldAttribute<IndexAttribute>(route));
         });
 
-        if(result.DbType.SqlServer == System.Data.SqlDbType.Vector && result.Size == null)
+        var isVector = route.Type == typeof(float[]); 
+        if (isVector && result.Size == null)
             throw new InvalidOperationException("Size must be specified for Vector columns (Field: {0})".FormatWith(route));
 
         return result;
