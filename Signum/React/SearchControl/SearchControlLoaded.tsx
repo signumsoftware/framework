@@ -1249,7 +1249,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return null;
 
     return (
-      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide}>
+      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} itemsCount={menuPack?.items.length ?? 0}>
         {renderEntityMenuItems && menuPack && menuPack.showSearch &&
           <AutoFocus>
             <input
