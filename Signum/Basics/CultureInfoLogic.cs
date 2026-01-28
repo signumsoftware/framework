@@ -25,33 +25,33 @@ public static class CultureInfoLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Include<CultureInfoEntity>()
-                .WithSave(CultureInfoOperation.Save)
-                .WithDelete(CultureInfoOperation.Delete)
-                .WithQuery(() => c => new
-                {
-                    Entity = c,
-                    c.Id,
-                    c.Name,
-                    c.EnglishName,
-                    c.NativeName,
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToFrozenDictionaryEx(ci => ci.Name,
-                ci => ci),
-                invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
+        sb.Include<CultureInfoEntity>()
+            .WithSave(CultureInfoOperation.Save)
+            .WithDelete(CultureInfoOperation.Delete)
+            .WithQuery(() => c => new
+            {
+                Entity = c,
+                c.Id,
+                c.Name,
+                c.EnglishName,
+                c.NativeName,
+            });
 
-            EntityToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToFrozenDictionaryEx(ci => ci,
-                ci => CultureInfoModifier(CultureInfo.GetCultureInfo(ci.Name))),
-                invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
+        CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToFrozenDictionaryEx(ci => ci.Name,
+            ci => ci),
+            invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
 
-            sb.Schema.Synchronizing += Schema_Synchronizing;
+        EntityToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToFrozenDictionaryEx(ci => ci,
+            ci => CultureInfoModifier(CultureInfo.GetCultureInfo(ci.Name))),
+            invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
 
-            if (sb.WebServerBuilder != null)
-                CultureServer.Start(sb.WebServerBuilder);
-        }
+        sb.Schema.Synchronizing += Schema_Synchronizing;
+
+        if (sb.WebServerBuilder != null)
+            CultureServer.Start(sb.WebServerBuilder);
     }
 
     static SqlPreCommand? Schema_Synchronizing(Replacements rep)

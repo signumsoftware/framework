@@ -18,6 +18,28 @@
   <Type Name="HelpImageFileType">
     <Member Name="Image" Description="Bild" />
   </Type>
+  <Type Name="HelpImportLineBase" Description="Hilfe-Import-Linienbasis">
+    <Member Name="Action" Description="Aktion" />
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="ExitingEntity" Description="Austretende Einheit" />
+    <Member Name="Key" Description="Schlüssel" />
+    <Member Name="Text" Description="Text" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="HelpImportPreviewLineEmbedded" Description="Hilfe-Import-Vorschauzeile">
+    <Member Name="Apply" Description="Anwenden?" />
+    <Member Name="ApplyVisible" Description="Sichtbare Anwendung" />
+  </Type>
+  <Type Name="HelpImportPreviewModel" Description="Hilfe-Import-Vorschau">
+    <Member Name="Lines" Description="Zeilen" />
+  </Type>
+  <Type Name="HelpImportReportLineEmbedded" Description="Hilfe-Import-Berichtszeile">
+    <Member Name="ActionError" Description="Aktionsfehler" />
+    <Member Name="Status" Description="Status" />
+  </Type>
+  <Type Name="HelpImportReportModel" Description="Hilfe-Import-Bericht">
+    <Member Name="Lines" Description="Zeilen" />
+  </Type>
   <Type Name="HelpKindMessage">
     <Member Name="AndIsMasterDataRarelyChanges" Description=" und ist Stammdaten (ändert sich selten)" />
     <Member Name="andIsTransactionalDataCreatedRegularly" Description=" und sind Transaktionsdaten (regelmäßig erstellt)" />
@@ -36,6 +58,7 @@
     <Member Name="_0IsACalculated1" Description="{0} ist eine berechnete {1}" />
     <Member Name="_0IsACollectionOfElements1" Description="{0} ist eine Liste von {1}-Elementen " />
     <Member Name="_0IsThePrimaryKeyOf1OfType2" Description="{0} ist der Primärschlüssel von {1}, des Typs {2}" />
+    <Member Name="ActionStatus" Description="Aktionsstatus" />
     <Member Name="Amount" Description="Betrag" />
     <Member Name="AnEmbeddedEntityOfType0" Description="Eine eingebettete Entität vom Typ {0}" />
     <Member Name="Any" Description="irgendein" />
@@ -45,23 +68,33 @@
     <Member Name="Buscador" Description="Suchmaschine" />
     <Member Name="Call0Over1OfThe2" Description="Führt {0} auf {1} von {2}" />
     <Member Name="Character" Description="Zeichen" />
+    <Member Name="ChooseZIPFile" Description="Wähle ZIP-Datei" />
     <Member Name="Close" Description="Schließen" />
     <Member Name="ConstructsANew0" Description="Erstellt eine neue {0}" />
     <Member Name="Date" Description="Datum" />
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
     <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="Entities" Description="Entitäten" />
+    <Member Name="ExportAsZip" Description="Als Zip exportieren" />
     <Member Name="ExpressedIn" Description="ausgedrückt in " />
     <Member Name="From0OfThe1" Description="von {0} von {1} " />
     <Member Name="FromMany0" Description="von vielen {0}" />
     <Member Name="full" Description="voll" />
     <Member Name="Help" Description="Hilfe" />
     <Member Name="HelpNotLoaded" Description="Hilfe nicht geladen" />
+    <Member Name="HelpZipContents" Description="Hilfe-Zip-Inhalt" />
+    <Member Name="Import" Description="Importieren" />
+    <Member Name="ImportCompletedSuccessfully" Description="Import erfolgreich abgeschlossen" />
+    <Member Name="ImportCompletedWithErrors" Description="Import mit Fehlern abgeschlossen" />
+    <Member Name="ImportError" Description="Importfehler" />
+    <Member Name="ImportHelpContentsFromZipFile" Description="Hilfe aus der ZIP-Datei importieren  " />
+    <Member Name="ImportReport" Description="Importbericht" />
     <Member Name="In0" Description="(in {0})" />
     <Member Name="Integer" Description="ganze Zahl " />
     <Member Name="JumpToViewMore" Description="Zu Mehr Sehen springen" />
     <Member Name="Key0NotFound" Description="Key {0} wurde nicht gefunden" />
     <Member Name="lite" Description="leicht" />
+    <Member Name="NewKey" Description="Neuer Schlüssel" />
     <Member Name="Next" Description="Nächster" />
     <Member Name="Optional" Description=" (fakultativ)" />
     <Member Name="Previous" Description="Vorherige" />
@@ -69,6 +102,8 @@
     <Member Name="QueryOf0" Description="Abfrage von {0} " />
     <Member Name="RemovesThe0FromTheDatabase" Description="Entfernt {0} aus der Datenbank" />
     <Member Name="SearchText" Description="Text suchen" />
+    <Member Name="SelectedFile" Description="Ausgewählte Datei" />
+    <Member Name="SelectTheZIPFileWithTheHelpContentsThatYouWantToImport" Description="Wählen Sie die ZIP-Datei mit den Hilfeinhalten aus, die Sie importieren möchten" />
     <Member Name="Should" Description=". Sollte  " />
     <Member Name="String" Description="Zeichenkette" />
     <Member Name="TheDatabaseVersion" Description="die Version der Datenbank" />
@@ -79,7 +114,7 @@
     <Member Name="YourVersion" Description="Ihre Version" />
   </Type>
   <Type Name="HelpPermissions">
-    <Member Name="DownloadHelp" Description="Hilfe herunterladen" />
+    <Member Name="ExportHelp" Description="Exporthilfe" />
     <Member Name="ViewHelp" Description="Hilfe anzeigen" />
   </Type>
   <Type Name="HelpSearchMessage">
@@ -115,6 +150,17 @@
     <Member Name="TranslateFrom" Description="Übersetzen aus..." />
     <Member Name="UnderlineText" Description="Text unterstreichen" />
     <Member Name="UnorderedListItem" Description="Ungeordnetes Listenelement" />
+  </Type>
+  <Type Name="ImportAction" Description="Importaktion">
+    <Member Name="Create" Description="Erstellen" />
+    <Member Name="NoChange" Description="Keine Änderung" />
+    <Member Name="Override" Description="Überschreiben" />
+  </Type>
+  <Type Name="ImportStatus" Description="Importstatus">
+    <Member Name="Applied" Description="Angewandt" />
+    <Member Name="Failed" Description="Gescheitert" />
+    <Member Name="NoChange" Description="Keine Änderung" />
+    <Member Name="Skipped" Description="Übersprungen" />
   </Type>
   <Type Name="NamespaceHelpEntity" Description="Namespacehilfe">
     <Member Name="Culture" Description="Kultur" />

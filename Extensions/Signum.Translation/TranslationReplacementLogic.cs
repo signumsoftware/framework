@@ -11,35 +11,35 @@ public static class TranslationReplacementLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Include<TranslationReplacementEntity>()
-                .WithUniqueIndex(tr => new { tr.CultureInfo, tr.WrongTranslation })
-                .WithSave(TranslationReplacementOperation.Save)
-                .WithDelete(TranslationReplacementOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.CultureInfo,
-                    e.WrongTranslation,
-                    e.RightTranslation,
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            
-            ReplacementsLazy = sb.GlobalLazy(() => Database.Query<TranslationReplacementEntity>()
-                .AgGroupToDictionary(a => a.CultureInfo.ToCultureInfo(),
-                gr =>
-                {
-                    var dic = gr.ToDictionaryEx(a => a.WrongTranslation, a => a.RightTranslation, StringComparer.InvariantCultureIgnoreCase, "wrong translations");
+        sb.Include<TranslationReplacementEntity>()
+            .WithUniqueIndex(tr => new { tr.CultureInfo, tr.WrongTranslation })
+            .WithSave(TranslationReplacementOperation.Save)
+            .WithDelete(TranslationReplacementOperation.Delete)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.CultureInfo,
+                e.WrongTranslation,
+                e.RightTranslation,
+            });
 
-                    var regex = new Regex(dic.Keys.ToString(Regex.Escape, "|"), RegexOptions.IgnoreCase);
 
-                    return new TranslationReplacementPack(dic, regex);
-                }).ToFrozenDictionaryEx(),
-                new InvalidateWith(typeof(TranslationReplacementEntity)));
+        ReplacementsLazy = sb.GlobalLazy(() => Database.Query<TranslationReplacementEntity>()
+            .AgGroupToDictionary(a => a.CultureInfo.ToCultureInfo(),
+            gr =>
+            {
+                var dic = gr.ToDictionaryEx(a => a.WrongTranslation, a => a.RightTranslation, StringComparer.InvariantCultureIgnoreCase, "wrong translations");
 
-        }
+                var regex = new Regex(dic.Keys.ToString(Regex.Escape, "|"), RegexOptions.IgnoreCase);
+
+                return new TranslationReplacementPack(dic, regex);
+            }).ToFrozenDictionaryEx(),
+            new InvalidateWith(typeof(TranslationReplacementEntity)));
+
     }
 
     public static void ReplacementFeedback(CultureInfo ci, string translationWrong, string translationRight)

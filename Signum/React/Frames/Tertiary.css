@@ -15,11 +15,14 @@
     --bs-btn-disabled-border-color: var(--bs-tertiary-bg);
 }
 
+.bg-tertiary {
+    background-color: var(--bs-tertiary-rgb) !important;
+}
+
 .border-tertiary {
     --bs-border-opacity: 1;
     border-color: var(--bs-tertiary-bg) !important;
 }
-
 
 .text-bg-tertiary {
     color: var(--bs-body-color) !important;

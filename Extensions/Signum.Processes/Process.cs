@@ -190,7 +190,33 @@ public enum ProcessMessage
     [Description("Suspend in the safer way of stoping a running process. Cancel anyway?")]
     SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway,
     ProcessSettings,
-    OnlyActive
+    OnlyActive,
+
+    [Description("ProcessLogic state (loading...) ")]
+    ProcessLogicStateLoading,
+    ProcessPanel,
+    Start,
+    Stop,
+    [Description("RUNNING")]
+    Running,
+    [Description("STOPPED")]
+    Stopped,
+    SimpleStatus,
+    JustMyProcesses,
+    MachineName,
+    ApplicationName,
+    MaxDegreeOfParallelism,
+    InitialDelayMilliseconds,
+    NextPlannedExecution,
+    None,
+    ExecutingProcesses,
+    Process,
+    State,
+    Progress,
+    IsCancellationRequest,
+    [Description("{0} processes executing in {1} / {2}")]
+    _0ProcessesExcecutingIn1_2,
+    LatestProcesses,
 }
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]

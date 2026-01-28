@@ -9,23 +9,23 @@ public static class ExceptionLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Include<ExceptionEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.CreationDate,
-                    e.ExceptionType,
-                    e.Origin,
-                    e.User,
-                    e.ExceptionMessage,
-                    e.StackTraceHash,
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            DefaultEnvironment = "Default";
-        }
+        sb.Include<ExceptionEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.CreationDate,
+                e.ExceptionType,
+                e.Origin,
+                e.User,
+                e.ExceptionMessage,
+                e.StackTraceHash,
+            });
+
+        DefaultEnvironment = "Default";
     }
 
     public static event Action<Exception, ExceptionEntity?>? OnExceptionLogged;

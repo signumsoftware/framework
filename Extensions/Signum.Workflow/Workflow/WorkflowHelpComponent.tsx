@@ -32,7 +32,7 @@ export default function WorkflowHelpComponent(p : WorkflowHelpComponentProps): R
         var text = acts.map(a => p.mode == "CSharp" ?
           `WorkflowActivityInfo.Current.Is("${getToString(w)}", "${getToString(a)}")` :
           `modules.WorkflowClient.inWorkflow(ctx, "${getToString(w)}", "${getToString(a)}")`
-        ).join(" ||\r\n");
+        ).join(" ||\n");
 
         AutoLineModal.show({
           type: { name: "string" },

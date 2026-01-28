@@ -9,6 +9,9 @@ public static class StreamExtensions
 {
     public static byte[] ReadAllBytes(this Stream str)
     {
+        if (str.CanSeek && str.Position > 0)
+            throw new InvalidOperationException("Already started reading");
+
         using (MemoryStream ms = new MemoryStream())
         {
             str.CopyTo(ms);
@@ -18,6 +21,9 @@ public static class StreamExtensions
 
     public static async Task<byte[]> ReadAllBytesAsync(this Stream str)
     {
+        if (str.CanSeek && str.Position > 0)
+            throw new InvalidOperationException("Already started reading");
+
         using (MemoryStream ms = new MemoryStream())
         {
             await str.CopyToAsync(ms);
@@ -28,6 +34,9 @@ public static class StreamExtensions
 
     public static void WriteAllBytes(this Stream str, byte[] data)
     {
+        if (str.CanSeek && str.Position > 0)
+            throw new InvalidOperationException("Already started writing");
+
         str.Write(data, 0, data.Length);
     }
 

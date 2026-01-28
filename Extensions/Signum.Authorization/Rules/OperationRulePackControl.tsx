@@ -12,6 +12,8 @@ import { OperationSymbol } from '@framework/Signum.Operations'
 import { Binding, getOperationInfo, GraphExplorer } from '@framework/Reflection'
 import { useDragAndDrop } from './TypeRulePackControl'
 import SelectorModal from '../../../Signum/React/SelectorModal';
+import { AccessibleRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
+import { LinkButton } from '../../../Signum/React/Basics/LinkButton'
 
 
 
@@ -42,8 +44,8 @@ export default function OperationRulePackControl({ ctx, initialTypeConditions, i
     const hasChanges = GraphExplorer.hasChanges(bc.pack.entity);
 
     return [
-      { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
-      { button: <Button variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> }
+      { button: <Button type="button" variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
+      { button: <Button type="button" variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> }
     ];
   }
 
@@ -75,7 +77,7 @@ export default function OperationRulePackControl({ ctx, initialTypeConditions, i
 
       {ctx.value.rules.some(a => !isConstructor(a.element)) &&
         <div className="form-compact">
-          <FormGroup ctx={ctx} label="Type Conditions">
+          <FormGroup ctx={ctx} label={AuthAdminMessage.TypeConditions.niceToString()}>
             {id =>
               <div id={id}>
                 <select id={id} className={hasOverrides(typeConditions)} value={typeConditions?.map(a => a.key).join(" & ")} onChange={e => {
@@ -86,14 +88,14 @@ export default function OperationRulePackControl({ ctx, initialTypeConditions, i
                     setTypeConditions(tcs);
                   }
                 }} >
-                  <option value="Fallback" className={hasOverrides(undefined)}>Fallback</option>
+                  <option value="Fallback" className={hasOverrides(undefined)}>{AuthAdminMessage.Fallback.niceToString()}</option>
                   {ctx.value.availableTypeConditions.map((arr, i) => <option value={arr.map(a => a.key).join(" & ")} className={hasOverrides(arr)}>
                     {arr.map(a => a.key.after(".")).join(" & ")}
                   </option>)}
                 </select>
 
                 {ctx.value.availableTypeConditions.length > 1 &&
-                  <button className="btn btn-xs btn-primary mx-1" onClick={e => {
+                  <button type="button" className="btn btn-xs btn-primary mx-1" onClick={e => {
                     var options = ["Fallback", ...ctx.value.availableTypeConditions.map(a => a.map(a => a.key).join(" & "))]
                       .filter(o => o != (typeConditions?.map(a => a.key).join(" & ") ?? "Fallback"))
                       .map(o => o.tryAfter(".") ?? o);
@@ -117,7 +119,7 @@ export default function OperationRulePackControl({ ctx, initialTypeConditions, i
                           .then(f => f())
                           .then(() => updateFrame());
                       });
-                  }}>Copy from…</button>}
+                  }}>{AuthAdminMessage.CopyFrom.niceToString()}…</button>}
               </div>}
           </FormGroup>
           <OperationTable ctx={ctx} filter={oar => !isConstructor(oar)} typeConditions={typeConditions} updateFrame={updateFrame} />
@@ -146,20 +148,24 @@ function OperationTable(p: {
   }
 
   return (
-    <table className="table table-sm sf-auth-rules">
+    <AccessibleTable
+      aria-label={AuthAdminMessage.AuthRuleOverview.niceToString()}
+      className="table table-sm sf-auth-rules"
+      mapCustomComponents={new Map([[OperationRow, "tr"]])}
+      multiselectable={false}>
       <thead>
         <tr>
           <th style={{ width: "50%" }}>
             {OperationSymbol.niceName()}
           </th>
           <th style={{ textAlign: "center" }}>
-            <a onClick={e => handleHeaderClick(e, "Allow")}>{OperationAllowed.niceToString("Allow")}</a>
+            <LinkButton title={undefined} onClick={e => handleHeaderClick(e, "Allow")} style={{ color: "inherit" }}>{OperationAllowed.niceToString("Allow")}</LinkButton>
           </th>
           <th style={{ textAlign: "center" }}>
-            <a onClick={e => handleHeaderClick(e, "DBOnly")}>{OperationAllowed.niceToString("DBOnly")}</a>
+            <LinkButton title={undefined} onClick={e => handleHeaderClick(e, "DBOnly")} style={{ color: "inherit" }}>{OperationAllowed.niceToString("DBOnly")}</LinkButton>
           </th>
           <th style={{ textAlign: "center" }}>
-            <a onClick={e => handleHeaderClick(e, "None")}>{OperationAllowed.niceToString("None")}</a>
+            <LinkButton title={undefined} onClick={e => handleHeaderClick(e, "None")} style={{ color: "inherit" }}>{OperationAllowed.niceToString("None")}</LinkButton>
           </th>
           <th style={{ textAlign: "center" }}>
             {AuthAdminMessage.Overriden.niceToString()}
@@ -169,12 +175,11 @@ function OperationTable(p: {
       <tbody>
         {p.ctx.mlistItemCtxs(a => a.rules).filter(a => p.filter(a.value)).map((tctx, i) => <OperationRow key={i} tctx={tctx} updateFrame={p.updateFrame} getBidning={tac => getBinding(tac, p.typeConditions)} />)}
       </tbody>
-    </table>
+    </AccessibleTable>
   )
 }
 
 function OperationRow(p: { tctx: TypeContext<OperationAllowedRule>, updateFrame: () => void, getBidning: (e: WithConditionsModel<OperationAllowed>) => Binding<OperationAllowed> }): React.JSX.Element {
-
   const getConfig = useDragAndDrop(p.tctx.value.allowed.conditionRules, () => p.updateFrame(), () => { p.tctx.value.modified = true; p.updateFrame(); });
 
   const allowedBinding = p.getBidning(p.tctx.value.allowed);
@@ -182,7 +187,6 @@ function OperationRow(p: { tctx: TypeContext<OperationAllowedRule>, updateFrame:
   const coercedBinding = p.getBidning(p.tctx.value.coerced);
 
   function renderRadio(allowed: OperationAllowed, color: string) {
-
     if (OperationAllowed.index(coercedBinding.getValue()) < OperationAllowed.index(allowed))
       return;
 
@@ -198,7 +202,7 @@ function OperationRow(p: { tctx: TypeContext<OperationAllowedRule>, updateFrame:
   }
 
   return (
-    <tr>
+    <AccessibleRow>
       <td>
         {getToString(p.tctx.value.resource.operation)}
       </td>
@@ -217,9 +221,10 @@ function OperationRow(p: { tctx: TypeContext<OperationAllowedRule>, updateFrame:
           p.updateFrame();
         }} />
       </td>
-    </tr>
+    </AccessibleRow>
   )
 }
+
 
 function matches(r: ConditionRuleModel<OperationAllowed>, typeConditions: TypeConditionSymbol[]) {
   return r.typeConditions.length == typeConditions.length && r.typeConditions.every((tc, i) => is(tc.element, typeConditions[i]));

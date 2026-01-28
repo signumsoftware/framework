@@ -13,6 +13,7 @@ using Signum.API;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using DocumentFormat.OpenXml.Office2013.Drawing.Chart;
+using Signum.Caching;
 
 namespace Signum.Cache;
 
@@ -56,33 +57,34 @@ public static class CacheLogic
         if (sb.WebServerBuilder != null)
             CacheServer.Start(sb.WebServerBuilder);
         
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        PermissionLogic.RegisterTypes(typeof(CachePermission));
+	    ReflectionServer.RegisterLike(typeof(CacheMessage), () => true);
+
+        sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
+
+        if (withSqlDependency == true && !Connector.Current.SupportsSqlDependency)
+            throw new InvalidOperationException("Sql Dependency is not supported by the current connection");
+
+        WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency;
+
+        if (serverBroadcast != null && WithSqlDependency)
+            throw new InvalidOperationException("cacheInvalidator is only necessary if SqlDependency is not enabled");
+
+        ServerBroadcast = serverBroadcast;
+        if(ServerBroadcast != null)
         {
-            PermissionLogic.RegisterTypes(typeof(CachePermission));
-
-            sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
-
-            if (withSqlDependency == true && !Connector.Current.SupportsSqlDependency)
-                throw new InvalidOperationException("Sql Dependency is not supported by the current connection");
-
-            WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency;
-
-            if (serverBroadcast != null && WithSqlDependency)
-                throw new InvalidOperationException("cacheInvalidator is only necessary if SqlDependency is not enabled");
-
-            ServerBroadcast = serverBroadcast;
-            if(ServerBroadcast != null)
-            {
-                ServerBroadcast!.Receive += ServerBroadcast_Receive;
-                sb.Schema.BeforeDatabaseAccess += () => ServerBroadcast!.StartIfNecessary();
-            }
-
-            sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
-            sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
-            sb.Schema.OnInvalidateCache += () => CacheLogic.ForceReset();
-
-            GlobalLazy.OnResetAll += systemLog => CacheLogic.ForceReset(systemLog);
+            ServerBroadcast!.Receive += ServerBroadcast_Receive;
+            sb.Schema.BeforeDatabaseAccess += () => ServerBroadcast!.StartIfNecessary();
         }
+
+        sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
+        sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
+        sb.Schema.OnInvalidateCache += () => CacheLogic.ForceReset();
+
+        GlobalLazy.OnResetAll += systemLog => CacheLogic.ForceReset(systemLog);
     }
 
     static void Schema_SchemaCompleted(SchemaBuilder sb)
@@ -161,11 +163,18 @@ public static class CacheLogic
         }
         else
         {
-            var list = CacheLogic.semiControllers.GetOrThrow(type);
-            foreach (var sc in list)
+            // Could be null when notifying an entity not cached but inverseDependencies, example:
+            // Master -> Lite (Transactional) -> Lite (Transactional)
+            // Cached  <-  Semi Cached            Not Cached at all but invalidated
+            //         <-------------------------
+            var list = CacheLogic.semiControllers.TryGetC(type);
+            if (list != null)
             {
-                sc.ResetAll(forceReset: false);
-                sc.controller.NotifyInvalidated();
+                foreach (var sc in list)
+                {
+                    sc.ResetAll(forceReset: false);
+                    sc.controller.NotifyInvalidated();
+                }
             }
         }
     }
@@ -298,7 +307,7 @@ public static class CacheLogic
     }
 
 
-    readonly static object startKeyLock = new object();
+    readonly static Lock startKeyLock = new();
     public static void StartSqlDependencyAndEnableBrocker()
     {
         if (!WithSqlDependency)

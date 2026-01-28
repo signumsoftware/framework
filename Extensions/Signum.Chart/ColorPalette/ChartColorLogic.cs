@@ -10,25 +10,25 @@ public static class ColorPaletteLogic
 
     internal static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<ColorPaletteEntity>()
-                .WithSave(ColorPaletteOperation.Save)
-                .WithDelete(ColorPaletteOperation.Delete)
-                .WithQuery(() => cc => new
-                {
-                    Entity = cc,
-                    cc.Id,
-                    cc.Type,
-                    cc.CategoryName,
-                    cc.Seed,
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            ColorPaletteCache = sb.GlobalLazy(() =>
-                Database.Query<ColorPaletteEntity>()
-                    .ToFrozenDictionaryEx(cc => cc.Type.ToType()),
-                new InvalidateWith(typeof(ColorPaletteEntity)));
-        }
+        sb.Include<ColorPaletteEntity>()
+            .WithSave(ColorPaletteOperation.Save)
+            .WithDelete(ColorPaletteOperation.Delete)
+            .WithQuery(() => cc => new
+            {
+                Entity = cc,
+                cc.Id,
+                cc.Type,
+                cc.CategoryName,
+                cc.Seed,
+            });
+
+        ColorPaletteCache = sb.GlobalLazy(() =>
+            Database.Query<ColorPaletteEntity>()
+                .ToFrozenDictionaryEx(cc => cc.Type.ToType()),
+            new InvalidateWith(typeof(ColorPaletteEntity)));
     }
 
     public static string? ColorFor(Entity entity)

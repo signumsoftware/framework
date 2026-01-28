@@ -7,28 +7,28 @@ public class RestLogLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<RestLogEntity>()
-                .WithIndex(a => a.StartDate)
-                .WithIndex(a => a.EndDate)
-                .WithIndex(a => a.Controller)
-                .WithIndex(a => a.Action)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.StartDate,
-                    e.Duration,
-                    e.Url,
-                    e.User,
-                    e.Exception,
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteRestLogs;
+        sb.Include<RestLogEntity>()
+            .WithIndex(a => a.StartDate)
+            .WithIndex(a => a.EndDate)
+            .WithIndex(a => a.Controller)
+            .WithIndex(a => a.Action)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.StartDate,
+                e.Duration,
+                e.Url,
+                e.User,
+                e.Exception,
+            });
+
+        ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteRestLogs;
 
 
-        }
     }
 
     private static void ExceptionLogic_DeleteRestLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)

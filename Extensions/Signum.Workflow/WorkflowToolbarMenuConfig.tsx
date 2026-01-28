@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as AppContext from '@framework/AppContext'
+import { Location } from 'react-router'
 import { useAPI } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { getTypeInfo } from '@framework/Reflection'
@@ -13,6 +14,7 @@ import { IconColor, ToolbarConfig, ToolbarContext } from '../Signum.Toolbar/Tool
 import { CaseActivityQuery, WorkflowEntity, WorkflowMainEntityStrategy, WorkflowPermission } from './Signum.Workflow'
 import { WorkflowClient } from './WorkflowClient'
 import { PermissionSymbol } from '@framework/Signum.Basics'
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionSymbol> {
 
@@ -21,7 +23,7 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
     super(type);
   }
 
-  getDefaultIcon(): IconProp { 
+  getDefaultIcon(): IconProp {
     return "shuffle";
   }
 
@@ -30,10 +32,10 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
   }
 
   getMenuItem(res: ToolbarResponse<PermissionSymbol>, key: number | string, ctx: ToolbarContext): React.JSX.Element {
-    return <WorkflowDropdownImp key={ key}/>
+    return <WorkflowDropdownImp key={key} />;
   }
 
-  isCompatibleWithUrlPrio(element: ToolbarResponse<PermissionSymbol>, location: Location, query: any, entityType?: string): { prio: number, inferredEntity?: Lite<Entity> } | null { 
+  isCompatibleWithUrlPrio(res: ToolbarResponse<PermissionSymbol>, location: Location, query: any): { prio: number, inferredEntity?: Lite<Entity> } | null {
     return null;
   }
 

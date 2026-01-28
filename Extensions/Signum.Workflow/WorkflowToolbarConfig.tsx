@@ -6,6 +6,7 @@ import { WorkflowClient } from './WorkflowClient'
 import { WorkflowEntity, WorkflowMainEntityStrategy } from './Signum.Workflow'
 import { Entity, is, Lite } from '@framework/Signum.Entities'
 import SelectorModal from '@framework/SelectorModal'
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity> {
 
@@ -31,7 +32,7 @@ export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity>
     return WorkflowClient.workflowStartUrl(element.content!, strategy);
   }
 
-  isCompatibleWithUrlPrio(element: ToolbarResponse<WorkflowEntity>, location: Location, query: any, entityType?: string): { prio: number, inferredEntity?: Lite<Entity> } | null {
-    return location.pathname.startsWith(WorkflowClient.workflowStartUrl(element.content!)) ? { prio: 2 } : null;
+  isCompatibleWithUrlPrio(res: ToolbarResponse<WorkflowEntity>, location: Location, query: any): { prio: number, inferredEntity?: Lite<Entity> } | null {
+    return location.pathname.startsWith(WorkflowClient.workflowStartUrl(res.content!)) ? ({ prio: 2 }) : null;
   }
 }

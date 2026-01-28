@@ -1,4 +1,10 @@
-﻿.sf-beat {
+﻿@media (prefers-reduced-motion: reduce) {
+    .sf-beat {
+        animation: none !important;
+    }
+}
+
+.sf-beat {
 animation: 1.5s ease 0s infinite beat;
 }
 

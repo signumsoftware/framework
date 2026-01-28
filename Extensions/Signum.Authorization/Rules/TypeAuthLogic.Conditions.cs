@@ -146,7 +146,7 @@ public static partial class TypeAuthLogic
             {
                 a.Id,
                 dic = dic.Evaluate(a, null)
-            }).ToList().ToDictionary(a => a.Id, a => a.dic);
+            }).DisableQueryFilter().ToList().ToDictionary(a => a.Id, a => a.dic);
 
 
             foreach (var e in gr)

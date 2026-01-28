@@ -35,7 +35,7 @@ export default function WordSearchMenu(p : WordSearchMenuProps): React.JSX.Eleme
   if (!wordReports || !wordReports.length)
     return null;
 
-  const label = <span><FontAwesomeIcon icon={"file-word"} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;
+  const label = <span><FontAwesomeIcon aria-hidden={true} icon={"file-word"} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;
 
   return (
     <DropdownButton id="wordTemplateDropDown" className="sf-word-dropdown" title={label}>

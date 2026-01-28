@@ -796,26 +796,44 @@ internal class DbExpressionNominator : DbExpressionVisitor
         if (innerProjection || !Has(exprStart) || !Has(exprEnd))
             return null;
 
-        var dateType = new[] { start.Type.UnNullify(), end.Type.UnNullify() }.Distinct().SingleEx(); 
 
         if (isPostgres)
         {
-            var age = new SqlFunctionExpression(dateType, null, PostgresFunction.age.ToString(), new[] { exprStart, exprEnd });
-
-            static SqlFunctionExpression Extract( SqlEnums part, Expression period)
+            static SqlFunctionExpression Extract(SqlEnums part, Expression period)
             {
                 return PostgresFunction.EXTRACT.CallExpression<int>(new SqlLiteralExpression(part), period);
             }
 
-            if (unit == SqlEnums.month)
-                return Add(Expression.Add(Extract(SqlEnums.year, age), Expression.Multiply(Extract(SqlEnums.month, age), new SqlConstantExpression(12, typeof(int)))));
-            else if (unit == SqlEnums.year)
-                return Add(Extract(SqlEnums.year, age));
+            if (unit == SqlEnums.day)
+            {
+                if (exprEnd.Type.UnNullify() == typeof(DateOnly))
+                {
+                    var days = new SqlFunctionExpression(typeof(int), null, PostgressOperator.Minus.ToString(), new[] { exprEnd, exprStart });
+                    return Add(days);
+                }
+                else
+                {
+                    var interval = new SqlFunctionExpression(typeof(TimeSpan), null, PostgressOperator.Minus.ToString(), new[] { exprEnd, exprStart });
+                    return Add(Extract(SqlEnums.day, interval));
+                }
+            }
             else
+            {
+                var age = new SqlFunctionExpression(typeof(TimeSpan), null, PostgresFunction.age.ToString(), new[] { exprStart, exprEnd });
+
+                if (unit == SqlEnums.month)
+                    return Add(Expression.Add(Extract(SqlEnums.year, age), Expression.Multiply(Extract(SqlEnums.month, age), new SqlConstantExpression(12, typeof(int)))));
+                if (unit == SqlEnums.year)
+                    return Add(Extract(SqlEnums.year, age));
+
                 throw new UnexpectedValueException(unit);
+            }
         }
         else
         {
+            var dateType = new[] { start.Type.UnNullify(), end.Type.UnNullify() }.Distinct().SingleEx();
+
+
             var datePart = new SqlLiteralExpression(unit);
 
             var diff = new SqlFunctionExpression(typeof(int), null, SqlFunction.DATEDIFF.ToString(),
@@ -1713,6 +1731,17 @@ internal class DbExpressionNominator : DbExpressionVisitor
                 return TrySqlFunction(null, SqlFunction.FREETEXT, typeof(bool), ToLiteralColumns(m), m.GetArgument("freeTextString"));
 
 
+            case "SqlVectorSearch.Vector_Distance":
+                return TrySqlFunction(null, SqlFunction.VECTOR_DISTANCE, typeof(float), ToSqlConstant<SqlVectorDistanceMetric>(m.GetArgument("distanceMetric"), SqlVectorSearch.GetSqlVectorDistanceMetric), m.GetArgument("vector1"), m.GetArgument("vector2"));
+
+            case "SqlVectorSearch.Vector_Norm":
+                return TrySqlFunction(null, SqlFunction.VECTOR_NORM, typeof(float), m.GetArgument("vector"), ToSqlConstant<SqlVectorNormType>(m.GetArgument("normType"), SqlVectorSearch.GetSqlVectorNormType));
+
+            case "SqlVectorSearch.Vector_Normalize":
+                return TrySqlFunction(null, SqlFunction.VECTOR_NORMALIZE, typeof(float[]), m.GetArgument("vector"), ToSqlConstant<SqlVectorNormType>(m.GetArgument("normType"), SqlVectorSearch.GetSqlVectorNormType));
+
+
+
             case "DateTime.Add":
             case "DateTimeOffset.Add":
             case "DateTime.Subtract":
@@ -1953,6 +1982,16 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
             default: return null;
         }
+    }
+
+    static SqlConstantExpression ToSqlConstant<T>(Expression expression, Func<T, string> converter)
+    {
+        if(expression is ConstantExpression ce && ce.Value is T metric)
+        {
+            return new SqlConstantExpression(converter(metric), typeof(string));
+        }
+
+        throw new UnexpectedValueException(expression);
     }
 
     private Expression? CreateRank(MethodCallExpression m)

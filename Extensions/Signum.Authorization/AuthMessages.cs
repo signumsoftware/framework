@@ -34,12 +34,7 @@ public enum LoginAuthMessage
     [Description("Show login form")]
     ShowLoginForm,
 
-    [Description("Login with Windows user")]
-    LoginWithWindowsUser,
-    [Description("No Windows user found")]
-    NoWindowsUserFound,
-    [Description("Looks like you windows user is not allowed to use this application, the browser is not providing identity information, or the server is not properly configured.")]
-    LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication,
+
 
     [Description("I forgot my password")]
     IForgotMyPassword,
@@ -97,7 +92,14 @@ public enum LoginAuthMessage
 
 
     [Description("Invalid token date {0}")]
-    InvalidTokenDate0
+    InvalidTokenDate0,
+
+    [Description("Sign up with Azure B2C")]
+    SignUpWithAzureB2C,
+    [Description("Sign in with Azure B2C")]
+    SignInWithAzureB2C,
+    [Description("Login with Azure B2C")]
+    LoginWithAzureB2C,
 }
 
 [AllowUnauthenticated]

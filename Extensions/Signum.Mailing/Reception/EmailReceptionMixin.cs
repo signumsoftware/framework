@@ -18,7 +18,7 @@ public class EmailReceptionInfoEmbedded : EmbeddedEntity
         this.BindParent();
     }
 
-    [UniqueIndex(AllowMultipleNulls = true)]
+    [UniqueIndex]
     [StringLengthValidator(Min = 1, Max = 100)]
     public string UniqueId { get; set; }
 

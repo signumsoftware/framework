@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { EntityDetail, EntityLine, EntityStrip, FormGroup, AutoLine } from '@framework/Lines'
+import { EntityDetail, EntityLine, EntityStrip, FormGroup, AutoLine, MultiValueLine } from '@framework/Lines'
 import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import * as AppContext from '@framework/AppContext'
@@ -50,6 +50,7 @@ export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMess
         <div className="col-sm-4">
           <AutoLine ctx={ctx.subCtx(f => f.sentDateTime)} labelColumns={6} />
           <AutoLine ctx={ctx.subCtx(f => f.receivedDateTime)} labelColumns={6} />
+          <MultiValueLine ctx={ctx.subCtx(f => f.categories)} labelColumns={3} />
         </div>
       </div>
 

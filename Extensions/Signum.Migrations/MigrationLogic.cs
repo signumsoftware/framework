@@ -4,63 +4,63 @@ public static class MigrationLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Include<SqlMigrationEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.VersionNumber,
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<CSharpMigrationEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.UniqueName,
-                    e.ExecutionDate,
-                });
-
-            sb.Include<LoadMethodLogEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Start,
-                    e.Duration,
-                    e.ClassName,
-                    e.MethodName,
-                    e.Description,
-                });
-
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
-
-            Administrator.AvoidSimpleSynchronize = () =>
+        sb.Include<SqlMigrationEntity>()
+            .WithQuery(() => e => new
             {
-                if (Administrator.ExistsTable<SqlMigrationEntity>())
-                {
-                    var count = Database.Query<SqlMigrationEntity>().Count();
-                    if (count > 0)
-                    {
-                        Console.Write("The database ");
-                        SafeConsole.WriteColor(ConsoleColor.Yellow, Connector.Current.DatabaseName());
-                        Console.Write(" contains ");
-                        SafeConsole.WriteColor(ConsoleColor.Yellow, count.ToString());
-                        Console.WriteLine(" Sql Migrations!");
+                Entity = e,
+                e.Id,
+                e.VersionNumber,
+            });
 
-                        if (SafeConsole.Ask("Do you want to create a new SQL Migration instead?", "continue", "migrations") == "migrations")
-                        {
-                            SqlMigrationRunner.SqlMigrations();
-                            return true;
-                        }
+        sb.Include<CSharpMigrationEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.UniqueName,
+                e.ExecutionDate,
+            });
+
+        sb.Include<LoadMethodLogEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Start,
+                e.Duration,
+                e.ClassName,
+                e.MethodName,
+                e.Description,
+            });
+
+        ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+        Administrator.AvoidSimpleSynchronize = () =>
+        {
+            if (Administrator.ExistsTable<SqlMigrationEntity>())
+            {
+                var count = Database.Query<SqlMigrationEntity>().Count();
+                if (count > 0)
+                {
+                    Console.Write("The database ");
+                    SafeConsole.WriteColor(ConsoleColor.Yellow, Connector.Current.DatabaseName());
+                    Console.Write(" contains ");
+                    SafeConsole.WriteColor(ConsoleColor.Yellow, count.ToString());
+                    Console.WriteLine(" Sql Migrations!");
+
+                    if (SafeConsole.Ask("Do you want to create a new SQL Migration instead?", "continue", "migrations") == "migrations")
+                    {
+                        SqlMigrationRunner.SqlMigrations();
+                        return true;
                     }
                 }
+            }
 
-                return false;
-            };
-        }
+            return false;
+        };
     }
 
     public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)

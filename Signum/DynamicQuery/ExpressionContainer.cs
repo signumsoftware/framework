@@ -303,7 +303,7 @@ public class ExtensionInfo
     public readonly Type SourceType;
     public readonly string Key;
     public Func<QueryToken, bool>? IsApplicable;
-    public bool IsProjection;
+    public readonly bool IsProjection;
     public bool Inherit = true;
 
     public Box<Implementations?>? ForceImplementations;

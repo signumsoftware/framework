@@ -176,7 +176,7 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines, on
             {stableKeys.map((t) => <TextEllipsis key={keyColumn.getKey(t)} maxWidth={bandwith * 2} className="x-key-label sf-transition"
             onClick={e => onDrillDown?.(t, e)}
             opacity={isActive?.(t) == false ? 0.5 : undefined}
-            style={{ fontWeight: isActive?.(t) == true ? "bold" : undefined, cursor: onDrillDown ? "pointer" : undefined }}
+            style={{ fontWeight: isActive?.(t) == true ? "bold" : undefined}}
             transform={translate(x(keyColumn.getKey(t))!, 0)}
               y={yRule.size('labels') / 4 + (keyInOrder.indexOf(t) % 2) * yRule.size('labels') / 2}
             dominantBaseline="middle"
@@ -233,7 +233,7 @@ export function YKeyTicks({ xRule, yRule, keyValues, keyColumn, y, showLabels, s
           {orderedKeys.map(t => <TextEllipsis maxWidth={xRule.size('labels')} key={keyColumn.getKey(t)} className="y-label sf-transition"
             onClick={e => onDrillDown?.(t, e)}
             opacity={isActive?.(t) == false ? 0.5 : undefined}
-            style={{ fontWeight: isActive?.(t) == true ? "bold" : undefined, cursor: onDrillDown ? "pointer" : undefined }}
+            style={{ fontWeight: isActive?.(t) == true ? "bold" : undefined }}
             transform={translate(0, -y(keyColumn.getKey(t))!)}
             dominantBaseline="middle"
             textAnchor="end">

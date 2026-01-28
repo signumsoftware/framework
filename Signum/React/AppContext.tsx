@@ -157,13 +157,16 @@ export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.K
     navigate(toAbsoluteUrl(path));
 }
 
-export function toAbsoluteUrl(appRelativeUrl: string): string {
-  if (appRelativeUrl?.startsWith("/") && window.__baseName != "")
-    if (!appRelativeUrl.startsWith(window.__baseName + (window.__baseName.endsWith("/") ? "" :  "/")))
-      return window.__baseName + appRelativeUrl;
+
+
+export function toAbsoluteUrl(appRelativeUrl: string, baseName?: string): string {
+  baseName ??= window.__baseName;
+  if (appRelativeUrl?.startsWith("/") && baseName != "")
+    if (!appRelativeUrl.startsWith(baseName + (baseName.endsWith("/") ? "" : "/")))
+      return baseName + appRelativeUrl;
 
   if (appRelativeUrl?.startsWith("~/"))
-    return window.__baseName + appRelativeUrl.after("~"); //For backwards compatibility
+    return baseName + appRelativeUrl.after("~"); //For backwards compatibility
 
   //var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "//"; //In Link render / is considered a relative url
   //if (appRelativeUrl?.startsWith(relativeCrappyUrl))
@@ -187,7 +190,7 @@ declare global {
   }
 }
 
-String.prototype.formatHtml = function (this: string) {
+String.prototype.formatHtml = function(this: string) {
   const regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 
   const args = arguments;
@@ -204,7 +207,7 @@ String.prototype.formatHtml = function (this: string) {
   return React.createElement(React.Fragment, undefined, ...result);
 };
 
-Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
+Array.prototype.joinCommaHtml = function(this: any[], lastSeparator: string) {
   const args = arguments;
 
   const result: (string | React.ReactElement)[] = [];
@@ -225,11 +228,11 @@ Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
   return React.createElement("span", undefined, ...result);
 }
 
-Array.prototype.joinHtml = function (this: any[], separator: string | React.ReactElement) {
+Array.prototype.joinHtml = function(this: any[], separator: string | React.ReactElement) {
   const args = arguments;
 
   const result: (string | React.ReactElement)[] = [];
-  for (let i = 0; i < this.length -1; i++) {
+  for (let i = 0; i < this.length - 1; i++) {
     result.push(this[i]);
     result.push(separator);
   }

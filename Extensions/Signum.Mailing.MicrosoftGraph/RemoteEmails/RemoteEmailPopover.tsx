@@ -36,7 +36,7 @@ export default function RemoteEmailPopover(p: { subject: string, user: Lite<User
       show={show} 
       placement="right" overlay={popover}>
       <span ref={ref} onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
-      <FontAwesomeIcon icon={p.isRead ? ["far", "envelope-open"] : ["far", "envelope"] } className="me-1" />
+        <FontAwesomeIcon aria-hidden={true} icon={p.isRead ? ["far", "envelope-open"] : ["far", "envelope"] } className="me-1" />
       </span>
     </OverlayTrigger>
   );

@@ -51,7 +51,7 @@ export class EntityCheckboxListController<V extends Lite<Entity> | ModifiableEnt
 
   refresh: number = 0;
 
-  getDefaultProps(state: EntityCheckboxListProps<V>): void {
+  override getDefaultProps(state: EntityCheckboxListProps<V>): void {
     super.getDefaultProps(state);
 
     if (state.ctx.value == null)
@@ -92,7 +92,7 @@ export class EntityCheckboxListController<V extends Lite<Entity> | ModifiableEnt
     }
   }
 
-  handleCreateClick = async (event: React.SyntheticEvent<any>): Promise<undefined> => {
+  override handleCreateClick = async (event: React.SyntheticEvent<any>): Promise<undefined> => {
 
     event.preventDefault();
     var pr = this.props.ctx.propertyRoute!.addMember("Indexer", "", true);

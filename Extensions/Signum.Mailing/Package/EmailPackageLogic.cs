@@ -22,68 +22,68 @@ public static class EmailPackageLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(EmailPackageEntity));
-            MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailMessagePackageMixin));
-            
-            sb.Include<EmailPackageEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
+        sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(EmailPackageEntity));
+        MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailMessagePackageMixin));
 
-
-            QueryLogic.Expressions.Register((EmailPackageEntity a) => a.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
-
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages;
-
-            QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.Messages(), EmailMessageMessage.Messages);
-            QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.RemainingMessages(), EmailMessageMessage.RemainingMessages);
-            QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.ExceptionMessages(), EmailMessageMessage.ExceptionMessages);
-
-            ProcessLogic.AssertStarted(sb);
-            ProcessLogic.Register(EmailMessageProcess.CreateEmailsSendAsync, new CreateEmailsSendAsyncProcessAlgorithm());
-            ProcessLogic.Register(EmailMessageProcess.SendEmails, new SendEmailProcessAlgorithm());
-
-            new Graph<ProcessEntity>.ConstructFromMany<EmailMessageEntity>(EmailMessagePackageOperation.ReSendEmails)
+        sb.Include<EmailPackageEntity>()
+            .WithQuery(() => e => new
             {
-                Construct = (messages, args) =>
+                Entity = e,
+                e.Id,
+                e.Name,
+            });
+
+
+
+        QueryLogic.Expressions.Register((EmailPackageEntity a) => a.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
+
+        ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages;
+
+        QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.Messages(), EmailMessageMessage.Messages);
+        QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.RemainingMessages(), EmailMessageMessage.RemainingMessages);
+        QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.ExceptionMessages(), EmailMessageMessage.ExceptionMessages);
+
+        ProcessLogic.AssertStarted(sb);
+        ProcessLogic.Register(EmailMessageProcess.CreateEmailsSendAsync, new CreateEmailsSendAsyncProcessAlgorithm());
+        ProcessLogic.Register(EmailMessageProcess.SendEmails, new SendEmailProcessAlgorithm());
+
+        new Graph<ProcessEntity>.ConstructFromMany<EmailMessageEntity>(EmailMessagePackageOperation.ReSendEmails)
+        {
+            Construct = (messages, args) =>
+            {
+                if (!messages.Any())
+                    return null;
+
+                EmailPackageEntity emailPackage = new EmailPackageEntity()
                 {
-                    if (!messages.Any())
-                        return null;
+                    Name = args.TryGetArgC<string>()
+                }.Save();
 
-                    EmailPackageEntity emailPackage = new EmailPackageEntity()
+                foreach (var m in messages.Select(m => m.Retrieve()))
+                {
+                    new EmailMessageEntity()
                     {
-                        Name = args.TryGetArgC<string>()
-                    }.Save();
-
-                    foreach (var m in messages.Select(m => m.Retrieve()))
-                    {
-                        new EmailMessageEntity()
-                        {
-                            From = m.From,
-                            Recipients = m.Recipients.ToMList(),
-                            Target = m.Target,
-                            Body = new BigStringEmbedded(m.Body.Text),
-                            IsBodyHtml = m.IsBodyHtml,
-                            Subject = m.Subject,
-                            Template = m.Template,
-                            EditableMessage = m.EditableMessage,
-                            State = EmailMessageState.RecruitedForSending,
-                            Attachments = m.Attachments.Select(a => a.Clone()).ToMList()
-                        }
-                        .SetMixin((EmailMessagePackageMixin m) => m.Package, emailPackage.ToLite())
-                        .Save();
+                        From = m.From,
+                        Recipients = m.Recipients.ToMList(),
+                        Target = m.Target,
+                        Body = new BigStringEmbedded(m.Body.Text),
+                        IsBodyHtml = m.IsBodyHtml,
+                        Subject = m.Subject,
+                        Template = m.Template,
+                        EditableMessage = m.EditableMessage,
+                        State = EmailMessageState.RecruitedForSending,
+                        Attachments = m.Attachments.Select(a => a.Clone()).ToMList()
                     }
-
-                    return ProcessLogic.Create(EmailMessageProcess.SendEmails, emailPackage);
+                    .SetMixin((EmailMessagePackageMixin m) => m.Package, emailPackage.ToLite())
+                    .Save();
                 }
-            }.Register();
-        }
+
+                return ProcessLogic.Create(EmailMessageProcess.SendEmails, emailPackage);
+            }
+        }.Register();
     }
 
     public static ProcessEntity SendMultipleEmailsAsync(Lite<EmailTemplateEntity> template, List<Lite<Entity>> targets, ModelConverterSymbol? converter)

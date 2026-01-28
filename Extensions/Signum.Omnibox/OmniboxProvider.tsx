@@ -35,6 +35,6 @@ export abstract class OmniboxProvider<T extends OmniboxResult> {
   }
 
   coloredIcon(icon: IconProp, color: string): React.ReactElement {
-    return <FontAwesomeIcon icon={icon} color={color} className="icon" />;
+    return <FontAwesomeIcon aria-hidden={true} icon={icon} color={color} className="icon" />;
   }
 }

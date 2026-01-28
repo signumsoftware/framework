@@ -6,6 +6,8 @@ using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Server;
 using Signum.Engine.Sync;
+using Microsoft.Data.SqlTypes;
+using Microsoft.Identity.Client;
 
 namespace Signum.Engine;
 
@@ -18,6 +20,8 @@ public class FieldReader
     private const TypeCode tcTimeSpan = (TypeCode)21;
     private const TypeCode tcDateTimeOffset = (TypeCode)22;
     private const TypeCode tcDateOnly = (TypeCode)24;
+    private const TypeCode tcTimeOnly = (TypeCode)25;
+
 
     public int? LastOrdinal;
     public string? LastMethodName;
@@ -34,6 +38,9 @@ public class FieldReader
 
             if (type == typeof(TimeSpan))
                 tc = tcTimeSpan;
+
+            if (type == typeof(TimeOnly))
+                tc = tcTimeOnly;
 
             if (type == typeof(DateTimeOffset))
                 tc = tcDateTimeOffset;
@@ -404,6 +411,7 @@ public class FieldReader
         var dt = typeCodes[ordinal] switch
         {
             TypeCode.DateTime => reader.GetDateTime(ordinal),
+            tcDateOnly => reader.GetFieldValue<DateOnly>(ordinal).ToDateTime(),
             _ => ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal)),
         };
 
@@ -510,8 +518,10 @@ public class FieldReader
                     return ((NpgsqlDataReader)reader).GetTimeSpan(ordinal);
                 else
                     return ((SqlDataReader)reader).GetTimeSpan(ordinal);
+            case tcTimeOnly:
+                return reader.GetFieldValue<TimeOnly>(ordinal).ToTimeSpan();
             default:
-                return ReflectionTools.ChangeType<TimeSpan>(reader.GetValue(ordinal));
+                return reader.GetFieldValue<TimeSpan>(ordinal);
         }
     }
 
@@ -532,13 +542,15 @@ public class FieldReader
         LastMethodName = nameof(GetTimeOnly);
         switch (typeCodes[ordinal])
         {
+            case tcTimeOnly:
+                return reader.GetFieldValue<TimeOnly>(ordinal);
             case tcTimeSpan:
                 if (isPostgres)
                     return TimeOnly.FromTimeSpan(((NpgsqlDataReader)reader).GetTimeSpan(ordinal));
                 else
                     return TimeOnly.FromTimeSpan(((SqlDataReader)reader).GetTimeSpan(ordinal));
             default:
-                return TimeOnly.FromTimeSpan(ReflectionTools.ChangeType<TimeSpan>(reader.GetValue(ordinal)));
+                return TimeOnly.FromTimeSpan(reader.GetFieldValue<TimeSpan>(ordinal));
         }
     }
 
@@ -561,7 +573,7 @@ public class FieldReader
         return typeCodes[ordinal] switch
         {
             tcGuid => reader.GetGuid(ordinal),
-            _ => ReflectionTools.ChangeType<Guid>(reader.GetValue(ordinal)),
+            _ => reader.GetFieldValue<Guid>(ordinal),
         };
     }
 
@@ -620,7 +632,14 @@ public class FieldReader
             return (T[])(object)null!;
         }
 
-        return (T[])this.reader[ordinal]; 
+        var result = this.reader[ordinal];
+        if (result is T[] arr)
+            return arr;
+
+        if(typeof(T) == typeof(float) && result is SqlVector<float> vec)
+            return (T[])(object)vec.Memory.ToArray();
+
+        return (T[])result; //To produce exception
     }
 
     static readonly MethodInfo miNullableGetRange = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetNullableRange<int>(0)).GetGenericMethodDefinition();

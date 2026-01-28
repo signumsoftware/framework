@@ -8,25 +8,25 @@ public static class DynamicMixinConnectionLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<DynamicMixinConnectionEntity>()
-                .WithUniqueIndex(e => new { e.EntityType, e.MixinName })
-                .WithSave(DynamicMixinConnectionOperation.Save)
-                .WithDelete(DynamicMixinConnectionOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.EntityType,
-                    e.MixinName,
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            DynamicLogic.GetCodeFiles += GetCodeFiles;
-            DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
-            EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicMixinConnectionEntity));
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicMixinConnectionEntity>().Where(dm => dm.EntityType.Is(type)));
-        }
+        sb.Include<DynamicMixinConnectionEntity>()
+            .WithUniqueIndex(e => new { e.EntityType, e.MixinName })
+            .WithSave(DynamicMixinConnectionOperation.Save)
+            .WithDelete(DynamicMixinConnectionOperation.Delete)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.EntityType,
+                e.MixinName,
+            });
+
+        DynamicLogic.GetCodeFiles += GetCodeFiles;
+        DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
+        EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicMixinConnectionEntity));
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicMixinConnectionEntity>().Where(dm => dm.EntityType.Is(type)));
     }
 
     public static void WriteDynamicStarter(StringBuilder sb, int indent)

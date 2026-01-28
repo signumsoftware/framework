@@ -8,35 +8,35 @@ public static class DynamicClientLogic
     public static bool IsStarted = false;
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<DynamicClientEntity>()
-                .WithSave(DynamicClientOperation.Save)
-                .WithDelete(DynamicClientOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    Code = e.Code.Etc(50),
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            new Graph<DynamicClientEntity>.ConstructFrom<DynamicClientEntity>(DynamicClientOperation.Clone)
+        sb.Include<DynamicClientEntity>()
+            .WithSave(DynamicClientOperation.Save)
+            .WithDelete(DynamicClientOperation.Delete)
+            .WithQuery(() => e => new
             {
-                Construct = (e, _) =>
+                Entity = e,
+                e.Id,
+                e.Name,
+                Code = e.Code.Etc(50),
+            });
+
+        new Graph<DynamicClientEntity>.ConstructFrom<DynamicClientEntity>(DynamicClientOperation.Clone)
+        {
+            Construct = (e, _) =>
+            {
+                return new DynamicClientEntity
                 {
-                    return new DynamicClientEntity
-                    {
-                        Name = e.Name + "_2",
-                        Code = e.Code,
-                    };
-                }
-            }.Register();
+                    Name = e.Name + "_2",
+                    Code = e.Code,
+                };
+            }
+        }.Register();
 
-            Clients = sb.GlobalLazy(() => Database.Query<DynamicClientEntity>().Where(a => !a.Mixin<DisabledMixin>().IsDisabled).ToList(),
-                new InvalidateWith(typeof(DynamicClientEntity)));
+        Clients = sb.GlobalLazy(() => Database.Query<DynamicClientEntity>().Where(a => !a.Mixin<DisabledMixin>().IsDisabled).ToList(),
+            new InvalidateWith(typeof(DynamicClientEntity)));
 
-            IsStarted = true;
-        }
+        IsStarted = true;
     }
 }

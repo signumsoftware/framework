@@ -18,3 +18,10 @@ public enum TemplateTokenMessage
     [Description("Impossible to access {0} because the template has no {1}")]
     ImpossibleToAccess0BecauseTheTemplateHAsNo1,
 }
+
+public enum TemplateMessage
+{
+    Template,
+    [Description("Copy to clipboard: Ctrl+C, ESC")]
+    CopyToClipboard,
+}

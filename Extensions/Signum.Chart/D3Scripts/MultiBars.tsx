@@ -11,6 +11,8 @@ import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
+import { ChartMessage, D3ChartScript } from '../Signum.Chart';
+import { symbolNiceName, getQueryNiceName } from '@framework/Reflection';
 
 
 export default function renderMultiBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -81,7 +83,8 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   return (
-    <svg direction="ltr" width={width} height={height}>
+    <svg direction="ltr" width={width} height={height} role="img">
+      <title id="multiBarsChartTitle">{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.MultiBars), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} x={x} />
       </g>
@@ -124,7 +127,15 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
                     height={ySubscale.bandwidth()}
                     width={width}
                     onClick={e => onDrillDown(row.rowClick, e)}
-                    cursor="pointer">
+                    role="button"
+                    tabIndex={0}
+                    cursor="pointer"
+                    onKeyDown={e => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        (onclick as any)?.(e);
+                      }
+                    }}>
                     <title>
                       {row.valueTitle}
                     </title>
@@ -135,6 +146,15 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
                       maxWidth={width}
                       transform={translate(width / 2, (ySubscale.bandwidth() / 2) + interMagin)}
                       onClick={e => onDrillDown(row.rowClick, e)}
+                      role="button"
+                      tabIndex={0}
+                      cursor="pointer"
+                      onKeyDown={e => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          (onclick as any)?.(e);
+                        }
+                      }}
                       opacity={parameters["NumberOpacity"]}
                       fill={parameters["NumberColor"]}
                       dominantBaseline="middle"

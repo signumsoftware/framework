@@ -90,7 +90,7 @@ public abstract partial class DiagnosticVerifier
             string diagnosticsOutput = actualResults.Any() ? FormatDiagnostics(analyzer, actualResults.ToArray()) : "    NONE.";
 
             Assert.IsTrue(false,
-                string.Format("Mismatch between number of diagnostics returned, expected \"{0}\" actual \"{1}\"\r\n\r\nDiagnostics:\r\n{2}\r\n", expectedCount, actualCount, diagnosticsOutput));
+                string.Format("Mismatch between number of diagnostics returned, expected \"{0}\" actual \"{1}\"\n\nDiagnostics:\n{2}\n", expectedCount, actualCount, diagnosticsOutput));
         }
 
         for (int i = 0; i < expectedResults.Length; i++)
@@ -115,7 +115,7 @@ public abstract partial class DiagnosticVerifier
                 if (additionalLocations.Length != expected.Locations.Length - 1)
                 {
                     Assert.IsTrue(false,
-                        string.Format("Expected {0} additional locations but got {1} for Diagnostic:\r\n    {2}\r\n",
+                        string.Format("Expected {0} additional locations but got {1} for Diagnostic:\n    {2}\n",
                             expected.Locations.Length - 1, additionalLocations.Length,
                             FormatDiagnostics(analyzer, actual)));
                 }
@@ -129,21 +129,21 @@ public abstract partial class DiagnosticVerifier
             if (actual.Id != expected.Id)
             {
                 Assert.IsTrue(false,
-                    string.Format("Expected diagnostic id to be \"{0}\" was \"{1}\"\r\n\r\nDiagnostic:\r\n    {2}\r\n",
+                    string.Format("Expected diagnostic id to be \"{0}\" was \"{1}\"\n\nDiagnostic:\n    {2}\n",
                         expected.Id, actual.Id, FormatDiagnostics(analyzer, actual)));
             }
 
             if (actual.Severity != expected.Severity)
             {
                 Assert.IsTrue(false,
-                    string.Format("Expected diagnostic severity to be \"{0}\" was \"{1}\"\r\n\r\nDiagnostic:\r\n    {2}\r\n",
+                    string.Format("Expected diagnostic severity to be \"{0}\" was \"{1}\"\n\nDiagnostic:\n    {2}\n",
                         expected.Severity, actual.Severity, FormatDiagnostics(analyzer, actual)));
             }
 
             if (actual.GetMessage() != expected.Message)
             {
                 Assert.IsTrue(false,
-                    string.Format("Expected diagnostic message to be \"{0}\" was \"{1}\"\r\n\r\nDiagnostic:\r\n    {2}\r\n",
+                    string.Format("Expected diagnostic message to be \"{0}\" was \"{1}\"\n\nDiagnostic:\n    {2}\n",
                         expected.Message, actual.GetMessage(), FormatDiagnostics(analyzer, actual)));
             }
         }
@@ -161,7 +161,7 @@ public abstract partial class DiagnosticVerifier
         var actualSpan = actual.GetLineSpan();
 
         Assert.IsTrue(actualSpan.Path == expected.Path || (actualSpan.Path != null && actualSpan.Path.Contains("Test0.") && expected.Path.Contains("Test.")),
-            string.Format("Expected diagnostic to be in file \"{0}\" was actually in file \"{1}\"\r\n\r\nDiagnostic:\r\n    {2}\r\n",
+            string.Format("Expected diagnostic to be in file \"{0}\" was actually in file \"{1}\"\n\nDiagnostic:\n    {2}\n",
                 expected.Path, actualSpan.Path, FormatDiagnostics(analyzer, diagnostic)));
 
         var actualLinePosition = actualSpan.StartLinePosition;
@@ -172,7 +172,7 @@ public abstract partial class DiagnosticVerifier
             if (actualLinePosition.Line + 1 != expected.Line)
             {
                 Assert.IsTrue(false,
-                    string.Format("Expected diagnostic to be on line \"{0}\" was actually on line \"{1}\"\r\n\r\nDiagnostic:\r\n    {2}\r\n",
+                    string.Format("Expected diagnostic to be on line \"{0}\" was actually on line \"{1}\"\n\nDiagnostic:\n    {2}\n",
                         expected.Line, actualLinePosition.Line + 1, FormatDiagnostics(analyzer, diagnostic)));
             }
         }
@@ -183,7 +183,7 @@ public abstract partial class DiagnosticVerifier
             if (actualLinePosition.Character + 1 != expected.Column)
             {
                 Assert.IsTrue(false,
-                    string.Format("Expected diagnostic to start at column \"{0}\" was actually at column \"{1}\"\r\n\r\nDiagnostic:\r\n    {2}\r\n",
+                    string.Format("Expected diagnostic to start at column \"{0}\" was actually at column \"{1}\"\n\nDiagnostic:\n    {2}\n",
                         expected.Column, actualLinePosition.Character + 1, FormatDiagnostics(analyzer, diagnostic)));
             }
         }
@@ -219,7 +219,7 @@ public abstract partial class DiagnosticVerifier
                     else
                     {
                         Assert.IsTrue(location.IsInSource,
-                            $"Test base does not currently handle diagnostics in metadata locations. Diagnostic in metadata: {diagnostics[i]}\r\n");
+                            $"Test base does not currently handle diagnostics in metadata locations. Diagnostic in metadata: {diagnostics[i]}\n");
 
                         string resultMethodName = diagnostics[i].Location.SourceTree.FilePath.EndsWith(".cs") ? "GetCSharpResultAt" : "GetBasicResultAt";
                         var linePosition = diagnostics[i].Location.GetLineSpan().StartLinePosition;

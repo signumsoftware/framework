@@ -1,14 +1,12 @@
-﻿# LINQ `Lite<T>` support
+﻿# LINQ `Lite<T>` Support
 
-`Lite<T>` is fully supported in queries. If you don't know what a `Lite<T>` is, take a look [here](../Signum.Entities/Lite.md). 
+`Lite<T>` is fully supported in Signum LINQ queries. If you are unfamiliar with `Lite<T>`, see the [Lite documentation](../../Signum/Entities/Lite.md).
 
-### Navigating `Lite<T>` relationships
-`Lite<T>` objects are just a convenient way to tell the Framework when to load an entity eagerly and when lazily, and to delimiter the graph that will be sent to the client application (Windows/React). 
+## Navigating `Lite<T>` Relationships
 
-In the SQL database schema there's no difference between an entity having a property of type `Lite<T>` or `T`: Both will create a foreign key to the related table, and
- while you're writing Linq to Signum queries, `Lite<T>` relationships are just an annoyance that you can workaround using `Entity` or `EntityOrNull` properties of `Lite<T>`.
+`Lite<T>` objects indicate when to load an entity eagerly or lazily, and help reduce the entity graph sent to the client (Windows/React). In the SQL schema, there is no difference between a property of type `Lite<T>` or `T`: both create a foreign key to the related table, and the convention is to use `PropertyId` (not `idProperty`). In Signum LINQ queries, you can access the underlying entity using the `Entity` or `EntityOrNull` property of `Lite<T>`.
 
-```C#
+```csharp
 var result = from b in Database.Query<BugEntity>()
              select new
              {
@@ -17,104 +15,102 @@ var result = from b in Database.Query<BugEntity>()
              };
 ```
 
-```SQL
+This translates to:
+
+```sql
 SELECT bdn.Description, pdn.Name
 FROM BugEntity AS bdn
 LEFT OUTER JOIN ProjectEntity AS pdn
-  ON (bdn.idProject = pdn.Id)
+  ON (bdn.ProjectId = pdn.Id)
 ```
 
-`Retrieve` method is not supported on queries, because will be misleading... you're already in the database! You don't need to retrieve!. So this query fails:
+> **Note:** To avoid confusion, the `Retrieve` method is not supported in queries, as you are already querying the database. For example, the following will throw an exception:
 
-```C#
- from b in Database.Query<BugEntity>()
- where b.Project.Retrieve().Name == "Framework"
- select new
- {
-     b.Description,
- }
-
-
-//throws InvalidOperationException("The expression can not be translated to SQL: new ProjectEntity(bdn.idProject)")
+```csharp
+from b in Database.Query<BugEntity>()
+where b.Project.Retrieve().Name == "Framework"
+select new { b.Description };
+// Throws InvalidOperationException: "The expression can not be translated to SQL: new ProjectEntity(bdn.ProjectId)"
 ```
 
-### Using `Lite<T>` as a result
- 
-The second use of `Lite<T>` objects is to use them for the set of results of a Linq query. You can create `Lite<T>` objects explicitly using `.ToLite()` extension method on any entity, or just get them if they are already `Lite<T>` in your data model: 
+## Using `Lite<T>` as a Query Result
 
-```C#
-//The first property is an explicit lite, while the second is lite because BugEntity.Project is `Lite<ProjectEntity>`. 
+You can use `Lite<T>` objects as results in LINQ queries. Create them explicitly with `.ToLite()` on any entity, or use them directly if your model already uses `Lite<T>` properties:
+
+```csharp
+// The first property is an explicit Lite, the second is already a Lite<ProjectEntity>.
 var result = from b in Database.Query<BugEntity>()
-             select new 
-			 { 
-				Bug = b.ToLite(), //Explicit ToLite() because b is a BugEntity 
-                Project = b.Project //Implicit because b.Project is already a Lite<ProjectEntity>
-             }; 
+             select new
+             {
+                 Bug = b.ToLite(), // Explicit ToLite() because b is a BugEntity
+                 Project = b.Project // Already a Lite<ProjectEntity>
+             };
 ```
 
-That get's translated to just:
+This translates to:
 
-```SQL
-SELECT bdn.Id, bdn.ToStr, bdn.idProject, pdn.ToStr AS ToStr1
+```sql
+SELECT bdn.Id, bdn.Description, bdn.ProjectId, pdn.Name
 FROM BugEntity AS bdn
 LEFT OUTER JOIN ProjectEntity AS pdn
-  ON (bdn.idProject = pdn.Id)
+  ON (bdn.ProjectId = pdn.Id)
 ```
 
-> **Note:** `ToLite` method is defined in `Lite` static class, in `Signum.Entities`. 
+> **Note:** The `ToLite` method is defined in the static `Lite` class in `Signum.Entities`.
 
-Of course, this also works with `ImplementedBy` and `ImplementedByAll` references.
+This also works with `ImplementedBy` and `ImplementedByAll` references:
 
-```C#
+```csharp
 var result = from b in Database.Query<BugEntity>()
-             select b.Discoverer.ToLite(); //Polymorphic lite 
+             select b.Discoverer.ToLite(); // Polymorphic Lite
 ```
 
-Notice how it joins to the different implementation to find the `ToStr` columns. 
+If the `ToString` property is implemented using `[AutoExpressionField]`, the columns used in the expression will be selected instead of the `ToStr` column. For example, if `ToString` is defined as `Name`, then `Name` will be selected in the SQL, not `ToStr`.
 
-```SQL
-SELECT bdn.idDiscoverer_Customer, bdn.idDiscoverer_Developer, cdn.ToStr, ddn.ToStr AS ToStr1
+This joins to the different implementations to get the correct columns:
+
+```sql
+SELECT bdn.DiscovererId_Customer, bdn.DiscovererId_Developer, cdn.Name, ddn.Name AS Name1
 FROM BugEntity AS bdn
 LEFT OUTER JOIN CustomerEntity AS cdn
-  ON (bdn.idDiscoverer_Customer = cdn.Id)
+  ON (bdn.DiscovererId_Customer = cdn.Id)
 LEFT OUTER JOIN DeveloperEntity AS ddn
-  ON (bdn.idDiscoverer_Developer = ddn.Id)
+  ON (bdn.DiscovererId_Developer = ddn.Id)
 ```
 
-The result of this query will be statically typed to `List<Lite<IBugDiscoverer>>` but at run-time, thanks to `Lite<T>` being co-variant, the elements will be either `Lite<CustomerEntity>` or `Lite<DeveloperEntity>`.
+The result will be statically typed as `List<Lite<IBugDiscoverer>>`, but at runtime, elements will be either `Lite<CustomerEntity>` or `Lite<DeveloperEntity>`.
 
-### Comparing Lite\<T>
+## Comparing `Lite<T>`
 
-Just as entities, `Lite<T>` can be compared with `==` and `!=` operators to `null` and `Is` extension method to everithing else (including `null`). This is to prevent unintended reference equality.
+Like entities, `Lite<T>` can be compared to `null` using `==` and `!=`, and to other entities or lites using the `Is` extension method. This prevents unintended reference equality checks.
 
-```C#
-Lite<DeveloperEntity> dev = //...
+```csharp
+Lite<DeveloperEntity> dev = ...;
 
 var discovererComments = from b in Database.Query<BugEntity>()
-                         where b.Discoverer.ToLite().Is(discoverer)
-                         select c.Date;
+                         where b.Discoverer.ToLite().Is(dev)
+                         select b.Date;
 ```
 
-You can also use `Is` extension method to compare a `Lite<T>` with a `T`: 
+You can also use `Is` to compare a `Lite<T>` with a `T`:
 
-```C#
-Lite<DeveloperEntity> dev = //...
+```csharp
+Lite<DeveloperEntity> dev = ...;
 
 var discovererComments = from b in Database.Query<BugEntity>()
-                         where discoverer.Is(b.Discoverer)
-                         select c.Date;
+                         where dev.Is(b.Discoverer)
+                         select b.Date;
 ```
 
-One annoying consequence of `Lite<T>` being co-variant, (and implemented as an `interface`) is that the C# compiler is happy comparing `Lite<T>` with `T`, so this **unfortunately compiles**, throwing an exception: 
+> **Warning:** Due to `Lite<T>` being covariant and implemented as an interface, the C# compiler allows comparing `Lite<T>` with `T`, which will compile but throw an exception at runtime:
 
-```C#
-Lite<DeveloperEntity> dev = //...
+```csharp
+Lite<DeveloperEntity> dev = ...;
 
 var result = from b in Database.Query<BugEntity>()
-              select b.Discoverer.Is(dev); //Polymorphic lite
-
-//throws InvalidOperationException("Imposible to compare expressions of type IBugDiscoverer == Lite<DeveloperEntity>");
+             select b.Discoverer.Is(dev); // Polymorphic Lite
+// Throws InvalidOperationException: "Impossible to compare expressions of type IBugDiscoverer == Lite<DeveloperEntity>"
 ```
 
-```Note:``` Signum.Analyzer restores the compile-time errors when he finds comparishons between `Lite<OrangeEntity>` and `AppleEntity`, or between `Lite<OrangeEntity>` and `Lite<AppleEntity>`. 
+> **Note:** The Signum.Analyzer restores compile-time errors when it detects comparisons between incompatible types, such as `Lite<OrangeEntity>` and `AppleEntity`, or `Lite<OrangeEntity>` and `Lite<AppleEntity>`.
 

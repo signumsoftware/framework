@@ -11,7 +11,7 @@ export interface TextBoxLineProps extends TextBaseProps<string | null> {
 }
 
 export class TextBoxLineController extends TextBaseController<TextBoxLineProps, string | null> {
-  init(p: TextBoxLineProps): void {
+  override init(p: TextBoxLineProps): void {
     super.init(p);
     this.assertType("TextBoxLine", ["string"]);
   }
@@ -36,7 +36,7 @@ export interface PasswordLineProps extends TextBaseProps<string | null> {
 
 
 export class PasswordLineController extends TextBaseController<PasswordLineProps, string | null> {
-  init(p: PasswordLineProps): void {
+  override init(p: PasswordLineProps): void {
     super.init(p);
     this.assertType("PasswordLine", ["string"]);
   }
@@ -63,7 +63,7 @@ export interface GuidLineProps extends TextBaseProps<string | null> {
 }
 
 export class GuidLineController extends TextBaseController<GuidLineProps, string | null> {
-  init(p: GuidLineProps): void {
+  override init(p: GuidLineProps): void {
     super.init(p);
     this.assertType("GuidLine", ["Guid"]);
   }
@@ -89,7 +89,7 @@ export interface ColorLineProps extends TextBaseProps<string | null> {
 }
 
 export class ColorLineController extends TextBaseController<ColorLineProps, string | null> {
-  init(p: TextBoxLineProps): void {
+  override init(p: TextBoxLineProps): void {
     super.init(p);
     this.assertType("TextBoxLine", ["Guid"]);
   }

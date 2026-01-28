@@ -6,6 +6,7 @@ import { TranslationMessage } from '../Signum.Translation'
 import "../Translation.css"
 import { encodeDots, decodeDots } from './TranslationCodeStatus'
 import { useAPI } from '@framework/Hooks'
+import { AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 
 export default function TranslationCodeSyncNamespaces(): React.JSX.Element {
   const params = useParams() as { culture: string; assembly: string; };
@@ -20,7 +21,9 @@ export default function TranslationCodeSyncNamespaces(): React.JSX.Element {
       return <strong>{JavascriptMessage.loading.niceToString()}</strong>;
 
     return (
-      <table className="st">
+      <AccessibleTable
+        aria-label={`${TranslationMessage.Namespace.niceToString()} / ${TranslationMessage.NewTranslations.niceToString()}`}
+        className="st table">
         <thead>
           <tr>
             <th> {TranslationMessage.Namespace.niceToString()} </th>
@@ -51,13 +54,13 @@ export default function TranslationCodeSyncNamespaces(): React.JSX.Element {
             </tr>
           )}
         </tbody>
-      </table>
+      </AccessibleTable>
     );
   }
   if (result?.length == 0) {
     return (
       <div>
-        <h2>{TranslationMessage._0AlreadySynchronized.niceToString(assembly)}</h2>
+        <h1 className="h2">{TranslationMessage._0AlreadySynchronized.niceToString(assembly)}</h1>
         <Link to={`/translation/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
         </Link>
@@ -68,7 +71,7 @@ export default function TranslationCodeSyncNamespaces(): React.JSX.Element {
 
   return (
     <div>
-      <h2><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {TranslationMessage.Synchronize0In1.niceToString(assembly, culture)}</h2>
+      <h1 className="h2"><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {TranslationMessage.Synchronize0In1.niceToString(assembly, culture)}</h1>
       {renderTable()}
     </div>
   );

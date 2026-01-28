@@ -1,4 +1,10 @@
-﻿.blinking {
+﻿@media (prefers-reduced-motion: reduce) {
+    .blinking {
+        animation: none !important;
+    }
+}
+
+.blinking {
     animation: blinker 1s linear infinite;
 }
 

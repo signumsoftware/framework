@@ -42,20 +42,20 @@ public static class TranslationLogic
 
     public static void Start(SchemaBuilder sb, bool countLocalizationHits, params ITranslator[] translators)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            Translators = translators;
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            CultureInfoLogic.AssertStarted(sb);
-            
-            PermissionLogic.RegisterTypes(typeof(TranslationPermission));
-            
-            if (countLocalizationHits)
-                DescriptionManager.NotLocalizedMember += DescriptionManager_NotLocalizedMemeber;
+        Translators = translators;
 
-            if (sb.WebServerBuilder != null)
-                TranslationServer.Start(sb.WebServerBuilder);
-        }
+        CultureInfoLogic.AssertStarted(sb);
+
+        PermissionLogic.RegisterTypes(typeof(TranslationPermission));
+
+        if (countLocalizationHits)
+            DescriptionManager.NotLocalizedMember += DescriptionManager_NotLocalizedMemeber;
+
+        if (sb.WebServerBuilder != null)
+            TranslationServer.Start(sb.WebServerBuilder);
     }
 
     private static void DescriptionManager_NotLocalizedMemeber(CultureInfo ci, MemberInfo mi)

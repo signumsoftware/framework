@@ -9,25 +9,25 @@ public static class VisualTipLogic
 
     public static void Start(SchemaBuilder sb, Func<bool>? isVisualTipConsumeEnabled = null)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            VisualTipLogic.isVisualTipConsumeEnabled = isVisualTipConsumeEnabled;
-            sb.Include<VisualTipConsumedEntity>()
-                .WithUniqueIndex(vt => new {vt.VisualTip, vt.User })
-                .WithDelete(VisualTipConsumedOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.VisualTip,
-                    e.User,
-                    e.ConsumedOn
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            SymbolLogic<VisualTipSymbol>.Start(sb, () => VisualTipSymbols);
+        VisualTipLogic.isVisualTipConsumeEnabled = isVisualTipConsumeEnabled;
+        sb.Include<VisualTipConsumedEntity>()
+            .WithUniqueIndex(vt => new {vt.VisualTip, vt.User })
+            .WithDelete(VisualTipConsumedOperation.Delete)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.VisualTip,
+                e.User,
+                e.ConsumedOn
+            });
 
-            RegisterType(typeof(SearchVisualTip));
-        }
+        SymbolLogic<VisualTipSymbol>.Start(sb, () => VisualTipSymbols);
+
+        RegisterType(typeof(SearchVisualTip));
     }
 
     public static void RegisterType(Type visualTipContainer)

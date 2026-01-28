@@ -41,15 +41,16 @@ public class ConnectionMapping<T> where T : class
 
     public int Count => userToConnection.Count;
 
+    Lock lockKey = new Lock();
     public HashSet<T> AllKeys()
     {
-        lock (this)
+        lock (lockKey)
             return userToConnection.Keys.ToHashSet();
     }
 
     public void Add(T key, string connectionId)
     {
-        lock (this)
+        lock (lockKey)
         {
             HashSet<string>? connections;
             if (!userToConnection.TryGetValue(key, out connections))
@@ -66,9 +67,10 @@ public class ConnectionMapping<T> where T : class
 
     public IEnumerable<string> GetConnections(T key) => userToConnection.TryGetC(key) ?? Enumerable.Empty<string>();
 
+
     public void Remove(string connectionId)
     {
-        lock (this)
+        lock (lockKey)
         {
             var user = connectionToUser.TryGetC(connectionId);
             if (user != null)

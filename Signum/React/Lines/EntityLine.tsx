@@ -11,6 +11,7 @@ import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { useAPI, useMounted } from '../Hooks'
 import { genericMemo, useController } from './LineBase'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { LinkButton } from '../Basics/LinkButton'
 
 
 export interface EntityLineProps<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseProps<V> {
@@ -36,7 +37,7 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
   focusNext!: React.RefObject<boolean>;
   typeahead!: React.RefObject<TypeaheadController | null>;
 
-  init(pro: EntityLineProps<V>): void {
+  override init(pro: EntityLineProps<V>): void {
     super.init(pro);
 
     [this.currentItem, this.setCurrentItem] = React.useState<ItemPair | undefined>();
@@ -45,6 +46,8 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
     this.typeahead = React.useRef<TypeaheadController>(null);
     React.useEffect(() => {
       const p = this.props;
+     
+
       if (p.autocomplete) {
         var entity = p.ctx.value;
 
@@ -82,14 +85,18 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
 
   }
 
-  overrideProps(p: EntityLineProps<V>, overridenProps: EntityLineProps<V>): void {
+  override overrideProps(p: EntityLineProps<V>, overridenProps: EntityLineProps<V>): void {
     super.overrideProps(p, overridenProps);
-    if (p.autocomplete === undefined && p.type) {
-      p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary,  p.ctx, p.create!, p.showType);
+    if (p.type) {
+      if (p.showType == undefined)
+        p.showType = p.type.name.contains(",");
+
+      if (p.autocomplete === undefined)
+        p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary, p.ctx, p.create!, p.showType);
     }
   }
 
-  setValue(val: any, event?: React.SyntheticEvent): void {
+  override setValue(val: any, event?: React.SyntheticEvent): void {
     if (val != null)
       this.focusNext.current = true;
 
@@ -136,11 +143,11 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
     const buttons = (
       <>
         {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
-        {!hasValue && !p.avoidViewButton && c.renderCreateButton(true, undefined, false)}
-        {!hasValue && c.renderFindButton(true, false)}
-        {hasValue && !p.avoidViewButton && c.renderViewButton(true, false)}
-        {hasValue && c.renderRemoveButton(true, false)}
-        {c.renderPasteButton(true, false)}
+        {!hasValue && !p.avoidCreateButton && c.renderCreateButton(true, undefined)}
+        {!hasValue && c.renderFindButton(true)}
+        {hasValue && !p.avoidViewButton && c.renderViewButton(true)}
+        {hasValue && c.renderRemoveButton(true)}
+        {c.renderPasteButton(true)}
         {c.props.extraButtons && c.props.extraButtons(c)}
       </>
     );
@@ -236,12 +243,12 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
 
       if (p.view && !p.avoidLink) {
         return (
-          <a ref={e => setLinkOrSpan(e)}
-            href="#" onClick={c.handleViewClick}
+          <LinkButton ref={e => setLinkOrSpan(e)}
+            onClick={c.handleViewClick}
             className={classes(p.ctx.formControlClass, "sf-entity-line-entity")}
             title={p.ctx.titleLabels ? getToString(value) : undefined} {...p.itemHtmlAttributes}>
             {str}
-          </a>
+          </LinkButton>
         );
       } else {
         return (

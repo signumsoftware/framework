@@ -13,25 +13,31 @@ public static class PropertyRouteTranslationLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Schema.SchemaCompleted += () =>
         {
-            sb.Schema.SchemaCompleted += () =>
+            var s = Schema.Current;
+
+            var missing = TranslateableRoutes.Keys.Where(t => t.IsEntity() && !s.Tables.ContainsKey(t)).ToList();
+
+            if (missing.Any())
+                throw new InvalidOperationException("PropertyRouteTranslationLogic.RegisterRoute has been called for types missing in the Schema:\n" + missing.ToString(a => " - " + a.Name, "\n"));
+
+
+            var prs = (from t in s.Tables.Keys
+                       from pr in PropertyRoute.GenerateRoutes(t)
+                       where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string) &&
+                       s.Settings.FieldAttribute<TranslatableAttribute>(pr) != null &&
+                       s.Settings.FieldAttribute<IgnoreAttribute>(pr) == null
+                       select KeyValuePair.Create(pr, s.Settings.FieldAttribute<TranslatableAttribute>(pr)!.TranslatableRouteType)).ToList();
+
+            foreach (var kvp in prs)
             {
-                var s = Schema.Current;
-
-                var prs = (from t in s.Tables.Keys
-                           from pr in PropertyRoute.GenerateRoutes(t)
-                           where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string) &&
-                           s.Settings.FieldAttribute<TranslatableAttribute>(pr) != null &&
-                           s.Settings.FieldAttribute<IgnoreAttribute>(pr) == null
-                           select KeyValuePair.Create(pr, s.Settings.FieldAttribute<TranslatableAttribute>(pr)!.TranslatableRouteType)).ToList();
-
-                foreach (var kvp in prs)
-                {
-                    RegisterRoute(kvp.Key, kvp.Value);
-                }
-            };
-        }
+                RegisterRoute(kvp.Key, kvp.Value);
+            }
+        };
     }
 
 

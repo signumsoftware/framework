@@ -10,11 +10,11 @@ public static class DynamicIsolationLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            DynamicLogic.GetCodeFiles += GetCodeFiles;
-            DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
-        }
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        DynamicLogic.GetCodeFiles += GetCodeFiles;
+        DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
     }
 
     public static void WriteDynamicStarter(StringBuilder sb, int indent)

@@ -137,7 +137,7 @@ a.sf-auth-link:hover {
 }
 
 .sf-master {
-    background: var(--bs-warning-subtle) !important;
+    background: var(--bs-warning-border-subtle) !important;
 }
 
 small.shy-text {

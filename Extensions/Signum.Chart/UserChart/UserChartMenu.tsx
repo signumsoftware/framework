@@ -206,9 +206,9 @@ export default function UserChartMenu(p: UserChartMenuProps): React.JSX.Element 
           })}
         </div>
         {Boolean(userCharts?.length) && <Dropdown.Divider />}
-        {crView.userChart && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={"share-from-square"} className="me-2" />{ChartMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
-        {crView.userChart && canSave && <Dropdown.Item onClick={handleEdit}><FontAwesomeIcon icon={"pen-to-square"} className="me-2" />{ChartMessage.Edit.niceToString()}</Dropdown.Item>}
-        {canSave && <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={"plus"} className="me-2" />{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>}
+        {crView.userChart && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon aria-hidden={true} icon={"share-from-square"} className="me-2" />{ChartMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
+        {crView.userChart && canSave && <Dropdown.Item onClick={handleEdit}><FontAwesomeIcon aria-hidden={true} icon={"pen-to-square"} className="me-2" />{ChartMessage.Edit.niceToString()}</Dropdown.Item>}
+        {canSave && <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon aria-hidden={true} icon={"plus"} className="me-2" />{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>}
       </Dropdown.Menu>
     </Dropdown>
   );

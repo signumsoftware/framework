@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.IO;
 using System.Runtime.Loader;
 
@@ -167,5 +168,17 @@ public static class EvalPanelPermission
 
 public enum EvalPanelMessage
 {
-    OpenErrors
+    OpenErrors,
+    DynamicPanel,
+    Search,
+    CheckEvals,
+    RefreshAll,
+    NoErrorsFound,
+    [Description("{0} found")]
+    _0Found,
+    [Description("Exception checking {0}")]
+    ExceptionChecking0_,
+    [Description("Now you need to refresh the clients manually (i.e. pressing F5).")]
+    YouNeedToRefreshManually,
+    RefreshThisClient,
 }

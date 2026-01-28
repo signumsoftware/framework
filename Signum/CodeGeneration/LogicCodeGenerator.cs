@@ -163,13 +163,11 @@ public class LogicCodeGenerator
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("public static void Start(SchemaBuilder sb)");
         sb.AppendLine("{");
-        sb.AppendLine("    if (sb.NotDefined(MethodInfo.GetCurrentMethod()))");
-        sb.AppendLine("    {");
+        sb.AppendLine("    if (sb.AlteryDefined(MethodInfo.GetCurrentMethod()))");
+        sb.AppendLine("        return;");
 
-        sb.AppendLine(WriteTypesAndExpresions(mod.Types, expressions).Indent(8));
+        sb.AppendLine(WriteTypesAndExpresions(mod.Types, expressions).Indent(4));
 
-
-        sb.AppendLine("    }");
         sb.AppendLine("}");
 
         return sb.ToString();

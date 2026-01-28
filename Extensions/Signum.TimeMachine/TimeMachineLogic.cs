@@ -18,13 +18,13 @@ public static class TimeMachineLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            PermissionLogic.RegisterTypes(typeof(TimeMachinePermission));
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            if (sb.WebServerBuilder != null)
-                TimeMachineServer.Start(sb.WebServerBuilder);
-        }
+        PermissionLogic.RegisterTypes(typeof(TimeMachinePermission));
+
+        if (sb.WebServerBuilder != null)
+            TimeMachineServer.Start(sb.WebServerBuilder);
     }
 
     public static T RestoreOlderVersion<T>(PrimaryKey id, DateTime lastVersion)

@@ -163,9 +163,9 @@ public static class WordImageReplacer
 
     static IEnumerable<Drawing> GetDrawings(WordprocessingDocument doc)
     {
-        return doc.MainDocumentPart!.Document.Descendants<Drawing>()
-                    .Concat(doc.MainDocumentPart!.HeaderParts.SelectMany(hp => hp.Header.Descendants<Drawing>()))
-                    .Concat(doc.MainDocumentPart!.FooterParts.SelectMany(hp => hp.Footer.Descendants<Drawing>()));
+        return doc.MainDocumentPart!.Document!.Descendants<Drawing>()
+                    .Concat(doc.MainDocumentPart!.HeaderParts.SelectMany(hp => hp.Header!.Descendants<Drawing>()))
+                    .Concat(doc.MainDocumentPart!.FooterParts.SelectMany(hp => hp.Footer!.Descendants<Drawing>()));
     }
 }
 

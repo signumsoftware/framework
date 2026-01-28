@@ -517,6 +517,8 @@ export interface EntityFrame<T extends ModifiableEntity = ModifiableEntity> {
 
   currentDate?: string;
   previousDate?: string;
+
+  hideAndClose?: boolean;
 }
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {

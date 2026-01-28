@@ -18,7 +18,7 @@ export default function PanelIcon(p: { ctx: TypeContext<DashboardEntity | PanelP
     <div>
       {icon &&
         <div className="mb-2">
-          <FontAwesomeIcon icon={icon} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} />
+          <FontAwesomeIcon aria-hidden={true} icon={icon} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} />
           &nbsp;<span style={{ color: titleColor ?? undefined }}>{title}</span>
         </div>}
       <IconTypeaheadLine ctx={ctx.subCtx(t => t.iconName)} onChange={() => forceUpdate()} />

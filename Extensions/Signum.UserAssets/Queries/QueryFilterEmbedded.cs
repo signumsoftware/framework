@@ -134,8 +134,8 @@ public class QueryFilterEmbedded : EmbeddedEntity
         if(ValueString.HasText() && Lite.TryParseLite(ValueString, out var result) == null)
         {
             var lite = ctx.ParseLite(ValueString, parentEntity, valuePr);
-            if (lite != null && lite.KeyLong() != ValueString)
-                ValueString = lite.KeyLong();
+            if (lite?.KeyLong() != ValueString)
+                ValueString = lite?.KeyLong();
 
         }
 

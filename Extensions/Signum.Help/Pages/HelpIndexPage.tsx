@@ -39,10 +39,10 @@ export default function HelpIndexPage(): React.JSX.Element {
             <ul className="responsive-columns">
               {gr.elements.orderBy(a => a.namespace).map(nh =>
                 <li className="mb-4" key={nh.namespace}>
-                  <h4 className="display-7">
+                  <h3 className="display-7 h4">
                     <Link to={HelpClient.Urls.namespaceUrl(nh.namespace)} className={nh.hasEntity ? "fw-bold" : undefined}>{nh.title}</Link>
                     {nh.namespace.after(".").tryBeforeLast(".") && <small> {HelpMessage.In0.niceToString(nh.namespace.after(".").tryBeforeLast("."))}</small>}
-                  </h4>
+                  </h3>
                   <ul>
                     {nh.allowedTypes.map(ei => <li key={ei.cleanName}><Link to={HelpClient.Urls.typeUrl(ei.cleanName)} className={ei.hasEntity ? "fw-bold" : undefined}>{getTypeInfo(ei.cleanName).niceName}</Link></li>)}
                   </ul>

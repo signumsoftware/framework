@@ -8,27 +8,27 @@ public static class SimpleTaskLogic
 
     internal static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            SymbolLogic<SimpleTaskSymbol>.Start(sb, () => tasks.Keys.ToHashSet());
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            SchedulerLogic.ExecuteTask.Register((SimpleTaskSymbol st, ScheduledTaskContext ctx) =>
+        SymbolLogic<SimpleTaskSymbol>.Start(sb, () => tasks.Keys.ToHashSet());
+
+        SchedulerLogic.ExecuteTask.Register((SimpleTaskSymbol st, ScheduledTaskContext ctx) =>
+        {
+            Func<ScheduledTaskContext, Lite<IEntity>?> func = tasks.GetOrThrow(st);
+            return func(ctx);
+        });
+
+        sb.Include<SimpleTaskSymbol>()
+            .WithQuery(() => ct => new
             {
-                Func<ScheduledTaskContext, Lite<IEntity>?> func = tasks.GetOrThrow(st);
-                return func(ctx);
+                Entity = ct,
+                ct.Id,
+                ct.Key,
             });
 
-            sb.Include<SimpleTaskSymbol>()
-                .WithQuery(() => ct => new
-                {
-                    Entity = ct,
-                    ct.Id,
-                    ct.Key,
-                });
+        sb.Schema.EntityEvents<SimpleTaskSymbol>().PreDeleteSqlSync += SimpleTaskLogic_PreDeleteSqlSync;
 
-            sb.Schema.EntityEvents<SimpleTaskSymbol>().PreDeleteSqlSync += SimpleTaskLogic_PreDeleteSqlSync;
-
-        }
     }
 
     private static SqlPreCommand? SimpleTaskLogic_PreDeleteSqlSync(SimpleTaskSymbol st)

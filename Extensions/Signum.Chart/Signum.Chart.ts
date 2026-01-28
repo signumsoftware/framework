@@ -159,6 +159,8 @@ export namespace ChartMessage {
   export const ListView: MessageKey = new MessageKey("ChartMessage", "ListView");
   export const TheSelectedTokenShouldBeA0: MessageKey = new MessageKey("ChartMessage", "TheSelectedTokenShouldBeA0");
   export const TheSelectedTokenShouldBeEither: MessageKey = new MessageKey("ChartMessage", "TheSelectedTokenShouldBeEither");
+  export const _0Of1_2: MessageKey = new MessageKey("ChartMessage", "_0Of1_2");
+  export const _0Of1_2Per3: MessageKey = new MessageKey("ChartMessage", "_0Of1_2Per3");
 }
 
 export const ChartParameter: EnumType<ChartParameter> = new EnumType<ChartParameter>("ChartParameter");

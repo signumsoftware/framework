@@ -10,62 +10,62 @@ public static class DynamicTypeConditionLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<DynamicTypeConditionSymbolEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Name,
+            });
+
+        sb.Include<DynamicTypeConditionEntity>()
+            .WithUniqueIndex(e => new { e.SymbolName, e.EntityType })
+            .WithSave(DynamicTypeConditionOperation.Save)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.SymbolName,
+                e.EntityType,
+                e.Eval.Script,
+            });
+
+        new Graph<DynamicTypeConditionEntity>.ConstructFrom<DynamicTypeConditionEntity>(DynamicTypeConditionOperation.Clone)
         {
-            sb.Include<DynamicTypeConditionSymbolEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                });
-
-            sb.Include<DynamicTypeConditionEntity>()
-                .WithUniqueIndex(e => new { e.SymbolName, e.EntityType })
-                .WithSave(DynamicTypeConditionOperation.Save)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.SymbolName,
-                    e.EntityType,
-                    e.Eval.Script,
-                });
-
-            new Graph<DynamicTypeConditionEntity>.ConstructFrom<DynamicTypeConditionEntity>(DynamicTypeConditionOperation.Clone)
+            Construct = (e, args) => new DynamicTypeConditionEntity()
             {
-                Construct = (e, args) => new DynamicTypeConditionEntity()
-                {
-                    SymbolName = e.SymbolName,
-                    EntityType = e.EntityType,
-                    Eval = new DynamicTypeConditionEval() { Script = e.Eval.Script },
-                }
-            }.Register();
+                SymbolName = e.SymbolName,
+                EntityType = e.EntityType,
+                Eval = new DynamicTypeConditionEval() { Script = e.Eval.Script },
+            }
+        }.Register();
 
-            new Graph<DynamicTypeConditionSymbolEntity>.Execute(DynamicTypeConditionSymbolOperation.Save)
+        new Graph<DynamicTypeConditionSymbolEntity>.Execute(DynamicTypeConditionSymbolOperation.Save)
+        {
+            CanBeModified = true,
+            CanBeNew = true,
+            Execute = (e, _) =>
             {
-                CanBeModified = true,
-                CanBeNew = true,
-                Execute = (e, _) =>
+                if (!e.IsNew)
                 {
-                    if (!e.IsNew)
+                    var old = e.ToLite().RetrieveAndRemember();
+                    if (old.Name != e.Name)
                     {
-                        var old = e.ToLite().RetrieveAndRemember();
-                        if (old.Name != e.Name)
-                        {
-                            DynamicSqlMigrationLogic.AddDynamicRename(typeof(TypeConditionSymbol).Name,
-                                $"CodeGenTypeCondition.{old.Name}",
-                                $"CodeGenTypeCondition.{e.Name}");
-                        }
+                        DynamicSqlMigrationLogic.AddDynamicRename(typeof(TypeConditionSymbol).Name,
+                            $"CodeGenTypeCondition.{old.Name}",
+                            $"CodeGenTypeCondition.{e.Name}");
                     }
                 }
-            }.Register();
+            }
+        }.Register();
 
-            DynamicLogic.GetCodeFiles += GetCodeFiles;
-            DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
-            EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicTypeConditionEntity));
-            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicTypeConditionEntity>().Where(dtc => dtc.EntityType.Is(type)));
-        }
+        DynamicLogic.GetCodeFiles += GetCodeFiles;
+        DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
+        EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicTypeConditionEntity));
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicTypeConditionEntity>().Where(dtc => dtc.EntityType.Is(type)));
     }
 
     public static void WriteDynamicStarter(StringBuilder sb, int indent)

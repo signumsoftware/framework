@@ -362,6 +362,19 @@ public abstract class QueryToken : IEquatable<QueryToken>
         }
     }
 
+    protected IEnumerable<QueryToken> TsVectorColumns(EntityPropertyToken mlistProperty)
+    {
+        var mlistTable = ((FieldMList)Schema.Current.Field(mlistProperty.PropertyRoute)).TableMList;
+
+        if (mlistTable != null)
+        {
+            foreach (var item in mlistTable.Columns.Values.OfType<PostgresTsVectorColumn>())
+            {
+                yield return new PgTsVectorColumnToken(this, item);
+            }
+        }
+    }
+
     public List<QueryToken> StringTokens()
     {
         return new List<QueryToken>

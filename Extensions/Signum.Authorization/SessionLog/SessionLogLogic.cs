@@ -8,27 +8,27 @@ public static class SessionLogLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            AuthLogic.AssertStarted(sb);
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<SessionLogEntity>()
-                .WithQuery(() => sl => new
-                {
-                    Entity = sl,
-                    sl.Id,
-                    sl.User,
-                    sl.SessionStart,
-                    sl.SessionEnd,
-                    sl.SessionTimeOut
-                });
+        AuthLogic.AssertStarted(sb);
 
-            PermissionLogic.RegisterPermissions(SessionLogPermission.TrackSession);
+        sb.Include<SessionLogEntity>()
+            .WithQuery(() => sl => new
+            {
+                Entity = sl,
+                sl.Id,
+                sl.User,
+                sl.SessionStart,
+                sl.SessionEnd,
+                sl.SessionTimeOut
+            });
 
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+        PermissionLogic.RegisterPermissions(SessionLogPermission.TrackSession);
 
-            IsStarted = true;
-        }
+        ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+        IsStarted = true;
     }
 
     public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)

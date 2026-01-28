@@ -58,6 +58,33 @@
   <Type Name="ScheduledTaskLogOperation">
     <Member Name="CancelRunningTask" Description="Laufende Tasks abbrechen" />
   </Type>
+  <Type Name="ScheduledTaskMessage">
+    <Member Name="ApplicationName" Description="Anwendungsname" />
+    <Member Name="AvailableTasks" Description="Verfügbare Aufgaben" />
+    <Member Name="Cancel" Description="Abbrechen" />
+    <Member Name="InitialDelayMilliseconds" Description="Anfangsverzögerung in Millisekunden" />
+    <Member Name="InMemoryQueue" Description="Speicher Warteschlange" />
+    <Member Name="MachineName" Description="Maschinenname" />
+    <Member Name="NextDate" Description="Nächster Termin" />
+    <Member Name="NextExecution" Description="Nächste Ausführung" />
+    <Member Name="None" Description="Keine" />
+    <Member Name="Remarks" Description="Bemerkungen" />
+    <Member Name="Rule" Description="Regel" />
+    <Member Name="Running" Description="LAUFEND" />
+    <Member Name="RunningTasks" Description="Laufende Aufgaben" />
+    <Member Name="ScheduledTask" Description="Geplante Aufgabe" />
+    <Member Name="SchedulePanel" Description="Schedule Übersicht" />
+    <Member Name="SchedulerMargin" Description="Scheduler Spielraum" />
+    <Member Name="SchedulerTaskLog" Description="Geplantes Task-Protokoll" />
+    <Member Name="SimpleStatus" Description="Einfacher Status" />
+    <Member Name="Start" Description="Start" />
+    <Member Name="StartTime" Description="Startzeit" />
+    <Member Name="State" Description="Zustand" />
+    <Member Name="Stop" Description="Stopp" />
+    <Member Name="Stopped" Description="ANGEHALTEN" />
+    <Member Name="ThereAreNoTasksRunning" Description="Es werden keine Aufgaben ausgeführt" />
+    <Member Name="ThereIsNoActiveScheduledTask" Description="Es gibt keine aktive geplante Aufgabe" />
+  </Type>
   <Type Name="ScheduledTaskOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />

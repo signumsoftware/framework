@@ -247,12 +247,22 @@ public class UpgradeContext
         return val.Replace("Southwind", this.ApplicationName);
     }
 
-    public void MoveFile(string from, string to, bool createDirectory = false)
+    public void MoveFile(string from, string to, bool createDirectory = false, WarningLevel showWarning = WarningLevel.Error)
     {
-        if (createDirectory)
-            Directory.CreateDirectory(Path.GetDirectoryName(AbsolutePathSouthwind(to))!);
+        var fromAbs = AbsolutePathSouthwind(from);
+        var toAbs = AbsolutePathSouthwind(to);
+        if (!File.Exists(fromAbs))
+        {
+            SafeConsole.WriteLineColor(showWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
+                  $"Unanble to move {from} -> {to}: File not found");
 
-        File.Move(AbsolutePathSouthwind(from), AbsolutePathSouthwind(to));
+            return;
+        }
+
+        if (createDirectory)
+            Directory.CreateDirectory(Path.GetDirectoryName(toAbs)!);
+
+        File.Move(fromAbs, toAbs);
 
         SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Moved {from} -> {to}");
     }

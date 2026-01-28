@@ -143,52 +143,52 @@ public static class WordModelLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Schema.Generating += Schema_Generating;
+        sb.Schema.Synchronizing += Schema_Synchronizing;
+        sb.Include<WordModelEntity>()
+            .WithQuery(() => se => new
+            {
+                Entity = se,
+                se.Id,
+                se.FullClassName,
+            });
+
+        RegisterWordModel<MultiEntityWord>(null);
+        RegisterWordModel<QueryWord>(null);
+
+        new Graph<WordTemplateEntity>.ConstructFrom<WordModelEntity>(WordTemplateOperation.CreateWordTemplateFromWordModel)
         {
-            sb.Schema.Generating += Schema_Generating;
-            sb.Schema.Synchronizing += Schema_Synchronizing;
-            sb.Include<WordModelEntity>()
-                .WithQuery(() => se => new
-                {
-                    Entity = se,
-                    se.Id,
-                    se.FullClassName,
-                });
+            CanConstruct = se => HasDefaultTemplateConstructor(se) ? null : WordTemplateMessage.NoDefaultTemplateDefined.NiceToString(),
+            Construct = (se, _) => CreateDefaultTemplate(se)!.Save()
+        }.Register();
 
-            RegisterWordModel<MultiEntityWord>(null);
-            RegisterWordModel<QueryWord>(null);
+        WordModelToTemplates = sb.GlobalLazy(() => (
+            from et in Database.Query<WordTemplateEntity>()
+            where et.Model != null
+            select new { swe = et.Model, et = et.ToLite() })
+            .GroupToDictionary(pair => pair.swe!.ToLite(), pair => pair.et!)
+            .ToFrozenDictionaryEx(),
+            new InvalidateWith(typeof(WordModelEntity), typeof(WordTemplateEntity)));
 
-            new Graph<WordTemplateEntity>.ConstructFrom<WordModelEntity>(WordTemplateOperation.CreateWordTemplateFromWordModel)
-            {
-                CanConstruct = se => HasDefaultTemplateConstructor(se) ? null : WordTemplateMessage.NoDefaultTemplateDefined.NiceToString(),
-                Construct = (se, _) => CreateDefaultTemplate(se)!.Save()
-            }.Register();
+        WordModelTypeToEntity = sb.GlobalLazy(() =>
+        {
+            var dbWordModels = Database.RetrieveAll<WordModelEntity>();
+            return EnumerableExtensions.JoinRelaxed(
+                dbWordModels, 
+                registeredWordModels.Keys, 
+                swr => swr.FullClassName, 
+                type => type.FullName!,
+                (swr, type) => KeyValuePair.Create(type, swr), 
+                "caching " + nameof(WordModelEntity)).ToFrozenDictionaryEx();
+        }, new InvalidateWith(typeof(WordModelEntity)));
 
-            WordModelToTemplates = sb.GlobalLazy(() => (
-                from et in Database.Query<WordTemplateEntity>()
-                where et.Model != null
-                select new { swe = et.Model, et = et.ToLite() })
-                .GroupToDictionary(pair => pair.swe!.ToLite(), pair => pair.et!)
-                .ToFrozenDictionaryEx(),
-                new InvalidateWith(typeof(WordModelEntity), typeof(WordTemplateEntity)));
+        sb.Schema.Initializing += () => WordModelTypeToEntity.Load();
 
-            WordModelTypeToEntity = sb.GlobalLazy(() =>
-            {
-                var dbWordModels = Database.RetrieveAll<WordModelEntity>();
-                return EnumerableExtensions.JoinRelaxed(
-                    dbWordModels, 
-                    registeredWordModels.Keys, 
-                    swr => swr.FullClassName, 
-                    type => type.FullName!,
-                    (swr, type) => KeyValuePair.Create(type, swr), 
-                    "caching " + nameof(WordModelEntity)).ToFrozenDictionaryEx();
-            }, new InvalidateWith(typeof(WordModelEntity)));
-
-            sb.Schema.Initializing += () => WordModelTypeToEntity.Load();
-
-            WordModelEntityToType = sb.GlobalLazy(() => WordModelTypeToEntity.Value.Inverse().ToFrozenDictionaryEx(),
-                new InvalidateWith(typeof(WordModelEntity)));
-        }
+        WordModelEntityToType = sb.GlobalLazy(() => WordModelTypeToEntity.Value.Inverse().ToFrozenDictionaryEx(),
+            new InvalidateWith(typeof(WordModelEntity)));
     }
 
     internal static bool HasDefaultTemplateConstructor(WordModelEntity wordModel)

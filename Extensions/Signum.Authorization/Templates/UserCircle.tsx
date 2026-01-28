@@ -32,7 +32,10 @@ export default function UserCircle(p: { user: Lite<UserEntity>, className?: stri
       textDecoration: "underline",
       textDecorationColor: color,
       backgroundColor: color
-    }} title={getToString(p.user)}>
+    }}
+      role="img"
+      aria-label={`${getToString(p.user)} icon`}
+      title={getToString(p.user)}>
       {getUserInitials(p.user)}
     </span>
   );

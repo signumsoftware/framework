@@ -1,24 +1,18 @@
 # CodeGenerator
 
-Whenever possible, we prefer hand-made code, succinct API and run-time intelligence instead of code generation, but once you hit the limits of what is possible with the language there is no reason not to save some time letting a machine write the remaining redundant code for you. 
+Whenever possible, we prefer hand-written code, a succinct API, and runtime intelligence over code generation. However, when language limitations make repetitive code unavoidable, automated code generation can save significant development time.
 
-These classes are designed to be run in the Load application, so the solution should be correctly compiling in order to take advantage of it (unlike the previous Visual Studio Item Templates). On the other side they don't require an installer and are more powerful and customizable. 
+The code generation classes are designed to run in the Load application, so the solution must compile successfully to use them. Unlike Visual Studio Item Templates, these generators do not require installation and offer greater power and customization.
 
-The aim stills the same though, once the code is generated you should own it and modifying it to your needs. 
+The goal remains: once code is generated, you own it and should adapt it to your needs.
 
-`CodeGenerator` class is the facade for 4 classes that do the actual code generation: 
+The `CodeGenerator` class acts as a facade for several specialized code generators:
 
-* **[EntityCodeGenerator](EntityCodeGenerator.md):** Useful if you have a legacy database. Reads the database System Views and generates compatible entities and operation declarations.
-* **[LogicCodeGenerator](LogicCodeGenerator.md):**  Generates Logic classes from compiled Entity classes, including entity tables, registering queries and expression, and implementing operations.  
-* **[WebCodeGenerator](WebCodeGenerator.md):** [Deprecated] Generates Web views from the compiled Entity classes, including the views itself, an empty TypeScript file and the Client class.
-* **[ReactCodeGenerator](ReactCodeGenerator.md):**  Generates React components from the compiled C# Entity classes, including the Typescript Client class and C# Controller.
-* **[WindowsCodeGenerator](WindowsCodeGenerator.md):**  Generates windows views from the compiled Entity classes, including the views itself with the empty code-behind file and the Client class. 
-* **[ReactCodeConverter](ReactCodeConverter.md):** Best-effort attempt to transform the content of the Clipboard from .cshtml to .tsx, requires manual adjustments but saves a lot of time migrating from Signum.Web to Signum.React.
+- **[EntityCodeGenerator](EntityCodeGenerator.md):** Reads legacy database system views and generates compatible entities and operation declarations.
+- **[LogicCodeGenerator](LogicCodeGenerator.md):** Generates logic classes from compiled entity classes, including entity tables, query registration, expressions, and operations.
+- **[ReactCodeGenerator](ReactCodeGenerator.md):** Generates React components, TypeScript client classes, and C# controllers from entity classes.
+- **[ReactCodeConverter](ReactCodeConverter.md):** Attempts to convert clipboard content from `.cshtml` to `.tsx`. Manual adjustments are required, but it accelerates migration from Signum.Web to Signum.React.
 
-The classes are all self contained and easy to understand and **override** to adapt to custom needs.
+All generator classes are self-contained, easy to understand, and can be overridden for custom needs. Code generation respects the existing module structure and is organized by feature, not technical concern.
 
-Finally, [**Legacy Databases: Connecting to AdventureWorks**](LegacyDatabase.AdventureWorks.md) is a detailed tutorial about how to use an example legacy application and auto-generate entities, logic, windows and web. 
-
-
-
- 
+For a detailed tutorial on using these tools with a legacy database, see [Legacy Databases: Connecting to AdventureWorks](LegacyDatabase.AdventureWorks.md).

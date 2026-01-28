@@ -209,6 +209,8 @@ public class ObjectName : IEquatable<ObjectName>
 
     public SchemaName Schema { get; private set; } // null only for postgres temporary
 
+
+
     public ObjectName(SchemaName schema, string name, bool isPostgres)
     {
         this.Name = name.HasText() ? name : throw new ArgumentNullException(nameof(name));
@@ -218,6 +220,19 @@ public class ObjectName : IEquatable<ObjectName>
         this.Schema = schema ?? (isPostgres && name.StartsWith("#") ? (SchemaName)null! : throw new ArgumentNullException(nameof(schema)));
         this.IsPostgres = isPostgres;
     }
+
+    ObjectName(string name, bool isPostgres)
+    : this(SchemaName.Default(isPostgres), name, isPostgres)
+    {
+        this.Name = name;
+        this.Schema = null!;
+        this.IsPostgres = isPostgres;
+    }
+
+    public static ObjectName Raw(string name, bool isPostgres)
+    {
+        return new ObjectName(name, isPostgres);
+    }   
 
     public override string ToString()
     {

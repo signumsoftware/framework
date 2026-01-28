@@ -1,4 +1,5 @@
 using Signum.Utilities.Reflection;
+using System.Security;
 
 namespace Signum.Authorization.Rules;
 
@@ -18,45 +19,39 @@ public static class PermissionAuthLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        AuthLogic.AssertStarted(sb);
+        PermissionLogic.Start(sb);
+
+        sb.Include<RulePermissionEntity>()
+           .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
+
+        cache = new PermissionCache(sb);
+
+        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>{  Database.Query<RulePermissionEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null;};
+        sb.Schema.EntityEvents<RoleEntity>().PreDeleteSqlSync += role => Administrator.UnsafeDeletePreCommand(Database.Query<RulePermissionEntity>().Where(a => a.Role.Is(role)));
+        sb.Schema.EntityEvents<PermissionSymbol>().PreDeleteSqlSync += permission => { Administrator.DeleteWhereScript((RulePermissionEntity rt) => rt.Resource, permission); return null; };
+
+        PermissionLogic.RegisterTypes(typeof(BasicPermission));
+
+        AuthLogic.ExportToXml += cache.ExportXml;
+        AuthLogic.ImportFromXml += cache.ImportXml;
+
+        PermissionLogic.IsAuthorizedImplementation = permissionSymbol =>
         {
-            AuthLogic.AssertStarted(sb);
-            PermissionLogic.Start(sb);
-
-            sb.Include<RulePermissionEntity>()
-               .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
-
-            cache = new PermissionCache(sb);
-
-            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
-            {
-                Database.Query<RulePermissionEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+            if (IsAuthorized(permissionSymbol))
                 return null;
-            };
 
-            PermissionLogic.RegisterTypes(typeof(BasicPermission));
+            return "Permission '{0}' is denied".FormatWith(permissionSymbol);
+        };
 
-            AuthLogic.ExportToXml += cache.ExportXml;
-            AuthLogic.ImportFromXml += cache.ImportXml;
+        AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
 
-            PermissionLogic.IsAuthorizedImplementation = permissionSymbol =>
-            {
-                if (IsAuthorized(permissionSymbol))
-                    return null;
-
-                return "Permission '{0}' is denied".FormatWith(permissionSymbol);
-            };
-
-            AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
-
-            sb.Schema.EntityEvents<PermissionSymbol>().PreDeleteSqlSync += AuthCache_PreDeleteSqlSync;
-        }
     }
 
-    static SqlPreCommand AuthCache_PreDeleteSqlSync(PermissionSymbol permission)
-    {
-        return Administrator.DeleteWhereScript((RulePermissionEntity rt) => rt.Resource, permission);
-    }
+
 
     public static bool IsAuthorized(PermissionSymbol permissionSymbol)
     {

@@ -16,7 +16,7 @@ export default function ToolbarSwitcher(p: { ctx: TypeContext<ToolbarSwitcherEnt
         columns={[
           {
             header: "Icon",
-            headerHtmlAttributes: { style: { width: "5%" } },
+            headerHtmlAttributes: { style: { width: "10%" } },
             template: ctx => {
               var icon = parseIcon(ctx.value.iconName);
               var bgColor = (ctx.value.iconColor && ctx.value.iconColor.toLowerCase() == "var(--bs-body-bg)" ? "var(--bs-body-color)" : undefined)
@@ -26,6 +26,7 @@ export default function ToolbarSwitcher(p: { ctx: TypeContext<ToolbarSwitcherEnt
             },
           },
           {
+            headerHtmlAttributes: { style: { width: "90%" } },
             property: a => a.toolbarMenu,
           },
         ]} />

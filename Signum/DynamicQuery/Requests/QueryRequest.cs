@@ -255,6 +255,13 @@ public abstract class Pagination : IEquatable<Pagination>
     public abstract bool Equals(Pagination? other);
     public abstract override string ToString();
 
+    public Pagination ToBigPage()
+    {
+        if (this is Pagination.Paginate p && p.CurrentPage > 1)
+            return new Paginate.Paginate(p.CurrentPage * p.ElementsPerPage, 1);
+
+        return this;
+    }
 
     public class All : Pagination
     {

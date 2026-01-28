@@ -900,7 +900,7 @@ export namespace Finder {
           fo2.pinned == null &&
           !isFilterGroup(fo2) &&
           similarToken(fo.token?.toString(), fo2.token?.toString()) &&
-          (fo.operation ?? "EqualsTo") == (fo2.operation ?? "EqualsTo") &&
+          (fo.operation ?? FilterOperation.value("EqualTo")) == (fo2.operation ?? FilterOperation.value("EqualTo")) &&
           (fo.pinned?.active == "Always" || fo2.value != null));
 
         if (fo2 != null) {
@@ -994,13 +994,28 @@ export namespace Finder {
     });
   }
 
-  export function getQueryValue(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], valueToken?: string, multipleValues?: boolean): Promise<any> {
+  export function useQueryValue<T = number>(queryName: PseudoType | QueryKey | null, filterOptions: (FilterOption | null | undefined)[], valueToken?: QueryTokenString<T> | string, multipleValues?: boolean, extraDeps?: React.DependencyList): T | null | undefined {
+
+    var query = {};
+    Encoder.encodeFilters(filterOptions);
+
+    return useAPI(() => !queryName ? null : getQueryValue(queryName, filterOptions, valueToken, multipleValues),
+      [
+        queryName && getQueryKey(queryName),
+        QueryString.stringify(query),
+        valueToken?.toString(),
+        multipleValues,
+        ...(extraDeps ?? [])
+      ]);
+  }
+
+  export function getQueryValue<T = number>(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], valueToken?: QueryTokenString<T> | string, multipleValues?: boolean): Promise<T> {
     return getQueryDescription(queryName).then(qd => {
-      return parseFilterOptions(filterOptions, false, qd).then(fops => {
+      return parseFilterOptions(filterOptions ?? [], false, qd).then(fops => {
 
         let filters = toFilterRequests(fops);
 
-        return API.queryValue({ queryKey: qd.queryKey, filters, valueToken, multipleValues });
+        return API.queryValue({ queryKey: qd.queryKey, filters, valueToken: valueToken?.toString(), multipleValues });
       });
     });
   }
@@ -1235,13 +1250,21 @@ export namespace Finder {
       .filter(fo => !isFilterGroup(fo) && (fo.operation == null || fo.operation == "EqualTo") && !fo.token.toString().contains(".") && fo.pinned == null && fo.value != null)
       .map(fo => ({ token: fo.token }) as ColumnOption);
   }
-  export function parseSingleToken(queryName: PseudoType | QueryKey, token: string, subTokenOptions: SubTokensOptions): Promise<QueryToken> {
+  export async function parseSingleToken(queryName: PseudoType | QueryKey, token: string | QueryTokenString<any>, subTokenOptions: SubTokensOptions): Promise<QueryToken> {
 
-    return getQueryDescription(getQueryKey(queryName)).then(qd => {
-      const completer = new TokenCompleter(qd);
-      const result = completer.request(token);
-      return completer.finished().then(() => completer.get(token, subTokenOptions));
-    });
+    var qd = await getQueryDescription(getQueryKey(queryName));
+    const completer = new TokenCompleter(qd);
+    const result = completer.request(token.toString());
+    await completer.finished();
+    return completer.get(token.toString(), subTokenOptions);
+  }
+
+  export async function parseTokens(queryName: PseudoType | QueryKey, tokens: (string | QueryTokenString<any>)[], subTokenOptions: SubTokensOptions): Promise<QueryToken[]> {
+    var qd = await getQueryDescription(getQueryKey(queryName));
+    const completer = new TokenCompleter(qd);
+    tokens.forEach(token => completer.request(token.toString()));
+    await completer.finished();
+    return tokens.map(token => completer.get(token.toString(), subTokenOptions));
   }
 
   export class TokenCompleter {
@@ -1337,7 +1360,7 @@ export namespace Finder {
 
       const subTokens = (dto as QueryTokenWithoutParent).subTokens;
       if (subTokens != null && (cached.subTokens == null)) {
-        cached.subTokens = Dic.map(subTokens, (key, st) => this.addToCache(st, cached.token).fullKey);
+        cached.subTokens = Dic.map(subTokens, (key, st) => this.addToCache(st, cached!.token).fullKey);
       }
 
       return cached.token;
@@ -1714,6 +1737,8 @@ export namespace Finder {
     [P in keyof T]: ExtractQueryToken<T[P]>;
   };
 
+  export function useQuery(fo: FindOptions, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined;
+  export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null;
   export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null {
     return useAPI(
       signal => fo == null ? null : getResultTable(fo, signal),
@@ -1732,10 +1757,12 @@ export namespace Finder {
 
 
 
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined {
-    return useAPI(() => fetchLites(fo),
+  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined;
+  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined;
+  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined {
+    return useAPI(() => fo && fetchLites(fo),
       [
-        findOptionsPath({
+        fo && findOptionsPath({
           queryName: fo.queryName,
           filterOptions: fo.filterOptions,
           orderOptions: fo.orderOptions,
@@ -1747,10 +1774,12 @@ export namespace Finder {
     );
   }
 
-  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | undefined {
-    return useAPI(() => fetchEntities(fo),
+  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | undefined;
+  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined;
+  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined {
+    return useAPI(() => fo && fetchEntities(fo),
       [
-        findOptionsPath({
+        fo && findOptionsPath({
           queryName: fo.queryName,
           filterOptions: fo.filterOptions,
           orderOptions: fo.orderOptions,
@@ -1763,6 +1792,8 @@ export namespace Finder {
   }
 
 
+  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | undefined;
+  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined;
   export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined {
     var fo2: FindOptions | null = fo && {
       pagination: { mode: "All" },
@@ -1866,6 +1897,8 @@ export namespace Finder {
 
 
 
+  export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> | string }>(entity: Entity | Lite<Entity>, tokensObject: TO, additionalDeps?: any[], options?: APIHookOptions): ExtractTokensObject<TO> | undefined;
+  export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> | string }>(entity: Entity | Lite<Entity> | null, tokensObject: TO, additionalDeps?: any[], options?: APIHookOptions): ExtractTokensObject<TO> | null | undefined;
   export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> | string }>(entity: Entity | Lite<Entity> | null, tokensObject: TO, additionalDeps?: any[], options?: APIHookOptions): ExtractTokensObject<TO> | null | undefined {
     var resultTable = useQuery(entity == null || isEntity(entity) && entity.isNew ? null : {
       queryName: isEntity(entity) ? entity.Type : entity.EntityType,
@@ -2050,6 +2083,7 @@ export namespace Finder {
     export function findLiteLike(request: AutocompleteRequest, signal?: AbortSignal): Promise<Lite<Entity>[]> {
       return ajaxGet({ url: "/api/query/findLiteLike?" + QueryString.stringify({ ...request }), signal });
     }
+
 
     export interface AutocompleteRequest {
       types: string;

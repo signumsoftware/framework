@@ -14,47 +14,47 @@ public static class NoteLogic
 
     public static void Start(SchemaBuilder sb, params Type[] registerExpressionsFor)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<NoteEntity>()
+            .WithSave(NoteOperation.Save)
+            .WithQuery(() => n => new
+            {
+                Entity = n,
+                n.Id,
+                n.CreatedBy,
+                n.CreationDate,
+                n.Title,
+                Text = n.Text.Etc(100),
+                n.Target
+            });
+
+        new Graph<NoteEntity>.ConstructFrom<Entity>(NoteOperation.CreateNoteFromEntity)
         {
-            sb.Include<NoteEntity>()
-                .WithSave(NoteOperation.Save)
-                .WithQuery(() => n => new
-                {
-                    Entity = n,
-                    n.Id,
-                    n.CreatedBy,
-                    n.CreationDate,
-                    n.Title,
-                    Text = n.Text.Etc(100),
-                    n.Target
-                });
-            
-            new Graph<NoteEntity>.ConstructFrom<Entity>(NoteOperation.CreateNoteFromEntity)
+            Construct = (a, _) => new NoteEntity{ CreationDate = Clock.Now, Target = a.ToLite() }
+        }.Register();
+
+        sb.Include<NoteTypeSymbol>()
+            .WithSave(NoteTypeOperation.Save)
+            .WithQuery(() => t => new
             {
-                Construct = (a, _) => new NoteEntity{ CreationDate = Clock.Now, Target = a.ToLite() }
-            }.Register();
+                Entity = t,
+                t.Id,
+                t.Name,
+                t.Key,
+            });
 
-            sb.Include<NoteTypeSymbol>()
-                .WithSave(NoteTypeOperation.Save)
-                .WithQuery(() => t => new
-                {
-                    Entity = t,
-                    t.Id,
-                    t.Name,
-                    t.Key,
-                });
-            
-            SemiSymbolLogic<NoteTypeSymbol>.Start(sb, () => SystemNoteTypes);
+        SemiSymbolLogic<NoteTypeSymbol>.Start(sb, () => SystemNoteTypes);
 
-            if (registerExpressionsFor != null)
-            {
-                var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Notes());
-                foreach (var type in registerExpressionsFor)
-                    QueryLogic.Expressions.Register(new ExtensionInfo(type, exp, exp.Body.Type, "Notes", () => typeof(NoteEntity).NicePluralName()));
-            }
-
-            started = true;
+        if (registerExpressionsFor != null)
+        {
+            var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Notes());
+            foreach (var type in registerExpressionsFor)
+                QueryLogic.Expressions.Register(new ExtensionInfo(type, exp, exp.Body.Type, "Notes", () => typeof(NoteEntity).NicePluralName()));
         }
+
+        started = true;
     }
 
     public static void RegisterNoteType(NoteTypeSymbol noteType)

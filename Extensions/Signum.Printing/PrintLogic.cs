@@ -19,60 +19,60 @@ public static class PrintingLogic
 
     public static void Start(SchemaBuilder sb, FileTypeSymbol? testFileType = null)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            TestFileType = testFileType;
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<PrintLineEntity>()
-                .WithQuery(() => p => new
-                {
-                    Entity = p,
-                    p.CreationDate,
-                    p.File,
-                    p.State,
-                    p.Package,
-                    p.PrintedOn,
-                    p.Referred,
-                });
-            
-            sb.Include<PrintPackageEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name
-                });
+        TestFileType = testFileType;
 
-            ProcessLogic.AssertStarted(sb);
-            ProcessLogic.Register(PrintPackageProcess.PrintPackage, new PrintPackageAlgorithm());
-            PermissionLogic.RegisterPermissions(PrintPermission.ViewPrintPanel);
-            PrintLineGraph.Register();
-
-            SimpleTaskLogic.Register(PrintTask.RemoveOldFiles, (ScheduledTaskContext ctx) =>
+        sb.Include<PrintLineEntity>()
+            .WithQuery(() => p => new
             {
-                var lines = Database.Query<PrintLineEntity>().Where(a => a.State == PrintLineState.Printed).Where(b => b.CreationDate <= Clock.Now.AddMinutes(-DeleteFilesAfter));
-                foreach (var line in lines)
-                {
-                    try
-                    {
-                        using (var tr = new Transaction())
-                        {
-                            line.File.DeleteFileOnCommit();
-                            line.State = PrintLineState.PrintedAndDeleted;
-                            using (OperationLogic.AllowSave<PackageLineEntity>())
-                                line.Save();
+                Entity = p,
+                p.CreationDate,
+                p.File,
+                p.State,
+                p.Package,
+                p.PrintedOn,
+                p.Referred,
+            });
 
-                            tr.Commit();
-                        }
-                    }
-                    catch (Exception e)
+        sb.Include<PrintPackageEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Name
+            });
+
+        ProcessLogic.AssertStarted(sb);
+        ProcessLogic.Register(PrintPackageProcess.PrintPackage, new PrintPackageAlgorithm());
+        PermissionLogic.RegisterPermissions(PrintPermission.ViewPrintPanel);
+        PrintLineGraph.Register();
+
+        SimpleTaskLogic.Register(PrintTask.RemoveOldFiles, (ScheduledTaskContext ctx) =>
+        {
+            var lines = Database.Query<PrintLineEntity>().Where(a => a.State == PrintLineState.Printed).Where(b => b.CreationDate <= Clock.Now.AddMinutes(-DeleteFilesAfter));
+            foreach (var line in lines)
+            {
+                try
+                {
+                    using (var tr = new Transaction())
                     {
-                        e.LogException();
+                        line.File.DeleteFileOnCommit();
+                        line.State = PrintLineState.PrintedAndDeleted;
+                        using (OperationLogic.AllowSave<PackageLineEntity>())
+                            line.Save();
+
+                        tr.Commit();
                     }
                 }
-                return null;
-            });
-        }
+                catch (Exception e)
+                {
+                    e.LogException();
+                }
+            }
+            return null;
+        });
     }
 
     public class PrintPackageAlgorithm : IProcessAlgorithm

@@ -15,6 +15,7 @@ import { QueryTokenString } from '@framework/Reflection';
 import { useForceUpdate } from '@framework/Hooks'
 import { QueryFilterEmbedded, QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 import { SubTokensOptions } from '@framework/QueryToken'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQueryEntity>, mainQuery: PredictorMainQueryEmbedded, mainQueryDescription: QueryDescription }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -26,7 +27,6 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
   }
 
   function handlePreviewSubQuery(e: React.MouseEvent<any>) {
-    e.preventDefault();
 
     var sq = p.ctx.value;
 
@@ -142,7 +142,7 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
             { property: a => a.nullHandling, template: colCtx => isInputOutput(colCtx.value.usage) && <AutoLine ctx={colCtx.subCtx(a => a.nullHandling)} /> },
           ]} />
 
-          {ctx.value.query && <a href="#" onClick={handlePreviewSubQuery}>{PredictorMessage.Preview.niceToString()}</a>}
+          {ctx.value.query && <LinkButton title={undefined} onClick={handlePreviewSubQuery}>{PredictorMessage.Preview.niceToString()}</LinkButton>}
         </div>}
     </div>
   );

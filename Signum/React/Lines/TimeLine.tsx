@@ -13,7 +13,7 @@ export interface TimeLineProps extends ValueBaseProps<string | null> {
 }
 
 export class TimeLineController extends ValueBaseController<TimeLineProps, string | null> {
-  init(p: TimeLineProps): void {
+  override init(p: TimeLineProps): void {
     super.init(p);
     this.assertType("TimeLine", ["TimeOnly", "TimeSpan"]);
   }

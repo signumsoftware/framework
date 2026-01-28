@@ -7,14 +7,14 @@ public static class UserTreePartLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
         {
-            DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
-            {
-                {"UserTreePart", typeof(UserTreePartEntity)},
-            });
-            
-            DashboardLogic.OnGetCachedQueryDefinition.Register((UserTreePartEntity ute, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
-        }
+            {"UserTreePart", typeof(UserTreePartEntity)},
+        });
+
+        DashboardLogic.OnGetCachedQueryDefinition.Register((UserTreePartEntity ute, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
     }
 }

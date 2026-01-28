@@ -75,133 +75,133 @@ public static class PredictorLogic
     public static void Start(SchemaBuilder sb, IFileTypeAlgorithm predictorFileAlgorithm)
     {
 
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Settings.AssertIgnored((PredictorEntity p) => p.MainQuery.Filters.Single().Pinned, "use PredictorLogic", "by calling PredictorLogic.IgnorePinned in Starter.OverrideAttributes");
-            sb.Settings.AssertIgnored((PredictorSubQueryEntity p) => p.Filters.Single().Pinned, "use PredictorLogic", "by calling PredictorLogic.IgnorePinned in Starter.OverrideAttributes");
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<PredictorEntity>()
-                .WithVirtualMList(p => p.SubQueries, mc => mc.Predictor)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.MainQuery.Query,
-                    e.Algorithm,
-                    e.State,
-                    e.TrainingException,
-                });
+        sb.Settings.AssertIgnored((PredictorEntity p) => p.MainQuery.Filters.Single().Pinned, "use PredictorLogic", "by calling PredictorLogic.IgnorePinned in Starter.OverrideAttributes");
+        sb.Settings.AssertIgnored((PredictorSubQueryEntity p) => p.Filters.Single().Pinned, "use PredictorLogic", "by calling PredictorLogic.IgnorePinned in Starter.OverrideAttributes");
 
-            PredictorGraph.Register();
-
-            sb.Include<PredictorSubQueryEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.Query,
-                    e.Predictor
-                });
-
-            sb.Include<PredictorCodificationEntity>()
-                .WithUniqueIndex(pc => new { pc.Predictor, pc.Index, pc.Usage })
-                .WithExpressionFrom((PredictorEntity e) => e.Codifications())
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Predictor,
-                    e.Index,
-                    e.Usage,
-                    e.OriginalColumnIndex,
-                    e.SubQueryIndex,
-                    e.SplitKey0,
-                    e.SplitKey1,
-                    e.SplitKey2,
-                    e.IsValue,
-                    e.Min,
-                    e.Max,
-                    e.Average,
-                    e.StdDev,
-                });
-
-            sb.Include<PredictorEpochProgressEntity>()
-                .WithExpressionFrom((PredictorEntity e) => e.EpochProgresses())
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Predictor,
-                    e.Id,
-                    e.Epoch,
-                    e.Ellapsed,
-                    e.LossTraining,
-                    e.AccuracyTraining,
-                    e.LossValidation,
-                    e.AccuracyValidation,
-                });
-
-            FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm);
-
-            SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, () => Algorithms.Keys);
-            SymbolLogic<PredictorColumnEncodingSymbol>.Start(sb, () => Algorithms.Values.SelectMany(a => a.GetRegisteredEncodingSymbols()).Distinct());
-            SymbolLogic<PredictorResultSaverSymbol>.Start(sb, () => ResultSavers.Keys);
-            SymbolLogic<PredictorPublicationSymbol>.Start(sb, () => Publications.Keys);
-
-            sb.Schema.EntityEvents<PredictorEntity>().Retrieved += PredictorEntity_Retrieved;
-            sb.Schema.EntityEvents<PredictorSubQueryEntity>().Retrieved += PredictorMultiColumnEntity_Retrieved;
-
-            Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Encoding).StaticPropertyValidation += Column_StaticPropertyValidation;
-            Validator.PropertyValidator((PredictorSubQueryColumnEmbedded c) => c.Token).StaticPropertyValidation += GroupKey_StaticPropertyValidation;
-            Validator.PropertyValidator((PredictorSubQueryEntity c) => c.Columns).StaticPropertyValidation += SubQueryColumns_StaticPropertyValidation;
-
-            sb.Include<PredictSimpleResultEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Predictor,
-                    e.Target,
-                    e.Type,
-                    e.OriginalValue,
-                    e.PredictedValue,
-                    e.OriginalCategory,
-                    e.PredictedCategory,
-                });
-
-            RegisterResultSaver(PredictorSimpleResultSaver.StatisticsOnly, new PredictorSimpleSaver { SaveAllResults = false });
-            RegisterResultSaver(PredictorSimpleResultSaver.Full, new PredictorSimpleSaver { SaveAllResults = true });
-
-            sb.Schema.EntityEvents<PredictorEntity>().PreUnsafeDelete += query =>
+        sb.Include<PredictorEntity>()
+            .WithVirtualMList(p => p.SubQueries, mc => mc.Predictor)
+            .WithQuery(() => e => new
             {
-                Database.Query<PredictSimpleResultEntity>().Where(a => query.Contains(a.Predictor.Entity)).UnsafeDelete();
-                return null;
-            };
-
-            sb.Schema.WhenIncluded<ProcessEntity>(() =>
-            {
-                sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(PredictorEntity));
-                sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(AutoconfigureNeuralNetworkEntity));
-                ProcessLogic.Register(PredictorProcessAlgorithm.AutoconfigureNeuralNetwork, new AutoconfigureNeuralNetworkAlgorithm());
-
-                new Graph<ProcessEntity>.ConstructFrom<PredictorEntity>(PredictorOperation.AutoconfigureNetwork)
-                {
-                    CanConstruct = p => p.AlgorithmSettings is NeuralNetworkSettingsEntity ? null : ValidationMessage._0ShouldBeOfType1.NiceToString(Entity.NicePropertyName(() => p.AlgorithmSettings), typeof(NeuralNetworkSettingsEntity).NiceName()),
-                    Construct = (p, _) =>
-                    {
-                        return ProcessLogic.Create(PredictorProcessAlgorithm.AutoconfigureNeuralNetwork, new AutoconfigureNeuralNetworkEntity
-                        {
-                            InitialPredictor = p.ToLite()
-                        });
-                    }
-                }.Register();
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.MainQuery.Query,
+                e.Algorithm,
+                e.State,
+                e.TrainingException,
             });
 
-            if (sb.WebServerBuilder != null)
-                PredictorServer.Start(sb.WebServerBuilder);
+        PredictorGraph.Register();
 
-        }
+        sb.Include<PredictorSubQueryEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.Query,
+                e.Predictor
+            });
+
+        sb.Include<PredictorCodificationEntity>()
+            .WithUniqueIndex(pc => new { pc.Predictor, pc.Index, pc.Usage })
+            .WithExpressionFrom((PredictorEntity e) => e.Codifications())
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Predictor,
+                e.Index,
+                e.Usage,
+                e.OriginalColumnIndex,
+                e.SubQueryIndex,
+                e.SplitKey0,
+                e.SplitKey1,
+                e.SplitKey2,
+                e.IsValue,
+                e.Min,
+                e.Max,
+                e.Average,
+                e.StdDev,
+            });
+
+        sb.Include<PredictorEpochProgressEntity>()
+            .WithExpressionFrom((PredictorEntity e) => e.EpochProgresses())
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Predictor,
+                e.Id,
+                e.Epoch,
+                e.Ellapsed,
+                e.LossTraining,
+                e.AccuracyTraining,
+                e.LossValidation,
+                e.AccuracyValidation,
+            });
+
+        FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm);
+
+        SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, () => Algorithms.Keys);
+        SymbolLogic<PredictorColumnEncodingSymbol>.Start(sb, () => Algorithms.Values.SelectMany(a => a.GetRegisteredEncodingSymbols()).Distinct());
+        SymbolLogic<PredictorResultSaverSymbol>.Start(sb, () => ResultSavers.Keys);
+        SymbolLogic<PredictorPublicationSymbol>.Start(sb, () => Publications.Keys);
+
+        sb.Schema.EntityEvents<PredictorEntity>().Retrieved += PredictorEntity_Retrieved;
+        sb.Schema.EntityEvents<PredictorSubQueryEntity>().Retrieved += PredictorMultiColumnEntity_Retrieved;
+
+        Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Encoding).StaticPropertyValidation += Column_StaticPropertyValidation;
+        Validator.PropertyValidator((PredictorSubQueryColumnEmbedded c) => c.Token).StaticPropertyValidation += GroupKey_StaticPropertyValidation;
+        Validator.PropertyValidator((PredictorSubQueryEntity c) => c.Columns).StaticPropertyValidation += SubQueryColumns_StaticPropertyValidation;
+
+        sb.Include<PredictSimpleResultEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Predictor,
+                e.Target,
+                e.Type,
+                e.OriginalValue,
+                e.PredictedValue,
+                e.OriginalCategory,
+                e.PredictedCategory,
+            });
+
+        RegisterResultSaver(PredictorSimpleResultSaver.StatisticsOnly, new PredictorSimpleSaver { SaveAllResults = false });
+        RegisterResultSaver(PredictorSimpleResultSaver.Full, new PredictorSimpleSaver { SaveAllResults = true });
+
+        sb.Schema.EntityEvents<PredictorEntity>().PreUnsafeDelete += query =>
+        {
+            Database.Query<PredictSimpleResultEntity>().Where(a => query.Contains(a.Predictor.Entity)).UnsafeDelete();
+            return null;
+        };
+
+        sb.Schema.WhenIncluded<ProcessEntity>(() =>
+        {
+            sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(PredictorEntity));
+            sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(AutoconfigureNeuralNetworkEntity));
+            ProcessLogic.Register(PredictorProcessAlgorithm.AutoconfigureNeuralNetwork, new AutoconfigureNeuralNetworkAlgorithm());
+
+            new Graph<ProcessEntity>.ConstructFrom<PredictorEntity>(PredictorOperation.AutoconfigureNetwork)
+            {
+                CanConstruct = p => p.AlgorithmSettings is NeuralNetworkSettingsEntity ? null : ValidationMessage._0ShouldBeOfType1.NiceToString(Entity.NicePropertyName(() => p.AlgorithmSettings), typeof(NeuralNetworkSettingsEntity).NiceName()),
+                Construct = (p, _) =>
+                {
+                    return ProcessLogic.Create(PredictorProcessAlgorithm.AutoconfigureNeuralNetwork, new AutoconfigureNeuralNetworkEntity
+                    {
+                        InitialPredictor = p.ToLite()
+                    });
+                }
+            }.Register();
+        });
+
+        if (sb.WebServerBuilder != null)
+            PredictorServer.Start(sb.WebServerBuilder);
+
     }
 
     public static void IgnorePinned(SchemaBuilder sb)

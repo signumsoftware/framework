@@ -529,7 +529,8 @@ internal class MetadataVisitor : ExpressionVisitor
     public static Implementations AggregateImplementations(IEnumerable<Implementations> implementations)
     {
         if (implementations.IsEmpty())
-            throw new InvalidOperationException("implementations is Empty");
+            return Implementations.By();
+            //throw new InvalidOperationException("implementations is Empty");
 
         if (implementations.Count() == 1)
             return implementations.First();

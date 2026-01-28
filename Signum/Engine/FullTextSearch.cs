@@ -48,8 +48,13 @@ public static class FullTextSearch
         var schema = Schema.Current;
         var table = schema.Table<T>();
 
-        IColumn[]? columns = fields == null ? null : IndexKeyColumns.Split(table, fields);
+        IColumn[]? columns = GetColumns(table, fields);
         return ContainsTable(table, columns, searchCondition, top_n_by_rank);
+    }
+
+    static IColumn[]? GetColumns(IFieldFinder table, LambdaExpression? fields)
+    {
+        return fields == null ? null : IndexKeyColumns.Split(table, fields).SelectMany(a => a.columns).ToArray();
     }
 
     public static IQueryable<FullTextResultTable> ContainsTable<T, V>(Expression<Func<T, MList<V>>> mlistProperty,
@@ -60,7 +65,7 @@ public static class FullTextSearch
         var schema = Schema.Current;
         var table = schema.TableMList(mlistProperty);
 
-        IColumn[]? columns = fields == null ? null : IndexKeyColumns.Split(table, fields);
+        IColumn[]? columns = GetColumns(table, fields);
         return ContainsTable(table, columns, searchCondition, top_n_by_rank);
     }
 
@@ -107,7 +112,7 @@ public static class FullTextSearch
         var schema = Schema.Current;
         var table = schema.Table<T>();
 
-        IColumn[]? columns = fields == null ? null : IndexKeyColumns.Split(table, fields);
+        IColumn[]? columns = GetColumns(table, fields);
         return FreeTextTable(table, columns, searchCondition, top_n_by_rank);
     }
 
@@ -119,7 +124,7 @@ public static class FullTextSearch
         var schema = Schema.Current;
         var table = schema.TableMList(mlistProperty);
 
-        IColumn[]? columns = fields == null ? null : IndexKeyColumns.Split(table, fields);
+        IColumn[]? columns = GetColumns(table, fields);
         return FreeTextTable(table, columns, searchCondition, top_n_by_rank);
     }
 }

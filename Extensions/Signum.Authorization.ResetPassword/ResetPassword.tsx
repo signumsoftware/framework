@@ -9,13 +9,16 @@ import { useLocation, useParams } from 'react-router'
 import { useStateWithPromise } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { LoginAuthMessage } from '../Signum.Authorization/Signum.Authorization'
-
+import { ResetPasswordAuthMessage } from './Signum.Authorization.ResetPassword'
+ 
 export default function ResetPassword(): React.JSX.Element {
   const location = useLocation();
 
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
 
   const [success, setSuccess] = React.useState<boolean>(false);
+  const [successRequestNewLink, setSuccessRquestNewLink] = React.useState<boolean>(false);
+  const [showRequestNewLink, setShowRequestNewLink] = React.useState<boolean>(false);
 
   const newPassword = React.useRef<HTMLInputElement>(null);
   const newPassword2 = React.useRef<HTMLInputElement>(null);
@@ -47,12 +50,13 @@ export default function ResetPassword(): React.JSX.Element {
           if (ex.modelState)
             setModelState(ex.modelState);
         }
+        else
+          setShowRequestNewLink(true);
 
         throw ex;
       }
     }
   }
-
 
   function validateNewPassword(): boolean {
     if (!newPassword.current!.value) {
@@ -77,6 +81,19 @@ export default function ResetPassword(): React.JSX.Element {
   function error(field: string): string | undefined {
     var ms = modelState;
     return ms && ms[field] && ms[field].length > 0 ? ms[field][0] : undefined;
+  }
+
+  if (successRequestNewLink) {
+    return (
+      <div className="container sf-request-new-link">
+        <div className="row">
+          <div className="col-md-6 offset-md-3">
+            <h2 className="sf-entity-title">{ResetPasswordAuthMessage.RequestNewLink.niceToString()}</h2>
+            <p>{ResetPasswordAuthMessage.NewLinkToResetPasswordHasBeenSentSuccessfully.niceToString()}</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (success || code == "OK") {
@@ -111,10 +128,20 @@ export default function ResetPassword(): React.JSX.Element {
               </div>
 
             </div>
-            <button type="submit" className="btn btn-primary" id="changePassword">{LoginAuthMessage.ChangePassword.niceToString()}</button>
+            <div className="d-flex">
+              <button type="submit" className="btn btn-primary" id="changePassword">{LoginAuthMessage.ChangePassword.niceToString()}</button>
+              {showRequestNewLink &&
+                <button className="btn btn-secondary ms-auto" id="requestNewLink" onClick={handleRequestNewLinkClick}>{ResetPasswordAuthMessage.RequestNewLink.niceToString()}</button>}
+            </div>
           </form>
         </div>
       </div>
     </div>
   );
+
+  function handleRequestNewLinkClick(e: React.MouseEvent<any>) {
+    e.preventDefault();
+    ResetPasswordClient.API.requestNewLink(code)
+      .then(() => setSuccessRquestNewLink(true));
+  }
 }

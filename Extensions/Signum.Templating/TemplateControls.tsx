@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FindOptions } from '@framework/FindOptions'
-import { TemplateTokenMessage } from './Signum.Templating'
+import { TemplateMessage, TemplateTokenMessage } from './Signum.Templating'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
 import AutoLineModal from '@framework/AutoLineModal'
 import { useAPI } from '@framework/Hooks'
@@ -26,14 +26,14 @@ export default function TemplateControls(p: TemplateControlsProps): React.JSX.El
   }, [p.queryKey])
 
   function renderButton(text: string, canClick: string | undefined, buildPattern: (key: string) => string) {
-    return <input type="button" disabled={!!canClick} className="btn btn-light btn-sm sf-button"
+    return <input type="button" disabled={!!canClick} className="btn btn-tertiary btn-sm sf-button"
       title={canClick} value={text}
       onClick={() => AutoLineModal.show({
         type: { name: "string" },
         initialValue: buildPattern(
           currentToken.type == 'Query' ? (currentToken.token ? currentToken.token.fullKey : "") : (currentToken.expression ? ("g:" + currentToken.expression.key) : "")),
-        title: "Template",
-        message: "Copy to clipboard: Ctrl+C, ESC",
+        title: TemplateMessage.Template.niceToString(),
+        message: TemplateMessage.CopyToClipboard.niceToString() ,
       })} />
   }
   

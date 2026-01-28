@@ -10,6 +10,7 @@ import { QueryString } from '@framework/QueryString'
 import { FrameMessage } from '@framework/Signum.Entities'
 import { TreeClient, TreeOptions } from './TreeClient'
 import { useTitle } from '@framework/AppContext'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 
 export default function TreePage(): React.JSX.Element {
@@ -37,9 +38,9 @@ export default function TreePage(): React.JSX.Element {
       <h2>
         <span className="sf-entity-title">{ti.nicePluralName}</span>
         &nbsp;
-        <a className="sf-popup-fullscreen" href="#" title={FrameMessage.Fullscreen.niceToString()} onClick={e => treeViewRef.current!.handleFullScreenClick(e)}>
+        <LinkButton className="sf-popup-fullscreen" title={FrameMessage.Fullscreen.niceToString()} onClick={e => treeViewRef.current!.handleFullScreenClick(e)}>
           <span className="fa fa-external-link"></span>
-        </a>
+        </LinkButton>
       </h2>
       <TreeViewer ref={treeViewRef}
         treeOptions={to}

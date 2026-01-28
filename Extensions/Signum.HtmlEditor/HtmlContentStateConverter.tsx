@@ -1,5 +1,6 @@
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
-import { $getRoot, $getSelection, $setSelection, EditorState, LexicalEditor } from "lexical";
+import { $getRoot, $getSelection, $setSelection, EditorState, LexicalEditor, LexicalNode } from "lexical";
+import { ImageNode } from "./Extensions/ImageExtension/ImageNode";
 
 export interface ITextConverter {
   $convertToText(editor: LexicalEditor): string;
@@ -7,41 +8,33 @@ export interface ITextConverter {
 }
 
 export class HtmlContentStateConverter implements ITextConverter {
-  $convertToText(
-    editor: LexicalEditor
-  ): ReturnType<ITextConverter["$convertToText"]> {
+
+  constructor() {
+
+  }
+
+  $convertToText(editor: LexicalEditor): string {
     return editor.read(() => fixListHTML($generateHtmlFromNodes(editor)));
   }
 
-  $convertFromText(
-    editor: LexicalEditor,
-    html: string
-  ): ReturnType<ITextConverter["$convertFromText"]> {
+  $convertFromText(editor: LexicalEditor, html: string): EditorState {
 
     editor.update(() => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
-
-      createImagePlaceholders(doc);
-      const nodes = $generateNodesFromDOM(editor, doc);
+      let nodes: LexicalNode[];
+      try {
+        ImageNode.currentHandler = editor.imageHandler;
+        nodes = $generateNodesFromDOM(editor, doc);
+      } finally {
+        ImageNode.currentHandler = undefined;
+      }
       $getRoot().clear().select();
       $getSelection()?.insertNodes(nodes);
       $setSelection(null);
     }, { discrete: true })
 
     return editor.getEditorState();
-  }
-}
-
-function createImagePlaceholders(doc: Document) {
-  const imgElements = doc.querySelectorAll("img");
-  for (let i = 0; i < imgElements.length; i++) {
-    const img = imgElements[i];
-    const attachmentId = img.getAttribute("data-attachment-id");
-    if (!attachmentId) continue;
-
-    const placeholderText = `[IMAGE_${attachmentId}]`;
-    img.replaceWith(document.createTextNode(placeholderText));
   }
 }
 

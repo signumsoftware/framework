@@ -41,15 +41,15 @@ public static class ExcelGenerator
 
             if (workbookPart.CalculationChainPart != null)
             {
-                workbookPart.Workbook.CalculationProperties!.ForceFullCalculation = true;
-                workbookPart.Workbook.CalculationProperties!.FullCalculationOnLoad = true;
+                workbookPart.Workbook!.CalculationProperties!.ForceFullCalculation = true;
+                workbookPart.Workbook!.CalculationProperties!.FullCalculationOnLoad = true;
             }
 
             WorksheetPart worksheetPart = document.GetWorksheetPartBySheetName(ExcelMessage.Data.NiceToString());
             
             CellBuilder cb = PlainExcelGenerator.CellBuilder;
             
-            SheetData sheetData = worksheetPart.Worksheet.Descendants<SheetData>().SingleEx();
+            SheetData sheetData = worksheetPart.Worksheet!.Descendants<SheetData>().SingleEx();
 
             List<ColumnData> columnEquivalences = GetColumnsEquivalences(document, sheetData, request);
 
@@ -69,12 +69,12 @@ public static class ExcelGenerator
             }.Cast<OpenXmlElement>());
 
             var pivotTableParts = workbookPart.PivotTableCacheDefinitionParts
-                .Where(ptpart => ptpart.PivotCacheDefinition.Descendants<WorksheetSource>()
+                .Where(ptpart => ptpart.PivotCacheDefinition!.Descendants<WorksheetSource>()
                                                             .Any(wss => wss.Sheet!.Value == ExcelMessage.Data.NiceToString()));
 
             foreach (PivotTableCacheDefinitionPart ptpart in pivotTableParts)
             {
-                PivotCacheDefinition pcd = ptpart.PivotCacheDefinition;
+                PivotCacheDefinition pcd = ptpart.PivotCacheDefinition!;
                 WorksheetSource wss = pcd.Descendants<WorksheetSource>().FirstEx();
                 wss.Reference!.Value = "A1:" + GetExcelColumn(columnEquivalences.Count(ce => !ce.IsNew) - 1) + (results.Rows.Count() + 1).ToString();
                 
@@ -83,7 +83,7 @@ public static class ExcelGenerator
                 pcd.Save();
             }
 
-            workbookPart.Workbook.Save();
+            workbookPart.Workbook!.Save();
         }
     }
 

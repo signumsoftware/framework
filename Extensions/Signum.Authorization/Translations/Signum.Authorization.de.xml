@@ -1,5 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="ActiveDirectoryAuthorizerMessage">
+    <Member Name="ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication" Description="Active Directory-Benutzer '{0}' ist nicht mit einem Benutzer in dieser Anwendung verknüpft." />
+  </Type>
+  <Type Name="ActiveDirectoryMessage">
+    <Member Name="AccountEnabled" Description="Konto aktiviert" />
+    <Member Name="CompanyName" Description="Firmenname" />
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="GivenName" Description="Vorname" />
+    <Member Name="HasUser" Description="Hat Benutzer" />
+    <Member Name="Id" Description="Id" />
+    <Member Name="InGroup" Description="In der Gruppe" />
+    <Member Name="JobTitle" Description="Berufsbezeichnung" />
+    <Member Name="Mail" Description="E-Mail" />
+    <Member Name="OnlyActiveUsers" Description="Nur aktive Nutzer" />
+    <Member Name="OnPremisesExtensionAttributes" Description="On-Premises-Erweiterungsattribute" />
+    <Member Name="OnPremisesImmutableId" Description="On-premises unveränderliches Id" />
+    <Member Name="SecurityEnabled" Description="Sicherheit aktiviert" />
+    <Member Name="Surname" Description="Nachname" />
+    <Member Name="Visibility" Description="Sichtbarkeit" />
+  </Type>
+  <Type Name="ActiveDirectoryPermission">
+    <Member Name="InviteUsersFromAD" Description="Benutzer aus AD einladen" />
+  </Type>
   <Type Name="AllowedRule`2">
     <Member Name="Allowed" Description="Erlaubt" />
     <Member Name="AllowedBase" Description="Base erlaubt" />
@@ -17,20 +41,27 @@
     <Member Name="_0RulesFor1" Description="{0} Regeln für {1}" />
     <Member Name="AddCondition" Description="Bedingung hinzufügen" />
     <Member Name="Allow" Description="Erlauben" />
+    <Member Name="AuthRuleOverview" Description="Übersciht der Auth-Regeln" />
     <Member Name="CanNotBeModified" Description="Kann nicht geändert werden" />
     <Member Name="CanNotBeModifiedBecauseIsInCondition0" Description="Kann nicht geändert werden, da es die Bedingung {0} erfüllt" />
     <Member Name="CanNotBeModifiedBecauseIsNotInCondition0" Description="Kann nicht geändert werden, da es die Bedingung {0} nicht erfüllt" />
     <Member Name="CanNotBeReadBecauseIsInCondition0" Description="Kann nicht gelesen werden, da es die Bedingung {0} erfüllt" />
     <Member Name="CanNotBeReadBecauseIsNotInCondition0" Description="Kann nicht gelesen werden, da es die Bedingung {0} nicht erfüllt" />
     <Member Name="Check" Description="Aktivieren" />
+    <Member Name="CopyFrom" Description="Kopieren von" />
     <Member Name="Deny" Description="Verweigern" />
+    <Member Name="DownloadAuthRules" Description="AuthRules.xml herunterladen" />
     <Member Name="Fallback" Description="Fallback" />
     <Member Name="Filter" Description="Filter" />
     <Member Name="FirstRule" Description="1. Regel" />
     <Member Name="NthRule" Description="{0}. Regel" />
     <Member Name="Overriden" Description="Überschrieben" />
+    <Member Name="PermissionOverriden" Description="Permission-!overriden" />
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
+    <Member Name="PermissionRulesOverview" Description="Übersicht über Berechtigungsregeln" />
     <Member Name="PleaseSaveChangesFirst" Description="Bitte erst Änderungen speichern" />
+    <Member Name="PropertyRuleOverview" Description="Übersicht über die Eigenschaftsregeln" />
+    <Member Name="QueryPermissionsOverview" Description="Abfrage-Berechtigungen Übersicht" />
     <Member Name="RemoveCondition" Description="Bedingung entfernen" />
     <Member Name="RepeatedTypeCondition" Description="Wiederholte Typbedingungen" />
     <Member Name="ResetChanges" Description="Zurücksetzen von Änderungen" />
@@ -46,6 +77,8 @@
     <Member Name="ThereAre0TypeConditionsDefinedFor1" Description="Es sind {0} Typbedingungen für {1} definiert." />
     <Member Name="TheUserStateMustBeDisabled" Description="Der Benutzerstatus muss deaktiviert werden." />
     <Member Name="ThirdRule" Description="3. Regel" />
+    <Member Name="TypeConditions" Description="Typbedingungen" />
+    <Member Name="TypePermissionOverview" Description="Übersicht über Typberechtigungen" />
     <Member Name="TypeRules" Description="Typregeln" />
     <Member Name="Uncheck" Description="Deaktivieren" />
     <Member Name="UsedByRoles" Description="Verwendet von Rollen" />
@@ -73,6 +106,13 @@
   <Type Name="AuthTokenConfigurationEmbedded" Description="Auth-token-Konfiguration">
     <Member Name="RefreshAnyTokenPreviousTo" Description="Aktualisieren Sie alle Token bis zu" />
     <Member Name="RefreshTokenEvery" Description="Aktualisieren Sie jeden Token" />
+  </Type>
+  <Type Name="BaseADConfigurationEmbedded" Description="Basis-AD-Konfiguration">
+    <Member Name="AllowMatchUsersBySimpleUserName" Description="Benutzer nach einfachem Benutzernamen zuordnen" />
+    <Member Name="AutoCreateUsers" Description="Benutzer automatisch erstellen" />
+    <Member Name="AutoUpdateUsers" Description="Benutzer automatisch aktualisieren" />
+    <Member Name="DefaultRole" Description="Standardrolle" />
+    <Member Name="RoleMapping" Description="Rollenabbildung" />
   </Type>
   <Type Name="BaseRulePack`1">
     <Member Name="Role" Description="Rolle" />
@@ -111,13 +151,11 @@
     <Member Name="InvalidUsernameOrPassword" Description="Ungültiger Benutzername oder Kennwort" />
     <Member Name="Login" Description="Login" />
     <Member Name="LoginWith0" Description="Login mit {0}" />
-    <Member Name="LoginWithWindowsUser" Description="Anmelden mit Windows-Benutzer" />
+    <Member Name="LoginWithAzureB2C" Description="Anmelden mit Azure B2C" />
     <Member Name="Logout" Description="Logout" />
-    <Member Name="LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication" Description="Sieht so aus, als ob Ihr Windows-Benutzer diese Anwendung nicht verwenden darf, der Browser keine Identitätsinformationen bereitstellt oder der Server nicht richtig konfiguriert ist." />
     <Member Name="MyProfile" Description="Mein Profil" />
     <Member Name="NewPassword" Description="Neues Passwort" />
     <Member Name="NotUserLogged" Description="Kein angemeldeter Benutzer" />
-    <Member Name="NoWindowsUserFound" Description="Kein Windows-Benutzer gefunden" />
     <Member Name="Password" Description="Passwort" />
     <Member Name="PasswordChanged" Description="Passwort geändert" />
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="Das Passwort wurde erfolgreich geändert" />
@@ -128,7 +166,9 @@
     <Member Name="RequestAccepted" Description="Anfrage angenommen" />
     <Member Name="SendEmail" Description="E-Mail senden" />
     <Member Name="ShowLoginForm" Description="Anmeldeformular anzeigen" />
+    <Member Name="SignInWithAzureB2C" Description="Anmelden mit Azure B2C" />
     <Member Name="SignInWithMicrosoft" Description="Mit Microsoft anmelden" />
+    <Member Name="SignUpWithAzureB2C" Description="Registrieren mit Azure B2C" />
     <Member Name="Success" Description="Erfolg" />
     <Member Name="SwitchUser" Description="Benutzer wechseln" />
     <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="Das Kennwort muss mindestens {0} Zeichen enthalten." />
@@ -190,6 +230,10 @@
     <Member Name="IsTrivialMerge" Description="Ist triviale Zusammenführung" />
     <Member Name="MergeStrategy" Description="Zusammenführstrategie" />
     <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="RoleMappingEmbedded" Description="Rollenabbildung">
+    <Member Name="ADNameOrGuid" Description="AD-Name oder Führer" />
+    <Member Name="Role" Description="Rolle" />
   </Type>
   <Type Name="RoleOperation">
     <Member Name="Delete" Description="Löschen" />
@@ -268,6 +312,14 @@
   </Type>
   <Type Name="TypeConditionSymbol" Description="Typbedingung" />
   <Type Name="TypeRulePack" Description="Typregelpack" />
+  <Type Name="UserADMessage">
+    <Member Name="Find0InActiveDirectory" Description="Finden Sie '{0}' im Active Directory" />
+    <Member Name="FindInActiveDirectory" Description="Im Active Directory finden" />
+    <Member Name="NameOrEmail" Description="Name oder E-Mail" />
+    <Member Name="NoUserContaining0FoundInActiveDirectory" Description="Kein Benutzer mit '{0}' findet sich in Active Directory" />
+    <Member Name="PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport" Description="Bitte wählen Sie den Benutzer aus Active Directory aus, den Sie importieren möchten" />
+    <Member Name="SelectActiveDirectoryUser" Description="Active Directory-Benutzer auswählen" />
+  </Type>
   <Type Name="UserEntity" Description="Benutzer" Gender="m">
     <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="DisabledOn" Description="Deaktiviert auf" />

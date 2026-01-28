@@ -19,6 +19,7 @@ import { ImageModal } from './ImageModal'
 import { Aprox, AsEntity } from '@framework/Lines/EntityBase'
 import { FilesClient } from '../FilesClient'
 import { JSX } from 'react/jsx-runtime'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export { FileTypeSymbol };
 
@@ -38,7 +39,7 @@ interface MultiFileImageLineProps<V extends ModifiableEntity/* & IFile*/ | Lite<
 
 export class MultiFileImageLineController<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile & */Entity>> extends EntityListBaseController<MultiFileImageLineProps<V>, V> {
 
-  overrideProps(p: MultiFileImageLineProps<V>, overridenProps: MultiFileImageLineProps<V>): void {
+  override overrideProps(p: MultiFileImageLineProps<V>, overridenProps: MultiFileImageLineProps<V>): void {
     super.overrideProps(p, overridenProps);
 
     let pr = p.ctx.propertyRoute;
@@ -108,11 +109,11 @@ export function MultiFileImageLine<V extends ModifiableEntity /*& IFile*/ | Lite
                   p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {getToString(mlec.value)}</span > :
                     renderFile(p.getFileFromElement ? mlec.subCtx(p.getFileFromElement) : mlec as unknown as TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity>>)}
                 {!p.ctx.readOnly &&
-                  <a href="#" title={EntityControlMessage.Remove.niceToString()}
+                  <LinkButton title={EntityControlMessage.Remove.niceToString()}
                     className="sf-line-button sf-remove"
-                    onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
-                    <FontAwesomeIcon icon="xmark" />
-                  </a>}
+                    onClick={e => { c.handleDeleteValue(mlec.index!); }}>
+                    <FontAwesomeIcon aria-hidden={true} icon="xmark" />
+                  </LinkButton>}
               </div>
             )
           }

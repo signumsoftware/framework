@@ -80,6 +80,10 @@ public enum WhatsNewMessage
     NewsPage,
     Preview,
     IsRead,
+    [Description("Close {0} WhatsNew")]
+    Close0WhatsNew,
+    [Description("NEW")]
+    New,
 }
 
 public enum WhatsNewState

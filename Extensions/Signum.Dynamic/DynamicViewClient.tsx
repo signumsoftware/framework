@@ -311,7 +311,7 @@ export namespace DynamicViewClient {
     try {
       return evalWithScope(code, globalModules);
     } catch (e) {
-      throw new Error("Syntax in DynamicViewSelector for '" + getToString(dvs.entityType) + "':\r\n" + code + "\r\n" + (e as Error).message);
+      throw new Error("Syntax in DynamicViewSelector for '" + getToString(dvs.entityType) + "':\n" + code + "\n" + (e as Error).message);
     }
   }
   
@@ -379,7 +379,7 @@ export namespace DynamicViewClient {
     try {
       return eval(code);
     } catch (e) {
-      throw new Error("Syntax in DynamicViewOverride for '" + getToString(dvo.entityType) + "':\r\n" + code + "\r\n" + (e as Error).message);
+      throw new Error("Syntax in DynamicViewOverride for '" + getToString(dvo.entityType) + "':\n" + code + "\n" + (e as Error).message);
     }
   }
   

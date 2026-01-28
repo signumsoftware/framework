@@ -10,12 +10,12 @@ public static class TemplatingLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            SymbolLogic<ModelConverterSymbol>.Start(sb, () => Converters.Keys);
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            TypeHelpLogic.Start(sb);
-        }
+        SymbolLogic<ModelConverterSymbol>.Start(sb, () => Converters.Keys);
+
+        TypeHelpLogic.Start(sb);
     }
 
     public static void Register<F, T>(ModelConverterSymbol modelConverter, Func<F, T> converterFunction)

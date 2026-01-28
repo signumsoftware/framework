@@ -8,13 +8,12 @@ public static class InlineImagesLogic
 {
 
     [AutoExpressionField]
-    public static IQueryable<HelpImageEntity> Images(this IHelpImageTarget e) =>
+    public static IQueryable<HelpImageEntity> Images(this IHelpEntity e) =>
         As.Expression(() => Database.Query<HelpImageEntity>().Where(a => a.Target.Is(e)));
 
-    public static Regex ImgRegex = new Regex(@"<img *(?<atts>.*) */>");
-    public static Regex AttRegex = new Regex(@"(?<key>[\w\-]+) *= *""(?<value>[^""]+)""");
+    public static Regex ImgRegex = new Regex(@"<img(\s+(?<key>[\w\-]+)\s*=\s*""(?<value>[^""]+)"")+\s*/?>");
 
-    public static bool SynchronizeInlineImages(IHelpImageTarget entity)
+    public static bool SynchronizeInlineImages(IHelpEntity entity)
     {
         using (OperationLogic.AllowSave<HelpImageEntity>())
         {
@@ -27,7 +26,7 @@ public static class InlineImagesLogic
             {
                 var newText = ImgRegex.Replace(text, m =>
                 {
-                    var atts = AttRegex.Matches(m.Groups["atts"].Value).ToDictionaryEx(a => a.Groups["key"].Value, a => a.Groups["value"].Value);
+                    Dictionary<string, string> atts = GetTagAttributes(m);
                     var newAtts = atts.ToDictionary();
                     if (atts.TryGetValue("data-help-image-id", out var imageId))
                     {
@@ -58,7 +57,7 @@ public static class InlineImagesLogic
                         }
                     }
 
-                    return "<img " + newAtts.ToString(a => @$"{a.Key}=""{a.Value}""", " ") + "/>";
+                    return $"<img {newAtts.ToString(a => @$"{a.Key}=""{a.Value}""", " ")}/>";
                 });
 
                 return newText;
@@ -79,20 +78,26 @@ public static class InlineImagesLogic
 
                 entity.ForeachHtmlField(text => ImgRegex.Replace(text?? "", m =>
                 {
-                    var newAtts = AttRegex.Replace(m.Groups["atts"].Value, m2 =>
+                    Dictionary<string, string> atts = GetTagAttributes(m);
+
+                    if (atts.TryGetValue("data-hash", out var hash))
                     {
-                        if (m2.Groups["key"].Value == "data-hash")
-                            return @$"data-help-image-id=""{hashToHelpImageId.GetOrThrow(m2.Groups["value"].Value)}""";
+                        atts.Remove("data-hash");
+                        atts.Add("data-help-image-id", hashToHelpImageId.GetOrThrow(hash).ToString());
+                    }
 
-                        return m2.Value;
-                    });
-
-                    return "<img " + newAtts + "/>";
+                    return $"<img {atts.ToString(a => $"{a.Key}=\"{a.Value}\"", " ")}/>";
                 }));
             }
 
             return true;
         }
+    }
+
+    private static Dictionary<string, string> GetTagAttributes(Match m)
+    {
+        return m.Groups["key"].Captures().Select(a => a.Value)
+        .Zip(m.Groups["value"].Captures().Select(a => a.Value)).ToDictionaryEx(p => p.First, p => p.Second);
     }
 
 }

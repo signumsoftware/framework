@@ -1,100 +1,87 @@
 ﻿# Legacy Databases
 
 ## History
-> For year we have been designing the framework with a radical code-first approach. This has allow us to see business software development from a different perspective than any other framework, archive grate levels or re-utilization, and reducing redundancy by using succinct API and run-time intelligence. 
+> For years, we have designed the framework with a radical code-first approach. This has allowed us to view business software development from a unique perspective, achieving high levels of reuse and reducing redundancy through a succinct API and runtime intelligence.
 
-> On the other side, arbitrary conventions in our database schema (like column names and types) has traditionally make us incompatible with legacy databases, making the framework unsuitable in many scenarios. 
+> However, arbitrary conventions in our database schema (such as column names and types) have traditionally made us incompatible with legacy databases, limiting the framework's applicability in many scenarios.
 
-> Also, our reluctance to do code generation, specially after deprecating the Visual Studio Item Templates, has stopped us to remove the last bits of boilerplate that can not be removed otherwise. 
+> Additionally, our reluctance to use code generation—especially after deprecating Visual Studio Item Templates—prevented us from removing the last bits of boilerplate that couldn't be eliminated otherwise.
 
-We're glad to announce that this two limitations have been solved, making it much easier to use Signum Framework with legacy applications.
+We are pleased to announce that these two limitations have been addressed, making it much easier to use Signum Framework with legacy applications.
 
-* Many new [field attributes](.../Signum.Entities/FieldAttributes.md) have been added to customize the translation from entities to database (like `TableNameAttribute`, `ColumnNameAttribute`, `BackReferenceColumnNameAttribute`, `TicksColumnAttribute`... ).
+* Many new [field attributes](../../Signum.Entities/FieldAttributes.md) have been added to customize the translation from entities to the database (e.g., `TableNameAttribute`, `ColumnNameAttribute`, `BackReferenceColumnNameAttribute`, `TicksColumnAttribute`).
+* Using [PrimaryKey](../../Signum.Entities/PrimaryKey.md) and [PrimaryKeyAttribute](../../Signum.Entities/FieldAttributes.md), you can change the type of the primary key to `int`, `long`, `Guid`, or any other `IComparable`, even if the `Id` column is defined in the base `Entity` class.
+* The new [EntityCodeGenerator](EntityCodeGenerator.md) can generate entities from almost any legacy database using these attributes.
+* [LogicCodeGenerator](LogicCodeGenerator.md) and [ReactCodeGenerator](ReactCodeGenerator.md) can be used to remove redundant parts of creating logic files, React views, and client files.
 
-* Using [PrimaryKey](.../Signum.Entities/PrimaryKey.md) and [PrimaryKeyAttribute](../Signum.Entities/FieldAttributes.md) we can change the type of the PrimaryKey to `int`, `long`, `Guid` or any other `IComparable`, even if the `Id` column is defined in the base `Entity` class.
+These new features do not sacrifice the experience for greenfield projects; instead, they have a positive impact, allowing you to auto-generate logic and React components from hand-crafted entities.
 
-* The new [EntityCodeGenerator](EntityCodeGenerator.md) is able to generate entities from almost any legacy database using the previous attributes. 
-
-* Finally [LogicCodeGenerator](LogicCodeGenerator.md), [WebCodeGenerator](WebCodeGenerator.md) and [WindowsCodeGenerator](WindowsCodeGenerator.md) can be used to remove the redundant parts of creating Logic files and Web and Windows views and Client files. 
-
-This new features does not sacrifice the experience for greenfield projects, instead they have a positive impact, allowing you to auto-generate Logic, Windows and Web from the hand-made entities. 
-
-The end result is being able to create a full Signum Framework application in a mater of minutes (Ok, maybe some hours...) from the database. Of course you'll have to invest time writing the interesting business logic and polishing the user interface, but a lot of redundant code will be made for you automatically.  
+The end result is the ability to create a full Signum Framework application in a matter of minutes (well, maybe hours) from the database. Of course, you'll still need to invest time writing business logic and polishing the user interface, but much of the redundant code will be generated automatically.
 
 ## Connecting to AdventureWorks
 
-The approach that we followed with **Northwind** example database was **revolutionary**: Create Southwind from scratch, maybe reconsidering the design, and load the data using LINQ to SQL to read the legacy database. 
+With the **Northwind** example database, we took a revolutionary approach: creating Southwind from scratch, reconsidering the design, and loading data using LINQ to SQL to read the legacy database.
 
-Now with **AdventureWorks** we'll follow an **evolutionary** approach, creating an application with just the minimum database changes necessary, and maybe even allowing the old application(s) and the new one to work at the same time for a while, and when the old application(s) are deprecated, we can evolve the new one easily, alongside with the schema, using the schema synchronizer.
+With **AdventureWorks**, we'll follow an evolutionary approach: creating an application with minimal database changes, possibly allowing the old and new applications to run simultaneously for a while. When the old applications are deprecated, you can evolve the new one easily, along with the schema, using the schema synchronizer.
 
-The strategy that you should follow depends on the quality of the database schema, and in the case of big databases, the downtime in production environment while loading the data. 
+The strategy you should follow depends on the quality of the database schema and, for large databases, the downtime required in production while loading data.
 
-Take this detailed tutorial about `AdventureWorks` as a guide for converting your legacy database in a Signum Framework application following an **evolutionary** strategy: 
+This tutorial guides you through converting your legacy AdventureWorks database into a Signum Framework application using an evolutionary strategy:
 
-### Step 1: Generate empty application
+### Step 1: Generate an Empty Application
 
-1. Go to [Create Application](http://signumsoftware.com/en/DuplicateApplication), 
+1. Go to [Create Application](http://signumsoftware.com/en/DuplicateApplication).
 2. Choose "AdventureWorks" as the name.
-3. Deselect "Example Entities and Logic", some other dependent modules should be deselected automatically. 
-4. Select/Deselect the remaining modules as you need. 
-5. Press "Create Application" and wait for the result
-6. Download the application and follow the steps 1 to 4 in First steps. 
+3. Deselect "Example Entities and Logic"; some dependent modules will be deselected automatically.
+4. Select/deselect the remaining modules as needed.
+5. Press "Create Application" and wait for the result.
+6. Download the application and follow steps 1 to 4 in the First Steps guide.
 
-At this point you should have a version of Southwind that has been renamed to AdventureWorks and without a trace of any Southwind entity. The solution should compile correctly. 
+At this point, you should have a version of Southwind renamed to AdventureWorks, with no trace of any Southwind entity. The solution should compile correctly.
 
-### Step 2: Restore Adventure works database
+### Step 2: Restore AdventureWorks Database
 
-1. Download "AdventureWorks2012-Full Database Backup.zip" from "http://msftdbprodsamples.codeplex.com/"
-2. Restore the backup in "AdventureWorks" database using SQL Management Studio. 
-3. If your database server is something different than `localhost`, you'll need to create a `UserConnections.txt` file in `C:\` with something like: 
+1. Download "AdventureWorks2012-Full Database Backup.zip" from "https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure?view=sql-server-ver17&tabs=ssms".
+2. Restore the backup to the "AdventureWorks" database using SQL Management Studio.
+3. If your database server is not `localhost`, fix `appsettings.json`.
 
-```
-AdventureWorks>Data Source=MyServer;Initial Catalog=AdventureWorks;User ID=sa;Password=sa
-```
+### Step 3: Disable Other Modules
 
-### Step 3: Disabling any other module
+Before generating entities, comment out any module that could register its own tables in the database, complicating the situation.
 
-Before generating the entities, makes sense that we comment out any module that could be registering their own tables in the database, complicating the situation.
-
-In `Start` method of `Starter` class, comment out every line between
+In the `Start` method of the `Starter` class, comment out every line between:
 
 ```
 OperationLogic.Start(sb);
 ```
-to the line 
-
+and
 ```
-Schema.Current.OnSchemaCompleted();;
+Schema.Current.OnSchemaCompleted();
 ```
+(Both lines NOT included!)
 
-Both lines NOT included!
-
-Also replace the lines 
-```C#
+Also, replace:
+```csharp
 sb.Schema.Settings.OverrideAttributes((ExceptionEntity ua) => ua.User, new ImplementedByAttribute(typeof(UserEntity)));
 sb.Schema.Settings.OverrideAttributes((OperationLogEntity ua) => ua.User, new ImplementedByAttribute(typeof(UserEntity)));
-````
-
-By 
-
-```C#
+```
+with:
+```csharp
 sb.Schema.Settings.OverrideAttributes((ExceptionEntity ua) => ua.User, new ImplementedByAttribute(/*typeof(UserEntity)*/));
 sb.Schema.Settings.OverrideAttributes((OperationLogEntity ua) => ua.User, new ImplementedByAttribute(/*typeof(UserEntity)*/));
-````
+```
 
-### Step 4: Adapting the legacy Schema
+### Step 4: Adapt the Legacy Schema
 
-If you run the `AdventureWorks.Load` application and choose `[G]enerate` -> `[E]ntities` and exception will be thrown. We'll need to fix that.
+If you run the `AdventureWorks.Terminal` application and choose `[G]enerate` -> `[E]ntities`, an exception will be thrown. We'll need to fix that.
 
-Unfortunately is not that easy, we have to override `EntityCodeGenerator` to teach the code generator about the singularities of `AdventureWorks` and how to adapt them to the requirements of Signum Framework. This is the most complicated step. 
+Unfortunately, it's not that easy. You must override `EntityCodeGenerator` to teach the code generator about the singularities of AdventureWorks and how to adapt them to Signum Framework requirements. This is the most complex step.
 
-* First you need to have some knowledge of how Signum Framework represents [`Entity` and `EmbeddedEntity`](../../Signum.Entities/BaseEntities.md), [`MList<T>`](../../Signum.Entities/MList.md), [`Lite<T>`](../../Signum.Entities/Lite.md), etc... in the database and what are the benefits of using each one. It's recomended to have some previous experience with the framework or make some module manually to get used. 
+* First, understand how Signum Framework represents [`Entity` and `EmbeddedEntity`](../../Signum.Entities/BaseEntities.md), [`MList<T>`](../../Signum.Entities/MList.md), [`Lite<T>`](../../Signum.Entities/Lite.md), etc., in the database and the benefits of each. It's recommended to have prior experience with the framework or manually create a module to get used to it.
+* Review the source code of [EntityCodeGenerator](EntityCodeGenerator.md) to see how it generates entity code; it's a self-contained piece of code and relatively easy to understand.
+* Create your own class `AdventureWorksEntityCodeGenerator` inheriting from `EntityCodeGenerator`, and register it at the very beginning of the `Main` method in `Program.cs`:
 
-* Then you need to take a look at the source code of [EntityCodeGenerator](EntityCodeGenerator.md) to see how it generates the entities code, is a self-contained piece of code relatively easy to understand. 
-
-* Then you need to create your own class `AdventureWorksEntityCodeGenerator` that inherits from `EntityCodeGenerator`, and register at the very beginning of the `Main` method in `Program.cs`
-
-```C#
+```csharp
 static void Main(string[] args)
 {
    CodeGenerator.Entities = new AdventureWorksEntityCodeGenerator();
@@ -102,23 +89,20 @@ static void Main(string[] args)
 }
 ```
 
-In order to customize the generator, we'll need to start overriding methods in `AdventureWorksEntityCodeGenerator`. 
+To customize the generator, override methods in `AdventureWorksEntityCodeGenerator`.
 
-Signum Framework now is much more flexible with legacy database, supporting arbitrary names of tables and columns, letting you choose the type of the inherited primary key, change Ticks to be a `DateTime` column, supporting default constraints,  etc... But we still require that **every table has exactly one primary key column**, and that **the primary key is not a foreign key**. 
+Signum Framework is now much more flexible with legacy databases, supporting arbitrary table and column names, custom primary key types, changing Ticks to a `DateTime` column, supporting default constraints, etc. However, we still require that **every table has exactly one primary key column**, and that **the primary key is not a foreign key**.
 
-If you take a look at the [Adventure Works database diagram](http://merc.tv/img/fig/AdventureWorks2008.gif), these restrictions are almost not followed by any table. No panic!! We can classify the problems and solve them one by one. 
+If you look at the [AdventureWorks database diagram](http://merc.tv/img/fig/AdventureWorks2008.gif), these restrictions are rarely followed. No panic! We can classify the problems and solve them one by one:
 
-1. Some **main tables**, like `Person`, `Store` or `Vendor` have a primary key that is, at the same time, foreign key and primary key. This is a way to create 1-to-1 relationships that Signum Framework does not allow, so we'll need to create a new column in this tables for the foreign key.
+1. Some **main tables** (e.g., `Person`, `Store`, `Vendor`) have a primary key that is also a foreign key. This creates 1-to-1 relationships that Signum Framework does not allow, so you'll need to create a new column in these tables for the foreign key.
+2. Most **relational tables** (e.g., `SalesTerritory`, `ProductDocument`, `BusinessEntityAddress`) have multiple foreign keys as primary keys and no unique Id. Add a new `ID PRIMARY KEY IDENTITY` and a multi-column unique index on the old primary keys. Any code accessing the table should be unaffected **as long as there are no FKs to this table**. Fortunately, that's the case for most tables, with a few exceptions.
+3. Tables like `SalesOrderDetail`, `PurchaseOrderDetail`, `EmailAddress` have a foreign key as part of their primary key columns, but also contain a valid unique column to serve as `Id`. Remove the foreign key from the list of primary key columns.
+4. `SpecialOfferProduct` is the only table referred to with multiple primary keys. Remove the foreign key manually and replace it with a simple foreign key, or refer to `SpecialOffer` and `Product` directly. *(Actually, this is not necessary because the FKs are gone in AdventureWorks2012!)*
 
-2. Most **relational tables**, like `SalesTerritory`, `ProductDocument` or `BusinessEntityAddress` have multiple foreign keys as primary keys and do not have their own unique Id. But if we add a new `ID PRIMARY KEY IDENTITY`,  and we add one multiple-column unique index on the old primary keys, any code that access the table should be unaffected **as long as there are no FKs to this table**. Fortunately that's the case for most of the tables with a few exceptions.
+Override `GetTables` to modify the retrieved database schema before code generation. For example:
 
-3. The tables `SaleOrderDetail`, `PurchaseOrderDetail`, `EmailAddress` have a foreign key as part of their primary key columns, but they also contain a valid unique column that will serve us as `Id`, so we just have to remove the foreign key from the list of primary key columns. 
-
-4. `SpecialOfferProduct` is the only that is referred that has multiple primary keys. In this case we'll need to remove the foreign key manually and replace them by a simple foreign key, or refer to `SpecialOffer` and `Product` directly. *(Well, actually is not necessary because the FKs are gone in AdventureWorks2012 for some reason!!)*.
-
-After this analysis, we can override `GetTables` to make some modifications in the retrieved database schema before any code is generated. This one will work for example: 
-
-```C#
+```csharp
 public class AdventureWorksEntityCodeGenerator : EntityCodeGenerator
 {
     protected override List<DiffTable> GetTables()
@@ -127,14 +111,14 @@ public class AdventureWorksEntityCodeGenerator : EntityCodeGenerator
 
         var dic = tables.ToDictionary(a => a.Name.Name);
 
-        //Problem 3, remove redundant primary keys
+        // Problem 3: remove redundant primary keys
         dic["PurchaseOrderDetail"].Columns["PurchaseOrderID"].PrimaryKey = false;
         dic["SalesOrderDetail"].Columns["SalesOrderID"].PrimaryKey = false;
         dic["EmailAddress"].Columns["BusinessEntityID"].PrimaryKey = false;
 
         foreach (var t in tables)
         {
-            //Problem 2, replace multiple primary keys by unique index and an a new Id column  
+            // Problem 2: replace multiple primary keys with a unique index and a new Id column
             if (t.Columns.Values.Count(a => a.PrimaryKey) > 1)
             {
                 var list = t.Columns.Values.Where(a => a.PrimaryKey).ToList();
@@ -142,7 +126,7 @@ public class AdventureWorksEntityCodeGenerator : EntityCodeGenerator
                 foreach (var item in list)
                     item.PrimaryKey = false;
 
-                var index = new DiffIndex { Columns = list.Select(a => a.Name).ToList(), IsUnique = true, IndexName = "UIX_" + list.ToString(a => a.Name, "_"), Type = DiffIndexType.NonClustered };
+                var index = new DiffIndex { Columns = list.Select(a => a.Name).ToList(), IsUnique = true, IndexName = "UIX_" + string.Join("_", list.Select(a => a.Name)), Type = DiffIndexType.NonClustered };
                 t.Indices.Add(index.IndexName, index);
 
                 t.Columns.Add("Id", new DiffColumn
@@ -154,7 +138,7 @@ public class AdventureWorksEntityCodeGenerator : EntityCodeGenerator
                 }); 
             }
 
-            //Problem 1, primary keys that are also forein keys, split in two columns
+            // Problem 1: primary keys that are also foreign keys, split into two columns
             var primaryKey = t.Columns.Values.SingleOrDefault(a => a.PrimaryKey);
             if (primaryKey != null && primaryKey.ForeignKey != null)
             {
@@ -174,17 +158,17 @@ public class AdventureWorksEntityCodeGenerator : EntityCodeGenerator
         return tables;
     }
 
-    ...
+    // ...
 }
 ```
 
-### Step 5: Polishing the generated entities.
+### Step 5: Polish the Generated Entities
 
-If we try to generate the entities now, using `[G]enerate` -> `[E]ntities` again, it will work, but the result could be improved a little bit. You could make the changes manually but we'll see how to teach the `EntityCodeGenerator` to follow your orders:
+If you generate the entities now (`[G]enerate` -> `[E]ntities`), it will work, but the result could be improved. You could make changes manually, but it's better to teach `EntityCodeGenerator` to follow your rules:
 
-1.  Some entities contain `SqlHierarchyId` or `SqlGeometry`. We need to include a reference to `dotMorten.Microsoft.SqlServer.Types` assembly and add the necessary namespace overriding `GetUsingNamespaces`.  
+1. Some entities contain `SqlHierarchyId` or `SqlGeometry`. Include a reference to the `dotMorten.Microsoft.SqlServer.Types` assembly and add the necessary namespace by overriding `GetUsingNamespaces`:
 
-    ```C#
+    ```csharp
     protected override List<string> GetUsingNamespaces(string fileName, IEnumerable<DiffTable> tables)
     {
         var result = base.GetUsingNamespaces(fileName, tables);
@@ -194,8 +178,8 @@ If we try to generate the entities now, using `[G]enerate` -> `[E]ntities` again
         return result;
     }
     ```
-2. Some tables, like `PersonCreditCard` reference to `Person` but the column name is `BusinessEntityID`, let's override it so the field name makes more sense: 
-   ```C#
+2. Some tables, like `PersonCreditCard`, reference `Person` but the column name is `BusinessEntityID`. Override it so the field name makes more sense:
+   ```csharp
    protected override string GetFieldName(DiffTable table, DiffColumn col)
    {
        if (col.Name == "BusinessEntityID" && col.ForeignKey != null)
@@ -204,8 +188,8 @@ If we try to generate the entities now, using `[G]enerate` -> `[E]ntities` again
        return base.GetFieldName(table, col);
    }
    ```
-3. Many tables have a `ModifiedDate` column of type `DateTime` for concurrency control. Signum Framework uses `Ticks` of type `long`, but we can override it using `TicksColumnAttribute`! 
-   ```C#
+3. Many tables have a `ModifiedDate` column of type `DateTime` for concurrency control. Signum Framework uses `Ticks` of type `long`, but you can override it using `TicksColumnAttribute`:
+   ```csharp
    protected override string GetTicksColumnAttribute(DiffTable table)
    {
        if (table.Columns.ContainsKey("ModifiedDate"))
@@ -214,8 +198,8 @@ If we try to generate the entities now, using `[G]enerate` -> `[E]ntities` again
        return "TicksColumn(false)";
    }
    ```
-   Then we don't need to generate the `ModifiedDate` field anymore:
-   ```C#
+   Then, don't generate the `ModifiedDate` field anymore:
+   ```csharp
    protected override string WriteField(string fileName, DiffTable table, DiffColumn col)
    {
        if (col.Name == "ModifiedDate")
@@ -224,13 +208,12 @@ If we try to generate the entities now, using `[G]enerate` -> `[E]ntities` again
        return base.WriteField(fileName, table, col);
    }
    ```
-4. And finally, the most important step: We can tell the generator what tables should be considered `MList<T>` of a parent entity. This is a good idea if there are a few elements in the list that should be modified by the parent entity, like the lines in an order, not if there are plenty of independent entities, like the persons in a country. 
-   
-   For example, `SalesOrderDetail`, `PurchaseOrderDetail`, `ProductProductPhoto` and `PersonPhone` and `EmailAddress` could better be manipulated as an `MList` of **embedded entities** inside a parent entity, than as entities that will be manipulated independently.
+4. The most important step: tell the generator which tables should be considered `MList<T>` of a parent entity. This is useful for lists that should be modified by the parent entity (e.g., order lines), not for independent entities (e.g., persons in a country).
+   For example, `SalesOrderDetail`, `PurchaseOrderDetail`, `ProductProductPhoto`, `PersonPhone`, and `EmailAddress` are better as `MList` of embedded entities inside a parent entity.
 
-   **Note:** The base implementation of `GetMListInfo` is now (2016) smart enought to detect MList-like tables using heuristics, still is interesting to see how you can override it in case this heuristics fail.
+   **Note:** The base implementation of `GetMListInfo` is now smart enough to detect MList-like tables using heuristics, but you can override it if needed:
 
-   ```C#
+   ```csharp
    protected override MListInfo GetMListInfo(DiffTable table)
    {
        switch (table.Name.Name)
@@ -245,15 +228,13 @@ If we try to generate the entities now, using `[G]enerate` -> `[E]ntities` again
    }
    ```
 
-   For other tables, like `SalesOrderHeaderSalesReason`, `ProductModelIllustration` and `ProductDocument`, an `MList` with an embedded entity will be an overkill, because the embedded entity will contains just a reference to another table. You can use `TrivialElementColumn` to directly refer the related entity in the `MList`. 
+   For other tables, like `SalesOrderHeaderSalesReason`, `ProductModelIllustration`, and `ProductDocument`, an `MList` with an embedded entity is overkill, since the embedded entity only contains a reference to another table. Use `TrivialElementColumn` to refer to the related entity directly:
 
-   ```C#
+   ```csharp
    protected override MListInfo GetMListInfo(DiffTable table)
    {
        switch (table.Name.Name)
        {
-           case "SalesOrderDetail": ... 
-           [...]
            case "SalesOrderHeaderSalesReason": return new MListInfo(table.Columns.GetOrThrow("SalesOrderID")) 
            { 
                TrivialElementColumn = table.Columns.GetOrThrow("SalesReasonID") 
@@ -271,56 +252,54 @@ If we try to generate the entities now, using `[G]enerate` -> `[E]ntities` again
    }
    ```
 
+Now, if you run `AdventureWorks.Load` and choose `[G]enerate` -> `[E]ntities`, many classes should be generated in `AdventureWorks.Entities`. Include them in the project and they should compile cleanly after adding the reference to `Microsoft.SqlServer.Types`.
 
-Nice! now if run `AdventureWorks.Load` and choose  `[G]enerate` -> `[E]ntities`, a lot of classes should have been generated in `AdventureWorks.Entities`, you can see them with "Show all files" in Solution Explorer. Just include them in the project and they should compile cleanly after including the reference to `Microsoft.SqlServer.Types`.
+**Note:** Don't rush to create entities; check the generated result and keep iterating by overriding methods and regenerating until the results are satisfactory. Designing good entities is the most important step in building a Signum Framework application.
 
-**Note:** Don't essitate creating the entities too fast, check the generated result and keep iterating by overriding methods and re-generating again until the results are satisfactory. Designing good entities is the most important step building an application with Signum Framework. 
+### Step 6: Generate Logic Classes
 
+Generating logic is straightforward. If you run `[G]enerate` -> `[L]ogic`, it will ask how to group entities into modules and which expressions to register. This can be annoying since they're already grouped by namespace. Create a new `AdventureWorksLogicCodeGenerator` and override `GetModules` and `ShouldWriteExpression`:
 
-### Step 6: Generate Logic class. 
-
-Generating the logic will be more straight forward. If we run `[G]enerate` -> `[L]ogic` it will start asking us how to group the entities into modules and what expressions to register. In our case this is a little bit annoying, since they are already grouped by namespace. Let's create a new `AdventureWorksLogicCodeGenerator` and override `GetModules` and `ShouldWriteExpression`: 
-
-```C#
-    public class AdventureWorksLogicCodeGenerator : LogicCodeGenerator
+```csharp
+public class AdventureWorksLogicCodeGenerator : LogicCodeGenerator
+{
+    protected override IEnumerable<Module> GetModules()
     {
-        protected override IEnumerable<Module> GetModules()
-        {
-            return GroupByNamespace(CandidateTypes(), this.SolutionName + ".Entities");
-        }
-
-        public static IEnumerable<Module> GroupByNamespace(List<Type> candidates, string baseNamespace)
-        {
-            var result = candidates.Where(a => a != typeof(ApplicationConfigurationEntity)).GroupBy(a => a.Namespace).Select(gr => new Module
-            {
-                ModuleName = gr.Key == baseNamespace ? "Internals" :
-                             gr.Key.RemoveStart(baseNamespace.Length + 1),
-                Types = gr.ToList(),
-            }).ToList();
-
-            return result;
-        }
-
-        protected override bool ShouldWriteExpression(LogicCodeGenerator.ExpressionInfo ei)
-        {
-            return true;
-        }
+        return GroupByNamespace(CandidateTypes(), this.SolutionName + ".Entities");
     }
+
+    public static IEnumerable<Module> GroupByNamespace(List<Type> candidates, string baseNamespace)
+    {
+        var result = candidates.Where(a => a != typeof(ApplicationConfigurationEntity)).GroupBy(a => a.Namespace).Select(gr => new Module
+        {
+            ModuleName = gr.Key == baseNamespace ? "Internals" :
+                         gr.Key.RemoveStart(baseNamespace.Length + 1),
+            Types = gr.ToList(),
+        }).ToList();
+
+        return result;
+    }
+
+    protected override bool ShouldWriteExpression(LogicCodeGenerator.ExpressionInfo ei)
+    {
+        return true;
+    }
+}
 ```
 
-Then we need to register our new class just as we did before, at the beginning of the `Main` method:
+Register your new class at the beginning of the `Main` method:
 
-```C#
+```csharp
 CodeGenerator.Logic = new AdventureWorksLogicCodeGenerator();
 ```
 
-Let's run `[G]enerate` -> `[L]ogic` one more time and now it generates all the logic files, without asking questions.   
+Run `[G]enerate` -> `[L]ogic` again; now it generates all logic files without asking questions.
 
-Just as we did before, include all the generated files in `AdventureWorks.Logic`. They should compile cleanly. 
+Include all generated files in `AdventureWorks.Logic`. They should compile cleanly.
 
-Also, in the `Start` method, after the commented out region, call the newly generated logic classes so they became part of the in-memory representation of the database schema, like this: 
+In the `Start` method, after the commented-out region, call the newly generated logic classes so they become part of the in-memory database schema:
 
-```C#
+```csharp
 InternalsLogic.Start(sb);
 ProductionLogic.Start(sb);
 PersonLogic.Start(sb);
@@ -329,26 +308,26 @@ PurchasingLogic.Start(sb);
 SalesLogic.Start(sb);
 ```
 
-You'll need to include the namespaces to make it compile. 
+Include the necessary namespaces to compile.
 
-### Step 7: Add Sql Migrations to the database
+### Step 7: Add SQL Migrations to the Database
 
-If everything has gone right, the application now should contain all the information to generate the database schema from scratch, and if we create new Sql Migrations by running `[SQL] Migrations` in `AdventureWorks.Load`, the changes should be relatively small: 
+If everything has gone well, the application should now contain all the information to generate the database schema from scratch. If you create new SQL migrations by running `[SQL] Migrations` in `AdventureWorks.Load`, the changes should be relatively small:
 
-1. The synchronizer will ask for the renames of the some unnecessary columns in the tables that have been converted to MList, answer no ('n'). 
-2. It will also ask for removing controlled indexes. This is because some AdventureWorks indexes have the same convention than the ones generated by the framework. Answer no. 
-3. Ask for the default value for the new non-nullable columns, like the primary-foreign keys that have been splitted in primary key and foreign key. Just press [Enter].
-4. Finally, it will ask you to create some recommended indexes in foreign keys. Also not necessary for now.
+1. The synchronizer will ask to rename some unnecessary columns in tables converted to MList; answer no ('n').
+2. It will ask to remove controlled indexes. Some AdventureWorks indexes have the same convention as those generated by the framework. Answer no.
+3. It will ask for default values for new non-nullable columns, like primary-foreign keys split into primary key and foreign key. Just press [Enter].
+4. Finally, it will ask to create recommended indexes on foreign keys. Not necessary for now.
 
-The generated script should contains the necessary modifications to adapt the database to the requirements of Signum Framework. While the script looks long, the modifications are pretty harmless: 
+The generated script contains the necessary modifications to adapt the database to Signum Framework requirements. While the script may look long, the modifications are harmless:
 
-1. Set Snapshot isolation as the default.
-2. Create some mandatory tables, like `TypeEntity`, `OperationSymbol`, `OperationLogEntity` and `ExceptionEntity`.
-3. On the tables that have been converted to an `MList` drop `ModifiedDate`, alongside with his default constraint.
-4. Drop the multi-column primary key constraints and add the new `Id INT IDENTITY NOT NULL PRIMARY KEY`, finally creating a multi-column unique index in the table. 
-5. For the new non-nullable columns, an script to remove the unnecessary Default constaint will be created. Also we need to fill information in this new fields:
+1. Set snapshot isolation as the default.
+2. Create mandatory tables, like `TypeEntity`, `OperationSymbol`, `OperationLogEntity`, and `ExceptionEntity`.
+3. In tables converted to `MList`, drop `ModifiedDate` and its default constraint.
+4. Drop multi-column primary key constraints and add a new `Id INT IDENTITY NOT NULL PRIMARY KEY`, then create a multi-column unique index.
+5. For new non-nullable columns, a script to remove unnecessary default constraints will be created. Also, fill information in these new fields:
 
-  ```SQL
+  ```sql
   update Person.Person set idBusinessEntity = BusinessEntityID
   update Person.Password set idPerson = BusinessEntityID
   update Purchasing.Vendor set idBusinessEntity = BusinessEntityID
@@ -357,37 +336,36 @@ The generated script should contains the necessary modifications to adapt the da
   update HumanResources.Employee set idPerson = BusinessEntityID
   ```
 
-6. Many foreign keys and indexes are renamed to follow the conventions of Signum Framework.
-7. All the necessary rows in `TypeEntity` are created.
-8. If cache module has been started, it will enable the notification broker. 
-9. All the necessary rows in `OperationSymbol` are created.
+6. Many foreign keys and indexes are renamed to follow Signum Framework conventions.
+7. All necessary rows in `TypeEntity` are created.
+8. If the cache module has started, it will enable the notification broker.
+9. All necessary rows in `OperationSymbol` are created.
 
-Once you have reviewed and understood the script, fell free to execute it using Sql Migrations.
-   
-AdventureWorks has evolved to SignumAdventureWorks, now is free to grow wings and fangs :P 
+Once you have reviewed and understood the script, feel free to execute it using SQL migrations.
 
+AdventureWorks has evolved to SignumAdventureWorks—now it's ready to grow wings and fangs :)
 
-### Step 8: Re-enable modules
+### Step 8: Re-enable Modules
 
-1. Let's turn back to `Start` method in `Starter` class and bring back the commented-out code. 
-2. Create another Sql Migration. Depending how many modules we selected in Step 1, more tables will be created. Fortunately, the synchronized does everything for us. It is possible that some of the stages of the synchronized have exception because previous ones have not been executed. Don't worry, the generated script will be just fine. Execute it all removing the exception messages and create another migration.
-3. Load the application one more time, but this time run `[CS] C#-Migrations` to create some basic entities:
+1. Return to the `Start` method in the `Starter` class and restore the commented-out code.
+2. Create another SQL migration. Depending on how many modules you selected in Step 1, more tables will be created. Fortunately, the synchronizer does everything for you. Some stages may throw exceptions because previous ones haven't been executed. Don't worry; the generated script will be fine. Execute it, remove exception messages, and create another migration.
+3. Load the application again, but this time run `[CS] C#-Migrations` to create some basic entities:
     1. Create Culture Info
-    2. Import Export Chart Scripts
+    2. Import/Export Chart Scripts
 
-**Note:** Import Export AuthRules won't work untill you define your roles and export them.  
+**Note:** Import/Export AuthRules won't work until you define your roles and export them.
 
-Create Sql Migrations one more time and now that we have the `CultureInfoEntity` registered, the  `EmailTemplateEntity` for the remember password will be created.
+Create SQL migrations again. Now that `CultureInfoEntity` is registered, the `EmailTemplateEntity` for the remember password will be created.
 
-Your application is growing fast! 
+Your application is growing fast!
 
-### Step 9: Create example users
+### Step 9: Create Example Users
 
-Also we will need to create some simple users and roles if we want to be able to log-in in the application (if Authorization module has been selected). 
+You'll need to create some simple users and roles to log in to the application (if the Authorization module is selected).
 
-Add this method in Program.cs:
+Add this method in `Program.cs`:
 
-```C#
+```csharp
 public static void LoadUsers()
 {
     using (Transaction tr = new Transaction())
@@ -412,49 +390,48 @@ public static void LoadUsers()
         
         tr.Commit();
     }
-
 }
 ```
 
-And register it C# Migrations. 
+Register it in C# migrations:
 
-```C#
- {LoadUsers},
+```csharp
+{LoadUsers},
 ```
 
-Then execute the new method using `[CS]-C# Migrations`. 
+Then execute the new method using `[CS]-C# Migrations`.
 
 ### Step 10: Generate Web Views
 
-Just as we did with logic, we need to create a `AdventureWorksWebCodeGenerator` that groups the entities by name-space to avoid annoying questions: 
+As with logic, create an `AdventureWorksWebCodeGenerator` that groups entities by namespace to avoid unnecessary questions:
 
-```C#
+```csharp
 public class AdventureWorksWebCodeGenerator : WebCodeGenerator
 {
     protected override IEnumerable<Module> GetModules()
     {
-        return AdventureWorksLogicCodeGenerator.GroupByNamespace(CandiateTypes(), this.SolutionName + ".Entities");
+        return AdventureWorksLogicCodeGenerator.GroupByNamespace(CandidateTypes(), this.SolutionName + ".Entities");
     }
 }
 ```
 
-And we also need to register it in the `Main` method.  
+Register it in the `Main` method:
 
-```C#
+```csharp
 CodeGenerator.React = new AdventureWorksWebCodeGenerator();
 ```
 
-Then, if we just run `[G]enerate -> [React]` many new files should be created in `AdventureWorks.React/App`>
+Run `[G]enerate -> [React]`; many new files should be created in `AdventureWorks.React/App`:
 
 * For each module:
-    * N Typescript React-Components (1 for each view).
-    * 1 Typescript Client module to register the views and other client stuff.
-    * 1 C# Web.API Controller Example. 
-    * 1 C# Server file to register server stuff. 
+    * N TypeScript React components (one for each view)
+    * 1 TypeScript client module to register views and other client code
+    * 1 C# Web API controller example
+    * 1 C# server file to register server code
 
-Just register the new server classes in Global.asax `WebStart` method, just before the line `OmniboxServer.Start(config,`: 
+Register the new server classes in `Global.asax` (`WebStart` method), just before the line `OmniboxServer.Start(config, ... )`:
 
-```C#
+```csharp
 InternalsServer.Start(config);
 ProductionServer.Start(config);
 PersonServer.Start(config);
@@ -463,33 +440,33 @@ PurchasingServer.Start(config);
 SalesServer.Start(config);
 ```
 
-Similarly, you will need to register the client modules in `Main.tsx` also before `OmniboxClient.start(`:
+Similarly, register the client modules in `Main.tsx`, also before `OmniboxClient.start(`:
 
-```C#
-InternalsClient.start({ routes });;
-ProductionClient.start({ routes });;
-PersonClient.start({ routes });;
-HumanResourcesClient.start({ routes });;
-PurchasingClient.start({ routes });;
-SalesClient.start({ routes });;
+```typescript
+InternalsClient.start({ routes });
+ProductionClient.start({ routes });
+PersonClient.start({ routes });
+HumanResourcesClient.start({ routes });
+PurchasingClient.start({ routes });
+SalesClient.start({ routes });
 ```
 
-Note: Is recomended to register the modules in the order of dependencies, that's why we put them and the end.   
+Note: It's recommended to register modules in dependency order; that's why they're listed at the end.
 
-That's it. Now you can run the web application and log-in with `su` password `su`. A fully featured application with the SearchControl, Operations, Charting, Omnibox and the remaining modules that you could have selected are all available. 
+That's it! Now you can run the web application and log in with `su`/`su`. A fully featured application with SearchControl, Operations, Charting, Omnibox, and any other selected modules is available.
 
 ### Step 11: Generate Windows Views
 
-Exactly the same process should be followed for Windows. 
+Follow the same process for Windows.
 
-We need to create a `AdventureWorksWindowsCodeGenerator` that groups the entities by name-space to avoid annoying questions: 
+Create an `AdventureWorksWindowsCodeGenerator` that groups entities by namespace to avoid unnecessary questions:
 
-```C#
+```csharp
 public class AdventureWorksWindowsCodeGenerator : WindowsCodeGenerator
 {
     protected override IEnumerable<Module> GetModules()
     {
-        return AdventureWorksLogicCodeGenerator.GroupByNamespace(CandiateTypes(), this.SolutionName + ".Entities");
+        return AdventureWorksLogicCodeGenerator.GroupByNamespace(CandidateTypes(), this.SolutionName + ".Entities");
     }
 
     protected override string GetViewName(Type type)
@@ -504,22 +481,22 @@ public class AdventureWorksWindowsCodeGenerator : WindowsCodeGenerator
 }
 ```
 
-`GetViewName` has also been overridden to avoid some conflicts with the view names. 
+Override `GetViewName` to avoid conflicts with view names.
 
-And we also need to register it in the `Main` method.  
+Register it in the `Main` method:
 
-```C#
+```csharp
 CodeGenerator.Windows = new AdventureWorksWindowsCodeGenerator();
 ```
 
-Then, if we just run `[G]enerate -> [Windows]` many new files should be created in 
+Run `[G]enerate -> [Windows]`; many new files should be created in:
 
-* `AdventureWorks.Windows/Controls`: Auto-generate controls for each entity, code behind included.
-* `AdventureWorks.Windows/Code`: Auto-generated Client classes to register the views.
+* `AdventureWorks.Windows/Controls`: Auto-generated controls for each entity, including code-behind
+* `AdventureWorks.Windows/Code`: Auto-generated client classes to register views
 
-Just register the new modules in App.xaml.cs in the `Start` method, just before the line `Navigator.Initialize();`: 
+Register the new modules in `App.xaml.cs` (`Start` method), just before the line `Navigator.Initialize();`:
 
-```C#
+```csharp
 InternalsClient.Start();
 ProductionClient.Start();
 PersonClient.Start();
@@ -528,18 +505,17 @@ PurchasingClient.Start();
 SalesClient.Start();
 ```
 
-Also ready!. Now you can run the windows application and log-in with `su` password `su`. A fully featured application with the SearchControl, Operations, Charting, Omnibox and the remaining modules that you could have selected are all available. 
+All set! Now you can run the Windows application and log in with `su`/`su`. A fully featured application with SearchControl, Operations, Charting, Omnibox, and any other selected modules is available.
 
+### Step 12: Polish and Maintain
 
-### Step 12: Polish and Maintenance
+This step will take the longest. The auto-generated code is ready, and there's little redundancy, so everything should be easy to change. Now it's time to own the generated code:
 
-This step will be the longest by far. The auto-generated stuff is ready, and there's not too much redundancy so everything should easy to change, but now is time that to own the generated code:
-
-* Make changes in the entities.
-* Implement business logic.
-* Design windows and web user interfaces.
-* Create a graph of roles, create users for each employee, and set permission for each role.
+* Make changes to entities
+* Implement business logic
+* Design Windows and web user interfaces
+* Create a graph of roles, create users for each employee, and set permissions for each role
 * ...
-* Finishing is the hardest part! 
+* Finishing is the hardest part!
 
 Enjoy!

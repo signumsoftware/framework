@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ActiveDirectoryAuthorizerMessage">
+    <Member Name="ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication" Description="L'utente di Active Directory '{0}' non è associato a un utente dell'applicazione." />
+  </Type>
+  <Type Name="ActiveDirectoryConfigurationEmbedded" Description="Active directory configuration">
+    <Member Name="AllowMatchUsersBySimpleUserName" Description="Allow match users by simple user name" />
+    <Member Name="AutoCreateUsers" Description="Auto create users" />
+    <Member Name="AutoUpdateUsers" Description="Aggiorna automaticamente gli utenti" />
+    <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
+    <Member Name="Azure_ClientSecret" Description="Valore del segreto client di AzureAzure Client Secret Value" />
+    <Member Name="Azure_DirectoryID" Description="Azure Directory (tenant) ID" />
+    <Member Name="DefaultRole" Description="Default role" />
+    <Member Name="DirectoryRegistry_Password" Description="DirectoryRegistry Password" />
+    <Member Name="DirectoryRegistry_Username" Description="Nome utente DirectoryRegistry" />
+    <Member Name="DomainName" Description="Domain name" />
+    <Member Name="LoginWithActiveDirectoryRegistry" Description="Login with active directory registry" />
+    <Member Name="LoginWithAzureAD" Description="Login with azure AD" />
+    <Member Name="LoginWithWindowsAuthenticator" Description="Login with windows authenticator" />
+    <Member Name="RoleMapping" Description="Role mapping" />
+    <Member Name="UseDelegatedPermission" Description="Usare l'autorizzazione delegata" />
+  </Type>
+  <Type Name="ActiveDirectoryMessage">
+    <Member Name="AccountEnabled" Description="Account abilitato" />
+    <Member Name="CompanyName" Description="Nome dell'azienda" />
+    <Member Name="Description" Description="Descrizione" />
+    <Member Name="DisplayName" Description="Nome visualizzato" />
+    <Member Name="GivenName" Description="Nome" />
+    <Member Name="HasUser" Description="Ha un utente" />
+    <Member Name="Id" Description="Id" />
+    <Member Name="InGroup" Description="In gruppo" />
+    <Member Name="JobTitle" Description="Titolo di lavoro" />
+    <Member Name="Mail" Description="Posta" />
+    <Member Name="OnlyActiveUsers" Description="Solo utenti attivi" />
+    <Member Name="OnPremisesExtensionAttributes" Description="Attributi di estensione locali" />
+    <Member Name="OnPremisesImmutableId" Description="ID non modificabile locale" />
+    <Member Name="SecurityEnabled" Description="Sicurezza abilitata" />
+    <Member Name="Surname" Description="Cognome" />
+    <Member Name="Visibility" Description="Visibilità" />
+  </Type>
+  <Type Name="ActiveDirectoryPermission">
+    <Member Name="InviteUsersFromAD" Description="Invitare utenti da AD" />
+  </Type>
+  <Type Name="ActiveDirectoryTask">
+    <Member Name="DeactivateUsers" Description="Disattivare gli utenti" />
+  </Type>
+  <Type Name="ADGroupEntity" Description="il gruppo AD" PluralDescription="Gruppi di Active Directory">
+    <Member Name="DisplayName" Description="Nome visualizzato" />
+  </Type>
+  <Type Name="ADGroupOperation">
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="AuthADFileType">
+    <Member Name="CachedProfilePhoto" Description="Foto del profilo memorizzata nella cache" />
+  </Type>
+  <Type Name="AzureADQuery">
+    <Member Name="ActiveDirectoryGroups" Description="Gruppi di Active Directory" />
+    <Member Name="ActiveDirectoryUsers" Description="Utenti di Active Directory" />
+  </Type>
+  <Type Name="CachedProfilePhotoEntity" Description="la foto del profilo memorizzata nella cache" PluralDescription="Foto del profilo memorizzate nella cache">
+    <Member Name="CreationDate" Description="Data di creazione" />
+    <Member Name="Photo" Description="Foto" />
+    <Member Name="Size" Description="Grandezza" />
+    <Member Name="User" Description="Utente" />
+  </Type>
+  <Type Name="CachedProfilePhotoOperation">
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="OnPremisesExtensionAttributesModel" Description="Attributi di estensione locali">
+    <Member Name="ExtensionAttribute1" Description="Attributo di estensione1" />
+    <Member Name="ExtensionAttribute10" Description="Attributo di estensione10" />
+    <Member Name="ExtensionAttribute11" Description="Attributo di estensione11" />
+    <Member Name="ExtensionAttribute12" Description="Attributo di estensione12" />
+    <Member Name="ExtensionAttribute13" Description="Attributo di estensione13" />
+    <Member Name="ExtensionAttribute14" Description="Attributo di estensione14" />
+    <Member Name="ExtensionAttribute15" Description="Attributo di estensione15" />
+    <Member Name="ExtensionAttribute2" Description="Attributo di estensione2" />
+    <Member Name="ExtensionAttribute3" Description="Attributo di estensione3" />
+    <Member Name="ExtensionAttribute4" Description="Attributo di estensione4" />
+    <Member Name="ExtensionAttribute5" Description="Attributo di estensione5" />
+    <Member Name="ExtensionAttribute6" Description="Attributo di estensione6" />
+    <Member Name="ExtensionAttribute7" Description="Attributo di estensione7" />
+    <Member Name="ExtensionAttribute8" Description="Attributo di estensione8" />
+    <Member Name="ExtensionAttribute9" Description="Attributo di estensione9" />
+  </Type>
+  <Type Name="RoleMappingEmbedded" Description="Role mapping">
+    <Member Name="ADNameOrGuid" Description="AD name or guid" />
+    <Member Name="Role" Description="Role" />
+  </Type>
+  <Type Name="UserADMessage">
+    <Member Name="Find0InActiveDirectory" Description="Trova '{0}' in Active Directory" />
+    <Member Name="FindInActiveDirectory" Description="Trova in Active Directory" />
+    <Member Name="NameOrEmail" Description="Nome o e-mail" />
+    <Member Name="NoUserContaining0FoundInActiveDirectory" Description="Nessun utente contenente '{0}' trovato in Active Directory" />
+    <Member Name="PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport" Description="Selezionare l'utente da Active Directory che si desidera importare" />
+    <Member Name="SelectActiveDirectoryUser" Description="Selezionare Utente Active Directory" />
+  </Type>
+  <Type Name="UserADMixin">
+    <Member Name="OID" Description="OID" />
+    <Member Name="SID" Description="SID" />
+  </Type>
+  <Type Name="UserOIDMessage">
+    <Member Name="TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet" Description="L'utente {0} è connesso ad Active Directory e non può avere una password locale impostata" />
+  </Type>
+</Translations>

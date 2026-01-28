@@ -19,9 +19,9 @@ export default function PrintPanelPage(p: {}): React.JSX.Element {
       return undefined;
 
     return (
-      <a href="#" className="sf-line-button" title="Print" onClick={e => handlePrintClick(e, fileType, vsc)}>
+      <LinkButton className="sf-line-button" title="Print" onClick={e => handlePrintClick(e, fileType, vsc)}>
         <FontAwesomeIcon icon="print" />
-      </a>
+      </LinkButton>
     );
   }
 

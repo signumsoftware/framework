@@ -92,338 +92,338 @@ public static class CaseActivityLogic
     public static Expression<Func<CaseNotificationEntity, bool>> IsForMe = n => n.User.Is(UserEntity.Current); // For Deputy scenarios
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Include<CaseEntity>()
-                .WithExpressionFrom((WorkflowEntity w) => w.Cases())
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Description,
-                    e.Workflow,
-                    e.MainEntity,
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<CaseTagTypeEntity>()
-                .WithSave(CaseTagTypeOperation.Save)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.Name,
-                    e.Color
-                });
-
-
-            sb.Include<CaseTagEntity>()
-                .WithExpressionFrom((CaseEntity ce) => ce.Tags())
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.CreationDate,
-                    e.Case,
-                    e.TagType,
-                    e.CreatedBy,
-                });
-
-            new Graph<CaseEntity>.Execute(CaseOperation.SetTags)
+        sb.Include<CaseEntity>()
+            .WithExpressionFrom((WorkflowEntity w) => w.Cases())
+            .WithQuery(() => e => new
             {
-                Execute = (e, args) =>
-                {
-                    var current = e.Tags().ToList();
-
-                    var model = args.GetArg<CaseTagsModel>();
-
-                    var toDelete = current.Where(ct => model.OldCaseTags.Contains(ct.TagType) && !model.CaseTags.Contains(ct.TagType)).ToList();
-
-                    Database.DeleteList(toDelete);
-
-                    model.CaseTags.Where(ctt => !current.Any(ct => ct.TagType.Is(ctt))).Select(ctt => new CaseTagEntity
-                    {
-                        Case = e.ToLite(),
-                        TagType = ctt,
-                        CreatedBy = UserHolder.Current.User,
-                    }).SaveList();
-                },
-            }.Register();
-
-
-            new Graph<CaseEntity>.Execute(CaseOperation.Cancel)
-            {
-                CanExecute = c => c.FinishDate == null ? null : CaseActivityMessage.AlreadyFinished.NiceToString(),
-                Execute = (c, args) =>
-                {
-                    var avoidRecompose = args.TryGetArgS<bool>() ?? false;
-
-                    foreach (var sc in c.SubCases().Where(a => a.FinishDate == null))
-                    {
-                        sc.Execute(CaseOperation.Cancel, true);
-                    }
-
-                    var currentActivities = c.CaseActivities().Where(a => a.DoneBy == null).ToList();
-
-                    foreach (var ca in currentActivities)
-                    {
-                        ca.DoneBy = UserEntity.Current;
-                        ca.DoneDate = Clock.Now;
-                        ca.DoneType = DoneType.Jump;
-                        ca.DoneDecision = CaseActivityMessage.CanceledCase.ToString();
-                        ca.Save();
-
-                        foreach (var notification in ca.Notifications().ToList())
-                        {
-                            notification.State = CaseNotificationState.DoneByOther;
-                            notification.Save();
-                        }
-                    }
-
-                    c.FinishDate = Clock.Now;
-                    CancelEntity(c.MainEntity, c);
-                    c.Save();
-
-                    if (c.ParentCase != null && !avoidRecompose)
-                        CaseActivityGraph.TryToRecompose(c);
-                }
-            }.Register();
-
-            new Graph<CaseEntity>.Delete(CaseOperation.Delete)
-            {
-                CanDelete = e => e.ParentCase == null ? null : CaseActivityMessage.CaseIsADecompositionOf0.NiceToString(e.ParentCase),
-                Delete = (c, args) =>
-                {
-                    DeleteCase(c);
-
-                    if (args.GetArg<bool>())
-                        c.MainEntity.Delete();
-                }
-
-            }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
-
-            void DeleteCase(CaseEntity c)
-            {
-                foreach (var sc in c.SubCases())
-                {
-                    DeleteCase(sc);
-                }
-
-                c.CaseActivities().SelectMany(ca => ca.Notifications()).UnsafeDelete();
-                c.CaseActivities().UnsafeDelete();
-                c.Delete();
-            }
-
-            IQueryable<CaseActivityEntity> RejectedCases(CaseEntity c)
-            {
-                return c.CaseActivities().Where(a => a.DoneBy != null && (a.DoneType == DoneType.Next || a.DoneType == DoneType.Recompose)).OrderByDescending(a => a.DoneDate).Take(1);
-            }
-
-            new Graph<CaseEntity>.Execute(CaseOperation.Reactivate)
-            {
-                CanExecute = c => c.FinishDate != null && CancelledCases(c).Any() ? null : CaseActivityMessage.NotCanceled.NiceToString(),
-                Execute = (c, _) =>
-                {
-                    ReactivateEntity(c.MainEntity, c);
-
-                    var currentActivities = CancelledCases(c).ToList();
-
-                    currentActivities = currentActivities.Concat(RejectedCases(c).ToList()).ToList();
-
-                    foreach (var ca in currentActivities)
-                    {
-                        ca.DoneBy = null;
-                        ca.DoneDate = null;
-                        ca.DoneType = null;
-                        ca.DoneDecision = null;
-                        var connections = ca.WorkflowActivity.NextConnections().ToList();
-
-                        ca.Save();
-
-                        foreach (var notification in ca.Notifications().ToList())
-                        {
-                            notification.State = CaseNotificationState.New;
-                            notification.Save();
-                        }
-                    }
-
-                    c.FinishDate = null;
-                    c.Save();
-
-                    foreach (var sc in c.SubCases().Where(a => a.FinishDate != null))
-                    {
-                        sc.Execute(CaseOperation.Reactivate, true);
-                    }
-                }
-            }.Register();
-
-
-            sb.Include<CaseActivityEntity>()
-                .WithIndex(a => new { a.ScriptExecution!.ProcessIdentifier }, a => a.DoneDate == null)
-                .WithIndex(a => new { a.ScriptExecution!.NextExecution }, a => a.DoneDate == null)
-                .WithExpressionFrom((WorkflowActivityEntity c) => c.CaseActivities())
-                .WithExpressionFrom((CaseEntity c) => c.CaseActivities())
-                .WithExpressionFrom((CaseActivityEntity c) => c.NextActivities())
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.WorkflowActivity,
-                    e.StartDate,
-                    e.DoneDate,
-                    e.DoneBy,
-                    e.Previous,
-                    e.Case,
-                });
-
-            sb.Schema.EntityEvents<CaseActivityEntity>().Saved += (e, args) =>
-            {
-                if (args.WasNew && e.WorkflowActivity is WorkflowActivityEntity wa && wa.Type == WorkflowActivityType.Script)
-                    WorkflowScriptRunner.WakeupOnCommit();
-            };
-
-            sb.Include<CaseActivityExecutedTimerEntity>()
-                .WithExpressionFrom((CaseActivityEntity ca) => ca.ExecutedTimers())
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.CreationDate,
-                    e.CaseActivity,
-                    e.BoundaryEvent,
-                });
-
-            QueryLogic.Expressions.Register((WorkflowActivityEntity a) => a.AverageDuration(), WorkflowActivityMessage.AverageDuration);
-
-            SimpleTaskLogic.Register(CaseActivityTask.Timeout, (ScheduledTaskContext ctx) =>
-            {
-                var boundaryCandidates =
-                (from ca in Database.Query<CaseActivityEntity>()
-                 where !ca.Workflow().HasExpired()
-                 where ca.State == CaseActivityState.Pending
-                 from we in ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers
-                 where we.Type == WorkflowEventType.BoundaryInterruptingTimer ? true :
-                 we.Type == WorkflowEventType.BoundaryForkTimer ? (we.RunRepeatedly || !ca.ExecutedTimers().Any(t => t.BoundaryEvent.Is(we))) :
-                 false
-                 select new ActivityEvent(ca, we)).ToList();
-
-                var intermediateCandidates =
-                (from ca in Database.Query<CaseActivityEntity>()
-                 where !ca.Workflow().HasExpired()
-                 where ca.State == CaseActivityState.Pending
-                 let we = ((WorkflowEventEntity)ca.WorkflowActivity)
-                 where we.Type == WorkflowEventType.IntermediateTimer
-                 select new ActivityEvent(ca, we)).ToList();
-
-                var candidates = boundaryCandidates.Concat(intermediateCandidates).Distinct().ToList();
-                var conditions = candidates.Select(a => a.Event.Timer!.Condition).Distinct().ToList();
-                var lastExecutions = boundaryCandidates
-                    .Where(a => a.Event.Type == WorkflowEventType.BoundaryForkTimer && a.Event.RunRepeatedly)
-                    .Select(a => new { ActivityEvent = a, LastExecution = a.Activity.LastExecutedTimer(a.Event.ToLite()) })
-                    .ToList();
-
-                var now = Clock.Now;
-                var activities = conditions.SelectMany(cond =>
-                {
-                    if (cond == null)
-                        return candidates.Where(a =>
-                        {
-                            var startDate = lastExecutions.SingleOrDefaultEx(le => le.ActivityEvent.Is(a))?.LastExecution?.CreationDate ?? a.Activity.StartDate;
-                            return a.Event.Timer!.Duration != null && a.Event.Timer!.Duration!.Add(startDate) < now;
-                        }).Select(a => a.Activity.ToLite()).ToList();
-
-                    return candidates.Where(a => !a.Event.Timer!.AvoidExecuteConditionByTimer && a.Event.Timer!.Condition.Is(cond) && cond.Evaluate(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
-                }).Distinct().ToList();
-
-                if (!activities.Any())
-                    return null;
-
-                var pkg = new PackageEntity().CreateLines(activities);
-
-                return ProcessLogic.Create(CaseActivityProcessAlgorithm.Timeout, pkg).Execute(ProcessOperation.Execute).ToLite();
+                Entity = e,
+                e.Id,
+                e.Description,
+                e.Workflow,
+                e.MainEntity,
             });
-            ProcessLogic.Register(CaseActivityProcessAlgorithm.Timeout, new PackageExecuteAlgorithm<CaseActivityEntity>(CaseActivityOperation.Timer));
 
-            QueryLogic.Expressions.Register((CaseEntity c) => c.DecompositionSurrogateActivity());
-            QueryLogic.Expressions.Register((CaseActivityEntity ca) => ca.CurrentUserHasNotification(), CaseActivityMessage.CurrentUserHasNotification);
-            QueryLogic.Expressions.Register((ICaseMainEntity a) => a.CaseActivities(), () => typeof(CaseActivityEntity).NicePluralName());
-            QueryLogic.Expressions.Register((ICaseMainEntity a) => a.Cases(), () => typeof(CaseEntity).NicePluralName());
-            QueryLogic.Expressions.Register((ICaseMainEntity a) => a.LastCaseActivity(), CaseActivityMessage.LastCaseActivity);
-            QueryLogic.Expressions.Register((ICaseMainEntity a) => a.CurrentUserHasNotification(), CaseActivityMessage.CurrentUserHasNotification);
-
-            sb.Include<CaseNotificationEntity>()
-                .WithExpressionFrom((CaseActivityEntity c) => c.Notifications())
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.CaseActivity.Entity.StartDate,
-                    e.State,
-                    e.CaseActivity,
-                    e.User,
-                });
-
-
-            new Graph<CaseNotificationEntity>.Execute(CaseNotificationOperation.SetRemarks)
+        sb.Include<CaseTagTypeEntity>()
+            .WithSave(CaseTagTypeOperation.Save)
+            .WithQuery(() => e => new
             {
-                Execute = (e, args) =>
-                {
-                    e.Remarks = args.GetArg<string>();
-                },
-            }.Register();
+                Entity = e,
+                e.Id,
+                e.Name,
+                e.Color
+            });
 
-            new Graph<CaseNotificationEntity>.Delete(CaseNotificationOperation.Delete)
+
+        sb.Include<CaseTagEntity>()
+            .WithExpressionFrom((CaseEntity ce) => ce.Tags())
+            .WithQuery(() => e => new
             {
-                Delete = (e, args) => e.Delete(),
-            }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
+                Entity = e,
+                e.Id,
+                e.CreationDate,
+                e.Case,
+                e.TagType,
+                e.CreatedBy,
+            });
 
-            new Graph<CaseNotificationEntity>.ConstructFrom<CaseActivityEntity>(CaseNotificationOperation.CreateCaseNotificationFromCaseActivity)
+        new Graph<CaseEntity>.Execute(CaseOperation.SetTags)
+        {
+            Execute = (e, args) =>
             {
-                Construct = (e, args) => new CaseNotificationEntity
+                var current = e.Tags().ToList();
+
+                var model = args.GetArg<CaseTagsModel>();
+
+                var toDelete = current.Where(ct => model.OldCaseTags.Contains(ct.TagType) && !model.CaseTags.Contains(ct.TagType)).ToList();
+
+                Database.DeleteList(toDelete);
+
+                model.CaseTags.Where(ctt => !current.Any(ct => ct.TagType.Is(ctt))).Select(ctt => new CaseTagEntity
                 {
-                    CaseActivity = e.ToLite(),
-                    Actor = args.GetArg<Lite<UserEntity>>(),
-                    User = args.GetArg<Lite<UserEntity>>(),
-                    State = CaseNotificationState.New,
-                }.Save(),
-            }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
+                    Case = e.ToLite(),
+                    TagType = ctt,
+                    CreatedBy = UserHolder.Current.User,
+                }).SaveList();
+            },
+        }.Register();
 
 
-            QueryLogic.Queries.Register(CaseActivityQuery.Inbox, () => DynamicQueryCore.Auto(
-                    from cn in Database.Query<CaseNotificationEntity>()
-                    where IsForMe.Evaluate(cn)
-                    let ca = cn.CaseActivity.Entity
-                    let previous = ca.Previous!.Entity
-                    select new
+        new Graph<CaseEntity>.Execute(CaseOperation.Cancel)
+        {
+            CanExecute = c => c.FinishDate == null ? null : CaseActivityMessage.AlreadyFinished.NiceToString(),
+            Execute = (c, args) =>
+            {
+                var avoidRecompose = args.TryGetArgS<bool>() ?? false;
+
+                foreach (var sc in c.SubCases().Where(a => a.FinishDate == null))
+                {
+                    sc.Execute(CaseOperation.Cancel, true);
+                }
+
+                var currentActivities = c.CaseActivities().Where(a => a.DoneBy == null).ToList();
+
+                foreach (var ca in currentActivities)
+                {
+                    ca.DoneBy = UserEntity.Current;
+                    ca.DoneDate = Clock.Now;
+                    ca.DoneType = DoneType.Jump;
+                    ca.DoneDecision = CaseActivityMessage.CanceledCase.ToString();
+                    ca.Save();
+
+                    foreach (var notification in ca.Notifications().ToList())
                     {
-                        Entity = cn.CaseActivity,
-                        ca.StartDate,
-                        Workflow = ca.Case.Workflow.ToLite(),
-                        Activity = new ActivityWithRemarks
-                        {
-                            WorkflowActivity = ((WorkflowActivityEntity)ca.WorkflowActivity).ToLite(),
-                            Case = ca.Case.ToLite(),
-                            CaseActivity = ca.ToLite(),
-                            Notification = cn.ToLite(),
-                            Remarks = cn.Remarks,
-                            Alerts = ca.MyActiveAlerts().Count(),
-                            Tags = ca.Case.Tags().Select(a => a.TagType).ToList(),
-                        },
-                        MainEntity = ca.Case.MainEntity.ToLite(ca.Case.ToString()),
-                        Sender = previous.DoneBy,
-                        SenderNote = previous.Note,
-                        cn.State,
-                        cn.Actor,
-                        cn.User,
-                    })
-                    .ColumnDisplayName(a => a.Activity, () => InboxMessage.Activity.NiceToString())
-                    .ColumnDisplayName(a => a.Sender, () => InboxMessage.Sender.NiceToString())
-                    .ColumnDisplayName(a => a.SenderNote, () => InboxMessage.SenderNote.NiceToString())
-                    );
+                        notification.State = CaseNotificationState.DoneByOther;
+                        notification.Save();
+                    }
+                }
 
+                c.FinishDate = Clock.Now;
+                CancelEntity(c.MainEntity, c);
+                c.Save();
 
-            CaseActivityGraph.Register();
-            OverrideCaseActivityMixin(sb);
+                if (c.ParentCase != null && !avoidRecompose)
+                    CaseActivityGraph.TryToRecompose(c);
+            }
+        }.Register();
+
+        new Graph<CaseEntity>.Delete(CaseOperation.Delete)
+        {
+            CanDelete = e => e.ParentCase == null ? null : CaseActivityMessage.CaseIsADecompositionOf0.NiceToString(e.ParentCase),
+            Delete = (c, args) =>
+            {
+                DeleteCase(c);
+
+                if (args.GetArg<bool>())
+                    c.MainEntity.Delete();
+            }
+
+        }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
+
+        void DeleteCase(CaseEntity c)
+        {
+            foreach (var sc in c.SubCases())
+            {
+                DeleteCase(sc);
+            }
+
+            c.CaseActivities().SelectMany(ca => ca.Notifications()).UnsafeDelete();
+            c.CaseActivities().UnsafeDelete();
+            c.Delete();
         }
+
+        IQueryable<CaseActivityEntity> RejectedCases(CaseEntity c)
+        {
+            return c.CaseActivities().Where(a => a.DoneBy != null && (a.DoneType == DoneType.Next || a.DoneType == DoneType.Recompose)).OrderByDescending(a => a.DoneDate).Take(1);
+        }
+
+        new Graph<CaseEntity>.Execute(CaseOperation.Reactivate)
+        {
+            CanExecute = c => c.FinishDate != null && CancelledCases(c).Any() ? null : CaseActivityMessage.NotCanceled.NiceToString(),
+            Execute = (c, _) =>
+            {
+                ReactivateEntity(c.MainEntity, c);
+
+                var currentActivities = CancelledCases(c).ToList();
+
+                currentActivities = currentActivities.Concat(RejectedCases(c).ToList()).ToList();
+
+                foreach (var ca in currentActivities)
+                {
+                    ca.DoneBy = null;
+                    ca.DoneDate = null;
+                    ca.DoneType = null;
+                    ca.DoneDecision = null;
+                    var connections = ca.WorkflowActivity.NextConnections().ToList();
+
+                    ca.Save();
+
+                    foreach (var notification in ca.Notifications().ToList())
+                    {
+                        notification.State = CaseNotificationState.New;
+                        notification.Save();
+                    }
+                }
+
+                c.FinishDate = null;
+                c.Save();
+
+                foreach (var sc in c.SubCases().Where(a => a.FinishDate != null))
+                {
+                    sc.Execute(CaseOperation.Reactivate, true);
+                }
+            }
+        }.Register();
+
+
+        sb.Include<CaseActivityEntity>()
+            .WithIndex(a => new { a.ScriptExecution!.ProcessIdentifier }, a => a.DoneDate == null)
+            .WithIndex(a => new { a.ScriptExecution!.NextExecution }, a => a.DoneDate == null)
+            .WithExpressionFrom((WorkflowActivityEntity c) => c.CaseActivities())
+            .WithExpressionFrom((CaseEntity c) => c.CaseActivities())
+            .WithExpressionFrom((CaseActivityEntity c) => c.NextActivities())
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.WorkflowActivity,
+                e.StartDate,
+                e.DoneDate,
+                e.DoneBy,
+                e.Previous,
+                e.Case,
+            });
+
+        sb.Schema.EntityEvents<CaseActivityEntity>().Saved += (e, args) =>
+        {
+            if (args.WasNew && e.WorkflowActivity is WorkflowActivityEntity wa && wa.Type == WorkflowActivityType.Script)
+                WorkflowScriptRunner.WakeupOnCommit();
+        };
+
+        sb.Include<CaseActivityExecutedTimerEntity>()
+            .WithExpressionFrom((CaseActivityEntity ca) => ca.ExecutedTimers())
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.CreationDate,
+                e.CaseActivity,
+                e.BoundaryEvent,
+            });
+
+        QueryLogic.Expressions.Register((WorkflowActivityEntity a) => a.AverageDuration(), WorkflowActivityMessage.AverageDuration);
+
+        SimpleTaskLogic.Register(CaseActivityTask.Timeout, (ScheduledTaskContext ctx) =>
+        {
+            var boundaryCandidates =
+            (from ca in Database.Query<CaseActivityEntity>()
+             where !ca.Workflow().HasExpired()
+             where ca.State == CaseActivityState.Pending
+             from we in ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers
+             where we.Type == WorkflowEventType.BoundaryInterruptingTimer ? true :
+             we.Type == WorkflowEventType.BoundaryForkTimer ? (we.RunRepeatedly || !ca.ExecutedTimers().Any(t => t.BoundaryEvent.Is(we))) :
+             false
+             select new ActivityEvent(ca, we)).ToList();
+
+            var intermediateCandidates =
+            (from ca in Database.Query<CaseActivityEntity>()
+             where !ca.Workflow().HasExpired()
+             where ca.State == CaseActivityState.Pending
+             let we = ((WorkflowEventEntity)ca.WorkflowActivity)
+             where we.Type == WorkflowEventType.IntermediateTimer
+             select new ActivityEvent(ca, we)).ToList();
+
+            var candidates = boundaryCandidates.Concat(intermediateCandidates).Distinct().ToList();
+            var conditions = candidates.Select(a => a.Event.Timer!.Condition).Distinct().ToList();
+            var lastExecutions = boundaryCandidates
+                .Where(a => a.Event.Type == WorkflowEventType.BoundaryForkTimer && a.Event.RunRepeatedly)
+                .Select(a => new { ActivityEvent = a, LastExecution = a.Activity.LastExecutedTimer(a.Event.ToLite()) })
+                .ToList();
+
+            var now = Clock.Now;
+            var activities = conditions.SelectMany(cond =>
+            {
+                if (cond == null)
+                    return candidates.Where(a =>
+                    {
+                        var startDate = lastExecutions.SingleOrDefaultEx(le => le.ActivityEvent.Is(a))?.LastExecution?.CreationDate ?? a.Activity.StartDate;
+                        return a.Event.Timer!.Duration != null && a.Event.Timer!.Duration!.Add(startDate) < now;
+                    }).Select(a => a.Activity.ToLite()).ToList();
+
+                return candidates.Where(a => !a.Event.Timer!.AvoidExecuteConditionByTimer && a.Event.Timer!.Condition.Is(cond) && cond.Evaluate(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
+            }).Distinct().ToList();
+
+            if (!activities.Any())
+                return null;
+
+            var pkg = new PackageEntity().CreateLines(activities);
+
+            return ProcessLogic.Create(CaseActivityProcessAlgorithm.Timeout, pkg).Execute(ProcessOperation.Execute).ToLite();
+        });
+        ProcessLogic.Register(CaseActivityProcessAlgorithm.Timeout, new PackageExecuteAlgorithm<CaseActivityEntity>(CaseActivityOperation.Timer));
+
+        QueryLogic.Expressions.Register((CaseEntity c) => c.DecompositionSurrogateActivity());
+        QueryLogic.Expressions.Register((CaseActivityEntity ca) => ca.CurrentUserHasNotification(), CaseActivityMessage.CurrentUserHasNotification);
+        QueryLogic.Expressions.Register((ICaseMainEntity a) => a.CaseActivities(), () => typeof(CaseActivityEntity).NicePluralName());
+        QueryLogic.Expressions.Register((ICaseMainEntity a) => a.Cases(), () => typeof(CaseEntity).NicePluralName());
+        QueryLogic.Expressions.Register((ICaseMainEntity a) => a.LastCaseActivity(), CaseActivityMessage.LastCaseActivity);
+        QueryLogic.Expressions.Register((ICaseMainEntity a) => a.CurrentUserHasNotification(), CaseActivityMessage.CurrentUserHasNotification);
+
+        sb.Include<CaseNotificationEntity>()
+            .WithExpressionFrom((CaseActivityEntity c) => c.Notifications())
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.CaseActivity.Entity.StartDate,
+                e.State,
+                e.CaseActivity,
+                e.User,
+            });
+
+
+        new Graph<CaseNotificationEntity>.Execute(CaseNotificationOperation.SetRemarks)
+        {
+            Execute = (e, args) =>
+            {
+                e.Remarks = args.GetArg<string>();
+            },
+        }.Register();
+
+        new Graph<CaseNotificationEntity>.Delete(CaseNotificationOperation.Delete)
+        {
+            Delete = (e, args) => e.Delete(),
+        }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
+
+        new Graph<CaseNotificationEntity>.ConstructFrom<CaseActivityEntity>(CaseNotificationOperation.CreateCaseNotificationFromCaseActivity)
+        {
+            Construct = (e, args) => new CaseNotificationEntity
+            {
+                CaseActivity = e.ToLite(),
+                Actor = args.GetArg<Lite<UserEntity>>(),
+                User = args.GetArg<Lite<UserEntity>>(),
+                State = CaseNotificationState.New,
+            }.Save(),
+        }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
+
+
+        QueryLogic.Queries.Register(CaseActivityQuery.Inbox, () => DynamicQueryCore.Auto(
+                from cn in Database.Query<CaseNotificationEntity>()
+                where IsForMe.Evaluate(cn)
+                let ca = cn.CaseActivity.Entity
+                let previous = ca.Previous!.Entity
+                select new
+                {
+                    Entity = cn.CaseActivity,
+                    ca.StartDate,
+                    Workflow = ca.Case.Workflow.ToLite(),
+                    Activity = new ActivityWithRemarks
+                    {
+                        WorkflowActivity = ((WorkflowActivityEntity)ca.WorkflowActivity).ToLite(),
+                        Case = ca.Case.ToLite(),
+                        CaseActivity = ca.ToLite(),
+                        Notification = cn.ToLite(),
+                        Remarks = cn.Remarks,
+                        Alerts = ca.MyActiveAlerts().Count(),
+                        Tags = ca.Case.Tags().Select(a => a.TagType).ToList(),
+                    },
+                    MainEntity = ca.Case.MainEntity.ToLite(ca.Case.ToString()),
+                    Sender = previous.DoneBy,
+                    SenderNote = previous.Note,
+                    cn.State,
+                    cn.Actor,
+                    cn.User,
+                })
+                .ColumnDisplayName(a => a.Activity, () => InboxMessage.Activity.NiceToString())
+                .ColumnDisplayName(a => a.Sender, () => InboxMessage.Sender.NiceToString())
+                .ColumnDisplayName(a => a.SenderNote, () => InboxMessage.SenderNote.NiceToString())
+                );
+
+
+        CaseActivityGraph.Register();
+        OverrideCaseActivityMixin(sb);
 
     }
 
@@ -1257,7 +1257,7 @@ public static class CaseActivityLogic
                         .Where(ca => ca != null)
                         .Select(ca => new { ca!.DoneBy, ca!.Note })
                         .ToList()
-                        .Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
+                        .Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\n");
 
                     decompositionCaseActivity.Note = lastActivitiesNotes;
                     ExecuteStep(decompositionCaseActivity, DoneType.Recompose, null, null);

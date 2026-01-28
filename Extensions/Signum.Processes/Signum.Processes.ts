@@ -90,6 +90,27 @@ export namespace ProcessMessage {
   export const SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway: MessageKey = new MessageKey("ProcessMessage", "SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway");
   export const ProcessSettings: MessageKey = new MessageKey("ProcessMessage", "ProcessSettings");
   export const OnlyActive: MessageKey = new MessageKey("ProcessMessage", "OnlyActive");
+  export const ProcessLogicStateLoading: MessageKey = new MessageKey("ProcessMessage", "ProcessLogicStateLoading");
+  export const ProcessPanel: MessageKey = new MessageKey("ProcessMessage", "ProcessPanel");
+  export const Start: MessageKey = new MessageKey("ProcessMessage", "Start");
+  export const Stop: MessageKey = new MessageKey("ProcessMessage", "Stop");
+  export const Running: MessageKey = new MessageKey("ProcessMessage", "Running");
+  export const Stopped: MessageKey = new MessageKey("ProcessMessage", "Stopped");
+  export const SimpleStatus: MessageKey = new MessageKey("ProcessMessage", "SimpleStatus");
+  export const JustMyProcesses: MessageKey = new MessageKey("ProcessMessage", "JustMyProcesses");
+  export const MachineName: MessageKey = new MessageKey("ProcessMessage", "MachineName");
+  export const ApplicationName: MessageKey = new MessageKey("ProcessMessage", "ApplicationName");
+  export const MaxDegreeOfParallelism: MessageKey = new MessageKey("ProcessMessage", "MaxDegreeOfParallelism");
+  export const InitialDelayMilliseconds: MessageKey = new MessageKey("ProcessMessage", "InitialDelayMilliseconds");
+  export const NextPlannedExecution: MessageKey = new MessageKey("ProcessMessage", "NextPlannedExecution");
+  export const None: MessageKey = new MessageKey("ProcessMessage", "None");
+  export const ExecutingProcesses: MessageKey = new MessageKey("ProcessMessage", "ExecutingProcesses");
+  export const Process: MessageKey = new MessageKey("ProcessMessage", "Process");
+  export const State: MessageKey = new MessageKey("ProcessMessage", "State");
+  export const Progress: MessageKey = new MessageKey("ProcessMessage", "Progress");
+  export const IsCancellationRequest: MessageKey = new MessageKey("ProcessMessage", "IsCancellationRequest");
+  export const _0ProcessesExcecutingIn1_2: MessageKey = new MessageKey("ProcessMessage", "_0ProcessesExcecutingIn1_2");
+  export const LatestProcesses: MessageKey = new MessageKey("ProcessMessage", "LatestProcesses");
 }
 
 export namespace ProcessOperation {

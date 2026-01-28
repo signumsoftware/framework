@@ -56,7 +56,7 @@ WITH
 MOVE '{2}' TO '{3}',
 MOVE '{4}' TO '{5}'{6}".FormatWith(databaseName, backupFile,
                 logicalDatabaseFile, databaseFile,
-                logicalDatabaseLogFile, databaseLogFile, replace ? ",\r\nREPLACE" : "")).ExecuteNonQuery();
+                logicalDatabaseLogFile, databaseLogFile, replace ? ",\nREPLACE" : "")).ExecuteNonQuery();
     }
 
     public static void DisableForeignKeys(ITable table)

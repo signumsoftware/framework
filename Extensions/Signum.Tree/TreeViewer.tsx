@@ -155,7 +155,6 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
   handleFullScreenClick = (ev: React.MouseEvent<any>): void => {
 
-    ev.preventDefault();
 
     const path = this.getCurrentUrl();
 

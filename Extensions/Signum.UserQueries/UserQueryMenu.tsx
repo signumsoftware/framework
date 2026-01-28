@@ -27,6 +27,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryColumnEmbedded, QueryFilterEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries'
 import FramePage from '@framework/Frames/FramePage'
 import { SubTokensOptions } from '@framework/QueryToken'
+import { AuthAdminClient } from '../Signum.Authorization/AuthAdminClient'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -141,12 +142,12 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     Navigator.API.fetch(uq).then(userQuery => {
       const sc = p.searchControl;
       const oldFindOptions = sc.props.findOptions;
-      UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, sc.props.extraOptions?.entity, sc.props.defaultIncudeDefaultFilters)
+      UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, currentEntity ?? sc.props.extraOptions?.entity, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
           sc.setState({ refreshMode: userQuery.refreshMode });
           sc.handleChangeFiltermode(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions) ? 'Simple' : "Advanced", false, true);
           setCurrentUserQuery(uq, translated(userQuery, a => a.displayName));
-          setCurrentEntity(undefined);
+          //setCurrentEntity(undefined);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
           }
@@ -249,9 +250,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     var stoOrder = (fo.groupResults ? SubTokensOptions.CanAggregate : 0) | SubTokensOptions.CanElement | SubTokensOptions.CanSnippet;
     var stoSummary = SubTokensOptions.CanAggregate | SubTokensOptions.CanElement;
 
+    
     return UserQueryEntity.New({
       query: qe,
-      owner: AppContext.currentUser && toLite(AppContext.currentUser),
+      owner: UserQueryEntity.typeInfo().minTypeAllowed != "None" ? null :  AppContext.currentUser && toLite(AppContext.currentUser),
       groupResults: fo.groupResults,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       includeDefaultFilters: fo.includeDefaultFilters,
@@ -349,10 +351,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
           })}
         </div>
         {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
-        {p.searchControl.props.allowChangeColumns && <Dropdown.Item onClick={handleBackToDefault} > <FontAwesomeIcon icon={"arrow-rotate-left"} className="me-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>}
-        {currentUserQuery && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={"share-from-square"} className="me-2" />{UserQueryMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
-        {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={"pen-to-square"} className="me-2" />{UserQueryMessage.Edit.niceToString()}</Dropdown.Item>}
-        {canSave && <Dropdown.Item onClick={handleCreateUserQuery}><FontAwesomeIcon icon={"plus"} className="me-2" />{UserQueryMessage.CreateNew.niceToString()}</Dropdown.Item>}</Dropdown.Menu>
+        {p.searchControl.props.allowChangeColumns && <Dropdown.Item onClick={handleBackToDefault} > <FontAwesomeIcon aria-hidden={true} icon={"arrow-rotate-left"} className="me-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>}
+        {currentUserQuery && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon aria-hidden={true} icon={"share-from-square"} className="me-2" />{UserQueryMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
+        {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon aria-hidden={true} icon={"pen-to-square"} className="me-2" />{UserQueryMessage.Edit.niceToString()}</Dropdown.Item>}
+        {canSave && <Dropdown.Item onClick={handleCreateUserQuery}><FontAwesomeIcon aria-hidden={true} icon={"plus"} className="me-2" />{UserQueryMessage.CreateNew.niceToString()}</Dropdown.Item>}</Dropdown.Menu>
     </Dropdown>
   );
 

@@ -6,6 +6,7 @@ import IFrameRenderer from './IframeRenderer'
 import { useForceUpdate } from '@framework/Hooks'
 import { Tabs, Tab } from 'react-bootstrap'
 import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateMessage, EmailTemplateViewMessage } from '../Signum.Mailing.Templates'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function EmailMasterTemplate(p : { ctx: TypeContext<EmailMasterTemplateEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -38,7 +39,6 @@ export function EmailTemplateMessageComponent(p : EmailMasterTemplateMessageComp
   const [showPreview, setShowPreview] = React.useState(false);
 
   function handlePreviewClick(e: React.FormEvent<any>) {
-    e.preventDefault();
     setShowPreview(!showPreview);
   }
 
@@ -56,11 +56,11 @@ export function EmailTemplateMessageComponent(p : EmailMasterTemplateMessageComp
           <HtmlCodeMirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />
         </div>
         <br />
-        <a href="#" onClick={handlePreviewClick}>
+        <LinkButton onClick={handlePreviewClick} title={undefined}>
           {showPreview ?
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}
-        </a>
+        </LinkButton>
         {showPreview && <IFrameRenderer style={{ width: "100%", minHeight: "800px" }} html={ec.value.text} />}
       </div>
     </div>

@@ -7,10 +7,11 @@ export const useRegisterExtensions = (
   extensions: HtmlEditorExtension[] = []
 ): void => {
   React.useEffect(() => {
-    if (!controller?.editor) return;
+    if (!controller?.editor)
+      return;
 
     const unsubscribeFns = extensions
-      .flatMap((plugin) => [plugin.registerExtension?.(controller)])
+      .flatMap((e) => [e.registerExtension?.(controller)])
       .notNull();
 
     return () => unsubscribeFns.forEach((fn) => fn());

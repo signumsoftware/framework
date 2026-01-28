@@ -139,11 +139,7 @@ public class TypeHelp : BaseHelp
         Operations = OperationLogic.TypeOperations(type)
                     .ToDictionary(op => op.OperationSymbol, op => new OperationHelp(op.OperationSymbol, type, opers?.TryGetCN(op.OperationSymbol)));
 
-     
-        var allQueries = HelpLogic.CachedQueriesHelp();
-
-        Queries = HelpLogic.TypeToQuery.Value.TryGetC(this.Type).EmptyIfNull().Select(a => allQueries.GetOrThrow(a)).ToDictionary(qh => qh.QueryName);
-
+        Queries = HelpLogic.TypeToQuery.Value.TryGetC(this.Type).EmptyIfNull().Select(a => HelpLogic.GetQueryHelp(a)).ToDictionary(qh => qh.QueryName);
     }
 
     public TypeHelpEntity GetEntity()
@@ -181,8 +177,9 @@ public class TypeHelp : BaseHelp
 
         result.Queries.AddRange(
             from qn in QueryLogic.Queries.GetTypeQueries(this.Type).Keys
+            where QueryLogic.Queries.QueryAllowed(qn, false)
             let qh = HelpLogic.GetQueryHelp(qn)
-            where qh.IsAllowed() == null
+            //where qh.IsAllowed() == null
             select qh.GetEntity());
 
         if (DBEntity != null)

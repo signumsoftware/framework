@@ -120,9 +120,9 @@ public class ViteAssets
     public static HtmlString LoadViteReactRefresh(int vitePort)
     {
         return new HtmlString($$"""
-            <script type="module" src="http://localhost:{{vitePort}}/dist/@vite/client"></script>
+            <script type="module" src="http://localhost:{{vitePort}}/@vite/client"></script>
             <script type="module">
-            	import RefreshRuntime from 'http://localhost:{{vitePort}}/dist/@react-refresh'
+            	import RefreshRuntime from 'http://localhost:{{vitePort}}/@react-refresh'
             	RefreshRuntime.injectIntoGlobalHook(window)
             	window.$RefreshReg$ = () => {}
             	window.$RefreshSig$ = () => (type) => type

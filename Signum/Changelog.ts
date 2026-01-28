@@ -11,6 +11,7 @@ const changeLog: ChangeLogDic= {
   "2023-11-22": "Migrate to .Net 8",
   "2023-11-10": "add view change logs",
 };
+
 export default changeLog;
 
 

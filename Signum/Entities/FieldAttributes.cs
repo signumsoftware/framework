@@ -11,8 +11,6 @@ public sealed class IndexAttribute : Attribute
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public sealed class UniqueIndexAttribute : Attribute
 {
-    public bool AllowMultipleNulls { get; set; }
-
     public bool AvoidAttachToUniqueIndexes { get; set; }
 }
 
@@ -200,6 +198,23 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     {
         return !(left == right);
     }
+
+    public static Implementations? Combine(IEnumerable<Implementations?> imps)
+    {
+        var list = imps.ToList();
+
+        if (list.Count == 0) 
+            return null;
+        if(list.Count == 1) 
+            return list[0];
+        if (list.Any(a => a == null)) 
+            return null;
+        if (list.Any(a => a!.Value.IsByAll)) 
+            return Implementations.ByAll;
+
+        var types = list.SelectMany(a => a!.Value.Types).Distinct().ToArray();
+        return Implementations.By(types);
+    }
 }
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
@@ -366,11 +381,11 @@ public sealed class PrimaryKeyAttribute : DbTypeAttribute
         }
     }
 
-    public PrimaryKeyAttribute(Type type)
+    public PrimaryKeyAttribute(Type type, bool identityBehaviour = true)
     {
         this.Type = type;
         this.Identity = type != typeof(Guid);
-        this.IdentityBehaviour = true;
+        this.IdentityBehaviour = identityBehaviour;
     }
 }
 

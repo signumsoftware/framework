@@ -110,7 +110,7 @@ function Notify(): React.ReactElement {
     }
 
     if (icon) {
-      return <FontAwesomeIcon icon={icon} fixedWidth style={{ fontSize: "larger" }} spin={opt.type === "loading"} />
+      return <FontAwesomeIcon icon={icon} className="fa-fw" style={{ fontSize: "larger" }} spin={opt.type === "loading"} />
     }
     else {
       return undefined;

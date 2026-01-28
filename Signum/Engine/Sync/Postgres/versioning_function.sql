@@ -98,10 +98,20 @@ BEGIN
       ERRCODE = 'null_value_not_allowed';
     END IF;
 
-    IF isempty(existing_range) OR NOT upper_inf(existing_range) THEN
-      RAISE 'system period column "%" of relation "%" contains invalid value', sys_period, TG_TABLE_NAME USING
-      ERRCODE = 'data_exception',
-      DETAIL = 'valid ranges must be non-empty and unbounded on the high side';
+    IF isempty(existing_range) THEN
+      RAISE 'system period column "%" of relation "%" contains invalid value',
+        sys_period, TG_TABLE_NAME
+        USING
+          ERRCODE = 'data_exception',
+          DETAIL  = 'valid ranges must be non-empty. Found: ' || existing_range::text;
+    END IF;
+
+    IF NOT upper_inf(existing_range) THEN
+      RAISE 'system period column "%" of relation "%" contains invalid value',
+        sys_period, TG_TABLE_NAME
+        USING
+          ERRCODE = 'data_exception',
+          DETAIL  = 'valid ranges must be unbounded on the high side. Found: ' || existing_range::text;
     END IF;
 
     IF TG_ARGV[2] = 'true' THEN

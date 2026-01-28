@@ -16,6 +16,7 @@
     <Member Name="AddMoreFiles" Description="Weitere Dateien hinzufügen" />
     <Member Name="DownloadFile" Description="Datei downloaden" />
     <Member Name="ErrorSavingFile" Description="Fehler beim Speichern der Datei" />
+    <Member Name="File0ContainsAThreatBy1" Description="Die Datei '{0}' enthält eine von {1} erkannte Bedrohung." />
     <Member Name="File0IsStillUploading" Description="Datei {0} wird noch hochgeladen" />
     <Member Name="File0IsTooBigTheMaximumSizeIs1" Description="Datei '{0}' ist zu groß, die maximale Größe ist {1}." />
     <Member Name="FileImage" Description="Datei-Bild" />

@@ -404,7 +404,8 @@ body.rtl .form-group.row>label {
 
 .form-select.form-select-xs {
     background-position: right 0.2rem center;
-    padding: 0px 20px 0px 5px;
+    padding: 0.5px 20px 0.5px 5px;
+    font-size: 0.875em;
 }
 
 input[type=checkbox].form-control-xs {
@@ -415,23 +416,22 @@ input[type=checkbox].form-control-xs {
 .input-group-xs>.form-control,
 .input-group-xs>.input-group-text,
 .input-group-xs>.btn {
-    padding: 1px 5px;
-    font-size: 0.875rem;
+    padding: 0.5px 5px;
+    font-size: 0.875em;
     line-height: 1.5;
-    height: 26px;
 }
 
 .col-form-label-xs {
     padding-top: 2px;
     padding-bottom: 2px;
-    font-size: 0.875rem;
+    font-size: 0.875em;
     line-height: 1.5;
 }
 
 
 
 .label-xs {
-    font-size: 0.875rem;
+    font-size: 0.875em;
     margin-bottom: 0px;
 }
 
@@ -442,7 +442,7 @@ input[type=checkbox].form-control-xs {
 .form-control-xs .rw-widget-input,
 .rw-widget-xs .rw-widget-input {
     min-height: 24px;
-    font-size: 0.875rem;
+    font-size: 0.875em;
 }
 /*.rw-calendar-header {
     background-color: var(--bs-body-bg);
@@ -489,14 +489,13 @@ input[type=checkbox].form-control-xs {
 .form-control-xs .rw-widget-picker,
 .rw-widget-xs .rw-widget-picker {
     min-height: 24px;
-    background-color: var(--bs-body-bg);
 }
 
-.form-group :not(label)>.form-check-input {
+.form-group :not(label):not(.form-check) > .form-check-input {
     margin-top: 0.5em;
 }
 
-.form-group.form-group-xs :not(label)>.form-check-input {
+.form-group.form-group-xs :not(label):not(.form-check) > .form-check-input {
     margin-top: 0.25em;
 }
 
@@ -507,7 +506,7 @@ input[type=checkbox].form-control-xs {
 .btn-xs,
 .btn-group-xs>.btn {
     padding: 0rem 0.2rem;
-    font-size: 0.875rem;
+    font-size: 0.875em;
     /*line-height: 1.5;*/
 }
 
@@ -518,7 +517,7 @@ input[type=checkbox].form-control-xs {
 }
 
 .label-sm {
-    font-size: 0.875rem;
+    font-size: 0.875em;
     margin-bottom: 0px;
 }
 /*
@@ -550,13 +549,13 @@ input[type=checkbox].form-control-xs {
 .rw-widget-sm .rw-widget-input {
     padding: 3px 6px;
     min-height: 28px;
-    font-size: 0.875rem;
+    font-size: 0.875em;
 }
 
 .rw-widget-sm .rw-multiselect .rw-widget-input {
     padding: 4px 3px;
     min-height: 28px;
-    font-size: 0.875rem;
+    font-size: 0.875em;
 }
 
 .rw-widget-sm .rw-multiselect-tag-label,
@@ -585,6 +584,10 @@ input[type=checkbox].form-control-xs {
 
 .input-group>.form-control-plaintext {
     padding-right: 5px;
+}
+.form-control-plaintext {
+    display: flex;
+    align-items: center;
 }
 
 .form-group.form-group-sm {
@@ -748,10 +751,21 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     padding: 8px;
 }
 
-.btn.input-group-text {
-    background: var(--bs-tertiary-bg);
-    border: var(--bs-border-width) solid var(--bs-border-color);
+.sf-multi-value-element {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2px;
+    margin-bottom: 2px;
 }
+
+    .sf-multi-value-element :last-child{
+        flex-grow: 1;
+    }
+
+    .btn.input-group-text {
+        background: var(--bs-tertiary-bg);
+        border: var(--bs-border-width) solid var(--bs-border-color);
+    }
 
 :root, [data-bs-theme=dark] {
     --rw-widget-color: var(--bs-body-color);
@@ -761,7 +775,11 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     --rw-btn-active-bg: var(--bs-border-color);
     --rw-input-color: var(--bs-body-color);
     --rw-input-bg: var(--bs-body-bg);
+    --rw-input-disabled-bg: var(--bs-secondary-bg);
+    --rw-input-disabled-border-color: var(--bs-border-color);
     --rw-bg: var(--bs-body-bg);
+    --rw-multiselect-tag-bg: var(--bs-body-bg);
+    --rw-multiselect-tag-border-color: var(--bs-border-color);
     /*repeat*/
     --rw-input-border-color: var(--rw-widget-border-color);
     --rw-input-addon-border-color: var(--rw-input-border-color);

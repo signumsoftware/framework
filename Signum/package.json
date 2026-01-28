@@ -38,10 +38,10 @@
     "popper.js": "1.16.1",
     "react-router": "7.7.0",
     "react-router-dom": "7.7.0",
-    "react": "19.1.0",
+    "react": "19.1.2",
     "bootstrap": "5.3.7",
     "react-bootstrap": "2.10.10",
-    "react-dom": "19.1.0",
+    "react-dom": "19.1.2",
     "react-widgets-up": "6.0.14"
   }
 }

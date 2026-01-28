@@ -8,16 +8,13 @@ export default function CustomPart(p: { ctx: TypeContext<CustomPartEntity> }): R
 
   const entityType = ctx.findParentCtx(DashboardEntity).value.entityType;
 
-  var registeredNames = entityType && Object.keys(DashboardClient.Options.customPartRenderers[entityType.model as string] ?? {});
+  var registeredNames = Object.keys(DashboardClient.Options.getCustomPartRenderer(entityType?.model as string) ?? {});
 
   return (
     <div>
-      {entityType == null ? <div className="alert alert-danger" role="alert">
-        {DashboardMessage._0CanOnlyBeUserInA1With2.niceToString(CustomPartEntity.niceName(), DashboardEntity.niceName(), DashboardEntity.nicePropertyName(a => a.entityType))}
-      </div> :
-        registeredNames!.length == 0 ?
+      {registeredNames.length == 0 ?
           <div className="alert alert-danger" role="alert">
-            No renderer for <code>{entityType!.model as string}</code> registered in <code>DashboardClient.Options.customPartRenderers</code>
+          No renderer for <code>{entityType?.model as string ?? "global"}</code> registered in <code>DashboardClient.Options.customPartRenderers</code>
           </div> :
           <EnumLine ctx={ctx.subCtx(p => p.customPartName)} optionItems={Object.values(registeredNames!)} />
       }

@@ -129,7 +129,7 @@ export namespace WhatsNewClient {
       if (!icon)
         return null;
   
-      return <FontAwesomeIcon icon={icon} className={"icon"} color={color} />;
+      return <FontAwesomeIcon aria-hidden={true} icon={icon} className={"icon"} color={color} />;
     }
   }
   

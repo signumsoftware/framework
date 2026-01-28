@@ -22,44 +22,44 @@ public static class SemiSymbolLogic<T>
 
     public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSemiSymbols)
     {
-        if (sb.NotDefined(typeof(SemiSymbolLogic<T>).GetMethod("Start")))
+        if (sb.AlreadyDefined(typeof(SemiSymbolLogic<T>).GetMethod("Start")))
+            return;
+
+        sb.Include<T>();
+
+        sb.Schema.Initializing += () => lazy.Load();
+        sb.Schema.Synchronizing += Schema_Synchronizing;
+        sb.Schema.Generating += Schema_Generating;
+
+        SemiSymbolLogic<T>.getSemiSymbols = getSemiSymbols;
+        lazy = sb.GlobalLazy(() =>
         {
-            sb.Include<T>();
-
-            sb.Schema.Initializing += () => lazy.Load();
-            sb.Schema.Synchronizing += Schema_Synchronizing;
-            sb.Schema.Generating += Schema_Generating;
-
-            SemiSymbolLogic<T>.getSemiSymbols = getSemiSymbols;
-            lazy = sb.GlobalLazy(() =>
+            using (AvoidCache())
             {
-                using (AvoidCache())
-                {
-                    var current = Database.RetrieveAll<T>().Where(a => a.Key.HasText());
+                var current = Database.RetrieveAll<T>().Where(a => a.Key.HasText());
 
-                    var result = EnumerableExtensions.JoinRelaxed(
-                      current,
-                      getSemiSymbols(),
-                      c => c.Key!,
-                      s => s.Key!,
-                      (c, s) => { s.SetIdAndProps(c); return s; },
-                      "caching " + typeof(T).Name);
+                var result = EnumerableExtensions.JoinRelaxed(
+                  current,
+                  getSemiSymbols(),
+                  c => c.Key!,
+                  s => s.Key!,
+                  (c, s) => { s.SetIdAndProps(c); return s; },
+                  "caching " + typeof(T).Name);
 
-                    SemiSymbol.SetFromDatabase<T>(current.ToDictionary(a => a.Key!));
-                    return result.ToFrozenDictionaryEx(a => a.Key!);
-                }
-            },
-            new InvalidateWith(typeof(T)),
-            Schema.Current.InvalidateMetadata);
+                SemiSymbol.SetFromDatabase<T>(current.ToDictionary(a => a.Key!));
+                return result.ToFrozenDictionaryEx(a => a.Key!);
+            }
+        },
+        new InvalidateWith(typeof(T)),
+        Schema.Current.InvalidateMetadata);
 
-            sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
-            SemiSymbol.CallRetrieved += (ss) =>
-            {
-                if (ss is T t)
-                    if (t.Key != null && t.FieldInfo == null)
-                        SymbolLogic_Retrieved(t, new PostRetrievingContext());
-            };
-        }
+        sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
+        SemiSymbol.CallRetrieved += (ss) =>
+        {
+            if (ss is T t)
+                if (t.Key != null && t.FieldInfo == null)
+                    SymbolLogic_Retrieved(t, new PostRetrievingContext());
+        };
     }
 
     static void SymbolLogic_Retrieved(T ident, PostRetrievingContext ctx)

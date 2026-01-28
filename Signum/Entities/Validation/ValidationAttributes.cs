@@ -1273,6 +1273,8 @@ public enum ValidationMessage
 
     NumberIsTooBig,
     NumberIsTooSmall,
+    [Description("Either {0} or {1} should be set.")]
+    Either0Or1ShouldBeSet,
 }
 
 public static class ValidationMessageHelper

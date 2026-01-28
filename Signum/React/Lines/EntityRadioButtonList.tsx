@@ -26,7 +26,7 @@ export interface EntityRadioButtonListProps<V extends Entity | Lite<Entity> | nu
 
 export class EntityRadioButtonListController<V extends Entity | Lite<Entity> | null> extends EntityBaseController<EntityRadioButtonListProps<V>, V> {
 
-  getDefaultProps(state: EntityRadioButtonListProps<V>): void {
+  override getDefaultProps(state: EntityRadioButtonListProps<V>): void {
     super.getDefaultProps(state);
 
     if (state.ctx.value == null)
@@ -171,6 +171,7 @@ export function EntityRadioButtonListSelect<V extends Lite<Entity> | Entity | nu
         <input type="radio" style={{ marginLeft: "10px" }}
           checked={is(value, row.entity)}
           onClick={e => c.handleOnChange(row.entity as AsLite<V>)}
+          aria-disabled={p.ctx.readOnly}
           disabled={p.ctx.readOnly}/>
         &nbsp;
         {c.props.onRenderItem ? c.props.onRenderItem(row.entity as AsLite<V>) : <span>{getToString(row.entity) ?? p.nullPlaceHolder ?? " - "}</span>}

@@ -1,14 +1,15 @@
-using Signum.Utilities.Reflection;
 using Microsoft.AspNetCore.Html;
-using System.Text.RegularExpressions;
-using Signum.Mailing;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
-using Signum.UserAssets;
+using Signum.Engine.Sync;
+using Signum.Mailing;
+using Signum.Mailing.Package;
 using Signum.Mailing.Templates;
 using Signum.Scheduler;
 using Signum.Templating;
-using Signum.Mailing.Package;
+using Signum.UserAssets;
+using Signum.Utilities.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Signum.Alerts;
 
@@ -46,66 +47,104 @@ public static class AlertLogic
 
     public static void Start(SchemaBuilder sb, params Type[] registerExpressionsFor)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<AlertEntity>()
+            .WithQuery(() => a => new
+            {
+                Entity = a,
+                a.Id,
+                a.AlertDate,
+                a.AlertType,
+                a.State,
+                a.Title,
+                Text = a.Text!.Etc(100),
+                a.Target,
+                a.LinkTarget,
+                a.Recipient,
+                a.CreationDate,
+                a.CreatedBy,
+                a.AttendedDate,
+                a.AttendedBy,
+            });
+
+        AlertGraph.Register();
+
+        As.ReplaceExpression((AlertEntity a) => a.Text, a => a.TextField.HasText() ? a.TextField : a.AlertType.GetText());
+
+        Schema.Current.EntityEvents<AlertEntity>().Retrieved += (a, ctx) =>
         {
-            sb.Include<AlertEntity>()
-                .WithQuery(() => a => new
-                {
-                    Entity = a,
-                    a.Id,
-                    a.AlertDate,
-                    a.AlertType,
-                    a.State,
-                    a.Title,
-                    Text = a.Text!.Etc(100),
-                    a.Target,
-                    a.LinkTarget,
-                    a.Recipient,
-                    a.CreationDate,
-                    a.CreatedBy,
-                    a.AttendedDate,
-                    a.AttendedBy,
-                });
+            a.TextFromAlertType = a.AlertType?.GetText();
+        };
 
-            AlertGraph.Register();
-
-            As.ReplaceExpression((AlertEntity a) => a.Text, a => a.TextField.HasText() ? a.TextField : a.AlertType.GetText());
-
-            Schema.Current.EntityEvents<AlertEntity>().Retrieved += (a, ctx) =>
+        sb.Include<AlertTypeSymbol>()
+            .WithSave(AlertTypeOperation.Save)
+            .WithDelete(AlertTypeOperation.Delete)
+            .WithQuery(() => t => new
             {
-                a.TextFromAlertType = a.AlertType?.GetText();
-            };
+                Entity = t,
+                t.Id,
+                t.Name,
+                t.Key,
+            });
 
-            sb.Include<AlertTypeSymbol>()
-                .WithSave(AlertTypeOperation.Save)
-                .WithDelete(AlertTypeOperation.Delete)
-                .WithQuery(() => t => new
-                {
-                    Entity = t,
-                    t.Id,
-                    t.Name,
-                    t.Key,
-                });
+        SemiSymbolLogic<AlertTypeSymbol>.Start(sb, () => SystemAlertTypes.Keys);
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
+        sb.Schema.EntityEvents<AlertTypeSymbol>().PreDeleteSqlSync += AlertType_PreDeleteSqlSync;
 
-            SemiSymbolLogic<AlertTypeSymbol>.Start(sb, () => SystemAlertTypes.Keys);
-
-            if (registerExpressionsFor != null)
+        if (registerExpressionsFor != null)
+        {
+            var alerts = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Alerts());
+            var myActiveAlerts = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.MyActiveAlerts());
+            foreach (var type in registerExpressionsFor)
             {
-                var alerts = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Alerts());
-                var myActiveAlerts = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.MyActiveAlerts());
-                foreach (var type in registerExpressionsFor)
-                {
-                    QueryLogic.Expressions.Register(new ExtensionInfo(type, alerts, alerts.Body.Type, "Alerts", () => typeof(AlertEntity).NicePluralName()));
-                    QueryLogic.Expressions.Register(new ExtensionInfo(type, myActiveAlerts, myActiveAlerts.Body.Type, "MyActiveAlerts", () => AlertMessage.MyActiveAlerts.NiceToString()));
-                }
+                QueryLogic.Expressions.Register(new ExtensionInfo(type, alerts, alerts.Body.Type, "Alerts", () => typeof(AlertEntity).NicePluralName()));
+                QueryLogic.Expressions.Register(new ExtensionInfo(type, myActiveAlerts, myActiveAlerts.Body.Type, "MyActiveAlerts", () => AlertMessage.MyActiveAlerts.NiceToString()));
             }
-            
-
-            Started = true;
-
-            if (sb.WebServerBuilder != null)
-                AlertsServer.Start(sb.WebServerBuilder);
         }
+
+
+        Started = true;
+
+        if (sb.WebServerBuilder != null)
+            AlertsServer.Start(sb.WebServerBuilder);
+    }
+
+    static SqlPreCommand? AlertType_PreDeleteSqlSync(AlertTypeSymbol alertType)
+    {
+        if (Administrator.ExistsTable<AlertEntity>() && Database.Query<AlertEntity>().Any(a => a.AlertType.Is(alertType)))
+        {
+            var table = Schema.Current.Table<AlertEntity>();
+            var column = (IColumn)(FieldReference)Schema.Current.Field((AlertEntity a) => a.AlertType);
+            return Administrator.DeleteWhereScript(table, column, alertType.Id);
+        }
+
+        return null;
+    }
+
+    static SqlPreCommand? Type_PreDeleteSqlSync(TypeEntity type)
+    {
+        return SqlPreCommand.Combine(Spacing.Simple,
+            Type_PreDeleteSqlSync(type, a => a.Target),
+            Type_PreDeleteSqlSync(type, a => a.LinkTarget),
+            Type_PreDeleteSqlSync(type, a => a.GroupTarget)
+        );
+    }
+
+    static SqlPreCommand? Type_PreDeleteSqlSync(TypeEntity type, Expression<Func<AlertEntity, Lite<Entity>?>> ibaField)
+    {
+        if (Administrator.ExistsTable<AlertEntity>() && Database.Query<AlertEntity>().Any(a => ibaField.Evaluate(a)!.EntityType.ToTypeEntity().Is(type)))
+        {
+            var table = Schema.Current.Table<AlertEntity>();
+            var column = (IColumn)((FieldImplementedByAll)Schema.Current.Field(ibaField)).TypeColumn;
+            if (SafeConsole.Ask($"Delete {table.Name} with {column.Name} of type {type}?"))
+            { 
+                return Administrator.DeleteWhereScript(table, column, type.Id);
+            }
+        }
+
+        return null;
     }
 
     public static void RegisterAlertNotificationMail(SchemaBuilder sb)

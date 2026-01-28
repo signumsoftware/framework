@@ -22,19 +22,33 @@
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="FolderId" Description="Ordner-ID" />
   </Type>
-  <Type Name="RemoteEmailMessage">
-    <Member Name="NotAuthorizedToViewEmailsFromOtherUsers" Description="Nicht berechtigt, E-Mails von anderen Benutzern anzuzeigen" />
+  <Type Name="RemoteEmailMessageMessage">
+    <Member Name="AddCategory" Description="Kategorie hinzufügen" />
+    <Member Name="ChangingCategories" Description="Wechselnde Kategorien" />
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Deleting" Description="Löschen" />
+    <Member Name="Message" Description="Nachricht" />
+    <Member Name="Messages" Description="Nachrichten" />
+    <Member Name="Move" Description="Verschieben" />
+    <Member Name="Moving" Description="Verschieben" />
+    <Member Name="PleaseConfirmYouWouldLikeToDelete0FromOutlook" Description="Bitte bestätigen Sie, dass Sie {0} aus Outlook löschen möchten." />
+    <Member Name="RemoveCategory" Description="Kategorie entfernen" />
+    <Member Name="SelectAFolder" Description="Wähle einen Ordner aus" />
+    <Member Name="User0HasNoMailbox" Description="Benutzer {0} hat kein Mailbox" />
+    <Member Name="UserFilterNotFound" Description="Benutzerfilter nicht gefunden" />
   </Type>
   <Type Name="RemoteEmailMessageModel" Description="Remote-E-Mail-Nachricht">
     <Member Name="Attachments" Description="Anhänge" />
     <Member Name="BccRecipients" Description="Bcc-Empfänger" />
     <Member Name="Body" Description="Körper" />
+    <Member Name="Categories" Description="Kategorien" />
     <Member Name="CcRecipients" Description="Cc-Empfänger" />
     <Member Name="CreatedDateTime" Description="Erstellungsdatum" />
     <Member Name="Extension0" Description="Erweiterung0" />
     <Member Name="Extension1" Description="Erweiterung1" />
     <Member Name="Extension2" Description="Erweiterung2" />
     <Member Name="Extension3" Description="Erweiterung3" />
+    <Member Name="Folder" Description="Ordner" />
     <Member Name="From" Description="Von" />
     <Member Name="HasAttachments" Description="Hat Anhänge" />
     <Member Name="Id" Description="Id" />
@@ -48,9 +62,6 @@
     <Member Name="ToRecipients" Description="An-Empfänger" />
     <Member Name="User" Description="Benutzer" />
     <Member Name="WebLink" Description="Weblink" />
-  </Type>
-  <Type Name="RemoteEmailMessagePermission">
-    <Member Name="ViewEmailMessagesFromOtherUsers" Description="E-Mail-Nachrichten von anderen Benutzern anzeigen" />
   </Type>
   <Type Name="RemoteEmailMessageQuery">
     <Member Name="RemoteEmailMessages" Description="Remote-E-Mail-Nachrichten" />

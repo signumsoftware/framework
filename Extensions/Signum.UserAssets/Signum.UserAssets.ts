@@ -36,6 +36,11 @@ export namespace UserAssetMessage {
   export const SameSelectionForAllConflictsOf0: MessageKey = new MessageKey("UserAssetMessage", "SameSelectionForAllConflictsOf0");
   export const _0IsNotFilterable: MessageKey = new MessageKey("UserAssetMessage", "_0IsNotFilterable");
   export const TheFilterOperation0isNotCompatibleWith1: MessageKey = new MessageKey("UserAssetMessage", "TheFilterOperation0isNotCompatibleWith1");
+  export const UserAssetLines: MessageKey = new MessageKey("UserAssetMessage", "UserAssetLines");
+  export const Import: MessageKey = new MessageKey("UserAssetMessage", "Import");
+  export const AssumeIs: MessageKey = new MessageKey("UserAssetMessage", "AssumeIs");
+  export const UsedBy: MessageKey = new MessageKey("UserAssetMessage", "UsedBy");
+  export const Advanced: MessageKey = new MessageKey("UserAssetMessage", "Advanced");
 }
 
 export namespace UserAssetPermission {
@@ -45,7 +50,7 @@ export namespace UserAssetPermission {
 export const UserAssetPreviewLineEmbedded: Type<UserAssetPreviewLineEmbedded> = new Type<UserAssetPreviewLineEmbedded>("UserAssetPreviewLineEmbedded");
 export interface UserAssetPreviewLineEmbedded extends Entities.EmbeddedEntity {
   Type: "UserAssetPreviewLineEmbedded";
-  type: Basics.TypeEntity | null;
+  type: Basics.TypeEntity;
   text: string;
   entityType: Basics.TypeEntity | null;
   action: EntityAction;

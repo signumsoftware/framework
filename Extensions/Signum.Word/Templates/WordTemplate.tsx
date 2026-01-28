@@ -105,7 +105,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
 }
 
 export function UserChartTemplateButton(p: {qd: QueryDescription}): React.JSX.Element {
-  return renderWidgetButton(<><FontAwesomeIcon icon={"chart-bar"} color={"darkviolet"} className="icon" /> {UserChartEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
+  return renderWidgetButton(<><FontAwesomeIcon aria-hidden={true} icon={"chart-bar"} color={"darkviolet"} className="icon" /> {UserChartEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
     queryName: UserChartEntity,
     filterOptions: [
       {
@@ -135,7 +135,7 @@ export function UserChartTemplateButton(p: {qd: QueryDescription}): React.JSX.El
 }
 
 export function UserQueryTemplateButton(p: { qd: QueryDescription }): React.JSX.Element {
-  return renderWidgetButton(<><FontAwesomeIcon icon={"rectangle-list"} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
+  return renderWidgetButton(<><FontAwesomeIcon aria-hidden={true} icon={"rectangle-list"} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
     queryName: UserQueryEntity,
     filterOptions: [{
       token: UserQueryEntity.token(a => a.entity!.entityType!.entity!.cleanName),
@@ -146,8 +146,8 @@ export function UserQueryTemplateButton(p: { qd: QueryDescription }): React.JSX.
 }
 
 function renderWidgetButton(text: React.ReactElement, getCode: () => Promise<string | undefined>) {
-  return <button className="btn btn-light btn-sm sf-button"
-
+  return <button className="btn btn-tertiary btn-sm sf-button"
+    type="button"
     onClick={() =>
       getCode()
         .then(code =>

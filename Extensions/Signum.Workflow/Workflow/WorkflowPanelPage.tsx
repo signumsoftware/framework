@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { OperationLogEntity } from '@framework/Signum.Operations'
 import { CopyHealthCheckButton } from '../../../Signum/React/Components/CopyHealthCheckButton'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function WorkflowPanelPage(): React.JSX.Element {
 
@@ -24,7 +25,7 @@ export default function WorkflowPanelPage(): React.JSX.Element {
           <WorkflowScriptRunnerTab />
         </Tab>
         <Tab title="Timers" eventKey="timers">
-          <a href="#" className="sf-button btn btn-link" onClick={e => { e.preventDefault(); window.open(AppContext.toAbsoluteUrl("/scheduler/view")); }}>Open Scheduler Panel</a>
+          <LinkButton title={undefined} className="sf-button btn btn-link" onClick={e => { window.open(AppContext.toAbsoluteUrl("/scheduler/view")); }}>Open Scheduler Panel</LinkButton>
         </Tab>
       </Tabs>
     </div>
@@ -46,12 +47,10 @@ export function WorkflowScriptRunnerTab(p: {}): React.JSX.Element {
   }, [tick]);
 
   function handleStop(e: React.MouseEvent<any>) {
-    e.preventDefault();
     WorkflowClient.API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
-    e.preventDefault();
     WorkflowClient.API.start().then(() => reloadState());
   }
 

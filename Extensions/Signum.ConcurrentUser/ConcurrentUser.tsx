@@ -133,7 +133,7 @@ export default function ConcurrentUser(p: { entity: Entity, isExecuting: boolean
             {otherUsers?.map((a, i) =>
               <div key={i} className="d-flex align-items-center" >
                 <SmallProfilePhoto user={a.user} className="me-2" /> {getToString(a.user)} <small className="ms-1 text-muted">({DateTime.fromISO(a.startTime).toRelative()})</small>
-                {a.isModified && <FontAwesomeIcon icon="pen-to-square" color={"#FFAA44"} title={ConcurrentUserMessage.CurrentlyEditing.niceToString()} style={{ marginLeft: "10px" }} />}
+                {a.isModified && <FontAwesomeIcon role="img" icon="pen-to-square" color={"#FFAA44"} title={ConcurrentUserMessage.CurrentlyEditing.niceToString()} style={{ marginLeft: "10px" }} />}
               </div>)}
 
 
@@ -157,7 +157,7 @@ export default function ConcurrentUser(p: { entity: Entity, isExecuting: boolean
                 <div className="mt-3">
                   <small>
                     {ConcurrentUserMessage.ThisIsNotTheLatestVersionOf0.niceToString().formatHtml(<strong>{getToString(p.entity)}</strong>)}
-                    <button className="btn btn-primary btn-sm" onClick={p.onReload}>{ConcurrentUserMessage.ReloadIt.niceToString()}</button>
+                    <button type="button" className="btn btn-primary btn-sm" onClick={p.onReload}>{ConcurrentUserMessage.ReloadIt.niceToString()}</button>
                   </small>
                 </div> : null
             }

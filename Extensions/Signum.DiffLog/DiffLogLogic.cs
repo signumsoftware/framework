@@ -11,24 +11,24 @@ public static class DiffLogLogic
 
     public static void Start(SchemaBuilder sb, bool registerAll)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            MixinDeclarations.AssertDeclared(typeof(OperationLogEntity), typeof(DiffLogMixin));
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            TypeConditionLogic.RegisterWhenAlreadyFilteringBy(OperationLogTypeCondition.FilteringByTarget, 
-                property: (OperationLogEntity ol) => ol.Target,
-                isConstantAuthorized: e => e != null && TypeAuthLogic.IsAllowedFor(e, TypeAllowedBasic.Read, true, FilterQueryArgs.FromLite(e)),
-                useInDBForInMemoryCondition: false);
+        MixinDeclarations.AssertDeclared(typeof(OperationLogEntity), typeof(DiffLogMixin));
 
-            OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
+        TypeConditionLogic.RegisterWhenAlreadyFilteringBy(OperationLogTypeCondition.FilteringByTarget, 
+            property: (OperationLogEntity ol) => ol.Target,
+            isConstantAuthorized: e => e != null && TypeAuthLogic.IsAllowedFor(e, TypeAllowedBasic.Read, true, FilterQueryArgs.FromLite(e)),
+            useInDBForInMemoryCondition: false);
 
-            if (registerAll)
-                RegisterShouldLog<Entity>((entity, oper) => true);
+        OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
 
-            if (sb.WebServerBuilder != null)
-                DiffLogServer.Start(sb.WebServerBuilder);
+        if (registerAll)
+            RegisterShouldLog<Entity>((entity, oper) => true);
 
-        }
+        if (sb.WebServerBuilder != null)
+            DiffLogServer.Start(sb.WebServerBuilder);
+
     }
 
     public static void RegisterShouldLog<T>(Func<IEntity, IOperation, bool> func) where T : Entity

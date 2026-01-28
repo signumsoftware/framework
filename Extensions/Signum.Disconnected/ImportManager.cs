@@ -541,7 +541,7 @@ FROM {0}
 INNER JOIN {1} as [table] ON {0}.{3} = [table].{3}".FormatWith(
  table.Name,
  table.Name.OnDatabase(newDatabaseName),
- table.Columns.Values.Where(c => !c.PrimaryKey).ToString(c => "   {0} = [table].{0}".FormatWith(c.Name.SqlEscape(isPostgres)), ",\r\n"),
+ table.Columns.Values.Where(c => !c.PrimaryKey).ToString(c => "   {0} = [table].{0}".FormatWith(c.Name.SqlEscape(isPostgres)), ",\n"),
  table.PrimaryKey.Name.SqlEscape(isPostgres))
  + GetUpdateWhere(table),
  new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id.Object, machine.Id.Object.GetType(), default) });
@@ -553,7 +553,7 @@ INNER JOIN {1} as [table] ON {0}.{3} = [table].{3}".FormatWith(
         var isPostgres = Schema.Current.Settings.IsPostgres;
         var s = Schema.Current;
 
-        var where = "\r\nWHERE [table].{0} = @machineId AND [table].{1} != [table].{2}".FormatWith(
+        var where = "\nWHERE [table].{0} = @machineId AND [table].{1} != [table].{2}".FormatWith(
             ((FieldReference)s.Field((T t) => t.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine)).Name.SqlEscape(isPostgres),
             ((FieldValue)s.Field((T t) => t.Ticks)).Name.SqlEscape(isPostgres),
             ((FieldValue)s.Field((T t) => t.Mixin<DisconnectedSubsetMixin>().LastOnlineTicks)).Name.SqlEscape(isPostgres));

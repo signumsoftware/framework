@@ -745,21 +745,38 @@ export function onReloadTypes(): void {
   onReloadTypesActions.forEach(a => a());
 }
 
-interface QueryContexts {
-  [queryName: string]: {
-    [contextType: string]: (string | number)[]
+interface TypesInDomain {
+  [typeName: string]: {
+    [domainType: string]: {
+      read: (string | number)[],
+      write: (string | number)[]
+    }
   }
 }
 
-export let queryContexts: QueryContexts | undefined;
-export function queryAllowedInContext(queryKey: string, context: Lite<Entity>): boolean  {
-  var list = queryContexts?.[queryKey]?.[context.EntityType];
+export let typeInDomain: TypesInDomain | undefined;
+export function typeAllowedInDomain(type: PseudoType, domain: Lite<Entity>, write = false) : boolean {
+  var ti = tryGetTypeInfo(type);
+  if (!ti)
+    return false;
 
-  return list == null || list.contains(context.id!);
+  var list = typeInDomain?.[ti.name]?.[domain.EntityType];
+
+  if (list == null)
+    return true; //Super user
+
+  if (!write && list.read.contains(domain.id!))
+    return true;
+
+  if (list.write.contains(domain.id!))
+    return true;
+
+  return false;
 }
-export function reloadQueryContexts(): Promise<void> {
-  return ajaxGet<QueryContexts>({ url: "/api/query/queryContexts" }).then(qc => {
-    queryContexts = qc;
+
+export function reloadTypesInDomains(): Promise<void> {
+  return ajaxGet<TypesInDomain>({ url: "/api/reflection/typeInDomains" }).then(tid => {
+    typeInDomain = tid;
     AppContext.resetUI();
   });
 }
@@ -982,6 +999,9 @@ export class MListElementBinding<T> implements IBinding<T> {
   constructor(
     public mListBinding: IBinding<MList<T>>,
     public index: number) {
+    if (isNaN(index))
+      throw new Error("NaN");
+
     this.suffix = "[" + this.index.toString() + "].element";
   }
 
@@ -1088,12 +1108,16 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
   while (body != parameter) {
     let m: RegExpExecArray | null;
 
-    if (m = memberRegex.exec(body) ?? memberIndexerRegex.exec(body)) {
+    if (m = memberRegex.exec(body)) {
       result.push({ name: m[2], type: "Member" });
       body = m[1];
     }
+    else if ( m = memberIndexerRegex.exec(body)) {
+      result.push({ name: m[3], type: "Member" });
+      body = m[1];
+    }
     else if (m = indexRegex.exec(body)) {
-      result.push({ name: m[2], type: "Indexer" });
+      result.push({ name: m[3], type: "Indexer" });
       body = m[1];
     }
     else {
@@ -1344,7 +1368,6 @@ export type Anonymous<T extends ModifiableEntity> = T & {
 }
 
 export class Type<T extends ModifiableEntity> implements IType {
-
 
 
   constructor(
@@ -1705,12 +1728,20 @@ export class QueryTokenString<T> {
     return new QueryTokenString<string>(this.token + "." + column);
   }
 
-  operation(os: OperationSymbol): string { //operation tokens are leaf
-    return this.token + ".[Operations]." + os.key.replace(".", "#");
+  operation(os: OperationSymbol): QueryTokenString<string> {
+    return new QueryTokenString<string>(this.token + ".[Operations]." + os.key.replace(".", "#"));
   }
 
-  indexer(prefix: string, key: string): string {
-    return this.token + ".[" + prefix + "].[" + key + "]";
+  translated(): QueryTokenString<string> {
+    return new QueryTokenString<string>(this.token + ".Translated");
+  }
+
+  indexer<S>(prefix: string, key: string): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".[" + prefix + "].[" + key + "]");
+  }
+
+  mlistElementProperty(property: "RowId" | "RowOrder" | "RowPartitionId"): QueryTokenString<string | number> {
+    return new QueryTokenString<string | number>(this.token + "." + property);
   }
 }
 

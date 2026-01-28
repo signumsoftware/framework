@@ -31,59 +31,59 @@ public static class DisconnectedLogic
 
     public static void Start(SchemaBuilder sb, long serverSeed = 1000000000)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            ServerSeed = serverSeed;
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<DisconnectedMachineEntity>()
-                .WithQuery(() => dm => new
-                {
-                    Entity = dm,
-                    dm.MachineName,
-                    dm.State,
-                    dm.SeedMin,
-                    dm.SeedMax,
-                });
+        ServerSeed = serverSeed;
 
-            sb.Include<DisconnectedExportEntity>()
-                .WithQuery(() => dm => new
-                {
-                    Entity = dm,
-                    dm.CreationDate,
-                    dm.Machine,
-                    dm.State,
-                    dm.Total,
-                    dm.Exception,
-                });
+        sb.Include<DisconnectedMachineEntity>()
+            .WithQuery(() => dm => new
+            {
+                Entity = dm,
+                dm.MachineName,
+                dm.State,
+                dm.SeedMin,
+                dm.SeedMax,
+            });
 
-            sb.Include<DisconnectedImportEntity>()
-                .WithQuery(() => dm => new
-                {
-                    Entity = dm,
-                    dm.CreationDate,
-                    dm.Machine,
-                    dm.State,
-                    dm.Total,
-                    dm.Exception,
-                });
-            
-            QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Imports(), DisconnectedMessage.Imports);
-            QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Exports(), DisconnectedMessage.Exports);
+        sb.Include<DisconnectedExportEntity>()
+            .WithQuery(() => dm => new
+            {
+                Entity = dm,
+                dm.CreationDate,
+                dm.Machine,
+                dm.State,
+                dm.Total,
+                dm.Exception,
+            });
 
-            MachineGraph.Register();
+        sb.Include<DisconnectedImportEntity>()
+            .WithQuery(() => dm => new
+            {
+                Entity = dm,
+                dm.CreationDate,
+                dm.Machine,
+                dm.State,
+                dm.Total,
+                dm.Exception,
+            });
 
-            sb.Schema.SchemaCompleted += AssertDisconnectedStrategies;
+        QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Imports(), DisconnectedMessage.Imports);
+        QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Exports(), DisconnectedMessage.Exports);
 
-            sb.Schema.Synchronizing += Schema_Synchronizing;
-            sb.Schema.Generating += Schema_Generating;
+        MachineGraph.Register();
 
-            sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<Entity>(EntityEventsGlobal_Saving);
+        sb.Schema.SchemaCompleted += AssertDisconnectedStrategies;
 
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync);
+        sb.Schema.Synchronizing += Schema_Synchronizing;
+        sb.Schema.Generating += Schema_Generating;
 
-            Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMin).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: true);
-            Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMax).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: false);
-        }
+        sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<Entity>(EntityEventsGlobal_Saving);
+
+        sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync);
+
+        Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMin).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: true);
+        Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMax).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: false);
     }
 
     private static SqlPreCommand? Schema_Generating()
@@ -203,19 +203,19 @@ public static class DisconnectedLogic
             a => a,
             (a, b) => 0);
 
-        var extra = result.Extra.OrderBy(a => a.Namespace).ThenBy(a => a.Name).ToString(t => "  DisconnectedLogic.Register<{0}>(Download.None, Upload.None);".FormatWith(t.Name), "\r\n");
+        var extra = result.Extra.OrderBy(a => a.Namespace).ThenBy(a => a.Name).ToString(t => "  DisconnectedLogic.Register<{0}>(Download.None, Upload.None);".FormatWith(t.Name), "\n");
 
-        var lacking = result.Missing.GroupBy(a => a.Namespace).OrderBy(gr => gr.Key).ToString(gr => "  //{0}\r\n".FormatWith(gr.Key) +
-            gr.ToString(t => "  DisconnectedLogic.Register<{0}>(Download.None, Upload.None);".FormatWith(t.Name), "\r\n"), "\r\n\r\n");
+        var lacking = result.Missing.GroupBy(a => a.Namespace).OrderBy(gr => gr.Key).ToString(gr => "  //{0}\n".FormatWith(gr.Key) +
+            gr.ToString(t => "  DisconnectedLogic.Register<{0}>(Download.None, Upload.None);".FormatWith(t.Name), "\n"), "\n\n");
 
         if (extra.HasText() || lacking.HasText())
-            throw new InvalidOperationException("DisconnectedLogic's download strategies are not synchronized with the Schema.\r\n" +
-                    (extra.HasText() ? ("Remove something like:\r\n" + extra + "\r\n\r\n") : null) +
-                    (lacking.HasText() ? ("Add something like:\r\n" + lacking + "\r\n\r\n") : null));
+            throw new InvalidOperationException("DisconnectedLogic's download strategies are not synchronized with the Schema.\n" +
+                    (extra.HasText() ? ("Remove something like:\n" + extra + "\n\n") : null) +
+                    (lacking.HasText() ? ("Add something like:\n" + lacking + "\n\n") : null));
 
-        string errors = strategies.Where(kvp => kvp.Value.Upload == Upload.Subset && s.Table(kvp.Key).Ticks == null).ToString(a => a.Key.Name, "\r\n");
+        string errors = strategies.Where(kvp => kvp.Value.Upload == Upload.Subset && s.Table(kvp.Key).Ticks == null).ToString(a => a.Key.Name, "\n");
         if (errors.HasText())
-            throw new InvalidOperationException("Ticks is mandatory for this Disconnected strategy. Tables: \r\n" + errors.Indent(4));
+            throw new InvalidOperationException("Ticks is mandatory for this Disconnected strategy. Tables: \n" + errors.Indent(4));
 
         foreach (var item in strategies.Where(kvp => kvp.Value.Upload != Upload.None).Select(a => a.Key))
         {

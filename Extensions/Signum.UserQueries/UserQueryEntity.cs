@@ -365,7 +365,6 @@ public class ValueUserQueryElementEmbedded : EmbeddedEntity
     }
 }
 
-
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class BigValuePartEntity : Entity, IPartParseDataEntity
 {
@@ -375,11 +374,23 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
 
     public bool RequiresTitle => false;
 
+    public string? CustomBigValue { get; set; }
+
+    public bool Navigate { get; set; }
+
+    public string? CustomUrl { get; set; }
+
+    public bool? IsClickable { get; set; }
+
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("BigValuePart",
            UserQuery == null ? null : new XAttribute(nameof(UserQuery), ctx.Include(UserQuery)),
-           ValueToken == null ? null : new XAttribute(nameof(ValueToken), ValueToken.Token.FullKey())
+           ValueToken == null ? null : new XAttribute(nameof(ValueToken), ValueToken.Token.FullKey()),
+           CustomBigValue == null ? null : new XAttribute(nameof(CustomBigValue), CustomBigValue),
+           !Navigate ? null: new XAttribute(nameof(Navigate), Navigate),
+           CustomUrl == null ? null : new XAttribute(nameof(CustomUrl), CustomUrl),
+           IsClickable == null ? null : new XAttribute(nameof(IsClickable), IsClickable.Value)
            );
     }
 
@@ -388,6 +399,10 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
         var uq = element.Attribute(nameof(UserQuery))?.Value;
         UserQuery = uq == null ? null : (UserQueryEntity)ctx.GetEntity(Guid.Parse(uq));
         ValueToken = element.Attribute(nameof(ValueToken))?.Let(t => new QueryTokenEmbedded(t.Value));
+        CustomBigValue = element.Attribute(nameof(CustomBigValue))?.Value;
+        Navigate = element.Attribute(nameof(Navigate))?.Value.ToBool() ?? false;
+        CustomUrl = element.Attribute(nameof(CustomUrl))?.Value;
+        IsClickable = element.Attribute(nameof(IsClickable))?.Value.ToBool();
     }
 
     public void ParseData(DashboardEntity dashboardEntity)
@@ -410,15 +425,36 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
     {
         ValueToken = ValueToken,
         UserQuery = UserQuery,
+        CustomBigValue = CustomBigValue,
+        IsClickable = IsClickable
     };
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         if(pi.Name == nameof(ValueToken))
         {
-            if (UserQuery == null && this.GetDashboard().EntityType == null)
+            if (ValueToken != null && UserQuery == null && this.GetDashboard().EntityType == null)
                 return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
         }
+
+        if(this.GetDashboard().EntityType == null)
+        {
+            if (pi.Name == nameof(UserQuery))
+            {
+                if (UserQuery == null)
+                    return ValidationMessage._0IsNotSet.NiceToString(NicePropertyName(() => UserQuery));
+            }
+        }
+        else
+        {
+            if (pi.Name == nameof(UserQuery) || pi.Name == nameof(ValueToken))
+            {
+                if (UserQuery == null && ValueToken == null)
+                    return ValidationMessage._0Or1ShouldBeSet.NiceToString(NicePropertyName(() => UserQuery), NicePropertyName(() => ValueToken));
+            }
+        }
+
+       
 
         return base.PropertyValidation(pi);
     }

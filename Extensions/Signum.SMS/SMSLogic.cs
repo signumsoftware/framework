@@ -49,75 +49,75 @@ public static class SMSLogic
 
     public static void Start(SchemaBuilder sb, ISMSProvider? provider, Func<SMSConfigurationEmbedded> getConfiguration)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        CultureInfoLogic.AssertStarted(sb);
+        sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
+
+        SMSLogic.getConfiguration = getConfiguration;
+        SMSLogic.Provider = provider;
+
+        sb.Include<SMSMessageEntity>()
+            .WithQuery(() => m => new
+            {
+                Entity = m,
+                m.Id,
+                m.From,
+                m.DestinationNumber,
+                m.State,
+                m.SendDate,
+                m.Template,
+                m.Referred,
+                m.Exception,
+            });
+
+        sb.Include<SMSTemplateEntity>()
+            .WithUniqueIndex(t => new { t.Model }, where: t => t.Model != null && t.IsActive == true)
+            .WithQuery(() => t => new
+            {
+                Entity = t,
+                t.Id,
+                t.Name,
+                t.IsActive,
+                t.From,
+                t.Query,
+                t.Model,
+            });
+
+
+        sb.Schema.EntityEvents<SMSTemplateEntity>().PreSaving += new PreSavingEventHandler<SMSTemplateEntity>(EmailTemplate_PreSaving);
+        sb.Schema.EntityEvents<SMSTemplateEntity>().Retrieved += SMSTemplateLogic_Retrieved;
+        sb.Schema.EntityEvents<SMSModelEntity>().PreDeleteSqlSync += e =>
+            Administrator.UnsafeDeletePreCommand(Database.Query<SMSTemplateEntity>()
+                .Where(a => a.Model.Is(e)));
+
+        SMSTemplatesLazy = sb.GlobalLazy(() =>
+            Database.Query<SMSTemplateEntity>().ToFrozenDictionary(et => et.ToLite())
+            , new InvalidateWith(typeof(SMSTemplateEntity)));
+
+        SMSTemplatesByQueryName = sb.GlobalLazy(() =>
         {
-            CultureInfoLogic.AssertStarted(sb);
-            sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
-
-            SMSLogic.getConfiguration = getConfiguration;
-            SMSLogic.Provider = provider;
-
-            sb.Include<SMSMessageEntity>()
-                .WithQuery(() => m => new
-                {
-                    Entity = m,
-                    m.Id,
-                    m.From,
-                    m.DestinationNumber,
-                    m.State,
-                    m.SendDate,
-                    m.Template,
-                    m.Referred,
-                    m.Exception,
-                });
-
-            sb.Include<SMSTemplateEntity>()
-                .WithUniqueIndex(t => new { t.Model }, where: t => t.Model != null && t.IsActive == true)
-                .WithQuery(() => t => new
-                {
-                    Entity = t,
-                    t.Id,
-                    t.Name,
-                    t.IsActive,
-                    t.From,
-                    t.Query,
-                    t.Model,
-                });
+            return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToFrozenDictionary();
+        }, new InvalidateWith(typeof(SMSTemplateEntity)));
 
 
-            sb.Schema.EntityEvents<SMSTemplateEntity>().PreSaving += new PreSavingEventHandler<SMSTemplateEntity>(EmailTemplate_PreSaving);
-            sb.Schema.EntityEvents<SMSTemplateEntity>().Retrieved += SMSTemplateLogic_Retrieved;
-            sb.Schema.EntityEvents<SMSModelEntity>().PreDeleteSqlSync += e =>
-                Administrator.UnsafeDeletePreCommand(Database.Query<SMSTemplateEntity>()
-                    .Where(a => a.Model.Is(e)));
+        SMSMessageGraph.Register();
+        SMSTemplateGraph.Register();
 
-            SMSTemplatesLazy = sb.GlobalLazy(() =>
-                Database.Query<SMSTemplateEntity>().ToFrozenDictionary(et => et.ToLite())
-                , new InvalidateWith(typeof(SMSTemplateEntity)));
+        Validator.PropertyValidator<SMSTemplateEntity>(et => et.Messages).StaticPropertyValidation += (t, pi) =>
+        {
 
-            SMSTemplatesByQueryName = sb.GlobalLazy(() =>
-            {
-                return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToFrozenDictionary();
-            }, new InvalidateWith(typeof(SMSTemplateEntity)));
+            var dc = SMSLogic.Configuration?.DefaultCulture;
 
+            if (dc != null && !t.Messages.Any(m => m.CultureInfo.Is(dc)))
+                return SMSTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(dc.EnglishName);
 
-            SMSMessageGraph.Register();
-            SMSTemplateGraph.Register();
+            return null;
+        };
 
-            Validator.PropertyValidator<SMSTemplateEntity>(et => et.Messages).StaticPropertyValidation += (t, pi) =>
-            {
-
-                var dc = SMSLogic.Configuration?.DefaultCulture;
-
-                if (dc != null && !t.Messages.Any(m => m.CultureInfo.Is(dc)))
-                    return SMSTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(dc.EnglishName);
-
-                return null;
-            };
-
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages;
-        } 
+        ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+        ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages;
     }
 
     public static void ExceptionLogic_DeletePackages(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)

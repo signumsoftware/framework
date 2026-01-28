@@ -170,7 +170,7 @@ export function IconTypeahead(p: IconTypeaheadProps): React.ReactElement {
 
     return (
       <span>
-        {icon && <FontAwesomeIcon icon={icon} className="icon" style={{ width: "12px", height: "12px" }} />}
+        {icon && <FontAwesomeIcon aria-hidden={true} icon={icon} className="icon" style={{ width: "12px", height: "12px" }} />}
         {hl.highlight(item as string)}
       </span>
     );

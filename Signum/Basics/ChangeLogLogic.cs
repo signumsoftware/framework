@@ -6,18 +6,18 @@ public static class ChangeLogLogic
 {
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            sb.Include<ChangeLogViewLogEntity>()
-                .WithDelete(ChangeLogViewLogOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.User,
-                    e.LastDate
-                });
-        }
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<ChangeLogViewLogEntity>()
+            .WithDelete(ChangeLogViewLogOperation.Delete)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.User,
+                e.LastDate
+            });
     }
 
     public static DateTime? GetLastDate()

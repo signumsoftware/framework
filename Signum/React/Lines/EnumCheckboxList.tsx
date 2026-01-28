@@ -18,7 +18,7 @@ export interface EnumCheckboxListProps<V extends string> extends LineBaseProps<M
 
 export class EnumCheckboxListController<V extends string> extends LineBaseController<EnumCheckboxListProps<V>, MList<V>> {
 
-  getDefaultProps(p: EnumCheckboxListProps<V>): void {
+  override getDefaultProps(p: EnumCheckboxListProps<V>): void {
     super.getDefaultProps(p);
     p.columnWidth = 200;
     if (p.type) {

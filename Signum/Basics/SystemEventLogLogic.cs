@@ -8,23 +8,23 @@ public static class SystemEventLogLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Include<SystemEventLogEntity>()
-                .WithQuery(() => s => new
-                {
-                    Entity = s,
-                    s.Id,
-                    s.Date,
-                    s.MachineName,
-                    s.EventType,
-                    s.Exception,
-                });
-            
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            Started = true;
-        }
+        sb.Include<SystemEventLogEntity>()
+            .WithQuery(() => s => new
+            {
+                Entity = s,
+                s.Id,
+                s.Date,
+                s.MachineName,
+                s.EventType,
+                s.Exception,
+            });
+
+        ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+        Started = true;
     }
 
     public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)

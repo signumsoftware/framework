@@ -4,6 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { AlertEntity, AlertMessage } from '../Signum.Alerts'
 import { AlertsClient } from '../AlertsClient'
 import { useForceUpdate } from '@framework/Hooks';
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function Alert(p: { ctx: TypeContext<AlertEntity> }): React.JSX.Element {
 
@@ -32,7 +33,7 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }): React.JSX.E
         </div>
       </div>
 
-    
+
       <EntityLine ctx={ctx.subCtx(n => n.recipient)} />
       <hr />
 
@@ -43,12 +44,12 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }): React.JSX.E
         !ctx.value.isNew && !edit ?
           <FormGroup ctx={ctx.subCtx(n => n.titleField)} label={AlertMessage.Text.niceToString()} >
             {() => <div style={{ whiteSpace: "pre-wrap" }}>
-                {AlertsClient.format(ctx.value.textField || ctx.value.textFromAlertType || "", ctx.value)}
-                <br />
-                <a href="#" className="text-muted" onClick={e => { e.preventDefault(); setEdit(true) }}>Edit</a>
-              </div>}
+              {AlertsClient.format(ctx.value.textField || ctx.value.textFromAlertType || "", ctx.value)}
+              <br />
+              <LinkButton title={undefined} className="text-muted" onClick={e => { setEdit(true) }}>Edit</LinkButton>
+            </div>}
           </FormGroup>
-          
+
           :
           <TextAreaLine ctx={ctx.subCtx(n => n.textField)} label={AlertMessage.Text.niceToString()} valueHtmlAttributes={{ style: { height: "180px" } }} />
       }

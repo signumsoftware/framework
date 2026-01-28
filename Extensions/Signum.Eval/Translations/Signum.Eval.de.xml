@@ -4,7 +4,16 @@
     <Member Name="Script" Description="Skript" />
   </Type>
   <Type Name="EvalPanelMessage">
+    <Member Name="_0Found" Description="{0} gefunden" />
+    <Member Name="CheckEvals" Description="Evals prüfen" />
+    <Member Name="DynamicPanel" Description="Dynamisches Panel" />
+    <Member Name="ExceptionChecking0_" Description="Ausnahme prüfen {0}" />
+    <Member Name="NoErrorsFound" Description="Keine Fehler gefunden" />
     <Member Name="OpenErrors" Description="Offene Fehler" />
+    <Member Name="RefreshAll" Description="Alle aktualisieren" />
+    <Member Name="RefreshThisClient" Description="Diesen Client aktualisieren" />
+    <Member Name="Search" Description="Suche" />
+    <Member Name="YouNeedToRefreshManually" Description="Nun müssen Sie die Clients manuell aktualisieren (d. h. F5 drücken)." />
   </Type>
   <Type Name="EvalPanelPermission">
     <Member Name="ViewDynamicPanel" Description="Dynamisches panel anzeigen" />

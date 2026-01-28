@@ -103,5 +103,6 @@ export namespace ValidationMessage {
   export const _0IsRepeated: MessageKey = new MessageKey("ValidationMessage", "_0IsRepeated");
   export const NumberIsTooBig: MessageKey = new MessageKey("ValidationMessage", "NumberIsTooBig");
   export const NumberIsTooSmall: MessageKey = new MessageKey("ValidationMessage", "NumberIsTooSmall");
+  export const Either0Or1ShouldBeSet: MessageKey = new MessageKey("ValidationMessage", "Either0Or1ShouldBeSet");
 }
 

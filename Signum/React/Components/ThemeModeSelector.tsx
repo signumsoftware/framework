@@ -32,11 +32,11 @@ export function useAuto(theme: BootstrapThemeModes): "dark" | "light" {
 
   return mode;
 }
-
+export const STORAGE_KEY = "bootstrap-theme-mode";
 export function ThemeModeSelector(p: { onSetMode?: (mode: "dark" | "light") => void }): JSX.Element {
 
   const getDefaultTheme = (): BootstrapThemeModes => {
-    const stored = localStorage.getItem("bootstrap-theme-mode") as BootstrapThemeModes | null;
+    const stored = localStorage.getItem(STORAGE_KEY) as BootstrapThemeModes | null;
     if (stored) return stored;
     return "auto"; // fallback to system preference
   };
@@ -48,7 +48,7 @@ export function ThemeModeSelector(p: { onSetMode?: (mode: "dark" | "light") => v
   useEffect(() => {
     document.body.dataset.bsTheme = finalMode;
     p.onSetMode?.(finalMode)
-    localStorage.setItem("bootstrap-theme-mode", finalMode);
+    localStorage.setItem(STORAGE_KEY, finalMode);
   }, [finalMode]);
 
   useWindowEvent("change-theme-mode", (e) => {
@@ -60,7 +60,7 @@ export function ThemeModeSelector(p: { onSetMode?: (mode: "dark" | "light") => v
       <NavDropdown
         title={
           <>
-            <FontAwesomeIcon icon={ICONS[bootstrapMode]} /> {(bootstrapMode.firstUpper())}
+            <FontAwesomeIcon icon={ICONS[bootstrapMode]} title={(bootstrapMode.firstUpper())} />
           </>
         }
       >
@@ -70,7 +70,7 @@ export function ThemeModeSelector(p: { onSetMode?: (mode: "dark" | "light") => v
             active={bootstrapMode === theme}
             onClick={() => setBootstrapMode(theme)}
           >
-            <FontAwesomeIcon icon={ICONS[theme]} className="me-2" />
+            <FontAwesomeIcon aria-hidden={true} icon={ICONS[theme]} className="me-2" />
             {(theme.firstUpper())}
           </NavDropdown.Item>
         ))}

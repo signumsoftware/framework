@@ -36,6 +36,7 @@ export interface SearchControlProps {
   defaultIncludeDefaultFilters?: boolean;
   showHeader?: boolean | "PinnedFilters";
   avoidTableFooterContainer?: boolean;
+  avoidGroupByMessage?: boolean;
   pinnedFilterVisible?: (fop: FilterOptionParsed) => boolean;
   showBarExtension?: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
@@ -212,6 +213,7 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
         searchOnLoad={p.searchOnLoad != null ? p.searchOnLoad : true}
         showHeader={p.showHeader != null ? p.showHeader : true}
         avoidTableFooterContainer={p.avoidTableFooterContainer ?? false}
+        avoidGroupByMessage={p.avoidGroupByMessage ?? false}
         pinnedFilterVisible={p.pinnedFilterVisible}
         showFilters={p.showFilters != null ? p.showFilters : false}
         showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}

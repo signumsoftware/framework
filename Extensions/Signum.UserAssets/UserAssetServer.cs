@@ -30,7 +30,7 @@ public static class UserAssetServer
 
         started = true;
 
-        ReflectionServer.RegisterLike(typeof(UserAssetMessage), () => UserAssetPermission.UserAssetsToXML.IsAuthorized());
+        ReflectionServer.RegisterLike(typeof(UserAssetMessage), () => UserAssetsImporter.UserAssetNames.Values.Any(t => Schema.Current.IsAllowed(t, true) == null));
         ReflectionServer.RegisterLike(typeof(QueryOrderEmbedded), () => QueryPermissionSymbols.Any(p => p.IsAuthorized()));
 
 

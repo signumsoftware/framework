@@ -325,7 +325,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
         {
             var s = Schema.Current.Settings;
             List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo))!.OfType<AttachToUniqueIndexesAttribute>().Any())
-               .SelectMany(f => TableIndex.GetColumnsFromFields(f.Field))
+               .SelectMany(f => TableIndex.GetColumnsFromField(f.Field))
                .ToList();
 
             if (attachedFields.Any())
@@ -449,19 +449,29 @@ public abstract partial class Field
         return Enumerable.Empty<TableIndex>();
     }
 
-    public virtual TableIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
+    public virtual TableIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute, ImplementationColumn? columnIB = null)
     {
         if (attribute == null)
             return null;
 
-        var result = new TableIndex(table, TableIndex.GetColumnsFromFields(this))
+        var columns = columnIB != null ? [columnIB] : TableIndex.GetColumnsFromField(this);
+
+        var result = new TableIndex(table, columns)
         {
             Unique = true,
             AvoidAttachToUniqueIndexes = attribute.AvoidAttachToUniqueIndexes
         };
 
-        if (attribute.AllowMultipleNulls)
+        var isPostgres = Schema.Current.Settings.IsPostgres;
+
+        if (columnIB != null)
+        {
+            result.Where = columnIB.Nullable == IsNullable.No ? null : "{0} IS NOT NULL".FormatWith(columnIB.Name.SqlEscape(isPostgres));
+        }
+        else
+        {
             result.Where = IndexWhereExpressionVisitor.IsNull(this, false, Schema.Current.Settings.IsPostgres);
+        }
 
         return result;
     }
@@ -471,7 +481,7 @@ public abstract partial class Field
         if (attribute == null)
             return null;
 
-        var result = new TableIndex(table, TableIndex.GetColumnsFromFields(this));
+        var result = new TableIndex(table, TableIndex.GetColumnsFromField(this));
 
         return result;
     }
@@ -1171,7 +1181,8 @@ public partial class FieldImplementedBy : Field, IFieldReference
 
     public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
     {
-        return this.Columns().Select(c => new TableIndex(table, c)).Concat(base.GenerateIndexes(table));
+        return this.Columns().Select(c => new TableIndex(table, c))
+            .Concat(this.ImplementationColumns.Select(a => a.Value.UniqueIndex).NotNull());
     }
 
     bool clearEntityOnSaving;
@@ -1203,11 +1214,11 @@ public partial class FieldImplementedByAll : Field, IFieldReference
 
     public Dictionary<Type/*PrimaryKeyType*/, ImplementedByAllIdColumn> IdColumns { get; set; }
 
-    public ImplementationColumn TypeColumn { get; set; }
+    public ImplementedByAllTypeColumn TypeColumn { get; set; }
 
     public Dictionary<Type, Type>? CustomLiteModelTypes;
 
-    public FieldImplementedByAll(PropertyRoute route, IEnumerable<ImplementedByAllIdColumn> columnIds, ImplementationColumn columnType) : base(route)
+    public FieldImplementedByAll(PropertyRoute route, IEnumerable<ImplementedByAllIdColumn> columnIds, ImplementedByAllTypeColumn columnType) : base(route)
     {
         this.IdColumns = columnIds.ToDictionaryEx(a => a.Type.UnNullify());
         this.TypeColumn = columnType;
@@ -1288,8 +1299,12 @@ public partial class ImplementationColumn : IColumn
     public Type? CustomLiteModelType { get; internal set; }
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
-    public ImplementationColumn(string name, Table referenceTable)
+    public TableIndex? UniqueIndex { get; internal set; }
+
+    public string PreName { get; }
+    public ImplementationColumn(string name, Table referenceTable, string preName)
     {
+        PreName = preName;
         Name = name;
         ReferenceTable = referenceTable;
     }
@@ -1321,9 +1336,11 @@ public partial class ImplementedByAllIdColumn : IColumn
     ComputedColumn? IColumn.ComputedColumn => null;
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
-    public ImplementedByAllIdColumn(string name, Type type, AbstractDbType dbType)
+    public string PreName { get; }
+    public ImplementedByAllIdColumn(string name, Type type, AbstractDbType dbType, string preName)
     {
-        Name = name;
+        this.Name = name;
+        this.PreName = preName;
         this.DbType = dbType;
         this.Type = type;
     }
@@ -1331,6 +1348,14 @@ public partial class ImplementedByAllIdColumn : IColumn
     public override string ToString()
     {
         return this.Name;
+    }
+}
+
+public partial class ImplementedByAllTypeColumn :ImplementationColumn
+{
+    public ImplementedByAllTypeColumn(string name, Table referenceTable, string preName)
+        : base(name, referenceTable, preName)
+    {
     }
 }
 
@@ -1688,6 +1713,21 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
                     return true;
                 default:
                     return false;
+            }
+
+        throw new NotImplementedException();
+    }
+
+    public bool IsVector()
+    {
+        if(sqlServer is SqlDbType s)
+            return s == SqlDbType.Vector;
+
+        if(postgreSql is NpgsqlDbType p)
+            switch (p)
+            {
+                case NpgsqlDbType.Array | NpgsqlDbType.Real: return true;
+                default: return false;
             }
 
         throw new NotImplementedException();

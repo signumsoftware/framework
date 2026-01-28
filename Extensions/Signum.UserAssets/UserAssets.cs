@@ -12,7 +12,7 @@ public class UserAssetPreviewModel : ModelEntity
 
 public class UserAssetPreviewLineEmbedded : EmbeddedEntity
 {
-    public TypeEntity? Type { get; set; }
+    public TypeEntity Type { get; set; }
 
     public string Text { get; set; }
 
@@ -74,6 +74,11 @@ public enum UserAssetMessage
     _0IsNotFilterable,
     [Description("The Filter Operation {0} is not compatible with {1}")]
     TheFilterOperation0isNotCompatibleWith1,
+    UserAssetLines,
+    Import,
+    AssumeIs,
+    UsedBy,
+    Advanced,
 }
 
 [AutoInit]

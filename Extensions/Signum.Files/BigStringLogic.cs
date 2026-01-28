@@ -46,13 +46,13 @@ public static class BigStringLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            MixinDeclarations.AssertDeclared(typeof(BigStringEmbedded), typeof(BigStringMixin));
-            sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
-            BigStringMixin.PreSavingAction = PreSaving;
-            BigStringMixin.PostRetrievingAction = PostRetrieving;
-        }
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        MixinDeclarations.AssertDeclared(typeof(BigStringEmbedded), typeof(BigStringMixin));
+        sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
+        BigStringMixin.PreSavingAction = PreSaving;
+        BigStringMixin.PostRetrievingAction = PostRetrieving;
     }
 
     public static Dictionary<Type, List<PropertyRoute>> CandidatesByDeclaringType = null!;

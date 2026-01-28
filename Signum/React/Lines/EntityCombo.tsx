@@ -39,7 +39,7 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
 
   refresh = 0;
 
-  getDefaultProps(p: EntityComboProps<V>): void {
+  override getDefaultProps(p: EntityComboProps<V>): void {
     p.remove = false;
     p.create = false;
     p.view = false;
@@ -47,14 +47,14 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
     p.find = false;
   }
 
-  overrideProps(p: EntityComboProps<V>, overridenProps: EntityComboProps<V>): void {
+  override overrideProps(p: EntityComboProps<V>, overridenProps: EntityComboProps<V>): void {
     super.overrideProps(p, overridenProps);
     if (p.onRenderItem === undefined && p.type && tryGetTypeInfos(p.type).some(a => a && Navigator.getSettings(a)?.renderLite)) {
       p.onRenderItem = (row, role, searchTerm) => row == null ? <span className="mx-2">-</span> : (row?.entity && Navigator.renderLite(row.entity, TextHighlighter.fromString(searchTerm))) ?? "";
     }
   }
 
-  async doView(entity: V): Promise<Aprox<V> | undefined> {
+  override async doView(entity: V): Promise<Aprox<V> | undefined> {
     var val = await super.doView(entity);
 
     this.refresh++;

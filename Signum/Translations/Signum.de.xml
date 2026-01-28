@@ -18,7 +18,12 @@
     <Member Name="Today" Description="Heute" />
   </Type>
   <Type Name="ChangeLogMessage">
+    <Member Name="_0ImplementedOn1WithFollowingChanges2" Description="{0}, implementiert am {1} mit folgenden Änderungen: {2}" />
+    <Member Name="ChangeLogEntries" Description="Änderungsprotokolleinträge" />
+    <Member Name="ChangeLogs" Description="Änderungsprotokolle" />
+    <Member Name="DeployedOn0" Description="Bereitgestellt am {0}" />
     <Member Name="SeeMore" Description="mehr sehen ..." />
+    <Member Name="SeeMoreChangeLogEntries" Description="Weitere Einträge im Änderungsprotokoll anzeigen" />
     <Member Name="ThereIsNotAnyNewChangesFrom0" Description="Es gibt keine neuen Änderungen von {0}" />
   </Type>
   <Type Name="ChangeLogViewLogEntity" Description="Change-Log Ansichtsprotokoll" PluralDescription="Change-Log Ansichtsprotokolle" Gender="n">
@@ -166,6 +171,7 @@
     <Member Name="Add" Description="hinzufügen..." />
     <Member Name="Added" Description="Hinzugefügt" />
     <Member Name="Changed" Description="Geändert" />
+    <Member Name="Close" Description="Schließen" />
     <Member Name="Collapse" Description="Einklappen" />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="Detail" Description="Detail" />
@@ -291,6 +297,12 @@
     <Member Name="TsQuery_Plain" Description="tsquery (einfach)" />
     <Member Name="TsQuery_WebSearch" Description="tsquery (Websuche)" />
   </Type>
+  <Type Name="FontSizeMessage">
+    <Member Name="FontSize" Description="Schriftgröße" />
+    <Member Name="IncreaseFontSize" Description="Schriftgröße vergrößern" />
+    <Member Name="ReduceFontSize" Description="Schriftgröße verkleinern" />
+    <Member Name="ResetFontSize" Description="Schriftgröße zurücksetzen" />
+  </Type>
   <Type Name="FrameMessage">
     <Member Name="Copied" Description="Kopiert" />
     <Member Name="CopyToClipboard" Description="In Zwischenablage kopieren" />
@@ -300,8 +312,17 @@
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
   </Type>
   <Type Name="HtmlEditorMessage">
+    <Member Name="Bold" Description="Fettgedruck (Strg + B)" />
+    <Member Name="Code" Description="Code" />
+    <Member Name="CodeBlock" Description="Code-Block" />
     <Member Name="EnterYourUrlHere" Description="Geben Sie hier Ihre URL ein..." />
+    <Member Name="Headings" Description="Überschriften" />
     <Member Name="Hyperlink" Description="Hyperlink" />
+    <Member Name="Italic" Description="Kursiv (Strg + I)" />
+    <Member Name="OrderedList" Description="Geordnete Liste" />
+    <Member Name="Quote" Description="Zitat" />
+    <Member Name="Underline" Description="Unterstrichen (Strg + U)" />
+    <Member Name="UnorderedList" Description="Ungeordnete Liste" />
   </Type>
   <Type Name="IEntity">
     <Member Name="Id" Description="Id" />
@@ -316,6 +337,7 @@
     <Member Name="cancel" Description="Abbrechen" />
     <Member Name="chooseAType" Description="Wählen Sie einen Typ" />
     <Member Name="chooseAValue" Description="Wählen Sie einen Wert" />
+    <Member Name="Close" Description="Schließen" />
     <Member Name="create" Description="Erstellen" />
     <Member Name="Date" Description="Datum" />
     <Member Name="deactivateTimeMachine" Description="Zeitmaschine deaktivieren" />
@@ -359,9 +381,6 @@
     <Member Name="ungroupResults" Description="Resultate der Gruppierung aufheben" />
     <Member Name="view" Description="Ansicht" />
   </Type>
-  <Type Name="LayoutMessage">
-    <Member Name="JumpToMainContent" Description="Zum Hauptinhalt springen" />
-  </Type>
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="ID ungültig" />
     <Member Name="InvalidFormat" Description="Ungültiges Format" />
@@ -392,6 +411,7 @@
     <Member Name="_0Errors" Description="{0} Fehler" />
     <Member Name="AddSetter" Description="Setter hinzufügen" />
     <Member Name="AreYouSureYouWantToCancelTheOperation" Description="Sind Sie sicher, dass Sie die Operation abbrechen wollen?" />
+    <Member Name="As" Description="als" />
     <Member Name="BulkModifications" Description="Massenänderungen" />
     <Member Name="CancelOperation" Description="Operation abbrechen?" />
     <Member Name="ClosingThisModalOrBrowserTabWillCancelTheOperation" Description="Durch Schließen dieses Modals (oder der Browser-Registerkarte!) wird der Vorgang auf dem Server abgebrochen." />
@@ -636,6 +656,7 @@
     <Member Name="_0FiltersCollapsed" Description="{0} filter zusammengeklappt" />
     <Member Name="_0GroupWith1_N" Description="{0} Gruppe[n] mit {1}" />
     <Member Name="_0Results_N" Description="{0} Ergebnis[se]." />
+    <Member Name="_0ResultTable" Description="{0} Ergebnistabelle" />
     <Member Name="_0Rows_N" Description="{0} Zeile[n]" />
     <Member Name="AddAndGroup" Description="AND-Gruppe hinzufügen" />
     <Member Name="AddColumn" Description="Spalte hinzufügen" />
@@ -662,6 +683,7 @@
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="DoYouWantToSelectTheNew01_G" Description="Möchten Sie [m:den neuen|f:die neue|n:das neue] {0} ({1}) übernehmen?" />
     <Member Name="EditPinnedFilters" Description="Angeheftete Filter bearbeiten" />
+    <Member Name="Enter" Description="Eingabe" />
     <Member Name="Equal0" Description="Gleich {0}" />
     <Member Name="Field" Description="Feld" />
     <Member Name="FilterDesigner" Description="Filter-Designer" />
@@ -716,6 +738,8 @@
     <Member Name="ReturnNewEntity" Description="Neue Entität zurückgeben?" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="Search" Description="Suche" />
+    <Member Name="SelectAllResults" Description="Alle Ergebnisse auswählen" />
+    <Member Name="SelectRow0_" Description="Zeile {0} auswählen" />
     <Member Name="ShowHiddenColumns" Description="Ausgeblendete Spalten anzeigen" />
     <Member Name="ShowMore" Description="Mehr anzeigen" />
     <Member Name="SimpleFilters" Description="Einfache Filter" />
@@ -874,6 +898,7 @@
     <Member Name="BeInThePast" Description="in der Vergangenheit sein" />
     <Member Name="BeNotNull" Description="nicht null sein" />
     <Member Name="EachRowRepresentsAGroupOf0WithSame1" Description="Jede Zeile steht für eine Gruppe von {0} mit demselben {1}" />
+    <Member Name="Either0Or1ShouldBeSet" Description="Es sollte entweder {0} oder {1} gesetzt werden." />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Have0Decimals" Description="{0} Dezimalstellen haben" />
     <Member Name="HaveANumberOfElements01" Description="eine Nummer von Elementen {0} {1} haben" />

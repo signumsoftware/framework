@@ -6,6 +6,8 @@ import { HtmlEditorExtension } from "./Extensions/types";
 import { ITextConverter } from "./HtmlContentStateConverter";
 import { Separator } from "./HtmlEditorButtons";
 import { isEmpty } from "./Utils/editorState";
+import { ImageExtension } from "./Extensions/ImageExtension";
+import { ImageHandlerBase } from "./Extensions/ImageExtension/ImageHandlerBase";
 
 export interface HtmlEditorControllerProps {
   binding: IBinding<string | null | undefined>;
@@ -13,25 +15,26 @@ export interface HtmlEditorControllerProps {
   readOnly?: boolean;
   small?: boolean;
   converter: ITextConverter;
-  plugins?: HtmlEditorExtension[];
+  extensions?: HtmlEditorExtension[];
   innerRef?: React.Ref<LexicalEditor>;
   initiallyFocused?: boolean | number;
 }
 
 export class HtmlEditorController {
   editor!: LexicalEditor;
-  editableElement: HTMLElement | null = null;
+  editableElement: HTMLDivElement | null = null;
   editorState!: EditorState;
 
   overrideToolbar!: React.ReactElement | undefined;
   setOverrideToolbar!: (newState: React.ReactElement | undefined) => void;
 
   converter!: ITextConverter;
-  plugins!: HtmlEditorExtension[];
+  extensions!: HtmlEditorExtension[];
   binding!: IBinding<string | null | undefined>;
   readOnly?: boolean;
   small?: boolean;
   initialEditorContent?: string;
+  imageHandler?: ImageHandlerBase;
 
   lastSavedString?: { str: string | null }
 
@@ -40,12 +43,13 @@ export class HtmlEditorController {
     this.readOnly = p.readOnly;
     this.small = p.small;
     this.converter = p.converter;
-    this.plugins = p.plugins ?? [];
-    this.editableElement = document.getElementById(p.editableId);
+    this.extensions = p.extensions ?? [];
 
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<
       React.ReactElement | undefined
-    >(undefined);
+      >(undefined);
+
+    this.imageHandler = p.extensions?.map(a => a instanceof ImageExtension ? a.imageHandler : null).notNull().singleOrNull() ?? undefined;
 
     React.useEffect(() => {
       if (p.initiallyFocused) {
@@ -66,37 +70,47 @@ export class HtmlEditorController {
         this.lastSavedString = undefined;
         return;
       }
-
-      
-      const newState = this.converter.$convertFromText(this.editor, newValue ||'');
-       
+     
       queueMicrotask(() => {
-        if(newState.isEmpty()) {
+        const newState = this.converter.$convertFromText(this.editor, newValue || '');
+
+        if (newState.isEmpty()) {
           this.editor.update(() => {
             $getRoot().clear();
-          })
+          });
         } else {
           this.editor.setEditorState(newState);
         }
+
         const htmlString = this.converter.$convertToText(this.editor);
         this.initialEditorContent = htmlString;
-      })
+      });
+
     }, [newValue, this.editor]);
 
     React.useEffect(() => {
       return () => this.saveHtml();
     }, []);
 
-    this.setRefs = React.useCallback(
+    this.setEditorRef = React.useCallback(
       (editor: LexicalEditor | null) => {
         this.editor = editor!;
+        if (this.editor)
+          this.editor.imageHandler = this.imageHandler;
+
         if (p.innerRef) {
-          if (typeof p.innerRef == "function") p.innerRef(editor);
+          if (typeof p.innerRef == "function")
+            p.innerRef(editor);
           else
-            (
-              p.innerRef as React.MutableRefObject<LexicalEditor | null>
-            ).current = editor;
+            (p.innerRef as React.RefObject<LexicalEditor | null>).current = editor;
         }
+      },
+      [p.innerRef]
+    );
+
+    this.setContentEditableRef = React.useCallback(
+      (element: HTMLDivElement | null) => {
+        this.editableElement = element!;
       },
       [p.innerRef]
     );
@@ -115,7 +129,7 @@ export class HtmlEditorController {
   }
 
   extraButtons(): React.ReactElement | null {
-    const buttons = this.plugins
+    const buttons = this.extensions
       .map((p) => p.getToolbarButtons?.(this))
       .notNull();
 
@@ -129,5 +143,6 @@ export class HtmlEditorController {
     );
   }
 
-  setRefs!: (editor: LexicalEditor | null) => void;
+  setEditorRef!: (editor: LexicalEditor | null) => void;
+  setContentEditableRef!: (editor: HTMLDivElement | null) => void;
 }

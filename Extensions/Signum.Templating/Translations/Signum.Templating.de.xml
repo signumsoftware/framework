@@ -17,6 +17,10 @@
     <Member Name="ConfigureYourQueryAndPressSearchBeforeOk" Description="Konfigurieren Sie Ihre Abfrage und klicken Sie auf [suchen] vor Sie [Ok] drücken." />
   </Type>
   <Type Name="TemplateApplicableEval" Description="Vorlage für eval" />
+  <Type Name="TemplateMessage">
+    <Member Name="CopyToClipboard" Description="In die Zwischenablage kopieren: Strg+C, ESC" />
+    <Member Name="Template" Description="Vorlage" />
+  </Type>
   <Type Name="TemplateTokenMessage">
     <Member Name="ImpossibleToAccess0BecauseTheTemplateHAsNo1" Description="Der Zugriff auf {0} ist nicht möglich, da die Vorlage keine {1} hat" />
     <Member Name="Insert" Description="Einfügen" />

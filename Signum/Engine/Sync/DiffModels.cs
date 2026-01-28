@@ -217,6 +217,9 @@ public class DiffIndex
         if (mix is FullTextTableIndex && !isPostgress)
             return DiffIndexType.FullTextIndex;
 
+        if (mix is VectorTableIndex)
+            return DiffIndexType.VectorIndex;
+
         if (mix.Clustered && !isPostgress)
             return DiffIndexType.Clustered;
 
@@ -287,6 +290,7 @@ public enum DiffIndexType
 
 
     FullTextIndex = 100,
+    VectorIndex = 101,
 }
 
 public enum GeneratedAlwaysType
@@ -405,12 +409,7 @@ public class DiffColumn
         if (p == null)
             return null;
 
-        while (
-            p.StartsWith("(") && p.EndsWith(")") ||
-            p.StartsWith("'") && p.EndsWith("'"))
-            p = p.Substring(1, p.Length - 2);
-
-        return p.ToLower();
+        return p.Replace("(", "").Replace(")", "").Replace("'", "").ToLower();
     }
 
     public DiffColumn Clone()
@@ -647,6 +646,13 @@ public class DiffColumn
             default:
                 throw new NotImplementedException("Unexpected SqlDbType");
         }
+    }
+
+    internal bool SizeEquals(DiffColumn hisCol)
+    {
+        return Precision == hisCol.Precision ||
+                Scale == hisCol.Scale ||
+                Length == hisCol.Length;
     }
 }
 

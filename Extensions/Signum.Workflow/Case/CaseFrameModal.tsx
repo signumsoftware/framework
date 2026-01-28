@@ -24,6 +24,7 @@ import { AutoFocus } from '@framework/Components/AutoFocus';
 import { FunctionalAdapter } from '@framework/Modals';
 import { AuthClient } from '../../Signum.Authorization/AuthClient'
 import { useForceUpdate, useStateWithPromise } from '@framework/Hooks'
+import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface CaseFrameModalProps extends IModalProps<CaseActivityEntity | undefined> {
   title?: string;
@@ -166,9 +167,9 @@ export const CaseFrameModal: React.ForwardRefExoticComponent<CaseFrameModalProps
       return null;
 
     return (
-      <a href="#" className="sf-popup-fullscreen" onClick={handlePopupFullScreen} > 
+      <LinkButton title={undefined} className="sf-popup-fullscreen" onClick={handlePopupFullScreen} > 
         <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()}/>
-      </a>
+      </LinkButton>
     );
   }
 

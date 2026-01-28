@@ -10,7 +10,6 @@ import React from "react";
 import { HtmlEditorController } from "../../HtmlEditorController";
 import { $findMatchingParent } from "../../Utils/node";
 import {
-  ComponentAndProps,
   HtmlEditorExtension,
   LexicalConfigNode,
   OptionalCallback,
@@ -19,25 +18,22 @@ import { AutoLinkExtension } from "./AutoLinkExtension";
 import ToolbarLinkButton from "./ToolbarLinkButton";
 import { validateUrl } from "./helper";
 
-export class LinkExtension implements HtmlEditorExtension {
-  name = "LinkExtension";
+export class LinkExtension extends HtmlEditorExtension {
+override name = "LinkExtension";
 
-  getToolbarButtons(controller: HtmlEditorController): React.ReactNode {
-    return <ToolbarLinkButton controller={controller} />;
-  }
+override getToolbarButtons(controller: HtmlEditorController): React.ReactNode {
+  return <ToolbarLinkButton controller={controller} />;
+}
 
-  getBuiltInComponent(): ComponentAndProps<typeof LinkPlugin> {
-    return {
-      component: LinkPlugin,
-      props: { attributes: { target: "_blank" }, validateUrl: validateUrl },
-    };
-  }
+override getBuiltPlugin(): React.ReactElement {
+  return <LinkPlugin attributes={{ target: "_blank" }} validateUrl={validateUrl} />;
+}
 
-  getNodes(): LexicalConfigNode {
-    return [LinkNode];
-  }
+override getNodes(): LexicalConfigNode {
+  return [LinkNode];
+}
 
-  registerExtension(controller: HtmlEditorController): OptionalCallback {
+override registerExtension(controller: HtmlEditorController): OptionalCallback {
     return controller.editor.registerCommand(
       CLICK_COMMAND,
       (event) => {

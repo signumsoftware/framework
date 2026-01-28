@@ -14,28 +14,28 @@ public class RestApiKeyLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            sb.Include<RestApiKeyEntity>()
-                .WithSave(RestApiKeyOperation.Save)
-                .WithDelete(RestApiKeyOperation.Delete)
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.User,
-                    e.ApiKey
-                });
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            RestApiKeyCache = sb.GlobalLazy(() =>
+        sb.Include<RestApiKeyEntity>()
+            .WithSave(RestApiKeyOperation.Save)
+            .WithDelete(RestApiKeyOperation.Delete)
+            .WithQuery(() => e => new
             {
-                return Database.Query<RestApiKeyEntity>().ToFrozenDictionaryEx(rak => rak.ApiKey);
-            }, new InvalidateWith(typeof(RestApiKeyEntity)));
+                Entity = e,
+                e.Id,
+                e.User,
+                e.ApiKey
+            });
+
+        RestApiKeyCache = sb.GlobalLazy(() =>
+        {
+            return Database.Query<RestApiKeyEntity>().ToFrozenDictionaryEx(rak => rak.ApiKey);
+        }, new InvalidateWith(typeof(RestApiKeyEntity)));
 
 
-            if (sb.WebServerBuilder != null)
-                RestApiKeyServer.Start(sb.WebServerBuilder);
-        }
+        if (sb.WebServerBuilder != null)
+            RestApiKeyServer.Start(sb.WebServerBuilder);
     }
 
     private static string DefaultGenerateRestApiKey()

@@ -1,49 +1,47 @@
 ﻿# PropertyRoute
 
-A `PropertyRoute` is a sequence of `PropertyInfo`, starting from a `System.Type` of an root entity (a `Entity` or a `ModelEntity`) that ultimately refers unambiguously to a logical database column. 
+A `PropertyRoute` represents a sequence of `PropertyInfo` objects, starting from the `System.Type` of a root entity (either an `Entity` or a `ModelEntity`). It unambiguously identifies a logical database column.
 
-There's just one canonical representation of a `PropertyRoute` because inheritance is not supported, neither the sequence of `PropertyInfo` can travel to a different `Entity`. 
+There is only one canonical representation of a `PropertyRoute` because inheritance is not supported, and the sequence of `PropertyInfo` cannot traverse to a different `Entity`.
 
-A `PropertyRoute` is an important concept to authorize properties, and override [FieldAttributes](FieldAttributes.md).
+`PropertyRoute` is a key concept for property authorization and for overriding [FieldAttributes](FieldAttributes.md).
 
-### PropertyRouteType
+## PropertyRouteType
 
-There are just a few different types of property routes, defined by `PropertyRouteType` enum:
+The `PropertyRouteType` enum defines the possible types of property routes:
 
-* **Root:** Where the root starts. i.e: `"(OrderEntity)"` 
-* **FieldOrProperty:** The last part has a `PropertyInfo` or `FieldInfo`.This is the only **complete** type of a `PropertyRoute`. i.e: `"(OrderEntity).CancellationDate"`. 
-* **Mixin:** Partial route accessing a Mixin. Like `"(OrderEntity)[CorruptMixin]"` 
-* **LiteEntity:** Partial route accessing the property `Entity` of a `Lite<T>`. Like `"(OrderEntity).Employee.Entity"`.
-* **MListItems:** Partial route accessing the indexer of a `Lite<T>`. Like `"(OrderEntity).Details[0]"`.
+- **Root:** The starting point of the route, e.g., `"(OrderEntity)"`.
+- **FieldOrProperty:** The last segment is a `PropertyInfo` or `FieldInfo`. This is the only **complete** type of a `PropertyRoute`, e.g., `"(OrderEntity).CancellationDate"`.
+- **Mixin:** A partial route accessing a Mixin, e.g., `"(OrderEntity)[CorruptMixin]"`.
+- **LiteEntity:** A partial route accessing the `Entity` property of a `Lite<T>`, e.g., `"(OrderEntity).Employee.Entity"`.
+- **MListItems:** A partial route accessing the indexer of an MList, e.g., `"(OrderEntity).Details[0]"`.
 
-### Members
+## Members
 
-Here are the members of a `PropertyRoute`: 
+The main members of the `PropertyRoute` class are:
 
-```C#
+```csharp
 public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
 {
     public PropertyRouteType PropertyRouteType { get; }
-    public FieldInfo FieldInfo { get; } // optional
-    public PropertyInfo PropertyInfo { get; } // optional
-    public PropertyRoute Parent { get; } // null for PropertyRouteType.Root
+    public FieldInfo? FieldInfo { get; } // Optional
+    public PropertyInfo? PropertyInfo { get; } // Optional
+    public PropertyRoute? Parent { get; } // Null for PropertyRouteType.Root
 
-    public Type Type { get; } // returning type of this PropertyRoute
-    public Type RootType { get; } // Type of the top-most parent (Root)
+    public Type Type { get; } // The type returned by this PropertyRoute
+    public Type RootType { get; } // The type of the top-most parent (Root)
 }
 ```
 
+## ToString and Parse
 
-### ToString and Parse
+`PropertyRoute` provides methods for string representation and parsing:
 
-`PropertyRoute` have `ToString` defined and can also be parsed: 
-
-```C#
+```csharp
 public class PropertyRoute
 {
-    public override string ToString() //returns '(OrderEntity).Details[0].SubTotalPrice'
-    public string PropertyString() //returns just: 'Details[0].SubTotalPrice'
-    public static PropertyRoute Parse(Type rootType, string propertyString) //parses a propertyString given the rootType
+    public override string ToString(); // Returns e.g. '(OrderEntity).Details[0].SubTotalPrice'
+    public string PropertyString(); // Returns just 'Details[0].SubTotalPrice'
+    public static PropertyRoute Parse(Type rootType, string propertyString); // Parses a propertyString given the rootType
 }
-``` 
 

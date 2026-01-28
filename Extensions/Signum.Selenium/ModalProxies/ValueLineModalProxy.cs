@@ -14,7 +14,7 @@ public class AutoLineModalProxy : ModalProxy
     {
         get
         {
-            var formGroup = this.Element.FindElement(By.CssSelector("div.modal-body div.form-group"));
+            var formGroup = this.Element.WaitElementVisible(By.CssSelector("div.modal-body div.form-group"));
             return BaseLineProxy.AutoLine(formGroup, route!);
         }
     }

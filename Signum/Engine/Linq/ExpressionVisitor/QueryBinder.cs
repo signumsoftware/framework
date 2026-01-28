@@ -9,6 +9,7 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Signum.Engine.Linq;
 
@@ -576,7 +577,15 @@ internal class QueryBinder : ExpressionVisitor
         if (expression.NodeType == ExpressionType.Convert && (expression.Type.IsInstantiationOf(typeof(IGrouping<,>)) ||
                                                               expression.Type.IsInstantiationOf(typeof(IEnumerable<>)) ||
                                                               expression.Type.IsInstantiationOf(typeof(IQueryable<>))))
-            expression = ((UnaryExpression)expression).Operand;
+            return ((UnaryExpression)expression).Operand;
+
+        if(expression is MethodCallExpression mc &&
+           (mc.Method.Name is "AsQueryable" or "AsEnumerable" or "ToList" or "ToArray") &&
+           (mc.Method.DeclaringType == typeof(Queryable) || mc.Method.DeclaringType == typeof(Enumerable)))
+        {
+            expression = mc.Arguments[0];
+        }
+
         return expression;
     }
 
@@ -1488,8 +1497,6 @@ internal class QueryBinder : ExpressionVisitor
         Type returnType = mce.Method.ReturnType;
         var type = returnType.GetGenericArguments()[0];
 
-
-
         if (mce.Method.DeclaringType == typeof(FullTextSearch) &&
               mce.Method.Name is nameof(FullTextSearch.ContainsTable) or nameof(FullTextSearch.FreeTextTable))
         {
@@ -1522,6 +1529,55 @@ internal class QueryBinder : ExpressionVisitor
             Alias selectAlias = NextSelectAlias();
 
             ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias);
+
+            ProjectionExpression projection = new ProjectionExpression(
+                new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, null, null, null, 0),
+            pc.Projector, null, returnType);
+
+            return projection;
+        }
+        else if (mce.Method.DeclaringType == typeof(SqlVectorSearch) &&
+                 mce.Method.Name == nameof(SqlVectorSearch.Vector_Search))
+        {
+            var functionName = mce.Method.GetCustomAttribute<SqlMethodAttribute>()?.Name ?? mce.Method.Name;
+            var tab = (ITable)((ConstantExpression)mce.GetArgument("table")).Value!;
+            var originalType = type.GetGenericArguments()[0];
+
+            Alias tableAlias = NextTableAlias(tab.Name);
+
+            Expression originalEntity = tab is Table t ? t.GetProjectorExpression(tableAlias, this) :
+                                        tab is TableMList tml ? tml.GetMListElementExpression(tableAlias, this) :
+                                        throw new UnexpectedValueException(tab);
+
+            var col = (IColumn)((ConstantExpression)mce.GetArgument("columns")).Value!;
+            var distanceMetric = (SqlVectorDistanceMetric)((ConstantExpression)mce.GetArgument("distanceMetric")).Value!;
+
+            var arguments = new List<Expression>
+            {
+                new SqlLiteralExpression(typeof(string), tab.Name.ToString()),
+                new SqlLiteralExpression(typeof(string), col.Name),
+                DbExpressionNominator.FullNominate(mce.GetArgument("queryVector")),
+                new SqlConstantExpression(SqlVectorSearch.GetSqlVectorDistanceMetric(distanceMetric), typeof(string)),
+            };
+
+            var topN = DbExpressionNominator.FullNominate(mce.GetArgument("top_n"));
+
+            if (!topN.IsNull())
+                arguments.Add(topN);
+
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, tab as Table, null, tableAlias, arguments);
+
+            var distanceColumn = new ColumnExpression(typeof(float), tableAlias, "Distance");
+
+            var withDistanceExpression = Expression.MemberInit(
+                Expression.New(type),
+                Expression.Bind(type.GetField("Original")!, originalEntity),
+                Expression.Bind(type.GetField("Distance")!, distanceColumn)
+            );
+
+            Alias selectAlias = NextSelectAlias();
+
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(withDistanceExpression, selectAlias);
 
             ProjectionExpression projection = new ProjectionExpression(
                 new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, null, null, null, 0),
@@ -2236,6 +2292,13 @@ internal class QueryBinder : ExpressionVisitor
         }
     }
 
+    static MList<T> ConcatMList<T>(MList<T> first, MList<T> second)
+    {
+        throw new NotImplementedException();
+    }
+
+    static readonly MethodInfo miConcatMList = ReflectionTools.GetMethodInfo(() => ConcatMList((MList<int>)null!, (MList<int>)null!)).GetGenericMethodDefinition();
+
     private Expression CombineImplementations(ICombineStrategy strategy, Dictionary<Type, Expression> expressions, Type returnType)
     {
         if (expressions.All(e => e.Value is LiteReferenceExpression))
@@ -2332,7 +2395,11 @@ internal class QueryBinder : ExpressionVisitor
         }
 
         if (expressions.Any(e => e.Value is MListExpression))
-            throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
+        {
+            //Doesn't really work yet, but delays the exception when using a Mixin<T> has an MList but is not used in the query
+            return expressions.Values.Aggregate((a, b) => Expression.Call(
+                miConcatMList.MakeGenericMethod(a.Type.ElementType()!), a, b)); 
+        }
 
         if (expressions.Any(e => e.Value is AdditionalFieldExpression))
             return strategy.CombineValues(expressions, returnType);

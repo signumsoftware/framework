@@ -1,62 +1,52 @@
-﻿# Symbols 
+﻿# Symbols
 
+## Why Not Just Enums?
 
-### Enums rules :)
-Enums are really convenient to use because they are values know at compile-time, so we can reference them easily from our code with auto-completion, are compile-time checked and affected by refactorings.
+Enums are convenient because their values are known at compile time, enabling easy referencing, auto-completion, compile-time checking, and support for refactoring.
 
-```C#
-if(order.State == OrderState.Shipped) //Nice :)
-
-if(order.State == "Shipped") // 'stringly'-typed :(
+```csharp
+if (order.State == OrderState.Shipped) // Good: strongly-typed
+if (order.State == "Shipped") // Bad: stringly-typed
 ```
 
-While constant could also do all this, `enums` are smarter, because when you call `ToString` on them they remember their textual definition. 
+Enums are also smart: calling `ToString()` on an enum returns its textual name.
 
-```C#
+```csharp
 DayOfWeek day = DayOfWeek.Monday;
-day.ToString() // returns "Monday"!
+day.ToString(); // returns "Monday"
 ```
 
-So, enums are, at the same time, a value and and a member.
+Additionally, the Signum schema synchronizer ensures code and database enums stay in sync, and the localization system provides user-friendly descriptions with `NiceToString`.
 
-Additionally, the schema synchronizer ensures that the code and the database will be at sync, and the localization system gives a user-friendly description with `NiceToString`,  making them even more convenient. 
+However, enums have a limitation: all values must be declared in one place. This makes them unsuitable for extensible concepts, such as permissions, where new values may be needed by different modules.
 
-### Enums sucks :(
+For example, if the Authorization module defines:
 
-There's one important caveat however: Enum values have to be enumerated **all in one place** so they are not good to model things that can have more or less items as you register more modules, like a permission.
-
-Imagine the Authorization module would create a `enum Permission` like this  
-
-```C#
+```csharp
 public enum Permission
 {
-   CreateUsers,
-   ModifyUsers,
-   DeleteUsers,
+    CreateUsers,
+    ModifyUsers,
+    DeleteUsers,
 }
 
 public bool IsAllowed(Permission permission) { ... }
 ```
 
-Then there's no way for you, in your application, to add new items to this `enum Permission` (for example `CreateOrder`).
+You cannot add new permissions (e.g., `CreateOrder`) from another module. Using `Enum` instead of `Permission` in `IsAllowed` is weakly-typed and does not work well with the database.
 
-One possible solution is to use `Enum` (in Uppercase) instead of `Permission` in our `IsAllowed` method, but this solution is more weakly-typed and doesn't work in the database. 
+## What Are Symbols?
 
-### What is a Symbols?
-
-`Symbols` are our answer to this problem. 
-
-A `Symbol` is a class with a fixed amount of instances declared in static fields (like `enums`) but this static fields can be in different classes (unlike `enums`). 
-
+Symbols solve this problem. A `Symbol` is a class with a fixed set of instances declared in static fields (like enums), but these fields can be spread across different classes (unlike enums).
 
 ### Declaring a Symbol Type
 
-This is how you declare a new `Symbol` type, in this case `PermissionSymbol`. 
+To declare a new symbol type, e.g., `PermissionSymbol`:
 
-```C#
+```csharp
 public class PermissionSymbol : Symbol
 {
-    private PermissionSymbol() { } 
+    private PermissionSymbol() { }
 
     public PermissionSymbol(Type declaringType, string fieldName)
         : base(declaringType, fieldName)
@@ -65,104 +55,128 @@ public class PermissionSymbol : Symbol
 }
 ```
 
-### Declaring Symbol instances
+Then create a logic class to manage registration:
 
-And this is how you declare a new Symbol instance/value: 
-
-```C#
-[AutoInit]
-public static class AuthorizationPermission
+```csharp
+//In PermissionLogic.cs
+public static class PermissionLogic
 {
-    public static PermissionSymbol CreateUsers;
-    public static PermissionSymbol ModifyUsers;
-    public static PermissionSymbol DeleteUsers;
+    static HashSet<PermissionSymbol> RegisteredPermissions = new HashSet<PermissionSymbol>();
+
+    // Called by each module to register its permissions
+    public static void RegisterPermission(PermissionSymbol permission)
+    {
+        RegisteredPermissions.Add(permission);
+    }
+
+    // Called during application startup to initialize SymbolLogic
+    public static void Start(SchemaBuilder sb)
+    {
+        SymbolLogic<PermissionSymbol>.Start(sb, () => RegisteredPermissions);
+    }
 }
 ```
 
-But now we can create new instances of `PermissonSymbol` in another modules: 
+### Declaring Symbol Instances
 
-```C#
+Declare symbol instances as static fields, using `[AutoInit]` to ensure initialization:
+
+```csharp
+
 [AutoInit]
-public static class OrdersPermission
+public static class OrderPermission
 {
     public static PermissionSymbol CreateOrder;
 }
 ```
 
-So a symbol instance has two different types:
-* The field type (in our example, `PermissionSymbol`).
-* The type where it was declared (`AuthorizationPermission`, `OrdersPermission`, ...).
+A symbol instance has two types:
+- The symbol type (e.g., `PermissionSymbol`)
+- The declaring type (e.g., `OrderPermission`)
+
+Then register the symbol in the module's logic class:
+
+```csharp
+
+//In OrderLogic.cs 
+public static class OrderLogic
+{
+    public static void Starter(SchemaBuilder sb)
+    {
+        PermissionLogic.RegisterPermission(OrderPermission.CreateOrder);
+    }
+}
+```
+
+
+Both logic classes should be started in your application startup.
+
+```csharp
+PermissionLogic.Start(sb);
+//(...)
+OrderLogic.Start(sb);
+```
+
+This pattern enables each module to independently register its own symbols (such as permissions), allowing the set of symbols to be easily extended as new modules are added.
 
 ### Symbol.ToString
 
-Some magic using `Signum.MSBuildTask` and `AutoInitAttribute` is done so symbols preserve the same smart `ToString` than `enums` have: 
+With the help of `Signum.MSBuildTask` and `AutoInitAttribute`, symbols provide a smart `ToString()` similar to enums:
 
-```C#
+```csharp
 PermissionSymbol permission = AuthorizationPermission.CreateUsers;
-permission.ToString() // returns "AuthorizationPermission.CreateUsers"!
+permission.ToString(); // returns "AuthorizationPermission.CreateUsers"
 ```
 
-### Symbols are Entities
+### Symbols as Entities
 
-Aditionally, `Symbol` inherits from entities and can be stored and referenced in the database. 
+Symbols inherit from entities and can be stored and referenced in the database. Not all declared symbols are registered in the database — only those registered by modules. `SymbolLogic<T>` tracks used symbols and can parse them.
 
-They don't need an intermediary entity, like enum's `EnumEntity<T>`, but not all the declared Symbols are registered in the database, only the ones that *are used* by the different modules. 
-
-`SymbolLogic<T>` is the class that is responsible of tracking what are the used symbols, usually by looking at some data structure where they are registered. This class is also able to parse symbols. 
-
-```C#
+```csharp
 public static class SymbolLogic<T>
-    where T: Symbol
+    where T : Symbol
 {
-    public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSymbols)
-
+    public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSymbols);
     public static ICollection<T> Symbols { get; }
-    public static HashSet<string> AllUniqueKeys()
-
-    public static T TryToSymbol(string key)
-    public static T ToSymbol(string key)
+    public static HashSet<string> AllUniqueKeys();
+    public static T TryToSymbol(string key);
+    public static T ToSymbol(string key);
 }
-
 ```
 
-Once the symbols are registered in this data structure, `SymbolLogic<T>` will generate / synchronize the table `T` to contain this particular symbols. 
-
-Additionaly, (and this is an implementation detail) when the application initializes `SymbolLogic<T>` retrieves the Symbols from the database and asigns the Id's to each coresponging entity instance in the `static readonly` fields 
+Once registered, `SymbolLogic<T>` synchronizes the table for `T` to contain the relevant symbols. On initialization, it retrieves symbols from the database and assigns IDs to the corresponding static fields.
 
 ### Symbol.NiceToString
 
-Symbols also have a user-friendly `NiceToString` definiton, that is pascal-spaced and localizable, making Symbols almost as convenient to use as `enums`. 
+Symbols also provide a user-friendly, localizable `NiceToString` (Pascal-spaced), making them almost as convenient as enums.
 
 ### Examples
 
-There are already a few examples in Signum.Extensions of Symbols: 
+Signum.Extensions includes several symbol types:
+- PermissionSymbol
+- TypeConditionSymbol
+- FileTypeSymbol
+- ProcessAlgorithmSymbol
+- SimpleTaskSymbol
+- OperationSymbol (used internally)
 
-* PermissionSymbol
-* TypeConditionSymbol
-* FileTypeSymbol
-* ProcessAlgorithmSymbol
-* SimpleTaskSymbol
-* OperationSymbol (but is hidden inside of a type-safe container)
-* ...
-
-Consider creating a symbol if you create a reusable module with an expansible number of options/strategies/algorithms/commands that will be defined by the client code. 
-
+Consider using a symbol if you are creating a reusable module with an extensible set of options, strategies, or commands defined by client code.
 
 ## SemiSymbols
 
-`SemiSymbols` is the *impure* brother of `Symbol`: A type that contain instances that behave like a `Symbol` and are instantiated in a `static readonly` field, and other instances that behave like a *Type of* entity. `AlertType` and `NoteType` are good examples because sometimes are used by the business logic (`Symbol`) and sometimes created by the user with run-time created types.   
+A `SemiSymbol` is a hybrid: some instances behave like symbols (declared in static readonly fields), while others are created at runtime (e.g., by users). Examples include `AlertType` and `NoteType`, which can be used both by business logic and created dynamically.
 
-In fact, we could classify entities depending their *staticness-dynamicness* like this: 
+## Entity Types by Row Change Frequency
 
+Entities can be classified by how frequently their rows are added, removed, or modified:
 
-**UP: Static and frequently used** 
+**Most Static**
+1. **Enums:** Rows are fixed at compile time and never change (e.g., `OrderState`).
+2. **Symbols:** Rows change only when developers add new symbols in code (e.g., `PermissionSymbol`).
+3. **SemiSymbols:** Rows change occasionally, either by developers or by users with admin privileges (e.g., `AlertType`).
+4. **String Master Entities:** Rows change as admin users add or modify entries (e.g., `CountryEntity`).
+5. **Master Entities:** Rows change as users with some admin privileges manage entries (e.g., `ProductEntity`).
+6. **Transactional Entities:** Rows change frequently as regular users create, update, or delete records (e.g., `OrderEntity`).
+7. **Log Entities:** Rows change very frequently; records are created automatically and often removed after some time (e.g., `OperationLogEntity`).
 
-1. **Enums:** Can only created by the developer in control of the type. (i.e.: `OrderState`)
-* **Symbols:** Can be created by any developer. (i.e.: `PermissionSymbol`)
-* **SemiSymbols:** Can be created by any developer or user with administrative privileges. (i.e.: `AlertType`)
-* **String Master Entities:** Can be created by any user with administrative privileges. (i.e.: `CountryEntity`)
-* **Master Entities:** Can be created by any user with some administrative privileges. (i.e.: `ProductEntity`)
-* **Transactional Entities:** Can be created by any user. (i.e.: `OrderEntity`)
-* **Log Entities:** Automatically created by the system, and removed after some time. (i.e.: `OperationLogEntity`)
-
-**DOWN: Dynamic and unfrequently used**
+**Most Dynamic**

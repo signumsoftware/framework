@@ -49,6 +49,11 @@ export interface TemplateApplicableEval extends Eval.EvalEmbedded<ITemplateAppli
   Type: "TemplateApplicableEval";
 }
 
+export namespace TemplateMessage {
+  export const Template: MessageKey = new MessageKey("TemplateMessage", "Template");
+  export const CopyToClipboard: MessageKey = new MessageKey("TemplateMessage", "CopyToClipboard");
+}
+
 export namespace TemplateTokenMessage {
   export const Insert: MessageKey = new MessageKey("TemplateTokenMessage", "Insert");
   export const NoColumnSelected: MessageKey = new MessageKey("TemplateTokenMessage", "NoColumnSelected");

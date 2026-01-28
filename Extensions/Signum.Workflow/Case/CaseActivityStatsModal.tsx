@@ -97,7 +97,6 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps):
   }
 
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
 
     Finder.find<CaseEntity>({
       queryName: CaseEntity,

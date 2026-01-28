@@ -17,7 +17,7 @@ public class SchemaSettings
     public bool IsPostgres { get; set; }
     public bool PostresVersioningFunctionNoChecks { get; set; }
 
-    public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int));
+    public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int), true);
 
     public Action<Type> AssertNotIncluded = null!;
 
@@ -70,6 +70,7 @@ public class SchemaSettings
         {typeof(TimeOnly),       new AbstractDbType(SqlDbType.Time,             NpgsqlDbType.Time)},
 
         {typeof(byte[]),         new AbstractDbType(SqlDbType.VarBinary,        NpgsqlDbType.Bytea)},
+        {typeof(float[]),        new AbstractDbType(SqlDbType.Vector,           NpgsqlDbType.Array | NpgsqlDbType.Real)},
 
         {typeof(Guid),           new AbstractDbType(SqlDbType.UniqueIdentifier, NpgsqlDbType.Uuid)},
     };

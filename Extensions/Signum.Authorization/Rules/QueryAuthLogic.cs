@@ -18,36 +18,26 @@ public static class QueryAuthLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            AuthLogic.AssertStarted(sb);
-            QueryLogic.Start(sb);
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            QueryLogic.Queries.AllowQuery += new Func<object, bool, bool>(dqm_AllowQuery);
+        AuthLogic.AssertStarted(sb);
+        QueryLogic.Start(sb);
 
-            sb.Include<RuleQueryEntity>()
-                .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
+        QueryLogic.Queries.AllowQuery += new Func<object, bool, bool>(dqm_AllowQuery);
 
-            cache = new QueryCache(sb);
+        sb.Include<RuleQueryEntity>()
+            .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
 
-            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
-            {
-                Database.Query<RuleQueryEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
-                return null;
-            };
+        cache = new QueryCache(sb);
 
-            AuthLogic.ExportToXml += cache.ExportXml;
-            AuthLogic.ImportFromXml += cache.ImportXml;
-            AuthLogic.HasRuleOverridesEvent += cache.HasRealOverrides;
-            sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += AuthCache_PreDeleteSqlSync;
-        }
-    }
 
-  
-
-    static SqlPreCommand AuthCache_PreDeleteSqlSync(QueryEntity query)
-    {
-        return Administrator.DeleteWhereScript((RuleQueryEntity rt) => rt.Resource, query);
+        AuthLogic.ExportToXml += cache.ExportXml;
+        AuthLogic.ImportFromXml += cache.ImportXml;
+        AuthLogic.HasRuleOverridesEvent += cache.HasRealOverrides;
+        sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += query => Administrator.DeleteWhereScript((RuleQueryEntity rt) => rt.Resource, query);
+        sb.Schema.EntityEvents<RoleEntity>().PreDeleteSqlSync += role => Administrator.UnsafeDeletePreCommand(Database.Query<RuleQueryEntity>().Where(a => a.Role.Is(role)));
+        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleQueryEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
     }
 
     public static void SetMaxAutomaticUpgrade(object queryName, QueryAllowed allowed)

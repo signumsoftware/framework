@@ -15,50 +15,50 @@ public static class FilePathLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-        {
-            FileTypeLogic.Start(sb);
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
 
-            sb.Include<FilePathEntity>()
-                .WithUniqueIndex(f => new { f.Suffix, f.FileType })
-                .WithQuery(() => p => new
-                {
-                    Entity = p,
-                    p.Id,
-                    p.FileName,
-                    p.FileType,
-                    p.Suffix
-                });
+        FileTypeLogic.Start(sb);
 
-            sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
-            sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
-
-            new Graph<FilePathEntity>.Execute(FilePathOperation.Save)
+        sb.Include<FilePathEntity>()
+            .WithUniqueIndex(f => new { f.Suffix, f.FileType })
+            .WithQuery(() => p => new
             {
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (fp, _) =>
-                {
-                    if (!fp.IsNew)
-                    {
-                        var ofp = fp.ToLite().RetrieveAndRemember();
+                Entity = p,
+                p.Id,
+                p.FileName,
+                p.FileType,
+                p.Suffix
+            });
 
-                        if (fp.FileName != ofp.FileName || fp.Suffix != ofp.Suffix)
+        sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
+        sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
+
+        new Graph<FilePathEntity>.Execute(FilePathOperation.Save)
+        {
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (fp, _) =>
+            {
+                if (!fp.IsNew)
+                {
+                    var ofp = fp.ToLite().RetrieveAndRemember();
+
+                    if (fp.FileName != ofp.FileName || fp.Suffix != ofp.Suffix)
+                    {
+                        using (var tr = new Transaction())
                         {
-                            using (var tr = new Transaction())
-                            {
-                                var preSufix = ofp.Suffix.Substring(0, ofp.Suffix.Length - ofp.FileName.Length);
-                                fp.Suffix = Path.Combine(preSufix, fp.FileName);
-                                fp.Save();
-                                fp.FileType.GetAlgorithm().MoveFile(ofp, fp,true);
-                                tr.Commit();
-                            }
+                            var preSufix = ofp.Suffix.Substring(0, ofp.Suffix.Length - ofp.FileName.Length);
+                            fp.Suffix = Path.Combine(preSufix, fp.FileName);
+                            fp.Save();
+                            fp.FileType.GetAlgorithm().MoveFile(ofp, fp,true);
+                            tr.Commit();
                         }
                     }
                 }
-            }.Register();
+            }
+        }.Register();
 
-        }
     }
 
     static readonly Variable<bool> avoidDeleteFiles = Statics.ThreadVariable<bool>("filePathUnsafeMode");

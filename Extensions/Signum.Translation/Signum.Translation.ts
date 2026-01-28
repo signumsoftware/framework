@@ -51,6 +51,20 @@ export namespace TranslationMessage {
   export const AreYouSureToContinueAutoTranslation0For1WithoutRevision: MessageKey = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslation0For1WithoutRevision");
   export const AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision: MessageKey = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision");
   export const AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision: MessageKey = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision");
+  export const TranslationStatus: MessageKey = new MessageKey("TranslationMessage", "TranslationStatus");
+  export const Singular: MessageKey = new MessageKey("TranslationMessage", "Singular");
+  export const Plural: MessageKey = new MessageKey("TranslationMessage", "Plural");
+  export const PluralDescription: MessageKey = new MessageKey("TranslationMessage", "PluralDescription");
+  export const Description: MessageKey = new MessageKey("TranslationMessage", "Description");
+  export const Gender: MessageKey = new MessageKey("TranslationMessage", "Gender");
+  export const Culture: MessageKey = new MessageKey("TranslationMessage", "Culture");
+  export const TranslationsOverview: MessageKey = new MessageKey("TranslationMessage", "TranslationsOverview");
+  export const InstanceRouteConflictsOverview: MessageKey = new MessageKey("TranslationMessage", "InstanceRouteConflictsOverview");
+  export const TranslationFor0_: MessageKey = new MessageKey("TranslationMessage", "TranslationFor0_");
+  export const OnlyNeutralCultures: MessageKey = new MessageKey("TranslationMessage", "OnlyNeutralCultures");
+  export const From0using1_: MessageKey = new MessageKey("TranslationMessage", "From0using1_");
+  export const SelectAxlsxFileWithTheTranslations: MessageKey = new MessageKey("TranslationMessage", "SelectAxlsxFileWithTheTranslations");
+  export const NoRoutesMarkedForTranslationConsiderUsing: MessageKey = new MessageKey("TranslationMessage", "NoRoutesMarkedForTranslationConsiderUsing");
 }
 
 export namespace TranslationPermission {

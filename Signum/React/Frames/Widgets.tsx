@@ -28,7 +28,7 @@ export function renderWidgets(wc: WidgetContext<ModifiableEntity>, stickyHeader?
   return (
     <ErrorBoundary>
       <div className={classes("sf-widgets", stickyHeader && "sf-sticky-header")}>
-        {widgets.map((w, i) => React.cloneElement((w as React.ReactElement), { key: i }))}
+        {widgets.slice().reverse().map((w, i) => React.cloneElement((w as React.ReactElement), { key: i }))}
       </div>
     </ErrorBoundary>
   );

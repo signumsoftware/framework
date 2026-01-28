@@ -31,15 +31,18 @@ class Upgrade_20250827_FixesAfterVite : CodeUpgradeBase
             file.ProcessLines(lines =>
             {
                 var pLine = lines.SingleEx(a => a.Contains("port:"));
-                port = int.Parse(pLine.After("port:").Before(","));
+                port = pLine.After("port:").Before(",").ToInt();
 
                 lines[lines.IndexOf(pLine)] = "port: port,".Indent(CodeFile.GetIndent(pLine));
 
                 return true;
             });
 
-            file.InsertBeforeFirstLine(a => a.Contains("export default defineConfig"), $"const port = {port!.Value};");
-            file.InsertAfterLastLine(a => a.Contains("strictPort") ||a.Contains("port: port"), $"origin: `http://localhost:${port}`,");
+            if (port.HasValue)
+            {
+                file.InsertBeforeFirstLine(a => a.Contains("export default defineConfig"), $"const port = {port!.Value};");
+                file.InsertAfterLastLine(a => a.Contains("strictPort") || a.Contains("port: port"), $"origin: `http://localhost:${port}`,");
+            }
         });
     }
 }

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { ModifiableEntity, EntityPack, is, SearchMessage, Lite, getToString, EntityControlMessage, liteKeyLong, Entity } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, SearchMessage, Lite, getToString, EntityControlMessage, liteKeyLong, Entity, isEntityPack } from '@framework/Signum.Entities';
 import { ifError, softCast } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
@@ -13,8 +13,8 @@ import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
 import {
   PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo, getAllTypes, Type,
-  QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol, reloadQueryContexts,
-  queryAllowedInContext, onReloadTypesActions
+  QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol, reloadTypesInDomains,
+  typeAllowedInDomain, onReloadTypesActions
 } from '@framework/Reflection'
 import {
   PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission,
@@ -127,9 +127,9 @@ export namespace AuthAdminClient {
       ],
       extraButtons: scl => [AppContext.isPermissionAuthorized(BasicPermission.AdminRules) && {
         order: -1,
-        button: <button className="btn btn-info"
-          onClick={e => { e.preventDefault(); API.downloadAuthRules(); }}>
-          <FontAwesomeIcon icon="download" /> Download AuthRules.xml
+        button: <button type="button" className="btn btn-info"
+          onClick={e => { API.downloadAuthRules(); }}>
+          <FontAwesomeIcon aria-hidden={true} icon="download" /> {AuthAdminMessage.DownloadAuthRules.niceToString()}
         </button>
       }]
     });
@@ -225,7 +225,7 @@ export namespace AuthAdminClient {
       Navigator.addSettings(new EntitySettings(QueryRulePack, e => import('./Rules/QueryRulePackControl')));
 
       if (options.queries == "queryContext")
-        reloadQueryContexts(); //fire and forget
+        reloadTypesInDomains(); //fire and forget
     }
   
     if (options.permissions) {
@@ -294,7 +294,7 @@ export namespace AuthAdminClient {
     var result = allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
 
     if (queries == "queryContext" && context != null)
-      return result && queryAllowedInContext(queryKey, context);
+      return result && typeAllowedInDomain(queryKey, context);
 
     return result;
   }
@@ -326,19 +326,19 @@ export namespace AuthAdminClient {
     return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed == "Read";
   }
   
-  export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsViewableOptions): boolean {
-  
+  export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity> | Lite<Entity>, options?: Navigator.IsViewableOptions): boolean {
+
     if (options?.isEmbedded)
       return true;
-  
+
     const ti = tryGetTypeInfo(typeName);
-  
+
     if (ti == undefined)
       return false;
-  
-    if (entityPack?.typeAllowed)
+
+    if (isEntityPack(entityPack) && entityPack?.typeAllowed)
       return entityPack.typeAllowed != "None";
-  
+
     return ti.maxTypeAllowed != "None";
   }
   

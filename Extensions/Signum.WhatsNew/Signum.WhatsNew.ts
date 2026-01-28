@@ -58,6 +58,8 @@ export namespace WhatsNewMessage {
   export const NewsPage: MessageKey = new MessageKey("WhatsNewMessage", "NewsPage");
   export const Preview: MessageKey = new MessageKey("WhatsNewMessage", "Preview");
   export const IsRead: MessageKey = new MessageKey("WhatsNewMessage", "IsRead");
+  export const Close0WhatsNew: MessageKey = new MessageKey("WhatsNewMessage", "Close0WhatsNew");
+  export const New: MessageKey = new MessageKey("WhatsNewMessage", "New");
 }
 
 export const WhatsNewMessageEmbedded: Type<WhatsNewMessageEmbedded> = new Type<WhatsNewMessageEmbedded>("WhatsNewMessageEmbedded");
