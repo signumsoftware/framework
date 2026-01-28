@@ -18,10 +18,10 @@ import { classes } from '@framework/Globals';
 import { EntityOperations, OperationButton } from '@framework/Operations/EntityOperations';
 import { EntityOperationContext } from '@framework/Operations';
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
-import { SubTokensOptions } from '@framework/FindOptions';
 import { ToolbarEntity, ToolbarMenuEntity } from '../../Signum.Toolbar/Signum.Toolbar';
 import CollapsableCard from '@framework/Components/CollapsableCard';
 import { UserAssetMessage } from '../../Signum.UserAssets/Signum.UserAssets';
+import { SubTokensOptions } from '@framework/QueryToken';
 
 export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -219,7 +219,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
           </div>
         </Tab>
         <Tab title={ctxBasic.niceName(a => a.tokenEquivalencesGroups)} eventKey="equivalences">
-          <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "xs" })} avoidFieldSet getComponent={ctxGr =>
+          <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "xs" })} avoidFieldSet getComponent={(ctxGr: TypeContext<TokenEquivalenceGroupEntity>) =>
             <div>
               <EnumLine ctx={ctxGr.subCtx(pp => pp.interactionGroup)}
                 onRenderDropDownListItem={(io) => <span className="sf-dot-container"><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />

@@ -19,7 +19,7 @@ import { TypeInfo } from '@framework/Reflection';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { DynamicViewMessage } from '../Signum.Dynamic.Views'
 import { QueryToken, SubTokensOptions } from '@framework/QueryToken'
-import { QueryDescription, QueryToken, SubTokensOptions, getFilterOperations } from '@framework/FindOptions'
+import { QueryDescription, getFilterOperations } from '@framework/FindOptions'
 import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface FindOptionsLineProps {
@@ -422,7 +422,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
   abstract newElement(): T;
 
 
-  render() {
+  override render() {
 
     const array = this.props.binding.getValue();
 

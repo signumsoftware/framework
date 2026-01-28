@@ -100,11 +100,11 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       this.props.onSelectedNode(node);
   }
 
-  componentWillMount() : void {
+  override componentWillMount() : void {
     this.initialize(this.props.treeOptions);
   }
 
-  componentWillReceiveProps(newProps: TreeViewerProps) : void {
+  override componentWillReceiveProps(newProps: TreeViewerProps) : void {
     var path = TreeClient.treePath(newProps.treeOptions);
     if (path == TreeClient.treePath(this.props.treeOptions)) {
       this.searchIfDeps(newProps);
@@ -198,7 +198,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
 
-  render(): React.ReactElement {
+  override render(): React.ReactElement {
     return (
       <div>
         {this.renderSearch()}
@@ -800,7 +800,7 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
     }
   }
 
-  render(): React.ReactElement<any> {
+  override render(): React.ReactElement<any> {
 
     var node = this.props.treeNode;
     const tv = this.props.treeViewer;

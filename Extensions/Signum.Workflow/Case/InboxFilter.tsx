@@ -26,7 +26,7 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
     model.toDate = null;
   }
 
-  render(): React.JSX.Element {
+  override render(): React.JSX.Element {
     var ctx = this.props.ctx;
     var ctx4 = this.props.ctx.subCtx({ labelColumns: 4 });
 

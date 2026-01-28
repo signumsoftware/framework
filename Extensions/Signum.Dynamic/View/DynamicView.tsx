@@ -42,7 +42,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     ];
   }
 
-  componentWillMount(): undefined {
+  override componentWillMount(): undefined {
     this.updateRoot();
   }
 
@@ -137,7 +137,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     return Promise.resolve(true);
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const ctx = this.props.ctx;
 
     return (
