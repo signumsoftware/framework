@@ -512,7 +512,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
                 
                 var options = new List<string>
                 {
-                    $"METRIC = '{VectorTableIndex.GetSqlServerVectorMetric(sqlOpts.Metric)}'",
+                    $"METRIC = '{SqlVectorSearch.GetSqlVectorDistanceMetric(sqlOpts.Metric)}'",
                     $"TYPE = '{sqlOpts.IndexType}'"
                 };
                 

@@ -1497,8 +1497,6 @@ internal class QueryBinder : ExpressionVisitor
         Type returnType = mce.Method.ReturnType;
         var type = returnType.GetGenericArguments()[0];
 
-
-
         if (mce.Method.DeclaringType == typeof(FullTextSearch) &&
               mce.Method.Name is nameof(FullTextSearch.ContainsTable) or nameof(FullTextSearch.FreeTextTable))
         {
@@ -1531,6 +1529,55 @@ internal class QueryBinder : ExpressionVisitor
             Alias selectAlias = NextSelectAlias();
 
             ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias);
+
+            ProjectionExpression projection = new ProjectionExpression(
+                new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, null, null, null, 0),
+            pc.Projector, null, returnType);
+
+            return projection;
+        }
+        else if (mce.Method.DeclaringType == typeof(SqlVectorSearch) &&
+                 mce.Method.Name == nameof(SqlVectorSearch.Vector_Search))
+        {
+            var functionName = mce.Method.GetCustomAttribute<SqlMethodAttribute>()?.Name ?? mce.Method.Name;
+            var tab = (ITable)((ConstantExpression)mce.GetArgument("table")).Value!;
+            var originalType = type.GetGenericArguments()[0];
+
+            Alias tableAlias = NextTableAlias(tab.Name);
+
+            Expression originalEntity = tab is Table t ? t.GetProjectorExpression(tableAlias, this) :
+                                        tab is TableMList tml ? tml.GetMListElementExpression(tableAlias, this) :
+                                        throw new UnexpectedValueException(tab);
+
+            var col = (IColumn)((ConstantExpression)mce.GetArgument("columns")).Value!;
+            var distanceMetric = (SqlVectorDistanceMetric)((ConstantExpression)mce.GetArgument("distanceMetric")).Value!;
+
+            var arguments = new List<Expression>
+            {
+                new SqlLiteralExpression(typeof(string), tab.Name.ToString()),
+                new SqlLiteralExpression(typeof(string), col.Name),
+                DbExpressionNominator.FullNominate(mce.GetArgument("queryVector")),
+                new SqlConstantExpression(SqlVectorSearch.GetSqlVectorDistanceMetric(distanceMetric), typeof(string)),
+            };
+
+            var topN = DbExpressionNominator.FullNominate(mce.GetArgument("top_n"));
+
+            if (!topN.IsNull())
+                arguments.Add(topN);
+
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, tab as Table, null, tableAlias, arguments);
+
+            var distanceColumn = new ColumnExpression(typeof(float), tableAlias, "Distance");
+
+            var withDistanceExpression = Expression.MemberInit(
+                Expression.New(type),
+                Expression.Bind(type.GetField("Original")!, originalEntity),
+                Expression.Bind(type.GetField("Distance")!, distanceColumn)
+            );
+
+            Alias selectAlias = NextSelectAlias();
+
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(withDistanceExpression, selectAlias);
 
             ProjectionExpression projection = new ProjectionExpression(
                 new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, null, null, null, 0),

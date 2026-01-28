@@ -1367,6 +1367,8 @@ public class ViewBuilder : SchemaBuilder
     }
 
 
+
+
     public override ObjectName GenerateTableName(Type type, TableNameAttribute? tn)
     {
         var name = base.GenerateTableName(type, tn);

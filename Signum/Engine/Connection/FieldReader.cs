@@ -6,6 +6,8 @@ using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Server;
 using Signum.Engine.Sync;
+using Microsoft.Data.SqlTypes;
+using Microsoft.Identity.Client;
 
 namespace Signum.Engine;
 
@@ -630,7 +632,14 @@ public class FieldReader
             return (T[])(object)null!;
         }
 
-        return (T[])this.reader[ordinal]; 
+        var result = this.reader[ordinal];
+        if (result is T[] arr)
+            return arr;
+
+        if(typeof(T) == typeof(float) && result is SqlVector<float> vec)
+            return (T[])(object)vec.Memory.ToArray();
+
+        return (T[])result; //To produce exception
     }
 
     static readonly MethodInfo miNullableGetRange = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetNullableRange<int>(0)).GetGenericMethodDefinition();

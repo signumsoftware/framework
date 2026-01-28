@@ -1718,6 +1718,21 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
         throw new NotImplementedException();
     }
 
+    public bool IsVector()
+    {
+        if(sqlServer is SqlDbType s)
+            return s == SqlDbType.Vector;
+
+        if(postgreSql is NpgsqlDbType p)
+            switch (p)
+            {
+                case NpgsqlDbType.Array | NpgsqlDbType.Real: return true;
+                default: return false;
+            }
+
+        throw new NotImplementedException();
+    }
+
     public bool IsNumber()
     {
         if (sqlServer is SqlDbType s)

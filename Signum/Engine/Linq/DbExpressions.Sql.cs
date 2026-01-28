@@ -657,6 +657,10 @@ internal enum SqlFunction
     FREETEXTTABLE,
     DATETRUNC,
     AtTimeZone,
+
+    VECTOR_DISTANCE,
+    VECTOR_NORM,
+    VECTOR_NORMALIZE,
 }
 
 internal enum PostgresFunction

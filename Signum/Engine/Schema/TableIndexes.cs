@@ -256,7 +256,7 @@ public class VectorTableIndex : TableIndex
 {
     public class SqlServerOptions
     {
-        public SqlServerDistanceMetric Metric { get; set; } = SqlServerDistanceMetric.Cosine;
+        public SqlVectorDistanceMetric Metric { get; set; } = SqlVectorDistanceMetric.Cosine;
         public SqlServerVectorIndexType IndexType { get; set; } = SqlServerVectorIndexType.DiskANN;
         public int? MaxDegreeOfParallelism { get; set; }
     }
@@ -297,13 +297,6 @@ public class VectorTableIndex : TableIndex
         _ => throw new UnexpectedValueException(changeTraking)
     };
 
-    public static string GetSqlServerVectorMetric(SqlServerDistanceMetric metric) => metric switch
-    {
-        SqlServerDistanceMetric.Cosine => "cosine",
-        SqlServerDistanceMetric.Euclidean => "euclidean",
-        SqlServerDistanceMetric.DotProduct => "dot",
-        _ => throw new UnexpectedValueException(metric)
-    };
 
     internal static string GetPGVectorIndex(PGVectorIndexType indexType) => indexType switch
     {
@@ -326,12 +319,7 @@ public enum SqlServerVectorIndexType
     DiskANN
 }
 
-public enum SqlServerDistanceMetric
-{
-    Cosine,
-    Euclidean,
-    DotProduct
-}
+
 
 public enum PGVectorIndexType
 {

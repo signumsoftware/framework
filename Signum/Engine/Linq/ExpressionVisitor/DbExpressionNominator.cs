@@ -1731,6 +1731,17 @@ internal class DbExpressionNominator : DbExpressionVisitor
                 return TrySqlFunction(null, SqlFunction.FREETEXT, typeof(bool), ToLiteralColumns(m), m.GetArgument("freeTextString"));
 
 
+            case "SqlVectorSearch.Vector_Distance":
+                return TrySqlFunction(null, SqlFunction.VECTOR_DISTANCE, typeof(float), ToSqlConstant<SqlVectorDistanceMetric>(m.GetArgument("distanceMetric"), SqlVectorSearch.GetSqlVectorDistanceMetric), m.GetArgument("vector1"), m.GetArgument("vector2"));
+
+            case "SqlVectorSearch.Vector_Norm":
+                return TrySqlFunction(null, SqlFunction.VECTOR_NORM, typeof(float), m.GetArgument("vector"), ToSqlConstant<SqlVectorNormType>(m.GetArgument("normType"), SqlVectorSearch.GetSqlVectorNormType));
+
+            case "SqlVectorSearch.Vector_Normalize":
+                return TrySqlFunction(null, SqlFunction.VECTOR_NORMALIZE, typeof(float[]), m.GetArgument("vector"), ToSqlConstant<SqlVectorNormType>(m.GetArgument("normType"), SqlVectorSearch.GetSqlVectorNormType));
+
+
+
             case "DateTime.Add":
             case "DateTimeOffset.Add":
             case "DateTime.Subtract":
@@ -1971,6 +1982,16 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
             default: return null;
         }
+    }
+
+    static SqlConstantExpression ToSqlConstant<T>(Expression expression, Func<T, string> converter)
+    {
+        if(expression is ConstantExpression ce && ce.Value is T metric)
+        {
+            return new SqlConstantExpression(converter(metric), typeof(string));
+        }
+
+        throw new UnexpectedValueException(expression);
     }
 
     private Expression? CreateRank(MethodCallExpression m)
