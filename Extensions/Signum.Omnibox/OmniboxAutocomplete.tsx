@@ -9,7 +9,7 @@ import '@framework/Frames/MenuIcons.css'
 import { TypeaheadController } from '@framework/Components/Typeahead';
 
 export interface OmniboxAutocompleteProps {
-  inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
+  inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
 export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps): React.JSX.Element {
