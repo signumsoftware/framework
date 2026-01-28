@@ -195,6 +195,15 @@ public class FullTextTableIndex : TableIndex
           yield return new PostgresTsVectorColumn(this.Postgres.TsVectorColumnName, this.Columns) { ComputedColumn = this.GetComputedColumn() };
         }
     }
+
+    internal static string GetSqlServerChangeTracking(FullTextIndexChangeTracking changeTraking) => changeTraking switch
+    {
+        FullTextIndexChangeTracking.Manual => "MANUAL",
+        FullTextIndexChangeTracking.Auto => "AUTO",
+        FullTextIndexChangeTracking.Off => "OFF",
+        FullTextIndexChangeTracking.Off_NoPopulation => "OFF, NO POPULATION",
+        _ => throw new UnexpectedValueException(changeTraking)
+    };
 }
 
 public class PostgresTsVectorColumn : IColumn
@@ -241,6 +250,100 @@ public enum FullTextIndexChangeTracking
     Auto,
     Off,
     Off_NoPopulation
+}
+
+public class VectorTableIndex : TableIndex
+{
+    public class SqlServerOptions
+    {
+        public SqlServerDistanceMetric Metric { get; set; } = SqlServerDistanceMetric.Cosine;
+        public SqlServerVectorIndexType IndexType { get; set; } = SqlServerVectorIndexType.DiskANN;
+        public int? MaxDegreeOfParallelism { get; set; }
+    }
+
+    public class PostgresOptions
+    {
+        public PGVectorIndexType? IndexType { get; set; }
+        public PGVectorDistanceMetric Metric { get; set; } = PGVectorDistanceMetric.Cosine;
+        public int? Lists { get; set; }
+    }
+
+    public SqlServerOptions SqlServer { get; set; } = new SqlServerOptions();
+    public PostgresOptions Postgres { get; set; } = new PostgresOptions();
+
+    public VectorTableIndex(ITable table, IColumn column) : base(table, column)
+    {
+    }
+
+    public override string GetIndexName(ObjectName tableName)
+    {
+        var prefix = tableName.IsPostgres ? "vec_ix" : "VEC_IX";
+        return StringHashEncoder.ChopHash($"{prefix}_{tableName.Name}_{ColumnSignature()}", MaxNameLength(), tableName.IsPostgres);
+    }
+
+    protected internal IEnumerable<IColumn> GenerateColumns()
+    {
+        // Vector columns are typically defined by the user with [DbType] attribute
+        // No additional columns need to be generated
+        yield break;
+    }
+
+    public static string GetSqlserverString(FullTextIndexChangeTracking changeTraking) => changeTraking switch
+    {
+        FullTextIndexChangeTracking.Manual => "MANUAL",
+        FullTextIndexChangeTracking.Auto => "AUTO",
+        FullTextIndexChangeTracking.Off => "OFF",
+        FullTextIndexChangeTracking.Off_NoPopulation => "OFF, NO POPULATION",
+        _ => throw new UnexpectedValueException(changeTraking)
+    };
+
+    public static string GetSqlServerVectorMetric(SqlServerDistanceMetric metric) => metric switch
+    {
+        SqlServerDistanceMetric.Cosine => "cosine",
+        SqlServerDistanceMetric.Euclidean => "euclidean",
+        SqlServerDistanceMetric.DotProduct => "dot",
+        _ => throw new UnexpectedValueException(metric)
+    };
+
+    internal static string GetPGVectorIndex(PGVectorIndexType indexType) => indexType switch
+    {
+        PGVectorIndexType.IVFFlat => "ivfflat",
+        PGVectorIndexType.HNSW => "hnsw",
+        _ => throw new UnexpectedValueException(indexType)
+    };
+
+    internal static object GetPGVectorDistanceMetric(PGVectorDistanceMetric metric) => metric switch
+    {
+        PGVectorDistanceMetric.Cosine => "vector_cosine_ops",
+        PGVectorDistanceMetric.L2 => "vector_l2_ops",
+        PGVectorDistanceMetric.InnerProduct => "vector_ip_ops",
+        _ => throw new UnexpectedValueException(metric)
+    };
+}
+
+public enum SqlServerVectorIndexType
+{
+    DiskANN
+}
+
+public enum SqlServerDistanceMetric
+{
+    Cosine,
+    Euclidean,
+    DotProduct
+}
+
+public enum PGVectorIndexType
+{
+    IVFFlat,
+    HNSW
+}
+
+public enum PGVectorDistanceMetric
+{
+    Cosine,
+    L2, // Euclidean
+    InnerProduct
 }
 
 public class IndexKeyColumns

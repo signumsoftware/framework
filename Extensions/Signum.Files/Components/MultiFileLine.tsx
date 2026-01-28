@@ -41,13 +41,13 @@ export class MultiFileLineController<V extends ModifiableEntity /*& IFile*/ | Li
   setForceShowUploader!: React.Dispatch<boolean>;
 
 
-  init(p: MultiFileLineProps<V>): void {
+  override init(p: MultiFileLineProps<V>): void {
     super.init(p);
     [this.forceShowUploader, this.setForceShowUploader] = React.useState<boolean>(() => this.getMListItemContext(p.ctx).length == 0);
   }
 
 
-  overrideProps(p: MultiFileLineProps<V>, overridenProps: MultiFileLineProps<V>): void {
+  override overrideProps(p: MultiFileLineProps<V>, overridenProps: MultiFileLineProps<V>): void {
 
     p.view = EntityBaseController.defaultIsViewable(p.type!, false) && overridenProps.getFileFromElement != null;
 

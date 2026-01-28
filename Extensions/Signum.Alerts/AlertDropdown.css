@@ -71,6 +71,12 @@
 }
 
 
+@media (prefers-reduced-motion: reduce) {
+    .ringing {
+        animation: none !important;
+    }
+}
+
 .ringing {
     animation: ring 4s ease infinite;
     transform-origin: 50% 10%;

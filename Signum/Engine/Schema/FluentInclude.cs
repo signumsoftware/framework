@@ -31,6 +31,12 @@ public class FluentInclude<T> where T : Entity
         return this;
     }
 
+    public FluentInclude<T> WithVectorIndex(Expression<Func<T, object?>> fields, Action<VectorTableIndex>? customize = null)
+    {
+        this.SchemaBuilder.AddVectorIndex<T>(fields, customize);
+        return this;
+    }
+
     public FluentInclude<T> WithUniqueIndexMList<M>(Expression<Func<T, MList<M>>> mlist, 
         Expression<Func<MListElement<T, M>, object>>? fields = null, 
         Expression<Func<MListElement<T, M>, bool>>? where = null, 
@@ -56,6 +62,13 @@ public class FluentInclude<T> where T : Entity
         Expression<Func<MListElement<T, M>, object>> fields, Action<FullTextTableIndex>? customize = null)
     {
         var result = this.SchemaBuilder.AddFullTextIndexMList<T, M>(mlist, fields, customize);
+        return this;
+    }
+
+    public FluentInclude<T> WithVectorIndexMList<M>(Expression<Func<T, MList<M>>> mlist,
+        Expression<Func<MListElement<T, M>, object>> fields, Action<VectorTableIndex>? customize = null)
+    {
+        this.SchemaBuilder.AddVectorIndexMList<T, M>(mlist, fields, customize);
         return this;
     }
 

@@ -479,7 +479,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
 
                 var options = new[]
                 {
-                    sqls.ChangeTraking != null ? "CHANGE_TRACKING = " + GetSqlserverString(sqls.ChangeTraking.Value) : null,
+                    sqls.ChangeTraking != null ? "CHANGE_TRACKING = " + FullTextTableIndex.GetSqlServerChangeTracking(sqls.ChangeTraking.Value) : null,
                     sqls.StoplistName != null ? "STOPLIST =" + sqls.StoplistName : null,
                     sqls.PropertyListName != null ? "SEARCH PROPERTY LIST=" + sqls.PropertyListName : null,
                 }.NotNull().ToList();
@@ -502,20 +502,45 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
                 return new SqlPreCommandSimple($"CREATE INDEX {ftindex.IndexName} ON {ftindex.Table.Name} USING GIN ({pg.TsVectorColumnName.SqlEscape(true)});");
             }
         }
+        else if(index is VectorTableIndex vectorIndex)
+        {
+            var column = vectorIndex.Columns.Single();
+            
+            if (!isPostgres)
+            {
+                var sqlOpts = vectorIndex.SqlServer;
+                
+                var options = new List<string>
+                {
+                    $"METRIC = '{VectorTableIndex.GetSqlServerVectorMetric(sqlOpts.Metric)}'",
+                    $"TYPE = '{sqlOpts.IndexType}'"
+                };
+                
+                if (sqlOpts.MaxDegreeOfParallelism != null)
+                    options.Add($"MAXDOP = {sqlOpts.MaxDegreeOfParallelism}");
+
+                return new SqlPreCommandSimple($"CREATE VECTOR INDEX {vectorIndex.IndexName.SqlEscape(isPostgres)} ON {vectorIndex.Table.Name}({column.Name.SqlEscape(isPostgres)}) WITH ({options.ToString(", ")});") { NoTransaction = NoTransactionMode.AfterScript };
+            }
+            else
+            {
+                var pgOpts = vectorIndex.Postgres;
+
+                var indexMethod = VectorTableIndex.GetPGVectorIndex(pgOpts.IndexType!.Value);
+                
+                var operatorClass = VectorTableIndex.GetPGVectorDistanceMetric(pgOpts.Metric);
+
+                var withClause = pgOpts.IndexType == PGVectorIndexType.IVFFlat && pgOpts.Lists != null ? $" WITH (lists = {pgOpts.Lists})" : "";
+                
+                return new SqlPreCommandSimple($"CREATE INDEX {vectorIndex.IndexName.SqlEscape(isPostgres)} ON {vectorIndex.Table.Name} USING {indexMethod} ({column.Name.SqlEscape(isPostgres)} {operatorClass}){withClause};");
+            }
+        }
         else
         {
             return CreateIndexBasic(index, forHistoryTable: false);
         }
     }
 
-    private string GetSqlserverString(FullTextIndexChangeTracking changeTraking) => changeTraking switch
-    {
-        FullTextIndexChangeTracking.Manual => "MANUAL",
-        FullTextIndexChangeTracking.Auto => "AUTO",
-        FullTextIndexChangeTracking.Off => "OFF",
-        FullTextIndexChangeTracking.Off_NoPopulation => "OFF, NO POPULATION",
-        _ => throw new UnexpectedValueException(changeTraking)
-    };
+    
 
     public int DuplicateCount(TableIndex uniqueIndex, Replacements rep)
     {

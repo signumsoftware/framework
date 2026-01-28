@@ -8,12 +8,14 @@ import {
 import { ImageHandlerBase, ImageInfo } from "./ImageHandlerBase";
 import { $createImageNode, ImageNode } from "./ImageNode";
 
-export class ImageExtension implements HtmlEditorExtension {
+export class ImageExtension extends HtmlEditorExtension {
 
-  name = "ImageExtension";
-  constructor(public imageHandler: ImageHandlerBase) { }
+override name = "ImageExtension";
+constructor(public imageHandler: ImageHandlerBase) { 
+  super();
+}
 
-  registerExtension(controller: HtmlEditorController): OptionalCallback {
+override registerExtension(controller: HtmlEditorController): OptionalCallback {
     const abortController = new AbortController();
     const element = controller.editableElement;
 
@@ -71,7 +73,7 @@ export class ImageExtension implements HtmlEditorExtension {
     };
   }
 
-  getNodes(): LexicalConfigNode {
+  override getNodes(): LexicalConfigNode {
     return [ImageNode];
   }
 

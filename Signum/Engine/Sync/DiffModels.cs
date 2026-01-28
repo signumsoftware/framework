@@ -217,6 +217,9 @@ public class DiffIndex
         if (mix is FullTextTableIndex && !isPostgress)
             return DiffIndexType.FullTextIndex;
 
+        if (mix is VectorTableIndex)
+            return DiffIndexType.VectorIndex;
+
         if (mix.Clustered && !isPostgress)
             return DiffIndexType.Clustered;
 
@@ -287,6 +290,7 @@ public enum DiffIndexType
 
 
     FullTextIndex = 100,
+    VectorIndex = 101,
 }
 
 public enum GeneratedAlwaysType

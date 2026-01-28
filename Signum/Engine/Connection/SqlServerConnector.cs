@@ -19,6 +19,7 @@ public enum SqlServerVersion
     SqlServer2017,
     SqlServer2019,
     SqlServer2022,
+    SqlServer2025,
 
     AzureSQL = 100,
 }
@@ -72,6 +73,7 @@ public static class SqlServerVersionDetector
                         "14" => SqlServerVersion.SqlServer2017,
                         "15" => SqlServerVersion.SqlServer2019,
                         "16" => SqlServerVersion.SqlServer2022,
+                        "17" => SqlServerVersion.SqlServer2025,
                         var a => throw new UnexpectedValueException(a),
                     };
                 }

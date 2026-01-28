@@ -674,7 +674,7 @@ public static class SchemaSynchronizer
                     var indexes = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => !kvp.Value.PrimaryKey).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
-                        createNew: (i, mix) => mix.Unique || mix is FullTextTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
+                        createNew: (i, mix) => mix.Unique || mix is FullTextTableIndex or VectorTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
                         removeOld: (i, dix) => !dix.IsControlledIndex(isPostgres) && dix.Columns.Any(IsColumnRemovedOrModified) && SafeConsole.Ask($"Recreate non-controlled index {dix.IndexName}?") ? sqlBuilder.RecreateDiffIndex(tab, dix) : null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                             mix.IndexName != dix.IndexName ? sqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);

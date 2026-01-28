@@ -6,7 +6,7 @@ import { ReactElement } from "react";
 // Should be subclassed by concrete nodes that implement getType, clone, and importJSON.
 export class ImageNode extends DecoratorNode<React.ReactElement> {
 
-  static getType(): string {
+  static override getType(): string {
     return "image";
   }
 
@@ -14,19 +14,19 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
     super(key);
   }
 
-  createDOM(): HTMLElement {
+  override createDOM(): HTMLElement {
     return document.createElement("div");
   }
 
-  updateDOM(): boolean {
+  override updateDOM(): boolean {
     return false;
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): ReactElement {
+  override decorate(editor: LexicalEditor, config: EditorConfig): ReactElement {
     return editor.imageHandler!.renderImage(this.imageInfo);
   }
 
-  exportJSON(): any {
+  override exportJSON(): any {
     return {
       type: "image",
       uploadedFile: this.imageInfo,
@@ -34,14 +34,14 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
     }
   }
 
-  exportDOM(editor: LexicalEditor): DOMExportOutput {
+  override exportDOM(editor: LexicalEditor): DOMExportOutput {
     const element = editor.imageHandler!.toElement(this.imageInfo) ?? null;
     return { element: element };
   }
 
   static currentHandler: ImageHandlerBase | undefined; //Hack but the is no way to acces the editor in importDOM, at least is sync.
 
-  static importDOM(): DOMConversionMap | null {
+  static override importDOM(): DOMConversionMap | null {
     return {
       img: (domNode: HTMLElement) => {
         return {
@@ -63,11 +63,11 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
     };
   }
   
-  static clone(node: ImageNode): ImageNode {
+  static override clone(node: ImageNode): ImageNode {
     return new ImageNode(node.imageInfo, node.__key);
   }
 
-  static importJSON(serializedNode: ImageInfo): ImageNode {
+  static override importJSON(serializedNode: ImageInfo): ImageNode {
     return new ImageNode(serializedNode);
   }
 }

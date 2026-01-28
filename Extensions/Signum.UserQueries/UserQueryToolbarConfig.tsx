@@ -20,7 +20,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     super(type);
   }
 
-  getCounter(element: ToolbarResponse<UserQueryEntity>, entity: Lite<Entity> | null): React.ReactElement | undefined {
+  override getCounter(element: ToolbarResponse<UserQueryEntity>, entity: Lite<Entity> | null): React.ReactElement | undefined {
 
     if (element.showCount != null) {
       return <SearchUserQueryCount userQuery={element.content!}
@@ -37,7 +37,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     return "rectangle-list";
   }
 
-  async selectSubEntityForUrl(element: ToolbarResponse<UserQueryEntity>, entity: Lite<Entity> | null): Promise<Lite<Entity> | undefined> {
+  override async selectSubEntityForUrl(element: ToolbarResponse<UserQueryEntity>, entity: Lite<Entity> | null): Promise<Lite<Entity> | undefined> {
     const userQuery = await Navigator.API.fetch(element.content!);
     return selectSubEntity(userQuery, entity ?? undefined);
   }

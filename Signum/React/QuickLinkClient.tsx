@@ -119,6 +119,9 @@ export namespace QuickLinkClient {
         if (!ql.allowsMultiple && ctx.lites.length > 1)
           return null;
 
+        if (Navigator.someNonViewable(ctx.lites))
+          return null;
+
         if (ql.isVisible == true || ql.isVisible == undefined)
           return Promise.resolve(ql);
 
@@ -218,7 +221,10 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.ReactElement | n
 
   return (
     <>
-      {!links ? [] : links.filter(a => a.group !== undefined).orderBy(a => a.order)
+      {!links ? [] : links
+        .slice().reverse()
+        .filter(a => a.group !== undefined)
+        .orderBy(a => a.order)
         .groupBy(a => a.group?.name ?? a.key)
         .map((gr, i) => {
           var first = gr.elements[0];

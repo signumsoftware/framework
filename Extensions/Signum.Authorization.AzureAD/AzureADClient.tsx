@@ -18,7 +18,7 @@ import { ActiveDirectoryClient } from '../Signum.Authorization/BaseAD/ActiveDire
 
 
 export namespace AzureADClient {
-  export function start(options: { routes: RouteObject[], adGroups: boolean, inviteUsers: boolean, profilePhotos: boolean | "cached"; }): void {
+  export function start(options: { routes: RouteObject[], adGroups: boolean, profilePhotos: boolean | "cached"; }): void {
     ChangeLogClient.registerChangeLogModule("Signum.Authentication.AzureAD", () => import("./Changelog"));
 
     Navigator.addSettings(new EntitySettings(AzureADConfigurationEmbedded, e => import('./AzureADConfiguration')));

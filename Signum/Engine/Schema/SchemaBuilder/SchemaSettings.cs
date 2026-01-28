@@ -70,6 +70,7 @@ public class SchemaSettings
         {typeof(TimeOnly),       new AbstractDbType(SqlDbType.Time,             NpgsqlDbType.Time)},
 
         {typeof(byte[]),         new AbstractDbType(SqlDbType.VarBinary,        NpgsqlDbType.Bytea)},
+        {typeof(float[]),        new AbstractDbType(SqlDbType.Vector,           NpgsqlDbType.Array | NpgsqlDbType.Real)},
 
         {typeof(Guid),           new AbstractDbType(SqlDbType.UniqueIdentifier, NpgsqlDbType.Uuid)},
     };

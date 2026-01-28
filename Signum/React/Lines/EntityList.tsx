@@ -14,12 +14,12 @@ export interface EntityListProps<V extends Lite<Entity> | ModifiableEntity> exte
 
 export class EntityListController<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseController<EntityListProps<V>, V>
 {
-  moveUp(index: number): void {
+  override moveUp(index: number): void {
     super.moveUp(index);
     this.forceUpdate();
   }
 
-  moveDown(index: number): void {
+  override moveDown(index: number): void {
     super.moveDown(index);
     this.forceUpdate();
   }

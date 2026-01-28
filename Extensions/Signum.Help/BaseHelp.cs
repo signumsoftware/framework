@@ -177,8 +177,9 @@ public class TypeHelp : BaseHelp
 
         result.Queries.AddRange(
             from qn in QueryLogic.Queries.GetTypeQueries(this.Type).Keys
+            where QueryLogic.Queries.QueryAllowed(qn, false)
             let qh = HelpLogic.GetQueryHelp(qn)
-            where qh.IsAllowed() == null
+            //where qh.IsAllowed() == null
             select qh.GetEntity());
 
         if (DBEntity != null)

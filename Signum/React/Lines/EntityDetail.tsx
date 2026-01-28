@@ -23,7 +23,7 @@ export interface EntityDetailProps<V extends ModifiableEntity | Lite<Entity> | n
 
 
 export class EntityDetailController<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseController<EntityDetailProps<V>, V> {
-  getDefaultProps(p: EntityDetailProps<V>): void {
+  override getDefaultProps(p: EntityDetailProps<V>): void {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.view = false;

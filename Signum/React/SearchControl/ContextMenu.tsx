@@ -15,9 +15,10 @@ interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement> {
   onHide: () => void;
   alignRight?: boolean;
   children: React.ReactNode;
+  itemsCount: number;
 }
 
-export default function ContextMenu({ position, onHide, children, alignRight, ...rest }: ContextMenuProps): React.ReactElement {
+export default function ContextMenu({ position, onHide, children, alignRight, itemsCount, ...rest }: ContextMenuProps): React.ReactElement {
 
   const { top, left } = position;
 
@@ -47,7 +48,7 @@ export default function ContextMenu({ position, onHide, children, alignRight, ..
 
       setAdjustedPosition({ top: adjustedTop, left: adjustedLeft });
     }
-  }, [React.Children.count(children), left, top, menuRef.current?.scrollWidth, menuRef.current?.scrollHeight, window.innerWidth, window.innerHeight]);
+  }, [itemsCount, left, top, menuRef.current?.scrollWidth, menuRef.current?.scrollHeight, window.innerWidth, window.innerHeight]);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -106,7 +107,6 @@ export function getMouseEventPosition(e: React.MouseEvent<HTMLTableElement>, con
     top: rec == null ? e.pageY : e.clientY - rec.top,
     maxTop: container?.getBoundingClientRect().top, //table's body top
   }) as ContextMenuPosition;
-
   return result;
 };
 

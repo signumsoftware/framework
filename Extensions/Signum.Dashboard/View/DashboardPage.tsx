@@ -41,7 +41,6 @@ export default function DashboardPage(): React.JSX.Element {
 
   useTitle(entity ? getToString(entity) : getToString(dashboard));
 
-
   return (
     <div className="sf-dashboard-page">
     
@@ -51,7 +50,7 @@ export default function DashboardPage(): React.JSX.Element {
             {entityKey ?
               <div>
                 {!entity ? <h1 className="h3">{JavascriptMessage.loading.niceToString()}</h1> :
-                  <h1 className="h3">
+                  <h1 tabIndex={0} className="h3" aria-label={getToString(entity) + (entity ? "" : " " + Navigator.getTypeSubTitle(entity, undefined))}>
                     <span className="display-6">{getToString(entity)}</span>
                     {Navigator.isViewable({ entity: entity, canExecute: {} } as EntityPack<Entity>) &&
                       <Link className="display-6 ms-2" to={Navigator.navigateRoute(entity)}><FontAwesomeIcon aria-hidden={true} icon="external-link" /></Link>

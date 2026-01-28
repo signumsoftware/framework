@@ -82,6 +82,14 @@
     cursor: pointer;
 }
 
+.sf-file-drop:focus-within {
+    background-color: var(--bs-body-bg);
+    border-color: rgb(127.5, 184, 201.5);
+    outline: 0;
+    border-width: 3px;
+}
+
+
 
 /*.sf-image-container{
     display: flex;

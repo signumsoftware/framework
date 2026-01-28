@@ -215,7 +215,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           undefined;
   }
 
-  componentDidMount(): void {
+  override componentDidMount(): void {
     window.addEventListener('resize', this.onResize);
     this.onResize();
 
@@ -232,14 +232,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       this.doSearch({ force: true });
   }
 
-  componentDidUpdate(props: SearchControlLoadedProps): void {
+  override componentDidUpdate(props: SearchControlLoadedProps): void {
     if (!Hooks.areEqualDeps(this.props.deps ?? [], props.deps ?? [])) {
       this.doSearchPage1();
     }
   }
 
   isUnmounted = false;
-  componentWillUnmount(): void {
+  override componentWillUnmount(): void {
     this.isUnmounted = true;
     window.removeEventListener('resize', this.onResize);
     this.abortableSearch.abort();
@@ -531,7 +531,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   containerDiv?: HTMLDivElement | null;
 
-  render(): React.ReactElement {
+  override render(): React.ReactElement {
     const p = this.props;
     const fo = this.props.findOptions;
     const qd = this.props.queryDescription;
@@ -1249,7 +1249,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return null;
 
     return (
-      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide}>
+      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} itemsCount={menuPack?.items.length ?? 0}>
         {renderEntityMenuItems && menuPack && menuPack.showSearch &&
           <AutoFocus>
             <input
@@ -1745,7 +1745,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if (this.props.view) {
       var lite = row.entity!;
 
-      if (!lite || !Navigator.isViewable(lite.EntityType, { isSearch: "main" }))
+      if (!lite || !Navigator.isViewable(lite, { isSearch: "main" }))
         return;
 
       e.preventDefault();
@@ -1956,7 +1956,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             }
           }}
           {...ra}
-          className={classes(markClassName, ra?.className, selected && "sf-row-selected")}
+          className={classes(markClassName, ra?.className, selected && "sf-row-selected", (!row.entity || Navigator.entitySettings[row.entity.EntityType]?.isViewableLite?.(row.entity, { isSearch: "main" }) === false) ? "sf-row-no-view" : null)}
         >
           {this.props.allowSelection &&
             <td className="centered-cell">

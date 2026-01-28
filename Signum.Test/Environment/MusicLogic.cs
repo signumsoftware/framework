@@ -108,6 +108,18 @@ public static class MusicLogic
                 e.Name
             });
 
+        sb.Include<SimplePassageEntity>()
+            .WithVectorIndex(a=>a.Embedding, vti =>
+            {
+            })
+            .WithQuery(() => p => new
+            {
+                Entity = p,
+                p.Id,
+                p.Note,
+                p.Embedding
+            });
+
         RegisterAwards(sb);
 
         QueryLogic.Queries.Register(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, description, cancellationToken) =>
