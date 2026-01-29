@@ -19,11 +19,10 @@ export interface EntityLineProps<V extends ModifiableEntity | Lite<Entity> | nul
   avoidViewButton?: boolean;
   avoidCreateButton?: boolean;
   autocomplete?: AutocompleteConfig<unknown> | null;
-  renderItem?: React.ReactNode;
   showType?: boolean;
   inputAttributes?: React.InputHTMLAttributes<HTMLInputElement>,
   itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  ref?: React.Ref<EntityLineController<NoInfer<V>>>;
+  ref?: React.Ref<EntityLineController<V>>;
 }
 
 interface ItemPair {
@@ -234,7 +233,6 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
       var value = p.ctx.value!;
 
       const str =
-        p.renderItem ? p.renderItem :
           c.currentItem && c.currentItem.item && p.autocomplete ? p.autocomplete.renderItem(c.currentItem.item, new TextHighlighter(undefined)) :
             getToString(value);
 
