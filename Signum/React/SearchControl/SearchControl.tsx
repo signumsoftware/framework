@@ -224,7 +224,7 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
         showFooter={SearchControlOptions.showFooter(handler, p)}
         allowChangeColumns={SearchControlOptions.allowChangeColumns(handler, p)}
         allowChangeOrder={SearchControlOptions.allowOrderColumns(handler, p)}
-        create={p.create != null ? p.create : (qs?.allowCreate ?? true) && tis.some(ti => Navigator.isCreable(ti, {isSearch: true }))}
+        create={p.create != null ? p.create : (qs?.allowCreate ?? true) && (fop => tis.some(ti => Navigator.isCreable(ti, {isSearch: true, fo: fop })))}
         createButtonClass={p.createButtonClass}
 
         view={p.view != null ? p.view : tis.some(ti => Navigator.isViewable(ti, { isSearch: "main" }))}

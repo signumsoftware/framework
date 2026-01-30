@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { DateTime, Duration } from 'luxon'
 import * as AppContext from "./AppContext"
 import { Navigator, ViewPromise } from "./Navigator"
-import { Dic, classes, isNumber, softCast } from './Globals'
+import { Dic, classes, isNumber, isPromise, softCast } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
@@ -532,14 +532,25 @@ export namespace Finder {
 
 
 
-  export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[], avoidCustom?: boolean): Promise<any> {
+  export async function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[], options? : { avoidCustom?: boolean}): Promise<any> {
 
     const ti = getTypeInfo(type);
-
-    if (!avoidCustom && querySettings[ti.name]?.customGetPropsFromFilter) {
+    if (!(options?.avoidCustom) && querySettings[ti.name]?.customGetPropsFromFilter) {
       return querySettings[ti.name].customGetPropsFromFilter!([...filterOptionsParsed]);
     }
 
+    var result = getPropsFromFiltersSync(type, filterOptionsParsed, true);
+
+    var promiseMembers = Object.entries(result).filter(([key, value]) => isPromise(value));
+
+    await Promise.all(promiseMembers.map(async ([key, value]) => result[key] = await value));
+
+    return result;
+  }
+
+  export function getPropsFromFiltersSync(type: PseudoType, filterOptionsParsed: FilterOptionParsed[], retrieveEntityInPromise: boolean = false): any {
+
+    const ti = getTypeInfo(type);
 
     function getMemberForToken(ti: TypeInfo, fullKey: string) {
       var token = fullKey.tryAfter("Entity.") ?? fullKey;
@@ -550,45 +561,42 @@ export namespace Finder {
       return ti.members[token];
     }
 
+    const result: any = {};
 
-    var result: any = {};
-
-    return Promise.all(filterOptionsParsed.map(fo => {
+    filterOptionsParsed.forEach(fo => {
 
       if (isFilterGroup(fo) ||
         fo.token == null ||
         !Options.tokenCanSetPropery(fo.token) ||
         fo.operation != "EqualTo" ||
         !isActive(fo))
-        return null;
+        return;
 
       const mi = getMemberForToken(ti, fo.token!.fullKey);
 
       if (!mi)
-        return null;
+        return;
 
-      const promise = tryConvert(fo.value, mi.type);
+      const valueOrPromise = tryConvert(fo.value, mi.type, retrieveEntityInPromise);
 
-      if (promise == null)
-        return null;
+      result[mi.name.firstLower()] = valueOrPromise;
+    });
 
-      return promise.then(v => result[mi.name.firstLower()] = v);
-
-    }).filter(p => !!p)).then(() => result);
+    return result;
   }
 
-  export function tryConvert(value: any, type: TypeReference): Promise<any> | undefined {
+  export function tryConvert(value: any, type: TypeReference, retrieveEntityInPromise: boolean): any | undefined {
 
     if (value == null)
-      return Promise.resolve(null);
+      return null;
 
     if (type.isLite) {
 
       if (isLite(value))
-        return Promise.resolve(value);
+        return value;
 
       if (isEntity(value))
-        return Promise.resolve(toLite(value));
+        return toLite(value);
 
       return undefined;
     }
@@ -598,29 +606,29 @@ export namespace Finder {
     if (ti?.kind == "Entity") {
 
       if (isLite(value))
-        return Navigator.API.fetch(value);
+        return retrieveEntityInPromise ? Navigator.API.fetch(value) : value;
 
       if (isEntity(value))
-        return Promise.resolve(value);
+        return value;
 
       return undefined;
     }
 
     if (type.name == "string" || type.name == "Guid" || type.name == "DateOnly" || ti?.kind == "Enum") {
       if (typeof value === "string")
-        return Promise.resolve(value);
+        return value;
 
       return undefined;
     }
 
     if (type.name == "boolean") {
       if (typeof value === "boolean")
-        return Promise.resolve(value);
+        return value;
     }
 
     if (isNumberType(type.name)) {
       if (typeof value === "number")
-        return Promise.resolve(value);
+        return value;
     }
 
     return undefined;

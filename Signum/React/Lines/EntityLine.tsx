@@ -16,8 +16,6 @@ import { LinkButton } from '../Basics/LinkButton'
 
 export interface EntityLineProps<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseProps<V> {
   avoidLink?: boolean;
-  avoidViewButton?: boolean;
-  avoidCreateButton?: boolean;
   autocomplete?: AutocompleteConfig<unknown> | null;
   renderItem?: React.ReactNode;
   showType?: boolean;
@@ -143,9 +141,9 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
     const buttons = (
       <>
         {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
-        {!hasValue && !p.avoidCreateButton && c.renderCreateButton(true, undefined)}
+        {!hasValue && c.renderCreateButton(true, undefined)}
         {!hasValue && c.renderFindButton(true)}
-        {hasValue && !p.avoidViewButton && c.renderViewButton(true)}
+        {hasValue && c.renderViewButton(true)}
         {hasValue && c.renderRemoveButton(true)}
         {c.renderPasteButton(true)}
         {c.props.extraButtons && c.props.extraButtons(c)}
