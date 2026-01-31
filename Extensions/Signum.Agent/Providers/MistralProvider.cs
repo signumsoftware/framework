@@ -1,7 +1,7 @@
 using Microsoft.Extensions.AI;
 using Mistral.SDK;
 
-namespace Signum.Chatbot.Providers;
+namespace Signum.Agent.Providers;
 
 public class MistralProvider : ILanguageModelProvider
 {

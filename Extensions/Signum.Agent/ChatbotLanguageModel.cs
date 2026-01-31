@@ -5,7 +5,7 @@ using Signum.Operations;
 using System;
 using System.ComponentModel;
 
-namespace Signum.Chatbot;
+namespace Signum.Agent;
 
 
 

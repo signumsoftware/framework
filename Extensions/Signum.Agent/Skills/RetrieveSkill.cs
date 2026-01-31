@@ -3,7 +3,7 @@ using Signum.API;
 using System.ComponentModel;
 using System.Reflection.Metadata;
 
-namespace Signum.Chatbot.Agents;
+namespace Signum.Agent.Skills;
 
 public class RetrieveSkill : ChatbotSkill
 {

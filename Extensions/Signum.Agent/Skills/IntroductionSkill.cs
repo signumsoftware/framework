@@ -4,7 +4,7 @@ using Microsoft.Identity.Client;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 
-namespace Signum.Chatbot.Agents;
+namespace Signum.Agent.Skills;
 
 
 public class IntroductionSkill : ChatbotSkill

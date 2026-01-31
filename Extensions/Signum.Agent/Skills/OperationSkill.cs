@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Reflection.Metadata;
 using System.Text.Json;
 
-namespace Signum.Chatbot.Agents;
+namespace Signum.Agent.Skills;
 
 public class OperationSkill : ChatbotSkill
 {

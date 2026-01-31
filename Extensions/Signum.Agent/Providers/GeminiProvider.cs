@@ -2,7 +2,7 @@ using GenerativeAI;
 using GenerativeAI.Microsoft;
 using Microsoft.Extensions.AI;
 
-namespace Signum.Chatbot.Providers;
+namespace Signum.Agent.Providers;
 
 public class GeminiProvider : ILanguageModelProvider
 {

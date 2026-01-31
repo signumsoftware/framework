@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import "./ChatbotModal.css";
 import { getToString, Lite, newMListElement } from "@framework/Signum.Entities";
-import { ChatbotMessage, ChatbotUICommand, ChatMessageEntity, ChatMessageRole, ChatSessionEntity, ToolCallEmbedded } from "./Signum.Chatbot";
+import { ChatbotMessage, ChatbotUICommand, ChatMessageEntity, ChatMessageRole, ChatSessionEntity, ToolCallEmbedded } from "./Signum.Agent";
 import { useForceUpdate, useVersion } from "@framework/Hooks";
 import { Finder } from "@framework/Finder";
 import { AuthClient } from "../Signum.Authorization/AuthClient";

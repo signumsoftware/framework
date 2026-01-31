@@ -4,9 +4,9 @@ using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
-using Signum.Chatbot.Agents;
-using Signum.Chatbot.Providers;
-using Signum.Chatbot.Skills;
+using Signum.Agent.Skills;
+using Signum.Agent.Providers;
+using Signum.Agent.Skills;
 using Signum.Utilities.Synchronization;
 using System.Formats.Tar;
 using System.IO;
@@ -16,7 +16,7 @@ using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
-namespace Signum.Chatbot;
+namespace Signum.Agent;
 
 
 public static class ChatbotLogic

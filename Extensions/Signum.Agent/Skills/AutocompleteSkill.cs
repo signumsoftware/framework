@@ -1,7 +1,7 @@
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 
-namespace Signum.Chatbot.Agents;
+namespace Signum.Agent.Skills;
 
 public class AutocompleteSkill : ChatbotSkill
 {

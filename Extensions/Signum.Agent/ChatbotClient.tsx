@@ -2,7 +2,7 @@ import * as React  from 'react'
 import { Link, RouteObject } from 'react-router'
 import { ajaxGet, wrapRequest, AjaxOptions } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, LanguageModelProviderSymbol, EmbeddingsLanguageModelEntity } from './Signum.Chatbot'
+import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, LanguageModelProviderSymbol, EmbeddingsLanguageModelEntity } from './Signum.Agent'
 import { toAbsoluteUrl } from '../../Signum/React/AppContext';
 import { registerToString } from '../../Signum/React/Signum.Entities';
 import { FontAwesomeIcon } from '@framework/Lines';

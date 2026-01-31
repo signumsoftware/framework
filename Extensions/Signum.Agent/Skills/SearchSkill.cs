@@ -12,7 +12,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
 
-namespace Signum.Chatbot.Agents;
+namespace Signum.Agent.Skills;
 
 public class SearchSkill : ChatbotSkill
 {
@@ -29,7 +29,7 @@ public class SearchSkill : ChatbotSkill
                 {
                     var imp = QueryLogic.Queries.GetEntityImplementations(a);
 
-                    var impStr = imp.Types.Only() == a ? "" : $" (ImplementedBy {imp.Types.ToString(t => t.Name, ", ")})";
+                    var impStr = imp.Types.Only() == a as Type ? "" : $" (ImplementedBy {imp.Types.ToString(t => t.Name, ", ")})";
 
                     return $"* {QueryUtils.GetKey(a)}{impStr}: {QueryUtils.GetNiceName(a)}";
                 } , "\n")

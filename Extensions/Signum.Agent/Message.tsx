@@ -1,6 +1,6 @@
 import { ErrorBoundary } from "@framework/Components";
 import * as React from "react";
-import { ChatbotMessage, ChatMessageEntity, ToolCallEmbedded } from "./Signum.Chatbot";
+import { ChatbotMessage, ChatMessageEntity, ToolCallEmbedded } from "./Signum.Agent";
 import { FontAwesomeIcon } from "@framework/Lines";
 import { ChatbotClient } from "./ChatbotClient";
 import { getToString } from "@framework/Signum.Entities";

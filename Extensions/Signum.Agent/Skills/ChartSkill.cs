@@ -3,13 +3,13 @@ using ModelContextProtocol;
 using ModelContextProtocol.Server;
 using Signum.API;
 using Signum.Chart;
-using Signum.Chatbot.Agents;
+using Signum.Agent.Skills;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Signum.Chatbot.Skills;
+namespace Signum.Agent.Skills;
 
 public class ChartSkill : ChatbotSkill
 {

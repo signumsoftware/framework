@@ -1,7 +1,7 @@
 using Microsoft.Extensions.AI;
 using OllamaSharp;
 
-namespace Signum.Chatbot.Providers;
+namespace Signum.Agent.Providers;
 
 public class OllamaProvider : ILanguageModelProvider
 {

@@ -5,7 +5,7 @@ import { Tabs, Tab, CloseButton } from 'react-bootstrap';
 import { newMListElement } from 'Signum/React/Signum.Entities';
 import { useForceUpdate } from 'Signum/React/Hooks';
 import { useState } from 'react';
-import { ChatMessageEntity, ChatSessionEntity } from '../Signum.Chatbot';
+import { ChatMessageEntity, ChatSessionEntity } from '../Signum.Agent';
 import { SearchControl } from 'Signum/React/Search';
 import HtmlEditorLine from '../../Signum.HtmlEditor/HtmlEditorLine';
 

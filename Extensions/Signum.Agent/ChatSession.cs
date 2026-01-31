@@ -7,7 +7,7 @@ using System;
 using System.ComponentModel;
 
 
-namespace Signum.Chatbot;
+namespace Signum.Agent;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class ChatSessionEntity : Entity

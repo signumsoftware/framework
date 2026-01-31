@@ -1,7 +1,7 @@
 
 using Microsoft.Extensions.AI;
 
-namespace Signum.Chatbot.Skills;
+namespace Signum.Agent.Skills;
 
 public class QuestionSumarizerSkill : ChatbotSkill
 {

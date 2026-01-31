@@ -1,17 +1,17 @@
 import * as React from 'react'
 import { AutoLine, EntityCombo, EnumLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { EmbeddingsLanguageModelEntity } from '../Signum.Chatbot';
+import { ChatbotLanguageModelEntity } from '../Signum.Agent';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
 import { ChatbotClient } from '../ChatbotClient';
 
-export default function EmbeddingsLanguageModel(p: { ctx: TypeContext<EmbeddingsLanguageModelEntity> }): React.JSX.Element {
+export default function ChatbotConfiguration(p: { ctx: TypeContext<ChatbotLanguageModelEntity> }): React.JSX.Element {
   const ctx = p.ctx;
   const ctx4 = ctx.subCtx({ labelColumns: 2 });
   const forceUpdate = useForceUpdate();
   const provider = ctx.value.provider;
 
-  const models = useAPI(() => provider && ChatbotClient.API.getEmbeddingModels(provider), [provider]);
+  const models = useAPI(() => provider && ChatbotClient.API.getModels(provider), [provider]);
 
   return (
     <div>
@@ -21,7 +21,8 @@ export default function EmbeddingsLanguageModel(p: { ctx: TypeContext<Embeddings
         forceUpdate();
       }} />
       <EnumLine ctx={ctx4.subCtx(n => n.model)} readOnly={models == null} optionItems={models ?? []} />
-      <AutoLine ctx={ctx4.subCtx(n => n.dimensions)} />
+      <AutoLine ctx={ctx4.subCtx(n => n.temperature)} />
+      <AutoLine ctx={ctx4.subCtx(n => n.maxTokens)} />
     </div>
   );
 }

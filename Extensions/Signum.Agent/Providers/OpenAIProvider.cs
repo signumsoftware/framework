@@ -1,7 +1,7 @@
 using Microsoft.Extensions.AI;
 using OpenAI;
 
-namespace Signum.Chatbot.Providers;
+namespace Signum.Agent.Providers;
 
 public class OpenAIProvider : ILanguageModelProvider
 {

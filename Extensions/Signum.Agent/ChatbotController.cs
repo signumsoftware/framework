@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.AI;
+using Signum.Agent.Skills;
 using Signum.API;
 using Signum.API.Filters;
 using Signum.Authorization;
-using Signum.Chatbot.Agents;
 using System.Data;
 using System.Diagnostics;
 using System.Text.Json;
 
-namespace Signum.Chatbot;
+namespace Signum.Agent;
 
 public class ChatbotController : Controller
 {

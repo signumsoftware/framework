@@ -10,7 +10,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
-namespace Signum.Chatbot.Providers;
+namespace Signum.Agent.Providers;
 
 public class AnthropicProvider : ILanguageModelProvider
 {
