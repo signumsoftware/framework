@@ -31,7 +31,6 @@ public static class MusicLogic
 
 
         sb.Include<NoteWithDateEntity>()
-            .WithSave(NoteWithDateOperation.Save)
             .WithQuery(() => a => new
             {
                 Entity = a,
@@ -40,6 +39,40 @@ public static class MusicLogic
                 a.Target,
                 a.CreationTime,
             });
+
+
+        new Graph<NoteWithDateEntity>.Execute(NoteWithDateOperation.Save)
+        {
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (e, _) =>
+            {
+                if(!e.IsNew)
+                    Database.Query<SimplePassageEntity>().Where(a=>a.Note.Is(e)).UnsafeDeleteChunks();
+
+                e.Save();
+
+                if (e.Title.HasText())
+                    new SimplePassageEntity
+                    {
+                        Note = e.ToLite(),
+                        IsTitle = true,
+                        Chunk = e.Title,
+                        Index = 0,
+                    }.Save();
+
+                e.Text?.SplitNoEmpty('\r', '\n', '.')
+                    .Select(t => t.Trim())
+                    .Where(t => t.HasText())
+                    .Select((t, i) => new SimplePassageEntity
+                    {
+                        Note = e.ToLite(),
+                        IsTitle = false,
+                        Chunk = t,
+                        Index = i + 1,
+                    }).SaveList();
+            },
+        }.Register();
 
         if (Connector.Current is SqlServerConnector ss && ss.SupportsFullTextSearch || Connector.Current is PostgreSqlConnector)
             sb.AddFullTextIndex<NoteWithDateEntity>(a => new { a.Title, a.Text });
@@ -109,9 +142,9 @@ public static class MusicLogic
             });
 
         sb.Include<SimplePassageEntity>()
-            .WithVectorIndex(a=>a.Embedding, vti =>
-            {
-            })
+            //.WithVectorIndex(a=>a.Embedding, vti =>
+            //{
+            //})
             .WithQuery(() => p => new
             {
                 Entity = p,

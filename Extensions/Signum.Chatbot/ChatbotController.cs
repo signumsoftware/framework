@@ -16,9 +16,17 @@ public class ChatbotController : Controller
     [HttpGet("api/chatbot/provider/{providerKey}/models")]
     public Task<List<string>> GetModels(string providerKey, CancellationToken token)
     {
-        var symbol = SymbolLogic<ChatbotProviderSymbol>.ToSymbol(providerKey);
+        var symbol = SymbolLogic<LanguageModelProviderSymbol>.ToSymbol(providerKey);
 
         return ChatbotLogic.GetModelNamesAsync(symbol, token);
+    }
+
+    [HttpGet("api/chatbot/provider/{providerKey}/embeddingModels")]
+    public Task<List<string>> GetEmbeddingModels(string providerKey, CancellationToken token)
+    {
+        var symbol = SymbolLogic<LanguageModelProviderSymbol>.ToSymbol(providerKey);
+
+        return ChatbotLogic.GetEmbeddingModelNamesAsync(symbol, token);
     }
 
     [HttpGet("api/chatbot/messages/{sessionID}")]

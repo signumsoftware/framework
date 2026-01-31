@@ -1,4 +1,6 @@
 
+using System.IO;
+
 namespace Signum.Test.LinqProvider;
 
 public class TakeSkipTest
@@ -7,6 +9,15 @@ public class TakeSkipTest
     {
         MusicStarter.StartAndLoad();
         Connector.CurrentLogger = new DebugTextWriter();
+    }
+
+
+    [Fact]
+    public void SimplePassage()
+    {
+        var chunks = Database.Query<SimplePassageEntity>().Select(a => a.Chunk).ToList();
+
+        File.WriteAllLines("lines.json", chunks);
     }
 
     [Fact]

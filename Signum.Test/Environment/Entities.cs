@@ -452,12 +452,17 @@ public class SimplePassageEntity : Entity
 {   
     public Lite<NoteWithDateEntity> Note { get; set; }
 
+    public bool IsTitle { get; set; }
+
     [DbType(Size = 10)]
     public float[]? Embedding { get; set; }
 
     [StringLengthValidator(Max = int.MaxValue)]
     public string Chunk { get; set; }
 
+    public int Index { get; set; }
+
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Note.ToString()!);
 }
+

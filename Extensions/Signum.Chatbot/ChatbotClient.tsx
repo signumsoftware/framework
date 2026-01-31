@@ -2,7 +2,7 @@ import * as React  from 'react'
 import { Link, RouteObject } from 'react-router'
 import { ajaxGet, wrapRequest, AjaxOptions } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, ChatbotProviderSymbol } from './Signum.Chatbot'
+import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, LanguageModelProviderSymbol, EmbeddingsLanguageModelEntity } from './Signum.Chatbot'
 import { toAbsoluteUrl } from '../../Signum/React/AppContext';
 import { registerToString } from '../../Signum/React/Signum.Entities';
 import { FontAwesomeIcon } from '@framework/Lines';
@@ -63,8 +63,12 @@ export namespace ChatbotClient {
     }
 
 
-    export function getModels(provider: ChatbotProviderSymbol): Promise<Array<string>> {
+    export function getModels(provider: LanguageModelProviderSymbol): Promise<Array<string>> {
       return ajaxGet({ url: `/api/chatbot/provider/${provider.key}/models` });
+    }
+
+    export function getEmbeddingModels(provider: LanguageModelProviderSymbol): Promise<Array<string>> {
+      return ajaxGet({ url: `/api/chatbot/provider/${provider.key}/embeddingModels` });
     }
 
     export function getMessagesBySessionId(sessionId: string | number | undefined): Promise<Array<ChatMessageEntity>> {

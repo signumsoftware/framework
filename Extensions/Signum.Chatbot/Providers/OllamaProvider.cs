@@ -3,13 +3,22 @@ using OllamaSharp;
 
 namespace Signum.Chatbot.Providers;
 
-public class OllamaChatbotProvider : IChatbotProvider
+public class OllamaProvider : ILanguageModelProvider
 {
     public async Task<List<string>> GetModelNames(CancellationToken ct)
     {
         string url = GetOllamaUrl();
         var models = await new OllamaApiClient(url).ListLocalModelsAsync(ct);
         return models.Select(a => a.Name).ToList();
+    }
+
+    public async Task<List<string>> GetEmbeddingModelNames(CancellationToken ct)
+    {
+        string url = GetOllamaUrl();
+        var models = await new OllamaApiClient(url).ListLocalModelsAsync(ct);
+        return models.Where(m => m.Name.Contains("embed", StringComparison.OrdinalIgnoreCase))
+                     .Select(a => a.Name)
+                     .ToList();
     }
 
     public IChatClient CreateChatClient(ChatbotLanguageModelEntity model)
@@ -30,5 +39,8 @@ public class OllamaChatbotProvider : IChatbotProvider
         return apiKey;
     }
 
-
+    public List<float[]> GetEmbeddings(string[] embeddings, int? numParameters)
+    {
+        throw new NotImplementedException("Ollama embedding API needs to be verified");
+    }
 }

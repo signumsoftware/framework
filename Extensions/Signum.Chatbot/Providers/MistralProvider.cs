@@ -3,7 +3,7 @@ using Mistral.SDK;
 
 namespace Signum.Chatbot.Providers;
 
-public class MistralChatbotProvider : IChatbotProvider
+public class MistralProvider : ILanguageModelProvider
 {
     public async Task<List<string>> GetModelNames(CancellationToken ct)
     {
@@ -12,6 +12,14 @@ public class MistralChatbotProvider : IChatbotProvider
         var models = await new MistralClient(new APIAuthentication(apiKey)).Models.GetModelsAsync(ct);
 
         return models.Data.Select(a => a.Id).ToList();    
+    }
+
+    public Task<List<string>> GetEmbeddingModelNames(CancellationToken ct)
+    {
+        return Task.FromResult(new List<string>
+        {
+            "mistral-embed"
+        });
     }
 
     static string GetApiKey()
@@ -28,5 +36,10 @@ public class MistralChatbotProvider : IChatbotProvider
         string? apiKey = GetApiKey();
 
         return new MistralClient(new APIAuthentication(apiKey)).Completions;
+    }
+
+    public List<float[]> GetEmbeddings(string[] embeddings, int? numParameters)
+    {
+        throw new NotImplementedException("Mistral embedding API needs to be verified");
     }
 }

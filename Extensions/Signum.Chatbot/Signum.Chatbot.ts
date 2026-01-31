@@ -26,7 +26,7 @@ export interface ChatbotConfigurationEmbedded extends Entities.EmbeddedEntity {
 export const ChatbotLanguageModelEntity: Type<ChatbotLanguageModelEntity> = new Type<ChatbotLanguageModelEntity>("ChatbotLanguageModel");
 export interface ChatbotLanguageModelEntity extends Entities.Entity {
   Type: "ChatbotLanguageModel";
-  provider: ChatbotProviderSymbol;
+  provider: LanguageModelProviderSymbol;
   model: string;
   temperature: number | null;
   maxTokens: number | null;
@@ -49,20 +49,6 @@ export namespace ChatbotMessage {
 
 export namespace ChatbotPermission {
   export const UseChatbot : Basics.PermissionSymbol = registerSymbol("Permission", "ChatbotPermission.UseChatbot");
-}
-
-export namespace ChatbotProviders {
-  export const OpenAI : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.OpenAI");
-  export const Gemini : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Gemini");
-  export const Anthropic : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Anthropic");
-  export const Mistral : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Mistral");
-  export const GithubModels : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.GithubModels");
-  export const Ollama : ChatbotProviderSymbol = registerSymbol("ChatbotProvider", "ChatbotProviders.Ollama");
-}
-
-export const ChatbotProviderSymbol: Type<ChatbotProviderSymbol> = new Type<ChatbotProviderSymbol>("ChatbotProvider");
-export interface ChatbotProviderSymbol extends Basics.Symbol {
-  Type: "ChatbotProvider";
 }
 
 export const ChatbotUICommand: EnumType<ChatbotUICommand> = new EnumType<ChatbotUICommand>("ChatbotUICommand");
@@ -113,6 +99,35 @@ export interface ChatSessionEntity extends Entities.Entity {
 
 export namespace ChatSessionOperation {
   export const Delete : Operations.DeleteSymbol<ChatSessionEntity> = registerSymbol("Operation", "ChatSessionOperation.Delete");
+}
+
+export const EmbeddingsLanguageModelEntity: Type<EmbeddingsLanguageModelEntity> = new Type<EmbeddingsLanguageModelEntity>("EmbeddingsLanguageModel");
+export interface EmbeddingsLanguageModelEntity extends Entities.Entity {
+  Type: "EmbeddingsLanguageModel";
+  provider: LanguageModelProviderSymbol;
+  model: string;
+  dimensions: number | null;
+  isDefault: boolean;
+}
+
+export namespace EmbeddingsLanguageModelOperation {
+  export const Save : Operations.ExecuteSymbol<EmbeddingsLanguageModelEntity> = registerSymbol("Operation", "EmbeddingsLanguageModelOperation.Save");
+  export const MakeDefault : Operations.ExecuteSymbol<EmbeddingsLanguageModelEntity> = registerSymbol("Operation", "EmbeddingsLanguageModelOperation.MakeDefault");
+  export const Delete : Operations.DeleteSymbol<EmbeddingsLanguageModelEntity> = registerSymbol("Operation", "EmbeddingsLanguageModelOperation.Delete");
+}
+
+export namespace LanguageModelProviders {
+  export const OpenAI : LanguageModelProviderSymbol = registerSymbol("LanguageModelProvider", "LanguageModelProviders.OpenAI");
+  export const Gemini : LanguageModelProviderSymbol = registerSymbol("LanguageModelProvider", "LanguageModelProviders.Gemini");
+  export const Anthropic : LanguageModelProviderSymbol = registerSymbol("LanguageModelProvider", "LanguageModelProviders.Anthropic");
+  export const Mistral : LanguageModelProviderSymbol = registerSymbol("LanguageModelProvider", "LanguageModelProviders.Mistral");
+  export const GithubModels : LanguageModelProviderSymbol = registerSymbol("LanguageModelProvider", "LanguageModelProviders.GithubModels");
+  export const Ollama : LanguageModelProviderSymbol = registerSymbol("LanguageModelProvider", "LanguageModelProviders.Ollama");
+}
+
+export const LanguageModelProviderSymbol: Type<LanguageModelProviderSymbol> = new Type<LanguageModelProviderSymbol>("LanguageModelProvider");
+export interface LanguageModelProviderSymbol extends Basics.Symbol {
+  Type: "LanguageModelProvider";
 }
 
 export const ToolCallEmbedded: Type<ToolCallEmbedded> = new Type<ToolCallEmbedded>("ToolCallEmbedded");

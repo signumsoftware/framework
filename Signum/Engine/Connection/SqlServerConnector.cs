@@ -599,7 +599,7 @@ public class SqlParameterBuilder : ParameterBuilder
 
         var exp =
             uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?)), Expression.Constant(dateTimeKind)) :
-            uType == typeof(float[]) ? Expression.New(ciSqlVector, Expression.Convert(value, typeof(float[]))) :
+            uType == typeof(float[]) ? Expression.New(ciSqlVector, Expression.Convert(Expression.Convert(value, typeof(float[])), typeof(System.ReadOnlyMemory<float>))) :
             ////https://github.com/dotnet/SqlClient/issues/1009
             //uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
             //uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :

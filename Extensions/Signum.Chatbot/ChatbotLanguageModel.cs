@@ -12,7 +12,7 @@ namespace Signum.Chatbot;
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class ChatbotLanguageModelEntity : Entity
 {
-    public ChatbotProviderSymbol Provider { get; set; }
+    public LanguageModelProviderSymbol Provider { get; set; }
 
     [StringLengthValidator(Max = 50)]
     public string Model { get; set; }
@@ -37,13 +37,38 @@ public static class ChatbotLanguageModelOperation
 }
 
 
+[EntityKind(EntityKind.Main, EntityData.Master)]
+public class EmbeddingsLanguageModelEntity : Entity
+{
+    public LanguageModelProviderSymbol Provider { get; set; }
+
+    [StringLengthValidator(Max = 50)]
+    public string Model { get; set; }
+
+    public int? Dimensions { get; set; }
+
+    public bool IsDefault { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Provider}: {Model}");
+}
+
+
+[AutoInit]
+public static class EmbeddingsLanguageModelOperation
+{
+    public static readonly ExecuteSymbol<EmbeddingsLanguageModelEntity> Save;
+    public static readonly ExecuteSymbol<EmbeddingsLanguageModelEntity> MakeDefault;
+    public static readonly DeleteSymbol<EmbeddingsLanguageModelEntity> Delete;
+}
+
 
 [EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
-public class ChatbotProviderSymbol : Symbol
+public class LanguageModelProviderSymbol : Symbol
 {
-    private ChatbotProviderSymbol() { }
+    private LanguageModelProviderSymbol() { }
 
-    public ChatbotProviderSymbol(Type declaringType, string fieldName) :
+    public LanguageModelProviderSymbol(Type declaringType, string fieldName) :
         base(declaringType, fieldName)
     {
     }
@@ -52,14 +77,14 @@ public class ChatbotProviderSymbol : Symbol
 
 
 [AutoInit]
-public static class ChatbotProviders
+public static class LanguageModelProviders
 {
-    public static readonly ChatbotProviderSymbol OpenAI;
-    public static readonly ChatbotProviderSymbol Gemini;
-    public static readonly ChatbotProviderSymbol Anthropic;
-    public static readonly ChatbotProviderSymbol Mistral; 
-    public static readonly ChatbotProviderSymbol GithubModels; 
-    public static readonly ChatbotProviderSymbol Ollama;
+    public static readonly LanguageModelProviderSymbol OpenAI;
+    public static readonly LanguageModelProviderSymbol Gemini;
+    public static readonly LanguageModelProviderSymbol Anthropic;
+    public static readonly LanguageModelProviderSymbol Mistral; 
+    public static readonly LanguageModelProviderSymbol GithubModels; 
+    public static readonly LanguageModelProviderSymbol Ollama;
 }
 
 

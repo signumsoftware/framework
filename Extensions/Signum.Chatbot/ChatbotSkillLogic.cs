@@ -27,20 +27,20 @@ public static class ChatbotSkillLogic
 
     public static void Start(SchemaBuilder sb, ChatbotSkill? defaultChatbotSkill)
     {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+            return;
+
+        if (defaultChatbotSkill != null)
         {
-            if (defaultChatbotSkill != null)
-            {
-                GetSkill(defaultChatbotSkill.GetType()); //Assert
-                IntroductionSkill = defaultChatbotSkill;
-            }
-
-            AllTools = new ResetLazy<Dictionary<string, AITool>>(() => SkillsByType
-            .SelectMany(a => a.Value.GetTools())
-            .ToDictionaryEx(a => a.Name, StringComparer.InvariantCultureIgnoreCase));
-
-            new QuestionSumarizerSkill().Register();
+            GetSkill(defaultChatbotSkill.GetType()); //Assert
+            IntroductionSkill = defaultChatbotSkill;
         }
+
+        AllTools = new ResetLazy<Dictionary<string, AITool>>(() => SkillsByType
+        .SelectMany(a => a.Value.GetTools())
+        .ToDictionaryEx(a => a.Name, StringComparer.InvariantCultureIgnoreCase));
+
+        new QuestionSumarizerSkill().Register();
     }
 
     public static ChatbotSkill GetSkill(string skillName)

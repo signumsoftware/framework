@@ -11,7 +11,7 @@ using System.Text.Json;
 
 namespace Signum.Chatbot.Providers;
 
-public class GithubModelsChatbotProvider : IChatbotProvider
+public class GithubModelsProvider : ILanguageModelProvider
 {
     public async Task<List<string>> GetModelNames(CancellationToken ct)
     {
@@ -28,6 +28,15 @@ public class GithubModelsChatbotProvider : IChatbotProvider
         var doc = JsonDocument.Parse(json);
 
         return doc.RootElement.EnumerateArray().Select(e => e.GetProperty("id").GetString()!).ToList();
+    }
+
+    public Task<List<string>> GetEmbeddingModelNames(CancellationToken ct)
+    {
+        return Task.FromResult(new List<string>
+        {
+            "text-embedding-3-small",
+            "text-embedding-3-large"
+        });
     }
 
     public IChatClient CreateChatClient(ChatbotLanguageModelEntity model)
@@ -52,5 +61,10 @@ public class GithubModelsChatbotProvider : IChatbotProvider
         if (apiKey.IsNullOrEmpty())
             throw new InvalidOperationException("No Token for Github Models configured!");
         return apiKey;
+    }
+
+    public List<float[]> GetEmbeddings(string[] embeddings, int? numParameters)
+    {
+        throw new NotImplementedException("GitHub Models embedding API needs to be verified");
     }
 }
