@@ -87,6 +87,7 @@ public static class OperationLogic
             return;
 
         sb.Include<OperationLogEntity>()
+            .WithIndex(a => a.Start)
             .WithQuery(() => lo => new
             {
                 Entity = lo,
