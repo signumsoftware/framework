@@ -395,7 +395,7 @@ export namespace Navigator {
 
     if (options?.fo != null) {
       const es = entitySettings[typeName];
-      if (es.isCreableByFilterProps && !es.isCreableByFilterProps(Finder.getPropsFromFiltersSync(type, options.fo.filterOptions)))
+      if (es && es.isCreableByFilterProps && !es.isCreableByFilterProps(Finder.getPropsFromFiltersSync(type, options.fo.filterOptions)))
         return false;
     }
 
