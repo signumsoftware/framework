@@ -376,6 +376,6 @@ export namespace ContextualOperations {
         if (!onlyType)
             return Promise.resolve([]);
 
-        return MultiPropertySetterModal.show(getTypeInfo(onlyType), coc.context.lites, coc.operationInfo, settersConfig == "Mandatory");
+        return MultiPropertySetterModal.show(getTypeInfo(onlyType), coc.context.lites, coc.operationInfo);
     }
 }

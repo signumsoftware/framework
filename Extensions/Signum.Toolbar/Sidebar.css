@@ -15,10 +15,8 @@
   flex-direction: column;
   flex-grow: 1;
 }
-.sf-context-menu .dropdown-menu.show {
-  max-height: 250px;
-  overflow-y: auto;
-}
+
+
 .sidebar {
   border-right: 1px solid var(--bs-border-color);
   background-color: var(--bs-body-bg);
