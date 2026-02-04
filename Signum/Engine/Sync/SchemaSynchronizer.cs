@@ -321,7 +321,7 @@ public static class SchemaSynchronizer
 
                                   var alterColumn = norCol.Nullable != hisCol.Nullable ||
                                      !norCol.DbType.Equals(hisCol.DbType) ||
-                                     !norCol.SizeEquals(hisCol) ?
+                                     !norCol.SizeScalePrecissionEquals(hisCol) ?
                                       sqlBuilder.AlterTableAlterDiffColumn(hisT.Name, norCol, hisCol) : null;
 
                                   return new[] { dropDefault, rename, alterColumn }.Combine(Spacing.Simple);
