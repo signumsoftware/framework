@@ -1,4 +1,5 @@
 using Signum.Utilities;
+using System.IO;
 
 namespace Signum.Upgrade.Upgrades;
 
@@ -8,9 +9,7 @@ class Upgrade_20260201_UpdateCopilotInstructions : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        uctx.ChangeCodeFile(@".github/copilot-instructions.md", cf =>
-        {
-            cf.Content = """
+        var content = """
 # GitHub Copilot Repository Instructions
 
 ## Project Overview
@@ -69,6 +68,10 @@ class Upgrade_20260201_UpdateCopilotInstructions : CodeUpgradeBase
        `YourMessage.MyFavoriteFoodIs0.niceToString("Tom Yum Soup")` (a shortcut for `.niceToString().formatWith("Tom Yum Soup")`).
 	- You can also use `formatHtml`/`joinHtml` to produce React nodes with formatting.
 """;
-        });
+        var fileName = @".github/copilot-instructions.md";
+        if (!File.Exists(uctx.AbsolutePath(fileName)))
+            uctx.CreateCodeFile(fileName, content);
+        else
+            uctx.ChangeCodeFile(fileName, cf => { cf.Content = content; });
     }
 }
