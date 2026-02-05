@@ -227,39 +227,64 @@ public static class AsyncEmailSender
 
         int batchSize = EmailLogic.Configuration.ChunkSizeSendingEmails;
         int total = 0;
-
-        while (true)
+        try
         {
-            var ids = Database.Query<EmailMessageEntity>()
-             .Where(m => m.State == EmailMessageState.ReadyToSend
-                      && m.CreationDate < now
-                      && (firstDate == null || m.CreationDate >= firstDate))
-             .OrderBy(m => m.CreationDate)
-             .Select(m => m.Id)
-             .Take(batchSize)
-             .ToList();
-
-            using (var tr = Transaction.ForceNew())
+            while (true)
             {
+                List<PrimaryKey> ids;
 
 
-                if (ids.Count == 0)
+
+                using (var tr = Transaction.ForceNew())
+                {
+                    ids = Database.Query<EmailMessageEntity>()
+                 .Where(m => m.State == EmailMessageState.ReadyToSend
+                          && m.CreationDate < now
+                          && (firstDate == null || m.CreationDate >= firstDate))
+                 .OrderBy(m => m.CreationDate)
+                 .Select(m => m.Id)
+                 .Take(batchSize)
+                 .ToList();
+                    tr.Commit();
+                }
+
+
+                using (var tr = Transaction.ForceNew())
+                {
+
+
+                    if (ids.Count == 0)
+                        break;
+
+                    var updated = Database.Query<EmailMessageEntity>()
+                          .Where(m => ids.Contains(m.Id))
+                          .UnsafeUpdate()
+                          .Set(m => m.ProcessIdentifier, m => processIdentifier)
+                          .Set(m => m.State, m => EmailMessageState.RecruitedForSending)
+                          .Execute();
+
+                    total += updated;
+                    tr.Commit();
+                }
+
+                if (ids.Count < batchSize)
                     break;
-                var updated = Database.Query<EmailMessageEntity>()
-                      .Where(m => ids.Contains(m.Id))
-                      .UnsafeUpdate()
-                      .Set(m => m.ProcessIdentifier, m => processIdentifier)
-                      .Set(m => m.State, m => EmailMessageState.RecruitedForSending)
-                      .Execute();
-
-                total += updated;
-                tr.Commit();
             }
 
-            if (ids.Count < batchSize)
-                break;
         }
+        catch (Exception ex)
+        {
+            ex.LogException();
+            if (ex is SqlException sqlEx && (sqlEx.Number == 1205 || sqlEx.Number == -2)) // Deadlock or Timeout
+            {
+                // Log and retry
+                SystemEventLogLogic.Log("EmailAsyncSender RecruitQueuedItems - SQL Exception: " + sqlEx.Message);
+            }
+            else
 
+                throw;
+        }
+      
         queuedItems = total;
         return total > 0;
     }
