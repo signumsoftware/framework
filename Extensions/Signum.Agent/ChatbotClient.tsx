@@ -1,4 +1,4 @@
-import * as React  from 'react'
+import * as React from 'react'
 import { Link, RouteObject } from 'react-router'
 import { ajaxGet, wrapRequest, AjaxOptions } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
@@ -15,11 +15,12 @@ export namespace ChatbotClient {
   
 
 
-  export let renderMarkdown = (markdown: string): React.JSX.Element => <ReactMarkdown components={{ a: renderLink}}>{markdown}</ReactMarkdown>;
+  export let renderMarkdown = (markdown: string): React.JSX.Element => <ReactMarkdown components={{ a: renderLink }}>{markdown}</ReactMarkdown>;
   //export let renderMarkdown = (markdown: string): React.JSX.Element => <ReactMarkdownWithFormulas>{markdown}</ReactMarkdownWithFormulas>;
   export function start(options: { routes: RouteObject[] }): void {
 
     Navigator.addSettings(new EntitySettings(ChatbotLanguageModelEntity, e => import('./Templates/ChatbotLanguageModel')));
+    Navigator.addSettings(new EntitySettings(EmbeddingsLanguageModelEntity, e => import('./Templates/EmbeddingsLanguageModel')));
     Navigator.addSettings(new EntitySettings(ChatSessionEntity, a => import('./Templates/ChatSession')));
     Navigator.addSettings(new EntitySettings(ChatMessageEntity, a => import('./Templates/ChatMessage')));
   }

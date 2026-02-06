@@ -1,19 +1,29 @@
 using Azure;
 using Microsoft.Extensions.AI;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Signum.Agent.Providers;
 
-public class GithubModelsProvider : ILanguageModelProvider
+public class GithubModelsProvider : IChatbotModelProvider, IEmbeddingsProvider
 {
     public async Task<List<string>> GetModelNames(CancellationToken ct)
+    {
+        var allModels = await GetAllModelNames(ct);
+        return allModels.Where(name => !name.Contains("embed", StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    public async Task<List<string>> GetEmbeddingModelNames(CancellationToken ct)
+    {
+        var allModels = await GetAllModelNames(ct);
+        return allModels.Where(name => name.Contains("embed", StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    async Task<List<string>> GetAllModelNames(CancellationToken ct)
     {
         var url = "https://models.github.ai/catalog/models";
 
@@ -28,15 +38,6 @@ public class GithubModelsProvider : ILanguageModelProvider
         var doc = JsonDocument.Parse(json);
 
         return doc.RootElement.EnumerateArray().Select(e => e.GetProperty("id").GetString()!).ToList();
-    }
-
-    public Task<List<string>> GetEmbeddingModelNames(CancellationToken ct)
-    {
-        return Task.FromResult(new List<string>
-        {
-            "text-embedding-3-small",
-            "text-embedding-3-large"
-        });
     }
 
     public IChatClient CreateChatClient(ChatbotLanguageModelEntity model)
@@ -54,6 +55,44 @@ public class GithubModelsProvider : ILanguageModelProvider
 
     }
 
+    public async Task<List<float[]>> GetEmbeddings(string[] inputs, EmbeddingsLanguageModelEntity model, CancellationToken ct)
+    {
+        var token = GetToken();
+        var url = "https://models.github.ai/inference/embeddings";
+
+        using var client = new HttpClient();
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
+
+        var requestBody = new
+        {
+            model = model.Model,
+            input = inputs
+        };
+
+        var content = new StringContent(
+            JsonSerializer.Serialize(requestBody),
+            System.Text.Encoding.UTF8,
+            "application/json");
+
+        var response = await client.PostAsync(url, content, ct);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync(ct);
+        var doc = JsonDocument.Parse(json);
+
+        var data = doc.RootElement.GetProperty("data");
+        var result = data.EnumerateArray()
+            .Select(e => e.GetProperty("embedding")
+                .EnumerateArray()
+                .Select(v => (float)v.GetDouble())
+                .ToArray())
+            .ToList();
+
+        return result;
+    }
+
     static string GetToken()
     {
         var apiKey = ChatbotLogic.GetConfig().GithubModelsToken;
@@ -61,10 +100,5 @@ public class GithubModelsProvider : ILanguageModelProvider
         if (apiKey.IsNullOrEmpty())
             throw new InvalidOperationException("No Token for Github Models configured!");
         return apiKey;
-    }
-
-    public List<float[]> GetEmbeddings(string[] embeddings, int? numParameters)
-    {
-        throw new NotImplementedException("GitHub Models embedding API needs to be verified");
     }
 }

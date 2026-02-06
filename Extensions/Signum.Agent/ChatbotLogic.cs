@@ -31,11 +31,20 @@ public static class ChatbotLogic
     public static ResetLazy<Dictionary<Lite<EmbeddingsLanguageModelEntity>, EmbeddingsLanguageModelEntity>> EmbeddingsModels = null!;
     public static ResetLazy<Lite<EmbeddingsLanguageModelEntity>?> DefaultEmbeddingsModel = null!;
 
-    public static Dictionary<LanguageModelProviderSymbol, ILanguageModelProvider> Providers = new Dictionary<LanguageModelProviderSymbol, ILanguageModelProvider>
+    public static Dictionary<LanguageModelProviderSymbol, IChatbotModelProvider> ChatbotModelProviders = new Dictionary<LanguageModelProviderSymbol, IChatbotModelProvider>
     {
         { LanguageModelProviders.OpenAI, new OpenAIProvider()},
         { LanguageModelProviders.Gemini, new GeminiProvider()},
         { LanguageModelProviders.Anthropic, new AnthropicProvider()},
+        { LanguageModelProviders.GithubModels, new GithubModelsProvider()},
+        { LanguageModelProviders.Mistral, new MistralProvider()}, 
+        { LanguageModelProviders.Ollama, new OllamaProvider()},
+    };
+
+    public static Dictionary<LanguageModelProviderSymbol, IEmbeddingsProvider> EmbeddingsProviders = new Dictionary<LanguageModelProviderSymbol, IEmbeddingsProvider>
+    {
+        { LanguageModelProviders.OpenAI, new OpenAIProvider()},
+        { LanguageModelProviders.Gemini, new GeminiProvider()},
         { LanguageModelProviders.GithubModels, new GithubModelsProvider()},
         { LanguageModelProviders.Mistral, new MistralProvider()},
         { LanguageModelProviders.Ollama, new OllamaProvider()},
@@ -48,6 +57,11 @@ public static class ChatbotLogic
         return LanguageModels.Value.GetOrThrow(lite);
     }
 
+    public static EmbeddingsLanguageModelEntity RetrieveFromCache(this Lite<EmbeddingsLanguageModelEntity> lite)
+    {
+        return EmbeddingsModels.Value.GetOrThrow(lite);
+    }
+
     public static void Start(SchemaBuilder sb, Func<ChatbotConfigurationEmbedded> config)
     {
         if (sb.AlreadyDefined(MethodBase.GetCurrentMethod()))
@@ -55,7 +69,7 @@ public static class ChatbotLogic
 
         GetConfig = config;
 
-        SymbolLogic<LanguageModelProviderSymbol>.Start(sb, () => Providers.Keys);
+        SymbolLogic<LanguageModelProviderSymbol>.Start(sb, () => ChatbotModelProviders.Keys.Union(EmbeddingsProviders.Keys));
 
         sb.Include<ChatbotLanguageModelEntity>()
             .WithSave(ChatbotLanguageModelOperation.Save)
@@ -97,6 +111,44 @@ public static class ChatbotLogic
 
         LanguageModels = sb.GlobalLazy(() => Database.Query<ChatbotLanguageModelEntity>().ToDictionary(a => a.ToLite()), new InvalidateWith(typeof(ChatbotLanguageModelEntity)));
         DefaultLanguageModel = sb.GlobalLazy(() => LanguageModels.Value.Values.SingleOrDefaultEx(a => a.IsDefault)?.ToLite(), new InvalidateWith(typeof(ChatbotLanguageModelEntity)));
+
+        sb.Include<EmbeddingsLanguageModelEntity>()
+            .WithSave(EmbeddingsLanguageModelOperation.Save)
+            .WithUniqueIndex(a => a.IsDefault, a => a.IsDefault == true)
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.IsDefault,
+                e.Provider,
+                e.Model,
+                e.Dimensions,
+            });
+
+        new Graph<EmbeddingsLanguageModelEntity>.Execute(EmbeddingsLanguageModelOperation.MakeDefault)
+        {
+            CanExecute = a => !a.IsDefault ? null : ValidationMessage._0IsSet.NiceToString(Entity.NicePropertyName(() => a.IsDefault)),
+            Execute = (e, _) =>
+            {
+                var other = Database.Query<EmbeddingsLanguageModelEntity>().Where(a => a.IsDefault).SingleOrDefaultEx();
+                if (other != null)
+                {
+                    other.IsDefault = false;
+                    other.Execute(EmbeddingsLanguageModelOperation.Save);
+                }
+
+                e.IsDefault = true;
+                e.Save();
+            }
+        }.Register();
+
+        new Graph<EmbeddingsLanguageModelEntity>.Delete(EmbeddingsLanguageModelOperation.Delete)
+        {
+            Delete = (e, _) => { e.Delete(); },
+        }.Register();
+
+        EmbeddingsModels = sb.GlobalLazy(() => Database.Query<EmbeddingsLanguageModelEntity>().ToDictionary(a => a.ToLite()), new InvalidateWith(typeof(EmbeddingsLanguageModelEntity)));
+        DefaultEmbeddingsModel = sb.GlobalLazy(() => EmbeddingsModels.Value.Values.SingleOrDefaultEx(a => a.IsDefault)?.ToLite(), new InvalidateWith(typeof(EmbeddingsLanguageModelEntity)));
 
         sb.Include<ChatSessionEntity>()
            .WithDelete(ChatSessionOperation.Delete)
@@ -146,28 +198,40 @@ public static class ChatbotLogic
         return cr.Text;
     }
 
-    public static void RegisterProvider(LanguageModelProviderSymbol symbol, ILanguageModelProvider provider)
+    public static void RegisterChatbotModelProvider(LanguageModelProviderSymbol symbol, IChatbotModelProvider provider)
     {
-        Providers.Add(symbol, provider);
+        ChatbotModelProviders.Add(symbol, provider);
+    }
+
+    public static void RegisterEmbeddingsProvider(LanguageModelProviderSymbol symbol, IEmbeddingsProvider provider)
+    {
+        EmbeddingsProviders.Add(symbol, provider);
     }
 
 
     public static Task<List<string>> GetModelNamesAsync(LanguageModelProviderSymbol provider, CancellationToken ct)
     {
-        return Providers.GetOrThrow(provider).GetModelNames(ct);
+        return ChatbotModelProviders.GetOrThrow(provider).GetModelNames(ct);
     }
 
     public static Task<List<string>> GetEmbeddingModelNamesAsync(LanguageModelProviderSymbol provider, CancellationToken ct)
     {
-        return Providers.GetOrThrow(provider).GetEmbeddingModelNames(ct);
+        return EmbeddingsProviders.GetOrThrow(provider).GetEmbeddingModelNames(ct);
     }
-
 
     public static IChatClient GetChatClient(ChatbotLanguageModelEntity model)
     {
-        var result = Providers.GetOrThrow(model.Provider).CreateChatClient(model);
+        var result = ChatbotModelProviders.GetOrThrow(model.Provider).CreateChatClient(model);
 
         return result;
+    }
+
+    public static Task<List<float[]>> GetEmbeddingsAsync(string[] inputs, EmbeddingsLanguageModelEntity model, CancellationToken ct)
+    {
+        using (HeavyProfiler.Log("GetEmbeddings", () => model.GetMessage() + "\n" + inputs.ToString("\n")))
+        {
+            return EmbeddingsProviders.GetOrThrow(model.Provider).GetEmbeddings(inputs, model, ct);
+        }
     }
 
     public static ChatOptions ChatOptions(ChatbotLanguageModelEntity languageModel, List<AITool>? tools)
@@ -197,15 +261,18 @@ public static class ChatbotLogic
 
 
 
-public interface ILanguageModelProvider
+public interface IChatbotModelProvider
 {
     Task<List<string>> GetModelNames(CancellationToken ct);
 
+    IChatClient CreateChatClient(ChatbotLanguageModelEntity model);
+}
+
+public interface IEmbeddingsProvider
+{
     Task<List<string>> GetEmbeddingModelNames(CancellationToken ct);
 
-    IChatClient CreateChatClient(ChatbotLanguageModelEntity model);
-
-    public List<float[]> GetEmbeddings(string[] embeddings, int? numParameters);
+    Task<List<float[]>> GetEmbeddings(string[] inputs, EmbeddingsLanguageModelEntity model, CancellationToken ct);
 }
 
 public class ConversationHistory

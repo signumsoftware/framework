@@ -12,7 +12,7 @@ using System.Text.Json;
 
 namespace Signum.Agent.Providers;
 
-public class AnthropicProvider : ILanguageModelProvider
+public class AnthropicProvider : IChatbotModelProvider
 {
     public async Task<List<string>> GetModelNames(CancellationToken ct)
     {
@@ -21,12 +21,6 @@ public class AnthropicProvider : ILanguageModelProvider
         var models = await new AnthropicClient(apiKey).Models.ListModelsAsync(ctx: ct);
         return models.Models.Select(models => models.Id).ToList();
     }
-
-    public Task<List<string>> GetEmbeddingModelNames(CancellationToken ct)
-    {
-        return Task.FromResult(new List<string>());
-    }
-
 
     public IChatClient CreateChatClient(ChatbotLanguageModelEntity model)
     {
@@ -44,10 +38,5 @@ public class AnthropicProvider : ILanguageModelProvider
         if (apiKey.IsNullOrEmpty())
             throw new InvalidOperationException("No API Key for Claude configured!");
         return apiKey;
-    }
-
-    public List<float[]> GetEmbeddings(string[] embeddings, int? numParameters)
-    {
-        throw new NotSupportedException("Anthropic does not provide embedding models. Consider using Voyage AI or another embedding provider.");
     }
 }

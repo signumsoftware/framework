@@ -49,6 +49,8 @@ public class EmbeddingsLanguageModelEntity : Entity
 
     public bool IsDefault { get; set; }
 
+    internal string GetMessage() => $"{Provider} - {Model}" + (Dimensions == null ? null : $" ({Dimensions} dims)");
+
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => $"{Provider}: {Model}");
 }
