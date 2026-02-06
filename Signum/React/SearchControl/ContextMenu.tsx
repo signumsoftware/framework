@@ -83,7 +83,7 @@ export default function ContextMenu({ position, onHide, children, alignRight, it
     }
   }
 
-  return ReactDOM.createPortal(
+  return (
     <Dropdown className="sf-context-menu" show={true}
       ref={menuRef}
       style={{
@@ -97,8 +97,7 @@ export default function ContextMenu({ position, onHide, children, alignRight, it
       <Dropdown.Menu onClick={handleMenuClick} onKeyDown={handleKeyDown} className="sf-context-menu">
         {children}
       </Dropdown.Menu>
-    </Dropdown>,
-    document.body
+    </Dropdown>
   );
 };
 
