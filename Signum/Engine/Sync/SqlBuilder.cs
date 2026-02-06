@@ -525,7 +525,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
             {
                 var pgOpts = vectorIndex.Postgres;
 
-                var indexMethod = VectorTableIndex.GetPGVectorIndex(pgOpts.IndexType!.Value);
+                var indexMethod = VectorTableIndex.GetPGVectorIndex(pgOpts.IndexType);
                 
                 var operatorClass = VectorTableIndex.GetPGVectorDistanceMetric(pgOpts.Metric);
 

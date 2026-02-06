@@ -1,4 +1,5 @@
 using Microsoft.SqlServer.Server;
+using Pgvector;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 
@@ -11,7 +12,7 @@ public static class SqlVectorSearch
     /// Calculates the distance between two vectors using the specified distance metric
     /// </summary>
     [AvoidEagerEvaluation]
-    public static float Vector_Distance(SqlVectorDistanceMetric distanceMetric, float[] vector1, float[] vector2)
+    public static float Vector_Distance(SqlVectorDistanceMetric distanceMetric, Vector vector1, Vector vector2)
     {
         throw new InvalidOperationException("VectorSearch.Vector_Distance is only supported inside a database query");
     }
@@ -21,7 +22,7 @@ public static class SqlVectorSearch
     /// Calculates the norm (length) of a vector
     /// </summary>
     [AvoidEagerEvaluation]
-    public static float Vector_Norm(float[] vector, SqlVectorNormType normType)
+    public static float Vector_Norm(Vector vector, SqlVectorNormType normType)
     {
         throw new InvalidOperationException("VectorSearch.Vector_Norm is only supported inside a database query");
     }
@@ -31,7 +32,7 @@ public static class SqlVectorSearch
     /// Normalizes a vector to unit length
     /// </summary>
     [AvoidEagerEvaluation]
-    public static float[] Vector_Normalize(float[] vector, SqlVectorNormType normType)
+    public static Vector Vector_Normalize(Vector vector, SqlVectorNormType normType)
     {
         throw new InvalidOperationException("VectorSearch.Vector_Normalize is only supported inside a database query");
     }
@@ -39,8 +40,8 @@ public static class SqlVectorSearch
     /// <summary>
     /// Performs a vector similarity search using the specified distance metric
     /// </summary>
-    public static IQueryable<WithDistance<T>> Vector_Search<T>(Expression<Func<T, byte[]>> vectorField,
-        float[] queryVector, SqlVectorDistanceMetric distanceMetric, int top_n)
+    public static IQueryable<WithDistance<T>> Vector_Search<T>(Expression<Func<T, Vector>> vectorField,
+        Vector queryVector, SqlVectorDistanceMetric distanceMetric, int top_n)
         where T : Entity
     {
         var schema = Schema.Current;
@@ -58,15 +59,15 @@ public static class SqlVectorSearch
     /// </summary>
     /// <param name="table">either an Entity or MListElement</param>
     [SqlMethod(Name = "VECTOR_SEARCH"), AvoidEagerEvaluation]
-    public static IQueryable<WithDistance<T>> Vector_Search<T>(ITable table, IColumn columns, float[] queryVector, SqlVectorDistanceMetric distanceMetric, int top_n)
+    public static IQueryable<WithDistance<T>> Vector_Search<T>(ITable table, IColumn columns, Vector queryVector, SqlVectorDistanceMetric distanceMetric, int top_n)
     {
         var mi = (MethodInfo)MethodInfo.GetCurrentMethod()!;
-        return new Query<WithDistance<T>>(DbQueryProvider.Single, Expression.Call(mi,
+        return new Query<WithDistance<T>>(DbQueryProvider.Single, Expression.Call(mi.MakeGenericMethod(typeof(T)),
             Expression.Constant(table, typeof(ITable)),
             Expression.Constant(columns, typeof(IColumn)),
-            Expression.Constant(queryVector, typeof(float[])),
+            Expression.Constant(queryVector, typeof(Vector)),
             Expression.Constant(distanceMetric, typeof(SqlVectorDistanceMetric)),
-            Expression.Constant(top_n, typeof(int?))
+            Expression.Constant(top_n, typeof(int))
         ));
     }
 

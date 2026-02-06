@@ -1,6 +1,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Types;
 using Npgsql;
+using Pgvector;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
@@ -524,7 +525,9 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
             IsNullable = nullable
         };
 
-        result.NpgsqlDbType = dbType.PostgreSql;
+        if (!dbType.IsVector())
+            result.NpgsqlDbType = dbType.PostgreSql;
+
         if (udtTypeName != null)
             result.DataTypeName = udtTypeName;
 
@@ -564,8 +567,10 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         List<MemberBinding> mb = new List<MemberBinding>()
             {
                 Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.IsNullable))!, Expression.Constant(nullable)),
-                Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.NpgsqlDbType))!, Expression.Constant(dbType.PostgreSql)),
             };
+
+        if (dbType.PostgreSql != AbstractDbType.VectorPG)
+            mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.NpgsqlDbType))!, Expression.Constant(dbType.PostgreSql)));
 
         if (size != null)
             mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.Size))!, Expression.Constant(size)));

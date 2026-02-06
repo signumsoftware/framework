@@ -1718,17 +1718,15 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
         throw new NotImplementedException();
     }
 
+    public static NpgsqlDbType VectorPG = (NpgsqlDbType)0x10000000; //NpgsqlDbType.Vector is not yet in the stable release
+
     public bool IsVector()
     {
         if(sqlServer is SqlDbType s)
             return s == SqlDbType.Vector;
 
-        if(postgreSql is NpgsqlDbType p)
-            switch (p)
-            {
-                case NpgsqlDbType.Array | NpgsqlDbType.Real: return true;
-                default: return false;
-            }
+        if (postgreSql is NpgsqlDbType p)
+            return p == VectorPG;
 
         throw new NotImplementedException();
     }
@@ -1827,6 +1825,9 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
 
         if (pg == NpgsqlDbType.Double)
             return "double precision";
+
+        if (pg == VectorPG)
+            return "vector";
 
         return pg.ToString()!;
     }

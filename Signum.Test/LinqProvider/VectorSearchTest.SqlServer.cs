@@ -1,4 +1,6 @@
+using Pgvector;
 using Signum.Engine.Maps;
+using Signum.Engine.Sync;
 using System.Data;
 using System.Diagnostics;
 using System.Text;
@@ -25,8 +27,8 @@ public class VectorSearchTest_SqlServer
     [Fact]
     public void Vector_Distance()
     {
-        var vector1 = new float[] { 1.0f, 0.0f, 0.0f };
-        var vector2 = new float[] { 0.0f, 1.0f, 0.0f };
+        var vector1 = new Vector(new float[] { 1.0f, 0.0f, 0.0f });
+        var vector2 = new Vector(new float[] { 0.0f, 1.0f, 0.0f });
 
         var distance1 = Database.Query<NoteWithDateEntity>().Select(n => SqlVectorSearch.Vector_Distance(SqlVectorDistanceMetric.Cosine, vector1, vector2).InSql()).First();
         var distance2 = Database.Query<NoteWithDateEntity>().Select(n => SqlVectorSearch.Vector_Distance(SqlVectorDistanceMetric.Euclidean, vector1, vector2).InSql()).First();
@@ -40,7 +42,7 @@ public class VectorSearchTest_SqlServer
     [Fact]
     public void Vector_Norm()
     {
-        var vector = new float[] { 2.0f, 3.0f, 6.0f };
+        var vector = new Vector(new float[] { 2.0f, 3.0f, 6.0f });
 
         var norm1 = Database.Query<NoteWithDateEntity>().Select(n => SqlVectorSearch.Vector_Norm(vector, SqlVectorNormType.Norm1).InSql()).First();
         var norm2 = Database.Query<NoteWithDateEntity>().Select(n => SqlVectorSearch.Vector_Norm(vector, SqlVectorNormType.Norm2).InSql()).First();
@@ -54,7 +56,7 @@ public class VectorSearchTest_SqlServer
     [Fact]
     public void Vector_Normalize()
     {
-        var vector = new float[] { 2.0f, 3.0f, 6.0f };
+        var vector = new Pgvector.Vector(new float[] { 2.0f, 3.0f, 6.0f });
 
         var norm1 = Database.Query<NoteWithDateEntity>().Select(n => SqlVectorSearch.Vector_Normalize(vector, SqlVectorNormType.Norm1).InSql()).First();
         var norm2 = Database.Query<NoteWithDateEntity>().Select(n => SqlVectorSearch.Vector_Normalize(vector, SqlVectorNormType.Norm2).InSql()).First();
@@ -62,82 +64,21 @@ public class VectorSearchTest_SqlServer
 
         foreach (var item in new[] { norm1, norm2, norminf})
         {
-            foreach (var a in item)
+            foreach (var a in item.Memory.ToArray())
             {
                 Assert.True(a > 0 && a <= 1.0f);
             }
         }
     }
 
+    [Fact]
+    public void Vector_Search()
+    {
+        var michael = Database.Query<SimplePassageEntity>().FirstEx(a => a.Chunk.Contains("Michael"));
 
-    //[Fact]
-    //public void Vector_Search_Similarity()
-    //{
-    //    var hasVectors = Convert.ToInt32(Executor.ExecuteScalar("SELECT COUNT(*) FROM NoteWithDateEntity WHERE Vector IS NOT NULL"));
-    //    if (hasVectors == 0)
-    //        throw SkipException.ForSkip("No vectors in test data.");
+        var cosine = SqlVectorSearch.Vector_Search<SimplePassageEntity>(a => a.Embedding!, michael.Embedding!, SqlVectorDistanceMetric.Cosine, 5)
+            .Select(a => new { a.Distance, a.Original.Chunk }).ToList();
 
-    //    var results = Database.Query<>()
-    //        .Take(5)
-    //        .ToList();
+    }
 
-    //    Assert.True(results.Count > 0);
-    //}
-
-    //[Fact]
-    //public void Vector_Multiple_Distance_Metrics()
-    //{
-    //    var vector1 = new float[] { 1.0f, 0.0f, 0.0f };
-    //    var vector2 = new float[] { 0.5f, 0.5f, 0.0f };
-
-    //    var results = Database.Query<NoteWithDateEntity>()
-    //        .Select(n => new
-    //        {
-    //            Cosine = VectorSearch.Vector_Distance("cosine", vector1, vector2),
-    //            Euclidean = VectorSearch.Vector_Distance("euclidean", vector1, vector2),
-    //            Dot = VectorSearch.Vector_Distance("dot", vector1, vector2)
-    //        })
-    //        .First();
-
-    //    Assert.True(results.Cosine >= 0);
-    //    Assert.True(results.Euclidean >= 0);
-    //    Assert.True(results.Dot >= 0);
-    //}
-
-    //[Fact]
-    //public void Vector_Distance_With_Filter()
-    //{
-    //    var vector = new float[] { 1.0f, 0.0f, 0.0f };
-    //    var compareVector = new float[] { 0.0f, 1.0f, 0.0f };
-
-    //    var results = (from n in Database.Query<NoteWithDateEntity>()
-    //                  where n.Title != null
-    //                  select new
-    //                  {
-    //                      Note = n,
-    //                      Distance = VectorSearch.Vector_Distance("cosine", vector, compareVector)
-    //                  }).Take(5).ToList();
-
-    //    Assert.True(results.Count > 0);
-    //    Assert.True(results.All(r => r.Distance >= 0));
-    //}
-
-    //[Fact]
-    //public void Vector_Operations_Chain()
-    //{
-    //    var vector = new float[] { 2.0f, 2.0f, 1.0f };
-
-    //    var result = Database.Query<NoteWithDateEntity>()
-    //        .Select(n => new
-    //        {
-    //            Norm = VectorSearch.Vector_Norm(vector),
-    //            Normalized = VectorSearch.Vector_Normalize(vector),
-    //            NormalizedNorm = VectorSearch.Vector_Norm(VectorSearch.Vector_Normalize(vector))
-    //        })
-    //        .First();
-
-    //    Assert.True(result.Norm > 0);
-    //    Assert.NotNull(result.Normalized);
-    //    Assert.True(Math.Abs(result.NormalizedNorm - 1.0) < 0.001);
-    //}
 }

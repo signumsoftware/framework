@@ -1,6 +1,10 @@
 using Signum.Engine.Maps;
 using Signum.DynamicQuery;
 using Signum.Basics;
+using System.IO;
+using System.Text.Json;
+using Microsoft.Data.SqlTypes;
+using Pgvector;
 
 namespace Signum.Test.Environment;
 
@@ -40,6 +44,8 @@ public static class MusicLogic
                 a.CreationTime,
             });
 
+        var embeddings = JsonSerializer.Deserialize<Dictionary<string, float[]>>(File.ReadAllText("linesWithEmbeddings.json"))!;
+
 
         new Graph<NoteWithDateEntity>.Execute(NoteWithDateOperation.Save)
         {
@@ -69,6 +75,7 @@ public static class MusicLogic
                         Note = e.ToLite(),
                         IsTitle = false,
                         Chunk = t,
+                        Embedding = new Vector(embeddings.GetOrThrow(t)),
                         Index = i + 1,
                     }).SaveList();
             },
@@ -142,9 +149,11 @@ public static class MusicLogic
             });
 
         sb.Include<SimplePassageEntity>()
-            //.WithVectorIndex(a=>a.Embedding, vti =>
-            //{
-            //})
+            .WithVectorIndex(a => a.Embedding, vti =>
+            {
+                if (Connector.Current is SqlServerConnector)
+                    vti.DelayCreation = true;
+            })
             .WithQuery(() => p => new
             {
                 Entity = p,

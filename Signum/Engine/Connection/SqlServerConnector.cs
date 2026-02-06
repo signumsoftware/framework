@@ -8,6 +8,7 @@ using Signum.Engine.Sync.SqlServer;
 using Npgsql;
 using Signum.Utilities.Reflection;
 using Microsoft.Data.SqlTypes;
+using Pgvector;
 
 namespace Signum.Engine;
 
@@ -575,8 +576,8 @@ public class SqlParameterBuilder : ParameterBuilder
         }
         else if (dbType.IsVector())
         {
-            if (value is float[] fa)
-                value = new SqlVector<float>(fa);
+            if (value is Vector v)
+                value = new SqlVector<float>(v.Memory);
         }
 
         var result = new SqlParameter(parameterName, value ?? DBNull.Value)
@@ -599,7 +600,7 @@ public class SqlParameterBuilder : ParameterBuilder
 
         var exp =
             uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?)), Expression.Constant(dateTimeKind)) :
-            uType == typeof(float[]) ? Expression.New(ciSqlVector, Expression.Convert(Expression.Convert(value, typeof(float[])), typeof(System.ReadOnlyMemory<float>))) :
+            uType == typeof(Vector) ? Expression.New(ciSqlVector, Expression.Convert(Expression.Property(Expression.Convert(value, typeof(Vector)), nameof(Vector.Memory)), typeof(System.ReadOnlyMemory<float>))) :
             ////https://github.com/dotnet/SqlClient/issues/1009
             //uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
             //uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :

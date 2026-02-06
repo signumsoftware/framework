@@ -654,7 +654,7 @@ public static class SchemaSynchronizer
 
             SqlPreCommand? addIndices =
                 Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
-                createNew: (tn, tab) => modelIndices[tab].Values.Where(a => !a.PrimaryKey).Select(index => sqlBuilder.CreateIndex(index, null)).Combine(Spacing.Simple),
+                createNew: (tn, tab) => modelIndices[tab].Values.Where(a => !a.PrimaryKey && !a.DelayCreation).Select(index => sqlBuilder.CreateIndex(index, null)).Combine(Spacing.Simple),
                 removeOld: null,
                 mergeBoth: (tn, tab, dif) =>
                 {
@@ -676,7 +676,7 @@ public static class SchemaSynchronizer
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: (i, mix) => mix.Unique || mix is FullTextTableIndex or VectorTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
                         removeOld: (i, dix) => !dix.IsControlledIndex(isPostgres) && dix.Columns.Any(IsColumnRemovedOrModified) && SafeConsole.Ask($"Recreate non-controlled index {dix.IndexName}?") ? sqlBuilder.RecreateDiffIndex(tab, dix) : null,
-                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
+                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) && !mix.DelayCreation ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                             mix.IndexName != dix.IndexName ? sqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
 
                     return SqlPreCommand.Combine(Spacing.Simple, indexes);

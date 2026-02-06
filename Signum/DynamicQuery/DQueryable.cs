@@ -492,8 +492,8 @@ public static class DQueryable
         var columns = fft.Tokens.Select(a => (IColumn)schema.Field(a.GetPropertyRoute()!)).Distinct().ToArray();
 
         var query = fft.Operation == FullTextFilterOperation.ComplexCondition ?
-            FullTextSearch.ContainsTable(table, columns, fft.SearchCondition, null) :
-            FullTextSearch.FreeTextTable(table, columns, fft.SearchCondition, null);
+            SqlFullTextSearch.ContainsTable(table, columns, fft.SearchCondition, null) :
+            SqlFullTextSearch.FreeTextTable(table, columns, fft.SearchCondition, null);
 
         if (fft.TableOuterJoin)
             return query.DefaultIfEmpty() as IQueryable<FullTextResultTable>;

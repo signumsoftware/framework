@@ -1,6 +1,8 @@
 using Signum.Engine.Maps;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
+using Microsoft.Data.SqlTypes;
+using Pgvector;
 
 namespace Signum.Test.Environment;
 
@@ -454,8 +456,8 @@ public class SimplePassageEntity : Entity
 
     public bool IsTitle { get; set; }
 
-    [DbType(Size = 10)]
-    public float[]? Embedding { get; set; }
+    [DbType(Size = 768)]
+    public Vector? Embedding { get; set; }
 
     [StringLengthValidator(Max = int.MaxValue)]
     public string Chunk { get; set; }

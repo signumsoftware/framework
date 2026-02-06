@@ -1497,8 +1497,8 @@ internal class QueryBinder : ExpressionVisitor
         Type returnType = mce.Method.ReturnType;
         var type = returnType.GetGenericArguments()[0];
 
-        if (mce.Method.DeclaringType == typeof(FullTextSearch) &&
-              mce.Method.Name is nameof(FullTextSearch.ContainsTable) or nameof(FullTextSearch.FreeTextTable))
+        if (mce.Method.DeclaringType == typeof(SqlFullTextSearch) &&
+              mce.Method.Name is nameof(SqlFullTextSearch.ContainsTable) or nameof(SqlFullTextSearch.FreeTextTable))
         {
             var functionName = mce.Method.GetCustomAttribute<SqlMethodAttribute>()?.Name ?? mce.Method.Name;
             var tab = (ITable)((ConstantExpression)mce.GetArgument("table")).Value!;
@@ -1516,7 +1516,7 @@ internal class QueryBinder : ExpressionVisitor
                 new SqlLiteralExpression(typeof(object), tab.Name.ToString()),
                 new SqlLiteralExpression(typeof(object),cols == null ?  "*" : ($"({cols.ToString(a=>a.Name, ", ")})")),
                 DbExpressionNominator.FullNominate(mce.GetArgument(
-                    mce.Method.Name is nameof(FullTextSearch.ContainsTable) ? "searchCondition" : "freeTextString")),
+                    mce.Method.Name is nameof(SqlFullTextSearch.ContainsTable) ? "searchCondition" : "freeTextString")),
             };
 
             var rank = DbExpressionNominator.FullNominate(mce.GetArgument("top_n_by_rank"));
@@ -1524,7 +1524,7 @@ internal class QueryBinder : ExpressionVisitor
             if (!rank.IsNull())
                 arguments.Add(rank);
 
-            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, null, tableAlias, arguments);
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, null, tableAlias, arguments, null);
 
             Alias selectAlias = NextSelectAlias();
 
@@ -1544,6 +1544,7 @@ internal class QueryBinder : ExpressionVisitor
             var originalType = type.GetGenericArguments()[0];
 
             Alias tableAlias = NextTableAlias(tab.Name);
+            Alias distanceAlias = NextSelectAlias();
 
             Expression originalEntity = tab is Table t ? t.GetProjectorExpression(tableAlias, this) :
                                         tab is TableMList tml ? tml.GetMListElementExpression(tableAlias, this) :
@@ -1554,7 +1555,7 @@ internal class QueryBinder : ExpressionVisitor
 
             var arguments = new List<Expression>
             {
-                new SqlLiteralExpression(typeof(string), tab.Name.ToString()),
+                new TableExpression(tableAlias, tab, null, null),
                 new SqlLiteralExpression(typeof(string), col.Name),
                 DbExpressionNominator.FullNominate(mce.GetArgument("queryVector")),
                 new SqlConstantExpression(SqlVectorSearch.GetSqlVectorDistanceMetric(distanceMetric), typeof(string)),
@@ -1565,14 +1566,21 @@ internal class QueryBinder : ExpressionVisitor
             if (!topN.IsNull())
                 arguments.Add(topN);
 
-            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, tab as Table, null, tableAlias, arguments);
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, tab as Table, null, distanceAlias, arguments, new[]
+            {
+                "TABLE",
+                "COLUMN",
+                "SIMILAR_TO",
+                "METRIC",
+                "TOP_N"
+            });
 
-            var distanceColumn = new ColumnExpression(typeof(float), tableAlias, "Distance");
+            var distanceColumn = new ColumnExpression(typeof(float), distanceAlias, "Distance");
 
             var withDistanceExpression = Expression.MemberInit(
                 Expression.New(type),
-                Expression.Bind(type.GetField("Original")!, originalEntity),
-                Expression.Bind(type.GetField("Distance")!, distanceColumn)
+                Expression.Bind(type.GetProperty(nameof(WithDistance<>.Original))!, originalEntity),
+                Expression.Bind(type.GetProperty(nameof(WithDistance<>.Distance))!, distanceColumn)
             );
 
             Alias selectAlias = NextSelectAlias();
@@ -1597,7 +1605,7 @@ internal class QueryBinder : ExpressionVisitor
 
             List<Expression> arguments = mce.Arguments.Select(a => DbExpressionNominator.FullNominate(a)!).ToList();
 
-            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName.ToString(), table, null, tableAlias, arguments);
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName.ToString(), table, null, tableAlias, arguments, null);
 
             Alias selectAlias = NextSelectAlias();
 
@@ -1620,7 +1628,7 @@ internal class QueryBinder : ExpressionVisitor
 
             var arguments = mce.Arguments.Select(a => DbExpressionNominator.FullNominate(a)!).ToList();
 
-            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName.ToString(), null, type, tableAlias, arguments);
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName.ToString(), null, type, tableAlias, arguments, null);
 
             var columnExpression = new ColumnExpression(type, tableAlias, null);
 

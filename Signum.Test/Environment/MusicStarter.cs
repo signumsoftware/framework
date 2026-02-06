@@ -37,7 +37,10 @@ public static class MusicStarter
             (Connector.Current as PostgreSqlConnector)?.ReloadTypes();
 
             MusicLoader.Load();
-       
+
+            if (Connector.Current is SqlServerConnector)
+                Schema.Current.Table<SimplePassageEntity>().AllIndexes().OfType<VectorTableIndex>().SingleEx().CreateVectorIndex();
+
             startedAndLoaded = true;
         }
     }
@@ -59,6 +62,7 @@ public static class MusicStarter
                 builder.EnableArrays();
                 builder.EnableLTree();
                 builder.EnableRanges();
+                builder.UseVector();
             });
         }
 

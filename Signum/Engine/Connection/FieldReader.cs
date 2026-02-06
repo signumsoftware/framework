@@ -8,6 +8,7 @@ using Microsoft.SqlServer.Server;
 using Signum.Engine.Sync;
 using Microsoft.Data.SqlTypes;
 using Microsoft.Identity.Client;
+using Pgvector;
 
 namespace Signum.Engine;
 
@@ -642,6 +643,26 @@ public class FieldReader
         return (T[])result; //To produce exception
     }
 
+
+    static readonly MethodInfo miGetVector = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetVector(0));
+
+    public Vector? GetVector(int ordinal)
+    {
+        LastOrdinal = ordinal;
+        LastMethodName = nameof(GetVector);
+        if (reader.IsDBNull(ordinal))
+            return (Vector?)null!;
+
+        var result = this.reader[ordinal];
+        if (result is Vector pgv)
+            return pgv;
+
+        if (result is SqlVector<float> vec)
+            return new Vector(vec.Memory);
+
+        return null;
+    }
+
     static readonly MethodInfo miNullableGetRange = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetNullableRange<int>(0)).GetGenericMethodDefinition();
     public NpgsqlTypes.NpgsqlRange<T>? GetNullableRange<T>(int ordinal)
     {
@@ -693,6 +714,11 @@ public class FieldReader
                 return Expression.Call(reader, miGetNullableUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
             else
                 return Expression.Call(reader, miGetUdt.MakeGenericMethod(type), Expression.Constant(ordinal));
+        }
+
+        if (type == typeof(Vector))
+        {
+            return Expression.Call(reader, miGetVector, Expression.Constant(ordinal));
         }
 
         if (type.IsArray)

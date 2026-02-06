@@ -111,6 +111,7 @@ public class TableIndex
     }
 
     public bool AvoidAttachToUniqueIndexes { get; set; }
+    public bool DelayCreation { get; set; }
 
     public override string ToString()
     {
@@ -263,7 +264,7 @@ public class VectorTableIndex : TableIndex
 
     public class PostgresOptions
     {
-        public PGVectorIndexType? IndexType { get; set; }
+        public PGVectorIndexType IndexType { get; set; } = PGVectorIndexType.HNSW;
         public PGVectorDistanceMetric Metric { get; set; } = PGVectorDistanceMetric.Cosine;
         public int? Lists { get; set; }
     }
@@ -305,11 +306,14 @@ public class VectorTableIndex : TableIndex
         _ => throw new UnexpectedValueException(indexType)
     };
 
-    internal static object GetPGVectorDistanceMetric(PGVectorDistanceMetric metric) => metric switch
+    internal static string GetPGVectorDistanceMetric(PGVectorDistanceMetric metric) => metric switch
     {
-        PGVectorDistanceMetric.Cosine => "vector_cosine_ops",
         PGVectorDistanceMetric.L2 => "vector_l2_ops",
         PGVectorDistanceMetric.InnerProduct => "vector_ip_ops",
+        PGVectorDistanceMetric.Cosine => "vector_cosine_ops",
+        PGVectorDistanceMetric.L1 => "vector_l1_ops",
+        PGVectorDistanceMetric.Hamming => "bit_hamming_ops",
+        PGVectorDistanceMetric.Jaccard => "bit_jaccard_ops",
         _ => throw new UnexpectedValueException(metric)
     };
 }
@@ -325,13 +329,6 @@ public enum PGVectorIndexType
 {
     IVFFlat,
     HNSW
-}
-
-public enum PGVectorDistanceMetric
-{
-    Cosine,
-    L2, // Euclidean
-    InnerProduct
 }
 
 public class IndexKeyColumns
