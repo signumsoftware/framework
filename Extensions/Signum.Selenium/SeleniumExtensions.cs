@@ -84,71 +84,39 @@ public static class SeleniumExtensions
         selenium.Wait(() => EqualityComparer<T>.Default.Equals(lastValue = value(), expectedValue), () => "expression to be " + expectedValue + " but is " + lastValue, timeout);
     }
 
-    public static IWebElement? TryFindElement(this WebDriver selenium, By locator)
+    public static IWebElement? TryFindElement(this ISearchContext searchContext, By locator)
     {
-        return selenium.FindElements(locator).FirstOrDefault();
+        return searchContext.FindElements(locator).FirstOrDefault();
     }
 
-    public static IWebElement? TryFindElement(this IWebElement element, By locator)
+    public static IWebElement WaitElementPresent(this ISearchContext searchContext, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
     {
-        return element.FindElements(locator).FirstOrDefault();
-    }
-
-    public static IWebElement WaitElementPresent(this WebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
-    {
-        return selenium.Wait(() => selenium.FindElements(locator).FirstOrDefault(),
+        var driver = searchContext.GetDriver();
+        return driver.Wait(() => searchContext.FindElements(locator).FirstOrDefault(),
             actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout)!;
     }
 
-    public static IWebElement WaitElementPresent(this IWebElement element, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
+    public static void AssertElementPresent(this ISearchContext searchContext, By locator)
     {
-        return element.GetDriver().Wait(() => element.FindElements(locator).FirstOrDefault(),
-            actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout)!;
-    }
-
-    public static void AssertElementPresent(this WebDriver selenium, By locator)
-    {
-        if (!selenium.IsElementPresent(locator))
+        if (!searchContext.IsElementPresent(locator))
             throw new InvalidOperationException("{0} not found".FormatWith(locator));
     }
 
-    public static void AssertElementPresent(this IWebElement element, By locator)
+    public static bool IsElementPresent(this ISearchContext searchContext, By locator)
     {
-        if (!element.IsElementPresent(locator))
-            throw new InvalidOperationException("{0} not found".FormatWith(locator));
+        return searchContext.FindElements(locator).Any();
     }
 
-    public static bool IsElementPresent(this WebDriver selenium, By locator)
+    public static void WaitElementNotPresent(this ISearchContext searchContext, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
     {
-        return selenium.FindElements(locator).Any();
-    }
-
-    public static bool IsElementPresent(this IWebElement element, By locator)
-    {
-        return element.FindElements(locator).Any();
-    }
-
-    public static void WaitElementNotPresent(this WebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
-    {
-        selenium.Wait(() => !selenium.IsElementPresent(locator),
+        var driver = searchContext.GetDriver();
+        driver.Wait(() => !searchContext.IsElementPresent(locator),
             actionDescription ?? (Func<string>)(() => "{0} to be not present".FormatWith(locator)), timeout);
     }
 
-    public static void WaitElementNotPresent(this IWebElement element, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
+    public static void AssertElementNotPresent(this ISearchContext searchContext, By locator)
     {
-        element.GetDriver().Wait(() => !element.IsElementPresent(locator),
-            actionDescription ?? (Func<string>)(() => "{0} to be not present".FormatWith(locator)), timeout);
-    }
-
-    public static void AssertElementNotPresent(this WebDriver selenium, By locator)
-    {
-        if (selenium.IsElementPresent(locator))
-            throw new InvalidOperationException("{0} is found".FormatWith(locator));
-    }
-
-    public static void AssertElementNotPresent(this IWebElement element, By locator)
-    {
-        if (element.IsElementPresent(locator))
+        if (searchContext.IsElementPresent(locator))
             throw new InvalidOperationException("{0} is found".FormatWith(locator));
     }
 
@@ -166,21 +134,16 @@ public static class SeleniumExtensions
         }
     }
 
-    public static IWebElement WaitElementVisible(this WebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
+    public static IWebElement WaitElementVisible(this ISearchContext searchContext, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
     {
-        return selenium.Wait(() => selenium.FindElements(locator).FirstOrDefault(a => a.Displayed),
+        var driver = searchContext.GetDriver();
+        return driver.Wait(() => searchContext.FindElements(locator).FirstOrDefault(a => a.Displayed),
             actionDescription ?? (Func<string>)(() => "{0} to be visible".FormatWith(locator)), timeout)!;
     }
 
-    public static IWebElement WaitElementVisible(this IWebElement element, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
+    public static void AssertElementVisible(this ISearchContext searchContext, By locator)
     {
-        return element.GetDriver().Wait(() => element.FindElements(locator).FirstOrDefault(a => a.Displayed),
-            actionDescription ?? (Func<string>)(() => "{0} to be visible".FormatWith(locator)), timeout)!;
-    }
-
-    public static void AssertElementVisible(this WebDriver selenium, By locator)
-    {
-        var elements = selenium.FindElements(locator);
+        var elements = searchContext.FindElements(locator);
 
         if (!elements.Any())
             throw new InvalidOperationException("{0} not found".FormatWith(locator));
@@ -189,11 +152,11 @@ public static class SeleniumExtensions
             throw new InvalidOperationException("{0} found but not visible".FormatWith(locator));
     }
 
-    public static bool IsElementVisible(this WebDriver selenium, By locator)
+    public static bool IsElementVisible(this ISearchContext searchContext, By locator)
     {
         try
         {
-            var elements = selenium.FindElements(locator);
+            var elements = searchContext.FindElements(locator);
             return elements.Count != 0 && elements.First().Displayed;
         }
         catch (StaleElementReferenceException)
@@ -202,46 +165,28 @@ public static class SeleniumExtensions
         }
     }
 
-    public static bool IsElementVisible(this IWebElement element, By locator)
+    public static void WaitElementNotVisible(this ISearchContext searchContext, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
     {
-        try
-        {
-            var elements = element.FindElements(locator);
-            return elements.Count != 0 && elements.First().Displayed;
-        }
-        catch (StaleElementReferenceException)
-        {
-            return false;
-        }
-    }
-
-    public static void WaitElementNotVisible(this WebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
-    {
-        selenium.Wait(() => !selenium.IsElementVisible(locator),
+        var driver = searchContext.GetDriver();
+        driver.Wait(() => !searchContext.IsElementVisible(locator),
             actionDescription ?? (Func<string>)(() => "{0} to be not visible".FormatWith(locator)), timeout);
     }
 
-    public static void WaitElementNotVisible(this IWebElement element, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
+    public static void AssertElementNotVisible(this ISearchContext searchContext, By locator)
     {
-        element.GetDriver().Wait(() => !element.IsElementVisible(locator),
-            actionDescription ?? (Func<string>)(() => "{0} to be not visible".FormatWith(locator)), timeout);
-    }
-
-    public static void AssertElementNotVisible(this WebDriver selenium, By locator)
-    {
-        if (selenium.IsElementVisible(locator))
+        if (searchContext.IsElementVisible(locator))
             throw new InvalidOperationException("{0} is visible".FormatWith(locator));
     }
 
-    public static void AssertElementNotVisible(this IWebElement element, By locator)
+    public static WebDriver GetDriver(this ISearchContext searchContext)
     {
-        if (element.IsElementVisible(locator))
-            throw new InvalidOperationException("{0} is visible".FormatWith(locator));
-    }
+        if (searchContext is WebDriver driver)
+            return driver;
 
-    public static WebDriver GetDriver(this IWebElement element)
-    {
-        return (WebDriver)((IWrapsDriver)element).WrappedDriver;
+        if (searchContext is IWrapsDriver wrapsDriver)
+            return (WebDriver)wrapsDriver.WrappedDriver;
+
+        throw new InvalidOperationException($"Cannot get WebDriver from {searchContext.GetType().Name}");
     }
 
     public static void SetChecked(this IWebElement element, bool isChecked)
@@ -512,9 +457,9 @@ public static class SeleniumExtensions
         }
     }
 
-    public static WebElementLocator WithLocator(this IWebElement element, By locator)
+    public static WebElementLocator WithLocator(this ISearchContext searchContext, By locator)
     {
-        return new WebElementLocator(element, locator);
+        return new WebElementLocator(searchContext, locator);
     }
 
     public static bool IsDomDisabled(this IWebElement element)

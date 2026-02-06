@@ -438,8 +438,19 @@ public class ScheduledTaskContext
     {
         this.Foreach(collection, elementID, e =>
         {
-            this.StringBuilder.AppendLine(elementID(e));
-            action(e);
+            try
+            {
+                this.StringBuilder.AppendLine(elementID(e));
+                action(e);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                this.StringBuilder.AppendLine("   Error: " + ex.Message);
+                throw;
+            }
         });
     }
 }

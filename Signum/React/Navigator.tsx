@@ -12,7 +12,7 @@ import * as Operations from './Operations';
 import { Constructor } from './Constructor';
 import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, getLitesWithSubStr, LiteAutocompleteConfig, MultiAutoCompleteConfig } from './Lines/AutoCompleteConfig'
-import { FindOptions } from './FindOptions'
+import { FindOptions, FindOptionsParsed } from './FindOptions'
 import { ImportComponent } from './ImportComponent'
 import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
@@ -383,19 +383,29 @@ export namespace Navigator {
     customComponent?: boolean;
     isSearch?: boolean;
     isEmbedded?: boolean;
+    fo?: FindOptionsParsed;
   }
 
   export function isCreable(type: PseudoType, options?: IsCreableOptions): boolean {
 
     const typeName = getTypeName(type);
 
-    const baseIsCreable = checkFlag(typeIsCreable(typeName, options?.isEmbedded), options?.isSearch);
+    if (!checkFlag(typeIsCreable(typeName, options?.isEmbedded), options?.isSearch))
+      return false;
 
-    const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
+    if (options?.fo != null) {
+      const es = entitySettings[typeName];
+      if (es && es.isCreableByFilterProps && !es.isCreableByFilterProps(Finder.getPropsFromFiltersSync(type, options.fo.filterOptions)))
+        return false;
+    }
 
-    const hasConstructor = hasAllowedConstructor(typeName);
+    if (!(options?.customComponent || viewDispatcher.hasDefaultView(typeName)))
+      return false;
 
-    return baseIsCreable && hasView && hasConstructor && isCreableEvent.every(f => f(typeName, options));
+    if (!hasAllowedConstructor(typeName))
+      return false;
+
+    return isCreableEvent.every(c => c(typeName, options));
   }
 
   function hasAllowedConstructor(typeName: string) {
@@ -455,9 +465,10 @@ export namespace Navigator {
 
     const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-    const baseIsReadOnly = options?.ignoreTypeIsReadonly ? false : typeIsReadOnly(typeName, options?.isEmbedded);
+    if (!options?.ignoreTypeIsReadonly && typeIsReadOnly(typeName, options?.isEmbedded))
+      return true;
 
-    return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName, entityPack, options));
+    return isReadonlyEvent.some(f => f(typeName, entityPack, options));
   }
 
   function typeIsReadOnly(typeName: string, isEmbedded: boolean | undefined): boolean {
@@ -1011,6 +1022,7 @@ export interface EnumConverter<T> {
 
 export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isCreable?: EntityWhen;
+  isCreableByFilterProps?: (props: Partial<T>) => boolean; 
   isFindable?: boolean;
   isViewable?: EntityWhen;
   isViewableLite?: (lite: Lite<T & Entity>, options: Navigator.IsViewableOptions | undefined) => boolean;
@@ -1081,6 +1093,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   viewOverrides?: Array<ViewOverride<T>>;
 
   isCreable?: EntityWhen;
+  isCreableByFilterProps?: (props: Partial<T>) => boolean; 
   isFindable?: boolean;
   isViewable?: EntityWhen;
   isViewableLite?: (lite: Lite<T & Entity>, options: Navigator.IsViewableOptions | undefined) => boolean;

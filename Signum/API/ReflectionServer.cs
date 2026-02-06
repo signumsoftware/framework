@@ -276,7 +276,7 @@ public static class ReflectionServer
                         var mi = new MemberInfoTS
                         {
                             NiceName = pr.PropertyInfo!.NiceName(),
-                            Format = pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(pr) : null,
+                            Format = pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.GetFormatString(pr) : null,
                             IsReadOnly = !IsId(pr, isEntity) && (pr.PropertyInfo?.IsReadOnly() ?? false),
                             Required = !IsId(pr, isEntity) && ((pr.Type.IsValueType && !pr.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!pr.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
                             Unit = UnitAttribute.GetTranslation(pr.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),

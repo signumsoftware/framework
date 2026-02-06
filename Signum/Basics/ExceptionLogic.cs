@@ -13,6 +13,7 @@ public static class ExceptionLogic
             return;
 
         sb.Include<ExceptionEntity>()
+            .WithIndex(a => a.CreationDate)
             .WithQuery(() => e => new
             {
                 Entity = e,

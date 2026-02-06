@@ -175,18 +175,10 @@ export namespace Operations {
       if (!coc.operationInfo.canBeModified)
         return "NoDialog";
 
-      if (isSave(coc.operationInfo)) {
-        if (coc.context.lites.length == 1)
-          return "NoButton";
+      if (coc.context.lites.length == 1 && isSave(coc.operationInfo))
+        return "NoButton";
 
-        return "Mandatory"
-      }
-      else {
-        if (coc.context.lites.length == 1)
-          return "NoDialog";
-
-        return "Optional";
-      }
+      return "Dialog"
     }
 
     export function getColor(oi: OperationInfo): BsColor {
@@ -459,7 +451,7 @@ export class ConstructorOperationContext<T extends Entity> {
 
 
 
-export type SettersConfig = "NoButton" | "NoDialog" | "Optional" | "Mandatory";
+export type SettersConfig = "NoButton" | "NoDialog" | "Dialog";
 
 /**
  * Contextual Operation Settings
@@ -613,7 +605,7 @@ export class ContextualOperationContext<T extends Entity> {
     if (this.settings?.createMenuItems)
       return this.settings.createMenuItems(this);
 
-    return [{ fullText: this.operationInfo.niceName, menu: <ContextualOperations.OperationMenuItem coc={ this} /> } as ContextualMenuItem];
+    return [{ fullText: this.operationInfo.niceName, menu: <ContextualOperations.OperationMenuItem coc={this} /> } as ContextualMenuItem];
   }
 
   raiseEntityChanged(): void {

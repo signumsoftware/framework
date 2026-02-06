@@ -765,10 +765,10 @@ export function typeAllowedInDomain(type: PseudoType, domain: Lite<Entity>, writ
   if (list == null)
     return true; //Super user
 
-  if (!write && list.read.contains(domain.id!))
+  if (!write && list.read.some(d => d == domain.id!))
     return true;
 
-  if (list.write.contains(domain.id!))
+  if (list.write.some(d => d == domain.id!))
     return true;
 
   return false;

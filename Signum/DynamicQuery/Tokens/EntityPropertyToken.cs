@@ -149,7 +149,7 @@ public class EntityPropertyToken : QueryToken
                     return StepTokens(this, att.DecimalPlaces).AndHasValue(this);
                 }
 
-                var format = Reflector.FormatString(route);
+                var format = Reflector.GetFormatString(route);
                 if (format != null)
                     return StepTokens(this, Reflector.NumDecimals(format)).AndHasValue(this);
             }
@@ -188,7 +188,7 @@ public class EntityPropertyToken : QueryToken
 
     public override string? Format
     {
-        get { return Reflector.FormatString(this.GetPropertyRoute()!); }
+        get { return Reflector.GetFormatString(this.GetPropertyRoute()!); }
     }
 
     public override string? Unit
