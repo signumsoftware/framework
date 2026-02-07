@@ -203,6 +203,26 @@ public static class MusicLogic
             .IsApplicableValidator<NotNullValidatorAttribute>(n => Corruption.Strict);
     }
 
+    //[Fact]
+    //public void SimplePassage()
+    //{
+    //    var chunks = Database.Query<SimplePassageEntity>().Select(a => a.Chunk).ToList();
+
+    //    File.WriteAllLines("lines.txt", chunks);
+    //}
+
+    //Run in Southwind, originally with Gemini models/text-embedding-004 with 768 dimensions
+    //static void ExportEmbeddings()
+    //{
+    //    var lines = File.ReadAllLines(@"..\..\..\lines.txt")!;
+    //    var model = ChatbotLogic.DefaultEmbeddingsModel.Value!.RetrieveFromCache();
+    //    var embeddings = ChatbotLogic.GetEmbeddingsAsync(lines, model, default).ResultSafe();
+
+    //    var dic = lines.Zip(embeddings, (l, e) => KeyValuePair.Create(l, e)).ToDictionary();
+
+    //    File.WriteAllText(@"..\..\..\linesWithEmbeddings.json", JsonSerializer.Serialize(dic));
+    //}
+
     private static void RegisterAwards(SchemaBuilder sb)
     {
         new Graph<AwardEntity>.Execute(AwardOperation.Save)
