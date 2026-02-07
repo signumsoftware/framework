@@ -816,7 +816,7 @@ public class SchemaBuilder
             f.Index = f.GenerateIndex(table, Settings.FieldAttribute<IndexAttribute>(route));
         });
 
-        if(result.DbType.IsVector() && result.Size == null)
+if(result.DbType.IsVector() && result.Size == null)
             throw new InvalidOperationException("Size must be specified for Vector columns (Field: {0})".FormatWith(route));
 
         return result;

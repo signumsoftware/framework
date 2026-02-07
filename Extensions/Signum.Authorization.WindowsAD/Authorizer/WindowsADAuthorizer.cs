@@ -211,7 +211,6 @@ public class WindowsADAuthorizer : ICustomAuthorizer
 
             tr.Commit();
         }
-
     }
 
     public Task<List<ActiveDirectoryUser>> FindUser(string subString, int count, CancellationToken token)

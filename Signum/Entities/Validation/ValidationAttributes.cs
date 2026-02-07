@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Signum.Utilities.Reflection;
 using System.Globalization;
 using System.IO;
+using Signum.Engine.Maps;
 
 namespace Signum.Entities.Validation;
 
@@ -37,7 +38,7 @@ public abstract class ValidatorAttribute : Attribute
         if (IsApplicable != null && !IsApplicable(entity))
             return null;
 
-        string? defaultError = OverrideError(value);
+        string? defaultError = OverrideError(value, entity, property);
 
         if (defaultError == null)
             return null;
@@ -59,19 +60,19 @@ public abstract class ValidatorAttribute : Attribute
     /// </summary>
     /// <param name="value"></param>
     /// <returns>returns an string with the error message, using {0} if you want the property name to be inserted</returns>
-    protected abstract string? OverrideError(object? value);
+    protected abstract string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property);
 }
 
 public class NotNullValidatorAttribute : ValidatorAttribute
 {
     public bool Disabled { get; set; }
 
-    protected override string? OverrideError(object? obj)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         if (Disabled)
             return null;
 
-        if (obj == null || obj is string s && s == "")
+        if (value == null || value is string s && s == "")
             return ValidationMessage._0IsNotSet.NiceToString();
 
         return null;
@@ -136,7 +137,7 @@ public class StringLengthValidatorAttribute : ValidatorAttribute
         set { max = value; }
     }
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         string val = (string)value!;
 
@@ -209,7 +210,7 @@ public abstract class RegexValidatorAttribute : ValidatorAttribute
         get;
     }
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         string? str = (string?)value;
         if (string.IsNullOrEmpty(str))
@@ -400,7 +401,7 @@ public class FileNameValidatorAttribute : ValidatorAttribute
 
     public override string HelpMessage => ValidationMessage.HaveValid0Format.NiceToString().FormatWith(FormatName);
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         string? str = (string?)value;
 
@@ -438,7 +439,7 @@ public class DecimalsValidatorAttribute : ValidatorAttribute
         this.DecimalPlaces = decimalPlaces;
     }
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         if (value == null)
             return null;
@@ -502,7 +503,7 @@ public class NumberIsValidatorAttribute : ValidatorAttribute
         this.number = number;
     }
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         if (value == null)
             return null;
@@ -522,7 +523,13 @@ public class NumberIsValidatorAttribute : ValidatorAttribute
         if (ok)
             return null;
 
-        return ValidationMessage._0ShouldBe12.NiceToString().FormatWith("{0}", ComparisonType.NiceToString().ToLower(), number.ToString());
+        var pr = entity.TryGetPropertyRoute(property);
+
+        var unit = pr != null ? Reflector.GetUnit(pr) : property.GetCustomAttribute<UnitAttribute>()?.UnitName;
+        var format = pr != null ? Reflector.GetFormatString(pr) :
+            property.GetCustomAttribute<FormatAttribute>()?.Format ?? Reflector.FormatString(property.PropertyType);
+
+        return ValidationMessage._0ShouldBe12.NiceToString().FormatWith("{0}", ComparisonType.NiceToString().ToLower(), ((IFormattable)value).ToString(format, null) + unit);
     }
 
     public override bool IsCompatibleWith(PropertyInfo pi)
@@ -576,7 +583,7 @@ public class NumberBetweenValidatorAttribute : ValidatorAttribute
         this.max = max;
     }
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         if (value == null)
             return null;
@@ -593,7 +600,16 @@ public class NumberBetweenValidatorAttribute : ValidatorAttribute
             val.CompareTo(max) <= 0)
             return null;
 
-        return ValidationMessage._0HasToBeBetween1And2.NiceToString("{0}", min, max);
+        var pr = entity.TryGetPropertyRoute(property);
+
+        var unit = pr != null ? Reflector.GetUnit(pr) : property.GetCustomAttribute<UnitAttribute>()?.UnitName;
+        var format = pr != null ? Reflector.GetFormatString(pr) : 
+            property.GetCustomAttribute<FormatAttribute>()?.Format ?? Reflector.FormatString(property.PropertyType);
+
+        return ValidationMessage._0HasToBeBetween1And2.NiceToString("{0}",
+            ((IFormattable)min).ToString(format, null),
+            ((IFormattable)max).ToString(format, null) + unit
+            );
     }
 
     public override bool IsCompatibleWith(PropertyInfo pi)
@@ -623,7 +639,7 @@ public class NumberPowerOfTwoValidatorAttribute : ValidatorAttribute
         return true;
     }
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         if (value == null)
             return null;
@@ -645,7 +661,7 @@ public class NumberPowerOfTwoValidatorAttribute : ValidatorAttribute
 
 public class NoRepeatValidatorAttribute : ValidatorAttribute
 {
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         IList? list = (IList?)value;
         if (list == null || list.Count <= 1)
@@ -685,7 +701,7 @@ public class CountIsValidatorAttribute : ValidatorAttribute
         this.Number = number;
     }
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         IList? list = (IList?)value;
 
@@ -735,7 +751,7 @@ public class DateTimePrecisionValidatorAttribute : ValidatorAttribute
         this.Precision = precision;
     }
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         if (value == null)
             return null;
@@ -785,7 +801,7 @@ public class DateTimePrecisionValidatorAttribute : ValidatorAttribute
 
 public class DateInPastValidatorAttribute : ValidatorAttribute
 {
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         if (value == null)
             return null;
@@ -815,7 +831,7 @@ public class YearGreaterThanValidatorAttribute : ValidatorAttribute
         this.MinYear = minYear;
     }
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         if (value == null)
             return null;
@@ -846,7 +862,7 @@ public class TimePrecisionValidatorAttribute : ValidatorAttribute
         this.Precision = precision;
     }
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         if (value == null)
             return null;
@@ -923,7 +939,7 @@ public class StringCaseValidatorAttribute : ValidatorAttribute
         this.textCase = textCase;
     }
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         string? str = (string?)value;
         if (!str.HasText())
@@ -964,7 +980,7 @@ public class IsAssignableToValidatorAttribute : ValidatorAttribute
         this.Type = type;
     }
 
-    protected override string? OverrideError(object? value)
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         if (value == null)
             return null;

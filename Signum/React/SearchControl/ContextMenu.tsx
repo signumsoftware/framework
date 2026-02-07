@@ -1,4 +1,5 @@
-import * as React from 'react'
+import * as React from 'react';
+import ReactDOM from 'react-dom';
 import { classes, DomUtils } from '../Globals'
 import { Dropdown } from 'react-bootstrap';
 import { useForceUpdate } from '../Hooks';
@@ -15,9 +16,10 @@ interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement> {
   onHide: () => void;
   alignRight?: boolean;
   children: React.ReactNode;
+  itemsCount: number;
 }
 
-export default function ContextMenu({ position, onHide, children, alignRight, ...rest }: ContextMenuProps): React.ReactElement {
+export default function ContextMenu({ position, onHide, children, alignRight, itemsCount, ...rest }: ContextMenuProps): React.ReactElement {
 
   const { top, left } = position;
 
@@ -29,8 +31,11 @@ export default function ContextMenu({ position, onHide, children, alignRight, ..
   React.useEffect(() => {
 
     if (menuRef.current) {
-      const menuWidth = menuRef.current.scrollWidth;
-      const menuHeight = menuRef.current.scrollHeight;
+      const menuElement = menuRef.current.querySelector('.dropdown-menu') as HTMLElement;
+      if (!menuElement) return;
+
+      const menuWidth = menuElement.scrollWidth;
+      const menuHeight = menuElement.offsetHeight; 
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
@@ -38,7 +43,7 @@ export default function ContextMenu({ position, onHide, children, alignRight, ..
       let adjustedLeft = left;
 
       if (adjustedTop + menuHeight > viewportHeight) {
-        adjustedTop = Math.max(position.maxTop ?? 14, viewportHeight - menuHeight);
+        adjustedTop = Math.max(position.maxTop ?? 14, viewportHeight - menuHeight -14);
       }
 
       if (adjustedLeft + menuWidth > viewportWidth) {
@@ -47,7 +52,7 @@ export default function ContextMenu({ position, onHide, children, alignRight, ..
 
       setAdjustedPosition({ top: adjustedTop, left: adjustedLeft });
     }
-  }, [React.Children.count(children), left, top, menuRef.current?.scrollWidth, menuRef.current?.scrollHeight, window.innerWidth, window.innerHeight]);
+  }, [itemsCount, left, top, position.maxTop]);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -84,7 +89,8 @@ export default function ContextMenu({ position, onHide, children, alignRight, ..
       style={{
         position: 'absolute',
         top: `${adjustedPosition.top}px`,
-        left: alignRight ? `${adjustedPosition.left - (menuRef.current?.scrollWidth ?? 100)}px` : `${adjustedPosition.left}px`,
+        left: alignRight ? `${adjustedPosition.left - (menuRef.current?.querySelector('.dropdown-menu')?.scrollWidth ?? 100)}px` : `${adjustedPosition.left}px`,
+        zIndex: 999999,
       }}
       {...rest as any}
     >
@@ -106,19 +112,17 @@ export function getMouseEventPosition(e: React.MouseEvent<HTMLTableElement>, con
     top: rec == null ? e.pageY : e.clientY - rec.top,
     maxTop: container?.getBoundingClientRect().top, //table's body top
   }) as ContextMenuPosition;
-
   return result;
 };
 
 export function getPositionElement(button: HTMLElement, alignRight?: boolean): ContextMenuPosition {
-  const op = DomUtils.offsetParent(button);
-
-  const recOp = op!.getBoundingClientRect();
+  //const op = DomUtils.offsetParent(button);
+  //const recOp = op!.getBoundingClientRect();
   const recButton = button.getBoundingClientRect();
+  // Since we're now using fixed positioning, calculate position relative to viewport
   var result = ({
-    left: recButton.left + (alignRight ? recButton.width : 0) - recOp.left,
-    top: recButton.top + recButton.height - recOp.top,
-    width: (op ? op.offsetWidth : window.outerWidth)
+    left: recButton.left + (alignRight ? recButton.width : 0),
+    top: recButton.top + recButton.height,
   }) as ContextMenuPosition;
 
   return result;

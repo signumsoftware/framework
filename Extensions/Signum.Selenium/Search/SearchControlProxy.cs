@@ -64,7 +64,8 @@ public class SearchControlProxy
 
     public IWebElement WaitContextMenu()
     {
-        return Element.WaitElementVisible(By.CssSelector(".sf-context-menu .dropdown-menu"));
+        //Using React Portal
+        return Element.GetDriver().WaitElementVisible(By.CssSelector(".sf-context-menu .dropdown-menu"));
     }
 
     public WebElementLocator ToggleFiltersButton
@@ -88,7 +89,7 @@ public class SearchControlProxy
 
 
 
-    public WebElementLocator ContextualMenu => this.Element.WithLocator(By.ClassName("sf-context-menu"));
+    public WebElementLocator ContextualMenu => new WebElementLocator(this.Element.GetDriver(), By.ClassName("sf-context-menu"));
 
     public FilterConditionProxy AddQuickFilter(int rowIndex, string token)
     {

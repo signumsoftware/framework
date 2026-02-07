@@ -221,6 +221,11 @@ public struct PrimaryKey : IEquatable<PrimaryKey>, IComparable, IComparable<Prim
         return a.Object.CompareTo(b.Object) > 0;
     }
 
+    public static explicit operator string(PrimaryKey v)
+    {
+        throw new NotImplementedException();
+    }
+
     public static bool TryParse(string value, Type entityType, out PrimaryKey id)
     {
         if (ReflectionTools.TryParse(value, Type(entityType), out object? val))

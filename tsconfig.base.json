@@ -13,6 +13,7 @@
     "strict": true,
     "noImplicitOverride": true,
     "declarationMap": true,
+    "forceConsistentCasingInFileNames": true,
     "lib": [
       "ESNext",
       "dom"

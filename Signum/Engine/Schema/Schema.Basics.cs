@@ -1488,7 +1488,7 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         this.CollectionType = collectionType;
         this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field!.FieldType)(this));
     }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     public override string ToString()
     {
@@ -1800,6 +1800,32 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
         throw new NotImplementedException();
     }
 
+    public bool IsBinary()
+    {
+        if (sqlServer is SqlDbType s)
+            switch (s)
+            {
+                case SqlDbType.Binary:
+                case SqlDbType.VarBinary:
+                case SqlDbType.Image:
+                case SqlDbType.Timestamp:
+                    return true;
+                default:
+                    return false;
+            }
+
+        if (postgreSql is NpgsqlDbType p)
+            switch (p)
+            {
+                case NpgsqlDbType.Bytea:
+                    return true;
+                default:
+                    return false;
+            }
+
+        throw new NotImplementedException();
+    }
+
 
     public override string ToString() => ToString(Schema.Current.Settings.IsPostgres);
     public string ToString(bool isPostgres)
@@ -1903,6 +1929,7 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
         throw new NotImplementedException();
     }
 }
+
 
 
 

@@ -212,18 +212,18 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(tableName, ColumnLineForHistory(column)));
     }
 
-    public SqlPreCommand AlterTableAlterDiffColumn(ObjectName tableName, DiffColumn column, DiffColumn his)
+    public SqlPreCommand AlterTableAlterDiffColumn(ObjectName tableName, DiffColumn col, DiffColumn his)
     {
         if (!IsPostgres)
-            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(tableName, ColumnLineForHistory(column)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(tableName, ColumnLineForHistory(col)));
         else
             return new[]
             {
-                 !column.DbType.Equals(his.DbType) || column.Collation != his.Collation || !column.SizeEquals(his) ?
-                 new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2};".FormatWith(tableName, column.Name.SqlEscape(isPostgres),  GetColumnType(column) + (column.Collation != null ? " COLLATE " + column.Collation : null))) : null,
-                 his.Nullable && !column.Nullable ? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} SET NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
-                 !his.Nullable && column.Nullable ? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
-             }.Combine(Spacing.Simple) ?? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} -- UNEXPECTED COLUMN CHANGE!!".FormatWith(tableName, column.Name.SqlEscape(isPostgres)));
+                 !col.DbType.Equals(his.DbType) || col.Collation != his.Collation || !col.SizeScalePrecissionEquals(his) ?
+                 new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2};".FormatWith(tableName, col.Name.SqlEscape(isPostgres),  GetColumnType(col) + (col.Collation != null ? " COLLATE " + col.Collation : null))) : null,
+                 his.Nullable && !col.Nullable ? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} SET NOT NULL;".FormatWith(tableName, col.Name.SqlEscape(isPostgres))) : null,
+                 !his.Nullable && col.Nullable ? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP NOT NULL;".FormatWith(tableName, col.Name.SqlEscape(isPostgres))) : null,
+             }.Combine(Spacing.Simple) ?? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} -- UNEXPECTED COLUMN CHANGE!!".FormatWith(tableName, col.Name.SqlEscape(isPostgres)));
     }
 
     public SqlPreCommand AlterTableAlterColumn(ITable tab, IColumn tabCol, DiffColumn difCol, bool withHistory)
@@ -245,7 +245,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
              new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(tableName, ColumnLine(column, null, null, isChange: true))) :
              new[]
              {
-                 !diffColumn.DbType.Equals(column.DbType) || diffColumn.Collation != column.Collation || !diffColumn.ScaleEquals(column) || !diffColumn.SizeEquals(column) ?
+                 !diffColumn.DbType.Equals(column.DbType) || diffColumn.Collation != column.Collation || !diffColumn.ScaleEquals(column) || !diffColumn.SizeEquals(column) || !diffColumn.PrecisionEquals(column)  ?
                  new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2};".FormatWith(tableName, column.Name.SqlEscape(isPostgres),  GetColumnType(column) + (column.Collation != null ? " COLLATE " + column.Collation : null))) : null,
                  diffColumn.Nullable &&  !column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} SET NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
                  !diffColumn.Nullable && column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
