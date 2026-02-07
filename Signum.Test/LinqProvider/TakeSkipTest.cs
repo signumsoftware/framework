@@ -11,15 +11,6 @@ public class TakeSkipTest
         Connector.CurrentLogger = new DebugTextWriter();
     }
 
-
-    [Fact]
-    public void SimplePassage()
-    {
-        var chunks = Database.Query<SimplePassageEntity>().Select(a => a.Chunk).ToList();
-
-        File.WriteAllLines("lines.json", chunks);
-    }
-
     [Fact]
     public void Take()
     {
