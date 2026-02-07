@@ -548,6 +548,8 @@ public class SqlServerConnector : Connector
 
     public override bool SupportsPartitioning => true;
 
+    public override bool SupportsVectors => this.Version >= SqlServerVersion.SqlServer2025;
+
     public override int MaxNameLength => 128;
 
     public override string ToString() => $"SqlServerConnector({Version}, Database: {this.DatabaseName()}, DataSource: {this.DataSourceName()})";
