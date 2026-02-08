@@ -344,23 +344,168 @@ public class DynamicQueryTest
 
         var qd = QueryLogic.Queries.QueryDescription(typeof(SimplePassageEntity));
 
-        // Parse the distance token - the path should be Entity.embedding.Distance
-        // (lowercase because PostgreSQL stores column names as lowercase)
         var distanceToken = QueryUtils.Parse("Entity.embedding.Distance", qd, cto);
 
         Assert.NotNull(distanceToken);
         Assert.IsType<VectorDistanceToken>(distanceToken);
         Assert.Equal(typeof(float?), distanceToken.Type);
         
-        // Verify parent is VectorColumnToken
         Assert.NotNull(distanceToken.Parent);
         Assert.IsType<VectorColumnToken>(distanceToken.Parent);
         
         var vectorToken = (VectorColumnToken)distanceToken.Parent;
         Assert.Equal(typeof(Vector), vectorToken.Type);
+
+        var sampleChunk = Database.Query<SimplePassageEntity>()
+            .Where(a => a.Embedding != null)
+            .Select(a => a.Chunk)
+            .FirstOrDefault();
+
+        if (sampleChunk == null)
+        {
+            Assert.Skip("No SimplePassageEntity with embeddings found in database");
+            return;
+        }
+
+        var rt = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+        {
+            QueryName = typeof(SimplePassageEntity),
+            GroupResults = false,
+            Columns = new List<Column>
+            {
+                new Column(QueryUtils.Parse("Entity.Chunk", qd, cto), null),
+                new Column(distanceToken, null),
+            },
+            Filters = new List<DynamicQuery.Filter>
+            {
+                new FilterCondition(vectorToken, FilterOperation.SmartSearch, sampleChunk),
+            },
+            Orders = new List<Order>
+            {
+                new Order(distanceToken, OrderType.Ascending),
+            },
+            Pagination = new Pagination.Firsts(5),
+        });
+
+        Assert.True(rt.Columns.Length == 2);
+        Assert.True(rt.Rows.Length > 0);
         
-        // Note: Actual query execution with SmartSearch requires the Signum.Agent extension
-        // to convert text queries to embeddings. This test only verifies token discovery.
+        var firstRow = rt.Rows[0];
+        var chunk = (string?)firstRow[0];
+        var distance = (float?)firstRow[1];
+        
+        Assert.Equal(sampleChunk, chunk);
+        Assert.NotNull(distance);
+        Assert.True(distance < 0.01f, $"Expected distance < 0.01 for exact text match, got {distance}");
+    }
+
+    [Fact]
+    public void VectorSearchWithDirectEmbedding()
+    {
+        if (!(Connector.Current is PostgreSqlConnector))
+        {
+            Assert.Skip("Skipping test because not PostgreSQL");
+            return;
+        }
+
+        var sampleChunk = Database.Query<SimplePassageEntity>()
+            .Where(a => a.Embedding != null)
+            .Select(a => a.Chunk)
+            .FirstOrDefault();
+
+        if (sampleChunk == null)
+        {
+            Assert.Skip("No SimplePassageEntity with embeddings found in database");
+            return;
+        }
+
+        var qd = QueryLogic.Queries.QueryDescription(typeof(SimplePassageEntity));
+
+        var rt = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+        {
+            QueryName = typeof(SimplePassageEntity),
+            GroupResults = false,
+            Columns = new List<Column>
+            {
+                new Column(QueryUtils.Parse("Entity.Chunk", qd, cto), null),
+                new Column(QueryUtils.Parse("Entity.embedding.Distance", qd, cto), null),
+            },
+            Filters = new List<DynamicQuery.Filter>
+            {
+                new FilterCondition(QueryUtils.Parse("Entity.embedding", qd, cto), FilterOperation.SmartSearch, sampleChunk),
+            },
+            Orders = new List<Order>
+            {
+                new Order(QueryUtils.Parse("Entity.embedding.Distance", qd, cto), OrderType.Ascending),
+            },
+            Pagination = new Pagination.Firsts(5),
+        });
+
+        Assert.True(rt.Columns.Length == 2);
+        Assert.True(rt.Rows.Length > 0);
+        
+        var firstRow = rt.Rows[0];
+        var distance = (float?)firstRow[1];
+        Assert.NotNull(distance);
+        Assert.True(distance < 0.01f, $"Expected distance < 0.01 for self-match, got {distance}");
+    }
+
+    [Fact]
+    public void VectorSmartSearchWithText()
+    {
+        if (!(Connector.Current is PostgreSqlConnector))
+        {
+            Assert.Skip("Skipping test because not PostgreSQL");
+            return;
+        }
+
+        // Get the first chunk text to use as search query
+        var sampleChunk = Database.Query<SimplePassageEntity>()
+            .Where(a => a.Embedding != null)
+            .Select(a => a.Chunk)
+            .FirstOrDefault();
+
+        if (sampleChunk == null)
+        {
+            Assert.Skip("No SimplePassageEntity with embeddings found in database");
+            return;
+        }
+
+        var qd = QueryLogic.Queries.QueryDescription(typeof(SimplePassageEntity));
+
+        // Execute query with SmartSearch filter using text
+        var rt = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+        {
+            QueryName = typeof(SimplePassageEntity),
+            GroupResults = false,
+            Columns = new List<Column>
+            {
+                new Column(QueryUtils.Parse("Entity.Chunk", qd, cto), null),
+                new Column(QueryUtils.Parse("Entity.embedding.Distance", qd, cto), null),
+            },
+            Filters = new List<DynamicQuery.Filter>
+            {
+                // Use SmartSearch with text - this will use Filter.GetEmbeddingForSmartSearch
+                new FilterCondition(QueryUtils.Parse("Entity.embedding", qd, cto), FilterOperation.SmartSearch, sampleChunk),
+            },
+            Orders = new List<Order>
+            {
+                new Order(QueryUtils.Parse("Entity.embedding.Distance", qd, cto), OrderType.Ascending),
+            },
+            Pagination = new Pagination.Firsts(5),
+        });
+
+        Assert.True(rt.Columns.Length == 2);
+        Assert.True(rt.Rows.Length > 0);
+        
+        // First result should be the exact match with distance ~0
+        var firstRow = rt.Rows[0];
+        var chunk = (string?)firstRow[0];
+        var distance = (float?)firstRow[1];
+        
+        Assert.Equal(sampleChunk, chunk);
+        Assert.NotNull(distance);
+        Assert.True(distance < 0.01f, $"Expected distance < 0.01 for exact text match, got {distance}");
     }
 
 

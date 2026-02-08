@@ -46,6 +46,13 @@ public static class MusicLogic
 
         var embeddings = JsonSerializer.Deserialize<Dictionary<string, float[]>>(File.ReadAllText("linesWithEmbeddings.json"))!;
 
+        Filter.GetEmbeddingForSmartSearch = (vectorToken, searchString) =>
+        {
+            if (embeddings.TryGetValue(searchString, out var embedding))
+                return new Vector(embedding);
+
+            throw new InvalidOperationException($"Test embedding not found for search string: '{searchString}'.");
+        };
 
         new Graph<NoteWithDateEntity>.Execute(NoteWithDateOperation.Save)
         {

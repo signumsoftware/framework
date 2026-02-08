@@ -16,6 +16,7 @@ export interface NumberLineProps extends ValueBaseProps<number | null> {
   incrementWithArrow?: boolean | number;
   minValue?: number | null;
   maxValue?: number | null;
+  datalist?: number[];
   ref?: React.Ref<NumberLineController>;
 }
 
@@ -93,20 +94,29 @@ function numericTextBox(c: NumberLineController, validateKey: (e: React.Keyboard
 
   return (
     <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
-      {inputId => c.withItemGroup(
-        <NumberBox
-          id={inputId}
-          minValue={p.minValue != undefined ? p.minValue : limits?.min}
-          maxValue={p.maxValue != undefined ? p.maxValue : limits?.max}
-          htmlAttributes={mergedHtml}
-          value={p.ctx.value}
-          onChange={handleOnChange}
-          formControlClass={classes(p.ctx.formControlClass, c.mandatoryClass)}
-          validateKey={validateKey}
-          format={numberFormat}
-          innerRef={c.setRefs}
-        />
-      )}
+      {inputId => <>
+        {c.withItemGroup(
+          <NumberBox
+            id={inputId}
+            minValue={p.minValue != undefined ? p.minValue : limits?.min}
+            maxValue={p.maxValue != undefined ? p.maxValue : limits?.max}
+            htmlAttributes={mergedHtml}
+            value={p.ctx.value}
+            onChange={handleOnChange}
+            formControlClass={classes(p.ctx.formControlClass, c.mandatoryClass)}
+            validateKey={validateKey}
+            format={numberFormat}
+            innerRef={c.setRefs}
+            datalist={p.datalist}
+            datalistId={p.datalist ? p.ctx.getUniqueId("dataList") : undefined}
+          />
+        )}
+        {p.datalist &&
+          <datalist id={p.ctx.getUniqueId("dataList")}>
+            {p.datalist.map((item, i) => <option key={i} value={item} />)}
+          </datalist>
+        }
+      </>}
     </FormGroup>
   );
 }
@@ -123,6 +133,8 @@ export interface NumberBoxProps {
   htmlAttributes?: React.InputHTMLAttributes<HTMLInputElement>;
   innerRef?: ((ta: HTMLInputElement | null) => void) | React.RefObject<HTMLInputElement>;
   id?: string;
+  datalist?: number[];
+  datalistId?: string;
 }
 
 const cachedLocaleSeparators: {
@@ -168,7 +180,8 @@ export function NumberBox(p: NumberBoxProps): React.ReactElement {
     onBlur={handleOnBlur}
     onChange={handleOnChange}
     onKeyDown={handleKeyDown}
-    onFocus={handleOnFocus} />
+    onFocus={handleOnFocus}
+    list={p.datalistId} />
 
 
   function handleOnFocus(e: React.FocusEvent<any>) {

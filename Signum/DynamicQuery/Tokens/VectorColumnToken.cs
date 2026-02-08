@@ -5,7 +5,7 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.DynamicQuery.Tokens;
 
-internal class VectorColumnToken : QueryToken
+public class VectorColumnToken : QueryToken
 {
     private QueryToken parent;
     private IColumn column;

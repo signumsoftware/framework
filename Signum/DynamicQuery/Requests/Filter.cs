@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Primitives;
 using NpgsqlTypes;
+using Pgvector;
 using Signum.DynamicQuery.Tokens;
 using Signum.Entities.TsVector;
 using Signum.Utilities.Reflection;
@@ -18,6 +19,13 @@ public enum FilterGroupOperation
 
 public abstract class Filter
 {
+    /// <summary>
+    /// Extension point for converting text to embeddings for SmartSearch operations.
+    /// Takes the VectorColumnToken and the search string, returns a Vector.
+    /// This should be set during application startup.
+    /// </summary>
+    public static Func<VectorColumnToken, string, Vector>? GetEmbeddingForSmartSearch = null;
+
     public abstract Expression GetExpression(BuildExpressionContext ctx, bool inMemory);
 
     public abstract IEnumerable<Filter> GetAllFilters();
@@ -378,9 +386,6 @@ public class FilterCondition : Filter
         }
         else if (Operation.IsSmartSearch())
         {
-            // For smart search (vector search), the filter just stores the query
-            // The actual distance filtering is done by ordering/limiting results
-            // So we return true here to include all results
             return Expression.Constant(true);
         }
         else

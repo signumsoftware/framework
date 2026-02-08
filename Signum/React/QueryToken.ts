@@ -112,6 +112,9 @@ export function getFilterType(tr: TypeReference): FilterType | undefined {
 
     case "NpgsqlTsVector":
       return "TsVector";
+
+    case "Vector":
+      return "Vector";
   }
 
   if (isTypeEnum(tr.name))

@@ -15,6 +15,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Pgvector;
 
 namespace Signum.Agent;
 
@@ -181,6 +182,20 @@ public static class ChatbotLogic
             });
 
         PermissionLogic.RegisterTypes(typeof(ChatbotPermission));
+
+        Filter.GetEmbeddingForSmartSearch = (vectorToken, searchString) =>
+        {
+            // Get the default embeddings model
+            var modelLite = ChatbotLogic.DefaultEmbeddingsModel.Value;
+            if (modelLite == null)
+                throw new InvalidOperationException("No default EmbeddingsLanguageModelEntity configured.");
+
+            // Retrieve and call the embeddings API
+            var model = modelLite.RetrieveFromCache();
+            var embeddings = model.GetEmbeddingsAsync(new[] { searchString }, CancellationToken.None).ResultSafe();
+
+            return new Vector(embeddings.SingleEx());
+        };
     }
 
     public static void RegisterUserTypeCondition(TypeConditionSymbol userEntities)

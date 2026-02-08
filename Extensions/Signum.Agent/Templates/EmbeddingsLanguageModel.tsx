@@ -21,7 +21,7 @@ export default function EmbeddingsLanguageModel(p: { ctx: TypeContext<Embeddings
         forceUpdate();
       }} />
       <EnumLine ctx={ctx4.subCtx(n => n.model)} readOnly={models == null} optionItems={models ?? []} />
-      <AutoLine ctx={ctx4.subCtx(n => n.dimensions)} />
+      <AutoLine ctx={ctx4.subCtx(n => n.dimensions)} datalist={[768, 1536, 3072]} />
     </div>
   );
 }

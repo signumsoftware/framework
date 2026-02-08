@@ -716,8 +716,7 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
         return <FilterTextArea ctx={ffc.ctx}
           filterOperation={fc.operation ?? null}
           onChange={(() => ffc.handleValueChange(f, false))}
-          label={ffc.label || SearchMessage.Search.niceToString()}
-          placeholder="Enter search text for semantic similarity..." />
+          label={ffc.label || SearchMessage.Search.niceToString()} />
       }
     },
     {
@@ -875,18 +874,22 @@ export function ComplexConditionSyntax(p: { fo: FilterOperation }): React.ReactE
 
   const popover = (
     <Popover id="popover-basic">
-      <Popover.Header as="h3">{ }</Popover.Header>
+      <Popover.Header as="h3">{help.title}</Popover.Header>
       <Popover.Body>
-        <ul className="ps-3">
-          {help?.examples.map((a, i) => <li key={i} style={{ whiteSpace: "nowrap" }}><code>{a}</code></li>)}
-        </ul>
+        {p.fo == "SmartSearch" ? (
+          <div>{SearchMessage.SmartSearchDescription.niceToString()}</div>
+        ) : (
+          <ul className="ps-3">
+            {help.examples.map((a, i) => <li key={i} style={{ whiteSpace: "nowrap" }}><code>{a}</code></li>)}
+          </ul>
+        )}
       </Popover.Body>
     </Popover>
   );
 
   return (
     <OverlayTrigger trigger="click" placement="right" overlay={popover} >
-      <button className="sf-line-button sf-view btn input-group-text">{help?.icon}</button>
+      <button className="sf-line-button sf-view btn input-group-text">{help.icon}</button>
     </OverlayTrigger>
   );
 
@@ -958,6 +961,12 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
       "\"Dragon Fruit\" OR \"Passion Fruit\"",
       "grape*"
     ]
+  },
+  "SmartSearch": {
+    icon: <FontAwesomeIcon icon="brain" />,
+    title: "Smart Search",
+    url: <span></span>,
+    examples: []
   },
 };
 

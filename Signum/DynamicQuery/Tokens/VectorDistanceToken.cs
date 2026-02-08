@@ -42,8 +42,6 @@ internal class VectorDistanceToken : QueryToken
         var vectorColumnToken = (VectorColumnToken)this.Parent!;
         var vectorIndex = vectorColumnToken.GetVectorIndex();
         
-        // Extract the vector value from filters on the parent VectorColumnToken
-        // First try SmartSearch, then fall back to direct Vector filter
         var vectorExpression = GetVectorFromFilters(context.Filters ?? new List<Filter>(), vectorColumnToken);
 
         if (vectorExpression == null)
@@ -51,7 +49,6 @@ internal class VectorDistanceToken : QueryToken
 
         var vectorColumn = this.Parent!.BuildExpression(context);
 
-        // Determine database type and create appropriate distance call
         if (Connector.Current is PostgreSqlConnector)
         {
             var metric = vectorIndex.Postgres.Metric;
@@ -70,7 +67,7 @@ internal class VectorDistanceToken : QueryToken
         }
     }
 
-    private Expression? GetVectorFromFilters(List<Filter> filters, VectorColumnToken vectorToken)
+    internal Expression? GetVectorFromFilters(List<Filter> filters, VectorColumnToken vectorToken)
     {
         foreach (var filter in filters)
         {
@@ -78,12 +75,16 @@ internal class VectorDistanceToken : QueryToken
             {
                 if (fc.Token != null && fc.Token.Equals(vectorToken))
                 {
-                    // Check for SmartSearch operation (string to embeddings)
                     if (fc.Operation == FilterOperation.SmartSearch && fc.Value is string searchString && searchString.Length > 0)
                     {
-                        return GetQueryVectorExpression(searchString);
+                        if (Filter.GetEmbeddingForSmartSearch == null)
+                            throw new InvalidOperationException(
+                                "Filter.GetEmbeddingForSmartSearch is not configured. " +
+                                "Please set this function during application startup to convert text queries to embeddings.");
+
+                        var vector = Filter.GetEmbeddingForSmartSearch(vectorToken, searchString);
+                        return Expression.Constant(vector, typeof(Vector));
                     }
-                    // Direct vector filter
                     else if (fc.Value is Vector v)
                     {
                         return Expression.Constant(v, typeof(Vector));
@@ -99,64 +100,6 @@ internal class VectorDistanceToken : QueryToken
         }
 
         return null;
-    }
-
-    private Expression GetQueryVectorExpression(string searchString)
-    {
-        // This method will be called at query build time, not execution time
-        // The embedding conversion needs to happen before the query is sent to the database
-        // So we need to do the embedding lookup here and create a constant expression
-        
-        // Try to load embedding functionality via reflection to avoid hard dependency
-        var chatbotLogicType = Type.GetType("Signum.Agent.ChatbotLogic, Signum.Agent");
-        if (chatbotLogicType == null)
-            throw new InvalidOperationException("Signum.Agent extension is not loaded. SmartSearch requires the Agent extension with embedding support.");
-
-        // Get DefaultEmbeddingsModel property
-        var defaultModelProperty = chatbotLogicType.GetProperty("DefaultEmbeddingsModel", 
-            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-        if (defaultModelProperty == null)
-            throw new InvalidOperationException("ChatbotLogic.DefaultEmbeddingsModel property not found.");
-
-        // Get the ResetLazy value
-        var defaultModelLazy = defaultModelProperty.GetValue(null);
-        if (defaultModelLazy == null)
-            throw new InvalidOperationException("DefaultEmbeddingsModel is null.");
-
-        // Get Value property from ResetLazy
-        var valueProperty = defaultModelLazy.GetType().GetProperty("Value");
-        var defaultModelLite = valueProperty?.GetValue(defaultModelLazy);
-        
-        if (defaultModelLite == null)
-            throw new InvalidOperationException("No default embedding model configured. Please configure a default EmbeddingsLanguageModelEntity.");
-
-        // Call RetrieveFromCache
-        var retrieveMethod = chatbotLogicType.GetMethod("RetrieveFromCache", 
-            new[] { defaultModelLite.GetType() });
-        if (retrieveMethod == null)
-            throw new InvalidOperationException("ChatbotLogic.RetrieveFromCache method not found.");
-
-        var model = retrieveMethod.Invoke(null, new[] { defaultModelLite });
-        if (model == null)
-            throw new InvalidOperationException("Failed to retrieve embedding model from cache.");
-        
-        // Call GetEmbeddingsAsync extension method
-        var getEmbeddingsMethod = chatbotLogicType.GetMethod("GetEmbeddingsAsync",
-            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-        
-        if (getEmbeddingsMethod == null)
-            throw new InvalidOperationException("GetEmbeddingsAsync method not found.");
-
-        // Call the async method and wait for result
-        var task = (Task<List<float[]>>)getEmbeddingsMethod.Invoke(model, 
-            new object[] { model, new[] { searchString }, CancellationToken.None })!;
-        
-        var embeddings = task.Result;
-        var embedding = embeddings[0];
-        
-        var vector = new Vector(embedding);
-
-        return Expression.Constant(vector, typeof(Vector));
     }
 
     protected override List<QueryToken> SubTokensOverride(SubTokensOptions options) => new List<QueryToken>();
