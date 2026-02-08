@@ -17,7 +17,7 @@ public static class PostgresVersionDetector
 {
     public static Version? Detect(string connectionString, Version? fallback)
     {
-        try 
+        try
         {
             using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
             {
@@ -48,7 +48,7 @@ public class PostgreSqlConnector : Connector
     public ResetLazy<string> LocalTimeZoneLazy = new ResetLazy<string>(() => (string)Executor.ExecuteScalar("SELECT current_setting('TIMEZONE')")!);
     public override string LocalTimeZone => LocalTimeZoneLazy.Value;
 
-    public ResetLazy<bool> SupportsVectorsLazy = new ResetLazy<bool>(() => 
+    public ResetLazy<bool> SupportsVectorsLazy = new ResetLazy<bool>(() =>
     {
         try
         {
@@ -247,7 +247,14 @@ public class PostgreSqlConnector : Connector
                         for (int j = 0; j < dt.Columns.Count; j++)
                         {
                             var col = dt.Columns[j];
-                            writer.Write(row[col], columns[j].DbType.PostgreSql);
+                            var type = columns[j].DbType.PostgreSql;
+                            if (type == AbstractDbType.VectorPG)
+                            {
+                                var vector = row[col];
+                                writer.Write(vector);
+                            }
+                            else
+                                writer.Write(row[col], type);
                         }
                     }
 
@@ -529,7 +536,7 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
                 AssertDateTime(dt, datetimeKind);
         }
 
-        if(dbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree && value is SqlHierarchyId shi)
+        if (dbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree && value is SqlHierarchyId shi)
         {
             value = shi.ToSortableString();
         }
@@ -558,7 +565,7 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         var exp =
              uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?)), Expression.Constant(dateTimeKind)) :
              uType == typeof(SqlHierarchyId) ? Expression.Coalesce(
-                    Expression.Call(miToSortableString, Expression.Convert(value, typeof(SqlHierarchyId?))), 
+                    Expression.Call(miToSortableString, Expression.Convert(value, typeof(SqlHierarchyId?))),
                     Expression.Constant(DBNull.Value, typeof(object))) :
              ////https://github.com/dotnet/SqlClient/issues/1009
              //uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :

@@ -39,9 +39,13 @@ public class GeminiProvider : IChatbotModelProvider, IEmbeddingsProvider
         var embeddingModel = new GoogleAi(apiKey).CreateEmbeddingModel(model.Model);
 
         var contents = inputs.Select(text => new GenerativeAI.Types.Content(text, null)).ToList();
-        var response = await embeddingModel.BatchEmbedContentAsync(contents, cancellationToken: ct);
 
-        return response.Embeddings!.Select(e => e.Values!.ToArray()).ToList();
+        var sizedResponse = await embeddingModel.BatchEmbedContentAsync(contents.Select(c => new GenerativeAI.Types.EmbedContentRequest
+        {
+            Content = c,
+            OutputDimensionality = model.Dimensions
+        }), cancellationToken: ct);
+        return sizedResponse.Embeddings!.Select(e => e.Values!.ToArray()).ToList();
     }
 
     static string GetApiKey()

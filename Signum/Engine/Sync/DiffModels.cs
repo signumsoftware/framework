@@ -175,6 +175,7 @@ public class DiffIndex
     public bool IsUnique;
     public bool IsPrimary;
     public FullTextIndex? FullTextIndex;
+    public DiffVectorIndex? VectorIndex;
     public string IndexName;
     public string? ViewName;
     public string? FilterDefinition;
@@ -205,6 +206,33 @@ public class DiffIndex
 
         if (this.Type != GetIndexType(mix, isPostgress))
             return false;
+
+        if (mix is VectorTableIndex vix)
+        {
+            if (this.VectorIndex == null)
+                return false;
+
+            if (isPostgress)
+            {
+                var expectedIndexType = VectorTableIndex.GetPGVectorIndex(vix.Postgres.IndexType);
+                var expectedMetric = VectorTableIndex.GetPGVectorDistanceMetric(vix.Postgres.Metric);
+
+                if (this.VectorIndex.IndexType != expectedIndexType)
+                    return false;
+
+                if (this.VectorIndex.DistanceMetric != expectedMetric)
+                    return false;
+
+                // Lists parameter is optional for IVFFlat, might not be stored in catalog
+                // if (vix.Postgres.Lists != null && this.VectorIndex.Lists != vix.Postgres.Lists)
+                //     return false;
+            }
+            else
+            {
+                // SQL Server vector index comparison (when implemented)
+                // For now, just check that VectorIndex is not null
+            }
+        }
 
         return true;
     }
@@ -275,6 +303,12 @@ public class FullTextIndex
     public string CatallogName;
     public string StopList;
     public string PropertiesList;
+}
+
+public class DiffVectorIndex
+{
+    public string? IndexType;  // "hnsw" or "ivfflat"
+    public string? DistanceMetric; // "vector_cosine_ops", "vector_l2_ops", etc.
 }
 
 public enum DiffIndexType

@@ -518,15 +518,10 @@ internal class QueryBinder : ExpressionVisitor
 
     private ProjectionExpression VisitCastProjection(Expression source)
     {
-        if (isPostgres && source is MemberExpression m && m.Type.IsArray)
+        var unnestCall = TryWrapArrayWithUnnest(source);
+        if (unnestCall != null)
         {
-            var miUnnest = ReflectionTools.GetMethodInfo(() => PostgresFunctions.unnest<int>(null!)).GetGenericMethodDefinition();
-
-            var eType = m.Type.ElementType()!;
-
-            var newSource = Expression.Call(null, miUnnest.MakeGenericMethod(eType), m);
-
-            return BindTableValueFunction(newSource);
+            return BindTableValueFunction(unnestCall);
         }
 
         if (source is MethodCallExpression mc && IsTableValuedFunction(mc))
@@ -539,6 +534,17 @@ internal class QueryBinder : ExpressionVisitor
             var visit = Visit(source);
             return AsProjection(visit);
         }
+    }
+
+    private MethodCallExpression? TryWrapArrayWithUnnest(Expression source)
+    {
+        if (isPostgres && source is MemberExpression m && m.Type.IsArray)
+        {
+            var miUnnest = ReflectionTools.GetMethodInfo(() => PostgresFunctions.unnest<int>(null!)).GetGenericMethodDefinition();
+            var eType = m.Type.ElementType()!;
+            return Expression.Call(null, miUnnest.MakeGenericMethod(eType), m);
+        }
+        return null;
     }
 
     private ProjectionExpression BindTableValueFunction(MethodCallExpression mc)
@@ -1150,15 +1156,51 @@ internal class QueryBinder : ExpressionVisitor
         ProjectionExpression projection = this.VisitCastProjection(source);
         bool outer = OverloadingSimplifier.ExtractDefaultIfEmpty(ref collectionSelector);
 
-        JoinType joinType = IsTable(collectionSelector.Body) && !outer ? JoinType.CrossJoin :
+        // Check if collection selector body is a PostgreSQL array that needs unnest wrapping
+        Expression collectionBody = collectionSelector.Body;
+        var unnestCall = TryWrapArrayWithUnnest(collectionBody);
+        if (unnestCall != null)
+        {
+            collectionBody = unnestCall;
+        }
+
+        JoinType joinType = IsTable(collectionBody) && !outer ? JoinType.CrossJoin :
                             outer ? JoinType.OuterApply :
                             JoinType.CrossApply;
 
-        Expression collectionExpression = collectionSelector.Parameters.Count == 1 ?
-            MapVisitExpand(collectionSelector, projection) :
-            MapVisitExpandWithIndex(collectionSelector, ref projection);
+        ProjectionExpression collectionProjection;
 
-        ProjectionExpression collectionProjection = AsProjection(collectionExpression);
+        // If the collection body is a TVF (including unnest), handle it specially
+        if (collectionBody is MethodCallExpression mce && IsTableValuedFunction(mce))
+        {
+            // Handle indexed selector if needed (2 parameters means index is requested)
+            if (collectionSelector.Parameters.Count == 2)
+            {
+                projection = WithIndex(projection, out ColumnExpression index);
+                map.Add(collectionSelector.Parameters[1], index);
+            }
+
+            // Map the parameter before visiting the TVF so arguments can reference it
+            using (SetCurrentSource(projection.Select))
+            {
+                map.Add(collectionSelector.Parameters[0], projection.Projector);
+                collectionProjection = BindTableValueFunction(mce);
+                map.Remove(collectionSelector.Parameters[0]);
+            }
+
+            if (collectionSelector.Parameters.Count == 2)
+            {
+                map.Remove(collectionSelector.Parameters[1]);
+            }
+        }
+        else
+        {
+            Expression collectionExpression = collectionSelector.Parameters.Count == 1 ?
+                MapVisitExpand(collectionSelector, projection) :
+                MapVisitExpandWithIndex(collectionSelector, ref projection);
+
+            collectionProjection = AsProjection(collectionExpression);
+        }
 
         Alias alias = NextSelectAlias();
         if (resultSelector == null)

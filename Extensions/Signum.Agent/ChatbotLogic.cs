@@ -226,7 +226,7 @@ public static class ChatbotLogic
         return result;
     }
 
-    public static Task<List<float[]>> GetEmbeddingsAsync(string[] inputs, EmbeddingsLanguageModelEntity model, CancellationToken ct)
+    public static Task<List<float[]>> GetEmbeddingsAsync(this EmbeddingsLanguageModelEntity model, string[] inputs, CancellationToken ct)
     {
         using (HeavyProfiler.Log("GetEmbeddings", () => model.GetMessage() + "\n" + inputs.ToString("\n")))
         {
