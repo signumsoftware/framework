@@ -12,13 +12,13 @@
 
 ## Language-Specific Guidance
 
-### Build System (IMPORTANT)
+### Build System (for Visual Studio COPILOT only!!)
 - **ALWAYS use `run_build` tool** instead of `run_command_in_terminal` with `dotnet build`
 - The `run_build` tool automatically uses Visual Studio's integrated compiler (much faster than dotnet CLI)
 - Only use `dotnet build` in terminal if `run_build` is unavailable or specific CLI flags are required
-- The solution is large; avoid compiling the entire solution unless necessary. Prefer compiling only the affected project.
 
 ### C#
+- The solution is large; avoid compiling the entire solution unless necessary. Prefer compiling only the affected project.
 - Prefer static classes for logic over dependency injection.
 - Prefer synchronous logic for methods used by operations or processes.
 - Use Signum LINQ provider for queries, not EF or SQL.
