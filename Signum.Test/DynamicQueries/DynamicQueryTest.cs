@@ -428,15 +428,15 @@ public class DynamicQueryTest
             Columns = new List<Column>
             {
                 new Column(QueryUtils.Parse("Entity.Chunk", qd, cto), null),
-                new Column(QueryUtils.Parse("Entity.embedding.Distance", qd, cto), null),
+                new Column(QueryUtils.Parse("Entity.Embedding.Distance", qd, cto), null),
             },
             Filters = new List<DynamicQuery.Filter>
             {
-                new FilterCondition(QueryUtils.Parse("Entity.embedding", qd, cto), FilterOperation.SmartSearch, sampleChunk),
+                new FilterCondition(QueryUtils.Parse("Entity.Embedding", qd, cto), FilterOperation.SmartSearch, sampleChunk),
             },
             Orders = new List<Order>
             {
-                new Order(QueryUtils.Parse("Entity.embedding.Distance", qd, cto), OrderType.Ascending),
+                new Order(QueryUtils.Parse("Entity.Embedding.Distance", qd, cto), OrderType.Ascending),
             },
             Pagination = new Pagination.Firsts(5),
         });
@@ -481,16 +481,16 @@ public class DynamicQueryTest
             Columns = new List<Column>
             {
                 new Column(QueryUtils.Parse("Entity.Chunk", qd, cto), null),
-                new Column(QueryUtils.Parse("Entity.embedding.Distance", qd, cto), null),
+                new Column(QueryUtils.Parse("Entity.Embedding.Distance", qd, cto), null),
             },
             Filters = new List<DynamicQuery.Filter>
             {
                 // Use SmartSearch with text - this will use Filter.GetEmbeddingForSmartSearch
-                new FilterCondition(QueryUtils.Parse("Entity.embedding", qd, cto), FilterOperation.SmartSearch, sampleChunk),
+                new FilterCondition(QueryUtils.Parse("Entity.Embedding", qd, cto), FilterOperation.SmartSearch, sampleChunk),
             },
             Orders = new List<Order>
             {
-                new Order(QueryUtils.Parse("Entity.embedding.Distance", qd, cto), OrderType.Ascending),
+                new Order(QueryUtils.Parse("Entity.Embedding.Distance", qd, cto), OrderType.Ascending),
             },
             Pagination = new Pagination.Firsts(5),
         });

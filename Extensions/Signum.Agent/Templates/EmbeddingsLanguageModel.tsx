@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityCombo, EnumLine } from '@framework/Lines'
+import { AutoLine, EntityCombo, EnumLine,NumberLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmbeddingsLanguageModelEntity } from '../Signum.Agent';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
@@ -21,7 +21,7 @@ export default function EmbeddingsLanguageModel(p: { ctx: TypeContext<Embeddings
         forceUpdate();
       }} />
       <EnumLine ctx={ctx4.subCtx(n => n.model)} readOnly={models == null} optionItems={models ?? []} />
-      <AutoLine ctx={ctx4.subCtx(n => n.dimensions)} datalist={[768, 1536, 3072]} />
+      <NumberLine ctx={ctx4.subCtx(n => n.dimensions)} datalist={[768, 1536, 3072]} />
     </div>
   );
 }

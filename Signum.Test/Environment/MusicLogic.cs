@@ -166,7 +166,6 @@ public static class MusicLogic
                 Entity = p,
                 p.Id,
                 p.Note,
-                p.Embedding
             });
 
         RegisterAwards(sb);

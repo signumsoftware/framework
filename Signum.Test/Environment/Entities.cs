@@ -456,7 +456,7 @@ public class SimplePassageEntity : Entity
 
     public bool IsTitle { get; set; }
 
-    [DbType(Size = 768)]
+    [DbType(Size = 768), QueryableProperty(false)]
     public Vector? Embedding { get; set; }
 
     [StringLengthValidator(Max = int.MaxValue)]
