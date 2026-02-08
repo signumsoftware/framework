@@ -1,4 +1,5 @@
 using NpgsqlTypes;
+using Pgvector;
 using Signum.DynamicQuery.Tokens;
 using Signum.Utilities.Reflection;
 using System.Collections.ObjectModel;
@@ -438,6 +439,9 @@ public static class QueryUtils
         if (QueryToken.IsCollection(token.Type))
             return "You can not add collections as columns";
 
+        if (token.Type == typeof(Vector))
+            return "You can not add vectors as columns";
+
         if (token.HasAllOrAny())
             return "Columns can not contain '{0}', '{1}', {2} or {3}".FormatWith(
                 CollectionAnyAllType.All.NiceToString(),
@@ -496,6 +500,9 @@ public static class QueryUtils
 
         if (QueryToken.IsCollection(token.Type))
             return "Collections can not be ordered";
+
+        if (token.Type == typeof(Vector))
+            return "Vectors can not be ordered";
 
         if (token.HasToArray() != null)
             return "ToArray can not be ordered";
