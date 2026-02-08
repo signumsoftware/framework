@@ -543,6 +543,10 @@ export const filterOperations: Record<FilterType, FilterOperation[]> = {
     "TsQuery_Plain",
     "TsQuery_Phrase",
     "TsQuery_WebSearch",
+  ],
+  
+  "Vector": [
+    "SmartSearch",
   ]
 };
 

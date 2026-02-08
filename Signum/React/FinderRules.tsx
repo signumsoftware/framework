@@ -709,6 +709,18 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
       }
     },
     {
+      name: "VectorSmartSearch",
+      applicable: (f, ffc) => isFilterCondition(f) && f.token?.filterType == "Vector" && f.operation == "SmartSearch",
+      renderValue: (f, ffc) => {
+        const fc = f as FilterConditionOptionParsed;
+        return <FilterTextArea ctx={ffc.ctx}
+          filterOperation={fc.operation ?? null}
+          onChange={(() => ffc.handleValueChange(f, false))}
+          label={ffc.label || SearchMessage.Search.niceToString()}
+          placeholder="Enter search text for semantic similarity..." />
+      }
+    },
+    {
       name: "FilterGroup",
       applicable: (f, ffc) => isFilterGroup(f),
       renderValue: (f, ffc) => {
@@ -831,11 +843,12 @@ export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type
 
 
 
-export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: FilterOperation | null, onChange: () => void, label?: string }): React.ReactElement {
+export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: FilterOperation | null, onChange: () => void, label?: string, placeholder?: string }): React.ReactElement {
   return <TextAreaLine ctx={p.ctx}
     type={{ name: "string" }}
     label={p.label}
     valueHtmlAttributes={p.filterOperation != null && p.filterOperation != "FreeText" ? {
+      placeholder: p.placeholder,
       onKeyDown: e => {
         console.log(e);
         if (e.key == KeyNames.enter && !e.shiftKey) {
@@ -848,7 +861,7 @@ export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: F
           e.stopPropagation()
         }
       }
-    } : undefined}
+    } : { placeholder: p.placeholder }}
     extraButtons={vlc => p.filterOperation && <ComplexConditionSyntax fo={p.filterOperation} />}
     onChange={p.onChange}
   />
