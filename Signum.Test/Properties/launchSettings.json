@@ -1,12 +1,18 @@
 {
   "profiles": {
-    "Signum.Test": {
+    "SQL Server": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "https://localhost:51333;http://localhost:51334"
+        "ASPNETCORE_ENVIRONMENT": "SQLServer"
+      }
+    },
+    "Postgres": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Postgres"
+      }
     }
   }
 }

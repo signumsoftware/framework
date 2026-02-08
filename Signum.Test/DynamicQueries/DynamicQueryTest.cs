@@ -280,12 +280,6 @@ public class DynamicQueryTest
     [Fact]
     public void VectorTableIndexExists()
     {
-        if (!(Connector.Current is PostgreSqlConnector))
-        {
-            Assert.Skip("Skipping test because not PostgreSQL");
-            return;
-        }
-
         var table = Schema.Current.Tables.TryGetC(typeof(SimplePassageEntity));
         Assert.NotNull(table);
 
@@ -303,12 +297,6 @@ public class DynamicQueryTest
     [Fact]
     public void VectorColumnDiscovery()
     {
-        if (!(Connector.Current is PostgreSqlConnector))
-        {
-            Assert.Skip("Skipping test because not PostgreSQL");
-            return;
-        }
-
         var qd = QueryLogic.Queries.QueryDescription(typeof(SimplePassageEntity));
 
         // Vector columns should appear on the Entity level, not as regular columns
@@ -336,15 +324,9 @@ public class DynamicQueryTest
     [Fact]
     public void VectorDistanceTokenParsing()
     {
-        if (!(Connector.Current is PostgreSqlConnector))
-        {
-            Assert.Skip("Skipping test because not PostgreSQL");
-            return;
-        }
-
         var qd = QueryLogic.Queries.QueryDescription(typeof(SimplePassageEntity));
 
-        var distanceToken = QueryUtils.Parse("Entity.embedding.Distance", qd, cto);
+        var distanceToken = QueryUtils.Parse("Entity.Embedding.Distance", qd, cto);
 
         Assert.NotNull(distanceToken);
         Assert.IsType<VectorDistanceToken>(distanceToken);
@@ -402,12 +384,6 @@ public class DynamicQueryTest
     [Fact]
     public void VectorSearchWithDirectEmbedding()
     {
-        if (!(Connector.Current is PostgreSqlConnector))
-        {
-            Assert.Skip("Skipping test because not PostgreSQL");
-            return;
-        }
-
         var sampleChunk = Database.Query<SimplePassageEntity>()
             .Where(a => a.Embedding != null)
             .Select(a => a.Chunk)
@@ -453,12 +429,6 @@ public class DynamicQueryTest
     [Fact]
     public void VectorSmartSearchWithText()
     {
-        if (!(Connector.Current is PostgreSqlConnector))
-        {
-            Assert.Skip("Skipping test because not PostgreSQL");
-            return;
-        }
-
         // Get the first chunk text to use as search query
         var sampleChunk = Database.Query<SimplePassageEntity>()
             .Where(a => a.Embedding != null)
@@ -506,6 +476,43 @@ public class DynamicQueryTest
         Assert.Equal(sampleChunk, chunk);
         Assert.NotNull(distance);
         Assert.True(distance < 0.01f, $"Expected distance < 0.01 for exact text match, got {distance}");
+    }
+
+    [Fact]
+    public void VectorOrderByDistanceWithoutFilter()
+    {
+        var qd = QueryLogic.Queries.QueryDescription(typeof(SimplePassageEntity));
+
+        var vectorToken = (VectorColumnToken)QueryUtils.Parse("Entity.Embedding", qd, cto);
+        var distanceToken = new VectorDistanceToken(vectorToken);
+        
+        // Query WITHOUT any filter - distance should be NULL since there's no vector to compare against
+        var rt = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+        {
+            QueryName = typeof(SimplePassageEntity),
+            GroupResults = false,
+            Columns = new List<Column>
+            {
+                new Column(QueryUtils.Parse("Entity.Chunk", qd, cto), null),
+                new Column(distanceToken, null),
+            },
+            Filters = new List<DynamicQuery.Filter>(), // No filters at all!
+            Orders = new List<Order>
+            {
+                new Order(distanceToken, OrderType.Ascending),
+            },
+            Pagination = new Pagination.Firsts(5),
+        });
+
+        Assert.True(rt.Columns.Length == 2);
+        Assert.True(rt.Rows.Length > 0);
+        
+        // Since there's no filter to provide a vector, all distance values should be NULL
+        foreach (var row in rt.Rows)
+        {
+            var distance = (float?)row[1];
+            Assert.Null(distance);
+        }
     }
 
 

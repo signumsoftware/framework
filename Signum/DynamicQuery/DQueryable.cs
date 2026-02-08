@@ -8,6 +8,7 @@ using System.Linq;
 using Azure.Core;
 using Signum.Utilities.ExpressionTrees;
 using System.Collections.Generic;
+using Pgvector;
 
 namespace Signum.DynamicQuery;
 
@@ -80,7 +81,7 @@ public static class DQueryable
             selectColumn.AddRange(request.Orders.Select(a => a.Token));
 
         return query
-            .SelectMany(request.Multiplications(), request.FullTextTableFilters())
+            .SelectMany(request.Multiplications(), request.TableFilters())
             .Where(request.Filters)
             .OrderBy(request.Orders, request.Pagination)
             .Select(selectColumn)
@@ -97,7 +98,7 @@ public static class DQueryable
             selectColumn.AddRange(request.Orders.Select(a => a.Token));
 
         return query
-            .SelectMany(request.Multiplications(), request.FullTextTableFilters())
+            .SelectMany(request.Multiplications(), request.TableFilters())
             .Where(request.Filters)
             .OrderBy(request.Orders, request.Pagination)
             .Select(selectColumn)
@@ -401,16 +402,21 @@ public static class DQueryable
     }
 
     #region SelectMany
-    public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<CollectionElementToken> elementTokens, List<FilterSqlServerFullText> fullTextTableFilters)
+    public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<CollectionElementToken> elementTokens, List<ITableFilter> tableFilters)
     {
         foreach (var cet in elementTokens)
         {
             query = query.SelectMany(cet);
         }
 
-        foreach (var fttf in fullTextTableFilters)
+        foreach (var tf in tableFilters)
         {
-            query = query.JoinWithFullText(fttf);
+            if (tf is FilterSqlServerFullText fft)
+                query = query.JoinWithFullText(fft);
+            else if (tf is FilterSqlServerVectorSearch fvs)
+                query = query.JoinWithVectorSearch(fvs);
+            else
+                throw new UnexpectedValueException(tf);
         }
 
         return query;
@@ -499,6 +505,80 @@ public static class DQueryable
             return query.DefaultIfEmpty() as IQueryable<FullTextResultTable>;
 
         return query;
+    }
+
+    public static DQueryable<T> JoinWithVectorSearch<T>(this DQueryable<T> query, FilterSqlServerVectorSearch fvs)
+    {
+        if (!fvs.IsTable)
+            throw new InvalidOperationException("IsTable should be true");
+
+        var schema = Schema.Current;
+        var vectorToken = (VectorColumnToken)fvs.Token;
+        var pr = vectorToken.GetPropertyRoute()!;
+        
+        var mle = pr.GetMListItemsRoute();
+        ITable table = mle != null ? ((FieldMList)schema.Field(mle.Parent!)).TableMList : (ITable)schema.Table(pr.RootType);
+        var column = (IColumn)schema.Field(pr);
+
+        // Get the entity type for the WithDistance generic parameter
+        Type entityType = table switch
+        {
+            Table t => t.Type,
+            TableMList tml => typeof(MListElement<,>).MakeGenericType(tml.BackReference.FieldType, tml.Field.FieldType),
+            _ => throw new UnexpectedValueException(table)
+        };
+
+        // Use reflection to call Vector_Search<T> with the correct entity type
+        var miVectorSearch = typeof(SqlVectorSearch).GetMethod(nameof(SqlVectorSearch.Vector_Search), 
+            new[] { typeof(ITable), typeof(IColumn), typeof(Vector), typeof(SqlVectorDistanceMetric), typeof(int) })!;
+        var miVectorSearchGeneric = miVectorSearch.MakeGenericMethod(entityType);
+        
+        var innerQuery = (IQueryable)miVectorSearchGeneric.Invoke(null, new object[] { table, column, fvs.QueryVector, fvs.DistanceMetric, fvs.TopN })!;
+        var withDistanceType = typeof(WithDistance<>).MakeGenericType(entityType);
+
+        QueryToken tableToken = fvs.Token.Follow(a => a.Parent)
+            .FirstOrDefault(a => table is TableMList ? a is CollectionElementToken : a.Type.IsLite()) 
+            ?? query.Context.Replacements.SingleEx(a => a.Key.FullKey() == "Entity").Key;
+
+        var replacement = query.Context.Replacements.ToDictionary(); //Necessary for SubQueries IEnumerable
+
+        var vsParam = Expression.Parameter(withDistanceType, "vs");
+
+        var idToken = tableToken is CollectionElementToken ? 
+            MListElementPropertyToken.RowId(tableToken, MListElementPropertyToken.AsMListEntityProperty(tableToken.Parent!)!) :
+            EntityPropertyToken.IdProperty(tableToken);
+
+        var idExpression = UndoUnwrapPrimaryKey(idToken.BuildExpression(query.Context));
+
+        var properties = replacement.Values.Select(box => box.RawExpression)
+            .And(Expression.Property(vsParam, "Distance"))
+            .ToList();
+        var ctor = TupleReflection.TupleChainConstructor(properties);
+
+        var join = Untyped.Join(query.Query, innerQuery,
+            outerKeySelector: Expression.Lambda(idExpression, query.Context.Parameter),
+            innerKeySelector: Expression.Lambda(
+                Expression.Property(Expression.Property(vsParam, "Original"), "Id"),
+                vsParam),
+            resultSelector: Expression.Lambda(ctor, query.Context.Parameter, vsParam));
+
+        var parameter = Expression.Parameter(ctor.Type);
+
+        var newReplacements = replacement.Select((kvp, i) => KeyValuePair.Create(kvp.Key,
+            new ExpressionBox(TupleReflection.TupleChainProperty(parameter, i),
+            mlistElementRoute: kvp.Value.MListElementRoute)
+        )).ToDictionary();
+
+        var distance = TupleReflection.TupleChainProperty(parameter, replacement.Count);
+
+        newReplacements.Add(new VectorDistanceToken(vectorToken), new ExpressionBox(distance, mlistElementRoute: null));
+
+        var newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements,
+            query.Context.Filters,
+            query.Context.Orders,
+            query.Context.Pagination);
+
+        return new DQueryable<T>(join, newContext);
     }
 
     static MethodInfo miDefaultIfEmptyE = ReflectionTools.GetMethodInfo(() => Enumerable.Empty<string>().DefaultIfEmpty()).GetGenericMethodDefinition();

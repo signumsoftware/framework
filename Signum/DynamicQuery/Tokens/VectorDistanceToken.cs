@@ -39,6 +39,12 @@ internal class VectorDistanceToken : QueryToken
 
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
+        // First check if we're using a table-valued function join (JoinWithVectorSearch or JoinWithFullText)
+        // In that case, the distance is already in the replacements
+        if (context.Replacements.TryGetValue(this, out var replacement))
+            return replacement.RawExpression;
+
+        // Otherwise, calculate distance inline using Vector_Distance function
         var vectorColumnToken = (VectorColumnToken)this.Parent!;
         var vectorIndex = vectorColumnToken.GetVectorIndex();
         

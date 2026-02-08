@@ -1,4 +1,6 @@
 using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlTypes;
+using Pgvector;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Collections;
@@ -205,14 +207,11 @@ public static class BulkInserter
     {
         var result = type.UnNullify();
 
-        //if (!isPostgres)
-        //{
-        //    if (result == typeof(DateOnly))
-        //        return typeof(DateTime);
-
-        //    if (result == typeof(TimeOnly))
-        //        return typeof(TimeSpan);
-        //}
+        if (!isPostgres)
+        {
+            if (result == typeof(Vector))
+                return typeof(SqlVector<float>);
+        }
 
         return result;
     }
