@@ -193,6 +193,7 @@ public class QueryTokenTS
         this.hideInAutoExpand = qt.HideInAutoExpand;
         this.hasOrderAdapter = QueryUtils.OrderAdapters.Any(a => a(qt) != null);
         this.tsVectorFor = qt is PgTsVectorColumnToken tsqt ? tsqt.GetColumnsRoutes().Select(a => a.ToString()).ToList() : null;
+        this.vectorDistanceMetric = qt is VectorColumnToken vct ? vct.GetVectorIndex().Postgres.Metric : null;
 
         this.preferEquals = qt.Type == typeof(string) &&
             qt.GetPropertyRoute() is PropertyRoute pr &&
@@ -264,6 +265,7 @@ public class QueryTokenTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool hasOrderAdapter;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool preferEquals;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public IReadOnlyList<string>? tsVectorFor;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public PGVectorDistanceMetric? vectorDistanceMetric;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public QueryTokenTS? parent;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? propertyRoute;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool autoExpand;

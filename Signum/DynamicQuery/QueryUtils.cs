@@ -49,6 +49,9 @@ public static class QueryUtils
         if (uType == typeof(NpgsqlTsVector))
             return FilterType.TsVector;
 
+        if (uType == typeof(Pgvector.Vector))
+            return FilterType.Vector;
+
         if (uType.IsEnum)
             return FilterType.Enum;
 
@@ -239,6 +242,12 @@ public static class QueryUtils
                 FilterOperation.TsQuery_Plain,
                 FilterOperation.TsQuery_Plain,
                 FilterOperation.TsQuery_WebSearch,
+            }.ToReadOnly()
+        },
+        {
+            FilterType.Vector, new List<FilterOperation>
+            {
+                FilterOperation.SmartSearch,
             }.ToReadOnly()
         },
     };
@@ -678,6 +687,11 @@ public static class QueryUtils
             fo == FilterOperation.TsQuery_Plain ||
             fo == FilterOperation.TsQuery_Phrase ||
             fo == FilterOperation.TsQuery_WebSearch;
+    }
+
+    public static bool IsSmartSearch(this FilterOperation fo)
+    {
+        return fo == FilterOperation.SmartSearch;
     }
 }
 

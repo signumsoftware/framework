@@ -255,6 +255,9 @@ public class FilterCondition : Filter
         if (operation.IsTsQuery())
             return typeof(string);
 
+        if (operation == FilterOperation.SmartSearch)
+            return typeof(string);
+
         if (operation.IsList())
             return typeof(IEnumerable<>).MakeGenericType(token.Type.Nullify());
         
@@ -372,6 +375,13 @@ public class FilterCondition : Filter
             var query = Expression.Call(mi, Expression.Constant(Value));
 
             return Expression.Call(TsVectorExtensions.miMatches, left, query);
+        }
+        else if (Operation.IsSmartSearch())
+        {
+            // For smart search (vector search), the filter just stores the query
+            // The actual distance filtering is done by ordering/limiting results
+            // So we return true here to include all results
+            return Expression.Constant(true);
         }
         else
         {
@@ -527,6 +537,9 @@ public enum FilterOperation
     TsQuery_Phrase,
     [Description("tsquery (web search)")]
     TsQuery_WebSearch,
+
+    [Description("smart search")]
+    SmartSearch, //Vector Search with Embeddings
 }
 
 [InTypeScript(true)]
@@ -544,6 +557,7 @@ public enum FilterType
     Enum,
     Guid,
     TsVector,
+    Vector,
 }
 
 public class FilterSqlServerFullText : Filter

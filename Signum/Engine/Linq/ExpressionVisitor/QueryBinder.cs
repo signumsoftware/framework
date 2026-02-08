@@ -1899,6 +1899,19 @@ internal class QueryBinder : ExpressionVisitor
             return tsVectorColumn;
         }
 
+        if (m.Method.DeclaringType?.FullName == "Signum.Entities.VectorSearch.VectorExtensions" && m.Method.Name == "GetVectorColumn")
+        {
+            var colArg = m.TryGetArgument("vectorColumnName");
+            var colName = (string)((ConstantExpression)colArg!).Value!;
+
+            var vectorColumn =
+                source is EntityExpression e ? Completed(e).Let(ec => ec.Table.GetVectorColumn(ec.TableAlias!, colName)) :
+                source is MListElementExpression mle ? mle.Table.GetVectorColumn(mle.Alias, colName) :
+                throw new InvalidOperationException("Unexpected source");
+
+            return vectorColumn;
+        }
+
         if (m.Method.DeclaringType == typeof(TypeLogic) && m.Method.Name == nameof(TypeLogic.ToTypeEntity))
         {
             var arg = m.Arguments[0];

@@ -1,5 +1,7 @@
 using Signum.DynamicQuery;
 using Signum.DynamicQuery.Tokens;
+using Signum.Engine.Maps;
+using Pgvector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -273,6 +275,92 @@ public class DynamicQueryTest
 
         Assert.True(rt.Columns.Length == 3);
         Assert.True(rt.Rows.Length > 0);
+    }
+
+    [Fact]
+    public void VectorTableIndexExists()
+    {
+        if (!(Connector.Current is PostgreSqlConnector))
+        {
+            Assert.Skip("Skipping test because not PostgreSQL");
+            return;
+        }
+
+        var table = Schema.Current.Tables.TryGetC(typeof(SimplePassageEntity));
+        Assert.NotNull(table);
+
+        var vectorIndexes = table.AllIndexes().OfType<VectorTableIndex>().ToList();
+        Assert.True(vectorIndexes.Count > 0, "Expected at least one VectorTableIndex on SimplePassageEntity");
+
+        var vectorIndex = vectorIndexes.First();
+        Assert.Single(vectorIndex.Columns);
+        
+        var column = vectorIndex.Columns.Single();
+        // PostgreSQL may store column names differently
+        Assert.True(column.Name.ToLower() == "embedding", $"Expected 'embedding' but got '{column.Name}'");
+    }
+
+    [Fact]
+    public void VectorColumnDiscovery()
+    {
+        if (!(Connector.Current is PostgreSqlConnector))
+        {
+            Assert.Skip("Skipping test because not PostgreSQL");
+            return;
+        }
+
+        var qd = QueryLogic.Queries.QueryDescription(typeof(SimplePassageEntity));
+
+        // Vector columns should appear on the Entity level, not as regular columns
+        // Parse Entity first
+        var entityToken = QueryUtils.Parse("Entity", qd, cto);
+        Assert.NotNull(entityToken);
+
+        // Get sub-tokens from Entity
+        var subTokens = QueryUtils.SubTokens(entityToken, qd, cto).ToList();
+        
+        // Look for VectorColumnToken in the Entity's sub-tokens
+        var vectorToken = subTokens.FirstOrDefault(st => st is VectorColumnToken);
+
+        Assert.NotNull(vectorToken);
+        Assert.IsType<VectorColumnToken>(vectorToken);
+
+        // Now check if VectorDistanceToken is available as a sub-token of VectorColumnToken
+        var vectorSubTokens = QueryUtils.SubTokens(vectorToken, qd, cto).ToList();
+        var distanceToken = vectorSubTokens.FirstOrDefault(st => st is VectorDistanceToken);
+
+        Assert.NotNull(distanceToken);
+        Assert.Equal(typeof(float?), distanceToken.Type);
+    }
+
+    [Fact]
+    public void VectorDistanceTokenParsing()
+    {
+        if (!(Connector.Current is PostgreSqlConnector))
+        {
+            Assert.Skip("Skipping test because not PostgreSQL");
+            return;
+        }
+
+        var qd = QueryLogic.Queries.QueryDescription(typeof(SimplePassageEntity));
+
+        // Parse the distance token - the path should be Entity.embedding.Distance
+        // (lowercase because PostgreSQL stores column names as lowercase)
+        var distanceToken = QueryUtils.Parse("Entity.embedding.Distance", qd, cto);
+
+        Assert.NotNull(distanceToken);
+        Assert.IsType<VectorDistanceToken>(distanceToken);
+        Assert.Equal(typeof(float?), distanceToken.Type);
+        
+        // Verify parent is VectorColumnToken
+        Assert.NotNull(distanceToken.Parent);
+        Assert.IsType<VectorColumnToken>(distanceToken.Parent);
+        
+        var vectorToken = (VectorColumnToken)distanceToken.Parent;
+        Assert.Equal(typeof(Vector), vectorToken.Type);
+        
+        // Note: Actual query execution with SmartSearch requires the Signum.Agent extension
+        // to convert text queries to embeddings. This test only verifies token discovery.
     }
 
 

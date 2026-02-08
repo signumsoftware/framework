@@ -1467,6 +1467,13 @@ public partial class TableMList
 
         return new ColumnExpression(typeof(NpgsqlTsVector), tableAlias, column.Name);
     }
+
+    internal ColumnExpression GetVectorColumn(Alias tableAlias, string columnName)
+    {
+        var column = this.Columns.GetOrThrow(columnName);
+
+        return new ColumnExpression(typeof(Pgvector.Vector), tableAlias, column.Name);
+    }
 }
 
 internal static class SaveUtils

@@ -53,7 +53,8 @@ export type FilterOperation =
   "TsQuery" |
   "TsQuery_Plain" |
   "TsQuery_Phrase" |
-  "TsQuery_WebSearch";
+  "TsQuery_WebSearch" |
+  "SmartSearch";
 
 export const FilterType: EnumType<FilterType> = new EnumType<FilterType>("FilterType");
 export type FilterType =
@@ -68,7 +69,8 @@ export type FilterType =
   "Boolean" |
   "Enum" |
   "Guid" |
-  "TsVector";
+  "TsVector" |
+  "Vector";
 
 export const OrderType: EnumType<OrderType> = new EnumType<OrderType>("OrderType");
 export type OrderType =
