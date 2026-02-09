@@ -313,8 +313,10 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     if (!this.state.selectedNode)
       return null;
 
+      var menuItems = this.renderMenuItems();
+
     return (
-      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide}>
+      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} itemsCount={menuItems.length}>
         {this.state.contextualMenu?.showSearchBox &&
           <AutoFocus>
             <input
@@ -326,7 +328,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
               onChange={this.handleMenuFilterChange} />
           </AutoFocus>}
           <div style={{ position:"relative", maxHeight: "calc(100vh - 400px)", overflowY: "auto" }}>
-            {this.renderMenuItems().map((mi, i) => React.cloneElement((mi as SearchableMenuItem).menu ?? mi, { key: i }))}
+            {menuItems.map((mi, i) => React.cloneElement((mi as SearchableMenuItem).menu ?? mi, { key: i }))}
           </div>
       </ContextMenu>
     );
