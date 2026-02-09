@@ -20,9 +20,11 @@ export default function ProcessPanelPage(): React.JSX.Element {
   const [state, reloadState] = useAPIWithReload(() => ProcessClient.API.view(), [], { avoidReset: true });
 
   const tick = useInterval(state == null || state.running ? 500 : null, 0, n => n + 1);
+  const [rotation, setRotation] = React.useState(0);
 
   React.useEffect(() => {
     reloadState();
+    setRotation(prev => prev + 45);
   }, [tick]);
 
   useTitle("Process Runner");
@@ -43,11 +45,27 @@ export default function ProcessPanelPage(): React.JSX.Element {
 
   return (
     <div>
-      <div className='d-flex align-items-center'><h1 className="display-6 h2"><FontAwesomeIcon aria-hidden="true" icon={"gears"} /> {ProcessMessage.ProcessPanel.niceToString()} <CopyHealthCheckButton
-        name={url.hostname + " Process Runner"}
-        healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/processes/healthCheck')}
-        clickUrl={url.href}
-      /></h1></div>
+      <div className='d-flex align-items-center'>
+        <h1 className="display-6 h2">
+          <FontAwesomeIcon aria-hidden="true" icon={"gears"} /> 
+          {ProcessMessage.ProcessPanel.niceToString()} 
+          <FontAwesomeIcon 
+            aria-hidden="true" 
+            icon="sync" 
+            className="ms-2" 
+            style={{ 
+              transform: `rotate(${rotation}deg)`,
+              transition: 'transform 0.5s ease-in-out',
+              opacity: 0.5
+            }} 
+          />
+          <CopyHealthCheckButton
+            name={url.hostname + " Process Runner"}
+            healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/processes/healthCheck')}
+            clickUrl={url.href}
+          />
+        </h1>
+      </div>
       <div className="btn-toolbar mt-3">
         <button type="button" className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon aria-hidden="true" icon="play" /> {ProcessMessage.Start.niceToString()}</button>
         <button type="button" className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon aria-hidden="true" icon="stop" /> {ProcessMessage.Stop.niceToString()}</button>

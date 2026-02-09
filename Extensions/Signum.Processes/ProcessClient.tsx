@@ -1,4 +1,3 @@
-
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { OverlayTrigger, Tooltip, Dropdown } from 'react-bootstrap';
@@ -174,7 +173,7 @@ export namespace ProcessClient {
     }
   
     export function view(): Promise<ProcessLogicState> {
-      return ajaxGet({ url: "/api/processes/view" });
+      return ajaxGet({ url: "/api/processes/view", avoidNotifyPendingRequests: true });
     }
   }
   
