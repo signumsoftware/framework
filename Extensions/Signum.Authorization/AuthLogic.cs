@@ -367,25 +367,25 @@ public static class AuthLogic
         set { globallyEnabled = value; }
     }
 
-    static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");
+    static readonly Variable<bool?> tempEnabled = Statics.ThreadVariable<bool?>("authTempDisabled");
 
-    public static IDisposable? Disable()
+    public static IDisposable Disable()
     {
-        if (tempDisabled.Value) return null;
-        tempDisabled.Value = true;
-        return new Disposable(() => tempDisabled.Value = false);
+        var oldValue = tempEnabled.Value;
+        tempEnabled.Value = false;
+        return new Disposable(() => tempEnabled.Value = oldValue);
     }
 
-    public static IDisposable? Enable()
+    public static IDisposable Enable()
     {
-        if (!tempDisabled.Value) return null;
-        tempDisabled.Value = false;
-        return new Disposable(() => tempDisabled.Value = true);
+        var oldValue = tempEnabled.Value;
+        tempEnabled.Value = true;
+        return new Disposable(() => tempEnabled.Value = oldValue);
     }
 
     public static bool IsEnabled
     {
-        get { return !tempDisabled.Value && globallyEnabled; }
+        get { return tempEnabled.Value ?? globallyEnabled; }
     }
 
     public static event Action? OnRulesChanged;
