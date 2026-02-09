@@ -777,7 +777,8 @@ export function typeAllowedInDomain(type: PseudoType, domain: Lite<Entity>, writ
 export function reloadTypesInDomains(): Promise<void> {
   return ajaxGet<TypesInDomain>({ url: "/api/reflection/typeInDomains" }).then(tid => {
     typeInDomain = tid;
-    AppContext.resetUI();
+    document.dispatchEvent(new Event("typeInDomains"));
+    //AppContext.resetUI();
   });
 }
 

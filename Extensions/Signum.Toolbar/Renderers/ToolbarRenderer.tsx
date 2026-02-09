@@ -8,7 +8,7 @@ import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useAPI, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
+import { useAPI, useDocumentEvent, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
 import { Entity, getToString, Lite } from '@framework/Signum.Entities'
@@ -29,7 +29,9 @@ export default function ToolbarRenderer(p: {
   Navigator.useEntityChanged(ToolbarEntity, () => reload(), []);
   Navigator.useEntityChanged(ToolbarMenuEntity, () => reload(), []);
   Navigator.useEntityChanged(ToolbarSwitcherEntity, () => reload(), []);
+  useDocumentEvent("typeInDomains", () => forceUpdate(), []);
 
+  const forceUpdate = useForceUpdate();
   const [response, reload] = useAPIWithReload(() => ToolbarClient.API.getCurrentToolbar("Side"), [], { avoidReset: true });
   const responseRef = useUpdatedRef(response);
 
