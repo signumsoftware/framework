@@ -105,7 +105,11 @@ public static class As
     /// <returns></returns>
     public static T Expression<T>(Expression<Func<T>> body)
     {
-        throw new InvalidOperationException("This method is not meant to be called. Missing reference to Signum.MSBuildTask in this assembly?");
+        throw new InvalidOperationException("""
+            This method is not meant to be called!!
+            Did you forget the AutoExpressionFieldAttribute or is the project missing reference to Signum.MSBuildTask in this assembly?
+            """);
+            
     }
 
     public static LambdaExpression GetExpressionUntyped(MemberInfo methodOrProperty)
