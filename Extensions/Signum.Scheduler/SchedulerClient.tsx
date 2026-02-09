@@ -1,4 +1,3 @@
-
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
@@ -82,7 +81,7 @@ export namespace SchedulerClient {
     }
   
     export function view(): Promise<SchedulerState> {
-      return ajaxGet({ url: "/api/scheduler/view" });
+      return ajaxGet({ url: "/api/scheduler/view", avoidNotifyPendingRequests: true });
     }
   }
   
@@ -94,6 +93,8 @@ export namespace SchedulerClient {
     nextExecution: string;
     machineName: string;
     applicationName: string;
+    serverTimeZone: string;
+    serverLocalTime: string;
     queue: SchedulerItemState[];
     runningTask: SchedulerRunningTaskState[];
   }

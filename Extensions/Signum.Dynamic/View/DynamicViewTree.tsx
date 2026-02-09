@@ -71,7 +71,7 @@ export function DynamicViewTree(p: DynamicViewTreeProps): React.JSX.Element {
     const isRoot = (dn.node == p.rootNode.node);
 
     return (
-      <ContextMenu position={cm.position} onHide={() => setContextualMenu(undefined)}>
+      <ContextMenu position={cm.position} onHide={() => setContextualMenu(undefined)} itemsCount={cn.children.length}>
         {no.isContainer && <Dropdown.Item onClick={handleAddChildren}><FontAwesomeIcon icon="arrow-right" />&nbsp; {DynamicViewMessage.AddChild.niceToString()}</Dropdown.Item>}
         {!isRoot && <Dropdown.Item onClick={handleAddSibling}><FontAwesomeIcon icon="arrow-down" />&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</Dropdown.Item>}
 
