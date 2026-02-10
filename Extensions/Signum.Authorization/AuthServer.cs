@@ -320,15 +320,18 @@ public static class AuthServer
 
                 var password = reader.GetString();
 
+                var user = (UserEntity)ctx.Entity;
+                
                 if (password == null)
-                    ((UserEntity)ctx.Entity).PasswordHash = null;
+                    user.PasswordHash = null;
                 else
                 {
                     var error = UserEntity.OnValidatePassword(password);
                     if (error != null)
                         throw new ApplicationException(error);
 
-                    ((UserEntity)ctx.Entity).PasswordHash = PasswordEncoding.EncodePassword(((UserEntity)ctx.Entity).UserName, password);
+                    user.PasswordHash = PasswordEncoding.EncodePassword(user.UserName, password);
+
                 }
             }
         });
