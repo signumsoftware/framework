@@ -297,12 +297,12 @@
     <Member Name="DBWriteUIRead" Description="DB schreiben UI lesen" />
     <Member Name="None" Description="Kein" />
     <Member Name="Read" Description="Lesen" />
-    <Member Name="Write" Description="schreiben" />
+    <Member Name="Write" Description="Schreiben" />
   </Type>
   <Type Name="TypeAllowedBasic">
     <Member Name="None" Description="Kein" />
     <Member Name="Read" Description="Lesen" />
-    <Member Name="Write" Description="schreiben" />
+    <Member Name="Write" Description="Schreiben" />
   </Type>
   <Type Name="TypeAllowedRule" Description="Typ Regel erlaubt">
     <Member Name="AvailableConditions" Description="Verfügbare Bedingungen" />
