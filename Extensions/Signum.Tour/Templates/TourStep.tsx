@@ -1,31 +1,26 @@
 import * as React from 'react'
 import { TourStepEmbedded } from '../Signum.Tour'
 import { AutoLine, TypeContext } from '@framework/Lines'
-import HtmlCodemirror from "@extensions/Signum.CodeMirror/HtmlCodemirror";
+import HtmlCodeMirror from "@extensions/Signum.CodeMirror/HtmlCodeMirror"
 
-export default function TourStep(p: { ctx: TypeContext<TourStepEmbedded> }) {
+export default function TourStep(p: { ctx: TypeContext<TourStepEmbedded>, invalidate: () => void; }) {
   const ctx = p.ctx;
   const sc = ctx.subCtx({ labelColumns: { sm: 2 } });
-  
-  // Get the parent forceUpdate from the frame
-  const handleChange = () => {
-    ctx.frame?.frameComponent?.forceUpdate();
-  };
-  
+ 
   return (
     <div>
-      <AutoLine ctx={sc.subCtx(a => a.element)} onChange={handleChange} />
-      <AutoLine ctx={sc.subCtx(a => a.title)} onChange={handleChange} />
+      <AutoLine ctx={sc.subCtx(a => a.title)} onChange={p.invalidate}  />
+      <AutoLine ctx={sc.subCtx(a => a.element)} />
       <div className="row mb-3">
         <div className="col-sm-6">
-          <AutoLine ctx={sc.subCtx(a => a.side)} onChange={handleChange} />
+          <AutoLine ctx={sc.subCtx(a => a.side)} />
         </div>
         <div className="col-sm-6">
-          <AutoLine ctx={sc.subCtx(a => a.align)} onChange={handleChange} />
+          <AutoLine ctx={sc.subCtx(a => a.align)} />
         </div>
       </div>
       <div className="code-container">
-        <HtmlCodemirror ctx={sc.subCtx(a => a.description)} onChange={handleChange} />
+        <HtmlCodeMirror ctx={sc.subCtx(a => a.description)} />
       </div>
     </div>
   );
