@@ -11,14 +11,8 @@ export default function TourStep(p: { ctx: TypeContext<TourStepEmbedded>, invali
     <div>
       <AutoLine ctx={sc.subCtx(a => a.title)} onChange={p.invalidate}  />
       <AutoLine ctx={sc.subCtx(a => a.element)} />
-      <div className="row mb-3">
-        <div className="col-sm-6">
-          <AutoLine ctx={sc.subCtx(a => a.side)} />
-        </div>
-        <div className="col-sm-6">
-          <AutoLine ctx={sc.subCtx(a => a.align)} />
-        </div>
-      </div>
+      <AutoLine ctx={sc.subCtx(a => a.side)} />
+      <AutoLine ctx={sc.subCtx(a => a.align)} />
       <div className="code-container">
         <HtmlCodeMirror ctx={sc.subCtx(a => a.description)} />
       </div>
