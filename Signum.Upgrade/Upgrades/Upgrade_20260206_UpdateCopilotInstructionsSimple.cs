@@ -20,7 +20,7 @@ This document contains shared instructions for AI coding assistants (GitHub Copi
 ## Base Instructions
 **This repository uses Signum Framework.** 
 
-For general Signum Framework conventions, **see `Framework/.github/copilot-instructions.md`** first.
+For general Signum Framework conventions, **see `Framework/AGENTS.md`** first.
 
 The instructions below provide {uctx.ApplicationName}-specific overrides and additions.
 
