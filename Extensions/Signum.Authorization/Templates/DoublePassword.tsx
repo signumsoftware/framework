@@ -7,7 +7,7 @@ import { classes } from '@framework/Globals'
 import { useForceUpdate } from '@framework/Hooks'
 import { LinkButton } from '@framework/Basics/LinkButton'
 
-export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boolean, mandatory: boolean }): React.JSX.Element {
+export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boolean, mandatory: boolean, onChange: ()=> void }): React.JSX.Element {
 
   const [isOpen, setIsOpen] = React.useState(p.initialOpen);
   var newPass = React.useRef<HTMLInputElement>(null);
@@ -25,6 +25,7 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
       else {
         ctx.error = undefined;
         ctx.value = newPass.current!.value;
+        p.onChange();
       }
     }
     forceUpdate();

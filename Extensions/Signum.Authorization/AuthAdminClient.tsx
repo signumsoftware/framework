@@ -70,7 +70,6 @@ export namespace AuthAdminClient {
   
   
     Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
-    Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(UserOperation.AutoDeactivate, { hideOnCanExecute: true, isVisible: () => false }));
     Operations.addSettings(new EntityOperationSettings(UserOperation.Deactivate, { hideOnCanExecute: true }));
     Operations.addSettings(new EntityOperationSettings(UserOperation.Reactivate, { hideOnCanExecute: true }));
