@@ -112,7 +112,12 @@ public static class PostgresCatalogSchema
                                               Columns = (from i in generate_subscripts(ix.indkey, 1)
                                                          let at = t.Attributes().Single(a => a.attnum == ix.indkey[i])
                                                          orderby i
-                                                         select new DiffIndexColumn { ColumnName = at.attname, Type = i >= ix.indnkeyatts ? DiffIndexColumnType.Included : DiffIndexColumnType.Key }).ToList()
+                                                         select new DiffIndexColumn
+                                                         {
+                                                             Index = i,
+                                                             ColumnName = at.attname,
+                                                             Type = i >= ix.indnkeyatts ? DiffIndexColumnType.Included : DiffIndexColumnType.Key
+                                                         }).ToList()
                                           }).ToList(),
 
                          ViewIndices = new List<DiffIndex>(),

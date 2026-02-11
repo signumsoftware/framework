@@ -64,7 +64,7 @@ public static class SysTablesSchema
                                     select new DiffColumn
                                     {
                                         Name = c.name,
-                                        DbType = new AbstractDbType(sysType == null ? SqlDbType.Udt : ToSqlDbType(sysType.name)),
+                                        DbType = new AbstractDbType(sysType == null ? SqlDbType.Udt : ToSqlDbType(userType.name ?? sysType.name)),
                                         UserTypeName = sysType == null ? userType.name : null,
                                         Nullable = c.is_nullable,
                                         Collation = c.collation_name == sysDb.collation_name ? null : c.collation_name,
@@ -123,6 +123,7 @@ public static class SysTablesSchema
                                                          orderby ic.index_column_id
                                                          select new DiffIndexColumn
                                                          {
+                                                             Index = ic.index_column_id,
                                                              ColumnName = c.name,
 															 IsDescending = ic.is_descending_key,
                                                              Type = ic.partition_ordinal > 0 ? DiffIndexColumnType.Partition :
@@ -145,6 +146,7 @@ public static class SysTablesSchema
                                                        orderby ic.index_column_id
                                                        select new DiffIndexColumn
                                                        {
+                                                           Index = ic.index_column_id,
                                                            ColumnName = c.name,
                                                            IsDescending = ic.is_descending_key,
                                                            Type = ic.partition_ordinal > 0 ? DiffIndexColumnType.Partition :
@@ -159,7 +161,10 @@ public static class SysTablesSchema
                                    {
                                        Columns = (from ic in fti.IndexColumns()
                                                   join c in t.Columns() on ic.column_id equals c.column_id
-                                                  select new DiffIndexColumn { ColumnName = c.name }).ToList(),
+                                                  select new DiffIndexColumn 
+                                                  { 
+                                                      ColumnName = c.name, 
+                                                  }).ToList(),
                                        IndexName = FullTextTableIndex.SqlServerOptions.FULL_TEXT,
                                        IsUnique = false,
                                        IsPrimary = false,

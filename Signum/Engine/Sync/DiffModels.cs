@@ -1,6 +1,7 @@
 using NpgsqlTypes;
 using Signum.Engine.Maps;
 using System.Data;
+using System.Data.SqlTypes;
 
 namespace Signum.Engine.Sync;
 
@@ -157,6 +158,7 @@ public class DiffStats
 
 public class DiffIndexColumn
 {
+    public int Index; 
     public string ColumnName;
     public bool IsDescending;
     public bool IsIncluded;
@@ -283,9 +285,16 @@ public class DiffIndex
         if (diffColumns.Count == 0)
             return true;
 
+
         var difColumns = diffColumns.Select(cn => dif.Columns.Values.SingleOrDefault(dc => dc.Name == cn.ColumnName)).ToList(); //Ny old name
 
+        if (diffColumns.Count > 1 && diffColumns.All(a => a.Index == 0)) //Full-Text index in SQL Server
+        {
+            difColumns = difColumns.OrderBy(dc => dc == null ? 0 : modColumns?.IndexOf(m => m.Name == dc.Name) ?? 0).ToList();
+        }
+     
         var perfect = difColumns.ZipOrDefault(modColumns!, (dc, mc) => dc != null && mc != null && dc.ColumnEquals(mc, ignorePrimaryKey: true, ignoreIdentity: true, ignoreGenerateAlways: true)).All(a => a);
+        
         return perfect;
     }
 
@@ -321,10 +330,10 @@ public enum DiffIndexType
     ClusteredColumnstore = 5,
     NonClusteredColumnstore = 6,
     NonClusteredHash = 7,
+    VectorIndex = 8,
 
 
     FullTextIndex = 100,
-    VectorIndex = 101,
 }
 
 public enum GeneratedAlwaysType
@@ -407,7 +416,11 @@ public class DiffColumn
             if (other.Size.Value == int.MaxValue)
                 return Length == -1;
 
-            return other.Size.Value == Length;
+
+            if (other.Size.Value == Length)
+                return true;
+
+            return false;
         }
 
         return true;
@@ -690,6 +703,15 @@ public class DiffColumn
                     case SqlDbType.NVarChar:
                     case SqlDbType.Xml:
                     case SqlDbType.Udt:
+                        return true;
+                    default:
+                        return false;
+                }
+
+            case SqlDbType.Vector:
+                switch (toType)
+                {
+                    case SqlDbType.Vector:
                         return true;
                     default:
                         return false;

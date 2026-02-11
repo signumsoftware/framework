@@ -400,7 +400,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
             return AlterTableDropConstraint(tableName, new ObjectName(tableName.Schema, index.IndexName, isPostgres))!;
 
         if (index.FullTextIndex != null)
-            return new SqlPreCommandSimple($@"DROP FULLTEXT INDEX ON {tableName}");
+            return new SqlPreCommandSimple($@"DROP FULLTEXT INDEX ON {tableName}") { NoTransaction = NoTransactionMode.BeforeScript };
 
         if (index.ViewName == null)
             return DropIndex(tableName, index.IndexName);
