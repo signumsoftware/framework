@@ -4,7 +4,7 @@ import { UserEntity, UserState, LoginAuthMessage, RoleEntity } from '../Signum.A
 import { Binding } from '@framework/Reflection'
 import { AutoLine, EntityLine, EntityCombo, FormGroup, TypeContext, CheckboxLine } from '@framework/Lines'
 import { DoublePassword } from './DoublePassword'
-import { tryGetMixin } from '@framework/Signum.Entities'
+import { is, tryGetMixin } from '@framework/Signum.Entities'
 import * as AppContext from "@framework/AppContext"
 import { useEffect, useState } from 'react'
 import ProfilePhoto from './ProfilePhoto'
