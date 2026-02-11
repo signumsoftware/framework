@@ -45,9 +45,7 @@ export namespace AutoLine {
     if (customs != null)
       return customs
 
-    let tis = tryGetTypeInfos(tr) as TypeInfo[];
-    if (tis.length == 1 && tis[0] == undefined)
-      tis = [];
+    let tis = tryGetTypeInfos(tr).notNull();
 
     if (tr.isCollection) {
       if (tr.name == IsByAll)
