@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
@@ -18,6 +18,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Anthropic.SDK" Version="5.9.0" />
+		<PackageReference Include="DeepSeek.NET" Version="1.2.0" />
 		<PackageReference Include="Google_GenerativeAI.Microsoft" Version="3.6.3" />
 		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.2.0-preview.1.26063.2" />
 		<PackageReference Include="Mistral.SDK" Version="2.3.1" />

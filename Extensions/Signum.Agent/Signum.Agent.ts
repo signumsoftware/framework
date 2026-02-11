@@ -20,6 +20,7 @@ export interface ChatbotConfigurationEmbedded extends Entities.EmbeddedEntity {
   geminiAPIKey: string | null;
   mistralAPIKey: string | null;
   githubModelsToken: string | null;
+  deepSeekAPIKey: string | null;
   ollamaUrl: string | null;
 }
 
@@ -123,6 +124,7 @@ export namespace LanguageModelProviders {
   export const Mistral : LanguageModelProviderSymbol = registerSymbol("LanguageModelProvider", "LanguageModelProviders.Mistral");
   export const GithubModels : LanguageModelProviderSymbol = registerSymbol("LanguageModelProvider", "LanguageModelProviders.GithubModels");
   export const Ollama : LanguageModelProviderSymbol = registerSymbol("LanguageModelProvider", "LanguageModelProviders.Ollama");
+  export const DeepSeek : LanguageModelProviderSymbol = registerSymbol("LanguageModelProvider", "LanguageModelProviders.DeepSeek");
 }
 
 export const LanguageModelProviderSymbol: Type<LanguageModelProviderSymbol> = new Type<LanguageModelProviderSymbol>("LanguageModelProvider");

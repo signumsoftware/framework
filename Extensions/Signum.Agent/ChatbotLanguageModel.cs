@@ -87,6 +87,7 @@ public static class LanguageModelProviders
     public static readonly LanguageModelProviderSymbol Mistral; 
     public static readonly LanguageModelProviderSymbol GithubModels; 
     public static readonly LanguageModelProviderSymbol Ollama;
+    public static readonly LanguageModelProviderSymbol DeepSeek;
 }
 
 
@@ -106,6 +107,9 @@ public class ChatbotConfigurationEmbedded : EmbeddedEntity
 
     [StringLengthValidator(Max = 300), Format(FormatAttribute.Password)]
     public string? GithubModelsToken { get; set; }
+
+    [StringLengthValidator(Max = 300), Format(FormatAttribute.Password)]
+    public string? DeepSeekAPIKey { get; set; }
 
     [StringLengthValidator(Max = 300)]
     public string? OllamaUrl { get; set; }

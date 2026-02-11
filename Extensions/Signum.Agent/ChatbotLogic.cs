@@ -40,6 +40,7 @@ public static class ChatbotLogic
         { LanguageModelProviders.GithubModels, new GithubModelsProvider()},
         { LanguageModelProviders.Mistral, new MistralProvider()}, 
         { LanguageModelProviders.Ollama, new OllamaProvider()},
+        { LanguageModelProviders.DeepSeek, new DeepSeekProvider()},
     };
 
     public static Dictionary<LanguageModelProviderSymbol, IEmbeddingsProvider> EmbeddingsProviders = new Dictionary<LanguageModelProviderSymbol, IEmbeddingsProvider>
