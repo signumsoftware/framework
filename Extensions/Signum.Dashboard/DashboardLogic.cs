@@ -1,22 +1,23 @@
+using DocumentFormat.OpenXml.Presentation;
+using Signum.API;
 using Signum.API.Json;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
-using Signum.UserAssets;
 using Signum.Files;
+using Signum.Omnibox;
 using Signum.Scheduler;
+using Signum.Toolbar;
+using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.Utilities.Reflection;
+using Signum.ViewLog;
+using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Xml.Linq;
-using Signum.ViewLog;
-using Signum.Toolbar;
-using Signum.API;
-using Signum.Omnibox;
-using System.Collections.Frozen;
 
 namespace Signum.Dashboard;
 
@@ -410,11 +411,14 @@ public static class DashboardLogic
     public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
         RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), d => d.Owner == null || AuthLogic.CurrentRoles().Contains(d.Owner));
 
-    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<DashboardEntity, bool>> conditionExpression)
+    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<DashboardEntity, bool>> condition, Func<DashboardEntity, bool>? imMemoryCondition = null)
     {
         sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Owner, ownerType);
 
-        TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition, conditionExpression);
+        if (imMemoryCondition == null)
+            TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition, condition);
+        else
+            TypeConditionLogic.Register<DashboardEntity>(typeCondition, condition, imMemoryCondition);
 
         TypeConditionLogic.Register<TokenEquivalenceGroupEntity>(typeCondition,
             teg => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.TokenEquivalencesGroups.Contains(teg)),
