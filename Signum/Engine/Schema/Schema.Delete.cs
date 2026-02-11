@@ -31,25 +31,26 @@ public partial class Table
         var main = new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}; --{3}"
                 .FormatWith(Name, this.PrimaryKey.Name.SqlEscape(isPostgres), variableOrId, comment ?? entity.ToString()));
 
-        if (isPostgres && declaration != null)
-        {
-            SqlPreCommandSimple ifStatement = AssertNotNull(entity.Id.VariableName!);
+        if(declaration == null)
+            return SqlPreCommand.Combine(Spacing.Simple, declaration, pre, collections, virtualMList, main)!;
 
-            var block = new SqlPreCommandPostgresDoBlock(
-                declarations: [declaration],
-                body: SqlPreCommand.Combine(Spacing.Simple, ifStatement, pre, collections, virtualMList, main)!
-                );
-
-            return block.SimplifyNested();
-        }
-
-        return SqlPreCommand.Combine(Spacing.Simple, declaration, pre, collections, virtualMList, main)!;
+        return BlockIfNecessary(isPostgres, [declaration], [
+            AssertNotNull(entity.Id.VariableName!, isPostgres),
+            pre,
+            collections,
+            virtualMList,
+            main
+            ]);
     }
 
-    private static SqlPreCommandSimple AssertNotNull(string variableName)
+    private SqlPreCommandSimple AssertNotNull(string variableName, bool isPostgres)
     {
-        return new SqlPreCommandSimple(@$"IF {variableName} IS NULL THEN 
-    RAISE EXCEPTION 'Not found';
+        if (isPostgres)
+            return new SqlPreCommandSimple(@$"IF {variableName} IS NULL 
+    THROW 50000, '{this.Type.Name} not found!', 1;;");
+        else
+            return new SqlPreCommandSimple(@$"IF {variableName} IS NULL THEN 
+    RAISE EXCEPTION '{this.Type.Name} not found';
 END IF;");
     }
 
@@ -91,7 +92,7 @@ END IF;");
 
         var result = Schema.Current.Settings.IsPostgres ?
         new SqlPreCommandSimple(@$"{variableName} {columnType} = ({queryCommandString});") :
-        new SqlPreCommandSimple($"DECLARE {variableName} {columnType} = COALESCE(({queryCommandString}), CAST('{typeof(T).TypeName()} not found!' as {columnType}));");
+        new SqlPreCommandSimple($"DECLARE {variableName} {columnType} = ({queryCommandString}));");
 
         return result;
     }
