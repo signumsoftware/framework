@@ -424,7 +424,7 @@ public static class UserQueryLogic
                                 switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, columnOptions, col.DisplayName.HasText() ? " '{0}' (Summary)".FormatWith(col.DisplayName) : null, allowRemoveToken: true, allowReCreate: false))
                                 {
                                     case FixTokenResult.Nothing: break;
-                                    case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
+                                    case FixTokenResult.DeleteEntity: return DeleteSql(table, uq);
                                     case FixTokenResult.RemoveToken: uq.Columns.Remove(col); break;
                                     case FixTokenResult.SkipEntity: return null;
                                     case FixTokenResult.Fix: col.Token = token; break;
@@ -437,7 +437,7 @@ public static class UserQueryLogic
                                     switch (QueryTokenSynchronizer.FixToken(replacements, ref sumToken, qd, options | SubTokensOptions.CanAggregate, col.DisplayName.HasText() ? " '{0}'".FormatWith(col.DisplayName) : null, allowRemoveToken: true, allowReCreate: false))
                                     {
                                         case FixTokenResult.Nothing: break;
-                                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
+                                        case FixTokenResult.DeleteEntity: return DeleteSql(table, uq);
                                         case FixTokenResult.RemoveToken: col.SummaryToken = null; break;
                                         case FixTokenResult.SkipEntity: return null;
                                         case FixTokenResult.Fix: col.SummaryToken = sumToken; break;

@@ -94,6 +94,8 @@ export namespace ScheduledTaskMessage {
   export const SchedulerMargin: MessageKey = new MessageKey("ScheduledTaskMessage", "SchedulerMargin");
   export const MachineName: MessageKey = new MessageKey("ScheduledTaskMessage", "MachineName");
   export const ApplicationName: MessageKey = new MessageKey("ScheduledTaskMessage", "ApplicationName");
+  export const ServerTimeZone: MessageKey = new MessageKey("ScheduledTaskMessage", "ServerTimeZone");
+  export const ServerLocalTime: MessageKey = new MessageKey("ScheduledTaskMessage", "ServerLocalTime");
   export const NextExecution: MessageKey = new MessageKey("ScheduledTaskMessage", "NextExecution");
   export const InMemoryQueue: MessageKey = new MessageKey("ScheduledTaskMessage", "InMemoryQueue");
   export const RunningTasks: MessageKey = new MessageKey("ScheduledTaskMessage", "RunningTasks");

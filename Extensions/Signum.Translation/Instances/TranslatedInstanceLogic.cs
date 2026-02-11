@@ -581,8 +581,12 @@ public static class TranslatedInstanceLogic
         Dictionary<(PropertyRoute route, string originalText), Dictionary<CultureInfo, string>> excelTranslations = records
             .Where(a => !isSync || a.TranslatedText.HasText())
             .GroupBy(a => (a.Key.Route, a.OriginalText), a => (a.Culture, a.TranslatedText))
-            .Select(gr => KeyValuePair.Create((gr.Key.Route, gr.Key.OriginalText), gr.AgGroupToDictionary(a=>a.Culture, a=>a.Select(a=>a.TranslatedText).Distinct().SingleEx())))
-            .ToDictionary();
+            .Select(gr => KeyValuePair.Create((gr.Key.Route, gr.Key.OriginalText), 
+                gr.AgGroupToDictionary(a => a.Culture, a => 
+                    a.Select(a => a.TranslatedText).Distinct().Only() ?? 
+                    throw new InvalidOperationException($"There are more than one translations for '{gr.Key.OriginalText}':\n" + a.Select(a => a.TranslatedText).Distinct().ToString(a => "* " + a, "\n"))
+                ))
+            ).ToDictionary();
 
         Dictionary<LocalizedInstanceKey, List<TranslatedInstanceEntity>> databaseTranslations =
             Database.Query<TranslatedInstanceEntity>()
@@ -591,7 +595,7 @@ public static class TranslatedInstanceLogic
             .GroupToDictionary(a =>
             {
                 var pr = a.PropertyRoute.ToPropertyRoute();
-                return new LocalizedInstanceKey(pr, a.Instance, a.RowId == null ? null : PrimaryKey.Parse(a.RowId.ToString(), pr));
+                return new LocalizedInstanceKey(pr, a.Instance, a.RowId == null ? null : PrimaryKey.Parse(a.RowId.ToString(), pr.GetMListItemsRoute()!.Parent!));
             });
 
         Dictionary<(PropertyRoute route, string originalText), List<(Lite<Entity> instance, PrimaryKey? rowId)>> currentInstances =

@@ -8,7 +8,7 @@ import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useAPI, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
+import { useAPI, useDocumentEvent, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
 import { Entity, getToString, Lite } from '@framework/Signum.Entities'
@@ -16,7 +16,7 @@ import { parseIcon } from '@framework/Components/IconTypeahead'
 import { ToolbarUrl } from '../ToolbarUrl';
 import { classes } from '@framework/Globals';
 import { LayoutMessage, ToolbarEntity, ToolbarMenuEntity,  ToolbarSwitcherEntity } from '../Signum.Toolbar';
-import { Binding, getTypeInfo, newLite, queryAllowedInContext } from '../../../Signum/React/Reflection';
+import { Binding, getTypeInfo, newLite, typeAllowedInDomain } from '../../../Signum/React/Reflection';
 import { Finder } from '../../../Signum/React/Finder';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
 import { RightCaretDropdown } from './RightCaretDropdown'
@@ -29,7 +29,9 @@ export default function ToolbarRenderer(p: {
   Navigator.useEntityChanged(ToolbarEntity, () => reload(), []);
   Navigator.useEntityChanged(ToolbarMenuEntity, () => reload(), []);
   Navigator.useEntityChanged(ToolbarSwitcherEntity, () => reload(), []);
+  useDocumentEvent("typeInDomains", () => forceUpdate(), []);
 
+  const forceUpdate = useForceUpdate();
   const [response, reload] = useAPIWithReload(() => ToolbarClient.API.getCurrentToolbar("Side"), [], { avoidReset: true });
   const responseRef = useUpdatedRef(response);
 
@@ -484,7 +486,7 @@ function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<En
   var result = resp
     .map(tr => {
 
-      if (tr.queryKey != null && !queryAllowedInContext(tr.queryKey, selectedEntity))
+      if (tr.queryKey != null && !typeAllowedInDomain(tr.queryKey, selectedEntity))
         return null;
 
       if (tr.elements && tr.elements.length > 0) {

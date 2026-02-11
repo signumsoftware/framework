@@ -16,16 +16,16 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     this.state = {};
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo): void {
+  override componentDidCatch(error: Error, info: React.ErrorInfo): void {
     this.setState({ error, info });
   }
 
-  UNSAFE_componentWillReceiveProps(newProps: ErrorBoundaryProps): void {
+  override UNSAFE_componentWillReceiveProps(newProps: ErrorBoundaryProps): void {
     if (!depsEquals(newProps.deps, this.props.deps) && (this.state.error || this.state.info))
       this.setState({ error: undefined, info: undefined });
   }
 
-  render(): React.ReactElement {
+  override render(): React.ReactElement {
     if (this.state.error || this.state.info) {
 
       function normalizeStack(error: Error) {

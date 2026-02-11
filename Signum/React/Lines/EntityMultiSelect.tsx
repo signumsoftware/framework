@@ -29,7 +29,7 @@ export interface EntityMultiSelectProps<V extends Lite<Entity> | Entity> extends
 }
 
 export class EntityMultiSelectController<V extends Lite<Entity> | Entity> extends EntityListBaseController<EntityMultiSelectProps<V>, V> {
-  overrideProps(p: EntityMultiSelectProps<V>, overridenProps: EntityMultiSelectProps<V>): void {
+  override overrideProps(p: EntityMultiSelectProps<V>, overridenProps: EntityMultiSelectProps<V>): void {
     super.overrideProps(p, overridenProps);
 
     if (p.type) {

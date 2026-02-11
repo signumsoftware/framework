@@ -32,7 +32,6 @@ interface MultiPropertySetterModalProps extends IModalProps<boolean | undefined>
   lites: Lite<Entity>[];
   operationInfo: OperationInfo;
   setters: Operations.API.PropertySetter[];
-  mandatory: boolean;
 }
 
 export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): React.ReactElement {
@@ -74,7 +73,8 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): Reac
             )}
         </p>
         <br />
-        <button className="btn btn-primary sf-entity-button sf-ok-button" aria-disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} onClick={handleOkClicked}>
+        <button className="btn btn-primary sf-entity-button sf-ok-button" 
+          disabled={p.setters.some(s => !isValid(s))} onClick={handleOkClicked}>
           {JavascriptMessage.ok.niceToString()}
         </button>
         <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
@@ -90,9 +90,9 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): Reac
 }
 
 export namespace MultiPropertySetterModal {
-  export function show(typeInfo: TypeInfo, lites: Lite<Entity>[], operationInfo: OperationInfo, mandatory: boolean, setters?: Operations.API.PropertySetter[]): Promise<Operations.API.PropertySetter[] | undefined> {
+  export function show(typeInfo: TypeInfo, lites: Lite<Entity>[], operationInfo: OperationInfo, setters?: Operations.API.PropertySetter[]): Promise<Operations.API.PropertySetter[] | undefined> {
     var settersOrDefault = setters ?? [{ property: null!, operation: null! } as Operations.API.PropertySetter];
-    return openModal<boolean | undefined>(<MultiPropertySetterModal typeInfo={typeInfo} lites={lites} operationInfo={operationInfo} mandatory={mandatory} setters={settersOrDefault} />).then(a => a ? settersOrDefault : undefined);
+    return openModal<boolean | undefined>(<MultiPropertySetterModal typeInfo={typeInfo} lites={lites} operationInfo={operationInfo} setters={settersOrDefault} />).then(a => a ? settersOrDefault : undefined);
   };
 }
 

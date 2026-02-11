@@ -6,6 +6,7 @@ using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections.Immutable;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Security.AccessControl;
@@ -234,14 +235,63 @@ public class SchemaBuilder
         return index;
     }
 
+    public VectorTableIndex AddVectorIndex<T>(Expression<Func<T, object?>> fields, Action<VectorTableIndex>? customize = null) where T : Entity
+    {
+        var table = Schema.Table<T>();
+
+        IColumn[] columns = IndexKeyColumns.Split(table, fields).SelectMany(a => a.columns).ToArray();
+
+        if (columns.Length != 1)
+            throw new InvalidOperationException("Vector index must have exactly one column");
+
+        return AddVectorIndex(table, columns[0], customize);
+    }
+
+    public VectorTableIndex AddVectorIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
+        Expression<Func<MListElement<T, V>, object>> fields, Action<VectorTableIndex>? customize = null)
+        where T : Entity
+    {
+        TableMList table = ((FieldMList)Schema.FindField(Schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).TableMList;
+
+        IColumn[] columns = IndexKeyColumns.Split(table, fields).SelectMany(a => a.columns).ToArray();
+
+        if (columns.Length != 1)
+            throw new InvalidOperationException("Vector index must have exactly one column");
+
+        return AddVectorIndex(table, columns[0], customize);
+    }
+
+    public VectorTableIndex AddVectorIndex(ITable table, Field field, Action<VectorTableIndex>? customize)
+    {
+        var columns = TableIndex.GetColumnsFromField(field);
+
+        if (columns.Length != 1)
+            throw new InvalidOperationException("Vector index must have exactly one column");
+
+        return AddVectorIndex(table, columns[0], customize);
+    }
+
+    public VectorTableIndex AddVectorIndex(ITable table, IColumn column, Action<VectorTableIndex>? customize)
+    {
+        var index = new VectorTableIndex(table, column);
+        customize?.Invoke(index);
+
+        if (IsPostgres && index.Postgres.IndexType == null)
+            throw new InvalidOperationException("IndexType not determined for Postgres");
+
+        AddIndex(index);
+
+        foreach (var col in index.GenerateColumns())
+        {
+            table.Columns.Add(col.Name, col);
+        }
+
+        return index;
+    }
+
     public void AddUniqueIndex(ITable table, Field[] fields)
     {
         var dic = fields.ToDictionary(f => f, f => TableIndex.GetColumnsFromField(f));
-
-
-
-
-
         var index = new TableIndex(table, dic.SelectMany(f => f.Value).ToArray()) { Unique = true };
         AddIndex(index);
 
@@ -749,7 +799,7 @@ public class SchemaBuilder
            Settings.GetSqlDbType(att, route.Type.ElementType()!) :
            Settings.GetSqlDbType(att, route.Type);
 
-        return new FieldValue(route, null, FixNameLength(name.ToString()))
+        var result = new FieldValue(route, null, FixNameLength(name.ToString()))
         {
             DbType = pair.DbType,
             Collation = Settings.GetCollation(att),
@@ -768,6 +818,12 @@ public class SchemaBuilder
             f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route));
             f.Index = f.GenerateIndex(table, Settings.FieldAttribute<IndexAttribute>(route));
         });
+
+        var isVector = route.Type == typeof(float[]); 
+        if (isVector && result.Size == null)
+            throw new InvalidOperationException("Size must be specified for Vector columns (Field: {0})".FormatWith(route));
+
+        return result;
     }
 
     protected virtual FieldEnum GenerateFieldEnum(ITable table, PropertyRoute route, NameSequence name, bool forceNull)

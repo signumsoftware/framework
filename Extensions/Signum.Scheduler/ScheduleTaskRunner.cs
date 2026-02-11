@@ -49,6 +49,8 @@ public static class ScheduleTaskRunner
             NextExecution = NextExecution,
             MachineName = Schema.Current.MachineName,
             ApplicationName = Schema.Current.ApplicationName,
+            ServerTimeZone = TimeZoneInfo.Local.Id,
+            ServerLocalTime = DateTime.Now.ToString("o"),
             Queue = priorityQueue.GetOrderedList().Select(p => new SchedulerItemState
             {
                 ScheduledTask = p.ScheduledTask.ToLite(),
@@ -358,6 +360,8 @@ public class SchedulerState
     public required List<SchedulerItemState> Queue;
     public required string MachineName;
     public required string ApplicationName;
+    public required string ServerTimeZone;
+    public required string ServerLocalTime;
 
     public required List<SchedulerRunningTaskState> RunningTask;
 }
@@ -438,8 +442,19 @@ public class ScheduledTaskContext
     {
         this.Foreach(collection, elementID, e =>
         {
-            this.StringBuilder.AppendLine(elementID(e));
-            action(e);
+            try
+            {
+                this.StringBuilder.AppendLine(elementID(e));
+                action(e);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                this.StringBuilder.AppendLine("   Error: " + ex.Message);
+                throw;
+            }
         });
     }
 }

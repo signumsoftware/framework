@@ -38,6 +38,8 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
 
     public DateTime? DisabledOn { get; set; }
 
+    public bool MustChangePassword { get; set; }
+
     public UserState State { get; set; } = UserState.New;
 
     protected override string? PropertyValidation(PropertyInfo pi)
@@ -87,7 +89,6 @@ public static class UserOperation
     public static ExecuteSymbol<UserEntity> Reactivate;
     public static ExecuteSymbol<UserEntity> Deactivate;
     public static ExecuteSymbol<UserEntity> AutoDeactivate;
-    public static ExecuteSymbol<UserEntity> SetPassword;
     public static DeleteSymbol<UserEntity> Delete;
 }
 

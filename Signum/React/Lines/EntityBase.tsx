@@ -88,7 +88,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
         tryGetTypeInfos(type).some(ti => ti && Navigator.isFindable(ti));
   }
 
-  static propEquals(prevProps: EntityBaseProps<any>, nextProps: EntityBaseProps<any>): boolean {
+  static override propEquals(prevProps: EntityBaseProps<any>, nextProps: EntityBaseProps<any>): boolean {
     if (
       nextProps.getComponent || prevProps.getComponent ||
       nextProps.extraButtons || prevProps.extraButtons ||
@@ -98,7 +98,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return LineBaseController.propEquals(prevProps, nextProps);
   }
 
-  getDefaultProps(state: P): void {
+  override getDefaultProps(state: P): void {
     if (state.type) {
       const type = state.type;
 

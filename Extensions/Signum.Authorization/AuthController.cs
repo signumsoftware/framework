@@ -139,6 +139,7 @@ public class AuthController : ControllerBase
         }
 
         user.PasswordHash = PasswordEncoding.EncodePassword(user.UserName, request.newPassword);
+        user.MustChangePassword = false;
         using (AuthLogic.Disable())
         using (OperationLogic.AllowSave<UserEntity>())
         {

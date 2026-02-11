@@ -23,7 +23,7 @@ public class NumberLineProxy : BaseLineProxy
 
     public void SetValue(IFormattable? value, string? format = null)
     {
-        format ??= Reflector.FormatString(this.Route);
+        format ??= Reflector.GetFormatString(this.Route);
 
         var str = value == null ? null : value.ToString(format, null);
 

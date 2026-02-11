@@ -79,7 +79,7 @@ public static class HelpGenerator
     static string ValueType(PropertyRoute pr)
     {
         Type type = pr.Type;
-        string? format = Reflector.FormatString(pr);
+        string? format = Reflector.GetFormatString(pr);
         string? unit = pr.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName;
         bool? nullable = IsNullable(pr);
         return ValueType(type, nullable, format, unit);

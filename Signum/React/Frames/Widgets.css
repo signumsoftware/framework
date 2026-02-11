@@ -1,7 +1,7 @@
 ﻿.sf-widgets {
     list-style-type: none;
     display: flex;
-    flex-direction: row-reverse;
+   
     font-size: 1rem!important;
     margin-left:auto;
     padding:0px;

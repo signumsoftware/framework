@@ -7,8 +7,6 @@ using Signum.DynamicQuery.Tokens;
 using Microsoft.AspNetCore.Mvc;
 using Signum.API.Json;
 using System.ComponentModel.DataAnnotations;
-using System.Reflection.Metadata;
-using Signum.DynamicQuery;
 
 namespace Signum.API.Controllers;
 
@@ -133,18 +131,7 @@ public class QueryController : ControllerBase
         }
     }
 
-    [HttpGet("api/query/queryContexts")]
-    public Dictionary<string/*queryKey*/, Dictionary<string /*context typeName*/, List<object>>> GetQueryContexts()
-    {
-        var context = (from qn in QueryLogic.Queries.GetAllowedQueryNames(false)
-                       let dic = QueryLogic.Queries.GetAllowedContexts(qn)
-                       where dic != null
-                       select KeyValuePair.Create(QueryUtils.GetKey(qn), 
-                            dic.ToDictionaryEx(kvp => TypeLogic.GetCleanName(kvp.Key), kvp => kvp.Value.Select(a => (object)a.Id.Object).ToList())))
-                       .ToDictionaryEx();
-
-        return context;
-    }
+   
 }
 
 

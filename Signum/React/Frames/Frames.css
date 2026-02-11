@@ -94,6 +94,10 @@
     width: 100%;
 }
 
+.sf-selector-modal:focus > .modal-dialog {
+    border: 2px solid rgb(127.5, 184, 201.5);
+}
+
 .sf-entity-title {
     font-size: 2rem;
     font-weight: 300;
@@ -197,6 +201,10 @@ a.expand-window:hover {
 .sf-hide-id {
     opacity: 0;
     transition: opacity 1s ease;
+}
+
+.sf-type-nice-name:focus-within .sf-hide-id {
+    opacity: 1;
 }
 
 .sf-entity-sub-title:hover .sf-hide-id {

@@ -103,7 +103,7 @@ export interface SearchControlLoadedProps {
   showFooter?: boolean;
   allowChangeColumns: boolean;
   allowChangeOrder: boolean;
-  create: boolean;
+  create: boolean | ((fo: FindOptionsParsed) => boolean);
   createButtonClass?: string;
   view: boolean | "InPlace";
   largeToolbarButtons: boolean;
@@ -215,7 +215,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           undefined;
   }
 
-  componentDidMount(): void {
+  override componentDidMount(): void {
     window.addEventListener('resize', this.onResize);
     this.onResize();
 
@@ -232,14 +232,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       this.doSearch({ force: true });
   }
 
-  componentDidUpdate(props: SearchControlLoadedProps): void {
+  override componentDidUpdate(props: SearchControlLoadedProps): void {
     if (!Hooks.areEqualDeps(this.props.deps ?? [], props.deps ?? [])) {
       this.doSearchPage1();
     }
   }
 
   isUnmounted = false;
-  componentWillUnmount(): void {
+  override componentWillUnmount(): void {
     this.isUnmounted = true;
     window.removeEventListener('resize', this.onResize);
     this.abortableSearch.abort();
@@ -531,7 +531,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   containerDiv?: HTMLDivElement | null;
 
-  render(): React.ReactElement {
+  override render(): React.ReactElement {
     const p = this.props;
     const fo = this.props.findOptions;
     const qd = this.props.queryDescription;
@@ -700,7 +700,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       this.props.showContextMenu(this.props.findOptions) != false && this.props.showSelectedButton && this.renderSelectedButton(),
 
-      p.create && !this.props.ctx?.frame?.currentDate && {
+      (p.create == true || typeof p.create == "function" && p.create(this.props.findOptions)) && !this.props.ctx?.frame?.currentDate && {
         order: -2,
         button: <button className={classes("btn ", p.createButtonClass ?? "btn-tertiary")} title={titleLabels ? this.createTitle() : undefined} onClick={this.handleCreate}>
           <FontAwesomeIcon aria-hidden={true} icon="plus" className="sf-create" /><span className="d-none d-sm-inline ms-1">{this.createTitle()}</span>
@@ -762,7 +762,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   handleCreate = (ev: React.MouseEvent<any>): void => {
 
-    if (!this.props.create)
+    if (!this.props.create || typeof this.props.create == "function" && !this.props.create(this.props.findOptions))
       return;
 
     const onCreate = this.props.onCreate;
@@ -1249,7 +1249,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return null;
 
     return (
-      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide}>
+      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} itemsCount={menuPack?.items.length ?? 0}>
         {renderEntityMenuItems && menuPack && menuPack.showSearch &&
           <AutoFocus>
             <input

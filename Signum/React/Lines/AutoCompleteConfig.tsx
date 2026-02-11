@@ -380,6 +380,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     fo = {
       ...fo,
       filterOptions: [{ token: QueryTokenString.entity<Entity>().append(e => e.id), operation: "EqualTo", value: lite.id }],
+      includeDefaultFilters: false,
     };
 
     return Finder.getQueryDescription(fo.queryName)

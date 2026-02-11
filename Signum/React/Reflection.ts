@@ -745,26 +745,40 @@ export function onReloadTypes(): void {
   onReloadTypesActions.forEach(a => a());
 }
 
-interface QueryContexts {
-  [queryName: string]: {
-    [contextType: string]: (string | number)[]
+interface TypesInDomain {
+  [typeName: string]: {
+    [domainType: string]: {
+      read: (string | number)[],
+      write: (string | number)[]
+    }
   }
 }
 
-export let queryContexts: QueryContexts | undefined;
-export function queryAllowedInContext(query: PseudoType | QueryKey, context: Lite<Entity>): boolean {
+export let typeInDomain: TypesInDomain | undefined;
+export function typeAllowedInDomain(type: PseudoType, domain: Lite<Entity>, write = false) : boolean {
+  var ti = tryGetTypeInfo(type);
+  if (!ti)
+    return false;
 
-  var queryKey = getQueryKey(query);
+  var list = typeInDomain?.[ti.name]?.[domain.EntityType];
 
-  var list = queryContexts?.[queryKey]?.[context.EntityType];
+  if (list == null)
+    return true; //Super user
 
-  return list == null || list.contains(context.id!);
+  if (!write && list.read.some(d => d == domain.id!))
+    return true;
+
+  if (list.write.some(d => d == domain.id!))
+    return true;
+
+  return false;
 }
 
-export function reloadQueryContexts(): Promise<void> {
-  return ajaxGet<QueryContexts>({ url: "/api/query/queryContexts" }).then(qc => {
-    queryContexts = qc;
-    AppContext.resetUI();
+export function reloadTypesInDomains(): Promise<void> {
+  return ajaxGet<TypesInDomain>({ url: "/api/reflection/typeInDomains" }).then(tid => {
+    typeInDomain = tid;
+    document.dispatchEvent(new Event("typeInDomains"));
+    //AppContext.resetUI();
   });
 }
 

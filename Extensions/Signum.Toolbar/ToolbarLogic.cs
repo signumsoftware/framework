@@ -96,6 +96,10 @@ public static class ToolbarLogic
             IsAuthorized = lite =>
             {
                 var entity = ToolbarMenus.Value.GetOrCreate(lite);
+                if (entity.EntityType != null)
+                    if (TypeAuthLogic.GetAllowed(entity.EntityType.ToType()).MaxUI() == TypeAllowedBasic.None)
+                        return false;
+
                 return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
             }
         }.Register();
@@ -474,6 +478,10 @@ public static class ToolbarLogic
             result.elements = tme.Options.Select(o => 
             {
                 var tm = ToolbarMenus.Value.GetOrThrow(o.ToolbarMenu);
+                var conf = ContentConfigDictionary.GetOrThrow(o.ToolbarMenu.EntityType);
+                if (!conf.IsAuhorized(o.ToolbarMenu))
+                    return null;
+
                 var subElements = ToResponseList(PropertyRouteTranslationLogic.TranslatedMList(tm, t => t.Elements).ToList());
 
                 if (subElements.IsEmpty())

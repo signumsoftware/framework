@@ -321,7 +321,7 @@ public static class SchemaSynchronizer
 
                                   var alterColumn = norCol.Nullable != hisCol.Nullable ||
                                      !norCol.DbType.Equals(hisCol.DbType) ||
-                                     !norCol.SizeEquals(hisCol) ?
+                                     !norCol.SizeScalePrecissionEquals(hisCol) ?
                                       sqlBuilder.AlterTableAlterDiffColumn(hisT.Name, norCol, hisCol) : null;
 
                                   return new[] { dropDefault, rename, alterColumn }.Combine(Spacing.Simple);
@@ -674,7 +674,7 @@ public static class SchemaSynchronizer
                     var indexes = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => !kvp.Value.PrimaryKey).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
-                        createNew: (i, mix) => mix.Unique || mix is FullTextTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
+                        createNew: (i, mix) => mix.Unique || mix is FullTextTableIndex or VectorTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
                         removeOld: (i, dix) => !dix.IsControlledIndex(isPostgres) && dix.Columns.Any(IsColumnRemovedOrModified) && SafeConsole.Ask($"Recreate non-controlled index {dix.IndexName}?") ? sqlBuilder.RecreateDiffIndex(tab, dix) : null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                             mix.IndexName != dix.IndexName ? sqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
@@ -1013,9 +1013,9 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             column.DbType.IsNumber() ? "0" :
             column.DbType.IsString() ? "''" :
             column.DbType.IsDate() ? (Schema.Current.Settings.IsPostgres ? "now()" : "GetDate()") :
-            column.DbType.IsGuid() ? "NEWID()" :
-        column.DbType.IsTime() ? "'00:00'" :
-        column.DbType.HasPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), NULL, '[)')" :
+            column.DbType.IsGuid() ? (Schema.Current.Settings.IsPostgres ? "uuid_generate_v1()" : "NEWID") :
+            column.DbType.IsTime() ? "'00:00'" :
+            column.DbType.HasPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), NULL, '[)')" :
             "?");
 
         string defaultValue = rep.Interactive ? SafeConsole.AskString($"Default value for '{table.Name.Name}.{column.Name}'? ([Enter] for {typeDefault} or 'force' if there are no {(forNewColumn ? "rows" : "nulls")}) ", stringValidator: str => null) : "";

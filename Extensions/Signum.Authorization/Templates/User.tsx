@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { UserEntity, UserState, LoginAuthMessage, RoleEntity } from '../Signum.Authorization'
 import { Binding } from '@framework/Reflection'
-import { AutoLine, EntityLine, EntityCombo, FormGroup, TypeContext } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityCombo, FormGroup, TypeContext, CheckboxLine } from '@framework/Lines'
 import { DoublePassword } from './DoublePassword'
 import { tryGetMixin } from '@framework/Signum.Entities'
 import * as AppContext from "@framework/AppContext"
@@ -11,8 +11,9 @@ import ProfilePhoto from './ProfilePhoto'
 import { Finder } from '@framework/Finder'
 import { AuthAdminClient } from '../AuthAdminClient'
 import { CultureClient } from '@framework/Basics/CultureClient'
-import { useAPI } from '@framework/Hooks'
+import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { Dic } from '@framework/Globals'
+import { AuthClient } from '../AuthClient'
 
 export default function User(p: { ctx: TypeContext<UserEntity> }): React.JSX.Element {
 
@@ -22,7 +23,7 @@ export default function User(p: { ctx: TypeContext<UserEntity> }): React.JSX.Ele
   });
   const entity = p.ctx.value;
   var cultures = useAPI(signal => CultureClient.getCultures(false), []);
-
+  const forceUpdate = useForceUpdate();
 
   return (
     <div>
@@ -36,8 +37,20 @@ export default function User(p: { ctx: TypeContext<UserEntity> }): React.JSX.Ele
           <AutoLine ctx={ctx.subCtx(e => e.state, { readOnly: true })} />
           <AutoLine ctx={ctx.subCtx(e => e.userName)} readOnly={userNameReadonly(ctx.value) ? true : undefined} />
           {!ctx.readOnly && !ctx.subCtx(a => a.passwordHash).isMemberReadOnly() && changePasswordVisible(ctx.value) &&
-            <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} initialOpen={Boolean(entity.isNew)} mandatory />}
-
+            <div className="mb-2">
+              <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} initialOpen={Boolean(entity.isNew)} mandatory onChange={() => {
+                if (!is(ctx.value, AuthClient.currentUser())) {
+                  ctx.value.mustChangePassword = true;
+                  forceUpdate();
+                }
+              }} />
+              <div className="row">
+                <div className="offset-sm-3 col-sm-9">
+              <CheckboxLine ctx={ctx.subCtx(e => e.mustChangePassword)} inlineCheckbox />
+              </div>
+              </div>
+            </div>
+          }
           <EntityLine ctx={ctx.subCtx(e => e.role)} onFind={() =>
             Finder.findMany(RoleEntity).then(rs => {
               if (rs == null)

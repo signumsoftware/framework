@@ -25,7 +25,7 @@ public static class AzureADLogic
         MixinDeclarations.AssertDeclared(typeof(UserEntity), typeof(UserAzureADMixin));
 
         PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
-            
+
         As.ReplaceExpression((UserEntity u) => u.EmailOwnerData, u => new EmailOwnerData
         {
             Owner = u.ToLite(),
@@ -291,23 +291,15 @@ public static class AzureADLogic
             ,
             Implementations.By());
 
-            if (sb.WebServerBuilder != null)
-            {
-                ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
-                ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () =>  
-        						QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryGroups, false) ||
-                	QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryUsers, false));
-            }
-        }
-        else
-        {
-            if (sb.WebServerBuilder != null)
-            {
-                ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
-                ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => false);
-            }
+
+
         }
 
+        if (sb.WebServerBuilder != null)
+        {
+            ReflectionServer.RegisterLike(typeof(AzureADType), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
+            ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
+        }
     }
 
 
@@ -494,6 +486,7 @@ public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
     public MicrosoftGraphCreateUserContext(User user, AzureADConfigurationEmbedded config)
     {
         User = user;
+        Config = config;
     }
 
     public User User { get; set; }

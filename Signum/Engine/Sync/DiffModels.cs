@@ -217,6 +217,9 @@ public class DiffIndex
         if (mix is FullTextTableIndex && !isPostgress)
             return DiffIndexType.FullTextIndex;
 
+        if (mix is VectorTableIndex)
+            return DiffIndexType.VectorIndex;
+
         if (mix.Clustered && !isPostgress)
             return DiffIndexType.Clustered;
 
@@ -287,6 +290,7 @@ public enum DiffIndexType
 
 
     FullTextIndex = 100,
+    VectorIndex = 101,
 }
 
 public enum GeneratedAlwaysType
@@ -353,17 +357,34 @@ public class DiffColumn
 
     public bool ScaleEquals(IColumn other)
     {
-        return (other.Scale == null || other.Scale.Value == Scale);
+        if (!other.DbType.IsDecimal())
+            return true;
+
+        return other.Scale == null || other.Scale.Value == Scale;
     }
 
     public bool SizeEquals(IColumn other)
     {
-        return (other.DbType.IsDecimal() || other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1);
+        if (other.Size == null)
+            return true;
+
+        if (other.DbType.IsString() || other.DbType.IsBinary())
+        {
+            if (other.Size.Value == int.MaxValue)
+                return Length == -1;
+
+            return other.Size.Value == Length;
+        }
+
+        return true;
     }
 
     public bool PrecisionEquals(IColumn other)
     {
-        return (!other.DbType.IsDecimal() || other.Precision == null || other.Precision == 0 || other.Precision.Value == Precision);
+        if (!other.DbType.IsDecimal())
+            return true;
+
+        return other.Precision == null || other.Precision == 0 || other.Precision.Value == Precision;
     }
 
     public bool DefaultEquals(IColumn other)
@@ -644,7 +665,7 @@ public class DiffColumn
         }
     }
 
-    internal bool SizeEquals(DiffColumn hisCol)
+    internal bool SizeScalePrecissionEquals(DiffColumn hisCol)
     {
         return Precision == hisCol.Precision ||
                 Scale == hisCol.Scale ||
