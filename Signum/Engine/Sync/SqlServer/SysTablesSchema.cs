@@ -118,6 +118,11 @@ public static class SysTablesSchema
                                               DataSpaceName = i.DataSpaceName(),
                                               FilterDefinition = i.filter_definition,
                                               Type = (DiffIndexType)i.type,
+                                              VectorIndex = i.type != (int)DiffIndexType.VectorIndex ? null : new DiffVectorIndex
+                                              {
+                                                  IndexType = i.VectorIndex()!.vector_index_type,
+                                                  DistanceMetric = i.VectorIndex()!.distance_metric,
+                                              },
                                               Columns = (from ic in i.IndexColumns()
                                                          join c in t.Columns() on ic.column_id equals c.column_id
                                                          orderby ic.index_column_id

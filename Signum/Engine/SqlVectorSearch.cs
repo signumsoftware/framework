@@ -73,17 +73,17 @@ public static class SqlVectorSearch
 
     public static string GetSqlVectorDistanceMetric(SqlVectorDistanceMetric metric) => metric switch
     {
-        SqlVectorDistanceMetric.Cosine => "cosine",
-        SqlVectorDistanceMetric.Euclidean => "euclidean",
-        SqlVectorDistanceMetric.DotProduct => "dot",
+        SqlVectorDistanceMetric.Cosine => "COSINE",
+        SqlVectorDistanceMetric.Euclidean => "EUCLIDEAN",
+        SqlVectorDistanceMetric.DotProduct => "DOT",
         _ => throw new UnexpectedValueException(metric)
     };
 
     public static string GetSqlVectorNormType(SqlVectorNormType norm) => norm switch
     {
-        SqlVectorNormType.Norm1 => "norm1",
-        SqlVectorNormType.Norm2 => "norm2",
-        SqlVectorNormType.Norminf => "norminf",
+        SqlVectorNormType.Norm1 => "NORM1",
+        SqlVectorNormType.Norm2 => "NORM2",
+        SqlVectorNormType.Norminf => "NORMINF",
         _ => throw new UnexpectedValueException(norm)
     };
 }

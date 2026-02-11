@@ -231,8 +231,15 @@ public class DiffIndex
             }
             else
             {
-                // SQL Server vector index comparison (when implemented)
-                // For now, just check that VectorIndex is not null
+                // SQL Server vector index comparison
+                var expectedIndexType = vix.SqlServer.IndexType.ToString();
+                var expectedMetric = SqlVectorSearch.GetSqlVectorDistanceMetric(vix.SqlServer.Metric);
+
+                if (this.VectorIndex.IndexType != expectedIndexType)
+                    return false;
+
+                if (this.VectorIndex.DistanceMetric != expectedMetric)
+                    return false;
             }
         }
 
