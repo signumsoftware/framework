@@ -8,7 +8,7 @@ class Upgrade_20260211_IndexErrorHandling : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        uctx.ForeachCodeFile(@"*.Server/Index.cshtml", file =>
+        uctx.ChangeCodeFile(@"Southwind.Server/Index.cshtml", file =>
         {
             file.ReplaceBetweenIncluded(
                 a => a.Contains("function showError(error) {"),
