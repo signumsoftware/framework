@@ -404,22 +404,16 @@ public static class DashboardLogic
         return CachedQueriesCache.Value.TryGetC(dashboard).EmptyIfNull();
     }
 
-    public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+    public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) => 
+        RegisterTypeCondition(sb, typeCondition, typeof(UserEntity), d => d.Owner.Is(UserEntity.Current));
+
+    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
+        RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), d => d.Owner == null || AuthLogic.CurrentRoles().Contains(d.Owner));
+
+    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<DashboardEntity, bool>> conditionExpression)
     {
-        sb.Schema.Settings.AssertImplementedBy((DashboardEntity uq) => uq.Owner, typeof(UserEntity));
+        sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Owner, ownerType);
 
-        RegisterTypeCondition(typeCondition, uq => uq.Owner.Is(UserEntity.Current));
-    }
-
-    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
-    {
-        sb.Schema.Settings.AssertImplementedBy((DashboardEntity uq) => uq.Owner, typeof(RoleEntity));
-
-        RegisterTypeCondition(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
-    }
-
-    public static void RegisterTypeCondition(TypeConditionSymbol typeCondition, Expression<Func<DashboardEntity, bool>> conditionExpression)
-    {
         TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition, conditionExpression);
 
         TypeConditionLogic.Register<TokenEquivalenceGroupEntity>(typeCondition,

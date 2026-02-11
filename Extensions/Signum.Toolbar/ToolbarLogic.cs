@@ -196,6 +196,17 @@ public static class ToolbarLogic
     public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
         RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), owner => owner == null || AuthLogic.CurrentRoles().Contains(owner));
 
+    public static void RegisterAllowedTypeTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
+        RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), owner => GetAllowedTypes().Contains(owner));
+
+
+    public static Dictionary<Type, Func<bool>> AllowedTypes = new Dictionary<Type, Func<bool>>();
+
+    public static HashSet<Lite<TypeEntity>> GetAllowedTypes()
+    {
+        return AllowedTypes.Where(a => a.Value()).Select(a => a.Key.ToTypeEntity().ToLite()).ToHashSet();
+    }
+
     public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<Lite<IEntity>?, bool>> isAllowed)
     {
         sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, ownerType);
@@ -439,7 +450,7 @@ public static class ToolbarLogic
                     label = transElement.TranslatedElement(a => a.Label!).DefaultToNull() ?? config?.DefaultLabel(extraElement.Content!),
                     iconName = extraElement.IconName.DefaultToNull() ?? config?.DefaultIconName(extraElement.Content!),
                     iconColor = extraElement.IconColor.DefaultToNull() ?? config?.DefaultIconColor(extraElement.Content!),
-                    queryKey = config?.GetRelatedQuery(element.Content!)?.Key,
+                    queryKey = config?.GetRelatedQuery(extraElement.Content!)?.Key,
                     showCount = extraElement.ShowCount,
                     autoRefreshPeriod = extraElement.AutoRefreshPeriod,
                     openInPopup = extraElement.OpenInPopup,

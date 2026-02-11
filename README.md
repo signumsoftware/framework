@@ -54,6 +54,10 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2025.12.15 Run TSGenerator on demand](https://github.com/signumsoftware/framework/commit/3cba964eef6dccedebd4517e027dcb5853f5914f#commitcomment-172898719)
+* [2025.12.14 TypeScript Native (tsgo) Previews 🚀](https://github.com/signumsoftware/framework/commit/0d154f2feff976298b34900beec6b50741a3e7a9#commitcomment-172744788)
+* [2025.12.06 Split ActiveDirectory into AzureAD and WindowsAD 🔑](https://github.com/signumsoftware/framework/commit/de37f4fef3ad3dd1ce85a3112feb2f2848b5bebc#commitcomment-172594546)
+* [2025.11.28 Import/Export Help 📚](https://github.com/signumsoftware/framework/commit/da567c70a0a3af3fc70aec0dc52e1df2f0945c5f#comments)
 * [2025.11.23 .Net 10](https://github.com/signumsoftware/framework/commit/fcb69ddcec43ea5c3fe5d096dc5368df293f7fd6#commitcomment-171171659)
 * [2025.10.01 TypeScript Compilation Performance and Signum.TSCBuild](https://github.com/signumsoftware/framework/commit/5d740e37effc19469b097f9ce763f5560e4a1d7a#commitcomment-167686513)
 * [2025.09.22 Toolbar Improvements 🛠️](https://github.com/signumsoftware/framework/commit/d9a168aae9d9a59f6416652c270a444b9d160c1e#commitcomment-167596454)

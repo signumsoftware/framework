@@ -9,9 +9,9 @@ import { softCast } from '../Globals';
 import ErrorModal from '../Modals/ErrorModal';
 
 
-export interface SearchableMenuItem  {
+export interface SearchableMenuItem {
   fullText: string; //used for filtering
-  menu : React.ReactElement<any>;
+  menu: React.ReactElement<any>;
 }
 
 export type ContextualMenuItem = React.ReactElement<any> | SearchableMenuItem;
@@ -35,7 +35,7 @@ export interface ContextualItemsContext<T extends Entity> {
 }
 
 export interface MarkedRowsDictionary {
-  [liteKey: string]: string | MarkedRow;
+  [liteKey: string]: string | MarkedRow | undefined;
 }
 
 export interface MarkedRow {

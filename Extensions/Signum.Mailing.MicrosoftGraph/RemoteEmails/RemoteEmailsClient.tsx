@@ -1,14 +1,17 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
+import { Dropdown } from 'react-bootstrap'
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
-import { RecipientEmbedded, RemoteEmailFolderModel, RemoteEmailMessageModel, RemoteEmailMessageQuery } from './Signum.Mailing.MicrosoftGraph.RemoteEmails';
-import { EntityOperationSettings } from '@framework/Operations'
+import { RecipientEmbedded, RemoteEmailFolderModel, RemoteEmailMessageMessage, RemoteEmailMessageModel, RemoteEmailMessageQuery } from './Signum.Mailing.MicrosoftGraph.RemoteEmails';
+import { EntityOperationSettings, Operations } from '@framework/Operations'
 import { EmailMessageEntity } from '../../Signum.Mailing/Signum.Mailing'
-import { Lite, ModifiableEntity, SearchMessage, newMListElement } from '@framework/Signum.Entities'
+import {
+  Entity,
+  Lite, ModifiableEntity, OperationMessage, SearchMessage, newMListElement } from '@framework/Signum.Entities'
 import { EntityBaseController, EntityCombo, EntityLine, LiteAutocompleteConfig } from '@framework/Lines'
-import { ajaxGet, ajaxGetRaw} from '@framework/Services'
+import { ajaxGet, ajaxGetRaw, ajaxPost, ajaxPostRaw } from '@framework/Services'
 import { UserEntity, UserLiteModel } from '../../Signum.Authorization/Signum.Authorization'
 import MessageModal from '@framework/Modals/MessageModal'
 import { QueryToken, ResultRow, SubTokensOptions, isFilterCondition } from '@framework/FindOptions'
@@ -17,15 +20,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import RemoteEmailPopover from './RemoteEmailPopover'
 import { FolderLine } from './FolderLine'
 import { ModelConverterSymbol } from '../../Signum.Templating/Signum.Templating'
-import { getTypeInfo } from '@framework/Reflection'
+import { getQueryKey,
+  getTypeInfo } from '@framework/Reflection'
 import { LinkButton } from '@framework/Basics/LinkButton'
+import { MultiMessageProgressModal } from './MultiMessageProgressModal';
+import * as ContextualItems from '@framework/SearchControl/ContextualItems';
+import SelectorModal from '@framework/SelectorModal';
+import { ButtonBar, ButtonBarManager } from '@framework/Frames/ButtonBar';
+import { ButtonBarElement,
+  ButtonsContext } from '@framework/TypeContext';
+import { classes } from '@framework/Globals';
 
 export namespace RemoteEmailsClient {
   
   
-  export function start(options: {
-    routes: RouteObject[],
-  }): void {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(RemoteEmailMessageModel, e => import('./RemoteEmailMessage'), {
       renderSubTitle: r => <span>
         {getTypeInfo(r.Type).niceName}
@@ -74,16 +83,16 @@ export namespace RemoteEmailsClient {
       applicable: (f: FilterOptionParsed, ffc: Finder.FilterFormatterContext) => isFilterCondition(f) && f.token?.fullKey == "User" && f.operation == "EqualTo",
       renderValue: (f: FilterOptionParsed, ffc: Finder.FilterFormatterContext) => {
   
-        return <EntityLine ctx={ffc.ctx} type={f.token!.type} create={false} onChange={() =>  ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
+        return <EntityLine ctx={ffc.ctx} type={f.token!.type} create={false} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
       }
     });
   
     Finder.filterValueFormatRules.push({
       name: "EmailFolder",
-      applicable: (f: FilterOptionParsed, ffc: Finder.FilterFormatterContext) => isFilterCondition(f) && f.token?.type.name == RemoteEmailFolderModel.typeName ,
+      applicable: (f: FilterOptionParsed, ffc: Finder.FilterFormatterContext) => isFilterCondition(f) && f.token?.type.name == RemoteEmailFolderModel.typeName,
       renderValue: (f: FilterOptionParsed, ffc: Finder.FilterFormatterContext) => {
         var user = ffc.filterOptions.firstOrNull(a => isFilterCondition(a) && a.token?.fullKey == "User" && a.operation == "EqualTo");
-        return <FolderLine ctx={ffc.ctx} mandatory={ffc.mandatory} label={ffc.label} user={user?.value as Lite<UserEntity>} onChange={()=> ffc.handleValueChange(f)} />
+        return <FolderLine ctx={ffc.ctx} mandatory={ffc.mandatory} label={ffc.label} user={user?.value as Lite<UserEntity>} onChange={() => ffc.handleValueChange(f)} />
       }
     });
   
@@ -127,6 +136,227 @@ export namespace RemoteEmailsClient {
         }, true)
       }
     });
+
+    ContextualItems.onContextualItems.push(getMessageContextualItems);
+    ButtonBarManager.onButtonBarRender.push(getMessageButtons);
+  }
+
+  export function getMessageButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined> | undefined {
+    if (!RemoteEmailMessageModel.isInstance(ctx.pack.entity))
+      return undefined;
+
+    var message = ctx.pack.entity;
+
+    var oid = (message.user?.model as UserLiteModel)?.oID!;
+    if (oid == null)
+      throw new Error("User has no OID");
+
+    async function finishSuccess() {
+      Operations.notifySuccess();
+
+      var remote = await API.getRemoteEmail(oid, message.id!);
+
+      ctx.frame.onReload(await Navigator.toEntityPack(remote));
+    }
+    
+
+    return [
+      {
+        button: <button className={classes("btn ", "btn-info")} 
+          title={RemoteEmailMessageMessage.Move.niceToString()}
+          onClick={async () => {
+            var folder = await selectFolder(oid);
+            if (folder == null)
+              return;
+
+            await API.movingEmails(oid!, [message.id!], folder?.folderId);
+
+            Operations.notifySuccess();
+          }}>
+          <FontAwesomeIcon aria-hidden={true} icon="folder-tree" /> {RemoteEmailMessageMessage.Move.niceToString()}
+        </button>,
+      },
+      {
+        button: <button className={classes("btn ", "btn-success")} 
+          title={RemoteEmailMessageMessage.AddCategory.niceToString()}
+          onClick={async () => {
+            var categories = await API.getRemoteCategories(oid);
+
+            var category = await SelectorModal.chooseElement(categories, {
+              title: RemoteEmailMessageMessage.AddCategory.niceToString(),
+            });
+
+            if (category == null)
+              return null;
+          
+            await API.changeCategoriesEmails(oid, { messageIds: [message.id!], categoriesToAdd: [category], categoriesToRemove: [] });
+
+            finishSuccess();
+
+          }}>
+          <FontAwesomeIcon aria-hidden={true} icon="tags" /> {RemoteEmailMessageMessage.AddCategory.niceToString()}
+        </button>,
+      },
+      {
+        button: <button className={classes("btn ", "btn-warning")} 
+          title={RemoteEmailMessageMessage.RemoveCategory.niceToString()}
+          onClick={async () => {
+            var category = await SelectorModal.chooseElement(message.categories.map(a => a.element), {
+              title: RemoteEmailMessageMessage.RemoveCategory.niceToString(),
+              forceShow: true
+            });
+
+            if (category == null)
+              return null;
+              
+            await API.changeCategoriesEmails(oid, { messageIds: [message.id!], categoriesToAdd: [], categoriesToRemove: [category] });
+
+            finishSuccess();
+          }}>
+          <FontAwesomeIcon aria-hidden={true} icon="tags" /> {RemoteEmailMessageMessage.RemoveCategory.niceToString()}
+        </button>,
+      },
+      {
+        button: <button className={classes("btn ", "btn-danger")} 
+          title={RemoteEmailMessageMessage.Delete.niceToString()}
+          onClick={async () => {
+            
+            if (!await confirmDelete(1))
+              return;
+
+            await API.deleteEmails(oid, [message.id!])
+
+            Operations.notifySuccess();
+
+            ctx.frame.onClose(undefined);
+          }}>
+          <FontAwesomeIcon aria-hidden={true} icon="trash" /> {RemoteEmailMessageMessage.Delete.niceToString()}
+        </button>,
+      },
+    ];
+  }
+
+  function confirmDelete(numberOfMessages: number): Promise<boolean> {
+    return MessageModal.show({
+      title: RemoteEmailMessageMessage.Delete.niceToString(),
+      message: RemoteEmailMessageMessage.PleaseConfirmYouWouldLikeToDelete0FromOutlook.niceToString()
+        .formatHtml(<span><strong>{numberOfMessages}</strong> {numberOfMessages == 1 ? RemoteEmailMessageMessage.Message.niceToString() : RemoteEmailMessageMessage.Messages.niceToString()}</span>),
+      buttons: "yes_no",
+      icon: "warning",
+      style: "warning",
+    }).then(result => { return result == "yes"; });
+  }
+
+  async function selectFolder(oid: string): Promise<RemoteEmailFolderModel | undefined> {
+    var folders = await API.getRemoteFolders(oid);
+
+    var folder = await SelectorModal.chooseElement(folders, {
+      title: RemoteEmailMessageMessage.Move.niceToString(),
+      message: RemoteEmailMessageMessage.SelectAFolder.niceToString(),
+      buttonDisplay: a => a.displayName,
+    });
+
+    return folder;
+  }
+
+  export async function getMessageContextualItems(ctx: ContextualItems.ContextualItemsContext<Entity>): Promise<ContextualItems.MenuItemBlock | undefined> {
+    if (ctx.queryDescription.queryKey != getQueryKey(RemoteEmailMessageQuery.RemoteEmailMessages))
+      return undefined;
+   
+    if (!(ctx.container instanceof SearchControlLoaded))
+      return undefined;
+
+    const sc = ctx.container as SearchControlLoaded;
+
+    var messageIds = sc.state.selectedRows?.map(r => sc.getRowValue<string>(r, "Id")).notNull() ?? [];
+
+    if (messageIds.length == 0)
+      return undefined;
+
+    const user = sc.state.resultFindOptions?.filterOptions.firstOrNull(fo => isFilterCondition(fo) && fo.token?.fullKey == "User" && fo.operation == "EqualTo")?.value as Lite<UserEntity>;
+    if (user == null)
+      throw new Error("No User found in filters");
+
+    const oid = (user.model as UserLiteModel)?.oID;
+    if (oid == null)
+      throw new Error("User has no OID"); 
+
+    return ({
+      header: RemoteEmailMessageMessage.Messages.niceToString(),
+      menuItems: [
+       
+        {
+          fullText: RemoteEmailMessageMessage.Move.niceToString(),
+          menu: <Dropdown.Item onClick={async () => {
+         
+            var folder = await selectFolder(oid);
+            if (folder == null)
+              return null;
+          
+            var result = await API.movingEmails(oid, messageIds, folder.folderId);
+
+            sc.markRows(result.errors);
+          }}>
+            <FontAwesomeIcon aria-hidden={true} icon={"folder-tree"} className="icon" color="blue" />
+            {RemoteEmailMessageMessage.Move.niceToString()}
+          </Dropdown.Item>
+        },
+        {
+          fullText: RemoteEmailMessageMessage.AddCategory.niceToString(),
+          menu: <Dropdown.Item onClick={async () => {
+            var categories = await API.getRemoteCategories(oid);
+
+            var category = await SelectorModal.chooseElement(categories, {
+              title: RemoteEmailMessageMessage.AddCategory.niceToString(),
+            });
+
+            if (category == null)
+              return null;
+          
+            var result = await API.changeCategoriesEmails(oid, { messageIds, categoriesToAdd: [category], categoriesToRemove: [] });
+
+            sc.markRows(result.errors);
+          }}>
+            <FontAwesomeIcon aria-hidden={true} icon={"tag"} className="icon" color="green" />
+            {RemoteEmailMessageMessage.AddCategory.niceToString()}
+          </Dropdown.Item>
+        },
+        {
+          fullText: RemoteEmailMessageMessage.RemoveCategory.niceToString(),
+          menu: <Dropdown.Item onClick={async () => {
+            var categories = await API.getRemoteCategories(oid);
+
+            var category = await SelectorModal.chooseElement(categories, {
+              title: RemoteEmailMessageMessage.RemoveCategory.niceToString(),
+            });
+
+            if (category == null)
+              return null;
+          
+            var result = await API.changeCategoriesEmails(oid, { messageIds, categoriesToAdd: [], categoriesToRemove: [category] });
+
+            sc.markRows(result.errors);
+          }}>
+            <FontAwesomeIcon aria-hidden={true} icon={"tag"} className="icon" color="orange" />
+            {RemoteEmailMessageMessage.RemoveCategory.niceToString()}
+          </Dropdown.Item>
+        },
+        {
+          fullText: RemoteEmailMessageMessage.Delete.niceToString(),
+          menu: <Dropdown.Item onClick={async () => {
+            if (!await confirmDelete(messageIds.length))
+              return;
+
+            var result = await API.deleteEmails(oid, messageIds);
+
+            sc.markRows(result.errors);
+          }} >
+            <FontAwesomeIcon aria-hidden={true} icon={"trash"} className="icon" color="red" />
+            {RemoteEmailMessageMessage.Delete.niceToString()}
+          </Dropdown.Item>
+        },
+      ]
+    });
   }
   
   async function openMessage(row: ResultRow, sc: SearchControlLoaded) {
@@ -145,24 +375,58 @@ export namespace RemoteEmailsClient {
     var message = await API.getRemoteEmail(oid, messageId);
   
     await Navigator.view(message);
+
+    await sc.doSearchPage1();
   }
   
   export namespace API {
     export function getRemoteEmail(userOID: string, messageId: string): Promise<RemoteEmailMessageModel> {
-      return ajaxGet({ url: `/api/remoteEmail/${userOID}/${messageId}` });
+      return ajaxGet({ url: `/api/remoteEmail/${userOID}/message/${messageId}` });
     }
   
     export function getRemoteFolders(oid: string): Promise<Array<RemoteEmailFolderModel>> {
       return ajaxGet({ url: `/api/remoteEmailFolders/${oid}` });
     }
+
+    export function getRemoteCategories(oid: string): Promise<Array<string>> {
+      return ajaxGet({ url: `/api/remoteEmailCategories/${oid}` });
+    }
   
     export function getRemoteAttachment(userOID: string, messageId: string, attachmentId: string): Promise<Response> {
-      return ajaxGetRaw({ url: `/api/remoteEmail/${userOID}/${messageId}/attachment/${attachmentId}`});
+      return ajaxGetRaw({ url: `/api/remoteEmail/${userOID}/message/${messageId}/attachment/${attachmentId}` });
     }
   
     export function getRemoteAttachmentUrl(userOID: string, messageId: string, attachmentId: string): string {
-      return `/api/remoteEmail/${userOID}/${messageId}/attachment/${attachmentId}`
+      return `/api/remoteEmail/${userOID}/message/${messageId}/attachment/${attachmentId}`
+    }
+
+    export function deleteEmails(userOID: string, messages: string[]): Promise<Operations.API.ErrorReport> {
+      var abortController = new AbortController();
+      return MultiMessageProgressModal.show(messages, RemoteEmailMessageMessage.Deleting.niceToString(), abortController,
+        () => ajaxPostRaw({ url: `/api/remoteEmail/${userOID}/delete` }, messages));
+    }
+
+    export function movingEmails(userOID: string, messages: string[], folderId: string): Promise<Operations.API.ErrorReport> {
+      var abortController = new AbortController();
+      return MultiMessageProgressModal.show(messages, RemoteEmailMessageMessage.Moving.niceToString(), abortController,
+        () => ajaxPostRaw({ url: `/api/remoteEmail/${userOID}/moveTo/${folderId}` }, messages));
+    }
+
+    export function changeCategoriesEmails(userOID: string, request: ChangeCategoriesRequest): Promise<Operations.API.ErrorReport> {
+      var abortController = new AbortController();
+      return MultiMessageProgressModal.show(request.messageIds, RemoteEmailMessageMessage.ChangingCategories.niceToString(), abortController,
+        () => ajaxPostRaw({ url: `/api/remoteEmail/${userOID}/changeCategories` }, request));
     }
   }
 }
 
+export interface ChangeCategoriesRequest {
+  messageIds: string[];
+  categoriesToAdd: string[];
+  categoriesToRemove: string[];
+}
+
+export interface EmailResult {
+  id: string;
+  error?: string;
+}

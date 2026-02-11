@@ -333,7 +333,7 @@ public class TemplateSynchronizationContext
         HasChanges = false;
     }
 
-    internal void SynchronizeToken(ParsedToken parsedToken, string remainingText)
+    internal void SynchronizeToken(ParsedToken parsedToken, string remainingText, bool forceChange)
     {
         if (parsedToken.QueryToken != null)
             return;
@@ -371,7 +371,7 @@ public class TemplateSynchronizationContext
         SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
         Console.WriteLine(" " + remainingText);
 
-        FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null);
+        FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null, forceChange);
         switch (result)
         {
             case FixTokenResult.Nothing:
@@ -387,21 +387,6 @@ public class TemplateSynchronizationContext
         }
     }
 
-    public void SynchronizeValue(Type targetType, ref string? value, bool isList, Type? currentEntityType)
-    {
-        string? val = value;
-        FixTokenResult result = QueryTokenSynchronizer.FixValue(Replacements, targetType, ref val, allowRemoveToken: false, isList: isList, currentEntityType);
-        switch (result)
-        {
-            case FixTokenResult.Fix:
-            case FixTokenResult.Nothing:
-                value = val;
-                break;
-            case FixTokenResult.SkipEntity:
-            case FixTokenResult.RemoveToken:
-                throw new TemplateSyncException(result);
-        }
-    }
 
 
     internal List<MemberWithArguments>? GetMembers(string fieldOrPropertyChain, Type initialType, ref bool hasChanges)

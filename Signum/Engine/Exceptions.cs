@@ -159,20 +159,21 @@ public class UniqueKeyException : ApplicationException
 
                 return (index, properties);
             }
-            else if(table is TableMList tm)
+            else if (table is TableMList tm)
             {
                 if (tm.Field is FieldEmbedded fe)
                 {
                     var properties = (from f in fe.EmbeddedFields.Values
                                       let cols = f.Field.Columns()
-                                      where cols.Any() && cols.All(c => index.Columns.Contains(c))
+                                      where cols.Any(c => index.Columns.Contains(c))
                                       select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
 
                     if (properties.IsEmpty())
                         return null;
+
                     return (index, properties);
                 }
-                else 
+                else
                     return null;
             }
             else

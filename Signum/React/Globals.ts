@@ -14,12 +14,13 @@ declare global {
   interface Window {
     __allowNavigatorWithoutUser?: boolean;
     __baseName: string;
+    __baseNameAPI: string;
     dataForChildWindow?: any;
     dataForCurrentWindow?: any;
     exploreGraphDebugMode: boolean;
   }
 
-  type Comparable = number | string | {valueOf: ()=> any };
+  type Comparable = number | string | { valueOf: () => any };
 
 
   interface RegExpConstructor {
@@ -28,7 +29,7 @@ declare global {
   
 
   interface Array<T> {
-    groupBy<K extends string>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] } [];
+    groupBy<K extends string>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
     groupBy<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K; elements: T[] }[];
     groupBy<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: ((key: K) => string) | undefined, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] }; // Remove by Object.groupBy when safary supports it https://caniuse.com/?search=Object.groupby
@@ -49,7 +50,7 @@ declare global {
 
 
     toMap<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T>;
-    toMap<K, V>(this: Array<T>, keySelector: (element: T) => K, valueSelector: (element: T) => V):  Map<K, V>;
+    toMap<K, V>(this: Array<T>, keySelector: (element: T) => K, valueSelector: (element: T) => V): Map<K, V>;
     toMapDistinct<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T>;
     toMapDistinct<K, V>(this: Array<T>, keySelector: (element: T) => V, valueSelector: (element: T) => V): Map<K, V>;
 
@@ -106,7 +107,7 @@ declare global {
     insertAt(this: Array<T>, index: number, element: T): void;
 
     notNull(this: Array<T>): NonNullable<T>[];
-    clone(this: Array<T>, ): T[];
+    clone(this: Array<T>,): T[];
     joinComma(this: Array<T>, lastSeparator: string): string;
     extract(this: Array<T>, filter: (element: T) => boolean): T[];
     findIndex(this: Array<T>, filter: (element: T, index: number, obj: Array<T>) => boolean): number;
@@ -151,7 +152,7 @@ declare global {
     etc(this: string, maxLength: number, etcString?: string): string;
 
     firstUpper(this: string): string;
-    firstLower(this: string, ): string;
+    firstLower(this: string,): string;
 
     repeat(this: string, n: number): string;
   }
@@ -160,15 +161,14 @@ declare global {
     abortSignal?: AbortSignal;
   }
 }
-Array.prototype.clear = function (): void {
+Array.prototype.clear = function(): void {
   this.length = 0;
 };
 
-Array.prototype.groupBy = function (this: any[],
+Array.prototype.groupBy = function(this: any[],
   keySelector: (element: any) => any,
   keyStringifier?: (element: any) => string,
-  elementSelector?: (element: any) => unknown):
-  { key: any /*string*/; elements: any[] }[] {
+  elementSelector?: (element: any) => unknown): { key: any /*string*/; elements: any[] }[] {
 
   const result: { key: any; elements: any[] }[] = [];
   const obj: { [key: string]: any[] } = {};
@@ -193,7 +193,7 @@ Array.prototype.groupBy = function (this: any[],
   return result;
 };
 
-Array.prototype.groupToObject = function (this: any[], keySelector: (element: any) => string | number, elementSelector?: (element: any) => unknown): { [key: string | number]: any[] } {
+Array.prototype.groupToObject = function(this: any[], keySelector: (element: any) => string | number, elementSelector?: (element: any) => unknown): { [key: string | number]: any[] } {
   const result: { [key: string | number]: any[] } = {};
 
   for (let i = 0; i < this.length; i++) {
@@ -207,7 +207,7 @@ Array.prototype.groupToObject = function (this: any[], keySelector: (element: an
 };
 
 
-Array.prototype.groupToMap = function (this: any[], keySelector: (element: any) => string, elementSelector?: (element: any) => unknown): Map<any, any[]> {
+Array.prototype.groupToMap = function(this: any[], keySelector: (element: any) => string, elementSelector?: (element: any) => unknown): Map<any, any[]> {
   const result = new Map<any, any[]>();
 
   for (let i = 0; i < this.length; i++) {
@@ -220,7 +220,7 @@ Array.prototype.groupToMap = function (this: any[], keySelector: (element: any) 
   return result;
 };
 
-Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) => boolean, includeKeyInGroup = false, beforeFirstKey : "throw" | "skip" | "defaultGroup" = "throw"): { key: any, elements: any[] }[] {
+Array.prototype.groupWhen = function(this: any[], isGroupKey: (element: any) => boolean, includeKeyInGroup = false, beforeFirstKey: "throw" | "skip" | "defaultGroup" = "throw"): { key: any, elements: any[] }[] {
   const result: { key: any, elements: any[] }[] = [];
 
   let group: { key: any, elements: any[] } | undefined = undefined;
@@ -251,7 +251,7 @@ Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) =>
   return result;
 };
 
-Array.prototype.groupWhenChange = function (this: any[], keySelector: (element: any) => any, keyStringifier?: (key: any) => string): { key: any, elements: any[] }[] {
+Array.prototype.groupWhenChange = function(this: any[], keySelector: (element: any) => any, keyStringifier?: (key: any) => string): { key: any, elements: any[] }[] {
   const result: { key: any, keyString: string, elements: any[] }[] = [];
 
   keyStringifier ??= a => a.toString();
@@ -264,7 +264,7 @@ Array.prototype.groupWhenChange = function (this: any[], keySelector: (element: 
     const keyString = keyStringifier(key);
     if (current == undefined) {
 
-      current = { key: key, keyString: keyString , elements: [item] };
+      current = { key: key, keyString: keyString, elements: [item] };
     }
     else if (current.keyString == keyString) {
       current.elements.push(item);
@@ -281,7 +281,7 @@ Array.prototype.groupWhenChange = function (this: any[], keySelector: (element: 
   return result;
 };
 
-Array.prototype.orderBy = function (this: any[], keySelector: (element: any) => any): any[] {
+Array.prototype.orderBy = function(this: any[], keySelector: (element: any) => any): any[] {
   const cloned = this.slice(0);
   cloned.sort((e1, e2) => {
     const v1 = keySelector(e1);
@@ -295,7 +295,7 @@ Array.prototype.orderBy = function (this: any[], keySelector: (element: any) => 
   return cloned;
 };
 
-Array.prototype.orderByDescending = function (this: any[], keySelector: (element: any) => any): any[] {
+Array.prototype.orderByDescending = function(this: any[], keySelector: (element: any) => any): any[] {
   const cloned = this.slice(0);
   cloned.sort((e1, e2) => {
     const v1 = keySelector(e1);
@@ -310,7 +310,7 @@ Array.prototype.orderByDescending = function (this: any[], keySelector: (element
 };
 
 
-Array.prototype.minBy = function (this: any[], keySelector: (element: any) => any): any {
+Array.prototype.minBy = function(this: any[], keySelector: (element: any) => any): any {
   if (this.length == 0)
     return undefined;
 
@@ -326,7 +326,7 @@ Array.prototype.minBy = function (this: any[], keySelector: (element: any) => an
   return result;
 };
 
-Array.prototype.maxBy = function (this: any[], keySelector: (element: any) => any): any {
+Array.prototype.maxBy = function(this: any[], keySelector: (element: any) => any): any {
   if (this.length == 0)
     return undefined;
 
@@ -342,7 +342,7 @@ Array.prototype.maxBy = function (this: any[], keySelector: (element: any) => an
   return result;
 };
 
-Array.prototype.toObject = function (this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
+Array.prototype.toObject = function(this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
   const obj: any = {};
 
   this.forEach(item => {
@@ -357,7 +357,7 @@ Array.prototype.toObject = function (this: any[], keySelector: (element: any) =>
   return obj;
 };
 
-Array.prototype.toObjectDistinct = function (this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
+Array.prototype.toObjectDistinct = function(this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
   const obj: any = {};
 
   this.forEach(item => {
@@ -369,7 +369,7 @@ Array.prototype.toObjectDistinct = function (this: any[], keySelector: (element:
   return obj;
 };
 
-Array.prototype.toMap = function (this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
+Array.prototype.toMap = function(this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
   const map = new Map();
 
   this.forEach(item => {
@@ -378,13 +378,13 @@ Array.prototype.toMap = function (this: any[], keySelector: (element: any) => an
     if (map.has(key))
       throw new Error("Repeated key {0}".formatWith(key));
 
-    map.set(key,  valueSelector ? valueSelector(item) : item);
+    map.set(key, valueSelector ? valueSelector(item) : item);
   });
 
   return map;
 };
 
-Array.prototype.toMapDistinct = function (this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
+Array.prototype.toMapDistinct = function(this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
   const map = new Map();
 
   this.forEach(item => {
@@ -396,7 +396,7 @@ Array.prototype.toMapDistinct = function (this: any[], keySelector: (element: an
   return map;
 };
 
-Array.prototype.distinctBy = function (this: any[], keySelector: (element: any) => unknown): any[] {
+Array.prototype.distinctBy = function(this: any[], keySelector: (element: any) => unknown): any[] {
   const keysFound = new Set<unknown>();
 
   keySelector ??= a => a.toString();
@@ -415,7 +415,7 @@ Array.prototype.distinctBy = function (this: any[], keySelector: (element: any) 
   return result;
 };
 
-Array.prototype.groupsOf = function (this: any[], groupSize: number, elementSize?: (item: any) => number) {
+Array.prototype.groupsOf = function(this: any[], groupSize: number, elementSize?: (item: any) => number) {
 
   const result: any[][] = [];
   let newList: any[] = [];
@@ -453,9 +453,9 @@ Array.prototype.groupsOf = function (this: any[], groupSize: number, elementSize
   return result;
 }
 
-Array.prototype.max = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
+Array.prototype.max = function(this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
-  var array: number[]= selector ?
+  var array: number[] = selector ?
     this.map(selector).filter(a => a != null) :
     this.filter(a => a != null);
   
@@ -472,9 +472,9 @@ Array.prototype.max = function (this: any[], selector?: (element: any, index: nu
   return max;
 };
 
-Array.prototype.min = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
+Array.prototype.min = function(this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
-  var array : number[] = selector ?
+  var array: number[] = selector ?
     this.map(selector).filter(a => a != null) :
     this.filter(a => a != null);
 
@@ -491,7 +491,7 @@ Array.prototype.min = function (this: any[], selector?: (element: any, index: nu
   return min;
 };
 
-Array.prototype.sum = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
+Array.prototype.sum = function(this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
   if (this.length == 0)
     return 0;
@@ -503,14 +503,14 @@ Array.prototype.sum = function (this: any[], selector?: (element: any, index: nu
     }
   } else {
     for (var i = 0; i < this.length; i++) {
-      result +=  this[i];
+      result += this[i];
     }
   }
 
   return result;
 };
 
-Array.prototype.count = function (this: any[], predicate: (element: any, index: number, array: any[]) => any) {
+Array.prototype.count = function(this: any[], predicate: (element: any, index: number, array: any[]) => any) {
 
   if (this.length == 0)
     return 0;
@@ -525,7 +525,7 @@ Array.prototype.count = function (this: any[], predicate: (element: any, index: 
 };
 
 
-Array.prototype.first = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
+Array.prototype.first = function(this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
 
   var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
@@ -536,7 +536,7 @@ Array.prototype.first = function (this: any[], errorContextOrPredicate?: string 
 };
 
 
-Array.prototype.firstOrNull = function (this: any[], predicate?: ((element: any, index: number, array: any[]) => unknown)) {
+Array.prototype.firstOrNull = function(this: any[], predicate?: ((element: any, index: number, array: any[]) => unknown)) {
 
   var array = typeof predicate == "function" ? this.filter(predicate) : this;
 
@@ -546,7 +546,7 @@ Array.prototype.firstOrNull = function (this: any[], predicate?: ((element: any,
   return array[0];
 };
 
-Array.prototype.last = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
+Array.prototype.last = function(this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
 
   var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
@@ -557,7 +557,7 @@ Array.prototype.last = function (this: any[], errorContextOrPredicate?: string |
 };
 
 
-Array.prototype.lastOrNull = function (this: any[], predicate?: ((element: any, index: number, array: any[]) => unknown)) {
+Array.prototype.lastOrNull = function(this: any[], predicate?: ((element: any, index: number, array: any[]) => unknown)) {
 
   var array = typeof predicate == "function" ? this.filter(predicate) : this;
 
@@ -567,7 +567,7 @@ Array.prototype.lastOrNull = function (this: any[], predicate?: ((element: any, 
   return array[array.length - 1];
 };
 
-Array.prototype.single = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
+Array.prototype.single = function(this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
 
   var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
@@ -580,7 +580,7 @@ Array.prototype.single = function (this: any[], errorContextOrPredicate?: string
   return array[0];
 };
 
-Array.prototype.singleOrNull = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
+Array.prototype.singleOrNull = function(this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
 
   var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
@@ -594,7 +594,7 @@ Array.prototype.singleOrNull = function (this: any[], errorContextOrPredicate?: 
 };
 
 
-Array.prototype.onlyOrNull = function (this: any[], predicate?: (element: any, index: number, array: any[]) => unknown) {
+Array.prototype.onlyOrNull = function(this: any[], predicate?: (element: any, index: number, array: any[]) => unknown) {
 
   var array = predicate ? this.filter(predicate) : this;
 
@@ -607,21 +607,21 @@ Array.prototype.onlyOrNull = function (this: any[], predicate?: (element: any, i
   return array[0];
 };
 
-Array.prototype.contains = function (this: any[], element: any) {
+Array.prototype.contains = function(this: any[], element: any) {
   return this.indexOf(element) !== -1;
 };
 
 if (!Array.prototype.includes) {
-  Array.prototype.includes = function (this: any[], element: any, fromIndex?: number) {
+  Array.prototype.includes = function(this: any[], element: any, fromIndex?: number) {
     return this.indexOf(element, fromIndex) !== -1;
   };
 }
 
-Array.prototype.removeAt = function (this: any[], index: number) {
+Array.prototype.removeAt = function(this: any[], index: number) {
   this.splice(index, 1);
 };
 
-Array.prototype.moveUp = function (this: any[], index: number) {
+Array.prototype.moveUp = function(this: any[], index: number) {
   if (index == 0)
     return 0;
 
@@ -631,7 +631,7 @@ Array.prototype.moveUp = function (this: any[], index: number) {
   return index - 1;
 };
 
-Array.prototype.moveDown = function (this: any[], index: number) {
+Array.prototype.moveDown = function(this: any[], index: number) {
   if (index == this.length - 1)
     return this.length - 1;
 
@@ -641,7 +641,7 @@ Array.prototype.moveDown = function (this: any[], index: number) {
   return index + 1;
 };
 
-Array.prototype.remove = function (this: any[], element: any) {
+Array.prototype.remove = function(this: any[], element: any) {
 
   const index = this.indexOf(element);
   if (index == -1)
@@ -651,19 +651,19 @@ Array.prototype.remove = function (this: any[], element: any) {
   return true;
 };
 
-Array.prototype.insertAt = function (this: any[], index: number, element: any) {
+Array.prototype.insertAt = function(this: any[], index: number, element: any) {
   this.splice(index, 0, element);
 };
 
-Array.prototype.clone = function (this: any[]) {
+Array.prototype.clone = function(this: any[]) {
   return this.slice(0);
 };
 
-Array.prototype.notNull = function (this: any[]) {
+Array.prototype.notNull = function(this: any[]) {
   return this.filter(a => a != null);
 };
 
-Array.prototype.joinComma = function (this: any[], lastSeparator: string) {
+Array.prototype.joinComma = function(this: any[], lastSeparator: string) {
   const array = this as any[];
 
   if (array.length == 0)
@@ -679,7 +679,7 @@ Array.prototype.joinComma = function (this: any[], lastSeparator: string) {
   return rest + lastSeparator + (array[lastIndex] == undefined ? "" : array[lastIndex].toString());
 };
 
-Array.prototype.extract = function (this: any[], predicate: (element: any) => boolean) {
+Array.prototype.extract = function(this: any[], predicate: (element: any) => boolean) {
   const result = this.filter(predicate);
 
   result.forEach(element => { this.remove(element) });
@@ -688,7 +688,7 @@ Array.prototype.extract = function (this: any[], predicate: (element: any) => bo
 };
 
 if (!Array.prototype.find) {
-  Array.prototype.find = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean, thisArg?: any) {
+  Array.prototype.find = function(this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean, thisArg?: any) {
     for (var i = 0; i < this.length; i++) {
       if (predicate.call(thisArg, this[i], i, this)) {
         return this[i];
@@ -699,7 +699,7 @@ if (!Array.prototype.find) {
 }
 
 if (!Array.prototype.findIndex) {
-  Array.prototype.findIndex = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean, thisArg?: any) {
+  Array.prototype.findIndex = function(this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean, thisArg?: any) {
     for (var i = 0; i < this.length; i++)
       if (predicate.call(thisArg, this[i], i, this))
         return i;
@@ -709,7 +709,7 @@ if (!Array.prototype.findIndex) {
 }
 
 if (!Array.prototype.findLastIndex) {
-  Array.prototype.findLastIndex = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean, thisArg?: any) {
+  Array.prototype.findLastIndex = function(this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean, thisArg?: any) {
     for (var i = this.length - 1; i >= 0; i--)
       if (predicate.call(thisArg, this[i], i, this))
         return i;
@@ -745,7 +745,7 @@ if (!Array.prototype.toTree) {
   }
 }
 
-Array.range = function (min: number, maxNotIncluded: number) {
+Array.range = function(min: number, maxNotIncluded: number) {
   const length = maxNotIncluded - min;
 
   const result = new Array(length);
@@ -756,7 +756,7 @@ Array.range = function (min: number, maxNotIncluded: number) {
   return result;
 }
 
-Array.repeat = function (count: number, val: any): any[] {
+Array.repeat = function(count: number, val: any): any[] {
 
   const result = new Array(count);
   for (let i = 0; i < count; i++) {
@@ -766,7 +766,7 @@ Array.repeat = function (count: number, val: any): any[] {
   return result;
 }
 
-Array.toArray = function (arrayish: { length: number;[index: number]: any }): any[] {
+Array.toArray = function(arrayish: { length: number;[index: number]: any }): any[] {
   var result: any[] = [];
   for (var i = 0; i < arrayish.length; i++)
     result.push(arrayish[i]);
@@ -774,25 +774,25 @@ Array.toArray = function (arrayish: { length: number;[index: number]: any }): an
 }
 
 if (!String.prototype.includes) {
-  String.prototype.includes = function (this: string, str: string, start?: number) {
+  String.prototype.includes = function(this: string, str: string, start?: number) {
     return this.indexOf(str, start) !== -1;
   };
 }
 
-String.prototype.contains = function (this: string, str: string) {
+String.prototype.contains = function(this: string, str: string) {
   return this.indexOf(str) !== -1;
 }
 
-String.prototype.startsWith = function (this: string, str: string) {
+String.prototype.startsWith = function(this: string, str: string) {
   return this.indexOf(str) === 0;
 }
 
-String.prototype.endsWith = function (this: string, str: string) {
+String.prototype.endsWith = function(this: string, str: string) {
   const index = this.lastIndexOf(str);
   return index !== -1 && index === (this.length - str.length); //keep it
 }
 
-String.prototype.formatWith = function () {
+String.prototype.formatWith = function() {
   const regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 
   const args: any = arguments;
@@ -835,7 +835,7 @@ String.prototype.splitByRegex = function splitByRegex(this: string, regex: RegEx
   return result;
 };
 
-String.prototype.forGenderAndNumber = function (this: string, gender: any, number?: number) {
+String.prototype.forGenderAndNumber = function(this: string, gender: any, number?: number) {
   
   if (!number && !isNaN(parseFloat(gender))) {
     number = gender;
@@ -888,12 +888,12 @@ export function softCast<T>(val: T): T {
   return val;
 }
 
-String.prototype.indent = function (this: string, numChars: number) {
+String.prototype.indent = function(this: string, numChars: number) {
   const indent = " ".repeat(numChars);
   return this.split("\n").map(a => indent + a).join("\n");
 };
 
-String.prototype.between = function (this: string, firstSeparator: string, secondSeparator?: string) {
+String.prototype.between = function(this: string, firstSeparator: string, secondSeparator?: string) {
 
   if (!secondSeparator)
     secondSeparator = firstSeparator;
@@ -910,7 +910,7 @@ String.prototype.between = function (this: string, firstSeparator: string, secon
   return this.substring(from, index2);
 };
 
-String.prototype.tryBetween = function (this: string, firstSeparator: string, secondSeparator?: string) {
+String.prototype.tryBetween = function(this: string, firstSeparator: string, secondSeparator?: string) {
 
   if (!secondSeparator)
     secondSeparator = firstSeparator;
@@ -927,7 +927,7 @@ String.prototype.tryBetween = function (this: string, firstSeparator: string, se
   return this.substring(from, index2);
 };
 
-String.prototype.after = function (this: string, separator: string) {
+String.prototype.after = function(this: string, separator: string) {
   const index = this.indexOf(separator);
   if (index == -1)
     throw Error("{0} not found".formatWith(separator));
@@ -935,7 +935,7 @@ String.prototype.after = function (this: string, separator: string) {
   return this.substring(index + separator.length);
 };
 
-String.prototype.before = function (this: string, separator: string) {
+String.prototype.before = function(this: string, separator: string) {
   const index = this.indexOf(separator);
   if (index == -1)
     throw Error("{0} not found".formatWith(separator));
@@ -943,7 +943,7 @@ String.prototype.before = function (this: string, separator: string) {
   return this.substring(0, index);
 };
 
-String.prototype.tryAfter = function (this: string, separator: string) {
+String.prototype.tryAfter = function(this: string, separator: string) {
   const index = this.indexOf(separator);
   if (index == -1)
     return undefined;
@@ -951,7 +951,7 @@ String.prototype.tryAfter = function (this: string, separator: string) {
   return this.substring(index + separator.length);
 };
 
-String.prototype.tryBefore = function (this: string, separator: string) {
+String.prototype.tryBefore = function(this: string, separator: string) {
   const index = this.indexOf(separator);
   if (index == -1)
     return undefined;
@@ -959,7 +959,7 @@ String.prototype.tryBefore = function (this: string, separator: string) {
   return this.substring(0, index);
 };
 
-String.prototype.beforeLast = function (this: string, separator: string) {
+String.prototype.beforeLast = function(this: string, separator: string) {
   const index = this.lastIndexOf(separator);
   if (index == -1)
     throw Error("{0} not found".formatWith(separator));
@@ -967,7 +967,7 @@ String.prototype.beforeLast = function (this: string, separator: string) {
   return this.substring(0, index);
 };
 
-String.prototype.afterLast = function (this: string, separator: string) {
+String.prototype.afterLast = function(this: string, separator: string) {
   const index = this.lastIndexOf(separator);
   if (index == -1)
     throw Error("{0} not found".formatWith(separator));
@@ -975,7 +975,7 @@ String.prototype.afterLast = function (this: string, separator: string) {
   return this.substring(index + separator.length);
 };
 
-String.prototype.tryBeforeLast = function (this: string, separator: string) {
+String.prototype.tryBeforeLast = function(this: string, separator: string) {
   const index = this.lastIndexOf(separator);
   if (index == -1)
     return undefined;
@@ -983,7 +983,7 @@ String.prototype.tryBeforeLast = function (this: string, separator: string) {
   return this.substring(0, index);
 };
 
-String.prototype.tryAfterLast = function (this: string, separator: string) {
+String.prototype.tryAfterLast = function(this: string, separator: string) {
   const index = this.lastIndexOf(separator);
   if (index == -1)
     return undefined;
@@ -991,7 +991,7 @@ String.prototype.tryAfterLast = function (this: string, separator: string) {
   return this.substring(index + separator.length);
 };
 
-String.prototype.etc = function (this: string, maxLength: number, etcString: string = "(…)") {
+String.prototype.etc = function(this: string, maxLength: number, etcString: string = "(…)") {
   let str = this;
 
   if (str.length > maxLength)
@@ -1000,15 +1000,15 @@ String.prototype.etc = function (this: string, maxLength: number, etcString: str
   return str;
 };
 
-String.prototype.firstUpper = function () {
+String.prototype.firstUpper = function() {
   return this[0].toUpperCase() + this.substring(1);
 };
 
-String.prototype.firstLower = function () {
+String.prototype.firstLower = function() {
   return this[0].toLowerCase() + this.substring(1);
 };
 
-String.prototype.repeat = function (this: string, n: number) {
+String.prototype.repeat = function(this: string, n: number) {
   let result = "";
   for (let i = 0; i < n; i++)
     result += this;
@@ -1115,7 +1115,7 @@ export module Dic {
   }
 
   export function except(obj: { [key: string]: any }, keys: string[]): { [key: string]: any } {
-    var result : { [key: string]: any } = {};
+    var result: { [key: string]: any } = {};
     for (const name in obj) {
       if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
         if (!keys.contains(name))
@@ -1136,7 +1136,7 @@ export module Dic {
     return result;
   }
 
-  export function mapObject<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): {[key: string] : R} {
+  export function mapObject<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): { [key: string]: R } {
     let index = 0;
     const result: { [key: string]: R } = {};
     for (const name in obj) {
@@ -1167,7 +1167,7 @@ export module Dic {
   export function simplify<T extends {}>(a: T): T;
   export function simplify<T extends {}>(a: undefined): undefined;
   export function simplify<T extends {}>(a: T | undefined): T | undefined;
-  export function simplify<T extends {}>(a: T | undefined): T | undefined{
+  export function simplify<T extends {}>(a: T | undefined): T | undefined {
     if (a == null)
       return a;
 
@@ -1218,7 +1218,7 @@ export function combineFunction<F extends Function>(func1?: F | null, func2?: F 
   } as any;
 }
 
-RegExp.escape = function (s: string) {
+RegExp.escape = function(s: string) {
   return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 };
 
@@ -1338,7 +1338,7 @@ export function roundTwoDecimals(num: number): number {
 }
 
 
-export function getColorContrasColorBWByHex (hexcolor: string): "black" | "white" {
+export function getColorContrasColorBWByHex(hexcolor: string): "black" | "white" {
   hexcolor = hexcolor.replace("#", "");
   var r = parseInt(hexcolor.substr(0, 2), 16);
   var g = parseInt(hexcolor.substr(2, 2), 16);

@@ -4,10 +4,10 @@ import "./Sidebar.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals';
 import { EntityControlMessage } from '@framework/Signum.Entities';
-import { LinkButton } from '../../Signum/React/Basics/LinkButton';
 import { LayoutMessage } from './Signum.Toolbar';
+import { LinkButton } from '../../Signum/React/Basics/LinkButton';
 
-export type SidebarMode = "Wide" | "Narrow" | "Hidden";   
+export type SidebarMode = "Wide" | "Narrow" | "Hidden";
 
 interface SidebarContainerProps {
   mode: SidebarMode;
@@ -16,24 +16,67 @@ interface SidebarContainerProps {
   children: React.ReactNode;
 }
 
-export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element{
+export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element {
+  const sidebarRef = React.useRef<HTMLDivElement>(null);
+  const isResizing = React.useRef(false);
+
+  React.useEffect(() => {
+    // Whenever sidebar mode becomes Wide on desktop, reset width to 250px
+    if (p.mode === "Wide" && !p.isMobile) {
+      document.documentElement.style.setProperty("--sidebar-width", `250px`);
+    }
+  }, [p.mode, p.isMobile]);
+  React.useEffect(() => {
+    function onMouseMove(e: MouseEvent) {
+      if (!isResizing.current || !sidebarRef.current) return;
+      const MIN_WIDTH = 250;
+      const MAX_WIDTH = 600;
+      const newWidth = Math.min(Math.max(e.clientX, MIN_WIDTH), MAX_WIDTH);
+      document.documentElement.style.setProperty(
+        "--sidebar-width",
+        `${newWidth}px`
+      );
+    }
+
+    function onMouseUp() {
+      isResizing.current = false;
+      document.body.classList.remove("sidebar-resizing");
+    }
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
+  function startResize() {
+    isResizing.current = true;
+    document.body.classList.add("sidebar-resizing");
+  }
+
   function renderSideBar() {
     return (
       <nav
-        className={classes("sidebar sidebar-nav", p.mode.firstLower(), p.isMobile && "mobile")}
-        role="navigation">
-        <a
-          href="#maincontent"
-          className="skip-link"
-          onClick={(e) => {
-            e.preventDefault();
-            const el = document.getElementById("maincontent");
-            if (el) {
-              el.focus();
-            }
-          }}
-        >{LayoutMessage.JumpToMainContent.niceToString()}</a>
+        ref={sidebarRef}
+        className={classes(
+          "sidebar sidebar-nav",
+          p.mode.firstLower(),
+          p.isMobile && "mobile"
+        )}
+        role="navigation"
+      >
         {p.sidebarContent}
+
+        {/* Resize handle (desktop + wide only) */}
+        {!p.isMobile && p.mode === "Wide" && (
+          <div
+            className="sidebar-resizer"
+            onMouseDown={startResize}
+          />
+        )}
       </nav>
     );
   }
@@ -42,9 +85,7 @@ export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element{
     <div className="sidebar-container">
       {p.sidebarContent && renderSideBar()}
       <div className="sf-page-container">
-        <ErrorBoundary>
-          {p.children}
-        </ErrorBoundary>
+        <ErrorBoundary>{p.children}</ErrorBoundary>
       </div>
     </div>
   );

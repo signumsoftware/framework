@@ -850,11 +850,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   createCaption(): string {
 
     const tis = this.entityColumnTypeInfos();
-
-    const types = tis.map(ti => ti.niceName).join(", ");
-    const gender = tis.first().gender;
-
-    return SearchMessage._0ResultTable.niceToString().forGenderAndNumber(gender).formatWith(types);
+    if (tis.length > 0) {
+      const types = tis.map(ti => ti.niceName).join(", ");
+      return SearchMessage._0ResultTable.niceToString().formatWith(types);
+    }
+    else {
+      const nn = getQueryNiceName(this.props.queryDescription.queryKey);
+      return SearchMessage._0ResultTable.niceToString(nn);
+    }
   }
 
   getSelectedEntities(): Lite<Entity>[] {
@@ -1742,7 +1745,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if (this.props.view) {
       var lite = row.entity!;
 
-      if (!lite || !Navigator.isViewable(lite.EntityType, { isSearch: "main" }))
+      if (!lite || !Navigator.isViewable(lite, { isSearch: "main" }))
         return;
 
       e.preventDefault();
@@ -1953,7 +1956,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             }
           }}
           {...ra}
-          className={classes(markClassName, ra?.className, selected && "sf-row-selected")}
+          className={classes(markClassName, ra?.className, selected && "sf-row-selected", (!row.entity || Navigator.entitySettings[row.entity.EntityType]?.isViewableLite?.(row.entity, { isSearch: "main" }) === false) ? "sf-row-no-view" : null)}
         >
           {this.props.allowSelection &&
             <td className="centered-cell">

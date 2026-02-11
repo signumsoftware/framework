@@ -70,7 +70,7 @@ public abstract class ValueProviderBase
 
     public override string ToString() => ToString(new ScopedDictionary<string, ValueProviderBase>(null), null);
 
-    public abstract void Synchronize(TemplateSynchronizationContext sc, string remainingText);
+    public abstract void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange);
 
     public virtual void Declare(ScopedDictionary<string, ValueProviderBase> variables)
     {
@@ -361,9 +361,9 @@ public class TokenValueProvider : ValueProviderBase
         sb.Append(this.ParsedToken.ToString(variables));
     }
 
-    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
+    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     {
-        sc.SynchronizeToken(ParsedToken, remainingText);
+        sc.SynchronizeToken(ParsedToken, remainingText, forceChange);
 
         Declare(sc.Variables);
     }
@@ -458,9 +458,9 @@ public class TranslateInstanceValueProvider : ValueProviderBase
         sb.Append(this.ParsedToken.ToString(variables));
     }
 
-    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
+    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     {
-        sc.SynchronizeToken(ParsedToken, remainingText);
+        sc.SynchronizeToken(ParsedToken, remainingText, forceChange);
 
         Declare(sc.Variables);
     }
@@ -666,7 +666,7 @@ public class ModelValueProvider : ValueProviderBase
         sb.Append(Members == null ? fieldOrPropertyChain : Members.ToString(a => a.ToString(variables), "."));
     }
 
-    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
+    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     {
         if (Members == null)
         {
@@ -795,7 +795,7 @@ public class NiceNameValueProvider : ValueProviderBase
 
     public override int GetHashCode() => fieldOrMessageChain?.GetHashCode() ?? 0;
 
-    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText) {}
+    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange) { }
 
     public override void FillQueryTokens(List<QueryToken> list, bool forForeach) {}
 }
@@ -905,7 +905,7 @@ public class GlobalValueProvider : ValueProviderBase
         }
     }
 
-    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
+    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     {
         globalKey = sc.Replacements.SelectInteractive(globalKey, GlobalVariables.Keys, "Globals", sc.StringDistance) ?? globalKey;
 
@@ -963,7 +963,7 @@ public class DateValueProvider : ValueProviderBase
         sb.Append(TemplateUtils.ScapeColon(this.dateTimeExpression!));
     }
 
-    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
+    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     { 
 
 
@@ -1043,7 +1043,7 @@ public class ConstantValueProvider : ValueProviderBase
         sb.Append(val);
     }
 
-    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
+    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     {
 
 
@@ -1153,7 +1153,7 @@ public class ContinueValueProvider : ValueProviderBase
         sb.Append(Members == null ? fieldOrPropertyChain : Members.ToString(a => a.ToString(variables)!, "."));
     }
 
-    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
+    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     {
         if (Members == null)
         {

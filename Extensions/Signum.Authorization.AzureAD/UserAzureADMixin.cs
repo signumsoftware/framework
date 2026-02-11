@@ -6,7 +6,7 @@ namespace Signum.Authorization.AzureAD;
 
 public class UserAzureADMixin : MixinEntity
 {
-    public static bool AllowPasswordForActiveDirectoryUsers = false;
+    public static bool AllowPasswordForAzureADUsers = false;
 
     UserAzureADMixin(ModifiableEntity mainEntity, MixinEntity? next)
         : base(mainEntity, next)
@@ -19,7 +19,7 @@ public class UserAzureADMixin : MixinEntity
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Name == nameof(OID) && OID != null && ((UserEntity)this.MainEntity).PasswordHash != null && !AllowPasswordForActiveDirectoryUsers)
+        if (pi.Name == nameof(OID) && OID != null && ((UserEntity)this.MainEntity).PasswordHash != null && !AllowPasswordForAzureADUsers)
             return UserOIDMessage.TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet.NiceToString(this.MainEntity);
 
 

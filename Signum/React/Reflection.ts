@@ -1703,16 +1703,20 @@ export class QueryTokenString<T> {
     return new QueryTokenString<string>(this.token + "." + column);
   }
 
-  operation(os: OperationSymbol): string { //operation tokens are leaf
-    return this.token + ".[Operations]." + os.key.replace(".", "#");
+  operation(os: OperationSymbol): QueryTokenString<string> {
+    return new QueryTokenString<string>(this.token + ".[Operations]." + os.key.replace(".", "#"));
   }
 
   translated(): QueryTokenString<string> {
     return new QueryTokenString<string>(this.token + ".Translated");
   }
 
-  indexer(prefix: string, key: string): string {
-    return this.token + ".[" + prefix + "].[" + key + "]";
+  indexer<S>(prefix: string, key: string): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".[" + prefix + "].[" + key + "]");
+  }
+
+  mlistElementProperty(property: "RowId" | "RowOrder" | "RowPartitionId"): QueryTokenString<string | number> {
+    return new QueryTokenString<string | number>(this.token + "." + property);
   }
 }
 

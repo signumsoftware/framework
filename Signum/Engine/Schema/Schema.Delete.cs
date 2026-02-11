@@ -92,7 +92,7 @@ END IF;");
 
         var result = Schema.Current.Settings.IsPostgres ?
         new SqlPreCommandSimple(@$"{variableName} {columnType} = ({queryCommandString});") :
-        new SqlPreCommandSimple($"DECLARE {variableName} {columnType} = ({queryCommandString}));");
+        new SqlPreCommandSimple($"DECLARE {variableName} {columnType} = ({queryCommandString});");
 
         return result;
     }

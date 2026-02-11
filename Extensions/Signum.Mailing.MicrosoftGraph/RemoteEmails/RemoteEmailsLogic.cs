@@ -1,45 +1,31 @@
-using Signum.Authorization;
+using Azure.Core;
 using Microsoft.Graph;
-using Signum.Utilities.Reflection;
-using Signum.API;
-using Signum.DynamicQuery.Tokens;
-using Microsoft.Graph.Models.ODataErrors;
 using Microsoft.Graph.Models;
-using Signum.UserAssets;
+using Microsoft.Graph.Models.ODataErrors;
+using Signum.API;
+using Signum.Authorization;
 using Signum.Authorization.AzureAD;
+using Signum.DynamicQuery.Tokens;
+using Signum.UserAssets;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Mailing.MicrosoftGraph.RemoteEmails;
 
 public static class RemoteEmailsLogic
 {
-    public static Action<QueryRequest> AuthorizeQueryRequest = qr =>
-    {
-        if (!qr.Filters.Any(a => a is FilterCondition fc && fc.Token.FullKey() == "User" && fc.Value is Lite<UserEntity> u && u.Is(UserEntity.Current)))
-        {
-            if (!RemoteEmailMessagePermission.ViewEmailMessagesFromOtherUsers.IsAuthorized())
-                throw new UnauthorizedAccessException(RemoteEmailMessage.NotAuthorizedToViewEmailsFromOtherUsers.NiceToString());
-        }
-    };
+    public static Func<List<string>>? HardCodedCategories; 
 
-    public static Action<Lite<UserEntity>, Microsoft.Graph.Models.Message> AuthorizeMessage = (user, qr) =>
-    { 
-        if (!user.Is(UserEntity.Current))
-        {
-            if (!RemoteEmailMessagePermission.ViewEmailMessagesFromOtherUsers.IsAuthorized())
-                throw new UnauthorizedAccessException(RemoteEmailMessage.NotAuthorizedToViewEmailsFromOtherUsers.NiceToString());
-        }
-    };
+    public static Func<Guid, TokenCredential> GetTokenCredentials = (oid) => AzureADLogic.GetTokenCredential();
 
     public static MessageMicrosoftGraphQueryConverter Converter = new MessageMicrosoftGraphQueryConverter();
 
-    public static Func<Lite<UserEntity>, bool> HasMailbox = user => user.Model is UserLiteModel um && um.OID is Guid oid;
+    public static Func<Lite<UserEntity>, Guid> GetMailbox = user => user.Model is UserLiteModel um && um.OID != null ? um.OID.Value :
+        throw new ApplicationException(RemoteEmailMessageMessage.User0HasNoMailbox.NiceToString(user));
 
     public static void Start(SchemaBuilder sb)
     {
         if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
             return;
-
-        PermissionLogic.RegisterTypes(typeof(RemoteEmailMessagePermission));
 
         FilterValueConverter.SpecificConverters.Add(new RemoteEmailFolderConverter());
 
@@ -47,59 +33,46 @@ public static class RemoteEmailsLogic
         {
             using (HeavyProfiler.Log("Microsoft Graph", () => "EmailMessage"))
             {
-                var tokenCredential = AzureADLogic.GetTokenCredential();
+                var user = request.Filters.OfType<FilterCondition>().Where(a => a.Token.FullKey() == "User").Only()?.Value as Lite<UserEntity>;
 
-                RemoteEmailsLogic.AuthorizeQueryRequest(request);
+                if (user == null)
+                    throw new ApplicationException(RemoteEmailMessageMessage.UserFilterNotFound.NiceToString());
+
+                var oid = GetMailbox(user);
+
+                var tokenCredential = RemoteEmailsLogic.GetTokenCredentials(oid);
 
                 GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
 
                 var userFilter = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "User" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
                 Microsoft.Graph.Models.MessageCollectionResponse response;
-                Lite<UserEntity>? user = userFilter?.Value as Lite<UserEntity>;
-                Dictionary<string, RemoteEmailFolderModel> mailFolders = null!; 
+                Dictionary<string, RemoteEmailFolderModel> mailFolders = null!;
                 try
                 {
-
                     var (filters, orders) = FixFiltersAndOrders(request.Filters.ToList(), request.Orders.ToList());
 
-                    if (user != null)
+                    response = (await graphClient.Users[oid.ToString()].Messages.GetAsync(req =>
                     {
-                        if (HasMailbox(user))
-                        {
-                            var oid = ((UserLiteModel)user.Model!).OID;
-                            response = (await graphClient.Users[oid.ToString()].Messages.GetAsync(req =>
-                            {
-                                req.QueryParameters.Filter = Converter.GetFilters(filters);
-                                req.QueryParameters.Search = Converter.GetSearch(filters);
-                                req.QueryParameters.Select = Converter.GetSelect(request.Columns.Where(c => InMSGRaph(c.Token)));
-                                req.QueryParameters.Orderby = Converter.GetOrderBy(orders.Where(c => InMSGRaph(c.Token)));
-                                req.QueryParameters.Expand = Converter.GetExpand(request.Columns.Where(c => InMSGRaph(c.Token)));
-                                req.QueryParameters.Top = Converter.GetTop(request.Pagination);
-                                req.QueryParameters.Count = true;
-                                req.Headers.Add("ConsistencyLevel", "eventual");
-                                req.Headers.Add("Prefer", "IdType='ImmutableId'");
-                            }))!;
+                        req.QueryParameters.Filter = Converter.GetFilters(filters);
+                        req.QueryParameters.Search = Converter.GetSearch(filters);
+                        req.QueryParameters.Select = Converter.GetSelect(request.Columns.Where(c => InMSGRaph(c.Token)));
+                        req.QueryParameters.Orderby = Converter.GetOrderBy(orders.Where(c => InMSGRaph(c.Token)));
+                        req.QueryParameters.Expand = Converter.GetExpand(request.Columns.Where(c => InMSGRaph(c.Token)));
+                        req.QueryParameters.Top = Converter.GetTop(request.Pagination);
+                        req.QueryParameters.Count = true;
+                        req.Headers.Add("ConsistencyLevel", "eventual");
+                        req.Headers.Add("Prefer", "IdType='ImmutableId'");
+                    }))!;
 
-                            var folders = (await graphClient.Users[oid.ToString()].MailFolders.GetAsync(req =>
-                            {
-                                req.QueryParameters.Select = new[] { "displayName" };
-                                req.QueryParameters.Top = 100;
-                                req.QueryParameters.IncludeHiddenFolders = "true";
-                            }))!;
-
-                
-
-                            mailFolders = folders.Value!.ToDictionary(a => a.Id!, a => new RemoteEmailFolderModel { FolderId = a.Id!, DisplayName = a.DisplayName! });
-                        }
-                        else
-                        {
-                            response = new Microsoft.Graph.Models.MessageCollectionResponse { Value = new List<Microsoft.Graph.Models.Message>(), OdataCount = 0 };
-                        }
-                    }
-                    else
+                    var folders = (await graphClient.Users[oid.ToString()].MailFolders.GetAsync(req =>
                     {
-                        response = new Microsoft.Graph.Models.MessageCollectionResponse { Value = new List<Microsoft.Graph.Models.Message>(), OdataCount = 0 };
-                    }
+                        req.QueryParameters.Select = new[] { "displayName" };
+                        req.QueryParameters.Top = 100;
+                        req.QueryParameters.IncludeHiddenFolders = "true";
+                    }))!;
+
+                    mailFolders = folders.Value!.ToDictionary(a => a.Id!, a => new RemoteEmailFolderModel { FolderId = a.Id!, DisplayName = a.DisplayName! });
+
                 }
                 catch (ODataError e)
                 {
@@ -108,7 +81,7 @@ public static class RemoteEmailsLogic
 
                 var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
 
-           
+
                 var list = response.Value!.Skip(skip).Select(u => new
                 {
                     Entity = (Lite<UserEntity>?)null,/*Lie*/
@@ -128,6 +101,7 @@ public static class RemoteEmailsLogic
                         FolderId = u.ParentFolderId,
                         DisplayName = "Unknown"
                     },
+                    u.Categories,
                     WellKnownFolderName = (string?)null,
                     User = user,
                     Extension0 = Converter.GetExtension(u, 0),
@@ -150,7 +124,7 @@ public static class RemoteEmailsLogic
         .ColumnProperyRoutes(a => a.User, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.User)),
         Implementations.By(typeof(UserEntity)) /*Lie*/);
 
-        if(sb.WebServerBuilder != null)
+        if (sb.WebServerBuilder != null)
         {
             ReflectionServer.RegisterLike(typeof(RemoteEmailMessageQuery), () => QueryLogic.Queries.QueryAllowed(RemoteEmailMessageQuery.RemoteEmailMessages, false));
         }
@@ -170,7 +144,7 @@ public static class RemoteEmailsLogic
         if (filters.IsEmpty())
             return (filters, orders);
 
-        if(filters.Any(a=>a is FilterCondition fc && fc.Operation == FilterOperation.Contains))
+        if (filters.Any(a => a is FilterCondition fc && fc.Operation == FilterOperation.Contains))
             return (filters, new List<Order>());
 
         var newFilters = new List<DynamicQuery.Filter>();
@@ -226,6 +200,9 @@ public class MessageMicrosoftGraphQueryConverter : MicrosoftGraphQueryConverter
         if (token.FullKey().StartsWith("Folder") || token.FullKey().StartsWith("WellKnownFolderName"))
             return "parentFolderId";
 
+        if (token is CollectionToArrayToken ct)
+            token = ct.Parent!;
+
         var field = token.Follow(a => a.Parent).Reverse().ToString(a =>
         {
             if (a is EntityPropertyToken ept)
@@ -254,9 +231,10 @@ public class MessageMicrosoftGraphQueryConverter : MicrosoftGraphQueryConverter
 
     public override string? ToFilter(DynamicQuery.Filter f)
     {
-        if(f is FilterCondition fc)
+        if (f is FilterCondition fc)
         {
-            if (fc.Token.FullKey().StartsWith("Extension")) {
+            if (fc.Token.FullKey().StartsWith("Extension"))
+            {
 
                 var id = GetExpansionPropertyId(int.Parse(fc.Token.FullKey().After("Extension")));
 

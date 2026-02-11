@@ -788,7 +788,7 @@ public class SqlPreCommandPostgresDoBlock : SqlPreCommand
         sb.AppendLine("BEGIN");
         sb.AppendLine(Body.PlainSql().Indent(4));
         sb.AppendLine("END $$;");
-        return new SqlPreCommandSimple(sb.ToString());
+        return new SqlPreCommandSimple(sb.ToString().Replace("\r\n", "\n"));
     }
 
     public override SqlPreCommand Replace(Regex regex, MatchEvaluator matchEvaluator)
