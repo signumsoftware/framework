@@ -14,19 +14,23 @@ namespace Signum.Agent;
 public class ChatbotController : Controller
 {
     [HttpGet("api/chatbot/provider/{providerKey}/models")]
-    public Task<List<string>> GetModels(string providerKey, CancellationToken token)
+    public async Task<List<string>> GetModels(string providerKey, CancellationToken token)
     {
         var symbol = SymbolLogic<LanguageModelProviderSymbol>.ToSymbol(providerKey);
 
-        return ChatbotLogic.GetModelNamesAsync(symbol, token);
+        var list = await ChatbotLogic.GetModelNamesAsync(symbol, token);
+
+        return list.Order().ToList();
     }
 
     [HttpGet("api/chatbot/provider/{providerKey}/embeddingModels")]
-    public Task<List<string>> GetEmbeddingModels(string providerKey, CancellationToken token)
+    public async Task<List<string>> GetEmbeddingModels(string providerKey, CancellationToken token)
     {
         var symbol = SymbolLogic<LanguageModelProviderSymbol>.ToSymbol(providerKey);
 
-        return ChatbotLogic.GetEmbeddingModelNamesAsync(symbol, token);
+        var list = await ChatbotLogic.GetEmbeddingModelNamesAsync(symbol, token);
+        
+        return list.Order().ToList();
     }
 
     [HttpGet("api/chatbot/messages/{sessionID}")]
