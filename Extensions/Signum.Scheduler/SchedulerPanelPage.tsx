@@ -24,9 +24,11 @@ export default function SchedulerPanelPage(): React.JSX.Element {
   const [state, reloadState] = useAPIWithReload(() => SchedulerClient.API.view(), [], { avoidReset: true });
 
   const tick = useInterval(state == null || state.running ? 500 : null, 0, n => n + 1);
+  const [rotation, setRotation] = React.useState(0);
 
   React.useEffect(() => {
     reloadState();
+    setRotation(prev => prev + 45);
   }, [tick]);
 
   useTitle("Scheduler Task Runner");
@@ -51,11 +53,25 @@ export default function SchedulerPanelPage(): React.JSX.Element {
 
   return (
     <div>
-      <h1 className="display-6 h2"><FontAwesomeIcon aria-hidden="true" icon="clock" />  {ScheduledTaskMessage.SchedulePanel.niceToString()} <CopyHealthCheckButton
-        name={url.hostname + " Scheduler Task Runner"}
-        healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/scheduler/healthCheck')}
-        clickUrl={url.href}
-      /></h1>
+      <h1 className="display-6 h2">
+        <FontAwesomeIcon aria-hidden="true" icon="clock" />  
+        {ScheduledTaskMessage.SchedulePanel.niceToString()} 
+        <FontAwesomeIcon 
+          aria-hidden="true" 
+          icon="sync" 
+          className="ms-2" 
+          style={{ 
+            transform: `rotate(${rotation}deg)`,
+            transition: 'transform 0.5s ease-in-out',
+            opacity: 0.5
+          }} 
+        />
+        <CopyHealthCheckButton
+          name={url.hostname + " Scheduler Task Runner"}
+          healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/scheduler/healthCheck')}
+          clickUrl={url.href}
+        />
+      </h1>
       <div className="btn-toolbar">
         <button type="button" className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon aria-hidden="true" icon="play" />  {ScheduledTaskMessage.Start.niceToString()}</button>
         <button type="button" className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon aria-hidden="true" icon="stop" />  {ScheduledTaskMessage.Stop.niceToString()}</button>
@@ -75,6 +91,10 @@ export default function SchedulerPanelPage(): React.JSX.Element {
         {ScheduledTaskMessage.MachineName.niceToString()}: {s.machineName}
         <br />
         {ScheduledTaskMessage.ApplicationName.niceToString()}: {s.applicationName}
+        <br />
+        {ScheduledTaskMessage.ServerTimeZone.niceToString()}: {s.serverTimeZone}
+        <br />
+        {ScheduledTaskMessage.ServerLocalTime.niceToString()}: {s.serverLocalTime}
         <br />
         {ScheduledTaskMessage.NextExecution.niceToString()}: {s.nextExecution} ({s.nextExecution == undefined ? ScheduledTaskMessage.None.niceToString() : DateTime.fromISO(s.nextExecution).toRelative()})
         <br />

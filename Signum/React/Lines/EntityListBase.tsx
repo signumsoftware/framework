@@ -626,7 +626,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       if (ke.key == KeyNames.arrowDown || ke.key == KeyNames.arrowRight) {
         ke.preventDefault();
         this.onMoveElement(index, ({ index: index + 1, offset: 1 }));
-      } else {
+      } else if (ke.key == KeyNames.arrowUp || ke.key == KeyNames.arrowLeft) {
         ke.preventDefault();
         this.onMoveElement(index, ({ index: index - 1, offset : 0}));
       }

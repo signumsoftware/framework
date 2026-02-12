@@ -80,7 +80,11 @@ override registerExtension(controller: HtmlEditorController): OptionalCallback {
           const listItemNode = $findMatchingParent(anchorNode, (node) =>
             $isListItemNode(node)
           ) as ListItemNode | undefined;
-          const depth = listItemNode?.getIndent() || 0;
+          
+          if (!listItemNode) return false;
+          
+          const depth = listItemNode.getIndent() || 0;
+          
           if (!event.shiftKey) {
             if (depth >= MAX_INDENT_LEVEL) return false;
             controller.editor.dispatchCommand(

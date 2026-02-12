@@ -64,15 +64,6 @@ public class UserGraph : Graph<UserEntity, UserState>
             },
         }.Register();
 
-        new Graph<UserEntity>.Execute(UserOperation.SetPassword)
-        {
-            Execute = (u, args) =>
-            {
-                byte[] passwordHash = args.GetArg<byte[]>();
-                u.PasswordHash = passwordHash;
-            }
-        }.Register();
-
         new Delete(UserOperation.Delete)
         {
             FromStates = { UserState.Deactivated, UserState.AutoDeactivate, UserState.Active },

@@ -801,17 +801,13 @@ END $$;"); ;
         var uc = updater.Value;
         var sql = uc.SqlUpdatePattern(suffix, false);
         var parameters = new List<DbParameter>().Do(ps => uc.UpdateParameters(entity, (entity as Entity)?.Ticks ?? -1, new Forbidden(), suffix, ps));
-
         var isPostgres = Schema.Current.Settings.IsPostgres;
 
         SqlPreCommandSimple? declare = null;
-        SqlPreCommandSimple? ifStatement = null;
         SqlPreCommand? update;
         if (where != null)
         {
             declare = DeclarePrimaryKeyVariable(entity, where);
-            ifStatement = AssertNotNull(entity.Id.VariableName!, this.Name.Name, isPostgres);
-
             update = new SqlPreCommandSimple(sql, parameters).AddComment(comment).ReplaceFirstParameter(entity.Id.VariableName);
         }
         else
@@ -824,17 +820,7 @@ END $$;"); ;
             if (declare == null)
                 return update;
 
-            if (isPostgres)
-            {
-                return new SqlPreCommandPostgresDoBlock(
-                    declarations: [declare],
-                    body: SqlPreCommand.Combine(Spacing.Simple, ifStatement, update)!
-                ).SimplifyNested();
-            }
-            else
-            {
-                return SqlPreCommand.Combine(Spacing.Simple, declare, ifStatement, update);
-            }
+            return BlockIfNecessary(isPostgres, [declare], [AssertNotNull(entity.Id.VariableName!, isPostgres), update]);
         }
 
         var vmis = VirtualMList.RegisteredVirtualMLists.TryGetC(this.Type);
@@ -850,19 +836,22 @@ END $$;"); ;
         if (declare == null)
             return script;
 
-        if (isPostgres)
-        {
-            return new SqlPreCommandPostgresDoBlock(
-                declarations: [declare],
-                body: SqlPreCommand.Combine(Spacing.Simple, ifStatement, script)!
-            ).SimplifyNested();
-        }
-        else
-        {
-            return SqlPreCommand.Combine(Spacing.Simple, declare, ifStatement, script);
-        }
+        return BlockIfNecessary(isPostgres, [declare], [AssertNotNull(entity.Id.VariableName!, isPostgres), script!]);
     }
 
+    public SqlPreCommand BlockIfNecessary(bool isPostgres, SqlPreCommand[] declarations, SqlPreCommand?[] instructions)
+    {
+        if (isPostgres)
+            return new SqlPreCommandPostgresDoBlock(
+                declarations: declarations,
+                body: instructions.Combine(Spacing.Simple)!
+            ).SimplifyNested();
+
+        else
+        {
+            return declarations.Concat(instructions).Combine(Spacing.Simple)!;
+        }
+    }
     static GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand>> giUpdateVirtualMListSync = new GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand>>(
         (e, vmi) => UpdateVirtualMListSync<Entity, Entity>(e, vmi));
 

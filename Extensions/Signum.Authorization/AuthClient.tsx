@@ -16,6 +16,8 @@ import { EntityOperationSettings, Operations } from "../../Signum/React/Operatio
 
 export namespace AuthClient {
   
+  export let pendingPasswordChangeUser: UserEntity | undefined;
+
   export function startPublic(options: { routes: RouteObject[], userTicket: boolean, notifyLogout: boolean }): void {
     Options.userTicket = options.userTicket;
   
@@ -183,31 +185,31 @@ export namespace AuthClient {
   export function autoLogin(): Promise<UserEntity | undefined> {
     if (AppContext.currentUser)
       return Promise.resolve(AppContext.currentUser as UserEntity);
-  
-    if (getAuthToken())
+
+    function loginWithAuthToken() {
       return API.fetchCurrentUser().then(u => {
-        setCurrentUser(u);
-        AppContext.resetUI();
-        return u;
+        if (u.mustChangePassword) {
+          pendingPasswordChangeUser = u;
+          return undefined;
+        } else {
+          setCurrentUser(u);
+          AppContext.resetUI();
+          return u;
+        }
       }, e => {
         console.error(e);
         setAuthToken(undefined, undefined);
         return undefined;
       });
+    }
+
+    if (getAuthToken())
+      return loginWithAuthToken();
   
     return new Promise<undefined>((resolve) => window.setTimeout(() => resolve(undefined), 500))
       .then(() => {
         if (getAuthToken()) {
-          return API.fetchCurrentUser()
-            .then(u => {
-              setCurrentUser(u);
-              AppContext.resetUI();
-              return u;
-            }, e => {
-              console.error(e);
-              setAuthToken(undefined, undefined);
-              return undefined;
-            });
+          return loginWithAuthToken();
         } else {
           return authenticate()
             .then(au => {
@@ -215,9 +217,17 @@ export namespace AuthClient {
                 return undefined;
               } else {
                 setAuthToken(au.token, au.authenticationType);
-                setCurrentUser(au.userEntity);
-                AppContext.resetUI();
-                return au.userEntity;
+                if (au.userEntity.mustChangePassword) {
+                  pendingPasswordChangeUser = au.userEntity;
+                  if (AppContext._internalRouter) {
+                    AppContext.navigate("/auth/changePassword");
+                  }
+                  return undefined;
+                } else {
+                  setCurrentUser(au.userEntity);
+                  AppContext.resetUI();
+                  return au.userEntity;
+                }
               }
             });
         }
