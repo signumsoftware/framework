@@ -224,6 +224,7 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
         return (
           <ToolbarNavItem key={key} title={res.label} isExternalLink={ToolbarUrl.isExternalLink(res.url)
       }
+            content={res.content}
             extraIcons={renderExtraIcons(res.extraIcons, ctx, selectedEntity)}
             active={isActive(ctx.active, res, selectedEntity)} icon={<>
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
@@ -610,10 +611,19 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   );
 }
 
-export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, isGroup?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
+export function ToolbarNavItem(p: { title: string | undefined, content?: Lite<Entity>, active?: boolean, isExternalLink?: boolean, isGroup?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
+  
+  const dataToolbarContent = p.content ? (() => {
+    let typeName = p.content.EntityType;
+    if (typeName.endsWith("Entity"))
+      typeName = typeName.substring(0, typeName.length - 6);
+    return `${typeName};${p.content.id}`;
+  })() : undefined;
+
   return (
     <li className="nav-item d-flex">
-      <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100" >
+      <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100"
+        data-toolbar-content={dataToolbarContent}>
         <div>{p.icon}</div>
         <span className={classes("nav-item-text", p.isGroup && "nav-item-group")}>
           {p.title}

@@ -4,9 +4,25 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 
+
+export const CssStepEmbedded: Type<CssStepEmbedded> = new Type<CssStepEmbedded>("CssStepEmbedded");
+export interface CssStepEmbedded extends Entities.EmbeddedEntity {
+  Type: "CssStepEmbedded";
+  type: CssStepType;
+  cssSelector: string | null;
+  property: Entities.Lite<Basics.PropertyRouteEntity> | null;
+  toolbarContent: Entities.Lite<Entities.Entity> | null;
+}
+
+export const CssStepType: EnumType<CssStepType> = new EnumType<CssStepType>("CssStepType");
+export type CssStepType =
+  "CSSSelector" |
+  "Property" |
+  "ToolbarContent";
 
 export const PopoverAlign: EnumType<PopoverAlign> = new EnumType<PopoverAlign>("PopoverAlign");
 export type PopoverAlign =
@@ -24,8 +40,8 @@ export type PopoverSide =
 export const TourEntity: Type<TourEntity> = new Type<TourEntity>("Tour");
 export interface TourEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "Tour";
-  name: string;
-  steps: Entities.MList<TourStepEmbedded>;
+  forEntity: Entities.Lite<Basics.TypeEntity>;
+  steps: Entities.MList<TourStepEntity>;
   showProgress: boolean;
   animate: boolean;
   showCloseButton: boolean;
@@ -41,14 +57,16 @@ export namespace TourMessage {
 
 export namespace TourOperation {
   export const Save : Operations.ExecuteSymbol<TourEntity> = registerSymbol("Operation", "TourOperation.Save");
+  export const Delete : Operations.DeleteSymbol<TourEntity> = registerSymbol("Operation", "TourOperation.Delete");
 }
 
-export const TourStepEmbedded: Type<TourStepEmbedded> = new Type<TourStepEmbedded>("TourStepEmbedded");
-export interface TourStepEmbedded extends Entities.EmbeddedEntity {
-  Type: "TourStepEmbedded";
-  element: string | null;
-  title: string | null;
-  description: string | null;
+export const TourStepEntity: Type<TourStepEntity> = new Type<TourStepEntity>("TourStep");
+export interface TourStepEntity extends Entities.Entity {
+  Type: "TourStep";
+  tour: Entities.Lite<TourEntity>;
+  title: string;
+  cssSteps: Entities.MList<CssStepEmbedded>;
+  description: string;
   side: PopoverSide | null;
   align: PopoverAlign | null;
 }

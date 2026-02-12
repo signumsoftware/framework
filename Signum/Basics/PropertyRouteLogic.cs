@@ -12,6 +12,7 @@ public static class PropertyRouteLogic
         As.Expression(() => prdn.RootType.Is(pr.RootType.ToTypeEntity()) && prdn.Path == pr.PropertyString());
 
     public static ResetLazy<FrozenDictionary<TypeEntity, FrozenDictionary<string, PropertyRouteEntity>>> Properties = null!;
+    public static ResetLazy<FrozenDictionary<Lite<PropertyRouteEntity>, PropertyRouteEntity>> PropertiesFromLite = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -30,7 +31,10 @@ public static class PropertyRouteLogic
 
         sb.Schema.Synchronizing += SynchronizeProperties;
 
-        Properties = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().AgGroupToDictionary(a => a.RootType, gr => gr.ToFrozenDictionaryEx(a => a.Path)).ToFrozenDictionaryEx(),
+        PropertiesFromLite = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
+            new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
+
+        Properties = sb.GlobalLazy(() => PropertiesFromLite.Value.Values.AgGroupToDictionary(a => a.RootType, gr => gr.ToFrozenDictionaryEx(a => a.Path)).ToFrozenDictionaryEx(),
             new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
 
         PropertyRouteEntity.ToPropertyRouteFunc = ToPropertyRouteImplementation;
@@ -50,6 +54,11 @@ public static class PropertyRouteLogic
                 }
             });
         }
+    }
+
+    public static PropertyRouteEntity RetrieveFromCache(this Lite<PropertyRouteEntity> route)
+    {
+        return PropertiesFromLite.Value.GetOrThrow(route);
     }
 
     private static SqlPreCommand? PropertyRouteLogic_PreDeleteSqlSync(TypeEntity type)

@@ -3,7 +3,7 @@ import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import { TourEntity, TourMessage } from "./Signum.Tour";
 import { useAPI } from "@framework/Hooks";
-import { Finder } from "@framework/Finder";
+import { TourClient, TourDTO } from "./TourClient";
 
 export interface TourHelpers {
   start: () => void;
@@ -14,24 +14,13 @@ export interface TourHelpers {
 }
 
 interface TourComponentProps {
-  tour: TourEntity | string;
+  tour: TourEntity | TourDTO;
   autoStart?: boolean;
 }
 
 export const TourComponent = React.forwardRef<TourHelpers, TourComponentProps>(
   function TourComponent({ tour, autoStart = true }, ref) {
     const driverRef = React.useRef<any>(null);
-
-    const tourEntity = useAPI(() => {
-      if (typeof tour === "string") {
-        return Finder.fetchEntities({
-          queryName: TourEntity,
-          filterOptions: [{ token: TourEntity.token(e => e.name), value: tour }],
-          count: 1,
-        }).then(r => r[0] as TourEntity | undefined);
-      }
-      return Promise.resolve(tour);
-    }, [tour]);
 
     React.useImperativeHandle(ref, () => ({
       start: () => driverRef.current?.drive(),
@@ -42,29 +31,50 @@ export const TourComponent = React.forwardRef<TourHelpers, TourComponentProps>(
     }), []);
 
     React.useEffect(() => {
-      if (!tourEntity) return;
+      if (!tour) return;
 
-      const steps = tourEntity.steps.map(step => ({
-        element: step.element.element || undefined,
-        popover: step.element.element ? {
-          title: step.element.title ?? undefined,
-          description: step.element.description ?? undefined,
-          side: step.element.side?.toLowerCase() as any,
-          align: step.element.align?.toLowerCase() as any,
-        } : {
-          title: step.element.title ?? undefined,
-          description: step.element.description ?? undefined,
-        }
-      }));
+      // Check if it's a TourDTO or TourEntity
+      const isTourDTO = 'guid' in tour && !('Type' in tour);
+      
+      const steps = isTourDTO 
+        ? (tour as TourDTO).steps.map(step => ({
+            element: step.cssSelector || undefined,
+            popover: step.cssSelector ? {
+              title: step.title ?? undefined,
+              description: step.description ?? undefined,
+              side: step.side as any,
+              align: step.align as any,
+            } : {
+              title: step.title ?? undefined,
+              description: step.description ?? undefined,
+            }
+          }))
+        : (tour as TourEntity).steps.map((step: any) => {
+            // Legacy path for TourEntity - find first CSSSelector type
+            const cssSelector = step.cssSteps?.find((cs: any) => cs.type === "CSSSelector")?.cssSelector || undefined;
+            
+            return {
+              element: cssSelector,
+              popover: cssSelector ? {
+                title: step.title ?? undefined,
+                description: step.description ?? undefined,
+                side: step.side?.toLowerCase() as any,
+                align: step.align?.toLowerCase() as any,
+              } : {
+                title: step.title ?? undefined,
+                description: step.description ?? undefined,
+              }
+            };
+          });
 
       const driverObj = driver({
         steps,
-        showProgress: tourEntity.showProgress,
-        animate: tourEntity.animate,
+        showProgress: tour.showProgress,
+        animate: tour.animate,
         showButtons: [
           "next",
           "previous",
-          tourEntity.showCloseButton ? "close" : null
+          tour.showCloseButton ? "close" : null
         ].filter(Boolean) as any,
         
         nextBtnText: TourMessage.Next.niceToString(),
@@ -86,7 +96,7 @@ export const TourComponent = React.forwardRef<TourHelpers, TourComponentProps>(
       }
 
       return () => driverObj.destroy();
-    }, [tourEntity, autoStart]);
+    }, [tour, autoStart]);
 
     return null;
   }

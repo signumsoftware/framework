@@ -11,11 +11,14 @@ public static class TourLogic
 
         sb.Include<TourEntity>()
             .WithSave(TourOperation.Save)
+            .WithDelete(TourOperation.Delete)
+            .WithVirtualMList(a=>a.Steps, s => s.Tour)
             .WithQuery(() => e => new
             {
                 Entity = e,
                 e.Id,
-                e.Name,
+                Name = e.ToString(),
+                e.ForEntity,
                 e.ShowProgress,
                 e.Animate,
                 e.ShowCloseButton,

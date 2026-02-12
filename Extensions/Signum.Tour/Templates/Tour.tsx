@@ -9,7 +9,7 @@ export default function Tour(p: { ctx: TypeContext<TourEntity> }): React.ReactEl
   const ctx = p.ctx.subCtx({ labelColumns: { sm: 2 } });
   return (
     <div>
-      <AutoLine ctx={ctx.subCtx(a => a.name)}  />
+      <AutoLine ctx={ctx.subCtx(a => a.forEntity)}  />
       <EntityAccordion ctx={ctx.subCtx(a => a.steps)}
         getComponent={ctx => <TourStep ctx={ctx} invalidate={forceUpdate} />}
         getTitle={ctx => ctx.value.title || ""} />
