@@ -13,6 +13,9 @@ Instructions for AI coding assistants (GitHub Copilot, OpenCode, Claude, etc.) w
 - Respect existing folder and module structure.
 - Prefer editing existing files over creating new ones.
 
+### Windows: Avoid Creating `nul` Files
+On Windows, `NUL` is a reserved device name. **Never** redirect output to `nul` or `/dev/null` in shell commands — this often creates an actual `nul` file in the working directory instead of discarding output. Use `> $null` in PowerShell, or simply omit the redirection and let the output print.
+
 ---
 
 ## Build System
