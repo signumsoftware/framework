@@ -103,6 +103,7 @@ public class ChatbotController : Controller
 
                 var messages = history.GetMessages();
                 List<ChatResponseUpdate> updates = [];
+                var sw = Stopwatch.StartNew();
                 await foreach (var update in client.GetStreamingResponseAsync(messages, options, ct))
                 {
                     if (updates.Count == 0)
@@ -116,6 +117,7 @@ public class ChatbotController : Controller
                         await resp.Body.FlushAsync();
                     }
                 }
+                sw.Stop();
 
                 var response = updates.ToChatResponse();
                 var responseMsg = response.Messages.SingleEx();
@@ -126,12 +128,19 @@ public class ChatbotController : Controller
                 if (notSupported.Any())
                     throw new InvalidOperationException("Unexpected response" + notSupported.ToString(a => a.GetType().Name, ", "));
 
+                var usage = response.Usage;
+                var inputTokens = (int?)usage?.InputTokenCount;
+                var outputTokens = (int?)usage?.OutputTokenCount;
+
                 var toolCalls = responseMsg.Contents.OfType<FunctionCallContent>().ToList();
                 var answer = new ChatMessageEntity
                 {
                     ChatSession = history.Session.ToLite(),
                     Role = ChatMessageRole.Assistant,
                     Content = responseMsg.Text,
+                    InputTokens = inputTokens,
+                    OutputTokens = outputTokens,
+                    Duration = sw.Elapsed,
                     ToolCalls = toolCalls.Select(fc => new ToolCallEmbedded
                     {
                         ToolId = fc.Name,
@@ -139,6 +148,10 @@ public class ChatbotController : Controller
                         Arguments = JsonSerializer.Serialize(fc.Arguments),
                     }).ToMList()
                 }.Save();
+
+                history.Session.TotalInputTokens += inputTokens ?? 0;
+                history.Session.TotalOutputTokens += outputTokens ?? 0;
+                history.Session.TotalToolCalls += toolCalls.Count;
 
                 foreach (var item in answer.ToolCalls)
                 {
@@ -160,11 +173,13 @@ public class ChatbotController : Controller
                 {
                     await resp.WriteAsync(UINotification(ChatbotUICommand.Tool, funCall.Name + "/" + funCall.CallId), ct);
 
+                    var toolSw = Stopwatch.StartNew();
                     try
                     {
                         AITool tool = ChatbotSkillLogic.AllTools.Value.GetOrThrow(funCall.Name);
                         var obj = await ((AIFunction)tool).InvokeAsync(new AIFunctionArguments(funCall.Arguments), ct);
                         string toolResponse = JsonSerializer.Serialize(obj);
+                        toolSw.Stop();
                         var toolMsg = new ChatMessageEntity()
                         {
                             ChatSession = history.Session.ToLite(),
@@ -172,6 +187,7 @@ public class ChatbotController : Controller
                             ToolCallID = funCall.CallId,
                             ToolID = funCall.Name,
                             Content = toolResponse,
+                            Duration = toolSw.Elapsed,
                         }.Save();
 
                         await resp.WriteAsync(toolResponse, ct);
@@ -182,6 +198,7 @@ public class ChatbotController : Controller
                     }
                     catch (Exception e)
                     {
+                        toolSw.Stop();
                         ChatMessageEntity toolMsg;
                         using (AuthLogic.Disable())
                         {
@@ -192,6 +209,7 @@ public class ChatbotController : Controller
                                 ToolCallID = funCall.CallId,
                                 ToolID = funCall.Name,
                                 Exception = e.LogException().ToLiteFat(),
+                                Duration = toolSw.Elapsed,
                             }.Save();
                         }
 
@@ -204,6 +222,8 @@ public class ChatbotController : Controller
                     }
                 }
             }
+
+            history.Session.Save();
 
             if (history.Session.Title == null || history.Session.Title.StartsWith("!*$"))
             {

@@ -75,6 +75,9 @@ export interface ChatMessageEntity extends Entities.Entity {
   toolCallID: string | null;
   toolID: string | null;
   exception: Entities.Lite<Basics.ExceptionEntity> | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  duration: string /*TimeSpan*/ | null;
 }
 
 export namespace ChatMessageOperation {
@@ -96,6 +99,9 @@ export interface ChatSessionEntity extends Entities.Entity {
   languageModel: Entities.Lite<ChatbotLanguageModelEntity>;
   user: Entities.Lite<Authorization.UserEntity>;
   startDate: string /*DateTime*/;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalToolCalls: number;
 }
 
 export namespace ChatSessionOperation {

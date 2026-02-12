@@ -162,6 +162,9 @@ public static class ChatbotLogic
                e.LanguageModel,
                e.User,
                e.StartDate,
+               e.TotalInputTokens,
+               e.TotalOutputTokens,
+               e.TotalToolCalls,
            });
 
         sb.Schema.EntityEvents<ChatSessionEntity>().PreUnsafeDelete += query =>

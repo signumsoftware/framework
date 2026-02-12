@@ -20,6 +20,11 @@ public class ChatSessionEntity : Entity
 
     public DateTime StartDate { get; set; }
 
+    public int TotalInputTokens { get; set; }
+
+    public int TotalOutputTokens { get; set; }
+
+    public int TotalToolCalls { get; set; }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Title ?? BaseToString());
@@ -55,6 +60,12 @@ public class ChatMessageEntity : Entity
     public string? ToolID { get; set; }
 
     public Lite<ExceptionEntity>? Exception { get; set; }
+
+    public int? InputTokens { get; set; }
+
+    public int? OutputTokens { get; set; }
+
+    public TimeSpan? Duration { get; set; }
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
