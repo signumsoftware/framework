@@ -41,6 +41,7 @@ public static class ChatbotSkillLogic
         .ToDictionaryEx(a => a.Name, StringComparer.InvariantCultureIgnoreCase));
 
         new QuestionSumarizerSkill().Register();
+        new ConversationSumarizerSkill().Register();
     }
 
     public static ChatbotSkill GetSkill(string skillName)

@@ -52,6 +52,8 @@ public static class ChatbotLogic
         { LanguageModelProviders.Ollama, new OllamaProvider()},
     };
 
+    public static int MaxContextMessages = 40;
+
     public static Func<ChatbotConfigurationEmbedded> GetConfig;
 
     public static ChatbotLanguageModelEntity RetrieveFromCache(this Lite<ChatbotLanguageModelEntity> lite)
@@ -208,6 +210,34 @@ public static class ChatbotLogic
         TypeConditionLogic.RegisterCompile<ChatMessageEntity>(userEntities, cm => cm.ChatSession.Entity.InCondition(userEntities));
     }
 
+    public static async Task<string> SumarizeConversation(List<ChatMessageEntity> messagesToSummarize, ChatbotLanguageModelEntity languageModel, CancellationToken ct)
+    {
+        var conversationText = new StringBuilder();
+        foreach (var msg in messagesToSummarize)
+        {
+            if (msg.Role == ChatMessageRole.System)
+                continue;
+
+            var roleName = msg.Role switch
+            {
+                ChatMessageRole.User => "User",
+                ChatMessageRole.Assistant => "Assistant",
+                ChatMessageRole.Tool => $"Tool({msg.ToolID})",
+                _ => msg.Role.ToString()
+            };
+
+            var content = msg.Content?.Etc(500) ?? (msg.Exception != null ? "[error]" : "[empty]");
+            conversationText.AppendLine($"{roleName}: {content}");
+        }
+
+        var skill = ChatbotSkillLogic.GetSkill<ConversationSumarizerSkill>();
+        var prompt = skill.GetInstruction(conversationText.ToString());
+        var client = GetChatClient(languageModel);
+        var options = ChatOptions(languageModel, []);
+        var cr = await client.GetResponseAsync(prompt, options, cancellationToken: ct);
+        return cr.Text;
+    }
+
     public static async Task<string> SumarizeTitle(ConversationHistory history, CancellationToken ct)
     {
         var prompt = ChatbotSkillLogic.GetSkill<QuestionSumarizerSkill>().GetInstruction(history);
@@ -296,44 +326,67 @@ public interface IEmbeddingsProvider
 
 public class ConversationHistory
 {
-    public ChatSessionEntity Session; 
+    public ChatSessionEntity Session;
 
     public ChatbotLanguageModelEntity LanguageModel;
 
     public List<ChatMessageEntity> Messages;
 
+    public string? ConversationSummary;
 
     public List<ChatMessage> GetMessages()
     {
-        return Messages.Select(c =>
+        var messagesToConvert = Messages;
+
+        if (ConversationSummary != null)
         {
-            var role = ToChatRole(c.Role);
+            var systemMsg = messagesToConvert.FirstOrDefault(m => m.Role == ChatMessageRole.System);
+            var rest = messagesToConvert.Where(m => m.Role != ChatMessageRole.System).ToList();
 
-            var content = c.Exception == null ? c.Content :
-                $"{c.Exception.Entity.ExceptionType}:\n{c.Exception.Entity.ExceptionMessage}";
+            var result = new List<ChatMessage>();
 
-            if(c.Role == ChatMessageRole.Tool)
-            {
-                return new ChatMessage(role, [
-                    new FunctionResultContent(c.ToolCallID!, content)
-                ]);
-            }
+            if (systemMsg != null)
+                result.Add(ToChatMessage(systemMsg));
 
-            if (c.ToolCalls.IsEmpty())
-                return new ChatMessage(role, content);
+            result.Add(new ChatMessage(ChatRole.System,
+                $"## Summary of earlier conversation\n{ConversationSummary}\n\n---\nRecent messages follow:"));
 
-            var contents = c.ToolCalls.Select(c =>
-            {
-                var arguments = JsonSerializer.Deserialize<Dictionary<string, object?>>(c.Arguments)!;
-                var cleanArguments = arguments.ToDictionary(kvp => kvp.Key, kvp => CleanValue(kvp.Value));
-                return (AIContent)new FunctionCallContent(c.CallId, c.ToolId, cleanArguments);
-            }).ToList();
+            result.AddRange(rest.Select(ToChatMessage));
+            return result;
+        }
 
-            if (content.HasText())
-                contents.Insert(0, new TextContent(content));
+        return messagesToConvert.Select(ToChatMessage).ToList();
+    }
 
-            return new ChatMessage(role, contents);
+    ChatMessage ToChatMessage(ChatMessageEntity c)
+    {
+        var role = ToChatRole(c.Role);
+
+        var content = c.Content ?? (c.Exception != null
+            ? $"{c.Exception.Entity.ExceptionType}:\n{c.Exception.Entity.ExceptionMessage}"
+            : null);
+
+        if (c.Role == ChatMessageRole.Tool)
+        {
+            return new ChatMessage(role, [
+                new FunctionResultContent(c.ToolCallID!, content)
+            ]);
+        }
+
+        if (c.ToolCalls.IsEmpty())
+            return new ChatMessage(role, content);
+
+        var contents = c.ToolCalls.Select(c =>
+        {
+            var arguments = JsonSerializer.Deserialize<Dictionary<string, object?>>(c.Arguments)!;
+            var cleanArguments = arguments.ToDictionary(kvp => kvp.Key, kvp => CleanValue(kvp.Value));
+            return (AIContent)new FunctionCallContent(c.CallId, c.ToolId, cleanArguments);
         }).ToList();
+
+        if (content.HasText())
+            contents.Insert(0, new TextContent(content));
+
+        return new ChatMessage(role, contents);
     }
 
     private static object? CleanValue(object? value)
@@ -355,15 +408,32 @@ public class ConversationHistory
 
     public List<AITool> GetTools()
     {
-        var skills = Messages.Select(m =>
-            m.Role == ChatMessageRole.System ? ChatbotSkillLogic.IntroductionSkill?.Name :
-            m.Role == ChatMessageRole.Assistant && m.ToolID == nameof(IntroductionSkill.Describe) ? JsonDocument.Parse(m.Content!).RootElement.GetProperty("skillName").GetString() :
-            null)
-            .NotNull()
-            .Distinct()
-            .ToList();
+        var activatedSkills = new HashSet<string>();
 
-        return skills
+        if (ChatbotSkillLogic.IntroductionSkill != null)
+            activatedSkills.Add(ChatbotSkillLogic.IntroductionSkill.Name);
+
+        foreach (var m in Messages)
+        {
+            if (m.Role == ChatMessageRole.Assistant)
+            {
+                foreach (var tc in m.ToolCalls)
+                {
+                    if (tc.ToolId == nameof(IntroductionSkill.Describe))
+                    {
+                        try
+                        {
+                            var args = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(tc.Arguments);
+                            if (args != null && args.TryGetValue("skillName", out var sn))
+                                activatedSkills.Add(sn.GetString()!);
+                        }
+                        catch { }
+                    }
+                }
+            }
+        }
+
+        return activatedSkills
             .SelectMany(skillName => ChatbotSkillLogic.GetSkill(skillName).GetToolsRecursive())
             .ToList();
     }
