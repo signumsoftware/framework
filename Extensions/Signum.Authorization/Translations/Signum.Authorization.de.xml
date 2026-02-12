@@ -159,6 +159,7 @@
     <Member Name="Password" Description="Passwort" />
     <Member Name="PasswordChanged" Description="Passwort geändert" />
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="Das Passwort wurde erfolgreich geändert" />
+    <Member Name="PasswordMustBeChanged" Description="Das Passwort muss geändert werden" />
     <Member Name="PasswordMustHaveAValue" Description="Das Kennwort muss angegeben werden" />
     <Member Name="PasswordsAreDifferent" Description="Die Passwörter sind unterschiedlich" />
     <Member Name="Register0" Description="{0} registrieren" />
@@ -179,6 +180,7 @@
     <Member Name="Username0IsNotValid" Description="Anwendername {0} ist ungültig" />
     <Member Name="UserNameMustHaveAValue" Description="Sie müssen den Benutzernamen eingeben" />
     <Member Name="WeHaveSentYouAnEmailToResetYourPassword" Description="Wir haben Ihnen eine E-Mail mit einem Link geschickt, mit dem Sie Ihr Passwort zurücksetzen können." />
+    <Member Name="YouMustChangeYourPasswordBeforeContinuing" Description="Sie müssen Ihr Passwort ändern, bevor Sie fortfahren" />
   </Type>
   <Type Name="MergeStrategy" Description="Zusammenführstrategie">
     <Member Name="Intersection" Description="Schnittmenge" />
@@ -326,6 +328,7 @@
     <Member Name="Email" Description="E-Mail" />
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />
     <Member Name="LoginFailedCounter" Description="fehlgeschlagener Login-Zähler" />
+    <Member Name="MustChangePassword" Description="Passwort muss geändert werden" />
     <Member Name="PasswordHash" Description="Passwort-Hash" />
     <Member Name="Role" Description="Rolle" />
     <Member Name="State" Description="Status" />
@@ -348,7 +351,6 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Reactivate" Description="Reaktivieren" />
     <Member Name="Save" Description="Speichern" />
-    <Member Name="SetPassword" Description="Passwort festlegen" />
   </Type>
   <Type Name="UserState" Description="Benutzerstatus">
     <Member Name="Active" Description="Aktiv" />

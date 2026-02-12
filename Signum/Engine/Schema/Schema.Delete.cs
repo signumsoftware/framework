@@ -45,7 +45,7 @@ public partial class Table
 
     private SqlPreCommandSimple AssertNotNull(string variableName, bool isPostgres)
     {
-        if (isPostgres)
+        if (!isPostgres)
             return new SqlPreCommandSimple(@$"IF {variableName} IS NULL 
     THROW 50000, '{this.Type.Name} not found!', 1;;");
         else
