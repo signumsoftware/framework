@@ -98,6 +98,23 @@ public class ChatbotController : Controller
             var client = ChatbotLogic.GetChatClient(history.LanguageModel);
             while (true)
             {
+                if (history.ConversationSummary == null && history.Messages.Count > ChatbotLogic.MaxContextMessages)
+                {
+                    var keepCount = ChatbotLogic.MaxContextMessages / 2;
+                    var systemMsg = history.Messages.FirstOrDefault(m => m.Role == ChatMessageRole.System);
+                    var nonSystemMessages = history.Messages.Where(m => m.Role != ChatMessageRole.System).ToList();
+                    var messagesToSummarize = nonSystemMessages.Take(nonSystemMessages.Count - keepCount).ToList();
+                    var recentMessages = nonSystemMessages.Skip(nonSystemMessages.Count - keepCount).ToList();
+
+                    history.ConversationSummary = await ChatbotLogic.SumarizeConversation(messagesToSummarize, history.LanguageModel, ct);
+
+                    var keptMessages = new List<ChatMessageEntity>();
+                    if (systemMsg != null)
+                        keptMessages.Add(systemMsg);
+                    keptMessages.AddRange(recentMessages);
+                    history.Messages = keptMessages;
+                }
+
                 var tools = history.GetTools();
                 var options = ChatbotLogic.ChatOptions(history.LanguageModel, tools);
 
