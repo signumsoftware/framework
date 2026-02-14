@@ -12,7 +12,8 @@ If the operation accepts modifications (canBeModified = true), you can return th
 * If you make any change in an entity, sub-entity or embedded, you need to set `modified = true` in this entity. 
 * Special properties like `Type`, `id`, `ticks`, `isNew`, `temporalId` and `modified` should be included as they are essential and should always be sent before any other property. 
 * The fields in `TypeInfo` are written in PascalCase, but in Json they should be camelCase, except for the `Type` field. 
-* For fields that are not basic types (`string`, `number`...) special attention if the field `isCollection` and `isLite` (if can be both!). 
+* For fields that are not basic types (`string`, `number`...) could be entities, or Lite if `isLite` is true.
+* Any type could be a collection (MList<T>) if `isCollection` is `true`. 
 * If is not a lite it you may need to retrieve the selected entity first. 
 * When calling `executeOperation` you only need to send the `entity`, not the `canExecute` dictionary. 
 

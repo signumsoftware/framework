@@ -14,65 +14,110 @@ public class OperationSkill : ChatbotSkill
     }
 
     [McpServerTool, Description("Gets the type information of a type")]
-    public static TypeInfoTS? GetTypeInfo(string cleanTypeName, CancellationToken token)
+    public static TypeInfoTS GetTypeInfo(string cleanTypeName, CancellationToken token)
     {
+        Type type = GetTypeWithHint(cleanTypeName);
+
+        if (type.IsEnumEntity())
+            return ReflectionServer.GetEnumTypeInfo(type)!;
+
+        if (type.IsEntity())
+            return ReflectionServer.GetEntityTypeInfo(type)!;
+
+        throw new InvalidOperationException("type is not an entity or an enum");
+    }
+
+    private static Type GetTypeWithHint(string cleanTypeName)
+    {
+        var s = Schema.Current;
+        Type type;
         try
         {
-            var type = TypeLogic.GetType(cleanTypeName);
-
-            if (type.IsEnumEntity())
-                return ReflectionServer.GetEnumTypeInfo(type);
-
-            if (type.IsEntity())
-                return ReflectionServer.GetEntityTypeInfo(type);
-
-            throw new InvalidOperationException("type is not an entity or an enum");
+            type = TypeLogic.GetType(cleanTypeName);
         }
         catch (Exception e)
         {
-            AddTypeNameHint(e, cleanTypeName);
+            StringDistance sd = new StringDistance();
+            var similar = from kvp in TypeLogic.NameToType
+                          where s.IsAllowed(kvp.Value, inUserInterface: true) == null
+                          let dist = sd.SmithWatermanScore(kvp.Key, cleanTypeName)
+                          where dist > cleanTypeName.Length
+                          orderby dist descending
+                          select kvp.Key;
+
+            if (similar.Any())
+                e.Data["Hint"] = $"Similar type names are {similar}";
+
             throw;
         }
+
+        s.AssertAllowed(type, inUserInterface: true);
+        return type;
+    }
+
+    [McpServerTool, Description("Construct an entity using an operation")]
+    public static EntityPackTS Operation_Construct(string typeName, string operationKey, CancellationToken token)
+    {
+        var type = GetTypeWithHint(typeName);
+
+        var operation = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
+
+        var newEntity = OperationLogic.ServiceConstruct(type, operation);
+
+        var canExecutes = OperationLogic.ServiceCanExecute(newEntity);
+
+        var result = new EntityPackTS(newEntity,
+            canExecutes.ToDictionary(a => a.Key.Key, a => a.Value));
+
+        return result;
+    }
+
+    [McpServerTool, Description("Construct an entity from another entity using an operation")]
+    public static EntityPackTS Operation_ConstructFrom(string entityJson, string operationKey, CancellationToken token)
+    {
+        Entity entity = DeserializeEntity(entityJson);
+
+        var operation = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
+
+        var newEntity = OperationLogic.ServiceConstructFrom(entity, operation);
+
+        var canExecutes = OperationLogic.ServiceCanExecute(newEntity);
+
+        var result = new EntityPackTS(newEntity,
+            canExecutes.ToDictionary(a => a.Key.Key, a => a.Value));
+
+        return result;
+    }
+
+    private static Entity DeserializeEntity(string entityJson)
+    {
+        return JsonSerializer.Deserialize<Entity>(entityJson, SignumServer.JsonSerializerOptions)!;
     }
 
     [McpServerTool, Description("Executes an operation on an entity")]
-    public static EntityPackTS ExecuteOperation(string entityJson, string operationKey, CancellationToken token)
+    public static EntityPackTS Operation_Execute(string entityJson, string operationKey, CancellationToken token)
     {
-        try
-        {
-            var entity = JsonSerializer.Deserialize<Entity>(entityJson, SignumServer.JsonSerializerOptions)!;
+        var entity = DeserializeEntity(entityJson)!;
 
-            var operation = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
+        var operation = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
-            var newEntity = OperationLogic.ServiceExecute(entity, operation);
+        var newEntity = OperationLogic.ServiceExecute(entity, operation);
 
-            var canExecutes = OperationLogic.ServiceCanExecute(newEntity);
+        var canExecutes = OperationLogic.ServiceCanExecute(newEntity);
 
-            var result = new EntityPackTS(newEntity,
-                canExecutes.ToDictionary(a => a.Key.Key, a => a.Value));
+        var result = new EntityPackTS(newEntity,
+            canExecutes.ToDictionary(a => a.Key.Key, a => a.Value));
 
-            return result;
-        }
-        catch (Exception e) when (e is not InvalidOperationException)
-        {
-            if (e is UnauthorizedAccessException || e.Message.Contains("not allowed", StringComparison.OrdinalIgnoreCase))
-                e.Data["Hint"] = "You don't have permission for this operation. Try a different approach or ask the user.";
-
-            if (e is JsonException)
-                e.Data["Hint"] = "The entity JSON format appears invalid. Make sure it matches the expected schema from GetTypeInfo.";
-
-            throw;
-        }
+        return result;
     }
 
-    static void AddTypeNameHint(Exception e, string cleanTypeName)
+    [McpServerTool, Description("Executes an operation on an entity")]
+    public static void Operation_Delete(string entityJson, string operationKey, CancellationToken token)
     {
-        var similar = TypeLogic.NameToType.Keys
-            .Where(k => k.Contains(cleanTypeName, StringComparison.OrdinalIgnoreCase))
-            .Take(5)
-            .ToList();
+        var entity = DeserializeEntity(entityJson)!;
 
-        if (similar.Any())
-            e.Data["Hint"] = $"Similar type names: {similar.ToString(", ")}";
+        var operation = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
+
+        OperationLogic.ServiceDelete(entity, operation);
     }
 }
