@@ -68,7 +68,7 @@ public class ChatbotController : Controller
                 await resp.WriteAsync(UINotification(ChatbotUICommand.System), ct);
                 await resp.WriteAsync(init.Content!, ct);
                 await resp.WriteAsync("\n", ct);
-                await resp.WriteAsync(UINotification(ChatbotUICommand.AnswerId, init.Id.ToString()), ct);
+                await resp.WriteAsync(UINotification(ChatbotUICommand.MessageId, init.Id.ToString()), ct);
             }
             else
             {
@@ -178,7 +178,7 @@ public class ChatbotController : Controller
                 }
 
                 await resp.WriteAsync("\n");
-                await resp.WriteAsync(UINotification(ChatbotUICommand.AnswerId, answer.Id.ToString()), ct);
+                await resp.WriteAsync(UINotification(ChatbotUICommand.MessageId, answer.Id.ToString()), ct);
                 await resp.Body.FlushAsync();
 
                 history.Messages.Add(answer);
@@ -209,7 +209,7 @@ public class ChatbotController : Controller
 
                         await resp.WriteAsync(toolResponse, ct);
                         await resp.WriteAsync("\n");
-                        await resp.WriteAsync(UINotification(ChatbotUICommand.AnswerId, toolMsg.Id.ToString()), ct);
+                        await resp.WriteAsync(UINotification(ChatbotUICommand.MessageId, toolMsg.Id.ToString()), ct);
                         await resp.Body.FlushAsync();
                         history.Messages.Add(toolMsg);
                     }
@@ -236,7 +236,7 @@ public class ChatbotController : Controller
                         await resp.WriteAsync(UINotification(ChatbotUICommand.Exception, toolMsg.Exception!.Id.ToString()), ct);
                         await resp.WriteAsync(errorContent, ct);
                         await resp.WriteAsync("\n");
-                        await resp.WriteAsync(UINotification(ChatbotUICommand.AnswerId, toolMsg.Id.ToString()), ct);
+                        await resp.WriteAsync(UINotification(ChatbotUICommand.MessageId, toolMsg.Id.ToString()), ct);
                         await resp.Body.FlushAsync();
                         history.Messages.Add(toolMsg);
                     }
@@ -347,7 +347,7 @@ public enum ChatbotUICommand
     SessionId,
     SessionTitle,
     QuestionId,
-    AnswerId,
+    MessageId,
     AssistantAnswer,
     AssistantTool,
     Tool,

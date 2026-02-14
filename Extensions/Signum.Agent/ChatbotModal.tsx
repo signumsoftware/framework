@@ -147,7 +147,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 
               break;
             }
-            case "AnswerId": {
+            case "MessageId": {
 
               answerRef.current!.id = ChatMessageEntity.parseId(args!);
               answerRef.current!.modified = false;
