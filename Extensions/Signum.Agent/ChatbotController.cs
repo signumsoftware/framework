@@ -29,7 +29,7 @@ public class ChatbotController : Controller
         var symbol = SymbolLogic<LanguageModelProviderSymbol>.ToSymbol(providerKey);
 
         var list = await ChatbotLogic.GetEmbeddingModelNamesAsync(symbol, token);
-        
+
         return list.Order().ToList();
     }
 
@@ -42,7 +42,7 @@ public class ChatbotController : Controller
     }
 
     [HttpPost("api/chatbot/ask")]
-    public  async Task AskQuestionAsync(CancellationToken ct)
+    public async Task AskQuestionAsync(CancellationToken ct)
     {
         var resp = this.HttpContext.Response;
         try
@@ -74,18 +74,31 @@ public class ChatbotController : Controller
             {
                 Schema.Current.AssertAllowed(typeof(ChatMessageEntity), true);
 
-                var messages = AuthLogic.Disable().Using(() => Database.Query<ChatMessageEntity>()
-                    .Where(c => c.ChatSession.Is(session))
-                    .ExpandLite(a => a.Exception, ExpandLite.EntityEager)
-                    .OrderBy(a => a.CreationDate)
-                    .ToList());
-
-                history = new ConversationHistory
+                using (AuthLogic.Disable())
                 {
-                    Session = session,
-                    LanguageModel = session.LanguageModel.RetrieveFromCache(),
-                    Messages = messages,
-                };
+                    var systemAndSummaries = Database.Query<ChatMessageEntity>()
+                        .Where(c => c.ChatSession.Is(session))
+                        .ExpandLite(a => a.Exception, ExpandLite.EntityEager)
+                        .Where(a => a.Role == ChatMessageRole.System)
+                        .OrderBy(a => a.CreationDate)
+                        .ToList();
+
+                    var lastSystemDate = systemAndSummaries.Max(a => a.CreationDate); //Inial or Summary
+
+                    var remainingMessages = Database.Query<ChatMessageEntity>()
+                        .Where(c => c.ChatSession.Is(session))
+                        .ExpandLite(a => a.Exception, ExpandLite.EntityEager)
+                        .Where(a => a.Role != ChatMessageRole.System && a.CreationDate > lastSystemDate)
+                        .OrderBy(a => a.CreationDate)
+                        .ToList();
+
+                    history = new ConversationHistory
+                    {
+                        Session = session,
+                        LanguageModel = session.LanguageModel.RetrieveFromCache(),
+                        Messages = systemAndSummaries.Concat(remainingMessages).ToList(),
+                    };
+                }
             }
 
             ChatMessageEntity userQuestion = NewChatMessage(session.ToLite(), question, ChatMessageRole.User).Save();
@@ -98,21 +111,31 @@ public class ChatbotController : Controller
             var client = ChatbotLogic.GetChatClient(history.LanguageModel);
             while (true)
             {
-                if (history.ConversationSummary == null && history.Messages.Count > ChatbotLogic.MaxContextMessages)
+                if (history.LanguageModel.MaxTokens != null && history.Messages.Skip(1).LastOrDefault()?.InputTokens > history.LanguageModel.MaxTokens * 0.8)
                 {
-                    var keepCount = ChatbotLogic.MaxContextMessages / 2;
-                    var systemMsg = history.Messages.FirstOrDefault(m => m.Role == ChatMessageRole.System);
-                    var nonSystemMessages = history.Messages.Where(m => m.Role != ChatMessageRole.System).ToList();
-                    var messagesToSummarize = nonSystemMessages.Take(nonSystemMessages.Count - keepCount).ToList();
-                    var recentMessages = nonSystemMessages.Skip(nonSystemMessages.Count - keepCount).ToList();
+                    var systemMsg = history.Messages.FirstEx();
+                    if (systemMsg.Role != ChatMessageRole.System)
+                        throw new InvalidOperationException("First message is expected to be system");
+                    var normalMessages = history.Messages.Skip(1).ToList();
+                    var toKeepIndex = normalMessages.FindLastIndex(a => a.InputTokens < history.LanguageModel.MaxTokens * 0.5).NotFoundToNull() ?? (normalMessages.Count - 1);
+                    var toSumarize = normalMessages.Take(toKeepIndex).ToList();
+                    var toKeep = normalMessages.Skip(toKeepIndex).ToList();
 
-                    history.ConversationSummary = await ChatbotLogic.SumarizeConversation(messagesToSummarize, history.LanguageModel, ct);
+                    var summaryContent = await ChatbotLogic.SumarizeConversation(toSumarize, history.LanguageModel, ct);
 
-                    var keptMessages = new List<ChatMessageEntity>();
-                    if (systemMsg != null)
-                        keptMessages.Add(systemMsg);
-                    keptMessages.AddRange(recentMessages);
-                    history.Messages = keptMessages;
+                    var summary = new ChatMessageEntity
+                    {
+                        ChatSession = history.Session.ToLite(),
+                        Role = ChatMessageRole.System,
+                        Content = $"## Summary of earlier conversation\n{summaryContent}\n\n---\nRecent messages follow:",
+                    }.Save();
+
+                    await resp.WriteAsync(UINotification(ChatbotUICommand.System), ct);
+                    await resp.WriteAsync(summary.Content!, ct);
+                    await resp.WriteAsync("\n", ct);
+                    await resp.WriteAsync(UINotification(ChatbotUICommand.MessageId, summary.Id.ToString()), ct);
+
+                    history.Messages = [systemMsg, summary, .. toKeep];
                 }
 
                 var tools = history.GetTools();
@@ -146,8 +169,6 @@ public class ChatbotController : Controller
                     throw new InvalidOperationException("Unexpected response" + notSupported.ToString(a => a.GetType().Name, ", "));
 
                 var usage = response.Usage;
-                var inputTokens = (int?)usage?.InputTokenCount;
-                var outputTokens = (int?)usage?.OutputTokenCount;
 
                 var toolCalls = responseMsg.Contents.OfType<FunctionCallContent>().ToList();
                 var answer = new ChatMessageEntity
@@ -155,8 +176,11 @@ public class ChatbotController : Controller
                     ChatSession = history.Session.ToLite(),
                     Role = ChatMessageRole.Assistant,
                     Content = responseMsg.Text,
-                    InputTokens = inputTokens,
-                    OutputTokens = outputTokens,
+                    LanguageModel = session.LanguageModel,
+                    InputTokens = (int?)usage?.InputTokenCount,
+                    CachedInputTokens = (int?)usage?.CachedInputTokenCount,
+                    OutputTokens = (int?)usage?.OutputTokenCount,
+                    ReasoningOutputTokens = (int?)usage?.ReasoningTokenCount,
                     Duration = sw.Elapsed,
                     ToolCalls = toolCalls.Select(fc => new ToolCallEmbedded
                     {
@@ -166,9 +190,12 @@ public class ChatbotController : Controller
                     }).ToMList()
                 }.Save();
 
-                history.Session.TotalInputTokens += inputTokens ?? 0;
-                history.Session.TotalOutputTokens += outputTokens ?? 0;
-                history.Session.TotalToolCalls += toolCalls.Count;
+                history.Session.TotalInputTokens += answer.InputTokens ?? 0;
+                history.Session.TotalCachedInputTokens += answer.CachedInputTokens ?? 0;
+                history.Session.TotalOutputTokens += answer.OutputTokens ?? 0;
+                history.Session.TotalReasoningOutputTokens += answer.ReasoningOutputTokens ?? 0;
+                history.Session.TotalToolCalls += answer.ToolCalls.Count;
+                history.Session.Save();
 
                 foreach (var item in answer.ToolCalls)
                 {
@@ -272,9 +299,9 @@ public class ChatbotController : Controller
     {
         var sb = new StringBuilder();
         sb.AppendLine($"Tool '{toolName}' failed.");
-        sb.AppendLine($"Arguments: {JsonSerializer.Serialize(arguments).Etc(300)}");
-        sb.AppendLine($"Error: {e.GetType().Name}: {e.Message}");
         if (arguments != null && arguments.Count > 0)
+            sb.AppendLine($"Arguments: {JsonSerializer.Serialize(arguments).Etc(300)}");
+        sb.AppendLine($"Error: {e.GetType().Name}: {e.Message}");
 
         if (e.Data["Hint"] is string s)
             sb.AppendLine($"Hint: {s}");

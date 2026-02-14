@@ -42,8 +42,6 @@ public static class ChatbotLogic
         { LanguageModelProviders.Ollama, new OllamaProvider()},
     };
 
-    public static int MaxContextMessages = 40;
-
     public static Func<ChatbotConfigurationEmbedded> GetConfig;
 
     public static ChatbotLanguageModelEntity RetrieveFromCache(this Lite<ChatbotLanguageModelEntity> lite)
@@ -66,7 +64,17 @@ public static class ChatbotLogic
         SymbolLogic<LanguageModelProviderSymbol>.Start(sb, () => ChatbotModelProviders.Keys.Union(EmbeddingsProviders.Keys));
 
         sb.Include<ChatbotLanguageModelEntity>()
-            .WithSave(ChatbotLanguageModelOperation.Save)
+            .WithSave(ChatbotLanguageModelOperation.Save, (m, args) =>
+            {
+                if (!m.IsNew && Database.Query<ChatMessageEntity>().Any(a => a.LanguageModel.Is(m)))
+                {
+                    var inDb = m.InDB(a => new { a.Model, a.Provider });
+                    if (inDb.Model != m.Model || inDb.Provider.Is(m.Provider))
+                    {
+                        throw new ArgumentNullException(ChatbotMessage.UnableToChangeModelOrProviderOnceUsed.NiceToString());
+                    }
+                }
+            })
             .WithUniqueIndex(a => a.IsDefault, a => a.IsDefault == true)
             .WithQuery(() => e => new
             {
@@ -154,6 +162,7 @@ public static class ChatbotLogic
                e.User,
                e.StartDate,
                e.TotalInputTokens,
+               e.TotalReasoningOutputTokens,
                e.TotalOutputTokens,
                e.TotalToolCalls,
                e.LanguageModel,
@@ -174,6 +183,7 @@ public static class ChatbotLogic
                 e.ToolID,
                 e.Content,
                 e.InputTokens,
+                e.CachedInputTokens,
                 e.OutputTokens,
                 e.Duration,
                 e.Exception,
@@ -264,7 +274,6 @@ public static class ChatbotLogic
     public static IChatClient GetChatClient(ChatbotLanguageModelEntity model)
     {
         var result = ChatbotModelProviders.GetOrThrow(model.Provider).CreateChatClient(model);
-
         return result;
     }
 
@@ -296,8 +305,6 @@ public static class ChatbotLogic
 
         return opts;
     }
-
-
 }
 
 
@@ -325,30 +332,9 @@ public class ConversationHistory
 
     public List<ChatMessageEntity> Messages;
 
-    public string? ConversationSummary;
-
     public List<ChatMessage> GetMessages()
     {
-        var messagesToConvert = Messages;
-
-        if (ConversationSummary != null)
-        {
-            var systemMsg = messagesToConvert.FirstOrDefault(m => m.Role == ChatMessageRole.System);
-            var rest = messagesToConvert.Where(m => m.Role != ChatMessageRole.System).ToList();
-
-            var result = new List<ChatMessage>();
-
-            if (systemMsg != null)
-                result.Add(ToChatMessage(systemMsg));
-
-            result.Add(new ChatMessage(ChatRole.System,
-                $"## Summary of earlier conversation\n{ConversationSummary}\n\n---\nRecent messages follow:"));
-
-            result.AddRange(rest.Select(ToChatMessage));
-            return result;
-        }
-
-        return messagesToConvert.Select(ToChatMessage).ToList();
+        return Messages.Select(m => ToChatMessage(m)).ToList();
     }
 
     ChatMessage ToChatMessage(ChatMessageEntity c)

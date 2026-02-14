@@ -20,11 +20,13 @@ public class ChatSessionEntity : Entity
 
     public DateTime StartDate { get; set; }
 
-    public int TotalInputTokens { get; set; }
+    public int? TotalInputTokens { get; set; }
 
-    public int TotalOutputTokens { get; set; }
+    public int? TotalOutputTokens { get; set; }
 
-    public int TotalToolCalls { get; set; }
+    public int? TotalToolCalls { get; set; }
+    public int TotalCachedInputTokens { get; internal set; }
+    public int TotalReasoningOutputTokens { get; internal set; }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Title ?? BaseToString());
@@ -41,6 +43,7 @@ public static class ChatSessionOperation
 public class ChatMessageEntity : Entity
 {
     public Lite<ChatSessionEntity> ChatSession { get; set; }
+
 
     public DateTime CreationDate { get; set; } = Clock.Now;
 
@@ -61,9 +64,12 @@ public class ChatMessageEntity : Entity
 
     public Lite<ExceptionEntity>? Exception { get; set; }
 
-    public int? InputTokens { get; set; }
+    public Lite<ChatbotLanguageModelEntity>? LanguageModel { get; set; }
 
+    public int? InputTokens { get; set; }
+    public int? CachedInputTokens { get; set; }
     public int? OutputTokens { get; set; }
+    public int? ReasoningOutputTokens { get; set; }
 
     public TimeSpan? Duration { get; set; }
 
@@ -118,6 +124,8 @@ public enum ChatbotMessage
     TypeAMessage,
     InitialInstruction,
     ShowSystem,
+    [Description("Unable to change Model or Provider once used")]
+    UnableToChangeModelOrProviderOnceUsed,
 }
 
 [AutoInit]

@@ -47,6 +47,7 @@ export namespace ChatbotMessage {
   export const TypeAMessage: MessageKey = new MessageKey("ChatbotMessage", "TypeAMessage");
   export const InitialInstruction: MessageKey = new MessageKey("ChatbotMessage", "InitialInstruction");
   export const ShowSystem: MessageKey = new MessageKey("ChatbotMessage", "ShowSystem");
+  export const UnableToChangeModelOrProviderOnceUsed: MessageKey = new MessageKey("ChatbotMessage", "UnableToChangeModelOrProviderOnceUsed");
 }
 
 export namespace ChatbotPermission {
@@ -59,7 +60,7 @@ export type ChatbotUICommand =
   "SessionId" |
   "SessionTitle" |
   "QuestionId" |
-  "AnswerId" |
+  "MessageId" |
   "AssistantAnswer" |
   "AssistantTool" |
   "Tool" |
@@ -76,8 +77,11 @@ export interface ChatMessageEntity extends Entities.Entity {
   toolCallID: string | null;
   toolID: string | null;
   exception: Entities.Lite<Basics.ExceptionEntity> | null;
+  languageModel: Entities.Lite<ChatbotLanguageModelEntity> | null;
   inputTokens: number | null;
+  cachedInputTokens: number | null;
   outputTokens: number | null;
+  reasoningOutputTokens: number | null;
   duration: string /*TimeSpan*/ | null;
 }
 
@@ -100,9 +104,11 @@ export interface ChatSessionEntity extends Entities.Entity {
   languageModel: Entities.Lite<ChatbotLanguageModelEntity>;
   user: Entities.Lite<Authorization.UserEntity>;
   startDate: string /*DateTime*/;
-  totalInputTokens: number;
-  totalOutputTokens: number;
-  totalToolCalls: number;
+  totalInputTokens: number | null;
+  totalOutputTokens: number | null;
+  totalToolCalls: number | null;
+  totalCachedInputTokens: number;
+  cachedReasoningTokens: number;
 }
 
 export namespace ChatSessionOperation {
