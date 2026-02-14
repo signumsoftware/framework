@@ -23,7 +23,19 @@ public class ResultTableSkill : ChatbotSkill
         return new ResultTableSimple
         {
             Columns = rt.Columns.Select((a, i) => KeyValuePair.Create("c" + i,  a.Token.FullKey())).ToDictionary(),
-            Rows = rt.Rows.Select(r => rt.Columns.ToDictionary(c => "c" + c.Index, c => r[c.Index])).ToList(),
+            Rows = rt.Rows.Select(r =>
+            {
+                var dic = new Dictionary<string, object?>();
+                if (!qr.GroupResults)
+                    dic.Add("Entity", r.Entity);
+                
+                for (int i = 0; i < rt.Columns.Length; i++)
+                {
+                    var rc = rt.Columns[i];
+                    dic.Add("c" + i, r[rc]);
+                }
+                return dic;
+            }).ToList(),
         };
     }
 }

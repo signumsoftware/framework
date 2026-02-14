@@ -5,7 +5,11 @@ import { Tabs, Tab, CloseButton } from 'react-bootstrap';
 import { newMListElement } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks';
 import { useState } from 'react';
-import { ChatMessageEntity, ChatSessionEntity } from '../Signum.Agent';
+import Markdown from 'react-markdown';
+import {
+  ChatbotMessage, ChatMessageEntity, 
+  ChatMessageRole, ChatSessionEntity 
+} from '../Signum.Agent';
 import { SearchControl } from '@framework/Search';
 
 
@@ -35,7 +39,14 @@ export default function ChatSession(p: { ctx: TypeContext<ChatSessionEntity> }):
         queryName: ChatMessageEntity,
         filterOptions: [{
           token: ChatMessageEntity.token(a => a.chatSession),
-          value: ctx.value
+          value: ctx.value,
+          frozen: true,
+        }, 
+        {
+          token: ChatMessageEntity.token(a => a.role),
+          operation: "DistinctTo",
+          value: ChatMessageRole.value("System"),
+          pinned: { active: "NotCheckbox_Unchecked", column: 1, label: ChatbotMessage.ShowSystem.niceToString() }
         }],
         orderOptions: [{
           token: ChatMessageEntity.token(a => a.id),

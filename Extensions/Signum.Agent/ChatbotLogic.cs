@@ -159,12 +159,12 @@ public static class ChatbotLogic
                Entity = e,
                e.Id,
                e.Title,
-               e.LanguageModel,
                e.User,
                e.StartDate,
                e.TotalInputTokens,
                e.TotalOutputTokens,
                e.TotalToolCalls,
+               e.LanguageModel,
            });
 
         sb.Schema.EntityEvents<ChatSessionEntity>().PreUnsafeDelete += query =>
@@ -181,6 +181,9 @@ public static class ChatbotLogic
                 e.Role,
                 e.ToolID,
                 e.Content,
+                e.InputTokens,
+                e.OutputTokens,
+                e.Duration,
                 e.Exception,
                 e.ChatSession,
             });
