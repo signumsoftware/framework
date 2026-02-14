@@ -7,15 +7,11 @@ import { toAbsoluteUrl } from '../../Signum/React/AppContext';
 import { registerToString } from '../../Signum/React/Signum.Entities';
 import { FontAwesomeIcon } from '@framework/Lines';
 
-const ReactMarkdown = React.lazy(() => import("react-markdown"));
-//const ReactMarkdownWithFormulas = React.lazy(() => import("./ReactMarkdownWithFormulas"));
+const ChatMarkdown = React.lazy(() => import("./Templates/ChatMarkdown"));
 
 export namespace ChatbotClient {
 
-  
-
-
-  export let renderMarkdown = (markdown: string): React.JSX.Element => <ReactMarkdown components={{ a: renderLink }}>{markdown}</ReactMarkdown>;
+  export let renderMarkdown = (markdown: string): React.JSX.Element => <ChatMarkdown content={markdown}/>;
   //export let renderMarkdown = (markdown: string): React.JSX.Element => <ReactMarkdownWithFormulas>{markdown}</ReactMarkdownWithFormulas>;
   export function start(options: { routes: RouteObject[] }): void {
 
@@ -23,18 +19,6 @@ export namespace ChatbotClient {
     Navigator.addSettings(new EntitySettings(EmbeddingsLanguageModelEntity, e => import('./Templates/EmbeddingsLanguageModel')));
     Navigator.addSettings(new EntitySettings(ChatSessionEntity, a => import('./Templates/ChatSession')));
     Navigator.addSettings(new EntitySettings(ChatMessageEntity, a => import('./Templates/ChatMessage')));
-  }
-
-  export function renderLink({ node, href, children, ...props }: React.PropsWithChildren<React.AnchorHTMLAttributes<HTMLAnchorElement>> & { node?: any }): React.ReactNode {
-    debugger;
-    if (href && href.startsWith("/")) 
-      return <Link to={href}>{children}</Link>;
-    
-    return (
-      <a href={href} {...props}>
-        {children} <FontAwesomeIcon icon="external-link" />
-      </a>
-    );
   }
 
   export namespace API {

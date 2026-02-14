@@ -117,6 +117,7 @@ public enum ChatbotMessage
     [Description("Type a message...")]
     TypeAMessage,
     InitialInstruction,
+    ShowSystem,
 }
 
 [AutoInit]

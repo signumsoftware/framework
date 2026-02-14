@@ -46,6 +46,7 @@ export namespace ChatbotMessage {
   export const Send: MessageKey = new MessageKey("ChatbotMessage", "Send");
   export const TypeAMessage: MessageKey = new MessageKey("ChatbotMessage", "TypeAMessage");
   export const InitialInstruction: MessageKey = new MessageKey("ChatbotMessage", "InitialInstruction");
+  export const ShowSystem: MessageKey = new MessageKey("ChatbotMessage", "ShowSystem");
 }
 
 export namespace ChatbotPermission {

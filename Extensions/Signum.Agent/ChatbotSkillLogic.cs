@@ -1,15 +1,10 @@
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Identity.Client;
 using ModelContextProtocol.Server;
-using Npgsql.Internal;
 using Signum.API;
 using Signum.Agent.Skills;
-using Signum.Agent.Skills;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace Signum.Agent;
