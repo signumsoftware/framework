@@ -40,23 +40,51 @@ public class SearchSkill : ChatbotSkill
     [McpServerTool, Description("Gets query description")]
     public static QueryDescriptionTS QueryDescription(string queryKey)
     {
-        var qn = QueryLogic.ToQueryName(queryKey);
-        var description = QueryLogic.Queries.QueryDescription(qn);
-        var result = new QueryDescriptionTS(description);
-        return result;
+        try
+        {
+            var qn = QueryLogic.ToQueryName(queryKey);
+            var description = QueryLogic.Queries.QueryDescription(qn);
+            var result = new QueryDescriptionTS(description);
+            return result;
+        }
+        catch (Exception e)
+        {
+            AddQueryKeyHint(e, queryKey);
+            throw;
+        }
     }
 
     [McpServerTool, Description("Returns the Sub-Tokens of a QueryToken")]
     public static List<QueryTokenTS> SubTokens(string queryKey, string token)
     {
-        var qn = QueryLogic.ToQueryName(queryKey);
-        var qd = QueryLogic.Queries.QueryDescription(qn);
+        try
+        {
+            var qn = QueryLogic.ToQueryName(queryKey);
+            var qd = QueryLogic.Queries.QueryDescription(qn);
 
-        var t = QueryUtils.Parse(token, qd, SubTokensOptions.All);
+            var t = QueryUtils.Parse(token, qd, SubTokensOptions.All);
 
-        var tokens = QueryUtils.SubTokens(t, qd, SubTokensOptions.All);
+            var tokens = QueryUtils.SubTokens(t, qd, SubTokensOptions.All);
 
-        return tokens.Select(qt => QueryTokenTS.WithAutoExpand(qt, qd)).ToList();
+            return tokens.Select(qt => QueryTokenTS.WithAutoExpand(qt, qd)).ToList();
+        }
+        catch (Exception e)
+        {
+            AddQueryKeyHint(e, queryKey);
+            throw;
+        }
+    }
+
+    static void AddQueryKeyHint(Exception e, string queryKey)
+    {
+        var similar = QueryLogic.Queries.GetAllowedQueryNames(fullScreen: true)
+            .Select(q => QueryUtils.GetKey(q))
+            .Where(k => k.Contains(queryKey, StringComparison.OrdinalIgnoreCase))
+            .Take(5)
+            .ToList();
+
+        if (similar.Any())
+            e.Data["Hint"] = $"Similar query names: {similar.ToString(", ")}";
     }
 
 

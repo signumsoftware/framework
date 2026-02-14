@@ -1,19 +1,9 @@
-using Anthropic.SDK;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Options;
-using ModelContextProtocol.Protocol;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Agent.Skills;
 using Signum.Agent.Providers;
-using Signum.Agent.Skills;
 using Signum.Utilities.Synchronization;
-using System.Formats.Tar;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Pgvector;
 

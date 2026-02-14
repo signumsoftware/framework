@@ -216,6 +216,8 @@ public class ChatbotController : Controller
                     catch (Exception e)
                     {
                         toolSw.Stop();
+                        var errorContent = FormatToolError(funCall.Name, e, funCall.Arguments);
+
                         ChatMessageEntity toolMsg;
                         using (AuthLogic.Disable())
                         {
@@ -225,13 +227,14 @@ public class ChatbotController : Controller
                                 Role = ChatMessageRole.Tool,
                                 ToolCallID = funCall.CallId,
                                 ToolID = funCall.Name,
+                                Content = errorContent,
                                 Exception = e.LogException().ToLiteFat(),
                                 Duration = toolSw.Elapsed,
                             }.Save();
                         }
 
                         await resp.WriteAsync(UINotification(ChatbotUICommand.Exception, toolMsg.Exception!.Id.ToString()), ct);
-                        await resp.WriteAsync(toolMsg.Exception!.ToString()!, ct);
+                        await resp.WriteAsync(errorContent, ct);
                         await resp.WriteAsync("\n");
                         await resp.WriteAsync(UINotification(ChatbotUICommand.AnswerId, toolMsg.Id.ToString()), ct);
                         await resp.Body.FlushAsync();
@@ -264,6 +267,21 @@ public class ChatbotController : Controller
         }
     }
 
+
+    static string FormatToolError(string toolName, Exception e, IDictionary<string, object?>? arguments)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"Tool '{toolName}' failed.");
+        sb.AppendLine($"Arguments: {JsonSerializer.Serialize(arguments).Etc(300)}");
+        sb.AppendLine($"Error: {e.GetType().Name}: {e.Message}");
+        if (arguments != null && arguments.Count > 0)
+
+        if (e.Data["Hint"] is string s)
+            sb.AppendLine($"Hint: {s}");
+
+        sb.AppendLine("Please review the error and try again with corrected arguments.");
+        return sb.ToString();
+    }
 
     string UINotification(ChatbotUICommand commandName, string? payload = null)
     {

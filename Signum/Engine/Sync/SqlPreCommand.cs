@@ -183,7 +183,7 @@ public static class SqlPreCommandExtensions
                 tr?.Commit();
             }
         }
-        catch (ExecuteSqlScriptException e)
+        catch (ExecuteSqlScriptException)
         {
             Console.WriteLine("The current script is in saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
 
