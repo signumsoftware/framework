@@ -16,6 +16,27 @@ public static class ChatbotLogic
     public static IQueryable<ChatMessageEntity> Messages(this ChatSessionEntity session) =>
         As.Expression(() => Database.Query<ChatMessageEntity>().Where(a => a.ChatSession.Is(session)));
 
+    [AutoExpressionField]
+    public static decimal? Price(this ChatMessageEntity message) =>
+        As.Expression(() =>
+            message.LanguageModel == null ? (decimal?)null :
+            (message.LanguageModel.Entity.PricePerInputToken == null &&
+             message.LanguageModel.Entity.PricePerOutputToken == null &&
+             message.LanguageModel.Entity.PricePerCachedInputToken == null &&
+             message.LanguageModel.Entity.PricePerReasoningOutputToken == null)
+            ? (decimal?)null
+            : (
+                (decimal)(message.InputTokens ?? 0) * (message.LanguageModel.Entity.PricePerInputToken ?? 0) +
+                (decimal)(message.OutputTokens ?? 0) * (message.LanguageModel.Entity.PricePerOutputToken ?? 0) +
+                (decimal)(message.CachedInputTokens ?? 0) * (message.LanguageModel.Entity.PricePerCachedInputToken ?? 0) +
+                (decimal)(message.ReasoningOutputTokens ?? 0) * (message.LanguageModel.Entity.PricePerReasoningOutputToken ?? 0)
+              ) / 1_000_000m
+        );
+
+    [AutoExpressionField]
+    public static decimal? TotalPrice(this ChatSessionEntity session) =>
+        As.Expression(() => session.Messages().Sum(m => m.Price()));
+
     public static ResetLazy<Dictionary<Lite<ChatbotLanguageModelEntity>, ChatbotLanguageModelEntity>> LanguageModels = null!;
     public static ResetLazy<Lite<ChatbotLanguageModelEntity>?> DefaultLanguageModel = null!;
 
@@ -85,6 +106,10 @@ public static class ChatbotLogic
                 e.Model,
                 e.Temperature,
                 e.MaxTokens,
+                e.PricePerInputToken,
+                e.PricePerOutputToken,
+                e.PricePerCachedInputToken,
+                e.PricePerReasoningOutputToken,
             });
 
         new Graph<ChatbotLanguageModelEntity>.Execute(ChatbotLanguageModelOperation.MakeDefault)
@@ -166,6 +191,7 @@ public static class ChatbotLogic
                e.TotalOutputTokens,
                e.TotalToolCalls,
                e.LanguageModel,
+               TotalPrice = e.TotalPrice(),
            });
 
         sb.Schema.EntityEvents<ChatSessionEntity>().PreUnsafeDelete += query =>
@@ -182,12 +208,15 @@ public static class ChatbotLogic
                 e.Role,
                 e.ToolID,
                 e.Content,
+                e.LanguageModel,
                 e.InputTokens,
                 e.CachedInputTokens,
                 e.OutputTokens,
+                e.ReasoningOutputTokens,
                 e.Duration,
                 e.Exception,
                 e.ChatSession,
+                Price = e.Price(),
             });
 
         PermissionLogic.RegisterTypes(typeof(ChatbotPermission));

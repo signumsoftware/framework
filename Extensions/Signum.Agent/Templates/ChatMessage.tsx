@@ -33,14 +33,25 @@ export default function ChatMessage(p: { ctx: TypeContext<ChatMessageEntity> }):
 
       <div className="row">
         <div className="col-sm-4">
-          <NumberLine ctx={ctx4.subCtx(n => n.inputTokens)} />
+          <AutoLine ctx={ctx4.subCtx(n => n.languageModel)} />
         </div>
-        <div className="col-sm-4">
-          <NumberLine ctx={ctx4.subCtx(n => n.outputTokens)} />
-        </div>
-
         <div className="col-sm-4">
           <AutoLine ctx={ctx4.subCtx(n => n.duration)} />
+        </div>
+      </div>
+
+      <div className="row">
+        <div className="col-sm-3">
+          <NumberLine ctx={ctx4.subCtx(n => n.inputTokens)} />
+        </div>
+        <div className="col-sm-3">
+          <NumberLine ctx={ctx4.subCtx(n => n.cachedInputTokens)} />
+        </div>
+        <div className="col-sm-3">
+          <NumberLine ctx={ctx4.subCtx(n => n.outputTokens)} />
+        </div>
+        <div className="col-sm-3">
+          <NumberLine ctx={ctx4.subCtx(n => n.reasoningOutputTokens)} />
         </div>
       </div>
 

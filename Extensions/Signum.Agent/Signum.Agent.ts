@@ -32,6 +32,10 @@ export interface ChatbotLanguageModelEntity extends Entities.Entity {
   temperature: number | null;
   maxTokens: number | null;
   isDefault: boolean;
+  pricePerInputToken: number | null;
+  pricePerOutputToken: number | null;
+  pricePerCachedInputToken: number | null;
+  pricePerReasoningOutputToken: number | null;
 }
 
 export namespace ChatbotLanguageModelOperation {
@@ -108,7 +112,7 @@ export interface ChatSessionEntity extends Entities.Entity {
   totalOutputTokens: number | null;
   totalToolCalls: number | null;
   totalCachedInputTokens: number;
-  cachedReasoningTokens: number;
+  totalReasoningOutputTokens: number;
 }
 
 export namespace ChatSessionOperation {

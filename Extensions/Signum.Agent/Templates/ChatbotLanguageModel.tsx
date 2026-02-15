@@ -23,6 +23,23 @@ export default function ChatbotConfiguration(p: { ctx: TypeContext<ChatbotLangua
       <EnumLine ctx={ctx4.subCtx(n => n.model)} readOnly={models == null} optionItems={models ?? []} />
       <AutoLine ctx={ctx4.subCtx(n => n.temperature)} />
       <AutoLine ctx={ctx4.subCtx(n => n.maxTokens)} />
+      <fieldset className="mt-3">
+        <legend className="fs-6 fw-semibold">Pricing ($ / 1M tokens)</legend>
+        <div className="row">
+          <div className="col-sm-3">
+            <AutoLine ctx={ctx4.subCtx(n => n.pricePerInputToken)} />
+          </div>
+          <div className="col-sm-3">
+            <AutoLine ctx={ctx4.subCtx(n => n.pricePerOutputToken)} />
+          </div>
+          <div className="col-sm-3">
+            <AutoLine ctx={ctx4.subCtx(n => n.pricePerCachedInputToken)} />
+          </div>
+          <div className="col-sm-3">
+            <AutoLine ctx={ctx4.subCtx(n => n.pricePerReasoningOutputToken)} />
+          </div>
+        </div>
+      </fieldset>
     </div>
   );
 }

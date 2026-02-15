@@ -23,6 +23,18 @@ public class ChatbotLanguageModelEntity : Entity
 
     public bool IsDefault { get; set; }
 
+    [Unit("$ / 1M tokens")]
+    public decimal? PricePerInputToken { get; set; }
+
+    [Unit("$ / 1M tokens")]
+    public decimal? PricePerOutputToken { get; set; }
+
+    [Unit("$ / 1M tokens")]
+    public decimal? PricePerCachedInputToken { get; set; }
+
+    [Unit("$ / 1M tokens")]
+    public decimal? PricePerReasoningOutputToken { get; set; }
+
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => $"{Provider}: {Model}");
 }
