@@ -52,6 +52,8 @@ export namespace ChatbotMessage {
   export const InitialInstruction: MessageKey = new MessageKey("ChatbotMessage", "InitialInstruction");
   export const ShowSystem: MessageKey = new MessageKey("ChatbotMessage", "ShowSystem");
   export const UnableToChangeModelOrProviderOnceUsed: MessageKey = new MessageKey("ChatbotMessage", "UnableToChangeModelOrProviderOnceUsed");
+  export const WhatWentWrong: MessageKey = new MessageKey("ChatbotMessage", "WhatWentWrong");
+  export const ProvideFeedback: MessageKey = new MessageKey("ChatbotMessage", "ProvideFeedback");
 }
 
 export namespace ChatbotPermission {
@@ -87,6 +89,8 @@ export interface ChatMessageEntity extends Entities.Entity {
   outputTokens: number | null;
   reasoningOutputTokens: number | null;
   duration: string /*TimeSpan*/ | null;
+  userFeedback: UserFeedback | null;
+  userFeedbackMessage: string | null;
 }
 
 export namespace ChatMessageOperation {
@@ -156,4 +160,9 @@ export interface ToolCallEmbedded extends Entities.EmbeddedEntity {
   toolId: string;
   arguments: string;
 }
+
+export const UserFeedback: EnumType<UserFeedback> = new EnumType<UserFeedback>("UserFeedback");
+export type UserFeedback =
+  "Positive" |
+  "Negative";
 

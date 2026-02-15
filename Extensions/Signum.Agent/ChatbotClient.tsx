@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { Link, RouteObject } from 'react-router'
-import { ajaxGet, wrapRequest, AjaxOptions } from '@framework/Services';
+import { ajaxGet, ajaxPost, wrapRequest, AjaxOptions } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, LanguageModelProviderSymbol, EmbeddingsLanguageModelEntity } from './Signum.Agent'
+import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, LanguageModelProviderSymbol, EmbeddingsLanguageModelEntity, UserFeedback } from './Signum.Agent'
 import { toAbsoluteUrl } from '../../Signum/React/AppContext';
 import { registerToString } from '../../Signum/React/Signum.Entities';
 import { FontAwesomeIcon } from '@framework/Lines';
@@ -58,6 +58,10 @@ export namespace ChatbotClient {
 
     export function getMessagesBySessionId(sessionId: string | number | undefined): Promise<Array<ChatMessageEntity>> {
       return ajaxGet({ url: "/api/chatbot/messages/" + sessionId });
+    }
+
+    export function setFeedback(messageId: string | number, feedback: UserFeedback, message?: string): Promise<void> {
+      return ajaxPost({ url: "/api/chatbot/feedback/" + messageId }, { feedback, message });
     }
   }
 

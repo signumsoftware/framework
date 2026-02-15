@@ -1,10 +1,13 @@
 import { ErrorBoundary } from "@framework/Components";
 import * as React from "react";
-import { ChatbotMessage, ChatMessageEntity, ToolCallEmbedded } from "./Signum.Agent";
+import { ChatbotMessage, ChatMessageEntity, ToolCallEmbedded, UserFeedback } from "./Signum.Agent";
 import { FontAwesomeIcon } from "@framework/Lines";
 import { ChatbotClient } from "./ChatbotClient";
 import { getToString } from "@framework/Signum.Entities";
 import { classes } from "@framework/Globals";
+import { useForceUpdate } from "@framework/Hooks";
+import AutoLineModal from "@framework/AutoLineModal";
+import { PropertyRoute } from "@framework/Reflection";
 
 export const Message: React.NamedExoticComponent<{ msg: ChatMessageEntity; toolResponses: number; }>
   = React.memo(function Message(p: { msg: ChatMessageEntity; toolResponses: number; }): React.ReactElement {
@@ -21,7 +24,7 @@ export const Message: React.NamedExoticComponent<{ msg: ChatMessageEntity; toolR
         {role}
       </ErrorBoundary>
     );
-  }, (a, b) => a.msg.id != null && a.toolResponses != b.toolResponses );
+  }, (a, b) => a.msg.id != null && a.toolResponses != b.toolResponses);
 
 
 function looksLikeJson(text: string) {
@@ -49,6 +52,60 @@ export function SystemMessage(p: { msg: ChatMessageEntity }): React.ReactElement
 
 
 export function AssistantMessage(p: { msg: ChatMessageEntity }): React.ReactElement {
+  const forceUpdate = useForceUpdate();
+
+  const isFinalized = p.msg.id != null;
+
+  async function handleThumbsUp() {
+    if (!isFinalized)
+      return;
+    if (p.msg.userFeedback === "Positive") {
+      await ChatbotClient.API.setFeedback(p.msg.id!, null);
+      p.msg.userFeedback = null;
+      p.msg.userFeedbackMessage = null;
+    } else {
+      await ChatbotClient.API.setFeedback(p.msg.id!, "Positive");
+      p.msg.userFeedback = "Positive";
+      p.msg.userFeedbackMessage = null;
+    }
+    forceUpdate();
+  }
+
+  async function handleThumbsDown() {
+    if (!isFinalized)
+      return;
+    if (p.msg.userFeedback === "Negative") {
+      await ChatbotClient.API.setFeedback(p.msg.id!, null);
+      p.msg.userFeedback = null;
+      p.msg.userFeedbackMessage = null;
+      forceUpdate();
+    } else {
+      await openFeedbackModal();
+    }
+  }
+
+  async function handleEditFeedback() {
+    await openFeedbackModal();
+  }
+
+  async function openFeedbackModal() {
+    const newMessage = await AutoLineModal.show({
+      propertyRoute: ChatMessageEntity.propertyRouteAssert(a => a.userFeedbackMessage),
+      initialValue: p.msg.userFeedbackMessage ?? "",
+      title: ChatbotMessage.ProvideFeedback.niceToString(),
+      message: ChatbotMessage.WhatWentWrong.niceToString(),
+      modalSize: "md",
+    });
+
+    if (newMessage === undefined)
+      return;
+
+    const newFeedback: UserFeedback = "Negative";
+    await ChatbotClient.API.setFeedback(p.msg.id!, newFeedback, newMessage || undefined);
+    p.msg.userFeedback = newFeedback;
+    p.msg.userFeedbackMessage = newMessage || null;
+    forceUpdate();
+  }
 
   return (
     <div className={`mb-2 justify-content-start`}>
@@ -58,6 +115,33 @@ export function AssistantMessage(p: { msg: ChatMessageEntity }): React.ReactElem
         </React.Suspense>
       }
       {p.msg.toolCalls.map(tc => <ToolCall toolCall={tc.element} />)}
+      {isFinalized && (
+        <div className="chat-feedback-buttons">
+          <button
+            className={classes("btn btn-link btn-sm chat-feedback-btn", p.msg.userFeedback === "Positive" && "chat-feedback-active-positive")}
+            onClick={handleThumbsUp}
+            title="Good response"
+          >
+            <FontAwesomeIcon icon="thumbs-up" />
+          </button>
+          <button
+            className={classes("btn btn-link btn-sm chat-feedback-btn", p.msg.userFeedback === "Negative" && "chat-feedback-active-negative")}
+            onClick={handleThumbsDown}
+            title="Bad response"
+          >
+            <FontAwesomeIcon icon="thumbs-down" />
+          </button>
+          {p.msg.userFeedback === "Negative" && (
+            <button
+              className="btn btn-link btn-sm chat-feedback-btn chat-feedback-edit"
+              onClick={handleEditFeedback}
+              title={ChatbotMessage.ProvideFeedback.niceToString()}
+            >
+              <FontAwesomeIcon icon="pen" />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

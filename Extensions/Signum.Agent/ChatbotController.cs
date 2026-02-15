@@ -33,6 +33,19 @@ public class ChatbotController : Controller
         return list.Order().ToList();
     }
 
+    [HttpPost("api/chatbot/feedback/{messageId}")]
+    public void SetFeedback(int messageId, [FromBody] SetFeedbackRequest request)
+    {
+        var message = Database.Retrieve<ChatMessageEntity>(messageId);
+
+        if (message.Role != ChatMessageRole.Assistant)
+            throw new InvalidOperationException("Feedback can only be set on Assistant messages.");
+
+        message.UserFeedback = request.Feedback;
+        message.UserFeedbackMessage = request.Feedback == UserFeedback.Negative ? request.Message : null;
+        message.Execute(ChatMessageOperation.Save);
+    }
+
     [HttpGet("api/chatbot/messages/{sessionID}")]
     public List<ChatMessageEntity> GetMessagesBySessionId(int sessionID)
     {
@@ -190,10 +203,10 @@ public class ChatbotController : Controller
                     }).ToMList()
                 }.Save();
 
-                history.Session.TotalInputTokens += answer.InputTokens ?? 0;
-                history.Session.TotalCachedInputTokens += answer.CachedInputTokens ?? 0;
-                history.Session.TotalOutputTokens += answer.OutputTokens ?? 0;
-                history.Session.TotalReasoningOutputTokens += answer.ReasoningOutputTokens ?? 0;
+                history.Session.TotalInputTokens = NullableAdd(history.Session.TotalInputTokens, answer.InputTokens);
+                history.Session.TotalCachedInputTokens = NullableAdd(history.Session.TotalCachedInputTokens, answer.CachedInputTokens);
+                history.Session.TotalOutputTokens = NullableAdd(history.Session.TotalOutputTokens, answer.OutputTokens);
+                history.Session.TotalReasoningOutputTokens = NullableAdd(history.Session.TotalReasoningOutputTokens, answer.ReasoningOutputTokens);
                 history.Session.TotalToolCalls += answer.ToolCalls.Count;
                 history.Session.Save();
 
@@ -295,6 +308,8 @@ public class ChatbotController : Controller
     }
 
 
+    static int? NullableAdd(int? a, int? b) => a == null && b == null ? null : (a ?? 0) + (b ?? 0);
+
     static string FormatToolError(string toolName, Exception e, IDictionary<string, object?>? arguments)
     {
         var sb = new StringBuilder();
@@ -365,6 +380,12 @@ public class ChatbotController : Controller
 
         return command;
     }
+}
+
+public class SetFeedbackRequest
+{
+    public UserFeedback Feedback { get; set; }
+    public string? Message { get; set; }
 }
 
 [InTypeScript(true)]

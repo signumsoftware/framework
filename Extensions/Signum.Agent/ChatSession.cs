@@ -23,10 +23,9 @@ public class ChatSessionEntity : Entity
     public int? TotalInputTokens { get; set; }
 
     public int? TotalOutputTokens { get; set; }
-
-    public int? TotalToolCalls { get; set; }
-    public int TotalCachedInputTokens { get; internal set; }
-    public int TotalReasoningOutputTokens { get; internal set; }
+    public int? TotalCachedInputTokens { get; set; }
+    public int? TotalReasoningOutputTokens { get; set; }
+    public int TotalToolCalls { get; set; }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Title ?? BaseToString());
@@ -73,6 +72,11 @@ public class ChatMessageEntity : Entity
 
     public TimeSpan? Duration { get; set; }
 
+    public UserFeedback? UserFeedback { get; set; }
+
+    [StringLengthValidator(Max = 1000, MultiLine = true)]
+    public string? UserFeedbackMessage { get; set; }
+
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         if(pi.Name == nameof(ToolID) && ToolID != null && Role != ChatMessageRole.Tool)
@@ -83,6 +87,12 @@ public class ChatMessageEntity : Entity
 
         if (pi.Name == nameof(Content) && Content == null && Role != ChatMessageRole.Assistant && Exception == null)
             return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+        if (pi.Name == nameof(UserFeedbackMessage) && UserFeedbackMessage != null && UserFeedback != Agent.UserFeedback.Negative)
+            return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
+
+        if (pi.Name == nameof(UserFeedback) && UserFeedback != null && Role != ChatMessageRole.Assistant)
+            return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
 
         return base.PropertyValidation(pi);
     }
@@ -108,11 +118,10 @@ public enum ChatMessageRole
     Tool,      //Answer toool
 }
 
-[AutoInit]
-public static class ChatMessageOperation
+public enum UserFeedback
 {
-    public static readonly ExecuteSymbol<ChatMessageEntity> Save;
-    public static readonly DeleteSymbol<ChatMessageEntity> Delete;
+    Positive,
+    Negative,
 }
 
 public enum ChatbotMessage
@@ -126,6 +135,10 @@ public enum ChatbotMessage
     ShowSystem,
     [Description("Unable to change Model or Provider once used")]
     UnableToChangeModelOrProviderOnceUsed,
+    [Description("What went wrong? (optional)")]
+    WhatWentWrong,
+    [Description("Provide feedback")]
+    ProvideFeedback,
 }
 
 [AutoInit]

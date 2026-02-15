@@ -79,6 +79,18 @@ export default function ChatMessage(p: { ctx: TypeContext<ChatMessageEntity> }):
             { property: a => a.arguments, template: ctx => <pre >{ctx.value.arguments}</pre> },
           ]} />
         }
+        {ctx.value.role == "Assistant" && (ctx.value.userFeedback != null || ctx.value.userFeedbackMessage != null) && (
+          <div className="row mt-2">
+            <div className="col-sm-3">
+              <AutoLine ctx={ctx4.subCtx(n => n.userFeedback)} />
+            </div>
+            {ctx.value.userFeedback === "Negative" && (
+              <div className="col-sm-9">
+                <AutoLine ctx={ctx4.subCtx(n => n.userFeedbackMessage)} />
+              </div>
+            )}
+          </div>
+        )}
       </>
       }
     </div>

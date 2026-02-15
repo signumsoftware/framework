@@ -216,6 +216,7 @@ public static class ChatbotLogic
                 e.Duration,
                 e.Exception,
                 e.ChatSession,
+                e.UserFeedback,
                 Price = e.Price(),
             });
 
