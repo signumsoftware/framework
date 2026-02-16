@@ -24,6 +24,11 @@ export type CssStepType =
   "Property" |
   "ToolbarContent";
 
+export const CustomTourSymbol: Type<CustomTourSymbol> = new Type<CustomTourSymbol>("CustomTour");
+export interface CustomTourSymbol extends Basics.Symbol {
+  Type: "CustomTour";
+}
+
 export const PopoverAlign: EnumType<PopoverAlign> = new EnumType<PopoverAlign>("PopoverAlign");
 export type PopoverAlign =
   "Start" |
@@ -40,7 +45,7 @@ export type PopoverSide =
 export const TourEntity: Type<TourEntity> = new Type<TourEntity>("Tour");
 export interface TourEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "Tour";
-  forEntity: Entities.Lite<Basics.TypeEntity>;
+  target: Entities.Lite<Entities.Entity>;
   steps: Entities.MList<TourStepEntity>;
   showProgress: boolean;
   animate: boolean;

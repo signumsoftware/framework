@@ -1,19 +1,19 @@
 import * as React from 'react'
 import { Nav } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { TourHelpers } from "./TourComponent";
+import { Driver } from 'driver.js';
 
 export interface TourNavItemProps {
-  getTourHelpers: () => TourHelpers | null;
+  getDriver: () => Driver | null;
 }
 
 export default function TourNavItem(p: TourNavItemProps) {
-  
-  function onClick() {
-    const helpers = p.getTourHelpers();
 
-    if (helpers)
-      helpers.start();
+  function onClick() {
+    const driver = p.getDriver();
+
+    if (driver)
+      driver.drive();
   }
 
   return (

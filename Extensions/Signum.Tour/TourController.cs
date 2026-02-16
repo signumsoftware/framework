@@ -13,7 +13,7 @@ public class TourController : ControllerBase
         var type = TypeLogic.GetType(typeName);
         var typeEntity = type.ToTypeEntity().ToLite();
         var tour = Database.Query<TourEntity>()
-            .Where(t => t.ForEntity.Is(typeEntity))
+            .Where(t => t.Target.Is(typeEntity))
             .FirstOrDefault();
 
         return tour == null ? null : ToDTO(tour);
@@ -23,7 +23,7 @@ public class TourController : ControllerBase
     {
         return new TourDTO
         {
-            ForEntity = tour.ForEntity,
+            ForEntity = tour.Target,
             Animate = tour.Animate,
             ShowCloseButton = tour.ShowCloseButton,
             Steps = tour.Steps.Select(s => new TourStepDTO

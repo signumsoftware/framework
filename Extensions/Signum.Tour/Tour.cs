@@ -8,7 +8,8 @@ namespace Signum.Tour;
 public class TourEntity : Entity, IUserAssetEntity
 {
     [UniqueIndex]
-    public Lite<TypeEntity> ForEntity { get; set; }
+    [ImplementedBy(typeof(TypeEntity), typeof(CustomTourSymbol))]
+    public Lite<Entity> Target { get; set; }
 
     [QueryableProperty, Ignore, NoRepeatValidator]
     public MList<TourStepEntity> Steps { get; set; } = new MList<TourStepEntity>();
@@ -23,13 +24,18 @@ public class TourEntity : Entity, IUserAssetEntity
     public Guid Guid { get; set; } = Guid.NewGuid();
 
     [AutoExpressionField]
-    public override string ToString() => As.Expression(() => IsNew ? this.BaseToString() : ForEntity.ToString()!);
+    public override string ToString() => As.Expression(() => IsNew ? this.BaseToString() : Target.ToString()!);
 
     public XElement ToXml(IToXmlContext ctx)
     {
+        var forEntityName = 
+            Target.Entity is TypeEntity ? ((Lite<TypeEntity>)(object)Target).RetrieveFromCache().CleanName :
+            Target.Entity is CustomTourSymbol symbol ? symbol.Key :
+            Target.ToString();
+
         return new XElement("Tour",
             new XAttribute("Guid", Guid),
-            new XElement("ForEntity", ctx.RetrieveLite(ForEntity).CleanName),
+            new XElement("ForEntity", forEntityName),
             new XElement("Steps", Steps.Select(s => s.ToXml(ctx))),
             new XElement("ShowProgress", ShowProgress),
             new XElement("Animate", Animate),
@@ -38,7 +44,11 @@ public class TourEntity : Entity, IUserAssetEntity
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        ForEntity = ctx.GetTypeLite(element.Element("ForEntity")!.Value);
+        var forEntityKey = element.Element("ForEntity")!.Value;
+        Target = 
+            (Lite<Entity>)ctx.GetTypeLite(forEntityKey) ?? 
+            ctx.GetSymbol<CustomTourSymbol>(forEntityKey)?.ToLite() ?? 
+            throw new InvalidOperationException($"ForEntity '{forEntityKey}' not found");
         Steps.Synchronize(element.Element("Steps")!.Elements().ToList(), (s, x) => s.FromXml(x, ctx, this));
         ShowProgress = bool.Parse(element.Element("ShowProgress")!.Value);
         Animate = element.Element("Animate") != null ? bool.Parse(element.Element("Animate")!.Value) : true;
@@ -52,6 +62,18 @@ public static class TourOperation
     public static readonly ExecuteSymbol<TourEntity> Save;
     public static readonly DeleteSymbol<TourEntity> Delete;
 }
+
+[EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
+public class CustomTourSymbol : Symbol
+{
+    private CustomTourSymbol() { }
+
+    public CustomTourSymbol(Type declaringType, string fieldName) :
+        base(declaringType, fieldName)
+    {
+    }
+}
+
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class TourStepEntity : Entity
@@ -153,7 +175,9 @@ public class CssStepEmbedded : EmbeddedEntity
     {
         Type = element.Element("Type")!.Value.ToEnum<CssStepType>();
         CssSelector = element.Element("CssSelector")?.Value;
-        Property = element.Element("Property")?.Let(e =>ctx.GetPropertyLite(((Lite<TypeEntity>)userAsset.ForEntity).RetrieveFromCache(), e.Value));
+        Property = element.Element("Property")?.Let(e => userAsset.Target is Lite<TypeEntity> typeEntity 
+            ? ctx.GetPropertyLite(typeEntity.RetrieveFromCache(), e.Value)
+            : null);
         var content = element.Element("Content")?.Value;
         ToolbarContent = !content.HasText() ? null :
            (Lite<Entity>?)ctx.TryGetQuery(content)?.ToLite() ??
