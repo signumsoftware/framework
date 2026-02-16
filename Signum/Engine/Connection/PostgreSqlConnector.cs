@@ -47,6 +47,20 @@ public class PostgreSqlConnector : Connector
     public ResetLazy<string> LocalTimeZoneLazy = new ResetLazy<string>(() => (string)Executor.ExecuteScalar("SELECT current_setting('TIMEZONE')")!);
     public override string LocalTimeZone => LocalTimeZoneLazy.Value;
 
+    public ResetLazy<bool> SupportsVectorsLazy = new ResetLazy<bool>(() =>
+    {
+        try
+        {
+            var result = Executor.ExecuteScalar("SELECT COUNT(*) FROM pg_available_extensions WHERE name = 'vector'");
+            return Convert.ToInt32(result) > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    });
+    public override bool SupportsVectors => SupportsVectorsLazy.Value;
+
     public override ParameterBuilder ParameterBuilder { get; protected set; }
 
     public Version? PostgresVersion { get; set; }
