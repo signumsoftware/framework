@@ -340,6 +340,19 @@ public class WhereTest
         var albums = Database.Query<BandEntity>().Where(a => ((PersonalAwardEntity?)a.LastAward) != null).ToList();
     }
 
+    class AwardInfo
+    {
+        public Lite<AwardEntity> Award { get; set; }
+    }
+    [Fact]
+    public void WhereLiteImplicitCastEntity()
+    {
+        var albums = Database.Query<GrammyAwardEntity>()
+            .Select(a => new AwardInfo { Award = a.ToLite() })
+            .Select(a => Database.Query<BandEntity>().Where(b => b.LastAward.Is(a.Award.Entity)).Count())
+            .ToList();
+    }
+
     [Fact]
     public void WhereOutsideEquals()
     {

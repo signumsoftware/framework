@@ -1940,6 +1940,8 @@ internal class QueryBinder : ExpressionVisitor
         }
 
         source = RemoveProjectionConvert(source);
+        source = source is UnaryExpression u && u.NodeType == ExpressionType.Convert ?
+            EntityCasting(u.Operand, u.Type) ?? u : source;
 
         switch (source.NodeType)
         {
