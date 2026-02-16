@@ -58,6 +58,12 @@ public enum LoginAuthMessage
     [Description("Current password")]
     CurrentPassword,
 
+    [Description("Password must be changed")]
+    PasswordMustBeChanged,
+    
+    [Description("You must change your password before continuing")]
+    YouMustChangeYourPasswordBeforeContinuing,
+
     [Description("We have sent you an email with a link that will allow you to reset your password.")]
     WeHaveSentYouAnEmailToResetYourPassword,
 

@@ -212,7 +212,7 @@ export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getCom
 
   return (
     <Accordion.Item {...htmlAttributes} className={classes(drag?.dropClass, "sf-accordion-element")} eventKey={ctx.index!.toString()}
-      ref={refHtml }
+      ref={refHtml}
       onDragEnter={drag?.onDragOver}
       onDragOver={drag?.onDragOver}
       onDrop={drag?.onDrop}

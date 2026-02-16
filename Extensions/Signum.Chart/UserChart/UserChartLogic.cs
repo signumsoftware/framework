@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Presentation;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Dashboard;
@@ -279,11 +280,14 @@ public static class UserChartLogic
     public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) => 
         RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), uq => uq.Owner == null || AuthLogic.CurrentRoles().Contains(uq.Owner));
 
-    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<UserChartEntity, bool>> conditionExpression)
+    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<UserChartEntity, bool>> condition, Func<UserChartEntity, bool>? inMemoryCondition = null)
     {
         sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, ownerType);
 
-        TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, conditionExpression);
+        if (inMemoryCondition == null)
+            TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, condition);
+        else
+            TypeConditionLogic.Register<UserChartEntity>(typeCondition, condition, inMemoryCondition);
 
         DashboardLogic.RegisterTypeConditionForPart<UserChartPartEntity>(typeCondition);
         DashboardLogic.RegisterTypeConditionForPart<CombinedUserChartPartEntity>(typeCondition);

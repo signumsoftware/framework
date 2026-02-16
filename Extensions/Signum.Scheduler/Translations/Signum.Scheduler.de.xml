@@ -76,6 +76,8 @@
     <Member Name="SchedulePanel" Description="Schedule Übersicht" />
     <Member Name="SchedulerMargin" Description="Scheduler Spielraum" />
     <Member Name="SchedulerTaskLog" Description="Geplantes Task-Protokoll" />
+    <Member Name="ServerLocalTime" Description="Server-Lokalzeit" />
+    <Member Name="ServerTimeZone" Description="Server-Zeitzone" />
     <Member Name="SimpleStatus" Description="Einfacher Status" />
     <Member Name="Start" Description="Start" />
     <Member Name="StartTime" Description="Startzeit" />
