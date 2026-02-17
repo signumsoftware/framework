@@ -60,7 +60,7 @@ export namespace ChatbotClient {
       return ajaxGet({ url: "/api/chatbot/messages/" + sessionId });
     }
 
-    export function setFeedback(messageId: string | number, feedback: UserFeedback, message?: string): Promise<void> {
+    export function setFeedback(messageId: string | number, feedback: UserFeedback | null, message?: string): Promise<void> {
       return ajaxPost({ url: "/api/chatbot/feedback/" + messageId }, { feedback, message });
     }
   }

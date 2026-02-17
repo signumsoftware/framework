@@ -93,11 +93,6 @@ export interface ChatMessageEntity extends Entities.Entity {
   userFeedbackMessage: string | null;
 }
 
-export namespace ChatMessageOperation {
-  export const Save : Operations.ExecuteSymbol<ChatMessageEntity> = registerSymbol("Operation", "ChatMessageOperation.Save");
-  export const Delete : Operations.DeleteSymbol<ChatMessageEntity> = registerSymbol("Operation", "ChatMessageOperation.Delete");
-}
-
 export const ChatMessageRole: EnumType<ChatMessageRole> = new EnumType<ChatMessageRole>("ChatMessageRole");
 export type ChatMessageRole =
   "System" |
@@ -114,9 +109,9 @@ export interface ChatSessionEntity extends Entities.Entity {
   startDate: string /*DateTime*/;
   totalInputTokens: number | null;
   totalOutputTokens: number | null;
-  totalToolCalls: number | null;
-  totalCachedInputTokens: number;
-  totalReasoningOutputTokens: number;
+  totalCachedInputTokens: number | null;
+  totalReasoningOutputTokens: number | null;
+  totalToolCalls: number;
 }
 
 export namespace ChatSessionOperation {

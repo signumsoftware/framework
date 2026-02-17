@@ -2,6 +2,7 @@
 using Azure.Core;
 using Microsoft.Identity.Client;
 using ModelContextProtocol.Server;
+using Signum.Authorization;
 using System.ComponentModel;
 
 namespace Signum.Agent.Skills;
@@ -15,7 +16,7 @@ public class IntroductionSkill : ChatbotSkill
         IsAllowed = () => true;
         Replacements = new Dictionary<string, Func<object?, string>>()
         {
-            { "<CurrentApplication>", obj => Assembly.GetEntryAssembly()!.GetName().Name!.Before(".") }
+            { "<CurrentApplication>", obj => Assembly.GetEntryAssembly()!.GetName().Name!.Before(".") },
         };
     }
 

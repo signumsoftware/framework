@@ -43,7 +43,7 @@ public class ChatbotController : Controller
 
         message.UserFeedback = request.Feedback;
         message.UserFeedbackMessage = request.Feedback == UserFeedback.Negative ? request.Message : null;
-        message.Execute(ChatMessageOperation.Save);
+        message.Save();
     }
 
     [HttpGet("api/chatbot/messages/{sessionID}")]
@@ -384,7 +384,7 @@ public class ChatbotController : Controller
 
 public class SetFeedbackRequest
 {
-    public UserFeedback Feedback { get; set; }
+    public UserFeedback? Feedback { get; set; }
     public string? Message { get; set; }
 }
 
