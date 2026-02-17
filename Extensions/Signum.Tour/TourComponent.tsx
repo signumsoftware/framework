@@ -2,14 +2,81 @@ import * as React from "react";
 import { Driver,
 driver } from "driver.js";
 import "driver.js/dist/driver.css";
-import { TourEntity, TourMessage } from "./Signum.Tour";
+import { TourEntity, TourMessage, CustomTourSymbol } from "./Signum.Tour";
 import { useAPI } from "@framework/Hooks";
 import { TourClient, TourDTO } from "./TourClient";
 import { Entity,
 Lite } from "@framework/Signum.Entities";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCompass } from "@fortawesome/free-solid-svg-icons";
 
-export function TourButton(p: { target: Lite<Entity> }) {
+function isCustomTourSymbol(target: Lite<Entity> | CustomTourSymbol): target is CustomTourSymbol {
+  return 'key' in target && target.Type === 'CustomTour';
+}
 
+export function TourButton(p: { target: Lite<Entity> | CustomTourSymbol }) {
+  const storageKey = isCustomTourSymbol(p.target)
+    ? `tour-viewed-${p.target.key}` 
+    : `tour-viewed-${p.target.id}`;
+
+  const [hasViewed, setHasViewed] = React.useState(() => {
+    return localStorage.getItem(storageKey) === "true";
+  });
+
+  const [startTour, setStartTour] = React.useState(false);
+
+  const tour = useAPI(() => {
+    if (isCustomTourSymbol(p.target)) {
+      return TourClient.API.getTourBySymbol(p.target.key);
+    } else {
+      return TourClient.API.getTourByEntity(p.target.EntityType);
+    }
+  }, [p.target]);
+
+  const driverRef = React.useRef<Driver | null>(null);
+
+  const handleClick = () => {
+    if (!hasViewed) {
+      localStorage.setItem(storageKey, "true");
+      setHasViewed(true);
+    }
+
+    // Toggle startTour to force recreation and auto-start
+    setStartTour(prev => !prev);
+  };
+
+  if (!tour) {
+    return null;
+  }
+
+  return (
+    <>
+      <button
+        className={`btn ${hasViewed ? 'btn-outline-secondary' : 'btn-warning'}`}
+        onClick={handleClick}
+        title={hasViewed ? "Replay tour" : "Start tour (new!)"}
+        style={!hasViewed ? {
+          animation: 'pulse 2s infinite',
+          boxShadow: '0 0 10px rgba(255, 193, 7, 0.5)'
+        } : undefined}
+      >
+        <FontAwesomeIcon icon={faCompass} />
+      </button>
+      {startTour && <TourComponent key={startTour.toString()} tour={tour} autoStart={true} ref={driverRef} />}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+          }
+          50% {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+          }
+        }
+      `}</style>
+    </>
+  );
 }
 
 export function TourComponent({ tour, autoStart = true, ref }: {

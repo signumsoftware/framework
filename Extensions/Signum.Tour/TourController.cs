@@ -19,6 +19,20 @@ public class TourController : ControllerBase
         return tour == null ? null : ToDTO(tour);
     }
 
+    [HttpGet("api/tour/bySymbol/{symbolKey}")]
+    public TourDTO? GetTourBySymbol(string symbolKey)
+    {
+        var symbol = SymbolLogic<CustomTourSymbol>.Symbols.SingleOrDefault(s => s.Key == symbolKey);
+        if (symbol == null)
+            return null;
+
+        var tour = Database.Query<TourEntity>()
+            .Where(t => t.Target.Is(symbol))
+            .FirstOrDefault();
+
+        return tour == null ? null : ToDTO(tour);
+    }
+
     private static TourDTO ToDTO(TourEntity tour)
     {
         return new TourDTO
