@@ -4,7 +4,7 @@ import { classes } from '../Globals';
 import { JavascriptMessage, BooleanEnum, EntityPack, ModifiableEntity, Entity, isEntity, SaveChangesMessage } from '../Signum.Entities'
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import "./Modals.css"
+import "./DialogModals.css"
 import { BsSize } from '../Components';
 import { Modal } from 'react-bootstrap';
 import { getTypeInfo, OperationInfo, tryGetTypeInfo, TypeInfo } from '../Reflection';
