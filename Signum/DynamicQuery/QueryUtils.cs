@@ -391,8 +391,9 @@ public static class QueryUtils
         return result;
     }
 
-    public static QueryToken? TryParse(string tokenString, QueryDescription qd, SubTokensOptions options, out string? error)
+    public static QueryToken? TryParse(string tokenString, QueryDescription qd, SubTokensOptions options, out string? error, out QueryToken? lastParsedToken)
     {
+        lastParsedToken = null; 
         if (string.IsNullOrEmpty(tokenString))
         {
             error = "Token is empty";
@@ -404,9 +405,9 @@ public static class QueryUtils
 
         string firstPart = parts.FirstEx();
 
-        QueryToken? result = SubToken(null, qd, options, firstPart);
+        lastParsedToken = SubToken(null, qd, options, firstPart);
 
-        if (result == null)
+        if (lastParsedToken == null)
         {
             error = "Column '{0}' not found on query {1}".FormatWith(firstPart, QueryUtils.GetKey(qd.QueryName));
             return null;
@@ -414,16 +415,16 @@ public static class QueryUtils
 
         foreach (var part in parts.Skip(1))
         {
-            var newResult = SubToken(result, qd, options, part);
+            var newResult = SubToken(lastParsedToken, qd, options, part);
             if (newResult == null)
             {
-                error = "Token with key '{0}' not found on token '{1}' of query {2}".FormatWith(part, result.FullKey(), QueryUtils.GetKey(qd.QueryName));
+                error = "Token with key '{0}' not found on token '{1}' of query {2}".FormatWith(part, lastParsedToken.FullKey(), QueryUtils.GetKey(qd.QueryName));
                 return null;
             }
-            result = newResult;
+            lastParsedToken = newResult;
         }
         error = null;
-        return result;
+        return lastParsedToken;
     }
 
     public static string? CanFilter(QueryToken token)
@@ -497,6 +498,12 @@ public static class QueryUtils
 
         var body = token.BuildExpression(ctx);
         return Expression.Lambda(body, ctx.Parameter);
+    }
+
+
+    public static string NextAlternatives(this QueryDescription qd, SubTokensOptions options, QueryToken? partial)
+    {
+        return (partial == null ? qd.Columns.ToString(", ") : QueryUtils.SubTokens(partial, qd, options).ToString(a => a.Key, ","));
     }
 
     public static string? CanOrder(QueryToken token)

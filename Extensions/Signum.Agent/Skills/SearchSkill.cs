@@ -1,4 +1,5 @@
 using Azure;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol;
 using ModelContextProtocol.Server;
 using Signum.API;
@@ -237,6 +238,7 @@ public class FindOptionsEncoder
     }
 
     private static string EscapeTilde(string input) => input.Replace("~", "~~");
+
 }
 
 public class FindOptions
@@ -344,10 +346,12 @@ public class FilterOption
     {
         if (Operation != null)
         {
-            var qt = QueryUtils.TryParse(Token!, qd, SubTokensOptions.CanElement | aggregate | SubTokensOptions.CanAnyAll, out string? error);
+            var options = SubTokensOptions.CanElement | aggregate | SubTokensOptions.CanAnyAll;
+            var qt = QueryUtils.TryParse(Token!, qd, options, out string? error, out var partial);
             if (qt == null)
             {
                 sb.AppendLine($"{path}.token (FilterCondition with token '{Token}'): {error}");
+                sb.AppendLine(" Possible next tokens: " + qd.NextAlternatives(options, partial));
                 return;
             }
 
@@ -392,8 +396,10 @@ public class FilterOption
         {
             if (Token.HasText())
             {
-                var qt = QueryUtils.TryParse(Token, qd, SubTokensOptions.CanElement | aggregate | SubTokensOptions.CanAnyAll, out string? error);
+                var options = SubTokensOptions.CanElement | aggregate | SubTokensOptions.CanAnyAll;
+                var qt = QueryUtils.TryParse(Token, qd, options, out string? error, out QueryToken? partial);
                 sb.AppendLine($"{path}.token (FilterGroup with token '{Token}'): {error}");
+                sb.AppendLine(" Possible next tokens: " + qd.NextAlternatives(options, partial));
                 return;
             }
 
@@ -408,6 +414,8 @@ public class FilterOption
             sb.AppendLine($"{path}: Should be either a FilterCondition or a FilterGroup");
         }
     }
+
+  
 
     internal Filter ToFilter(QueryDescription qd, SubTokensOptions aggregate)
     {
@@ -447,10 +455,11 @@ public class OrderOption
     {
         var options = SubTokensOptions.CanElement | agg;
 
-        var parsedToken = QueryUtils.TryParse(Token, qd, options, out var error);
+        var parsedToken = QueryUtils.TryParse(Token, qd, options, out var error, out var partial);
         if (error.HasText())
         {
             sb.AppendLine($"{path}.token (Order with token '{Token}'): {error}");
+            sb.AppendLine(" Possible next tokens: " + qd.NextAlternatives(options, partial));
             return;
         }
     }
@@ -475,19 +484,21 @@ public class ColumnOption
     {
         var options = SubTokensOptions.CanElement | agg;
 
-        var parsedToken = QueryUtils.TryParse(Token, qd, options, out var error);
+        var parsedToken = QueryUtils.TryParse(Token, qd, options, out var error, out var partial);
         if (error.HasText())
         {
             sb.AppendLine($"{path}.token (Column with token '{Token}'): {error}");
+            sb.AppendLine(" Possible next tokens: " + qd.NextAlternatives(options, partial));
             return;
         }
 
         if (SummaryToken.HasText())
         {
-            var summaryToken = QueryUtils.TryParse(SummaryToken, qd, options | SubTokensOptions.CanAggregate, out var errorSummary);
+            var summaryToken = QueryUtils.TryParse(SummaryToken, qd, options | SubTokensOptions.CanAggregate, out var errorSummary, out var partialSummary);
             if (errorSummary.HasText())
             {
                 sb.AppendLine($"{path}.summaryToken (Column with summaryToken '{SummaryToken}'): {errorSummary}");
+                sb.AppendLine(" Possible next tokens: " + qd.NextAlternatives(options | SubTokensOptions.CanAggregate, partialSummary));
                 return;
             }
 

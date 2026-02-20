@@ -150,10 +150,11 @@ public class ChartColumnOption
         }
         else
         {
-            var parsedToken = QueryUtils.TryParse(Token, qd, options, out var error);
+            var parsedToken = QueryUtils.TryParse(Token, qd, options, out var error, out var partial);
             if (error.HasText())
             {
                 sb.AppendLine($"{path}.token (Column '{ScriptColumnName}'): {error}");
+                sb.AppendLine(" Possible next tokens: " + qd.NextAlternatives(options, partial));
                 return;
             }
 
