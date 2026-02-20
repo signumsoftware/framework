@@ -9,13 +9,13 @@ import { useForceUpdate } from "@framework/Hooks";
 import AutoLineModal from "@framework/AutoLineModal";
 import { PropertyRoute } from "@framework/Reflection";
 
-export const Message: React.NamedExoticComponent<{ msg: ChatMessageEntity; toolResponses: number; }>
-  = React.memo(function Message(p: { msg: ChatMessageEntity; toolResponses: number; }): React.ReactElement {
+export const Message: React.NamedExoticComponent<{ msg: ChatMessageEntity; toolResponses: number; sendToolResponse: (call: ToolCallEmbedded, response: unknown) => void }>
+  = React.memo(function Message(p: { msg: ChatMessageEntity; toolResponses: number; sendToolResponse: (call: ToolCallEmbedded, response: unknown) => void }): React.ReactElement {
 
     const role =
       p.msg.role == "System" ? <SystemMessage msg={p.msg} /> :
         p.msg.role == "User" ? <UserMessage msg={p.msg} /> :
-          p.msg.role == "Assistant" ? <AssistantMessage msg={p.msg} /> :
+          p.msg.role == "Assistant" ? <AssistantMessage msg={p.msg} sendToolResponse={p.sendToolResponse}/> :
             p.msg.role == "Tool" ? <ToolMessage msg={p.msg} /> :
               null;
 
@@ -24,10 +24,10 @@ export const Message: React.NamedExoticComponent<{ msg: ChatMessageEntity; toolR
         {role}
       </ErrorBoundary>
     );
-  }, (a, b) => a.msg.id != null && a.toolResponses != b.toolResponses);
+  }, (a, b) => a.msg.id != null && a.toolResponses == b.toolResponses);
 
 
-function looksLikeJson(text: string) {
+export function looksLikeJson(text: string) {
   return text && (text.trim().startsWith("{") || text.trim().startsWith("["));
 }
 
@@ -51,7 +51,7 @@ export function SystemMessage(p: { msg: ChatMessageEntity }): React.ReactElement
 }
 
 
-export function AssistantMessage(p: { msg: ChatMessageEntity }): React.ReactElement {
+export function AssistantMessage(p: { msg: ChatMessageEntity, sendToolResponse: (call: ToolCallEmbedded, response: unknown) => void }): React.ReactElement {
   const forceUpdate = useForceUpdate();
 
   const isFinalized = p.msg.id != null;
@@ -114,8 +114,8 @@ export function AssistantMessage(p: { msg: ChatMessageEntity }): React.ReactElem
           {ChatbotClient.renderMarkdown(p.msg.content)}
         </React.Suspense>
       }
-      {p.msg.toolCalls.map(tc => <ToolCall toolCall={tc.element} />)}
-      {isFinalized && (
+      {p.msg.toolCalls.map(tc => <ToolCall toolCall={tc.element} sendToolResponse={p.sendToolResponse} />)}
+      {isFinalized && p.msg.toolCalls.length == 0 && (
         <div className="chat-feedback-buttons">
           <button
             className={classes("btn btn-link btn-sm chat-feedback-btn", p.msg.userFeedback === "Positive" && "chat-feedback-active-positive")}
@@ -146,14 +146,22 @@ export function AssistantMessage(p: { msg: ChatMessageEntity }): React.ReactElem
   );
 }
 
-function ToolCall(p: { toolCall: ToolCallEmbedded }): React.ReactElement {
+function ToolCall(p: { toolCall: ToolCallEmbedded, sendToolResponse: (call: ToolCallEmbedded, response: unknown) => void }): React.ReactElement {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const isJson = looksLikeJson(p.toolCall.arguments!);
   const [formatJson, setFormatJson] = React.useState<boolean>(false);
 
-
   const response = p.toolCall._response;
+
+  // Render-type UITools are shown inline in the conversation instead of the raw collapsible tool block
+  if (p.toolCall.isUITool) {
+    var tool = ChatbotClient.getUITool(p.toolCall.toolId);
+    if (tool && tool.renderWidget) {
+      return tool.renderWidget(p.toolCall, p.sendToolResponse);
+    }
+  }
+
   return (
     <div className={`mb-2 justify-content-start`}>
       <a className="chat-internal" href="#" onClick={e => { e.preventDefault(); setIsOpen(!isOpen); }}>
@@ -188,17 +196,38 @@ export function ToolResponseBlock(p: { msg: ChatMessageEntity }): React.ReactEle
           <pre className="text-danger">
             {getToString(p.msg.exception)}
           </pre>
-          :
-          looksLikeJson(p.msg.content!) ?
-            <FormatJson code={p.msg.content} formatJson={formatJson} className="mb-0" />
-            :
-            <React.Suspense fallback={null}>
-              {ChatbotClient.renderMarkdown(p.msg.content!)}
-            </React.Suspense>
+          : <MarkdownOrJson content={p.msg.content!} formatJson={formatJson} />
+          
         }
       </div>
     </div>
   );
+}
+
+export function MarkdownOrJson(p: { content: string | null | undefined, formatJson?: boolean }) {
+  if (!p.content)
+    return <span className="text-muted">{p.content + ""}</span>;
+  
+  if (looksLikeJson(p.content!)) 
+    return <FormatJson code={p.content} formatJson={p.formatJson ?? true} className="mb-0" />;
+
+  return (
+    <React.Suspense fallback={null}>
+      {ChatbotClient.renderMarkdown(tryParseJsonString(p.content!))}
+    </React.Suspense>
+  );
+}
+
+export function tryParseJsonString(str: string) {
+  try {
+    if (str.startsWith("\"") && str.endsWith("\"")) {
+      return JSON.parse(str);
+    }
+
+    return str;
+  } catch {
+    return str;
+  }
 }
 
 export function FormatJson({ code, formatJson, ...rest }: { code: string | undefined | null, formatJson: boolean } & React.HTMLAttributes<HTMLDivElement>): React.ReactElement {

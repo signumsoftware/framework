@@ -69,6 +69,7 @@ export type ChatbotUICommand =
   "MessageId" |
   "AssistantAnswer" |
   "AssistantTool" |
+  "AssistantUITool" |
   "Tool" |
   "Exception";
 
@@ -154,6 +155,7 @@ export interface ToolCallEmbedded extends Entities.EmbeddedEntity {
   callId: string;
   toolId: string;
   arguments: string;
+  isUITool: boolean;
 }
 
 export const UserFeedback: EnumType<UserFeedback> = new EnumType<UserFeedback>("UserFeedback");

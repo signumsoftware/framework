@@ -7,6 +7,7 @@ using Signum.API.Filters;
 using Signum.Authorization;
 using System.Data;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json;
 
 namespace Signum.Agent;
@@ -114,12 +115,38 @@ public class ChatbotController : Controller
                 }
             }
 
-            ChatMessageEntity userQuestion = NewChatMessage(session.ToLite(), question, ChatMessageRole.User).Save();
+            // If this request is a UI reply, inject the tool result into history and skip adding a new user message
+            string? uiReplyCallId = HttpContext.Request.Headers["X-Chatbot-UIReply-CallId"].ToString().DefaultToNull();
+            string? uiReplyToolId = HttpContext.Request.Headers["X-Chatbot-UIReply-ToolId"].ToString().DefaultToNull();
 
-            history.Messages.Add(userQuestion);
+            if (uiReplyCallId != null && uiReplyToolId != null)
+            {
+                // Create the Tool message now that we have the client's result
+                var toolMsg = new ChatMessageEntity()
+                {
+                    ChatSession = session.ToLite(),
+                    Role = ChatMessageRole.Tool,
+                    ToolCallID = uiReplyCallId,
+                    ToolID = uiReplyToolId,
+                    Content = question, // request body carries the JSON result
+                }.Save();
 
-            await resp.WriteAsync(UINotification(ChatbotUICommand.QuestionId, userQuestion.Id.ToString()), ct);
-            await resp.Body.FlushAsync();
+                await resp.WriteAsync(UINotification(ChatbotUICommand.Tool, uiReplyToolId + "/" + uiReplyCallId), ct);
+                await resp.WriteAsync(question, ct);
+                await resp.WriteAsync("\n");
+                await resp.WriteAsync(UINotification(ChatbotUICommand.MessageId, toolMsg.Id.ToString()), ct);
+                await resp.Body.FlushAsync();
+                history.Messages.Add(toolMsg);
+            }
+            else
+            {
+                ChatMessageEntity userQuestion = NewChatMessage(session.ToLite(), question, ChatMessageRole.User).Save();
+
+                history.Messages.Add(userQuestion);
+
+                await resp.WriteAsync(UINotification(ChatbotUICommand.QuestionId, userQuestion.Id.ToString()), ct);
+                await resp.Body.FlushAsync();
+            }
 
             var client = ChatbotLogic.GetChatClient(history.LanguageModel);
             while (true)
@@ -184,6 +211,17 @@ public class ChatbotController : Controller
                 var usage = response.Usage;
 
                 var toolCalls = responseMsg.Contents.OfType<FunctionCallContent>().ToList();
+
+                // Detect UITool calls — the server never invokes their bodies
+                var uiToolCalls = toolCalls.Where(fc =>
+                {
+                    var tool = ChatbotSkillLogic.AllTools.Value.GetOrThrow(fc.Name);
+                    return ((AIFunction)tool).UnderlyingMethod?.GetCustomAttribute<UIToolAttribute>() != null;
+                }).ToList();
+
+                if (uiToolCalls.Count > 1)
+                    throw new InvalidOperationException($"The LLM invoked more than one UITool in a single response ({string.Join(", ", uiToolCalls.Select(t => t.Name))}). Only one UITool can be active at a time.");
+
                 var answer = new ChatMessageEntity
                 {
                     ChatSession = history.Session.ToLite(),
@@ -200,6 +238,7 @@ public class ChatbotController : Controller
                         ToolId = fc.Name,
                         CallId = fc.CallId,
                         Arguments = JsonSerializer.Serialize(fc.Arguments),
+                        IsUITool = uiToolCalls.Any(u => u.CallId == fc.CallId),
                     }).ToMList()
                 }.Save();
 
@@ -213,7 +252,8 @@ public class ChatbotController : Controller
                 foreach (var item in answer.ToolCalls)
                 {
                     await resp.WriteAsync("\n");
-                    await resp.WriteAsync(UINotification(ChatbotUICommand.AssistantTool, item.ToolId + "/" + item.CallId), ct);
+                    var cmd = item.IsUITool ? ChatbotUICommand.AssistantUITool : ChatbotUICommand.AssistantTool;
+                    await resp.WriteAsync(UINotification(cmd, item.ToolId + "/" + item.CallId), ct);
                     await resp.WriteAsync(item.Arguments, ct);
                 }
 
@@ -226,6 +266,10 @@ public class ChatbotController : Controller
                 if (toolCalls.IsEmpty())
                     break;
 
+                // If a UITool was invoked, close the stream — the client will resume via a new ask request
+                if (uiToolCalls.Any())
+                    goto doneWithTools;
+
                 foreach (var funCall in toolCalls)
                 {
                     await resp.WriteAsync(UINotification(ChatbotUICommand.Tool, funCall.Name + "/" + funCall.CallId), ct);
@@ -235,8 +279,9 @@ public class ChatbotController : Controller
                     {
                         AITool tool = ChatbotSkillLogic.AllTools.Value.GetOrThrow(funCall.Name);
                         var obj = await ((AIFunction)tool).InvokeAsync(new AIFunctionArguments(funCall.Arguments), ct);
-                        string toolResponse = JsonSerializer.Serialize(obj);
                         toolSw.Stop();
+
+                        string toolResponse = JsonSerializer.Serialize(obj);
                         var toolMsg = new ChatMessageEntity()
                         {
                             ChatSession = history.Session.ToLite(),
@@ -283,6 +328,7 @@ public class ChatbotController : Controller
                 }
             }
 
+            doneWithTools:
             history.Session.Save();
 
             if (history.Session.Title == null || history.Session.Title.StartsWith("!*$"))
@@ -398,6 +444,7 @@ public enum ChatbotUICommand
     MessageId,
     AssistantAnswer,
     AssistantTool,
+    AssistantUITool,
     Tool,
     Exception,
 }

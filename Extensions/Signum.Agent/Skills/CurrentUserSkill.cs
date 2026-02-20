@@ -32,7 +32,7 @@ public class CurrentUserSkill : ChatbotSkill
             UserId: userLite.Id.ToString(),
             UserLiteKey: userLite.Key(),
             UserName: user.UserName,
-            UserRole: user.Role.ToString(),
+            UserRole: user.Role.ToString()!,
             CurrentCulture: CultureInfo.CurrentCulture.Name,
             CurrentUICulture: CultureInfo.CurrentUICulture.Name
         );

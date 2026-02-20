@@ -191,6 +191,15 @@ public enum SkillActivation
     Lazy,
 }
 
+/// <summary>
+/// Marks a [McpServerTool] method as a UI tool: the server never invokes its body.
+/// Instead the controller detects this attribute before calling InvokeAsync and routes
+/// the call to the client via the $!AssistantUITool streaming command.
+/// The method body must throw InvalidOperationException("This method should not be called on the server").
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class UIToolAttribute : Attribute { }
+
 public static partial class SignumMcpServerBuilderExtensions
 {
     public static IMcpServerBuilder WithSignumSkill(this IMcpServerBuilder builder, ChatbotSkill skill)

@@ -9,6 +9,12 @@ import { ChatMessageEntity, ChatSessionEntity } from '../Signum.Agent';
 import { SearchControl } from 'Signum/React/Search';
 import HtmlEditorLine from '../../Signum.HtmlEditor/HtmlEditorLine';
 import Markdown from 'react-markdown';
+import {
+  FormatJson,
+  looksLikeJson, 
+  MarkdownOrJson, 
+  tryParseJsonString } from '../Message';
+import { ChatbotClient } from '../ChatbotClient';
 
 
 export default function ChatMessage(p: { ctx: TypeContext<ChatMessageEntity> }): React.JSX.Element {
@@ -67,16 +73,18 @@ export default function ChatMessage(p: { ctx: TypeContext<ChatMessageEntity> }):
             <EntityLine ctx={ctx4.subCtx(n => n.exception)} />
           </div>
         </div>
-        <pre >{ctx4.value.content}</pre>
+        <MarkdownOrJson content={ctx4.value.content}/>
       </> : <>
         <FormGroup ctx={ctx4.subCtx(n => n.content)}>
-          {id => <Markdown components={{ a: LinkRenderer }}>{ctx4.value.content}</Markdown>}
+          {id => ctx4.value.content && ChatbotClient.renderMarkdown(ctx4.value.content)}
         </FormGroup>
         {ctx.value.role == "Assistant" && ctx4.value.toolCalls.length > 0 &&
           <EntityTable ctx={ctx4.subCtx(n => n.toolCalls)} columns={[
             { property: a => a.callId },
             { property: a => a.toolId },
-            { property: a => a.arguments, template: ctx => <pre >{ctx.value.arguments}</pre> },
+            {
+              property: a => a.arguments, template: ctx => <MarkdownOrJson content={ctx.value.arguments}/>
+            },
           ]} />
         }
         {ctx.value.role == "Assistant" && (ctx.value.userFeedback != null || ctx.value.userFeedbackMessage != null) && (

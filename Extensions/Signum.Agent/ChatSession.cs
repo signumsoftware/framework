@@ -108,6 +108,8 @@ public class ToolCallEmbedded : EmbeddedEntity
 
     [StringLengthValidator(MultiLine = true)]
     public string Arguments { get; set; }
+
+    public bool IsUITool { get; set; }
 }
 
 public enum ChatMessageRole

@@ -64,16 +64,35 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
     forceUpdate();
   }
 
-  async function handleCreateRequestAsync() {
+  const sendToolResponse = React.useCallback(async function sendToolResponse(toolCall: ToolCallEmbedded, json: unknown) {
 
-    if (questionRef.current.trim().length == 0)
+    if (isLoadingRef.current) {
+      console.error("sendToolResponse called twice")
       return;
+    }
 
     isLoadingRef.current = true;
     forceUpdate();
 
-    const r = await ChatbotClient.API.ask(questionRef.current, currentSessionRef?.current?.id, undefined).catch(error => { });
+    try {
 
+      var content = JSON.stringify(json);
+
+      const r = await ChatbotClient.API.ask(content, {
+        sessionId: currentSessionRef?.current?.id, 
+        toolId: toolCall.toolId,
+        callId: toolCall.callId,
+      }, undefined);
+      
+      await processStream(r!);
+    }
+    finally {
+      isLoadingRef.current = false;
+      forceUpdate();
+    }
+  }, []);
+
+  async function processStream(r: Response) {
     const reader = r!.body!.getReader();
 
     try {
@@ -102,7 +121,6 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
               break;
             }
             case "QuestionId": {
-
               messagesRef.current!.push({
                 msg: ChatMessageEntity.New({
                   id: ChatMessageEntity.parseId(args!),
@@ -114,10 +132,12 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
                 }),
                 toolResponses: 0
               });
+              questionRef.current = "";
               break;
             }
 
             case "Tool": {
+              debugger;
               setAnswer("Tool", args!.before("/"), args!.after("/"));
               break;
             }
@@ -134,12 +154,23 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
                 toolId: args!.before("/"),
                 callId: args!.after("/"),
                 arguments: "",
+                isUITool: false,
               })));
               break;
             }
+            case "AssistantUITool": {
+              answerRef.current!.toolCalls.push(newMListElement(ToolCallEmbedded.New({
+                toolId: args!.before("/"),
+                callId: args!.after("/"),
+                arguments: "",
+                isUITool: true,
+              })));
+              break;
+            }
+
             case "Exception": {
 
-              if (answerRef.current){
+              if (answerRef.current) {
                 answerRef.current!.exception = newLite(ExceptionEntity, args!, "");
               }
               else
@@ -154,6 +185,17 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
               answerRef.current!.isNew = false;
 
               addMessage(messagesRef.current!, answerRef.current!);
+
+              // After finalizing an assistant message, check for a UITool call.
+              // All arguments have been streamed at this point.
+              const toolCall = answerRef.current!.toolCalls.lastOrNull()?.element;
+              if (toolCall?.isUITool) {
+
+                var uiTool = ChatbotClient.getUITool(toolCall.toolId);
+                if (uiTool && uiTool.handleDirectly) {
+                  uiTool.handleDirectly(toolCall, sendToolResponse);
+                }
+              }
 
               answerRef.current = null;
 
@@ -192,6 +234,22 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 
     }
     finally {
+      forceUpdate();
+    }
+  }
+
+  async function handleCreateRequestAsync() {
+    if (questionRef.current.trim().length == 0)
+      return;
+
+    isLoadingRef.current = true;
+    forceUpdate();
+
+    try {
+      const r = await ChatbotClient.API.ask(questionRef.current, { sessionId: currentSessionRef?.current?.id }, undefined).catch(error => { });
+      await processStream(r!);
+    }
+    finally {
       isLoadingRef.current = false;
       forceUpdate();
     }
@@ -213,9 +271,11 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
         </React.Suspense>
       </h4>
       {/* Chat History */}
-      <div className="chat-history flex-grow-1 p-3 pt-0">
-        {messagesRef.current?.map(a => <Message key={a.msg.id} msg={a.msg} toolResponses={a.toolResponses} />)}
-        {answerRef.current && <Message msg={answerRef.current} toolResponses={0} />}
+      <div className="chat-history flex-grow-1 p-3 pt-0" ref={scrollRef}>
+        {messagesRef.current?.map(a =>
+          <Message key={a.msg.id} msg={a.msg} toolResponses={a.toolResponses} sendToolResponse={sendToolResponse} />
+        )}
+        {answerRef.current && <Message msg={answerRef.current} toolResponses={0} sendToolResponse={sendToolResponse} />}
       </div>
 
       {/* Input */}
@@ -223,9 +283,9 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
         <textarea
           className="form-control me-2"
           rows={2}
-          placeholder={ChatbotMessage.TypeAMessage.niceToString()}
+          placeholder={messagesRef.current?.lastOrNull()?.msg.toolCalls.some(a => a.element.isUITool) ? "Answer above please" : ChatbotMessage.TypeAMessage.niceToString()}
           value={questionRef.current}
-          disabled={isLoadingRef.current || messagesRef.current == undefined}
+          disabled={isLoadingRef.current || messagesRef.current == undefined || messagesRef.current.lastOrNull()?.msg.toolCalls.some(a=>a.element.isUITool) == true}
           onChange={(e) => { questionRef.current = e.target.value; forceUpdate() }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -252,12 +312,14 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 }
 
 function addMessage(list: MessageCount[], msg: ChatMessageEntity) {
-  const pair = msg.toolCallID ? list.lastOrNull(a => a.msg.role == "Assistant" && a.msg.toolCalls.some(tc => tc.element.callId == msg.toolCallID)) : null;
+  
+  debugger;
+  const pair = msg.toolCallID ? list.lastOrNull(a => a.msg.role == "Assistant" && a.msg.toolCalls.some(tc => tc.element.callId == msg.toolCallID)) ?? null : null;
 
   const tools = pair?.msg.toolCalls.singleOrNull(a => a.element.callId == msg.toolCallID);
 
   if (tools == null)
-    list.push({ msg, toolResponses: 0 });
+    list.push({ msg, toolResponses: 0 } satisfies MessageCount);
   else {
     tools.element._response = msg;
     pair!.toolResponses++;
