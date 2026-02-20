@@ -276,12 +276,12 @@ export interface QuickLinkContext<T extends Entity> {
 
 
 
-const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeColor: BsColor }, ref: React.Ref<HTMLAnchorElement>) {
+function QuickLinkToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeColor: BsColor, ref?: React.Ref<HTMLAnchorElement> }) {
 
 
   return (
     <LinkButton
-      ref={ref}
+      ref={p.ref}
       className={classes("badge badge-pill sf-quicklinks", "text-bg-" + p.badgeColor)}
       title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
       data-toggle="dropdown"
@@ -289,7 +289,7 @@ const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: Re
       {p.content}
     </LinkButton>
   );
-});
+}
 
 export interface QuickLinkGroup {
   name: string;

@@ -20,6 +20,7 @@ import { TimeMachineColors } from '../Lines/TimeMachineIcon'
 import { LinkButton } from '../Basics/LinkButton'
 
 export interface SearchValueProps {
+  ref?: React.Ref<SearchValueController>;
   ctx?: StyleContext;
   id?: string;
   valueToken?: string | QueryTokenString<any> | QueryToken;
@@ -73,8 +74,7 @@ function getQueryRequestValue(fo: FindOptionsParsed, valueToken?: string | Query
   };
 }
 
-const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefAttributes<SearchValueController>> =
-  React.forwardRef(function SearchValue(p: SearchValueProps, ref: React.Ref<SearchValueController>): React.ReactNode | null {
+function SearchValue(p: SearchValueProps): React.ReactNode | null {
 
     const fo = p.findOptions;
 
@@ -194,7 +194,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
 
 
 
-    React.useImperativeHandle(ref, () => controller, []);
+    React.useImperativeHandle(p.ref, () => controller, []);
 
     function isNumeric() {
       let token = valueToken;
@@ -456,7 +456,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
             p.onExplored();
         });
     }
-  });
+  }
 
 
 (SearchValue as any).defaultProps = {

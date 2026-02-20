@@ -24,8 +24,7 @@ import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Qu
 import { QueryToken, SubTokensOptions } from '@framework/QueryToken'
 import { LinkButton } from '@framework/Basics/LinkButton'
 
-export const Predictor: React.ForwardRefExoticComponent<{ ctx: TypeContext<PredictorEntity> } & React.RefAttributes<IRenderButtons>> =
-  React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<PredictorEntity> }, ref: React.Ref<IRenderButtons>): React.ReactElement {
+export function Predictor({ ctx, ref }: { ctx: TypeContext<PredictorEntity>, ref?: React.Ref<IRenderButtons> }): React.ReactElement {
 
     const p = ctx.value;
     const queryDescription = useAPI(() => !p.mainQuery.query ? Promise.resolve(null) :
@@ -244,7 +243,7 @@ export const Predictor: React.ForwardRefExoticComponent<{ ctx: TypeContext<Predi
         </Tabs>
       </div>
     );
-  });
+}
 
 export default Predictor;
 
