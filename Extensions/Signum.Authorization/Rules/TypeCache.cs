@@ -177,12 +177,23 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
 
                 return TypeLogic.TypeToEntity.GetOrThrow(type);
             },
-            parseAllowed: e =>
+            parseAllowed: (e, resource) =>
             {
-                return new WithConditions<TypeAllowed>(fallback: e.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>(),
-                    conditionRules: e.Elements("Condition").Select(xc => new ConditionRule<TypeAllowed>(
-                        typeConditions: xc.Attribute("Name")!.Value.SplitNoEmpty(",").Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToFrozenSet(),
-                        allowed: xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>())).ToReadOnly());
+                var type = resource.ToType();
+
+                var fallback = e.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>();
+
+                var conditionRules = (from xc in e.Elements("Condition")
+                                      let tcs = xc.Attribute("Name")!.Value.SplitNoEmpty(",")
+                                      .Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim())))
+                                      .NotNull()
+                                      .Where(tc => TypeConditionLogic.IsDefined(type, tc) || !SafeConsole.Ask($"Type condition {tc} is not defined. Remove it?"))
+                                      .ToFrozenSet()
+                                      where tcs.Count > 0
+                                      select new ConditionRule<TypeAllowed>(typeConditions: tcs, allowed: xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>()))
+                                      .ToReadOnly();
+
+                return new WithConditions<TypeAllowed>(fallback: fallback, conditionRules: conditionRules);
             });
     }
 

@@ -155,8 +155,9 @@ public static class MusicLogic
                 e.Name
             });
 
+        if (Connector.Current.SupportsVectors)
         sb.Include<SimplePassageEntity>()
-            .WithVectorIndex(a => a.Embedding, vti =>
+            .WithVectorIndex(a=>a.Embedding, vti =>
             {
                 if (Connector.Current is SqlServerConnector)
                     vti.DelayCreation = true;

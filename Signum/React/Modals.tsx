@@ -2,6 +2,7 @@ import * as AppContext from './AppContext';
 import * as React from 'react'
 import { useForceUpdatePromise, useStateWithPromise, useUpdatedRef} from './Hooks';
 import { useLocation } from 'react-router';
+import './Modals.css';
 
 declare global {
   interface KeyboardEvent {
