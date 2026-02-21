@@ -361,7 +361,13 @@ public class ConversationHistory
 
     public List<ChatMessage> GetMessages()
     {
-        return Messages.Select(m => ToChatMessage(m)).ToList();
+        var provider = ChatbotLogic.ChatbotModelProviders.GetOrThrow(LanguageModel.Provider);
+        return Messages.Select(m =>
+        {
+            var msg = ToChatMessage(m);
+            provider.CustomizeMessage(msg);
+            return msg;
+        }).ToList();
     }
 
     ChatMessage ToChatMessage(ChatMessageEntity c)

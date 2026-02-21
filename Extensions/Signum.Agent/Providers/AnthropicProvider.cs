@@ -31,6 +31,15 @@ public class AnthropicProvider : IChatbotModelProvider
         return client;
     }
 
+    public void CustomizeMessage(ChatMessage message)
+    {
+        if (message.Role == ChatRole.System)
+        {
+            message.AdditionalProperties ??= new AdditionalPropertiesDictionary();
+            message.AdditionalProperties["cache_control"] = new { type = "ephemeral" };
+        }
+    }
+
     private static string GetApiKey()
     {
         var apiKey = ChatbotLogic.GetConfig().AnthropicAPIKey;
