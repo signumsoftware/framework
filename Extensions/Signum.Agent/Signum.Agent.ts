@@ -54,6 +54,8 @@ export namespace ChatbotMessage {
   export const UnableToChangeModelOrProviderOnceUsed: MessageKey = new MessageKey("ChatbotMessage", "UnableToChangeModelOrProviderOnceUsed");
   export const WhatWentWrong: MessageKey = new MessageKey("ChatbotMessage", "WhatWentWrong");
   export const ProvideFeedback: MessageKey = new MessageKey("ChatbotMessage", "ProvideFeedback");
+  export const Price: MessageKey = new MessageKey("ChatbotMessage", "Price");
+  export const TotalPrice: MessageKey = new MessageKey("ChatbotMessage", "TotalPrice");
 }
 
 export namespace ChatbotPermission {

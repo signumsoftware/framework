@@ -141,6 +141,8 @@ public enum ChatbotMessage
     WhatWentWrong,
     [Description("Provide feedback")]
     ProvideFeedback,
+    Price,
+    TotalPrice,
 }
 
 [AutoInit]

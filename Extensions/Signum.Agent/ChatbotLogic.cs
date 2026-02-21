@@ -208,17 +208,12 @@ public static class ChatbotLogic
                 e.Role,
                 e.ToolID,
                 e.Content,
-                e.LanguageModel,
-                e.InputTokens,
-                e.CachedInputTokens,
-                e.OutputTokens,
-                e.ReasoningOutputTokens,
-                e.Duration,
                 e.Exception,
                 e.ChatSession,
-                e.UserFeedback,
-                Price = e.Price(),
             });
+
+        QueryLogic.Expressions.Register((ChatMessageEntity cm) => cm.Price(), ChatbotMessage.Price);
+        QueryLogic.Expressions.Register((ChatSessionEntity cm) => cm.TotalPrice(), ChatbotMessage.TotalPrice);
 
         PermissionLogic.RegisterTypes(typeof(ChatbotPermission));
 
@@ -345,6 +340,8 @@ public interface IChatbotModelProvider
     Task<List<string>> GetModelNames(CancellationToken ct);
 
     IChatClient CreateChatClient(ChatbotLanguageModelEntity model);
+
+    void CustomizeMessage(ChatMessage message) { }
 }
 
 public interface IEmbeddingsProvider

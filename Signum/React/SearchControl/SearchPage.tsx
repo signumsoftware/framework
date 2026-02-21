@@ -8,6 +8,7 @@ import SearchControl, { SearchControlHandler } from './SearchControl'
 import { useTitle } from '../AppContext'
 import { QueryString } from '../QueryString'
 import { useAPI, useForceUpdate } from '../Hooks'
+import { usePageUIState } from '../Modals'
 
 
 function SearchPage(): React.ReactElement {
@@ -17,6 +18,13 @@ function SearchPage(): React.ReactElement {
   const fo = Finder.parseFindOptionsPath(params.queryName!, QueryString.parse(location.search));
   const qd = useAPI(() => Finder.getQueryDescription(fo.queryName), [fo.queryName]);
   const forceUpdate = useForceUpdate();
+
+  usePageUIState(() => {
+    const scl = searchControl.current?.searchControlLoaded;
+    if (scl)
+      return { name: "SearchPage", context: Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, scl.props.defaultIncudeDefaultFilters) };
+    return { name: "SearchPage", context: fo };
+  });
   
 
   React.useEffect(() => {

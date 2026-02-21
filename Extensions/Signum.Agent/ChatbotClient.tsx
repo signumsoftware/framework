@@ -5,6 +5,8 @@ import { Navigator, EntitySettings } from '@framework/Navigator'
 import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, LanguageModelProviderSymbol, EmbeddingsLanguageModelEntity, ToolCallEmbedded, UserFeedback } from './Signum.Agent'
 import { toAbsoluteUrl } from '../../Signum/React/AppContext';
 import { Dic } from '@framework/Globals';
+import { Finder } from '@framework/Finder';
+import { MarkdownOrJson } from './Message';
 
 const ChatMarkdown = React.lazy(() => import("./Templates/ChatMarkdown"));
 
@@ -18,6 +20,8 @@ export namespace ChatbotClient {
     Navigator.addSettings(new EntitySettings(EmbeddingsLanguageModelEntity, e => import('./Templates/EmbeddingsLanguageModel')));
     Navigator.addSettings(new EntitySettings(ChatSessionEntity, a => import('./Templates/ChatSession')));
     Navigator.addSettings(new EntitySettings(ChatMessageEntity, a => import('./Templates/ChatMessage')));
+
+    Finder.registerPropertyFormatter(ChatMessageEntity.tryPropertyRoute(a => a.content), new Finder.CellFormatter((cell, ctx, column) => cell &&  <MarkdownOrJson content={cell}  />, true));
   }
 
   export namespace API {

@@ -4,6 +4,32 @@ import { useForceUpdatePromise, useStateWithPromise, useUpdatedRef} from './Hook
 import { useLocation } from 'react-router';
 import './Modals.css';
 
+export interface UIState {
+  name: string;
+  context: unknown;
+}
+
+let currentGetPageUIState: (() => UIState) | null = null;
+
+export namespace GlobalModalManager {
+  export function getPageUIState(): UIState | null {
+    return currentGetPageUIState?.() ?? null;
+  }
+}
+
+export function usePageUIState(getState: () => UIState): void {
+  const getStateRef = useUpdatedRef(getState);
+
+  React.useEffect(() => {
+    const fn = () => getStateRef.current();
+    currentGetPageUIState = fn;
+    return () => {
+      if (currentGetPageUIState === fn)
+        currentGetPageUIState = null;
+    };
+  }, []);
+}
+
 declare global {
   interface KeyboardEvent {
     openedModals?: boolean;
