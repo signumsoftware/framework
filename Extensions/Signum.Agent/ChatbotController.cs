@@ -182,6 +182,7 @@ public class ChatbotController : Controller
                 var options = ChatbotLogic.ChatOptions(history.LanguageModel, tools);
 
                 var messages = history.GetMessages();
+                ChatbotLogic.GetProvider(history.LanguageModel).CustomizeMessagesAndOptions(messages, options);
                 List<ChatResponseUpdate> updates = [];
                 var sw = Stopwatch.StartNew();
                 await foreach (var update in client.GetStreamingResponseAsync(messages, options, ct))

@@ -1,14 +1,6 @@
 using Anthropic.SDK;
-using Anthropic.SDK.Constants;
-using Anthropic.SDK.Models;
+using Anthropic.SDK.Messaging;
 using Microsoft.Extensions.AI;
-using OpenAI.Embeddings;
-using Signum.Utilities.Synchronization;
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
 
 namespace Signum.Agent.Providers;
 
@@ -31,13 +23,23 @@ public class AnthropicProvider : IChatbotModelProvider
         return client;
     }
 
-    public void CustomizeMessage(ChatMessage message)
+    public void CustomizeMessagesAndOptions(List<ChatMessage> messages, ChatOptions options)
     {
-        if (message.Role == ChatRole.System)
-        {
-            message.AdditionalProperties ??= new AdditionalPropertiesDictionary();
-            message.AdditionalProperties["cache_control"] = new { type = "ephemeral" };
-        }
+        var systemMessages = messages
+            .Where(m => m.Role == ChatRole.System)
+            .Select(m => new SystemMessage(string.Concat(m.Contents.OfType<TextContent>().Select(tc => tc.Text)))
+            {
+                CacheControl = new CacheControl { Type = CacheControlType.ephemeral }
+            })
+            .ToList();
+
+        if (systemMessages.Count == 0)
+            return;
+
+        // Remove system messages from the list so ChatClientHelper doesn't re-add them without CacheControl
+        messages.RemoveAll(m => m.Role == ChatRole.System);
+
+        options.RawRepresentationFactory = _ => new MessageParameters { System = systemMessages };
     }
 
     private static string GetApiKey()

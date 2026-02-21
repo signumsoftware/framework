@@ -296,10 +296,14 @@ public static class ChatbotLogic
         return EmbeddingsProviders.GetOrThrow(provider).GetEmbeddingModelNames(ct);
     }
 
+    public static IChatbotModelProvider GetProvider(ChatbotLanguageModelEntity model)
+    {
+        return ChatbotModelProviders.GetOrThrow(model.Provider);
+    }
+
     public static IChatClient GetChatClient(ChatbotLanguageModelEntity model)
     {
-        var result = ChatbotModelProviders.GetOrThrow(model.Provider).CreateChatClient(model);
-        return result;
+        return GetProvider(model).CreateChatClient(model);
     }
 
     public static Task<List<float[]>> GetEmbeddingsAsync(this EmbeddingsLanguageModelEntity model, string[] inputs, CancellationToken ct)
@@ -341,7 +345,7 @@ public interface IChatbotModelProvider
 
     IChatClient CreateChatClient(ChatbotLanguageModelEntity model);
 
-    void CustomizeMessage(ChatMessage message) { }
+    void CustomizeMessagesAndOptions(List<ChatMessage> messages, ChatOptions options) { }
 }
 
 public interface IEmbeddingsProvider
@@ -361,13 +365,7 @@ public class ConversationHistory
 
     public List<ChatMessage> GetMessages()
     {
-        var provider = ChatbotLogic.ChatbotModelProviders.GetOrThrow(LanguageModel.Provider);
-        return Messages.Select(m =>
-        {
-            var msg = ToChatMessage(m);
-            provider.CustomizeMessage(msg);
-            return msg;
-        }).ToList();
+        return Messages.Select(m => ToChatMessage(m)).ToList();
     }
 
     ChatMessage ToChatMessage(ChatMessageEntity c)
