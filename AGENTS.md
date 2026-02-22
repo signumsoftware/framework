@@ -74,6 +74,16 @@ End-user messages MUST be localized:
   }
   // Usage: YourMessage.MyFavoriteFoodIs0.NiceToString("Tom Yum Soup")
   ```
+- **Enum key naming rule:** The enum key must be the PascalCase of the full `[Description]` sentence (ignoring punctuation and format placeholders). This is critical because the translation system keys translations by enum name — if the description changes without changing the key, existing translations silently become stale.
+  ```cs
+  // ✅ Good — key matches the description
+  [Description("My favorite food is {0}")]
+  MyFavoriteFoodIs0,
+
+  // ❌ Bad — key is too short; a description change won't invalidate old translations
+  [Description("My favorite food is {0}")]
+  FavoriteFood,
+  ```
 
 ### Validation
 - Use declarative validators: `[StringLengthValidator]`, `[NotNullValidator]`, `[TelephoneValidator]`, etc.
