@@ -49,7 +49,7 @@ public static class ChatbotLogic
         { LanguageModelProviders.Gemini, new GeminiProvider()},
         { LanguageModelProviders.Anthropic, new AnthropicProvider()},
         { LanguageModelProviders.GithubModels, new GithubModelsProvider()},
-        { LanguageModelProviders.Mistral, new MistralProvider()}, 
+        { LanguageModelProviders.Mistral, new MistralProvider()},
         { LanguageModelProviders.Ollama, new OllamaProvider()},
         { LanguageModelProviders.DeepSeek, new DeepSeekProvider()},
     };
@@ -90,7 +90,7 @@ public static class ChatbotLogic
                 if (!m.IsNew && Database.Query<ChatMessageEntity>().Any(a => a.LanguageModel.Is(m)))
                 {
                     var inDb = m.InDB(a => new { a.Model, a.Provider });
-                    if (inDb.Model != m.Model || inDb.Provider.Is(m.Provider))
+                    if (inDb.Model != m.Model || !inDb.Provider.Is(m.Provider))
                     {
                         throw new ArgumentNullException(ChatbotMessage.UnableToChangeModelOrProviderOnceUsed.NiceToString());
                     }
