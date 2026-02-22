@@ -212,6 +212,13 @@ public static class ChatbotLogic
                 e.ChatSession,
             });
 
+
+        new Graph<ChatMessageEntity>.Delete(ChatMessageOperation.Delete)
+        {
+            CanDelete = m => m.ChatSession.InDB(s => s.Messages().OrderByDescending(a=>a.CreationDate).Last().ToLite()).Is(m) ? null : ChatbotMessage.MessageMustBeTheLastToDelete.NiceToString(),
+            Delete = (e, _) => { e.Delete(); },
+        }.Register();
+
         QueryLogic.Expressions.Register((ChatMessageEntity cm) => cm.Price(), ChatbotMessage.Price);
         QueryLogic.Expressions.Register((ChatSessionEntity cm) => cm.TotalPrice(), ChatbotMessage.TotalPrice);
 

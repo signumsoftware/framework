@@ -2,6 +2,7 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxGet, ajaxPost, wrapRequest, AjaxOptions } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, LanguageModelProviderSymbol, EmbeddingsLanguageModelEntity, ToolCallEmbedded, UserFeedback } from './Signum.Agent'
 import { toAbsoluteUrl } from '../../Signum/React/AppContext';
 import { Dic } from '@framework/Globals';
@@ -12,7 +13,7 @@ const ChatMarkdown = React.lazy(() => import("./Templates/ChatMarkdown"));
 
 export namespace ChatbotClient {
 
-  export let renderMarkdown = (markdown: string): React.JSX.Element => <ChatMarkdown content={markdown}/>;
+  export let renderMarkdown = (markdown: string): React.JSX.Element => <ChatMarkdown content={markdown} />;
   //export let renderMarkdown = (markdown: string): React.JSX.Element => <ReactMarkdownWithFormulas>{markdown}</ReactMarkdownWithFormulas>;
   export function start(options: { routes: RouteObject[] }): void {
 
@@ -20,8 +21,21 @@ export namespace ChatbotClient {
     Navigator.addSettings(new EntitySettings(EmbeddingsLanguageModelEntity, e => import('./Templates/EmbeddingsLanguageModel')));
     Navigator.addSettings(new EntitySettings(ChatSessionEntity, a => import('./Templates/ChatSession')));
     Navigator.addSettings(new EntitySettings(ChatMessageEntity, a => import('./Templates/ChatMessage')));
+    Finder.registerPropertyFormatter(ChatMessageEntity.tryPropertyRoute(a => a.content), new Finder.CellFormatter((cell, ctx, column) => cell && <MarkdownOrJson content={cell} />, true));
+  
+    AppContext.clearSettingsActions.push(() => uiToolRegistry.clear());
+  }
 
-    Finder.registerPropertyFormatter(ChatMessageEntity.tryPropertyRoute(a => a.content), new Finder.CellFormatter((cell, ctx, column) => cell &&  <MarkdownOrJson content={cell}  />, true));
+  const uiToolRegistry = new Map<string, UITool>();
+
+  export function registerUITool(tool: UITool, override = false): void {
+    if (uiToolRegistry.has(tool.uiToolName) && !override)
+      throw new Error(`UITool '${tool.uiToolName}' is already registered.`);
+    uiToolRegistry.set(tool.uiToolName, tool);
+  }
+
+  export function getUITool(uiToolName: string): UITool | undefined {
+    return uiToolRegistry.get(uiToolName);
   }
 
   export namespace API {
@@ -70,33 +84,20 @@ export namespace ChatbotClient {
     }
   }
 
-  
-
-  const uiToolRegistry = new Map<string, UITool>();
-
-  export function registerUITool(tool: UITool, override = false): void {
-    if (uiToolRegistry.has(tool.uiToolName) && !override)
-      throw new Error(`UITool '${tool.uiToolName}' is already registered.`);
-    uiToolRegistry.set(tool.uiToolName, tool);
-  }
-
-  export function getUITool(uiToolName: string): UITool |undefined {
-    return uiToolRegistry.get(uiToolName);
-  }
 }
 
-  // UI Tool registry
-  //
-  // Subclass UITool and implement either:
-  //  • handleDirectly() — resolves automatically without showing anything in the chat
-  //                       (e.g. GetUIContext just reads browser state and calls sendToolResponse)
-  //  • renderWidget()   — renders a React widget inline in the conversation;
-  //                       call sendToolResponse() from the widget when the user responds.
-  //
-  export abstract class UITool {
-    abstract uiToolName: string;
+// UI Tool registry
+//
+// Subclass UITool and implement either:
+//  • handleDirectly() — resolves automatically without showing anything in the chat
+//                       (e.g. GetUIContext just reads browser state and calls sendToolResponse)
+//  • renderWidget()   — renders a React widget inline in the conversation;
+//                       call sendToolResponse() from the widget when the user responds.
+//
+export abstract class UITool {
+  abstract uiToolName: string;
 
-    handleDirectly?(call: ToolCallEmbedded, sendToolResponse: (call: ToolCallEmbedded, response: unknown) => void): Promise<void>;
+  handleDirectly?(call: ToolCallEmbedded, sendToolResponse: (call: ToolCallEmbedded, response: unknown) => void): Promise<void>;
 
-    renderWidget?(call: ToolCallEmbedded, sendToolResponse: (call: ToolCallEmbedded, response: unknown) => void): React.ReactElement;
-  }
+  renderWidget?(call: ToolCallEmbedded, sendToolResponse: (call: ToolCallEmbedded, response: unknown) => void): React.ReactElement;
+}

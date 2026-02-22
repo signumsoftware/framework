@@ -98,6 +98,12 @@ public class ChatMessageEntity : Entity
     }
 }
 
+[AutoInit]
+public static class ChatMessageOperation
+{
+    public static readonly DeleteSymbol<ChatMessageEntity> Delete;
+}
+
 public class ToolCallEmbedded : EmbeddedEntity
 {
     [StringLengthValidator(Max = 100)]
@@ -143,6 +149,8 @@ public enum ChatbotMessage
     ProvideFeedback,
     Price,
     TotalPrice,
+    AnswerAbovePlease,
+    MessageMustBeTheLastToDelete,
 }
 
 [AutoInit]

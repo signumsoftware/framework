@@ -255,6 +255,8 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
     }
   }
 
+   const waitingForWidget = messagesRef.current?.lastOrNull()?.msg.toolCalls.some(a => a.element.isUITool && ChatbotClient.getUITool(a.element.toolId)?.renderWidget) == true;
+
   return (
     <div className="chat-modal">
       {/* Header */}
@@ -283,9 +285,9 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
         <textarea
           className="form-control me-2"
           rows={2}
-          placeholder={messagesRef.current?.lastOrNull()?.msg.toolCalls.some(a => a.element.isUITool) ? "Answer above please" : ChatbotMessage.TypeAMessage.niceToString()}
+          placeholder={waitingForWidget ? ChatbotMessage.AnswerAbovePlease.niceToString() : ChatbotMessage.TypeAMessage.niceToString()}
           value={questionRef.current}
-          disabled={isLoadingRef.current || messagesRef.current == undefined || messagesRef.current.lastOrNull()?.msg.toolCalls.some(a=>a.element.isUITool) == true}
+          disabled={isLoadingRef.current || messagesRef.current == undefined || waitingForWidget}
           onChange={(e) => { questionRef.current = e.target.value; forceUpdate() }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {

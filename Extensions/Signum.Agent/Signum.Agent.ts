@@ -56,6 +56,8 @@ export namespace ChatbotMessage {
   export const ProvideFeedback: MessageKey = new MessageKey("ChatbotMessage", "ProvideFeedback");
   export const Price: MessageKey = new MessageKey("ChatbotMessage", "Price");
   export const TotalPrice: MessageKey = new MessageKey("ChatbotMessage", "TotalPrice");
+  export const AnswerAbovePlease: MessageKey = new MessageKey("ChatbotMessage", "AnswerAbovePlease");
+  export const MessageMustBeTheLastToDelete: MessageKey = new MessageKey("ChatbotMessage", "MessageMustBeTheLastToDelete");
 }
 
 export namespace ChatbotPermission {
@@ -94,6 +96,10 @@ export interface ChatMessageEntity extends Entities.Entity {
   duration: string /*TimeSpan*/ | null;
   userFeedback: UserFeedback | null;
   userFeedbackMessage: string | null;
+}
+
+export namespace ChatMessageOperation {
+  export const Delete : Operations.DeleteSymbol<ChatMessageEntity> = registerSymbol("Operation", "ChatMessageOperation.Delete");
 }
 
 export const ChatMessageRole: EnumType<ChatMessageRole> = new EnumType<ChatMessageRole>("ChatMessageRole");

@@ -27,7 +27,7 @@ public class AnthropicProvider : IChatbotModelProvider
     {
         var systemMessages = messages
             .Where(m => m.Role == ChatRole.System)
-            .Select(m => new SystemMessage(string.Concat(m.Contents.OfType<TextContent>().Select(tc => tc.Text)))
+            .Select(m => new SystemMessage(string.Concat(m.Contents.OfType<Microsoft.Extensions.AI.TextContent>().Select(tc => tc.Text)))
             {
                 CacheControl = new CacheControl { Type = CacheControlType.ephemeral }
             })
