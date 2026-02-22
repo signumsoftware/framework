@@ -55,7 +55,7 @@ export default function FramePage(): React.ReactElement {
 
   useTitle(getToString(state?.pack.entity) ?? "", [state?.pack.entity]);
 
-  usePageUIState(() => ({ name: "FramePage", context: state?.pack }));
+  usePageUIState(() => ({ name: "FramePage", context: state?.pack ?? null }));
 
   useLooseChanges(state && !state.executing ? ({ entity: state.pack.entity, lastEntity: state.lastEntity }) : undefined);
 

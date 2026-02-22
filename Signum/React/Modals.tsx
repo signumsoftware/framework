@@ -21,11 +21,11 @@ export interface IHandleKeyboard {
 
 export interface UIState {
   name: string;
-  context: unknown;
+  context: unknown | null;
 }
 
 export interface IGetUIState {
-  getUIState?: () => UIState | null;
+  getUIState?: () => UIState;
 }
 
 export interface GlobalModalContainerState {
@@ -182,10 +182,10 @@ export namespace GlobalModalContainer {
     return currentGetPageUIState?.() ?? null;
   }
 
-  export function getModalUIStates(): (UIState | null)[] {
+  export function getModalUIStates(): (UIState| null)[] {
     return modalInstances
       .map(inst => FunctionalAdapter.innerRef(inst))
-      .map(inst => inst.getUIState?());
+      .map(inst => inst.getUIState?() ?? null);
   }
 }
 

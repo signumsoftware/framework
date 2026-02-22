@@ -23,7 +23,7 @@ function SearchPage(): React.ReactElement {
     const scl = searchControl.current?.searchControlLoaded;
     if (scl)
       return { name: "SearchPage", context: Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, scl.props.defaultIncudeDefaultFilters) };
-    return { name: "SearchPage", context: fo };
+    return { name: "SearchPage", context: null };
   });
   
 
