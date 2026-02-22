@@ -10,9 +10,11 @@ The first step is to identify the root query.
 
 Sometimes this could be tricky, for example if the user asks for "Best products last month", the root may not be "Product", but maybe "Order", "OrderLine" or "Invoice".
 
-Here are the tables that can be use as root query in format "QueryName: DisplayName"; 
+Here are some tables that can be use as root query grouped by namespace; 
 
 <LIST_ROOT_QUERIES>
+
+You can use ListQueryNames by namespace to get more options if you think the root query is not in the list above.
 
 Note: Not all queries represent types, the ones with a (ImplementedBy) can be used as `queryName` but not as `typeName` in `autoCompleteLite`.
 

@@ -17,7 +17,11 @@ namespace Signum.Agent.Skills;
 
 public class SearchSkill : ChatbotSkill
 {
-    public SearchSkill()
+    public SearchSkill(HashSet<object> inlineQueryNames) : this (q => inlineQueryNames.Contains(q))
+    {
+    }
+
+    public SearchSkill(Func<object, bool> inlineQueryName)
     {
         ShortDescription = "Explores the database schema to search any information in the database";
         IsAllowed = () => true;
@@ -26,16 +30,33 @@ public class SearchSkill : ChatbotSkill
             {
                 "<LIST_ROOT_QUERIES>",
                 obj => QueryLogic.Queries.GetAllowedQueryNames(fullScreen: true)
-                .ToString(a =>
+                .GroupBy(a => a is Type t? t.Namespace : a is Enum e ? e.GetType().Namespace : "Unknown")
+                .ToString(gr =>
                 {
-                    var imp = QueryLogic.Queries.GetEntityImplementations(a);
+                    var inlineQueries = gr.Where(inlineQueryName).ToString(qn =>
+                    {
+                        var imp = QueryLogic.Queries.GetEntityImplementations(qn);
+                        var impStr = imp.Types.Only() == qn as Type ? "" : $" (ImplementedBy {imp.Types.ToString(t => t.Name, ", ")})";
 
-                    var impStr = imp.Types.Only() == a as Type ? "" : $" (ImplementedBy {imp.Types.ToString(t => t.Name, ", ")})";
+                            return $"* {QueryUtils.GetKey(qn)}{impStr}";
+                    }, "\n");
 
-                    return $"* {QueryUtils.GetKey(a)}{impStr}: {QueryUtils.GetNiceName(a)}";
+                    if(inlineQueries.HasText())
+                        return "* Module " + gr.Key + $": {gr.Count()} queries including...\n" + inlineQueries.Indent("2");
+
+                    return "* Module " + gr.Key + $": {gr.Count()} queries";
                 } , "\n")
             }
         };
+    }
+
+    [McpServerTool, Description("List all query names in a namespace")]
+    public static List<string> ListQueryNames(string namespaceName)
+    {
+        return QueryLogic.Queries.GetAllowedQueryNames(fullScreen: true)
+            .Where(qn => (qn is Type t ? t.Namespace : qn is Enum e ? e.GetType().Namespace : "Unknown") == namespaceName)
+            .Select(qn => QueryUtils.GetKey(qn))
+            .ToList();
     }
 
     [McpServerTool, Description("Gets query description")]
