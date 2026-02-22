@@ -201,6 +201,7 @@ public static class ChatbotLogic
         };
 
         sb.Include<ChatMessageEntity>()
+            .WithIndex(a => new { a.ChatSession, a.CreationDate })
             .WithQuery(() => e => new
             {
                 Entity = e,
@@ -215,7 +216,7 @@ public static class ChatbotLogic
 
         new Graph<ChatMessageEntity>.Delete(ChatMessageOperation.Delete)
         {
-            CanDelete = m => m.ChatSession.InDB(s => s.Messages().OrderByDescending(a=>a.CreationDate).Last().ToLite()).Is(m) ? null : ChatbotMessage.MessageMustBeTheLastToDelete.NiceToString(),
+            CanDelete = m => m.Is(Database.Query<ChatMessageEntity>().Where(a => a.ChatSession.Is(m.ChatSession)).OrderByDescending(a => a.CreationDate).Select(a => a.ToLite()).First()) ? null : ChatbotMessage.MessageMustBeTheLastToDelete.NiceToString(),
             Delete = (e, _) => { e.Delete(); },
         }.Register();
 

@@ -58,6 +58,8 @@ export namespace ChatbotMessage {
   export const TotalPrice: MessageKey = new MessageKey("ChatbotMessage", "TotalPrice");
   export const AnswerAbovePlease: MessageKey = new MessageKey("ChatbotMessage", "AnswerAbovePlease");
   export const MessageMustBeTheLastToDelete: MessageKey = new MessageKey("ChatbotMessage", "MessageMustBeTheLastToDelete");
+  export const SessionInterruptedDoYouWantToRecover: MessageKey = new MessageKey("ChatbotMessage", "SessionInterruptedDoYouWantToRecover");
+  export const Recover: MessageKey = new MessageKey("ChatbotMessage", "Recover");
 }
 
 export namespace ChatbotPermission {

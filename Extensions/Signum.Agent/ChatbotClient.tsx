@@ -40,7 +40,7 @@ export namespace ChatbotClient {
 
   export namespace API {
 
-    export function ask(question: string, optiions: { sessionId?: string | number, callId?: string, toolId?: string }, signal?: AbortSignal): Promise<Response> {
+    export function ask(question: string, optiions: { sessionId?: string | number, callId?: string, toolId?: string, recover?: boolean }, signal?: AbortSignal): Promise<Response> {
 
       const options: AjaxOptions = { url: "/api/chatbot/ask", };
 
@@ -52,6 +52,7 @@ export namespace ChatbotClient {
           'X-Chatbot-Session-Id': optiions.sessionId,
           'X-Chatbot-UIReply-CallId': optiions.callId,
           'X-Chatbot-UIReply-ToolId': optiions.toolId,
+          'X-Chatbot-Recover': optiions.recover ? 'true' : undefined,
           ...options.headers
         } as any;
 

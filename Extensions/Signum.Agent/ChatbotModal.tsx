@@ -18,6 +18,38 @@ interface MessageCount {
   toolResponses: number;
 }
 
+type RecoverKind =
+  | { kind: "uitool-direct"; toolCall: ToolCallEmbedded }
+  | { kind: "uitool-widget"; toolCall: ToolCallEmbedded }
+  | { kind: "tool"; toolCall: ToolCallEmbedded }
+  | { kind: "continue" };
+
+function getRecoverState(messages: MessageCount[]): RecoverKind | null {
+  const last = messages.lastOrNull()?.msg;
+  if (last == null)
+    return null;
+
+  if (last.role === "Assistant") {
+    const pendingToolCall = last.toolCalls.map(tc => tc.element).firstOrNull(tc => tc._response == null);
+    if (pendingToolCall == null)
+      return null; // all tool calls have responses — session is complete
+
+    if (pendingToolCall.isUITool) {
+      const uiTool = ChatbotClient.getUITool(pendingToolCall.toolId);
+      if (uiTool?.handleDirectly)
+        return { kind: "uitool-direct", toolCall: pendingToolCall };
+      return { kind: "uitool-widget", toolCall: pendingToolCall };
+    }
+
+    return { kind: "tool", toolCall: pendingToolCall };
+  }
+
+  if (last.role === "User" || last.role === "Tool")
+    return { kind: "continue" };
+
+  return null;
+}
+
 export default function ChatModal(p: { onClose: () => void }): React.ReactElement {
 
   const currentSessionRef = React.useRef<Lite<ChatSessionEntity> | null>(null);
@@ -28,6 +60,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
   const answerRef = React.useRef<ChatMessageEntity | null>(null);
   const generalExceptionRef = React.useRef<Lite<ExceptionEntity> | null>(null);
   const questionRef = React.useRef<string>("");
+  const recoverRef = React.useRef<RecoverKind | null>(null);
   const forceUpdate = useForceUpdate();
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
@@ -41,6 +74,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
     currentSessionRef.current = null;
     messagesRef.current = [];
     answerRef.current = null;
+    recoverRef.current = null;
     forceUpdate();
   }
 
@@ -54,24 +88,33 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 
     currentSessionRef.current = session;
     messagesRef.current = undefined;
+    recoverRef.current = null;
     forceUpdate();
 
     const messages = await ChatbotClient.API.getMessagesBySessionId(currentSessionRef.current?.id);
 
     messagesRef.current = [];
-    messages.forEach(a => addMessage(messagesRef.current!, a))
+    messages.forEach(a => addMessage(messagesRef.current!, a));
+
+    const recover = getRecoverState(messagesRef.current);
+
+    if (recover != null) {
+      recoverRef.current = recover;
+
+      // Auto-trigger handleDirectly UITools immediately (no user interaction needed)
+      if (recover.kind === "uitool-direct") {
+        const uiTool = ChatbotClient.getUITool(recover.toolCall.toolId)!;
+        uiTool.handleDirectly!(recover.toolCall, sendToolResponse_Directly);
+        recoverRef.current = null;
+      }
+    }
 
     forceUpdate();
   }
 
-  const sendToolResponse = React.useCallback(async function sendToolResponse(toolCall: ToolCallEmbedded, json: unknown) {
+  const sendToolResponse_Directly = React.useCallback(async function sendToolResponse(toolCall: ToolCallEmbedded, json: unknown) {
 
-    if (isLoadingRef.current) {
-      console.error("sendToolResponse called twice")
-      return;
-    }
-
-    isLoadingRef.current = true;
+    recoverRef.current = null;
     forceUpdate();
 
     try {
@@ -79,11 +122,39 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
       var content = JSON.stringify(json);
 
       const r = await ChatbotClient.API.ask(content, {
-        sessionId: currentSessionRef?.current?.id, 
+        sessionId: currentSessionRef?.current?.id,
         toolId: toolCall.toolId,
         callId: toolCall.callId,
       }, undefined);
-      
+
+      await processStream(r!);
+    }
+    finally {
+      forceUpdate();
+    }
+  }, []);
+
+  const sendToolResponse_Interactive = React.useCallback(async function sendToolResponse(toolCall: ToolCallEmbedded, json: unknown) {
+
+    if (isLoadingRef.current) {
+      console.error("sendToolResponse called twice")
+      return;
+    }
+
+    isLoadingRef.current = true;
+    recoverRef.current = null;
+    forceUpdate();
+
+    try {
+
+      var content = JSON.stringify(json);
+
+      const r = await ChatbotClient.API.ask(content, {
+        sessionId: currentSessionRef?.current?.id,
+        toolId: toolCall.toolId,
+        callId: toolCall.callId,
+      }, undefined);
+
       await processStream(r!);
     }
     finally {
@@ -91,6 +162,38 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
       forceUpdate();
     }
   }, []);
+
+  async function handleRecover() {
+    const recover = recoverRef.current;
+    if (recover == null)
+      return;
+
+    isLoadingRef.current = true;
+    recoverRef.current = null;
+    forceUpdate();
+
+    try {
+      if (recover.kind === "tool") {
+        // Re-send as a UIReply-style recover: body is empty, server re-executes the tool
+        const r = await ChatbotClient.API.ask("", {
+          sessionId: currentSessionRef?.current?.id,
+          recover: true,
+        }, undefined);
+        await processStream(r!);
+      } else {
+        // kind === "continue": last message is User or Tool — just resume the agent loop
+        const r = await ChatbotClient.API.ask("", {
+          sessionId: currentSessionRef?.current?.id,
+          recover: true,
+        }, undefined);
+        await processStream(r!);
+      }
+    }
+    finally {
+      isLoadingRef.current = false;
+      forceUpdate();
+    }
+  }
 
   async function processStream(r: Response) {
     const reader = r!.body!.getReader();
@@ -193,7 +296,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 
                 var uiTool = ChatbotClient.getUITool(toolCall.toolId);
                 if (uiTool && uiTool.handleDirectly) {
-                  uiTool.handleDirectly(toolCall, sendToolResponse);
+                  uiTool.handleDirectly(toolCall, sendToolResponse_Directly);
                 }
               }
 
@@ -220,7 +323,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
         forceUpdate();
       }
 
-      const ge = generalExceptionRef.current; 
+      const ge = generalExceptionRef.current;
       if (ge) {
         throw new ServiceError({
           exceptionId: ge.id!.toString(),
@@ -257,6 +360,8 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 
    const waitingForWidget = messagesRef.current?.lastOrNull()?.msg.toolCalls.some(a => a.element.isUITool && ChatbotClient.getUITool(a.element.toolId)?.renderWidget) == true;
 
+  const showRecoverBar = recoverRef.current != null && (recoverRef.current.kind === "tool" || recoverRef.current.kind === "continue" || recoverRef.current.kind === "uitool-widget");
+
   return (
     <div className="chat-modal">
       {/* Header */}
@@ -275,31 +380,41 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
       {/* Chat History */}
       <div className="chat-history flex-grow-1 p-3 pt-0" ref={scrollRef}>
         {messagesRef.current?.map(a =>
-          <Message key={a.msg.id} msg={a.msg} toolResponses={a.toolResponses} sendToolResponse={sendToolResponse} />
+          <Message key={a.msg.id} msg={a.msg} toolResponses={a.toolResponses} sendToolResponse={sendToolResponse_Interactive} />
         )}
-        {answerRef.current && <Message msg={answerRef.current} toolResponses={0} sendToolResponse={sendToolResponse} />}
+        {answerRef.current && <Message msg={answerRef.current} toolResponses={0} sendToolResponse={sendToolResponse_Interactive} />}
       </div>
 
-      {/* Input */}
-      <div className="p-2 border-top d-flex align-items-center">
-        <textarea
-          className="form-control me-2"
-          rows={2}
-          placeholder={waitingForWidget ? ChatbotMessage.AnswerAbovePlease.niceToString() : ChatbotMessage.TypeAMessage.niceToString()}
-          value={questionRef.current}
-          disabled={isLoadingRef.current || messagesRef.current == undefined || waitingForWidget}
-          onChange={(e) => { questionRef.current = e.target.value; forceUpdate() }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleCreateRequestAsync();
-            }
-          }}
-        />
-        <button className="btn btn-primary" onClick={handleCreateRequestAsync} title={ChatbotMessage.Send.niceToString()} disabled={isLoadingRef.current || messagesRef.current == undefined}>
-          <FontAwesomeIcon icon={faPaperPlane} />
-        </button>
-      </div>
+      {/* Recover bar — replaces input area when session needs recovery */}
+      {showRecoverBar ? (
+        <div className="alert alert-warning d-flex align-items-center justify-content-between m-2 mb-2">
+          <span>{ChatbotMessage.SessionInterruptedDoYouWantToRecover.niceToString()}</span>
+          <button className="btn btn-warning btn-sm ms-3" onClick={handleRecover} disabled={isLoadingRef.current}>
+            {ChatbotMessage.Recover.niceToString()}
+          </button>
+        </div>
+      ) : (
+        /* Input */
+        <div className="p-2 border-top d-flex align-items-center">
+          <textarea
+            className="form-control me-2"
+            rows={2}
+            placeholder={waitingForWidget ? ChatbotMessage.AnswerAbovePlease.niceToString() : ChatbotMessage.TypeAMessage.niceToString()}
+            value={questionRef.current}
+            disabled={isLoadingRef.current || messagesRef.current == undefined || waitingForWidget}
+            onChange={(e) => { questionRef.current = e.target.value; forceUpdate() }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleCreateRequestAsync();
+              }
+            }}
+          />
+          <button className="btn btn-primary" onClick={handleCreateRequestAsync} title={ChatbotMessage.Send.niceToString()} disabled={isLoadingRef.current || messagesRef.current == undefined}>
+            <FontAwesomeIcon icon={faPaperPlane} />
+          </button>
+        </div>
+      )}
     </div>
   );
   function setAnswer(role: ChatMessageRole, toolId?: string, callId?: string) {
@@ -314,7 +429,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 }
 
 function addMessage(list: MessageCount[], msg: ChatMessageEntity) {
-  
+
   debugger;
   const pair = msg.toolCallID ? list.lastOrNull(a => a.msg.role == "Assistant" && a.msg.toolCalls.some(tc => tc.element.callId == msg.toolCallID)) ?? null : null;
 

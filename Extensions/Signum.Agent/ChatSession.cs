@@ -43,7 +43,6 @@ public class ChatMessageEntity : Entity
 {
     public Lite<ChatSessionEntity> ChatSession { get; set; }
 
-
     public DateTime CreationDate { get; set; } = Clock.Now;
 
     public ChatMessageRole Role { get; set; }
@@ -151,6 +150,9 @@ public enum ChatbotMessage
     TotalPrice,
     AnswerAbovePlease,
     MessageMustBeTheLastToDelete,
+    [Description("Session interrupted, do you want to recover?")]
+    SessionInterruptedDoYouWantToRecover,
+    Recover,
 }
 
 [AutoInit]

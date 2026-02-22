@@ -118,6 +118,7 @@ public class ChatbotController : Controller
             // If this request is a UI reply, inject the tool result into history and skip adding a new user message
             string? uiReplyCallId = HttpContext.Request.Headers["X-Chatbot-UIReply-CallId"].ToString().DefaultToNull();
             string? uiReplyToolId = HttpContext.Request.Headers["X-Chatbot-UIReply-ToolId"].ToString().DefaultToNull();
+            bool isRecover = HttpContext.Request.Headers["X-Chatbot-Recover"].ToString() == "true";
 
             if (uiReplyCallId != null && uiReplyToolId != null)
             {
@@ -137,6 +138,30 @@ public class ChatbotController : Controller
                 await resp.WriteAsync(UINotification(ChatbotUICommand.MessageId, toolMsg.Id.ToString()), ct);
                 await resp.Body.FlushAsync();
                 history.Messages.Add(toolMsg);
+            }
+            else if (isRecover)
+            {
+                // Recover mode: body must be empty — we resume from the last saved state
+                if (question.HasText())
+                    throw new InvalidOperationException("Recover requests must have an empty body.");
+
+                // Case C: last message in history is an Assistant with an unresponded regular tool call.
+                // Re-execute that tool call so the agent loop can continue.
+                var lastAssistant = history.Messages.LastOrDefault(m => m.Role == ChatMessageRole.Assistant);
+                if (lastAssistant != null)
+                {
+                    var pendingToolCall = lastAssistant.ToolCalls
+                        .Select(tc => tc)
+                        .FirstOrDefault(tc => !tc.IsUITool &&
+                            !history.Messages.Any(m => m.Role == ChatMessageRole.Tool && m.ToolCallID == tc.CallId));
+
+                    if (pendingToolCall != null)
+                    {
+                        var parsedArgs = JsonSerializer.Deserialize<Dictionary<string, object?>>(pendingToolCall.Arguments) ?? new();
+                        await ExecuteToolAsync(history, pendingToolCall.ToolId, pendingToolCall.CallId, parsedArgs, ct);
+                    }
+                }
+                // Case D (User or Tool as last message): history is already correct — fall through to the agent loop.
             }
             else
             {
@@ -272,61 +297,7 @@ public class ChatbotController : Controller
                     goto doneWithTools;
 
                 foreach (var funCall in toolCalls)
-                {
-                    await resp.WriteAsync(UINotification(ChatbotUICommand.Tool, funCall.Name + "/" + funCall.CallId), ct);
-
-                    var toolSw = Stopwatch.StartNew();
-                    try
-                    {
-                        AITool tool = ChatbotSkillLogic.AllTools.Value.GetOrThrow(funCall.Name);
-                        var obj = await ((AIFunction)tool).InvokeAsync(new AIFunctionArguments(funCall.Arguments), ct);
-                        toolSw.Stop();
-
-                        string toolResponse = JsonSerializer.Serialize(obj);
-                        var toolMsg = new ChatMessageEntity()
-                        {
-                            ChatSession = history.Session.ToLite(),
-                            Role = ChatMessageRole.Tool,
-                            ToolCallID = funCall.CallId,
-                            ToolID = funCall.Name,
-                            Content = toolResponse,
-                            Duration = toolSw.Elapsed,
-                        }.Save();
-
-                        await resp.WriteAsync(toolResponse, ct);
-                        await resp.WriteAsync("\n");
-                        await resp.WriteAsync(UINotification(ChatbotUICommand.MessageId, toolMsg.Id.ToString()), ct);
-                        await resp.Body.FlushAsync();
-                        history.Messages.Add(toolMsg);
-                    }
-                    catch (Exception e)
-                    {
-                        toolSw.Stop();
-                        var errorContent = FormatToolError(funCall.Name, e, funCall.Arguments);
-
-                        ChatMessageEntity toolMsg;
-                        using (AuthLogic.Disable())
-                        {
-                            toolMsg = new ChatMessageEntity()
-                            {
-                                ChatSession = history.Session.ToLite(),
-                                Role = ChatMessageRole.Tool,
-                                ToolCallID = funCall.CallId,
-                                ToolID = funCall.Name,
-                                Content = errorContent,
-                                Exception = e.LogException().ToLiteFat(),
-                                Duration = toolSw.Elapsed,
-                            }.Save();
-                        }
-
-                        await resp.WriteAsync(UINotification(ChatbotUICommand.Exception, toolMsg.Exception!.Id.ToString()), ct);
-                        await resp.WriteAsync(errorContent, ct);
-                        await resp.WriteAsync("\n");
-                        await resp.WriteAsync(UINotification(ChatbotUICommand.MessageId, toolMsg.Id.ToString()), ct);
-                        await resp.Body.FlushAsync();
-                        history.Messages.Add(toolMsg);
-                    }
-                }
+                    await ExecuteToolAsync(history, funCall.Name, funCall.CallId, funCall.Arguments!, ct);
             }
 
             doneWithTools:
@@ -356,6 +327,65 @@ public class ChatbotController : Controller
 
 
     static int? NullableAdd(int? a, int? b) => a == null && b == null ? null : (a ?? 0) + (b ?? 0);
+
+    async Task ExecuteToolAsync(ConversationHistory history, string toolId, string callId, IDictionary<string, object?> arguments, CancellationToken ct)
+    {
+        var resp = this.HttpContext.Response;
+
+        await resp.WriteAsync(UINotification(ChatbotUICommand.Tool, toolId + "/" + callId), ct);
+
+        var toolSw = Stopwatch.StartNew();
+        try
+        {
+            AITool tool = ChatbotSkillLogic.AllTools.Value.GetOrThrow(toolId);
+            var obj = await ((AIFunction)tool).InvokeAsync(new AIFunctionArguments(arguments), ct);
+            toolSw.Stop();
+
+            string toolResponse = JsonSerializer.Serialize(obj);
+            var toolMsg = new ChatMessageEntity()
+            {
+                ChatSession = history.Session.ToLite(),
+                Role = ChatMessageRole.Tool,
+                ToolCallID = callId,
+                ToolID = toolId,
+                Content = toolResponse,
+                Duration = toolSw.Elapsed,
+            }.Save();
+
+            await resp.WriteAsync(toolResponse, ct);
+            await resp.WriteAsync("\n");
+            await resp.WriteAsync(UINotification(ChatbotUICommand.MessageId, toolMsg.Id.ToString()), ct);
+            await resp.Body.FlushAsync();
+            history.Messages.Add(toolMsg);
+        }
+        catch (Exception e)
+        {
+            toolSw.Stop();
+            var errorContent = FormatToolError(toolId, e, arguments);
+
+            ChatMessageEntity toolMsg;
+            using (AuthLogic.Disable())
+            {
+                toolMsg = new ChatMessageEntity()
+                {
+                    ChatSession = history.Session.ToLite(),
+                    Role = ChatMessageRole.Tool,
+                    ToolCallID = callId,
+                    ToolID = toolId,
+                    Content = errorContent,
+                    Exception = e.LogException().ToLiteFat(),
+                    Duration = toolSw.Elapsed,
+                }.Save();
+            }
+
+            await resp.WriteAsync(UINotification(ChatbotUICommand.Exception, toolMsg.Exception!.Id.ToString()), ct);
+            await resp.WriteAsync(errorContent, ct);
+            await resp.WriteAsync("\n");
+            await resp.WriteAsync(UINotification(ChatbotUICommand.MessageId, toolMsg.Id.ToString()), ct);
+            await resp.Body.FlushAsync();
+            history.Messages.Add(toolMsg);
+        }
+    }
 
     static string FormatToolError(string toolName, Exception e, IDictionary<string, object?>? arguments)
     {
