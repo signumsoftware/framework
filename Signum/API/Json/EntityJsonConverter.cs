@@ -290,7 +290,8 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                     writer.WriteString("Type", ReflectionServer.GetTypeName(mod.GetType()));
                 }
 
-                writer.WriteString("temporalId", mod.temporalId);
+                if (tup.pr.RootType.IsEntity() && EntityKindCache.SerializeTemportalId(tup.pr.RootType))
+                    writer.WriteString("temporalId", mod.temporalId);
 
                 if (!(mod is MixinEntity))
                 {
