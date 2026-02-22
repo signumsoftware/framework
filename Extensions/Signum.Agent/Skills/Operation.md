@@ -39,8 +39,47 @@ export interface MListElement<T> {
 
  ### Creating new entities
 
- Creating new entities (or sub-entites) could be harder than modifying existing ones because you don't start with an example json. Some advices: 
+ Creating new entities (or sub-entites) could be harder than modifying existing ones because you don't start with an example json. Some advices:
 
  * Check the `TypeInfo` for the desired type.
  * The `Type` property should be set on every entity, sub-entity or embedded entity. If should be the `cleanName` not the `fullName`.
- * Fo new entities, the `id` property should be skipped. 
+ * Fo new entities, the `id` property should be skipped.
+
+### Construct
+
+The tool `operation_Construct` creates a new entity of a given type using a constructor operation (i.e. an operation of kind `ConstructOperation`).
+
+Use it when you need to create a fresh entity and the type has a registered constructor operation (typically named `<TypeName>.Create`). The operation may apply default values or business logic during construction.
+
+Returns an `EntityPackTS` with the newly created (unsaved) entity and its `canExecute` dictionary. To persist the entity, follow up with `operation_Execute` using a save operation.
+
+### ConstructFrom
+
+The tool `operation_ConstructFrom` creates a new entity derived from an existing one using a `ConstructFromOperation`.
+
+Use it when the new entity is logically created *from* another entity (e.g. creating an `Order` from a `Customer`, or cloning/converting an entity). The source entity is passed as JSON (same rules as `executeOperation` apply: include `Type`, `id`, `ticks`, `modified`).
+
+Returns an `EntityPackTS` with the newly constructed entity and its `canExecute` dictionary. The source entity is not modified. To persist the result, follow up with `operation_Execute` using a save operation.
+
+### ConstructFromMany
+
+The tool `operation_ConstructFromMany` creates a new entity derived from a collection of existing entities using a `ConstructFromManyOperation`.
+
+Use it when an operation logically aggregates or merges several source entities into a new one (e.g. creating a combined shipment from multiple orders). The sources are passed as a JSON array of Lites:
+
+```json
+[
+  { "EntityType": "Order", "id": 1, "model": "Order 1" },
+  { "EntityType": "Order", "id": 2, "model": "Order 2" }
+]
+```
+
+All lites must be of the same entity type. Returns an `EntityPackTS` with the newly constructed entity and its `canExecute` dictionary. The source entities are not modified. To persist the result, follow up with `operation_Execute` using a save operation.
+
+### Delete
+
+The tool `operation_Delete` permanently deletes an entity using a delete operation (i.e. an operation of kind `DeleteOperation`).
+
+Pass the entity as JSON (same rules as `executeOperation` apply). Returns nothing on success.
+
+**This action is irreversible** — always confirm with the user before calling this tool. Check the `canExecute` dictionary (from a prior retrieve or execute) to verify the delete operation is allowed before attempting it.

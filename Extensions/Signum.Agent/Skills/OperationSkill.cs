@@ -89,6 +89,26 @@ public class OperationSkill : ChatbotSkill
         return result;
     }
 
+    [McpServerTool, Description("Construct an entity from many entities using an operation")]
+    public static EntityPackTS Operation_ConstructFromMany(string entitiesJson, string operationKey, CancellationToken token)
+    {
+        var lites = JsonSerializer.Deserialize<List<Lite<Entity>>>(entitiesJson, SignumServer.JsonSerializerOptions)!;
+
+        var operation = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
+
+        var onlyType = lites.Select(a => a.EntityType).Distinct().Only()
+            ?? throw new InvalidOperationException("All lites must be of the same type when no common base type can be inferred");
+
+        var newEntity = OperationLogic.ServiceConstructFromMany(lites.Cast<Lite<IEntity>>().ToList(), onlyType, operation);
+
+        var canExecutes = OperationLogic.ServiceCanExecute(newEntity);
+
+        var result = new EntityPackTS(newEntity,
+            canExecutes.ToDictionary(a => a.Key.Key, a => a.Value));
+
+        return result;
+    }
+
     private static Entity DeserializeEntity(string entityJson)
     {
         return JsonSerializer.Deserialize<Entity>(entityJson, SignumServer.JsonSerializerOptions)!;
