@@ -1,34 +1,9 @@
 import * as AppContext from './AppContext';
 import * as React from 'react'
-import { useForceUpdatePromise, useStateWithPromise, useUpdatedRef} from './Hooks';
+import { useForceUpdatePromise, useStateWithPromise, useUpdatedRef } from './Hooks';
 import { useLocation } from 'react-router';
 import './Modals.css';
 
-export interface UIState {
-  name: string;
-  context: unknown;
-}
-
-let currentGetPageUIState: (() => UIState) | null = null;
-
-export namespace GlobalModalManager {
-  export function getPageUIState(): UIState | null {
-    return currentGetPageUIState?.() ?? null;
-  }
-}
-
-export function usePageUIState(getState: () => UIState): void {
-  const getStateRef = useUpdatedRef(getState);
-
-  React.useEffect(() => {
-    const fn = () => getStateRef.current();
-    currentGetPageUIState = fn;
-    return () => {
-      if (currentGetPageUIState === fn)
-        currentGetPageUIState = null;
-    };
-  }, []);
-}
 
 declare global {
   interface KeyboardEvent {
@@ -44,13 +19,22 @@ export interface IHandleKeyboard {
   handleKeyDown?: (e: KeyboardEvent) => void;
 }
 
+export interface UIState {
+  name: string;
+  context: unknown;
+}
+
+export interface IGetUIState {
+  getUIState?: () => UIState | null;
+}
+
 export interface GlobalModalContainerState {
   modals: React.ReactElement<IModalProps<any>>[];
   currentUrl: string;
 }
 let current: GlobalModalContainerHandles;
   
-const modalInstances: (React.Component & IHandleKeyboard)[] = [];
+const modalInstances: (React.Component & IHandleKeyboard & IGetUIState)[] = [];
 
 export function isStarted(): boolean {
   return current != null;
@@ -64,7 +48,7 @@ interface GlobalModalContainerHandles {
 }
 
 export function GlobalModalContainer(): React.DetailedReactHTMLElement<{
-    className: string;
+  className: string;
 }, HTMLElement> {
 
 
@@ -107,7 +91,7 @@ export function GlobalModalContainer(): React.DetailedReactHTMLElement<{
     return () => { current = null!; };
   }, []);
 
-  function hanldleKeyDown(e: KeyboardEvent){
+  function hanldleKeyDown(e: KeyboardEvent) {
     if (modalInstances.length) {
       e.openedModals = true;
       var topMost = modalInstances[modalInstances.length - 1];
@@ -191,3 +175,29 @@ export class FunctionalAdapter extends React.Component<FunctionalAdapterProps> {
 }
 
 
+let currentGetPageUIState: (() => UIState) | null = null;
+
+export namespace GlobalModalContainer {
+  export function getPageUIState(): UIState | null {
+    return currentGetPageUIState?.() ?? null;
+  }
+
+  export function getModalUIStates(): (UIState | null)[] {
+    return modalInstances
+      .map(inst => FunctionalAdapter.innerRef(inst))
+      .map(inst => inst.getUIState?());
+  }
+}
+
+export function usePageUIState(getState: () => UIState): void {
+  const getStateRef = useUpdatedRef(getState);
+
+  React.useEffect(() => {
+    const fn = () => getStateRef.current();
+    currentGetPageUIState = fn;
+    return () => {
+      if (currentGetPageUIState === fn)
+        currentGetPageUIState = null;
+    };
+  }, []);
+}
