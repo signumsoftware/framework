@@ -16,14 +16,11 @@ import { LinkButton } from '../Basics/LinkButton'
 
 export interface EntityLineProps<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseProps<V> {
   avoidLink?: boolean;
-  avoidViewButton?: boolean;
-  avoidCreateButton?: boolean;
   autocomplete?: AutocompleteConfig<unknown> | null;
-  renderItem?: React.ReactNode;
   showType?: boolean;
   inputAttributes?: React.InputHTMLAttributes<HTMLInputElement>,
   itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  ref?: React.Ref<EntityLineController<NoInfer<V>>>;
+  ref?: React.Ref<EntityLineController<V>>;
 }
 
 interface ItemPair {
@@ -143,9 +140,9 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
     const buttons = (
       <>
         {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
-        {!hasValue && !p.avoidCreateButton && c.renderCreateButton(true, undefined)}
+        {!hasValue && c.renderCreateButton(true, undefined)}
         {!hasValue && c.renderFindButton(true)}
-        {hasValue && !p.avoidViewButton && c.renderViewButton(true)}
+        {hasValue && c.renderViewButton(true)}
         {hasValue && c.renderRemoveButton(true)}
         {c.renderPasteButton(true)}
         {c.props.extraButtons && c.props.extraButtons(c)}
@@ -234,7 +231,6 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
       var value = p.ctx.value!;
 
       const str =
-        p.renderItem ? p.renderItem :
           c.currentItem && c.currentItem.item && p.autocomplete ? p.autocomplete.renderItem(c.currentItem.item, new TextHighlighter(undefined)) :
             getToString(value);
 

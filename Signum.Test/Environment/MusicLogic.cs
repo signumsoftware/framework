@@ -108,17 +108,18 @@ public static class MusicLogic
                 e.Name
             });
 
-        sb.Include<SimplePassageEntity>()
-            .WithVectorIndex(a=>a.Embedding, vti =>
-            {
-            })
-            .WithQuery(() => p => new
-            {
-                Entity = p,
-                p.Id,
-                p.Note,
-                p.Embedding
-            });
+        if (Connector.Current.SupportsVectors)
+            sb.Include<SimplePassageEntity>()
+                .WithVectorIndex(a => a.Embedding, vti =>
+                {
+                })
+                .WithQuery(() => p => new
+                {
+                    Entity = p,
+                    p.Id,
+                    p.Note,
+                    p.Embedding
+                });
 
         RegisterAwards(sb);
 

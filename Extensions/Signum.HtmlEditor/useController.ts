@@ -75,7 +75,8 @@ export const useController = ({
     controller.editor.setEditable(!readOnly);
   }, [controller.editor, readOnly]);
 
-  useRegisterExtensions(controller, extensions);
+  //useRegisterExtensions(controller, extensions);
+  useRegisterExtensions(controller, finalExtension);
 
   useRegisterKeybindings(controller, handleKeybindings);
 
@@ -86,7 +87,8 @@ export const useController = ({
     converter: textConverter,
     innerRef,
     initiallyFocused,
-    extensions,
+    //extensions,
+    extensions: finalExtension,
     editableId,
   });
 

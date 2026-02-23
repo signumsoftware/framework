@@ -41,6 +41,13 @@ public static class UserAssetsExporter
 
         T IToXmlContext.RetrieveLite<T>(Lite<T> lite)
         {
+
+            if (lite is Lite<QueryEntity> q)
+                return (T)(object)q.RetrieveFromCache();
+
+            if (lite is Lite<TypeEntity> t)
+                return (T)(object)t.RetrieveFromCache();
+
             return lite.Retrieve();
         }
     }

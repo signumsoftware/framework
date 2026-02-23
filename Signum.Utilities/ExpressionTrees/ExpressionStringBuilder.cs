@@ -688,12 +688,12 @@ internal sealed class ExpressionStringBuilder : ExpressionVisitor
                 break;
             case ExpressionType.TypeAs:
                 Out(" As ");
-                Out(node.Type.Name);
+                Out(node.Type.TypeName());
                 Out(')'); break;
             case ExpressionType.Convert:
             case ExpressionType.ConvertChecked:
                 Out(", ");
-                Out(node.Type.Name);
+                Out(node.Type.TypeName());
                 Out(')'); break; // These were changed in .NET Core to add the type name
             case ExpressionType.PostIncrementAssign: Out("++"); break;
             case ExpressionType.PostDecrementAssign: Out("--"); break;

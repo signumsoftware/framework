@@ -128,7 +128,10 @@ public class AzureADAuthorizer : ICustomAuthorizer
         {
             user.Mixin<UserAzureADMixin>().OID = ctx.OID;
             if (!UserAzureADMixin.AllowPasswordForAzureADUsers)
+            {
                 user.PasswordHash = null;
+                user.MustChangePassword = false;
+            }
         }
 
         user.UserName = ctx.UserName;

@@ -13,7 +13,7 @@ public static class TemplateUtils
 {
     public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<expr>(?>[^\[\]]+|\[(?<open>)|\](?<-open>))*(?(open)(?!))?)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
 
-    public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>((?<type>[\w]):)?.+?)(?<operation>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]]+)");
+    public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>((?<type>[\w]):)?.+?) *(?<operation>(" + FilterValueConverter.OperationRegex + @")) *(?<value>[^\]]+)");
 
     public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>((?<type>[\w]):)?((\[[^\[\]]+\])|([^\[\]\:]+))+)(\:(?<format>.*))?");
     
@@ -371,7 +371,7 @@ public class TemplateSynchronizationContext
         SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
         Console.WriteLine(" " + remainingText);
 
-        FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null, forceChange);
+        FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/ | SubTokensOptions.CanNested, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null, forceChange);
         switch (result)
         {
             case FixTokenResult.Nothing:

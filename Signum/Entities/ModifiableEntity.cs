@@ -376,6 +376,40 @@ public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneab
         return pp.IsPropertyReadonly(this);
     }
 
+
+    public PropertyRoute? TryGetPropertyRoute(MemberInfo mi) => TryGetPropertyRoute()?.Add(mi);
+    public PropertyRoute? TryGetPropertyRoute()
+    {
+        if(this is IRootEntity)
+            return PropertyRoute.Root(this.GetType());
+
+        if(this.parentEntity is { } p &&  p.TryGetPropertyRoute() is PropertyRoute pr)
+        {
+            var validators = Validator.GetPropertyValidators(p.GetType());
+
+            var type = this.GetType();
+
+            foreach (var kvp in validators)
+            {
+                if (kvp.Value.PropertyInfo.PropertyType.IsAssignableFrom(type))
+                {
+                    if(kvp.Value.GetValueUntyped(this.parentEntity) == this)
+                        return pr.Add(kvp.Value.PropertyInfo);
+                }
+
+                if (kvp.Value.PropertyInfo.PropertyType.ElementType()?.IsAssignableFrom(type) == true)
+                {
+                    if (kvp.Value.GetValueUntyped(this.parentEntity) is IEnumerable<IModifiableEntity> list)
+                        if (list.Contains(this))
+                            return pr.Add(kvp.Value.PropertyInfo).Add("Item");
+                }
+            }
+        }
+
+        return null;
+    }
+
+
     protected internal virtual bool IsPropertyReadonly(PropertyInfo pi)
     {
         return false;

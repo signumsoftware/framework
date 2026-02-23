@@ -7,10 +7,15 @@ import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Authorization'
 import { AuthClient } from '../AuthClient'
 import { useStateWithPromise } from '@framework/Hooks'
+import { QueryString } from "@framework/QueryString"
 
 export default function ChangePasswordPage(): React.JSX.Element {
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
 
+  const currentUser = AuthClient.currentUser();
+  const pendingUser = AuthClient.pendingPasswordChangeUser;
+  const user = currentUser ?? pendingUser;
+  const mustChangePassword = pendingUser != null || currentUser?.mustChangePassword === true;
 
   const oldPassword = React.useRef<HTMLInputElement>(null);
   const newPassword = React.useRef<HTMLInputElement>(null);
@@ -34,8 +39,17 @@ export default function ChangePasswordPage(): React.JSX.Element {
         .then(lr => {
           AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);
-          AppContext.resetUI();
-          AppContext.navigate("/auth/changePasswordSuccess");
+          AuthClient.pendingPasswordChangeUser = undefined; // Clear pending user
+          
+          // If it was a forced password change, redirect using onLogin
+          if (mustChangePassword) {
+            const back = QueryString.parse(window.location.search).back;
+            AuthClient.Options.onLogin(back);
+          } else {
+            // For voluntary password change, reset UI and go to success page
+            AppContext.resetUI();
+            AppContext.navigate("/auth/changePasswordSuccess");
+          }
         })
         .catch(ifError(ValidationError, e => {
           if (e.modelState)
@@ -82,6 +96,12 @@ export default function ChangePasswordPage(): React.JSX.Element {
         <div className="col-md-6 offset-md-3">
           <form onSubmit={(e) => handleSubmit(e)} className="w-100">
             <h1 className="sf-entity-title h2">{LoginAuthMessage.ChangePassword.niceToString()}</h1>
+            {mustChangePassword && (
+              <div className="alert alert-warning" role="alert">
+                <strong>{LoginAuthMessage.PasswordMustBeChanged.niceToString()}</strong>
+                <p className="mb-0">{LoginAuthMessage.YouMustChangeYourPasswordBeforeContinuing.niceToString()}</p>
+              </div>
+            )}
             <p>{LoginAuthMessage.EnterActualPasswordAndNewOne.niceToString()}</p>
             <div className={classes("form-group form-group-sm", error("oldPassword") && "has-error")}>
               <label className="col-form-label col-form-label-sm">{LoginAuthMessage.CurrentPassword.niceToString()}</label>

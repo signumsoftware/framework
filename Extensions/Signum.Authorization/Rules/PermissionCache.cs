@@ -53,7 +53,7 @@ class PermissionCache : AuthCache<RulePermissionEntity, PermissionAllowedRule, P
 
         return ImportXmlInternal(root, "Permissions", "Permission", roles,
             toResource: s => SymbolLogic<PermissionSymbol>.TryToSymbol(replacements.Apply(replacementKey, s)), 
-            parseAllowed: e => bool.Parse(e.Attribute("Allowed")!.Value));
+            parseAllowed: (e, resource) => bool.Parse(e.Attribute("Allowed")!.Value));
     }
 
 

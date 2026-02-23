@@ -486,6 +486,7 @@ public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
     public MicrosoftGraphCreateUserContext(User user, AzureADConfigurationEmbedded config)
     {
         User = user;
+        Config = config;
     }
 
     public User User { get; set; }
