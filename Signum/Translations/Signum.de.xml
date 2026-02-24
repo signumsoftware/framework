@@ -895,6 +895,7 @@
     <Member Name="BeAMultilineString" Description="eine mehrzeilige Zeichenkette sein" />
     <Member Name="BeAString" Description="eine Zeichenkette sein" />
     <Member Name="BeBetween0And1" Description="zwischen {0} und {1} sein" />
+    <Member Name="BeInTheFuture" Description="In der Zukunft sein" />
     <Member Name="BeInThePast" Description="in der Vergangenheit sein" />
     <Member Name="BeNotNull" Description="nicht null sein" />
     <Member Name="EachRowRepresentsAGroupOf0WithSame1" Description="Jede Zeile steht für eine Gruppe von {0} mit demselben {1}" />

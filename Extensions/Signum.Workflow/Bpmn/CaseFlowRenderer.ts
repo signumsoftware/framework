@@ -11,7 +11,7 @@ import { Color, Gradient } from "@framework/Basics/Color"
 import { Rectangle } from "../../Signum.Map/Schema/ClientColorProvider"
 
 export class CaseFlowRenderer extends CustomRenderer {
-  static $inject: string[] = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
+  static override $inject: string[] = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
   constructor(config: any, eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, textRenderer: any, priority: number) {
     super(config, eventBus, styles, pathMap, canvas, textRenderer, 1200);
   }
@@ -21,7 +21,7 @@ export class CaseFlowRenderer extends CustomRenderer {
   viewer!: NavigatedViewer;
   caseFlowColor?: CaseFlowColor;
 
-  drawConnection(visuals: any, element: BPMN.Connection): SVGElement {
+  override drawConnection(visuals: any, element: BPMN.Connection): SVGElement {
 
     const path = super.drawConnection(visuals, element);
 
@@ -44,7 +44,7 @@ export class CaseFlowRenderer extends CustomRenderer {
     { value: 1, color: Color.parse("rgb(251, 114, 95)") },
   ]);
 
-  drawShape(visuals: any, element: BPMN.DiElement): SVGElement {
+  override drawShape(visuals: any, element: BPMN.DiElement): SVGElement {
 
     const result = super.drawShape(visuals, element);
 

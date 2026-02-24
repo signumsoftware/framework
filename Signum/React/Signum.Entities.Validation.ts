@@ -83,6 +83,7 @@ export namespace ValidationMessage {
   export const _0ShouldBeGreaterThanOrEqual1: MessageKey = new MessageKey("ValidationMessage", "_0ShouldBeGreaterThanOrEqual1");
   export const _0ShouldBeLessThan1: MessageKey = new MessageKey("ValidationMessage", "_0ShouldBeLessThan1");
   export const _0ShouldBeLessThanOrEqual1: MessageKey = new MessageKey("ValidationMessage", "_0ShouldBeLessThanOrEqual1");
+  export const BeInTheFuture: MessageKey = new MessageKey("ValidationMessage", "BeInTheFuture");
   export const _0HasAPrecisionOf1InsteadOf2: MessageKey = new MessageKey("ValidationMessage", "_0HasAPrecisionOf1InsteadOf2");
   export const _0ShouldBeOfType1: MessageKey = new MessageKey("ValidationMessage", "_0ShouldBeOfType1");
   export const _0ShouldNotBeOfType1: MessageKey = new MessageKey("ValidationMessage", "_0ShouldNotBeOfType1");

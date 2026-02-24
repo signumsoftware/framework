@@ -26,9 +26,9 @@ public static class AuthServer
     public static Action<ActionContext, UserWithClaims> UserLoggingOut;
 
 
-    public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
+    public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string authTokenEncryptionKey)
     {
-        AuthTokenServer.Start(tokenConfig, hashableEncryptionKey);
+        AuthTokenServer.Start(tokenConfig, authTokenEncryptionKey);
 
         RrgisterWithCondition<TypeAllowed>();
         RrgisterWithCondition<PropertyAllowed>();

@@ -859,6 +859,29 @@ public class DateInPastValidatorAttribute : ValidatorAttribute
     public override string HelpMessage => ValidationMessage.BeInThePast.NiceToString();
 }
 
+public class DateInFutureValidatorAttribute : ValidatorAttribute
+{
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
+    {
+        if (value == null)
+            return null;
+
+        DateTime dateTime = DateTimePrecisionValidatorAttribute.ToDateTime(value);
+
+        if (dateTime < Clock.Now)
+            return ValidationMessage._0ShouldBeADateInTheFuture.NiceToString();
+
+        return null;
+    }
+
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return ReflectionTools.IsDate(pi.PropertyType.UnNullify());
+    }
+
+    public override string HelpMessage => ValidationMessage.BeInTheFuture.NiceToString();
+}
+
 public class YearGreaterThanValidatorAttribute : ValidatorAttribute
 {
     public int MinYear { get; set; }
@@ -1289,6 +1312,7 @@ public enum ValidationMessage
     _0ShouldBeLessThan1,
     [Description("{0} should be less than or equal {1}")]
     _0ShouldBeLessThanOrEqual1,
+    BeInTheFuture,
     [Description("{0} has a precision of {1} instead of {2}")]
     _0HasAPrecisionOf1InsteadOf2,
     [Description("{0} should be of type {1}")]
