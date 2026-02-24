@@ -25,11 +25,11 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
     return "shuffle";
   }
 
-  isApplicableTo(element: ToolbarResponse<PermissionSymbol>): boolean {
+  override isApplicableTo(element: ToolbarResponse<PermissionSymbol>): boolean {
     return is(element.content, WorkflowPermission.WorkflowToolbarMenu);
   }
 
-  getMenuItem(res: ToolbarResponse<PermissionSymbol>, key: number | string, ctx: ToolbarContext): React.JSX.Element {
+  override getMenuItem(res: ToolbarResponse<PermissionSymbol>, key: number | string, ctx: ToolbarContext): React.JSX.Element {
     return <WorkflowDropdownImp key={key} />;
   }
 
