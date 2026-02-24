@@ -104,5 +104,6 @@ export namespace ValidationMessage {
   export const NumberIsTooBig: MessageKey = new MessageKey("ValidationMessage", "NumberIsTooBig");
   export const NumberIsTooSmall: MessageKey = new MessageKey("ValidationMessage", "NumberIsTooSmall");
   export const Either0Or1ShouldBeSet: MessageKey = new MessageKey("ValidationMessage", "Either0Or1ShouldBeSet");
+  export const _0ContainsInvalidControlCharactersNear1: MessageKey = new MessageKey("ValidationMessage", "_0ContainsInvalidControlCharactersNear1");
 }
 
