@@ -19,11 +19,11 @@ public static class AuthTokenServer
     public static Action<UserWithClaims, AuthToken?, AuthToken?> OnAuthToken;
     public static Func<string, bool> AuthenticateHeader = (authHeader) => true;
 
-    public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
+    public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string authTokenEncryptionKey)
     {
         Configuration = tokenConfig;
         using var md5 = MD5.Create();
-        CryptoKey = md5.ComputeHash(Encoding.UTF8.GetBytes(hashableEncryptionKey));
+        CryptoKey = md5.ComputeHash(Encoding.UTF8.GetBytes(authTokenEncryptionKey.DefaultToNull() ?? throw new ArgumentNullException("AuthTokenEncryptionKey is not set")));
         ReflectionServer.RegisterLike(typeof(AuthTokenConfigurationEmbedded), () => false);
         SignumAuthenticationFilter.Authenticators.Add(TokenAuthenticator);
         SignumAuthenticationFilter.Authenticators.Add(AnonymousUserAuthenticator);

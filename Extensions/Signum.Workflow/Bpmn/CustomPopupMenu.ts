@@ -8,11 +8,11 @@ export class CustomReplaceMenuProvider extends BpmnReplaceMenuProvider {
     super(popupMenu, modeling, moddle, bpmnReplace, rules, translate);
   }
 
-  getHeaderEntries(element: BPMN.DiElement): never[] {
+  override getHeaderEntries(element: BPMN.DiElement): never[] {
     return [];
   }
 
-  getPopupMenuEntries(element: BPMN.DiElement): (entries: BPMN.EntriesObject) => BPMN.EntriesObject {
+  override getPopupMenuEntries(element: BPMN.DiElement): (entries: BPMN.EntriesObject) => BPMN.EntriesObject {
 
     if (BpmnUtils.isGatewayAnyKind(element.type))
       return this.entriesOrUpdaterGateways;

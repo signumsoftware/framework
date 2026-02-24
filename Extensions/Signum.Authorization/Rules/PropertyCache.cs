@@ -321,7 +321,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
                 return property;
 
             },
-            parseAllowed: e =>
+            parseAllowed: (e, resource) =>
             {
                 return new WithConditions<PropertyAllowed>(fallback: e.Attribute("Allowed")!.Value.ToEnum<PropertyAllowed>(),
                     conditionRules: e.Elements("Condition").Select(xc => new ConditionRule<PropertyAllowed>(

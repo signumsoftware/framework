@@ -6,7 +6,7 @@ import { ajaxPost, ExternalServiceError, ServiceError, ValidationError } from '.
 import { JavascriptMessage, FrameMessage, ConnectionMessage, EntityControlMessage } from '../Signum.Entities'
 import { ClientErrorModel, ExceptionEntity } from '../Signum.Basics'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import "./Modals.css"
+import "./DialogModals.css"
 import { newLite } from '../Reflection';
 import { Modal } from 'react-bootstrap';
 import MessageModal from './MessageModal';
