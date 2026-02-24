@@ -32,16 +32,22 @@ declare global {
     groupBy<K extends string>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
     groupBy<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K; elements: T[] }[];
     groupBy<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: ((key: K) => string) | undefined, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
-    groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] }; // Remove by Object.groupBy when safary supports it https://caniuse.com/?search=Object.groupby
+    groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
     groupToObject<E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): { [key: string]: E[] };
-    groupToMap<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T[]>; // Remove by MAp.groupBy when safary supports it https://caniuse.com/?search=Map.groupby
+    groupToMap<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T[]>;
     groupToMap<K, E>(this: Array<T>, keySelector: (element: T) => K, elementSelector: (element: T) => E): Map<K, E[]>;
+    groupToDictionary<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string): Dictionary<K, T[]>;
+    groupToDictionary<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string, elementSelector: (element: T) => E): Dictionary<K, E[]>;
+
+    agGroupToObject<R>(this: Array<T>, keySelector: (element: T) => string, agregateElements: (gr: { key: string, elements: T[] }) => R): { [key: string]: R };
+    agGroupToMap<K, R>(this: Array<T>, keySelector: (element: T) => K, agregateElements: (gr: { key: string, elements: T[] }) => R): Map<K, R>;
+    agGroupToDictionary<K, R>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string, agregateElements: (gr: { key: string, elements: T[] }) => R): Dictionary<K, R>;
+
     groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, beforeFirstKey?: "throw" | "skip" | "defaultGroup"): { key: T, elements: T[] }[];
     groupWhenChange<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K, elements: T[] }[];
 
     orderBy<V extends Comparable>(this: Array<T>, keySelector: (element: T) => V | null | undefined): T[];
     orderByDescending<V extends Comparable>(this: Array<T>, keySelector: (element: T) => V | null | undefined): T[];
-
 
     toObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T };
     toObject<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
@@ -53,6 +59,11 @@ declare global {
     toMap<K, V>(this: Array<T>, keySelector: (element: T) => K, valueSelector: (element: T) => V): Map<K, V>;
     toMapDistinct<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T>;
     toMapDistinct<K, V>(this: Array<T>, keySelector: (element: T) => V, valueSelector: (element: T) => V): Map<K, V>;
+    
+    toDictionary<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string): Dictionary<K, T>;
+    toDictionary<K, V>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string, valueSelector: (element: T) => V): Dictionary<K, V>;
+    toDictionaryDistinct<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string): Dictionary<K, T>;
+    toDictionaryDistinct<K, V>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string, valueSelector: (element: T) => V): Dictionary<K, V>;
 
     distinctBy(this: Array<T>, keySelector?: (element: T) => unknown): T[];
 
@@ -161,6 +172,7 @@ declare global {
     abortSignal?: AbortSignal;
   }
 }
+
 Array.prototype.clear = function(): void {
   this.length = 0;
 };
@@ -218,6 +230,59 @@ Array.prototype.groupToMap = function(this: any[], keySelector: (element: any) =
     result.get(key)!.push(elementSelector ? elementSelector(element) : element);
   }
   return result;
+};
+
+Array.prototype.groupToDictionary = function(this: any[], keySelector: (element: any) => unknown, keyStringified: (key: unknown) => string, elementSelector?: (element: any) => unknown): Dictionary<any, any[]> {
+  const result = new Dictionary<any, any[]>(keyStringified);
+
+  for (let i = 0; i < this.length; i++) {
+    const element: any = this[i];
+    const key = keySelector(element);
+    if (!result.has(key))
+      result.set(key, []);
+    result.get(key)!.push(elementSelector ? elementSelector(element) : element);
+  }
+  return result;
+};
+
+
+Array.prototype.groupToMap = function(this: any[], keySelector: (element: any) => string, elementSelector?: (element: any) => unknown): Map<any, any[]> {
+  const result = new Map<any, any[]>();
+
+  for (let i = 0; i < this.length; i++) {
+    const element: any = this[i];
+    const key = keySelector(element);
+    if (!result.has(key))
+      result.set(key, []);
+    result.get(key)!.push(elementSelector ? elementSelector(element) : element);
+  }
+  return result;
+};
+
+Array.prototype.groupToDictionary = function(this: any[], keySelector: (element: any) => unknown, keyStringified: (key: unknown) => string, elementSelector?: (element: any) => unknown): Dictionary<any, any[]> {
+  const result = new Dictionary<any, any[]>(keyStringified);
+
+  for (let i = 0; i < this.length; i++) {
+    const element: any = this[i];
+    const key = keySelector(element);
+    if (!result.has(key))
+      result.set(key, []);
+    result.get(key)!.push(elementSelector ? elementSelector(element) : element);
+  }
+  return result;
+};
+
+
+Array.prototype.agGroupToObject = function(this: any[], keySelector: (element: any) => string, aggregateSelector: (gr: { key: string, elements: any[] }) => any): { [key: string]: any } {
+  return this.groupBy(keySelector).toObject(gr => gr.key, gr => aggregateSelector(gr));
+};
+
+Array.prototype.agGroupToMap = function(this: any[], keySelector: (element: any) => any, aggregateSelector: (gr: { key: any, elements: any[] }) => any): Map<any, any> {
+  return this.groupBy(keySelector).toMap(gr => gr.key, gr => aggregateSelector(gr));
+};
+
+Array.prototype.agGroupToDictionary = function(this: any[], keySelector: (element: any) => any, keyStringifier: (key: any) => string, aggregateSelector: (gr: { key: any, elements: any[] }) => any): Dictionary<any, any> {
+  return this.groupBy(keySelector, keyStringifier).toDictionary(gr => gr.key, keyStringifier, gr => aggregateSelector(gr));
 };
 
 Array.prototype.groupWhen = function(this: any[], isGroupKey: (element: any) => boolean, includeKeyInGroup = false, beforeFirstKey: "throw" | "skip" | "defaultGroup" = "throw"): { key: any, elements: any[] }[] {
@@ -395,6 +460,34 @@ Array.prototype.toMapDistinct = function(this: any[], keySelector: (element: any
 
   return map;
 };
+
+Array.prototype.toDictionary = function(this: any[], keySelector: (element: any) => any, keyStringifier: (elem: any) => string, valueSelector?: (element: any) => any): Dictionary<any, any> {
+  const dic = new Dictionary<any, any>(keyStringifier);
+
+  this.forEach(item => {
+    const key = keySelector(item);
+
+    if (dic.has(key))
+      throw new Error("Repeated key {0}".formatWith(key));
+
+    dic.set(key, valueSelector ? valueSelector(item) : item);
+  });
+
+  return dic;
+};
+
+Array.prototype.toDictionaryDistinct = function(this: any[], keySelector: (element: any) => any, keyStringifier: (elem: any) => string, valueSelector?: (element: any) => any): Dictionary<any, any> {
+  const dic = new Dictionary<any, any>(keyStringifier);
+
+  this.forEach(item => {
+    const key = keySelector(item);
+
+    dic.set(key, valueSelector ? valueSelector(item) : item);
+  });
+
+  return dic;
+};
+
 
 Array.prototype.distinctBy = function(this: any[], keySelector: (element: any) => unknown): any[] {
   const keysFound = new Set<unknown>();
@@ -1354,3 +1447,43 @@ export function isPromise(value: any): value is Promise<any> {
 export function toPromise<T>(value: T | Promise<T>): Promise<T> {
   return isPromise(value) ? value : Promise.resolve(value);
 }
+
+
+//Similar to Map<K, V> but with keyStringifier for custom formatter
+export class Dictionary<K, V> {
+  private map = new Map<string, V>();
+  private keyStringifier: (key: K) => string;
+
+  constructor(keyStringifier: (key: K) => string) {
+    this.keyStringifier = keyStringifier;
+  }
+
+  set(key: K, value: V): this {
+    this.map.set(this.keyStringifier(key), value);
+    return this;
+  }
+
+  get(key: K): V | undefined {
+    return this.map.get(this.keyStringifier(key));
+  }
+
+  has(key: K): boolean {
+    return this.map.has(this.keyStringifier(key));
+  }
+
+  delete(key: K): boolean {
+    return this.map.delete(this.keyStringifier(key));
+  }
+
+  get size(): number {
+    return this.map.size;
+  }
+
+  clear(): void {
+    this.map.clear();
+  }
+
+  values(): MapIterator<V> {
+    return this.map.values();
+  }
+} 
