@@ -34,14 +34,13 @@ declare global {
     groupBy<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: ((key: K) => string) | undefined, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
     groupToObject<E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): { [key: string]: E[] };
+    groupReduceToObject<R>(this: Array<T>, keySelector: (element: T) => string, reduceElements: (gr: { key: string, elements: T[] }) => R): { [key: string]: R };
     groupToMap<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T[]>;
     groupToMap<K, E>(this: Array<T>, keySelector: (element: T) => K, elementSelector: (element: T) => E): Map<K, E[]>;
+    groupReduceToMap<K, R>(this: Array<T>, keySelector: (element: T) => K, reduceElements: (gr: { key: string, elements: T[] }) => R): Map<K, R>;
     groupToDictionary<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string): Dictionary<K, T[]>;
     groupToDictionary<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string, elementSelector: (element: T) => E): Dictionary<K, E[]>;
-
-    agGroupToObject<R>(this: Array<T>, keySelector: (element: T) => string, agregateElements: (gr: { key: string, elements: T[] }) => R): { [key: string]: R };
-    agGroupToMap<K, R>(this: Array<T>, keySelector: (element: T) => K, agregateElements: (gr: { key: string, elements: T[] }) => R): Map<K, R>;
-    agGroupToDictionary<K, R>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string, agregateElements: (gr: { key: string, elements: T[] }) => R): Dictionary<K, R>;
+    groupReduceToDictionary<K, R>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string, reduceElements: (gr: { key: string, elements: T[] }) => R): Dictionary<K, R>;
 
     groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, beforeFirstKey?: "throw" | "skip" | "defaultGroup"): { key: T, elements: T[] }[];
     groupWhenChange<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K, elements: T[] }[];
@@ -273,16 +272,16 @@ Array.prototype.groupToDictionary = function(this: any[], keySelector: (element:
 };
 
 
-Array.prototype.agGroupToObject = function(this: any[], keySelector: (element: any) => string, aggregateSelector: (gr: { key: string, elements: any[] }) => any): { [key: string]: any } {
-  return this.groupBy(keySelector).toObject(gr => gr.key, gr => aggregateSelector(gr));
+Array.prototype.groupReduceToObject = function(this: any[], keySelector: (element: any) => string, reduceElements: (gr: { key: string, elements: any[] }) => any): { [key: string]: any } {
+  return this.groupBy(keySelector).toObject(gr => gr.key, gr => reduceElements(gr));
 };
 
-Array.prototype.agGroupToMap = function(this: any[], keySelector: (element: any) => any, aggregateSelector: (gr: { key: any, elements: any[] }) => any): Map<any, any> {
-  return this.groupBy(keySelector).toMap(gr => gr.key, gr => aggregateSelector(gr));
+Array.prototype.groupReduceToMap = function(this: any[], keySelector: (element: any) => any, reduceElements: (gr: { key: any, elements: any[] }) => any): Map<any, any> {
+  return this.groupBy(keySelector).toMap(gr => gr.key, gr => reduceElements(gr));
 };
 
-Array.prototype.agGroupToDictionary = function(this: any[], keySelector: (element: any) => any, keyStringifier: (key: any) => string, aggregateSelector: (gr: { key: any, elements: any[] }) => any): Dictionary<any, any> {
-  return this.groupBy(keySelector, keyStringifier).toDictionary(gr => gr.key, keyStringifier, gr => aggregateSelector(gr));
+Array.prototype.groupReduceToDictionary = function(this: any[], keySelector: (element: any) => any, keyStringifier: (key: any) => string, reduceElements: (gr: { key: any, elements: any[] }) => any): Dictionary<any, any> {
+  return this.groupBy(keySelector, keyStringifier).toDictionary(gr => gr.key, keyStringifier, gr => reduceElements(gr));
 };
 
 Array.prototype.groupWhen = function(this: any[], isGroupKey: (element: any) => boolean, includeKeyInGroup = false, beforeFirstKey: "throw" | "skip" | "defaultGroup" = "throw"): { key: any, elements: any[] }[] {

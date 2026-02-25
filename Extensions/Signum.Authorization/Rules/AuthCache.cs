@@ -144,7 +144,7 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
             throw new IntegrityCheckException(errors);
 
         Dictionary<Lite<RoleEntity>, Dictionary<K, A>> realRules = rules
-              .AgGroupToDictionary(ru => ru.Role!, gr => gr
+              .GroupAggregateToDictionary(ru => ru.Role!, gr => gr
                 .SelectCatch(ru => KeyValuePair.Create(ToKey(ru.Resource!), GetRuleAllowed(ru)))
                 .ToDictionaryEx());
 
