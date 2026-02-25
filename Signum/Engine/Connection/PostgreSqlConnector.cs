@@ -68,10 +68,14 @@ public class PostgreSqlConnector : Connector
     Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder;
 
     string originalDatabaseName;
+    
+    public bool IsAzurePostgres { get; private set; }
+    
     public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion, Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder = null) : base(schema.Do(s => s.Settings.IsPostgres = true))
     {
         this.originalDatabaseName = new NpgsqlConnectionStringBuilder(connectionString).Database!;
         this.customizeBuilder = customizeBuilder;
+        this.IsAzurePostgres = connectionString.Contains("postgres.database.azure.com", StringComparison.OrdinalIgnoreCase);
         this.ChangeConnectionString(connectionString, runCustomizer: true);
         this.ConnectionString = connectionString;
         this.ParameterBuilder = new PostgreSqlParameterBuilder();
