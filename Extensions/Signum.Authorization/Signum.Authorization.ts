@@ -31,6 +31,8 @@ export namespace AuthMessage {
 
 export namespace LoginAuthMessage {
   export const ThePasswordMustHaveAtLeast0Characters: MessageKey = new MessageKey("LoginAuthMessage", "ThePasswordMustHaveAtLeast0Characters");
+  export const SuperUserPasswordMustHaveAtLeast0Characters: MessageKey = new MessageKey("LoginAuthMessage", "SuperUserPasswordMustHaveAtLeast0Characters");
+  export const PasswordComplexityWarning: MessageKey = new MessageKey("LoginAuthMessage", "PasswordComplexityWarning");
   export const NotUserLogged: MessageKey = new MessageKey("LoginAuthMessage", "NotUserLogged");
   export const Username0IsNotValid: MessageKey = new MessageKey("LoginAuthMessage", "Username0IsNotValid");
   export const User0IsDeactivated: MessageKey = new MessageKey("LoginAuthMessage", "User0IsDeactivated");
@@ -102,6 +104,7 @@ export interface RoleEntity extends Entities.Entity {
   isTrivialMerge: boolean;
   inheritsFrom: Entities.MList<Entities.Lite<RoleEntity>>;
   description: string | null;
+  minPasswordLength: number | null;
 }
 
 export namespace RoleOperation {

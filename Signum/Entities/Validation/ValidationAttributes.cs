@@ -122,6 +122,8 @@ public class StringLengthValidatorAttribute : ValidatorAttribute
     }
 
     public bool MultiLine { get; set; }
+    
+    public bool DisallowControlCharacters { get; set; }
 
     int min = -1;
     public int Min
@@ -137,12 +139,47 @@ public class StringLengthValidatorAttribute : ValidatorAttribute
         set { max = value; }
     }
 
+    private static bool IsValidXmlChar(char c)
+    {
+        return c == 0x9 || c == 0xA || c == 0xD ||
+               (c >= 0x20 && c <= 0xD7FF) ||
+               (c >= 0xE000 && c <= 0xFFFD);
+    }
+
+    private static string GetContextAroundInvalidChar(string val, int invalidCharIndex)
+    {
+        int contextLength = 20;
+        int start = Math.Max(0, invalidCharIndex - contextLength);
+        int end = Math.Min(val.Length, invalidCharIndex + contextLength + 1);
+        
+        var beforeInvalid = val.Substring(start, invalidCharIndex - start);
+        var afterInvalid = val.Substring(invalidCharIndex + 1, end - invalidCharIndex - 1);
+        
+        var context = beforeInvalid + "█" + afterInvalid;
+        if (start > 0) context = "..." + context;
+        if (end < val.Length) context = context + "...";
+        
+        return context;
+    }
+
     protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
         string val = (string)value!;
 
         if (string.IsNullOrEmpty(val))
             return null;
+
+        if (DisallowControlCharacters)
+        {
+            for (int i = 0; i < val.Length; i++)
+            {
+                if (!IsValidXmlChar(val[i]))
+                {
+                    var context = GetContextAroundInvalidChar(val, i);
+                    return ValidationMessage._0ContainsInvalidControlCharactersNear1.NiceToString("{0}", $"position {i + 1}: '{context}'");
+                }
+            }
+        }
 
         if (!MultiLine && (val.Contains('\n') || val.Contains('\r')))
             return ValidationMessage._0ShouldHaveJustOneLine.NiceToString();
@@ -1315,6 +1352,8 @@ public enum ValidationMessage
     NumberIsTooSmall,
     [Description("Either {0} or {1} should be set.")]
     Either0Or1ShouldBeSet,
+    [Description("{0} contains invalid control characters near: '{1}'")]
+    _0ContainsInvalidControlCharactersNear1,
 }
 
 public static class ValidationMessageHelper

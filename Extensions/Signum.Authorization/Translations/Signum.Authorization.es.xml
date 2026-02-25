@@ -81,6 +81,7 @@
     <Member Name="NoWindowsUserFound" Description="No se ha encontrado ningún usuario de Windows" />
     <Member Name="Password" Description="Contraseña" />
     <Member Name="PasswordChanged" Description="Contraseña cambiada" />
+    <Member Name="PasswordComplexityWarning" Description="No ha cumplido con los requisitos de complejidad de contraseña recomendados (mínimo 1 letra mayúscula, 1 letra minúscula, 1 número y 1 carácter especial)." />
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="La contraseña se ha cambiado correctamente" />
     <Member Name="PasswordMustHaveAValue" Description="La contraseña debe tener un valor" />
     <Member Name="PasswordsAreDifferent" Description="Las contraseñas no coinciden" />
@@ -90,6 +91,7 @@
     <Member Name="SendEmail" Description="Enviar correo electrónico" />
     <Member Name="ShowLoginForm" Description="Mostrar formulario de inicio de sesión" />
     <Member Name="Success" Description="Éxito" />
+    <Member Name="SuperUserPasswordMustHaveAtLeast0Characters" Description="La contraseña de super usuario debe tener al menos {0} caracteres" />
     <Member Name="SwitchUser" Description="Cambiar de usuario" />
     <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="La contraseña debe tener al menos {0} caracteres" />
     <Member Name="TheUserIsNotLongerInTheDatabase" Description="El usuario ya no está en la base de datos" />
@@ -139,6 +141,7 @@
   </Type>
   <Type Name="RoleEntity" Description="Rol">
     <Member Name="MergeStrategy" Description="Estrategia de mezcla" />
+    <Member Name="MinPasswordLength" Description="Longitud mínima de contraseña" />
     <Member Name="Name" Description="Nombre" />
   </Type>
   <Type Name="RoleOperation">

@@ -29,7 +29,7 @@ public static class TranslationReplacementLogic
 
 
         ReplacementsLazy = sb.GlobalLazy(() => Database.Query<TranslationReplacementEntity>()
-            .AgGroupToDictionary(a => a.CultureInfo.ToCultureInfo(),
+            .GroupAggregateToDictionary(a => a.CultureInfo.ToCultureInfo(),
             gr =>
             {
                 var dic = gr.ToDictionaryEx(a => a.WrongTranslation, a => a.RightTranslation, StringComparer.InvariantCultureIgnoreCase, "wrong translations");

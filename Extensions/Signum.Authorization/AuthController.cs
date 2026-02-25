@@ -122,11 +122,12 @@ public class AuthController : ControllerBase
         if (string.IsNullOrEmpty(request.newPassword))
             return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
-        var error = UserEntity.OnValidatePassword(request.newPassword);
+        var user = UserEntity.Current.Retrieve();
+        
+        var error = UserEntity.OnValidatePassword(request.newPassword, user.Role);
         if (error.HasText())
             return ModelError("newPassword", error);
 
-        var user = UserEntity.Current.Retrieve();
         if (string.IsNullOrEmpty(request.oldPassword))
         {
             if (user.PasswordHash != null)
@@ -149,6 +150,19 @@ public class AuthController : ControllerBase
         return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(user), authenticationType = "changePassword" };
     }
 
+    [HttpPost("api/auth/validatePassword")]
+    public PasswordValidationResponse ValidatePasswordComplexity([Required, FromBody] ValidatePasswordRequest request)
+    {
+        var user = UserEntity.Current?.Retrieve();
+        var result = PasswordValidator.ValidatePassword(request.password, user?.Role);
+        
+        return new PasswordValidationResponse
+        {
+            isValid = result.IsValid,
+            errorMessage = result.ErrorMessage,
+            complexityWarning = result.ComplexityWarning
+        };
+    }
 
     private BadRequestObjectResult ModelError(string field, string error)
     {
@@ -187,5 +201,17 @@ public class ResetPasswordRequest
 public class ForgotPasswordRequest
 {
     public string eMail { get; set; }
+}
+
+public class ValidatePasswordRequest
+{
+    public string password { get; set; }
+}
+
+public class PasswordValidationResponse
+{
+    public bool isValid { get; set; }
+    public string? errorMessage { get; set; }
+    public string? complexityWarning { get; set; }
 }
 #pragma warning restore IDE1006 // Naming Styles
