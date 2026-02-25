@@ -453,7 +453,12 @@ public static class PostgreSqlConnectorScripts
         if (databaseName != null)
             throw new NotSupportedException();
 
-        return new SqlPreCommandSimple(@"
+        var executeAsRole = Schema.Current.ExecuteAs;
+        var executeAsCondition = executeAsRole != null 
+            ? $" OR pr.rolname='{executeAsRole}'" 
+            : "";
+
+        return new SqlPreCommandSimple($@"
 DO $$
 DECLARE
         r RECORD;
@@ -512,7 +517,7 @@ BEGIN
                 FROM pg_namespace pns, pg_roles pr
                 WHERE pr.oid=pns.nspowner
                     AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast', 'public')
-                    AND pr.rolname=current_user
+                    AND (pr.rolname=current_user{executeAsCondition})
             ) LOOP
                 EXECUTE format('DROP SCHEMA %I;', r.nspname);
         END LOOP;

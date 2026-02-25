@@ -81,11 +81,7 @@ public class Schema : IImplementationsFinder
 
     public Dictionary<string, Func<Schema, bool>> PostgresExtensions = new Dictionary<string, Func<Schema, bool>>()
     {
-        { "plpgsql", s => {
-            if (Connector.Current is PostgreSqlConnector psc && psc.IsAzurePostgres)
-                return false; // plpgsql is pre-installed in Azure PostgreSQL and cannot be created by users
-            return true;
-        }},
+        { "plpgsql", s => true }, // Always include in the list (pre-installed in Azure PostgreSQL)
         { "uuid-ossp", s => true },
         { "ltree", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.Type.UnNullify() == typeof(SqlHierarchyId)))},
     };
