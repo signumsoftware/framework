@@ -64,6 +64,8 @@ declare global {
     toDictionaryDistinct<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string): Dictionary<K, T>;
     toDictionaryDistinct<K, V>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string, valueSelector: (element: T) => V): Dictionary<K, V>;
 
+    toHashSet(this: Array<T>, keyStringifier: (element: T) => string): HashSet<T>;
+
     distinctBy(this: Array<T>, keySelector?: (element: T) => unknown): T[];
 
     clear(this: Array<T>): void;
@@ -487,6 +489,15 @@ Array.prototype.toDictionaryDistinct = function(this: any[], keySelector: (eleme
   return dic;
 };
 
+Array.prototype.toHashSet = function(this: any[], keyStringifier: (element: any) => string): HashSet<any> {
+  const set = new HashSet<any>(keyStringifier)
+
+  this.forEach(item => {
+    set.add(item)
+  })
+
+  return set
+};
 
 Array.prototype.distinctBy = function(this: any[], keySelector: (element: any) => unknown): any[] {
   const keysFound = new Set<unknown>();
@@ -1485,4 +1496,42 @@ export class Dictionary<K, V> {
   values(): MapIterator<V> {
     return this.map.values();
   }
+} 
+
+export class HashSet<T> {
+  private map = new Map<string, T>();
+  private keyStringifier: (item: T) => string;
+
+  constructor(keyStringifier: (item: T) => string) {
+    this.keyStringifier = keyStringifier;
+  }
+
+  add(item: T): this {
+    this.map.set(this.keyStringifier(item), item);
+    return this;
+  }
+
+  has(item: T): boolean {
+    return this.map.has(this.keyStringifier(item));
+  }
+
+  delete(item: T): boolean {
+    return this.map.delete(this.keyStringifier(item));
+  }
+
+  get size(): number {
+    return this.map.size;
+  }
+
+  clear(): void {
+    this.map.clear();
+  }
+
+  values(): MapIterator<T> {
+    return this.map.values();
+  }
+
+  [Symbol.iterator](): MapIterator<T> {
+    return this.map.values()
+  } 
 } 
