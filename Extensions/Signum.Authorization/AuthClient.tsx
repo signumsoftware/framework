@@ -298,6 +298,20 @@ export namespace AuthClient {
     export function fetchCurrentUser(refreshToken: boolean = false): Promise<UserEntity> {
       return ajaxGet({ url: "/api/auth/currentUser" + (refreshToken ? "?refreshToken=true" : ""), cache: "no-cache" });
     }
+
+    export interface ValidatePasswordRequest {
+      password: string;
+    }
+
+    export interface PasswordValidationResponse {
+      isValid: boolean;
+      errorMessage?: string;
+      complexityWarning?: string;
+    }
+
+    export function validatePassword(password: string): Promise<PasswordValidationResponse> {
+      return ajaxPost({ url: "/api/auth/validatePassword" }, { password });
+    }
   
     export function logout(): Promise<void> {
       return ajaxPost({ url: "/api/auth/logout" }, undefined);

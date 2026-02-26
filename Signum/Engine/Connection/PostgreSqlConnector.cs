@@ -68,10 +68,14 @@ public class PostgreSqlConnector : Connector
     Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder;
 
     string originalDatabaseName;
+    
+    public bool IsAzurePostgres { get; private set; }
+    
     public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion, Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder = null) : base(schema.Do(s => s.Settings.IsPostgres = true))
     {
         this.originalDatabaseName = new NpgsqlConnectionStringBuilder(connectionString).Database!;
         this.customizeBuilder = customizeBuilder;
+        this.IsAzurePostgres = connectionString.Contains("postgres.database.azure.com", StringComparison.OrdinalIgnoreCase);
         this.ChangeConnectionString(connectionString, runCustomizer: true);
         this.ConnectionString = connectionString;
         this.ParameterBuilder = new PostgreSqlParameterBuilder();
@@ -449,7 +453,12 @@ public static class PostgreSqlConnectorScripts
         if (databaseName != null)
             throw new NotSupportedException();
 
-        return new SqlPreCommandSimple(@"
+        var executeAsRole = Schema.Current.ExecuteAs;
+        var executeAsCondition = executeAsRole != null 
+            ? $" OR pr.rolname='{executeAsRole}'" 
+            : "";
+
+        return new SqlPreCommandSimple($@"
 DO $$
 DECLARE
         r RECORD;
@@ -508,7 +517,7 @@ BEGIN
                 FROM pg_namespace pns, pg_roles pr
                 WHERE pr.oid=pns.nspowner
                     AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast', 'public')
-                    AND pr.rolname=current_user
+                    AND (pr.rolname=current_user{executeAsCondition})
             ) LOOP
                 EXECUTE format('DROP SCHEMA %I;', r.nspname);
         END LOOP;

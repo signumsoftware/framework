@@ -38,6 +38,10 @@ export namespace ResetPasswordClient {
       return ajaxPost({ url: "/api/auth/requestNewLink" }, code);
     }
 
+    export function validatePasswordForReset(code: string, password: string): Promise<PasswordValidationResponse> {
+      return ajaxPost({ url: "/api/auth/validatePasswordForReset" }, { code, password });
+    }
+
   export interface ResetPasswordRequest {
     code: string;
     newPassword: string;
@@ -51,6 +55,12 @@ export namespace ResetPasswordClient {
       success: boolean;
       message: string;
       title?: string;
+    }
+
+    export interface PasswordValidationResponse {
+      isValid: boolean;
+      errorMessage?: string;
+      complexityWarning?: string;
     }
   }
 }
