@@ -112,19 +112,19 @@ public class SearchSkill : ChatbotSkill
 
 
     [McpServerTool, Description("Convert FindOptions to a url")]
-    public static string GetFindOptionsUrl(string findOptionsJson)
+    public static string GetFindOptionsUrl(JsonElement findOptions)
     {
-        FindOptions fo = ParseFindOptions(findOptionsJson);
+        FindOptions fo = ParseFindOptions(findOptions);
 
         return FindOptionsEncoder.FindOptionsPath(fo);
     }
 
-    public static FindOptions ParseFindOptions(string findOptionsJson)
+    public static FindOptions ParseFindOptions(JsonElement findOptions)
     {
         FindOptions fo;
         try
         {
-            fo = JsonSerializer.Deserialize<FindOptions>(findOptionsJson, new JsonSerializerOptions
+            fo = findOptions.Deserialize<FindOptions>(new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
                 IncludeFields = true,

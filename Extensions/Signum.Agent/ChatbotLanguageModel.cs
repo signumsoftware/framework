@@ -23,16 +23,16 @@ public class ChatbotLanguageModelEntity : Entity
 
     public bool IsDefault { get; set; }
 
-    [Unit("$ / 1M tokens")]
+    [Unit("$ / 1M tokens"), DecimalsValidator(4)]
     public decimal? PricePerInputToken { get; set; }
 
-    [Unit("$ / 1M tokens")]
+    [Unit("$ / 1M tokens"), DecimalsValidator(4)]
     public decimal? PricePerOutputToken { get; set; }
 
-    [Unit("$ / 1M tokens")]
+    [Unit("$ / 1M tokens"), DecimalsValidator(4)]
     public decimal? PricePerCachedInputToken { get; set; }
 
-    [Unit("$ / 1M tokens")]
+    [Unit("$ / 1M tokens"), DecimalsValidator(4)]
     public decimal? PricePerReasoningOutputToken { get; set; }
 
     [AutoExpressionField]

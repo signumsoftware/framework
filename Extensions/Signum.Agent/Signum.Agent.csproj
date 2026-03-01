@@ -18,7 +18,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="Anthropic.SDK" Version="5.9.0" />
-		<PackageReference Include="Ater.DeepSeek.Core" Version="1.3.2" />
 		<PackageReference Include="Google_GenerativeAI.Microsoft" Version="3.6.3" />
 		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.3.0" />
 		<PackageReference Include="Mistral.SDK" Version="2.3.1" />

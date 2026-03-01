@@ -122,7 +122,7 @@ public abstract class ChatbotSkill
             if (item.Value == SkillActivation.Eager)
                 sb.AppendLineLF(skill.GetInstruction(null));
             else
-                sb.AppendLineLF("Use the tool 'describe' to get more information about this skill.");
+                sb.AppendLineLF("Use the tool 'describe' to get more information about this skill and discover additional tools.");
         }
     }
 

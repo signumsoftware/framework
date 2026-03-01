@@ -2,6 +2,7 @@ using ModelContextProtocol.Server;
 using Signum.API;
 using System.ComponentModel;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Signum.Agent.Skills;
 
@@ -9,7 +10,9 @@ public class OperationSkill : ChatbotSkill
 {
     public OperationSkill()
     {
-        ShortDescription = "Executes operations in an entity";
+        ShortDescription = @"Executes operations in an entity like Construct / Construct_From / Execute (like Save) / Delete. 
+IMPORTANT: Most user actions are operations on entities (typically also QueryName), so check for available entity operations first.";
+
         IsAllowed = () => true;
     }
 
@@ -73,7 +76,7 @@ public class OperationSkill : ChatbotSkill
     }
 
     [McpServerTool, Description("Construct an entity from another entity using an operation")]
-    public static EntityPackTS Operation_ConstructFrom(string entityJson, string operationKey, CancellationToken token)
+    public static EntityPackTS Operation_ConstructFrom(JsonElement entityJson, string operationKey, CancellationToken token)
     {
         Entity entity = DeserializeEntity(entityJson);
 
@@ -90,9 +93,9 @@ public class OperationSkill : ChatbotSkill
     }
 
     [McpServerTool, Description("Construct an entity from many entities using an operation")]
-    public static EntityPackTS Operation_ConstructFromMany(string entitiesJson, string operationKey, CancellationToken token)
+    public static EntityPackTS Operation_ConstructFromMany(JsonArray entitiesJson, string operationKey, CancellationToken token)
     {
-        var lites = JsonSerializer.Deserialize<List<Lite<Entity>>>(entitiesJson, SignumServer.JsonSerializerOptions)!;
+        var lites = entitiesJson.Deserialize<List<Lite<Entity>>>(SignumServer.JsonSerializerOptions)!;
 
         var operation = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
@@ -109,13 +112,13 @@ public class OperationSkill : ChatbotSkill
         return result;
     }
 
-    private static Entity DeserializeEntity(string entityJson)
+    private static Entity DeserializeEntity(JsonElement entityJson)
     {
-        return JsonSerializer.Deserialize<Entity>(entityJson, SignumServer.JsonSerializerOptions)!;
+        return entityJson.Deserialize<Entity>(SignumServer.JsonSerializerOptions)!;
     }
 
     [McpServerTool, Description("Executes an operation on an entity")]
-    public static EntityPackTS Operation_Execute(string entityJson, string operationKey, CancellationToken token)
+    public static EntityPackTS Operation_Execute(JsonElement entityJson, string operationKey, CancellationToken token)
     {
         var entity = DeserializeEntity(entityJson)!;
 
@@ -132,7 +135,7 @@ public class OperationSkill : ChatbotSkill
     }
 
     [McpServerTool, Description("Executes an operation on an entity")]
-    public static void Operation_Delete(string entityJson, string operationKey, CancellationToken token)
+    public static void Operation_Delete(JsonElement entityJson, string operationKey, CancellationToken token)
     {
         var entity = DeserializeEntity(entityJson)!;
 

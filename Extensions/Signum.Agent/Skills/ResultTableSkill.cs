@@ -1,5 +1,6 @@
 using ModelContextProtocol.Server;
 using System.ComponentModel;
+using System.Text.Json;
 
 namespace Signum.Agent.Skills;
 
@@ -12,9 +13,9 @@ public class ResultTableSkill : ChatbotSkill
     }
 
     [McpServerTool, Description("Executes a FindOptions and returns a dynamic ResultTable")]
-    public static ResultTableSimple GetResultTable(string findOptionsJson)
+    public static ResultTableSimple GetResultTable(JsonElement findOptions)
     {
-        FindOptions fo = SearchSkill.ParseFindOptions(findOptionsJson);
+        FindOptions fo = SearchSkill.ParseFindOptions(findOptions);
 
         var qr = fo.ToQueryRequest();
 

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ChatMessageEntity, ToolCallEmbedded } from "../Signum.Agent";
 import { ChatbotClient,UITool } from "../ChatbotClient";
+import ChatMarkdown from "../Templates/ChatMarkdown";
 
 interface ConfirmPayload {
   title: string;
@@ -26,7 +27,7 @@ function ConfirmWidget(p: {
     <div className="chat-ui-confirm mb-2">
       <div className="chat-bubble bot">
         <strong>{p.payload.title}</strong>
-        <p className="mb-2">{p.payload.message}</p>
+        <p className="mb-2"><ChatMarkdown content={p.payload.message}/></p>
         <div className="d-flex gap-2 flex-wrap">
           {p.payload.buttons.map(label => (
             <button

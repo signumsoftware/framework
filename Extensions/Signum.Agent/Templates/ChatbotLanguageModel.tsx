@@ -8,7 +8,7 @@ import { ChatbotClient } from '../ChatbotClient';
 export default function ChatbotConfiguration(p: { ctx: TypeContext<ChatbotLanguageModelEntity> }): React.JSX.Element {
   const ctx = p.ctx;
   const ctx4 = ctx.subCtx({ labelColumns: 4 });
-  const ctx6 = ctx.subCtx({ labelColumns: 6 });
+  const ctx6 = ctx.subCtx({ labelColumns: 5 });
   const forceUpdate = useForceUpdate();
   const provider = ctx.value.provider;
 
