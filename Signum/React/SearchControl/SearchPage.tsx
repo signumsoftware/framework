@@ -21,9 +21,7 @@ function SearchPage(): React.ReactElement {
 
   usePageUIState(() => {
     const scl = searchControl.current?.searchControlLoaded;
-    if (scl)
-      return { name: "SearchPage", context: Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, scl.props.defaultIncudeDefaultFilters) };
-    return { name: "SearchPage", context: null };
+    return { name: "SearchPage", context: scl && Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, scl.props.defaultIncudeDefaultFilters) };
   });
   
 
@@ -55,7 +53,7 @@ function SearchPage(): React.ReactElement {
     const newPath = Finder.findOptionsPath(findOptions, scl.extraUrlParams);
 
     if (location.pathname + location.search != newPath)
-      AppContext.navigate(newPath, { replace : true });
+      AppContext.navigate(newPath, { replace: true });
   }
 
   if (!Finder.isFindable(fo.queryName, true))
@@ -68,7 +66,7 @@ function SearchPage(): React.ReactElement {
       </div>
     );
 
-  const setSearchControl = React.useCallback(function (sc: SearchControlHandler | null) {
+  const setSearchControl = React.useCallback(function(sc: SearchControlHandler | null) {
     searchControl.current = sc;
     onResize();
   }, []);
