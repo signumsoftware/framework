@@ -1,6 +1,6 @@
 import * as React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { faPaperPlane, faStop } from "@fortawesome/free-solid-svg-icons";
 import "./ChatbotModal.css";
 import { getToString, Lite, newMListElement } from "@framework/Signum.Entities";
 import { ChatbotMessage, ChatbotUICommand, ChatMessageEntity, ChatMessageRole, ChatSessionEntity, ToolCallEmbedded } from "./Signum.Agent";
@@ -56,6 +56,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
   const messagesRef = React.useRef<MessageCount[] | undefined>([]);
 
   const isLoadingRef = React.useRef<boolean>(false);
+  const abortControllerRef = React.useRef<AbortController | null>(null);
 
   const answerRef = React.useRef<ChatMessageEntity | null>(null);
   const generalExceptionRef = React.useRef<Lite<ExceptionEntity> | null>(null);
@@ -76,6 +77,10 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
     answerRef.current = null;
     recoverRef.current = null;
     forceUpdate();
+  }
+
+  function handleStop() {
+    abortControllerRef.current?.abort();
   }
 
   async function handleOpenSession() {
@@ -121,13 +126,13 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 
       var content = JSON.stringify(json);
 
+      abortControllerRef.current = new AbortController();
       const r = await ChatbotClient.API.ask(content, {
         sessionId: currentSessionRef?.current?.id,
         toolId: toolCall.toolId,
         callId: toolCall.callId,
-      }, undefined);
-
-      await processStream(r!);
+      }, abortControllerRef.current.signal).catch(e => { if ((e as DOMException)?.name === 'AbortError') return null; throw e; });
+      if (r) await processStream(r);
     }
     finally {
       forceUpdate();
@@ -149,13 +154,13 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 
       var content = JSON.stringify(json);
 
+      abortControllerRef.current = new AbortController();
       const r = await ChatbotClient.API.ask(content, {
         sessionId: currentSessionRef?.current?.id,
         toolId: toolCall.toolId,
         callId: toolCall.callId,
-      }, undefined);
-
-      await processStream(r!);
+      }, abortControllerRef.current.signal).catch(e => { if ((e as DOMException)?.name === 'AbortError') return null; throw e; });
+      if (r) await processStream(r);
     }
     finally {
       isLoadingRef.current = false;
@@ -173,21 +178,13 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
     forceUpdate();
 
     try {
-      if (recover.kind === "tool") {
-        // Re-send as a UIReply-style recover: body is empty, server re-executes the tool
-        const r = await ChatbotClient.API.ask("", {
-          sessionId: currentSessionRef?.current?.id,
-          recover: true,
-        }, undefined);
-        await processStream(r!);
-      } else {
-        // kind === "continue": last message is User or Tool — just resume the agent loop
-        const r = await ChatbotClient.API.ask("", {
-          sessionId: currentSessionRef?.current?.id,
-          recover: true,
-        }, undefined);
-        await processStream(r!);
-      }
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
+      const r = await ChatbotClient.API.ask("", {
+        sessionId: currentSessionRef?.current?.id,
+        recover: true,
+      }, signal).catch(e => { if ((e as DOMException)?.name === 'AbortError') return null; throw e; });
+      if (r) await processStream(r);
     }
     finally {
       isLoadingRef.current = false;
@@ -201,6 +198,8 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
     try {
 
       for await (const chunk of getWordsOrCommands(reader!)) {
+        if (abortControllerRef.current?.signal.aborted)
+          break;
 
 
         console.log(chunk);
@@ -334,9 +333,14 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
         });
       }
 
-
+    }
+    catch (e) {
+      if ((e as DOMException)?.name === 'AbortError')
+        return;
+      throw e;
     }
     finally {
+      abortControllerRef.current = null;
       forceUpdate();
     }
   }
@@ -349,8 +353,10 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
     forceUpdate();
 
     try {
-      const r = await ChatbotClient.API.ask(questionRef.current, { sessionId: currentSessionRef?.current?.id }, undefined).catch(error => { });
-      await processStream(r!);
+      abortControllerRef.current = new AbortController();
+      const r = await ChatbotClient.API.ask(questionRef.current, { sessionId: currentSessionRef?.current?.id }, abortControllerRef.current.signal)
+        .catch(e => { if ((e as DOMException)?.name === 'AbortError') return null; throw e; });
+      if (r) await processStream(r);
     }
     finally {
       isLoadingRef.current = false;
@@ -410,9 +416,15 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
               }
             }}
           />
-          <button className="btn btn-primary" onClick={handleCreateRequestAsync} title={ChatbotMessage.Send.niceToString()} disabled={isLoadingRef.current || messagesRef.current == undefined}>
-            <FontAwesomeIcon icon={faPaperPlane} />
-          </button>
+          {isLoadingRef.current ? (
+            <button className="btn btn-tertiary text-danger" onClick={handleStop} title="Stop">
+              <FontAwesomeIcon icon={faStop} />
+            </button>
+          ) : (
+            <button className="btn btn-primary" onClick={handleCreateRequestAsync} title={ChatbotMessage.Send.niceToString()} disabled={messagesRef.current == undefined}>
+              <FontAwesomeIcon icon={faPaperPlane} />
+            </button>
+          )}
         </div>
       )}
     </div>

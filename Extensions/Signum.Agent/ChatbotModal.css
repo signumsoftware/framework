@@ -5,7 +5,7 @@
     right: 20px;
     width: 30vw;
     max-width: 500px;
-    background: white;
+    background: var(--bs-tertiary-bg);
     display: flex;
     flex-direction: column;
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
@@ -88,19 +88,19 @@ h4.chatbot-response {
 
     .chat-bubble.tool-request {
         background-color: var(--bs-secondary-bg);
-        color: #333;
+        color: var(--bs-body-color);
         border-bottom-left-radius: 0;
     }
 
     .chat-bubble.tool-response {
         background-color: var(--bs-warning-bg-subtle);
-        color: #222;
+        color: var(--bs-body-color);
         border-bottom-right-radius: 0;
     }
 
     .chat-bubble.system {
         background-color: var(--bs-warning-bg-subtle);
-        color: #444;
+        color: var(--bs-body-color);
         font-style: italic;
         border-radius: 12px;
     }
