@@ -566,7 +566,10 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                         case JsonTokenType.StartObject:
                         case JsonTokenType.StartArray:
                         case JsonTokenType.PropertyName:
-                            throw;
+                            {
+                                e.Data["PropertyRoute"] = pr.ToString();
+                                throw;
+                            }
 
                         //Probably will be able to continue
                         case JsonTokenType.EndObject:
@@ -752,6 +755,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                 case "ticks": reader.Read(); info.Ticks = long.Parse(reader.GetString()!); break;
                 case "modified": reader.Read(); info.Modified = reader.GetBoolean(); break;
                 case "temporalId": reader.Read(); info.temporalId = Guid.Parse(reader.GetString()!); break;
+                case "EntityType": throw new JsonException($"Unexpected property 'EntityType' in full entity JSON. Use 'Type' instead (full entities use 'Type', Lite uses 'EntityType').");
                 default: goto finish;
             }
 
