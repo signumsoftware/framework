@@ -114,7 +114,16 @@ IMPORTANT: Most user actions are operations on entities (typically also QueryNam
 
     private static Entity DeserializeEntity(JsonElement entityJson)
     {
-        return entityJson.Deserialize<Entity>(SignumServer.JsonSerializerOptions)!;
+        try
+        {
+            return entityJson.Deserialize<Entity>(SignumServer.JsonSerializerOptions)!;
+        }
+        catch (Exception e)
+        {
+            if (e.Data["PropertyRoute"] is string pr)
+                e.Data["Hint"] = $"Error deserializing property at '{pr}'";
+            throw;
+        }
     }
 
     [McpServerTool, Description("Executes an operation on an entity")]
