@@ -520,6 +520,7 @@ public class TypeReferenceTS
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsCollection { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsLite { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsFullEntity { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsNotNullable { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsEmbedded { get; set; }
     public required string Name { get; set; }
@@ -533,6 +534,7 @@ public class TypeReferenceTS
 
         var clean = type == typeof(string) ? type : (type.ElementType() ?? type);
         this.IsLite = clean.IsLite();
+        this.IsFullEntity = clean.IsIEntity();
         this.IsNotNullable = clean.IsValueType && !clean.IsNullable();
         this.IsEmbedded = clean.IsEmbeddedEntity();
 
