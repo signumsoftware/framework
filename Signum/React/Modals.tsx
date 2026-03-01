@@ -185,7 +185,7 @@ export namespace GlobalModalContainer {
   export function getModalUIStates(): (UIState| null)[] {
     return modalInstances
       .map(inst => FunctionalAdapter.innerRef(inst))
-      .map(inst => inst.getUIState?() ?? null);
+      .map(inst => inst.getUIState?.() ?? null);
   }
 }
 
