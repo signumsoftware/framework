@@ -15,7 +15,6 @@ export default function ResetPassword(): React.JSX.Element {
   const location = useLocation();
 
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
-  const [complexityWarning, setComplexityWarning] = React.useState<string | undefined>(undefined);
 
   const [success, setSuccess] = React.useState<boolean>(false);
   const [successRequestNewLink, setSuccessRquestNewLink] = React.useState<boolean>(false);
@@ -29,7 +28,7 @@ export default function ResetPassword(): React.JSX.Element {
 
     e.preventDefault();
 
-    if (await validateNewPassword()) {
+    if (validateNewPassword()) {
 
       try {
         const request: ResetPasswordClient.API.ResetPasswordRequest = {
@@ -44,6 +43,8 @@ export default function ResetPassword(): React.JSX.Element {
         AuthClient.Options.onLogin("/auth/ResetPassword?code=OK");
 
         setSuccess(true);
+        //Navigator.resetUI();
+        //AppContext.navigate("/auth/ResetPassword?code=OK");
       } catch (ex) {
         if (ex instanceof ValidationError) {
           if (ex.modelState)
@@ -57,7 +58,7 @@ export default function ResetPassword(): React.JSX.Element {
     }
   }
 
-  async function validateNewPassword(): Promise<boolean> {
+  function validateNewPassword(): boolean {
     if (!newPassword.current!.value) {
       setModelState({ "newPassword": [LoginAuthMessage.PasswordMustHaveAValue.niceToString()] });
       return false;
@@ -73,26 +74,8 @@ export default function ResetPassword(): React.JSX.Element {
       });
       return false;
     } 
-    
-    const validationResult = await ResetPasswordClient.API.validatePasswordForReset(code, newPassword.current!.value);
-    if (validationResult.errorMessage) {
-      setModelState({ "newPassword": [validationResult.errorMessage] });
-      return false;
-    }
-    
-    setComplexityWarning(validationResult.complexityWarning);
     setModelState({});
     return true;
-  }
-
-  async function handlePasswordBlur() {
-    if (newPassword.current!.value) {
-      const validationResult = await ResetPasswordClient.API.validatePasswordForReset(code, newPassword.current!.value);
-      setComplexityWarning(validationResult.complexityWarning);
-      if (validationResult.errorMessage) {
-        setModelState({ "newPassword": [validationResult.errorMessage] });
-      }
-    }
   }
 
   function error(field: string): string | undefined {
@@ -136,13 +119,8 @@ export default function ResetPassword(): React.JSX.Element {
             <div>
 
               <div className={classes("form-group mb-3", error("newPassword") && "has-error")}>
-                <input type="password" className="form-control" id="newPassword" ref={newPassword} onBlur={handlePasswordBlur} placeholder={LoginAuthMessage.EnterTheNewPassword.niceToString()} />
+                <input type="password" className="form-control" id="newPassword" ref={newPassword} onBlur={validateNewPassword} placeholder={LoginAuthMessage.EnterTheNewPassword.niceToString()} />
                 {error("newPassword") && <span className="help-block text-danger">{error("newPassword")}</span>}
-                {complexityWarning && !error("newPassword") && (
-                  <div className="alert alert-warning mt-2" role="alert">
-                    {complexityWarning}
-                  </div>
-                )}
               </div>
               <div className={classes("form-group mb-3", error("newPassword") && "has-error")}>
                 <input type="password" className="form-control" id="newPassword2" ref={newPassword2} onBlur={validateNewPassword} placeholder={LoginAuthMessage.ConfirmNewPassword.niceToString()} />

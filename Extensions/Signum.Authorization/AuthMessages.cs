@@ -5,13 +5,6 @@ public enum LoginAuthMessage
 {
     [Description("The password must have at least {0} characters")]
     ThePasswordMustHaveAtLeast0Characters,
-    
-    [Description("Super user password must have at least {0} characters")]
-    SuperUserPasswordMustHaveAtLeast0Characters,
-    
-    [Description("You have not met the recommended password complexity requirements (minimum 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character).")]
-    PasswordComplexityWarning,
-    
     NotUserLogged,
 
     [Description("Username {0} is not valid")]

@@ -49,24 +49,13 @@ public class ResetPasswordController : ControllerBase
         if (string.IsNullOrEmpty(request.newPassword))
             return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
-        using (AuthLogic.Disable())
-        {
-            var rpr = Database.Query<ResetPasswordRequestEntity>()
-                .Where(r => r.Code == request.code)
-                .SingleOrDefaultEx();
+        var error = UserEntity.OnValidatePassword(request.newPassword, UserEntity.Current.Retrieve());
+        if (error != null)
+            return ModelError("newPassword", error);
 
-            if (rpr == null)
-                throw new ApplicationException(ResetPasswordMessage.TheCodeOfYourLinkIsIncorrect.NiceToString());
+        var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
 
-            var user = rpr.User;
-            var error = UserEntity.OnValidatePassword(request.newPassword, user.Role);
-            if (error != null)
-                return ModelError("newPassword", error);
-        }
-
-        var rprResult = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
-
-        return new LoginResponse { userEntity = rprResult.User, token = AuthTokenServer.CreateToken(rprResult.User), authenticationType = "resetPassword" };
+        return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
     }
 
     [HttpPost("api/auth/requestNewLink"), SignumAllowAnonymous]
@@ -78,39 +67,9 @@ public class ResetPasswordController : ControllerBase
         ResetPasswordRequestLogic.RequestNewLink(code);
     }
 
-    [HttpPost("api/auth/validatePasswordForReset"), SignumAllowAnonymous]
-    public PasswordValidationResponse ValidatePasswordForReset([Required, FromBody] ValidatePasswordForResetRequest request)
-    {
-        using (AuthLogic.Disable())
-        {
-            var rpr = Database.Query<ResetPasswordRequestEntity>()
-                .Where(r => r.Code == request.code)
-                .SingleOrDefaultEx();
-
-            if (rpr == null)
-                throw new ApplicationException(ResetPasswordMessage.TheCodeOfYourLinkIsIncorrect.NiceToString());
-
-            var user = rpr.User;
-            var result = PasswordValidator.ValidatePassword(request.password, user.Role);
-            
-            return new PasswordValidationResponse
-            {
-                isValid = result.IsValid,
-                errorMessage = result.ErrorMessage,
-                complexityWarning = result.ComplexityWarning
-            };
-        }
-    }
-
     private BadRequestObjectResult ModelError(string field, string error)
     {
         ModelState.AddModelError(field, error);
         return new BadRequestObjectResult(ModelState);
     }
-}
-
-public class ValidatePasswordForResetRequest
-{
-    public string code { get; set; }
-    public string password { get; set; }
 }

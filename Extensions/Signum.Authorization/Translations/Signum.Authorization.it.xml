@@ -107,7 +107,6 @@
     <Member Name="NoWindowsUserFound" Description="Nessun utente di Windows trovato" />
     <Member Name="Password" Description="Password" />
     <Member Name="PasswordChanged" Description="Password modificata" />
-    <Member Name="PasswordComplexityWarning" Description="Non hai soddisfatto i requisiti di complessità della password consigliati (minimo 1 lettera maiuscola, 1 lettera minuscola, 1 numero e 1 carattere speciale)." />
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="La password è stata modificata correttamente" />
     <Member Name="PasswordMustHaveAValue" Description="La password deve avere un valore" />
     <Member Name="PasswordsAreDifferent" Description="Le password non corrispondono" />
@@ -118,7 +117,6 @@
     <Member Name="ShowLoginForm" Description="Mostra modulo di accesso" />
     <Member Name="SignInWithMicrosoft" Description="Accedere con Microsoft" />
     <Member Name="Success" Description="Successo" />
-    <Member Name="SuperUserPasswordMustHaveAtLeast0Characters" Description="La password del super utente deve contenere almeno {0} caratteri" />
     <Member Name="SwitchUser" Description="Cambia utente" />
     <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="La password deve avere almeno {0} caratteri" />
     <Member Name="TheUserIsNotLongerInTheDatabase" Description="L'utente non è più nel database" />
@@ -171,7 +169,6 @@
     <Member Name="InheritsFrom" Description="Eredita da" />
     <Member Name="IsTrivialMerge" Description="È un'unione banale" />
     <Member Name="MergeStrategy" Description="Strategia di unione" />
-    <Member Name="MinPasswordLength" Description="Lunghezza minima della password" />
     <Member Name="Name" Description="Nome" />
   </Type>
   <Type Name="RoleOperation">

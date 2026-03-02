@@ -19,8 +19,6 @@ public class RoleEntity : Entity
     [StringLengthValidator(MultiLine = true)]
     public string? Description { get; set; }
 
-    public int? MinPasswordLength { get; set; }
-
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
 
@@ -40,11 +38,6 @@ public class RoleEntity : Entity
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Name == nameof(MinPasswordLength) && MinPasswordLength.HasValue && MinPasswordLength.Value < PasswordValidator.MinimumPasswordLength)
-        {
-            return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.GreaterThanOrEqualTo, PasswordValidator.MinimumPasswordLength);
-        }
-
         if (IsTrivialMerge)
         {
             if (pi.Name == nameof(InheritsFrom) && InheritsFrom.Count < 2)

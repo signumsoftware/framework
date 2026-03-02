@@ -6,29 +6,18 @@ namespace Signum.Authorization;
 [EntityKind(EntityKind.Main, EntityData.Transactional)]
 public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
 {
-    public static Func<string, Lite<RoleEntity>?, PasswordValidationResult> ValidatePassword = (p, role) =>
+    public static Func<string, UserEntity?, string?> ValidatePassword = (p, user) =>
     {
-        return PasswordValidator.ValidatePassword(p, role);
+        if (p.Length >= 5)
+            return null;
+
+        return LoginAuthMessage.ThePasswordMustHaveAtLeast0Characters.NiceToString(5);
     };
 
-    public static string? OnValidatePassword(string password, Lite<RoleEntity>? userRole = null)
+    public static string? OnValidatePassword(string password, UserEntity? user)
     {
         if (ValidatePassword != null)
-        {
-            var result = ValidatePassword(password, userRole);
-            return result.ErrorMessage;
-        }
-
-        return null;
-    }
-
-    public static string? OnValidatePasswordComplexity(string password)
-    {
-        if (ValidatePassword != null)
-        {
-            var result = ValidatePassword(password, null);
-            return result.ComplexityWarning;
-        }
+            return ValidatePassword(password, user);
 
         return null;
     }

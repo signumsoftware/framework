@@ -72,7 +72,7 @@ public static class ResetPasswordRequestLogic
                 e.Used = true;
                 var user = e.User;
 
-                var error = UserEntity.OnValidatePassword(password, user.Role);
+                var error = UserEntity.OnValidatePassword(password, user);
                 if (error != null)
                     throw new ResetPasswordException(error);
 

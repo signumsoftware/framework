@@ -94,18 +94,16 @@
     <Member Name="NoWindowsUserFound" Description="Aucun utilisateur Windows trouvé" />
     <Member Name="Password" Description="Mot de passe" />
     <Member Name="PasswordChanged" Description="Mot de passe modifié" />
-    <Member Name="PasswordComplexityWarning" Description="Vous n'avez pas satisfait aux exigences de complexité de mot de passe recommandées (minimum 1 lettre majuscule, 1 lettre minuscule, 1 chiffre et 1 caractère spécial)." />
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="Le mot de passe a été modifié avec succès" />
     <Member Name="PasswordMustHaveAValue" Description="Le mot de passe doit être spécifié" />
     <Member Name="PasswordsAreDifferent" Description="Les mots de passe sont différents" />
-    <Member Name="Register0" Description="S'inscrire {0}" />
+    <Member Name="Register0" Description="S’inscrire {0}" />
     <Member Name="RememberMe" Description="Se souvenir de moi" />
     <Member Name="RequestAccepted" Description="Demande acceptée" />
     <Member Name="SendEmail" Description="Envoyer" />
     <Member Name="ShowLoginForm" Description="Afficher le formulaire de connexion" />
     <Member Name="Success" Description="Succès" />
-    <Member Name="SuperUserPasswordMustHaveAtLeast0Characters" Description="Le mot de passe du super utilisateur doit comporter au moins {0} caractères" />
-    <Member Name="SwitchUser" Description="Changer d'utilisateur" />
+    <Member Name="SwitchUser" Description="Changer d’utilisateur" />
     <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="Le mot de passe doit comporter au moins {0} caractères" />
     <Member Name="TheUserIsNotLongerInTheDatabase" Description="L’utilisateur n’est plus dans la base de données" />
     <Member Name="TryToLogInWithIt" Description="Essayez de vous connecter avec !" />
@@ -120,7 +118,6 @@
     <Member Name="InheritsFrom" Description="Hérite de" />
     <Member Name="IsTrivialMerge" Description="Est une fusion triviale" />
     <Member Name="MergeStrategy" Description="Stratégie de fusion" />
-    <Member Name="MinPasswordLength" Description="Longueur minimale du mot de passe" />
     <Member Name="Name" Description="Nom" />
   </Type>
   <Type Name="UserTicketEntity" Description="Utilisateur ticket">

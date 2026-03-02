@@ -326,7 +326,7 @@ public static class AuthServer
                     user.PasswordHash = null;
                 else
                 {
-                    var error = UserEntity.OnValidatePassword(password);
+                    var error = UserEntity.OnValidatePassword(password, user);
                     if (error != null)
                         throw new ApplicationException(error);
 

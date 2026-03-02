@@ -158,7 +158,6 @@
     <Member Name="NotUserLogged" Description="Kein angemeldeter Benutzer" />
     <Member Name="Password" Description="Passwort" />
     <Member Name="PasswordChanged" Description="Passwort geändert" />
-    <Member Name="PasswordComplexityWarning" Description="Sie haben nicht die empfohlene Passwortkomplexität erreicht (mindestens 1 Großbuchstabe, 1 Kleinbuchstabe, 1 Zahl und 1 Sonderzeichen)." />
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="Das Passwort wurde erfolgreich geändert" />
     <Member Name="PasswordMustBeChanged" Description="Das Passwort muss geändert werden" />
     <Member Name="PasswordMustHaveAValue" Description="Das Kennwort muss angegeben werden" />
@@ -173,7 +172,6 @@
     <Member Name="SignUpWithAzureB2C" Description="Registrieren mit Azure B2C" />
     <Member Name="Success" Description="Erfolg" />
     <Member Name="SwitchUser" Description="Benutzer wechseln" />
-    <Member Name="SuperUserPasswordMustHaveAtLeast0Characters" Description="Das Super-User-Passwort muss mindestens {0} Zeichen enthalten." />
     <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="Das Kennwort muss mindestens {0} Zeichen enthalten." />
     <Member Name="TheUserIsNotLongerInTheDatabase" Description="Der Benutzer ist nicht mehr in der Datenbank" />
     <Member Name="TryToLogInWithIt" Description="Versuchen Sie, sich damit anzumelden!" />
@@ -233,7 +231,6 @@
     <Member Name="InheritsFrom" Description="Erbt von" />
     <Member Name="IsTrivialMerge" Description="Ist triviale Zusammenführung" />
     <Member Name="MergeStrategy" Description="Zusammenführstrategie" />
-    <Member Name="MinPasswordLength" Description="Minimale Passwortlänge" />
     <Member Name="Name" Description="Name" />
   </Type>
   <Type Name="RoleMappingEmbedded" Description="Rollenabbildung">

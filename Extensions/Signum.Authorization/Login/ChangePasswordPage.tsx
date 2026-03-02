@@ -11,7 +11,6 @@ import { QueryString } from "@framework/QueryString"
 
 export default function ChangePasswordPage(): React.JSX.Element {
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
-  const [complexityWarning, setComplexityWarning] = React.useState<string | undefined>(undefined);
 
   const currentUser = AuthClient.currentUser();
   const pendingUser = AuthClient.pendingPasswordChangeUser;
@@ -40,7 +39,7 @@ export default function ChangePasswordPage(): React.JSX.Element {
         .then(lr => {
           AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);
-          AuthClient.pendingPasswordChangeUser = undefined;
+          AuthClient.pendingPasswordChangeUser = undefined; // Clear pending user
           
           // If it was a forced password change, redirect using onLogin
           if (mustChangePassword) {
@@ -70,16 +69,8 @@ export default function ChangePasswordPage(): React.JSX.Element {
     setModelState({ ...modelState, ...validateOldPassword() });
   }
 
-  async function handleNewPasswordBlur(event: React.SyntheticEvent<any>) {
-    const ms = validateNewPassword(event.currentTarget == newPassword2!.current);
-    setModelState({ ...modelState, ...ms });
-
-    if (newPassword.current!.value && !ms["newPassword"]?.length) {
-      const validationResult = await AuthClient.API.validatePassword(newPassword.current!.value);
-      setComplexityWarning(validationResult.complexityWarning);
-    } else {
-      setComplexityWarning(undefined);
-    }
+  function handleNewPasswordBlur(event: React.SyntheticEvent<any>) {
+    setModelState({ ...modelState, ...validateNewPassword(event.currentTarget == newPassword2!.current) });
   }
 
   function validateOldPassword(): ModelState {
@@ -124,11 +115,6 @@ export default function ChangePasswordPage(): React.JSX.Element {
               <div>
                 <input type="password" className="form-control form-control-sm" id="newPassword" ref={newPassword} onBlur={handleNewPasswordBlur} autoComplete="new-password"/>
                 {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
-                {complexityWarning && !error("newPassword") && (
-                  <div className="alert alert-warning mt-2" role="alert">
-                    {complexityWarning}
-                  </div>
-                )}
               </div>
             </div>
             <div className={classes("form-group form-group-sm", error("newPassword") && "has-error")}>
@@ -145,3 +131,4 @@ export default function ChangePasswordPage(): React.JSX.Element {
     </div>
   );
 }
+  
