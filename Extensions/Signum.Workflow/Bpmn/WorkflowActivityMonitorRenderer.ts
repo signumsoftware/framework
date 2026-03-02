@@ -23,7 +23,7 @@ export class WorkflowActivityMonitorRenderer extends CustomRenderer {
     { value: 1, color: Color.parse("rgb(251, 114, 95)") },
   ]);
 
-  drawShape(visuals: any, element: BPMN.DiElement): SVGElement {
+  override drawShape(visuals: any, element: BPMN.DiElement): SVGElement {
     const result = super.drawShape(visuals, element);
 
     if (BpmnUtils.isTaskAnyKind(element.type)) {

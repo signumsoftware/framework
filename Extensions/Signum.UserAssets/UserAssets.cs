@@ -184,6 +184,31 @@ public static class FromXmlExtensions
         oldElements.AddRange(newElements);
     }
 
+    public static void Synchronize<T, K>(this MList<T> entities, List<XElement>? xElements, Func<T, K> getKey, Func<XElement, K> getElementKey, Action<T, XElement> syncAction)
+        where T : class, new()
+        where K : notnull
+    {
+        if (xElements == null)
+            xElements = new List<XElement>();
+
+        var dic = entities.ToDictionary(getKey);
+
+        var list = xElements.Select(x =>
+        {
+            var entity = dic.TryGetC(getElementKey(x)) ?? new T();
+            syncAction(entity, x);
+            return entity;
+        });
+            
+      
+        if(!Enumerable.SequenceEqual(entities, list))
+        {
+            entities.Clear();
+            entities.AddRange(list);
+        }
+    }
+
+
     public static T? CreateOrAssignEmbedded<T>(this T? embedded, XElement? element, Action<T, XElement> syncAction)
       where T : EmbeddedEntity, new()
     {

@@ -340,11 +340,15 @@ public static class UserQueryLogic
     public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         => RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), uq => uq.Owner == null || AuthLogic.CurrentRoles().Contains(uq.Owner));
 
-    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<UserQueryEntity, bool>> condition)
+    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<UserQueryEntity, bool>> condition, Func<UserQueryEntity, bool>? inMemoryCondition = null)
     {
         sb.Schema.Settings.AssertImplementedBy((UserQueryEntity uq) => uq.Owner, ownerType);
 
-        TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition, condition);
+        if (inMemoryCondition == null)
+            TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition, condition);
+        else
+            TypeConditionLogic.Register<UserQueryEntity>(typeCondition, condition, inMemoryCondition);
+
 
         DashboardLogic.RegisterTypeConditionForPart<ValueUserQueryListPartEntity>(typeCondition);
         DashboardLogic.RegisterTypeConditionForPart<UserQueryPartEntity>(typeCondition);

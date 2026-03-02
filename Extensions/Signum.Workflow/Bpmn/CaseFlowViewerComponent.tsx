@@ -59,7 +59,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     }
   }
 
-  componentDidMount(): void {
+  override componentDidMount(): void {
     this.viewer = new CustomViewer({
       container: this.divArea,
       keyboard: {
@@ -91,11 +91,11 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
       CaseActivityStatsModal.show(this.props.case, stats);
   }
 
-  componentWillUnmount(): void {
+  override componentWillUnmount(): void {
     this.viewer.destroy();
   }
 
-  componentWillReceiveProps(nextProps: CaseFlowViewerComponentProps): void {
+  override componentWillReceiveProps(nextProps: CaseFlowViewerComponentProps): void {
     if (this.viewer) {
       if (nextProps.diagramXML !== undefined && this.props.diagramXML !== nextProps.diagramXML) {
         this.viewer.importXML(nextProps.diagramXML, this.handleOnModelError);
@@ -161,7 +161,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     zoomScroll.reset();
   }
 
-  render(): React.JSX.Element {
+  override render(): React.JSX.Element {
     return (
       <div>
         <div className="btn-toolbar">

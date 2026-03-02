@@ -8,7 +8,7 @@ public static class MimeMapping
 {
     public static FileExtensionContentTypeProvider MimeConverter = new FileExtensionContentTypeProvider();
 
-    public static Dictionary<string, string> MimeTypeToExtension = MimeConverter.Mappings.AgGroupToDictionary(a => a.Value, gr => gr.First().Key);
+    public static Dictionary<string, string> MimeTypeToExtension = MimeConverter.Mappings.GroupAggregateToDictionary(a => a.Value, gr => gr.First().Key);
 
     public static string GetMimeType(string fileName)
     {

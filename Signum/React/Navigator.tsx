@@ -1043,7 +1043,6 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   stickyHeader?: boolean;
 
-  onAssignServerChanges?: (local: T, server: T) => void;
 
   renderSubTitle?: (entity: T) => React.ReactNode;
 
@@ -1113,8 +1112,6 @@ export class EntitySettings<T extends ModifiableEntity> {
   modalFullScreen?: boolean;
 
   stickyHeader?: boolean;
-
-  onAssignServerChanges?: (local: T, server: T) => void;
 
   renderSubTitle?: (entity: T) => React.ReactNode;
 

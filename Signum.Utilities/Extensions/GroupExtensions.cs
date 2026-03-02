@@ -162,7 +162,7 @@ public static class GroupExtensions
             .ToDictionaryEx(g => g.Key, g => g.Count());
     }
 
-    public static Dictionary<K, V> AgGroupToDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
+    public static Dictionary<K, V> GroupAggregateToDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
         where K : notnull
     {
         return collection
@@ -170,7 +170,7 @@ public static class GroupExtensions
             .ToDictionaryEx(g => g.Key, aggregateSelector);
     }
 
-    public static Dictionary<K, V> AgGroupToDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector, IEqualityComparer<K> comparer)
+    public static Dictionary<K, V> GroupAggregateToDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector, IEqualityComparer<K> comparer)
         where K : notnull
     {
         return collection
@@ -178,7 +178,7 @@ public static class GroupExtensions
             .ToDictionaryEx(g => g.Key, aggregateSelector, comparer);
     }
 
-    public static FrozenDictionary<K, V> AgGroupToFrozenDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
+    public static FrozenDictionary<K, V> GroupAggregateToFrozenDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
         where K : notnull
     {
         return collection
@@ -186,7 +186,7 @@ public static class GroupExtensions
             .ToFrozenDictionaryEx(g => g.Key, aggregateSelector);
     }
 
-    public static FrozenDictionary<K, V> AgGroupToFrozenDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector, IEqualityComparer<K> comparer)
+    public static FrozenDictionary<K, V> GroupAggregateToFrozenDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector, IEqualityComparer<K> comparer)
         where K : notnull
     {
         return collection
@@ -194,7 +194,7 @@ public static class GroupExtensions
             .ToFrozenDictionaryEx(g => g.Key, aggregateSelector, comparer);
     }
 
-    public static Dictionary<K, V> AgGroupToDictionaryDescending<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
+    public static Dictionary<K, V> GroupAggregateToDictionaryDescending<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
         where K : notnull
     {
         return collection
@@ -203,7 +203,7 @@ public static class GroupExtensions
             .ToDictionaryEx(g => g.Key, aggregateSelector);
     }
 
-    public static FrozenDictionary<K, V> AgGroupToFrozenDictionaryDescending<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
+    public static FrozenDictionary<K, V> GroupAggregateToFrozenDictionaryDescending<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
         where K : notnull
     {
         return collection

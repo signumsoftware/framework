@@ -296,7 +296,7 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
 
                 return new OperationTypeEmbedded { Operation = operation, Type = type.ToTypeEntity() };
             },
-            parseAllowed: e =>
+            parseAllowed: (e, resource) =>
             {
                 return new WithConditions<OperationAllowed>(fallback: e.Attribute("Allowed")!.Value.ToEnum<OperationAllowed>(),
                     conditionRules: e.Elements("Condition").Select(xc => new ConditionRule<OperationAllowed>(

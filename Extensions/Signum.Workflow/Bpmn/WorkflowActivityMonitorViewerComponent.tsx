@@ -34,7 +34,7 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
       throw new Error('Error rendering the model ' + err);
   }
 
-  componentDidMount(): void {
+  override componentDidMount(): void {
     this.viewer = new CustomViewer({
       container: this.divArea,
       keyboard: {
@@ -67,11 +67,11 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
     }
   }
 
-  componentWillUnmount(): void {
+  override componentWillUnmount(): void {
     this.viewer.destroy();
   }
 
-  componentWillReceiveProps(nextProps: WorkflowActivityMonitorViewerComponentProps): void {
+  override componentWillReceiveProps(nextProps: WorkflowActivityMonitorViewerComponentProps): void {
 
     if (this.viewer) {
 
@@ -125,7 +125,7 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
     this.resetZoom();
   }
 
-  render(): React.JSX.Element {
+  override render(): React.JSX.Element {
     return (
       <div>
         <div className="btn-toolbar" style={{ marginBottom: "5px" }}>
