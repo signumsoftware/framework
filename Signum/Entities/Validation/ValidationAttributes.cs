@@ -1,10 +1,11 @@
+using Signum.Engine.Maps;
+using Signum.Utilities.Reflection;
 using System.Collections;
 using System.ComponentModel;
-using System.Text.RegularExpressions;
-using Signum.Utilities.Reflection;
 using System.Globalization;
 using System.IO;
-using Signum.Engine.Maps;
+using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Signum.Entities.Validation;
 
@@ -104,6 +105,66 @@ public static class NotNullValidatorExtensions
     }
 }
 
+public class XmlStringValidator : ValidatorAttribute
+{
+    public override string HelpMessage => ValidationMessage.ValidXMLCharacters.NiceToString();
+
+    protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
+    {
+        if (value == null)
+            return null;
+
+        string text = (string)value;
+
+        int utf16Index = 0;
+
+        foreach (var rune in text.EnumerateRunes())
+        {
+            if (!IsValidXmlChar(rune))
+            {
+                string context = GetContextAroundInvalidChar(text, utf16Index);
+
+                return ValidationMessage._0ContainsInvalidControlCharactersNear1.NiceToString("{0}", context);
+            }
+
+            utf16Index += rune.Utf16SequenceLength;
+        }
+
+        return null;
+
+       
+    }
+
+    public static bool IsValidXmlChar(Rune rune)
+    {
+        int v = rune.Value;
+
+        return v == 0x9 ||
+               v == 0xA ||
+               v == 0xD ||
+               (v >= 0x20 && v <= 0xD7FF) ||
+               (v >= 0xE000 && v <= 0xFFFD) ||
+               (v >= 0x10000 && v <= 0x10FFFF);
+    }
+
+
+    private static string GetContextAroundInvalidChar(string val, int invalidCharIndex)
+    {
+        int contextLength = 20;
+        int start = Math.Max(0, invalidCharIndex - contextLength);
+        int end = Math.Min(val.Length, invalidCharIndex + contextLength + 1);
+
+        var beforeInvalid = val.Substring(start, invalidCharIndex - start);
+        var afterInvalid = val.Substring(invalidCharIndex + 1, end - invalidCharIndex - 1);
+
+        var context = beforeInvalid + "█" + afterInvalid;
+        if (start > 0) context = "..." + context;
+        if (end < val.Length) context = context + "...";
+
+        return context;
+    }
+}
+
 
 public class StringLengthValidatorAttribute : ValidatorAttribute
 {
@@ -123,7 +184,6 @@ public class StringLengthValidatorAttribute : ValidatorAttribute
 
     public bool MultiLine { get; set; }
     
-    public bool DisallowControlCharacters { get; set; }
 
     int min = -1;
     public int Min
@@ -139,28 +199,7 @@ public class StringLengthValidatorAttribute : ValidatorAttribute
         set { max = value; }
     }
 
-    private static bool IsValidXmlChar(char c)
-    {
-        return c == 0x9 || c == 0xA || c == 0xD ||
-               (c >= 0x20 && c <= 0xD7FF) ||
-               (c >= 0xE000 && c <= 0xFFFD);
-    }
-
-    private static string GetContextAroundInvalidChar(string val, int invalidCharIndex)
-    {
-        int contextLength = 20;
-        int start = Math.Max(0, invalidCharIndex - contextLength);
-        int end = Math.Min(val.Length, invalidCharIndex + contextLength + 1);
-        
-        var beforeInvalid = val.Substring(start, invalidCharIndex - start);
-        var afterInvalid = val.Substring(invalidCharIndex + 1, end - invalidCharIndex - 1);
-        
-        var context = beforeInvalid + "█" + afterInvalid;
-        if (start > 0) context = "..." + context;
-        if (end < val.Length) context = context + "...";
-        
-        return context;
-    }
+  
 
     protected override string? OverrideError(object? value, ModifiableEntity entity, PropertyInfo property)
     {
@@ -168,19 +207,6 @@ public class StringLengthValidatorAttribute : ValidatorAttribute
 
         if (string.IsNullOrEmpty(val))
             return null;
-
-        if (DisallowControlCharacters)
-        {
-            for (int i = 0; i < val.Length; i++)
-            {
-                if (!IsValidXmlChar(val[i]))
-                {
-                    var context = GetContextAroundInvalidChar(val, i);
-                    return ValidationMessage._0ContainsInvalidControlCharactersNear1.NiceToString("{0}", $"position {i + 1}: '{context}'");
-                }
-            }
-        }
-
         if (!MultiLine && (val.Contains('\n') || val.Contains('\r')))
             return ValidationMessage._0ShouldHaveJustOneLine.NiceToString();
 
@@ -1354,6 +1380,7 @@ public enum ValidationMessage
     Either0Or1ShouldBeSet,
     [Description("{0} contains invalid control characters near: '{1}'")]
     _0ContainsInvalidControlCharactersNear1,
+    ValidXMLCharacters,
 }
 
 public static class ValidationMessageHelper
