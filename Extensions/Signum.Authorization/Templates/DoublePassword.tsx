@@ -7,12 +7,6 @@ import { classes } from '@framework/Globals'
 import { useForceUpdate } from '@framework/Hooks'
 import { LinkButton } from '@framework/Basics/LinkButton'
 
-export namespace DoublePassword {
-  export namespace Options {
-    export var ValidatePassword: ((password: string, user: UserEntity) => Promise<string | null>) | undefined = undefined;
-  }
-}
-
 export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boolean, mandatory: boolean, onChange: ()=> void }): React.JSX.Element {
 
   const [isOpen, setIsOpen] = React.useState(p.initialOpen);
@@ -35,8 +29,6 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
           ctx.error = errorMessage;
         }
       }
-
-      p.onChange();
     }
     forceUpdate();
     ctx.frame!.revalidate();
@@ -79,4 +71,10 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
       </FormGroup>
     </div>
   );
+}
+
+export namespace DoublePassword {
+  export namespace Options {
+    export var ValidatePassword: ((password: string, user: UserEntity) => Promise<string | null>) | undefined = undefined;
+  }
 }
