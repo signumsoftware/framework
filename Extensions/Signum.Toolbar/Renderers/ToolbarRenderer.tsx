@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useDocumentEvent, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
-import { Entity, getToString, Lite } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, parseLite } from '@framework/Signum.Entities'
 import { parseIcon } from '@framework/Components/IconTypeahead'
 import { ToolbarUrl } from '../ToolbarUrl';
 import { classes } from '@framework/Globals';
@@ -431,6 +431,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
   }, [entities]);
 
   const active = p.ctx.active;
+  const location = useLocation();
 
   React.useEffect(() => {
 
@@ -439,8 +440,33 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
 
       if (!is(active.menuWithEntity.entity, selEntityRef.current))
         setSelectedEntity(active.menuWithEntity.entity);
+    } else if (active?.inferredEntity && p.response.entityType &&
+      active.inferredEntity.EntityType === p.response.entityType) {
+      // Check if inferredEntity matches our entity type
+      if (!is(active.inferredEntity, selEntityRef.current) && entities) {
+        const matchingEntity = entities.onlyOrNull(e => is(e, active.inferredEntity));
+        if (matchingEntity)
+          setSelectedEntity(matchingEntity);
+      }
+    } else if (p.response.entityType && entities) {
+      // Fallback: check query string for entity parameter
+      const query = QueryString.parse(location.search);
+      if (query["entity"]) {
+        const entityLite = parseLite(query["entity"]);
+        if (entityLite && entityLite.EntityType === p.response.entityType && !is(entityLite, selEntityRef.current)) {
+          const matchingEntity = entities.onlyOrNull(e => is(e, entityLite));
+          if (matchingEntity)
+            setSelectedEntity(matchingEntity);
+        }
+      } else {
+        // No entity in URL or context, clear selection if we have one
+        if (selEntityRef.current) {
+          setSelectedEntity(null);
+        }
+      }
     }
-  }, [active, p.response]);
+  }, [active, p.response, entities, location.search]);
+
   React.useEffect(() => {
 
     if (selEntityRef.current && !selEntityRef.current.model && entities) {
@@ -549,6 +575,8 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
     return p.response.elements?.onlyOrNull(a => a.content!.id!.toString() == sel);
   });
 
+  const location = useLocation();
+
   React.useEffect(() => {
 
     if (p.ctx.active) {
@@ -556,9 +584,58 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
       if (menu && menu !== selectedOption) {
         setSelectedOption(menu);
         localStorage.setItem(key, menu.content!.id!.toString());
+      } else if (p.ctx.active.menuWithEntity) {
+        // Check if the menuWithEntity's menu is contained within one of our switcher options
+        const matchingOptionByMenu = p.response.elements?.firstOrNull(e => 
+          containsResponse(e, p.ctx.active!.menuWithEntity!.menu)
+        );
+        if (matchingOptionByMenu && matchingOptionByMenu !== selectedOption) {
+          setSelectedOption(matchingOptionByMenu);
+          localStorage.setItem(key, matchingOptionByMenu.content!.id!.toString());
+        } else {
+          // Fallback: check if any switcher option has the same entityType as the menuWithEntity's entity
+          const entityType = p.ctx.active.menuWithEntity.entity.EntityType;
+          if (entityType) {
+            const matchingOptionByEntityType = p.response.elements?.firstOrNull(e => 
+              e.entityType === entityType
+            );
+            if (matchingOptionByEntityType && matchingOptionByEntityType !== selectedOption) {
+              setSelectedOption(matchingOptionByEntityType);
+              localStorage.setItem(key, matchingOptionByEntityType.content!.id!.toString());
+            }
+          }
+        }
+      } else if (p.ctx.active.inferredEntity) {
+        // If there's no menuWithEntity but there's an inferredEntity, use that to find the matching option
+        const entityType = p.ctx.active.inferredEntity.EntityType;
+        if (entityType) {
+          const matchingOptionByInferredEntityType = p.response.elements?.firstOrNull(e => 
+            e.entityType === entityType
+          );
+          if (matchingOptionByInferredEntityType && matchingOptionByInferredEntityType !== selectedOption) {
+            setSelectedOption(matchingOptionByInferredEntityType);
+            localStorage.setItem(key, matchingOptionByInferredEntityType.content!.id!.toString());
+          }
+        }
+      } else {
+        // Last resort: check query string for entity parameter
+        const query = QueryString.parse(location.search);
+        if (query["entity"]) {
+          const entityLite = parseLite(query["entity"]);
+          if (entityLite) {
+            const entityType = entityLite.EntityType;
+            const matchingOptionByQueryEntity = p.response.elements?.firstOrNull(e => 
+              e.entityType === entityType
+            );
+            if (matchingOptionByQueryEntity && matchingOptionByQueryEntity !== selectedOption) {
+              setSelectedOption(matchingOptionByQueryEntity);
+              localStorage.setItem(key, matchingOptionByQueryEntity.content!.id!.toString());
+            }
+          }
+        }
       }
     }
-  }, [p.ctx.active, p.response.elements]);
+  }, [p.ctx.active, p.response.elements, selectedOption, key, location.search]);
 
   function handleSetShow(value: ToolbarResponse<any>, e: React.SyntheticEvent | null) {
 

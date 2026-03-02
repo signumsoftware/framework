@@ -620,7 +620,7 @@ public static class SchemaSynchronizer
 
             SqlPreCommand? syncEnums = SynchronizeEnumsScript(replacements);
 
-            SqlPreCommand? addForeingKeys = Synchronizer.SynchronizeScript(
+            SqlPreCommand? addForeignKeys = Synchronizer.SynchronizeScript(
                  Spacing.Double,
                  modelTables,
                  databaseTables,
@@ -760,7 +760,7 @@ public static class SchemaSynchronizer
                 delayedDrops.Combine(Spacing.Simple),
                 delayedAddSystemVersioning.Combine(Spacing.Simple),
                 syncEnums,
-                addForeingKeys,
+                addForeignKeys,
                 addIndices, addIndicesHistory,
 
                 dropSchemas,
@@ -1285,13 +1285,14 @@ EXEC(@{1})".FormatWith(databaseName.Name, variableName));
         var s = Schema.Current;
         var should = s.PostgresExtensions.Where(kvp => kvp.Value(s)).ToDictionary(a => a.Key, a => a.Key);
 
+        var isAzure = Connector.Current is PostgreSqlConnector psc && psc.IsAzurePostgres;
 
         var sb = Connector.Current.SqlBuilder;
         var result = Synchronizer.SynchronizeScript(Spacing.Simple,
               newDictionary: should,
               oldDictionary: current,
-              createNew: (key, n) => sb.CreateExtensionIfNotExist(key),
-              removeOld: (key, o) => sb.DropExtension(key),
+              createNew: (key, n) => isAzure && key == "plpgsql" ? null : sb.CreateExtensionIfNotExist(key), // Skip plpgsql creation in Azure
+              removeOld: (key, o) => isAzure && key == "plpgsql" ? null : sb.DropExtension(key), // Skip plpgsql drop in Azure
               mergeBoth: (k, n, o) => null);
 
         return result;

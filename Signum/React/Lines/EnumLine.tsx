@@ -327,11 +327,12 @@ function getOptionsItems(el: EnumLineController<any>): OptionItem[] {
 
 function toOptionItem(m: MemberInfo | OptionItem | string): OptionItem {
 
-  if (typeof m == "string")
+
+  if (typeof m == "string" || typeof m == "number")
     return {
       value: m,
       label: m,
-    }
+    };
 
   if ((m as MemberInfo).name)
     return {

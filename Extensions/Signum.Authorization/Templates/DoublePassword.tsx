@@ -14,6 +14,25 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
   var newPass2 = React.useRef<HTMLInputElement>(null);
   const forceUpdate = useForceUpdate();
 
+  async function handlePasswordChange(e: React.SyntheticEvent<any>) {
+    const ctx = p.ctx;
+
+    if (newPass.current!.value) {
+      ctx.error = undefined;
+      ctx.value = newPass.current!.value;
+
+      if (DoublePassword.Options.ValidatePassword) {
+        const user = ctx.frame!.pack.entity as UserEntity;
+        const errorMessage = await DoublePassword.Options.ValidatePassword(newPass.current!.value, user);
+        
+        if (errorMessage) {
+          ctx.error = errorMessage;
+        }
+      }
+    }
+    forceUpdate();
+    ctx.frame!.revalidate();
+  }
 
   function handlePasswordBlur(e: React.SyntheticEvent<any>) {
     const ctx = p.ctx;
@@ -45,11 +64,17 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
   return (
     <div>
       <FormGroup ctx={p.ctx} label={LoginAuthMessage.NewPassword.niceToString()}>
-        {inputId => <input id={inputId} type="password" ref={newPass} autoComplete="off" placeholder={LoginAuthMessage.NewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />}
+        {inputId => <input id={inputId} type="password" ref={newPass} autoComplete="off" placeholder={LoginAuthMessage.NewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass.current?.value ? "sf-mandatory" : null)} onChange={handlePasswordChange} onBlur={handlePasswordBlur} />}
       </FormGroup>
       <FormGroup ctx={p.ctx} label={LoginAuthMessage.ConfirmNewPassword.niceToString()}>
         {inputId => <input id={inputId} type="password" ref={newPass2} autoComplete="off" placeholder={LoginAuthMessage.ConfirmNewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass2.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />}
       </FormGroup>
     </div>
   );
+}
+
+export namespace DoublePassword {
+  export namespace Options {
+    export var ValidatePassword: ((password: string, user: UserEntity) => Promise<string | null>) | undefined = undefined;
+  }
 }
