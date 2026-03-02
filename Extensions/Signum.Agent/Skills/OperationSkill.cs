@@ -11,7 +11,7 @@ public class OperationSkill : ChatbotSkill
     public OperationSkill()
     {
         ShortDescription = @"Executes operations in an entity like Construct / Construct_From / Execute (like Save) / Delete. 
-IMPORTANT: Most user actions are operations on entities (typically also QueryName), so check for available entity operations first.";
+IMPORTANT: Most user actions are operations on entities (typically also QueryName), so check for available operations on an entity before rejecting the request.";
 
         IsAllowed = () => true;
     }

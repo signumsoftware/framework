@@ -143,6 +143,8 @@ For example, if you want to filter orders that have any order line with more tha
 
 Without the group with prefix the two filters would be applied independently, resulting in orders that have any line with quantity > 2 AND any line with product "X", which is not the same.
 
+IMPORTANT: For time-related filters, first check the current date using `CurrentDateSkill`. 
+
 ### Orders
 
 You can specify any number of orders, they will be applied in the order specified.
@@ -195,6 +197,8 @@ The `columnOptionsMode` can be:
 * `ReplaceAll`: Ignore the default columns and use only the specified ones.
 * `InsertStart`: Add the specified columns at the start of the the default ones.
 * `ReplaceOrAdd`: For each specified column, if it exists in the default columns replace it, otherwise add it at the end (make sense only if you want to change the display name or summary token of some default columns).
+
+IMPORTANT: Always set the appropiate `columnOptionsMode`; when grouping use `ReplaceAll`.  
 
 Each column has:
 * `token`: the expression to use, can not use `Any`, `All`.
@@ -270,4 +274,6 @@ The final results is typically to convert the `FindOptions` to a url that can be
 
 You can use the tool `getFindOptionsUrl`. It will validate the `FindOptions` and return either an error message or the url.
 
-Once you have the url, use a markdown link to show it to the user. 
+Once you have the url, use a markdown link to show it to the user.
+
+**Important:** The URL returned by `getFindOptionsUrl` is a local path (e.g. `/find/OrderEntity`). Do not add any host prefix — never use `http://`, `https://`, or a domain name. Always present the path as-is, starting with `/`.

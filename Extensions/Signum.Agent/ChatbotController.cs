@@ -108,7 +108,8 @@ public class ChatbotController : Controller
 
                     history = new ConversationHistory
                     {
-                        Session = session,
+                        Session = session.ToLite(),
+                        SessionTitle = session.Title,
                         LanguageModel = session.LanguageModel.RetrieveFromCache(),
                         Messages = systemAndSummaries.Concat(remainingMessages).ToList(),
                     };
@@ -190,7 +191,7 @@ public class ChatbotController : Controller
 
                     var summary = new ChatMessageEntity
                     {
-                        ChatSession = history.Session.ToLite(),
+                        ChatSession = history.Session,
                         Role = ChatMessageRole.System,
                         Content = $"## Summary of earlier conversation\n{summaryContent}\n\n---\nRecent messages follow:",
                     }.Save();
@@ -250,7 +251,7 @@ public class ChatbotController : Controller
 
                 var answer = new ChatMessageEntity
                 {
-                    ChatSession = history.Session.ToLite(),
+                    ChatSession = history.Session,
                     Role = ChatMessageRole.Assistant,
                     Content = responseMsg.Text,
                     LanguageModel = session.LanguageModel,
@@ -268,12 +269,16 @@ public class ChatbotController : Controller
                     }).ToMList()
                 }.Save();
 
-                history.Session.TotalInputTokens = NullableAdd(history.Session.TotalInputTokens, answer.InputTokens);
-                history.Session.TotalCachedInputTokens = NullableAdd(history.Session.TotalCachedInputTokens, answer.CachedInputTokens);
-                history.Session.TotalOutputTokens = NullableAdd(history.Session.TotalOutputTokens, answer.OutputTokens);
-                history.Session.TotalReasoningOutputTokens = NullableAdd(history.Session.TotalReasoningOutputTokens, answer.ReasoningOutputTokens);
-                history.Session.TotalToolCalls += answer.ToolCalls.Count;
-                history.Session.Save();
+
+                Expression<Func<int?, int?, int?>> NullableAdd = (a, b) => a == null && b == null ? null : (a ?? 0) + (b ?? 0);
+
+                history.Session.InDB().UnsafeUpdate()
+                    .Set(a => a.TotalInputTokens, a => NullableAdd.Evaluate(a.TotalInputTokens, answer.InputTokens))
+                    .Set(a => a.TotalCachedInputTokens, a => NullableAdd.Evaluate(a.TotalCachedInputTokens, answer.CachedInputTokens))
+                    .Set(a => a.TotalOutputTokens, a => NullableAdd.Evaluate(a.TotalOutputTokens, answer.OutputTokens))
+                    .Set(a => a.TotalReasoningOutputTokens, a => NullableAdd.Evaluate(a.TotalReasoningOutputTokens, answer.ReasoningOutputTokens))
+                    .Set(a => a.TotalToolCalls, a => a.TotalToolCalls + answer.ToolCalls.Count)
+                    .Execute();
 
                 foreach (var item in answer.ToolCalls)
                 {
@@ -301,16 +306,18 @@ public class ChatbotController : Controller
             }
 
             doneWithTools:
-            history.Session.Save();
 
-            if (history.Session.Title == null || history.Session.Title.StartsWith("!*$"))
+            if (history.SessionTitle == null || history.SessionTitle.StartsWith("!*$"))
             {
-                string title = await ChatbotLogic.SumarizeTitle(history, ct);
-                if (title.HasText() && title.ToLower() != "pending")
+                history.SessionTitle = history.Session.InDB(a => a.Title);
+                if (history.SessionTitle == null || history.SessionTitle.StartsWith("!*$"))
                 {
-                    history.Session.Title = title;
-                    history.Session.Save();
-                    await resp.WriteAsync(UINotification(ChatbotUICommand.SessionTitle, title), ct);
+                    string title = await ChatbotLogic.SumarizeTitle(history, ct);
+                    if (title.HasText() && title.ToLower() != "pending")
+                    {
+                        history.Session.InDB().UnsafeUpdate(a => a.Title, a => title);
+                        await resp.WriteAsync(UINotification(ChatbotUICommand.SessionTitle, title), ct);
+                    }
                 }
             }
         }
@@ -325,8 +332,6 @@ public class ChatbotController : Controller
         }
     }
 
-
-    static int? NullableAdd(int? a, int? b) => a == null && b == null ? null : (a ?? 0) + (b ?? 0);
 
     async Task ExecuteToolAsync(ConversationHistory history, string toolId, string callId, IDictionary<string, object?> arguments, CancellationToken ct)
     {
@@ -344,7 +349,7 @@ public class ChatbotController : Controller
             string toolResponse = JsonSerializer.Serialize(obj);
             var toolMsg = new ChatMessageEntity()
             {
-                ChatSession = history.Session.ToLite(),
+                ChatSession = history.Session,
                 Role = ChatMessageRole.Tool,
                 ToolCallID = callId,
                 ToolID = toolId,
@@ -368,7 +373,7 @@ public class ChatbotController : Controller
             {
                 toolMsg = new ChatMessageEntity()
                 {
-                    ChatSession = history.Session.ToLite(),
+                    ChatSession = history.Session,
                     Role = ChatMessageRole.Tool,
                     ToolCallID = callId,
                     ToolID = toolId,
@@ -430,7 +435,8 @@ public class ChatbotController : Controller
 
         var history = new ConversationHistory
         {
-            Session = session,
+            Session = session.ToLite(),
+            SessionTitle = session.Title,
             LanguageModel = session.LanguageModel.RetrieveFromCache(),
             Messages = new List<ChatMessageEntity>
             {

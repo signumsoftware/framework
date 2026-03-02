@@ -19,17 +19,108 @@ Every field in the explored type has, among other properties:
 
 For `isFullEntity` consider calling `getTypeInfo` for the related type(s). 
 
-### Execute operations on entities
+### Quick checklist
+
+1. Call `getTypeInfo` for the target type (and related full entities).
+2. Build JSON using camelCase fields, keeping `Type` in PascalCase.
+3. For MLists, use `{ rowId, element }` items.
+4. Execute with `executeOperation` or construct first using `operation_Construct`.
+
+### Key rules
+
+* `Type`, `id`, `ticks`, `isNew`, `temporalId`, `modified` must appear before other fields.
+* Use camelCase for member names from TypeInfo.
+* Set `modified = true` on any entity/embedded you change.
+* For Lites, use `{ EntityType, id, model }`.
+* For full entities, use `{ Type, id, ticks, ... }` (include the embedded/mixin fields if present).
+
+### Example: From TypeInfo to entity JSON
+
+Suppose `getTypeInfo("Book")` returns a simplified shape like this:
+
+```json
+{
+  "kind": "Entity",
+  "fullName": "Library.BookEntity",
+  "niceName": "Book",
+  "members": {
+    "Title": { "type": { "name": "string" }, "required": true },
+    "Isbn": { "type": { "name": "string" }, "required": true },
+    "PublishYear": { "type": { "name": "int" } },
+    "IsPublished": { "type": { "isNotNullable": true, "name": "boolean" }, "required": true },
+    "Publisher": { "type": { "isLite": true, "name": "Publisher" } },
+    "Dimensions": { "type": { "isEmbedded": true, "name": "DimensionsEmbedded" }, "required": true },
+    "Dimensions.Width": { "type": { "name": "decimal" }, "required": true },
+    "Dimensions.Height": { "type": { "name": "decimal" }, "required": true },
+    "Tags": { "type": { "isCollection": true, "name": "string" } },
+    "Chapters": { "type": { "isCollection": true, "isEmbedded": true, "name": "ChapterEmbedded" } },
+    "Chapters/Title": { "type": { "name": "string" }, "required": true },
+    "Chapters/PageCount": { "type": { "name": "int" }, "required": true },
+    "[AuditMixin].SourceSystem": { "type": { "name": "string" } }
+  }
+}
+```
+
+A compatible entity JSON (fields only, omitting `canExecute`, `propsMeta`, and operations) would look like:
+
+```json
+{
+  "Type": "Book",
+  "id": 101,
+  "ticks": "0",
+  "toStr": "Refactoring Recipes",
+  "modified": false,
+  "title": "Refactoring Recipes",
+  "isbn": "978-1-23456-789-0",
+  "publishYear": 2024,
+  "isPublished": true,
+  "publisher": {
+    "EntityType": "Publisher",
+    "id": 5,
+    "model": "Acme Press"
+  },
+  "dimensions": {
+    "Type": "DimensionsEmbedded",
+    "toStr": "24 x 17",
+    "modified": false,
+    "width": 24.0,
+    "height": 17.0
+  },
+  "tags": [
+    { "rowId": 1, "element": "refactoring" },
+    { "rowId": 2, "element": "patterns" }
+  ],
+  "chapters": [
+    {
+      "rowId": 10,
+      "element": {
+        "Type": "ChapterEmbedded",
+        "toStr": "Intro",
+        "modified": false,
+        "title": "Introduction",
+        "pageCount": 12
+      }
+    }
+  ],
+  "mixins": {
+    "AuditMixin": {
+      "Type": "AuditMixin",
+      "modified": false,
+      "sourceSystem": "Import"
+    }
+  }
+}
+```
+
+* `toStr` field of an entity is server-generated and necessary.
+
+### Operations
+
+#### Execute operations on entities
 
 The tool `executeOperation` allows you to modify the state or data of an entity by executing an operation.
 
-If the operation accepts modifications (canBeModified = true), you can return the modified entity in JSON format but remember: 
-
-* Preserve the ticks value to ensure data integrity. 
-* If you make any change in an entity, sub-entity or embedded, you need to set `modified = true` in this entity. 
-* IMPORTANT: Special properties like `Type`, `id`, `ticks`, `isNew`, `temporalId` and `modified` should be included as they are essential and should always be before any other property on each entity. 
-* The fields in `getTypeInfo` are written in PascalCase, but in Json they should be camelCase, except for the `Type` field. 
-* When calling `executeOperation` you only need to send the `entity`, not the `canExecute` dictionary. 
+If the operation accepts modifications (canBeModified = true), you can return the modified entity in JSON format. Follow the Key rules above, and preserve `ticks` when you do so. When calling `executeOperation` you only need to send the `entity`, not the `canExecute` dictionary. 
 
 
 #### Modifying MList
@@ -51,14 +142,14 @@ export interface MListElement<T> {
 
  Also if you make any modification in an MList (adding or removing elements) you need to set `modified=true` on the parent entity. 
 
- ### Creating new entities
+### Creating new entities
 
  Creating new entities (or sub-entites) could be harder than modifying existing ones because you don't start with an example json. Some advices:
 
  * Check the `TypeInfo` for the desired type.
  * The `Type` property should be set on every entity, sub-entity or embedded entity. If should be the `cleanName` not the `fullName`.
  * For new entities, the `id` property should be skipped.
-	
+    
 For some types, custom constructor operations cound be defined:
 
 #### Construct

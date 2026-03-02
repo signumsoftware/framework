@@ -365,11 +365,13 @@ public interface IEmbeddingsProvider
 
 public class ConversationHistory
 {
-    public ChatSessionEntity Session;
+    public Lite<ChatSessionEntity> Session;
 
     public ChatbotLanguageModelEntity LanguageModel;
 
     public List<ChatMessageEntity> Messages;
+
+    public string? SessionTitle { get; internal set; }
 
     public List<ChatMessage> GetMessages()
     {
