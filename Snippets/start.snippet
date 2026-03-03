@@ -14,10 +14,9 @@
       <Code Language="csharp">
         <![CDATA[public static void Start(SchemaBuilder sb)
 {
-    if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-    {
-                
-    }
+    if (sb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+	    return;
+        
 }]]>
       </Code>
     </Snippet>
