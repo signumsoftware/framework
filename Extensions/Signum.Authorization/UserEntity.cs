@@ -29,6 +29,9 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
     [DbType(Size = 128), QueryableProperty(false)]
     public byte[]? PasswordHash { get; set; }
 
+    [Ignore]
+    public bool PasswordIsChanging { get; set; }
+
     public Lite<RoleEntity> Role { get; set; }
 
     [StringLengthValidator(Max = 200), EMailValidator]
@@ -49,6 +52,9 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
             if (DisabledOn != null && State is not (UserState.Deactivated or UserState.AutoDeactivate))
                 return AuthAdminMessage.TheUserStateMustBeDisabled.NiceToString();
         }
+
+        if (pi.Name == nameof(PasswordIsChanging) && PasswordIsChanging)
+            return AuthAdminMessage.PasswordChangeIsNotCompleted.NiceToString();
 
         return base.PropertyValidation(pi);
     }

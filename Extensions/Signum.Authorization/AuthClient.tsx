@@ -18,6 +18,10 @@ export namespace AuthClient {
   
   export let pendingPasswordChangeUser: UserEntity | undefined;
 
+  export interface PasswordValidationResult { message: string, level: "error" | "warning" }
+
+  export let validatePassword: ((password: string, user: UserEntity) => Promise<PasswordValidationResult | null>) | undefined = undefined;
+
   export function startPublic(options: { routes: RouteObject[], userTicket: boolean, notifyLogout: boolean }): void {
     Options.userTicket = options.userTicket;
   
