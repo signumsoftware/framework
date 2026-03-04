@@ -592,7 +592,7 @@ public class NumberIsValidatorAttribute : ValidatorAttribute
         var format = pr != null ? Reflector.GetFormatString(pr) :
             property.GetCustomAttribute<FormatAttribute>()?.Format ?? Reflector.FormatString(property.PropertyType);
 
-        return ValidationMessage._0ShouldBe12.NiceToString().FormatWith("{0}", ComparisonType.NiceToString().ToLower(), ((IFormattable)value).ToString(format, null) + unit);
+        return ValidationMessage._0ShouldBe12.NiceToString().FormatWith("{0}", ComparisonType.NiceToString().ToLower(), ((IFormattable)number).ToString(format, null) + unit);
     }
 
     public override bool IsCompatibleWith(PropertyInfo pi)
