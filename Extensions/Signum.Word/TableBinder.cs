@@ -339,7 +339,7 @@ public static class TableBinder
     {
         Dictionary<object, Dictionary<object, object>> dictionary =
             dt.Rows.Cast<DataRow>()
-            .AgGroupToDictionary(
+            .GroupAggregateToDictionary(
                 row => row[rowColumnIndex],
                 gr => gr.ToDictionaryEx(
                     row => row[columnColumnIndex],

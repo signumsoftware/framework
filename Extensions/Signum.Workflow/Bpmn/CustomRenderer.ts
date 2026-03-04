@@ -24,7 +24,7 @@ export class CustomRenderer extends BpmnRenderer {
   getConnectionType!: (element: BPMN.Connection) => ConnectionType | undefined;
   getDecisionStyle!: (element: BPMN.Connection) => BootstrapStyle | undefined;
 
-  drawConnection(visuals: any, element: BPMN.Connection): SVGElement {
+  override drawConnection(visuals: any, element: BPMN.Connection): SVGElement {
     var result = super.drawConnection(visuals, element);
     var ct = this.getConnectionType(element);
     var ds = this.getDecisionStyle(element);
@@ -39,7 +39,7 @@ export class CustomRenderer extends BpmnRenderer {
     return result;
   }
 
-  drawShape(visuals: any, element: BPMN.DiElement): SVGElement {
+  override drawShape(visuals: any, element: BPMN.DiElement): SVGElement {
 
     var result = super.drawShape(visuals, element);
 

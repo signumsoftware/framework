@@ -143,7 +143,7 @@ public class QueryCache : AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEnti
 
                 return QueryLogic.GetQueryEntity(qn);
             },
-            parseAllowed: e =>
+            parseAllowed: (e, resource) =>
             {
                 var allowed = e.Attribute("Allowed")!.Value;
                 if (Enum.TryParse<QueryAllowed>(allowed, out var result))

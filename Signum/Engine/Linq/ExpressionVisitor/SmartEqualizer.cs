@@ -627,7 +627,7 @@ internal static class SmartEqualizer
         if (collection.IsEmpty())
             return False;
 
-        Dictionary<Type, PrimaryKey[]> entityIDs = collection.Where(a => a.IdOrNull.HasValue).AgGroupToDictionary(a => a.GetType(), gr => gr.Select(a => a.Id).ToArray());
+        Dictionary<Type, PrimaryKey[]> entityIDs = collection.Where(a => a.IdOrNull.HasValue).GroupAggregateToDictionary(a => a.GetType(), gr => gr.Select(a => a.Id).ToArray());
 
         return EntityIn(newItem, entityIDs);
     }
@@ -637,7 +637,7 @@ internal static class SmartEqualizer
         if (collection.IsEmpty())
             return False;
 
-        Dictionary<Type, PrimaryKey[]> entityIDs = collection.Where(a => a.IdOrNull.HasValue).AgGroupToDictionary(a => a.EntityType, gr => gr.Select(a => a.Id).ToArray());
+        Dictionary<Type, PrimaryKey[]> entityIDs = collection.Where(a => a.IdOrNull.HasValue).GroupAggregateToDictionary(a => a.EntityType, gr => gr.Select(a => a.Id).ToArray());
 
         return EntityIn(liteReference.Reference, entityIDs);
     }

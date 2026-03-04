@@ -570,4 +570,14 @@ internal class OverloadingSimplifier : ExpressionVisitor
         }
         return false;
     }
+
+
+    protected override MemberAssignment VisitMemberAssignment(MemberAssignment node)
+    {
+        var exp = Visit(node.Expression);
+        if(node.Member.ReturningType() != node.Expression.Type)
+            exp = Expression.Convert(exp, node.Member.ReturningType());
+        return node.Update(exp);
+    }
+  
 }

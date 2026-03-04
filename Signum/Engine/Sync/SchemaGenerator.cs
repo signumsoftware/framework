@@ -127,8 +127,13 @@ public static class SchemaGenerator
             return null;
 
         var s = Schema.Current;
+        var isAzure = Connector.Current is PostgreSqlConnector psc && psc.IsAzurePostgres;
 
-        return s.PostgresExtensions.Where(kvp => kvp.Value(s)).Select(kvp => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(kvp.Key)).Combine(Spacing.Simple);
+        return s.PostgresExtensions
+            .Where(kvp => kvp.Value(s))
+            .Where(kvp => !isAzure || kvp.Key != "plpgsql") // Skip plpgsql creation in Azure (pre-installed)
+            .Select(kvp => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(kvp.Key))
+            .Combine(Spacing.Simple);
     }
 
 

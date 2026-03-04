@@ -367,25 +367,25 @@ public static class AuthLogic
         set { globallyEnabled = value; }
     }
 
-    static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");
+    static readonly Variable<bool?> tempEnabled = Statics.ThreadVariable<bool?>("authTempDisabled");
 
-    public static IDisposable? Disable()
+    public static IDisposable Disable()
     {
-        if (tempDisabled.Value) return null;
-        tempDisabled.Value = true;
-        return new Disposable(() => tempDisabled.Value = false);
+        var oldValue = tempEnabled.Value;
+        tempEnabled.Value = false;
+        return new Disposable(() => tempEnabled.Value = oldValue);
     }
 
-    public static IDisposable? Enable()
+    public static IDisposable Enable()
     {
-        if (!tempDisabled.Value) return null;
-        tempDisabled.Value = false;
-        return new Disposable(() => tempDisabled.Value = true);
+        var oldValue = tempEnabled.Value;
+        tempEnabled.Value = true;
+        return new Disposable(() => tempEnabled.Value = oldValue);
     }
 
     public static bool IsEnabled
     {
-        get { return !tempDisabled.Value && globallyEnabled; }
+        get { return tempEnabled.Value ?? globallyEnabled; }
     }
 
     public static event Action? OnRulesChanged;
@@ -657,7 +657,8 @@ public static class AuthLogic
 
         Dictionary<string, XElement> rolesXml = doc.Root!.Element("Roles")!.Elements("Role").ToDictionary(x => x.Attribute("Name")!.Value);
 
-        Dictionary<string, RoleEntity> rolesDic = AuthLogic.RolesInOrder(includeTrivialMerge: false).Reverse().Select(r => AuthLogic.RolesByLite.Value.GetOrThrow(r)).ToDictionary(a => a.ToString());
+        var dbRoles = Database.Query<RoleEntity>().Where(a => a.IsTrivialMerge == false).ToDictionaryEx(a => a.ToLite());
+        Dictionary<string, RoleEntity> rolesDic =  AuthLogic.RolesInOrder(includeTrivialMerge: false).Reverse().Select(r => dbRoles.GetOrThrow(r)).ToDictionary(a => a.ToString());
         
         Replacements replacements = new Replacements { Interactive = interactive, AutoReplacement = autoReplacement };
 

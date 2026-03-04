@@ -65,7 +65,7 @@ public class TranslatedInstanceController : ControllerBase
                                  let newText = master.TryGet(kvpLocIns.Key, null)
                                  group (lockIns: kvpLocIns.Key, translatedInstance: kvpLocIns.Value, culture: kvpCult.Key, newText) by kvpLocIns.Key.Instance into gInstance
                                  select KeyValuePair.Create(gInstance.Key,
-                                 gInstance.AgGroupToDictionary(a => a.lockIns.RouteAndRowId(),
+                                 gInstance.GroupAggregateToDictionary(a => a.lockIns.RouteAndRowId(),
                                     gr => gr.ToDictionary(a => a.culture.Name, a => new TranslatedPairViewTS
                                     {
                                         OriginalText = a.translatedInstance.OriginalText,

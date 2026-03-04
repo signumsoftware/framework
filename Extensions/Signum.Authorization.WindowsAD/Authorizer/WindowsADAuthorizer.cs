@@ -182,7 +182,10 @@ public class WindowsADAuthorizer : ICustomAuthorizer
         {
             user.Mixin<UserWindowsADMixin>().SID = ctx.SID;
             if (!UserWindowsADMixin.AllowPasswordForActiveDirectoryUsers)
+            { 
                 user.PasswordHash = null;
+                user.MustChangePassword = false;
+            }
         }
 
         user.UserName = ctx.UserName;

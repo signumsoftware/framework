@@ -67,8 +67,10 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
     return new ImageNode(node.imageInfo, node.__key);
   }
 
-  static override importJSON(serializedNode: ImageInfo): ImageNode {
-    return new ImageNode(serializedNode);
+  static override importJSON(serializedNode: any): ImageNode {
+    // Handle both direct ImageInfo and the wrapped format from exportJSON
+    const imageInfo = serializedNode.uploadedFile ?? serializedNode;
+    return new ImageNode(imageInfo);
   }
 }
 

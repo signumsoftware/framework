@@ -235,7 +235,7 @@ public static class PropertyAuthLogic
     {
         if (dd.AdditionalDictionary == null)
         {
-            var lookup = dd.OverrideDictionary!.AgGroupToFrozenDictionary(kvp => kvp.Key.RootType, gr => gr.ToFrozenDictionaryEx());
+            var lookup = dd.OverrideDictionary!.GroupAggregateToFrozenDictionary(kvp => kvp.Key.RootType, gr => gr.ToFrozenDictionaryEx());
             dd.AdditionalDictionary = lookup;
             return lookup;
         }

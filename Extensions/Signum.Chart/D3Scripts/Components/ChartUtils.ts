@@ -277,7 +277,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     if (min == undefined  || max == undefined)
       return values;
 
-    var isServerUtc = values.some(a => (a as string).endsWith("Z"));
+    var isServerUtc = values.notNull().some(a => (a as string).endsWith("Z"));
 
     const minDate = DateTime.fromISO(min, { zone: isServerUtc ? "utc" : undefined }).startOf(unit); //Needed to fix offset issues after UTC conversion
     const maxDate = DateTime.fromISO(max, { zone: isServerUtc ? "utc" : undefined }).startOf(unit); //Needed to fix offset issues after UTC conversion
