@@ -1,13 +1,15 @@
 import { PropertyRoute } from "@framework/Lines";
 import { getSymbol } from "@framework/Reflection";
+import { useAPI } from "@framework/Hooks";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FileImage } from "../../Signum.Files/Components/FileImage";
 import { toFileEntity } from "../../Signum.Files/Components/FileUploader";
 import { FilePathEmbedded, FileTypeSymbol } from "../../Signum.Files/Signum.Files";
-import type { FilesClient } from '../../Signum.Files/FilesClient';
 import { ImageHandlerBase, ImageInfo } from "../../Signum.HtmlEditor/Extensions/ImageExtension/ImageHandlerBase";
-import { HelpImageEntity } from "../Signum.Help";
+import { HelpImageEntity, HelpMessage } from "../Signum.Help";
 import { HelpImageNode } from "./HelpImageNode";
 import { ImageNodeBase } from "../../Signum.HtmlEditor/Extensions/ImageExtension/ImageNodeBase";
+import { HelpClient } from "../HelpClient";
 
 export class HelpImageHandler implements ImageHandlerBase {
 
@@ -24,7 +26,7 @@ export class HelpImageHandler implements ImageHandlerBase {
 
     val.binaryFile && img.setAttribute("data-binary-file", val.binaryFile);
     img.setAttribute("data-file-name", val.fileName || "");
-    val.imageId && img.setAttribute("data-help-image-id", val.imageId);
+    val.key && img.setAttribute("data-help-image-guid", val.key);
 
     return img;
   }
@@ -43,28 +45,16 @@ export class HelpImageHandler implements ImageHandlerBase {
       }));
   }
 
-  renderImage(info: ImageInfo): React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> {
-    var fp = FilePathEmbedded.New({
-      binaryFile: info.binaryFile,
-      entityId: info.imageId,
-      mListRowId: null,
-      fileType: getSymbol(FileTypeSymbol, this.pr.member!.defaultFileTypeInfo!.key),
-      rootType: this.pr.findRootType().name,
-      propertyRoute: this.pr.propertyPath()
-    });
-
-    if (fp.entityId == null && fp.binaryFile == null)
-      return <div className="alert alert-danger">{JSON.stringify(info)}</div>;
-
-    return <FileImage file={fp} />;
+  renderImage(info: ImageInfo): React.ReactElement {
+    return <InlineImage info={info} pr={this.pr} />;
   }
 
   toHtml(val: ImageInfo): string | undefined {
     if (val.binaryFile)
       return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" />`;
 
-    if (val.imageId)
-      return `<img data-help-image-id="${val.imageId}" />`;
+    if (val.key)
+      return `<img data-help-image-guid="${val.key}" />`;
 
     return undefined;
   }
@@ -72,12 +62,39 @@ export class HelpImageHandler implements ImageHandlerBase {
   fromElement(element: HTMLDivElement): ImageInfo | undefined {
     if (element.tagName == "IMG") {
       return {
-        binaryFile: element.dataset["binaryFile"],
-        fileName: element.dataset["fileName"],
-        imageId: element.dataset["helpImageId"],
+        binaryFile: element.getAttribute("data-binary-file") ?? undefined,
+        fileName: element.getAttribute("data-file-name") ?? undefined,
+        key: element.getAttribute("data-help-image-guid") ?? undefined,
       };
     }
 
     return undefined;
   }
+}
+
+function InlineImage(p: { info: ImageInfo, pr: PropertyRoute }): React.ReactElement | undefined
+{
+  const imageId = useAPI(() => p.info.key && HelpClient.API.getImageId(p.info.key), []);
+
+  if (!imageId && !p.info.binaryFile)
+  return (
+    <div className="alert alert-info d-inline-block" >
+      <span>
+        <FontAwesomeIcon icon="gear" className="fa-fw me-2" style={{ fontSize: "larger" }} spin />
+        {HelpMessage.LoadingImage.niceToString()}...
+      </span>
+    </div>
+  );
+
+  const fp = FilePathEmbedded.New({
+    binaryFile: p.info.binaryFile,
+    entityId: imageId,
+    mListRowId: null,
+    fileType: getSymbol(FileTypeSymbol, p.pr.member!.defaultFileTypeInfo!.key),
+    rootType: p.pr.findRootType().name,
+    propertyRoute: p.pr.propertyPath()
+  });
+
+  return <FileImage file={fp} />;
+
 }

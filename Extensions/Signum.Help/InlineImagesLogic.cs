@@ -11,16 +11,16 @@ public static class InlineImagesLogic
     public static IQueryable<HelpImageEntity> Images(this IHelpEntity e) =>
         As.Expression(() => Database.Query<HelpImageEntity>().Where(a => a.Target.Is(e)));
 
-    public static Regex ImgRegex = new Regex(@"<img(\s+(?<key>[\w\-]+)\s*=\s*""(?<value>[^""]+)"")+\s*/?>");
+    public static Regex ImgRegex = new(@"<img(\s+(?<key>[\w\-]+)\s*=\s*""(?<value>[^""]+)"")+\s*/?>");
 
     public static bool SynchronizeInlineImages(IHelpEntity entity)
     {
         using (OperationLogic.AllowSave<HelpImageEntity>())
         {
-            var toDeleteImages = entity.IsNew ? new Dictionary<PrimaryKey, Lite<HelpImageEntity>>() :
-                entity.Images().Select(a => a.ToLite()).ToDictionaryEx(a => a.Id) ;
+            var toDeleteImages = entity.IsNew ? [] :
+                entity.Images().Select(a => new { lite = a.ToLite(), a.Guid }).ToDictionaryEx(a => a.Guid) ;
 
-            List<HelpImageEntity> newImages = new List<HelpImageEntity>();
+            List<HelpImageEntity> newImages = [];
 
             var hasChanges = entity.ForeachHtmlField(text =>
             {
@@ -28,9 +28,9 @@ public static class InlineImagesLogic
                 {
                     Dictionary<string, string> atts = GetTagAttributes(m);
                     var newAtts = atts.ToDictionary();
-                    if (atts.TryGetValue("data-help-image-id", out var imageId))
+                    if (atts.TryGetValue("data-help-image-guid", out var imageGuid))
                     {
-                        toDeleteImages.Remove(PrimaryKey.Parse(imageId, typeof(HelpImageEntity)));
+                        toDeleteImages.Remove(Guid.Parse(imageGuid));
                     }
 
                     if (atts.TryGetValue("data-binary-file", out var base64Data))
@@ -53,7 +53,7 @@ public static class InlineImagesLogic
                         else
                         {
                             image.Save();
-                            newAtts.Add("data-help-image-id", image.Id.ToString());
+                            newAtts.Add("data-help-image-guid", image.Guid.ToString());
                         }
                     }
 
@@ -64,7 +64,7 @@ public static class InlineImagesLogic
             });
 
             if (toDeleteImages.Any())
-                Database.DeleteList(toDeleteImages.Values.ToList());
+                Database.DeleteList(toDeleteImages.Values.Select(a => a.lite).ToList());
 
             if (!hasChanges)
                 return false;
@@ -74,7 +74,7 @@ public static class InlineImagesLogic
                 entity.Save();
                 newImages.SaveList();
 
-                var hashToHelpImageId = newImages.ToDictionary(a => a.File.Hash!, a => a.Id);
+                var hashToHelpImageId = newImages.ToDictionary(a => a.File.Hash!, a => a.Guid);
 
                 entity.ForeachHtmlField(text => ImgRegex.Replace(text?? "", m =>
                 {
@@ -83,7 +83,7 @@ public static class InlineImagesLogic
                     if (atts.TryGetValue("data-hash", out var hash))
                     {
                         atts.Remove("data-hash");
-                        atts.Add("data-help-image-id", hashToHelpImageId.GetOrThrow(hash).ToString());
+                        atts.Add("data-help-image-guid", hashToHelpImageId.GetOrThrow(hash).ToString());
                     }
 
                     return $"<img {atts.ToString(a => $"{a.Key}=\"{a.Value}\"", " ")}/>";

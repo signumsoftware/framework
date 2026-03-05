@@ -3,7 +3,6 @@ using Signum.Files;
 namespace Signum.Help;
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
-[PrimaryKey(typeof(Guid))]
 public class HelpImageEntity : Entity
 {
     [ImplementedBy(typeof(AppendixHelpEntity), typeof(NamespaceHelpEntity), typeof(QueryHelpEntity), typeof(TypeHelpEntity))]
@@ -13,6 +12,10 @@ public class HelpImageEntity : Entity
 
     [DefaultFileType(nameof(HelpImageFileType.Image), nameof(HelpImageFileType))]
     public FilePathEmbedded File { get; set; }
+
+    [UniqueIndex]
+    public Guid Guid { get; set; } = Guid.NewGuid();
+
 }
 
 [AutoInit]

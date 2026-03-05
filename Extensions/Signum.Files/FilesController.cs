@@ -1,10 +1,10 @@
+using Azure.Core;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
+using Microsoft.Net.Http.Headers;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
-using System.Security.Cryptography;
-using System.Reflection.Metadata.Ecma335;
-using Azure.Core;
+using System.IO;
 
 namespace Signum.Files;
 
@@ -24,7 +24,7 @@ public class FilesController : ControllerBase
     {
         var filePath = Database.Retrieve<FilePathEntity>(PrimaryKey.Parse(filePathId, typeof(FilePathEntity)));
 
-   		Response.Headers.CacheControl = $"max-age={FilePathLogic.MaxAge(filePath)}, private";
+        Response.GetTypedHeaders().CacheControl = FilesCacheControl(filePath);
 
         return MimeMapping.GetFileStreamResult(filePath.OpenRead(), filePath.FileName);
     }
@@ -53,10 +53,16 @@ public class FilesController : ControllerBase
         if (fpe == null)
             return null;
 
-    	Response.Headers.CacheControl = $"max-age={FilePathLogic.MaxAge(fpe)}, private";
+        Response.GetTypedHeaders().CacheControl = FilesCacheControl(fpe);
 
-        return MimeMapping.GetFileStreamResult(fpe.OpenRead(), fpe.FileName);
+        return MimeMapping.GetFileStreamResult(fpe.OpenRead(), fpe.FileName);   
     }
+
+    private static CacheControlHeaderValue FilesCacheControl(IFilePath fpe) => new()
+    {
+        Private = true,
+        MaxAge = TimeSpan.FromSeconds(FilePathLogic.MaxAge(fpe))
+    };
 
     static ConcurrentDictionary<PropertyRoute, Func<PrimaryKey, string?, FilePathEmbedded?>> queryBuilderCache = 
         new ConcurrentDictionary<PropertyRoute, Func<PrimaryKey, string?, FilePathEmbedded?>>();

@@ -155,7 +155,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.
       timeoutWriteText.current = window.setTimeout(() => {
         p.onFiltersChanged && p.onFiltersChanged(p.filterOptions, avoidSearch);
         timeoutWriteText.current = null;
-      }, 200);
+      }, PinnedFilterBuilderOptions.searchTextTimeout(f));
 
     } else {
       p.onFiltersChanged && p.onFiltersChanged(p.filterOptions, avoidSearch);
@@ -179,4 +179,8 @@ export function getAllPinned(filterOptions: FilterOptionParsed[]): FilterOptionP
     .flatMap(f => f.pinned == null && isFilterGroup(f) ? getAllPinned(f.filters) : []);
 
   return direct.concat(recursive);
+}
+
+export namespace PinnedFilterBuilderOptions {
+  export let searchTextTimeout = (f: FilterOptionParsed): number => 200;
 }

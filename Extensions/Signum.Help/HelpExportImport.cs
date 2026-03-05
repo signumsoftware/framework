@@ -65,7 +65,7 @@ public static class HelpExportImport
 
     private static FileContent[] GetImageContents(IHelpEntity entity) =>
         [.. Database.Query<HelpImageEntity>().Where(a => a.Target.Is(entity))
-            .Select(i => new FileContent(i.Id + "." + i.File.FileName, i.File.GetByteArray()))];
+            .Select(i => new FileContent(i.Guid + "." + i.File.FileName, i.File.GetByteArray()))];
 
     private static byte[] ToBytes(this XDocument doc)
     {
@@ -870,14 +870,16 @@ public static class HelpExportImport
 
         Synchronizer.Synchronize(
               newDictionary: content.Images.ToDictionaryEx(i => i.FileName),
-              oldDictionary: oldImages.EmptyIfNull().ToDictionaryEx(o => o.Id + "." + o.File.FileName),
+              oldDictionary: oldImages.EmptyIfNull().ToDictionaryEx(o => o.Guid + "." + o.File.FileName),
               createNew: (k, n) =>
               {
-                  Administrator.SaveDisableIdentity(new HelpImageEntity
+                  new HelpImageEntity
                   {
                       Target = (entity).ToLite(),
-                      File = new FilePathEmbedded(HelpImageFileType.Image, n.FileName.After("."), n.Bytes)
-                  }.SetId(Guid.Parse(n.FileName.Before("."))));
+                      File = new FilePathEmbedded(HelpImageFileType.Image, n.FileName.After("."), n.Bytes),
+                      Guid = Guid.Parse(n.FileName.Before("."))
+                  }.Save();
+
                   SafeConsole.WriteColor(ConsoleColor.Green, '.');
               },
               removeOld: (k, o) =>
@@ -889,12 +891,6 @@ public static class HelpExportImport
               {
               });
     }
-
-/*    public static string TypesDirectory = "Types";
-    public static string QueriesDirectory = "Query";
-    public static string OperationsDirectory = "Operation";
-    public static string NamespacesDirectory = "Namespace";
-    public static string AppendicesDirectory = "Appendix";*/
 
     #region Export methods
 

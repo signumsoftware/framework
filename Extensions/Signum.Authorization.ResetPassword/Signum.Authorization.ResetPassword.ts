@@ -8,6 +8,12 @@ import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Authorization from '../Signum.Authorization/Signum.Authorization'
 
 
+export namespace ResetPasswordAuthMessage {
+  export const PleaseConsiderRequestingANewLink: MessageKey = new MessageKey("ResetPasswordAuthMessage", "PleaseConsiderRequestingANewLink");
+  export const RequestNewLink: MessageKey = new MessageKey("ResetPasswordAuthMessage", "RequestNewLink");
+  export const NewLinkToResetPasswordHasBeenSentSuccessfully: MessageKey = new MessageKey("ResetPasswordAuthMessage", "NewLinkToResetPasswordHasBeenSentSuccessfully");
+}
+
 export namespace ResetPasswordMessage {
   export const YouRecentlyRequestedANewPassword: MessageKey = new MessageKey("ResetPasswordMessage", "YouRecentlyRequestedANewPassword");
   export const YourUsernameIs: MessageKey = new MessageKey("ResetPasswordMessage", "YourUsernameIs");
