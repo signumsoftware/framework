@@ -771,7 +771,7 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
         if (IsPostgres)
             return new SqlPreCommandSimple($"ALTER TABLE {tn} RENAME CONSTRAINT {foreignKeyName.Name.SqlEscape(IsPostgres)} TO {newName.SqlEscape(IsPostgres)};");
 
-        return SP_RENAME(foreignKeyName.Schema.Database, foreignKeyName.OnDatabase(null).ToString(), newName, "OBJECT");
+        return SP_RENAME(foreignKeyName.Schema.Database, foreignKeyName.OnDatabase(null).OnSchema(tn.Schema).ToString(), newName, "OBJECT");
     }
 
     public SqlPreCommandSimple SP_RENAME(DatabaseName? database, string oldName, string newName, string? objectType)

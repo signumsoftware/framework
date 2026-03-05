@@ -766,7 +766,7 @@ public class ImporterFromExcel
     {
         return filters.OfType<FilterCondition>()
             .Where(fc => IsSimpleProperty(fc.Token, mainType) == null && !fc.Token.HasElement())
-            .AgGroupToDictionary(a => Normalize(a.Token, qd, mainType), gr =>
+            .GroupAggregateToDictionary(a => Normalize(a.Token, qd, mainType), gr =>
         {
             var values = gr.Select(a => a.Value).Distinct();
             if (values.Count() > 1)

@@ -44,7 +44,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
   }
 
 
-  componentDidMount(): void {
+  override componentDidMount(): void {
     this.modeler = new CustomModeler({
       container: this.divArea,
       height: 1000,
@@ -478,11 +478,11 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
   }
 
-  componentWillUnmount(): void {
+  override componentWillUnmount(): void {
     this.modeler.destroy();
   }
 
-  componentWillReceiveProps(nextProps: BpmnModelerComponentProps): void {
+  override componentWillReceiveProps(nextProps: BpmnModelerComponentProps): void {
     if (this.modeler) {
       if (nextProps.diagramXML !== undefined && this.props.diagramXML !== nextProps.diagramXML) {
         this.modeler.importXML(nextProps.diagramXML, this.handleOnModelError);
@@ -518,7 +518,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     zoomScroll.reset();
   }
 
-  render(): React.JSX.Element {
+  override render(): React.JSX.Element {
     return (
       <div>
         <Button variant="secondary" style={{ marginLeft: "10px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>

@@ -7,7 +7,7 @@ export class CustomContextPadProvider extends BpmnContextPadProvider {
     super(config, injector, eventBus, contextPad, modeling, elementFactory, connect, create, popupMenu, canvas, rules, translate);
   }
 
-  getContextPadEntries(element: BPMN.DiElement): any {
+  override getContextPadEntries(element: BPMN.DiElement): any {
     var result = super.getContextPadEntries(element);
 
     delete result["append.text-annotation"];

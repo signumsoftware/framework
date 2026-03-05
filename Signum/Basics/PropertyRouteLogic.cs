@@ -34,7 +34,7 @@ public static class PropertyRouteLogic
         PropertiesFromLite = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
             new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
 
-        Properties = sb.GlobalLazy(() => PropertiesFromLite.Value.Values.AgGroupToDictionary(a => a.RootType, gr => gr.ToFrozenDictionaryEx(a => a.Path)).ToFrozenDictionaryEx(),
+        Properties = sb.GlobalLazy(() => PropertiesFromLite.Value.Values.GroupAggregateToDictionary(a => a.RootType, gr => gr.ToFrozenDictionaryEx(a => a.Path)).ToFrozenDictionaryEx(),
             new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
 
         PropertyRouteEntity.ToPropertyRouteFunc = ToPropertyRouteImplementation;
@@ -78,7 +78,7 @@ public static class PropertyRouteLogic
     public const string PropertiesFor = "Properties For:{0}";
     static SqlPreCommand? SynchronizeProperties(Replacements rep)
     {
-        var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(rep).AgGroupToDictionary(a => a.RootType.CleanName, g => g.ToDictionaryEx(f => f.Path, "PropertyEntity in the database with path"));
+        var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(rep).GroupAggregateToDictionary(a => a.RootType.CleanName, g => g.ToDictionaryEx(f => f.Path, "PropertyEntity in the database with path"));
 
         var should = TypeLogic.TryEntityToType(rep).SelectDictionary(dn => dn.CleanName, (dn, t) => GenerateProperties(t, dn, forSync: true).ToDictionaryEx(f => f.Path, "PropertyEntity in the database with path"));
 

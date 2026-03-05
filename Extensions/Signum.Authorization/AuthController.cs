@@ -122,11 +122,11 @@ public class AuthController : ControllerBase
         if (string.IsNullOrEmpty(request.newPassword))
             return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
-        var error = UserEntity.OnValidatePassword(request.newPassword);
+        var user = UserEntity.Current.Retrieve();
+        var error = UserEntity.OnValidatePassword(request.newPassword, user);
         if (error.HasText())
             return ModelError("newPassword", error);
 
-        var user = UserEntity.Current.Retrieve();
         if (string.IsNullOrEmpty(request.oldPassword))
         {
             if (user.PasswordHash != null)

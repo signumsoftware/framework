@@ -26,9 +26,9 @@ public static class AuthServer
     public static Action<ActionContext, UserWithClaims> UserLoggingOut;
 
 
-    public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
+    public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string authTokenEncryptionKey)
     {
-        AuthTokenServer.Start(tokenConfig, hashableEncryptionKey);
+        AuthTokenServer.Start(tokenConfig, authTokenEncryptionKey);
 
         RrgisterWithCondition<TypeAllowed>();
         RrgisterWithCondition<PropertyAllowed>();
@@ -326,7 +326,7 @@ public static class AuthServer
                     user.PasswordHash = null;
                 else
                 {
-                    var error = UserEntity.OnValidatePassword(password);
+                    var error = UserEntity.OnValidatePassword(password, user);
                     if (error != null)
                         throw new ApplicationException(error);
 
