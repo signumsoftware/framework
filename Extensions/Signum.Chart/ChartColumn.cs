@@ -42,6 +42,7 @@ public class ChartColumnEmbedded : EmbeddedEntity
         }
     }
 
+    [Translatable]
     public string? DisplayName { get; set; }
 
     public string? Format { get; set; }

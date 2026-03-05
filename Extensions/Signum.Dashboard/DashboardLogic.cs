@@ -316,14 +316,6 @@ public static class DashboardLogic
         return result;
     }
 
-    public static void RegisterTranslatableRoutes()
-    {
-        PropertyRouteTranslationLogic.RegisterRoute((DashboardEntity d) => d.DisplayName);
-        PropertyRouteTranslationLogic.RegisterRoute((DashboardEntity d) => d.Parts[0].Title);
-        if (Schema.Current.Tables.ContainsKey(typeof(TextPartEntity)))
-            PropertyRouteTranslationLogic.RegisterRoute((TextPartEntity tp) => tp.TextContent);
-    }
-
     public static List<DashboardEntity> GetEmbeddedDashboards(Type entityType)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
