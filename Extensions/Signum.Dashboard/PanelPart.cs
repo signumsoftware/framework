@@ -19,6 +19,9 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     [StringLengthValidator(Min = 3, Max = 100), Translatable]
     public string? Title { get; set; }
 
+    [StringLengthValidator(Max = int.MaxValue, MultiLine = true), Translatable]
+    public string? Tooltip { get; set; }
+
     [StringLengthValidator(Min = 3, Max = 100)]
     public string? IconName { get; set; }
 
@@ -80,6 +83,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             StartColumn = StartColumn,
             Content = Content.Clone(),
             Title = Title,
+            Tooltip = Tooltip,
             Row = Row,
             InteractionGroup = InteractionGroup,
             IconColor = IconColor,
@@ -102,6 +106,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             new XAttribute("StartColumn", StartColumn),
             new XAttribute("Columns", Columns),
             Title == null ? null! : new XAttribute("Title", Title),
+            Tooltip == null ? null! : new XAttribute("Tooltip", Tooltip),
             IconName == null ? null! : new XAttribute("IconName", IconName),
             IconColor == null ? null! : new XAttribute("IconColor", IconColor),
             TitleColor == null ? null! : new XAttribute("TitleColor", TitleColor),
@@ -116,6 +121,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         StartColumn = int.Parse(x.Attribute("StartColumn")!.Value);
         Columns = int.Parse(x.Attribute("Columns")!.Value);
         Title = x.Attribute("Title")?.Value;
+        Tooltip = x.Attribute("Tooltip")?.Value;
         IconName = x.Attribute("IconName")?.Value;
         IconColor = x.Attribute("IconColor")?.Value;
         TitleColor = x.Attribute("UseIconColorForTitle")?.Let(a => bool.Parse(a.Value) ? IconColor : null) ?? x.Attribute("TitleColor")?.Value;

@@ -15,6 +15,7 @@ import { CachedQueryJS } from '../CachedQueryExecutor'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder'
 import { Navigator } from '@framework/Navigator'
 import { LinkButton } from '@framework/Basics/LinkButton'
+import { OverlayTrigger, Popover } from 'react-bootstrap'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, embedded?: boolean, deps?: React.DependencyList; reload: () => void; hideEditButton?: boolean }): React.JSX.Element {
 
@@ -231,13 +232,19 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
   }
 
   const titleText = translated(part, p => p.title) ?? (renderer.defaultTitle ? renderer.defaultTitle(content) : getToString(content));
+  const tooltipHtml = translated(part, p => p.tooltip);
   const icon = parseIcon(part.iconName);
   const iconColor = part.iconColor;
 
-  const title = !icon ? titleText :
+  const iconElement = icon ? (
+    <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} color={iconColor ?? undefined} className="me-1" />
+  ) : null;
+
+  const title = !icon ? titleText : (
     <span>
-      <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} color={iconColor ?? undefined} className="me-1" />{titleText}
-    </span>;
+      {iconElement}{titleText}
+    </span>
+  );
 
   var dashboardFilter = p.dashboardController?.filters.get(p.ctx.value);
 
@@ -245,7 +252,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
     p.dashboardController.clearFilters(p.ctx.value);
   }
 
-  return (
+  const cardContent = (
     <div className={classes("card", !part.customColor && "border-tertiary", "shadow-sm", "mb-4")} style={{ flex: p.flex ? 1 : undefined,/* overflow: "hidden"*/ }}>
       <div className={classes("card-header fw-bold", "sf-show-hover", "d-flex", !part.customColor)}
         style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined}}
@@ -292,4 +299,19 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
       </div>
     </div>
   );
+
+  return tooltipHtml ? (
+    <OverlayTrigger
+      placement="auto"
+      overlay={
+        <Popover id={`tooltip-part-${part.row}-${part.startColumn}`}>
+          <Popover.Body>
+            <div dangerouslySetInnerHTML={{ __html: tooltipHtml }} />
+          </Popover.Body>
+        </Popover>
+      }
+    >
+      {cardContent}
+    </OverlayTrigger>
+  ) : cardContent;
 }
