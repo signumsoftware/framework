@@ -15,7 +15,8 @@ import { CachedQueryJS } from '../CachedQueryExecutor'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder'
 import { Navigator } from '@framework/Navigator'
 import { LinkButton } from '@framework/Basics/LinkButton'
-import { OverlayTrigger, Popover } from 'react-bootstrap'
+import { OverlayTrigger, Popover, Tooltip } from 'react-bootstrap'
+import { HtmlViewer } from '../Admin/TextPart'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, embedded?: boolean, deps?: React.DependencyList; reload: () => void; hideEditButton?: boolean }): React.JSX.Element {
 
@@ -216,7 +217,9 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
   const lite = p.entity ? toLite(p.entity) : undefined;
 
   if (renderer.withPanel && !renderer.withPanel(content, lite)) {
-    return (
+    const tooltipHtml = translated(part, p => p.tooltip);
+    
+    const partContent = (
       <ErrorBoundary>
         {React.createElement(state.component, {
           partEmbedded: part,
@@ -229,6 +232,19 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
         } as PanelPartContentProps<IPartEntity>)}
       </ErrorBoundary >
     );
+
+    return tooltipHtml ? (
+      <OverlayTrigger
+        placement="auto"
+        overlay={
+          <Tooltip id={`tooltip-part-${part.row}-${part.startColumn}`}>
+            <HtmlViewer text={tooltipHtml} />
+          </Tooltip>
+        }
+      >
+        <div>{partContent}</div>
+      </OverlayTrigger>
+    ) : partContent;
   }
 
   const titleText = translated(part, p => p.title) ?? (renderer.defaultTitle ? renderer.defaultTitle(content) : getToString(content));
@@ -237,7 +253,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
   const iconColor = part.iconColor;
 
   const iconElement = icon ? (
-    <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} color={iconColor ?? undefined} className="me-1" />
+    <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} color={iconColor ?? undefined} className="me-1" style={{ fontSize: "16px" }} />
   ) : null;
 
   const title = !icon ? titleText : (
@@ -304,11 +320,9 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
     <OverlayTrigger
       placement="auto"
       overlay={
-        <Popover id={`tooltip-part-${part.row}-${part.startColumn}`}>
-          <Popover.Body>
-            <div dangerouslySetInnerHTML={{ __html: tooltipHtml }} />
-          </Popover.Body>
-        </Popover>
+        <Tooltip id={`tooltip-part-${part.row}-${part.startColumn}`}>
+          <HtmlViewer text={tooltipHtml} />
+        </Tooltip>
       }
     >
       {cardContent}

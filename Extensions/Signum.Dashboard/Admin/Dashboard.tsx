@@ -236,33 +236,45 @@ function PanelPartEditor({ tc, ctx, colors, forceUpdate, selectIcon }: {
       propertyRoute: tc.propertyRoute,
       getViewPromise: e => new ViewPromise(import("./PanelPart")),
       modalSize: "lg",
-      buttons: "close",
+      buttons: "ok_cancel",
       isOperationVisible: e => false,
       requiresSaveOperation: false,
-    }).then(() => forceUpdate());
+    }).then(result => {
+      if (result) {
+        // Copy all modified properties from the modal back to the original entity
+        tc.value.iconName = result.iconName;
+        tc.value.iconColor = result.iconColor;
+        tc.value.titleColor = result.titleColor;
+        tc.value.customColor = result.customColor;
+        tc.value.interactionGroup = result.interactionGroup;
+        tc.value.tooltip = result.tooltip;
+        tc.value.modified = true;
+        forceUpdate();
+      }
+    });
   }
 
   const title = (
     <div>
-      <div className="d-flex">
+      <div className="d-flex align-items-center">
         {icon && <div className="mx-2" style={{ position: 'relative' }}>
-          <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} />
+          <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "20px" }} />
           <button
             type="button"
             style={{ 
               position: 'absolute', 
-              top: -5, 
-              right: -5, 
+              top: -6, 
+              right: -6, 
               background: 'transparent', 
               border: 'none',
               borderRadius: '50%',
-              width: '18px',
-              height: '18px',
+              width: '16px',
+              height: '16px',
               padding: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '12px',
+              fontSize: '11px',
               color: 'var(--bs-secondary)',
               cursor: 'pointer'
             }}
