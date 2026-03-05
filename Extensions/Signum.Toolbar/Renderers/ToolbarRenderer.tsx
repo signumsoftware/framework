@@ -580,15 +580,25 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   const icon = ToolbarConfig.coloredIcon(parseIcon(p.response.iconName), p.response.iconColor);
   const title = p.response.label || getToString(p.response.content);
 
+  const dataToolbarContent = p.response.content ? (() => {
+    let typeName = p.response.content.EntityType;
+    if (typeName.endsWith("Entity"))
+      typeName = typeName.substring(0, typeName.length - 6);
+    return `${typeName};${p.response.content.id}`;
+  })() : undefined;
+
   const options = (p.response.elements ?? []).map(el => ({
     value: el,
     label: el.label || getToString(el.content),
     icon: el.iconName ? ToolbarConfig.coloredIcon(parseIcon(el.iconName), el.iconColor) : undefined
   }));
+
   return (
     <li>
       <ul>
-        <Nav.Item title={title} className="d-flex mb-2">
+        <Nav.Item 
+        data-toolbar-content={dataToolbarContent}
+        title={title} className="d-flex mb-2">
           {icon}
           <RightCaretDropdown
             options={options}

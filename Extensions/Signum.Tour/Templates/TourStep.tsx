@@ -10,7 +10,19 @@ export default function TourStep(p: { ctx: TypeContext<TourStepEntity>, invalida
   const ctx = p.ctx;
   const sc = ctx.subCtx({ labelColumns: 2 });
   const sc4 = ctx.subCtx({ labelColumns: 6 });
- 
+  const forceUpdate = useForceUpdate();
+
+  const handleSideChange = () => {
+    const side = ctx.value.side;
+    if (side === "Top" || side === "Bottom") {
+      ctx.value.align = "Center";
+    } else if (side === "Left" || side === "Right") {
+      ctx.value.align = "Start";
+    }
+    forceUpdate();
+    p.invalidate();
+  };
+
   return (
     <div>
       <AutoLine ctx={sc.subCtx(a => a.title)} onChange={p.invalidate} />
@@ -38,14 +50,14 @@ export default function TourStep(p: { ctx: TypeContext<TourStepEntity>, invalida
       ]} />
       <div className="row">
         <div className="col-sm-4">
-          <AutoLine ctx={sc4.subCtx(a => a.side)} />
+          <AutoLine ctx={sc4.subCtx(a => a.side)} onChange={handleSideChange} mandatory/>
         </div>
         <div className="col-sm-4">
           <AutoLine ctx={sc4.subCtx(a => a.align)} />
         </div>
       </div>
       <div className="code-container">
-        <HtmlCodeMirror ctx={sc.subCtx(a => a.description)} />
+        <HtmlCodeMirror ctx={sc.subCtx(a => a.description)}  />
       </div>
     </div>
   );
