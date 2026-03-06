@@ -15,8 +15,7 @@ import { CachedQueryJS } from '../CachedQueryExecutor'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder'
 import { Navigator } from '@framework/Navigator'
 import { LinkButton } from '@framework/Basics/LinkButton'
-import { OverlayTrigger, Popover, Tooltip } from 'react-bootstrap'
-import { HtmlViewer } from '../Admin/TextPart'
+import { DashboardTooltipIcon } from './DashboardTooltipIcon'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, embedded?: boolean, deps?: React.DependencyList; reload: () => void; hideEditButton?: boolean }): React.JSX.Element {
 
@@ -233,18 +232,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
       </ErrorBoundary >
     );
 
-    return tooltipHtml ? (
-      <OverlayTrigger
-        placement="auto"
-        overlay={
-          <Tooltip id={`tooltip-part-${part.row}-${part.startColumn}`}>
-            <HtmlViewer text={tooltipHtml} />
-          </Tooltip>
-        }
-      >
-        <div>{partContent}</div>
-      </OverlayTrigger>
-    ) : partContent;
+    return partContent;
   }
 
   const titleText = translated(part, p => p.title) ?? (renderer.defaultTitle ? renderer.defaultTitle(content) : getToString(content));
@@ -256,9 +244,27 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
     <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} color={iconColor ?? undefined} className="me-1" style={{ fontSize: "16px" }} />
   ) : null;
 
-  const title = !icon ? titleText : (
+  const title = !icon ? (
+    <>
+      {titleText}
+      {tooltipHtml && (
+        <DashboardTooltipIcon
+          tooltipHtml={tooltipHtml}
+          className="ms-2"
+          iconClassName="sf-tooltip-icon"
+        />
+      )}
+    </>
+  ) : (
     <span>
       {iconElement}{titleText}
+      {tooltipHtml && (
+        <DashboardTooltipIcon
+          tooltipHtml={tooltipHtml}
+          className="ms-2"
+          iconClassName="sf-tooltip-icon"
+        />
+      )}
     </span>
   );
 
@@ -316,16 +322,5 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
     </div>
   );
 
-  return tooltipHtml ? (
-    <OverlayTrigger
-      placement="auto"
-      overlay={
-        <Tooltip id={`tooltip-part-${part.row}-${part.startColumn}`}>
-          <HtmlViewer text={tooltipHtml} />
-        </Tooltip>
-      }
-    >
-      {cardContent}
-    </OverlayTrigger>
-  ) : cardContent;
+  return cardContent;
 }
