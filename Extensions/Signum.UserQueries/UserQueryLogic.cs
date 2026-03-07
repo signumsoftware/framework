@@ -313,13 +313,6 @@ public static class UserQueryLogic
              .ToList();
     }
 
-    public static void RegisterTranslatableRoutes()
-    {
-        PropertyRouteTranslationLogic.RegisterRoute((UserQueryEntity uq) => uq.DisplayName);
-        PropertyRouteTranslationLogic.RegisterRoute((UserQueryEntity uq) => uq.Columns[0].DisplayName);
-        PropertyRouteTranslationLogic.RegisterRoute((UserQueryEntity uq) => uq.Filters[0].Pinned!.Label);
-    }
-
     public static UserQueryEntity RetrieveUserQuery(this Lite<UserQueryEntity> userQuery)
     {
         using (ViewLogLogic.LogView(userQuery, "UserQuery"))

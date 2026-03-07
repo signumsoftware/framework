@@ -22,6 +22,9 @@ import { ToolbarEntity, ToolbarMenuEntity } from '../../Signum.Toolbar/Signum.To
 import CollapsableCard from '@framework/Components/CollapsableCard';
 import { UserAssetMessage } from '../../Signum.UserAssets/Signum.UserAssets';
 import { SubTokensOptions } from '@framework/QueryToken';
+import HtmlEditorLine from '../../Signum.HtmlEditor/HtmlEditorLine';
+
+
 
 export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -66,63 +69,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
   var colors = ["#DFFF00", "#FFBF00", "#FF7F50", "#DE3163", "#9FE2BF", "#40E0D0", "#6495ED", "#CCCCFF"]
 
   function renderPart(tc: TypeContext<PanelPartEmbedded>) {
-    const tcs = tc.subCtx({ formGroupStyle: "SrOnly", formSize: "xs", placeholderLabels: true });
-
-    var icon = parseIcon(tc.value.iconName) ?? "border-none";
-
-    var avoidDrag: React.HTMLAttributes<any> = {
-      draggable: true,
-      onDragStart: e => {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    const title = (
-      <div>
-        <div className="d-flex">
-          {icon && <div className="mx-2">
-            <button
-              type="button"
-              style={{ background: "none", border: "none", padding: 0 }}
-              aria-label={DashboardMessage.SelectIcon.niceToString()}
-              onClick={() => selectIcon(tc).then(a => {
-                if (a) {
-                  tc.value.iconName = a.iconName;
-                  tc.value.iconColor = a.iconColor;
-                  tc.value.titleColor = a.titleColor;
-                  tc.value.modified = true;
-                  forceUpdate();
-                }
-              })}>
-              <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag as any} />
-            </button>
-          </div>}
-          <div style={{ flexGrow: 1 }} className="me-2">
-
-            <TextBoxLine ctx={tcs.subCtx(pp => pp.title)} label={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} valueHtmlAttributes={avoidDrag} />
-            <div className="row">
-              <div className="col-sm-6">
-                <ColorLine ctx={tcs.subCtx(pp => pp.customColor)} onChange={() => forceUpdate()} />
-
-              </div>
-              <div className="col-sm-6">
-                <EnumLine ctx={tcs.subCtx(pp => pp.interactionGroup)} valueHtmlAttributes={avoidDrag}
-                  onRenderDropDownListItem={(io) => <span className="sf-dot-container"><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
-              </div>
-            </div>
-
-
-          </div>
-        </div>
-      </div>
-    );
-
-    return (
-      <EntityGridItem title={title} customColor={tc.value.customColor ?? undefined}>
-        <RenderEntity ctx={tc.subCtx(a => a.content)} extraProps={{ dashboard: ctx.value }} />
-      </EntityGridItem>
-    );
+    return <PanelPartEditor tc={tc} ctx={ctx} colors={colors} forceUpdate={forceUpdate} selectIcon={selectIcon} />;
   }
 
   const ctx = p.ctx;
@@ -260,4 +207,103 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
 export function IsQueryCachedLine(p: { ctx: TypeContext<boolean> }): React.JSX.Element {
   const forceUpate = useForceUpdate();
   return <CheckboxLine ctx={p.ctx} label={<span className={classes("fw-bold", p.ctx.value ? "text-success" : "text-danger")}> {p.ctx.niceName()}</span>} inlineCheckbox="block" onChange={forceUpate} />
+}
+
+function PanelPartEditor({ tc, ctx, colors, forceUpdate, selectIcon }: { 
+  tc: TypeContext<PanelPartEmbedded>, 
+  ctx: TypeContext<DashboardEntity>, 
+  colors: string[], 
+  forceUpdate: () => void, 
+  selectIcon: (ctx: TypeContext<DashboardEntity | PanelPartEmbedded>) => Promise<DashboardEntity | PanelPartEmbedded | undefined> 
+}): React.JSX.Element {
+  const tcs = tc.subCtx({ formGroupStyle: "SrOnly", formSize: "xs", placeholderLabels: true });
+
+  var icon = parseIcon(tc.value.iconName) ?? "border-none";
+
+  var avoidDrag: React.HTMLAttributes<any> = {
+    draggable: true,
+    onDragStart: e => {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  function handleSettingsClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    Navigator.view(tc.value, {
+      propertyRoute: tc.propertyRoute,
+      getViewPromise: e => new ViewPromise(import("./PanelPart")),
+      modalSize: "lg",
+      buttons: "ok_cancel",
+      isOperationVisible: e => false,
+      requiresSaveOperation: false,
+    }).then(result => {
+      if (result) {
+        // Copy all modified properties from the modal back to the original entity
+        tc.value.iconName = result.iconName;
+        tc.value.iconColor = result.iconColor;
+        tc.value.titleColor = result.titleColor;
+        tc.value.customColor = result.customColor;
+        tc.value.interactionGroup = result.interactionGroup;
+        tc.value.tooltip = result.tooltip;
+        tc.value.modified = true;
+        forceUpdate();
+      }
+    });
+  }
+
+  const title = (
+    <div>
+      <div className="d-flex align-items-center">
+        {icon && <div className="mx-2" style={{ position: 'relative' }}>
+          <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "20px" }} />
+          <button
+            type="button"
+            style={{ 
+              position: 'absolute', 
+              top: -6, 
+              right: -6, 
+              background: 'transparent', 
+              border: 'none',
+              borderRadius: '50%',
+              width: '16px',
+              height: '16px',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '11px',
+              color: 'var(--bs-secondary)',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--bs-primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--bs-secondary)'}
+            onClick={handleSettingsClick}
+            title="Part Settings"
+            {...avoidDrag as any}
+          >
+            <FontAwesomeIcon icon="cog" />
+          </button>
+        </div>}
+        <div style={{ flexGrow: 1 }} className="me-2">
+          <TextBoxLine ctx={tcs.subCtx(pp => pp.title)} label={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} valueHtmlAttributes={avoidDrag} />
+          {tc.value.interactionGroup && (
+            <div className="mt-1">
+              <span className="badge" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(tc.value.interactionGroup)] }}>
+                {tc.value.interactionGroup}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <EntityGridItem title={title} customColor={tc.value.customColor ?? undefined}>
+      <RenderEntity ctx={tc.subCtx(a => a.content)} extraProps={{ dashboard: ctx.value }} />
+    </EntityGridItem>
+  );
 }

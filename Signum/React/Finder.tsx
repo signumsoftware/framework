@@ -1810,9 +1810,14 @@ export namespace Finder {
       columnOptionsMode: "ReplaceAll",
     };
 
-    var result = useAPI(signal => fo2 && getResultTable(fo2, signal), [fo2 && findOptionsPath(fo2), ...(additionalDeps || [])], options);
+    return useAPI(async signal => {
+      if (!fo2)
+        return null;
 
-    return result && result.rows.map(row => toTypedRow(tokensObject, result!.columns, row));
+      var rt = await getResultTable(fo2, signal);
+
+      return rt.rows.map(row => toTypedRow(tokensObject, rt!.columns, row));
+    }, [fo2 && findOptionsPath(fo2), ...(additionalDeps || [])], options);
   }
 
   function getAllColumns(tokensObject: TokenObject): ColumnOption[] {

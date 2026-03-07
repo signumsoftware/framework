@@ -21,15 +21,15 @@ export default function TextPart(p: PanelPartContentProps<TextPartEntity>): Reac
 
   function PreviewType(): React.JSX.Element {
     if (p.content?.textPartType == "Text")
-      return (<text>{p.content.textContent}</text>)
+      return (<text>{p.content.textContent}</text>);
 
     if (p.content?.textPartType == "Markdown")
-      return (<Markdown components={{ a: LinkRenderer }}>{p.content.textContent}</Markdown>)
+      return (<Markdown components={{ a: LinkRenderer }}>{p.content.textContent}</Markdown>);
 
     if (p.content?.textPartType == "HTML" && p.content?.textContent != null)
-      return (<HtmlViewer text={p.content.textContent} />)
+      return (<HtmlViewer text={p.content.textContent} />);
 
-    return (<text>{p.content?.textContent}</text>)
+    return (<text>{p.content?.textContent}</text>);
   }
 
   return (

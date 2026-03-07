@@ -114,6 +114,7 @@ export interface UserEntity extends Entities.Entity, Basics.IEmailOwnerEntity, S
   Type: "User";
   userName: string;
   passwordHash: string /*Byte[]*/ | null;
+  passwordIsChanging: boolean;
   role: Entities.Lite<RoleEntity>;
   email: string | null;
   cultureInfo: Basics.CultureInfoEntity | null;

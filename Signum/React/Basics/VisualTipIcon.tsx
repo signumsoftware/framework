@@ -77,7 +77,7 @@ export function VisualTipIcon(p: {
     <OverlayTrigger
       trigger="click"
       rootClose
-      placement="bottom"
+      placement="auto"
       overlay={(injected: OverlayInjectedProps) => (
         <AccessibleOverlay
           id="visual-tip-popover"
