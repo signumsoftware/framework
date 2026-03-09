@@ -11,6 +11,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCompass } from "@fortawesome/free-solid-svg-icons";
 import { getTypeName,
 PseudoType } from "@framework/Reflection";
+import { LinkButton } from "@framework/Basics/LinkButton";
+import { classes } from "@framework/Globals";
 
 
 
@@ -51,30 +53,14 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol }) {
 
   return (
     <>
-      <button
-        className={`btn ${hasViewed ? 'btn-outline-secondary' : 'btn-warning'}`}
+       <LinkButton
+        className={'sf-pointer nav-link'}
         onClick={handleClick}
         title={hasViewed ? "Replay tour" : "Start tour (new!)"}
-        style={!hasViewed ? {
-          animation: 'pulse 2s infinite',
-          boxShadow: '0 0 10px rgba(255, 193, 7, 0.5)'
-        } : undefined}
       >
-        <FontAwesomeIcon icon={faCompass} />
-      </button>
+        <FontAwesomeIcon icon={faCompass} className={classes(!hasViewed && 'text-warning fa-beat')} />
+      </LinkButton>
       {startTour && <TourComponent key={startTour.toString()} tour={tour} autoStart={true} ref={driverRef} />}
-      <style>{`
-        @keyframes pulse {
-          0%, 100% {
-            transform: scale(1);
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
-          }
-          50% {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
-          }
-        }
-      `}</style>
     </>
   );
 }
