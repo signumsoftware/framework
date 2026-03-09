@@ -55,7 +55,7 @@ public static class DynamicExpressionLogic
                 using (ExecutionMode.Global())
                     return Database.Query<DynamicExpressionEntity>()
                     .Where(a => a.Translation == DynamicExpressionTranslation.TranslateExpressionName)
-                    .AgGroupToDictionary(a => a.FromType, gr => gr.ToDictionary(a => a.Name, a => "CodeGenExpressionMessage." + a.Name));
+                    .GroupAggregateToDictionary(a => a.FromType, gr => gr.ToDictionary(a => a.Name, a => "CodeGenExpressionMessage." + a.Name));
             }
             finally
             {
@@ -75,7 +75,7 @@ public static class DynamicExpressionLogic
                 using (ExecutionMode.Global())
                     return Database.Query<DynamicExpressionEntity>()
                     .Where(a => a.Format != null || a.Unit != null)
-                    .AgGroupToDictionary(a => a.FromType!, gr => gr.ToDictionary(a => a.Name!, a => new FormatUnit(a.Format, a.Unit)));
+                    .GroupAggregateToDictionary(a => a.FromType!, gr => gr.ToDictionary(a => a.Name!, a => new FormatUnit(a.Format, a.Unit)));
             }
             finally
             {
