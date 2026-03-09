@@ -3,6 +3,7 @@ using Microsoft.SqlServer.Types;
 using NpgsqlTypes;
 using Signum.Engine.Maps;
 using Signum.Entities.TsVector;
+using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System.Collections.ObjectModel;
 using System.Data;
@@ -238,6 +239,103 @@ internal class DbExpressionNominator : DbExpressionVisitor
                         throw new InvalidOperationException("NpgsqlRange constructor must have 2 arguments: lowerBound, upperBound");
 
                     return Add(new SqlFunctionExpression(nex.Type, null, "tstzrange", [lowerBound, upperBound, new SqlConstantExpression("[)")]));
+                }
+
+                var type = nex.Type.UnNullify();
+
+                if (type == typeof(DateOnly))
+                {
+                    var dYear = nex.TryGetArgument("year");
+                    var dMonth = nex.TryGetArgument("month");
+                    var dDay = nex.TryGetArgument("day");
+
+                    if (dYear != null && dMonth != null && dDay != null)
+                    {
+                        if (isPostgres)
+                            return Add(new SqlFunctionExpression(typeof(DateOnly), null, "MAKE_DATE", [dYear, dMonth, dDay]));
+                        else
+                            return Add(new SqlFunctionExpression(typeof(DateOnly), null, "DATEFROMPARTS", [dYear, dMonth, dDay]));
+                    }
+                }
+
+                if (type == typeof(DateTime))
+                {
+                    var dtYear = nex.TryGetArgument("year");
+                    var dtMonth = nex.TryGetArgument("month");
+                    var dtDay = nex.TryGetArgument("day");
+                    var dtHour = nex.TryGetArgument("hour");
+                    var dtMinute = nex.TryGetArgument("minute");
+                    var dtSecond = nex.TryGetArgument("second");
+
+                    if (dtYear != null && dtMonth != null && dtDay != null)
+                    {
+                        if (dtHour != null && dtMinute != null)
+                        {
+                            if (isPostgres)
+                                return Add(new SqlFunctionExpression(typeof(DateTime), null, "MAKE_TIMESTAMP", 
+                                    [dtYear, dtMonth, dtDay, dtHour, dtMinute, dtSecond ?? Expression.Constant(0)]));
+                            else
+                                return Add(new SqlFunctionExpression(typeof(DateTime), null, "DATETIME2FROMPARTS", 
+                                    [dtYear, dtMonth, dtDay, dtHour, dtMinute, dtSecond ?? Expression.Constant(0), Expression.Constant(0), Expression.Constant(0)]));
+                        }
+                        else
+                        {
+                            if (isPostgres)
+                                return Add(new SqlCastExpression(typeof(DateTime),
+                                    new SqlFunctionExpression(typeof(DateOnly), null, "MAKE_DATE", [dtYear, dtMonth, dtDay])));
+                            else
+                                return Add(new SqlCastExpression(typeof(DateTime),
+                                    new SqlFunctionExpression(typeof(DateOnly), null, "DATEFROMPARTS", [dtYear, dtMonth, dtDay])));
+                        }
+                    }
+                }
+
+                if (type == typeof(TimeOnly))
+                {
+                    var toHour = nex.TryGetArgument("hour");
+                    var toMinute = nex.TryGetArgument("minute");
+                    var toSecond = nex.TryGetArgument("second");
+
+                    if (toHour != null && toMinute != null && toSecond != null)
+                    {
+                        if (isPostgres)
+                            return Add(new SqlFunctionExpression(typeof(TimeOnly), null, "MAKE_TIME", [toHour, toMinute, toSecond]));
+                        else
+                            return Add(new SqlFunctionExpression(typeof(TimeOnly), null, "TIMEFROMPARTS", [toHour, toMinute, toSecond, Expression.Constant(0), Expression.Constant(0)]));
+                    }
+                }
+
+                if (type == typeof(TimeSpan))
+                {
+                    var tsHour = nex.TryGetArgument("hours");
+                    var tsMinute = nex.TryGetArgument("minutes");
+                    var tsSecond = nex.TryGetArgument("seconds");
+                    var tsDay = nex.TryGetArgument("days");
+
+                    if (tsHour != null && tsMinute != null && tsSecond != null)
+                    {
+                        if (isPostgres)
+                            return Add(new SqlFunctionExpression(typeof(TimeSpan), null, "MAKE_TIME", [tsHour, tsMinute, tsSecond]));
+                        else
+                            return Add(new SqlFunctionExpression(typeof(TimeSpan), null, "TIMEFROMPARTS", [tsHour, tsMinute, tsSecond, Expression.Constant(0), Expression.Constant(0)]));
+                    }
+
+                    if (tsDay != null && tsHour != null && tsMinute != null && tsSecond != null)
+                    {
+                        if (isPostgres)
+                        {
+                            var totalHours = Expression.Add(Expression.Multiply(tsDay, Expression.Constant(24)), tsHour);
+                            totalHours = Expression.Add(Expression.Multiply(totalHours, Expression.Constant(60)), tsMinute);
+                            totalHours = Expression.Add(Expression.Multiply(totalHours, Expression.Constant(60)), tsSecond);
+                            return Add(new SqlFunctionExpression(typeof(TimeSpan), null, "MAKE_TIME", [
+                                Expression.Modulo(totalHours, Expression.Constant(24)),
+                                Expression.Modulo(totalHours, Expression.Constant(60)),
+                                Expression.Modulo(totalHours, Expression.Constant(60))
+                            ]));
+                        }
+                        else
+                            return Add(new SqlFunctionExpression(typeof(TimeSpan), null, "TIMEFROMPARTS", [tsHour, tsMinute, tsSecond, Expression.Constant(0), Expression.Constant(0)]));
+                    }
                 }
 
                 return Add(nex);
