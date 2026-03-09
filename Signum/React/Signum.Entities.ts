@@ -742,6 +742,7 @@ export namespace SearchMessage {
   export const Copy: MessageKey = new MessageKey("SearchMessage", "Copy");
   export const MoreThanOne0Selected: MessageKey = new MessageKey("SearchMessage", "MoreThanOne0Selected");
   export const CombineRowsWith: MessageKey = new MessageKey("SearchMessage", "CombineRowsWith");
+  export const SmartSearchDescription: MessageKey = new MessageKey("SearchMessage", "SmartSearchDescription");
   export const Equal0: MessageKey = new MessageKey("SearchMessage", "Equal0");
   export const SwitchViewMode: MessageKey = new MessageKey("SearchMessage", "SwitchViewMode");
   export const SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup: MessageKey = new MessageKey("SearchMessage", "SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup");

@@ -18,10 +18,10 @@ import { classes } from '@framework/Globals';
 import { EntityOperations, OperationButton } from '@framework/Operations/EntityOperations';
 import { EntityOperationContext } from '@framework/Operations';
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
-import { SubTokensOptions } from '@framework/FindOptions';
 import { ToolbarEntity, ToolbarMenuEntity } from '../../Signum.Toolbar/Signum.Toolbar';
 import CollapsableCard from '@framework/Components/CollapsableCard';
 import { UserAssetMessage } from '../../Signum.UserAssets/Signum.UserAssets';
+import { SubTokensOptions } from '@framework/QueryToken';
 import HtmlEditorLine from '../../Signum.HtmlEditor/HtmlEditorLine';
 
 

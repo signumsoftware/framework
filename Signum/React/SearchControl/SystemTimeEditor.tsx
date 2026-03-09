@@ -3,7 +3,7 @@ import * as React from 'react'
 import { FormCheck } from 'react-bootstrap'
 import { Finder } from '../Finder'
 import { classes } from '../Globals';
-import { SystemTime, FindOptionsParsed, QueryDescription, SubTokensOptions } from '../FindOptions'
+import { SystemTime, FindOptionsParsed, QueryDescription } from '../FindOptions'
 import { SystemTimeJoinMode, SystemTimeMode, TimeSeriesUnit } from '../Signum.DynamicQuery'
 import { JavascriptMessage } from '../Signum.Entities'
 import { DateTimePicker } from 'react-widgets-up';
@@ -13,6 +13,7 @@ import { AggregateFunction, QueryTokenDateMessage } from '../Signum.DynamicQuery
 import { isNumberKey, NumberBox } from '../Lines/NumberLine';
 import SearchValue from './SearchValue';
 import { useAPI, useForceUpdate } from '../Hooks';
+import { SubTokensOptions } from '../QueryToken';
 
 interface SystemTimeEditorProps {
   findOptions: FindOptionsParsed;

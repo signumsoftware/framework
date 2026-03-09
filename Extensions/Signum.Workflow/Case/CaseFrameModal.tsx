@@ -27,6 +27,7 @@ import { useForceUpdate, useStateWithPromise } from '@framework/Hooks'
 import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface CaseFrameModalProps extends IModalProps<CaseActivityEntity | undefined> {
+  ref?: React.Ref<IHandleKeyboard>;
   title?: string;
   entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack;
   avoidPromptLooseChange?: boolean;
@@ -43,8 +44,7 @@ interface CaseFrameModalState {
 
 var modalCount = 0;
 
-export const CaseFrameModal: React.ForwardRefExoticComponent<CaseFrameModalProps & React.RefAttributes<IHandleKeyboard>> =
-  React.forwardRef(function CaseFrameModal(p: CaseFrameModalProps, ref: React.Ref<IHandleKeyboard>) {
+export function CaseFrameModal(p: CaseFrameModalProps) {
 
   const [state, setState] = useStateWithPromise<CaseFrameModalState | undefined>(undefined);
   const [show, setShow] = React.useState(true);
@@ -60,7 +60,7 @@ export const CaseFrameModal: React.ForwardRefExoticComponent<CaseFrameModalProps
 
   const [errorsPosition, setErrorsPosition] = React.useState<"top" | "bottom">("top");
 
-  React.useImperativeHandle(ref, () => ({
+  React.useImperativeHandle(p.ref, () => ({
     handleKeyDown(e: KeyboardEvent) {
       buttonBarRef.current && buttonBarRef.current.handleKeyDown(e);
     },
@@ -333,7 +333,7 @@ export const CaseFrameModal: React.ForwardRefExoticComponent<CaseFrameModalProps
 
     </Modal>
   );
-});
+}
 
 const CaseFrameModalExt = CaseFrameModal;
 

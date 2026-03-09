@@ -13,13 +13,11 @@ import {
 import { EntityBaseController, EntityCombo, EntityLine, LiteAutocompleteConfig } from '@framework/Lines'
 import { ajaxGet, ajaxGetRaw, ajaxPost, ajaxPostRaw } from '@framework/Services'
 import { UserEntity, UserLiteModel } from '../../Signum.Authorization/Signum.Authorization'
-import MessageModal from '@framework/Modals/MessageModal'
-import { QueryToken, ResultRow, SubTokensOptions, isFilterCondition } from '@framework/FindOptions'
+import { ResultRow, isFilterCondition } from '@framework/FindOptions'
 import { FilterOptionParsed, SearchControlHandler, SearchControlLoaded } from '@framework/Search'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import RemoteEmailPopover from './RemoteEmailPopover'
 import { FolderLine } from './FolderLine'
-import { ModelConverterSymbol } from '../../Signum.Templating/Signum.Templating'
 import { getQueryKey,
   getTypeInfo } from '@framework/Reflection'
 import { LinkButton } from '@framework/Basics/LinkButton'
@@ -30,6 +28,8 @@ import { ButtonBar, ButtonBarManager } from '@framework/Frames/ButtonBar';
 import { ButtonBarElement,
   ButtonsContext } from '@framework/TypeContext';
 import { classes } from '@framework/Globals';
+import MessageModal from '@framework/Modals/MessageModal'
+import { QueryToken } from '@framework/QueryToken'
 
 export namespace RemoteEmailsClient {
   
@@ -83,16 +83,16 @@ export namespace RemoteEmailsClient {
       applicable: (f: FilterOptionParsed, ffc: Finder.FilterFormatterContext) => isFilterCondition(f) && f.token?.fullKey == "User" && f.operation == "EqualTo",
       renderValue: (f: FilterOptionParsed, ffc: Finder.FilterFormatterContext) => {
   
-        return <EntityLine ctx={ffc.ctx} type={f.token!.type} create={false} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
+        return <EntityLine ctx={ffc.ctx} type={f.token!.type} create={false} onChange={() =>  ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
       }
     });
   
     Finder.filterValueFormatRules.push({
       name: "EmailFolder",
-      applicable: (f: FilterOptionParsed, ffc: Finder.FilterFormatterContext) => isFilterCondition(f) && f.token?.type.name == RemoteEmailFolderModel.typeName,
+      applicable: (f: FilterOptionParsed, ffc: Finder.FilterFormatterContext) => isFilterCondition(f) && f.token?.type.name == RemoteEmailFolderModel.typeName ,
       renderValue: (f: FilterOptionParsed, ffc: Finder.FilterFormatterContext) => {
         var user = ffc.filterOptions.firstOrNull(a => isFilterCondition(a) && a.token?.fullKey == "User" && a.operation == "EqualTo");
-        return <FolderLine ctx={ffc.ctx} mandatory={ffc.mandatory} label={ffc.label} user={user?.value as Lite<UserEntity>} onChange={() => ffc.handleValueChange(f)} />
+        return <FolderLine ctx={ffc.ctx} mandatory={ffc.mandatory} label={ffc.label} user={user?.value as Lite<UserEntity>} onChange={()=> ffc.handleValueChange(f)} />
       }
     });
   
@@ -115,7 +115,7 @@ export namespace RemoteEmailsClient {
       entityFormatter: new Finder.EntityFormatter(ctx => {
         return (
           <LinkButton title={SearchMessage.View.niceToString()} onClick={async e => openMessage(ctx.row, ctx.searchControl!)}>
-            {EntityBaseController.getViewIcon()}
+              {EntityBaseController.getViewIcon()}
           </LinkButton>
         );
   
@@ -157,8 +157,8 @@ export namespace RemoteEmailsClient {
       var remote = await API.getRemoteEmail(oid, message.id!);
 
       ctx.frame.onReload(await Navigator.toEntityPack(remote));
-    }
-    
+  }
+  
 
     return [
       {
@@ -387,7 +387,7 @@ export namespace RemoteEmailsClient {
     export function getRemoteFolders(oid: string): Promise<Array<RemoteEmailFolderModel>> {
       return ajaxGet({ url: `/api/remoteEmailFolders/${oid}` });
     }
-
+  
     export function getRemoteCategories(oid: string): Promise<Array<string>> {
       return ajaxGet({ url: `/api/remoteEmailCategories/${oid}` });
     }
@@ -417,8 +417,8 @@ export namespace RemoteEmailsClient {
       return MultiMessageProgressModal.show(request.messageIds, RemoteEmailMessageMessage.ChangingCategories.niceToString(), abortController,
         () => ajaxPostRaw({ url: `/api/remoteEmail/${userOID}/changeCategories` }, request));
     }
+    }
   }
-}
 
 export interface ChangeCategoriesRequest {
   messageIds: string[];

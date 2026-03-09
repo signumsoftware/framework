@@ -17,7 +17,7 @@ import { useStateWithPromise, useForceUpdate, useMounted, useDocumentEvent, useW
 import { Operations } from '../Operations'
 import WidgetEmbedded from './WidgetEmbedded'
 import { useTitle } from '../AppContext'
-import { FunctionalAdapter } from '../Modals'
+import { FunctionalAdapter, usePageUIState } from '../Modals'
 import { QueryString } from '../QueryString'
 import { classes } from '../Globals'
 
@@ -54,6 +54,8 @@ export default function FramePage(): React.ReactElement {
     state = undefined;
 
   useTitle(getToString(state?.pack.entity) ?? "", [state?.pack.entity]);
+
+  usePageUIState(() => ({ name: "FramePage", context: state?.pack ?? null }));
 
   useLooseChanges(state && !state.executing ? ({ entity: state.pack.entity, lastEntity: state.lastEntity }) : undefined);
 

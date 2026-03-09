@@ -7,7 +7,6 @@ import { IModalProps, openModal } from "@framework/Modals";
 import { PredictorClient } from "../PredictorClient";
 import { Lite, Entity, EntityControlMessage, getToString } from "@framework/Signum.Entities";
 import { StyleContext, FormGroup, TypeContext, EntityLine, EntityCombo, AutoLine, EnumLine } from "@framework/Lines";
-import { QueryToken } from "@framework/FindOptions";
 import { tryGetTypeInfos, ReadonlyBinding, getTypeInfo, getTypeInfos, toNumberFormatOptions, toNumberFormat } from "@framework/Reflection";
 import { IsByAll } from "@framework/Reflection";
 import { Dic, isNumber } from "@framework/Globals";
@@ -17,6 +16,7 @@ import { isLite } from "@framework/Signum.Entities";
 import { ModalHeaderButtons } from "@framework/Components/ModalHeaderButtons";
 import { AbortableRequest } from "@framework/Services";
 import { NumberBox } from "@framework/Lines/NumberLine";
+import { QueryToken } from "@framework/QueryToken";
 
 interface PredictModalProps extends IModalProps<undefined> {
   initialPredict: PredictorClient.PredictRequest;

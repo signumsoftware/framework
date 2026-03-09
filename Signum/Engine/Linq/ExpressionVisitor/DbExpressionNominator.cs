@@ -1,6 +1,7 @@
 using Microsoft.SqlServer.Server;
 using Microsoft.SqlServer.Types;
 using NpgsqlTypes;
+using Pgvector;
 using Signum.Engine.Maps;
 using Signum.Entities.TsVector;
 using Signum.Utilities.ExpressionTrees;
@@ -10,7 +11,6 @@ using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Numerics;
 using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Linq;
@@ -53,10 +53,24 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
 
     bool isPostgres;
-    private DbExpressionNominator() 
+    private DbExpressionNominator()
     {
         this.isPostgres = Schema.Current.Settings.IsPostgres;
     }
+
+    void AssertPostgres(MethodCallExpression m)
+    {
+        if (!this.isPostgres)
+            throw new InvalidOperationException($"The method {m.Method.DeclaringType!.TypeName()}.{m.Method.Name} can only be called with a " + nameof(PostgreSqlConnector));
+    }
+
+    void AssertSqlServer(MethodCallExpression m)
+    {
+        if (this.isPostgres)
+            throw new InvalidOperationException($"The method {m.Method.DeclaringType!.TypeName()}.{m.Method.Name} can only be called with a " + nameof(SqlServerConnector));
+    }
+
+
 
     static internal HashSet<Expression> Nominate(Expression? expression, out Expression newExpression, bool isGroupKey = false)
     {
@@ -83,7 +97,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
         return result;
     }
 
-    [return:NotNullIfNotNull("exp")]
+    [return: NotNullIfNotNull("exp")]
     public override Expression? Visit(Expression? exp)
     {
         Expression result = base.Visit(exp)!;
@@ -101,13 +115,13 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
         return expDb.DbNodeType switch
         {
-            DbExpressionType.Table or 
-            DbExpressionType.Select or 
-            DbExpressionType.Projection or 
-            DbExpressionType.Join or 
-            DbExpressionType.AggregateRequest or 
-            DbExpressionType.Update or 
-            DbExpressionType.Delete or 
+            DbExpressionType.Table or
+            DbExpressionType.Select or
+            DbExpressionType.Projection or
+            DbExpressionType.Join or
+            DbExpressionType.AggregateRequest or
+            DbExpressionType.Update or
+            DbExpressionType.Delete or
             DbExpressionType.CommandAggregate => true,
             _ => false,
         };
@@ -403,7 +417,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
     {
         ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a => Visit(a));
         if (args != sqlFunction.Arguments)
-            sqlFunction = new SqlTableValuedFunctionExpression(sqlFunction.FunctionName, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args); ;
+            sqlFunction = new SqlTableValuedFunctionExpression(sqlFunction.FunctionName, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args, sqlFunction.NamedArguments);
 
         if (args.All(Has))
             return Add(sqlFunction);
@@ -470,7 +484,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
         {
             expression = SmartEqualizer.UnwrapPrimaryKey(expression);
 
-            if(IsFullNominateOrAggresive) //IBA
+            if (IsFullNominateOrAggresive) //IBA
             {
                 var toStri = ConvertIdToString(expression);
                 var result = Visit(toStri);
@@ -593,7 +607,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
         if (format == null)
             return null;
 
-        var result= Regex.Replace(format, @"\b\w+\b", m => postgresReplacement.TryGetC(m.Value) ?? m.Value);
+        var result = Regex.Replace(format, @"\b\w+\b", m => postgresReplacement.TryGetC(m.Value) ?? m.Value);
         return result;
     }
 
@@ -604,7 +618,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
     protected Expression? TrySqlFunction(Expression? obj, SqlFunction sqlFunction, Type type, params Expression[] expression)
     {
-        return TrySqlFunction(obj, isPostgres? sqlFunction.ToString().ToLower() : sqlFunction.ToString(), type, expression);
+        return TrySqlFunction(obj, isPostgres ? sqlFunction.ToString().ToLower() : sqlFunction.ToString(), type, expression);
     }
 
     protected Expression? TrySqlFunction(Expression? obj, string sqlFunction, Type type, params Expression[] expression)
@@ -664,7 +678,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
         if (isPostgres)
         {
             if (unit == SqlEnums.day && left.Type == typeof(DateOnly) && right.Type == typeof(DateOnly))
-                return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(()=> DaysBetween(DateOnly.MinValue, DateOnly.MinValue))), typeof(double)));
+                return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(() => DaysBetween(DateOnly.MinValue, DateOnly.MinValue))), typeof(double)));
 
             var secondsDouble = PostgresFunction.EXTRACT.CallExpression<double>(
                 new SqlLiteralExpression(SqlEnums.epoch),
@@ -849,8 +863,8 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
         //Sql Server DateTime + DateTime
         //Postgres TimeSpan + Time
-        var castDate = new SqlCastExpression(typeof(DateTime), exprDate, new AbstractDbType(SqlDbType.DateTime, NpgsqlDbType.Timestamp)); 
-        var castTime = new SqlCastExpression(typeof(TimeSpan), exprTime, new AbstractDbType(SqlDbType.DateTime, NpgsqlDbType.Time)); 
+        var castDate = new SqlCastExpression(typeof(DateTime), exprDate, new AbstractDbType(SqlDbType.DateTime, NpgsqlDbType.Timestamp));
+        var castTime = new SqlCastExpression(typeof(TimeSpan), exprTime, new AbstractDbType(SqlDbType.DateTime, NpgsqlDbType.Time));
 
         var result = add ? Expression.Add(castDate, castTime) :
             Expression.Subtract(castDate, castTime);
@@ -871,7 +885,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
     public static bool IsTimeSpanFrom(Expression exp, out Expression value, out SqlEnums unit)
     {
-        if(exp is MethodCallExpression mce && mce.Method.DeclaringType == typeof(TimeSpan))
+        if (exp is MethodCallExpression mce && mce.Method.DeclaringType == typeof(TimeSpan))
         {
             switch (mce.Method.Name)
             {
@@ -974,7 +988,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
                 var left = Visit(newB.Left)!;
                 var right = Visit(newB.Right)!;
 
-                if(ExtractDayOfWeek(left, out var ldow) &&
+                if (ExtractDayOfWeek(left, out var ldow) &&
                    ExtractDayOfWeek(right, out var rdow))
                 {
                     left = ldow!;
@@ -1015,7 +1029,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
                 return TryAddSubtractTimeSpan(b.Left, b.Right, b.NodeType == ExpressionType.Add) ?? b;
             }
 
-            if (b.NodeType == ExpressionType.Subtract && b.Type == typeof(int) && 
+            if (b.NodeType == ExpressionType.Subtract && b.Type == typeof(int) &&
                 b.Left is MemberExpression leftSide && leftSide.Member is PropertyInfo piLeft && ReflectionTools.PropertyEquals(piLeft, piDayNumber) &&
                 b.Right is MemberExpression rightSide && rightSide.Member is PropertyInfo piRight && ReflectionTools.PropertyEquals(piRight, piDayNumber))
             {
@@ -1029,7 +1043,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
             b = SmartEqualizer.UnwrapPrimaryKeyBinary(b);
 
-           
+
             Expression left = this.Visit(b.Left);
             Expression right = this.Visit(b.Right);
             Expression? conversion = this.Visit(b.Conversion);
@@ -1047,11 +1061,11 @@ internal class DbExpressionNominator : DbExpressionVisitor
             Expression result = b;
             if (candidates.Contains(left) && candidates.Contains(right) && IsFullNominateOrAggresive)
             {
-                if ((b.NodeType == ExpressionType.Add || b.NodeType == ExpressionType.Subtract) &&  b.Left.Type.UnNullify() == typeof(DateTime) && b.Right.Type.UnNullify() == typeof(TimeSpan))
+                if ((b.NodeType == ExpressionType.Add || b.NodeType == ExpressionType.Subtract) && b.Left.Type.UnNullify() == typeof(DateTime) && b.Right.Type.UnNullify() == typeof(TimeSpan))
                 {
                     result = TryAddSubtractDateTimeTimeSpan(b.Left, b.Right, b.NodeType == ExpressionType.Add) ?? result;
                 }
-               
+
                 else if (b.NodeType == ExpressionType.Add)
                 {
                     result = ConvertToSqlAddition(b);
@@ -1312,7 +1326,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             return base.Visit(u.Operand); //Could make sense to simulate a similar convert (nullify / unnullify)
         }
 
-        if(this.isFullNominate && u.Operand is ToDayOfWeekExpression && (u.Type.UnNullify() == typeof(int) || u.Type.UnNullify() == typeof(DayOfWeek)))
+        if (this.isFullNominate && u.Operand is ToDayOfWeekExpression && (u.Type.UnNullify() == typeof(int) || u.Type.UnNullify() == typeof(DayOfWeek)))
         {
             return base.Visit(u.Operand); //Could make sense to simulate a similar convert (nullify / unnullify)
         }
@@ -1518,7 +1532,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
         if (Has(newSubExpression) && Has(newExpression))
         {
             SqlFunctionExpression result = isPostgres ?
-                PostgresFunction.strpos.CallExpression<int>(newExpression, newSubExpression):
+                PostgresFunction.strpos.CallExpression<int>(newExpression, newSubExpression) :
                 SqlFunction.CHARINDEX.CallExpression<int>(newSubExpression, newExpression);
 
             Add(result);
@@ -1565,32 +1579,32 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "DateTimeOffset.Year":
             case "DateOnly.Year":
             case "DateTime.Year": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.year), m.Expression!);
-            
+
             case "DateTimeOffset.Month":
             case "DateOnly.Month":
             case "DateTime.Month": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.month), m.Expression!);
-           
+
             case "DateTimeOffset.Day":
             case "DateOnly.Day":
             case "DateTime.Day": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.day), m.Expression!);
-            
+
             case "DateTimeOffset.DayOfYear":
             case "DateOnly.DayOfYear":
-            case "DateTime.DayOfYear": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(isPostgres? SqlEnums.doy: SqlEnums.dayofyear), m.Expression!);
-           
+            case "DateTime.DayOfYear": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(isPostgres ? SqlEnums.doy : SqlEnums.dayofyear), m.Expression!);
+
             case "DateTimeOffset.DayOfWeek":
             case "DateOnly.DayOfWeek":
             case "DateTime.DayOfWeek": return TrySqlDayOftheWeek(m.Expression!);
 
             case "DateTimeOffset.Hour":
             case "DateTime.Hour": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.hour), m.Expression!);
-            
+
             case "DateTimeOffset.Minute":
             case "DateTime.Minute": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.minute), m.Expression!);
-            
+
             case "DateTimeOffset.Second":
             case "DateTime.Second": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.second), m.Expression!);
-            
+
             case "DateTimeOffset.Millisecond":
             case "DateTime.Millisecond": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.millisecond), m.Expression!);
 
@@ -1631,7 +1645,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "TimeSpan.Minutes": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.minute), m.Expression!);
             case "TimeSpan.Seconds": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.second), m.Expression!);
             case "TimeSpan.Milliseconds": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.millisecond), m.Expression!);
-                
+
             case "TimeSpan.TotalDays": return TrySqlDifference(SqlEnums.day, m.Type, m.Expression!);
             case "TimeSpan.TotalHours": return TrySqlDifference(SqlEnums.hour, m.Type, m.Expression!);
             case "TimeSpan.TotalMilliseconds": return TrySqlDifference(SqlEnums.millisecond, m.Type, m.Expression!);
@@ -1758,6 +1772,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
                     if (charIndex == null)
                         return null;
+
                     Expression result = Expression.Subtract(charIndex, new SqlConstantExpression(1));
                     if (Has(charIndex))
                         return Add(result);
@@ -1822,12 +1837,41 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "LinqHints.Collate":
                 return TryCollate(m.GetArgument("str"), m.GetArgument("collation"));
 
-            case "FullTextSearch.Contains":
+            case "SqlFullTextSearch.Contains":
+                AssertSqlServer(m);
                 return TrySqlFunction(null, SqlFunction.CONTAINS, typeof(bool), ToLiteralColumns(m), m.GetArgument("searchCondition"));
-
-            case "FullTextSearch.FreeText":
+            case "SqlFullTextSearch.FreeText":
+                AssertSqlServer(m);
                 return TrySqlFunction(null, SqlFunction.FREETEXT, typeof(bool), ToLiteralColumns(m), m.GetArgument("freeTextString"));
+            case "SqlVectorSearch.Vector_Distance":
+                AssertSqlServer(m);
+                return TrySqlFunction(null, SqlFunction.VECTOR_DISTANCE, typeof(float), ToSqlConstant<SqlVectorDistanceMetric>(m.GetArgument("distanceMetric"), SqlVectorSearch.GetSqlVectorDistanceMetric), m.GetArgument("vector1"), m.GetArgument("vector2"));
+            case "SqlVectorSearch.Vector_Norm":
+                AssertSqlServer(m);
+                return TrySqlFunction(null, SqlFunction.VECTOR_NORM, typeof(float), m.GetArgument("vector"), ToSqlConstant<SqlVectorNormType>(m.GetArgument("normType"), SqlVectorSearch.GetSqlVectorNormType));
+            case "SqlVectorSearch.Vector_Normalize":
+                AssertSqlServer(m);
+                return TrySqlFunction(null, SqlFunction.VECTOR_NORMALIZE, typeof(Vector), m.GetArgument("vector"), ToSqlConstant<SqlVectorNormType>(m.GetArgument("normType"), SqlVectorSearch.GetSqlVectorNormType));
 
+            case "PgVectorSearch.Distance":
+                AssertPostgres(m);
+                var metric = (PGVectorDistanceMetric)((ConstantExpression)m.GetArgument("distanceMetric")).Value!;
+                var op = PgVectorSearch.GetPgVectorDistanceFunction(metric);
+                using (this.ForceFullNominate())
+                    return TrySqlFunction(null, op, typeof(float), m.GetArgument("vector1"), m.GetArgument("vector2"));
+
+            case "PgVectorSearch.L2_Norm":
+                {
+                    AssertPostgres(m);
+                    var result = TrySqlFunction(null, "l2_norm", typeof(float), m.GetArgument("vector"));
+
+                    if (result is SqlFunctionExpression sf)
+                        return Add(new SqlFunctionExpression(sf.Type, null, sf.SqlFunction, [new SqlCastExpression(typeof(Vector), sf.Arguments.SingleEx(), new AbstractDbType(AbstractDbType.VectorPG))]));
+                    return result;
+                }
+            case "PgVectorSearch.Normalize":
+                AssertPostgres(m);
+                return TrySqlFunction(null, "l2_normalize", typeof(Vector), m.GetArgument("vector"));
 
             case "DateTime.Add":
             case "DateTimeOffset.Add":
@@ -1945,7 +1989,6 @@ internal class DbExpressionNominator : DbExpressionVisitor
                     return Visit(m.GetArgument("value"));
                 }
 
-
             case "decimal.Parse": return Add(new SqlCastExpression(typeof(decimal), m.GetArgument("s")));
             case "double.Parse": return Add(new SqlCastExpression(typeof(double), m.GetArgument("s")));
             case "float.Parse": return Add(new SqlCastExpression(typeof(float), m.GetArgument("s")));
@@ -2053,28 +2096,52 @@ internal class DbExpressionNominator : DbExpressionVisitor
                     return base.VisitMethodCall(m);
                 }
 
-            case "TsVectorExtensions.ToTsQuery": 
-            case "TsVectorExtensions.ToTsQuery_Plain": 
-            case "TsVectorExtensions.ToTsQuery_Phrase": 
-            case "TsVectorExtensions.ToTsQuery_WebSearch": 
+            case "TsVectorExtensions.ToTsQuery":
+            case "TsVectorExtensions.ToTsQuery_Plain":
+            case "TsVectorExtensions.ToTsQuery_Phrase":
+            case "TsVectorExtensions.ToTsQuery_WebSearch":
+                AssertPostgres(m);
                 return CreateTsQuery(m);
 
 
             case "TsVectorExtensions.Matches":
+                AssertPostgres(m);
                 return TrySqlFunction(null, PostgressOperator.Matches, typeof(bool), m.GetArgument("vector"), m.GetArgument("query"));
 
             case "TsVectorExtensions.Rank":
             case "TsVectorExtensions.RankCoverDensity":
+                AssertPostgres(m);
                 return CreateRank(m);
 
             default: return null;
         }
+
+        void AssertPostgres(MethodCallExpression m)
+        {
+            if (!this.isPostgres)
+                throw new InvalidOperationException($"The method {m.Method.DeclaringType!.TypeName()}.{m.Method.Name} can only be called with a " + nameof(PostgreSqlConnector));
+        }
+
+        void AssertSqlServer(MethodCallExpression m)
+        {
+            if (this.isPostgres)
+                throw new InvalidOperationException($"The method {m.Method.DeclaringType!.TypeName()}.{m.Method.Name} can only be called with a " + nameof(SqlServerConnector));
+        }
+    }
+
+    static SqlConstantExpression ToSqlConstant<T>(Expression expression, Func<T, string> converter)
+    {
+        if (expression is ConstantExpression ce && ce.Value is T metric)
+        {
+            return new SqlConstantExpression(converter(metric), typeof(string));
+        }
+
+        throw new UnexpectedValueException(expression);
     }
 
     private Expression? CreateRank(MethodCallExpression m)
     {
-        if (!this.isPostgres)
-            throw new InvalidOperationException($"The method {m.Method.DeclaringType!.TypeName()}.{m.Method.Name} can only be called with a " + nameof(PostgreSqlConnector));
+        AssertPostgres(m);
 
         var method = m.Method.Name switch
         {
@@ -2092,8 +2159,8 @@ internal class DbExpressionNominator : DbExpressionVisitor
             var norm = (TsRankingNormalization)((ConstantExpression)normalization).Value!;
             normalization = new SqlConstantExpression((int)norm);
         }
-       
-        var weights =  m.TryGetArgument("weights");
+
+        var weights = m.TryGetArgument("weights");
         if (weights != null)
         {
             var wei = (float[])((ConstantExpression)weights).Value!;
@@ -2105,8 +2172,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
     private Expression? CreateTsQuery(MethodCallExpression m)
     {
-        if (!this.isPostgres)
-            throw new InvalidOperationException($"The method {m.Method.DeclaringType!.TypeName()}.{m.Method.Name} can only be called with a " + nameof(PostgreSqlConnector));
+        AssertPostgres(m);
 
         var method = m.Method.Name switch
         {
@@ -2120,7 +2186,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
         var value = Visit(m.GetArgument("value"));
         var config = Visit(m.TryGetArgument("config"));
 
-        if(config == null)
+        if (config == null)
             return Add(method.CallExpression<NpgsqlTsQuery>(value));
 
         return Add(method.CallExpression<NpgsqlTsQuery>(value, config));
@@ -2160,7 +2226,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
         }
 
         var table = mce.TryGetArgument("table");
-        if(table != null)
+        if (table != null)
         {
             var alias = table is EntityExpression ee ? ee.TableAlias! :
                 table is MListElementExpression mle ? mle.Alias :
@@ -2297,7 +2363,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             //LEFT('A=>B=>C', 2 - 1)
             //'A'
 
-            var index = isPostgres ? PostgresFunction.strpos.CallExpression<int>(newStr, newSep) :  SqlFunction.CHARINDEX.CallExpression<int>(newSep, newStr);
+            var index = isPostgres ? PostgresFunction.strpos.CallExpression<int>(newStr, newSep) : SqlFunction.CHARINDEX.CallExpression<int>(newSep, newStr);
             var len = Expression.Subtract(index, new SqlConstantExpression(1));
 
             value = SqlFunction.LEFT.CallExpression<string>(newStr, len);
@@ -2312,8 +2378,8 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
             var index = isPostgres ? PostgresFunction.strpos.CallExpression<int>(newStr, newSep) : SqlFunction.CHARINDEX.CallExpression<int>(newSep, newStr);
 
-            var len = IsOneLength(newSep) ? 
-                                    Expression.Subtract(isPostgres ? PostgresFunction.length.CallExpression<int>(newStr) : SqlFunction.LEN.CallExpression<int>(newStr), index):
+            var len = IsOneLength(newSep) ?
+                                    Expression.Subtract(isPostgres ? PostgresFunction.length.CallExpression<int>(newStr) : SqlFunction.LEN.CallExpression<int>(newStr), index) :
                 Expression.Subtract(Expression.Subtract(isPostgres ? PostgresFunction.length.CallExpression<int>(newStr) : SqlFunction.LEN.CallExpression<int>(newStr), index), Expression.Subtract(SepLen(), new SqlConstantExpression(1)));
 
             value = SqlFunction.RIGHT.CallExpression<string>(newStr, len);
@@ -2327,7 +2393,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
             var index = isPostgres ? PostgresFunction.strpos.CallExpression<int>(SqlFunction.REVERSE.CallExpression<string>(newStr), ReverseSep()) : SqlFunction.CHARINDEX.CallExpression<int>(ReverseSep(), SqlFunction.REVERSE.CallExpression<string>(newStr));
 
-            var len = IsOneLength(newSep) ? 
+            var len = IsOneLength(newSep) ?
                                     Expression.Subtract(isPostgres ? PostgresFunction.length.CallExpression<int>(newStr) : SqlFunction.LEN.CallExpression<int>(newStr), index) :
                 Expression.Subtract(Expression.Subtract(isPostgres ? PostgresFunction.length.CallExpression<int>(newStr) : SqlFunction.LEN.CallExpression<int>(newStr), index), Expression.Subtract(SepLen(), new SqlConstantExpression(1)));
 

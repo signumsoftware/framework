@@ -1,4 +1,4 @@
-import { QueryToken } from "@framework/FindOptions";
+import { QueryToken } from "@framework/QueryToken";
 import * as d3 from "d3";
 import { ChartClient, ChartTable, ChartColumn, ChartRow } from "../../ChartClient";
 
