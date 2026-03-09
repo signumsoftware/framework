@@ -393,3 +393,5 @@ export function DashboardTitle(p: { dashboard: DashboardEntity }): React.JSX.Ele
     </div>
   );
 }
+
+export { DashboardTooltipIcon } from './View/DashboardTooltipIcon';

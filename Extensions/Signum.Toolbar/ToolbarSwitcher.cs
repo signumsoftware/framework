@@ -9,7 +9,7 @@ namespace  Signum.Toolbar;
 public class ToolbarSwitcherEntity : Entity, IToolbarEntity, IUserAssetEntity
 {
     [UniqueIndex]
-    [StringLengthValidator(Max = 100)]
+    [StringLengthValidator(Max = 100), Translatable]
     public string Name { get; set; }
 
     [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]

@@ -10,6 +10,8 @@ public class QueryColumnEmbedded : EmbeddedEntity
     public QueryTokenEmbedded Token { get; set; }
 
     string? displayName;
+    
+    [Translatable]
     public string? DisplayName
     {
         get { return displayName.DefaultToNull(); }

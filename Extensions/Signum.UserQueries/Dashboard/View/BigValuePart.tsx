@@ -18,7 +18,7 @@ import { toAbsoluteUrl } from '@framework/AppContext'
 import { ToolbarUrl } from '../../../Signum.Toolbar/ToolbarUrl'
 import { ToolbarClient } from '../../../Signum.Toolbar/ToolbarClient'
 import { selectSubEntity } from '../../UserQueryToolbarConfig'
-import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
+import { PanelPartContentProps, DashboardTooltipIcon } from '../../../Signum.Dashboard/DashboardClient'
 
 
 export interface UserQueryPartHandler {
@@ -122,6 +122,8 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
 
   var custom = p.content.customBigValue ? BigValueClient.renderCustomBigValue(p.content.customBigValue, { content: p.content, entity: p.entity, value: vsc.current?.value }) : null; 
 
+  const tooltipHtml = translated(p.partEmbedded, pe => pe.tooltip);
+
   function renderCardContent() {
     return (
       <>
@@ -144,11 +146,17 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
               <FontAwesomeIcon role="img" icon={parseIcon(p.partEmbedded.iconName)!} color={p.partEmbedded.iconColor ?? undefined} size="2x" />}
           </div>
         </div>
-        <h2 className="medium h3">{
-          custom?.message ?? (translated(p.partEmbedded, a => a.title) ||
-            (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))
-
-        }</h2>
+        <h2 className="medium h3">
+          {custom?.message ?? (translated(p.partEmbedded, a => a.title) ||
+            (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))}
+          {tooltipHtml && (
+            <DashboardTooltipIcon
+              tooltipHtml={tooltipHtml}
+              className="ms-2"
+              iconClassName="sf-tooltip-icon"
+            />
+          )}
+        </h2>
       </>
     );
   }
