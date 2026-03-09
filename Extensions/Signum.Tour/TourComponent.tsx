@@ -2,22 +2,22 @@ import * as React from "react";
 import { Driver,
 driver } from "driver.js";
 import "driver.js/dist/driver.css";
-import { TourEntity, TourMessage, CustomTourSymbol } from "./Signum.Tour";
+import { TourEntity, TourMessage, TourTriggerSymbol } from "./Signum.Tour";
 import { useAPI } from "@framework/Hooks";
 import { TourClient, TourDTO } from "./TourClient";
 import { Entity,
 Lite } from "@framework/Signum.Entities";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCompass } from "@fortawesome/free-solid-svg-icons";
+import { getTypeName,
+PseudoType } from "@framework/Reflection";
 
-function isCustomTourSymbol(target: Lite<Entity> | CustomTourSymbol): target is CustomTourSymbol {
-  return 'key' in target && target.Type === 'CustomTour';
-}
 
-export function TourButton(p: { target: Lite<Entity> | CustomTourSymbol }) {
-  const storageKey = isCustomTourSymbol(p.target)
-    ? `tour-viewed-${p.target.key}` 
-    : `tour-viewed-${p.target.id}`;
+
+export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol }) {
+  const storageKey = TourTriggerSymbol.isInstance(p.trigger)
+    ? `tour-viewed-${p.trigger.key}` 
+    : `tour-viewed-${getTypeName(p.trigger)}`;
 
   const [hasViewed, setHasViewed] = React.useState(() => {
     return localStorage.getItem(storageKey) === "true";
@@ -26,12 +26,12 @@ export function TourButton(p: { target: Lite<Entity> | CustomTourSymbol }) {
   const [startTour, setStartTour] = React.useState(false);
 
   const tour = useAPI(() => {
-    if (isCustomTourSymbol(p.target)) {
-      return TourClient.API.getTourBySymbol(p.target.key);
+    if (TourTriggerSymbol.isInstance(p.trigger)) {
+      return TourClient.API.getTourBySymbol(p.trigger.key);
     } else {
-      return TourClient.API.getTourByEntity(p.target.EntityType);
+      return TourClient.API.getTourByEntity(getTypeName(p.trigger));
     }
-  }, [p.target]);
+  }, [p.trigger]);
 
   const driverRef = React.useRef<Driver | null>(null);
 

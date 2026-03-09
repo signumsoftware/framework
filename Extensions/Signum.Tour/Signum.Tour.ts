@@ -14,7 +14,7 @@ export interface CssStepEmbedded extends Entities.EmbeddedEntity {
   Type: "CssStepEmbedded";
   type: CssStepType;
   cssSelector: string | null;
-  property: Entities.Lite<Basics.PropertyRouteEntity> | null;
+  property: Basics.PropertyRouteEntity | null;
   toolbarContent: Entities.Lite<Entities.Entity> | null;
 }
 
@@ -23,11 +23,6 @@ export type CssStepType =
   "CSSSelector" |
   "Property" |
   "ToolbarContent";
-
-export const CustomTourSymbol: Type<CustomTourSymbol> = new Type<CustomTourSymbol>("CustomTour");
-export interface CustomTourSymbol extends Basics.Symbol {
-  Type: "CustomTour";
-}
 
 export const PopoverAlign: EnumType<PopoverAlign> = new EnumType<PopoverAlign>("PopoverAlign");
 export type PopoverAlign =
@@ -45,7 +40,7 @@ export type PopoverSide =
 export const TourEntity: Type<TourEntity> = new Type<TourEntity>("Tour");
 export interface TourEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "Tour";
-  target: Entities.Lite<Entities.Entity>;
+  trigger: Entities.Lite<Entities.Entity>;
   steps: Entities.MList<TourStepEntity>;
   showProgress: boolean;
   animate: boolean;
@@ -74,5 +69,10 @@ export interface TourStepEntity extends Entities.Entity {
   description: string;
   side: PopoverSide | null;
   align: PopoverAlign | null;
+}
+
+export const TourTriggerSymbol: Type<TourTriggerSymbol> = new Type<TourTriggerSymbol>("TourTrigger");
+export interface TourTriggerSymbol extends Basics.Symbol {
+  Type: "TourTrigger";
 }
 

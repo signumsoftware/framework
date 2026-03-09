@@ -216,13 +216,13 @@ public static class UserAssetsImporter
             return SymbolLogic<T>.ToSymbol(value);
         }
 
-        public Lite<PropertyRouteEntity> GetPropertyLite(TypeEntity typeEntity, string path)
+        public PropertyRouteEntity GetPropertyRoute(TypeEntity typeEntity, string path)
         {
             var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity);
 
             var pr = properties.SingleEx(a => a.Path == path);
 
-            return pr.ToLite(pr.IsNew);
+            return pr;
         }
     }
 
@@ -343,13 +343,13 @@ public static class UserAssetsImporter
             return SymbolLogic<T>.ToSymbol(value);
         }
 
-        public Lite<PropertyRouteEntity> GetPropertyLite(TypeEntity typeEntity, string path)
+        public PropertyRouteEntity GetPropertyRoute(TypeEntity typeEntity, string path)
         {
             var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity);
 
             var pr = properties.SingleEx(a => a.Path == path);
 
-            return pr.ToLite(pr.IsNew);
+            return pr;
         }
     }
 

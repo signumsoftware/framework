@@ -12,9 +12,7 @@ public class TourController : ControllerBase
     {
         var type = TypeLogic.GetType(typeName);
         var typeEntity = type.ToTypeEntity().ToLite();
-        var tour = Database.Query<TourEntity>()
-            .Where(t => t.Target.Is(typeEntity))
-            .FirstOrDefault();
+        var tour = TourLogic.ToursByTrigger.Value.TryGetC(typeEntity);
 
         return tour == null ? null : ToDTO(tour);
     }
@@ -22,13 +20,11 @@ public class TourController : ControllerBase
     [HttpGet("api/tour/bySymbol/{symbolKey}")]
     public TourDTO? GetTourBySymbol(string symbolKey)
     {
-        var symbol = SymbolLogic<CustomTourSymbol>.Symbols.SingleOrDefault(s => s.Key == symbolKey);
+        var symbol = SymbolLogic<TourTriggerSymbol>.Symbols.SingleOrDefault(s => s.Key == symbolKey);
         if (symbol == null)
             return null;
 
-        var tour = Database.Query<TourEntity>()
-            .Where(t => t.Target.Is(symbol))
-            .FirstOrDefault();
+        var tour = TourLogic.ToursByTrigger.Value.TryGetC(symbol.ToLite());
 
         return tour == null ? null : ToDTO(tour);
     }
@@ -37,7 +33,7 @@ public class TourController : ControllerBase
     {
         return new TourDTO
         {
-            ForEntity = tour.Target,
+            ForEntity = tour.Trigger,
             Animate = tour.Animate,
             ShowCloseButton = tour.ShowCloseButton,
             Steps = tour.Steps.Select(s => new TourStepDTO
@@ -67,7 +63,7 @@ public class TourController : ControllerBase
                     break;
 
                 case CssStepType.Property:
-                    var propertyRoute = step.Property!.RetrieveFromCache();
+                    var propertyRoute = step.Property!;
                     selectors.Add($"[data-property-path='{propertyRoute.Path}']");
                     break;
 

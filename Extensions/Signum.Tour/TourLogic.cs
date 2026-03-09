@@ -1,24 +1,31 @@
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Signum.API;
+using Signum.Basics;
 using Signum.UserAssets;
+using System.Collections.Frozen;
+using System.IO;
 
 namespace Signum.Tour;
 
 public static class TourLogic
 {
-    public static IEnumerable<CustomTourSymbol> RegisteredCustomTours
+    public static ResetLazy<FrozenDictionary<Lite<Entity>, TourEntity>> ToursByTrigger = null!;
+
+    public static IEnumerable<TourTriggerSymbol> RegisteredTourTriggers
     {
-        get { return customTours; }
+        get { return tourTriggers; }
     }
 
-    static HashSet<CustomTourSymbol> customTours = new HashSet<CustomTourSymbol>();
+    static HashSet<TourTriggerSymbol> tourTriggers = new HashSet<TourTriggerSymbol>();
 
-    public static void RegisterCustomTours(params CustomTourSymbol[] tours)
+    public static void RegisterTourTriggers(params TourTriggerSymbol[] tours)
     {
         foreach (var t in tours)
         {
             if (t == null)
-                throw AutoInitAttribute.ArgumentNullException(typeof(CustomTourSymbol), nameof(tours));
+                throw AutoInitAttribute.ArgumentNullException(typeof(TourTriggerSymbol), nameof(tours));
 
-            TourLogic.customTours.Add(t);
+            TourLogic.tourTriggers.Add(t);
         }
     }
 
@@ -37,13 +44,27 @@ public static class TourLogic
                 Entity = e,
                 e.Id,
                 Name = e.ToString(),
-                e.Target,
+                e.Trigger,
                 e.ShowProgress,
                 e.Animate,
                 e.ShowCloseButton,
             });
 
-        SymbolLogic<CustomTourSymbol>.Start(sb, () => RegisteredCustomTours.ToHashSet());
+        SymbolLogic<TourTriggerSymbol>.Start(sb, () => RegisteredTourTriggers.ToHashSet());
+
+        ToursByTrigger = sb.GlobalLazy(() =>
+            Database.Query<TourEntity>().ToFrozenDictionaryEx(a => a.Trigger),
+            new InvalidateWith(typeof(TourEntity)));
+
+        if (sb.WebServerBuilder != null)
+        {
+            EntityPackTS.AddExtension += pack =>
+            {
+                var tour = ToursByTrigger.Value.TryGetC(pack.entity.GetType().ToTypeEntity().ToLite());
+                if (tour != null)
+                    pack.extension.Add("hasTour", true);
+            };
+        }
 
         UserAssetsImporter.Register<TourEntity>("Tour", TourOperation.Save);
     }
