@@ -40,7 +40,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
 
     public Lite<Entity>? Owner { get; set; }
 
-    [StringLengthValidator(Min = 1, Max = 200)]
+    [StringLengthValidator(Min = 1, Max = 200), Translatable]
     public string DisplayName { get; set; }
 
     public bool AppendFilters { get; set; }

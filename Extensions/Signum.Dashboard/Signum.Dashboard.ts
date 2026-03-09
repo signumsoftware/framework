@@ -175,6 +175,7 @@ export const PanelPartEmbedded: Type<PanelPartEmbedded> = new Type<PanelPartEmbe
 export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   Type: "PanelPartEmbedded";
   title: string | null;
+  tooltip: string | null;
   iconName: string | null;
   iconColor: string | null;
   titleColor: string | null;

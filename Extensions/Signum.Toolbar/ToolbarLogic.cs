@@ -293,16 +293,6 @@ public static class ToolbarLogic
         }
     }
 
-    public static void RegisterTranslatableRoutes()
-    {
-        PropertyRouteTranslationLogic.RegisterRoute((ToolbarEntity tb) => tb.Name);
-        PropertyRouteTranslationLogic.RegisterRoute((ToolbarEntity tb) => tb.Elements[0].Label);
-        PropertyRouteTranslationLogic.RegisterRoute((ToolbarMenuEntity tm) => tm.Name);
-        PropertyRouteTranslationLogic.RegisterRoute((ToolbarMenuEntity tb) => tb.Elements[0].Label);
-        PropertyRouteTranslationLogic.RegisterRoute((ToolbarSwitcherEntity tm) => tm.Name);
-
-    }
-
     public static ToolbarEntity? GetCurrent(ToolbarLocation location)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<ToolbarEntity>(userInterface: false);

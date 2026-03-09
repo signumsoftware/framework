@@ -1118,7 +1118,7 @@ String.prototype.repeat = function(this: string, n: number) {
   return result;
 };
 
-export module Dic {
+export namespace Dic {
 
   var simplesTypes = ["number", "boolean", "string"];
   export const skipClasses: Function[] = [];
@@ -1351,7 +1351,7 @@ export function bytesToSize(bytes: number): string {
   return Math.round((bytes / Math.pow(1024, unit)) * 100) / 100 + ' ' + sizes[unit];
 };
 
-export module DomUtils {
+export namespace DomUtils {
   export function matches(elem: HTMLElement, selector: string): boolean {
     // Vendor-specific implementations of `Element.prototype.matches()`.
     const proto = Element.prototype as any;
