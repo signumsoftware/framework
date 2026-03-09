@@ -43,20 +43,66 @@ After restoring the database, the infrastructure automatically calls `/api/clear
 
 ## 3. Checking the App Is Running
 
-Before running tests, verify the application process is up. As an AI agent, check this with CLI or MCP tools:
+**Before running any Selenium tests, the web application MUST be running.**
 
-**CLI — check the process:**
-```bash
-tasklist | findstr iisexpress   # IIS Express
-tasklist | findstr dotnet        # Kestrel
+The test infrastructure expects the app to be already up and will fail immediately if it's not:
+- The static constructor posts to `/api/clearAllBlocks` during test class initialization
+- If the app is not running, this will throw an `HttpRequestException` with a connection refused error
+
+### How to Check if IIS Express / Kestrel is Running
+
+**Option 1 — Check via process list (CLI):**
+
+```powershell
+# For IIS Express (Visual Studio F5 default)
+tasklist | Select-String "iisexpress"
+
+# For Kestrel (dotnet run)
+tasklist | Select-String "dotnet" | Select-String "exec"
+
+# Combined check
+$iis = Get-Process -Name "iisexpress" -ErrorAction SilentlyContinue
+$kestrel = Get-Process -Name "dotnet" | Where-Object { $_.CommandLine -like "*exec*" } -ErrorAction SilentlyContinue
+if ($iis -or $kestrel) { Write-Host "Web server is running" } else { Write-Host "Web server is NOT running" }
 ```
 
-**MCP (Chrome DevTools) — check the login page loads:**
-Use `mcp__Claude_in_Chrome__navigate` to open `BaseUrl`, then `mcp__Claude_in_Chrome__read_page` to confirm the login page is present.
+**Option 2 — Check via HTTP request:**
 
-If the app is not running, **stop and tell the user** — do not try to start it. Ask them to start the project in Visual Studio (F5 / IIS Express) or run `dotnet run`, then retry.
+```powershell
+# Test if the BaseUrl responds
+$baseUrl = "http://localhost:5000"  # Replace with your actual BaseUrl
+try {
+    $response = Invoke-WebRequest -Uri $baseUrl -TimeoutSec 5 -UseBasicParsing
+    Write-Host "App is running - Status: $($response.StatusCode)"
+} catch {
+    Write-Host "App is NOT running - Error: $_"
+}
+```
 
-The test startup itself also verifies availability: it posts to `/api/clearAllBlocks` and will throw an `HttpRequestException` immediately if the app is down.
+**Option 3 — Use Chrome DevTools MCP (for AI agents):**
+
+If you have the Chrome DevTools MCP server set up, you can:
+1. Use `chrome_devtools_navigate_page` to open `BaseUrl`
+2. Use `chrome_devtools_take_snapshot` to confirm the login page is present
+
+### What to Do if the App Is Not Running
+
+**If you're an AI agent:** Stop immediately and tell the user the app must be running before tests can execute. **Do not attempt to start it automatically.**
+
+**If you're a developer:** Start the application using one of these methods:
+
+1. **Visual Studio:** Press F5 or Ctrl+F5 to run with IIS Express
+2. **CLI:** Navigate to the project folder and run:
+   ```bash
+   dotnet run
+   ```
+3. **Visual Studio Test Explorer:** Some projects auto-start the app when running tests — check your `.runsettings` file
+
+Once the app is running, the test infrastructure will automatically:
+- Restore the database to a known state (snapshot or fresh creation)
+- Call `/api/clearAllBlocks` to clear any in-memory state
+- Call `/api/cache/invalidateAll` to sync the cache
+- Proceed with the test execution
 
 ---
 
@@ -250,7 +296,96 @@ If a debugger is attached and the wait exceeds 5 s, a breakpoint is triggered au
 
 ---
 
-## 9. Debugging Test Failures
+## 9. Debug Mode — Keep Browser Open on Failure
+
+When debugging a failing test, you often want the browser to stay open so you can inspect the final state. Use **SELENIUM_DEBUG_MODE** to prevent the browser from closing.
+
+### How to Enable Debug Mode
+
+1. **Create the file** `SELENIUM_DEBUG_MODE.txt` in your test project root (same folder as your `.csproj` file)
+2. **Set its content** to `true` (case-insensitive)
+3. **Run your test** — the browser will stay open after failures
+
+Example file structure:
+```
+YourProject.Test.React/
+├── SELENIUM_DEBUG_MODE.txt    ← Add this file
+├── YourProject.Test.React.csproj
+├── Agile360TestClass.cs
+└── ...
+```
+
+File content:
+```text
+true
+```
+
+### What Debug Mode Does
+
+When `SELENIUM_DEBUG_MODE.txt` exists and contains `true`:
+
+- ✅ **Browser stays open** after test failures (skips `selenium.Close()` in the `finally` block)
+- ✅ **Modals don't auto-close** (lets you inspect modal state before disposal)
+- ✅ **Console notification** printed at test startup: `[SELENIUM DEBUG MODE] Enabled via ...`
+
+When the file is missing, empty, or contains anything other than `true`:
+- ❌ Debug mode is disabled (normal cleanup behavior)
+
+### Example Usage
+
+**Test fails with a timeout:**
+```cs
+[Fact]
+public void FailingTest()
+{
+    Browse("System", b =>
+    {
+        b.SearchPage(typeof(ProjectEntity)).EndUsing(search =>
+        {
+            // This will time out and fail
+            search.Results.WaitRows(999);
+        });
+    });
+}
+```
+
+**Without debug mode:**
+- Test fails → screenshot saved → browser closes immediately → you can't inspect
+
+**With debug mode (SELENIUM_DEBUG_MODE.txt = `true`):**
+- Test fails → screenshot saved → **browser stays open** → you can:
+  - Inspect the DOM in Chrome DevTools
+  - Check the network tab for failed requests
+  - Verify the console for JS errors
+  - Manually interact with the page to understand the issue
+
+### Resetting Debug Mode at Runtime
+
+The `DebugMode` property is cached after the first read. If you change the file during a test run:
+
+```cs
+// Force re-read of SELENIUM_DEBUG_MODE.txt
+BrowserProxy.ResetDebugMode();
+```
+
+This is rarely needed — usually you set it once before running tests and disable it when done.
+
+### When to Use Debug Mode
+
+✅ **Good use cases:**
+- Debugging a failing test to see the final page state
+- Inspecting an unexpected modal or error message
+- Understanding why an element is not found
+- Manually stepping through a complex UI interaction
+
+❌ **Don't leave it enabled:**
+- In CI/CD pipelines (will leak browser processes)
+- When running large test suites (prevents cleanup)
+- When committing to version control (add `SELENIUM_DEBUG_MODE.txt` to `.gitignore`)
+
+---
+
+## 10. Debugging Test Failures
 
 Work through this checklist in order:
 
