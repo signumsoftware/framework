@@ -1,6 +1,6 @@
 namespace Signum.Agent.Skills;
 
-public class EntityUrlSkill : ChatbotSkill
+public class EntityUrlSkill : AgentSkill
 {
     public EntityUrlSkill()
     {

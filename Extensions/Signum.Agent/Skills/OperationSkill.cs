@@ -6,7 +6,7 @@ using System.Text.Json.Nodes;
 
 namespace Signum.Agent.Skills;
 
-public class OperationSkill : ChatbotSkill
+public class OperationSkill : AgentSkill
 {
     public OperationSkill()
     {

@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Signum.Agent.Skills;
 
-public class AutocompleteSkill : ChatbotSkill
+public class AutocompleteSkill : AgentSkill
 {
     public AutocompleteSkill()
     {

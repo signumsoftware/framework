@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Signum.Agent.Skills;
 
-public class CurrentDateSkill : ChatbotSkill
+public class CurrentDateSkill : AgentSkill
 {
     public CurrentDateSkill()
     {

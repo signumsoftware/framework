@@ -8,7 +8,7 @@ using System.ComponentModel;
 namespace Signum.Agent.Skills;
 
 
-public class IntroductionSkill : ChatbotSkill
+public class IntroductionSkill : AgentSkill
 {
     public IntroductionSkill()
     {
@@ -28,7 +28,7 @@ public class IntroductionSkill : ChatbotSkill
         if (skillName.Contains("error"))
             throw new Exception(skillName + " has an error");
 
-        var skill = ChatbotSkillLogic.GetSkill(skillName);
+        var skill = AgentSkillLogic.GetSkill(skillName);
 
         return skill.GetInstruction(null);
     }

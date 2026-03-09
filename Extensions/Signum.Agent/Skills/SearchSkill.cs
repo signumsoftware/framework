@@ -15,13 +15,11 @@ using System.Web;
 
 namespace Signum.Agent.Skills;
 
-public class SearchSkill : ChatbotSkill
+public class SearchSkill : AgentSkill
 {
-    public SearchSkill(HashSet<object> inlineQueryNames) : this (q => inlineQueryNames.Contains(q))
-    {
-    }
+    public static Func<object, bool> IsnlineQueryName = q => false; 
 
-    public SearchSkill(Func<object, bool> inlineQueryName)
+    public SearchSkill()
     {
         ShortDescription = "Explores the database schema to search any information in the database";
         IsAllowed = () => true;
@@ -33,7 +31,7 @@ public class SearchSkill : ChatbotSkill
                 .GroupBy(a => a is Type t? t.Namespace : a is Enum e ? e.GetType().Namespace : "Unknown")
                 .ToString(gr =>
                 {
-                    var inlineQueries = gr.Where(inlineQueryName).ToString(qn =>
+                    var inlineQueries = gr.Where(IsnlineQueryName).ToString(qn =>
                     {
                         var imp = QueryLogic.Queries.GetEntityImplementations(qn);
                         var impStr = imp.Types.Only() == qn as Type ? "" : $" (ImplementedBy {imp.Types.ToString(t => t.Name, ", ")})";

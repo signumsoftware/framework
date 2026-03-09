@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace Signum.Agent.Skills;
 
-public class RetrieveSkill : ChatbotSkill
+public class RetrieveSkill : AgentSkill
 {
     public RetrieveSkill()
     {

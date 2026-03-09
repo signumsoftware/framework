@@ -9,18 +9,18 @@ using System.Text.Json;
 
 namespace Signum.Agent;
 
-public static class ChatbotSkillLogic
+public static class AgentSkillLogic
 {
-    public static Dictionary<Type, ChatbotSkill> SkillsByType = new Dictionary<Type, ChatbotSkill>();
+    public static Dictionary<Type, AgentSkill> SkillsByType = new Dictionary<Type, AgentSkill>();
 
-    public static ResetLazy<Dictionary<string, ChatbotSkill>> SkillByName =
-        new ResetLazy<Dictionary<string, ChatbotSkill>>(() => SkillsByType.Values.ToDictionary(a => a.Name));
+    public static ResetLazy<Dictionary<string, AgentSkill>> SkillByName =
+        new ResetLazy<Dictionary<string, AgentSkill>>(() => SkillsByType.Values.ToDictionary(a => a.Name));
 
     public static ResetLazy<Dictionary<string, AITool>> AllTools;
 
-    public static ChatbotSkill? IntroductionSkill;
+    public static AgentSkill? IntroductionSkill;
 
-    public static void Start(SchemaBuilder sb, ChatbotSkill? defaultChatbotSkill)
+    public static void Start(SchemaBuilder sb, AgentSkill? defaultChatbotSkill)
     {
         if (sb.AlreadyDefined(MethodBase.GetCurrentMethod()))
             return;
@@ -39,22 +39,22 @@ public static class ChatbotSkillLogic
         new ConversationSumarizerSkill().Register();
     }
 
-    public static ChatbotSkill GetSkill(string skillName)
+    public static AgentSkill GetSkill(string skillName)
     {
         return SkillByName.Value.GetOrThrow(skillName, "{0} not registered");
     }
 
-    public static T GetSkill<T>() where T : ChatbotSkill
+    public static T GetSkill<T>() where T : AgentSkill
     {
         return (T)SkillsByType.GetOrThrow(typeof(T));
     }
 
-    public static ChatbotSkill GetSkill(Type skillType)
+    public static AgentSkill GetSkill(Type skillType)
     {
         return SkillsByType.GetOrThrow(skillType, "{0} not registered");
     }
 
-    public static ChatbotSkill Register(this ChatbotSkill chatbotSkill)
+    public static AgentSkill Register(this AgentSkill chatbotSkill)
     {
         SkillsByType.Add(chatbotSkill.GetType(), chatbotSkill);
         AllTools?.Reset();
@@ -63,7 +63,7 @@ public static class ChatbotSkillLogic
         return chatbotSkill;
     }
 
-    public static ChatbotSkill WithSubSkill(this ChatbotSkill parent, SkillActivation activation, ChatbotSkill children)
+    public static AgentSkill WithSubSkill(this AgentSkill parent, SkillActivation activation, AgentSkill children)
     {
         GetSkill(children.GetType()); //Assert
         parent.SubSkills.Add(children.GetType(), activation);
@@ -72,7 +72,7 @@ public static class ChatbotSkillLogic
 }
 
 
-public abstract class ChatbotSkill
+public abstract class AgentSkill
 {
     public string Name => this.GetType().Name.Before("Skill");
     public string ShortDescription;
@@ -80,7 +80,7 @@ public abstract class ChatbotSkill
     public Dictionary<string, Func<object?, string>>? Replacements;
 
 
-    public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(typeof(ChatbotSkill).Assembly.Location)!, "Skills");
+    public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(typeof(AgentSkill).Assembly.Location)!, "Skills");
 
     string? originalInstructions;
     public string OriginalInstructions
@@ -113,7 +113,7 @@ public abstract class ChatbotSkill
     {
         foreach (var item in SubSkills)
         {
-            var skill = ChatbotSkillLogic.GetSkill(item.Key);
+            var skill = AgentSkillLogic.GetSkill(item.Key);
 
             sb.AppendLineLF("# Skill " + skill.Name);
             sb.AppendLineLF("**Summary**: " + skill.ShortDescription);
@@ -156,7 +156,7 @@ public abstract class ChatbotSkill
         {
             if (item.Value == SkillActivation.Eager)
             {
-                var skill = ChatbotSkillLogic.GetSkill(item.Key);
+                var skill = AgentSkillLogic.GetSkill(item.Key);
                 list.AddRange(skill.GetToolsRecursive());
             }
         }
@@ -179,7 +179,7 @@ public abstract class ChatbotSkill
 
         foreach (var subSkill in this.SubSkills.Where(a => a.Value == SkillActivation.Eager))
         {
-            ChatbotSkillLogic.GetSkill(subSkill.Key).AddMcpServer(builder);
+            AgentSkillLogic.GetSkill(subSkill.Key).AddMcpServer(builder);
         }
     }
 
@@ -202,7 +202,7 @@ public class UIToolAttribute : Attribute { }
 
 public static partial class SignumMcpServerBuilderExtensions
 {
-    public static IMcpServerBuilder WithSignumSkill(this IMcpServerBuilder builder, ChatbotSkill skill)
+    public static IMcpServerBuilder WithSignumSkill(this IMcpServerBuilder builder, AgentSkill skill)
     {
         skill.AddMcpServer(builder);
 

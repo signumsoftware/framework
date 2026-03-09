@@ -242,7 +242,7 @@ public class ChatbotController : Controller
                 // Detect UITool calls — the server never invokes their bodies
                 var uiToolCalls = toolCalls.Where(fc =>
                 {
-                    var tool = ChatbotSkillLogic.AllTools.Value.GetOrThrow(fc.Name);
+                    var tool = AgentSkillLogic.AllTools.Value.GetOrThrow(fc.Name);
                     return ((AIFunction)tool).UnderlyingMethod?.GetCustomAttribute<UIToolAttribute>() != null;
                 }).ToList();
 
@@ -342,7 +342,7 @@ public class ChatbotController : Controller
         var toolSw = Stopwatch.StartNew();
         try
         {
-            AITool tool = ChatbotSkillLogic.AllTools.Value.GetOrThrow(toolId);
+            AITool tool = AgentSkillLogic.AllTools.Value.GetOrThrow(toolId);
             var obj = await ((AIFunction)tool).InvokeAsync(new AIFunctionArguments(arguments), ct);
             toolSw.Stop();
 
@@ -431,7 +431,7 @@ public class ChatbotController : Controller
 
     ConversationHistory CreateNewConversationHistory(ChatSessionEntity session)
     {
-        var intro = ChatbotSkillLogic.GetSkill<IntroductionSkill>();
+        var intro = AgentSkillLogic.GetSkill<IntroductionSkill>();
 
         var history = new ConversationHistory
         {

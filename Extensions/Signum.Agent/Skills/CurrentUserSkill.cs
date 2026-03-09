@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace Signum.Agent.Skills;
 
-public class CurrentUserSkill : ChatbotSkill
+public class CurrentUserSkill : AgentSkill
 {
     public CurrentUserSkill()
     {

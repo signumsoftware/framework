@@ -266,7 +266,7 @@ public static class ChatbotLogic
             conversationText.AppendLine($"{roleName}: {content}");
         }
 
-        var skill = ChatbotSkillLogic.GetSkill<ConversationSumarizerSkill>();
+        var skill = AgentSkillLogic.GetSkill<ConversationSumarizerSkill>();
         var prompt = skill.GetInstruction(conversationText.ToString());
         var client = GetChatClient(languageModel);
         var options = ChatOptions(languageModel, []);
@@ -276,7 +276,7 @@ public static class ChatbotLogic
 
     public static async Task<string> SumarizeTitle(ConversationHistory history, CancellationToken ct)
     {
-        var prompt = ChatbotSkillLogic.GetSkill<QuestionSumarizerSkill>().GetInstruction(history);
+        var prompt = AgentSkillLogic.GetSkill<QuestionSumarizerSkill>().GetInstruction(history);
         var client = GetChatClient(history.LanguageModel);
         var options = ChatbotLogic.ChatOptions(history.LanguageModel, []);
         var cr = await client.GetResponseAsync(prompt, options, cancellationToken: ct);
@@ -430,8 +430,8 @@ public class ConversationHistory
     {
         var activatedSkills = new HashSet<string>();
 
-        if (ChatbotSkillLogic.IntroductionSkill != null)
-            activatedSkills.Add(ChatbotSkillLogic.IntroductionSkill.Name);
+        if (AgentSkillLogic.IntroductionSkill != null)
+            activatedSkills.Add(AgentSkillLogic.IntroductionSkill.Name);
 
         foreach (var m in Messages)
         {
@@ -454,7 +454,7 @@ public class ConversationHistory
         }
 
         return activatedSkills
-            .SelectMany(skillName => ChatbotSkillLogic.GetSkill(skillName).GetToolsRecursive())
+            .SelectMany(skillName => AgentSkillLogic.GetSkill(skillName).GetToolsRecursive())
             .ToList();
     }
 

@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace Signum.Agent.Skills;
 
-public class ResultTableSkill : ChatbotSkill
+public class ResultTableSkill : AgentSkill
 {
     public ResultTableSkill()
     {
