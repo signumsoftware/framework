@@ -14,7 +14,7 @@ import { GraphExplorer } from '@framework/Reflection'
 import { RoleEntity } from '../Signum.Authorization'
 import { AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 
-export default function PermissionRulesPackControl(p: { ctx: TypeContext<PermissionRulePack>, innerRef: React.Ref<IRenderButtons> }): React.JSX.Element {
+export default function PermissionRulesPackControl(p: { ctx: TypeContext<PermissionRulePack>, ref: React.Ref<IRenderButtons> }): React.JSX.Element {
 
   function renderButtons(bc: ButtonsContext) {
 
@@ -58,7 +58,7 @@ export default function PermissionRulesPackControl(p: { ctx: TypeContext<Permiss
 
   const [filter, setFilter] = React.useState("");
 
-  React.useImperativeHandle(p.innerRef, () => ({ renderButtons }), [p.ctx.value])
+  React.useImperativeHandle(p.ref, () => ({ renderButtons }), [p.ctx.value])
 
   function updateFrame() {
     ctx.frame!.frameComponent.forceUpdate();

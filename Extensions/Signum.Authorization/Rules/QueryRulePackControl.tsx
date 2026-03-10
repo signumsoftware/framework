@@ -13,7 +13,7 @@ import { QueryEntity } from '@framework/Signum.Basics'
 import { AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 import { LinkButton } from '../../../Signum/React/Basics/LinkButton'
 
-export default function QueryRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<QueryRulePack>, innerRef: React.Ref<IRenderButtons> }): React.JSX.Element {
+export default function QueryRulesPackControl({ ctx, ref }: { ctx: TypeContext<QueryRulePack>, ref: React.Ref<IRenderButtons> }): React.JSX.Element {
 
   function updateFrame() {
     ctx.frame!.frameComponent.forceUpdate();
@@ -35,7 +35,7 @@ export default function QueryRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
     ];
   }
 
-  React.useImperativeHandle(innerRef, () => ({ renderButtons }), [ctx.value]);
+  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value]);
 
   function handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: QueryAllowed) {
 
