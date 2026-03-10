@@ -6,6 +6,7 @@ import "codemirror/lib/codemirror.css"
 import { useUpdatedRef } from '@framework/Hooks';
 
 export interface CodeMirrorProps {
+  ref?: React.Ref<CodeMirrorComponentHandler>;
   onChange?: (value: string) => void,
   onFocusChange?: (focused: boolean) => void,
   options?: CodeMirror.EditorConfiguration,
@@ -21,8 +22,7 @@ export interface CodeMirrorComponentHandler {
   codeMirror?: CodeMirror.EditorFromTextArea;
 }
 
-export const CodeMirrorComponent: React.ForwardRefExoticComponent<CodeMirrorProps & React.RefAttributes<CodeMirrorComponentHandler>> =
-  React.forwardRef(function CodeMirrorComponent(p: CodeMirrorProps, ref: React.Ref<CodeMirrorComponentHandler>) {
+export function CodeMirrorComponent(p: CodeMirrorProps) {
 
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   const codeMirrorRef = React.useRef<CodeMirror.EditorFromTextArea | undefined>(undefined);
@@ -83,7 +83,7 @@ export const CodeMirrorComponent: React.ForwardRefExoticComponent<CodeMirrorProp
     }
   }
 
-  React.useImperativeHandle(ref, () => ({
+  React.useImperativeHandle(p.ref, () => ({
     codeMirror: codeMirrorRef.current
   }));
 
@@ -111,4 +111,4 @@ export const CodeMirrorComponent: React.ForwardRefExoticComponent<CodeMirrorProp
       <textarea ref={textAreaRef} name={p.path} defaultValue={p.value ?? undefined} autoComplete="off" />
     </div>
   );
-});
+}

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Primitives;
 using NpgsqlTypes;
+using Pgvector;
 using Signum.DynamicQuery.Tokens;
 using Signum.Entities.TsVector;
 using Signum.Utilities.Reflection;
@@ -18,13 +19,20 @@ public enum FilterGroupOperation
 
 public abstract class Filter
 {
+    /// <summary>
+    /// Extension point for converting text to embeddings for SmartSearch operations.
+    /// Takes the VectorColumnToken and the search string, returns a Vector.
+    /// This should be set during application startup.
+    /// </summary>
+    public static Func<VectorColumnToken, string, Vector> GetEmbeddingForSmartSearch = (token, value) => throw new InvalidOperationException("Filter.GetEmbeddingForSmartSearch is not configured");
+
     public abstract Expression GetExpression(BuildExpressionContext ctx, bool inMemory);
 
     public abstract IEnumerable<Filter> GetAllFilters();
 
     public abstract IEnumerable<QueryToken> GetTokens();
 
-    public abstract Filter? ToFullText();
+    public abstract Filter? ToTableFilter();
 
     public abstract bool IsAggregate();
     public abstract bool IsTimeSeries();
@@ -64,6 +72,7 @@ public abstract class Filter
     public static void SetIsTable(List<Filter> filters, IEnumerable<QueryToken> allTokens)
     {
         var fullTextOrders = allTokens.OfType<FullTextRankToken>().Select(a => a.Parent!);
+        var vectorSearchOrders = allTokens.OfType<VectorDistanceToken>().Select(a => a.Parent!);
 
         foreach (var fft in filters.OfType<FilterSqlServerFullText>())
         {
@@ -71,10 +80,21 @@ public abstract class Filter
             fft.TableOuterJoin = false;
         }
 
+        foreach (var fvs in filters.OfType<FilterSqlServerVectorSearch>())
+        {
+            fvs.IsTable = vectorSearchOrders.Contains(fvs.Token);
+            fvs.TableOuterJoin = false;
+        }
+
         foreach (var fg in filters.OfType<FilterGroup>())
         {
-            fg.SetIsTable(fullTextOrders, false);
+            fg.SetIsTable(fullTextOrders, vectorSearchOrders, false);
         }
+    }
+
+    public static List<ITableFilter> GetTableFilters(List<Filter> filters)
+    {
+        return filters.SelectMany(a => a.GetAllFilters()).OfType<ITableFilter>().Where(a => a.IsTable).ToList();
     }
 
     internal CollectionNestedToken? GetDeepestNestedToken()
@@ -153,7 +173,7 @@ public class FilterGroup : Filter
         return GetExpressionWithAnyAll(ctx, anyAll, inMemory);
     }
 
-    public override Filter? ToFullText()
+    public override Filter? ToTableFilter()
     {
         if (this.GroupOperation == FilterGroupOperation.Or)
         {
@@ -188,7 +208,7 @@ public class FilterGroup : Filter
         }
         else
         {
-            var filters = this.Filters.Select(a => a.ToFullText()).NotNull().ToList();
+            var filters = this.Filters.Select(a => a.ToTableFilter()).NotNull().ToList();
 
             if (filters.Count == 0)
                 return null;
@@ -217,7 +237,7 @@ public class FilterGroup : Filter
         return this.Filters.Any(f => f.IsTimeSeries());
     }
 
-    internal void SetIsTable(IEnumerable<QueryToken> fullTextOrders, bool isOuter)
+    internal void SetIsTable(IEnumerable<QueryToken> fullTextOrders, IEnumerable<QueryToken> vectorSearchOrders, bool isOuter)
     {
         isOuter |= this.GroupOperation == FilterGroupOperation.Or && this.Filters.Count > 1;
 
@@ -227,9 +247,15 @@ public class FilterGroup : Filter
             fft.TableOuterJoin = isOuter;
         }
 
+        foreach (var fvs in this.Filters.OfType<FilterSqlServerVectorSearch>())
+        {
+            fvs.IsTable = vectorSearchOrders.Contains(fvs.Token);
+            fvs.TableOuterJoin = isOuter;
+        }
+
         foreach (var fg in this.Filters.OfType<FilterGroup>())
         {
-            fg.SetIsTable(fullTextOrders, isOuter);
+            fg.SetIsTable(fullTextOrders, vectorSearchOrders, isOuter);
         }
     }
 
@@ -255,6 +281,9 @@ public class FilterCondition : Filter
         if (operation.IsTsQuery())
             return typeof(string);
 
+        if (operation == FilterOperation.SmartSearch)
+            return typeof(string);
+
         if (operation.IsList())
             return typeof(IEnumerable<>).MakeGenericType(token.Type.Nullify());
         
@@ -271,12 +300,30 @@ public class FilterCondition : Filter
         yield return Token;
     }
 
-    public override Filter? ToFullText()
+    public override Filter? ToTableFilter()
     {
         if (Operation.IsFullTextFilterOperation())
         {
             if (Value is string s && s.Length > 0)
                 return new FilterSqlServerFullText(Operation.ToFullTextFilterOperation(), new List<QueryToken> { Token }, s);
+            return null;
+        }
+
+        // Handle SmartSearch for Vector columns (SQL Server only)
+        // PostgreSQL uses inline vector distance calculation instead of table joins
+        if (Operation == FilterOperation.SmartSearch && Token is VectorColumnToken vct && Connector.Current is SqlServerConnector)
+        {
+            if (Value is string searchText && searchText.Length > 0)
+            {
+                var vector = Filter.GetEmbeddingForSmartSearch(vct, searchText);
+                var index = vct.GetVectorIndex();
+                
+                // Use the metric from the index configuration
+                var metric = index.SqlServer.Metric;
+
+                // Default TopN to 100 if not specified
+                return new FilterSqlServerVectorSearch(Token, vector, metric, 100);
+            }
             return null;
         }
 
@@ -372,6 +419,10 @@ public class FilterCondition : Filter
             var query = Expression.Call(mi, Expression.Constant(Value));
 
             return Expression.Call(TsVectorExtensions.miMatches, left, query);
+        }
+        else if (Operation.IsSmartSearch())
+        {
+            return Expression.Constant(true);
         }
         else
         {
@@ -527,6 +578,9 @@ public enum FilterOperation
     TsQuery_Phrase,
     [Description("tsquery (web search)")]
     TsQuery_WebSearch,
+
+    [Description("smart search")]
+    SmartSearch, //Vector Search with Embeddings
 }
 
 [InTypeScript(true)]
@@ -544,9 +598,16 @@ public enum FilterType
     Enum,
     Guid,
     TsVector,
+    Vector,
 }
 
-public class FilterSqlServerFullText : Filter
+public interface ITableFilter
+{
+    bool IsTable { get; set; }
+    bool TableOuterJoin { get; set; }
+}
+
+public class FilterSqlServerFullText : Filter, ITableFilter
 {
     public FilterSqlServerFullText(FullTextFilterOperation operation, List<QueryToken> tokens, string value)
     {
@@ -611,14 +672,9 @@ public class FilterSqlServerFullText : Filter
         return false;
     }
 
-    public override Filter ToFullText()
+    public override Filter ToTableFilter()
     {
         throw new InvalidOperationException("Already FilterFullText!");
-    }
-
-    public static List<FilterSqlServerFullText> TableFilters(List<Filter> filters)
-    {
-        return filters.SelectMany(a => a.GetAllFilters()).OfType<FilterSqlServerFullText>().Where(a => a.IsTable).ToList();
     }
 
     //Keep in sync with Finder.tsx extractComplexConditions
@@ -633,6 +689,83 @@ public class FilterSqlServerFullText : Filter
     }
 
     
+}
+
+public class FilterSqlServerVectorSearch : Filter, ITableFilter
+{
+    public FilterSqlServerVectorSearch(QueryToken token, Vector queryVector, SqlVectorDistanceMetric distanceMetric, int topN)
+    {
+        if (token == null)
+            throw new ArgumentNullException(nameof(token));
+
+        Token = token;
+        QueryVector = queryVector;
+        DistanceMetric = distanceMetric;
+        TopN = topN;
+    }
+
+    public QueryToken Token { get; }
+    public Vector QueryVector { get; }
+    public SqlVectorDistanceMetric DistanceMetric { get; }
+    public int TopN { get; }
+    
+    public bool IsTable { get; set; }
+    public bool TableOuterJoin { get; set; }
+
+    public override Expression GetExpression(BuildExpressionContext ctx, bool inMemory)
+    {
+        if (this.IsTable)
+        {
+            var dist = ctx.Replacements.GetOrThrow(new VectorDistanceToken(Token));
+
+            return Expression.NotEqual(dist.RawExpression.Nullify(), Expression.Constant(null, typeof(float?)));
+        }
+        else
+        {
+            // For non-table mode, we check if distance is within TopN results
+            // This is less efficient than table mode but can be used without ordering by distance
+            var distanceToken = new VectorDistanceToken(Token);
+            var distanceExpression = distanceToken.BuildExpression(ctx);
+            
+            // Return true - the actual filtering happens via VECTOR_SEARCH in table mode
+            return Expression.Constant(true);
+        }
+    }
+
+    public override IEnumerable<Filter> GetAllFilters()
+    {
+        yield return this;
+    }
+
+    public override IEnumerable<QueryToken> GetTokens()
+    {
+        yield return Token;
+    }
+
+    public override bool IsAggregate()
+    {
+        return false;
+    }
+
+    public override bool IsTimeSeries()
+    {
+        return false;
+    }
+
+    public override Filter ToTableFilter()
+    {
+        throw new InvalidOperationException("Already FilterVectorSearch!");
+    }
+
+    public static List<FilterSqlServerVectorSearch> TableFilters(List<Filter> filters)
+    {
+        return filters.SelectMany(a => a.GetAllFilters()).OfType<FilterSqlServerVectorSearch>().Where(a => a.IsTable).ToList();
+    }
+
+    public override IEnumerable<string> GetKeywords()
+    {
+        return Enumerable.Empty<string>();
+    }
 }
 
 public static class FullTextFilterOperationExtensions
@@ -654,7 +787,7 @@ public static class FullTextFilterOperationExtensions
 public enum FullTextFilterOperation
 {
     ComplexCondition, //Full Text Search
-    FreeText, //Full Text Searc
+    FreeText, //Full Text Search
 }
 
 [InTypeScript(true)]

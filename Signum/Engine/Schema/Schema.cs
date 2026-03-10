@@ -84,6 +84,7 @@ public class Schema : IImplementationsFinder
         { "plpgsql", s => true }, // Always include in the list (pre-installed in Azure PostgreSQL)
         { "uuid-ossp", s => true },
         { "ltree", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.Type.UnNullify() == typeof(SqlHierarchyId)))},
+        { "vector", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.DbType.IsVector()))},
     };
 
     #region Events

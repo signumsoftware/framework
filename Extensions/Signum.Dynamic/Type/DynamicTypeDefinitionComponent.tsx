@@ -840,7 +840,7 @@ export class CustomFieldsetComponent<T> extends React.Component<CustomFieldsetCo
       this.props.onChange();
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     let value = this.props.binding.getValue();
     return (
       <fieldset style={{ marginTop: "-5px" }}>

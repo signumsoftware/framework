@@ -8,7 +8,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { LinkButton } from '@framework/Basics/LinkButton'
 import { AuthClient } from '../AuthClient'
 
-export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boolean, mandatory: boolean, onChange: ()=> void }): React.JSX.Element {
+export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boolean, mandatory: boolean, onChange?: ()=> void }): React.JSX.Element {
 
   const [isOpen, setIsOpen] = React.useState(p.initialOpen);
   const [passValidation, setPassValidation] = React.useState<AuthClient.PasswordValidationResult | null>(null);
@@ -26,7 +26,7 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
       const result = await AuthClient.validatePassword(newPass.current!.value, user);
 
       setPassValidation(result);
-
+        
       if (result?.level == "error") {
         ctx.error = result.message;
       } else {
@@ -51,15 +51,15 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
 
     if (passValidation?.level == 'error') {
       ctx.error = passValidation.message;
-    }
+      }
     else if (firstValue && secondValue && firstValue == secondValue) {
-      ctx.error = undefined;
+        ctx.error = undefined;
       ctx.value = firstValue;
       const user = ctx.frame!.pack.entity as UserEntity;
       user.passwordIsChanging = false;
       setPassValidation(null);
-      p.onChange();
-    }
+        p.onChange?.();
+      }
     else if (firstValue || secondValue) {
       ctx.error = LoginAuthMessage.PasswordsAreDifferent.niceToString();
     }

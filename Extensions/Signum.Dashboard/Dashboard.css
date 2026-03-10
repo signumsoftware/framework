@@ -38,7 +38,6 @@
 .sf-grid-element .card-header {
     cursor: move;
     color: var(--bs-body-color) !important;
-    background-color: var(--bs-body-bg) !important;
     border-color: var(--bs-border-color) !important;
 }
 

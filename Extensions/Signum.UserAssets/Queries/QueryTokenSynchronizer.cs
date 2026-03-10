@@ -505,7 +505,7 @@ public static class QueryTokenSynchronizer
                     return null;
                 }
 
-                var tryToken = QueryUtils.TryParse(rawAnswer, qd, options);
+                var tryToken = QueryUtils.TryParse(rawAnswer, qd, options, out var _, out var _);
 
                 if (tryToken != null)
                 {

@@ -704,6 +704,20 @@ public static class Administrator
         });
     }
 
+    public static void DropVectorIndex(this VectorTableIndex index)
+    {
+        var sqlBuilder = Connector.Current.SqlBuilder;
+        SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, " DROP Vector Index " + index.IndexName);
+        sqlBuilder.DropIndex(index.Table.Name, index.IndexName).ExecuteLeaves();
+    }
+
+    public static void CreateVectorIndex(this VectorTableIndex index)
+    {
+        var sqlBuilder = Connector.Current.SqlBuilder;
+        SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, " ´CREATE Vector Index " + index.IndexName);
+        sqlBuilder.CreateIndex(index, null).ExecuteLeaves();
+    }
+
     public static List<string> GetIndixesNames(this ITable table, bool unique)
     {
         using (OverrideDatabaseInSysViews(table.Name.Schema.Database))

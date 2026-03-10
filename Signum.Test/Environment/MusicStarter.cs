@@ -21,13 +21,22 @@ public static class MusicStarter
             if (startedAndLoaded)
                 return;
 
-            var conf = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .AddUserSecrets(typeof(MusicStarter).Assembly, optional: true)
+            var environment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                ?? throw new InvalidOperationException("ASPNETCORE_ENVIRONMENT environment variable must be set to 'SqlServer' or 'Postgres'");
+            
+            var conf = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true)
+                .AddJsonFile($"appsettings.{environment}.json", optional: false)
+                .AddEnvironmentVariables()
                 .Build();
 
-            var connectionString = conf.GetConnectionString("SignumTest") ?? throw new InvalidOperationException("No connection string");
+            var connectionString = conf.GetConnectionString("SignumTest") 
+                ?? throw new InvalidOperationException($"No connection string found in appsettings.{environment}.json");
 
+            Console.WriteLine($"[MusicStarter] Environment: {environment}");
+            Console.WriteLine($"[MusicStarter] Connection string: {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
+            
             Start(connectionString);
 
             Administrator.TotalGeneration(interactive: false);
@@ -37,7 +46,10 @@ public static class MusicStarter
             (Connector.Current as PostgreSqlConnector)?.ReloadTypes();
 
             MusicLoader.Load();
-       
+
+            if (Connector.Current is SqlServerConnector)
+                Schema.Current.Table<SimplePassageEntity>().AllIndexes().OfType<VectorTableIndex>().SingleEx().CreateVectorIndex();
+
             startedAndLoaded = true;
         }
     }
@@ -59,6 +71,7 @@ public static class MusicStarter
                 builder.EnableArrays();
                 builder.EnableLTree();
                 builder.EnableRanges();
+                builder.UseVector();
             });
         }
 

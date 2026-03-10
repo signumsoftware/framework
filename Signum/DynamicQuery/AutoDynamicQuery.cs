@@ -103,7 +103,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
         var query = Query
             .ToDQueryable(GetQueryDescription())
-            .SelectMany(request.Multiplications(), request.FullTextTableFilters())
+            .SelectMany(request.Multiplications(), request.TableFilters())
             .Where(filters);
 
         if (request.SystemTime != null && request.SystemTime.mode == SystemTimeMode.TimeSeries)
@@ -147,7 +147,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
         DQueryable<T> query = Query
             .ToDQueryable(GetQueryDescription())
-            .SelectMany(request.Multiplications(), request.FullTextTableFilters())
+            .SelectMany(request.Multiplications(), request.TableFilters())
             .Where(simpleFilters)
             .GroupBy(keys, allAggregates)
             .Where(aggregateFilters);
@@ -177,7 +177,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         using (SystemTime.Override(request.SystemTime))
         {
             var query = Query.ToDQueryable(GetQueryDescription())
-            .SelectMany(request.Multiplications(), request.FullTextTableFilters())
+            .SelectMany(request.Multiplications(), request.TableFilters())
             .Where(request.Filters);
 
             if (request.ValueToken == null)
@@ -195,7 +195,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         using (SystemTime.Override(request.SystemTime))
         {
             var query = Query.ToDQueryable(GetQueryDescription())
-            .SelectMany(request.Multiplications(), request.FullTextTableFilters())
+            .SelectMany(request.Multiplications(), request.TableFilters())
             .Where(request.Filters);
 
             if (request.ValueToken == null)
@@ -217,7 +217,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
         DQueryable<T> orderQuery = Query
             .ToDQueryable(GetQueryDescription())
-            .SelectMany(request.Multiplications(), request.FullTextTableFilters())
+            .SelectMany(request.Multiplications(), request.TableFilters())
             .Where(request.Filters)
             .OrderBy(request.Orders, null);
 
@@ -234,7 +234,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
         DQueryable<T> orderQuery = Query
             .ToDQueryable(GetQueryDescription())
-            .SelectMany(request.Multiplications(), request.FullTextTableFilters())
+            .SelectMany(request.Multiplications(), request.TableFilters())
             .Where(request.Filters)
             .OrderBy(request.Orders, null);
 
@@ -251,7 +251,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
         DQueryable<T> query = Query
          .ToDQueryable(GetQueryDescription())
-         .SelectMany(request.Multiplications(), request.FullTextTableFilters())
+         .SelectMany(request.Multiplications(), request.TableFilters())
          .OrderBy(request.Orders, null)
          .Where(request.Filters)
          .Select(new HashSet<QueryToken> { ex });
@@ -270,7 +270,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
         DQueryable<T> query = Query
          .ToDQueryable(GetQueryDescription())
-         .SelectMany(request.Multiplications(), request.FullTextTableFilters())
+         .SelectMany(request.Multiplications(), request.TableFilters())
          .OrderBy(request.Orders, null)
          .Where(request.Filters)
          .Select(new HashSet<QueryToken>{ ex });

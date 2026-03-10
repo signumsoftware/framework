@@ -6,6 +6,7 @@ import DropdownMenu from 'react-bootstrap/DropdownMenu';
 import { useStateWithPromise } from '../Hooks';
 
 export interface TypeaheadProps {
+  ref?: React.Ref<TypeaheadController>;
   value?: string;
   onChange?: (newValue: string) => void;
   onBlur?: () => void;
@@ -240,11 +241,11 @@ export class TypeaheadController {
 }
 
 
-export const Typeahead: React.ForwardRefExoticComponent<TypeaheadProps & React.RefAttributes<TypeaheadController>> = React.forwardRef(function Typeahead(p: TypeaheadProps, ref: React.Ref<TypeaheadController>) {
+export function Typeahead(p: TypeaheadProps) {
 
   const controller = React.useMemo(() => new TypeaheadController(), []);
   controller.init(p);
-  React.useImperativeHandle(ref, () => controller, []);
+  React.useImperativeHandle(p.ref, () => controller, []);
 
   const input =
     <input ref={controller.setInput} type="text" autoComplete="off" {...p.inputAttrs}
@@ -294,7 +295,7 @@ export const Typeahead: React.ForwardRefExoticComponent<TypeaheadProps & React.R
       </Dropdown.Menu>
     );
   }
-});
+}
 
 
 
