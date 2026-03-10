@@ -9,6 +9,11 @@ import * as Operations from '../../Signum/React/Signum.Operations'
 import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 
 
+export const ClickTrigger: EnumType<ClickTrigger> = new EnumType<ClickTrigger>("ClickTrigger");
+export type ClickTrigger =
+  "OnLoad" |
+  "OnNext";
+
 export const CssStepEmbedded: Type<CssStepEmbedded> = new Type<CssStepEmbedded>("CssStepEmbedded");
 export interface CssStepEmbedded extends Entities.EmbeddedEntity {
   Type: "CssStepEmbedded";
@@ -69,6 +74,8 @@ export interface TourStepEntity extends Entities.Entity {
   description: string;
   side: PopoverSide | null;
   align: PopoverAlign | null;
+  click: ClickTrigger | null;
+  order: number;
 }
 
 export const TourTriggerSymbol: Type<TourTriggerSymbol> = new Type<TourTriggerSymbol>("TourTrigger");

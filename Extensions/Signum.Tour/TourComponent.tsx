@@ -1,16 +1,20 @@
 import * as React from "react";
-import { Driver,
-driver } from "driver.js";
+import {
+  Alignment,
+  Driver,
+  driver, 
+  DriveStep,
+  Side } from "driver.js";
 import "driver.js/dist/driver.css";
 import { TourEntity, TourMessage, TourTriggerSymbol } from "./Signum.Tour";
 import { useAPI } from "@framework/Hooks";
 import { TourClient, TourDTO } from "./TourClient";
 import { Entity,
-Lite } from "@framework/Signum.Entities";
+  Lite } from "@framework/Signum.Entities";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCompass } from "@fortawesome/free-solid-svg-icons";
 import { getTypeName,
-PseudoType } from "@framework/Reflection";
+  PseudoType } from "@framework/Reflection";
 import { LinkButton } from "@framework/Basics/LinkButton";
 import { classes } from "@framework/Globals";
 
@@ -53,7 +57,7 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol }) {
 
   return (
     <>
-       <LinkButton
+      <LinkButton
         className={'sf-pointer nav-link'}
         onClick={handleClick}
         title={hasViewed ? "Replay tour" : "Start tour (new!)"}
@@ -63,6 +67,31 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol }) {
       {startTour && <TourComponent key={startTour.toString()} tour={tour} autoStart={true} ref={driverRef} />}
     </>
   );
+}
+
+function waitForElement(selector: string, timeout: number = 5000): Promise<Element> {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(selector)) {
+      return resolve(document.querySelector(selector)!);
+    }
+    
+    const observer = new MutationObserver(() => {
+      if (document.querySelector(selector)) {
+        observer.disconnect();
+        resolve(document.querySelector(selector)!);
+      }
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+    
+    setTimeout(() => {
+      observer.disconnect();
+      reject(new Error('Element not found: ' + selector));
+    }, timeout);
+  });
 }
 
 export function TourComponent({ tour, autoStart = true, ref }: {
@@ -79,17 +108,35 @@ export function TourComponent({ tour, autoStart = true, ref }: {
 
     // Check if it's a TourDTO or TourEntity
 
-    const steps = tour.steps.map(step => ({
+    const steps = tour.steps.map<DriveStep>((step, i, steps) => ({
       element: step.cssSelector || undefined,
       popover: step.cssSelector ? {
         title: step.title ?? undefined,
         description: step.description ?? undefined,
-        side: step.side as any,
-        align: step.align as any,
+        side: step.side as Side,
+        align: step.align as Alignment,
+        onPopoverRender: async (popover, opts) => {
+          if (step.click === "OnLoad") {
+            if (step.cssSelector) {
+              var elem = await waitForElement(step.cssSelector);
+              (elem as HTMLButtonElement).click();
+            }
+          }
+        },
+        onNextClick: async e => {
+          if (step.click === "OnNext") {
+            (e as HTMLButtonElement).click();
+            var nextStep = steps[i + 1];
+            if (nextStep?.cssSelector)
+              await waitForElement(nextStep?.cssSelector);
+          }
+
+          driverObj.moveNext();
+        },
       } : {
         title: step.title ?? undefined,
         description: step.description ?? undefined,
-      }
+      },
     }));
 
     const driverObj = driver({
@@ -107,7 +154,7 @@ export function TourComponent({ tour, autoStart = true, ref }: {
       doneBtnText: TourMessage.Done.niceToString(),
 
       overlayColor: "black",
-      overlayOpacity: 0.75,
+      overlayOpacity: 0.3,
       stagePadding: 10,
       stageRadius: 5,
       popoverOffset: 10,

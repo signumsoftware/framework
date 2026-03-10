@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Signum.Tour;
 
 public class TourDTO
@@ -12,8 +14,9 @@ public class TourDTO
 public class TourStepDTO
 {
     public string? CssSelector { get; set; }
-    public string? Title { get; set; }
-    public string? Description { get; set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
     public string? Side { get; set; }
     public string? Align { get; set; }
+    public ClickTrigger? Click { get; set; }
 }
