@@ -42,7 +42,8 @@ public class TourController : ControllerBase
                 Title = s.Title,
                 Description = s.Description,
                 Side = s.Side?.ToString().ToLower(),
-                Align = s.Align?.ToString().ToLower()
+                Align = s.Align?.ToString().ToLower(),
+                Click = s.Click 
             }).ToList()
         };
     }

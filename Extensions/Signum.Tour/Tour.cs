@@ -11,7 +11,7 @@ public class TourEntity : Entity, IUserAssetEntity
     [ImplementedBy(typeof(TypeEntity), typeof(TourTriggerSymbol))]
     public Lite<Entity> Trigger { get; set; }
 
-    [QueryableProperty, Ignore, NoRepeatValidator]
+    [QueryableProperty, Ignore, NoRepeatValidator, PreserveOrder]
     public MList<TourStepEntity> Steps { get; set; } = new MList<TourStepEntity>();
 
     public bool ShowProgress { get; set; }
@@ -76,7 +76,7 @@ public class TourTriggerSymbol : Symbol
 
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
-public class TourStepEntity : Entity
+public class TourStepEntity : Entity, ICanBeOrdered
 {
     [NotNullValidator(Disabled = true)]
     public Lite<TourEntity> Tour { get; set; }
@@ -95,6 +95,9 @@ public class TourStepEntity : Entity
     public PopoverSide? Side { get; set; }
 
     public PopoverAlign? Align { get; set; }
+    public ClickTrigger? Click { get; set; }
+
+    public int Order { get; set; }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Title ?? "Step");
@@ -106,7 +109,8 @@ public class TourStepEntity : Entity
             Title == null ? null! : new XElement("Title", Title),
             Description == null ? null! : new XElement("Description", Description),
             Side == null ? null! : new XElement("Side", Side.ToString()),
-            Align == null ? null! : new XElement("Align", Align.ToString()));
+            Align == null ? null! : new XElement("Align", Align.ToString()),
+            Click == null ? null! : new XElement("Click", Click.ToString()));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx, TourEntity tour)
@@ -116,7 +120,14 @@ public class TourStepEntity : Entity
         Description = element.Element("Description")!.Value;
         Side = element.Element("Side") != null ? element.Element("Side")!.Value.ToEnum<PopoverSide>() : null;
         Align = element.Element("Align") != null ? element.Element("Align")!.Value.ToEnum<PopoverAlign>() : null;
+        Click = element.Element("Click") != null ? element.Element("Click")!.Value.ToEnum<ClickTrigger>() : null;
     }
+}
+
+public enum ClickTrigger
+{
+    OnLoad,
+    OnNext,
 }
 
 public enum PopoverSide

@@ -2,7 +2,8 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { Navigator, EntitySettings } from '@framework/Navigator';
 import { ajaxGet } from '@framework/Services';
-import { CssStepEmbedded, TourEntity, TourStepEntity } from './Signum.Tour'
+import { ClickTrigger,
+CssStepEmbedded, TourEntity, TourStepEntity } from './Signum.Tour'
 import { Entity, Lite, ModifiableEntity, EntityPack } from '@framework/Signum.Entities';
 import { onWidgets } from '@framework/Frames/Widgets';
 import { TourButton } from './TourComponent';
@@ -48,6 +49,7 @@ export interface TourStepDTO {
   description?: string;
   side?: string;
   align?: string;
+  click?: ClickTrigger;
 }
 
 declare module '@framework/Signum.Entities' {

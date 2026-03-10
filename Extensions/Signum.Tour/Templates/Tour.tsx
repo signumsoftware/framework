@@ -14,7 +14,7 @@ export default function Tour(p: { ctx: TypeContext<TourEntity> }): React.ReactEl
     <div>
       <AutoLine ctx={ctx.subCtx(a => a.trigger)} />
 
-      <EntityAccordion ctx={ctx.subCtx(a => a.steps)}
+      <EntityAccordion ctx={ctx.subCtx(a => a.steps)} avoidFieldSet="h4"
         getComponent={ctx => <TourStep ctx={ctx} invalidate={forceUpdate} type={type} />}
         getTitle={ctx => ctx.value.title || ""} />
 

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useLocation, Location } from 'react-router'
-import { is } from '@framework/Signum.Entities'
+import { is,liteKey } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import { ToolbarClient, ToolbarResponse } from '../ToolbarClient'
 import { ToolbarConfig, ToolbarContext, InferActiveResponse } from "../ToolbarConfig";
@@ -20,6 +20,7 @@ import { Binding, getTypeInfo, newLite, typeAllowedInDomain } from '../../../Sig
 import { Finder } from '../../../Signum/React/Finder';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
 import { RightCaretDropdown } from './RightCaretDropdown'
+import { QueryEntity } from '@framework/Signum.Basics';
 
 
 export default function ToolbarRenderer(p: {
@@ -580,13 +581,6 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   const icon = ToolbarConfig.coloredIcon(parseIcon(p.response.iconName), p.response.iconColor);
   const title = p.response.label || getToString(p.response.content);
 
-  const dataToolbarContent = p.response.content ? (() => {
-    let typeName = p.response.content.EntityType;
-    if (typeName.endsWith("Entity"))
-      typeName = typeName.substring(0, typeName.length - 6);
-    return `${typeName};${p.response.content.id}`;
-  })() : undefined;
-
   const options = (p.response.elements ?? []).map(el => ({
     value: el,
     label: el.label || getToString(el.content),
@@ -597,7 +591,7 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
     <li>
       <ul>
         <Nav.Item 
-        data-toolbar-content={dataToolbarContent}
+        data-toolbar-content={liteKeyOrQuery(p.response.content)}
         title={title} className="d-flex mb-2">
           {icon}
           <RightCaretDropdown
@@ -623,17 +617,11 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
 
 export function ToolbarNavItem(p: { title: string | undefined, content?: Lite<Entity>, active?: boolean, isExternalLink?: boolean, isGroup?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
   
-  const dataToolbarContent = p.content ? (() => {
-    let typeName = p.content.EntityType;
-    if (typeName.endsWith("Entity"))
-      typeName = typeName.substring(0, typeName.length - 6);
-    return `${typeName};${p.content.id}`;
-  })() : undefined;
 
   return (
     <li className="nav-item d-flex">
       <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100"
-        data-toolbar-content={dataToolbarContent}>
+        data-toolbar-content={liteKeyOrQuery(p.content)}>
         <div>{p.icon}</div>
         <span className={classes("nav-item-text", p.isGroup && "nav-item-group")}>
           {p.title}
@@ -644,6 +632,10 @@ export function ToolbarNavItem(p: { title: string | undefined, content?: Lite<En
       </Nav.Link>
     </li>
   );
+}
+
+export function liteKeyOrQuery(content: Lite<Entity> | null | undefined): string | null{
+  return content == null ? null : QueryEntity.isLite(content) ? getToString(content): liteKey(content);
 }
 
 export function isActive(active: InferActiveResponse | null, res: ToolbarResponse<any>, selectedEntity: Lite<Entity> | null): boolean {
