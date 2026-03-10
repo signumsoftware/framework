@@ -348,16 +348,26 @@ internal class QueryFormatter : DbExpressionVisitor
 
     protected internal override Expression VisitSqlCast(SqlCastExpression castExpr)
     {
-        sb.Append("CAST(");
-        Visit(castExpr.Expression);
-        sb.Append(" as ");
-        sb.Append(castExpr.DbType.ToString(schema.Settings.IsPostgres));
-        
-        if (!schema.Settings.IsPostgres && (castExpr.DbType.SqlServer == SqlDbType.NVarChar || castExpr.DbType.SqlServer == SqlDbType.VarChar))
-            sb.Append("(MAX)");
+        if (schema.Settings.IsPostgres)
+        {
+            Visit(castExpr.Expression);
+            sb.Append(" :: ");
+            sb.Append(castExpr.DbType.ToString(schema.Settings.IsPostgres));
+            return castExpr;
+        }
+        else
+        {
+            sb.Append("CAST(");
+            Visit(castExpr.Expression);
+            sb.Append(" as ");
+            sb.Append(castExpr.DbType.ToString(schema.Settings.IsPostgres));
 
-        sb.Append(')');
-        return castExpr;
+            if (!schema.Settings.IsPostgres && (castExpr.DbType.SqlServer == SqlDbType.NVarChar || castExpr.DbType.SqlServer == SqlDbType.VarChar))
+                sb.Append("(MAX)");
+
+            sb.Append(')');
+            return castExpr;
+        }
     }
 
     protected override Expression VisitConstant(ConstantExpression c)
@@ -677,7 +687,15 @@ internal class QueryFormatter : DbExpressionVisitor
             Expression exp = sqlFunction.Arguments[i];
             if (i > 0)
                 sb.Append(", ");
-            this.Visit(exp);
+
+            var named = sqlFunction.NamedArguments?[i];
+            if(named != null)
+                sb.Append(named + " = ");
+
+            if (exp is SourceWithAliasExpression sea)
+                this.VisitSource(sea);
+            else
+                this.Visit(exp);
         }
         sb.Append(')');
 

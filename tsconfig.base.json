@@ -6,6 +6,7 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "incremental": true,
     "composite": true,

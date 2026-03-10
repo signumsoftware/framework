@@ -2,7 +2,8 @@ import * as React from 'react'
 import { classes } from '../Globals'
 import { Finder } from '../Finder'
 import { Constructor } from '../Constructor'
-import { FindOptions, FindOptionsParsed, QueryDescription, QueryToken, QueryValueRequest } from '../FindOptions'
+import { FindOptions, FindOptionsParsed, QueryDescription, QueryValueRequest } from '../FindOptions'
+import { QueryToken } from '../QueryToken'
 import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'
 import { getQueryKey, getQueryNiceName, QueryTokenString, tryGetTypeInfos, getTypeInfos } from '../Reflection'
 import { Navigator, ViewPromise } from '../Navigator'
@@ -19,6 +20,7 @@ import { toAbsoluteUrl } from '../AppContext'
 import { LinkButton } from '../Basics/LinkButton'
 
 export interface SearchValueLineProps {
+  ref?: React.Ref<SearchValueLineController>;
   ctx: StyleContext;
   findOptions?: FindOptions | Lite<Entity> | Entity;
   valueToken?: string | QueryTokenString<any>;
@@ -59,12 +61,11 @@ export interface SearchValueLineController {
   refreshValue(): void;
 }
 
-const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & React.RefAttributes<SearchValueLineController>> =
-  React.forwardRef(function SearchValueLine(p: SearchValueLineProps, ref?: React.Ref<SearchValueLineController>) {
+export default function SearchValueLine(p: SearchValueLineProps) {
 
   var svRef = React.useRef<SearchValueController>(null);
 
-  React.useImperativeHandle(ref, () => ({
+  React.useImperativeHandle(p.ref, () => ({
     searchValue: svRef.current,
     refreshValue: () => svRef.current?.refreshValue(),
   }), [svRef.current]);
@@ -279,7 +280,4 @@ const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & Re
       .then(ti => ti ? ti.name : undefined);
   }
 
-});
-
-
-export default SearchValueLine; 
+}

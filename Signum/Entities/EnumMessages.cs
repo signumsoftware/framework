@@ -343,6 +343,9 @@ public enum SearchMessage
     MoreThanOne0Selected,
     CombineRowsWith,
 
+    [Description("Finds similar results based on meaning, not exact words")]
+    SmartSearchDescription,
+
     [Description("Equal {0}")]
     Equal0,
 

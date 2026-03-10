@@ -1531,7 +1531,7 @@ public static class CaseActivityLogic
 
                             var graph = WorkflowLogic.GetWorkflowNodeGraph(node.Lane.Pool.Workflow.ToLite());
 
-                            var trackGroups = connections.AgGroupToDictionary(
+                            var trackGroups = connections.GroupAggregateToDictionary(
                                 wc => graph.TrackId.GetOrThrow(wc.From),
                                 wcs => wcs.ToDictionaryEx(wc => wc, wc => AllTrackCompleted(depth + 1, wc.From, ctx, visited).IsCompatible(wc)));
 

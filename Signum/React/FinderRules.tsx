@@ -4,10 +4,10 @@ import { Navigator } from "./Navigator"
 import { Dic, classes } from './Globals'
 import {
   FilterOptionParsed,
-  QueryToken,
   FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroup, isFilterCondition,
-  hasToArray, getFilterOperations, getFilterGroupUnifiedFilterType, FilterConditionOption, isList
+  getFilterOperations, getFilterGroupUnifiedFilterType, FilterConditionOption, isList
 } from './FindOptions';
+import { hasToArray, QueryToken } from './QueryToken';
 import { FilterOperation } from './Signum.DynamicQuery';
 import { Entity, Lite, SearchMessage, JavascriptMessage, getToString, MList, newMListElement } from './Signum.Entities';
 import {
@@ -709,6 +709,17 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
       }
     },
     {
+      name: "VectorSmartSearch",
+      applicable: (f, ffc) => isFilterCondition(f) && f.token?.filterType == "Vector" && f.operation == "SmartSearch",
+      renderValue: (f, ffc) => {
+        const fc = f as FilterConditionOptionParsed;
+        return <FilterTextArea ctx={ffc.ctx}
+          filterOperation={fc.operation ?? null}
+          onChange={(() => ffc.handleValueChange(f, false))}
+          label={ffc.label || SearchMessage.Search.niceToString()} />
+      }
+    },
+    {
       name: "FilterGroup",
       applicable: (f, ffc) => isFilterGroup(f),
       renderValue: (f, ffc) => {
@@ -831,11 +842,12 @@ export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type
 
 
 
-export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: FilterOperation | null, onChange: () => void, label?: string }): React.ReactElement {
+export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: FilterOperation | null, onChange: () => void, label?: string, placeholder?: string }): React.ReactElement {
   return <TextAreaLine ctx={p.ctx}
     type={{ name: "string" }}
     label={p.label}
     valueHtmlAttributes={p.filterOperation != null && p.filterOperation != "FreeText" ? {
+      placeholder: p.placeholder,
       onKeyDown: e => {
         console.log(e);
         if (e.key == KeyNames.enter && !e.shiftKey) {
@@ -848,7 +860,7 @@ export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: F
           e.stopPropagation()
         }
       }
-    } : undefined}
+    } : { placeholder: p.placeholder }}
     extraButtons={vlc => p.filterOperation && <ComplexConditionSyntax fo={p.filterOperation} />}
     onChange={p.onChange}
   />
@@ -862,18 +874,22 @@ export function ComplexConditionSyntax(p: { fo: FilterOperation }): React.ReactE
 
   const popover = (
     <Popover id="popover-basic">
-      <Popover.Header as="h3">{ }</Popover.Header>
+      <Popover.Header as="h3">{help.title}</Popover.Header>
       <Popover.Body>
-        <ul className="ps-3">
-          {help?.examples.map((a, i) => <li key={i} style={{ whiteSpace: "nowrap" }}><code>{a}</code></li>)}
-        </ul>
+        {p.fo == "SmartSearch" ? (
+          <div>{SearchMessage.SmartSearchDescription.niceToString()}</div>
+        ) : (
+          <ul className="ps-3">
+            {help.examples.map((a, i) => <li key={i} style={{ whiteSpace: "nowrap" }}><code>{a}</code></li>)}
+          </ul>
+        )}
       </Popover.Body>
     </Popover>
   );
 
   return (
     <OverlayTrigger trigger="click" placement="right" overlay={popover} >
-      <button className="sf-line-button sf-view btn input-group-text">{help?.icon}</button>
+      <button className="sf-line-button sf-view btn input-group-text">{help.icon}</button>
     </OverlayTrigger>
   );
 
@@ -945,6 +961,12 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
       "\"Dragon Fruit\" OR \"Passion Fruit\"",
       "grape*"
     ]
+  },
+  "SmartSearch": {
+    icon: <FontAwesomeIcon icon="brain" />,
+    title: "Smart Search",
+    url: <span></span>,
+    examples: []
   },
 };
 

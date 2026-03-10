@@ -1,11 +1,15 @@
 import { DashboardEntity, InteractionGroup, PanelPartEmbedded } from '../Signum.Dashboard';
-import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOption, FilterOptionParsed, FindOptions, isActive, isFilterGroup, QueryToken, tokenStartsWith } from '@framework/FindOptions';
+import {
+  FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOption,
+  FilterOptionParsed, FindOptions, isActive, isFilterGroup,
+} from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.DynamicQuery';
 import { Entity, is, Lite } from '@framework/Signum.Entities';
 import { Finder } from '@framework/Finder';
 import { getQueryKey } from '@framework/Reflection';
 import { Dic, softCast } from '@framework/Globals';
 import { DashboardClient } from '../DashboardClient';
+import { QueryToken, tokenStartsWith } from '@framework/QueryToken';
 
 
 
@@ -34,7 +38,7 @@ export class DashboardController {
 
   setIsLoading(): void {
     this.isLoading = !this.dashboard.parts
-      .filter(p => DashboardClient.hasWaitForInvalidation(p.element.content.Type))
+      .filter(p => p.element.content.Type && DashboardClient.hasWaitForInvalidation(p.element.content.Type))
       .every(p => this.invalidationMap.has(p.element));
   }
 

@@ -3,7 +3,8 @@ import { DateTime, Duration } from 'luxon'
 import { classes } from '../Globals'
 import { Navigator } from '../Navigator'
 import { Finder } from '../Finder'
-import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest, QueryDescription } from '../FindOptions'
+import { FindOptions, FindOptionsParsed, QueryValueRequest, QueryDescription } from '../FindOptions'
+import { QueryToken, SubTokensOptions } from '../QueryToken'
 import { Lite, Entity, getToString, EmbeddedEntity, EntityControlMessage } from '../Signum.Entities'
 import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toLuxonDurationFormat, timeToString, toFormatWithFixes } from '../Reflection'
 import { SearchControlProps } from "./SearchControl";
@@ -19,6 +20,7 @@ import { TimeMachineColors } from '../Lines/TimeMachineIcon'
 import { LinkButton } from '../Basics/LinkButton'
 
 export interface SearchValueProps {
+  ref?: React.Ref<SearchValueController>;
   ctx?: StyleContext;
   id?: string;
   valueToken?: string | QueryTokenString<any> | QueryToken;
@@ -72,8 +74,7 @@ function getQueryRequestValue(fo: FindOptionsParsed, valueToken?: string | Query
   };
 }
 
-const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefAttributes<SearchValueController>> =
-  React.forwardRef(function SearchValue(p: SearchValueProps, ref: React.Ref<SearchValueController>): React.ReactNode | null {
+function SearchValue(p: SearchValueProps): React.ReactNode | null {
 
     const fo = p.findOptions;
 
@@ -193,7 +194,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
 
 
 
-    React.useImperativeHandle(ref, () => controller, []);
+    React.useImperativeHandle(p.ref, () => controller, []);
 
     function isNumeric() {
       let token = valueToken;
@@ -455,7 +456,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
             p.onExplored();
         });
     }
-  });
+  }
 
 
 (SearchValue as any).defaultProps = {

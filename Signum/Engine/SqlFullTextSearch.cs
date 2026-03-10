@@ -4,7 +4,7 @@ using Signum.Engine.Maps;
 
 namespace Signum.Engine;
 
-public static class FullTextSearch
+public static class SqlFullTextSearch
 {
     /// <summary>
     /// https://learn.microsoft.com/en-us/sql/t-sql/queries/contains-transact-sql?view=sql-server-ver16
@@ -12,7 +12,7 @@ public static class FullTextSearch
     [AvoidEagerEvaluation]
     public static bool Contains(string[] columns, string searchCondition)
     {
-        throw new InvalidOperationException("FullTextSearch.Contains is only supported inside a database query");
+        throw new InvalidOperationException("SqlFullTextSearch.Contains is only supported inside a database query");
     }
 
     /// <summary>
@@ -22,7 +22,7 @@ public static class FullTextSearch
     [AvoidEagerEvaluation]
     public static bool Contains(object table, string searchCondition)
     {
-        throw new InvalidOperationException("FullTextSearch.Contains is only supported inside a database query");
+        throw new InvalidOperationException("SqlFullTextSearch.Contains is only supported inside a database query");
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ public static class FullTextSearch
     [AvoidEagerEvaluation]
     public static bool FreeText(string[] columns, string freeTextString)
     {
-        throw new InvalidOperationException("FullTextSearch.FreeText is only supported inside a database query");
+        throw new InvalidOperationException("SqlFullTextSearch.FreeText is only supported inside a database query");
     }
 
     /// <summary>
@@ -85,7 +85,7 @@ public static class FullTextSearch
     [AvoidEagerEvaluation]
     public static bool FreeText(object table, string freeTextString)
     {
-        throw new InvalidOperationException("FullTextSearch.FreeText is only supported inside a database query");
+        throw new InvalidOperationException("SqlFullTextSearch.FreeText is only supported inside a database query");
     }
 
     /// <summary>

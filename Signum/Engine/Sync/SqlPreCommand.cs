@@ -110,54 +110,81 @@ public static class SqlPreCommandExtensions
     public static void OpenSqlFileRetry(this SqlPreCommand command)
     {
         SafeConsole.WriteLineColor(ConsoleColor.Yellow, "There are changes!");
-        var fileName = "Sync {0:dd-MM-yyyy HH_mm_ss}.sql".FormatWith(DateTime.Now);
-
-        Save(command, fileName);
-        SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, command.PlainSql());
-
-        Console.WriteLine("Script saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
-        Console.WriteLine("Check the synchronization script before running it!");
-        var answer = SafeConsole.AskRetry("Open or run?", "run", "open", "exit");
-
-        if (answer == "open")
+        
+        if(command is SqlPreCommandConcat c)
         {
-            Thread.Sleep(1000);
-            Open(fileName);
-            if (SafeConsole.Ask("run now?"))
-                ExecuteRetry(fileName);
+            var (before, after) = c.ExtractNoTransaction();
+
+            if (before != null)
+                if (!CreateAndRun(before, NoTransactionMode.BeforeScript))
+                    return;
+
+            if (c.Commands.Any())
+                if (!CreateAndRun(c, null))
+                    return;
+
+            if (after != null)
+                if (!CreateAndRun(after, NoTransactionMode.AfterScript))
+                    return;
         }
-        else if (answer == "run")
+        else if(command is SqlPreCommandSimple s)
         {
-            ExecuteRetry(fileName);
+            CreateAndRun(command, s.NoTransaction);
         }
+        else 
+            throw new UnexpectedValueException(command);
+
+
+        static bool CreateAndRun(SqlPreCommand command, NoTransactionMode? noTransaction)
+        {
+            var fileName = "Sync {0:yyyy-MM-dd HH_mm_ss}{1}.sql".FormatWith(DateTime.Now, noTransaction == null ? null : ("_" + noTransaction));
+
+            Save(command, fileName);
+            SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, command.PlainSql());
+
+            Console.WriteLine("Script saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
+            Console.WriteLine("Check the synchronization script before running it!");
+            var answer = SafeConsole.AskRetry("Open or run?", "run", "open", "exit");
+
+            if (answer == "open")
+            {
+                Thread.Sleep(1000);
+                Open(fileName);
+                if (SafeConsole.Ask("run now?"))
+                {
+                    ExecuteRetry(fileName, noTransaction);
+                    return true;
+                }
+                return false;
+                
+            }
+            else if (answer == "run")
+            {
+                ExecuteRetry(fileName, noTransaction);
+                return true;
+            }
+
+            return false;
+        }
+
+
+        
     }
 
-    static void ExecuteRetry(string fileName)
+    static void ExecuteRetry(string fileName, NoTransactionMode? noTransaction)
     {
     retry:
         try
         {
             var script = File.ReadAllText(fileName);
-            using (var tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
+            using (var tr = noTransaction.HasValue ? null : Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
             {
-                ExecuteScript("script", script, autoRun: false); 
-                tr.Commit();
+                ExecuteScript("script", script, autoRun: false);
+                tr?.Commit();
             }
         }
-        catch (ExecuteSqlScriptException e)
+        catch (ExecuteSqlScriptException)
         {
-            if (e.InnerException is SqlException sqle && sqle.Number == 574)
-            {
-                if (SafeConsole.Ask("Execute without transaction?"))
-                {
-                    var script = File.ReadAllText(fileName);
-                    ExecuteScript("script", script, autoRun: false);
-                    return;
-                }
-                else
-                    throw;
-            }
-
             Console.WriteLine("The current script is in saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
 
             var answer = SafeConsole.AskRetry("Open or retry?", "retry", "open", "exit");
@@ -168,7 +195,7 @@ public static class SqlPreCommandExtensions
                 Thread.Sleep(1000);
                 Open(fileName);
                 if (SafeConsole.Ask("run now?"))
-                    ExecuteRetry(fileName);
+                    ExecuteRetry(fileName, noTransaction);
             }
         }
     }
