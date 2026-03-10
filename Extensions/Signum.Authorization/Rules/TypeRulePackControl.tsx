@@ -37,7 +37,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { AccessibleRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 import { LinkButton } from '@framework/Basics/LinkButton'
 
-export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<TypeRulePack>, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
+export default function TypesRulesPackControl({ ctx, ref }: { ctx: TypeContext<TypeRulePack>, ref?: React.Ref<IRenderButtons> }): React.JSX.Element {
 
   const [filter, setFilter] = React.useState("");
 
@@ -52,7 +52,7 @@ export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
     ];
   }
 
-  React.useImperativeHandle(innerRef, () => ({ renderButtons }), [ctx.value])
+  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value])
 
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
