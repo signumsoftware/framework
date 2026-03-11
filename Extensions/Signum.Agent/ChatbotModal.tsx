@@ -7,7 +7,6 @@ import { ChatbotMessage, ChatbotUICommand, ChatMessageEntity, ChatMessageRole, C
 import { useForceUpdate, useVersion } from "@framework/Hooks";
 import { Finder } from "@framework/Finder";
 import { AuthClient } from "../Signum.Authorization/AuthClient";
-import { newLite } from "Signum/React/Reflection";
 import { ChatbotClient } from "./ChatbotClient";
 import { Message, ToolResponseBlock } from "./Message";
 import { ExceptionEntity } from "@framework/Signum.Basics";

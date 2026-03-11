@@ -76,7 +76,7 @@ IMPORTANT: Most user actions are operations on entities (typically also QueryNam
     }
 
     [McpServerTool, Description("Construct an entity from another entity using an operation")]
-    public static EntityPackTS Operation_ConstructFrom(JsonElement entityJson, string operationKey, CancellationToken token)
+    public static EntityPackTS Operation_ConstructFrom(JsonObject entityJson, string operationKey, CancellationToken token)
     {
         Entity entity = DeserializeEntity(entityJson);
 
@@ -112,7 +112,7 @@ IMPORTANT: Most user actions are operations on entities (typically also QueryNam
         return result;
     }
 
-    private static Entity DeserializeEntity(JsonElement entityJson)
+    private static Entity DeserializeEntity(JsonObject entityJson)
     {
         try
         {
@@ -127,7 +127,7 @@ IMPORTANT: Most user actions are operations on entities (typically also QueryNam
     }
 
     [McpServerTool, Description("Executes an operation on an entity")]
-    public static EntityPackTS Operation_Execute(JsonElement entityJson, string operationKey, CancellationToken token)
+    public static EntityPackTS Operation_Execute(JsonObject entityJson, string operationKey, CancellationToken token)
     {
         var entity = DeserializeEntity(entityJson)!;
 
@@ -144,7 +144,7 @@ IMPORTANT: Most user actions are operations on entities (typically also QueryNam
     }
 
     [McpServerTool, Description("Executes an operation on an entity")]
-    public static void Operation_Delete(JsonElement entityJson, string operationKey, CancellationToken token)
+    public static void Operation_Delete(JsonObject entityJson, string operationKey, CancellationToken token)
     {
         var entity = DeserializeEntity(entityJson)!;
 
