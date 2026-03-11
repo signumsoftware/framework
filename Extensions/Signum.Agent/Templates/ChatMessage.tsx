@@ -3,7 +3,6 @@ import { AutoLine, EntityLine, EntityTable, EntityTabRepeater, NumberLine, TextA
 import { TypeContext } from '@framework/TypeContext'
 import { Tabs, Tab, CloseButton } from 'react-bootstrap';
 import { ChatMessageEntity, ChatSessionEntity } from '../Signum.Agent';
-import { SearchControl } from 'Signum/React/Search';
 import HtmlEditorLine from '../../Signum.HtmlEditor/HtmlEditorLine';
 import Markdown from 'react-markdown';
 import {
