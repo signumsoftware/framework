@@ -291,6 +291,7 @@
     <Member Name="NotEndsWith" Description="endet nicht mit" />
     <Member Name="NotLike" Description="nicht wie" />
     <Member Name="NotStartsWith" Description="beginnt nicht mit" />
+    <Member Name="SmartSearch" Description="intelligente Suche" />
     <Member Name="StartsWith" Description="beginnt mit" />
     <Member Name="TsQuery" Description="tsquery" />
     <Member Name="TsQuery_Phrase" Description="tsquery (Phrase)" />
@@ -743,6 +744,7 @@
     <Member Name="ShowHiddenColumns" Description="Ausgeblendete Spalten anzeigen" />
     <Member Name="ShowMore" Description="Mehr anzeigen" />
     <Member Name="SimpleFilters" Description="Einfache Filter" />
+    <Member Name="SmartSearchDescription" Description="Findet ähnliche Ergebnisse basierend auf Bedeutung, nicht auf genaue Wörter" />
     <Member Name="Split" Description="Aufteilen" />
     <Member Name="SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup" Description="Teilt den Zeichenfolgenwert durch Leerzeichen auf und durchsucht jeden Teil unabhängig voneinander in einer UND-Gruppe" />
     <Member Name="SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup" Description="Teilt die Werte auf und durchsucht jeden Wert unabhängig voneinander in einer UND-Gruppe" />
