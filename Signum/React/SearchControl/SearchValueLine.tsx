@@ -4,7 +4,7 @@ import { Finder } from '../Finder'
 import { Constructor } from '../Constructor'
 import { FindOptions, FindOptionsParsed, QueryDescription, QueryValueRequest } from '../FindOptions'
 import { QueryToken } from '../QueryToken'
-import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'
+import { Lite, Entity, isEntity, EntityControlMessage, isLite,SearchMessage } from '../Signum.Entities'
 import { getQueryKey, getQueryNiceName, QueryTokenString, tryGetTypeInfos, getTypeInfos } from '../Reflection'
 import { Navigator, ViewPromise } from '../Navigator'
 import { StyleContext, TypeContext } from '../TypeContext'
@@ -130,6 +130,11 @@ export default function SearchValueLine(p: SearchValueLineProps) {
     );
   }
   
+  
+  var label = (p.label == undefined ? undefined :
+    typeof p.label == "function" ? p.label() :
+      p.label) ?? token?.niceName ?? getQueryNiceName(fo.queryName);
+
   var token = svRef.current?.valueToken;
 
   const isQuery = p.valueToken == undefined || token?.queryTokenType == "Aggregate";
@@ -145,33 +150,31 @@ export default function SearchValueLine(p: SearchValueLineProps) {
   const find = value != undefined && (p.findButton ?? isQuery) &&
     <LinkButton style={{ display: "flex", alignItems: "center" }} className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
       onClick={svRef.current!.handleClick}
-      title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
+      title={ctx.titleLabels ? SearchMessage.Search.niceToString() + " " + label : undefined}>
       {EntityBaseController.getFindIcon()}
     </LinkButton>;
   
   const create = !p.ctx.frame?.currentDate && (p.create == true || p.create == "ifNull" && value === null) &&
     <LinkButton style={{ display: "flex", alignItems: "center" }} className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
-      title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
+      title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() + " " + label : undefined}>
       {EntityBaseController.getCreateIcon()}
     </LinkButton>;
 
   const view = value != undefined && (p.viewEntityButton ?? (isLite(value) && Navigator.isViewable(value.EntityType))) &&
     <LinkButton className={classes("sf-line-button sf-view", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleViewEntityClick}
-      title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
+      title={ctx.titleLabels ? EntityControlMessage.View.niceToString() + " " + label : undefined}>
       {EntityBaseController.getViewIcon()}
     </LinkButton>
 
   let extra = svRef.current && p.extraButtons && p.extraButtons(svRef.current);
 
-  var label = p.label == undefined ? undefined :
-    typeof p.label == "function" ? p.label() :
-      p.label;
 
+      
   return (
     <FormGroup ctx={p.ctx}
-      label={label ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
+      label={label}
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...p.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName) } }}
       helpText={p.helpText && svRef.current && p.helpText(svRef.current)}>
