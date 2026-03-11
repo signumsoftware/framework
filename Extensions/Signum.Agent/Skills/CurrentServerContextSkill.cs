@@ -7,6 +7,8 @@ namespace Signum.Agent.Skills;
 
 public class CurrentServerContextSkill : AgentSkill
 {
+    public static Func<string?> UrlLeft;
+
     public CurrentServerContextSkill()
     {
         ShortDescription = "Returns the server context including date information, user information and url of the application";
@@ -65,7 +67,7 @@ public class CurrentServerContextSkill : AgentSkill
             CurrentCulture: CultureInfo.CurrentCulture.Name,
             CurrentUICulture: CultureInfo.CurrentUICulture.Name
             ),
-            UrlPrefix: ChatbotLogic.UrlLeft()
+            UrlPrefix: UrlLeft?.Invoke()
         );
     }
 }

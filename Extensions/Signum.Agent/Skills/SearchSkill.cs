@@ -110,39 +110,22 @@ public class SearchSkill : AgentSkill
 
 
     [McpServerTool, Description("Convert FindOptions to a url")]
-    public static string GetFindOptionsUrl(JsonElement findOptions)
+    public static string GetFindOptionsUrl(FindOptions findOptions)
     {
         FindOptions fo = ParseFindOptions(findOptions);
 
         return FindOptionsEncoder.FindOptionsPath(fo);
     }
 
-    public static FindOptions ParseFindOptions(JsonElement findOptions)
+    public static FindOptions ParseFindOptions(FindOptions findOptions)
     {
-        FindOptions fo;
-        try
-        {
-            fo = findOptions.Deserialize<FindOptions>(new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                IncludeFields = true,
-                Converters = {
-                    new JsonStringEnumConverter(),
-                }
-            })!;
-        }
-        catch (Exception e)
-        {
-            throw new McpException(e.Message, e);
-        }
-
-        var queryName = QueryLogic.ToQueryName(fo.QueryName);
+        var queryName = QueryLogic.ToQueryName(findOptions.QueryName);
         var qd = QueryLogic.Queries.QueryDescription(queryName);
 
-        var error = fo.Validate(qd);
+        var error = findOptions.Validate(qd);
         if (error.HasText())
             throw new McpException(error);
-        return fo;
+        return findOptions;
     }
 
  
