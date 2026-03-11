@@ -2,9 +2,6 @@ import * as React from 'react'
 import { AutoLine, EntityLine, EntityTable, EntityTabRepeater, NumberLine, TextAreaLine, FormGroup } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { Tabs, Tab, CloseButton } from 'react-bootstrap';
-import { newMListElement } from 'Signum/React/Signum.Entities';
-import { useForceUpdate } from 'Signum/React/Hooks';
-import { useState } from 'react';
 import { ChatMessageEntity, ChatSessionEntity } from '../Signum.Agent';
 import { SearchControl } from 'Signum/React/Search';
 import HtmlEditorLine from '../../Signum.HtmlEditor/HtmlEditorLine';
