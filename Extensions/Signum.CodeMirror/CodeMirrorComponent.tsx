@@ -22,7 +22,7 @@ export interface CodeMirrorComponentHandler {
   codeMirror?: CodeMirror.EditorFromTextArea;
 }
 
-export function CodeMirrorComponent(p: CodeMirrorProps) {
+export function CodeMirrorComponent(p: CodeMirrorProps): React.JSX.Element {
 
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   const codeMirrorRef = React.useRef<CodeMirror.EditorFromTextArea | undefined>(undefined);
