@@ -1,6 +1,5 @@
 using ModelContextProtocol.Server;
 using System.ComponentModel;
-using System.Text.Json;
 
 namespace Signum.Agent.Skills;
 
@@ -13,7 +12,7 @@ public class ResultTableSkill : AgentSkill
     }
 
     [McpServerTool, Description("Executes a FindOptions and returns a dynamic ResultTable")]
-    public static ResultTableSimple GetResultTable(JsonElement findOptions)
+    public static ResultTableSimple GetResultTable(FindOptions findOptions)
     {
         FindOptions fo = SearchSkill.ParseFindOptions(findOptions);
 

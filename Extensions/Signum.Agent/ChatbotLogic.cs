@@ -75,15 +75,12 @@ public static class ChatbotLogic
         return EmbeddingsModels.Value.GetOrThrow(lite);
     }
 
-    public static Func<string?> UrlLeft;
-
-    public static void Start(SchemaBuilder sb, Func<ChatbotConfigurationEmbedded> config, Func<string?> urlLeft)
+    public static void Start(SchemaBuilder sb, Func<ChatbotConfigurationEmbedded> config)
     {
         if (sb.AlreadyDefined(MethodBase.GetCurrentMethod()))
             return;
 
         GetConfig = config;
-        UrlLeft = urlLeft;
 
         SymbolLogic<LanguageModelProviderSymbol>.Start(sb, () => ChatbotModelProviders.Keys.Union(EmbeddingsProviders.Keys));
 

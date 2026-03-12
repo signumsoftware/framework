@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
@@ -38,6 +38,13 @@
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
 		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
 		<ProjectReference Include="..\Signum.Chart\Signum.Chart.csproj" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Update="Skills\*.md">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

@@ -1,8 +1,8 @@
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using ModelContextProtocol.Server;
-using Signum.API;
 using Signum.Agent.Skills;
+using Signum.API;
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
@@ -20,23 +20,20 @@ public static class AgentSkillLogic
 
     public static AgentSkill? IntroductionSkill;
 
-    public static void Start(SchemaBuilder sb, AgentSkill? defaultChatbotSkill)
+    public static void Start(SchemaBuilder sb, Type? defaultChatbotSkillType = null)
     {
         if (sb.AlreadyDefined(MethodBase.GetCurrentMethod()))
             return;
 
-        if (defaultChatbotSkill != null)
-        {
-            GetSkill(defaultChatbotSkill.GetType()); //Assert
-            IntroductionSkill = defaultChatbotSkill;
-        }
+        if (defaultChatbotSkillType != null)
+            IntroductionSkill = GetSkill(defaultChatbotSkillType); // Assert registered
 
         AllTools = new ResetLazy<Dictionary<string, AITool>>(() => SkillsByType
-        .SelectMany(a => a.Value.GetTools())
-        .ToDictionaryEx(a => a.Name, StringComparer.InvariantCultureIgnoreCase));
+            .SelectMany(a => a.Value.GetTools())
+            .ToDictionaryEx(a => a.Name, StringComparer.InvariantCultureIgnoreCase));
 
-        new QuestionSumarizerSkill().Register();
-        new ConversationSumarizerSkill().Register();
+        Register<QuestionSumarizerSkill>();
+        Register<ConversationSumarizerSkill>();
     }
 
     public static AgentSkill GetSkill(string skillName)
@@ -54,13 +51,16 @@ public static class AgentSkillLogic
         return SkillsByType.GetOrThrow(skillType, "{0} not registered");
     }
 
-    public static AgentSkill Register(this AgentSkill chatbotSkill)
+    public static AgentSkill Register<T>() where T : AgentSkill, new()
     {
-        SkillsByType.Add(chatbotSkill.GetType(), chatbotSkill);
+        if (SkillsByType.TryGetValue(typeof(T), out var existing))
+            return existing; // no-op
+
+        var skill = new T();
+        SkillsByType[typeof(T)] = skill;
         AllTools?.Reset();
         SkillByName?.Reset();
-
-        return chatbotSkill;
+        return skill;
     }
 
     public static AgentSkill WithSubSkill(this AgentSkill parent, SkillActivation activation, AgentSkill children)
@@ -79,13 +79,12 @@ public abstract class AgentSkill
     public Func<bool> IsAllowed;
     public Dictionary<string, Func<object?, string>>? Replacements;
 
-
-    public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(typeof(AgentSkill).Assembly.Location)!, "Skills");
+    public static string SkillsDirectory = Path.Combine(Path.GetDirectoryName(typeof(AgentSkill).Assembly.Location)!, "Skills");
 
     string? originalInstructions;
     public string OriginalInstructions
     {
-        get { return originalInstructions ??= File.ReadAllText(Path.Combine(TranslationDirectory, this.Name + ".md")); }
+        get { return originalInstructions ??= File.ReadAllText(Path.Combine(SkillsDirectory, this.Name + ".md")); }
         set { originalInstructions = value; }
     }
 
@@ -128,7 +127,7 @@ public abstract class AgentSkill
 
     public Dictionary<Type, SkillActivation> SubSkills = new Dictionary<Type, SkillActivation>();
 
-    IEnumerable<AITool> chatbotTools; 
+    IEnumerable<AITool> chatbotTools;
     internal IEnumerable<AITool> GetTools()
     {
         return (chatbotTools ??= this.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
@@ -146,7 +145,10 @@ public abstract class AgentSkill
             .ToList());
     }
 
-    protected virtual JsonSerializerOptions GetJsonSerializerOptions() => SignumServer.JsonSerializerOptions;
+
+    static JsonSerializerOptions JsonSerializationOptions = new JsonSerializerOptions().AddSignumJsonConverters();
+
+    public virtual JsonSerializerOptions GetJsonSerializerOptions() => JsonSerializationOptions;
 
     public IEnumerable<AITool> GetToolsRecursive()
     {
@@ -164,24 +166,24 @@ public abstract class AgentSkill
         return list;
     }
 
-    public void AddMcpServer(IMcpServerBuilder builder)
-    {
-        foreach (var toolMethod in this.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
-        {
-            if (toolMethod.GetCustomAttribute<McpServerToolAttribute>() is not null)
-            {
-                builder.Services.AddSingleton(services => McpServerTool.Create(
-                    toolMethod,
-                    toolMethod.IsStatic ? null : this,
-                    new() { Services = services, SerializerOptions = this.GetJsonSerializerOptions() }));
-            }
-        }
+    //public void AddMcpServer(IMcpServerBuilder builder)
+    //{
+    //    foreach (var toolMethod in this.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+    //    {
+    //        if (toolMethod.GetCustomAttribute<McpServerToolAttribute>() is not null)
+    //        {
+    //            builder.Services.AddSingleton(services => McpServerTool.Create(
+    //                toolMethod,
+    //                toolMethod.IsStatic ? null : this,
+    //                new() { Services = services, SerializerOptions = this.GetJsonSerializerOptions() }));
+    //        }
+    //    }
 
-        foreach (var subSkill in this.SubSkills.Where(a => a.Value == SkillActivation.Eager))
-        {
-            AgentSkillLogic.GetSkill(subSkill.Key).AddMcpServer(builder);
-        }
-    }
+    //    foreach (var subSkill in this.SubSkills.Where(a => a.Value == SkillActivation.Eager))
+    //    {
+    //        AgentSkillLogic.GetSkill(subSkill.Key).AddMcpServer(builder);
+    //    }
+    //}
 
 }
 
@@ -202,12 +204,18 @@ public class UIToolAttribute : Attribute { }
 
 public static partial class SignumMcpServerBuilderExtensions
 {
-    public static IMcpServerBuilder WithSignumSkill(this IMcpServerBuilder builder, AgentSkill skill)
+    public static IMcpServerBuilder WithSignumSkill<T>(this IMcpServerBuilder builder)
+        where T : AgentSkill, new()
     {
-        skill.AddMcpServer(builder);
-
-        //builder.Services.Configure((McpServerOptions opts) => opts.ServerInstructions = skill.GetInstruction(null));
+        var agent = AgentSkillLogic.Register<T>();
+        builder.WithTools<T>(/*agent.GetJsonSerializerOptions()*/);
         return builder;
     }
-}
 
+    //public static IMcpServerBuilder WithSignumSkill(this IMcpServerBuilder builder, AgentSkill skill)
+    //{
+    //    skill.AddMcpServer(builder);
+    //    //builder.Services.Configure((McpServerOptions opts) => opts.ServerInstructions = skill.GetInstruction(null));
+    //    return builder;
+    //}
+}
