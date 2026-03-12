@@ -385,7 +385,7 @@ export interface EmbeddedEntity extends ModifiableEntity {
 
 export namespace EngineMessage {
   export const ConcurrencyErrorOnDatabaseTable0Id1: MessageKey = new MessageKey("EngineMessage", "ConcurrencyErrorOnDatabaseTable0Id1");
-  export const EntityWithType0AndId1NotFound: MessageKey = new MessageKey("EngineMessage", "EntityWithType0AndId1NotFound");
+  export const _01NotFound: MessageKey = new MessageKey("EngineMessage", "_01NotFound");
   export const NoWayOfMappingType0Found: MessageKey = new MessageKey("EngineMessage", "NoWayOfMappingType0Found");
   export const TheEntity0IsNew: MessageKey = new MessageKey("EngineMessage", "TheEntity0IsNew");
   export const ThereAre0ThatReferThisEntityByProperty1: MessageKey = new MessageKey("EngineMessage", "ThereAre0ThatReferThisEntityByProperty1");
