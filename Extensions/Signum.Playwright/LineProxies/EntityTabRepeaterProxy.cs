@@ -1,5 +1,6 @@
 using Microsoft.Playwright;
 using Signum.Basics;
+using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.LineProxies;
 

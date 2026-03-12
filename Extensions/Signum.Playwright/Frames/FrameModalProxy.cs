@@ -1,4 +1,5 @@
 using Microsoft.Playwright;
+using Signum.Playwright.LineProxies;
 using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Frames;
@@ -7,11 +8,6 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
     where T : ModifiableEntity
 {
     public PropertyRoute Route { get; }
-
-    ILocator ILineContainer.Element => Modal;
-    ILocator IEntityButtonContainer<T>.Element => Modal;
-    ILocator IValidationSummaryContainer.Element => Modal;
-
     public FrameModalProxy(IPage page, PropertyRoute? route = null) : base(page)
     {
         Route = route ?? PropertyRoute.Root(typeof(T));
@@ -22,57 +18,11 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
         Route = route ?? PropertyRoute.Root(typeof(T));
     }
 
-    public async Task<EntityInfoProxy> GetEntityInfoAsync()
-    {
-        var mainControl = Modal.Locator("div.sf-main-control");
-        var attr = await mainControl.GetAttributeAsync("data-main-entity");
-        
-        if (attr == null)
-            throw new InvalidOperationException("data-main-entity attribute not found");
+    public ILocator Container => Modal;
+    ILocator ILineContainer.Element => Modal;
+    ILocator IValidationSummaryContainer.Element => Modal;
 
-        return EntityInfoProxy.Parse(attr)!;
-    }
-
-    public async Task<FrameModalProxy<T>> WaitLoadedAsync()
-    {
-        await Modal.Locator("div.sf-main-control").WaitVisibleAsync();
-        return this;
-    }
-
-    public bool AvoidClose { get; set; }
-    public Action<bool>? Disposing { get; set; }
-    public bool OkPressed { get; private set; }
-
-    public ILocator CloseButtonLocator => Modal.Locator("button.close, .btn-close");
-
-    public override async Task OkAsync()
-    {
-        OkPressed = true;
-        await base.OkAsync();
-    }
-
-    private async Task<bool> TryToCloseAsync()
-    {
-        try
-        {
-            var closeCount = await CloseButtonLocator.CountAsync();
-            if (closeCount == 0)
-                return false;
-
-            var close = CloseButtonLocator.First;
-            if (await close.IsVisibleAsync())
-            {
-                await close.ClickAsync();
-            }
-            return false;
-        }
-        catch (Exception)
-        {
-            return true;
-        }
-    }
-
-    public async Task DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         if (!AvoidClose)
         {
@@ -100,7 +50,42 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
             }
         }
 
-        Disposing?.Invoke(OkPressed);
+        Disposing?.Invoke(this.OkPressed);
+    }
+    private async Task<bool> TryToCloseAsync()
+    {
+        try
+        {
+            var closeCount = await this.CloseButton.CountAsync();
+            if (closeCount == 0)
+                return false;
+
+            var close = this.CloseButton.First;
+            if (await close.IsVisibleAsync())
+            {
+                await close.ClickAsync();
+            }
+            return false;
+        }
+        catch (Exception)
+        {
+            return true;
+        }
+    }
+    public async Task<EntityInfoProxy> GetEntityInfoAsync()
+    {
+        var mainControl = Modal.Locator("div.sf-main-control");
+        var attr = await mainControl.GetAttributeAsync("data-main-entity");
+        
+        if (attr == null)
+            throw new InvalidOperationException("data-main-entity attribute not found");
+
+        return EntityInfoProxy.Parse(attr)!;
+    }
+    public async Task<FrameModalProxy<T>> WaitLoadedAsync()
+    {
+        await Modal.Locator("div.sf-main-control").WaitVisibleAsync();
+        return this;
     }
 }
 

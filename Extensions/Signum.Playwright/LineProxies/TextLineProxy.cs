@@ -54,20 +54,6 @@ public class TextBoxLineProxy : TextBoxBaseLineProxy
 }
 
 /// <summary>
-/// Proxy for multi-line text input (TextArea)
-/// Equivalent to Selenium's TextAreaLineProxy
-/// </summary>
-public class TextAreaLineProxy : TextBoxBaseLineProxy
-{
-    public TextAreaLineProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
-    {
-    }
-
-    protected override ILocator InputLocator => Element.Locator("textarea.form-control, textarea");
-}
-
-/// <summary>
 /// Proxy for password input
 /// </summary>
 public class PasswordBoxLineProxy : TextBoxBaseLineProxy

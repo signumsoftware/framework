@@ -1,9 +1,10 @@
 using Microsoft.Playwright;
+using Signum.Playwright.LineProxies;
 using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Frames;
 
-public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, IWidgetContainer, IValidationSummaryContainer, IAsyncDisposable 
+public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer, IWidgetContainer, IValidationSummaryContainer, IAsyncDisposable 
     where T : ModifiableEntity
 {
     public IPage Page { get; }
@@ -15,6 +16,36 @@ public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, I
         Page = page;
         Element = page.Locator(".normal-control");
         Route = PropertyRoute.Root(typeof(T));
+        WaitLoadedAsync().GetAwaiter();
+    }
+
+
+    public ILocator Container => Element;
+
+    public Action? OnDisposed { get; set; }
+
+    public async ValueTask DisposeAsync()
+    {
+        OnDisposed?.Invoke();
+        await Task.CompletedTask;
+    }
+
+    public ILocator MainControl => Element.Locator(".sf-main-control");
+
+    async Task<EntityInfoProxy> GetEntityInfoAsync()
+    {
+        var attr = await MainControl.First.GetAttributeAsync("data-main-entity");
+        return attr == null ? throw new InvalidOperationException("data-main-entity attribute not found") : EntityInfoProxy.Parse(attr)!;
+    }
+    Task<EntityInfoProxy> IEntityButtonContainer.GetEntityInfoAsync()
+    {
+        return GetEntityInfoAsync();
+    }
+
+    public async Task<T> RetrieveEntityAsync()
+    {
+        var lite = (await GetEntityInfoAsync()).ToLite();
+        return (T)(IEntity)lite.RetrieveAndRemember();
     }
 
     public async Task<FramePageProxy<T>> WaitLoadedAsync()
@@ -31,28 +62,4 @@ public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, I
         return this;
     }
 
-    public ILocator MainControl => Element.Locator(".sf-main-control");
-
-    public async Task<EntityInfoProxy> GetEntityInfoAsync()
-    {
-        var attr = await MainControl.First.GetAttributeAsync("data-main-entity");
-        if (attr == null)
-            throw new InvalidOperationException("data-main-entity attribute not found");
-
-        return EntityInfoProxy.Parse(attr)!;
-    }
-
-    public async Task<T> RetrieveEntityAsync()
-    {
-        var lite = (await GetEntityInfoAsync()).ToLite();
-        return (T)(IEntity)lite.RetrieveAndRemember();
-    }
-
-    public Action? OnDisposed { get; set; }
-
-    public async ValueTask DisposeAsync()
-    {
-        OnDisposed?.Invoke();
-        await Task.CompletedTask;
-    }
 }

@@ -6,7 +6,7 @@ namespace Signum.Playwright;
 /// Core extension methods for Playwright in Signum Framework
 /// Provides Selenium-like patterns with Playwright's advantages
 /// </summary>
-public static class Extensions
+public static class PlaywrightExtensions
 {
     public static TimeSpan DefaultTimeout = TimeSpan.FromSeconds(20);
     public static TimeSpan DefaultPollingInterval = TimeSpan.FromMilliseconds(200);

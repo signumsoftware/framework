@@ -1,3 +1,5 @@
+using Signum.Playwright.ModalProxies;
+
 namespace Signum.Playwright.LineProxies;
 
 /// <summary>

@@ -1,8 +1,7 @@
 using Microsoft.Playwright;
-using Signum.Playwright.Search;
 using Signum.Playwright.ModalProxies;
 
-namespace Signum.Playwright;
+namespace Signum.Playwright.Search;
 
 /// <summary>
 /// Playwright equivalent of Selenium's SearchControlProxy

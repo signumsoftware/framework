@@ -1,4 +1,5 @@
 using Microsoft.Playwright;
+using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Search;
 
