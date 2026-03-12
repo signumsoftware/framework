@@ -152,8 +152,8 @@
   </Type>
   <Type Name="EmbeddedEntity" Description="Eingebettete Entität" />
   <Type Name="EngineMessage">
+    <Member Name="_01NotFound" Description="{0} {1} nicht gefunden" />
     <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Parallelitätsfehler in der Datenbank, Tabelle = {0}, ID = {1}" />
-    <Member Name="EntityWithType0AndId1NotFound" Description="Keine {0} mit der ID {1} gefunden" />
     <Member Name="NoWayOfMappingType0Found" Description="Keine Möglichkeit für die Übersetzung des Typ {0} gefunden" />
     <Member Name="TheEntity0IsNew" Description="Die Entität {0} ist neu" />
     <Member Name="ThereAre0ThatReferThisEntityByProperty1" Description="Es gibt '{0}', die sich auf diese Entität durch die Eigenschaft '{1}' beziehen" />
