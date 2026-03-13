@@ -102,7 +102,7 @@ export namespace SearchControlOptions {
   export let showFooter = (sc: SearchControlHandler, p: SearchControlProps): boolean | undefined => p.showFooter;
 }
 
-function SearchControl(p: SearchControlProps) {
+function SearchControl(p: SearchControlProps): React.JSX.Element | null {
 
   const searchControlLoaded = React.useRef<SearchControlLoaded>(null);
   const lastDeps = usePrevious(p.deps);

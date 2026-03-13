@@ -67,7 +67,7 @@ function HtmlEditor(
     handleKeybindings,
     placeholder,
     ...props }: HtmlEditorProps
-) {
+): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const id = React.useMemo(() => createUid(), []);
   const editableId = "editable_" + id;
