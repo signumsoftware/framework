@@ -39,6 +39,7 @@
     cursor: move;
     color: var(--bs-body-color) !important;
     border-color: var(--bs-border-color) !important;
+    background-color: var(--bs-body-bg) !important;
 }
 
 .sf-rightHandle {
