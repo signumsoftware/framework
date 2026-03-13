@@ -241,7 +241,7 @@ export class TypeaheadController {
 }
 
 
-export function Typeahead(p: TypeaheadProps) {
+export function Typeahead(p: TypeaheadProps): React.JSX.Element {
 
   const controller = React.useMemo(() => new TypeaheadController(), []);
   controller.init(p);

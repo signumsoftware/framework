@@ -1,12 +1,12 @@
 import * as React from "react"
-import { Lite, Entity, liteKey, ModifiableEntity, getToString } from '../Signum.Entities';
+import { Lite, Entity, liteKey, ModifiableEntity, getToString, EngineMessage } from '../Signum.Entities';
 import * as AppContext from '../AppContext';
 import { Navigator, ViewPromise } from '../Navigator';
 import { Link } from 'react-router-dom';
 import { StyleContext } from "../Lines";
 import { classes } from "../Globals";
 import { Finder } from '../Finder';
-import { getQueryKey } from '../Reflection';
+import { getQueryKey, getTypeInfo } from '../Reflection';
 
 export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   lite: Lite<Entity>;
@@ -34,6 +34,10 @@ export default function EntityLink(p: EntityLinkProps): React.ReactElement | nul
 
     return <span data-entity={liteKey(lite)} className={settings?.allowWrapEntityLink ? undefined : "try-no-wrap"}>{p.children ?? Navigator.renderLite(lite)}</span>;
   }
+  const toString = getToString(lite);
+  const isDeleted = toString == `[${EngineMessage._01NotFound.niceToString(getTypeInfo(lite.EntityType).niceName, lite.id)}]`;
+  if (isDeleted)
+    return <span data-entity={liteKey(lite)} className={classes("try-no-wrap", shy ? "sf-shy-link" : null)}>{p.children ?? toString}</span>;
 
   return (
     <Link

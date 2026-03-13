@@ -15,7 +15,7 @@ export interface ButtonBarHandle {
 }
 
 
-export function ButtonBar(p: ButtonBarProps) {
+export function ButtonBar(p: ButtonBarProps): React.JSX.Element {
 
   const ctx: ButtonsContext = p;
   const rb = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IRenderButtons | null;

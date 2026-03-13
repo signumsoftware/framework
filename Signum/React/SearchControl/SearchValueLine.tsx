@@ -61,7 +61,7 @@ export interface SearchValueLineController {
   refreshValue(): void;
 }
 
-export default function SearchValueLine(p: SearchValueLineProps) {
+export default function SearchValueLine(p: SearchValueLineProps): React.JSX.Element | null {
 
   var svRef = React.useRef<SearchValueController>(null);
 

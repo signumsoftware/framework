@@ -152,14 +152,14 @@
   </Type>
   <Type Name="EmbeddedEntity" Description="Eingebettete Entität" />
   <Type Name="EngineMessage">
+    <Member Name="_01NotFound" Description="{0} {1} nicht gefunden" />
     <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Parallelitätsfehler in der Datenbank, Tabelle = {0}, ID = {1}" />
-    <Member Name="EntityWithType0AndId1NotFound" Description="Keine {0} mit der ID {1} gefunden" />
     <Member Name="NoWayOfMappingType0Found" Description="Keine Möglichkeit für die Übersetzung des Typ {0} gefunden" />
     <Member Name="TheEntity0IsNew" Description="Die Entität {0} ist neu" />
     <Member Name="ThereAre0ThatReferThisEntityByProperty1" Description="Es gibt '{0}', die sich auf diese Entität durch die Eigenschaft '{1}' beziehen" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Gibt es Datensätze in '{0}', die druch die Spalte '{1}' auf diese Tabelle verweisen" />
-    <Member Name="ThereIsAlreadyA0With1EqualsTo2_G" Description="Es gibt bereits [m:ein|n:ein|f:eine] {0} mit {1} gleich {2}" />
-    <Member Name="ThereIsAlreadyA0WithTheSame1_G" Description="Es gibt bereits [m:ein|n:ein|f:eine] {0} mit dem gleichen {1}" />
+    <Member Name="ThereIsAlreadyA0With1EqualsTo2_G" Description="Es gibt bereits [m:einen|n:ein|f:eine] {0} mit {1} gleich {2}" />
+    <Member Name="ThereIsAlreadyA0WithTheSame1_G" Description="Es gibt bereits [m:einen|n:ein|f:eine] {0} mit dem gleichen {1}" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Nicht zulässiger Zugriff auf {0}, weil {1}" />
   </Type>
   <Type Name="Entity" Description="Entität">

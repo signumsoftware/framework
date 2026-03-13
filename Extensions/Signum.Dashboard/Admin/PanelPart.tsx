@@ -22,7 +22,7 @@ export default function PanelPart(p: { ctx: TypeContext<PanelPartEmbedded> }): R
   return (
     <div>
       {icon && (
-        <div className="mb-3 p-3 border rounded bg-light">
+        <div className="mb-3 p-3 border rounded bg-tertiary">
           <div className="d-flex align-items-center">
             <FontAwesomeIcon 
               aria-hidden={true} 

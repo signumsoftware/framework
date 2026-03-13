@@ -9,7 +9,7 @@ export interface ValidationErrorsHandle {
   forceUpdate() : void; 
 }
 
-export function ValidationErrors(p: { entity: ModifiableEntity, prefix: string, ref?: React.Ref<ValidationErrorsHandle> }) {
+export function ValidationErrors(p: { entity: ModifiableEntity, prefix: string, ref?: React.Ref<ValidationErrorsHandle> }): React.JSX.Element | null {
 
   const forceUpdate = useForceUpdate();
 
