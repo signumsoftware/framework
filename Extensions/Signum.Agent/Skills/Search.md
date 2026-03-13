@@ -6,7 +6,7 @@ If the query system is not expressive enought to satisfy the user request, tell 
 
 ## Identify the root query name
 
-The first step is to identify the root query. 
+The first step is to identify the root query. A `queryName` (typically also a `typeName`) is an string WITHOUT `"Entity"` suffix or any namespace. For example `"User"`. 
 
 Sometimes this could be tricky, for example if the user asks for "Best products last month", the root may not be "Product", but maybe "Order", "OrderLine" or "Invoice".
 
