@@ -93,9 +93,9 @@ IMPORTANT: Most user actions are operations on entities (typically also QueryNam
     }
 
     [McpServerTool, Description("Construct an entity from many entities using an operation")]
-    public static EntityPackTS Operation_ConstructFromMany(JsonArray entitiesJson, string operationKey, CancellationToken token)
+    public static EntityPackTS Operation_ConstructFromMany(List<Lite<Entity>> entities, string operationKey, CancellationToken token)
     {
-        var lites = entitiesJson.Deserialize<List<Lite<Entity>>>(SignumServer.JsonSerializerOptions)!;
+        var lites = entities;
 
         var operation = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
@@ -110,6 +110,13 @@ IMPORTANT: Most user actions are operations on entities (typically also QueryNam
             canExecutes.ToDictionary(a => a.Key.Key, a => a.Value));
 
         return result;
+    }
+
+    public class SimpleLite
+    {
+        public object Id { get; set; }
+        public string EntityType { get; set; }
+        public object Model { get; set; }
     }
 
     private static Entity DeserializeEntity(JsonObject entityJson)

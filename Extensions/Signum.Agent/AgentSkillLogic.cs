@@ -6,6 +6,7 @@ using Signum.API;
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Signum.Agent;
 
@@ -146,7 +147,12 @@ public abstract class AgentSkill
     }
 
 
-    static JsonSerializerOptions JsonSerializationOptions = new JsonSerializerOptions().AddSignumJsonConverters();
+    static JsonSerializerOptions JsonSerializationOptions = new JsonSerializerOptions 
+    { 
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    }.AddSignumJsonConverters();
 
     public virtual JsonSerializerOptions GetJsonSerializerOptions() => JsonSerializationOptions;
 
@@ -208,7 +214,7 @@ public static partial class SignumMcpServerBuilderExtensions
         where T : AgentSkill, new()
     {
         var agent = AgentSkillLogic.Register<T>();
-        builder.WithTools<T>(/*agent.GetJsonSerializerOptions()*/);
+        builder.WithTools<T>(agent.GetJsonSerializerOptions());
         return builder;
     }
 

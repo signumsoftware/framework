@@ -32,5 +32,11 @@ public class IntroductionSkill : AgentSkill
 
         return skill.GetInstruction(null);
     }
+
+    [McpServerTool, Description("Gets the introduction for an skill")]
+    public Dictionary<string, string> ListSkillNames()
+    {
+        return AgentSkillLogic.SkillByName.Value.ToDictionary(a => a.Key, a => a.Value.ShortDescription);
+    }
 }
 

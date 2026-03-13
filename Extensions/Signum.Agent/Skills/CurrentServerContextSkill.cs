@@ -7,7 +7,7 @@ namespace Signum.Agent.Skills;
 
 public class CurrentServerContextSkill : AgentSkill
 {
-    public static Func<string?> UrlLeft;
+    public static Func<string?>? UrlLeft;
 
     public CurrentServerContextSkill()
     {

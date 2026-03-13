@@ -14,7 +14,7 @@ Here are some tables that can be use as root query grouped by namespace;
 
 <LIST_ROOT_QUERIES>
 
-You can use ListQueryNames by namespace to get more options if you think the root query is not in the list above.
+You can use `list_query_names` by namespace to get more options if you think the root query is not in the list above.
 
 Note: Not all queries represent types, the ones with a (ImplementedBy) can be used as `queryName` but not as `typeName` in `autoCompleteLite`.
 
@@ -220,15 +220,13 @@ Each column has:
 
 ### Grouping results
 
-If you want to group the results using the specified columns, set `groupResults` to true. 
+If you want to group the results using the specified columns, set `groupResults` to true. Take into account:
 
-When grouping, any `ColumnOption` (or `OrderOption`) that is not an aggregate token will be used as grouping key.
-
-In some rare cases you may want to group by a `token` that is not shown, then add the column with `hiddenColumn` set to true.
-
-If you are not grouping, you should not use any aggregate token or the `FindOptions` will be invalid.
-
-In filters, you can use aggregate tokens to filter the results after the grouping (similar to SQL `HAVING`).
+* When grouping, any `ColumnOption` (or `OrderOption`) that is not an aggregate token will be used as grouping key.
+* In some rare cases you may want to group by a `token` that is not shown, for example group by `User` but show `User.UserName` and `User.Role`,  then add the column (`User`) with `hiddenColumn` set to true.
+* If you dont set `groupResults` to true, you should not use any aggregate token or the `FindOptions` will be invalid.
+* In filters, you can use aggregate tokens to filter the results after the grouping (similar to SQL `HAVING`).
+* You can calculate global aggregates (total `Count`, total `Amount.Min`) by setting `groupResults` to true and having only aggregates. 
 
 Example: 
 ```TS

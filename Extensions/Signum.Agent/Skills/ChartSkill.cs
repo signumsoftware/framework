@@ -34,7 +34,7 @@ public class ChartSkill : AgentSkill
     {
         ChartOptions fo = ParseChartOptions(chartOptions);
 
-        return ChartOptionsEncoder.ChartOptionsPath(fo);
+        return CurrentServerContextSkill.UrlLeft?.Invoke() + ChartOptionsEncoder.ChartOptionsPath(fo);
     }
 
     private static ChartOptions ParseChartOptions(string chartOptions)

@@ -114,7 +114,7 @@ public class SearchSkill : AgentSkill
     {
         FindOptions fo = ParseFindOptions(findOptions);
 
-        return FindOptionsEncoder.FindOptionsPath(fo);
+        return CurrentServerContextSkill.UrlLeft?.Invoke() + FindOptionsEncoder.FindOptionsPath(fo);
     }
 
     public static FindOptions ParseFindOptions(FindOptions findOptions)
@@ -274,7 +274,7 @@ public class FindOptions
     List<Column> MergeColumns(QueryDescription qd, SubTokensOptions aggregates)
     {
         var columns = this.ColumnOptions.EmptyIfNull();
-        switch (this.ColumnOptionsMode ?? DynamicQuery.ColumnOptionsMode.Add)
+        switch (this.ColumnOptionsMode ?? DynamicQuery.ColumnOptionsMode.ReplaceAll)
         {
             case DynamicQuery.ColumnOptionsMode.Add: return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(columns.Select(co => co.ToColumn(qd, aggregates))).ToList();
             case DynamicQuery.ColumnOptionsMode.Remove: return qd.Columns.Where(cd => !cd.IsEntity && !columns.Any(co => co.Token == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
