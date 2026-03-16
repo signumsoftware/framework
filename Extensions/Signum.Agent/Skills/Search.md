@@ -43,7 +43,7 @@ But maybe you don't need it, this are the sub-tokens you can expect for each `fi
 * `Integer` / `Decimal`: Numbers have sub-tokens for grouping by range like `Step100`. If you need this functionality use `subTokens`. 
 * Collection have many sub-tokens 
 	* `Count`: The number of elements in the collection
-	* `Element`: Joins (using outer apply / outer join) with the collection table effectively multilying the number of results. If more than one filter/order/column repeat the same `Element` expression the same join will be re-used. `Element2`, `Element3` are usfull in the rare cases that you want to make independent joins to the collection table. 
+	* `Element`: Joins (using outer apply / outer join) with the collection table effectively multiplying the number of results. Beware or cartessian multiplication if you use `Element` in two independent collections. If more than one filter/order/column repeat the same `Element` expression, the same join will be re-used. `Element2`, `Element3` are usfull in the rare cases that you want to make independent joins to the collection table. 
 	* `Any`, `All`: Only for filters, allows to add conditions that some or every element should satisfy. `Entity.Details.Any.Quantity` `EqualsTo`  `2` translates in C# to `Entity.Details.Any(d => d.Quantity == 2)`
 	* `SeparatedByComma`, `SeparatedByNewLine`: Only for columns, shows the `ToString()` of all the elements in the collection in one column. The expression `Entity.Details.SeparatedByComma.Product` is in C# `string.Join(", ", Entity.Details.Select(a => a.Product.ToString()))`.
 

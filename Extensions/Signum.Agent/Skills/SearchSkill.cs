@@ -308,16 +308,18 @@ public class FindOptions
 
     List<Column> MergeColumns(QueryDescription qd, SubTokensOptions aggregates)
     {
+        var options = SubTokensOptions.CanElement | SubTokensOptions.CanToArray |  aggregates;
+
         var columns = this.ColumnOptions.EmptyIfNull();
         switch (this.ColumnOptionsMode ?? DynamicQuery.ColumnOptionsMode.ReplaceAll)
         {
-            case DynamicQuery.ColumnOptionsMode.Add: return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(columns.Select(co => co.ToColumn(qd, aggregates))).ToList();
+            case DynamicQuery.ColumnOptionsMode.Add: return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(columns.Select(co => co.ToColumn(qd, options))).ToList();
             case DynamicQuery.ColumnOptionsMode.Remove: return qd.Columns.Where(cd => !cd.IsEntity && !columns.Any(co => co.Token == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
-            case DynamicQuery.ColumnOptionsMode.ReplaceAll: return columns.Select(co => co.ToColumn(qd,  aggregates)).ToList();
+            case DynamicQuery.ColumnOptionsMode.ReplaceAll: return columns.Select(co => co.ToColumn(qd, options)).ToList();
             case DynamicQuery.ColumnOptionsMode.ReplaceOrAdd:
                 {
                     var original = qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).ToList();
-                    var toReplaceOrAdd = columns.Select(co => co.ToColumn(qd, aggregates)).ToList();
+                    var toReplaceOrAdd = columns.Select(co => co.ToColumn(qd, options)).ToList();
                     foreach (var item in toReplaceOrAdd)
                     {
                         var index = original.FindIndex(o => o.Token.Equals(item.Token));
@@ -458,13 +460,13 @@ public class FilterOption
     {
         if (Operation != null)
         {
-            var token = QueryUtils.Parse(Token!, qd, SubTokensOptions.CanElement | SubTokensOptions.All | aggregate);
+            var token = QueryUtils.Parse(Token!, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | aggregate);
             return new FilterCondition(token, Operation ?? FilterOperation.EqualTo, Value);
         }
 
         if(GroupOperation != null)
         {
-            var token = Token.HasText() ? null : QueryUtils.Parse(Token!, qd, SubTokensOptions.CanElement | SubTokensOptions.All | aggregate);
+            var token = Token.HasText() ? null : QueryUtils.Parse(Token!, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | aggregate);
 
             return new FilterGroup(GroupOperation.Value, token,
                 this.Filters.Select(a => a.ToFilter(qd, aggregate)).ToList()
@@ -483,7 +485,7 @@ public class OrderOption
 
     internal Order ToOrder(QueryDescription qd, SubTokensOptions agg)
     {
-        var parsedToken = QueryUtils.Parse(Token, qd, agg);
+        var parsedToken = QueryUtils.Parse(Token, qd, SubTokensOptions.CanElement | agg);
 
         return new Order(parsedToken, OrderType);
     }

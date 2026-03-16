@@ -18,7 +18,7 @@ public class IntroductionSkill : AgentSkill
         };
     }
 
-    [McpServerTool, Description("Gets the introduction for an skill")]
+    [McpServerTool, Description("Gets the introduction for an skill and discorver new tools")]
     public string Describe(string skillName)
     {
         //throw new InvalidOperationException("bla");
@@ -32,7 +32,7 @@ public class IntroductionSkill : AgentSkill
         return skill.GetInstruction(null);
     }
 
-    [McpServerTool, Description("Gets the introduction for an skill")]
+    [McpServerTool, Description("List available skills with a short description, start here to discover new tools.")]
     public Dictionary<string, string> ListSkillNames()
     {
         return this.GetSkillsRecursive().ToDictionary(a => a.Name, a => a.ShortDescription);
