@@ -17,11 +17,11 @@ namespace Signum.Agent.Skills;
 
 public class SearchSkill : AgentSkill
 {
-    public static Func<object, bool> IsnlineQueryName = q => false; 
+    public static Func<object, bool> InlineQueryName = q => false; 
 
     public SearchSkill()
     {
-        ShortDescription = "Explores the database schema to search any information in the database";
+        ShortDescription = "Explores the database schema and queries any information in the database";
         IsAllowed = () => true;
         Replacements = new Dictionary<string, Func<object?, string>>()
         {
@@ -31,7 +31,7 @@ public class SearchSkill : AgentSkill
                 .GroupBy(a => a is Type t? t.Namespace : a is Enum e ? e.GetType().Namespace : "Unknown")
                 .ToString(gr =>
                 {
-                    var inlineQueries = gr.Where(IsnlineQueryName).ToString(qn =>
+                    var inlineQueries = gr.Where(InlineQueryName).ToString(qn =>
                     {
                         var imp = QueryLogic.Queries.GetEntityImplementations(qn);
                         var impStr = imp.Types.Only() == qn as Type ? "" : $" (ImplementedBy {imp.Types.ToString(t => t.Name, ", ")})";
@@ -128,7 +128,42 @@ public class SearchSkill : AgentSkill
         return findOptions;
     }
 
- 
+
+    [McpServerTool, Description("Executes a FindOptions and returns a dynamic ResultTable")]
+    public static ResultTableSimple GetResultTable(FindOptions findOptions)
+    {
+        FindOptions fo = ParseFindOptions(findOptions);
+
+        var qr = fo.ToQueryRequest();
+
+        var rt = QueryLogic.Queries.ExecuteQuery(qr);
+
+        return new ResultTableSimple
+        {
+            Columns = rt.Columns.Select((a, i) => KeyValuePair.Create("c" + i, a.Token.FullKey())).ToDictionary(),
+            Rows = rt.Rows.Select(r =>
+            {
+                var dic = new Dictionary<string, object?>();
+                if (!qr.GroupResults)
+                    dic.Add("Entity", r.Entity);
+
+                for (int i = 0; i < rt.Columns.Length; i++)
+                {
+                    var rc = rt.Columns[i];
+                    dic.Add("c" + i, r[rc]);
+                }
+                return dic;
+            }).ToList(),
+        };
+    }
+}
+
+public class ResultTableSimple
+{
+    public Dictionary<string, string> Columns { get; internal set; }
+
+    public List<Dictionary<string, object?>> Rows { get; internal set; }
+
 }
 
 public class SimpleChatScript

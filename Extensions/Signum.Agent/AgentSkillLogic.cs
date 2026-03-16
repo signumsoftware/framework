@@ -1,8 +1,11 @@
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using ModelContextProtocol;
+using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 using Signum.Agent.Skills;
 using Signum.API;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
@@ -12,62 +15,25 @@ namespace Signum.Agent;
 
 public static class AgentSkillLogic
 {
-    public static Dictionary<Type, AgentSkill> SkillsByType = new Dictionary<Type, AgentSkill>();
-
-    public static ResetLazy<Dictionary<string, AgentSkill>> SkillByName =
-        new ResetLazy<Dictionary<string, AgentSkill>>(() => SkillsByType.Values.ToDictionary(a => a.Name));
-
-    public static ResetLazy<Dictionary<string, AITool>> AllTools;
+    public static readonly AsyncThreadVariable<bool> IsMCP = Statics.ThreadVariable<bool>("IsMCP");
 
     public static AgentSkill? IntroductionSkill;
 
-    public static void Start(SchemaBuilder sb, Type? defaultChatbotSkillType = null)
+    public static ConversationSumarizerSkill ConversationSumarizerSkill = new ConversationSumarizerSkill();
+    public static QuestionSumarizerSkill QuestionSumarizerSkill = new QuestionSumarizerSkill();
+
+    public static void Start(SchemaBuilder sb, AgentSkill? introductionSkill = null)
     {
         if (sb.AlreadyDefined(MethodBase.GetCurrentMethod()))
             return;
 
-        if (defaultChatbotSkillType != null)
-            IntroductionSkill = GetSkill(defaultChatbotSkillType); // Assert registered
-
-        AllTools = new ResetLazy<Dictionary<string, AITool>>(() => SkillsByType
-            .SelectMany(a => a.Value.GetTools())
-            .ToDictionaryEx(a => a.Name, StringComparer.InvariantCultureIgnoreCase));
-
-        Register<QuestionSumarizerSkill>();
-        Register<ConversationSumarizerSkill>();
+        if (introductionSkill != null)
+            IntroductionSkill = introductionSkill;
     }
 
-    public static AgentSkill GetSkill(string skillName)
+    public static AgentSkill WithSubSkill(this AgentSkill parent, SkillActivation activation, AgentSkill child)
     {
-        return SkillByName.Value.GetOrThrow(skillName, "{0} not registered");
-    }
-
-    public static T GetSkill<T>() where T : AgentSkill
-    {
-        return (T)SkillsByType.GetOrThrow(typeof(T));
-    }
-
-    public static AgentSkill GetSkill(Type skillType)
-    {
-        return SkillsByType.GetOrThrow(skillType, "{0} not registered");
-    }
-
-    public static AgentSkill Register<T>() where T : AgentSkill, new()
-    {
-        if (SkillsByType.TryGetValue(typeof(T), out var existing))
-            return existing; // no-op
-
-        var skill = new T();
-        SkillsByType[typeof(T)] = skill;
-        AllTools?.Reset();
-        SkillByName?.Reset();
-        return skill;
-    }
-
-    public static AgentSkill WithSubSkill(this AgentSkill parent, SkillActivation activation, AgentSkill children)
-    {
-        GetSkill(children.GetType()); //Assert
-        parent.SubSkills.Add(children.GetType(), activation);
+        parent.SubSkills[child] = activation;
         return parent;
     }
 }
@@ -111,24 +77,22 @@ public abstract class AgentSkill
 
     private void FillSubInstructions(StringBuilder sb)
     {
-        foreach (var item in SubSkills)
+        foreach (var (skill, activation) in SubSkills)
         {
-            var skill = AgentSkillLogic.GetSkill(item.Key);
-
             sb.AppendLineLF("# Skill " + skill.Name);
             sb.AppendLineLF("**Summary**: " + skill.ShortDescription);
             sb.AppendLineLF();
 
-            if (item.Value == SkillActivation.Eager)
+            if (activation == SkillActivation.Eager)
                 sb.AppendLineLF(skill.GetInstruction(null));
             else
                 sb.AppendLineLF("Use the tool 'describe' to get more information about this skill and discover additional tools.");
         }
     }
 
-    public Dictionary<Type, SkillActivation> SubSkills = new Dictionary<Type, SkillActivation>();
+    public Dictionary<AgentSkill, SkillActivation> SubSkills = new Dictionary<AgentSkill, SkillActivation>();
 
-    IEnumerable<AITool> chatbotTools;
+    IEnumerable<AITool>? chatbotTools;
     internal IEnumerable<AITool> GetTools()
     {
         return (chatbotTools ??= this.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
@@ -146,9 +110,14 @@ public abstract class AgentSkill
             .ToList());
     }
 
+    internal IEnumerable<McpServerTool> GetMcpServerTools() =>
+        GetTools().Select(t => McpServerTool.Create((AIFunction)t, new McpServerToolCreateOptions
+        {
+            SerializerOptions = GetJsonSerializerOptions(),
+        }));
 
-    static JsonSerializerOptions JsonSerializationOptions = new JsonSerializerOptions 
-    { 
+    static JsonSerializerOptions JsonSerializationOptions = new JsonSerializerOptions
+    {
         TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -160,37 +129,56 @@ public abstract class AgentSkill
     {
         var list = GetTools().ToList();
 
-        foreach (var item in SubSkills)
+        foreach (var (skill, activation) in SubSkills)
         {
-            if (item.Value == SkillActivation.Eager)
-            {
-                var skill = AgentSkillLogic.GetSkill(item.Key);
+            if (activation == SkillActivation.Eager)
                 list.AddRange(skill.GetToolsRecursive());
-            }
         }
 
         return list;
     }
 
-    //public void AddMcpServer(IMcpServerBuilder builder)
-    //{
-    //    foreach (var toolMethod in this.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
-    //    {
-    //        if (toolMethod.GetCustomAttribute<McpServerToolAttribute>() is not null)
-    //        {
-    //            builder.Services.AddSingleton(services => McpServerTool.Create(
-    //                toolMethod,
-    //                toolMethod.IsStatic ? null : this,
-    //                new() { Services = services, SerializerOptions = this.GetJsonSerializerOptions() }));
-    //        }
-    //    }
+    public AgentSkill? FindSkill(string name)
+    {
+        if (this.Name == name) return this;
+        foreach (var (skill, _) in SubSkills)
+        {
+            var found = skill.FindSkill(name);
+            if (found != null) return found;
+        }
+        return null;
+    }
 
-    //    foreach (var subSkill in this.SubSkills.Where(a => a.Value == SkillActivation.Eager))
-    //    {
-    //        AgentSkillLogic.GetSkill(subSkill.Key).AddMcpServer(builder);
-    //    }
-    //}
+    public AITool? FindTool(string name)
+    {
+        var tool = GetTools().FirstOrDefault(t => t.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+        if (tool != null) return tool;
+        foreach (var (skill, _) in SubSkills)
+        {
+            var found = skill.FindTool(name);
+            if (found != null) return found;
+        }
+        return null;
+    }
 
+    public IEnumerable<AgentSkill> GetSkillsRecursive()
+    {
+        yield return this;
+        foreach (var (skill, _) in SubSkills)
+            foreach (var s in skill.GetSkillsRecursive())
+                yield return s;
+    }
+
+    public IEnumerable<AgentSkill> GetEagerSkillsRecursive()
+    {
+        yield return this;
+        foreach (var (skill, activation) in SubSkills)
+        {
+            if (activation == SkillActivation.Eager)
+                foreach (var s in skill.GetEagerSkillsRecursive())
+                    yield return s;
+        }
+    }
 }
 
 public enum SkillActivation
@@ -210,18 +198,78 @@ public class UIToolAttribute : Attribute { }
 
 public static partial class SignumMcpServerBuilderExtensions
 {
-    public static IMcpServerBuilder WithSignumSkill<T>(this IMcpServerBuilder builder)
-        where T : AgentSkill, new()
+    public static IMcpServerBuilder WithSignumSkill(this IMcpServerBuilder builder, AgentSkill rootSkill)
     {
-        var agent = AgentSkillLogic.Register<T>();
-        builder.WithTools<T>(agent.GetJsonSerializerOptions());
-        return builder;
-    }
+        var allSkillTools = rootSkill.GetSkillsRecursive()
+            .ToDictionary(s => s.Name, s => s.GetMcpServerTools().ToList());
 
-    //public static IMcpServerBuilder WithSignumSkill(this IMcpServerBuilder builder, AgentSkill skill)
-    //{
-    //    skill.AddMcpServer(builder);
-    //    //builder.Services.Configure((McpServerOptions opts) => opts.ServerInstructions = skill.GetInstruction(null));
-    //    return builder;
-    //}
+        var sessionActivated = new ConcurrentDictionary<string, HashSet<string>>();
+
+        HashSet<string> InitialActivated() =>
+            rootSkill.GetEagerSkillsRecursive().Select(s => s.Name).ToHashSet();
+
+        IEnumerable<string> GetActivated(string? sessionId) =>
+            sessionId != null && sessionActivated.TryGetValue(sessionId, out var s)
+                ? s
+                : InitialActivated();
+
+        return builder
+            .WithHttpTransport(options =>
+            {
+#pragma warning disable MCPEXP002
+                options.RunSessionHandler = async (httpContext, mcpServer, token) =>
+                {
+                    if (mcpServer.SessionId != null)
+                        sessionActivated[mcpServer.SessionId] = InitialActivated();
+                    try { await mcpServer.RunAsync(token); }
+                    finally
+                    {
+                        if (mcpServer.SessionId != null)
+                            sessionActivated.TryRemove(mcpServer.SessionId, out _);
+                    }
+                };
+#pragma warning restore MCPEXP002
+            })
+            .WithListToolsHandler(async (ctx, ct) =>
+            {
+                var tools = GetActivated(ctx.Server.SessionId)
+                    .Where(allSkillTools.ContainsKey)
+                    .SelectMany(n => allSkillTools[n])
+                    .Select(t => t.ProtocolTool)
+                    .ToList();
+
+                return new ListToolsResult { Tools = tools };
+            })
+            .WithCallToolHandler(async (ctx, ct) =>
+            {
+                var toolName = ctx.Params!.Name;
+                var tool = GetActivated(ctx.Server.SessionId)
+                    .Where(allSkillTools.ContainsKey)
+                    .SelectMany(n => allSkillTools[n])
+                    .FirstOrDefault(t => t.ProtocolTool.Name == toolName)
+                    ?? throw new McpException($"Tool '{toolName}' not found");
+
+                CallToolResult result;
+                using (AgentSkillLogic.IsMCP.Override(true))
+                    result = await tool.InvokeAsync(ctx, ct);
+
+
+                // When Describe is called for a Lazy skill, activate it for this session
+                if (toolName == nameof(IntroductionSkill.Describe)
+                    && ctx.Params.Arguments?.TryGetValue("skillName", out var je) == true
+                    && je.GetString() is { } skillName
+                    && ctx.Server.SessionId is { } sessionId)
+                {
+                    var newSkill = rootSkill.FindSkill(skillName);
+                    if (newSkill != null && sessionActivated.TryGetValue(sessionId, out var skills))
+                    {
+                        foreach (var s in newSkill.GetEagerSkillsRecursive())
+                            skills.Add(s.Name);
+                        await ctx.Server.SendNotificationAsync(NotificationMethods.ToolListChangedNotification, ct);
+                    }
+                }
+
+                return result;
+            });
+    }
 }

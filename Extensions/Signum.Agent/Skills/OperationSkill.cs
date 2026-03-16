@@ -58,7 +58,7 @@ IMPORTANT: Most user actions are operations on entities (typically also QueryNam
         return type;
     }
 
-    [McpServerTool, Description("Construct an entity using an operation")]
+    [McpServerTool(Destructive = true), Description("Construct an entity using an operation")]
     public static EntityPackTS Operation_Construct(string typeName, string operationKey, CancellationToken token)
     {
         var type = GetTypeWithHint(typeName);
@@ -75,7 +75,7 @@ IMPORTANT: Most user actions are operations on entities (typically also QueryNam
         return result;
     }
 
-    [McpServerTool, Description("Construct an entity from another entity using an operation")]
+    [McpServerTool(Destructive = true), Description("Construct an entity from another entity using an operation")]
     public static EntityPackTS Operation_ConstructFrom(JsonObject entityJson, string operationKey, CancellationToken token)
     {
         Entity entity = DeserializeEntity(entityJson);
@@ -92,7 +92,7 @@ IMPORTANT: Most user actions are operations on entities (typically also QueryNam
         return result;
     }
 
-    [McpServerTool, Description("Construct an entity from many entities using an operation")]
+    [McpServerTool(Destructive = true), Description("Construct an entity from many entities using an operation")]
     public static EntityPackTS Operation_ConstructFromMany(List<Lite<Entity>> entities, string operationKey, CancellationToken token)
     {
         var lites = entities;
@@ -133,7 +133,7 @@ IMPORTANT: Most user actions are operations on entities (typically also QueryNam
         }
     }
 
-    [McpServerTool, Description("Executes an operation on an entity")]
+    [McpServerTool(Destructive = true), Description("Executes an operation on an entity")]
     public static EntityPackTS Operation_Execute(JsonObject entityJson, string operationKey, CancellationToken token)
     {
         var entity = DeserializeEntity(entityJson)!;
@@ -150,7 +150,7 @@ IMPORTANT: Most user actions are operations on entities (typically also QueryNam
         return result;
     }
 
-    [McpServerTool, Description("Executes an operation on an entity")]
+    [McpServerTool(Destructive = true), Description("Executes an operation on an entity")]
     public static void Operation_Delete(JsonObject entityJson, string operationKey, CancellationToken token)
     {
         var entity = DeserializeEntity(entityJson)!;

@@ -1,6 +1,4 @@
 
-using Azure.Core;
-using Microsoft.Identity.Client;
 using ModelContextProtocol.Server;
 using Signum.Authorization;
 using System.ComponentModel;
@@ -28,7 +26,8 @@ public class IntroductionSkill : AgentSkill
         if (skillName.Contains("error"))
             throw new Exception(skillName + " has an error");
 
-        var skill = AgentSkillLogic.GetSkill(skillName);
+        var skill = this.FindSkill(skillName)
+            ?? throw new KeyNotFoundException($"Skill '{skillName}' not found");
 
         return skill.GetInstruction(null);
     }
@@ -36,7 +35,7 @@ public class IntroductionSkill : AgentSkill
     [McpServerTool, Description("Gets the introduction for an skill")]
     public Dictionary<string, string> ListSkillNames()
     {
-        return AgentSkillLogic.SkillByName.Value.ToDictionary(a => a.Key, a => a.Value.ShortDescription);
+        return this.GetSkillsRecursive().ToDictionary(a => a.Name, a => a.ShortDescription);
     }
 }
 

@@ -2,7 +2,7 @@ You can help the user search information by configuring a FindOptions in Signum 
 
 Before starting, make sure you understand the user request. You can ask for clarifications if needed.
 
-If the query system is not expressive enought to satisfy the user request, tell the user about the limitations or problems you find. 
+If the query system is not expressive enough to satisfy the user request, tell the user about the limitations or problems you find. 
 
 ## Identify the root query name
 
@@ -203,7 +203,7 @@ IMPORTANT: Always set the appropiate `columnOptionsMode`; when grouping use `Rep
 Each column has:
 * `token`: the expression to use, can not use `Any`, `All`.
 * `displayName`: optional, if not specified the default name will be used.
-* `summaryToken`: optional, only used to shown and aggregate in the header of the column. Can be used even if the `FindOptions` does not set `groupResults`.
+* `summaryToken`: optional, only used to shown and aggregate in the header of the column. Can be used even if the `FindOptions` does not set `groupResults`. You can not aggregate twice (avoid `Count.Sum`, just use `Count`), but you can sum the number of elements in a collection (`Friends.Count.Sum`). 
 * `hiddenColumn`: optional, if true the column will not be shown, only usefull for hiding the real grouping key if `groupResults` is true.
 * `combineRows`: optional, if specified consecutive rows with the same value in this column will be combined in one row with rowspan in the html table. `EqualValue` compares similar values, `EqualEntity` compares the entity ids.
 
@@ -274,4 +274,6 @@ You can use the tool `getFindOptionsUrl`. It will validate the `FindOptions` and
 
 Once you have the url, use a markdown link to show it to the user.
 
-**Important:** The URL returned by `getFindOptionsUrl` is a local path (e.g. `/find/OrderEntity`). Do not add any host prefix — never use `http://`, `https://`, or a domain name. Always present the path as-is, starting with `/`.
+### Executing a query and returning the results as a table
+
+If needed, you can execute a query and get the result as a table to compose a result message using the `getResultTable` tool.

@@ -157,6 +157,13 @@ public class AsyncThreadVariable<T> : Variable<T>, IThreadVariable
     {
         Value = default!;
     }
+
+    public IDisposable Override(T newValue)
+    {
+        var oldValue = Value;
+        Value = newValue;
+        return new Disposable(() => { Value = oldValue; });
+    }
 }
 
 public abstract class SessionVariable<T> : Variable<T>

@@ -87,7 +87,7 @@ export function LoginForm(p: { ctx: LoginContext }): React.JSX.Element {
       .then(lr => {
         setModelState(undefined);
         AuthClient.setAuthToken(lr.token, lr.authenticationType);
-        p.ctx.setLoading(undefined);
+        //p.ctx.setLoading(undefined);
 
         const back = QueryString.parse(window.location.search).back;
         if (lr.userEntity.mustChangePassword) {
