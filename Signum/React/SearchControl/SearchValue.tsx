@@ -275,7 +275,6 @@ function SearchValue(p: SearchValueProps): React.ReactNode | null {
     let className = classes(
       p.valueToken == undefined && "count-search",
       p.valueToken == undefined && (value > 0 ? "count-with-results" : "count-no-results"),
-      valueToken && (valueToken.type.isLite || valueToken!.type.isEmbedded) && "sf-entity-line-entity",
       p.formControlClass,
       p.formControlClass && isNumeric() && "numeric",
       p.formControlClass && isMultiLine() && "sf-multi-line",
