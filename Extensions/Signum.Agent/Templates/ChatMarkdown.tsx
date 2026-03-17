@@ -2,6 +2,7 @@ import Markdown from 'react-markdown';
 import { Link } from 'react-router'
 import { FontAwesomeIcon } from '@framework/Lines';
 import remarkGfm from 'remark-gfm'
+import { toAbsoluteUrl } from '@framework/AppContext';
 
 
 export default function ChatMarkdown(p: { content: string }){
@@ -14,8 +15,13 @@ export default function ChatMarkdown(p: { content: string }){
   }
 
   export function renderLink({ node, href, children, ...props }: React.PropsWithChildren<React.AnchorHTMLAttributes<HTMLAnchorElement>> & { node?: any }): React.ReactNode {
+    debugger;
     if (href && href.startsWith("/")) 
       return <Link to={href}>{children}</Link>;
+
+    var origin = document.location.origin + toAbsoluteUrl("~/");
+    if (href && href.startsWith(origin))
+      return <Link to={href!.substr(origin.length -1)}>{children}</Link>;
     
     return (
       <a href={href} {...props}>

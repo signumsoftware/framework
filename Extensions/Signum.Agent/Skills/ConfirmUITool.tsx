@@ -19,7 +19,6 @@ function ConfirmWidget(p: {
   const answeredLabel: string | null = p.response?.content ? JSON.parse(p.response.content) : null;
 
   function handleClick(label: string) {
-    debugger;
     p.onConfirm(label);
   }
 

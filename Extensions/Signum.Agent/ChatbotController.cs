@@ -242,7 +242,8 @@ public class ChatbotController : Controller
                 // Detect UITool calls — the server never invokes their bodies
                 var uiToolCalls = toolCalls.Where(fc =>
                 {
-                    var tool = AgentSkillLogic.AllTools.Value.GetOrThrow(fc.Name);
+                    var tool = AgentSkillLogic.IntroductionSkill?.FindTool(fc.Name)
+                        ?? throw new InvalidOperationException($"Tool '{fc.Name}' not found");
                     return ((AIFunction)tool).UnderlyingMethod?.GetCustomAttribute<UIToolAttribute>() != null;
                 }).ToList();
 
@@ -342,7 +343,8 @@ public class ChatbotController : Controller
         var toolSw = Stopwatch.StartNew();
         try
         {
-            AITool tool = AgentSkillLogic.AllTools.Value.GetOrThrow(toolId);
+            AITool tool = AgentSkillLogic.IntroductionSkill?.FindTool(toolId)
+                ?? throw new InvalidOperationException($"Tool '{toolId}' not found");
             var obj = await ((AIFunction)tool).InvokeAsync(new AIFunctionArguments(arguments), ct);
             toolSw.Stop();
 
@@ -431,7 +433,8 @@ public class ChatbotController : Controller
 
     ConversationHistory CreateNewConversationHistory(ChatSessionEntity session)
     {
-        var intro = AgentSkillLogic.GetSkill<IntroductionSkill>();
+        var intro = AgentSkillLogic.IntroductionSkill
+            ?? throw new InvalidOperationException("IntroductionSkill not configured");
 
         var history = new ConversationHistory
         {

@@ -239,7 +239,6 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
             }
 
             case "Tool": {
-              debugger;
               setAnswer("Tool", args!.before("/"), args!.after("/"));
               break;
             }
@@ -442,7 +441,6 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
 
 function addMessage(list: MessageCount[], msg: ChatMessageEntity) {
 
-  debugger;
   const pair = msg.toolCallID ? list.lastOrNull(a => a.msg.role == "Assistant" && a.msg.toolCalls.some(tc => tc.element.callId == msg.toolCallID)) ?? null : null;
 
   const tools = pair?.msg.toolCalls.singleOrNull(a => a.element.callId == msg.toolCallID);
