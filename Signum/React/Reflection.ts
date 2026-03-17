@@ -1193,7 +1193,6 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
     Type: getTypeName(type),
     isNew: true,
     modified: true,
-    temporalId: newGuid(),
     toStr: undefined
   });
 
@@ -1265,7 +1264,6 @@ export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRou
     Type: original.Type,
     isNew: true,
     modified: true,
-    temporalId: newGuid(),
     toStr: undefined,
   });
 

@@ -12,7 +12,6 @@ export interface ModifiableEntity {
   toStr: string | undefined;
   modified: boolean;
   isNew: boolean | undefined; //required in embedded to remove and re-create in EntityJsonSerializer
-  temporalId: string;
   error?: { [member: string]: string };
   propsMeta?: string[];
   mixins?: { [name: string]: MixinEntity }
