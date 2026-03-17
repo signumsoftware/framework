@@ -118,7 +118,7 @@ public static class SysTablesSchema
                                               DataSpaceName = i.DataSpaceName(),
                                               FilterDefinition = i.filter_definition,
                                               Type = (DiffIndexType)i.type,
-                                              VectorIndex = i.type != (int)DiffIndexType.VectorIndex ? null : new DiffVectorIndex
+                                              VectorIndex = !con.SupportsVectors || i.type != (int)DiffIndexType.VectorIndex ? null : new DiffVectorIndex
                                               {
                                                   IndexType = i.VectorIndex()!.vector_index_type,
                                                   DistanceMetric = i.VectorIndex()!.distance_metric,
