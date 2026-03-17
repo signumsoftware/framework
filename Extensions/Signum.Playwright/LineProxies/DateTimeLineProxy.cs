@@ -1,12 +1,10 @@
 using Microsoft.Playwright;
 using Signum.Basics;
+using Signum.Entities.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Playwright.LineProxies;
 
-/// <summary>
-/// Proxy for DateTime/DateOnly input controls
-/// Equivalent to Selenium's DateTimeLineProxy
-/// </summary>
 public class DateTimeLineProxy : BaseLineProxy
 {
     public DateTimeLineProxy(ILocator element, PropertyRoute route, IPage page)
@@ -14,74 +12,33 @@ public class DateTimeLineProxy : BaseLineProxy
     {
     }
 
-    public override async Task SetValueUntypedAsync(object? value)
+    public ILocator InputLocator => this.Element.Locator("div.rw-date-picker input[type=text]");
+    public ILocator InputReadonlyLocator => this.Element.Locator("input.sf-readonly-date");
+
+    public async Task SetValueAsync(IFormattable? value, string? format = null)
     {
-        if (value == null)
-        {
-            await SetInputValueAsync("");
-            return;
-        }
+        format ??= Reflector.GetFormatString(this.Route);
 
-        string stringValue;
-        if (value is DateTime dt)
-        {
-            stringValue = dt.ToString("yyyy-MM-ddTHH:mm");
-        }
-        else if (value is DateOnly d)
-        {
-            stringValue = d.ToString("yyyy-MM-dd");
-        }
-        else if (value is DateTimeOffset dto)
-        {
-            stringValue = dto.ToString("yyyy-MM-ddTHH:mm");
-        }
-        else
-        {
-            stringValue = value.ToString()!;
-        }
+        var str = value == null ? null : value.ToString(format, null);
 
-        await SetInputValueAsync(stringValue);
+        await InputLocator.FillAsync(str ?? "");
     }
 
-    public override async Task<object?> GetValueUntypedAsync()
+    public async Task<IFormattable?> GetValueAsync()
     {
-        var stringValue = await GetInputValueAsync();
-        if (string.IsNullOrWhiteSpace(stringValue))
-            return null;
+        var readonlyVisible = await InputReadonlyLocator.CountAsync() > 0;
 
-        var type = Route.Type.UnNullify();
+        var locator = readonlyVisible ? InputReadonlyLocator : InputLocator;
 
-        if (type == typeof(DateTime))
-            return DateTime.Parse(stringValue);
-        
-        if (type == typeof(DateOnly))
-            return DateOnly.Parse(stringValue);
-        
-        if (type == typeof(DateTimeOffset))
-            return DateTimeOffset.Parse(stringValue);
+        var strValue = await locator.InputValueAsync();
 
-        return stringValue;
+        return strValue == null ? null :
+            (IFormattable?)ReflectionTools.Parse(strValue, this.Route.Type);
     }
+
+    public override async Task<object?> GetValueUntypedAsync() => await GetValueAsync();
+    public override async Task SetValueUntypedAsync(object? value) => await SetValueAsync((IFormattable?)value);
 
     public override async Task<bool> IsReadonlyAsync()
-    {
-        var input = InputLocator.First;
-        return !await input.IsEnabledAsync();
-    }
-
-    /// <summary>
-    /// Set date value
-    /// </summary>
-    public async Task SetDateAsync(DateTime date)
-    {
-        await SetValueUntypedAsync(date);
-    }
-
-    /// <summary>
-    /// Get date value
-    /// </summary>
-    public async Task<DateTime?> GetDateAsync()
-    {
-        return (DateTime?)await GetValueUntypedAsync();
-    }
+        => await InputReadonlyLocator.CountAsync() > 0;
 }

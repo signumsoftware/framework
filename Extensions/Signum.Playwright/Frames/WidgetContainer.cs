@@ -47,6 +47,6 @@ public static class WidgetContainerExtensions
             await element.ClickAsync();
         });
 
-        return new SearchModalProxy(container.Page, modal.Modal);
+        return new SearchModalProxy(modal.Modal, container.Page);
     }
 }

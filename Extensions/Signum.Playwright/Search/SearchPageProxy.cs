@@ -1,146 +1,79 @@
 using Microsoft.Playwright;
+using Signum.Playwright.Frames;
+using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Search;
 
-/// <summary>
-/// Playwright equivalent of Selenium's SearchPageProxy
-/// </summary>
-public class SearchPageProxy
+public class SearchPageProxy : IAsyncDisposable
 {
-    public IPage Page { get; }
-    public SearchControlProxy SearchControl { get; }
+    public IPage Page { get; private set; }
+    public SearchControlProxy SearchControl { get; private set; }
+    public ResultTableProxy Results => SearchControl.Results;
+    public FiltersProxy Filters => SearchControl.Filters;
+    public PaginationSelectorProxy Pagination => SearchControl.Pagination;
 
     public SearchPageProxy(IPage page)
     {
         Page = page;
-        SearchControl = new SearchControlProxy(page);
     }
 
-    public async Task<PlaywrightResultTableProxy> GetResultsAsync()
+    public async Task InitializeAsync()
     {
-        return SearchControl.Results;
+        var element = Page.Locator(".sf-search-page .sf-search-control");
+        await element.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+        SearchControl = new SearchControlProxy(element, Page);
     }
 
-    public async Task ClickCreateAsync()
+    public async Task<FrameModalProxy<T>> CreateAsync<T>() where T : ModifiableEntity
     {
-        await Page.Locator("a.sf-create, .sf-query-button-bar a:has-text('Create')").ClickAsync();
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        await Page.Locator(".sf-main-control").WaitVisibleAsync();
+        var createButton = SearchControl.CreateButton;
+        var popup = await createButton.ClickCaptureAsync();
+
+        if (await SelectorModalProxy.IsSelectorAsync(popup))
+            popup = await popup.AsSelectorModal().SelectAndCaptureAsync<T>();
+
+        return new FrameModalProxy<T>(popup);
     }
 
-    public async Task SearchAsync(string searchText)
+    public async Task<FramePageProxy<T>> CreateInPlaceAsync<T>() where T : ModifiableEntity
     {
-        await SearchControl.SearchAsync(searchText);
-    }
-}
-
-/// <summary>
-/// Playwright equivalent of Selenium's FramePageProxy
-/// </summary>
-public class FramePageProxy<T> where T : Entity
-{
-    public IPage Page { get; }
-    public ILocator MainControl { get; }
-
-    public FramePageProxy(IPage page)
-    {
-        Page = page;
-        MainControl = page.Locator(".sf-main-control");
+        await SearchControl.CreateButton.ClickAsync();
+        return new FramePageProxy<T>(Page);
     }
 
-    public async Task<EntityProxy<T>> GetEntityAsync()
+    public async Task<FramePageProxy<T>> CreateInTabAsync<T>() where T : ModifiableEntity
     {
-        return new EntityProxy<T>(MainControl, Page);
+        var oldPages = Page.Context.Pages.ToList();
+
+        await SearchControl.CreateButton.ClickAsync();
+
+        // Warten auf neues Tab
+        await Page.Context.WaitForEventAsync(ContextEvent.Page);
+
+        var newPages = Page.Context.Pages.ToList();
+        var newPage = newPages.Except(oldPages).FirstOrDefault();
+
+        if (newPage == null)
+            throw new InvalidOperationException("Neues Tab konnte nicht gefunden werden.");
+
+        var result = new FramePageProxy<T>(newPage);
+        result.OnDisposed += () => newPage.CloseAsync();
+        return result;
     }
 
-    public async Task<T> RetrieveAsync()
+    public async Task SearchAsync()
     {
-        var url = Page.Url;
-        var match = System.Text.RegularExpressions.Regex.Match(url, @"/view/\w+/(\d+)");
-        
-        if (!match.Success || !int.TryParse(match.Groups[1].Value, out var id))
-            throw new InvalidOperationException("Cannot extract entity ID from URL");
-
-        return Database.Retrieve<T>(id);
-    }
-}
-
-/// <summary>
-/// Entity proxy for working with entity forms
-/// </summary>
-public class EntityProxy<T> where T : Entity
-{
-    public ILocator Element { get; }
-    public IPage Page { get; }
-
-    public EntityProxy(ILocator element, IPage page)
-    {
-        Element = element;
-        Page = page;
+        await SearchControl.SearchAsync();
     }
 
-    public async Task SetFieldValueAsync(string fieldName, string value)
+    public async Task WaitLoadedAsync()
     {
-        var selectors = new[]
-        {
-            $"[data-member='{fieldName}'] .form-control",
-            $"[data-property-route='{fieldName}'] .form-control",
-            $"input[name='{fieldName}']",
-            $"#{fieldName}"
-        };
-
-        ILocator? field = null;
-        foreach (var selector in selectors)
-        {
-            var locator = Element.Locator(selector);
-            if (await locator.IsPresentAsync())
-            {
-                field = locator.First;
-                break;
-            }
-        }
-
-        if (field == null)
-            throw new InvalidOperationException($"Could not find field '{fieldName}'");
-
-        await field.FillAsync(value);
+        await SearchControl.SearchButton.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
     }
 
-    public async Task<string?> GetFieldValueAsync(string fieldName)
+    public async ValueTask DisposeAsync()
     {
-        var selectors = new[]
-        {
-            $"[data-member='{fieldName}'] .form-control",
-            $"input[name='{fieldName}']"
-        };
-
-        foreach (var selector in selectors)
-        {
-            var locator = Element.Locator(selector);
-            if (await locator.IsPresentAsync())
-            {
-                return await locator.First.InputValueAsync();
-            }
-        }
-
-        return null;
-    }
-
-    public async Task SaveAsync()
-    {
-        await Element.Locator("button.sf-entity-button-save, button:has-text('Save')").ClickAsync();
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-    }
-
-    public async Task ExecuteOperationAsync(string operationName)
-    {
-        await Element.Locator($"button:has-text('{operationName}'), .sf-operation-button:has-text('{operationName}')").ClickAsync();
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-    }
-
-    public async Task ClickTabAsync(string tabName)
-    {
-        await Element.Locator($"a.nav-link:has-text('{tabName}'), ul.nav-tabs a:has-text('{tabName}')").ClickAsync();
-        await Task.Delay(500);
+        // Bei Playwright meist Page nicht direkt schließen, nur Ressourcen freigeben falls nötig
+        // await Page.CloseAsync();
     }
 }

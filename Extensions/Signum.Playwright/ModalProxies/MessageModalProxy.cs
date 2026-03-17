@@ -4,24 +4,28 @@ namespace Signum.Playwright.ModalProxies;
 
 public class MessageModalProxy : ModalProxy
 {
-    public MessageModalProxy(IPage page) : base(page)
-    {
-    }
+    public IPage Page { get; }
+    public ILocator Element { get; }
 
-    public MessageModalProxy(IPage page, ILocator modalElement) : base(modalElement, page)
+    public MessageModalProxy(ILocator element, IPage page)
+        : base(element, page)
     {
+        this.Element = element;
+        this.Page = page;
     }
 
     public ILocator GetButton(MessageModalButton button)
     {
-        var className =
-            button == MessageModalButton.Yes ? "sf-yes-button" :
-            button == MessageModalButton.No ? "sf-no-button" :
-            button == MessageModalButton.Ok ? "sf-ok-button" :
-            button == MessageModalButton.Cancel ? "sf-cancel-button" :
-            throw new NotImplementedException("Unexpected button");
+        string className = button switch
+        {
+            MessageModalButton.Yes => "sf-yes-button",
+            MessageModalButton.No => "sf-no-button",
+            MessageModalButton.Ok => "sf-ok-button",
+            MessageModalButton.Cancel => "sf-cancel-button",
+            _ => throw new NotImplementedException("Unexpected button")
+        };
 
-        return Modal.Locator($".{className}");
+        return Element.Locator($".{className}");
     }
 
     public async Task ClickAsync(MessageModalButton button)
@@ -32,42 +36,67 @@ public class MessageModalProxy : ModalProxy
     public async Task ClickWaitCloseAsync(MessageModalButton button)
     {
         await GetButton(button).ClickAsync();
-        await WaitForCloseAsync();
+        await WaitNotVisibleAsync();
     }
 
-    public async Task<string> GetBodyTextAsync() => 
-        await Modal.Locator(".modal-body").TextContentAsync() ?? "";
+    public async Task<string> BodyTextAsync()
+    {
+        var body = await Element.Locator(".modal-body").InnerTextAsync();
+        return body.Trim();
+    }
 
-    public async Task<string> GetTitleTextAsync() => 
-        await Modal.Locator(".modal-title").TextContentAsync() ?? "";
+    public async Task<string> TitleTextAsync()
+    {
+        var title = await Element.Locator(".modal-title").InnerTextAsync();
+        return title.Trim();
+    }
+
+    public async Task WaitNotVisibleAsync()
+    {
+        await Element.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });
+    }
 }
 
 public static class MessageModalProxyExtensions
 {
     public static async Task<MessageModalProxy?> GetMessageModalAsync(this IPage page)
     {
-        var count = await page.Locator(".message-modal").CountAsync();
+        var element = page.Locator(".message-modal");
 
-        if (count == 0)
+        if (await element.CountAsync() == 0)
             return null;
 
-        var element = page.Locator(".message-modal").First;
-
-        var parent = page.Locator(".modal-dialog").Filter(new LocatorFilterOptions
-        {
-            Has = element
-        });
-
-        return new MessageModalProxy(page, parent);
+        return new MessageModalProxy(element.Locator(".."), page);
     }
 
     public static async Task CloseMessageModalAsync(this IPage page, MessageModalButton button)
     {
-        var message = await GetMessageModalAsync(page);
-        if (message == null)
-            throw new InvalidOperationException("No message modal found");
+        var message = await page.WaitForMessageModalAsync();
+        if (message != null)
+            await message.ClickWaitCloseAsync(button);
+    }
 
-        await message.ClickAsync(button);
+    public static MessageModalProxy AsMessageModal(this ILocator element, IPage page)
+    {
+        return new MessageModalProxy(element, page);
+    }
+
+    public static async Task<MessageModalProxy?> WaitForMessageModalAsync(this IPage page, int timeoutMs = 5000)
+    {
+        var element = page.Locator(".message-modal");
+        try
+        {
+            await element.WaitForAsync(new LocatorWaitForOptions
+            {
+                State = WaitForSelectorState.Visible,
+                Timeout = timeoutMs
+            });
+            return new MessageModalProxy(element.Locator(".."), page);
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
 

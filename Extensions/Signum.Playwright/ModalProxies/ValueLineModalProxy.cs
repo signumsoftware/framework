@@ -1,40 +1,41 @@
 using Microsoft.Playwright;
+using Signum.Playwright.LineProxies;
 
 namespace Signum.Playwright.ModalProxies;
 
-public class ValueLineModalProxy : ModalProxy
+public class AutoLineModalProxy : ModalProxy
 {
     private PropertyRoute route;
+    public ILocator Element { get; }
+    public IPage Page { get; }
 
-    public ValueLineModalProxy(IPage page, PropertyRoute route) : base(page)
+    public AutoLineModalProxy(ILocator element, IPage page, PropertyRoute route) : base(element, page)
     {
-        this.route = route;
-    }
-
-    public ValueLineModalProxy(IPage page, ILocator modalElement, PropertyRoute route) : base(modalElement, page)
-    {
+        this.Element = element;
+        this.Page = page;
         this.route = route;
     }
 
     public async Task<BaseLineProxy> GetAutoLineAsync()
     {
-        var formGroup = Modal.Locator("div.modal-body div.form-group");
-        await formGroup.WaitVisibleAsync();
-        
-        return await LineProxyHelpers.AutoLineAsync(formGroup.First, route, Page);
+        // Warten bis die form-group sichtbar ist
+        var formGroup = Element.Locator("div.modal-body div.form-group");
+        await formGroup.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+
+        return BaseLineProxy.AutoLine(formGroup, route, Page);
     }
 }
 
 public static class ValueLineModalProxyExtensions
 {
-    public static ValueLineModalProxy AsValueLineModal(this ModalProxy modal, PropertyRoute pr)
+    public static AutoLineModalProxy AsAutoLineModal(this ILocator element, IPage page, PropertyRoute pr)
     {
-        return new ValueLineModalProxy(modal.Page, modal.Modal, pr);
+        return new AutoLineModalProxy(element, page, pr);
     }
 
-    public static ValueLineModalProxy AsValueLineModal<T, V>(this ModalProxy modal, Expression<Func<T, V>> propertyRoute)
+    public static AutoLineModalProxy AsValueLineModal<T, V>(this ILocator element, IPage page, Expression<Func<T, V>> propertyRoute)
         where T : IRootEntity
     {
-        return new ValueLineModalProxy(modal.Page, modal.Modal, PropertyRoute.Construct(propertyRoute));
+        return new AutoLineModalProxy(element, page, PropertyRoute.Construct(propertyRoute));
     }
 }

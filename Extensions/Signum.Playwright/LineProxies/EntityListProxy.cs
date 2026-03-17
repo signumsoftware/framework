@@ -1,77 +1,55 @@
+using Signum.Playwright.Frames;
 using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.LineProxies;
 
-/// <summary>
-/// Proxy for EntityList control (autocomplete list of entities)
-/// Equivalent to Selenium's EntityListProxy
-/// </summary>
 public class EntityListProxy : EntityBaseProxy
 {
+    public override PropertyRoute ItemRoute => base.ItemRoute.Add("Item");
+
     public EntityListProxy(ILocator element, PropertyRoute route, IPage page)
         : base(element, route, page)
     {
     }
 
-    public ILocator Items => Element.Locator(".sf-search-element");
+    public override Task<object?> GetValueUntypedAsync() => throw new NotImplementedException();
+    public override Task SetValueUntypedAsync(object? value) => throw new NotImplementedException();
+    public override Task<bool> IsReadonlyAsync() => throw new NotImplementedException();
 
-    public override async Task SetValueUntypedAsync(object? value)
+    public ILocator ListElement => Element.Locator("select.form-control");
+
+    public ILocator OptionElement(int index)
     {
-        throw new NotImplementedException("EntityList SetValue not yet implemented");
+        return ListElement.Locator($"option:nth-child({index + 1})");
     }
 
-    public override async Task<object?> GetValueUntypedAsync()
+    public async Task SelectAsync(int index)
     {
-        var count = await GetItemCountAsync();
-        var items = new List<EntityInfoProxy?>();
-
-        for (int i = 0; i < count; i++)
-        {
-            items.Add(await GetEntityInfoAsync(i));
-        }
-
-        return items;
+        var option = OptionElement(index);
+        var value = await option.GetAttributeAsync("value");
+        await ListElement.SelectOptionAsync(value);
     }
 
-    public override async Task<bool> IsReadonlyAsync()
+    public async Task<FrameModalProxy<T>> ViewAsync<T>(int index) where T : ModifiableEntity
     {
-        return await Element.IsDomDisabledAsync();
+        await SelectAsync(index);
+        return await base.ViewInternalAsync<T>();
     }
 
-    public async Task<int> GetItemCountAsync()
+    public async Task<int> ItemsCountAsync()
     {
-        return await Items.CountAsync();
+        return await ListElement.Locator("option").CountAsync();
     }
 
-    public async Task AddItemAsync(Lite<IEntity> lite)
+    public async Task<EntityInfoProxy?> EntityInfoAsync(int index)
     {
-        if (await AutoCompleteElement.IsVisibleAsync())
-        {
-            await AutoCompleteAsync(lite);
-        }
-        else if (await FindButton.IsPresentAsync())
-        {
-            var findModal = await FindModalAsync();
-            await findModal.Modal.Locator($"tr[data-entity-key='{lite.Key()}']").ClickAsync();
-            await findModal.OkAsync();
-        }
+        return await EntityInfoInternalAsync(index);
     }
 
-    public async Task RemoveItemAsync(int index)
+    public async Task DoubleClickAsync(int index)
     {
-        var item = Items.Nth(index);
-        var removeButton = item.Locator(".sf-line-button.sf-remove");
-        await removeButton.ClickAsync();
-    }
-
-    public async Task<ModalProxy> ViewItemAsync<T>(int index) where T : ModifiableEntity
-    {
-        var item = Items.Nth(index);
-        var viewButton = item.Locator(".sf-line-button.sf-view");
-        
-        return await ModalProxy.CaptureAsync(Page, async () =>
-        {
-            await viewButton.ClickAsync();
-        });
+        var option = OptionElement(index);
+        await option.ClickAsync();
+        await option.DblClickAsync();
     }
 }

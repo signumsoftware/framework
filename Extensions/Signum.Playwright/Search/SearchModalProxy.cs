@@ -1,66 +1,109 @@
 using Microsoft.Playwright;
+using Signum.Playwright.Frames;
 using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Search;
 
 public class SearchModalProxy : ModalProxy
 {
-    public SearchControlProxy SearchControl { get; }
+    public SearchControlProxy SearchControl { get; private set; }
+    public ResultTableProxy Results => SearchControl.Results;
+    public FiltersProxy Filters => SearchControl.Filters;
+    public PaginationSelectorProxy Pagination => SearchControl.Pagination;
 
-    public SearchModalProxy(IPage page) : base(page)
+    public SearchModalProxy(ILocator element, IPage page, bool waitInitialSearch = true)
+        : base(element, page)
     {
-        SearchControl = new SearchControlProxy(Modal.Locator(".sf-search-control"), page);
+        this.SearchControl = new SearchControlProxy(element.Locator(".sf-search-control"), page);
+
+        if (waitInitialSearch)
+            this.SearchControl.WaitInitialSearchCompletedAsync().GetAwaiter().GetResult();
     }
 
-    public SearchModalProxy(IPage page, ILocator modalElement) : base(modalElement, page)
+    public async Task SelectLiteAsync(Lite<IEntity> lite)
     {
-        SearchControl = new SearchControlProxy(Modal.Locator(".sf-search-control"), page);
+        if (!await this.SearchControl.FiltersVisibleAsync())
+            await this.SearchControl.ToggleFiltersAsync(true);
+
+        await this.SearchControl.Filters.AddFilterAsync("Entity.Id", FilterOperation.EqualTo, lite.Id);
+
+        await this.SearchControl.SearchAsync();
+
+        this.SearchControl.Results.SelectRow(lite);
+
+        await this.OkWaitClosedAsync();
+
+        await DisposeAsync();
     }
 
-    public async Task<ModalProxy> SelectAndViewAsync(int rowIndex)
+    public async Task SelectByPositionAsync(int rowIndex)
     {
-        var row = SearchControl.Results.GetRow(rowIndex);
-        
-        return await ModalProxy.CaptureAsync(Page, async () =>
+        this.SearchControl.Results.SelectRow(rowIndex);
+        await this.OkWaitClosedAsync();
+        await DisposeAsync();
+    }
+
+    public async Task SelectByPositionOrderByIdAsync(int rowIndex)
+    {
+        this.Results.OrderBy("Id");
+        this.SearchControl.Results.SelectRow(rowIndex);
+        await this.OkWaitClosedAsync();
+        await DisposeAsync();
+    }
+
+    public async Task SelectByIdAsync(PrimaryKey id)
+    {
+        if (!await this.SearchControl.FiltersVisibleAsync())
+            await this.SearchControl.ToggleFiltersAsync(true);
+
+        await this.SearchControl.Filters.AddFilterAsync("Entity.Id", FilterOperation.EqualTo, id);
+        await this.SearchControl.SearchAsync();
+
+        this.Results.SelectRow(0);
+
+        await this.OkWaitClosedAsync();
+        await DisposeAsync();
+    }
+
+    public async Task SelectByPositionAsync(params int[] rowIndexes)
+    {
+        await this.SearchControl.SearchAsync();
+
+        foreach (var index in rowIndexes)
+            this.SearchControl.Results.SelectRow(index);
+
+        await this.OkWaitClosedAsync();
+        await DisposeAsync();
+    }
+
+    public async Task<FrameModalProxy<T>> CreateAsync<T>() where T : ModifiableEntity
+    {
+        return await SearchControl.CreateAsync<T>();
+    }
+
+    public async Task CreateAndSelectAsync<T>(Func<FrameModalProxy<T>, Task> action) where T : ModifiableEntity
+    {
+        var message = await this.Element.CapturePopupAsync(async () =>
         {
-            await row.ClickAsync();
+            var modal = await SearchControl.CreateAsync<T>();
+            await action(modal);
         });
+
+        await message.AsMessageModalAsync().ClickWaitCloseAsync(MessageModalButton.Yes);
+
+        await WaitNotVisibleAsync();
     }
 
-    public async Task SelectRowAsync(int rowIndex)
+    public async Task SearchAsync()
     {
-        var row = SearchControl.Results.GetRow(rowIndex);
-        await row.ClickAsync();
-        await OkAsync();
-    }
-
-    public async Task<Lite<Entity>?> SelectLiteAsync(int rowIndex)
-    {
-        var row = SearchControl.Results.GetRow(rowIndex);
-        var entityKey = await row.GetAttributeAsync("data-entity-key");
-        
-        await row.ClickAsync();
-        await OkAsync();
-
-        if (string.IsNullOrEmpty(entityKey))
-            return null;
-
-        var parts = entityKey.Split(';');
-        if (parts.Length < 2)
-            return null;
-
-        var type = Type.GetType(parts[0]);
-        var id = PrimaryKey.Parse(parts[1], type!);
-        var text = await row.TextContentAsync();
-
-        return Lite.Create(type!, id, text);
+        await this.SearchControl.SearchAsync();
     }
 }
 
 public static class SearchModalExtensions
 {
-    public static SearchModalProxy AsSearchModal(this ModalProxy modal)
+    public static SearchModalProxy AsSearchModal(this ILocator modal, IPage page, bool waitInitialSearch = true)
     {
-        return new SearchModalProxy(modal.Page, modal.Modal);
+        return new SearchModalProxy(modal, page, waitInitialSearch);
     }
 }

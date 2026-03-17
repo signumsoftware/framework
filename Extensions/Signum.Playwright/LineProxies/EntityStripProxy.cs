@@ -1,9 +1,7 @@
+using Signum.Playwright.Frames;
+
 namespace Signum.Playwright.LineProxies;
 
-/// <summary>
-/// Proxy for EntityStrip control (horizontal list of entities)
-/// Equivalent to Selenium's EntityStripProxy
-/// </summary>
 public class EntityStripProxy : EntityBaseProxy
 {
     public EntityStripProxy(ILocator element, PropertyRoute route, IPage page)
@@ -11,54 +9,35 @@ public class EntityStripProxy : EntityBaseProxy
     {
     }
 
-    public ILocator Items => Element.Locator(".sf-strip-element");
+    public override Task<object?> GetValueUntypedAsync() => throw new NotImplementedException();
+    public override Task SetValueUntypedAsync(object? value) => throw new NotImplementedException();
+    public override Task<bool> IsReadonlyAsync() => throw new NotImplementedException();
 
-    public override async Task SetValueUntypedAsync(object? value)
+    public ILocator ItemsContainerElement => this.Element.Locator("ul.sf-strip");
+
+    public ILocator StripItemSelector(int index)
+        => ItemsContainerElement.Locator($"> li.sf-strip-element:nth-child({index + 1})");
+
+    public async Task<int> ItemsCountAsync()
+        => await ItemsContainerElement.Locator("> li.sf-strip-element").CountAsync();
+
+    public ILocator ViewElementIndex(int index)
+        => StripItemSelector(index).Locator("> a.sf-entitStrip-link");
+
+    public ILocator RemoveElementIndex(int index)
+        => StripItemSelector(index).Locator("> a.sf-remove");
+
+    public async Task RemoveAsync(int index)
+        => await RemoveElementIndex(index).ClickAsync();
+
+    public async Task<FrameModalProxy<T>> ViewAsync<T>(int index) where T : ModifiableEntity
     {
-        throw new NotImplementedException("EntityStrip SetValue not yet implemented");
-    }
+        var changes = await GetChangesAsync();
+        var popup = await CaptureOnClickAsync(ViewElementIndex(index));
 
-    public override async Task<object?> GetValueUntypedAsync()
-    {
-        var count = await GetItemCountAsync();
-        var items = new List<EntityInfoProxy?>();
-
-        for (int i = 0; i < count; i++)
+        return new FrameModalProxy<T>(Page, popup, this.ItemRoute)
         {
-            items.Add(await GetEntityInfoAsync(i));
-        }
-
-        return items;
-    }
-
-    public override async Task<bool> IsReadonlyAsync()
-    {
-        return await Element.IsDomDisabledAsync();
-    }
-
-    public async Task<int> GetItemCountAsync()
-    {
-        return await Items.CountAsync();
-    }
-
-    public async Task AddItemAsync(Lite<IEntity> lite)
-    {
-        if (await AutoCompleteElement.IsVisibleAsync())
-        {
-            await AutoCompleteAsync(lite);
-        }
-        else if (await FindButton.IsPresentAsync())
-        {
-            var findModal = await FindModalAsync();
-            await findModal.Modal.Locator($"tr[data-entity-key='{lite.Key()}']").ClickAsync();
-            await findModal.OkAsync();
-        }
-    }
-
-    public async Task RemoveItemAsync(int index)
-    {
-        var item = Items.Nth(index);
-        var removeButton = item.Locator(".sf-line-button.sf-remove");
-        await removeButton.ClickAsync();
+            Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
+        };
     }
 }

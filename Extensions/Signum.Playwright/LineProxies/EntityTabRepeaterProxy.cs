@@ -1,86 +1,73 @@
 using Microsoft.Playwright;
 using Signum.Basics;
+using Signum.Playwright.Frames;
 using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.LineProxies;
 
-/// <summary>
-/// Proxy for EntityTabRepeater control (tabbed list of embedded entities)
-/// Equivalent to Selenium's EntityTabRepeaterProxy
-/// </summary>
 public class EntityTabRepeaterProxy : EntityBaseProxy
 {
-    public EntityTabRepeaterProxy(ILocator element, PropertyRoute route, IPage page)
+    public ILocator Element { get; }
+    public IPage Page { get; }
+
+    public override PropertyRoute ItemRoute => base.ItemRoute.Add("Item");
+
+    public EntityTabRepeaterProxy(ILocator element, IPage page, PropertyRoute route)
         : base(element, route, page)
     {
+        this.Element = element;
+        this.Page = page;
     }
 
-    public ILocator TabHeaders => Element.Locator(".nav-tabs .nav-link");
-    public ILocator TabContent => Element.Locator(".tab-content");
+    public override Task<object?> GetValueUntypedAsync() => throw new NotImplementedException();
 
-    public override async Task SetValueUntypedAsync(object? value)
+    public override Task SetValueUntypedAsync(object? value) => throw new NotImplementedException();
+
+    public override Task<bool> IsReadonlyAsync() => throw new NotImplementedException();
+
+
+    public ILocator Tab(int index) => Element.Locator($".nav-tabs .nav-item .nav-link[data-rr-ui-event-key=\"{index}\"]");
+
+    public ILocator ElementPanel() => Element.Locator(".sf-repeater-element.active");
+
+    public async Task<LineContainer<T>> SelectTabAsync<T>(int index) where T : ModifiableEntity
     {
-        throw new NotImplementedException("EntityTabRepeater SetValue not yet implemented");
+        await Tab(index).ClickAsync();
+
+        await Page.WaitForFunctionAsync(
+            @"({ container, idx }) => {
+            const panel = container.querySelector('.sf-repeater-element.active');
+            return panel && panel.id && panel.id.endsWith('-' + idx);
+        }",
+            new { container = Element, idx = index });
+
+        return await DetailsAsync<T>();
     }
 
-    public override async Task<object?> GetValueUntypedAsync()
+    public async Task<int> SelectedTabIndexAsync()
     {
-        var count = await GetTabCountAsync();
-        var items = new List<EntityInfoProxy?>();
+        var active = Element.Locator(".nav-tabs .nav-item .nav-link.active");
 
-        for (int i = 0; i < count; i++)
+        await active.WaitForAsync(new LocatorWaitForOptions
         {
-            items.Add(await GetEntityInfoAsync(i));
-        }
-
-        return items;
-    }
-
-    public override async Task<bool> IsReadonlyAsync()
-    {
-        return await Element.IsDomDisabledAsync();
-    }
-
-    public async Task<int> GetTabCountAsync()
-    {
-        return await TabHeaders.CountAsync();
-    }
-
-    public async Task AddTabAsync<T>() where T : ModifiableEntity
-    {
-        await CreateModalAsync<T>();
-    }
-
-    public async Task RemoveTabAsync(int index)
-    {
-        await SelectTabAsync(index);
-        var activeTab = TabContent.Locator(".tab-pane.active");
-        var removeButton = activeTab.Locator(".sf-line-button.sf-remove");
-        await removeButton.ClickAsync();
-    }
-
-    public async Task SelectTabAsync(int index)
-    {
-        var tab = TabHeaders.Nth(index);
-        await tab.ClickAsync();
-        await Task.Delay(300); // Wait for tab content to be visible
-    }
-
-    public async Task<string?> GetTabTitleAsync(int index)
-    {
-        var tab = TabHeaders.Nth(index);
-        return await tab.TextContentAsync();
-    }
-
-    public async Task<ModalProxy> ViewTabAsync<T>(int index) where T : ModifiableEntity
-    {
-        await SelectTabAsync(index);
-        var activeTab = TabContent.Locator(".tab-pane.active");
-        var viewButton = activeTab.Locator(".sf-line-button.sf-view");
-        
-        return await ModalProxy.CaptureAsync(Page, async () =>
-        {
-            await viewButton.ClickAsync();
+            State = WaitForSelectorState.Visible
         });
+
+        var value = await active.GetAttributeAsync("data-rr-ui-event-key");
+
+        return int.Parse(value!);
+    }
+
+    public async Task<LineContainer<T>> DetailsAsync<T>()
+        where T : ModifiableEntity
+    {
+        var panel = ElementPanel();
+
+        await panel.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible
+        });
+
+        return new LineContainer<T>(panel, this.Page, this.ItemRoute);
     }
 }

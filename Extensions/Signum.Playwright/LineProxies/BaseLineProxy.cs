@@ -1,12 +1,6 @@
-using Microsoft.Playwright;
-using Signum.Basics;
-
+using Signum.Entities.Reflection;
 namespace Signum.Playwright.LineProxies;
 
-/// <summary>
-/// Base class for all line proxies in Playwright
-/// Equivalent to Selenium's BaseLineProxy
-/// </summary>
 public abstract class BaseLineProxy
 {
     public ILocator Element { get; }
@@ -20,116 +14,116 @@ public abstract class BaseLineProxy
         Page = page;
     }
 
-    /// <summary>
-    /// Set value with automatic type handling
-    /// </summary>
     public abstract Task SetValueUntypedAsync(object? value);
-
-    /// <summary>
-    /// Get value with automatic type handling
-    /// </summary>
     public abstract Task<object?> GetValueUntypedAsync();
-
-    /// <summary>
-    /// Check if the line is readonly
-    /// </summary>
     public abstract Task<bool> IsReadonlyAsync();
 
-    /// <summary>
-    /// Factory method to create appropriate line proxy based on property route
-    /// Equivalent to Selenium's AutoLine
-    /// NOTE: Simplified implementation - expand based on your needs
-    /// </summary>
     public static BaseLineProxy AutoLine(ILocator element, PropertyRoute route, IPage page)
     {
-        var type = route.Type;
-        
-        // Remove nullable wrapper if present
-        if (Nullable.GetUnderlyingType(type) != null)
-            type = Nullable.GetUnderlyingType(type)!;
+        var type = route.Type.UnNullify();
+        var imp = route.TryGetImplementations();
 
-        // Entity types
-        if (typeof(Entity).IsAssignableFrom(type) || typeof(Lite<>).IsAssignableFromGenericDefinition(type))
+        if (type.ElementType() != null && type != typeof(string))
         {
-            // TODO: Add logic to distinguish between EntityLine, EntityCombo, EntityDetail based on implementations
-            return new EntityLineProxy(element, route, page);
-        }
+            if (imp != null)
+            {
+                if (imp.Value.IsByAll)
+                    return new EntityStripProxy(element, route, page);
 
-        // Bool
-        if (type == typeof(bool))
+                if (imp.Value.Types.Count() == 1 && !type.IsLite() &&
+                    (type.IsModelEntity() ||
+                     EntityKindCache.GetEntityKind(imp.Value.Types.SingleEx())
+                        is EntityKind.Part or EntityKind.SharedPart))
+                    return new EntityTableProxy(element, route, page);
+
+                if (imp.Value.Types.All(t =>
+                        EntityKindCache.GetEntityKind(t)
+                        is EntityKind.Part or EntityKind.SharedPart))
+                    return new EntityRepeaterProxy(element, route, page);
+
+                if (imp.Value.Types.All(t =>
+                        EntityKindCache.IsLowPopulation(t)))
+                    return new EntityListCheckBoxProxy(element, route, page);
+
+                return new EntityStripProxy(element, route, page);
+            }
+
+            if (type.IsEmbeddedEntity())
+                return new EntityTableProxy(element, route, page);
+
+            if (type.IsEnum)
+                throw new InvalidOperationException("EnumCheckBoxListProxy not implemented");
+
+            throw new InvalidOperationException("MultiValueLineProxy not implemented");
+        }
+        else
         {
-            return new CheckboxLineProxy(element, route, page);
+            if (type == typeof(PrimaryKey))
+                type = PrimaryKey.Type(route.RootType);
+
+            if (imp != null)
+            {
+                if (imp.Value.IsByAll)
+                    return new EntityLineProxy(element, route, page);
+
+                if (imp.Value.Types.All(t =>
+                        EntityKindCache.GetEntityKind(t)
+                        is EntityKind.Part or EntityKind.SharedPart))
+                    return new EntityDetailProxy(element, route, page);
+
+                if (imp.Value.Types.All(t =>
+                        EntityKindCache.IsLowPopulation(t)))
+                    return new EntityComboProxy(element, route, page);
+
+                return new EntityLineProxy(element, route, page);
+            }
+
+            if (type.IsEntity())
+                return new EntityLineProxy(element, route, page);
+
+            if (type.IsEmbeddedEntity())
+                return new EntityDetailProxy(element, route, page);
+
+            if (type.IsEnum)
+                return new EnumLineProxy(element, route, page);
+
+            if (type == typeof(bool))
+                return route.Type.IsNullable()
+                    ? new EnumLineProxy(element, route, page)
+                    : new CheckboxLineProxy(element, route, page);
+
+            if (type == typeof(DateTime) ||
+                type == typeof(DateOnly) ||
+                type == typeof(DateTimeOffset))
+                return new DateTimeLineProxy(element, route, page);
+
+            if (type == typeof(string))
+            {
+                var multiLine =
+                    Validator.TryGetPropertyValidator(route)?
+                        .Validators.Any(a =>
+                            a is StringLengthValidatorAttribute slv &&
+                            slv.MultiLine);
+
+                if (multiLine == true)
+                    return new TextAreaLineProxy(element, route, page);
+
+                if (Reflector.GetFormatString(route) == "Color")
+                    return new ColorBoxLineProxy(element, route, page);
+
+                return new TextBoxLineProxy(element, route, page);
+            }
+
+            if (type == typeof(int) || type == typeof(decimal))
+                return new NumberLineProxy(element, route, page);
+
+            if (type == typeof(Guid))
+                return new GuidBoxLineProxy(element, route, page);
+
+            if (type == typeof(TimeSpan) || type == typeof(TimeOnly))
+                return new TimeLineProxy(element, route, page);
+
+            throw new UnexpectedValueException(type);
         }
-
-        // Enum
-        if (type.IsEnum)
-        {
-            return new EnumLineProxy(element, route, page);
-        }
-
-        // DateTime
-        if (type == typeof(DateTime) || type == typeof(DateOnly) || type == typeof(DateTimeOffset))
-        {
-            return new DateTimeLineProxy(element, route, page);
-        }
-
-        // TimeSpan
-        if (type == typeof(TimeSpan) || type == typeof(TimeOnly))
-        {
-            return new TimeLineProxy(element, route, page);
-        }
-
-        // Guid
-        if (type == typeof(Guid))
-        {
-            return new GuidBoxLineProxy(element, route, page);
-        }
-
-        // Numeric types
-        if (type.IsNumericType())
-        {
-            return new NumberLineProxy(element, route, page);
-        }
-
-        // String - default to TextBox
-        if (type == typeof(string))
-        {
-            // TODO: Detect multiline from validators
-            return new TextBoxLineProxy(element, route, page);
-        }
-
-        // Default to text box
-        return new TextBoxLineProxy(element, route, page);
-    }
-
-    /// <summary>
-    /// Get the input element within the line
-    /// </summary>
-    protected virtual ILocator InputLocator => Element.Locator(".form-control, .form-control-readonly, input, textarea, select");
-
-    /// <summary>
-    /// Helper to get value from input
-    /// </summary>
-    protected async Task<string?> GetInputValueAsync()
-    {
-        var input = InputLocator.First;
-        
-        // Check if it's a select element
-        var tagName = await input.EvaluateAsync<string>("el => el.tagName.toLowerCase()");
-        if (tagName == "select")
-        {
-            return await input.EvaluateAsync<string>("el => el.options[el.selectedIndex]?.text");
-        }
-
-        return await input.InputValueAsync();
-    }
-
-    /// <summary>
-    /// Helper to set value in input
-    /// </summary>
-    protected async Task SetInputValueAsync(string? value)
-    {
-        var input = InputLocator.First;
-        await input.FillAsync(value ?? "");
     }
 }

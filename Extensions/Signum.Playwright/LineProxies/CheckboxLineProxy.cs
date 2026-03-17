@@ -1,6 +1,3 @@
-using Microsoft.Playwright;
-using Signum.Basics;
-
 namespace Signum.Playwright.LineProxies;
 
 /// <summary>
@@ -14,45 +11,30 @@ public class CheckboxLineProxy : BaseLineProxy
     {
     }
 
-    protected override ILocator InputLocator => Element.Locator("input[type='checkbox']");
+    public ILocator CheckboxLocator => this.Element.Locator("input[type=checkbox]");
 
-    public override async Task SetValueUntypedAsync(object? value)
+    public async Task SetValueAsync(bool value)
     {
-        var boolValue = value is bool b && b;
-        await SetCheckedAsync(boolValue);
+        if (value)
+            await CheckboxLocator.CheckAsync();
+        else
+            await CheckboxLocator.UncheckAsync();
+    }
+
+    public async Task<bool> GetValueAsync()
+    {
+        return await CheckboxLocator.IsCheckedAsync();
     }
 
     public override async Task<object?> GetValueUntypedAsync()
-    {
-        return await GetCheckedAsync();
-    }
+        => await GetValueAsync();
 
-    public async Task SetCheckedAsync(bool isChecked)
-    {
-        var checkbox = InputLocator.First;
-        var currentState = await checkbox.IsCheckedAsync();
-
-        if (currentState != isChecked)
-        {
-            await checkbox.ClickAsync();
-            
-            // Wait for state to change
-            await Assertions.Expect(checkbox).ToBeCheckedAsync(new LocatorAssertionsToBeCheckedOptions
-            {
-                Checked = isChecked
-            });
-        }
-    }
-
-    public async Task<bool> GetCheckedAsync()
-    {
-        var checkbox = InputLocator.First;
-        return await checkbox.IsCheckedAsync();
-    }
+    public override async Task SetValueUntypedAsync(object? value)
+        => await SetValueAsync((bool)value!);
 
     public override async Task<bool> IsReadonlyAsync()
     {
-        var checkbox = InputLocator.First;
-        return !await checkbox.IsEnabledAsync();
+        return await CheckboxLocator.IsDisabledAsync()
+            || (await CheckboxLocator.GetAttributeAsync("readonly")) != null;
     }
 }

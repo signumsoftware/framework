@@ -4,141 +4,114 @@ namespace Signum.Playwright.Search;
 
 public class ResultTableProxy
 {
-    public ILocator Element { get; }
-    public SearchControlProxy SearchControl { get; }
-    public IPage Page => SearchControl.Page;
+    public IPage Page { get; private set; }
+    public ILocator Element { get; private set; }
+    private SearchControlProxy SearchControl;
 
-    public ResultTableProxy(ILocator element, SearchControlProxy searchControl)
+    public ResultTableProxy(ILocator element, SearchControlProxy searchControl, IPage page)
     {
-        Element = element;
-        SearchControl = searchControl;
+        this.Page = page;
+        this.Element = element;
+        this.SearchControl = searchControl;
     }
 
-    public ILocator Table => Element.Locator("table.sf-search-results, table");
-    public ILocator Rows => Table.Locator("tbody tr");
-    public ILocator HeaderCells => Table.Locator("thead th");
+    public ILocator ResultTableElement => Element.Locator("table.sf-search-results");
+    public ILocator RowsLocator => Element.Locator("table.sf-search-results > tbody > tr");
 
-    public async Task<int> GetRowCountAsync()
+    public async Task<List<ResultRowProxy>> AllRowsAsync()
     {
-        return await Rows.CountAsync();
+        var elements = await RowsLocator.AllAsync();
+        return elements.Select(e => new ResultRowProxy(e, Page)).ToList();
     }
 
-    public ILocator GetRow(int index)
+    public ResultRowProxy RowElement(int rowIndex)
     {
-        return Rows.Nth(index);
+        return new ResultRowProxy(RowElementLocator(rowIndex), Page);
     }
 
-    public async Task<FramePageProxy<T>> EntityClickAsync<T>(int rowIndex) where T : Entity
+    private ILocator RowElementLocator(int rowIndex)
     {
-        var row = GetRow(rowIndex);
-        var link = row.Locator("td a").First;
-        
-        await link.ClickAsync();
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        
-        return new FramePageProxy<T>(Page);
+        return Element.Locator($"tr[data-row-index='{rowIndex}']");
     }
 
-    public async Task EntityClickAsync(int rowIndex)
+    public ResultRowProxy RowElement(Lite<IEntity> lite)
     {
-        var row = GetRow(rowIndex);
-        var link = row.Locator("td a").First;
-        
-        await link.ClickAsync();
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        return new ResultRowProxy(RowElementLocator(lite), Page);
     }
 
-    public async Task<string?> GetCellTextAsync(int rowIndex, int columnIndex)
+    private ILocator RowElementLocator(Lite<IEntity> lite)
     {
-        var row = GetRow(rowIndex);
-        var cell = row.Locator("td").Nth(columnIndex);
-        return await cell.TextContentAsync();
+        return Element.Locator($"tr[data-entity='{lite.Key()}']");
     }
 
-    public async Task<string?> GetCellTextAsync(int rowIndex, string columnName)
+    public async Task<List<Lite<IEntity>>> SelectedEntitiesAsync()
     {
-        var columnIndex = await GetColumnIndexAsync(columnName);
-        if (columnIndex < 0)
-            throw new InvalidOperationException($"Column '{columnName}' not found");
-
-        return await GetCellTextAsync(rowIndex, columnIndex);
+        var rows = await RowsLocator.AllAsync();
+        var entities = new List<Lite<IEntity>>();
+        foreach (var row in rows)
+        {
+            if (await row.Locator("input.sf-td-selection:checked").CountAsync() > 0)
+                entities.Add(Lite.Parse<IEntity>(await row.GetAttributeAsync("data-entity")));
+        }
+        return entities;
     }
 
     public ILocator CellElement(int rowIndex, string token)
     {
-        // Find the column index for the token
-        return GetRow(rowIndex).Locator($"td[data-column-name='{token}'], td[data-token='{token}']");
+        var columnIndex = GetColumnIndex(token);
+        return RowElement(rowIndex).CellElement(columnIndex);
     }
 
-    public ILocator HeaderCellElement(string token)
+    public ILocator CellElement(Lite<IEntity> lite, string token)
     {
-        return Table.Locator($"thead th[data-column-name='{token}'], thead th[data-token='{token}']");
+        var columnIndex = GetColumnIndex(token);
+        return RowElement(lite).CellElement(columnIndex);
     }
 
-    public async Task<int> GetColumnIndexAsync(string columnName)
+    public int GetColumnIndex(string token)
     {
-        var headerCount = await HeaderCells.CountAsync();
-        
-        for (int i = 0; i < headerCount; i++)
-        {
-            var headerText = await HeaderCells.Nth(i).TextContentAsync();
-            if (headerText?.Trim() == columnName)
-                return i;
-        }
-
-        return -1;
+        var tokens = GetColumnTokens();
+        var index = Array.IndexOf(tokens, token);
+        if (index == -1)
+            throw new InvalidOperationException($"Token {token} not found between {string.Join(", ", tokens)}");
+        return index;
     }
 
-    public async Task<List<string[]>> GetAllDataAsync()
+    public void SelectRow(int rowIndex) => RowElement(rowIndex).SelectedCheckbox.ClickAsync().GetAwaiter().GetResult();
+    public void SelectRow(params int[] rowIndexes)
     {
-        var data = new List<string[]>();
-        var rowCount = await GetRowCountAsync();
-
-        for (int i = 0; i < rowCount; i++)
-        {
-            var row = GetRow(i);
-            var cells = row.Locator("td");
-            var cellCount = await cells.CountAsync();
-
-            var rowData = new string[cellCount];
-            for (int j = 0; j < cellCount; j++)
-            {
-                rowData[j] = (await cells.Nth(j).TextContentAsync())?.Trim() ?? "";
-            }
-
-            data.Add(rowData);
-        }
-
-        return data;
+        foreach (var index in rowIndexes)
+            SelectRow(index);
     }
+    public void SelectRow(Lite<IEntity> lite) => RowElement(lite).SelectedCheckbox.ClickAsync().GetAwaiter().GetResult();
 
-    public async Task SelectRowAsync(int rowIndex)
+    public ILocator HeaderElement => Element.Locator("thead > tr > th");
+
+    public string[] GetColumnTokens()
     {
-        var row = GetRow(rowIndex);
-        var checkbox = row.Locator("input[type='checkbox']");
-        await checkbox.CheckAsync();
+        var ths = Element.Locator("thead > tr > th").AllAsync().GetAwaiter().GetResult();
+        return ths.Select(a => a.GetAttributeAsync("data-column-name").GetAwaiter().GetResult() ?? "").ToArray();
     }
 
-    public async Task<bool> IsRowSelectedAsync(int rowIndex)
+    public ILocator HeaderCellElement(string token) => HeaderElement.Locator($"[data-column-name='{token}']");
+
+    public int RowsCount() => Element.Locator("tbody > tr[data-entity]").CountAsync().GetAwaiter().GetResult();
+}
+
+public class ResultRowProxy
+{
+    public ILocator RowElement { get; private set; }
+    private IPage Page;
+
+    public ResultRowProxy(ILocator rowElement, IPage page)
     {
-        var row = GetRow(rowIndex);
-        var checkbox = row.Locator("input[type='checkbox']");
-        return await checkbox.IsCheckedAsync();
+        RowElement = rowElement;
+        Page = page;
     }
 
-    public async Task<List<int>> GetSelectedRowsAsync()
-    {
-        var selectedRows = new List<int>();
-        var rowCount = await GetRowCountAsync();
+    public ILocator SelectedCheckbox => RowElement.Locator("input.sf-td-selection");
 
-        for (int i = 0; i < rowCount; i++)
-        {
-            if (await IsRowSelectedAsync(i))
-            {
-                selectedRows.Add(i);
-            }
-        }
+    public ILocator CellElement(int columnIndex) => RowElement.Locator($"td:nth-child({columnIndex + 1})");
 
-        return selectedRows;
-    }
+    public ILocator EntityLink(int entityColumnIndex) => CellElement(entityColumnIndex).Locator("> a");
 }

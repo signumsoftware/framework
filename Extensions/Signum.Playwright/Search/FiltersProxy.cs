@@ -8,103 +8,87 @@ public class FiltersProxy
     public IPage Page { get; }
     public object QueryName { get; }
 
-    public FiltersProxy(ILocator element, IPage page, object queryName)
+    public FiltersProxy(ILocator element, object queryName, IPage page)
     {
         Element = element;
-        Page = page;
         QueryName = queryName;
+        Page = page;
     }
 
-    public ILocator FilterRows => Element.Locator(".sf-filter-row");
-
-    public async Task<int> GetFilterCountAsync()
+    public async Task<List<FilterProxy>> FiltersAsync()
     {
-        return await FilterRows.CountAsync();
+        var rows = await Element.Locator("table > tbody > tr").ElementHandlesAsync();
+        var list = new List<FilterProxy>();
+
+        foreach (var row in rows)
+        {
+            var locator = row; // ILocator wrapper in Playwright
+            var className = await locator.GetAttributeAsync("class") ?? "";
+
+            if (className.Contains("sf-filter-condition"))
+                list.Add(new FilterConditionProxy(locator, QueryName, Page));
+            else if (className.Contains("sf-filter-group"))
+                list.Add(new FilterGroupProxy(locator, QueryName, Page));
+        }
+
+        return list;
     }
 
-    public async Task AddFilterAsync(string columnName)
+    public async Task<FilterProxy> GetNewFilterAsync(Func<Task> action)
     {
-        var addButton = Element.Locator(".sf-filter-button-add, button:has-text('Add filter')");
-        await addButton.ClickAsync();
-
-        // Select the column
-        var columnSelect = Element.Locator(".sf-filter-column select").Last;
-        await columnSelect.SelectOptionAsync(new SelectOptionValue { Label = columnName });
-    }
-
-    public FilterConditionProxy GetFilter(int index)
-    {
-        var filterRow = FilterRows.Nth(index);
-        return new FilterConditionProxy(filterRow, Page, QueryName);
-    }
-
-    public async Task<FilterConditionProxy> GetNewFilterAsync(Func<Task> action)
-    {
-        var initialCount = await GetFilterCountAsync();
+        var oldFilters = await FiltersAsync();
         await action();
-        
-        // Wait for new filter to appear
-        await Page.WaitForTimeoutAsync(300);
-        var newCount = await GetFilterCountAsync();
-        
-        if (newCount > initialCount)
+        ILocator? newFilter = null;
+
+        await Element.Page.WaitForFunctionAsync(async () =>
         {
-            return GetFilter(newCount - 1);
-        }
+            var currentFilters = await FiltersAsync();
+            if (currentFilters.Count > oldFilters.Count)
+            {
+                newFilter = currentFilters.Skip(oldFilters.Count).FirstOrDefault();
+                return true;
+            }
+            return false;
+        });
 
-        throw new InvalidOperationException("No new filter was added");
+        return newFilter!;
     }
 
-    public async Task RemoveFilterAsync(int index)
+    public ILocator AddFilterButton => Element.Locator(".sf-line-button.sf-create-condition");
+    public ILocator AddGroupButton => Element.Locator(".sf-line-button.sf-create-group");
+    public ILocator RemoveAllButton => Element.Locator("thead th .sf-remove");
+
+    public async Task<FilterConditionProxy> AddFilterAsync()
     {
-        var filter = GetFilter(index);
-        await filter.RemoveAsync();
+        return (FilterConditionProxy)await GetNewFilterAsync(async () => await AddFilterButton.ClickAsync());
     }
 
-    public async Task ClearFiltersAsync()
+    public async Task<FilterGroupProxy> AddGroupAsync()
     {
-        var clearButton = Element.Locator(".sf-filter-button-clear, button:has-text('Clear')");
-        if (await clearButton.IsPresentAsync())
-        {
-            await clearButton.ClickAsync();
-        }
-    }
-}
-
-public class FilterConditionProxy
-{
-    public ILocator Element { get; }
-    public IPage Page { get; }
-    public object QueryName { get; }
-
-    public FilterConditionProxy(ILocator element, IPage page, object queryName)
-    {
-        Element = element;
-        Page = page;
-        QueryName = queryName;
+        return (FilterGroupProxy)await GetNewFilterAsync(async () => await AddGroupButton.ClickAsync());
     }
 
-    public ILocator OperationSelect => Element.Locator(".sf-filter-operation select");
-    public ILocator ValueInput => Element.Locator(".sf-filter-value input, .sf-filter-value select");
-    public ILocator RemoveButton => Element.Locator(".sf-line-button.sf-remove");
-
-    public async Task SetOperationAsync(string operation)
+    public async Task AddFilterAsync(string token, FilterOperation operation, object? value)
     {
-        await OperationSelect.SelectOptionAsync(new SelectOptionValue { Label = operation });
+        var fo = await AddFilterAsync();
+        await fo.QueryToken.SelectTokenAsync(token);
+        fo.Operation = operation;
+        await fo.SetValueAsync(value);
     }
 
-    public async Task SetValueAsync(string value)
+    public async Task RemoveAllAsync()
     {
-        await ValueInput.First.FillAsync(value);
+        await RemoveAllButton.ClickAsync();
     }
 
-    public async Task<string?> GetValueAsync()
+    public async Task<bool> IsAddFilterEnabledAsync()
     {
-        return await ValueInput.First.InputValueAsync();
+        return await AddFilterButton.Locator(":not([disabled])").IsVisibleAsync();
     }
 
-    public async Task RemoveAsync()
+    public async Task<FilterProxy> GetFilterAsync(int index)
     {
-        await RemoveButton.ClickAsync();
+        var filters = await FiltersAsync();
+        return filters[index];
     }
 }

@@ -1,9 +1,7 @@
+using Signum.Playwright.Frames;
+
 namespace Signum.Playwright.LineProxies;
 
-/// <summary>
-/// Proxy for EntityDetail control (embedded entity form)
-/// Equivalent to Selenium's EntityDetailProxy
-/// </summary>
 public class EntityDetailProxy : EntityBaseProxy
 {
     public EntityDetailProxy(ILocator element, PropertyRoute route, IPage page)
@@ -11,53 +9,35 @@ public class EntityDetailProxy : EntityBaseProxy
     {
     }
 
+    public override async Task<object?> GetValueUntypedAsync()
+        => (await EntityInfoInternalAsync(null))?.ToLite();
+
     public override async Task SetValueUntypedAsync(object? value)
+        => await SetLiteAsync(value is Entity e ? e.ToLite() : (Lite<Entity>?)value);
+
+    public override Task<bool> IsReadonlyAsync()
+        => throw new NotImplementedException();
+
+    public async Task<Lite<IEntity>?> GetLiteAsync()
+        => (await EntityInfoInternalAsync(null))?.ToLite();
+
+    public async Task SetLiteAsync(Lite<Entity>? value)
     {
         if (value == null)
         {
-            if (await CreateButton.IsPresentAsync())
-            {
-                // Already has a value, remove it
-                var removeBtn = Element.Locator(".sf-remove");
-                if (await removeBtn.IsPresentAsync())
-                {
-                    await RemoveAsync();
-                }
-            }
+            if (await EntityInfoInternalAsync(null) != null)
+                await RemoveAsync();
         }
         else
         {
-            // Create if doesn't exist
-            if (await CreateButton.IsPresentAsync())
-            {
-                await CreateButton.ClickAsync();
-            }
-
-            // Now set the embedded entity fields
-            // This would require field-by-field setting based on the entity type
-            // Implementation depends on your specific needs
+            var modal = await FindAsync();
+            await modal.SelectLiteAsync(value);
         }
     }
 
-    public override async Task<object?> GetValueUntypedAsync()
+    public LineContainer<T> Details<T>() where T : ModifiableEntity
     {
-        var info = await GetEntityInfoAsync();
-        return info?.ToLite();
-    }
-
-    public override async Task<bool> IsReadonlyAsync()
-    {
-        return await Element.IsDomDisabledAsync();
-    }
-
-    /// <summary>
-    /// Get a field proxy within this embedded entity
-    /// </summary>
-    public BaseLineProxy GetField(string fieldName)
-    {
-        var fieldRoute = ItemRoute.Add(fieldName);
-        var fieldElement = Element.Locator($"[data-member='{fieldName}']");
-        
-        return BaseLineProxy.AutoLine(fieldElement, fieldRoute, Page);
+        var subRoute = Route.Type == typeof(T) ? Route : PropertyRoute.Root(typeof(T));
+        return new LineContainer<T>(this.Element.Locator("div[data-property-path]"), Page, subRoute);
     }
 }

@@ -4,56 +4,56 @@ namespace Signum.Playwright.ModalProxies;
 
 public class ErrorModalProxy : ModalProxy
 {
-    public ErrorModalProxy(IPage page) : base(page)
+    public IPage Page { get; }
+    public ILocator Element { get; }
+
+    public ErrorModalProxy(ILocator element, IPage page)
+        : base(element, page)
     {
+        this.Element = element;
+        this.Page = page;
     }
 
-    public ErrorModalProxy(IPage page, ILocator modalElement) : base(modalElement, page)
-    {
-    }
-
-    public ILocator GetButton()
-    {
-        return Modal.Locator(".sf-ok-button");
-    }
+    public ILocator GetButton() => Element.Locator(".sf-ok-button");
 
     public async Task ClickOkAsync()
     {
         await GetButton().ClickAsync();
     }
 
-    public async Task ClickOkWaitCloseAsync()
+    public async Task ClickOkAndWaitCloseAsync()
     {
         await GetButton().ClickAsync();
-        await WaitForCloseAsync();
+        await WaitNotVisibleAsync();
     }
 
-    public async Task<string> GetBodyTextAsync()
+    public async Task<string> BodyTextAsync()
     {
-        var text = await Modal.Locator(".modal-body").TextContentAsync();
-        return text?.Trim() ?? "";
+        var body = await Element.Locator(".modal-body").InnerTextAsync();
+        return body.Trim();
     }
 
-    public async Task<string> GetTitleTextAsync()
+    public async Task<string> TitleTextAsync()
     {
-        var text = await Modal.Locator(".modal-title").TextContentAsync();
-        return text?.Trim() ?? "";
+        var title = await Element.Locator(".modal-title").InnerTextAsync();
+        return title.Trim();
     }
 
     public async Task ThrowErrorModalAsync()
     {
-        var header = Modal.Locator(".modal-header");
-
-        var hasErrorClass = await header.EvaluateAsync<bool>(
-            "el => el.classList.contains('dialog-header-error')");
-
-        if (!hasErrorClass)
+        var header = Element.Locator(".modal-header");
+        if (!await header.IsVisibleAsync() || !await header.EvaluateAsync<bool>("el => el.classList.contains('dialog-header-error')"))
             throw new InvalidOperationException("The modal is not an error!");
 
-        var title = await GetTitleTextAsync();
-        var body = await GetBodyTextAsync();
+        throw new ErrorModalException(
+            await TitleTextAsync(),
+            await BodyTextAsync()
+        );
+    }
 
-        throw new ErrorModalException(title, body);
+    public async Task WaitNotVisibleAsync()
+    {
+        await Element.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });
     }
 }
 
@@ -62,8 +62,9 @@ public class ErrorModalException : Exception
 {
     public string Title { get; }
     public string Body { get; }
-    
-    public ErrorModalException(string title, string body) : base(title + "\n\n" + body)
+
+    public ErrorModalException(string title, string body)
+        : base(title + "\n\n" + body)
     {
         this.Title = title;
         this.Body = body;
@@ -74,18 +75,11 @@ public static class ErrorModalExtensions
 {
     public static async Task<ErrorModalProxy?> GetErrorModalAsync(this IPage page)
     {
-        var count = await page.Locator(".error-modal").CountAsync();
+        var element = page.Locator(".error-modal");
 
-        if (count == 0)
+        if (await element.CountAsync() == 0)
             return null;
 
-        var element = page.Locator(".error-modal").First;
-
-        var parent = page.Locator(".modal-dialog").Filter(new LocatorFilterOptions
-        {
-            Has = element
-        });
-
-        return new ErrorModalProxy(page, parent);
+        return new ErrorModalProxy(element.Locator(".."), page);
     }
 }

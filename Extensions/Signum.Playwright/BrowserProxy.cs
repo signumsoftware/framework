@@ -1,4 +1,5 @@
 using Signum.Entities.Reflection;
+using Signum.Playwright.Frames;
 using Signum.Playwright.Search;
 
 namespace Signum.Playwright;

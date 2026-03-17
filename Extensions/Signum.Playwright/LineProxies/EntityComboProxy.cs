@@ -1,9 +1,7 @@
+using Signum.Playwright.Frames;
+
 namespace Signum.Playwright.LineProxies;
 
-/// <summary>
-/// Proxy for EntityCombo control (dropdown of entities)
-/// Equivalent to Selenium's EntityComboProxy
-/// </summary>
 public class EntityComboProxy : EntityBaseProxy
 {
     public EntityComboProxy(ILocator element, PropertyRoute route, IPage page)
@@ -11,71 +9,69 @@ public class EntityComboProxy : EntityBaseProxy
     {
     }
 
-    protected override ILocator InputLocator => Element.Locator("select.form-control");
+    public ILocator ComboElement => this.Element.Locator("select");
+    public ILocator DropdownListInput => this.Element.Locator(".rw-dropdown-list-input");
 
+    public override async Task<object?> GetValueUntypedAsync() => await GetLiteValueAsync();
     public override async Task SetValueUntypedAsync(object? value)
-    {
-        await SetLiteAsync(value is Entity e ? e.ToLite() : (Lite<Entity>?)value);
-    }
-
-    public override async Task<object?> GetValueUntypedAsync()
-    {
-        return await GetLiteAsync();
-    }
-
-    public async Task SetLiteAsync(Lite<IEntity>? value)
-    {
-        if (value == null)
-        {
-            await SelectByIndexAsync(0); // Select empty option
-            return;
-        }
-
-        await SelectByValueAsync(value.Key());
-    }
-
-    public async Task<Lite<Entity>?> GetLiteAsync()
-    {
-        var select = InputLocator.First;
-        var selectedValue = await select.EvaluateAsync<string?>("el => el.value");
-
-        if (string.IsNullOrEmpty(selectedValue))
-            return null;
-
-        var text = await select.EvaluateAsync<string>("el => el.options[el.selectedIndex].text");
-        
-        // Parse the entity key (format: "Type;Id")
-        var parts = selectedValue.Split(';');
-        if (parts.Length < 2)
-            return null;
-
-        var type = Type.GetType(parts[0]);
-        var id = PrimaryKey.Parse(parts[1], type!);
-
-        return Lite.Create(type!, id, text);
-    }
-
-    public async Task SelectByValueAsync(string value)
-    {
-        var select = InputLocator.First;
-        await select.SelectOptionAsync(value);
-    }
-
-    public async Task SelectByTextAsync(string text)
-    {
-        var select = InputLocator.First;
-        await select.SelectOptionAsync(new SelectOptionValue { Label = text });
-    }
-
-    public async Task SelectByIndexAsync(int index)
-    {
-        var select = InputLocator.First;
-        await select.SelectOptionAsync(new SelectOptionValue { Index = index });
-    }
+        => await SetLiteValueAsync(value is Entity e ? e.ToLite() : (Lite<Entity>?)value);
 
     public override async Task<bool> IsReadonlyAsync()
+        => await this.Element.Locator("input[readonly]").CountAsync() > 0;
+
+    public async Task<Lite<IEntity>?> GetLiteValueAsync()
     {
-        var select = InputLocator.First;
-        return !await select.IsEnabledAsync();
+        var ei = await EntityInfoInternalAsync(null);
+        if (ei == null)
+            return null;
+
+        var selected = ComboElement.Locator("option:checked");
+        var text = await selected.TextContentAsync();
+
+        return ei.ToLite(text);
     }
+
+    public async Task SetLiteValueAsync(Lite<Entity>? value)
+    {
+        var val = value == null ? "" : value.Key();
+        await ComboElement.SelectOptionAsync(new SelectOptionValue { Value = val });
+    }
+
+    public async Task<List<Lite<Entity>?>> OptionsAsync()
+    {
+        var options = await ComboElement.Locator("option").AllAsync();
+
+        var result = new List<Lite<Entity>?>();
+        foreach (var o in options)
+        {
+            var val = await o.GetAttributeAsync("value");
+            var text = await o.TextContentAsync();
+            var lite = Lite.Parse(val)?.Do(l => l.SetModel(text));
+            result.Add(lite);
+        }
+
+        return result;
+    }
+
+    public Task<FrameModalProxy<T>> ViewAsync<T>() where T : ModifiableEntity
+        => base.ViewInternalAsync<T>();
+
+    public async Task SelectLabelAsync(string label)
+    {
+        await WaitChangesAsync(async () =>
+        {
+            await ComboElement.SelectOptionAsync(new SelectOptionValue { Label = label });
+        }, "ComboBox selected");
+    }
+
+    public async Task SelectIndexAsync(int index)
+    {
+        await WaitChangesAsync(async () =>
+        {
+            await ComboElement.SelectOptionAsync(new SelectOptionIndex { Index = index + 1 });
+        }, "ComboBox selected");
+    }
+
+    public async Task<EntityInfoProxy?> EntityInfoAsync()
+        => await EntityInfoInternalAsync(null);
 }

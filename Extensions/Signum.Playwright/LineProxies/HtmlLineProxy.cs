@@ -12,7 +12,7 @@ public class HtmlLineProxy : BaseLineProxy
     }
 
     // HTML editors typically use iframe or contenteditable
-    protected override ILocator InputLocator => Element.Locator(".html-editor, [contenteditable='true'], iframe");
+    protected ILocator InputLocator => Element.Locator(".html-editor, [contenteditable='true'], iframe");
 
     public override async Task SetValueUntypedAsync(object? value)
     {

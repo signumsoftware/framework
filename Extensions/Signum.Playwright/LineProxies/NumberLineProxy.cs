@@ -1,47 +1,83 @@
-using Microsoft.Playwright;
-using Signum.Basics;
+
 using Signum.Entities.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Playwright.LineProxies;
 
-/// <summary>
-/// Proxy for numeric input controls
-/// Equivalent to Selenium's NumberLineProxy
-/// </summary>
 public class NumberLineProxy : BaseLineProxy
 {
+    public ILocator Element { get; }
+    public IPage Page { get; }
+
     public NumberLineProxy(ILocator element, PropertyRoute route, IPage page)
         : base(element, route, page)
     {
+        this.Element = element;
+        this.Page = page;
     }
 
-    public override async Task SetValueUntypedAsync(object? value)
-    {
-        await SetInputValueAsync(value?.ToString());
-    }
+    public ILocator InputLocator => Element.Locator("input[type=text].numeric");
 
     public override async Task<object?> GetValueUntypedAsync()
-    {
-        var stringValue = await GetInputValueAsync();
-        if (string.IsNullOrWhiteSpace(stringValue))
-            return null;
+        => await GetValueAsync();
 
-        var type = Route.Type.UnNullify();
-
-        if (type == typeof(int)) return int.Parse(stringValue);
-        if (type == typeof(long)) return long.Parse(stringValue);
-        if (type == typeof(short)) return short.Parse(stringValue);
-        if (type == typeof(byte)) return byte.Parse(stringValue);
-        if (type == typeof(decimal)) return decimal.Parse(stringValue);
-        if (type == typeof(double)) return double.Parse(stringValue);
-        if (type == typeof(float)) return float.Parse(stringValue);
-
-        return stringValue;
-    }
+    public override async Task SetValueUntypedAsync(object? value)
+        => await SetValueAsync((IFormattable?)value);
 
     public override async Task<bool> IsReadonlyAsync()
     {
-        var input = InputLocator.First;
-        return !await input.IsEnabledAsync() || await input.EvaluateAsync<bool>("el => el.hasAttribute('readonly')");
+        var input = InputLocator;
+
+        await input.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Attached
+        });
+
+        return await input.IsDisabledAsync() ||
+               await input.EvaluateAsync<bool>("e => e.hasAttribute('readonly')");
+    }
+
+    public async Task SetValueAsync(IFormattable? value, string? format = null)
+    {
+        format ??= Reflector.GetFormatString(this.Route);
+
+        var str = value == null ? null : value.ToString(format, null);
+
+        // Prozentformat-Sonderfall
+        if (!string.IsNullOrWhiteSpace(str) &&
+            !string.IsNullOrWhiteSpace(format) &&
+            format.ToUpper() == "P")
+        {
+            str = str.Replace("%", "").Trim();
+        }
+
+        var input = InputLocator;
+
+        await input.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible
+        });
+
+        // Playwright Best Practice: erst leeren
+        await input.FillAsync("");
+
+        if (!string.IsNullOrEmpty(str))
+            await input.FillAsync(str);
+    }
+
+    public async Task<IFormattable?> GetValueAsync()
+    {
+        var input = InputLocator;
+
+        await input.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Attached
+        });
+
+        var strValue = await input.InputValueAsync();
+
+        return string.IsNullOrWhiteSpace(strValue)
+            ? null
+            : (IFormattable?)ReflectionTools.Parse(strValue, this.Route.Type);
     }
 }

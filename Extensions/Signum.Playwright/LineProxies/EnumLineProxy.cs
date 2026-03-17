@@ -11,7 +11,7 @@ public class EnumLineProxy : BaseLineProxy
     {
     }
 
-    protected override ILocator InputLocator => Element.Locator("select.form-control, select");
+    protected ILocator InputLocator => Element.Locator("select.form-control, select");
 
     public override async Task SetValueUntypedAsync(object? value)
     {

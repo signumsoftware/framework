@@ -1,70 +1,85 @@
+using Signum.Playwright.Frames;
 using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.LineProxies;
 
-/// <summary>
-/// Proxy for EntityRepeater control (list of embedded entities)
-/// Equivalent to Selenium's EntityRepeaterProxy
-/// </summary>
 public class EntityRepeaterProxy : EntityBaseProxy
 {
+    public override PropertyRoute ItemRoute => base.ItemRoute.Add("Item");
+
     public EntityRepeaterProxy(ILocator element, PropertyRoute route, IPage page)
         : base(element, route, page)
     {
     }
 
-    public ILocator Rows => Element.Locator(".sf-repeater-element");
+    public override Task<object?> GetValueUntypedAsync() => throw new NotImplementedException();
+    public override Task SetValueUntypedAsync(object? value) => throw new NotImplementedException();
+    public override Task<bool> IsReadonlyAsync() => throw new NotImplementedException();
 
-    public override async Task SetValueUntypedAsync(object? value)
+    public virtual ILocator ItemsContainerElement => Element.Locator(".sf-repater-elements");
+
+    public virtual ILocator ItemElement(int index)
     {
-        throw new NotImplementedException("EntityRepeater SetValue not yet implemented");
+        return ItemsContainerElement.Locator($"div:nth-child({index + 1}) > fieldset.sf-repeater-element");
     }
 
-    public override async Task<object?> GetValueUntypedAsync()
+    public async Task WaitItemLoadedAsync(int index)
     {
-        var count = await GetItemCountAsync();
-        var items = new List<EntityInfoProxy?>();
-
-        for (int i = 0; i < count; i++)
-        {
-            items.Add(await GetEntityInfoAsync(i));
-        }
-
-        return items;
+        await ItemElement(index).WaitForAsync();
     }
 
-    public override async Task<bool> IsReadonlyAsync()
+    public virtual async Task MoveUpAsync(int index)
     {
-        return await Element.IsDomDisabledAsync();
+        await ItemElement(index).Locator("a.move-up").ClickAsync();
     }
 
-    public async Task<int> GetItemCountAsync()
+    public virtual async Task MoveDownAsync(int index)
     {
-        return await Rows.CountAsync();
+        await ItemElement(index).Locator("a.move-down").ClickAsync();
     }
 
-    public async Task AddItemAsync<T>() where T : ModifiableEntity
+    public virtual async Task<int> ItemsCountAsync()
     {
-        await CreateModalAsync<T>();
+        return await ItemsContainerElement.Locator("fieldset.sf-repeater-element").CountAsync();
     }
 
-    public async Task RemoveItemAsync(int index)
+    public virtual ILocator Items()
     {
-        var row = Rows.Nth(index);
-        var removeButton = row.Locator(".sf-line-button.sf-remove");
-        await removeButton.ClickAsync();
+        return ItemsContainerElement.Locator("fieldset.sf-repeater-element");
     }
 
-    public async Task<ModalProxy> ViewItemAsync<T>(int index) where T : ModifiableEntity
+    public LineContainer<T> Details<T>(int index) where T : ModifiableEntity
     {
-        var row = Rows.Nth(index);
-        var viewButton = row.Locator(".sf-line-button.sf-view");
-        
-        var popup = await ModalProxy.CaptureAsync(Page, async () =>
-        {
-            await viewButton.ClickAsync();
-        });
+        return new LineContainer<T>(ItemElement(index), this.Page, this.ItemRoute);
+    }
 
-        return popup;
+    public ILocator RemoveElementIndex(int index)
+    {
+        return ItemElement(index).Locator("a.remove");
+    }
+
+    public async Task RemoveAsync(int index)
+    {
+        await RemoveElementIndex(index).ClickAsync();
+    }
+
+    public async Task<EntityInfoProxy?> EntityInfoAsync(int index)
+    {
+        return await EntityInfoInternalAsync(index);
+    }
+
+    public async Task<LineContainer<T>> CreateElementAsync<T>() where T : ModifiableEntity
+    {
+        var count = await ItemsCountAsync();
+
+        await CreateEmbeddedAsync<T>();
+
+        return Details<T>(count + 1);
+    }
+
+    public async Task<LineContainer<T>> LastDetailsAsync<T>() where T : ModifiableEntity
+    {
+        var count = await ItemsCountAsync();
+        return Details<T>(count - 1);
     }
 }

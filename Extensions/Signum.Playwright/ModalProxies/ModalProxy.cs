@@ -107,7 +107,7 @@ public class ModalProxy : IAsyncDisposable
         var disposing = Disposing;
         Disposing = null;
 
-        return new SearchModalProxy(Page, newModal.Modal)
+        return new SearchModalProxy(newModal.Modal, Page)
         {
             Disposing = disposing
         };

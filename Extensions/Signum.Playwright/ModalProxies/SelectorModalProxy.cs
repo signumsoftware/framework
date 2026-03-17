@@ -4,77 +4,71 @@ namespace Signum.Playwright.ModalProxies;
 
 public class SelectorModalProxy : ModalProxy
 {
-    public SelectorModalProxy(IPage page) : base(page)
-    {
-    }
+    public ILocator Element { get; private set; }
+    public IPage Page { get; private set; }
 
-    public SelectorModalProxy(IPage page, ILocator modalElement) : base(modalElement, page)
+    public SelectorModalProxy(ILocator element, IPage page)
+        : base(element, page)
     {
+        Element = element;
+        Page = page;
     }
 
     public async Task SelectAsync(string value)
     {
         await SelectPrivateAsync(value);
-        await WaitForCloseAsync();
+        await WaitNotVisibleAsync();
     }
 
     public async Task SelectAsync(Enum enumValue)
     {
         await SelectPrivateAsync(enumValue.ToString());
-        await WaitForCloseAsync();
+        await WaitNotVisibleAsync();
     }
 
     public async Task SelectAsync(Lite<Entity> lite)
     {
         await SelectPrivateAsync(lite.Key());
-        await WaitForCloseAsync();
+        await WaitNotVisibleAsync();
     }
 
     public async Task SelectAsync<T>()
     {
         await SelectPrivateAsync(TypeLogic.GetCleanName(typeof(T)));
-        await WaitForCloseAsync();
+        await WaitNotVisibleAsync();
     }
 
-    public static async Task<ModalProxy> SelectAndCaptureAsync(IPage page, Func<Task> clickAction, string value)
+    public async Task<ILocator> SelectAndCaptureAsync(string value)
     {
-        var modal = await ModalProxy.CaptureAsync(page, clickAction);
-        var selector = new SelectorModalProxy(page, modal.Modal);
-        await selector.SelectPrivateAsync(value);
-        
-        // Wait for new modal
-        await Task.Delay(300);
-        var newModal = await ModalProxy.CaptureAsync(page, async () => await Task.CompletedTask);
-        return newModal;
+        return await CapturePopupAsync(async () => await SelectPrivateAsync(value));
     }
 
-    public static async Task<ModalProxy> SelectAndCaptureAsync(IPage page, Func<Task> clickAction, Enum enumValue)
+    public async Task<ILocator> SelectAndCaptureAsync(Enum enumValue)
     {
-        return await SelectAndCaptureAsync(page, clickAction, enumValue.ToString());
+        return await CapturePopupAsync(async () => await SelectPrivateAsync(enumValue.ToString()));
     }
 
-    public static async Task<ModalProxy> SelectAndCaptureAsync(IPage page, Func<Task> clickAction, Lite<Entity> lite)
+    public async Task<ILocator> SelectAndCaptureAsync(Lite<Entity> lite)
     {
-        return await SelectAndCaptureAsync(page, clickAction, lite.Key());
+        return await CapturePopupAsync(async () => await SelectPrivateAsync(lite.Key()));
     }
 
-    public static async Task<ModalProxy> SelectAndCaptureAsync<T>(IPage page, Func<Task> clickAction)
+    public async Task<ILocator> SelectAndCaptureAsync<T>()
     {
-        return await SelectAndCaptureAsync(page, clickAction, TypeLogic.GetCleanName(typeof(T)));
+        return await CapturePopupAsync(async () => await SelectPrivateAsync(TypeLogic.GetCleanName(typeof(T))));
     }
 
-    public async Task<string[]> GetButtonNamesAsync()
+    public async Task<string[]> ButtonNamesAsync()
     {
-        var buttons = await Modal.Locator("button[name]").AllAsync();
+        var buttons = Element.Locator("button[name]");
+        var count = await buttons.CountAsync();
         var names = new List<string>();
-        
-        foreach (var button in buttons)
+
+        for (int i = 0; i < count; i++)
         {
-            var name = await button.GetAttributeAsync("name");
-            if (name != null)
-                names.Add(name);
+            names.Add(await buttons.Nth(i).GetAttributeAsync("name") ?? "");
         }
-        
+
         return names.ToArray();
     }
 
@@ -85,16 +79,31 @@ public class SelectorModalProxy : ModalProxy
 
     private async Task SelectPrivateAsync(string name)
     {
-        var button = Modal.Locator($"button[name='{name}']");
-        await button.WaitVisibleAsync();
+        var button = Element.Locator($"button[name='{name}']");
+        await button.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
         await button.ClickAsync();
+    }
+
+    private async Task<ILocator> CapturePopupAsync(Func<Task> action)
+    {
+        // Einfacher Wrapper für Playwright-Popups, z.B. neues Modal, Alert oder Window
+        await action();
+        // Annahme: Popup erscheint innerhalb des gleichen Pages, Locator muss ggf. angepasst werden
+        var popup = Page.Locator(".sf-popup:visible");
+        await popup.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+        return popup;
+    }
+
+    private async Task WaitNotVisibleAsync()
+    {
+        await Element.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });
     }
 }
 
 public static class SelectorModalExtensions
 {
-    public static SelectorModalProxy AsSelectorModal(this ModalProxy modal)
+    public static SelectorModalProxy AsSelectorModal(this ILocator modal, IPage page)
     {
-        return new SelectorModalProxy(modal.Page, modal.Modal);
+        return new SelectorModalProxy(modal, page);
     }
 }

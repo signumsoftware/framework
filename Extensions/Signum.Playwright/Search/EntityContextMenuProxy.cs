@@ -1,50 +1,131 @@
 using Microsoft.Playwright;
+using Signum.Playwright.Frames;
 
 namespace Signum.Playwright.Search;
 
 public class EntityContextMenuProxy
 {
-    public ResultTableProxy Results { get; }
-    public ILocator Element { get; }
-    public IPage Page => Results.Page;
+    public ResultTableProxy ResultTable { get; private set; }
+    public ILocator Element { get; private set; }
 
-    public EntityContextMenuProxy(ResultTableProxy results, ILocator element)
+    public IPage Page => ResultTable.Page;
+
+    public EntityContextMenuProxy(ResultTableProxy resultTable, ILocator element)
     {
-        Results = results;
+        ResultTable = resultTable;
         Element = element;
     }
 
-    public ILocator MenuItems => Element.Locator(".dropdown-item, a.dropdown-item");
-
-    public async Task<int> GetMenuItemCountAsync()
+    public ILocator QuickLink(string name)
     {
-        return await MenuItems.CountAsync();
+        return Element.Locator($"a[data-name='{name}']");
     }
 
-    public async Task ClickMenuItemAsync(string text)
+    public async Task<SearchModalProxy> QuickLinkClickSearchAsync(string name)
     {
-        var item = Element.Locator($".dropdown-item:has-text('{text}')");
-        await item.ClickAsync();
+        var a = QuickLink(name);
+        await a.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+        var popup = await a.ClickAsyncCapturePopup();
+        return new SearchModalProxy(popup, Page);
     }
 
-    public async Task<List<string>> GetMenuItemTextsAsync()
+    public async Task ExecuteClickAsync<T>(
+        ExecuteSymbol<T> executeSymbol,
+        bool consumeConfirmation = false,
+        bool shouldDisappear = false,
+        Func<EntityContextMenuProxy, Func<Task>>? customCheck = null,
+        bool scrollTo = false
+    ) where T : Entity
     {
-        var texts = new List<string>();
-        var count = await MenuItems.CountAsync();
+        var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheckAsync(shouldDisappear);
 
-        for (int i = 0; i < count; i++)
+        var op = Operation(executeSymbol);
+        if (scrollTo)
+            await op.ScrollIntoViewIfNeededAsync();
+        await op.ClickAsync();
+
+        if (consumeConfirmation)
+            await ResultTable.Page.RunAndConsumeAlertAsync();
+
+        await check();
+    }
+
+    public async Task<FrameModalProxy<T>> ConstructFromAsync<F, T>(
+        ConstructSymbol<T>.From<F> constructSymbol,
+        bool shouldDisappear = false,
+        Func<EntityContextMenuProxy, Func<Task>>? customCheck = null,
+        bool scrollTo = false
+    ) where F : Entity
+      where T : Entity
+    {
+        var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheckAsync(shouldDisappear);
+
+        var modalLocator = Operation(constructSymbol);
+        if (scrollTo)
+            await modalLocator.ScrollIntoViewIfNeededAsync();
+        var modal = await modalLocator.ClickAsyncCapturePopup();
+
+        var result = new FrameModalProxy<T>(modal);
+        result.Disposing += async okPressed => await check();
+
+        return result;
+    }
+
+    public async Task DeleteClickAsync(
+        IOperationSymbolContainer symbolContainer,
+        bool consumeConfirmation = true,
+        bool shouldDisappear = true,
+        Func<EntityContextMenuProxy, Func<Task>>? customCheck = null,
+        bool scrollTo = false
+    )
+    {
+        var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheckAsync(shouldDisappear);
+
+        var op = Operation(symbolContainer);
+        if (scrollTo)
+            await op.ScrollIntoViewIfNeededAsync();
+        await op.ClickAsync();
+
+        if (consumeConfirmation)
+            await ResultTable.Page.RunAndConsumeAlertAsync();
+
+        await check();
+    }
+
+    private Func<Task> GetShouldDisappearCheckAsync(bool shouldDisappear)
+    {
+        var selectedEntities = ResultTable.SelectedEntities();
+        return async () =>
         {
-            var text = await MenuItems.Nth(i).TextContentAsync();
-            if (!string.IsNullOrEmpty(text))
-                texts.Add(text.Trim());
-        }
-
-        return texts;
+            if (shouldDisappear)
+                await ResultTable.WaitNoVisibleAsync(selectedEntities);
+            else
+                await ResultTable.WaitSuccessAsync(selectedEntities);
+        };
     }
 
-    public async Task<bool> HasMenuItemAsync(string text)
+    public ILocator Operation(IOperationSymbolContainer symbolContainer)
     {
-        var item = Element.Locator($".dropdown-item:has-text('{text}')");
-        return await item.CountAsync() > 0;
+        return Element.Locator($"a[data-operation='{symbolContainer.Symbol.Key}']");
+    }
+
+    public async Task<bool> OperationIsDisabledAsync(IOperationSymbolContainer symbolContainer)
+    {
+        var op = Operation(symbolContainer);
+        await op.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+        return await op.IsDisabledAsync();
+    }
+
+    public async Task<ILocator> OperationClickCaptureAsync(IOperationSymbolContainer symbolContainer, bool scrollTo = false)
+    {
+        var op = Operation(symbolContainer);
+        if (scrollTo)
+            await op.ScrollIntoViewIfNeededAsync();
+        return await op.ClickAsyncCapturePopup();
+    }
+
+    public async Task WaitNotLoadingAsync()
+    {
+        await Element.Locator("li.sf-tm-selected-loading").WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Detached });
     }
 }
