@@ -130,12 +130,12 @@ export default function SearchValueLine(p: SearchValueLineProps): React.JSX.Elem
     );
   }
   
+  const token = svRef.current?.valueToken;
   
-  var label = (p.label == undefined ? undefined :
+  const label = (p.label == undefined ? undefined :
     typeof p.label == "function" ? p.label() :
       p.label) ?? token?.niceName ?? getQueryNiceName(fo.queryName);
 
-  var token = svRef.current?.valueToken;
 
   const isQuery = p.valueToken == undefined || token?.queryTokenType == "Aggregate";
 
