@@ -102,6 +102,7 @@ export namespace ProfilerClient {
     beforeStart: number;
     start: number;
     end: number;
+    totalMax: number;
     elapsed: string;
     isFinished: boolean;
     kind: string;
