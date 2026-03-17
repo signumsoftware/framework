@@ -58,6 +58,8 @@ export namespace TourMessage {
   export const Previous: MessageKey = new MessageKey("TourMessage", "Previous");
   export const Close: MessageKey = new MessageKey("TourMessage", "Close");
   export const Done: MessageKey = new MessageKey("TourMessage", "Done");
+  export const ReplayTour: MessageKey = new MessageKey("TourMessage", "ReplayTour");
+  export const StartTour: MessageKey = new MessageKey("TourMessage", "StartTour");
 }
 
 export namespace TourOperation {

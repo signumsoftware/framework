@@ -60,7 +60,7 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol }) {
       <LinkButton
         className={'sf-pointer nav-link'}
         onClick={handleClick}
-        title={hasViewed ? "Replay tour" : "Start tour (new!)"}
+        title={hasViewed ? TourMessage.ReplayTour.niceToString() : TourMessage.StartTour.niceToString()}
       >
         <FontAwesomeIcon icon={faCompass} className={classes(!hasViewed && 'text-warning fa-beat')} />
       </LinkButton>
