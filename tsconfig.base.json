@@ -14,11 +14,11 @@
     "strict": true,
     "noImplicitOverride": true,
     "declarationMap": true,
-    "forceConsistentCasingInFileNames": true,
     "noUncheckedSideEffectImports": false,
     "lib": [
       "ESNext",
       "dom"
-    ]
+    ],
+    "types": [ "node", "google.maps" ]
   }
 }
