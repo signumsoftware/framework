@@ -353,12 +353,9 @@ export function Scala(p: { ctx: TypeContext<ChartParameterEmbedded>, scriptParam
   const compatible = Object.entries(scala.standardScalas).filter(([value, columnType]) => columnType == undefined || token == undefined || ChartClient.isChartColumnType(token, columnType))
     .map(([value, columnType]) => value);
 
- 
-
   const format = toNumberFormat(token?.format);
 
   function numberLine(part: string | null | undefined, buildPart: (newNumber: number | null) => string, label: string) {
-
 
     return <FormGroup label={label} ctx={ctx}>{id => <div className={p.ctx.inputGroupClass}>
       <NumberBox formControlClass={p.ctx.formControlClass} value={part ? (parseFloat(part) ?? null) : null}
@@ -374,10 +371,7 @@ export function Scala(p: { ctx: TypeContext<ChartParameterEmbedded>, scriptParam
     }</FormGroup>;
   }
 
-  var value = ctx.value.value?.contains("...") ? "Custom" : (ctx.value.value ?? undefined);
-
-  if (!compatible.contains(value))
-    compatible.push(value);
+  const value = ctx.value.value?.contains("...") ? "Custom" : (ctx.value.value ?? undefined);
 
   return (
     <div>
