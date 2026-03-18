@@ -3,9 +3,9 @@ using System.ComponentModel;
 
 namespace Signum.Agent.Skills;
 
-public class ConfirmSkill : AgentSkill
+public class ConfirmUISkill : AgentSkill
 {
-    public ConfirmSkill()
+    public ConfirmUISkill()
     {
         ShortDescription = "Asks the user for confirmation or a choice before proceeding with a sensitive action";
         IsAllowed = () => true;

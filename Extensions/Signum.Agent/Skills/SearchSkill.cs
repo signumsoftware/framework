@@ -1,4 +1,3 @@
-using Azure;
 using Microsoft.Extensions.Options;
 using ModelContextProtocol;
 using ModelContextProtocol.Server;

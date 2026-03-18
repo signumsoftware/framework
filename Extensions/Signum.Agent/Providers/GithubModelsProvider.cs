@@ -1,4 +1,3 @@
-using Azure;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using OpenAI.Chat;
