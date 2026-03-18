@@ -19,6 +19,7 @@
     "lib": [
       "ESNext",
       "dom"
-    ]
+    ],
+    "types": [ "node", "google.maps" ]
   }
 }
