@@ -486,10 +486,10 @@ export default function renderPivotTable({ data, width, height, parameters, load
     const link = (p.gor == null || style == null || style.showAggregateValues == false) ? null : <LinkButton title={undefined} onClick={e => handleNumberClick(e)}>{cellFormatter(multiVal ??= sumValue(p.gor))}</LinkButton>;
 
     var color =
-      p.isSummary == 4 ? "rgb(228, 228, 228)" :
-        p.isSummary == 3 ? "rgb(236, 236, 236)" :
-          p.isSummary == 2 ? "rgb(241, 241, 241)" :
-            p.isSummary == 1 ? "#f8f8f8" :
+      p.isSummary == 4 ? "var(--bs-secondary-bg)" :
+        p.isSummary == 3 ? "var(--bs-tertiary-bg)" :
+          p.isSummary == 2 ? "var(--bs-tertiary-bg)" :
+            p.isSummary == 1 ? "var(--bs-tertiary-bg)" :
               style && style.background && style.background(gr?.value, firstValue(multiVal ??= sumValue(p.gor)));
 
 
