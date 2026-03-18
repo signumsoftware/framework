@@ -16,6 +16,7 @@ Detailed guidance is organized in `Framework/Skills/`. Read the relevant file be
 
 | Skill | Description |
 |---|---|
+| [CreatingSignumUpgrades](Skills/CreatingSignumUpgrades.md) | How to create Signum.Upgrade scripts from Southwind commits |
 | [Localization](Skills/Localization.md) | How to localize user-facing messages in C# and TypeScript/React |
 | [ReactTesting](Skills/ReactTesting.md) | How to write Selenium UI tests: proxies, environment setup, waiting, debugging |
 
