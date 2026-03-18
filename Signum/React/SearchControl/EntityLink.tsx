@@ -5,8 +5,7 @@ import { Navigator, ViewPromise } from '../Navigator';
 import { Link } from 'react-router-dom';
 import { StyleContext } from "../Lines";
 import { classes } from "../Globals";
-import { Finder } from '../Finder';
-import { getQueryKey, getTypeInfo } from '../Reflection';
+import { getTypeInfo } from '../Reflection';
 
 export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   lite: Lite<Entity>;
@@ -63,19 +62,13 @@ export default function EntityLink(p: EntityLinkProps): React.ReactElement | nul
     const s = Navigator.getSettings(lite.EntityType)
     const avoidPopup = s != undefined && s.avoidPopup;
 
-    const queryKey = getQueryKey(lite.EntityType);
-    const finderSettings = Finder.getSettings(queryKey);
-    const effectiveInPlaceNavigation = p.inPlaceNavigation === true ? true : (
-      finderSettings?.inPlaceNavigation ?? false
-    );
-
-    if (event.ctrlKey || event.button == 1 || avoidPopup && !effectiveInPlaceNavigation) {
+    if (event.ctrlKey || event.button == 1 || avoidPopup && !p.inPlaceNavigation) {
       var vp = p.getViewPromise && p.getViewPromise(null);
       window.open(AppContext.toAbsoluteUrl(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined) + (p.extraQuery ?? "")));
       return;
     }
 
-    if (effectiveInPlaceNavigation) {
+    if (p.inPlaceNavigation) {
       var vp = p.getViewPromise && p.getViewPromise(null);
       AppContext.navigate(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined) + (p.extraQuery ?? ""));
     } else {
