@@ -52,6 +52,8 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
   const showPinnedFiltersOptions = p.showPinnedFiltersOptionsButton ? showPinnedFiltersOptionsState : (p.showPinnedFiltersOptions ?? false);
 
   const [highlightFilter, setHighlightFilter] = React.useState<FilterOptionParsed | undefined>();
+  const [draggingFilter, setDraggingFilter] = React.useState<FilterOptionParsed | undefined>();
+  const [dropInfo, setDropInfo] = React.useState<FilterDropInfo | undefined>();
 
   const forceUpdate = useForceUpdatePromise();
 
@@ -112,6 +114,128 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
       p.onHeightChanged();
   }
 
+  function handleDragStart(e: React.DragEvent<any>, filter: FilterOptionParsed) {
+    e.dataTransfer.setData('text', "start");
+    e.dataTransfer.effectAllowed = "move";
+    setDraggingFilter(filter);
+  }
+
+  function handleDragEnd() {
+    setDraggingFilter(undefined);
+    setDropInfo(undefined);
+  }
+
+  function handleDragOver(e: React.DragEvent<HTMLTableRowElement>, targetFilter: FilterOptionParsed, targetCollection: FilterOptionParsed[], mode: DropMode) {
+    if (!draggingFilter)
+      return;
+
+    if (draggingFilter == targetFilter || (isFilterGroup(draggingFilter) && containsFilter(draggingFilter, targetFilter))) {
+      if (dropInfo != undefined)
+        setDropInfo(undefined);
+      return;
+    }
+
+    e.preventDefault();
+
+    const newDropInfo = { targetFilter, targetCollection, mode };
+    const isSameDropInfo = dropInfo != null && dropInfo.targetFilter == newDropInfo.targetFilter && dropInfo.mode == newDropInfo.mode && dropInfo.targetCollection == newDropInfo.targetCollection;
+    if (!isSameDropInfo)
+      setDropInfo(newDropInfo);
+  }
+
+  function handleDrop(e: React.DragEvent<HTMLTableRowElement>) {
+    e.preventDefault();
+
+    if (draggingFilter == null || dropInfo == null) {
+      handleDragEnd();
+      return;
+    }
+
+    if (draggingFilter == dropInfo.targetFilter || (isFilterGroup(draggingFilter) && containsFilter(draggingFilter, dropInfo.targetFilter))) {
+      handleDragEnd();
+      return;
+    }
+
+    const source = extractFilter(p.filterOptions, draggingFilter);
+    if (!source) {
+      handleDragEnd();
+      return;
+    }
+
+    let destinationCollection: FilterOptionParsed[];
+    let insertIndex: number;
+
+    if (dropInfo.mode == "InsideFirst" || dropInfo.mode == "InsideLast") {
+      if (!isFilterGroup(dropInfo.targetFilter)) {
+        handleDragEnd();
+        return;
+      }
+
+      destinationCollection = dropInfo.targetFilter.filters;
+      insertIndex = dropInfo.mode == "InsideFirst" ? 0 : destinationCollection.length;
+    } else {
+      destinationCollection = dropInfo.targetCollection;
+      const index = destinationCollection.indexOf(dropInfo.targetFilter);
+      if (index == -1) {
+        handleDragEnd();
+        return;
+      }
+
+      insertIndex = index + (dropInfo.mode == "After" ? 1 : 0);
+    }
+
+    const moved = source.collection[source.index];
+    source.collection.splice(source.index, 1);
+
+    if (source.collection == destinationCollection && source.index < insertIndex)
+      insertIndex--;
+
+    destinationCollection.splice(insertIndex, 0, moved);
+
+    if (p.onFiltersChanged)
+      p.onFiltersChanged(p.filterOptions);
+
+    handleDragEnd();
+    forceUpdate().then(handleHeightChanged);
+  }
+
+  function extractFilter(collection: FilterOptionParsed[], filter: FilterOptionParsed): { collection: FilterOptionParsed[]; index: number } | undefined {
+    const index = collection.indexOf(filter);
+    if (index != -1)
+      return { collection, index };
+
+    for (const child of collection) {
+      if (isFilterGroup(child)) {
+        const result = extractFilter(child.filters, filter);
+        if (result)
+          return result;
+      }
+    }
+
+    return undefined;
+  }
+
+  function containsFilter(group: FilterGroupOptionParsed, filter: FilterOptionParsed): boolean {
+    for (const child of group.filters) {
+      if (child == filter)
+        return true;
+
+      if (isFilterGroup(child) && containsFilter(child, filter))
+        return true;
+    }
+
+    return false;
+  }
+
+  const dragDrop: FilterDragDropState = {
+    draggingFilter,
+    dropInfo,
+    onDragStart: handleDragStart,
+    onDragEnd: handleDragEnd,
+    onDragOver: handleDragOver,
+    onDrop: handleDrop,
+  };
+
 
   var keyGenerator = React.useMemo(() => new KeyGenerator(), []);
   var showDashboardBehaviour = showPinnedFiltersOptions && (p.showDashboardBehaviour ?? true);
@@ -150,6 +274,7 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
               {p.filterOptions.map((f) => isFilterGroup(f) ?
                 <FilterGroupComponent key={keyGenerator.getKey(f)} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                   allFilterOptions={p.filterOptions}
+                  currentFilterOptions={p.filterOptions}
                   prefixToken={undefined}
                   subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                   onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged}
@@ -158,11 +283,12 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
                   showDashboardBehaviour={showDashboardBehaviour}
                   disableValue={false}
                   setHighlightFilter={showPinnedFiltersOptions ? setHighlightFilter : undefined}
-
                   level={0}
+                  dragDrop={dragDrop}
                 /> :
                 <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                   allFilterOptions={p.filterOptions}
+                  currentFilterOptions={p.filterOptions}
                   prefixToken={undefined}
                   subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                   onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged} renderValue={p.renderValue}
@@ -170,7 +296,8 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
                   showDashboardBehaviour={showDashboardBehaviour}
                   disableValue={false}
                   setHighlightFilter={showPinnedFiltersOptions ? setHighlightFilter : undefined}
-                  level={0} />
+                  level={0}
+                  dragDrop={dragDrop} />
               )}
               {!p.readOnly &&
                 <tr className="sf-filter-create">
@@ -217,9 +344,27 @@ export interface RenderValueContext {
   handleValueChange: () => void;
 }
 
+type DropMode = "Before" | "After" | "InsideFirst" | "InsideLast";
+
+interface FilterDropInfo {
+  targetFilter: FilterOptionParsed;
+  targetCollection: FilterOptionParsed[];
+  mode: DropMode;
+}
+
+interface FilterDragDropState {
+  draggingFilter?: FilterOptionParsed;
+  dropInfo?: FilterDropInfo;
+  onDragStart: (e: React.DragEvent<any>, filter: FilterOptionParsed) => void;
+  onDragEnd: () => void;
+  onDragOver: (e: React.DragEvent<HTMLTableRowElement>, targetFilter: FilterOptionParsed, targetCollection: FilterOptionParsed[], mode: DropMode) => void;
+  onDrop: (e: React.DragEvent<HTMLTableRowElement>) => void;
+}
+
 export interface FilterGroupComponentsProps {
   prefixToken: QueryToken | undefined;
   allFilterOptions: FilterOptionParsed[];
+  currentFilterOptions: FilterOptionParsed[];
   filterGroup: FilterGroupOptionParsed;
   readOnly: boolean;
   onDeleteFilter: (fo: FilterGroupOptionParsed) => void;
@@ -235,6 +380,7 @@ export interface FilterGroupComponentsProps {
   disableValue: boolean;
   setHighlightFilter?: (fo: FilterOptionParsed | undefined) => void;
   level: number;
+  dragDrop: FilterDragDropState;
 }
 
 export function FilterGroupComponent(p: FilterGroupComponentsProps): React.ReactElement | null {
@@ -320,12 +466,25 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
     return null;
 
   const readOnly = fg.frozen || p.readOnly;
+  const currentDropInfo = p.dragDrop.dropInfo;
+  const rowDropClass = currentDropInfo == null || currentDropInfo.targetFilter != fg ? undefined :
+    currentDropInfo.mode == "Before" ? "drag-top" :
+      currentDropInfo.mode == "InsideFirst" ? "drag-bottom" : undefined;
+  const addRowDropClass = currentDropInfo == null || currentDropInfo.targetFilter != fg ? undefined :
+    currentDropInfo.mode == "InsideLast" ? "drag-top" :
+      currentDropInfo.mode == "After" ? "drag-bottom" : undefined;
 
   var paddingLeft = (25 * p.level);
   var paddingLeftNext = (25 * (p.level + 1)) + 5;
   return (
     <>
-      <tr className="sf-filter-group" style={{ backgroundColor: "var(--bs-secondary-bg)" }}
+      <tr className={classes("sf-filter-group",
+        p.dragDrop.draggingFilter == fg && "sf-dragging",
+        rowDropClass)}
+        style={{ backgroundColor: "var(--bs-secondary-bg)" }}
+        onDragEnter={e => handleDragOverHeader(e)}
+        onDragOver={e => handleDragOverHeader(e)}
+        onDrop={p.dragDrop.onDrop}
         onMouseEnter={() => p.setHighlightFilter?.(fg.pinned ? fg : undefined)}
         onMouseLeave={() => p.setHighlightFilter?.(undefined)}
       >
@@ -336,6 +495,16 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
               title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
               onClick={!readOnly ? handleDeleteFilter : undefined}>
               <FontAwesomeIcon aria-hidden={true} icon="xmark" />
+            </LinkButton>
+
+            <LinkButton href={!readOnly ? "#" : undefined}
+              className={classes("sf-line-button sf-move sf-filter-drag-handle", readOnly && "disabled")}
+              title={StyleContext.default.titleLabels ? EntityControlMessage.MoveWithDragAndDropOrCtrlUpDown.niceToString() : undefined}
+              onClick={e => e.preventDefault()}
+              draggable={!readOnly}
+              onDragStart={e => p.dragDrop.onDragStart(e, fg)}
+              onDragEnd={p.dragDrop.onDragEnd}>
+              <FontAwesomeIcon aria-hidden={true} icon="bars" />
             </LinkButton>
 
             <div className="align-items-center d-flex">
@@ -393,6 +562,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
 
         <FilterGroupComponent key={keyGenerator.getKey(f)} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
           allFilterOptions={p.allFilterOptions}
+          currentFilterOptions={fg.filters}
           prefixToken={fg.token}
           subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
           onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged}
@@ -402,10 +572,12 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
           disableValue={p.disableValue || fg.pinned != null && !isCheckBox(fg.pinned.active)}
           level={p.level + 1}
           setHighlightFilter={p.setHighlightFilter}
+          dragDrop={p.dragDrop}
         /> :
 
         <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
           allFilterOptions={p.allFilterOptions}
+          currentFilterOptions={fg.filters}
           prefixToken={fg.token}
           subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
           onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged} renderValue={p.renderValue}
@@ -414,11 +586,16 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
           disableValue={p.disableValue || fg.pinned != null && !isCheckBox(fg.pinned.active)}
           setHighlightFilter={p.setHighlightFilter}
           level={p.level + 1}
+          dragDrop={p.dragDrop}
         />
       )}
 
       {!p.readOnly &&
-        <tr className="sf-filter-create">
+        <tr className={classes("sf-filter-create",
+          addRowDropClass)}
+          onDragEnter={e => handleDragOverAddRow(e)}
+          onDragOver={e => handleDragOverAddRow(e)}
+          onDrop={p.dragDrop.onDrop}>
           <td colSpan={4} style={{ paddingLeft: paddingLeftNext }}>
             <LinkButton title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
               className="sf-line-button sf-create"
@@ -460,6 +637,18 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
     forceUpdate();
     p.onFilterChanged();
   }
+
+  function handleDragOverHeader(e: React.DragEvent<HTMLTableRowElement>) {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const offsetY = (e.nativeEvent as DragEvent).y - rect.top;
+    p.dragDrop.onDragOver(e, fg, p.currentFilterOptions, offsetY < rect.height / 2 ? "Before" : "InsideFirst");
+  }
+
+  function handleDragOverAddRow(e: React.DragEvent<HTMLTableRowElement>) {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const offsetY = (e.nativeEvent as DragEvent).y - rect.top;
+    p.dragDrop.onDragOver(e, fg, p.currentFilterOptions, offsetY < rect.height / 2 ? "InsideLast" : "After");
+  }
 }
 
 
@@ -480,6 +669,7 @@ function isFilterActive(fo: FilterOptionParsed) {
 export interface FilterConditionComponentProps {
   filter: FilterConditionOptionParsed;
   allFilterOptions: FilterOptionParsed[];
+  currentFilterOptions: FilterOptionParsed[];
   prefixToken: QueryToken | undefined;
   readOnly: boolean;
   onDeleteFilter: (fo: FilterConditionOptionParsed) => void;
@@ -493,6 +683,7 @@ export interface FilterConditionComponentProps {
   setHighlightFilter?: (fo: FilterOptionParsed | undefined) => void;
   disableValue: boolean;
   level: number;
+  dragDrop: FilterDragDropState;
 }
 
 export function FilterConditionComponent(p: FilterConditionComponentProps): React.ReactElement | null {
@@ -574,13 +765,21 @@ export function FilterConditionComponent(p: FilterConditionComponentProps): Reac
   const f = p.filter;
 
   const readOnly = f.frozen || p.readOnly;
+  const currentDropInfo = p.dragDrop.dropInfo;
+  const rowDropClass = currentDropInfo == null || currentDropInfo.targetFilter != f ? undefined :
+    currentDropInfo.mode == "Before" ? "drag-top" : currentDropInfo.mode == "After" ? "drag-bottom" : undefined;
 
   if (!p.showPinnedFiltersOptions && !isFilterActive(f))
     return null;
 
   return (
     <>
-      <tr className="sf-filter-condition"
+      <tr className={classes("sf-filter-condition",
+        p.dragDrop.draggingFilter == f && "sf-dragging",
+        rowDropClass)}
+        onDragEnter={e => handleDragOver(e)}
+        onDragOver={e => handleDragOver(e)}
+        onDrop={p.dragDrop.onDrop}
         onMouseEnter={() => p.setHighlightFilter?.(f.pinned ? f : undefined)}
         onMouseLeave={() => p.setHighlightFilter?.(undefined)}
       >
@@ -590,6 +789,16 @@ export function FilterConditionComponent(p: FilterConditionComponentProps): Reac
               className={classes("sf-line-button sf-remove sf-remove-filter-icon", readOnly && "disabled")}
               onClick={!readOnly ? handleDeleteFilter : undefined}>
               <FontAwesomeIcon aria-hidden={true} icon="xmark" />
+            </LinkButton>
+
+            <LinkButton href={!readOnly ? "#" : undefined}
+              className={classes("sf-line-button sf-move sf-filter-drag-handle", readOnly && "disabled")}
+              title={StyleContext.default.titleLabels ? EntityControlMessage.MoveWithDragAndDropOrCtrlUpDown.niceToString() : undefined}
+              onClick={e => e.preventDefault()}
+              draggable={!readOnly}
+              onDragStart={e => p.dragDrop.onDragStart(e, f)}
+              onDragEnd={p.dragDrop.onDragEnd}>
+              <FontAwesomeIcon aria-hidden={true} icon="bars" />
             </LinkButton>
             <div className="rw-widget-xs">
               <QueryTokenBuilder
@@ -660,6 +869,12 @@ export function FilterConditionComponent(p: FilterConditionComponentProps): Reac
   function handleValueChange() {
     forceUpdate();
     p.onFilterChanged();
+  }
+
+  function handleDragOver(e: React.DragEvent<HTMLTableRowElement>) {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const offsetY = (e.nativeEvent as DragEvent).y - rect.top;
+    p.dragDrop.onDragOver(e, f, p.currentFilterOptions, offsetY < rect.height / 2 ? "Before" : "After");
   }
 }
 

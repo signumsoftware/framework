@@ -40,6 +40,30 @@ select.form-control.sf-group-selector {
     background-color: var(--bs-warning-bg-subtle);
 }
 
+.sf-filter-drag-handle {
+    cursor: grab;
+    min-width: 22px;
+    width: 22px;
+    padding-left: 0;
+    padding-right: 0;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sf-filter-drag-handle:active {
+    cursor: grabbing;
+}
+
+.sf-filter-drag-handle > svg {
+    width: 12px;
+}
+
+.sf-filter-drag-inside td {
+    box-shadow: inset 3px 0 0 var(--bs-border-color), inset -3px 0 0 var(--bs-border-color) !important;
+}
+
 
 .sf-remove-filter-icon {
     min-width: 22px;
