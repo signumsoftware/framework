@@ -486,10 +486,10 @@ export default function renderPivotTable({ data, width, height, parameters, load
     const link = (p.gor == null || style == null || style.showAggregateValues == false) ? null : <LinkButton title={undefined} onClick={e => handleNumberClick(e)}>{cellFormatter(multiVal ??= sumValue(p.gor))}</LinkButton>;
 
     var color =
-      p.isSummary == 4 ? "var(--bs-secondary-bg)" :
-        p.isSummary == 3 ? "var(--bs-tertiary-bg)" :
-          p.isSummary == 2 ? "var(--bs-tertiary-bg)" :
-            p.isSummary == 1 ? "var(--bs-tertiary-bg)" :
+      p.isSummary == 4 ? "rgba(var(--bs-secondary-rgb),0.4)" :
+        p.isSummary == 3 ? "rgba(var(--bs-secondary-rgb),0.3)" :
+          p.isSummary == 2 ? "rgba(var(--bs-secondary-rgb),0.2)" :
+            p.isSummary == 1 ? "rgba(var(--bs-secondary-rgb),0.1)" :
               style && style.background && style.background(gr?.value, firstValue(multiVal ??= sumValue(p.gor)));
 
 
@@ -510,10 +510,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     let cssStyle: React.CSSProperties | undefined = style && {
       backgroundColor: color,
       color:
-        p.isSummary == 4 ? "rgb(66, 66, 66)" :
-          p.isSummary == 3 ? "rgb(97, 97, 97)" :
-            p.isSummary == 2 ? "rgb(115, 115, 115)" :
-              p.isSummary == 1 ? "rgb(191, 191, 191)" :
+              p.isSummary != null ? "var(--bs-secondary-rgb)" :
                 color != null ? Color.parse(color).lerp(0.5, Color.parse(color).opositePole()).toString() : undefined,
       paddingLeft: p.indent ? (p.indent * 30) + "px" : undefined,
       textAlign: p.indent != undefined ? "left" : "center",
