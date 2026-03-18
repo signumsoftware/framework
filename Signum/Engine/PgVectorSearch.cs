@@ -1,6 +1,4 @@
 using Pgvector;
-using Signum.Engine.Linq;
-using Signum.Engine.Maps;
 
 namespace Signum.Engine;
 

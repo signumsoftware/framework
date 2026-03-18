@@ -1,7 +1,3 @@
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-
 namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20240116_UpdateNugets : CodeUpgradeBase

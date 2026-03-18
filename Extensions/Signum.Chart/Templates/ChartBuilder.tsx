@@ -353,6 +353,7 @@ export function Scala(p: { ctx: TypeContext<ChartParameterEmbedded>, scriptParam
   const compatible = Object.entries(scala.standardScalas).filter(([value, columnType]) => columnType == undefined || token == undefined || ChartClient.isChartColumnType(token, columnType))
     .map(([value, columnType]) => value);
 
+ 
 
   const format = toNumberFormat(token?.format);
 
@@ -373,11 +374,16 @@ export function Scala(p: { ctx: TypeContext<ChartParameterEmbedded>, scriptParam
     }</FormGroup>;
   }
 
+  var value = ctx.value.value?.contains("...") ? "Custom" : (ctx.value.value ?? undefined);
+
+  if (!compatible.contains(value))
+    compatible.push(value);
+
   return (
     <div>
       <FormGroup ctx={ctx} label={scriptParameter.displayName}
         labelHtmlAttributes={{ style: { fontWeight: ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token) ? "bold" : undefined } }}>
-        {id => <select id={id} className={p.ctx.formSelectClass} value={ctx.value.value?.contains("...") ? "Custom" : (ctx.value.value ?? undefined)}
+        {id => <select id={id} className={p.ctx.formSelectClass} value={value}
           onChange={o => {
             ctx.value.value = o.currentTarget.value == "Custom" ? "0...100" : o.currentTarget.value;
             ctx.value.modified = true;

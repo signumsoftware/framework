@@ -3,7 +3,6 @@ using System.Collections.Specialized;
 using Signum.UserAssets;
 using System.Xml.Linq;
 using Signum.Scheduler;
-using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.Queries;
 
 namespace Signum.Dashboard;

@@ -1,7 +1,3 @@
-using Signum.Engine.Maps;
-using Signum.Utilities;
-using System.Diagnostics;
-
 namespace Signum.Test.LinqProvider;
 
 public class NewDateTimeTest

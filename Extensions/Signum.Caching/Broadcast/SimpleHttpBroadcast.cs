@@ -1,4 +1,3 @@
-using Azure.Core;
 using Signum.API.Json;
 using System.Net.Http;
 using System.Net.Http.Json;

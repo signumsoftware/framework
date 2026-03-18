@@ -1,4 +1,4 @@
-﻿global using System;
+global using System;
 global using System.Collections.Generic;
 global using System.Linq;
 global using System.Linq.Expressions;
@@ -10,10 +10,5 @@ global using Signum.Entities;
 global using Signum.Entities.Reflection;
 global using Signum.Entities.Validation;
 global using Signum.DynamicQuery;
-global using Signum.Operations;
-global using Signum.Engine;
 global using Signum.Basics;
-global using Signum.Security;
-global using System.Threading.Tasks;
-global using System.Threading;
 global using Signum.Engine.Maps;

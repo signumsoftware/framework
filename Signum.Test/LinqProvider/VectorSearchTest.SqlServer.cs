@@ -1,10 +1,5 @@
 using Pgvector;
-using Signum.Engine.Maps;
-using Signum.Engine.Sync;
 using System.Data;
-using System.Diagnostics;
-using System.Text;
-using System.Threading;
 using Xunit.Sdk;
 
 namespace Signum.Test.LinqProvider;

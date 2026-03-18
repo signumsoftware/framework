@@ -1,7 +1,6 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Types;
 using Npgsql;
-using Pgvector;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;

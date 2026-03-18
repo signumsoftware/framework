@@ -1,12 +1,3 @@
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
 using Signum.Authorization.AzureAD.Authorizer;

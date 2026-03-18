@@ -3,7 +3,6 @@ using Signum.Utilities.Reflection;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
 using System.Collections.Frozen;
-using System.Data.Common;
 
 namespace Signum.Basics;
 

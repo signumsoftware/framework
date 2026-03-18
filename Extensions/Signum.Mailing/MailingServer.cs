@@ -1,15 +1,10 @@
-using Microsoft.AspNetCore.Builder;
 using System.Net.Mail;
-using Signum.Utilities.Reflection;
-using System.Text.Json;
 using Signum.Mailing.Templates;
 using Signum.Authorization.Rules;
 using Signum.Authorization;
 using Signum.API;
-using Signum.API.Json;
 using Signum.Templating;
 using Signum.API.Controllers;
-using Signum.Eval.TypeHelp;
 
 namespace Signum.Mailing;
 

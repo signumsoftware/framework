@@ -1,6 +1,3 @@
-using Signum.Utilities;
-using System.IO;
-
 namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20260212_UpdateCopilotInstructions3 : CodeUpgradeBase

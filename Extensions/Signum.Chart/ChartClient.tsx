@@ -493,8 +493,13 @@ export namespace ChartClient {
       }
       case "Scala":
         const standardScalas = (scriptParameter.valueDefinition as Scala).standardScalas;
-        if (value && (standardScalas as Object).hasOwnProperty(value))
+        if (relatedColumn && value &&  standardScalas[value]) {
+          var cct = standardScalas[value];
+          if (cct && !isChartColumnType(relatedColumn, cct))
+            return false;
+
           return true;
+        }
 
         if (value?.contains("..."))
           return !isNaN(parseFloat(value.before("..."))) && !isNaN(parseFloat(value.after("...")));

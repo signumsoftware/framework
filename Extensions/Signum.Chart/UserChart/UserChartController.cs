@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Signum.API.Filters;
 using Signum.Chart.UserChart;
-using Signum.UserAssets;
 
 namespace Signum.Chart;
 

@@ -5,7 +5,6 @@ using System.Data.SqlTypes;
 using Microsoft.Data.SqlClient;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.SqlServer;
-using Npgsql;
 using Signum.Utilities.Reflection;
 using Microsoft.Data.SqlTypes;
 using Pgvector;

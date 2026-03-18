@@ -4,7 +4,6 @@ using NpgsqlTypes;
 using Pgvector;
 using Signum.Engine.Maps;
 using Signum.Entities.TsVector;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System.Collections.ObjectModel;
 using System.Data;

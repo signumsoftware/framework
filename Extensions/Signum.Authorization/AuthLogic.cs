@@ -1,15 +1,10 @@
-using Microsoft.Extensions.Logging.Abstractions;
-using Signum.API;
 using Signum.API.Filters;
 using Signum.Authorization.AuthToken;
 using Signum.Authorization.Rules;
-using Signum.Entities;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections.Frozen;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using static Signum.Engine.Sync.Replacements;
 

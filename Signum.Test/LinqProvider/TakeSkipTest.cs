@@ -1,6 +1,3 @@
-
-using System.IO;
-
 namespace Signum.Test.LinqProvider;
 
 public class TakeSkipTest

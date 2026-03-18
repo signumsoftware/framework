@@ -37,6 +37,10 @@ Detailed guidance is organized in `Framework/Skills/`. Read the relevant file be
 - Messages for the end user MUST be localized. See [Localization](Skills/Localization.md).
 
 ### TypeScript / React
+- **Package Manager:** ALWAYS use `yarn` exclusively, never `npm`. For example:
+  - Use `yarn install` instead of `npm install`
+  - Use `yarn add` instead of `npm install <package>`
+  - Use `yarn <script>` instead of `npm run <script>`
 - The solution is large; avoid compiling the entire solution unless necessary. Prefer compiling only the affected tsconfig using `yarn tsgo --build`.
 - If you change code in C#, you can regenerate the TypeScript definitions just compiling the csproj.
 - Prioritize React and TypeScript for UI code.

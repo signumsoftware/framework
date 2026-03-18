@@ -1,5 +1,3 @@
-using Signum.Basics;
-
 namespace Signum.Translation.Instances;
 
 [EntityKind(EntityKind.System, EntityData.Master)]

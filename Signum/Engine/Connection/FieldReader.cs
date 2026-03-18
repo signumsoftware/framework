@@ -7,7 +7,6 @@ using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Server;
 using Signum.Engine.Sync;
 using Microsoft.Data.SqlTypes;
-using Microsoft.Identity.Client;
 using Pgvector;
 
 namespace Signum.Engine;

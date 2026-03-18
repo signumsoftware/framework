@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.API;
 using Signum.API.Controllers;
 using Signum.API.Filters;
-using Signum.Dashboard;
 using System.ComponentModel.DataAnnotations;
 
 namespace Signum.Processes;
