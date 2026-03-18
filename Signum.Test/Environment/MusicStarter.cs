@@ -2,9 +2,7 @@ using Signum.Engine.Maps;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.SqlServer.Types;
-using Signum.Basics;
 using Npgsql;
-using Npgsql.Internal;
 
 namespace Signum.Test.Environment;
 

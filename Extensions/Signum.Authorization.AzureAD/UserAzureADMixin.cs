@@ -1,4 +1,3 @@
-using Signum.Authorization;
 using Signum.Scheduler;
 using System.ComponentModel;
 

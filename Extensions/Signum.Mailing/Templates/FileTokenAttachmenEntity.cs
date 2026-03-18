@@ -2,7 +2,6 @@ using Signum.UserAssets;
 using Signum.Files;
 using System.Xml.Linq;
 using Signum.UserAssets.Queries;
-using Microsoft.Azure.Amqp.Framing;
 
 namespace Signum.Mailing.Templates;
 

@@ -1,5 +1,4 @@
 using Signum.Utilities.Reflection;
-using System.Security;
 
 namespace Signum.Authorization.Rules;
 

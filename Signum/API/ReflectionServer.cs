@@ -6,7 +6,6 @@ using Signum.Utilities.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using Signum.API.Json;
 using System.Collections.Frozen;
-using NpgsqlTypes;
 using Signum.DynamicQuery.Tokens;
 
 namespace Signum.API;

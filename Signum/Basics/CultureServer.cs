@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Signum.API;
 using Signum.API.Filters;
 using System.Globalization;

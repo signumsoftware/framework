@@ -1,9 +1,7 @@
 using Signum.Engine.Maps;
 using Signum.DynamicQuery;
-using Signum.Basics;
 using System.IO;
 using System.Text.Json;
-using Microsoft.Data.SqlTypes;
 using Pgvector;
 
 namespace Signum.Test.Environment;

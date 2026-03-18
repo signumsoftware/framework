@@ -1,4 +1,3 @@
-using Microsoft.IdentityModel.Abstractions;
 using Signum.Entities.TsVector;
 
 namespace Signum.DynamicQuery.Tokens;

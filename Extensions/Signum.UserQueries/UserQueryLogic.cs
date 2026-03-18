@@ -1,9 +1,7 @@
-using Signum.API;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Dashboard;
 using Signum.DynamicQuery.Tokens;
-using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Omnibox;
 using Signum.Toolbar;
@@ -13,7 +11,6 @@ using Signum.UserAssets.QueryTokens;
 using Signum.ViewLog;
 using System.Collections.Frozen;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 
 namespace Signum.UserQueries;
 

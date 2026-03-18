@@ -1,9 +1,5 @@
 using Signum.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Upgrade.Upgrades;
 public class Upgrade_20240306_Finder : CodeUpgradeBase

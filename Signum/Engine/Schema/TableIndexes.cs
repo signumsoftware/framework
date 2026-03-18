@@ -1,8 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Identity.Client;
 using NpgsqlTypes;
 using Signum.Engine.Sync;
-using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Maps;

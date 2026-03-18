@@ -4,10 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Collections;
 using Signum.Engine.Maps;
 using Signum.DynamicQuery.Tokens;
-using System.Linq;
-using Azure.Core;
-using Signum.Utilities.ExpressionTrees;
-using System.Collections.Generic;
 using Pgvector;
 
 namespace Signum.DynamicQuery;

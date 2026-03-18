@@ -6,7 +6,6 @@ using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Globalization;
-using static Signum.Engine.Maps.FullTextTableIndex;
 using static Signum.Engine.Sync.Replacements;
 
 namespace Signum.Engine.Maps;

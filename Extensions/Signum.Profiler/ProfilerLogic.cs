@@ -1,6 +1,3 @@
-using Signum.API;
-using Signum.Authorization.Rules;
-
 namespace Signum.Profiler;
 
 public static class ProfilerLogic

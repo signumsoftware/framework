@@ -1,7 +1,6 @@
 using System.Data;
 using System.Diagnostics;
 using System.Threading;
-using Signum.Engine;
 using Xunit.Sdk;
 
 namespace Signum.Test.LinqProvider;

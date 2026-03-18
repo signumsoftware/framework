@@ -1,6 +1,5 @@
 using System.Collections.Frozen;
 using System.Data;
-using System.Net.Http.Headers;
 using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;

@@ -1,7 +1,5 @@
 using Signum.UserAssets;
-using Microsoft.AspNetCore.Builder;
 using Signum.API;
-using Signum.Dashboard;
 
 namespace Signum.UserQueries;
 

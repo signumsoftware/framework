@@ -1,10 +1,8 @@
 using NpgsqlTypes;
-using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
 using System.Data;
-using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Sync;
 
