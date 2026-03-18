@@ -2,9 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
-using System.Security.Cryptography;
-using System.Reflection.Metadata.Ecma335;
-using Azure.Core;
 
 namespace Signum.Files;
 

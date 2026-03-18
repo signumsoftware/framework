@@ -1,4 +1,3 @@
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Signum.API.Controllers;
 using Signum.API.Json;
 using Signum.Authorization;

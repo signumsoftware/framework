@@ -1,5 +1,4 @@
 using Signum.DynamicQuery.Tokens;
-using Signum.Engine.Sync;
 using Signum.UserAssets;
 using Signum.UserAssets.QueryTokens;
 using Signum.Utilities.DataStructures;

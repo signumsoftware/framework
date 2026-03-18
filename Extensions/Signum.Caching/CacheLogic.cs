@@ -10,9 +10,7 @@ using Signum.Engine.Sync;
 using Microsoft.Data.SqlClient;
 using Signum.Engine.Sync.SqlServer;
 using Signum.API;
-using Signum.Authorization;
 using Signum.Authorization.Rules;
-using DocumentFormat.OpenXml.Office2013.Drawing.Chart;
 using Signum.Caching;
 
 namespace Signum.Cache;

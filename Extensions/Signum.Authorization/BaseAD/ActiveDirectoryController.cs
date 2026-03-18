@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
 using Signum.API.Filters;
 
 namespace Signum.Authorization.BaseAD;

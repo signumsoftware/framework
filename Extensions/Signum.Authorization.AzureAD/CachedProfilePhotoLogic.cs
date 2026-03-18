@@ -1,7 +1,4 @@
-using Microsoft.Graph.Models;
-using Npgsql.Replication.PgOutput.Messages;
 using Signum.Files;
-using System.IO;
 
 namespace Signum.Authorization.AzureAD;
 

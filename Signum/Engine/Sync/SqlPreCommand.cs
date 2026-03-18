@@ -6,11 +6,6 @@ using System.Globalization;
 using Signum.Engine.Maps;
 using Npgsql;
 using Microsoft.Data.SqlClient;
-using Signum.Utilities.ExpressionTrees;
-using System.Diagnostics.Metrics;
-using Npgsql.PostgresTypes;
-using System.Runtime.CompilerServices;
-using Microsoft.Identity.Client;
 
 namespace Signum.Engine.Sync;
 

@@ -2,11 +2,6 @@ using Signum.DynamicQuery;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Maps;
 using Pgvector;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Test.DynamicQueries;
 

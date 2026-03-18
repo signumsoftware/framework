@@ -1,5 +1,3 @@
-using DocumentFormat.OpenXml.Presentation;
-using Signum.API;
 using Signum.API.Json;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
@@ -10,7 +8,6 @@ using Signum.Omnibox;
 using Signum.Scheduler;
 using Signum.Toolbar;
 using Signum.UserAssets;
-using Signum.UserAssets.Queries;
 using Signum.Utilities.Reflection;
 using Signum.ViewLog;
 using System.Collections.Frozen;

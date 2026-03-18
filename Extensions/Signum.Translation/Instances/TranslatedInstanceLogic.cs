@@ -1,15 +1,8 @@
 using System.Globalization;
 using Signum.Utilities.Reflection;
-using Signum.Basics;
-using System.Collections.Concurrent;
 using System.IO;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Intrinsics.Arm;
-using Signum.Translation;
-using Signum.Basics;
 using Signum.Engine.Sync;
 using Signum.Excel;
-using Signum.UserAssets;
 using System.Collections.Frozen;
 
 namespace Signum.Translation.Instances;

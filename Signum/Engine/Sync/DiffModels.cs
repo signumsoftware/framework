@@ -1,7 +1,6 @@
 using NpgsqlTypes;
 using Signum.Engine.Maps;
 using System.Data;
-using System.Data.SqlTypes;
 
 namespace Signum.Engine.Sync;
 

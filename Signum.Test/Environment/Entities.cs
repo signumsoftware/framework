@@ -1,7 +1,6 @@
 using Signum.Engine.Maps;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
-using Microsoft.Data.SqlTypes;
 using Pgvector;
 
 namespace Signum.Test.Environment;

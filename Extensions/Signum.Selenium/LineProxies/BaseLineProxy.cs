@@ -1,7 +1,6 @@
 using OpenQA.Selenium;
 using Signum.Entities.Reflection;
 using Signum.Selenium.LineProxies;
-using System.ClientModel.Primitives;
 
 namespace Signum.Selenium;
 

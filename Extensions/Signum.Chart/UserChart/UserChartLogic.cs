@@ -1,4 +1,3 @@
-using DocumentFormat.OpenXml.Presentation;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Dashboard;
@@ -7,7 +6,6 @@ using Signum.Toolbar;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.UserAssets.QueryTokens;
-using Signum.UserQueries;
 using Signum.ViewLog;
 using System.Collections.Frozen;
 

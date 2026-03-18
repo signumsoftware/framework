@@ -1,5 +1,3 @@
-using Signum.Engine.Maps;
-
 namespace Signum.DynamicQuery.Tokens;
 
 public class ColumnToken : QueryToken

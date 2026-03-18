@@ -1,12 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using Signum.Basics;
 using Signum.Dashboard;
-using Signum.DynamicQuery;
-using Signum.Omnibox;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
 
 namespace Signum.UserQueries;

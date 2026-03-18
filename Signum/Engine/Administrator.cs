@@ -1,4 +1,3 @@
-using Microsoft.Identity.Client;
 using Npgsql;
 using Signum.CodeGeneration;
 using Signum.Engine.Linq;

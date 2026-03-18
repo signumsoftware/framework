@@ -1,6 +1,4 @@
 using Pgvector;
-using Signum.Engine;
-using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 
 namespace Signum.DynamicQuery.Tokens;

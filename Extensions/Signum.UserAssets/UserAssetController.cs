@@ -6,7 +6,6 @@ using System.Text.Json;
 using Signum.API.Controllers;
 using Signum.API;
 using Signum.API.Filters;
-using Signum.DynamicQuery;
 using Signum.Files;
 
 namespace Signum.UserAssets;

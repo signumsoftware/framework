@@ -1,15 +1,6 @@
-using Microsoft.SqlServer.Server;
 using Signum.Authorization;
 using Signum.DiffLog;
-using Signum.Engine.Linq;
-using Signum.Engine.Maps;
-using Signum.Entities;
 using Signum.Utilities.Reflection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.TimeMachine;
 

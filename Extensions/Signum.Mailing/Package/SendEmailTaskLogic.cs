@@ -1,11 +1,9 @@
-using Signum.Entities;
 using Signum.Mailing;
 using Signum.Mailing.Templates;
 using Signum.Processes;
 using Signum.Scheduler;
 using Signum.Templating;
 using Signum.UserQueries;
-using Signum.Utilities;
 
 namespace Signum.Mailing.Package;
 

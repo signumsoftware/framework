@@ -1,10 +1,8 @@
 using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.Toolbar;
 using Signum.UserAssets;
 using Signum.Utilities.DataStructures;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
 namespace Signum.Dashboard;

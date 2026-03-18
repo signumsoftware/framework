@@ -1,18 +1,13 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
-using Microsoft.Extensions.Logging;
 using Signum.API.Filters;
 using Signum.API.Json;
-using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using static Signum.API.Controllers.OperationController;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Signum.API.Controllers;
 

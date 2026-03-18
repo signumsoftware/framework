@@ -11,7 +11,6 @@ using Signum.Templating;
 using Signum.Files;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
-using Signum.API;
 using System.Collections.Frozen;
 
 namespace Signum.Word;

@@ -1,6 +1,5 @@
 
 using Microsoft.SqlServer.Types;
-using Signum.Engine.Maps;
 
 namespace Signum.Test;
 

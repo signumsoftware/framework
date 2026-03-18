@@ -3,7 +3,6 @@ using Signum.Engine.Maps;
 using System.Collections.Concurrent;
 using Signum.Utilities.Reflection;
 using Npgsql;
-using System.Globalization;
 
 namespace Signum.Engine;
 

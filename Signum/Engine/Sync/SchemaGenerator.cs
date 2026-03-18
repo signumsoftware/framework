@@ -1,8 +1,5 @@
-using Microsoft.Identity.Client;
 using Signum.Engine.Maps;
-using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
-using System.IO;
 
 namespace Signum.Engine.Sync;
 

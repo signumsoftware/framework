@@ -1,9 +1,5 @@
-using NpgsqlTypes;
 using Signum.Entities.TsVector;
 using System.Data;
-using System.Diagnostics;
-using System.Threading;
-using Xunit.Sdk;
 
 namespace Signum.Test.LinqProvider;
 

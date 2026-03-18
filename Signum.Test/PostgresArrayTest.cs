@@ -1,7 +1,4 @@
 using Signum.Engine.Sync.Postgres;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit.Sdk;
 
 namespace Signum.Test;

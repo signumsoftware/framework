@@ -1,5 +1,3 @@
-using Signum.Basics;
-
 namespace Signum.ViewLog;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]

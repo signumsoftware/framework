@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Primitives;
-using NpgsqlTypes;
 using Pgvector;
 using Signum.DynamicQuery.Tokens;
 using Signum.Entities.TsVector;

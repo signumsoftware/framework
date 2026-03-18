@@ -1,4 +1,3 @@
-using Signum.Translation;
 using Signum.Utilities.DataStructures;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
