@@ -173,6 +173,14 @@ export default function FilterBuilder(p: FilterBuilderProps): React.ReactElement
 
       destinationCollection = dropInfo.targetFilter.filters;
       insertIndex = dropInfo.mode == "InsideFirst" ? 0 : destinationCollection.length;
+
+      // If dropping a condition with Any/All token into a group without a prefix token, set the group's token to the Any/All part
+      if (isFilterCondition(draggingFilter) && dropInfo.targetFilter.token == null && draggingFilter.token && hasAnyOrAll(draggingFilter.token)) {
+        const anyOrAllToken = getTokenParents(draggingFilter.token).filter(a => a.queryTokenType == "AnyOrAll").lastOrNull();
+        if (anyOrAllToken) {
+          dropInfo.targetFilter.token = anyOrAllToken;
+        }
+      }
     } else {
       destinationCollection = dropInfo.targetCollection;
       const index = destinationCollection.indexOf(dropInfo.targetFilter);
