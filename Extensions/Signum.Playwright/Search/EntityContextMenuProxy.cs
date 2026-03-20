@@ -8,8 +8,6 @@ public class EntityContextMenuProxy
     public ResultTableProxy ResultTable { get; private set; }
     public ILocator Element { get; private set; }
 
-    public IPage Page => ResultTable.Page;
-
     public EntityContextMenuProxy(ResultTableProxy resultTable, ILocator element)
     {
         ResultTable = resultTable;
@@ -25,8 +23,8 @@ public class EntityContextMenuProxy
     {
         var a = QuickLink(name);
         await a.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
-        var popup = await a.CaptureOnClickAsync(Page);
-        return new SearchModalProxy(popup, Page);
+        var popup = await a.CaptureOnClickAsync();
+        return new SearchModalProxy(popup);
     }
 
     public async Task ExecuteClickAsync<T>(
@@ -46,7 +44,7 @@ public class EntityContextMenuProxy
 
         if (consumeConfirmation)
         {
-            await ResultTable.Page.RunAndConsumeAlertAsync(async () =>
+            await ResultTable.Element.Page.RunAndConsumeAlertAsync(async () =>
             {
                 await op.ClickAsync();
             });
@@ -72,9 +70,9 @@ public class EntityContextMenuProxy
         var modalLocator = Operation(constructSymbol);
         if (scrollTo)
             await modalLocator.ScrollIntoViewIfNeededAsync();
-        var modal = await modalLocator.CaptureOnClickAsync(Page);
+        var modal = await modalLocator.CaptureOnClickAsync();
 
-        var result = new FrameModalProxy<T>(Page, modal);
+        var result = new FrameModalProxy<T>(modal);
         result.Disposing += async okPressed => await check();
 
         return result;
@@ -95,7 +93,7 @@ public class EntityContextMenuProxy
 
         if (consumeConfirmation)
         {
-            await ResultTable.Page.RunAndConsumeAlertAsync(async () =>
+            await ResultTable.Element.Page.RunAndConsumeAlertAsync(async () =>
             {
                 await op.ClickAsync();
             });
@@ -137,7 +135,7 @@ public class EntityContextMenuProxy
         var op = Operation(symbolContainer);
         if (scrollTo)
             await op.ScrollIntoViewIfNeededAsync();
-        return await op.CaptureOnClickAsync(Page);
+        return await op.CaptureOnClickAsync();
     }
 
     public async Task WaitNotLoadingAsync()

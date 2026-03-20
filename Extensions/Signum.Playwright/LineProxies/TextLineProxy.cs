@@ -4,14 +4,9 @@ namespace Signum.Playwright.LineProxies;
 
 public abstract class TextBoxBaseLineProxy : BaseLineProxy
 {
-    public ILocator Element { get; }
-    public IPage Page { get; }
-
-    protected TextBoxBaseLineProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    protected TextBoxBaseLineProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
-        this.Element = element;
-        this.Page = page;
     }
 
     public ILocator InputLocator => Element.Locator(".form-control, .form-control-readonly");
@@ -71,24 +66,24 @@ public abstract class TextBoxBaseLineProxy : BaseLineProxy
 
 public class TextBoxLineProxy : TextBoxBaseLineProxy
 {
-    public TextBoxLineProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public TextBoxLineProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 }
 
 public class PasswordBoxLineProxy : TextBoxBaseLineProxy
 {
-    public PasswordBoxLineProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public PasswordBoxLineProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 }
 
 public class ColorBoxLineProxy : TextBoxBaseLineProxy
 {
-    public ColorBoxLineProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public ColorBoxLineProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 }

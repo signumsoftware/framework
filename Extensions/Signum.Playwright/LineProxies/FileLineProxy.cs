@@ -2,14 +2,10 @@ namespace Signum.Playwright.LineProxies;
 
 public class FileLineProxy : BaseLineProxy
 {
-    public ILocator Element { get; }
-    public IPage Page { get; }
 
-    public FileLineProxy(ILocator element, IPage page, PropertyRoute route)
-        : base(element, route, page)
+    public FileLineProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
-        this.Element = element;
-        this.Page = page;
     }
 
     private ILocator FileElement => Element.Locator("input[type=file]");

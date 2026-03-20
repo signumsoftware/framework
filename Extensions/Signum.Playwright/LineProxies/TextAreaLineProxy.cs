@@ -2,8 +2,8 @@ namespace Signum.Playwright.LineProxies;
 
 public class TextAreaLineProxy : BaseLineProxy
 {
-    public TextAreaLineProxy(ILocator element, PropertyRoute route, IPage page)
-       : base(element, route, page)
+    public TextAreaLineProxy(ILocator element, PropertyRoute route)
+       : base(element, route)
     {
     }
 

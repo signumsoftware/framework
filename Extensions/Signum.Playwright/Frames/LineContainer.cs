@@ -16,20 +16,17 @@ public interface ILineContainer
 {
     ILocator Element { get; }
     PropertyRoute Route { get; }
-    IPage Page { get; }
 }
 
 public class LineLocator<T>
 {
     public ILocator ElementLocator { get; set; }
     public PropertyRoute Route { get; set; }
-    public IPage Page { get; set; }
 
-    public LineLocator(ILocator elementLocator, PropertyRoute route, IPage page)
+    public LineLocator(ILocator elementLocator, PropertyRoute route)
     {
         ElementLocator = elementLocator;
         Route = route;
-        Page = page;
     }
 }
 
@@ -37,18 +34,16 @@ public class LineContainer<T> : ILineContainer<T> where T : IModifiableEntity
 {
     public ILocator Element { get; private set; }
     public PropertyRoute Route { get; private set; }
-    public IPage Page { get; private set; }
 
-    public LineContainer(ILocator element, IPage page, PropertyRoute? route = null)
+    public LineContainer(ILocator element, PropertyRoute? route = null)
     {
         this.Element = element;
         this.Route = route ?? PropertyRoute.Root(typeof(T));
-        this.Page = page;
     }
 
     public LineContainer<S> As<S>() where S : T
     {
-        return new LineContainer<S>(this.Element, this.Page, PropertyRoute.Root(typeof(S)));
+        return new LineContainer<S>(this.Element, PropertyRoute.Root(typeof(S)));
     }
 }
 
@@ -80,7 +75,6 @@ public static class LineContainerExtensions
 
         return new LineLocator<S>(
             elementLocator: locator.Locator($"[data-property-path='{route.PropertyString()}']"),
-            page: locator.Page,
             route: route
         );
     }
@@ -135,14 +129,14 @@ public static class LineContainerExtensions
         where S : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new LineContainer<S>(element ?? lineLocator.ElementLocator, lineLocator.Page, lineLocator.Route);
+        return new LineContainer<S>(element ?? lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static CheckboxLineProxy CheckboxLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, bool>> property)
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new CheckboxLineProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new CheckboxLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static async Task CheckboxLineValueAsync<T>(this ILineContainer<T> lineContainer, Expression<Func<T, bool>> property, bool value)
@@ -156,7 +150,7 @@ public static class LineContainerExtensions
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new DateTimeLineProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new DateTimeLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static async Task DateTimeLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
@@ -170,7 +164,7 @@ public static class LineContainerExtensions
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new EnumLineProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new EnumLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static async Task EnumLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
@@ -184,7 +178,7 @@ public static class LineContainerExtensions
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new GuidBoxLineProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new GuidBoxLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static async Task GuidLineValueAsync<T>(this ILineContainer<T> lineContainer, Expression<Func<T, Guid?>> property, Guid? value)
@@ -198,7 +192,7 @@ public static class LineContainerExtensions
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new NumberLineProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new NumberLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static async Task NumberLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
@@ -212,7 +206,7 @@ public static class LineContainerExtensions
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new HtmlLineProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new HtmlLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static async Task HtmlLineValueAsync<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property, string? value)
@@ -226,7 +220,7 @@ public static class LineContainerExtensions
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new TextAreaLineProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new TextAreaLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static async Task TextAreaLineValueAsync<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property, string? value)
@@ -240,7 +234,7 @@ public static class LineContainerExtensions
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new TextBoxLineProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new TextBoxLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static async Task TextBoxLineValueAsync<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property, string? value)
@@ -254,7 +248,7 @@ public static class LineContainerExtensions
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new TimeLineProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new TimeLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static async Task TimeLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
@@ -268,7 +262,7 @@ public static class LineContainerExtensions
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return EntityBaseProxy.AutoLine(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return EntityBaseProxy.AutoLine(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static async Task AutoLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
@@ -289,14 +283,14 @@ public static class LineContainerExtensions
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new FileLineProxy(lineLocator.ElementLocator, lineLocator.Page, lineLocator.Route);
+        return new FileLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static EntityLineProxy EntityLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new EntityLineProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new EntityLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static async Task<V> EntityLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -317,7 +311,7 @@ public static class LineContainerExtensions
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new EntityComboProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new EntityComboProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static async Task<V> EntityComboValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -339,49 +333,49 @@ public static class LineContainerExtensions
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new EntityDetailProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new EntityDetailProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static EntityRepeaterProxy EntityRepeater<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new EntityRepeaterProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new EntityRepeaterProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static EntityTabRepeaterProxy EntityTabRepeater<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new EntityTabRepeaterProxy(lineLocator.ElementLocator, lineLocator.Page, lineLocator.Route);
+        return new EntityTabRepeaterProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static EntityStripProxy EntityStrip<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new EntityStripProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new EntityStripProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static EntityListProxy EntityList<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new EntityListProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new EntityListProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static EntityTableProxy EntityTable<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new EntityTableProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new EntityTableProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static EntityListCheckBoxProxy EntityListCheckBox<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new EntityListCheckBoxProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+        return new EntityListCheckBoxProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static QueryTokenBuilderProxy QueryTokenBuilder<T>(this ILineContainer<T> lineContainer, Expression<Func<T, QueryTokenEmbedded>> property)
@@ -401,13 +395,13 @@ public static class LineContainerExtensions
     {
         string queryKey = QueryUtils.GetKey(queryName);
         var element = lineContainer.Element.Locator($"div.sf-search-control[data-query-key='{queryKey}']");
-        return new SearchControlProxy(element, lineContainer.Page);
+        return new SearchControlProxy(element);
     }
 
     public static SearchValueLineProxy GetSearchValueLine(this ILineContainer lineContainer, object queryName)
     {
         string queryKey = QueryUtils.GetKey(queryName);
         var element = lineContainer.Element.Locator($"[data-value-query-key='{queryKey}']");
-        return new SearchValueLineProxy(element, lineContainer.Page);
+        return new SearchValueLineProxy(element);
     }
 }

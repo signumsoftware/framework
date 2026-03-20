@@ -38,7 +38,7 @@ public static class PlaywrightExtensions
     {
         try
         {
-            return await locator.IsVisibleAsync(new LocatorIsVisibleOptions { Timeout = 0 });
+            return await locator.IsVisibleAsync(new LocatorIsVisibleOptions {});
         }
         catch
         {
@@ -375,9 +375,9 @@ public static class PlaywrightExtensions
 
     /// <summary>
     /// Capture popup that opens on click
-    /// Equivalent to Selenium's CapturePopup
+    /// Equivalent to Selenium's CaptureModal
     /// </summary>
-    public static async Task<ILocator> CapturePopupAsync(this IPage page, Func<Task> clickAction)
+    public static async Task<ILocator> CaptureModalAsync(this IPage page, Func<Task> clickAction)
     {
         var oldModals = await page.Locator(".modal.fade.show").AllAsync();
         var oldModalHandles = new HashSet<ILocator>(oldModals);
@@ -397,9 +397,9 @@ public static class PlaywrightExtensions
     /// Capture popup on locator click
     /// Equivalent to Selenium's CaptureOnClick
     /// </summary>
-    public static async Task<ILocator> CaptureOnClickAsync(this ILocator button, IPage page)
+    public static async Task<ILocator> CaptureOnClickAsync(this ILocator button)
     {
-        return await page.CapturePopupAsync(async () => await button.ClickAsync());
+        return await button.Page.CaptureModalAsync(async () => await button.ClickAsync());
     }
 
     #endregion

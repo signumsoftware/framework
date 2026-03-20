@@ -4,14 +4,12 @@ namespace Signum.Playwright.ModalProxies;
 
 public class MessageModalProxy : ModalProxy
 {
-    public IPage Page { get; }
     public ILocator Element { get; }
 
-    public MessageModalProxy(ILocator element, IPage page)
-        : base(element, page)
+    public MessageModalProxy(ILocator element)
+        : base(element)
     {
         this.Element = element;
-        this.Page = page;
     }
 
     public ILocator GetButton(MessageModalButton button)
@@ -66,7 +64,7 @@ public static class MessageModalProxyExtensions
         if (await element.CountAsync() == 0)
             return null;
 
-        return new MessageModalProxy(element.Locator(".."), page);
+        return new MessageModalProxy(element.Locator(".."));
     }
 
     public static async Task CloseMessageModalAsync(this IPage page, MessageModalButton button)
@@ -76,9 +74,9 @@ public static class MessageModalProxyExtensions
             await message.ClickWaitCloseAsync(button);
     }
 
-    public static MessageModalProxy AsMessageModal(this ILocator element, IPage page)
+    public static MessageModalProxy AsMessageModal(this ILocator element)
     {
-        return new MessageModalProxy(element, page);
+        return new MessageModalProxy(element);
     }
 
     public static async Task<MessageModalProxy?> WaitForMessageModalAsync(this IPage page, int timeoutMs = 5000)
@@ -91,7 +89,7 @@ public static class MessageModalProxyExtensions
                 State = WaitForSelectorState.Visible,
                 Timeout = timeoutMs
             });
-            return new MessageModalProxy(element.Locator(".."), page);
+            return new MessageModalProxy(element.Locator(".."));
         }
         catch
         {

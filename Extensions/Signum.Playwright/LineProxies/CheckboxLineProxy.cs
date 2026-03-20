@@ -6,8 +6,8 @@ namespace Signum.Playwright.LineProxies;
 /// </summary>
 public class CheckboxLineProxy : BaseLineProxy
 {
-    public CheckboxLineProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public CheckboxLineProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 

@@ -7,8 +7,8 @@ public class EntityRepeaterProxy : EntityBaseProxy
 {
     public override PropertyRoute ItemRoute => base.ItemRoute.Add("Item");
 
-    public EntityRepeaterProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public EntityRepeaterProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 
@@ -50,7 +50,7 @@ public class EntityRepeaterProxy : EntityBaseProxy
 
     public LineContainer<T> Details<T>(int index) where T : ModifiableEntity
     {
-        return new LineContainer<T>(ItemElement(index), this.Page, this.ItemRoute);
+        return new LineContainer<T>(ItemElement(index), this.ItemRoute);
     }
 
     public ILocator RemoveElementIndex(int index)

@@ -8,12 +8,7 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
     where T : ModifiableEntity
 {
     public PropertyRoute Route { get; }
-    public FrameModalProxy(IPage page, PropertyRoute? route = null) : base(page)
-    {
-        Route = route ?? PropertyRoute.Root(typeof(T));
-    }
-
-    public FrameModalProxy(IPage page, ILocator modalElement, PropertyRoute? route = null) : base(modalElement, page)
+    public FrameModalProxy(ILocator locator, PropertyRoute? route = null) : base(locator)
     {
         Route = route ?? PropertyRoute.Root(typeof(T));
     }
@@ -39,7 +34,7 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
                 if (await TryToCloseAsync())
                     break;
 
-                var message = await Page.GetMessageModalAsync();
+                var message = await Modal.Page.GetMessageModalAsync();
                 if (message != null)
                 {
                     await message.ClickAsync(MessageModalButton.Yes);
@@ -94,6 +89,6 @@ public static class FrameModalProxyExtension
     public static FrameModalProxy<T> AsFrameModal<T>(this ModalProxy modal)
         where T : ModifiableEntity
     {
-        return new FrameModalProxy<T>(modal.Page, modal.Modal);
+        return new FrameModalProxy<T>(modal.Modal);
     }
 }

@@ -7,28 +7,24 @@ public abstract class FilterProxy { }
 public class FilterGroupProxy : FilterProxy
 {
     public ILocator Element { get; }
-    public IPage Page { get; }
     readonly object queryName;
 
-    public FilterGroupProxy(ILocator element, object queryName, IPage page)
+    public FilterGroupProxy(ILocator element, object queryName)
     {
         Element = element;
         this.queryName = queryName;
-        Page = page;
     }
 }
 
 public class FilterConditionProxy : FilterProxy
 {
     public ILocator Element { get; }
-    public IPage Page { get; }
     readonly object QueryName;
 
-    public FilterConditionProxy(ILocator element, object queryName, IPage page)
+    public FilterConditionProxy(ILocator element, object queryName)
     {
         Element = element;
         QueryName = queryName;
-        Page = page;
     }
 
     public ILocator DeleteButton => Element.Locator(".sf-line-button.sf-remove");
@@ -55,7 +51,7 @@ public class FilterConditionProxy : FilterProxy
 
     public EntityLineProxy EntityLine()
     {
-        return new EntityLineProxy(ValueElement, null!, Page);
+        return new EntityLineProxy(ValueElement, null!);
     }
 
     internal async Task SetValueAsync(object? value)
@@ -64,7 +60,7 @@ public class FilterConditionProxy : FilterProxy
         var qt = QueryUtils.Parse(fullKey!, QueryLogic.Queries.QueryDescription(QueryName),
             SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll);
 
-        var al = BaseLineProxy.AutoLine(ValueElement, qt.GetPropertyRoute()!, Page);
+        var al = BaseLineProxy.AutoLine(ValueElement, qt.GetPropertyRoute()!);
 
         if (value is PrimaryKey pk)
             await al.SetValueUntypedAsync(pk.Object);

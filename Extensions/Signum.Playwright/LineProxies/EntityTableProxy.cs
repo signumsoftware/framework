@@ -7,8 +7,8 @@ public class EntityTableProxy : EntityBaseProxy
 {
     public override PropertyRoute ItemRoute => base.ItemRoute.Add("Item");
 
-    public EntityTableProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public EntityTableProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 
@@ -36,7 +36,7 @@ public class EntityTableProxy : EntityBaseProxy
 
     public EntityTableRow<T> Row<T>(int index) where T : ModifiableEntity
     {
-        return new EntityTableRow<T>(this, RowElement(index), this.ItemRoute, Page);
+        return new EntityTableRow<T>(this, RowElement(index), this.ItemRoute);
     }
 
     internal async Task<int> IndexOfAsync(ILocator row)
@@ -82,13 +82,11 @@ public class EntityTableRow<T> : LineContainer<T>
     where T : ModifiableEntity
 {
     public EntityTableProxy EntityTable { get; }
-    private IPage Page;
 
-    public EntityTableRow(EntityTableProxy entityTable, ILocator element, PropertyRoute? route, IPage page)
-        : base(element, page, route)
+    public EntityTableRow(EntityTableProxy entityTable, ILocator element, PropertyRoute? route)
+        : base(element, route)
     {
         EntityTable = entityTable;
-        Page = page;
     }
 
     public async Task<int> IndexAsync()
@@ -109,7 +107,7 @@ public class EntityTableRow<T> : LineContainer<T>
         await action();
 
         EntityTableRow<T> result = null!;
-        await Page.WaitForFunctionAsync(
+        await Element.Page.WaitForFunctionAsync(
             @"([table, index]) => {
                 const rows = table.querySelectorAll(':scope > tbody > tr');
                 return rows[index] && rows[index] !== arguments[2];

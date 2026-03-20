@@ -7,8 +7,8 @@ namespace Signum.Playwright.LineProxies;
 
 public class DateTimeLineProxy : BaseLineProxy
 {
-    public DateTimeLineProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public DateTimeLineProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 

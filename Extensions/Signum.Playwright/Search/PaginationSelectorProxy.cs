@@ -7,8 +7,6 @@ public class PaginationSelectorProxy
     private readonly SearchControlProxy searchControl;
     public ILocator Element { get; }
 
-    public IPage Page => searchControl.Page;
-
     public PaginationSelectorProxy(SearchControlProxy searchControl)
     {
         this.searchControl = searchControl;

@@ -7,8 +7,8 @@ public class EntityListProxy : EntityBaseProxy
 {
     public override PropertyRoute ItemRoute => base.ItemRoute.Add("Item");
 
-    public EntityListProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public EntityListProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 
@@ -27,7 +27,7 @@ public class EntityListProxy : EntityBaseProxy
     {
         var option = OptionElement(index);
         var value = await option.GetAttributeAsync("value");
-        await ListElement.SelectOptionAsync(value);
+        await ListElement.SelectOptionAsync(value!);
     }
 
     public async Task<FrameModalProxy<T>> ViewAsync<T>(int index) where T : ModifiableEntity

@@ -5,14 +5,12 @@ namespace Signum.Playwright.Search;
 public class FiltersProxy
 {
     public ILocator Element { get; }
-    public IPage Page { get; }
     public object QueryName { get; }
 
-    public FiltersProxy(ILocator element, object queryName, IPage page)
+    public FiltersProxy(ILocator element, object queryName)
     {
         Element = element;
         QueryName = queryName;
-        Page = page;
     }
 
     public async Task<List<FilterProxy>> FiltersAsync()
@@ -27,9 +25,9 @@ public class FiltersProxy
             ILocator locator = (ILocator)handle;
 
             if (className.Contains("sf-filter-condition"))
-                list.Add(new FilterConditionProxy(locator, QueryName, Page));
+                list.Add(new FilterConditionProxy(locator, QueryName));
             else if (className.Contains("sf-filter-group"))
-                list.Add(new FilterGroupProxy(locator, QueryName, Page));
+                list.Add(new FilterGroupProxy(locator, QueryName));
         }
 
         return list;
@@ -42,7 +40,7 @@ public class FiltersProxy
 
         FilterProxy? newFilter = null;
 
-        await Page.WaitForFunctionAsync(
+        await Element.Page.WaitForFunctionAsync(
             @"([table, oldCount]) => table.querySelectorAll('tbody > tr').length > oldCount",
             new object[] { Element, oldFilters.Count }
         );

@@ -4,8 +4,8 @@ namespace Signum.Playwright.LineProxies;
 
 public class EntityDetailProxy : EntityBaseProxy
 {
-    public EntityDetailProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public EntityDetailProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 
@@ -38,6 +38,6 @@ public class EntityDetailProxy : EntityBaseProxy
     public LineContainer<T> Details<T>() where T : ModifiableEntity
     {
         var subRoute = Route.Type == typeof(T) ? Route : PropertyRoute.Root(typeof(T));
-        return new LineContainer<T>(this.Element.Locator("div[data-property-path]"), Page, subRoute);
+        return new LineContainer<T>(this.Element.Locator("div[data-property-path]"), subRoute);
     }
 }

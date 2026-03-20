@@ -5,14 +5,9 @@ namespace Signum.Playwright.LineProxies;
 
 public class TimeLineProxy : BaseLineProxy
 {
-    public ILocator Element { get; }
-    public IPage Page { get; }
-
-    public TimeLineProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public TimeLineProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
-        this.Element = element;
-        this.Page = page;
     }
 
     public ILocator InputLocator => Element.Locator("input[type=text].numeric");

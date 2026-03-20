@@ -87,14 +87,9 @@ public static class EntityButtonContainerExtensions
         await container.OperationClickAsync(symbol.Symbol);
     }
 
-    public static async Task<ILocator> OperationClickCaptureAsync(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
+    public static Task<ILocator> OperationClickCaptureAsync(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
     {
-        var button = container.OperationButton(symbol, groupId);
-        await button.ClickAsync();
-        var modalLocator = container.Page.Locator(".modal-dialog").Last;
-        await modalLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
-
-        return modalLocator;
+        return container.OperationButton(symbol, groupId).CaptureOnClickAsync();
     }
 
     public static async Task<ILocator> OperationClickCaptureAsync<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol, string? groupId = null)
@@ -110,7 +105,7 @@ public static class EntityButtonContainerExtensions
         {
             await container.OperationClickAsync(symbol);
             if (consumeAlert)
-                await container.Page.Locator("div.sf-message-modal button:has-text('Yes')").ClickAsync();
+                await container.Container.Page.CloseMessageModalAsync(MessageModalButton.Yes);
         });
 
         if (checkValidationErrors && container is IValidationSummaryContainer vs)
@@ -126,7 +121,7 @@ public static class EntityButtonContainerExtensions
 
         await action();
 
-        await container.Page.WaitForFunctionAsync(
+        await container.Container.Page.WaitForFunctionAsync(
             @"(oldCount) => {
             const el = document.querySelector('div.sf-main-control[data-refresh-count]');
             if (!el) return false;
@@ -150,7 +145,7 @@ public static class EntityButtonContainerExtensions
     {
         await container.OperationClickAsync(symbol);
         if (consumeAlert)
-            await container.Page.Locator("div.sf-message-modal button:has-text('Yes')").ClickAsync();
+            await container.Modal.Page.Locator("div.sf-message-modal button:has-text('Yes')").ClickAsync();
 
         await container.WaitForCloseAsync();
     }
@@ -160,7 +155,7 @@ public static class EntityButtonContainerExtensions
         where F : Entity
     {
         var element = await container.OperationClickCaptureAsync(symbol);
-        var modal = await new FrameModalProxy<T>(container.Page, element).WaitLoadedAsync();
+        var modal = await new FrameModalProxy<T>(element).WaitLoadedAsync();
         return modal;
     }
 
@@ -170,11 +165,11 @@ public static class EntityButtonContainerExtensions
     {
         await container.OperationClickAsync(symbol);
 
-        await container.Page.WaitForFunctionAsync(@"(container) => {
+        await container.Container.Page.WaitForFunctionAsync(@"(container) => {
             try { return container.EntityInfo().IsNew; } catch { return false; }
         }", container);
 
-        return new FramePageProxy<T>(container.Page);
+        return new FramePageProxy<T>(container.Container.Page);
     }
 
     public static async Task<long?> RefreshCountAsync(this IEntityButtonContainer container)

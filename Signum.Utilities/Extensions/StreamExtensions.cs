@@ -247,12 +247,10 @@ public static class StreamExtensions
         }
     }
 
-
     [DebuggerStepThrough]
-    public static async Task EndUsingAsync<T>(this Task<T> task, Func<T, Task> action)
+    public static async Task EndUsingAsync<T>(this T disposable, Func<T, Task> action)
         where T : IDisposable
     {
-        var disposable = await task;
         try
         {
             await action(disposable);
@@ -279,9 +277,10 @@ public static class StreamExtensions
     }
 
     [DebuggerStepThrough]
-    public static async Task EndUsingAsync<T>(this T disposable, Func<T, Task> action)
+    public static async Task EndUsingAsync<T>(this Task<T> task, Func<T, Task> action)
         where T : IDisposable
     {
+        var disposable = await task;
         try
         {
             await action(disposable);

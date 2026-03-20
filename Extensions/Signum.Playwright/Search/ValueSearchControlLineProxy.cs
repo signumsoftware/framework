@@ -5,13 +5,11 @@ namespace Signum.Playwright.Search;
 
 public class SearchValueLineProxy
 {
-    public IPage Page { get; private set; }
     public ILocator Element { get; private set; }
 
-    public SearchValueLineProxy(ILocator element, IPage page)
+    public SearchValueLineProxy(ILocator element)
     {
         this.Element = element;
-        this.Page = page;
     }
 
     public ILocator CountSearch => Element.Locator(".count-search");
@@ -26,11 +24,11 @@ public class SearchValueLineProxy
 
         if (await SelectorModalProxy.IsSelectorAsync(popup))
         {
-            var selector = popup.AsSelectorModal(Page);
+            var selector = popup.AsSelectorModal();
             popup = await selector.SelectAndCaptureAsync<T>();
         }
 
-        return await new FrameModalProxy<T>(Page, popup).WaitLoadedAsync();
+        return await new FrameModalProxy<T>(popup).WaitLoadedAsync();
     }
 
     private async Task<ILocator> CapturePopupAsync(ILocator trigger, Func<Task> action)
@@ -38,7 +36,7 @@ public class SearchValueLineProxy
         // Playwright Popup Capture Simulation
         await action();
         // Annahme: Das neue Modal wird als sichtbares Element auf der Page angezeigt
-        var popup = Page.Locator(".sf-popup:visible");
+        var popup = Element.Page.Locator(".sf-popup:visible");
         await popup.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
         return popup;
     }

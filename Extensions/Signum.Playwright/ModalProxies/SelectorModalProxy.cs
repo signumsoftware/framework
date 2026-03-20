@@ -4,14 +4,9 @@ namespace Signum.Playwright.ModalProxies;
 
 public class SelectorModalProxy : ModalProxy
 {
-    public ILocator Element { get; private set; }
-    public IPage Page { get; private set; }
-
-    public SelectorModalProxy(ILocator element, IPage page)
-        : base(element, page)
+    public SelectorModalProxy(ILocator element)
+        : base(element)
     {
-        Element = element;
-        Page = page;
     }
 
     public async Task SelectAsync(string value)
@@ -60,7 +55,7 @@ public class SelectorModalProxy : ModalProxy
 
     public async Task<string[]> ButtonNamesAsync()
     {
-        var buttons = Element.Locator("button[name]");
+        var buttons = Modal.Locator("button[name]");
         var count = await buttons.CountAsync();
         var names = new List<string>();
 
@@ -79,7 +74,7 @@ public class SelectorModalProxy : ModalProxy
 
     private async Task SelectPrivateAsync(string name)
     {
-        var button = Element.Locator($"button[name='{name}']");
+        var button = Modal.Locator($"button[name='{name}']");
         await button.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
         await button.ClickAsync();
     }
@@ -89,21 +84,21 @@ public class SelectorModalProxy : ModalProxy
         // Einfacher Wrapper für Playwright-Popups, z.B. neues Modal, Alert oder Window
         await action();
         // Annahme: Popup erscheint innerhalb des gleichen Pages, Locator muss ggf. angepasst werden
-        var popup = Page.Locator(".sf-popup:visible");
+        var popup = Modal.Page.Locator(".sf-popup:visible");
         await popup.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
         return popup;
     }
 
     private async Task WaitNotVisibleAsync()
     {
-        await Element.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });
+        await Modal.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });
     }
 }
 
 public static class SelectorModalExtensions
 {
-    public static SelectorModalProxy AsSelectorModal(this ILocator modal, IPage page)
+    public static SelectorModalProxy AsSelectorModal(this ILocator modal)
     {
-        return new SelectorModalProxy(modal, page);
+        return new SelectorModalProxy(modal);
     }
 }

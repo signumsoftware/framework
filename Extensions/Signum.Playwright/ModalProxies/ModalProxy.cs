@@ -9,40 +9,18 @@ namespace Signum.Playwright.ModalProxies;
 /// </summary>
 public class ModalProxy : IDisposable, IAsyncDisposable
 {
-    public IPage Page { get; }
     public ILocator Modal { get; }
 
     public Func<Task>? AfterClose { get; set; }
 
-    public ModalProxy(IPage page, int modalIndex = -1)
+    public ModalProxy(ILocator locator)
     {
-        Page = page;
-
-        Modal = modalIndex >= 0
-            ? page.Locator(".modal-dialog").Nth(modalIndex)
-            : page.Locator(".modal-dialog").Last;
-    }
-
-    public ModalProxy(IPage page, string modalTitle)
-    {
-        Page = page;
-
-        Modal = page.Locator(".modal-dialog")
-            .Filter(new LocatorFilterOptions
-            {
-                Has = page.Locator($".modal-title:has-text('{modalTitle}')")
-            });
-    }
-
-    public ModalProxy(ILocator modalElement, IPage page)
-    {
-        Page = page;
-        Modal = modalElement;
+        Modal = locator;
     }
 
     public ILocator CloseButton =>
         Modal.Locator(".modal-header button.btn-close");
-
+    
     public bool AvoidClose { get; set; }
 
     public void Dispose()
@@ -85,7 +63,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
     public async Task<FrameModalProxy<T>> OkWaitFrameModalAsync<T>()
     where T : ModifiableEntity
     {
-        var newModal = await CaptureAsync(Page, async () =>
+        var newModal = await CaptureAsync(Modal.Page, async () =>
         {
             await OkButton.ClickAsync();
         });
@@ -93,7 +71,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
         var disposing = Disposing;
         Disposing = null;
 
-        return new FrameModalProxy<T>(Page, newModal.Modal)
+        return new FrameModalProxy<T>(newModal.Modal)
         {
             Disposing = disposing
         };
@@ -101,7 +79,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
 
     public async Task<SearchModalProxy> OkWaitSearchModalAsync()
     {
-        var newModal = await CaptureAsync(Page, async () =>
+        var newModal = await CaptureAsync(Modal.Page, async () =>
         {
             await OkButton.ClickAsync();
         });
@@ -109,7 +87,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
         var disposing = Disposing;
         Disposing = null;
 
-        return new SearchModalProxy(newModal.Modal, Page)
+        return new SearchModalProxy(newModal.Modal)
         {
             Disposing = disposing
         };
@@ -123,7 +101,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
 
         if (consumeAlert)
         {
-            var alert = Page.Locator(".modal-dialog .message-modal");
+            var alert = Modal.Locator(".modal-dialog .message-modal");
             if (await alert.IsVisibleAsync())
             {
                 await alert.GetByRole(AriaRole.Button, new() { Name = "OK" }).ClickAsync();
@@ -162,7 +140,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
 
         var modal = page.Locator(".modal-dialog").Nth(beforeCount);
 
-        return new ModalProxy(modal, page);
+        return new ModalProxy(modal);
     }
 
  

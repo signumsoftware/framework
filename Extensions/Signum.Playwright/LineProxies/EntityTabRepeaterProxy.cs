@@ -7,16 +7,11 @@ namespace Signum.Playwright.LineProxies;
 
 public class EntityTabRepeaterProxy : EntityBaseProxy
 {
-    public ILocator Element { get; }
-    public IPage Page { get; }
-
     public override PropertyRoute ItemRoute => base.ItemRoute.Add("Item");
 
-    public EntityTabRepeaterProxy(ILocator element, IPage page, PropertyRoute route)
-        : base(element, route, page)
+    public EntityTabRepeaterProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
-        this.Element = element;
-        this.Page = page;
     }
 
     public override Task<object?> GetValueUntypedAsync() => throw new NotImplementedException();
@@ -68,6 +63,6 @@ public class EntityTabRepeaterProxy : EntityBaseProxy
             State = WaitForSelectorState.Visible
         });
 
-        return new LineContainer<T>(panel, this.Page, this.ItemRoute);
+        return new LineContainer<T>(panel, this.ItemRoute);
     }
 }

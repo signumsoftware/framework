@@ -4,8 +4,8 @@ namespace Signum.Playwright.LineProxies;
 
 public class EntityStripProxy : EntityBaseProxy
 {
-    public EntityStripProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public EntityStripProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 
@@ -35,7 +35,7 @@ public class EntityStripProxy : EntityBaseProxy
         var changes = await GetChangesAsync();
         var popup = await CaptureOnClickAsync(ViewElementIndex(index));
 
-        return new FrameModalProxy<T>(Page, popup, this.ItemRoute)
+        return new FrameModalProxy<T>(popup, this.ItemRoute)
         {
             Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
         };

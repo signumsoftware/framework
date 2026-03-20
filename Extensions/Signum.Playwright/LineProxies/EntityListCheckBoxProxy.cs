@@ -2,8 +2,8 @@ namespace Signum.Playwright.LineProxies;
 
 public class EntityListCheckBoxProxy : EntityBaseProxy
 {
-    public EntityListCheckBoxProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public EntityListCheckBoxProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 

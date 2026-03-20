@@ -2,14 +2,9 @@ namespace Signum.Playwright.LineProxies;
 
 public class GuidBoxLineProxy : BaseLineProxy
 {
-    public ILocator Element { get; }
-    public IPage Page { get; }
-
-    public GuidBoxLineProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public GuidBoxLineProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
-        this.Element = element;
-        this.Page = page;
     }
 
     public ILocator InputLocator => Element.Locator("input[type=text]");

@@ -11,10 +11,10 @@ public class SearchModalProxy : ModalProxy
     public Task<FiltersProxy> GetFiltersAsync() => SearchControl.GetFiltersAsync();
     public PaginationSelectorProxy Pagination => SearchControl.Pagination;
 
-    public SearchModalProxy(ILocator element, IPage page, bool waitInitialSearch = true)
-        : base(element, page)
+    public SearchModalProxy(ILocator element, bool waitInitialSearch = true)
+        : base(element)
     {
-        this.SearchControl = new SearchControlProxy(element.Locator(".sf-search-control"), page);
+        this.SearchControl = new SearchControlProxy(element.Locator(".sf-search-control"));
 
         if (waitInitialSearch)
             this.SearchControl.WaitInitialSearchCompletedAsync().GetAwaiter().GetResult();
@@ -87,15 +87,15 @@ public class SearchModalProxy : ModalProxy
     {
         await SearchControl.CreateButton.ClickAsync();
 
-        var modalLocator = Page.Locator(".sf-modal");
+        var modalLocator = Modal.Locator(".sf-modal");
         await modalLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
 
-        var modal = new FrameModalProxy<T>(Page, modalLocator);
+        var modal = new FrameModalProxy<T>(modalLocator);
         await action(modal);
-        var message = Page.Locator(".message-modal");
+        var message = modalLocator.Locator(".message-modal");
         if (await message.CountAsync() > 0)
         {
-            var msg = new MessageModalProxy(message, Page);
+            var msg = new MessageModalProxy(message);
             await msg.ClickWaitCloseAsync(MessageModalButton.Yes);
         }
 
@@ -110,8 +110,8 @@ public class SearchModalProxy : ModalProxy
 
 public static class SearchModalExtensions
 {
-    public static SearchModalProxy AsSearchModal(this ILocator modal, IPage page, bool waitInitialSearch = true)
+    public static SearchModalProxy AsSearchModal(this ILocator modal, bool waitInitialSearch = true)
     {
-        return new SearchModalProxy(modal, page, waitInitialSearch);
+        return new SearchModalProxy(modal, waitInitialSearch);
     }
 }

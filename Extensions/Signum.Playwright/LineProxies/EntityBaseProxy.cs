@@ -6,8 +6,8 @@ namespace Signum.Playwright.LineProxies;
 
 public abstract class EntityBaseProxy : BaseLineProxy
 {
-    protected EntityBaseProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    protected EntityBaseProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 
@@ -44,7 +44,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
 
         var itemRoute = this.ItemRoute.Type == typeof(T) ? this.ItemRoute : PropertyRoute.Root(typeof(T));
 
-        return new FrameModalProxy<T>(Page, popup, itemRoute)
+        return new FrameModalProxy<T>(popup, itemRoute)
         {
             Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
         };
@@ -57,7 +57,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
         var popup = await CaptureOnClickAsync(ViewButton);
         string changes = await GetChangesAsync();
 
-        return new FrameModalProxy<T>(Page, popup, this.ItemRoute)
+        return new FrameModalProxy<T>(popup, this.ItemRoute)
         {
             Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
         };
@@ -79,7 +79,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
 
         popup = await ChooseTypeCaptureAsync(popup, selectType);
 
-        return new SearchModalProxy(popup, Page)
+        return new SearchModalProxy(popup)
         {
             Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
         };
@@ -146,7 +146,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
                     element.querySelectorAll('[data-entity]')[index];
                 return target.getAttribute('data-entity') !== oldVal;
             }",
-            new object[] { Element, entityInfo, index });
+            new object?[] { Element, entityInfo, index });
     }
 
     protected async Task<string> EntityInfoStringAsync(int? index)

@@ -5,13 +5,11 @@ namespace Signum.Playwright.Search;
 
 public class ResultTableProxy
 {
-    public IPage Page { get; }
     public ILocator Element { get; }
     private SearchControlProxy SearchControl;
 
-    public ResultTableProxy(ILocator element, SearchControlProxy searchControl, IPage page)
+    public ResultTableProxy(ILocator element, SearchControlProxy searchControl)
     {
-        Page = page;
         Element = element;
         SearchControl = searchControl;
     }
@@ -24,17 +22,17 @@ public class ResultTableProxy
     public async Task<List<ResultRowProxy>> AllRowsAsync()
     {
         var rows = await RowsLocator.AllAsync();
-        return rows.Select(r => new ResultRowProxy(r, Page)).ToList();
+        return rows.Select(r => new ResultRowProxy(r)).ToList();
     }
 
     public ResultRowProxy RowElement(int rowIndex)
-        => new ResultRowProxy(RowElementLocator(rowIndex), Page);
+        => new ResultRowProxy(RowElementLocator(rowIndex));
 
     private ILocator RowElementLocator(int rowIndex)
         => Element.Locator($"tr[data-row-index='{rowIndex}']");
 
     public ResultRowProxy RowElement(Lite<IEntity> lite)
-        => new ResultRowProxy(RowElementLocator(lite), Page);
+        => new ResultRowProxy(RowElementLocator(lite));
 
     private ILocator RowElementLocator(Lite<IEntity> lite)
         => Element.Locator($"tr[data-entity='{lite.Key()}']");
@@ -140,15 +138,16 @@ public class ResultTableProxy
 
         do
         {
+            var page = this.Element.Page;
             await SearchControl.WaitSearchCompletedAsync(async () =>
             {
                 if (thenBy)
-                    await Page.Keyboard.DownAsync("Shift");
+                    await page.Keyboard.DownAsync("Shift");
 
                 await header.ClickAsync();
 
                 if (thenBy)
-                    await Page.Keyboard.UpAsync("Shift");
+                    await page.Keyboard.UpAsync("Shift");
             });
         }
         while (!await IsHeaderMarkedSortedAsync(token, descending));
@@ -171,7 +170,7 @@ public class ResultTableProxy
         where T : Entity
     {
         var link = await EntityLinkAsync(lite);
-        var popup = await Page.RunAndWaitForPopupAsync(() => link.ClickAsync());
+        var popup = await link.CaptureOnClickAsync();
         return new FrameModalProxy<T>(popup);
     }
 
@@ -180,7 +179,7 @@ public class ResultTableProxy
     {
         var link = await EntityLinkAsync(lite);
         await link.ClickAsync();
-        return new FramePageProxy<T>(Page);
+        return new FramePageProxy<T>(this.Element.Page);
     }
 
     public async Task<ILocator> EntityLinkAsync(Lite<IEntity> lite)
@@ -209,7 +208,7 @@ public class ResultTableProxy
 
     public async Task WaitRowsAsync(int rows)
     {
-        await Page.WaitForFunctionAsync(
+        await this.Element.Page.WaitForFunctionAsync(
             @"([locator, count]) => document.querySelectorAll(locator).length === count",
             new object[] { "tbody > tr[data-entity]", rows });
     }
@@ -237,12 +236,10 @@ public class ResultTableProxy
 public class ResultRowProxy
 {
     public ILocator RowElement { get; private set; }
-    private IPage Page;
 
-    public ResultRowProxy(ILocator rowElement, IPage page)
+    public ResultRowProxy(ILocator rowElement)
     {
         RowElement = rowElement;
-        Page = page;
     }
 
     public ILocator SelectedCheckbox => RowElement.Locator("input.sf-td-selection");

@@ -6,22 +6,20 @@ namespace Signum.Playwright.Search;
 
 public class SearchControlProxy
 {
-    public IPage Page { get; private set; }
     public ILocator Element { get; private set; }
     public ResultTableProxy Results { get; private set; }
 
     public async Task<object> QueryNameAsync() => QueryLogic.ToQueryName((await Element.GetAttributeAsync("data-query-key"))!);
 
-    public async Task<FiltersProxy> GetFiltersAsync() => new FiltersProxy(FiltersPanel, await QueryNameAsync(), Page);
+    public async Task<FiltersProxy> GetFiltersAsync() => new FiltersProxy(FiltersPanel, await QueryNameAsync());
     public ColumnEditorProxy ColumnEditor() => new ColumnEditorProxy(Element.Locator(".sf-column-editor"));
 
     public PaginationSelectorProxy Pagination => new PaginationSelectorProxy(this);
 
-    public SearchControlProxy(ILocator element, IPage page)
+    public SearchControlProxy(ILocator element)
     {
-        Page = page;
         Element = element;
-        Results = new ResultTableProxy(Element.Locator(".sf-scroll-table-container"), this, Page);
+        Results = new ResultTableProxy(Element.Locator(".sf-scroll-table-container"), this);
     }
 
     public ILocator SearchButton => Element.Locator(".sf-query-button.sf-search");
@@ -46,7 +44,7 @@ public class SearchControlProxy
 
     private async Task WaitSearchCompletedAsync(string? counter)
     {
-        await Page.WaitForFunctionAsync(
+        await Element.Page.WaitForFunctionAsync(
             $"() => document.querySelector('{Element}').getAttribute('data-search-count') != '{counter}'"
         );
     }
@@ -61,7 +59,7 @@ public class SearchControlProxy
 
     public async Task<ILocator> WaitContextMenuAsync()
     {
-        var locator = Page.Locator(".sf-context-menu .dropdown-menu");
+        var locator = Element.Page.Locator(".sf-context-menu .dropdown-menu");
 
         await locator.WaitForAsync(new LocatorWaitForOptions
         {
@@ -83,7 +81,7 @@ public class SearchControlProxy
             await FiltersPanel.WaitNotVisibleAsync();
     }
 
-    public ILocator ContextualMenu => Page.Locator(".sf-context-menu");
+    public ILocator ContextualMenu => Element.Page.Locator(".sf-context-menu");
 
     public async Task<FilterConditionProxy> AddQuickFilterAsync(int rowIndex, string token)
     {
@@ -113,12 +111,12 @@ public class SearchControlProxy
     {
         await CreateButton.ClickAsync();
 
-        var modalLocator = Page.Locator(".sf-selector-modal, .sf-modal");
+        var modalLocator = this.Element.Page.Locator(".sf-selector-modal, .sf-modal");
         await modalLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
 
         if (await SelectorModalProxy.IsSelectorAsync(modalLocator))
-            modalLocator = await modalLocator.AsSelectorModal(Page).SelectAndCaptureAsync<T>();
-        var modal = await new FrameModalProxy<T>(Page, modalLocator).WaitLoadedAsync();
+            modalLocator = await modalLocator.AsSelectorModal().SelectAndCaptureAsync<T>();
+        var modal = await new FrameModalProxy<T>(modalLocator).WaitLoadedAsync();
         return modal;
     }
 
@@ -129,6 +127,6 @@ public class SearchControlProxy
 
     public ILineContainer<T> SimpleFilterBuilder<T>() where T : ModifiableEntity
     {
-        return new LineContainer<T>(Element.Locator(".simple-filter-builder"), Page);
+        return new LineContainer<T>(Element.Locator(".simple-filter-builder"));
     }
 }

@@ -4,7 +4,7 @@ using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Frames;
 
-public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer, IWidgetContainer, IValidationSummaryContainer, IAsyncDisposable 
+public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, IWidgetContainer, IValidationSummaryContainer, IAsyncDisposable, IDisposable
     where T : ModifiableEntity
 {
     public IPage Page { get; }
@@ -16,9 +16,8 @@ public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer, IWid
         Page = page;
         Element = page.Locator(".normal-control");
         Route = PropertyRoute.Root(typeof(T));
-        WaitLoadedAsync().GetAwaiter();
+        WaitLoadedAsync().GetAwaiter().GetResult();
     }
-
 
     public ILocator Container => Element;
 

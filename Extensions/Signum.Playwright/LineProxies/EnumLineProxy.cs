@@ -6,8 +6,8 @@ namespace Signum.Playwright.LineProxies;
 /// </summary>
 public class EnumLineProxy : BaseLineProxy
 {
-    public EnumLineProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public EnumLineProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 

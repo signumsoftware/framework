@@ -4,8 +4,8 @@ namespace Signum.Playwright.LineProxies;
 
 public class EntityComboProxy : EntityBaseProxy
 {
-    public EntityComboProxy(ILocator element, PropertyRoute route, IPage page)
-        : base(element, route, page)
+    public EntityComboProxy(ILocator element, PropertyRoute route)
+        : base(element, route)
     {
     }
 
@@ -46,7 +46,7 @@ public class EntityComboProxy : EntityBaseProxy
         {
             var val = await o.GetAttributeAsync("value");
             var text = await o.TextContentAsync();
-            var lite = Lite.Parse(val)?.Do(l => l.SetModel(text));
+            var lite = Lite.Parse(val!)?.Do(l => l.SetModel(text));
             result.Add(lite);
         }
 

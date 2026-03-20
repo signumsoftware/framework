@@ -21,18 +21,18 @@ public class SearchPageProxy : IDisposable, IAsyncDisposable
     {
         var element = Page.Locator(".sf-search-page .sf-search-control");
         await element.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
-        SearchControl = new SearchControlProxy(element, Page);
+        SearchControl = new SearchControlProxy(element);
     }
 
     public async Task<FrameModalProxy<T>> CreateAsync<T>() where T : ModifiableEntity
     {
         var createButton = SearchControl.CreateButton;
-        var popup = await createButton.CaptureOnClickAsync(Page);
+        var popup = await createButton.CaptureOnClickAsync();
 
         if (await SelectorModalProxy.IsSelectorAsync(popup))
-            popup = await popup.AsSelectorModal(Page).SelectAndCaptureAsync<T>();
+            popup = await popup.AsSelectorModal().SelectAndCaptureAsync<T>();
 
-        return new FrameModalProxy<T>(Page, popup);
+        return new FrameModalProxy<T>(popup);
     }
 
     public async Task<FramePageProxy<T>> CreateInPlaceAsync<T>() where T : ModifiableEntity
