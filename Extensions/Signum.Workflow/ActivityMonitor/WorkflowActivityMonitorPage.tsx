@@ -6,12 +6,13 @@ import { WorkflowEntity, WorkflowModel, WorkflowActivityMonitorMessage, CaseActi
 import { Navigator } from '@framework/Navigator'
 import { WorkflowClient } from '../WorkflowClient'
 import WorkflowActivityMonitorViewerComponent from '../Bpmn/WorkflowActivityMonitorViewerComponent'
-import { ColumnOptionParsed, FilterOptionParsed, SubTokensOptions, QueryDescription, ColumnRequest } from '@framework/FindOptions';
+import { ColumnOptionParsed, FilterOptionParsed, QueryDescription, ColumnRequest } from '@framework/FindOptions';
 import { useLocation, useParams } from "react-router";
 import { newLite } from '@framework/Reflection';
 import FilterBuilder from '@framework/SearchControl/FilterBuilder';
 import ColumnBuilder from '@framework/SearchControl/ColumnBuilder';
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
+import { SubTokensOptions } from '@framework/QueryToken'
 
 export interface WorkflowActivityMonitorConfig {
   workflow: Lite<WorkflowEntity>;

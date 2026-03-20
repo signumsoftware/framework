@@ -33,13 +33,13 @@ public static class SignumServer
     public static JsonOptions AddSignumJsonConverters(this JsonOptions jsonOptions)
     {
         jsonOptions.JsonSerializerOptions.AddSignumJsonConverters();
+        JsonSerializerOptions = jsonOptions.JsonSerializerOptions;
         return jsonOptions;
     }
 
-    public static void AddSignumJsonConverters(this JsonSerializerOptions jso)
+    public static JsonSerializerOptions AddSignumJsonConverters(this JsonSerializerOptions jso)
     {
         //Signum converters
-        JsonSerializerOptions = jso;
         jso.IncludeFields = true;
         jso.WriteIndented = true;
         jso.Converters.Add(WebEntityJsonConverterFactory);
@@ -50,6 +50,8 @@ public static class SignumServer
         jso.Converters.Add(new TimeSpanConverter());
         jso.Converters.Add(new DateOnlyConverter());
         jso.Converters.Add(new TimeOnlyConverter());
+
+        return jso;
     }
 
     public static MvcOptions AddSignumGlobalFilters(this MvcOptions options)

@@ -1,12 +1,14 @@
 import { RouteObject } from 'react-router'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation, ShowCount, ToolbarSwitcherEntity, ToolbarSwitcherOptionEmbedded, ToolbarMenuElementEmbedded } from './Signum.Toolbar'
-import { Constructor } from '@framework/Constructor'
+import {
+  ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded,
+  ToolbarElementType, ToolbarLocation, ShowCount, ToolbarSwitcherEntity,
+  ToolbarSwitcherOptionEmbedded, ToolbarMenuElementEmbedded
+} from './Signum.Toolbar'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { Dic } from '@framework/Globals';
 import QueryToolbarConfig from './QueryToolbarConfig';

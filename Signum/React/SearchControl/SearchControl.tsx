@@ -18,6 +18,7 @@ export interface SimpleFilterBuilderProps {
 }
 
 export interface SearchControlProps {
+  ref?: React.Ref<SearchControlHandler>;
   findOptions: FindOptions;
   formatters?: { [token: string]: Finder.CellFormatter };
   rowAttributes?: (row: ResultRow, searchControl: SearchControlLoaded) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
@@ -101,7 +102,7 @@ export namespace SearchControlOptions {
   export let showFooter = (sc: SearchControlHandler, p: SearchControlProps): boolean | undefined => p.showFooter;
 }
 
-const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.RefAttributes<SearchControlHandler>> = React.forwardRef(function SearchControl(p: SearchControlProps, ref: React.Ref<SearchControlHandler>) {
+function SearchControl(p: SearchControlProps): React.JSX.Element | null {
 
   const searchControlLoaded = React.useRef<SearchControlLoaded>(null);
   const lastDeps = usePrevious(p.deps);
@@ -116,7 +117,7 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
     doSearch: opts => searchControlLoaded.current && searchControlLoaded.current.doSearch(opts),
     doSearchPage1: force => searchControlLoaded.current && searchControlLoaded.current.doSearchPage1(force),
   };
-  React.useImperativeHandle(ref, () => handler, [p.findOptions, searchControlLoaded.current]);
+  React.useImperativeHandle(p.ref, () => handler, [p.findOptions, searchControlLoaded.current]);
 
   const qd = useAPI<QueryDescription | "not-allowed">(() => {
 
@@ -265,7 +266,7 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
       />
     </ErrorBoundary>
   );
-});
+}
 
 export default SearchControl;
 

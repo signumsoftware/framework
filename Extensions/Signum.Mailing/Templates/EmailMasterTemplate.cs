@@ -1,8 +1,6 @@
 using System.Text.RegularExpressions;
-using Signum.Basics;
 using System.Xml.Linq;
 using Signum.UserAssets;
-using Signum.Basics;
 
 namespace Signum.Mailing.Templates;
 

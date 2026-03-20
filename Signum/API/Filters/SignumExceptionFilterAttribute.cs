@@ -56,10 +56,10 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
 
                 await response.WriteAsync(errorJson);
                 context.ExceptionHandled = true;
-
             }
         }
     }
+
 
     internal static async Task LogException(Exception exception, ActionContext actionContext)
     {
@@ -150,7 +150,9 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
 
 public class HttpError
 {
-    public HttpError(Exception e, bool includeErrorDetails = true, bool includeId = true)
+    public static Func<Exception, bool> IncludeErrorDetails = e => true;
+
+    public HttpError(Exception e, bool? includeErrorDetails = true, bool includeId = true)
     {
         this.ExceptionMessage = e.Message;
         this.ExceptionType = e.GetType().FullName!;
@@ -159,7 +161,7 @@ public class HttpError
         if (includeId)
             this.ExceptionId = e.GetExceptionEntity()?.Id.ToString();
 
-        if (includeErrorDetails)
+        if (includeErrorDetails ?? IncludeErrorDetails(e))
         {
             this.StackTrace = e.StackTrace;
             this.InnerException = e.InnerException == null ? null : new HttpError(e.InnerException);
@@ -197,3 +199,7 @@ public class SignumInitializeFilterAttribute : IAsyncResourceFilter
         return next();
     }
 }
+
+
+
+

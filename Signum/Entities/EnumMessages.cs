@@ -89,8 +89,8 @@ public enum EngineMessage
 {
     [Description("Concurrency error on the database, Table = {0}, Id = {1}")]
     ConcurrencyErrorOnDatabaseTable0Id1,
-    [Description("Entity with type {0} and Id {1} not found")]
-    EntityWithType0AndId1NotFound,
+    [Description("{0} {1} not found")]
+    _01NotFound,
     [Description("No way of mapping type {0} found")]
     NoWayOfMappingType0Found,
     [Description("The entity {0} is new")]
@@ -342,6 +342,9 @@ public enum SearchMessage
     [Description("More than one {0} selected")]
     MoreThanOne0Selected,
     CombineRowsWith,
+
+    [Description("Finds similar results based on meaning, not exact words")]
+    SmartSearchDescription,
 
     [Description("Equal {0}")]
     Equal0,

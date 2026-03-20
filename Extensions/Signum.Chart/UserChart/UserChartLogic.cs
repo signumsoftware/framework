@@ -1,4 +1,3 @@
-using DocumentFormat.OpenXml.Presentation;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Dashboard;
@@ -7,7 +6,6 @@ using Signum.Toolbar;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.UserAssets.QueryTokens;
-using Signum.UserQueries;
 using Signum.ViewLog;
 using System.Collections.Frozen;
 
@@ -291,13 +289,6 @@ public static class UserChartLogic
 
         DashboardLogic.RegisterTypeConditionForPart<UserChartPartEntity>(typeCondition);
         DashboardLogic.RegisterTypeConditionForPart<CombinedUserChartPartEntity>(typeCondition);
-    }
-
-    public static void RegisterTranslatableRoutes()
-    {
-        PropertyRouteTranslationLogic.RegisterRoute((UserChartEntity uc) => uc.DisplayName);
-        PropertyRouteTranslationLogic.RegisterRoute((UserChartEntity uq) => uq.Columns[0].DisplayName);
-        PropertyRouteTranslationLogic.RegisterRoute((UserChartEntity uq) => uq.Filters[0].Pinned!.Label);
     }
 
     static SqlPreCommand? Schema_Synchronizing(Replacements replacements)

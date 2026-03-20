@@ -1,5 +1,3 @@
-using Signum.Basics;
-
 namespace Signum.Scheduler;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]

@@ -1,8 +1,6 @@
 using System.Data;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
-using Signum.Utilities;
 
 #pragma warning disable CA1822 // Mark members as static
 
@@ -400,7 +398,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
             return AlterTableDropConstraint(tableName, new ObjectName(tableName.Schema, index.IndexName, isPostgres))!;
 
         if (index.FullTextIndex != null)
-            return new SqlPreCommandSimple($@"DROP FULLTEXT INDEX ON {tableName}");
+            return new SqlPreCommandSimple($@"DROP FULLTEXT INDEX ON {tableName}") { NoTransaction = NoTransactionMode.BeforeScript };
 
         if (index.ViewName == null)
             return DropIndex(tableName, index.IndexName);
@@ -512,7 +510,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
                 
                 var options = new List<string>
                 {
-                    $"METRIC = '{VectorTableIndex.GetSqlServerVectorMetric(sqlOpts.Metric)}'",
+                    $"METRIC = '{SqlVectorSearch.GetSqlVectorDistanceMetric(sqlOpts.Metric)}'",
                     $"TYPE = '{sqlOpts.IndexType}'"
                 };
                 
@@ -525,7 +523,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
             {
                 var pgOpts = vectorIndex.Postgres;
 
-                var indexMethod = VectorTableIndex.GetPGVectorIndex(pgOpts.IndexType!.Value);
+                var indexMethod = VectorTableIndex.GetPGVectorIndex(pgOpts.IndexType);
                 
                 var operatorClass = VectorTableIndex.GetPGVectorDistanceMetric(pgOpts.Metric);
 

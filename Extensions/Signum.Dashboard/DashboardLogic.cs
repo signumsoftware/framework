@@ -1,5 +1,3 @@
-using DocumentFormat.OpenXml.Presentation;
-using Signum.API;
 using Signum.API.Json;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
@@ -10,7 +8,6 @@ using Signum.Omnibox;
 using Signum.Scheduler;
 using Signum.Toolbar;
 using Signum.UserAssets;
-using Signum.UserAssets.Queries;
 using Signum.Utilities.Reflection;
 using Signum.ViewLog;
 using System.Collections.Frozen;
@@ -314,14 +311,6 @@ public static class DashboardLogic
             .FirstOrDefault();
 
         return result;
-    }
-
-    public static void RegisterTranslatableRoutes()
-    {
-        PropertyRouteTranslationLogic.RegisterRoute((DashboardEntity d) => d.DisplayName);
-        PropertyRouteTranslationLogic.RegisterRoute((DashboardEntity d) => d.Parts[0].Title);
-        if (Schema.Current.Tables.ContainsKey(typeof(TextPartEntity)))
-            PropertyRouteTranslationLogic.RegisterRoute((TextPartEntity tp) => tp.TextContent);
     }
 
     public static List<DashboardEntity> GetEmbeddedDashboards(Type entityType)

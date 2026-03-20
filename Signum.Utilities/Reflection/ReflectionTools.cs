@@ -1,7 +1,6 @@
 using System.Collections;
 using System.ComponentModel;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using Signum.Utilities.ExpressionTrees;
 using System.IO;
 
@@ -20,6 +19,16 @@ public static class ReflectionTools
     }
 
     public static bool? IsNullable(this PropertyInfo pi)
+    {
+        var info = new NullabilityInfoContext().Create(pi);
+
+        if (info.ReadState == NullabilityState.Unknown)
+            return null;
+
+        return info.ReadState == NullabilityState.Nullable;
+    }
+
+    public static bool? IsNullable(this ParameterInfo pi)
     {
         var info = new NullabilityInfoContext().Create(pi);
 

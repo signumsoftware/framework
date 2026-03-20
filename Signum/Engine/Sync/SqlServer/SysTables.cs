@@ -332,6 +332,10 @@ public class SysIndexes : IView
     [AutoExpressionField]
     public string? DataSpaceName() =>
         As.Expression(() => Database.View<SysDataSpaces>().SingleOrDefault(au => au.data_space_id == data_space_id)!.name);
+
+    [AutoExpressionField]
+    public SysVectorIndexes? VectorIndex() =>
+        As.Expression(() => Database.View<SysVectorIndexes>().SingleOrDefault(vi => vi.object_id == object_id && vi.index_id == index_id));
 }
 
 [TableName("sys.index_columns")]
@@ -345,6 +349,15 @@ public class SysIndexColumn : IView
     public int partition_ordinal;
     public bool is_included_column;
     public bool is_descending_key;
+}
+
+[TableName("sys.vector_indexes")]
+public class SysVectorIndexes : IView
+{
+    public int object_id;
+    public int index_id;
+    public string distance_metric; // 'cosine', 'euclidean', 'dot'
+    public string vector_index_type; // 'DiskANN'
 }
 
 

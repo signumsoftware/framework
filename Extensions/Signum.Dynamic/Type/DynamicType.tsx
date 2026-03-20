@@ -30,7 +30,7 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
     this.state = {};
   }
 
-  componentWillMount() : void {
+  override componentWillMount() : void {
     this.parseDefinition();
   }
 
@@ -65,7 +65,7 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
     });
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const ctx = this.props.ctx;
     const dc = { refreshView: () => this.forceUpdate() };
 

@@ -17,9 +17,7 @@ using Signum.UserAssets;
 using Signum.Chart.UserChart;
 using Signum.Chart;
 using Signum.Chart.ColorPalette;
-using Signum.Entities;
 using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.InkML;
 
 namespace Signum.Word;
 

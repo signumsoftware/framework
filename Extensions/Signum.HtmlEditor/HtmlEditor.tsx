@@ -32,6 +32,7 @@ import { HtmlEditorMessage } from "../../Signum/React/Signum.Entities";
 import { ImageExtension } from "./Extensions/ImageExtension";
 
 export interface HtmlEditorProps {
+  ref?: React.Ref<HtmlEditorController>;
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
   small?: boolean;
@@ -50,8 +51,9 @@ export interface HtmlEditorProps {
 
 const createUid = () => Math.random().toString(36).substring(2, 9);
 
-const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAttributes<HtmlEditorController>> = React.forwardRef(function HtmlEditor(
+function HtmlEditor(
   {
+    ref,
     readOnly,
     small,
     binding,
@@ -64,9 +66,8 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
     initiallyFocused,
     handleKeybindings,
     placeholder,
-    ...props }: HtmlEditorProps,
-  ref?: React.Ref<HtmlEditorController>
-) {
+    ...props }: HtmlEditorProps
+): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const id = React.useMemo(() => createUid(), []);
   const editableId = "editable_" + id;
@@ -145,7 +146,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
       </LexicalComposer>
     </div>
   );
-});
+}
 
 export default HtmlEditor;
 

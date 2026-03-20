@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Signum.Authorization;
-using Signum.UserAssets;
 
 namespace Signum.Dashboard;
 

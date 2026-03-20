@@ -27,7 +27,7 @@ public class ModalProxy : IDisposable
     public virtual void Dispose()
     {
         if (this.Selenium.GetMessageModal() == null)
-            if (!AvoidClose)
+            if (!AvoidClose && !BrowserProxy.DebugMode)
             {
                 try
                 {

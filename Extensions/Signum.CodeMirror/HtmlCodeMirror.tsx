@@ -17,6 +17,7 @@ import "codemirror/addon/hint/show-hint"
 import "codemirror/addon/search/match-highlighter"
 import "codemirror/addon/search/search"
 import "codemirror/addon/search/searchcursor"
+import "codemirror/theme/dracula.css"
 
 export default function HtmlCodeMirror(p: {
   ctx: TypeContext<string | null | undefined>,
@@ -26,6 +27,22 @@ export default function HtmlCodeMirror(p: {
 }): React.JSX.Element {
 
   const { ctx, onChange, innerRef } = p;
+  
+  // Detect dark mode from Bootstrap theme
+  const [isDarkMode, setIsDarkMode] = React.useState(document.body.dataset.bsTheme === 'dark');
+  
+  React.useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDarkMode(document.body.dataset.bsTheme === 'dark');
+    });
+    
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['data-bs-theme']
+    });
+    
+    return () => observer.disconnect();
+  }, []);
 
   function handleOnChange(newValue: string) {
     if (!ctx.readOnly) {
@@ -39,6 +56,7 @@ export default function HtmlCodeMirror(p: {
   const options = {
     lineNumbers: true,
     mode: "htmlmixed",
+    theme: isDarkMode ? "dracula" : "default",
     extraKeys: {
       "Ctrl-K": (cm: any) => cm.lineComment(cm.getCursor(true), cm.getCursor(false)),
       "Ctrl-U": (cm: any) => cm.uncomment(cm.getCursor(true), cm.getCursor(false)),

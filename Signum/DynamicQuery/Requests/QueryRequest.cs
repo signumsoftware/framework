@@ -1,6 +1,4 @@
 using System.ComponentModel;
-using System.Reflection.Metadata.Ecma335;
-using Signum.API.Json;
 using Signum.DynamicQuery.Tokens;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
@@ -81,7 +79,7 @@ public class QueryRequest : BaseQueryRequest
     }
 
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
-    public List<FilterSqlServerFullText> FullTextTableFilters() => FilterSqlServerFullText.TableFilters(this.Filters);
+    public List<ITableFilter> TableFilters() => Filter.GetTableFilters(this.Filters);
 
     public override HashSet<QueryToken> AllTokens() => 
         Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
@@ -108,7 +106,7 @@ public class QueryRequest : BaseQueryRequest
             QueryUrl = this.QueryUrl,
             Columns = this.Columns,
             GroupResults = this.GroupResults,
-            Filters = this.Filters.Select(f => f.ToFullText()).NotNull().ToList(),
+            Filters = this.Filters.Select(f => f.ToTableFilter()).NotNull().ToList(),
             Orders = this.Orders.Select(o => o.ToFullText()).ToList(),
             Pagination = this.Pagination,
             SystemTime = this.SystemTime,
@@ -339,7 +337,7 @@ public class QueryValueRequest : BaseQueryRequest
               .ToHashSet();
 
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
-    public List<FilterSqlServerFullText> FullTextTableFilters() => FilterSqlServerFullText.TableFilters(this.Filters);
+    public List<ITableFilter> TableFilters() => Filter.GetTableFilters(this.Filters);
 
     public override QueryValueRequest CombineFullTextFilters()
     {
@@ -347,7 +345,7 @@ public class QueryValueRequest : BaseQueryRequest
         {
             QueryName = this.QueryName,
             QueryUrl = this.QueryUrl,
-            Filters = this.Filters.Select(f => f.ToFullText()).NotNull().ToList(),
+            Filters = this.Filters.Select(f => f.ToTableFilter()).NotNull().ToList(),
             SystemTime = this.SystemTime,
             ValueToken = this.ValueToken,
             MultipleValues = this.MultipleValues
@@ -378,7 +376,7 @@ public class UniqueEntityRequest : BaseQueryRequest
     public required UniqueType UniqueType { get; set; }
 
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
-    public List<FilterSqlServerFullText> FullTextTableFilters() => FilterSqlServerFullText.TableFilters(this.Filters);
+    public List<ITableFilter> TableFilters() => Filter.GetTableFilters(this.Filters);
 
     public override HashSet<QueryToken> AllTokens() =>
         Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
@@ -390,7 +388,7 @@ public class UniqueEntityRequest : BaseQueryRequest
         {
             QueryName = this.QueryName,
             QueryUrl = this.QueryUrl,
-            Filters = this.Filters.Select(f => f.ToFullText()).NotNull().ToList(),
+            Filters = this.Filters.Select(f => f.ToTableFilter()).NotNull().ToList(),
             Orders = this.Orders.Select(f => f.ToFullText()).ToList(),
             UniqueType = this.UniqueType,
         };
@@ -417,7 +415,7 @@ public class QueryEntitiesRequest : BaseQueryRequest
     public required List<Order> Orders { get; set; }
 
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(AllTokens());
-    public List<FilterSqlServerFullText> FullTextTableFilters() => FilterSqlServerFullText.TableFilters(this.Filters);
+    public List<ITableFilter> TableFilters() => Filter.GetTableFilters(this.Filters);
 
     public override HashSet<QueryToken> AllTokens() => 
         Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
@@ -434,7 +432,7 @@ public class QueryEntitiesRequest : BaseQueryRequest
         {
             QueryName = this.QueryName,
             QueryUrl = this.QueryUrl,
-            Filters = this.Filters.Select(f => f.ToFullText()).NotNull().ToList(),
+            Filters = this.Filters.Select(f => f.ToTableFilter()).NotNull().ToList(),
             Orders = this.Orders.Select(f => f.ToFullText()).ToList(),
             Count = Count
         };

@@ -3,7 +3,6 @@ using Signum.Engine.Maps;
 using System.Collections.Concurrent;
 using Signum.Utilities.Reflection;
 using Npgsql;
-using System.Globalization;
 
 namespace Signum.Engine;
 
@@ -332,7 +331,7 @@ public class EntityNotFoundException : Exception
     public PrimaryKey[] Ids { get; private set; }
 
     public EntityNotFoundException(Type type, params PrimaryKey[] ids)
-        : base(EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(type.Name, ids.ToString(", ")))
+        : base(EngineMessage._01NotFound.NiceToString().FormatWith(type.Name, ids.ToString(", ")))
     {
         this.Type = type;
         this.Ids = ids;

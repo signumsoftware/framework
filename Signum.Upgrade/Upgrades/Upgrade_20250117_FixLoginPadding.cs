@@ -1,10 +1,3 @@
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-
 namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20250117_FixLoginPadding : CodeUpgradeBase

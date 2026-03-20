@@ -1,10 +1,8 @@
 using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.Toolbar;
 using Signum.UserAssets;
 using Signum.Utilities.DataStructures;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
 namespace Signum.Dashboard;
@@ -16,8 +14,11 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         BindParent();
     }
 
-    [StringLengthValidator(Min = 3, Max = 100)]
+    [StringLengthValidator(Min = 3, Max = 100), Translatable]
     public string? Title { get; set; }
+
+    [StringLengthValidator(Max = int.MaxValue, MultiLine = true), Translatable]
+    public string? Tooltip { get; set; }
 
     [StringLengthValidator(Min = 3, Max = 100)]
     public string? IconName { get; set; }
@@ -80,6 +81,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             StartColumn = StartColumn,
             Content = Content.Clone(),
             Title = Title,
+            Tooltip = Tooltip,
             Row = Row,
             InteractionGroup = InteractionGroup,
             IconColor = IconColor,
@@ -102,6 +104,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             new XAttribute("StartColumn", StartColumn),
             new XAttribute("Columns", Columns),
             Title == null ? null! : new XAttribute("Title", Title),
+            Tooltip == null ? null! : new XAttribute("Tooltip", Tooltip),
             IconName == null ? null! : new XAttribute("IconName", IconName),
             IconColor == null ? null! : new XAttribute("IconColor", IconColor),
             TitleColor == null ? null! : new XAttribute("TitleColor", TitleColor),
@@ -116,6 +119,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         StartColumn = int.Parse(x.Attribute("StartColumn")!.Value);
         Columns = int.Parse(x.Attribute("Columns")!.Value);
         Title = x.Attribute("Title")?.Value;
+        Tooltip = x.Attribute("Tooltip")?.Value;
         IconName = x.Attribute("IconName")?.Value;
         IconColor = x.Attribute("IconColor")?.Value;
         TitleColor = x.Attribute("UseIconColorForTitle")?.Let(a => bool.Parse(a.Value) ? IconColor : null) ?? x.Attribute("TitleColor")?.Value;
@@ -389,7 +393,7 @@ public class HealthCheckElementEmbedded : EmbeddedEntity
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class TextPartEntity : Entity, IPartEntity
 {
-    [StringLengthValidator(Min = 1, MultiLine = true)]
+    [StringLengthValidator(Min = 1, MultiLine = true), Translatable]
     public string? TextContent { get; set; }
 
     public TextPartType TextPartType { get; set; }

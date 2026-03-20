@@ -160,8 +160,8 @@ export function MarkermapChartImp({ data, parameters, onDrillDown, memo }: Chart
             });
           }
           else {
-            marker.addListener("click", e => {
-              onDrillDown(r, e as any as MouseEvent);
+            marker.addListener("click", (e: google.maps.MapMouseEvent) => {
+              onDrillDown(r, e.domEvent as MouseEvent);
             });
           }
 

@@ -129,14 +129,31 @@ internal class SqlTableValuedFunctionExpression : SourceWithAliasExpression
     public readonly Table? ViewTable;
     public readonly Type? SingleColumnType; 
     public readonly ReadOnlyCollection<Expression> Arguments;
+    public readonly ReadOnlyCollection<string?>? NamedArguments;
     public readonly string FunctionName; 
 
     public override Alias[] KnownAliases
     {
-        get { return new[] { Alias }; }
+        get
+        {
+            if (NamedArguments != null) //VECTOR_SEARCH
+            {
+                var aliases = new List<Alias> { Alias };
+                foreach (var arg in Arguments.OfType<SourceWithAliasExpression>())
+                {
+                    aliases.AddRange(arg.KnownAliases);
+                }
+                return aliases.ToArray();
+
+            }
+            else
+            {
+                return new[] { Alias };
+            }
+        }
     }
 
-    public SqlTableValuedFunctionExpression(string functionName, Table? viewTable, Type? singleColumnType, Alias alias, IEnumerable<Expression> arguments)
+    public SqlTableValuedFunctionExpression(string functionName, Table? viewTable, Type? singleColumnType, Alias alias, IEnumerable<Expression> arguments, IEnumerable<string?>? namedArguments)
         : base(DbExpressionType.SqlTableValuedFunction, alias)
     {
         if ((viewTable == null) == (singleColumnType == null))
@@ -146,6 +163,7 @@ internal class SqlTableValuedFunctionExpression : SourceWithAliasExpression
         this.ViewTable = viewTable;
         this.SingleColumnType = singleColumnType;
         this.Arguments = arguments.ToReadOnly();
+        this.NamedArguments = namedArguments?.ToReadOnly();
     }
 
     public override string ToString()
@@ -657,6 +675,10 @@ internal enum SqlFunction
     FREETEXTTABLE,
     DATETRUNC,
     AtTimeZone,
+
+    VECTOR_DISTANCE,
+    VECTOR_NORM,
+    VECTOR_NORMALIZE,
 }
 
 internal enum PostgresFunction

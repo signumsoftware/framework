@@ -1,4 +1,3 @@
-using DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Authorization;
 using Signum.Scheduler;
 using Schema = Signum.Engine.Maps.Schema;

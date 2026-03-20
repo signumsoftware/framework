@@ -1,12 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using Signum.Basics;
 using Signum.Dashboard;
-using Signum.DynamicQuery;
-using Signum.Omnibox;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
 
 namespace Signum.UserQueries;
@@ -40,7 +35,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
 
     public Lite<Entity>? Owner { get; set; }
 
-    [StringLengthValidator(Min = 1, Max = 200)]
+    [StringLengthValidator(Min = 1, Max = 200), Translatable]
     public string DisplayName { get; set; }
 
     public bool AppendFilters { get; set; }

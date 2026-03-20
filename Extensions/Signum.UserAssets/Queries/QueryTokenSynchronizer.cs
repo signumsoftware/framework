@@ -1,6 +1,5 @@
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
-using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 
 namespace Signum.UserAssets.QueryTokens;
@@ -505,7 +504,7 @@ public static class QueryTokenSynchronizer
                     return null;
                 }
 
-                var tryToken = QueryUtils.TryParse(rawAnswer, qd, options);
+                var tryToken = QueryUtils.TryParse(rawAnswer, qd, options, out var _, out var _);
 
                 if (tryToken != null)
                 {

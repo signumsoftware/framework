@@ -1,13 +1,7 @@
-using Npgsql.Internal.Postgres;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Engine.Sync;
 internal class PrimaryKeyUpdater

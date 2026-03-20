@@ -18,10 +18,10 @@ import { classes } from '@framework/Globals';
 import { EntityOperations, OperationButton } from '@framework/Operations/EntityOperations';
 import { EntityOperationContext } from '@framework/Operations';
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
-import { SubTokensOptions } from '@framework/FindOptions';
 import { ToolbarEntity, ToolbarMenuEntity } from '../../Signum.Toolbar/Signum.Toolbar';
 import CollapsableCard from '@framework/Components/CollapsableCard';
 import { UserAssetMessage } from '../../Signum.UserAssets/Signum.UserAssets';
+import { SubTokensOptions } from '@framework/QueryToken';
 
 export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -78,6 +78,32 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
       }
     };
 
+    function handleSettingsClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    Navigator.view(tc.value, {
+      propertyRoute: tc.propertyRoute,
+      getViewPromise: e => new ViewPromise(import("./PanelPart")),
+      modalSize: "lg",
+      buttons: "ok_cancel",
+      isOperationVisible: e => false,
+      requiresSaveOperation: false,
+    }).then(result => {
+      if (result) {
+        // Copy all modified properties from the modal back to the original entity
+        tc.value.iconName = result.iconName;
+        tc.value.iconColor = result.iconColor;
+        tc.value.titleColor = result.titleColor;
+        tc.value.customColor = result.customColor;
+        tc.value.interactionGroup = result.interactionGroup;
+        tc.value.tooltip = result.tooltip;
+        tc.value.modified = true;
+        forceUpdate();
+      }
+    });
+  }
+
     const title = (
       <div>
         <div className="d-flex">
@@ -86,33 +112,20 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
               type="button"
               style={{ background: "none", border: "none", padding: 0 }}
               aria-label={DashboardMessage.SelectIcon.niceToString()}
-              onClick={() => selectIcon(tc).then(a => {
-                if (a) {
-                  tc.value.iconName = a.iconName;
-                  tc.value.iconColor = a.iconColor;
-                  tc.value.titleColor = a.titleColor;
-                  tc.value.modified = true;
-                  forceUpdate();
-                }
-              })}>
+              onClick={handleSettingsClick}>
               <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag as any} />
             </button>
           </div>}
           <div style={{ flexGrow: 1 }} className="me-2">
 
             <TextBoxLine ctx={tcs.subCtx(pp => pp.title)} label={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} valueHtmlAttributes={avoidDrag} />
-            <div className="row">
-              <div className="col-sm-6">
-                <ColorLine ctx={tcs.subCtx(pp => pp.customColor)} onChange={() => forceUpdate()} />
-
+            {tc.value.interactionGroup && (
+              <div className="mt-1">
+                <span className="badge" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(tc.value.interactionGroup)] }}>
+                  {tc.value.interactionGroup}
+                </span>
               </div>
-              <div className="col-sm-6">
-                <EnumLine ctx={tcs.subCtx(pp => pp.interactionGroup)} valueHtmlAttributes={avoidDrag}
-                  onRenderDropDownListItem={(io) => <span className="sf-dot-container"><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
-              </div>
-            </div>
-
-
+            )}
           </div>
         </div>
       </div>

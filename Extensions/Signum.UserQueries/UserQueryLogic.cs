@@ -1,9 +1,7 @@
-using Signum.API;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Dashboard;
 using Signum.DynamicQuery.Tokens;
-using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Omnibox;
 using Signum.Toolbar;
@@ -13,7 +11,6 @@ using Signum.UserAssets.QueryTokens;
 using Signum.ViewLog;
 using System.Collections.Frozen;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 
 namespace Signum.UserQueries;
 
@@ -311,13 +308,6 @@ public static class UserQueryLogic
              .Select(d => d.ToLite(UserQueryLiteModel.Translated(d)))
              .Autocomplete(subString, limit)
              .ToList();
-    }
-
-    public static void RegisterTranslatableRoutes()
-    {
-        PropertyRouteTranslationLogic.RegisterRoute((UserQueryEntity uq) => uq.DisplayName);
-        PropertyRouteTranslationLogic.RegisterRoute((UserQueryEntity uq) => uq.Columns[0].DisplayName);
-        PropertyRouteTranslationLogic.RegisterRoute((UserQueryEntity uq) => uq.Filters[0].Pinned!.Label);
     }
 
     public static UserQueryEntity RetrieveUserQuery(this Lite<UserQueryEntity> userQuery)

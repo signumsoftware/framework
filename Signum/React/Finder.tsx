@@ -9,17 +9,15 @@ import { ajaxGet, ajaxPost } from './Services';
 import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed,
-  QueryToken, ColumnOption, ColumnOptionParsed, Pagination,
-  ResultTable, ResultRow, OrderOption, SubTokensOptions, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
+  ColumnOption, ColumnOptionParsed, Pagination,
+  ResultTable, ResultRow, OrderOption, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
   FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption,
-  FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement,
-  toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, hasManual,
-  hasSnippet,
-  hasNested,
-  hasTimeSeries,
+  FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime,
+  toPinnedFilterParsed, isActive, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, 
   QueryDescriptionDTO,
   QueryTokenWithoutParent
 } from './FindOptions';
+import { completeToken, hasAggregate, hasAnyOrAll, hasElement, hasManual, hasNested, hasOperation, hasSnippet, hasTimeSeries, hasToArray, QueryToken, SubTokensOptions, Writable } from './QueryToken';
 
 import { FilterOperation, FilterGroupOperation, PinnedFilterActive } from './Signum.DynamicQuery';
 
@@ -1345,7 +1343,6 @@ export namespace Finder {
           return token.tryBeforeLast(".");
         }
 
-
         if (parentToken == null) {
           if (getParent(dto.fullKey) != null)
             throw new Error(`Token with key '${dto.fullKey}' on query '${this.qd.queryKey}' has no parent, but it is not a root token`);
@@ -1360,6 +1357,7 @@ export namespace Finder {
         token.__isCached__ = true;
         //if (token.fullKey == "Locked")
         //  console.log(token);
+        completeToken(token);
         Object.freeze(token);
         cached = { token: token as QueryToken, subTokens: undefined };
         this.queryCache.set(dto.fullKey, cached);
@@ -1518,7 +1516,7 @@ export namespace Finder {
 
         return ({
           token: token,
-          operation: fo.operation ?? "EqualTo",
+          operation: fo.operation ?? (token && getFilterOperations(token).firstOrNull()) ?? "EqualTo",
           value: fo.value,
           frozen: fo.frozen || false,
           removeElementWarning: fo.removeElementWarning,
@@ -1812,9 +1810,14 @@ export namespace Finder {
       columnOptionsMode: "ReplaceAll",
     };
 
-    var result = useAPI(signal => fo2 && getResultTable(fo2, signal), [fo2 && findOptionsPath(fo2), ...(additionalDeps || [])], options);
+    return useAPI(async signal => {
+      if (!fo2)
+        return null;
 
-    return result && result.rows.map(row => toTypedRow(tokensObject, result!.columns, row));
+      var rt = await getResultTable(fo2, signal);
+
+      return rt.rows.map(row => toTypedRow(tokensObject, rt!.columns, row));
+    }, [fo2 && findOptionsPath(fo2), ...(additionalDeps || [])], options);
   }
 
   function getAllColumns(tokensObject: TokenObject): ColumnOption[] {
@@ -2499,7 +2502,3 @@ export namespace Finder {
   }
 
 }
-
-type Writable<T> = {
-  -readonly [P in keyof T]: T[P];
-};

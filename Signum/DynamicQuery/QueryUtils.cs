@@ -1,4 +1,5 @@
 using NpgsqlTypes;
+using Pgvector;
 using Signum.DynamicQuery.Tokens;
 using Signum.Utilities.Reflection;
 using System.Collections.ObjectModel;
@@ -47,6 +48,9 @@ public static class QueryUtils
 
         if (uType == typeof(NpgsqlTsVector))
             return FilterType.TsVector;
+
+        if (uType == typeof(Pgvector.Vector))
+            return FilterType.Vector;
 
         if (uType.IsEnum)
             return FilterType.Enum;
@@ -240,6 +244,12 @@ public static class QueryUtils
                 FilterOperation.TsQuery_WebSearch,
             }.ToReadOnly()
         },
+        {
+            FilterType.Vector, new List<FilterOperation>
+            {
+                FilterOperation.SmartSearch,
+            }.ToReadOnly()
+        },
     };
 
 
@@ -381,30 +391,40 @@ public static class QueryUtils
         return result;
     }
 
-    public static QueryToken? TryParse(string tokenString, QueryDescription qd, SubTokensOptions options)
+    public static QueryToken? TryParse(string tokenString, QueryDescription qd, SubTokensOptions options, out string? error, out QueryToken? lastParsedToken)
     {
+        lastParsedToken = null; 
         if (string.IsNullOrEmpty(tokenString))
+        {
+            error = "Token is empty";
             return null;
+        }    
 
         //https://stackoverflow.com/questions/35418597/split-string-on-the-dot-characters-that-are-not-inside-of-brackets
         string[] parts = SplitRegex.Split(tokenString);
 
         string firstPart = parts.FirstEx();
 
-        QueryToken? result = SubToken(null, qd, options, firstPart);
+        lastParsedToken = SubToken(null, qd, options, firstPart);
 
-        if (result == null)
+        if (lastParsedToken == null)
+        {
+            error = "Column '{0}' not found on query {1}".FormatWith(firstPart, QueryUtils.GetKey(qd.QueryName));
             return null;
+        }
 
         foreach (var part in parts.Skip(1))
         {
-            var newResult = SubToken(result, qd, options, part);
+            var newResult = SubToken(lastParsedToken, qd, options, part);
             if (newResult == null)
+            {
+                error = "Token with key '{0}' not found on token '{1}' of query {2}".FormatWith(part, lastParsedToken.FullKey(), QueryUtils.GetKey(qd.QueryName));
                 return null;
-            result = newResult;
+            }
+            lastParsedToken = newResult;
         }
-
-        return result;
+        error = null;
+        return lastParsedToken;
     }
 
     public static string? CanFilter(QueryToken token)
@@ -428,6 +448,9 @@ public static class QueryUtils
 
         if (QueryToken.IsCollection(token.Type))
             return "You can not add collections as columns";
+
+        if (token.Type == typeof(Vector))
+            return "You can not add vectors as columns";
 
         if (token.HasAllOrAny())
             return "Columns can not contain '{0}', '{1}', {2} or {3}".FormatWith(
@@ -477,6 +500,12 @@ public static class QueryUtils
         return Expression.Lambda(body, ctx.Parameter);
     }
 
+
+    public static string NextAlternatives(this QueryDescription qd, SubTokensOptions options, QueryToken? partial)
+    {
+        return (partial == null ? qd.Columns.ToString(", ") : QueryUtils.SubTokens(partial, qd, options).ToString(a => a.Key, ","));
+    }
+
     public static string? CanOrder(QueryToken token)
     {
         if (token == null)
@@ -487,6 +516,9 @@ public static class QueryUtils
 
         if (QueryToken.IsCollection(token.Type))
             return "Collections can not be ordered";
+
+        if (token.Type == typeof(Vector))
+            return "Vectors can not be ordered";
 
         if (token.HasToArray() != null)
             return "ToArray can not be ordered";
@@ -662,6 +694,11 @@ public static class QueryUtils
             fo == FilterOperation.TsQuery_Plain ||
             fo == FilterOperation.TsQuery_Phrase ||
             fo == FilterOperation.TsQuery_WebSearch;
+    }
+
+    public static bool IsSmartSearch(this FilterOperation fo)
+    {
+        return fo == FilterOperation.SmartSearch;
     }
 }
 

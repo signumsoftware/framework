@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualBasic;
 using Signum.Authorization;
 using Signum.Utilities.Reflection;
 using System.IO;
@@ -215,6 +213,15 @@ public static class UserAssetsImporter
         {
             return SymbolLogic<T>.ToSymbol(value);
         }
+
+        public PropertyRouteEntity GetPropertyRoute(TypeEntity typeEntity, string path)
+        {
+            var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity);
+
+            var pr = properties.SingleEx(a => a.Path == path);
+
+            return pr;
+        }
     }
 
     public static UserAssetPreviewModel Preview(byte[] doc)
@@ -328,9 +335,19 @@ public static class UserAssetsImporter
             return lite.Retrieve();
         }
 
-        public T GetSymbol<T>(string value) where T : Symbol
+        public T GetSymbol<T>(string value)
+             where T : Symbol
         {
-            throw new NotImplementedException();
+            return SymbolLogic<T>.ToSymbol(value);
+        }
+
+        public PropertyRouteEntity GetPropertyRoute(TypeEntity typeEntity, string path)
+        {
+            var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity);
+
+            var pr = properties.SingleEx(a => a.Path == path);
+
+            return pr;
         }
     }
 

@@ -357,20 +357,16 @@ public class SaveTest
     {
         using (var tr = new Transaction())
         {
-            var max = Database.Query<NoteWithDateEntity>().Select(a => a.Id).ToList().Max();
+            var max = Database.Query<FolderEntity>().Select(a => (int?)a.Id).ToList().Max();
 
-            var list = Database.Query<AlbumEntity>().Select(a => new NoteWithDateEntity
+            var list = Database.Query<AlbumEntity>().Select(a => new FolderEntity
             {
-                CreationTime = Clock.Now,
-                CreationDate = DateTime.Now.ToDateOnly(),
-                ReleaseDate = DateTime.Now.ToDateOnly(),
-                Title = "Nice album " + a.Name,
-                Target = a
+                Name = "Folder for " + a.Name,
             }).ToList();
 
             BulkInserter.BulkInsertTable(list);
 
-            Database.Query<NoteWithDateEntity>().Where(a => a.Id > max).UnsafeDelete();
+            Database.Query<FolderEntity>().Where(a => max == null || a.Id > max).UnsafeDelete();
 
             //tr.Commit();
         }

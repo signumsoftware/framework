@@ -28,7 +28,7 @@ export default function PropertyRouteCombo(p : PropertyRouteComboProps): React.R
 
   var ctx = p.ctx;
 
-  var routes = p.routes ?? Dic.getValues(getTypeInfo(p.type.cleanName).members).filter(p.filter!).map(mi => PropertyRoute.parse(p.type.cleanName, mi.name));
+  var routes = p.routes ?? Dic.getValues(getTypeInfo(p.type.cleanName).members).filter(m => p.filter?.(m) ?? true).map(mi => PropertyRoute.parse(p.type.cleanName, mi.name));
 
   return (
     <select className={ctx.formSelectClass} value={ctx.value?.path ?? ""} onChange={handleChange} >

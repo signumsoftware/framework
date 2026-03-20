@@ -56,6 +56,7 @@
     <Member Name="FirstRule" Description="1. Regel" />
     <Member Name="NthRule" Description="{0}. Regel" />
     <Member Name="Overriden" Description="Überschrieben" />
+    <Member Name="PasswordChangeIsNotCompleted" Description="Passwortänderung ist nicht abgeschlossen" />
     <Member Name="PermissionOverriden" Description="Permission-!overriden" />
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
     <Member Name="PermissionRulesOverview" Description="Übersicht über Berechtigungsregeln" />
@@ -330,6 +331,7 @@
     <Member Name="LoginFailedCounter" Description="fehlgeschlagener Login-Zähler" />
     <Member Name="MustChangePassword" Description="Passwort muss geändert werden" />
     <Member Name="PasswordHash" Description="Passwort-Hash" />
+    <Member Name="PasswordIsChanging" Description="Passwort wird geändert" />
     <Member Name="Role" Description="Rolle" />
     <Member Name="State" Description="Status" />
     <Member Name="UserName" Description="Benutzername" />

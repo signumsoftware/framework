@@ -244,7 +244,13 @@ export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getCom
         </div>
       </Accordion.Header>
       <Accordion.Body>
-        <RenderEntity ctx={ctx} getComponent={getComponent as any} getViewPromise={getViewPromise as any} onRefresh={forceUpdate} />
+        <Accordion.Collapse
+          eventKey={ctx.index!.toString()}
+          mountOnEnter
+          unmountOnExit
+        >
+        <RenderEntity ctx={ctx} getComponent={getComponent as any} getViewPromise={getViewPromise as any} onRefresh={forceUpdate} / >
+        </Accordion.Collapse>
       </Accordion.Body>
     </Accordion.Item>
   );

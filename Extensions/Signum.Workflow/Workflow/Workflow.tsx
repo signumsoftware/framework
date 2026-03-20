@@ -12,6 +12,7 @@ import { BsColor } from '@framework/Components';
 import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface WorkflowProps {
+  ref?: React.Ref<WorkflowHandle>;
   ctx: TypeContext<WorkflowEntity>;
 }
 
@@ -27,8 +28,7 @@ export interface WorkflowHandle {
   getSvg(): Promise<string>;
 }
 
-export const Workflow: React.ForwardRefExoticComponent<WorkflowProps & React.RefAttributes<WorkflowHandle>> =
-  React.forwardRef(function Workflow(p: WorkflowProps, ref: React.Ref<WorkflowHandle>) {
+export function Workflow(p: WorkflowProps) {
 
   const bpmnModelerComponentRef = React.useRef<BpmnModelerComponent>(null);
 
@@ -63,7 +63,7 @@ export const Workflow: React.ForwardRefExoticComponent<WorkflowProps & React.Ref
         });
   }, [p.ctx.value.id, p.ctx.value.ticks]);
 
-  React.useImperativeHandle(ref, () => ({
+  React.useImperativeHandle(p.ref, () => ({
     workflowState: workflowState,
     setIssues: (value) => setIssues(value),
     getXml: () => bpmnModelerComponentRef.current!.getXml(),
@@ -176,6 +176,6 @@ export const Workflow: React.ForwardRefExoticComponent<WorkflowProps & React.Ref
       </fieldset>
     </div>
   );
-});
+}
 
 export default Workflow;

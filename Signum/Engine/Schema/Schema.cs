@@ -6,7 +6,6 @@ using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Globalization;
-using static Signum.Engine.Maps.FullTextTableIndex;
 using static Signum.Engine.Sync.Replacements;
 
 namespace Signum.Engine.Maps;
@@ -84,6 +83,7 @@ public class Schema : IImplementationsFinder
         { "plpgsql", s => true }, // Always include in the list (pre-installed in Azure PostgreSQL)
         { "uuid-ossp", s => true },
         { "ltree", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.Type.UnNullify() == typeof(SqlHierarchyId)))},
+        { "vector", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.DbType.IsVector()))},
     };
 
     #region Events

@@ -117,7 +117,7 @@ internal class OrderByRewriter : DbExpressionVisitor
 
         if (select.IsDistinct)
         {
-            gatheredOrderings = null;
+            //gatheredOrderings = null;
 
             if (gatheredKeys != null)
             {

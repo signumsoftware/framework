@@ -3,7 +3,6 @@ using Signum.Utilities.Reflection;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
 using System.Collections.Frozen;
-using System.Data.Common;
 
 namespace Signum.Basics;
 
@@ -22,8 +21,8 @@ public static class QueryLogic
 
     static QueryLogic()
     {
-        FilterSqlServerFullText.miContains = ReflectionTools.GetMethodInfo(() => FullTextSearch.Contains(new string[0], ""));
-        FilterSqlServerFullText.miFreeText = ReflectionTools.GetMethodInfo(() => FullTextSearch.FreeText(new string[0], ""));
+        FilterSqlServerFullText.miContains = ReflectionTools.GetMethodInfo(() => SqlFullTextSearch.Contains(new string[0], ""));
+        FilterSqlServerFullText.miFreeText = ReflectionTools.GetMethodInfo(() => SqlFullTextSearch.FreeText(new string[0], ""));
 
         ExtensionToken.BuildExtension = (parentType, key, parentExpression) => Expressions.BuildExtension(parentType, key, parentExpression);
     }

@@ -1,6 +1,4 @@
 using Signum.DynamicQuery.Tokens;
-using Signum.UserAssets;
-using Signum.UserAssets.QueryTokens;
 using System.Xml.Linq;
 
 namespace Signum.UserAssets.Queries;
@@ -10,6 +8,8 @@ public class QueryColumnEmbedded : EmbeddedEntity
     public QueryTokenEmbedded Token { get; set; }
 
     string? displayName;
+    
+    [Translatable]
     public string? DisplayName
     {
         get { return displayName.DefaultToNull(); }

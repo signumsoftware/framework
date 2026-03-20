@@ -2,8 +2,9 @@ import * as React from 'react'
 import { classes } from '../Globals'
 import { Finder } from '../Finder'
 import { Constructor } from '../Constructor'
-import { FindOptions, FindOptionsParsed, QueryDescription, QueryToken, QueryValueRequest } from '../FindOptions'
-import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'
+import { FindOptions, FindOptionsParsed, QueryDescription, QueryValueRequest } from '../FindOptions'
+import { QueryToken } from '../QueryToken'
+import { Lite, Entity, isEntity, EntityControlMessage, isLite,SearchMessage } from '../Signum.Entities'
 import { getQueryKey, getQueryNiceName, QueryTokenString, tryGetTypeInfos, getTypeInfos } from '../Reflection'
 import { Navigator, ViewPromise } from '../Navigator'
 import { StyleContext, TypeContext } from '../TypeContext'
@@ -19,6 +20,7 @@ import { toAbsoluteUrl } from '../AppContext'
 import { LinkButton } from '../Basics/LinkButton'
 
 export interface SearchValueLineProps {
+  ref?: React.Ref<SearchValueLineController>;
   ctx: StyleContext;
   findOptions?: FindOptions | Lite<Entity> | Entity;
   valueToken?: string | QueryTokenString<any>;
@@ -59,12 +61,11 @@ export interface SearchValueLineController {
   refreshValue(): void;
 }
 
-const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & React.RefAttributes<SearchValueLineController>> =
-  React.forwardRef(function SearchValueLine(p: SearchValueLineProps, ref?: React.Ref<SearchValueLineController>) {
+export default function SearchValueLine(p: SearchValueLineProps): React.JSX.Element | null {
 
   var svRef = React.useRef<SearchValueController>(null);
 
-  React.useImperativeHandle(ref, () => ({
+  React.useImperativeHandle(p.ref, () => ({
     searchValue: svRef.current,
     refreshValue: () => svRef.current?.refreshValue(),
   }), [svRef.current]);
@@ -129,7 +130,12 @@ const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & Re
     );
   }
   
-  var token = svRef.current?.valueToken;
+  const token = svRef.current?.valueToken;
+  
+  const label = (p.label == undefined ? undefined :
+    typeof p.label == "function" ? p.label() :
+      p.label) ?? token?.niceName ?? getQueryNiceName(fo.queryName);
+
 
   const isQuery = p.valueToken == undefined || token?.queryTokenType == "Aggregate";
 
@@ -144,33 +150,31 @@ const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & Re
   const find = value != undefined && (p.findButton ?? isQuery) &&
     <LinkButton style={{ display: "flex", alignItems: "center" }} className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
       onClick={svRef.current!.handleClick}
-      title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
+      title={ctx.titleLabels ? SearchMessage.Search.niceToString() + " " + label : undefined}>
       {EntityBaseController.getFindIcon()}
     </LinkButton>;
   
   const create = !p.ctx.frame?.currentDate && (p.create == true || p.create == "ifNull" && value === null) &&
     <LinkButton style={{ display: "flex", alignItems: "center" }} className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
-      title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
+      title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() + " " + label : undefined}>
       {EntityBaseController.getCreateIcon()}
     </LinkButton>;
 
   const view = value != undefined && (p.viewEntityButton ?? (isLite(value) && Navigator.isViewable(value.EntityType))) &&
     <LinkButton className={classes("sf-line-button sf-view", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleViewEntityClick}
-      title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
+      title={ctx.titleLabels ? EntityControlMessage.View.niceToString() + " " + label : undefined}>
       {EntityBaseController.getViewIcon()}
     </LinkButton>
 
   let extra = svRef.current && p.extraButtons && p.extraButtons(svRef.current);
 
-  var label = p.label == undefined ? undefined :
-    typeof p.label == "function" ? p.label() :
-      p.label;
 
+      
   return (
     <FormGroup ctx={p.ctx}
-      label={label ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
+      label={label}
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...p.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName) } }}
       helpText={p.helpText && svRef.current && p.helpText(svRef.current)}>
@@ -279,7 +283,4 @@ const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & Re
       .then(ti => ti ? ti.name : undefined);
   }
 
-});
-
-
-export default SearchValueLine; 
+}

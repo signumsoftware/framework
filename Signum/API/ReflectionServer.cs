@@ -6,7 +6,6 @@ using Signum.Utilities.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using Signum.API.Json;
 using System.Collections.Frozen;
-using NpgsqlTypes;
 using Signum.DynamicQuery.Tokens;
 
 namespace Signum.API;
@@ -520,6 +519,7 @@ public class TypeReferenceTS
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsCollection { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsLite { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsFullEntity { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsNotNullable { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsEmbedded { get; set; }
     public required string Name { get; set; }
@@ -533,11 +533,12 @@ public class TypeReferenceTS
 
         var clean = type == typeof(string) ? type : (type.ElementType() ?? type);
         this.IsLite = clean.IsLite();
+        this.IsFullEntity = clean.IsIEntity();
         this.IsNotNullable = clean.IsValueType && !clean.IsNullable();
         this.IsEmbedded = clean.IsEmbeddedEntity();
 
         if (this.IsEmbedded)
-            this.TypeNiceName = this.IsCollection ? type.ElementType()!.NiceName() :  type.NiceName();
+            this.TypeNiceName = clean.NiceName();
         if (implementations != null)
         {
             try

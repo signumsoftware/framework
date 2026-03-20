@@ -1,15 +1,9 @@
 using Signum.API;
-using Signum.DynamicQuery;
 using Signum.Engine.Linq;
 using Signum.Engine.Sync;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
-using System.Collections.Immutable;
 using System.Data;
-using System.IO;
-using System.Linq;
-using System.Security.AccessControl;
 
 namespace Signum.Engine.Maps;
 
@@ -275,9 +269,6 @@ public class SchemaBuilder
     {
         var index = new VectorTableIndex(table, column);
         customize?.Invoke(index);
-
-        if (IsPostgres && index.Postgres.IndexType == null)
-            throw new InvalidOperationException("IndexType not determined for Postgres");
 
         AddIndex(index);
 
@@ -819,8 +810,7 @@ public class SchemaBuilder
             f.Index = f.GenerateIndex(table, Settings.FieldAttribute<IndexAttribute>(route));
         });
 
-        var isVector = route.Type == typeof(float[]); 
-        if (isVector && result.Size == null)
+        if (result.DbType.IsVector() && result.Size == null)
             throw new InvalidOperationException("Size must be specified for Vector columns (Field: {0})".FormatWith(route));
 
         return result;
@@ -1366,6 +1356,8 @@ public class ViewBuilder : SchemaBuilder
 
         return table;
     }
+
+
 
 
     public override ObjectName GenerateTableName(Type type, TableNameAttribute? tn)

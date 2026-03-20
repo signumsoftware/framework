@@ -1,10 +1,7 @@
 using Signum.Authorization;
-using Signum.DynamicQuery;
 using Signum.UserAssets;
 using Signum.Utilities.Reflection;
-using System;
 using System.ComponentModel;
-using System.Net.Sockets;
 using System.Xml.Linq;
 
 namespace  Signum.Toolbar;
@@ -25,7 +22,7 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
     [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
     public Lite<IEntity>? Owner { get; set; }
 
-    [StringLengthValidator(Max = 100)]
+    [StringLengthValidator(Max = 100), Translatable]
     public string Name { get; set; }
 
     public ToolbarLocation Location { get; set; }
@@ -86,7 +83,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
 {
     public ToolbarElementType Type { get; set; }
 
-    [StringLengthValidator(Min = 1, Max = 100)]
+    [StringLengthValidator(Min = 1, Max = 100), Translatable]
     public string? Label { get; set; }
 
     [StringLengthValidator(Min = 3, Max = 100)]
@@ -207,7 +204,7 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
 
-    [StringLengthValidator(Max = 100)]
+    [StringLengthValidator(Max = 100), Translatable]
     public string Name { get; set; }
 
     [PreserveOrder]

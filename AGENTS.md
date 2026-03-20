@@ -10,6 +10,16 @@
 - Respect existing folder and module structure: code is organized by feature/module, not by technical concern.
 - Framework\Extensions contains many reusable vertical modules with both C# and TypeScript.
 
+## Skills
+
+Detailed guidance is organized in `Framework/Skills/`. Read the relevant file before working on that area:
+
+| Skill | Description |
+|---|---|
+| [CreatingSignumUpgrades](Skills/CreatingSignumUpgrades.md) | How to create Signum.Upgrade scripts from Southwind commits |
+| [Localization](Skills/Localization.md) | How to localize user-facing messages in C# and TypeScript/React |
+| [ReactTesting](Skills/ReactTesting.md) | How to write Selenium UI tests: proxies, environment setup, waiting, debugging |
+
 ## Language-Specific Guidance
 
 ### Build System (for Visual Studio COPILOT only!!)
@@ -25,21 +35,13 @@
 - Avoid dependency injection unless ASP.Net extensibility requires it.
 - Follow Signum static logic registration patterns.
 - Use not nullable reference types, but allow DTOs without default values or constructors (often deserialized).
-- Messages for the end user in framework code MUST be localized. Use the extension methods in `DescriptionManager`:
-	- Entities (e.g., `typeof(LabelEntity).NiceName()` / `typeof(LabelEntity).NicePluralName()`)
-	- Properties (e.g., `ReflectionTools.GetPropertyInfo((LabelEntity l) => l.Name).NiceName()` or often just `pi.NiceName()`)
-	- Enums (e.g., `LabelState.Active.NiceToString()`)
-	- For custom messages, try reusing first, otherwise create a new Message enum like: 
-	 ```cs
-	 public enum YourMessage
-	 {
-		 [Description("My favorite food is {0}")]
-		 MyFavoriteFoodIs0,
-	 }
-	 ```
-	 Then you can use it like `YourMessage.MyFavoriteFoodIs0.NiceToString("Tom Yum Soup")`).
+- Messages for the end user MUST be localized. See [Localization](Skills/Localization.md).
 
 ### TypeScript / React
+- **Package Manager:** ALWAYS use `yarn` exclusively, never `npm`. For example:
+  - Use `yarn install` instead of `npm install`
+  - Use `yarn add` instead of `npm install <package>`
+  - Use `yarn <script>` instead of `npm run <script>`
 - The solution is large; avoid compiling the entire solution unless necessary. Prefer compiling only the affected tsconfig using `yarn tsgo --build`.
 - If you change code in C#, you can regenerate the TypeScript definitions just compiling the csproj.
 - Prioritize React and TypeScript for UI code.
@@ -49,10 +51,4 @@
 - Prefer Signum hooks (e.g., useAPI, useForceUpdate) over state management libraries.
 - Use strict mode in TypeScript.
 - Allow imperative modification of entities in React components; do not enforce strict immutability.
-- Messages for the end user in framework code MUST be localized. Use the methods in Reflection.ts
-	- Entities (e.g., `LabelEntity.niceName()` / `LabelEntity.nicePluralName()`)
-	- Properties (e.g., `LabelEntity.nicePropertyName(a => a.name)`)
-	- Enums (e.g., `LabelState.niceToString("Active")`)
-	- For custom messages, consider reusing or creating a new Message enum in C# first, recompile C#, then you can use 
-       `YourMessage.MyFavoriteFoodIs0.niceToString("Tom Yum Soup")` (a shortcut for `.niceToString().formatWith("Tom Yum Soup")`).
-	- You can also use `formatHtml`/`joinHtml` to produce React nodes with formatting.
+- Messages for the end user MUST be localized. See [Localization](Skills/Localization.md).

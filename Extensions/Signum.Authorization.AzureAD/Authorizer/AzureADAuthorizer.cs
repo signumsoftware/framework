@@ -1,8 +1,4 @@
-using DocumentFormat.OpenXml.Spreadsheet;
 using Signum.API.Filters;
-using Signum.Authorization.AzureAD;
-using System.DirectoryServices.AccountManagement;
-using System.Runtime.InteropServices.Marshalling;
 
 #pragma warning disable CA1416 // Validate platform compatibility
 namespace Signum.Authorization.AzureAD.Authorizer;

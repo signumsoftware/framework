@@ -1,8 +1,5 @@
-using Microsoft.Identity.Client;
 using Signum.Engine.Maps;
-using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
-using System.IO;
 
 namespace Signum.Engine.Sync;
 
@@ -85,7 +82,7 @@ public static class SchemaGenerator
 
             fullTextSearchCatallogs?.AddRange(allIndexes.OfType<FullTextTableIndex>().Select(a => a.SqlServer.CatallogName));
 
-            var mainIndices = allIndexes.Select(ix => sqlBuilder.CreateIndex(ix, checkUnique: null)).Combine(Spacing.Simple);
+            var mainIndices = allIndexes.Where(a => !a.DelayCreation).Select(ix => sqlBuilder.CreateIndex(ix, checkUnique: null)).Combine(Spacing.Simple);
 
             var historyIndices = t.SystemVersioned == null ? null :
                      allIndexes.Where(a => a.GetType() == typeof(TableIndex) && !a.Unique).Select(mix => sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple);

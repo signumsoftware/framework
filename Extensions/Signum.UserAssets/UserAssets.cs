@@ -1,4 +1,3 @@
-using Signum.Authorization.Rules;
 using System.ComponentModel;
 using System.Xml.Linq;
 
@@ -122,6 +121,7 @@ public interface IFromXmlContext
     public T RetrieveLite<T>(Lite<T> lite) where T : class, IEntity;
 
     public T GetSymbol<T>(string value) where T : Symbol;
+    PropertyRouteEntity? GetPropertyRoute(TypeEntity typeEntity, string value);
 
     public Dictionary<Guid, ModelEntity?> CustomResolutionModel { get; }
 }

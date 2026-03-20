@@ -284,7 +284,7 @@ internal class ConditionsRewriter: DbExpressionVisitor
     {
         ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a => MakeSqlValue(Visit(a)));
         if (args != sqlFunction.Arguments)
-            return new SqlTableValuedFunctionExpression(sqlFunction.FunctionName, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args);
+            return new SqlTableValuedFunctionExpression(sqlFunction.FunctionName, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args, sqlFunction.NamedArguments);
         return sqlFunction;
     }
 

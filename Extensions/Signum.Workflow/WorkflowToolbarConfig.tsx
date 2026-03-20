@@ -1,11 +1,11 @@
 import { Location } from 'react-router'
 import { ToolbarClient, ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 import { IconColor, ToolbarConfig } from '../Signum.Toolbar/ToolbarConfig'
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { WorkflowClient } from './WorkflowClient'
 import { WorkflowEntity, WorkflowMainEntityStrategy } from './Signum.Workflow'
 import { Entity, is, Lite } from '@framework/Signum.Entities'
 import SelectorModal from '@framework/SelectorModal'
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity> {
 
