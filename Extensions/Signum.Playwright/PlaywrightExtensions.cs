@@ -526,4 +526,29 @@ public static class PlaywrightExtensions
     }
 
     #endregion
+
+
+
+
+
+
+    public static async Task RunAndConsumeAlertAsync(this IPage page, Func<Task> action)
+    {
+        var tcs = new TaskCompletionSource<IDialog>();
+
+        void Handler(object? sender, IDialog dialog)
+        {
+            tcs.TrySetResult(dialog);
+        }
+
+        page.Dialog += Handler;
+
+        await action();
+
+        var dialog = await tcs.Task;
+        await dialog.AcceptAsync();
+
+        page.Dialog -= Handler;
+    }
+
 }

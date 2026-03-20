@@ -25,7 +25,7 @@ public class EntityContextMenuProxy
     {
         var a = QuickLink(name);
         await a.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
-        var popup = await a.ClickAsyncCapturePopup();
+        var popup = await a.CaptureOnClickAsync(Page);
         return new SearchModalProxy(popup, Page);
     }
 
@@ -40,12 +40,21 @@ public class EntityContextMenuProxy
         var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheckAsync(shouldDisappear);
 
         var op = Operation(executeSymbol);
+
         if (scrollTo)
             await op.ScrollIntoViewIfNeededAsync();
-        await op.ClickAsync();
 
         if (consumeConfirmation)
-            await ResultTable.Page.RunAndConsumeAlertAsync();
+        {
+            await ResultTable.Page.RunAndConsumeAlertAsync(async () =>
+            {
+                await op.ClickAsync();
+            });
+        }
+        else
+        {
+            await op.ClickAsync();
+        }
 
         await check();
     }
@@ -63,44 +72,51 @@ public class EntityContextMenuProxy
         var modalLocator = Operation(constructSymbol);
         if (scrollTo)
             await modalLocator.ScrollIntoViewIfNeededAsync();
-        var modal = await modalLocator.ClickAsyncCapturePopup();
+        var modal = await modalLocator.CaptureOnClickAsync(Page);
 
-        var result = new FrameModalProxy<T>(modal);
+        var result = new FrameModalProxy<T>(Page, modal);
         result.Disposing += async okPressed => await check();
 
         return result;
     }
 
     public async Task DeleteClickAsync(
-        IOperationSymbolContainer symbolContainer,
-        bool consumeConfirmation = true,
-        bool shouldDisappear = true,
-        Func<EntityContextMenuProxy, Func<Task>>? customCheck = null,
-        bool scrollTo = false
-    )
+    IOperationSymbolContainer symbolContainer,
+    bool consumeConfirmation = true,
+    bool shouldDisappear = true,
+    Func<EntityContextMenuProxy, Func<Task>>? customCheck = null,
+    bool scrollTo = false)
     {
         var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheckAsync(shouldDisappear);
 
         var op = Operation(symbolContainer);
         if (scrollTo)
             await op.ScrollIntoViewIfNeededAsync();
-        await op.ClickAsync();
 
         if (consumeConfirmation)
-            await ResultTable.Page.RunAndConsumeAlertAsync();
+        {
+            await ResultTable.Page.RunAndConsumeAlertAsync(async () =>
+            {
+                await op.ClickAsync();
+            });
+        }
+        else
+        {
+            await op.ClickAsync();
+        }
 
         await check();
     }
 
     private Func<Task> GetShouldDisappearCheckAsync(bool shouldDisappear)
     {
-        var selectedEntities = ResultTable.SelectedEntities();
+        var selectedEntities = ResultTable.SelectedEntitiesAsync();
         return async () =>
         {
             if (shouldDisappear)
-                await ResultTable.WaitNoVisibleAsync(selectedEntities);
+                await ResultTable.WaitNoVisibleAsync(await selectedEntities);
             else
-                await ResultTable.WaitSuccessAsync(selectedEntities);
+                await ResultTable.WaitSuccessAsync(await selectedEntities);
         };
     }
 
@@ -121,7 +137,7 @@ public class EntityContextMenuProxy
         var op = Operation(symbolContainer);
         if (scrollTo)
             await op.ScrollIntoViewIfNeededAsync();
-        return await op.ClickAsyncCapturePopup();
+        return await op.CaptureOnClickAsync(Page);
     }
 
     public async Task WaitNotLoadingAsync()

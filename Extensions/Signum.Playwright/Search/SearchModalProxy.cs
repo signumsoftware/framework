@@ -29,7 +29,7 @@ public class SearchModalProxy : ModalProxy
 
         await this.SearchControl.SearchAsync();
 
-        this.SearchControl.Results.SelectRow(lite);
+        await this.SearchControl.Results.SelectRowAsync(lite);
 
         await this.OkWaitClosedAsync();
 
@@ -38,15 +38,15 @@ public class SearchModalProxy : ModalProxy
 
     public async Task SelectByPositionAsync(int rowIndex)
     {
-        this.SearchControl.Results.SelectRow(rowIndex);
+        await this.SearchControl.Results.SelectRowAsync(rowIndex);
         await this.OkWaitClosedAsync();
         await DisposeAsync();
     }
 
     public async Task SelectByPositionOrderByIdAsync(int rowIndex)
     {
-        this.Results.OrderBy("Id");
-        this.SearchControl.Results.SelectRow(rowIndex);
+        await this.Results.OrderByAsync("Id");
+        await this.SearchControl.Results.SelectRowAsync(rowIndex);
         await this.OkWaitClosedAsync();
         await DisposeAsync();
     }
@@ -59,7 +59,7 @@ public class SearchModalProxy : ModalProxy
         await this.SearchControl.Filters.AddFilterAsync("Entity.Id", FilterOperation.EqualTo, id);
         await this.SearchControl.SearchAsync();
 
-        this.Results.SelectRow(0);
+        await this.Results.SelectRowAsync(0);
 
         await this.OkWaitClosedAsync();
         await DisposeAsync();
@@ -70,7 +70,7 @@ public class SearchModalProxy : ModalProxy
         await this.SearchControl.SearchAsync();
 
         foreach (var index in rowIndexes)
-            this.SearchControl.Results.SelectRow(index);
+            await this.SearchControl.Results.SelectRowAsync(index);
 
         await this.OkWaitClosedAsync();
         await DisposeAsync();
@@ -83,15 +83,21 @@ public class SearchModalProxy : ModalProxy
 
     public async Task CreateAndSelectAsync<T>(Func<FrameModalProxy<T>, Task> action) where T : ModifiableEntity
     {
-        var message = await this.Element.CapturePopupAsync(async () =>
+        await SearchControl.CreateButton.ClickAsync();
+
+        var modalLocator = Page.Locator(".sf-modal");
+        await modalLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+
+        var modal = new FrameModalProxy<T>(Page, modalLocator);
+        await action(modal);
+        var message = Page.Locator(".message-modal");
+        if (await message.CountAsync() > 0)
         {
-            var modal = await SearchControl.CreateAsync<T>();
-            await action(modal);
-        });
+            var msg = new MessageModalProxy(message, Page);
+            await msg.ClickWaitCloseAsync(MessageModalButton.Yes);
+        }
 
-        await message.AsMessageModalAsync().ClickWaitCloseAsync(MessageModalButton.Yes);
-
-        await WaitNotVisibleAsync();
+        await modalLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Detached });
     }
 
     public async Task SearchAsync()

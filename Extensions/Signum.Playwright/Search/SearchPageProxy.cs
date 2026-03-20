@@ -27,12 +27,12 @@ public class SearchPageProxy : IAsyncDisposable
     public async Task<FrameModalProxy<T>> CreateAsync<T>() where T : ModifiableEntity
     {
         var createButton = SearchControl.CreateButton;
-        var popup = await createButton.ClickCaptureAsync();
+        var popup = await createButton.CaptureOnClickAsync(Page);
 
         if (await SelectorModalProxy.IsSelectorAsync(popup))
-            popup = await popup.AsSelectorModal().SelectAndCaptureAsync<T>();
+            popup = await popup.AsSelectorModal(Page).SelectAndCaptureAsync<T>();
 
-        return new FrameModalProxy<T>(popup);
+        return new FrameModalProxy<T>(Page, popup);
     }
 
     public async Task<FramePageProxy<T>> CreateInPlaceAsync<T>() where T : ModifiableEntity
@@ -47,17 +47,25 @@ public class SearchPageProxy : IAsyncDisposable
 
         await SearchControl.CreateButton.ClickAsync();
 
-        // Warten auf neues Tab
-        await Page.Context.WaitForEventAsync(ContextEvent.Page);
+        var tcs = new TaskCompletionSource<IPage>();
+        void Handler(object? sender, IPage page)
+        {
+            if (!oldPages.Contains(page))
+            {
+                tcs.TrySetResult(page);
+            }
+        }
 
-        var newPages = Page.Context.Pages.ToList();
-        var newPage = newPages.Except(oldPages).FirstOrDefault();
+        Page.Context.Page += Handler;
+        var newPage = await tcs.Task;
+        Page.Context.Page -= Handler;
 
         if (newPage == null)
             throw new InvalidOperationException("Neues Tab konnte nicht gefunden werden.");
 
         var result = new FramePageProxy<T>(newPage);
-        result.OnDisposed += () => newPage.CloseAsync();
+
+        result.OnDisposed += async () => await newPage.CloseAsync();
         return result;
     }
 

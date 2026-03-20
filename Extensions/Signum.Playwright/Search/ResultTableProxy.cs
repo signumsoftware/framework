@@ -1,101 +1,237 @@
 using Microsoft.Playwright;
+using Signum.Playwright.Frames;
 
 namespace Signum.Playwright.Search;
 
 public class ResultTableProxy
 {
-    public IPage Page { get; private set; }
-    public ILocator Element { get; private set; }
+    public IPage Page { get; }
+    public ILocator Element { get; }
     private SearchControlProxy SearchControl;
 
     public ResultTableProxy(ILocator element, SearchControlProxy searchControl, IPage page)
     {
-        this.Page = page;
-        this.Element = element;
-        this.SearchControl = searchControl;
+        Page = page;
+        Element = element;
+        SearchControl = searchControl;
     }
 
     public ILocator ResultTableElement => Element.Locator("table.sf-search-results");
     public ILocator RowsLocator => Element.Locator("table.sf-search-results > tbody > tr");
 
+    // ---------------- ROWS ----------------
+
     public async Task<List<ResultRowProxy>> AllRowsAsync()
     {
-        var elements = await RowsLocator.AllAsync();
-        return elements.Select(e => new ResultRowProxy(e, Page)).ToList();
+        var rows = await RowsLocator.AllAsync();
+        return rows.Select(r => new ResultRowProxy(r, Page)).ToList();
     }
 
     public ResultRowProxy RowElement(int rowIndex)
-    {
-        return new ResultRowProxy(RowElementLocator(rowIndex), Page);
-    }
+        => new ResultRowProxy(RowElementLocator(rowIndex), Page);
 
     private ILocator RowElementLocator(int rowIndex)
-    {
-        return Element.Locator($"tr[data-row-index='{rowIndex}']");
-    }
+        => Element.Locator($"tr[data-row-index='{rowIndex}']");
 
     public ResultRowProxy RowElement(Lite<IEntity> lite)
-    {
-        return new ResultRowProxy(RowElementLocator(lite), Page);
-    }
+        => new ResultRowProxy(RowElementLocator(lite), Page);
 
     private ILocator RowElementLocator(Lite<IEntity> lite)
-    {
-        return Element.Locator($"tr[data-entity='{lite.Key()}']");
-    }
+        => Element.Locator($"tr[data-entity='{lite.Key()}']");
+
+    public async Task<int> RowsCountAsync()
+        => await Element.Locator("tbody > tr[data-entity]").CountAsync();
+
+    // ---------------- SELECTION ----------------
 
     public async Task<List<Lite<IEntity>>> SelectedEntitiesAsync()
     {
         var rows = await RowsLocator.AllAsync();
-        var entities = new List<Lite<IEntity>>();
+        var result = new List<Lite<IEntity>>();
+
         foreach (var row in rows)
         {
             if (await row.Locator("input.sf-td-selection:checked").CountAsync() > 0)
-                entities.Add(Lite.Parse<IEntity>(await row.GetAttributeAsync("data-entity")));
+            {
+                var entity = await row.GetAttributeAsync("data-entity");
+                if (entity != null)
+                    result.Add(Lite.Parse<IEntity>(entity));
+            }
         }
-        return entities;
+
+        return result;
     }
 
-    public ILocator CellElement(int rowIndex, string token)
+    public async Task SelectRowAsync(int rowIndex)
+        => await RowElement(rowIndex).SelectedCheckbox.ClickAsync();
+
+    public async Task SelectRowAsync(params int[] indexes)
     {
-        var columnIndex = GetColumnIndex(token);
-        return RowElement(rowIndex).CellElement(columnIndex);
+        foreach (var i in indexes)
+            await SelectRowAsync(i);
     }
 
-    public ILocator CellElement(Lite<IEntity> lite, string token)
-    {
-        var columnIndex = GetColumnIndex(token);
-        return RowElement(lite).CellElement(columnIndex);
-    }
+    public async Task SelectRowAsync(Lite<IEntity> lite)
+        => await RowElement(lite).SelectedCheckbox.ClickAsync();
 
-    public int GetColumnIndex(string token)
+    // ---------------- CELLS ----------------
+
+    public async Task<int> GetColumnIndexAsync(string token)
     {
-        var tokens = GetColumnTokens();
+        var tokens = await GetColumnTokensAsync();
         var index = Array.IndexOf(tokens, token);
+
         if (index == -1)
             throw new InvalidOperationException($"Token {token} not found between {string.Join(", ", tokens)}");
+
         return index;
     }
 
-    public void SelectRow(int rowIndex) => RowElement(rowIndex).SelectedCheckbox.ClickAsync().GetAwaiter().GetResult();
-    public void SelectRow(params int[] rowIndexes)
+    public async Task<string[]> GetColumnTokensAsync()
     {
-        foreach (var index in rowIndexes)
-            SelectRow(index);
+        var headers = await Element.Locator("thead > tr > th").AllAsync();
+        var result = new List<string>();
+
+        foreach (var h in headers)
+            result.Add(await h.GetAttributeAsync("data-column-name") ?? "");
+
+        return result.ToArray();
     }
-    public void SelectRow(Lite<IEntity> lite) => RowElement(lite).SelectedCheckbox.ClickAsync().GetAwaiter().GetResult();
+
+    public async Task<ILocator> CellElementAsync(int rowIndex, string token)
+    {
+        var col = await GetColumnIndexAsync(token);
+        return RowElement(rowIndex).CellElement(col);
+    }
+
+    public async Task<ILocator> CellElementAsync(Lite<IEntity> lite, string token)
+    {
+        var col = await GetColumnIndexAsync(token);
+        return RowElement(lite).CellElement(col);
+    }
+
+    // ---------------- HEADER ----------------
 
     public ILocator HeaderElement => Element.Locator("thead > tr > th");
 
-    public string[] GetColumnTokens()
+    public ILocator HeaderCellElement(string token)
+        => HeaderElement.Locator($"[data-column-name='{token}']");
+
+    public async Task<bool> HasColumnAsync(string token)
+        => await HeaderCellElement(token).CountAsync() > 0;
+
+    public async Task RemoveColumnAsync(string token)
     {
-        var ths = Element.Locator("thead > tr > th").AllAsync().GetAwaiter().GetResult();
-        return ths.Select(a => a.GetAttributeAsync("data-column-name").GetAwaiter().GetResult() ?? "").ToArray();
+        var header = HeaderCellElement(token);
+
+        await header.ClickAsync(new() { Button = MouseButton.Right });
+        var menu = await SearchControl.WaitContextMenuAsync();
+
+        await menu.Locator(".sf-remove-header").ClickAsync();
+
+        await header.WaitForAsync(new() { State = WaitForSelectorState.Detached });
     }
 
-    public ILocator HeaderCellElement(string token) => HeaderElement.Locator($"[data-column-name='{token}']");
+    // ---------------- SORTING ----------------
 
-    public int RowsCount() => Element.Locator("tbody > tr[data-entity]").CountAsync().GetAwaiter().GetResult();
+    public async Task OrderByAsync(string token, bool descending = false, bool thenBy = false)
+    {
+        var header = HeaderCellElement(token);
+
+        do
+        {
+            await SearchControl.WaitSearchCompletedAsync(async () =>
+            {
+                if (thenBy)
+                    await Page.Keyboard.DownAsync("Shift");
+
+                await header.ClickAsync();
+
+                if (thenBy)
+                    await Page.Keyboard.UpAsync("Shift");
+            });
+        }
+        while (!await IsHeaderMarkedSortedAsync(token, descending));
+    }
+
+    public async Task<bool> IsHeaderMarkedSortedAsync(string token, bool descending)
+    {
+        var selector = descending
+            ? "span.sf-header-sort.desc"
+            : "span.sf-header-sort.asc";
+
+        return await HeaderCellElement(token)
+            .Locator(selector)
+            .CountAsync() > 0;
+    }
+
+    // ---------------- ENTITY CLICK ----------------
+
+    public async Task<FrameModalProxy<T>> EntityClickAsync<T>(Lite<T> lite)
+        where T : Entity
+    {
+        var link = await EntityLinkAsync(lite);
+        var popup = await Page.RunAndWaitForPopupAsync(() => link.ClickAsync());
+        return new FrameModalProxy<T>(popup);
+    }
+
+    public async Task<FramePageProxy<T>> EntityClickInPlaceAsync<T>(Lite<T> lite)
+        where T : Entity
+    {
+        var link = await EntityLinkAsync(lite);
+        await link.ClickAsync();
+        return new FramePageProxy<T>(Page);
+    }
+
+    public async Task<ILocator> EntityLinkAsync(Lite<IEntity> lite)
+    {
+        var col = await GetColumnIndexAsync("Entity");
+        return RowElement(lite).EntityLink(col);
+    }
+
+    // ---------------- CONTEXT MENU ----------------
+
+    public async Task<EntityContextMenuProxy> EntityContextMenuAsync(
+        int rowIndex,
+        string columnToken = "Entity")
+    {
+        var cell = await CellElementAsync(rowIndex, columnToken);
+
+        await cell.ScrollIntoViewIfNeededAsync();
+        await cell.ClickAsync(new() { Button = MouseButton.Right });
+
+        var menu = await SearchControl.WaitContextMenuAsync();
+
+        return new EntityContextMenuProxy(this, menu);
+    }
+
+    // ---------------- WAIT HELPERS ----------------
+
+    public async Task WaitRowsAsync(int rows)
+    {
+        await Page.WaitForFunctionAsync(
+            @"([locator, count]) => document.querySelectorAll(locator).length === count",
+            new object[] { "tbody > tr[data-entity]", rows });
+    }
+
+    public async Task WaitSuccessAsync(List<Lite<IEntity>> lites)
+    {
+        foreach (var lite in lites)
+        {
+            await RowElementLocator(lite)
+                .Locator(".sf-entity-ctxmenu-success")
+                .WaitForAsync(new() { State = WaitForSelectorState.Visible });
+        }
+    }
+
+    public async Task WaitNoVisibleAsync(List<Lite<IEntity>> lites)
+    {
+        foreach (var lite in lites)
+        {
+            await RowElementLocator(lite)
+                .WaitForAsync(new() { State = WaitForSelectorState.Detached });
+        }
+    }
 }
 
 public class ResultRowProxy

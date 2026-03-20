@@ -17,13 +17,14 @@ public class FiltersProxy
 
     public async Task<List<FilterProxy>> FiltersAsync()
     {
-        var rows = await Element.Locator("table > tbody > tr").ElementHandlesAsync();
+        var handles = await Element.Locator("table > tbody > tr").ElementHandlesAsync();
         var list = new List<FilterProxy>();
 
-        foreach (var row in rows)
+        foreach (var handle in handles)
         {
-            var locator = row; // ILocator wrapper in Playwright
-            var className = await locator.GetAttributeAsync("class") ?? "";
+            var className = await handle.GetAttributeAsync("class") ?? "";
+
+            ILocator locator = (ILocator)handle;
 
             if (className.Contains("sf-filter-condition"))
                 list.Add(new FilterConditionProxy(locator, QueryName, Page));
@@ -38,18 +39,16 @@ public class FiltersProxy
     {
         var oldFilters = await FiltersAsync();
         await action();
-        ILocator? newFilter = null;
 
-        await Element.Page.WaitForFunctionAsync(async () =>
-        {
-            var currentFilters = await FiltersAsync();
-            if (currentFilters.Count > oldFilters.Count)
-            {
-                newFilter = currentFilters.Skip(oldFilters.Count).FirstOrDefault();
-                return true;
-            }
-            return false;
-        });
+        FilterProxy? newFilter = null;
+
+        await Page.WaitForFunctionAsync(
+            @"([table, oldCount]) => table.querySelectorAll('tbody > tr').length > oldCount",
+            new object[] { Element, oldFilters.Count }
+        );
+
+        var currentFilters = await FiltersAsync();
+        newFilter = currentFilters.Skip(oldFilters.Count).First();
 
         return newFilter!;
     }
@@ -72,7 +71,7 @@ public class FiltersProxy
     {
         var fo = await AddFilterAsync();
         await fo.QueryToken.SelectTokenAsync(token);
-        fo.Operation = operation;
+        await fo.SetOperationAsync(operation);
         await fo.SetValueAsync(value);
     }
 

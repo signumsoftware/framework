@@ -59,6 +59,18 @@ public class SearchControlProxy
         return new EntityContextMenuProxy(Results, menu);
     }
 
+    public async Task<ILocator> WaitContextMenuAsync()
+    {
+        var locator = Page.Locator(".sf-context-menu .dropdown-menu");
+
+        await locator.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible
+        });
+
+        return locator;
+    }
+
     public ILocator ToggleFiltersButton => Element.Locator(".sf-filter-button");
     public ILocator FiltersPanel => Element.Locator(".sf-filters-list");
 
@@ -66,20 +78,24 @@ public class SearchControlProxy
     {
         await ToggleFiltersButton.ClickAsync();
         if (show)
-            await FiltersPanel.WaitForAsync();
+            await FiltersPanel.WaitVisibleAsync();
         else
-            await FiltersPanel.WaitForElementStateAsync(ElementState.Hidden);
+            await FiltersPanel.WaitNotVisibleAsync();
     }
 
     public ILocator ContextualMenu => Page.Locator(".sf-context-menu");
 
     public async Task<FilterConditionProxy> AddQuickFilterAsync(int rowIndex, string token)
     {
-        await Results.CellElement(rowIndex, token).ClickAsync(new() { Button = MouseButton.Right });
+        var cell = await Results.CellElementAsync(rowIndex, token);
+        await cell.ClickAsync(new() { Button = MouseButton.Right });
+
         var menuItem = ContextualMenu.Locator(".sf-quickfilter-header a");
-        await menuItem.WaitForAsync();
-        var FilterProxy = await Filters.GetNewFilterAsync(async () => await menuItem.ClickAsync());
-        return (FilterConditionProxy)FilterProxy;
+        await menuItem.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+
+        var filterProxy = await Filters.GetNewFilterAsync(async () => await menuItem.ClickAsync());
+
+        return (FilterConditionProxy)filterProxy;
     }
 
     public async Task<FilterConditionProxy> AddQuickFilterAsync(string token)
@@ -93,11 +109,15 @@ public class SearchControlProxy
 
     public async Task<FrameModalProxy<T>> CreateAsync<T>() where T : ModifiableEntity
     {
-        var popup = await CreateButton.ClickAsync();
-        var modal = await SelectorModalProxy.IsSelectorAsync(popup);
-        if (modal)
-            popup = await popup.AsSelectorModal().SelectAndCapture<T>();
-        return new FrameModalProxy<T>(popup).WaitLoaded();
+        await CreateButton.ClickAsync();
+
+        var modalLocator = Page.Locator(".sf-selector-modal, .sf-modal");
+        await modalLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+
+        if (await SelectorModalProxy.IsSelectorAsync(modalLocator))
+            modalLocator = await modalLocator.AsSelectorModal(Page).SelectAndCaptureAsync<T>();
+        var modal = await new FrameModalProxy<T>(Page, modalLocator).WaitLoadedAsync();
+        return modal;
     }
 
     public ILocator CreateButton => Element.Locator(".sf-create");
