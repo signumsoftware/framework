@@ -103,34 +103,8 @@ public static class StreamExtensions
     }
 
     [DebuggerStepThrough]
-    public static R Using<T, R>(this T disposable, Func<T, R> function)
-        where T : IDisposable? 
-    {
-        //using (disposable)
-        //    return function(disposable);
-
-        try
-        {
-            return function(disposable);
-        }
-        catch (Exception e)
-        {
-
-            if (disposable is IDisposableException de)
-                de.OnException(e);
-
-            throw;
-        }
-        finally
-        {
-            if (disposable != null)
-                disposable.Dispose();
-        }
-    }
-
-    [DebuggerStepThrough]
     public static R Using<T, R>(this T disposable, Func<R> function)
-        where T : IDisposable?
+       where T : IDisposable
     {
         //using (disposable)
         //    return function(disposable);
@@ -155,12 +129,144 @@ public static class StreamExtensions
     }
 
     [DebuggerStepThrough]
+    public static R Using<T, R>(this T disposable, Func<T, R> function)
+        where T : IDisposable
+    {
+        //using (disposable)
+        //    return function(disposable);
+
+        try
+        {
+            return function(disposable);
+        }
+        catch (Exception e)
+        {
+
+            if (disposable is IDisposableException de)
+                de.OnException(e);
+
+            throw;
+        }
+        finally
+        {
+            if (disposable != null)
+                disposable.Dispose();
+        }
+    }
+
+
+    [DebuggerStepThrough]
+    public static async Task<R> UsingAsync<T, R>(this T disposable, Func<T, Task<R>> function)
+    where T : IDisposable
+    {
+        //using (disposable)
+        //    return function(disposable);
+
+        try
+        {
+            return await function(disposable);
+        }
+        catch (Exception e)
+        {
+
+            if (disposable is IDisposableException de)
+                de.OnException(e);
+
+            throw;
+        }
+        finally
+        {
+            if (disposable != null)
+                disposable.Dispose();
+        }
+    }
+
+    [DebuggerStepThrough]
+    public static async Task<R> UsingAsync<T, R>(this Task<T> task, Func<T, Task<R>> function)
+    where T : IDisposable
+    {
+        //using (disposable)
+        //    return function(disposable);
+
+        var disposable = await task;
+
+        try
+        {
+
+            return await function(disposable);
+        }
+        catch (Exception e)
+        {
+
+            if (disposable is IDisposableException de)
+                de.OnException(e);
+
+            throw;
+        }
+        finally
+        {
+            if (disposable != null)
+                disposable.Dispose();
+        }
+    }
+
+
+
+    [DebuggerStepThrough]
     public static void EndUsing<T>(this T disposable, Action<T> action)
-        where T : IDisposable? 
+        where T : IDisposable
     {
         try
         {
             action(disposable);
+        }
+        catch (Exception e)
+        {
+
+            if (disposable is IDisposableException de)
+                de.OnException(e);
+
+            throw;
+        }
+        finally
+        {
+            if (disposable != null)
+                disposable.Dispose();
+        }
+    }
+
+
+    [DebuggerStepThrough]
+    public static async Task EndUsingAsync<T>(this Task<T> task, Func<T, Task> action)
+        where T : IDisposable
+    {
+        var disposable = await task;
+        try
+        {
+            await action(disposable);
+        }
+        catch (Exception e)
+        {
+
+            if (disposable is IDisposableException de)
+                de.OnException(e);
+
+            throw;
+        }
+        finally
+        {
+            if (disposable != null)
+                disposable.Dispose();
+        }
+    }
+
+    [DebuggerStepThrough]
+    public static async Task EndUsingAsync<T>(this T disposable, Func<T, Task> action)
+        where T : IDisposable
+    {
+        try
+        {
+            await action(disposable);
         }
         catch (Exception e)
         {

@@ -1,6 +1,8 @@
 using Microsoft.Playwright;
 using Signum.Entities.Reflection;
 using Signum.Playwright.LineProxies;
+using Signum.Playwright.Search;
+using Signum.UserAssets.Queries;
 
 namespace Signum.Playwright.Frames;
 
@@ -81,22 +83,25 @@ public static class LineContainerExtensions
         );
     }
 
-    public static bool IsVisible<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
+    public static async Task<bool> IsVisibleAsync<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
         where T : IModifiableEntity
     {
-        return lineContainer.LineLocator(property).ElementLocator.IsVisibleAsync().Result;
+        return await lineContainer.LineLocator(property).ElementLocator.IsVisibleAsync();
     }
 
-    public static bool IsPresent<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
+    public static async Task<bool> IsPresentAsync<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
         where T : IModifiableEntity
     {
-        return lineContainer.LineLocator(property).ElementLocator.IsVisibleAsync().Result;
+        return await lineContainer.LineLocator(property).ElementLocator.CountAsync() > 0;
     }
 
     public static async Task WaitVisibleAsync<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
         where T : IModifiableEntity
     {
-        await lineContainer.LineLocator(property).ElementLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+        await lineContainer.LineLocator(property).ElementLocator.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible
+        });
     }
 
     public static async Task WaitPresentAsync<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
@@ -108,13 +113,19 @@ public static class LineContainerExtensions
     public static async Task WaitNoVisibleAsync<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
         where T : IModifiableEntity
     {
-        await lineContainer.LineLocator(property).ElementLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });
+        await lineContainer.LineLocator(property).ElementLocator.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Hidden
+        });
     }
 
     public static async Task WaitNoPresentAsync<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
         where T : IModifiableEntity
     {
-        await lineContainer.LineLocator(property).ElementLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Detached });
+        await lineContainer.LineLocator(property).ElementLocator.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Detached
+        });
     }
 
     public static LineContainer<S> SubContainer<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property, ILocator? element = null)
@@ -122,7 +133,7 @@ public static class LineContainerExtensions
         where S : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new LineContainer<S>(element ?? lineLocator.ElementLocator, lineLocator.Page);
+        return new LineContainer<S>(element ?? lineLocator.ElementLocator, lineLocator.Page, lineLocator.Route);
     }
 
     public static CheckboxLineProxy CheckboxLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, bool>> property)
@@ -135,8 +146,8 @@ public static class LineContainerExtensions
     public static async Task CheckboxLineValueAsync<T>(this ILineContainer<T> lineContainer, Expression<Func<T, bool>> property, bool value)
         where T : IModifiableEntity
     {
-        var line = lineContainer.CheckboxLine(property);
-        await line.SetValueAsync(value);
+        var valueLine = lineContainer.CheckboxLine(property);
+        await valueLine.SetValueAsync(value);
     }
 
     public static DateTimeLineProxy DateTimeLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -148,10 +159,9 @@ public static class LineContainerExtensions
 
     public static async Task DateTimeLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
         where T : IModifiableEntity
-        where V : IFormattable
     {
-        var line = lineContainer.DateTimeLine(property);
-        await line.SetValueAsync(value);
+        var valueLine = lineContainer.DateTimeLine(property);
+        await valueLine.SetValueAsync((IFormattable?)value);
     }
 
     public static EnumLineProxy EnumLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -164,8 +174,8 @@ public static class LineContainerExtensions
     public static async Task EnumLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
         where T : IModifiableEntity
     {
-        var line = lineContainer.EnumLine(property);
-        await line.SetValueUntypedAsync(value);
+        var valueLine = lineContainer.EnumLine(property);
+        await valueLine.SetValueUntypedAsync(value);
     }
 
     public static GuidBoxLineProxy GuidLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, Guid?>> property)
@@ -178,8 +188,8 @@ public static class LineContainerExtensions
     public static async Task GuidLineValueAsync<T>(this ILineContainer<T> lineContainer, Expression<Func<T, Guid?>> property, Guid? value)
         where T : IModifiableEntity
     {
-        var line = lineContainer.GuidLine(property);
-        await line.SetValueAsync(value);
+        var valueLine = lineContainer.GuidLine(property);
+        await valueLine.SetValueAsync(value);
     }
 
     public static NumberLineProxy NumberLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -191,10 +201,9 @@ public static class LineContainerExtensions
 
     public static async Task NumberLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
         where T : IModifiableEntity
-        where V : IFormattable
     {
-        var line = lineContainer.NumberLine(property);
-        await line.SetValueAsync(value);
+        var valueLine = lineContainer.NumberLine(property);
+        await valueLine.SetValueAsync((IFormattable?)value);
     }
 
     public static HtmlLineProxy HtmlLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property)
@@ -207,8 +216,8 @@ public static class LineContainerExtensions
     public static async Task HtmlLineValueAsync<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property, string? value)
         where T : IModifiableEntity
     {
-        var line = lineContainer.HtmlLine(property);
-        await line.SetValueUntypedAsync(value);
+        var valueLine = lineContainer.HtmlLine(property);
+        await valueLine.SetValueUntypedAsync(value);
     }
 
     public static TextAreaLineProxy TextAreaLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property)
@@ -221,8 +230,8 @@ public static class LineContainerExtensions
     public static async Task TextAreaLineValueAsync<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property, string? value)
         where T : IModifiableEntity
     {
-        var line = lineContainer.TextAreaLine(property);
-        await line.SetValueAsync(value);
+        var valueLine = lineContainer.TextAreaLine(property);
+        await valueLine.SetValueAsync(value);
     }
 
     public static TextBoxLineProxy TextBoxLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property)
@@ -235,8 +244,8 @@ public static class LineContainerExtensions
     public static async Task TextBoxLineValueAsync<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property, string? value)
         where T : IModifiableEntity
     {
-        var line = lineContainer.TextBoxLine(property);
-        await line.SetValueAsync(value);
+        var valueLine = lineContainer.TextBoxLine(property);
+        await valueLine.SetValueAsync(value);
     }
 
     public static TimeLineProxy TimeLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -248,10 +257,9 @@ public static class LineContainerExtensions
 
     public static async Task TimeLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
         where T : IModifiableEntity
-        where V : IFormattable
     {
-        var line = lineContainer.TimeLine(property);
-        await line.SetValueAsync(value);
+        var valueLine = lineContainer.TimeLine(property);
+        await valueLine.SetValueAsync((IFormattable?)value);
     }
 
     public static BaseLineProxy AutoLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -264,8 +272,71 @@ public static class LineContainerExtensions
     public static async Task AutoLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
         where T : IModifiableEntity
     {
-        var line = lineContainer.AutoLine(property);
-        await line.SetValueUntypedAsync(value);
+        var valueLine = lineContainer.AutoLine(property);
+        await valueLine.SetValueUntypedAsync(value);
+    }
+
+    public static async Task<V> AutoLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var valueLine = lineContainer.AutoLine(property);
+        return (V)(await valueLine.GetValueUntypedAsync())!;
+    }
+
+    public static FileLineProxy FileLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+        return new FileLineProxy(lineLocator.ElementLocator, lineLocator.Page, lineLocator.Route);
+    }
+
+    public static EntityLineProxy EntityLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+        return new EntityLineProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+    }
+
+    public static EntityComboProxy EntityCombo<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+        return new EntityComboProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+    }
+
+    public static EntityDetailProxy EntityDetail<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+        return new EntityDetailProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+    }
+
+    public static EntityRepeaterProxy EntityRepeater<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+        return new EntityRepeaterProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+    }
+
+    public static EntityTabRepeaterProxy EntityTabRepeater<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+        return new EntityTabRepeaterProxy(lineLocator.ElementLocator, lineLocator.Page, lineLocator.Route);
+    }
+
+    public static EntityStripProxy EntityStrip<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+        return new EntityStripProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+    }
+
+    public static EntityListProxy EntityList<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+        return new EntityListProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
     }
 
     public static EntityTableProxy EntityTable<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -273,5 +344,39 @@ public static class LineContainerExtensions
     {
         var lineLocator = lineContainer.LineLocator(property);
         return new EntityTableProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+    }
+
+    public static EntityListCheckBoxProxy EntityListCheckBox<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+        return new EntityListCheckBoxProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+    }
+
+    public static QueryTokenBuilderProxy QueryTokenBuilder<T>(this ILineContainer<T> lineContainer, Expression<Func<T, QueryTokenEmbedded>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+        return new QueryTokenBuilderProxy(lineLocator.ElementLocator);
+    }
+
+    public static async Task SelectTabAsync(this ILineContainer lineContainer, string eventKey)
+    {
+        var element = lineContainer.Element.Locator($".nav-tabs .nav-item .nav-link[data-rr-ui-event-key='{eventKey}']");
+        await element.ClickAsync();
+    }
+
+    public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName)
+    {
+        string queryKey = QueryUtils.GetKey(queryName);
+        var element = lineContainer.Element.Locator($"div.sf-search-control[data-query-key='{queryKey}']");
+        return new SearchControlProxy(element, lineContainer.Page);
+    }
+
+    public static SearchValueLineProxy GetSearchValueLine(this ILineContainer lineContainer, object queryName)
+    {
+        string queryKey = QueryUtils.GetKey(queryName);
+        var element = lineContainer.Element.Locator($"[data-value-query-key='{queryKey}']");
+        return new SearchValueLineProxy(element, lineContainer.Page);
     }
 }

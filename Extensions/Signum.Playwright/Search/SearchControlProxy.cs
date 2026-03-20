@@ -10,9 +10,9 @@ public class SearchControlProxy
     public ILocator Element { get; private set; }
     public ResultTableProxy Results { get; private set; }
 
-    public object QueryName => QueryLogic.ToQueryName(Element.GetAttributeAsync("data-query-key").GetAwaiter().GetResult());
+    public async Task<object> QueryNameAsync() => QueryLogic.ToQueryName((await Element.GetAttributeAsync("data-query-key"))!);
 
-    public FiltersProxy Filters => new FiltersProxy(FiltersPanel, QueryName, Page);
+    public async Task<FiltersProxy> GetFiltersAsync() => new FiltersProxy(FiltersPanel, await QueryNameAsync(), Page);
     public ColumnEditorProxy ColumnEditor() => new ColumnEditorProxy(Element.Locator(".sf-column-editor"));
 
     public PaginationSelectorProxy Pagination => new PaginationSelectorProxy(this);
@@ -93,7 +93,8 @@ public class SearchControlProxy
         var menuItem = ContextualMenu.Locator(".sf-quickfilter-header a");
         await menuItem.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
 
-        var filterProxy = await Filters.GetNewFilterAsync(async () => await menuItem.ClickAsync());
+        var filters = await GetFiltersAsync();
+        var filterProxy = await filters.GetNewFilterAsync(async () => await menuItem.ClickAsync());
 
         return (FilterConditionProxy)filterProxy;
     }
@@ -103,7 +104,8 @@ public class SearchControlProxy
         await Results.HeaderCellElement(token).ClickAsync(new() { Button = MouseButton.Right });
         var menuItem = ContextualMenu.Locator(".sf-quickfilter-header a");
         await menuItem.WaitForAsync();
-        var FilterProxy = await Filters.GetNewFilterAsync(async () => await menuItem.ClickAsync());
+        var filters = await GetFiltersAsync();
+        var FilterProxy = await filters.GetNewFilterAsync(async () => await menuItem.ClickAsync());
         return (FilterConditionProxy)FilterProxy;
     }
 
