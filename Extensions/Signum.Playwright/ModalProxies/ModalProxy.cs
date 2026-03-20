@@ -7,13 +7,10 @@ namespace Signum.Playwright.ModalProxies;
 /// <summary>
 /// Proxy for working with Signum Framework modals
 /// </summary>
-public class ModalProxy : IAsyncDisposable
+public class ModalProxy : IDisposable, IAsyncDisposable
 {
     public IPage Page { get; }
     public ILocator Modal { get; }
-
-
-
 
     public Func<Task>? AfterClose { get; set; }
 
@@ -47,6 +44,11 @@ public class ModalProxy : IAsyncDisposable
         Modal.Locator(".modal-header button.btn-close");
 
     public bool AvoidClose { get; set; }
+
+    public void Dispose()
+    {
+        DisposeAsync().GetAwaiter().GetResult();
+    }
 
     public virtual async ValueTask DisposeAsync()
     {
@@ -163,4 +165,5 @@ public class ModalProxy : IAsyncDisposable
         return new ModalProxy(modal, page);
     }
 
+ 
 }

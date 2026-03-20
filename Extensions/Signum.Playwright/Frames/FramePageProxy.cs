@@ -30,6 +30,11 @@ public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer, IWid
         await Task.CompletedTask;
     }
 
+    public void Dispose()
+    {
+        DisposeAsync().GetAwaiter().GetResult();
+    }
+
     public ILocator MainControl => Element.Locator(".sf-main-control");
 
     async Task<EntityInfoProxy> GetEntityInfoAsync()

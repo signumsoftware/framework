@@ -17,6 +17,11 @@ public class EntityLineProxy : EntityBaseProxy
     public override async Task SetValueUntypedAsync(object? value)
         => await SetLiteAsync(value is Entity e ? e.ToLite() : (Lite<Entity>?)value);
 
+    public async Task<Lite<Entity>?> GetLiteAsync()
+    {
+        return (await EntityInfoInternalAsync(null))?.ToLite();
+    }
+
     public ILocator AutoCompleteElement => this.Element.Locator(".sf-entity-autocomplete");
 
     public async Task SetLiteAsync(Lite<IEntity>? value)

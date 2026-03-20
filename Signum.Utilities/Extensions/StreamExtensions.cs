@@ -104,7 +104,7 @@ public static class StreamExtensions
 
     [DebuggerStepThrough]
     public static R Using<T, R>(this T disposable, Func<R> function)
-       where T : IDisposable
+       where T : IDisposable?
     {
         //using (disposable)
         //    return function(disposable);
@@ -130,7 +130,7 @@ public static class StreamExtensions
 
     [DebuggerStepThrough]
     public static R Using<T, R>(this T disposable, Func<T, R> function)
-        where T : IDisposable
+        where T : IDisposable?
     {
         //using (disposable)
         //    return function(disposable);
@@ -177,7 +177,13 @@ public static class StreamExtensions
         finally
         {
             if (disposable != null)
-                disposable.Dispose();
+            {
+                // Prefer async disposal if available
+                if (disposable is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync();
+                else
+                    disposable.Dispose();
+            }
         }
     }
 
@@ -206,7 +212,13 @@ public static class StreamExtensions
         finally
         {
             if (disposable != null)
-                disposable.Dispose();
+            {
+                // Prefer async disposal if available
+                if (disposable is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync();
+                else
+                    disposable.Dispose();
+            }
         }
     }
 
@@ -214,7 +226,7 @@ public static class StreamExtensions
 
     [DebuggerStepThrough]
     public static void EndUsing<T>(this T disposable, Action<T> action)
-        where T : IDisposable
+        where T : IDisposable?
     {
         try
         {
@@ -256,7 +268,13 @@ public static class StreamExtensions
         finally
         {
             if (disposable != null)
-                disposable.Dispose();
+            {
+                // Prefer async disposal if available
+                if (disposable is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync();
+                else
+                    disposable.Dispose();
+            }
         }
     }
 
@@ -279,7 +297,13 @@ public static class StreamExtensions
         finally
         {
             if (disposable != null)
-                disposable.Dispose();
+            {
+                // Prefer async disposal if available
+                if (disposable is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync();
+                else
+                    disposable.Dispose();
+            }
         }
     }
 }

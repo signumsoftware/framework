@@ -31,7 +31,7 @@ public class EntityComboProxy : EntityBaseProxy
         return ei.ToLite(text);
     }
 
-    public async Task SetLiteValueAsync(Lite<Entity>? value)
+    public async Task SetLiteValueAsync(Lite<IEntity>? value)
     {
         var val = value == null ? "" : value.Key();
         await ComboElement.SelectOptionAsync(new SelectOptionValue { Value = val });

@@ -4,7 +4,7 @@ using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Search;
 
-public class SearchPageProxy : IAsyncDisposable
+public class SearchPageProxy : IDisposable, IAsyncDisposable
 {
     public IPage Page { get; private set; }
     public SearchControlProxy SearchControl { get; private set; }
@@ -81,7 +81,10 @@ public class SearchPageProxy : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        // Bei Playwright meist Page nicht direkt schließen, nur Ressourcen freigeben falls nötig
-        // await Page.CloseAsync();
+    }
+
+    public void Dispose()
+    {
+        DisposeAsync().GetAwaiter().GetResult();
     }
 }

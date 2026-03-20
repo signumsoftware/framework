@@ -8,7 +8,7 @@ public class SearchModalProxy : ModalProxy
 {
     public SearchControlProxy SearchControl { get; private set; }
     public ResultTableProxy Results => SearchControl.Results;
-    public FiltersProxy Filters => SearchControl.Filters;
+    public Task<FiltersProxy> GetFiltersAsync() => SearchControl.GetFiltersAsync();
     public PaginationSelectorProxy Pagination => SearchControl.Pagination;
 
     public SearchModalProxy(ILocator element, IPage page, bool waitInitialSearch = true)
@@ -25,7 +25,8 @@ public class SearchModalProxy : ModalProxy
         if (!await this.SearchControl.FiltersVisibleAsync())
             await this.SearchControl.ToggleFiltersAsync(true);
 
-        await this.SearchControl.Filters.AddFilterAsync("Entity.Id", FilterOperation.EqualTo, lite.Id);
+        var filters = await this.SearchControl.GetFiltersAsync();
+        await filters.AddFilterAsync("Entity.Id", FilterOperation.EqualTo, lite.Id);
 
         await this.SearchControl.SearchAsync();
 
@@ -56,7 +57,8 @@ public class SearchModalProxy : ModalProxy
         if (!await this.SearchControl.FiltersVisibleAsync())
             await this.SearchControl.ToggleFiltersAsync(true);
 
-        await this.SearchControl.Filters.AddFilterAsync("Entity.Id", FilterOperation.EqualTo, id);
+        var filters = await this.SearchControl.GetFiltersAsync();
+        await filters.AddFilterAsync("Entity.Id", FilterOperation.EqualTo, id);
         await this.SearchControl.SearchAsync();
 
         await this.Results.SelectRowAsync(0);

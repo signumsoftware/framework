@@ -100,4 +100,24 @@ public class EntityTableRow<T> : LineContainer<T>
 
         return -1;
     }
+
+    public async Task<EntityTableRow<T>> WaitRefreshAsync(Func<Task> action)
+    {
+        var index = await IndexAsync();
+        var originalHandle = await Element.ElementHandleAsync();
+
+        await action();
+
+        EntityTableRow<T> result = null!;
+        await Page.WaitForFunctionAsync(
+            @"([table, index]) => {
+                const rows = table.querySelectorAll(':scope > tbody > tr');
+                return rows[index] && rows[index] !== arguments[2];
+            }",
+            new object[] { await EntityTable.TableElement.ElementHandleAsync(), index, originalHandle }
+        );
+
+        result = EntityTable.Row<T>(index);
+        return result;
+    }
 }

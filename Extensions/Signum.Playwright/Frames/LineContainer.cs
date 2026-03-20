@@ -1,8 +1,10 @@
 using Microsoft.Playwright;
 using Signum.Entities.Reflection;
+using Signum.Engine;
 using Signum.Playwright.LineProxies;
 using Signum.Playwright.Search;
 using Signum.UserAssets.Queries;
+using System.Threading;
 
 namespace Signum.Playwright.Frames;
 
@@ -297,11 +299,40 @@ public static class LineContainerExtensions
         return new EntityLineProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
     }
 
+    public static async Task<V> EntityLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lite = await lineContainer.EntityLine(property).GetLiteAsync();
+
+        return lite is V ? (V)lite : (V)(object)lite?.RetrieveAndRemember()!;
+    }
+
+    public static async Task EntityLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
+        where T : IModifiableEntity
+    {
+        await lineContainer.EntityLine(property).SetLiteAsync(value as Lite<IEntity> ?? ((IEntity?)value)?.ToLite());
+    }
+
     public static EntityComboProxy EntityCombo<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
         return new EntityComboProxy(lineLocator.ElementLocator, lineLocator.Route, lineLocator.Page);
+    }
+
+    public static async Task<V> EntityComboValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lite = await lineContainer.EntityCombo(property).GetLiteValueAsync();
+
+        return lite is V ? (V)lite : (V)(object)lite?.RetrieveAndRemember()!;
+    }
+
+    public static async Task EntityComboValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
+        where T : IModifiableEntity
+    {
+        Lite<IEntity>? lite = value as Lite<IEntity> ?? ((IEntity?)value)?.ToLite();
+        await lineContainer.EntityCombo(property).SetLiteValueAsync(lite);
     }
 
     public static EntityDetailProxy EntityDetail<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
