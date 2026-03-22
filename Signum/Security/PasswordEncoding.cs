@@ -9,18 +9,14 @@ public delegate List<byte[]> HashPasswordAlternativesDelegate(string usernameFor
 public static class PasswordEncoding
 {
 
-    public static HashPasswordDelegate HashPassword = (usernameForSalt, originalPassword) => PBKDF2Hash(originalPassword, usernameForSalt);
+    public static HashPasswordDelegate HashPassword = (usernameForSalt, originalPassword) => PBKDF2Hash(originalPassword, usernameForSalt, 100000);
     public static HashPasswordAlternativesDelegate HashPasswordAlternatives = (usernameForSalt, originalPassword) => new List<byte[]> 
     {
         MD5Hash(originalPassword) // Backwards compatibility only
     };
 
-    public static int PBKDF2Iterations { get; set; } = 100000;
-    public static byte[] PBKDF2Hash(string password, string salt, int iterations = -1)
+    public static byte[] PBKDF2Hash(string password, string salt, int iterations)
     {
-        if (iterations == -1)
-            iterations = PBKDF2Iterations;
-
         return Rfc2898DeriveBytes.Pbkdf2(
             password,
             Encoding.UTF8.GetBytes(salt),
