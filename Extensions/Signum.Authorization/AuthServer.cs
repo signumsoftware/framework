@@ -325,7 +325,7 @@ public static class AuthServer
                     if (error != null)
                         throw new ApplicationException(error);
 
-                    user.PasswordHash = PasswordEncoding.EncodePassword(user.UserName, password);
+                    user.PasswordHash = PasswordEncoding.HashPassword(user.UserName, password);
 
                 }
             }

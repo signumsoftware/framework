@@ -3,33 +3,40 @@ using System.Security.Cryptography;
 
 namespace Signum.Security;
 
-public delegate byte[] EncodePasswordDelegate(string usernameForSalt, string password) ;
-public delegate List<byte[]> EncodePasswordAlternativesDelegate(string usernameForSalt, string password);
+public delegate byte[] HashPasswordDelegate(string usernameForSalt, string password) ;
+public delegate List<byte[]> HashPasswordAlternativesDelegate(string usernameForSalt, string password);
 
 public static class PasswordEncoding
 {
-    public static EncodePasswordDelegate EncodePassword = (usernameForSalt, originalPassword) => MD5Hash(originalPassword);
-    public static EncodePasswordAlternativesDelegate EncodePasswordAlternatives = (usernameForSalt, originalPassword) => new List<byte[]> { EncodePassword(usernameForSalt, originalPassword) };
 
-    public static byte[] MD5Hash(string saltedPassword)
+    public static HashPasswordDelegate HashPassword = (usernameForSalt, originalPassword) => PBKDF2Hash(originalPassword, usernameForSalt);
+    public static HashPasswordAlternativesDelegate HashPasswordAlternatives = (usernameForSalt, originalPassword) => new List<byte[]> 
+    {
+        MD5Hash(originalPassword) // Backwards compatibility only
+    };
+
+    public static int PBKDF2Iterations { get; set; } = 100000;
+    public static byte[] PBKDF2Hash(string password, string salt, int iterations = -1)
+    {
+        if (iterations == -1)
+            iterations = PBKDF2Iterations;
+
+        return Rfc2898DeriveBytes.Pbkdf2(
+            password,
+            Encoding.UTF8.GetBytes(salt),
+            iterations,
+            HashAlgorithmName.SHA256,
+            32 // 256 bits
+        );
+    }
+
+    //Obsolete, for backwards compatibility only. Do not use for new passwords
+    static byte[] MD5Hash(string saltedPassword)
     {
         byte[] originalBytes = Encoding.Default.GetBytes(saltedPassword);
         byte[] encodedBytes = MD5.Create().ComputeHash(originalBytes);
         return encodedBytes;
     }
-
-    public static string GetSHA1(string str)
-    {
-        SHA1 sha1 = SHA1.Create();
-        ASCIIEncoding encoding = new ASCIIEncoding();
-        StringBuilder sb = new StringBuilder();
-        byte[] stream = sha1.ComputeHash(encoding.GetBytes(str));
-        for (int i = 0; i < stream.Length; i++)
-            sb.AppendFormat("{0:x2}", stream[i]);
-        return sb.ToString();
-    }
-
-
 }
 
 public class CryptorEngine

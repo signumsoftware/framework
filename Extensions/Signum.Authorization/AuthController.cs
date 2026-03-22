@@ -24,7 +24,7 @@ public class AuthController : ControllerBase
         try
         {
             if (AuthLogic.Authorizer == null)
-                user = AuthLogic.Login(data.userName, PasswordEncoding.EncodePasswordAlternatives(data.userName, data.password), out authenticationType);
+                user = AuthLogic.Login(data.userName, data.password, out authenticationType);
             else
                 user = AuthLogic.Authorizer.Login(data.userName, data.password, out authenticationType);
         }
@@ -134,11 +134,11 @@ public class AuthController : ControllerBase
         }
         else
         {
-            if (user.PasswordHash == null || !PasswordEncoding.EncodePasswordAlternatives(user.UserName, request.oldPassword).Any(oldPasswordHash => oldPasswordHash.SequenceEqual(user.PasswordHash)))
+            if (user.PasswordHash == null || !PasswordEncoding.HashPasswordAlternatives(user.UserName, request.oldPassword).Any(oldPasswordHash => oldPasswordHash.SequenceEqual(user.PasswordHash)))
                 return ModelError("oldPassword", LoginAuthMessage.InvalidPassword.NiceToString());
         }
 
-        user.PasswordHash = PasswordEncoding.EncodePassword(user.UserName, request.newPassword);
+        user.PasswordHash = PasswordEncoding.HashPassword(user.UserName, request.newPassword);
         user.MustChangePassword = false;
         using (AuthLogic.Disable())
         using (OperationLogic.AllowSave<UserEntity>())
