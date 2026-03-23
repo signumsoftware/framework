@@ -366,8 +366,8 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             f.Solution_RemoveProject(uctx.ApplicationName + ".React");
 
             f.Solution_AddFolder("0.Solution Items");
-            f.Solution_SolutionItem("Directory.Build.props", "0.Solution Items");
-            f.Solution_SolutionItem("Directory.Build.targets", "0.Solution Items");
+            f.Solution_AddSolutionItem("Directory.Build.props", "0.Solution Items");
+            f.Solution_AddSolutionItem("Directory.Build.targets", "0.Solution Items");
 
             var appProject = $"{uctx.ApplicationName}\\{uctx.ApplicationName}.csproj";
             f.Solution_AddProject(appProject, null);

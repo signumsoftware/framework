@@ -1,6 +1,9 @@
+using LibGit2Sharp;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace Signum.Upgrade.Upgrades;
 
@@ -8,16 +11,24 @@ class Upgrade_20260321_SeleniumToPlaywright : CodeUpgradeBase
 {
     public override string Description => "Convert Selenium tests to Playwright by making methods async";
 
-    // Regex to match method declarations with named capturing groups
-    // Assumes method declaration ends with ) on the same line
-    // Excludes generic methods (no < or >)
-    static readonly Regex MethodDeclarationRegex = new Regex(
-        @"^(?<prefix>\s*(?:(?:public|private|protected|internal|static|virtual|override|abstract|sealed)\s+)*)(?<returnType>\w+)(?<rest>\s+\w+\s*\([^)]*\)\s*)$",
-        RegexOptions.Compiled);
+    //language = regex
+    static string identifier = @"[a-zA-Z_][a-zA-Z0-9_.]*";
+
+    //language = regex
+    static string methodDeclaraton = @"^(?>(?<prefix>\s*(?:(?:public|private|protected|internal|static|virtual|override|abstract|sealed|async)\s+)*))(?<returnType>{identifier}(?:<[^>]+>)?)\s+(?<methodName>{identifier})(?<genericParams><[^>]+>)?\s*\((?<params>[^)]*)\)\s*$"
+            .Replace("{identifier}", identifier);
+
+    static readonly Regex MethodDeclarationRegex = new Regex(methodDeclaraton, RegexOptions.Compiled);
 
 
     public override void Execute(UpgradeContext uctx)
     {
+        uctx.ChangeCodeFile("Southwind.sln", file =>
+        {
+            //file.Solution_RemoveProject(@"Framework\Extensions\Signum.Selenium\Signum.Selenium.csproj");
+            file.Solution_AddProject(@"Framework\Extensions\Signum.Playwright\Signum.Playwright.csproj", "2.Extensions");
+        });
+
         // Update project references from Selenium to Playwright
         uctx.ChangeCodeFile(@"Southwind.Test.React\Southwind.Test.React.csproj", file =>
         {
@@ -37,8 +48,9 @@ class Upgrade_20260321_SeleniumToPlaywright : CodeUpgradeBase
             {
                 file.InsertAfterLastLine(l => l.StartsWith("global using"), @"global using Signum.Playwright;
 global using Signum.Playwright.Frames;
-global using Signum.Playwright.LineProxies;
 global using Signum.Playwright.Search;
+global using Signum.Playwright.LineProxies;
+global using Signum.Playwright.ModalProxies;
 global using Microsoft.Playwright;
 global using System.Threading.Tasks;");
             }
@@ -48,50 +60,96 @@ global using System.Threading.Tasks;");
         uctx.ChangeCodeFile(@"Southwind.Test.React\Common.cs", file =>
         {
             file.Replace(
-    new Regex(@"public static void Browse\(string username, Action<(?<br>\w+)> action)"),
+    new Regex(@"public static void Browse\(string username, Action<(?<br>\w+)> action\)"),
     @"public static async Task BrowseAsync(string username, Func<${br}, Task> action)");
 
             SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Common.BrowseAsync requires manual convertion! check Southwind code");
 
         }, WarningLevel.Warning);
 
+        uctx.ForeachCodeFile(@"*.cs", uctx.TestReactDirectory, file =>
+        {
+            file.ProcessLines(lines =>
+            {
+                bool changed = false;
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    var line = SimpleTypeReplacements(lines[i]);
+                    if (line != lines[i])
+                    {
+                        lines[i] = line;
+                        changed = true;
+                    }
+                }
+                return changed;
+            });
+        });
+
+        ConvertToAsyncPlaywright(uctx, isTest: false);
+        ConvertToAsyncPlaywright(uctx, isTest: true);
+    }
+
+    private void ConvertToAsyncPlaywright(UpgradeContext uctx, bool isTest)
+    {
         // Process all C# files to convert methods to async
         uctx.ForeachCodeFile(@"*.cs", uctx.TestReactDirectory, file =>
         {
-            file.ReplaceBetween(
-                new(l => MethodDeclarationRegex.IsMatch(l), 0),
+            file.ReplaceBetweenAll(
+                new(l => MethodDeclarationRegex.IsMatch(l) && !l.Contains("async"), 0),
                 new(l => l.Contains("}"), 0) { SameIdentation = true },
-                oldText =>
+                (oldText, ctx) =>
                 {
-                    var lines = oldText.Split('\n').ToList();
+                    var lines = oldText.Lines();
 
-                    if (lines.Count < 4)
+                    if (!(lines is [var methodDeclaration, ..var parametersBraceAndBody, var closeBrace]))
+                    {
+                        SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Unexpected method format, skipping: " + lines[1]);
+                        return oldText;
+                    }
+                    var pre = ctx.lines[ctx.from - 1];
+                    if (isTest != (pre.Contains("[Test]") || pre.Contains("[Fact]")))
                         return oldText;
 
-                    if (lines[1].Trim() != "{" || lines[lines.Count - 1].Trim() != "}")
-                        return oldText;
+                    var openBraceIndex = parametersBraceAndBody.IndexOf(a => a.Trim() == "{");
 
-                    var body = lines.Skip(2).Take(lines.Count - 3).ToList();
+                    if(openBraceIndex == -1)
+                    {
+                        SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Could not find opening brace, skipping: " + lines[1]);
+                        return oldText;
+                    }
+
+                    var parameters = parametersBraceAndBody[..openBraceIndex];
+                    var openBrace = parametersBraceAndBody[openBraceIndex];
+                    var body = parametersBraceAndBody[(openBraceIndex + 1)..];
 
                     var newBody = body.Select(line => ToAsyncMethod(line)).ToList();
 
                     if (body.SequenceEqual(newBody))
                         return oldText;
 
-                    var methodDeclaration = lines[0];
+                    var newMethodDeclaration = ConvertMethodSignatureToAsync(methodDeclaration, out var oldMethodName);
 
-                    var indent = CodeFile.GetIndent(methodDeclaration);
+                    if(oldMethodName == "SearchPageInBelegerfassungAsync")
+                    {
 
-                    var newMEthodDeclaration = indent + ConvertMethodSignatureToAsync(methodDeclaration);
+                    }
+
+                    if(!isTest)
+                    {
+                        MethodsToConvertAsync.Add(oldMethodName);
+                    }
 
                     string[] newLines = [
-                        newMEthodDeclaration,
-                        lines[1],
+                        newMethodDeclaration,
+                        ..parameters,
+                        openBrace,
                         ..newBody,
-                        lines[lines.Count - 1]
+                        closeBrace
                         ];
 
-                    return newLines.ToString("\n");
+                    var result = newLines.ToString("\n");
+
+                    return result;
                 });
         });
     }
@@ -111,7 +169,7 @@ global using System.Threading.Tasks;");
         "WaitElementNotPresent",
         "WaitElementNotVisible",
         "WaitInitialSearchCompleted",
-
+        "WaitReload",
         // Assert Methods
         "AssertPresent",
         "AssertNotPresent",
@@ -141,7 +199,7 @@ global using System.Threading.Tasks;");
         "SetChecked",
 
         // Selection Methods
-        "Select",
+        //"Select",
         "SelectLabel",
         "SelectByValue",
         "SelectByPredicate",
@@ -163,6 +221,7 @@ global using System.Threading.Tasks;");
         "View",
         "Find",
         "Create",
+        "CreateInPlace",
         "Remove",
         "AutoComplete",
         "AutoCompleteBasic",
@@ -182,6 +241,11 @@ global using System.Threading.Tasks;");
         "TextBoxLineValue",
         "TimeLineValue",
         "AutoLineValue",
+        "EntityLineValue",
+        "EntityComboValue",
+        "WaitRefresh",
+        "WaitChanges",
+        "WaitLoaded",
 
         // Line Container Methods - Checks
         "IsVisible",
@@ -213,45 +277,165 @@ global using System.Threading.Tasks;");
         "Execute",
         "ExecuteClick",
 
+        "ConstructFrom",
+        "ConstructFromMany",
+
         // Authentication Methods
         "Login",
         "Logout",
         "GetCurrentUser",
         "SetCurrentCulture",
 
+        "SelectClick",
+        "WaitSearchCompleted",
+        "WaitInitialSearchCompleted",
+        "AddQuickFilter",
+
         // Popup/Modal Capture
         "CapturePopup",
         "CaptureManyPopup",
+
+        "SelectRow",
+        "SelectRow",
+        "SelectAllRows",
+        "SelectAndCapture",
+        "OperationClickCapture",
+        "Wait",
+
+        "ToggleFilters",
+
+        "EntityContextMenu",
+        "OkWaitFrameModal",
+        "SelectIndex",
+        "GetColumnIndex",
+        "AllRows",
+        "GetValueUntyped",
+
     };
 
+    static Dictionary<string, string> CustomMethodReplacements = new Dictionary<string, string>
+    {
+        { "AsMessageModal", "Await_AsMessageModal" },
+        { "AsSearchModal", "Await_AsSearchModal" },
+        { "AsFrameModal", "Await_AsFrameModal" },
+    };
 
     private string ToAsyncMethod(string line)
     {
         var result = line;
 
         // Simple type replacements (Selenium -> Playwright)
-        result = SimpleTypeReplacements(result);
+        result = SimpleAsyncReplacements(result);
 
         // 1. Browse("xxx", -> await Browse("xxx", async
-        result = Regex.Replace(result, @"\bBrowse\s*\(", "await BrowseAsync(", RegexOptions.None);
+        result = Regex.Replace(result, @"\bBrowse\s*\(\s*""(?<user>[^""]+)""\s*, ", @"await BrowseAsync(""${user}"", async ", RegexOptions.None);
 
         // 2. Using( -> .UsingAsync(async
-        result = Regex.Replace(result, @"\b\.Using\s*\(", ".UsingAsync(async ", RegexOptions.None);
+        result = Regex.Replace(result, @"\.Using\s*\(", ".Await_UsingAsync(async ", RegexOptions.None);
+
+        result = Regex.Replace(result, @"\.Do\s*\(", ".Await_DoAsync(async ", RegexOptions.None);
+        result = Regex.Replace(result, @"\.WaitRefresh\s*\(", ".WaitRefreshAsync(async ", RegexOptions.None);
 
         // 3. EndUsing( -> .EndUsingAsync(async
-        result = Regex.Replace(result, @"\b\.EndUsing\s*\(", ".EndUsingAsync(async ", RegexOptions.None);
+        result = Regex.Replace(result, @"\.EndUsing\s*\(", ".Await_EndUsingAsync(async ", RegexOptions.None);
 
         // 4. xxxxx.SomeMethod( -> await xxxxx.SomeMethodAsync(
         // Build a single regex pattern with all method names using alternation (|)
-        var methodNamesPattern = string.Join("|", MethodsToConvertAsync.Select(Regex.Escape));
-        var pattern = $@"(?<expr>(?:\w+|\([^)]*\))+)\.(?<method>{methodNamesPattern})\s*\(";
 
-        result = Regex.Replace(result, pattern, m =>
+
+        foreach (var first in Regex.Matches(result, @"\b\w+(?=\()").Where(m => MethodsToConvertAsync.Contains(m.Value) || CustomMethodReplacements.ContainsKey(m.Value)).ToList())
         {
-            var expr = m.Groups["expr"].Value;
-            var method = m.Groups["method"].Value;
-            return $"await {expr}.{method}Async(";
-        });
+            if(first.Name == "EntityClickInPlaceAsync" || first.Name == "OkWaitFrameModal")
+            {
+
+            }
+
+            var pattern = new Regex(expr + "?" + $@"(?<method>{first.Value})\s*(?<genericParams><[^>]+>)?\s*\(");
+
+            var newResult = pattern.Replace(result, m =>
+            {
+                var expr = m.Groups["expr"].Value;
+                var method = m.Groups["method"].Value;
+                var genericParams = m.Groups["genericParams"].Value;
+
+                var newMethod = CustomMethodReplacements.TryGetC(method) ?? method + "Async";
+
+                if (expr.Trim() == "" && result.Contains("." + m.Value))
+                    return $"{newMethod}{genericParams}(";
+
+                return $"await {expr}{newMethod}{genericParams}(";
+            });
+
+            if(result == newResult)
+            {
+                
+            }
+            else
+            {
+                result = newResult;
+            }
+        }
+
+        if (line == result)
+            return line;
+
+        return result;
+    }
+
+    static Dictionary<string, string> propertyToMethod = new Dictionary<string, string>
+    {
+        { "Text", "TextContentAsync" },
+        { "Displayed", "IsVisibleAsync" },
+        { "Enabled", "IsEnabledAsync" },
+        { "Selected", "IsCheckedAsync" },
+    };
+
+    static Dictionary<string, string> methodToMethod = new Dictionary<string, string>
+    {
+        { "SendKeys", "FillAsync" },
+        { "Click", "ClickAsync" },
+        { "GetAttribute", "GetAttributeAsync" },
+        { "GetDomAttribute", "GetAttributeAsync" },
+        { "GetDomProperty", "GetAttributeAsync" },
+    };
+
+    // language=regex
+    static string parens = @"(?:\((?>(?:[^()]+|(?<open>\()|(?<-open>\))))*(?(open)(?!))\))";
+
+    // language=regex
+    static string generic = @"(?:<[^>]+>)";
+
+    // language=regex
+    static string expr = @"(?<expr>(new )?\b{identifier}{generic}?{parens}?(?:!?\.{identifier}{generic}?{parens}?)*!?\.)"
+        .Replace("{generic}", generic)
+        .Replace("{parens}", parens)
+        .Replace("{identifier}", identifier);
+
+    private string SimpleAsyncReplacements(string line)
+    {
+        var result = line;
+
+
+        foreach (var kvp in propertyToMethod)
+        {
+            if (line.Contains(kvp.Key))
+                result = Regex.Replace(result, expr + @$"{kvp.Key}\b", @"await ${expr}" + kvp.Value + "()", RegexOptions.None);
+        }
+
+
+        foreach (var kvp in methodToMethod)
+        {
+            if (line.Contains(kvp.Key))
+                result = Regex.Replace(result, expr + @$"{kvp.Key}\(", @"await ${expr}" + kvp.Value + "(", RegexOptions.None);
+        }
+
+        // Clear -> Fill with empty string
+        if (line.Contains("Clear"))
+            result = Regex.Replace(result, expr + @"Clear\(\)", ".FillAsync(\"\")", RegexOptions.None);
+
+        if (line.Contains("Url"))
+            result = Regex.Replace(result, expr + @"Url\s+=\s+(?<url>[^;]+);", "await ${expr}GotoAsync(${url});", RegexOptions.None);
+
 
         return result;
     }
@@ -261,6 +445,9 @@ global using System.Threading.Tasks;");
         var result = line;
 
         // Core Selenium types -> Playwright types
+        result = Regex.Replace(result, @"\Selenium\b", "Page", RegexOptions.None);
+
+        result = Regex.Replace(result, @"\bWebElementLocator\b", "ILocator", RegexOptions.None);
         result = Regex.Replace(result, @"\bIWebElement\b", "ILocator", RegexOptions.None);
         result = Regex.Replace(result, @"\bWebDriver\b", "IPage", RegexOptions.None);
         result = Regex.Replace(result, @"\bIWebDriver\b", "IPage", RegexOptions.None);
@@ -281,41 +468,26 @@ global using System.Threading.Tasks;");
         result = Regex.Replace(result, @"\.FindElement\(", ".Locator(", RegexOptions.None);
         result = Regex.Replace(result, @"\.FindElements\(", ".Locator(", RegexOptions.None);
 
-        // Common Selenium properties -> Playwright equivalents
-        result = Regex.Replace(result, @"\.Text\b", ".TextContentAsync()", RegexOptions.None);
-        result = Regex.Replace(result, @"\.Displayed\b", ".IsVisibleAsync()", RegexOptions.None);
-        result = Regex.Replace(result, @"\.Enabled\b", ".IsEnabledAsync()", RegexOptions.None);
-        result = Regex.Replace(result, @"\.Selected\b", ".IsCheckedAsync()", RegexOptions.None);
+        result = Regex.Replace(result, @"\.GetDriver\(\)", ".Page", RegexOptions.None);
 
-        // SendKeys -> Fill
-        result = Regex.Replace(result, @"\.SendKeys\(", ".FillAsync(", RegexOptions.None);
-
-        // Click (simple standalone) -> ClickAsync
-        result = Regex.Replace(result, @"\.Click\(\)", ".ClickAsync()", RegexOptions.None);
-
-        // Clear -> Fill with empty string
-        result = Regex.Replace(result, @"\.Clear\(\)", ".FillAsync(\"\")", RegexOptions.None);
-
-        // Submit -> PressAsync("Enter")
-        result = Regex.Replace(result, @"\.Submit\(\)", ".PressAsync(\"Enter\")", RegexOptions.None);
-
-        // GetAttribute -> GetAttributeAsync
-        result = Regex.Replace(result, @"\.GetAttribute\(", ".GetAttributeAsync(", RegexOptions.None);
-        result = Regex.Replace(result, @"\.GetDomAttribute\(", ".GetAttributeAsync(", RegexOptions.None);
-        result = Regex.Replace(result, @"\.GetDomProperty\(", ".GetAttributeAsync(", RegexOptions.None);
+     
 
         return result;
     }
 
-    string ConvertMethodSignatureToAsync(string firstLine)
+    string ConvertMethodSignatureToAsync(string firstLine, out string oldMethodName)
     {
         var match = MethodDeclarationRegex.Match(firstLine);
         if (!match.Success)
-            return firstLine;
+            throw new InvalidOperationException("Unexpected method declaration format: " + firstLine);
 
         var prefix = match.Groups["prefix"].Value;
         var returnType = match.Groups["returnType"].Value;
-        var rest = match.Groups["rest"].Value;
+        var methodName = match.Groups["methodName"].Value;
+        var genericParams = match.Groups["genericParams"].Value; // Can be empty string
+        var parameters = match.Groups["params"].Value;
+
+        oldMethodName = methodName;
 
         // Convert return type to async Task or async Task<T>
         string newReturnType;
@@ -328,23 +500,15 @@ global using System.Threading.Tasks;");
             newReturnType = $"async Task<{returnType}>";
         }
 
-        // Extract method name and add "Async" suffix if it doesn't end with "Test"
-        var methodNameMatch = Regex.Match(rest, @"^(\s+)(\w+)(\s*\([^)]*\)\s*)$");
-        if (methodNameMatch.Success)
+        // Add "Async" suffix to method name if it doesn't end with "Test"
+        string newMethodName = methodName;
+        if (!methodName.EndsWith("Test"))
         {
-            var beforeName = methodNameMatch.Groups[1].Value;
-            var methodName = methodNameMatch.Groups[2].Value;
-            var afterName = methodNameMatch.Groups[3].Value;
-
-            if (!methodName.EndsWith("Test"))
-            {
-                methodName = methodName + "Async";
-            }
-
-            rest = beforeName + methodName + afterName;
+            newMethodName = methodName + "Async";
         }
 
-        return $"{prefix}{newReturnType}{rest}";
+        // Reconstruct the method signature
+        return $"{prefix}{newReturnType} {newMethodName}{genericParams}({parameters})";
     }
 
 }
