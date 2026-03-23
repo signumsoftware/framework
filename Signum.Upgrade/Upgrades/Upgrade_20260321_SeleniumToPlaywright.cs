@@ -84,9 +84,14 @@ global using System.Threading.Tasks;");
                 return changed;
             });
         });
-
+        
         ConvertToAsyncPlaywright(uctx, isTest: false);
         ConvertToAsyncPlaywright(uctx, isTest: true);
+
+        uctx.ForeachCodeFile(@"*.cs", uctx.TestReactDirectory, file =>
+        {
+            file.Replace(new Regex(/*language = regex*/@"async\s+(?<var>{identifier})\s*=>\s+await".Replace("{identifier}", identifier)), "${var} => ");
+        });
     }
 
     private void ConvertToAsyncPlaywright(UpgradeContext uctx, bool isTest)
@@ -129,11 +134,6 @@ global using System.Threading.Tasks;");
 
                     var newMethodDeclaration = ConvertMethodSignatureToAsync(methodDeclaration, out var oldMethodName);
 
-                    if(oldMethodName == "SearchPageInBelegerfassungAsync")
-                    {
-
-                    }
-
                     if(!isTest)
                     {
                         MethodsToConvertAsync.Add(oldMethodName);
@@ -164,10 +164,7 @@ global using System.Threading.Tasks;");
         "WaitNotVisible",
         "WaitNoPresent",
         "WaitNoVisible",
-        "WaitElementPresent",
-        "WaitElementVisible",
-        "WaitElementNotPresent",
-        "WaitElementNotVisible",
+
         "WaitInitialSearchCompleted",
         "WaitReload",
         // Assert Methods
@@ -300,7 +297,6 @@ global using System.Threading.Tasks;");
         "SelectAllRows",
         "SelectAndCapture",
         "OperationClickCapture",
-        "Wait",
 
         "ToggleFilters",
 
@@ -318,6 +314,11 @@ global using System.Threading.Tasks;");
         { "AsMessageModal", "Await_AsMessageModal" },
         { "AsSearchModal", "Await_AsSearchModal" },
         { "AsFrameModal", "Await_AsFrameModal" },
+        { "WaitElementPresent", "WaitPresentAsync" },
+        { "WaitElementVisible", "WaitVisibleAsync" },
+        { "WaitElementNotPresent", "WaitNoPresentAsync"},
+        { "WaitElementNotVisible", "WaitNoVisibleAsync" },
+        { "SafeSendKeys", "SafeFillAsync" }
     };
 
     private string ToAsyncMethod(string line)
@@ -339,17 +340,17 @@ global using System.Threading.Tasks;");
         // 3. EndUsing( -> .EndUsingAsync(async
         result = Regex.Replace(result, @"\.EndUsing\s*\(", ".Await_EndUsingAsync(async ", RegexOptions.None);
 
+        result = Regex.Replace(result, @"\.Wait\s*\(", ".WaitAsync(async ", RegexOptions.None);
+
+
+
+
         // 4. xxxxx.SomeMethod( -> await xxxxx.SomeMethodAsync(
         // Build a single regex pattern with all method names using alternation (|)
 
 
-        foreach (var first in Regex.Matches(result, @"\b\w+(?=\()").Where(m => MethodsToConvertAsync.Contains(m.Value) || CustomMethodReplacements.ContainsKey(m.Value)).ToList())
+        foreach (var first in Regex.Matches(result, @"\b\w+(?=[<(])").Where(m => MethodsToConvertAsync.Contains(m.Value) || CustomMethodReplacements.ContainsKey(m.Value)).ToList())
         {
-            if(first.Name == "EntityClickInPlaceAsync" || first.Name == "OkWaitFrameModal")
-            {
-
-            }
-
             var pattern = new Regex(expr + "?" + $@"(?<method>{first.Value})\s*(?<genericParams><[^>]+>)?\s*\(");
 
             var newResult = pattern.Replace(result, m =>
@@ -444,8 +445,10 @@ global using System.Threading.Tasks;");
     {
         var result = line;
 
+
+
         // Core Selenium types -> Playwright types
-        result = Regex.Replace(result, @"\Selenium\b", "Page", RegexOptions.None);
+        result = Regex.Replace(result, @"\bSelenium\b", "Page", RegexOptions.None);
 
         result = Regex.Replace(result, @"\bWebElementLocator\b", "ILocator", RegexOptions.None);
         result = Regex.Replace(result, @"\bIWebElement\b", "ILocator", RegexOptions.None);
@@ -470,7 +473,9 @@ global using System.Threading.Tasks;");
 
         result = Regex.Replace(result, @"\.GetDriver\(\)", ".Page", RegexOptions.None);
 
-     
+        result = Regex.Replace(result, @"\.(?<method>WaitElementPresent|WaitElementVisible)\s*\(\s*""(?<loc>(?>[^""]*))""\s*\)", @".Locator(""${loc}"").${method}()", RegexOptions.None);
+
+        result = Regex.Replace(result, @"\b(Find|WaitPresent|WaitVisible|WaitElementVisible|WaitElementPresent)\(\)\s*\.\s*(?<method>(Click|SafeSendKeys|CaptureOnClick))\s*\(", "${method}(", RegexOptions.None);
 
         return result;
     }

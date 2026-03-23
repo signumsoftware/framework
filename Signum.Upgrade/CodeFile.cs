@@ -311,11 +311,11 @@ public class CodeFile
                 {
                     var newLines = text.Lines().Select(a => IndentAndReplace(a, "")).ToList();
                     lines.InsertRange(from, newLines);
-                    currentIndex = from + newLines.Count + 1;
+                    currentIndex = from + newLines.Count;
                 }
                 else
                 {
-                    currentIndex = from + 1;
+                    currentIndex = from;
                 }
             }
         });
