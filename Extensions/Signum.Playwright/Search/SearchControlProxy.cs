@@ -1,6 +1,7 @@
 using Microsoft.Playwright;
 using Signum.Playwright.Frames;
 using Signum.Playwright.ModalProxies;
+using Signum.Utilities.Synchronization;
 
 namespace Signum.Playwright.Search;
 
@@ -9,17 +10,23 @@ public class SearchControlProxy
     public ILocator Element { get; private set; }
     public ResultTableProxy Results { get; private set; }
 
-    public async Task<object> QueryNameAsync() => QueryLogic.ToQueryName((await Element.GetAttributeAsync("data-query-key"))!);
+    public object QueryName { get; private set; }
 
-    public async Task<FiltersProxy> GetFiltersAsync() => new FiltersProxy(FiltersPanel, await QueryNameAsync());
-    public ColumnEditorProxy ColumnEditor() => new ColumnEditorProxy(Element.Locator(".sf-column-editor"));
-
+    public FiltersProxy Filters => new FiltersProxy(FiltersPanel, QueryName);
+    public ColumnEditorProxy ColumnEditor => new ColumnEditorProxy(Element.Locator(".sf-column-editor"));
     public PaginationSelectorProxy Pagination => new PaginationSelectorProxy(this);
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public SearchControlProxy(ILocator element)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     {
         Element = element;
         Results = new ResultTableProxy(Element.Locator(".sf-scroll-table-container"), this);
+    }
+
+    public async Task Initialize()
+    {
+        QueryName = QueryLogic.ToQueryName((await Element.GetAttributeAsync("data-query-key"))!);
     }
 
     public ILocator SearchButton => Element.Locator(".sf-query-button.sf-search");
@@ -91,8 +98,7 @@ public class SearchControlProxy
         var menuItem = ContextualMenu.Locator(".sf-quickfilter-header a");
         await menuItem.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
 
-        var filters = await GetFiltersAsync();
-        var filterProxy = await filters.GetNewFilterAsync(async () => await menuItem.ClickAsync());
+        var filterProxy = await this.Filters.GetNewFilterAsync(() => menuItem.ClickAsync());
 
         return (FilterConditionProxy)filterProxy;
     }
@@ -102,8 +108,7 @@ public class SearchControlProxy
         await Results.HeaderCellElement(token).ClickAsync(new() { Button = MouseButton.Right });
         var menuItem = ContextualMenu.Locator(".sf-quickfilter-header a");
         await menuItem.WaitForAsync();
-        var filters = await GetFiltersAsync();
-        var FilterProxy = await filters.GetNewFilterAsync(async () => await menuItem.ClickAsync());
+        var FilterProxy = await this.Filters.GetNewFilterAsync(() => menuItem.ClickAsync());
         return (FilterConditionProxy)FilterProxy;
     }
 

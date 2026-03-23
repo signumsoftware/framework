@@ -46,8 +46,10 @@ public class EntityContextMenuProxy
 
         var modal = Operation(constructSymbol).WaitVisible(scrollTo).CaptureOnClick();
 
-        var result = new FrameModalProxy<T>(modal);
-        result.Disposing += okPressed => check();
+        var result = new FrameModalProxy<T>(modal)
+        {
+           Disposing = okPressed => check()
+        };
 
         return result;
     }

@@ -8,16 +8,21 @@ public class SearchModalProxy : ModalProxy
 {
     public SearchControlProxy SearchControl { get; private set; }
     public ResultTableProxy Results => SearchControl.Results;
-    public Task<FiltersProxy> GetFiltersAsync() => SearchControl.GetFiltersAsync();
+    public FiltersProxy Filters => SearchControl.Filters;
     public PaginationSelectorProxy Pagination => SearchControl.Pagination;
 
-    public SearchModalProxy(ILocator element, bool waitInitialSearch = true)
+    public SearchModalProxy(ILocator element)
         : base(element)
     {
         this.SearchControl = new SearchControlProxy(element.Locator(".sf-search-control"));
+    }
 
-        if (waitInitialSearch)
-            this.SearchControl.WaitInitialSearchCompletedAsync().GetAwaiter().GetResult();
+    public async Task Initialize( bool waitInitialSearch)
+    {
+        await SearchControl.Initialize();
+
+        if(waitInitialSearch)
+            await SearchControl.WaitInitialSearchCompletedAsync();
     }
 
     public async Task SelectLiteAsync(Lite<IEntity> lite)
@@ -25,8 +30,7 @@ public class SearchModalProxy : ModalProxy
         if (!await this.SearchControl.FiltersVisibleAsync())
             await this.SearchControl.ToggleFiltersAsync(true);
 
-        var filters = await this.SearchControl.GetFiltersAsync();
-        await filters.AddFilterAsync("Entity.Id", FilterOperation.EqualTo, lite.Id);
+        await this.SearchControl.Filters.AddFilterAsync("Entity.Id", FilterOperation.EqualTo, lite.Id);
 
         await this.SearchControl.SearchAsync();
 
@@ -57,8 +61,7 @@ public class SearchModalProxy : ModalProxy
         if (!await this.SearchControl.FiltersVisibleAsync())
             await this.SearchControl.ToggleFiltersAsync(true);
 
-        var filters = await this.SearchControl.GetFiltersAsync();
-        await filters.AddFilterAsync("Entity.Id", FilterOperation.EqualTo, id);
+        await this.SearchControl.Filters.AddFilterAsync("Entity.Id", FilterOperation.EqualTo, id);
         await this.SearchControl.SearchAsync();
 
         await this.Results.SelectRowAsync(0);
@@ -110,8 +113,17 @@ public class SearchModalProxy : ModalProxy
 
 public static class SearchModalExtensions
 {
-    public static SearchModalProxy AsSearchModal(this ILocator modal, bool waitInitialSearch = true)
+    public static async Task<SearchModalProxy> Await_AsSearchModal(this Task<ILocator> modal, bool waitInitialSearch = true)
     {
-        return new SearchModalProxy(modal, waitInitialSearch);
+        var result = new SearchModalProxy(await modal);
+        await result.Initialize(waitInitialSearch);
+        return result;
+    }
+
+    public static async Task<SearchModalProxy> AsSearchModal(this ILocator modal, bool waitInitialSearch = true)
+    {
+         var result = new SearchModalProxy(modal);
+        await result.Initialize(waitInitialSearch);
+        return result;
     }
 }

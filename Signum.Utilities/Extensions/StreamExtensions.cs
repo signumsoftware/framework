@@ -156,39 +156,7 @@ public static class StreamExtensions
 
 
     [DebuggerStepThrough]
-    public static async Task<R> UsingAsync<T, R>(this T disposable, Func<T, Task<R>> function)
-    where T : IDisposable
-    {
-        //using (disposable)
-        //    return function(disposable);
-
-        try
-        {
-            return await function(disposable);
-        }
-        catch (Exception e)
-        {
-
-            if (disposable is IDisposableException de)
-                de.OnException(e);
-
-            throw;
-        }
-        finally
-        {
-            if (disposable != null)
-            {
-                // Prefer async disposal if available
-                if (disposable is IAsyncDisposable asyncDisposable)
-                    await asyncDisposable.DisposeAsync();
-                else
-                    disposable.Dispose();
-            }
-        }
-    }
-
-    [DebuggerStepThrough]
-    public static async Task<R> UsingAsync<T, R>(this Task<T> task, Func<T, Task<R>> function)
+    public static async Task<R> Await_UsingAsync<T, R>(this Task<T> task, Func<T, Task<R>> function)
     where T : IDisposable
     {
         //using (disposable)
@@ -221,6 +189,39 @@ public static class StreamExtensions
             }
         }
     }
+
+    [DebuggerStepThrough] // The D means Direct or Disposable, only there to avoid ambiguities with UsingAsync
+    public static async Task<R> UsingAsync<T, R>(this T disposable, Func<T, Task<R>> function)
+    where T : IDisposable
+    {
+        //using (disposable)
+        //    return function(disposable);
+
+        try
+        {
+            return await function(disposable);
+        }
+        catch (Exception e)
+        {
+
+            if (disposable is IDisposableException de)
+                de.OnException(e);
+
+            throw;
+        }
+        finally
+        {
+            if (disposable != null)
+            {
+                // Prefer async disposal if available
+                if (disposable is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync();
+                else
+                    disposable.Dispose();
+            }
+        }
+    }
+
 
 
 
@@ -277,7 +278,7 @@ public static class StreamExtensions
     }
 
     [DebuggerStepThrough]
-    public static async Task EndUsingAsync<T>(this Task<T> task, Func<T, Task> action)
+    public static async Task Await_EndUsingAsync<T>(this Task<T> task, Func<T, Task> action)
         where T : IDisposable
     {
         var disposable = await task;

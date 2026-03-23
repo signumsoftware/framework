@@ -49,13 +49,14 @@ public class ModalProxy : IDisposable, IAsyncDisposable
             await WaitForCloseAsync();
         }
 
-        Disposing?.Invoke(OkPressed);
+        if (Disposing != null)
+            await Disposing(OkPressed);
 
         if (AfterClose != null)
             await AfterClose();
     }
 
-    public Action<bool>? Disposing;
+    public Func<bool, Task>? Disposing;
 
     public ILocator OkButton =>
         Modal.Locator(".sf-entity-button.sf-ok-button");

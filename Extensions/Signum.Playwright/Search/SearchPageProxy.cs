@@ -9,7 +9,7 @@ public class SearchPageProxy : IDisposable, IAsyncDisposable
     public IPage Page { get; private set; }
     public SearchControlProxy SearchControl { get; private set; }
     public ResultTableProxy Results => SearchControl.Results;
-    public Task<FiltersProxy> GetFiltersAsync => SearchControl.GetFiltersAsync();
+    public FiltersProxy Filters => SearchControl.Filters;
     public PaginationSelectorProxy Pagination => SearchControl.Pagination;
 
     public SearchPageProxy(IPage page)

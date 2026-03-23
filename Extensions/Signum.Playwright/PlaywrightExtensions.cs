@@ -402,6 +402,11 @@ public static class PlaywrightExtensions
         return await button.Page.CaptureModalAsync(async () => await button.ClickAsync());
     }
 
+    public static async Task<ILocator> CaptureOnDoubleClickAsync(this ILocator button)
+    {
+        return await button.Page.CaptureModalAsync(async () => await button.DoubleClickAsync());
+    }
+
     #endregion
 
     #region Disabled/Readonly Checks

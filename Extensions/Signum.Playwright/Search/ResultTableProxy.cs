@@ -63,7 +63,7 @@ public class ResultTableProxy
     public async Task SelectRowAsync(int rowIndex)
         => await RowElement(rowIndex).SelectedCheckbox.ClickAsync();
 
-    public async Task SelectRowAsync(params int[] indexes)
+    public async Task SelectRowsAsync(params int[] indexes)
     {
         foreach (var i in indexes)
             await SelectRowAsync(i);
@@ -71,6 +71,14 @@ public class ResultTableProxy
 
     public async Task SelectRowAsync(Lite<IEntity> lite)
         => await RowElement(lite).SelectedCheckbox.ClickAsync();
+
+
+    public async Task SelectAllRowsAsync()
+    {
+        var rowCount = await RowsCountAsync();  
+
+        await SelectRowsAsync(0.To(rowCount).ToArray());
+    }
 
     // ---------------- CELLS ----------------
 
@@ -166,12 +174,28 @@ public class ResultTableProxy
 
     // ---------------- ENTITY CLICK ----------------
 
+    public async Task<FrameModalProxy<T>> EntityClickAsync<T>(int rowIndex)
+    where T : Entity
+    {
+        var link = await EntityLinkAsync(rowIndex);
+        var popup = await link.CaptureOnClickAsync();
+        return new FrameModalProxy<T>(popup);
+    }
+
     public async Task<FrameModalProxy<T>> EntityClickAsync<T>(Lite<T> lite)
         where T : Entity
     {
         var link = await EntityLinkAsync(lite);
         var popup = await link.CaptureOnClickAsync();
         return new FrameModalProxy<T>(popup);
+    }
+
+    public async Task<FramePageProxy<T>> EntityClickInPlaceAsync<T>(int rowIndex)
+    where T : Entity
+    {
+        var link = await EntityLinkAsync(rowIndex);
+        await link.ClickAsync();
+        return new FramePageProxy<T>(this.Element.Page);
     }
 
     public async Task<FramePageProxy<T>> EntityClickInPlaceAsync<T>(Lite<T> lite)
@@ -186,6 +210,12 @@ public class ResultTableProxy
     {
         var col = await GetColumnIndexAsync("Entity");
         return RowElement(lite).EntityLink(col);
+    }
+
+    public async Task<ILocator> EntityLinkAsync(int rowIndex)
+    {
+        var col = await GetColumnIndexAsync("Entity");
+        return RowElement(rowIndex).EntityLink(col);
     }
 
     // ---------------- CONTEXT MENU ----------------

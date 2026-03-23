@@ -263,6 +263,11 @@ styles ?? DateTimeStyles.None, out DateTime result))
         return func(t);
     }
 
+    public static async Task<R> Await_Let<T, R>(this Task<T> t, Func<T, R> func)
+    {
+        return func(await t); 
+    }
+
     public delegate R? TryCC<T, R>(T val) where T : class where R : class;
     public static R? Try<T, R>(this T? t, TryCC<T, R> func) where T : class where R : class
     {
@@ -326,7 +331,7 @@ styles ?? DateTimeStyles.None, out DateTime result))
         return t;
     }
 
-    public static async Task<T> DoAsync<T>(this Task<T> task, Func<T, Task> action)
+    public static async Task<T> Await_DoAsync<T>(this Task<T> task, Func<T, Task> action)
     {
         var t = await task;
         await action(t);

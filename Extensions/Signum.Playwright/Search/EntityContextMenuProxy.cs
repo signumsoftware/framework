@@ -27,7 +27,7 @@ public class EntityContextMenuProxy
         return new SearchModalProxy(popup);
     }
 
-    public async Task ExecuteClickAsync<T>(
+    public async Task ExecuteAsync<T>(
         ExecuteSymbol<T> executeSymbol,
         bool consumeConfirmation = false,
         bool shouldDisappear = false,
@@ -62,8 +62,9 @@ public class EntityContextMenuProxy
         bool shouldDisappear = false,
         Func<EntityContextMenuProxy, Func<Task>>? customCheck = null,
         bool scrollTo = false
-    ) where F : Entity
-      where T : Entity
+        ) 
+        where F : Entity
+        where T : Entity
     {
         var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheckAsync(shouldDisappear);
 
@@ -73,17 +74,39 @@ public class EntityContextMenuProxy
         var modal = await modalLocator.CaptureOnClickAsync();
 
         var result = new FrameModalProxy<T>(modal);
-        result.Disposing += async okPressed => await check();
+        result.Disposing += okPressed => check();
 
         return result;
     }
 
-    public async Task DeleteClickAsync(
-    IOperationSymbolContainer symbolContainer,
-    bool consumeConfirmation = true,
-    bool shouldDisappear = true,
-    Func<EntityContextMenuProxy, Func<Task>>? customCheck = null,
-    bool scrollTo = false)
+    public async Task<FrameModalProxy<T>> ConstructFromManyAsync<F, T>(
+        ConstructSymbol<T>.FromMany<F> constructSymbol,
+        bool shouldDisappear = false,
+        Func<EntityContextMenuProxy, Func<Task>>? customCheck = null,
+        bool scrollTo = false
+        )
+        where F : Entity
+        where T : Entity
+    {
+        var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheckAsync(shouldDisappear);
+
+        var modalLocator = Operation(constructSymbol);
+        if (scrollTo)
+            await modalLocator.ScrollIntoViewIfNeededAsync();
+        var modal = await modalLocator.CaptureOnClickAsync();
+
+        var result = new FrameModalProxy<T>(modal);
+        result.Disposing += okPressed => check();
+
+        return result;
+    }
+
+    public async Task DeleteAsync(
+        IOperationSymbolContainer symbolContainer,
+        bool consumeConfirmation = true,
+        bool shouldDisappear = true,
+        Func<EntityContextMenuProxy, Func<Task>>? customCheck = null,
+        bool scrollTo = false)
     {
         var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheckAsync(shouldDisappear);
 
