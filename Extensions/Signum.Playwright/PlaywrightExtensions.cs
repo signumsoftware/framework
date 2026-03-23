@@ -465,7 +465,6 @@ public static class PlaywrightExtensions
     /// Equivalent to Selenium's Wait
     /// </summary>
     public static async Task<T> WaitAsync<T>(this IPage page, Func<Task<T?>> condition, string? actionDescription = null, TimeSpan? timeout = null)
-        where T : class
     {
         var maxTime = timeout ?? DefaultTimeout;
         var startTime = DateTime.Now;
@@ -476,7 +475,7 @@ public static class PlaywrightExtensions
             try
             {
                 var result = await condition();
-                if (result != null)
+                if (result != null && !result.Equals(false))
                     return result;
             }
             catch (Exception ex)

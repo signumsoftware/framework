@@ -1,6 +1,7 @@
 using Microsoft.Playwright;
 using Signum.Playwright.Frames;
 using Signum.Playwright.Search;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Playwright.ModalProxies;
 
@@ -143,6 +144,14 @@ public class ModalProxy : IDisposable, IAsyncDisposable
 
         return new ModalProxy(modal);
     }
-
  
+}
+
+public static class ModalProxyExtensions
+{
+
+    public static async Task<ModalProxy> Await_AsModalProxy(this Task<ILocator> locator)
+    {
+        return new ModalProxy(await locator);
+    }
 }

@@ -195,7 +195,6 @@ public class BrowserProxy
     /// Equivalent to Selenium's Wait
     /// </summary>
     public async Task<T> WaitAsync<T>(Func<Task<T?>> condition, string? description = null, TimeSpan? timeout = null)
-        where T : class
     {
         return await Page.WaitAsync(condition, description, timeout);
     }

@@ -21,6 +21,11 @@ public class EntityDetailProxy : EntityBaseProxy
     public async Task<Lite<IEntity>?> GetLiteAsync()
         => (await EntityInfoInternalAsync(null))?.ToLite();
 
+    public async Task<EntityInfoProxy?> EntityInfoAsync()
+    {
+        return await EntityInfoInternalAsync(null);
+    }
+
     public async Task SetLiteAsync(Lite<Entity>? value)
     {
         if (value == null)

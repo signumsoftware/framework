@@ -340,6 +340,8 @@ global using System.Threading.Tasks;");
         // 3. EndUsing( -> .EndUsingAsync(async
         result = Regex.Replace(result, @"\.EndUsing\s*\(", ".Await_EndUsingAsync(async ", RegexOptions.None);
 
+        result = Regex.Replace(result, @"\.CreateAndSelect\s*\(", ".CreateAndSelectAsync(async ", RegexOptions.None);
+
         result = Regex.Replace(result, @"\.Wait\s*\(", ".WaitAsync(async ", RegexOptions.None);
 
 

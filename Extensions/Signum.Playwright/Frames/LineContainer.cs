@@ -1,9 +1,10 @@
 using Microsoft.Playwright;
-using Signum.Entities.Reflection;
 using Signum.Engine;
+using Signum.Entities.Reflection;
 using Signum.Playwright.LineProxies;
 using Signum.Playwright.Search;
 using Signum.UserAssets.Queries;
+using System.Globalization;
 using System.Threading;
 
 namespace Signum.Playwright.Frames;
@@ -153,11 +154,14 @@ public static class LineContainerExtensions
         return new DateTimeLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
-    public static async Task DateTimeLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
+    public static async Task DateTimeLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
         where T : IModifiableEntity
     {
         var valueLine = lineContainer.DateTimeLine(property);
         await valueLine.SetValueAsync((IFormattable?)value);
+
+        if (loseFocus)
+            await valueLine.InputLocator.EvaluateAsync("el => el.blur()");
     }
 
     public static EnumLineProxy EnumLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -195,11 +199,14 @@ public static class LineContainerExtensions
         return new NumberLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
-    public static async Task NumberLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
+    public static async Task NumberLineValueAsync<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
         where T : IModifiableEntity
     {
         var valueLine = lineContainer.NumberLine(property);
         await valueLine.SetValueAsync((IFormattable?)value);
+
+        if (loseFocus)
+            await valueLine.InputLocator.EvaluateAsync("el => el.blur()");
     }
 
     public static HtmlLineProxy HtmlLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property)
