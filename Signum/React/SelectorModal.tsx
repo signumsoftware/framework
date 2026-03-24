@@ -204,7 +204,7 @@ namespace SelectorModal {
 
   export function chooseLite<T extends Entity>(type: Type<T> | TypeInfo | string, values: Lite<T>[], config?: SelectorConfig<Lite<T>>): Promise<Lite<T> | undefined> {
     const ti = getTypeInfo(type);
-    return SelectorModal.chooseElement<Lite<T>>(values,
+    return SelectorModal.chooseElement<Lite<T>>(values.orderBy(l => getToString(l)),
       {
         buttonDisplay: a => getToString(a),
         buttonName: a => liteKey(a),
