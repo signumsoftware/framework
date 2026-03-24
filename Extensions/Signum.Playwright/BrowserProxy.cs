@@ -152,7 +152,8 @@ public class BrowserProxy
     public virtual async Task LoginAsync(string username, string password)
     {
         await Page.GotoAsync(Url("Auth/Login"));
-        
+
+        await Page.Locator(".sf-login-page").WaitPresentAsync();
         // Check if login form button exists
         var showLoginButton = Page.Locator("#sf-show-login-form");
         if (await showLoginButton.IsPresentAsync())
