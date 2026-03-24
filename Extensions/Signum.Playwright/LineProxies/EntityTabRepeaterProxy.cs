@@ -34,7 +34,7 @@ public class EntityTabRepeaterProxy : EntityBaseProxy
             const panel = container.querySelector('.sf-repeater-element.active');
             return panel && panel.id && panel.id.endsWith('-' + idx);
         }",
-            new { container = Element, idx = index });
+            new { container = await Element.ElementHandleAsync(), idx = index });
 
         return await DetailsAsync<T>();
     }

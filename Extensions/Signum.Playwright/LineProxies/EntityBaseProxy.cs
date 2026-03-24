@@ -121,8 +121,8 @@ public abstract class EntityBaseProxy : BaseLineProxy
     public async Task WaitNewChangesAsync(string changes, string actionDescription)
     {
         await Page.WaitForFunctionAsync(
-            @"(element, oldVal) => element.getAttribute('data-changes') !== oldVal",
-            new object[] { Element, changes });
+            @"([element, oldVal]) => element.getAttribute('data-changes') !== oldVal",
+            new object[] { await Element.ElementHandleAsync(), changes });
     }
 
     public async Task<string> GetChangesAsync()
@@ -141,12 +141,12 @@ public abstract class EntityBaseProxy : BaseLineProxy
         await action();
 
         await Page.WaitForFunctionAsync(
-            @"(element, oldVal, index) => {
+            @"([element, oldVal, index}) => {
                 let target = index == null ? element :
                     element.querySelectorAll('[data-entity]')[index];
                 return target.getAttribute('data-entity') !== oldVal;
             }",
-            new object?[] { Element, entityInfo, index });
+            new object?[] { await Element.ElementHandleAsync(), entityInfo, index });
     }
 
     protected async Task<string> EntityInfoStringAsync(int? index)
@@ -185,7 +185,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
     public static async Task AutoCompleteBasicAsync(ILocator input, ILocator container, Lite<IEntity> lite)
     {
         await input.FillAsync("id:" + lite.Id.ToString());
-
+        await input.PressAsync("Space");
         var list = container.Locator(".typeahead.dropdown-menu");
         await list.WaitForAsync(new() { State = WaitForSelectorState.Visible });
 

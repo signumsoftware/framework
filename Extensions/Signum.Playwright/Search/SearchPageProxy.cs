@@ -7,14 +7,24 @@ namespace Signum.Playwright.Search;
 public class SearchPageProxy : IDisposable, IAsyncDisposable
 {
     public IPage Page { get; private set; }
-    public SearchControlProxy SearchControl { get; private set; }
+    public SearchControlProxy SearchControl { get; private set; } = null!;
     public ResultTableProxy Results => SearchControl.Results;
     public FiltersProxy Filters => SearchControl.Filters;
     public PaginationSelectorProxy Pagination => SearchControl.Pagination;
 
-    public SearchPageProxy(IPage page)
+    private SearchPageProxy(IPage page)
     {
         Page = page;
+    }
+
+    public static async Task<SearchPageProxy> CreateAsync(IPage page, bool waitInitialSearchCompleted = true)
+    {
+        var sc = new SearchPageProxy(page);
+        await sc.InitializeAsync();
+
+        if (waitInitialSearchCompleted)
+            await sc.SearchControl.WaitInitialSearchCompletedAsync();
+        return sc;
     }
 
     public async Task InitializeAsync()
@@ -38,7 +48,7 @@ public class SearchPageProxy : IDisposable, IAsyncDisposable
     public async Task<FramePageProxy<T>> CreateInPlaceAsync<T>() where T : ModifiableEntity
     {
         await SearchControl.CreateButton.ClickAsync();
-        return new FramePageProxy<T>(Page);
+        return await FramePageProxy<T>.CreateAsync(Page);
     }
 
     public async Task<FramePageProxy<T>> CreateInTabAsync<T>() where T : ModifiableEntity
@@ -63,7 +73,7 @@ public class SearchPageProxy : IDisposable, IAsyncDisposable
         if (newPage == null)
             throw new InvalidOperationException("Neues Tab konnte nicht gefunden werden.");
 
-        var result = new FramePageProxy<T>(newPage);
+        var result = await FramePageProxy<T>.CreateAsync(newPage);
 
         result.OnDisposed += async () => await newPage.CloseAsync();
         return result;

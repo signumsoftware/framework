@@ -302,6 +302,37 @@ public static class PlaywrightExtensions
         return classes.Contains(className);
     }
 
+    public static async Task WaitHasClassAsync(this ILocator locator, string className, bool shouldHave)
+    {
+        await locator.Page.WaitForFunctionAsync(
+            @"([el, cls, shouldHave]) => {
+                const hasClass = el.classList.contains(cls);
+                return shouldHave == hasClass;
+            }",
+            new object[]{ await locator.ElementHandleAsync(), className, shouldHave }
+        );
+    }
+
+    public static async Task WaitAttributeAsync(this ILocator locator, string attributeName, string? expectedValue)
+    {
+        var elementHandle = await locator.ElementHandleAsync();
+
+        await locator.Page.WaitForFunctionAsync(
+            @"([el, attr, value]) => el.getAttribute(attr) === value",
+            new object?[] { elementHandle, attributeName, expectedValue }
+        );
+    }
+
+    public static async Task WaitDisabledAsync(this ILocator locator, bool shouldBeDisabled)
+    {
+        var elementHandle = await locator.ElementHandleAsync();
+
+        await locator.Page.WaitForFunctionAsync(
+            @"([el, disabled]) => el.disabled === disabled",
+            new object[] { elementHandle, shouldBeDisabled }
+        );
+    }
+
     /// <summary>
     /// Check if locator has all specified CSS classes
     /// Equivalent to Selenium's HasClass (params version)
@@ -528,12 +559,7 @@ public static class PlaywrightExtensions
             return EqualityComparer<T>.Default.Equals(value, expectedValue);
         }, $"value to equal {expectedValue}", timeout);
     }
-
     #endregion
-
-
-
-
 
 
     public static async Task RunAndConsumeAlertAsync(this IPage page, Func<Task> action)

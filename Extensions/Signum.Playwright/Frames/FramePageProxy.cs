@@ -11,22 +11,32 @@ public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, I
     public ILocator Element { get; }
     public PropertyRoute Route { get; }
 
-    public FramePageProxy(IPage page)
+    private FramePageProxy(IPage page)
     {
         Page = page;
         Element = page.Locator(".normal-control");
         Route = PropertyRoute.Root(typeof(T));
-        WaitLoadedAsync().GetAwaiter().GetResult();
     }
+
+    public static async Task<FramePageProxy<T>> CreateAsync(IPage page)
+    {
+        var result = new FramePageProxy<T>(page);
+        await result.WaitLoadedAsync();
+        return result;
+    }
+
+
+
+
 
     public ILocator Container => Element;
 
-    public Action? OnDisposed { get; set; }
+    public Func<Task>? OnDisposed { get; set; }
 
     public async ValueTask DisposeAsync()
     {
-        OnDisposed?.Invoke();
-        await Task.CompletedTask;
+        if (OnDisposed != null)
+            await OnDisposed.Invoke();
     }
 
     public void Dispose()

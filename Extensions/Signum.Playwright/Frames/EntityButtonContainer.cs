@@ -23,14 +23,15 @@ public static class EntityButtonContainerExtensions
         return (Lite<T>)entityInfo.ToLite();
     }
 
-    public static ILocator OperationButton(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
+
+    public static async Task<ILocator> OperationButtonAsync(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
     {
         if (groupId != null)
         {
             var groupButton = container.Element.Locator($"#{groupId}");
             if (groupButton.GetAttributeAsync("aria-expanded").Result != "true")
             {
-                groupButton.ClickAsync().GetAwaiter().GetResult();
+                await groupButton.ClickAsync();
             }
 
             return container.Container.Locator($"a[data-operation='{symbol.Key}']");
@@ -39,15 +40,37 @@ public static class EntityButtonContainerExtensions
         return container.Container.Locator($"button[data-operation='{symbol.Key}']");
     }
 
-    public static ILocator OperationButton<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+    public static Task<ILocator> OperationButtonWaitVisibleAsync<T>(this IEntityButtonContainer container, IEntityOperationSymbolContainer<T> symbol, string? groupId = null)
         where T : Entity
     {
-        return container.OperationButton(symbol.Symbol);
+        return OperationButtonWaitVisibleAsync(container, symbol.Symbol, groupId);
     }
 
-    public static async Task<bool> OperationEnabledAsync(this IEntityButtonContainer container, OperationSymbol symbol)
+    public static async Task<ILocator> OperationButtonWaitVisibleAsync(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
     {
-        var button = container.OperationButton(symbol);
+        if (groupId != null)
+        {
+            var groupButton = await container.Element.Locator($"#{groupId}").WaitVisibleAsync();
+            if (groupButton.GetAttributeAsync("aria-expanded").Result != "true")
+            {
+                await groupButton.ClickAsync();
+            }
+
+            return await container.Container.Locator($"a[data-operation='{symbol.Key}']").WaitVisibleAsync();
+        }
+
+        return await container.Container.Locator($"button[data-operation='{symbol.Key}']").WaitVisibleAsync();
+    }
+
+    public static Task<ILocator> OperationButtonAsync<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol, string? groupId = null)
+        where T : Entity
+    {
+        return container.OperationButtonAsync(symbol.Symbol, groupId);
+    }
+
+    public static async Task<bool> OperationEnabledAsync(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
+    {
+        var button = await container.OperationButtonAsync(symbol, groupId);
         return !await button.IsDisabledAsync();
     }
 
@@ -71,25 +94,26 @@ public static class EntityButtonContainerExtensions
     public static async Task<bool> OperationNotPresentAsync<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
         where T : Entity
     {
-        var button = container.OperationButton(symbol);
+        var button = await container.OperationButtonAsync(symbol);
         return await button.CountAsync() == 0;
     }
 
     public static async Task OperationClickAsync(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
     {
-        var button = container.OperationButton(symbol, groupId);
+        var button = await container.OperationButtonAsync(symbol, groupId);
         await button.ClickAsync();
     }
 
-    public static async Task OperationClickAsync<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+    public static async Task OperationClickAsync<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol, string? groupId = null)
         where T : Entity
     {
-        await container.OperationClickAsync(symbol.Symbol);
+        await container.OperationClickAsync(symbol.Symbol, groupId);
     }
 
-    public static Task<ILocator> OperationClickCaptureAsync(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
+    public static async Task<ILocator> OperationClickCaptureAsync(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
     {
-        return container.OperationButton(symbol, groupId).CaptureOnClickAsync();
+        var button = await container.OperationButtonAsync(symbol, groupId);
+        return await button.CaptureOnClickAsync();
     }
 
     public static async Task<ILocator> OperationClickCaptureAsync<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol, string? groupId = null)
@@ -122,13 +146,12 @@ public static class EntityButtonContainerExtensions
         await action();
 
         await container.Container.Page.WaitForFunctionAsync(
-            @"(oldCount) => {
-            const el = document.querySelector('div.sf-main-control[data-refresh-count]');
-            if (!el) return false;
-            return parseInt(el.getAttribute('data-refresh-count')) !== oldCount;
-        }",
-            oldCount ?? -1
-        );
+            """
+            ([c, oldCount]) => {
+                var el = c.querySelector('div.sf-main-control[data-refresh-count]');
+                return el && parseInt(el.getAttribute('data-refresh-count')) !== oldCount;
+            }
+            """, new object[]{ await container.Container.ElementHandleAsync(), oldCount });
     }
 
     private static async Task<Task> AssertNoErrorsAsync(IValidationSummaryContainer vs)
@@ -165,11 +188,12 @@ public static class EntityButtonContainerExtensions
     {
         await container.OperationClickAsync(symbol);
 
-        await container.Container.Page.WaitForFunctionAsync(@"(container) => {
-            try { return container.EntityInfo().IsNew; } catch { return false; }
-        }", container);
+        await container.Container.Page.WaitAsync(async () =>
+        {
+            try { return (await container.GetEntityInfoAsync()).IsNew; } catch { return false; }
+        });
 
-        return new FramePageProxy<T>(container.Container.Page);
+        return await FramePageProxy<T>.CreateAsync(container.Container.Page);
     }
 
     public static async Task<long?> RefreshCountAsync(this IEntityButtonContainer container)

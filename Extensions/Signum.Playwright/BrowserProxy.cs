@@ -11,14 +11,10 @@ namespace Signum.Playwright;
 public class BrowserProxy
 {
     public IPage Page { get; }
-    public IPlaywright PlaywrightInstance { get; }
-    public IBrowser Browser { get; }
 
-    public BrowserProxy(IPage page, IPlaywright playwrightInstance, IBrowser browser)
+    public BrowserProxy(IPage page)
     {
         Page = page;
-        PlaywrightInstance = playwrightInstance;
-        Browser = browser;
     }
 
     /// <summary>
@@ -39,7 +35,7 @@ public class BrowserProxy
         var url = Url(FindRoute(queryName));
         await Page.GotoAsync(url);
 
-        var result = new SearchPageProxy(Page);
+        var result = await SearchPageProxy.CreateAsync(Page);
 
         if (waitInitialSearch)
         {
@@ -82,7 +78,7 @@ public class BrowserProxy
     {
         var url = Url(NavigateRoute(typeof(T), null));
         await Page.GotoAsync(url);
-        return new FramePageProxy<T>(Page);
+        return await FramePageProxy<T>.CreateAsync(Page);
     }
 
     public async Task<FramePageProxy<T>> FramePageAsync<T>(Lite<T> lite) where T : Entity
@@ -92,7 +88,7 @@ public class BrowserProxy
 
         var url = Url(NavigateRoute(lite));
         await Page.GotoAsync(url);
-        return new FramePageProxy<T>(Page);
+        return await FramePageProxy<T>.CreateAsync(Page);
     }
 
     /// <summary>

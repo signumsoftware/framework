@@ -108,9 +108,9 @@ public class EntityTableRow<T> : LineContainer<T>
 
         EntityTableRow<T> result = null!;
         await Element.Page.WaitForFunctionAsync(
-            @"([table, index]) => {
+            @"([table, index, handle]) => {
                 const rows = table.querySelectorAll(':scope > tbody > tr');
-                return rows[index] && rows[index] !== arguments[2];
+                return rows[index] && rows[index] !== handle;
             }",
             new object[] { await EntityTable.TableElement.ElementHandleAsync(), index, originalHandle }
         );

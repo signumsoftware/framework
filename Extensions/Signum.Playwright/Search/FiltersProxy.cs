@@ -42,7 +42,7 @@ public class FiltersProxy
 
         await Element.Page.WaitForFunctionAsync(
             @"([table, oldCount]) => table.querySelectorAll('tbody > tr').length > oldCount",
-            new object[] { Element, oldFilters.Count }
+            new object[] { await Element.ElementHandleAsync(), oldFilters.Count }
         );
 
         var currentFilters = await FiltersAsync();

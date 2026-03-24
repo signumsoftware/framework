@@ -196,7 +196,7 @@ public class ResultTableProxy
     {
         var link = await EntityLinkAsync(rowIndex);
         await link.ClickAsync();
-        return new FramePageProxy<T>(this.Element.Page);
+        return await FramePageProxy<T>.CreateAsync(this.Element.Page);
     }
 
     public async Task<FramePageProxy<T>> EntityClickInPlaceAsync<T>(Lite<T> lite)
@@ -204,7 +204,7 @@ public class ResultTableProxy
     {
         var link = await EntityLinkAsync(lite);
         await link.ClickAsync();
-        return new FramePageProxy<T>(this.Element.Page);
+        return await FramePageProxy<T>.CreateAsync(this.Element.Page);
     }
 
     public async Task<ILocator> EntityLinkAsync(Lite<IEntity> lite)
@@ -254,8 +254,8 @@ public class ResultTableProxy
     public async Task WaitRowsAsync(int rows)
     {
         await this.Element.Page.WaitForFunctionAsync(
-            @"([locator, count]) => document.querySelectorAll(locator).length === count",
-            new object[] { "tbody > tr[data-entity]", rows });
+            @"([table, locator, count]) => table.querySelectorAll(locator).length === count",
+            new object[] { await this.Element.ElementHandleAsync(),  "tbody > tr[data-entity]", rows });
     }
 
     public async Task WaitSuccessAsync(List<Lite<IEntity>> lites)

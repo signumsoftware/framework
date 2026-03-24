@@ -51,9 +51,8 @@ public class SearchControlProxy
 
     private async Task WaitSearchCompletedAsync(string? counter)
     {
-        await Element.Page.WaitForFunctionAsync(
-            $"() => document.querySelector('{Element}').getAttribute('data-search-count') != '{counter}'"
-        );
+        await Element.Page.WaitForFunctionAsync($"([e, counter]) => e.getAttribute('data-search-count') != counter", 
+            new object?[] {  await this.Element.ElementHandleAsync(), counter });
     }
 
     public async Task<EntityContextMenuProxy> SelectedClickAsync()
