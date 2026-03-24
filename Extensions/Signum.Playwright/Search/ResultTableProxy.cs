@@ -1,5 +1,6 @@
 using Microsoft.Playwright;
 using Signum.Playwright.Frames;
+using Signum.Utilities.Synchronization;
 
 namespace Signum.Playwright.Search;
 
@@ -220,9 +221,7 @@ public class ResultTableProxy
 
     // ---------------- CONTEXT MENU ----------------
 
-    public async Task<EntityContextMenuProxy> EntityContextMenuAsync(
-        int rowIndex,
-        string columnToken = "Entity")
+    public async Task<EntityContextMenuProxy> EntityContextMenuAsync(int rowIndex, string columnToken = "Entity")
     {
         var cell = await CellElementAsync(rowIndex, columnToken);
 
@@ -230,6 +229,22 @@ public class ResultTableProxy
         await cell.ClickAsync(new() { Button = MouseButton.Right });
 
         var menu = await SearchControl.WaitContextMenuAsync();
+
+        return new EntityContextMenuProxy(this, menu);
+    }
+
+    public async Task<EntityContextMenuProxy> EntityContextMenuAsync(Lite<Entity> lite, string columnToken = "Entity")
+    {
+        var cell = CellElementAsync(lite, columnToken).ResultSafe();
+        await cell.ScrollIntoViewIfNeededAsync();
+
+        var box = await cell.BoundingBoxAsync();
+        if (box == null)
+            throw new Exception("Cell element not visible");
+
+
+        await cell.ClickAsync(new() { Button = MouseButton.Right });
+        var menu = await this.SearchControl.WaitContextMenuAsync();
 
         return new EntityContextMenuProxy(this, menu);
     }
