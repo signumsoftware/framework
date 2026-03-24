@@ -632,7 +632,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   };
 
-  handleChangeFiltermode = async (mode: SearchControlFilterMode, refreshFilters = true, force = false): Promise<void> => {
+  async handleChangeFiltermode(mode: SearchControlFilterMode, refreshFilters: boolean = true, force: boolean = false): Promise<void> {
     if (this.state.filterMode == mode && !force)
       return;
 
@@ -644,7 +644,6 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       simpleFilterBuilder: mode == "Simple" ? this.getSimpleFilterBuilderElement() : undefined,
       filterMode: mode
     }, () => this.handleHeightChanged());
-
   }
 
   handleSystemTimeClick = (): void => {

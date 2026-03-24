@@ -475,6 +475,14 @@ public static class AuthLogic
         }
     }
 
+    public static UserEntity? TryRetrieveUser(string username, string password)
+    {
+        return TryRetrieveUser(username, [
+            PasswordEncoding.HashPassword(username, password),
+            ..PasswordEncoding.HashPasswordAlternatives(username, password)
+        ]);
+    }
+
     public static UserEntity? TryRetrieveUser(string username, IList<byte[]> passwordHashes)
     {
         using (AuthLogic.Disable())

@@ -16,10 +16,9 @@ public class WindowsADAuthorizer : ICustomAuthorizer
 
     public virtual UserEntity Login(string userName, string password, out string authenticationType)
     {
-        var passwordHashes = PasswordEncoding.EncodePasswordAlternatives(userName, password);
 
-        if (AuthLogic.TryRetrieveUser(userName, passwordHashes) != null)
-            return AuthLogic.Login(userName, passwordHashes, out authenticationType); //Database is faster than Active Directory
+        if (AuthLogic.TryRetrieveUser(userName, password) != null)
+            return AuthLogic.Login(userName, password, out authenticationType); //Database is faster than Active Directory
 
         UserEntity? user = LoginWithWindowsADRegistry(userName, password);
         if (user != null)
@@ -28,7 +27,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
             return user;
         }
 
-        return AuthLogic.Login(userName, passwordHashes, out authenticationType);
+        return AuthLogic.Login(userName, password, out authenticationType);
     }
 
     public virtual UserEntity? LoginWithWindowsADRegistry(string userName, string password)
