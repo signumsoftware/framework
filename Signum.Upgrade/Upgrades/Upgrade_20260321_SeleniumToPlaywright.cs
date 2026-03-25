@@ -33,6 +33,7 @@ class Upgrade_20260321_SeleniumToPlaywright : CodeUpgradeBase
         uctx.ChangeCodeFile(@"Southwind.Test.React\Southwind.Test.React.csproj", file =>
         {
             file.Replace("Signum.Selenium", "Signum.Playwright");
+            file.RemoveAllLines(a => a.Contains("Selenium.WebDriver"));
         }, WarningLevel.Warning);
 
         // Update GlobalUsings.cs
@@ -59,16 +60,79 @@ global using System.Threading.Tasks;");
         // Convert Browse method in Common.cs
         uctx.ChangeCodeFile(@"Southwind.Test.React\Common.cs", file =>
         {
-            file.Replace(
-    new Regex(@"public static void Browse\(string username, Action<(?<br>\w+)> action\)"),
-    @"public static async Task BrowseAsync(string username, Func<${br}, Task> action)");
+            file.ReplaceBetween(
+                new(a => a.Contains("public static void Browse"), 0),
+                new(a => a.Contains("}"), 0) { SameIdentation = true },
+                text =>
+                {
+                    var match = Regex.Match(text, @"public static void Browse\(string username, Action<(?<br>\w+)> action");
 
-            SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Common.BrowseAsync requires manual convertion! check Southwind code");
+                    var browserName = match.Success ? match.Groups["br"].Value : uctx.ApplicationName + "Browser";
 
-        }, WarningLevel.Warning);
+                    return $$"""
+                        private static readonly Lazy<Task<IBrowser>> DefaultBrowser = new(async () =>
+                        {
+                            var playwright = await Microsoft.Playwright.Playwright.CreateAsync();
+
+                            string? headless = System.Environment.GetEnvironmentVariable("PLAYWRIGHT_HEADLESS");
+
+                            if (headless != null && headless.ToLower() == "true")
+                                return await playwright.Chromium.LaunchAsync(new() { Headless = true });
+
+                            // Configure browser launch options (equivalent to ChromeOptions)
+                            var launchOptions = new BrowserTypeLaunchOptions
+                            {
+                                Headless = false,
+                                Args = new[]
+                                {
+                                    "--start-maximized",
+                                    "--no-first-run",
+                                    "--no-default-browser-check",
+                                    "--disable-popup-blocking",
+                                },
+                            };
+
+                            return await playwright.Chromium.LaunchAsync(launchOptions);
+                        });
+
+                        public static async Task BrowseAsync(string username, Func<{{browserName}}, Task> action)
+                        {
+                            var contextOptions = new BrowserNewContextOptions
+                            {
+                                ViewportSize = ViewportSize.NoViewport, // Allow start-maximized to work
+                                Permissions = new[] { "geolocation", "notifications" },
+                            };
+
+                            var browser = await DefaultBrowser.Value;
+                            var context = await browser.NewContextAsync(contextOptions);
+
+                            // Set preferences equivalent to Chrome user profile preferences
+                            await context.GrantPermissionsAsync(new[] { "clipboard-read", "clipboard-write" });
+
+                            var page = await context.NewPageAsync();
+
+                            var browserProxy = new {{browserName}}(page);
+
+                            try
+                            {
+                                await browserProxy.LoginAsync(username, username);
+                                await action(browserProxy);
+                            }
+                            finally
+                            {
+                                await page.CloseAsync();
+                                await context.CloseAsync();
+                            }
+                        }
+
+                        """;
+                }
+                );
+        });
 
         uctx.ForeachCodeFile(@"*.cs", uctx.TestReactDirectory, file =>
         {
+            file.RemoveAllLines(a => a.Contains("using OpenQA"));
             file.ProcessLines(lines =>
             {
                 bool changed = false;
