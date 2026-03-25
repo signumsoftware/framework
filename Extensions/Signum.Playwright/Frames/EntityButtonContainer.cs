@@ -139,20 +139,7 @@ public static class EntityButtonContainerExtensions
     }
 
     //TODO
-    public static async Task WaitReloadAsync(this IEntityButtonContainer container, Func<Task> action)
-    {
-        var oldCount = await container.RefreshCountAsync();
-
-        await action();
-
-        await container.Container.Page.WaitForFunctionAsync(
-            """
-            ([c, oldCount]) => {
-                var el = c.querySelector('div.sf-main-control[data-refresh-count]');
-                return el && parseInt(el.getAttribute('data-refresh-count')) !== oldCount;
-            }
-            """, new object[]{ await container.Container.ElementHandleAsync(), oldCount });
-    }
+  
 
     private static async Task<Task> AssertNoErrorsAsync(IValidationSummaryContainer vs)
     {
@@ -198,18 +185,16 @@ public static class EntityButtonContainerExtensions
 
     public static async Task<long?> RefreshCountAsync(this IEntityButtonContainer container)
     {
-        try
-        {
-            var elem = container.Element.Locator("div.sf-main-control[data-refresh-count]");
-            if (await elem.CountAsync() == 0)
-                return null;
+        var value = await container.Element.Locator("div.sf-main-control").GetAttributeAsync("data-refresh-count");
+        return long.TryParse(value, out var result) ? result : null;
+    }
 
-            var value = await elem.GetAttributeAsync("data-refresh-count");
-            return long.TryParse(value, out var result) ? result : null;
-        }
-        catch
-        {
-            return null;
-        }
+    public static async Task WaitReloadAsync(this IEntityButtonContainer container, Func<Task> action)
+    {
+        var oldCount = await container.RefreshCountAsync();
+
+        await action();
+
+        await Assertions.Expect(container.Container.Locator("div.sf-main-control")).Not.ToHaveAttributeAsync("data-refresh-count", oldCount?.ToString() ?? "");
     }
 }
