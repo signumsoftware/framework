@@ -2,6 +2,9 @@ using Microsoft.Playwright;
 
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for PaginationSelector.tsx
+/// </summary>
 public class PaginationSelectorProxy
 {
     private readonly SearchControlProxy searchControl;

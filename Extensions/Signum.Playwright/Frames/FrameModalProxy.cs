@@ -4,6 +4,7 @@ using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Frames;
 
+//Proxy for FrameModal.tsx
 public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonContainer<T>, IValidationSummaryContainer 
     where T : ModifiableEntity
 {

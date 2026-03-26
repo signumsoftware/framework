@@ -1,5 +1,8 @@
 namespace Signum.Playwright.Frames;
 
+///  <summary>
+/// Interface for proxies of components calling ValidationErrors.tsx
+/// </summary>
 public interface IValidationSummaryContainer
 {
     ILocator Element { get; }

@@ -2,8 +2,12 @@ using Signum.Playwright.LineProxies;
 
 namespace Signum.Playwright.Search;
 
+
 public abstract class FilterProxy { }
 
+/// <summary>
+/// Proxy for FilterGroupComponent in FilterBuilder.tsx
+/// </summary>
 public class FilterGroupProxy : FilterProxy
 {
     public ILocator Element { get; }
@@ -16,6 +20,9 @@ public class FilterGroupProxy : FilterProxy
     }
 }
 
+/// <summary>
+/// Proxy for FilterConditionComponent in FilterBuilder.tsx
+/// </summary>
 public class FilterConditionProxy : FilterProxy
 {
     public ILocator Element { get; }

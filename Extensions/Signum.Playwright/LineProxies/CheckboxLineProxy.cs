@@ -1,8 +1,7 @@
 namespace Signum.Playwright.LineProxies;
 
 /// <summary>
-/// Proxy for checkbox controls
-/// Equivalent to Selenium's CheckboxLineProxy
+/// Proxy for CheckboxLine.tsx
 /// </summary>
 public class CheckboxLineProxy : BaseLineProxy
 {

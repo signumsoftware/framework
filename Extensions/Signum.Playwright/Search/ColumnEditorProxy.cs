@@ -1,5 +1,8 @@
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for ColumnEditor.tsx
+/// </summary>
 public class ColumnEditorProxy
 {
     public ILocator Element { get; }

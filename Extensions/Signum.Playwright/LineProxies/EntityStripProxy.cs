@@ -2,6 +2,9 @@ using Signum.Playwright.Frames;
 
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Proxy for EntityStrip.tsx
+/// </summary>
 public class EntityStripProxy : EntityBaseProxy
 {
     public EntityStripProxy(ILocator element, PropertyRoute route)

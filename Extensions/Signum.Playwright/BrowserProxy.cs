@@ -5,8 +5,9 @@ using Signum.Playwright.Search;
 namespace Signum.Playwright;
 
 /// <summary>
-/// Playwright equivalent of Selenium's BrowserProxy
-/// Main entry point for Signum Framework testing with Playwright
+/// Base class for the strongly-typed proxy for your application. 
+/// Can perform common actions like login/logout and contains method to navigate to different pages (SearchPage / FramePage)
+/// You can inherit from this class to provide application-specific pages, and override Url with your base URL.
 /// </summary>
 public class BrowserProxy
 {
@@ -19,7 +20,6 @@ public class BrowserProxy
 
     /// <summary>
     /// Override this method to provide base URL
-    /// Equivalent to Selenium's Url method
     /// </summary>
     public virtual string Url(string url)
     {
@@ -28,7 +28,6 @@ public class BrowserProxy
 
     /// <summary>
     /// Navigate to search page for a query
-    /// Equivalent to Selenium's SearchPage
     /// </summary>
     public async Task<SearchPageProxy> SearchPageAsync(object queryName, bool waitInitialSearch = true)
     {
@@ -47,27 +46,14 @@ public class BrowserProxy
 
     /// <summary>
     /// Get route for Find page
-    /// Equivalent to Selenium's FindRoute
     /// </summary>
     public virtual string FindRoute(object queryName)
     {
-        return "Find/" + GetWebQueryName(queryName);
-    }
-
-    /// <summary>
-    /// Get web query name from type or object
-    /// </summary>
-    public string GetWebQueryName(object queryName)
-    {
-        if (queryName is Type t)
-            return Reflector.CleanTypeName(t);
-
-        return queryName.ToString()!;
+        return "Find/" + QueryUtils.GetKey(queryName);
     }
 
     /// <summary>
     /// Navigate to entity frame page
-    /// Equivalent to Selenium's FramePage
     /// </summary>
     public async Task<FramePageProxy<T>> FramePageAsync<T>(PrimaryKey id) where T : Entity
     {
@@ -93,7 +79,6 @@ public class BrowserProxy
 
     /// <summary>
     /// Get navigation route for entity
-    /// Equivalent to Selenium's NavigateRoute
     /// </summary>
     public virtual string NavigateRoute(Type type, PrimaryKey? id)
     {
@@ -112,7 +97,6 @@ public class BrowserProxy
 
     /// <summary>
     /// Get current logged-in user
-    /// Equivalent to Selenium's GetCurrentUser
     /// </summary>
     public virtual async Task<string?> GetCurrentUserAsync()
     {
@@ -129,7 +113,6 @@ public class BrowserProxy
 
     /// <summary>
     /// Logout current user
-    /// Equivalent to Selenium's Logout
     /// </summary>
     public virtual async Task LogoutAsync()
     {
@@ -143,7 +126,6 @@ public class BrowserProxy
 
     /// <summary>
     /// Login to application
-    /// Equivalent to Selenium's Login
     /// </summary>
     public virtual async Task LoginAsync(string username, string password)
     {
@@ -189,7 +171,6 @@ public class BrowserProxy
 
     /// <summary>
     /// Wait helper
-    /// Equivalent to Selenium's Wait
     /// </summary>
     public async Task<T> WaitAsync<T>(Func<Task<T?>> condition, string? description = null, TimeSpan? timeout = null)
     {

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 namespace Signum.Playwright.ModalProxies;
 
 /// <summary>
-/// Proxy for working with Signum Framework modals
+/// Generic proxy for bootstrap Modals
 /// </summary>
 public class ModalProxy : IDisposable, IAsyncDisposable
 {

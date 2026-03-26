@@ -4,6 +4,9 @@ using Signum.Playwright.Search;
 
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Abstract proxy for EntityBase.tsx
+/// </summary>
 public abstract class EntityBaseProxy : BaseLineProxy
 {
     protected EntityBaseProxy(ILocator element, PropertyRoute route)
@@ -163,8 +166,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
         return attr;
     }
 
-    protected async Task<EntityInfoProxy?> EntityInfoInternalAsync(int? index)
-        => EntityInfoProxy.Parse(await EntityInfoStringAsync(index));
+    protected async Task<EntityInfoProxy?> EntityInfoInternalAsync(int? index) => EntityInfoProxy.Parse(await EntityInfoStringAsync(index));
 
     public async Task AutoCompleteWaitChangesAsync(ILocator input, ILocator container, Lite<IEntity> lite)
     {

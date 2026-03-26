@@ -2,6 +2,9 @@ using Microsoft.Playwright;
 
 namespace Signum.Playwright.ModalProxies;
 
+/// <summary>
+/// Proxy for ErrorModal.tsx
+/// </summary>
 public class ErrorModalProxy : ModalProxy
 {
 

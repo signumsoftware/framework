@@ -4,6 +4,9 @@ using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for SearchModal.tsx
+/// </summary>
 public class SearchModalProxy : ModalProxy
 {
     public SearchControlProxy SearchControl { get; private set; }

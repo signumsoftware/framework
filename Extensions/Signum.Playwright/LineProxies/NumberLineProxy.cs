@@ -4,6 +4,9 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Proxy for NumberLine.tsx
+/// </summary>
 public class NumberLineProxy : BaseLineProxy
 {
     public NumberLineProxy(ILocator element, PropertyRoute route)

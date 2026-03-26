@@ -2,6 +2,9 @@ using Microsoft.Playwright;
 
 namespace Signum.Playwright.ModalProxies;
 
+/// <summary>
+/// Proxy for SelectorModal.tsx
+/// </summary>
 public class SelectorModalProxy : ModalProxy
 {
     public SelectorModalProxy(ILocator element)

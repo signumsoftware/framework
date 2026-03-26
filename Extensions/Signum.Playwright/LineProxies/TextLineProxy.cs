@@ -2,9 +2,12 @@ using Microsoft.AspNetCore.Routing;
 
 namespace Signum.Playwright.LineProxies;
 
-public abstract class TextBoxBaseLineProxy : BaseLineProxy
+/// <summary>
+/// Abstract Proxy for TextBase.tsx
+/// </summary>
+public abstract class TextBaseLineProxy : BaseLineProxy
 {
-    protected TextBoxBaseLineProxy(ILocator element, PropertyRoute route)
+    protected TextBaseLineProxy(ILocator element, PropertyRoute route)
         : base(element, route)
     {
     }
@@ -64,7 +67,10 @@ public abstract class TextBoxBaseLineProxy : BaseLineProxy
     }
 }
 
-public class TextBoxLineProxy : TextBoxBaseLineProxy
+/// <summary>
+/// Proxy for TextBoxLine in TextBoxLine.tsx
+/// </summary>
+public class TextBoxLineProxy : TextBaseLineProxy
 {
     public TextBoxLineProxy(ILocator element, PropertyRoute route)
         : base(element, route)
@@ -72,17 +78,23 @@ public class TextBoxLineProxy : TextBoxBaseLineProxy
     }
 }
 
-public class PasswordBoxLineProxy : TextBoxBaseLineProxy
+/// <summary>
+/// Proxy for PasswordLine in TextBoxLine.tsx
+/// </summary>
+public class PasswordLineProxy : TextBaseLineProxy
 {
-    public PasswordBoxLineProxy(ILocator element, PropertyRoute route)
+    public PasswordLineProxy(ILocator element, PropertyRoute route)
         : base(element, route)
     {
     }
 }
 
-public class ColorBoxLineProxy : TextBoxBaseLineProxy
+/// <summary>
+/// Proxy for ColorLine in TextBoxLine.tsx
+/// </summary>
+public class ColorLineProxy : TextBaseLineProxy
 {
-    public ColorBoxLineProxy(ILocator element, PropertyRoute route)
+    public ColorLineProxy(ILocator element, PropertyRoute route)
         : base(element, route)
     {
     }

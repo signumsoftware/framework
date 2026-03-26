@@ -1,5 +1,8 @@
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for QueryTokenPart in QueryTokenBuilder.tsx
+/// </summary>
 public class QueryTokenPartProxy
 {
     public ILocator Element { get; }

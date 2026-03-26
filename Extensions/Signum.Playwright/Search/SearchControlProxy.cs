@@ -5,6 +5,9 @@ using Signum.Utilities.Synchronization;
 
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for SearchControlLoaded.tsx
+/// </summary>
 public class SearchControlProxy
 {
     public ILocator Element { get; private set; }

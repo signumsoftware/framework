@@ -2,6 +2,9 @@ using Microsoft.Playwright;
 
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for FilterBuilder.tsx
+/// </summary>
 public class FiltersProxy
 {
     public ILocator Element { get; }

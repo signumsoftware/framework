@@ -4,6 +4,9 @@ using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Proxy for EntityLine.tsx
+/// </summary>
 public class EntityLineProxy : EntityBaseProxy
 {
     public EntityLineProxy(ILocator element, PropertyRoute route)

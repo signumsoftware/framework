@@ -4,6 +4,9 @@ using Signum.Playwright.Search;
 
 namespace Signum.Playwright.Frames;
 
+/// <summary>
+/// Interface for proxies of components calling Widgets.tsx
+/// </summary>
 public interface IWidgetContainer
 {
     ILocator Element { get; }
