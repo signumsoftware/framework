@@ -65,7 +65,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
     public async Task<FrameModalProxy<T>> OkWaitFrameModalAsync<T>()
     where T : ModifiableEntity
     {
-        var newModal = await CaptureAsync(Modal.Page, async () =>
+        var newModal = await Modal.Page.CaptureModalAsync(async () =>
         {
             await OkButton.ClickAsync();
         });
@@ -73,7 +73,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
         var disposing = Disposing;
         Disposing = null;
 
-        return new FrameModalProxy<T>(newModal.Modal)
+        return new FrameModalProxy<T>(newModal)
         {
             Disposing = disposing
         };
@@ -81,7 +81,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
 
     public async Task<SearchModalProxy> OkWaitSearchModalAsync()
     {
-        var newModal = await CaptureAsync(Modal.Page, async () =>
+        var newModal = await Modal.Page.CaptureModalAsync(async () =>
         {
             await OkButton.ClickAsync();
         });
@@ -89,7 +89,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
         var disposing = Disposing;
         Disposing = null;
 
-        return new SearchModalProxy(newModal.Modal)
+        return new SearchModalProxy(newModal)
         {
             Disposing = disposing
         };
@@ -129,22 +129,6 @@ public class ModalProxy : IDisposable, IAsyncDisposable
         await WaitForCloseAsync();
     }
 
-    public static async Task<ModalProxy> CaptureAsync(IPage page, Func<Task> clickAction)
-    {
-        var beforeCount = await page.Locator(".modal-dialog").CountAsync();
-
-        await clickAction();
-
-        await page.WaitForFunctionAsync(
-            @"(before) => document.querySelectorAll('.modal-dialog').length > before",
-            beforeCount
-        );
-
-        var modal = page.Locator(".modal-dialog").Nth(beforeCount);
-
-        return new ModalProxy(modal);
-    }
- 
 }
 
 public static class ModalProxyExtensions

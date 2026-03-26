@@ -64,7 +64,7 @@ public class EntityComboProxy : EntityBaseProxy
         await WaitChangesAsync(async () =>
         {
             await ComboElement.SelectOptionAsync(new SelectOptionValue { Label = label });
-        }, "ComboBox selected");
+        });
     }
 
     public async Task SelectIndexAsync(int index)
@@ -75,7 +75,7 @@ public class EntityComboProxy : EntityBaseProxy
             {
                 Index = index + 1
             });
-        }, "ComboBox selected");
+        });
     }
 
     public async Task<EntityInfoProxy?> EntityInfoAsync()

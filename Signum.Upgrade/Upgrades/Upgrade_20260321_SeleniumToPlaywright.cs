@@ -115,6 +115,7 @@ global using System.Threading.Tasks;");
 
                             try
                             {
+                                page.SetDefaultTimeout(10000);
                                 await browserProxy.LoginAsync(username, username);
                                 await action(browserProxy);
                             }

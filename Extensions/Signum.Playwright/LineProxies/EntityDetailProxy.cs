@@ -12,6 +12,8 @@ public class EntityDetailProxy : EntityBaseProxy
     {
     }
 
+    internal override ILocator ButtonBar => this.Element.Locator(">legend");
+
     public override async Task<object?> GetValueUntypedAsync()
         => (await EntityInfoInternalAsync(null))?.ToLite();
 
