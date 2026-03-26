@@ -22,7 +22,7 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
     }
 
     ILocator IEntityButtonContainer.Container => Modal;
-    ILocator ILineContainer.Element => Modal;
+    ILocator ILineContainer.Element => MainControl;
     ILocator IValidationSummaryContainer.Element => Modal;
 
     public override async ValueTask DisposeAsync()
@@ -62,7 +62,7 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
         }
     }
 
-    private ILocator MainControl => Modal.Locator("div.sf-main-control");
+    public ILocator MainControl => Modal.Locator("div.sf-main-control");
 
 
     public Task<EntityInfoProxy> GetEntityInfoAsync() => EntityInfoProxy.GetFromMainEntityAsync(MainControl);
