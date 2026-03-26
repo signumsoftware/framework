@@ -11,9 +11,11 @@ public abstract class EntityBaseProxy : BaseLineProxy
     {
     }
 
+    internal virtual ILocator ButtonBar => Element;
+
     public virtual PropertyRoute ItemRoute => this.Route;
 
-    public ILocator CreateButton => Element.Locator("a.sf-create");
+    public ILocator CreateButton => ButtonBar.Locator("a.sf-create");
 
     protected async Task CreateEmbeddedAsync<T>()
     {
@@ -23,7 +25,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
 
             if (imp != null && imp.Value.Types.Count() != 1)
             {
-                var popup = await CaptureOnClickAsync(CreateButton);
+                var popup = await CreateButton.CaptureOnClickAsync();
                 await ChooseTypeAsync(popup, typeof(T));
             }
             else
@@ -31,14 +33,14 @@ public abstract class EntityBaseProxy : BaseLineProxy
                 await CreateButton.ClickAsync();
             }
 
-        }, "create clicked");
+        });
     }
 
     public async Task<FrameModalProxy<T>> CreateModalAsync<T>() where T : ModifiableEntity
     {
         string changes = await GetChangesAsync();
 
-        var popup = await CaptureOnClickAsync(await CreateButton.WaitForAsync(new() { State = WaitForSelectorState.Visible }).ContinueWith(_ => CreateButton));
+        var popup = await CreateButton.CaptureOnClickAsync();
 
         popup = await ChooseTypeCaptureAsync(popup, typeof(T));
 
@@ -46,42 +48,43 @@ public abstract class EntityBaseProxy : BaseLineProxy
 
         return new FrameModalProxy<T>(popup, itemRoute)
         {
-            Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
+            Disposing = async okPressed => await WaitNewChangesAsync(changes)
         };
     }
 
-    public ILocator ViewButton => Element.Locator("a.sf-view");
+    public ILocator ViewButton => ButtonBar.Locator("a.sf-view");
 
     protected async Task<FrameModalProxy<T>> ViewInternalAsync<T>() where T : ModifiableEntity
     {
-        var popup = await CaptureOnClickAsync(ViewButton);
+        var popup = await ViewButton.CaptureOnClickAsync();
         string changes = await GetChangesAsync();
 
         return new FrameModalProxy<T>(popup, this.ItemRoute)
         {
-            Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
+            Disposing = async okPressed => await WaitNewChangesAsync(changes)
         };
     }
 
-    public ILocator FindButton => Element.Locator("a.sf-find");
 
-    public ILocator RemoveButton => Element.Locator("a.sf-remove");
+    public ILocator FindButton => ButtonBar.Locator("a.sf-find");
+
+    public ILocator RemoveButton => ButtonBar.Locator("a.sf-remove");
 
     public async Task RemoveAsync()
     {
-        await WaitChangesAsync(async () => await RemoveButton.ClickAsync(), "removing");
+        await WaitChangesAsync(async () => await RemoveButton.ClickAsync());
     }
 
     public async Task<SearchModalProxy> FindAsync(Type? selectType = null)
     {
         string changes = await GetChangesAsync();
-        var popup = await CaptureOnClickAsync(FindButton);
+        var popup = await FindButton.CaptureOnClickAsync();
 
         popup = await ChooseTypeCaptureAsync(popup, selectType);
 
         return new SearchModalProxy(popup)
         {
-            Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
+            Disposing = async okPressed => await WaitNewChangesAsync(changes)
         };
     }
 
@@ -109,20 +112,18 @@ public abstract class EntityBaseProxy : BaseLineProxy
         return Page.Locator(".modal:visible").Last;
     }
 
-    public async Task WaitChangesAsync(Func<Task> action, string actionDescription)
+    public async Task WaitChangesAsync(Func<Task> action)
     {
         var changes = await GetChangesAsync();
 
         await action();
 
-        await WaitNewChangesAsync(changes, actionDescription);
+        await WaitNewChangesAsync(changes);
     }
 
-    public async Task WaitNewChangesAsync(string changes, string actionDescription)
+    public async Task WaitNewChangesAsync(string changes)
     {
-        await Page.WaitForFunctionAsync(
-            @"([element, oldVal]) => element.getAttribute('data-changes') !== oldVal",
-            new object[] { await Element.ElementHandleAsync(), changes });
+        await Assertions.Expect(Element).Not.ToHaveAttributeAsync("data-changes", changes!);
     }
 
     public async Task<string> GetChangesAsync()
@@ -140,20 +141,12 @@ public abstract class EntityBaseProxy : BaseLineProxy
 
         await action();
 
-        await Page.WaitForFunctionAsync(
-            @"([element, oldVal, index}) => {
-                let target = index == null ? element :
-                    element.querySelectorAll('[data-entity]')[index];
-                return target.getAttribute('data-entity') !== oldVal;
-            }",
-            new object?[] { await Element.ElementHandleAsync(), entityInfo, index });
+        await Assertions.Expect(DataEntityLocator(index)).Not.ToHaveAttributeAsync("data-entity", entityInfo!);
     }
 
     protected async Task<string> EntityInfoStringAsync(int? index)
     {
-        var element = index == null
-            ? Element
-            : Element.Locator("[data-entity]").Nth(index.Value);
+        ILocator element = DataEntityLocator(index);
 
         var attr = await element.GetAttributeAsync("data-entity");
 
@@ -161,6 +154,13 @@ public abstract class EntityBaseProxy : BaseLineProxy
             throw new InvalidOperationException("data-entity attribute not found");
 
         return attr;
+    }
+
+    private ILocator DataEntityLocator(int? index)
+    {
+        return index == null ?
+            Element :
+            Element.Locator("[data-entity]").Nth(index.Value);
     }
 
     protected async Task<EntityInfoProxy?> EntityInfoInternalAsync(int? index)
@@ -171,7 +171,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
         await WaitChangesAsync(async () =>
         {
             await AutoCompleteBasicAsync(input, container, lite);
-        }, "autocomplete selection");
+        });
     }
 
     public async Task AutoCompleteWaitChangesAsync(ILocator input, ILocator container, string beginning)
@@ -179,7 +179,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
         await WaitChangesAsync(async () =>
         {
             await AutoCompleteBasicAsync(input, container, beginning);
-        }, "autocomplete selection");
+        });
     }
 
     public static async Task AutoCompleteBasicAsync(ILocator input, ILocator container, Lite<IEntity> lite)
@@ -202,12 +202,6 @@ public abstract class EntityBaseProxy : BaseLineProxy
 
         var item = list.Locator("[data-entity-key]").Filter(new() { HasTextString = beginning });
         await item.First.ClickAsync();
-    }
-
-    protected async Task<ILocator> CaptureOnClickAsync(ILocator locator)
-    {
-        await locator.ClickAsync();
-        return Page.Locator(".modal:visible").Last;
     }
 }
 
