@@ -425,7 +425,7 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
       return undefined;
 
     return (
-      <LinkButton className="sf-popup-fullscreen sf-pointer" tabIndex={0} onClick={handlePopupFullScreen} title={FrameMessage.Fullscreen.niceToString()}>
+      <LinkButton className="sf-popup-fullscreen sf-pointer" tabIndex={0} onClick={handlePopupFullScreen} onAuxClick={handlePopupFullScreen} title={FrameMessage.Fullscreen.niceToString()}>
         <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
       </LinkButton>
     );
@@ -436,6 +436,7 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
     e.preventDefault();
 
     var entity = pack!.entity;
+
     var vp = getViewPromise && getViewPromise(entity);
     AppContext.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
   }
