@@ -313,12 +313,12 @@ public static class PlaywrightExtensions
         );
     }
 
-    public static async Task WaitAttributeAsync(this ILocator locator, string attributeName, string? expectedValue)
+    public static async Task WaitAttributeAsync(this ILocator locator, string attributeName, string? expectedValue, string op = "===")
     {
         var elementHandle = await locator.ElementHandleAsync();
 
         await locator.Page.WaitForFunctionAsync(
-            @"([el, attr, value]) => el.getAttribute(attr) === value",
+            $@"([el, attr, value]) => el.getAttribute(attr) {op} value",
             new object?[] { elementHandle, attributeName, expectedValue }
         );
     }

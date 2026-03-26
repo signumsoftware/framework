@@ -57,8 +57,7 @@ public class FilterConditionProxy : FilterProxy
     internal async Task SetValueAsync(object? value)
     {
         var fullKey = await QueryToken.FullKeyAsync();
-        var qt = QueryUtils.Parse(fullKey!, QueryLogic.Queries.QueryDescription(QueryName),
-            SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll);
+        var qt = QueryUtils.Parse(fullKey!, QueryLogic.Queries.QueryDescription(this.QueryName), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll);
 
         var al = BaseLineProxy.AutoLine(ValueElement, qt.GetPropertyRoute()!);
 

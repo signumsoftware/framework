@@ -33,11 +33,11 @@ public class EntityStripProxy : EntityBaseProxy
     public async Task<FrameModalProxy<T>> ViewAsync<T>(int index) where T : ModifiableEntity
     {
         var changes = await GetChangesAsync();
-        var popup = await CaptureOnClickAsync(ViewElementIndex(index));
+        var popup = await ViewElementIndex(index).CaptureOnClickAsync();
 
         return new FrameModalProxy<T>(popup, this.ItemRoute)
         {
-            Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
+            Disposing = async okPressed => await WaitNewChangesAsync(changes)
         };
     }
 }

@@ -15,19 +15,20 @@ public class FiltersProxy
 
     public async Task<List<FilterProxy>> FiltersAsync()
     {
-        var handles = await Element.Locator("table > tbody > tr").ElementHandlesAsync();
+        var rows = Element.Locator("table > tbody > tr");
+        var count = await rows.CountAsync();
+
         var list = new List<FilterProxy>();
 
-        foreach (var handle in handles)
+        for (int i = 0; i < count; i++)
         {
-            var className = await handle.GetAttributeAsync("class") ?? "";
-
-            ILocator locator = (ILocator)handle;
+            var row = rows.Nth(i);
+            var className = await row.GetAttributeAsync("class") ?? "";
 
             if (className.Contains("sf-filter-condition"))
-                list.Add(new FilterConditionProxy(locator, QueryName));
+                list.Add(new FilterConditionProxy(row, QueryName));
             else if (className.Contains("sf-filter-group"))
-                list.Add(new FilterGroupProxy(locator, QueryName));
+                list.Add(new FilterGroupProxy(row, QueryName));
         }
 
         return list;

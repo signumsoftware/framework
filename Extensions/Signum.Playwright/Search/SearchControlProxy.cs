@@ -1,7 +1,9 @@
 using Microsoft.Playwright;
 using Signum.Playwright.Frames;
 using Signum.Playwright.ModalProxies;
+using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Synchronization;
+using System.Diagnostics;
 
 namespace Signum.Playwright.Search;
 
@@ -39,8 +41,7 @@ public class SearchControlProxy
     public async Task WaitSearchCompletedAsync(Func<Task> searchTrigger)
     {
         var counter = await Element.GetAttributeAsync("data-search-count");
-        if (searchTrigger != null)
-            await searchTrigger();
+        await searchTrigger();
         await WaitSearchCompletedAsync(counter);
     }
 
@@ -51,7 +52,7 @@ public class SearchControlProxy
 
     private async Task WaitSearchCompletedAsync(string? counter)
     {
-        await Assertions.Expect(Element).Not.ToHaveAttributeAsync("data-search-count", counter!);
+        await Element.WaitAttributeAsync("data-search-count", counter, "!==");
     }
 
     public async Task<EntityContextMenuProxy> SelectedClickAsync()
