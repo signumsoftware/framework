@@ -112,11 +112,7 @@ public class SearchControlProxy
 
     public async Task<FrameModalProxy<T>> CreateAsync<T>() where T : ModifiableEntity
     {
-        await CreateButton.ClickAsync();
-
-        var modalLocator = this.Element.Page.Locator(".sf-selector-modal, .sf-modal");
-        await modalLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
-
+        var modalLocator = await CreateButton.CaptureOnClickAsync();
         if (await SelectorModalProxy.IsSelectorAsync(modalLocator))
             modalLocator = await modalLocator.AsSelectorModal().SelectAndCaptureAsync<T>();
         var modal = await new FrameModalProxy<T>(modalLocator).WaitLoadedAsync();
