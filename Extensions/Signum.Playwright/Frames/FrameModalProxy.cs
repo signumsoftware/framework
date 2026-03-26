@@ -65,15 +65,7 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
     private ILocator MainControl => Modal.Locator("div.sf-main-control");
 
 
-    public async Task<EntityInfoProxy> GetEntityInfoAsync()
-    {
-        var attr = await MainControl.GetAttributeAsync("data-main-entity");
-
-        if (attr == null)
-            throw new InvalidOperationException("data-main-entity attribute not found");
-
-        return EntityInfoProxy.Parse(attr)!;
-    }
+    public Task<EntityInfoProxy> GetEntityInfoAsync() => EntityInfoProxy.GetFromMainEntityAsync(MainControl);
 }
 
 public static class FrameModalProxyExtension

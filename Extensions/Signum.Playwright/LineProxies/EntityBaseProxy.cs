@@ -247,4 +247,14 @@ public class EntityInfoProxy
 
         return new EntityInfoProxy(dataEntity);
     }
+
+    public static async Task<EntityInfoProxy> GetFromMainEntityAsync(ILocator locator, string attribute = "data-main-entity")
+    {
+        await locator.WaitAttributeAsync(attribute, null, "!==");
+        var attr = await locator.GetAttributeAsync(attribute);
+        if (attr == null)
+            throw new InvalidOperationException($"{attribute} attribute not found");
+
+        return Parse(attr)!;
+    }
 }

@@ -13,12 +13,19 @@ public class CaseFrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButt
     where T : ICaseMainEntity
 {
     public PropertyRoute Route { get; }
-    public CaseFrameModalProxy(ILocator locator, PropertyRoute? route = null) : base(locator)
+    CaseFrameModalProxy(ILocator locator, PropertyRoute? route = null) : base(locator)
     {
         Route = route ?? PropertyRoute.Root(typeof(T));
     }
 
-    public ILocator Container => Modal;
+    public static async Task<CaseFrameModalProxy<T>> NewAsync(ILocator modal, PropertyRoute? route = null)
+    {
+        var result = new CaseFrameModalProxy<T>(modal, route);
+        await result.MainControl.WaitVisibleAsync();
+        return result;
+    }
+
+    ILocator IEntityButtonContainer.Container => Modal;
     ILocator ILineContainer.Element => Modal;
     ILocator IValidationSummaryContainer.Element => Modal;
 
@@ -59,34 +66,23 @@ public class CaseFrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButt
         }
     }
 
-    public async Task<EntityInfoProxy> GetEntityInfoAsync()
-    {
-        var mainControl = Modal.Locator("div.sf-main-control");
-        var attr = await mainControl.GetAttributeAsync("data-main-entity");
-        
-        if (attr == null)
-            throw new InvalidOperationException("data-main-entity attribute not found");
+    private ILocator MainControl => Modal.Locator("div.sf-main-control");
 
-        return EntityInfoProxy.Parse(attr)!;
-    }
-    public async Task<CaseFrameModalProxy<T>> WaitLoadedAsync()
-    {
-        await Modal.Locator("div.sf-main-control").WaitVisibleAsync();
-        return this;
-    }
+
+    public Task<EntityInfoProxy> GetEntityInfoAsync() => EntityInfoProxy.GetFromMainEntityAsync(MainControl);
 }
 
-public static class FrameModalProxyExtension
+public static class CaseFrameModalProxyExtension
 {
-    public static async Task<FrameModalProxy<T>> Await_AsFrameModal<T>(this Task<ILocator> modal)
-    where T : ModifiableEntity
+    public static async Task<CaseFrameModalProxy<T>> Await_AsCaseFrameModal<T>(this Task<ILocator> modal)
+    where T : ICaseMainEntity
     {
-        return new FrameModalProxy<T>(await modal);
+        return await CaseFrameModalProxy<T>.NewAsync(await modal);
     }
 
-    public static FrameModalProxy<T> AsFrameModal<T>(this ILocator modal)
-        where T : ModifiableEntity
+    public static Task<CaseFrameModalProxy<T>> AsCaseFrameModal<T>(this ILocator modal)
+        where T : ICaseMainEntity   
     {
-        return new FrameModalProxy<T>(modal);
+        return CaseFrameModalProxy<T>.NewAsync(modal);
     }
 }

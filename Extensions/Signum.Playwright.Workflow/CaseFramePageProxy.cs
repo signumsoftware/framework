@@ -46,11 +46,8 @@ public class CaseFramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T
 
     public ILocator MainControl => Element.Locator(".sf-main-control");
 
-    async Task<EntityInfoProxy> GetEntityInfoAsync()
-    {
-        var attr = await MainControl.First.GetAttributeAsync("data-main-entity");
-        return attr == null ? throw new InvalidOperationException("data-main-entity attribute not found") : EntityInfoProxy.Parse(attr)!;
-    }
+    public Task<EntityInfoProxy> GetEntityInfoAsync() => EntityInfoProxy.GetFromMainEntityAsync(MainControl);
+
     Task<EntityInfoProxy> IEntityButtonContainer.GetEntityInfoAsync()
     {
         return GetEntityInfoAsync();
