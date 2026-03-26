@@ -1516,7 +1516,7 @@ export namespace Finder {
 
         return ({
           token: token,
-          operation: fo.operation ?? (token && getFilterOperations(token).firstOrNull()) ?? "EqualTo",
+          operation: fo.operation ?? (token && getFilterOperations(token).orderBy(a=>a == "EqualTo" ? 0 : 1).firstOrNull()) ?? "EqualTo",
           value: fo.value,
           frozen: fo.frozen || false,
           removeElementWarning: fo.removeElementWarning,
