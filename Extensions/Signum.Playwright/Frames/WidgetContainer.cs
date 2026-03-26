@@ -4,6 +4,9 @@ using Signum.Playwright.Search;
 
 namespace Signum.Playwright.Frames;
 
+/// <summary>
+/// Interface for proxies of components calling Widgets.tsx
+/// </summary>
 public interface IWidgetContainer
 {
     ILocator Element { get; }
@@ -34,7 +37,7 @@ public static class WidgetContainerExtensions
 
     public static async Task<SearchModalProxy> QuickLinkClickSearchAsync(this IWidgetContainer container, string name)
     {
-        var modal = await ModalProxy.CaptureAsync(container.Page, async () =>
+        var modal = await container.Page.CaptureModalAsync(async () =>
         {
             var ql = container.WidgetContainer().Locator(".dropdown .sf-quicklinks");
 
@@ -47,6 +50,6 @@ public static class WidgetContainerExtensions
             await element.ClickAsync();
         });
 
-        return new SearchModalProxy(modal.Modal);
+        return new SearchModalProxy(modal);
     }
 }

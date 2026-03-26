@@ -3,6 +3,9 @@ using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for SearchValueLine.tsx
+/// </summary>
 public class SearchValueLineProxy
 {
     public ILocator Element { get; private set; }

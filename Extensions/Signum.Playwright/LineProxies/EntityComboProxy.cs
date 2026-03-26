@@ -2,6 +2,9 @@ using Signum.Playwright.Frames;
 
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Abstract proxy for EntityBase.tsx
+/// </summary>
 public class EntityComboProxy : EntityBaseProxy
 {
     public EntityComboProxy(ILocator element, PropertyRoute route)

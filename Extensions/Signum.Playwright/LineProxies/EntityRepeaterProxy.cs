@@ -3,6 +3,9 @@ using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Proxy for EntityRepeater.tsx
+/// </summary>
 public class EntityRepeaterProxy : EntityBaseProxy
 {
     public override PropertyRoute ItemRoute => base.ItemRoute.Add("Item");

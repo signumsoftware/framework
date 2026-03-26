@@ -4,6 +4,9 @@ using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for SearchPage.tsx
+/// </summary>
 public class SearchPageProxy : IDisposable, IAsyncDisposable
 {
     public IPage Page { get; private set; }

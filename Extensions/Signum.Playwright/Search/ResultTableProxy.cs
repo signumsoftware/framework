@@ -4,6 +4,9 @@ using Signum.Utilities.Synchronization;
 
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for the result table part in SearchControlLoaded.tsx
+/// </summary>
 public class ResultTableProxy
 {
     public ILocator Element { get; }

@@ -1,12 +1,11 @@
 namespace Signum.Playwright.LineProxies;
 
 /// <summary>
-/// Proxy for HTML editor controls
-/// Equivalent to Selenium's HtmlLineProxy
+/// Proxy for HtmlEditorLine.tsx
 /// </summary>
-public class HtmlLineProxy : BaseLineProxy
+public class HtmlEditorLineProxy : BaseLineProxy
 {
-    public HtmlLineProxy(ILocator element, PropertyRoute route)
+    public HtmlEditorLineProxy(ILocator element, PropertyRoute route)
         : base(element, route)
     {
     }

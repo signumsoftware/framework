@@ -5,6 +5,9 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Proxy for DateTimeLine.tsx
+/// </summary>
 public class DateTimeLineProxy : BaseLineProxy
 {
     public DateTimeLineProxy(ILocator element, PropertyRoute route)

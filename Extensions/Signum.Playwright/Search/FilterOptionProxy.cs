@@ -2,8 +2,12 @@ using Signum.Playwright.LineProxies;
 
 namespace Signum.Playwright.Search;
 
+
 public abstract class FilterProxy { }
 
+/// <summary>
+/// Proxy for FilterGroupComponent in FilterBuilder.tsx
+/// </summary>
 public class FilterGroupProxy : FilterProxy
 {
     public ILocator Element { get; }
@@ -16,6 +20,9 @@ public class FilterGroupProxy : FilterProxy
     }
 }
 
+/// <summary>
+/// Proxy for FilterConditionComponent in FilterBuilder.tsx
+/// </summary>
 public class FilterConditionProxy : FilterProxy
 {
     public ILocator Element { get; }
@@ -57,8 +64,7 @@ public class FilterConditionProxy : FilterProxy
     internal async Task SetValueAsync(object? value)
     {
         var fullKey = await QueryToken.FullKeyAsync();
-        var qt = QueryUtils.Parse(fullKey!, QueryLogic.Queries.QueryDescription(QueryName),
-            SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll);
+        var qt = QueryUtils.Parse(fullKey!, QueryLogic.Queries.QueryDescription(this.QueryName), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll);
 
         var al = BaseLineProxy.AutoLine(ValueElement, qt.GetPropertyRoute()!);
 

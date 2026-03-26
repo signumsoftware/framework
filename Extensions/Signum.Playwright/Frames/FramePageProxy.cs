@@ -4,6 +4,7 @@ using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Frames;
 
+//Proxy for FramePage.tsx
 public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, IWidgetContainer, IValidationSummaryContainer, IAsyncDisposable, IDisposable
     where T : ModifiableEntity
 {

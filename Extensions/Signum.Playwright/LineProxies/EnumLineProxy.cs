@@ -3,8 +3,7 @@ using Signum.Utilities.Reflection;
 namespace Signum.Playwright.LineProxies;
 
 /// <summary>
-/// Proxy for enum dropdown controls
-/// Equivalent to Selenium's EnumLineProxy
+/// Proxy for EnumLine.tsx
 /// </summary>
 public class EnumLineProxy : BaseLineProxy
 {

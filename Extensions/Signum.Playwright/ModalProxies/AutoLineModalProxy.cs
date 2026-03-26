@@ -3,6 +3,9 @@ using Signum.Playwright.LineProxies;
 
 namespace Signum.Playwright.ModalProxies;
 
+/// <summary>
+/// Proxy for AutoLineModal.tsx
+/// </summary>
 public class AutoLineModalProxy : ModalProxy
 {
     private PropertyRoute route;
