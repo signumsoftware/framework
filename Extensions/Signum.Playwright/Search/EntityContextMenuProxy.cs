@@ -73,7 +73,7 @@ public class EntityContextMenuProxy
             await modalLocator.ScrollIntoViewIfNeededAsync();
         var modal = await modalLocator.CaptureOnClickAsync();
 
-        var result = new FrameModalProxy<T>(modal);
+        var result = await FrameModalProxy<T>.NewAsync(modal);
         result.Disposing += okPressed => check();
 
         return result;
@@ -95,7 +95,7 @@ public class EntityContextMenuProxy
             await modalLocator.ScrollIntoViewIfNeededAsync();
         var modal = await modalLocator.CaptureOnClickAsync();
 
-        var result = new FrameModalProxy<T>(modal);
+        var result = await FrameModalProxy<T>.NewAsync(modal);
         result.Disposing += okPressed => check();
 
         return result;

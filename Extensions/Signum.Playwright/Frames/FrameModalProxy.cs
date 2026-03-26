@@ -8,12 +8,19 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
     where T : ModifiableEntity
 {
     public PropertyRoute Route { get; }
-    public FrameModalProxy(ILocator locator, PropertyRoute? route = null) : base(locator)
+    FrameModalProxy(ILocator locator, PropertyRoute? route = null) : base(locator)
     {
         Route = route ?? PropertyRoute.Root(typeof(T));
     }
 
-    public ILocator Container => Modal;
+    public static async Task<FrameModalProxy<T>> NewAsync(ILocator modal, PropertyRoute? route = null)
+    {
+        var result = new FrameModalProxy<T>(modal, route);
+        await result.MainControl.WaitVisibleAsync();    
+        return result;
+    }
+
+    ILocator IEntityButtonContainer.Container => Modal;
     ILocator ILineContainer.Element => Modal;
     ILocator IValidationSummaryContainer.Element => Modal;
 
@@ -21,66 +28,50 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
     {
         if (!AvoidClose)
         {
-            var maxAttempts = 10;
-            var attempts = 0;
-
-            while (attempts < maxAttempts)
+            await this.Modal.Page.WaitAsync(async () =>
             {
-                attempts++;
-
                 if (!await Modal.IsVisibleAsync())
-                    break;
+                    return true;
 
                 if (await TryToCloseAsync())
-                    break;
+                    return true;
 
                 var message = await Modal.Page.GetMessageModalAsync();
                 if (message != null)
                 {
                     await message.ClickAsync(MessageModalButton.Yes);
-                    await Task.Delay(300);
                 }
 
-                await Task.Delay(200);
-            }
+                return false;
+            });
         }
 
         Disposing?.Invoke(this.OkPressed);
     }
     private async Task<bool> TryToCloseAsync()
     {
-        try
+        if (await this.CloseButton.IsVisibleAsync())
         {
-            var closeCount = await this.CloseButton.CountAsync();
-            if (closeCount == 0)
-                return false;
-
-            var close = this.CloseButton.First;
-            if (await close.IsVisibleAsync())
-            {
-                await close.ClickAsync();
-            }
+            await this.CloseButton.ClickAsync();
             return false;
         }
-        catch (Exception)
+        else
         {
             return true;
         }
     }
+
+    private ILocator MainControl => Modal.Locator("div.sf-main-control");
+
+
     public async Task<EntityInfoProxy> GetEntityInfoAsync()
     {
-        var mainControl = Modal.Locator("div.sf-main-control");
-        var attr = await mainControl.GetAttributeAsync("data-main-entity");
-        
+        var attr = await MainControl.GetAttributeAsync("data-main-entity");
+
         if (attr == null)
             throw new InvalidOperationException("data-main-entity attribute not found");
 
         return EntityInfoProxy.Parse(attr)!;
-    }
-    public async Task<FrameModalProxy<T>> WaitLoadedAsync()
-    {
-        await Modal.Locator("div.sf-main-control").WaitVisibleAsync();
-        return this;
     }
 }
 
@@ -89,12 +80,12 @@ public static class FrameModalProxyExtension
     public static async Task<FrameModalProxy<T>> Await_AsFrameModal<T>(this Task<ILocator> modal)
     where T : ModifiableEntity
     {
-        return new FrameModalProxy<T>(await modal);
+        return await FrameModalProxy<T>.NewAsync(await modal);
     }
 
-    public static FrameModalProxy<T> AsFrameModal<T>(this ILocator modal)
+    public static Task<FrameModalProxy<T>> AsFrameModal<T>(this ILocator modal)
         where T : ModifiableEntity
     {
-        return new FrameModalProxy<T>(modal);
+        return FrameModalProxy<T>.NewAsync(modal);
     }
 }

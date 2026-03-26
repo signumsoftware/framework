@@ -28,7 +28,7 @@ public class SearchValueLineProxy
             popup = await selector.SelectAndCaptureAsync<T>();
         }
 
-        return await new FrameModalProxy<T>(popup).WaitLoadedAsync();
+        return await FrameModalProxy<T>.NewAsync(popup);
     }
 
     private async Task<ILocator> CapturePopupAsync(ILocator trigger, Func<Task> action)

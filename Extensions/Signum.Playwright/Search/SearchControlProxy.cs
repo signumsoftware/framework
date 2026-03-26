@@ -115,7 +115,7 @@ public class SearchControlProxy
         var modalLocator = await CreateButton.CaptureOnClickAsync();
         if (await SelectorModalProxy.IsSelectorAsync(modalLocator))
             modalLocator = await modalLocator.AsSelectorModal().SelectAndCaptureAsync<T>();
-        var modal = await new FrameModalProxy<T>(modalLocator).WaitLoadedAsync();
+        var modal = await FrameModalProxy<T>.NewAsync(modalLocator);
         return modal;
     }
 

@@ -73,10 +73,9 @@ public class ModalProxy : IDisposable, IAsyncDisposable
         var disposing = Disposing;
         Disposing = null;
 
-        return new FrameModalProxy<T>(newModal.Modal)
-        {
-            Disposing = disposing
-        };
+        var result = await FrameModalProxy<T>.NewAsync(newModal.Modal);
+        result.Disposing = disposing;
+        return result;
     }
 
     public async Task<SearchModalProxy> OkWaitSearchModalAsync()

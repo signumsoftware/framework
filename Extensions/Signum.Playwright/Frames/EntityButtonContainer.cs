@@ -165,7 +165,7 @@ public static class EntityButtonContainerExtensions
         where F : Entity
     {
         var element = await container.OperationClickCaptureAsync(symbol);
-        var modal = await new FrameModalProxy<T>(element).WaitLoadedAsync();
+        var modal = await FrameModalProxy<T>.NewAsync(element);
         return modal;
     }
 
@@ -180,7 +180,7 @@ public static class EntityButtonContainerExtensions
             try { return (await container.GetEntityInfoAsync()).IsNew; } catch { return false; }
         });
 
-        return await FramePageProxy<T>.CreateAsync(container.Container.Page);
+        return await FramePageProxy<T>.NewAsync(container.Container.Page);
     }
 
     public static async Task<long?> RefreshCountAsync(this IEntityButtonContainer container)

@@ -18,15 +18,12 @@ public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, I
         Route = PropertyRoute.Root(typeof(T));
     }
 
-    public static async Task<FramePageProxy<T>> CreateAsync(IPage page)
+    public static async Task<FramePageProxy<T>> NewAsync(IPage page)
     {
         var result = new FramePageProxy<T>(page);
         await result.WaitLoadedAsync();
         return result;
     }
-
-
-
 
 
     public ILocator Container => Element;
@@ -62,7 +59,7 @@ public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, I
         return (T)(IEntity)lite.RetrieveAndRemember();
     }
 
-    public async Task<FramePageProxy<T>> WaitLoadedAsync()
+    async Task WaitLoadedAsync()
     {
         await Page.WaitForSelectorAsync(".normal-control");
         
@@ -73,7 +70,5 @@ public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, I
         }
 
         await MainControl.WaitVisibleAsync();
-        return this;
     }
-
 }

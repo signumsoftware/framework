@@ -35,7 +35,7 @@ public class BrowserProxy
         var url = Url(FindRoute(queryName));
         await Page.GotoAsync(url);
 
-        var result = await SearchPageProxy.CreateAsync(Page);
+        var result = await SearchPageProxy.NewAsync(Page);
 
         if (waitInitialSearch)
         {
@@ -78,7 +78,7 @@ public class BrowserProxy
     {
         var url = Url(NavigateRoute(typeof(T), null));
         await Page.GotoAsync(url);
-        return await FramePageProxy<T>.CreateAsync(Page);
+        return await FramePageProxy<T>.NewAsync(Page);
     }
 
     public async Task<FramePageProxy<T>> FramePageAsync<T>(Lite<T> lite) where T : Entity
@@ -88,7 +88,7 @@ public class BrowserProxy
 
         var url = Url(NavigateRoute(lite));
         await Page.GotoAsync(url);
-        return await FramePageProxy<T>.CreateAsync(Page);
+        return await FramePageProxy<T>.NewAsync(Page);
     }
 
     /// <summary>

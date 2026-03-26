@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Signum.Playwright.Frames;
 using Signum.Playwright.ModalProxies;
 using Signum.Playwright.Search;
@@ -31,7 +32,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
                 await CreateButton.ClickAsync();
             }
 
-        }, "create clicked");
+        });
     }
 
     public async Task<FrameModalProxy<T>> CreateModalAsync<T>() where T : ModifiableEntity
@@ -44,10 +45,9 @@ public abstract class EntityBaseProxy : BaseLineProxy
 
         var itemRoute = this.ItemRoute.Type == typeof(T) ? this.ItemRoute : PropertyRoute.Root(typeof(T));
 
-        return new FrameModalProxy<T>(popup, itemRoute)
-        {
-            Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
-        };
+        var modal = await FrameModalProxy<T>.NewAsync(popup, itemRoute);
+        modal.Disposing = async okPressed => await WaitNewChangesAsync(changes);
+        return modal;
     }
 
     public ILocator ViewButton => Element.Locator("a.sf-view");
@@ -57,10 +57,9 @@ public abstract class EntityBaseProxy : BaseLineProxy
         var popup = await CaptureOnClickAsync(ViewButton);
         string changes = await GetChangesAsync();
 
-        return new FrameModalProxy<T>(popup, this.ItemRoute)
-        {
-            Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
-        };
+        var result = await FrameModalProxy<T>.NewAsync(popup, this.ItemRoute);
+        result.Disposing = async okPressed => await WaitNewChangesAsync(changes);
+        return result;
     }
 
     public ILocator FindButton => Element.Locator("a.sf-find");
@@ -69,7 +68,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
 
     public async Task RemoveAsync()
     {
-        await WaitChangesAsync(async () => await RemoveButton.ClickAsync(), "removing");
+        await WaitChangesAsync(async () => await RemoveButton.ClickAsync());
     }
 
     public async Task<SearchModalProxy> FindAsync(Type? selectType = null)
@@ -81,7 +80,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
 
         return new SearchModalProxy(popup)
         {
-            Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
+            Disposing = async okPressed => await WaitNewChangesAsync(changes)
         };
     }
 
@@ -109,16 +108,16 @@ public abstract class EntityBaseProxy : BaseLineProxy
         return Page.Locator(".modal:visible").Last;
     }
 
-    public async Task WaitChangesAsync(Func<Task> action, string actionDescription)
+    public async Task WaitChangesAsync(Func<Task> action)
     {
         var changes = await GetChangesAsync();
 
         await action();
 
-        await WaitNewChangesAsync(changes, actionDescription);
+        await WaitNewChangesAsync(changes);
     }
 
-    public async Task WaitNewChangesAsync(string changes, string actionDescription)
+    public async Task WaitNewChangesAsync(string changes)
     {
         await Page.WaitForFunctionAsync(
             @"([element, oldVal]) => element.getAttribute('data-changes') !== oldVal",
@@ -171,7 +170,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
         await WaitChangesAsync(async () =>
         {
             await AutoCompleteBasicAsync(input, container, lite);
-        }, "autocomplete selection");
+        });
     }
 
     public async Task AutoCompleteWaitChangesAsync(ILocator input, ILocator container, string beginning)
@@ -179,7 +178,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
         await WaitChangesAsync(async () =>
         {
             await AutoCompleteBasicAsync(input, container, beginning);
-        }, "autocomplete selection");
+        });
     }
 
     public static async Task AutoCompleteBasicAsync(ILocator input, ILocator container, Lite<IEntity> lite)
