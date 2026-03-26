@@ -68,14 +68,14 @@ public static class LineContainerExtensions
                 var newRoute = route.Add(mi);
 
                 if (newRoute.Parent != route && route != lineContainer.Route)
-                    locator = locator.Locator($"[data-property-path='{route.PropertyString()}']");
+                    locator = locator.Locator($"[data-property-path='{route.PropertyString()}']").First;
 
                 route = newRoute;
             }
         }
 
         return new LineLocator<S>(
-            elementLocator: locator.Locator($"[data-property-path='{route.PropertyString()}']"),
+            elementLocator: locator.Locator($"[data-property-path='{route.PropertyString()}']").First,
             route: route
         );
     }
