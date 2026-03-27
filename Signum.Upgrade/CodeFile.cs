@@ -274,6 +274,53 @@ public class CodeFile
         });
     }
 
+
+
+    public void ReplaceBetweenAll(ReplaceBetweenOption fromLine, ReplaceBetweenOption toLine, Func<string, (IReadOnlyList<string> lines, int from, int to), string> getText)
+    {
+        ProcessLines(lines =>
+        {
+            bool hasChanges = false;
+            int currentIndex = 0;
+            while (true)
+            {
+                var from = fromLine.FindStartIndex(lines, currentIndex);
+                if (from == -1)
+                {
+                    return hasChanges;
+                }
+
+                var indent = GetIndent(lines[from - fromLine.Delta]);
+                var to = toLine.FindEndIndex(lines, from, indent);
+                if (to == -1)
+                {
+                    Warning($"Unable to find a line where {toLine.Condition} after line {to} to insert text before it");
+                    return hasChanges;
+                }
+
+                if(to == from)
+                {
+
+                }
+                hasChanges = true;
+                var oldText = lines.Where((l, i) => i >= from && i <= to).ToList().ToString("\n");
+                lines.RemoveRange(from, to - from + 1);
+
+                var text = getText(oldText, (lines, from, to));
+                if (text.HasText())
+                {
+                    var newLines = text.Lines().Select(a => IndentAndReplace(a, "")).ToList();
+                    lines.InsertRange(from, newLines);
+                    currentIndex = from + newLines.Count;
+                }
+                else
+                {
+                    currentIndex = from;
+                }
+            }
+        });
+    }
+
     public string GetMethodBody(Expression<Predicate<string>> methodLine) =>
         GetLinesBetween(
             new(methodLine, 2),
@@ -318,7 +365,7 @@ public class CodeFile
                 return false;
             }
             text = lines.Where((l, i) => i >= from && i <= to).ToList().ToString("\n");
-            return true;
+            return false;
         });
         return text;
     }
@@ -684,6 +731,9 @@ public class CodeFile
 
     public void Solution_AddProject(string projectFile, string? parentFolder, string projecTypeId = "9A19103F-16F7-4668-BE54-9A1E7A4F7556", WarningLevel showWarning = WarningLevel.Error)
     {
+        if (Content.Contains($@"""{projectFile}"""))
+            return;
+
         var prjRegex = new Regex(@"[\\]?(?<project>[\.\w]*).csproj");
 
         var prjName = prjRegex.Match(projectFile).Groups["project"].Value;
@@ -729,7 +779,7 @@ public class CodeFile
                 """);
     }
 
-    public void Solution_SolutionItem(string relativeFilePath, string folderName)
+    public void Solution_AddSolutionItem(string relativeFilePath, string folderName)
     {
         var folderId = Guid.NewGuid().ToString().ToUpper();
 
@@ -836,11 +886,11 @@ public class ReplaceBetweenOption
 
    
 
-    internal int FindStartIndex(List<string> lines)
+    internal int FindStartIndex(List<string> lines, int afterIndex = 0)
     {
         var cond = Condition.Compile();
         var from = !LastIndex ?
-          lines.FindIndex(cond) :
+          lines.FindIndex(afterIndex, cond) :
           lines.FindLastIndex(cond);
 
         if (from == -1)

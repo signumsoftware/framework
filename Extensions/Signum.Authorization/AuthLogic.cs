@@ -390,12 +390,19 @@ public static class AuthLogic
         OnRulesChanged?.Invoke();
     }
 
-    public static UserEntity Login(string username, IList<byte[]> passwordHashes, out string authenticationType)
+    public static UserEntity Login(string username, string password, out string authenticationType)
+    {
+        return Login(username,
+            PasswordEncoding.HashPassword(username, password),
+            PasswordEncoding.HashPasswordAlternatives(username, password),
+            out authenticationType);
+    }
+
+    public static UserEntity Login(string username, byte[] passwordHash, IList<byte[]> alternativePasswordHashes, out string authenticationType)
     {
         using (AuthLogic.Disable())
         {
-            UserEntity user = RetrieveUser(username, passwordHashes);
-
+            UserEntity user = RetrieveUser(username, passwordHash, alternativePasswordHashes);
             OnUserLogingIn(user, nameof(Login));
 
             authenticationType = "database";
@@ -411,7 +418,7 @@ public static class AuthLogic
 
     public static Action<UserEntity>? OnDeactivateUser;
 
-    public static UserEntity RetrieveUser(string username, IList<byte[]> passwordHashes)
+    public static UserEntity RetrieveUser(string username, byte[] passwordHash, IList<byte[]> alternativePasswordHashes)
     {
         using (AuthLogic.Disable())
         {
@@ -421,7 +428,7 @@ public static class AuthLogic
                 throw new IncorrectUsernameException(LoginAuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
 
-            if (user.PasswordHash == null || (!passwordHashes.Any(passwordHash => passwordHash.SequenceEqual(user.PasswordHash))))
+            if (user.PasswordHash == null || (!alternativePasswordHashes.PreAnd(passwordHash).Any(passwordHash => passwordHash.SequenceEqual(user.PasswordHash))))
             {
                 using (UserHolder.UserSession(SystemUser!))
                 {
@@ -453,9 +460,9 @@ public static class AuthLogic
                 }
             }
 
-            if (!user.PasswordHash.SequenceEqual(passwordHashes.Last()))
+            if (!user.PasswordHash.SequenceEqual(passwordHash))
             {
-                user.PasswordHash = passwordHashes.Last();
+                user.PasswordHash = passwordHash;
 
                 using (AuthLogic.Disable())
                 using (OperationLogic.AllowSave<UserEntity>())
@@ -466,6 +473,14 @@ public static class AuthLogic
 
             return user;
         }
+    }
+
+    public static UserEntity? TryRetrieveUser(string username, string password)
+    {
+        return TryRetrieveUser(username, [
+            PasswordEncoding.HashPassword(username, password),
+            ..PasswordEncoding.HashPasswordAlternatives(username, password)
+        ]);
     }
 
     public static UserEntity? TryRetrieveUser(string username, IList<byte[]> passwordHashes)

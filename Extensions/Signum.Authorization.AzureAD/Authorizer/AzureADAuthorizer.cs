@@ -14,9 +14,7 @@ public class AzureADAuthorizer : ICustomAuthorizer
 
     public virtual UserEntity Login(string userName, string password, out string authenticationType)
     {
-        var passwordHashes = PasswordEncoding.EncodePasswordAlternatives(userName, password);
-
-        return AuthLogic.Login(userName, passwordHashes, out authenticationType);
+        return AuthLogic.Login(userName, password, out authenticationType);
     }
 
     public virtual UserEntity OnCreateUser(IAutoCreateUserContext ctx)

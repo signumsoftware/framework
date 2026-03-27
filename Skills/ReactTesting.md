@@ -1,29 +1,32 @@
 # React UI Testing
 
-UI tests use **xUnit.v3** + **Selenium WebDriver** with Signum's proxy layer. Tests drive a real Chrome browser against a running application.
+UI tests use **xUnit.v3** + **Playwright** with Signum's async proxy layer. 
 
 ## 1. Test Class Structure
 
-Every test class relies on a static base class that initializes the environment once and provides a `Browse()` helper:
+Every test class relies on a base class that initializes the environment once and provides a `BrowseAsync()` helper:
 
 ```cs
-public class YourTestClass
+    static async Task BrowseAsync(string username, Func<SouthwindProxy, Task> action) { ... }
+```
+
+A test method looks like this:
+
+```cs
+public class YourTestClass : SpitzleiTestClass
 {
     [Fact]
-    public void SomeTest()
+    public async Task SomeTestAsync()
     {
-        Browse("System", b =>
+        //Prepare test data here (using Database.Save Database.Query<T>, Operations, etc..) 
+
+        await BrowseAsync("System", async b =>
         {
             // use b (BrowserProxy) to interact with the app
         });
     }
-
-    static void Browse(string username, Action<BrowserProxy> action) { ... }
 }
 ```
-
-- The static constructor calls `YourEnvironment.StartAndInitialize()` once per test run.
-- `Browse()` creates a `ChromeDriver`, logs in as `username`, runs `action`, and always disposes the driver — even on failure.
 
 ---
 
@@ -33,44 +36,29 @@ The test environment infrastructure (`YourEnvironment.cs`, `Common.cs`) is alrea
 
 What you need to configure before running tests for the first time:
 
-- **`appsettings.json`** — set `BaseUrl` to the running application URL.
+- **`appsettings.json`** — set `Url` to the running application URL (e.g., `http://localhost:5000`).
 - **User Secrets** — set `ConnectionString` and any secrets (broadcast keys, storage). Never commit secrets to `appsettings.json`.
-- **Database** — `StartAndInitialize()` calls `Administrator.RestoreSnapshotOrDatabase()` automatically. If no snapshot exists it creates the database from scratch.
+- **Database** — `StartAndInitialize()` calls `Administrator.RestoreSnapshot()` or `RestoreSnapshotOrDatabase()` automatically. If no snapshot exists it creates the database from scratch.
 
-After restoring the database, the infrastructure automatically calls `/api/clearAllBlocks` and `/api/cache/invalidateAll` to bring the running app in sync with the restored state.
+After restoring the database, the infrastructure automatically calls `/api/cache/invalidateAll` to bring the running app in sync with the restored state.
 
 ---
 
 ## 3. Checking the App Is Running
 
-**Before running any Selenium tests, the web application MUST be running.**
+**Before running any UI tests, the web application MUST be running.**
 
 The test infrastructure expects the app to be already up and will fail immediately if it's not:
-- The static constructor posts to `/api/clearAllBlocks` during test class initialization
+- The static constructor posts to `/api/cache/invalidateAll` during test class initialization
 - If the app is not running, this will throw an `HttpRequestException` with a connection refused error
 
-### How to Check if IIS Express / Kestrel is Running
+### How to Check if the App is Running
 
-**Option 1 — Check via process list (CLI):**
-
-```powershell
-# For IIS Express (Visual Studio F5 default)
-tasklist | Select-String "iisexpress"
-
-# For Kestrel (dotnet run)
-tasklist | Select-String "dotnet" | Select-String "exec"
-
-# Combined check
-$iis = Get-Process -Name "iisexpress" -ErrorAction SilentlyContinue
-$kestrel = Get-Process -Name "dotnet" | Where-Object { $_.CommandLine -like "*exec*" } -ErrorAction SilentlyContinue
-if ($iis -or $kestrel) { Write-Host "Web server is running" } else { Write-Host "Web server is NOT running" }
-```
-
-**Option 2 — Check via HTTP request:**
+**Option 1 — Check via HTTP request:**
 
 ```powershell
 # Test if the BaseUrl responds
-$baseUrl = "http://localhost:5000"  # Replace with your actual BaseUrl
+$baseUrl = "http://localhost:5000"  # Replace with your actual URL
 try {
     $response = Invoke-WebRequest -Uri $baseUrl -TimeoutSec 5 -UseBasicParsing
     Write-Host "App is running - Status: $($response.StatusCode)"
@@ -79,11 +67,12 @@ try {
 }
 ```
 
-**Option 3 — Use Chrome DevTools MCP (for AI agents):**
+**Option 2 — Check via process list:**
 
-If you have the Chrome DevTools MCP server set up, you can:
-1. Use `chrome_devtools_navigate_page` to open `BaseUrl`
-2. Use `chrome_devtools_take_snapshot` to confirm the login page is present
+```powershell
+# For Kestrel (dotnet run)
+tasklist | Select-String "dotnet" | Select-String "exec"
+```
 
 ### What to Do if the App Is Not Running
 
@@ -91,16 +80,14 @@ If you have the Chrome DevTools MCP server set up, you can:
 
 **If you're a developer:** Start the application using one of these methods:
 
-1. **Visual Studio:** Press F5 or Ctrl+F5 to run with IIS Express
-2. **CLI:** Navigate to the project folder and run:
+1. **Visual Studio:** Press F5 or Ctrl+F5 to run the server project
+2. **CLI:** Navigate to the server project folder and run:
    ```bash
    dotnet run
    ```
-3. **Visual Studio Test Explorer:** Some projects auto-start the app when running tests — check your `.runsettings` file
 
 Once the app is running, the test infrastructure will automatically:
 - Restore the database to a known state (snapshot or fresh creation)
-- Call `/api/clearAllBlocks` to clear any in-memory state
 - Call `/api/cache/invalidateAll` to sync the cache
 - Proceed with the test execution
 
@@ -108,137 +95,278 @@ Once the app is running, the test infrastructure will automatically:
 
 ## 4. Proxies
 
-A **proxy** is a class that represents a UI page or control. It encapsulates all Selenium interactions for that page so tests stay readable and free of low-level browser code.
+A **proxy** is a class that represents a UI page or control. It encapsulates all Playwright interactions for that page so tests stay readable and free of low-level browser code.
 
 | Proxy | Represents | Disposal |
 |---|---|---|
-| `BrowserProxy` (`b`) | The browser session | Disposed by `Browse()` |
-| `FramePageProxy<T>` | An entity edit page | Navigates away |
-| `SearchPageProxy` | A search / list page | Navigates away |
-| `FrameModalProxy<T>` | An entity edit modal | Closes the modal |
-| `MessageModalProxy` | A confirmation dialog | Closes the modal |
-| Custom (e.g. `BoardPageProxy`) | Domain-specific page/widget | Custom logic |
+| `BrowserProxy` (`b`) | The browser session | Disposed by `BrowseAsync()` |
+| `FramePageProxy<T>` | An entity edit page | Async disposal via `IAsyncDisposable` |
+| `SearchPageProxy` | A search / list page | Async disposal via `IAsyncDisposable` |
+| `FrameModalProxy<T>` | An entity edit modal | Closes the modal on disposal |
+| `MessageModalProxy` | A confirmation dialog | Closes the modal on disposal |
+| Custom (e.g. `BoardPageProxy`) | Domain-specific page/widget | Custom async disposal logic |
 
-### `using` / `EndUsing` — code structure mirrors page structure
+### Async/Await Patterns — Understanding the Differences
 
-Page and Modal Proxies implement `IDisposable`. The nesting of `EndUsing` blocks shows exactly which page or modal each line is operating on:
+With Playwright, all UI interactions are asynchronous. Signum provides extension methods that combine awaiting a `Task<T>` with resource disposal, making test code clean and maintainable.
+
+#### Pattern 1: `Await_UsingAsync` / `Await_EndUsingAsync` (Most Common)
+
+Use these when a method **returns a `Task<T>`** where `T` is `IDisposable`:
 
 ```cs
-Browse("System", b =>
+await BrowseAsync("System", async b =>
 {
-    b.SearchPage(typeof(ProjectEntity)).EndUsing(search =>      // on the search page
-    {
-        search.Create<ProjectEntity>().EndUsing(project =>      //   new project modal/page
+    // SearchPageAsync returns Task<SearchPageProxy>
+    // SearchPageProxy implements IDisposable
+    await b.SearchPageAsync(typeof(ProjectEntity))
+        .Await_EndUsingAsync(async search =>
         {
-            project.AutoLineValue(p => p.Name, "Agile360");    //     filling the form
-            project.ExecuteMainOperation(ProjectOperation.Save);
-        });                                                      //   modal closed
-        search.Results.WaitRows(1);
-    });                                                          // search page left
+            // Create returns Task<FrameModalProxy<ProjectEntity>>
+            await search.CreateModalAsync<ProjectEntity>()
+                .Await_EndUsingAsync(async project =>
+                {
+                    await project.AutoLineValueAsync(p => p.Name, "Agile360");
+                    await project.ExecuteAsync(ProjectOperation.Save);
+                    await project.OkWaitClosedAsync();
+                });
+
+            await search.Results.WaitRowsAsync(1);
+        });
 });
 ```
 
-### Built-in page navigation
+**What it does:**
+1. Awaits the `Task<T>` to get the disposable resource
+2. Executes your async lambda
+3. Calls `DisposeAsync()` if `T` implements `IAsyncDisposable`, otherwise calls `Dispose()`
+4. Ensures disposal even if exceptions occur
+
+**When to use:**
+- The method returns `Task<SearchPageProxy>`, `Task<FramePageProxy<T>>`, or any `Task<T>` where `T : IDisposable`
+- You need to work with the proxy and ensure it's disposed when done
+
+**Variants:**
+- `Await_EndUsingAsync` — returns no value, just runs the action
+- `Await_UsingAsync` — returns a value from the lambda for further chaining
+
+#### Pattern 2: `EndUsingAsync` / `UsingAsync` (Direct Disposal)
+
+Use these when you **already have the disposable object** (not a Task):
 
 ```cs
-b.FramePage(entity.ToLite()).EndUsing(page => { ... });        // entity edit page
-b.SearchPage(typeof(ProjectEntity)).EndUsing(search => { ... }); // search page
+// When you have the proxy directly (synchronous creation)
+var page = await b.FramePageAsync<ProjectEntity>();
+await page.EndUsingAsync(async p =>
+{
+    await p.AutoLineValueAsync(p => p.Name, "Test");
+    await p.ExecuteAsync(ProjectOperation.Save);
+});
 ```
 
-### Custom proxies — proxy first, test second
+**What it does:**
+1. Takes the disposable directly (no awaiting)
+2. Executes your async lambda
+3. Calls `DisposeAsync()` or `Dispose()` after completion
 
-When a page has domain-specific UI (drag-and-drop, custom widgets, etc.), **always build the proxy first, then write the test**. Raw Selenium calls must live inside the proxy, never in the test method.
+**When to use:**
+- You've already awaited the Task and have the proxy
+- Less common in tests — prefer `Await_EndUsingAsync` for cleaner chaining
 
-**Step 1 — build the proxy:**
+#### Pattern 3: `await using` (C# Built-in)
+
+Standard C# async disposal pattern:
+
 ```cs
-public class BoardPageProxy : IDisposable
+await BrowseAsync("System", async b =>
 {
-    public IWebDriver Selenium { get; }
-    public BoardPageProxy(IWebDriver selenium) => Selenium = selenium;
+    await using var search = await b.SearchPageAsync(typeof(ProjectEntity));
+    await search.Results.WaitRowsAsync(1);
 
-    public void MoveTaskToColumn(Lite<TaskEntity> task, BoardColumn column)
+    // search.DisposeAsync() called automatically at end of scope
+});
+```
+
+**When to use:**
+- When you need the proxy for multiple statements in a scope
+- Equivalent to `using` but calls `DisposeAsync()` instead of `Dispose()`
+
+#### Pattern 4: `Await_DoAsync` (No Disposal)
+
+Use when a method returns `Task<T>` but `T` is **NOT disposable**, and you want to perform actions on `T`:
+
+```cs
+await fall.EntityTable(f => f.Fahrten).CreateRowAsync<FahrtEntity>()
+    .Await_DoAsync(async row =>
     {
-        // Selenium details stay here, inside the proxy
-        var card = Selenium.WaitElementVisible(By.CssSelector($"[data-task='{task.Id}']"));
-        var col  = Selenium.WaitElementVisible(By.CssSelector($"[data-column='{column}']"));
-        new Actions(Selenium).DragAndDrop(card, col).Perform();
+        await row.AutoLineValueAsync(a => a.Datum, Clock.Today);
+        await row.AutoLineValueAsync(a => a.Strecke, 10);
+    });
+```
+
+**What it does:**
+1. Awaits the `Task<T>`
+2. Executes your lambda with the result
+3. Returns the result (no disposal)
+
+**When to use:**
+- Working with row proxies, line proxies, or other non-disposable objects
+- You need to perform async operations on the awaited result
+
+### Code Structure Mirrors Page Structure
+
+The nesting of async disposal blocks shows exactly which page or modal each line is operating on:
+
+```cs
+await BrowseAsync("System", async b =>
+{
+    await b.SearchPageAsync(typeof(ProjectEntity))          // Task<SearchPageProxy>
+        .Await_EndUsingAsync(async search =>                 // on the search page
+        {
+            await search.CreateModalAsync<ProjectEntity>()   // Task<FrameModalProxy<T>>
+                .Await_EndUsingAsync(async project =>        //   modal opened
+                {
+                    await project.AutoLineValueAsync(p => p.Name, "Agile360");
+                    await project.ExecuteAsync(ProjectOperation.Save);
+                    await project.OkWaitClosedAsync();
+                });                                           //   modal closed
+
+            await search.Results.WaitRowsAsync(1);
+        });                                                   // search page left
+});
+```
+
+### Built-in Page Navigation
+
+```cs
+// Navigate to entity page
+await b.FramePageAsync<ProjectEntity>()
+    .Await_EndUsingAsync(async page => { /* ... */ });
+
+// Navigate to search page
+await b.SearchPageAsync(typeof(ProjectEntity))
+    .Await_EndUsingAsync(async search => { /* ... */ });
+
+// Navigate to specific entity
+await b.FramePageAsync(entity.ToLite())
+    .Await_EndUsingAsync(async page => { /* ... */ });
+```
+
+### Custom Proxies — Proxy First, Test Second
+
+When a page has domain-specific UI (drag-and-drop, custom widgets, etc.), **always build the proxy first, then write the test**. Raw Playwright calls must live inside the proxy, never in the test method.
+
+**Step 1 — Build the proxy:**
+```cs
+public class BoardPageProxy : IAsyncDisposable
+{
+    public IPage Page { get; }
+    public BoardPageProxy(IPage page) => Page = page;
+
+    public async Task MoveTaskToColumnAsync(Lite<TaskEntity> task, BoardColumn column)
+    {
+        // Playwright details stay here, inside the proxy
+        var card = Page.Locator($"[data-task='{task.Id}']");
+        var col = Page.Locator($"[data-column='{column}']");
+        await card.DragToAsync(col);
     }
 
-    public void WaitTaskInColumn(Lite<TaskEntity> task, BoardColumn column) { ... }
+    public async Task WaitTaskInColumnAsync(Lite<TaskEntity> task, BoardColumn column)
+    {
+        var card = Page.Locator($"[data-task='{task.Id}']");
+        var col = Page.Locator($"[data-column='{column}']");
+        await Page.WaitAsync(async () => 
+            await card.IsVisibleAsync() && 
+            await col.Locator($"[data-task='{task.Id}']").IsVisibleAsync());
+    }
 
-    public void Dispose() { }
+    public async ValueTask DisposeAsync() { }
 }
 ```
 
-**Step 2 — write the test using only proxy methods:**
+**Step 2 — Write the test using only proxy methods:**
 ```cs
 [Fact]
-public void MoveTaskToDone()
+public async Task MoveTaskToDoneAsync()
 {
     var task = CreateTask("Fix bug");
-    Browse("System", b =>
+    await BrowseAsync("System", async b =>
     {
-        using var board = new BoardPageProxy(b.Selenium);
-        b.Navigate(board.Url(sprintId));
-        board.MoveTaskToColumn(task.ToLite(), BoardColumn.Done);
-        board.WaitTaskInColumn(task.ToLite(), BoardColumn.Done);
+        await using var board = new BoardPageProxy(b.Page);
+        await b.Page.GotoAsync(board.Url(sprintId));
+        await board.MoveTaskToColumnAsync(task.ToLite(), BoardColumn.Done);
+        await board.WaitTaskInColumnAsync(task.ToLite(), BoardColumn.Done);
     });
 }
 ```
 
-The test reads like a specification — not like a Selenium script.
+The test reads like a specification — not like a Playwright script.
 
 ---
 
 ## 5. Interacting with Form Lines
 
-Inside a `FramePageProxy<T>`, access form fields via typed expression helpers:
+Inside a `FramePageProxy<T>`, access form fields via typed expression helpers. **All methods are async:**
 
 ```cs
-page.EndUsing(p =>
+await page.Await_EndUsingAsync(async p =>
 {
     // Read / write any field generically
-    p.AutoLineValue(m => m.Name, "New value");
-    var name = p.AutoLineValue(m => m.Name);
+    await p.AutoLineValueAsync(m => m.Name, "New value");
+    var name = await p.AutoLineValueAsync(m => m.Name);
 
     // Specific line types when you need more control
-    p.TextBoxLine(m => m.Description).Element.SafeSendKeys("text");
-    p.EntityLine(m => m.Project).LiteValue = project.ToLite();
-    p.EnumLine(m => m.State).EnumValue = TaskState.Done;
-    p.EntityStrip(m => m.Tags).AddElement().EndUsing(tag => { ... });
+    await p.TextBoxLine(m => m.Description).Element.FillAsync("text");
+    await p.EntityLine(m => m.Project).SetLiteValueAsync(project.ToLite());
+    await p.EnumLine(m => m.State).SetEnumValueAsync(TaskState.Done);
+
+    // Work with entity collections
+    await p.EntityTable(m => m.Tags).CreateRowAsync<TagEntity>()
+        .Await_DoAsync(async tag =>
+        {
+            await tag.AutoLineValueAsync(t => t.Name, "Backend");
+        });
 
     // Navigate to an embedded entity
-    p.EntityDetail(m => m.Address).EndUsing(addr =>
-    {
-        addr.AutoLineValue(a => a.City, "Barcelona");
-    });
+    await p.EntityDetail(m => m.Address).Details<AddressEntity>()
+        .EndUsingAsync(async addr =>
+        {
+            await addr.AutoLineValueAsync(a => a.City, "Barcelona");
+        });
 
     // Save
-    p.ExecuteMainOperation(TaskOperation.Save);
+    await p.ExecuteAsync(TaskOperation.Save);
 });
 ```
 
-Prefer `AutoLineValue()` for simple reads/writes. Use the specific line proxy only when you need interactions beyond get/set (e.g. clicking the entity selector, adding items to a strip).
+**Key points:**
+- Prefer `AutoLineValueAsync()` for simple reads/writes
+- All interactions are awaited
+- Use `.Await_DoAsync()` for non-disposable line operations
+- Use `.EndUsingAsync()` for disposable nested entities
 
 ---
 
 ## 6. Search Pages
 
 ```cs
-b.SearchPage(typeof(ProjectEntity)).EndUsing(search =>
-{
-    search.Search();
-    search.Results.WaitRows(3);
+await b.SearchPageAsync(typeof(ProjectEntity))
+    .Await_EndUsingAsync(async search =>
+    {
+        await search.SearchControl.SearchAsync();
+        await search.Results.WaitRowsAsync(3);
 
-    // Open entity from results
-    search.Results.EntityClick(project.ToLite()).EndUsing(page => { ... });
+        // Open entity from results
+        await search.Results.EntityClickInPlaceAsync(project.ToLite())
+            .Await_EndUsingAsync(async page => { /* ... */ });
 
-    // Create new from search page
-    search.Create<ProjectEntity>().EndUsing(page => { ... });
+        // Create new from search page
+        await search.CreateModalAsync<ProjectEntity>()
+            .Await_EndUsingAsync(async modal => { /* ... */ });
 
-    // Filters
-    search.Filters.AddFilter(...);
-});
+        // Add filters
+        await search.Filters.AddFilterAsync(...);
+    });
 ```
 
 ---
@@ -248,157 +376,163 @@ b.SearchPage(typeof(ProjectEntity)).EndUsing(search =>
 **Capture a modal opened by a button click:**
 
 ```cs
-page.CaptureOnClick(page.OperationButton(MyOperation.DoSomething))
-    .EndUsing(modal => { ... });
+await page.OperationClickCaptureAsync(MyOperation.DoSomething)
+    .Await_EndUsingAsync(async modal => { /* ... */ });
 ```
 
 **Entity creation / edit in a modal:**
 
 ```cs
-strip.AddElement().EndUsing((FrameModalProxy<TagEntity> tag) =>
-{
-    tag.AutoLineValue(t => t.Name, "Backend");
-    tag.OkWaitClosed();
-});
+await combo.CreateModalAsync<TagEntity>()
+    .Await_EndUsingAsync(async tag =>
+    {
+        await tag.AutoLineValueAsync(t => t.Name, "Backend");
+        await tag.ExecuteAsync(TagOperation.Save);
+        await tag.OkWaitClosedAsync();
+    });
 ```
 
 **Confirmation dialogs:**
 
 ```cs
-page.CaptureOnClick(deleteButton).EndUsing((MessageModalProxy msg) =>
-{
-    msg.ClickWaitClose(MessageModalButton.Yes);
-});
+await deleteButton.CaptureOnClickAsync()
+    .Await_DoAsync(modal => 
+        new MessageModalProxy(modal).ClickWaitCloseAsync(MessageModalButton.Yes));
 ```
 
-**Error modals** are detected automatically: if a modal with the `.error-modal` class appears while the test is waiting, it is thrown as a `WebDriverTimeoutException` with the title and body text included. You usually don't need to handle these explicitly — the test will fail with a descriptive message.
+**Selector modals:**
+
+```cs
+await createButton.CaptureOnClickAsync()
+    .Await_EndUsingAsync(modal => 
+        modal.AsSelectorModal().SelectAsync(SomeType.Value));
+```
+
+**Error modals** are detected automatically: if a modal with error content appears while the test is waiting, it is thrown as a `TimeoutException` with the title and body text included. You usually don't need to handle these explicitly — the test will fail with a descriptive message.
 
 ---
 
-## 8. Waiting — Never Use `Thread.Sleep`
+## 8. Waiting — Never Use `Task.Delay` or `Thread.Sleep`
 
-Always use Signum's `Wait` utilities. They poll every 200 ms up to a 20 s timeout and include a meaningful description in the timeout exception:
+Always use Signum's async `Wait` utilities. They poll every 200 ms up to a 20 s timeout and include a meaningful description in the timeout exception:
 
 ```cs
 // Wait for an element
-element.WithLocator(By.CssSelector(".my-class")).WaitVisible();
-element.WithLocator(By.CssSelector(".spinner")).WaitNotVisible();
+await page.Locator(".my-class").WaitVisibleAsync();
+await page.Locator(".spinner").WaitNotVisibleAsync();
 
 // Wait for a condition
-selenium.Wait(() => someElement.GetDomAttribute("data-loaded") == "true",
-    () => "data-loaded attribute to be true");
+await page.WaitAsync(async () => 
+    await someElement.GetAttributeAsync("data-loaded") == "true",
+    description: "data-loaded attribute to be true");
 
-// Wait for a value
-selenium.WaitEquals("Done", () => page.AutoLineValue(m => m.State).ToString());
+// Wait for an element to be present
+await page.Locator(".content").WaitPresentAsync();
 ```
 
-If a debugger is attached and the wait exceeds 5 s, a breakpoint is triggered automatically — use this to inspect the live browser before the full 20 s timeout fires.
+**Playwright advantages:**
+- Built-in auto-waiting for most actions (click, fill, etc.)
+- More reliable element detection
+- Better error messages with selector chains
 
 ---
 
-## 9. Debug Mode — Keep Browser Open on Failure
-
-When debugging a failing test, you often want the browser to stay open so you can inspect the final state. Use **SELENIUM_DEBUG_MODE** to prevent the browser from closing.
-
-### How to Enable Debug Mode
-
-1. **Create the file** `SELENIUM_DEBUG_MODE.txt` in your test project root (same folder as your `.csproj` file)
-2. **Set its content** to `true` (case-insensitive)
-3. **Run your test** — the browser will stay open after failures
-
-Example file structure:
-```
-YourProject.Test.React/
-├── SELENIUM_DEBUG_MODE.txt    ← Add this file
-├── YourProject.Test.React.csproj
-├── Agile360TestClass.cs
-└── ...
-```
-
-File content:
-```text
-true
-```
-
-### What Debug Mode Does
-
-When `SELENIUM_DEBUG_MODE.txt` exists and contains `true`:
-
-- ✅ **Browser stays open** after test failures (skips `selenium.Close()` in the `finally` block)
-- ✅ **Modals don't auto-close** (lets you inspect modal state before disposal)
-- ✅ **Console notification** printed at test startup: `[SELENIUM DEBUG MODE] Enabled via ...`
-
-When the file is missing, empty, or contains anything other than `true`:
-- ❌ Debug mode is disabled (normal cleanup behavior)
-
-### Example Usage
-
-**Test fails with a timeout:**
-```cs
-[Fact]
-public void FailingTest()
-{
-    Browse("System", b =>
-    {
-        b.SearchPage(typeof(ProjectEntity)).EndUsing(search =>
-        {
-            // This will time out and fail
-            search.Results.WaitRows(999);
-        });
-    });
-}
-```
-
-**Without debug mode:**
-- Test fails → screenshot saved → browser closes immediately → you can't inspect
-
-**With debug mode (SELENIUM_DEBUG_MODE.txt = `true`):**
-- Test fails → screenshot saved → **browser stays open** → you can:
-  - Inspect the DOM in Chrome DevTools
-  - Check the network tab for failed requests
-  - Verify the console for JS errors
-  - Manually interact with the page to understand the issue
-
-### Resetting Debug Mode at Runtime
-
-The `DebugMode` property is cached after the first read. If you change the file during a test run:
-
-```cs
-// Force re-read of SELENIUM_DEBUG_MODE.txt
-BrowserProxy.ResetDebugMode();
-```
-
-This is rarely needed — usually you set it once before running tests and disable it when done.
-
-### When to Use Debug Mode
-
-✅ **Good use cases:**
-- Debugging a failing test to see the final page state
-- Inspecting an unexpected modal or error message
-- Understanding why an element is not found
-- Manually stepping through a complex UI interaction
-
-❌ **Don't leave it enabled:**
-- In CI/CD pipelines (will leak browser processes)
-- When running large test suites (prevents cleanup)
-- When committing to version control (add `SELENIUM_DEBUG_MODE.txt` to `.gitignore`)
-
----
-
-## 10. Debugging Test Failures
+## 9. Debugging Test Failures
 
 Work through this checklist in order:
 
-1. **Read the exception message.** Error modals are captured automatically and their title + body appear in the `WebDriverTimeoutException`. Usually this is enough.
+1. **Read the exception message.** Error modals are captured automatically and their content appears in the exception. Usually this is enough.
 
-2. **Check the screenshot.** On any `WebDriverException`, a `.jpg` is saved to `./Screenshots/` with the URL and timestamp in the filename. The full path is printed to the test output console.
+2. **Check Playwright traces.** Playwright can record traces with screenshots, network activity, and DOM snapshots. Enable tracing in your test setup:
+   ```cs
+   await context.Tracing.StartAsync(new() 
+   {
+       Screenshots = true,
+       Snapshots = true
+   });
+   // Run test
+   await context.Tracing.StopAsync(new() 
+   {
+       Path = "trace.zip"
+   });
+   ```
+   Then view with: `playwright show-trace trace.zip`
 
-3. **Use the Chrome DevTools MCP server** for live browser inspection (elements, network, console). Install the [Claude in Chrome](https://chromewebstore.google.com/detail/claude-in-chrome/...)) extension and use the `mcp__Claude_in_Chrome__*` tools to:
-   - Inspect the DOM with `read_page`
-   - Run JS with `javascript_tool`
-   - Watch network requests with `read_network_requests`
-   - Read console errors with `read_console_messages`
+3. **Use headed mode.** Set the `PLAYWRIGHT_HEADLESS` environment variable to `false` to see the browser:
+   ```cs
+   Environment.SetEnvironmentVariable("PLAYWRIGHT_HEADLESS", "false");
+   ```
 
-   If the extension is not installed, suggest the user install it and connect it before the test run.
+4. **Pause execution.** Add `await page.PauseAsync()` to pause the test and inspect the browser interactively.
 
-4. **Add a temporary `Debugger.Break()`** just before the failing line and run with debugger attached — the 5 s wait threshold will pause at the right moment.
+5. **Add a breakpoint.** Set a breakpoint just before the failing line and inspect the page state in the debugger.
+
+---
+
+## 10. Async/Await Best Practices
+
+### ✅ Do:
+- Always use `async Task` for test methods (never `async void`)
+- Always `await` Playwright operations — never `.Wait()` or `.Result`
+- Use `Await_EndUsingAsync` when disposing proxies returned from async methods
+- Use `Await_DoAsync` for non-disposable async operations
+- Keep async lambdas (`async () => { }` or `async x => { }`) 
+
+### ❌ Don't:
+- Don't use synchronous disposal (`using` or `EndUsing`) with async methods
+- Don't mix `.Wait()` or `.Result` — causes deadlocks
+- Don't use `Thread.Sleep` — use `await Task.Delay()` if absolutely necessary (prefer `WaitAsync`)
+- Don't forget to `await` — unawaited tasks may not execute
+
+### Common Patterns
+
+**Opening and closing modals:**
+```cs
+// Modal that you interact with
+await button.CaptureOnClickAsync()
+    .Await_EndUsingAsync(async modal =>
+    {
+        await modal.DoSomethingAsync();
+        await modal.OkWaitClosedAsync();
+    });
+
+// Confirmation dialog (no interaction needed)
+await button.CaptureOnClickAsync()
+    .Await_DoAsync(modal =>
+        new MessageModalProxy(modal).ClickWaitCloseAsync(MessageModalButton.Yes));
+```
+
+**Working with entity tables:**
+```cs
+await page.EntityTable(f => f.Items).CreateRowAsync<ItemEntity>()
+    .Await_DoAsync(async row =>
+    {
+        await row.AutoLineValueAsync(i => i.Name, "Item 1");
+        await row.AutoLineValueAsync(i => i.Quantity, 5);
+    });
+
+await page.EntityTable(f => f.Items).LastRowAsync<ItemEntity>()
+    .Await_DoAsync(async row =>
+    {
+        await row.AutoLineValueAsync(i => i.Price, 100);
+    });
+```
+
+**Nested proxies:**
+```cs
+await b.SearchPageAsync(typeof(ProjectEntity))
+    .Await_EndUsingAsync(async search =>
+    {
+        await search.Results.EntityClickInPlaceAsync(project.ToLite())
+            .Await_EndUsingAsync(async page =>
+            {
+                await page.EntityDetail(p => p.Address).Details<AddressEntity>()
+                    .EndUsingAsync(async addr =>
+                    {
+                        await addr.AutoLineValueAsync(a => a.City, "Madrid");
+                    });
+
+                await page.ExecuteAsync(ProjectOperation.Save);
+            });
+    });
+```
