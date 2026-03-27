@@ -125,7 +125,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
 
     public async Task WaitNewChangesAsync(string changes)
     {
-        await Assertions.Expect(Element).Not.ToHaveAttributeAsync("data-changes", changes!);
+        await Element.WaitAttributeAsync("data-changes", changes, "!==");
     }
 
     public async Task<string> GetChangesAsync()
@@ -137,13 +137,13 @@ public abstract class EntityBaseProxy : BaseLineProxy
         return attr;
     }
 
-    public async Task WaitEntityInfoChangesAsync(Func<Task> action, string actionDescription, int? index = null)
+    public async Task WaitEntityInfoChangesAsync(Func<Task> action, int? index = null)
     {
         var entityInfo = await EntityInfoStringAsync(index);
 
         await action();
 
-        await Assertions.Expect(DataEntityLocator(index)).Not.ToHaveAttributeAsync("data-entity", entityInfo!);
+        await DataEntityLocator(index).WaitAttributeAsync("data-entity", entityInfo, "!==");
     }
 
     protected async Task<string> EntityInfoStringAsync(int? index)

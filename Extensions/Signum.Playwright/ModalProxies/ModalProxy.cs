@@ -65,10 +65,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
     public async Task<FrameModalProxy<T>> OkWaitFrameModalAsync<T>()
     where T : ModifiableEntity
     {
-        var newModal = await Modal.Page.CaptureModalAsync(async () =>
-        {
-            await OkButton.ClickAsync();
-        });
+        var newModal = await OkButton.CaptureOnClickAsync();
 
         var disposing = Disposing;
         Disposing = null;
@@ -80,10 +77,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
 
     public async Task<SearchModalProxy> OkWaitSearchModalAsync()
     {
-        var newModal = await Modal.Page.CaptureModalAsync(async () =>
-        {
-            await OkButton.ClickAsync();
-        });
+        var newModal = await OkButton.CaptureOnClickAsync();
 
         var disposing = Disposing;
         Disposing = null;
