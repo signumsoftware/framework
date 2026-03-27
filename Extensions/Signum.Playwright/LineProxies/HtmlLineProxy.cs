@@ -59,13 +59,20 @@ public class HtmlEditorLineProxy : BaseLineProxy
             var frameName = await editor.GetAttributeAsync("name");
             var iframe = Page.FrameLocator(frameName ?? "");
             var body = iframe.Locator("body");
-            
+
             await body.EvaluateAsync($"el => el.innerHTML = {System.Text.Json.JsonSerializer.Serialize(html ?? "")}");
         }
         else
         {
-            // Handle contenteditable element
-            await editor.EvaluateAsync($"el => el.innerHTML = {System.Text.Json.JsonSerializer.Serialize(html ?? "")}");
+            // Handle Lexical contenteditable: use keyboard input to properly trigger Lexical's internal state updates
+            await editor.ClickAsync();
+            await editor.Page.Keyboard.PressAsync("Control+a");
+            if (!string.IsNullOrEmpty(html))
+                await editor.PressSequentiallyAsync(html);
+            else
+                await editor.Page.Keyboard.PressAsync("Delete");
+            // Blur the editor to trigger saveHtml() → binding.setValue()
+            await editor.EvaluateAsync("el => el.blur()");
         }
     }
 

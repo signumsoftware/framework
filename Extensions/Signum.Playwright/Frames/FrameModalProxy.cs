@@ -40,7 +40,7 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
                 var message = await Modal.Page.GetMessageModalAsync();
                 if (message != null)
                 {
-                    await message.ClickAsync(MessageModalButton.Yes);
+                    await message.ClickAsync(MessageModalButton.No);
                 }
 
                 return false;

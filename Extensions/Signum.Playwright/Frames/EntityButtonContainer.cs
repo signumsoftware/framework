@@ -155,7 +155,7 @@ public static class EntityButtonContainerExtensions
     {
         await container.OperationClickAsync(symbol);
         if (consumeAlert)
-            await container.Modal.Page.Locator("div.sf-message-modal button:has-text('Yes')").ClickAsync();
+            await container.Modal.Page.CloseMessageModalAsync(MessageModalButton.Yes);
 
         await container.WaitForCloseAsync();
     }
@@ -185,7 +185,7 @@ public static class EntityButtonContainerExtensions
 
     public static async Task<long?> RefreshCountAsync(this IEntityButtonContainer container)
     {
-        var value = await container.Element.Locator("div.sf-main-control").GetAttributeAsync("data-refresh-count");
+        var value = await container.Container.Locator("div.sf-main-control").GetAttributeAsync("data-refresh-count");
         return long.TryParse(value, out var result) ? result : null;
     }
 
