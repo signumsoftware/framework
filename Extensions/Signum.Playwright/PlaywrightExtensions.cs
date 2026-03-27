@@ -311,22 +311,27 @@ public static class PlaywrightExtensions
     #region Modal/Popup Methods
 
     /// <summary>
-    /// Capture popup that opens on click
+    /// Capture the modal that opens as a result of clickAction.
+    /// Uses data-capture-old to reliably detect the new modal even in the swap case (1→0→1),
+    /// then returns Nth() so error messages stay readable.
     /// </summary>
     public static async Task<ILocator> CaptureModalAsync(this IPage page, Func<Task> clickAction)
     {
-        var oldModals = await page.Locator(".modal.fade.show").AllAsync();
-        var oldModalHandles = new HashSet<ILocator>(oldModals);
+        // Mark all currently visible modals so we can identify the new one
+        await page.EvaluateAsync("document.querySelectorAll('.modal.fade.show').forEach(el => el.setAttribute('data-capture-old', 'true'))");
 
         await clickAction();
 
-        // Wait for new modal
-        await page.WaitForSelectorAsync(".modal.fade.show");
+        // Wait for a modal without the marker to appear (works for add and swap cases)
+        await page.WaitForSelectorAsync(".modal.fade.show:not([data-capture-old])");
 
-        var newModals = await page.Locator(".modal.fade.show").AllAsync();
-        var newModal = newModals.FirstOrDefault(m => !oldModalHandles.Contains(m));
+        // Resolve its index among all visible modals, then clean up the marker
+        var index = await page.EvaluateAsync<int>(
+            "Array.from(document.querySelectorAll('.modal.fade.show')).findIndex(el => !el.hasAttribute('data-capture-old'))");
 
-        return newModal ?? page.Locator(".modal.fade.show").Last;
+        await page.EvaluateAsync("document.querySelectorAll('[data-capture-old]').forEach(el => el.removeAttribute('data-capture-old'))");
+
+        return page.Locator(".modal.fade.show").Nth(index);
     }
 
     /// <summary>

@@ -185,7 +185,7 @@ public static class EntityButtonContainerExtensions
 
     public static async Task<long?> RefreshCountAsync(this IEntityButtonContainer container)
     {
-        var value = await container.Container.Locator("div.sf-main-control").GetAttributeAsync("data-refresh-count");
+        var value = await container.Element.GetAttributeAsync("data-refresh-count");
         return long.TryParse(value, out var result) ? result : null;
     }
 
@@ -195,6 +195,6 @@ public static class EntityButtonContainerExtensions
 
         await action();
 
-        await Assertions.Expect(container.Container.Locator("div.sf-main-control")).Not.ToHaveAttributeAsync("data-refresh-count", oldCount?.ToString() ?? "");
+        await container.Element.WaitAttributeAsync("data-refresh-count", oldCount?.ToString(), "!==");
     }
 }
