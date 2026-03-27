@@ -12,7 +12,7 @@ public class AutocompleteSkill : AgentSkill
     }
 
     [McpServerTool, Description("Returns the lites (entities) of some type that contain subString")]
-    public static async Task<List<Lite<Entity>>> AutoCompleteLite(string typeName, string subString, CancellationToken token)
+    public async Task<List<Lite<Entity>>> AutoCompleteLite(string typeName, string subString, CancellationToken token)
     {
         var types = typeName.Split(",").Select(a => TypeLogic.GetType(a.Trim())).ToArray();
 
