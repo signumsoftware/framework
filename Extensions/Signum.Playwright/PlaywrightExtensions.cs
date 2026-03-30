@@ -1,4 +1,5 @@
 using Microsoft.Playwright;
+using System.Diagnostics;
 
 namespace Signum.Playwright;
 
@@ -309,12 +310,7 @@ public static class PlaywrightExtensions
 
     #region Modal/Popup Methods
 
-    static readonly AsyncLocal<int> captureModalIndex = new();
 
-    public static void ResetCaptureModalIndex()
-    {
-        captureModalIndex.Value = 0;
-    }
 
     /// <summary>
     /// Capture the modal that opens as a result of clickAction.
@@ -322,17 +318,21 @@ public static class PlaywrightExtensions
     /// </summary>
     public static async Task<ILocator> CaptureModalAsync(this IPage page, Func<Task> clickAction)
     {
-        var currentCaptureIndex = ++captureModalIndex.Value;
-
         // Mark all currently visible modals as old
-        await page.EvaluateAsync("""
+        var maxIndexJs = await page.EvaluateAsync("""
             () => {
+                var max = 0;
                 document.querySelectorAll('.modal.fade.show').forEach(el => {
                     if (!el.hasAttribute('data-capture-index'))
                         el.setAttribute('data-capture-index', '-1');
+                    
+                    max = Math.max(max, parseInt(el.getAttribute('data-capture-index')));
                 });
+                return max;
             }
             """);
+
+        var maxIndex = (maxIndexJs?.ToObject<int>() ?? 0) + 1;
 
         await clickAction();
 
@@ -347,9 +347,9 @@ public static class PlaywrightExtensions
                 if (modal)
                     modal.setAttribute('data-capture-index', captureIndex.toString());
             }
-            """, currentCaptureIndex);
+            """, maxIndex);
 
-        return page.Locator($".modal.fade.show[data-capture-index='{currentCaptureIndex}']");
+        return page.Locator($".modal.fade.show[data-capture-index='{maxIndex}']");
     }
 
     /// <summary>
