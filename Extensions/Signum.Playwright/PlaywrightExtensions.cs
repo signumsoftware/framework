@@ -7,7 +7,6 @@ namespace Signum.Playwright;
 /// </summary>
 public static class PlaywrightExtensions
 {
-
     #region Existence Checks (No Wait)
 
     /// <summary>
@@ -310,28 +309,47 @@ public static class PlaywrightExtensions
 
     #region Modal/Popup Methods
 
+    static readonly AsyncLocal<int> captureModalIndex = new();
+
+    public static void ResetCaptureModalIndex()
+    {
+        captureModalIndex.Value = 0;
+    }
+
     /// <summary>
     /// Capture the modal that opens as a result of clickAction.
-    /// Uses data-capture-old to reliably detect the new modal even in the swap case (1→0→1),
-    /// then returns Nth() so error messages stay readable.
+    /// Uses data-capture-index to identify old modals and assign a unique index to the new one.
     /// </summary>
     public static async Task<ILocator> CaptureModalAsync(this IPage page, Func<Task> clickAction)
     {
-        // Mark all currently visible modals so we can identify the new one
-        await page.EvaluateAsync("document.querySelectorAll('.modal.fade.show').forEach(el => el.setAttribute('data-capture-old', 'true'))");
+        var currentCaptureIndex = ++captureModalIndex.Value;
+
+        // Mark all currently visible modals as old
+        await page.EvaluateAsync("""
+            () => {
+                document.querySelectorAll('.modal.fade.show').forEach(el => {
+                    if (!el.hasAttribute('data-capture-index'))
+                        el.setAttribute('data-capture-index', '-1');
+                });
+            }
+            """);
 
         await clickAction();
 
-        // Wait for a modal without the marker to appear (works for add and swap cases)
-        await page.WaitForSelectorAsync(".modal.fade.show:not([data-capture-old])");
+        // Wait for the new modal (the only visible modal without capture-index)
+        await page.WaitForSelectorAsync(".modal.fade.show:not([data-capture-index])");
 
-        // Resolve its index among all visible modals, then clean up the marker
-        var index = await page.EvaluateAsync<int>(
-            "Array.from(document.querySelectorAll('.modal.fade.show')).findIndex(el => !el.hasAttribute('data-capture-old'))");
+        // Tag the captured modal with a unique index so the locator is stable
+        await page.EvaluateAsync("""
+            (captureIndex) => {
+                const modal = document.querySelector('.modal.fade.show:not([data-capture-index])');
 
-        await page.EvaluateAsync("document.querySelectorAll('[data-capture-old]').forEach(el => el.removeAttribute('data-capture-old'))");
+                if (modal)
+                    modal.setAttribute('data-capture-index', captureIndex.toString());
+            }
+            """, currentCaptureIndex);
 
-        return page.Locator(".modal.fade.show").Nth(index);
+        return page.Locator($".modal.fade.show[data-capture-index='{currentCaptureIndex}']");
     }
 
     /// <summary>

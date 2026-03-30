@@ -50,4 +50,14 @@ public class EntityDetailProxy : EntityBaseProxy
         var subRoute = Route.Type == typeof(T) ? Route : PropertyRoute.Root(typeof(T));
         return new LineContainer<T>(this.Element.Locator("div[data-property-path]"), subRoute);
     }
+
+    public async Task<ILineContainer<T>> GetOrCreateDetailControlAsync<T>() where T : ModifiableEntity
+    {
+        if (await EntityInfoInternalAsync(null) != null)
+            return Details<T>();
+
+        await CreateEmbeddedAsync<T>();
+
+        return Details<T>();
+    }
 }

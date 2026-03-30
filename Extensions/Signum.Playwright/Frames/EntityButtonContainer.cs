@@ -169,7 +169,7 @@ public static class EntityButtonContainerExtensions
         return modal;
     }
 
-    public static async Task<FramePageProxy<T>> ConstructFromNormalPageAsync<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+    public static async Task<FramePageProxy<T>> ConstructFromFramePageAsync<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
         where T : Entity
         where F : Entity
     {

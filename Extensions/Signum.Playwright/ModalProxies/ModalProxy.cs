@@ -31,7 +31,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
 
     public virtual async ValueTask DisposeAsync()
     {
-        if (!AvoidClose)
+        if (!AvoidClose && !BrowserProxy.DebugMode)
         {
             try
             {
