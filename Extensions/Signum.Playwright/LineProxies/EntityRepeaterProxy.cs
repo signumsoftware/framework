@@ -68,7 +68,7 @@ public class EntityRepeaterProxy : EntityBaseProxy
 
     public async Task<EntityInfoProxy?> EntityInfoAsync(int index)
     {
-        return await EntityInfoInternalAsync(index);
+        return await base.EntityInfoInternalAsync(index);
     }
 
     public async Task<LineContainer<T>> CreateElementAsync<T>() where T : ModifiableEntity

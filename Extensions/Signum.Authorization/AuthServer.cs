@@ -261,7 +261,7 @@ public static class AuthServer
                 if (allowed == PropertyAllowed.None)
                     return PropertyMetadata.Hidden;
 
-                if (allowed == PropertyAllowed.Read)
+                if (allowed == PropertyAllowed.Read && asm.Default != PropertyAllowed.Read)
                     return PropertyMetadata.ReadOnly;
 
                 return null;
