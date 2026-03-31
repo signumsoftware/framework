@@ -65,7 +65,7 @@ public class EntityTableProxy : EntityBaseProxy
 
     public async Task<EntityInfoProxy?> EntityInfoAsync(int index)
     {
-        return await EntityInfoInternalAsync(index);
+        return await base.EntityInfoInternalAsync(index);
     }
 
     public async Task<EntityTableRow<T>> CreateRowAsync<T>() where T : ModifiableEntity

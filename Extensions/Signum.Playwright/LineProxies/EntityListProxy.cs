@@ -46,7 +46,7 @@ public class EntityListProxy : EntityBaseProxy
 
     public async Task<EntityInfoProxy?> EntityInfoAsync(int index)
     {
-        return await EntityInfoInternalAsync(index);
+        return await base.EntityInfoInternalAsync(index);
     }
 
     public async Task DoubleClickAsync(int index)

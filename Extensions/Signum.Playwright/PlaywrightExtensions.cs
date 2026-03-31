@@ -266,6 +266,16 @@ public static class PlaywrightExtensions
         );
     }
 
+    public static async Task WaitContentAsync(this ILocator locator, string? expectedContent, string op = "===")
+    {
+        var elementHandle = await locator.ElementHandleAsync();
+
+        await locator.Page.WaitForFunctionAsync(
+            $@"([el, content]) => el.innerText {op} content",
+            new object?[] { elementHandle, expectedContent }
+        );
+    }
+
     public static async Task WaitDisabledAsync(this ILocator locator, bool shouldBeDisabled)
     {
         var elementHandle = await locator.ElementHandleAsync();
