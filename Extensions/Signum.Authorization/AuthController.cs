@@ -134,7 +134,9 @@ public class AuthController : ControllerBase
         }
         else
         {
-            if (user.PasswordHash == null || !PasswordEncoding.HashPasswordAlternatives(user.UserName, request.oldPassword).Any(oldPasswordHash => oldPasswordHash.SequenceEqual(user.PasswordHash)))
+            if (user.PasswordHash == null || 
+                !PasswordEncoding.HashPassword(user.UserName, request.oldPassword).SequenceEqual(user.PasswordHash) &&
+                !PasswordEncoding.HashPasswordAlternatives(user.UserName, request.oldPassword).Any(oldPasswordHash => oldPasswordHash.SequenceEqual(user.PasswordHash)))
                 return ModelError("oldPassword", LoginAuthMessage.InvalidPassword.NiceToString());
         }
 

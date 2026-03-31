@@ -11,7 +11,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
   lite: Lite<Entity>;
   inSearch?: "main" | "related";
   inPlaceNavigation?: boolean;
-  hideIfNotViable?: boolean;
+  hideIfNotViewable?: boolean;
   onNavigated?: (lite: Lite<Entity>) => void;
   getViewPromise?: (e: ModifiableEntity | null) => undefined | string | ViewPromise<ModifiableEntity>;
   innerRef?: React.Ref<HTMLAnchorElement>;
@@ -23,12 +23,12 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
 
 export default function EntityLink(p: EntityLinkProps): React.ReactElement | null {
 
-  const { lite, inSearch, children, onNavigated, getViewPromise, inPlaceNavigation, shy, ...htmlAtts } = p;
+  const { lite, inSearch, children, onNavigated, getViewPromise, inPlaceNavigation, shy, hideIfNotViewable, ...htmlAtts } = p;
 
   const settings = Navigator.getSettings(p.lite.EntityType);
 
   if (!Navigator.isViewable(lite, { isSearch: p.inSearch })){
-    if (p.hideIfNotViable)
+    if (hideIfNotViewable)
       return null;
 
     return <span data-entity={liteKey(lite)} className={settings?.allowWrapEntityLink ? undefined : "try-no-wrap"}>{p.children ?? Navigator.renderLite(lite)}</span>;
