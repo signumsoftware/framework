@@ -1,8 +1,9 @@
+using Signum.Utilities.Reflection;
+
 namespace Signum.Playwright.LineProxies;
 
 /// <summary>
-/// Proxy for enum dropdown controls
-/// Equivalent to Selenium's EnumLineProxy
+/// Proxy for EnumLine.tsx
 /// </summary>
 public class EnumLineProxy : BaseLineProxy
 {
@@ -11,64 +12,85 @@ public class EnumLineProxy : BaseLineProxy
     {
     }
 
-    protected ILocator InputLocator => Element.Locator("select.form-control, select");
+    protected ILocator SelectLocator => Element.Locator("select.form-select, .form-control, .form-control-plaintext");
+    protected ILocator WidgetLocator => Element.Locator("div.rw-dropdown-list");
 
     public override async Task SetValueUntypedAsync(object? value)
     {
-        if (value == null)
-        {
-            await SelectByIndexAsync(0); // Select first (empty) option
-            return;
-        }
+        if (value is bool b)
+            value = b ? BooleanEnum.True : BooleanEnum.False;
 
-        var enumValue = value is Enum ? value.ToString() : value.ToString();
-        await SelectByValueAsync(enumValue!);
+        var strValue =
+            value == null ? "" :
+            value is Enum e ? e.ToString() :
+            throw new UnexpectedValueException(value);
+
+        var rw = WidgetLocator.First;
+        var rwCount = await rw.CountAsync();
+
+        if (rwCount > 0)
+        {
+            // Handle React Widget dropdown
+            var popup = rw.Locator(".rw-popup-container");
+
+            if (!await popup.IsVisibleAsync())
+            {
+                await rw.Locator(".rw-dropdown-list-value").ClickAsync();
+                await popup.WaitVisibleAsync();
+            }
+
+            await popup.Locator($"[data-value='{strValue}']").ClickAsync();
+        }
+        else
+        {
+            // Handle standard select element
+            var select = SelectLocator.First;
+            await select.SelectOptionAsync(strValue);
+        }
     }
 
     public override async Task<object?> GetValueUntypedAsync()
     {
-        var select = InputLocator.First;
-        var selectedValue = await select.EvaluateAsync<string?>("el => el.value");
+        var rw = WidgetLocator.First;
+        var rwCount = await rw.CountAsync();
+        string? strValue = null;
 
-        if (string.IsNullOrEmpty(selectedValue))
+        if (rwCount > 0)
+        {
+            // Handle React Widget dropdown
+            strValue = await rw.Locator("[data-value]").GetAttributeAsync("data-value");
+        }
+        else
+        {
+            // Handle standard select element
+            var elem = SelectLocator.First;
+            var tagName = await elem.EvaluateAsync<string>("el => el.tagName.toLowerCase()");
+
+            if (tagName == "select")
+            {
+                strValue = await elem.EvaluateAsync<string?>("el => el.value");
+            }
+            else
+            {
+                strValue = await elem.GetAttributeAsync("data-value");
+            }
+        }
+
+        if (string.IsNullOrEmpty(strValue))
             return null;
 
-        var enumType = Route.Type.UnNullify();
-        if (enumType.IsEnum)
-        {
-            return Enum.Parse(enumType, selectedValue);
-        }
+        if (Route.Type.UnNullify() == typeof(bool))
+            return ReflectionTools.Parse<BooleanEnum>(strValue) == BooleanEnum.True;
 
-        // For nullable bool (Yes/No dropdown)
-        if (enumType == typeof(bool))
-        {
-            return bool.Parse(selectedValue);
-        }
-
-        return selectedValue;
+        return ReflectionTools.Parse(strValue, Route.Type);
     }
 
-    public async Task SelectByValueAsync(string value)
-    {
-        var select = InputLocator.First;
-        await select.SelectOptionAsync(value);
-    }
 
-    public async Task SelectByTextAsync(string text)
-    {
-        var select = InputLocator.First;
-        await select.SelectOptionAsync(new SelectOptionValue { Label = text });
-    }
-
-    public async Task SelectByIndexAsync(int index)
-    {
-        var select = InputLocator.First;
-        await select.SelectOptionAsync(new SelectOptionValue { Index = index });
-    }
 
     public override async Task<bool> IsReadonlyAsync()
     {
-        var select = InputLocator.First;
-        return !await select.IsEnabledAsync();
+        var readonlyInput = Element.Locator("input[readonly]");
+        var count = await readonlyInput.CountAsync();
+        return count > 0;
     }
 }

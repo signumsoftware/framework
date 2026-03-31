@@ -1,8 +1,12 @@
 using Microsoft.Playwright;
 using Signum.Playwright.Frames;
+using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for ContextMenu in SearchControlLoaded.tsx
+/// </summary>
 public class EntityContextMenuProxy
 {
     public ResultTableProxy ResultTable { get; private set; }
@@ -44,10 +48,11 @@ public class EntityContextMenuProxy
 
         if (consumeConfirmation)
         {
-            await ResultTable.Element.Page.RunAndConsumeAlertAsync(async () =>
+            await using (var mm = await this.Element.Page.GetMessageModalAsync())
             {
-                await op.ClickAsync();
-            });
+                if (mm != null)
+                    await mm.OkWaitClosedAsync();
+            }
         }
         else
         {
@@ -73,7 +78,7 @@ public class EntityContextMenuProxy
             await modalLocator.ScrollIntoViewIfNeededAsync();
         var modal = await modalLocator.CaptureOnClickAsync();
 
-        var result = new FrameModalProxy<T>(modal);
+        var result = await FrameModalProxy<T>.NewAsync(modal);
         result.Disposing += okPressed => check();
 
         return result;
@@ -95,7 +100,7 @@ public class EntityContextMenuProxy
             await modalLocator.ScrollIntoViewIfNeededAsync();
         var modal = await modalLocator.CaptureOnClickAsync();
 
-        var result = new FrameModalProxy<T>(modal);
+        var result = await FrameModalProxy<T>.NewAsync(modal);
         result.Disposing += okPressed => check();
 
         return result;
@@ -116,10 +121,11 @@ public class EntityContextMenuProxy
 
         if (consumeConfirmation)
         {
-            await ResultTable.Element.Page.RunAndConsumeAlertAsync(async () =>
+            await using (var mm = await this.Element.Page.GetMessageModalAsync())
             {
-                await op.ClickAsync();
-            });
+                if (mm != null)
+                    await mm.OkWaitClosedAsync();
+            }
         }
         else
         {

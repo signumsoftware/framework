@@ -1,12 +1,15 @@
 using Signum.Entities.Reflection;
 using Signum.Playwright.Frames;
 using Signum.Playwright.Search;
+using System.Diagnostics;
+using System.IO;
 
 namespace Signum.Playwright;
 
 /// <summary>
-/// Playwright equivalent of Selenium's BrowserProxy
-/// Main entry point for Signum Framework testing with Playwright
+/// Base class for the strongly-typed proxy for your application.
+/// Can perform common actions like login/logout and contains method to navigate to different pages (SearchPage / FramePage)
+/// You can inherit from this class to provide application-specific pages, and override Url with your base URL.
 /// </summary>
 public class BrowserProxy
 {
@@ -17,9 +20,80 @@ public class BrowserProxy
         Page = page;
     }
 
+    
+    /// <summary>
+    /// When true, connects to an independent Chrome instance via CDP, keeps the browser open on test failure, and prevents modal auto-close.
+    /// Checks for PLAYWRIGHT_DEBUG_MODE.txt file (relative path: ../../../PLAYWRIGHT_DEBUG_MODE.txt from bin folder).
+    /// Debug mode is enabled only if the file exists AND contains "true".
+    /// </summary>
+    public static bool DebugMode { get; set; }
+
+    /// <summary>
+    /// Launches an independent Chrome instance with remote debugging on the given port and connects
+    /// Playwright to it via CDP. The browser stays open after the test, making it suitable for debug mode.
+    /// Chrome is started with a dedicated user-data-dir so it runs as a fresh, separate instance
+    /// even if Chrome is already open.
+    /// Chrome path is resolved from the CHROME_PATH env var or the standard Windows install locations.
+    /// </summary>
+    public static async Task<IBrowser> ConnectDebugChromeAsync(IPlaywright playwright, int port, string userDataDir)
+    {
+        var args = $"--remote-debugging-port={port} --user-data-dir=\"{userDataDir}\" " +
+                   "--start-maximized --no-first-run --no-default-browser-check --disable-popup-blocking " +
+                   "--enable-automation --disable-save-password-bubble about:blank";
+
+        // Write Chrome profile preferences before launch so Password Manager and
+        // leak detection are disabled from the very first run (equivalent to
+        // Selenium's AddUserProfilePreference).
+        var prefsDir = Path.Combine(userDataDir, "Default");
+        Directory.CreateDirectory(prefsDir);
+        File.WriteAllText(Path.Combine(prefsDir, "Preferences"), """
+            {
+              "profile": {
+                "password_manager_enabled": false,
+                "password_manager_leak_detection": false,
+                "default_content_setting_values": {
+                  "automatic_downloads": 1,
+                  "notifications": 2
+                }
+              }
+            }
+            """);
+
+        Console.WriteLine($"[PLAYWRIGHT DEBUG MODE] Starting Chrome on port {port}...");
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = GetChromePath(),
+            Arguments = args,
+            UseShellExecute = true,
+        });
+
+        // Give Chrome time to start and open the debugging port
+        await Task.Delay(2000);
+
+        Console.WriteLine($"[PLAYWRIGHT DEBUG MODE] Connecting Playwright to http://localhost:{port}");
+        return await playwright.Chromium.ConnectOverCDPAsync($"http://localhost:{port}");
+    }
+
+    private static string GetChromePath()
+    {
+        var candidates = new[]
+        {
+            Environment.GetEnvironmentVariable("CHROME_PATH") ?? "",
+            @"C:\Program Files\Google\Chrome\Application\chrome.exe",
+            @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        };
+
+        foreach (var candidate in candidates)
+            if (!string.IsNullOrEmpty(candidate) && File.Exists(candidate))
+                return candidate;
+
+        throw new FileNotFoundException(
+            "Chrome executable not found. Set the CHROME_PATH environment variable to point to chrome.exe.");
+    }
+
     /// <summary>
     /// Override this method to provide base URL
-    /// Equivalent to Selenium's Url method
     /// </summary>
     public virtual string Url(string url)
     {
@@ -28,14 +102,13 @@ public class BrowserProxy
 
     /// <summary>
     /// Navigate to search page for a query
-    /// Equivalent to Selenium's SearchPage
     /// </summary>
     public async Task<SearchPageProxy> SearchPageAsync(object queryName, bool waitInitialSearch = true)
     {
         var url = Url(FindRoute(queryName));
         await Page.GotoAsync(url);
 
-        var result = await SearchPageProxy.CreateAsync(Page);
+        var result = await SearchPageProxy.NewAsync(Page);
 
         if (waitInitialSearch)
         {
@@ -47,27 +120,14 @@ public class BrowserProxy
 
     /// <summary>
     /// Get route for Find page
-    /// Equivalent to Selenium's FindRoute
     /// </summary>
     public virtual string FindRoute(object queryName)
     {
-        return "Find/" + GetWebQueryName(queryName);
-    }
-
-    /// <summary>
-    /// Get web query name from type or object
-    /// </summary>
-    public string GetWebQueryName(object queryName)
-    {
-        if (queryName is Type t)
-            return Reflector.CleanTypeName(t);
-
-        return queryName.ToString()!;
+        return "find/" + QueryUtils.GetKey(queryName);
     }
 
     /// <summary>
     /// Navigate to entity frame page
-    /// Equivalent to Selenium's FramePage
     /// </summary>
     public async Task<FramePageProxy<T>> FramePageAsync<T>(PrimaryKey id) where T : Entity
     {
@@ -78,7 +138,7 @@ public class BrowserProxy
     {
         var url = Url(NavigateRoute(typeof(T), null));
         await Page.GotoAsync(url);
-        return await FramePageProxy<T>.CreateAsync(Page);
+        return await FramePageProxy<T>.NewAsync(Page);
     }
 
     public async Task<FramePageProxy<T>> FramePageAsync<T>(Lite<T> lite) where T : Entity
@@ -88,12 +148,11 @@ public class BrowserProxy
 
         var url = Url(NavigateRoute(lite));
         await Page.GotoAsync(url);
-        return await FramePageProxy<T>.CreateAsync(Page);
+        return await FramePageProxy<T>.NewAsync(Page);
     }
 
     /// <summary>
     /// Get navigation route for entity
-    /// Equivalent to Selenium's NavigateRoute
     /// </summary>
     public virtual string NavigateRoute(Type type, PrimaryKey? id)
     {
@@ -112,7 +171,6 @@ public class BrowserProxy
 
     /// <summary>
     /// Get current logged-in user
-    /// Equivalent to Selenium's GetCurrentUser
     /// </summary>
     public virtual async Task<string?> GetCurrentUserAsync()
     {
@@ -129,7 +187,6 @@ public class BrowserProxy
 
     /// <summary>
     /// Logout current user
-    /// Equivalent to Selenium's Logout
     /// </summary>
     public virtual async Task LogoutAsync()
     {
@@ -143,7 +200,6 @@ public class BrowserProxy
 
     /// <summary>
     /// Login to application
-    /// Equivalent to Selenium's Login
     /// </summary>
     public virtual async Task LoginAsync(string username, string password)
     {
@@ -169,27 +225,49 @@ public class BrowserProxy
         await Page.Locator("#login").WaitNotPresentAsync();
         await Page.Locator(".sf-login-dropdown").WaitVisibleAsync();
 
+        // Read culture after login so the user's server-side culture preference is used.
         await SetCurrentCultureAsync();
     }
 
     /// <summary>
-    /// Set current culture from page
+    /// Sets the test thread culture to match the application's current culture.
+    /// Before login: reads data-culture from the .sf-culture-dropdown element.
+    /// After login: reads data-culture from the active CultureDropdownMenuItem item inside .sf-login-dropdown.
+    /// IsPresentAsync checks DOM presence so this works even when dropdowns are closed.
     /// </summary>
     public virtual async Task SetCurrentCultureAsync()
     {
-        var cultureDropdown = Page.Locator(".sf-culture-dropdown");
-        var culture = await cultureDropdown.GetAttributeAsync("data-culture");
-
-        if (!string.IsNullOrEmpty(culture))
+        // Before login: CultureDropdown renders as .sf-culture-dropdown with data-culture on the element itself.
+        var dropdown = Page.Locator(".sf-culture-dropdown");
+        if (await dropdown.IsPresentAsync())
         {
-            Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture = 
-                new System.Globalization.CultureInfo(culture);
+            var culture = await dropdown.GetAttributeAsync("data-culture");
+            if (!string.IsNullOrEmpty(culture))
+            {
+                Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture =
+                    new System.Globalization.CultureInfo(culture);
+                return;
+            }
+        }
+
+        // After login: CultureDropdownMenuItem renders individual items with data-culture inside .sf-login-dropdown;
+        var loginDropdown = Page.Locator(".sf-login-dropdown"); 
+        if (await loginDropdown.IsPresentAsync())
+        {
+            await loginDropdown.ClickAsync();
+            var cultureMenuItem = Page.Locator(".sf-login-dropdown .sf-culture-menu-item");
+            await cultureMenuItem.WaitPresentAsync();
+            var culture = await cultureMenuItem.GetAttributeAsync("data-culture");
+            if (!string.IsNullOrEmpty(culture))
+            {
+                Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture =
+                    new System.Globalization.CultureInfo(culture);
+            }
         }
     }
 
     /// <summary>
     /// Wait helper
-    /// Equivalent to Selenium's Wait
     /// </summary>
     public async Task<T> WaitAsync<T>(Func<Task<T?>> condition, string? description = null, TimeSpan? timeout = null)
     {

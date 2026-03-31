@@ -1,28 +1,32 @@
 using Microsoft.Playwright;
+using Signum.Playwright.Frames;
 using Signum.Playwright.LineProxies;
 using Signum.Playwright.ModalProxies;
+using Signum.Workflow;
 
-namespace Signum.Playwright.Frames;
+namespace Signum.Playwright.Workflow;
 
-//Proxy for FrameModal.tsx
-public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonContainer<T>, IValidationSummaryContainer 
-    where T : ModifiableEntity
+/// <summary>
+/// Proxy of CaseFrameModal.tsx
+/// </summary>
+public class CaseFrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonContainer<T>, IValidationSummaryContainer 
+    where T : ICaseMainEntity
 {
     public PropertyRoute Route { get; }
-    FrameModalProxy(ILocator locator, PropertyRoute? route = null) : base(locator)
+    CaseFrameModalProxy(ILocator locator, PropertyRoute? route = null) : base(locator)
     {
         Route = route ?? PropertyRoute.Root(typeof(T));
     }
 
-    public static async Task<FrameModalProxy<T>> NewAsync(ILocator modal, PropertyRoute? route = null)
+    public static async Task<CaseFrameModalProxy<T>> NewAsync(ILocator modal, PropertyRoute? route = null)
     {
-        var result = new FrameModalProxy<T>(modal, route);
-        await result.MainControl.WaitVisibleAsync();    
+        var result = new CaseFrameModalProxy<T>(modal, route);
+        await result.MainControl.WaitVisibleAsync();
         return result;
     }
 
     ILocator IEntityButtonContainer.Container => Modal;
-    ILocator ILineContainer.Element => MainControl;
+    ILocator ILineContainer.Element => Modal;
     ILocator IValidationSummaryContainer.Element => Modal;
 
     public override async ValueTask DisposeAsync()
@@ -40,7 +44,7 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
                 var message = await Modal.Page.GetMessageModalAsync();
                 if (message != null)
                 {
-                    await message.ClickAsync(MessageModalButton.No);
+                    await message.ClickAsync(MessageModalButton.Yes);
                 }
 
                 return false;
@@ -62,23 +66,23 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
         }
     }
 
-    public ILocator MainControl => Modal.Locator("div.sf-main-control");
+    private ILocator MainControl => Modal.Locator("div.sf-main-control");
 
 
     public Task<EntityInfoProxy> GetEntityInfoAsync() => EntityInfoProxy.GetFromMainEntityAsync(MainControl);
 }
 
-public static class FrameModalProxyExtension
+public static class CaseFrameModalProxyExtension
 {
-    public static async Task<FrameModalProxy<T>> Await_AsFrameModal<T>(this Task<ILocator> modal)
-    where T : ModifiableEntity
+    public static async Task<CaseFrameModalProxy<T>> Await_AsCaseFrameModal<T>(this Task<ILocator> modal)
+    where T : ICaseMainEntity
     {
-        return await FrameModalProxy<T>.NewAsync(await modal);
+        return await CaseFrameModalProxy<T>.NewAsync(await modal);
     }
 
-    public static Task<FrameModalProxy<T>> AsFrameModal<T>(this ILocator modal)
-        where T : ModifiableEntity
+    public static Task<CaseFrameModalProxy<T>> AsCaseFrameModal<T>(this ILocator modal)
+        where T : ICaseMainEntity   
     {
-        return FrameModalProxy<T>.NewAsync(modal);
+        return CaseFrameModalProxy<T>.NewAsync(modal);
     }
 }

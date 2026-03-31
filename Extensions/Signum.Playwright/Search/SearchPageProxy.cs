@@ -4,6 +4,9 @@ using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for SearchPage.tsx
+/// </summary>
 public class SearchPageProxy : IDisposable, IAsyncDisposable
 {
     public IPage Page { get; private set; }
@@ -17,7 +20,7 @@ public class SearchPageProxy : IDisposable, IAsyncDisposable
         Page = page;
     }
 
-    public static async Task<SearchPageProxy> CreateAsync(IPage page, bool waitInitialSearchCompleted = true)
+    public static async Task<SearchPageProxy> NewAsync(IPage page, bool waitInitialSearchCompleted = true)
     {
         var sc = new SearchPageProxy(page);
         await sc.InitializeAsync();
@@ -42,13 +45,13 @@ public class SearchPageProxy : IDisposable, IAsyncDisposable
         if (await SelectorModalProxy.IsSelectorAsync(popup))
             popup = await popup.AsSelectorModal().SelectAndCaptureAsync<T>();
 
-        return new FrameModalProxy<T>(popup);
+        return await FrameModalProxy<T>.NewAsync(popup);
     }
 
     public async Task<FramePageProxy<T>> CreateInPlaceAsync<T>() where T : ModifiableEntity
     {
         await SearchControl.CreateButton.ClickAsync();
-        return await FramePageProxy<T>.CreateAsync(Page);
+        return await FramePageProxy<T>.NewAsync(Page);
     }
 
     public async Task<FramePageProxy<T>> CreateInTabAsync<T>() where T : ModifiableEntity
@@ -73,7 +76,7 @@ public class SearchPageProxy : IDisposable, IAsyncDisposable
         if (newPage == null)
             throw new InvalidOperationException("Neues Tab konnte nicht gefunden werden.");
 
-        var result = await FramePageProxy<T>.CreateAsync(newPage);
+        var result = await FramePageProxy<T>.NewAsync(newPage);
 
         result.OnDisposed += async () => await newPage.CloseAsync();
         return result;

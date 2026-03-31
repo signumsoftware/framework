@@ -2,12 +2,17 @@ using Signum.Playwright.Frames;
 
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Proxy for EntityDetail.tsx
+/// </summary>
 public class EntityDetailProxy : EntityBaseProxy
 {
     public EntityDetailProxy(ILocator element, PropertyRoute route)
         : base(element, route)
     {
     }
+
+    internal override ILocator ButtonBar => this.Element.Locator(">legend");
 
     public override async Task<object?> GetValueUntypedAsync()
         => (await EntityInfoInternalAsync(null))?.ToLite();
@@ -44,5 +49,15 @@ public class EntityDetailProxy : EntityBaseProxy
     {
         var subRoute = Route.Type == typeof(T) ? Route : PropertyRoute.Root(typeof(T));
         return new LineContainer<T>(this.Element.Locator("div[data-property-path]"), subRoute);
+    }
+
+    public async Task<ILineContainer<T>> GetOrCreateDetailControlAsync<T>() where T : ModifiableEntity
+    {
+        if (await EntityInfoInternalAsync(null) != null)
+            return Details<T>();
+
+        await CreateEmbeddedAsync<T>();
+
+        return Details<T>();
     }
 }

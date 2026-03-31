@@ -4,6 +4,9 @@ using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for SearchModal.tsx
+/// </summary>
 public class SearchModalProxy : ModalProxy
 {
     public SearchControlProxy SearchControl { get; private set; }
@@ -93,7 +96,7 @@ public class SearchModalProxy : ModalProxy
         var modalLocator = Modal.Locator(".sf-modal");
         await modalLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
 
-        var modal = new FrameModalProxy<T>(modalLocator);
+        var modal = await FrameModalProxy<T>.NewAsync(modalLocator);
         await action(modal);
         var message = modalLocator.Locator(".message-modal");
         if (await message.CountAsync() > 0)

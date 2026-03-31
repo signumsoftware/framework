@@ -1,12 +1,11 @@
 namespace Signum.Playwright.LineProxies;
 
 /// <summary>
-/// Proxy for HTML editor controls
-/// Equivalent to Selenium's HtmlLineProxy
+/// Proxy for HtmlEditorLine.tsx
 /// </summary>
-public class HtmlLineProxy : BaseLineProxy
+public class HtmlEditorLineProxy : BaseLineProxy
 {
-    public HtmlLineProxy(ILocator element, PropertyRoute route)
+    public HtmlEditorLineProxy(ILocator element, PropertyRoute route)
         : base(element, route)
     {
     }
@@ -60,13 +59,20 @@ public class HtmlLineProxy : BaseLineProxy
             var frameName = await editor.GetAttributeAsync("name");
             var iframe = Page.FrameLocator(frameName ?? "");
             var body = iframe.Locator("body");
-            
+
             await body.EvaluateAsync($"el => el.innerHTML = {System.Text.Json.JsonSerializer.Serialize(html ?? "")}");
         }
         else
         {
-            // Handle contenteditable element
-            await editor.EvaluateAsync($"el => el.innerHTML = {System.Text.Json.JsonSerializer.Serialize(html ?? "")}");
+            // Handle Lexical contenteditable: use keyboard input to properly trigger Lexical's internal state updates
+            await editor.ClickAsync();
+            await editor.Page.Keyboard.PressAsync("Control+a");
+            if (!string.IsNullOrEmpty(html))
+                await editor.PressSequentiallyAsync(html);
+            else
+                await editor.Page.Keyboard.PressAsync("Delete");
+            // Blur the editor to trigger saveHtml() → binding.setValue()
+            await editor.EvaluateAsync("el => el.blur()");
         }
     }
 

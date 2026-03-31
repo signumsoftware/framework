@@ -1,5 +1,8 @@
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Proxy for FileLine.tsx
+/// </summary>
 public class FileLineProxy : BaseLineProxy
 {
 

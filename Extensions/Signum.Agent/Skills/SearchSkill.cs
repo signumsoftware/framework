@@ -16,10 +16,14 @@ namespace Signum.Agent.Skills;
 
 public class SearchSkill : AgentSkill
 {
-    public static Func<object, bool> InlineQueryName = q => false; 
+    public Func<object, bool> InlineQueryName = q => false; 
 
-    public SearchSkill()
+    public SearchSkill(params HashSet<object> queries) : this(q => queries.Contains(q))
     {
+    }  
+    public SearchSkill(Func<object, bool> inlineQueryName)
+    {
+        InlineQueryName = inlineQueryName;
         ShortDescription = "Explores the database schema and queries any information in the database";
         IsAllowed = () => true;
         Replacements = new Dictionary<string, Func<object?, string>>()

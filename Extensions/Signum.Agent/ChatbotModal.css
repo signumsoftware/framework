@@ -9,7 +9,7 @@
     display: flex;
     flex-direction: column;
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
-    z-index: 1051;
+    z-index: 2000;
     opacity: .8;
     transition: opacity ease .5s
 }

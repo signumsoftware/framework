@@ -2,6 +2,9 @@ using Signum.Playwright.Frames;
 
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Abstract proxy for EntityBase.tsx
+/// </summary>
 public class EntityComboProxy : EntityBaseProxy
 {
     public EntityComboProxy(ILocator element, PropertyRoute route)
@@ -61,7 +64,7 @@ public class EntityComboProxy : EntityBaseProxy
         await WaitChangesAsync(async () =>
         {
             await ComboElement.SelectOptionAsync(new SelectOptionValue { Label = label });
-        }, "ComboBox selected");
+        });
     }
 
     public async Task SelectIndexAsync(int index)
@@ -72,7 +75,7 @@ public class EntityComboProxy : EntityBaseProxy
             {
                 Index = index + 1
             });
-        }, "ComboBox selected");
+        });
     }
 
     public async Task<EntityInfoProxy?> EntityInfoAsync()

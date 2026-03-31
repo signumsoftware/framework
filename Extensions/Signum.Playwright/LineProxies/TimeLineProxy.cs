@@ -3,6 +3,9 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Proxy for TimeLine.tsx
+/// </summary>
 public class TimeLineProxy : BaseLineProxy
 {
     public TimeLineProxy(ILocator element, PropertyRoute route)

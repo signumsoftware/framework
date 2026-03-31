@@ -78,7 +78,8 @@ export function CultureDropdownMenuItem(props: {
     <div>
       <button
         type="button"
-        className="dropdown-item d-flex align-items-center"
+        data-culture={current.name}
+        className="dropdown-item d-flex align-items-center sf-culture-menu-item"
         onClick={() => setShow(!show)}
         aria-expanded={show}
         aria-haspopup="true"

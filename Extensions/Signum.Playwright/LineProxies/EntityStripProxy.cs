@@ -2,6 +2,9 @@ using Signum.Playwright.Frames;
 
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Proxy for EntityStrip.tsx
+/// </summary>
 public class EntityStripProxy : EntityBaseProxy
 {
     public EntityStripProxy(ILocator element, PropertyRoute route)
@@ -33,11 +36,10 @@ public class EntityStripProxy : EntityBaseProxy
     public async Task<FrameModalProxy<T>> ViewAsync<T>(int index) where T : ModifiableEntity
     {
         var changes = await GetChangesAsync();
-        var popup = await CaptureOnClickAsync(ViewElementIndex(index));
+        var popup = await ViewElementIndex(index).CaptureOnClickAsync();
 
-        return new FrameModalProxy<T>(popup, this.ItemRoute)
-        {
-            Disposing = async okPressed => await WaitNewChangesAsync(changes, "create dialog closed")
-        };
+        var modal = await FrameModalProxy<T>.NewAsync(popup, this.ItemRoute);
+        modal.Disposing = async okPressed => await WaitNewChangesAsync(changes);
+        return modal;
     }
 }

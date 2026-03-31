@@ -42,7 +42,7 @@ public abstract class BaseLineProxy
 
                 if (imp.Value.Types.All(t =>
                         EntityKindCache.IsLowPopulation(t)))
-                    return new EntityListCheckBoxProxy(element, route);
+                    return new EntityCheckBoxListProxy(element, route);
 
                 return new EntityStripProxy(element, route);
             }
@@ -108,7 +108,7 @@ public abstract class BaseLineProxy
                     return new TextAreaLineProxy(element, route);
 
                 if (Reflector.GetFormatString(route) == "Color")
-                    return new ColorBoxLineProxy(element, route);
+                    return new ColorLineProxy(element, route);
 
                 return new TextBoxLineProxy(element, route);
             }

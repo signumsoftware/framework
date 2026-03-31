@@ -68,14 +68,14 @@ public static class LineContainerExtensions
                 var newRoute = route.Add(mi);
 
                 if (newRoute.Parent != route && route != lineContainer.Route)
-                    locator = locator.Locator($"[data-property-path='{route.PropertyString()}']");
+                    locator = locator.Locator($"[data-property-path='{route.PropertyString()}']").First;
 
                 route = newRoute;
             }
         }
 
         return new LineLocator<S>(
-            elementLocator: locator.Locator($"[data-property-path='{route.PropertyString()}']"),
+            elementLocator: locator.Locator($"[data-property-path='{route.PropertyString()}']").First,
             route: route
         );
     }
@@ -209,17 +209,17 @@ public static class LineContainerExtensions
             await valueLine.InputLocator.EvaluateAsync("el => el.blur()");
     }
 
-    public static HtmlLineProxy HtmlLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property)
+    public static HtmlEditorLineProxy HtmlEditorLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property)
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new HtmlLineProxy(lineLocator.ElementLocator, lineLocator.Route);
+        return new HtmlEditorLineProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
-    public static async Task HtmlLineValueAsync<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property, string? value)
+    public static async Task HtmlEditorLineValueAsync<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property, string? value)
         where T : IModifiableEntity
     {
-        var valueLine = lineContainer.HtmlLine(property);
+        var valueLine = lineContainer.HtmlEditorLine(property);
         await valueLine.SetValueUntypedAsync(value);
     }
 
@@ -378,11 +378,11 @@ public static class LineContainerExtensions
         return new EntityTableProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
-    public static EntityListCheckBoxProxy EntityListCheckBox<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+    public static EntityCheckBoxListProxy EntityCheckBoxList<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
-        return new EntityListCheckBoxProxy(lineLocator.ElementLocator, lineLocator.Route);
+        return new EntityCheckBoxListProxy(lineLocator.ElementLocator, lineLocator.Route);
     }
 
     public static QueryTokenBuilderProxy QueryTokenBuilder<T>(this ILineContainer<T> lineContainer, Expression<Func<T, QueryTokenEmbedded>> property)

@@ -4,6 +4,9 @@ using Signum.Utilities.Synchronization;
 
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for the result table part in SearchControlLoaded.tsx
+/// </summary>
 public class ResultTableProxy
 {
     public ILocator Element { get; }
@@ -180,7 +183,7 @@ public class ResultTableProxy
     {
         var link = await EntityLinkAsync(rowIndex);
         var popup = await link.CaptureOnClickAsync();
-        return new FrameModalProxy<T>(popup);
+        return await FrameModalProxy<T>.NewAsync(popup);
     }
 
     public async Task<FrameModalProxy<T>> EntityClickAsync<T>(Lite<T> lite)
@@ -188,7 +191,7 @@ public class ResultTableProxy
     {
         var link = await EntityLinkAsync(lite);
         var popup = await link.CaptureOnClickAsync();
-        return new FrameModalProxy<T>(popup);
+        return await FrameModalProxy<T>.NewAsync(popup);
     }
 
     public async Task<FramePageProxy<T>> EntityClickInPlaceAsync<T>(int rowIndex)
@@ -196,7 +199,7 @@ public class ResultTableProxy
     {
         var link = await EntityLinkAsync(rowIndex);
         await link.ClickAsync();
-        return await FramePageProxy<T>.CreateAsync(this.Element.Page);
+        return await FramePageProxy<T>.NewAsync(this.Element.Page);
     }
 
     public async Task<FramePageProxy<T>> EntityClickInPlaceAsync<T>(Lite<T> lite)
@@ -204,7 +207,7 @@ public class ResultTableProxy
     {
         var link = await EntityLinkAsync(lite);
         await link.ClickAsync();
-        return await FramePageProxy<T>.CreateAsync(this.Element.Page);
+        return await FramePageProxy<T>.NewAsync(this.Element.Page);
     }
 
     public async Task<ILocator> EntityLinkAsync(Lite<IEntity> lite)

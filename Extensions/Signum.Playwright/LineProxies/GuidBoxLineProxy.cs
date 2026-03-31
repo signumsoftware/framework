@@ -1,5 +1,8 @@
 namespace Signum.Playwright.LineProxies;
 
+/// <summary>
+/// Proxy for GuidLine in TextBoxLine.tsx
+/// </summary>
 public class GuidBoxLineProxy : BaseLineProxy
 {
     public GuidBoxLineProxy(ILocator element, PropertyRoute route)

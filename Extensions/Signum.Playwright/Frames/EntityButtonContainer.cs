@@ -155,7 +155,7 @@ public static class EntityButtonContainerExtensions
     {
         await container.OperationClickAsync(symbol);
         if (consumeAlert)
-            await container.Modal.Page.Locator("div.sf-message-modal button:has-text('Yes')").ClickAsync();
+            await container.Modal.Page.CloseMessageModalAsync(MessageModalButton.Yes);
 
         await container.WaitForCloseAsync();
     }
@@ -165,11 +165,11 @@ public static class EntityButtonContainerExtensions
         where F : Entity
     {
         var element = await container.OperationClickCaptureAsync(symbol);
-        var modal = await new FrameModalProxy<T>(element).WaitLoadedAsync();
+        var modal = await FrameModalProxy<T>.NewAsync(element);
         return modal;
     }
 
-    public static async Task<FramePageProxy<T>> ConstructFromNormalPageAsync<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+    public static async Task<FramePageProxy<T>> ConstructFromFramePageAsync<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
         where T : Entity
         where F : Entity
     {
@@ -180,12 +180,12 @@ public static class EntityButtonContainerExtensions
             try { return (await container.GetEntityInfoAsync()).IsNew; } catch { return false; }
         });
 
-        return await FramePageProxy<T>.CreateAsync(container.Container.Page);
+        return await FramePageProxy<T>.NewAsync(container.Container.Page);
     }
 
     public static async Task<long?> RefreshCountAsync(this IEntityButtonContainer container)
     {
-        var value = await container.Element.Locator("div.sf-main-control").GetAttributeAsync("data-refresh-count");
+        var value = await container.Element.GetAttributeAsync("data-refresh-count");
         return long.TryParse(value, out var result) ? result : null;
     }
 
@@ -195,6 +195,6 @@ public static class EntityButtonContainerExtensions
 
         await action();
 
-        await Assertions.Expect(container.Container.Locator("div.sf-main-control")).Not.ToHaveAttributeAsync("data-refresh-count", oldCount?.ToString() ?? "");
+        await container.Element.WaitAttributeAsync("data-refresh-count", oldCount?.ToString(), "!==");
     }
 }

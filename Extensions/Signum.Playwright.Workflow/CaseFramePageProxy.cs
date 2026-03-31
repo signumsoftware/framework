@@ -1,31 +1,33 @@
-using Microsoft.Playwright;
+using Signum.Playwright.Frames;
 using Signum.Playwright.LineProxies;
 using Signum.Playwright.ModalProxies;
+using Signum.Workflow;
 
-namespace Signum.Playwright.Frames;
+namespace Signum.Playwright.Workflow;
 
-//Proxy for FramePage.tsx
-public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, IWidgetContainer, IValidationSummaryContainer, IAsyncDisposable, IDisposable
-    where T : ModifiableEntity
+/// <summary>
+/// Proxy of CaseFramePage.tsx
+/// </summary>
+public class CaseFramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, IWidgetContainer, IValidationSummaryContainer, IAsyncDisposable, IDisposable
+    where T : ICaseMainEntity
 {
     public IPage Page { get; }
     public ILocator Element { get; }
     public PropertyRoute Route { get; }
 
-    private FramePageProxy(IPage page)
+    private CaseFramePageProxy(IPage page)
     {
         Page = page;
         Element = page.Locator(".normal-control");
         Route = PropertyRoute.Root(typeof(T));
     }
 
-    public static async Task<FramePageProxy<T>> NewAsync(IPage page)
+    public static async Task<CaseFramePageProxy<T>> NewAsync(IPage page)
     {
-        var result = new FramePageProxy<T>(page);
+        var result = new CaseFramePageProxy<T>(page);
         await result.WaitLoadedAsync();
         return result;
     }
-
 
     public ILocator Container => Element;
 
@@ -46,10 +48,21 @@ public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, I
 
     public Task<EntityInfoProxy> GetEntityInfoAsync() => EntityInfoProxy.GetFromMainEntityAsync(MainControl);
 
+    Task<EntityInfoProxy> IEntityButtonContainer.GetEntityInfoAsync()
+    {
+        return GetEntityInfoAsync();
+    }
+
+    public async Task<T> RetrieveEntityAsync()
+    {
+        var lite = (await GetEntityInfoAsync()).ToLite();
+        return (T)(IEntity)lite.RetrieveAndRemember();
+    }
+
     async Task WaitLoadedAsync()
     {
         await Page.WaitForSelectorAsync(".normal-control");
-        
+
         var error = await Page.GetErrorModalAsync();
         if (error != null)
         {
@@ -58,4 +71,5 @@ public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, I
 
         await MainControl.WaitVisibleAsync();
     }
+
 }

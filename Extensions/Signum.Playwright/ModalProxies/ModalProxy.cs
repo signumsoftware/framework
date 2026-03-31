@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 namespace Signum.Playwright.ModalProxies;
 
 /// <summary>
-/// Proxy for working with Signum Framework modals
+/// Generic proxy for bootstrap Modals
 /// </summary>
 public class ModalProxy : IDisposable, IAsyncDisposable
 {
@@ -31,7 +31,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
 
     public virtual async ValueTask DisposeAsync()
     {
-        if (!AvoidClose)
+        if (!AvoidClose && !BrowserProxy.DebugMode)
         {
             try
             {
@@ -65,31 +65,24 @@ public class ModalProxy : IDisposable, IAsyncDisposable
     public async Task<FrameModalProxy<T>> OkWaitFrameModalAsync<T>()
     where T : ModifiableEntity
     {
-        var newModal = await CaptureAsync(Modal.Page, async () =>
-        {
-            await OkButton.ClickAsync();
-        });
+        var newModal = await OkButton.CaptureOnClickAsync();
 
         var disposing = Disposing;
         Disposing = null;
 
-        return new FrameModalProxy<T>(newModal.Modal)
-        {
-            Disposing = disposing
-        };
+        var result = await FrameModalProxy<T>.NewAsync(newModal);
+        result.Disposing = disposing;
+        return result;
     }
 
     public async Task<SearchModalProxy> OkWaitSearchModalAsync()
     {
-        var newModal = await CaptureAsync(Modal.Page, async () =>
-        {
-            await OkButton.ClickAsync();
-        });
+        var newModal = await OkButton.CaptureOnClickAsync();
 
         var disposing = Disposing;
         Disposing = null;
 
-        return new SearchModalProxy(newModal.Modal)
+        return new SearchModalProxy(newModal)
         {
             Disposing = disposing
         };
@@ -129,22 +122,6 @@ public class ModalProxy : IDisposable, IAsyncDisposable
         await WaitForCloseAsync();
     }
 
-    public static async Task<ModalProxy> CaptureAsync(IPage page, Func<Task> clickAction)
-    {
-        var beforeCount = await page.Locator(".modal-dialog").CountAsync();
-
-        await clickAction();
-
-        await page.WaitForFunctionAsync(
-            @"(before) => document.querySelectorAll('.modal-dialog').length > before",
-            beforeCount
-        );
-
-        var modal = page.Locator(".modal-dialog").Nth(beforeCount);
-
-        return new ModalProxy(modal);
-    }
- 
 }
 
 public static class ModalProxyExtensions

@@ -1,10 +1,15 @@
 using Microsoft.Playwright;
 using Signum.Playwright.Frames;
 using Signum.Playwright.ModalProxies;
+using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Synchronization;
+using System.Diagnostics;
 
 namespace Signum.Playwright.Search;
 
+/// <summary>
+/// Proxy for SearchControlLoaded.tsx
+/// </summary>
 public class SearchControlProxy
 {
     public ILocator Element { get; private set; }
@@ -39,8 +44,7 @@ public class SearchControlProxy
     public async Task WaitSearchCompletedAsync(Func<Task> searchTrigger)
     {
         var counter = await Element.GetAttributeAsync("data-search-count");
-        if (searchTrigger != null)
-            await searchTrigger();
+        await searchTrigger();
         await WaitSearchCompletedAsync(counter);
     }
 
@@ -51,7 +55,7 @@ public class SearchControlProxy
 
     private async Task WaitSearchCompletedAsync(string? counter)
     {
-        await Assertions.Expect(Element).Not.ToHaveAttributeAsync("data-search-count", counter!);
+        await Element.WaitAttributeAsync("data-search-count", counter, "!==");
     }
 
     public async Task<EntityContextMenuProxy> SelectedClickAsync()
@@ -112,14 +116,10 @@ public class SearchControlProxy
 
     public async Task<FrameModalProxy<T>> CreateAsync<T>() where T : ModifiableEntity
     {
-        await CreateButton.ClickAsync();
-
-        var modalLocator = this.Element.Page.Locator(".sf-selector-modal, .sf-modal");
-        await modalLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
-
+        var modalLocator = await CreateButton.CaptureOnClickAsync();
         if (await SelectorModalProxy.IsSelectorAsync(modalLocator))
             modalLocator = await modalLocator.AsSelectorModal().SelectAndCaptureAsync<T>();
-        var modal = await new FrameModalProxy<T>(modalLocator).WaitLoadedAsync();
+        var modal = await FrameModalProxy<T>.NewAsync(modalLocator);
         return modal;
     }
 
