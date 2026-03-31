@@ -8,6 +8,7 @@ public interface IEntityButtonContainer : ILineContainer
 {
     Task<EntityInfoProxy> GetEntityInfoAsync();
     ILocator Container { get; }
+    ILocator MainControl { get; }
 }
 
 public interface IEntityButtonContainer<T> : IEntityButtonContainer, ILineContainer<T>
@@ -185,7 +186,7 @@ public static class EntityButtonContainerExtensions
 
     public static async Task<long?> RefreshCountAsync(this IEntityButtonContainer container)
     {
-        var value = await container.Element.GetAttributeAsync("data-refresh-count");
+        var value = await container.MainControl.GetAttributeAsync("data-refresh-count");
         return long.TryParse(value, out var result) ? result : null;
     }
 
@@ -195,6 +196,6 @@ public static class EntityButtonContainerExtensions
 
         await action();
 
-        await container.Element.WaitAttributeAsync("data-refresh-count", oldCount?.ToString(), "!==");
+        await container.MainControl.WaitAttributeAsync("data-refresh-count", oldCount?.ToString(), "!==");
     }
 }
