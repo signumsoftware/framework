@@ -249,6 +249,7 @@ public static class PlaywrightExtensions
     {
         await locator.Page.WaitForFunctionAsync(
             @"([el, cls, shouldHave]) => {
+                debugger;
                 const hasClass = el.classList.contains(cls);
                 return shouldHave == hasClass;
             }",
@@ -278,12 +279,10 @@ public static class PlaywrightExtensions
 
     public static async Task WaitDisabledAsync(this ILocator locator, bool shouldBeDisabled)
     {
-        var elementHandle = await locator.ElementHandleAsync();
-
-        await locator.Page.WaitForFunctionAsync(
-            @"([el, disabled]) => el.disabled === disabled",
-            new object[] { elementHandle, shouldBeDisabled }
-        );
+        if (shouldBeDisabled)
+            await Assertions.Expect(locator).ToBeDisabledAsync();
+        else
+            await Assertions.Expect(locator).ToBeEnabledAsync();
     }
 
     /// <summary>
@@ -314,6 +313,38 @@ public static class PlaywrightExtensions
     public static ILocator GetParent(this ILocator locator)
     {
         return locator.Locator("..");
+    }
+
+    /// <summary>
+    /// Returns a valid CSS selector derived from the locator's ToString() representation.
+    /// Strips the "Locator@" prefix, removes Playwright-specific "nth=N" parts,
+    /// and replaces " >> " descendant separators with a space.
+    /// </summary>
+    public static string ToCssSelector_QueryAll(this ILocator locator) => $"document.querySelectorAll(\"{locator.ToCssSelector()}\")"; 
+    public static string ToCssSelector(this ILocator locator)
+    {
+        var selector = locator.ToString()!.After('@');
+
+        var parts = selector.Split(" >> ");
+        var result = new List<string>();
+        foreach (var part in parts)
+        {
+            if (part.StartsWith("nth=") && part[4..].All(char.IsDigit))
+            {
+                //var n = int.Parse(part[4..]);
+                //if (result.Count > 0)
+                //    result[^1] += $":nth-child({n + 1})";
+            }
+            else if (part.Contains(','))
+            {
+                result.Add($":is({part})");
+            }
+            else
+            {
+                result.Add(part);
+            }
+        }
+        return string.Join(" ", result);
     }
 
     #endregion

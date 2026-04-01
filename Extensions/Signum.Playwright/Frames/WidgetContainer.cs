@@ -50,6 +50,6 @@ public static class WidgetContainerExtensions
             await element.ClickAsync();
         });
 
-        return new SearchModalProxy(modal);
+        return await SearchModalProxy.NewAsync(modal);
     }
 }

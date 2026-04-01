@@ -101,23 +101,4 @@ public class EntityTableRow<T> : LineContainer<T>
 
         return -1;
     }
-
-    public async Task<EntityTableRow<T>> WaitRefreshAsync(Func<Task> action)
-    {
-        var index = await IndexAsync();
-        var rows = EntityTable.TableElement.Locator(":scope > tbody > tr");
-
-        var originalRow = rows.Nth(index);
-        await action();
-
-        await originalRow.WaitForAsync(new()
-        {
-            State = WaitForSelectorState.Detached
-        });
-
-        var refreshedRow = rows.Nth(index);
-
-        await Assertions.Expect(refreshedRow).ToBeAttachedAsync();
-        return EntityTable.Row<T>(index);
-    }
 }

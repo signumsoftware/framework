@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Office2010.Drawing;
 using Microsoft.Playwright;
 using Signum.Playwright.LineProxies;
 
@@ -22,6 +23,20 @@ public class AutoLineModalProxy : ModalProxy
         await formGroup.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
 
         return BaseLineProxy.AutoLine(formGroup, route);
+    }
+
+    public async Task SetValueOk(string kommentar)
+    {
+        using (this)
+        {
+            await this.SetValueAsync(kommentar);
+            await this.OkWaitClosedAsync();
+        }
+    }
+
+    public async Task SetValueAsync(object? value)
+    {
+        await (await GetAutoLineAsync()).SetValueUntypedAsync(value);
     }
 }
 

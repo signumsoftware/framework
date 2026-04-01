@@ -2,6 +2,7 @@ using Signum.Entities.Reflection;
 using Signum.Playwright.Frames;
 using Signum.Playwright.Search;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 
 namespace Signum.Playwright;
@@ -225,8 +226,6 @@ public class BrowserProxy
         await Page.Locator("#login").WaitNotPresentAsync();
         await Page.Locator(".sf-login-dropdown").WaitVisibleAsync();
 
-        // Read culture after login so the user's server-side culture preference is used.
-        await SetCurrentCultureAsync();
     }
 
     /// <summary>
@@ -235,7 +234,7 @@ public class BrowserProxy
     /// After login: reads data-culture from the active CultureDropdownMenuItem item inside .sf-login-dropdown.
     /// IsPresentAsync checks DOM presence so this works even when dropdowns are closed.
     /// </summary>
-    public virtual async Task SetCurrentCultureAsync()
+    public virtual async Task<CultureInfo> GetCurrentCultureAsync()
     {
         // Before login: CultureDropdown renders as .sf-culture-dropdown with data-culture on the element itself.
         var dropdown = Page.Locator(".sf-culture-dropdown");
@@ -244,9 +243,7 @@ public class BrowserProxy
             var culture = await dropdown.GetAttributeAsync("data-culture");
             if (!string.IsNullOrEmpty(culture))
             {
-                Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture =
-                    new System.Globalization.CultureInfo(culture);
-                return;
+                return new CultureInfo(culture);
             }
         }
 
@@ -260,10 +257,11 @@ public class BrowserProxy
             var culture = await cultureMenuItem.GetAttributeAsync("data-culture");
             if (!string.IsNullOrEmpty(culture))
             {
-                Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture =
-                    new System.Globalization.CultureInfo(culture);
+                return new CultureInfo(culture);
             }
         }
+
+        throw new InvalidOperationException("Unable to find culture");
     }
 
     /// <summary>

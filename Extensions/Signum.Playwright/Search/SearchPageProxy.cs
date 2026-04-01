@@ -33,7 +33,7 @@ public class SearchPageProxy : IDisposable, IAsyncDisposable
     public async Task InitializeAsync()
     {
         var element = Page.Locator(".sf-search-page .sf-search-control");
-        await element.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+        await element.WaitVisibleAsync();
         SearchControl = new SearchControlProxy(element);
     }
 

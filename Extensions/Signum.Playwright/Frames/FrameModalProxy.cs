@@ -1,6 +1,7 @@
 using Microsoft.Playwright;
 using Signum.Playwright.LineProxies;
 using Signum.Playwright.ModalProxies;
+using System.Diagnostics;
 
 namespace Signum.Playwright.Frames;
 
@@ -28,6 +29,7 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
     public override async ValueTask DisposeAsync()
     {
         if (!AvoidClose)
+        if (!AvoidClose && !(BrowserProxy.DebugMode && this.exception != null))
         {
             await this.Modal.Page.WaitAsync(async () =>
             {
@@ -47,7 +49,8 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
             });
         }
 
-        Disposing?.Invoke(this.OkPressed);
+        if (Disposing != null)
+            await Disposing.Invoke(this.OkPressed);
     }
     private async Task<bool> TryToCloseAsync()
     {

@@ -1,14 +1,13 @@
-using Microsoft.Playwright;
 using Signum.Playwright.Frames;
 using Signum.Playwright.Search;
-using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace Signum.Playwright.ModalProxies;
 
 /// <summary>
 /// Generic proxy for bootstrap Modals
 /// </summary>
-public class ModalProxy : IDisposable, IAsyncDisposable
+public class ModalProxy : IAsyncDisposable , IDisposableException
 {
     public ILocator Modal { get; }
 
@@ -26,12 +25,19 @@ public class ModalProxy : IDisposable, IAsyncDisposable
 
     public void Dispose()
     {
+        Debug.WriteLine("DisposeAsync " + this.GetType().Name);
         DisposeAsync().GetAwaiter().GetResult();
+    }
+
+    protected Exception? exception;
+    public void OnException(Exception ex)
+    {
+        this.exception = ex;
     }
 
     public virtual async ValueTask DisposeAsync()
     {
-        if (!AvoidClose && !BrowserProxy.DebugMode)
+        if (!AvoidClose && !(BrowserProxy.DebugMode && exception != null))
         {
             try
             {
@@ -81,11 +87,9 @@ public class ModalProxy : IDisposable, IAsyncDisposable
 
         var disposing = Disposing;
         Disposing = null;
-
-        return new SearchModalProxy(newModal)
-        {
-            Disposing = disposing
-        };
+        var result = await SearchModalProxy.NewAsync(newModal);
+        result.Disposing = disposing;
+        return result;
     }
     
     public bool OkPressed;
@@ -122,6 +126,7 @@ public class ModalProxy : IDisposable, IAsyncDisposable
         await WaitForCloseAsync();
     }
 
+    
 }
 
 public static class ModalProxyExtensions

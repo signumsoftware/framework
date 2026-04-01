@@ -58,22 +58,11 @@ public class SearchControlProxy
         await Element.WaitAttributeAsync("data-search-count", counter, "!==");
     }
 
-    public async Task<EntityContextMenuProxy> SelectedClickAsync()
-    {
-        await Element.Locator(".sf-tm-selected").ClickAsync();
-        var menu = Element.Locator("div.dropdown > .dropdown-menu");
-        await menu.WaitForAsync();
-        return new EntityContextMenuProxy(Results, menu);
-    }
-
     public async Task<ILocator> WaitContextMenuAsync()
     {
         var locator = Element.Page.Locator(".sf-context-menu .dropdown-menu");
 
-        await locator.WaitForAsync(new LocatorWaitForOptions
-        {
-            State = WaitForSelectorState.Visible
-        });
+        await locator.WaitVisibleAsync();
 
         return locator;
     }

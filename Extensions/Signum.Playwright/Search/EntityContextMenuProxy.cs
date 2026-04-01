@@ -12,10 +12,13 @@ public class EntityContextMenuProxy
     public ResultTableProxy ResultTable { get; private set; }
     public ILocator Element { get; private set; }
 
-    public EntityContextMenuProxy(ResultTableProxy resultTable, ILocator element)
+    public List<Lite<IEntity>> SelectedEntities; 
+
+    public EntityContextMenuProxy(ResultTableProxy resultTable, ILocator element, List<Lite<IEntity>> selectedEntities)
     {
         ResultTable = resultTable;
         Element = element;
+        SelectedEntities = selectedEntities;
     }
 
     public ILocator QuickLink(string name)
@@ -28,7 +31,7 @@ public class EntityContextMenuProxy
         var a = QuickLink(name);
         await a.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
         var popup = await a.CaptureOnClickAsync();
-        return new SearchModalProxy(popup);
+        return await SearchModalProxy.NewAsync(popup);
     }
 
     public async Task ExecuteAsync<T>(
@@ -39,7 +42,7 @@ public class EntityContextMenuProxy
         bool scrollTo = false
     ) where T : Entity
     {
-        var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheckAsync(shouldDisappear);
+        var check = customCheck != null ? customCheck(this) : this.GetShouldDisappearCheckAsync(shouldDisappear);
 
         var op = Operation(executeSymbol);
 
@@ -113,7 +116,7 @@ public class EntityContextMenuProxy
         Func<EntityContextMenuProxy, Func<Task>>? customCheck = null,
         bool scrollTo = false)
     {
-        var check = customCheck != null ? customCheck(this) : GetShouldDisappearCheckAsync(shouldDisappear);
+        var check = customCheck != null ? customCheck(this) : this.GetShouldDisappearCheckAsync(shouldDisappear);
 
         var op = Operation(symbolContainer);
         if (scrollTo)
@@ -137,14 +140,10 @@ public class EntityContextMenuProxy
 
     private Func<Task> GetShouldDisappearCheckAsync(bool shouldDisappear)
     {
-        var selectedEntities = ResultTable.SelectedEntitiesAsync();
-        return async () =>
-        {
-            if (shouldDisappear)
-                await ResultTable.WaitNoVisibleAsync(await selectedEntities);
-            else
-                await ResultTable.WaitSuccessAsync(await selectedEntities);
-        };
+        if (shouldDisappear)
+            return () => ResultTable.WaitNoVisibleAsync(this.SelectedEntities);
+
+        return () => ResultTable.WaitSuccessAsync(this.SelectedEntities);
     }
 
     public ILocator Operation(IOperationSymbolContainer symbolContainer)

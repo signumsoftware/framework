@@ -29,17 +29,24 @@ public class ResultTableProxy
         return rows.Select(r => new ResultRowProxy(r)).ToList();
     }
 
-    public ResultRowProxy RowElement(int rowIndex)
+    public ResultRowProxy Row(int rowIndex)
         => new ResultRowProxy(RowElementLocator(rowIndex));
 
     private ILocator RowElementLocator(int rowIndex)
         => Element.Locator($"tr[data-row-index='{rowIndex}']");
 
-    public ResultRowProxy RowElement(Lite<IEntity> lite)
-        => new ResultRowProxy(RowElementLocator(lite));
+    public ResultRowProxy Row(Lite<IEntity> lite, int? subRowIndex)
+        => new ResultRowProxy(RowLocator(lite, subRowIndex));
 
-    private ILocator RowElementLocator(Lite<IEntity> lite)
-        => Element.Locator($"tr[data-entity='{lite.Key()}']");
+    private ILocator RowLocator(Lite<IEntity> lite, int? subRowIndex)
+    {
+        var locator = Element.Locator($"tr[data-entity='{lite.Key()}']");
+
+        if (subRowIndex != null)
+            return locator.Nth(subRowIndex.Value);
+
+        return locator;
+    }
 
     public async Task<int> RowsCountAsync()
         => await Element.Locator("tbody > tr[data-entity]").CountAsync();
@@ -65,7 +72,7 @@ public class ResultTableProxy
     }
 
     public async Task SelectRowAsync(int rowIndex)
-        => await RowElement(rowIndex).SelectedCheckbox.ClickAsync();
+        => await Row(rowIndex).SelectedCheckbox.ClickAsync();
 
     public async Task SelectRowsAsync(params int[] indexes)
     {
@@ -73,8 +80,8 @@ public class ResultTableProxy
             await SelectRowAsync(i);
     }
 
-    public async Task SelectRowAsync(Lite<IEntity> lite)
-        => await RowElement(lite).SelectedCheckbox.ClickAsync();
+    public async Task SelectRowAsync(Lite<IEntity> lite, int? subRowIndex = null)
+        => await Row(lite, subRowIndex).SelectedCheckbox.ClickAsync();
 
 
     public async Task SelectAllRowsAsync()
@@ -111,13 +118,13 @@ public class ResultTableProxy
     public async Task<ILocator> CellElementAsync(int rowIndex, string token)
     {
         var col = await GetColumnIndexAsync(token);
-        return RowElement(rowIndex).CellElement(col);
+        return Row(rowIndex).CellElement(col);
     }
 
-    public async Task<ILocator> CellElementAsync(Lite<IEntity> lite, string token)
+    public async Task<ILocator> CellElementAsync(Lite<IEntity> lite, string token, int? subRowIndex = null)
     {
         var col = await GetColumnIndexAsync(token);
-        return RowElement(lite).CellElement(col);
+        return Row(lite, subRowIndex).CellElement(col);
     }
 
     // ---------------- HEADER ----------------
@@ -186,10 +193,10 @@ public class ResultTableProxy
         return await FrameModalProxy<T>.NewAsync(popup);
     }
 
-    public async Task<FrameModalProxy<T>> EntityClickAsync<T>(Lite<T> lite)
+    public async Task<FrameModalProxy<T>> EntityClickAsync<T>(Lite<T> lite, int? subRowIndex = null)
         where T : Entity
     {
-        var link = await EntityLinkAsync(lite);
+        var link = await EntityLinkAsync(lite, subRowIndex);
         var popup = await link.CaptureOnClickAsync();
         return await FrameModalProxy<T>.NewAsync(popup);
     }
@@ -202,24 +209,24 @@ public class ResultTableProxy
         return await FramePageProxy<T>.NewAsync(this.Element.Page);
     }
 
-    public async Task<FramePageProxy<T>> EntityClickInPlaceAsync<T>(Lite<T> lite)
+    public async Task<FramePageProxy<T>> EntityClickInPlaceAsync<T>(Lite<T> lite, int? subRowIndex = null)
         where T : Entity
     {
-        var link = await EntityLinkAsync(lite);
+        var link = await EntityLinkAsync(lite, subRowIndex);
         await link.ClickAsync();
         return await FramePageProxy<T>.NewAsync(this.Element.Page);
     }
 
-    public async Task<ILocator> EntityLinkAsync(Lite<IEntity> lite)
+    public async Task<ILocator> EntityLinkAsync(Lite<IEntity> lite, int? subRowIndex = null)
     {
         var col = await GetColumnIndexAsync("Entity");
-        return RowElement(lite).EntityLink(col);
+        return Row(lite, subRowIndex).EntityLink(col);
     }
 
     public async Task<ILocator> EntityLinkAsync(int rowIndex)
     {
         var col = await GetColumnIndexAsync("Entity");
-        return RowElement(rowIndex).EntityLink(col);
+        return Row(rowIndex).EntityLink(col);
     }
 
     // ---------------- CONTEXT MENU ----------------
@@ -233,12 +240,14 @@ public class ResultTableProxy
 
         var menu = await SearchControl.WaitContextMenuAsync();
 
-        return new EntityContextMenuProxy(this, menu);
+        var selectedEntities = await SearchControl.Results.SelectedEntitiesAsync();
+
+        return new EntityContextMenuProxy(this, menu, selectedEntities);
     }
 
-    public async Task<EntityContextMenuProxy> EntityContextMenuAsync(Lite<Entity> lite, string columnToken = "Entity")
+    public async Task<EntityContextMenuProxy> EntityContextMenuAsync(Lite<Entity> lite, string columnToken = "Entity", int? subRowIndex = null)
     {
-        var cell = CellElementAsync(lite, columnToken).ResultSafe();
+        var cell = await CellElementAsync(lite, columnToken, subRowIndex);
         await cell.ScrollIntoViewIfNeededAsync();
 
         var box = await cell.BoundingBoxAsync();
@@ -249,7 +258,9 @@ public class ResultTableProxy
         await cell.ClickAsync(new() { Button = MouseButton.Right });
         var menu = await this.SearchControl.WaitContextMenuAsync();
 
-        return new EntityContextMenuProxy(this, menu);
+        var selectedEntities = await SearchControl.Results.SelectedEntitiesAsync();
+
+        return new EntityContextMenuProxy(this, menu, selectedEntities);
     }
 
     // ---------------- WAIT HELPERS ----------------
@@ -265,9 +276,7 @@ public class ResultTableProxy
     {
         foreach (var lite in lites)
         {
-            await RowElementLocator(lite)
-                .Locator(".sf-entity-ctxmenu-success")
-                .WaitForAsync(new() { State = WaitForSelectorState.Visible });
+            await RowLocator(lite, null).WaitHasClassAsync("sf-entity-ctxmenu-success", true);
         }
     }
 
@@ -275,7 +284,7 @@ public class ResultTableProxy
     {
         foreach (var lite in lites)
         {
-            await RowElementLocator(lite)
+            await RowLocator(lite, null)
                 .WaitForAsync(new() { State = WaitForSelectorState.Detached });
         }
     }
@@ -283,16 +292,16 @@ public class ResultTableProxy
 
 public class ResultRowProxy
 {
-    public ILocator RowElement { get; private set; }
+    public ILocator Locator { get; private set; }
 
     public ResultRowProxy(ILocator rowElement)
     {
-        RowElement = rowElement;
+        Locator = rowElement;
     }
 
-    public ILocator SelectedCheckbox => RowElement.Locator("input.sf-td-selection");
+    public ILocator SelectedCheckbox => Locator.Locator("input.sf-td-selection");
 
-    public ILocator CellElement(int columnIndex) => RowElement.Locator($"td:nth-child({columnIndex + 1})");
+    public ILocator CellElement(int columnIndex) => Locator.Locator($"td:nth-child({columnIndex + 1})");
 
     public ILocator EntityLink(int entityColumnIndex) => CellElement(entityColumnIndex).Locator("> a");
 }

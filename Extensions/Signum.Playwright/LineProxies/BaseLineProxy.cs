@@ -1,4 +1,5 @@
 using Signum.Entities.Reflection;
+using Signum.Utilities.Reflection;
 namespace Signum.Playwright.LineProxies;
 
 public abstract class BaseLineProxy
@@ -113,7 +114,7 @@ public abstract class BaseLineProxy
                 return new TextBoxLineProxy(element, route);
             }
 
-            if (type == typeof(int) || type == typeof(decimal))
+            if (ReflectionTools.IsNumber(type))
                 return new NumberLineProxy(element, route);
 
             if (type == typeof(Guid))

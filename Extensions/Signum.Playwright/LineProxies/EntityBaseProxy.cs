@@ -80,14 +80,13 @@ public abstract class EntityBaseProxy : BaseLineProxy
     public async Task<SearchModalProxy> FindAsync(Type? selectType = null)
     {
         string changes = await GetChangesAsync();
-        var popup = await FindButton.CaptureOnClickAsync();
+        var modal = await FindButton.CaptureOnClickAsync();
 
-        popup = await ChooseTypeCaptureAsync(popup, selectType);
+        modal = await ChooseTypeCaptureAsync(modal, selectType);
 
-        return new SearchModalProxy(popup)
-        {
-            Disposing = async okPressed => await WaitNewChangesAsync(changes)
-        };
+        var result = await SearchModalProxy.NewAsync(modal);
+        result.Disposing = async okPressed => await WaitNewChangesAsync(changes);
+        return result;
     }
 
     private async Task ChooseTypeAsync(ILocator element, Type selectType)

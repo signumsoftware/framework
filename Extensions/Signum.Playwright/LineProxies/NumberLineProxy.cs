@@ -51,16 +51,11 @@ public class NumberLineProxy : BaseLineProxy
 
         var input = InputLocator;
 
-        await input.WaitForAsync(new LocatorWaitForOptions
-        {
-            State = WaitForSelectorState.Visible
-        });
+        await input.WaitVisibleAsync();
 
-        // Playwright Best Practice: erst leeren
-        await input.FillAsync("");
+        await input.FillAsync(str ?? "");
 
-        if (!string.IsNullOrEmpty(str))
-            await input.FillAsync(str);
+        await input.BlurAsync();
     }
 
     public async Task<IFormattable?> GetValueAsync()

@@ -14,13 +14,20 @@ public class SearchModalProxy : ModalProxy
     public FiltersProxy Filters => SearchControl.Filters;
     public PaginationSelectorProxy Pagination => SearchControl.Pagination;
 
-    public SearchModalProxy(ILocator element)
+    SearchModalProxy(ILocator element)
         : base(element)
     {
         this.SearchControl = new SearchControlProxy(element.Locator(".sf-search-control"));
     }
 
-    public async Task Initialize( bool waitInitialSearch)
+    public static async Task<SearchModalProxy> NewAsync(ILocator element, bool waitInitialSearch = true)
+    {
+        var result = new SearchModalProxy(element);
+        await result.Initialize(waitInitialSearch);
+        return result;
+    }
+
+    public async Task Initialize(bool waitInitialSearch)
     {
         await SearchControl.Initialize();
 
@@ -28,7 +35,7 @@ public class SearchModalProxy : ModalProxy
             await SearchControl.WaitInitialSearchCompletedAsync();
     }
 
-    public async Task SelectLiteAsync(Lite<IEntity> lite)
+    public async Task SelectLiteAsync(Lite<IEntity> lite, int? subRowIndex = null)
     {
         if (!await this.SearchControl.FiltersVisibleAsync())
             await this.SearchControl.ToggleFiltersAsync(true);
@@ -37,7 +44,7 @@ public class SearchModalProxy : ModalProxy
 
         await this.SearchControl.SearchAsync();
 
-        await this.SearchControl.Results.SelectRowAsync(lite);
+        await this.SearchControl.Results.SelectRowAsync(lite, subRowIndex);
 
         await this.OkWaitClosedAsync();
 
@@ -91,21 +98,12 @@ public class SearchModalProxy : ModalProxy
 
     public async Task CreateAndSelectAsync<T>(Func<FrameModalProxy<T>, Task> action) where T : ModifiableEntity
     {
-        await SearchControl.CreateButton.ClickAsync();
+        var frameModal = await CreateAsync<T>();
 
-        var modalLocator = Modal.Locator(".sf-modal");
-        await modalLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+        await action(frameModal);
+        await this.Modal.Page.CloseMessageModalAsync(MessageModalButton.Yes);
 
-        var modal = await FrameModalProxy<T>.NewAsync(modalLocator);
-        await action(modal);
-        var message = modalLocator.Locator(".message-modal");
-        if (await message.CountAsync() > 0)
-        {
-            var msg = new MessageModalProxy(message);
-            await msg.ClickWaitCloseAsync(MessageModalButton.Yes);
-        }
-
-        await modalLocator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Detached });
+        await this.WaitForCloseAsync();
     }
 
     public async Task SearchAsync()
@@ -118,15 +116,11 @@ public static class SearchModalExtensions
 {
     public static async Task<SearchModalProxy> Await_AsSearchModal(this Task<ILocator> modal, bool waitInitialSearch = true)
     {
-        var result = new SearchModalProxy(await modal);
-        await result.Initialize(waitInitialSearch);
-        return result;
+        return await SearchModalProxy.NewAsync(await modal, waitInitialSearch);
     }
 
     public static async Task<SearchModalProxy> AsSearchModal(this ILocator modal, bool waitInitialSearch = true)
     {
-         var result = new SearchModalProxy(modal);
-        await result.Initialize(waitInitialSearch);
-        return result;
+        return await SearchModalProxy.NewAsync(modal, waitInitialSearch);
     }
 }
