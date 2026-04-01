@@ -129,7 +129,7 @@ button.dropdown-item:not(:disabled):not(.disabled) {
 
 a.expand-window {
     cursor: pointer;
-    color: var(--bs-secondary-text);
+    color: var(--bs-secondary);
     margin-top: 10px;
     position: fixed;
     top: 50px;
@@ -138,7 +138,7 @@ a.expand-window {
 }
 
 a.expand-window:hover {
-    color: var(--bs-secondary-text);
+    color: var(--bs-secondary);
 }
 
 .btn-toolbar.right .btn,
