@@ -88,42 +88,39 @@ Methods that already return strongly-typed proxies (typical flows):
 - `ResultTableProxy.EntityClickAsync<T>(...)`
 - `EntityButtonContainerExtensions.ConstructFromAsync<F, T>(...)`
 
-### Async Workflows (UsingAsync, EndUsingAsync, Await_UsingAsync, Await_EndUsingAsync)
+### Async Workflows (.Then)
 
-Use these helpers to keep disposal safe and express modal nesting clearly.
+Use `.Then(...)` to chain async proxy operations safely. It handles disposal automatically and expresses modal nesting clearly.
 
-1. `EndUsingAsync`: takes an existing disposable proxy and returns nothing.
-2. `UsingAsync`: takes an existing disposable proxy and returns a value/proxy.
-3. `Await_EndUsingAsync`: same as `EndUsingAsync` but starts from `Task<TDisposable>`.
-4. `Await_UsingAsync`: same as `UsingAsync` but starts from `Task<TDisposable>`.
+`Then` is an extension method on `Task<T>` for chaining async proxy operations.
 
-Also use modal casting helpers when you capture raw `ILocator`:
-- `Await_AsSearchModal(...)`
-- `Await_AsFrameModal<T>(...)`
+Use modal casting helpers when chaining from a captured `ILocator`:
+- `.Then(loc => loc.AsSearchModal())`
+- `.Then(loc => loc.AsFrameModal<T>())`
 
 Why preferred:
 - block/lambda nesting mirrors modal levels
 - easy to jump modal-to-modal in wizard-like flows
 - disposal is guaranteed
 
-Guideline: prefer these helpers over `using` in modal-heavy tests. 
-AVOID `using var ...` without an explicit block (Dispose iscalled too late).
+Guideline: prefer `.Then(...)` over `using` in modal-heavy tests.
+AVOID `using var ...` without an explicit block (Dispose is called too late).
 
 Example:
 
 ```cs
 await page.OperationClickCaptureAsync(OrderOperation.Ship)
-    .Await_AsSearchModal()
-    .Await_EndUsingAsync(async searchModal =>
+    .Then(a => a.AsSearchModal())
+    .Then(async sm =>
     {
-        await searchModal.SearchAsync();
+        await sm.SearchAsync();
 
-        await searchModal.Results.EntityClickAsync<OrderEntity>(0)
-            .Await_EndUsingAsync(async orderModal =>
+        await sm.Results.EntityClickAsync<OrderEntity>(0)
+            .Then(async orderModal =>
             {
                 await orderModal.OperationClickCaptureAsync(OrderOperation.Save)
-                    .Await_AsFrameModal<OrderEntity>()
-                    .Await_EndUsingAsync(async nextModal =>
+                    .Then(loc => loc.AsFrameModal<OrderEntity>())
+                    .Then(async nextModal =>
                     {
                         await nextModal.OkWaitClosedAsync();
                     });
@@ -160,7 +157,7 @@ Example:
 
 ```cs
 await b.FramePageAsync<OrderEntity>()
-    .Await_EndUsingAsync(async order =>
+    .Then(async order =>
     {
         await order.AutoLineValueAsync(o => o.Reference, "SO-1001");
         await order.AutoLineValueAsync(o => o.OrderDate, Clock.Now);
@@ -168,7 +165,7 @@ await b.FramePageAsync<OrderEntity>()
         var reference = await order.AutoLineValueAsync(o => o.Reference);
 
         await order.EntityTable(o => o.Details).CreateRowAsync<OrderDetailEmbedded>()
-            .Await_DoAsync(async row =>
+            .Then(async row =>
             {
                 await row.AutoLineValueAsync(d => d.Quantity, 5);
             });
@@ -189,12 +186,12 @@ Example:
 
 ```cs
 await b.FramePageAsync<OrderEntity>(order.ToLite())
-    .Await_EndUsingAsync(async page =>
+    .Then(async page =>
     {
         await page.ExecuteAsync(OrderOperation.Save);
 
         await page.ConstructFromAsync<OrderEntity, InvoiceEntity>(OrderOperation.InvoiceFrom)
-            .Await_EndUsingAsync(async invoiceModal =>
+            .Then(async invoiceModal =>
             {
                 await invoiceModal.OkWaitClosedAsync();
             });

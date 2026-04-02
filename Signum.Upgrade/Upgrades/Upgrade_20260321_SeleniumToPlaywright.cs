@@ -57,9 +57,12 @@ global using System.Threading.Tasks;");
             }
         }, WarningLevel.Warning);
 
+        string? browserCode = null;
         // Convert Browse method in Common.cs
         uctx.ChangeCodeFile(@"Southwind.Test.React\Common.cs", file =>
         {
+            file.Replace($"class {uctx.ApplicationName}TestClass", $"public class {uctx.ApplicationName}TestClass : IAsyncLifetime");
+
             file.ReplaceBetween(
                 new(a => a.Contains("public static void Browse"), 0),
                 new(a => a.Contains("}"), 0) { SameIdentation = true },
@@ -70,14 +73,45 @@ global using System.Threading.Tasks;");
                     var browserName = match.Success ? match.Groups["br"].Value : uctx.ApplicationName + "Browser";
 
                     return $$"""
+                        public async ValueTask InitializeAsync()
+                        {
+                            Administrator.RestoreSnapshotOrDatabase();
+
+                            using (var c = new HttpClient())
+                            {
+                                AssertClean200(await c.PostAsync(BaseUrl + "api/cache/invalidateAll", JsonContent.Create(new
+                                {
+                                    SecretHash = {{uctx.ApplicationName}}Environment.BroadcastSecretHash,
+                                })));
+                            }
+                        }
+
+                        private static void AssertClean200(HttpResponseMessage response)
+                        {
+                            var content = response.Content.ReadAsStringAsync().ResultSafe();
+                            if (!response.IsSuccessStatusCode || content != "")
+                                throw new InvalidOperationException($"Error {response.StatusCode}\n"
+                                    + "Content:\n"
+                                    + content
+                                    );
+                        }
+
                         private static readonly Lazy<Task<IBrowser>> DefaultBrowser = new(async () =>
                         {
                             var playwright = await Microsoft.Playwright.Playwright.CreateAsync();
 
-                            string? headless = System.Environment.GetEnvironmentVariable("PLAYWRIGHT_HEADLESS");
+                            string? mode = System.Environment.GetEnvironmentVariable("PLAYWRIGHT_MODE") ??
+                                       (Debugger.IsAttached ? "debug" : null);
 
-                            if (headless != null && headless.ToLower() == "true")
+                            if (mode != null && mode.ToLower() == "headless")
                                 return await playwright.Chromium.LaunchAsync(new() { Headless = true });
+
+                            if (mode != null && mode.ToLower() == "debug")
+                            {
+                                BrowserProxy.DebugMode = true;
+                                var userDataDir = Path.Combine(Path.GetTempPath(), "playwright-debug-chrome");
+                                return await BrowserProxy.ConnectDebugChromeAsync(playwright, DebugChromePort, userDataDir);
+                            }
 
                             // Configure browser launch options (equivalent to ChromeOptions)
                             var launchOptions = new BrowserTypeLaunchOptions
@@ -97,39 +131,71 @@ global using System.Threading.Tasks;");
 
                         public static async Task BrowseAsync(string username, Func<{{browserName}}, Task> action)
                         {
-                            var contextOptions = new BrowserNewContextOptions
-                            {
-                                ViewportSize = ViewportSize.NoViewport, // Allow start-maximized to work
-                                Permissions = new[] { "geolocation", "notifications" },
-                            };
-
                             var browser = await DefaultBrowser.Value;
-                            var context = await browser.NewContextAsync(contextOptions);
 
-                            // Set preferences equivalent to Chrome user profile preferences
-                            await context.GrantPermissionsAsync(new[] { "clipboard-read", "clipboard-write" });
+                            IBrowserContext context;
+                            if (BrowserProxy.DebugMode)
+                            {
+                                // Reuse the default context of the CDP-launched Chrome window so the
+                                // new page opens as a tab there instead of a separate incognito window.
+                                context = browser.Contexts[0];
+                                await context.GrantPermissionsAsync(new[] { "geolocation", "notifications", "clipboard-read", "clipboard-write" });
+                            }
+                            else
+                            {
+                                context = await browser.NewContextAsync(new BrowserNewContextOptions
+                                {
+                                    ViewportSize = ViewportSize.NoViewport, // Allow start-maximized to work
+                                    Permissions = new[] { "geolocation", "notifications" },
+                                });
+                                await context.GrantPermissionsAsync(new[] { "clipboard-read", "clipboard-write" });
+                            }
 
                             var page = await context.NewPageAsync();
 
                             var browserProxy = new {{browserName}}(page);
 
+                            Exception? exception = null;
                             try
                             {
                                 page.SetDefaultTimeout(10000);
                                 await browserProxy.LoginAsync(username, username);
                                 await action(browserProxy);
                             }
+                            catch(Exception ex)
+                            {
+                                exception = ex;
+                                throw;
+                            }
                             finally
                             {
-                                await page.CloseAsync();
-                                await context.CloseAsync();
+                                if (!(BrowserProxy.DebugMode && exception != null))
+                                {
+                                    await page.CloseAsync();
+                                    if (!BrowserProxy.DebugMode)
+                                        await context.CloseAsync();
+                                }
                             }
                         }
 
                         """;
                 }
                 );
+
+            file.ReplaceBetween(
+                new ReplaceBetweenOption(a => a.Contains($"public class {uctx.ApplicationName}Browser")),
+                new ReplaceBetweenOption(a => a.Contains("}")) { SameIdentation = true },
+                text =>
+                {
+                    browserCode = text;
+                    return "";
+                });
         });
+
+        uctx.MoveFile(@"Southwind.Test.React\Common.cs", @"Southwind.Test.React\SouthwindTestClass.cs");
+
+        if (browserCode != null)
+            uctx.CreateCodeFile(@"Southwind.Test.React\SouthwindBrowser.cs", browserCode);
 
         uctx.ForeachCodeFile(@"*.cs", uctx.TestReactDirectory, file =>
         {
