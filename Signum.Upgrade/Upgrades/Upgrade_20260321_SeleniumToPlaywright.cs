@@ -397,13 +397,13 @@ global using System.Threading.Tasks;");
         result = Regex.Replace(result, @"\bBrowse\s*\(\s*""(?<user>[^""]+)""\s*, ", @"await BrowseAsync(""${user}"", async ", RegexOptions.None);
 
         // 2. Using( -> .UsingAsync(async
-        result = Regex.Replace(result, @"\.Using\s*\(", ".Await_UsingAsync(async ", RegexOptions.None);
+        result = Regex.Replace(result, @"\.Using\s*\(", ".Then(async ", RegexOptions.None);
 
-        result = Regex.Replace(result, @"\.Do\s*\(", ".Await_DoAsync(async ", RegexOptions.None);
+        result = Regex.Replace(result, @"\.Do\s*\(", ".Then(async ", RegexOptions.None);
         result = Regex.Replace(result, @"\.WaitRefresh\s*\(", ".WaitRefreshAsync(async ", RegexOptions.None);
 
         // 3. EndUsing( -> .EndUsingAsync(async
-        result = Regex.Replace(result, @"\.EndUsing\s*\(", ".Await_EndUsingAsync(async ", RegexOptions.None);
+        result = Regex.Replace(result, @"\.EndUsing\s*\(", ".Then(async ", RegexOptions.None);
 
         result = Regex.Replace(result, @"\.CreateAndSelect\s*\(", ".CreateAndSelectAsync(async ", RegexOptions.None);
 

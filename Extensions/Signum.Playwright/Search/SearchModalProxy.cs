@@ -9,7 +9,7 @@ namespace Signum.Playwright.Search;
 /// </summary>
 public class SearchModalProxy : ModalProxy
 {
-    public SearchControlProxy SearchControl { get; private set; }
+    public SearchControlProxy SearchControl { get; private set; } = null!;
     public ResultTableProxy Results => SearchControl.Results;
     public FiltersProxy Filters => SearchControl.Filters;
     public PaginationSelectorProxy Pagination => SearchControl.Pagination;
@@ -17,22 +17,15 @@ public class SearchModalProxy : ModalProxy
     SearchModalProxy(ILocator element)
         : base(element)
     {
-        this.SearchControl = new SearchControlProxy(element.Locator(".sf-search-control"));
+        
     }
 
     public static async Task<SearchModalProxy> NewAsync(ILocator element, bool waitInitialSearch = true)
     {
-        var result = new SearchModalProxy(element);
-        await result.Initialize(waitInitialSearch);
-        return result;
-    }
-
-    public async Task Initialize(bool waitInitialSearch)
-    {
-        await SearchControl.Initialize();
-
-        if(waitInitialSearch)
-            await SearchControl.WaitInitialSearchCompletedAsync();
+        return new SearchModalProxy(element)
+        {
+            SearchControl = await SearchControlProxy.NewAsync(element.Locator(".sf-search-control"), waitInitialSearch)
+        };
     }
 
     public async Task SelectLiteAsync(Lite<IEntity> lite, int? subRowIndex = null)
@@ -114,11 +107,6 @@ public class SearchModalProxy : ModalProxy
 
 public static class SearchModalExtensions
 {
-    public static async Task<SearchModalProxy> Await_AsSearchModal(this Task<ILocator> modal, bool waitInitialSearch = true)
-    {
-        return await SearchModalProxy.NewAsync(await modal, waitInitialSearch);
-    }
-
     public static async Task<SearchModalProxy> AsSearchModal(this ILocator modal, bool waitInitialSearch = true)
     {
         return await SearchModalProxy.NewAsync(modal, waitInitialSearch);

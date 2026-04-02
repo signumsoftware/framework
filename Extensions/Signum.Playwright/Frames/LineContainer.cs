@@ -401,8 +401,15 @@ public static class LineContainerExtensions
     public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName)
     {
         string queryKey = QueryUtils.GetKey(queryName);
-        var element = lineContainer.Element.Locator($"div.sf-search-control[data-query-key='{queryKey}']");
-        return new SearchControlProxy(element);
+        var locator = lineContainer.Element.Locator($"div.sf-search-control[data-query-key='{queryKey}']");
+        return new SearchControlProxy(locator, queryName);
+    }
+
+    public static async Task<SearchControlProxy> GetSearchControl_WaitInitialSearch(this ILineContainer lineContainer, object queryName)
+    {
+        var sc = lineContainer.GetSearchControl(queryName);
+        await sc.WaitInitialSearchCompletedAsync();
+        return sc;
     }
 
     public static SearchValueLineProxy GetSearchValueLine(this ILineContainer lineContainer, object queryName)

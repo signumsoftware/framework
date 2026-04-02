@@ -12,29 +12,35 @@ namespace Signum.Playwright.Search;
 /// </summary>
 public class SearchControlProxy
 {
-    public ILocator Element { get; private set; }
+    public ILocator Locator { get; private set; }
     public ResultTableProxy Results { get; private set; }
 
     public object QueryName { get; private set; }
 
     public FiltersProxy Filters => new FiltersProxy(FiltersPanel, QueryName);
-    public ColumnEditorProxy ColumnEditor => new ColumnEditorProxy(Element.Locator(".sf-column-editor"));
+    public ColumnEditorProxy ColumnEditor => new ColumnEditorProxy(Locator.Locator(".sf-column-editor"));
     public PaginationSelectorProxy Pagination => new PaginationSelectorProxy(this);
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    public SearchControlProxy(ILocator element)
+    public SearchControlProxy(ILocator locator, object queryName)
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     {
-        Element = element;
-        Results = new ResultTableProxy(Element.Locator(".sf-scroll-table-container"), this);
+        Locator = locator;
+        Results = new ResultTableProxy(Locator.Locator(".sf-scroll-table-container"), this);
+        QueryName = queryName;
     }
 
-    public async Task Initialize()
+    public static async Task<SearchControlProxy> NewAsync(ILocator locator, bool waitInitialSearch)
     {
-        QueryName = QueryLogic.ToQueryName((await Element.GetAttributeAsync("data-query-key"))!);
+        var queryName = QueryLogic.ToQueryName((await locator.GetAttributeAsync("data-query-key"))!);
+        var sc = new SearchControlProxy(locator, queryName);
+        if (waitInitialSearch)
+            await sc.WaitInitialSearchCompletedAsync();
+
+        return sc;
     }
 
-    public ILocator SearchButton => Element.Locator(".sf-query-button.sf-search");
+    public ILocator SearchButton => Locator.Locator(".sf-query-button.sf-search");
 
     public async Task SearchAsync()
     {
@@ -43,7 +49,7 @@ public class SearchControlProxy
 
     public async Task WaitSearchCompletedAsync(Func<Task> searchTrigger)
     {
-        var counter = await Element.GetAttributeAsync("data-search-count");
+        var counter = await Locator.GetAttributeAsync("data-search-count");
         await searchTrigger();
         await WaitSearchCompletedAsync(counter);
     }
@@ -55,20 +61,20 @@ public class SearchControlProxy
 
     private async Task WaitSearchCompletedAsync(string? counter)
     {
-        await Element.WaitAttributeAsync("data-search-count", counter, "!==");
+        await Locator.WaitAttributeAsync("data-search-count", counter, "!==");
     }
 
     public async Task<ILocator> WaitContextMenuAsync()
     {
-        var locator = Element.Page.Locator(".sf-context-menu .dropdown-menu");
+        var locator = Locator.Page.Locator(".sf-context-menu .dropdown-menu");
 
         await locator.WaitVisibleAsync();
 
         return locator;
     }
 
-    public ILocator ToggleFiltersButton => Element.Locator(".sf-filter-button");
-    public ILocator FiltersPanel => Element.Locator(".sf-filters-list");
+    public ILocator ToggleFiltersButton => Locator.Locator(".sf-filter-button");
+    public ILocator FiltersPanel => Locator.Locator(".sf-filters-list");
 
     public async Task ToggleFiltersAsync(bool show)
     {
@@ -79,7 +85,7 @@ public class SearchControlProxy
             await FiltersPanel.WaitNotVisibleAsync();
     }
 
-    public ILocator ContextualMenu => Element.Page.Locator(".sf-context-menu");
+    public ILocator ContextualMenu => Locator.Page.Locator(".sf-context-menu");
 
     public async Task<FilterConditionProxy> AddQuickFilterAsync(int rowIndex, string token)
     {
@@ -112,13 +118,15 @@ public class SearchControlProxy
         return modal;
     }
 
-    public ILocator CreateButton => Element.Locator(".sf-create");
+    public ILocator CreateButton => Locator.Locator(".sf-create");
 
-    public async Task<bool> HasMultiplyMessageAsync() => await Element.Locator(".sf-td-multiply").CountAsync() > 0;
+    public async Task<bool> HasMultiplyMessageAsync() => await Locator.Locator(".sf-td-multiply").CountAsync() > 0;
     public async Task<bool> FiltersVisibleAsync() => await FiltersPanel.IsVisibleAsync();
 
     public ILineContainer<T> SimpleFilterBuilder<T>() where T : ModifiableEntity
     {
-        return new LineContainer<T>(Element.Locator(".simple-filter-builder"));
+        return new LineContainer<T>(Locator.Locator(".simple-filter-builder"));
     }
+
+ 
 }

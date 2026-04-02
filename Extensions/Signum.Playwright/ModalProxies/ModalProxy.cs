@@ -132,8 +132,8 @@ public class ModalProxy : IAsyncDisposable , IDisposableException
 public static class ModalProxyExtensions
 {
 
-    public static async Task<ModalProxy> Await_AsModalProxy(this Task<ILocator> locator)
+    public static async Task<ModalProxy> AsModalProxy(this ILocator locator)
     {
-        return new ModalProxy(await locator);
+        return new ModalProxy(locator);
     }
 }

@@ -104,11 +104,6 @@ public class SelectorModalProxy : ModalProxy
 
 public static class SelectorModalExtensions
 {
-    public static async Task<SelectorModalProxy> Await_AsSelectorModal(this Task<ILocator> modal)
-    {
-        return new SelectorModalProxy(await modal);
-    }
-
     public static SelectorModalProxy AsSelectorModal(this ILocator modal)
     {
         return new SelectorModalProxy(modal);

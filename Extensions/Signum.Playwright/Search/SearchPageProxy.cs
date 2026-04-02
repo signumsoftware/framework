@@ -15,26 +15,18 @@ public class SearchPageProxy : IDisposable, IAsyncDisposable
     public FiltersProxy Filters => SearchControl.Filters;
     public PaginationSelectorProxy Pagination => SearchControl.Pagination;
 
-    private SearchPageProxy(IPage page)
+    SearchPageProxy(IPage page)
     {
         Page = page;
     }
 
-    public static async Task<SearchPageProxy> NewAsync(IPage page, bool waitInitialSearchCompleted = true)
+    public static async Task<SearchPageProxy> NewAsync(IPage page, bool waitInitialSearch = true)
     {
-        var sc = new SearchPageProxy(page);
-        await sc.InitializeAsync();
-
-        if (waitInitialSearchCompleted)
-            await sc.SearchControl.WaitInitialSearchCompletedAsync();
-        return sc;
-    }
-
-    public async Task InitializeAsync()
-    {
-        var element = Page.Locator(".sf-search-page .sf-search-control");
+        var sp = new SearchPageProxy(page);
+        var element = page.Locator(".sf-search-page .sf-search-control");
         await element.WaitVisibleAsync();
-        SearchControl = new SearchControlProxy(element);
+        sp.SearchControl = await SearchControlProxy.NewAsync(element, waitInitialSearch);
+        return sp;
     }
 
     public async Task<FrameModalProxy<T>> CreateAsync<T>() where T : ModifiableEntity

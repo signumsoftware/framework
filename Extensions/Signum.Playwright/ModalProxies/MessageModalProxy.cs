@@ -77,11 +77,6 @@ public static class MessageModalProxyExtensions
             await message.ClickWaitCloseAsync(button);
     }
 
-    public static async Task<MessageModalProxy> Await_AsMessageModal(this Task<ILocator> element)
-    {
-        return new MessageModalProxy(await element);
-    }
-
     public static MessageModalProxy AsMessageModal(this ILocator element)
     {
         return new MessageModalProxy(element);

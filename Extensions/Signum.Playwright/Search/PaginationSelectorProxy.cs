@@ -13,7 +13,7 @@ public class PaginationSelectorProxy
     public PaginationSelectorProxy(SearchControlProxy searchControl)
     {
         this.searchControl = searchControl;
-        Element = searchControl.Element.Locator(".sf-search-footer");
+        Element = searchControl.Locator.Locator(".sf-search-footer");
     }
 
     public ILocator ElementsPerPageElement => Element.Locator("select.sf-elements-per-page");

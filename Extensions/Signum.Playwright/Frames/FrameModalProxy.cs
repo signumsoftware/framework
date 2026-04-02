@@ -73,12 +73,6 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
 
 public static class FrameModalProxyExtension
 {
-    public static async Task<FrameModalProxy<T>> Await_AsFrameModal<T>(this Task<ILocator> modal)
-    where T : ModifiableEntity
-    {
-        return await FrameModalProxy<T>.NewAsync(await modal);
-    }
-
     public static Task<FrameModalProxy<T>> AsFrameModal<T>(this ILocator modal)
         where T : ModifiableEntity
     {

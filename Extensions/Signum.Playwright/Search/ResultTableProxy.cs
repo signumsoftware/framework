@@ -231,7 +231,9 @@ public class ResultTableProxy
 
     // ---------------- CONTEXT MENU ----------------
 
-    public async Task<EntityContextMenuProxy> EntityContextMenuAsync(int rowIndex, string columnToken = "Entity")
+    public SearchContextMenu ContextMenu(int rowIndex, string columnToken = "Entity") =>
+        new SearchContextMenu(ContextMenuAsync_Private(rowIndex, columnToken), SearchControl);
+    async Task<ILocator> ContextMenuAsync_Private(int rowIndex, string columnToken)
     {
         var cell = await CellElementAsync(rowIndex, columnToken);
 
@@ -240,27 +242,18 @@ public class ResultTableProxy
 
         var menu = await SearchControl.WaitContextMenuAsync();
 
-        var selectedEntities = await SearchControl.Results.SelectedEntitiesAsync();
-
-        return new EntityContextMenuProxy(this, menu, selectedEntities);
+        return menu;
     }
 
-    public async Task<EntityContextMenuProxy> EntityContextMenuAsync(Lite<Entity> lite, string columnToken = "Entity", int? subRowIndex = null)
+    public SearchContextMenu ContextMenu(Lite<Entity> lite, string columnToken = "Entity", int? subRowIndex = null) =>
+        new SearchContextMenu(ContextMenu_Private(lite, columnToken, subRowIndex), SearchControl);
+    async Task<ILocator> ContextMenu_Private(Lite<Entity> lite, string columnToken, int? subRowIndex)
     {
         var cell = await CellElementAsync(lite, columnToken, subRowIndex);
         await cell.ScrollIntoViewIfNeededAsync();
-
-        var box = await cell.BoundingBoxAsync();
-        if (box == null)
-            throw new Exception("Cell element not visible");
-
-
         await cell.ClickAsync(new() { Button = MouseButton.Right });
         var menu = await this.SearchControl.WaitContextMenuAsync();
-
-        var selectedEntities = await SearchControl.Results.SelectedEntitiesAsync();
-
-        return new EntityContextMenuProxy(this, menu, selectedEntities);
+        return menu;
     }
 
     // ---------------- WAIT HELPERS ----------------
@@ -304,4 +297,56 @@ public class ResultRowProxy
     public ILocator CellElement(int columnIndex) => Locator.Locator($"td:nth-child({columnIndex + 1})");
 
     public ILocator EntityLink(int entityColumnIndex) => CellElement(entityColumnIndex).Locator("> a");
+}
+
+
+public class SearchContextMenu
+{
+    public SearchControlProxy SearchControl { get; private set; }
+    public Task<ILocator> LocatorTask { get; private set; }
+
+    public SearchContextMenu(Task<ILocator> locatorTask, SearchControlProxy search)
+    {
+        SearchControl = search;
+        LocatorTask = locatorTask;
+    }
+
+
+    public async Task WaitRowsSuccess(Func<ContextMenuProxy, Task> action)
+    {
+        var menu = new ContextMenuProxy(await LocatorTask);
+
+        var selectedEntities = await SearchControl.Results.SelectedEntitiesAsync();
+
+        await action(menu);
+
+        await SearchControl.Results.WaitSuccessAsync(selectedEntities);
+    }
+
+    public async Task WaitRowsNoVisible(Func<ContextMenuProxy, Task> action)
+    {
+        var menu = new ContextMenuProxy(await LocatorTask);
+
+        var selectedEntities = await SearchControl.Results.SelectedEntitiesAsync();
+
+        await action(menu);
+
+        await SearchControl.Results.WaitNoVisibleAsync(selectedEntities);
+    }
+
+
+    public async Task WaitParentEntityReload(IEntityButtonContainer container, Func<ContextMenuProxy, Task> action)
+    {
+        var menu = new ContextMenuProxy(await LocatorTask);
+
+        await container.WaitReloadAsync(() => action(menu));
+    }
+
+    public async Task WaitCustom(Func<ContextMenuProxy, SearchControlProxy, Task> actionAndCheck)
+    {
+        var menu = new ContextMenuProxy(await LocatorTask);
+
+        await actionAndCheck(menu, SearchControl);
+    }
+
 }
