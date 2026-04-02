@@ -55,7 +55,7 @@ export function MultiMessageProgressModal(p: MultiMessageProgressModalProps): Re
   }
 
   function handleOnExited() {
-    p.onExited!({ errors: messageResultRef.current.toObject(a => a.id, a => a.error) });
+    p.onExited!({ errors: messageResultRef.current.toObject(a => a.id, a => a.error ?? null) });
   }
 
   var errors = messageResultRef.current.filter(a => a.error != null);
@@ -93,7 +93,7 @@ export namespace MultiMessageProgressModal {
     } else {
       return makeRequest().then(r => r.json()).then(obj => {
         var a = obj as EmailResult;
-        return softCast<Operations.API.ErrorReport>({ errors: { [a.id]: a.error } });
+        return softCast<Operations.API.ErrorReport>({ errors: { [a.id]: a.error ?? null } });
       });
     }
   }
