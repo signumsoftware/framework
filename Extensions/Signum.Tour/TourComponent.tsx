@@ -17,10 +17,10 @@ import { getTypeName,
   PseudoType } from "@framework/Reflection";
 import { LinkButton } from "@framework/Basics/LinkButton";
 import { classes } from "@framework/Globals";
+import { JSX } from "react/jsx-runtime";
+import { micromark } from "micromark";
 
-
-
-export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol }) {
+export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol }): JSX.Element | null {
   const storageKey = TourTriggerSymbol.isInstance(p.trigger)
     ? `tour-viewed-${p.trigger.key}` 
     : `tour-viewed-${getTypeName(p.trigger)}`;
@@ -112,7 +112,7 @@ export function TourComponent({ tour, autoStart = true, ref }: {
       element: step.cssSelector || undefined,
       popover: step.cssSelector ? {
         title: step.title ?? undefined,
-        description: step.description ?? undefined,
+        description: step.description ? micromark(step.description) : undefined,
         side: step.side as Side,
         align: step.align as Alignment,
         onPopoverRender: async (popover, opts) => {
@@ -135,7 +135,7 @@ export function TourComponent({ tour, autoStart = true, ref }: {
         },
       } : {
         title: step.title ?? undefined,
-        description: step.description ?? undefined,
+        description: step.description ? micromark(step.description) : undefined,
       },
     }));
 
