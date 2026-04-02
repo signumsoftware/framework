@@ -405,7 +405,10 @@ public static class LineContainerExtensions
         return new SearchControlProxy(locator, queryName);
     }
 
-    public static async Task<SearchControlProxy> GetSearchControl_WaitInitialSearch(this ILineContainer lineContainer, object queryName)
+    /// <summary>
+    /// Waits for the initial query to be completed
+    /// </summary>
+    public static async Task<SearchControlProxy> GetSearchControlAsync(this ILineContainer lineContainer, object queryName)
     {
         var sc = lineContainer.GetSearchControl(queryName);
         await sc.WaitInitialSearchCompletedAsync();
