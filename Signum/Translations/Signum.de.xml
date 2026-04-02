@@ -388,6 +388,10 @@
     <Member Name="ToStr" Description="Text" />
     <Member Name="Type0NotFound" Description="Typ {0} wurde nicht gefunden" />
   </Type>
+  <Type Name="MarkdownMessage">
+    <Member Name="_0IsCurrentlyEditable" Description="{0} ist derzeit bearbeitbar" />
+    <Member Name="_0IsCurrentlyViewableOnly" Description="{0} ist derzeit nur einsehbar" />
+  </Type>
   <Type Name="ModelEntity" Description="Modellentität" />
   <Type Name="ModifiableEntity" Description="Veränderbare Entität" />
   <Type Name="NormalControlMessage">
