@@ -35,7 +35,7 @@ export interface ContextualItemsContext<T extends Entity> {
 }
 
 export interface MarkedRowsDictionary {
-  [liteKey: string]: string | MarkedRow | undefined;
+  [liteKey: string]: string | MarkedRow | null;
 }
 
 export interface MarkedRow {

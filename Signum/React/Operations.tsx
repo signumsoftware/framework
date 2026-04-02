@@ -310,7 +310,7 @@ export namespace Operations {
     }
 
     export interface ErrorReport {
-      errors: { [liteKey: string]: string | undefined; }
+      errors: { [liteKey: string]: string | null; }
     }
 
     export interface OperationResult {

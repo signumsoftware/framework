@@ -299,7 +299,7 @@ export namespace ContextualOperations {
                             if (pack?.entity.id != null)
                                 Navigator.raiseEntityChanged(pack.entity);
                             Navigator.createNavigateOrTab(pack, coc.event!)
-                                .then(() => coc.context.markRows({}));
+                                .then(() => coc.context.markRows(lites.toObject(liteKey, lite => null)));
                         }));
                 }
             case "ConstructorFrom":
@@ -310,7 +310,7 @@ export namespace ContextualOperations {
                                 Navigator.raiseEntityChanged(pack.entity);
                             Operations.notifySuccess();
                             return Navigator.createNavigateOrTab(pack, coc.event!)
-                                .then(() => coc.context.markRows({}))
+                                .then(() => coc.context.markRows(lites.toObject(liteKey, lite => null)))
                         }));
                 } else {
 
