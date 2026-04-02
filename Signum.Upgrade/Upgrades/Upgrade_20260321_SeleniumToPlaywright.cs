@@ -95,7 +95,8 @@ global using System.Threading.Tasks;");
                                     + content
                                     );
                         }
-
+                        
+                        const int DebugChromePort = 9222;
                         private static readonly Lazy<Task<IBrowser>> DefaultBrowser = new(async () =>
                         {
                             var playwright = await Microsoft.Playwright.Playwright.CreateAsync();
