@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { CssStepType, TourEntity, TourMessage, TourStepEntity } from '../Signum.Tour'
-import { AutoLine, CheckboxLine, EntityLine, EntityTable, EnumLine, FormGroup, TextAreaLine, TextBoxLine, TypeContext } from '@framework/Lines'
+import { AutoLine, CheckboxLine, EntityLine, EntityTable, EnumLine, FormGroup, MarkdownLine, TextAreaLine, TextBoxLine, TypeContext } from '@framework/Lines'
 import HtmlCodeMirror from "@extensions/Signum.CodeMirror/HtmlCodeMirror"
 import { getTypeInfos, getTypeInfo } from '@framework/Reflection';
 import { PropertyRouteEntity, QueryEntity, TypeEntity } from '@framework/Signum.Basics';
@@ -8,8 +8,9 @@ import { useForceUpdate } from '@framework/Hooks';
 import PropertyRouteCombo from '@framework/Components/PropertyRouteCombo';
 import { classes } from '@framework/Globals';
 import { getToString, liteKey } from '@framework/Signum.Entities';
+import { JSX } from 'react/jsx-runtime';
 
-export default function TourStep(p: { ctx: TypeContext<TourStepEntity>, invalidate: () => void; type?: TypeEntity | null }) {
+export default function TourStep(p: { ctx: TypeContext<TourStepEntity>, invalidate: () => void; type?: TypeEntity | null }): JSX.Element {
   const ctx = p.ctx;
   const sc = ctx.subCtx({ labelColumns: 2 });
   const sc4 = ctx.subCtx({ labelColumns: 4 });
@@ -85,9 +86,7 @@ export default function TourStep(p: { ctx: TypeContext<TourStepEntity>, invalida
           <EnumLine ctx={sc4.subCtx(a => a.click)} onChange={forceUpdate} />
         </div>
       </div>
-      <div className={classes("code-container", sc.value.description ? null : "sf-mandatory")}>
-        <HtmlCodeMirror ctx={sc.subCtx(a => a.description)} onChange={forceUpdate} />
-      </div>
+      <MarkdownLine ctx={sc.subCtx(a => a.description)} onChange={forceUpdate} />
     </div>
   );
 }
