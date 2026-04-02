@@ -185,6 +185,14 @@ public enum HtmlEditorMessage
     Code,
 }
 
+public enum MarkdownMessage
+{
+    [Description("{0} is currently editable")]
+    _0IsCurrentlyEditable,
+        [Description("{0} is currently viewable only")]
+    _0IsCurrentlyViewableOnly,
+}
+
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum BooleanEnum
 {

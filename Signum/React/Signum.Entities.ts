@@ -523,6 +523,11 @@ export namespace LiteMessage {
   export const ToStr: MessageKey = new MessageKey("LiteMessage", "ToStr");
 }
 
+export namespace MarkdownMessage {
+  export const _0IsCurrentlyEditable: MessageKey = new MessageKey("MarkdownMessage", "_0IsCurrentlyEditable");
+  export const _0IsCurrentlyViewableOnly: MessageKey = new MessageKey("MarkdownMessage", "_0IsCurrentlyViewableOnly");
+}
+
 export interface ModelEntity extends ModifiableEntity {
 }
 
