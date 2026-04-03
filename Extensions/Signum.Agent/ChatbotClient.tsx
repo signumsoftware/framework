@@ -74,6 +74,14 @@ export namespace ChatbotClient {
   }
 }
 
+// UI Tool registry
+//
+// Subclass UITool and implement either:
+//  • handleDirectly() — resolves automatically without showing anything in the chat
+//                       (e.g. GetUIContext just reads browser state and calls sendToolResponse)
+//  • renderWidget()   — renders a React widget inline in the conversation;
+//                       call sendToolResponse() from the widget when the user responds.
+//
 export abstract class UITool {
   abstract uiToolName: string;
 

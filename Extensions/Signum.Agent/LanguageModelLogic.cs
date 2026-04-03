@@ -1,6 +1,7 @@
 using Microsoft.Extensions.AI;
 using Signum.Agent.Providers;
 using Pgvector;
+using Signum.Utilities.Synchronization;
 
 namespace Signum.Agent;
 

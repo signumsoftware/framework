@@ -12,6 +12,54 @@ export interface ToolCallEmbedded {
   _response?: ChatMessageEntity
 }
 
+export const AgentSkillCodeEntity: Type<AgentSkillCodeEntity> = new Type<AgentSkillCodeEntity>("AgentSkillCode");
+export interface AgentSkillCodeEntity extends Entities.Entity {
+  Type: "AgentSkillCode";
+  fullClassName: string;
+}
+
+export const AgentSkillEntity: Type<AgentSkillEntity> = new Type<AgentSkillEntity>("AgentSkill");
+export interface AgentSkillEntity extends Entities.Entity {
+  Type: "AgentSkill";
+  name: string;
+  skillCode: AgentSkillCodeEntity;
+  active: boolean;
+  useCase: AgentUseCaseSymbol | null;
+  shortDescription: string | null;
+  instructions: string | null;
+  propertyOverrides: Entities.MList<AgentSkillPropertyOverrideEmbedded>;
+  subSkills: Entities.MList<AgentSkillSubSkillEmbedded>;
+}
+
+export namespace AgentSkillOperation {
+  export const Save : Operations.ExecuteSymbol<AgentSkillEntity> = registerSymbol("Operation", "AgentSkillOperation.Save");
+  export const Delete : Operations.DeleteSymbol<AgentSkillEntity> = registerSymbol("Operation", "AgentSkillOperation.Delete");
+}
+
+export const AgentSkillPropertyOverrideEmbedded: Type<AgentSkillPropertyOverrideEmbedded> = new Type<AgentSkillPropertyOverrideEmbedded>("AgentSkillPropertyOverrideEmbedded");
+export interface AgentSkillPropertyOverrideEmbedded extends Entities.EmbeddedEntity {
+  Type: "AgentSkillPropertyOverrideEmbedded";
+  propertyName: string;
+  value: string | null;
+}
+
+export const AgentSkillSubSkillEmbedded: Type<AgentSkillSubSkillEmbedded> = new Type<AgentSkillSubSkillEmbedded>("AgentSkillSubSkillEmbedded");
+export interface AgentSkillSubSkillEmbedded extends Entities.EmbeddedEntity {
+  Type: "AgentSkillSubSkillEmbedded";
+  skill: Entities.Lite<AgentSkillEntity>;
+  activation: SkillActivation;
+}
+
+export namespace AgentUseCase {
+  export const DefaultChatbot : AgentUseCaseSymbol = registerSymbol("AgentUseCase", "AgentUseCase.DefaultChatbot");
+  export const Summarizer : AgentUseCaseSymbol = registerSymbol("AgentUseCase", "AgentUseCase.Summarizer");
+}
+
+export const AgentUseCaseSymbol: Type<AgentUseCaseSymbol> = new Type<AgentUseCaseSymbol>("AgentUseCase");
+export interface AgentUseCaseSymbol extends Basics.Symbol {
+  Type: "AgentUseCase";
+}
+
 export const ChatbotConfigurationEmbedded: Type<ChatbotConfigurationEmbedded> = new Type<ChatbotConfigurationEmbedded>("ChatbotConfigurationEmbedded");
 export interface ChatbotConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "ChatbotConfigurationEmbedded";
@@ -158,6 +206,11 @@ export const LanguageModelProviderSymbol: Type<LanguageModelProviderSymbol> = ne
 export interface LanguageModelProviderSymbol extends Basics.Symbol {
   Type: "LanguageModelProvider";
 }
+
+export const SkillActivation: EnumType<SkillActivation> = new EnumType<SkillActivation>("SkillActivation");
+export type SkillActivation =
+  "Eager" |
+  "Lazy";
 
 export const ToolCallEmbedded: Type<ToolCallEmbedded> = new Type<ToolCallEmbedded>("ToolCallEmbedded");
 export interface ToolCallEmbedded extends Entities.EmbeddedEntity {

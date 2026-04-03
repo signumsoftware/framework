@@ -47,16 +47,16 @@ export default function AgentSkill(p: { ctx: TypeContext<AgentSkillEntity> }): R
 
       <fieldset className="mt-3">
         <legend className="fs-6 fw-semibold">Sub-Skills</legend>
-        <EntityTable ctx={ctx.subCtx(e => e.subSkills)} columns={EntityTable.typedColumns<AgentSkillSubSkillEmbedded>([
-          { property: e => e.skill, template: ectx => <EntityLine ctx={ectx.subCtx(e => e.skill)} /> },
+        <EntityTable ctx={ctx.subCtx(e => e.subSkills)} columns={[
           { property: e => e.activation, template: ectx => <EnumLine ctx={ectx.subCtx(e => e.activation)} /> },
-        ])} />
+          { property: e => e.skill, template: ectx => <EntityLine ctx={ectx.subCtx(e => e.skill)} /> },
+        ]} />
       </fieldset>
 
       {skillCodeInfo && skillCodeInfo.properties.length > 0 && (
         <fieldset className="mt-3">
           <legend className="fs-6 fw-semibold">Property Overrides</legend>
-          <EntityTable ctx={ctx.subCtx(e => e.propertyOverrides)} columns={EntityTable.typedColumns<AgentSkillPropertyOverrideEmbedded>([
+          <EntityTable ctx={ctx.subCtx(e => e.propertyOverrides)} columns={[
             {
               property: e => e.propertyName,
               template: ectx => (
@@ -69,7 +69,7 @@ export default function AgentSkill(p: { ctx: TypeContext<AgentSkillEntity> }): R
               property: e => e.value,
               template: ectx => <PropertyValueControl ctx={ectx.subCtx(e => e.value)} properties={skillCodeInfo.properties} propertyName={ectx.value.propertyName} />
             },
-          ])} />
+          ]} />
         </fieldset>
       )}
     </div>
