@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ViewLogEntity" Description="Voir le log" PluralDescription="Voir les logs">
+    <Member Name="Data" Description="Données" />
+    <Member Name="Duration" Description="Durée" />
+    <Member Name="EndDate" Description="Date de fin" />
+    <Member Name="StartDate" Description="Date de début" />
+    <Member Name="Target" Description="Cible" />
+    <Member Name="User" Description="Utilisateur" />
+    <Member Name="ViewAction" Description="Voir l’action" />
+  </Type>
+  <Type Name="ViewLogMessage">
+    <Member Name="ViewLogMyLast" Description="Voir mon dernier log" />
+  </Type>
+</Translations>

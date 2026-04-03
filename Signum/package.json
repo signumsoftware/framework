@@ -1,0 +1,48 @@
+{
+  "name": "signum",
+  "version": "1.0.0",
+  "description": "Base React components for Signum Framework",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/signumsoftware/framework.git"
+  },
+  "keywords": [
+    "Signum",
+    "Framework",
+    "React",
+    "LINQ",
+    "Bootstrap",
+    "D3"
+  ],
+  "author": "Signum Software",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/signumsoftware/framework/issues"
+  },
+  "homepage": "https://github.com/signumsoftware/framework#readme",
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "6.7.2",
+    "@fortawesome/free-brands-svg-icons": "6.7.2",
+    "@fortawesome/free-regular-svg-icons": "6.7.2",
+    "@fortawesome/free-solid-svg-icons": "6.7.2",
+    "@fortawesome/react-fontawesome": "3.0.0",
+    "@types/d3": "7.4.3",
+    "@types/d3-scale-chromatic": "3.1.0",
+    "@types/luxon": "3.6.2",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "@microsoft/signalr": "8.0.7",
+    "d3": "7.9.0",
+    "d3-scale-chromatic": "3.1.0",
+    "luxon": "3.7.1",
+    "popper.js": "1.16.1",
+    "react-router": "7.7.0",
+    "react-router-dom": "7.7.0",
+    "react": "19.1.2",
+    "bootstrap": "5.3.7",
+    "react-bootstrap": "2.10.10",
+    "react-dom": "19.1.2",
+    "react-widgets-up": "6.0.14",
+    "react-markdown": "10.1.0"
+  }
+}

@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="AlertCurrentState" Description="Estado actual de la alerta">
+    <Member Name="Alerted" Description="Alertada" />
+    <Member Name="Attended" Description="Atendida" />
+    <Member Name="Future" Description="Futura" />
+  </Type>
+  <Type Name="AlertEntity" Description="Alerta">
+    <Member Name="AlertDate" Description="Fecha alerta" />
+    <Member Name="Alerted" Description="Alertada" />
+    <Member Name="AlertType" Description="Tipo de alerta" />
+    <Member Name="Attended" Description="Atendida" />
+    <Member Name="AttendedBy" Description="Atendida por" />
+    <Member Name="AttendedDate" Description="Fecha revisión" />
+    <Member Name="CreatedBy" Description="Creado por" />
+    <Member Name="CreationDate" Description="Fecha de creación" />
+    <Member Name="CurrentState" Description="Estado actual" />
+    <Member Name="EmailNotificationsSent" Description="Notificacion por correo electrónico enviada" />
+    <Member Name="Future" Description="Futura" />
+    <Member Name="NotAttended" Description="No atendida" />
+    <Member Name="Recipient" Description="Destinatario" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="Target" Description="Destino" />
+    <Member Name="Text" Description="Texto" />
+    <Member Name="TextArguments" Description="Argumentos de texto" />
+    <Member Name="TextField" Description="Texto" />
+    <Member Name="TextFromAlertType" Description="Texto del tipo de alerta" />
+    <Member Name="Title" Description="Título" />
+    <Member Name="TitleField" Description="Título" />
+  </Type>
+  <Type Name="AlertMessage">
+    <Member Name="_0HiddenAlerts" Description="{0} alertas ocultas" />
+    <Member Name="_0SimilarAlerts" Description="{0} alertas similares" />
+    <Member Name="Alert" Description="Alerta" />
+    <Member Name="Alerts" Description="Alertas" />
+    <Member Name="Alerts_Attended" Description="Atendidas" />
+    <Member Name="Alerts_Future" Description="Futuras" />
+    <Member Name="Alerts_NotAttended" Description="No atendidas" />
+    <Member Name="AllMyAlerts" Description="Todas mis alertas" />
+    <Member Name="CheckedAlerts" Description="Atendidas" />
+    <Member Name="CloseAll" Description="Cerrar todo" />
+    <Member Name="CreateAlert" Description="Crear alerta" />
+    <Member Name="CustomDelay" Description="Retraso personalizado" />
+    <Member Name="DelayDuration" Description="Duración del retraso" />
+    <Member Name="FutureAlerts" Description="Futuras" />
+    <Member Name="Hi0" Description="Hola {0}," />
+    <Member Name="MyActiveAlerts" Description="Mis alertas activas" />
+    <Member Name="NewAlert" Description="Nueva alerta" />
+    <Member Name="NewUnreadNotifications" Description="Nuevas notificaciones sin leer" />
+    <Member Name="PleaseVisit0" Description="Por favor visita {0}" />
+    <Member Name="Text" Description="Texto" />
+    <Member Name="Title" Description="Título" />
+    <Member Name="ViewMore" Description="Ver más" />
+    <Member Name="WarnedAlerts" Description="Alertadas" />
+    <Member Name="YouDoNotHaveAnyActiveAlert" Description="No tiene ninguna alerta activa" />
+    <Member Name="YouHaveSomePendingAlerts" Description="Tienes algunas alertas pendientes:" />
+  </Type>
+  <Type Name="AlertOperation">
+    <Member Name="Attend" Description="Atender" />
+    <Member Name="Create" Description="Crear" />
+    <Member Name="CreateAlertFromEntity" Description="Crear alerta desde entidad" />
+    <Member Name="Delay" Description="Retrasar" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="Unattend" Description="Desatender" />
+  </Type>
+  <Type Name="AlertState" Description="Estado de la alerta">
+    <Member Name="Attended" Description="Atendida" />
+    <Member Name="New" Description="Nuevo" />
+    <Member Name="Saved" Description="Guardado" />
+  </Type>
+  <Type Name="AlertTypeOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="AlertTypeSymbol" Description="Tipo de alerta" />
+  <Type Name="DelayOption">
+    <Member Name="_15Mins" Description="15 minutos" />
+    <Member Name="_1Day" Description="1 día" />
+    <Member Name="_1Hour" Description="1 hora" />
+    <Member Name="_2Hours" Description="2 horas" />
+    <Member Name="_30Mins" Description="30 minutos" />
+    <Member Name="_5Mins" Description="5 minutos" />
+    <Member Name="Custom" Description="Personalizado" />
+  </Type>
+  <Type Name="SendAlertTypeBehavior" Description="Comportamiento de envío de tipo de alerta">
+    <Member Name="All" Description="Todos" />
+    <Member Name="Exclude" Description="Excluir" />
+    <Member Name="Include" Description="Incluir" />
+  </Type>
+  <Type Name="SendNotificationEmailTaskEntity" Description="Tarea de envío de notificación de email">
+    <Member Name="AlertTypes" Description="Tipos de alerta" />
+    <Member Name="SendBehavior" Description="Comportamiento de envío" />
+    <Member Name="SendNotificationsOlderThan" Description="Enviar notificaciones anteriores a" />
+  </Type>
+  <Type Name="SendNotificationEmailTaskOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+</Translations>

@@ -1,0 +1,203 @@
+import * as AppContext from './AppContext';
+import * as React from 'react'
+import { useForceUpdatePromise, useStateWithPromise, useUpdatedRef } from './Hooks';
+import { useLocation } from 'react-router';
+import './Modals.css';
+
+
+declare global {
+  interface KeyboardEvent {
+    openedModals?: boolean;
+  }
+}
+
+export interface IModalProps<T> {
+  onExited?: (val: T) => void;
+}
+
+export interface IHandleKeyboard {
+  handleKeyDown?: (e: KeyboardEvent) => void;
+}
+
+export interface UIState {
+  name: string;
+  context: unknown | null;
+}
+
+export interface IGetUIState {
+  getUIState?: () => UIState;
+}
+
+export interface GlobalModalContainerState {
+  modals: React.ReactElement<IModalProps<any>>[];
+  currentUrl: string;
+}
+let current: GlobalModalContainerHandles;
+  
+const modalInstances: (React.Component & IHandleKeyboard & IGetUIState)[] = [];
+
+export function isStarted(): boolean {
+  return current != null;
+}
+
+
+interface GlobalModalContainerHandles {
+  pushModal(element: React.ReactElement<IModalProps<any>>): number;
+  popModal(index: number): Promise<void>;
+  getCount(): number;
+}
+
+export function GlobalModalContainer(): React.DetailedReactHTMLElement<{
+  className: string;
+}, HTMLElement> {
+
+
+  React.useEffect(() => {
+    window.addEventListener("keydown", hanldleKeyDown);
+    return () => window.removeEventListener("keydown", hanldleKeyDown);
+  }, []);
+
+  const forceUpdatePromise = useForceUpdatePromise();
+
+  const location = useLocation();
+
+
+  const modals = React.useMemo<React.ReactElement<IModalProps<any>>[]>(() => [], []);
+
+  React.useEffect(() => {
+    modals.clear();
+    forceUpdatePromise();
+  }, [location]);
+
+  React.useEffect(() => {
+    current = {
+      pushModal: e => {
+        modals.push(e);
+        forceUpdatePromise();
+        return modals.length;
+      },
+      popModal: index => {
+        if (index != modals.length) {
+          console.error(`Trying to close modal ${index} of ${modals.length}`);
+          return new Promise(resolve => { }); //Never
+        }
+        else {
+          modals.pop();
+          return forceUpdatePromise();
+        }
+      },
+      getCount: () => modals.length
+    };
+    return () => { current = null!; };
+  }, []);
+
+  function hanldleKeyDown(e: KeyboardEvent) {
+    if (modalInstances.length) {
+      e.openedModals = true;
+      var topMost = modalInstances[modalInstances.length - 1];
+      topMost = FunctionalAdapter.innerRef(topMost);
+      if (topMost && topMost.handleKeyDown) {
+        topMost.handleKeyDown(e);
+      }
+    }
+  }
+
+  return React.createElement("div", { className: "sf-modal-container", id: "modal-container" }, ...modals);
+}
+
+export function openModal<T>(modal: React.ReactElement<IModalProps<T>>): Promise<T> {
+
+  return new Promise<T>((resolve) => {
+    let cloned: React.ReactElement<IModalProps<T>>;
+
+    cloned = FunctionalAdapter.withRef(React.cloneElement(modal, {
+      key: current.getCount(),
+      onExited: (val: T) => {
+        current.popModal(index!).then(() => resolve(val));
+      },
+    } as any),
+      c => {
+        c ? modalInstances.push(c) : modalInstances.pop();
+      });
+
+    let index: number = current.pushModal(cloned);;
+  });
+}
+
+
+
+
+export interface FunctionalAdapterProps {
+  children: React.ReactNode;
+}
+
+export class FunctionalAdapter extends React.Component<FunctionalAdapterProps> {
+
+  innerRef?: any | null;
+
+  override render(): React.ReactNode {
+    var only = React.Children.only(this.props.children);
+    if (!React.isValidElement(only))
+      throw new Error("Not a valid react element: " + only);
+
+    return React.cloneElement(only, { ref: (a: any) => { this.innerRef = a; } } as any);
+  }
+
+  static withRef<P>(element: React.ReactElement<P>, ref: React.Ref<any>): React.ReactElement<P> {
+    var type = element.type as React.ComponentClass | React.FunctionComponent | string;
+    if (typeof type == "string" || type.prototype?.render) {
+      return React.cloneElement(element, { ref: ref } as any);
+    } else {
+      return <FunctionalAdapter ref={ref as React.Ref<FunctionalAdapter>}>{element}</FunctionalAdapter>
+    }
+  }
+
+  static isInstanceOf(component: React.Component | null | undefined, type: React.ComponentType): boolean {
+
+    if (component instanceof type)
+      return true;
+
+    if (component instanceof FunctionalAdapter) {
+      var only = React.Children.only(component.props.children);
+      return React.isValidElement(only) && only.type == type;
+    }
+
+    return false
+  }
+
+  static innerRef(component: React.Component | null | undefined): any {
+
+    if (component instanceof FunctionalAdapter) {
+      return component.innerRef;
+    }
+    return component;
+  }
+}
+
+
+let currentGetPageUIState: (() => UIState) | null = null;
+
+export namespace GlobalModalContainer {
+  export function getPageUIState(): UIState | null {
+    return currentGetPageUIState?.() ?? null;
+  }
+
+  export function getModalUIStates(): (UIState| null)[] {
+    return modalInstances
+      .map(inst => FunctionalAdapter.innerRef(inst))
+      .map(inst => inst.getUIState?.() ?? null);
+  }
+}
+
+export function usePageUIState(getState: () => UIState): void {
+  const getStateRef = useUpdatedRef(getState);
+
+  React.useEffect(() => {
+    const fn = () => getStateRef.current();
+    currentGetPageUIState = fn;
+    return () => {
+      if (currentGetPageUIState === fn)
+        currentGetPageUIState = null;
+    };
+  }, []);
+}

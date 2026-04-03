@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="LayoutMessage">
+    <Member Name="JumpToMainContent" Description="Zum Hauptinhalt springen" />
+	<Member Name="SelectA0_G" Description="Wählen Sie [m:ein|f:eine|n:ein] {0} aus" />
+  </Type>
+  <Type Name="ShowCount" Description="Anzahl anzeigen">
+    <Member Name="Always" Description="Immer" />
+    <Member Name="MoreThan0" Description="Mehr als 0" />
+  </Type>
+  <Type Name="ToolbarElementEmbedded" Description="Toolbar-element">
+    <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
+    <Member Name="Content" Description="Inhalt" />
+    <Member Name="IconColor" Description="Symbolfarbe" />
+    <Member Name="IconName" Description="Symbolname" />
+    <Member Name="Label" Description="Etikett" />
+    <Member Name="OpenInPopup" Description="Im Popup öffnen" />
+    <Member Name="ShowCount" Description="Anzahl anzeigen" />
+    <Member Name="Type" Description="Typ" />
+    <Member Name="Url" Description="URL" />
+  </Type>
+  <Type Name="ToolbarElementType" Description="Toolbar-Elementtyp">
+    <Member Name="Divider" Description="Teiler" />
+    <Member Name="ExtraIcon" Description="Zusätzliches Symbol" />
+    <Member Name="Header" Description="Kopfzeile" />
+    <Member Name="Item" Description="Element" />
+  </Type>
+  <Type Name="ToolbarEntity" Description="Toolbar" PluralDescription="Toolbars" Gender="f">
+    <Member Name="Elements" Description="Elemente" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Location" Description="Position" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Owner" Description="Eigentümer" />
+    <Member Name="Priority" Description="Priorität" />
+  </Type>
+  <Type Name="ToolbarLocation" Description="Toolbar-Position">
+    <Member Name="Main" Description="Haupt" />
+    <Member Name="Side" Description="Seite" />
+    <Member Name="Top" Description="Top" />
+  </Type>
+  <Type Name="ToolbarMenuElementEmbedded" Description="Menüelement der Symbolleiste">
+    <Member Name="AutoSelect" Description="Automatisch auswählen" />
+    <Member Name="WithEntity" Description="Mit Entität" />
+  </Type>
+  <Type Name="ToolbarMenuEntity" Description="Toolbar-Menü" PluralDescription="Toolbar-Menüs" Gender="f">
+    <Member Name="Elements" Description="Elemente" />
+    <Member Name="EntityType" Description="Entitätstyp" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Owner" Description="Eigentümer" />
+  </Type>
+  <Type Name="ToolbarMenuOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="ToolbarMessage">
+    <Member Name="_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships" Description="{0} Zyklen wurden aufgrund der Beziehungen in der Toolbar gefunden:" />
+    <Member Name="ExtraIconCanNotComeAfterDivider" Description="Zusätzliches Symbol kann nicht nach der Trennwand kommen" />
+    <Member Name="FirstElementCanNotBeExtraIcon" Description="Das erste Element kann kein zusätzliches Symbol sein" />
+    <Member Name="If0Selected" Description="Wenn {0} ausgewählt" />
+    <Member Name="No0Selected" Description="Keine {0} ausgewählt" />
+    <Member Name="RecursionDetected" Description="Rekursion erkannt" />
+
+    <Member Name="ShowTogether" Description="Gemeinsam anzeigen" />
+  </Type>
+  <Type Name="ToolbarOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="ToolbarSwitcherEntity" Description="Toolbar-Umschalter" Gender="m">
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Options" Description="Optionen" />
+    <Member Name="Owner" Description="Besitzer" />
+  </Type>
+  <Type Name="ToolbarSwitcherOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="ToolbarSwitcherOptionEmbedded" Description="Toolbar-Umschalter-Option">
+    <Member Name="IconColor" Description="Symbolfarbe" />
+    <Member Name="IconName" Description="Symbolname" />
+    <Member Name="ToolbarMenu" Description="Toolbar-Menü" />
+  </Type>
+</Translations>

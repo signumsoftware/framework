@@ -1,0 +1,273 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="AutoconfigureNeuralNetworkEntity" Description="Autoconfigure neural network" PluralDescription="Autoconfigure neural networks">
+    <Member Name="ExploreHiddenLayers" Description="Explorer les couches cachées" />
+    <Member Name="ExploreLearner" Description="Explore learner" />
+    <Member Name="ExploreLearningValues" Description="Explorer les valeurs d’apprentissage" />
+    <Member Name="ExploreOutputLayer" Description="Explorer la couche de sortie" />
+    <Member Name="Generations" Description="Générations" />
+    <Member Name="InitialMutationProbability" Description="Probabilité de mutation initiale" />
+    <Member Name="InitialPredictor" Description="Initial predictor" />
+    <Member Name="MaxLayers" Description="Nombre maximal de couches" />
+    <Member Name="MaxNeuronsPerLayer" Description="Max. neurones par couche" />
+    <Member Name="MinNeuronsPerLayer" Description="Min. neurones par couche" />
+    <Member Name="OneTrainingDuration" Description="Durée d’une séance d’entraînement" />
+    <Member Name="Population" Description="Population" />
+    <Member Name="Seed" Description="Seed" />
+    <Member Name="SurvivalRate" Description="Taux de survie" />
+  </Type>
+  <Type Name="NeuralNetworkActivation" Description="Activation du réseau neuronal">
+    <Member Name="None" Description="Aucun" />
+    <Member Name="ReLU" Description="Re LU" />
+    <Member Name="Sigmoid" Description="Sigmoïde" />
+    <Member Name="Tanh" Description="Tanh" />
+  </Type>
+  <Type Name="NeuralNetworkEvalFunction" Description="Fonction d’évaluation du réseau neuronal">
+    <Member Name="ClassificationError" Description="Erreur de classification" />
+    <Member Name="MeanAbsoluteError" Description="Erreur absolue moyenne" />
+    <Member Name="MeanAbsolutePercentageError" Description="Erreur absolue moyenne en pourcentage" />
+    <Member Name="MeanSquaredError" Description="Erreur quadratique moyenne" />
+    <Member Name="sigmoid_cross_entropy_with_logits" Description="sigmoid cross entropy with logits" />
+    <Member Name="softmax_cross_entropy_with_logits" Description="softmax cross entropy with logits" />
+    <Member Name="softmax_cross_entropy_with_logits_v2" Description="softmax cross entropy with logits v2" />
+  </Type>
+  <Type Name="NeuralNetworkHidenLayerEmbedded" Description="Couche de réseau neuronal cachée">
+    <Member Name="Activation" Description="Activation" />
+    <Member Name="Initializer" Description="Initialiseur" />
+    <Member Name="Size" Description="Taille" />
+  </Type>
+  <Type Name="NeuralNetworkInitializer" Description="Initialiseur de réseau neuronal">
+    <Member Name="glorot_uniform_initializer" Description="glorot uniform initializer" />
+    <Member Name="ones_initializer" Description="ones initializer" />
+    <Member Name="orthogonal_initializer" Description="orthogonal initializer" />
+    <Member Name="random_normal_initializer" Description="random normal initializer" />
+    <Member Name="random_uniform_initializer" Description="random uniform initializer" />
+    <Member Name="truncated_normal_initializer" Description="truncated normal initializer" />
+    <Member Name="variance_scaling_initializer" Description="variance scaling initializer" />
+    <Member Name="zeros_initializer" Description="zeros initializer" />
+  </Type>
+  <Type Name="NeuralNetworkSettingsEntity" Description="Paramètres du réseau neuronal">
+    <Member Name="BestResultFromLast" Description="Best result from last" />
+    <Member Name="Device" Description="Appareil" />
+    <Member Name="EvalErrorFunction" Description="Fonction d’erreur d’évaluation" />
+    <Member Name="HiddenLayers" Description="Couches cachés" />
+    <Member Name="LearningEpsilon" Description="Apprentissage Epsilon" />
+    <Member Name="LearningRate" Description="Taux d’apprentissage" />
+    <Member Name="LossFunction" Description="Fonction de perte" />
+    <Member Name="MinibatchSize" Description="Taille du mini-lot" />
+    <Member Name="NumMinibatches" Description="Nombre de mini-lots" />
+    <Member Name="Optimizer" Description="Optimiseur" />
+    <Member Name="OutputActivation" Description="Activation de la sortie" />
+    <Member Name="OutputInitializer" Description="Initialiseur de sortie" />
+    <Member Name="SaveProgressEvery" Description="Sauvegardez votre progression tous les" />
+    <Member Name="SaveValidationProgressEvery" Description="Enregistrer la progression de la validation tous les" />
+  </Type>
+  <Type Name="DefaultColumnEncodings">
+    <Member Name="None" Description="Aucun" />
+    <Member Name="NormalizeLog" Description="Normalize Log" />
+    <Member Name="NormalizeMinMax" Description="Normalize Min-Max" />
+    <Member Name="NormalizeZScore" Description="Normalize Z-Score" />
+    <Member Name="OneHot" Description="One hot" />
+    <Member Name="SplitWords" Description="Séparer les mots" />
+  </Type>
+  <Type Name="PredictionSet" Description="Ensemble de prédictions">
+    <Member Name="Training" Description="Formation" />
+    <Member Name="Validation" Description="Validation" />
+  </Type>
+  <Type Name="PredictionType" Description="Type de prédiction">
+    <Member Name="Classification" Description="Classification" />
+    <Member Name="MultiClassification" Description="Multi classification" />
+    <Member Name="MultiRegression" Description="Multi régression" />
+    <Member Name="Regression" Description="Régression" />
+  </Type>
+  <Type Name="PredictorAlgorithmSymbol" Description="Predictor algorithm" PluralDescription="Predictor algorithms" />
+  <Type Name="PredictorClassificationMetricsEmbedded" Description="Predictor classification metrics">
+    <Member Name="MissCount" Description="Miss count" />
+    <Member Name="MissRate" Description="Miss rate" />
+    <Member Name="TotalCount" Description="Nombre total" />
+  </Type>
+  <Type Name="PredictorCodificationEntity" Description="Predictor codification" PluralDescription="Predictor codifications">
+    <Member Name="Average" Description="Moyenne" />
+    <Member Name="Index" Description="Index" />
+    <Member Name="IsValue" Description="Is value" />
+    <Member Name="Max" Description="Max" />
+    <Member Name="Min" Description="Min" />
+    <Member Name="OriginalColumnIndex" Description="Original column index" />
+    <Member Name="Predictor" Description="Predictor" />
+    <Member Name="SplitKey0" Description="Split key0" />
+    <Member Name="SplitKey1" Description="Split key1" />
+    <Member Name="SplitKey2" Description="Split key2" />
+    <Member Name="StdDev" Description="Déviation standard" />
+    <Member Name="SubQueryIndex" Description="Sub query index" />
+    <Member Name="Usage" Description="Usage" />
+  </Type>
+  <Type Name="PredictorColumnEmbedded" Description="Predictor column">
+    <Member Name="Encoding" Description="Encoding" />
+    <Member Name="NullHandling" Description="Gestion des valeurs nulles" />
+    <Member Name="Token" Description="Token" />
+    <Member Name="Usage" Description="Usage" />
+  </Type>
+  <Type Name="PredictorColumnEncodingSymbol" Description="Predictor column encoding" PluralDescription="Predictor column encodings" />
+  <Type Name="PredictorColumnNullHandling" Description="Predictor column null handling">
+    <Member Name="Average" Description="Moyenne" />
+    <Member Name="Error" Description="Erreur" />
+    <Member Name="Max" Description="Max" />
+    <Member Name="Min" Description="Min" />
+    <Member Name="Zero" Description="Zéro" />
+  </Type>
+  <Type Name="PredictorColumnUsage" Description="Predictor column usage">
+    <Member Name="Input" Description="Entrée" />
+    <Member Name="Output" Description="Sortie" />
+  </Type>
+  <Type Name="PredictorEntity" Description="Predictor" PluralDescription="Predictors">
+    <Member Name="Algorithm" Description="Algorithme" />
+    <Member Name="AlgorithmSettings" Description="Paramètres de l’algorithme" />
+    <Member Name="ClassificationTraining" Description="Classification training" />
+    <Member Name="ClassificationValidation" Description="Classification validation" />
+    <Member Name="Files" Description="Fichiers" />
+    <Member Name="MainQuery" Description="Requête principale" />
+    <Member Name="Name" Description="Nom" />
+    <Member Name="Publication" Description="Publication" />
+    <Member Name="RegressionTraining" Description="Regression training" />
+    <Member Name="RegressionValidation" Description="Regression validation" />
+    <Member Name="ResultSaver" Description="Économiseur de résultats" />
+    <Member Name="ResultTraining" Description="Result training" />
+    <Member Name="ResultValidation" Description="Validation des résultats" />
+    <Member Name="Settings" Description="Paramètres" />
+    <Member Name="State" Description="État" />
+    <Member Name="SubQueries" Description="Sous-requêtes" />
+    <Member Name="TrainingException" Description="Training exception" />
+    <Member Name="User" Description="Utilisateur" />
+  </Type>
+  <Type Name="PredictorEpochProgressEntity" Description="Predictor epoch progress">
+    <Member Name="AccuracyTraining" Description="Accuracy training" />
+    <Member Name="AccuracyValidation" Description="Accuracy validation" />
+    <Member Name="CreationDate" Description="Date de création" />
+    <Member Name="Ellapsed" Description="Écoulé" />
+    <Member Name="Epoch" Description="Epoch" />
+    <Member Name="LossTraining" Description="Loss training" />
+    <Member Name="LossValidation" Description="Loss validation" />
+    <Member Name="Predictor" Description="Predictor" />
+    <Member Name="TrainingExamples" Description="Training examples" />
+  </Type>
+  <Type Name="PredictorFileType">
+    <Member Name="PredictorFile" Description="Fichier de prédiction" />
+  </Type>
+  <Type Name="PredictorMainQueryEmbedded" Description="Predictor main query">
+    <Member Name="Columns" Description="Colonnes" />
+    <Member Name="Filters" Description="Filtres" />
+    <Member Name="GroupResults" Description="Résultats du groupe" />
+    <Member Name="Query" Description="Requête" />
+  </Type>
+  <Type Name="PredictorMessage">
+    <Member Name="_0CanNotBe1Because2Use3" Description="{0} ne peut pas être {1} car {2} utilisez {3}" />
+    <Member Name="_0IsAlreadyBeingTrained" Description="{0} est déjà en cours de formation" />
+    <Member Name="_0IsNotCompatibleWith12" Description="{0} n’est pas compatible avec {1} {2}" />
+    <Member Name="_0IsRequiredFor1" Description="{0} est nécessaire pour {1}" />
+    <Member Name="_0NotSuportedFor1" Description="{0} non pris en charge pour {1}" />
+    <Member Name="_0ShouldBeDivisibleBy12" Description="{0} doit être divisible par {1} ({2})" />
+    <Member Name="Codifications" Description="Codifications" />
+    <Member Name="Csv" Description="CSV" />
+    <Member Name="DownloadCsv" Description="Télécharger CSV" />
+    <Member Name="DownloadTsv" Description="Télécharger TSV" />
+    <Member Name="DownloadTsvMetadata" Description="Télécharger les métadonnées TSV" />
+    <Member Name="NoPublicationsForQuery0Registered" Description="No publications for query {0} registered" />
+    <Member Name="NoPublicationsProcessRegisteredFor0" Description="No publications process registered for {0}" />
+    <Member Name="OpenTensorflowProjector" Description="Open tensorflow projector" />
+    <Member Name="Predict" Description="Prédire" />
+    <Member Name="PredictorIsPublishedUntrainAnyway" Description="Predictor est publié. Le désentraîner quand même ?" />
+    <Member Name="Preview" Description="Aperçu" />
+    <Member Name="Progress" Description="Progrès" />
+    <Member Name="Results" Description="Résultats" />
+    <Member Name="ShouldBeOfType0" Description="Doit être de type {0}" />
+    <Member Name="StartingTraining" Description="Début de la formation" />
+    <Member Name="TensorflowProjector" Description="Tensorflow projector" />
+    <Member Name="ThereShouldBe0ColumnsWith12Currently3" Description="Il devrait y avoir {0} colonnes avec {1} {2} (actuellement {3})" />
+    <Member Name="TheTypeOf01DoesNotMatch23" Description="Le type de {0} ({1}) ne correspond pas à {2} ({3})" />
+    <Member Name="TooManyParentKeys" Description="Trop de clés parents" />
+    <Member Name="Tsv" Description="TSV" />
+    <Member Name="TsvMetadata" Description="metadonnées TSV" />
+  </Type>
+  <Type Name="PredictorMetricsEmbedded" Description="Métriques de prédiction">
+    <Member Name="Accuracy" Description="Précision" />
+    <Member Name="Loss" Description="Perte" />
+  </Type>
+  <Type Name="PredictorOperation">
+    <Member Name="AfterPublishProcess" Description="Processus après la publication" />
+    <Member Name="AutoconfigureNetwork" Description="Autoconfigure network" />
+    <Member Name="CancelTraining" Description="Annuler la formation" />
+    <Member Name="Clone" Description="Clone" />
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Publish" Description="Publier" />
+    <Member Name="Save" Description="Sauvegarder" />
+    <Member Name="StopTraining" Description="Arrêter la formation" />
+    <Member Name="Train" Description="Train" />
+    <Member Name="Untrain" Description="Désentraîner" />
+  </Type>
+  <Type Name="PredictorProcessAlgorithm">
+    <Member Name="AutoconfigureNeuralNetwork" Description="Autoconfigure neural network" />
+  </Type>
+  <Type Name="PredictorPublicationSymbol" Description="Predictor publication" PluralDescription="Predictor publications" />
+  <Type Name="PredictorRegressionMetricsEmbedded" Description="Predictor regression metrics">
+    <Member Name="MeanAbsoluteError" Description="Erreur absolue moyenne" />
+    <Member Name="MeanAbsolutePercentageError" Description="Erreur absolue moyenne en pourcentage" />
+    <Member Name="MeanError" Description="Erreur moyenne" />
+    <Member Name="MeanPercentageError" Description="Pourcentage moyen d’erreur" />
+    <Member Name="MeanSquaredError" Description="Erreur quadratique moyenne" />
+    <Member Name="RootMeanSquareError" Description="Erreur quadratique moyenne" />
+  </Type>
+  <Type Name="PredictorResultSaverSymbol" Description="Predictor result saver" PluralDescription="Predictor result savers" />
+  <Type Name="PredictorSettingsEmbedded" Description="Paramètres du prédicteur">
+    <Member Name="Seed" Description="Seed" />
+    <Member Name="TestPercentage" Description="Pourcentage de test" />
+  </Type>
+  <Type Name="PredictorSimpleResultSaver">
+    <Member Name="Full" Description="Complet" />
+    <Member Name="StatisticsOnly" Description="Statistiques uniquement" />
+  </Type>
+  <Type Name="PredictorState" Description="Predictor state">
+    <Member Name="Draft" Description="Brouillon" />
+    <Member Name="Error" Description="Erreur" />
+    <Member Name="Trained" Description="Entrainé" />
+    <Member Name="Training" Description="Formation" />
+  </Type>
+  <Type Name="PredictorSubQueryColumnEmbedded" Description="Predictor sub query column">
+    <Member Name="Encoding" Description="Encoding" />
+    <Member Name="NullHandling" Description="Gestion des valeurs nulles" />
+    <Member Name="Token" Description="Token" />
+    <Member Name="Usage" Description="Usage" />
+  </Type>
+  <Type Name="PredictorSubQueryColumnUsage" Description="Predictor sub query column usage">
+    <Member Name="Input" Description="Entrée" />
+    <Member Name="Output" Description="Sortie" />
+    <Member Name="ParentKey" Description="Clé parent" />
+    <Member Name="SplitBy" Description="Diviser par" />
+  </Type>
+  <Type Name="PredictorSubQueryEntity" Description="Predictor sub query" PluralDescription="Predictor sub queries">
+    <Member Name="Columns" Description="Colonnes" />
+    <Member Name="Filters" Description="Filtres" />
+    <Member Name="Name" Description="Nom" />
+    <Member Name="Order" Description="Commande" />
+    <Member Name="Predictor" Description="Predictor" />
+    <Member Name="Query" Description="Requête" />
+  </Type>
+  <Type Name="PredictSimpleResultEntity" Description="Predict simple result" PluralDescription="Predict simple results">
+    <Member Name="Key0" Description="Clé0" />
+    <Member Name="Key1" Description="Clé1" />
+    <Member Name="Key2" Description="Clé2" />
+    <Member Name="OriginalCategory" Description="Catégorie d’origine" />
+    <Member Name="OriginalValue" Description="Valeur d’origine" />
+    <Member Name="PredictedCategory" Description="Catégorie prédite" />
+    <Member Name="PredictedValue" Description="Valeur prédite" />
+    <Member Name="Predictor" Description="Predictor" />
+    <Member Name="Target" Description="Cible" />
+    <Member Name="Type" Description="Type" />
+  </Type>
+  <Type Name="TensorFlowOptimizer" Description="Tensor flow optimizer">
+    <Member Name="Adam" Description="Adam" />
+    <Member Name="GradientDescentOptimizer" Description="Gradient descent optimizer" />
+  </Type>
+  <Type Name="TensorFlowPredictorAlgorithm">
+    <Member Name="NeuralNetworkGraph" Description="Graphique de réseau neuronal" />
+  </Type>
+</Translations>

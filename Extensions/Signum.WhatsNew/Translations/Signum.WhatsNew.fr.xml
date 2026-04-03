@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="WhatsNewEntity" Description="Quoi de neuf ?">
+    <Member Name="Attachment" Description="Attachement" />
+    <Member Name="CreationDate" Description="Date de création" />
+    <Member Name="Messages" Description="Messages" />
+    <Member Name="Name" Description="Nom" />
+    <Member Name="PreviewPicture" Description="Aperçu de l’image" />
+    <Member Name="Status" Description="Statut" />
+  </Type>
+  <Type Name="WhatsNewFileType">
+    <Member Name="WhatsNewAttachmentFileType" Description="Nouveau type de pièces jointes" />
+    <Member Name="WhatsNewPreviewFileType" Description="Aperçu sur des nouveaux types de fichiers" />
+  </Type>
+  <Type Name="WhatsNewLogEntity" Description="le journal des nouveautés" PluralDescription="Journaux des nouveautés">
+    <Member Name="ReadOn" Description="Lire la suite" />
+    <Member Name="User" Description="Utilisateur" />
+    <Member Name="WhatsNew" Description="Quoi de neuf?" />
+  </Type>
+  <Type Name="WhatsNewLogOperation">
+    <Member Name="Delete" Description="Supprimer" />
+  </Type>
+  <Type Name="WhatsNewMessage">
+    <Member Name="_0ContiansNoVersionForCulture1" Description="{0} ne contient pas de version pour la culture '{1}'" />
+    <Member Name="AllMyNews" Description="Toutes mes actualités" />
+    <Member Name="BackToOverview" Description="Retour à l’aperçu" />
+    <Member Name="CloseAll" Description="Tout fermer" />
+    <Member Name="Downloads" Description="Téléchargements" />
+    <Member Name="Language" Description="Langue" />
+    <Member Name="MyActiveNews" Description="Mon actualité active" />
+    <Member Name="NewNews" Description="Nouvelles" />
+    <Member Name="News" Description="Nouvelles" />
+    <Member Name="NewsPage" Description="Page d’actualités" />
+    <Member Name="NewUnreadNews" Description="Nouveaux messages non lus" />
+    <Member Name="Preview" Description="Aperçu" />
+    <Member Name="ReadFurther" Description="Lire la suite" />
+    <Member Name="ThisNewIsNoLongerAvailable" Description="Cette nouvelle n’est plus disponible" />
+    <Member Name="ViewMore" Description="Voir plus" />
+    <Member Name="YouDoNotHaveAnyUnreadNews" Description="Vous n’avez aucun message non lu" />
+    <Member Name="YourNews" Description="Vos actualités" />
+  </Type>
+  <Type Name="WhatsNewMessageEmbedded" Description="Nouveau message">
+    <Member Name="Culture" Description="Culture" />
+    <Member Name="Description" Description="Description" />
+    <Member Name="Title" Description="Titre" />
+  </Type>
+  <Type Name="WhatsNewOperation">
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Publish" Description="Publier" />
+    <Member Name="Save" Description="Sauvegarder" />
+    <Member Name="Unpublish" Description="Annuler la publication" />
+  </Type>
+  <Type Name="WhatsNewState" Description="Actualités Statut">
+    <Member Name="Draft" Description="Brouillon" />
+    <Member Name="Publish" Description="Publier" />
+  </Type>
+</Translations>

@@ -1,341 +1,379 @@
-﻿using Signum.Engine;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
-using Signum.Engine.Operations;
-using Signum.Entities;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
+using Signum.DynamicQuery;
+using System.IO;
+using System.Text.Json;
+using Pgvector;
 
-namespace Signum.Test.Environment
+namespace Signum.Test.Environment;
+
+public static class MusicLogic
 {
-    public static class MusicLogic
+    [AutoExpressionField]
+    public static IQueryable<AlbumEntity> Albums(this IAuthorEntity e) => 
+        As.Expression(() => Database.Query<AlbumEntity>().Where(a => a.Author == e));
+
+    public static void Start(SchemaBuilder sb)
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
+            return;
+
+        sb.Include<AlbumEntity>()
+            .WithExpressionFrom((IAuthorEntity au) => au.Albums())
+            .WithQuery(() => a => new
             {
-                if (sb.Schema.Settings.DBMS == DBMS.SqlCompact || sb.Schema.Settings.DBMS == DBMS.SqlServer2005)
+                Entity = a,
+                a.Id,
+                a.Name,
+                a.Author,
+                a.Label,
+                a.Year
+            });
+        AlbumGraph.Register();
+
+
+
+        sb.Include<NoteWithDateEntity>()
+            .WithQuery(() => a => new
+            {
+                Entity = a,
+                a.Id,
+                a.Title,
+                a.Target,
+                a.CreationTime,
+            });
+
+        var embeddings = JsonSerializer.Deserialize<Dictionary<string, float[]>>(File.ReadAllText("linesWithEmbeddings.json"))!;
+
+        Filter.GetEmbeddingForSmartSearch = (vectorToken, searchString) =>
+        {
+            if (embeddings.TryGetValue(searchString, out var embedding))
+                return new Vector(embedding);
+
+            throw new InvalidOperationException($"Test embedding not found for search string: '{searchString}'.");
+        };
+
+        new Graph<NoteWithDateEntity>.Execute(NoteWithDateOperation.Save)
+        {
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (e, _) =>
+            {
+                if(!e.IsNew)
+                    Database.Query<SimplePassageEntity>().Where(a=>a.Note.Is(e)).UnsafeDeleteChunks();
+
+                e.Save();
+
+                if (e.Title.HasText())
+                    new SimplePassageEntity
+                    {
+                        Note = e.ToLite(),
+                        IsTitle = true,
+                        Chunk = e.Title,
+                        Index = 0,
+                    }.Save();
+
+                e.Text?.SplitNoEmpty('\r', '\n', '.')
+                    .Select(t => t.Trim())
+                    .Where(t => t.HasText())
+                    .Select((t, i) => new SimplePassageEntity
+                    {
+                        Note = e.ToLite(),
+                        IsTitle = false,
+                        Chunk = t,
+                        Embedding = new Vector(embeddings.GetOrThrow(t)),
+                        Index = i + 1,
+                    }).SaveList();
+            },
+        }.Register();
+
+        if (Connector.Current is SqlServerConnector ss && ss.SupportsFullTextSearch || Connector.Current is PostgreSqlConnector)
+            sb.AddFullTextIndex<NoteWithDateEntity>(a => new { a.Title, a.Text });
+
+        sb.Include<ConfigEntity>()
+            .WithSave(ConfigOperation.Save);
+
+        MinimumExtensions.IncludeFunction(sb.Schema.Assets);
+        sb.Include<ArtistEntity>()
+            .WithSave(ArtistOperation.Save)
+            .WithVirtualMList(a => a.Nominations, n => (Lite<ArtistEntity>)n.Author)
+            .WithQuery(() => a => new
+            {
+                Entity = a,
+                a.Id,
+                a.Name,
+                a.IsMale,
+                a.Sex,
+                a.Dead,
+                a.LastAward,
+            });
+
+        new Graph<ArtistEntity>.Execute(ArtistOperation.AssignPersonalAward)
+        {
+            CanExecute = a => a.LastAward != null ? "Artist already has an award" : null,
+            Execute = (a, para) => a.LastAward = new PersonalAwardEntity() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }.Execute(AwardOperation.Save)
+        }.Register();
+
+        sb.Include<BandEntity>()
+            .WithQuery(() => a => new
+            {
+                Entity = a,
+                a.Id,
+                a.Name,
+                a.LastAward,
+            });
+
+        new Graph<BandEntity>.Execute(BandOperation.Save)
+        {
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (b, _) =>
+            {
+                using (OperationLogic.AllowSave<ArtistEntity>())
                 {
-                    sb.Settings.OverrideAttributes((AlbumDN a) => a.Songs[0].Duration, new Signum.Entities.IgnoreAttribute());
-                    sb.Settings.OverrideAttributes((AlbumDN a) => a.BonusTrack.Duration, new Signum.Entities.IgnoreAttribute());
+                    b.Save();
                 }
-
-                sb.Include<AlbumDN>();
-                sb.Include<NoteWithDateDN>();
-                sb.Include<PersonalAwardDN>();
-                sb.Include<AwardNominationDN>();
-                sb.Include<ConfigDN>();
-
-                MinimumExtensions.IncludeFunction(sb.Schema.Assets);
-
-                dqm.RegisterQuery(typeof(AlbumDN), ()=> 
-                    from a in Database.Query<AlbumDN>()
-                    select new
-                    {
-                        Entity = a,
-                        a.Id,
-                        a.Name,
-                        a.Author,
-                        a.Label,
-                        a.Year
-                    });
-
-                dqm.RegisterQuery(typeof(NoteWithDateDN), ()=> 
-                    from a in Database.Query<NoteWithDateDN>()
-                    select new
-                    {
-                        Entity = a,
-                        a.Id,
-                        a.Text,
-                        a.Target,
-                        a.CreationTime,
-                    });
-
-                dqm.RegisterQuery(typeof(ArtistDN), ()=> 
-                    from a in Database.Query<ArtistDN>()
-                    select new
-                    {
-                        Entity = a,
-                        a.Id,
-                        a.Name,
-                        a.IsMale,
-                        a.Sex,
-                        a.Dead,
-                        a.LastAward,
-                    });
-
-                dqm.RegisterExpression((IAuthorDN au) => Database.Query<AlbumDN>().Where(a => a.Author == au), () => typeof(AlbumDN).NicePluralName(), "Albums");
-
-                dqm.RegisterQuery(typeof(BandDN), ()=> 
-                    from a in Database.Query<BandDN>()
-                    select new
-                    {
-                        Entity = a.ToLite(),
-                        a.Id,
-                        a.Name,
-                        a.LastAward,
-                    });
-
-
-                dqm.RegisterQuery(typeof(LabelDN), ()=> 
-                    from a in Database.Query<LabelDN>()
-                    select new
-                    {
-                        Entity = a.ToLite(),
-                        a.Id,
-                        a.Name,
-                    });
-
-
-                dqm.RegisterQuery(typeof(AmericanMusicAwardDN), ()=> 
-                    from a in Database.Query<AmericanMusicAwardDN>()
-                    select new
-                    {
-                        Entity = a.ToLite(),
-                        a.Id,
-                        a.Year,
-                        a.Category,
-                        a.Result,
-                    });
-
-                dqm.RegisterQuery(typeof(GrammyAwardDN), ()=> 
-                    from a in Database.Query<GrammyAwardDN>()
-                    select new
-                    {
-                        Entity = a.ToLite(),
-                        a.Id,
-                        a.Year,
-                        a.Category,
-                        a.Result
-                    });
-
-                dqm.RegisterQuery(typeof(PersonalAwardDN), ()=> 
-                    from a in Database.Query<PersonalAwardDN>()
-                    select new
-                    {
-                        Entity = a.ToLite(),
-                        a.Id,
-                        a.Year,
-                        a.Category,
-                        a.Result
-                    });
-
-                dqm.RegisterQuery(typeof(AwardNominationDN), ()=> 
-                    from a in Database.Query<AwardNominationDN>()
-                    select new
-                    {
-                        Entity = a.ToLite(),
-                        a.Id,
-                        a.Award,
-                        a.Author
-                    });
-
-
-                dqm.RegisterQuery(typeof(IAuthorDN), () => DynamicQuery.Manual((request, descriptions) =>
-                    {
-                        var one = (from a in Database.Query<ArtistDN>()
-                                   select new
-                                   {
-                                       Entity = a.ToLite<IAuthorDN>(),
-                                       a.Id,
-                                       Type = "Artist",
-                                       a.Name,
-                                       Lonely = a.Lonely(),
-                                       LastAward = a.LastAward.ToLite()
-                                   }).ToDQueryable(descriptions).AllQueryOperations(request);
-
-                        var two = (from a in Database.Query<BandDN>()
-                                   select new
-                                   {
-                                       Entity = a.ToLite<IAuthorDN>(),
-                                       a.Id,
-                                       Type = "Band",
-                                       a.Name,
-                                       Lonely = a.Lonely(),
-                                       LastAward = a.LastAward.ToLite()
-                                   }).ToDQueryable(descriptions).AllQueryOperations(request);
-
-                        return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
-
-                    }).Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll),
-                    entityImplementations: Implementations.By(typeof(ArtistDN), typeof(BandDN)));
-
-                Validator.PropertyValidator((NoteWithDateDN n) => n.Text)
-                    .IsApplicableValidator<StringLengthValidatorAttribute>(n => Corruption.Strict); 
-
-                AlbumGraph.Register();
-
-                RegisterOperations();
             }
-        }
+        }.Register();
 
-        private static void RegisterOperations()
+        sb.Include<LabelEntity>()
+            .WithSave(LabelOperation.Save)
+            .WithQuery(() => a => new
+            {
+                Entity = a,
+                a.Id,
+                a.Name,
+            });
+
+
+        sb.Include<FolderEntity>()
+            .WithQuery(() => e => new
+            {
+                Entity = e,
+                e.Id,
+                e.Name
+            });
+
+        if (Connector.Current.SupportsVectors)
+        sb.Include<SimplePassageEntity>()
+            .WithVectorIndex(a=>a.Embedding, vti =>
+            {
+                if (Connector.Current is SqlServerConnector)
+                    vti.DelayCreation = true;
+            })
+            .WithQuery(() => p => new
+            {
+                Entity = p,
+                p.Id,
+                p.Note,
+            });
+
+        RegisterAwards(sb);
+
+        QueryLogic.Queries.Register(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, description, cancellationToken) =>
         {
-            new Graph<AwardDN>.Execute(AwardOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (a, _) => { }
-            }.Register();
+            var one = await (from a in Database.Query<ArtistEntity>()
+                             select new
+                             {
+                                 Entity = (IAuthorEntity)a,
+                                 a.Id,
+                                 Type = "Artist",
+                                 a.Name,
+                                 Lonely = a.Lonely(),
+                                 a.LastAward
+                             })
+                           .ToDQueryable(description)
+                           .AllQueryOperationsAsync(request, cancellationToken, forConcat: true);
 
+            var two = await (from a in Database.Query<BandEntity>()
+                             select new
+                             {
+                                 Entity = (IAuthorEntity)a,
+                                 a.Id,
+                                 Type = "Band",
+                                 a.Name,
+                                 Lonely = a.Lonely(),
+                                 a.LastAward
+                             })
+                           .ToDQueryable(description)
+                           .AllQueryOperationsAsync(request, cancellationToken, forConcat: true);
 
-            new Graph<NoteWithDateDN>.Execute(NoteWithDateOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (n, _) => { }
-            }.Register();
+            return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
 
-            new Graph<ArtistDN>.Execute(ArtistOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (a, _) => { }
-            }.Register();
+        })
+            .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll)
+            .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((ArtistEntity a) => a.Id), PropertyRoute.Construct((BandEntity a) => a.Id)),
+            entityImplementations: Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
 
-            new Graph<ArtistDN>.Execute(ArtistOperation.AssignPersonalAward)
-            {
-                Lite = true,
-                AllowsNew = false,
-                CanExecute = a => a.LastAward != null ? "Artist already has an award" : null,
-                Execute = (a, para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }.Execute(AwardOperation.Save)
-            }.Register();
-
-            new Graph<BandDN>.Execute(BandOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (b, _) => 
-                {
-                    using (OperationLogic.AllowSave<ArtistDN>())
-                    {
-                        b.Save();
-                    }
-                }
-            }.Register();
-
-            new Graph<LabelDN>.Execute(LabelOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (l, _) => { }
-            }.Register();
-
-            new Graph<ConfigDN>.Execute(ConfigOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (e, _) => { },
-            }.Register();
-        }
+        Validator.PropertyValidator((NoteWithDateEntity n) => n.Title)
+            .IsApplicableValidator<NotNullValidatorAttribute>(n => Corruption.Strict);
     }
 
-    public class AlbumGraph : Graph<AlbumDN, AlbumState>
+    //[Fact]
+    //public void SimplePassage()
+    //{
+    //    var chunks = Database.Query<SimplePassageEntity>().Select(a => a.Chunk).ToList();
+
+    //    File.WriteAllLines("lines.txt", chunks);
+    //}
+
+    //Run in Southwind, originally with Gemini models/text-embedding-004 with 768 dimensions
+    //static void ExportEmbeddings()
+    //{
+    //    var lines = File.ReadAllLines(@"..\..\..\lines.txt")!;
+    //    var model = ChatbotLogic.DefaultEmbeddingsModel.Value!.RetrieveFromCache();
+    //    var embeddings = ChatbotLogic.GetEmbeddingsAsync(lines, model, default).ResultSafe();
+
+    //    var dic = lines.Zip(embeddings, (l, e) => KeyValuePair.Create(l, e)).ToDictionary();
+
+    //    File.WriteAllText(@"..\..\..\linesWithEmbeddings.json", JsonSerializer.Serialize(dic));
+    //}
+
+    private static void RegisterAwards(SchemaBuilder sb)
     {
-        public static void Register()
+        new Graph<AwardEntity>.Execute(AwardOperation.Save)
         {
-            GetState = f => f.State;
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (a, _) => { }
+        }.Register();
 
-            new Execute(AlbumOperation.Save)
-            {
-                FromStates = { AlbumState.New },
-                ToState = AlbumState.Saved,
-                AllowsNew = true,
-                Lite = false,
-                Execute = (album, _) => { album.State = AlbumState.Saved; album.Save(); },
-            }.Register();
 
-            new Execute(AlbumOperation.Modify)
+        sb.Include<AmericanMusicAwardEntity>()
+            .WithQuery(() => a => new
             {
-                FromStates = { AlbumState.Saved },
-                ToState = AlbumState.Saved,
-                AllowsNew = false,
-                Lite = false,
-                Execute = (album, _) => { },
-            }.Register();
+                Entity = a,
+                a.Id,
+                a.Year,
+                a.Category,
+                a.Result,
+            });
 
-            new ConstructFrom<BandDN>(AlbumOperation.CreateAlbumFromBand)
+        sb.Include<GrammyAwardEntity>()
+            .WithQuery(() => a => new
             {
-                ToState = AlbumState.Saved,
-                AllowsNew = false,
-                Lite = true,
-                Construct = (BandDN band, object[] args) =>
-                    new AlbumDN
-                    {
-                        Author = band,
-                        Name = args.GetArg<string>(),
-                        Year = args.GetArg<int>(),
-                        State = AlbumState.Saved,
-                        Label = args.GetArg<LabelDN>()
-                    }.Save()
-            }.Register();
+                Entity = a,
+                a.Id,
+                a.Year,
+                a.Category,
+                a.Result
+            });
 
-            new ConstructFrom<AlbumDN>(AlbumOperation.Clone)
+        sb.Include<PersonalAwardEntity>()
+            .WithQuery(() => a => new
             {
-                ToState = AlbumState.New,
-                AllowsNew = false,
-                Lite = true,
-                Construct = (g, args) =>
+                Entity = a,
+                a.Id,
+                a.Year,
+                a.Category,
+                a.Result
+            });
+
+        sb.Include<AwardNominationEntity>()
+            .WithQuery(() => a => new
+            {
+                Entity = a,
+                a.Id,
+                a.Award,
+                a.Author
+            });
+    }
+}
+
+public class AlbumGraph : Graph<AlbumEntity, AlbumState>
+{
+    public static void Register()
+    {
+        GetState = f => f.State;
+
+        new Execute(AlbumOperation.Save)
+        {
+            FromStates = { AlbumState.New },
+            ToStates = { AlbumState.Saved },
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (album, _) => { album.State = AlbumState.Saved; album.Save(); },
+        }.Register();
+
+        new Execute(AlbumOperation.Modify)
+        {
+            FromStates = { AlbumState.Saved },
+            ToStates = { AlbumState.Saved },
+            CanBeModified = true,
+            Execute = (album, _) => { },
+        }.Register();
+
+        new ConstructFrom<BandEntity>(AlbumOperation.CreateAlbumFromBand)
+        {
+            ToStates = { AlbumState.Saved },
+            Construct = (BandEntity band, object?[]? args) =>
+                new AlbumEntity
                 {
-                    return new AlbumDN
-                    {
-                        Author = g.Author,
-                        Label = g.Label,
-                        BonusTrack = new SongDN
-                        {
-                            Name = "Clone bonus track"
-                        }
-                    };
-                }
-            }.Register();
+                    Author = band,
+                    Name = args.GetArg<string>(),
+                    Year = args.GetArg<int>(),
+                    State = AlbumState.Saved,
+                    Label = args.GetArg<LabelEntity>()
+                }.Save()
+        }.Register();
 
-            new ConstructFromMany<AlbumDN>(AlbumOperation.CreateGreatestHitsAlbum)
+        new ConstructFrom<AlbumEntity>(AlbumOperation.Clone)
+        {
+            ToStates = { AlbumState.New },
+            Construct = (g, args) =>
             {
-                ToState = AlbumState.New,
-                Construct = (albumLites, _) =>
+                return new AlbumEntity
                 {
-                    List<AlbumDN> albums = albumLites.Select(a => a.Retrieve()).ToList();
-                    if (albums.Select(a => a.Author).Distinct().Count() > 1)
-                        throw new ArgumentException("All album authors must be the same in order to create a Greatest Hits Album");
-
-                    return new AlbumDN()
+                    Author = g.Author,
+                    Label = g.Label,
+                    BonusTrack = new SongEmbedded
                     {
-                        Author = albums.FirstEx().Author,
-                        Year = DateTime.Now.Year,
-                        Songs = albums.SelectMany(a => a.Songs).ToMList()
-                    };
-                }
-            }.Register();
+                        Name = "Clone bonus track"
+                    }
+                };
+            }
+        }.Register();
 
-
-            new ConstructFromMany<AlbumDN>(AlbumOperation.CreateEmptyGreatestHitsAlbum)
+        new ConstructFromMany<AlbumEntity>(AlbumOperation.CreateGreatestHitsAlbum)
+        {
+            ToStates = { AlbumState.New },
+            Construct = (albumLites, _) =>
             {
-                ToState = AlbumState.New,
-                Construct = (albumLites, _) =>
+                List<AlbumEntity> albums = albumLites.Select(a => a.RetrieveAndRemember()).ToList();
+                if (albums.Select(a => a.Author).Distinct().Count() > 1)
+                    throw new ArgumentException("All album authors must be the same in order to create a Greatest Hits Album");
+
+                return new AlbumEntity()
                 {
-                    List<AlbumDN> albums = albumLites.Select(a => a.Retrieve()).ToList();
-                    if (albums.Select(a => a.Author).Distinct().Count() > 1)
-                        throw new ArgumentException("All album authors must be the same in order to create a Greatest Hits Album");
-
-                    return new AlbumDN()
-                    {
-                        Author = albums.FirstEx().Author,
-                        Year = DateTime.Now.Year,
-                    };
-                }
-            }.Register();
+                    Author = albums.FirstEx().Author,
+                    Year = DateTime.Now.Year,
+                    Songs = albums.SelectMany(a => a.Songs).ToMList()
+                };
+            }
+        }.Register();
 
 
-            new Delete(AlbumOperation.Delete)
+        new ConstructFromMany<AlbumEntity>(AlbumOperation.CreateEmptyGreatestHitsAlbum)
+        {
+            ToStates = { AlbumState.New },
+            Construct = (albumLites, _) =>
             {
-                FromStates = { AlbumState.Saved },
-                Delete = (album, _) => album.Delete()
-            }.Register();
-        }
+                List<AlbumEntity> albums = albumLites.Select(a => a.RetrieveAndRemember()).ToList();
+                if (albums.Select(a => a.Author).Distinct().Count() > 1)
+                    throw new ArgumentException("All album authors must be the same in order to create a Greatest Hits Album");
+
+                return new AlbumEntity()
+                {
+                    Author = albums.FirstEx().Author,
+                    Year = DateTime.Now.Year,
+                };
+            }
+        }.Register();
+
+
+        new Delete(AlbumOperation.Delete)
+        {
+            FromStates = { AlbumState.Saved },
+            Delete = (album, _) => album.Delete()
+        }.Register();
     }
 }

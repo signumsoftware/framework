@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ExcelMessage">
+    <Member Name="Administer" Description="Administrar" />
+    <Member Name="CreateNew" Description="Criar novo" />
+    <Member Name="Data" Description="Dados" />
+    <Member Name="Download" Description="Download" />
+    <Member Name="Excel2007Spreadsheet" Description="Folha de cálculo de Microsoft Office Excel 2007 (*.xlsx)|*.xlsx" />
+    <Member Name="ExcelReport" Description="Relatório do Excel" />
+    <Member Name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" Description="Modelo Excel deverá ter a extensão. xlsx, a actual tem {0}" />
+    <Member Name="FindLocationFoExcelReport" Description="Localize o relatório Excel" />
+    <Member Name="Reports" Description="Relatório" />
+    <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="O modelo do Excel tem uma coluna {0} não existente no motor de busca" />
+    <Member Name="ThereAreNoResultsToWrite" Description="Não há resultados para escrever" />
+  </Type>
+  <Type Name="ExcelReportEntity" Description="Relatório do Excel" PluralDescription="Relatórios do Excel">
+    <Member Name="DisplayName" Description="Nome do relatório" />
+    <Member Name="File" Description="Ficheiro" />
+    <Member Name="Query" Description="Consulta" />
+  </Type>
+  <Type Name="ExcelReportOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+</Translations>

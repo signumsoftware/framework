@@ -1,0 +1,42 @@
+﻿<CodeSnippet Format="1.1.0" xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <Header>
+    <Title>React useState Hook</Title>
+    <Author>Signum Software</Author>
+    <Shortcut>useState</Shortcut>
+    <Description>Code snippet for adding a useState Hook to React Function Component</Description>
+    <SnippetTypes>
+      <SnippetType>Expansion</SnippetType>
+    </SnippetTypes>
+  </Header>
+  <Snippet>
+    <Imports>
+      <Import>
+        <Namespace>
+          import * as React from 'react';
+        </Namespace>
+      </Import>
+    </Imports>
+    <Declarations>
+      <Literal>
+        <ID>var</ID>
+        <ToolTip>state variable name</ToolTip>
+        <Default>foo</Default>
+      </Literal>
+      <Literal>
+        <ID>type</ID>
+        <ToolTip>state variable type</ToolTip>
+        <Default>number</Default>
+      </Literal>
+      <Literal>
+        <ID>init</ID>
+        <ToolTip>state variable init value</ToolTip>
+        <Default>0</Default>
+      </Literal>
+    </Declarations>
+    <Code Language="TypeScript">
+      <![CDATA[
+const [$var$, set_$var$] = React.useState<$type$>($init$)
+     ]]>
+    </Code>
+  </Snippet>
+</CodeSnippet>

@@ -1,0 +1,19 @@
+﻿.user-profile-photo {
+    border: 3px solid var(--profile-photo-border, var(--bs-light));
+    box-shadow: 1px 1px 12px var(--profile-photo-shadow, rgba(0, 0, 0, 0.2));
+    border-radius: 50% !important;
+}
+
+.user-profile-photo img {
+    object-fit: cover;
+    width: 100%;
+    border-radius: 50% !important;
+}
+
+.small-user-profile-photo {
+    border-radius: 50% !important;
+}
+.small-user-profile-photo img {
+    object-fit: cover;
+    border-radius: 50% !important;
+}

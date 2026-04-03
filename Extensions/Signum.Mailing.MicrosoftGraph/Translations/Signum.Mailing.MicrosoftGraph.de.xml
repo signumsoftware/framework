@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="MicrosoftGraphEmailServiceEntity" Description="Microsoft Graph-E-Mail-Dienst" PluralDescription="Microsoft Graph-E-Mail-Dienste" Gender="m">
+    <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
+    <Member Name="Azure_ClientSecret" Description="Azure Client Secret Value" />
+    <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
+    <Member Name="UseActiveDirectoryConfiguration" Description="Active Directory-Konfiguration verwenden" />
+  </Type>
+  <Type Name="RecipientEmbedded" Description="Empfänger">
+    <Member Name="EmailAddress" Description="E-Mail-Adresse" />
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="RemoteAttachmentEmbedded" Description="Remote-Anhang">
+    <Member Name="ContentId" Description="Content-id" />
+    <Member Name="Id" Description="Id" />
+    <Member Name="IsInline" Description="Ist inline" />
+    <Member Name="LastModifiedDateTime" Description="Letzten-Änderung-Datum" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Size" Description="Größe" />
+  </Type>
+  <Type Name="RemoteEmailFolderModel" Description="Remote-E-Mail-Ordner">
+    <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="FolderId" Description="Ordner-ID" />
+  </Type>
+  <Type Name="RemoteEmailMessageMessage">
+    <Member Name="AddCategory" Description="Kategorie hinzufügen" />
+    <Member Name="ChangingCategories" Description="Wechselnde Kategorien" />
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Deleting" Description="Löschen" />
+    <Member Name="Message" Description="Nachricht" />
+    <Member Name="Messages" Description="Nachrichten" />
+    <Member Name="Move" Description="Verschieben" />
+    <Member Name="Moving" Description="Verschieben" />
+    <Member Name="PleaseConfirmYouWouldLikeToDelete0FromOutlook" Description="Bitte bestätigen Sie, dass Sie {0} aus Outlook löschen möchten." />
+    <Member Name="RemoveCategory" Description="Kategorie entfernen" />
+    <Member Name="SelectAFolder" Description="Wähle einen Ordner aus" />
+    <Member Name="User0HasNoMailbox" Description="Benutzer {0} hat kein Mailbox" />
+    <Member Name="UserFilterNotFound" Description="Benutzerfilter nicht gefunden" />
+  </Type>
+  <Type Name="RemoteEmailMessageModel" Description="Remote-E-Mail-Nachricht">
+    <Member Name="Attachments" Description="Anhänge" />
+    <Member Name="BccRecipients" Description="Bcc-Empfänger" />
+    <Member Name="Body" Description="Körper" />
+    <Member Name="Categories" Description="Kategorien" />
+    <Member Name="CcRecipients" Description="Cc-Empfänger" />
+    <Member Name="CreatedDateTime" Description="Erstellungsdatum" />
+    <Member Name="Extension0" Description="Erweiterung0" />
+    <Member Name="Extension1" Description="Erweiterung1" />
+    <Member Name="Extension2" Description="Erweiterung2" />
+    <Member Name="Extension3" Description="Erweiterung3" />
+    <Member Name="Folder" Description="Ordner" />
+    <Member Name="From" Description="Von" />
+    <Member Name="HasAttachments" Description="Hat Anhänge" />
+    <Member Name="Id" Description="Id" />
+    <Member Name="IsBodyHtml" Description="Ist Körper html" />
+    <Member Name="IsDraft" Description="Ist Entwurf" />
+    <Member Name="IsRead" Description="Wird gelesen" />
+    <Member Name="LastModifiedDateTime" Description="Letzten-Änderung-Datum" />
+    <Member Name="ReceivedDateTime" Description="Empfangsdatum " />
+    <Member Name="SentDateTime" Description="Versanddatum" />
+    <Member Name="Subject" Description="Betreff" />
+    <Member Name="ToRecipients" Description="An-Empfänger" />
+    <Member Name="User" Description="Benutzer" />
+    <Member Name="WebLink" Description="Weblink" />
+  </Type>
+  <Type Name="RemoteEmailMessageQuery">
+    <Member Name="RemoteEmailMessages" Description="Remote-E-Mail-Nachrichten" />
+  </Type>
+</Translations>

@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <SnippetTypes>
+        <SnippetType>SurroundsWith</SnippetType>
+      </SnippetTypes>
+      <Title>SafeConsole.WaitRows</Title>
+      <Author>Signum Framework</Author>
+      <Description>WaitRows</Description>
+      <HelpUrl>
+      </HelpUrl>
+      <Shortcut>wait</Shortcut>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal Editable="true">
+          <ID>def</ID>
+          <ToolTip>
+          </ToolTip>
+          <Default> startingText</Default>
+          <Function>
+          </Function>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp" Delimiter="$"><![CDATA[SafeConsole.WaitRows("$def$", () =>
+    $selected$
+);]]></Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

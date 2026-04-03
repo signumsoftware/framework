@@ -1,0 +1,33 @@
+﻿
+.whatsnewbody{
+    width: 50%;
+    margin: auto;
+}
+
+@media (max-width: 800px) {
+    .whatsnewbody {
+        width: 100% !important;
+        margin: auto;
+    }
+}
+
+.headerpicture {
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.headerpicture-shadow {
+    border: thin solid var(--bs-border-color);
+    padding: 10px;
+    box-shadow: 0 5px 5px 0 var(--bs-box-shadow);
+    transition: box-shadow 0.3s
+}
+
+.whatsnew-image {
+    border: thin solid var(--bs-border-color);
+    padding: 10px;
+    box-shadow: 0 5px 5px 0 var(--bs-box-shadow);
+    transition: box-shadow 0.3s;
+    max-width: 90% !important;
+}

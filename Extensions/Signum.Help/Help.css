@@ -1,0 +1,78 @@
+﻿.import-preview .row-selected {
+  --bs-table-bg: var(--bs-primary-bg-subtle);
+  --bs-table-color: var(--bs-body-color);
+}
+
+.import-preview .no-change {
+  opacity: 0.4;
+  font-style: italic;
+}
+
+ul.responsive-columns {
+  column-width: 360px;
+}
+
+ul.responsive-columns>li {
+    break-inside: avoid-column;
+}
+
+.sf-edit-container:hover .sf-edit-button {
+    color: var(--bs-secondary-text);
+}
+
+.sf-edit-button {
+    color: var(--bs-body-color);
+    font-size: 16px;
+}
+
+.sf-edit-button:hover {
+    color: var(--bs-secondary-text) !important;
+}
+
+.sf-edit-button.active {
+    color: var(--bs-secondary-text) !important;
+}
+
+.sf-edit-button.block {
+    display: block;
+}
+
+.sf-info {
+    opacity: .6;
+}
+
+.sf-no-text {
+    opacity: .3;
+}
+
+.shortcut {
+    opacity: 0;
+    transition: opacity .25s ease-in-out;
+}
+
+.shortcut-container:hover .shortcut {
+    opacity: 1;
+    cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sf-target {
+        background-color: transparent;
+        animation: none;
+    }
+}
+
+.sf-target {
+    animation: target-fade 1s;
+}
+
+@keyframes target-fade {
+    from {
+        background-color: var(--bs-danger);
+    }
+
+    /* [1] */
+    to {
+        background-color: transparent;
+    }
+}

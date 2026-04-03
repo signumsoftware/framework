@@ -1,0 +1,28 @@
+﻿/* 
+    https://github.com/facebookarchive/draft-js/issues/1667 
+*/
+
+.html-editor-line .public-DraftStyleDefault-orderedListItem.public-DraftStyleDefault-depth1:before {
+    counter-increment: ol1;
+    content: counter(ol0)"."counter(ol1)". ";
+}
+
+.html-editor-line .public-DraftStyleDefault-orderedListItem.public-DraftStyleDefault-depth2:before {
+    counter-increment: ol2;
+    content: counter(ol0)"."counter(ol1)"."counter(ol2)". ";
+}
+
+.html-editor-line .public-DraftStyleDefault-orderedListItem.public-DraftStyleDefault-depth3:before {
+    counter-increment: ol3;
+    content: counter(ol0)"."counter(ol1)"."counter(ol2)"."counter(ol3)". ";
+}
+
+.html-editor-line .public-DraftStyleDefault-orderedListItem.public-DraftStyleDefault-depth4:before {
+    counter-increment: ol4;
+    content: counter(ol0)"."counter(ol1)"."counter(ol2)"."counter(ol3)"."counter(ol4)". ";
+}
+
+.html-editor-line .public-DraftStyleDefault-orderedListItem.public-DraftStyleDefault-listLTR:before {
+    width: 76px;
+    left: -80px;
+}

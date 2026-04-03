@@ -1,29 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-	<CodeSnippet Format="1.0.0">
-		<Header>
-			<Title>fieldEuro</Title>
-			<Shortcut>fieldEuro</Shortcut>
-			<Description>Field with decimal amount in euros</Description>
-			<Author>Signum Software</Author>
-			<SnippetTypes>
-				<SnippetType>Expansion</SnippetType>
-			</SnippetTypes>
-		</Header>
-		<Snippet>
-      <Imports>
-        <Import>
-          <Namespace>Signum.Entities</Namespace>
-          <Namespace>Signum.Utilities</Namespace>
-        </Import>
-      </Imports>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>fieldEuro</Title>
+      <Shortcut>fieldEuro</Shortcut>
+      <Description>Field with decimal amount in euros</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
       <Declarations>
-        <Literal>
-          <ID>field</ID>
-          <ToolTip>Field</ToolTip>
-          <Default>amount</Default>
-          <Function></Function>
-        </Literal>
         <Literal>
           <ID>property</ID>
           <ToolTip>Property</ToolTip>
@@ -31,15 +19,11 @@
           <Function></Function>
         </Literal>
       </Declarations>
-			<Code Language="csharp">
-				<![CDATA[decimal $field$;
-        [DecimalsValidatorAttribute, Unit("€")]
-        public decimal $property$
-        {
-            get { return $field$; }
-            set { Set(ref $field$, value); }
-        }$end$]]>
-			</Code>
-		</Snippet>
-	</CodeSnippet>
+      <Code Language="csharp">
+        <![CDATA[
+        [DecimalsValidator, Unit("€")]
+        public decimal $property$ { get; set; }$end$]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>

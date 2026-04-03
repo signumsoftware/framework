@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="EntityAction" Description="Acçao de entidade">
+    <Member Name="Different" Description="Diferentes" />
+    <Member Name="Identical" Description="Identica" />
+    <Member Name="New" Description="Nova" />
+  </Type>
+  <Type Name="IUserAssetEntity">
+    <Member Name="Guid" Description="Guid" />
+  </Type>
+  <Type Name="QueryColumnEmbedded" Description="Coluna de consulta">
+    <Member Name="DisplayName" Description="Nome" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="QueryFilterEmbedded" Description="Filtro de consulta">
+    <Member Name="Operation" Description="Operação" />
+    <Member Name="Token" Description="Token" />
+    <Member Name="ValueString" Description="String de valor" />
+  </Type>
+  <Type Name="QueryOrderEmbedded" Description="Ordem de consulta">
+    <Member Name="OrderType" Description="Tipo de ordem" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="QueryTokenEmbedded" Description="Token de consulta">
+    <Member Name="TokenString" Description="Token string" />
+  </Type>
+  <Type Name="UserAssetMessage">
+    <Member Name="ExportToXml" Description="Exportar a xml" />
+    <Member Name="ImportPreview" Description="Previsualizar importaçao" />
+    <Member Name="ImportUserAssets" Description="Importar recursos de utilizador" />
+    <Member Name="SelectTheEntitiesToOverride" Description="Seleccionar as entidades a substituir" />
+    <Member Name="SucessfullyImported" Description="Correctamente importado" />
+  </Type>
+  <Type Name="UserAssetPermission">
+    <Member Name="UserAssetsToXML" Description="Activos de utilizador em XML" />
+  </Type>
+  <Type Name="UserAssetPreviewLineEmbedded" Description="Linhas de previsualizaçao de activos de utilizador">
+    <Member Name="Action" Description="Acçao" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="OverrideEntity" Description="Substituir entidade" />
+    <Member Name="Text" Description="Texto" />
+    <Member Name="Type" Description="Tipo" />
+  </Type>
+  <Type Name="UserAssetPreviewModel" Description="Previsualizaçao de recursos de utilizador">
+    <Member Name="Lines" Description="Linhas" />
+  </Type>
+</Translations>

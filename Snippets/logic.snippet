@@ -1,77 +1,48 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-	<CodeSnippet Format="1.0.0">
-		<Header>
-			<Title>Logic</Title>
-			<Shortcut>logic</Shortcut>
-			<Description>New logic static class</Description>
-			<Author>Signum Software</Author>
-			<SnippetTypes>
-				<SnippetType>Expansion</SnippetType>
-			</SnippetTypes>
-		</Header>
-		<Snippet>
-      <Imports>
-        <Import>
-          <Namespace>Signum.Engine</Namespace>
-          <Namespace>Signum.Entities</Namespace>
-          <Namespace>Signum.Utilities</Namespace>
-        </Import>
-      </Imports>
-			<Declarations>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Logic</Title>
+      <Shortcut>logic</Shortcut>
+      <Description>New logic static class</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
         <Literal>
           <ID>entityName</ID>
           <ToolTip>Name of the main entity</ToolTip>
           <Default>Foo</Default>
         </Literal>
-         <Literal>
+        <Literal>
           <ID>entityParam</ID>
           <ToolTip>Entity parameter</ToolTip>
           <Default>e</Default>
         </Literal>
-        <Literal>
-          <ID>methodName</ID>
-          <ToolTip>Name of one extension method</ToolTip>
-          <Default>Bla</Default>
-        </Literal>
-			</Declarations>
-			<Code Language="csharp">
-				<![CDATA[public static class $entityName$Logic
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[public static class $entityName$Logic
+{
+    public static void Start(SchemaBuilder sb)
     {
-        static Expression<Func<$entityName$DN, int>> $methodName$Expression = 
-            $entityParam$ => $end$; 
-        public static int $methodName$(this $entityName$DN $entityParam$)
-        {
-            return $methodName$Expression.Evaluate($entityParam$);
-        }
-
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.AlreadyDefined(MethodBase.GetCurrentMethod()))
+		    return;
+        
+        sb.Include<$entityName$Entity>()
+            .WithSave($entityName$Operation.Save)
+            .WithDelete($entityName$Operation.Delete)
+            .WithQuery(() => $entityParam$ => new
             {
-                sb.Include<$entityName$DN>();
-
-                dqm.RegisterQuery(typeof($entityName$DN), ()=>
-                    from $entityParam$ in Database.Query<$entityName$DN>()
-                    select new
-                    {
-                        Entity = $entityParam$,
-                        $entityParam$.Id
-                        //More fields
-                    });
-
-                dqm.RegisterExpression(($entityName$DN $entityParam$) => $entityParam$.$methodName$());
-                
-                new Graph<$entityName$DN>.Execute($entityName$Operation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = ($entityParam$, _)=>{}
-                }.Register();
-            }
-        }
-    }]]>
-			</Code>
-		</Snippet>
-	</CodeSnippet>
+                Entity = $entityParam$,
+                $entityParam$.Id,
+                $entityParam$.$end$
+            });
+    }
+}]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>

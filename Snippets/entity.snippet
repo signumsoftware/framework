@@ -1,42 +1,38 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-	<CodeSnippet Format="1.0.0">
-		<Header>
-			<Title>Entity</Title>
-			<Shortcut>entity</Shortcut>
-			<Description>New Entity</Description>
-			<Author>Signum Software</Author>
-			<SnippetTypes>
-				<SnippetType>Expansion</SnippetType>
-			</SnippetTypes>
-		</Header>
-		<Snippet>
-      <Imports>
-        <Import>
-          <Namespace>Signum.Entities</Namespace>
-          <Namespace>Signum.Utilities</Namespace>
-        </Import>
-      </Imports>
-			<Declarations>
-				<Literal>
-					<ID>entityName</ID>
-					<ToolTip>Name of the Entity</ToolTip>
-					<Default>Foo</Default>
-				</Literal>
-			</Declarations>
-			<Code Language="csharp">
-				<![CDATA[[Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class $entityName$DN: Entity
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Entity</Title>
+      <Shortcut>entity</Shortcut>
+      <Description>New Entity</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>entityName</ID>
+          <ToolTip>Name of the Entity</ToolTip>
+          <Default>Foo</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[[EntityKind(EntityKind.Main, EntityData.Transactional)]
+    public class $entityName$Entity: Entity
     {
        $end$
        
     }
     
+    [AutoInit]
     public static class $entityName$Operation
     {
-        public static readonly ExecuteSymbol<$entityName$DN> Save = OperationSymbol.Execute<$entityName$DN>();
+        public static readonly ExecuteSymbol<$entityName$Entity> Save;
+        public static readonly DeleteSymbol<$entityName$Entity> Delete;
     }]]>
-			</Code>
-		</Snippet>
-	</CodeSnippet>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>

@@ -1,598 +1,469 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities;
-using System.Linq.Expressions;
-using Signum.Utilities;
+using Signum.Engine.Maps;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
-using Signum.Engine;
-using Signum.Engine.Maps;
+using Pgvector;
 
-namespace Signum.Test.Environment
+namespace Signum.Test.Environment;
+
+[EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)),
+    Mixin(typeof(ColaboratorsMixin)), PrimaryKey(typeof(Guid))]
+public class NoteWithDateEntity : Entity
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)), Mixin(typeof(ColaboratorsMixin))]
-    public class NoteWithDateDN : Entity
+    [ForceNullable]
+    [StringLengthValidator(Max = 100)]
+    public string Title { get; set; }
+
+    [StringLengthValidator(Min = 3, MultiLine = true)]
+    public string? Text { get; set; }
+
+    [ForceNullable]
+    [ImplementedByAll]
+    public IEntity Target { get; set; }
+
+    [ImplementedByAll]
+    public Lite<IEntity>? OtherTarget { get; set; }
+
+    public DateTime CreationTime { get; set; }
+
+    public DateOnly CreationDate { get; set; }
+    public DateOnly? ReleaseDate { get; set; }
+
+    public override string ToString()
     {
-        [SqlDbType(Size = int.MaxValue)]
-        string text;
-        [StringLengthValidator(AllowNulls = false, Min = 3)]
-        public string Text
-        {
-            get { return text; }
-            set { SetToStr(ref text, value); }
-        }
+        return "{0} -> {1}".FormatWith(CreationTime, Title);
+    }
+}
 
-        [ImplementedByAll]
-        IIdentifiable target;
-        public IIdentifiable Target
-        {
-            get { return target; }
-            set { Set(ref target, value); }
-        }
+// Just a pattern
+public class ColaboratorsMixin : MixinEntity
+{
+    ColaboratorsMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
-        [ImplementedByAll]
-        Lite<IIdentifiable> otherTarget;
-        public Lite<IIdentifiable> OtherTarget
-        {
-            get { return otherTarget; }
-            set { Set(ref otherTarget, value); }
-        }
+    [NoRepeatValidator]
+    public MList<ArtistEntity> Colaborators { get; set; } = new MList<ArtistEntity>();
+}
 
-        DateTime creationTime;
-        public DateTime CreationTime
-        {
-            get { return creationTime; }
-            set { Set(ref creationTime, value); }
-        }
+[AutoInit]
+public static class NoteWithDateOperation
+{
+    public static ExecuteSymbol<NoteWithDateEntity> Save;
+}
 
-        public override string ToString()
+[DescriptionOptions(DescriptionOptions.All)]
+public interface IAuthorEntity : IEntity
+{
+    string Name { get; }
+
+    AwardEntity? LastAward { get; }
+
+    string FullName { get; }
+
+    bool Lonely();
+}
+
+[EntityKind(EntityKind.Shared, EntityData.Transactional)]
+public class ArtistEntity : Entity, IAuthorEntity
+{
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string Name { get; set; }
+
+    public bool Dead { get; set; }
+
+    public Sex Sex { get; set; }
+
+    public Status? Status { get; set; }
+
+    [AutoExpressionField]
+    public bool IsMale => As.Expression(() => Sex == Sex.Male);
+
+    [ImplementedByAll]
+    public AwardEntity? LastAward { get; set; }
+
+    [AutoExpressionField]
+    public IEnumerable<Lite<Entity>> FriendsCovariant() => As.Expression(() => (IEnumerable<Lite<Entity>>)Friends);
+
+    public MList<Lite<ArtistEntity>> Friends { get; set; } = new MList<Lite<ArtistEntity>>();
+
+    [Ignore, QueryableProperty]
+    [NoRepeatValidator]
+    public MList<AwardNominationEntity> Nominations { get; set; } = new MList<AwardNominationEntity>();
+
+
+    [AutoExpressionField]
+    public string FullName => As.Expression(() => Name + (Dead ? " Dead" : "") + (IsMale ? " Male" : " Female"));
+
+    [AutoExpressionField]
+    public bool Lonely() => As.Expression(() => !Friends.Any());
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Name);
+}
+
+[AutoInit]
+public static class ArtistOperation
+{
+    public static ExecuteSymbol<ArtistEntity> Save;
+    public static ExecuteSymbol<ArtistEntity> AssignPersonalAward;
+}
+
+[Flags]
+public enum Sex : short
+{
+    Male,
+    Female,
+    Undefined
+}
+
+public static class SexExtensions
+{
+    [AutoExpressionField]
+    public static bool IsDefined(this Sex s) => As.Expression(() => s == Sex.Male || s == Sex.Female);
+}
+
+public enum Status
+{
+    Single,
+    Married,
+}
+
+[EntityKind(EntityKind.Main, EntityData.Transactional)]
+public class BandEntity : Entity, IAuthorEntity
+{
+    [UniqueIndex]
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string Name { get; set; }
+
+    public MList<ArtistEntity> Members { get; set; } = new MList<ArtistEntity>();
+
+    [ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity))]
+    public AwardEntity? LastAward { get; set; }
+
+    [ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity))]
+    public MList<AwardEntity> OtherAwards { get; set; } = new MList<AwardEntity>();
+
+    [AutoExpressionField]
+    public string FullName => As.Expression(() => Name + " (" + Members.Count + " members)");
+
+    [AutoExpressionField]
+    public bool Lonely() => As.Expression(() => !Members.Any());
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Name);
+}
+
+[AutoInit]
+public static class BandOperation
+{
+    public static ExecuteSymbol<BandEntity> Save;
+}
+
+[EntityKind(EntityKind.Shared, EntityData.Transactional), PrimaryKey(typeof(long))]
+public abstract class AwardEntity : Entity
+{
+    public int Year { get; set; }
+
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string Category { get; set; }
+
+    public AwardResult Result { get; set; }
+}
+
+[AutoInit]
+public static class AwardOperation
+{
+    public static ExecuteSymbol<AwardEntity> Save;
+}
+
+public enum AwardResult
+{
+    Won,
+    Nominated
+}
+
+public class AwardLiteModel : ModelEntity
+{
+    [StringLengthValidator(Max = 100)]
+    public string Type { get; set; }
+
+    [StringLengthValidator(Max = 100)]
+    public string Category { get; set; }
+
+    public int Year { get; set; }
+
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Category} {Year}");
+}
+
+public class GrammyAwardEntity : AwardEntity
+{
+}
+
+public class AmericanMusicAwardEntity : AwardEntity
+{
+}
+
+public class PersonalAwardEntity : AwardEntity
+{
+}
+
+
+[EntityKind(EntityKind.Main, EntityData.Master)]
+public class LabelEntity : Entity
+{
+    [UniqueIndex]
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string Name { get; set; }
+
+    public CountryEntity Country { get; set; }
+
+    public Lite<LabelEntity>? Owner { get; set; }
+
+    [UniqueIndex]
+    public SqlHierarchyId Node { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Name);
+}
+
+[AutoInit]
+public static class LabelOperation
+{
+    public static ExecuteSymbol<LabelEntity> Save;
+}
+
+[EntityKind(EntityKind.SystemString, EntityData.Master)]
+public class CountryEntity : Entity
+{
+    [UniqueIndex]
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string Name { get; set; }
+
+    public override string ToString()
+    {
+        return Name;
+    }
+}
+
+[EntityKind(EntityKind.Main, EntityData.Transactional)]
+public class AlbumEntity : Entity, ISecretContainer
+{
+    [UniqueIndex]
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string Name { get; set; }
+
+    [NumberBetweenValidator(1900, 2100)]
+    public int Year { get; set; }
+
+    [ImplementedBy(typeof(ArtistEntity), typeof(BandEntity))]
+    public IAuthorEntity Author { get; set; }
+
+    [PreserveOrder]
+    public MList<SongEmbedded> Songs { get; set; } = new MList<SongEmbedded>();
+
+    public SongEmbedded? BonusTrack { get; set; }
+
+    [ForceNullable]
+    public LabelEntity Label { get; set; }
+
+    public AlbumState State { get; set; }
+
+    string? ISecretContainer.Secret { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Name} ({Author})");
+}
+
+public interface ISecretContainer
+{
+    string? Secret { get; set; }
+}
+
+public enum AlbumState
+{
+    [Ignore]
+    New,
+    Saved
+}
+
+[AutoInit]
+public static class AlbumOperation
+{
+    public static ExecuteSymbol<AlbumEntity> Save;
+    public static ExecuteSymbol<AlbumEntity> Modify;
+    public static ConstructSymbol<AlbumEntity>.From<BandEntity> CreateAlbumFromBand;
+    public static DeleteSymbol<AlbumEntity> Delete;
+    public static ConstructSymbol<AlbumEntity>.From<AlbumEntity> Clone;
+    public static ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateGreatestHitsAlbum;
+    public static ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateEmptyGreatestHitsAlbum;
+}
+
+public class SongEmbedded : EmbeddedEntity
+{
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string Name { get; set; }
+
+    TimeSpan? duration;
+    public TimeSpan? Duration
+    {
+        get { return duration; }
+        set
         {
-            return "{0} -> {1}".Formato(creationTime, text);
+            if (Set(ref duration, value))
+                Seconds = duration == null ? null : (int?)duration.Value.TotalSeconds;
         }
     }
 
-    [Serializable] // Just a pattern
-    public class ColaboratorsMixin : MixinEntity
+    public int? Seconds { get; set; }
+
+    public int Index { get; set; }
+
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Name);
+}
+
+[EntityKind(EntityKind.System, EntityData.Transactional)]
+public class AwardNominationEntity : Entity, ICanBeOrdered
+{
+    [NotNullValidator(Disabled = true)]
+    [ImplementedBy(typeof(ArtistEntity), typeof(BandEntity))]
+    public Lite<IAuthorEntity> Author { get; set; }
+
+    [ForceNullable]
+    [LiteModel(typeof(AwardLiteModel), ForEntityType = typeof(GrammyAwardEntity))]
+    [ImplementedBy(typeof(GrammyAwardEntity), typeof(PersonalAwardEntity), typeof(AmericanMusicAwardEntity))]
+    [NotNullValidator(Disabled = true)]
+    public Lite<AwardEntity> Award { get; set; }
+
+    public int Year { get; set; }
+
+    public int Order { get; set; }
+
+    [PreserveOrder]
+    [NoRepeatValidator]
+    public MList<NominationPointEmbedded> Points { get; set; } = new MList<NominationPointEmbedded>();
+}
+
+public class NominationPointEmbedded : EmbeddedEntity
+{
+    public int Point { get; set; }
+}
+
+[EntityKind(EntityKind.Main, EntityData.Transactional)]
+public class ConfigEntity : Entity
+{
+    public EmbeddedConfigEmbedded? EmbeddedConfig { get; set; }
+}
+
+[AutoInit]
+public static class ConfigOperation
+{
+    public static ExecuteSymbol<ConfigEntity> Save;
+}
+
+public class EmbeddedConfigEmbedded : EmbeddedEntity
+{
+    public Lite<LabelEntity>? DefaultLabel { get; set; }
+
+    [NoRepeatValidator]
+    public MList<Lite<GrammyAwardEntity>> Awards { get; set; } = new MList<Lite<GrammyAwardEntity>>();
+}
+
+
+
+public static class MinimumExtensions
+{
+    [SqlMethod(Name = "MinimumTableValued")]
+    public static IQueryable<IntValue> MinimumTableValued(int? a, int? b)
     {
-        ColaboratorsMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
-
-        [NotNullable]
-        MList<ArtistDN> colaborators = new MList<ArtistDN>();
-        [NotNullValidator, NoRepeatValidator]
-        public MList<ArtistDN> Colaborators
-        {
-            get { return colaborators; }
-            set { Set(ref colaborators, value); }
-        }
-    }
-
-    public static class NoteWithDateOperation
-    {
-        public static readonly ExecuteSymbol<NoteWithDateDN> Save = OperationSymbol.Execute<NoteWithDateDN>();
-    }
-
-    [DescriptionOptions(DescriptionOptions.All)]
-    public interface IAuthorDN : IIdentifiable
-    {
-        string Name { get; }
-
-        AwardDN LastAward { get; }
-
-        string FullName { get; }
-
-        bool Lonely();
-    }
-
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
-    public class ArtistDN : Entity, IAuthorDN
-    {
-        [NotNullable, SqlDbType(Size = 100)]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
-
-        bool dead;
-        public bool Dead
-        {
-            get { return dead; }
-            set { Set(ref dead, value); }
-        }
-
-        Sex sex;
-        public Sex Sex
-        {
-            get { return sex; }
-            set { Set(ref sex, value); }
-        }
-
-        Status? status;
-        public Status? Status
-        {
-            get { return status; }
-            set { Set(ref status, value); }
-        }
-
-
-        static Expression<Func<ArtistDN, bool>> IsMaleExpression = a => a.Sex == Sex.Male;
-        public bool IsMale
-        {
-            get { return Sex == Sex.Male; }
-        }
-
-        [ImplementedByAll]
-        AwardDN lastAward;
-        public AwardDN LastAward
-        {
-            get { return lastAward; }
-            set { Set(ref lastAward, value); }
-        }
-
-        static Expression<Func<ArtistDN, IEnumerable<Lite<IdentifiableEntity>>>> FriendsCovariantExpression =
-            a => a.Friends; 
-        public IEnumerable<Lite<IdentifiableEntity>> FriendsCovariant()
-        {
-            return FriendsCovariantExpression.Evaluate(this);
-        }
-
-        //[NotNullable] Do not add Nullable for testing purposes
-        MList<Lite<ArtistDN>> friends = new MList<Lite<ArtistDN>>();
-        public MList<Lite<ArtistDN>> Friends
-        {
-            get { return friends; }
-            set { Set(ref friends, value); }
-        }
-
-        static Expression<Func<ArtistDN, string>> FullNameExpression =
-             a => a.Name + (a.Dead ? " Dead" : "") + (a.IsMale ? " Male" : " Female");
-        public string FullName
-        {
-            get{ return FullNameExpression.Evaluate(this); }
-        }
-
-        static Expression<Func<ArtistDN, bool>> LonelyExpression =
-            a => !a.Friends.Any();
-        public bool Lonely()
-        {
-            return LonelyExpression.Evaluate(this);
-        }
-
-        static Expression<Func<ArtistDN, string>> ToStringExpression = a => a.name;
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
-    }
-
-    public static class ArtistOperation
-    {
-        public static readonly ExecuteSymbol<ArtistDN> Save = OperationSymbol.Execute<ArtistDN>();
-        public static readonly ExecuteSymbol<ArtistDN> AssignPersonalAward = OperationSymbol.Execute<ArtistDN>();
-    }
-
-    [Flags]
-    public enum Sex
-    {
-        Male,
-        Female
-    }
-
-    public enum Status
-    {
-        Single,
-        Married, 
-    }
-
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class BandDN : Entity, IAuthorDN
-    {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
-
-        [NotNullable]
-        MList<ArtistDN> members = new MList<ArtistDN>();
-        public MList<ArtistDN> Members
-        {
-            get { return members; }
-            set { Set(ref members, value); }
-        }
-
-        [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
-        AwardDN lastAward;
-        public AwardDN LastAward
-        {
-            get { return lastAward; }
-            set { Set(ref lastAward, value); }
-        }
-
-        [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN)), NotNullable]
-        MList<AwardDN> otherAwards = new MList<AwardDN>();
-        public MList<AwardDN> OtherAwards 
-        {
-            get { return otherAwards; }
-            set { Set(ref otherAwards, value); }
-        }
-
-        static Expression<Func<BandDN, string>> FullNameExpression =
-            b => b.Name + " (" + b.Members.Count + " members)";
-        public string FullName
-        {
-            get { return FullNameExpression.Evaluate(this); }
-        }
-
-        static Expression<Func<BandDN, bool>> LonelyExpression =
-            b => !b.Members.Any();
-        public bool Lonely()
-        {
-            return LonelyExpression.Evaluate(this);
-        }
-
-        static Expression<Func<BandDN, string>> ToStringExpression = a => a.name;
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
-    }
-
-    public static class BandOperation
-    {
-        public static readonly ExecuteSymbol<BandDN> Save = OperationSymbol.Execute<BandDN>();
-    }
-
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
-    public abstract class AwardDN : Entity
-    {
-        int year;
-        public int Year
-        {
-            get { return year; }
-            set { Set(ref year, value); }
-        }
-
-        [NotNullable, SqlDbType( Size = 100)]
-        string category;
-        [StringLengthValidator(AllowNulls=false, Min = 3, Max = 100)]
-        public string Category
-        {
-            get { return category; }
-            set { Set(ref category, value); }
-        }
-
-        AwardResult result;
-        public AwardResult Result
-        {
-            get { return result; }
-            set { Set(ref result, value); }
-        }
-    }
-
-    public static class AwardOperation
-    {
-        public static readonly ExecuteSymbol<AwardDN> Save = OperationSymbol.Execute<AwardDN>();
-    }
-
-    public enum AwardResult 
-    {
-        Won,
-        Nominated
-    }
-
-    [Serializable]
-    public class GrammyAwardDN : AwardDN
-    {
-    }
-
-    [Serializable]
-    public class AmericanMusicAwardDN : AwardDN
-    {
-    }
-
-    [Serializable]
-    public class PersonalAwardDN : AwardDN
-    {
+        throw new InvalidOperationException("sql only");
     }
 
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class LabelDN : Entity
+    [SqlMethod(Name = "MinimumScalar")]
+    public static int? MinimumScalar(int? a, int? b)
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
-
-        CountryDN country;
-        public CountryDN Country
-        {
-            get { return country; }
-            set { Set(ref country, value); }
-        }
-
-        Lite<LabelDN> owner;
-        public Lite<LabelDN> Owner
-        {
-            get { return owner; }
-            set { Set(ref owner, value); }
-        }
-
-        [UniqueIndex]
-        SqlHierarchyId node;
-        public SqlHierarchyId Node
-        {
-            get { return node; }
-            set { Set(ref node, value); }
-        }
-
-        static Expression<Func<LabelDN, string>> ToStringExpression = a => a.name;
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        throw new InvalidOperationException("sql only");
     }
 
-    public static class LabelOperation
+    internal static void IncludeFunction(SchemaAssets assets)
     {
-        public static readonly ExecuteSymbol<LabelDN> Save = OperationSymbol.Execute<LabelDN>();
-    }
-
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public class CountryDN : Entity
-    {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
+        if (Schema.Current.Settings.IsPostgres)
         {
-            get { return name; }
-            set { SetToStr(ref name, value); }
+            assets.IncludeUserDefinedFunction("MinimumTableValued", @"(p1 integer, p2 integer)
+RETURNS TABLE(min_value integer)
+AS $$
+BEGIN
+RETURN QUERY 
+SELECT Case When p1 < p2 Then p1
+       Else COALESCE(p2, p1) End as MinValue;
+            END
+$$ LANGUAGE plpgsql;");
+
+            assets.IncludeUserDefinedFunction("MinimumScalar", @"(p1 integer, p2 integer)
+RETURNS integer
+AS $$
+BEGIN
+RETURN (Case When p1 < p2 Then p1
+       Else COALESCE(p2, p1) End);
+END
+$$ LANGUAGE plpgsql;");
         }
-
-        public override string ToString()
-        {
-            return name;
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class AlbumDN : Entity, ISecretContainer
-    {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
-
-        int year;
-        [NumberBetweenValidator(1900, 2100)]
-        public int Year
-        {
-            get { return year; }
-            set { Set(ref year, value); }
-        }
-
-        [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
-        IAuthorDN author;
-        [NotNullValidator]
-        public IAuthorDN Author
-        {
-            get { return author; }
-            set { Set(ref author, value); }
-        }
-
-        [NotNullable, PreserveOrder]
-        MList<SongDN> songs = new MList<SongDN>();
-        public MList<SongDN> Songs
-        {
-            get { return songs; }
-            set { Set(ref songs, value); }
-        }
-
-        SongDN bonusTrack;
-        public SongDN BonusTrack
-        {
-            get { return bonusTrack; }
-            set { Set(ref bonusTrack, value); }
-        }
-
-        LabelDN label;
-        public LabelDN Label
-        {
-            get { return label; }
-            set { Set(ref label, value); }
-        }
-
-        AlbumState state;
-        public AlbumState State
-        {
-            get { return state; }
-            set { Set(ref state, value); }
-        }
-
-        string secret;
-        string ISecretContainer.Secret
-        {
-            get { return secret; }
-            set { Set(ref secret, value); }
-        }
-
-        static Expression<Func<AlbumDN, string>> ToStringExpression = a => a.name;
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
-    }
-
-    public interface ISecretContainer
-    {
-        string Secret { get; set; } 
-    }
-
-    [DescriptionOptions(DescriptionOptions.Members)]
-    public enum AlbumState
-    {
-        [Ignore]
-        New,
-        Saved
-    }
-
-    public static class AlbumOperation
-    {
-        public static readonly ExecuteSymbol<AlbumDN> Save = OperationSymbol.Execute<AlbumDN>();
-        public static readonly ExecuteSymbol<AlbumDN> Modify = OperationSymbol.Execute<AlbumDN>();
-        public static readonly ConstructSymbol<AlbumDN>.From<BandDN> CreateAlbumFromBand = OperationSymbol.Construct<AlbumDN>.From<BandDN>();
-        public static readonly DeleteSymbol<AlbumDN> Delete = OperationSymbol.Delete<AlbumDN>();
-        public static readonly ConstructSymbol<AlbumDN>.From<AlbumDN> Clone = OperationSymbol.Construct<AlbumDN>.From<AlbumDN>();
-        public static readonly ConstructSymbol<AlbumDN>.FromMany<AlbumDN> CreateGreatestHitsAlbum = OperationSymbol.Construct<AlbumDN>.FromMany<AlbumDN>();
-        public static readonly ConstructSymbol<AlbumDN>.FromMany<AlbumDN> CreateEmptyGreatestHitsAlbum = OperationSymbol.Construct<AlbumDN>.FromMany<AlbumDN>();
-    }
-
-    [Serializable]
-    public class SongDN : EmbeddedEntity
-    {
-        [NotNullable, SqlDbType(Size = 100)]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
-
-        TimeSpan? duration;
-        public TimeSpan? Duration
-        {
-            get { return duration; }
-            set
-            {
-                if (Set(ref duration, value))
-                    seconds = duration == null ? null : (int?)duration.Value.TotalSeconds;
-            }
-        }
-
-        int? seconds;
-        public int? Seconds
-        {
-            get { return seconds; }
-            set { Set(ref seconds, value); }
-        }
-
-        static Expression<Func<SongDN, string>> ToStringExpression = a => a.name;
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class AwardNominationDN : Entity
-    {
-        [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
-        Lite<IAuthorDN> author;
-        public Lite<IAuthorDN> Author
-        {
-            get { return author; }
-            set { Set(ref author, value); }
-        }
-
-        [ImplementedBy(typeof(GrammyAwardDN), typeof(PersonalAwardDN), typeof(AmericanMusicAwardDN))]
-        Lite<AwardDN> award;
-        public Lite<AwardDN> Award
-        {
-            get { return award; }
-            set { Set(ref award, value); }
-        }
-
-        int year;
-        public int Year
-        {
-            get { return year; }
-            set { Set(ref year, value); }
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class ConfigDN : Entity
-    {
-        EmbeddedConfigDN embeddedConfig;
-        public EmbeddedConfigDN EmbeddedConfig
-        {
-            get { return embeddedConfig; }
-            set { Set(ref embeddedConfig, value); }
-        }
-    }
-
-    public static class ConfigOperation
-    {
-        public static readonly ExecuteSymbol<ConfigDN> Save = OperationSymbol.Execute<ConfigDN>();
-    }
-
-    public class EmbeddedConfigDN : EmbeddedEntity
-    {
-        [NotNullable]
-        MList<Lite<GrammyAwardDN>> awards = new MList<Lite<GrammyAwardDN>>();
-        [NotNullValidator, NoRepeatValidator]
-        public MList<Lite<GrammyAwardDN>> Awards
-        {
-            get { return awards; }
-            set { Set(ref awards, value); }
-        }
-    }
-
-    
-
-    public static class MinimumExtensions
-    {
-        [SqlMethod(Name = "dbo.MinimumTableValued")]
-        public static IQueryable<IntValue> MinimumTableValued(int? a, int? b)
-        {
-            throw new InvalidOperationException("sql only");
-        }
-
-
-        [SqlMethod(Name = "dbo.MinimumScalar")]
-        public static int? MinimumScalar(int? a, int? b)
-        {
-            throw new InvalidOperationException("sql only");
-        }
-
-        internal static void IncludeFunction(SchemaAssets assets)
+        else
         {
             assets.IncludeUserDefinedFunction("MinimumTableValued", @"(@Param1 Integer, @Param2 Integer)
 RETURNS Table As
-RETURN (SELECT Case When @Param1 < @Param2 Then @Param1 
-               Else COALESCE(@Param2, @Param1) End MinValue)");
-
+RETURN (SELECT Case When @Param1 < @Param2 Then @Param1
+           Else COALESCE(@Param2, @Param1) End MinValue)");
 
             assets.IncludeUserDefinedFunction("MinimumScalar", @"(@Param1 Integer, @Param2 Integer)
 RETURNS Integer
 AS
 BEGIN
-   RETURN (Case When @Param1 < @Param2 Then @Param1 
-           Else COALESCE(@Param2, @Param1) End);
+   RETURN (Case When @Param1 < @Param2 Then @Param1
+       Else COALESCE(@Param2, @Param1) End);
 END");
         }
     }
-
-    public class IntValue : IView
-    {
-        public int? MinValue; 
-    }
 }
+
+public class IntValue : IView
+{
+    public int? MinValue;
+}
+
+
+
+[EntityKind(EntityKind.System, EntityData.Transactional)]
+public class FolderEntity : Entity
+{
+    [UniqueIndex]
+    [StringLengthValidator(Max = 100)]
+    public string Name { get; set; }
+
+    public Lite<FolderEntity>? Parent { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Name);
+}
+
+[EntityKind(EntityKind.System, EntityData.Transactional)]
+public class SimplePassageEntity : Entity
+{   
+    public Lite<NoteWithDateEntity> Note { get; set; }
+
+    public bool IsTitle { get; set; }
+
+    [DbType(Size = 768), QueryableProperty(false)]
+    public Vector? Embedding { get; set; }
+
+    [StringLengthValidator(Max = int.MaxValue)]
+    public string Chunk { get; set; }
+
+    public int Index { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Note.ToString()!);
+}
+

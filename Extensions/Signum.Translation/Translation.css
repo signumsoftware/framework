@@ -1,0 +1,78 @@
+﻿.status-None {
+    color: var(--bs-danger);
+}
+
+.status-Pending {
+    color: var(--bs-warning);
+}
+
+.status-Completed {
+    color: var(--bs-success);
+}
+
+
+table.st {
+    margin: 20px;
+    text-align: left;
+}
+
+table.st th {
+    border-top: 1px solid var(--bs-border-color);
+    background: var(--bs-secondary-bg-subtle);
+    color: var(--bs-secondary);
+    font-size: 13px;
+    font-weight: normal;
+    padding: 4px;
+}
+
+table.st td {
+    background: var(--bs-secondary-bg-subtle);
+    border-top: 1px solid var(--bs-border-color);
+    color: var(--bs-secondary);
+    padding: 4px;
+}
+
+table.st select,
+table.st textarea {
+    vertical-align: middle;
+}
+
+table.st thead th {
+    background: var(--bs-secondary-bg-subtle);
+}
+
+table.st .leftCell {
+    font-weight: bold;
+    width: 1px;
+    text-align: right;
+}
+
+table.st .smallCell {
+    text-align: right;
+    width: 1px;
+}
+
+table.st .titleCell {
+    font-weight: bold;
+}
+
+table.st .monospaceCell {
+    font-family: monospace;
+    font-size: 14px;
+}
+
+table.st .monospaceCell pre {
+    padding: 0px;
+    color: var(--bs-secondary);
+    background-color: transparent;
+    border: none;
+    font-size: 14px;
+}
+
+.auto-translate {
+    font-size: small;
+}
+
+.auto-translate-all {
+    font-size: smaller;
+}

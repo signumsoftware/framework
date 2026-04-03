@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="TimeMachineMessage">
+    <Member Name="CompareVersions" Description="Comparar versiones" />
+    <Member Name="EntityDeleted" Description="[Entidad eliminada]" />
+    <Member Name="TimeMachine" Description="Máquina del tiempo" />
+  </Type>
+  <Type Name="TimeMachinePermission">
+    <Member Name="ShowTimeMachine" Description="Mostrar máquina del tiempo" />
+  </Type>
+</Translations>

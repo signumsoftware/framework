@@ -1,33 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
 
-namespace Signum.Utilities.DataStructures
+namespace Signum.Utilities.DataStructures;
+
+public class HashSetComparer<T> : IEqualityComparer<HashSet<T>>, IEqualityComparer
 {
-    [Serializable]
-    public class HashSetComparer<T> : IEqualityComparer<HashSet<T>>, IEqualityComparer
+    public bool Equals(HashSet<T>? x, HashSet<T>? y)
     {
-        public bool Equals(HashSet<T> x, HashSet<T> y)
-        {
-            return x.SetEquals(y);
-        }
+        if (x == null && y == null)
+            return true;
 
-        public int GetHashCode(HashSet<T> obj)
-        {
-            var comparer = obj.Comparer;
-            return obj.Aggregate(0, (acum, o) => acum ^ comparer.GetHashCode(o));
-        }
+        if (x == null || y == null)
+            return false;
 
-        bool IEqualityComparer.Equals(object x, object y)
-        {
-            return Equals((HashSet<T>)x, (HashSet<T>)y);
-        }
+        return x.SetEquals(y);
+    }
 
-        int IEqualityComparer.GetHashCode(object obj)
-        {
-            return GetHashCode((HashSet<T>)obj); 
-        }
+    public int GetHashCode(HashSet<T> obj)
+    {
+        var comparer = obj.Comparer;
+        return obj.Aggregate(0, (acum, o) => acum ^ (o == null ? 0 : comparer.GetHashCode(o)));
+    }
+
+    bool IEqualityComparer.Equals(object? x, object? y)
+    {
+        return Equals((HashSet<T>)x!, (HashSet<T>)y!);
+    }
+
+    int IEqualityComparer.GetHashCode(object? obj)
+    {
+        return GetHashCode((HashSet<T>)obj!);
     }
 }

@@ -1,0 +1,80 @@
+import { $applyNodeReplacement, DecoratorNode, DOMConversion, DOMConversionMap, DOMConversionOutput, DOMExportOutput, EditorConfig, LexicalEditor, NodeKey } from "lexical";
+import { ImageHandlerBase, ImageInfo } from "./ImageHandlerBase";
+import { ReactElement } from "react";
+
+// Pseudo-abstract base class.
+// Should be subclassed by concrete nodes that implement getType, clone, and importJSON.
+export class ImageNode extends DecoratorNode<React.ReactElement> {
+
+  static override getType(): string {
+    return "image";
+  }
+
+  constructor(public imageInfo: ImageInfo, key?: NodeKey) {
+    super(key);
+  }
+
+  override createDOM(): HTMLElement {
+    return document.createElement("div");
+  }
+
+  override updateDOM(): boolean {
+    return false;
+  }
+
+  override decorate(editor: LexicalEditor, config: EditorConfig): ReactElement {
+    return editor.imageHandler!.renderImage(this.imageInfo);
+  }
+
+  override exportJSON(): any {
+    return {
+      type: "image",
+      uploadedFile: this.imageInfo,
+      version: 1
+    }
+  }
+
+  override exportDOM(editor: LexicalEditor): DOMExportOutput {
+    const element = editor.imageHandler!.toElement(this.imageInfo) ?? null;
+    return { element: element };
+  }
+
+  static currentHandler: ImageHandlerBase | undefined; //Hack but the is no way to acces the editor in importDOM, at least is sync.
+
+  static override importDOM(): DOMConversionMap | null {
+    return {
+      img: (domNode: HTMLElement) => {
+        return {
+          priority: 1,
+          conversion: (element: HTMLElement) => {
+            try {
+              if (this.currentHandler == null)
+                throw new Error("currentHandler not set");
+
+              const info = this.currentHandler!.fromElement(element);
+              if (!info) return null;
+              return { node: new this(info) };
+            } catch {
+              return null;
+            }
+          },
+        };
+      },
+    };
+  }
+  
+  static override clone(node: ImageNode): ImageNode {
+    return new ImageNode(node.imageInfo, node.__key);
+  }
+
+  static override importJSON(serializedNode: any): ImageNode {
+    // Handle both direct ImageInfo and the wrapped format from exportJSON
+    const imageInfo = serializedNode.uploadedFile ?? serializedNode;
+    return new ImageNode(imageInfo);
+  }
+}
+
+export function $createImageNode(file: ImageInfo, nodeType: typeof ImageNode): ImageNode {
+  const node = new nodeType(file);
+  return $applyNodeReplacement(node);
+}

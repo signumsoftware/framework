@@ -1,323 +1,399 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Signum.Utilities;
-using Signum.Engine;
-using Signum.Entities;
-using Signum.Entities.Reflection;
-using Signum.Engine.Operations;
-using Signum.Test.Environment;
+namespace Signum.Test;
 
-namespace Signum.Test
+public class SaveTest
 {
-    [TestClass]
-    public class SaveTest
+    public SaveTest()
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        MusicStarter.StartAndLoad();
+        Connector.CurrentLogger = new DebugTextWriter();
+    }
+
+    [Fact]
+    public void SaveCycle()
+    {
+        using (var tr = new Transaction())
+        using (OperationLogic.AllowSave<ArtistEntity>())
         {
-            Starter.StartAndLoad();
+            ArtistEntity m = new ArtistEntity() { Name = "Michael" };
+            ArtistEntity f = new ArtistEntity() { Name = "Frank" };
+            m.Friends.Add(f.ToLiteFat());
+            f.Friends.Add(m.ToLiteFat());
+
+            Database.SaveParams(m, f);
+
+            var list = Database.Query<ArtistEntity>().Where(a => a.Is(m) || a.Is(f)).ToList();
+
+            Assert.Contains(list[1].ToLite(), list[0].Friends);
+            Assert.Contains(list[0].ToLite(), list[1].Friends);
+
+            //tr.Commit();
         }
 
-        [TestInitialize]
-        public void Initialize()
+    }
+
+    [Fact]
+    public void SaveSelfCycle()
+    {
+        using (var tr = new Transaction())
+        using (OperationLogic.AllowSave<ArtistEntity>())
         {
-            Connector.CurrentLogger = new DebugTextWriter();
+            ArtistEntity m = new ArtistEntity() { Name = "Michael" };
+            m.Friends.Add(m.ToLiteFat());
+
+            m.Save();
+
+            var m2 = m.ToLite().Retrieve();
+
+            Assert.Contains(m2.ToLite(), m2.Friends);
+
+            //tr.Commit();
         }
 
-        [TestMethod]
-        public void SaveCycle()
+    }
+
+    [Fact]
+    public void SaveMany()
+    {
+        using (var tr = new Transaction())
+        using (OperationLogic.AllowSave<ArtistEntity>())
         {
-            using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<ArtistDN>())
+            var prev =  Database.Query<ArtistEntity>().Count();
+
+            Type[] types = typeof(int).Assembly.GetTypes().Where(a => a.Name.Length > 3 && a.Name.StartsWith("A")).ToArray();
+
+            var list = types.Select(t => new ArtistEntity() { Name = t.Name }).ToList();
+
+            list.SaveList();
+
+            Assert.Equal(prev + types.Length, Database.Query<ArtistEntity>().Count());
+
+            list.ForEach(a => a.Name += "Updated");
+
+            list.SaveList();
+
+            //tr.Commit();
+        }
+    }
+
+    [Fact]
+    public void SaveMList()
+    {
+        using (var tr = new Transaction())
+        using (OperationLogic.AllowSave<LabelEntity>())
+        using (OperationLogic.AllowSave<CountryEntity>())
+        using (OperationLogic.AllowSave<AlbumEntity>())
+        using (OperationLogic.AllowSave<ArtistEntity>())
+        {
+            var prev = Database.MListQuery((AlbumEntity a) => a.Songs).Count();
+
+            Type[] types = typeof(int).Assembly.GetTypes().Where(a => a.Name.Length > 3 && a.Name.StartsWith("A")).ToArray();
+
+            AlbumEntity album = new AlbumEntity()
             {
-                ArtistDN m = new ArtistDN() { Name = "Michael" };
-                ArtistDN f = new ArtistDN() { Name = "Frank" };
-                m.Friends.Add(f.ToLiteFat());
-                f.Friends.Add(m.ToLiteFat());
+                Name = "System Greatest hits",
+                Author = new ArtistEntity { Name = ".Net Framework" },
+                Year = 2001,
+                Songs = types.Select(t => new SongEmbedded() { Name = t.Name }).ToMList(),
+                State = AlbumState.Saved,
+                Label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany"}, Node = MusicLoader.NextLabelNode() },
+            }.Save();
 
-                Database.SaveParams(m, f);
+            Assert.All(GraphExplorer.FromRoot(album), a => Assert.False(a.IsGraphModified));
 
-                var list = Database.Query<ArtistDN>().Where(a => a == m || a == f).ToList();
+            Assert.Equal(prev + types.Length, Database.MListQuery((AlbumEntity a) => a.Songs).Count());
 
-                Assert.IsTrue(list[0].Friends.Contains(list[1].ToLite()));
-                Assert.IsTrue(list[1].Friends.Contains(list[0].ToLite()));
+            album.Name += "Updated";
 
-                //tr.Commit();
+            album.Save();
+
+            album.Songs.ForEach(a => a.Name = "Updated");
+
+            album.Save();
+
+            //tr.Commit();
+        }
+    }
+
+
+    [Fact]
+    public void SmartSaveMList()
+    {
+        using (var tr = new Transaction())
+        using (OperationLogic.AllowSave<LabelEntity>())
+        using (OperationLogic.AllowSave<CountryEntity>())
+        using (OperationLogic.AllowSave<AlbumEntity>())
+        using (OperationLogic.AllowSave<ArtistEntity>())
+        {
+            var maxRowId = Database.MListQuery((AlbumEntity a) => a.Songs).Max(a => a.RowId);
+
+            var artist = Database.Query<ArtistEntity>().First();
+
+            var album = new AlbumEntity
+            {
+                Name = "Test album",
+                Author = artist,
+                Year = 2000,
+                Songs = { new SongEmbedded { Name = "Song 1" } },
+                State = AlbumState.Saved,
+                Label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany" }, Node = MusicLoader.NextLabelNode() },
+            };
+
+            var innerList = ((IMListPrivate<SongEmbedded>)album.Songs).InnerList;
+
+            Assert.Null(innerList[0].RowId);
+            //Insert and row-id is set
+            album.Save();
+            Assert.NotNull(innerList[0].RowId);
+            Assert.True(innerList[0].RowId > maxRowId);
+
+
+            album.Songs.Add(new SongEmbedded { Name = "Song 2" });
+
+            Assert.Null(innerList[1].RowId);
+
+            album.Save();
+            //Insert and row-id is set
+            Assert.NotNull(innerList[1].RowId);
+
+            var song = innerList[0];
+
+            album.Songs.Remove(song.Element);
+            //Delete
+            album.Save();
+
+            {
+                var album2 = album.ToLite().RetrieveAndRemember();
+
+                Assert.True(album.Songs.Count == album2.Songs.Count);
+                Assert.True(innerList[0].RowId == ((IMListPrivate<SongEmbedded>)album2.Songs).InnerList[0].RowId);
+                Assert.True(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
             }
 
-        }
+            album.Songs[0].Name += "*";
+            //Update
+            album.Save();
 
-        [TestMethod]
-        public void SaveSelfCycle()
-        {
-            using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<ArtistDN>())
             {
-                ArtistDN m = new ArtistDN() { Name = "Michael" };
-                m.Friends.Add(m.ToLiteFat());
+                var album2 = album.ToLite().RetrieveAndRemember();
 
-                m.Save();
-
-                var m2 = m.ToLite().RetrieveAndForget();
-
-                Assert.IsTrue(m2.Friends.Contains(m2.ToLite()));
-
-                //tr.Commit();
+                Assert.True(album.Songs.Count == album2.Songs.Count);
+                Assert.True(innerList[0].RowId == ((IMListPrivate<SongEmbedded>)album2.Songs).InnerList[0].RowId);
+                Assert.True(album.Songs[0].Name == album2.Songs[0].Name);
+                Assert.True(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
             }
 
+            //tr.Commit();
+        }
+    }
+
+    [Fact]
+    public void SmartSaveMListOrder()
+    {
+        using (var tr = new Transaction())
+        using (OperationLogic.AllowSave<LabelEntity>())
+        using (OperationLogic.AllowSave<CountryEntity>())
+        using (OperationLogic.AllowSave<AlbumEntity>())
+        using (OperationLogic.AllowSave<ArtistEntity>())
+        {
+            var artist = Database.Query<ArtistEntity>().First();
+
+            var album = new AlbumEntity
+            {
+                Name = "Test album",
+                Author = artist,
+                Year = 2000,
+                Songs = { new SongEmbedded { Name = "Song 0" }, new SongEmbedded { Name = "Song 1" }, new SongEmbedded { Name = "Song 2" }, },
+                State = AlbumState.Saved,
+                Label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany" }, Node = MusicLoader.NextLabelNode() },
+            };
+
+            album.Save();
+
+            AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.RowOrder).Select(mle => KeyValuePair.Create(mle.RowOrder, mle.Element.Name)),
+                new Dictionary<int, string> { { 0, "Song 0" }, { 1, "Song 1" }, { 2, "Song 2" } });
+
+            var ids = album.MListElements(a => a.Songs).Select(a => a.RowId).ToHashSet();
+
+            album.Songs.SortDescending(a => a.Name);
+
+            album.Save();
+
+            var ids2 = album.MListElements(a => a.Songs).Select(a => a.RowId).ToHashSet();
+
+            AssertSequenceEquals(ids.OrderBy(), ids2.OrderBy());
+
+
+            AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.RowOrder).Select(mle => KeyValuePair.Create(mle.RowOrder, mle.Element.Name)),
+                new Dictionary<int, string> { { 0, "Song 2" }, { 1, "Song 1" }, { 2, "Song 0" } });
+
+
+            var s3 = album.Songs[0];
+
+            album.Songs.RemoveAt(0);
+
+            album.Songs.Insert(1, s3);
+
+            album.Save();
+
+            AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.RowOrder).Select(mle => KeyValuePair.Create(mle.RowOrder, mle.Element.Name)),
+                new Dictionary<int, string> { { 0, "Song 1" }, { 1, "Song 2" }, { 2, "Song 0" } });
+
+            AssertSequenceEquals(album.ToLite().RetrieveAndRemember().Songs.Select(a => a.Name), new[] { "Song 1", "Song 2", "Song 0" });
+
+            //tr.Commit();
+        }
+    }
+
+    static void AssertSequenceEquals<T>(IEnumerable<T> one, IEnumerable<T> two)
+    {
+        Assert.True(one.SequenceEqual(two));
+    }
+
+    [Fact]
+    public void SaveManyMList()
+    {
+        using (var tr = new Transaction())
+        using (OperationLogic.AllowSave<LabelEntity>())
+        using (OperationLogic.AllowSave<CountryEntity>())
+        using (OperationLogic.AllowSave<AlbumEntity>())
+        using (OperationLogic.AllowSave<ArtistEntity>())
+        {
+            var prev = Database.MListQuery((AlbumEntity a) => a.Songs).Count();
+
+            var authors =
+                Database.Query<BandEntity>().Take(6).ToList().Concat<IAuthorEntity>(
+                Database.Query<ArtistEntity>().Take(8).ToList()).ToList();
+
+            var label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany" }, Node = MusicLoader.NextLabelNode() };
+
+            List<AlbumEntity> albums = 0.To(16).Select(i => new AlbumEntity()
+            {
+                Name = "System Greatest hits {0}".FormatWith(i),
+                Author = i < authors.Count ? authors[i] : new ArtistEntity { Name = ".Net Framework" },
+                Year = 2001,
+                Songs = { new SongEmbedded { Name = "Compilation {0}".FormatWith(i) } },
+                State = AlbumState.Saved,
+                Label = label,
+            }).ToList();
+
+            albums.SaveList();
+
+            Assert.All(GraphExplorer.FromRoots(albums), a => Assert.False(a.IsGraphModified));
+
+            Assert.Equal(prev + 16, Database.MListQuery((AlbumEntity a) => a.Songs).Count());
+
+            albums.ForEach(a => a.Name += "Updated");
+
+            albums.SaveList();
+
+            albums.ForEach(a => a.Songs.ForEach(s => s.Name = "Updated"));
+
+            albums.SaveList();
+
+            //tr.Commit();
         }
 
-        [TestMethod]
-        public void SaveMany()
+    }
+
+    [Fact]
+    public void RetrieveSealed()
+    {
+        using (var tr = new Transaction())
+        using (new EntityCache(EntityCacheType.ForceNewSealed))
         {
-            using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<ArtistDN>())
-            {
-                var prev =  Database.Query<ArtistDN>().Count();
+            var albums = Database.Query<AlbumEntity>().ToList();
 
-                Type[] types = typeof(int).Assembly.GetTypes().Where(a => a.Name.Length > 3 && a.Name.StartsWith("A")).ToArray();
+            Assert.All(GraphExplorer.FromRoots(albums), a => Assert.Equal(ModifiedState.Sealed, a.Modified));
 
-                var list = types.Select(t => new ArtistDN() { Name = t.Name }).ToList();
+            var e = Assert.Throws<InvalidOperationException>(() => albums.First().Name = "New name");
+            Assert.Contains("sealed", e.Message);
 
-                list.SaveList();
+            var notes = Database.Query<NoteWithDateEntity>().ToList();
+            Assert.All(GraphExplorer.FromRoots(notes), a => Assert.Equal(ModifiedState.Sealed,  a.Modified));
 
-                Assert.AreEqual(prev + types.Length, Database.Query<ArtistDN>().Count());
-
-                list.ForEach(a => a.Name += "Updated");
-
-                list.SaveList();
-
-                //tr.Commit();
-            }
+            //tr.Commit();
         }
+    }
 
-        [TestMethod]
-        public void SaveMList()
+
+
+    [Fact]
+    public void BulkInsertWithMList()
+    {
+        using (var tr = new Transaction())
         {
-            using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<AlbumDN>())
-            using (OperationLogic.AllowSave<ArtistDN>())
+            var max = Database.Query<AlbumEntity>().Select(a => a.Id).ToList().Max();
+            var count = Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count();
+
+            var list = Database.Query<AlbumEntity>().ToList().Select(a => new AlbumEntity
             {
-                var prev = Database.MListQuery((AlbumDN a) => a.Songs).Count();
-
-                Type[] types = typeof(int).Assembly.GetTypes().Where(a => a.Name.Length > 3 && a.Name.StartsWith("A")).ToArray();
-
-                AlbumDN album = new AlbumDN()
+                Name = "Copy of " + a.Name,
+                Author = a.Author,
+                Label = a.Label,
+                State = a.State,
+                Year = a.Year,
+                Songs = a.Songs.Select(s => new SongEmbedded
                 {
-                    Name = "System Greatest hits",
-                    Author = new ArtistDN { Name = ".Net Framework" },
-                    Year = 2001,
-                    Songs = types.Select(t => new SongDN() { Name = t.Name }).ToMList(),
-                    State = AlbumState.Saved
-                }.Save();
+                    Name = s.Name,
+                    Seconds = s.Seconds,
+                }).ToMList()
+            }).ToList();
 
-                Assert2.AssertAll(GraphExplorer.FromRoot(album), a => !a.IsGraphModified);
+            list.BulkInsertQueryIds(keySelector: a => a.Name, isNewPredicate: a => a.Id > max);
 
-                Assert.AreEqual(prev + types.Length, Database.MListQuery((AlbumDN a) => a.Songs).Count());
+            Assert.NotEqual(count, Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count());
 
-                album.Name += "Updated";
+            Database.Query<AlbumEntity>().Where(a => a.Id > max).UnsafeDelete();
 
-                album.Save();
+            Assert.Equal(count, Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count());
 
-                album.Songs.ForEach(a => a.Name = "Updated");
-
-                album.Save();
-
-                //tr.Commit();
-            }
+            //tr.Commit();
         }
+    }
 
 
-        [TestMethod]
-        public void SmartSaveMList()
+    [Fact]
+    public void BulkInsertTable()
+    {
+        using (var tr = new Transaction())
         {
-            using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<AlbumDN>())
-            using (OperationLogic.AllowSave<ArtistDN>())
+            var max = Database.Query<FolderEntity>().Select(a => (int?)a.Id).ToList().Max();
+
+            var list = Database.Query<AlbumEntity>().Select(a => new FolderEntity
             {
-                var maxRowId = Database.MListQuery((AlbumDN a) => a.Songs).Max(a => a.RowId);
+                Name = "Folder for " + a.Name,
+            }).ToList();
 
-                var artist = Database.Query<ArtistDN>().First();
+            BulkInserter.BulkInsertTable(list);
 
-                var album = new AlbumDN
-                {
-                    Name = "Test album",
-                    Author = artist,
-                    Year = 2000,
-                    Songs = { new SongDN { Name = "Song 1" } },
-                    State = AlbumState.Saved,
-                };
+            Database.Query<FolderEntity>().Where(a => max == null || a.Id > max).UnsafeDelete();
 
-                var innerList = ((IMListPrivate<SongDN>)album.Songs).InnerList;
-
-                Assert.IsNull(innerList[0].RowId);
-                //Insert and row-id is set
-                album.Save();
-                Assert.IsNotNull(innerList[0].RowId);
-                Assert.IsTrue(innerList[0].RowId > maxRowId); 
-
-
-                album.Songs.Add(new SongDN { Name = "Song 2" });
-
-                Assert.IsNull(innerList[1].RowId);
-
-                album.Save();
-                //Insert and row-id is set
-                Assert.IsNotNull(innerList[1].RowId);
-
-                var song = innerList[0];
-
-                album.Songs.Remove(song.Value);
-                //Delete
-                album.Save();
-
-                {
-                    var album2 = album.ToLite().Retrieve();
-
-                    Assert.IsTrue(album.Songs.Count == album2.Songs.Count);
-                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongDN>)album2.Songs).InnerList[0].RowId);
-                    Assert.IsTrue(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
-                }
-
-                album.Songs[0].Name += "*";
-                //Update
-                album.Save();
-
-                {
-                    var album2 = album.ToLite().Retrieve();
-                    
-                    Assert.IsTrue(album.Songs.Count == album2.Songs.Count);
-                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongDN>)album2.Songs).InnerList[0].RowId);
-                    Assert.IsTrue(album.Songs[0].Name == album2.Songs[0].Name);
-                    Assert.IsTrue(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
-                }
-
-                //tr.Commit();
-            }
+            //tr.Commit();
         }
 
-        [TestMethod]
-        public void SmartSaveMListOrder()
+    }
+
+
+    [Fact]
+    public void BulkInsertMList()
+    {
+        using (var tr = new Transaction())
         {
-            using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<AlbumDN>())
-            using (OperationLogic.AllowSave<ArtistDN>())
+            var max = Database.MListQuery((AlbumEntity a) => a.Songs).Max(a => a.RowId);
+
+            var list = Database.Query<AlbumEntity>().Select(a => new MListElement<AlbumEntity, SongEmbedded>
             {
-                var artist = Database.Query<ArtistDN>().First();
+                Parent = a,
+                Element = new SongEmbedded { Duration = TimeSpan.FromMinutes(1), Name = "Bonus - " + a.Name },
+                RowOrder = 100,
+            }).ToList();
 
-                var album = new AlbumDN
-                {
-                    Name = "Test album",
-                    Author = artist,
-                    Year = 2000,
-                    Songs = { new SongDN { Name = "Song 0" }, new SongDN { Name = "Song 1" }, new SongDN { Name = "Song 2" }, },
-                    State = AlbumState.Saved,
-                };
+            list.BulkInsertMListTable( a => a.Songs);
 
-                album.Save();
+            Database.MListQuery((AlbumEntity a) => a.Songs).Where(a => a.RowId > max).UnsafeDeleteMList();
 
-                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a=>a.Order).Select(mle => KVP.Create(mle.Order, mle.Element.Name)),
-                    new Dictionary<int, string> { { 0, "Song 0" }, { 1, "Song 1" }, { 2, "Song 2" } });
-
-                var ids = album.MListElements(a => a.Songs).Select(a => a.RowId).ToHashSet();
-
-                album.Songs.SortDescending(a => a.Name);
-
-                album.Save();
-
-                var ids2 = album.MListElements(a => a.Songs).Select(a => a.RowId).ToHashSet();
-
-                AssertSequenceEquals(ids.OrderBy(), ids2.OrderBy());
-
-
-                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.Order).Select(mle => KVP.Create(mle.Order, mle.Element.Name)),
-                    new Dictionary<int, string> { { 0, "Song 2" }, { 1, "Song 1" }, { 2, "Song 0" } });
-
-
-                var s3 = album.Songs[0];
-
-                album.Songs.RemoveAt(0);
-
-                album.Songs.Insert(1, s3);
-
-                album.Save();
-
-                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.Order).Select(mle => KVP.Create(mle.Order, mle.Element.Name)),
-                    new Dictionary<int, string> { { 0, "Song 1" }, { 1, "Song 2" }, { 2, "Song 0" } });
-
-                AssertSequenceEquals(album.ToLite().Retrieve().Songs.Select(a => a.Name), new[] { "Song 1", "Song 2", "Song 0" });
-
-                 //tr.Commit();
-            }
+            //tr.Commit();
         }
 
-        void AssertSequenceEquals<T>(IEnumerable<T> one, IEnumerable<T> two)
-        {
-            Assert.IsTrue(one.SequenceEqual(two));
-        }
-
-        [TestMethod]
-        public void SaveManyMList()
-        {
-            using (Transaction tr = new Transaction())
-            using (OperationLogic.AllowSave<AlbumDN>())
-            using (OperationLogic.AllowSave<ArtistDN>())
-            {
-                var prev = Database.MListQuery((AlbumDN a) => a.Songs).Count();
-
-                var authors = 
-                    Database.Query<BandDN>().Take(6).ToList().Concat<IAuthorDN>(
-                    Database.Query<ArtistDN>().Take(8).ToList()).ToList();
-
-                List<AlbumDN> albums = 0.To(16).Select(i => new AlbumDN()
-                {
-                    Name = "System Greatest hits {0}".Formato(i),
-                    Author = i < authors.Count ? authors[i] : new ArtistDN { Name = ".Net Framework" },
-                    Year = 2001,
-                    Songs =  { new SongDN { Name = "Compilation {0}".Formato(i) }},
-                    State = AlbumState.Saved
-                }).ToList();
-
-                albums.SaveList();
-
-                Assert2.AssertAll(GraphExplorer.FromRoots(albums), a => !a.IsGraphModified);
-
-                Assert.AreEqual(prev + 16, Database.MListQuery((AlbumDN a) => a.Songs).Count());
-
-                albums.ForEach(a => a.Name += "Updated");
-
-                albums.SaveList();
-
-                albums.ForEach(a => a.Songs.ForEach(s => s.Name = "Updated"));
-
-                albums.SaveList();
-
-                //tr.Commit();
-            }
-
-        }
-        
-        [TestMethod]
-        public void RetrieveSealed()
-        {
-            using (Transaction tr = new Transaction())
-            using (new EntityCache(EntityCacheType.ForceNewSealed))
-            {
-                var albums = Database.Query<AlbumDN>().ToList();
-
-                Assert2.AssertAll(GraphExplorer.FromRoots(albums), a => a.Modified == ModifiedState.Sealed);
-
-                Assert2.Throws<InvalidOperationException>("sealed", () => albums.First().Name = "New name");
-
-
-                var notes = Database.Query<NoteWithDateDN>().ToList();
-                Assert2.AssertAll(GraphExplorer.FromRoots(notes), a => a.Modified == ModifiedState.Sealed);
-
-                //tr.Commit();
-            }
-        }
     }
 }

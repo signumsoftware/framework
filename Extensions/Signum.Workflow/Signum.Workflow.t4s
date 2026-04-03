@@ -1,0 +1,12 @@
+interface IWorkflowTimerConditionEvaluator {}
+interface IWorkflowConditionEvaluator {}
+interface IWorkflowActionExecutor {}
+interface IWorkflowLaneActorsEvaluator {}
+interface ISubEntitiesEvaluator{}
+interface IWorkflowScriptExecutor{}
+interface IWorkflowEventTaskConditionEvaluator{}
+interface IWorkflowEventTaskActionEval{}
+
+export interface WorkflowEntitiesDictionary {
+    [bpmnElementId: string]: Entities.ModelEntity
+}

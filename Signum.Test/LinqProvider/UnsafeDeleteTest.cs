@@ -1,115 +1,127 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Signum.Engine;
-using Signum.Entities;
-using System.Diagnostics;
-using System.IO;
-using Signum.Utilities;
-using Signum.Test.Environment;
-using System.Data.SqlClient;
+﻿
+namespace Signum.Test.LinqProviderUpdateDelete;
 
-namespace Signum.Test.LinqProviderUpdateDelete
+/// <summary>
+/// Summary description for LinqProvider
+/// </summary>
+public class UnsafeDeleteTest
 {
-    /// <summary>
-    /// Summary description for LinqProvider
-    /// </summary>
-    [TestClass]
-    public class UnsafeDeleteTest
+    public UnsafeDeleteTest()
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        MusicStarter.StartAndLoad();
+        Connector.CurrentLogger = new DebugTextWriter();
+    }
+
+    [Fact]
+    public void DeleteAll()
+    {
+        using (var tr = new Transaction())
         {
-            Starter.StartAndLoad();
+            int count = Database.Query<AlbumEntity>().UnsafeDelete();
+
+            //tr.Commit();
         }
 
+    }
 
-        [TestInitialize]
-        public void Initialize()
+    [Fact]
+    public void Delete()
+    {
+        using (var tr = new Transaction())
         {
-            Connector.CurrentLogger = new DebugTextWriter();
+            int count = Database.Query<AlbumEntity>().Where(a => a.Year < 1990).UnsafeDelete();
+
+            //tr.Commit();
+        }
+    }
+
+    [Fact]
+    public void DeleteChunks()
+    {
+        using (var tr = new Transaction())
+        {
+            int count = Database.Query<AlbumEntity>().UnsafeDeleteChunks(2);
+
+            //tr.Commit();
+        }
+    }
+
+    [Fact]
+    public void DeleteJoin()
+    {
+        using (var tr = new Transaction())
+        {
+            int count = Database.Query<AlbumEntity>().Where(a => ((ArtistEntity)a.Author).Dead).UnsafeDelete();
+            //tr.Commit();
+        }
+    }
+
+
+    [Fact]
+    public void DeleteMListLite()
+    {
+        using (var tr = new Transaction())
+        {
+            int count = Database.MListQuery((ArtistEntity a) => a.Friends).UnsafeDeleteMList();
+            //tr.Commit();
+        }
+    }
+
+    [Fact]
+    public void DeleteMListEntity()
+    {
+        using (var tr = new Transaction())
+        {
+            int count = Database.MListQuery((BandEntity a) => a.Members).UnsafeDeleteMList();
+
+            //tr.Commit();
+        }
+    }
+
+    [Fact]
+    public void DeleteMListEmbedded()
+    {
+        using (var tr = new Transaction())
+        {
+            int count = Database.MListQuery((AlbumEntity a) => a.Songs).UnsafeDeleteMList();
+
+            //tr.Commit();
+        }
+    }
+
+
+    [Fact]
+    public void DeleteManual()
+    {
+        using (var tr = new Transaction())
+        {
+            var list = Database.Query<AlbumEntity>().Where(a => ((ArtistEntity)a.Author).Dead).Select(a => a.ToLite()).ToList();
+
+            Database.DeleteList(list);
+            //tr.Commit();
+        }
+    }
+
+    [TableName("#MyView")]
+    class MyTempView : IView
+    {
+        [ViewPrimaryKey]
+        public int MyId { get; set; }
+    }
+
+    [Fact]
+    public void UnsafeDeleteMyView()
+    {
+        using (var tr = new Transaction())
+        {
+            Administrator.CreateTemporaryTable<MyTempView>();
+
+            Database.Query<ArtistEntity>().UnsafeInsertView(a => new MyTempView { MyId = (int)a.Id });
+
+            Database.View<MyTempView>().Where(a=>a.MyId > 1).UnsafeDeleteView();
+
+            tr.Commit();
         }
 
-        [TestMethod]
-        public void DeleteAll()
-        {
-            using (Transaction tr = new Transaction())
-            {
-                int count = Database.Query<AlbumDN>().UnsafeDelete();
-
-                //tr.Commit();
-            }
-
-        }
-
-        [TestMethod]
-        public void Delete()
-        {
-            using (Transaction tr = new Transaction())
-            {
-                int count = Database.Query<AlbumDN>().Where(a => a.Year < 1990).UnsafeDelete();
-
-                //tr.Commit();
-            }
-        }
-
-        [TestMethod]
-        public void DeleteJoin()
-        {
-            using (Transaction tr = new Transaction())
-            {
-                int count = Database.Query<AlbumDN>().Where(a => ((ArtistDN)a.Author).Dead).UnsafeDelete();
-                //tr.Commit();
-            }
-        }
-
-
-        [TestMethod]
-        public void DeleteMListLite()
-        {
-            using (Transaction tr = new Transaction())
-            {
-                int count = Database.MListQuery((ArtistDN a) => a.Friends).UnsafeDelete();
-                //tr.Commit();
-            }
-        }
-
-        [TestMethod]
-        public void DeleteMListEntity()
-        {
-            using (Transaction tr = new Transaction())
-            {
-                int count = Database.MListQuery((BandDN a) => a.Members).UnsafeDelete();
-
-                //tr.Commit();
-            }
-        }
-
-        [TestMethod]
-        public void DeleteMListEmbedded()
-        {
-            using (Transaction tr = new Transaction())
-            {
-                int count = Database.MListQuery((AlbumDN a) => a.Songs).UnsafeDelete();
-
-                //tr.Commit();
-            }
-        }
-
-
-        [TestMethod]
-        public void DeleteManual()
-        {
-            using (Transaction tr = new Transaction())
-            {
-                var list = Database.Query<AlbumDN>().Where(a => ((ArtistDN)a.Author).Dead).Select(a => a.ToLite()).ToList();
-
-                Database.DeleteList(list);
-                //tr.Commit();
-            }
-
-        }
     }
 }

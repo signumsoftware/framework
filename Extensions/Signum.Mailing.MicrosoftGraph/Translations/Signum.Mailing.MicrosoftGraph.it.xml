@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="MicrosoftGraphEmailServiceEntity" Description="il servizio di posta elettronica Microsoft Graph" PluralDescription="Servizi di posta elettronica Microsoft Graph">
+    <Member Name="Azure_ApplicationID" Description="ID applicazione (client) di Azure" />
+    <Member Name="Azure_ClientSecret" Description="Valore del segreto client di AzureAzure Client Secret Value" />
+    <Member Name="Azure_DirectoryID" Description="Azure Directory (tenant) ID" />
+    <Member Name="UseActiveDirectoryConfiguration" Description="Usare la configurazione di Active Directory" />
+  </Type>
+  <Type Name="RecipientEmbedded" Description="Destinatario">
+    <Member Name="EmailAddress" Description="Indirizzo email" />
+    <Member Name="Name" Description="Nome" />
+  </Type>
+  <Type Name="RemoteAttachmentEmbedded" Description="Collegamento remoto">
+    <Member Name="ContentId" Description="ID contenuto" />
+    <Member Name="Id" Description="Id" />
+    <Member Name="IsInline" Description="È in linea" />
+    <Member Name="LastModifiedDateTime" Description="Data e ora dell'ultima modifica" />
+    <Member Name="Name" Description="Nome" />
+    <Member Name="Size" Description="Grandezza" />
+  </Type>
+  <Type Name="RemoteEmailFolderModel" Description="Cartella di posta elettronica remota">
+    <Member Name="DisplayName" Description="Nome visualizzato" />
+    <Member Name="FolderId" Description="ID cartella" />
+  </Type>
+  <Type Name="RemoteEmailMessage">
+    <Member Name="NotAuthorizedToViewEmailsFromOtherUsers" Description="Non autorizzato a visualizzare le e-mail di altri utenti" />
+  </Type>
+  <Type Name="RemoteEmailMessageModel" Description="Messaggio di posta elettronica remota">
+    <Member Name="Attachments" Description="Allegati" />
+    <Member Name="BccRecipients" Description="Destinatari Ccn" />
+    <Member Name="Body" Description="Corpo" />
+    <Member Name="CcRecipients" Description="Destinatari Cc" />
+    <Member Name="CreatedDateTime" Description="Data e ora di creazione" />
+    <Member Name="Extension0" Description="Estensione0" />
+    <Member Name="Extension1" Description="Estensione1" />
+    <Member Name="Extension2" Description="Estensione2" />
+    <Member Name="Extension3" Description="Estensione3" />
+    <Member Name="From" Description="Da" />
+    <Member Name="HasAttachments" Description="Ha allegati" />
+    <Member Name="Id" Description="Id" />
+    <Member Name="IsBodyHtml" Description="È il corpo html" />
+    <Member Name="IsDraft" Description="È una bozza" />
+    <Member Name="IsRead" Description="Si legge" />
+    <Member Name="LastModifiedDateTime" Description="Data e ora dell'ultima modifica" />
+    <Member Name="ReceivedDateTime" Description="Data e ora di ricezione" />
+    <Member Name="SentDateTime" Description="Data e ora di invio" />
+    <Member Name="Subject" Description="Oggetto" />
+    <Member Name="ToRecipients" Description="Ai destinatari" />
+    <Member Name="User" Description="Utente" />
+    <Member Name="WebLink" Description="Collegamento Web" />
+  </Type>
+  <Type Name="RemoteEmailMessagePermission">
+    <Member Name="ViewEmailMessagesFromOtherUsers" Description="Visualizzare i messaggi di posta elettronica di altri utenti" />
+  </Type>
+  <Type Name="RemoteEmailMessageQuery">
+    <Member Name="RemoteEmailMessages" Description="Messaggi di posta elettronica remoti" />
+  </Type>
+</Translations>

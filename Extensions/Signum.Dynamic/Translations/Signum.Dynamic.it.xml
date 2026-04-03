@@ -1,0 +1,212 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="DynamicApiEntity" Description="l'API dinamica" PluralDescription="API dinamiche">
+    <Member Name="Eval" Description="Eval" />
+    <Member Name="Name" Description="Nome" />
+  </Type>
+  <Type Name="DynamicApiEval" Description="Valutazione dinamica dell'API" />
+  <Type Name="DynamicApiOperation">
+    <Member Name="Clone" Description="Clone" />
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicBaseType" Description="Tipo di base dinamico">
+    <Member Name="EmbeddedEntity" Description="Entità incorporata" />
+    <Member Name="Entity" Description="Entità" />
+    <Member Name="MixinEntity" Description="Entità Mixin" />
+    <Member Name="ModelEntity" Description="Entità del modello" />
+  </Type>
+  <Type Name="DynamicClientEntity" Description="il client dinamico" PluralDescription="Client dinamici">
+    <Member Name="Code" Description="Codice" />
+    <Member Name="Name" Description="Nome" />
+  </Type>
+  <Type Name="DynamicClientOperation">
+    <Member Name="Clone" Description="Clone" />
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicCSSOverrideEntity" Description="l'override del CSS dinamico" PluralDescription="Sostituzioni CSS dinamiche">
+    <Member Name="Name" Description="Nome" />
+    <Member Name="Script" Description="Copione" />
+  </Type>
+  <Type Name="DynamicCSSOverrideOperation">
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicExpressionEntity" Description="l'espressione Dynamic" PluralDescription="Espressioni dinamiche">
+    <Member Name="Body" Description="Corpo" />
+    <Member Name="Format" Description="Formato" />
+    <Member Name="FromType" Description="Da tipo" />
+    <Member Name="Name" Description="Nome" />
+    <Member Name="ReturnType" Description="Tipo restituito" />
+    <Member Name="Translation" Description="Traduzione" />
+    <Member Name="Unit" Description="Unità" />
+  </Type>
+  <Type Name="DynamicExpressionOperation">
+    <Member Name="Clone" Description="Clone" />
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicExpressionTranslation" Description="Traduzione dinamica delle espressioni">
+    <Member Name="NoTranslation" Description="Nessuna traduzione" />
+    <Member Name="ReuseTranslationOfReturnType" Description="Riutilizzare la traduzione del tipo restituito" />
+    <Member Name="TranslateExpressionName" Description="Traduci nome espressione" />
+  </Type>
+  <Type Name="DynamicIsolationMixin">
+    <Member Name="IsolationStrategy" Description="Strategia di isolamento" />
+  </Type>
+  <Type Name="DynamicMixinConnectionEntity" Description="la connessione Dynamic mixin" PluralDescription="Connessioni mixin dinamiche">
+    <Member Name="EntityType" Description="Tipo di entità" />
+    <Member Name="MixinName" Description="Nome del mixin" />
+  </Type>
+  <Type Name="DynamicMixinConnectionOperation">
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicPanelPermission">
+    <Member Name="RestartApplication" Description="Riavvia l'applicazione" />
+  </Type>
+  <Type Name="DynamicRenameEntity" Description="la ridenominazione dinamica" PluralDescription="Rinominazioni dinamiche">
+    <Member Name="CreationDate" Description="Data di creazione" />
+    <Member Name="NewName" Description="Nuovo nome" />
+    <Member Name="OldName" Description="Vecchio nome" />
+    <Member Name="ReplacementKey" Description="Chiave sostitutiva" />
+  </Type>
+  <Type Name="DynamicSqlMigrationEntity" Description="la migrazione sql dinamica" PluralDescription="Migrazioni sql dinamiche">
+    <Member Name="Comment" Description="Commento" />
+    <Member Name="CreatedBy" Description="Creato da" />
+    <Member Name="CreationDate" Description="Data di creazione" />
+    <Member Name="ExecutedBy" Description="Eseguito da" />
+    <Member Name="ExecutionDate" Description="Data di esecuzione" />
+    <Member Name="Script" Description="Copione" />
+  </Type>
+  <Type Name="DynamicSqlMigrationMessage">
+    <Member Name="PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer" Description="Impedire la generazione di un nuovo script a causa di errori nel codice dinamico. Correggi gli errori e riavvia il server." />
+    <Member Name="TheMigrationIsAlreadyExecuted" Description="La migrazione è già stata eseguita" />
+  </Type>
+  <Type Name="DynamicSqlMigrationOperation">
+    <Member Name="Create" Description="Creare" />
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Execute" Description="Eseguire" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicTypeConditionEntity" Description="la condizione di tipo dinamico" PluralDescription="Condizioni di tipo dinamico">
+    <Member Name="EntityType" Description="Tipo di entità" />
+    <Member Name="Eval" Description="Eval" />
+    <Member Name="SymbolName" Description="Nome del simbolo" />
+  </Type>
+  <Type Name="DynamicTypeConditionEval" Description="Valutazione della condizione di tipo dinamico" />
+  <Type Name="DynamicTypeConditionOperation">
+    <Member Name="Clone" Description="Clone" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicTypeConditionSymbolEntity" Description="il simbolo della condizione di tipo dinamico" PluralDescription="Simboli di condizione di tipo dinamico">
+    <Member Name="Name" Description="Nome" />
+  </Type>
+  <Type Name="DynamicTypeConditionSymbolOperation">
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicTypeEntity" Description="il tipo Dinamico" PluralDescription="Tipi dinamici">
+    <Member Name="BaseType" Description="Tipo di base" />
+    <Member Name="TypeDefinition" Description="Definizione del tipo" />
+    <Member Name="TypeName" Description="Nome del tipo" />
+  </Type>
+  <Type Name="DynamicTypeMessage">
+    <Member Name="DynamicType0SucessfullySavedGoToDynamicPanelNow" Description="DynamicType '{0}' salvato correttamente. Vai a DynamicPanel ora?" />
+    <Member Name="RemoveSaveOperation" Description="Rimuovere l'operazione di salvataggio?" />
+    <Member Name="ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain" Description="Il server è stato riavviato con errori nel codice dinamico. Correggi gli errori e riavvia." />
+    <Member Name="TheEntityShouldBeSynchronizedToApplyMixins" Description="L'entità deve essere sincronizzata per applicare i mixin" />
+    <Member Name="TypeSaved" Description="Tipo salvato" />
+  </Type>
+  <Type Name="DynamicTypeOperation">
+    <Member Name="Clone" Description="Clone" />
+    <Member Name="Create" Description="Creare" />
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicValidationEntity" Description="la validazione dinamica" PluralDescription="Convalide dinamiche">
+    <Member Name="EntityType" Description="Tipo di entità" />
+    <Member Name="Eval" Description="Eval" />
+    <Member Name="Name" Description="Nome" />
+    <Member Name="SubEntity" Description="Entità secondaria" />
+  </Type>
+  <Type Name="DynamicValidationEval" Description="Valutazione di convalida dinamica" />
+  <Type Name="DynamicValidationMessage">
+    <Member Name="PropertyIs" Description="La proprietà è" />
+  </Type>
+  <Type Name="DynamicValidationOperation">
+    <Member Name="Clone" Description="Clone" />
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicViewEntity" Description="la vista Dinamica" PluralDescription="Viste dinamiche">
+    <Member Name="EntityType" Description="Tipo di entità" />
+    <Member Name="Locals" Description="Locali" />
+    <Member Name="Props" Description="Trovarobe" />
+    <Member Name="ViewContent" Description="Visualizza contenuto" />
+    <Member Name="ViewName" Description="Nome della vista" />
+  </Type>
+  <Type Name="DynamicViewMessage">
+    <Member Name="AddChild" Description="Aggiungi figlio" />
+    <Member Name="AddSibling" Description="Aggiungi elemento di pari livello" />
+    <Member Name="ChooseAView" Description="Scegli una vista" />
+    <Member Name="ClearChildren" Description="Cancella figli" />
+    <Member Name="ExampleEntity" Description="Entità di esempio" />
+    <Member Name="GenerateChildren" Description="Generare figli" />
+    <Member Name="HideHelp" Description="Nascondi aiuto" />
+    <Member Name="ModulesHelp" Description="Moduli" />
+    <Member Name="PropsHelp" Description="trovarobe" />
+    <Member Name="Remove" Description="Togliere" />
+    <Member Name="SelectANodeFirst" Description="Selezionare prima un nodo" />
+    <Member Name="SelectATypeOfComponent" Description="Selezionare un tipo di componente" />
+    <Member Name="ShowHelp" Description="Mostra aiuto" />
+    <Member Name="SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually" Description="Poiché non è presente alcun DynamicViewSelector, è necessario scegliere manualmente una visualizzazione:" />
+    <Member Name="SuggestedFindOptions" Description="Opzioni di ricerca suggerite" />
+    <Member Name="TheFollowingQueriesReference0" Description="Le query seguenti fanno riferimento {0}:" />
+    <Member Name="UseExpression" Description="Usa espressione" />
+  </Type>
+  <Type Name="DynamicViewOperation">
+    <Member Name="Clone" Description="Clone" />
+    <Member Name="Create" Description="Creare" />
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicViewOverrideEntity" Description="l'override della vista dinamica" PluralDescription="Sostituzioni della vista dinamica">
+    <Member Name="EntityType" Description="Tipo di entità" />
+    <Member Name="Script" Description="Copione" />
+    <Member Name="ViewName" Description="Nome della vista" />
+  </Type>
+  <Type Name="DynamicViewOverrideOperation">
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicViewPropEmbedded" Description="Oggetto di visualizzazione dinamica">
+    <Member Name="Name" Description="Nome" />
+    <Member Name="Type" Description="Digitare" />
+  </Type>
+  <Type Name="DynamicViewSelectorEntity" Description="il selettore della vista dinamica" PluralDescription="Selettori di visualizzazione dinamica">
+    <Member Name="EntityType" Description="Tipo di entità" />
+    <Member Name="Script" Description="Copione" />
+  </Type>
+  <Type Name="DynamicViewSelectorOperation">
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DynamicViewValidationMessage">
+    <Member Name="_0CanNotBe1" Description=" 0CanNotBe1" />
+    <Member Name="_0RequiresA1" Description="{0} richiede un {1}" />
+    <Member Name="_0ShouldStartByLowercase" Description=" 0ShouldStartByLowercase" />
+    <Member Name="AggregateIsMandatoryFor01" Description="L'aggregato è obbligatorio per {0} ({1})." />
+    <Member Name="CollectionOfEntities" Description="Raccolta di entità" />
+    <Member Name="CollectionOfEnums" Description="Raccolta di enumerazioni" />
+    <Member Name="Entity" Description="Entità" />
+    <Member Name="EntityOrValue" Description="Entità o valore" />
+    <Member Name="FilteringWithNew0ConsiderChangingVisibility" Description="Filtraggio con nuove {0}. Prendi in considerazione la possibilità di modificare la visibilità." />
+    <Member Name="Member0IsMandatoryFor1" Description="La &quot;{0}&quot; del membro è obbligatoria per &quot;{1}&quot;" />
+    <Member Name="OnlyChildNodesOfType0Allowed" Description="Sono consentiti solo i nodi figlio di tipo '{0}'" />
+    <Member Name="Type0DoesNotContainsField1" Description="Il tipo '{0}' non contiene il campo '{1}'" />
+    <Member Name="Value" Description="Valore" />
+    <Member Name="ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity" Description="ValueToken non può essere utilizzato per '{0}' perché non è un'entità." />
+    <Member Name="ViewNameIsNotAllowedWhileHavingChildren" Description="Il nome della vista non è consentito in caso di figli" />
+  </Type>
+</Translations>

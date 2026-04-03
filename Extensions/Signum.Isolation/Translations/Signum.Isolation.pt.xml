@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="IsolationEntity" Description="Isolamento" PluralDescription="Isolamentos">
+    <Member Name="Name" Description="Nome" />
+  </Type>
+  <Type Name="IsolationMessage">
+    <Member Name="Entity0HasIsolation1ButCurrentIsolationIs2" Description="Entidade {0} tem isolamento {1} mas o isolamento actual é {2}" />
+    <Member Name="Entity0HasIsolation1ButEntity2HasIsolation3" Description="A entidade '{0}' tem isolamento {1} mas a entidade '{2}' tem isolamento {3}" />
+    <Member Name="SelectAnIsolation" Description="Seleccionar um isolamento" />
+  </Type>
+  <Type Name="IsolationMixin">
+    <Member Name="Isolation" Description="Isolamento" />
+  </Type>
+  <Type Name="IsolationOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+</Translations>

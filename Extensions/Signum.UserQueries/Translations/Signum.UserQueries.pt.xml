@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="UserQueryEntity" Description="Consulta de utilizador" PluralDescription="Consultas de utilizador">
+    <Member Name="Columns" Description="Colunas" />
+    <Member Name="ColumnsMode" Description="Modo de colunas" />
+    <Member Name="DisplayName" Description="Nome" />
+    <Member Name="ElementsPerPage" Description="Elementos por página" />
+    <Member Name="EntityType" Description="Tipo de entidade" />
+    <Member Name="Filters" Description="Filtros" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Orders" Description="Ordens" />
+    <Member Name="Owner" Description="Proprietário" />
+    <Member Name="PaginationMode" Description="Modo de paginaçao" />
+    <Member Name="Query" Description="Consulta" />
+  </Type>
+  <Type Name="UserQueryMessage">
+    <Member Name="Edit" Description="Editar" />
+    <Member Name="Use0ToFilterCurrentEntity" Description="Utilize {0} para filtrar a entidade actual" />
+  </Type>
+  <Type Name="UserQueryOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="UserQueryPartEntity" Description="Parte de consulta do utilizador" PluralDescription="Partes de consulta do utilizador">
+    <Member Name="RequiresTitle" Description="Requer título" />
+    <Member Name="UserQuery" Description="Consulta de utilizador" />
+  </Type>
+  <Type Name="UserQueryPermission">
+    <Member Name="ViewUserQuery" Description="Ver consultas de utilizador" />
+  </Type>
+</Translations>

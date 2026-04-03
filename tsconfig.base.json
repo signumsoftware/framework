@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "isolatedDeclarations": true,
+    "sourceMap": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "declarationMap": true,
+    "noUncheckedSideEffectImports": false,
+    "lib": [
+      "ESNext",
+      "dom"
+    ],
+    "types": [ "node", "google.maps" ]
+  }
+}

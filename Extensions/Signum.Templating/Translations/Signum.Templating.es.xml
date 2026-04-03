@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ModelConverterSymbol" Description="Conversor de modelo" />
+  <Type Name="MultiEntityModel" Description="Multi entidad">
+    <Member Name="Entities" Description="Entidades" />
+  </Type>
+  <Type Name="QueryModel" Description="Consulta">
+    <Member Name="Filters" Description="Filtros" />
+    <Member Name="Orders" Description="Órdenes" />
+    <Member Name="Pagination" Description="Paginación" />
+    <Member Name="QueryName" Description="Nombre de la consulta" />
+  </Type>
+  <Type Name="QueryModelMessage">
+    <Member Name="ConfigureYourQueryAndPressSearchBeforeOk" Description="Configure su consulta y pulse [Buscar] antes de [Aceptar]" />
+  </Type>
+  <Type Name="TemplateApplicableEval" Description="Evaluar plantilla aplicable" />
+  <Type Name="TemplateTokenMessage">
+    <Member Name="Insert" Description="Insertar" />
+    <Member Name="NoColumnSelected" Description="Ninguna columna seleccionada" />
+    <Member Name="YouCannotAddBlocksWithAllOrAny" Description="No puede agregar bloques con 'Todos' o 'Alguno'" />
+    <Member Name="YouCannotAddIfBlocksOnCollectionFields" Description="No se puede agregar bloques 'If' en campos de colección" />
+    <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Sólo puede agregar bloques 'Foreach' con campos de colección" />
+    <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Tienes que añadir el token 'Elemento' para usar Foreach en campos de colección" />
+  </Type>
+</Translations>

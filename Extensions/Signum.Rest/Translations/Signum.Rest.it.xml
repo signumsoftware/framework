@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="QueryStringValueEmbedded" Description="Valore della stringa di query">
+    <Member Name="Key" Description="Chiave" />
+    <Member Name="Value" Description="Valore" />
+  </Type>
+  <Type Name="RestApiKeyEntity" Description="la chiave API Rest" PluralDescription="Chiavi API REST">
+    <Member Name="ApiKey" Description="Chiave API" />
+    <Member Name="User" Description="Utente" />
+  </Type>
+  <Type Name="RestApiKeyMessage">
+    <Member Name="GenerateApiKey" Description="Genera chiave API" />
+  </Type>
+  <Type Name="RestApiKeyOperation">
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="RestLogEntity" Description="il Resto del registro" PluralDescription="Registri di riposo">
+    <Member Name="Action" Description="Azione" />
+    <Member Name="AllowReplay" Description="Consenti riproduzione" />
+    <Member Name="ApplicationName" Description="Nome dell'applicazione" />
+    <Member Name="ChangedPercentage" Description="Percentuale modificata" />
+    <Member Name="Controller" Description="Controllore" />
+    <Member Name="ControllerName" Description="Nome del controller" />
+    <Member Name="Duration" Description="Durata" />
+    <Member Name="EndDate" Description="Data di fine" />
+    <Member Name="Exception" Description="Eccezione" />
+    <Member Name="HttpMethod" Description="Metodo HTTP" />
+    <Member Name="MachineName" Description="Nome del computer" />
+    <Member Name="QueryString" Description="Stringa di query" />
+    <Member Name="Referrer" Description="Referrer" />
+    <Member Name="ReplayDate" Description="Data di riproduzione" />
+    <Member Name="ReplayState" Description="Stato di riproduzione" />
+    <Member Name="RequestBody" Description="Corpo della richiesta" />
+    <Member Name="ResponseBody" Description="Corpo della risposta" />
+    <Member Name="StartDate" Description="Data di inizio" />
+    <Member Name="Url" Description="URL" />
+    <Member Name="User" Description="Utente" />
+    <Member Name="UserHostAddress" Description="Indirizzo host dell'utente" />
+    <Member Name="UserHostName" Description="Nome host dell'utente" />
+  </Type>
+  <Type Name="RestLogReplayState" Description="Stato di riproduzione del log di riposo">
+    <Member Name="NoChanges" Description="Nessuna modifica" />
+    <Member Name="WithChanges" Description="Con le modifiche" />
+  </Type>
+</Translations>

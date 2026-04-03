@@ -1,0 +1,90 @@
+﻿<CodeSnippet Format="1.1.0" xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <Header>
+    <Title>React Class Component With State</Title>
+    <Author>Signum Software</Author>
+    <Shortcut>reactClassState</Shortcut>
+    <Description>Code snippet for adding a React class component with explicit props and state</Description>
+    <SnippetTypes>
+      <SnippetType>Expansion</SnippetType>
+    </SnippetTypes>
+  </Header>
+  <Snippet>
+    <Imports>
+      <Import>
+        <Namespace>
+          import * as React from 'react';
+        </Namespace>
+      </Import>
+    </Imports>
+    <Declarations>
+      <Literal>
+        <ID>ComponentName</ID>
+        <ToolTip>Component Class Name</ToolTip>
+        <Default>MyComponent</Default>
+      </Literal>
+    </Declarations>
+    <Declarations>
+      <Literal>
+        <ID>StateName</ID>
+        <ToolTip>state property name</ToolTip>
+        <Default>data</Default>
+      </Literal>
+    </Declarations>
+    <Declarations>
+      <Literal>
+        <ID>StateType</ID>
+        <ToolTip>state property Type</ToolTip>
+        <Default>string[]</Default>
+      </Literal>
+    </Declarations>
+    <Code Language="TypeScript">
+      <![CDATA[
+interface $ComponentName$Props {
+  ctx: TypeContext<$ComponentName$Entity>
+}
+
+interface $ComponentName$State {
+  $StateName$?: $StateType$
+}
+
+export class $ComponentName$ extends React.Component<$ComponentName$Props, $ComponentName$State> {
+
+  constructor(props: $ComponentName$Props) {
+    super(props);
+    this.state = {};
+  }
+
+  componentWillMount() {
+    this.loadData(this.props);
+  }
+
+  componentWillReceiveProps(newProps: $ComponentName$Props) {
+    if (!is(newProps.ctx.value, this.props.ctx.value))
+      this.loadData(newProps);
+  }
+
+  loadData(props: $ComponentName$Props) {
+    API.someQuery()
+      .then($StateName$ => this.setState({ $StateName$ }))
+      .done();
+  }
+
+  render() {
+    const ctx = this.props.ctx;
+    return (
+      <div>
+        <ValueLine ctx={ctx.subCtx(a => a.name)} />
+        {this.state.$StateName$ && this.renderData(this.state.$StateName$)}
+        $end$
+      </div>
+    );
+  }
+
+  renderData($StateName$: $StateType$) {
+    return <div></div>;
+  }
+}
+     ]]>
+    </Code>
+  </Snippet>
+</CodeSnippet>

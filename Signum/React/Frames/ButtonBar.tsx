@@ -1,0 +1,61 @@
+import * as React from 'react'
+import { classes } from '../Globals'
+import { Navigator } from '../Navigator'
+import { IRenderButtons, ButtonsContext, ButtonBarElement } from '../TypeContext'
+import { namespace } from 'd3';
+import { FunctionalAdapter } from '../Modals';
+
+export interface ButtonBarProps extends ButtonsContext {
+  ref?: React.Ref<ButtonBarHandle>;
+  align?: "left" | "right";
+}
+
+export interface ButtonBarHandle {
+  handleKeyDown(e: KeyboardEvent): void;
+}
+
+
+export function ButtonBar(p: ButtonBarProps): React.JSX.Element {
+
+  const ctx: ButtonsContext = p;
+  const rb = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IRenderButtons | null;
+
+  const es = Navigator.getSettings(p.pack.entity.Type);
+
+  const buttons = ButtonBarManager.onButtonBarRender.flatMap(func => func(p) ?? [])
+    .concat(rb?.renderButtons ? rb.renderButtons(ctx) : [])
+    .concat(es?.extraToolbarButtons ? es.extraToolbarButtons(ctx) : [])
+    .filter(a => a != null)
+    .orderBy(a => a!.order ?? 0);
+
+  var shortcuts = buttons.filter(a => a!.shortcut != null).map(a => a!.shortcut!);
+
+    function handleKeyDown(e: KeyboardEvent) {
+    var s = shortcuts;
+    if (s != null) {
+      for (var i = 0; i < s.length; i++) {
+        if (s[i](e)) {
+          e.preventDefault();
+          return;
+        }
+      }
+    }
+  }
+  React.useImperativeHandle(p.ref, () => ({
+    handleKeyDown
+  }));
+
+  return React.cloneElement(<div className={classes("btn-toolbar", "sf-button-bar", p.align == "right" ? "justify-content-end" : undefined)} />,
+    undefined,
+    ...buttons.map(a => a!.button)
+  );
+}
+
+export namespace ButtonBarManager {
+
+  export const onButtonBarRender = [] as ((c: ButtonsContext) => Array<ButtonBarElement | undefined> | undefined)[];
+
+  export function clearButtonBarRenderer(): void{
+    onButtonBarRender.clear();
+  }
+}

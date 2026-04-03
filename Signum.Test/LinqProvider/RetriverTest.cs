@@ -1,109 +1,84 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Signum.Engine;
-using Signum.Entities;
-using System.Diagnostics;
-using System.IO;
-using Signum.Engine.Linq;
-using Signum.Utilities;
-using System.Linq.Expressions;
-using System.Data.SqlTypes;
-using System.Reflection;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities.Reflection;
-using Signum.Test.Environment;
 
-namespace Signum.Test.LinqProvider
+namespace Signum.Test.LinqProvider;
+
+/// <summary>
+/// Summary description for LinqProvider
+/// </summary>
+public class RetrieverTest
 {
-    /// <summary>
-    /// Summary description for LinqProvider
-    /// </summary>
-    [TestClass]
-    public class RetrieverTest
+    public RetrieverTest()
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
-        {
-            Starter.StartAndLoad();
-        }
+        MusicStarter.StartAndLoad();
+        Connector.CurrentLogger = new DebugTextWriter();
+    }
 
-        [TestInitialize]
-        public void Initialize()
-        {
-            Connector.CurrentLogger = new DebugTextWriter();
-        }      
+    [Fact]
+    public void RetrieveSimple()
+    {
+        var list = Database.Query<CountryEntity>().ToList();
 
-        [TestMethod]
-        public void RetrieveSimple()
-        {
-            var list = Database.Query<CountryDN>().ToList();
+        AssertRetrieved(list);
+    }
 
-            AssertRetrieved(list);
-        }
+    [Fact]
+    public void RetrieveWithEnum()
+    {
+        var list = Database.Query<GrammyAwardEntity>().ToList();
 
-        [TestMethod]
-        public void RetrieveWithEnum()
-        {
-            var list = Database.Query<GrammyAwardDN>().ToList();
-
-            AssertRetrieved(list);
-        }
+        AssertRetrieved(list);
+    }
 
 
-        [TestMethod]
-        public void RetrieveWithRelatedEntityAndLite()
-        {
-            var list = Database.Query<LabelDN>().ToList();
+    [Fact]
+    public void RetrieveWithRelatedEntityAndLite()
+    {
+        var list = Database.Query<LabelEntity>().ToList();
 
-            AssertRetrieved(list);
-        }
+        AssertRetrieved(list);
+    }
 
-        [TestMethod]
-        public void RetrieveWithIBA()
-        {
-            var list = Database.Query<NoteWithDateDN>().ToList();
+    [Fact]
+    public void RetrieveWithIBA()
+    {
+        var list = Database.Query<NoteWithDateEntity>().ToList();
 
-            AssertRetrieved(list);
-        }
+        AssertRetrieved(list);
+    }
 
-        [TestMethod]
-        public void RetrieveWithMList()
-        {
-            var list = Database.Query<ArtistDN>().ToList();
+    [Fact]
+    public void RetrieveWithMList()
+    {
+        var list = Database.Query<ArtistEntity>().ToList();
 
-            AssertRetrieved(list);
-        }
+        AssertRetrieved(list);
+    }
 
-        [TestMethod]
-        public void RetrieveWithMListEmbedded()
-        {
-            var list = Database.Query<AlbumDN>().ToList();
+    [Fact]
+    public void RetrieveWithMListEmbedded()
+    {
+        var list = Database.Query<AlbumEntity>().ToList();
 
-            AssertRetrieved(list);
-        }
+        AssertRetrieved(list);
+    }
 
-        private void AssertRetrieved<T>(List<T> list) where T:Modifiable
-        {
-            var graph = GraphExplorer.FromRoots(list);
+    private void AssertRetrieved<T>(List<T> list) where T:Modifiable
+    {
+        var graph = GraphExplorer.FromRoots(list);
 
-            var problematic = graph.Where(a =>
-                a.IsGraphModified &&
-                a is IdentifiableEntity && (((IdentifiableEntity)a).IdOrNull == null || ((IdentifiableEntity)a).IsNew));
+        var problematic = graph.Where(a =>
+            a.IsGraphModified &&
+            a is Entity && (((Entity)a).IdOrNull == null || ((Entity)a).IsNew));
 
-            if (problematic.Any())
-                throw new AssertFailedException("Some non-retrived elements: {0}".Formato(problematic.ToString(", ")));  
-        }
+        if (problematic.Any())
+            Assert.Fail("Some non-retrived elements: {0}".FormatWith(problematic.ToString(", ")));
+    }
 
 
-        [TestMethod]
-        public void RetrieveWithMListCount()
-        {
-            var artist = Database.Query<ArtistDN>().OrderBy(a => a.Name).First();
+    [Fact]
+    public void RetrieveWithMListCount()
+    {
+        var artist = Database.Query<ArtistEntity>().OrderBy(a => a.Name).First();
 
-            Assert.AreEqual(artist.ToLite().Retrieve().Friends.Count, artist.Friends.Count);
-        }
+        Assert.Equal(artist.ToLite().RetrieveAndRemember().Friends.Count, artist.Friends.Count);
     }
 }

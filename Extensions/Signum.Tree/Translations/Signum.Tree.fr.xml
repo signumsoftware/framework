@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="InsertPlace" Description="Insérer l’emplacement">
+    <Member Name="After" Description="Après" />
+    <Member Name="Before" Description="Avant" />
+    <Member Name="FirstNode" Description="Premier nœud" />
+    <Member Name="LastNode" Description="Dernier nœud" />
+  </Type>
+  <Type Name="MoveTreeModel" Description="Déplacer l’arbre">
+    <Member Name="InsertPlace" Description="Insérer l’emplacement" />
+    <Member Name="NewParent" Description="Nouveau parent" />
+    <Member Name="Sibling" Description="Même niveau" />
+  </Type>
+  <Type Name="TreeEntity" Description="l’arbre" PluralDescription="Arbres">
+    <Member Name="FullName" Description="Nom complet" />
+    <Member Name="IsSibling" Description="Est au même niveau" />
+    <Member Name="Level" Description="Niveau" />
+    <Member Name="Name" Description="Nom" />
+    <Member Name="ParentOrSibling" Description="Parent ou même niveau" />
+    <Member Name="ParentRoute" Description="Route parent" />
+    <Member Name="Route" Description="Route" />
+    <Member Name="RouteToString" Description="Route vers texte" />
+  </Type>
+  <Type Name="TreeMessage">
+    <Member Name="Ascendants" Description="Ancêtres" />
+    <Member Name="Children" Description="Enfants" />
+    <Member Name="Copy0" Description="Copier {0}" />
+    <Member Name="Descendants" Description="Descendants" />
+    <Member Name="ImpossibleToMove01Of2" Description="Impossible de se déplacer {0} {1} de {2}" />
+    <Member Name="ImpossibleToMove0InsideOf1" Description="Impossible de se déplacer {0} l’intérieur de {1}" />
+    <Member Name="Level" Description="Niveau" />
+    <Member Name="LevelShouldNotBeGreaterThan0" Description="Le niveau ne doit pas être supérieur à {0}" />
+    <Member Name="Move0" Description="Déplacer {0}" />
+    <Member Name="Parent" Description="Parent" />
+    <Member Name="Tree" Description="Arbre" />
+    <Member Name="TreeType" Description="Type d’arbre" />
+  </Type>
+  <Type Name="TreeOperation">
+    <Member Name="Copy" Description="Copier" />
+    <Member Name="CreateChild" Description="Créer un noeud enfant" />
+    <Member Name="CreateNextSibling" Description="Créer un noeud au même niveau" />
+    <Member Name="CreateRoot" Description="Créer une racine" />
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Move" Description="Déplacer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="TreeViewerMessage">
+    <Member Name="AddChild" Description="Ajouter un nœud enfant" />
+    <Member Name="AddRoot" Description="Ajouter un nœud racine" />
+    <Member Name="AddSibling" Description="Ajouter un nœud au même niveau" />
+    <Member Name="None" Description="Aucun" />
+    <Member Name="Remove" Description="Supprimer" />
+    <Member Name="Search" Description="Rechercher" />
+  </Type>
+  <Type Name="UserTreePartEntity" Description="La partie de l’arborescence des utilisateurs" PluralDescription="Parties de l’arborescence de l’utilisateur">
+    <Member Name="RequiresTitle" Description="Nécessite un titre" />
+    <Member Name="UserQuery" Description="Requête de l’utilisateur" />
+  </Type>
+</Translations>

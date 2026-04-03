@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ActiveDirectoryAuthorizerMessage">
+    <Member Name="ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication" Description="L’utilisateur Active Directory '{0}' n’est pas associé à un utilisateur dans cette application." />
+  </Type>
+  <Type Name="ActiveDirectoryConfigurationEmbedded" Description="Configuration d’Active Directory">
+    <Member Name="AllowMatchUsersBySimpleUserName" Description="Autoriser la correspondance des utilisateurs par simple nom d’utilisateur" />
+    <Member Name="AutoCreateUsers" Description="Création automatique d’utilisateurs" />
+    <Member Name="AutoUpdateUsers" Description="Mise à jour automatique des utilisateurs" />
+    <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
+    <Member Name="Azure_ClientSecret" Description="Azure Client Secret" />
+    <Member Name="Azure_DirectoryID" Description="Azure Directory (tenant) ID" />
+    <Member Name="DefaultRole" Description="Rôle par défaut" />
+    <Member Name="DirectoryRegistry_Password" Description="Mot de passe DirectoryRegistry" />
+    <Member Name="DirectoryRegistry_Username" Description="Nom d’utilisateur DirectoryRegistry" />
+    <Member Name="DomainName" Description="Nom de domaine" />
+    <Member Name="DomainServer" Description="Serveur de domaine" />
+    <Member Name="LoginWithActiveDirectoryRegistry" Description="Connexion avec le registre Active Directory" />
+    <Member Name="LoginWithAzureAD" Description="Se connecter avec azure AD" />
+    <Member Name="LoginWithWindowsAuthenticator" Description="Se connecter avec Windows Authenticator" />
+    <Member Name="RoleMapping" Description="Attribution de rôle" />
+  </Type>
+  <Type Name="ActiveDirectoryMessage">
+    <Member Name="AccountEnabled" Description="Compte activé" />
+    <Member Name="CompanyName" Description="Nom de l’entreprise" />
+    <Member Name="Description" Description="Description" />
+    <Member Name="DisplayName" Description="Nom d’affichage" />
+    <Member Name="GivenName" Description="Prénom" />
+    <Member Name="HasUser" Description="A des utilisateurs" />
+    <Member Name="Id" Description="Id" />
+    <Member Name="InGroup" Description="Dans le groupe" />
+    <Member Name="JobTitle" Description="Titre du poste" />
+    <Member Name="Mail" Description="Courrier" />
+    <Member Name="OnlyActiveUsers" Description="Uniquement les utilisateurs actifs" />
+    <Member Name="OnPremisesExtensionAttributes" Description="Attributs d’extension sur site" />
+    <Member Name="OnPremisesImmutableId" Description="Identifiant immuable local" />
+    <Member Name="SecurityEnabled" Description="Sécurité activée" />
+    <Member Name="Surname" Description="Nom de famille" />
+    <Member Name="Visibility" Description="Visibilité" />
+  </Type>
+  <Type Name="ActiveDirectoryPermission">
+    <Member Name="InviteUsersFromAD" Description="Inviter des utilisateurs à partir d’AD" />
+  </Type>
+  <Type Name="ActiveDirectoryTask">
+    <Member Name="DeactivateUsers" Description="Désactiver des utilisateurs" />
+  </Type>
+  <Type Name="ADGroupEntity" Description="Groupe AD" PluralDescription="Groupes AD">
+    <Member Name="DisplayName" Description="Nom d’affichage" />
+  </Type>
+  <Type Name="ADGroupOperation">
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="OnPremisesExtensionAttributesModel" Description="Attributs d'extension sur site">
+    <Member Name="ExtensionAttribute1" Description="Attribut d’extension 1" />
+    <Member Name="ExtensionAttribute10" Description="Attribut d’extension 10" />
+    <Member Name="ExtensionAttribute11" Description="Attribut d’extension 11" />
+    <Member Name="ExtensionAttribute12" Description="Attribut d’extension 12" />
+    <Member Name="ExtensionAttribute13" Description="Attribut d’extension 13" />
+    <Member Name="ExtensionAttribute14" Description="Attribut d’extension 14" />
+    <Member Name="ExtensionAttribute15" Description="Attribut d’extension 15" />
+    <Member Name="ExtensionAttribute2" Description="Attribut d’extension 2 " />
+    <Member Name="ExtensionAttribute3" Description="Attribut d’extension 3" />
+    <Member Name="ExtensionAttribute4" Description="Attribut d’extension 4" />
+    <Member Name="ExtensionAttribute5" Description="Attribut d’extension 5" />
+    <Member Name="ExtensionAttribute6" Description="Attribut d’extension 6" />
+    <Member Name="ExtensionAttribute7" Description="Attribut d’extension 7" />
+    <Member Name="ExtensionAttribute8" Description="Attribut d’extension 8" />
+    <Member Name="ExtensionAttribute9" Description="Attribut d’extension 9" />
+  </Type>
+  <Type Name="RoleMappingEmbedded" Description="Attribution de rôle">
+    <Member Name="ADNameOrGuid" Description="Nom de L'Active Directory ou GUID" />
+    <Member Name="Role" Description="Rôle" />
+  </Type>
+  <Type Name="UserADMessage">
+    <Member Name="Find0InActiveDirectory" Description="Recherchez '{0}' dans Active Directory" />
+    <Member Name="FindInActiveDirectory" Description="Rechercher dans Active Directory" />
+    <Member Name="NameOrEmail" Description="Nom ou adresse e-mail" />
+    <Member Name="NoUserContaining0FoundInActiveDirectory" Description="Aucun utilisateur contenant '{0}' n’a été trouvé dans Active Directory" />
+    <Member Name="PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport" Description="Sélectionnez l’utilisateur Active Directory que vous souhaitez importer" />
+    <Member Name="SelectActiveDirectoryUser" Description="Sélectionnez Utilisateur Active Directory" />
+  </Type>
+  <Type Name="UserADMixin">
+    <Member Name="OID" Description="OID" />
+    <Member Name="SID" Description="SID" />
+  </Type>
+  <Type Name="UserADQuery">
+    <Member Name="ActiveDirectoryGroups" Description="Groupes Active Directory" />
+    <Member Name="ActiveDirectoryUsers" Description="Utilisateurs Active Directory" />
+  </Type>
+  <Type Name="UserOIDMessage">
+    <Member Name="TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet" Description="L’utilisateur {0} est connecté à Active Directory et ne peut pas avoir de mot de passe local défini" />
+  </Type>
+</Translations>

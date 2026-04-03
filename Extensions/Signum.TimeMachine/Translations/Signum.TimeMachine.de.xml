@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="TimeMachineMessage">
+    <Member Name="AllVersions" Description="Alle Versionen" />
+    <Member Name="BetweenThisTimeRange" Description="(zwischen diesem Zeitraum)" />
+    <Member Name="CompareVersions" Description="Versionen vergleichen" />
+    <Member Name="DataDifferences" Description="Data-Unterschiede" />
+    <Member Name="DataSnapshot" Description="Daten-Snapshot" />
+    <Member Name="EntityDeleted" Description="[Entität gelöscht]" />
+    <Member Name="SelectedVersions" Description="Ausgewählte Versionen" />
+    <Member Name="ShowDiffs" Description="Unterschiede anzeigen" />
+    <Member Name="ThisVersionDidNotChange" Description="Diese Version HAT SICH NICHT GEÄNDERT" />
+    <Member Name="ThisVersionWasCreated" Description="Diese Version wurde ERSTELLT" />
+    <Member Name="ThisVersionWasCreatedAndDeleted" Description="Diese Version wurde ERSTELLT und GELÖSCHT" />
+    <Member Name="ThisVersionWasDeleted" Description="Diese Version wurde GELÖSCHT" />
+    <Member Name="TimeMachine" Description="Zeitmaschine" />
+    <Member Name="UIDifferences" Description="UI-Unterschiede" />
+    <Member Name="UISnapshot" Description="UI-Snapshot" />
+    <Member Name="YouCanNotSelectMoreThanTwoVersionToCompare" Description="Sie können nicht mehr als zwei Versionen zum Vergleich auswählen" />
+  </Type>
+  <Type Name="TimeMachinePermission">
+    <Member Name="ShowTimeMachine" Description="Zeitmaschine anzeigen" />
+  </Type>
+</Translations>

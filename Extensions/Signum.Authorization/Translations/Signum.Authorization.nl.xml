@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="LoginAuthMessage">
+    <Member Name="ChangePassword" Description="&#xA;Verander wachtwoord" />
+    <Member Name="Logout" Description="Afmelden" />
+  </Type>
+</Translations>

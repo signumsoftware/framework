@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="IToolbarEntity">
+    <Member Name="Elements" Description="Elementi" />
+  </Type>
+  <Type Name="ShowCount" Description="Mostra conteggio">
+    <Member Name="Always" Description="Sempre" />
+    <Member Name="MoreThan0" Description="Più di 0" />
+  </Type>
+  <Type Name="ToolbarElementEmbedded" Description="Elemento della barra degli strumenti">
+    <Member Name="AutoRefreshPeriod" Description="Periodo di aggiornamento automatico" />
+    <Member Name="Content" Description="Contenuto" />
+    <Member Name="IconColor" Description="Colore dell'icona" />
+    <Member Name="IconName" Description="Nome dell'icona" />
+    <Member Name="Label" Description="Etichetta" />
+    <Member Name="OpenInPopup" Description="Apri in popup" />
+    <Member Name="ShowCount" Description="Mostra conteggio" />
+    <Member Name="Type" Description="Digitare" />
+    <Member Name="Url" Description="URL" />
+  </Type>
+  <Type Name="ToolbarElementType" Description="Tipo di elemento della barra degli strumenti">
+    <Member Name="Divider" Description="Divisore" />
+    <Member Name="ExtraIcon" Description="Icona aggiuntiva" />
+    <Member Name="Header" Description="Intestazione" />
+    <Member Name="Item" Description="Articolo" />
+  </Type>
+  <Type Name="ToolbarEntity" Description="la barra degli strumenti" PluralDescription="Barre degli strumenti">
+    <Member Name="Elements" Description="Elementi" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Location" Description="Ubicazione" />
+    <Member Name="Name" Description="Nome" />
+    <Member Name="Owner" Description="Proprietario" />
+    <Member Name="Priority" Description="Priorità" />
+  </Type>
+  <Type Name="ToolbarLocation" Description="Posizione della barra degli strumenti">
+    <Member Name="Main" Description="Principale" />
+    <Member Name="Side" Description="Lato" />
+    <Member Name="Top" Description="In alto" />
+  </Type>
+  <Type Name="ToolbarMenuEntity" Description="il menu Barra degli strumenti" PluralDescription="Menu della barra degli strumenti">
+    <Member Name="Elements" Description="Elementi" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Name" Description="Nome" />
+    <Member Name="Owner" Description="Proprietario" />
+  </Type>
+  <Type Name="ToolbarMenuOperation">
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="ToolbarMessage">
+    <Member Name="_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships" Description="{0} cicli sono stati trovati nella barra degli strumenti a causa delle relazioni:" />
+    <Member Name="ExtraIconCanNotComeAfterDivider" Description="L'icona extra non può venire dopo il divisore" />
+    <Member Name="FirstElementCanNotBeExtraIcon" Description="Il primo elemento non può essere un'icona aggiuntiva" />
+    <Member Name="RecursionDetected" Description="Ricorsione rilevata" />
+  </Type>
+  <Type Name="ToolbarOperation">
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+</Translations>

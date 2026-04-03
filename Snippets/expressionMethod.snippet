@@ -11,13 +11,6 @@
       </SnippetTypes>
     </Header>
     <Snippet>
-      <Imports>
-        <Import>
-          <Namespace>Signum.Entities</Namespace>
-          <Namespace>Signum.Utilities</Namespace>
-          <Namespace>System.Linq.Expressions</Namespace>
-        </Import>
-      </Imports>
       <Declarations>
         <Literal>
           <ID>methodName</ID>
@@ -27,7 +20,7 @@
         <Literal>
           <ID>type</ID>
           <ToolTip>Type</ToolTip>
-          <Default>IdentifiableEntity</Default>
+          <Default>Entity</Default>
         </Literal>
         <Literal>
           <ID>paramName</ID>
@@ -41,12 +34,8 @@
         </Literal>
       </Declarations>
       <Code Language="csharp">
-        <![CDATA[static Expression<Func<$type$, $returnType$>> $methodName$Expression = 
-            $paramName$ => ; 
-        public static $returnType$ $methodName$(this $type$ $paramName$)
-        {
-            return $methodName$Expression.Evaluate($paramName$);
-        }]]>
+        <![CDATA[[AutoExpressionField]
+        public static $returnType$ $methodName$(this $type$ $paramName$) => As.Expression(() => $end$);]]>
       </Code>
     </Snippet>
   </CodeSnippet>

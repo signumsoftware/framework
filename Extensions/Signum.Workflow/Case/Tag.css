@@ -1,0 +1,17 @@
+﻿.case-tag {
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 80px;
+    text-overflow: ellipsis;
+    border: 1px solid;
+    padding: 0 3px;
+    border-radius: 3px;
+    font-size: smaller;
+    font-style: normal;
+    font-weight: normal;
+    display: inline-block;
+}
+
+a.case-icon {
+    display: inline-flex;
+}

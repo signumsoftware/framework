@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="DisconnectedCreatedMixin">
+    <Member Name="DisconnectedCreated" Description="Disconnected created" />
+  </Type>
+  <Type Name="DisconnectedExportEntity" Description="Exportation déconnectée" PluralDescription="Exportations déconnectées">
+    <Member Name="BackupDatabase" Description="Sauvegarde de la base de données" />
+    <Member Name="Copies" Description="Copies" />
+    <Member Name="CreateDatabase" Description="Créer une base de données" />
+    <Member Name="CreateSchema" Description="Créer un schéma" />
+    <Member Name="CreationDate" Description="Date de création" />
+    <Member Name="DisableForeignKeys" Description="Désactiver les clés étrangères" />
+    <Member Name="DropDatabase" Description="Supprimer la base de données" />
+    <Member Name="EnableForeignKeys" Description="Activer les clés étrangères" />
+    <Member Name="Exception" Description="Exception" />
+    <Member Name="Lock" Description="Verrou" />
+    <Member Name="Machine" Description="Machine" />
+    <Member Name="ReseedIds" Description="Reseed IDs" />
+    <Member Name="State" Description="État" />
+    <Member Name="Total" Description="Total" />
+  </Type>
+  <Type Name="DisconnectedExportState" Description="Statut d’exportation Déconnecté">
+    <Member Name="Completed" Description="Terminé" />
+    <Member Name="Error" Description="Erreur" />
+    <Member Name="InProgress" Description="En cours" />
+  </Type>
+  <Type Name="DisconnectedExportTableEmbedded" Description="Exporter la table déconnectée">
+    <Member Name="CopyTable" Description="Copier la table" />
+    <Member Name="Errors" Description="Erreurs" />
+    <Member Name="Type" Description="Type" />
+  </Type>
+  <Type Name="DisconnectedImportEntity" Description="Importation déconnectée" PluralDescription="Importations déconnectée">
+    <Member Name="Copies" Description="Copies" />
+    <Member Name="CreationDate" Description="Date de création" />
+    <Member Name="DisableForeignKeys" Description="Désactiver les clés étrangères" />
+    <Member Name="DropDatabase" Description="Supprimer la base de données" />
+    <Member Name="EnableForeignKeys" Description="Activer les clés étrangères" />
+    <Member Name="Exception" Description="Exception" />
+    <Member Name="Machine" Description="Machine" />
+    <Member Name="RestoreDatabase" Description="Restaurer la base de données" />
+    <Member Name="State" Description="État" />
+    <Member Name="SynchronizeSchema" Description="Synchroniser le schéma" />
+    <Member Name="Total" Description="Total" />
+    <Member Name="Unlock" Description="Déverrouiller" />
+  </Type>
+  <Type Name="DisconnectedImportState" Description="Statut d’importation déconnecté">
+    <Member Name="Completed" Description="Terminé" />
+    <Member Name="Error" Description="Erreur" />
+    <Member Name="InProgress" Description="En cours" />
+  </Type>
+  <Type Name="DisconnectedImportTableEmbedded" Description="Table d’importation déconnectée">
+    <Member Name="CopyTable" Description="Copier la table" />
+    <Member Name="DisableForeignKeys" Description="Désactiver les clés étrangères" />
+    <Member Name="InsertedOrUpdated" Description="Inséré ou mis à jour" />
+    <Member Name="InsertedRows" Description="Lignes insérées" />
+    <Member Name="Type" Description="Type" />
+    <Member Name="UpdatedRows" Description="Lignes mises à jour" />
+  </Type>
+  <Type Name="DisconnectedMachineEntity" Description=" Machine déconnectée" PluralDescription="Machines déconnectées">
+    <Member Name="CreationDate" Description="Date de création" />
+    <Member Name="MachineName" Description="Nom de la machine" />
+    <Member Name="SeedInterval" Description="Seed interval" />
+    <Member Name="SeedMax" Description="Seed max" />
+    <Member Name="SeedMin" Description="Seed min" />
+    <Member Name="State" Description="État" />
+  </Type>
+  <Type Name="DisconnectedMachineOperation">
+    <Member Name="FixImport" Description="Correction de l’importation" />
+    <Member Name="Save" Description="Sauvegarder" />
+    <Member Name="UnsafeUnlock" Description="Déverrouillage non sécurisé" />
+  </Type>
+  <Type Name="DisconnectedMachineState" Description="État de la machine déconnectée">
+    <Member Name="Connected" Description="Connecté" />
+    <Member Name="Disconnected" Description="Déconnecté" />
+    <Member Name="Faulted" Description="Défectueux" />
+    <Member Name="Fixed" Description="Fixé" />
+  </Type>
+  <Type Name="DisconnectedMessage">
+    <Member Name="_0OverlapsWith1" Description="{0} chevauche {1}" />
+    <Member Name="Exports" Description="Exportations" />
+    <Member Name="Imports" Description="Importations" />
+    <Member Name="NotAllowedToSave0WhileOffline" Description="Impossible d’enregistrer {0} en mode non connecté" />
+    <Member Name="The0WithId12IsLockedBy3" Description="Le {0} avec Id {1} ({2}) est verrouillé par {3}" />
+  </Type>
+  <Type Name="DisconnectedSubsetMixin">
+    <Member Name="DisconnectedMachine" Description="Machine déconnectée" />
+    <Member Name="LastOnlineTicks" Description="Last online ticks" />
+  </Type>
+  <Type Name="Download">
+    <Member Name="All" Description="Tout" />
+    <Member Name="None" Description="Aucun" />
+    <Member Name="Replace" Description="Remplacer" />
+    <Member Name="Subset" Description="Sous-ensemble" />
+  </Type>
+</Translations>

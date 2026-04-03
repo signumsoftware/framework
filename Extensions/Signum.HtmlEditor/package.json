@@ -1,0 +1,21 @@
+{
+  "name": "signum-htmleditor",
+  "version": "1.0.0",
+  "description": "Resable modules to use on top of Signum Framework",
+  "repository": "",
+  "keywords": [],
+  "author": "Signum Software",
+  "license": "MIT",
+  "resolutions": {},
+  "dependencies": {
+    "lexical": "0.38.2",
+    "@lexical/react": "0.38.2",
+    "@lexical/code": "0.38.2",
+    "@lexical/list": "0.38.2",
+    "@lexical/rich-text": "0.38.2",
+    "@lexical/markdown": "0.38.2",
+    "@lexical/selection": "0.38.2",
+    "@types/prismjs": "1.26.5",
+    "@lexical/link": "0.38.2"
+  }
+}

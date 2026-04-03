@@ -11,13 +11,6 @@
       </SnippetTypes>
     </Header>
     <Snippet>
-      <Imports>
-        <Import>
-          <Namespace>Signum.Engine</Namespace>
-          <Namespace>Signum.Entities</Namespace>
-          <Namespace>Signum.Utilities</Namespace>
-        </Import>
-      </Imports>
       <Declarations>
         <Literal>
           <ID>entityName</ID>
@@ -31,7 +24,7 @@
         </Literal>
       </Declarations>
       <Code Language="csharp">
-        <![CDATA[public class $entityName$Graph : Graph<$entityName$DN, $entityName$State>
+        <![CDATA[public class $entityName$Graph : Graph<$entityName$Entity, $entityName$State>
     {
         public static void Register()
         {
@@ -39,11 +32,17 @@
 
             new Execute($entityName$Operation.Save)
             {
-                FromStates = new[] { $entityName$State.New },
-                ToState = $entityName$State.Saved,
-                AllowsNew = true,
-                Lite = false,
+                FromStates = { $entityName$State.New },
+                ToStates = { $entityName$State.Saved },
+                CanBeNew = true,
+                CanBeModified = true,
                 Execute = ($entityParam$, _) => { },
+            }.Register();
+			
+			new Delete($entityName$Operation.Delete)
+            {
+			    FromStates = { $entityName$State.Saved },
+                Delete = ($entityParam$, _) => { $entityParam$.Delete(); },
             }.Register();
         }
     }]]>

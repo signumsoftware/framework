@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="CalendarDayEntity" Description="Jour calendrier" PluralDescription="Jours calendriers">
+    <Member Name="Date" Description="Date" />
+  </Type>
+</Translations>

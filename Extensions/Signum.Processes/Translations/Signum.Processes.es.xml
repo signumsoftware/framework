@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="PackageEntity" Description="Paquete">
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="OperationArguments" Description="Argumentos operación" />
+  </Type>
+  <Type Name="PackageLineEntity" Description="Línea paquete">
+    <Member Name="FinishTime" Description="Fin" />
+    <Member Name="Package" Description="Paquete" />
+    <Member Name="Result" Description="Resultado" />
+    <Member Name="Target" Description="Destino" />
+  </Type>
+  <Type Name="PackageOperationEntity" Description="Operación de paquete">
+    <Member Name="Operation" Description="Operación" />
+  </Type>
+  <Type Name="PackageOperationProcess">
+    <Member Name="PackageOperation" Description="Paquete operación" />
+  </Type>
+  <Type Name="PackageQuery">
+    <Member Name="PackageLastProcess" Description="Paquete último proceso" />
+    <Member Name="PackageLineLastProcess" Description="Paquete línea de último proceso" />
+    <Member Name="PackageOperationLastProcess" Description="Operación de paquete último proceso" />
+  </Type>
+  <Type Name="ProcessAlgorithmSymbol" Description="Símbolo de algoritmo de proceso" />
+  <Type Name="ProcessEntity" Description="Proceso">
+    <Member Name="Algorithm" Description="Algoritmo" />
+    <Member Name="ApplicationName" Description="Nombre de la aplicación" />
+    <Member Name="CancelationDate" Description="Fecha de cancelación" />
+    <Member Name="CreationDate" Description="Fecha de creación" />
+    <Member Name="Data" Description="Datos" />
+    <Member Name="Duration" Description="Duración" />
+    <Member Name="DurationSpan" Description="Período de duración" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="ExceptionDate" Description="Fecha de excepción" />
+    <Member Name="ExecutionEnd" Description="Final de ejecución" />
+    <Member Name="ExecutionStart" Description="Inicio de ejecución" />
+    <Member Name="MachineName" Description="Nombre máquina" />
+    <Member Name="PlannedDate" Description="Fecha prevista" />
+    <Member Name="Progress" Description="Progreso" />
+    <Member Name="QueuedDate" Description="Fecha encolado" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="Status" Description="Estado" />
+    <Member Name="SuspendDate" Description="Fecha de suspensión" />
+    <Member Name="User" Description="Usuario" />
+  </Type>
+  <Type Name="ProcessExceptionLineEntity" Description="Línea de proceso de excepción">
+    <Member Name="ElementInfo" Description="Información de elemento" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="Line" Description="Línea" />
+    <Member Name="Process" Description="Proceso" />
+  </Type>
+  <Type Name="ProcessMessage">
+    <Member Name="ExceptionLines" Description="Lineas excepción" />
+    <Member Name="LastProcess" Description="Último proceso" />
+    <Member Name="Lines" Description="Líneas" />
+    <Member Name="Process0IsNotRunningAnymore" Description="Proceso {0} ya no está en ejecución" />
+    <Member Name="ProcessStartIsGreaterThanProcessEnd" Description="Process Start es mayor que Process End" />
+    <Member Name="ProcessStartIsNullButProcessEndIsNot" Description="Process Start es nulo, pero Process End no" />
+    <Member Name="SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway" Description="Suspender de la forma más segura para detener un proceso en ejecución. ¿Cancelar de todos modos?" />
+  </Type>
+  <Type Name="ProcessOperation">
+    <Member Name="Cancel" Description="Cancelar" />
+    <Member Name="Execute" Description="Ejecutar" />
+    <Member Name="Plan" Description="Planificar" />
+    <Member Name="Retry" Description="Reintentar" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="Suspend" Description="Suspender" />
+  </Type>
+  <Type Name="ProcessPermission">
+    <Member Name="ViewProcessPanel" Description="Ver panel de procesos" />
+  </Type>
+  <Type Name="ProcessState" Description="Estado del proceso">
+    <Member Name="Canceled" Description="Cancelado" />
+    <Member Name="Created" Description="Creado" />
+    <Member Name="Error" Description="Error" />
+    <Member Name="Executing" Description="Ejecutándose" />
+    <Member Name="Finished" Description="Finalizado" />
+    <Member Name="Planned" Description="Planeado" />
+    <Member Name="Queued" Description="Encolado" />
+    <Member Name="Suspended" Description="Suspendido" />
+    <Member Name="Suspending" Description="Suspendiéndose" />
+  </Type>
+</Translations>

@@ -1,0 +1,34 @@
+﻿.version-alert {
+    text-align:center;
+    font-size: 1.3em;
+    flex-grow: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .blink {
+        animation: none !important;
+    }
+}
+
+.blink {
+    animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0.5;
+    }
+}
+
+#tooltip-buildId .tooltip-inner {
+    max-width: initial;
+    white-space: normal;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+    box-shadow: var(--bs-box-shadow);
+}
+
+.sf-version-info {
+    cursor: default;
+}

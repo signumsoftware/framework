@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ChartColumnEmbedded" Description="Columna de gráfico">
+    <Member Name="DisplayName" Description="Nombre para Mostrar" />
+    <Member Name="Format" Description="Formato" />
+    <Member Name="OrderByIndex" Description="Ordenar por índice" />
+    <Member Name="OrderByType" Description="Ordenar por tipo" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="ChartColumnType">
+    <Member Name="DateTime" Description="Fecha hora" />
+    <Member Name="Enum" Description="Enum" />
+    <Member Name="Groupable" Description="Agrupable" />
+    <Member Name="Integer" Description="Entero" />
+    <Member Name="Lite" Description="Lite" />
+    <Member Name="Magnitude" Description="Magnitud" />
+    <Member Name="Positionable" Description="Posicionable" />
+    <Member Name="Real" Description="Real" />
+    <Member Name="RealGroupable" Description="Real groupable" />
+    <Member Name="String" Description="Cadena" />
+    <Member Name="Time" Description="Hora" />
+  </Type>
+  <Type Name="ChartMessage">
+    <Member Name="_0CanOnlyBeCreatedFromTheChartWindow" Description="{0} sólo se puede crear desde la ventana del gráfico" />
+    <Member Name="_0CanOnlyBeCreatedFromTheSearchWindow" Description="{0} sólo se puede crear desde el buscador" />
+    <Member Name="_0IsAnAggregateButTheChartIsNotGrouping" Description="{0} es un agregado, pero el gráfico no es una agrupación" />
+    <Member Name="_0IsKeyBut1IsAnAggregate" Description="{0} es clave, pero {1} es un agregado" />
+    <Member Name="_0IsNot1" Description="{0} no es {1}" />
+    <Member Name="_0IsNotOptional" Description="{0} no es opcional" />
+    <Member Name="_0ShouldBeAnAggregate" Description="{0} debe ser un agregado" />
+    <Member Name="_0ShouldBeNull" Description="{0} debe ser nulo" />
+    <Member Name="_0ShouldBeSet" Description="{0} debe establecerse" />
+    <Member Name="ApplyChanges" Description="Aplicar cambios" />
+    <Member Name="Chart" Description="Gráfico" />
+    <Member Name="ChartFor" Description="Gráfico para" />
+    <Member Name="ChartOf0" Description="Gráfico de {0}" />
+    <Member Name="ChartSettings" Description="Configuración de gráfico" />
+    <Member Name="ChartToken" Description="Grafico" />
+    <Member Name="ChooseABasePalette" Description="Elegir una paleta base" />
+    <Member Name="ColorsFor0" Description="Colores para {0}" />
+    <Member Name="CreateNew" Description="Crear" />
+    <Member Name="CreatePalette" Description="Crear paleta" />
+    <Member Name="Data" Description="Datos" />
+    <Member Name="DeletePalette" Description="Eliminar paleta" />
+    <Member Name="Dimension" Description="Dimensión" />
+    <Member Name="DrawChart" Description="Dibujar gráfico" />
+    <Member Name="Edit" Description="Editar" />
+    <Member Name="Group" Description="Grupo" />
+    <Member Name="HideChartSettings" Description="Ocultar la configuración del gráfico" />
+    <Member Name="Maximize" Description="Maximizar" />
+    <Member Name="Minimize" Description="Minimizar" />
+    <Member Name="MyCharts" Description="Mis Gráficos" />
+    <Member Name="NewPalette" Description="Nueva paleta" />
+    <Member Name="Preview" Description="Vista previa" />
+    <Member Name="Query0IsNotAllowed" Description="La consulta {0} no está permitida" />
+    <Member Name="QueryResultReachedMaxRows0" Description="El resultado de la consulta ha alcanzado el máximo de filas ({0})" />
+    <Member Name="Reload" Description="Recargar" />
+    <Member Name="SavePalette" Description="Guardar paleta" />
+    <Member Name="ShowChartSettings" Description="Mostrar la configuración del gráfico" />
+    <Member Name="ToggleInfo" Description="Cambiar info" />
+    <Member Name="Type0NotFoundInTheDatabase" Description="El tipo {0} no está en la base de datos" />
+    <Member Name="TypeNotFound" Description="Tipo no encontrado" />
+    <Member Name="ViewPalette" Description="Ver paleta" />
+  </Type>
+  <Type Name="ChartParameterEmbedded" Description="Parámetro de gráfico">
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="ScriptParameter" Description="Parámetro de secuencia de comandos" />
+    <Member Name="Value" Description="Valor" />
+  </Type>
+  <Type Name="ChartPermission">
+    <Member Name="ViewCharting" Description="Ver gráficos" />
+  </Type>
+  <Type Name="ChartRequestModel" Description="Solicitud de gráfico">
+    <Member Name="ChartScript" Description="Script de gráfico" />
+    <Member Name="Columns" Description="Columnas" />
+    <Member Name="Filters" Description="Filtros" />
+    <Member Name="MaxRows" Description="Filas máximas" />
+    <Member Name="Multiplications" Description="Multiplicaciones" />
+    <Member Name="Parameters" Description="Parámetros" />
+    <Member Name="QueryName" Description="Nombre de consulta" />
+  </Type>
+  <Type Name="ChartScriptSymbol" Description="Script de gráfico" Gender="m" />
+  <Type Name="CombinedUserChartPartEntity" Description="Parte del gráfico de usuario combinado">
+    <Member Name="AllowChangeShowData" Description="Permitir cambio de datos mostrados" />
+    <Member Name="CombinePinnedFiltersWithSameLabel" Description="Combinar filtros anclados con la misma etiqueta" />
+    <Member Name="RequiresTitle" Description="Requiere título" />
+    <Member Name="ShowData" Description="Mostrar datos" />
+    <Member Name="UserCharts" Description="Gráficos de usuario" />
+    <Member Name="UseSameScale" Description="Usar la misma escala" />
+  </Type>
+  <Type Name="D3ChartScript">
+    <Member Name="Bars" Description="Barras" />
+    <Member Name="BubblePack" Description="Paquete de burbujas" />
+    <Member Name="Bubbleplot" Description="Gráfica de burbujas" />
+    <Member Name="CalendarStream" Description="Secuencia de calendario" />
+    <Member Name="Columns" Description="Columnas" />
+    <Member Name="Line" Description="Línea" />
+    <Member Name="MultiBars" Description="Barras múltiples" />
+    <Member Name="MultiColumns" Description="Columnas múltiples" />
+    <Member Name="MultiLines" Description="Líneas múltiples" />
+    <Member Name="ParallelCoordinates" Description="Coordenadas paralelas" />
+    <Member Name="Pie" Description="Tarta" />
+    <Member Name="Punchcard" Description="Tabla de puntos" />
+    <Member Name="Scatterplot" Description="Gráfica de dispersión" />
+    <Member Name="StackedBars" Description="Barras apiladas" />
+    <Member Name="StackedColumns" Description="Columnas apiladas" />
+    <Member Name="StackedLines" Description="Líneas apiladas" />
+    <Member Name="Treemap" Description="Mapa arbóreo" />
+  </Type>
+  <Type Name="HtmlChartScript">
+    <Member Name="PivotTable" Description="Tabla dinámica" />
+  </Type>
+  <Type Name="UserChartEntity" Description="Gráfico de usuario">
+    <Member Name="ChartScript" Description="Script de gráfico" />
+    <Member Name="Columns" Description="Columnas" />
+    <Member Name="DisplayName" Description="Nombre para mostrar" />
+    <Member Name="EntityType" Description="Tipo de entidad" />
+    <Member Name="Filters" Description="Filtros" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="HideQuickLink" Description="Ocultar quick link" />
+    <Member Name="MaxRows" Description="Filas máximas" />
+    <Member Name="Owner" Description="Propietario" />
+    <Member Name="Parameters" Description="Parámetros" />
+    <Member Name="Query" Description="Consulta" />
+  </Type>
+  <Type Name="UserChartOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="UserChartPartEntity" Description="Parte gráfico de usuario ">
+    <Member Name="AllowChangeShowData" Description="Permitir cambio de datos mostrados" />
+    <Member Name="AutoRefresh" Description="Actualización automática" />
+    <Member Name="CreateNew" Description="Crear nuevo" />
+    <Member Name="RequiresTitle" Description="Requiere título" />
+    <Member Name="ShowData" Description="Mostrar datos" />
+    <Member Name="UserChart" Description="Gráfico de usuario" />
+  </Type>
+</Translations>

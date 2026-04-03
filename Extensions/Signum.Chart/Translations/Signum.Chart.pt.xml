@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ChartColumnEmbedded" Description="Coluna de gráfico">
+    <Member Name="DisplayName" Description="Nome de exibição" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="ChartColumnType">
+    <Member Name="DateTime" Description="Data hora" />
+    <Member Name="Enum" Description="Enum" />
+    <Member Name="Groupable" Description="Agrupável" />
+    <Member Name="Integer" Description="Inteiro" />
+    <Member Name="Lite" Description="Lite" />
+    <Member Name="Magnitude" Description="Magnitude" />
+    <Member Name="Positionable" Description="Posicionável" />
+    <Member Name="Real" Description="Real" />
+    <Member Name="String" Description="String" />
+  </Type>
+  <Type Name="ChartMessage">
+    <Member Name="_0CanOnlyBeCreatedFromTheChartWindow" Description="{0} só pode ser criado desde a janela do gráfico" />
+    <Member Name="_0CanOnlyBeCreatedFromTheSearchWindow" Description="{0} só pode ser criado desde a barra de pesquisa" />
+    <Member Name="_0IsAnAggregateButTheChartIsNotGrouping" Description="{0} é um agregado, mas o gráfico não é uma agrupação" />
+    <Member Name="_0IsKeyBut1IsAnAggregate" Description="{0} é chave, mas {1} é um agregado" />
+    <Member Name="_0IsNot1" Description="{0} não é {1}" />
+    <Member Name="_0IsNotOptional" Description="{0} não é opcional" />
+    <Member Name="_0ShouldBeAnAggregate" Description="{0} deve ser um agregado" />
+    <Member Name="_0ShouldBeNull" Description="{0} deve ser nulo" />
+    <Member Name="_0ShouldBeSet" Description="{0} deve se estabelecer" />
+    <Member Name="Chart" Description="Gráfico" />
+    <Member Name="ChartFor" Description="Gráfico para " />
+    <Member Name="ChartOf0" Description="Gráfico de {0}" />
+    <Member Name="ChartToken" Description="Gráfico" />
+    <Member Name="ChooseABasePalette" Description="Escolher uma nova palete" />
+    <Member Name="ColorsFor0" Description="Cores para {0}" />
+    <Member Name="CreateNew" Description="Criar" />
+    <Member Name="CreatePalette" Description="Criar palete" />
+    <Member Name="Data" Description="Dados" />
+    <Member Name="DeletePalette" Description="Eliminar palete" />
+    <Member Name="MyCharts" Description="Meus gráficos" />
+    <Member Name="NewPalette" Description="Nova palete" />
+    <Member Name="SavePalette" Description="Guadar palete" />
+    <Member Name="ViewPalette" Description="Ver palete" />
+  </Type>
+  <Type Name="ChartPermission">
+    <Member Name="ViewCharting" Description="Ver gráficos" />
+  </Type>
+  <Type Name="UserChartEntity" Description="Gráfico de utilizador" PluralDescription="Gráficos de utilizador">
+    <Member Name="ChartScript" Description="Script de gráfico" />
+    <Member Name="Columns" Description="Colunas" />
+    <Member Name="DisplayName" Description="Nome para exibição" />
+    <Member Name="EntityType" Description="Tipo de entidad" />
+    <Member Name="Filters" Description="Filtros" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Owner" Description="Proprietario" />
+    <Member Name="Query" Description="Consulta" />
+  </Type>
+  <Type Name="UserChartOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="UserChartPartEntity" Description="Gráfico de utilizador parte" PluralDescription="Gráficos de utilizador parte">
+    <Member Name="RequiresTitle" Description="Requer título" />
+    <Member Name="ShowData" Description="Mostrar dados" />
+    <Member Name="UserChart" Description="Gráfico de utilizador" />
+  </Type>
+</Translations>

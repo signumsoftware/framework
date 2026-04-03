@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ViewLogEntity" Description="Registo de visita" PluralDescription="Registos de visita">
+    <Member Name="Duration" Description="Duraçao" />
+    <Member Name="EndDate" Description="Data de fim" />
+    <Member Name="StartDate" Description="Data de inicio" />
+    <Member Name="Target" Description="Destino" />
+    <Member Name="User" Description="Utilizador" />
+    <Member Name="ViewAction" Description="Acçao de vista" />
+  </Type>
+</Translations>

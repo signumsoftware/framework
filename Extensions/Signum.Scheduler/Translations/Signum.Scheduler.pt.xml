@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="HolidayCalendarEntity" Description="Calendário de festas" PluralDescription="Calendários de festas">
+    <Member Name="Holidays" Description="Férias" />
+    <Member Name="Name" Description="Nome" />
+  </Type>
+  <Type Name="HolidayCalendarOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="HolidayEmbedded" Description="Feriados">
+    <Member Name="Date" Description="Data" />
+    <Member Name="Name" Description="Nome" />
+  </Type>
+  <Type Name="ScheduledTaskEntity" Description="Tarefa agendada" PluralDescription="Tarefas agendada">
+    <Member Name="ApplicationName" Description="Nome aplicaçao" />
+    <Member Name="MachineName" Description="Nome da máquina" />
+    <Member Name="Rule" Description="Regra" />
+    <Member Name="Suspended" Description="Suspenso" />
+    <Member Name="Task" Description="Tarefa" />
+  </Type>
+  <Type Name="ScheduledTaskLogEntity" Description="Registo de tarefas programadas" PluralDescription="Registos de tarefas programadas">
+    <Member Name="ApplicationName" Description="Nome da aplicação" />
+    <Member Name="Duration" Description="Duração" />
+    <Member Name="EndTime" Description="Hora de fim" />
+    <Member Name="Exception" Description="Exceção" />
+    <Member Name="MachineName" Description="Nome de máquina " />
+    <Member Name="ProductEntity" Description="Entidade de produto" />
+    <Member Name="ScheduledTask" Description="Tarefa programada" />
+    <Member Name="StartTime" Description="Hora de início" />
+    <Member Name="Task" Description="Tarefa" />
+    <Member Name="User" Description="Utilizador" />
+  </Type>
+  <Type Name="ScheduledTaskOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="SchedulerMessage">
+    <Member Name="Each0Minutes" Description="Cada {0} minutos" />
+    <Member Name="ScheduleRuleWeekDaysDN_AndHoliday" Description="e feriados" />
+    <Member Name="ScheduleRuleWeekDaysDN_At" Description="às" />
+    <Member Name="ScheduleRuleWeekDaysDN_ButHoliday" Description="exepcto feriados" />
+    <Member Name="ScheduleRuleWeekDaysDN_Sa" Description="S" />
+    <Member Name="ScheduleRuleWeekDaysDN_Th" Description="5f" />
+  </Type>
+  <Type Name="SchedulerPermission">
+    <Member Name="ViewSchedulerPanel" Description="Ver painel de tarefas programadas" />
+  </Type>
+  <Type Name="ScheduleRuleMinutelyEntity" Description="Programar regra por minuto" PluralDescription="Programar regras por minuto">
+    <Member Name="EachMinutes" Description="Cada minutos" />
+  </Type>
+  <Type Name="ScheduleRuleWeekDaysEntity" Description="Regra de días da semana " PluralDescription="Regras de días da semana">
+    <Member Name="Calendar" Description="Calendário" />
+    <Member Name="Friday" Description="Sexta-feira" />
+    <Member Name="Holiday" Description="Feriado" />
+    <Member Name="Monday" Description="Segunda-feira" />
+    <Member Name="Saturday" Description="Sábado" />
+    <Member Name="Sunday" Description="Domingo" />
+    <Member Name="Thursday" Description="Quinta-feira" />
+    <Member Name="Tuesday" Description="Terça-feira" />
+    <Member Name="Wednesday" Description="Quarta-feira" />
+  </Type>
+  <Type Name="SimpleTaskSymbol" Description="Tarefa simples" PluralDescription="Tarefas simples" />
+</Translations>

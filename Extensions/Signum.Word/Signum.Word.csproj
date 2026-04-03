@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework> 
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+		<OutputType>Library</OutputType>
+		<NoWarn>8618</NoWarn>
+	</PropertyGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
+	<ItemGroup>
+		
+		<PackageReference Include="System.Drawing.Common" Version="10.0.5" />
+		<PackageReference Include="DocumentFormat.OpenXml" Version="3.5.1" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+		<PackageReference Include="SixLabors.ImageSharp" Version="2.1.13" />
+		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
+		<PackageReference Include="Signum.MSBuildTask" Version="10.0.0" />
+		<PackageReference Include="Signum.TSGenerator" Version="10.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
+		<ProjectReference Include="..\..\Signum\Signum.csproj" />
+		<ProjectReference Include="..\Signum.Chart\Signum.Chart.csproj" />
+		<ProjectReference Include="..\Signum.Excel\Signum.Excel.csproj" />
+		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
+		<ProjectReference Include="..\Signum.Mailing\Signum.Mailing.csproj" />
+		<ProjectReference Include="..\Signum.Templating\Signum.Templating.csproj" />
+		<ProjectReference Include="..\Signum.UserAssets\Signum.UserAssets.csproj" />
+	</ItemGroup>
+
+
+</Project>

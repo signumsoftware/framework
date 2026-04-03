@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="EvalEmbedded`1">
+    <Member Name="Script" Description="Copione" />
+  </Type>
+  <Type Name="EvalPanelMessage">
+    <Member Name="OpenErrors" Description="Errori di apertura" />
+  </Type>
+  <Type Name="EvalPanelPermission">
+    <Member Name="ViewDynamicPanel" Description="Visualizza pannello dinamico" />
+  </Type>
+  <Type Name="TypeHelpMessage">
+    <Member Name="Next" Description="Prossimo" />
+    <Member Name="Previous" Description="Precedente" />
+  </Type>
+</Translations>

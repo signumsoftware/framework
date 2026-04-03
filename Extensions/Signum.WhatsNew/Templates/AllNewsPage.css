@@ -1,0 +1,44 @@
+﻿.sf-news-notify-badge {
+    position: absolute;
+    background: var(--bs-primary);
+    text-align: center;
+    color: var(--bs-body-color);
+    padding: 5px 10px;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+.news-stats {
+    color: var(--bs-secondary-text);
+    font-size: 10px;
+}
+
+.news-shadow {
+    box-shadow: 0 1px 2px 0 var(--bs-box-shadow);
+    transition: box-shadow 0.3s
+}
+
+.news-shadow:hover {
+    box-shadow: 0 2px 4px 0 var(--bs-box-shadow);
+}
+
+.news-shadow.selected {
+    color: var(--bs-body-color);
+    background: var(--bs-primary);
+}
+
+.news-shadow.selected .news-stats {
+    color: var(--bs-primary-text);
+}
+
+.preview-picture-card-box {
+    padding: 30px 0px;
+    max-height: 40vh;
+    max-width: 400px;
+    display: table;
+    margin: auto;
+}
+
+.card .news-shadow {
+    max-width: 90vw;
+}

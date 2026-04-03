@@ -1,0 +1,48 @@
+﻿<CodeSnippet Format="1.1.0" xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <Header>
+    <Title>EntityTable</Title>
+    <Author>Signum Software</Author>
+    <Shortcut>entityTable</Shortcut>
+    <Description>Code snippet for adding an React EntityTable using typedColumns helper method</Description>
+    <SnippetTypes>
+      <SnippetType>Expansion</SnippetType>
+    </SnippetTypes>
+  </Header>
+  <Snippet>
+    <Imports>
+      <Import>
+        <Namespace>
+          import { EntityTable } from '@framework/Lines';
+        </Namespace>
+      </Import>
+    </Imports>
+    <Declarations>
+      <Literal>
+        <ID>prop</ID>
+        <ToolTip>MList property</ToolTip>
+        <Default>elements</Default>
+      </Literal>
+      <Literal>
+        <ID>entityType</ID>
+        <ToolTip>Name of the embedded</ToolTip>
+        <Default>FooEmbedded</Default>
+      </Literal>
+      <Literal>
+        <ID>elemProp</ID>
+        <ToolTip>Property of the table's first column</ToolTip>
+        <Default>prop1</Default>
+      </Literal>
+    </Declarations>
+    <Code Language="TypeScript">
+      <![CDATA[<EntityTable ctx={ctx.subCtx(p => p.$prop$)} columns={EntityTable.typedColumns<$entityType$>([
+          {
+            property: p => p.$elemProp1$,
+            //template: (ectx) => <ValueLine ctx={ectx.subCtx(p => p.$elemProp1$)} />,
+            headerHtmlAttributes: { style: { width: "30%" } },
+          },
+          $end$
+        ])}
+      />]]>
+    </Code>
+  </Snippet>
+</CodeSnippet>

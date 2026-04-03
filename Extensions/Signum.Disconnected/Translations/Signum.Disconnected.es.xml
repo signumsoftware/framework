@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="DisconnectedCreatedMixin">
+    <Member Name="DisconnectedCreated" Description="Desconectado creado" />
+  </Type>
+  <Type Name="DisconnectedExportEntity" Description="Exportación desconectada">
+    <Member Name="BackupDatabase" Description="Copia de seguridad de base de datos" />
+    <Member Name="Copies" Description="Copias" />
+    <Member Name="CreateDatabase" Description="Crear base de datos" />
+    <Member Name="CreateSchema" Description="Crear esquema" />
+    <Member Name="CreationDate" Description="Fecha de creación" />
+    <Member Name="DisableForeignKeys" Description="Desactivar Foreign Keys" />
+    <Member Name="DropDatabase" Description="Eliminar Base de Datos" />
+    <Member Name="EnableForeignKeys" Description="Activar Foreign Keys" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="Lock" Description="Bloqueado" />
+    <Member Name="Machine" Description="Máquina" />
+    <Member Name="ReseedIds" Description="Reinicio Ids" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="Total" Description="Total" />
+  </Type>
+  <Type Name="DisconnectedExportTableEmbedded" Description="Tabla de exportación desconectada">
+    <Member Name="CopyTable" Description="Copiar tabla" />
+    <Member Name="Errors" Description="Errores" />
+    <Member Name="Type" Description="Tipo" />
+  </Type>
+  <Type Name="DisconnectedImportEntity" Description="Importación desconectada">
+    <Member Name="Copies" Description="Copias" />
+    <Member Name="CreationDate" Description="Fecha de creación" />
+    <Member Name="DisableForeignKeys" Description="Desactivar Foreign Keys" />
+    <Member Name="DropDatabase" Description="Eliminar Base de Datos" />
+    <Member Name="EnableForeignKeys" Description="Activar Foreign Keys" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="Machine" Description="Máquina" />
+    <Member Name="RestoreDatabase" Description="Restaurar base de datos" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="SynchronizeSchema" Description="Sincronizar el esquema" />
+    <Member Name="Total" Description="Total" />
+    <Member Name="Unlock" Description="Desbloquear" />
+  </Type>
+  <Type Name="DisconnectedImportTableEmbedded" Description="Tabla de importación desconectada">
+    <Member Name="CopyTable" Description="Copiar tabla" />
+    <Member Name="DisableForeignKeys" Description="Desactivar las claves externas" />
+    <Member Name="InsertedOrUpdated" Description="Insertar o actualizar" />
+    <Member Name="InsertedRows" Description="Filas insertadas" />
+    <Member Name="Type" Description="Tipo" />
+    <Member Name="UpdatedRows" Description="Filas actualizadas" />
+  </Type>
+  <Type Name="DisconnectedMachineEntity" Description="Máquina desconectada">
+    <Member Name="CreationDate" Description="Fecha de creación" />
+    <Member Name="MachineName" Description="Nombre de la máquina" />
+    <Member Name="SeedInterval" Description="Intervalo semilla" />
+    <Member Name="SeedMax" Description="Semilla Máxima" />
+    <Member Name="SeedMin" Description="Semilla Mínima" />
+    <Member Name="State" Description="Estado" />
+  </Type>
+  <Type Name="DisconnectedMachineOperation">
+    <Member Name="FixImport" Description="Arreglar Importación" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="UnsafeUnlock" Description="Desbloqueo Inseguro" />
+  </Type>
+  <Type Name="DisconnectedMessage">
+    <Member Name="_0OverlapsWith1" Description="{0} se solapa con {1}" />
+    <Member Name="Exports" Description="Exportaciones" />
+    <Member Name="Imports" Description="Importaciones" />
+    <Member Name="NotAllowedToSave0WhileOffline" Description="No se puede guardar {0} en modo descaonectado" />
+    <Member Name="The0WithId12IsLockedBy3" Description="El {0} con Id {1} ({2}) está bloqueado por {3}" />
+  </Type>
+  <Type Name="DisconnectedSubsetMixin">
+    <Member Name="DisconnectedMachine" Description="Equipo desconectado" />
+    <Member Name="LastOnlineTicks" Description="Últimos ticks online" />
+  </Type>
+  <Type Name="Download">
+    <Member Name="All" Description="Todos" />
+    <Member Name="None" Description="Ninguno" />
+    <Member Name="Replace" Description="Reemplazar" />
+    <Member Name="Subset" Description="Subconjunto" />
+  </Type>
+  <Type Name="Upload">
+    <Member Name="New" Description="Nuevo" />
+    <Member Name="None" Description="Ninguno" />
+    <Member Name="Subset" Description="Subconjunto" />
+  </Type>
+</Translations>

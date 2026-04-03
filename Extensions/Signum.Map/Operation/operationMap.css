@@ -1,0 +1,37 @@
+﻿
+rect.state {
+    stroke-width: 1px;
+    shape-rendering: geometricPrecision;
+}
+
+    rect.state.special {
+        color:lightgray;
+        fill: lightgray;
+        stroke-width: 2px;
+        stroke-dasharray: 2 2;
+    }
+
+    rect.state.ignore {
+        stroke-dasharray: 2 2;
+    }
+
+text.state {
+    text-anchor: middle;
+    cursor: default;
+    font-size: 16px;
+}
+
+rect.operation {
+    fill-opacity: .5;
+    stroke-width:0;
+}
+
+text.operation {
+    text-anchor: middle;
+    cursor: default;
+    font-size: 12px;
+}
+
+path.link {
+ fill:transparent;
+}

@@ -1,0 +1,29 @@
+{
+  "profiles": {
+    "Signum": {
+      "commandName": "Project",
+      "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.dll\" \"obj\\SignumReferences.txt\"",
+      "workingDirectory": "..\\Signum\\"
+    },
+    "Authorization": {
+      "commandName": "Project",
+      "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.Authorization.dll\" \"obj\\SignumReferences.txt\"",
+      "workingDirectory": "..\\Extensions\\Signum.Authorization\\"
+    },
+    "Files": {
+      "commandName": "Project",
+      "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.Files.dll\" \"obj\\SignumReferences.txt\"",
+      "workingDirectory": "..\\Extensions\\Signum.Files\\"
+    },
+    "MailingPackage": {
+      "commandName": "Project",
+      "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.MailingPackage.dll\" \"obj\\SignumReferences.txt\"",
+      "workingDirectory": "..\\Extensions\\Signum.MailingPackage\\"
+    },
+    "Southwind": {
+      "commandName": "Project",
+      "commandLineArgs": "\"obj\\x64\\Debug\\net8.0\\Southwind.React.dll\" \"obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Southwind.React\\obj\\SignumContent.txt\"",
+      "workingDirectory": "..\\Southwind.React\\"
+    }
+  }
+}

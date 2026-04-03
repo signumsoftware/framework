@@ -1,0 +1,6 @@
+import { QueryToken } from '@framework/QueryToken'
+
+export interface QueryTokenEmbedded {
+    token?: QueryToken;
+    parseException?: string;
+}
