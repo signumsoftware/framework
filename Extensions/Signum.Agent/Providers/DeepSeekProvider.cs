@@ -49,7 +49,7 @@ public class DeepSeekProvider : IChatbotModelProvider
 
     static string GetApiKey()
     {
-        var apiKey = ChatbotLogic.GetConfig().DeepSeekAPIKey;
+        var apiKey = LanguageModelLogic.GetConfig().DeepSeekAPIKey;
 
         if (string.IsNullOrEmpty(apiKey))
             throw new InvalidOperationException("No API Key for DeepSeek configured!");

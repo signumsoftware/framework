@@ -50,7 +50,7 @@ public class GeminiProvider : IChatbotModelProvider, IEmbeddingsProvider
 
     static string GetApiKey()
     {
-        var apiKey = ChatbotLogic.GetConfig().GeminiAPIKey;
+        var apiKey = LanguageModelLogic.GetConfig().GeminiAPIKey;
 
         if (apiKey.IsNullOrEmpty())
             throw new InvalidOperationException("No API Key for Gemini configured!");

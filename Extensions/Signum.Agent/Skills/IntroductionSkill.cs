@@ -24,10 +24,7 @@ public class IntroductionSkill : AgentSkillCode
         if (skillName.Contains("error"))
             throw new Exception(skillName + " has an error");
 
-        var root = AgentSkillLogic.CurrentMcpRoot.Value
-            ?? throw new InvalidOperationException("Describe can only be called from an MCP context");
-
-        var skill = root.FindSkill(skillName)
+        var skill = this.FindSkill(skillName)
             ?? throw new KeyNotFoundException($"Skill '{skillName}' not found");
 
         return skill.GetInstruction(null);
@@ -36,10 +33,7 @@ public class IntroductionSkill : AgentSkillCode
     [McpServerTool, Description("List available skills with a short description, start here to discover new tools.")]
     public Dictionary<string, string> ListSkillNames()
     {
-        var root = AgentSkillLogic.CurrentMcpRoot.Value
-            ?? throw new InvalidOperationException("ListSkillNames can only be called from an MCP context");
-
-        return root.GetSkillsRecursive().ToDictionary(a => a.Name, a => a.ShortDescription);
+        return this.GetSkillsRecursive().ToDictionary(a => a.Name, a => a.ShortDescription);
     }
 }
 

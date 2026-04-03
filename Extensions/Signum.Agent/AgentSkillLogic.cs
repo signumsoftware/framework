@@ -19,18 +19,14 @@ namespace Signum.Agent;
 public static class AgentSkillLogic
 {
     public static readonly AsyncThreadVariable<bool> IsMCP = Statics.ThreadVariable<bool>("IsMCP");
-    internal static readonly AsyncThreadVariable<AgentSkillCode?> CurrentMcpRoot = Statics.ThreadVariable<AgentSkillCode?>("CurrentMcpRoot");
 
-    /// <summary>Key = FullClassName (e.g. "Signum.Agent.Skills.SearchSkill"), Value = Type.</summary>
     public static Dictionary<string, Type> RegisteredCodes = new();
 
-    // Kept as convenient instances for internal use (e.g. ChatbotLogic summarisation).
     public static ConversationSumarizerSkill ConversationSumarizerSkill = null!;
     public static QuestionSumarizerSkill QuestionSumarizerSkill = null!;
 
     public static ResetLazy<Dictionary<AgentUseCaseSymbol, AgentSkillCode>> RootsByUseCase = null!;
 
-    /// <summary>Registers an AgentSkillCode type. The class must have a parameterless constructor.</summary>
     public static void RegisterCode<T>() where T : AgentSkillCode
     {
         RegisteredCodes[typeof(T).FullName!] = typeof(T);
@@ -91,8 +87,6 @@ public static class AgentSkillLogic
         }, new InvalidateWith(typeof(AgentSkillEntity)));
     }
 
-    // ─── AgentSkillCodeEntity sync ────────────────────────────────────────────
-
     static SqlPreCommand? Schema_Generating()
     {
         var table = Schema.Current.Table<AgentSkillCodeEntity>();
@@ -117,8 +111,6 @@ public static class AgentSkillLogic
     static List<AgentSkillCodeEntity> GenerateCodeEntities() =>
         RegisteredCodes.Keys.Select(fc => new AgentSkillCodeEntity { FullClassName = fc }).ToList();
 
-    // ─── Resolve ──────────────────────────────────────────────────────────────
-
     public static AgentSkillCode ResolveCode(
         AgentSkillEntity entity,
         Dictionary<Lite<AgentSkillEntity>, AgentSkillEntity> allEntities)
@@ -142,8 +134,6 @@ public static class AgentSkillLogic
         return code;
     }
 
-    // ─── Circular reference validation ────────────────────────────────────────
-
     static void ValidateNoCircularReferences(AgentSkillEntity entity)
     {
         using (new EntityCache(EntityCacheType.ForceNew))
@@ -165,8 +155,6 @@ public static class AgentSkillLogic
                     problems.ToString(e => $"  {e.From.Name} → {e.To.Name}", "\n"));
         }
     }
-
-    // ─── Public API ───────────────────────────────────────────────────────────
 
     public static AgentSkillCode? GetRootForUseCase(AgentUseCaseSymbol symbol) =>
         RootsByUseCase.Value.TryGetC(symbol);
@@ -200,8 +188,6 @@ public static class AgentSkillLogic
     }
 }
 
-// ─── SkillCodeInfo ────────────────────────────────────────────────────────────
-
 public class SkillCodeInfo
 {
     public string DefaultShortDescription { get; set; } = null!;
@@ -216,8 +202,6 @@ public class SkillPropertyMeta
     public string? ValueHint { get; set; }
     public string PropertyType { get; set; } = null!;
 }
-
-// ─── AgentSkillPropertyAttribute ─────────────────────────────────────────────
 
 [AttributeUsage(AttributeTargets.Property)]
 public class AgentSkillPropertyAttribute : Attribute
@@ -267,11 +251,8 @@ public class AgentSkillProperty_QueryListAttribute : AgentSkillPropertyAttribute
     public override string? ValueHint => "Comma-separated query keys";
 }
 
-// ─── AgentSkillCode ───────────────────────────────────────────────────────────
-
 public abstract class AgentSkillCode
 {
-    /// <summary>Set from AgentSkillEntity.Name when resolved from DB; falls back to the class-derived short name.</summary>
     public string? InstanceName { get; internal set; }
     public string Name => InstanceName ?? this.GetType().Name.Before("Skill");
 
@@ -289,7 +270,7 @@ public abstract class AgentSkillCode
         set { originalInstructions = value; }
     }
 
-    /// <summary>Runtime sub-skill tree, populated from DB entity. Never set in code.</summary>
+    // Populated from DB at resolve time; never set in code.
     public List<(AgentSkillCode Code, SkillActivation Activation)> SubSkills { get; } = new();
 
     public string GetInstruction(object? context)
@@ -424,17 +405,13 @@ public enum SkillActivation
     Lazy,
 }
 
-// ─── UIToolAttribute ──────────────────────────────────────────────────────────
-
 /// <summary>
-/// Marks a [McpServerTool] method as a UI tool: the server never invokes its body.
+/// Marks a [McpServerTool] as a UI tool: the server never invokes its body.
 /// The controller routes the call to the client via the $!AssistantUITool streaming command.
-/// The method body must throw InvalidOperationException("This method should not be called on the server").
+/// The method body must throw InvalidOperationException.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public class UIToolAttribute : Attribute { }
-
-// ─── MCP server builder extension ────────────────────────────────────────────
 
 public static partial class SignumMcpServerBuilderExtensions
 {
@@ -500,7 +477,6 @@ public static partial class SignumMcpServerBuilderExtensions
                     ?? throw new McpException($"Tool '{toolName}' not found");
 
                 CallToolResult result;
-                using (AgentSkillLogic.CurrentMcpRoot.Override(root))
                 using (AgentSkillLogic.IsMCP.Override(true))
                     result = await tool.InvokeAsync(ctx, ct);
 

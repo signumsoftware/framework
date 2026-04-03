@@ -94,7 +94,7 @@ public class GithubModelsProvider : IChatbotModelProvider, IEmbeddingsProvider
 
     static string GetToken()
     {
-        var apiKey = ChatbotLogic.GetConfig().GithubModelsToken;
+        var apiKey = LanguageModelLogic.GetConfig().GithubModelsToken;
 
         if (apiKey.IsNullOrEmpty())
             throw new InvalidOperationException("No Token for Github Models configured!");
