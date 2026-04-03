@@ -207,9 +207,7 @@ public static class AgentSkillLogic
     public static AgentSkillCode? GetRootForUseCase(AgentUseCaseSymbol symbol) =>
         RootsByUseCase.Value.TryGetC(symbol);
 
-    static bool NeedsEntity(AgentSkillCode code) => !code.IsDefault();
-
-    static AgentSkillEntity ConvertToEntity(AgentSkillCode code, AgentUseCaseSymbol? useCase,
+static AgentSkillEntity ConvertToEntity(AgentSkillCode code, AgentUseCaseSymbol? useCase,
         Dictionary<string, AgentSkillCodeEntity> codeEntities)
     {
         var type = code.GetType();
@@ -243,7 +241,7 @@ public static class AgentSkillLogic
         foreach (var (sub, activation) in code.SubSkills)
         {
             Lite<Entity> skillLite;
-            if (NeedsEntity(sub))
+            if (!sub.IsDefault())
             {
                 var subEntity = ConvertToEntity(sub, null, codeEntities).Save();
                 skillLite = (Lite<Entity>)(object)subEntity.ToLite();
