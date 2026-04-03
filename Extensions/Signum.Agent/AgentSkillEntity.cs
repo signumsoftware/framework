@@ -1,11 +1,5 @@
 namespace Signum.Agent;
 
-// ─── AgentSkillCodeEntity ──────────────────────────────────────────────────────
-
-/// <summary>
-/// Catalog of registered AgentSkillCode types. Rows are auto-generated/synchronized
-/// from code (same pattern as EmailModelEntity) — never created manually.
-/// </summary>
 [EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
 public class AgentSkillCodeEntity : Entity
 {
@@ -15,8 +9,6 @@ public class AgentSkillCodeEntity : Entity
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => FullClassName.AfterLast('.'));
 }
-
-// ─── AgentUseCaseSymbol ────────────────────────────────────────────────────────
 
 public class AgentUseCaseSymbol : Symbol
 {
@@ -29,8 +21,6 @@ public static class AgentUseCase
     public static AgentUseCaseSymbol DefaultChatbot = null!;
     public static AgentUseCaseSymbol Summarizer = null!;
 }
-
-// ─── AgentSkillEntity ─────────────────────────────────────────────────────────
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class AgentSkillEntity : Entity
@@ -77,8 +67,6 @@ public class AgentSkillEntity : Entity
     }
 }
 
-// ─── AgentSkillPropertyOverrideEmbedded ───────────────────────────────────────
-
 public class AgentSkillPropertyOverrideEmbedded : EmbeddedEntity
 {
     [StringLengthValidator(Min = 1, Max = 200)]
@@ -88,16 +76,12 @@ public class AgentSkillPropertyOverrideEmbedded : EmbeddedEntity
     public string? Value { get; set; }
 }
 
-// ─── AgentSkillSubSkillEmbedded ───────────────────────────────────────────────
-
 public class AgentSkillSubSkillEmbedded : EmbeddedEntity
 {
     public Lite<AgentSkillEntity> Skill { get; set; }
 
     public SkillActivation Activation { get; set; }
 }
-
-// ─── AgentSkillOperation ──────────────────────────────────────────────────────
 
 [AutoInit]
 public static class AgentSkillOperation

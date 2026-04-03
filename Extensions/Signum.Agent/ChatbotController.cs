@@ -5,7 +5,6 @@ using Signum.Agent.Skills;
 using Signum.API;
 using Signum.API.Filters;
 using Signum.Authorization;
-using System.Data;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
@@ -17,20 +16,6 @@ public class ChatbotController : Controller
     [HttpGet("api/agentSkill/skillCodeInfo/{skillCode}")]
     public SkillCodeInfo GetSkillCodeInfo(string skillCode) =>
         AgentSkillLogic.GetSkillCodeInfo(skillCode);
-
-    [HttpGet("api/chatbot/provider/{providerKey}/models")]
-    public async Task<List<string>> GetModels(string providerKey, CancellationToken token)
-    {
-        var symbol = SymbolLogic<LanguageModelProviderSymbol>.ToSymbol(providerKey);
-        return (await ChatbotLogic.GetModelNamesAsync(symbol, token)).Order().ToList();
-    }
-
-    [HttpGet("api/chatbot/provider/{providerKey}/embeddingModels")]
-    public async Task<List<string>> GetEmbeddingModels(string providerKey, CancellationToken token)
-    {
-        var symbol = SymbolLogic<LanguageModelProviderSymbol>.ToSymbol(providerKey);
-        return (await ChatbotLogic.GetEmbeddingModelNamesAsync(symbol, token)).Order().ToList();
-    }
 
     [HttpPost("api/chatbot/feedback/{messageId}")]
     public void SetFeedback(int messageId, [FromBody] SetFeedbackRequest request)
@@ -177,7 +162,7 @@ public class ChatbotController : Controller
         return sessionID.HasText() == false || sessionID == "undefined"
             ? new ChatSessionEntity
             {
-                LanguageModel = ChatbotLogic.DefaultLanguageModel.Value
+                LanguageModel = LanguageModelLogic.DefaultLanguageModel.Value
                     ?? throw new InvalidOperationException($"No default {typeof(ChatbotLanguageModelEntity).Name}"),
                 User = UserEntity.Current,
                 StartDate = Clock.Now,
@@ -210,9 +195,6 @@ public class ChatbotController : Controller
     }
 }
 
-// ─── HttpAgentOutput ──────────────────────────────────────────────────────────
-
-/// <summary>Implements IAgentOutput by streaming UINotification events to the HTTP response.</summary>
 public class HttpAgentOutput : IAgentOutput
 {
     readonly HttpResponse _resp;
