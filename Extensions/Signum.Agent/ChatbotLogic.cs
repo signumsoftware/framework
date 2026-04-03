@@ -6,6 +6,7 @@ using Signum.Agent.Providers;
 using Signum.Utilities.Synchronization;
 using System.Text.Json;
 using Pgvector;
+using System.Diagnostics;
 
 namespace Signum.Agent;
 
@@ -560,12 +561,11 @@ public static class ChatbotLogic
     /// </summary>
     public static async Task<ConversationHistory> RunHeadlessAsync(
         string prompt,
-        AgentUseCaseSymbol? useCase = null,
+        AgentUseCaseSymbol useCase,
         Lite<ChatbotLanguageModelEntity>? languageModel = null,
         IAgentOutput? output = null,
         CancellationToken ct = default)
     {
-        useCase ??= AgentUseCase.DefaultChatbot;
         output ??= NullAgentOutput.Instance;
 
         var modelLite = languageModel ?? DefaultLanguageModel.Value

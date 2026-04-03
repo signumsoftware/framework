@@ -5,6 +5,9 @@ using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 using Signum.Agent.Skills;
 using Signum.API;
+using Signum.Engine.Sync;
+using Signum.Utilities.DataStructures;
+using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.IO;
@@ -224,7 +227,7 @@ public class AgentSkillPropertyAttribute : Attribute
         if (value == null)
             return null;
 
-        return ReflectionTools.Convert(value, targetType);
+        return ReflectionTools.ChangeType(value, targetType);
     }
 
     public virtual string? ValidateValue(string? value, Type targetType) => null;
@@ -253,7 +256,7 @@ public class AgentSkillProperty_QueryListAttribute : AgentSkillPropertyAttribute
 
         var errors = value.Split(',')
             .Select(k => k.Trim())
-            .Where(k => k.HasText() && QueryLogic.ToQueryNameCatch(k) == null)
+            .Where(k => k.HasText() && QueryLogic.ToQueryName(k) == null)
             .ToList();
 
         return errors.Any()
