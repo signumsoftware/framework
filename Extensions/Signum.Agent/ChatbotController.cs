@@ -14,6 +14,18 @@ namespace Signum.Agent;
 
 public class ChatbotController : Controller
 {
+    [HttpGet("api/agentSkill/skillCodeDefaults/{skillCode}")]
+    public SkillCodeDefaults GetSkillCodeDefaults(string skillCode) =>
+        AgentSkillLogic.GetSkillCodeDefaults(skillCode);
+
+    [HttpGet("api/agentSkill/skillCodeProperties/{skillCode}")]
+    public List<SkillPropertyMeta> GetSkillCodeProperties(string skillCode) =>
+        AgentSkillLogic.GetSkillCodeProperties(skillCode);
+
+    [HttpGet("api/agentSkill/registeredCodes")]
+    public List<string> GetRegisteredCodes() =>
+        AgentSkillLogic.RegisteredCodes.Keys.Order().ToList();
+
     [HttpGet("api/chatbot/provider/{providerKey}/models")]
     public async Task<List<string>> GetModels(string providerKey, CancellationToken token)
     {
@@ -111,6 +123,7 @@ public class ChatbotController : Controller
                         Session = session.ToLite(),
                         SessionTitle = session.Title,
                         LanguageModel = session.LanguageModel.RetrieveFromCache(),
+                        RootSkill = AgentSkillLogic.GetRootForUseCase(AgentUseCase.DefaultChatbot),
                         Messages = systemAndSummaries.Concat(remainingMessages).ToList(),
                     };
                 }
@@ -242,7 +255,7 @@ public class ChatbotController : Controller
                 // Detect UITool calls — the server never invokes their bodies
                 var uiToolCalls = toolCalls.Where(fc =>
                 {
-                    var tool = AgentSkillLogic.IntroductionSkill?.FindTool(fc.Name)
+                    var tool = history.RootSkill?.FindTool(fc.Name)
                         ?? throw new InvalidOperationException($"Tool '{fc.Name}' not found");
                     return ((AIFunction)tool).UnderlyingMethod?.GetCustomAttribute<UIToolAttribute>() != null;
                 }).ToList();
@@ -343,7 +356,7 @@ public class ChatbotController : Controller
         var toolSw = Stopwatch.StartNew();
         try
         {
-            AITool tool = AgentSkillLogic.IntroductionSkill?.FindTool(toolId)
+            AITool tool = history.RootSkill?.FindTool(toolId)
                 ?? throw new InvalidOperationException($"Tool '{toolId}' not found");
             var obj = await ((AIFunction)tool).InvokeAsync(new AIFunctionArguments(arguments), ct);
             toolSw.Stop();
@@ -433,21 +446,22 @@ public class ChatbotController : Controller
 
     ConversationHistory CreateNewConversationHistory(ChatSessionEntity session)
     {
-        var intro = AgentSkillLogic.IntroductionSkill
-            ?? throw new InvalidOperationException("IntroductionSkill not configured");
+        var rootSkill = AgentSkillLogic.GetRootForUseCase(AgentUseCase.DefaultChatbot)
+            ?? throw new InvalidOperationException("No active AgentSkillEntity with UseCase = DefaultChatbot");
 
         var history = new ConversationHistory
         {
             Session = session.ToLite(),
             SessionTitle = session.Title,
             LanguageModel = session.LanguageModel.RetrieveFromCache(),
+            RootSkill = rootSkill,
             Messages = new List<ChatMessageEntity>
             {
                 new ChatMessageEntity
                 {
                     Role = ChatMessageRole.System,
                     ChatSession = session.ToLite(),
-                    Content = intro.GetInstruction(null),
+                    Content = rootSkill.GetInstruction(null),
                 }.Save()
             }
         };

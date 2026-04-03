@@ -373,6 +373,8 @@ public class ConversationHistory
 
     public string? SessionTitle { get; internal set; }
 
+    public ResolvedSkillNode? RootSkill { get; set; }
+
     public List<ChatMessage> GetMessages()
     {
         return Messages.Select(m => ToChatMessage(m)).ToList();
@@ -428,10 +430,11 @@ public class ConversationHistory
 
     public List<AITool> GetTools()
     {
-        var activatedSkills = new HashSet<string>();
+        if (RootSkill == null)
+            return new List<AITool>();
 
-        if (AgentSkillLogic.IntroductionSkill != null)
-            activatedSkills.Add(AgentSkillLogic.IntroductionSkill.Name);
+        var activatedSkills = new HashSet<string>(
+            RootSkill.GetEagerSkillsRecursive().Select(s => s.Name));
 
         foreach (var m in Messages)
         {
@@ -445,7 +448,13 @@ public class ConversationHistory
                         {
                             var args = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(tc.Arguments);
                             if (args != null && args.TryGetValue("skillName", out var sn))
-                                activatedSkills.Add(sn.GetString()!);
+                            {
+                                var skillName = sn.GetString()!;
+                                var newSkill = RootSkill.FindSkill(skillName);
+                                if (newSkill != null)
+                                    foreach (var s in newSkill.GetEagerSkillsRecursive())
+                                        activatedSkills.Add(s.Name);
+                            }
                         }
                         catch { }
                     }
@@ -454,9 +463,9 @@ public class ConversationHistory
         }
 
         return activatedSkills
-            .Select(skillName => AgentSkillLogic.IntroductionSkill?.FindSkill(skillName))
-            .OfType<AgentSkill>()
-            .SelectMany(skill => skill.GetToolsRecursive())
+            .Select(name => RootSkill.FindSkill(name))
+            .OfType<ResolvedSkillNode>()
+            .SelectMany(skill => skill.GetTools())
             .ToList();
     }
 
