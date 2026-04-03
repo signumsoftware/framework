@@ -207,26 +207,7 @@ public static class AgentSkillLogic
     public static AgentSkillCode? GetRootForUseCase(AgentUseCaseSymbol symbol) =>
         RootsByUseCase.Value.TryGetC(symbol);
 
-    static bool NeedsEntity(AgentSkillCode code)
-    {
-        if (code.SubSkills.Any()) return true;
-
-        var defaultCode = (AgentSkillCode)Activator.CreateInstance(code.GetType())!;
-        if (code.ShortDescription != defaultCode.ShortDescription) return true;
-        if (code.OriginalInstructions != defaultCode.OriginalInstructions) return true;
-
-        foreach (var pi in code.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
-        {
-            var attr = pi.GetCustomAttribute<AgentSkillPropertyAttribute>();
-            if (attr == null) continue;
-
-            var currentStr = attr.ConvertValueToString(pi.GetValue(code), pi.PropertyType);
-            var defaultStr = attr.ConvertValueToString(pi.GetValue(defaultCode), pi.PropertyType);
-            if (currentStr != defaultStr) return true;
-        }
-
-        return false;
-    }
+    static bool NeedsEntity(AgentSkillCode code) => !code.IsDefault();
 
     static AgentSkillEntity ConvertToEntity(AgentSkillCode code, AgentUseCaseSymbol? useCase,
         Dictionary<string, AgentSkillCodeEntity> codeEntities)
@@ -395,6 +376,26 @@ public abstract class AgentSkillCode
         get { return originalInstructions ??= File.ReadAllText(Path.Combine(SkillsDirectory, this.GetType().Name.Before("Skill") + ".md")); }
         set { originalInstructions = value; }
     }
+    public bool IsDefault()
+    {
+        if (SubSkills.Count > 0) return false;
+
+        var defaultCode = (AgentSkillCode)Activator.CreateInstance(GetType())!;
+        if (ShortDescription != defaultCode.ShortDescription) return false;
+        if (OriginalInstructions != defaultCode.OriginalInstructions) return false;
+
+        foreach (var pi in GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            var attr = pi.GetCustomAttribute<AgentSkillPropertyAttribute>();
+            if (attr == null) continue;
+            var currentStr = attr.ConvertValueToString(pi.GetValue(this), pi.PropertyType);
+            var defaultStr = attr.ConvertValueToString(pi.GetValue(defaultCode), pi.PropertyType);
+            if (currentStr != defaultStr) return false;
+        }
+
+        return true;
+    }
+
     // Populated from DB at resolve time, or from code when building a default tree for a factory.
     public List<(AgentSkillCode Code, SkillActivation Activation)> SubSkills { get; } = new();
 
