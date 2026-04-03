@@ -210,10 +210,10 @@ public static class AgentSkillLogic
     static bool NeedsEntity(AgentSkillCode code)
     {
         if (code.SubSkills.Any()) return true;
-        if (code.HasCustomInstructions) return true;
 
         var defaultCode = (AgentSkillCode)Activator.CreateInstance(code.GetType())!;
         if (code.ShortDescription != defaultCode.ShortDescription) return true;
+        if (code.OriginalInstructions != defaultCode.OriginalInstructions) return true;
 
         foreach (var pi in code.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
@@ -241,7 +241,7 @@ public static class AgentSkillLogic
             Active = true,
             UseCase = useCase,
             ShortDescription = code.ShortDescription != defaultCode.ShortDescription ? code.ShortDescription : null,
-            Instructions = code.HasCustomInstructions ? code.OriginalInstructions : null,
+            Instructions = code.OriginalInstructions != defaultCode.OriginalInstructions ? code.OriginalInstructions : null,
         };
 
         foreach (var pi in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
@@ -395,8 +395,6 @@ public abstract class AgentSkillCode
         get { return originalInstructions ??= File.ReadAllText(Path.Combine(SkillsDirectory, this.GetType().Name.Before("Skill") + ".md")); }
         set { originalInstructions = value; }
     }
-    internal bool HasCustomInstructions => originalInstructions != null;
-
     // Populated from DB at resolve time, or from code when building a default tree for a factory.
     public List<(AgentSkillCode Code, SkillActivation Activation)> SubSkills { get; } = new();
 

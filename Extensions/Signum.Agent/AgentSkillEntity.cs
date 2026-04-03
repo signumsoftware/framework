@@ -50,6 +50,13 @@ public class AgentSkillEntity : Entity
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
 
+    // True when the entity has no customisations over its SkillCode defaults.
+    public bool IsDefault() =>
+        SubSkills.Count == 0 &&
+        Instructions == null &&
+        ShortDescription == null &&
+        PropertyOverrides.Count == 0;
+
     protected override string? ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
     {
         if (sender is AgentSkillPropertyOverrideEmbedded po
