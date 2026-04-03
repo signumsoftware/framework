@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { ajaxGet, ajaxPost, wrapRequest, AjaxOptions } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, LanguageModelProviderSymbol, EmbeddingsLanguageModelEntity, ToolCallEmbedded, UserFeedback, AgentSkillEntity } from './Signum.Agent'
+import { ChatbotLanguageModelEntity, ChatSessionEntity, ChatMessageEntity, LanguageModelProviderSymbol, EmbeddingsLanguageModelEntity, ToolCallEmbedded, UserFeedback } from './Signum.Agent'
 import { toAbsoluteUrl } from '../../Signum/React/AppContext';
 import { Dic } from '@framework/Globals';
 import { Finder } from '@framework/Finder';
@@ -17,7 +17,6 @@ export namespace ChatbotClient {
   //export let renderMarkdown = (markdown: string): React.JSX.Element => <ReactMarkdownWithFormulas>{markdown}</ReactMarkdownWithFormulas>;
   export function start(options: { routes: RouteObject[] }): void {
 
-    Navigator.addSettings(new EntitySettings(AgentSkillEntity, e => import('./Templates/AgentSkill')));
     Navigator.addSettings(new EntitySettings(ChatbotLanguageModelEntity, e => import('./Templates/ChatbotLanguageModel')));
     Navigator.addSettings(new EntitySettings(EmbeddingsLanguageModelEntity, e => import('./Templates/EmbeddingsLanguageModel')));
     Navigator.addSettings(new EntitySettings(ChatSessionEntity, a => import('./Templates/ChatSession')));

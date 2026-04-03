@@ -16,44 +16,41 @@ namespace Signum.Agent;
 public static class AgentSkillLogic
 {
     public static readonly AsyncThreadVariable<bool> IsMCP = Statics.ThreadVariable<bool>("IsMCP");
-    internal static readonly AsyncThreadVariable<ResolvedSkillNode?> CurrentMcpRoot = Statics.ThreadVariable<ResolvedSkillNode?>("CurrentMcpRoot");
+    internal static readonly AsyncThreadVariable<AgentSkillCode?> CurrentMcpRoot = Statics.ThreadVariable<AgentSkillCode?>("CurrentMcpRoot");
 
-    // Registered code definitions: key = AgentSkillCode.Name (e.g. "Search", "Retrieve")
-    public static Dictionary<string, (AgentSkillCode Default, Func<AgentSkillCode>? Factory)> RegisteredCodes = new();
+    /// <summary>Key = FullClassName (e.g. "Signum.Agent.Skills.SearchSkill"), Value = Type.</summary>
+    public static Dictionary<string, Type> RegisteredCodes = new();
 
-    // Legacy instances kept for ChatbotLogic internal use (summarization)
+    // Kept as convenient instances for internal use (e.g. ChatbotLogic summarisation).
     public static ConversationSumarizerSkill ConversationSumarizerSkill = null!;
     public static QuestionSumarizerSkill QuestionSumarizerSkill = null!;
 
-    public static ResetLazy<Dictionary<AgentUseCaseSymbol, ResolvedSkillNode>> RootsByUseCase = null!;
+    public static ResetLazy<Dictionary<AgentUseCaseSymbol, AgentSkillCode>> RootsByUseCase = null!;
 
-    /// <summary>Registers an AgentSkillCode singleton (no cloning on entity resolve).</summary>
-    public static T RegisterCode<T>(T instance) where T : AgentSkillCode
+    /// <summary>Registers an AgentSkillCode type. The class must have a parameterless constructor.</summary>
+    public static void RegisterCode<T>() where T : AgentSkillCode
     {
-        RegisteredCodes[instance.Name] = (instance, null);
-        return instance;
+        RegisteredCodes[typeof(T).FullName!] = typeof(T);
     }
 
-    /// <summary>Registers an AgentSkillCode with a factory so each entity gets a fresh instance with property overrides applied.</summary>
-    public static T RegisterCode<T>(Func<T> factory) where T : AgentSkillCode
-    {
-        var defaultInstance = factory();
-        RegisteredCodes[defaultInstance.Name] = (defaultInstance, () => factory());
-        return defaultInstance;
-    }
-
-    public static void Start(SchemaBuilder sb, AgentSkillCode? introductionSkill = null)
+    public static void Start(SchemaBuilder sb)
     {
         if (sb.AlreadyDefined(MethodBase.GetCurrentMethod()))
             return;
 
-        ConversationSumarizerSkill = RegisterCode(new ConversationSumarizerSkill());
-        QuestionSumarizerSkill = RegisterCode(new QuestionSumarizerSkill());
+        RegisterCode<ConversationSumarizerSkill>();
+        RegisterCode<QuestionSumarizerSkill>();
 
-        if (introductionSkill != null)
-            RegisterCode(introductionSkill);
+        ConversationSumarizerSkill = new ConversationSumarizerSkill();
+        QuestionSumarizerSkill = new QuestionSumarizerSkill();
 
         SymbolLogic<AgentUseCaseSymbol>.Start(sb, () => [AgentUseCase.DefaultChatbot, AgentUseCase.Summarizer]);
+
+        sb.Include<AgentSkillCodeEntity>()
+            .WithQuery(() => e => new { Entity = e, e.Id, e.FullClassName });
+
+        sb.Schema.Generating += Schema_Generating;
+        sb.Schema.Synchronizing += Schema_Synchronizing;
 
         sb.Include<AgentSkillEntity>()
             .WithSave(AgentSkillOperation.Save)
@@ -86,10 +83,63 @@ public static class AgentSkillLogic
                 .GroupBy(e => e.UseCase!)
                 .ToDictionary(
                     g => g.Key,
-                    g => ResolvedSkillNode.Resolve(g.SingleEx(), allEntities)
+                    g => ResolveCode(g.SingleEx(), allEntities)
                 );
         }, new InvalidateWith(typeof(AgentSkillEntity)));
     }
+
+    // ─── AgentSkillCodeEntity sync ────────────────────────────────────────────
+
+    static SqlPreCommand? Schema_Generating()
+    {
+        var table = Schema.Current.Table<AgentSkillCodeEntity>();
+        return GenerateCodeEntities()
+            .Select(e => table.InsertSqlSync(e))
+            .Combine(Spacing.Simple);
+    }
+
+    static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
+    {
+        var table = Schema.Current.Table<AgentSkillCodeEntity>();
+        var should = GenerateCodeEntities().ToDictionary(e => e.FullClassName);
+        var current = Administrator.TryRetrieveAll<AgentSkillCodeEntity>(replacements)
+            .ToDictionary(e => e.FullClassName);
+
+        return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
+            createNew: (_, s) => table.InsertSqlSync(s),
+            removeOld: (_, c) => table.DeleteSqlSync(c, e => e.FullClassName == c.FullClassName),
+            mergeBoth: (_, s, c) => table.UpdateSqlSync(c, e => e.FullClassName == c.FullClassName));
+    }
+
+    static List<AgentSkillCodeEntity> GenerateCodeEntities() =>
+        RegisteredCodes.Keys.Select(fc => new AgentSkillCodeEntity { FullClassName = fc }).ToList();
+
+    // ─── Resolve ──────────────────────────────────────────────────────────────
+
+    public static AgentSkillCode ResolveCode(
+        AgentSkillEntity entity,
+        Dictionary<Lite<AgentSkillEntity>, AgentSkillEntity> allEntities)
+    {
+        var type = RegisteredCodes.GetOrThrow(entity.SkillCode.FullClassName,
+            $"AgentSkillCode type '{entity.SkillCode.FullClassName}' is not registered.");
+
+        var code = (AgentSkillCode)Activator.CreateInstance(type)!;
+        code.InstanceName = entity.Name;
+
+        if (entity.ShortDescription != null)
+            code.ShortDescription = entity.ShortDescription;
+        if (entity.Instructions != null)
+            code.OriginalInstructions = entity.Instructions;
+
+        code.ApplyPropertyOverrides(entity);
+
+        foreach (var ss in entity.SubSkills)
+            code.SubSkills.Add((ResolveCode(allEntities.GetOrThrow(ss.Skill), allEntities), ss.Activation));
+
+        return code;
+    }
+
+    // ─── Circular reference validation ────────────────────────────────────────
 
     static void ValidateNoCircularReferences(AgentSkillEntity entity)
     {
@@ -113,16 +163,19 @@ public static class AgentSkillLogic
         }
     }
 
-    public static ResolvedSkillNode? GetRootForUseCase(AgentUseCaseSymbol symbol) =>
+    // ─── Public API ───────────────────────────────────────────────────────────
+
+    public static AgentSkillCode? GetRootForUseCase(AgentUseCaseSymbol symbol) =>
         RootsByUseCase.Value.TryGetC(symbol);
 
-    /// <summary>Returns skill code metadata (properties marked [AgentSkillProperty]) for the frontend.</summary>
-    public static List<SkillPropertyMeta> GetSkillCodeProperties(string skillCode)
+    public static SkillCodeInfo GetSkillCodeInfo(string fullClassName)
     {
-        if (!RegisteredCodes.TryGetValue(skillCode, out var entry))
-            return new List<SkillPropertyMeta>();
+        if (!RegisteredCodes.TryGetValue(fullClassName, out var type))
+            throw new KeyNotFoundException($"AgentSkillCode type '{fullClassName}' is not registered.");
 
-        return entry.Default.GetType()
+        var instance = (AgentSkillCode)Activator.CreateInstance(type)!;
+
+        var properties = type
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Select(pi => new { pi, attr = pi.GetCustomAttribute<AgentSkillPropertyAttribute>() })
             .Where(x => x.attr != null)
@@ -134,20 +187,23 @@ public static class AgentSkillLogic
                 PropertyType = x.pi.PropertyType.TypeName(),
             })
             .ToList();
-    }
 
-    /// <summary>Returns the default short description and instructions for a registered SkillCode.</summary>
-    public static SkillCodeDefaults GetSkillCodeDefaults(string skillCode)
-    {
-        if (!RegisteredCodes.TryGetValue(skillCode, out var entry))
-            throw new KeyNotFoundException($"SkillCode '{skillCode}' is not registered.");
-
-        return new SkillCodeDefaults
+        return new SkillCodeInfo
         {
-            DefaultShortDescription = entry.Default.ShortDescription,
-            DefaultInstructions = entry.Default.OriginalInstructions,
+            DefaultShortDescription = instance.ShortDescription,
+            DefaultInstructions = instance.OriginalInstructions,
+            Properties = properties,
         };
     }
+}
+
+// ─── SkillCodeInfo ────────────────────────────────────────────────────────────
+
+public class SkillCodeInfo
+{
+    public string DefaultShortDescription { get; set; } = null!;
+    public string DefaultInstructions { get; set; } = null!;
+    public List<SkillPropertyMeta> Properties { get; set; } = null!;
 }
 
 public class SkillPropertyMeta
@@ -158,18 +214,11 @@ public class SkillPropertyMeta
     public string PropertyType { get; set; } = null!;
 }
 
-public class SkillCodeDefaults
-{
-    public string DefaultShortDescription { get; set; } = null!;
-    public string DefaultInstructions { get; set; } = null!;
-}
-
-// ─── AgentSkillPropertyAttribute ──────────────────────────────────────────────
+// ─── AgentSkillPropertyAttribute ─────────────────────────────────────────────
 
 [AttributeUsage(AttributeTargets.Property)]
 public class AgentSkillPropertyAttribute : Attribute
 {
-    /// <summary>Converts a string stored in the DB to the typed property value. Default uses ReflectionTools.Convert.</summary>
     public virtual object? ConvertFromString(string? value, Type targetType)
     {
         if (value == null)
@@ -178,13 +227,14 @@ public class AgentSkillPropertyAttribute : Attribute
         return ReflectionTools.Convert(value, targetType);
     }
 
+    public virtual string? ValidateValue(string? value, Type targetType) => null;
+
     public virtual string? ValueHint => null;
 }
 
 [AttributeUsage(AttributeTargets.Property)]
 public class AgentSkillProperty_QueryListAttribute : AgentSkillPropertyAttribute
 {
-    /// <summary>Splits a comma-separated list of query keys and converts each via QueryLogic.ToQueryName.</summary>
     public override object? ConvertFromString(string? value, Type targetType)
     {
         if (value == null)
@@ -196,6 +246,21 @@ public class AgentSkillProperty_QueryListAttribute : AgentSkillPropertyAttribute
             .ToHashSet();
     }
 
+    public override string? ValidateValue(string? value, Type targetType)
+    {
+        if (value == null)
+            return null;
+
+        var errors = value.Split(',')
+            .Select(k => k.Trim())
+            .Where(k => k.HasText() && QueryLogic.ToQueryNameCatch(k) == null)
+            .ToList();
+
+        return errors.Any()
+            ? $"Unknown query key(s): {errors.ToString(", ")}"
+            : null;
+    }
+
     public override string? ValueHint => "Comma-separated query keys";
 }
 
@@ -203,25 +268,49 @@ public class AgentSkillProperty_QueryListAttribute : AgentSkillPropertyAttribute
 
 public abstract class AgentSkillCode
 {
-    public string Name => this.GetType().Name.Before("Skill");
+    /// <summary>Set from AgentSkillEntity.Name when resolved from DB; falls back to the class-derived short name.</summary>
+    public string? InstanceName { get; internal set; }
+    public string Name => InstanceName ?? this.GetType().Name.Before("Skill");
+
     public string ShortDescription { get; set; } = "";
     public Func<bool> IsAllowed { get; set; } = () => true;
     public Dictionary<string, Func<object?, string>>? Replacements;
 
-    public static string SkillsDirectory = Path.Combine(Path.GetDirectoryName(typeof(AgentSkillCode).Assembly.Location)!, "Skills");
+    public static string SkillsDirectory = Path.Combine(
+        Path.GetDirectoryName(typeof(AgentSkillCode).Assembly.Location)!, "Skills");
 
     string? originalInstructions;
     public string OriginalInstructions
     {
-        get { return originalInstructions ??= File.ReadAllText(Path.Combine(SkillsDirectory, this.Name + ".md")); }
+        get { return originalInstructions ??= File.ReadAllText(Path.Combine(SkillsDirectory, this.GetType().Name.Before("Skill") + ".md")); }
         set { originalInstructions = value; }
     }
+
+    /// <summary>Runtime sub-skill tree, populated from DB entity. Never set in code.</summary>
+    public List<(AgentSkillCode Code, SkillActivation Activation)> SubSkills { get; } = new();
 
     public string GetInstruction(object? context)
     {
         var text = OriginalInstructions;
         if (!Replacements.IsNullOrEmpty())
             text = text.Replace(Replacements.SelectDictionary(k => k, v => v(context)));
+
+        if (SubSkills.Any())
+        {
+            var sb = new StringBuilder(text);
+            foreach (var (sub, activation) in SubSkills)
+            {
+                sb.AppendLineLF("# Skill " + sub.Name);
+                sb.AppendLineLF("**Summary**: " + sub.ShortDescription);
+                sb.AppendLineLF();
+                if (activation == SkillActivation.Eager)
+                    sb.AppendLineLF(sub.GetInstruction(null));
+                else
+                    sb.AppendLineLF("Use the tool 'describe' to get more information about this skill and discover additional tools.");
+            }
+            return sb.ToString();
+        }
+
         return text;
     }
 
@@ -231,10 +320,10 @@ public abstract class AgentSkillCode
         {
             var pi = this.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(p => p.Name == po.PropertyName && p.GetCustomAttribute<AgentSkillPropertyAttribute>() != null);
+                .FirstOrDefault(p => p.Name == po.PropertyName
+                    && p.GetCustomAttribute<AgentSkillPropertyAttribute>() != null);
 
-            if (pi == null)
-                continue;
+            if (pi == null) continue;
 
             var attr = pi.GetCustomAttribute<AgentSkillPropertyAttribute>()!;
             var value = attr.ConvertFromString(po.Value, pi.PropertyType);
@@ -242,18 +331,68 @@ public abstract class AgentSkillCode
         }
     }
 
+    public AgentSkillCode? FindSkill(string name)
+    {
+        if (this.Name == name) return this;
+        foreach (var (sub, _) in SubSkills)
+        {
+            var found = sub.FindSkill(name);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    public AITool? FindTool(string toolName)
+    {
+        var tool = GetTools().FirstOrDefault(t => t.Name.Equals(toolName, StringComparison.InvariantCultureIgnoreCase));
+        if (tool != null) return tool;
+        foreach (var (sub, _) in SubSkills)
+        {
+            var found = sub.FindTool(toolName);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    public IEnumerable<AgentSkillCode> GetSkillsRecursive()
+    {
+        yield return this;
+        foreach (var (sub, _) in SubSkills)
+            foreach (var s in sub.GetSkillsRecursive())
+                yield return s;
+    }
+
+    public IEnumerable<AgentSkillCode> GetEagerSkillsRecursive()
+    {
+        yield return this;
+        foreach (var (sub, activation) in SubSkills)
+            if (activation == SkillActivation.Eager)
+                foreach (var s in sub.GetEagerSkillsRecursive())
+                    yield return s;
+    }
+
+    public IEnumerable<AITool> GetToolsRecursive()
+    {
+        var list = GetTools().ToList();
+        foreach (var (sub, activation) in SubSkills)
+            if (activation == SkillActivation.Eager)
+                list.AddRange(sub.GetToolsRecursive());
+        return list;
+    }
+
     IEnumerable<AITool>? cachedTools;
     internal IEnumerable<AITool> GetTools()
     {
-        return (cachedTools ??= this.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+        return (cachedTools ??= this.GetType()
+            .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
             .Where(m => m.GetCustomAttribute<McpServerToolAttribute>() != null)
             .Select(m =>
             {
-                Type delType = Expression.GetDelegateType(m.GetParameters().Select(a => a.ParameterType).And(m.ReturnType).ToArray());
-                Delegate del = m.IsStatic ?
-                    Delegate.CreateDelegate(delType, m) :
-                    Delegate.CreateDelegate(delType, this, m);
-
+                Type delType = Expression.GetDelegateType(
+                    m.GetParameters().Select(a => a.ParameterType).And(m.ReturnType).ToArray());
+                Delegate del = m.IsStatic
+                    ? Delegate.CreateDelegate(delType, m)
+                    : Delegate.CreateDelegate(delType, this, m);
                 string? description = m.GetCustomAttribute<DescriptionAttribute>()?.Description;
                 return (AITool)AIFunctionFactory.Create(del, m.Name, description, GetJsonSerializerOptions());
             })
@@ -276,125 +415,6 @@ public abstract class AgentSkillCode
     public virtual JsonSerializerOptions GetJsonSerializerOptions() => JsonSerializationOptions;
 }
 
-// ─── ResolvedSkillNode ────────────────────────────────────────────────────────
-
-/// <summary>A runtime node combining an AgentSkillEntity with its resolved AgentSkillCode and sub-skill tree.</summary>
-public class ResolvedSkillNode
-{
-    public AgentSkillEntity Entity { get; }
-    public AgentSkillCode Code { get; }
-    public List<(ResolvedSkillNode Node, SkillActivation Activation)> SubSkills { get; }
-
-    public string Name => Entity.Name;
-    public string ShortDescription => Entity.ShortDescription ?? Code.ShortDescription;
-
-    ResolvedSkillNode(AgentSkillEntity entity, AgentSkillCode code, List<(ResolvedSkillNode, SkillActivation)> subSkills)
-    {
-        Entity = entity;
-        Code = code;
-        SubSkills = subSkills;
-    }
-
-    public string GetInstruction(object? context)
-    {
-        var text = Entity.Instructions ?? Code.OriginalInstructions;
-        if (!Code.Replacements.IsNullOrEmpty())
-            text = text.Replace(Code.Replacements.SelectDictionary(k => k, v => v(context)));
-
-        var sb = new StringBuilder(text);
-        foreach (var (node, activation) in SubSkills)
-        {
-            sb.AppendLineLF("# Skill " + node.Name);
-            sb.AppendLineLF("**Summary**: " + node.ShortDescription);
-            sb.AppendLineLF();
-            if (activation == SkillActivation.Eager)
-                sb.AppendLineLF(node.GetInstruction(null));
-            else
-                sb.AppendLineLF("Use the tool 'describe' to get more information about this skill and discover additional tools.");
-        }
-
-        return sb.ToString();
-    }
-
-    public IEnumerable<AITool> GetTools() => Code.GetTools();
-
-    public IEnumerable<AITool> GetToolsRecursive()
-    {
-        var list = GetTools().ToList();
-        foreach (var (node, activation) in SubSkills)
-        {
-            if (activation == SkillActivation.Eager)
-                list.AddRange(node.GetToolsRecursive());
-        }
-        return list;
-    }
-
-    public ResolvedSkillNode? FindSkill(string name)
-    {
-        if (this.Name == name) return this;
-        foreach (var (node, _) in SubSkills)
-        {
-            var found = node.FindSkill(name);
-            if (found != null) return found;
-        }
-        return null;
-    }
-
-    public AITool? FindTool(string toolName)
-    {
-        var tool = GetTools().FirstOrDefault(t => t.Name.Equals(toolName, StringComparison.InvariantCultureIgnoreCase));
-        if (tool != null) return tool;
-        foreach (var (node, _) in SubSkills)
-        {
-            var found = node.FindTool(toolName);
-            if (found != null) return found;
-        }
-        return null;
-    }
-
-    public IEnumerable<ResolvedSkillNode> GetSkillsRecursive()
-    {
-        yield return this;
-        foreach (var (node, _) in SubSkills)
-            foreach (var s in node.GetSkillsRecursive())
-                yield return s;
-    }
-
-    public IEnumerable<ResolvedSkillNode> GetEagerSkillsRecursive()
-    {
-        yield return this;
-        foreach (var (node, activation) in SubSkills)
-        {
-            if (activation == SkillActivation.Eager)
-                foreach (var s in node.GetEagerSkillsRecursive())
-                    yield return s;
-        }
-    }
-
-    public static ResolvedSkillNode Resolve(AgentSkillEntity entity, Dictionary<Lite<AgentSkillEntity>, AgentSkillEntity> allEntities)
-    {
-        var (defaultInstance, factory) = AgentSkillLogic.RegisteredCodes.GetOrThrow(entity.SkillCode,
-            $"SkillCode '{entity.SkillCode}' not registered. Entity: '{entity.Name}'");
-
-        AgentSkillCode code;
-        if (factory != null && entity.PropertyOverrides.Any())
-        {
-            code = factory();
-            code.ApplyPropertyOverrides(entity);
-        }
-        else
-        {
-            code = defaultInstance;
-        }
-
-        var subSkills = entity.SubSkills
-            .Select(ss => (Resolve(allEntities.GetOrThrow(ss.Skill), allEntities), ss.Activation))
-            .ToList();
-
-        return new ResolvedSkillNode(entity, code, subSkills);
-    }
-}
-
 public enum SkillActivation
 {
     Eager,
@@ -405,8 +425,7 @@ public enum SkillActivation
 
 /// <summary>
 /// Marks a [McpServerTool] method as a UI tool: the server never invokes its body.
-/// Instead the controller detects this attribute before calling InvokeAsync and routes
-/// the call to the client via the $!AssistantUITool streaming command.
+/// The controller routes the call to the client via the $!AssistantUITool streaming command.
 /// The method body must throw InvalidOperationException("This method should not be called on the server").
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
@@ -422,7 +441,7 @@ public static partial class SignumMcpServerBuilderExtensions
 
         var sessionActivated = new ConcurrentDictionary<string, HashSet<string>>();
 
-        ResolvedSkillNode GetRoot() =>
+        AgentSkillCode GetRoot() =>
             AgentSkillLogic.GetRootForUseCase(useCase)
             ?? throw new InvalidOperationException($"No active AgentSkillEntity with UseCase = {useCase.Key}");
 
@@ -433,16 +452,6 @@ public static partial class SignumMcpServerBuilderExtensions
             sessionId != null && sessionActivated.TryGetValue(sessionId, out var s)
                 ? s
                 : InitialActivated();
-
-        McpServerTool? FindMcpTool(string toolName, IEnumerable<string> activatedNames)
-        {
-            var root = GetRoot();
-            return activatedNames
-                .Select(name => root.FindSkill(name))
-                .OfType<ResolvedSkillNode>()
-                .SelectMany(n => n.Code.GetMcpServerTools())
-                .FirstOrDefault(t => t.ProtocolTool.Name == toolName);
-        }
 
         return builder
             .WithHttpTransport(options =>
@@ -463,12 +472,12 @@ public static partial class SignumMcpServerBuilderExtensions
             })
             .WithListToolsHandler(async (ctx, ct) =>
             {
-                var activated = GetActivated(ctx.Server.SessionId);
                 var root = GetRoot();
+                var activated = GetActivated(ctx.Server.SessionId);
                 var tools = activated
                     .Select(name => root.FindSkill(name))
-                    .OfType<ResolvedSkillNode>()
-                    .SelectMany(n => n.Code.GetMcpServerTools())
+                    .OfType<AgentSkillCode>()
+                    .SelectMany(s => s.GetMcpServerTools())
                     .Select(t => t.ProtocolTool)
                     .ToList();
 
@@ -477,22 +486,26 @@ public static partial class SignumMcpServerBuilderExtensions
             .WithCallToolHandler(async (ctx, ct) =>
             {
                 var toolName = ctx.Params!.Name;
+                var root = GetRoot();
                 var activated = GetActivated(ctx.Server.SessionId);
-                var tool = FindMcpTool(toolName, activated)
+
+                var tool = activated
+                    .Select(name => root.FindSkill(name))
+                    .OfType<AgentSkillCode>()
+                    .SelectMany(s => s.GetMcpServerTools())
+                    .FirstOrDefault(t => t.ProtocolTool.Name == toolName)
                     ?? throw new McpException($"Tool '{toolName}' not found");
 
                 CallToolResult result;
-                using (AgentSkillLogic.CurrentMcpRoot.Override(GetRoot()))
+                using (AgentSkillLogic.CurrentMcpRoot.Override(root))
                 using (AgentSkillLogic.IsMCP.Override(true))
                     result = await tool.InvokeAsync(ctx, ct);
 
-                // When Describe is called for a Lazy skill, activate it for this session
                 if (toolName == nameof(IntroductionSkill.Describe)
                     && ctx.Params.Arguments?.TryGetValue("skillName", out var je) == true
                     && je.GetString() is { } skillName
                     && ctx.Server.SessionId is { } sessionId)
                 {
-                    var root = GetRoot();
                     var newSkill = root.FindSkill(skillName);
                     if (newSkill != null && sessionActivated.TryGetValue(sessionId, out var skills))
                     {

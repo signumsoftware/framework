@@ -3,6 +3,11 @@ import * as Entities from '../../Signum/React/Signum.Entities';
 import * as Basics from '../../Signum/React/Signum.Basics';
 import * as Operations from '../../Signum/React/Signum.Operations';
 import * as Authorization from '../Signum.Authorization/Signum.Authorization';
+export declare const AgentSkillCodeEntity: Type<AgentSkillCodeEntity>;
+export interface AgentSkillCodeEntity extends Entities.Entity {
+    Type: "AgentSkillCode";
+    fullClassName: string;
+}
 export declare const AgentUseCaseSymbol: Type<AgentUseCaseSymbol>;
 export interface AgentUseCaseSymbol extends Basics.Symbol {
     Type: "AgentUseCase";
@@ -15,7 +20,7 @@ export declare const AgentSkillEntity: Type<AgentSkillEntity>;
 export interface AgentSkillEntity extends Entities.Entity {
     Type: "AgentSkill";
     name: string;
-    skillCode: string;
+    skillCode: AgentSkillCodeEntity;
     active: boolean;
     useCase: AgentUseCaseSymbol | null;
     shortDescription: string | null;
@@ -47,9 +52,10 @@ export interface SkillPropertyMeta {
     valueHint: string | null;
     propertyType: string;
 }
-export interface SkillCodeDefaults {
+export interface SkillCodeInfo {
     defaultShortDescription: string;
     defaultInstructions: string;
+    properties: SkillPropertyMeta[];
 }
 export interface ToolCallEmbedded {
     _response?: ChatMessageEntity;
@@ -89,7 +95,7 @@ export declare namespace ChatbotPermission {
     const UseChatbot: Basics.PermissionSymbol;
 }
 export declare const ChatbotUICommand: EnumType<ChatbotUICommand>;
-export type ChatbotUICommand = "System" | "SessionId" | "SessionTitle" | "QuestionId" | "AnswerId" | "AssistantAnswer" | "AssistantTool" | "Tool" | "Exception";
+export type ChatbotUICommand = "System" | "SessionId" | "SessionTitle" | "QuestionId" | "MessageId" | "AssistantAnswer" | "AssistantTool" | "AssistantUITool" | "Tool" | "Exception";
 export declare const ChatMessageEntity: Type<ChatMessageEntity>;
 export interface ChatMessageEntity extends Entities.Entity {
     Type: "ChatMessage";

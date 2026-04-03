@@ -683,7 +683,7 @@ public class ConversationHistory
 
     public string? SessionTitle { get; internal set; }
 
-    public ResolvedSkillNode? RootSkill { get; set; }
+    public AgentSkillCode? RootSkill { get; set; }
 
     public List<ChatMessage> GetMessages()
     {
@@ -774,7 +774,7 @@ public class ConversationHistory
 
         return activatedSkills
             .Select(name => RootSkill.FindSkill(name))
-            .OfType<ResolvedSkillNode>()
+            .OfType<AgentSkillCode>()
             .SelectMany(skill => skill.GetTools())
             .ToList();
     }

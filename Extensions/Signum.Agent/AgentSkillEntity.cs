@@ -1,5 +1,23 @@
 namespace Signum.Agent;
 
+// ─── AgentSkillCodeEntity ──────────────────────────────────────────────────────
+
+/// <summary>
+/// Catalog of registered AgentSkillCode types. Rows are auto-generated/synchronized
+/// from code (same pattern as EmailModelEntity) — never created manually.
+/// </summary>
+[EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
+public class AgentSkillCodeEntity : Entity
+{
+    [UniqueIndex]
+    public string FullClassName { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => FullClassName.AfterLast('.'));
+}
+
+// ─── AgentUseCaseSymbol ────────────────────────────────────────────────────────
+
 public class AgentUseCaseSymbol : Symbol
 {
     private AgentUseCaseSymbol() { }
@@ -12,6 +30,8 @@ public static class AgentUseCase
     public static AgentUseCaseSymbol Summarizer = null!;
 }
 
+// ─── AgentSkillEntity ─────────────────────────────────────────────────────────
+
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class AgentSkillEntity : Entity
 {
@@ -19,8 +39,7 @@ public class AgentSkillEntity : Entity
     [StringLengthValidator(Min = 1, Max = 200)]
     public string Name { get; set; }
 
-    [StringLengthValidator(Min = 1, Max = 200)]
-    public string SkillCode { get; set; }
+    public AgentSkillCodeEntity SkillCode { get; set; }
 
     public bool Active { get; set; } = true;
 
@@ -41,17 +60,24 @@ public class AgentSkillEntity : Entity
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
 
-    protected override string? PropertyValidation(PropertyInfo pi)
+    protected override string? ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
     {
-        if (pi.Name == nameof(SkillCode) && SkillCode.HasText() && AgentSkillLogic.RegisteredCodes.Any())
+        if (sender is AgentSkillPropertyOverrideEmbedded po
+            && pi.Name == nameof(AgentSkillPropertyOverrideEmbedded.Value)
+            && SkillCode != null
+            && AgentSkillLogic.RegisteredCodes.TryGetValue(SkillCode.FullClassName, out var codeType))
         {
-            if (!AgentSkillLogic.RegisteredCodes.ContainsKey(SkillCode))
-                return $"SkillCode '{SkillCode}' is not registered. Available: {AgentSkillLogic.RegisteredCodes.Keys.ToString(", ")}";
+            var propInfo = codeType.GetProperty(po.PropertyName, BindingFlags.Public | BindingFlags.Instance);
+            var attr = propInfo?.GetCustomAttribute<AgentSkillPropertyAttribute>();
+            if (attr != null)
+                return attr.ValidateValue(po.Value, propInfo!.PropertyType);
         }
 
-        return base.PropertyValidation(pi);
+        return base.ChildPropertyValidation(sender, pi);
     }
 }
+
+// ─── AgentSkillPropertyOverrideEmbedded ───────────────────────────────────────
 
 public class AgentSkillPropertyOverrideEmbedded : EmbeddedEntity
 {
@@ -62,12 +88,16 @@ public class AgentSkillPropertyOverrideEmbedded : EmbeddedEntity
     public string? Value { get; set; }
 }
 
+// ─── AgentSkillSubSkillEmbedded ───────────────────────────────────────────────
+
 public class AgentSkillSubSkillEmbedded : EmbeddedEntity
 {
     public Lite<AgentSkillEntity> Skill { get; set; }
 
     public SkillActivation Activation { get; set; }
 }
+
+// ─── AgentSkillOperation ──────────────────────────────────────────────────────
 
 [AutoInit]
 public static class AgentSkillOperation

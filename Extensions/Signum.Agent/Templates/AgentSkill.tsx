@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, CheckboxLine, EntityCombo, EntityLine, EntityTable, EnumLine, TextBoxLine } from '@framework/Lines'
+import { CheckboxLine, EntityCombo, EntityLine, EntityTable, EnumLine, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { AgentSkillEntity, AgentSkillPropertyOverrideEmbedded, AgentSkillSubSkillEmbedded, SkillPropertyMeta } from '../Signum.Agent'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
@@ -15,24 +15,17 @@ export default function AgentSkill(p: { ctx: TypeContext<AgentSkillEntity> }): R
 
   const skillCode = ctx.value.skillCode;
 
-  const skillCodeDefaults = useAPI(
-    () => skillCode ? AgentSkillClient.API.getSkillCodeDefaults(skillCode) : Promise.resolve(null),
+  const skillCodeInfo = useAPI(
+    () => skillCode ? AgentSkillClient.API.getSkillCodeInfo(skillCode.fullClassName) : Promise.resolve(null),
     [skillCode]
   );
-
-  const skillCodeProperties = useAPI(
-    () => skillCode ? AgentSkillClient.API.getSkillCodeProperties(skillCode) : Promise.resolve([]),
-    [skillCode]
-  );
-
-  const registeredCodes = useAPI(() => AgentSkillClient.API.getRegisteredCodes(), []);
 
   return (
     <div>
       <div className="row">
         <div className="col-sm-6">
           <TextBoxLine ctx={ctx4.subCtx(e => e.name)} />
-          <EnumLine ctx={ctx4.subCtx(e => e.skillCode)} readOnly={registeredCodes == null} optionItems={registeredCodes ?? []}
+          <EntityCombo ctx={ctx4.subCtx(e => e.skillCode)}
             onChange={() => {
               ctx.value.shortDescription = null;
               ctx.value.instructions = null;
@@ -44,13 +37,13 @@ export default function AgentSkill(p: { ctx: TypeContext<AgentSkillEntity> }): R
         </div>
         <div className="col-sm-6">
           <TextBoxLine ctx={ctx4.subCtx(e => e.shortDescription)}
-            helpText={skillCodeDefaults && ctx.value.shortDescription == null
-              ? `Default: ${skillCodeDefaults.defaultShortDescription}`
+            helpText={skillCodeInfo && ctx.value.shortDescription == null
+              ? `Default: ${skillCodeInfo.defaultShortDescription}`
               : undefined} />
         </div>
       </div>
 
-      <InstructionsField ctx={ctx} defaults={skillCodeDefaults} />
+      <InstructionsField ctx={ctx} info={skillCodeInfo} />
 
       <fieldset className="mt-3">
         <legend className="fs-6 fw-semibold">Sub-Skills</legend>
@@ -60,7 +53,7 @@ export default function AgentSkill(p: { ctx: TypeContext<AgentSkillEntity> }): R
         ])} />
       </fieldset>
 
-      {skillCodeProperties && skillCodeProperties.length > 0 && (
+      {skillCodeInfo && skillCodeInfo.properties.length > 0 && (
         <fieldset className="mt-3">
           <legend className="fs-6 fw-semibold">Property Overrides</legend>
           <EntityTable ctx={ctx.subCtx(e => e.propertyOverrides)} columns={EntityTable.typedColumns<AgentSkillPropertyOverrideEmbedded>([
@@ -68,13 +61,13 @@ export default function AgentSkill(p: { ctx: TypeContext<AgentSkillEntity> }): R
               property: e => e.propertyName,
               template: ectx => (
                 <EnumLine ctx={ectx.subCtx(e => e.propertyName)}
-                  optionItems={skillCodeProperties.map(m => m.propertyName)}
+                  optionItems={skillCodeInfo.properties.map(m => m.propertyName)}
                   onChange={() => { ectx.value.value = null; forceUpdate(); }} />
               )
             },
             {
               property: e => e.value,
-              template: ectx => <PropertyValueControl ctx={ectx.subCtx(e => e.value)} properties={skillCodeProperties} propertyName={ectx.value.propertyName} />
+              template: ectx => <PropertyValueControl ctx={ectx.subCtx(e => e.value)} properties={skillCodeInfo.properties} propertyName={ectx.value.propertyName} />
             },
           ])} />
         </fieldset>
@@ -85,7 +78,7 @@ export default function AgentSkill(p: { ctx: TypeContext<AgentSkillEntity> }): R
 
 function InstructionsField(p: {
   ctx: TypeContext<AgentSkillEntity>,
-  defaults: { defaultInstructions: string } | null | undefined
+  info: { defaultInstructions: string } | null | undefined
 }): React.JSX.Element {
   const [showDiff, setShowDiff] = React.useState(false);
   const ctx = p.ctx;
@@ -93,7 +86,7 @@ function InstructionsField(p: {
   const label = (
     <span>
       Instructions
-      {p.defaults && (
+      {p.info && (
         <LinkButton className="ms-2 small" title={showDiff ? "Show editor" : "Show diff with default"}
           onClick={e => setShowDiff(v => !v)}>
           {showDiff ? "Show Editor" : "Show Diff"}
@@ -102,13 +95,13 @@ function InstructionsField(p: {
     </span>
   );
 
-  if (showDiff && p.defaults) {
+  if (showDiff && p.info) {
     return (
       <div className="mb-3">
         <label className="form-label">{label}</label>
         <DiffDocument
-          first={p.defaults.defaultInstructions}
-          second={ctx.value.instructions ?? p.defaults.defaultInstructions}
+          first={p.info.defaultInstructions}
+          second={ctx.value.instructions ?? p.info.defaultInstructions}
         />
       </div>
     );
@@ -116,7 +109,7 @@ function InstructionsField(p: {
 
   return (
     <MarkdownLine ctx={ctx.subCtx(e => e.instructions)}
-      helpText={p.defaults && ctx.value.instructions == null ? "Using default from code (.md file)" : undefined}
+      helpText={p.info && ctx.value.instructions == null ? "Using default from code (.md file)" : undefined}
       label={label as any}
     />
   );

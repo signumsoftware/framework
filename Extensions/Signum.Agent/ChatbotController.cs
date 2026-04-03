@@ -14,17 +14,9 @@ namespace Signum.Agent;
 
 public class ChatbotController : Controller
 {
-    [HttpGet("api/agentSkill/skillCodeDefaults/{skillCode}")]
-    public SkillCodeDefaults GetSkillCodeDefaults(string skillCode) =>
-        AgentSkillLogic.GetSkillCodeDefaults(skillCode);
-
-    [HttpGet("api/agentSkill/skillCodeProperties/{skillCode}")]
-    public List<SkillPropertyMeta> GetSkillCodeProperties(string skillCode) =>
-        AgentSkillLogic.GetSkillCodeProperties(skillCode);
-
-    [HttpGet("api/agentSkill/registeredCodes")]
-    public List<string> GetRegisteredCodes() =>
-        AgentSkillLogic.RegisteredCodes.Keys.Order().ToList();
+    [HttpGet("api/agentSkill/skillCodeInfo/{skillCode}")]
+    public SkillCodeInfo GetSkillCodeInfo(string skillCode) =>
+        AgentSkillLogic.GetSkillCodeInfo(skillCode);
 
     [HttpGet("api/chatbot/provider/{providerKey}/models")]
     public async Task<List<string>> GetModels(string providerKey, CancellationToken token)

@@ -3,7 +3,7 @@ import { ajaxGet } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator';
 import * as AppContext from '@framework/AppContext';
 import { TypeContext } from '@framework/TypeContext';
-import { AgentSkillEntity, SkillPropertyMeta, SkillCodeDefaults } from './Signum.Agent';
+import { AgentSkillEntity, SkillPropertyMeta, SkillCodeInfo } from './Signum.Agent';
 
 export namespace AgentSkillClient {
 
@@ -40,16 +40,8 @@ export namespace AgentSkillClient {
   // ─── API ──────────────────────────────────────────────────────────────────
 
   export namespace API {
-    export function getSkillCodeDefaults(skillCode: string): Promise<SkillCodeDefaults> {
-      return ajaxGet({ url: `/api/agentSkill/skillCodeDefaults/${encodeURIComponent(skillCode)}` });
-    }
-
-    export function getSkillCodeProperties(skillCode: string): Promise<SkillPropertyMeta[]> {
-      return ajaxGet({ url: `/api/agentSkill/skillCodeProperties/${encodeURIComponent(skillCode)}` });
-    }
-
-    export function getRegisteredCodes(): Promise<string[]> {
-      return ajaxGet({ url: '/api/agentSkill/registeredCodes' });
+    export function getSkillCodeInfo(skillCode: string): Promise<SkillCodeInfo> {
+      return ajaxGet({ url: `/api/agentSkill/skillCodeInfo/${encodeURIComponent(skillCode)}` });
     }
   }
 }
