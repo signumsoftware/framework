@@ -342,10 +342,320 @@ public static class ChatbotLogic
 
         return opts;
     }
+
+    // ─── Headless / extracted loop ────────────────────────────────────────────
+
+    /// <summary>
+    /// Runs the full agent loop on an already-initialised ConversationHistory.
+    /// history.Messages must already contain the system message and any initial
+    /// user / tool messages to resume from.
+    /// Stops when the LLM produces a response with no tool calls, or when a
+    /// UITool is invoked (caller must resume via a new request).
+    /// </summary>
+    public static async Task RunAgentLoopAsync(ConversationHistory history, IAgentOutput output, CancellationToken ct)
+    {
+        var client = GetChatClient(history.LanguageModel);
+
+        while (true)
+        {
+            // Context-window management: summarise when close to the token limit
+            if (history.LanguageModel.MaxTokens != null &&
+                history.Messages.Skip(1).LastOrDefault()?.InputTokens > history.LanguageModel.MaxTokens * 0.8)
+            {
+                var systemMsg = history.Messages.FirstEx();
+                if (systemMsg.Role != ChatMessageRole.System)
+                    throw new InvalidOperationException("First message is expected to be system");
+
+                var normalMessages = history.Messages.Skip(1).ToList();
+                var toKeepIndex = normalMessages.FindLastIndex(a => a.InputTokens < history.LanguageModel.MaxTokens * 0.5)
+                    .NotFoundToNull() ?? (normalMessages.Count - 1);
+
+                var toSumarize = normalMessages.Take(toKeepIndex).ToList();
+                var toKeep = normalMessages.Skip(toKeepIndex).ToList();
+
+                var summaryContent = await SumarizeConversation(toSumarize, history.LanguageModel, ct);
+
+                var summary = new ChatMessageEntity
+                {
+                    ChatSession = history.Session,
+                    Role = ChatMessageRole.System,
+                    Content = $"## Summary of earlier conversation\n{summaryContent}\n\n---\nRecent messages follow:",
+                }.Save();
+
+                await output.OnSummarizationAsync(summary, ct);
+                history.Messages = [systemMsg, summary, .. toKeep];
+            }
+
+            var tools = history.GetTools();
+            var options = ChatOptions(history.LanguageModel, tools);
+            var messages = history.GetMessages();
+            GetProvider(history.LanguageModel).CustomizeMessagesAndOptions(messages, options);
+
+            List<ChatResponseUpdate> updates = [];
+            var sw = Stopwatch.StartNew();
+            bool assistantStarted = false;
+
+            await foreach (var update in client.GetStreamingResponseAsync(messages, options, ct))
+            {
+                if (!assistantStarted)
+                {
+                    await output.OnAssistantStartedAsync(ct);
+                    assistantStarted = true;
+                }
+                updates.Add(update);
+                if (update.Text.HasText())
+                    await output.OnTextChunkAsync(update.Text, ct);
+            }
+            sw.Stop();
+
+            var response = updates.ToChatResponse();
+            var responseMsg = response.Messages.SingleEx();
+
+            var notSupported = responseMsg.Contents
+                .Where(a => a is not FunctionCallContent and not Microsoft.Extensions.AI.TextContent)
+                .ToList();
+            if (notSupported.Any())
+                throw new InvalidOperationException("Unexpected response: " + notSupported.ToString(a => a.GetType().Name, ", "));
+
+            var usage = response.Usage;
+            var toolCalls = responseMsg.Contents.OfType<FunctionCallContent>().ToList();
+
+            var uiToolCalls = toolCalls.Where(fc =>
+            {
+                var tool = history.RootSkill?.FindTool(fc.Name)
+                    ?? throw new InvalidOperationException($"Tool '{fc.Name}' not found");
+                return ((AIFunction)tool).UnderlyingMethod?.GetCustomAttribute<UIToolAttribute>() != null;
+            }).ToList();
+
+            if (uiToolCalls.Count > 1)
+                throw new InvalidOperationException(
+                    $"The LLM invoked more than one UITool in a single response ({string.Join(", ", uiToolCalls.Select(t => t.Name))}). Only one UITool can be active at a time.");
+
+            var answer = new ChatMessageEntity
+            {
+                ChatSession = history.Session,
+                Role = ChatMessageRole.Assistant,
+                Content = responseMsg.Text,
+                LanguageModel = history.Session.InDB(s => s.LanguageModel),
+                InputTokens = (int?)usage?.InputTokenCount,
+                CachedInputTokens = (int?)usage?.CachedInputTokenCount,
+                OutputTokens = (int?)usage?.OutputTokenCount,
+                ReasoningOutputTokens = (int?)usage?.ReasoningTokenCount,
+                Duration = sw.Elapsed,
+                ToolCalls = toolCalls.Select(fc => new ToolCallEmbedded
+                {
+                    ToolId = fc.Name,
+                    CallId = fc.CallId,
+                    Arguments = JsonSerializer.Serialize(fc.Arguments),
+                    IsUITool = uiToolCalls.Any(u => u.CallId == fc.CallId),
+                }).ToMList()
+            }.Save();
+
+            Expression<Func<int?, int?, int?>> NullableAdd = (a, b) =>
+                a == null && b == null ? null : (a ?? 0) + (b ?? 0);
+
+            history.Session.InDB().UnsafeUpdate()
+                .Set(a => a.TotalInputTokens, a => NullableAdd.Evaluate(a.TotalInputTokens, answer.InputTokens))
+                .Set(a => a.TotalCachedInputTokens, a => NullableAdd.Evaluate(a.TotalCachedInputTokens, answer.CachedInputTokens))
+                .Set(a => a.TotalOutputTokens, a => NullableAdd.Evaluate(a.TotalOutputTokens, answer.OutputTokens))
+                .Set(a => a.TotalReasoningOutputTokens, a => NullableAdd.Evaluate(a.TotalReasoningOutputTokens, answer.ReasoningOutputTokens))
+                .Set(a => a.TotalToolCalls, a => a.TotalToolCalls + answer.ToolCalls.Count)
+                .Execute();
+
+            await output.OnAssistantMessageAsync(answer, ct);
+            history.Messages.Add(answer);
+
+            if (toolCalls.IsEmpty() || uiToolCalls.Any())
+                break;
+
+            foreach (var funCall in toolCalls)
+                await ExecuteToolAsync(history, funCall.Name, funCall.CallId, funCall.Arguments!, output, ct);
+        }
+
+        // Title summarisation (runs regardless of UITool pause or normal completion)
+        if (history.SessionTitle == null || history.SessionTitle.StartsWith("!*$"))
+        {
+            history.SessionTitle = history.Session.InDB(a => a.Title);
+            if (history.SessionTitle == null || history.SessionTitle.StartsWith("!*$"))
+            {
+                string title = await SumarizeTitle(history, ct);
+                if (title.HasText() && title.ToLower() != "pending")
+                {
+                    history.Session.InDB().UnsafeUpdate(a => a.Title, a => title);
+                    history.SessionTitle = title;
+                    await output.OnTitleUpdatedAsync(title, ct);
+                }
+            }
+        }
+    }
+
+    public static async Task ExecuteToolAsync(
+        ConversationHistory history,
+        string toolId, string callId,
+        IDictionary<string, object?> arguments,
+        IAgentOutput output,
+        CancellationToken ct)
+    {
+        await output.OnToolStartAsync(toolId, callId, ct);
+        var toolSw = Stopwatch.StartNew();
+        try
+        {
+            AITool tool = history.RootSkill?.FindTool(toolId)
+                ?? throw new InvalidOperationException($"Tool '{toolId}' not found");
+            var obj = await ((AIFunction)tool).InvokeAsync(new AIFunctionArguments(arguments), ct);
+            toolSw.Stop();
+
+            var toolMsg = new ChatMessageEntity
+            {
+                ChatSession = history.Session,
+                Role = ChatMessageRole.Tool,
+                ToolCallID = callId,
+                ToolID = toolId,
+                Content = JsonSerializer.Serialize(obj),
+                Duration = toolSw.Elapsed,
+            }.Save();
+
+            await output.OnToolFinishedAsync(toolMsg, ct);
+            history.Messages.Add(toolMsg);
+        }
+        catch (Exception e)
+        {
+            toolSw.Stop();
+            var errorContent = FormatToolError(toolId, e, arguments);
+            ChatMessageEntity toolMsg;
+            using (AuthLogic.Disable())
+            {
+                toolMsg = new ChatMessageEntity
+                {
+                    ChatSession = history.Session,
+                    Role = ChatMessageRole.Tool,
+                    ToolCallID = callId,
+                    ToolID = toolId,
+                    Content = errorContent,
+                    Exception = e.LogException().ToLiteFat(),
+                    Duration = toolSw.Elapsed,
+                }.Save();
+            }
+            await output.OnToolFinishedAsync(toolMsg, ct);
+            history.Messages.Add(toolMsg);
+        }
+    }
+
+    public static string FormatToolError(string toolName, Exception e, IDictionary<string, object?>? arguments)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"Tool '{toolName}' failed.");
+        if (arguments != null && arguments.Count > 0)
+            sb.AppendLine($"Arguments: {JsonSerializer.Serialize(arguments).Etc(300)}");
+        sb.AppendLine($"Error: {e.GetType().Name}: {e.Message}");
+        if (e.Data["Hint"] is string s)
+            sb.AppendLine($"Hint: {s}");
+        sb.AppendLine("Please review the error and try again with corrected arguments.");
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Creates a new session and runs the agent loop headlessly (no HTTP connection).
+    /// The caller is responsible for setting up the authentication context if needed.
+    /// </summary>
+    public static async Task<ConversationHistory> RunHeadlessAsync(
+        string prompt,
+        AgentUseCaseSymbol? useCase = null,
+        Lite<ChatbotLanguageModelEntity>? languageModel = null,
+        IAgentOutput? output = null,
+        CancellationToken ct = default)
+    {
+        useCase ??= AgentUseCase.DefaultChatbot;
+        output ??= NullAgentOutput.Instance;
+
+        var modelLite = languageModel ?? DefaultLanguageModel.Value
+            ?? throw new InvalidOperationException($"No default {nameof(ChatbotLanguageModelEntity)} configured.");
+
+        var rootSkill = AgentSkillLogic.GetRootForUseCase(useCase)
+            ?? throw new InvalidOperationException($"No active AgentSkillEntity with UseCase = {useCase.Key}.");
+
+        var session = new ChatSessionEntity
+        {
+            LanguageModel = modelLite,
+            User = UserEntity.Current,
+            StartDate = Clock.Now,
+        }.Save();
+
+        var systemMsg = new ChatMessageEntity
+        {
+            Role = ChatMessageRole.System,
+            ChatSession = session.ToLite(),
+            Content = rootSkill.GetInstruction(null),
+        }.Save();
+
+        await output.OnSystemMessageAsync(systemMsg, ct);
+
+        var userMsg = new ChatMessageEntity
+        {
+            Role = ChatMessageRole.User,
+            ChatSession = session.ToLite(),
+            Content = prompt,
+        }.Save();
+
+        await output.OnUserQuestionAsync(userMsg, ct);
+
+        var history = new ConversationHistory
+        {
+            Session = session.ToLite(),
+            LanguageModel = modelLite.RetrieveFromCache(),
+            RootSkill = rootSkill,
+            Messages = [systemMsg, userMsg],
+        };
+
+        await RunAgentLoopAsync(history, output, ct);
+        return history;
+    }
 }
 
 
 
+
+// ─── IAgentOutput ─────────────────────────────────────────────────────────────
+
+/// <summary>
+/// Receives events from the agent loop. All methods have no-op default implementations
+/// so implementations only override what they care about.
+/// </summary>
+public interface IAgentOutput
+{
+    /// <summary>Called when the initial system message is saved (new session).</summary>
+    Task OnSystemMessageAsync(ChatMessageEntity msg, CancellationToken ct) => Task.CompletedTask;
+
+    /// <summary>Called when a user question message is saved.</summary>
+    Task OnUserQuestionAsync(ChatMessageEntity msg, CancellationToken ct) => Task.CompletedTask;
+
+    /// <summary>Called when the context-window summary message is saved.</summary>
+    Task OnSummarizationAsync(ChatMessageEntity summaryMsg, CancellationToken ct) => Task.CompletedTask;
+
+    /// <summary>Called once at the start of each assistant response, before any text chunks.</summary>
+    Task OnAssistantStartedAsync(CancellationToken ct) => Task.CompletedTask;
+
+    /// <summary>Called for each streaming text chunk from the LLM.</summary>
+    Task OnTextChunkAsync(string chunk, CancellationToken ct) => Task.CompletedTask;
+
+    /// <summary>Called when the assistant message entity is fully saved (includes tool call metadata).</summary>
+    Task OnAssistantMessageAsync(ChatMessageEntity msg, CancellationToken ct) => Task.CompletedTask;
+
+    /// <summary>Called just before a tool is invoked.</summary>
+    Task OnToolStartAsync(string toolId, string callId, CancellationToken ct) => Task.CompletedTask;
+
+    /// <summary>Called after a tool completes. Check toolMsg.Exception for errors.</summary>
+    Task OnToolFinishedAsync(ChatMessageEntity toolMsg, CancellationToken ct) => Task.CompletedTask;
+
+    /// <summary>Called when the session title is determined or updated.</summary>
+    Task OnTitleUpdatedAsync(string title, CancellationToken ct) => Task.CompletedTask;
+}
+
+public sealed class NullAgentOutput : IAgentOutput
+{
+    public static readonly NullAgentOutput Instance = new();
+    private NullAgentOutput() { }
+}
 
 public interface IChatbotModelProvider
 {
