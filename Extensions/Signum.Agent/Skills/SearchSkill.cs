@@ -14,7 +14,7 @@ using System.Web;
 
 namespace Signum.Agent.Skills;
 
-public class SearchSkill : AgentSkill
+public class SearchSkill : AgentSkillCode
 {
     public Func<object, bool> InlineQueryName = q => false; 
 

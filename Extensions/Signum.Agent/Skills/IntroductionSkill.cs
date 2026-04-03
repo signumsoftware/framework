@@ -6,7 +6,7 @@ using System.ComponentModel;
 namespace Signum.Agent.Skills;
 
 
-public class IntroductionSkill : AgentSkill
+public class IntroductionSkill : AgentSkillCode
 {
     public IntroductionSkill()
     {
@@ -18,15 +18,16 @@ public class IntroductionSkill : AgentSkill
         };
     }
 
-    [McpServerTool, Description("Gets the introduction for an skill and discorver new tools")]
+    [McpServerTool, Description("Gets the instructions for a skill and discovers its tools")]
     public string Describe(string skillName)
     {
-        //throw new InvalidOperationException("bla");
-
         if (skillName.Contains("error"))
             throw new Exception(skillName + " has an error");
 
-        var skill = this.FindSkill(skillName)
+        var root = AgentSkillLogic.CurrentMcpRoot.Value
+            ?? throw new InvalidOperationException("Describe can only be called from an MCP context");
+
+        var skill = root.FindSkill(skillName)
             ?? throw new KeyNotFoundException($"Skill '{skillName}' not found");
 
         return skill.GetInstruction(null);
@@ -35,7 +36,11 @@ public class IntroductionSkill : AgentSkill
     [McpServerTool, Description("List available skills with a short description, start here to discover new tools.")]
     public Dictionary<string, string> ListSkillNames()
     {
-        return this.GetSkillsRecursive().ToDictionary(a => a.Name, a => a.ShortDescription);
+        var root = AgentSkillLogic.CurrentMcpRoot.Value
+            ?? throw new InvalidOperationException("ListSkillNames can only be called from an MCP context");
+
+        return root.GetSkillsRecursive().ToDictionary(a => a.Name, a => a.ShortDescription);
     }
 }
+
 

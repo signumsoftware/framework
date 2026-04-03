@@ -3,6 +3,60 @@ import * as Entities from '../../Signum/React/Signum.Entities';
 import * as Basics from '../../Signum/React/Signum.Basics';
 import * as Operations from '../../Signum/React/Signum.Operations';
 import * as Authorization from '../Signum.Authorization/Signum.Authorization';
+export declare const AgentSkillCodeEntity: Type<AgentSkillCodeEntity>;
+export interface AgentSkillCodeEntity extends Entities.Entity {
+    Type: "AgentSkillCode";
+    fullClassName: string;
+}
+export declare const AgentUseCaseSymbol: Type<AgentUseCaseSymbol>;
+export interface AgentUseCaseSymbol extends Basics.Symbol {
+    Type: "AgentUseCase";
+}
+export declare namespace AgentUseCase {
+    const DefaultChatbot: AgentUseCaseSymbol;
+    const Summarizer: AgentUseCaseSymbol;
+}
+export declare const AgentSkillEntity: Type<AgentSkillEntity>;
+export interface AgentSkillEntity extends Entities.Entity {
+    Type: "AgentSkill";
+    name: string;
+    skillCode: AgentSkillCodeEntity;
+    active: boolean;
+    useCase: AgentUseCaseSymbol | null;
+    shortDescription: string | null;
+    instructions: string | null;
+    propertyOverrides: Entities.MList<AgentSkillPropertyOverrideEmbedded>;
+    subSkills: Entities.MList<AgentSkillSubSkillEmbedded>;
+}
+export declare namespace AgentSkillOperation {
+    const Save: Operations.ExecuteSymbol<AgentSkillEntity>;
+    const Delete: Operations.DeleteSymbol<AgentSkillEntity>;
+}
+export declare const AgentSkillPropertyOverrideEmbedded: Type<AgentSkillPropertyOverrideEmbedded>;
+export interface AgentSkillPropertyOverrideEmbedded extends Entities.EmbeddedEntity {
+    Type: "AgentSkillPropertyOverrideEmbedded";
+    propertyName: string;
+    value: string | null;
+}
+export declare const AgentSkillSubSkillEmbedded: Type<AgentSkillSubSkillEmbedded>;
+export interface AgentSkillSubSkillEmbedded extends Entities.EmbeddedEntity {
+    Type: "AgentSkillSubSkillEmbedded";
+    skill: Entities.Lite<AgentSkillEntity>;
+    activation: SkillActivation;
+}
+export declare const SkillActivation: EnumType<SkillActivation>;
+export type SkillActivation = "Eager" | "Lazy";
+export interface SkillPropertyMeta {
+    propertyName: string;
+    attributeName: string;
+    valueHint: string | null;
+    propertyType: string;
+}
+export interface SkillCodeInfo {
+    defaultShortDescription: string;
+    defaultInstructions: string;
+    properties: SkillPropertyMeta[];
+}
 export interface ToolCallEmbedded {
     _response?: ChatMessageEntity;
 }
@@ -41,7 +95,7 @@ export declare namespace ChatbotPermission {
     const UseChatbot: Basics.PermissionSymbol;
 }
 export declare const ChatbotUICommand: EnumType<ChatbotUICommand>;
-export type ChatbotUICommand = "System" | "SessionId" | "SessionTitle" | "QuestionId" | "AnswerId" | "AssistantAnswer" | "AssistantTool" | "Tool" | "Exception";
+export type ChatbotUICommand = "System" | "SessionId" | "SessionTitle" | "QuestionId" | "MessageId" | "AssistantAnswer" | "AssistantTool" | "AssistantUITool" | "Tool" | "Exception";
 export declare const ChatMessageEntity: Type<ChatMessageEntity>;
 export interface ChatMessageEntity extends Entities.Entity {
     Type: "ChatMessage";
