@@ -3,7 +3,20 @@ import { ajaxGet } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator';
 import * as AppContext from '@framework/AppContext';
 import { TypeContext } from '@framework/TypeContext';
-import { AgentSkillEntity, SkillPropertyMeta, SkillCodeInfo } from './Signum.Agent';
+import { AgentSkillEntity } from './Signum.Agent';
+
+export interface SkillPropertyMeta {
+  propertyName: string;
+  attributeName: string;
+  valueHint: string | null;
+  propertyType: string;
+}
+
+export interface SkillCodeInfo {
+  defaultShortDescription: string;
+  defaultInstructions: string;
+  properties: SkillPropertyMeta[];
+}
 
 export namespace AgentSkillClient {
 
@@ -12,8 +25,6 @@ export namespace AgentSkillClient {
     AppContext.clearSettingsActions.push(() => propertyValueRegistry.clear());
   }
 
-  // ─── Property value control registry ─────────────────────────────────────
-
   export type PropertyValueFactory = (
     ctx: TypeContext<string | null>,
     meta: SkillPropertyMeta
@@ -21,23 +32,13 @@ export namespace AgentSkillClient {
 
   const propertyValueRegistry = new Map<string, PropertyValueFactory>();
 
-  /**
-   * Register a custom control for editing AgentSkillPropertyOverride.value,
-   * keyed by the C# attribute name without "Attribute"
-   * (e.g. "AgentSkillProperty_QueryList", "AgentSkillProperty").
-   */
-  export function registerPropertyValueControl(
-    attributeName: string,
-    factory: PropertyValueFactory
-  ): void {
+  export function registerPropertyValueControl(attributeName: string, factory: PropertyValueFactory): void {
     propertyValueRegistry.set(attributeName, factory);
   }
 
   export function getPropertyValueControl(attributeName: string): PropertyValueFactory | undefined {
     return propertyValueRegistry.get(attributeName);
   }
-
-  // ─── API ──────────────────────────────────────────────────────────────────
 
   export namespace API {
     export function getSkillCodeInfo(skillCode: string): Promise<SkillCodeInfo> {

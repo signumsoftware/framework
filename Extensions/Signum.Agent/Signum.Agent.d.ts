@@ -46,17 +46,6 @@ export interface AgentSkillSubSkillEmbedded extends Entities.EmbeddedEntity {
 }
 export declare const SkillActivation: EnumType<SkillActivation>;
 export type SkillActivation = "Eager" | "Lazy";
-export interface SkillPropertyMeta {
-    propertyName: string;
-    attributeName: string;
-    valueHint: string | null;
-    propertyType: string;
-}
-export interface SkillCodeInfo {
-    defaultShortDescription: string;
-    defaultInstructions: string;
-    properties: SkillPropertyMeta[];
-}
 export interface ToolCallEmbedded {
     _response?: ChatMessageEntity;
 }

@@ -212,19 +212,6 @@ export type SkillActivation =
   "Eager" |
   "Lazy";
 
-export interface SkillPropertyMeta {
-  propertyName: string;
-  attributeName: string;
-  valueHint: string | null;
-  propertyType: string;
-}
-
-export interface SkillCodeInfo {
-  defaultShortDescription: string;
-  defaultInstructions: string;
-  properties: SkillPropertyMeta[];
-}
-
 export const ToolCallEmbedded: Type<ToolCallEmbedded> = new Type<ToolCallEmbedded>("ToolCallEmbedded");
 export interface ToolCallEmbedded extends Entities.EmbeddedEntity {
   Type: "ToolCallEmbedded";
