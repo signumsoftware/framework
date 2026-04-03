@@ -78,7 +78,9 @@ public class AgentSkillPropertyOverrideEmbedded : EmbeddedEntity
 
 public class AgentSkillSubSkillEmbedded : EmbeddedEntity
 {
-    public Lite<AgentSkillEntity> Skill { get; set; }
+    // Can reference either an AgentSkillEntity (customised) or AgentSkillCodeEntity (default, no DB entity needed)
+    [ImplementedBy(typeof(AgentSkillEntity), typeof(AgentSkillCodeEntity))]
+    public Lite<Entity> Skill { get; set; }
 
     public SkillActivation Activation { get; set; }
 }
@@ -88,4 +90,5 @@ public static class AgentSkillOperation
 {
     public static ExecuteSymbol<AgentSkillEntity> Save = null!;
     public static DeleteSymbol<AgentSkillEntity> Delete = null!;
+    public static ConstructSymbol<AgentSkillEntity>.From<AgentUseCaseSymbol> CreateFromUseCase = null!;
 }

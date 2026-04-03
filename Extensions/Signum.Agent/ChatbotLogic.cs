@@ -388,21 +388,31 @@ public static class ChatbotLogic
 
 public interface IAgentOutput
 {
-    Task OnSystemMessageAsync(ChatMessageEntity msg, CancellationToken ct) => Task.CompletedTask;
-    Task OnUserQuestionAsync(ChatMessageEntity msg, CancellationToken ct) => Task.CompletedTask;
-    Task OnSummarizationAsync(ChatMessageEntity summaryMsg, CancellationToken ct) => Task.CompletedTask;
-    Task OnAssistantStartedAsync(CancellationToken ct) => Task.CompletedTask;
-    Task OnTextChunkAsync(string chunk, CancellationToken ct) => Task.CompletedTask;
-    Task OnAssistantMessageAsync(ChatMessageEntity msg, CancellationToken ct) => Task.CompletedTask;
-    Task OnToolStartAsync(string toolId, string callId, CancellationToken ct) => Task.CompletedTask;
-    Task OnToolFinishedAsync(ChatMessageEntity toolMsg, CancellationToken ct) => Task.CompletedTask;
-    Task OnTitleUpdatedAsync(string title, CancellationToken ct) => Task.CompletedTask;
+    Task OnSystemMessageAsync(ChatMessageEntity msg, CancellationToken ct);
+    Task OnUserQuestionAsync(ChatMessageEntity msg, CancellationToken ct);
+    Task OnSummarizationAsync(ChatMessageEntity summaryMsg, CancellationToken ct);
+    Task OnAssistantStartedAsync(CancellationToken ct);
+    Task OnTextChunkAsync(string chunk, CancellationToken ct);
+    Task OnAssistantMessageAsync(ChatMessageEntity msg, CancellationToken ct);
+    Task OnToolStartAsync(string toolId, string callId, CancellationToken ct);
+    Task OnToolFinishedAsync(ChatMessageEntity toolMsg, CancellationToken ct);
+    Task OnTitleUpdatedAsync(string title, CancellationToken ct);
 }
 
 public sealed class NullAgentOutput : IAgentOutput
 {
     public static readonly NullAgentOutput Instance = new();
     private NullAgentOutput() { }
+
+    public Task OnSystemMessageAsync(ChatMessageEntity msg, CancellationToken ct) => Task.CompletedTask;
+    public Task OnUserQuestionAsync(ChatMessageEntity msg, CancellationToken ct) => Task.CompletedTask;
+    public Task OnSummarizationAsync(ChatMessageEntity summaryMsg, CancellationToken ct) => Task.CompletedTask;
+    public Task OnAssistantStartedAsync(CancellationToken ct) => Task.CompletedTask;
+    public Task OnTextChunkAsync(string chunk, CancellationToken ct) => Task.CompletedTask;
+    public Task OnAssistantMessageAsync(ChatMessageEntity msg, CancellationToken ct) => Task.CompletedTask;
+    public Task OnToolStartAsync(string toolId, string callId, CancellationToken ct) => Task.CompletedTask;
+    public Task OnToolFinishedAsync(ChatMessageEntity toolMsg, CancellationToken ct) => Task.CompletedTask;
+    public Task OnTitleUpdatedAsync(string title, CancellationToken ct) => Task.CompletedTask;
 }
 
 public class ConversationHistory

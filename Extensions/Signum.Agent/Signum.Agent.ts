@@ -34,6 +34,7 @@ export interface AgentSkillEntity extends Entities.Entity {
 export namespace AgentSkillOperation {
   export const Save : Operations.ExecuteSymbol<AgentSkillEntity> = registerSymbol("Operation", "AgentSkillOperation.Save");
   export const Delete : Operations.DeleteSymbol<AgentSkillEntity> = registerSymbol("Operation", "AgentSkillOperation.Delete");
+  export const CreateFromUseCase : Operations.ConstructSymbol_From<AgentSkillEntity, AgentUseCaseSymbol> = registerSymbol("Operation", "AgentSkillOperation.CreateFromUseCase");
 }
 
 export const AgentSkillPropertyOverrideEmbedded: Type<AgentSkillPropertyOverrideEmbedded> = new Type<AgentSkillPropertyOverrideEmbedded>("AgentSkillPropertyOverrideEmbedded");
@@ -46,7 +47,7 @@ export interface AgentSkillPropertyOverrideEmbedded extends Entities.EmbeddedEnt
 export const AgentSkillSubSkillEmbedded: Type<AgentSkillSubSkillEmbedded> = new Type<AgentSkillSubSkillEmbedded>("AgentSkillSubSkillEmbedded");
 export interface AgentSkillSubSkillEmbedded extends Entities.EmbeddedEntity {
   Type: "AgentSkillSubSkillEmbedded";
-  skill: Entities.Lite<AgentSkillEntity>;
+  skill: Entities.Lite<AgentSkillEntity | AgentSkillCodeEntity>;
   activation: SkillActivation;
 }
 

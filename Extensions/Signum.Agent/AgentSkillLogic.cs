@@ -21,6 +21,7 @@ public static class AgentSkillLogic
     public static readonly AsyncThreadVariable<bool> IsMCP = Statics.ThreadVariable<bool>("IsMCP");
 
     public static Dictionary<string, Type> RegisteredCodes = new();
+    public static Dictionary<AgentUseCaseSymbol, Func<AgentSkillCode>> DefaultRoots = new();
 
     public static ConversationSumarizerSkill ConversationSumarizerSkill = null!;
     public static QuestionSumarizerSkill QuestionSumarizerSkill = null!;
@@ -30,6 +31,11 @@ public static class AgentSkillLogic
     public static void RegisterCode<T>() where T : AgentSkillCode
     {
         RegisteredCodes[typeof(T).FullName!] = typeof(T);
+    }
+
+    public static void RegisterDefaultRoot(AgentUseCaseSymbol useCase, Func<AgentSkillCode> factory)
+    {
+        DefaultRoots[useCase] = factory;
     }
 
     public static void Start(SchemaBuilder sb)
@@ -65,6 +71,19 @@ public static class AgentSkillLogic
                 e.ShortDescription,
             });
 
+        new Graph<AgentSkillEntity>.ConstructFrom<AgentUseCaseSymbol>(AgentSkillOperation.CreateFromUseCase)
+        {
+            Construct = (useCase, _) =>
+            {
+                if (!DefaultRoots.TryGetValue(useCase, out var factory))
+                    return new AgentSkillEntity { UseCase = useCase };
+
+                var root = factory();
+                var codeEntities = Database.Query<AgentSkillCodeEntity>().ToDictionary(e => e.FullClassName);
+                return ConvertToEntity(root, useCase, codeEntities);
+            }
+        }.Register();
+
         sb.Schema.EntityEvents<AgentSkillEntity>().Saving += entity =>
         {
             if (!entity.IsNew && entity.SubSkills.IsGraphModified)
@@ -73,17 +92,25 @@ public static class AgentSkillLogic
 
         RootsByUseCase = sb.GlobalLazy(() =>
         {
-            var allEntities = Database.Query<AgentSkillEntity>()
-                .ToList()
-                .ToDictionary(e => e.ToLite());
+            var allEntities = Database.Query<AgentSkillEntity>().ToList();
+            var allEntitiesById = allEntities.ToDictionary(e => e.Id);
+            var codeFullNames = Database.Query<AgentSkillCodeEntity>()
+                .Select(e => new { e.Id, e.FullClassName })
+                .ToDictionary(e => e.Id, e => e.FullClassName);
 
-            return allEntities.Values
+            var fromDb = allEntities
                 .Where(e => e.UseCase != null && e.Active)
                 .GroupBy(e => e.UseCase!)
                 .ToDictionary(
                     g => g.Key,
-                    g => ResolveCode(g.SingleEx(), allEntities)
+                    g => ResolveCode(g.SingleEx(), allEntitiesById, codeFullNames)
                 );
+
+            // Fall back to registered default factories for use cases not in DB
+            foreach (var (useCase, factory) in DefaultRoots)
+                fromDb.TryAdd(useCase, factory());
+
+            return fromDb;
         }, new InvalidateWith(typeof(AgentSkillEntity)));
     }
 
@@ -113,7 +140,8 @@ public static class AgentSkillLogic
 
     public static AgentSkillCode ResolveCode(
         AgentSkillEntity entity,
-        Dictionary<Lite<AgentSkillEntity>, AgentSkillEntity> allEntities)
+        Dictionary<PrimaryKey, AgentSkillEntity> allEntitiesById,
+        Dictionary<PrimaryKey, string> codeFullNames)
     {
         var type = RegisteredCodes.GetOrThrow(entity.SkillCode.FullClassName,
             $"AgentSkillCode type '{entity.SkillCode.FullClassName}' is not registered.");
@@ -129,7 +157,22 @@ public static class AgentSkillLogic
         code.ApplyPropertyOverrides(entity);
 
         foreach (var ss in entity.SubSkills)
-            code.SubSkills.Add((ResolveCode(allEntities.GetOrThrow(ss.Skill), allEntities), ss.Activation));
+        {
+            AgentSkillCode subCode;
+            if (ss.Skill.EntityType == typeof(AgentSkillEntity))
+            {
+                var subEntity = allEntitiesById.GetOrThrow(ss.Skill.Id);
+                subCode = ResolveCode(subEntity, allEntitiesById, codeFullNames);
+            }
+            else
+            {
+                var fullClassName = codeFullNames.GetOrThrow(ss.Skill.Id);
+                var subType = RegisteredCodes.GetOrThrow(fullClassName,
+                    $"AgentSkillCode type '{fullClassName}' is not registered.");
+                subCode = (AgentSkillCode)Activator.CreateInstance(subType)!;
+            }
+            code.SubSkills.Add((subCode, ss.Activation));
+        }
 
         return code;
     }
@@ -143,9 +186,14 @@ public static class AgentSkillLogic
 
             var graph = DirectedGraph<AgentSkillEntity>.Generate(
                 allEntities,
-                e => e.Is(entity)
-                    ? entity.SubSkills.Select(s => s.Skill.RetrieveAndRemember()).ToList()
-                    : e.SubSkills.Select(s => s.Skill.RetrieveAndRemember()).ToList()
+                e =>
+                {
+                    var subSkills = e.Is(entity) ? entity.SubSkills : e.SubSkills;
+                    return subSkills
+                        .Where(s => s.Skill.EntityType == typeof(AgentSkillEntity))
+                        .Select(s => (AgentSkillEntity)s.Skill.RetrieveAndRemember())
+                        .ToList();
+                }
             );
 
             var problems = graph.FeedbackEdgeSet().Edges.ToList();
@@ -158,6 +206,76 @@ public static class AgentSkillLogic
 
     public static AgentSkillCode? GetRootForUseCase(AgentUseCaseSymbol symbol) =>
         RootsByUseCase.Value.TryGetC(symbol);
+
+    static bool NeedsEntity(AgentSkillCode code)
+    {
+        if (code.SubSkills.Any()) return true;
+        if (code.HasCustomInstructions) return true;
+
+        var defaultCode = (AgentSkillCode)Activator.CreateInstance(code.GetType())!;
+        if (code.ShortDescription != defaultCode.ShortDescription) return true;
+
+        foreach (var pi in code.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            var attr = pi.GetCustomAttribute<AgentSkillPropertyAttribute>();
+            if (attr == null) continue;
+
+            var currentStr = attr.ConvertValueToString(pi.GetValue(code), pi.PropertyType);
+            var defaultStr = attr.ConvertValueToString(pi.GetValue(defaultCode), pi.PropertyType);
+            if (currentStr != defaultStr) return true;
+        }
+
+        return false;
+    }
+
+    static AgentSkillEntity ConvertToEntity(AgentSkillCode code, AgentUseCaseSymbol? useCase,
+        Dictionary<string, AgentSkillCodeEntity> codeEntities)
+    {
+        var type = code.GetType();
+        var defaultCode = (AgentSkillCode)Activator.CreateInstance(type)!;
+
+        var entity = new AgentSkillEntity
+        {
+            Name = code.Name,
+            SkillCode = codeEntities.GetOrThrow(type.FullName!),
+            Active = true,
+            UseCase = useCase,
+            ShortDescription = code.ShortDescription != defaultCode.ShortDescription ? code.ShortDescription : null,
+            Instructions = code.HasCustomInstructions ? code.OriginalInstructions : null,
+        };
+
+        foreach (var pi in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            var attr = pi.GetCustomAttribute<AgentSkillPropertyAttribute>();
+            if (attr == null) continue;
+
+            var currentStr = attr.ConvertValueToString(pi.GetValue(code), pi.PropertyType);
+            var defaultStr = attr.ConvertValueToString(pi.GetValue(defaultCode), pi.PropertyType);
+            if (currentStr != defaultStr && currentStr != null)
+                entity.PropertyOverrides.Add(new AgentSkillPropertyOverrideEmbedded
+                {
+                    PropertyName = pi.Name,
+                    Value = currentStr,
+                });
+        }
+
+        foreach (var (sub, activation) in code.SubSkills)
+        {
+            Lite<Entity> skillLite;
+            if (NeedsEntity(sub))
+            {
+                var subEntity = ConvertToEntity(sub, null, codeEntities).Save();
+                skillLite = (Lite<Entity>)(object)subEntity.ToLite();
+            }
+            else
+            {
+                skillLite = (Lite<Entity>)(object)codeEntities.GetOrThrow(sub.GetType().FullName!).ToLite();
+            }
+            entity.SubSkills.Add(new AgentSkillSubSkillEmbedded { Skill = skillLite, Activation = activation });
+        }
+
+        return entity;
+    }
 
     public static SkillCodeInfo GetSkillCodeInfo(string fullClassName)
     {
@@ -214,6 +332,8 @@ public class AgentSkillPropertyAttribute : Attribute
         return ReflectionTools.ChangeType(value, targetType);
     }
 
+    public virtual string? ConvertValueToString(object? value, Type targetType) => value?.ToString();
+
     public virtual string? ValidateValue(string? value, Type targetType) => null;
 
     public virtual string? ValueHint => null;
@@ -231,6 +351,12 @@ public class AgentSkillProperty_QueryListAttribute : AgentSkillPropertyAttribute
             .Split(',')
             .Select(k => QueryLogic.ToQueryName(k.Trim()))
             .ToHashSet();
+    }
+
+    public override string? ConvertValueToString(object? value, Type targetType)
+    {
+        if (value is not System.Collections.IEnumerable enumerable) return value?.ToString();
+        return enumerable.Cast<object>().Select(q => QueryLogic.GetQueryEntity(q).Key).ToString(", ");
     }
 
     public override string? ValidateValue(string? value, Type targetType)
@@ -269,9 +395,16 @@ public abstract class AgentSkillCode
         get { return originalInstructions ??= File.ReadAllText(Path.Combine(SkillsDirectory, this.GetType().Name.Before("Skill") + ".md")); }
         set { originalInstructions = value; }
     }
+    internal bool HasCustomInstructions => originalInstructions != null;
 
-    // Populated from DB at resolve time; never set in code.
+    // Populated from DB at resolve time, or from code when building a default tree for a factory.
     public List<(AgentSkillCode Code, SkillActivation Activation)> SubSkills { get; } = new();
+
+    public AgentSkillCode WithSubSkill(AgentSkillCode sub, SkillActivation activation = SkillActivation.Lazy)
+    {
+        SubSkills.Add((sub, activation));
+        return this;
+    }
 
     public string GetInstruction(object? context)
     {
