@@ -16,7 +16,6 @@ namespace Signum.Agent;
 public static class AgentSkillLogic
 {
     public static readonly AsyncThreadVariable<bool> IsMCP = Statics.ThreadVariable<bool>("IsMCP");
-    internal static readonly AsyncThreadVariable<AgentSkillCode?> CurrentMcpRoot = Statics.ThreadVariable<AgentSkillCode?>("CurrentMcpRoot");
 
     /// <summary>Key = FullClassName (e.g. "Signum.Agent.Skills.SearchSkill"), Value = Type.</summary>
     public static Dictionary<string, Type> RegisteredCodes = new();
@@ -497,7 +496,6 @@ public static partial class SignumMcpServerBuilderExtensions
                     ?? throw new McpException($"Tool '{toolName}' not found");
 
                 CallToolResult result;
-                using (AgentSkillLogic.CurrentMcpRoot.Override(root))
                 using (AgentSkillLogic.IsMCP.Override(true))
                     result = await tool.InvokeAsync(ctx, ct);
 
