@@ -23,7 +23,7 @@ public class SearchValueLineProxy
 
     public async Task<FrameModalProxy<T>> CreateAsync<T>() where T : ModifiableEntity
     {
-        var popup = await CapturePopupAsync(CreateButton, async () => await CreateButton.ClickAsync());
+        var popup = await CreateButton.CaptureOnClickAsync();
 
         if (await SelectorModalProxy.IsSelectorAsync(popup))
         {
@@ -32,15 +32,5 @@ public class SearchValueLineProxy
         }
 
         return await FrameModalProxy<T>.NewAsync(popup);
-    }
-
-    private async Task<ILocator> CapturePopupAsync(ILocator trigger, Func<Task> action)
-    {
-        // Playwright Popup Capture Simulation
-        await action();
-        // Annahme: Das neue Modal wird als sichtbares Element auf der Page angezeigt
-        var popup = Element.Page.Locator(".sf-popup:visible");
-        await popup.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
-        return popup;
     }
 }

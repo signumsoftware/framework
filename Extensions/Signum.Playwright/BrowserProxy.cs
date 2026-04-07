@@ -202,9 +202,9 @@ public class BrowserProxy
     /// <summary>
     /// Login to application
     /// </summary>
-    public virtual async Task LoginAsync(string username, string password)
+    public virtual async Task LoginAsync(string username, string password, int timeout = 30000)
     {
-        await Page.GotoAsync(Url("Auth/Login"));
+        await Page.GotoAsync(Url("Auth/Login"), new PageGotoOptions { Timeout = timeout });
 
         await Page.Locator(".sf-login-page").WaitPresentAsync();
         // Check if login form button exists
@@ -237,10 +237,12 @@ public class BrowserProxy
     public virtual async Task<CultureInfo> GetCurrentCultureAsync()
     {
         // Before login: CultureDropdown renders as .sf-culture-dropdown with data-culture on the element itself.
-        var dropdown = Page.Locator(".sf-culture-dropdown");
-        if (await dropdown.IsPresentAsync())
+        await Page.Locator(".sf-culture-dropdown, .sf-login-dropdown").First.WaitVisibleAsync();
+
+        var cultureDropdown = Page.Locator(".sf-culture-dropdown");
+        if (await cultureDropdown.IsPresentAsync())
         {
-            var culture = await dropdown.GetAttributeAsync("data-culture");
+            var culture = await cultureDropdown.GetAttributeAsync("data-culture");
             if (!string.IsNullOrEmpty(culture))
             {
                 return new CultureInfo(culture);
@@ -270,5 +272,18 @@ public class BrowserProxy
     public async Task<T> WaitAsync<T>(Func<Task<T?>> condition, string? description = null, TimeSpan? timeout = null)
     {
         return await Page.WaitAsync(condition, description, timeout);
+    }
+
+    public static string? ReadModeFromFile(string fileName)
+    {
+        if (!File.Exists(fileName))
+            return null;
+
+        var firstLine = File.ReadAllLines(fileName).FirstOrDefault();
+
+        if (firstLine != null && firstLine.ToLower() is "debug" or "headless")
+            return firstLine;
+
+        return null;
     }
 }
