@@ -167,7 +167,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
     protected async Task<EntityInfoProxy?> EntityInfoInternalAsync(int? index)
         => EntityInfoProxy.Parse(await EntityInfoStringAsync(index));
 
-    public async Task AutoCompleteWaitChangesAsync(ILocator input, ILocator container, Lite<IEntity> lite)
+    protected async Task AutoCompleteWaitChangesAsync(ILocator input, ILocator container, Lite<IEntity> lite)
     {
         await WaitChangesAsync(async () =>
         {
@@ -175,7 +175,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
         });
     }
 
-    public async Task AutoCompleteWaitChangesAsync(ILocator input, ILocator container, string beginning)
+    protected async Task AutoCompleteWaitChangesAsync(ILocator input, ILocator container, string beginning)
     {
         await WaitChangesAsync(async () =>
         {
@@ -183,7 +183,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
         });
     }
 
-    public static async Task AutoCompleteBasicAsync(ILocator input, ILocator container, Lite<IEntity> lite)
+    protected static async Task AutoCompleteBasicAsync(ILocator input, ILocator container, Lite<IEntity> lite)
     {
         await input.FillAsync("id:" + lite.Id.ToString());
         await input.PressAsync("Space");
@@ -194,7 +194,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
         await item.ClickAsync();
     }
 
-    public static async Task AutoCompleteBasicAsync(ILocator input, ILocator container, string beginning)
+    protected static async Task AutoCompleteBasicAsync(ILocator input, ILocator container, string beginning)
     {
         await input.FillAsync(beginning);
 

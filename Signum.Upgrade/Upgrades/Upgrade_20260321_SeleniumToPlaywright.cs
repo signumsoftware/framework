@@ -420,10 +420,6 @@ global using System.Threading.Tasks;");
         "WaitInitialSearchCompleted",
         "AddQuickFilter",
 
-        // Popup/Modal Capture
-        "CapturePopup",
-        "CaptureManyPopup",
-
         "SelectRow",
         "SelectRow",
         "SelectAllRows",
@@ -443,6 +439,8 @@ global using System.Threading.Tasks;");
 
     static Dictionary<string, string> CustomMethodReplacements = new Dictionary<string, string>
     {
+        { "CapturePopup", "CaptureModalAsync" },
+        { "CaptureManyPopup", "CaptureManyModalPopup" },
         { "WaitElementPresent", "WaitPresentAsync" },
         { "WaitElementVisible", "WaitVisibleAsync" },
         { "WaitElementNotPresent", "WaitNoPresentAsync"},
@@ -472,6 +470,8 @@ global using System.Threading.Tasks;");
         result = Regex.Replace(result, @"\.CreateAndSelect\s*\(", ".CreateAndSelectAsync(async ", RegexOptions.None);
 
         result = Regex.Replace(result, @"\.Wait\s*\(", ".WaitAsync(async ", RegexOptions.None);
+
+        result = Regex.Replace(result, @"\.(AsMessageModal|AsSearchModal|AsFrameModal<\w+>|AsAutoLineModal|AsSelectorModal)\(\)", ".Then(a => a.$1())", RegexOptions.None);
 
 
 

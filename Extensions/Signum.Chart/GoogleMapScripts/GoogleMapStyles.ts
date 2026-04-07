@@ -1,5 +1,3 @@
-/// <reference types="google.maps" />
-
 const mapStyles: { [name: string]: google.maps.MapTypeStyle[] } = {
   "Silver": [
     {
