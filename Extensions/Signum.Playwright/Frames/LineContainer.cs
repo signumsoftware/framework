@@ -1,3 +1,5 @@
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Playwright;
 using Signum.Engine;
 using Signum.Entities.Reflection;
@@ -78,6 +80,11 @@ public static class LineContainerExtensions
             elementLocator: locator.Locator($"[data-property-path='{route.PropertyString()}']").First,
             route: route
         );
+    }
+
+    public static ILocator UntypedLineLocator(this ILineContainer lineContainer, PropertyRoute route)
+    {
+        return lineContainer.Element.Locator($"[data-property-path='{route.PropertyString()}']").First;
     }
 
     public static async Task<bool> IsVisibleAsync<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)

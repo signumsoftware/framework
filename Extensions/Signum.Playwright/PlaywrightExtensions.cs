@@ -352,12 +352,11 @@ public static class PlaywrightExtensions
     #region Modal/Popup Methods
 
 
-
     /// <summary>
-    /// Capture the modal that opens as a result of clickAction.
-    /// Uses data-capture-index to identify old modals and assign a unique index to the new one.
+    /// Capture the modals that open as a result of clickAction.
+    /// Uses data-capture-index to identify old modals and assign unique indices to the new ones.
     /// </summary>
-    public static async Task<ILocator> CaptureModalAsync(this IPage page, Func<Task> clickAction)
+    public static async Task<List<ILocator>> CaptureManyModalAsync(this IPage page, Func<Task> clickAction)
     {
         // Mark all currently visible modals as old
         var maxIndexJs = await page.EvaluateAsync("""
@@ -366,7 +365,7 @@ public static class PlaywrightExtensions
                 document.querySelectorAll('.modal.fade.show').forEach(el => {
                     if (!el.hasAttribute('data-capture-index'))
                         el.setAttribute('data-capture-index', '-1');
-                    
+
                     max = Math.max(max, parseInt(el.getAttribute('data-capture-index')));
                 });
                 return max;
@@ -380,17 +379,35 @@ public static class PlaywrightExtensions
         // Wait for the new modal (the only visible modal without capture-index)
         await page.WaitForSelectorAsync(".modal.fade.show:not([data-capture-index])");
 
-        // Tag the captured modal with a unique index so the locator is stable
-        await page.EvaluateAsync("""
+        // Tag the captured modals with unique indices
+        var countJs = await page.EvaluateAsync("""
             (captureIndex) => {
-                const modal = document.querySelector('.modal.fade.show:not([data-capture-index])');
-
-                if (modal)
-                    modal.setAttribute('data-capture-index', captureIndex.toString());
+                const modals = document.querySelectorAll('.modal.fade.show:not([data-capture-index])');
+                var count = 0;
+                modals.forEach(modal => {
+                    modal.setAttribute('data-capture-index', (captureIndex + count).toString());
+                    count++;
+                });
+                return count;
             }
             """, maxIndex);
 
-        return page.Locator($".modal.fade.show[data-capture-index='{maxIndex}']");
+        var count = countJs?.ToObject<int>() ?? 0;
+        var result = new List<ILocator>();
+        for (int i = 0; i < count; i++)
+        {
+            result.Add(page.Locator($".modal.fade.show[data-capture-index='{maxIndex + i}']"));
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Capture the modal that opens as a result of clickAction.
+    /// Uses data-capture-index to identify old modals and assign a unique index to the new one.
+    /// </summary>
+    public static async Task<ILocator> CaptureModalAsync(this IPage page, Func<Task> clickAction)
+    {
+        return (await page.CaptureManyModalAsync(clickAction)).SingleEx();
     }
 
     /// <summary>
@@ -399,6 +416,11 @@ public static class PlaywrightExtensions
     public static async Task<ILocator> CaptureOnClickAsync(this ILocator button)
     {
         return await button.Page.CaptureModalAsync(async () => await button.ClickAsync());
+    }
+
+    public static async Task<List<ILocator>> CaptureManyOnClickAsync(this ILocator button)
+    {
+        return await button.Page.CaptureManyModalAsync(async () => await button.ClickAsync());
     }
 
     public static async Task<ILocator> CaptureOnDoubleClickAsync(this ILocator button)
