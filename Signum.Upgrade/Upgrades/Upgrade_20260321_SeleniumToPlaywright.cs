@@ -61,7 +61,7 @@ global using System.Threading.Tasks;");
         // Convert Browse method in Common.cs
         uctx.ChangeCodeFile(@"Southwind.Test.React\Common.cs", file =>
         {
-            file.Replace($"class {uctx.ApplicationName}TestClass", $"public class {uctx.ApplicationName}TestClass : IAsyncLifetime");
+            file.Replace($"public class {uctx.ApplicationName}TestClass", $"public class {uctx.ApplicationName}TestClass : IAsyncLifetime");
 
             file.ReplaceBetween(
                 new(a => a.Contains("public static void Browse"), 0),
@@ -443,9 +443,6 @@ global using System.Threading.Tasks;");
 
     static Dictionary<string, string> CustomMethodReplacements = new Dictionary<string, string>
     {
-        { "AsMessageModal", "Await_AsMessageModal" },
-        { "AsSearchModal", "Await_AsSearchModal" },
-        { "AsFrameModal", "Await_AsFrameModal" },
         { "WaitElementPresent", "WaitPresentAsync" },
         { "WaitElementVisible", "WaitVisibleAsync" },
         { "WaitElementNotPresent", "WaitNoPresentAsync"},
