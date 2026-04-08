@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace Signum.Agent.Skills;
 
-public class CurrentServerContextSkill : AgentSkillCode
+public class CurrentServerContextSkill : SkillCode
 {
     public static Func<string?>? UrlLeft;
 

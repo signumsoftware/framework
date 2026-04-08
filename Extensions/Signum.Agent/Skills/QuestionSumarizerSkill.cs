@@ -3,7 +3,7 @@ using Microsoft.Extensions.AI;
 
 namespace Signum.Agent.Skills;
 
-public class QuestionSumarizerSkill : AgentSkillCode
+public class QuestionSumarizerSkill : SkillCode
 {
     public QuestionSumarizerSkill()
     {

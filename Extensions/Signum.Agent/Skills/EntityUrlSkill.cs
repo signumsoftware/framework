@@ -1,6 +1,6 @@
 namespace Signum.Agent.Skills;
 
-public class EntityUrlSkill : AgentSkillCode
+public class EntityUrlSkill : SkillCode
 {
     public EntityUrlSkill()
     {

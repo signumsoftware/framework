@@ -1,14 +1,14 @@
 import * as React from 'react'
 import { CheckboxLine, EntityCombo, EntityLine, EntityTable, EnumLine, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { AgentSkillEntity, AgentSkillPropertyOverrideEmbedded, AgentSkillSubSkillEmbedded } from '../Signum.Agent'
-import { AgentSkillClient, SkillPropertyMeta } from '../AgentSkillClient'
+import { SkillCustomizationEntity } from '../Signum.Agent'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { MarkdownLine } from '@framework/Lines/MarkdownLine'
 import { DiffDocument } from '../../Signum.DiffLog/Templates/DiffDocument'
 import { LinkButton } from '@framework/Basics/LinkButton'
+import { AgentClient, SkillPropertyMeta } from '../AgentClient'
 
-export default function AgentSkill(p: { ctx: TypeContext<AgentSkillEntity> }): React.JSX.Element {
+export default function SkillCustomization(p: { ctx: TypeContext<SkillCustomizationEntity> }): React.JSX.Element {
   const ctx = p.ctx;
   const ctx4 = ctx.subCtx({ labelColumns: 4 });
   const forceUpdate = useForceUpdate();
@@ -16,7 +16,7 @@ export default function AgentSkill(p: { ctx: TypeContext<AgentSkillEntity> }): R
   const skillCode = ctx.value.skillCode;
 
   const skillCodeInfo = useAPI(
-    () => skillCode ? AgentSkillClient.API.getSkillCodeInfo(skillCode.fullClassName) : Promise.resolve(null),
+    () => skillCode ? AgentClient.API.getSkillCodeInfo(skillCode.className) : Promise.resolve(null),
     [skillCode]
   );
 
@@ -24,16 +24,14 @@ export default function AgentSkill(p: { ctx: TypeContext<AgentSkillEntity> }): R
     <div>
       <div className="row">
         <div className="col-sm-6">
-          <TextBoxLine ctx={ctx4.subCtx(e => e.name)} />
           <EntityCombo ctx={ctx4.subCtx(e => e.skillCode)}
             onChange={() => {
               ctx.value.shortDescription = null;
               ctx.value.instructions = null;
-              ctx.value.propertyOverrides = [];
+              ctx.value.properties = [];
               forceUpdate();
             }} />
-          <CheckboxLine ctx={ctx4.subCtx(e => e.active)} inlineCheckbox />
-          <EntityCombo ctx={ctx4.subCtx(e => e.useCase)} />
+          <EntityCombo ctx={ctx4.subCtx(e => e.agent)} />
         </div>
         <div className="col-sm-6">
           <TextBoxLine ctx={ctx4.subCtx(e => e.shortDescription)}
@@ -45,18 +43,13 @@ export default function AgentSkill(p: { ctx: TypeContext<AgentSkillEntity> }): R
 
       <InstructionsField ctx={ctx} info={skillCodeInfo} />
 
-      <fieldset className="mt-3">
-        <legend className="fs-6 fw-semibold">Sub-Skills</legend>
-        <EntityTable ctx={ctx.subCtx(e => e.subSkills)} columns={[
+        <EntityTable ctx={ctx.subCtx(e => e.subSkills)} avoidFieldSet="h5" columns={[
           { property: e => e.activation, template: ectx => <EnumLine ctx={ectx.subCtx(e => e.activation)} /> },
           { property: e => e.skill, template: ectx => <EntityLine ctx={ectx.subCtx(e => e.skill)} /> },
         ]} />
-      </fieldset>
 
       {skillCodeInfo && skillCodeInfo.properties.length > 0 && (
-        <fieldset className="mt-3">
-          <legend className="fs-6 fw-semibold">Property Overrides</legend>
-          <EntityTable ctx={ctx.subCtx(e => e.propertyOverrides)} columns={[
+          <EntityTable ctx={ctx.subCtx(e => e.properties)} avoidFieldSet="h5" columns={[
             {
               property: e => e.propertyName,
               template: ectx => (
@@ -67,52 +60,43 @@ export default function AgentSkill(p: { ctx: TypeContext<AgentSkillEntity> }): R
             },
             {
               property: e => e.value,
-              template: ectx => <PropertyValueControl ctx={ectx.subCtx(e => e.value)} properties={skillCodeInfo.properties} propertyName={ectx.value.propertyName} />
+              template: ectx => <PropertyValueControl ctx={ectx.subCtx(e => e.value)} 
+                properties={skillCodeInfo.properties} 
+                propertyName={ectx.value.propertyName} />
             },
           ]} />
-        </fieldset>
       )}
     </div>
   );
 }
 
 function InstructionsField(p: {
-  ctx: TypeContext<AgentSkillEntity>,
+  ctx: TypeContext<SkillCustomizationEntity>,
   info: { defaultInstructions: string } | null | undefined
 }): React.JSX.Element {
   const [showDiff, setShowDiff] = React.useState(false);
   const ctx = p.ctx;
 
-  const label = (
-    <span>
-      Instructions
-      {p.info && (
+  const button = p.info && (
         <LinkButton className="ms-2 small" title={showDiff ? "Show editor" : "Show diff with default"}
           onClick={e => setShowDiff(v => !v)}>
           {showDiff ? "Show Editor" : "Show Diff"}
         </LinkButton>
-      )}
-    </span>
-  );
+      );
 
-  if (showDiff && p.info) {
     return (
       <div className="mb-3">
-        <label className="form-label">{label}</label>
-        <DiffDocument
-          first={p.info.defaultInstructions}
-          second={ctx.value.instructions ?? p.info.defaultInstructions}
-        />
+      <div className="float-end">
+      {button}
+      </div>
+        {showDiff && p.info ?<DiffDocument
+            first={p.info?.defaultInstructions}
+            second={ctx.value.instructions ?? ""}
+          />:  
+          <MarkdownLine ctx={ctx.subCtx(e => e.instructions)} /> }
       </div>
     );
-  }
-
-  return (
-    <MarkdownLine ctx={ctx.subCtx(e => e.instructions)}
-      helpText={p.info && ctx.value.instructions == null ? "Using default from code (.md file)" : undefined}
-      label={label as any}
-    />
-  );
+  
 }
 
 function PropertyValueControl(p: {
@@ -126,7 +110,7 @@ function PropertyValueControl(p: {
     return <TextBoxLine ctx={p.ctx} />;
   }
 
-  const factory = AgentSkillClient.getPropertyValueControl(meta.attributeName);
+  const factory = AgentClient.getPropertyValueControl(meta.attributeName);
   if (factory) {
     return factory(p.ctx, meta);
   }

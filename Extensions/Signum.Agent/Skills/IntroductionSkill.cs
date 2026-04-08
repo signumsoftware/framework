@@ -6,7 +6,7 @@ using System.ComponentModel;
 namespace Signum.Agent.Skills;
 
 
-public class IntroductionSkill : AgentSkillCode
+public class IntroductionSkill : SkillCode
 {
     public IntroductionSkill()
     {

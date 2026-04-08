@@ -3,25 +3,12 @@ import { ajaxGet } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator';
 import * as AppContext from '@framework/AppContext';
 import { TypeContext } from '@framework/TypeContext';
-import { AgentSkillEntity } from './Signum.Agent';
+import { SkillCustomizationEntity } from './Signum.Agent';
 
-export interface SkillPropertyMeta {
-  propertyName: string;
-  attributeName: string;
-  valueHint: string | null;
-  propertyType: string;
-}
-
-export interface SkillCodeInfo {
-  defaultShortDescription: string;
-  defaultInstructions: string;
-  properties: SkillPropertyMeta[];
-}
-
-export namespace AgentSkillClient {
+export namespace AgentClient {
 
   export function start(options: { routes: unknown[] }): void {
-    Navigator.addSettings(new EntitySettings(AgentSkillEntity, e => import('./Templates/AgentSkill')));
+    Navigator.addSettings(new EntitySettings(SkillCustomizationEntity, e => import('./Templates/SkillCustomization')));
     AppContext.clearSettingsActions.push(() => propertyValueRegistry.clear());
   }
 
@@ -46,3 +33,18 @@ export namespace AgentSkillClient {
     }
   }
 }
+
+
+export interface SkillPropertyMeta {
+    propertyName: string;
+    attributeName: string;
+    valueHint: string | null;
+    propertyType: string;
+  }
+
+  export interface SkillCodeInfo {
+    defaultShortDescription: string;
+    defaultInstructions: string;
+    properties: SkillPropertyMeta[];
+  }
+

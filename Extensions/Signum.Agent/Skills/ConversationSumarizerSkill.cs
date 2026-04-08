@@ -2,7 +2,7 @@ using Microsoft.Extensions.AI;
 
 namespace Signum.Agent.Skills;
 
-public class ConversationSumarizerSkill : AgentSkillCode
+public class ConversationSumarizerSkill : SkillCode
 {
     public ConversationSumarizerSkill()
     {

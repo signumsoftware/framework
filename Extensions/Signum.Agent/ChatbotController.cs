@@ -13,9 +13,9 @@ namespace Signum.Agent;
 
 public class ChatbotController : Controller
 {
-    [HttpGet("api/agentSkill/skillCodeInfo/{skillCode}")]
-    public SkillCodeInfo GetSkillCodeInfo(string skillCode) =>
-        AgentSkillLogic.GetSkillCodeInfo(skillCode);
+    [HttpGet("api/agentSkill/skillCodeInfo/{skillCodeName}")]
+    public DefaultSkillCodeInfo GetSkillCodeInfo(string skillCodeName) =>
+        SkillCodeLogic.GetDefaultSkillCodeInfo(skillCodeName);
 
     [HttpPost("api/chatbot/feedback/{messageId}")]
     public void SetFeedback(int messageId, [FromBody] SetFeedbackRequest request)
@@ -86,7 +86,7 @@ public class ChatbotController : Controller
                         Session = session.ToLite(),
                         SessionTitle = session.Title,
                         LanguageModel = session.LanguageModel.RetrieveFromCache(),
-                        RootSkill = AgentSkillLogic.GetRootForUseCase(AgentUseCase.DefaultChatbot),
+                        RootSkill = AgentLogic.GetEffectiveSkillCode(DefaultAgent.Chatbot),
                         Messages = systemAndSummaries.Concat(remainingMessages).ToList(),
                     };
                 }
@@ -173,7 +173,7 @@ public class ChatbotController : Controller
 
     ConversationHistory CreateNewConversationHistory(ChatSessionEntity session)
     {
-        var rootSkill = AgentSkillLogic.GetRootForUseCase(AgentUseCase.DefaultChatbot)
+        var rootSkill = AgentLogic.GetEffectiveSkillCode(DefaultAgent.Chatbot)
             ?? throw new InvalidOperationException("No active AgentSkillEntity with UseCase = DefaultChatbot");
 
         return new ConversationHistory

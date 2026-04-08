@@ -116,8 +116,7 @@ public static class ChatbotLogic
             conversationText.AppendLine($"{roleName}: {content}");
         }
 
-        var skill = AgentSkillLogic.ConversationSumarizerSkill;
-        var prompt = skill.GetInstruction(conversationText.ToString());
+        var prompt = DefaultAgent.ConversationSumarizer.GetEffectiveSkillCode().GetInstruction(conversationText.ToString());
         var client = LanguageModelLogic.GetChatClient(languageModel);
         var options = LanguageModelLogic.ChatOptions(languageModel, []);
         var cr = await client.GetResponseAsync(prompt, options, cancellationToken: ct);
@@ -126,7 +125,7 @@ public static class ChatbotLogic
 
     public static async Task<string> SumarizeTitle(ConversationHistory history, CancellationToken ct)
     {
-        var prompt = AgentSkillLogic.QuestionSumarizerSkill.GetInstruction(history);
+        var prompt = DefaultAgent.QuestionSummarizer.GetEffectiveSkillCode().GetInstruction(history);
         var client = LanguageModelLogic.GetChatClient(history.LanguageModel);
         var options = LanguageModelLogic.ChatOptions(history.LanguageModel, []);
         var cr = await client.GetResponseAsync(prompt, options, cancellationToken: ct);
@@ -335,7 +334,7 @@ public static class ChatbotLogic
 
     public static async Task<ConversationHistory> RunHeadlessAsync(
         string prompt,
-        AgentUseCaseSymbol useCase,
+        AgentSymbol useCase,
         Lite<ChatbotLanguageModelEntity>? languageModel = null,
         IAgentOutput? output = null,
         CancellationToken ct = default)
@@ -345,7 +344,7 @@ public static class ChatbotLogic
         var modelLite = languageModel ?? LanguageModelLogic.DefaultLanguageModel.Value
             ?? throw new InvalidOperationException($"No default {nameof(ChatbotLanguageModelEntity)} configured.");
 
-        var rootSkill = AgentSkillLogic.GetRootForUseCase(useCase)
+        var rootSkill = AgentLogic.GetEffectiveSkillCode(useCase)
             ?? throw new InvalidOperationException($"No active AgentSkillEntity with UseCase = {useCase.Key}.");
 
         var session = new ChatSessionEntity
@@ -421,7 +420,7 @@ public class ConversationHistory
     public ChatbotLanguageModelEntity LanguageModel;
     public List<ChatMessageEntity> Messages;
     public string? SessionTitle { get; internal set; }
-    public AgentSkillCode? RootSkill { get; set; }
+    public SkillCode? RootSkill { get; set; }
 
     public List<ChatMessage> GetMessages() =>
         Messages.Select(ToChatMessage).ToList();
@@ -506,7 +505,7 @@ public class ConversationHistory
 
         return activatedSkills
             .Select(name => RootSkill.FindSkill(name))
-            .OfType<AgentSkillCode>()
+            .OfType<SkillCode>()
             .SelectMany(skill => skill.GetTools())
             .ToList();
     }

@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace Signum.Agent.Skills;
 
-public class RetrieveSkill : AgentSkillCode
+public class RetrieveSkill : SkillCode
 {
     public RetrieveSkill()
     {

@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Signum.Agent.Skills;
 
-public class GetUIContextSkill : AgentSkillCode
+public class GetUIContextSkill : SkillCode
 {
     public GetUIContextSkill()
     {

@@ -11,7 +11,7 @@ using System.Text.Json.Serialization;
 
 namespace Signum.Agent.Skills;
 
-public class ChartSkill : AgentSkillCode
+public class ChartSkill : SkillCode
 {
     public ChartSkill()
     {

@@ -28,7 +28,7 @@ export interface WorkflowHandle {
   getSvg(): Promise<string>;
 }
 
-export function Workflow(p: WorkflowProps) {
+export function Workflow(p: WorkflowProps) : JSX.Element {
 
   const bpmnModelerComponentRef = React.useRef<BpmnModelerComponent>(null);
 

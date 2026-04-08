@@ -27,8 +27,8 @@ export const Message: React.NamedExoticComponent<{ msg: ChatMessageEntity; toolR
   }, (a, b) => a.msg.id != null && a.toolResponses == b.toolResponses);
 
 
-export function looksLikeJson(text: string) {
-  return text && (text.trim().startsWith("{") || text.trim().startsWith("["));
+export function looksLikeJson(text: string) : boolean {
+  return text != null && (text.trim().startsWith("{") || text.trim().startsWith("["));
 }
 
 export function SystemMessage(p: { msg: ChatMessageEntity }): React.ReactElement {
@@ -204,7 +204,7 @@ export function ToolResponseBlock(p: { msg: ChatMessageEntity }): React.ReactEle
   );
 }
 
-export function MarkdownOrJson(p: { content: string | null | undefined, formatJson?: boolean }) {
+export function MarkdownOrJson(p: { content: string | null | undefined, formatJson?: boolean }) : JSX.Element {
   if (!p.content)
     return <span className="text-muted">{p.content + ""}</span>;
   
@@ -218,7 +218,7 @@ export function MarkdownOrJson(p: { content: string | null | undefined, formatJs
   );
 }
 
-export function tryParseJsonString(str: string) {
+export function tryParseJsonString(str: string): string {
   try {
     if (str.startsWith("\"") && str.endsWith("\"")) {
       return JSON.parse(str);
