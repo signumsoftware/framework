@@ -274,16 +274,4 @@ public class BrowserProxy
         return await Page.WaitAsync(condition, description, timeout);
     }
 
-    public static string? ReadModeFromFile(string fileName)
-    {
-        if (!File.Exists(fileName))
-            return null;
-
-        var firstLine = File.ReadAllLines(fileName).FirstOrDefault();
-
-        if (firstLine != null && firstLine.ToLower() is "debug" or "headless")
-            return firstLine;
-
-        return null;
-    }
 }
