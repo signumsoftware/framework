@@ -57,7 +57,7 @@ public class SignumPlaywrightTestClass
         });
     }
 
-    protected async Task<IPage> GetPageAsync(IBrowser browser, IEnumerable<string> permissions)
+    protected virtual async Task<IPage> GetPageAsync(IBrowser browser, IEnumerable<string> permissions)
     {
         if (BrowserProxy.DebugMode)
         {

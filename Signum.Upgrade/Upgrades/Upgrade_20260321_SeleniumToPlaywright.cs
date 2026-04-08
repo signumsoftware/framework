@@ -95,7 +95,7 @@ global using System.Threading.Tasks;");
                             return await GetBrowser(playwright, mode);
                         });
 
-                        public static async Task BrowseAsync(string username, Func<{{browserName}}, Task> action)
+                        public async Task BrowseAsync(string username, Func<{{browserName}}, Task> action)
                         {
                             var browser = await DefaultBrowser.Value;
 

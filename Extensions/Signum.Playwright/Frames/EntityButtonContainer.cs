@@ -161,20 +161,20 @@ public static class EntityButtonContainerExtensions
         await container.WaitForCloseAsync();
     }
 
-    public static async Task<FrameModalProxy<T>> ConstructFromAsync<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+    public static async Task<FrameModalProxy<T>> ConstructFromAsync<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol, string? groupId = null)
         where T : Entity
         where F : Entity
     {
-        var element = await container.OperationClickCaptureAsync(symbol);
+        var element = await container.OperationClickCaptureAsync(symbol, groupId);
         var modal = await FrameModalProxy<T>.NewAsync(element);
         return modal;
     }
 
-    public static async Task<FramePageProxy<T>> ConstructFromFramePageAsync<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+    public static async Task<FramePageProxy<T>> ConstructFromFramePageAsync<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol, string? groupId = null)
         where T : Entity
         where F : Entity
     {
-        await container.OperationClickAsync(symbol);
+        await container.OperationClickAsync(symbol, groupId);
 
         await container.Container.Page.WaitAsync(async () =>
         {
