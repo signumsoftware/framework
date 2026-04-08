@@ -66,7 +66,7 @@ public class SignumPlaywrightTestClass
             // new page opens as a tab there instead of a separate incognito window.
             var context = browser.Contexts.SingleEx();
             await context.GrantPermissionsAsync(permissions);
-            return context.Pages.Last();
+            return context.Pages.Last(a => !IsOmniboxPage(a));
         }
         else
         {
@@ -87,7 +87,8 @@ public class SignumPlaywrightTestClass
                 await item.CloseAsync();
 
             var ctx = browser.Contexts.SingleEx();
-            foreach (var pg in ctx.Pages.Skip(1).ToList())
+            
+            foreach (var pg in ctx.Pages.Where(a => !IsOmniboxPage(a)).Skip(1).ToList())
                 await pg.CloseAsync();
 
             Cleaned = true;
@@ -100,6 +101,10 @@ public class SignumPlaywrightTestClass
         }
     }
 
+    private static bool IsOmniboxPage(IPage a)
+    {
+        return a.Url.Contains("omnibox-popup.top-chrome");
+    }
 
     public static string? ReadModeFromFile(string fileName)
     {
