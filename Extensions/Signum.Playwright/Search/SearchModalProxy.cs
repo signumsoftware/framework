@@ -46,7 +46,7 @@ public class SearchModalProxy : ModalProxy
 
     public async Task<ILocator> SelectLiteAsync_Capture(Lite<IEntity> lite, int? subRowIndex = null)
     {
-        return await this.Modal.Page.CaptureModalAsync(() => this.SelectLiteAsync(lite, subRowIndex));
+        return await Modal.Page.CaptureModalAsync(()=> SelectLiteAsync(lite, subRowIndex));
     }
 
     public async Task SelectByPositionAsync(int rowIndex)
@@ -58,7 +58,7 @@ public class SearchModalProxy : ModalProxy
 
     public async Task<ILocator> SelectByPositionAsync_Capture(int rowIndex)
     {
-        return await this.Modal.Page.CaptureModalAsync(() => this.SelectByPositionAsync(rowIndex));
+        return await Modal.Page.CaptureModalAsync(()=> SelectByPositionAsync(rowIndex));
     }
 
 
@@ -78,7 +78,7 @@ public class SearchModalProxy : ModalProxy
 
     public async Task<ILocator> SelectByIdAsync_Capture(PrimaryKey id)
     {
-        return await this.Modal.Page.CaptureModalAsync(() => this.SelectByIdAsync(id));
+        return await Modal.Page.CaptureModalAsync(()=> SelectByIdAsync(id));
     }
 
     public async Task SelectByPositionAsync(params int[] rowIndexes)

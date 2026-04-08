@@ -37,18 +37,15 @@ public static class WidgetContainerExtensions
 
     public static async Task<SearchModalProxy> QuickLinkClickSearchAsync(this IWidgetContainer container, string name)
     {
-        var modal = await container.Page.CaptureModalAsync(async () =>
-        {
-            var ql = container.WidgetContainer().Locator(".dropdown .sf-quicklinks");
+        var ql = container.WidgetContainer().Locator(".dropdown .sf-quicklinks");
 
-            await ql.ClickAsync();
+        await ql.ClickAsync();
 
-            var element = ql
-                .Locator("xpath=..")
-                .Locator($"ul.dropdown-menu a[data-name='{name}']");
+        var element = ql
+            .Locator("xpath=..")
+            .Locator($"ul.dropdown-menu a[data-name='{name}']");
 
-            await element.ClickAsync();
-        });
+        var modal = await container.Page.CaptureModalAsync(() => element.ClickAsync());
 
         return await SearchModalProxy.NewAsync(modal);
     }

@@ -34,11 +34,14 @@ public class MessageModalProxy : ModalProxy
         await GetButton(button).ClickAsync();
     }
 
-    public async Task ClickWaitCloseAsync(MessageModalButton button)
+    public async Task ClickCloseAsync(MessageModalButton button)
     {
         await GetButton(button).ClickAsync();
         await WaitNotVisibleAsync();
     }
+
+    public Task<ILocator> ClickCloseCaptureAsync(MessageModalButton button) =>
+        Modal.Page.CaptureModalAsync(() => ClickCloseAsync(button));
 
     public async Task<string> BodyTextAsync()
     {
@@ -74,7 +77,7 @@ public static class MessageModalProxyExtensions
     {
         var message = await page.WaitForMessageModalAsync();
         if (message != null)
-            await message.ClickWaitCloseAsync(button);
+            await message.ClickCloseAsync(button);
     }
 
     public static MessageModalProxy AsMessageModal(this ILocator element)

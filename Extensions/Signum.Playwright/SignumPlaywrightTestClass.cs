@@ -70,7 +70,7 @@ public class SignumPlaywrightTestClass
         }
         else
         {
-            var context = await browser.NewContextAsync(new BrowserNewContextOptions
+            var context = browser.Contexts.SingleOrDefaultEx() /*Nested BrowseAsync*/ ??  await browser.NewContextAsync(new BrowserNewContextOptions
             {
                 ViewportSize = ViewportSize.NoViewport, // Allow start-maximized to work
                 Permissions = permissions,
