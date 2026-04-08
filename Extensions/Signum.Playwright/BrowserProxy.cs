@@ -228,39 +228,30 @@ public class BrowserProxy
 
     }
 
-    /// <summary>
-    /// Sets the test thread culture to match the application's current culture.
-    /// Before login: reads data-culture from the .sf-culture-dropdown element.
-    /// After login: reads data-culture from the active CultureDropdownMenuItem item inside .sf-login-dropdown.
-    /// IsPresentAsync checks DOM presence so this works even when dropdowns are closed.
-    /// </summary>
-    public virtual async Task<CultureInfo> GetCurrentCultureAsync()
+    public virtual async Task<CultureInfo> GetCultureFromDropdownAsync()
     {
-        // Before login: CultureDropdown renders as .sf-culture-dropdown with data-culture on the element itself.
-        await Page.Locator(".sf-culture-dropdown, .sf-login-dropdown").First.WaitVisibleAsync();
-
         var cultureDropdown = Page.Locator(".sf-culture-dropdown");
-        if (await cultureDropdown.IsPresentAsync())
+        await cultureDropdown.WaitVisibleAsync();
+        var culture = await cultureDropdown.GetAttributeAsync("data-culture");
+        if (!string.IsNullOrEmpty(culture))
         {
-            var culture = await cultureDropdown.GetAttributeAsync("data-culture");
-            if (!string.IsNullOrEmpty(culture))
-            {
-                return new CultureInfo(culture);
-            }
+            return new CultureInfo(culture);
         }
 
-        // After login: CultureDropdownMenuItem renders individual items with data-culture inside .sf-login-dropdown;
-        var loginDropdown = Page.Locator(".sf-login-dropdown"); 
-        if (await loginDropdown.IsPresentAsync())
+        throw new InvalidOperationException("Unable to find culture in .sf-culture-dropdown");
+    }
+
+    public async Task<CultureInfo> GetCultureFromLoginDropdownAsync()
+    {
+        var loginDropdown = Page.Locator(".sf-login-dropdown");
+        await loginDropdown.WaitPresentAsync();
+        await loginDropdown.ClickAsync();
+        var cultureMenuItem = Page.Locator(".sf-login-dropdown .sf-culture-menu-item");
+        await cultureMenuItem.WaitPresentAsync();
+        var culture = await cultureMenuItem.GetAttributeAsync("data-culture");
+        if (!string.IsNullOrEmpty(culture))
         {
-            await loginDropdown.ClickAsync();
-            var cultureMenuItem = Page.Locator(".sf-login-dropdown .sf-culture-menu-item");
-            await cultureMenuItem.WaitPresentAsync();
-            var culture = await cultureMenuItem.GetAttributeAsync("data-culture");
-            if (!string.IsNullOrEmpty(culture))
-            {
-                return new CultureInfo(culture);
-            }
+            return new CultureInfo(culture);
         }
 
         throw new InvalidOperationException("Unable to find culture");
