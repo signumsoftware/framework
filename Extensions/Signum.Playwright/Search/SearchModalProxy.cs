@@ -44,6 +44,11 @@ public class SearchModalProxy : ModalProxy
         await DisposeAsync();
     }
 
+    public async Task<ILocator> SelectLiteAsync_Capture(Lite<IEntity> lite, int? subRowIndex = null)
+    {
+        return await Modal.Page.CaptureModalAsync(()=> SelectLiteAsync(lite, subRowIndex));
+    }
+
     public async Task SelectByPositionAsync(int rowIndex)
     {
         await this.SearchControl.Results.SelectRowAsync(rowIndex);
@@ -51,13 +56,11 @@ public class SearchModalProxy : ModalProxy
         await DisposeAsync();
     }
 
-    public async Task SelectByPositionOrderByIdAsync(int rowIndex)
+    public async Task<ILocator> SelectByPositionAsync_Capture(int rowIndex)
     {
-        await this.Results.OrderByAsync("Id");
-        await this.SearchControl.Results.SelectRowAsync(rowIndex);
-        await this.OkWaitClosedAsync();
-        await DisposeAsync();
+        return await Modal.Page.CaptureModalAsync(()=> SelectByPositionAsync(rowIndex));
     }
+
 
     public async Task SelectByIdAsync(PrimaryKey id)
     {
@@ -71,6 +74,11 @@ public class SearchModalProxy : ModalProxy
 
         await this.OkWaitClosedAsync();
         await DisposeAsync();
+    }
+
+    public async Task<ILocator> SelectByIdAsync_Capture(PrimaryKey id)
+    {
+        return await Modal.Page.CaptureModalAsync(()=> SelectByIdAsync(id));
     }
 
     public async Task SelectByPositionAsync(params int[] rowIndexes)

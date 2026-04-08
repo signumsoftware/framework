@@ -66,7 +66,7 @@ public static class CacheLogic
         if (withSqlDependency == true && !Connector.Current.SupportsSqlDependency)
             throw new InvalidOperationException("Sql Dependency is not supported by the current connection");
 
-        WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency;
+        WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency && serverBroadcast == null;
 
         if (serverBroadcast != null && WithSqlDependency)
             throw new InvalidOperationException("cacheInvalidator is only necessary if SqlDependency is not enabled");

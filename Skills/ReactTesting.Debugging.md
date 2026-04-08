@@ -99,22 +99,30 @@ dotnet test ...
 
 In `debug` mode the Chrome window stays open after a test failure. You can inspect the page directly using the **chrome-devtools-mcp** MCP server.
 
-Configure the MCP client to auto-connect to the running Chrome instance (no manual port needed):
+Since the test launches Chrome with `--remote-debugging-port=9222`, configure the MCP server to connect directly to that port:
 
 ```json
 "mcpServers": {
   "chrome-devtools": {
+    "type": "stdio",
     "command": "npx",
-    "args": ["chrome-devtools-mcp@latest", "--autoConnect"]
+    "args": [
+      "-y",
+      "chrome-devtools-mcp@latest",
+      "--browserUrl=http://127.0.0.1:9222"
+    ]
   }
 }
 ```
 
-Once connected, use the available tools to inspect the stuck page:
+This ensures the MCP server connects to the same Chrome instance that the test is using. Use the available MCP tools to inspect the page state, take screenshots/snapshots, check console messages, and review network requests.
 
-- `list_pages` — find the test tab
-- `select_page` — switch to it
-- `take_screenshot` — see what the UI looks like
-- `take_snapshot` — get the full a11y tree
-- `evaluate_script` — run JavaScript (e.g. read `data-refresh-count`, intercept `fetch`)
-- `list_network_requests` / `list_console_messages` — check for errors
+### Fixing a failing test
+
+When a test fails and you're investigating via MCP:
+
+1. **Check the failing state via MCP** - Use Chrome MCP tools to understand the actual page state when the test failed
+
+2. **Check the implementation (tsx)** - Review the React component to verify the test matches the actual UI behavior
+
+3. **DO NOT remove or comment out failing test code** - If the test needs to be modified or removed, get explicit user confirmation first. Never silently delete assertions or test functionality without understanding and discussing why they fail

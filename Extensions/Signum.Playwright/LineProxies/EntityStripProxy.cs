@@ -1,4 +1,5 @@
 using Signum.Playwright.Frames;
+using System.Xml.Linq;
 
 namespace Signum.Playwright.LineProxies;
 
@@ -41,5 +42,16 @@ public class EntityStripProxy : EntityBaseProxy
         var modal = await FrameModalProxy<T>.NewAsync(popup, this.ItemRoute);
         modal.Disposing = async okPressed => await WaitNewChangesAsync(changes);
         return modal;
+    }
+
+    public ILocator AutoCompleteElement => this.Element.Locator(".sf-entity-autocomplete");
+    public Task AutoCompleteAsync(Lite<Entity> lite)
+    {
+        return this.AutoCompleteWaitChangesAsync(AutoCompleteElement, Element, lite);
+    }
+
+    public Task AutoCompleteAsync(string beginning)
+    {
+        return this.AutoCompleteWaitChangesAsync(AutoCompleteElement, Element, beginning);
     }
 }

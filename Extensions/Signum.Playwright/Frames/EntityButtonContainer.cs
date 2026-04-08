@@ -29,8 +29,8 @@ public static class EntityButtonContainerExtensions
     {
         if (groupId != null)
         {
-            var groupButton = container.Element.Locator($"#{groupId}");
-            if (groupButton.GetAttributeAsync("aria-expanded").Result != "true")
+            var groupButton = container.Container.Locator($"#{groupId}");
+            if ((await groupButton.GetAttributeAsync("aria-expanded")) != "true")
             {
                 await groupButton.ClickAsync();
             }
@@ -123,12 +123,12 @@ public static class EntityButtonContainerExtensions
         return await container.OperationClickCaptureAsync(symbol.Symbol, groupId);
     }
 
-    public static async Task ExecuteAsync<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false, bool checkValidationErrors = true)
+    public static async Task ExecuteAsync<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false, bool checkValidationErrors = true, string? groupId = null)
         where T : Entity
     {
         await container.WaitReloadAsync(async () =>
         {
-            await container.OperationClickAsync(symbol);
+            await container.OperationClickAsync(symbol, groupId);
             if (consumeAlert)
                 await container.Container.Page.CloseMessageModalAsync(MessageModalButton.Yes);
         });
@@ -151,30 +151,30 @@ public static class EntityButtonContainerExtensions
         return Task.CompletedTask;
     }
 
-    public static async Task DeleteAsync<T>(this FrameModalProxy<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
+    public static async Task DeleteAsync<T>(this FrameModalProxy<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true, string? groupId = null)
         where T : Entity
     {
-        await container.OperationClickAsync(symbol);
+        await container.OperationClickAsync(symbol, groupId);
         if (consumeAlert)
             await container.Modal.Page.CloseMessageModalAsync(MessageModalButton.Yes);
 
         await container.WaitForCloseAsync();
     }
 
-    public static async Task<FrameModalProxy<T>> ConstructFromAsync<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+    public static async Task<FrameModalProxy<T>> ConstructFromAsync<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol, string? groupId = null)
         where T : Entity
         where F : Entity
     {
-        var element = await container.OperationClickCaptureAsync(symbol);
+        var element = await container.OperationClickCaptureAsync(symbol, groupId);
         var modal = await FrameModalProxy<T>.NewAsync(element);
         return modal;
     }
 
-    public static async Task<FramePageProxy<T>> ConstructFromFramePageAsync<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+    public static async Task<FramePageProxy<T>> ConstructFromFramePageAsync<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol, string? groupId = null)
         where T : Entity
         where F : Entity
     {
-        await container.OperationClickAsync(symbol);
+        await container.OperationClickAsync(symbol, groupId);
 
         await container.Container.Page.WaitAsync(async () =>
         {

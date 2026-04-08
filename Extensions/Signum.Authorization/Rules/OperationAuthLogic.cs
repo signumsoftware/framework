@@ -225,7 +225,7 @@ public static class OperationAuthLogic
 
         TypeAllowedBasic checkFor = operation.OperationType switch
         {
-            OperationType.ConstructorFrom => TypeAllowedBasic.Read,
+            OperationType.ConstructorFrom => ((IConstructorFromOperation)operation).SourceEntityIsModified ? TypeAllowedBasic.Write : TypeAllowedBasic.Read,
             OperationType.ConstructorFromMany => TypeAllowedBasic.Read,
             OperationType.Execute => ((IExecuteOperation)operation).ForReadonlyEntity ? TypeAllowedBasic.Read : TypeAllowedBasic.Write,
             OperationType.Delete => TypeAllowedBasic.Write,

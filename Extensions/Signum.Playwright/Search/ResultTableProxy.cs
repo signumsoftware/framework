@@ -129,10 +129,10 @@ public class ResultTableProxy
 
     // ---------------- HEADER ----------------
 
-    public ILocator HeaderElement => Element.Locator("thead > tr > th");
+    public ILocator HeaderElement => Element.Locator("thead > tr");
 
     public ILocator HeaderCellElement(string token)
-        => HeaderElement.Locator($"[data-column-name='{token}']");
+        => HeaderElement.Locator($"th[data-column-name='{token}']");
 
     public async Task<bool> HasColumnAsync(string token)
         => await HeaderCellElement(token).CountAsync() > 0;

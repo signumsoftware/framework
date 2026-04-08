@@ -9,6 +9,7 @@ public interface IConstructorFromOperation : IEntityOperation
 {
     IEntity Construct(IEntity entity, params object?[]? parameters);
     bool ResultIsSaved { get; }
+    bool SourceEntityIsModified { get; }
 }
 
 public interface IConstructorFromManyOperation : IOperation
