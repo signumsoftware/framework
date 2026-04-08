@@ -27,8 +27,8 @@ export const Message: React.NamedExoticComponent<{ msg: ChatMessageEntity; toolR
   }, (a, b) => a.msg.id != null && a.toolResponses == b.toolResponses);
 
 
-export function looksLikeJson(text: string) {
-  return text && (text.trim().startsWith("{") || text.trim().startsWith("["));
+export function looksLikeJson(text: string): boolean {
+  return text != null && (text.trim().startsWith("{") || text.trim().startsWith("["));
 }
 
 export function SystemMessage(p: { msg: ChatMessageEntity }): React.ReactElement {
