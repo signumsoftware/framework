@@ -124,6 +124,7 @@ li.sf-strip-element {
 .sf-line-button {
     cursor: pointer;
     color: var(--bs-secondary-color);
+    text-decoration: none;
 }
 
 .sf-line-button.input-group-text {
@@ -648,6 +649,14 @@ ul.dropdown-menu>li>a.disabled {
 
 .item-group {
     white-space: nowrap;
+}
+
+tr .sf-shy-icon {
+    opacity: 0;
+}
+
+tr:hover .sf-shy-icon {
+    opacity: 0.6;
 }
 
 table.sf-multi-value {
