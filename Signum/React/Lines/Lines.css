@@ -651,12 +651,18 @@ ul.dropdown-menu>li>a.disabled {
     white-space: nowrap;
 }
 
-tr .sf-shy-icon {
+tr .sf-shy-row {
     opacity: 0;
 }
 
-tr:hover .sf-shy-icon {
+tr:hover .sf-shy-row {
     opacity: 0.6;
+}
+
+@media (hover: none) {
+    tr .sf-shy-row {
+        opacity: 0.6;
+    }
 }
 
 table.sf-multi-value {

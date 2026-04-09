@@ -106,7 +106,7 @@ function ColumnEditorModal(p: ColumnEditorModalProps): React.ReactElement {
             <div className="d-flex align-items-center gap-1">
               <LinkButton
                 title={SearchMessage.Orders.niceToString()}
-                className={classes("sf-line-button", order == null && "sf-shy-icon")}
+                className={classes("sf-line-button", order == null && "sf-shy-row")}
                 style={btnStyle}
                 onClick={e => handleColumnOrderClick(e, co.token)}>
                 <span className={`sf-header-sort ${sortClass}${lClass}`} />
@@ -128,7 +128,7 @@ function ColumnEditorModal(p: ColumnEditorModalProps): React.ReactElement {
             <div className="d-flex align-items-center gap-1 mt-1">
               <LinkButton
                 title={SearchMessage.SummaryHeader.niceToString()}
-                className={classes("sf-line-button", co.summaryToken == null && "sf-shy-icon")}
+                className={classes("sf-line-button", co.summaryToken == null && "sf-shy-row")}
                 style={btnStyle}
                 onClick={() => { co.summaryToken = co.summaryToken ? undefined : co.token; fu(); }}>
                 Ʃ
@@ -163,7 +163,7 @@ function ColumnEditorModal(p: ColumnEditorModalProps): React.ReactElement {
               placeholder={co.token?.niceName}
               onChange={e => { co.displayName = e.currentTarget.value || undefined; fu(); }} />
           </div>
-          <label className="col-form-label col-form-label-xs mt-1 mb-0">
+          <label className={classes("col-form-label col-form-label-xs mt-1 mb-0", !co.hiddenColumn && "sf-shy-row")}>
             <input type="checkbox" className="form-check-input me-1"
               checked={co.hiddenColumn ?? false}
               onChange={() => {
@@ -185,7 +185,7 @@ function ColumnEditorModal(p: ColumnEditorModalProps): React.ReactElement {
       headerHtmlAttributes: { style: { width: "180px" } },
       cellHtmlAttributes: { style: { width: "180px" } },
       template: (co, _i, fu) => (
-        <select className="form-select form-select-xs" value={co.combineRows ?? ""}
+        <select className={classes("form-select form-select-xs", !co.combineRows && "sf-shy-row")} value={co.combineRows ?? ""}
           disabled={co.hiddenColumn ?? false}
           onChange={e => { co.combineRows = (e.currentTarget.value as CombineRows) || undefined; fu(); }}>
           <option value="">{" - "}</option>
