@@ -1893,7 +1893,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   getEntityFormatter(): Finder.EntityFormatter {
     const qs = this.props.querySettings;
-    return this.props.entityFormatter ?? (qs?.entityFormatter) ?? Finder.entityFormatRules.filter(a => a.isApplicable(this)).last("EntityFormatRules").formatter;
+    return (this.state.resultFindOptions?.groupResults ? null : this.props.entityFormatter ?? qs?.entityFormatter) 
+      ?? Finder.entityFormatRules.filter(a => a.isApplicable(this)).last("EntityFormatRules").formatter;
   }
 
   hasEntityColumn(): boolean | "InPlace" {
