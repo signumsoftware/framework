@@ -353,61 +353,53 @@ public static class PlaywrightExtensions
 
 
     /// <summary>
-    /// Capture the modals that open as a result of clickAction.
-    /// Uses data-capture-index to identify old modals and assign unique indices to the new ones.
+    /// Capture the modal that opens as a result of clickAction.
+    /// Uses data-capture-index to identify old modals and assign a unique index to the new one.
+    /// Only captures the first modal that appears. Call this method multiple times to capture multiple modals.
     /// </summary>
-    public static async Task<List<ILocator>> CaptureManyModalAsync(this IPage page, Func<Task> clickAction)
+    public static async Task<ILocator> CaptureModalAsync(this IPage page, Func<Task> clickButton)
     {
-        // Mark all currently visible modals as old
-        var maxIndexJs = await page.EvaluateAsync("""
+        var maxBefore = await page.EvaluateAsync("""
             () => {
                 var max = 0;
-                document.querySelectorAll('.modal.fade.show').forEach(el => {
-                    if (!el.hasAttribute('data-capture-index'))
-                        el.setAttribute('data-capture-index', '-1');
-
+                document.querySelectorAll('.modal.fade.show[data-capture-index]').forEach(el => {
                     max = Math.max(max, parseInt(el.getAttribute('data-capture-index')));
                 });
                 return max;
             }
             """);
 
-        var maxIndex = (maxIndexJs?.ToObject<int>() ?? 0) + 1;
+        await clickButton();
 
-        await clickAction();
-
-        // Wait for the new modal (the only visible modal without capture-index)
+        // Wait for the new modal (the first visible modal without capture-index)
         await page.WaitForSelectorAsync(".modal.fade.show:not([data-capture-index])");
 
-        // Tag the captured modals with unique indices
-        var countJs = await page.EvaluateAsync("""
-            (captureIndex) => {
-                const modals = document.querySelectorAll('.modal.fade.show:not([data-capture-index])');
-                var count = 0;
-                modals.forEach(modal => {
-                    modal.setAttribute('data-capture-index', (captureIndex + count).toString());
-                    count++;
+        var maxAfter = await page.EvaluateAsync("""
+            () => {
+                var max = 0;
+                document.querySelectorAll('.modal.fade.show[data-capture-index]').forEach(el => {
+                    max = Math.max(max, parseInt(el.getAttribute('data-capture-index')));
                 });
-                return count;
+                return max;
             }
-            """, maxIndex);
+            """);
 
-        var count = countJs?.ToObject<int>() ?? 0;
-        var result = new List<ILocator>();
-        for (int i = 0; i < count; i++)
-        {
-            result.Add(page.Locator($".modal.fade.show[data-capture-index='{maxIndex + i}']"));
-        }
-        return result;
-    }
+        var nextIndex = Math.Max(
+            maxBefore?.ToObject<int>() ?? 0,
+            maxAfter?.ToObject<int>() ?? 0
+            ) + 1;
 
-    /// <summary>
-    /// Capture the modal that opens as a result of clickAction.
-    /// Uses data-capture-index to identify old modals and assign a unique index to the new one.
-    /// </summary>
-    public static async Task<ILocator> CaptureModalAsync(this IPage page, Func<Task> clickAction)
-    {
-        return (await page.CaptureManyModalAsync(clickAction)).SingleEx();
+        // Tag only the first captured modal with a unique index
+        await page.EvaluateAsync("""
+            (nextIndex) => {
+                const modal = document.querySelector('.modal.fade.show:not([data-capture-index])');
+                if (modal) {
+                    modal.setAttribute('data-capture-index', nextIndex.toString());
+                }
+            }
+            """, nextIndex);
+
+        return page.Locator($".modal.fade.show[data-capture-index='{nextIndex}']");
     }
 
     /// <summary>
@@ -415,17 +407,20 @@ public static class PlaywrightExtensions
     /// </summary>
     public static async Task<ILocator> CaptureOnClickAsync(this ILocator button)
     {
-        return await button.Page.CaptureModalAsync(async () => await button.ClickAsync());
+        return await button.Page.CaptureModalAsync(()=> button.ClickAsync());
     }
 
-    public static async Task<List<ILocator>> CaptureManyOnClickAsync(this ILocator button)
+    public static async Task MoveMouseAsync(this ILocator button, float xRatio = .5f, float yRatio = .5f)
     {
-        return await button.Page.CaptureManyModalAsync(async () => await button.ClickAsync());
+        var bb = await button.BoundingBoxAsync();
+        await button.Page.Mouse.MoveAsync(bb!.X + bb.Width * xRatio, bb.Y + bb.Height * yRatio);
     }
+
+
 
     public static async Task<ILocator> CaptureOnDoubleClickAsync(this ILocator button)
     {
-        return await button.Page.CaptureModalAsync(async () => await button.DoubleClickAsync());
+        return await button.Page.CaptureModalAsync(()=> button.DoubleClickAsync());
     }
 
     #endregion

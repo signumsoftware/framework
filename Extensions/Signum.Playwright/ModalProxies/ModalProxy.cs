@@ -112,6 +112,9 @@ public class ModalProxy : IAsyncDisposable , IDisposableException
         OkPressed = true;
     }
 
+    public Task<ILocator> OkWaitClosedCaptureAsync(bool consumeAlert = false) =>
+        this.Modal.Page.CaptureModalAsync(() => this.OkWaitClosedAsync(consumeAlert));
+
     public async Task WaitForCloseAsync()
     {
         await Modal.WaitForAsync(new()

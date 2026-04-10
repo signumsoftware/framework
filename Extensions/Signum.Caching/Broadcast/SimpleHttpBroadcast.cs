@@ -17,7 +17,7 @@ public class SimpleHttpBroadcast : IServerBroadcast
     {
         this.bordcastSecretHash = Convert.ToBase64String(PasswordEncoding.HashPassword("", broadcastSecret));
         this.broadcastUrls = broadcastUrls
-            .SplitNoEmpty(new char[] { ';', ',' } /*In theory ; and , are valid in a URL, but since we talk only domain names or IPs...*/)
+            .SplitNoEmpty(';', ',' /*In theory ; and , are valid in a URL, but since we talk only domain names or IPs...*/)
             .Select(a => a.Trim())
             .Where(a => a.HasText())
             .ToArray();

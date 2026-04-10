@@ -679,6 +679,9 @@ export namespace SearchMessage {
   export const DeleteAllFilter: MessageKey = new MessageKey("SearchMessage", "DeleteAllFilter");
   export const Filters: MessageKey = new MessageKey("SearchMessage", "Filters");
   export const Columns: MessageKey = new MessageKey("SearchMessage", "Columns");
+  export const Orders: MessageKey = new MessageKey("SearchMessage", "Orders");
+  export const Before: MessageKey = new MessageKey("SearchMessage", "Before");
+  export const After: MessageKey = new MessageKey("SearchMessage", "After");
   export const Find: MessageKey = new MessageKey("SearchMessage", "Find");
   export const FinderOf0: MessageKey = new MessageKey("SearchMessage", "FinderOf0");
   export const Name: MessageKey = new MessageKey("SearchMessage", "Name");
@@ -757,6 +760,7 @@ export namespace SearchMessage {
   export const AdvancedFilters: MessageKey = new MessageKey("SearchMessage", "AdvancedFilters");
   export const FilterDesigner: MessageKey = new MessageKey("SearchMessage", "FilterDesigner");
   export const TimeMachine: MessageKey = new MessageKey("SearchMessage", "TimeMachine");
+  export const EditAllColumns: MessageKey = new MessageKey("SearchMessage", "EditAllColumns");
   export const Options: MessageKey = new MessageKey("SearchMessage", "Options");
   export const YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages: MessageKey = new MessageKey("SearchMessage", "YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages");
   export const CurrentPage: MessageKey = new MessageKey("SearchMessage", "CurrentPage");

@@ -399,33 +399,47 @@ public static class LineContainerExtensions
         return new QueryTokenBuilderProxy(lineLocator.ElementLocator);
     }
 
-    public static async Task SelectTabAsync(this ILineContainer lineContainer, string eventKey)
+    public static async Task<LineContainer<T>> SelectTabAsync<T>(this ILineContainer<T> lineContainer, string eventKey)
+        where T : IModifiableEntity
     {
-        var element = lineContainer.Element.Locator($".nav-tabs .nav-item .nav-link[data-rr-ui-event-key='{eventKey}']");
+        var locator = await lineContainer.Element.SelectTabAsync(eventKey);
+        return new LineContainer<T>(locator, lineContainer.Route);
+    }
+    public static async Task<ILocator> SelectTabAsync(this ILocator locator, string eventKey)
+    {
+        var element = locator.Locator($".nav-tabs .nav-item .nav-link[data-rr-ui-event-key='{eventKey}']");
         await element.ClickAsync();
+        var id = await element.GetIdAsync();
+        var tabLocator = locator.Locator($"div.fade.tab-pane.active.show[aria-labelledby='{id}']");
+        await tabLocator.WaitVisibleAsync();
+        return tabLocator;
     }
 
-    public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName)
+
+    public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName) => lineContainer.Element.GetSearchControl(queryName);
+    public static SearchControlProxy GetSearchControl(this ILocator locator, object queryName)
     {
         string queryKey = QueryUtils.GetKey(queryName);
-        var locator = lineContainer.Element.Locator($"div.sf-search-control[data-query-key='{queryKey}']");
-        return new SearchControlProxy(locator, queryName);
+        var sc = locator.Locator($"div.sf-search-control[data-query-key='{queryKey}']");
+        return new SearchControlProxy(sc, queryName);
     }
 
     /// <summary>
     /// Waits for the initial query to be completed
     /// </summary>
-    public static async Task<SearchControlProxy> GetSearchControlAsync(this ILineContainer lineContainer, object queryName)
+    public static Task<SearchControlProxy> GetSearchControlAsync(this ILineContainer lineContainer, object queryName) => lineContainer.Element.GetSearchControlAsync(queryName);
+    public static async Task<SearchControlProxy> GetSearchControlAsync(this ILocator lineContainer, object queryName)
     {
         var sc = lineContainer.GetSearchControl(queryName);
         await sc.WaitInitialSearchCompletedAsync();
         return sc;
     }
 
-    public static SearchValueLineProxy GetSearchValueLine(this ILineContainer lineContainer, object queryName)
+    public static SearchValueLineProxy GetSearchValueLine(this ILineContainer lineContainer, object queryName) => lineContainer.Element.GetSearchValueLine(queryName);
+    public static SearchValueLineProxy GetSearchValueLine(this ILocator locator, object queryName)
     {
         string queryKey = QueryUtils.GetKey(queryName);
-        var element = lineContainer.Element.Locator($"[data-value-query-key='{queryKey}']");
+        var element = locator.Locator($"[data-value-query-key='{queryKey}']");
         return new SearchValueLineProxy(element);
     }
 }

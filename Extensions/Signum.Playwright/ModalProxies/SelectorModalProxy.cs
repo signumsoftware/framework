@@ -44,27 +44,27 @@ public class SelectorModalProxy : ModalProxy
 
     public async Task<ILocator> SelectAndCaptureAsync(string value)
     {
-        return await Modal.Page.CaptureModalAsync(async () => await SelectPrivateAsync(value));
+        return await Modal.Page.CaptureModalAsync(() => SelectPrivateAsync(value));
     }
 
     public async Task<ILocator> SelectAndCaptureAsync(Enum enumValue)
     {
-        return await Modal.Page.CaptureModalAsync(async () => await SelectPrivateAsync(enumValue.ToString()));
+        return await Modal.Page.CaptureModalAsync(() => SelectPrivateAsync(enumValue.ToString()));
     }
 
     public async Task<ILocator> SelectAndCaptureAsync(Lite<Entity> lite)
     {
-        return await Modal.Page.CaptureModalAsync(async () => await SelectPrivateAsync(lite.Key()));
+        return await Modal.Page.CaptureModalAsync(()=> SelectPrivateAsync(lite.Key()));
     }
 
     public async Task<ILocator> SelectAndCaptureAsync<T>()
     {
-        return await Modal.Page.CaptureModalAsync(async () => await SelectPrivateAsync(TypeLogic.GetCleanName(typeof(T))));
+        return await Modal.Page.CaptureModalAsync(()=> SelectPrivateAsync(TypeLogic.GetCleanName(typeof(T))));
     }
 
     public async Task<ILocator> SelectByIndexAndCaptureAsync(int index)
     {
-        return await Modal.Page.CaptureModalAsync(async () => await SelectPrivateByIndexAsync(index));
+        return await Modal.Page.CaptureModalAsync(() => SelectPrivateByIndexAsync(index));
     }
 
     public async Task<string[]> ButtonNamesAsync()

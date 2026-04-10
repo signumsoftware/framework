@@ -5,8 +5,7 @@ import remarkGfm from 'remark-gfm'
 import { toAbsoluteUrl } from '@framework/AppContext';
 
 
-export default function ChatMarkdown(p: { content: string }){
-
+export default function ChatMarkdown(p: { content: string }) : React.ReactElement {
   return <Markdown remarkPlugins={[remarkGfm]} components={{ a: renderLink, table: renderTable }}>{p.content}</Markdown>;
 }
 
