@@ -420,6 +420,7 @@ public static class ToolbarLogic
             openInPopup = element.OpenInPopup,
             autoSelect = (element as ToolbarMenuElementEmbedded)?.AutoSelect == true,
             withEntity = (element as ToolbarMenuElementEmbedded)?.WithEntity == true,
+            entityConditionKey = (element as ToolbarMenuElementEmbedded)?.EntityConditionKey.DefaultToNull(),
             extraIcons = gr.IsEmpty() ? null : gr.Select(extra =>
             {
                 var extraElement = extra.Value;
@@ -588,6 +589,7 @@ public class ToolbarResponseBase
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool withEntity;
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? queryKey; //For authorization by selected entity (queryAllowedInContext)
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? entityConditionKey;
 
     public override string ToString() => $"{type} {label} {content} {url}";
 

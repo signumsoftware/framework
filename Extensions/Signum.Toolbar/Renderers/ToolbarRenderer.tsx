@@ -387,6 +387,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
   const selEntityRef = React.useRef<Lite<Entity> | null>(null);
   const previousResponseRef = React.useRef<ToolbarResponse<ToolbarMenuEntity> | null>(null);
   const forceUpdate = useForceUpdate();
+  const [entityConditions, setEntityConditions] = React.useState<Set<string>>(new Set());
 
   function setSelectedEntity(entity: Lite<Entity> | null) {
     selEntityRef.current = entity;
@@ -453,6 +454,18 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
 
   }, [selEntityRef.current, entities]);
 
+  React.useEffect(() => {
+    const entity = selEntityRef.current;
+    if (entity) {
+      const evaluator = ToolbarClient.EntityConditionRegistry.get(entity.EntityType);
+      if (evaluator) {
+        evaluator(entity).then(setEntityConditions);
+        return;
+      }
+    }
+    setEntityConditions(new Set());
+  }, [selEntityRef.current]);
+
   function handleSelect(e: React.SyntheticEvent | undefined) {
 
     forceUpdate();
@@ -477,22 +490,25 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
         </Nav.Item>
       )}
       {selEntityRef.current ?
-        simplifyForEntity(p.response.elements!.filter(sr => sr.withEntity), selEntityRef.current).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity)) :
+        simplifyForEntity(p.response.elements!.filter(sr => sr.withEntity), selEntityRef.current, entityConditions).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity)) :
         p.response.elements!.filter(sr => !sr.withEntity).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity))
       }
     </>
   );
 }
 
-function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<Entity>): ToolbarResponse<any>[] {
+function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<Entity>, entityConditions?: Set<string>): ToolbarResponse<any>[] {
   var result = resp
     .map(tr => {
 
       if (tr.queryKey != null && !typeAllowedInDomain(tr.queryKey, selectedEntity))
         return null;
 
+      if (tr.entityConditionKey != null && !(entityConditions?.has(tr.entityConditionKey) ?? false))
+        return null;
+
       if (tr.elements && tr.elements.length > 0) {
-        const inner = simplifyForEntity(tr.elements, selectedEntity);
+        const inner = simplifyForEntity(tr.elements, selectedEntity, entityConditions);
         if (inner.length == 0)
           return null;
 
@@ -500,7 +516,7 @@ function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<En
       }
 
       if (tr.extraIcons && tr.extraIcons.length > 0) {
-        const extraIcons = simplifyForEntity(tr.extraIcons, selectedEntity);
+        const extraIcons = simplifyForEntity(tr.extraIcons, selectedEntity, entityConditions);
 
         tr = { ...tr, extraIcons };
       }
