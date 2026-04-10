@@ -484,7 +484,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
           <div style={{ width: "100%" }}>
             <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false} mandatory="warning"
               inputAttributes={{ placeholder: LayoutMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
-              onChange={e => handleSelect(e.originalEvent)} create={false} formGroupStyle="SrOnly" />
+              onChange={e => handleSelect(e.originalEvent)} create={false} createOnFind={false} formGroupStyle="SrOnly" />
           </div>
           {renderExtraIcons(p.response.extraIcons, p.ctx, selEntityRef.current ?? p.selectedEntity)}
         </Nav.Item>
