@@ -732,14 +732,14 @@ export namespace Finder {
     if (qs?.defaultOrders)
       return qs.defaultOrders;
 
-    const tis = getTypeInfos(qd.columns["Entity"].type);
+    const tis = tryGetTypeInfos(qd.columns["Entity"].type);
 
     if (!qd.columns[defaultOrderColumn])
       return undefined;
 
     return [{
       token: defaultOrderColumn,
-      orderType: tis.some(a => a.entityData == "Transactional") ? "Descending" : "Ascending"
+      orderType: tis.some(a => a == null || a.entityData == "Transactional") ? "Descending" : "Ascending"
     }];
   }
 

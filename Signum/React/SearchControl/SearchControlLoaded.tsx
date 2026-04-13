@@ -252,7 +252,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
   entityColumnTypeInfos(): TypeInfo[] {
-    return getTypeInfos(this.entityColumn().type);
+    return tryGetTypeInfos(this.entityColumn().type).notNull();
   }
 
   canFilter(): boolean {
