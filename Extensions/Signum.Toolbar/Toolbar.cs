@@ -248,11 +248,15 @@ public class ToolbarMenuElementEmbedded: ToolbarElementEmbedded
 
     public bool AutoSelect { get; set; }
 
+    [StringLengthValidator(Max = 200)]
+    public string? EntityConditionKey { get; set; }
+
     public override XElement ToXml(IToXmlContext ctx)
     {
         var e = base.ToXml(ctx);
         e.Add(WithEntity ? new XAttribute("WithEntity", WithEntity) : null!);
         e.Add(AutoSelect ? new XAttribute("AutoSelect", AutoSelect) : null!);
+        e.Add(EntityConditionKey.HasText() ? new XAttribute("EntityConditionKey", EntityConditionKey!) : null!);
         return e;
     }
 
@@ -262,6 +266,7 @@ public class ToolbarMenuElementEmbedded: ToolbarElementEmbedded
 
         WithEntity = x.Attribute("WithEntity")?.Value.ToBool() ?? false;
         AutoSelect = x.Attribute("AutoSelect")?.Value.ToBool() ?? false;
+        EntityConditionKey = x.Attribute("EntityConditionKey")?.Value;
     }
 }
 

@@ -64,6 +64,7 @@ export const ToolbarMenuElementEmbedded: Type<ToolbarMenuElementEmbedded> = new 
 export interface ToolbarMenuElementEmbedded extends ToolbarElementEmbedded {
   withEntity: boolean;
   autoSelect: boolean;
+  entityConditionKey: string | null;
 }
 
 export const ToolbarMenuEntity: Type<ToolbarMenuEntity> = new Type<ToolbarMenuEntity>("ToolbarMenu");

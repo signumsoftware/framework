@@ -1,7 +1,8 @@
 import * as React from 'react'
-import { AutoLine, EntityLine, TextBoxLine } from '@framework/Lines'
+import { AutoLine, EntityLine, EnumLine, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ToolbarElementEmbedded } from '../Signum.Toolbar'
+import { ToolbarElementEmbedded, ToolbarMenuElementEmbedded } from '../Signum.Toolbar'
+import { ToolbarClient } from '../ToolbarClient'
 import { IconTypeaheadLine, parseIcon } from '@framework/Components/IconTypeahead'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getToString } from '@framework/Signum.Entities'
@@ -26,10 +27,10 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
   }
 
   const ctx = p.ctx;
+  const menuCtx = ToolbarMenuElementEmbedded.isInstance(ctx.value) ? ctx as TypeContext<ToolbarMenuElementEmbedded> : null;
 
   const ctx4 = ctx.subCtx({ labelColumns: 4 });
   const ctx2 = ctx.subCtx({ labelColumns: 2 });
-  const ctx6 = ctx.subCtx({ labelColumns: 6 });
   const bgColor = (ctx4.value.iconColor && ctx4.value.iconColor.toLowerCase() == "var(--bs-body-bg)" ? "var(--bs-body-color)" : undefined);
 
   var content = ctx2.value.content;
@@ -43,7 +44,7 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
           <AutoLine ctx={ctx4.subCtx(t => t.type)} onChange={handleTypeChanges} />
         </div>
         <div className="col-sm-5 offset-sm-1">
-          {ctx2.value.type != "Divider" && <EntityLine ctx={ctx2.subCtx(t => t.content)} onChange={handleContentChange} />}
+          {ctx2.value.type != "Divider" && <EntityLine ctx={ctx4.subCtx(t => t.content)} onChange={handleContentChange} />}
         </div>
       </div>
 
@@ -62,14 +63,17 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
             }
           </div>
           <div className="col-sm-5">
-            <TextBoxLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: getToString(content) || undefined }} />
-            {(ctx2.value.type == "Header" || ctx2.value.type == "Item") && (ctx2.value.content == null || PermissionSymbol.isLite(ctx2.value.content)) && <AutoLine ctx={ctx2.subCtx(t => t.url)} />}
+            <TextBoxLine ctx={ctx4.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: getToString(content) || undefined }} />
+            {(ctx2.value.type == "Header" || ctx2.value.type == "Item") && (ctx2.value.content == null || PermissionSymbol.isLite(ctx2.value.content)) && <AutoLine ctx={ctx4.subCtx(t => t.url)} />}
             {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") &&
               <div>
-                <AutoLine ctx={ctx6.subCtx(t => t.openInPopup)} />
-                <AutoLine ctx={ctx6.subCtx(t => t.autoRefreshPeriod)} />
+                <AutoLine ctx={ctx4.subCtx(t => t.openInPopup)} />
+                <AutoLine ctx={ctx4.subCtx(t => t.autoRefreshPeriod)} />
               </div>
             }
+            {menuCtx && <EnumLine ctx={menuCtx.subCtx(t => t.entityConditionKey, { labelColumns: 4 })}
+              lineType="ComboBoxText"
+              optionItems={Array.from(ToolbarClient.ConditionKeyRegistry)} />}
           </div>
         </div>
       }
