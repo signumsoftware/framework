@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using Signum.API.Json;
 using System.Collections.Frozen;
 using Signum.DynamicQuery.Tokens;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.API;
 
@@ -418,11 +419,36 @@ public static class ReflectionServer
         if (AllowedDomains == null)
             return null;
 
-        var dic = AllowedDomains.ToDictionary(a => a.Key, a => a.Value(entityType)).Where(a => a.Value != null).ToDictionary();
+        var dic = AllowedDomains.ToDictionary(a => a.Key, a =>
+        {
+            var lists = a.Value.GetInvocationListTyped().Select(f => f(entityType));
+
+            var result = lists.Aggregate((dic1, dic2) =>
+            {
+                if (dic1 == null)
+                    return dic2;
+
+                if (dic2 == null)
+                    return dic1;
+
+                return dic1.JoinDictionary(dic2, (key, a, b) => a < b ? a : b);
+            });
+
+            return result;
+        }).Where(a => a.Value != null).ToDictionary();
+
         if (dic.IsEmpty())
             return null;
 
         return dic!;
+    }
+
+    public static void RegisterAllowedInDomain(Type type, Func<Type, Dictionary<Lite<Entity>, DomainAccess>?> getDomainsForType)
+    {
+        if (AllowedDomains.ContainsKey(type))
+            AllowedDomains[type] += getDomainsForType;
+        else
+            AllowedDomains.Add(type, getDomainsForType);
     }
 }
 
