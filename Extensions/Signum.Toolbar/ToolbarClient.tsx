@@ -47,18 +47,6 @@ export namespace ToolbarClient {
   
   
   export const configs: { [type: string]: ToolbarConfig<any>[] } = {};
-
-  export const EntityConditionRegistry = new Map<string, (entity: Lite<Entity>) => Promise<Set<string>>>();
-  export const ConditionKeyRegistry = new Set<string>();
-
-  export function registerEntityCondition(
-    typeName: string,
-    evaluator: (entity: Lite<Entity>) => Promise<Set<string>>,
-    conditionKeys: string[]
-  ): void {
-    EntityConditionRegistry.set(typeName, evaluator);
-    conditionKeys.forEach(k => ConditionKeyRegistry.add(k));
-  }
   
   export function registerConfig<T extends Entity>(config: ToolbarConfig<T>): void {
     (configs[config.type.typeName] ??= []).push(config);
@@ -93,7 +81,6 @@ export interface ToolbarResponse<T extends Entity> {
   openInPopup?: boolean;
   autoSelect?: boolean;
   withEntity?: boolean;
-  entityConditionKey?: string;
   elements?: Array<ToolbarResponse<any>>;
   extraIcons?: Array<ToolbarResponse<any>>;
   queryKey?: string;
