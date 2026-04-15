@@ -412,7 +412,7 @@ public static class ReflectionServer
    
     //Query Context are entities that couold influence the query visibility
     //Example: query TaskEntity is visible depending of the Lite<ProjectEntity> context
-    public static Dictionary<Type /*DomainType*/, Func<Type, Dictionary<Lite<Entity> /*Domain*/, DomainAccess>?>> AllowedDomains = [];
+    public static Dictionary<Type /*DomainType*/, Func<Type /*ie. Task*/, Dictionary<Lite<Entity> /*Domain*/, DomainAccess>?>> AllowedDomains = [];
 
     public static Dictionary<Type /*DomainType*/, Dictionary<Lite<Entity> /*Domain*/, DomainAccess>>? GetAllowedDomains(Type entityType)
     {
