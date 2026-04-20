@@ -26,9 +26,11 @@ public class ToolbarSidebarProxy
         new MenuItemProxy(SidebarInner.Locator($".nav-link:has(.nav-item-text:text-is('{displayName}'))"));
 
 
-    public Task OpenMenu(string displayName)
+    public async Task OpenMenu(string displayName)
     {
-        return MenuItemDisplayName(displayName).ClickAsync();
+        var subMenu = SidebarInner.Locator($"li:has(.nav-link:has(.nav-item-text:text-is('{displayName}'))) .nav-item-sub-menu");
+        if (!await subMenu.IsVisibleAsync())
+            await MenuItemDisplayName(displayName).ClickAsync();
     }
 
     public MenuItemProxy MenuItem(Lite<Entity> entityLite) =>

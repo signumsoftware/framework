@@ -1696,7 +1696,11 @@ export namespace Finder {
     return getQueryDescription(fo.queryName)
       .then(qd => parseFindOptions(fo!, qd, false))
       .then(fop => API.executeQuery(getQueryRequest(fop)))
-      .then(rt => rt.rows[0].columns[0]);
+      .then(rt => {
+        if (rt.rows.length != 1)
+          throw new Error(`inDB: expected exactly 1 row for ${liteKey(isLite(entity) ? entity : toLite(entity))} but got ${rt.rows.length}`);
+        return rt.rows[0].columns[0];
+      });
   }
 
   export function inDBMany<TO extends { [name: string]: QueryTokenString<any> | string }>(entity: Entity | Lite<Entity>, tokensObject: TO): Promise<ExtractTokensObject<TO>> {
@@ -1713,8 +1717,9 @@ export namespace Finder {
       .then(qd => parseFindOptions(fo!, qd, false))
       .then(fop => API.executeQuery(getQueryRequest(fop)))
       .then(rt => {
-        var firstRow = rt.rows[0];
-        return firstRow && Dic.mapObject(tokensObject, (key, value, index) => firstRow.columns[index]) as ExtractTokensObject<TO>;
+        if (rt.rows.length != 1)
+          throw new Error(`inDBMany: expected exactly 1 row for ${liteKey(isLite(entity) ? entity : toLite(entity))} but got ${rt.rows.length}`);
+        return Dic.mapObject(tokensObject, (key, value, index) => rt.rows[0].columns[index]) as ExtractTokensObject<TO>;
       });
   }
 
