@@ -47,8 +47,8 @@ public class EntityLineProxy : EntityBaseProxy
     public async Task AutoCompleteAsync(Lite<IEntity> lite)
         => await AutoCompleteWaitChangesAsync(AutoCompleteElement, Element, lite);
 
-    public async Task AutoCompleteAsync(string beginning)
-    => await AutoCompleteWaitChangesAsync(AutoCompleteElement, Element, beginning);
+    public async Task AutoCompleteAsync(string beginning, bool resultContainsText = true)
+    => await AutoCompleteWaitChangesAsync(AutoCompleteElement, Element, beginning, resultContainsText);
 
     public override async Task<bool> IsReadonlyAsync()
         => await Element.Locator(".form-control[readonly]").CountAsync() > 0

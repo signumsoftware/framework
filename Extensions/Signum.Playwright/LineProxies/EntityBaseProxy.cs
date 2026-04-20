@@ -175,11 +175,11 @@ public abstract class EntityBaseProxy : BaseLineProxy
         });
     }
 
-    protected async Task AutoCompleteWaitChangesAsync(ILocator input, ILocator container, string beginning)
+    protected async Task AutoCompleteWaitChangesAsync(ILocator input, ILocator container, string beginning, bool resultContainsText = true)
     {
         await WaitChangesAsync(async () =>
         {
-            await AutoCompleteBasicAsync(input, container, beginning);
+            await AutoCompleteBasicAsync(input, container, beginning, resultContainsText);
         });
     }
 
@@ -197,7 +197,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
         await item.ClickAsync();
     }
 
-    protected static async Task AutoCompleteBasicAsync(ILocator input, ILocator container, string beginning)
+    protected static async Task AutoCompleteBasicAsync(ILocator input, ILocator container, string beginning, bool resultContainsText = true)
     {
         await input.ClickAsync();
         await input.ClearAsync();
@@ -207,7 +207,10 @@ public abstract class EntityBaseProxy : BaseLineProxy
         var list = container.Locator(".typeahead.dropdown-menu");
         await list.WaitForAsync(new() { State = WaitForSelectorState.Visible });
 
-        var item = list.Locator("[data-entity-key]").Filter(new() { HasTextString = beginning });
+        var item = list.Locator("[data-entity-key]");
+        if (resultContainsText)
+            item = item.Filter(new() { HasTextString = beginning });
+
         await item.First.ClickAsync();
     }
 }
