@@ -49,7 +49,7 @@ export default function TextEllipsis({ maxWidth, padding, children, etcText, onC
     : {};
 
   return (
-    <text ref={txt} {...atts} {...accessibilityPropsOnClick}>
+    <text ref={txt} {...atts} {...accessibilityPropsOnClick} onClick={onClick}>
       {children ?? ""}
     </text>
   );

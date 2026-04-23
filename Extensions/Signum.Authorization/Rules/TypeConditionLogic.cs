@@ -393,7 +393,12 @@ public static class TypeConditionLogic
         if (func != null)
             return func(entity);
 
-        var d = (Dictionary<TypeConditionSymbol, bool>)entity._TypeConditions!;
+        var d = (Dictionary<TypeConditionSymbol, bool>?)entity._TypeConditions;
+
+        if(d == null)
+            entity.FillTypeConditions(); //Fishy, but happens if you request an operation after saving but before commiting. 
+
+        d = (Dictionary<TypeConditionSymbol, bool>?)entity._TypeConditions!;
 
         if (d == null || !d.TryGetValue(typeCodition, out var result))
             throw new InvalidOperationException($"TypeCondition {typeCodition} can not be evaluated in-memory for {typeof(T).Name} and has not been included when retrieving/saving the entity.\nNote: Cached entities should have in-memory type conditions");

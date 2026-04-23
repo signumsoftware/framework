@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using Signum.API.Json;
 using System.Collections.Frozen;
 using Signum.DynamicQuery.Tokens;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.API;
 
@@ -411,18 +412,43 @@ public static class ReflectionServer
    
     //Query Context are entities that couold influence the query visibility
     //Example: query TaskEntity is visible depending of the Lite<ProjectEntity> context
-    public static Dictionary<Type /*DomainType*/, Func<Type, Dictionary<Lite<Entity> /*Domain*/, DomainAccess>?>> AllowedDomains = [];
+    public static Dictionary<Type /*DomainType*/, Func<Type /*ie. Task*/, Dictionary<Lite<Entity> /*Domain*/, DomainAccess>?>> AllowedDomains = [];
 
     public static Dictionary<Type /*DomainType*/, Dictionary<Lite<Entity> /*Domain*/, DomainAccess>>? GetAllowedDomains(Type entityType)
     {
         if (AllowedDomains == null)
             return null;
 
-        var dic = AllowedDomains.ToDictionary(a => a.Key, a => a.Value(entityType)).Where(a => a.Value != null).ToDictionary();
+        var dic = AllowedDomains.ToDictionary(a => a.Key, a =>
+        {
+            var lists = a.Value.GetInvocationListTyped().Select(f => f(entityType));
+
+            var result = lists.Aggregate((dic1, dic2) =>
+            {
+                if (dic1 == null)
+                    return dic2;
+
+                if (dic2 == null)
+                    return dic1;
+
+                return dic1.JoinDictionary(dic2, (key, a, b) => a < b ? a : b);
+            });
+
+            return result;
+        }).Where(a => a.Value != null).ToDictionary();
+
         if (dic.IsEmpty())
             return null;
 
         return dic!;
+    }
+
+    public static void RegisterAllowedInDomain(Type type, Func<Type, Dictionary<Lite<Entity>, DomainAccess>?> getDomainsForType)
+    {
+        if (AllowedDomains.ContainsKey(type))
+            AllowedDomains[type] += getDomainsForType;
+        else
+            AllowedDomains.Add(type, getDomainsForType);
     }
 }
 

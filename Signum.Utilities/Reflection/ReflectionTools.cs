@@ -432,6 +432,9 @@ public static class ReflectionTools
         if (utype == typeof(DateOnly))
             return DateOnly.Parse(value);
 
+        if (utype == typeof(TimeOnly))
+            return TimeOnly.Parse(value);
+
         if (CustomParsers.TryGetValue(utype, out var func))
             return func(value); //Delay reference
 

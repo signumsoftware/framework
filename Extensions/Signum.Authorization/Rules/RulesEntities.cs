@@ -285,7 +285,8 @@ public static class TypeAllowedExtensions
         return true;
     }
 
-    static ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>> cache = new ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>>();
+    static ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>> cache = 
+        new ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>>();
     public static WithConditions<PropertyAllowed> ToPropertyAllowed(this WithConditions<TypeAllowed> taac)
     {
         return cache.GetOrAdd(taac, taac =>

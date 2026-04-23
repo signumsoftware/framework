@@ -220,6 +220,8 @@ public static class AuthLogic
                 EntityCache.AddFullGraph(role);
                 var allRoles = Database.RetrieveAll<RoleEntity>();
 
+                var roleToTrivialMerge = allRoles.ToDictionary(a => a.ToLite(), a => a.IsTrivialMerge);
+
                 if (role.InheritsFrom.IsGraphModified)
                 {
                     var roleGraph = DirectedGraph<RoleEntity>.Generate(allRoles, r => r.InheritsFrom.Select(sr => sr.RetrieveAndRemember()));
@@ -234,7 +236,7 @@ public static class AuthLogic
 
                 var dic = allRoles.ToDictionary(a => a.ToLite());
 
-                var problems2 = allRoles.SelectMany(r => r.InheritsFrom.Where(inh => RolesByLite.Value.GetOrThrow(inh).IsTrivialMerge).Select(inh => new { r, inh })).ToList();
+                var problems2 = allRoles.SelectMany(r => r.InheritsFrom.Where(inh => roleToTrivialMerge.GetOrThrow(inh)).Select(inh => new { r, inh })).ToList();
                 if (problems2.Any())
                     throw new ApplicationException(
                         problems2.GroupBy(a => a.r, a => a.inh)
