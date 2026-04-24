@@ -28,7 +28,7 @@ public class AuthController : ControllerBase
             else
                 user = AuthLogic.Authorizer.Login(data.userName, data.password, out authenticationType);
         }
-        catch (Exception e) when (e is IncorrectUsernameException || e is IncorrectPasswordException)
+        catch (Exception e) when (e is IncorrectUsernameException || e is IncorrectPasswordException || e is UserLockedException)
         {
             if (AuthServer.AvoidExplicitErrorMessages)
             {
@@ -41,6 +41,10 @@ public class AuthController : ControllerBase
             else if (e is IncorrectPasswordException)
             {
                 return ModelError("password", LoginAuthMessage.InvalidPassword.NiceToString());
+            }
+            else if (e is UserLockedException)
+            {
+                return ModelError("password", LoginAuthMessage.User0IsDeactivated.NiceToString(data.userName));
             }
             throw;
         }
