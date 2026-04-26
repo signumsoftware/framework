@@ -9,7 +9,7 @@ export interface ImageHandlerBase {
 }
 
 export interface ImageInfo extends Partial<SerializedLexicalNode>{
-  key?: string;
+  imageId?: string;
   binaryFile?: string;
   fileName?: string;
 }
