@@ -93,7 +93,7 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
                 ...mergedHtml,
                 ...({ 'data-value': p.ctx.value } as any), /*Testing*/
               }} ctx={p.ctx} innerRef={c.setRefs}>
-              {niceValue}
+              {c.props.onRenderDropDownListItem ? (p.ctx.value == undefined ? undefined : c.props.onRenderDropDownListItem({ label: niceValue!, value: p.ctx.value })) : niceValue}
             </FormControlReadonly>)
         }
       </FormGroup>
@@ -327,11 +327,12 @@ function getOptionsItems(el: EnumLineController<any>): OptionItem[] {
 
 function toOptionItem(m: MemberInfo | OptionItem | string): OptionItem {
 
-  if (typeof m == "string")
+
+  if (typeof m == "string" || typeof m == "number")
     return {
       value: m,
       label: m,
-    }
+    };
 
   if ((m as MemberInfo).name)
     return {

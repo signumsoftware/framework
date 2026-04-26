@@ -91,7 +91,7 @@ public static class SymbolLogic<T>
 
     private static void SymbolLogic_Saved(T ident, SavedEventArgs args)
     {
-        if (args.WasSelfModified || args.WasNew)
+        if (args.WasModified || args.WasNew)
             throw new InvalidOperationException($"Attempt to save symbol {ident} of type {ident.GetType()}");
     }
 

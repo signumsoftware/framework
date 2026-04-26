@@ -5,6 +5,7 @@ using Signum.Utilities.Reflection;
 using NpgsqlTypes;
 using Microsoft.SqlServer.Server;
 using Microsoft.SqlServer.Types;
+using Pgvector;
 
 namespace Signum.Engine.Maps;
 
@@ -70,9 +71,12 @@ public class SchemaSettings
         {typeof(TimeOnly),       new AbstractDbType(SqlDbType.Time,             NpgsqlDbType.Time)},
 
         {typeof(byte[]),         new AbstractDbType(SqlDbType.VarBinary,        NpgsqlDbType.Bytea)},
+        {typeof(Vector),         new AbstractDbType(SqlDbType.Vector,           AbstractDbType.VectorPG)},
 
         {typeof(Guid),           new AbstractDbType(SqlDbType.UniqueIdentifier, NpgsqlDbType.Uuid)},
     };
+
+
 
     readonly Dictionary<SqlDbType, int> defaultSizeSqlServer = new Dictionary<SqlDbType, int>()
     {

@@ -36,7 +36,7 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
 
   typeahead!: React.RefObject<TypeaheadController | null>;
 
-  overrideProps(p: EntityStripProps<V>, overridenProps: EntityStripProps<V>): void {
+  override overrideProps(p: EntityStripProps<V>, overridenProps: EntityStripProps<V>): void {
     super.overrideProps(p, overridenProps);
     this.typeahead = React.useRef<TypeaheadController>(null);
 
@@ -71,7 +71,7 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
 
     function withAvoidDuplicates(fo: FindOptions, typeName: string): FindOptions {
 
-      const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
+      const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? (!e.entity?.isNew) && e.EntityType == typeName : isEntity(e) ? !e.isNew && e.Type == typeName : null).notNull();
 
       return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible, frozen: true }] };
     }
@@ -284,6 +284,8 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
       currentEntityRef.current?.item ? p.autoComplete!.renderItem(currentEntityRef.current.item, new TextHighlighter(undefined)) :
         getToStr();
 
+
+
   function getToStr() {
     const toStr = getToString(p.ctx.value);
     return !p.showType || !(isEntity(p.ctx.value) || isLite(p.ctx.value)) ? toStr :
@@ -320,11 +322,11 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
         {hasIcon && p.iconStart && <span style={{ marginRight: "5px", whiteSpace: "nowrap" }}>{removeIcon()}&nbsp;{dragIcon()}{p.move?.renderMoveUp()}{p.move?.renderMoveDown()}</span>}
         {
           p.onView ?
-            <a href={url} className={classes("sf-strip-link", htmlAttributes?.className)} onClick={p.onView} {...htmlAttributes}>
+            <a href={url} className={classes("sf-strip-link", htmlAttributes?.className ?? "text-body")} onClick={p.onView} {...htmlAttributes}>
               {toStr}
             </a>
             :
-            <span className={classes("sf-strip-link", htmlAttributes?.className)} {...htmlAttributes}>
+            <span className={classes("sf-strip-link", htmlAttributes?.className ?? "text-body")} {...htmlAttributes}>
               {toStr}
             </span>
         }
@@ -345,7 +347,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
   }
 
   //function dragIcon() {
-  //  return drag && <span className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+  //  return drag && <span className={classes("sf-line-button", "sf-move", drag.dropClass)} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
   //    draggable={true}
   //    onDragStart={drag.onDragStart}
   //    onDragEnd={drag.onDragEnd}
@@ -358,21 +360,18 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
   function dragIcon() {
     return (
       drag && (
-        <button
-          type="button"
-          className={classes("sf-line-button", "sf-move")}
+        <LinkButton
+          className={classes("sf-line-button", "sf-move", drag.dropClass)}
           onClick={e => {
-            e.preventDefault();
             e.stopPropagation();
           }}
           draggable={true}
           onDragStart={drag.onDragStart}
           onDragEnd={drag.onDragEnd}
           onKeyDown={drag.onKeyDown}
-          title={drag.title}
-          aria-label={drag.title}>
+          title={drag.title}>
           {EntityBaseController.getMoveIcon()}
-        </button>
+        </LinkButton>
       )
     );
   }

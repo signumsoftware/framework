@@ -1,14 +1,15 @@
-using Signum.Utilities.Reflection;
 using Microsoft.AspNetCore.Html;
-using System.Text.RegularExpressions;
-using Signum.Mailing;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
-using Signum.UserAssets;
+using Signum.Engine.Sync;
+using Signum.Mailing;
+using Signum.Mailing.Package;
 using Signum.Mailing.Templates;
 using Signum.Scheduler;
 using Signum.Templating;
-using Signum.Mailing.Package;
+using Signum.UserAssets;
+using Signum.Utilities.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Signum.Alerts;
 
@@ -60,6 +61,7 @@ public static class AlertLogic
                 a.Title,
                 Text = a.Text!.Etc(100),
                 a.Target,
+                a.TargetToString,
                 a.LinkTarget,
                 a.Recipient,
                 a.CreationDate,
@@ -89,6 +91,8 @@ public static class AlertLogic
             });
 
         SemiSymbolLogic<AlertTypeSymbol>.Start(sb, () => SystemAlertTypes.Keys);
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
+        sb.Schema.EntityEvents<AlertTypeSymbol>().PreDeleteSqlSync += AlertType_PreDeleteSqlSync;
 
         if (registerExpressionsFor != null)
         {
@@ -106,6 +110,42 @@ public static class AlertLogic
 
         if (sb.WebServerBuilder != null)
             AlertsServer.Start(sb.WebServerBuilder);
+    }
+
+    static SqlPreCommand? AlertType_PreDeleteSqlSync(AlertTypeSymbol alertType)
+    {
+        if (Administrator.ExistsTable<AlertEntity>() && Database.Query<AlertEntity>().Any(a => a.AlertType.Is(alertType)))
+        {
+            var table = Schema.Current.Table<AlertEntity>();
+            var column = (IColumn)(FieldReference)Schema.Current.Field((AlertEntity a) => a.AlertType);
+            return Administrator.DeleteWhereScript(table, column, alertType.Id);
+        }
+
+        return null;
+    }
+
+    static SqlPreCommand? Type_PreDeleteSqlSync(TypeEntity type)
+    {
+        return SqlPreCommand.Combine(Spacing.Simple,
+            Type_PreDeleteSqlSync(type, a => a.Target),
+            Type_PreDeleteSqlSync(type, a => a.LinkTarget),
+            Type_PreDeleteSqlSync(type, a => a.GroupTarget)
+        );
+    }
+
+    static SqlPreCommand? Type_PreDeleteSqlSync(TypeEntity type, Expression<Func<AlertEntity, Lite<Entity>?>> ibaField)
+    {
+        if (Administrator.ExistsTable<AlertEntity>() && Database.Query<AlertEntity>().Any(a => ibaField.Evaluate(a)!.EntityType.ToTypeEntity().Is(type)))
+        {
+            var table = Schema.Current.Table<AlertEntity>();
+            var column = (IColumn)((FieldImplementedByAll)Schema.Current.Field(ibaField)).TypeColumn;
+            if (SafeConsole.Ask($"Delete {table.Name} with {column.Name} of type {type}?"))
+            { 
+                return Administrator.DeleteWhereScript(table, column, type.Id);
+            }
+        }
+
+        return null;
     }
 
     public static void RegisterAlertNotificationMail(SchemaBuilder sb)
@@ -218,6 +258,15 @@ public static class AlertLogic
                     var lite = prop is Entity e ? e.ToLite() :
                                 prop is Lite<Entity> l ? l : null;
 
+                    var toString = lite?.ToString();
+                    var isDeleted = toString != null && toString == "[" + EngineMessage._01NotFound.NiceToString().FormatWith(lite!.EntityType.NiceName(), lite.Id) + "]";
+
+                    if (isDeleted)
+                    {
+                        var textToShow = ReplacePlaceHolders(m.Groups["text"].Value.DefaultToNull(), alert) ?? alert.TargetToString ?? lite?.ToString();
+                        return $"<strong>{textToShow}</strong>" + ReplacePlaceHolders(pair.after, alert);
+                    }
+
                     var url = ReplacePlaceHolders(m.Groups["url"].Value.DefaultToNull(), alert)?.Let(url => url.StartsWith("~") ? (EmailLogic.Configuration.UrlLeft + url.After("~")) : url) ??
                     (lite != null ? EntityUrl(lite) : "#");
 
@@ -324,6 +373,7 @@ public static class AlertLogic
                 TextArguments = textArguments?.ToString("\n###\n"),
                 TextField = text,
                 Target = (Lite<Entity>)entity,
+                TargetToString = entity.ToString()?.Truncate(200),
                 LinkTarget = linkTarget,
                 GroupTarget = groupTarget,
                 AlertType = alertType,
@@ -348,18 +398,20 @@ public static class AlertLogic
             createdBy ??= UserHolder.Current?.User;
 
             var txtArgumentJoined = textArguments?.ToString("\n###\n");
-            return query.UnsafeInsert(tuple => new AlertEntity
+            return query.Select(tuple => new { tuple, toString = tuple.target != null ? tuple.target.ToString() : null })
+                .UnsafeInsert(item => new AlertEntity
             {
                 AlertDate = alertDate,
                 CreatedBy = createdBy,
                 TitleField = title,
                 TextArguments = txtArgumentJoined,
                 TextField = text,
-                Target = tuple.target,
+                Target = item.tuple.target,
+                TargetToString = item.toString != null && item.toString.Length > 200 ? item.toString.Substring(0, 200) : item.toString,
                 LinkTarget = linkTarget,
                 GroupTarget= groupTarget,
                 AlertType = alertType,
-                Recipient = tuple.recipient,
+                Recipient = item.tuple.recipient,
                 State = AlertState.Saved,
                 EmailNotificationsSent = false,
                 AvoidSendMail = avoidSendMail,

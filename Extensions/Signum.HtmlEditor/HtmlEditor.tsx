@@ -1,7 +1,7 @@
-import { classes } from "@framework/Globals";
+import { classes, softCast } from "@framework/Globals";
 import { IBinding } from "@framework/Reflection";
 import { $isCodeNode } from "@lexical/code";
-import { InitialConfigType, LexicalComposer } from "@lexical/react/LexicalComposer";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { EditorRefPlugin } from "@lexical/react/LexicalEditorRefPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
@@ -29,15 +29,17 @@ import { formatCode, formatHeading, formatList, formatQuote } from "./Utils/form
 import { $findMatchingParent, isHeadingActive, isListActive, isQuoteActive } from "./Utils/node";
 import { useForceUpdate } from "../../Signum/React/Hooks";
 import { HtmlEditorMessage } from "../../Signum/React/Signum.Entities";
+import { ImageExtension } from "./Extensions/ImageExtension";
 
 export interface HtmlEditorProps {
+  ref?: React.Ref<HtmlEditorController>;
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
   small?: boolean;
   mandatory?: boolean | "warning";
   converter?: ITextConverter;
   innerRef?: React.Ref<LexicalEditor>;
-  plugins?: HtmlEditorExtension[];
+  extensions?: HtmlEditorExtension[];
   handleKeybindings?: (event: KeyboardEvent) => boolean;
   toolbarButtons?: (c: HtmlEditorController) => React.ReactNode;
   placeholder?: React.ReactNode;
@@ -49,34 +51,34 @@ export interface HtmlEditorProps {
 
 const createUid = () => Math.random().toString(36).substring(2, 9);
 
-const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAttributes<HtmlEditorController>> = React.forwardRef(function HtmlEditor(
+function HtmlEditor(
   {
+    ref,
     readOnly,
     small,
     binding,
     converter,
     innerRef,
     toolbarButtons,
-    plugins,
+    extensions,
     htmlAttributes,
     mandatory,
     initiallyFocused,
     handleKeybindings,
     placeholder,
-    ...props }: HtmlEditorProps,
-  ref?: React.Ref<HtmlEditorController>
-) {
+    ...props }: HtmlEditorProps
+): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const id = React.useMemo(() => createUid(), []);
   const editableId = "editable_" + id;
-  const { controller, nodes, builtinComponents } = useController({
+  const { controller, nodes, builtinPlugins } = useController({
     binding,
     readOnly,
     small,
     converter,
     innerRef,
     initiallyFocused,
-    plugins,
+    extensions,
     handleKeybindings,
     editableId
   });
@@ -85,6 +87,8 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
 
   const error = binding.getError();
 
+  const imageHandler = extensions?.filter(a => a instanceof ImageExtension ? a.imageHandler : null).notNull().singleOrNull() == null;
+
   return (
     <div
       title={error}
@@ -92,6 +96,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
       {...htmlAttributes}
       className={classes(
         "sf-html-editor",
+        controller.readOnly && "read-only",
         mandatory &&
         isEmpty(controller.editorState) &&
         (mandatory == "warning" ? "sf-mandatory-warning" : "sf-mandatory"),
@@ -106,7 +111,9 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
           nodes: [HeadingNode, QuoteNode, ...nodes!],
           theme: LexicalTheme,
           onError: (error) => console.error(error),
-          editable: !readOnly
+          editable: !readOnly,
+          // @ts-ignore
+          imageHandler: imageHandler
         }}
       >
         {
@@ -135,11 +142,11 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
         />
         <EditorRefPlugin editorRef={comp => { controller.setEditorRef(comp); if (comp) forceUpdate(); }} />
         <HistoryPlugin />
-        {builtinComponents.map(({ component: Component, props }) => <Component key={Component.name} {...props} />)}
+        {...builtinPlugins.map((a, i) => React.cloneElement(a, { key: i }))}
       </LexicalComposer>
     </div>
   );
-});
+}
 
 export default HtmlEditor;
 
@@ -162,3 +169,4 @@ const defaultToolbarButtons = (c: HtmlEditorController) => (
     {c.extraButtons()}
   </div>
 );
+

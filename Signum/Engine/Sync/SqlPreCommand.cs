@@ -6,10 +6,6 @@ using System.Globalization;
 using Signum.Engine.Maps;
 using Npgsql;
 using Microsoft.Data.SqlClient;
-using Signum.Utilities.ExpressionTrees;
-using System.Diagnostics.Metrics;
-using Npgsql.PostgresTypes;
-using System.Runtime.CompilerServices;
 
 namespace Signum.Engine.Sync;
 
@@ -109,54 +105,81 @@ public static class SqlPreCommandExtensions
     public static void OpenSqlFileRetry(this SqlPreCommand command)
     {
         SafeConsole.WriteLineColor(ConsoleColor.Yellow, "There are changes!");
-        var fileName = "Sync {0:dd-MM-yyyy HH_mm_ss}.sql".FormatWith(DateTime.Now);
-
-        Save(command, fileName);
-        SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, command.PlainSql());
-
-        Console.WriteLine("Script saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
-        Console.WriteLine("Check the synchronization script before running it!");
-        var answer = SafeConsole.AskRetry("Open or run?", "run", "open", "exit");
-
-        if (answer == "open")
+        
+        if(command is SqlPreCommandConcat c)
         {
-            Thread.Sleep(1000);
-            Open(fileName);
-            if (SafeConsole.Ask("run now?"))
-                ExecuteRetry(fileName);
+            var (before, after) = c.ExtractNoTransaction();
+
+            if (before != null)
+                if (!CreateAndRun(before, NoTransactionMode.BeforeScript))
+                    return;
+
+            if (c.Commands.Any())
+                if (!CreateAndRun(c, null))
+                    return;
+
+            if (after != null)
+                if (!CreateAndRun(after, NoTransactionMode.AfterScript))
+                    return;
         }
-        else if (answer == "run")
+        else if(command is SqlPreCommandSimple s)
         {
-            ExecuteRetry(fileName);
+            CreateAndRun(command, s.NoTransaction);
         }
+        else 
+            throw new UnexpectedValueException(command);
+
+
+        static bool CreateAndRun(SqlPreCommand command, NoTransactionMode? noTransaction)
+        {
+            var fileName = "Sync {0:yyyy-MM-dd HH_mm_ss}{1}.sql".FormatWith(DateTime.Now, noTransaction == null ? null : ("_" + noTransaction));
+
+            Save(command, fileName);
+            SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, command.PlainSql());
+
+            Console.WriteLine("Script saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
+            Console.WriteLine("Check the synchronization script before running it!");
+            var answer = SafeConsole.AskRetry("Open or run?", "run", "open", "exit");
+
+            if (answer == "open")
+            {
+                Thread.Sleep(1000);
+                Open(fileName);
+                if (SafeConsole.Ask("run now?"))
+                {
+                    ExecuteRetry(fileName, noTransaction);
+                    return true;
+                }
+                return false;
+                
+            }
+            else if (answer == "run")
+            {
+                ExecuteRetry(fileName, noTransaction);
+                return true;
+            }
+
+            return false;
+        }
+
+
+        
     }
 
-    static void ExecuteRetry(string fileName)
+    static void ExecuteRetry(string fileName, NoTransactionMode? noTransaction)
     {
     retry:
         try
         {
             var script = File.ReadAllText(fileName);
-            using (var tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
+            using (var tr = noTransaction.HasValue ? null : Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
             {
-                ExecuteScript("script", script, autoRun: false); 
-                tr.Commit();
+                ExecuteScript("script", script, autoRun: false);
+                tr?.Commit();
             }
         }
-        catch (ExecuteSqlScriptException e)
+        catch (ExecuteSqlScriptException)
         {
-            if (e.InnerException is SqlException sqle && sqle.Number == 574)
-            {
-                if (SafeConsole.Ask("Execute without transaction?"))
-                {
-                    var script = File.ReadAllText(fileName);
-                    ExecuteScript("script", script, autoRun: false);
-                    return;
-                }
-                else
-                    throw;
-            }
-
             Console.WriteLine("The current script is in saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
 
             var answer = SafeConsole.AskRetry("Open or retry?", "retry", "open", "exit");
@@ -167,7 +190,7 @@ public static class SqlPreCommandExtensions
                 Thread.Sleep(1000);
                 Open(fileName);
                 if (SafeConsole.Ask("run now?"))
-                    ExecuteRetry(fileName);
+                    ExecuteRetry(fileName, noTransaction);
             }
         }
     }
@@ -744,6 +767,103 @@ public class SqlPreCommandConcat : SqlPreCommand
         );
     }
 }
+
+
+
+public class SqlPreCommandPostgresDoBlock : SqlPreCommand
+{
+    public override bool HasNoTransaction => false;
+
+    public override bool GoBefore { get; set; }
+    public override bool GoAfter { get; set; }
+
+    public SqlPreCommand[] Declarations { get; }
+    public SqlPreCommand Body { get; }
+
+    public SqlPreCommandPostgresDoBlock(SqlPreCommand[] declarations, SqlPreCommand body)
+    {
+        Declarations = declarations;
+        Body = body;
+    }
+
+    protected internal override int NumParameters
+    {
+        get { return Declarations.Sum(a=>a.NumParameters) + Body.NumParameters; }
+    }
+
+    public override SqlPreCommand Clone()
+    {
+        return new SqlPreCommandPostgresDoBlock(
+            Declarations.Select(c => c.Clone()).ToArray(),
+            Body.Clone());
+    }
+
+    public SqlPreCommandSimple ToSqlPreCommandSimple()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("DO $$");
+        sb.AppendLine("DECLARE");
+        foreach (var decl in Declarations)
+        {
+            sb.AppendLine(decl.PlainSql().Indent(4));
+        }
+        sb.AppendLine("BEGIN");
+        sb.AppendLine(Body.PlainSql().Indent(4));
+        sb.AppendLine("END $$;");
+        return new SqlPreCommandSimple(sb.ToString().Replace("\r\n", "\n"));
+    }
+
+    public override SqlPreCommand Replace(Regex regex, MatchEvaluator matchEvaluator)
+    {
+        return new SqlPreCommandPostgresDoBlock(
+            Declarations.Select(c => c.Replace(regex, matchEvaluator)).ToArray(),
+            Body.Replace(regex, matchEvaluator));
+    }
+
+    protected internal override void PlainSql(StringBuilder sb)
+    {
+        ToSqlPreCommandSimple().PlainSql(sb);
+    }
+
+    public override IEnumerable<SqlPreCommandSimple> Leaves()
+    {
+        return [this.ToSqlPreCommandSimple()];
+    }
+
+    public SqlPreCommandPostgresDoBlock SimplifyNested()
+    {
+        var newDeclarations = Declarations.ToList();
+
+        var newBody = Simplify(Body);
+
+        SqlPreCommand Simplify(SqlPreCommand exp)
+        {
+            if (exp is SqlPreCommandPostgresDoBlock pgDo)
+            {
+                newDeclarations.AddRange(pgDo.Declarations);
+                return Simplify(pgDo.Body);
+            }
+            else if (exp is SqlPreCommandConcat concat)
+            {
+                var simplifiedCommands = concat.Commands.Select(Simplify).ToArray();
+                if (simplifiedCommands.SequenceEqual(concat.Commands))
+                    return exp;
+
+                return new SqlPreCommandConcat(concat.Spacing, simplifiedCommands);
+            }
+            else if (exp is SqlPreCommandSimple simple)
+                return exp;
+            else 
+                throw new UnexpectedValueException(exp);
+        }
+
+        if (newBody == Body)
+            return this;
+
+        return new SqlPreCommandPostgresDoBlock(newDeclarations.ToArray(), newBody);
+    }
+}
+
 
 public class SqlPreCommand_WithHistory : SqlPreCommand
 {

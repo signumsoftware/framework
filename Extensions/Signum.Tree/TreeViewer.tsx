@@ -9,7 +9,10 @@ import { Finder } from '@framework/Finder'
 import { Operations } from '@framework/Operations'
 import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, getToString, Lite } from '@framework/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Tree'
-import { FilterOptionParsed, ColumnOptionParsed, QueryDescription, SubTokensOptions, FilterOption, ColumnOption, QueryRequest, hasToArray, ResultRow } from "@framework/FindOptions";
+import {
+  FilterOptionParsed, ColumnOptionParsed, QueryDescription, FilterOption,
+  ColumnOption, QueryRequest, ResultRow
+} from "@framework/FindOptions";
 import FilterBuilder from "@framework/SearchControl/FilterBuilder";
 import { ISimpleFilterBuilder } from "@framework/Search";
 import { is } from "@framework/Signum.Entities";
@@ -25,6 +28,7 @@ import { DisabledMixin } from '@framework/Signum.Basics'
 import SearchControlLoaded, { ColumnParsed } from '@framework/SearchControl/SearchControlLoaded';
 import { AutoFocus } from '../../Signum/React/Components/AutoFocus';
 import { KeyNames } from '../../Signum/React/Components/Basic';
+import { hasToArray, SubTokensOptions } from '@framework/QueryToken';
 
 interface TreeViewerProps {
   treeOptions: TreeOptions;
@@ -96,11 +100,11 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       this.props.onSelectedNode(node);
   }
 
-  componentWillMount() : void {
+  override componentWillMount() : void {
     this.initialize(this.props.treeOptions);
   }
 
-  componentWillReceiveProps(newProps: TreeViewerProps) : void {
+  override componentWillReceiveProps(newProps: TreeViewerProps) : void {
     var path = TreeClient.treePath(newProps.treeOptions);
     if (path == TreeClient.treePath(this.props.treeOptions)) {
       this.searchIfDeps(newProps);
@@ -194,7 +198,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
 
-  render(): React.ReactElement {
+  override render(): React.ReactElement {
     return (
       <div>
         {this.renderSearch()}
@@ -313,8 +317,10 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     if (!this.state.selectedNode)
       return null;
 
+      var menuItems = this.renderMenuItems();
+
     return (
-      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide}>
+      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} itemsCount={menuItems.length}>
         {this.state.contextualMenu?.showSearchBox &&
           <AutoFocus>
             <input
@@ -326,7 +332,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
               onChange={this.handleMenuFilterChange} />
           </AutoFocus>}
           <div style={{ position:"relative", maxHeight: "calc(100vh - 400px)", overflowY: "auto" }}>
-            {this.renderMenuItems().map((mi, i) => React.cloneElement((mi as SearchableMenuItem).menu ?? mi, { key: i }))}
+            {menuItems.map((mi, i) => React.cloneElement((mi as SearchableMenuItem).menu ?? mi, { key: i }))}
           </div>
       </ContextMenu>
     );
@@ -666,7 +672,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
   }
 
-  getOffset(pageY: number, rect: ClientRect, margin: number): DraggedPosition {
+  getOffset(pageY: number, rect: DOMRect, margin: number): DraggedPosition {
 
     const height = Math.round(rect.height / 5) * 5;
     const offsetY = pageY - rect.top;
@@ -796,7 +802,7 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
     }
   }
 
-  render(): React.ReactElement<any> {
+  override render(): React.ReactElement<any> {
 
     var node = this.props.treeNode;
     const tv = this.props.treeViewer;

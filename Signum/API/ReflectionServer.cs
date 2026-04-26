@@ -6,8 +6,8 @@ using Signum.Utilities.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using Signum.API.Json;
 using System.Collections.Frozen;
-using NpgsqlTypes;
 using Signum.DynamicQuery.Tokens;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.API;
 
@@ -276,7 +276,7 @@ public static class ReflectionServer
                         var mi = new MemberInfoTS
                         {
                             NiceName = pr.PropertyInfo!.NiceName(),
-                            Format = pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(pr) : null,
+                            Format = pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.GetFormatString(pr) : null,
                             IsReadOnly = !IsId(pr, isEntity) && (pr.PropertyInfo?.IsReadOnly() ?? false),
                             Required = !IsId(pr, isEntity) && ((pr.Type.IsValueType && !pr.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!pr.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
                             Unit = UnitAttribute.GetTranslation(pr.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
@@ -408,8 +408,55 @@ public static class ReflectionServer
 
         return t.Name;
     }
+
+   
+    //Query Context are entities that couold influence the query visibility
+    //Example: query TaskEntity is visible depending of the Lite<ProjectEntity> context
+    public static Dictionary<Type /*DomainType*/, Func<Type /*ie. Task*/, Dictionary<Lite<Entity> /*Domain*/, DomainAccess>?>> AllowedDomains = [];
+
+    public static Dictionary<Type /*DomainType*/, Dictionary<Lite<Entity> /*Domain*/, DomainAccess>>? GetAllowedDomains(Type entityType)
+    {
+        if (AllowedDomains == null)
+            return null;
+
+        var dic = AllowedDomains.ToDictionary(a => a.Key, a =>
+        {
+            var lists = a.Value.GetInvocationListTyped().Select(f => f(entityType));
+
+            var result = lists.Aggregate((dic1, dic2) =>
+            {
+                if (dic1 == null)
+                    return dic2;
+
+                if (dic2 == null)
+                    return dic1;
+
+                return dic1.JoinDictionary(dic2, (key, a, b) => a < b ? a : b);
+            });
+
+            return result;
+        }).Where(a => a.Value != null).ToDictionary();
+
+        if (dic.IsEmpty())
+            return null;
+
+        return dic!;
+    }
+
+    public static void RegisterAllowedInDomain(Type type, Func<Type, Dictionary<Lite<Entity>, DomainAccess>?> getDomainsForType)
+    {
+        if (AllowedDomains.ContainsKey(type))
+            AllowedDomains[type] += getDomainsForType;
+        else
+            AllowedDomains.Add(type, getDomainsForType);
+    }
 }
 
+public enum DomainAccess
+{
+    Read,
+    Write
+}
 
 public class TypeInfoTS
 {
@@ -498,6 +545,7 @@ public class TypeReferenceTS
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsCollection { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsLite { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsFullEntity { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsNotNullable { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsEmbedded { get; set; }
     public required string Name { get; set; }
@@ -511,11 +559,12 @@ public class TypeReferenceTS
 
         var clean = type == typeof(string) ? type : (type.ElementType() ?? type);
         this.IsLite = clean.IsLite();
+        this.IsFullEntity = clean.IsIEntity();
         this.IsNotNullable = clean.IsValueType && !clean.IsNullable();
         this.IsEmbedded = clean.IsEmbeddedEntity();
 
         if (this.IsEmbedded)
-            this.TypeNiceName = this.IsCollection ? type.ElementType()!.NiceName() :  type.NiceName();
+            this.TypeNiceName = clean.NiceName();
         if (implementations != null)
         {
             try

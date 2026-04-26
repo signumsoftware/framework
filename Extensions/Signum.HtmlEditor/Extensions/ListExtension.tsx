@@ -18,7 +18,6 @@ import {
 import { HtmlEditorController } from "../HtmlEditorController";
 import { $findMatchingParent, isListActive } from "../Utils/node";
 import {
-  ComponentAndProps,
   HtmlEditorExtension,
   LexicalConfigNode,
   OptionalCallback,
@@ -26,18 +25,18 @@ import {
 
 const MAX_INDENT_LEVEL = 6;
 
-export class ListExtension implements HtmlEditorExtension {
-  name = "ListExtension";
+export class ListExtension extends HtmlEditorExtension {
+override name = "ListExtension";
 
-  getBuiltInComponent(): ComponentAndProps {
-    return { component: ListPlugin };
-  }
+override getBuiltPlugin(): React.ReactElement {
+  return <ListPlugin />;
+}
 
-  getNodes(): LexicalConfigNode {
-    return [ListNode, ListItemNode];
-  }
+override getNodes(): LexicalConfigNode {
+  return [ListNode, ListItemNode];
+}
 
-  registerExtension(controller: HtmlEditorController): OptionalCallback {
+override registerExtension(controller: HtmlEditorController): OptionalCallback {
     const unsubscribeSpaceCommand = controller.editor.registerCommand(
       KEY_SPACE_COMMAND,
       () => {
@@ -81,7 +80,11 @@ export class ListExtension implements HtmlEditorExtension {
           const listItemNode = $findMatchingParent(anchorNode, (node) =>
             $isListItemNode(node)
           ) as ListItemNode | undefined;
-          const depth = listItemNode?.getIndent() || 0;
+          
+          if (!listItemNode) return false;
+          
+          const depth = listItemNode.getIndent() || 0;
+          
           if (!event.shiftKey) {
             if (depth >= MAX_INDENT_LEVEL) return false;
             controller.editor.dispatchCommand(

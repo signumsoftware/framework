@@ -3,7 +3,7 @@ import { BigValuePartEntity, HealthCheckConditionEmbedded, SystemTimeEmbedded, U
 import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip, CheckboxLine, TextBoxLine, EntityDetail, EnumLine, NumberLine } from '@framework/Lines'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
-import { FilterConditionOption, filterOperations, FindOptions, getFilterOperations, SubTokensOptions } from '@framework/FindOptions'
+import { FilterConditionOption, filterOperations, FindOptions, getFilterOperations } from '@framework/FindOptions'
 import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
@@ -13,6 +13,7 @@ import { SearchMessage, getToString, toLite } from '@framework/Signum.Entities'
 import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 import { CopyHealthCheckButton } from '@framework/Components/CopyHealthCheckButton'
 import { UserQueryClient } from '../UserQueryClient'
+import { SubTokensOptions } from '@framework/QueryToken'
 import { ToolbarEntity, ToolbarMenuEntity } from '../../Signum.Toolbar/Signum.Toolbar'
 import { DashboardEntity } from '../../Signum.Dashboard/Signum.Dashboard'
 import { SearchValueLine } from '@framework/Search'
@@ -56,7 +57,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
 
       {query &&
         (<div>
-          <EntityLine ctx={ctx.subCtx(e => e.entityType)} readOnly={ctx.value.appendFilters} onChange={() => forceUpdate()}
+        <EntityLine ctx={ctx.subCtx(e => e.entityType)} readOnly={ctx.value.appendFilters || undefined} onChange={() => forceUpdate()}
             helpText={
               <div>
                 {UserQueryMessage.MakesThe0AvailableAsAQuickLinkOf1.niceToString(UserQueryEntity.niceName(), ctx.value.entityType ? getToString(ctx.value.entityType) : UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))}
@@ -72,7 +73,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
           <CollapsableCard header={UserAssetMessage.Advanced.niceToString()} size="xs">
               <div className="row mt-2 mb-2">
                 <div className="col-sm-6">
-                  <AutoLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
+                  <AutoLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null || undefined} onChange={() => forceUpdate()}
                     helpText={UserQueryMessage.MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0.niceToString(UserQueryEntity.niceName(), query?.key)} />
                   <AutoLine ctx={ctx4.subCtx(e => e.refreshMode)} />
                   <EntityStrip ctx={ctx4.subCtx(e => e.customDrilldowns)}
@@ -85,7 +86,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
                 <div className="col-sm-6">
                   {!ctx.value.isNew &&
                     <div>
-                      <h5 className="mt-0">{UserAssetMessage.UsedBy.niceToString()}</h5>
+                      <h3 className="mt-0 h5">{UserAssetMessage.UsedBy.niceToString()}</h3>
                       <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarMenuEntity, filterOptions: [{ token: ToolbarMenuEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
                       <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarEntity, filterOptions: [{ token: ToolbarEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
                       <SearchValueLine ctx={ctx4} findOptions={{
@@ -108,12 +109,12 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
           </div>
         </div>
           <div>
-            <h4 className="d-inline-block">
+            <h2 className="d-inline-block h4">
               <CheckboxLine ctx={ctx4.subCtx(e => e.groupResults)} onChange={handleOnGroupResultsChange} inlineCheckbox="block" formSize="lg" />
-            </h4>
+            </h2>
 
             <div className="my-2">
-              <h4>{ctx.niceName(a => a.filters)}</h4>
+              <h2 className="h4">{ctx.niceName(a => a.filters)}</h2>
               <div className="ms-3">
                 <AutoLine ctx={ctxxs.subCtx(e => e.includeDefaultFilters)} valueColumns={4} />
                 <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
@@ -125,7 +126,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
             </div>
 
             <div className="my-2">
-              <h4>{ctx.niceName(a => a.columns)}</h4>
+              <h2 className="h4">{ctx.niceName(a => a.columns)}</h2>
               <div className="ms-3">
                 <AutoLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
 
@@ -142,7 +143,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
 
                         <div className="d-flex">
                           <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
-                            <input type="checkbox" className="form-check-input" disabled={ctx.value.token == null} checked={ctx.value.summaryToken != null} onChange={() => {
+                            <input type="checkbox" className="form-check-input" disabled={ctx.value.token == null || ctx.readOnly} checked={ctx.value.summaryToken != null} onChange={() => {
                               ctx.value.summaryToken = ctx.value.summaryToken == null ? QueryTokenEmbedded.New(ctx.value.token) : null;
                               ctx.value.modified = true;
                               row.forceUpdate();
@@ -161,10 +162,10 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
                   },
                   {
                     property: a => a.displayName,
-                    template: (ctx, row) => <TextBoxLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
+                    template: (ctx, row) => <TextBoxLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn || undefined} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
                       helpText={
                         <div>
-                          <AutoLine ctx={ctx.subCtx(a => a.combineRows)} readOnly={ctx.value.hiddenColumn} />
+                          <AutoLine ctx={ctx.subCtx(a => a.combineRows)} readOnly={ctx.value.hiddenColumn || undefined} />
                           <CheckboxLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox="block" onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; ctx.value.combineRows = null; row.forceUpdate(); }} />
                         </div>
                       }
@@ -176,7 +177,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
             </div>
 
             <div className="my-4">
-              <h4>{ctx.niceName(a => a.orders)}</h4>
+              <h2 className="h4">{ctx.niceName(a => a.orders)}</h2>
               <div className="ms-3">
                 <EntityTable ctx={ctxxs.subCtx(e => e.orders)} avoidFieldSet columns={[
                   {
@@ -193,7 +194,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
           </div>
 
           <div className="my-4">
-            <h5>{UserQueryMessage.Pagination.niceToString()}</h5>
+            <h3 className="h5">{UserQueryMessage.Pagination.niceToString()}</h3>
 
             <div className=" ms-3 row">
               <div className="col-sm-6">

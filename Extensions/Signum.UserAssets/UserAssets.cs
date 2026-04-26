@@ -1,4 +1,3 @@
-using Signum.Authorization.Rules;
 using System.ComponentModel;
 using System.Xml.Linq;
 
@@ -12,7 +11,7 @@ public class UserAssetPreviewModel : ModelEntity
 
 public class UserAssetPreviewLineEmbedded : EmbeddedEntity
 {
-    public TypeEntity? Type { get; set; }
+    public TypeEntity Type { get; set; }
 
     public string Text { get; set; }
 
@@ -122,6 +121,7 @@ public interface IFromXmlContext
     public T RetrieveLite<T>(Lite<T> lite) where T : class, IEntity;
 
     public T GetSymbol<T>(string value) where T : Symbol;
+    PropertyRouteEntity? GetPropertyRoute(TypeEntity typeEntity, string value);
 
     public Dictionary<Guid, ModelEntity?> CustomResolutionModel { get; }
 }
@@ -183,6 +183,31 @@ public static class FromXmlExtensions
         oldElements.Clear();
         oldElements.AddRange(newElements);
     }
+
+    public static void Synchronize<T, K>(this MList<T> entities, List<XElement>? xElements, Func<T, K> getKey, Func<XElement, K> getElementKey, Action<T, XElement> syncAction)
+        where T : class, new()
+        where K : notnull
+    {
+        if (xElements == null)
+            xElements = new List<XElement>();
+
+        var dic = entities.ToDictionary(getKey);
+
+        var list = xElements.Select(x =>
+        {
+            var entity = dic.TryGetC(getElementKey(x)) ?? new T();
+            syncAction(entity, x);
+            return entity;
+        });
+            
+      
+        if(!Enumerable.SequenceEqual(entities, list))
+        {
+            entities.Clear();
+            entities.AddRange(list);
+        }
+    }
+
 
     public static T? CreateOrAssignEmbedded<T>(this T? embedded, XElement? element, Action<T, XElement> syncAction)
       where T : EmbeddedEntity, new()

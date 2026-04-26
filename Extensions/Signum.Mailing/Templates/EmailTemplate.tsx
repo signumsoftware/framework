@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { FormGroup, AutoLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable, EntityAccordion, Binding, CheckboxLine, TextAreaLine } from '@framework/Lines'
-import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
 import { TemplateApplicableEval } from '../../Signum.Templating/Signum.Templating'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
@@ -17,6 +16,7 @@ import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor'
 import { EmailMessageFormat, EmailTemplateEntity, EmailTemplateFromEmbedded, EmailTemplateMessage, EmailTemplateMessageEmbedded, EmailTemplateRecipientEmbedded, EmailTemplateViewMessage } from '../Signum.Mailing.Templates'
 import { QueryOrderEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 import { ValidationMessage } from '../../../Signum/React/Signum.Entities.Validation'
+import { SubTokensOptions } from '@framework/QueryToken'
 import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }): React.JSX.Element {
@@ -44,7 +44,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
               <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => forceUpdate()}
                 onCreate={() => Promise.resolve(EmailTemplateFromEmbedded.New({ whenNone: "ThrowException", whenMany: "SplitMessages" }))}
                 getComponent={fctx => <EmailTemplateFrom ctx={fctx} query={p.ctx.value.query} />} />
-              <h5 className="text-muted">{ecXs.niceName(s => s.recipients)}</h5>
+              <h3 className="text-muted h5">{ecXs.niceName(s => s.recipients)}</h3>
               <EntityAccordion avoidFieldSet ctx={ecXs.subCtx(s => s.recipients)}
                 getTitle={(ctx: TypeContext<EmailTemplateRecipientEmbedded>) => <span>
                   {ctx.value.kind && <strong className="me-1">{ctx.value.kind}:</strong>}

@@ -1,7 +1,6 @@
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Sync;
-using Signum.Entities;
 
 namespace Signum.Basics;
 
@@ -13,6 +12,7 @@ public static class ExceptionLogic
             return;
 
         sb.Include<ExceptionEntity>()
+            .WithIndex(a => a.CreationDate)
             .WithQuery(() => e => new
             {
                 Entity = e,

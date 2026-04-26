@@ -37,7 +37,7 @@ export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
       ...options.headers
     } as any);
 
-    return fetch(toAbsoluteUrl(options.url), {
+    return fetch(toAbsoluteUrl(options.url, window.__baseNameAPI), {
       method: "GET",
       headers: headers,
       mode: options.mode,
@@ -73,7 +73,7 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
       delete headers['Content-Type'];
     }
 
-    return fetch(toAbsoluteUrl(options.url), {
+    return fetch(toAbsoluteUrl(options.url, window.__baseNameAPI), {
       method: "POST",
       credentials: options.credentials || "same-origin",
       headers: headers,
@@ -98,7 +98,7 @@ export function ajaxPostUpload<T>(options: AjaxOptions, blob: Blob): Promise<T> 
       ...options.headers
     } as any);
 
-    return fetch(toAbsoluteUrl(options.url), {
+    return fetch(toAbsoluteUrl(options.url, window.__baseNameAPI), {
       method: "POST",
       credentials: options.credentials || "same-origin",
       headers: headers,

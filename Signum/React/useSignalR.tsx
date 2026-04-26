@@ -29,7 +29,7 @@ export function useSignalRConnection(url: string, options?: signalR.IHttpConnect
   const connection = React.useMemo<signalR.HubConnection | undefined>(() => {
 
     var connection = new signalR.HubConnectionBuilder()
-      .withUrl(AppContext.toAbsoluteUrl(url), options ?? {})
+      .withUrl(AppContext.toAbsoluteUrl(url, window.__baseNameAPI), options ?? {})
       .withAutomaticReconnect()
       .build();
     return connection;

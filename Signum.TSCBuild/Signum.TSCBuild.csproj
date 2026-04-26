@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="CompileTypeScript.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RunTSGenerator.cs" />
     <Compile Include="Signum.TSCBuildPackage.cs" />
   </ItemGroup>
   <ItemGroup>

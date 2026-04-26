@@ -28,14 +28,14 @@ export default function CacheStatisticsPage(): React.JSX.Element {
   if (state == null)
     return (
       <div>
-        <h2>{CacheMessage.Loading.niceToString()}...</h2>
+        <h1 className="h2">{CacheMessage.Loading.niceToString()}...</h1>
       </div>
     );
 
 
   return (
     <div>
-      <h2>{CacheMessage.CacheStatistics.niceToString()}</h2>
+      <h1 className="h2">{CacheMessage.CacheStatistics.niceToString()}</h1>
       <div className="btn-toolbar">
         {state.isEnabled == true && <button type="button" onClick={handleDisabled} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-danger)" }}>{CacheMessage.Disable.niceToString()}</button>}
         {state.isEnabled == false && <button type="button" onClick={handleEnabled} className="sf-button btn btn-tertiary" style={{ color: "var(--bs-success)" }}>{CacheMessage.Enable.niceToString()}</button>}

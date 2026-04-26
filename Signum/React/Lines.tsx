@@ -68,6 +68,8 @@ export { EntityStrip } from './Lines/EntityStrip'
 
 export { EntityMultiSelect } from './Lines/EntityMultiSelect'
 
+export { MarkdownLine } from './Lines/MarkdownLine'
+export type { MarkdownLineProps } from './Lines/MarkdownLine'
 
 export { EntityCheckboxList } from './Lines/EntityCheckboxList'
 export { EntityRadioButtonList } from './Lines/EntityRadioButtonList'

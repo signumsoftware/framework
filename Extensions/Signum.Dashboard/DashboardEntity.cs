@@ -3,7 +3,6 @@ using System.Collections.Specialized;
 using Signum.UserAssets;
 using System.Xml.Linq;
 using Signum.Scheduler;
-using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.Queries;
 
 namespace Signum.Dashboard;
@@ -36,7 +35,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
     [Unit("s"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 10)]
     public int? AutoRefreshPeriod { get; set; }
 
-    [StringLengthValidator(Min = 2, Max = 200)]
+    [StringLengthValidator(Min = 2, Max = 200), Translatable]
     public string DisplayName { get; set; }
 
     public bool HideDisplayName { get; set; }

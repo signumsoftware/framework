@@ -96,6 +96,10 @@ public static class ToolbarLogic
             IsAuthorized = lite =>
             {
                 var entity = ToolbarMenus.Value.GetOrCreate(lite);
+                if (entity.EntityType != null)
+                    if (TypeAuthLogic.GetAllowed(entity.EntityType.ToType()).MaxUI() == TypeAllowedBasic.None)
+                        return false;
+
                 return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
             }
         }.Register();
@@ -196,6 +200,17 @@ public static class ToolbarLogic
     public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
         RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), owner => owner == null || AuthLogic.CurrentRoles().Contains(owner));
 
+    public static void RegisterAllowedTypeTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
+        RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), owner => GetAllowedTypes().Contains(owner));
+
+
+    public static Dictionary<Type, Func<bool>> AllowedTypes = new Dictionary<Type, Func<bool>>();
+
+    public static HashSet<Lite<TypeEntity>> GetAllowedTypes()
+    {
+        return AllowedTypes.Where(a => a.Value()).Select(a => a.Key.ToTypeEntity().ToLite()).ToHashSet();
+    }
+
     public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<Lite<IEntity>?, bool>> isAllowed)
     {
         sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, ownerType);
@@ -276,16 +291,6 @@ public static class ToolbarLogic
                 return null;
             };
         }
-    }
-
-    public static void RegisterTranslatableRoutes()
-    {
-        PropertyRouteTranslationLogic.RegisterRoute((ToolbarEntity tb) => tb.Name);
-        PropertyRouteTranslationLogic.RegisterRoute((ToolbarEntity tb) => tb.Elements[0].Label);
-        PropertyRouteTranslationLogic.RegisterRoute((ToolbarMenuEntity tm) => tm.Name);
-        PropertyRouteTranslationLogic.RegisterRoute((ToolbarMenuEntity tb) => tb.Elements[0].Label);
-        PropertyRouteTranslationLogic.RegisterRoute((ToolbarSwitcherEntity tm) => tm.Name);
-
     }
 
     public static ToolbarEntity? GetCurrent(ToolbarLocation location)
@@ -439,7 +444,7 @@ public static class ToolbarLogic
                     label = transElement.TranslatedElement(a => a.Label!).DefaultToNull() ?? config?.DefaultLabel(extraElement.Content!),
                     iconName = extraElement.IconName.DefaultToNull() ?? config?.DefaultIconName(extraElement.Content!),
                     iconColor = extraElement.IconColor.DefaultToNull() ?? config?.DefaultIconColor(extraElement.Content!),
-                    queryKey = config?.GetRelatedQuery(element.Content!)?.Key,
+                    queryKey = config?.GetRelatedQuery(extraElement.Content!)?.Key,
                     showCount = extraElement.ShowCount,
                     autoRefreshPeriod = extraElement.AutoRefreshPeriod,
                     openInPopup = extraElement.OpenInPopup,
@@ -463,6 +468,10 @@ public static class ToolbarLogic
             result.elements = tme.Options.Select(o => 
             {
                 var tm = ToolbarMenus.Value.GetOrThrow(o.ToolbarMenu);
+                var conf = ContentConfigDictionary.GetOrThrow(o.ToolbarMenu.EntityType);
+                if (!conf.IsAuhorized(o.ToolbarMenu))
+                    return null;
+
                 var subElements = ToResponseList(PropertyRouteTranslationLogic.TranslatedMList(tm, t => t.Elements).ToList());
 
                 if (subElements.IsEmpty())

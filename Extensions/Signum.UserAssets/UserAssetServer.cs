@@ -1,12 +1,7 @@
-using Signum.UserAssets;
-using Microsoft.AspNetCore.Builder;
 using System.Text.Json;
 using Signum.API;
-using Signum.Authorization;
 using Signum.API.Json;
 using Signum.API.Controllers;
-using Signum.Authorization.Rules;
-using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.Queries;
 
 namespace Signum.UserAssets;
@@ -30,7 +25,7 @@ public static class UserAssetServer
 
         started = true;
 
-        ReflectionServer.RegisterLike(typeof(UserAssetMessage), () => UserAssetPermission.UserAssetsToXML.IsAuthorized());
+        ReflectionServer.RegisterLike(typeof(UserAssetMessage), () => UserAssetsImporter.UserAssetNames.Values.Any(t => Schema.Current.IsAllowed(t, true) == null));
         ReflectionServer.RegisterLike(typeof(QueryOrderEmbedded), () => QueryPermissionSymbols.Any(p => p.IsAuthorized()));
 
 

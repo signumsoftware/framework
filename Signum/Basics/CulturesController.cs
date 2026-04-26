@@ -35,9 +35,7 @@ public class CultureController : ControllerBase
     public string SetCurrentCulture([Required, FromBody]Lite<CultureInfoEntity> culture)
     {
         var ci = ExecutionMode.Global().Using(_ => culture.RetrieveAndRemember().ToCultureInfo());
-
-     
-
+        OnChangeCulture?.Invoke(culture);
         ControllerContext.HttpContext.Response.Cookies.Append("language", ci.Name, new CookieOptions
         {
             Expires = DateTimeOffset.Now.AddYears(10),

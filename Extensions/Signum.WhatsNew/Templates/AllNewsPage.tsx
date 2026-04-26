@@ -17,8 +17,8 @@ export default function AllNews(): React.JSX.Element {
 
   return (
     <div>
-      <h2>{WhatsNewMessage.YourNews.niceToString()} {news && <span className="sf-news-notify-badge" style={{ marginTop: "6px", marginLeft: "3px", fontSize: "12px" }}>{news.length}</span>}
-      </h2>
+      <h1 className="h2">{WhatsNewMessage.YourNews.niceToString()} {news && <span className="sf-news-notify-badge" style={{ marginTop: "6px", marginLeft: "3px", fontSize: "12px" }}>{news.length}</span>}
+      </h1>
         <div className="mt-3">
         <div style={{ display: "flex", flexFlow: "wrap" }}>
           {news && news.orderByDescending(n => n.creationDate).map(wn =>
@@ -71,8 +71,8 @@ export function WhatsNewPreviewPicture(p: { news: WhatsNewClient.WhatsNewFull}):
             </div>
           </Link>
         }
-        <div className={"card-body pt-2"}>
-          <h5 className={"card-title"}>{whatsnew.title}</h5>
+        <div className="card-body pt-2">
+          <h2 className="card-title h5">{whatsnew.title}</h2>
           <small><HtmlViewer text={HTMLSubstring(whatsnew.description)} /></small>
           <br />
           <div style={{ display: "flex", justifyContent: "space-between"}}>
@@ -102,7 +102,7 @@ export function Attachments(p: { news: WhatsNewClient.WhatsNewFull }): React.JSX
   return (
     <div>
       <hr />
-      <h5>{WhatsNewMessage.Downloads.niceToString()} ({p.news.attachments.toString()})</h5>
+      <h3 className="h5">{WhatsNewMessage.Downloads.niceToString()} ({p.news.attachments.toString()})</h3>
     </div>
   );
 }

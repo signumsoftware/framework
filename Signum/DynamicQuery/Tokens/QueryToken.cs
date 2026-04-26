@@ -330,6 +330,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
                 .NotNull()
                 .Concat(EntityProperties(onlyType))
                 .Concat(TsVectorColumns(onlyType))
+                .Concat(VectorColumns(onlyType))
                 .ToList().AndHasValue(this);
             }
 
@@ -358,6 +359,50 @@ public abstract class QueryToken : IEquatable<QueryToken>
             foreach (var item in table.Columns.Values.OfType<PostgresTsVectorColumn>())
             {
                 yield return new PgTsVectorColumnToken(this, item);
+            }
+        }
+    }
+
+    protected IEnumerable<QueryToken> TsVectorColumns(EntityPropertyToken mlistProperty)
+    {
+        var mlistTable = ((FieldMList)Schema.Current.Field(mlistProperty.PropertyRoute)).TableMList;
+
+        if (mlistTable != null)
+        {
+            foreach (var item in mlistTable.Columns.Values.OfType<PostgresTsVectorColumn>())
+            {
+                yield return new PgTsVectorColumnToken(this, item);
+            }
+        }
+    }
+
+    private IEnumerable<QueryToken> VectorColumns(Type onlyType)
+    {
+        var table = Schema.Current.Tables.TryGetC(onlyType);
+
+        if (table != null)
+        {
+            // Get vector indexes and create tokens for their columns
+            var vectorIndexes = table.AllIndexes().OfType<VectorTableIndex>();
+            foreach (var index in vectorIndexes)
+            {
+                var column = index.Columns.Single(); // Vector indexes have exactly one column
+                yield return new VectorColumnToken(this, column, index);
+            }
+        }
+    }
+
+    protected IEnumerable<QueryToken> VectorColumns(EntityPropertyToken mlistProperty)
+    {
+        var mlistTable = ((FieldMList)Schema.Current.Field(mlistProperty.PropertyRoute)).TableMList;
+
+        if (mlistTable != null)
+        {
+            var vectorIndexes = mlistTable.AllIndexes().OfType<VectorTableIndex>();
+            foreach (var index in vectorIndexes)
+            {
+                var column = index.Columns.Single();
+                yield return new VectorColumnToken(this, column, index);
             }
         }
     }

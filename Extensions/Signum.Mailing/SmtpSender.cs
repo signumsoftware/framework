@@ -1,5 +1,4 @@
 using Signum.Files;
-using System.Linq;
 using System.Net.Mail;
 
 namespace Signum.Mailing;

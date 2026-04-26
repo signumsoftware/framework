@@ -3,7 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTypeInfo, PseudoType, QueryKey } from './Reflection'
 import { classes, Dic, toPromise } from './Globals'
-import { FindOptions, ManualCellDto, ManualToken, QueryToken } from './FindOptions'
+import { FindOptions } from './FindOptions'
+import { ManualCellDto, ManualToken, QueryToken } from './QueryToken'
 import { Finder } from './Finder'
 import * as AppContext from './AppContext'
 import { Navigator } from './Navigator'
@@ -119,6 +120,9 @@ export namespace QuickLinkClient {
         if (!ql.allowsMultiple && ctx.lites.length > 1)
           return null;
 
+        if (Navigator.someNonViewable(ctx.lites))
+          return null;
+
         if (ql.isVisible == true || ql.isVisible == undefined)
           return Promise.resolve(ql);
 
@@ -218,7 +222,10 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.ReactElement | n
 
   return (
     <>
-      {!links ? [] : links.filter(a => a.group !== undefined).orderBy(a => a.order)
+      {!links ? [] : links
+        .slice().reverse()
+        .filter(a => a.group !== undefined)
+        .orderBy(a => a.order)
         .groupBy(a => a.group?.name ?? a.key)
         .map((gr, i) => {
           var first = gr.elements[0];
@@ -269,12 +276,12 @@ export interface QuickLinkContext<T extends Entity> {
 
 
 
-const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeColor: BsColor }, ref: React.Ref<HTMLAnchorElement>) {
+function QuickLinkToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeColor: BsColor, ref?: React.Ref<HTMLAnchorElement> }) {
 
 
   return (
     <LinkButton
-      ref={ref}
+      ref={p.ref}
       className={classes("badge badge-pill sf-quicklinks", "text-bg-" + p.badgeColor)}
       title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
       data-toggle="dropdown"
@@ -282,7 +289,7 @@ const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: Re
       {p.content}
     </LinkButton>
   );
-});
+}
 
 export interface QuickLinkGroup {
   name: string;

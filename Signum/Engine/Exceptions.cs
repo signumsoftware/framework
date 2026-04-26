@@ -3,7 +3,6 @@ using Signum.Engine.Maps;
 using System.Collections.Concurrent;
 using Signum.Utilities.Reflection;
 using Npgsql;
-using System.Globalization;
 
 namespace Signum.Engine;
 
@@ -159,20 +158,21 @@ public class UniqueKeyException : ApplicationException
 
                 return (index, properties);
             }
-            else if(table is TableMList tm)
+            else if (table is TableMList tm)
             {
                 if (tm.Field is FieldEmbedded fe)
                 {
                     var properties = (from f in fe.EmbeddedFields.Values
                                       let cols = f.Field.Columns()
-                                      where cols.Any() && cols.All(c => index.Columns.Contains(c))
+                                      where cols.Any(c => index.Columns.Contains(c))
                                       select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
 
                     if (properties.IsEmpty())
                         return null;
+
                     return (index, properties);
                 }
-                else 
+                else
                     return null;
             }
             else
@@ -331,7 +331,7 @@ public class EntityNotFoundException : Exception
     public PrimaryKey[] Ids { get; private set; }
 
     public EntityNotFoundException(Type type, params PrimaryKey[] ids)
-        : base(EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(type.Name, ids.ToString(", ")))
+        : base(EngineMessage._01NotFound.NiceToString().FormatWith(type.Name, ids.ToString(", ")))
     {
         this.Type = type;
         this.Ids = ids;

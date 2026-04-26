@@ -2,7 +2,6 @@ import * as React from 'react'
 import ChartBuilder from '../Templates/ChartBuilder'
 import { FormGroup, AutoLine, EntityLine, EntityStrip, CheckboxLine } from '@framework/Lines'
 import { Finder } from '@framework/Finder'
-import { SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import "../Chart.css"
@@ -13,6 +12,7 @@ import { CombinedUserChartPartEntity, UserChartEntity, UserChartPartEntity } fro
 import { BigValuePartEntity, UserQueryMessage, UserQueryPartEntity } from '../../Signum.UserQueries/Signum.UserQueries'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
 import { toAbsoluteUrl } from '@framework/AppContext'
+import { SubTokensOptions } from '@framework/QueryToken'
 import CollapsableCard from '@framework/Components/CollapsableCard'
 import { SearchValueLine } from '@framework/Search'
 import { ToolbarEntity, ToolbarMenuEntity } from '../../Signum.Toolbar/Signum.Toolbar'
@@ -74,7 +74,7 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }): Re
             <div className="col-sm-6">
               {!ctx.value.isNew &&
                 <div>
-                  <h5 className="mt-0">{UserAssetMessage.UsedBy.niceToString()}</h5>
+                  <h2 className="h5 mt-0">{UserAssetMessage.UsedBy.niceToString()}</h2>
                   <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarMenuEntity, filterOptions: [{ token: ToolbarMenuEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
                   <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarEntity, filterOptions: [{ token: ToolbarEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
                   <SearchValueLine ctx={ctx4} findOptions={{

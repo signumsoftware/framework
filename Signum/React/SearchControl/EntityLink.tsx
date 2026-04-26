@@ -1,15 +1,17 @@
 import * as React from "react"
-import { Lite, Entity, liteKey, ModifiableEntity, getToString } from '../Signum.Entities';
+import { Lite, Entity, liteKey, ModifiableEntity, getToString, EngineMessage } from '../Signum.Entities';
 import * as AppContext from '../AppContext';
 import { Navigator, ViewPromise } from '../Navigator';
 import { Link } from 'react-router-dom';
 import { StyleContext } from "../Lines";
 import { classes } from "../Globals";
+import { getTypeInfo } from '../Reflection';
 
 export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   lite: Lite<Entity>;
   inSearch?: "main" | "related";
   inPlaceNavigation?: boolean;
+  hideIfNotViewable?: boolean;
   onNavigated?: (lite: Lite<Entity>) => void;
   getViewPromise?: (e: ModifiableEntity | null) => undefined | string | ViewPromise<ModifiableEntity>;
   innerRef?: React.Ref<HTMLAnchorElement>;
@@ -19,15 +21,22 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
   shy?: boolean
 }
 
-export default function EntityLink(p: EntityLinkProps): React.ReactElement {
+export default function EntityLink(p: EntityLinkProps): React.ReactElement | null {
 
-  const { lite, inSearch, children, onNavigated, getViewPromise, inPlaceNavigation, shy, ...htmlAtts } = p;
+  const { lite, inSearch, children, onNavigated, getViewPromise, inPlaceNavigation, shy, hideIfNotViewable, ...htmlAtts } = p;
 
   const settings = Navigator.getSettings(p.lite.EntityType);
 
-  if (!Navigator.isViewable(lite.EntityType, { isSearch: p.inSearch }))
-    return <span data-entity={liteKey(lite)} className={settings?.allowWrapEntityLink ? undefined : "try-no-wrap"}>{p.children ?? Navigator.renderLite(lite)}</span>;
+  if (!Navigator.isViewable(lite, { isSearch: p.inSearch })){
+    if (hideIfNotViewable)
+      return null;
 
+    return <span data-entity={liteKey(lite)} className={settings?.allowWrapEntityLink ? undefined : "try-no-wrap"}>{p.children ?? Navigator.renderLite(lite)}</span>;
+  }
+  const toString = getToString(lite);
+  const isDeleted = toString == `[${EngineMessage._01NotFound.niceToString(getTypeInfo(lite.EntityType).niceName, lite.id)}]`;
+  if (isDeleted)
+    return <span data-entity={liteKey(lite)} className={classes("try-no-wrap", shy ? "sf-shy-link" : null)}>{p.children ?? toString}</span>;
 
   return (
     <Link

@@ -10,10 +10,11 @@ import { Color } from '@framework/Basics/Color';
 import './PivotTable.css'
 import { isLite, Lite, Entity, BooleanEnum, EntityControlMessage } from '@framework/Signum.Entities';
 import { FilterOptionParsed } from '@framework/Search';
-import { QueryToken, FilterConditionOptionParsed, isFilterCondition } from '@framework/FindOptions';
+import { FilterConditionOptionParsed, isFilterCondition } from '@framework/FindOptions';
 import { EntityBaseController } from '@framework/Lines';
 import { QueryTokenMessage } from '@framework/Signum.DynamicQuery.Tokens';
 import { ChartParameter } from '../Signum.Chart';
+import { QueryToken } from '@framework/QueryToken';
 import { LinkButton } from '@framework/Basics/LinkButton';
 
 interface RowDictionary {
@@ -485,10 +486,10 @@ export default function renderPivotTable({ data, width, height, parameters, load
     const link = (p.gor == null || style == null || style.showAggregateValues == false) ? null : <LinkButton title={undefined} onClick={e => handleNumberClick(e)}>{cellFormatter(multiVal ??= sumValue(p.gor))}</LinkButton>;
 
     var color =
-      p.isSummary == 4 ? "rgb(228, 228, 228)" :
-        p.isSummary == 3 ? "rgb(236, 236, 236)" :
-          p.isSummary == 2 ? "rgb(241, 241, 241)" :
-            p.isSummary == 1 ? "#f8f8f8" :
+      p.isSummary == 4 ? "rgba(var(--bs-secondary-rgb),0.4)" :
+        p.isSummary == 3 ? "rgba(var(--bs-secondary-rgb),0.3)" :
+          p.isSummary == 2 ? "rgba(var(--bs-secondary-rgb),0.2)" :
+            p.isSummary == 1 ? "rgba(var(--bs-secondary-rgb),0.1)" :
               style && style.background && style.background(gr?.value, firstValue(multiVal ??= sumValue(p.gor)));
 
 
@@ -509,10 +510,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     let cssStyle: React.CSSProperties | undefined = style && {
       backgroundColor: color,
       color:
-        p.isSummary == 4 ? "rgb(66, 66, 66)" :
-          p.isSummary == 3 ? "rgb(97, 97, 97)" :
-            p.isSummary == 2 ? "rgb(115, 115, 115)" :
-              p.isSummary == 1 ? "rgb(191, 191, 191)" :
+              p.isSummary != null ? "var(--bs-secondary-rgb)" :
                 color != null ? Color.parse(color).lerp(0.5, Color.parse(color).opositePole()).toString() : undefined,
       paddingLeft: p.indent ? (p.indent * 30) + "px" : undefined,
       textAlign: p.indent != undefined ? "left" : "center",

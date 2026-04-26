@@ -26,7 +26,7 @@ export default function HealthCheckPart(p: PanelPartContentProps<HealthCheckPart
 
   return (
     <div className="my-3">
-      <h5 style={{ color: p.partEmbedded.titleColor ?? undefined }} >{title}</h5>
+      <h2 className="h5" style={{ color: p.partEmbedded.titleColor ?? undefined }} >{title}</h2>
       <div className="d-flex flex-wrap">
         {
           p.content.items.map(mle => mle.element).map((le, i) => <HealthCheckElement key={i} element={le} />)

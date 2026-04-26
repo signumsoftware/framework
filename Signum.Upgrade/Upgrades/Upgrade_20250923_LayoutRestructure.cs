@@ -1,9 +1,3 @@
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-
 namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20250923_LayoutRestructure : CodeUpgradeBase

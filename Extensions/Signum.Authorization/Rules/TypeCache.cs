@@ -1,13 +1,7 @@
-using Microsoft.VisualBasic;
-using Signum.Authorization;
-using Signum.Authorization.Rules;
-using Signum.Basics;
-using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.ObjectModel;
 using System.Data;
-using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
@@ -177,12 +171,25 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
 
                 return TypeLogic.TypeToEntity.GetOrThrow(type);
             },
-            parseAllowed: e =>
+            parseAllowed: (e, resource) =>
             {
-                return new WithConditions<TypeAllowed>(fallback: e.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>(),
-                    conditionRules: e.Elements("Condition").Select(xc => new ConditionRule<TypeAllowed>(
-                        typeConditions: xc.Attribute("Name")!.Value.SplitNoEmpty(",").Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToFrozenSet(),
-                        allowed: xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>())).ToReadOnly());
+                var type = resource.ToType();
+
+                var fallback = e.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>();
+
+                var conditionRules = (from xc in e.Elements("Condition")
+                                      let tcs = xc.Attribute("Name")!.Value.SplitNoEmpty(",")
+                                      .Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim())))
+                                      .NotNull()
+                                      .Where(tc => TypeConditionLogic.IsDefined(type, tc) || 
+                                            (replacements.Interactive? !SafeConsole.Ask($"Type condition {tc} is not defined for {type}. Remove it?"): 
+                                                throw new Exception($"Type condition {tc} is not defined for {type}. Import AuthRules interactively.")))
+                                      .ToFrozenSet()
+                                      where tcs.Count > 0
+                                      select new ConditionRule<TypeAllowed>(typeConditions: tcs, allowed: xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>()))
+                                      .ToReadOnly();
+
+                return new WithConditions<TypeAllowed>(fallback: fallback, conditionRules: conditionRules);
             });
     }
 

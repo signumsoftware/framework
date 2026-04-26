@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ClickTrigger" Description="Klick-Trigger">
+    <Member Name="OnLoad" Description="Am Laden" />
+    <Member Name="OnNext" Description="Als nächstes" />
+  </Type>
+  <Type Name="CssStepEmbedded" Description="CSS-Schritt">
+    <Member Name="CssSelector" Description="CSS-Selektor" />
+    <Member Name="Property" Description="Objekt" />
+    <Member Name="ToolbarContent" Description="Toolbar-Inhalt" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="CssStepType" Description="CSS-Schritttyp">
+    <Member Name="CSSSelector" Description="CSS-Selektor" />
+    <Member Name="Property" Description="Objekt" />
+    <Member Name="ToolbarContent" Description="Toolbar-Inhalt" />
+  </Type>
+  <Type Name="PopoverAlign" Description="Popover-Ausrichtung">
+    <Member Name="Center" Description="Zentrum" />
+    <Member Name="End" Description="Ende" />
+    <Member Name="Start" Description="Start" />
+  </Type>
+  <Type Name="PopoverSide" Description="Popover-Seite">
+    <Member Name="Bottom" Description="Unten" />
+    <Member Name="Left" Description="Links" />
+    <Member Name="Right" Description="Rechts" />
+    <Member Name="Top" Description="Top" />
+  </Type>
+  <Type Name="TourEntity" Description="Tour" PluralDescription="Rundgänge">
+    <Member Name="Animate" Description="Animieren" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="ShowCloseButton" Description="Schaltfläche &quot;Schließen&quot; anzeigen" />
+    <Member Name="ShowProgress" Description="Fortschritt anzeigen" />
+    <Member Name="Steps" Description="Schritte" />
+    <Member Name="Trigger" Description="Auslöser" />
+  </Type>
+  <Type Name="TourMessage">
+    <Member Name="Close" Description="Schließen" />
+    <Member Name="Done" Description="Fertig" />
+    <Member Name="Next" Description="Weiter" />
+    <Member Name="Previous" Description="Vorherige" />
+    <Member Name="ReplayTour" Description="Wiederholungstour" />
+    <Member Name="StartTour" Description="Tour starten" />
+  </Type>
+  <Type Name="TourOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="TourStepEntity" Description="Tour-Schritt" Gender="m">
+    <Member Name="Align" Description="Align" />
+    <Member Name="Click" Description="Klick" />
+    <Member Name="CssSteps" Description="CSS-Schritte" />
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Order" Description="Bestellung" />
+    <Member Name="Side" Description="Seite" />
+    <Member Name="Title" Description="Titel" />
+    <Member Name="Tour" Description="Tour" />
+  </Type>
+  <Type Name="TourTriggerSymbol" Description="Tour-Auslöser" Gender="m" />
+</Translations>

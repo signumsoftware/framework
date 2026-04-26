@@ -6,6 +6,8 @@ import { HtmlEditorExtension } from "./Extensions/types";
 import { ITextConverter } from "./HtmlContentStateConverter";
 import { Separator } from "./HtmlEditorButtons";
 import { isEmpty } from "./Utils/editorState";
+import { ImageExtension } from "./Extensions/ImageExtension";
+import { ImageHandlerBase } from "./Extensions/ImageExtension/ImageHandlerBase";
 
 export interface HtmlEditorControllerProps {
   binding: IBinding<string | null | undefined>;
@@ -13,7 +15,7 @@ export interface HtmlEditorControllerProps {
   readOnly?: boolean;
   small?: boolean;
   converter: ITextConverter;
-  plugins?: HtmlEditorExtension[];
+  extensions?: HtmlEditorExtension[];
   innerRef?: React.Ref<LexicalEditor>;
   initiallyFocused?: boolean | number;
 }
@@ -27,11 +29,12 @@ export class HtmlEditorController {
   setOverrideToolbar!: (newState: React.ReactElement | undefined) => void;
 
   converter!: ITextConverter;
-  plugins!: HtmlEditorExtension[];
+  extensions!: HtmlEditorExtension[];
   binding!: IBinding<string | null | undefined>;
   readOnly?: boolean;
   small?: boolean;
   initialEditorContent?: string;
+  imageHandler?: ImageHandlerBase;
 
   lastSavedString?: { str: string | null }
 
@@ -40,11 +43,13 @@ export class HtmlEditorController {
     this.readOnly = p.readOnly;
     this.small = p.small;
     this.converter = p.converter;
-    this.plugins = p.plugins ?? [];
+    this.extensions = p.extensions ?? [];
 
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<
       React.ReactElement | undefined
-    >(undefined);
+      >(undefined);
+
+    this.imageHandler = p.extensions?.map(a => a instanceof ImageExtension ? a.imageHandler : null).notNull().singleOrNull() ?? undefined;
 
     React.useEffect(() => {
       if (p.initiallyFocused) {
@@ -90,13 +95,14 @@ export class HtmlEditorController {
     this.setEditorRef = React.useCallback(
       (editor: LexicalEditor | null) => {
         this.editor = editor!;
+        if (this.editor)
+          this.editor.imageHandler = this.imageHandler;
+
         if (p.innerRef) {
           if (typeof p.innerRef == "function")
             p.innerRef(editor);
           else
-            (
-              p.innerRef as React.MutableRefObject<LexicalEditor | null>
-            ).current = editor;
+            (p.innerRef as React.RefObject<LexicalEditor | null>).current = editor;
         }
       },
       [p.innerRef]
@@ -123,7 +129,7 @@ export class HtmlEditorController {
   }
 
   extraButtons(): React.ReactElement | null {
-    const buttons = this.plugins
+    const buttons = this.extensions
       .map((p) => p.getToolbarButtons?.(this))
       .notNull();
 

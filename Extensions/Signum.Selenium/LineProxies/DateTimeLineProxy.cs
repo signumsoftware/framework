@@ -1,11 +1,6 @@
 using OpenQA.Selenium;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Selenium.LineProxies;
 public class DateTimeLineProxy : BaseLineProxy
@@ -20,7 +15,7 @@ public class DateTimeLineProxy : BaseLineProxy
 
     public void SetValue(IFormattable? value, string? format = null)
     {
-        format ??= Reflector.FormatString(this.Route);
+        format ??= Reflector.GetFormatString(this.Route);
 
         var str = value == null ? null : value.ToString(format, null);
 

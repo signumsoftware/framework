@@ -4,7 +4,6 @@ import { AutoLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTa
 } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, isEntity, EntityPack } from '@framework/Signum.Entities'
 import { classes, Dic } from '@framework/Globals'
-import { SubTokensOptions } from '@framework/FindOptions'
 import { SearchControl, SearchValueLine, FindOptionsParsed, ResultTable, SearchControlLoaded } from '@framework/Search'
 import { TypeInfo, MemberInfo, getTypeInfo, tryGetTypeInfos, PropertyRoute, isTypeEntity, Binding, IsByAll, getAllTypes } from '@framework/Reflection'
 import * as AppContext from '@framework/AppContext'
@@ -36,6 +35,7 @@ import { useAPI } from '@framework/Hooks';
 import { DynamicViewValidationMessage } from '../Signum.Dynamic.Views'
 import { FileEmbedded, FileEntity, FilePathEmbedded, FilePathEntity } from '../../Signum.Files/Signum.Files'
 import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
+import { SubTokensOptions } from '@framework/QueryToken'
 
 export interface BaseNode {
   ref?: Expression<any>;

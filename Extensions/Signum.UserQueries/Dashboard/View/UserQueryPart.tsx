@@ -1,4 +1,3 @@
-
 import * as React from 'react'
 import { FindOptions } from '@framework/FindOptions'
 import { getQueryKey, getQueryNiceName } from '@framework/Reflection'
@@ -96,22 +95,24 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChange
 
   return (
     <FullscreenComponent onReload={e => { e.preventDefault(); onReload ? onReload() : scRef.current!.doSearch({dataChanged : false}); }}>
-      {fullScreen => <SearchControl
-        ref={scRef}
-        deps={deps}
-        findOptions={findOptions}
-        showHeader={"PinnedFilters"}
-        avoidTableFooterContainer={true}
-        pinnedFilterVisible={fop => fop.dashboardBehaviour == null}
-        showFooter={part.showFooter}
-        allowSelection={part.allowSelection}
-        defaultRefreshMode={part.userQuery.refreshMode}
-        searchOnLoad={part.userQuery.refreshMode == "Auto"}
-        customRequest={cachedQuery && ((req, fop) => cachedQuery!.then(cq => executeQueryCached(req, fop, cq)))}
-        onSearch={(fo, dataChange) => dataChange && onDataChanged()}
-        maxResultsHeight={part.allowMaxHeight ? "none" : undefined}
-        extraOptions={{ userQuery: toLite(part.userQuery) }}
-      />}
+      {fullScreen => <div style={fullScreen ? { display: "flex", flexDirection: "column", height: "100%" } : { minWidth: 0, flexGrow: 1 }}>
+        <SearchControl
+          ref={scRef}
+          deps={deps}
+          findOptions={findOptions}
+          showHeader={"PinnedFilters"}
+          avoidTableFooterContainer={true}
+          pinnedFilterVisible={fop => fop.dashboardBehaviour == null}
+          showFooter={part.showFooter}
+          allowSelection={part.allowSelection}
+          defaultRefreshMode={part.userQuery.refreshMode}
+          searchOnLoad={part.userQuery.refreshMode == "Auto"}
+          customRequest={cachedQuery && ((req, fop) => cachedQuery!.then(cq => executeQueryCached(req, fop, cq)))}
+          onSearch={(fo, dataChange) => dataChange && onDataChanged()}
+          maxResultsHeight={fullScreen ? "calc(100vh - 10px)" : (part.allowMaxHeight ? "none" : undefined)}
+          extraOptions={{ userQuery: toLite(part.userQuery) }}
+        />
+      </div>}
     </FullscreenComponent>
   );
 }

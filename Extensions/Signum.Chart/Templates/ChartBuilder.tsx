@@ -123,7 +123,7 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
       <div className="col-lg-2">
         <div className="sf-chart-type card bg-body rounded shadow-sm border-0 p-2">
           <div className="card-header">
-            <h6 className="mb-3 card-title" style={{ backgroundColor: "inherit" }}>{ChartMessage.ChartType.niceToString()}</h6>
+            <h2 className="mb-3 card-title h6" style={{ backgroundColor: "inherit" }}>{ChartMessage.ChartType.niceToString()}</h2>
           </div>
           <div className="card-body">
             {chartScripts?.map((cs, i) =>
@@ -146,7 +146,7 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
       <div className="col-lg-10">
         <div className="sf-chart-tokens card bg-body rounded shadow-sm border-0 p-2">
           <div className="card-header" style={{ backgroundColor: "inherit" }}>
-            <h6 className="mb-3 card-title">{ChartMessage.ChartSettings.niceToString()}</h6>
+            <h2 className="mb-3 card-title h6">{ChartMessage.ChartSettings.niceToString()}</h2>
           </div>
           <div>
             <div className="card-body">
@@ -353,11 +353,9 @@ export function Scala(p: { ctx: TypeContext<ChartParameterEmbedded>, scriptParam
   const compatible = Object.entries(scala.standardScalas).filter(([value, columnType]) => columnType == undefined || token == undefined || ChartClient.isChartColumnType(token, columnType))
     .map(([value, columnType]) => value);
 
-
   const format = toNumberFormat(token?.format);
 
   function numberLine(part: string | null | undefined, buildPart: (newNumber: number | null) => string, label: string) {
-
 
     return <FormGroup label={label} ctx={ctx}>{id => <div className={p.ctx.inputGroupClass}>
       <NumberBox formControlClass={p.ctx.formControlClass} value={part ? (parseFloat(part) ?? null) : null}
@@ -373,11 +371,13 @@ export function Scala(p: { ctx: TypeContext<ChartParameterEmbedded>, scriptParam
     }</FormGroup>;
   }
 
+  const value = ctx.value.value?.contains("...") ? "Custom" : (ctx.value.value ?? undefined);
+
   return (
     <div>
       <FormGroup ctx={ctx} label={scriptParameter.displayName}
         labelHtmlAttributes={{ style: { fontWeight: ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token) ? "bold" : undefined } }}>
-        {id => <select id={id} className={p.ctx.formSelectClass} value={ctx.value.value?.contains("...") ? "Custom" : (ctx.value.value ?? undefined)}
+        {id => <select id={id} className={p.ctx.formSelectClass} value={value}
           onChange={o => {
             ctx.value.value = o.currentTarget.value == "Custom" ? "0...100" : o.currentTarget.value;
             ctx.value.modified = true;

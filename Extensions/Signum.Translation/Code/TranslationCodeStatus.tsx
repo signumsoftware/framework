@@ -19,7 +19,7 @@ export default function TranslationCodeStatus(): React.JSX.Element {
 
   return (
     <div>
-      <h2>{TranslationMessage.CodeTranslations.niceToString()}</h2>
+      <h1 className="h2">{TranslationMessage.CodeTranslations.niceToString()}</h1>
       {result == undefined ? <strong>{JavascriptMessage.loading.niceToString()}</strong> :
         <TranslationTable result={result} onRefreshView={reloadResult} />}
     </div>

@@ -4,7 +4,7 @@ import { classes } from '../Globals';
 import { JavascriptMessage, BooleanEnum } from '../Signum.Entities'
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import "./Modals.css"
+import "./DialogModals.css"
 import { BsSize } from '../Components';
 import { Modal } from 'react-bootstrap';
 import { AutoFocus } from '../Components/AutoFocus';
@@ -166,9 +166,9 @@ function MessageModal(p: MessageModalProps): React.ReactElement {
     }, [p.autoFocusonTitle]);  
 
     return (
-      <h5 ref={titleRef} tabIndex={0} className="modal-title">
+      <h1 ref={titleRef} tabIndex={0} className="modal-title h5">
         {iconSpan}{iconSpan && <span>&nbsp;&nbsp;</span>}{p.title}
-      </h5>
+      </h1>
     );
   }
 

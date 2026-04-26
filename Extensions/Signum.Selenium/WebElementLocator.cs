@@ -5,78 +5,78 @@ namespace Signum.Selenium;
 
 public class WebElementLocator
 {
-    public IWebElement ParentElement;
+    public ISearchContext Parent;
     public By Locator;
 
-    public WebElementLocator(IWebElement parentElement, By locator)
+    public WebElementLocator(ISearchContext parent, By locator)
     {
-        this.ParentElement = parentElement;
+        this.Parent = parent;
         this.Locator = locator;
     }
 
     public IWebElement Find()
     {
-       return ParentElement.FindElement(this.Locator);
+       return Parent.FindElement(this.Locator);
     }
 
     public ReadOnlyCollection<IWebElement> FindElements()
     {
-        return ParentElement.FindElements(this.Locator);
+        return Parent.FindElements(this.Locator);
     }
 
     public IWebElement? TryFind()
     {
-        return ParentElement.TryFindElement(this.Locator);
+        return Parent.TryFindElement(this.Locator);
     }
 
     public bool IsPresent()
     {
-        return ParentElement.IsElementPresent(this.Locator);
+        return Parent.IsElementPresent(this.Locator);
     }
 
     public bool IsVisible()
     {
-        return ParentElement.IsElementVisible(this.Locator);
+        return Parent.IsElementVisible(this.Locator);
     }
 
     public IWebElement WaitPresent()
     {
-        return ParentElement.WaitElementPresent(this.Locator);
+        return Parent.WaitElementPresent(this.Locator);
     }
     public void WaitNoPresent()
     {
-        ParentElement.WaitElementNotPresent(this.Locator);
+        Parent.WaitElementNotPresent(this.Locator);
     }
 
     public IWebElement WaitVisible(bool scrollTo = false)
     {
-        var element = ParentElement.WaitElementVisible(this.Locator);
+        var element = Parent.WaitElementVisible(this.Locator);
         return scrollTo ? element.ScrollTo() : element;
     }
 
     public void WaitNoVisible()
     {
-        ParentElement.WaitElementNotVisible(this.Locator);
+        Parent.WaitElementNotVisible(this.Locator);
     }
 
     public void AssertNotPresent()
     {
-        ParentElement.AssertElementNotPresent(this.Locator);
+        Parent.AssertElementNotPresent(this.Locator);
     }
 
     public void AssertNotVisible()
     {
-        ParentElement.AssertElementNotVisible(this.Locator);
+        Parent.AssertElementNotVisible(this.Locator);
     }
 
     public void AssertPresent()
     {
-        ParentElement.AssertElementPresent(this.Locator);
+        Parent.AssertElementPresent(this.Locator);
     }
 
     public WebElementLocator CombineCss(string cssSelectorSuffix)
     {
-        return new WebElementLocator(this.ParentElement, this.Locator.CombineCss(cssSelectorSuffix));
+        return new WebElementLocator(this.Parent, this.Locator.CombineCss(cssSelectorSuffix));
     }
 
 }

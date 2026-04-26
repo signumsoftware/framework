@@ -31,10 +31,27 @@ public partial class Table
         var main = new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}; --{3}"
                 .FormatWith(Name, this.PrimaryKey.Name.SqlEscape(isPostgres), variableOrId, comment ?? entity.ToString()));
 
-        if (isPostgres && declaration != null)
-            return PostgresDoBlock(entity.Id.VariableName!, declaration, SqlPreCommand.Combine(Spacing.Simple, pre, collections, virtualMList, main)!);
+        if(declaration == null)
+            return SqlPreCommand.Combine(Spacing.Simple, declaration, pre, collections, virtualMList, main)!;
 
-        return SqlPreCommand.Combine(Spacing.Simple, declaration, pre, collections, virtualMList, main)!;
+        return BlockIfNecessary(isPostgres, [declaration], [
+            AssertNotNull(entity.Id.VariableName!, isPostgres),
+            pre,
+            collections,
+            virtualMList,
+            main
+            ]);
+    }
+
+    private SqlPreCommandSimple AssertNotNull(string variableName, bool isPostgres)
+    {
+        if (!isPostgres)
+            return new SqlPreCommandSimple(@$"IF {variableName} IS NULL 
+    THROW 50000, '{this.Type.Name} not found!', 1;;");
+        else
+            return new SqlPreCommandSimple(@$"IF {variableName} IS NULL THEN 
+    RAISE EXCEPTION '{this.Type.Name} not found';
+END IF;");
     }
 
     static GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand?>> giDeleteVirtualMListSync = new GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand?>>(
@@ -75,24 +92,9 @@ public partial class Table
 
         var result = Schema.Current.Settings.IsPostgres ?
         new SqlPreCommandSimple(@$"{variableName} {columnType} = ({queryCommandString});") :
-        new SqlPreCommandSimple($"DECLARE {variableName} {columnType} = COALESCE(({queryCommandString}), CAST('{typeof(T).TypeName()} not found!' as {columnType}));");
+        new SqlPreCommandSimple($"DECLARE {variableName} {columnType} = ({queryCommandString});");
 
         return result;
     }
-
-    private SqlPreCommandSimple PostgresDoBlock(string variableName, SqlPreCommandSimple declaration, SqlPreCommand block)
-    {
-        return new SqlPreCommandSimple(@$"DO $$
-DECLARE 
-{declaration.PlainSql().Indent(4)}
-BEGIN
-IF {variableName} IS NULL THEN 
-    RAISE EXCEPTION 'Not found';
-END IF; 
-{block.PlainSql().Indent(4)}
-END $$;");
-    }
-
-
 
 }

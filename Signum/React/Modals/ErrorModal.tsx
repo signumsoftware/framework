@@ -6,7 +6,7 @@ import { ajaxPost, ExternalServiceError, ServiceError, ValidationError } from '.
 import { JavascriptMessage, FrameMessage, ConnectionMessage, EntityControlMessage } from '../Signum.Entities'
 import { ClientErrorModel, ExceptionEntity } from '../Signum.Basics'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import "./Modals.css"
+import "./DialogModals.css"
 import { newLite } from '../Reflection';
 import { Modal } from 'react-bootstrap';
 import MessageModal from './MessageModal';
@@ -46,16 +46,16 @@ const ErrorModal: {
 
   return (
     <Modal show={show} onExited={handleOnExited} onHide={handleCloseClicked} size="lg" dialogClassName="error-modal">
-      <div className="modal-header dialog-header-error">
-        <h5 className="modal-title">
+      <div className="modal-header dialog-header-error" role="dialog">
+        <h1 className="modal-title h5">
           {
             se ? renderServiceTitle(se) :
               ve ? renderValidationTitle(ve) :
                 ese ? renderExternalServiceTitle(ese) :
                   renderTitle(e)
           }
-        </h5>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label={EntityControlMessage.Close.niceToString()} onClick={handleCloseClicked} />
+        </h1>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label={JavascriptMessage.Close.niceToString()} onClick={handleCloseClicked} />
       </div>
 
       <div className="modal-body">

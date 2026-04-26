@@ -801,6 +801,7 @@ END $$;"); ;
         var uc = updater.Value;
         var sql = uc.SqlUpdatePattern(suffix, false);
         var parameters = new List<DbParameter>().Do(ps => uc.UpdateParameters(entity, (entity as Entity)?.Ticks ?? -1, new Forbidden(), suffix, ps));
+        var isPostgres = Schema.Current.Settings.IsPostgres;
 
         SqlPreCommandSimple? declare = null;
         SqlPreCommand? update;
@@ -819,10 +820,7 @@ END $$;"); ;
             if (declare == null)
                 return update;
 
-            if (Schema.Current.Settings.IsPostgres)
-                return PostgresDoBlock(entity.Id.VariableName!, declare, update!);
-            else
-                return SqlPreCommand.Combine(Spacing.Simple, declare, update);
+            return BlockIfNecessary(isPostgres, [declare], [AssertNotNull(entity.Id.VariableName!, isPostgres), update]);
         }
 
         var vmis = VirtualMList.RegisteredVirtualMLists.TryGetC(this.Type);
@@ -838,12 +836,22 @@ END $$;"); ;
         if (declare == null)
             return script;
 
-        if (Schema.Current.Settings.IsPostgres)
-            return PostgresDoBlock(entity.Id.VariableName!, declare, script!);
-        else
-            return SqlPreCommand.Combine(Spacing.Simple, declare, script);
+        return BlockIfNecessary(isPostgres, [declare], [AssertNotNull(entity.Id.VariableName!, isPostgres), script!]);
     }
 
+    public SqlPreCommand BlockIfNecessary(bool isPostgres, SqlPreCommand[] declarations, SqlPreCommand?[] instructions)
+    {
+        if (isPostgres)
+            return new SqlPreCommandPostgresDoBlock(
+                declarations: declarations,
+                body: instructions.Combine(Spacing.Simple)!
+            ).SimplifyNested();
+
+        else
+        {
+            return declarations.Concat(instructions).Combine(Spacing.Simple)!;
+        }
+    }
     static GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand>> giUpdateVirtualMListSync = new GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand>>(
         (e, vmi) => UpdateVirtualMListSync<Entity, Entity>(e, vmi));
 
@@ -1447,6 +1455,13 @@ public partial class TableMList
         var column = (PostgresTsVectorColumn)this.Columns.GetOrThrow(columnName) ;
 
         return new ColumnExpression(typeof(NpgsqlTsVector), tableAlias, column.Name);
+    }
+
+    internal ColumnExpression GetVectorColumn(Alias tableAlias, string columnName)
+    {
+        var column = this.Columns.GetOrThrow(columnName);
+
+        return new ColumnExpression(typeof(Pgvector.Vector), tableAlias, column.Name);
     }
 }
 

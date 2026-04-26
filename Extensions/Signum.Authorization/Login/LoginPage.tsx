@@ -31,7 +31,7 @@ function LoginPage(): React.JSX.Element {
     <div className="container sf-login-page">
       <div className="row">
         <div className="col-md-6 offset-md-3">
-          <h2 className="sf-entity-title">{AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}</h2>
+          <h1 className="sf-entity-title h2">{AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}</h1>
         </div>
       </div>
       {showLoginForm && <LoginForm ctx={ctx} />}
@@ -52,7 +52,7 @@ function LoginPage(): React.JSX.Element {
 }
 
 namespace LoginPage {
-  export let customLoginButtons: ((ctx: LoginContext) => React.ReactElement<any>) | null = null;
+  export let customLoginButtons: ((ctx: LoginContext) => React.ReactNode) | null = null;
   export let showLoginForm: "yes" | "no" | "initially_not" = "yes";
   export let usernameLabel: () => string = () => LoginAuthMessage.Username.niceToString();
   export let resetPasswordControl = () => null as null | React.ReactElement;
@@ -87,10 +87,17 @@ export function LoginForm(p: { ctx: LoginContext }): React.JSX.Element {
       .then(lr => {
         setModelState(undefined);
         AuthClient.setAuthToken(lr.token, lr.authenticationType);
-        AuthClient.setCurrentUser(lr.userEntity);
+        //p.ctx.setLoading(undefined);
 
-        const back = QueryString.parse(window.location.search).back
-        AuthClient.Options.onLogin(back);
+        const back = QueryString.parse(window.location.search).back;
+        if (lr.userEntity.mustChangePassword) {
+          // Don't set currentUser, store it for password change page
+          AuthClient.pendingPasswordChangeUser = lr.userEntity;
+          AppContext.navigate("/auth/changePassword" + (back ? "?back=" + encodeURIComponent(back) : ""));
+        } else {
+          AuthClient.setCurrentUser(lr.userEntity);
+          AuthClient.Options.onLogin(back);
+        }
       })
       .catch((e: ValidationError) => {
         p.ctx.setLoading(undefined);

@@ -3,8 +3,9 @@ import { DateTime, Duration } from 'luxon'
 import { classes } from '../Globals'
 import { Navigator } from '../Navigator'
 import { Finder } from '../Finder'
-import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest, QueryDescription } from '../FindOptions'
-import { Lite, Entity, getToString, EmbeddedEntity, EntityControlMessage } from '../Signum.Entities'
+import { FindOptions, FindOptionsParsed, QueryValueRequest, QueryDescription } from '../FindOptions'
+import { QueryToken, SubTokensOptions } from '../QueryToken'
+import { Lite, Entity, getToString, EmbeddedEntity, EntityControlMessage,isEntity,isLite } from '../Signum.Entities'
 import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toLuxonDurationFormat, timeToString, toFormatWithFixes } from '../Reflection'
 import { SearchControlProps } from "./SearchControl";
 import { ColumnParsed } from "./SearchControlLoaded";
@@ -19,10 +20,11 @@ import { TimeMachineColors } from '../Lines/TimeMachineIcon'
 import { LinkButton } from '../Basics/LinkButton'
 
 export interface SearchValueProps {
+  ref?: React.Ref<SearchValueController>;
   ctx?: StyleContext;
   id?: string;
   valueToken?: string | QueryTokenString<any> | QueryToken;
-  findOptions: FindOptions;
+  findOptions: FindOptions | Lite<Entity> | Entity;
   multipleValues?: { vertical?: boolean, showType?: boolean };
   isLink?: boolean;
   isBadge?: boolean | "MoreThanZero";
@@ -72,10 +74,12 @@ function getQueryRequestValue(fo: FindOptionsParsed, valueToken?: string | Query
   };
 }
 
-const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefAttributes<SearchValueController>> =
-  React.forwardRef(function SearchValue(p: SearchValueProps, ref: React.Ref<SearchValueController>): React.ReactNode | null {
+function SearchValue(p: SearchValueProps): React.ReactNode | null {
 
-    const fo = p.findOptions;
+    const findOptions: FindOptions = 
+    isLite(p.findOptions) ? { queryName: p.findOptions.EntityType, filterOptions: [{ token: "Entity", value: p.findOptions }] } :
+      isEntity(p.findOptions) ? { queryName: p.findOptions.Type, filterOptions: [{ token: "Entity", value: p.findOptions }] } :
+        p.findOptions;
 
     const valueToken = useAPI(() => {
       if (p.valueToken == null)
@@ -84,7 +88,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
       if ((p.valueToken as QueryToken).key)
         return p.valueToken as QueryToken;
 
-      return Finder.parseSingleToken(p.findOptions.queryName, p.valueToken.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)
+      return Finder.parseSingleToken(findOptions.queryName, p.valueToken.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)
         .then(st => {
           controller.valueToken = st;
           p.onTokenLoaded && p.onTokenLoaded();
@@ -101,17 +105,17 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
 
       async function makeRequest() {
 
-        if (!Finder.isFindable(fo.queryName, false)) {
+        if (!Finder.isFindable(findOptions.queryName, false)) {
           if (p.throwIfNotFindable)
-            throw Error(`Query ${getQueryKey(fo.queryName)} not allowed`);
+            throw Error(`Query ${getQueryKey(findOptions.queryName)} not allowed`);
         }
 
-        var qd = await Finder.getQueryDescription(p.findOptions.queryName);
+        var qd = await Finder.getQueryDescription(findOptions.queryName);
         controller.queryDescription = qd;
 
-        var fop = await Finder.parseFindOptions(p.findOptions, qd, false);
+        var fop = await Finder.parseFindOptions(findOptions, qd, false);
 
-        const systemVersioned = p.findOptions.systemTime == undefined && p.ctx?.frame?.currentDate && Finder.isSystemVersioned(qd.columns["Entity"].type);
+        const systemVersioned = findOptions.systemTime == undefined && p.ctx?.frame?.currentDate && Finder.isSystemVersioned(qd.columns["Entity"].type);
         if (systemVersioned)
           fop.systemTime = { mode: 'AsOf', startDate: p.ctx?.frame!.currentDate };
 
@@ -179,7 +183,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
         return makeRequest();
       }
 
-    }, [p.initialValue, valueToken, Finder.findOptionsPath(p.findOptions), p.ctx?.frame?.currentDate, p.ctx?.frame?.previousDate, ...(deps || [])], { avoidReset: true });
+    }, [p.initialValue, valueToken, Finder.findOptionsPath(findOptions), p.ctx?.frame?.currentDate, p.ctx?.frame?.previousDate, ...(deps || [])], { avoidReset: true });
 
 
 
@@ -193,7 +197,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
 
 
 
-    React.useImperativeHandle(ref, () => controller, []);
+    React.useImperativeHandle(p.ref, () => controller, []);
 
     function isNumeric() {
       let token = valueToken;
@@ -205,14 +209,14 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
       return token && token.filterType == "String" && token.propertyRoute && PropertyRoute.parseFull(token.propertyRoute).member?.isMultiline;
     }
 
-    if (!Finder.isFindable(fo.queryName, false))
+    if (!Finder.isFindable(findOptions.queryName, false))
       return null;
 
-    var errorMessage = Finder.validateNewEntities(fo);
+    var errorMessage = Finder.validateNewEntities(findOptions);
     if (errorMessage) {
       return (
         <div className="alert alert-danger" role="alert" >
-          <strong>Error in SearchValue ({getQueryKey(fo.queryName)}): </strong>
+          <strong>Error in SearchValue ({getQueryKey(findOptions.queryName)}): </strong>
           {errorMessage}
         </div>
       );
@@ -274,7 +278,6 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
     let className = classes(
       p.valueToken == undefined && "count-search",
       p.valueToken == undefined && (value > 0 ? "count-with-results" : "count-no-results"),
-      valueToken && (valueToken.type.isLite || valueToken!.type.isEmbedded) && "sf-entity-line-entity",
       p.formControlClass,
       p.formControlClass && isNumeric() && "numeric",
       p.formControlClass && isMultiLine() && "sf-multi-line",
@@ -346,47 +349,13 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
       if (!token)
         return null;
 
-      var qs = Finder.getSettings(p.findOptions.queryName);
+      var qs = Finder.getSettings(findOptions.queryName);
 
       var formatter = Finder.getCellFormatter(qs, token, undefined);
 
       const cfc: Finder.CellFormatterContext = { columns: [token.fullKey], row: { entity: undefined, columns: [value] }, rowIndex: 0, refresh: () => updateVersion() };
       const cp: ColumnParsed = { column: { token: token }, columnIndex: 0, resultIndex: 0 };
       return formatter.formatter(value, cfc, cp) ?? null;
-
-      //switch (token.filterType) {
-      //  case "Integer":
-      //  case "Decimal":
-      //    {
-      //      const numberFormat = toNumberFormat(p.format ?? token.format);
-
-      //      var unit = p.unit === null ? p.unit : p.unit ?? token.unit;
-      //      if (unit)
-      //        return numberFormat.format(value) + " " + unit;
-      //      else
-      //        return numberFormat.format(value);
-      //    }
-      //  case "DateTime":
-      //    {
-      //      const luxonFormat = toLuxonFormat(p.format ?? token.format, token.type.name as "DateOnly" | "DateTime");
-      //      return toFormatWithFixes(DateTime.fromISO(value), luxonFormat);
-      //    }
-      //  case "Time":
-      //    {
-      //      const luxonFormat = toLuxonDurationFormat(p.format ?? token.format);
-      //      return Duration.fromISOTime(value).toFormat(luxonFormat ?? "hh:mm:ss");
-      //    }
-      //  case "String": return value;
-      //  case "Lite": return value && Navigator.renderLite(value as Lite<Entity>);
-      //  case "Embedded": return getToString(value as EmbeddedEntity);
-      //  case "Boolean": return <input type="checkbox" className="form-check-input" disabled={true} checked={value} />
-      //  case "Enum": return getEnumInfo(token!.type.name, value).niceName;
-      //  case "Guid":
-      //    let str = value as string;
-      //    return <span className="guid">{str.substring(0, 4) + "…" + str.substring(str.length - 4)}</span>;
-      //}
-
-      //return value;
     }
 
 
@@ -405,11 +374,11 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
       }
 
       p.htmlAttributes?.onClick?.(e);
-
+      
       var fo: FindOptions;
-      if (p.findOptions.columnOptions == undefined && valueToken && valueToken.parent)
+      if (findOptions.columnOptions == undefined && valueToken && valueToken.parent)
         fo = {
-          ...p.findOptions,
+          ...findOptions,
           columnOptions: [{
             token: valueToken.queryTokenType == "Aggregate" ? valueToken.parent!.fullKey : valueToken.fullKey,
             summaryToken: valueToken.queryTokenType == "Aggregate" ? valueToken.fullKey : undefined,
@@ -417,7 +386,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
           columnOptionsMode: "ReplaceOrAdd",
         }
       else
-        fo = { ...p.findOptions };
+        fo = { ...findOptions };
 
       if (fo.systemTime == null && p.ctx?.frame?.currentDate && Finder.isSystemVersioned(controller.queryDescription!.columns["Entity"].type)) {
         if (p.ctx?.frame?.previousDate)
@@ -455,7 +424,7 @@ const SearchValue: React.ForwardRefExoticComponent<SearchValueProps & React.RefA
             p.onExplored();
         });
     }
-  });
+  }
 
 
 (SearchValue as any).defaultProps = {

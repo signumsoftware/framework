@@ -57,14 +57,14 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
   dropBorderIndex!: IndexWithOffset | undefined;
   setDropBorderIndex!: React.Dispatch<IndexWithOffset | undefined>;
 
-  init(p: P): void {
+  override init(p: P): void {
     super.init(p);
     [this.dragIndex, this.setDragIndex] = React.useState<number | undefined>(undefined);
     [this.dropBorderIndex, this.setDropBorderIndex] = React.useState<IndexWithOffset | undefined>(undefined);
   }
 
   keyGenerator: KeyGenerator = new KeyGenerator();
-  getDefaultProps(state: P): void {
+  override getDefaultProps(state: P): void {
     if (state.type) {
       const type = state.type;
 
@@ -83,7 +83,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
 
 
 
-  overrideProps(p: P, overridenProps: P): void {
+  override overrideProps(p: P, overridenProps: P): void {
     super.overrideProps(p, overridenProps);
     if (p.type) {
       var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;
@@ -93,18 +93,20 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
           return;
 
         if (types.length == 1) {
-          var tn = types.single().name;
-          p.findOptions = withAvoidDuplicates(p.findOptions ?? Navigator.entitySettings[tn]?.defaultFindOptions ?? { queryName: tn }, tn);
+          var type = types.single();
+          if (type.queryDefined) {
+            p.findOptions = withAvoidDuplicates(p.findOptions ?? Navigator.entitySettings[type.name]?.defaultFindOptions ?? { queryName: type.name }, type.name);
+          }
         }
         else {
-          p.findOptionsDictionary = types.toObject(a => a.name, a => withAvoidDuplicates(p.findOptionsDictionary?.[a.name] ?? Navigator.entitySettings[a.name]?.defaultFindOptions ?? { queryName: a.name }, a.name));
+          p.findOptionsDictionary = types.filter(a => a.queryDefined).toObject(a => a.name, a => withAvoidDuplicates(p.findOptionsDictionary?.[a.name] ?? Navigator.entitySettings[a.name]?.defaultFindOptions ?? { queryName: a.name }, a.name));
         }
       }
     }
 
     function withAvoidDuplicates(fo: FindOptions, typeName: string): FindOptions {
 
-      const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
+      const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? (!e.entity?.isNew) && e.EntityType == typeName : isEntity(e) ? !e.isNew && e.Type == typeName : null).notNull();
 
       return {
         ...fo,
@@ -624,7 +626,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       if (ke.key == KeyNames.arrowDown || ke.key == KeyNames.arrowRight) {
         ke.preventDefault();
         this.onMoveElement(index, ({ index: index + 1, offset: 1 }));
-      } else {
+      } else if (ke.key == KeyNames.arrowUp || ke.key == KeyNames.arrowLeft) {
         ke.preventDefault();
         this.onMoveElement(index, ({ index: index - 1, offset : 0}));
       }

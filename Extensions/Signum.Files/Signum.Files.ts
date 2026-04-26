@@ -82,6 +82,7 @@ export namespace FileMessage {
   export const Uploading01: MessageKey = new MessageKey("FileMessage", "Uploading01");
   export const SaveThe0WhenFinished: MessageKey = new MessageKey("FileMessage", "SaveThe0WhenFinished");
   export const AddMoreFiles: MessageKey = new MessageKey("FileMessage", "AddMoreFiles");
+  export const File0ContainsAThreatBy1: MessageKey = new MessageKey("FileMessage", "File0ContainsAThreatBy1");
 }
 
 export const FilePathEmbedded: Type<FilePathEmbedded> = new Type<FilePathEmbedded>("FilePathEmbedded");

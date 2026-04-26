@@ -1,7 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace Signum.Utilities;
@@ -12,7 +10,7 @@ public static class StringExtensions
     static readonly Expression<Func<string, bool>> HasTextExpression = str => (str ?? "").Length > 0;
 #pragma warning restore IDE0052 // Remove unread private members
     [ExpressionField("HasTextExpression")]
-    public static bool HasText([NotNullWhen(true)]this string? str)
+    public static bool HasText([NotNullWhen(true)] this string? str)
     {
         return !string.IsNullOrEmpty(str);
     }
@@ -515,7 +513,7 @@ public static class StringExtensions
 
         List<string> result = new List<string>();
 
-        for (int i = 0; i < str.Length; i+= maxChars)
+        for (int i = 0; i < str.Length; i += maxChars)
         {
             if (i + maxChars < str.Length)
                 result.Add(str.Substring(i, maxChars));
@@ -552,11 +550,11 @@ public static class StringExtensions
         int index = 0;
 
         while (index < str.Length)
-    {
+        {
             var newIndex = str.IndexOfAny(new[] { '\r', '\n' }, index).NotFound(str.Length);
 
             if (newIndex > index + 1)
-        {
+            {
                 var res = str.Substring(index, newIndex - index).Trim();
                 if (res.Length > 0)
                     return res;
@@ -588,7 +586,7 @@ public static class StringExtensions
     public static string VerticalEtc(this string str, int maxLines, string etcString = "(…)")
     {
         if (str.HasText() && (str.Contains("\n")))
-    {
+        {
             string[] arr = str.Split(new string[] { "\n" }, maxLines - 1, StringSplitOptions.None);
             string res = arr.ToString("\n");
             if (res.Length < str.Length)
@@ -690,10 +688,10 @@ public static class StringExtensions
     {
         StringBuilder sb = new StringBuilder();
 
-        for (int pos = 0; pos < str.Length; )
+        for (int pos = 0; pos < str.Length;)
         {
             var nextPos = str.IndexOf('\n', pos);
-            if(nextPos == -1)
+            if (nextPos == -1)
             {
                 sb.Append(space);
                 sb.Append(str.Substring(pos));
@@ -788,7 +786,7 @@ public static class StringExtensions
         if (string.IsNullOrEmpty(s))
             return s;
 
-        var dr  = NaturalLanguageTools.DiacriticsRemover.TryGetC(CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
+        var dr = NaturalLanguageTools.DiacriticsRemover.TryGetC(CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
 
         if (dr != null)
             s = dr.RemoveDiacritics(s);
@@ -816,7 +814,7 @@ public static class StringExtensions
 
         return "{0:#,###.00} {1}".FormatWith(valor, abbreviations[i]);
     }
-    
+
     public static string Combine(this string separator, params object?[] elements)
     {
         StringBuilder? sb = null;
@@ -885,5 +883,15 @@ public static class StringExtensions
     public static Uri Combine(this Uri baseUrl, string suffix)
     {
         return new Uri(baseUrl.ToString().TrimEnd('/') + "/" + suffix.TrimStart('/'));
+    }
+
+    public static StringBuilder AppendLineLF(this StringBuilder sb, string value)
+    {
+        return sb.Append(value).Append('\n');
+    }
+
+    public static StringBuilder AppendLineLF(this StringBuilder sb)
+    {
+        return sb.Append('\n');
     }
 }

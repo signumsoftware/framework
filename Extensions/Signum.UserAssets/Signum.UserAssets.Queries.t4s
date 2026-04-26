@@ -1,4 +1,4 @@
-import { QueryToken } from '@framework/FindOptions'
+import { QueryToken } from '@framework/QueryToken'
 
 export interface QueryTokenEmbedded {
     token?: QueryToken;

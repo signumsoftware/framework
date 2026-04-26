@@ -1,6 +1,7 @@
 using Signum.Engine.Maps;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
+using Pgvector;
 
 namespace Signum.Test.Environment;
 
@@ -446,3 +447,23 @@ public class FolderEntity : Entity
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
 }
+
+[EntityKind(EntityKind.System, EntityData.Transactional)]
+public class SimplePassageEntity : Entity
+{   
+    public Lite<NoteWithDateEntity> Note { get; set; }
+
+    public bool IsTitle { get; set; }
+
+    [DbType(Size = 768), QueryableProperty(false)]
+    public Vector? Embedding { get; set; }
+
+    [StringLengthValidator(Max = int.MaxValue)]
+    public string Chunk { get; set; }
+
+    public int Index { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Note.ToString()!);
+}
+

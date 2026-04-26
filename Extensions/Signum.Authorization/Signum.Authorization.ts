@@ -48,9 +48,6 @@ export namespace LoginAuthMessage {
   export const RememberMe: MessageKey = new MessageKey("LoginAuthMessage", "RememberMe");
   export const IHaveForgottenMyPassword: MessageKey = new MessageKey("LoginAuthMessage", "IHaveForgottenMyPassword");
   export const ShowLoginForm: MessageKey = new MessageKey("LoginAuthMessage", "ShowLoginForm");
-  export const LoginWithWindowsUser: MessageKey = new MessageKey("LoginAuthMessage", "LoginWithWindowsUser");
-  export const NoWindowsUserFound: MessageKey = new MessageKey("LoginAuthMessage", "NoWindowsUserFound");
-  export const LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication: MessageKey = new MessageKey("LoginAuthMessage", "LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication");
   export const IForgotMyPassword: MessageKey = new MessageKey("LoginAuthMessage", "IForgotMyPassword");
   export const EnterYourUserEmail: MessageKey = new MessageKey("LoginAuthMessage", "EnterYourUserEmail");
   export const SendEmail: MessageKey = new MessageKey("LoginAuthMessage", "SendEmail");
@@ -65,6 +62,8 @@ export namespace LoginAuthMessage {
   export const ConfirmNewPassword: MessageKey = new MessageKey("LoginAuthMessage", "ConfirmNewPassword");
   export const EnterActualPasswordAndNewOne: MessageKey = new MessageKey("LoginAuthMessage", "EnterActualPasswordAndNewOne");
   export const CurrentPassword: MessageKey = new MessageKey("LoginAuthMessage", "CurrentPassword");
+  export const PasswordMustBeChanged: MessageKey = new MessageKey("LoginAuthMessage", "PasswordMustBeChanged");
+  export const YouMustChangeYourPasswordBeforeContinuing: MessageKey = new MessageKey("LoginAuthMessage", "YouMustChangeYourPasswordBeforeContinuing");
   export const WeHaveSentYouAnEmailToResetYourPassword: MessageKey = new MessageKey("LoginAuthMessage", "WeHaveSentYouAnEmailToResetYourPassword");
   export const UserNameMustHaveAValue: MessageKey = new MessageKey("LoginAuthMessage", "UserNameMustHaveAValue");
   export const InvalidUsernameOrPassword: MessageKey = new MessageKey("LoginAuthMessage", "InvalidUsernameOrPassword");
@@ -115,10 +114,12 @@ export interface UserEntity extends Entities.Entity, Basics.IEmailOwnerEntity, S
   Type: "User";
   userName: string;
   passwordHash: string /*Byte[]*/ | null;
+  passwordIsChanging: boolean;
   role: Entities.Lite<RoleEntity>;
   email: string | null;
   cultureInfo: Basics.CultureInfoEntity | null;
   disabledOn: string /*DateTime*/ | null;
+  mustChangePassword: boolean;
   state: UserState;
   loginFailedCounter: number;
 }
@@ -143,7 +144,6 @@ export namespace UserOperation {
   export const Reactivate : Operations.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Reactivate");
   export const Deactivate : Operations.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Deactivate");
   export const AutoDeactivate : Operations.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.AutoDeactivate");
-  export const SetPassword : Operations.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.SetPassword");
   export const Delete : Operations.DeleteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Delete");
 }
 

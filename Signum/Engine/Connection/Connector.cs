@@ -158,6 +158,9 @@ public abstract class Connector
     public abstract bool SupportsDateDifBig { get; }
 
     public abstract bool SupportsPartitioning { get; }
+
+    public abstract bool SupportsVectors { get; }
+
     public abstract string LocalTimeZone { get; }
 }
 

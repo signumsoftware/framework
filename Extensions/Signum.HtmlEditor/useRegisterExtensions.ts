@@ -2,16 +2,13 @@ import React from "react";
 import { HtmlEditorExtension } from "./Extensions/types";
 import { HtmlEditorController } from "./HtmlEditorController";
 
-export const useRegisterExtensions = (
-  controller: HtmlEditorController,
-  extensions: HtmlEditorExtension[] = []
-): void => {
+export function useRegisterExtensions(controller: HtmlEditorController, extensions: HtmlEditorExtension[] = []): void {
   React.useEffect(() => {
     if (!controller?.editor)
       return;
 
     const unsubscribeFns = extensions
-      .flatMap((plugin) => [plugin.registerExtension?.(controller)])
+      .flatMap((e) => [e.registerExtension?.(controller)])
       .notNull();
 
     return () => unsubscribeFns.forEach((fn) => fn());

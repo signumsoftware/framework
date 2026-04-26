@@ -1,6 +1,3 @@
-using Signum.Engine.Maps;
-using Signum.Entities.Reflection;
-
 namespace Signum.DynamicQuery;
 
 public class ColumnDescriptionFactory
@@ -46,10 +43,10 @@ public class ColumnDescriptionFactory
             {
                 var br = this.BestRoute();
 
-                Format = br == null ? null : Reflector.FormatString(br);
+                Format = br == null ? null : Reflector.GetFormatString(br);
                 Unit = br == null ? null : Reflector.GetUnit(br);
                 if (Implementations == null)
-                    Implementations = propertyRoutes.FirstEx().TryGetImplementations();
+                    Implementations = Signum.Entities.Implementations.Combine(propertyRoutes.Select(a => a.TryGetImplementations()));
                 processedType = null;
             }
         }
@@ -162,7 +159,7 @@ public class ColumnDescriptionFactory
 
     internal static string? CombineFormat(PropertyRoute[] propertyRoutes)
     {
-        return propertyRoutes.Select(a => Reflector.FormatString(a)).Distinct().Only();
+        return propertyRoutes.Select(a => Reflector.GetFormatString(a)).Distinct().Only();
     }
 
     internal static string? CombineUnit(PropertyRoute[] propertyRoutes)

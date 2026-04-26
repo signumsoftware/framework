@@ -107,6 +107,12 @@ public static class DateTimeExtensions
         return end.DayNumber - start.DayNumber;
     }
 
+    public static int DaysTo(this DateTime start, DateTime end)
+    {
+        return (end.Date - start.Date).Days;
+    }
+
+
     public static double TotalMonths(this DateTime start, DateTime end)
     {
         int wholeMonths = start.MonthsTo(end);

@@ -1,6 +1,5 @@
 using System.Collections.Frozen;
 using System.Data;
-using System.Net.Http.Headers;
 using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
@@ -144,7 +143,7 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
             throw new IntegrityCheckException(errors);
 
         Dictionary<Lite<RoleEntity>, Dictionary<K, A>> realRules = rules
-              .AgGroupToDictionary(ru => ru.Role!, gr => gr
+              .GroupAggregateToDictionary(ru => ru.Role!, gr => gr
                 .SelectCatch(ru => KeyValuePair.Create(ToKey(ru.Resource!), GetRuleAllowed(ru)))
                 .ToDictionaryEx());
 
@@ -318,7 +317,7 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
     public abstract SqlPreCommand? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements);
 
     protected SqlPreCommand? ImportXmlInternal(XElement root, XName rootName, XName elementName, Dictionary<string, Lite<RoleEntity>> roles,
-        Func<string, R?> toResource, Func<XElement, A> parseAllowed)
+        Func<string, R?> toResource, Func<XElement, R, A> parseAllowed)
     {
         var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
         var xRoles = (root.Element(rootName)?.Elements("Role")).EmptyIfNull();
@@ -332,7 +331,7 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
                 var dic = (from xr in x.Elements(elementName)
                            let r = toResource(xr.Attribute("Resource")!.Value)
                            where r != null
-                           select KeyValuePair.Create(r, parseAllowed(xr)))
+                           select KeyValuePair.Create(r, parseAllowed(xr, r)))
                            .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
                 SqlPreCommand? restSql = dic.Select(kvp => table.InsertSqlSync(SetRuleAllowed(new RT
@@ -359,16 +358,18 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
                 SqlPreCommand? restSql = Synchronizer.SynchronizeScript(Spacing.Simple, shouldResources, currentResources,
                     (r, xr) =>
                     {
-                        var a = parseAllowed(xr);
-                        return table.InsertSqlSync(SetRuleAllowed(new RT { Resource = ToEntity(r), Role = role }, a), comment: Comment(role, ToEntity(r), a));
+                        var resource = ToEntity(r);
+                        var a = parseAllowed(xr, resource);
+                        return table.InsertSqlSync(SetRuleAllowed(new RT { Resource = resource, Role = role }, a), comment: Comment(role, ToEntity(r), a));
                     },
                     (r, rt) => table.DeleteSqlSync(rt, null, Comment(role, ToEntity(r), GetRuleAllowed(rt))),
                     (r, xr, rt) =>
                     {
+                        var resource = ToEntity(r);
                         var oldA = GetRuleAllowed(rt);
-                        SetRuleAllowed(rt, parseAllowed(xr));
+                        SetRuleAllowed(rt, parseAllowed(xr, resource));
                         if (rt.IsGraphModified)
-                            return table.UpdateSqlSync(rt, null, comment: Comment(role, ToEntity(r), oldA, GetRuleAllowed(rt)));
+                            return table.UpdateSqlSync(rt, null, comment: Comment(role, resource, oldA, GetRuleAllowed(rt)));
                         return null;
                     })?.Do(p => p.GoBefore = true);
 

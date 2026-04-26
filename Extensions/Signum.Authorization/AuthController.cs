@@ -24,7 +24,7 @@ public class AuthController : ControllerBase
         try
         {
             if (AuthLogic.Authorizer == null)
-                user = AuthLogic.Login(data.userName, PasswordEncoding.EncodePasswordAlternatives(data.userName, data.password), out authenticationType);
+                user = AuthLogic.Login(data.userName, data.password, out authenticationType);
             else
                 user = AuthLogic.Authorizer.Login(data.userName, data.password, out authenticationType);
         }
@@ -86,6 +86,8 @@ public class AuthController : ControllerBase
 
         var token = AuthTokenServer.CreateToken(user);
 
+        AuthLogic.OnUserLogingIn(user, nameof(Relogin));
+
         return new LoginResponse { userEntity = user, token = token, authenticationType = "relogin" };
     }
 
@@ -97,11 +99,11 @@ public class AuthController : ControllerBase
 
         var user = UserEntity.Current.Retrieve();
 
+        AuthLogic.OnUserLogingIn(user, nameof(LoginFromCookie));
+
         var token = AuthTokenServer.CreateToken(user);
         return new LoginResponse { userEntity = user, token = token, authenticationType = "cookie" };
     }
-
-
 
     [HttpGet("api/auth/currentUser")]
     public UserEntity? GetCurrentUser()
@@ -124,11 +126,11 @@ public class AuthController : ControllerBase
         if (string.IsNullOrEmpty(request.newPassword))
             return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
-        var error = UserEntity.OnValidatePassword(request.newPassword);
+        var user = UserEntity.Current.Retrieve();
+        var error = UserEntity.OnValidatePassword(request.newPassword, user);
         if (error.HasText())
             return ModelError("newPassword", error);
 
-        var user = UserEntity.Current.Retrieve();
         if (string.IsNullOrEmpty(request.oldPassword))
         {
             if (user.PasswordHash != null)
@@ -136,11 +138,14 @@ public class AuthController : ControllerBase
         }
         else
         {
-            if (user.PasswordHash == null || !PasswordEncoding.EncodePasswordAlternatives(user.UserName, request.oldPassword).Any(oldPasswordHash => oldPasswordHash.SequenceEqual(user.PasswordHash)))
+            if (user.PasswordHash == null || 
+                !PasswordEncoding.HashPassword(user.UserName, request.oldPassword).SequenceEqual(user.PasswordHash) &&
+                !PasswordEncoding.HashPasswordAlternatives(user.UserName, request.oldPassword).Any(oldPasswordHash => oldPasswordHash.SequenceEqual(user.PasswordHash)))
                 return ModelError("oldPassword", LoginAuthMessage.InvalidPassword.NiceToString());
         }
 
-        user.PasswordHash = PasswordEncoding.EncodePassword(user.UserName, request.newPassword);
+        user.PasswordHash = PasswordEncoding.HashPassword(user.UserName, request.newPassword);
+        user.MustChangePassword = false;
         using (AuthLogic.Disable())
         using (OperationLogic.AllowSave<UserEntity>())
         {

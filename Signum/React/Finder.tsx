@@ -3,23 +3,21 @@ import { RouteObject } from 'react-router'
 import { DateTime, Duration } from 'luxon'
 import * as AppContext from "./AppContext"
 import { Navigator, ViewPromise } from "./Navigator"
-import { Dic, classes, isNumber, softCast } from './Globals'
+import { Dic, classes, isNumber, isPromise, softCast } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed,
-  QueryToken, ColumnOption, ColumnOptionParsed, Pagination,
-  ResultTable, ResultRow, OrderOption, SubTokensOptions, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
+  ColumnOption, ColumnOptionParsed, Pagination,
+  ResultTable, ResultRow, OrderOption, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
   FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption,
-  FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement,
-  toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, hasManual,
-  hasSnippet,
-  hasNested,
-  hasTimeSeries,
+  FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime,
+  toPinnedFilterParsed, isActive, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, 
   QueryDescriptionDTO,
   QueryTokenWithoutParent
 } from './FindOptions';
+import { completeToken, hasAggregate, hasAnyOrAll, hasElement, hasManual, hasNested, hasOperation, hasSnippet, hasTimeSeries, hasToArray, QueryToken, SubTokensOptions, Writable } from './QueryToken';
 
 import { FilterOperation, FilterGroupOperation, PinnedFilterActive } from './Signum.DynamicQuery';
 
@@ -532,14 +530,25 @@ export namespace Finder {
 
 
 
-  export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[], avoidCustom?: boolean): Promise<any> {
+  export async function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[], options? : { avoidCustom?: boolean}): Promise<any> {
 
     const ti = getTypeInfo(type);
-
-    if (!avoidCustom && querySettings[ti.name]?.customGetPropsFromFilter) {
+    if (!(options?.avoidCustom) && querySettings[ti.name]?.customGetPropsFromFilter) {
       return querySettings[ti.name].customGetPropsFromFilter!([...filterOptionsParsed]);
     }
 
+    var result = getPropsFromFiltersSync(type, filterOptionsParsed, true);
+
+    var promiseMembers = Object.entries(result).filter(([key, value]) => isPromise(value));
+
+    await Promise.all(promiseMembers.map(async ([key, value]) => result[key] = await value));
+
+    return result;
+  }
+
+  export function getPropsFromFiltersSync(type: PseudoType, filterOptionsParsed: FilterOptionParsed[], retrieveEntityInPromise: boolean = false): any {
+
+    const ti = getTypeInfo(type);
 
     function getMemberForToken(ti: TypeInfo, fullKey: string) {
       var token = fullKey.tryAfter("Entity.") ?? fullKey;
@@ -550,45 +559,42 @@ export namespace Finder {
       return ti.members[token];
     }
 
+    const result: any = {};
 
-    var result: any = {};
-
-    return Promise.all(filterOptionsParsed.map(fo => {
+    filterOptionsParsed.forEach(fo => {
 
       if (isFilterGroup(fo) ||
         fo.token == null ||
         !Options.tokenCanSetPropery(fo.token) ||
         fo.operation != "EqualTo" ||
         !isActive(fo))
-        return null;
+        return;
 
       const mi = getMemberForToken(ti, fo.token!.fullKey);
 
       if (!mi)
-        return null;
+        return;
 
-      const promise = tryConvert(fo.value, mi.type);
+      const valueOrPromise = tryConvert(fo.value, mi.type, retrieveEntityInPromise);
 
-      if (promise == null)
-        return null;
+      result[mi.name.firstLower()] = valueOrPromise;
+    });
 
-      return promise.then(v => result[mi.name.firstLower()] = v);
-
-    }).filter(p => !!p)).then(() => result);
+    return result;
   }
 
-  export function tryConvert(value: any, type: TypeReference): Promise<any> | undefined {
+  export function tryConvert(value: any, type: TypeReference, retrieveEntityInPromise: boolean): any | undefined {
 
     if (value == null)
-      return Promise.resolve(null);
+      return null;
 
     if (type.isLite) {
 
       if (isLite(value))
-        return Promise.resolve(value);
+        return value;
 
       if (isEntity(value))
-        return Promise.resolve(toLite(value));
+        return toLite(value);
 
       return undefined;
     }
@@ -598,29 +604,29 @@ export namespace Finder {
     if (ti?.kind == "Entity") {
 
       if (isLite(value))
-        return Navigator.API.fetch(value);
+        return retrieveEntityInPromise ? Navigator.API.fetch(value) : value;
 
       if (isEntity(value))
-        return Promise.resolve(value);
+        return value;
 
       return undefined;
     }
 
     if (type.name == "string" || type.name == "Guid" || type.name == "DateOnly" || ti?.kind == "Enum") {
       if (typeof value === "string")
-        return Promise.resolve(value);
+        return value;
 
       return undefined;
     }
 
     if (type.name == "boolean") {
       if (typeof value === "boolean")
-        return Promise.resolve(value);
+        return value;
     }
 
     if (isNumberType(type.name)) {
       if (typeof value === "number")
-        return Promise.resolve(value);
+        return value;
     }
 
     return undefined;
@@ -726,14 +732,14 @@ export namespace Finder {
     if (qs?.defaultOrders)
       return qs.defaultOrders;
 
-    const tis = getTypeInfos(qd.columns["Entity"].type);
+    const tis = tryGetTypeInfos(qd.columns["Entity"].type);
 
     if (!qd.columns[defaultOrderColumn])
       return undefined;
 
     return [{
       token: defaultOrderColumn,
-      orderType: tis.some(a => a.entityData == "Transactional") ? "Descending" : "Ascending"
+      orderType: tis.some(a => a == null || a.entityData == "Transactional") ? "Descending" : "Ascending"
     }];
   }
 
@@ -902,7 +908,7 @@ export namespace Finder {
           fo2.pinned == null &&
           !isFilterGroup(fo2) &&
           similarToken(fo.token?.toString(), fo2.token?.toString()) &&
-          (fo.operation ?? "EqualsTo") == (fo2.operation ?? "EqualsTo") &&
+          (fo.operation ?? FilterOperation.value("EqualTo")) == (fo2.operation ?? FilterOperation.value("EqualTo")) &&
           (fo.pinned?.active == "Always" || fo2.value != null));
 
         if (fo2 != null) {
@@ -996,13 +1002,28 @@ export namespace Finder {
     });
   }
 
-  export function getQueryValue(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], valueToken?: string, multipleValues?: boolean): Promise<any> {
+  export function useQueryValue<T = number>(queryName: PseudoType | QueryKey | null, filterOptions: (FilterOption | null | undefined)[], valueToken?: QueryTokenString<T> | string, multipleValues?: boolean, extraDeps?: React.DependencyList): T | null | undefined {
+
+    var query = {};
+    Encoder.encodeFilters(filterOptions);
+
+    return useAPI(() => !queryName ? null : getQueryValue(queryName, filterOptions, valueToken, multipleValues),
+      [
+        queryName && getQueryKey(queryName),
+        QueryString.stringify(query),
+        valueToken?.toString(),
+        multipleValues,
+        ...(extraDeps ?? [])
+      ]);
+  }
+
+  export function getQueryValue<T = number>(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], valueToken?: QueryTokenString<T> | string, multipleValues?: boolean): Promise<T> {
     return getQueryDescription(queryName).then(qd => {
-      return parseFilterOptions(filterOptions, false, qd).then(fops => {
+      return parseFilterOptions(filterOptions ?? [], false, qd).then(fops => {
 
         let filters = toFilterRequests(fops);
 
-        return API.queryValue({ queryKey: qd.queryKey, filters, valueToken, multipleValues });
+        return API.queryValue({ queryKey: qd.queryKey, filters, valueToken: valueToken?.toString(), multipleValues });
       });
     });
   }
@@ -1237,13 +1258,21 @@ export namespace Finder {
       .filter(fo => !isFilterGroup(fo) && (fo.operation == null || fo.operation == "EqualTo") && !fo.token.toString().contains(".") && fo.pinned == null && fo.value != null)
       .map(fo => ({ token: fo.token }) as ColumnOption);
   }
-  export function parseSingleToken(queryName: PseudoType | QueryKey, token: string, subTokenOptions: SubTokensOptions): Promise<QueryToken> {
+  export async function parseSingleToken(queryName: PseudoType | QueryKey, token: string | QueryTokenString<any>, subTokenOptions: SubTokensOptions): Promise<QueryToken> {
 
-    return getQueryDescription(getQueryKey(queryName)).then(qd => {
-      const completer = new TokenCompleter(qd);
-      const result = completer.request(token);
-      return completer.finished().then(() => completer.get(token, subTokenOptions));
-    });
+    var qd = await getQueryDescription(getQueryKey(queryName));
+    const completer = new TokenCompleter(qd);
+    const result = completer.request(token.toString());
+    await completer.finished();
+    return completer.get(token.toString(), subTokenOptions);
+  }
+
+  export async function parseTokens(queryName: PseudoType | QueryKey, tokens: (string | QueryTokenString<any>)[], subTokenOptions: SubTokensOptions): Promise<QueryToken[]> {
+    var qd = await getQueryDescription(getQueryKey(queryName));
+    const completer = new TokenCompleter(qd);
+    tokens.forEach(token => completer.request(token.toString()));
+    await completer.finished();
+    return tokens.map(token => completer.get(token.toString(), subTokenOptions));
   }
 
   export class TokenCompleter {
@@ -1314,7 +1343,6 @@ export namespace Finder {
           return token.tryBeforeLast(".");
         }
 
-
         if (parentToken == null) {
           if (getParent(dto.fullKey) != null)
             throw new Error(`Token with key '${dto.fullKey}' on query '${this.qd.queryKey}' has no parent, but it is not a root token`);
@@ -1329,6 +1357,7 @@ export namespace Finder {
         token.__isCached__ = true;
         //if (token.fullKey == "Locked")
         //  console.log(token);
+        completeToken(token);
         Object.freeze(token);
         cached = { token: token as QueryToken, subTokens: undefined };
         this.queryCache.set(dto.fullKey, cached);
@@ -1339,7 +1368,7 @@ export namespace Finder {
 
       const subTokens = (dto as QueryTokenWithoutParent).subTokens;
       if (subTokens != null && (cached.subTokens == null)) {
-        cached.subTokens = Dic.map(subTokens, (key, st) => this.addToCache(st, cached.token).fullKey);
+        cached.subTokens = Dic.map(subTokens, (key, st) => this.addToCache(st, cached!.token).fullKey);
       }
 
       return cached.token;
@@ -1487,7 +1516,7 @@ export namespace Finder {
 
         return ({
           token: token,
-          operation: fo.operation ?? "EqualTo",
+          operation: fo.operation ?? (token && getFilterOperations(token).orderBy(a=>a == "EqualTo" ? 0 : 1).firstOrNull()) ?? "EqualTo",
           value: fo.value,
           frozen: fo.frozen || false,
           removeElementWarning: fo.removeElementWarning,
@@ -1667,7 +1696,11 @@ export namespace Finder {
     return getQueryDescription(fo.queryName)
       .then(qd => parseFindOptions(fo!, qd, false))
       .then(fop => API.executeQuery(getQueryRequest(fop)))
-      .then(rt => rt.rows[0].columns[0]);
+      .then(rt => {
+        if (rt.rows.length != 1)
+          throw new Error(`inDB: expected exactly 1 row for ${liteKey(isLite(entity) ? entity : toLite(entity))} but got ${rt.rows.length}`);
+        return rt.rows[0].columns[0];
+      });
   }
 
   export function inDBMany<TO extends { [name: string]: QueryTokenString<any> | string }>(entity: Entity | Lite<Entity>, tokensObject: TO): Promise<ExtractTokensObject<TO>> {
@@ -1684,8 +1717,9 @@ export namespace Finder {
       .then(qd => parseFindOptions(fo!, qd, false))
       .then(fop => API.executeQuery(getQueryRequest(fop)))
       .then(rt => {
-        var firstRow = rt.rows[0];
-        return firstRow && Dic.mapObject(tokensObject, (key, value, index) => firstRow.columns[index]) as ExtractTokensObject<TO>;
+        if (rt.rows.length != 1)
+          throw new Error(`inDBMany: expected exactly 1 row for ${liteKey(isLite(entity) ? entity : toLite(entity))} but got ${rt.rows.length}`);
+        return Dic.mapObject(tokensObject, (key, value, index) => rt.rows[0].columns[index]) as ExtractTokensObject<TO>;
       });
   }
 
@@ -1716,6 +1750,8 @@ export namespace Finder {
     [P in keyof T]: ExtractQueryToken<T[P]>;
   };
 
+  export function useQuery(fo: FindOptions, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined;
+  export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null;
   export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null {
     return useAPI(
       signal => fo == null ? null : getResultTable(fo, signal),
@@ -1734,10 +1770,12 @@ export namespace Finder {
 
 
 
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined {
-    return useAPI(() => fetchLites(fo),
+  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined;
+  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined;
+  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined {
+    return useAPI(() => fo && fetchLites(fo),
       [
-        findOptionsPath({
+        fo && findOptionsPath({
           queryName: fo.queryName,
           filterOptions: fo.filterOptions,
           orderOptions: fo.orderOptions,
@@ -1749,10 +1787,12 @@ export namespace Finder {
     );
   }
 
-  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | undefined {
-    return useAPI(() => fetchEntities(fo),
+  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | undefined;
+  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined;
+  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined {
+    return useAPI(() => fo && fetchEntities(fo),
       [
-        findOptionsPath({
+        fo && findOptionsPath({
           queryName: fo.queryName,
           filterOptions: fo.filterOptions,
           orderOptions: fo.orderOptions,
@@ -1765,6 +1805,8 @@ export namespace Finder {
   }
 
 
+  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | undefined;
+  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined;
   export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined {
     var fo2: FindOptions | null = fo && {
       pagination: { mode: "All" },
@@ -1773,9 +1815,14 @@ export namespace Finder {
       columnOptionsMode: "ReplaceAll",
     };
 
-    var result = useAPI(signal => fo2 && getResultTable(fo2, signal), [fo2 && findOptionsPath(fo2), ...(additionalDeps || [])], options);
+    return useAPI(async signal => {
+      if (!fo2)
+        return null;
 
-    return result && result.rows.map(row => toTypedRow(tokensObject, result!.columns, row));
+      var rt = await getResultTable(fo2, signal);
+
+      return rt.rows.map(row => toTypedRow(tokensObject, rt!.columns, row));
+    }, [fo2 && findOptionsPath(fo2), ...(additionalDeps || [])], options);
   }
 
   function getAllColumns(tokensObject: TokenObject): ColumnOption[] {
@@ -1868,6 +1915,8 @@ export namespace Finder {
 
 
 
+  export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> | string }>(entity: Entity | Lite<Entity>, tokensObject: TO, additionalDeps?: any[], options?: APIHookOptions): ExtractTokensObject<TO> | undefined;
+  export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> | string }>(entity: Entity | Lite<Entity> | null, tokensObject: TO, additionalDeps?: any[], options?: APIHookOptions): ExtractTokensObject<TO> | null | undefined;
   export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> | string }>(entity: Entity | Lite<Entity> | null, tokensObject: TO, additionalDeps?: any[], options?: APIHookOptions): ExtractTokensObject<TO> | null | undefined {
     var resultTable = useQuery(entity == null || isEntity(entity) && entity.isNew ? null : {
       queryName: isEntity(entity) ? entity.Type : entity.EntityType,
@@ -2458,7 +2507,3 @@ export namespace Finder {
   }
 
 }
-
-type Writable<T> = {
-  -readonly [P in keyof T]: T[P];
-};

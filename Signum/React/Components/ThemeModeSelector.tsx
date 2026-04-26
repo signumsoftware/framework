@@ -58,6 +58,7 @@ export function ThemeModeSelector(p: { onSetMode?: (mode: "dark" | "light") => v
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
       <NavDropdown
+        id="changeTheme"
         title={
           <>
             <FontAwesomeIcon icon={ICONS[bootstrapMode]} title={(bootstrapMode.firstUpper())} />

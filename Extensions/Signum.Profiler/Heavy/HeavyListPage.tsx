@@ -74,18 +74,18 @@ export default function HeavyList(): React.JSX.Element {
   const { size, setContainer } = useSize();
 
   if (entries == undefined)
-    return <h3 className="display-6">{HeavyProfilerMessage.HeavyProfilerLoading.niceToString()}</h3>;
+    return <h1 className="display-6 h3">{HeavyProfilerMessage.HeavyProfilerLoading.niceToString()}</h1>;
 
   return (
     <div>
-      <h2 className="display-6">{HeavyProfilerMessage.HeavyProfiler.niceToString()}</h2>
+      <h1 className="display-6 h2">{HeavyProfilerMessage.HeavyProfiler.niceToString()}</h1>
       <br />
       <div className="btn-toolbar" style={{ float: "right" }}>
         <input key={fileVer} type="file" className="form-control" onChange={handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
         <button type="button" onClick={handleUpload} className="btn btn-info" aria-aria-disabled={!fileToUpload} disabled={!fileToUpload}><FontAwesomeIcon aria-hidden={true} icon="cloud-arrow-up" /> {HeavyProfilerMessage.Upload.niceToString()}</button>
       </div>
       <div className="btn-toolbar">
-        <button type="button" className={classes("btn btn-tertiary", enabled ? "btn-outline-danger" : "btn-tertiary")} onClick={() => handleSetEnabled(!enabled)}><FontAwesomeIcon icon={["fas", "circle"]} /> {HeavyProfilerMessage.Record.niceToString()}</button>
+        <button type="button" className={classes("btn", enabled ? "btn-outline-danger" : "btn-tertiary")} onClick={() => handleSetEnabled(!enabled)}><FontAwesomeIcon icon={["fas", "circle"]} /> {HeavyProfilerMessage.Record.niceToString()}</button>
         <button type="button" onClick={handleUpdate} className="btn btn-tertiary"><FontAwesomeIcon aria-hidden={true} icon="refresh" /> {HeavyProfilerMessage.Update.niceToString()}</button>
         <button type="button" onClick={handleClear} className="btn btn-tertiary"><FontAwesomeIcon aria-hidden={true} icon="trash" /> {HeavyProfilerMessage.Clear.niceToString()}</button>
         <button type="button" onClick={handleDownload} className="btn btn-tertiary btn-outline-info"><FontAwesomeIcon aria-hidden={true} icon="cloud-arrow-down" /> {HeavyProfilerMessage.Download.niceToString()}</button>
@@ -98,7 +98,7 @@ export default function HeavyList(): React.JSX.Element {
       <p className="help-block">{HeavyProfilerMessage.UploadPreviousRunsToComparePerformance.niceToString()}</p>
       <p className="help-block">{HeavyProfilerMessage.EnableTheProfilerWithTheDebuggerWith0AndSaveTheResultsWith1.niceToString("HeavyProfiler.Enabled = true", "HeavyProfiler.ExportXml().Save(\"profile.xml\")")}</p>
       <br />
-      <h3>{HeavyProfilerMessage.Entries.niceToString()}</h3>
+      <h2 className="h3">{HeavyProfilerMessage.Entries.niceToString()}</h2>
       <div className="sf-profiler-chart" ref={setContainer}>
         {size && <EntrieListPath entries={entries} width={size.width} />}
       </div>

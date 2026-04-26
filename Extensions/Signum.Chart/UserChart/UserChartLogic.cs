@@ -6,7 +6,6 @@ using Signum.Toolbar;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.UserAssets.QueryTokens;
-using Signum.UserQueries;
 using Signum.ViewLog;
 using System.Collections.Frozen;
 
@@ -273,40 +272,32 @@ public static class UserChartLogic
         return cr;
     }
 
-    public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+    public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) => 
+        RegisterTypeCondition(sb, typeCondition, typeof(UserEntity), uq => uq.Owner.Is(UserEntity.Current));
+
+    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) => 
+        RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), uq => uq.Owner == null || AuthLogic.CurrentRoles().Contains(uq.Owner));
+
+    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<UserChartEntity, bool>> condition, Func<UserChartEntity, bool>? inMemoryCondition = null)
     {
-        sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(UserEntity));
+        sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, ownerType);
 
-        RegisterTypeCondition(typeCondition, uq => uq.Owner.Is(UserEntity.Current));
-    }
-
-
-    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
-    {
-        sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(RoleEntity));
-
-        RegisterTypeCondition(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
-    }
-
-    public static void RegisterTypeCondition(TypeConditionSymbol typeCondition, Expression<Func<UserChartEntity, bool>> conditionExpression)
-    {
-        TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, conditionExpression);
+        if (inMemoryCondition == null)
+            TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, condition);
+        else
+            TypeConditionLogic.Register<UserChartEntity>(typeCondition, condition, inMemoryCondition);
 
         DashboardLogic.RegisterTypeConditionForPart<UserChartPartEntity>(typeCondition);
         DashboardLogic.RegisterTypeConditionForPart<CombinedUserChartPartEntity>(typeCondition);
-    }
-
-    public static void RegisterTranslatableRoutes()
-    {
-        PropertyRouteTranslationLogic.RegisterRoute((UserChartEntity uc) => uc.DisplayName);
-        PropertyRouteTranslationLogic.RegisterRoute((UserChartEntity uq) => uq.Columns[0].DisplayName);
-        PropertyRouteTranslationLogic.RegisterRoute((UserChartEntity uq) => uq.Filters[0].Pinned!.Label);
     }
 
     static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
     {
         if (!replacements.Interactive)
             return null;
+
+        QueryLogic.AssertLoaded();
+        TypeLogic.AssertLoaded();
 
         var list = Database.Query<UserChartEntity>().ToList();
 
@@ -329,11 +320,11 @@ public static class UserChartLogic
         {
             try
             {
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(uc.Query.ToQueryName());
+
                 if (uc.Filters.Any(a => a.Token?.ParseException != null) ||
                    uc.Columns.Any(a => a.Token?.ParseException != null))
                 {
-                    QueryDescription qd = QueryLogic.Queries.QueryDescription(uc.Query.ToQueryName());
-
                     if (uc.Filters.Any())
                     {
                         using (DelayedConsole.Delay(() => Console.WriteLine(" Filters:")))
@@ -387,13 +378,35 @@ public static class UserChartLogic
                 {
                 retry:
                     string? val = item.ValueString;
-                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), entityType))
+                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), fixInstead: true, entityType))
                     {
                         case FixTokenResult.Nothing: break;
                         case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
                         case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: item.ValueString = val; goto retry;
+                        case FixTokenResult.FixTokenInstead:
+
+                            QueryTokenEmbedded token = item.Token;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate,
+                                " {0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false, forceChange: true))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return DeleteSQl(table, uc);
+                                case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix:
+                                    item.Token = token;
+                                    goto retry;
+                                default: break;
+                            }
+                            break;
+
+                        case FixTokenResult.FixOperationInstead:
+                            var newOperation = SafeConsole.AskMultiLine($"New filter operation for: {item.Token} {item.Operation} {item.ValueString}?", EnumEntity.GetValues(typeof(FilterOperation)).Select(a => a.ToString()).ToArray());
+                            if (newOperation != null)
+                                item.Operation = Enum.Parse<FilterOperation>(newOperation);
+                            goto retry;
                     }
                 }
 

@@ -29,11 +29,9 @@ public static class PermissionAuthLogic
 
         cache = new PermissionCache(sb);
 
-        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
-        {
-            Database.Query<RulePermissionEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
-            return null;
-        };
+        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>{  Database.Query<RulePermissionEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null;};
+        sb.Schema.EntityEvents<RoleEntity>().PreDeleteSqlSync += role => Administrator.UnsafeDeletePreCommand(Database.Query<RulePermissionEntity>().Where(a => a.Role.Is(role)));
+        sb.Schema.EntityEvents<PermissionSymbol>().PreDeleteSqlSync += permission => { return Administrator.DeleteWhereScript((RulePermissionEntity rt) => rt.Resource, permission);  };
 
         PermissionLogic.RegisterTypes(typeof(BasicPermission));
 
@@ -50,13 +48,9 @@ public static class PermissionAuthLogic
 
         AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
 
-        sb.Schema.EntityEvents<PermissionSymbol>().PreDeleteSqlSync += AuthCache_PreDeleteSqlSync;
     }
 
-    static SqlPreCommand AuthCache_PreDeleteSqlSync(PermissionSymbol permission)
-    {
-        return Administrator.DeleteWhereScript((RulePermissionEntity rt) => rt.Resource, permission);
-    }
+
 
     public static bool IsAuthorized(PermissionSymbol permissionSymbol)
     {

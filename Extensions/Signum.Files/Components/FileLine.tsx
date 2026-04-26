@@ -41,7 +41,7 @@ export interface FileLineProps<V extends ModifiableEntity/* & IFile */ | Lite</*
 export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*IFile &*/ Entity> | null> extends EntityBaseController<FileLineProps<V>, V> {
   executeWhenFinished?: OperationInfo;
 
-  overrideProps(p: FileLineProps<V>, overridenProps: FileLineProps<V>): void {
+  override overrideProps(p: FileLineProps<V>, overridenProps: FileLineProps<V>): void {
     p.view = EntityBaseController.defaultIsViewable(p.type!, false) && overridenProps.getFileFromElement != null;
 
     super.overrideProps(p, overridenProps);

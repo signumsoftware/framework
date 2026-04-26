@@ -1,12 +1,9 @@
 using System.Globalization;
 using Signum.DynamicQuery.Tokens;
-using Signum.Basics;
 using Signum.Engine.Sync;
-using Signum.Basics;
 using Signum.Templating;
 using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.Queries;
-using Signum.API;
 using Signum.Authorization;
 using System.Collections.Frozen;
 
@@ -366,6 +363,9 @@ public static class EmailTemplateLogic
         if (AvoidSynchronizeTokens)
             return null;
 
+        QueryLogic.AssertLoaded();
+        TypeLogic.AssertLoaded();
+
         var dc = EmailLogic.Configuration.DefaultCulture; // To avoid many exceptions
 
         StringDistance sd = new StringDistance();
@@ -495,7 +495,7 @@ public static class EmailTemplateLogic
 
                     foreach (var item in et.Messages)
                     {
-                        var sc = new TemplateSynchronizationContext(replacements, sd, qd, et.Model?.ToType());
+                        var sc = new TemplateSynchronizationContext(et, replacements, sd, qd, et.Model?.ToType());
 
                         item.Subject = TextTemplateParser.Synchronize(item.Subject, sc);
                         item.Text = TextTemplateParser.Synchronize(item.Text, sc);

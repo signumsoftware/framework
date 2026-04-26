@@ -16,7 +16,7 @@ export interface TextAreaLineProps extends TextBaseProps<string | null> {
 }
 
 export class TextAreaLineController extends TextBaseController<TextAreaLineProps, string | null> {
-  init(p: TextAreaLineProps): void {
+  override init(p: TextAreaLineProps): void {
     super.init(p);
     this.assertType("TextAreaLine", ["string"]);
   }

@@ -2,7 +2,7 @@ import * as React from "react"
 import { RouteObject } from 'react-router'
 import { Dic, classes, softCast, } from './Globals';
 import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
-import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity, EnumEntity } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity, EnumEntity, SearchMessage } from './Signum.Entities';
 import { TypeEntity, ExceptionEntity } from './Signum.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo, EnumType } from './Reflection';
 import { ButtonBarElement, ButtonsContext, EntityFrame, TypeContext } from './TypeContext';
@@ -12,7 +12,7 @@ import * as Operations from './Operations';
 import { Constructor } from './Constructor';
 import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, getLitesWithSubStr, LiteAutocompleteConfig, MultiAutoCompleteConfig } from './Lines/AutoCompleteConfig'
-import { FindOptions } from './FindOptions'
+import { FindOptions, FindOptionsParsed } from './FindOptions'
 import { ImportComponent } from './ImportComponent'
 import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
@@ -105,7 +105,7 @@ export namespace Navigator {
       const typeInfo = getTypeInfo(entity.Type);
 
       if (entity.isNew)
-        return FrameMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
+        return null;
 
       return defaultRenderSubTitle(typeInfo, entity);
     }
@@ -219,6 +219,17 @@ export namespace Navigator {
     var es = entitySettings[entity.Type];
     if (es != null && es.renderEntity != null) {
       return es.renderEntity(entity, new TextHighlighter(undefined));
+    }
+
+    if (entity.isNew) {
+      var ti = tryGetTypeInfo(entity.Type);
+
+      if (ti) {
+        if (isTypeModel(entity.Type))
+          return ti.niceName!;
+
+        return FrameMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
+      }
     }
 
     return getToString(entity);
@@ -372,19 +383,29 @@ export namespace Navigator {
     customComponent?: boolean;
     isSearch?: boolean;
     isEmbedded?: boolean;
+    fo?: FindOptionsParsed;
   }
 
   export function isCreable(type: PseudoType, options?: IsCreableOptions): boolean {
 
     const typeName = getTypeName(type);
 
-    const baseIsCreable = checkFlag(typeIsCreable(typeName, options?.isEmbedded), options?.isSearch);
+    if (!checkFlag(typeIsCreable(typeName, options?.isEmbedded), options?.isSearch))
+      return false;
 
-    const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
+    if (options?.fo != null) {
+      const es = entitySettings[typeName];
+      if (es && es.isCreableByFilterProps && !es.isCreableByFilterProps(Finder.getPropsFromFiltersSync(type, options.fo.filterOptions)))
+        return false;
+    }
 
-    const hasConstructor = hasAllowedConstructor(typeName);
+    if (!(options?.customComponent || viewDispatcher.hasDefaultView(typeName)))
+      return false;
 
-    return baseIsCreable && hasView && hasConstructor && isCreableEvent.every(f => f(typeName, options));
+    if (!hasAllowedConstructor(typeName))
+      return false;
+
+    return isCreableEvent.every(c => c(typeName, options));
   }
 
   function hasAllowedConstructor(typeName: string) {
@@ -444,9 +465,10 @@ export namespace Navigator {
 
     const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-    const baseIsReadOnly = options?.ignoreTypeIsReadonly ? false : typeIsReadOnly(typeName, options?.isEmbedded);
+    if (!options?.ignoreTypeIsReadonly && typeIsReadOnly(typeName, options?.isEmbedded))
+      return true;
 
-    return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName, entityPack, options));
+    return isReadonlyEvent.some(f => f(typeName, entityPack, options));
   }
 
   function typeIsReadOnly(typeName: string, isEmbedded: boolean | undefined): boolean {
@@ -545,7 +567,7 @@ export namespace Navigator {
     }
   }
 
-  export const isViewableEvent: Array<(typeName: string, entityPack: EntityPack<ModifiableEntity> | undefined, options: IsViewableOptions | undefined) => boolean> = [];
+  export const isViewableEvent: Array<(typeName: string, entityPack: EntityPack<ModifiableEntity> | Lite<Entity> | undefined, options: IsViewableOptions | undefined) => boolean> = [];
 
   export interface IsViewableOptions {
     customComponent?: boolean;
@@ -572,17 +594,40 @@ export namespace Navigator {
     return "close";
   }
 
-  export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, options?: IsViewableOptions): boolean {
+  export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity> | Lite<Entity>, options?: IsViewableOptions): boolean {
 
-    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
+    const entity =
+      isEntityPack(typeOrEntity) ? typeOrEntity :
+        isLite(typeOrEntity) ? typeOrEntity :
+          undefined;
 
-    const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
+    const typeName =
+      isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type :
+        isLite(typeOrEntity) ? typeOrEntity.EntityType :
+          getTypeName(typeOrEntity as PseudoType);
 
-    const baseTypeName = checkFlag(typeIsViewable(typeName, options?.isEmbedded), options?.isSearch == "main");
+    const typeViewable = checkFlag(typeIsViewable(typeName, options?.isEmbedded), options?.isSearch == "main");
+    if (!typeViewable)
+      return false;
 
     const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
+    if (!hasView)
+      return false;
 
-    return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack, options));
+    if (entity) {
+      const es = entitySettings[typeName];
+
+      if (es != null && isLite(entity) && es.isViewableLite && !es.isViewableLite(entity, options))
+        return false;
+
+      if (es != null && isEntityPack(entity) && es.isViewableEntityPack && !es.isViewableEntityPack(entity, options))
+        return false;
+    }
+
+    if (!isViewableEvent.every(f => f(typeName, entity, options)))
+      return false;
+
+    return true;
   }
 
   function typeIsViewable(typeName: string, isEmbedded: boolean | undefined): EntityWhen {
@@ -844,6 +889,12 @@ export namespace Navigator {
     }).notNull();
   }
 
+  export function someNonViewable(lites: Lite<Entity>[]) : boolean {
+    return lites.groupBy(a => a.EntityType).some(gr => {
+      var isViewable = Navigator.entitySettings[gr.key]?.isViewableLite;
+      return isViewable && gr.elements.some(lite => !isViewable!(lite, { isSearch: "main" }))
+    });
+  }
 
   export namespace API {
 
@@ -971,8 +1022,11 @@ export interface EnumConverter<T> {
 
 export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isCreable?: EntityWhen;
+  isCreableByFilterProps?: (props: Partial<T>) => boolean; 
   isFindable?: boolean;
   isViewable?: EntityWhen;
+  isViewableLite?: (lite: Lite<T & Entity>, options: Navigator.IsViewableOptions | undefined) => boolean;
+  isViewableEntityPack?: (entityPack: EntityPack<T>, options: Navigator.IsViewableOptions | undefined) => boolean;
   isReadOnly?: boolean;
   avoidPopup?: boolean;
   supportsAdditionalTabs?: boolean;
@@ -989,7 +1043,6 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   stickyHeader?: boolean;
 
-  onAssignServerChanges?: (local: T, server: T) => void;
 
   renderSubTitle?: (entity: T) => React.ReactNode;
 
@@ -1039,8 +1092,11 @@ export class EntitySettings<T extends ModifiableEntity> {
   viewOverrides?: Array<ViewOverride<T>>;
 
   isCreable?: EntityWhen;
+  isCreableByFilterProps?: (props: Partial<T>) => boolean; 
   isFindable?: boolean;
   isViewable?: EntityWhen;
+  isViewableLite?: (lite: Lite<T & Entity>, options: Navigator.IsViewableOptions | undefined) => boolean;
+  isViewableEntityPack?: (entityPack: EntityPack<T>, options: Navigator.IsViewableOptions | undefined) => boolean;
   isReadOnly?: boolean;
   avoidPopup!: boolean;
   supportsAdditionalTabs?: boolean;
@@ -1056,8 +1112,6 @@ export class EntitySettings<T extends ModifiableEntity> {
   modalFullScreen?: boolean;
 
   stickyHeader?: boolean;
-
-  onAssignServerChanges?: (local: T, server: T) => void;
 
   renderSubTitle?: (entity: T) => React.ReactNode;
 

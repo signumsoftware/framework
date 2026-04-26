@@ -326,8 +326,8 @@ WITH".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
                              ic.index_column_id
                          }).ToList();
 
-        var tables = plainData.AgGroupToDictionary(a => a.table,
-            gr => gr.AgGroupToDictionary(a => new { a.index, a.is_unique },
+        var tables = plainData.GroupAggregateToDictionary(a => a.table,
+            gr => gr.GroupAggregateToDictionary(a => new { a.index, a.is_unique },
                 gr2 => gr2.OrderBy(a => a.index_column_id)
                     .Select(a => a.column + (a.is_included_column ? "(K)" : "(I)") + (a.is_descending_key ? "(D)" : "(A)"))
                     .ToString("|")));

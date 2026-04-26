@@ -6,7 +6,7 @@ import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { ValidationError, AbortableRequest } from '@framework/Services'
 import { FrameMessage, Lite } from '@framework/Signum.Entities'
-import { SubTokensOptions, QueryToken, FilterOptionParsed } from '@framework/FindOptions'
+import { FilterOptionParsed } from '@framework/FindOptions'
 import { StyleContext, TypeContext } from '@framework/TypeContext'
 import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer, getTypeInfos } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
@@ -25,6 +25,7 @@ import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart';
 import ChartTimeSeries from './ChartTimeSeries';
 import { DateTime } from 'luxon';
+import { QueryToken, SubTokensOptions } from '@framework/QueryToken';
 import { LinkButton } from '@framework/Basics/LinkButton';
 
 interface ChartRequestViewProps {
@@ -170,12 +171,12 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
   const canTimeSeries = cr.chartTimeSeries != null ? SubTokensOptions.CanTimeSeries : 0;
   return (
     <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-      <h2>
+      <h1 className="h2">
         <span className="sf-entity-title">{getQueryNiceName(cr.queryKey)}</span>&nbsp;
         <LinkButton className="sf-popup-fullscreen" title={FrameMessage.Fullscreen.niceToString()} aria-label={FrameMessage.Fullscreen.niceToString()} onClick={handleOnFullScreen} >
           <FontAwesomeIcon icon="up-right-from-square" aria-hidden={true} />
         </LinkButton>
-      </h2 >
+      </h1 >
       <ValidationErrors entity={cr} prefix="chartRequest" />
       <div>
         {showChartSettings ?

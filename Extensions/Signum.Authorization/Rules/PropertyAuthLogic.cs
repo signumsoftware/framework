@@ -1,11 +1,8 @@
-using Microsoft.AspNetCore.Routing;
 using Signum.API.Json;
 using Signum.DynamicQuery.Tokens;
-using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
-using System.Diagnostics.Eventing.Reader;
 
 namespace Signum.Authorization.Rules;
 
@@ -33,12 +30,7 @@ public static class PropertyAuthLogic
 
         cache = new PropertyCache(sb);
 
-        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
-        {
-            Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
-            return null;
-        };
-
+        
         PropertyRoute.SetIsAllowedCallback(pp => pp.CanBeAllowedFor(PropertyAllowed.Read));
 
 
@@ -49,6 +41,7 @@ public static class PropertyAuthLogic
 
         sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RulePropertyConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleProperty.Entity.Resource.RootType, rtc => rtc.RuleProperty.Entity.Role);
         sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
+        sb.Schema.EntityEvents<RoleEntity>().PreDeleteSqlSync += role => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RulePropertyEntity>().Where(a => a.Role.Is(role)));
         sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RulePropertyEntity>().Where(a => a.Resource.Is(t)));
         sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RulePropertyConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
 
@@ -239,7 +232,7 @@ public static class PropertyAuthLogic
     {
         if (dd.AdditionalDictionary == null)
         {
-            var lookup = dd.OverrideDictionary!.AgGroupToFrozenDictionary(kvp => kvp.Key.RootType, gr => gr.ToFrozenDictionaryEx());
+            var lookup = dd.OverrideDictionary!.GroupAggregateToFrozenDictionary(kvp => kvp.Key.RootType, gr => gr.ToFrozenDictionaryEx());
             dd.AdditionalDictionary = lookup;
             return lookup;
         }

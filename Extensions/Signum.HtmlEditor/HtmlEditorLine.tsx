@@ -45,7 +45,7 @@ export default function HtmlEditorLine({
                 ((p.mandatory ?? ctx.propertyRoute?.member?.required) && !ctx.value) && "sf-mandatory"
               )}
               style={{
-              backgroundColor: readOnly ? "#e9ecef" : undefined,
+                backgroundColor: readOnly ? "var(--bs-secondary-bg)" : undefined,
               flexGrow: 1,
                 ...p.htmlAttributes?.style,
               }}
@@ -56,7 +56,7 @@ export default function HtmlEditorLine({
                 readOnly={ctx.readOnly}
                 binding={ctx.binding}
                 ref={htmlEditorRef}
-                plugins={p.plugins}
+                extensions={p.extensions}
                 {...p}
                 onEditorBlur={(e, controller) => {
                   forceUpdate();

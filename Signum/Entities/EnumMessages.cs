@@ -29,6 +29,8 @@ public enum OperationMessage
     Confirm,
     [Description("Please confirm you would like to delete {0} from the system")]
     PleaseConfirmYouWouldLikeToDelete0FromTheSystem,
+    [Description("as")]
+    As,
 
     [Description("Please confirm you would like to {0} {1}")]
     PleaseConfirmYouWouldLikeTo01,
@@ -87,8 +89,8 @@ public enum EngineMessage
 {
     [Description("Concurrency error on the database, Table = {0}, Id = {1}")]
     ConcurrencyErrorOnDatabaseTable0Id1,
-    [Description("Entity with type {0} and Id {1} not found")]
-    EntityWithType0AndId1NotFound,
+    [Description("{0} {1} not found")]
+    _01NotFound,
     [Description("No way of mapping type {0} found")]
     NoWayOfMappingType0Found,
     [Description("The entity {0} is new")]
@@ -183,6 +185,14 @@ public enum HtmlEditorMessage
     Code,
 }
 
+public enum MarkdownMessage
+{
+    [Description("{0} is currently editable")]
+    _0IsCurrentlyEditable,
+        [Description("{0} is currently viewable only")]
+    _0IsCurrentlyViewableOnly,
+}
+
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum BooleanEnum
 {
@@ -226,6 +236,11 @@ public enum SearchMessage
     DeleteAllFilter,
     Filters,
     Columns,
+    Orders,
+    [Description("before")]
+    Before,
+    [Description("after")]
+    After,
     Find,
     [Description("Finder of {0}")]
     FinderOf0,
@@ -341,6 +356,9 @@ public enum SearchMessage
     MoreThanOne0Selected,
     CombineRowsWith,
 
+    [Description("Finds similar results based on meaning, not exact words")]
+    SmartSearchDescription,
+
     [Description("Equal {0}")]
     Equal0,
 
@@ -362,6 +380,8 @@ public enum SearchMessage
     AdvancedFilters,
     FilterDesigner,
     TimeMachine,
+    [Description("Edit all columns")]
+    EditAllColumns,
     Options,
 
     [Description("You have selected all rows on this page. Do you want to {0} only these rows, or to all rows across all pages?")]
@@ -666,6 +686,7 @@ public enum JavascriptMessage
 
     [Description("Date")]
     Date,
+    Close,
 }
 
 //https://github.com/jquense/react-widgets/blob/5d4985c6dac0df34b86c7d8ad311ff97066977ab/packages/react-widgets/src/messages.tsx#L35

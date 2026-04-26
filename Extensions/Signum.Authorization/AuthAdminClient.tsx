@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { ModifiableEntity, EntityPack, is, SearchMessage, Lite, getToString, EntityControlMessage, liteKeyLong, Entity } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, SearchMessage, Lite, getToString, EntityControlMessage, liteKeyLong, Entity, isEntityPack } from '@framework/Signum.Entities';
 import { ifError, softCast } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
@@ -13,8 +13,8 @@ import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
 import {
   PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo, getAllTypes, Type,
-  QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol, reloadQueryContexts,
-  queryAllowedInContext, onReloadTypesActions
+  QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol, reloadTypesInDomains,
+  typeAllowedInDomain, onReloadTypesActions
 } from '@framework/Reflection'
 import {
   PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission,
@@ -27,12 +27,13 @@ import { TypeaheadOptions } from '@framework/Components/Typeahead';
 import { EntityLink, similarToken } from '@framework/Search';
 import UserCircle from './Templates/UserCircle';
 import { AuthMessage, RoleEntity, UserEntity, UserLiteModel, UserOperation, UserState } from './Signum.Authorization';
-import { QueryDescription, SubTokensOptions, getTokenParents, isFilterCondition } from '@framework/FindOptions';
+import { QueryDescription, isFilterCondition } from '@framework/FindOptions';
 import { similarTokenToStr } from '@framework/FinderRules';
 import { CollectionMessage } from '@framework/Signum.External';
 import { useAPI } from '@framework/Hooks';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 import { QuickLinkAction, QuickLinkClient } from '@framework/QuickLinkClient';
+import { getTokenParents, SubTokensOptions } from '@framework/QueryToken';
 
 export namespace AuthAdminClient {
   
@@ -70,7 +71,6 @@ export namespace AuthAdminClient {
   
   
     Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
-    Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(UserOperation.AutoDeactivate, { hideOnCanExecute: true, isVisible: () => false }));
     Operations.addSettings(new EntityOperationSettings(UserOperation.Deactivate, { hideOnCanExecute: true }));
     Operations.addSettings(new EntityOperationSettings(UserOperation.Reactivate, { hideOnCanExecute: true }));
@@ -174,7 +174,7 @@ export namespace AuthAdminClient {
           });
         }
       });
-
+  
       fixTypes();
       onReloadTypesActions.push(() => fixTypes());
   
@@ -224,7 +224,7 @@ export namespace AuthAdminClient {
       Navigator.addSettings(new EntitySettings(QueryRulePack, e => import('./Rules/QueryRulePackControl')));
 
       if (options.queries == "queryContext")
-        reloadQueryContexts(); //fire and forget
+        reloadTypesInDomains(); //fire and forget
     }
   
     if (options.permissions) {
@@ -293,7 +293,7 @@ export namespace AuthAdminClient {
     var result = allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
 
     if (queries == "queryContext" && context != null)
-      return result && queryAllowedInContext(queryKey, context);
+      return result && typeAllowedInDomain(queryKey, context);
 
     return result;
   }
@@ -325,19 +325,19 @@ export namespace AuthAdminClient {
     return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed == "Read";
   }
   
-  export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsViewableOptions): boolean {
-  
+  export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity> | Lite<Entity>, options?: Navigator.IsViewableOptions): boolean {
+
     if (options?.isEmbedded)
       return true;
-  
+
     const ti = tryGetTypeInfo(typeName);
-  
+
     if (ti == undefined)
       return false;
-  
-    if (entityPack?.typeAllowed)
+
+    if (isEntityPack(entityPack) && entityPack?.typeAllowed)
       return entityPack.typeAllowed != "None";
-  
+
     return ti.maxTypeAllowed != "None";
   }
   

@@ -157,6 +157,7 @@ public class DiffStats
 
 public class DiffIndexColumn
 {
+    public int Index; 
     public string ColumnName;
     public bool IsDescending;
     public bool IsIncluded;
@@ -175,6 +176,7 @@ public class DiffIndex
     public bool IsUnique;
     public bool IsPrimary;
     public FullTextIndex? FullTextIndex;
+    public DiffVectorIndex? VectorIndex;
     public string IndexName;
     public string? ViewName;
     public string? FilterDefinition;
@@ -206,6 +208,40 @@ public class DiffIndex
         if (this.Type != GetIndexType(mix, isPostgress))
             return false;
 
+        if (mix is VectorTableIndex vix)
+        {
+            if (this.VectorIndex == null)
+                return false;
+
+            if (isPostgress)
+            {
+                var expectedIndexType = VectorTableIndex.GetPGVectorIndex(vix.Postgres.IndexType);
+                var expectedMetric = VectorTableIndex.GetPGVectorDistanceMetric(vix.Postgres.Metric);
+
+                if (this.VectorIndex.IndexType != expectedIndexType)
+                    return false;
+
+                if (this.VectorIndex.DistanceMetric != expectedMetric)
+                    return false;
+
+                // Lists parameter is optional for IVFFlat, might not be stored in catalog
+                // if (vix.Postgres.Lists != null && this.VectorIndex.Lists != vix.Postgres.Lists)
+                //     return false;
+            }
+            else
+            {
+                // SQL Server vector index comparison
+                var expectedIndexType = vix.SqlServer.IndexType.ToString();
+                var expectedMetric = SqlVectorSearch.GetSqlVectorDistanceMetric(vix.SqlServer.Metric);
+
+                if (this.VectorIndex.IndexType != expectedIndexType)
+                    return false;
+
+                if (this.VectorIndex.DistanceMetric != expectedMetric)
+                    return false;
+            }
+        }
+
         return true;
     }
 
@@ -216,6 +252,9 @@ public class DiffIndex
 
         if (mix is FullTextTableIndex && !isPostgress)
             return DiffIndexType.FullTextIndex;
+
+        if (mix is VectorTableIndex)
+            return DiffIndexType.VectorIndex;
 
         if (mix.Clustered && !isPostgress)
             return DiffIndexType.Clustered;
@@ -252,9 +291,16 @@ public class DiffIndex
         if (diffColumns.Count == 0)
             return true;
 
+
         var difColumns = diffColumns.Select(cn => dif.Columns.Values.SingleOrDefault(dc => dc.Name == cn.ColumnName)).ToList(); //Ny old name
 
+        if (diffColumns.Count > 1 && diffColumns.All(a => a.Index == 0)) //Full-Text index in SQL Server
+        {
+            difColumns = difColumns.OrderBy(dc => dc == null ? 0 : modColumns?.IndexOf(m => m.Name == dc.Name) ?? 0).ToList();
+        }
+     
         var perfect = difColumns.ZipOrDefault(modColumns!, (dc, mc) => dc != null && mc != null && dc.ColumnEquals(mc, ignorePrimaryKey: true, ignoreIdentity: true, ignoreGenerateAlways: true)).All(a => a);
+        
         return perfect;
     }
 
@@ -274,6 +320,12 @@ public class FullTextIndex
     public string PropertiesList;
 }
 
+public class DiffVectorIndex
+{
+    public string? IndexType;  // "hnsw" or "ivfflat"
+    public string? DistanceMetric; // "vector_cosine_ops", "vector_l2_ops", etc.
+}
+
 public enum DiffIndexType
 {
     Heap = 0,
@@ -284,6 +336,7 @@ public enum DiffIndexType
     ClusteredColumnstore = 5,
     NonClusteredColumnstore = 6,
     NonClusteredHash = 7,
+    VectorIndex = 8,
 
 
     FullTextIndex = 100,
@@ -353,17 +406,38 @@ public class DiffColumn
 
     public bool ScaleEquals(IColumn other)
     {
-        return (other.Scale == null || other.Scale.Value == Scale);
+        if (!other.DbType.IsDecimal())
+            return true;
+
+        return other.Scale == null || other.Scale.Value == Scale;
     }
 
     public bool SizeEquals(IColumn other)
     {
-        return (other.DbType.IsDecimal() || other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1);
+        if (other.Size == null)
+            return true;
+
+        if (other.DbType.IsString() || other.DbType.IsBinary())
+        {
+            if (other.Size.Value == int.MaxValue)
+                return Length == -1;
+
+
+            if (other.Size.Value == Length)
+                return true;
+
+            return false;
+        }
+
+        return true;
     }
 
     public bool PrecisionEquals(IColumn other)
     {
-        return (!other.DbType.IsDecimal() || other.Precision == null || other.Precision == 0 || other.Precision.Value == Precision);
+        if (!other.DbType.IsDecimal())
+            return true;
+
+        return other.Precision == null || other.Precision == 0 || other.Precision.Value == Precision;
     }
 
     public bool DefaultEquals(IColumn other)
@@ -405,12 +479,7 @@ public class DiffColumn
         if (p == null)
             return null;
 
-        while (
-            p.StartsWith("(") && p.EndsWith(")") ||
-            p.StartsWith("'") && p.EndsWith("'"))
-            p = p.Substring(1, p.Length - 2);
-
-        return p.ToLower();
+        return p.Replace("(", "").Replace(")", "").Replace("'", "").ToLower();
     }
 
     public DiffColumn Clone()
@@ -644,9 +713,25 @@ public class DiffColumn
                     default:
                         return false;
                 }
+
+            case SqlDbType.Vector:
+                switch (toType)
+                {
+                    case SqlDbType.Vector:
+                        return true;
+                    default:
+                        return false;
+                }
             default:
                 throw new NotImplementedException("Unexpected SqlDbType");
         }
+    }
+
+    internal bool SizeScalePrecissionEquals(DiffColumn hisCol)
+    {
+        return Precision == hisCol.Precision ||
+                Scale == hisCol.Scale ||
+                Length == hisCol.Length;
     }
 }
 

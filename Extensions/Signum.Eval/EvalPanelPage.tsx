@@ -39,7 +39,7 @@ export default function DynamicPanelSimplePage(): React.JSX.Element {
 
   return (
     <div>
-      <h2>{EvalPanelMessage.DynamicPanel.niceToString()}</h2>
+      <h1 className="h2">{EvalPanelMessage.DynamicPanel.niceToString()}</h1>
    
       <Tabs activeKey={step ?? "search"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={handleSelect}>
         <Tab eventKey="search" title={EvalPanelMessage.Search.niceToString()}>

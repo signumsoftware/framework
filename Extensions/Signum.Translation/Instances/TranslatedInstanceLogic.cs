@@ -1,15 +1,8 @@
 using System.Globalization;
 using Signum.Utilities.Reflection;
-using Signum.Basics;
-using System.Collections.Concurrent;
 using System.IO;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Intrinsics.Arm;
-using Signum.Translation;
-using Signum.Basics;
 using Signum.Engine.Sync;
 using Signum.Excel;
-using Signum.UserAssets;
 using System.Collections.Frozen;
 
 namespace Signum.Translation.Instances;
@@ -48,7 +41,7 @@ public static class TranslatedInstanceLogic
         LocalizationCache = sb.GlobalLazy(() =>
             Database.Query<TranslatedInstanceEntity>()
             .ToList()
-            .AgGroupToDictionary(a => a.Culture.ToCultureInfo(),
+            .GroupAggregateToDictionary(a => a.Culture.ToCultureInfo(),
             gr2 => gr2.GroupBy(a => a.PropertyRoute)
                 .SelectMany(gr =>
                 {
@@ -509,7 +502,7 @@ public static class TranslatedInstanceLogic
 
                                   Original = str,
                               }
-                          }).AgGroupToDictionary(a => new IndexedPropertyRoute(a.Route!, a.RowId), g => g.ToDictionary(a => a.Culture!, a => a.Conflict!));
+                          }).GroupAggregateToDictionary(a => new IndexedPropertyRoute(a.Route!, a.RowId), g => g.ToDictionary(a => a.Culture!, a => a.Conflict!));
 
             return new InstanceChanges
             {
@@ -581,8 +574,12 @@ public static class TranslatedInstanceLogic
         Dictionary<(PropertyRoute route, string originalText), Dictionary<CultureInfo, string>> excelTranslations = records
             .Where(a => !isSync || a.TranslatedText.HasText())
             .GroupBy(a => (a.Key.Route, a.OriginalText), a => (a.Culture, a.TranslatedText))
-            .Select(gr => KeyValuePair.Create((gr.Key.Route, gr.Key.OriginalText), gr.AgGroupToDictionary(a=>a.Culture, a=>a.Select(a=>a.TranslatedText).Distinct().SingleEx())))
-            .ToDictionary();
+            .Select(gr => KeyValuePair.Create((gr.Key.Route, gr.Key.OriginalText), 
+                gr.GroupAggregateToDictionary(a => a.Culture, a => 
+                    a.Select(a => a.TranslatedText).Distinct().Only() ?? 
+                    throw new InvalidOperationException($"There are more than one translations for '{gr.Key.OriginalText}':\n" + a.Select(a => a.TranslatedText).Distinct().ToString(a => "* " + a, "\n"))
+                ))
+            ).ToDictionary();
 
         Dictionary<LocalizedInstanceKey, List<TranslatedInstanceEntity>> databaseTranslations =
             Database.Query<TranslatedInstanceEntity>()
@@ -591,7 +588,7 @@ public static class TranslatedInstanceLogic
             .GroupToDictionary(a =>
             {
                 var pr = a.PropertyRoute.ToPropertyRoute();
-                return new LocalizedInstanceKey(pr, a.Instance, a.RowId == null ? null : PrimaryKey.Parse(a.RowId.ToString(), pr));
+                return new LocalizedInstanceKey(pr, a.Instance, a.RowId == null ? null : PrimaryKey.Parse(a.RowId.ToString(), pr.GetMListItemsRoute()!.Parent!));
             });
 
         Dictionary<(PropertyRoute route, string originalText), List<(Lite<Entity> instance, PrimaryKey? rowId)>> currentInstances =

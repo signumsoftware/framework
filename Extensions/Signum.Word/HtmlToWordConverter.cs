@@ -185,8 +185,8 @@ public static class HtmlToWordConverter
                         numberings.Numbering = new Numbering();
                     }
 
-                    int abstractId = (numberings.Numbering.Elements<AbstractNum>().Max(a => a.AbstractNumberId?.Value) ?? 0) + 1;
-                    int numberId = (numberings.Numbering.Elements<NumberingInstance>().Max(a => a.NumberID?.Value) ?? 0) + 1;
+                    int abstractId = (numberings.Numbering!.Elements<AbstractNum>().Max(a => a.AbstractNumberId?.Value) ?? 0) + 1;
+                    int numberId = (numberings.Numbering!.Elements<NumberingInstance>().Max(a => a.NumberID?.Value) ?? 0) + 1;
 
                     var abstractNum = new AbstractNum() { AbstractNumberId = abstractId };
 

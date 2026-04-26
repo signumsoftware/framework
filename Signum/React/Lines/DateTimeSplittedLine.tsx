@@ -23,7 +23,7 @@ export interface DateTimeSplittedLineProps extends ValueBaseProps<string /*Date 
 }
 
 export class DateTimeSplittedLineController extends ValueBaseController<DateTimeSplittedLineProps, string /*Date or DateTime*/ | null >{
-  init(p: DateTimeSplittedLineProps): void {
+  override init(p: DateTimeSplittedLineProps): void {
     super.init(p);
     this.assertType("DateTimeSplittedLine", ["DateOnly", "DateTime"]);
   }

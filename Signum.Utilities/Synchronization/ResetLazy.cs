@@ -59,7 +59,7 @@ public class ResetLazy<T>: IResetLazy
     public int Invalidations;
     public TimeSpan SumLoadtime;
 
-    object syncLock = new();
+    Lock syncLock = new();
 
     bool loading;
     Box? box;

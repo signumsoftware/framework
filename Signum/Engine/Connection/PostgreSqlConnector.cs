@@ -16,7 +16,7 @@ public static class PostgresVersionDetector
 {
     public static Version? Detect(string connectionString, Version? fallback)
     {
-        try 
+        try
         {
             using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
             {
@@ -47,6 +47,20 @@ public class PostgreSqlConnector : Connector
     public ResetLazy<string> LocalTimeZoneLazy = new ResetLazy<string>(() => (string)Executor.ExecuteScalar("SELECT current_setting('TIMEZONE')")!);
     public override string LocalTimeZone => LocalTimeZoneLazy.Value;
 
+    public ResetLazy<bool> SupportsVectorsLazy = new ResetLazy<bool>(() =>
+    {
+        try
+        {
+            var result = Executor.ExecuteScalar("SELECT COUNT(*) FROM pg_available_extensions WHERE name = 'vector'");
+            return Convert.ToInt32(result) > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    });
+    public override bool SupportsVectors => SupportsVectorsLazy.Value;
+
     public override ParameterBuilder ParameterBuilder { get; protected set; }
 
     public Version? PostgresVersion { get; set; }
@@ -54,10 +68,14 @@ public class PostgreSqlConnector : Connector
     Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder;
 
     string originalDatabaseName;
+    
+    public bool IsAzurePostgres { get; private set; }
+    
     public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion, Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder = null) : base(schema.Do(s => s.Settings.IsPostgres = true))
     {
         this.originalDatabaseName = new NpgsqlConnectionStringBuilder(connectionString).Database!;
         this.customizeBuilder = customizeBuilder;
+        this.IsAzurePostgres = connectionString.Contains("postgres.database.azure.com", StringComparison.OrdinalIgnoreCase);
         this.ChangeConnectionString(connectionString, runCustomizer: true);
         this.ConnectionString = connectionString;
         this.ParameterBuilder = new PostgreSqlParameterBuilder();
@@ -232,7 +250,14 @@ public class PostgreSqlConnector : Connector
                         for (int j = 0; j < dt.Columns.Count; j++)
                         {
                             var col = dt.Columns[j];
-                            writer.Write(row[col], columns[j].DbType.PostgreSql);
+                            var type = columns[j].DbType.PostgreSql;
+                            if (type == AbstractDbType.VectorPG)
+                            {
+                                var vector = row[col];
+                                writer.Write(vector);
+                            }
+                            else
+                                writer.Write(row[col], type);
                         }
                     }
 
@@ -435,70 +460,16 @@ public static class PostgreSqlConnectorScripts
         if (databaseName != null)
             throw new NotSupportedException();
 
-        return new SqlPreCommandSimple(@"-- Copyright © 2019
---      mirabilos <t.glaser@tarent.de>
---
--- Provided that these terms and disclaimer and all copyright notices
--- are retained or reproduced in an accompanying document, permission
--- is granted to deal in this work without restriction, including un‐
--- limited rights to use, publicly perform, distribute, sell, modify,
--- merge, give away, or sublicence.
---
--- This work is provided “AS IS” and WITHOUT WARRANTY of any kind, to
--- the utmost extent permitted by applicable law, neither express nor
--- implied; without malicious intent or gross negligence. In no event
--- may a licensor, author or contributor be held liable for indirect,
--- direct, other damage, loss, or other issues arising in any way out
--- of dealing in the work, even if advised of the possibility of such
--- damage or existence of a defect, except proven that it results out
--- of said person’s immediate fault when using the work as intended.
--- -
--- Drop everything from the PostgreSQL database.
+        var executeAsRole = Schema.Current.ExecuteAs;
+        var executeAsCondition = executeAsRole != null 
+            ? $" OR pr.rolname='{executeAsRole}'" 
+            : "";
 
+        return new SqlPreCommandSimple($@"
 DO $$
 DECLARE
         r RECORD;
 BEGIN
-        -- triggers
-        FOR r IN (SELECT pns.nspname, pc.relname, pt.tgname
-                FROM pg_trigger pt, pg_class pc, pg_namespace pns
-                WHERE pns.oid=pc.relnamespace AND pc.oid=pt.tgrelid
-                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-                    AND pt.tgisinternal=false
-            ) LOOP
-                EXECUTE format('DROP TRIGGER %I ON %I.%I;',
-                    r.tgname, r.nspname, r.relname);
-        END LOOP;
-        -- constraints #1: foreign key
-        FOR r IN (SELECT pns.nspname, pc.relname, pcon.conname
-                FROM pg_constraint pcon, pg_class pc, pg_namespace pns
-                WHERE pns.oid=pc.relnamespace AND pc.oid=pcon.conrelid
-                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-                    AND pcon.contype='f'
-            ) LOOP
-                EXECUTE format('ALTER TABLE ONLY %I.%I DROP CONSTRAINT %I;',
-                    r.nspname, r.relname, r.conname);
-        END LOOP;
-        -- constraints #2: the rest
-        FOR r IN (SELECT pns.nspname, pc.relname, pcon.conname
-                FROM pg_constraint pcon, pg_class pc, pg_namespace pns
-                WHERE pns.oid=pc.relnamespace AND pc.oid=pcon.conrelid
-                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-                    AND pcon.contype<>'f'
-            ) LOOP
-                EXECUTE format('ALTER TABLE ONLY %I.%I DROP CONSTRAINT %I;',
-                    r.nspname, r.relname, r.conname);
-        END LOOP;
-        -- indicēs
-        FOR r IN (SELECT pns.nspname, pc.relname
-                FROM pg_class pc, pg_namespace pns
-                WHERE pns.oid=pc.relnamespace
-                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-                    AND pc.relkind='i'
-            ) LOOP
-                EXECUTE format('DROP INDEX %I.%I;',
-                    r.nspname, r.relname);
-        END LOOP;
         -- normal and materialised views
         FOR r IN (SELECT pns.nspname, pc.relname
                 FROM pg_class pc, pg_namespace pns
@@ -507,7 +478,7 @@ BEGIN
                     AND pc.relname NOT LIKE 'pg_%'
                     AND pc.relkind IN ('v', 'm')
             ) LOOP
-                EXECUTE format('DROP VIEW %I.%I;',
+                EXECUTE format('DROP VIEW %I.%I CASCADE;',
                     r.nspname, r.relname);
         END LOOP;
         -- tables
@@ -517,7 +488,7 @@ BEGIN
                     AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
                     AND pc.relkind='r'
             ) LOOP
-                EXECUTE format('DROP TABLE %I.%I;',
+                EXECUTE format('DROP TABLE %I.%I CASCADE;',
                     r.nspname, r.relname);
         END LOOP;
         -- sequences
@@ -553,7 +524,7 @@ BEGIN
                 FROM pg_namespace pns, pg_roles pr
                 WHERE pr.oid=pns.nspowner
                     AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast', 'public')
-                    AND pr.rolname=current_user
+                    AND (pr.rolname=current_user{executeAsCondition})
             ) LOOP
                 EXECUTE format('DROP SCHEMA %I;', r.nspname);
         END LOOP;
@@ -573,7 +544,7 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
                 AssertDateTime(dt, datetimeKind);
         }
 
-        if(dbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree && value is SqlHierarchyId shi)
+        if (dbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree && value is SqlHierarchyId shi)
         {
             value = shi.ToSortableString();
         }
@@ -583,7 +554,9 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
             IsNullable = nullable
         };
 
-        result.NpgsqlDbType = dbType.PostgreSql;
+        if (!dbType.IsVector())
+            result.NpgsqlDbType = dbType.PostgreSql;
+
         if (udtTypeName != null)
             result.DataTypeName = udtTypeName;
 
@@ -600,7 +573,7 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         var exp =
              uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?)), Expression.Constant(dateTimeKind)) :
              uType == typeof(SqlHierarchyId) ? Expression.Coalesce(
-                    Expression.Call(miToSortableString, Expression.Convert(value, typeof(SqlHierarchyId?))), 
+                    Expression.Call(miToSortableString, Expression.Convert(value, typeof(SqlHierarchyId?))),
                     Expression.Constant(DBNull.Value, typeof(object))) :
              ////https://github.com/dotnet/SqlClient/issues/1009
              //uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
@@ -623,8 +596,10 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         List<MemberBinding> mb = new List<MemberBinding>()
             {
                 Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.IsNullable))!, Expression.Constant(nullable)),
-                Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.NpgsqlDbType))!, Expression.Constant(dbType.PostgreSql)),
             };
+
+        if (dbType.PostgreSql != AbstractDbType.VectorPG)
+            mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.NpgsqlDbType))!, Expression.Constant(dbType.PostgreSql)));
 
         if (size != null)
             mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.Size))!, Expression.Constant(size)));

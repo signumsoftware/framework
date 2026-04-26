@@ -6,18 +6,24 @@ import {
   OptionalCallback,
 } from "../types";
 import { ImageHandlerBase, ImageInfo } from "./ImageHandlerBase";
-import { $createImageNode, ImageNodeBase } from "./ImageNodeBase";
+import { $createImageNode, ImageNode } from "./ImageNode";
 
-export class ImageExtension implements HtmlEditorExtension {
+export class ImageExtension extends HtmlEditorExtension {
 
-  name = "ImageExtension";
-  constructor(public nodeType: typeof ImageNodeBase) {}
+override name = "ImageExtension";
+constructor(public imageHandler: ImageHandlerBase) { 
+  super();
+}
 
-  registerExtension(controller: HtmlEditorController): OptionalCallback {
+override registerExtension(controller: HtmlEditorController): OptionalCallback {
     const abortController = new AbortController();
     const element = controller.editableElement;
 
-    if (!element) return;
+    if (!element)
+      return;
+
+    if (controller.editor && controller.editor.imageHandler != this.imageHandler)
+      controller.editor.imageHandler = this.imageHandler;
 
     element.addEventListener("dragenter", (event) => {
       if (!controller.editor.isEditable()) {
@@ -50,7 +56,7 @@ export class ImageExtension implements HtmlEditorExtension {
       const files = event.dataTransfer?.files;
       if (!files?.length) return;
 
-      this.insertImageNodes(files, controller, this.nodeType.handler);
+      this.insertImageNodes(files, controller, controller.editor.imageHandler!);
     }, { signal: abortController.signal });
 
     element.addEventListener("paste", (event) => {
@@ -59,7 +65,7 @@ export class ImageExtension implements HtmlEditorExtension {
       if (!files?.length) return;
 
       event.preventDefault();
-      this.insertImageNodes(files, controller, this.nodeType.handler);
+      this.insertImageNodes(files, controller, controller.editor.imageHandler!);
     }, { signal: abortController.signal });
 
     return () => {
@@ -67,8 +73,8 @@ export class ImageExtension implements HtmlEditorExtension {
     };
   }
 
-  getNodes(): LexicalConfigNode {
-    return [this.nodeType];
+  override getNodes(): LexicalConfigNode {
+    return [ImageNode];
   }
 
   async insertImageNodes(
@@ -97,7 +103,7 @@ export class ImageExtension implements HtmlEditorExtension {
 
     controller.editor.update(() => {
       for (const file of successfulFiles) {
-        const imageNode = $createImageNode(file, this.nodeType);
+        const imageNode = $createImageNode(file, ImageNode);
         $getRoot().append(imageNode);
       }
     });

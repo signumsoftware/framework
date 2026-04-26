@@ -8,6 +8,11 @@
       <Group guid="guidSignumTSCBuildPackageCmdSet" id="ProjectContextMenuGroup" priority="0x0000">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE"/>
       </Group>
+
+      <!-- Separate group so Run TSGenerator can be positioned below general Build -->
+      <Group guid="guidSignumTSCBuildPackageBottomGroup" id="RunTSGeneratorGroup" priority="0x0200">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE"/>
+      </Group>
     </Groups>
     <Buttons>
       <!-- Build TypeScript button in project context menu -->
@@ -18,9 +23,18 @@
           <ButtonText>Build TypeScript</ButtonText>
         </Strings>
       </Button>
+
+      <!-- Run TSGenerator button in its own group so it can appear below general Build -->
+      <Button guid="guidSignumTSCBuildPackageCmdSet" id="RunTSGeneratorId" priority="0x0101" type="Button">
+        <Parent guid="guidSignumTSCBuildPackageBottomGroup" id="RunTSGeneratorGroup" />
+        <Icon guid="guidImages" id="bmpPic2" />
+        <Strings>
+          <ButtonText>Run TSGenerator (C# -> TS)</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
     <Bitmaps>
-      <Bitmap guid="guidImages" href="Resources\CompileTypeScript.png" usedList="bmpPic1"/>
+      <Bitmap guid="guidImages" href="Resources\\CompileTypeScript.png" usedList="bmpPic1,bmpPic2"/>
     </Bitmaps>
   </Commands>
   <Symbols>
@@ -28,9 +42,17 @@
     <GuidSymbol name="guidSignumTSCBuildPackageCmdSet" value="{57018ec6-5e1b-4ac7-8226-30120d45e7c0}">
       <IDSymbol name="ProjectContextMenuGroup" value="0x0110" />
       <IDSymbol name="BuildTypeScriptId" value="0x0111" />
+      <IDSymbol name="RunTSGeneratorId" value="0x0112" />
     </GuidSymbol>
+
+    <!-- New GUID/group for placing Run TSGenerator below Build -->
+    <GuidSymbol name="guidSignumTSCBuildPackageBottomGroup" value="{a2d5f6e1-3c2b-4a9f-8d4c-1b2e3f4a5b6c}">
+      <IDSymbol name="RunTSGeneratorGroup" value="0x0120" />
+    </GuidSymbol>
+
     <GuidSymbol name="guidImages" value="{23cba6d2-98f6-4688-ac94-56b64f2a71d8}">
       <IDSymbol name="bmpPic1" value="1" />
+      <IDSymbol name="bmpPic2" value="2" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

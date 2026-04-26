@@ -2,7 +2,6 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.Authorization;
 using Signum.Cache;
-using System.Threading.Channels;
 
 namespace Signum.Processes;
 

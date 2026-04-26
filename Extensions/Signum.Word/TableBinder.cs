@@ -17,9 +17,7 @@ using Signum.UserAssets;
 using Signum.Chart.UserChart;
 using Signum.Chart;
 using Signum.Chart.ColorPalette;
-using Signum.Entities;
 using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.InkML;
 
 namespace Signum.Word;
 
@@ -339,7 +337,7 @@ public static class TableBinder
     {
         Dictionary<object, Dictionary<object, object>> dictionary =
             dt.Rows.Cast<DataRow>()
-            .AgGroupToDictionary(
+            .GroupAggregateToDictionary(
                 row => row[rowColumnIndex],
                 gr => gr.ToDictionaryEx(
                     row => row[columnColumnIndex],

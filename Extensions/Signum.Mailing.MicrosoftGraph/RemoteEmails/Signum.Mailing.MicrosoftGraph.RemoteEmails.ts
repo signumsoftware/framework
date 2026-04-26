@@ -4,7 +4,6 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Signum/React/Reflection'
 import * as Entities from '../../../Signum/React/Signum.Entities'
-import * as Basics from '../../../Signum/React/Signum.Basics'
 import * as Authorization from '../../Signum.Authorization/Signum.Authorization'
 
 
@@ -33,8 +32,20 @@ export interface RemoteEmailFolderModel extends Entities.ModelEntity {
   displayName: string;
 }
 
-export namespace RemoteEmailMessage {
-  export const NotAuthorizedToViewEmailsFromOtherUsers: MessageKey = new MessageKey("RemoteEmailMessage", "NotAuthorizedToViewEmailsFromOtherUsers");
+export namespace RemoteEmailMessageMessage {
+  export const UserFilterNotFound: MessageKey = new MessageKey("RemoteEmailMessageMessage", "UserFilterNotFound");
+  export const User0HasNoMailbox: MessageKey = new MessageKey("RemoteEmailMessageMessage", "User0HasNoMailbox");
+  export const Deleting: MessageKey = new MessageKey("RemoteEmailMessageMessage", "Deleting");
+  export const Delete: MessageKey = new MessageKey("RemoteEmailMessageMessage", "Delete");
+  export const Moving: MessageKey = new MessageKey("RemoteEmailMessageMessage", "Moving");
+  export const Move: MessageKey = new MessageKey("RemoteEmailMessageMessage", "Move");
+  export const AddCategory: MessageKey = new MessageKey("RemoteEmailMessageMessage", "AddCategory");
+  export const RemoveCategory: MessageKey = new MessageKey("RemoteEmailMessageMessage", "RemoveCategory");
+  export const ChangingCategories: MessageKey = new MessageKey("RemoteEmailMessageMessage", "ChangingCategories");
+  export const Messages: MessageKey = new MessageKey("RemoteEmailMessageMessage", "Messages");
+  export const Message: MessageKey = new MessageKey("RemoteEmailMessageMessage", "Message");
+  export const SelectAFolder: MessageKey = new MessageKey("RemoteEmailMessageMessage", "SelectAFolder");
+  export const PleaseConfirmYouWouldLikeToDelete0FromOutlook: MessageKey = new MessageKey("RemoteEmailMessageMessage", "PleaseConfirmYouWouldLikeToDelete0FromOutlook");
 }
 
 export const RemoteEmailMessageModel: Type<RemoteEmailMessageModel> = new Type<RemoteEmailMessageModel>("RemoteEmailMessageModel");
@@ -53,6 +64,8 @@ export interface RemoteEmailMessageModel extends Entities.ModelEntity {
   ccRecipients: Entities.MList<RecipientEmbedded>;
   bccRecipients: Entities.MList<RecipientEmbedded>;
   attachments: Entities.MList<RemoteAttachmentEmbedded>;
+  folder: RemoteEmailFolderModel | null;
+  categories: Entities.MList<string>;
   createdDateTime: string /*DateTimeOffset*/ | null;
   lastModifiedDateTime: string /*DateTimeOffset*/ | null;
   receivedDateTime: string /*DateTimeOffset*/ | null;
@@ -62,10 +75,6 @@ export interface RemoteEmailMessageModel extends Entities.ModelEntity {
   extension1: string | null;
   extension2: string | null;
   extension3: string | null;
-}
-
-export namespace RemoteEmailMessagePermission {
-  export const ViewEmailMessagesFromOtherUsers : Basics.PermissionSymbol = registerSymbol("Permission", "RemoteEmailMessagePermission.ViewEmailMessagesFromOtherUsers");
 }
 
 export namespace RemoteEmailMessageQuery {

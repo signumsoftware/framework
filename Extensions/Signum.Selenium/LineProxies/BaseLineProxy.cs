@@ -1,7 +1,6 @@
 using OpenQA.Selenium;
 using Signum.Entities.Reflection;
 using Signum.Selenium.LineProxies;
-using System.ClientModel.Primitives;
 
 namespace Signum.Selenium;
 
@@ -102,7 +101,7 @@ public abstract class BaseLineProxy
                 if (multiLine == true)
                     return new TextAreaLineProxy(element, route);
 
-                if(Reflector.FormatString(route) == "Color")
+                if(Reflector.GetFormatString(route) == "Color")
                     return new ColorBoxLineProxy(element, route);
 
                 return new TextBoxLineProxy(element, route);

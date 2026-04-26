@@ -18,7 +18,7 @@ export interface EnumMultiSelectProps<V extends string> extends LineBaseProps<ML
 
 export class EnumMultiSelectController<V extends string> extends LineBaseController<EnumMultiSelectProps<V>, MList<V>> {
 
-  getDefaultProps(p: EnumMultiSelectProps<V>): void {
+  override getDefaultProps(p: EnumMultiSelectProps<V>): void {
     super.getDefaultProps(p);
     if (p.type) {
       const ti = getTypeInfo(p.type.name);

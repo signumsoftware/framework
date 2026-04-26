@@ -76,6 +76,8 @@ public enum ScheduledTaskMessage
     SchedulerMargin,
     MachineName,
     ApplicationName,
+    ServerTimeZone,
+    ServerLocalTime,
     NextExecution,
     InMemoryQueue,
     RunningTasks,

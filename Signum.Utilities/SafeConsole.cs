@@ -6,7 +6,7 @@ namespace Signum.Utilities;
 
 public static class SafeConsole
 {
-    public static readonly object SyncKey = new object();
+    public static readonly Lock SyncKey = new ();
     static bool needToClear = false;
 
     public static void WriteSameLine(string format, params object?[] parameters)

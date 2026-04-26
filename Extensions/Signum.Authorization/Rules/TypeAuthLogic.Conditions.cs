@@ -1,7 +1,6 @@
 using Signum.Authorization.Rules;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Signum.Authorization;
 
@@ -146,7 +145,7 @@ public static partial class TypeAuthLogic
             {
                 a.Id,
                 dic = dic.Evaluate(a, null)
-            }).ToList().ToDictionary(a => a.Id, a => a.dic);
+            }).DisableQueryFilter().ToList().ToDictionary(a => a.Id, a => a.dic);
 
 
             foreach (var e in gr)

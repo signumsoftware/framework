@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useLocation, Location } from 'react-router'
-import { is } from '@framework/Signum.Entities'
+import { is,liteKey } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import { ToolbarClient, ToolbarResponse } from '../ToolbarClient'
 import { ToolbarConfig, ToolbarContext, InferActiveResponse } from "../ToolbarConfig";
@@ -8,18 +8,19 @@ import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useAPI, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
+import { useAPI, useDocumentEvent, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
-import { Entity, getToString, Lite } from '@framework/Signum.Entities'
+import { Entity, EngineMessage, getToString, Lite } from '@framework/Signum.Entities'
 import { parseIcon } from '@framework/Components/IconTypeahead'
 import { ToolbarUrl } from '../ToolbarUrl';
 import { classes } from '@framework/Globals';
-import { LayoutMessage, ToolbarEntity, ToolbarMenuEntity,  ToolbarSwitcherEntity } from '../Signum.Toolbar';
-import { Binding, getTypeInfo, newLite, queryAllowedInContext } from '../../../Signum/React/Reflection';
+import { LayoutMessage, ToolbarEntity, ToolbarMenuEntity, ToolbarSwitcherEntity } from '../Signum.Toolbar';
+import { Binding, getTypeInfo, newLite, typeAllowedInDomain } from '../../../Signum/React/Reflection';
 import { Finder } from '../../../Signum/React/Finder';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
 import { RightCaretDropdown } from './RightCaretDropdown'
+import { QueryEntity } from '@framework/Signum.Basics';
 
 
 export default function ToolbarRenderer(p: {
@@ -29,7 +30,9 @@ export default function ToolbarRenderer(p: {
   Navigator.useEntityChanged(ToolbarEntity, () => reload(), []);
   Navigator.useEntityChanged(ToolbarMenuEntity, () => reload(), []);
   Navigator.useEntityChanged(ToolbarSwitcherEntity, () => reload(), []);
+  useDocumentEvent("typeInDomains", () => forceUpdate(), []);
 
+  const forceUpdate = useForceUpdate();
   const [response, reload] = useAPIWithReload(() => ToolbarClient.API.getCurrentToolbar("Side"), [], { avoidReset: true });
   const responseRef = useUpdatedRef(response);
 
@@ -220,8 +223,9 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
       if (res.url) {
         const config = res.content && ToolbarClient.getConfig(res);
         return (
-          <ToolbarNavItem key={key} title={res.label} isExternalLink={ToolbarUrl.isExternalLink(res.url)
-      }
+          <ToolbarNavItem key={key} title={res.label} 
+            isExternalLink={ToolbarUrl.isExternalLink(res.url)}
+            content={res.content}
             extraIcons={renderExtraIcons(res.extraIcons, ctx, selectedEntity)}
             active={isActive(ctx.active, res, selectedEntity)} icon={<>
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
@@ -307,6 +311,11 @@ function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: Too
 
   function handleShowClick(e: React.MouseEvent | null) {
 
+    if (e?.altKey && p.response.content && Navigator.isViewable(p.response.content)) {
+      Navigator.view(p.response.content!);
+      return;
+    }
+
     var value = !show;
 
     if (value)
@@ -373,16 +382,52 @@ export function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntit
 function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.ReactNode {
 
   const entityType = p.response.entityType!;
+  const selEntityStorageKey = "toolbar-menuitems-entitytype-" + p.response.content!.id + "-" + entityType;
+
   const selEntityRef = React.useRef<Lite<Entity> | null>(null);
+  const previousResponseRef = React.useRef<ToolbarResponse<ToolbarMenuEntity> | null>(null);
   const forceUpdate = useForceUpdate();
 
   function setSelectedEntity(entity: Lite<Entity> | null) {
     selEntityRef.current = entity;
+
+    if (entity)
+      localStorage.setItem(selEntityStorageKey, entity.id!.toString());
+    else
+      localStorage.removeItem(selEntityStorageKey);
+
     forceUpdate();
   }
 
+  class RefBinding extends Binding<Lite<Entity> | null> {
+    override setValue(val: Lite<Entity> | null): void {
+      setSelectedEntity(val);
+      super.setValue(val);
+    }
+  }
 
-  const entities = useAPI(() => Finder.API.fetchAllLites({ types: entityType }), [entityType]);
+  React.useEffect(() => {
+    if (previousResponseRef.current && !is(previousResponseRef.current.content, p.response.content)) {
+      setSelectedEntity(null);
+    }
+    previousResponseRef.current = p.response;
+  }, [p.response]);
+
+
+  React.useEffect(() => {
+    if (selEntityRef.current)
+      return;
+
+    const savedId = localStorage.getItem(selEntityStorageKey);
+    if (!savedId)
+      return;
+
+    Finder.fetchLites({ queryName: entityType, filterOptions: [{ token: "Entity.Id", operation: "EqualTo", value: savedId }], count: 1 })
+      .then(lites => {
+        if (lites.length > 0)
+          setSelectedEntity(lites[0]);
+      });
+  }, [entityType]);
 
   const active = p.ctx.active;
 
@@ -394,40 +439,42 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
       if (!is(active.menuWithEntity.entity, selEntityRef.current))
         setSelectedEntity(active.menuWithEntity.entity);
     }
-    else if (active != null)
-      setSelectedEntity(null);
-
-  }, [active?.menuWithEntity, p.response]);
-
+  }, [active, p.response]);
   React.useEffect(() => {
+    if (!selEntityRef.current || selEntityRef.current.model)
+      return;
 
-    if (selEntityRef.current && !selEntityRef.current.model && entities) {
-      var only = entities.onlyOrNull(a => is(a, selEntityRef.current));
-      if (only != null)
-        setSelectedEntity(only);
-    }
-
-  }, [selEntityRef.current, entities]);
+    const current = selEntityRef.current;
+    Finder.fetchLites({ queryName: entityType, filterOptions: [{ token: "Entity", operation: "EqualTo", value: current }], count: 1 })
+      .then(lites => {
+        if (lites.length > 0)
+          setSelectedEntity(lites[0]);
+        else {
+          current.model = EngineMessage._01NotFound.niceToString(getTypeInfo(entityType).niceName, current.id);
+          forceUpdate();
+        }
+      });
+  }, [selEntityRef.current]);
 
   function handleSelect(e: React.SyntheticEvent | undefined) {
 
     forceUpdate();
-    var autoSelect = p.response.elements?.firstOrNull(a => a.autoSelect && a.withEntity == Boolean(selEntityRef.current));
+    var autoSelect = p.response.elements?.firstOrNull(a => a.autoSelect && Boolean(a.withEntity) == Boolean(selEntityRef.current));
     if (autoSelect) {
       responseClick(autoSelect, selEntityRef.current, e, p.ctx);
     }
   }
 
-  const ctx = new TypeContext<Lite<Entity> | null>(undefined, undefined, undefined, new Binding(selEntityRef, "current"));
+  const ctx = new TypeContext<Lite<Entity> | null>(undefined, undefined, undefined, new RefBinding(selEntityRef, "current"));
   var ti = getTypeInfo(entityType);
   return (
     <>
       {entityType && (
         <Nav.Item title={ti.niceName} className="d-flex mx-2 mb-2">
           <div style={{ width: "100%" }}>
-            <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false}
+            <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false} mandatory="warning"
               inputAttributes={{ placeholder: LayoutMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
-              onChange={e => handleSelect(e.originalEvent)} create={false} formGroupStyle="SrOnly" />
+              onChange={e => handleSelect(e.originalEvent)} create={false} createOnFind={false} formGroupStyle="SrOnly" />
           </div>
           {renderExtraIcons(p.response.extraIcons, p.ctx, selEntityRef.current ?? p.selectedEntity)}
         </Nav.Item>
@@ -444,7 +491,7 @@ function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<En
   var result = resp
     .map(tr => {
 
-      if (tr.queryKey != null && !queryAllowedInContext(tr.queryKey, selectedEntity))
+      if (tr.queryKey != null && !typeAllowedInDomain(tr.queryKey, selectedEntity))
         return null;
 
       if (tr.elements && tr.elements.length > 0) {
@@ -507,29 +554,32 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
     return p.response.elements?.onlyOrNull(a => a.content!.id!.toString() == sel);
   });
 
-  function handleSetShow(value: ToolbarResponse<any>, e: React.SyntheticEvent | null) {
-    localStorage.setItem(key, value.content!.id!.toString());
-
-    setSelectedOption(value);
-
-    if (value && e) {
-      var autoSelect = value.elements?.firstOrNull(a => a.autoSelect && !a.withEntity);
-      if (autoSelect) {
-        responseClick(autoSelect, p.selectedEntity, e, p.ctx);
-      }
-
-    }
-  }
-
-
   React.useEffect(() => {
 
     if (p.ctx.active) {
       const menu = p.response.elements?.firstOrNull(e => containsResponse(e, p.ctx.active!.response!));
-      if (menu != null && menu != selectedOption)
-        handleSetShow(menu, null);
+      if (menu && menu !== selectedOption) {
+        setSelectedOption(menu);
+        localStorage.setItem(key, menu.content!.id!.toString());
+      }
     }
-  }, [p.ctx.active]);
+  }, [p.ctx.active, p.response.elements]);
+
+  function handleSetShow(value: ToolbarResponse<any>, e: React.SyntheticEvent | null) {
+
+    if (e && (e as React.MouseEvent).altKey && value.content && Navigator.isViewable(value.content)) {
+      Navigator.view(value.content!);
+      return;
+    }
+
+    localStorage.setItem(key, value.content!.id!.toString());
+    setSelectedOption(value);
+
+    var autoSelect = value.elements?.firstOrNull(a => a.autoSelect && !a.withEntity);
+    if (autoSelect) {
+      responseClick(autoSelect, null, undefined, p.ctx);
+    }
+  }
 
   const icon = ToolbarConfig.coloredIcon(parseIcon(p.response.iconName), p.response.iconColor);
   const title = p.response.label || getToString(p.response.content);
@@ -539,15 +589,18 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
     label: el.label || getToString(el.content),
     icon: el.iconName ? ToolbarConfig.coloredIcon(parseIcon(el.iconName), el.iconColor) : undefined
   }));
+
   return (
     <li>
       <ul>
-        <Nav.Item title={title} className="d-flex mx-2 mb-2">
+        <Nav.Item 
+        data-toolbar-content={liteKeyOrQuery(p.response.content)}
+        title={title} className="d-flex mb-2">
           {icon}
           <RightCaretDropdown
             options={options}
             value={selectedOption ?? null}
-            onChange={val => val && handleSetShow(val, null)}
+            onChange={(val, e) => val && handleSetShow(val, e)}
             placeholder={title}
             disabled={false} />
           {renderExtraIcons(p.response.extraIcons, p.ctx, p.selectedEntity)}
@@ -565,10 +618,13 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   );
 }
 
-export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, isGroup?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
+export function ToolbarNavItem(p: { title: string | undefined, content?: Lite<Entity>, active?: boolean, isExternalLink?: boolean, isGroup?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
+  
+
   return (
     <li className="nav-item d-flex">
-      <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100" >
+      <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100"
+        data-toolbar-content={liteKeyOrQuery(p.content)}>
         <div>{p.icon}</div>
         <span className={classes("nav-item-text", p.isGroup && "nav-item-group")}>
           {p.title}
@@ -579,6 +635,10 @@ export function ToolbarNavItem(p: { title: string | undefined, active?: boolean,
       </Nav.Link>
     </li>
   );
+}
+
+export function liteKeyOrQuery(content: Lite<Entity> | null | undefined): string | null{
+  return content == null ? null : QueryEntity.isLite(content) ? getToString(content): liteKey(content);
 }
 
 export function isActive(active: InferActiveResponse | null, res: ToolbarResponse<any>, selectedEntity: Lite<Entity> | null): boolean {
@@ -599,7 +659,7 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
 
       if (ei.url) {
         return <button type="button" className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i}
-          onClick={e => { e.stopPropagation(); linkClick(ei, selectedEntity, e, ctx); } }>
+          onClick={e => { e.stopPropagation(); linkClick(ei, selectedEntity, e, ctx); }}>
           {ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}
         </button>;
       }

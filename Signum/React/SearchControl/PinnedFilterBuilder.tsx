@@ -182,5 +182,5 @@ export function getAllPinned(filterOptions: FilterOptionParsed[]): FilterOptionP
 }
 
 export namespace PinnedFilterBuilderOptions {
-  export let searchTextTimeout = (f: FilterOptionParsed): number => 200;
+  export let searchTextTimeout = (f: FilterOptionParsed): number => 400;
 }

@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { FindOptions, QueryToken } from '@framework/FindOptions'
+import { FindOptions } from '@framework/FindOptions'
+import { QueryToken } from '@framework/QueryToken'
 import { getQueryKey } from '@framework/Reflection'
 import { JavascriptMessage, toLite, liteKey, translated } from '@framework/Signum.Entities'
 import { SearchValue, SearchValueController } from '@framework/Search'
@@ -18,7 +19,7 @@ import { toAbsoluteUrl } from '@framework/AppContext'
 import { ToolbarUrl } from '../../../Signum.Toolbar/ToolbarUrl'
 import { ToolbarClient } from '../../../Signum.Toolbar/ToolbarClient'
 import { selectSubEntity } from '../../UserQueryToolbarConfig'
-import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
+import { PanelPartContentProps, DashboardTooltipIcon } from '../../../Signum.Dashboard/DashboardClient'
 
 
 export interface UserQueryPartHandler {
@@ -26,9 +27,11 @@ export interface UserQueryPartHandler {
   refresh: () => void;
 }
 
-export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity>): React.JSX.Element {
+export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity>): React.JSX.Element | null {
 
-  let fo = useAPI(signal => p.content.userQuery == null ? null : UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity && liteKey(p.entity)]);
+  let fo = useAPI<"not-findable" | null | FindOptions>(signal => p.content.userQuery == null ? null :
+    !Finder.isFindable(p.content.userQuery.query.key, false) ? "not-findable" :
+      UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity && liteKey(p.entity)]);
 
   let valueToken = p.content.valueToken && UserAssetClient.getToken(p.content.valueToken);
 
@@ -36,14 +39,15 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
 
   React.useEffect(() => {
 
-    if (fo) {
+    if (fo && typeof fo == "object") {
+      const foObj = fo;
       var dashboardPinnedFilters = fo.filterOptions?.filter(a => a?.dashboardBehaviour == "PromoteToDasboardPinnedFilter") ?? [];
 
       if (dashboardPinnedFilters.length) {
         Finder.getQueryDescription(fo.queryName)
-          .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, fo!.groupResults ?? false, qd))
+          .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, foObj.groupResults ?? false, qd))
           .then(fops => {
-            p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops));
+            p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(foObj.queryName), fops));
             p.dashboardController.registerInvalidations(p.partEmbedded, () => updateVersion());
           });
       } else {
@@ -53,7 +57,7 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
     }
   }, [fo, p.partEmbedded]);
 
-  const cachedQuery = p.content.userQuery && p.cachedQueries[liteKey(toLite(p.content.userQuery))];
+  //const cachedQuery = p.content.userQuery && p.cachedQueries[liteKey(toLite(p.content.userQuery))];
 
   if (p.content.userQuery == null)
     fo = {
@@ -61,15 +65,15 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
       filterOptions: [{ token: "Entity", value: p.entity }]
     };
 
-
-
-
   const vsc = React.useRef<SearchValueController>(null);
   const forceUpdate = useForceUpdate();
 
 
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
+
+  if (fo == "not-findable")
+    return null;
 
   if (p.dashboardController.isLoading)
     return <span>{JavascriptMessage.loading.niceToString()}...</span>;
@@ -81,7 +85,8 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
     refresh: updateVersion,
   });
 
-  const clickable = p.content.userQuery != null;
+  //const clickable = p.content.userQuery != null;
+  const clickable = p.content.userQuery != null && (p.content.isClickable ?? true)
   const customColor = p.partEmbedded.customColor;
 
   async function handleNavigate(e: React.MouseEvent) {
@@ -118,6 +123,8 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
 
   var custom = p.content.customBigValue ? BigValueClient.renderCustomBigValue(p.content.customBigValue, { content: p.content, entity: p.entity, value: vsc.current?.value }) : null; 
 
+  const tooltipHtml = translated(p.partEmbedded, pe => pe.tooltip);
+
   function renderCardContent() {
     return (
       <>
@@ -140,11 +147,17 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
               <FontAwesomeIcon role="img" icon={parseIcon(p.partEmbedded.iconName)!} color={p.partEmbedded.iconColor ?? undefined} size="2x" />}
           </div>
         </div>
-        <h3 className="medium">{
-          custom?.message ?? (translated(p.partEmbedded, a => a.title) ||
-            (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))
-
-        }</h3>
+        <h2 className="medium h3">
+          {custom?.message ?? (translated(p.partEmbedded, a => a.title) ||
+            (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))}
+          {tooltipHtml && (
+            <DashboardTooltipIcon
+              tooltipHtml={tooltipHtml}
+              className="ms-2"
+              iconClassName="sf-tooltip-icon"
+            />
+          )}
+        </h2>
       </>
     );
   }

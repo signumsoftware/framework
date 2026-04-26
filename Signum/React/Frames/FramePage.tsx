@@ -17,7 +17,7 @@ import { useStateWithPromise, useForceUpdate, useMounted, useDocumentEvent, useW
 import { Operations } from '../Operations'
 import WidgetEmbedded from './WidgetEmbedded'
 import { useTitle } from '../AppContext'
-import { FunctionalAdapter } from '../Modals'
+import { FunctionalAdapter, usePageUIState } from '../Modals'
 import { QueryString } from '../QueryString'
 import { classes } from '../Globals'
 
@@ -54,6 +54,8 @@ export default function FramePage(): React.ReactElement {
     state = undefined;
 
   useTitle(getToString(state?.pack.entity) ?? "", [state?.pack.entity]);
+
+  usePageUIState(() => ({ name: "FramePage", context: state?.pack ?? null }));
 
   useLooseChanges(state && !state.executing ? ({ entity: state.pack.entity, lastEntity: state.lastEntity }) : undefined);
 
@@ -212,7 +214,14 @@ export default function FramePage(): React.ReactElement {
   }
 
   function onClose() {
-    if (Finder.isFindable(params.type!, true))
+    const settings = Navigator.getSettings(params.type!);
+    
+    // If entity has custom navigation route and we have a current entity with an ID, navigate to it
+    if (settings?.onNavigateRoute && stateRef.current?.pack.entity && !stateRef.current.pack.entity.isNew) {
+      const entity = stateRef.current.pack.entity;
+      AppContext.navigate(Navigator.navigateRoute(entity));
+    }
+    else if (Finder.isFindable(params.type!, true))
       AppContext.navigate(Finder.findOptionsPath({ queryName: params.type! }));
     else
       AppContext.navigate("/");
@@ -348,7 +357,7 @@ export default function FramePage(): React.ReactElement {
   function renderTitle() {
 
     if (!state)
-      return <h3 className="display-6 sf-entity-title">{JavascriptMessage.loading.niceToString()}</h3>;
+      return <h1 className="display-6 sf-entity-title h3">{JavascriptMessage.loading.niceToString()}</h1>;
 
     const entity = state.pack.entity;
     const title = Navigator.renderEntity(entity); 
@@ -356,7 +365,7 @@ export default function FramePage(): React.ReactElement {
     const widgets = renderWidgets(wc, settings?.stickyHeader);
 
     return (
-      <h4 className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")} >
+      <h1 className={classes("border-bottom pb-3 mb-2 h4", settings?.stickyHeader && "sf-sticky-header")} >
         {title && <>
           <span className="sf-entity-title">{title}</span>&nbsp;
         </>
@@ -368,7 +377,7 @@ export default function FramePage(): React.ReactElement {
             <br />
           </div>
         }
-      </h4>
+      </h1>
     );
   }
 }

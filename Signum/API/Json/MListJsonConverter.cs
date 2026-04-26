@@ -2,7 +2,6 @@ using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using static System.Net.WebRequestMethods;
 
 namespace Signum.API.Json;
 

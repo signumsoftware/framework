@@ -1060,7 +1060,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         using (var tr = new Transaction())
         {
-            var dic = lites.AgGroupToDictionary(a => a.EntityType, gr =>
+            var dic = lites.GroupAggregateToDictionary(a => a.EntityType, gr =>
                 RetrieveList(gr.Key, gr.Select(a => a.Id).Distinct().ToList(), message).ToDictionaryEx(a => a.Id));
 
             var result = lites.Select(l => (T)(object)dic[l.EntityType][l.Id]).ToList(); // keep same order

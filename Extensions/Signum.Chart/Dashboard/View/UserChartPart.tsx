@@ -8,12 +8,13 @@ import ChartRenderer, { handleDrillDown } from '../../Templates/ChartRenderer'
 import ChartTableComponent from '../../Templates/ChartTable'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
-import { FilterOptionParsed, isActive, isFilterGroup, QueryToken, tokenStartsWith } from '@framework/FindOptions'
+import { FilterOptionParsed, isActive, isFilterGroup } from '@framework/FindOptions'
 import { DashboardBehaviour } from '@framework/Signum.DynamicQuery'
 import { softCast } from '@framework/Globals'
 import { DashboardClient, PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 import { UserChartPartEntity } from '../../UserChart/Signum.Chart.UserChart'
 import { DashboardFilter, DashboardFilterRow, DashboardPinnedFilters, equalsDFR } from '../../../Signum.Dashboard/View/DashboardFilterController'
+import { QueryToken, tokenStartsWith } from '@framework/QueryToken'
 
 export interface UserChartPartHandler {
   chartRequest: ChartRequestModel | undefined;
@@ -136,7 +137,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   if (resultOrError?.error) {
     return (
       <div>
-        <h4>Error!</h4>
+        <h1 className="h4">Error!</h1>
         {renderError(resultOrError.error)}
       </div>
     );

@@ -23,7 +23,7 @@ export class MultiValueLineController<V> extends LineBaseController<MultiValueLi
 
   keyGenerator: KeyGenerator = new KeyGenerator();
 
-  getDefaultProps(p: MultiValueLineProps<V>): void {
+  override getDefaultProps(p: MultiValueLineProps<V>): void {
     if (p.ctx.value == undefined)
       p.ctx.value = [];
 

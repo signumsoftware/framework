@@ -1,6 +1,6 @@
 
 import * as React from 'react'
-import { openModal, IModalProps, IHandleKeyboard, FunctionalAdapter } from '../Modals'
+import { openModal, IModalProps, IHandleKeyboard, IGetUIState, UIState, FunctionalAdapter } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
 import { Navigator, ViewPromise } from '../Navigator'
 import * as AppContext from '../AppContext';
@@ -8,7 +8,7 @@ import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { ValidationError } from '../Services'
 import { classes, ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges, ButtonsContext } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, FrameMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity, SaveChangesMessage, ModelEntity } from '../Signum.Entities'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, FrameMessage, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity, SaveChangesMessage, ModelEntity } from '../Signum.Entities'
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
 import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
@@ -40,8 +40,7 @@ interface FrameModalProps<T extends ModifiableEntity> extends IModalProps<T | un
   readOnly?: boolean;
   modalSize?: BsSize;
   createNew?: () => Promise<EntityPack<T> | undefined>;
-  ref?: React.Ref<IHandleKeyboard>
-  innerRef?: React.Ref<IHandleKeyboard>
+  ref?: React.Ref<IHandleKeyboard & IGetUIState>
 }
 
 let modalCount = 0;
@@ -68,11 +67,14 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
 
   const forceUpdate = useForceUpdate();
 
-  React.useImperativeHandle(p.innerRef, () => ({
+  React.useImperativeHandle(p.ref, () => ({
     handleKeyDown(e: KeyboardEvent) {
       buttonBar.current && buttonBar.current.handleKeyDown(e);
+    },
+    getUIState(): UIState {
+      return { name: "FrameModal", context: state?.pack ?? null };
     }
-  }));
+  }), [state]);
   const typeName = getTypeName(p.entityOrPack);
   const typeInfo = tryGetTypeInfo(typeName);
 
@@ -198,13 +200,15 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
 
           if (result instanceof EntityOperationContext) {
 
-            result.onExecuteSuccess = pack => {
-              Operations.notifySuccess();
-              frameRef.current!.onClose?.(pack);
-              return Promise.resolve();
-            };
+            frame.execute(() => {
+              result.onExecuteSuccess = pack => {
+                Operations.notifySuccess();
+                frameRef.current!.onClose?.(pack);
+                return Promise.resolve();
+              };
 
-            result.defaultClick();
+              return result.defaultClick();
+            });
           }
         });
     }
@@ -421,7 +425,7 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
       return undefined;
 
     return (
-      <LinkButton className="sf-popup-fullscreen sf-pointer" tabIndex={0} onClick={handlePopupFullScreen} title={FrameMessage.Fullscreen.niceToString()}>
+      <LinkButton className="sf-popup-fullscreen sf-pointer" tabIndex={0} onClick={handlePopupFullScreen} onAuxClick={handlePopupFullScreen} title={FrameMessage.Fullscreen.niceToString()}>
         <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
       </LinkButton>
     );
@@ -432,6 +436,7 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
     e.preventDefault();
 
     var entity = pack!.entity;
+
     var vp = getViewPromise && getViewPromise(entity);
     AppContext.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
   }

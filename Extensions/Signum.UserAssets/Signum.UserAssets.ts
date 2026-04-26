@@ -50,7 +50,7 @@ export namespace UserAssetPermission {
 export const UserAssetPreviewLineEmbedded: Type<UserAssetPreviewLineEmbedded> = new Type<UserAssetPreviewLineEmbedded>("UserAssetPreviewLineEmbedded");
 export interface UserAssetPreviewLineEmbedded extends Entities.EmbeddedEntity {
   Type: "UserAssetPreviewLineEmbedded";
-  type: Basics.TypeEntity | null;
+  type: Basics.TypeEntity;
   text: string;
   entityType: Basics.TypeEntity | null;
   action: EntityAction;

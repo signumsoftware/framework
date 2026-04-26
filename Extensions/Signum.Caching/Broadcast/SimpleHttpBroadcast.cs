@@ -1,4 +1,3 @@
-using Azure.Core;
 using Signum.API.Json;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -16,9 +15,9 @@ public class SimpleHttpBroadcast : IServerBroadcast
 
     public SimpleHttpBroadcast(string broadcastSecret, string broadcastUrls)
     {
-        this.bordcastSecretHash = Convert.ToBase64String(PasswordEncoding.EncodePassword("", broadcastSecret));
+        this.bordcastSecretHash = Convert.ToBase64String(PasswordEncoding.HashPassword("", broadcastSecret));
         this.broadcastUrls = broadcastUrls
-            .SplitNoEmpty(new char[] { ';', ',' } /*In theory ; and , are valid in a URL, but since we talk only domain names or IPs...*/)
+            .SplitNoEmpty(';', ',' /*In theory ; and , are valid in a URL, but since we talk only domain names or IPs...*/)
             .Select(a => a.Trim())
             .Where(a => a.HasText())
             .ToArray();

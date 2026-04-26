@@ -11,6 +11,7 @@ import "../Translation.css"
 import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Hooks'
 import { EntityLink } from '@framework/Search'
 import { DiffDocumentSimple } from '../../Signum.DiffLog/Templates/DiffDocument'
+import "../../Signum.DiffLog/Templates/DiffLog.css"
 import TextArea from '@framework/Components/TextArea'
 import { KeyNames } from '@framework/Components'
 import { useTitle } from '@framework/AppContext'
@@ -85,7 +86,7 @@ export default function TranslationInstanceView(): React.JSX.Element {
   return (
     <div>
       <div className="mb-2">
-        <h2><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
+        <h1 className="h2"><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h1>
         <TranslateSearchBox setFilter={setFilter} filter={filter ?? ""} />
         {culture == null && <label style={{ float: 'right' }}>
           <input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} /> {TranslationMessage.OnlyNeutralCultures.niceToString()}

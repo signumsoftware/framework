@@ -379,15 +379,17 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
         }
     }
 
-    public static Func<AutoReplacementContext, Selection?>? AutoReplacement;
+    public static Func<AutoReplacementContext, Selection?>? GlobalAutoReplacement;
+    public Func<AutoReplacementContext, Selection?>? AutoReplacement;
     public static Action<string, string, string?>? ResponseRecorder;//  replacementsKey,oldValue,newValue
 
     //public static Dictionary<String, Replacements.Selection>? cases ;
-    public static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive, ref bool alwaysNoRename)
+    public Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive, ref bool alwaysNoRename)
     {
-        if (AutoReplacement != null)
+        var autoReplacement = AutoReplacement ?? GlobalAutoReplacement;
+        if (autoReplacement != null)
         {
-            Selection? selection = AutoReplacement(new AutoReplacementContext(replacementsKey, oldValue, newValues));
+            Selection? selection = autoReplacement(new AutoReplacementContext(replacementsKey, oldValue, newValues));
             if (selection != null)
             {
                 SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "AutoReplacement:");

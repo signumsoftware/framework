@@ -4,7 +4,10 @@ import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, Dic, softCast } from '@framework/Globals'
 import { Finder } from '@framework/Finder'
-import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement, getToString, Entity, toMList, translated } from '@framework/Signum.Entities'
+import {
+  parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage,
+  MList, MListElement, getToString, Entity, toMList, translated
+} from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
 import { SystemTimeEmbedded, UserQueryEntity, UserQueryLiteModel, UserQueryMessage, UserQueryOperation, UserQueryPermission } from './Signum.UserQueries'
@@ -14,7 +17,7 @@ import { Dropdown } from 'react-bootstrap';
 import { getQueryKey } from '@framework/Reflection';
 import { Operations } from '@framework/Operations';
 import { FilterOption, FilterOptionParsed } from '@framework/Search'
-import { FindOptionsParsed, isFilterCondition, isFilterGroup, PinnedFilter, SubTokensOptions } from '@framework/FindOptions'
+import { FindOptionsParsed, isFilterCondition, isFilterGroup, PinnedFilter } from '@framework/FindOptions'
 import { QueryString } from '@framework/QueryString'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyNames } from '@framework/Components'
@@ -23,6 +26,7 @@ import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { useForceUpdate } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryColumnEmbedded, QueryFilterEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries'
 import FramePage from '@framework/Frames/FramePage'
+import { SubTokensOptions } from '@framework/QueryToken'
 import { AuthAdminClient } from '../Signum.Authorization/AuthAdminClient'
 
 export interface UserQueryMenuProps {
@@ -138,7 +142,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     Navigator.API.fetch(uq).then(userQuery => {
       const sc = p.searchControl;
       const oldFindOptions = sc.props.findOptions;
-      UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, sc.props.extraOptions?.entity, sc.props.defaultIncudeDefaultFilters)
+      UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, currentEntity ?? sc.props.extraOptions?.entity, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
           sc.setState({ refreshMode: userQuery.refreshMode });
           sc.handleChangeFiltermode(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions) ? 'Simple' : "Advanced", false, true);

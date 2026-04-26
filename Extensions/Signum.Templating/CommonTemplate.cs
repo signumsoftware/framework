@@ -13,7 +13,7 @@ public static class TemplateUtils
 {
     public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<expr>(?>[^\[\]]+|\[(?<open>)|\](?<-open>))*(?(open)(?!))?)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
 
-    public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>((?<type>[\w]):)?.+?)(?<operation>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]]+)");
+    public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>((?<type>[\w]):)?.+?) *(?<operation>(" + FilterValueConverter.OperationRegex + @")) *(?<value>[^\]]+)");
 
     public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>((?<type>[\w]):)?((\[[^\[\]]+\])|([^\[\]\:]+))+)(\:(?<format>.*))?");
     
@@ -318,10 +318,13 @@ public class TemplateSynchronizationContext
     public StringDistance StringDistance;
     public QueryDescription? QueryDescription;
 
+    public IEntity Template; 
+
     public bool HasChanges;
 
-    public TemplateSynchronizationContext(Replacements replacements, StringDistance stringDistance, QueryDescription? queryDescription, Type? modelType)
+    public TemplateSynchronizationContext(IEntity template, Replacements replacements, StringDistance stringDistance, QueryDescription? queryDescription, Type? modelType)
     {
+        Template = template;
         Variables = new ScopedDictionary<string, ValueProviderBase>(null);
         ModelType = modelType;
         Replacements = replacements;
@@ -330,74 +333,60 @@ public class TemplateSynchronizationContext
         HasChanges = false;
     }
 
-    internal void SynchronizeToken(ParsedToken parsedToken, string remainingText)
+    internal void SynchronizeToken(ParsedToken parsedToken, string remainingText, bool forceChange)
     {
-        if (parsedToken.QueryToken == null)
+        if (parsedToken.QueryToken != null)
+            return;
+
+        if (this.QueryDescription == null)
+            throw new InvalidOperationException("Unable to Sync token without QueryDescription: " + parsedToken);
+
+        string tokenString = parsedToken.String;
+
+        if (tokenString.StartsWith("$"))
         {
-            if (this.QueryDescription == null)
-                throw new InvalidOperationException("Unable to Sync token without QueryDescription: " + parsedToken);
+            string v = tokenString.TryBefore('.') ?? tokenString;
 
-            string tokenString = parsedToken.String;
+            if (!Variables.TryGetValue(v, out ValueProviderBase? prov))
+                SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' not found!".FormatWith(v));
 
-            if (tokenString.StartsWith("$"))
-            {
-                string v = tokenString.TryBefore('.') ?? tokenString;
+            var provToken = prov as TokenValueProvider;
+            if (!(provToken is TokenValueProvider))
+                SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' is not a Query Token");
 
-                if (!Variables.TryGetValue(v, out ValueProviderBase? prov))
-                    SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' not found!".FormatWith(v));
+            var part = provToken?.ParsedToken;
 
-                var provToken = prov as TokenValueProvider;
-                if (!(provToken is TokenValueProvider))
-                    SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' is not a Query Token");
+            if (part != null && part.QueryToken == null)
+                SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' is not fixed yet! currently: '{1}'".FormatWith(v, part.String));
 
-                var part = provToken?.ParsedToken; 
+            var after = tokenString.TryAfter('.');
 
-                if (part != null && part.QueryToken == null)
-                    SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' is not fixed yet! currently: '{1}'".FormatWith(v, part.String));
-
-                var after = tokenString.TryAfter('.');
-
-                tokenString =
-                    (part == null ? "Unknown" :
-                    part.QueryToken == null ? part.String :
-                    part.QueryToken.FullKey()) + (after == null ? null : ("." + after));
-            }
-
-            SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
-            Console.WriteLine(" " + remainingText);
-
-            FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null);
-            switch (result)
-            {
-                case FixTokenResult.Nothing:
-                case FixTokenResult.Fix:
-                    this.HasChanges = true;
-                    parsedToken.QueryToken = token;
-                    parsedToken.String = token!.FullKey();
-                    break;
-                case FixTokenResult.SkipEntity:
-                case FixTokenResult.RemoveToken:
-                case FixTokenResult.RegenerateEntity:
-                    throw new TemplateSyncException(result);
-            }
+            tokenString =
+                (part == null ? "Unknown" :
+                part.QueryToken == null ? part.String :
+                part.QueryToken.FullKey()) + (after == null ? null : ("." + after));
         }
-    }
 
-    public void SynchronizeValue(Type targetType, ref string? value, bool isList, Type? currentEntityType)
-    {
-        string? val = value;
-        FixTokenResult result = QueryTokenSynchronizer.FixValue(Replacements, targetType, ref val, allowRemoveToken: false, isList: isList, currentEntityType);
+        Console.WriteLine(this.Template.GetType().Name + ": " + this.Template.ToString());
+        SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
+        Console.WriteLine(" " + remainingText);
+
+        FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/ | SubTokensOptions.CanNested, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null, forceChange);
         switch (result)
         {
-            case FixTokenResult.Fix:
             case FixTokenResult.Nothing:
-                value = val;
+            case FixTokenResult.Fix:
+                this.HasChanges = true;
+                parsedToken.QueryToken = token;
+                parsedToken.String = token!.FullKey();
                 break;
             case FixTokenResult.SkipEntity:
             case FixTokenResult.RemoveToken:
+            case FixTokenResult.RegenerateEntity:
                 throw new TemplateSyncException(result);
         }
     }
+
 
 
     internal List<MemberWithArguments>? GetMembers(string fieldOrPropertyChain, Type initialType, ref bool hasChanges)

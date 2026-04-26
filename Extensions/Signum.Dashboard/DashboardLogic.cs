@@ -3,20 +3,18 @@ using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
-using Signum.UserAssets;
 using Signum.Files;
+using Signum.Omnibox;
 using Signum.Scheduler;
-using Signum.UserAssets.Queries;
+using Signum.Toolbar;
+using Signum.UserAssets;
 using Signum.Utilities.Reflection;
+using Signum.ViewLog;
+using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Xml.Linq;
-using Signum.ViewLog;
-using Signum.Toolbar;
-using Signum.API;
-using Signum.Omnibox;
-using System.Collections.Frozen;
 
 namespace Signum.Dashboard;
 
@@ -315,14 +313,6 @@ public static class DashboardLogic
         return result;
     }
 
-    public static void RegisterTranslatableRoutes()
-    {
-        PropertyRouteTranslationLogic.RegisterRoute((DashboardEntity d) => d.DisplayName);
-        PropertyRouteTranslationLogic.RegisterRoute((DashboardEntity d) => d.Parts[0].Title);
-        if (Schema.Current.Tables.ContainsKey(typeof(TextPartEntity)))
-            PropertyRouteTranslationLogic.RegisterRoute((TextPartEntity tp) => tp.TextContent);
-    }
-
     public static List<DashboardEntity> GetEmbeddedDashboards(Type entityType)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
@@ -404,23 +394,20 @@ public static class DashboardLogic
         return CachedQueriesCache.Value.TryGetC(dashboard).EmptyIfNull();
     }
 
-    public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+    public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) => 
+        RegisterTypeCondition(sb, typeCondition, typeof(UserEntity), d => d.Owner.Is(UserEntity.Current));
+
+    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
+        RegisterTypeCondition(sb, typeCondition, typeof(RoleEntity), d => d.Owner == null || AuthLogic.CurrentRoles().Contains(d.Owner));
+
+    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Type ownerType, Expression<Func<DashboardEntity, bool>> condition, Func<DashboardEntity, bool>? imMemoryCondition = null)
     {
-        sb.Schema.Settings.AssertImplementedBy((DashboardEntity uq) => uq.Owner, typeof(UserEntity));
+        sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Owner, ownerType);
 
-        RegisterTypeCondition(typeCondition, uq => uq.Owner.Is(UserEntity.Current));
-    }
-
-    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
-    {
-        sb.Schema.Settings.AssertImplementedBy((DashboardEntity uq) => uq.Owner, typeof(RoleEntity));
-
-        RegisterTypeCondition(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
-    }
-
-    public static void RegisterTypeCondition(TypeConditionSymbol typeCondition, Expression<Func<DashboardEntity, bool>> conditionExpression)
-    {
-        TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition, conditionExpression);
+        if (imMemoryCondition == null)
+            TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition, condition);
+        else
+            TypeConditionLogic.Register<DashboardEntity>(typeCondition, condition, imMemoryCondition);
 
         TypeConditionLogic.Register<TokenEquivalenceGroupEntity>(typeCondition,
             teg => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.TokenEquivalencesGroups.Contains(teg)),

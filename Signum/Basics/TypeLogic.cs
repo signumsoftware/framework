@@ -32,6 +32,12 @@ public static class TypeLogic
         get { return Schema.Current.typeCachesLazy.Value.LiteToType; }
     }
 
+    public static TypeEntity RetrieveFromCache(this Lite<TypeEntity> type)
+    {
+        var lazy = Schema.Current.typeCachesLazy.Value;
+        var t = lazy.LiteToType.GetOrThrow(type);
+        return lazy.TypeToEntity.GetOrThrow(t);
+    }
 
     public static void AssertStarted(SchemaBuilder sb)
     {
@@ -227,6 +233,11 @@ public static class TypeLogic
     public static string? TryGetCleanName(Type type)
     {
         return TypeToName.TryGetC(type);
+    }
+
+    public static void AssertLoaded()
+    {
+        var a = TypeToId.Values;
     }
 }
 

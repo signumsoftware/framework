@@ -10,7 +10,6 @@ using Signum.Engine.Sync;
 using Microsoft.Data.SqlClient;
 using Signum.Engine.Sync.SqlServer;
 using Signum.API;
-using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Caching;
 
@@ -67,7 +66,7 @@ public static class CacheLogic
         if (withSqlDependency == true && !Connector.Current.SupportsSqlDependency)
             throw new InvalidOperationException("Sql Dependency is not supported by the current connection");
 
-        WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency;
+        WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency && serverBroadcast == null;
 
         if (serverBroadcast != null && WithSqlDependency)
             throw new InvalidOperationException("cacheInvalidator is only necessary if SqlDependency is not enabled");
@@ -162,11 +161,18 @@ public static class CacheLogic
         }
         else
         {
-            var list = CacheLogic.semiControllers.GetOrThrow(type);
-            foreach (var sc in list)
+            // Could be null when notifying an entity not cached but inverseDependencies, example:
+            // Master -> Lite (Transactional) -> Lite (Transactional)
+            // Cached  <-  Semi Cached            Not Cached at all but invalidated
+            //         <-------------------------
+            var list = CacheLogic.semiControllers.TryGetC(type);
+            if (list != null)
             {
-                sc.ResetAll(forceReset: false);
-                sc.controller.NotifyInvalidated();
+                foreach (var sc in list)
+                {
+                    sc.ResetAll(forceReset: false);
+                    sc.controller.NotifyInvalidated();
+                }
             }
         }
     }
@@ -299,7 +305,7 @@ public static class CacheLogic
     }
 
 
-    readonly static object startKeyLock = new object();
+    readonly static Lock startKeyLock = new();
     public static void StartSqlDependencyAndEnableBrocker()
     {
         if (!WithSqlDependency)

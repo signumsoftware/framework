@@ -47,8 +47,8 @@ public class WorkflowController : Controller
     public class EntityPackWorkflow
     {
         public CaseActivityEntity Activity { get; set; }
-        public Dictionary<string, string> CanExecuteActivity { get; set; }
-        public Dictionary<string, string> CanExecuteMainEntity { get; set; }
+        public Dictionary<string, string?> CanExecuteActivity { get; set; }
+        public Dictionary<string, string?> CanExecuteMainEntity { get; set; }
 
         [JsonExtensionData]
         public Dictionary<string, object?> Extension { get; set; } = new Dictionary<string, object?>();

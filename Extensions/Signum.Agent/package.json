@@ -1,0 +1,15 @@
+{
+  "name": "signum-chatbot",
+  "version": "1.0.0",
+  "description": "Resable modules to use on top of Signum Framework",
+  "repository": "",
+  "keywords": [],
+  "author": "Signum Software",
+  "license": "MIT",
+  "resolutions": {
+  },
+  "dependencies": {
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1"
+  }
+}

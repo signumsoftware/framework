@@ -14,7 +14,7 @@ export interface ValueBaseProps<V = any> extends LineBaseProps<V> {
 export class ValueBaseController<T extends ValueBaseProps<V>, V> extends LineBaseController<T, V> {
 
   inputElement!: React.RefObject<HTMLElement | null>;
-  init(p: T): void {
+  override init(p: T): void {
     super.init(p);
 
     this.inputElement = React.useRef<HTMLElement>(null);
@@ -31,7 +31,7 @@ export class ValueBaseController<T extends ValueBaseProps<V>, V> extends LineBas
       throw new Error(`Invalid type '${this.props.type?.name}'' in ${tagName} for ${this.props.ctx.propertyPath ?? this.props.ctx.prefix}`)
   }
 
-  overrideProps(state: T, overridenProps: T): void {
+  override overrideProps(state: T, overridenProps: T): void {
 
       const valueHtmlAttributes = { ...state.valueHtmlAttributes, ...Dic.simplify(overridenProps.valueHtmlAttributes) };
       super.overrideProps(state, overridenProps);

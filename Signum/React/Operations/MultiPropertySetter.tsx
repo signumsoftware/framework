@@ -18,12 +18,13 @@ import { openModal, IModalProps } from '../Modals'
 import { Modal } from 'react-bootstrap'
 import { ErrorBoundary } from '../Components'
 import './MultiPropertySetter.css';
-import { FilterOperation, filterOperations, getFilterType } from '../FindOptions'
+import { FilterOperation, filterOperations } from '../FindOptions'
 import { PropertyOperation } from '../Signum.Operations'
 import { CollectionMessage } from '../Signum.External'
 import { EnumLine } from '../Lines/EnumLine'
 import { AutoLine } from '../Lines/AutoLine'
 import SelectorModal from '../SelectorModal'
+import { getFilterType } from '../QueryToken'
 import { LinkButton } from '../Basics/LinkButton'
 
 
@@ -32,7 +33,6 @@ interface MultiPropertySetterModalProps extends IModalProps<boolean | undefined>
   lites: Lite<Entity>[];
   operationInfo: OperationInfo;
   setters: Operations.API.PropertySetter[];
-  mandatory: boolean;
 }
 
 export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): React.ReactElement {
@@ -57,7 +57,7 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): Reac
   return (
     <Modal onHide={handleCancelClicked} show={show} className="message-modal" size="xl" onExited={handleOnExited}>
       <div className="modal-header">
-        <h5 className="modal-title">{OperationMessage.BulkModifications.niceToString()}</h5>
+        <h1 className="modal-title h5">{OperationMessage.BulkModifications.niceToString()}</h1>
         <button type="button" className="btn-close" data-dismiss="modal" aria-label={EntityControlMessage.Close.niceToString()} onClick={handleCancelClicked}/>
       </div>
       <div className="modal-body">
@@ -74,7 +74,8 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): Reac
             )}
         </p>
         <br />
-        <button className="btn btn-primary sf-entity-button sf-ok-button" aria-disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} onClick={handleOkClicked}>
+        <button className="btn btn-primary sf-entity-button sf-ok-button" 
+          disabled={p.setters.some(s => !isValid(s))} onClick={handleOkClicked}>
           {JavascriptMessage.ok.niceToString()}
         </button>
         <button className="btn btn-tertiary sf-entity-button sf-close-button" onClick={handleCancelClicked}>
@@ -90,9 +91,9 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps): Reac
 }
 
 export namespace MultiPropertySetterModal {
-  export function show(typeInfo: TypeInfo, lites: Lite<Entity>[], operationInfo: OperationInfo, mandatory: boolean, setters?: Operations.API.PropertySetter[]): Promise<Operations.API.PropertySetter[] | undefined> {
+  export function show(typeInfo: TypeInfo, lites: Lite<Entity>[], operationInfo: OperationInfo, setters?: Operations.API.PropertySetter[]): Promise<Operations.API.PropertySetter[] | undefined> {
     var settersOrDefault = setters ?? [{ property: null!, operation: null! } as Operations.API.PropertySetter];
-    return openModal<boolean | undefined>(<MultiPropertySetterModal typeInfo={typeInfo} lites={lites} operationInfo={operationInfo} mandatory={mandatory} setters={settersOrDefault} />).then(a => a ? settersOrDefault : undefined);
+    return openModal<boolean | undefined>(<MultiPropertySetterModal typeInfo={typeInfo} lites={lites} operationInfo={operationInfo} setters={settersOrDefault} />).then(a => a ? settersOrDefault : undefined);
   };
 }
 
@@ -311,12 +312,12 @@ export function PropertySetterComponent(p: PropertySetterComponentProps): React.
             <>
               {p.setter.property && p.setter.operation && showValue(p.setter.operation) && renderValue()}
               {subRoot && p.setter.operation && showPredicate(p.setter.operation) && pr && <div>
-                <h5>{OperationMessage.Condition.niceToString()}</h5>
+                <h2 className="h5">{OperationMessage.Condition.niceToString()}</h2>
                 <MultiPropertySetter onChange={p.onSetterChanged} setters={p.setter.predicate!} isPredicate={true} root={subRoot} />
               </div>
               }
               {subRoot && p.setter.operation && showSetters(p.setter.operation) && pr && <div>
-                <h5>{OperationMessage.Setters.niceToString()}</h5>
+                <h2 className="h5">{OperationMessage.Setters.niceToString()}</h2>
                 <MultiPropertySetter onChange={p.onSetterChanged} setters={p.setter.setters!} isPredicate={false} root={subRoot} />
               </div>
               }

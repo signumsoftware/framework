@@ -38,7 +38,7 @@ export default function TextIfFits({ maxWidth, padding, children, etcText, onCli
     : {};
 
   return (
-    <text ref={txt} {...atts} {...accessibilityPropsOnClick}>
+    <text ref={txt} {...atts} {...accessibilityPropsOnClick} onClick={onClick}>
       {children ?? ""}
     </text>
   );

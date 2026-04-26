@@ -1,19 +1,18 @@
-using Microsoft.Extensions.Logging.Abstractions;
-using Signum.API;
+using Signum.API.Filters;
 using Signum.Authorization.AuthToken;
 using Signum.Authorization.Rules;
-using Signum.Entities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections.Frozen;
 using System.IO;
 using System.Xml.Linq;
+using static Signum.Engine.Sync.Replacements;
 
 namespace Signum.Authorization;
 
 public static class AuthLogic
 {
-    public static event Action<UserEntity>? UserLogingIn;
+    public static event Action<UserEntity, string/*loginMethod*/>? UserLogingIn;
     public static ICustomAuthorizer? Authorizer;
 
     public static ResetLazy<HashSet<Lite<UserEntity>>> RecentlyUsersDisabled;
@@ -82,6 +81,8 @@ public static class AuthLogic
 
         SystemUserName = systemUserName;
         AnonymousUserName = anonymousUserName;
+
+        UserLogingIn += OnLogin_UpdateUserCulture;
 
         RoleEntity.RetrieveFromCache = r => RolesByLite.Value.GetOrThrow(r);
 
@@ -155,6 +156,20 @@ public static class AuthLogic
 
     }
 
+    private static void OnLogin_UpdateUserCulture(UserEntity user, string loginMethod)
+    {
+        if(user.CultureInfo == null && SignumCurrentContextFilter.CurrentContext is { } cc)
+        {
+            using (Disable())
+            using (OperationLogic.AllowSave<UserEntity>())
+            {
+                user.CultureInfo = CultureServer.InferUserCulture(cc.HttpContext);
+                UserHolder.Current = new UserWithClaims(user);
+                user.Save();
+            }
+        }
+    }
+
     public static Lite<RoleEntity> GetOrCreateTrivialMergeRole(List<Lite<RoleEntity>> roles, Dictionary<string, Lite<RoleEntity>>? newRoles = null)
     {
         roles = roles.Distinct().ToList();
@@ -205,6 +220,8 @@ public static class AuthLogic
                 EntityCache.AddFullGraph(role);
                 var allRoles = Database.RetrieveAll<RoleEntity>();
 
+                var roleToTrivialMerge = allRoles.ToDictionary(a => a.ToLite(), a => a.IsTrivialMerge);
+
                 if (role.InheritsFrom.IsGraphModified)
                 {
                     var roleGraph = DirectedGraph<RoleEntity>.Generate(allRoles, r => r.InheritsFrom.Select(sr => sr.RetrieveAndRemember()));
@@ -219,7 +236,7 @@ public static class AuthLogic
 
                 var dic = allRoles.ToDictionary(a => a.ToLite());
 
-                var problems2 = allRoles.SelectMany(r => r.InheritsFrom.Where(inh => RolesByLite.Value.GetOrThrow(inh).IsTrivialMerge).Select(inh => new { r, inh })).ToList();
+                var problems2 = allRoles.SelectMany(r => r.InheritsFrom.Where(inh => roleToTrivialMerge.GetOrThrow(inh)).Select(inh => new { r, inh })).ToList();
                 if (problems2.Any())
                     throw new ApplicationException(
                         problems2.GroupBy(a => a.r, a => a.inh)
@@ -229,9 +246,7 @@ public static class AuthLogic
 
             if (!role.IsTrivialMerge)
             {
-                var trivialDependant = rolesInverse.Value.IndirectlyRelatedTo(role.ToLite())
-                    .Select(r => RolesByLite.Value.GetOrThrow(r))
-                    .Where(a => a.IsTrivialMerge);
+                var trivialDependant = Database.Query<RoleEntity>().Where(a => a.IsTrivialMerge && a.InheritsFrom.Contains(role.ToLite())).ToList();
 
                 if (trivialDependant.Any())
                 {
@@ -349,25 +364,25 @@ public static class AuthLogic
         set { globallyEnabled = value; }
     }
 
-    static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");
+    static readonly Variable<bool?> tempEnabled = Statics.ThreadVariable<bool?>("authTempDisabled");
 
-    public static IDisposable? Disable()
+    public static IDisposable Disable()
     {
-        if (tempDisabled.Value) return null;
-        tempDisabled.Value = true;
-        return new Disposable(() => tempDisabled.Value = false);
+        var oldValue = tempEnabled.Value;
+        tempEnabled.Value = false;
+        return new Disposable(() => tempEnabled.Value = oldValue);
     }
 
-    public static IDisposable? Enable()
+    public static IDisposable Enable()
     {
-        if (!tempDisabled.Value) return null;
-        tempDisabled.Value = false;
-        return new Disposable(() => tempDisabled.Value = true);
+        var oldValue = tempEnabled.Value;
+        tempEnabled.Value = true;
+        return new Disposable(() => tempEnabled.Value = oldValue);
     }
 
     public static bool IsEnabled
     {
-        get { return !tempDisabled.Value && globallyEnabled; }
+        get { return tempEnabled.Value ?? globallyEnabled; }
     }
 
     public static event Action? OnRulesChanged;
@@ -377,13 +392,20 @@ public static class AuthLogic
         OnRulesChanged?.Invoke();
     }
 
-    public static UserEntity Login(string username, IList<byte[]> passwordHashes, out string authenticationType)
+    public static UserEntity Login(string username, string password, out string authenticationType)
+    {
+        return Login(username,
+            PasswordEncoding.HashPassword(username, password),
+            PasswordEncoding.HashPasswordAlternatives(username, password),
+            out authenticationType);
+    }
+
+    public static UserEntity Login(string username, byte[] passwordHash, IList<byte[]> alternativePasswordHashes, out string authenticationType)
     {
         using (AuthLogic.Disable())
         {
-            UserEntity user = RetrieveUser(username, passwordHashes);
-
-            OnUserLogingIn(user);
+            UserEntity user = RetrieveUser(username, passwordHash, alternativePasswordHashes);
+            OnUserLogingIn(user, nameof(Login));
 
             authenticationType = "database";
 
@@ -391,14 +413,14 @@ public static class AuthLogic
         }
     }
 
-    public static void OnUserLogingIn(UserEntity user)
+    public static void OnUserLogingIn(UserEntity user, string loginMethod)
     {
-        UserLogingIn?.Invoke(user);
+        UserLogingIn?.Invoke(user, loginMethod);
     }
 
     public static Action<UserEntity>? OnDeactivateUser;
 
-    public static UserEntity RetrieveUser(string username, IList<byte[]> passwordHashes)
+    public static UserEntity RetrieveUser(string username, byte[] passwordHash, IList<byte[]> alternativePasswordHashes)
     {
         using (AuthLogic.Disable())
         {
@@ -408,7 +430,7 @@ public static class AuthLogic
                 throw new IncorrectUsernameException(LoginAuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
 
-            if (user.PasswordHash == null || (!passwordHashes.Any(passwordHash => passwordHash.SequenceEqual(user.PasswordHash))))
+            if (user.PasswordHash == null || (!alternativePasswordHashes.PreAnd(passwordHash).Any(passwordHash => passwordHash.SequenceEqual(user.PasswordHash))))
             {
                 using (UserHolder.UserSession(SystemUser!))
                 {
@@ -440,9 +462,9 @@ public static class AuthLogic
                 }
             }
 
-            if (!user.PasswordHash.SequenceEqual(passwordHashes.Last()))
+            if (!user.PasswordHash.SequenceEqual(passwordHash))
             {
-                user.PasswordHash = passwordHashes.Last();
+                user.PasswordHash = passwordHash;
 
                 using (AuthLogic.Disable())
                 using (OperationLogic.AllowSave<UserEntity>())
@@ -453,6 +475,14 @@ public static class AuthLogic
 
             return user;
         }
+    }
+
+    public static UserEntity? TryRetrieveUser(string username, string password)
+    {
+        return TryRetrieveUser(username, [
+            PasswordEncoding.HashPassword(username, password),
+            ..PasswordEncoding.HashPasswordAlternatives(username, password)
+        ]);
     }
 
     public static UserEntity? TryRetrieveUser(string username, IList<byte[]> passwordHashes)
@@ -632,15 +662,18 @@ public static class AuthLogic
             roles.Values.SaveList();
     }
 
-    public static void SynchronizeRoles(XDocument doc, bool interactive = true)
+    public static void SynchronizeRoles(XDocument doc, bool interactive, Func<AutoReplacementContext, Selection?>? autoReplacement = null)
     {
         Table table = Schema.Current.Table(typeof(RoleEntity));
         TableMList relationalTable = table.TablesMList().Single();
 
         Dictionary<string, XElement> rolesXml = doc.Root!.Element("Roles")!.Elements("Role").ToDictionary(x => x.Attribute("Name")!.Value);
 
-        Dictionary<string, RoleEntity> rolesDic = Database.Query<RoleEntity>().Where(a => !a.IsTrivialMerge).ToDictionary(a => a.ToString());
-        Replacements replacements = new Replacements { Interactive = interactive }; 
+        var dbRoles = Database.Query<RoleEntity>().Where(a => a.IsTrivialMerge == false).ToDictionaryEx(a => a.ToLite());
+        Dictionary<string, RoleEntity> rolesDic =  AuthLogic.RolesInOrder(includeTrivialMerge: false).Reverse().Select(r => dbRoles.GetOrThrow(r)).ToDictionary(a => a.ToString());
+        
+        Replacements replacements = new Replacements { Interactive = interactive, AutoReplacement = autoReplacement };
+
         replacements.AskForReplacements(rolesDic.Keys.ToHashSet(), rolesXml.Keys.ToHashSet(), "Roles");
         rolesDic = replacements.ApplyReplacementsToOld(rolesDic, "Roles");
 
@@ -650,20 +683,70 @@ public static class AuthLogic
             var roleInsertsDeletes = Synchronizer.SynchronizeScript(Spacing.Double,
                 rolesXml,
                 rolesDic,
-                createNew: (name, xElement) => table.InsertSqlSync(new RoleEntity
+                createNew: (name, xElement) =>
                 {
-                    Name = name,
-                    MergeStrategy = xElement.Attribute("MergeStrategy")?.Value.ToEnum<MergeStrategy>() ?? MergeStrategy.Union,
-                    Description = xElement.Attribute("Description")?.Value,
-                    IsTrivialMerge = false,
-                }, includeCollections: false),
+                    var newRole = new RoleEntity
+                    {
+                        Name = name,
+                        MergeStrategy = xElement.Attribute("MergeStrategy")?.Value.ToEnum<MergeStrategy>() ?? MergeStrategy.Union,
+                        Description = xElement.Attribute("Description")?.Value,
+                        IsTrivialMerge = false,
+                    };
+
+                    if (interactive)
+                        return table.InsertSqlSync(newRole, includeCollections: false);
+                    else
+                    {
+                        Console.WriteLine("Created:" + newRole.ToString());
+                        newRole.Save();
+                        return null;
+                    }
+                },
 
                 removeOld: (name, role) =>
                 {
-                    if (SafeConsole.Ask($"Delete role '{role}' from the database?"))
-                        return table.DeleteSqlSync(role, r => r.Name == role.Name);
+                    if (interactive)
+                    {
+                        if (SafeConsole.Ask($"Delete role '{role}' from the database?"))
+                            return new[]{
+                                Administrator.UnsafeDeletePreCommandMList((RoleEntity e) => e.InheritsFrom, Database.MListQuery((RoleEntity e) => e.InheritsFrom).Where(r => r.Element.Entity.Name == role.Name)),
+                                table.DeleteSqlSync(role, r => r.Name == role.Name)
+                            }.Combine(Spacing.Simple);
+                        else
+                            return null;
+                    }
                     else
+                    {
+                        if (Database.Query<UserEntity>().Where(u => u.Role.Is(role)).Any())
+                        {
+                            var alternative = role.InheritsFrom.FirstOrDefault()?.Retrieve() ??
+                            Database.Query<RoleEntity>().FirstOrDefault(a => !a.IsTrivialMerge && a.MergeStrategy == MergeStrategy.Union && a.InheritsFrom.Count == 0) /*Min User*/ ??
+                            throw new InvalidOperationException($"Unable to find alternative role for {role} to move the users to");
+
+                            var updated = Database.Query<UserEntity>().Where(u => u.Role.Is(role)).UnsafeUpdate(a => a.Role, a => alternative.ToLite());
+
+                            Console.WriteLine($"Moved {updated} users from role {role} to {alternative}");
+                        }
+
+                        foreach (var tm in Database.Query<RoleEntity>().Where(a=>a.IsTrivialMerge && a.InheritsFrom.Contains(role.ToLite())))
+                        {
+                            var alternative = AuthLogic.GetOrCreateTrivialMergeRole(tm.InheritsFrom.Where(a => !a.Is(role)).ToList());
+
+                            if (Database.Query<UserEntity>().Where(u => u.Role.Is(tm)).Any())
+                            {
+                                var updated = Database.Query<UserEntity>().Where(u => u.Role.Is(tm)).UnsafeUpdate(a => a.Role, a => alternative);
+                                Console.WriteLine($"Moved {updated} users from role {tm} to {alternative}");
+                            }
+
+                            tm.Delete();
+                            Console.WriteLine("Deleted:" + tm.ToString());
+                        }
+
+                        Database.MListQuery((RoleEntity e) => e.InheritsFrom).Where(r => r.Element.Is(role)).UnsafeDeleteMList();
+                        role.Delete();
+                        Console.WriteLine("Deleted:" + role.ToString());
                         return null;
+                    }
                 },
                 mergeBoth: (name, xElement, role) =>
                 {
@@ -672,27 +755,39 @@ public static class AuthLogic
                     role.MergeStrategy = xElement.Attribute("MergeStrategy")?.Value.ToEnum<MergeStrategy>() ?? MergeStrategy.Union;
                     role.Description = xElement.Attribute("Description")?.Value;
                     role.IsTrivialMerge = false;
-                    return table.UpdateSqlSync(role, r => r.Name == oldName, includeCollections: false, comment: oldName);
+                    if (interactive)
+                        return table.UpdateSqlSync(role, r => r.Name == oldName, includeCollections: false, comment: oldName);
+                    else
+                    {
+                        if (role.IsGraphModified)
+                        {
+                            Console.WriteLine("Updated:" + role.ToString());
+                            role.Save();
+                        }
+                        return null;
+                    }
                 });
 
-            if (roleInsertsDeletes != null)
+            if (interactive)
             {
-                SqlPreCommand.Combine(Spacing.Triple,
-                   new SqlPreCommandSimple("-- BEGIN ROLE SYNC SCRIPT"),
-                   Connector.Current.SqlBuilder.UseDatabase(),
-                   roleInsertsDeletes,
-                   new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
+                if (roleInsertsDeletes != null)
+                {
+                    SqlPreCommand.Combine(Spacing.Triple,
+                       new SqlPreCommandSimple("-- BEGIN ROLE SYNC SCRIPT"),
+                       Connector.Current.SqlBuilder.UseDatabase(),
+                       roleInsertsDeletes,
+                       new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
 
-                if (!interactive && !SafeConsole.Ask("Did you run the previous script (Sync Roles)?"))
-                    return;
-            }
-            else
-            {
-                SafeConsole.WriteLineColor(ConsoleColor.Green, "Already synchronized");
+                    if (!SafeConsole.Ask("Did you run the previous script (Sync Roles)?"))
+                        return;
+                }
+                else
+                {
+                    SafeConsole.WriteLineColor(ConsoleColor.Green, "Already synchronized");
+                }
+                GlobalLazy.ResetAll(systemLog: false);
             }
         }
-
-        GlobalLazy.ResetAll(systemLog: false);
 
         {
             Console.WriteLine("Part 2: Synchronize roles relationships and trivial merges");
@@ -717,7 +812,20 @@ public static class AuthLogic
                     if (!role.InheritsFrom.ToHashSet().SetEquals(should))
                         role.InheritsFrom = should;
 
-                    return table.UpdateSqlSync(role, r => r.Name == role.Name);
+                    if (interactive)
+                    {
+                        return table.UpdateSqlSync(role, r => r.Name == role.Name);
+                    }
+                    else
+                    {
+                        if (GraphExplorer.IsGraphModified(role))
+                        {
+                            Console.WriteLine("Updated:" + role.ToString());
+                            role.Save();
+                        }
+
+                        return null;
+                    }
                 });
 
 
@@ -725,13 +833,19 @@ public static class AuthLogic
             var trivialMergeRoles = Database.Query<RoleEntity>().Where(a => a.IsTrivialMerge == true).ToList();
 
             var trivialMerges = trivialMergeRoles.Select(tr =>
-                {
+            {
                 var oldName = tr.Name;
                 tr.Name = RoleEntity.CalculateTrivialMergeName(tr.InheritsFrom);
-                if (tr.IsGraphModified)
-                    return table.UpdateSqlSync(tr, a => a.Name == oldName);
+                if (!tr.IsGraphModified)
+                    return null;
 
-                return null;
+                if (interactive)
+                    return table.UpdateSqlSync(tr, a => a.Name == oldName);
+                else
+                {
+                    tr.Save();
+                    return null;
+                }
             }).Combine(Spacing.Double);
 
             if (roleRelationships != null || trivialMerges != null)
@@ -848,7 +962,7 @@ public static class AuthLogic
 
             Console.WriteLine("Generating script to synchronize roles...");
 
-            SynchronizeRoles(doc);
+            SynchronizeRoles(doc, interactive: true);
             if (SafeConsole.Ask("Import rules now?"))
                 Import();
 
@@ -963,12 +1077,6 @@ public static class AuthLogic
 
 
 
-
-
-public interface ICustomAuthorizer
-{
-    UserEntity Login(string userName, string password, out string authenticationType);
-}
 
 public class InvalidRoleGraphException : Exception
 {

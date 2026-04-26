@@ -5,7 +5,6 @@ using Signum.Utilities.DataStructures;
 using System.Collections.ObjectModel;
 using Signum.Engine.Sync;
 using Microsoft.SqlServer.Types;
-using System.Runtime.CompilerServices;
 
 namespace Signum.Engine.Linq;
 

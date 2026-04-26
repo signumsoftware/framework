@@ -25,7 +25,7 @@ export default class PredictSimpleResult extends React.Component<{ ctx: TypeCont
     });
   }
 
-  render(): React.ReactElement {
+  override render(): React.ReactElement {
     const ctx = this.props.ctx;
 
     return (

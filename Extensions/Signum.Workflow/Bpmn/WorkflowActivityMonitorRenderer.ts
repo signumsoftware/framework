@@ -7,7 +7,7 @@ import { WorkflowClient } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import { WorkflowActivityMonitorConfig } from "../ActivityMonitor/WorkflowActivityMonitorPage";
-import { QueryToken } from "@framework/FindOptions";
+import { QueryToken } from "@framework/QueryToken";
 import { getToString, is } from "@framework/Signum.Entities";
 
 export class WorkflowActivityMonitorRenderer extends CustomRenderer {
@@ -23,7 +23,7 @@ export class WorkflowActivityMonitorRenderer extends CustomRenderer {
     { value: 1, color: Color.parse("rgb(251, 114, 95)") },
   ]);
 
-  drawShape(visuals: any, element: BPMN.DiElement): SVGElement {
+  override drawShape(visuals: any, element: BPMN.DiElement): SVGElement {
     const result = super.drawShape(visuals, element);
 
     if (BpmnUtils.isTaskAnyKind(element.type)) {

@@ -1,12 +1,11 @@
 using Signum.Authorization.Rules;
-using System.Globalization;
 
 namespace Signum.Authorization;
 
 [EntityKind(EntityKind.Main, EntityData.Transactional)]
 public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
 {
-    public static Func<string, string?> ValidatePassword = p =>
+    public static Func<string, UserEntity?, string?> ValidatePassword = (p, user) =>
     {
         if (p.Length >= 5)
             return null;
@@ -14,10 +13,10 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
         return LoginAuthMessage.ThePasswordMustHaveAtLeast0Characters.NiceToString(5);
     };
 
-    public static string? OnValidatePassword(string password)
+    public static string? OnValidatePassword(string password, UserEntity? user)
     {
         if (ValidatePassword != null)
-            return ValidatePassword(password);
+            return ValidatePassword(password, user);
 
         return null;
     }
@@ -29,6 +28,9 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
     [DbType(Size = 128), QueryableProperty(false)]
     public byte[]? PasswordHash { get; set; }
 
+    [Ignore]
+    public bool PasswordIsChanging { get; set; }
+
     public Lite<RoleEntity> Role { get; set; }
 
     [StringLengthValidator(Max = 200), EMailValidator]
@@ -37,6 +39,8 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
     public CultureInfoEntity? CultureInfo { get; set; }
 
     public DateTime? DisabledOn { get; set; }
+
+    public bool MustChangePassword { get; set; }
 
     public UserState State { get; set; } = UserState.New;
 
@@ -47,6 +51,9 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
             if (DisabledOn != null && State is not (UserState.Deactivated or UserState.AutoDeactivate))
                 return AuthAdminMessage.TheUserStateMustBeDisabled.NiceToString();
         }
+
+        if (pi.Name == nameof(PasswordIsChanging) && PasswordIsChanging)
+            return AuthAdminMessage.PasswordChangeIsNotCompleted.NiceToString();
 
         return base.PropertyValidation(pi);
     }
@@ -87,7 +94,6 @@ public static class UserOperation
     public static ExecuteSymbol<UserEntity> Reactivate;
     public static ExecuteSymbol<UserEntity> Deactivate;
     public static ExecuteSymbol<UserEntity> AutoDeactivate;
-    public static ExecuteSymbol<UserEntity> SetPassword;
     public static DeleteSymbol<UserEntity> Delete;
 }
 

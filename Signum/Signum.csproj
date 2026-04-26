@@ -1,25 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework> 
 		<Nullable>enable</Nullable>
 		<WarningsAsErrors>nullable</WarningsAsErrors>
 		<RootNamespace>Signum</RootNamespace>
 		<OutputType>Library</OutputType>
 		<NoWarn>8618</NoWarn>
 		<UserSecretsId>4236b9c6-a674-4f4f-8ce6-6a591967257e</UserSecretsId>
+		<TSGeneratorDisabled>false</TSGeneratorDisabled>
 	</PropertyGroup>
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
 
-	<Target Name="PrintStartupDir" BeforeTargets="Build">
-		<Message Text="MSBuildStartupDirectory = $(MSBuildStartupDirectory)" Importance="High" />
-	</Target>
-
-
 	<ItemGroup>
 	  <TypeScriptCompile Remove="node_modules\**" />
 	</ItemGroup>
+
 
 	<ItemGroup>
 		<EmbeddedResource Include="Engine\Sync\Postgres\versioning_function.sql" />
@@ -27,13 +24,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
-		<PackageReference Include="Microsoft.SqlServer.Types" Version="160.1000.6" />
-		<PackageReference Include="Npgsql" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0" />
+		<PackageReference Include="Microsoft.SqlServer.Types" Version="170.1000.7" />
+		<PackageReference Include="Npgsql" Version="10.0.2" />
+		<PackageReference Include="Pgvector" Version="0.3.2" />
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
-		<PackageReference Include="Signum.MSBuildTask" Version="9.0.0" />
+		<PackageReference Include="Signum.MSBuildTask" Version="10.0.0" />
 		<PackageReference Include="Signum.TSGenerator" Version="10.0.3" />
-		<PackageReference Include="System.Text.Json" Version="9.0.10" />
 	</ItemGroup>
 
 	<ItemGroup>

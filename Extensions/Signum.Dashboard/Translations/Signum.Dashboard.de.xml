@@ -131,6 +131,7 @@
     <Member Name="StartColumn" Description="Spalte Start" />
     <Member Name="Title" Description="Titel" />
     <Member Name="TitleColor" Description="Titel Farbe" />
+    <Member Name="Tooltip" Description="Tooltip" />
   </Type>
   <Type Name="SeparatorPartEntity" Description="Trennzeichenteil" PluralDescription="Separatorteile" Gender="n">
     <Member Name="RequiresTitle" Description="Erfordert Titel" />

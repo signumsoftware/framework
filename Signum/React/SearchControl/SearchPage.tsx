@@ -8,6 +8,7 @@ import SearchControl, { SearchControlHandler } from './SearchControl'
 import { useTitle } from '../AppContext'
 import { QueryString } from '../QueryString'
 import { useAPI, useForceUpdate } from '../Hooks'
+import { usePageUIState } from '../Modals'
 
 
 function SearchPage(): React.ReactElement {
@@ -17,6 +18,11 @@ function SearchPage(): React.ReactElement {
   const fo = Finder.parseFindOptionsPath(params.queryName!, QueryString.parse(location.search));
   const qd = useAPI(() => Finder.getQueryDescription(fo.queryName), [fo.queryName]);
   const forceUpdate = useForceUpdate();
+
+  usePageUIState(() => {
+    const scl = searchControl.current?.searchControlLoaded;
+    return { name: "SearchPage", context: scl && Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, scl.props.defaultIncudeDefaultFilters) };
+  });
   
 
   React.useEffect(() => {
@@ -47,7 +53,7 @@ function SearchPage(): React.ReactElement {
     const newPath = Finder.findOptionsPath(findOptions, scl.extraUrlParams);
 
     if (location.pathname + location.search != newPath)
-      AppContext.navigate(newPath, { replace : true });
+      AppContext.navigate(newPath, { replace: true });
   }
 
   if (!Finder.isFindable(fo.queryName, true))
@@ -60,7 +66,7 @@ function SearchPage(): React.ReactElement {
       </div>
     );
 
-  const setSearchControl = React.useCallback(function (sc: SearchControlHandler | null) {
+  const setSearchControl = React.useCallback(function(sc: SearchControlHandler | null) {
     searchControl.current = sc;
     onResize();
   }, []);
@@ -68,13 +74,13 @@ function SearchPage(): React.ReactElement {
   var qs = Finder.getSettings(fo.queryName);
   return (
     <div id="divSearchPage" className="sf-search-page">
-      <h3 className="display-6 sf-query-title">
+      <h1 tabIndex={0} className="display-6 sf-query-title h3">
         <span>{getQueryNiceName(fo.queryName)}</span>
         {searchControl.current?.searchControlLoaded?.pageSubTitle && <>
           <small className="sf-type-nice-name text-muted"> - {searchControl.current?.searchControlLoaded?.pageSubTitle}</small>
         </>
         }
-      </h3>
+      </h1>
       {qd && <SearchControl ref={setSearchControl}
         defaultIncludeDefaultFilters={true}
         findOptions={fo}

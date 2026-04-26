@@ -3,27 +3,29 @@ import Dropdown from "react-bootstrap/Dropdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { JSX } from "react/jsx-runtime";
 import "./RightCaretDropdown.css";
-export interface RightCaretDropdownOption<T> {
-  value: T;
+import { ToolbarResponse } from "../ToolbarClient";
+import { liteKeyOrQuery } from "./ToolbarRenderer";
+export interface RightCaretDropdownOption {
+  value: ToolbarResponse<any>;
   label: string;
   icon?: React.ReactNode;
 }
 
-interface RightCaretDropdownProps<T> {
-  options: RightCaretDropdownOption<T>[];
-  value: T | null;
-  onChange: (value: T) => void;
+interface RightCaretDropdownProps {
+  options: RightCaretDropdownOption[];
+  value: ToolbarResponse<any> | null;
+  onChange: (value: ToolbarResponse<any>, e: React.MouseEvent) => void;
   disabled?: boolean;
   placeholder?: string;
 }
 
-export function RightCaretDropdown<T>({
+export function RightCaretDropdown({
   options,
   value,
   onChange,
   disabled,
   placeholder,
-}: RightCaretDropdownProps<T>): JSX.Element {
+}: RightCaretDropdownProps): JSX.Element {
   const selected = options.find((o) => o.value === value);
 
   return (
@@ -43,11 +45,12 @@ export function RightCaretDropdown<T>({
         {options.map((opt, idx) => (
           <Dropdown.Item
             key={idx}
-            onClick={() => onChange(opt.value)}
+            onClick={e => onChange(opt.value, e)}
             className="switcher-item"
             active={opt.value === value}
             title={opt.label}
             aria-label={opt.label}
+            data-toolbar-content={liteKeyOrQuery(opt.value.content)}
           >
             <div className="switcher-item-icon">{opt.icon}</div>
             <small>{opt.label}</small>

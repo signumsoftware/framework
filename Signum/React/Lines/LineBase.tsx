@@ -48,6 +48,12 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
     if (next.extraButtonsBefore || prev.extraButtonsBefore)
       return false;
 
+    if (typeof next.helpText == "function" || typeof prev.helpText == "function")
+      return false;
+
+    if (typeof next.helpTextOnTop == "function" || typeof prev.helpTextOnTop == "function")
+      return false;
+
     if (next.labelIcon || prev.labelIcon)
       return false;
 

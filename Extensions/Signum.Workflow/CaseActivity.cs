@@ -60,7 +60,7 @@ public class CaseActivityEntity : Entity
     }
 
     [AutoExpressionField]
-    public override string ToString() => As.Expression(() => WorkflowActivity + " " + DoneBy);
+    public override string ToString() => As.Expression(() => (WorkflowActivity + " " + DoneBy).Trim());
 
     protected override void PreSaving(PreSavingContext ctx)
     { 

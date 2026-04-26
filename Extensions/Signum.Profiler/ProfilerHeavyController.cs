@@ -172,6 +172,7 @@ public class ProfilerHeavyController : ControllerBase
         public long BeforeStart;
         public long Start;
         public long End;
+        public long TotalMax;
         public string Elapsed;
         public string Kind;
         public string Color;
@@ -186,6 +187,7 @@ public class ProfilerHeavyController : ControllerBase
             BeforeStart = e.BeforeStart;
             Start = e.Start;
             End = e.End ?? now;
+            TotalMax = End;
             Elapsed = e.ElapsedToString();
             IsFinished = e.End.HasValue;
             Kind = e.Kind;
@@ -197,23 +199,42 @@ public class ProfilerHeavyController : ControllerBase
 
         internal static int Fill(List<HeavyProfofilerEntryTS> result, HeavyProfilerEntry entry, int asyncDepth, long now)
         {
-            result.Add(new HeavyProfofilerEntryTS(entry, true, now) { AsyncDepth = asyncDepth });
+            var entryTS = new HeavyProfofilerEntryTS(entry, true, now) { AsyncDepth = asyncDepth };
+            result.Add(entryTS);
 
             if (entry.Entries == null)
                 return asyncDepth;
 
-
-            Dictionary<HeavyProfilerEntry, int> newDepths = new Dictionary<HeavyProfilerEntry, int>();
+            Dictionary<HeavyProfilerEntry, EntryAsyncInfo> entryInfos = new Dictionary<HeavyProfilerEntry, EntryAsyncInfo>();
             for (int i = 0; i < entry.Entries.Count; i++)
             {
                 var e = entry.Entries[i];
-                var maxAsyncDepth = newDepths.Where(kvp => kvp.Key.Overlaps(e)).Max(a => (int?)a.Value);
+
+                var maxAsyncDepth = entryInfos
+                    .Where(kvp => OverlapsAsync(kvp.Key, kvp.Value.TotalMax, e))
+                    .Max(a => (int?)a.Value.AsyncDepth);
 
                 var newAsyncDepth = Fill(result, e, maxAsyncDepth.HasValue ? maxAsyncDepth.Value + 1 : asyncDepth + 1, now);
-                newDepths.Add(e, newAsyncDepth);
+                var childTotalMax = result[result.Count - 1].TotalMax;
+                entryInfos.Add(e, new EntryAsyncInfo { AsyncDepth = newAsyncDepth, TotalMax = childTotalMax });
+
+                if (childTotalMax > entryTS.TotalMax)
+                    entryTS.TotalMax = childTotalMax;
             }
 
-            return newDepths.Values.Max();
+            return entryInfos.Values.Max(a => a.AsyncDepth);
+        }
+
+        static bool OverlapsAsync(HeavyProfilerEntry entry, long entryTotalMax, HeavyProfilerEntry other)
+        {
+            var otherEnd = other.End ?? PerfCounter.Ticks;
+            return !((entryTotalMax <= other.BeforeStart) || (otherEnd <= entry.BeforeStart));
+        }
+
+        private struct EntryAsyncInfo
+        {
+            public int AsyncDepth;
+            public long TotalMax;
         }
     }
 

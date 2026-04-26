@@ -39,6 +39,13 @@ public static class UserAssetsExporter
 
         T IToXmlContext.RetrieveLite<T>(Lite<T> lite)
         {
+
+            if (lite is Lite<QueryEntity> q)
+                return (T)(object)q.RetrieveFromCache();
+
+            if (lite is Lite<TypeEntity> t)
+                return (T)(object)t.RetrieveFromCache();
+
             return lite.Retrieve();
         }
     }
@@ -52,8 +59,8 @@ public static class UserAssetsExporter
 
         XDocument doc = new(
             new XDeclaration("1.0", "UTF8", "yes"),
-            new XElement("Entities",
-                ctx.elements.OrderBy(a => a.Value.Name.ToString()).ThenBy(a=>a.Key).Select(a => a.Value)));
+            new XElement("Entities", 
+                ctx.elements.Values));
 
 
         if (PreExport != null)
@@ -189,6 +196,7 @@ public static class UserAssetsImporter
             if (newLite == null || lite.ToString() != newLite.ToString() || lite.Id != newLite.Id)
             {
                 this.liteConflicts.GetOrCreate(userAsset.Guid)[(lite, route)] = newLite;
+                return newLite;
             }
 
             return lite;
@@ -204,6 +212,15 @@ public static class UserAssetsImporter
                where T : Symbol
         {
             return SymbolLogic<T>.ToSymbol(value);
+        }
+
+        public PropertyRouteEntity GetPropertyRoute(TypeEntity typeEntity, string path)
+        {
+            var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity);
+
+            var pr = properties.SingleEx(a => a.Path == path);
+
+            return pr;
         }
     }
 
@@ -318,9 +335,19 @@ public static class UserAssetsImporter
             return lite.Retrieve();
         }
 
-        public T GetSymbol<T>(string value) where T : Symbol
+        public T GetSymbol<T>(string value)
+             where T : Symbol
         {
-            throw new NotImplementedException();
+            return SymbolLogic<T>.ToSymbol(value);
+        }
+
+        public PropertyRouteEntity GetPropertyRoute(TypeEntity typeEntity, string path)
+        {
+            var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity);
+
+            var pr = properties.SingleEx(a => a.Path == path);
+
+            return pr;
         }
     }
 
@@ -350,7 +377,38 @@ public static class UserAssetsImporter
 
     public static void ImportAll(byte[] document)
     {
-        Import(document, Preview(document));
+        var preview = Preview(document);
+        foreach (var item in preview.Lines)
+        {
+            var color = item.Action switch
+            {
+                EntityAction.New => ConsoleColor.Green,
+                EntityAction.Identical => ConsoleColor.DarkGray,
+                EntityAction.Different => ConsoleColor.Yellow,
+                _ => throw new UnexpectedValueException(item.Action)
+            };
+
+            SafeConsole.WriteLineColor(color, $"{item.Action.ToString().ToUpperInvariant()} {item.Type}: {item.Text}" + (item.EntityType == null ? null : $"({item.EntityType})"));
+            foreach (var lc in item.LiteConflicts)
+            {
+                lc.To = giFindAlternative.GetInvoker(lc.From.EntityType)(lc.From);
+                Console.Write($" LiteConflict: {lc.From.KeyLong()} -> ");
+
+                if (lc.To == null)
+                    SafeConsole.WriteLineColor(ConsoleColor.Red, "Not found");
+                else
+                    SafeConsole.WriteLineColor(ConsoleColor.Green, lc.To.KeyLong());
+            }
+        }
+        Import(document, preview);
+    }
+
+    static GenericInvoker<Func<Lite<Entity>, Lite<Entity>?>> giFindAlternative =
+        new (lite => FindAlternative<Entity>(lite));
+    static Lite<T>? FindAlternative<T>(Lite<T> from)
+        where T : Entity
+    {
+        return Database.Query<T>().Where(a => a.ToString() == from.ToString()).Select(a => a.ToLite()).SingleOrDefault();
     }
 
     public static void Import(byte[] document, UserAssetPreviewModel preview)

@@ -1,13 +1,7 @@
-using Npgsql.Internal.Postgres;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Engine.Sync;
 internal class PrimaryKeyUpdater
@@ -15,18 +9,15 @@ internal class PrimaryKeyUpdater
 
 
     private bool isPostgres;
-    private Dictionary<string, DiffTable> databaseTables;
-    private Dictionary<string, ITable> modelTables;
     private Dictionary<ITable, Dictionary<string, List<IColumn>>> ibas;
 
     private Table type_Table;
     private IColumn type_Id;
     private IColumn type_TableName;
 
-    public PrimaryKeyUpdater(bool isPostgres, Dictionary<string, DiffTable> databaseTables, Dictionary<string, ITable> modelTables)
+    public PrimaryKeyUpdater(bool isPostgres, Dictionary<string, ITable> modelTables)
     {
         this.isPostgres = isPostgres;
-        this.databaseTables = databaseTables;
         this.ibas = (from t in modelTables.Values
                      select new
                      {
@@ -87,7 +78,7 @@ internal class PrimaryKeyUpdater
     }
 
 
-    public SqlPreCommandSimple? UpdateFKToAnotherTable(ObjectName tn, DiffColumn difCol, IColumn tabCol, Func<ObjectName, ObjectName> changeName)
+    public SqlPreCommand? UpdateFKToAnotherTable(ObjectName tn, DiffColumn difCol, IColumn tabCol, Func<ObjectName, ObjectName> changeName, bool withHistory)
     {
         if (difCol.ForeignKey == null || tabCol.ReferenceTable == null || tabCol.AvoidForeignKey)
             return null;
@@ -112,6 +103,9 @@ internal class PrimaryKeyUpdater
 
         var message = @$"-- Column {tn}.{tabCol.Name} was referencing {oldFk} but now references {newFk}. An update is needed?";
         result.AlterSql(message + "\n" + result.Sql);
+        if (withHistory)
+            return new SqlPreCommand_WithHistory(normal: result, history: null);
+
         return result;
     }
 
@@ -262,14 +256,14 @@ internal class PrimaryKeyUpdater
 
     private SqlPreCommand? UpdateIBAIfNecesary(ITable table, ObjectName oldTableName, IColumn newId, DiffColumn oldId, ObjectName ibaTable, IColumn ibaType, IColumn ibaOldId, IColumn ibaNewId)
     {
-        var count = (int)Executor.ExecuteScalar($"""
+        var count = Convert.ToInt32(Executor.ExecuteScalar($"""
                     SELECT Count(*) 
                     FROM {ibaTable} iba
                     JOIN {type_Table} type 
                     ON type.{Esc(this.type_Id)} = iba.{ibaType} 
                     AND type.{Esc(this.type_TableName)} = '{oldTableName}' 
                     """
-            )!;
+            )!);
 
         if (count == 0)
             return null;

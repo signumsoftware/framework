@@ -133,7 +133,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
   if (infos.some(a => a.error != null)) {
     return (
       <div>
-        <h4>Error!</h4>
+        <h1 className="h4">Error!</h1>
         {
           infos
             .filter(m => m.error != null)

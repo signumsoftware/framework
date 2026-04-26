@@ -16,9 +16,9 @@
 span.process-contextual-icon {
     font-size: initial;
     margin-left: 5px;
-    color: var(--bs-secondary-text);
+    color: var(--bs-secondary);
 }
 
 span.process-contextual-icon:hover {
-    color: var(--bs-secondary-text);
+    color: var(--bs-secondary);
 }

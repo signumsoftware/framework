@@ -16,7 +16,7 @@ import { ProgressModal, ProgressModalOptions } from "./Operations/ProgressModal"
 import { QuickLinkClient, QuickLinkExplore } from "./QuickLinkClient";
 import { getOperationInfo, getQueryKey, getTypeInfo, getTypeName, GraphExplorer, OperationInfo, OperationType, QueryTokenString, Type, TypeInfo } from './Reflection';
 import { SearchControlLoaded } from "./Search";
-import * as ContexualItems from './SearchControl/ContextualItems';
+import * as ContextualItems from './SearchControl/ContextualItems';
 import { ContextualItemsContext, ContextualMenuItem } from './SearchControl/ContextualItems';
 import { ajaxPost, ajaxPostRaw, WebApiHttpError } from './Services';
 import { FilterOperation } from "./Signum.DynamicQuery";
@@ -35,7 +35,7 @@ export namespace Operations {
 
   export function start(): void {
     ButtonBarManager.onButtonBarRender.push(EntityOperations.getEntityOperationButtons);
-    ContexualItems.onContextualItems.push(ContextualOperations.getOperationsContextualItems);
+    ContextualItems.onContextualItems.push(ContextualOperations.getOperationsContextualItems);
 
     AppContext.clearSettingsActions.push(clearOperationSettings);
 
@@ -175,18 +175,10 @@ export namespace Operations {
       if (!coc.operationInfo.canBeModified)
         return "NoDialog";
 
-      if (isSave(coc.operationInfo)) {
-        if (coc.context.lites.length == 1)
-          return "NoButton";
+      if (coc.context.lites.length == 1 && isSave(coc.operationInfo))
+        return "NoButton";
 
-        return "Mandatory"
-      }
-      else {
-        if (coc.context.lites.length == 1)
-          return "NoDialog";
-
-        return "Optional";
-      }
+      return "Dialog"
     }
 
     export function getColor(oi: OperationInfo): BsColor {
@@ -216,7 +208,7 @@ export namespace Operations {
     export function getAlternatives<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T>[] | undefined {
       if (Defaults.isSave(eoc.operationInfo)) {
         return [
-          eoc.frame.onClose ? EntityOperations.andClose(eoc) : undefined,
+          eoc.frame.hideAndClose ? undefined : EntityOperations.andClose(eoc),
           EntityOperations.andNew(eoc)
         ].notNull()
       }
@@ -318,12 +310,12 @@ export namespace Operations {
     }
 
     export interface ErrorReport {
-      errors: { [liteKey: string]: string; }
+      errors: { [liteKey: string]: string | null; }
     }
 
     export interface OperationResult {
       entity: Lite<Entity>;
-      error: string;
+      error?: string;
     }
 
     export interface ProgressStep<T> {
@@ -459,7 +451,7 @@ export class ConstructorOperationContext<T extends Entity> {
 
 
 
-export type SettersConfig = "NoButton" | "NoDialog" | "Optional" | "Mandatory";
+export type SettersConfig = "NoButton" | "NoDialog" | "Dialog";
 
 /**
  * Contextual Operation Settings
@@ -574,6 +566,9 @@ export class ContextualOperationContext<T extends Entity> {
     if (oi.operationType == "ConstructorFrom" && this.context.lites.length > 1 && !oi.resultIsSaved)
       return false;
 
+    if (Navigator.someNonViewable(this.context.lites))
+      return false;
+
     const eos = this.entityOperationSettings;
     if (eos) {
       if (eos.isVisible != null) //If you override isVisible in EntityOperationsettings you have to override in ContextualOperationSettings too
@@ -610,7 +605,7 @@ export class ContextualOperationContext<T extends Entity> {
     if (this.settings?.createMenuItems)
       return this.settings.createMenuItems(this);
 
-    return [{ fullText: this.operationInfo.niceName, menu: <ContextualOperations.OperationMenuItem coc={ this} /> } as ContextualMenuItem];
+    return [{ fullText: this.operationInfo.niceName, menu: <ContextualOperations.OperationMenuItem coc={this} /> } as ContextualMenuItem];
   }
 
   raiseEntityChanged(): void {
@@ -826,7 +821,7 @@ export class EntityOperationContext<T extends Entity> {
 
   onDeleteSuccess?: () => Promise<void> | undefined;
   onDeleteSuccess_Default = (): void => {
-    this.frame.onClose?.();
+    this.frame.onClose();
     Navigator.raiseEntityChanged(this.entity.Type);
     Operations.notifySuccess();
   }

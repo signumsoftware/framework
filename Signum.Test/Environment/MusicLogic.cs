@@ -1,6 +1,8 @@
 using Signum.Engine.Maps;
 using Signum.DynamicQuery;
-using Signum.Basics;
+using System.IO;
+using System.Text.Json;
+using Pgvector;
 
 namespace Signum.Test.Environment;
 
@@ -31,7 +33,6 @@ public static class MusicLogic
 
 
         sb.Include<NoteWithDateEntity>()
-            .WithSave(NoteWithDateOperation.Save)
             .WithQuery(() => a => new
             {
                 Entity = a,
@@ -40,6 +41,50 @@ public static class MusicLogic
                 a.Target,
                 a.CreationTime,
             });
+
+        var embeddings = JsonSerializer.Deserialize<Dictionary<string, float[]>>(File.ReadAllText("linesWithEmbeddings.json"))!;
+
+        Filter.GetEmbeddingForSmartSearch = (vectorToken, searchString) =>
+        {
+            if (embeddings.TryGetValue(searchString, out var embedding))
+                return new Vector(embedding);
+
+            throw new InvalidOperationException($"Test embedding not found for search string: '{searchString}'.");
+        };
+
+        new Graph<NoteWithDateEntity>.Execute(NoteWithDateOperation.Save)
+        {
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (e, _) =>
+            {
+                if(!e.IsNew)
+                    Database.Query<SimplePassageEntity>().Where(a=>a.Note.Is(e)).UnsafeDeleteChunks();
+
+                e.Save();
+
+                if (e.Title.HasText())
+                    new SimplePassageEntity
+                    {
+                        Note = e.ToLite(),
+                        IsTitle = true,
+                        Chunk = e.Title,
+                        Index = 0,
+                    }.Save();
+
+                e.Text?.SplitNoEmpty('\r', '\n', '.')
+                    .Select(t => t.Trim())
+                    .Where(t => t.HasText())
+                    .Select((t, i) => new SimplePassageEntity
+                    {
+                        Note = e.ToLite(),
+                        IsTitle = false,
+                        Chunk = t,
+                        Embedding = new Vector(embeddings.GetOrThrow(t)),
+                        Index = i + 1,
+                    }).SaveList();
+            },
+        }.Register();
 
         if (Connector.Current is SqlServerConnector ss && ss.SupportsFullTextSearch || Connector.Current is PostgreSqlConnector)
             sb.AddFullTextIndex<NoteWithDateEntity>(a => new { a.Title, a.Text });
@@ -108,6 +153,20 @@ public static class MusicLogic
                 e.Name
             });
 
+        if (Connector.Current.SupportsVectors)
+        sb.Include<SimplePassageEntity>()
+            .WithVectorIndex(a=>a.Embedding, vti =>
+            {
+                if (Connector.Current is SqlServerConnector)
+                    vti.DelayCreation = true;
+            })
+            .WithQuery(() => p => new
+            {
+                Entity = p,
+                p.Id,
+                p.Note,
+            });
+
         RegisterAwards(sb);
 
         QueryLogic.Queries.Register(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, description, cancellationToken) =>
@@ -123,7 +182,7 @@ public static class MusicLogic
                                  a.LastAward
                              })
                            .ToDQueryable(description)
-                           .AllQueryOperationsAsync(request, cancellationToken);
+                           .AllQueryOperationsAsync(request, cancellationToken, forConcat: true);
 
             var two = await (from a in Database.Query<BandEntity>()
                              select new
@@ -136,7 +195,7 @@ public static class MusicLogic
                                  a.LastAward
                              })
                            .ToDQueryable(description)
-                           .AllQueryOperationsAsync(request, cancellationToken);
+                           .AllQueryOperationsAsync(request, cancellationToken, forConcat: true);
 
             return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
 
@@ -148,6 +207,26 @@ public static class MusicLogic
         Validator.PropertyValidator((NoteWithDateEntity n) => n.Title)
             .IsApplicableValidator<NotNullValidatorAttribute>(n => Corruption.Strict);
     }
+
+    //[Fact]
+    //public void SimplePassage()
+    //{
+    //    var chunks = Database.Query<SimplePassageEntity>().Select(a => a.Chunk).ToList();
+
+    //    File.WriteAllLines("lines.txt", chunks);
+    //}
+
+    //Run in Southwind, originally with Gemini models/text-embedding-004 with 768 dimensions
+    //static void ExportEmbeddings()
+    //{
+    //    var lines = File.ReadAllLines(@"..\..\..\lines.txt")!;
+    //    var model = ChatbotLogic.DefaultEmbeddingsModel.Value!.RetrieveFromCache();
+    //    var embeddings = ChatbotLogic.GetEmbeddingsAsync(lines, model, default).ResultSafe();
+
+    //    var dic = lines.Zip(embeddings, (l, e) => KeyValuePair.Create(l, e)).ToDictionary();
+
+    //    File.WriteAllText(@"..\..\..\linesWithEmbeddings.json", JsonSerializer.Serialize(dic));
+    //}
 
     private static void RegisterAwards(SchemaBuilder sb)
     {

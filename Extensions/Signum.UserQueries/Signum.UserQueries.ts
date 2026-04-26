@@ -27,6 +27,7 @@ export interface BigValuePartEntity extends Entities.Entity, Dashboard.IPartPars
   customBigValue: string | null;
   navigate: boolean;
   customUrl: string | null;
+  isClickable: boolean | null;
 }
 
 export const HealthCheckConditionEmbedded: Type<HealthCheckConditionEmbedded> = new Type<HealthCheckConditionEmbedded>("HealthCheckConditionEmbedded");

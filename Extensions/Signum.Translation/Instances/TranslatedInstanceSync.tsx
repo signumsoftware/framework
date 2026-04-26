@@ -13,6 +13,7 @@ import { EntityLink } from '@framework/Search'
 import { DiffDocumentSimple } from '../../Signum.DiffLog/Templates/DiffDocument'
 import TextArea from '@framework/Components/TextArea'
 import { KeyNames } from '@framework/Components'
+import "../../Signum.DiffLog/Templates/DiffLog.css"
 import { getTypeInfo } from '@framework/Reflection'
 import { useTitle } from '@framework/AppContext'
 import { TranslationMember, initialElementIf } from '../Code/TranslationTypeTable'
@@ -82,7 +83,7 @@ export default function TranslatedInstanceSync(): React.JSX.Element {
     return (
       <div>
         <div className="mb-2">
-          <h2> {TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName)}</h2>
+          <h1 className="h2"> {TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName)}</h1>
         </div>
         {deletedTranslations}
         {result && result.totalInstances == 0 && <Link to={`/translatedInstance/status`}>
@@ -96,7 +97,7 @@ export default function TranslatedInstanceSync(): React.JSX.Element {
   return (
     <div>
       <div className="mb-2">
-        <h2><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
+        <h1 className="h2"><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h1>
       </div>
       {deletedTranslations}
       {result && result.totalInstances > 0 && renderTable()}

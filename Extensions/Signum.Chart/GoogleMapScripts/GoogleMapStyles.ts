@@ -1,5 +1,3 @@
-/// <reference path="../../../../node_modules/@types/googlemaps/index.d.ts" />
-
 const mapStyles: { [name: string]: google.maps.MapTypeStyle[] } = {
   "Silver": [
     {

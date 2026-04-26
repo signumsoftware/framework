@@ -6,13 +6,13 @@ import { Navigator } from '@framework/Navigator'
 import { getTypeInfo } from '@framework/Reflection'
 import { Entity, getToString, is, Lite } from '@framework/Signum.Entities'
 import * as React from 'react'
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { ToolbarNavItem } from '../Signum.Toolbar/Renderers/ToolbarRenderer'
 import { ToolbarClient, ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 import { IconColor, ToolbarConfig, ToolbarContext } from '../Signum.Toolbar/ToolbarConfig'
 import { CaseActivityQuery, WorkflowEntity, WorkflowMainEntityStrategy, WorkflowPermission } from './Signum.Workflow'
 import { WorkflowClient } from './WorkflowClient'
 import { PermissionSymbol } from '@framework/Signum.Basics'
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionSymbol> {
 
@@ -25,11 +25,11 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
     return "shuffle";
   }
 
-  isApplicableTo(element: ToolbarResponse<PermissionSymbol>): boolean {
+  override isApplicableTo(element: ToolbarResponse<PermissionSymbol>): boolean {
     return is(element.content, WorkflowPermission.WorkflowToolbarMenu);
   }
 
-  getMenuItem(res: ToolbarResponse<PermissionSymbol>, key: number | string, ctx: ToolbarContext): React.JSX.Element {
+  override getMenuItem(res: ToolbarResponse<PermissionSymbol>, key: number | string, ctx: ToolbarContext): React.JSX.Element {
     return <WorkflowDropdownImp key={key} />;
   }
 

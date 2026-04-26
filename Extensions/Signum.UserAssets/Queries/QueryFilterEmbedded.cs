@@ -1,6 +1,4 @@
 using Signum.DynamicQuery.Tokens;
-using Signum.UserAssets;
-using Signum.UserAssets.QueryTokens;
 using System.Xml.Linq;
 
 namespace Signum.UserAssets.Queries;
@@ -134,8 +132,8 @@ public class QueryFilterEmbedded : EmbeddedEntity
         if(ValueString.HasText() && Lite.TryParseLite(ValueString, out var result) == null)
         {
             var lite = ctx.ParseLite(ValueString, parentEntity, valuePr);
-            if (lite != null && lite.KeyLong() != ValueString)
-                ValueString = lite.KeyLong();
+            if (lite?.KeyLong() != ValueString)
+                ValueString = lite?.KeyLong();
 
         }
 
@@ -163,7 +161,7 @@ public class QueryFilterEmbedded : EmbeddedEntity
 
 public class PinnedQueryFilterEmbedded : EmbeddedEntity
 {
-    [StringLengthValidator(Max = 100)]
+    [StringLengthValidator(Max = 100), Translatable]
     public string? Label { get; set; }
 
     public int? Column { get; set; }

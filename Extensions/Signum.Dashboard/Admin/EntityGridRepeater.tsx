@@ -38,12 +38,12 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
   drag!: EntityGridRepaterDragging<V> | undefined;
   setDrag!: React.Dispatch<EntityGridRepaterDragging<V> | undefined>;
 
-  init(p: EntityGridRepeaterProps<V>): void {
+  override init(p: EntityGridRepeaterProps<V>): void {
     super.init(p);
     [this.drag, this.setDrag] = React.useState<EntityGridRepaterDragging<V> | undefined>(undefined);
   }
 
-  getDefaultProps(state: EntityGridRepeaterProps<V>): void {
+  override getDefaultProps(state: EntityGridRepeaterProps<V>): void {
     super.getDefaultProps(state);
     state.viewOnCreate = false;
     state.move = true;
@@ -51,7 +51,7 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
     state.remove = true;
   }
 
-  handleCreateClick = async (event: React.SyntheticEvent<any>): Promise<void> => {
+  override handleCreateClick = async (event: React.SyntheticEvent<any>): Promise<void> => {
 
     event.preventDefault();
 

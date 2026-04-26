@@ -10,9 +10,9 @@ import { ErrorBoundary } from '@framework/Components';
 import { WhatsNewEntity } from '../Signum.WhatsNew';
 import { ImageModal } from '../../Signum.Files/Components/ImageModal';
 import { LexicalEditor } from "lexical";
-import { ImageConverter, ImageInfo } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
 import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
 import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension';
+import { ImageHandlerBase, ImageInfo } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageHandlerBase';
 
 export default function WhatsNewHtmlEditor(p: {
   binding: Binding<string | undefined | null>;
@@ -22,9 +22,9 @@ export default function WhatsNewHtmlEditor(p: {
 
   return (
     <ErrorBoundary>
-      <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} plugins={[
+      <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} extensions={[
         new LinkExtension(),
-        new ImageExtension(new AttachmentImageConverter())
+        new ImageExtension(new WhatsNewImageHandler())
       ]} />
     </ErrorBoundary>
   );
@@ -37,9 +37,9 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
   return (
     <div className="html-viewer" >
       <ErrorBoundary>
-        <HtmlEditor readOnly binding={binding} small plugins={[
+        <HtmlEditor readOnly binding={binding} small extensions={[
           new LinkExtension(),
-          new ImageExtension(new AttachmentImageConverter())
+          new ImageExtension(new WhatsNewImageHandler())
         ]} />
       </ErrorBoundary>
     </div>
@@ -47,12 +47,10 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
 }
 
 
-export class AttachmentImageConverter implements ImageConverter{
-  
-  dataImageIdAttribute = "data-attachment-id";
-  pr: PropertyRoute;
-  constructor() {
-    this.pr = WhatsNewEntity.propertyRouteAssert(a => a.attachment);
+export class WhatsNewImageHandler implements ImageHandlerBase {
+
+  get pr(): PropertyRoute {
+    return WhatsNewEntity.propertyRouteAssert(a => a.attachment);
   }
 
   toElement(val: ImageInfo): HTMLElement | undefined {
@@ -102,10 +100,10 @@ export class AttachmentImageConverter implements ImageConverter{
   toHtml(val: ImageInfo): string | undefined {
 
     if (val.binaryFile)
-      return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" />`;
+      return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" alt="" />`;
 
     if (val.imageId)
-      return `<img data-attachment-id="${val.imageId}" />`;
+      return `<img data-attachment-id="${val.imageId}" alt="" />`;
 
     return undefined;
   }

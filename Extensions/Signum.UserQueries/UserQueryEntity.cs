@@ -1,12 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using Signum.Basics;
 using Signum.Dashboard;
-using Signum.DynamicQuery;
-using Signum.Omnibox;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
 
 namespace Signum.UserQueries;
@@ -40,7 +35,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
 
     public Lite<Entity>? Owner { get; set; }
 
-    [StringLengthValidator(Min = 1, Max = 200)]
+    [StringLengthValidator(Min = 1, Max = 200), Translatable]
     public string DisplayName { get; set; }
 
     public bool AppendFilters { get; set; }
@@ -380,6 +375,8 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
 
     public string? CustomUrl { get; set; }
 
+    public bool? IsClickable { get; set; }
+
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("BigValuePart",
@@ -387,7 +384,8 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
            ValueToken == null ? null : new XAttribute(nameof(ValueToken), ValueToken.Token.FullKey()),
            CustomBigValue == null ? null : new XAttribute(nameof(CustomBigValue), CustomBigValue),
            !Navigate ? null: new XAttribute(nameof(Navigate), Navigate),
-           CustomUrl == null ? null : new XAttribute(nameof(CustomUrl), CustomUrl)
+           CustomUrl == null ? null : new XAttribute(nameof(CustomUrl), CustomUrl),
+           IsClickable == null ? null : new XAttribute(nameof(IsClickable), IsClickable.Value)
            );
     }
 
@@ -399,6 +397,7 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
         CustomBigValue = element.Attribute(nameof(CustomBigValue))?.Value;
         Navigate = element.Attribute(nameof(Navigate))?.Value.ToBool() ?? false;
         CustomUrl = element.Attribute(nameof(CustomUrl))?.Value;
+        IsClickable = element.Attribute(nameof(IsClickable))?.Value.ToBool();
     }
 
     public void ParseData(DashboardEntity dashboardEntity)
@@ -421,7 +420,8 @@ public class BigValuePartEntity : Entity, IPartParseDataEntity
     {
         ValueToken = ValueToken,
         UserQuery = UserQuery,
-        CustomBigValue = CustomBigValue
+        CustomBigValue = CustomBigValue,
+        IsClickable = IsClickable
     };
 
     protected override string? PropertyValidation(PropertyInfo pi)

@@ -45,7 +45,7 @@ export class EntityAccordionController<V extends ModifiableEntity> extends Entit
   setSelectedIndex!: (index: number | null) => void;
   initialIsControlled!: boolean;
 
-  init(p: EntityAccordionProps<V>): void {
+  override init(p: EntityAccordionProps<V>): void {
     super.init(p);
 
     this.initialIsControlled = React.useMemo(() => isControlled(p), []);
@@ -66,13 +66,13 @@ export class EntityAccordionController<V extends ModifiableEntity> extends Entit
     }, [p.initialSelectedIndex]);
   }
 
-  getDefaultProps(p: EntityAccordionProps<V>): void {
+  override getDefaultProps(p: EntityAccordionProps<V>): void {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.createAsLink = true;
   }
 
-  addElement(entityOrLite: V): void {
+  override addElement(entityOrLite: V): void {
 
     if (isLite(entityOrLite) != (this.props.type!.isLite || false))
       throw new Error("entityOrLite should be already converted");
@@ -212,7 +212,7 @@ export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getCom
 
   return (
     <Accordion.Item {...htmlAttributes} className={classes(drag?.dropClass, "sf-accordion-element")} eventKey={ctx.index!.toString()}
-      ref={refHtml }
+      ref={refHtml}
       onDragEnter={drag?.onDragOver}
       onDragOver={drag?.onDragOver}
       onDrop={drag?.onDrop}
@@ -244,7 +244,13 @@ export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getCom
         </div>
       </Accordion.Header>
       <Accordion.Body>
-        <RenderEntity ctx={ctx} getComponent={getComponent as any} getViewPromise={getViewPromise as any} onRefresh={forceUpdate} />
+        <Accordion.Collapse
+          eventKey={ctx.index!.toString()}
+          mountOnEnter
+          unmountOnExit
+        >
+        <RenderEntity ctx={ctx} getComponent={getComponent as any} getViewPromise={getViewPromise as any} onRefresh={forceUpdate} / >
+        </Accordion.Collapse>
       </Accordion.Body>
     </Accordion.Item>
   );

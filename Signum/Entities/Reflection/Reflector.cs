@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Routing;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.CodeDom.Compiler;
@@ -407,7 +406,7 @@ public static class Reflector
         return Schema.Current.Settings.FieldAttribute<UnitAttribute>(pr.SimplifyToProperty())?.UnitName;
     }
 
-    public static string? FormatString(PropertyRoute route)
+    public static string? GetFormatString(PropertyRoute route)
     {
         if (route.PropertyRouteType == PropertyRouteType.Root)
             return null;

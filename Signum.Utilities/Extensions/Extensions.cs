@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace Signum.Utilities;
@@ -317,6 +317,12 @@ styles ?? DateTimeStyles.None, out DateTime result))
     public static T Do<T>(this T t, Action<T> action)
     {
         action(t);
+        return t;
+    }
+
+    public static async Task<T> DoAsync<T>(this T t, Func<T, Task> action)
+    {
+        await action(t);
         return t;
     }
 

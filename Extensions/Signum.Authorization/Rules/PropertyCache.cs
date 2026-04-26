@@ -1,11 +1,5 @@
-
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Signum.DynamicQuery.Tokens;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Reflection.Metadata.Ecma335;
 using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
@@ -278,7 +272,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
         Dictionary<Type, Dictionary<string, PropertyRoute>> routesDicCache = new Dictionary<Type, Dictionary<string, PropertyRoute>>();
 
         var groups = root.Element("Properties")!.Elements("Role").SelectMany(r => r.Elements("Property")).Select(p => new PropertyPair(p.Attribute("Resource")!.Value))
-            .AgGroupToDictionary(a => a.Type, gr => gr.Select(pp => pp.Property).ToHashSet());
+            .GroupAggregateToDictionary(a => a.Type, gr => gr.Select(pp => pp.Property).ToHashSet());
 
         foreach (var item in groups)
         {
@@ -321,7 +315,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
                 return property;
 
             },
-            parseAllowed: e =>
+            parseAllowed: (e, resource) =>
             {
                 return new WithConditions<PropertyAllowed>(fallback: e.Attribute("Allowed")!.Value.ToEnum<PropertyAllowed>(),
                     conditionRules: e.Elements("Condition").Select(xc => new ConditionRule<PropertyAllowed>(

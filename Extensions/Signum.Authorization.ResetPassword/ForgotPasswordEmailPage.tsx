@@ -68,7 +68,7 @@ export default function ForgotPasswordEmailPage(): React.JSX.Element {
           <div className="col-md-6 offset-md-3 forgot-password-success">
             {title &&
               <>
-                <h2 className="sf-entity-title">{title}</h2>
+                <h1 className="sf-entity-title h2">{title}</h1>
                 <p>{message}</p>
               </>}
             {!title && <h2 className="sf-entity-title">{message}</h2>}
@@ -85,7 +85,7 @@ export default function ForgotPasswordEmailPage(): React.JSX.Element {
         <div className="row">
           <div className="col-md-6 offset-md-3">
             <form onSubmit={(e) => handleSubmit(e)}>
-              <h2 className="sf-entity-title">{LoginAuthMessage.IForgotMyPassword.niceToString()}</h2>
+              <h1 className="sf-entity-title h2">{LoginAuthMessage.IForgotMyPassword.niceToString()}</h1>
               <p>{LoginAuthMessage.GiveUsYourUserEmailToResetYourPassword.niceToString()}</p>
 
               <div className={classes("form-group mb-3", error("eMail") && "has-error")}>

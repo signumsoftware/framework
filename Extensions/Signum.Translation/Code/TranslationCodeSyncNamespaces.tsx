@@ -60,7 +60,7 @@ export default function TranslationCodeSyncNamespaces(): React.JSX.Element {
   if (result?.length == 0) {
     return (
       <div>
-        <h2>{TranslationMessage._0AlreadySynchronized.niceToString(assembly)}</h2>
+        <h1 className="h2">{TranslationMessage._0AlreadySynchronized.niceToString(assembly)}</h1>
         <Link to={`/translation/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
         </Link>
@@ -71,7 +71,7 @@ export default function TranslationCodeSyncNamespaces(): React.JSX.Element {
 
   return (
     <div>
-      <h2><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {TranslationMessage.Synchronize0In1.niceToString(assembly, culture)}</h2>
+      <h1 className="h2"><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {TranslationMessage.Synchronize0In1.niceToString(assembly, culture)}</h1>
       {renderTable()}
     </div>
   );

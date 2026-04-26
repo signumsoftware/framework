@@ -3,9 +3,10 @@ import * as d3 from "d3"
 import { ChartClient, ChartColumn } from "../../ChartClient"
 import { Dic } from "@framework/Globals";
 import { tryGetTypeInfo } from "@framework/Reflection";
-import { isFilterGroup, FilterConditionOptionParsed, FilterOptionParsed, QueryToken } from "@framework/FindOptions";
+import { isFilterGroup, FilterConditionOptionParsed, FilterOptionParsed } from "@framework/FindOptions";
 import { MemoRepository } from "./ReactChart";
 import * as ColorUtils from "../../ColorPalette/ColorUtils"
+import { QueryToken } from "@framework/QueryToken";
 
 
 
@@ -277,7 +278,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     if (min == undefined  || max == undefined)
       return values;
 
-    var isServerUtc = values.some(a => (a as string).endsWith("Z"));
+    var isServerUtc = values.notNull().some(a => (a as string).endsWith("Z"));
 
     const minDate = DateTime.fromISO(min, { zone: isServerUtc ? "utc" : undefined }).startOf(unit); //Needed to fix offset issues after UTC conversion
     const maxDate = DateTime.fromISO(max, { zone: isServerUtc ? "utc" : undefined }).startOf(unit); //Needed to fix offset issues after UTC conversion

@@ -1,5 +1,3 @@
-using Signum.Authorization;
-using Signum.Basics;
 using Signum.Mailing;
 using Signum.Mailing.Templates;
 
@@ -72,7 +70,7 @@ public static class ResetPasswordRequestLogic
                 e.Used = true;
                 var user = e.User;
 
-                var error = UserEntity.OnValidatePassword(password);
+                var error = UserEntity.OnValidatePassword(password, user);
                 if (error != null)
                     throw new ResetPasswordException(error);
 
@@ -81,7 +79,7 @@ public static class ResetPasswordRequestLogic
                     user.Execute(UserOperation.Reactivate);
                 }
 
-                user.PasswordHash = PasswordEncoding.EncodePassword(user.UserName, password);
+                user.PasswordHash = PasswordEncoding.HashPassword(user.UserName, password);
                 user.LoginFailedCounter = 0;
                 using (AuthLogic.Disable())
                 {

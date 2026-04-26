@@ -88,7 +88,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
         tryGetTypeInfos(type).some(ti => ti && Navigator.isFindable(ti));
   }
 
-  static propEquals(prevProps: EntityBaseProps<any>, nextProps: EntityBaseProps<any>): boolean {
+  static override propEquals(prevProps: EntityBaseProps<any>, nextProps: EntityBaseProps<any>): boolean {
     if (
       nextProps.getComponent || prevProps.getComponent ||
       nextProps.extraButtons || prevProps.extraButtons ||
@@ -98,7 +98,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return LineBaseController.propEquals(prevProps, nextProps);
   }
 
-  getDefaultProps(state: P): void {
+  override getDefaultProps(state: P): void {
     if (state.type) {
       const type = state.type;
 
@@ -208,7 +208,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return (
       <LinkButton className={classes("sf-line-button", "sf-view", btn ?  "input-group-text" : undefined)}
         onClick={this.handleViewClick}
-        title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() + " " + this.props.label : undefined}>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() + " " + (this.props.label ?? "") : undefined}>
         {EntityBaseController.getViewIcon()}
       </LinkButton>
     );
@@ -329,7 +329,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return (
       <LinkButton className={classes("sf-line-button", "sf-create", btn ? "input-group-text" : undefined)}
         onClick={this.handleCreateClick}
-        title={this.props.ctx.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() + " " + this.props.label : undefined}>
+        title={this.props.ctx.titleLabels ? (createMessage ?? EntityControlMessage.Create.niceToString() + " " + (this.props.label ?? "")) : undefined}>
         {EntityBaseController.getCreateIcon()}
       </LinkButton>
     );
@@ -399,7 +399,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return (
       <LinkButton className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
         onClick={this.handleFindClick}
-        title={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() + " " + this.props.label : undefined}>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() + " " + (this.props.label ?? "") : undefined}>
         {EntityBaseController.getFindIcon()}
       </LinkButton>
     );
@@ -425,7 +425,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return (
       <LinkButton className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
         onClick={this.handleRemoveClick}
-        title={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() + "" + this.props.label : undefined}>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() + " " + (this.props.label ?? "") : undefined}>
         {EntityBaseController.getRemoveIcon()}
       </LinkButton>
     );
