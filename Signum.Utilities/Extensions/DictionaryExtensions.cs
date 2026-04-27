@@ -257,6 +257,20 @@ public static class DictionaryExtensions
         return dictionary.ToDictionaryEx(p => p.Key, p => other[p.Value]);
     }
 
+    public static Dictionary<K, V3> JoinDictionaryStrict<K, V1, V2, V3>(this IDictionary<K, V1> current, IDictionary<K, V2> should, Func<K, V1, V2, V3> mixer)
+    where K : notnull
+    {
+        var extra = current.Keys.Where(k => !should.ContainsKey(k)).ToList();
+        var missing = should.Keys.Where(k => !current.ContainsKey(k)).ToList();
+
+        if(extra.Any() || missing.Any())
+            throw new InvalidOperationException("The two dictionaries do not have the same keys\n" +
+                        (extra.Any() ? ("Extra:\n" + extra.ToString(a => " "  + a.ToString(), "\n") + "\n\n") : null) +
+                        (missing.Any() ? ("Missing:\n" + missing.ToString(a => " " + a.ToString(), "\n") + "\n\n") : null));
+
+        return current.ToDictionaryEx(kvp => kvp.Key, kvp => mixer(kvp.Key, kvp.Value, should[kvp.Key]));
+    }
+
     public static Dictionary<K, V3> JoinDictionary<K, V1, V2, V3>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1, V2, V3> mixer)
         where K : notnull
     {

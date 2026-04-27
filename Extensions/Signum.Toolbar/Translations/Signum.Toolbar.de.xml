@@ -2,7 +2,7 @@
 <Translations>
   <Type Name="LayoutMessage">
     <Member Name="JumpToMainContent" Description="Zum Hauptinhalt springen" />
-	<Member Name="SelectA0_G" Description="Wählen Sie [m:ein|f:eine|n:ein] {0} aus" />
+    <Member Name="SelectA0_G" Description="Wählen Sie [m:ein|f:eine|n:ein] {0} aus" />
   </Type>
   <Type Name="ShowCount" Description="Anzahl anzeigen">
     <Member Name="Always" Description="Immer" />
@@ -40,6 +40,7 @@
   </Type>
   <Type Name="ToolbarMenuElementEmbedded" Description="Menüelement der Symbolleiste">
     <Member Name="AutoSelect" Description="Automatisch auswählen" />
+    <Member Name="EntityConditionKey" Description="Entitätskonditionsschlüssel" />
     <Member Name="WithEntity" Description="Mit Entität" />
   </Type>
   <Type Name="ToolbarMenuEntity" Description="Toolbar-Menü" PluralDescription="Toolbar-Menüs" Gender="f">
@@ -60,7 +61,6 @@
     <Member Name="If0Selected" Description="Wenn {0} ausgewählt" />
     <Member Name="No0Selected" Description="Keine {0} ausgewählt" />
     <Member Name="RecursionDetected" Description="Rekursion erkannt" />
-
     <Member Name="ShowTogether" Description="Gemeinsam anzeigen" />
   </Type>
   <Type Name="ToolbarOperation">

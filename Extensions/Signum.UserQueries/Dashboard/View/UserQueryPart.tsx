@@ -95,7 +95,7 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChange
 
   return (
     <FullscreenComponent onReload={e => { e.preventDefault(); onReload ? onReload() : scRef.current!.doSearch({dataChanged : false}); }}>
-      {fullScreen => <div style={fullScreen ? { display: "flex", flexDirection: "column", height: "100%" } : undefined}>
+      {fullScreen => <div style={fullScreen ? { display: "flex", flexDirection: "column", height: "100%" } : { minWidth: 0, flexGrow: 1 }}>
         <SearchControl
           ref={scRef}
           deps={deps}

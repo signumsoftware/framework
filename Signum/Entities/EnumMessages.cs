@@ -236,6 +236,11 @@ public enum SearchMessage
     DeleteAllFilter,
     Filters,
     Columns,
+    Orders,
+    [Description("before")]
+    Before,
+    [Description("after")]
+    After,
     Find,
     [Description("Finder of {0}")]
     FinderOf0,
@@ -375,6 +380,8 @@ public enum SearchMessage
     AdvancedFilters,
     FilterDesigner,
     TimeMachine,
+    [Description("Edit all columns")]
+    EditAllColumns,
     Options,
 
     [Description("You have selected all rows on this page. Do you want to {0} only these rows, or to all rows across all pages?")]

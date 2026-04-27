@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useDocumentEvent, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
-import { Entity, getToString, Lite } from '@framework/Signum.Entities'
+import { Entity, EngineMessage, getToString, Lite } from '@framework/Signum.Entities'
 import { parseIcon } from '@framework/Components/IconTypeahead'
 import { ToolbarUrl } from '../ToolbarUrl';
 import { classes } from '@framework/Globals';
@@ -414,12 +414,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
   }, [p.response]);
 
 
-  const entities = useAPI(() => Finder.API.fetchAllLites({ types: entityType }), [entityType]);
-
   React.useEffect(() => {
-    if (!entities)
-      return;
-
     if (selEntityRef.current)
       return;
 
@@ -427,10 +422,12 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
     if (!savedId)
       return;
 
-    const only = entities.onlyOrNull(a => a.id!.toString() == savedId);
-    if (only != null)
-      setSelectedEntity(only);
-  }, [entities]);
+    Finder.fetchLites({ queryName: entityType, filterOptions: [{ token: "Entity.Id", operation: "EqualTo", value: savedId }], count: 1 })
+      .then(lites => {
+        if (lites.length > 0)
+          setSelectedEntity(lites[0]);
+      });
+  }, [entityType]);
 
   const active = p.ctx.active;
 
@@ -444,14 +441,20 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
     }
   }, [active, p.response]);
   React.useEffect(() => {
+    if (!selEntityRef.current || selEntityRef.current.model)
+      return;
 
-    if (selEntityRef.current && !selEntityRef.current.model && entities) {
-      var only = entities.onlyOrNull(a => is(a, selEntityRef.current));
-      if (only != null)
-        setSelectedEntity(only);
-    }
-
-  }, [selEntityRef.current, entities]);
+    const current = selEntityRef.current;
+    Finder.fetchLites({ queryName: entityType, filterOptions: [{ token: "Entity", operation: "EqualTo", value: current }], count: 1 })
+      .then(lites => {
+        if (lites.length > 0)
+          setSelectedEntity(lites[0]);
+        else {
+          current.model = EngineMessage._01NotFound.niceToString(getTypeInfo(entityType).niceName, current.id);
+          forceUpdate();
+        }
+      });
+  }, [selEntityRef.current]);
 
   function handleSelect(e: React.SyntheticEvent | undefined) {
 
@@ -471,7 +474,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
           <div style={{ width: "100%" }}>
             <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false} mandatory="warning"
               inputAttributes={{ placeholder: LayoutMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
-              onChange={e => handleSelect(e.originalEvent)} create={false} formGroupStyle="SrOnly" />
+              onChange={e => handleSelect(e.originalEvent)} create={false} createOnFind={false} formGroupStyle="SrOnly" />
           </div>
           {renderExtraIcons(p.response.extraIcons, p.ctx, selEntityRef.current ?? p.selectedEntity)}
         </Nav.Item>

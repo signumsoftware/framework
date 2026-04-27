@@ -669,8 +669,10 @@
     <Member Name="AddOrGroup" Description="OR-Gruppe hinzufügen" />
     <Member Name="AddValue" Description="Wert hinzufügen" />
     <Member Name="AdvancedFilters" Description="Erweiterte Filter" />
+    <Member Name="After" Description="nach" />
     <Member Name="AllPages" Description="Alle Seiten" />
     <Member Name="AndGroup" Description="AND-Gruppe" />
+    <Member Name="Before" Description="Vor" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Wählen Sie den Anzeigenamen der neuen Spalte" />
     <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Collections können nicht als Spalten hinzugefügt werden" />
     <Member Name="ColSpan" Description="ColSpan" />
@@ -687,6 +689,7 @@
     <Member Name="DerivedGroupKey" Description="Abgeleiteter Gruppenschlüssel" />
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="DoYouWantToSelectTheNew01_G" Description="Möchten Sie [m:den neuen|f:die neue|n:das neue] {0} ({1}) übernehmen?" />
+    <Member Name="EditAllColumns" Description="Alle Spalten bearbeiten" />
     <Member Name="EditPinnedFilters" Description="Angeheftete Filter bearbeiten" />
     <Member Name="Enter" Description="Eingabe" />
     <Member Name="Equal0" Description="Gleich {0}" />
@@ -723,6 +726,7 @@
     <Member Name="OperationsForSelectedElements" Description="Operationen für ausgewählte Elemente" />
     <Member Name="Operator" Description="Operator" />
     <Member Name="Options" Description="Optionen" />
+    <Member Name="Orders" Description="Reihenfolge" />
     <Member Name="OrGroup" Description="OR-Gruppe" />
     <Member Name="PaginationAll_0Elements" Description="{0} Elemente" />
     <Member Name="PaginationFirst_01Elements" Description="{0} {1} Elemente" />
