@@ -58,31 +58,34 @@ public static class MusicLogic
             CanBeModified = true,
             Execute = (e, _) =>
             {
-                if(!e.IsNew)
-                    Database.Query<SimplePassageEntity>().Where(a=>a.Note.Is(e)).UnsafeDeleteChunks();
+                if (Schema.Current.Tables.ContainsKey(typeof(SimplePassageEntity)))
+                {
+                    if (!e.IsNew)
+                        Database.Query<SimplePassageEntity>().Where(a => a.Note.Is(e)).UnsafeDeleteChunks();
 
-                e.Save();
+                    e.Save();
 
-                if (e.Title.HasText())
-                    new SimplePassageEntity
-                    {
-                        Note = e.ToLite(),
-                        IsTitle = true,
-                        Chunk = e.Title,
-                        Index = 0,
-                    }.Save();
+                    if (e.Title.HasText())
+                        new SimplePassageEntity
+                        {
+                            Note = e.ToLite(),
+                            IsTitle = true,
+                            Chunk = e.Title,
+                            Index = 0,
+                        }.Save();
 
-                e.Text?.SplitNoEmpty('\r', '\n', '.')
-                    .Select(t => t.Trim())
-                    .Where(t => t.HasText())
-                    .Select((t, i) => new SimplePassageEntity
-                    {
-                        Note = e.ToLite(),
-                        IsTitle = false,
-                        Chunk = t,
-                        Embedding = new Vector(embeddings.GetOrThrow(t)),
-                        Index = i + 1,
-                    }).SaveList();
+                    e.Text?.SplitNoEmpty('\r', '\n', '.')
+                        .Select(t => t.Trim())
+                        .Where(t => t.HasText())
+                        .Select((t, i) => new SimplePassageEntity
+                        {
+                            Note = e.ToLite(),
+                            IsTitle = false,
+                            Chunk = t,
+                            Embedding = new Vector(embeddings.GetOrThrow(t)),
+                            Index = i + 1,
+                        }).SaveList();
+                }
             },
         }.Register();
 

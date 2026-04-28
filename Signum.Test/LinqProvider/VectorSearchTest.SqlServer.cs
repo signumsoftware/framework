@@ -15,7 +15,7 @@ public class VectorSearchTest_SqlServer
         if (!(Connector.Current is SqlServerConnector con))
             throw SkipException.ForSkip("Skipping tests because not SQL Server.");
 
-        if (con.Version < SqlServerVersion.SqlServer2025)
+        if (!con.SupportsVectors)
             throw SkipException.ForSkip("Skipping tests because Vector Search requires SQL Server 2025 or later.");
     }
 
