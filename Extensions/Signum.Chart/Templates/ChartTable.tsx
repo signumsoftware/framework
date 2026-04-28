@@ -104,7 +104,7 @@ export default function ChartTableComponent(p: ChartTableProps): React.JSX.Eleme
     .map(cc => ({ token: cc.token!.token, displayName: cc.displayName } as ColumnOptionParsed))
     .map(co => {
 
-      const formatter = (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co.token!, undefined)).last("FormatRules").formatter(co.token!, undefined);
+      const formatter = (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co.token!, undefined, undefined)).last("FormatRules").formatter(co.token!, undefined, undefined);
 
       let resultIndex: number | "Entity" = resultTable.columns.indexOf(co.token!.fullKey);
 
