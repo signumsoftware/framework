@@ -288,8 +288,8 @@ internal class DbExpressionNominator : DbExpressionVisitor
                                 return Add(new SqlFunctionExpression(typeof(DateTime), null, "MAKE_TIMESTAMP", 
                                     [dtYear, dtMonth, dtDay, dtHour, dtMinute, dtSecond ?? Expression.Constant(0)]));
                             else
-                                return Add(new SqlFunctionExpression(typeof(DateTime), null, "DATETIME2FROMPARTS", 
-                                    [dtYear, dtMonth, dtDay, dtHour, dtMinute, dtSecond ?? Expression.Constant(0), Expression.Constant(0), Expression.Constant(0)]));
+                                return Add(new SqlFunctionExpression(typeof(DateTime), null, "DATETIME2FROMPARTS",
+                                    [dtYear, dtMonth, dtDay, dtHour, dtMinute, dtSecond ?? Expression.Constant(0), new SqlConstantExpression(0), new SqlConstantExpression(0)]));
                         }
                         else
                         {
@@ -314,7 +314,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
                         if (isPostgres)
                             return Add(new SqlFunctionExpression(typeof(TimeOnly), null, "MAKE_TIME", [toHour, toMinute, toSecond]));
                         else
-                            return Add(new SqlFunctionExpression(typeof(TimeOnly), null, "TIMEFROMPARTS", [toHour, toMinute, toSecond, Expression.Constant(0), Expression.Constant(0)]));
+                            return Add(new SqlFunctionExpression(typeof(TimeOnly), null, "TIMEFROMPARTS", [toHour, toMinute, toSecond, new SqlConstantExpression(0), new SqlConstantExpression(0)]));
                     }
                 }
 
@@ -330,7 +330,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
                         if (isPostgres)
                             return Add(new SqlFunctionExpression(typeof(TimeSpan), null, "MAKE_TIME", [tsHour, tsMinute, tsSecond]));
                         else
-                            return Add(new SqlFunctionExpression(typeof(TimeSpan), null, "TIMEFROMPARTS", [tsHour, tsMinute, tsSecond, Expression.Constant(0), Expression.Constant(0)]));
+                            return Add(new SqlFunctionExpression(typeof(TimeSpan), null, "TIMEFROMPARTS", [tsHour, tsMinute, tsSecond, new SqlConstantExpression(0), new SqlConstantExpression(0)]));
                     }
 
                     if (tsDay != null && tsHour != null && tsMinute != null && tsSecond != null)
@@ -347,7 +347,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
                             ]));
                         }
                         else
-                            return Add(new SqlFunctionExpression(typeof(TimeSpan), null, "TIMEFROMPARTS", [tsHour, tsMinute, tsSecond, Expression.Constant(0), Expression.Constant(0)]));
+                            return Add(new SqlFunctionExpression(typeof(TimeSpan), null, "TIMEFROMPARTS", [tsHour, tsMinute, tsSecond, new SqlConstantExpression(0), new SqlConstantExpression(0)]));
                     }
                 }
 
