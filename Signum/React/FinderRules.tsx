@@ -269,7 +269,7 @@ export function initFormatRules(): Finder.FormatRule[] {
     },
     {
       name: "Number with Unit",
-      isApplicable: qt => (qt.filterType == "Integer" || qt.filterType == "Decimal") && Boolean(qt.unit),
+      isApplicable: (qt, sc, opts) => (qt.filterType == "Integer" || qt.filterType == "Decimal") && Boolean(qt.unit) && !opts?.avoidUnit,
       formatter: qt => {
         const numberFormat = toNumberFormat(qt.format);
         return new Finder.CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, false, "numeric-cell");
