@@ -45,7 +45,7 @@ public static class MusicStarter
 
             MusicLoader.Load();
 
-            if (Connector.Current is SqlServerConnector)
+            if (Connector.Current is SqlServerConnector c && c.SupportsVectors)
                 Schema.Current.Table<SimplePassageEntity>().AllIndexes().OfType<VectorTableIndex>().SingleEx().CreateVectorIndex();
 
             startedAndLoaded = true;

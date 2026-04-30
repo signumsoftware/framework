@@ -2395,7 +2395,11 @@ export namespace Finder {
     return tr != null && getTypeInfos(tr).some(ti => ti.isSystemVersioned == true)
   }
 
-  export function getCellFormatter(qs: QuerySettings | undefined, qt: QueryToken, sc: SearchControlLoaded | undefined): CellFormatter {
+  interface GetFormatterOptions {
+    avoidUnit?: boolean;
+  }
+
+  export function getCellFormatter(qs: QuerySettings | undefined, qt: QueryToken, sc: SearchControlLoaded | undefined, options?: GetFormatterOptions): CellFormatter {
 
     const result = qs?.formatters && qs.formatters[qt.fullKey];
 
@@ -2406,9 +2410,9 @@ export namespace Finder {
     if (prRoute)
       return prRoute;
 
-    const rule = formatRules.filter(a => a.isApplicable(qt, sc)).last("FormatRules");
+    const rule = formatRules.filter(a => a.isApplicable(qt, sc, options)).last("FormatRules");
 
-    return rule.formatter(qt, sc);
+    return rule.formatter(qt, sc, options);
   }
 
   export function resetFormatRules(): void {
@@ -2429,8 +2433,8 @@ export namespace Finder {
 
   export interface FormatRule {
     name: string;
-    formatter: (column: QueryToken, sc: SearchControlLoaded | undefined) => CellFormatter;
-    isApplicable: (column: QueryToken, sc: SearchControlLoaded | undefined) => boolean;
+    formatter: (column: QueryToken, sc: SearchControlLoaded | undefined, opts: GetFormatterOptions | undefined) => CellFormatter;
+    isApplicable: (column: QueryToken, sc: SearchControlLoaded | undefined, opts: GetFormatterOptions | undefined) => boolean;
   }
 
   export class CellFormatter {

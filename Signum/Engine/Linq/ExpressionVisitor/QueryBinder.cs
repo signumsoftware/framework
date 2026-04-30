@@ -2831,7 +2831,7 @@ internal class QueryBinder : ExpressionVisitor
             throw new UnexpectedValueException(table);
 
         List<ColumnAssignment> assignments = new List<ColumnAssignment>();
-        using (SetCurrentSource(pr.Select.From!))
+        using (SetCurrentSource(pr.Select))
         {
             foreach (var setter in setterExpressions)
             {
