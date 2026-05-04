@@ -7,8 +7,11 @@ using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using Signum.Engine.Sync;
+using Signum.Basics;
 using Signum.Omnibox;
 using Signum.Files;
+using Signum.Entities;
+using DocumentFormat.OpenXml.Vml.Office;
 using Signum.API;
 
 namespace Signum.Help;
@@ -234,10 +237,7 @@ public static class HelpLogic
         throw new InvalidOperationException("No compatible CultureInfo found in the database for {0}".FormatWith(ci.Name));
     }
 
-    public static PrimaryKey? GetImageId(Guid guid)
-    {
-        return Database.Query<HelpImageEntity>().Single((HelpImageEntity a) => a.Guid == guid).Id;
-    }
+
 
     public static List<Type> AllTypes()
     {

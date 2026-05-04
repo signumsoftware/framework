@@ -164,8 +164,7 @@ public enum HelpMessage
     SelectedFile,
     HelpZipContents,
     NewKey,
-    ActionStatus,
-    LoadingImage,
+    ActionStatus
 }
 
 public enum HelpKindMessage
