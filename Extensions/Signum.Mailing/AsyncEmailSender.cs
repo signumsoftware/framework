@@ -190,103 +190,32 @@ public static class AsyncEmailSender
     static bool sqlDependencyRegistered = false;
     private static void SetSqlDepndency()
     {
-        if (sqlDependencyRegistered)
-            return;
-
+		if(sqlDependencyRegistered)
+			return;
+		
         var query = Database.Query<EmailMessageEntity>().Where(m => m.State == EmailMessageState.ReadyToSend).Select(m => m.Id);
         sqlDependencyRegistered = true;
-        query.ToListWithInvalidation(typeof(EmailMessageEntity), "EmailAsyncSender ReadyToSend dependency", a =>
-        {
+        query.ToListWithInvalidation(typeof(EmailMessageEntity), "EmailAsyncSender ReadyToSend dependency", a => {
             sqlDependencyRegistered = false;
             WakeUp("EmailAsyncSender ReadyToSend dependency", a);
         });
     }
 
-    //private static bool RecruitQueuedItems()
-    //{
-    //    DateTime? firstDate = EmailLogic.Configuration.AvoidSendingEmailsOlderThan == null ?
-    //        null : (DateTime?)Clock.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
-
-    //    queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
-    //        m.State == EmailMessageState.ReadyToSend &&
-    //        m.CreationDate  < Clock.Now.AddSeconds(-4) &&
-    //        (firstDate == null ? true : m.CreationDate >= firstDate)).UnsafeUpdate()
-    //            .Set(m => m.ProcessIdentifier, m => processIdentifier)
-    //            .Set(m => m.State, m => EmailMessageState.RecruitedForSending)
-    //            .Execute();
-    //    return queuedItems > 0;
-    //}
-
     private static bool RecruitQueuedItems()
     {
-        DateTime now = Clock.Now.AddSeconds(-2);
-        DateTime? firstDate = EmailLogic.Configuration.AvoidSendingEmailsOlderThan == null
-            ? null
-            : now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
+        DateTime? firstDate = EmailLogic.Configuration.AvoidSendingEmailsOlderThan == null ?
+            null : (DateTime?)Clock.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
 
-        int batchSize = EmailLogic.Configuration.ChunkSizeSendingEmails;
-        int total = 0;
-        try
-        {
-            while (true)
-            {
-                List<PrimaryKey> ids;
-
-
-
-                using (var tr = Transaction.ForceNew())
-                {
-                    ids = Database.Query<EmailMessageEntity>()
-                 .Where(m => m.State == EmailMessageState.ReadyToSend
-                          && m.CreationDate < now
-                          && (firstDate == null || m.CreationDate >= firstDate))
-                 .OrderBy(m => m.CreationDate)
-                 .Select(m => m.Id)
-                 .Take(batchSize)
-                 .ToList();
-                    tr.Commit();
-                }
-
-
-                using (var tr = Transaction.ForceNew())
-                {
-
-
-                    if (ids.Count == 0)
-                        break;
-
-                    var updated = Database.Query<EmailMessageEntity>()
-                          .Where(m => ids.Contains(m.Id))
-                          .UnsafeUpdate()
-                          .Set(m => m.ProcessIdentifier, m => processIdentifier)
-                          .Set(m => m.State, m => EmailMessageState.RecruitedForSending)
-                          .Execute();
-
-                    total += updated;
-                    tr.Commit();
-                }
-
-                if (ids.Count < batchSize)
-                    break;
-            }
-
-        }
-        catch (Exception ex)
-        {
-            ex.LogException();
-            if (ex is SqlException sqlEx && (sqlEx.Number == 1205 || sqlEx.Number == -2)) // Deadlock or Timeout
-            {
-                // Log and retry
-                SystemEventLogLogic.Log("EmailAsyncSender RecruitQueuedItems - SQL Exception: " + sqlEx.Message);
-            }
-            else
-
-                throw;
-        }
-      
-        queuedItems = total;
-        return total > 0;
+        queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
+            m.State == EmailMessageState.ReadyToSend &&
+            m.CreationDate  < Clock.Now &&
+            (firstDate == null ? true : m.CreationDate >= firstDate)).UnsafeUpdate()
+                .Set(m => m.ProcessIdentifier, m => processIdentifier)
+                .Set(m => m.State, m => EmailMessageState.RecruitedForSending)
+                .Execute();
+        return queuedItems > 0;
     }
+
 
 
     internal static bool WakeUp(string reason, SqlNotificationEventArgs? args)
