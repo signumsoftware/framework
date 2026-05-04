@@ -112,7 +112,7 @@ export class MentionNode extends DecoratorNode<React.JSX.Element> {
   }
 
   override isIsolated(): boolean {
-    return true;
+    return false;
   }
 }
 
