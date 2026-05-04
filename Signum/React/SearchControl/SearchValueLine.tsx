@@ -185,7 +185,7 @@ export default function SearchValueLine(p: SearchValueLineProps): React.JSX.Elem
           id={inputId}
           ref={handleSearchValueLoaded}
           findOptions={fo}
-          avoidUnit
+          unit={null}
           initialValue={p.initialValue}
           onInitialValueLoaded={() => forceUpdate()}
           multipleValues={p.multipleValues}
