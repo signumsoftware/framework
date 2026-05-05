@@ -2357,6 +2357,7 @@ export namespace Finder {
     pagination?: Pagination;
     allowSystemTime?: boolean;
     defaultOrders?: OrderOption[];
+    defaultOrdersAutocomplete?: OrderOption[];
     defaultFilters?: FilterOption[];
     defaultAggregates?: ColumnOption[];
     hiddenColumns?: ColumnOption[];

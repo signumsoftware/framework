@@ -60,7 +60,7 @@ function MentionPlugin(p: { handler: MentionHandlerBase }): React.JSX.Element | 
 
   const allItems = useAPI(() => p.handler.getItems(), [p.handler]);
 
-  const triggerFn = useBasicTypeaheadTriggerMatch(p.handler.trigger, { minLength: 0, maxLength: 50 });
+  const triggerFn = useBasicTypeaheadTriggerMatch(p.handler.trigger, { minLength: 0, maxLength: 50, allowWhitespace: true });
 
   const onQueryChange = React.useCallback((query: string | null) => {
     if (query === null || !allItems) {
