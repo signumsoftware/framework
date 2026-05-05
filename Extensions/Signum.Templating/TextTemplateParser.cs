@@ -209,6 +209,18 @@ public static partial class TextTemplateParser
                                     DeclareVariable(cc.ValueProvider);
                                 break;
                             }
+                        case "elseif":
+                            {
+                                var ifn = (IfNode?)PopBlock(typeof(IfNode))?.owner;
+                                if (ifn != null)
+                                {
+                                    ConditionBase cond = TemplateUtils.ParseCondition(expr, variable, this);
+                                    PushBlock(ifn.CreateElseIf(cond));
+                                    if (cond is ConditionCompare cc)
+                                        DeclareVariable(cc.ValueProvider);
+                                }
+                                break;
+                            }
                         case "else":
                             {
                                 var ifn = (IfNode?)PopBlock(typeof(IfNode))?.owner;

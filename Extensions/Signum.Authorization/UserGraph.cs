@@ -4,6 +4,8 @@ namespace Signum.Authorization;
 
 public class UserGraph : Graph<UserEntity, UserState>
 {
+    public static event Action<UserEntity>? OnDeactivated; 
+
     public static void Register()
     {
         GetState = u => u.State;
@@ -33,7 +35,7 @@ public class UserGraph : Graph<UserEntity, UserState>
                 u.State = UserState.Deactivated;
 
                 AuthLogic.RecentlyUsersDisabled.Reset();
-                var rt = UserTicketLogic.RemoveTickets(u);
+                OnDeactivated?.Invoke(u);
             },
         }.Register();
 

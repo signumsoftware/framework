@@ -395,6 +395,9 @@ public static partial class TextTemplateParser
     {
         public readonly ConditionBase Condition;
         public readonly BlockNode IfBlock;
+
+        public List<(ConditionBase Condition, BlockNode Block)> ElseIfBranches = new();
+
         public BlockNode? ElseBlock;
 
         internal IfNode(ConditionBase condition, TextTemplateParserImp walker)
@@ -402,7 +405,14 @@ public static partial class TextTemplateParser
             this.Condition = condition;
             this.IfBlock = new BlockNode(this);
         }
-        
+
+        public BlockNode CreateElseIf(ConditionBase condition)
+        {
+            var block = new BlockNode(this);
+            ElseIfBranches.Add((condition, block));
+            return block;
+        }
+
         public BlockNode CreateElse()
         {
             ElseBlock = new BlockNode(this);
@@ -413,6 +423,11 @@ public static partial class TextTemplateParser
         {
             this.Condition.FillQueryTokens(list);
             IfBlock.FillQueryTokens(list);
+            foreach (var (cond, block) in ElseIfBranches)
+            {
+                cond.FillQueryTokens(list);
+                block.FillQueryTokens(list);
+            }
             if (ElseBlock != null)
                 ElseBlock.FillQueryTokens(list);
         }
@@ -424,9 +439,20 @@ public static partial class TextTemplateParser
             {
                 IfBlock.PrintList(p);
             }
-            else if (ElseBlock != null)
+            else
             {
-                ElseBlock.PrintList(p);
+                bool handled = false;
+                foreach (var (cond, block) in ElseIfBranches)
+                {
+                    if (cond.Evaluate(p))
+                    {
+                        block.PrintList(p);
+                        handled = true;
+                        break;
+                    }
+                }
+                if (!handled && ElseBlock != null)
+                    ElseBlock.PrintList(p);
             }
             p.StringBuilder.Append(EmptyPlaceholder);
         }
@@ -442,6 +468,16 @@ public static partial class TextTemplateParser
                 IfBlock.ToString(sb, newVars);
             }
 
+            foreach (var (cond, block) in ElseIfBranches)
+            {
+                sb.Append("@elseif[");
+                cond.ToStringInternal(sb, variables);
+                sb.Append("]");
+                var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
+                cond.Declare(newVars);
+                block.ToString(sb, newVars);
+            }
+
             if (ElseBlock != null)
             {
                 sb.Append("@else");
@@ -453,7 +489,6 @@ public static partial class TextTemplateParser
             sb.Append("@endif");
         }
 
-
         public override void Synchronize(TemplateSynchronizationContext sc)
         {
             using (sc.NewScope())
@@ -463,8 +498,17 @@ public static partial class TextTemplateParser
                 using (sc.NewScope())
                 {
                     Condition.Declare(sc.Variables);
-
                     IfBlock.Synchronize(sc);
+                }
+
+                foreach (var (cond, block) in ElseIfBranches)
+                {
+                    cond.Synchronize(sc, "elseif[]");
+                    using (sc.NewScope())
+                    {
+                        cond.Declare(sc.Variables);
+                        block.Synchronize(sc);
+                    }
                 }
 
                 if (ElseBlock != null)
@@ -472,7 +516,6 @@ public static partial class TextTemplateParser
                     using (sc.NewScope())
                     {
                         Condition.Declare(sc.Variables);
-
                         ElseBlock.Synchronize(sc);
                     }
                 }

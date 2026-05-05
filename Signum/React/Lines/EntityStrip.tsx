@@ -53,9 +53,12 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
           if (types.length == 0)
             return;
 
-          if (types.length == 1) {
+          if (p.findOptions) {
+            p.findOptions = withAvoidDuplicates(p.findOptions, types.onlyOrNull()?.name);
+          }
+          else if (types.length == 1) {
             var tn = types.single().name;
-            p.findOptions = withAvoidDuplicates(p.findOptions ?? Navigator.entitySettings[tn]?.defaultFindOptions ?? { queryName: tn }, tn);
+            p.findOptions = withAvoidDuplicates(Navigator.entitySettings[tn]?.defaultFindOptions ?? { queryName: tn }, tn);
           }
           else {
             p.findOptionsDictionary = types.toObject(a => a.name, a => withAvoidDuplicates(p.findOptionsDictionary?.[a.name] ?? Navigator.entitySettings[a.name]?.defaultFindOptions ?? { queryName: a.name }, a.name));
@@ -69,9 +72,12 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
 
     }
 
-    function withAvoidDuplicates(fo: FindOptions, typeName: string): FindOptions {
+    function withAvoidDuplicates(fo: FindOptions, typeName?: string): FindOptions {
 
-      const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? (!e.entity?.isNew) && e.EntityType == typeName : isEntity(e) ? !e.isNew && e.Type == typeName : null).notNull();
+      const compatible = p.ctx.value.map(a => a.element).filter(e =>
+        isLite(e) ? (!e.entity?.isNew) && (typeName == null || e.EntityType == typeName) :
+          isEntity(e) ? !e.isNew && (typeName == null || e.Type == typeName) :
+            false).notNull();
 
       return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible, frozen: true }] };
     }

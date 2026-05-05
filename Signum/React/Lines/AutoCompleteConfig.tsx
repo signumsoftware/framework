@@ -177,7 +177,7 @@ export async function getLitesWithSubStr(fo: FindOptions, subStr: string, signal
 
   const fop = await Finder.parseFindOptions({
     ...fo,
-    orderOptions: [
+    orderOptions: qs?.defaultOrdersAutocomplete ?? [
       { token: "Entity.ToString.Length", orderType: "Ascending" },
       { token: "Entity.ToString", orderType: "Ascending" },
     ],
@@ -304,7 +304,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
     return Finder.getQueryDescription(fo.queryName)
       .then(qd => Finder.parseFindOptions({
-        orderOptions: [
+        orderOptions: qs?.defaultOrdersAutocomplete ?? [
           { token: "Entity.ToString.Length", orderType: "Ascending" },
           { token: "Entity.ToString", orderType: "Ascending" },
         ],

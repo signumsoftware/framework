@@ -592,21 +592,65 @@ public abstract class BlockContainerNode : BaseNode
 
     protected internal abstract void ReplaceBlock();
 
-    protected void NormalizeInterval(ref MatchNodePair first, ref MatchNodePair last, MatchNode errorHintParent)
+    public OpenXmlElement? CommonAncestor;
+
+    protected OpenXmlElement FindCommonAncestor(MatchNode errorHint, params MatchNode[] tokens)
     {
-        if (first.MatchNode == last.MatchNode)
-            throw new ArgumentException("first and last are the same node");
+        var chains = tokens.Select(t => ((OpenXmlElement)t).Follow(a => a.Parent).Reverse().ToList()).ToArray();
 
-        var chainFirst = ((OpenXmlElement)first.MatchNode).Follow(a => a.Parent).Reverse().ToList();
-        var chainLast = ((OpenXmlElement)last.MatchNode).Follow(a => a.Parent).Reverse().ToList();
+        int minLen = chains.Min(c => c.Count);
+        int divergeAt = minLen;
+        for (int i = 0; i < minLen; i++)
+        {
+            if (chains.Select(c => c[i]).Distinct(ReferenceEqualityComparer.Instance).Count() != 1)
+            {
+                divergeAt = i;
+                break;
+            }
+        }
 
-        var result = chainFirst.Zip(chainLast, (f, l) => new { f, l }).First(a => a.f != a.l);
-        AssertNotImportant(chainFirst, result.f, errorHintParent, first.MatchNode, last.MatchNode); 
-        AssertNotImportant(chainLast, result.l, errorHintParent, last.MatchNode, first.MatchNode);
-        
-        first.AscendantNode = result.f;
-        last.AscendantNode = result.l;
+        var children = chains.Select(c => c[divergeAt]).ToArray();
+
+        for (int i = 0; i < tokens.Length; i++)
+            AssertNotImportant(chains[i], children[i], errorHint, tokens[i], tokens[(i + 1) % tokens.Length]);
+
+        return chains[0][divergeAt - 1];
     }
+
+    protected OpenXmlElement ChildOfAncestor(MatchNode token) =>
+        ((OpenXmlElement)token).Follow(a => a.Parent).First(a => a.Parent == CommonAncestor);
+
+    protected List<OpenXmlElement> NodesBetween(MatchNode first, MatchNode last)
+    {
+        var firstChild = ChildOfAncestor(first);
+        var lastChild = ChildOfAncestor(last);
+
+        int indexFirst = CommonAncestor!.ChildElements.IndexOf(firstChild);
+        int indexLast = CommonAncestor!.ChildElements.IndexOf(lastChild);
+
+        return CommonAncestor!.ChildElements.Where((e, i) => indexFirst < i && i < indexLast).ToList();
+    }
+
+    protected static OpenXmlElement? ReplaceMatchNode(MatchNode token, string text)
+    {
+        var run = token.NodeProvider.NewRun((OpenXmlCompositeElement?)token.RunProperties?.CloneNode(true), text);
+        var container = ((OpenXmlElement)token).Follow(a => a.Parent).Last();
+        if (container == token) return run;
+        token.ReplaceBy(run);
+        return container;
+    }
+
+    protected static MatchNode CloneToken(MatchNode token)
+    {
+        var container = ((OpenXmlElement)token).Follow(a => a.Parent).Last();
+        if (container == token)
+            return (MatchNode)token.CloneNode(true);
+        var containerClone = container.CloneNode(true);
+        return containerClone as MatchNode ?? containerClone.Descendants<MatchNode>().SingleEx();
+    }
+
+    protected static MatchNode? CloneOptionalToken(MatchNode? token) =>
+        token == null ? null : CloneToken(token);
 
     private void AssertNotImportant(List<OpenXmlElement> chain, OpenXmlElement openXmlElement, MatchNode errorHintParent, MatchNode errorHint1, MatchNode errorHint2)
     {
@@ -650,31 +694,15 @@ public abstract class BlockContainerNode : BaseNode
         return false;
     }
 
-    protected static List<OpenXmlElement> NodesBetween(MatchNodePair first, MatchNodePair last)
-    {
-        var parent = first.CommonParent(last);
 
-        int indexFirst = parent.ChildElements.IndexOf(first.AscendantNode);
-        if (indexFirst == -1)
-            throw new InvalidOperationException("Element not found");
-
-        int indexLast = parent.ChildElements.IndexOf(last.AscendantNode);
-        if (indexLast == -1)
-            throw new InvalidOperationException("Element not found");
-
-        var childs = parent.ChildElements.Where((e, i) => indexFirst < i && i < indexLast).ToList();
-        return childs;
-    }
-
-    
 }
 
 public class ForeachNode : BlockContainerNode
 {
     public readonly ValueProviderBase ValueProvider;
 
-    public MatchNodePair ForeachToken;
-    public MatchNodePair EndForeachToken;
+    public MatchNode ForeachToken = null!;
+    public MatchNode EndForeachToken = null!;
 
     public BlockNode? ForeachBlock;
 
@@ -689,8 +717,8 @@ public class ForeachNode : BlockContainerNode
         : base(original)
     {
         this.ValueProvider = original.ValueProvider;
-        this.ForeachToken = original.ForeachToken.CloneNode();
-        this.EndForeachToken = original.EndForeachToken.CloneNode();
+        this.ForeachToken = CloneToken(original.ForeachToken);
+        this.EndForeachToken = CloneToken(original.EndForeachToken);
         this.ForeachBlock = (BlockNode?)original.ForeachBlock?.Let(a => a.CloneNode(true));
     }
 
@@ -708,13 +736,13 @@ public class ForeachNode : BlockContainerNode
 
     protected internal override void ReplaceBlock()
     {
-        this.NormalizeInterval(ref ForeachToken, ref EndForeachToken, errorHintParent: ForeachToken.MatchNode);
+        CommonAncestor = FindCommonAncestor(ForeachToken, ForeachToken, EndForeachToken);
 
         this.ForeachBlock = new BlockNode(this.NodeProvider);
         this.ForeachBlock.MoveChilds(NodesBetween(ForeachToken, EndForeachToken));
 
-        ForeachToken.AscendantNode!.ReplaceBy(this);
-        EndForeachToken.AscendantNode!.Remove();
+        ChildOfAncestor(ForeachToken).ReplaceBy(this);
+        ChildOfAncestor(EndForeachToken).Remove();
     }
 
     public override void WriteTo(XmlWriter xmlWriter)
@@ -749,15 +777,14 @@ public class ForeachNode : BlockContainerNode
         var parent = this.Parent!;
         int index = parent.ChildElements.IndexOf(this);
         this.Remove();
-        parent.InsertAt(this.ForeachToken.ReplaceMatchNode("@foreach" + this.ValueProvider.ToString(variables, null)), index++);
+        parent.InsertAt(ReplaceMatchNode(ForeachToken, "@foreach" + this.ValueProvider.ToString(variables, null))!, index++);
         {
             var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
             ValueProvider.Declare(newVars);
             this.ForeachBlock!.RenderTemplate(newVars);
             parent.MoveChildsAt(ref index, this.ForeachBlock.ChildElements);
         }
-        parent.InsertAt(this.EndForeachToken.ReplaceMatchNode("@endforeach"), index++);
-
+        parent.InsertAt(ReplaceMatchNode(EndForeachToken, "@endforeach")!, index++);
     }
 
     public override void Synchronize(TemplateSynchronizationContext sc)
@@ -775,72 +802,17 @@ public class ForeachNode : BlockContainerNode
         }
     }
 
-    public override string InnerText => $@"{this.ForeachToken.MatchNode.InnerText}{this.ForeachBlock!.InnerText}{this.EndForeachToken.MatchNode.InnerText}";
+    public override string InnerText => $@"{ForeachToken.InnerText}{ForeachBlock!.InnerText}{EndForeachToken.InnerText}";
 }
 
-public struct MatchNodePair
-{
-    public MatchNodePair(MatchNode matchNode)
-    {
-        this.MatchNode = matchNode;
-        this.AscendantNode = null;
-    }
-
-    public MatchNode MatchNode;
-    public OpenXmlElement? AscendantNode;
-
-    public OpenXmlElement CommonParent(MatchNodePair other)
-    {
-        if (this.AscendantNode!.Parent != other.AscendantNode!.Parent)
-            throw new InvalidOperationException("Parents do not match");
-
-        return this.AscendantNode.Parent!;
-    }
-
-    public MatchNodePair CloneNode()
-    {
-        if (this.AscendantNode != null)
-        {
-            var ascClone = this.AscendantNode.CloneNode(true);
-            var match = ascClone as MatchNode ?? ascClone.Descendants<MatchNode>().SingleEx();
-
-            return new MatchNodePair(match) { AscendantNode = ascClone };
-        }
-        else if (this.MatchNode != null)
-        {
-            var clone = this.MatchNode.CloneNode(true);
-            return new MatchNodePair((MatchNode)clone);
-        }
-        else
-        {
-            return default(MatchNodePair);
-        }
-    }
-
-    internal OpenXmlElement? ReplaceMatchNode(string text)
-    {
-        var run = this.MatchNode.NodeProvider.NewRun((OpenXmlCompositeElement?)this.MatchNode.RunProperties?.CloneNode(true), text);
-
-        if (this.MatchNode == AscendantNode)
-            return run;
-
-        this.MatchNode.ReplaceBy(run);
-        return AscendantNode;
-    }
-
-    public override string ToString()
-    {
-        return "{0} {1}".FormatWith(MatchNode, AscendantNode);
-    }
-}
 
 public class AnyNode : BlockContainerNode
 {
     public readonly ConditionBase Condition;
 
-    public MatchNodePair AnyToken;
-    public MatchNodePair NotAnyToken;
-    public MatchNodePair EndAnyToken;
+    public MatchNode AnyToken = null!;
+    public MatchNode? NotAnyToken;
+    public MatchNode EndAnyToken = null!;
 
     public BlockNode? AnyBlock;
     public BlockNode? NotAnyBlock;
@@ -855,9 +827,9 @@ public class AnyNode : BlockContainerNode
     {
         this.Condition= original.Condition.Clone();
 
-        this.AnyToken = original.AnyToken.CloneNode();
-        this.NotAnyToken = original.NotAnyToken.CloneNode();
-        this.EndAnyToken = original.EndAnyToken.CloneNode();
+        this.AnyToken = CloneToken(original.AnyToken);
+        this.NotAnyToken = CloneOptionalToken(original.NotAnyToken);
+        this.EndAnyToken = CloneToken(original.EndAnyToken);
 
         this.AnyBlock = (BlockNode?)original.AnyBlock?.Let(a => a.CloneNode(true));
         this.NotAnyBlock = (BlockNode?)original.NotAnyBlock?.Let(a => a.CloneNode(true));
@@ -885,34 +857,29 @@ public class AnyNode : BlockContainerNode
 
     protected internal override void ReplaceBlock()
     {
-        if (this.NotAnyToken.MatchNode == null)
+        if (this.NotAnyToken == null)
         {
-            this.NormalizeInterval(ref AnyToken, ref EndAnyToken, errorHintParent: AnyToken.MatchNode);
+            CommonAncestor = FindCommonAncestor(AnyToken, AnyToken, EndAnyToken);
 
             this.AnyBlock = new BlockNode(this.NodeProvider);
             this.AnyBlock.MoveChilds(NodesBetween(AnyToken, EndAnyToken));
 
-            this.AnyToken.AscendantNode!.ReplaceBy(this);
-            this.EndAnyToken.AscendantNode!.Remove();
+            ChildOfAncestor(AnyToken).ReplaceBy(this);
+            ChildOfAncestor(EndAnyToken).Remove();
         }
         else
         {
-            var notAnyToken = this.NotAnyToken;
-            this.NormalizeInterval(ref AnyToken, ref notAnyToken, errorHintParent: AnyToken.MatchNode);
-            this.NormalizeInterval(ref NotAnyToken, ref EndAnyToken, errorHintParent: AnyToken.MatchNode);
-
-            if (notAnyToken.AscendantNode != NotAnyToken.AscendantNode)
-                throw new InvalidOperationException("Unbalanced tokens");
+            CommonAncestor = FindCommonAncestor(AnyToken, AnyToken, NotAnyToken, EndAnyToken);
 
             this.AnyBlock = new BlockNode(this.NodeProvider);
-            this.AnyBlock.MoveChilds(NodesBetween(this.AnyToken, this.NotAnyToken));
+            this.AnyBlock.MoveChilds(NodesBetween(AnyToken, NotAnyToken));
 
             this.NotAnyBlock = new BlockNode(this.NodeProvider);
-            this.NotAnyBlock.MoveChilds(NodesBetween(this.NotAnyToken, this.EndAnyToken));
+            this.NotAnyBlock.MoveChilds(NodesBetween(NotAnyToken, EndAnyToken));
 
-            this.AnyToken.AscendantNode!.ReplaceBy(this);
-            this.NotAnyToken.AscendantNode!.Remove();
-            this.EndAnyToken.AscendantNode!.Remove();
+            ChildOfAncestor(AnyToken).ReplaceBy(this);
+            ChildOfAncestor(NotAnyToken).Remove();
+            ChildOfAncestor(EndAnyToken).Remove();
         }
     }
 
@@ -979,7 +946,7 @@ public class AnyNode : BlockContainerNode
 
         string str = "@any" + this.Condition.ToString(variables);
 
-        parent.InsertAt(this.AnyToken.ReplaceMatchNode(str), index++);
+        parent.InsertAt(ReplaceMatchNode(this.AnyToken, str)!, index++);
         {
             var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
             Condition.Declare(newVars);
@@ -987,9 +954,9 @@ public class AnyNode : BlockContainerNode
             parent.MoveChildsAt(ref index, this.AnyBlock.ChildElements);
         }
 
-        if (this.NotAnyToken.MatchNode != null)
+        if (this.NotAnyToken != null)
         {
-            parent.InsertAt(this.NotAnyToken.ReplaceMatchNode("@notany"), index++);
+            parent.InsertAt(ReplaceMatchNode(this.NotAnyToken, "@notany")!, index++);
 
             var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
             Condition.Declare(newVars);
@@ -997,24 +964,25 @@ public class AnyNode : BlockContainerNode
             parent.MoveChildsAt(ref index, this.NotAnyBlock.ChildElements);
         }
 
-        parent.InsertAt(this.EndAnyToken.ReplaceMatchNode("@endany"), index++);
+        parent.InsertAt(ReplaceMatchNode(this.EndAnyToken, "@endany")!, index++);
     }
 
-    public override string InnerText => $@"{this.AnyToken.MatchNode.InnerText}{this.AnyBlock!.InnerText}{this.NotAnyToken.MatchNode?.InnerText}{this.NotAnyBlock?.InnerText}{this.EndAnyToken.MatchNode.InnerText}";
+    public override string InnerText => $@"{this.AnyToken.InnerText}{this.AnyBlock!.InnerText}{this.NotAnyToken?.InnerText}{this.NotAnyBlock?.InnerText}{this.EndAnyToken.InnerText}";
 }
 
 
 public class IfNode : BlockContainerNode
 {
+    public MatchNode IfToken = null!;
     public ConditionBase Condition;
-
-
-    public MatchNodePair IfToken;
-    public MatchNodePair ElseToken;
-    public MatchNodePair EndIfToken;
-
     public BlockNode? IfBlock;
+
+    public List<(MatchNode Token, ConditionBase Condition, BlockNode? Block)> ElseIfBranches = new();
+
+    public MatchNode? ElseToken;
     public BlockNode? ElseBlock;
+
+    public MatchNode EndIfToken = null!;
 
     internal IfNode(INodeProvider nodeProvider, ConditionBase condition) : base(nodeProvider)
     {
@@ -1026,12 +994,16 @@ public class IfNode : BlockContainerNode
     {
         this.Condition = original.Condition.Clone();
 
-        this.IfToken = original.IfToken.CloneNode();
-        this.ElseToken = original.ElseToken.CloneNode();
-        this.EndIfToken = original.EndIfToken.CloneNode();
+        this.IfToken = CloneToken(original.IfToken);
+        this.ElseToken = CloneOptionalToken(original.ElseToken);
+        this.EndIfToken = CloneToken(original.EndIfToken);
 
         this.IfBlock = (BlockNode?)original.IfBlock?.Let(a => a.CloneNode(true));
         this.ElseBlock = (BlockNode?)original.ElseBlock?.Let(a => a.CloneNode(true));
+
+        this.ElseIfBranches = original.ElseIfBranches
+            .Select(b => (CloneToken(b.Token), b.Condition.Clone(), (BlockNode?)b.Block?.Let(a => a.CloneNode(true))))
+            .ToList();
     }
 
     public override OpenXmlElement CloneNode(bool deep)
@@ -1041,57 +1013,67 @@ public class IfNode : BlockContainerNode
 
     protected internal override void ReplaceBlock()
     {
-        if (this.ElseToken.MatchNode == null)
-        {
-            this.NormalizeInterval(ref IfToken, ref EndIfToken, errorHintParent: IfToken.MatchNode);
+        var tokens = AllTokens().ToArray();
+        CommonAncestor = FindCommonAncestor(IfToken, tokens);
 
-            this.IfBlock = new BlockNode(this.NodeProvider);
-            this.IfBlock.MoveChilds(NodesBetween(IfToken, EndIfToken));
+        this.IfBlock = BlockBetween(tokens[0], tokens[1]);
 
-            IfToken.AscendantNode!.ReplaceBy(this);
-            EndIfToken.AscendantNode!.Remove();
-        }
-        else
-        {
-            var elseToken = ElseToken;
-            this.NormalizeInterval(ref IfToken, ref elseToken, errorHintParent: IfToken.MatchNode);
-            this.NormalizeInterval(ref ElseToken, ref EndIfToken, errorHintParent: IfToken.MatchNode);
+        for (int i = 0; i < ElseIfBranches.Count; i++)
+            ElseIfBranches[i] = (ElseIfBranches[i].Token, ElseIfBranches[i].Condition, BlockBetween(tokens[i + 1], tokens[i + 2]));
 
-            if (elseToken.AscendantNode != ElseToken.AscendantNode)
-                throw new InvalidOperationException("Unbalanced tokens");
+        if (ElseToken != null)
+            this.ElseBlock = BlockBetween(tokens[^2], tokens[^1]);
 
-            this.IfBlock = new BlockNode(this.NodeProvider);
-            this.IfBlock.MoveChilds(NodesBetween(this.IfToken, this.ElseToken));
+        ChildOfAncestor(tokens[0]).ReplaceBy(this);
+        for (int i = 1; i < tokens.Length; i++)
+            ChildOfAncestor(tokens[i]).Remove();
+    }
 
-            this.ElseBlock = new BlockNode(this.NodeProvider);
-            this.ElseBlock.MoveChilds(NodesBetween(this.ElseToken, this.EndIfToken));
+    IEnumerable<MatchNode> AllTokens()
+    {
+        yield return IfToken;
+        foreach (var (token, _, _) in ElseIfBranches)
+            yield return token;
+        if (ElseToken != null)
+            yield return ElseToken;
+        yield return EndIfToken;
+    }
 
-            this.IfToken.AscendantNode!.ReplaceBy(this);
-            this.ElseToken.AscendantNode!.Remove();
-            this.EndIfToken.AscendantNode!.Remove();
-        }
+    BlockNode BlockBetween(MatchNode first, MatchNode last)
+    {
+        var block = new BlockNode(this.NodeProvider);
+        block.MoveChilds(NodesBetween(first, last));
+        return block;
     }
 
     public override void WriteTo(System.Xml.XmlWriter xmlWriter)
     {
         this.AppendChild(this.IfBlock);
-
+        foreach (var (_, _, block) in ElseIfBranches)
+            if (block != null) this.AppendChild(block);
         if (this.ElseBlock != null)
             this.AppendChild(this.ElseBlock);
-     
+
         base.WriteTo(xmlWriter);
-        
+
         if (this.ElseBlock != null)
             this.RemoveChild(this.ElseBlock);
-
+        foreach (var (_, _, block) in ElseIfBranches.AsEnumerable().Reverse())
+            if (block != null) this.RemoveChild(block);
         this.RemoveChild(this.IfBlock!);
     }
 
     public override void FillTokens(List<QueryToken> tokens)
     {
         this.Condition.FillQueryTokens(tokens);
-
         this.IfBlock!.FillTokens(tokens);
+
+        foreach (var (_, cond, block) in ElseIfBranches)
+        {
+            cond.FillQueryTokens(tokens);
+            block?.FillTokens(tokens);
+        }
+
         if (this.ElseBlock != null)
             this.ElseBlock.FillTokens(tokens);
     }
@@ -1103,13 +1085,26 @@ public class IfNode : BlockContainerNode
             this.ReplaceBy(this.IfBlock!);
             this.IfBlock!.RenderNode(p);
         }
-        else if (ElseBlock != null)
-        {
-            this.ReplaceBy(this.ElseBlock);
-            this.ElseBlock.RenderNode(p);
-        }
         else
-            this.Parent!.RemoveChild(this);
+        {
+            foreach (var (_, cond, block) in ElseIfBranches)
+            {
+                if (cond.Evaluate(p))
+                {
+                    this.ReplaceBy(block!);
+                    block!.RenderNode(p);
+                    return;
+                }
+            }
+
+            if (ElseBlock != null)
+            {
+                this.ReplaceBy(this.ElseBlock);
+                this.ElseBlock!.RenderNode(p);
+            }
+            else
+                this.Parent!.RemoveChild(this);
+        }
     }
 
     public override void Synchronize(TemplateSynchronizationContext sc)
@@ -1121,8 +1116,17 @@ public class IfNode : BlockContainerNode
             using (sc.NewScope())
             {
                 this.Condition.Declare(sc.Variables);
-
                 IfBlock!.Synchronize(sc);
+            }
+
+            foreach (var (_, cond, block) in ElseIfBranches)
+            {
+                cond.Synchronize(sc, "@elseif");
+                using (sc.NewScope())
+                {
+                    cond.Declare(sc.Variables);
+                    block!.Synchronize(sc);
+                }
             }
 
             if (ElseBlock != null)
@@ -1130,7 +1134,6 @@ public class IfNode : BlockContainerNode
                 using (sc.NewScope())
                 {
                     this.Condition.Declare(sc.Variables);
-
                     ElseBlock.Synchronize(sc);
                 }
             }
@@ -1143,9 +1146,7 @@ public class IfNode : BlockContainerNode
         int index = parent.ChildElements.IndexOf(this);
         this.Remove();
 
-        var str = "@if" + this.Condition.ToString(variables);
-
-        parent.InsertAt(this.IfToken.ReplaceMatchNode(str), index++);
+        parent.InsertAt(ReplaceMatchNode(this.IfToken, "@if" + this.Condition.ToString(variables))!, index++);
         {
             var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
             this.Condition.Declare(newVars);
@@ -1153,20 +1154,31 @@ public class IfNode : BlockContainerNode
             parent.MoveChildsAt(ref index, this.IfBlock.ChildElements);
         }
 
-        if (this.ElseToken.MatchNode != null)
+        foreach (var (token, cond, block) in ElseIfBranches)
         {
-            parent.InsertAt(this.ElseToken.ReplaceMatchNode("@else"), index++);
+            parent.InsertAt(ReplaceMatchNode(token, "@elseif" + cond.ToString(variables))!, index++);
+            var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
+            cond.Declare(newVars);
+            block!.RenderTemplate(newVars);
+            parent.MoveChildsAt(ref index, block!.ChildElements);
+        }
 
+        if (this.ElseToken != null)
+        {
+            parent.InsertAt(ReplaceMatchNode(this.ElseToken, "@else")!, index++);
             var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
             this.Condition.Declare(newVars);
             this.ElseBlock!.RenderTemplate(newVars);
             parent.MoveChildsAt(ref index, this.ElseBlock.ChildElements);
         }
 
-        parent.InsertAt(this.EndIfToken.ReplaceMatchNode("@endif"), index++);
+        parent.InsertAt(ReplaceMatchNode(this.EndIfToken, "@endif")!, index++);
     }
 
-    public override string InnerText => $@"{this.IfToken.MatchNode.InnerText}{this.IfBlock!.InnerText}{this.ElseToken.MatchNode?.InnerText}{this.ElseBlock?.InnerText}{this.EndIfToken.MatchNode.InnerText}";
+    public override string InnerText =>
+        $"{this.IfToken.InnerText}{this.IfBlock!.InnerText}" +
+        string.Concat(ElseIfBranches.Select(b => b.Token.InnerText + (b.Block?.InnerText ?? ""))) +
+        $"{this.ElseToken?.InnerText}{this.ElseBlock?.InnerText}{this.EndIfToken.InnerText}";
 }
 
 public static class OpenXmlElementExtensions

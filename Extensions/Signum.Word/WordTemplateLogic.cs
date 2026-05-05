@@ -268,21 +268,30 @@ public static class WordTemplateLogic
             var queryName = template.Query?.ToQueryName();
             QueryDescription? qd = queryName == null ? null : QueryLogic.Queries.QueryDescription(queryName);
 
-            string? error = null;
-            template.ProcessOpenXmlPackage(document =>
+            WordTemplateParser? parser = null;
+            try
             {
-                Dump(document, "0.Original.txt");
+                template.ProcessOpenXmlPackage(document =>
+                {
+                    Dump(document, "0.Original.txt");
 
-                var parser = new WordTemplateParser(document, template, qd, template.Model?.ToType());
-                parser.ParseDocument(); Dump(document, "1.Match.txt");
-                parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
-                parser.AssertClean();
+                    parser = new WordTemplateParser(document, template, qd, template.Model?.ToType());
+                    parser.ParseDocument(); Dump(document, "1.Match.txt");
+                    parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
+                    parser.AssertClean();
 
-                error = parser.Errors.IsEmpty() ? null :
-                    parser.Errors.ToString(e => e.Message, "\n");
-            });
+                 
+                });
+            }
+            catch (Exception e)
+            {
+                return "\n".Combine(parser?.Errors.ToString(e => e.Message, "\n"), e.GetType().Name + ": " + e.Message);
+            }
 
-            return error;
+            if (parser!.Errors.IsEmpty())
+                return null;
+
+            return parser.Errors.ToString(e => e.Message, "\n"); ;
         }
     }
 

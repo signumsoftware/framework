@@ -351,7 +351,7 @@ function SearchValue(p: SearchValueProps): React.ReactNode | null {
 
       var qs = Finder.getSettings(findOptions.queryName);
 
-      var formatter = Finder.getCellFormatter(qs, token, undefined);
+      var formatter = Finder.getCellFormatter(qs, token, undefined, { unit: p.unit, format: p.format });
 
       const cfc: Finder.CellFormatterContext = { columns: [token.fullKey], row: { entity: undefined, columns: [value] }, rowIndex: 0, refresh: () => updateVersion() };
       const cp: ColumnParsed = { column: { token: token }, columnIndex: 0, resultIndex: 0 };

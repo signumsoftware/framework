@@ -162,16 +162,16 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "DateTime",
       isApplicable: qt => qt.filterType == "DateTime",
-      formatter: qt => {
-        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
+      formatter: (qt, sc, opts) => {
+        const luxonFormat = toLuxonFormat(opts?.format ?? qt.format, qt.type.name as "DateOnly" | "DateTime");
         return new Finder.CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>, false, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
     {
       name: "Time",
       isApplicable: qt => qt.filterType == "Time",
-      formatter: qt => {
-        const durationFormat = toLuxonDurationFormat(qt.format) ?? "hh:mm:ss";
+      formatter: (qt, sc, opts) => {
+        const durationFormat = toLuxonDurationFormat(opts?.format ?? qt.format) ?? "hh:mm:ss";
 
         return new Finder.CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{Duration.fromISOTime(cell).toFormat(durationFormat)}</bdi>, false, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
       }
@@ -179,8 +179,8 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "TimeSeries",
       isApplicable: qt => qt.fullKey == QueryTokenString.timeSeries.token,
-      formatter: (qt, scl) => {
-        let luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
+      formatter: (qt, scl, opts) => {
+        let luxonFormat = toLuxonFormat(opts?.format ?? qt.format, qt.type.name as "DateOnly" | "DateTime");
         const st = scl?.props.findOptions.systemTime;
         if (st) {
           var start = DateTime.fromISO(st.startDate!);
@@ -189,7 +189,7 @@ export function initFormatRules(): Finder.FormatRule[] {
             luxonFormat = toLuxonFormat(st.timeSeriesUnit == "Year" ? "YYYY" :
               st.timeSeriesUnit == "Month" ? "LLLL YYYY" :
                 st.timeSeriesUnit == "Day" ? "d" :
-                  qt.format, "DateTime");
+                  opts?.format ?? qt.format, "DateTime");
           }
         }
 
@@ -200,7 +200,8 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "SystemValidFrom",
       isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidFrom",
-      formatter: qt => {
+      formatter: (qt, sc, opts) => {
+        const luxonFormat = toLuxonFormat(opts?.format ?? qt.format, qt.type.name as "DateOnly" | "DateTime");
         return new Finder.CellFormatter((cell: string | undefined, ctx) => {
 
           if (cell == undefined || cell == "")
@@ -212,7 +213,6 @@ export function initFormatRules(): Finder.FormatRule[] {
             ctx.systemTime && ctx.systemTime.mode == "Between" && DateTime.fromISO(ctx.systemTime.startDate!) <= c ? "date-created" :
               undefined;
 
-          const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
           return (
             <bdi className={classes("date", "try-no-wrap", className)}>
               {toFormatWithFixes(c, luxonFormat)}
@@ -223,7 +223,8 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "SystemValidTo",
       isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidTo",
-      formatter: qt => {
+      formatter: (qt, sc, opts) => {
+        const luxonFormat = toLuxonFormat(opts?.format ?? qt.format, qt.type.name as "DateOnly" | "DateTime");
         return new Finder.CellFormatter((cell: string | undefined, ctx) => {
           if (cell == undefined || cell == "")
             return "";
@@ -234,7 +235,6 @@ export function initFormatRules(): Finder.FormatRule[] {
             ctx.systemTime && ctx.systemTime.mode == "Between" && c <= DateTime.fromISO(ctx.systemTime.endDate!) ? "date-removed" :
               undefined;
 
-          const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
           return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(c, luxonFormat)}</bdi>;
         }, false, "date-cell");//To avoid flippig hour and date (L LT) in RTL cultures
       }
@@ -242,9 +242,9 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "Integer",
       isApplicable: qt => qt.filterType == "Integer",
-      formatter: (qt, sc) => {
+      formatter: (qt, sc, opts) => {
         var values = getKeywordsSC(qt, sc)?.map(a => a.toLowerCase());
-        const numberFormat = toNumberFormat(qt.format);
+        const numberFormat = toNumberFormat(opts?.format ?? qt.format);
         return new Finder.CellFormatter((cell: number | undefined) => {
           if (cell == null)
             return cell;
@@ -262,17 +262,18 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "Decimal",
       isApplicable: qt => qt.filterType == "Decimal",
-      formatter: (qt, hl) => {
-        const numberFormat = toNumberFormat(qt.format);
+      formatter: (qt, sc, opts) => {
+        const numberFormat = toNumberFormat(opts?.format ?? qt.format);
         return new Finder.CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell)}</span>, false, "numeric-cell");
       }
     },
     {
       name: "Number with Unit",
-      isApplicable: qt => (qt.filterType == "Integer" || qt.filterType == "Decimal") && Boolean(qt.unit),
-      formatter: qt => {
-        const numberFormat = toNumberFormat(qt.format);
-        return new Finder.CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, false, "numeric-cell");
+      isApplicable: (qt, sc, opts) => (qt.filterType == "Integer" || qt.filterType == "Decimal") && (opts?.unit !== undefined ? Boolean(opts.unit) : Boolean(qt.unit)),
+      formatter: (qt, sc, opts) => {
+        const numberFormat = toNumberFormat(opts?.format ?? qt.format);
+        const unit = opts !== undefined && opts.unit !== undefined ? opts.unit : qt.unit;
+        return new Finder.CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell) + "\u00a0" + unit}</span>, false, "numeric-cell");
       }
     },
     {
