@@ -44,7 +44,7 @@ interface CaseFrameModalState {
 
 var modalCount = 0;
 
-export function CaseFrameModal(p: CaseFrameModalProps) {
+export function CaseFrameModal(p: CaseFrameModalProps): React.JSX.Element {
 
   const [state, setState] = useStateWithPromise<CaseFrameModalState | undefined>(undefined);
   const [show, setShow] = React.useState(true);

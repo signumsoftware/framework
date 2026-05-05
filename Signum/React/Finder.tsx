@@ -2396,7 +2396,8 @@ export namespace Finder {
   }
 
   interface GetFormatterOptions {
-    avoidUnit?: boolean;
+    unit?: string | null;
+    format?: string;
   }
 
   export function getCellFormatter(qs: QuerySettings | undefined, qt: QueryToken, sc: SearchControlLoaded | undefined, options?: GetFormatterOptions): CellFormatter {

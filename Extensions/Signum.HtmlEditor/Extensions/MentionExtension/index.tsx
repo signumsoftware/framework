@@ -2,11 +2,18 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { LexicalTypeaheadMenuPlugin, MenuOption, useBasicTypeaheadTriggerMatch } from '@lexical/react/LexicalTypeaheadMenuPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { TextNode } from 'lexical';
+import {
+  TextNode,
+  $getSelection,
+  $isNodeSelection,
+  KEY_BACKSPACE_COMMAND,
+  KEY_DELETE_COMMAND,
+  COMMAND_PRIORITY_LOW,
+} from 'lexical';
 import { useAPI } from '@framework/Hooks';
 import { HtmlEditorExtension, LexicalConfigNode } from '../types';
 import { MentionHandlerBase, MentionItem } from './MentionHandlerBase';
-import { MentionNode, $createMentionNode } from './MentionNode';
+import { MentionNode, $createMentionNode, $isMentionNode } from './MentionNode';
 
 class MentionOption extends MenuOption {
   constructor(public item: MentionItem) {
@@ -33,6 +40,23 @@ export class MentionExtension extends HtmlEditorExtension {
 function MentionPlugin(p: { handler: MentionHandlerBase }): React.JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const [options, setOptions] = React.useState<MentionOption[]>([]);
+
+  // Delete a mention chip with a single Backspace/Delete when it is in NodeSelection
+  // (e.g. the user clicked directly on the chip).
+  React.useEffect(() => {
+    function removeSelectedMentions(event: KeyboardEvent): boolean {
+      const selection = $getSelection();
+      if (!$isNodeSelection(selection)) return false;
+      const mentions = selection.getNodes().filter($isMentionNode);
+      if (mentions.length === 0) return false;
+      event.preventDefault();
+      mentions.forEach(n => n.remove());
+      return true;
+    }
+    const unregisterBackspace = editor.registerCommand(KEY_BACKSPACE_COMMAND, removeSelectedMentions, COMMAND_PRIORITY_LOW);
+    const unregisterDelete    = editor.registerCommand(KEY_DELETE_COMMAND,    removeSelectedMentions, COMMAND_PRIORITY_LOW);
+    return () => { unregisterBackspace(); unregisterDelete(); };
+  }, [editor]);
 
   const allItems = useAPI(() => p.handler.getItems(), [p.handler]);
 
