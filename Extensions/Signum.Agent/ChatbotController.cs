@@ -17,6 +17,14 @@ public class ChatbotController : Controller
     public DefaultSkillCodeInfo GetSkillCodeInfo(string skillCodeName) =>
         SkillCodeLogic.GetDefaultSkillCodeInfo(skillCodeName);
 
+    [HttpGet("api/agentSkill/defaultAgentSkillCodeInfo/{agentName}")]
+    public DefaultSkillCodeInfo GetDefaultAgentSkillCodeInfo(string agentName)
+    {
+        var agent = AgentLogic.RegisteredAgents.Keys.SingleOrDefault(a => a.Key == agentName)
+            ?? throw new KeyNotFoundException($"Agent '{agentName}' is not registered.");
+        return SkillCodeLogic.GetDefaultSkillCodeInfo(AgentLogic.RegisteredAgents[agent]());
+    }
+
     [HttpPost("api/chatbot/feedback/{messageId}")]
     public void SetFeedback(int messageId, [FromBody] SetFeedbackRequest request)
     {

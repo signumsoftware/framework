@@ -4,8 +4,7 @@ import { Navigator, EntitySettings } from '@framework/Navigator';
 import * as AppContext from '@framework/AppContext';
 import { TypeContext } from '@framework/TypeContext';
 import { LanguageModelClient } from './LanguageModelClient';
-import { MarkdownOrJson } from './Message';
-import { SkillCustomizationEntity } from './Signum.Agent';
+import { AgentSymbol, SkillActivation, SkillCustomizationEntity } from './Signum.Agent';
 
 export namespace AgentClient {
 
@@ -13,6 +12,7 @@ export namespace AgentClient {
 
    
     Navigator.addSettings(new EntitySettings(SkillCustomizationEntity, e => import('./Templates/SkillCustomization')));
+    Navigator.addSettings(new EntitySettings(AgentSymbol, e => import('./Templates/Agent')));
 
     LanguageModelClient.start(options);
     AppContext.clearSettingsActions.push(() => propertyValueRegistry.clear());
@@ -37,6 +37,10 @@ export namespace AgentClient {
     export function getSkillCodeInfo(skillCode: string): Promise<SkillCodeInfo> {
       return ajaxGet({ url: `/api/agentSkill/skillCodeInfo/${encodeURIComponent(skillCode)}` });
     }
+
+    export function getDefaultAgentSkillCodeInfo(agentName: string): Promise<SkillCodeInfo> {
+      return ajaxGet({ url: `/api/agentSkill/defaultAgentSkillCodeInfo/${encodeURIComponent(agentName)}` });
+    }
   }
 }
 
@@ -46,11 +50,34 @@ export interface SkillPropertyMeta {
   attributeName: string;
   valueHint: string | null;
   propertyType: string;
+  defaultValue: string | null;
 }
 
 export interface SkillCodeInfo {
   defaultShortDescription: string;
   defaultInstructions: string;
   properties: SkillPropertyMeta[];
+  tools: ToolInfo[];
+  subSkills: SubSkillInfo[];
+}
+
+export interface ToolInfo {
+  mcpName: string;
+  description: string | null;
+  returnType: string;
+  parameters: ToolParameter[];
+}
+
+export interface ToolParameter {
+  name: string;
+  type: string;
+  isRequired: boolean;
+  description: string | null;
+}
+
+export interface SubSkillInfo {
+  className: string;
+  activation: SkillActivation;
+  info: SkillCodeInfo;
 }
 

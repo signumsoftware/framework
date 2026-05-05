@@ -1,5 +1,7 @@
+using ModelContextProtocol.Server;
 using Signum.Engine.Sync;
 using System.Collections.Frozen;
+using System.ComponentModel;
 
 namespace Signum.Agent;
 
@@ -99,7 +101,12 @@ public static class SkillCodeLogic
         if (!SkillCodeLogic.RegisteredCodes.TryGetValue(skillCodeName, out var type))
             throw new KeyNotFoundException($"AgentSkillCode type '{skillCodeName}' is not registered.");
 
-        var instance = (SkillCode)Activator.CreateInstance(type)!;
+        return GetDefaultSkillCodeInfo((SkillCode)Activator.CreateInstance(type)!);
+    }
+
+    public static DefaultSkillCodeInfo GetDefaultSkillCodeInfo(SkillCode instance)
+    {
+        var type = instance.GetType();
 
         var properties = type
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -111,6 +118,40 @@ public static class SkillCodeLogic
                 AttributeName = x.attr!.GetType().Name.Before("Attribute"),
                 ValueHint = x.attr.ValueHint,
                 PropertyType = x.pi.PropertyType.TypeName(),
+                DefaultValue = x.attr.ConvertValueToString(x.pi.GetValue(instance), x.pi.PropertyType),
+            })
+            .ToList();
+
+        var methods = type
+            .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+            .Where(m => m.GetCustomAttribute<McpServerToolAttribute>() != null)
+            .ToList();
+
+        var mcpTools = instance.GetMcpServerTools().ToList();
+
+        var tools = methods.Zip(mcpTools, (method, mcpTool) => new DefaultToolInfo
+        {
+            McpName = mcpTool.ProtocolTool.Name,
+            Description = method.GetCustomAttribute<DescriptionAttribute>()?.Description,
+            ReturnType = UnwrapTaskType(method.ReturnType).TypeName(),
+            Parameters = method.GetParameters()
+                .Where(p => p.ParameterType != typeof(CancellationToken))
+                .Select(p => new DefaultToolParameter
+                {
+                    Name = p.Name!,
+                    Type = p.ParameterType.TypeName(),
+                    IsRequired = !p.HasDefaultValue && Nullable.GetUnderlyingType(p.ParameterType) == null,
+                    Description = p.GetCustomAttribute<DescriptionAttribute>()?.Description,
+                })
+                .ToList(),
+        }).ToList();
+
+        var subSkills = instance.SubSkills
+            .Select(ss => new DefaultSubSkillInfo
+            {
+                ClassName = ss.Code.GetType().Name,
+                Activation = ss.Activation,
+                Info = GetDefaultSkillCodeInfo(ss.Code),
             })
             .ToList();
 
@@ -119,7 +160,21 @@ public static class SkillCodeLogic
             DefaultShortDescription = instance.ShortDescription,
             DefaultInstructions = instance.OriginalInstructions,
             Properties = properties,
+            Tools = tools,
+            SubSkills = subSkills,
         };
+    }
+
+    static Type UnwrapTaskType(Type t)
+    {
+        if (t == typeof(Task) || t == typeof(void)) return typeof(void);
+        if (t.IsGenericType)
+        {
+            var def = t.GetGenericTypeDefinition();
+            if (def == typeof(Task<>) || def == typeof(ValueTask<>))
+                return t.GetGenericArguments()[0];
+        }
+        return t;
     }
 
     public static bool IsAutoRegister;
@@ -137,6 +192,15 @@ public class DefaultSkillCodeInfo
     public string DefaultShortDescription { get; set; } = null!;
     public string DefaultInstructions { get; set; } = null!;
     public List<DefaultSkillCodeProperty> Properties { get; set; } = null!;
+    public List<DefaultToolInfo> Tools { get; set; } = null!;
+    public List<DefaultSubSkillInfo> SubSkills { get; set; } = null!;
+}
+
+public class DefaultSubSkillInfo
+{
+    public string ClassName { get; set; } = null!;
+    public SkillActivation Activation { get; set; }
+    public DefaultSkillCodeInfo Info { get; set; } = null!;
 }
 
 public class DefaultSkillCodeProperty
@@ -145,4 +209,21 @@ public class DefaultSkillCodeProperty
     public string AttributeName { get; set; } = null!;
     public string? ValueHint { get; set; }
     public string PropertyType { get; set; } = null!;
+    public string? DefaultValue { get; set; }
+}
+
+public class DefaultToolInfo
+{
+    public string McpName { get; set; } = null!;
+    public string? Description { get; set; }
+    public string ReturnType { get; set; } = null!;
+    public List<DefaultToolParameter> Parameters { get; set; } = null!;
+}
+
+public class DefaultToolParameter
+{
+    public string Name { get; set; } = null!;
+    public string Type { get; set; } = null!;
+    public bool IsRequired { get; set; }
+    public string? Description { get; set; }
 }

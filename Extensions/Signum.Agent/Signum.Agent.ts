@@ -15,6 +15,7 @@ export interface ToolCallEmbedded {
 export const AgentSymbol: Type<AgentSymbol> = new Type<AgentSymbol>("Agent");
 export interface AgentSymbol extends Basics.Symbol {
   Type: "Agent";
+  skillCustomization: Entities.Lite<SkillCustomizationEntity> | null;
 }
 
 export const ChatbotConfigurationEmbedded: Type<ChatbotConfigurationEmbedded> = new Type<ChatbotConfigurationEmbedded>("ChatbotConfigurationEmbedded");
@@ -185,7 +186,6 @@ export const SkillCustomizationEntity: Type<SkillCustomizationEntity> = new Type
 export interface SkillCustomizationEntity extends Entities.Entity {
   Type: "SkillCustomization";
   skillCode: SkillCodeEntity;
-  agent: AgentSymbol | null;
   shortDescription: string | null;
   instructions: string | null;
   properties: Entities.MList<SkillPropertyEmbedded>;

@@ -19,6 +19,8 @@ public class AgentSymbol : Symbol
         base(declaringType, fieldName)
     {
     }
+
+    public Lite<SkillCustomizationEntity>? SkillCustomization { get; set; }
 }
 
 [AutoInit]
@@ -33,9 +35,6 @@ public static class DefaultAgent
 public class SkillCustomizationEntity : Entity
 {
     public SkillCodeEntity SkillCode { get; set; }
-
-    [UniqueIndex]
-    public AgentSymbol? Agent { get; set; }
 
     [StringLengthValidator(Min = 1, Max = 500)]
     public string? ShortDescription { get; set; }

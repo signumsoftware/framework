@@ -17,9 +17,7 @@ public static class AgentLogic
 
     public static Dictionary<AgentSymbol, Func<SkillCode>> RegisteredAgents = new();
 
-    public static ResetLazy<ConcurrentDictionary<AgentSymbol, SkillCode>> SkillCodeByAgent = null!;
-
-    public static ResetLazy<FrozenDictionary<AgentSymbol, SkillCustomizationEntity>> SkillCustomizationByAgent = null!;
+    public static ResetLazy<FrozenDictionary<AgentSymbol, SkillCode>> SkillCodeByAgent = null!;
 
 
     public static void RegisterAgent(AgentSymbol agent, Func<SkillCode> factory)
@@ -50,7 +48,6 @@ public static class AgentLogic
 
         
         sb.Include<SkillCustomizationEntity>()
-            .WithUniqueIndex(a => a.Agent, a => a.Agent != null)
             .WithSave(SkillCustomizationOperation.Save)
             .WithDelete(SkillCustomizationOperation.Delete)
             .WithQuery(() => e => new
@@ -58,7 +55,6 @@ public static class AgentLogic
                 Entity = e,
                 e.Id,
                 e.SkillCode,
-                e.Agent,
                 e.ShortDescription,
             });
 
@@ -67,10 +63,10 @@ public static class AgentLogic
             Construct = (agentSymbol, _) =>
             {
                 if (!RegisteredAgents.TryGetValue(agentSymbol, out var factory))
-                    return new SkillCustomizationEntity { Agent = agentSymbol };
+                    return new SkillCustomizationEntity();
 
                 var code = factory();
-                return code.ToCustomizationEntity(agentSymbol);
+                return code.ToCustomizationEntity();
             }
         }.Register();
 
@@ -80,12 +76,19 @@ public static class AgentLogic
                 ValidateNoCircularReferences(entity);
         };
 
-        SkillCodeByAgent = sb.GlobalLazy(() => new ConcurrentDictionary<AgentSymbol, SkillCode>(),
-            new InvalidateWith(typeof(SkillCustomizationEntity)));
+        SkillCodeByAgent = sb.GlobalLazy(() =>
+        {
+            var agentCustomizations = Database.Query<AgentSymbol>()
+                .Where(a => a.SkillCustomization != null)
+                .Select(a => new { a.Key, SkillCustomization = a.SkillCustomization })
+                .ToList()
+                .ToDictionary(x => x.Key, x => x.SkillCustomization!.Retrieve().ToSkillCode());
 
-
-        SkillCustomizationByAgent = sb.GlobalLazy(() => Database.Query<SkillCustomizationEntity>().Where(a=>a.Agent != null).ToFrozenDictionaryEx(a=>a.Agent!),
-            new InvalidateWith(typeof(SkillCustomizationEntity)));
+            return RegisteredAgents.Keys.ToFrozenDictionary(
+                a => a,
+                a => agentCustomizations.TryGetValue(a.Key, out var skillCode) ? skillCode : RegisteredAgents[a]()
+            );
+        }, new InvalidateWith(typeof(SkillCustomizationEntity), typeof(AgentSymbol)));
     }
    
     public static SkillCode ToSkillCode(this SkillCustomizationEntity entity)
@@ -142,27 +145,16 @@ public static class AgentLogic
 
     public static SkillCode GetEffectiveSkillCode(this AgentSymbol agentSymbol)
     {
-        return SkillCodeByAgent.Value.GetOrCreate(agentSymbol, s =>
-        {
-            var skillCustomization = SkillCustomizationByAgent.Value.TryGetC(s);
-            if(skillCustomization != null)
-                skillCustomization.ToSkillCode();
-
-            var def = RegisteredAgents.GetOrThrow(agentSymbol);
-
-            return def();
-        });
-
+        return SkillCodeByAgent.Value.GetOrThrow(agentSymbol);
     }
 
-    static SkillCustomizationEntity ToCustomizationEntity(this SkillCode code, AgentSymbol? agent)
+    static SkillCustomizationEntity ToCustomizationEntity(this SkillCode code)
     {
         var type = code.GetType();
 
         var entity = new SkillCustomizationEntity
         {
             SkillCode = SkillCodeLogic.ToSkillCodeEntity(type),
-            Agent = agent,
             ShortDescription = code.ShortDescription,
             Instructions = code.OriginalInstructions,
         };
@@ -182,7 +174,7 @@ public static class AgentLogic
 
         foreach (var (sub, activation) in code.SubSkills)
         {
-            Entity skillLite = !sub.IsDefault() ? sub.ToCustomizationEntity(agent: null) :
+            Entity skillLite = !sub.IsDefault() ? sub.ToCustomizationEntity() :
                 SkillCodeLogic.ToSkillCodeEntity(sub.GetType());
             entity.SubSkills.Add(new SubSkillEmbedded { Skill = skillLite, Activation = activation });
         }
