@@ -20,8 +20,23 @@ public static class ProcessLogic
         As.Expression(() => p.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault());
 
     [AutoExpressionField]
-    public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this ProcessEntity p) => 
+    public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this ProcessEntity p) =>
         As.Expression(() => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Process.Is(p)));
+
+    [AutoExpressionField]
+    public static ProcessDatesDTO Dates(this ProcessEntity p) =>
+        As.Expression(() => new ProcessDatesDTO
+        {
+            CreationDate = p.CreationDate,
+            PlannedDate = p.PlannedDate,
+            CancelationDate = p.CancelationDate,
+            QueuedDate = p.QueuedDate,
+            ExecutionStart = p.ExecutionStart,
+            ExecutionEnd = p.ExecutionEnd,
+            SuspendDate = p.SuspendDate,
+            ExceptionDate = p.ExceptionDate,
+            State = p.State,
+        });
 
     [AutoExpressionField]
     public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this PackageLineEntity pl) => 
@@ -70,13 +85,7 @@ public static class ProcessLogic
                 p.MachineName,
                 p.ApplicationName,
                 p.CreationDate,
-                p.PlannedDate,
-                p.CancelationDate,
-                p.QueuedDate,
-                p.ExecutionStart,
-                p.ExecutionEnd,
-                p.SuspendDate,
-                p.ExceptionDate,
+                Dates = p.Dates(),
             });
 
         sb.Include<ProcessExceptionLineEntity>()
@@ -116,6 +125,7 @@ public static class ProcessLogic
 
         QueryLogic.Expressions.Register((ProcessEntity p) => p.ExceptionLines(), ProcessMessage.ExceptionLines);
         QueryLogic.Expressions.Register((PackageLineEntity p) => p.ExceptionLines(), ProcessMessage.ExceptionLines);
+        QueryLogic.Expressions.Register((ProcessEntity p) => p.Dates(), ProcessMessage.Dates);
 
         PropertyAuthLogic.SetMaxAutomaticUpgrade(PropertyRoute.Construct((ProcessEntity p) => p.User), PropertyAllowed.Read);
 
