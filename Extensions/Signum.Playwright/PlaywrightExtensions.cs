@@ -52,11 +52,12 @@ public static class PlaywrightExtensions
     /// <summary>
     /// Wait for locator to be present (attached to DOM)
     /// </summary>
-    public static async Task<ILocator> WaitPresentAsync(this ILocator locator, float? timeout = null)
+    public static async Task<ILocator> WaitPresentAsync(this ILocator locator, float? timeoutMs = null)
     {
         await locator.WaitForAsync(new LocatorWaitForOptions
         {
             State = WaitForSelectorState.Attached,
+            Timeout = timeoutMs,
         });
         return locator;
     }
@@ -64,11 +65,12 @@ public static class PlaywrightExtensions
     /// <summary>
     /// Wait for locator to be visible
     /// </summary>
-    public static async Task<ILocator> WaitVisibleAsync(this ILocator locator, float? timeout = null, bool scrollTo = false)
+    public static async Task<ILocator> WaitVisibleAsync(this ILocator locator, float? timeoutMs = null, bool scrollTo = false)
     {
         await locator.WaitForAsync(new LocatorWaitForOptions
         {
             State = WaitForSelectorState.Visible,
+            Timeout = timeoutMs,
         });
 
         if (scrollTo)
@@ -82,22 +84,24 @@ public static class PlaywrightExtensions
     /// <summary>
     /// Wait for locator to not be present (detached from DOM)
     /// </summary>
-    public static async Task WaitNotPresentAsync(this ILocator locator, float? timeout = null)
+    public static async Task WaitNotPresentAsync(this ILocator locator, float? timeoutMs = null)
     {
         await locator.WaitForAsync(new LocatorWaitForOptions
         {
             State = WaitForSelectorState.Detached,
+            Timeout = timeoutMs,
         });
     }
 
     /// <summary>
     /// Wait for locator to not be visible
     /// </summary>
-    public static async Task WaitNotVisibleAsync(this ILocator locator, float? timeout = null)
+    public static async Task WaitNotVisibleAsync(this ILocator locator, float? timeoutMs = null)
     {
         await locator.WaitForAsync(new LocatorWaitForOptions
         {
             State = WaitForSelectorState.Hidden,
+            Timeout = timeoutMs,
         });
     }
 
@@ -245,7 +249,7 @@ public static class PlaywrightExtensions
         return classes.Contains(className);
     }
 
-    public static async Task WaitHasClassAsync(this ILocator locator, string className, bool shouldHave)
+    public static async Task WaitHasClassAsync(this ILocator locator, string className, bool shouldHave, float? timeoutMs = null)
     {
         await locator.Page.WaitForFunctionAsync(
             @"([el, cls, shouldHave]) => {
@@ -253,36 +257,39 @@ public static class PlaywrightExtensions
                 const hasClass = el.classList.contains(cls);
                 return shouldHave == hasClass;
             }",
-            new object[]{ await locator.ElementHandleAsync(), className, shouldHave }
+            new object[]{ await locator.ElementHandleAsync(), className, shouldHave },
+            new PageWaitForFunctionOptions { Timeout = timeoutMs }
         );
     }
 
-    public static async Task WaitAttributeAsync(this ILocator locator, string attributeName, string? expectedValue, string op = "===")
+    public static async Task WaitAttributeAsync(this ILocator locator, string attributeName, string? expectedValue, string op = "===", float? timeoutMs = null)
     {
         var elementHandle = await locator.ElementHandleAsync();
 
         await locator.Page.WaitForFunctionAsync(
             $@"([el, attr, value]) => el.getAttribute(attr) {op} value",
-            new object?[] { elementHandle, attributeName, expectedValue }
+            new object?[] { elementHandle, attributeName, expectedValue },
+            new PageWaitForFunctionOptions() { Timeout = timeoutMs}
         );
     }
 
-    public static async Task WaitContentAsync(this ILocator locator, string? expectedContent, string op = "===")
+    public static async Task WaitContentAsync(this ILocator locator, string? expectedContent, string op = "===", float? timeoutMs = null)
     {
         var elementHandle = await locator.ElementHandleAsync();
 
         await locator.Page.WaitForFunctionAsync(
             $@"([el, content]) => el.innerText {op} content",
-            new object?[] { elementHandle, expectedContent }
+            new object?[] { elementHandle, expectedContent },
+            new PageWaitForFunctionOptions() { Timeout = timeoutMs}
         );
     }
 
-    public static async Task WaitDisabledAsync(this ILocator locator, bool shouldBeDisabled)
+    public static async Task WaitDisabledAsync(this ILocator locator, bool shouldBeDisabled, float? timeoutMs = null)
     {
         if (shouldBeDisabled)
-            await Assertions.Expect(locator).ToBeDisabledAsync();
+            await Assertions.Expect(locator).ToBeDisabledAsync(timeoutMs == null ? null : new LocatorAssertionsToBeDisabledOptions { Timeout = timeoutMs });
         else
-            await Assertions.Expect(locator).ToBeEnabledAsync();
+            await Assertions.Expect(locator).ToBeEnabledAsync(timeoutMs == null ? null : new LocatorAssertionsToBeEnabledOptions { Timeout = timeoutMs });
     }
 
     /// <summary>
