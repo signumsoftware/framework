@@ -107,6 +107,7 @@ global using System.Threading.Tasks;");
                             {
                                 page.SetDefaultTimeout(10000);
                                 await browserProxy.LoginAsync(username, username);
+                                CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = await browserProxy.GetCultureFromLoginDropdownAsync();
                                 await action(browserProxy);
                             }
                             finally
