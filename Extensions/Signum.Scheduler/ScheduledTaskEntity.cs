@@ -100,4 +100,5 @@ public enum ScheduledTaskMessage
     SchedulePanel,
     Start,
     Stop,
+    Dates,
 }
