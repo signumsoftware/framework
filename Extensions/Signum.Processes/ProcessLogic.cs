@@ -599,6 +599,7 @@ public static class ProcessLogic
 public interface IProcessAlgorithm
 {
     void Execute(ExecutingProcess executingProcess);
+    bool AllowParallelExecution => true;
 }
 
 public class ActionProcessAlgorithm : IProcessAlgorithm
