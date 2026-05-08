@@ -51,6 +51,7 @@ public static class AlertLogic
             return;
 
         sb.Include<AlertEntity>()
+            .WithCascadeDeleteBy(a => a.Recipient)
             .WithQuery(() => a => new
             {
                 Entity = a,

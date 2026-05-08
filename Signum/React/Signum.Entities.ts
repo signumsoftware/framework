@@ -360,6 +360,17 @@ export namespace CalendarMessage {
   export const Today: MessageKey = new MessageKey("CalendarMessage", "Today");
 }
 
+export namespace CascadeDeleteMessage {
+  export const ThisEntityIsStillReferenced: MessageKey = new MessageKey("CascadeDeleteMessage", "ThisEntityIsStillReferenced");
+  export const TheFollowingEntitiesStillReference0RemoveThemBeforeDeleting: MessageKey = new MessageKey("CascadeDeleteMessage", "TheFollowingEntitiesStillReference0RemoveThemBeforeDeleting");
+  export const NoReferencesFoundYouCanNowDeleteThisEntity: MessageKey = new MessageKey("CascadeDeleteMessage", "NoReferencesFoundYouCanNowDeleteThisEntity");
+  export const Refresh: MessageKey = new MessageKey("CascadeDeleteMessage", "Refresh");
+  export const ReferencedVia: MessageKey = new MessageKey("CascadeDeleteMessage", "ReferencedVia");
+  export const Delete: MessageKey = new MessageKey("CascadeDeleteMessage", "Delete");
+  export const ErrorDetails: MessageKey = new MessageKey("CascadeDeleteMessage", "ErrorDetails");
+  export const _0MoreNotVisibleForYou: MessageKey = new MessageKey("CascadeDeleteMessage", "_0MoreNotVisibleForYou");
+}
+
 export namespace ConnectionMessage {
   export const VersionInfo: MessageKey = new MessageKey("ConnectionMessage", "VersionInfo");
   export const ANewVersionHasJustBeenDeployedSaveChangesAnd0: MessageKey = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedSaveChangesAnd0");

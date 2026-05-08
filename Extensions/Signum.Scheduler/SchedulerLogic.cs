@@ -80,6 +80,7 @@ public static class SchedulerLogic
             });
 
         sb.Include<SchedulerTaskExceptionLineEntity>()
+            .WithCascadeDeleteBy(a=>a.SchedulerTaskLog)
             .WithQuery(() => cte => new
             {
                 Entity = cte,
@@ -134,12 +135,6 @@ public static class SchedulerLogic
             new InvalidateWith(typeof(ScheduledTaskEntity)));
 
         ScheduledTasksLazy.OnReset += ScheduleTaskRunner.ScheduledTasksLazy_OnReset;
-
-        sb.Schema.EntityEvents<ScheduledTaskLogEntity>().PreUnsafeDelete += query =>
-        {
-            query.SelectMany(e => e.ExceptionLines()).UnsafeDelete();
-            return null;
-        };
 
         UserAssetsImporter.Register<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely", e => e.Save());
         UserAssetsImporter.Register<ScheduleRuleMonthsEntity>("ScheduleRuleMonths", e => e.Save());

@@ -96,19 +96,12 @@ public static class UserQueryLogic
             DashboardLogic.OnGetCachedQueryDefinition.Register((ValueUserQueryListPartEntity vuql, PanelPartEmbedded pp) => vuql.UserQueries.Select(uqe => new CachedQueryDefinition(uqe.UserQuery.ToQueryRequestValue(), uqe.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqe.UserQuery, uqe.IsQueryCached, canWriteFilters: false)));
             DashboardLogic.OnGetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.UserQuery.ToQueryRequest(), uqp.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqp.UserQuery, uqp.IsQueryCached, canWriteFilters: false) });
 
-            sb.Schema.EntityEvents<UserQueryEntity>().PreUnsafeDelete += query =>
-            {
-                Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((BigValuePartEntity)mle.Element.Content).UserQuery)).UnsafeDeleteMList();
-                Database.Query<BigValuePartEntity>().Where(uqp => query.Contains(uqp.UserQuery)).UnsafeDelete();
-                return null;
-            };
+            sb.Include<BigValuePartEntity>()
+                .WithCascadeDeleteBy(a => a.UserQuery);
 
-            sb.Schema.EntityEvents<UserQueryEntity>().PreUnsafeDelete += query =>
-            {
-                Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((UserQueryPartEntity)mle.Element.Content).UserQuery)).UnsafeDeleteMList();
-                Database.Query<UserQueryPartEntity>().Where(uqp => query.Contains(uqp.UserQuery)).UnsafeDelete();
-                return null;
-            };
+            sb.Include<UserQueryPartEntity>()
+                .WithCascadeDeleteBy(a => a.UserQuery);
+
 
             sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += q =>
             {
@@ -125,13 +118,13 @@ public static class UserQueryLogic
                     .Where(mle => ((UserQueryPartEntity)mle.Element.Content).UserQuery.Is(uq)));
 
                 var uqParts = Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryPartEntity>()
-                  .Where(mle => mle.UserQuery.Is(uq)));
+                    .Where(mle => mle.UserQuery.Is(uq)));
 
                 var bigValuePartsMList = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
-              .Where(mle => ((BigValuePartEntity)mle.Element.Content).UserQuery.Is(uq)));
+                    .Where(mle => ((BigValuePartEntity)mle.Element.Content).UserQuery.Is(uq)));
 
                 var bigValueParts = Administrator.UnsafeDeletePreCommand(Database.Query<BigValuePartEntity>()
-                  .Where(mle => mle.UserQuery.Is(uq)));
+                    .Where(mle => mle.UserQuery.Is(uq)));
 
                 return SqlPreCommand.Combine(Spacing.Simple, uqPartsMList, uqParts, bigValueParts, bigValuePartsMList);
             };

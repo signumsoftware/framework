@@ -11,6 +11,7 @@ import { Navigator } from './Navigator';
 import { CellOperationButton, defaultCellOperationClick } from "./Operations/CellOperationButton";
 import { ContextualOperations } from './Operations/ContextualOperations';
 import { EntityOperations, OperationButton } from './Operations/EntityOperations';
+import { DeleteErrorModal } from './Operations/DeleteErrorModal';
 import { MultiOperationProgressModal } from "./Operations/MultiOperationProgressModal";
 import { ProgressModal, ProgressModalOptions } from "./Operations/ProgressModal";
 import { QuickLinkClient, QuickLinkExplore } from "./QuickLinkClient";
@@ -34,6 +35,7 @@ export namespace Operations {
   }
 
   export function start(): void {
+    DeleteErrorModal.register();
     ButtonBarManager.onButtonBarRender.push(EntityOperations.getEntityOperationButtons);
     ContextualItems.onContextualItems.push(ContextualOperations.getOperationsContextualItems);
 
