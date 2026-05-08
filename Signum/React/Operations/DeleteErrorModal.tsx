@@ -6,10 +6,12 @@ import { Navigator } from '../Navigator'
 import { Finder } from '../Finder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Modal, Spinner } from 'react-bootstrap'
-import { getTypeInfo, getQueryKey } from '../Reflection'
+import { getTypeInfo, PropertyRoute } from '../Reflection'
+import { useAPI, useVersion } from '../Hooks'
 import { EntityOperations } from './EntityOperations'
 import { Operations } from '../Operations'
 import SearchValue from '../SearchControl/SearchValue'
+import { LinkButton } from '../Basics/LinkButton'
 
 export interface CascadeReferenceDto {
   typeName: string;
@@ -25,23 +27,12 @@ interface DeleteErrorModalProps extends IModalProps<boolean> {
 
 export function DeleteErrorModal(p: DeleteErrorModalProps): React.ReactElement {
   const [show, setShow] = React.useState(true);
-  const [references, setReferences] = React.useState<CascadeReferenceDto[] | undefined>(undefined);
-  const [loading, setLoading] = React.useState(true);
+  const [version, updateVersion] = useVersion();
+  const references = useAPI(() => API.getReferences(p.lite), [version], { avoidReset: true });
   const [deleting, setDeleting] = React.useState(false);
   const [showDetails, setShowDetails] = React.useState(false);
-  const [version, setVersion] = React.useState(0);
 
-  React.useEffect(() => { loadReferences(); }, []);
-
-  async function loadReferences(): Promise<void> {
-    setLoading(true);
-    try {
-      const refs = await API.getReferences(p.lite);
-      setReferences(refs);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const loading = references === undefined;
 
   async function handleDelete(): Promise<void> {
     setDeleting(true);
@@ -49,7 +40,7 @@ export function DeleteErrorModal(p: DeleteErrorModalProps): React.ReactElement {
       await p.executeDelete();
       p.onExited!(true);
     } catch {
-      await loadReferences();
+      updateVersion();
     } finally {
       setDeleting(false);
     }
@@ -61,11 +52,6 @@ export function DeleteErrorModal(p: DeleteErrorModalProps): React.ReactElement {
 
   function handleOnExited(): void {
     p.onExited!(false);
-  }
-
-  function handleExplored(): void {
-    loadReferences();
-    setVersion(v => v + 1);
   }
 
   const hasReferences = references != null && references.length > 0;
@@ -98,7 +84,7 @@ export function DeleteErrorModal(p: DeleteErrorModalProps): React.ReactElement {
                   key={dto.typeName + "|" + dto.propertyRoute}
                   dto={dto}
                   targetLite={p.lite}
-                  onExplored={handleExplored}
+                  onExplored={updateVersion}
                   version={version}
                 />
               ))}
@@ -136,7 +122,7 @@ export function DeleteErrorModal(p: DeleteErrorModalProps): React.ReactElement {
       </Modal.Body>
 
       <Modal.Footer>
-        <button className="btn btn-secondary" onClick={loadReferences} disabled={loading || deleting}>
+        <button className="btn btn-secondary" onClick={updateVersion} disabled={loading || deleting}>
           <FontAwesomeIcon icon="arrows-rotate" className="me-1" />
           {CascadeDeleteMessage.Refresh.niceToString()}
         </button>
@@ -166,9 +152,9 @@ interface ReferenceRowProps {
 }
 
 function ReferenceRow({ dto, targetLite, onExplored, version }: ReferenceRowProps): React.ReactElement {
-  const [visibleCount, setVisibleCount] = React.useState<number | undefined>(undefined);
   const isFindable = Finder.isFindable(dto.typeName, false);
   const typeInfo = getTypeInfo(dto.typeName);
+  const niceName = typeInfo?.niceName ?? dto.typeName;
   const token = propertyRouteToQueryToken(dto.propertyRoute);
 
   const findOptions = {
@@ -180,70 +166,61 @@ function ReferenceRow({ dto, targetLite, onExplored, version }: ReferenceRowProp
     }],
   };
 
-  const hidden = visibleCount != null ? Math.max(0, dto.count - visibleCount) : 0;
-
   return (
     <div className="list-group-item d-flex align-items-center gap-2 py-2">
-      <div className="flex-grow-1">
+      <div className="flex-grow-1 d-flex align-items-center gap-1">
+        {isFindable ? (
+          <SearchValue
+            findOptions={findOptions}
+            onExplored={onExplored}
+            deps={[version]}
+            onRender={(value, vsc) => {
+              if (value === undefined)
+                return <span className="badge text-bg-secondary">…</span>;
+
+              const count = (value as number) ?? 0;
+              const hidden = Math.max(0, dto.count - count);
+              return (
+                <>
+                  <LinkButton title={undefined} className="text-decoration-none" onClick={vsc.handleClick}>
+                    <span className="badge text-bg-secondary me-1">{count}</span>
+                    {niceName}
+                  </LinkButton>
+                  {hidden > 0 && (
+                    <span className="text-muted small">
+                      ({CascadeDeleteMessage._0MoreNotVisibleForYou.niceToString(hidden)})
+                    </span>
+                  )}
+                </>
+              );
+            }}
+          />
+        ) : (
+          <span className="badge bg-secondary">{dto.count} {niceName}</span>
+        )}
+      </div>
+      <div>
         <span className="text-muted small me-1">{CascadeDeleteMessage.ReferencedVia.niceToString()}</span>
         <code className="small">{dto.propertyRoute}</code>
-      </div>
-      <div className="d-flex align-items-center gap-1">
-        {isFindable ? (
-          <>
-            <SearchValue
-              findOptions={findOptions}
-              isLink={true}
-              isBadge="MoreThanZero"
-              onExplored={onExplored}
-              onValueChange={v => setVisibleCount(v as number)}
-              deps={[version]}
-            />
-            {hidden > 0 && (
-              <span className="text-muted small">
-                ({CascadeDeleteMessage._0MoreNotVisibleForYou.niceToString(hidden)})
-              </span>
-            )}
-          </>
-        ) : (
-          <span className="badge bg-secondary">{dto.count} {typeInfo?.niceName ?? dto.typeName}</span>
-        )}
       </div>
     </div>
   );
 }
 
 function propertyRouteToQueryToken(route: string): string {
-  const rootMatch = route.match(/^\([^)]+\)/);
-  if (!rootMatch) return 'Entity';
-
-  const rest = route.slice(rootMatch[0].length);
-  if (!rest) return 'Entity';
+  const pr = PropertyRoute.tryParseFull(route);
+  if (pr == null)
+    return 'Entity';
 
   let result = 'Entity';
-  let i = 0;
-
-  while (i < rest.length) {
-    const ch = rest[i];
-    if (ch === '/') {
-      result += '.Any';
-      i++;
-    } else if (ch === '.') {
-      i++;
-    } else if (ch === '[') {
-      const end = rest.indexOf(']', i);
-      if (end === -1) break;
-      const mixinName = rest.slice(i + 1, end);
-      result += '.(' + mixinName + ')';
-      i = end + 1;
-    } else {
-      const nextSep = rest.slice(i).search(/[./[]/);
-      const fieldName = nextSep === -1 ? rest.slice(i) : rest.slice(i, i + nextSep);
-      result += '.' + fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
-      i += fieldName.length;
+  for (const p of pr.allParents(true)) {
+    switch (p.propertyRouteType) {
+      case "Field": result += '.' + p.member!.name; break;
+      case "Mixin": result += '.(' + p.mixinName + ')'; break;
+      case "MListItem": result += '.Any'; break;
+      case "LiteEntity": result += '.Entity'; break;
     }
   }
-
   return result;
 }
 
