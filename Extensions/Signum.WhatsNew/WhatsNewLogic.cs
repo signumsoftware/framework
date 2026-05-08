@@ -39,6 +39,7 @@ public static class WhatsNewLogic
             });
 
         sb.Include<WhatsNewLogEntity>()
+            .WithCascadeDeleteBy(a=>a.WhatsNew)
            .WithExpressionFrom((WhatsNewEntity wn) => wn.WhatsNewLogs())
            .WithDelete(WhatsNewLogOperation.Delete)
            .WithQuery(() => e => new
@@ -52,7 +53,6 @@ public static class WhatsNewLogic
 
         QueryLogic.Expressions.Register((WhatsNewEntity wn) => wn.IsRead(), WhatsNewMessage.IsRead);
 
-        sb.Schema.EntityEvents<WhatsNewEntity>().PreUnsafeDelete += WhatsNewLogic_PreUnsafeDelete;
 
         WhatsNews = sb.GlobalLazy(() => Database.Query<WhatsNewEntity>().ToFrozenDictionary(a => a.ToLite()),
             new InvalidateWith(typeof(WhatsNewEntity)));
@@ -76,12 +76,6 @@ public static class WhatsNewLogic
         RegisterRelatedConfig<PermissionSymbol>(lite => PermissionAuthLogic.IsAuthorized(SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!)));
 
         WhatsNewGraph.Register();
-    }
-
-    private static IDisposable? WhatsNewLogic_PreUnsafeDelete(IQueryable<WhatsNewEntity> query)
-    {
-        query.SelectMany(wn => wn.WhatsNewLogs()).UnsafeDelete();
-        return null;
     }
 
     public static WhatsNewMessageEmbedded GetCurrentMessage(this WhatsNewEntity wn)

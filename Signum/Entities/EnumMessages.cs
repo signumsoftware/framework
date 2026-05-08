@@ -77,6 +77,26 @@ public enum OperationMessage
     Operation
 }
 
+public enum CascadeDeleteMessage
+{
+    [Description("This entity is still referenced")]
+    ThisEntityIsStillReferenced,
+    [Description("The following entities still reference {0}. Remove them before deleting.")]
+    TheFollowingEntitiesStillReference0RemoveThemBeforeDeleting,
+    [Description("No references found. You can now delete this entity.")]
+    NoReferencesFoundYouCanNowDeleteThisEntity,
+    [Description("Refresh")]
+    Refresh,
+    [Description("referenced via")]
+    ReferencedVia,
+    [Description("Delete")]
+    Delete,
+    [Description("Error details")]
+    ErrorDetails,
+    [Description("{0} more not visible for you")]
+    _0MoreNotVisibleForYou,
+}
+
 public enum SynchronizerMessage
 {
     [Description("--- END OF SYNC SCRIPT")]

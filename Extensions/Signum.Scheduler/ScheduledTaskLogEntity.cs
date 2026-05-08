@@ -49,6 +49,13 @@ public class ScheduledTaskLogEntity : Entity
     }
 }
 
+public class ScheduledTaskLogDatesDTO
+{
+    public DateTime StartTime { get; set; }
+    public DateTime? EndTime { get; set; }
+    public bool HasException { get; set; }
+}
+
 [AutoInit]
 public static class ScheduledTaskLogOperation
 {

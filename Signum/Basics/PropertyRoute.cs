@@ -603,13 +603,18 @@ public class PropertyRoute : IEquatable<PropertyRoute>
         return null;
     }
 
+    static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()).GetGenericMethodDefinition();
+
     /// <typeparam name="T">The RootType or the type of MListElement</typeparam>
     /// <typeparam name="R">Result type</typeparam>
     /// <returns></returns>
-    public Expression<Func<T, R>> GetLambdaExpression<T, R>(bool safeNullAccess, PropertyRoute? skipBefore = null)
+    public Expression<Func<T, R>> GetLambdaExpression<T, R>(bool safeNullAccess, PropertyRoute? skipBefore = null, bool toLite = false)
     {
         ParameterExpression pe = Expression.Parameter(typeof(T), "p");
-        Expression exp = GetBody(safeNullAccess, skipBefore, pe, typeof(R));
+        Expression exp = GetBody(safeNullAccess, skipBefore, pe, toLite ? this.Type : typeof(R));
+
+        if (toLite)
+            exp = Expression.Call(null, miToLite.MakeGenericMethod(exp.Type), exp);
 
         var selector = Expression.Lambda<Func<T, R>>(exp, pe);
         return selector;
@@ -618,10 +623,13 @@ public class PropertyRoute : IEquatable<PropertyRoute>
     /// <typeparam name="T">The RootType or the type of MListElement</typeparam>
     /// <typeparam name="R">Result type</typeparam>
     /// <returns></returns>
-    public LambdaExpression GetLambdaExpression(Type fromType, Type resultType, bool safeNullAccess, PropertyRoute? skipBefore = null)
+    public LambdaExpression GetLambdaExpression(Type fromType, Type resultType, bool safeNullAccess, PropertyRoute? skipBefore = null, bool toLite = false)
     {
         ParameterExpression pe = Expression.Parameter(fromType, "p");
-        Expression exp = GetBody(safeNullAccess, skipBefore, pe, resultType);
+        Expression exp = GetBody(safeNullAccess, skipBefore, pe, toLite ? this.Type : resultType);
+
+        if (toLite)
+            exp = Expression.Call(null, miToLite.MakeGenericMethod(exp.Type), exp);
 
         var selector = Expression.Lambda(exp, pe);
         return selector;

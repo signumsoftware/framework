@@ -111,6 +111,7 @@ export namespace ProcessMessage {
   export const IsCancellationRequest: MessageKey = new MessageKey("ProcessMessage", "IsCancellationRequest");
   export const _0ProcessesExcecutingIn1_2: MessageKey = new MessageKey("ProcessMessage", "_0ProcessesExcecutingIn1_2");
   export const LatestProcesses: MessageKey = new MessageKey("ProcessMessage", "LatestProcesses");
+  export const Dates: MessageKey = new MessageKey("ProcessMessage", "Dates");
 }
 
 export namespace ProcessOperation {

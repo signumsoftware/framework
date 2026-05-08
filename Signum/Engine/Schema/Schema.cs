@@ -696,6 +696,7 @@ public class Schema : IImplementationsFinder
         OnInvalidateCache += () => GlobalLazy.ResetAll(systemLog: false);
 
         SchemaCompleted += Schema.CheckImplementedByAllPrimaryKeyTypes;
+        SchemaCompleted += CascadeDeleteLogic.RegisterCascadeDeleteHandlers;
     }
 
     public static Schema Current

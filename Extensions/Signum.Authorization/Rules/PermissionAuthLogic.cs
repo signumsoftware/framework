@@ -25,11 +25,11 @@ public static class PermissionAuthLogic
         PermissionLogic.Start(sb);
 
         sb.Include<RulePermissionEntity>()
+           .WithCascadeDeleteBy(a=>a.Role)
            .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
 
         cache = new PermissionCache(sb);
 
-        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>{  Database.Query<RulePermissionEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null;};
         sb.Schema.EntityEvents<RoleEntity>().PreDeleteSqlSync += role => Administrator.UnsafeDeletePreCommand(Database.Query<RulePermissionEntity>().Where(a => a.Role.Is(role)));
         sb.Schema.EntityEvents<PermissionSymbol>().PreDeleteSqlSync += permission => { return Administrator.DeleteWhereScript((RulePermissionEntity rt) => rt.Resource, permission);  };
 

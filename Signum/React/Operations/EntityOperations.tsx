@@ -7,12 +7,14 @@ import { Navigator } from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
 import { Operations, EntityOperationSettings, EntityOperationContext, EntityOperationGroup, AlternativeOperationSetting } from '../Operations'
+import { ServiceError } from '../Services'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip, ButtonGroup } from "react-bootstrap";
 import { BsColor } from "../Components";
 
 export namespace EntityOperations {
+  export var onDeleteError: ((eoc: EntityOperationContext<any>, e: ServiceError) => Promise<boolean>) | undefined;
   export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined> | undefined {
     const ti = tryGetTypeInfo(ctx.pack.entity.Type);
 
@@ -205,7 +207,11 @@ export namespace EntityOperations {
 
       return Operations.API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
         .then(eoc.onDeleteSuccess ?? eoc.onDeleteSuccess_Default)
-        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
+        .catch(async e => {
+          if (e instanceof ValidationError) { eoc.frame.setError(e.modelState, "entity"); return; }
+          if (onDeleteError) { const handled = await onDeleteError(eoc, e); if (handled) return; }
+          throw e;
+        });
     });
   }
 
@@ -217,7 +223,11 @@ export namespace EntityOperations {
 
       return Operations.API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
         .then(eoc.onDeleteSuccess ?? eoc.onDeleteSuccess_Default)
-        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
+        .catch(async e => {
+          if (e instanceof ValidationError) { eoc.frame.setError(e.modelState, "entity"); return; }
+          if (onDeleteError) { const handled = await onDeleteError(eoc, e); if (handled) return; }
+          throw e;
+        });
     });
   }
 
