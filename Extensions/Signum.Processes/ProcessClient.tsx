@@ -19,13 +19,35 @@ import { ConstructSymbol_From, DeleteSymbol, ExecuteSymbol } from '@framework/Si
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 import { ContextualItemsContext, ContextualMenuItem } from '../../Signum/React/SearchControl/ContextualItems';
 import { SearchControlLoaded } from '@framework/Search';
+import { Finder } from '@framework/Finder';
+import { DateTime } from 'luxon';
+import { buildDateScale } from '@framework/Basics/D3Utils';
+
 
 export namespace ProcessClient {
-  
+
+  export const processStateColor: Record<ProcessState, string> = {
+    Created: "var(--bs-secondary)",
+    Planned: "var(--bs-info)",
+    Canceled: "var(--bs-secondary)",
+    Queued: "var(--bs-info)",
+    Executing: "var(--bs-primary)",
+    Suspending: "var(--bs-warning)",
+    Suspended: "var(--bs-warning)",
+    Finished: "var(--bs-success)",
+    Error: "var(--bs-danger)",
+  };
+
   export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }): void {
-  
+
     ChangeLogClient.registerChangeLogModule("Signum.Processes", () => import("./Changelog"));
-  
+
+    const execEnd = (dto: ProcessDatesDTO, nowISO: string): string | null =>
+      dto.executionEnd ?? dto.suspendDate ?? dto.exceptionDate ??
+      ((dto.state === "Executing" || dto.state === "Suspending") ? nowISO : null);
+
+
+
     Navigator.addSettings(new EntitySettings(ProcessEntity, e => import('./Templates/Process'), { isCreable: "Never" }));
   
     if (options.packages || options.packageOperations) {
@@ -77,6 +99,80 @@ export namespace ProcessClient {
     }));
 
     AppContext.clearSettingsActions.push(() => Dic.clear(processOperationSettings));
+
+    Finder.formatRules.push({
+      name: "ProcessDates",
+      isApplicable: qt => qt.type.name === "ProcessDatesDTO",
+      formatter: (column, sc) => {
+        const nowISO = new Date().toISOString();
+
+        const colIdx = sc?.state.resultTable?.columns.indexOf(column.fullKey) ?? -1;
+        if (colIdx == -1)
+          return new Finder.CellFormatter(() => null, true);
+
+        const allDtos = sc!.state.resultTable!.rows.map(r => r.columns[colIdx] as ProcessDatesDTO | null).notNull();
+
+        const scale = buildDateScale(allDtos.flatMap(dto => [
+          dto.creationDate,
+          dto.plannedDate,
+          dto.cancelationDate,
+          dto.queuedDate,
+          dto.executionStart,
+          execEnd(dto, nowISO),
+        ]).notNull(), true);
+
+        return new Finder.CellFormatter(cell => {
+          if (!cell) return null;
+          const dto = cell as ProcessDatesDTO;
+
+          const creationPct = scale(dto.creationDate);
+          const cancelPct = dto.cancelationDate ? scale(dto.cancelationDate) : null;
+          const queuePct = dto.queuedDate && scale(dto.queuedDate);
+          const barStartPct = dto.executionStart ? scale(dto.executionStart) : null;
+          const barEndStr = execEnd(dto, nowISO);
+          const barEndPct = barEndStr ? scale(barEndStr) : null;
+          const color = processStateColor[dto.state];
+
+          return (
+            <OverlayTrigger placement="top" overlay={props => {
+              const fmt = (d: string) => DateTime.fromISO(d).toLocaleString(DateTime.DATETIME_SHORT);
+              return (
+                <Tooltip id="date-gantt-tooltip" className="tooltip-process" {...props}>
+                  {[
+                    `${ProcessEntity.nicePropertyName(p => p.state)}: ${ProcessState.niceToString(dto.state)}`,
+                    `${ProcessEntity.nicePropertyName(p => p.creationDate)}: ${fmt(dto.creationDate)}`,
+                    dto.plannedDate && `${ProcessEntity.nicePropertyName(p => p.plannedDate)}: ${fmt(dto.plannedDate)}`,
+                    dto.queuedDate && `${ProcessEntity.nicePropertyName(p => p.queuedDate)}: ${fmt(dto.queuedDate)}`,
+                    dto.executionStart && `${ProcessEntity.nicePropertyName(p => p.executionStart)}: ${fmt(dto.executionStart)}`,
+                    dto.executionEnd && `${ProcessEntity.nicePropertyName(p => p.executionEnd)}: ${fmt(dto.executionEnd)}`,
+                    dto.suspendDate && `${ProcessEntity.nicePropertyName(p => p.suspendDate)}: ${fmt(dto.suspendDate)}`,
+                    dto.exceptionDate && `${ProcessEntity.nicePropertyName(p => p.exceptionDate)}: ${fmt(dto.exceptionDate)}`,
+                    dto.cancelationDate && `${ProcessEntity.nicePropertyName(p => p.cancelationDate)}: ${fmt(dto.cancelationDate)}`,
+                  ].notNull().map((line, i) => <div key={i}>{line}</div>)}
+                </Tooltip>
+              );
+            }}>
+              <svg style={{ minWidth: "300px", width: "100%", height: "20px", overflow: "visible", display: "block" }} shapeRendering="crispEdges">
+                {barEndPct !== null &&
+                  <line x1={`${creationPct}%`} y1="50%" x2={`${barEndPct}%`} y2="50%" stroke="var(--bs-secondary-bg-subtle)" strokeWidth="1" />
+                }
+                <line x1={`${creationPct}%`} y1="15%" x2={`${creationPct}%`} y2="85%" stroke="var(--bs-secondary)" strokeWidth="1" />
+                {queuePct !== null &&
+                  <line x1={`${queuePct}%`} y1="15%" x2={`${queuePct}%`} y2="85%" stroke="var(--bs-info)" strokeWidth="1" />
+                }
+                {barStartPct !== null && barEndPct !== null &&
+                  <rect x={`${barStartPct}%`} y="28%" width={`${Math.max(0.5, barEndPct - barStartPct)}%`} height="44%" fill={color} />
+                }
+                {cancelPct !== null &&
+                  <text x={`${cancelPct}%`} y="50%" dy="2" textAnchor="middle" dominantBaseline="middle" fill="var(--bs-danger)" fontSize="12" fontWeight="bold">✕</text>
+                }
+              </svg>
+            </OverlayTrigger>
+          );
+        }, true);
+      },
+    });
+
   }
   
   export const processOperationSettings: { [key: string]: ContextualOperationSettings<any> } = {};
@@ -199,3 +295,16 @@ export namespace ProcessClient {
     applicationName: string;
   }
 }
+
+export interface ProcessDatesDTO {
+  creationDate: string /*DateTime*/;
+  plannedDate: string /*DateTime*/ | null;
+  cancelationDate: string /*DateTime*/ | null;
+  queuedDate: string /*DateTime*/ | null;
+  executionStart: string /*DateTime*/ | null;
+  executionEnd: string /*DateTime*/ | null;
+  suspendDate: string /*DateTime*/ | null;
+  exceptionDate: string /*DateTime*/ | null;
+  state: ProcessState;
+}
+

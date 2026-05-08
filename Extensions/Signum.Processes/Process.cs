@@ -145,6 +145,19 @@ public interface IProcessDataEntity : IEntity
 {
 }
 
+public class ProcessDatesDTO
+{
+    public DateTime CreationDate { get; set; }
+    public DateTime? PlannedDate { get; set; }
+    public DateTime? CancelationDate { get; set; }
+    public DateTime? QueuedDate { get; set; }
+    public DateTime? ExecutionStart { get; set; }
+    public DateTime? ExecutionEnd { get; set; }
+    public DateTime? SuspendDate { get; set; }
+    public DateTime? ExceptionDate { get; set; }
+    public ProcessState State { get; set; }
+}
+
 
 public enum ProcessState
 {
@@ -217,6 +230,7 @@ public enum ProcessMessage
     [Description("{0} processes executing in {1} / {2}")]
     _0ProcessesExcecutingIn1_2,
     LatestProcesses,
+    Dates,
 }
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]

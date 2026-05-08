@@ -23,6 +23,15 @@ public static class SchedulerLogic
     public static IQueryable<SchedulerTaskExceptionLineEntity> ExceptionLines(this ScheduledTaskLogEntity e) =>
         As.Expression(() => Database.Query<SchedulerTaskExceptionLineEntity>().Where(a => a.SchedulerTaskLog.Is(e)));
 
+    [AutoExpressionField]
+    public static ScheduledTaskLogDatesDTO Dates(this ScheduledTaskLogEntity s) =>
+        As.Expression(() => new ScheduledTaskLogDatesDTO
+        {
+            StartTime = s.StartTime,
+            EndTime = s.EndTime,
+            HasException = s.Exception != null,
+        });
+
     public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>> ExecuteTask =
         new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>>();
 
@@ -76,7 +85,7 @@ public static class SchedulerLogic
                 cte.MachineName,
                 cte.User,
                 cte.Exception,
-
+                Dates = cte.Dates(),
             });
 
         sb.Include<SchedulerTaskExceptionLineEntity>()
@@ -102,6 +111,7 @@ public static class SchedulerLogic
         QueryLogic.Expressions.Register((ITaskEntity ct) => ct.LastExecution(), ITaskMessage.LastExecution);
         QueryLogic.Expressions.Register((ScheduledTaskEntity ct) => ct.Executions(), ITaskMessage.Executions);
         QueryLogic.Expressions.Register((ScheduledTaskLogEntity ct) => ct.ExceptionLines(), ITaskMessage.ExceptionLines);
+        QueryLogic.Expressions.Register((ScheduledTaskLogEntity ct) => ct.Dates(), ScheduledTaskMessage.Dates);
 
 
 
