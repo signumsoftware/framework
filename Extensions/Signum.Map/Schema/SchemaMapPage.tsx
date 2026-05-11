@@ -1,11 +1,12 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { OverlayTrigger, Popover } from 'react-bootstrap'
 import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities'
 import { MapMessage } from '../Signum.Map'
 import { MapClient } from '../MapClient'
-import { SchemaMapD3 } from './SchemaMap'
+import { RelationFilterMode, SchemaMapD3 } from './SchemaMap'
 import { useLocation, useParams, Location } from "react-router";
 import "./schemaMap.css"
 import { useSize } from '@framework/Hooks'
@@ -18,8 +19,7 @@ import { LinkButton } from '@framework/Basics/LinkButton'
 interface ParsedQueryString {
   filter?: string;
   color?: string;
-  focus?: boolean;
-  depth?: number;
+  showRelations?: RelationFilterMode;
   tables: Tables;
 }
 
@@ -41,10 +41,10 @@ function getParsedQuery(location: Location): ParsedQueryString {
       result.filter = value;
     else if (name == "color")
       result.color = value;
-    else if (name == "focus")
-      result.focus = value == "1" || value == "true";
-    else if (name == "depth")
-      result.depth = parseInt(value);
+    else if (name == "showRelations") {
+      if (value == "All" || value == "Selected" || value == "SelectedAndNeighbors")
+        result.showRelations = value;
+    }
     else {
       result.tables[name] = {
         x: parseFloat(value.before(",")),
@@ -62,8 +62,7 @@ export default function SchemaMapPage(): React.JSX.Element | null {
 
   const [filter, setFilter] = React.useState<string>("");
   const [color, setColor] = React.useState<string>("");
-  const [focusOnSelection, setFocusOnSelection] = React.useState<boolean>(false);
-  const [depth, setDepth] = React.useState<number>(2);
+  const [showRelations, setShowRelations] = React.useState<RelationFilterMode>("All");
   const [tables, setTables] = React.useState<Tables | undefined>(undefined);
   const [schemaInfo, setSchemaInfo] = React.useState<SchemaMapInfo | undefined>(undefined);
   const [providers, setProviders] = React.useState<{ [name: string]: ClientColorProvider } | undefined>(undefined);
@@ -86,8 +85,7 @@ export default function SchemaMapPage(): React.JSX.Element | null {
           setFilter(parsedQuery.filter ?? "");
           setTables(parsedQuery.tables);
           setColor(parsedQuery.color ?? smi.providers.first().name);
-          setFocusOnSelection(parsedQuery.focus ?? false);
-          setDepth(parsedQuery.depth != null && !isNaN(parsedQuery.depth) ? parsedQuery.depth : 2);
+          setShowRelations(parsedQuery.showRelations ?? "All");
           setSchemaInfo(smi);
           setProviders(providers.toObject(a => a.name));
 
@@ -105,14 +103,8 @@ export default function SchemaMapPage(): React.JSX.Element | null {
     setColor((e.currentTarget as HTMLInputElement).value);
   }
 
-  function handleSetFocus(e: React.FormEvent<any>) {
-    setFocusOnSelection((e.currentTarget as HTMLInputElement).checked);
-  }
-
-  function handleSetDepth(e: React.FormEvent<any>) {
-    const val = parseInt((e.currentTarget as HTMLInputElement).value);
-    if (!isNaN(val) && val >= 1)
-      setDepth(val);
+  function handleSetShowRelations(e: React.FormEvent<any>) {
+    setShowRelations((e.currentTarget as HTMLSelectElement).value as RelationFilterMode);
   }
 
   function handleFullscreenClick(e: React.MouseEvent<any>) {
@@ -124,8 +116,7 @@ export default function SchemaMapPage(): React.JSX.Element | null {
 
     const query = {
       ...tables, filter: filter, color: color,
-      focus: focusOnSelection ? "1" : undefined,
-      depth: focusOnSelection ? depth : undefined,
+      showRelations: showRelations != "All" ? showRelations : undefined,
     };
 
     const url = "/map?" + QueryString.stringify(query);
@@ -158,20 +149,34 @@ export default function SchemaMapPage(): React.JSX.Element | null {
             </select>
           </div>
           <div className="col-auto">
-            <div className="form-check form-check-inline">
-              <input type="checkbox" className="form-check-input" id="focusOnSelection" checked={focusOnSelection} onChange={handleSetFocus} />
-              <label className="form-check-label" htmlFor="focusOnSelection">{MapMessage.FocusOnSelection.niceToString()}</label>
-            </div>
+            <label htmlFor="showItems"> {MapMessage.Show.niceToString()}</label>&nbsp;
           </div>
           <div className="col-auto">
-            <label htmlFor="depth" className="me-1">{MapMessage.Depth.niceToString()}</label>
-            <input type="number" min={1} max={10} step={1} className="form-control form-control-sm d-inline-block" style={{ width: "70px" }} id="depth" value={depth} onChange={handleSetDepth} disabled={!focusOnSelection} />
+            <select className="form-select form-select-sm" id="showItems" value={showRelations} onChange={handleSetShowRelations}>
+              <option value="All">{MapMessage.All.niceToString()}</option>
+              <option value="Selected">{MapMessage.Selected.niceToString()}</option>
+              <option value="SelectedAndNeighbors">{MapMessage.SelectedAndNeighbors.niceToString()}</option>
+            </select>
           </div>
           <div className="col-auto">
-            <span style={{ marginLeft: "10px" }}>
-              {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
-            </span>
-            &nbsp;
+            <OverlayTrigger
+              trigger="click"
+              rootClose
+              placement="bottom-end"
+              overlay={
+                <Popover id="schemaMapHelpPopover">
+                  <Popover.Header as="h3">{MapMessage.Help.niceToString()}</Popover.Header>
+                  <Popover.Body>
+                    <div>{MapMessage.HelpClick.niceToString()}</div>
+                    <div className="mt-1">{MapMessage.HelpShiftClick.niceToString()}</div>
+                    <div className="mt-1">{MapMessage.HelpCtrlClick.niceToString()}</div>
+                  </Popover.Body>
+                </Popover>
+              }>
+              <LinkButton title={MapMessage.Help.niceToString()} id="sfMapHelp" className="me-2">
+                <FontAwesomeIcon aria-hidden={true} icon="circle-question" />
+              </LinkButton>
+            </OverlayTrigger>
             <LinkButton title={FrameMessage.Fullscreen.niceToString()} id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} >
               <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
             </LinkButton>
@@ -195,8 +200,7 @@ export default function SchemaMapPage(): React.JSX.Element | null {
               tables={tables!}
               filter={filter}
               color={color}
-              focusOnSelection={focusOnSelection}
-              depth={depth}
+              showRelations={showRelations}
               height={size.height}
               width={size.width}
               providers={providers}
@@ -211,8 +215,7 @@ export interface SchemaMapRendererProps {
   schemaMapInfo: SchemaMapInfo;
   filter: string;
   color: string;
-  focusOnSelection: boolean;
-  depth: number;
+  showRelations: RelationFilterMode;
   width: number;
   height: number;
   providers: { [name: string]: ClientColorProvider };
@@ -226,15 +229,14 @@ export function SchemaMapRenderer(p: SchemaMapRendererProps): React.JSX.Element 
 
   React.useEffect(() => {
     fixSchemaMap(p.schemaMapInfo, p.tables);
-    mapD3Ref.current = new SchemaMapD3(svgRef.current!, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height, p.focusOnSelection, p.depth);
+    mapD3Ref.current = new SchemaMapD3(svgRef.current!, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height, p.showRelations);
 
     return () => { mapD3Ref.current!.stop(); };
   }, []);
 
   React.useEffect(() => mapD3Ref.current!.setColor(p.color), [p.color]);
   React.useEffect(() => mapD3Ref.current!.setFilter(p.filter), [p.filter]);
-  React.useEffect(() => mapD3Ref.current!.setFocusOnSelection(p.focusOnSelection), [p.focusOnSelection]);
-  React.useEffect(() => mapD3Ref.current!.setDepth(p.depth), [p.depth]);
+  React.useEffect(() => mapD3Ref.current!.setFilterMode(p.showRelations), [p.showRelations]);
 
   function fixSchemaMap(map: SchemaMapInfo, tables: Tables) {
     map.tables.forEach(t => t.mlistTables.forEach(ml => {

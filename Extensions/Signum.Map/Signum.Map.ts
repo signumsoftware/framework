@@ -21,9 +21,14 @@ export namespace MapMessage {
   export const StateColor: MessageKey = new MessageKey("MapMessage", "StateColor");
   export const RowsHistory: MessageKey = new MessageKey("MapMessage", "RowsHistory");
   export const TableSizeHistory: MessageKey = new MessageKey("MapMessage", "TableSizeHistory");
-  export const FocusOnSelection: MessageKey = new MessageKey("MapMessage", "FocusOnSelection");
-  export const Depth: MessageKey = new MessageKey("MapMessage", "Depth");
-  export const SelectATableToFocus: MessageKey = new MessageKey("MapMessage", "SelectATableToFocus");
+  export const Show: MessageKey = new MessageKey("MapMessage", "Show");
+  export const All: MessageKey = new MessageKey("MapMessage", "All");
+  export const Selected: MessageKey = new MessageKey("MapMessage", "Selected");
+  export const SelectedAndNeighbors: MessageKey = new MessageKey("MapMessage", "SelectedAndNeighbors");
+  export const Help: MessageKey = new MessageKey("MapMessage", "Help");
+  export const HelpClick: MessageKey = new MessageKey("MapMessage", "HelpClick");
+  export const HelpShiftClick: MessageKey = new MessageKey("MapMessage", "HelpShiftClick");
+  export const HelpCtrlClick: MessageKey = new MessageKey("MapMessage", "HelpCtrlClick");
 }
 
 export namespace MapPermission {

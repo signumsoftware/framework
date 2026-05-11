@@ -19,11 +19,18 @@ public enum MapMessage
     StateColor,
     RowsHistory,
     TableSizeHistory,
-    [Description("Focus on selection")]
-    FocusOnSelection,
-    Depth,
-    [Description("Select a table to focus")]
-    SelectATableToFocus,
+    Show,
+    All,
+    Selected,
+    [Description("Selected and neighbors")]
+    SelectedAndNeighbors,
+    Help,
+    [Description("Click a table to select it. Click again to deselect.")]
+    HelpClick,
+    [Description("Shift+Click to add or remove a table from the selection.")]
+    HelpShiftClick,
+    [Description("Ctrl+Click to open the table in a new tab.")]
+    HelpCtrlClick,
 }
 
 [DescriptionOptions(DescriptionOptions.Members)]
