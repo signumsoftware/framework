@@ -7,10 +7,10 @@ import { Navigator, EntitySettings } from '@framework/Navigator'
 import { EvalClient } from '../Signum.Eval/EvalClient';
 import {
   EntityPack, Lite, toLite, newMListElement, Entity, isEntityPack, isEntity, getToString,
-  JavascriptMessage
+  JavascriptMessage, liteKey
 } from '@framework/Signum.Entities'
 import { TypeEntity } from '@framework/Signum.Basics'
-import { Type, PropertyRoute, OperationInfo, toNumberFormat, getQueryKey, getQueryNiceName, getOperationInfo } from '@framework/Reflection'
+import { Type, PropertyRoute, OperationInfo, toNumberFormat, getQueryKey, getQueryNiceName, getOperationInfo, getTypeInfo } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { Finder } from '@framework/Finder'
@@ -51,6 +51,8 @@ import { FunctionalAdapter } from '@framework/Modals';
 import { QueryString } from '@framework/QueryString';
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { ContextualOperations } from '@framework/Operations/ContextualOperations';
+import { onContextualItems, ContextualItemsContext, MenuItemBlock, MarkedRowsDictionary } from '@framework/SearchControl/ContextualItems';
+import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
 import { UserEntity } from '../Signum.Authorization/Signum.Authorization';
 import MessageModal from '@framework/Modals/MessageModal';
 import { ExecuteSymbol } from '@framework/Signum.Operations';
@@ -61,6 +63,19 @@ import WorkflowToolbarMenuConfig from './WorkflowToolbarMenuConfig';
 import { isPermissionAuthorized } from '@framework/AppContext';
 import "./Case/Inbox.css";
 import { useAPI } from '../../Signum/React/Hooks';
+
+
+declare module '@framework/Operations' {
+  interface ContextualOperationContext<T extends Entity> {
+    readonly caseActivityLites?: Lite<CaseActivityEntity>[];
+  }
+}
+
+declare module '@framework/SearchControl/ContextualItems' {
+  interface ContextualItemsContext<T extends Entity> {
+    caseActivityLites?: Lite<CaseActivityEntity>[];
+  }
+}
 
 
 export namespace WorkflowClient {
@@ -83,6 +98,19 @@ export namespace WorkflowClient {
   }
   
   export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }): void {
+
+    Object.defineProperty(ContextualOperationContext.prototype, "caseActivityLites", {
+      configurable: true,
+      get: function (this: ContextualOperationContext<any>) {
+        return (this.context as ContextualItemsContext<Entity>).caseActivityLites;
+      },
+    });
+
+    const opsIndex = onContextualItems.indexOf(ContextualOperations.getOperationsContextualItems as any);
+    if (opsIndex >= 0)
+      onContextualItems.insertAt(opsIndex + 1, getMainEntityContextualItems);
+    else
+      onContextualItems.push(getMainEntityContextualItems);
 
     UserAssetClient.start({ routes: options.routes });
     UserAssetClient.registerExportAssertLink(WorkflowEntity);
@@ -533,6 +561,58 @@ export namespace WorkflowClient {
   }
 
 
+  async function getMainEntityContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> {
+
+    if (ctx.lites.length == 0)
+      return undefined;
+
+    if (ctx.lites[0].EntityType != CaseActivityEntity.typeName)
+      return undefined;
+
+    if (ctx.container instanceof SearchControlLoaded && ctx.container.state.resultFindOptions?.systemTime)
+      return undefined;
+
+    const caseActivityLites = ctx.lites as Lite<CaseActivityEntity>[];
+    const pairs = await API.mainEntitiesFromCaseActivities(caseActivityLites);
+
+    if (pairs.length == 0)
+      return undefined;
+
+    const types = pairs.map(p => p.mainEntity.EntityType).distinctBy();
+    if (types.length != 1)
+      return undefined;
+
+    const mainEntityLites = pairs.map(p => p.mainEntity);
+    const caByMainKey: { [k: string]: Lite<CaseActivityEntity> } = {};
+    pairs.forEach(p => caByMainKey[liteKey(p.mainEntity)] = p.caseActivity);
+
+    const translatedCtx: ContextualItemsContext<Entity> = {
+      lites: mainEntityLites,
+      queryDescription: ctx.queryDescription,
+      styleContext: ctx.styleContext,
+      caseActivityLites: caseActivityLites,
+      markRows: dic => {
+        const remapped: MarkedRowsDictionary = {};
+        Object.keys(dic).forEach(k => {
+          const ca = caByMainKey[k];
+          if (ca)
+            remapped[liteKey(ca)] = dic[k];
+        });
+        ctx.markRows(remapped);
+      },
+    };
+
+    const block = await ContextualOperations.getOperationsContextualItems(translatedCtx);
+    if (!block)
+      return undefined;
+
+    const ti = getTypeInfo(types[0]);
+    block.header = WorkflowMessage._0Operations.niceToString(ti.niceName);
+
+    return block;
+  }
+
+
   export function workflowActivityMonitorUrl
     (workflow: Lite<WorkflowEntity>) {
     return `/workflow/activityMonitor/${workflow.id}`;
@@ -894,6 +974,15 @@ export namespace WorkflowClient {
     export function getOnlyWorkflowActivity(caseActivities: Lite<CaseActivityEntity>[]): Promise<WorkflowActivityEntity | null> {
       return ajaxPost({ url: "/api/workflow/onlyWorkflowActivity" }, caseActivities);
     }
+
+    export function mainEntitiesFromCaseActivities(caseActivities: Lite<CaseActivityEntity>[]): Promise<CaseActivityMainEntityPair[]> {
+      return ajaxPost({ url: "/api/workflow/mainEntitiesFromCaseActivities" }, caseActivities);
+    }
+  }
+
+  export interface CaseActivityMainEntityPair {
+    caseActivity: Lite<CaseActivityEntity>;
+    mainEntity: Lite<ICaseMainEntity>;
   }
 
   export interface NextConnectionsRequest {
