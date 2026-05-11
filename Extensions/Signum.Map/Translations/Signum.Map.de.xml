@@ -8,13 +8,16 @@
   <Type Name="MapMessage">
     <Member Name="Color" Description="Farbe" />
     <Member Name="Columns" Description="Spalten" />
+    <Member Name="Depth" Description="Tiefe" />
     <Member Name="Filter" Description="Filter" />
+    <Member Name="FocusOnSelection" Description="Auf Auswahl fokussieren" />
     <Member Name="Map" Description="Karte" />
     <Member Name="Namespace" Description="Namespace" />
     <Member Name="Press0ToExploreEachTable" Description="Drücken Sie {0}, um jede Tabelle zu erkunden" />
     <Member Name="Press0ToExploreStatesAndOperations" Description="Drücken Sie {0}, um Status und Operationen zu erkunden" />
     <Member Name="Rows" Description="Zeilen" />
     <Member Name="RowsHistory" Description="Zeilen Historie" />
+    <Member Name="SelectATableToFocus" Description="Tabelle zum Fokussieren auswählen" />
     <Member Name="State" Description="Status" />
     <Member Name="StateColor" Description="Statusfarbe" />
     <Member Name="TableSize" Description="Tabellengröße" />

@@ -18,6 +18,8 @@ import { LinkButton } from '@framework/Basics/LinkButton'
 interface ParsedQueryString {
   filter?: string;
   color?: string;
+  focus?: boolean;
+  depth?: number;
   tables: Tables;
 }
 
@@ -39,6 +41,10 @@ function getParsedQuery(location: Location): ParsedQueryString {
       result.filter = value;
     else if (name == "color")
       result.color = value;
+    else if (name == "focus")
+      result.focus = value == "1" || value == "true";
+    else if (name == "depth")
+      result.depth = parseInt(value);
     else {
       result.tables[name] = {
         x: parseFloat(value.before(",")),
@@ -56,6 +62,8 @@ export default function SchemaMapPage(): React.JSX.Element | null {
 
   const [filter, setFilter] = React.useState<string>("");
   const [color, setColor] = React.useState<string>("");
+  const [focusOnSelection, setFocusOnSelection] = React.useState<boolean>(false);
+  const [depth, setDepth] = React.useState<number>(2);
   const [tables, setTables] = React.useState<Tables | undefined>(undefined);
   const [schemaInfo, setSchemaInfo] = React.useState<SchemaMapInfo | undefined>(undefined);
   const [providers, setProviders] = React.useState<{ [name: string]: ClientColorProvider } | undefined>(undefined);
@@ -78,6 +86,8 @@ export default function SchemaMapPage(): React.JSX.Element | null {
           setFilter(parsedQuery.filter ?? "");
           setTables(parsedQuery.tables);
           setColor(parsedQuery.color ?? smi.providers.first().name);
+          setFocusOnSelection(parsedQuery.focus ?? false);
+          setDepth(parsedQuery.depth != null && !isNaN(parsedQuery.depth) ? parsedQuery.depth : 2);
           setSchemaInfo(smi);
           setProviders(providers.toObject(a => a.name));
 
@@ -95,6 +105,16 @@ export default function SchemaMapPage(): React.JSX.Element | null {
     setColor((e.currentTarget as HTMLInputElement).value);
   }
 
+  function handleSetFocus(e: React.FormEvent<any>) {
+    setFocusOnSelection((e.currentTarget as HTMLInputElement).checked);
+  }
+
+  function handleSetDepth(e: React.FormEvent<any>) {
+    const val = parseInt((e.currentTarget as HTMLInputElement).value);
+    if (!isNaN(val) && val >= 1)
+      setDepth(val);
+  }
+
   function handleFullscreenClick(e: React.MouseEvent<any>) {
 
     const tables = schemaInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
@@ -103,7 +123,9 @@ export default function SchemaMapPage(): React.JSX.Element | null {
         (a.fy! / size!.height!).toPrecision(4));
 
     const query = {
-      ...tables, filter: filter, color: color
+      ...tables, filter: filter, color: color,
+      focus: focusOnSelection ? "1" : undefined,
+      depth: focusOnSelection ? depth : undefined,
     };
 
     const url = "/map?" + QueryString.stringify(query);
@@ -136,6 +158,16 @@ export default function SchemaMapPage(): React.JSX.Element | null {
             </select>
           </div>
           <div className="col-auto">
+            <div className="form-check form-check-inline">
+              <input type="checkbox" className="form-check-input" id="focusOnSelection" checked={focusOnSelection} onChange={handleSetFocus} />
+              <label className="form-check-label" htmlFor="focusOnSelection">{MapMessage.FocusOnSelection.niceToString()}</label>
+            </div>
+          </div>
+          <div className="col-auto">
+            <label htmlFor="depth" className="me-1">{MapMessage.Depth.niceToString()}</label>
+            <input type="number" min={1} max={10} step={1} className="form-control form-control-sm d-inline-block" style={{ width: "70px" }} id="depth" value={depth} onChange={handleSetDepth} disabled={!focusOnSelection} />
+          </div>
+          <div className="col-auto">
             <span style={{ marginLeft: "10px" }}>
               {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
             </span>
@@ -163,6 +195,8 @@ export default function SchemaMapPage(): React.JSX.Element | null {
               tables={tables!}
               filter={filter}
               color={color}
+              focusOnSelection={focusOnSelection}
+              depth={depth}
               height={size.height}
               width={size.width}
               providers={providers}
@@ -177,6 +211,8 @@ export interface SchemaMapRendererProps {
   schemaMapInfo: SchemaMapInfo;
   filter: string;
   color: string;
+  focusOnSelection: boolean;
+  depth: number;
   width: number;
   height: number;
   providers: { [name: string]: ClientColorProvider };
@@ -190,13 +226,15 @@ export function SchemaMapRenderer(p: SchemaMapRendererProps): React.JSX.Element 
 
   React.useEffect(() => {
     fixSchemaMap(p.schemaMapInfo, p.tables);
-    mapD3Ref.current = new SchemaMapD3(svgRef.current!, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height);
+    mapD3Ref.current = new SchemaMapD3(svgRef.current!, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height, p.focusOnSelection, p.depth);
 
     return () => { mapD3Ref.current!.stop(); };
   }, []);
 
   React.useEffect(() => mapD3Ref.current!.setColor(p.color), [p.color]);
   React.useEffect(() => mapD3Ref.current!.setFilter(p.filter), [p.filter]);
+  React.useEffect(() => mapD3Ref.current!.setFocusOnSelection(p.focusOnSelection), [p.focusOnSelection]);
+  React.useEffect(() => mapD3Ref.current!.setDepth(p.depth), [p.depth]);
 
   function fixSchemaMap(map: SchemaMapInfo, tables: Tables) {
     map.tables.forEach(t => t.mlistTables.forEach(ml => {

@@ -21,6 +21,9 @@ export namespace MapMessage {
   export const StateColor: MessageKey = new MessageKey("MapMessage", "StateColor");
   export const RowsHistory: MessageKey = new MessageKey("MapMessage", "RowsHistory");
   export const TableSizeHistory: MessageKey = new MessageKey("MapMessage", "TableSizeHistory");
+  export const FocusOnSelection: MessageKey = new MessageKey("MapMessage", "FocusOnSelection");
+  export const Depth: MessageKey = new MessageKey("MapMessage", "Depth");
+  export const SelectATableToFocus: MessageKey = new MessageKey("MapMessage", "SelectATableToFocus");
 }
 
 export namespace MapPermission {

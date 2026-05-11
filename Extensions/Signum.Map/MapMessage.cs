@@ -19,6 +19,11 @@ public enum MapMessage
     StateColor,
     RowsHistory,
     TableSizeHistory,
+    [Description("Focus on selection")]
+    FocusOnSelection,
+    Depth,
+    [Description("Select a table to focus")]
+    SelectATableToFocus,
 }
 
 [DescriptionOptions(DescriptionOptions.Members)]

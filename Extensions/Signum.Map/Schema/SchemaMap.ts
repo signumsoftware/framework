@@ -29,7 +29,9 @@ export class SchemaMapD3 {
     public filter: string,
     public color: string,
     public width: number,
-    public height: number) {
+    public height: number,
+    public focusOnSelection: boolean = false,
+    public depth: number = 2) {
 
     this.simulation = d3.forceSimulation<ITableInfo, IRelationInfo>()
       .force("bounding", forceBoundingBox(width, height))
@@ -86,6 +88,11 @@ export class SchemaMapD3 {
       .on("click", (e, d) => {
 
         this.selectedTable = this.selectedTable == d ? undefined : d;
+
+        if (this.focusOnSelection) {
+          this.regenerate();
+          this.showHideNodes();
+        }
 
         this.selectedLinks();
         this.selectedNode();
@@ -182,8 +189,17 @@ export class SchemaMapD3 {
       return false;
     };
 
-    this.nodes = this.map.allNodes.filter((n, i) => this.filter == undefined ||
+    let nodes = this.map.allNodes.filter((n, i) => this.filter == undefined ||
       isMatch(n.namespace.toLowerCase() + "|" + n.tableName.toLowerCase() + "|" + n.niceName.toLowerCase()));
+
+    if (this.focusOnSelection && this.selectedTable) {
+      const focused = this.getNodesWithinDepth(this.selectedTable, this.depth);
+      nodes = nodes.filter(n => focused.has(n));
+      if (!nodes.contains(this.selectedTable))
+        nodes.push(this.selectedTable);
+    }
+
+    this.nodes = nodes;
 
     this.links = this.map.allLinks.filter(l =>
       this.nodes.contains(<ITableInfo>l.source) &&
@@ -246,6 +262,70 @@ export class SchemaMapD3 {
     this.regenerate();
     this.selectedLinks();
     this.showHideNodes();
+  }
+
+  setFocusOnSelection(value: boolean): void {
+    if (this.focusOnSelection == value)
+      return;
+    this.focusOnSelection = value;
+    this.regenerate();
+    this.selectedLinks();
+    this.showHideNodes();
+  }
+
+  setDepth(value: number): void {
+    if (this.depth == value)
+      return;
+    this.depth = value;
+    if (this.focusOnSelection && this.selectedTable) {
+      this.regenerate();
+      this.selectedLinks();
+      this.showHideNodes();
+    }
+  }
+
+  adjacency: Map<ITableInfo, Set<ITableInfo>> | undefined;
+
+  getAdjacency(): Map<ITableInfo, Set<ITableInfo>> {
+    if (this.adjacency)
+      return this.adjacency;
+
+    const adj = new Map<ITableInfo, Set<ITableInfo>>();
+    this.map.allLinks.forEach(l => {
+      const s = l.source as ITableInfo;
+      const t = l.target as ITableInfo;
+      let ss = adj.get(s);
+      if (!ss) { ss = new Set(); adj.set(s, ss); }
+      let ts = adj.get(t);
+      if (!ts) { ts = new Set(); adj.set(t, ts); }
+      ss.add(t);
+      ts.add(s);
+    });
+    this.adjacency = adj;
+    return adj;
+  }
+
+  getNodesWithinDepth(root: ITableInfo, depth: number): Set<ITableInfo> {
+    const adj = this.getAdjacency();
+    const result = new Set<ITableInfo>();
+    result.add(root);
+    let frontier: ITableInfo[] = [root];
+    for (let i = 0; i < depth; i++) {
+      const next: ITableInfo[] = [];
+      for (const n of frontier) {
+        const neighbors = adj.get(n);
+        if (!neighbors) continue;
+        neighbors.forEach(nb => {
+          if (!result.has(nb)) {
+            result.add(nb);
+            next.push(nb);
+          }
+        });
+      }
+      if (next.length == 0) break;
+      frontier = next;
+    }
+    return result;
   }
 
 
