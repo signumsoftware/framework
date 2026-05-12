@@ -2,6 +2,7 @@ using Signum.Engine.Sync;
 using System.IO;
 using System.Text.RegularExpressions;
 using Signum.Engine;
+using Signum.Migrations;
 
 namespace Signum.UserAssets.TokenMigrations;
 
@@ -42,10 +43,20 @@ public static class TokenMigrationLogic
     /// </summary>
     static readonly Dictionary<string, string> PendingQueryRenames = new();
 
+    public static bool IsStarted { get; private set; }
+
+    public static void AssertStarted()
+    {
+        if (!IsStarted)
+            throw new InvalidOperationException("TokenMigrationLogic is not started. Please call TokenMigrationLogic.Start in your application startup.");
+    }
+
     public static void Start(SchemaBuilder sb)
     {
         if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
             return;
+
+        PermissionLogic.RegisterPermissions(UserAssetPermission.UserAssetsToXML);
 
         sb.Include<TokenMigrationEntity>()
             .WithQuery(() => e => new
@@ -56,7 +67,12 @@ public static class TokenMigrationLogic
                 e.Comment,
             });
 
-        Signum.Basics.QueryLogic.QueryRenamed += OnQueryRenamedDuringSync;
+        QueryLogic.QueryRenamed += OnQueryRenamedDuringSync;
+        SqlMigrationRunner.AfterMigrationsCompleted += TokenMigrationRunner.AutoApplyAfterSqlMigrations;
+        SqlMigrationRunner.AfterCreatingMigration += FlushPendingQueryRenames;
+        Administrator.AfterSynchronize += TokenMigrationRunner.AutoRecordAfterSynchronize;
+
+        IsStarted = true;
     }
 
     static void OnQueryRenamedDuringSync(string oldKey, string newKey)
@@ -77,10 +93,10 @@ public static class TokenMigrationLogic
     /// <see cref="TokenMigrationFile"/> populated with <see cref="TokenMigrationFile.Types"/> only).
     /// Returns true if anything was written.
     /// </summary>
-    public static bool FlushPendingQueryRenames(string version, string comment)
+    public static void FlushPendingQueryRenames(string version, string comment)
     {
         if (PendingQueryRenames.Count == 0)
-            return false;
+            return;
 
         var file = new TokenMigrationFile { Types = new Dictionary<string, string>(PendingQueryRenames) };
         PendingQueryRenames.Clear();
@@ -95,12 +111,8 @@ public static class TokenMigrationLogic
 
         SafeConsole.WriteLineColor(ConsoleColor.Green, "Query rename migration written: " + fullPath);
         SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  Type renames: " + file.Types.Count);
-        return true;
+        return;
     }
-
-    /// <summary>Subscribed to <c>SqlMigrationRunner.AfterCreatingMigration</c>.</summary>
-    public static void OnSqlMigrationCreated(string version, string comment)
-        => FlushPendingQueryRenames(version, comment);
 
     internal static void FireTokenSynchronizing(TokenSyncContext ctx)
     {

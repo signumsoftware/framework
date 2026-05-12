@@ -1,4 +1,3 @@
-using Signum.Cache;
 using Signum.Engine.Sync;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -320,7 +319,7 @@ public class SqlMigrationRunner
 
     private static void ResetCache()
     {
-        CacheLogic.ForceReset(systemLog: false);
+        Schema.Current.InvalidateCache();
         GlobalLazy.ResetAll(systemLog: false);
         Schema.Current.InvalidateMetadata();
     }

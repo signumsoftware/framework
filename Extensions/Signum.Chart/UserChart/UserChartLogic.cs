@@ -28,7 +28,7 @@ public static class UserChartLogic
             return;
 
         UserAssetsImporter.Register<UserChartEntity>("UserChart", UserChartOperation.Save);
-
+        
         TokenMigrationLogic.TokenSynchronizing += TokenMigration_Sync;
 
         sb.Include<UserChartEntity>()
