@@ -1,11 +1,12 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { OverlayTrigger, Popover } from 'react-bootstrap'
 import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities'
 import { MapMessage } from '../Signum.Map'
 import { MapClient } from '../MapClient'
-import { SchemaMapD3 } from './SchemaMap'
+import { RelationFilterMode, SchemaMapD3 } from './SchemaMap'
 import { useLocation, useParams, Location } from "react-router";
 import "./schemaMap.css"
 import { useSize } from '@framework/Hooks'
@@ -18,6 +19,7 @@ import { LinkButton } from '@framework/Basics/LinkButton'
 interface ParsedQueryString {
   filter?: string;
   color?: string;
+  showRelations?: RelationFilterMode;
   tables: Tables;
 }
 
@@ -39,6 +41,10 @@ function getParsedQuery(location: Location): ParsedQueryString {
       result.filter = value;
     else if (name == "color")
       result.color = value;
+    else if (name == "showRelations") {
+      if (value == "All" || value == "Selected" || value == "SelectedAndNeighbors")
+        result.showRelations = value;
+    }
     else {
       result.tables[name] = {
         x: parseFloat(value.before(",")),
@@ -56,6 +62,7 @@ export default function SchemaMapPage(): React.JSX.Element | null {
 
   const [filter, setFilter] = React.useState<string>("");
   const [color, setColor] = React.useState<string>("");
+  const [showRelations, setShowRelations] = React.useState<RelationFilterMode>("All");
   const [tables, setTables] = React.useState<Tables | undefined>(undefined);
   const [schemaInfo, setSchemaInfo] = React.useState<SchemaMapInfo | undefined>(undefined);
   const [providers, setProviders] = React.useState<{ [name: string]: ClientColorProvider } | undefined>(undefined);
@@ -78,6 +85,7 @@ export default function SchemaMapPage(): React.JSX.Element | null {
           setFilter(parsedQuery.filter ?? "");
           setTables(parsedQuery.tables);
           setColor(parsedQuery.color ?? smi.providers.first().name);
+          setShowRelations(parsedQuery.showRelations ?? "All");
           setSchemaInfo(smi);
           setProviders(providers.toObject(a => a.name));
 
@@ -95,6 +103,10 @@ export default function SchemaMapPage(): React.JSX.Element | null {
     setColor((e.currentTarget as HTMLInputElement).value);
   }
 
+  function handleSetShowRelations(e: React.FormEvent<any>) {
+    setShowRelations((e.currentTarget as HTMLSelectElement).value as RelationFilterMode);
+  }
+
   function handleFullscreenClick(e: React.MouseEvent<any>) {
 
     const tables = schemaInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
@@ -103,7 +115,8 @@ export default function SchemaMapPage(): React.JSX.Element | null {
         (a.fy! / size!.height!).toPrecision(4));
 
     const query = {
-      ...tables, filter: filter, color: color
+      ...tables, filter: filter, color: color,
+      showRelations: showRelations != "All" ? showRelations : undefined,
     };
 
     const url = "/map?" + QueryString.stringify(query);
@@ -136,10 +149,34 @@ export default function SchemaMapPage(): React.JSX.Element | null {
             </select>
           </div>
           <div className="col-auto">
-            <span style={{ marginLeft: "10px" }}>
-              {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
-            </span>
-            &nbsp;
+            <label htmlFor="showItems"> {MapMessage.Show.niceToString()}</label>&nbsp;
+          </div>
+          <div className="col-auto">
+            <select className="form-select form-select-sm" id="showItems" value={showRelations} onChange={handleSetShowRelations}>
+              <option value="All">{MapMessage.All.niceToString()}</option>
+              <option value="Selected">{MapMessage.Selected.niceToString()}</option>
+              <option value="SelectedAndNeighbors">{MapMessage.SelectedAndNeighbors.niceToString()}</option>
+            </select>
+          </div>
+          <div className="col-auto">
+            <OverlayTrigger
+              trigger="click"
+              rootClose
+              placement="bottom-end"
+              overlay={
+                <Popover id="schemaMapHelpPopover">
+                  <Popover.Header as="h3">{MapMessage.Help.niceToString()}</Popover.Header>
+                  <Popover.Body>
+                    <div>{MapMessage.HelpClick.niceToString()}</div>
+                    <div className="mt-1">{MapMessage.HelpShiftClick.niceToString()}</div>
+                    <div className="mt-1">{MapMessage.HelpCtrlClick.niceToString()}</div>
+                  </Popover.Body>
+                </Popover>
+              }>
+              <LinkButton title={MapMessage.Help.niceToString()} id="sfMapHelp" className="me-2">
+                <FontAwesomeIcon aria-hidden={true} icon="circle-question" />
+              </LinkButton>
+            </OverlayTrigger>
             <LinkButton title={FrameMessage.Fullscreen.niceToString()} id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} >
               <FontAwesomeIcon aria-hidden={true} icon="up-right-from-square" />
             </LinkButton>
@@ -163,6 +200,7 @@ export default function SchemaMapPage(): React.JSX.Element | null {
               tables={tables!}
               filter={filter}
               color={color}
+              showRelations={showRelations}
               height={size.height}
               width={size.width}
               providers={providers}
@@ -177,6 +215,7 @@ export interface SchemaMapRendererProps {
   schemaMapInfo: SchemaMapInfo;
   filter: string;
   color: string;
+  showRelations: RelationFilterMode;
   width: number;
   height: number;
   providers: { [name: string]: ClientColorProvider };
@@ -190,13 +229,14 @@ export function SchemaMapRenderer(p: SchemaMapRendererProps): React.JSX.Element 
 
   React.useEffect(() => {
     fixSchemaMap(p.schemaMapInfo, p.tables);
-    mapD3Ref.current = new SchemaMapD3(svgRef.current!, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height);
+    mapD3Ref.current = new SchemaMapD3(svgRef.current!, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height, p.showRelations);
 
     return () => { mapD3Ref.current!.stop(); };
   }, []);
 
   React.useEffect(() => mapD3Ref.current!.setColor(p.color), [p.color]);
   React.useEffect(() => mapD3Ref.current!.setFilter(p.filter), [p.filter]);
+  React.useEffect(() => mapD3Ref.current!.setFilterMode(p.showRelations), [p.showRelations]);
 
   function fixSchemaMap(map: SchemaMapInfo, tables: Tables) {
     map.tables.forEach(t => t.mlistTables.forEach(ml => {
