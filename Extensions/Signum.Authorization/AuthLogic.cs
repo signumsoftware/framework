@@ -776,7 +776,7 @@ public static class AuthLogic
                        new SqlPreCommandSimple("-- BEGIN ROLE SYNC SCRIPT"),
                        Connector.Current.SqlBuilder.UseDatabase(),
                        roleInsertsDeletes,
-                       new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
+                       new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry("Auth_Roles {0:yyyy-MM-dd HH_mm_ss}.sql".FormatWith(DateTime.Now));
 
                     if (!SafeConsole.Ask("Did you run the previous script (Sync Roles)?"))
                         return;
@@ -855,7 +855,7 @@ public static class AuthLogic
                    Connector.Current.SqlBuilder.UseDatabase(),
                    roleRelationships,
                    trivialMerges,
-                   new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
+                   new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry("Auth_RoleRels {0:yyyy-MM-dd HH_mm_ss}.sql".FormatWith(DateTime.Now));
 
                 if (!SafeConsole.Ask("Did you run the previous script (Sync Roles Relationships)?"))
                     return;
@@ -936,7 +936,7 @@ public static class AuthLogic
             if (command == null)
                 SafeConsole.WriteLineColor(ConsoleColor.Green, "Already syncronized");
             else
-                command.OpenSqlFileRetry();
+                command.OpenSqlFileRetry("Auth {0:yyyy-MM-dd HH_mm_ss}.sql".FormatWith(DateTime.Now));
 
             GlobalLazy.ResetAll(systemLog: false);
         }

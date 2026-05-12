@@ -1,3 +1,4 @@
+using Signum.Engine.Sync;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -85,6 +86,11 @@ public class TokenMigrationFile
     {
         var json = JsonSerializer.Serialize(this, JsonOptions);
         File.WriteAllText(filePath, json, Encoding.UTF8);
+
+
+        Console.WriteLine("Json file saved in:  " + filePath);
+        SafeConsole.WriteLineColor(ConsoleColor.DarkGray, json);
+
     }
 
     /// <summary>
@@ -124,6 +130,11 @@ public class TokenMigrationFile
 
     public static string FilterValueSubKey(string queryKey, string tokenString)
         => queryKey + "|" + tokenString;
+
+    internal void LoadTypes(Replacements rep)
+    {
+        Types = rep.TryGetC(QueryLogic.QueriesKey) ?? new Dictionary<string, string>();
+    }
 }
 
 public class UserAssetEntityAction

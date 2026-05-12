@@ -22,7 +22,7 @@ public class SqlMigrationRunner
     /// and the dev confirmed a new .sql file). Receives the version/comment stem so subscribers can
     /// write sibling artefacts (e.g. .query.json with the same name).
     /// </summary>
-    public static event Action<string /*version*/, string /*comment*/>? AfterCreatingMigration;
+    public static event Action<string /* fileName */, Replacements>? AfterCreatingMigration;
 
     /// <summary>
     /// Outcome of one iteration of the migration loop:
@@ -257,7 +257,7 @@ public class SqlMigrationRunner
             if (!SafeConsole.Ask("Create new migration?"))
                 return PromptResult.Completed;
 
-            var script = Schema.Current.SynchronizationScript(interactive: true, replaceDatabaseName: DatabaseNameReplacement);
+            var script = Schema.Current.SynchronizationScript(out var rep, interactive: true, replaceDatabaseName: DatabaseNameReplacement);
 
             if (script == null)
             {
@@ -276,9 +276,11 @@ public class SqlMigrationRunner
             string comment = SafeConsole.AskString("Comment for the new Migration? ", stringValidator: s => null).Trim();
             string fileName = version + (comment.HasText() ? "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment) : null) + ".sql";
 
-            File.WriteAllText(Path.Combine(MigrationsDirectory, fileName), script.ToString(), Encoding.UTF8);
+            var fullFileName = Path.Combine(MigrationsDirectory, fileName);
 
-            AfterCreatingMigration?.Invoke(version, comment);
+            File.WriteAllText(fullFileName, script.ToString(), Encoding.UTF8);
+
+            AfterCreatingMigration?.Invoke(fullFileName, rep);
 
             return PromptResult.Continue;
         }
@@ -395,11 +397,11 @@ public class SqlMigrationRunner
 
         Console.ReadLine();
 
-        while (Administrator.TotalSynchronizeScript() is SqlPreCommand cmd)
+        while (Administrator.TotalSynchronizeScript(out _) is SqlPreCommand cmd)
         {
             if(cmd != null)
             {
-                cmd.OpenSqlFileRetry();
+                cmd.OpenSqlFileRetry("Sync {0:yyyy-MM-dd HH_mm_ss}.sql".FormatWith(DateTime.Now));
             }
         }
 

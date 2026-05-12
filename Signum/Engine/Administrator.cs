@@ -161,7 +161,7 @@ public static class Administrator
     /// opened. Subscribers (e.g. token-migration recorder) can chain follow-up prompts here so
     /// devs see them as part of their normal sync muscle memory.
     /// </summary>
-    public static event Action? AfterSynchronize;
+    public static event Action<string? /*fileName*/, Replacements?>? AfterSynchronize;
 
     public static void Synchronize()
     {
@@ -170,27 +170,28 @@ public static class Administrator
 
         Console.WriteLine();
 
-        SqlPreCommand? command = Administrator.TotalSynchronizeScript();
+        SqlPreCommand? command = Administrator.TotalSynchronizeScript(out var rep);
         if (command == null)
         {
             SafeConsole.WriteLineColor(ConsoleColor.Green, "Already synchronized!");
-            AfterSynchronize?.Invoke();
+            AfterSynchronize?.Invoke(null, null);
             return;
         }
 
-        command.OpenSqlFileRetry();
+        var fileName = "Sync {0:yyyy-MM-dd HH_mm_ss}.sql".FormatWith(DateTime.Now);
+        command.OpenSqlFileRetry(fileName);
 
         GlobalLazy.ResetAll(systemLog: false);
         Schema.Current.InvalidateMetadata();
         Schema.Current.InvalidateCache();
 
-        AfterSynchronize?.Invoke();
+        AfterSynchronize?.Invoke(fileName, rep);
     }
 
-    public static SqlPreCommand? TotalSynchronizeScript(bool interactive = true, bool schemaOnly = false)
+    public static SqlPreCommand? TotalSynchronizeScript(out Replacements replacements, bool interactive = true, bool schemaOnly = false)
     {
 
-        var command = Schema.Current.SynchronizationScript(interactive, schemaOnly);
+        var command = Schema.Current.SynchronizationScript(out replacements, interactive, schemaOnly);
 
         if (command == null)
             return null;

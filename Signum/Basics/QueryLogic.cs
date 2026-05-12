@@ -19,16 +19,6 @@ public static class QueryLogic
     public static DynamicQueryContainer Queries { get; } = new DynamicQueryContainer();
     public static ExpressionContainer Expressions { get; } = new ExpressionContainer();
 
-    /// <summary>
-    /// Fires whenever <see cref="SynchronizeQueries"/> persists a renamed query (old key → new key).
-    /// Captured by the token-migration layer so query renames can be serialised to .query.json and
-    /// later used to translate stale <c>tokens-Query-&lt;oldname&gt;</c> entries in committed
-    /// .tokens.json files.
-    /// </summary>
-    public static event Action<string /*oldKey*/, string /*newKey*/>? QueryRenamed;
-
-    internal static void OnQueryRenamed(string oldKey, string newKey) => QueryRenamed?.Invoke(oldKey, newKey);
-
     static QueryLogic()
     {
         FilterSqlServerFullText.miContains = ReflectionTools.GetMethodInfo(() => SqlFullTextSearch.Contains(new string[0], ""));
@@ -215,8 +205,6 @@ public static class QueryLogic
                 {
                     var originalKey = c.Key;
                     c.Key = s.Key;
-                    if (originalKey != s.Key)
-                        OnQueryRenamed(originalKey, s.Key);
                     return table.UpdateSqlSync(c, q => q.Key == originalKey);
                 });
     }

@@ -5,45 +5,12 @@ namespace Signum.UserAssets.TokenMigrations;
 
 public static class TokenMigrationRunner
 {
-    /// <summary>
-    /// Subscribed to <c>SqlMigrationRunner.AfterMigrationsCompleted</c> from app-level wiring. Fires
-    /// whether or not the SQL runner actually applied anything — so token/query migrations get a
-    /// chance to run even when the schema was already up to date.
-    /// </summary>
-    public static void AutoApplyAfterSqlMigrations(bool autoRun)
-    {
-        var infos = TokenMigrationLogic.ReadMigrationsDirectory(silent: true);
-        SetExecuted(infos);
-
-        var pending = infos.Where(a => !a.IsExecuted && a.FileName != null).ToList();
-        if (pending.Count == 0)
-            return;
-
-        Draw(pending);
-
-        if (!autoRun && !SafeConsole.Ask("Apply {0} token/query migration(s)?".FormatWith(pending.Count)))
-            return;
-
-        ApplyPending(pending);
-    }
-
-    /// <summary>
-    /// Subscribed to <c>Administrator.AfterSynchronize</c>. Drives Record mode so devs see the
-    /// token-rename prompts in the same console session as their schema sync.
-    /// </summary>
-    public static void AutoRecordAfterSynchronize()
-    {
-        if (!SafeConsole.Ask("Record token migrations now?"))
-            return;
-
-        RecordNew();
-    }
-
-    public static void TokenMigrations()
-        => TokenMigrations(autoRun: false);
-
     public static void TokenMigrations(bool autoRun)
     {
+        Console.WriteLine();
+        if (!(autoRun || SafeConsole.Ask("SQL Migrations is finished... run Token Migrations now?")))
+            return;
+
         while (true)
         {
             var infos = TokenMigrationLogic.ReadMigrationsDirectory();
@@ -54,7 +21,7 @@ public static class TokenMigrationRunner
             var pending = infos.Where(a => !a.IsExecuted && a.FileName != null).ToList();
             if (pending.Any())
             {
-                if (!autoRun && !SafeConsole.Ask("Apply {0} token migration(s)?".FormatWith(pending.Count)))
+                if (!autoRun && !SafeConsole.Ask("Apply {0} Token Migrations (s)?".FormatWith(pending.Count)))
                     return;
 
                 ApplyPending(pending);
@@ -64,24 +31,23 @@ public static class TokenMigrationRunner
             }
             else
             {
+                if (infos.Count > 0)
+                    Console.WriteLine("All token migrations are applied.");
+
+
                 if (autoRun)
                     return;
 
-                if (!SafeConsole.Ask("All token migrations are applied. Record a new one?"))
+                if (!SafeConsole.Ask("Create new Token Migration?"))
                     return;
 
-                RecordNew();
+                RecordNewMigration();
             }
         }
     }
 
     static void SetExecuted(List<TokenMigrationLogic.MigrationInfo> infos)
     {
-        if (!Connector.Current.HasTables())
-            return;
-
-        TokenMigrationLogic.EnsureTokenMigrationTable();
-
         var executed = Database.Query<TokenMigrationEntity>()
             .Select(m => new { m.VersionNumber, m.Comment })
             .OrderBy(a => a.VersionNumber)
@@ -135,7 +101,6 @@ public static class TokenMigrationRunner
             PrintReport(ctx);
         }
 
-        TokenMigrationLogic.EnsureTokenMigrationTable();
         using (var tr = Transaction.ForceNew())
         {
             foreach (var p in pending)
@@ -151,7 +116,33 @@ public static class TokenMigrationRunner
         }
     }
 
-    static void RecordNew()
+    public static void AfterSynchronize(string? fileName, Replacements? rep)
+    {
+        if (!SafeConsole.Ask("Synchronize tokens now?"))
+            return;
+
+        QueryLogic.AssertLoaded();
+        TypeLogic.AssertLoaded();
+        var recording = new TokenMigrationFile();
+
+        if (rep != null)
+            recording.LoadTypes(rep);
+
+        var ctx = new TokenSyncContext(TokenSyncMode.Record, [], recording);
+        TokenMigrationLogic.FireTokenSynchronizing(ctx);
+
+        if (recording.IsEmpty)
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.Green, "No changes needed.");
+            return;
+        }
+
+        var newFileName = Path.GetFileNameWithoutExtension(fileName) + ".tokens.json";
+
+        recording.Save(newFileName);
+    }
+
+    static void RecordNewMigration()
     {
         // History = every committed migration file (both .tokens.json and .query.json), regardless
         // of whether applied to the dev DB. Files are loaded as-is; era-aware subKey resolution
@@ -174,39 +165,21 @@ public static class TokenMigrationRunner
 
         PrintReport(ctx);
 
+        if (recording.IsEmpty)
+            SafeConsole.WriteLineColor(ConsoleColor.Green, "No new token decisions to record.");
+
         var version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
         var comment = SafeConsole.AskString("Comment for the new token migration? ", stringValidator: s => null).Trim();
 
-        if (!recording.IsEmpty)
-        {
-            var fileName = version + (comment.HasText() ? "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment) : null) + TokenMigrationLogic.TokensFileExtension;
+        var fileName = version + (comment.HasText() ? "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment) : null) + TokenMigrationLogic.TokensFileExtension;
 
-            if (!Directory.Exists(TokenMigrationLogic.MigrationsDirectory))
-                Directory.CreateDirectory(TokenMigrationLogic.MigrationsDirectory);
+        var migrationDirectory = TokenMigrationLogic.MigrationsDirectory();
 
-            var fullPath = Path.Combine(TokenMigrationLogic.MigrationsDirectory, fileName);
-            recording.Save(fullPath);
+        if (!Directory.Exists(migrationDirectory))
+            Directory.CreateDirectory(migrationDirectory);
 
-            var tokenRenameCount = recording.TokensColumn.Sum(kvp => kvp.Value.Count) + recording.TokensType.Sum(kvp => kvp.Value.Count);
-            var filterValueCount = recording.FilterValues.Sum(kvp => kvp.Value.Count);
-            var memberCount = recording.Members.Sum(kvp => kvp.Value.Count);
-
-            SafeConsole.WriteLineColor(ConsoleColor.Green, "Token migration written: " + fullPath);
-            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  Token renames: " + tokenRenameCount);
-            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  Filter value renames: " + filterValueCount);
-            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  Type renames: " + recording.Types.Count);
-            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  Member renames: " + memberCount);
-            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  Global renames: " + recording.Globals.Count);
-            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  Entity actions: " + recording.UserAssetActions.Count);
-        }
-        else
-        {
-            SafeConsole.WriteLineColor(ConsoleColor.Green, "No new token decisions to record.");
-        }
-
-        // Always flush pending query renames — having only a .query.json with no accompanying
-        // .tokens.json is a valid outcome (useful for FixValue Lite type resolution later).
-        TokenMigrationLogic.FlushPendingQueryRenames(version, comment);
+        var fullPath = Path.Combine(migrationDirectory, fileName);
+        recording.Save(fullPath);
     }
 
     static void PrintReport(TokenSyncContext ctx)

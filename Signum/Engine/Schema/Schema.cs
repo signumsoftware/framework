@@ -417,17 +417,14 @@ public class Schema : IImplementationsFinder
     }
 
     public event Func<Replacements, SqlPreCommand?> Synchronizing;
-    public SqlPreCommand? SynchronizationScript(bool interactive = true, bool schemaOnly = false, string? replaceDatabaseName = null, Func<AutoReplacementContext, Selection?>? autoReplacement = null)
+    public SqlPreCommand? SynchronizationScript(out Replacements replacements, bool interactive = true, bool schemaOnly = false, string? replaceDatabaseName = null, Func<AutoReplacementContext, Selection?>? autoReplacement = null)
     {
         OnBeforeDatabaseAccess();
-
-        if (Synchronizing == null)
-            return null;
 
         using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
         using (ExecutionMode.Global())
         {
-            Replacements replacements = new Replacements()
+            var rep = new Replacements()
             {
                 Interactive = interactive,
                 ReplaceDatabaseName = replaceDatabaseName,
@@ -445,7 +442,7 @@ public class Schema : IImplementationsFinder
                         SafeConsole.WriteColor(ConsoleColor.DarkGray, e.Method.MethodName());
                         Console.Write("...");
 
-                        var result = e(replacements);
+                        var result = e(rep);
 
                         if (result == null)
                             SafeConsole.WriteLineColor(ConsoleColor.Green, "OK");
@@ -463,6 +460,8 @@ public class Schema : IImplementationsFinder
                     }
                 })
                 .Combine(Spacing.Triple);
+
+            replacements = rep;
 
             return command;
         }
