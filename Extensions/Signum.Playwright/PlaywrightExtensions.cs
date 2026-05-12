@@ -1,6 +1,3 @@
-using Microsoft.Playwright;
-using System.Diagnostics;
-
 namespace Signum.Playwright;
 
 /// <summary>

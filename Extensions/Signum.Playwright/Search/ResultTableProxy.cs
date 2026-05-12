@@ -1,6 +1,4 @@
-using Microsoft.Playwright;
 using Signum.Playwright.Frames;
-using Signum.Utilities.Synchronization;
 
 namespace Signum.Playwright.Search;
 

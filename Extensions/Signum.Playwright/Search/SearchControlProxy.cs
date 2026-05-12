@@ -1,9 +1,5 @@
-using Microsoft.Playwright;
 using Signum.Playwright.Frames;
 using Signum.Playwright.ModalProxies;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Synchronization;
-using System.Diagnostics;
 
 namespace Signum.Playwright.Search;
 

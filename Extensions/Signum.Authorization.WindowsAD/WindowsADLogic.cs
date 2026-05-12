@@ -2,10 +2,6 @@ using Signum.Scheduler;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using Signum.API;
-using Signum.Mailing;
-using DocumentFormat.OpenXml.Vml.Office;
-using Signum.Engine.Sync;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Signum.Authorization.WindowsAD.Authorizer;
 using Signum.Authorization.BaseAD;
 

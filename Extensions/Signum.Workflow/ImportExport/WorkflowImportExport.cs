@@ -3,7 +3,6 @@ using Signum.UserAssets;
 using System.Globalization;
 using Signum.Engine.Sync;
 using Signum.Scheduler;
-using System.Diagnostics;
 
 namespace Signum.Workflow;
 
