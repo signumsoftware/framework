@@ -1,5 +1,3 @@
-using Microsoft.Playwright;
-using Signum.Playwright.ModalProxies;
 using Signum.Playwright.Search;
 
 namespace Signum.Playwright.Frames;

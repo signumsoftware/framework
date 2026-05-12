@@ -1,4 +1,3 @@
-using Microsoft.Playwright;
 using Signum.Playwright.Frames;
 using Signum.Playwright.ModalProxies;
 

@@ -1,6 +1,4 @@
-using System.IO;
 using System.Diagnostics;
-using System.Net.Http;
 using Signum.Utilities.Synchronization;
 
 namespace Signum.Playwright;
