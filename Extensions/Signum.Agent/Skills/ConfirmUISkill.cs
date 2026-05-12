@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Signum.Agent.Skills;
 
-public class ConfirmUISkill : AgentSkill
+public class ConfirmUISkill : SkillCode
 {
     public ConfirmUISkill()
     {

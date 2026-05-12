@@ -3,7 +3,7 @@ import { AutoLine, EntityCombo, EnumLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ChatbotLanguageModelEntity } from '../Signum.Agent';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
-import { ChatbotClient } from '../ChatbotClient';
+import { LanguageModelClient } from '../LanguageModelClient';
 
 export default function ChatbotConfiguration(p: { ctx: TypeContext<ChatbotLanguageModelEntity> }): React.JSX.Element {
   const ctx = p.ctx;
@@ -12,7 +12,7 @@ export default function ChatbotConfiguration(p: { ctx: TypeContext<ChatbotLangua
   const forceUpdate = useForceUpdate();
   const provider = ctx.value.provider;
 
-  const models = useAPI(() => provider && ChatbotClient.API.getModels(provider), [provider]);
+  const models = useAPI(() => provider && LanguageModelClient.API.getModels(provider), [provider]);
 
   return (
     <div>
