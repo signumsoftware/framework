@@ -84,6 +84,7 @@ export type ChatbotUICommand =
   "SessionTitle" |
   "QuestionId" |
   "MessageId" |
+  "AssistantStarted" |
   "AssistantAnswer" |
   "AssistantReasoning" |
   "AssistantTool" |
