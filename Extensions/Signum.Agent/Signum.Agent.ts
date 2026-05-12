@@ -12,8 +12,12 @@ export interface ToolCallEmbedded {
   _response?: ChatMessageEntity
 }
 
+export namespace AgentOperation {
+  export const Save : Operations.ExecuteSymbol<AgentSymbol> = registerSymbol("Operation", "AgentOperation.Save");
+}
+
 export const AgentSymbol: Type<AgentSymbol> = new Type<AgentSymbol>("Agent");
-export interface AgentSymbol extends Basics.Symbol {
+export interface AgentSymbol extends Basics.SemiSymbol {
   Type: "Agent";
   skillCustomization: Entities.Lite<SkillCustomizationEntity> | null;
 }
@@ -66,6 +70,7 @@ export namespace ChatbotMessage {
   export const MessageMustBeTheLastToDelete: MessageKey = new MessageKey("ChatbotMessage", "MessageMustBeTheLastToDelete");
   export const SessionInterruptedDoYouWantToRecover: MessageKey = new MessageKey("ChatbotMessage", "SessionInterruptedDoYouWantToRecover");
   export const Recover: MessageKey = new MessageKey("ChatbotMessage", "Recover");
+  export const Reasoning: MessageKey = new MessageKey("ChatbotMessage", "Reasoning");
 }
 
 export namespace ChatbotPermission {
@@ -80,6 +85,7 @@ export type ChatbotUICommand =
   "QuestionId" |
   "MessageId" |
   "AssistantAnswer" |
+  "AssistantReasoning" |
   "AssistantTool" |
   "AssistantUITool" |
   "Tool" |
@@ -92,6 +98,7 @@ export interface ChatMessageEntity extends Entities.Entity {
   creationDate: string /*DateTime*/;
   role: ChatMessageRole;
   content: string | null;
+  reasoningContent: string | null;
   toolCalls: Entities.MList<ToolCallEmbedded>;
   toolCallID: string | null;
   toolID: string | null;

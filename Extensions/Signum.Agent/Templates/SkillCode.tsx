@@ -1,6 +1,28 @@
 import * as React from 'react'
-import { SkillCodeInfo, SubSkillInfo, ToolInfo } from '../AgentClient'
+import { TypeContext } from '@framework/TypeContext'
+import { useAPI } from '@framework/Hooks'
+import { SkillCodeEntity } from '../Signum.Agent'
+import { AgentClient, SkillCodeInfo, SubSkillInfo, ToolInfo } from '../AgentClient'
 import { SkillActivation } from '../Signum.Agent'
+import ChatMarkdown from './ChatMarkdown'
+import { openModal, IModalProps } from '@framework/Modals'
+import { Modal } from 'react-bootstrap'
+
+export default function SkillCode(p: { ctx: TypeContext<SkillCodeEntity> }): React.JSX.Element {
+  const ctx = p.ctx;
+
+  const info = useAPI(
+    () => AgentClient.API.getSkillCodeInfo(ctx.value.className),
+    [ctx.value.className]
+  );
+
+  return (
+    <div>
+      <h5>{ctx.value.className}</h5>
+      {info && <SkillCodeView info={info} />}
+    </div>
+  );
+}
 
 export function SkillCodeView(p: { info: SkillCodeInfo }): React.JSX.Element {
   return (
@@ -8,9 +30,9 @@ export function SkillCodeView(p: { info: SkillCodeInfo }): React.JSX.Element {
       {p.info.defaultShortDescription && (
         <p className="text-muted fst-italic">{p.info.defaultShortDescription}</p>
       )}
-      <pre className="border rounded p-2 bg-light small" style={{ whiteSpace: 'pre-wrap' }}>
-        {p.info.defaultInstructions}
-      </pre>
+      <div className="border rounded p-2 small">
+        <ChatMarkdown content={p.info.defaultInstructions} />
+      </div>
       {p.info.properties.length > 0 && (
         <div className="mt-2">
           <strong className="small">Properties</strong>
@@ -31,7 +53,19 @@ export function SkillCodeView(p: { info: SkillCodeInfo }): React.JSX.Element {
       <ToolsView tools={p.info.tools} />
       {p.info.subSkills.length > 0 && (
         <div className="mt-2">
-          {p.info.subSkills.map((ss, i) => <SubSkillView key={i} subSkill={ss} />)}
+          <strong className="small d-block mb-1">Sub Skills</strong>
+          <table className="table table-sm table-borderless small mb-0">
+            <tbody>
+              {p.info.subSkills.map((ss, i) => (
+                <tr key={i}>
+                  <td className="text-nowrap pe-2">
+                    <SubSkillLink subSkill={ss} />
+                  </td>
+                  <td className="text-muted text-nowrap">{SkillActivation.niceToString(ss.activation)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
@@ -62,15 +96,32 @@ export function ToolsView(p: { tools: ToolInfo[] }): React.JSX.Element | null {
   );
 }
 
-function SubSkillView(p: { subSkill: SubSkillInfo }): React.JSX.Element {
-  const { subSkill } = p;
+function SubSkillLink(p: { subSkill: SubSkillInfo }): React.JSX.Element {
   return (
-    <div className="border rounded p-2 mb-2">
-      <div className="d-flex align-items-center gap-2 mb-1">
-        <strong>{subSkill.className}</strong>
-        <span className="badge bg-secondary">{SkillActivation.niceToString(subSkill.activation)}</span>
-      </div>
-      <SkillCodeView info={subSkill.info} />
-    </div>
+    <a href="#" className="text-decoration-none" onClick={e => { e.preventDefault(); SubSkillModal.show(p.subSkill); }}>
+      {p.subSkill.className}
+    </a>
   );
 }
+
+interface SubSkillModalProps extends IModalProps<void> {
+  subSkill: SubSkillInfo;
+}
+
+function SubSkillModal(p: SubSkillModalProps): React.JSX.Element {
+  const [show, setShow] = React.useState(true);
+
+  return (
+    <Modal show={show} onHide={() => setShow(false)} onExited={() => p.onExited!(undefined)} size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>{p.subSkill.className}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <SkillCodeView info={p.subSkill.info} />
+      </Modal.Body>
+    </Modal>
+  );
+}
+
+SubSkillModal.show = (subSkill: SubSkillInfo): Promise<void> =>
+  openModal<void>(<SubSkillModal subSkill={subSkill} />);

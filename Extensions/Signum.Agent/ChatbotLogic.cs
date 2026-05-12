@@ -172,18 +172,42 @@ public static class ChatbotLogic
 
             List<ChatResponseUpdate> updates = [];
             var sw = Stopwatch.StartNew();
-            bool assistantStarted = false;
+            AssistantMode? mode = null;
 
             await foreach (var update in client.GetStreamingResponseAsync(messages, options, ct))
             {
-                if (!assistantStarted)
-                {
-                    await output.OnAssistantStartedAsync(ct);
-                    assistantStarted = true;
-                }
                 updates.Add(update);
-                if (update.Text.HasText())
-                    await output.OnTextChunkAsync(update.Text, ct);
+
+                var reasoningChunk = update.Contents.OfType<TextReasoningContent>().ToString(tc => tc.Text, "");
+                if (reasoningChunk.HasText())
+                {
+                    if (mode == null)
+                        await output.OnAssistantModeAsync(null, ct);
+
+                    if (mode != AssistantMode.Reasoning)
+                    {
+                        await output.OnAssistantModeAsync(AssistantMode.Reasoning, ct);
+                        mode = AssistantMode.Reasoning;
+                    }
+                    await output.OnChunkAsync(reasoningChunk, ct);
+                }
+
+                var textChunk = update.Contents.OfType<TextContent>().ToString(tc => tc.Text, "");
+                if (!textChunk.HasText() && update.Text.HasText())
+                    textChunk = update.Text;
+
+                if (textChunk.HasText())
+                {
+                    if (mode == null)
+                        await output.OnAssistantModeAsync(null, ct);
+
+                    if (mode != AssistantMode.Text)
+                    {
+                        await output.OnAssistantModeAsync(AssistantMode.Text, ct);
+                        mode = AssistantMode.Text;
+                    }
+                    await output.OnChunkAsync(textChunk, ct);
+                }
             }
             sw.Stop();
 
@@ -191,7 +215,7 @@ public static class ChatbotLogic
             var responseMsg = response.Messages.SingleEx();
 
             var notSupported = responseMsg.Contents
-                .Where(a => a is not FunctionCallContent and not Microsoft.Extensions.AI.TextContent)
+                .Where(a => a is not FunctionCallContent and not TextContent and not TextReasoningContent)
                 .ToList();
             if (notSupported.Any())
                 throw new InvalidOperationException("Unexpected response: " + notSupported.ToString(a => a.GetType().Name, ", "));
@@ -215,12 +239,14 @@ public static class ChatbotLogic
                 ChatSession = history.Session,
                 Role = ChatMessageRole.Assistant,
                 Content = responseMsg.Text,
+                ReasoningContent = responseMsg.Contents.OfType<TextReasoningContent>().ToString(tc => tc.Text, "").DefaultToNull(),
                 LanguageModel = history.Session.InDB(s => s.LanguageModel),
                 InputTokens = (int?)usage?.InputTokenCount,
                 CachedInputTokens = (int?)usage?.CachedInputTokenCount,
                 OutputTokens = (int?)usage?.OutputTokenCount,
                 ReasoningOutputTokens = (int?)usage?.ReasoningTokenCount,
                 Duration = sw.Elapsed,
+                
                 ToolCalls = toolCalls.Select(fc => new ToolCallEmbedded
                 {
                     ToolId = fc.Name,
@@ -385,13 +411,15 @@ public static class ChatbotLogic
     }
 }
 
+public enum AssistantMode { Text, Reasoning }
+
 public interface IAgentOutput
 {
     Task OnSystemMessageAsync(ChatMessageEntity msg, CancellationToken ct);
     Task OnUserQuestionAsync(ChatMessageEntity msg, CancellationToken ct);
     Task OnSummarizationAsync(ChatMessageEntity summaryMsg, CancellationToken ct);
-    Task OnAssistantStartedAsync(CancellationToken ct);
-    Task OnTextChunkAsync(string chunk, CancellationToken ct);
+    Task OnAssistantModeAsync(AssistantMode? mode, CancellationToken ct);
+    Task OnChunkAsync(string chunk, CancellationToken ct);
     Task OnAssistantMessageAsync(ChatMessageEntity msg, CancellationToken ct);
     Task OnToolStartAsync(string toolId, string callId, CancellationToken ct);
     Task OnToolFinishedAsync(ChatMessageEntity toolMsg, CancellationToken ct);
@@ -406,8 +434,8 @@ public sealed class NullAgentOutput : IAgentOutput
     public Task OnSystemMessageAsync(ChatMessageEntity msg, CancellationToken ct) => Task.CompletedTask;
     public Task OnUserQuestionAsync(ChatMessageEntity msg, CancellationToken ct) => Task.CompletedTask;
     public Task OnSummarizationAsync(ChatMessageEntity summaryMsg, CancellationToken ct) => Task.CompletedTask;
-    public Task OnAssistantStartedAsync(CancellationToken ct) => Task.CompletedTask;
-    public Task OnTextChunkAsync(string chunk, CancellationToken ct) => Task.CompletedTask;
+    public Task OnAssistantModeAsync(AssistantMode? mode, CancellationToken ct) => Task.CompletedTask;
+    public Task OnChunkAsync(string chunk, CancellationToken ct) => Task.CompletedTask;
     public Task OnAssistantMessageAsync(ChatMessageEntity msg, CancellationToken ct) => Task.CompletedTask;
     public Task OnToolStartAsync(string toolId, string callId, CancellationToken ct) => Task.CompletedTask;
     public Task OnToolFinishedAsync(ChatMessageEntity toolMsg, CancellationToken ct) => Task.CompletedTask;
@@ -436,18 +464,21 @@ public class ConversationHistory
         if (c.Role == ChatMessageRole.Tool)
             return new ChatMessage(role, [new FunctionResultContent(c.ToolCallID!, content)]);
 
-        if (c.ToolCalls.IsEmpty())
-            return new ChatMessage(role, content);
+        List<AIContent> contents = []; 
 
-        var contents = c.ToolCalls.Select(c =>
+        
+        if(c.ReasoningContent.HasText())
+            contents.Add(new TextReasoningContent(c.ReasoningContent!));
+
+        contents.AddRange(c.ToolCalls.Select(c =>
         {
             var arguments = JsonSerializer.Deserialize<Dictionary<string, object?>>(c.Arguments)!;
             var cleanArguments = arguments.ToDictionary(kvp => kvp.Key, kvp => CleanValue(kvp.Value));
             return (AIContent)new FunctionCallContent(c.CallId, c.ToolId, cleanArguments);
-        }).ToList();
+        }));
 
         if (content.HasText())
-            contents.Insert(0, new TextContent(content));
+            contents.Add(new TextContent(content));
 
         return new ChatMessage(role, contents);
     }

@@ -15,7 +15,7 @@ export const Message: React.NamedExoticComponent<{ msg: ChatMessageEntity; toolR
     const role =
       p.msg.role == "System" ? <SystemMessage msg={p.msg} /> :
         p.msg.role == "User" ? <UserMessage msg={p.msg} /> :
-          p.msg.role == "Assistant" ? <AssistantMessage msg={p.msg} sendToolResponse={p.sendToolResponse}/> :
+          p.msg.role == "Assistant" ? <AssistantMessage msg={p.msg} sendToolResponse={p.sendToolResponse} /> :
             p.msg.role == "Tool" ? <ToolMessage msg={p.msg} /> :
               null;
 
@@ -27,7 +27,7 @@ export const Message: React.NamedExoticComponent<{ msg: ChatMessageEntity; toolR
   }, (a, b) => a.msg.id != null && a.toolResponses == b.toolResponses);
 
 
-export function looksLikeJson(text: string) : boolean {
+export function looksLikeJson(text: string): boolean {
   return text != null && (text.trim().startsWith("{") || text.trim().startsWith("["));
 }
 
@@ -53,6 +53,7 @@ export function SystemMessage(p: { msg: ChatMessageEntity }): React.ReactElement
 
 export function AssistantMessage(p: { msg: ChatMessageEntity, sendToolResponse: (call: ToolCallEmbedded, response: unknown) => void }): React.ReactElement {
   const forceUpdate = useForceUpdate();
+  const [isReasoningOpen, setIsReasoningOpen] = React.useState(false);
 
   const isFinalized = p.msg.id != null;
 
@@ -109,6 +110,16 @@ export function AssistantMessage(p: { msg: ChatMessageEntity, sendToolResponse: 
 
   return (
     <div className={`mb-2 justify-content-start`}>
+      {p.msg.reasoningContent && <div className="chat-reasoning mt-1">
+        <a className="chat-internal" href="#" onClick={e => { e.preventDefault(); setIsReasoningOpen(!isReasoningOpen); }}>
+          <FontAwesomeIcon icon={"brain"} /> {ChatbotMessage.Reasoning.niceToString()}
+        </a>
+        {isReasoningOpen && <div className="chat-bubble reasoning mt-1">
+          <React.Suspense fallback={null}>
+            {ChatbotClient.renderMarkdown(p.msg.reasoningContent)}
+          </React.Suspense>
+        </div>}
+      </div>}
       {
         p.msg.content && <React.Suspense fallback={null}>
           {ChatbotClient.renderMarkdown(p.msg.content)}
@@ -185,7 +196,7 @@ function ToolCall(p: { toolCall: ToolCallEmbedded, sendToolResponse: (call: Tool
 export function ToolResponseBlock(p: { msg: ChatMessageEntity }): React.ReactElement {
   const isJson = looksLikeJson(p.msg.content!);
   const [formatJson, setFormatJson] = React.useState<boolean>(false);
- 
+
   return (
     <div>
       <h4 className="chatbot-response">Response {isJson && !formatJson && <button className={classes("btn btn-sm btn-link", formatJson && "active")} onClick={() => setFormatJson(!formatJson)}>
@@ -197,18 +208,18 @@ export function ToolResponseBlock(p: { msg: ChatMessageEntity }): React.ReactEle
             {getToString(p.msg.exception)}
           </pre>
           : <MarkdownOrJson content={p.msg.content!} formatJson={formatJson} />
-          
+
         }
       </div>
     </div>
   );
 }
 
-export function MarkdownOrJson(p: { content: string | null | undefined, formatJson?: boolean }) : JSX.Element {
+export function MarkdownOrJson(p: { content: string | null | undefined, formatJson?: boolean }): JSX.Element {
   if (!p.content)
     return <span className="text-muted">{p.content + ""}</span>;
-  
-  if (looksLikeJson(p.content!)) 
+
+  if (looksLikeJson(p.content!))
     return <FormatJson code={p.content} formatJson={p.formatJson ?? true} className="mb-0" />;
 
   return (

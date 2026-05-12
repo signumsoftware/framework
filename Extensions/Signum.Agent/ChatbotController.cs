@@ -242,12 +242,14 @@ public class HttpAgentOutput : IAgentOutput
         await _resp.WriteAsync(Notification(ChatbotUICommand.MessageId, msg.Id.ToString()), ct);
     }
 
-    public async Task OnAssistantStartedAsync(CancellationToken ct)
+    public async Task OnAssistantModeAsync(AssistantMode? mode, CancellationToken ct)
     {
-        await _resp.WriteAsync(Notification(ChatbotUICommand.AssistantAnswer), ct);
+        var cmd = mode == null ? ChatbotUICommand.AssistantStarted :
+                  mode == AssistantMode.Text ? ChatbotUICommand.AssistantAnswer : ChatbotUICommand.AssistantReasoning;
+        await _resp.WriteAsync(Notification(cmd), ct);
     }
 
-    public async Task OnTextChunkAsync(string chunk, CancellationToken ct)
+    public async Task OnChunkAsync(string chunk, CancellationToken ct)
     {
         await _resp.WriteAsync(chunk, ct);
         await _resp.Body.FlushAsync(ct);
@@ -303,7 +305,9 @@ public enum ChatbotUICommand
     SessionTitle,
     QuestionId,
     MessageId,
+    AssistantStarted,
     AssistantAnswer,
+    AssistantReasoning,
     AssistantTool,
     AssistantUITool,
     Tool,

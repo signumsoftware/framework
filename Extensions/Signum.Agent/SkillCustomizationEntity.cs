@@ -10,8 +10,8 @@ public class SkillCodeEntity : Entity
     public override string ToString() => As.Expression(() => ClassName);
 }
 
-[EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
-public class AgentSymbol : Symbol
+[EntityKind(EntityKind.Main, EntityData.Master, IsLowPopulation = true, RequiresSaveOperation = false)]
+public class AgentSymbol : SemiSymbol
 {
     private AgentSymbol() { }
 
@@ -21,6 +21,20 @@ public class AgentSymbol : Symbol
     }
 
     public Lite<SkillCustomizationEntity>? SkillCustomization { get; set; }
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(SkillCustomization) && SkillCustomization == null && Key == null)
+            return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+        return base.PropertyValidation(pi);
+    }
+}
+
+[AutoInit]
+public static class AgentOperation
+{
+    public static ExecuteSymbol<AgentSymbol> Save;
 }
 
 [AutoInit]

@@ -1,18 +1,23 @@
 import * as React from 'react'
 import { ajaxGet } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator';
+import { Operations, EntityOperationSettings } from '@framework/Operations';
 import * as AppContext from '@framework/AppContext';
 import { TypeContext } from '@framework/TypeContext';
 import { LanguageModelClient } from './LanguageModelClient';
-import { AgentSymbol, SkillActivation, SkillCustomizationEntity } from './Signum.Agent';
+import { AgentSymbol, SkillActivation, SkillCodeEntity, SkillCustomizationEntity, SkillCustomizationOperation } from './Signum.Agent';
 
 export namespace AgentClient {
 
   export function start(options: { routes: unknown[] }): void {
 
-   
+    Navigator.addSettings(new EntitySettings(SkillCodeEntity, e => import('./Templates/SkillCode')));
     Navigator.addSettings(new EntitySettings(SkillCustomizationEntity, e => import('./Templates/SkillCustomization')));
     Navigator.addSettings(new EntitySettings(AgentSymbol, e => import('./Templates/Agent')));
+
+    Operations.addSettings(new EntityOperationSettings(SkillCustomizationOperation.CreateFromAgent, {
+      isVisible: () => false,
+    }));
 
     LanguageModelClient.start(options);
     AppContext.clearSettingsActions.push(() => propertyValueRegistry.clear());

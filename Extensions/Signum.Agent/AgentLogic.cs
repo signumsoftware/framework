@@ -44,8 +44,22 @@ public static class AgentLogic
         RegisterAgent(DefaultAgent.QuestionSummarizer, () => new QuestionSumarizerSkill());
         RegisterAgent(DefaultAgent.ConversationSumarizer, () => new ConversationSumarizerSkill());
 
-        SymbolLogic<AgentSymbol>.Start(sb, () => RegisteredAgents.Keys);
+        SemiSymbolLogic<AgentSymbol>.Start(sb, () => RegisteredAgents.Keys);
 
+
+        QueryLogic.Queries.Register(typeof(AgentSymbol), () => Database.Query<AgentSymbol>().Select(a => new
+        {
+            Entity = a,
+            a.Key,
+            a.SkillCustomization
+        }));
+
+        new Graph<AgentSymbol>.Execute(AgentOperation.Save)
+        {
+            CanBeNew = true,
+            CanBeModified = true,
+            Execute = (e, _) => { },
+        }.Register();
         
         sb.Include<SkillCustomizationEntity>()
             .WithSave(SkillCustomizationOperation.Save)
@@ -78,16 +92,11 @@ public static class AgentLogic
 
         SkillCodeByAgent = sb.GlobalLazy(() =>
         {
-            var agentCustomizations = Database.Query<AgentSymbol>()
-                .Where(a => a.SkillCustomization != null)
-                .Select(a => new { a.Key, SkillCustomization = a.SkillCustomization })
-                .ToList()
-                .ToDictionary(x => x.Key, x => x.SkillCustomization!.Retrieve().ToSkillCode());
+            var list = Database.Query<AgentSymbol>()
+                .Select(a => new { Agent = a, SkillCustomization = a.SkillCustomization!.Entity })
+                .ToFrozenDictionary(x => x.Agent, x => x.SkillCustomization?.ToSkillCode() ?? RegisteredAgents.GetOrThrow(x.Agent).Invoke());
 
-            return RegisteredAgents.Keys.ToFrozenDictionary(
-                a => a,
-                a => agentCustomizations.TryGetValue(a.Key, out var skillCode) ? skillCode : RegisteredAgents[a]()
-            );
+            return list;
         }, new InvalidateWith(typeof(SkillCustomizationEntity), typeof(AgentSymbol)));
     }
    
