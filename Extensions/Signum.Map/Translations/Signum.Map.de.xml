@@ -9,12 +9,20 @@
     <Member Name="Color" Description="Farbe" />
     <Member Name="Columns" Description="Spalten" />
     <Member Name="Filter" Description="Filter" />
+    <Member Name="Help" Description="Hilfe" />
+    <Member Name="HelpClick" Description="Klicken Sie auf eine Tabelle, um sie auszuwählen. Erneut klicken, um die Auswahl aufzuheben." />
+    <Member Name="HelpCtrlClick" Description="Strg+Klick öffnet die Tabelle in einem neuen Tab." />
+    <Member Name="HelpShiftClick" Description="Umschalt+Klick fügt eine Tabelle zur Auswahl hinzu oder entfernt sie." />
     <Member Name="Map" Description="Karte" />
     <Member Name="Namespace" Description="Namespace" />
     <Member Name="Press0ToExploreEachTable" Description="Drücken Sie {0}, um jede Tabelle zu erkunden" />
     <Member Name="Press0ToExploreStatesAndOperations" Description="Drücken Sie {0}, um Status und Operationen zu erkunden" />
+    <Member Name="All" Description="Alle" />
     <Member Name="Rows" Description="Zeilen" />
     <Member Name="RowsHistory" Description="Zeilen Historie" />
+    <Member Name="Selected" Description="Ausgewählte" />
+    <Member Name="SelectedAndNeighbors" Description="Ausgewählte und Nachbarn" />
+    <Member Name="Show" Description="Anzeigen" />
     <Member Name="State" Description="Status" />
     <Member Name="StateColor" Description="Statusfarbe" />
     <Member Name="TableSize" Description="Tabellengröße" />

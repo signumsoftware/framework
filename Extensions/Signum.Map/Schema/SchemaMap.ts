@@ -6,6 +6,9 @@ import { Point, ITableInfo, Rectangle, TableInfo, MListTableInfo, ClientColorPro
 import { calculatePoint, wrap, forceBoundingBox } from '../Utils'
 
 
+export type RelationFilterMode = "All" | "Selected" | "SelectedAndNeighbors";
+
+
 export class SchemaMapD3 {
 
   nodes!: ITableInfo[];
@@ -13,7 +16,7 @@ export class SchemaMapD3 {
   simulation: d3.Simulation<ITableInfo, IRelationInfo>;
   fanIn: { [key: string]: IRelationInfo[] };
 
-  selectedTable: ITableInfo | undefined;
+  selectedTables: Set<ITableInfo> = new Set();
 
   link: d3.Selection<SVGPathElement, IRelationInfo, any, any>;
 
@@ -29,7 +32,8 @@ export class SchemaMapD3 {
     public filter: string,
     public color: string,
     public width: number,
-    public height: number) {
+    public height: number,
+    public filterMode: RelationFilterMode = "All") {
 
     this.simulation = d3.forceSimulation<ITableInfo, IRelationInfo>()
       .force("bounding", forceBoundingBox(width, height))
@@ -85,23 +89,36 @@ export class SchemaMapD3 {
       .style("cursor", d => (d as TableInfo).typeName && Finder.isFindable((d as TableInfo).typeName, true) ? "pointer" : null)
       .on("click", (e, d) => {
 
-        this.selectedTable = this.selectedTable == d ? undefined : d;
-
-        this.selectedLinks();
-        this.selectedNode();
-
-        if (e.defaultPrevented)
-          return;
-
         if (e.ctrlKey && (d as TableInfo).typeName) {
           window.open(AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: (d as TableInfo).typeName })));
           e.preventDefault();
+          return;
         }
+
+        if (e.shiftKey) {
+          if (this.selectedTables.has(d))
+            this.selectedTables.delete(d);
+          else
+            this.selectedTables.add(d);
+        } else {
+          const onlyThis = this.selectedTables.size == 1 && this.selectedTables.has(d);
+          this.selectedTables.clear();
+          if (!onlyThis)
+            this.selectedTables.add(d);
+        }
+
+        if (this.filterMode != "All") {
+          this.regenerate();
+          this.showHideNodes();
+        }
+
+        this.selectedLinks();
+        this.selectedNode();
       })
       .on("keydown", (e: KeyboardEvent, d) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          const synthetic = new MouseEvent("click", { ctrlKey: e.ctrlKey });
+          const synthetic = new MouseEvent("click", { ctrlKey: e.ctrlKey, shiftKey: e.shiftKey });
           (e.currentTarget as SVGGElement).dispatchEvent(synthetic);
         }
 
@@ -182,8 +199,25 @@ export class SchemaMapD3 {
       return false;
     };
 
-    this.nodes = this.map.allNodes.filter((n, i) => this.filter == undefined ||
+    let nodes = this.map.allNodes.filter((n, i) => this.filter == undefined ||
       isMatch(n.namespace.toLowerCase() + "|" + n.tableName.toLowerCase() + "|" + n.niceName.toLowerCase()));
+
+    if (this.filterMode != "All" && this.selectedTables.size > 0) {
+      const visible = new Set<ITableInfo>(this.selectedTables);
+      if (this.filterMode == "SelectedAndNeighbors") {
+        const adj = this.getAdjacency();
+        this.selectedTables.forEach(s => {
+          const nbs = adj.get(s);
+          if (nbs) nbs.forEach(nb => visible.add(nb));
+        });
+      }
+      nodes = nodes.filter(n => visible.has(n));
+      this.selectedTables.forEach(s => { if (!nodes.contains(s)) nodes.push(s); });
+    } else if (this.filterMode != "All" && this.selectedTables.size == 0) {
+      nodes = [];
+    }
+
+    this.nodes = nodes;
 
     this.links = this.map.allLinks.filter(l =>
       this.nodes.contains(<ITableInfo>l.source) &&
@@ -213,14 +247,14 @@ export class SchemaMapD3 {
   }
 
   selectedLinks(): void {
-    const selectedTable = this.selectedTable;
+    const sel = this.selectedTables;
     this.link
-      .style("stroke-width", d => d.source == selectedTable || d.target == selectedTable ? 1.5 : d.isMList ? 1.5 : 1)
-      .style("opacity", d => d.source == selectedTable || d.target == selectedTable ? 1 : d.isMList ? 0.8 : Math.max(.1, this.getOpacity((<RelationInfo>d).toTable)));
+      .style("stroke-width", d => sel.has(d.source as ITableInfo) || sel.has(d.target as ITableInfo) ? 1.5 : d.isMList ? 1.5 : 1)
+      .style("opacity", d => sel.has(d.source as ITableInfo) || sel.has(d.target as ITableInfo) ? 1 : d.isMList ? 0.8 : Math.max(.1, this.getOpacity((<RelationInfo>d).toTable)));
   }
 
   selectedNode(): void {
-    this.label.style("font-weight", d => d == this.selectedTable ? "bold" : null);
+    this.label.style("font-weight", d => this.selectedTables.has(d) ? "bold" : null);
   }
 
   showHideNodes(): void {
@@ -246,6 +280,36 @@ export class SchemaMapD3 {
     this.regenerate();
     this.selectedLinks();
     this.showHideNodes();
+  }
+
+  setFilterMode(value: RelationFilterMode): void {
+    if (this.filterMode == value)
+      return;
+    this.filterMode = value;
+    this.regenerate();
+    this.selectedLinks();
+    this.showHideNodes();
+  }
+
+  adjacency: Map<ITableInfo, Set<ITableInfo>> | undefined;
+
+  getAdjacency(): Map<ITableInfo, Set<ITableInfo>> {
+    if (this.adjacency)
+      return this.adjacency;
+
+    const adj = new Map<ITableInfo, Set<ITableInfo>>();
+    this.map.allLinks.forEach(l => {
+      const s = l.source as ITableInfo;
+      const t = l.target as ITableInfo;
+      let ss = adj.get(s);
+      if (!ss) { ss = new Set(); adj.set(s, ss); }
+      let ts = adj.get(t);
+      if (!ts) { ts = new Set(); adj.set(t, ts); }
+      ss.add(t);
+      ts.add(s);
+    });
+    this.adjacency = adj;
+    return adj;
   }
 
 

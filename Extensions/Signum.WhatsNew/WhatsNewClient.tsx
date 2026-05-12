@@ -60,8 +60,8 @@ export namespace WhatsNewClient {
       return (object as any)[str.firstLower()]
     }
   }
-  
-  export module API {
+
+  export namespace API {
   
     export function myNews(): Promise<WhatsNewShort[]> {
       return ajaxGet({ url: "/api/whatsnew/myNews", avoidNotifyPendingRequests: true });
