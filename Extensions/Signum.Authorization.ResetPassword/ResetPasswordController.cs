@@ -49,14 +49,10 @@ public class ResetPasswordController : ControllerBase
         if (string.IsNullOrEmpty(request.newPassword))
             return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
-        if (UserEntity.Current != null)
-        {
-            var error = UserEntity.OnValidatePassword(request.newPassword, UserEntity.Current.Retrieve());
-            if (error != null)
-                return ModelError("newPassword", error);
-        }
+        var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword, out var passwordError);
 
-        var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
+        if (rpr == null)
+            return ModelError("newPassword", passwordError!);
 
         return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
     }
