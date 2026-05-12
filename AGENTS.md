@@ -30,6 +30,8 @@ Detailed guidance is organized in `Framework/Skills/`. Read the relevant file be
 - The `run_build` tool automatically uses Visual Studio's integrated compiler (much faster than dotnet CLI)
 - Only use `dotnet build` in terminal if `run_build` is unavailable or specific CLI flags are required
 
+
+
 ### C#
 - The solution is large; avoid compiling the entire solution unless necessary. Prefer compiling only the affected project.
 - Prefer static classes for logic over dependency injection.
@@ -55,3 +57,5 @@ Detailed guidance is organized in `Framework/Skills/`. Read the relevant file be
 - Use strict mode in TypeScript.
 - Allow imperative modification of entities in React components; do not enforce strict immutability.
 - Messages for the end user MUST be localized. See [Localization](Skills/Localization.md).
+### SQL
+- **Never create or modify SQL migration files.** They are generated automatically by the framework and probably already executed in the database. Do not create, edit, or delete any `.sql` files under `Souwhtind.Terminal/Migrations/` if not explicitly requested by user. 

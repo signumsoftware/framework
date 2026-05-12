@@ -55,7 +55,7 @@ export namespace UserQueryClient {
           .then(uqs => uqs.map(uq => new QuickLinkAction(liteKey(uq), () => getToString(uq), async ctx => {
             const uqe = await Navigator.API.fetch(uq);
             const url = await getUserQueryUrl(uqe, ctx.lite);
-            window.open(url);
+            window.open(AppContext.toAbsoluteUrl(url));
           }, {
             icon: "rectangle-list", iconColor: "dodgerblue", color: "info",
             onlyForToken: (uq.model as UserQueryLiteModel).hideQuickLink

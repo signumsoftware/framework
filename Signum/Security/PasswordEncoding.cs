@@ -27,7 +27,7 @@ public static class PasswordEncoding
     }
 
     //Obsolete, for backwards compatibility only. Do not use for new passwords
-    static byte[] MD5Hash(string saltedPassword)
+    public static byte[] MD5Hash(string saltedPassword)
     {
         byte[] originalBytes = Encoding.Default.GetBytes(saltedPassword);
         byte[] encodedBytes = MD5.Create().ComputeHash(originalBytes);

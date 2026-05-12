@@ -185,7 +185,7 @@ export default function SearchValueLine(p: SearchValueLineProps): React.JSX.Elem
           id={inputId}
           ref={handleSearchValueLoaded}
           findOptions={fo}
-          format={p.format}
+          avoidUnit
           initialValue={p.initialValue}
           onInitialValueLoaded={() => forceUpdate()}
           multipleValues={p.multipleValues}
@@ -201,7 +201,6 @@ export default function SearchValueLine(p: SearchValueLineProps): React.JSX.Elem
           onExplored={p.onExplored}
           searchControlProps={p.searchControlProps}
           modalSize={p.modalSize}
-          unit={null}
           deps={p.deps}
           onRender={p.onRender}
           onExplore={p.onExplore}

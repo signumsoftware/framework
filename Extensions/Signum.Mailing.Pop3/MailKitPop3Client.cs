@@ -23,7 +23,7 @@ public class MailKitPop3Client : Mailing.Pop3.IPop3Client
 
         string cleanpw = Pop3ConfigurationLogic.DecryptPassword(service.Password!);
 
-        client.Authenticate(service.Username, cleanpw);
+        client.Authenticate(service.Username!, cleanpw);
     }
 
     public EmailMessageEntity GetMessage(MessageUid messageInfo, Lite<EmailReceptionEntity> reception)
@@ -61,9 +61,9 @@ public class MailKitPop3Client : Mailing.Pop3.IPop3Client
             EditableMessage = false,
 
             From =
-            GetMailboxAddress(message.From).Select(x => new EmailFromEmbedded { EmailAddress = x.Address, DisplayName = x.Name }).FirstOrDefault() ??
-            GetMailboxAddress(message.ReplyTo).Select(x => new EmailFromEmbedded { EmailAddress = x.Name, DisplayName = x.Name }).FirstOrDefault() ??
-                new EmailFromEmbedded { EmailAddress = message.MessageId, InvalidEmail = true, DisplayName = "Missing FROM and ReplyTo" },
+            GetMailboxAddress(message.From).Select(x => new EmailFromEmbedded { EmailAddress = x.Address, DisplayName = x.Name.HasText() ? x.Name : x.Address }).FirstOrDefault() ??
+            GetMailboxAddress(message.ReplyTo).Select(x => new EmailFromEmbedded { EmailAddress = x.Address, DisplayName = x.Name.HasText() ? x.Name : x.Address }).FirstOrDefault() ??
+                new EmailFromEmbedded { EmailAddress = "Missing FROM and ReplyTo -" + (message.MessageId ?? ""), InvalidEmail = true, DisplayName = "Missing FROM and ReplyTo" },
 
             Recipients =
                GetMailboxAddress(message.To).Select(x => new EmailRecipientEmbedded(new System.Net.Mail.MailAddress(x.Address, x.Name), EmailRecipientKind.To)).Concat(
@@ -93,20 +93,21 @@ public class MailKitPop3Client : Mailing.Pop3.IPop3Client
         {
             if (a is MessagePart)
             {
-                var fileName = a.ContentDisposition?.FileName;
                 var rfc822 = (MessagePart)a;
+                if (rfc822.Message == null)
+                    continue;
 
+                var fileName = a.ContentDisposition?.FileName;
                 if (string.IsNullOrEmpty(fileName))
                     fileName = "attached-message.eml";
 
                 using (var stream = new MemoryStream())
                 {
-                    rfc822.Message.WriteTo(stream)
-;
+                    rfc822.Message.WriteTo(stream);
 
                     var attf = new EmailAttachmentEmbedded
                     {
-                        ContentId = a.ContentId,
+                        ContentId = a.ContentId.HasText() ? a.ContentId : "NotSet{0}".FormatWith(Guid.NewGuid().ToString()).Substring(0, 20),
                         Type = EmailAttachmentType.Attachment,
                         File = new FilePathEmbedded(EmailFileType.Attachment, fileName, stream.ReadAllBytes())
                     };
@@ -255,7 +256,7 @@ public class MailKitPop3Client : Mailing.Pop3.IPop3Client
         return "noname" + (MimeMapping.GetExtensionFromMimeType(ct.MediaType) ?? ".unknown");
     }
 
-    private static string? TrimAndClean(string emailIdentifier)
+    private static string? TrimAndClean(string? emailIdentifier)
     {
         if (emailIdentifier.IsNullOrEmpty())
             return null;

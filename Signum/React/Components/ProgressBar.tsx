@@ -52,9 +52,9 @@ export default function ProgressBar(p: ProgressBarProps): React.ReactElement {
         aria-valuemin={value == null ? undefined : 0}
         aria-valuemax={value == null ? undefined : 100}
         style={{ width: value == null ? "100%" : (value * 100) + "%", userSelect: "none", ...p.progressHtmlAttributes?.style }}>
-        {value != null && value > breakpoint ? <span>{fullMessage}</span> : null}
+        {value != null && value > breakpoint ? <span style={{ fontSize: '0.75rem' }}>{fullMessage}</span> : null}
       </div>
-      {value != null && value < breakpoint ? <span style={{ marginLeft: 5 }}>{fullMessage}</span> : null}
+      {value != null && value < breakpoint ? <span style={{ marginLeft: 5, display: 'flex', alignItems: 'center', fontSize: '0.75rem' }}>{fullMessage}</span> : null}
     </div>
   );
 }
