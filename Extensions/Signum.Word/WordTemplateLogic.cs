@@ -11,6 +11,7 @@ using Signum.Templating;
 using Signum.Files;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
+using Signum.UserAssets.TokenMigrations;
 using System.Collections.Frozen;
 
 namespace Signum.Word;
@@ -157,7 +158,7 @@ public static class WordTemplateLogic
                     .ToFrozenDictionaryEx();
         }, new InvalidateWith(typeof(WordTemplateEntity)));
 
-        Schema.Current.Synchronizing += Schema_Synchronize_Tokens;
+        TokenMigrationLogic.TokenSynchronizing += TokenMigration_Sync;
 
         Validator.PropertyValidator((WordTemplateEntity e) => e.Template).StaticPropertyValidation += ValidateTemplate;
         Validator.PropertyValidator((WordTemplateEntity e) => e.FileName).StaticPropertyValidation += ValidateFileName;
@@ -469,88 +470,56 @@ public static class WordTemplateLogic
         }
     }
 
-    static SqlPreCommand? Schema_Synchronize_Tokens(Replacements replacements)
+    internal static void TokenMigration_Sync(TokenSyncContext ctx)
     {
         if (AvoidSynchronize)
-            return null;
+            return;
 
         QueryLogic.AssertLoaded();
         TypeLogic.AssertLoaded();
 
-        StringDistance sd = new StringDistance();
-
+        var sd = new StringDistance();
         var wordTemplates = Database.Query<WordTemplateEntity>().ToList();
-        var table = Schema.Current.Table(typeof(WordTemplateEntity));
 
         WordModelLogic.WordModelTypeToEntity.Load(); //To avoid N exceptions
 
-        SqlPreCommand? cmd = wordTemplates
-            .Select(wt => SynchronizeWordTemplate(replacements, wt, sd, table)?.TransactionBlock($"WordTemplate Guid = {wt.Guid} Ticks = {wt.Ticks} ({wt})"))
-            .Combine(Spacing.Double);
-
-        return cmd;
+        foreach (var wt in wordTemplates)
+            SynchronizeWordTemplate(ctx, wt, sd);
     }
 
-
-    internal static SqlPreCommand? SynchronizeWordTemplate(Replacements replacements, WordTemplateEntity wt, StringDistance sd, Table table)
+    internal static void SynchronizeWordTemplate(TokenSyncContext ctx, WordTemplateEntity wt, StringDistance sd)
     {
-        if (!replacements.Interactive)
-            return null;
+        if (ctx.Mode == TokenSyncMode.Apply && ctx.IsKnownAction(wt, out var preAction))
+        {
+            try
+            {
+                switch (preAction)
+                {
+                    case UserAssetEntityActionType.Skip: SkipWordTemplate(ctx, wt); return;
+                    case UserAssetEntityActionType.Delete: DeleteWordTemplateAndFile(ctx, wt); return;
+                    case UserAssetEntityActionType.Regenerate: RegenerateWordTemplateAndFile(ctx, wt); return;
+                }
+            }
+            catch (Exception ex) { ctx.LogEntityError(wt, ex); return; }
+        }
 
         Console.Write(".");
 
         try
         {
             var queryName = wt.Query?.ToQueryName();
-
-            QueryDescription? qd = queryName == null ? null : QueryLogic.Queries.QueryDescription(queryName);
+            var qd = queryName == null ? null : QueryLogic.Queries.QueryDescription(queryName);
             var file = wt.Template.RetrieveAndRemember();
+            var changes = new List<string>();
+            bool fileTouched = false;
+            bool entityTouched = false;
 
-            SqlPreCommand DeleteWorkTemplateAndFile()
-            {
-                return SqlPreCommand.Combine(Spacing.Simple,
-                    Schema.Current.Table<WordTemplateEntity>().DeleteSqlSync(wt, wt => wt.Name == wt.Name),
-                    Schema.Current.Table<FileEntity>().DeleteSqlSync(file, f => f.Hash == file.Hash)
-                )?.TransactionBlock($"WordTemplate Guid = {wt.Guid}")!;
-            }
-
-            SqlPreCommand? RegenerateTemplateAndFile()
-            {
-                var newTemplate = wt.Model == null ? null : WordModelLogic.CreateDefaultTemplate(wt.Model);
-                if (newTemplate == null)
-                    return null;
-
-                newTemplate.SetId(wt.IdOrNull);
-                newTemplate.SetIsNew(false);
-                newTemplate.Ticks = wt.Ticks;
-                newTemplate.Template = wt.Template;
-
-                using (file.AllowChanges())
-                {
-                    file.BinaryFile = newTemplate.Template.Entity.BinaryFile;
-                    file.FileName = newTemplate.Template.Entity.FileName;
-
-                    using (replacements?.WithReplacedDatabaseName())
-                    {
-                        return SqlPreCommand.Combine(Spacing.Simple,
-                            Schema.Current.Table<WordTemplateEntity>().UpdateSqlSync(newTemplate, f => f.Guid == wt.Guid && f.Ticks == wt.Ticks, comment: "WordTemplate File Regenerated: " + wt.Name),
-                            Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == file.Hash, comment: "WordTemplate File Regenerated: " + wt.Name)
-                        )?.TransactionBlock($"WordTemplate Guid = {wt.Guid} Ticks = {wt.Ticks} ({wt})");
-                    }
-
-                }
-            }
-
-            SqlPreCommand? wordTemplateSync;
             using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "WordTemplate: " + wt.Name)))
             using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + (wt.Query?.Key ?? "-"))))
             {
-                SqlPreCommand? fileSync;
-
-                var oldHash = file.Hash;
                 try
                 {
-                    var sc = new TemplateSynchronizationContext(wt, replacements, sd, qd, wt.Model?.ToType());
+                    var sc = new TemplateSynchronizationContext(wt, ctx, sd, qd, wt.Model?.ToType());
 
                     var bytes = wt.ProcessOpenXmlPackage(document =>
                     {
@@ -564,9 +533,7 @@ public static class WordTemplateLogic
                         foreach (var root in document.AllRootElements())
                         {
                             foreach (var node in root.Descendants<BaseNode>().ToList())
-                            {
                                 node.Synchronize(sc);
-                            }
                         }
 
                         if (sc.HasChanges)
@@ -576,38 +543,29 @@ public static class WordTemplateLogic
                             {
                                 var variables = new ScopedDictionary<string, ValueProviderBase>(null);
                                 foreach (var node in root.Descendants<BaseNode>().ToList())
-                                {
                                     node.RenderTemplate(variables);
-                                }
                             }
-
                             Dump(document, "4.Rendered.txt");
                         }
                     });
 
-                    if (!sc.HasChanges)
-                        fileSync = null;
-                    else
+                    if (sc.HasChanges)
                     {
                         file.AllowChange = true;
                         file.BinaryFile = bytes;
-
-                        using (replacements.WithReplacedDatabaseName())
-                            fileSync = Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == oldHash && f.WordTemplate().Guid == wt.Guid && f.WordTemplate().Ticks == wt.Ticks, comment: "WordTemplate: " + wt.Name);
+                        fileTouched = true;
+                        changes.Add("document tokens rewritten");
                     }
                 }
                 catch (TemplateSyncException ex)
                 {
-                    if (ex.Result == FixTokenResult.SkipEntity)
-                        return null;
-
-                    if (ex.Result == FixTokenResult.DeleteEntity)
-                        return DeleteWorkTemplateAndFile();
-
-                    if (ex.Result == FixTokenResult.RegenerateEntity)
-                        return RegenerateTemplateAndFile();
-
-                    throw new InvalidOperationException("Unexcpected {0}".FormatWith(ex.Result));
+                    switch (ex.Result)
+                    {
+                        case FixTokenResult.SkipEntity: SkipWordTemplate(ctx, wt); return;
+                        case FixTokenResult.DeleteEntity: DeleteWordTemplateAndFile(ctx, wt); return;
+                        case FixTokenResult.RegenerateEntity: RegenerateWordTemplateAndFile(ctx, wt); return;
+                        default: throw new InvalidOperationException("Unexpected {0}".FormatWith(ex.Result));
+                    }
                 }
 
                 if (qd != null)
@@ -619,15 +577,15 @@ public static class WordTemplateLogic
                             foreach (var item in wt.Filters.ToList())
                             {
                                 QueryTokenEmbedded token = item.Token!;
-                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Filters", allowRemoveToken: false, allowReCreate: wt.Model != null))
+                                var r = QueryTokenSynchronizer.FixToken(ctx, ref token, qd, SubTokensOptions.CanElement, " Filters", allowRemoveToken: false, allowReCreate: wt.Model != null);
+                                switch (r)
                                 {
                                     case FixTokenResult.Nothing: break;
-                                    case FixTokenResult.DeleteEntity: return DeleteWorkTemplateAndFile();
-                                    case FixTokenResult.RemoveToken: wt.Filters.Remove(item); break;
-                                    case FixTokenResult.SkipEntity: return null;
-                                    case FixTokenResult.Fix: item.Token = token; break;
-                                    case FixTokenResult.RegenerateEntity: return RegenerateTemplateAndFile();
-                                    default: break;
+                                    case FixTokenResult.RemoveToken: wt.Filters.Remove(item); entityTouched = true; changes.Add("filter removed"); break;
+                                    case FixTokenResult.Fix: item.Token = token; entityTouched = true; changes.Add("filter -> " + token.TokenString); break;
+                                    case FixTokenResult.SkipEntity: SkipWordTemplate(ctx, wt); return;
+                                    case FixTokenResult.DeleteEntity: DeleteWordTemplateAndFile(ctx, wt); return;
+                                    case FixTokenResult.RegenerateEntity: RegenerateWordTemplateAndFile(ctx, wt); return;
                                 }
                             }
                         }
@@ -640,53 +598,185 @@ public static class WordTemplateLogic
                             foreach (var item in wt.Orders.ToList())
                             {
                                 QueryTokenEmbedded token = item.Token!;
-                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Orders", allowRemoveToken: false, allowReCreate: wt.Model != null))
+                                var r = QueryTokenSynchronizer.FixToken(ctx, ref token, qd, SubTokensOptions.CanElement, " Orders", allowRemoveToken: false, allowReCreate: wt.Model != null);
+                                switch (r)
                                 {
                                     case FixTokenResult.Nothing: break;
-                                    case FixTokenResult.DeleteEntity: return DeleteWorkTemplateAndFile();
-                                    case FixTokenResult.RemoveToken: wt.Orders.Remove(item); break;
-                                    case FixTokenResult.SkipEntity: return null;
-                                    case FixTokenResult.Fix: item.Token = token; break;
-                                    case FixTokenResult.RegenerateEntity: return RegenerateTemplateAndFile();
-                                    default: break;
+                                    case FixTokenResult.RemoveToken: wt.Orders.Remove(item); entityTouched = true; changes.Add("order removed"); break;
+                                    case FixTokenResult.Fix: item.Token = token; entityTouched = true; changes.Add("order -> " + token.TokenString); break;
+                                    case FixTokenResult.SkipEntity: SkipWordTemplate(ctx, wt); return;
+                                    case FixTokenResult.DeleteEntity: DeleteWordTemplateAndFile(ctx, wt); return;
+                                    case FixTokenResult.RegenerateEntity: RegenerateWordTemplateAndFile(ctx, wt); return;
                                 }
                             }
                         }
                     }
-                }
 
+                    var modelType = wt.Model == null ? null : wt.Model?.ToType();
+
+                    foreach (var item in wt.Filters.Where(f => !f.IsGroup).ToList())
+                    {
+                    retry:
+                        string? val = item.ValueString;
+                        switch (QueryTokenSynchronizer.FixValue(ctx, wt.Query!.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), fixInstead: true, modelType))
+                        {
+                            case FixTokenResult.Nothing: break;
+                            case FixTokenResult.RemoveToken: wt.Filters.Remove(item); entityTouched = true; changes.Add("filter value removed"); break;
+                            case FixTokenResult.Fix: item.ValueString = val; entityTouched = true; changes.Add("filter value -> " + val); goto retry;
+                            case FixTokenResult.FixTokenInstead:
+                                QueryTokenEmbedded itoken = item.Token;
+                                switch (QueryTokenSynchronizer.FixToken(ctx, ref itoken, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate,
+                                    " {0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false, forceChange: true))
+                                {
+                                    case FixTokenResult.Nothing: break;
+                                    case FixTokenResult.RemoveToken: wt.Filters.Remove(item); entityTouched = true; changes.Add("filter removed"); break;
+                                    case FixTokenResult.Fix: item.Token = itoken; entityTouched = true; changes.Add("filter -> " + itoken.TokenString); goto retry;
+                                    case FixTokenResult.SkipEntity: SkipWordTemplate(ctx, wt); return;
+                                    case FixTokenResult.DeleteEntity: DeleteWordTemplateAndFile(ctx, wt); return;
+                                }
+                                break;
+
+                            case FixTokenResult.FixOperationInstead:
+                                var newOperation = SafeConsole.AskMultiLine($"New filter operation for: {item.Token} {item.Operation} {item.ValueString}?", EnumEntity.GetValues(typeof(FilterOperation)).Select(a => a.ToString()).ToArray());
+                                if (newOperation != null) { item.Operation = Enum.Parse<FilterOperation>(newOperation); entityTouched = true; changes.Add("filter operation -> " + newOperation); }
+                                goto retry;
+                            case FixTokenResult.SkipEntity: SkipWordTemplate(ctx, wt); return;
+                            case FixTokenResult.DeleteEntity: DeleteWordTemplateAndFile(ctx, wt); return;
+                        }
+                    }
+                }
 
                 try
                 {
-
-                    var sc = new TemplateSynchronizationContext(wt, replacements, sd, qd, wt.Model?.ToType());
-
-                    wt.FileName = TextTemplateParser.Synchronize(wt.FileName, sc);
-
-                    using (replacements.WithReplacedDatabaseName())
-                        wordTemplateSync = table.UpdateSqlSync(wt, e => e.Guid == wt.Guid && e.Ticks == wt.Ticks, includeCollections: true, comment: "WordTempalte: " + wt.Name);
+                    var sc = new TemplateSynchronizationContext(wt, ctx, sd, qd, wt.Model?.ToType());
+                    var newFileName = TextTemplateParser.Synchronize(wt.FileName, sc);
+                    if (newFileName != wt.FileName)
+                    {
+                        wt.FileName = newFileName;
+                        entityTouched = true;
+                        changes.Add("FileName -> " + newFileName);
+                    }
                 }
                 catch (TemplateSyncException ex)
                 {
-                    if (ex.Result == FixTokenResult.SkipEntity)
-                        return null;
-
-                    if (ex.Result == FixTokenResult.DeleteEntity)
-                        return DeleteWorkTemplateAndFile();
-
-                    if (ex.Result == FixTokenResult.RegenerateEntity)
-                        return RegenerateTemplateAndFile();
-
-                    throw new UnexpectedValueException(ex.Result);
+                    switch (ex.Result)
+                    {
+                        case FixTokenResult.SkipEntity: SkipWordTemplate(ctx, wt); return;
+                        case FixTokenResult.DeleteEntity: DeleteWordTemplateAndFile(ctx, wt); return;
+                        case FixTokenResult.RegenerateEntity: RegenerateWordTemplateAndFile(ctx, wt); return;
+                        default: throw new UnexpectedValueException(ex.Result);
+                    }
                 }
 
-            
-                return SqlPreCommand.Combine(Spacing.Simple, wordTemplateSync, fileSync);
+                if (!entityTouched && !fileTouched)
+                    return;
+
+                if (ctx.Mode == TokenSyncMode.Apply)
+                {
+                    try
+                    {
+                        SaveWordTemplate(wt, file, fileTouched, entityTouched);
+                        ctx.LogEntityChange(wt, changes.ToArray());
+                    }
+                    catch (Exception ex) { ctx.LogEntityError(wt, ex); }
+                }
+                else
+                {
+                    ctx.LogEntityChange(wt, changes.ToArray());
+                }
             }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            return new SqlPreCommandSimple("-- Exception on {0}\n{1}".FormatWith(wt.BaseToString(), e.Message.Indent(2, '-')));
+            ctx.LogEntityError(wt, ex);
+        }
+    }
+
+    /// <summary>
+    /// Records or replays a Skip decision on <paramref name="wt"/>. In Record mode appends the action
+    /// into <see cref="TokenSyncContext.Recording"/>; in Apply mode there's no DB side-effect (the
+    /// entity is left untouched). Either way the report carries the action so the operator log shows
+    /// it in the right colour.
+    /// </summary>
+    static void SkipWordTemplate(TokenSyncContext ctx, WordTemplateEntity wt)
+    {
+        if (ctx.Mode == TokenSyncMode.Record)
+            ctx.AddUserAssetAction(wt, UserAssetEntityActionType.Skip);
+
+        ctx.LogEntityChange(wt, UserAssetEntityActionType.Skip);
+    }
+
+    /// <summary>
+    /// Records or executes a Delete on <paramref name="wt"/> and its FileEntity. The Apply path
+    /// owns its own transaction so the caller doesn't need to wrap it.
+    /// </summary>
+    static void DeleteWordTemplateAndFile(TokenSyncContext ctx, WordTemplateEntity wt)
+    {
+        if (ctx.Mode == TokenSyncMode.Record)
+        {
+            ctx.AddUserAssetAction(wt, UserAssetEntityActionType.Delete);
+        }
+        else
+        {
+            using (var tr = Transaction.ForceNew())
+            {
+                var file = wt.Template.RetrieveAndRemember();
+                wt.Delete();
+                file.Delete();
+                tr.Commit();
+            }
+        }
+
+        ctx.LogEntityChange(wt, UserAssetEntityActionType.Delete);
+    }
+
+    /// <summary>
+    /// Records or executes a Regenerate: rebuilds the docx + FileEntity contents from the
+    /// WordModel's default template. Apply owns its own transaction.
+    /// </summary>
+    static void RegenerateWordTemplateAndFile(TokenSyncContext ctx, WordTemplateEntity wt)
+    {
+        if (ctx.Mode == TokenSyncMode.Record)
+        {
+            ctx.AddUserAssetAction(wt, UserAssetEntityActionType.Regenerate);
+            ctx.LogEntityChange(wt, UserAssetEntityActionType.Regenerate);
+            return;
+        }
+
+        if (wt.Model == null)
+            return;
+
+        var newTemplate = WordModelLogic.CreateDefaultTemplate(wt.Model);
+        if (newTemplate == null)
+            return;
+
+        using (var tr = Transaction.ForceNew())
+        {
+            var file = wt.Template.RetrieveAndRemember();
+            using (file.AllowChanges())
+            {
+                file.BinaryFile = newTemplate.Template.Entity.BinaryFile;
+                file.FileName = newTemplate.Template.Entity.FileName;
+                file.Save();
+            }
+            wt.Save();
+            tr.Commit();
+        }
+
+        ctx.LogEntityChange(wt, UserAssetEntityActionType.Regenerate);
+    }
+
+    /// <summary>
+    /// Persists pending file/entity changes in a single transaction. Caller pre-loaded
+    /// <paramref name="file"/> via <c>wt.Template.RetrieveAndRemember()</c>.
+    /// </summary>
+    static void SaveWordTemplate(WordTemplateEntity wt, FileEntity file, bool fileTouched, bool entityTouched)
+    {
+        using (var tr = Transaction.ForceNew())
+        {
+            if (fileTouched) file.Save();
+            if (entityTouched) wt.Save();
+            tr.Commit();
         }
     }
 

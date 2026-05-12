@@ -156,10 +156,17 @@ public static class Administrator
 
     public static Func<bool> AvoidSimpleSynchronize = () => false;
 
+    /// <summary>
+    /// Fires at the end of <see cref="Synchronize"/>, after the sync script (if any) has been
+    /// opened. Subscribers (e.g. token-migration recorder) can chain follow-up prompts here so
+    /// devs see them as part of their normal sync muscle memory.
+    /// </summary>
+    public static event Action? AfterSynchronize;
+
     public static void Synchronize()
     {
         if (AvoidSimpleSynchronize())
-            return; 
+            return;
 
         Console.WriteLine();
 
@@ -167,6 +174,7 @@ public static class Administrator
         if (command == null)
         {
             SafeConsole.WriteLineColor(ConsoleColor.Green, "Already synchronized!");
+            AfterSynchronize?.Invoke();
             return;
         }
 
@@ -175,6 +183,8 @@ public static class Administrator
         GlobalLazy.ResetAll(systemLog: false);
         Schema.Current.InvalidateMetadata();
         Schema.Current.InvalidateCache();
+
+        AfterSynchronize?.Invoke();
     }
 
     public static SqlPreCommand? TotalSynchronizeScript(bool interactive = true, bool schemaOnly = false)

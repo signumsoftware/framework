@@ -9,6 +9,37 @@ public class SqlMigrationRunner
 {
     public static string MigrationsDirectory = Path.Combine("..", "..", "..", "Migrations");
 
+    /// <summary>
+    /// Fires when the SQL migration loop reaches a fully-synced state — every committed migration
+    /// has been applied and the dev chose not to add a new one. Fires whether or not we actually
+    /// applied anything this session, so subscribers (token / query migrations) get a chance to run
+    /// even when the schema was already up to date. 
+    /// </summary>
+    public static event Action<bool /*autoRun*/>? AfterMigrationsCompleted;
+
+
+    /// <summary>
+    /// Fires after a successful "create new migration" interactive step (when sync produced changes
+    /// and the dev confirmed a new .sql file). Receives the version/comment stem so subscribers can
+    /// write sibling artefacts (e.g. .query.json with the same name).
+    /// </summary>
+    public static event Action<string /*version*/, string /*comment*/>? AfterCreatingMigration;
+
+    /// <summary>
+    /// Outcome of one iteration of the migration loop:
+    /// <list type="bullet">
+    /// <item><b>Continue</b> — keep looping (just applied something or just created a new migration; recheck state).</item>
+    /// <item><b>Skip</b> — exit without firing the completion event (user declined to act).</item>
+    /// <item><b>Completed</b> — exit and fire <see cref="AfterMigrationsCompleted"/>: SQL is fully synced.</item>
+    /// </list>
+    /// </summary>
+    public enum PromptResult
+    {
+        Continue,
+        Skip,
+        Completed,
+    }
+
     public static void SqlMigrations()
     {
         SqlMigrations(autoRun: false);
@@ -41,8 +72,18 @@ public class SqlMigrationRunner
             {
                 SetExecuted(list);
 
-                if (!Prompt(list, autoRun) || autoRun)
-                    return;
+                var outcome = Prompt(list, autoRun);
+                switch (outcome)
+                {
+                    case PromptResult.Skip:
+                        return;
+                    case PromptResult.Completed:
+                        AfterMigrationsCompleted?.Invoke(autoRun);
+                        return;
+                    case PromptResult.Continue:
+                        if (autoRun) return;
+                        continue;
+                }
             }
         }
     }
@@ -178,7 +219,7 @@ public class SqlMigrationRunner
     public const string DatabaseNameReplacement = "#DatabaseName#";
     public const string InitialMigrationComment = "Initial Migration";
 
-    private static bool Prompt(List<MigrationInfo> migrations, bool autoRun)
+    private static PromptResult Prompt(List<MigrationInfo> migrations, bool autoRun)
     {
         Draw(migrations, null);
 
@@ -189,9 +230,8 @@ public class SqlMigrationRunner
                 throw new InvalidOperationException(str);
 
             SafeConsole.WriteLineColor(ConsoleColor.Red, str);
-            return false;
+            return PromptResult.Skip;
         }
-
 
         if (migrations.SkipWhile(a => a.IsExecuted).Any(a => a.IsExecuted))
         {
@@ -206,46 +246,47 @@ public class SqlMigrationRunner
             Console.WriteLine("' to execute them anyway");
 
             if (Console.ReadLine() != "force")
-                return false;
+                return PromptResult.Skip;
         }
 
-        var last = migrations.LastOrDefault() ?? null;
-        if (migrations.All(a=>a.IsExecuted))
+        if (migrations.All(a => a.IsExecuted))
         {
-            if (autoRun || !SafeConsole.Ask("Create new migration?"))
-                return false;
+            // autoRun: SQL is fully synced — nothing to ask, just signal completion.
+            if (autoRun)
+                return PromptResult.Completed;
+
+            if (!SafeConsole.Ask("Create new migration?"))
+                return PromptResult.Completed;
 
             var script = Schema.Current.SynchronizationScript(interactive: true, replaceDatabaseName: DatabaseNameReplacement);
 
             if (script == null)
             {
                 SafeConsole.WriteLineColor(ConsoleColor.Green, "No changes found!");
-                return false;
-            }
-            else
-            {
-                SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Some changes found, here is the script:");
-                Console.WriteLine();
-
-                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, script.ToString().Indent(4));
-
-                Console.WriteLine();
-
-                string version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
-
-                string comment = SafeConsole.AskString("Comment for the new Migration? ", stringValidator: s => null).Trim();
-
-                string fileName = version + (comment.HasText() ? "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment): null) + ".sql";
-
-                File.WriteAllText(Path.Combine(MigrationsDirectory, fileName), script.ToString(), Encoding.UTF8);
+                return PromptResult.Completed;
             }
 
-            return true;
+            SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Some changes found, here is the script:");
+            Console.WriteLine();
+
+            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, script.ToString().Indent(4));
+
+            Console.WriteLine();
+
+            string version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
+            string comment = SafeConsole.AskString("Comment for the new Migration? ", stringValidator: s => null).Trim();
+            string fileName = version + (comment.HasText() ? "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment) : null) + ".sql";
+
+            File.WriteAllText(Path.Combine(MigrationsDirectory, fileName), script.ToString(), Encoding.UTF8);
+
+            AfterCreatingMigration?.Invoke(version, comment);
+
+            return PromptResult.Continue;
         }
         else
         {
             if (!autoRun && !SafeConsole.Ask("Run {0} migration(s)?".FormatWith(migrations.Count(a => !a.IsExecuted))))
-                return false;
+                return PromptResult.Skip;
 
             try
             {
@@ -262,17 +303,19 @@ public class SqlMigrationRunner
 
                 Console.WriteLine("Elapsed time: {0}".FormatWith(Clock.Now.Subtract(start).ToString(@"hh\:mm\:ss")));
 
-                return true;
+                // We applied everything that was pending. In autoRun mode there's nothing left
+                // to ask, so report completion directly. In interactive mode loop back so the dev
+                // can confirm + add a new migration if needed.
+                return autoRun ? PromptResult.Completed : PromptResult.Continue;
             }
             catch (ExecuteSqlScriptException)
             {
                 if (autoRun)
                     throw;
 
-                return true;
+                return PromptResult.Continue;
             }
         }
-
     }
 
     private static void ResetCache()

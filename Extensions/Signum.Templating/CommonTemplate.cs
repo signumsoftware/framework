@@ -314,20 +314,20 @@ public class TemplateSynchronizationContext
 {
     public ScopedDictionary<string, ValueProviderBase> Variables;
     public Type? ModelType;
-    public Replacements Replacements;
+    public Signum.UserAssets.TokenMigrations.TokenSyncContext TokenSync;
     public StringDistance StringDistance;
     public QueryDescription? QueryDescription;
 
-    public IEntity Template; 
+    public IEntity Template;
 
     public bool HasChanges;
 
-    public TemplateSynchronizationContext(IEntity template, Replacements replacements, StringDistance stringDistance, QueryDescription? queryDescription, Type? modelType)
+    public TemplateSynchronizationContext(IEntity template, Signum.UserAssets.TokenMigrations.TokenSyncContext tokenSync, StringDistance stringDistance, QueryDescription? queryDescription, Type? modelType)
     {
         Template = template;
         Variables = new ScopedDictionary<string, ValueProviderBase>(null);
         ModelType = modelType;
-        Replacements = replacements;
+        TokenSync = tokenSync;
         StringDistance = stringDistance;
         QueryDescription = queryDescription;
         HasChanges = false;
@@ -371,7 +371,7 @@ public class TemplateSynchronizationContext
         SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
         Console.WriteLine(" " + remainingText);
 
-        FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/ | SubTokensOptions.CanNested, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null, forceChange);
+        FixTokenResult result = QueryTokenSynchronizer.FixToken(TokenSync, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/ | SubTokensOptions.CanNested, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null, forceChange);
         switch (result)
         {
             case FixTokenResult.Nothing:
@@ -402,7 +402,7 @@ public class TemplateSynchronizationContext
                 .Concat(type.IsModifiableEntity() && !type.IsAbstract ? MixinDeclarations.GetMixinDeclarations(type) : new HashSet<Type>())
                 .ToDictionary(a => a.Name);
 
-            string? s = this.Replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), this.StringDistance);
+            string? s = this.TokenSync.AskRename(Signum.UserAssets.TokenMigrations.RenameBucket.Member, type.FullName, field, allMembers.Keys, this.StringDistance);
 
             if (s == null)
             {
