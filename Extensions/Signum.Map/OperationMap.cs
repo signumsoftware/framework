@@ -1,4 +1,3 @@
-using Signum.Chart.ColorPalette;
 using Signum.Utilities.Reflection;
 using System.Collections;
 
@@ -6,6 +5,8 @@ namespace Signum.Map;
 
 public static class OperationMap
 {
+    public static Func<Entity, string>? ColorFor; //consider connect ColorPaletteLogic.ColorFor here
+
     public static OperationMapInfo GetOperationMapInfo(Type type)
     {
         var operations = OperationLogic.TypeOperationsAndConstructors(type);
@@ -41,7 +42,7 @@ public static class OperationMap
                           key = e.ToString(),
                           niceName = e.NiceToString(),
                           isSpecial = t == typeof(DefaultState),
-                          color = ColorPaletteLogic.ColorFor(EnumEntity.FromEnumUntyped(e)),
+                          color = OperationMap.ColorFor?.Invoke(EnumEntity.FromEnumUntyped(e)),
                           token = tokens.GetOrThrow(e.GetType()),
                       }).ToList(),
 

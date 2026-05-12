@@ -1,4 +1,5 @@
 using Signum.Authorization;
+using Signum.UserAssets.TokenMigrations;
 using Signum.Utilities.Reflection;
 using System.IO;
 using System.Xml.Linq;
@@ -465,7 +466,8 @@ public static class UserAssetsImporter
 
     public static void Register<T>(string userAssetName, Action<T> saveEntity) where T : Entity, IUserAssetEntity
     {
-        PermissionLogic.RegisterPermissions(UserAssetPermission.UserAssetsToXML);
+        TokenMigrationLogic.AssertStarted();
+
         UserAssetNames.Add(userAssetName, typeof(T));
         UserAssetsImporter.SaveEntity.Register(saveEntity);
     }
