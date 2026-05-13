@@ -24,17 +24,9 @@ public class AzureClaimsAutoCreateUserContext : IAutoCreateUserContext
 
     public string? TryGetClaim(string type) => ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == type)?.Value;
 
-    public virtual Guid? OID
-    {
-        get
-        {
-            var oid = TryGetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier")
-                   ?? TryGetClaim("oid"); // fallback for AAD v2.0
-            return oid != null ? Guid.Parse(oid) : null;
-        }
-    }
-
-    public string? SID => null;
+    public virtual string? ExternalId =>
+        TryGetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier")
+        ?? TryGetClaim("oid"); // fallback for AAD v2.0
 
     public virtual string UserName => GetClaim("preferred_username");
     public virtual string? EmailAddress => GetClaim("preferred_username");
@@ -84,7 +76,7 @@ public class AzureB2CClaimsAutoCreateUserContext : AzureClaimsAutoCreateUserCont
     public override string FirstName => GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname");
     public override string LastName => GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname");
 
-    public override Guid? OID => Guid.Parse(GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"));
+    public override string? ExternalId => GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
 
     public AzureB2CClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal, string accessToken, AzureADConfigurationEmbedded config) : base(claimsPrincipal, accessToken, config)
     {

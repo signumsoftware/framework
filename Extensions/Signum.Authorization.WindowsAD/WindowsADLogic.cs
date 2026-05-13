@@ -28,7 +28,7 @@ public static class WindowsADLogic
         {
             UserName = u.UserName,
             ToStringValue = u.ToString(),
-            SID = u.Mixin<UserWindowsADMixin>().SID,
+            ExternalId = u.ExternalId,
         });
 
         if (deactivateUsersTask)
@@ -49,7 +49,7 @@ public static class WindowsADLogic
                         {
                             if (foundUser != null && foundUser.Enabled.HasValue && foundUser.Enabled == false)
                             {
-                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserWindowsADMixin>().SID} has been deactivated in AD");
+                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.ExternalId} has been deactivated in AD");
                                 u.Execute(UserOperation.Deactivate);
                             }
                             else
@@ -59,7 +59,7 @@ public static class WindowsADLogic
 
                             if (foundUser == null && u.PasswordHash == null)
                             {
-                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserWindowsADMixin>().SID} has been deactivated in AD");
+                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.ExternalId} has been deactivated in AD");
                                 u.Execute(UserOperation.Deactivate);
                             }
 
@@ -69,7 +69,7 @@ public static class WindowsADLogic
                         {
                             if (foundUser != null && foundUser.Enabled.HasValue && foundUser.Enabled == true)
                             {
-                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserWindowsADMixin>().SID} has been reactivated in AD");
+                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.ExternalId} has been reactivated in AD");
                                 u.Execute(UserOperation.Reactivate);
                             }
                         }
@@ -224,7 +224,7 @@ public static class WindowsADLogic
             using (ExecutionMode.Global())
             using (var tr = new Transaction())
             {
-                var user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserWindowsADMixin>().SID == userPc.Sid.ToString());
+                var user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.ExternalId == userPc.Sid.ToString());
 
                 if (user == null)
                 {

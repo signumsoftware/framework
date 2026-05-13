@@ -46,7 +46,7 @@ export function RemoteEmailSnippet(p: {  user: Lite<UserEntity>, remoteEmailId: 
 
   const model = p.user.model as UserLiteModel;
 
-  const email = useAPI(() => RemoteEmailsClient.API.getRemoteEmail(model.oID!, p.remoteEmailId), [p.user, p.remoteEmailId]);
+  const email = useAPI(() => RemoteEmailsClient.API.getRemoteEmail(model.externalId!, p.remoteEmailId), [p.user, p.remoteEmailId]);
 
   return (
     <div style={{ minWidth: "500px" }}>

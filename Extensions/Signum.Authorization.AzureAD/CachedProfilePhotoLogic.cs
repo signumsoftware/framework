@@ -45,7 +45,8 @@ public static class CachedProfilePhotoLogic
         {
             size = AzureADLogic.ToAzureSize(size);
 
-            var result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserAzureADMixin>().OID == oid && a.Size == size);
+            var oidStr = oid.ToString();
+            var result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.ExternalId == oidStr && a.Size == size);
 
             if (result != null && result.InvalidationDate >= Clock.Now)
                 return result;
@@ -54,7 +55,7 @@ public static class CachedProfilePhotoLogic
 
             using (var tr = new Transaction())
             {
-                result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserAzureADMixin>().OID == oid && a.Size == size);
+                result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.ExternalId == oidStr && a.Size == size);
                 if (result != null && result.InvalidationDate >= Clock.Now)
                     return tr.Commit(result);
 
@@ -79,7 +80,7 @@ public static class CachedProfilePhotoLogic
                 }
                 else
                 {
-                    var user = Database.Query<UserEntity>().Where(u => u.Mixin<UserAzureADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
+                    var user = Database.Query<UserEntity>().Where(u => u.ExternalId == oidStr).Select(a => a.ToLite()).SingleEx();
                     result = new CachedProfilePhotoEntity
                     {
                         Photo = bytes == null ? null : new FilePathEmbedded(AuthADFileType.CachedProfilePhoto, oid.ToString() + "x" + size + ".jpg", bytes),
@@ -99,6 +100,7 @@ public static class CachedProfilePhotoLogic
 
     internal static Task<bool> HasCachedPicture(Guid oid, int size)
     {
-        return Database.Query<CachedProfilePhotoEntity>().AnyAsync(a => a.User.Entity.Mixin<UserAzureADMixin>().OID == oid && a.Size == size);
+        var oidStr = oid.ToString();
+        return Database.Query<CachedProfilePhotoEntity>().AnyAsync(a => a.User.Entity.ExternalId == oidStr && a.Size == size);
     }
 }

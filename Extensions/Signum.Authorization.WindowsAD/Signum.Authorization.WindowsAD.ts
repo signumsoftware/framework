@@ -8,12 +8,6 @@ import * as BaseAD from '../Signum.Authorization/Signum.Authorization.BaseAD'
 import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
 
 
-export const UserWindowsADMixin: Type<UserWindowsADMixin> = new Type<UserWindowsADMixin>("UserWindowsADMixin");
-export interface UserWindowsADMixin extends Entities.MixinEntity {
-  Type: "UserWindowsADMixin";
-  sID: string | null;
-}
-
 export const WindowsADConfigurationEmbedded: Type<WindowsADConfigurationEmbedded> = new Type<WindowsADConfigurationEmbedded>("WindowsADConfigurationEmbedded");
 export interface WindowsADConfigurationEmbedded extends BaseAD.BaseADConfigurationEmbedded {
   loginWithWindowsAuthenticator: boolean;

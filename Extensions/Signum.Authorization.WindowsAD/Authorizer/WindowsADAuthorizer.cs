@@ -51,7 +51,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
                             
                             var sid = dsacuCtx.GetUserPrincipal().Sid;
 
-                            UserEntity? user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserWindowsADMixin>().SID == sid.ToString()) ?? 
+                            UserEntity? user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.ExternalId == sid.ToString()) ??
                                 AuthLogic.RetrieveUser(localName);
 
                             if (user != null)
@@ -177,11 +177,11 @@ public class WindowsADAuthorizer : ICustomAuthorizer
             user.DisabledOn = null;
         }
 
-        if (ctx.SID != null)
+        if (ctx.ExternalId != null)
         {
-            user.Mixin<UserWindowsADMixin>().SID = ctx.SID;
-            if (!UserWindowsADMixin.AllowPasswordForActiveDirectoryUsers)
-            { 
+            user.ExternalId = ctx.ExternalId;
+            if (!UserEntity.AllowPasswordForUserWithExternalId)
+            {
                 user.PasswordHash = null;
                 user.MustChangePassword = false;
             }

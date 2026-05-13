@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'
-import { Lite, SearchMessage, tryGetMixin } from '@framework/Signum.Entities';
+import { Lite, SearchMessage } from '@framework/Signum.Entities';
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
 import * as AppContext from "@framework/AppContext"
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
@@ -12,7 +12,7 @@ import * as User from '../Signum.Authorization/Templates/User';
 import { UserEntity, UserLiteModel } from '../Signum.Authorization/Signum.Authorization';
 import * as ProfilePhoto from '../Signum.Authorization/Templates/ProfilePhoto';
 import { ResultRow } from '@framework/FindOptions';
-import { AzureADConfigurationEmbedded, AzureADQuery, UserAzureADMixin } from './Signum.Authorization.AzureAD';
+import { AzureADConfigurationEmbedded, AzureADQuery } from './Signum.Authorization.AzureAD';
 import { ActiveDirectoryMessage } from '../Signum.Authorization/Signum.Authorization.BaseAD';
 import { ActiveDirectoryClient } from '../Signum.Authorization/BaseAD/ActiveDirectoryClient';
 
@@ -23,15 +23,15 @@ export namespace AzureADClient {
 
     Navigator.addSettings(new EntitySettings(AzureADConfigurationEmbedded, e => import('./AzureADConfiguration')));
 
-    User.setChangePasswordVisibleFunction((user: UserEntity) => tryGetMixin(user, UserAzureADMixin)?.oID == null);
-    User.setUserNameReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserAzureADMixin)?.oID != null);
-    User.setEmailReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserAzureADMixin)?.oID != null);
+    User.setChangePasswordVisibleFunction((user: UserEntity) => user.externalId == null);
+    User.setUserNameReadonlyFunction((user: UserEntity) => user.externalId != null);
+    User.setEmailReadonlyFunction((user: UserEntity) => user.externalId != null);
     if (options.profilePhotos) {
       ProfilePhoto.urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
 
         var oid =
-          (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :
-            tryGetMixin(u, UserAzureADMixin)?.oID;
+          (UserEntity.isLite(u)) ? (u.model as UserLiteModel).externalId :
+            u.externalId;
 
         if (oid == null)
           return null;

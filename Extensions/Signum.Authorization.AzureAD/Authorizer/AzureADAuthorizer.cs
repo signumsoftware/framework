@@ -55,13 +55,13 @@ public class AzureADAuthorizer : ICustomAuthorizer
     {
         var config = (AzureADConfigurationEmbedded)ctx.Config;
 
-        if (ctx.OID != null && config != null)
+        if (ctx.ExternalId != null && config != null)
         {
             if (config.RoleMapping.Any())
             {
-                var groups = ctx is AzureClaimsAutoCreateUserContext ac && config.UseDelegatedPermission ? 
+                var groups = ctx is AzureClaimsAutoCreateUserContext ac && config.UseDelegatedPermission ?
                     AzureADLogic.CurrentADGroupsInternal(ac.AccessToken) :
-                    AzureADLogic.CurrentADGroupsInternal(ctx.OID!.Value);
+                    AzureADLogic.CurrentADGroupsInternal(Guid.Parse(ctx.ExternalId));
 
                 var roles = config.RoleMapping.Where(m =>
                 {
@@ -118,10 +118,10 @@ public class AzureADAuthorizer : ICustomAuthorizer
             user.DisabledOn = null;
         }
 
-        if (ctx.OID != null)
+        if (ctx.ExternalId != null)
         {
-            user.Mixin<UserAzureADMixin>().OID = ctx.OID;
-            if (!UserAzureADMixin.AllowPasswordForAzureADUsers)
+            user.ExternalId = ctx.ExternalId;
+            if (!UserEntity.AllowPasswordForUserWithExternalId)
             {
                 user.PasswordHash = null;
                 user.MustChangePassword = false;

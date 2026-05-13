@@ -20,8 +20,7 @@ public interface IAutoCreateUserContext
     public string? EmailAddress { get; }
     public string FirstName { get; }
     public string LastName { get; }
-    public Guid? OID { get; }
-    public string? SID { get; }
+    public string? ExternalId { get; }
 }
 
 public class ActiveDirectoryUser

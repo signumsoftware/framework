@@ -55,10 +55,22 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
         if (pi.Name == nameof(PasswordIsChanging) && PasswordIsChanging)
             return AuthAdminMessage.PasswordChangeIsNotCompleted.NiceToString();
 
+        if (pi.Name == nameof(ExternalId) && ExternalId != null && PasswordHash != null && !AllowPasswordForUserWithExternalId)
+            return UserExternalIdMessage.TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet.NiceToString(this);
+
         return base.PropertyValidation(pi);
     }
 
     public int LoginFailedCounter { get; set; }
+
+    [UniqueIndex]
+    [StringLengthValidator(Max = 500)]
+    public string? ExternalId { get; set; }
+
+    public static bool AllowPasswordForUserWithExternalId = false;
+
+    public static string? CurrentExternalId =>
+        UserHolder.Current?.GetClaim("ExternalId") as string;
 
     public static Lite<UserEntity> Current => (Lite<UserEntity>)UserHolder.Current?.User!;
 
@@ -132,9 +144,7 @@ public class UserLiteModel : ModelEntity
 
     public string? ToStringValue { get; set; }
 
-    public Guid? OID { get; set; }
-
-    public string? SID { get; set; }
+    public string? ExternalId { get; set; }
 
     public string? PhotoSuffix { get; set; }
 
@@ -147,5 +157,10 @@ public class UserLiteModel : ModelEntity
 public enum UserMessage
 {
     UserIsNotActive
+}
 
+public enum UserExternalIdMessage
+{
+    [Description("The user {0} is connected to an external provider and can not have a local password set")]
+    TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet,
 }

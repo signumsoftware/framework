@@ -22,8 +22,6 @@ public static class AzureADLogic
         if (sb.AlreadyDefined(MethodBase.GetCurrentMethod()))
             return;
 
-        MixinDeclarations.AssertDeclared(typeof(UserEntity), typeof(UserAzureADMixin));
-
         PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
 
         As.ReplaceExpression((UserEntity u) => u.EmailOwnerData, u => new EmailOwnerData
@@ -32,33 +30,32 @@ public static class AzureADLogic
             CultureInfo = u.CultureInfo,
             DisplayName = u.UserName,
             Email = u.Email,
-            AzureUserId = u.Mixin<UserAzureADMixin>().OID
+            AzureUserId = u.GetOID(),
         });
 
         UserWithClaims.FillClaims += (userWithClaims, user) =>
         {
-            var mixin = ((UserEntity)user).Mixin<UserAzureADMixin>();
-            userWithClaims.Claims["OID"] = mixin.OID;
+            userWithClaims.Claims["ExternalId"] = ((UserEntity)user).ExternalId;
         };
 
         Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
         {
             UserName = u.UserName,
             ToStringValue = u.ToString(),
-            OID = u.Mixin<UserAzureADMixin>().OID,
+            ExternalId = u.ExternalId,
         });
 
         if (deactivateUsersTask)
         {
             SimpleTaskLogic.Register(AzureADTask.DeactivateUsers, stc =>
             {
-                var list = Database.Query<UserEntity>().Where(u => u.Mixin<UserAzureADMixin>().OID != null).ToList();
+                var list = Database.Query<UserEntity>().Where(u => u.ExternalId != null).ToList();
 
                 var tokenCredential = GetTokenCredential();
                 GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
                 stc.ForeachWriting(list.Chunk(10), gr => gr.Length + " user(s)...", gr =>
                 {
-                    var filter = gr.Select(a => "id eq '" + a.Mixin<UserAzureADMixin>().OID + "'").Combined(FilterGroupOperation.Or);
+                    var filter = gr.Select(a => "id eq '" + a.ExternalId + "'").Combined(FilterGroupOperation.Or);
                     var users = graphClient.Users.GetAsync(r =>
                     {
                         r.QueryParameters.Select = new[] { "id", "accountEnabled" };
@@ -69,15 +66,16 @@ public static class AzureADLogic
 
                     foreach (var u in gr)
                     {
-                        if (u.State == UserState.Active && isEnabledDictionary.TryGetS(u.Mixin<UserAzureADMixin>().OID!.Value) != true)
+                        var oid = u.GetOID();
+                        if (u.State == UserState.Active && isEnabledDictionary.TryGetS(oid!.Value) != true)
                         {
-                            stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.Mixin<UserAzureADMixin>().OID} has been deactivated in Azure AD");
+                            stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.ExternalId} has been deactivated in Azure AD");
                             u.Execute(UserOperation.AutoDeactivate);
                         }
 
-                        if (u.State == UserState.AutoDeactivate && isEnabledDictionary.TryGetS(u.Mixin<UserAzureADMixin>().OID!.Value) == true)
+                        if (u.State == UserState.AutoDeactivate && isEnabledDictionary.TryGetS(oid!.Value) == true)
                         {
-                            stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.Mixin<UserAzureADMixin>().OID} has been reactivated in Azure AD");
+                            stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.ExternalId} has been reactivated in Azure AD");
                             u.Execute(UserOperation.Reactivate);
                         }
                     }
@@ -233,11 +231,11 @@ public static class AzureADLogic
                         var converter = new MicrosoftGraphQueryConverter();
                         if (inGroup?.Value is Lite<UserEntity> user)
                         {
-                            var oid = user.InDB(a => a.Mixin<UserAzureADMixin>().OID);
-                            if (oid == null)
-                                throw new InvalidOperationException($"User {user} has no OID");
+                            var externalId = user.InDB(a => a.ExternalId);
+                            if (externalId == null)
+                                throw new InvalidOperationException($"User {user} has no ExternalId");
 
-                            response = (await graphClient.Users[oid.ToString()].TransitiveMemberOf.GraphGroup.GetAsync(req =>
+                            response = (await graphClient.Users[externalId].TransitiveMemberOf.GraphGroup.GetAsync(req =>
                             {
                                 req.QueryParameters.Filter = converter.GetFilters(request.Filters);
                                 req.QueryParameters.Search = converter.GetSearch(request.Filters);
@@ -360,13 +358,14 @@ public static class AzureADLogic
 
     public static List<SimpleGroup> CurrentADGroups()
     {
-        var oid = UserAzureADMixin.CurrentOID;
-        if (oid == null)
+        var externalId = UserEntity.CurrentExternalId;
+        if (externalId == null)
             return new List<SimpleGroup>();
 
+        var oid = Guid.Parse(externalId);
         var tuple = ADGroupsCache.AddOrUpdate(UserEntity.Current,
-            addValueFactory: user => (Clock.Now, CurrentADGroupsInternal(oid.Value)),
-            updateValueFactory: (user, old) => old.date.Add(CacheADGroupsFor) > Clock.Now ? old : (Clock.Now, CurrentADGroupsInternal(oid.Value)));
+            addValueFactory: user => (Clock.Now, CurrentADGroupsInternal(oid)),
+            updateValueFactory: (user, old) => old.date.Add(CacheADGroupsFor) > Clock.Now ? old : (Clock.Now, CurrentADGroupsInternal(oid)));
 
         return tuple.groups;
     }
@@ -419,7 +418,7 @@ public static class AzureADLogic
         {
             using (var tr = new Transaction())
             {
-                var user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserAzureADMixin>().OID == acuCtx.OID);
+                var user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.ExternalId == acuCtx.ExternalId);
                 if (user == null)
                 {
                     user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName.ToLower() == acuCtx.UserName.ToLower()) ??
@@ -478,6 +477,12 @@ public static class AzureADLogic
 
 public record SimpleGroup(Guid Id, string? DisplayName);
 
+public static class AzureADUserExtensions
+{
+    public static Guid? GetOID(this UserEntity user) =>
+        user.ExternalId != null ? Guid.Parse(user.ExternalId) : null;
+}
+
 public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
 {
     AzureADConfigurationEmbedded Config { get; }
@@ -497,10 +502,7 @@ public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
     public string FirstName => User.GivenName ?? User.DisplayName.TryBefore(" ") ?? User.DisplayName!;
     public string LastName => User.Surname ?? User.DisplayName.TryAfter(" ") ?? User.DisplayName!;
 
-    public Guid? OID => Guid.Parse(User.Id!);
-
-    public string? SID => null;
-
+    public string? ExternalId => User.Id;
 }
 
 

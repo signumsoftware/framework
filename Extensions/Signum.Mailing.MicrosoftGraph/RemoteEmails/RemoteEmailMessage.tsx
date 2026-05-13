@@ -16,7 +16,7 @@ import { getToString } from '@framework/Signum.Entities'
 export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMessageModel> }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ readOnly: true });
 
-  var oid = (ctx.value.user.model as UserLiteModel).oID!;
+  var oid = (ctx.value.user.model as UserLiteModel).externalId!;
 
   return (
     <div>
@@ -92,7 +92,7 @@ export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMess
 
 export function RemoteEmailRenderer(p: { remoteEmail: RemoteEmailMessageModel }): React.JSX.Element {
 
-  var oid = (p.remoteEmail.user.model as UserLiteModel).oID!;
+  var oid = (p.remoteEmail.user.model as UserLiteModel).externalId!;
 
   function manipulateDom(doc: Document) {
     doc.body.querySelectorAll("a").forEach(a => a.target = "_blank");

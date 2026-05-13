@@ -81,13 +81,4 @@ export interface OnPremisesExtensionAttributesModel extends Entities.ModelEntity
   extensionAttribute15: string | null;
 }
 
-export const UserAzureADMixin: Type<UserAzureADMixin> = new Type<UserAzureADMixin>("UserAzureADMixin");
-export interface UserAzureADMixin extends Entities.MixinEntity {
-  Type: "UserAzureADMixin";
-  oID: string /*Guid*/ | null;
-}
-
-export namespace UserOIDMessage {
-  export const TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet: MessageKey = new MessageKey("UserOIDMessage", "TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet");
-}
 

@@ -8,7 +8,6 @@ using Signum.API;
 using Signum.API.Controllers;
 using Signum.API.Filters;
 using Signum.Authorization;
-using Signum.Authorization.AzureAD;
 using Signum.Mailing.MicrosoftGraph.RemoteEmails;
 using System.Text.Json;
 using System.Threading;
@@ -27,7 +26,8 @@ public class RemoteEmailController : ControllerBase
 
             GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
 
-            var user = Database.Query<UserEntity>().Where(a => a.Mixin<UserAzureADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
+            var oidStr = oid.ToString();
+            var user = Database.Query<UserEntity>().Where(a => a.ExternalId == oidStr).Select(a => a.ToLite()).SingleEx();
 
             var message = (await graphClient.Users[oid.ToString()].Messages[messageId].GetAsync(req =>
             {

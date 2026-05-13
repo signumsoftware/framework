@@ -56,7 +56,7 @@ public class WindowsADServer
 
                 var sid = ((WindowsIdentity)wp.Identity).User!.Value;
 
-                UserEntity? user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserWindowsADMixin>().SID == sid);
+                UserEntity? user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.ExternalId == sid);
 
                 if (user == null)
                 {
@@ -75,7 +75,7 @@ public class WindowsADServer
 
                         using (PrincipalContext pc = GetPrincipalContext(config))
                         {
-                            user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserWindowsADMixin>().SID == sid);
+                            user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.ExternalId == sid);
 
                             if (user == null)
                             {

@@ -122,6 +122,7 @@ export interface UserEntity extends Entities.Entity, Basics.IEmailOwnerEntity, S
   mustChangePassword: boolean;
   state: UserState;
   loginFailedCounter: number;
+  externalId: string | null;
 }
 
 export const UserLiteModel: Type<UserLiteModel> = new Type<UserLiteModel>("UserLiteModel");
@@ -129,13 +130,16 @@ export interface UserLiteModel extends Entities.ModelEntity {
   Type: "UserLiteModel";
   userName: string;
   toStringValue: string | null;
-  oID: string /*Guid*/ | null;
-  sID: string | null;
+  externalId: string | null;
   photoSuffix: string | null;
 }
 
 export namespace UserMessage {
   export const UserIsNotActive: MessageKey = new MessageKey("UserMessage", "UserIsNotActive");
+}
+
+export namespace UserExternalIdMessage {
+  export const TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet: MessageKey = new MessageKey("UserExternalIdMessage", "TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet");
 }
 
 export namespace UserOperation {
