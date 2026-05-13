@@ -7,7 +7,7 @@ export interface TourNavItemProps {
   getDriver: () => Driver | null;
 }
 
-export default function TourNavItem(p: TourNavItemProps) {
+export default function TourNavItem(p: TourNavItemProps) : React.ReactElement {
 
   function onClick() {
     const driver = p.getDriver();

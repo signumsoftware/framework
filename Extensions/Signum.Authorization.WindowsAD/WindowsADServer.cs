@@ -19,25 +19,25 @@ public class WindowsADServer
         return new PrincipalContext(ContextType.Domain, windowsAD.DomainName); //Uses current user
     }
 
-    public static bool LoginWindowsAuthentication(ActionContext ac, bool throwError)
+    public static bool LoginWindowsAuthentication(ActionContext ac, bool throwErrors)
     {
         using (AuthLogic.Disable())
         {
             try
             {
                 if (!(ac.HttpContext.User is WindowsPrincipal wp))
-                    return throwError ? throw new InvalidOperationException($"User is not a WindowsPrincipal ({ac.HttpContext.User.GetType().Name})")
+                    return throwErrors ? throw new InvalidOperationException($"User is not a WindowsPrincipal ({ac.HttpContext.User.GetType().Name})")
                         : false;
 
                 if (AuthLogic.Authorizer is not WindowsADAuthorizer ada)
-                    return throwError ? throw new InvalidOperationException("No AuthLogic.Authorizer set")
+                    return throwErrors ? throw new InvalidOperationException("No AuthLogic.Authorizer set")
                         : false;
 
                 var config = ada.GetConfig()!;
 
                 if (config == null)
                 {
-                    if (throwError)
+                    if (throwErrors)
                         throw new Exception($"No {nameof(WindowsADConfigurationEmbedded)} is not set");
 
                     return false;
@@ -45,7 +45,7 @@ public class WindowsADServer
 
                 if (!config.LoginWithWindowsAuthenticator)
                 {
-                    if (throwError)
+                    if (throwErrors)
                         throw new Exception($"{ReflectionTools.GetPropertyInfo((WindowsADConfigurationEmbedded e) => e.LoginWithWindowsAuthenticator)} is set to false");
                     return false;
                 }
@@ -70,7 +70,7 @@ public class WindowsADServer
                     {
                         if (!config.AutoCreateUsers)
                         {
-                            return throwError ? throw new InvalidOperationException("AutoCreateUsers is false") : false;
+                            return throwErrors ? throw new InvalidOperationException(LoginAuthMessage.NoLocalUserFound.NiceToString()) : false;
                         }
 
                         using (PrincipalContext pc = GetPrincipalContext(config))
@@ -86,7 +86,7 @@ public class WindowsADServer
                     else
                     {
                         if(user.State == UserState.Deactivated)
-                            return throwError ? throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user)) : false;
+                            return throwErrors ? throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user)) : false;
 
                         if (config.AutoUpdateUsers)
                         {
@@ -113,7 +113,7 @@ public class WindowsADServer
             {
                 e.LogException();
 
-                if (throwError)
+                if (throwErrors)
                     throw;
 
                 return false;

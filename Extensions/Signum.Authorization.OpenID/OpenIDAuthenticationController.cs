@@ -9,9 +9,9 @@ namespace Signum.Authorization.OpenID;
 public class OpenIDAuthenticationController : ControllerBase
 {
     [HttpPost("api/auth/loginWithOpenID"), SignumAllowAnonymous]
-    public LoginResponse? LoginWithOpenID([FromBody, Required] LoginWithOpenIDRequest request, [FromQuery] bool throwErrors = true)
+    public async Task<LoginResponse?> LoginWithOpenID([FromBody, Required] LoginWithOpenIDRequest request, [FromQuery] bool throwErrors = true)
     {
-        if (!OpenIDAuthenticationServer.LoginOpenIDAuthentication(ControllerContext, request, throwErrors))
+        if (!await OpenIDAuthenticationServer.LoginOpenIDAuthentication(ControllerContext, request, throwErrors))
             return null;
 
         var user = UserEntity.Current.Retrieve();

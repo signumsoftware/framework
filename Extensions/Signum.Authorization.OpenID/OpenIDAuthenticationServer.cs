@@ -15,7 +15,7 @@ public class OpenIDAuthenticationServer
 {
     static readonly HttpClient HttpClient = new HttpClient();
 
-    public static bool LoginOpenIDAuthentication(ActionContext ac, LoginWithOpenIDRequest request, bool throwErrors)
+    public static async Task<bool> LoginOpenIDAuthentication(ActionContext ac, LoginWithOpenIDRequest request, bool throwErrors)
     {
         using (AuthLogic.Disable())
         {
@@ -26,8 +26,8 @@ public class OpenIDAuthenticationServer
                 if (config == null || !config.Enabled)
                     return false;
 
-                var tokenResponse = ExchangeCodeForTokens(request.Code, request.RedirectUri, config);
-                var principal = ValidateToken(tokenResponse.IdToken!, config, out _);
+                var tokenResponse = await ExchangeCodeForTokens(request.Code, request.RedirectUri, config);
+                var principal = await ValidateToken(tokenResponse.IdToken!, config);
                 var ctx = new OpenIDClaimsAutoCreateUserContext(principal, tokenResponse.AccessToken ?? "", config);
 
                 UserEntity? user = Database.Query<UserEntity>().SingleOrDefault(a => a.ExternalId == ctx.ExternalId);
@@ -43,7 +43,9 @@ public class OpenIDAuthenticationServer
                 if (user == null)
                 {
                     if (!config.AutoCreateUsers)
-                        return false;
+                    {
+                        return throwErrors ? throw new InvalidOperationException(LoginAuthMessage.NoLocalUserFound.NiceToString()) : false;
+                    }
 
                     user = authorizer.OnCreateUser(ctx);
                 }
@@ -74,9 +76,9 @@ public class OpenIDAuthenticationServer
         }
     }
 
-    static OpenIDTokenResponse ExchangeCodeForTokens(string code, string redirectUri, OpenIDConfigurationEmbedded config)
+    static async Task<OpenIDTokenResponse> ExchangeCodeForTokens(string code, string redirectUri, OpenIDConfigurationEmbedded config)
     {
-        var discoveryDoc = GetDiscoveryDocument(config);
+        var discoveryDoc = await GetDiscoveryDocument(config);
 
         var body = new FormUrlEncodedContent(
         [
@@ -87,24 +89,30 @@ public class OpenIDAuthenticationServer
             new KeyValuePair<string, string>("client_secret", config.ClientSecret!),
         ]);
 
-        var response = HttpClient.PostAsync(discoveryDoc.TokenEndpoint, body).GetAwaiter().GetResult();
+        var response = await HttpClient.PostAsync(discoveryDoc.TokenEndpoint, body);
         response.EnsureSuccessStatusCode();
 
-        var json = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+        var json = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<OpenIDTokenResponse>(json)!;
     }
 
-    static OpenIdConnectConfiguration GetDiscoveryDocument(OpenIDConfigurationEmbedded config)
+    static Task<OpenIdConnectConfiguration> GetDiscoveryDocument(OpenIDConfigurationEmbedded config)
     {
+        var endpoint = config.GetDiscoveryEndpoint();
+        var retriever = new HttpDocumentRetriever
+        {
+            RequireHttps = endpoint.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+        };
         var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
-            config.GetDiscoveryEndpoint(),
-            new OpenIdConnectConfigurationRetriever());
-        return configManager.GetConfigurationAsync().Result;
+            endpoint,
+            new OpenIdConnectConfigurationRetriever(),
+            retriever);
+        return configManager.GetConfigurationAsync();
     }
 
-    public static ClaimsPrincipal ValidateToken(string jwt, OpenIDConfigurationEmbedded config, out JwtSecurityToken jwtSecurityToken)
+    public static async Task<ClaimsPrincipal> ValidateToken(string jwt, OpenIDConfigurationEmbedded config)
     {
-        var discoveryDoc = GetDiscoveryDocument(config);
+        var discoveryDoc = await GetDiscoveryDocument(config);
 
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -120,7 +128,7 @@ public class OpenIDAuthenticationServer
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var principal = tokenHandler.ValidateToken(jwt, validationParameters, out var securityToken);
-        jwtSecurityToken = (JwtSecurityToken)securityToken;
+        //jwtSecurityToken = (JwtSecurityToken)securityToken;
         return principal;
     }
 }

@@ -42,7 +42,9 @@ public class AzureADAuthenticationServer
                 if (user == null)
                 {
                     if (!config.AutoCreateUsers)
-                        return false;
+                    {
+                        return throwErrors ? throw new InvalidOperationException(LoginAuthMessage.NoLocalUserFound.NiceToString()) : false;
+                    }
 
                     user = ada.OnCreateUser(ctx);
                 }

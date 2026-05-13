@@ -81,6 +81,7 @@ export namespace LoginAuthMessage {
   export const SignUpWithAzureB2C: MessageKey = new MessageKey("LoginAuthMessage", "SignUpWithAzureB2C");
   export const SignInWithAzureB2C: MessageKey = new MessageKey("LoginAuthMessage", "SignInWithAzureB2C");
   export const LoginWithAzureB2C: MessageKey = new MessageKey("LoginAuthMessage", "LoginWithAzureB2C");
+  export const NoLocalUserFound: MessageKey = new MessageKey("LoginAuthMessage", "NoLocalUserFound");
 }
 
 export const MergeStrategy: EnumType<MergeStrategy> = new EnumType<MergeStrategy>("MergeStrategy");

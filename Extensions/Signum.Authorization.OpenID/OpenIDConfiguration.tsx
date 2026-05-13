@@ -3,6 +3,7 @@ import { EntityLine, EntityTable, AutoLine, CheckboxLine, TextBoxLine } from '@f
 import { TypeContext } from '@framework/TypeContext'
 import { useForceUpdate } from '@framework/Hooks'
 import { OpenIDConfigurationEmbedded } from './Signum.Authorization.OpenID'
+import { toAbsoluteUrl } from '../../Signum/ts_out/React/AppContext';
 
 const roleClaimPathSuggestions = [
   "roles",
@@ -26,7 +27,7 @@ export default function OpenIDConfiguration(p: { ctx: TypeContext<OpenIDConfigur
       </div>
 
       <AutoLine ctx={ctx.subCtx(n => n.authority)} helpText="Base URL of the OpenID provider (e.g. https://keycloak.example.com/realms/myrealm)" />
-      <AutoLine ctx={ctx.subCtx(n => n.clientId)} />
+      <AutoLine ctx={ctx.subCtx(n => n.clientId)} helpText={"Redirect url: " + window.location.origin + toAbsoluteUrl("/openid-callback")} />
       <AutoLine ctx={ctx.subCtx(n => n.clientSecret)} />
       <AutoLine ctx={ctx.subCtx(n => n.scopes)} helpText='Space-separated scopes (default: "openid profile email")' />
 

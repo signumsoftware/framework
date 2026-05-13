@@ -137,12 +137,12 @@ public class OpenIDAuthorizer : ICustomAuthorizer
         if (parts.Length == 1)
         {
             return principal.Claims
-                .Where(c => c.Type == roleClaimPath)
+                .Where(c => c.Type.Trim() == roleClaimPath)
                 .Select(c => c.Value)
                 .ToList();
         }
 
-        var claimValue = principal.Claims.SingleOrDefaultEx(c => c.Type == parts[0])?.Value;
+        var claimValue = principal.Claims.SingleOrDefaultEx(c => c.Type.Trim() == parts[0])?.Value;
         if (claimValue == null)
             return new List<string>();
 

@@ -1,3 +1,7 @@
+using Signum.API;
+using Signum.Authorization.BaseAD;
+using Signum.Utilities.Reflection;
+
 namespace Signum.Authorization.OpenID;
 
 public static class OpenIDLogic
@@ -13,5 +17,7 @@ public static class OpenIDLogic
             ToStringValue = u.ToString(),
             ExternalId = u.ExternalId,
         });
+        ReflectionServer.RegisterLike(typeof(UserADMessage), () => true);
+        ReflectionServer.RegisterLike(typeof(OpenIDMessage), () => true);
     }
 }
