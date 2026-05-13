@@ -10,13 +10,13 @@ export interface MarkdownLineProps extends TextAreaLineProps {
   markdownOption?: Options;
 }
 
-export function MarkdownLine({ ctx, markdownOption, readOnly, ...p }: MarkdownLineProps): React.JSX.Element {
+export function MarkdownLine({ ctx, markdownOption, readOnly, label, valueHtmlAttributes, ...p }: MarkdownLineProps): React.JSX.Element {
   const [preview, setPreview] = React.useState(false);
 
   return (
     <ErrorBoundary>
       <div>
-        <label>{ctx.niceName()}
+        <label>{label ?? ctx.niceName()}
           <LinkButton className='ms-1' title={!preview ? MarkdownMessage._0IsCurrentlyEditable?.niceToString(ctx.niceName()) : MarkdownMessage._0IsCurrentlyViewableOnly?.niceToString(ctx.niceName())}
             onClick={e => {
               setPreview(a => !a);
@@ -25,7 +25,14 @@ export function MarkdownLine({ ctx, markdownOption, readOnly, ...p }: MarkdownLi
           </LinkButton>
         </label>
         {preview ? <div className='form-control form-control-sm'><Markdown>{ctx.value}</Markdown></div> :
-          <TextAreaLine ctx={ctx.subCtx({ formGroupStyle: 'None' })} valueHtmlAttributes={{ style: { minHeight: 80 } }} />}
+          <TextAreaLine
+            ctx={ctx.subCtx({ formGroupStyle: 'None' })}
+            readOnly={readOnly}
+            {...p}
+            valueHtmlAttributes={{
+              ...valueHtmlAttributes,
+              style: { minHeight: 80, ...valueHtmlAttributes?.style },
+            }} />}
       </div>
     </ErrorBoundary>
   );
