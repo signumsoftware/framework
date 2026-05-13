@@ -5,7 +5,7 @@ using System.DirectoryServices.AccountManagement;
 #pragma warning disable CA1416 // Validate platform compatibility
 namespace Signum.Authorization.WindowsAD.Authorizer;
 
-public class WindowsADAuthorizer : ICustomAuthorizer
+public class WindowsADAuthorizer : ICustomAuthorizer, IDirectoryInviter
 {
     public Func<WindowsADConfigurationEmbedded?> GetConfig;
 
@@ -215,12 +215,12 @@ public class WindowsADAuthorizer : ICustomAuthorizer
         }
     }
 
-    public Task<List<ActiveDirectoryUser>> FindUser(string subString, int count, CancellationToken token)
+    public Task<List<ExternalUser>> FindUser(string subString, int count, CancellationToken token)
     {
         return WindowsADLogic.SearchUser(subString, count);
     }
 
-    public UserEntity CreateADUser(ActiveDirectoryUser user)
+    public UserEntity CreateFromExternalUser(ExternalUser user)
     {
         return WindowsADLogic.CreateUserFromAD(user);
     }

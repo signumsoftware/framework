@@ -67,11 +67,11 @@ export namespace ActiveDirectoryClient {
 
   export function importADUser(text: string): Promise<Lite<UserEntity> | undefined> {
     return API.findADUsers({ count: 10, subString: text, types: UserEntity.typeName })
-      .then(adUsers => {
-        if (adUsers.length == 0)
+      .then(externalUsers => {
+        if (externalUsers.length == 0)
           return MessageModal.showError(UserADMessage.NoUserContaining0FoundInActiveDirectory.niceToString(text));
 
-        return SelectorModal.chooseElement(adUsers, {
+        return SelectorModal.chooseElement(externalUsers, {
           forceShow: true,
           size: "md",
           title: UserADMessage.SelectActiveDirectoryUser.niceToString(),
@@ -82,27 +82,27 @@ export namespace ActiveDirectoryClient {
             {u.jobTitle && <span className="text-muted">{u.jobTitle}</span>}
           </div>
         })
-          .then(adu => adu ? API.createADUser(adu) : undefined);
+          .then(eu => eu ? API.createADUser(eu) : undefined);
       })
   }
 
 
   export namespace API {
 
-    export function findADUsers(request: Finder.API.AutocompleteRequest, signal?: AbortSignal): Promise<ActiveDirectoryUser[]> {
+    export function findADUsers(request: Finder.API.AutocompleteRequest, signal?: AbortSignal): Promise<ExternalUser[]> {
       return ajaxGet({ url: "/api/findADUsers?" + QueryString.stringify({ ...request }), signal });
     }
 
-    export function createADUser(model: ActiveDirectoryUser): Promise<Lite<UserEntity>> {
+    export function createADUser(model: ExternalUser): Promise<Lite<UserEntity>> {
       return ajaxPost({ url: `/api/createADUser` }, model);
     }
   }
 
-  export interface ActiveDirectoryUser {
+  export interface ExternalUser {
     displayName: string;
     jobTitle: string;
     upn: string;
-    objectID: string;
+    externalId: string | null;
   }
 
 }

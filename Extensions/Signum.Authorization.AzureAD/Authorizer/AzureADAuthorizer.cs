@@ -3,7 +3,7 @@ using Signum.API.Filters;
 #pragma warning disable CA1416 // Validate platform compatibility
 namespace Signum.Authorization.AzureAD.Authorizer;
 
-public class AzureADAuthorizer : ICustomAuthorizer
+public class AzureADAuthorizer : ICustomAuthorizer, IDirectoryInviter
 { 
     public Func<string? /*adVariant*/, AzureADConfigurationEmbedded?> GetConfig;
 
@@ -157,12 +157,12 @@ public class AzureADAuthorizer : ICustomAuthorizer
 
     }
 
-    public Task<List<ActiveDirectoryUser>> FindUser(string subString, int count, CancellationToken token)
+    public Task<List<ExternalUser>> FindUser(string subString, int count, CancellationToken token)
     {
         return AzureADLogic.FindActiveDirectoryUsers(subString, count, token);
     }
 
-    public UserEntity CreateADUser(ActiveDirectoryUser user)
+    public UserEntity CreateFromExternalUser(ExternalUser user)
     {
         return AzureADLogic.CreateUserFromAD(user);
     }

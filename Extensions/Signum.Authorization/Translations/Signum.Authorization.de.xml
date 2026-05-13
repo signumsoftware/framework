@@ -337,9 +337,8 @@
     <Member Name="UserName" Description="Benutzername" />
   </Type>
   <Type Name="UserLiteModel" Description="Benutzer-Lite">
-    <Member Name="OID" Description="OID" />
+    <Member Name="ExternalId" Description="Externe ID" />
     <Member Name="PhotoSuffix" Description="Foto-Suffix" />
-    <Member Name="SID" Description="SID" />
     <Member Name="ToStringValue" Description="Zum Zeichenfolgenwert" />
     <Member Name="UserName" Description="Benutzername" />
   </Type>

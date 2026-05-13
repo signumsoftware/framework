@@ -297,7 +297,7 @@ public static class AzureADLogic
 
 
 
-    public static async Task<List<ActiveDirectoryUser>> FindActiveDirectoryUsers(string subStr, int top, CancellationToken token)
+    public static async Task<List<ExternalUser>> FindActiveDirectoryUsers(string subStr, int top, CancellationToken token)
     {
         var tokenCredential = GetTokenCredential();
         GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
@@ -315,17 +315,16 @@ public static class AzureADLogic
             req.QueryParameters.Filter = query;
         }, token);
 
-        return result!.Value!.Select(a => new ActiveDirectoryUser
+        return result!.Value!.Select(a => new ExternalUser
         {
             UPN = a.UserPrincipalName!,
             DisplayName = a.DisplayName!,
             JobTitle = a.JobTitle!,
-            ObjectID = Guid.Parse(a.Id!),
-            SID = null,
+            ExternalId = a.Id,
         }).ToList();
     }
 
-    public static async Task<ActiveDirectoryUser> GetActiveDirectoryUser(Guid oid, CancellationToken token)
+    public static async Task<ExternalUser> GetActiveDirectoryUser(Guid oid, CancellationToken token)
     {
         var tokenCredential = GetTokenCredential();
         GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
@@ -336,13 +335,12 @@ public static class AzureADLogic
             throw new Exception("User with OID '" + oid.ToString() + "' not found in Active Directory");
         else
         {
-            return new ActiveDirectoryUser
+            return new ExternalUser
             {
                 UPN = u.UserPrincipalName!,
                 DisplayName = u.DisplayName!,
                 JobTitle = u.JobTitle!,
-                ObjectID = Guid.Parse(u.Id!),
-                SID = null,
+                ExternalId = u.Id,
             };
         }
     }
@@ -402,7 +400,7 @@ public static class AzureADLogic
 
 
 
-    public static UserEntity CreateUserFromAD(ActiveDirectoryUser adUser)
+    public static UserEntity CreateUserFromAD(ExternalUser adUser)
     {
         var adAuthorizer = (AzureADAuthorizer)AuthLogic.Authorizer!;
         var config = adAuthorizer.GetConfig(null);
@@ -434,11 +432,11 @@ public static class AzureADLogic
         }
     }
 
-    private static MicrosoftGraphCreateUserContext GetMicrosoftGraphContext(ActiveDirectoryUser adUser, AzureADConfigurationEmbedded config)
+    private static MicrosoftGraphCreateUserContext GetMicrosoftGraphContext(ExternalUser adUser, AzureADConfigurationEmbedded config)
     {
         var tokenCredential = GetTokenCredential();
         GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
-        var msGraphUser = graphClient.Users[adUser.ObjectID.ToString()].GetAsync().Result;
+        var msGraphUser = graphClient.Users[adUser.ExternalId].GetAsync().Result;
 
         return new MicrosoftGraphCreateUserContext(msGraphUser!, config);
     }

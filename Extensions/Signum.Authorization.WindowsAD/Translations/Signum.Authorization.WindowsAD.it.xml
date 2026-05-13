@@ -97,10 +97,6 @@
     <Member Name="PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport" Description="Selezionare l'utente da Active Directory che si desidera importare" />
     <Member Name="SelectActiveDirectoryUser" Description="Selezionare Utente Active Directory" />
   </Type>
-  <Type Name="UserADMixin">
-    <Member Name="OID" Description="OID" />
-    <Member Name="SID" Description="SID" />
-  </Type>
   <Type Name="UserOIDMessage">
     <Member Name="TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet" Description="L'utente {0} è connesso ad Active Directory e non può avere una password locale impostata" />
   </Type>

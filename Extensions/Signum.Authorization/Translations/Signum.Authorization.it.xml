@@ -246,9 +246,8 @@
     <Member Name="UserName" Description="Nome utente" />
   </Type>
   <Type Name="UserLiteModel" Description="Utente lite">
-    <Member Name="OID" Description="OID" />
+    <Member Name="ExternalId" Description="ID esterno" />
     <Member Name="PhotoSuffix" Description="Suffisso foto" />
-    <Member Name="SID" Description="SID" />
     <Member Name="ToStringValue" Description="Al valore stringa" />
     <Member Name="UserName" Description="Nome utente" />
   </Type>

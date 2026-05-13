@@ -8,6 +8,7 @@ using Signum.API;
 using Signum.API.Controllers;
 using Signum.API.Filters;
 using Signum.Authorization;
+using Signum.Authorization.AzureAD;
 using Signum.Mailing.MicrosoftGraph.RemoteEmails;
 using System.Text.Json;
 using System.Threading;

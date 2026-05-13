@@ -7,10 +7,13 @@ namespace Signum.Authorization;
 public interface ICustomAuthorizer
 {
     UserEntity Login(string userName, string password, out string authenticationType);
+}
 
-    Task<List<ActiveDirectoryUser>> FindUser(string subString, int count, CancellationToken token);
+public interface IDirectoryInviter
+{
+    Task<List<ExternalUser>> FindUser(string subString, int count, CancellationToken token);
 
-    UserEntity CreateADUser(ActiveDirectoryUser user);
+    UserEntity CreateFromExternalUser(ExternalUser user);
 }
 
 public interface IAutoCreateUserContext
@@ -23,11 +26,10 @@ public interface IAutoCreateUserContext
     public string? ExternalId { get; }
 }
 
-public class ActiveDirectoryUser
+public class ExternalUser
 {
     public required string DisplayName;
     public required string UPN;
     public required string JobTitle;
-    public Guid? ObjectID;
-    public string? SID;
+    public string? ExternalId;
 }

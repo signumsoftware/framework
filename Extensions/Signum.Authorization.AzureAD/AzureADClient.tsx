@@ -118,12 +118,12 @@ export namespace AzureADClient {
     });
   }
 
-  export function toActiveDirectoryUser(row: ResultRow, scl: SearchControlLoaded): ActiveDirectoryClient.ActiveDirectoryUser {
+  export function toExternalUser(row: ResultRow, scl: SearchControlLoaded): ActiveDirectoryClient.ExternalUser {
     const columns = scl.state.resultTable!.columns;
     return ({
       displayName: row.columns[columns.indexOf("DisplayName")],
       jobTitle: row.columns[columns.indexOf("JobTitle")],
-      objectID: row.columns[columns.indexOf("Id")],
+      externalId: row.columns[columns.indexOf("Id")],
       upn: row.columns[columns.indexOf("UserPrincipalName")],
     });
   }

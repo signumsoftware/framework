@@ -91,7 +91,7 @@ public static class WindowsADLogic
             return new PrincipalContext(ContextType.Domain, config.DomainName);
     }
 
-    public static Task<List<ActiveDirectoryUser>> SearchUser(string searchUserName, int limit)
+    public static Task<List<ExternalUser>> SearchUser(string searchUserName, int limit)
     {
         using (var pc = GetPrincipalContext())
         {
@@ -124,25 +124,24 @@ public static class WindowsADLogic
                 // Perform the search
                 var results = searcher.FindAll();
 
-                // Map results to ActiveDirectoryUser objects
-                var activeDirectoryUsers = new List<ActiveDirectoryUser>();
+                // Map results to ExternalUser objects
+                var externalUsers = new List<ExternalUser>();
                 foreach (SearchResult result in results)
                 {
-                    var user = new ActiveDirectoryUser
+                    var user = new ExternalUser
                     {
                         UPN = result.Properties["userPrincipalName"]?.Count > 0 ? result.Properties["userPrincipalName"][0].ToString()! : "",
                         DisplayName = result.Properties["displayName"]?.Count > 0 ? result.Properties["displayName"][0].ToString()! : "",
                         JobTitle = result.Properties["description"]?.Count > 0 ? result.Properties["description"][0].ToString()! : "",
-                        SID = result.Properties["objectSid"]?.Count > 0 ? new System.Security.Principal.SecurityIdentifier((byte[])result.Properties["objectSid"][0], 0).ToString() : null,
-                        ObjectID = null
+                        ExternalId = result.Properties["objectSid"]?.Count > 0 ? new System.Security.Principal.SecurityIdentifier((byte[])result.Properties["objectSid"][0], 0).ToString() : null,
                     };
 
-                    activeDirectoryUsers.Add(user);
+                    externalUsers.Add(user);
                 }
 
                 // Return distinct results
-                var distinctUsers = activeDirectoryUsers
-                    .DistinctBy(a => a.SID)
+                var distinctUsers = externalUsers
+                    .DistinctBy(a => a.ExternalId)
                     .OrderBy(a => a.UPN)
                     .ToList();
 
@@ -202,7 +201,7 @@ public static class WindowsADLogic
     //    }
     //}
 
-    public static UserEntity CreateUserFromAD(ActiveDirectoryUser adUser)
+    public static UserEntity CreateUserFromAD(ExternalUser adUser)
     {
         var ada = (WindowsADAuthorizer)AuthLogic.Authorizer!;
 

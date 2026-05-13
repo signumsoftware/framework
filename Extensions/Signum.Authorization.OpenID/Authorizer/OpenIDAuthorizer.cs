@@ -1,5 +1,4 @@
 using Signum.API.Filters;
-using Signum.Authorization.BaseAD;
 using System.Security.Claims;
 using System.Text.Json;
 

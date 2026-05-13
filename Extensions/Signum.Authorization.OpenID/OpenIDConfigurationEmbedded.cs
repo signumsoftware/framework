@@ -1,4 +1,5 @@
 using Signum.Authorization.BaseAD;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace Signum.Authorization.OpenID;

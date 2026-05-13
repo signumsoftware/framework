@@ -81,7 +81,7 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
         CultureInfo = CultureInfo,
         DisplayName = UserName,
         Email = Email,
-        AzureUserId = null,
+        ExternalId = null,
     });
 
     [AutoExpressionField]

@@ -48,10 +48,6 @@
     <Member Name="PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport" Description="Por favor, seleccione el usuario de Active Directory que desea importar" />
     <Member Name="SelectActiveDirectoryUser" Description="Seleccionar usuario de Active Directory" />
   </Type>
-  <Type Name="UserADMixin">
-    <Member Name="OID" Description="OID" />
-    <Member Name="SID" Description="SID" />
-  </Type>
   <Type Name="UserADQuery">
     <Member Name="ActiveDirectoryGroups" Description="Grupos de Active Directory" />
     <Member Name="ActiveDirectoryUsers" Description="Usuarios de Active Directory" />

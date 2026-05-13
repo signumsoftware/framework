@@ -247,8 +247,7 @@
     <Member Name="UserName" Description="Nom d'utilisateur" />
   </Type>
   <Type Name="UserLiteModel" Description="Utilisateur lite">
-    <Member Name="OID" Description="OID" />
-    <Member Name="SID" Description="SID" />
+    <Member Name="ExternalId" Description="ID externe" />
     <Member Name="ToStringValue" Description="Vers chaîne de caractères" />
     <Member Name="UserName" Description="Nom d'utilisateur" />
   </Type>

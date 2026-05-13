@@ -125,6 +125,10 @@ export interface UserEntity extends Entities.Entity, Basics.IEmailOwnerEntity, S
   externalId: string | null;
 }
 
+export namespace UserExternalIdMessage {
+  export const TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet: MessageKey = new MessageKey("UserExternalIdMessage", "TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet");
+}
+
 export const UserLiteModel: Type<UserLiteModel> = new Type<UserLiteModel>("UserLiteModel");
 export interface UserLiteModel extends Entities.ModelEntity {
   Type: "UserLiteModel";
@@ -136,10 +140,6 @@ export interface UserLiteModel extends Entities.ModelEntity {
 
 export namespace UserMessage {
   export const UserIsNotActive: MessageKey = new MessageKey("UserMessage", "UserIsNotActive");
-}
-
-export namespace UserExternalIdMessage {
-  export const TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet: MessageKey = new MessageKey("UserExternalIdMessage", "TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet");
 }
 
 export namespace UserOperation {
