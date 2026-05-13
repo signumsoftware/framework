@@ -8,8 +8,7 @@ public static class TokenMigrationRunner
     public static void TokenMigrations(bool autoRun)
     {
         Console.WriteLine();
-        if (!(autoRun || SafeConsole.Ask("SQL Migrations is finished... run Token Migrations now?")))
-            return;
+        SafeConsole.WriteLineColor(ConsoleColor.Cyan, "..:: Token Migrations ::..");
 
         while (true)
         {
@@ -118,7 +117,8 @@ public static class TokenMigrationRunner
 
     public static void AfterSynchronize(string? fileName, Replacements? rep)
     {
-        SafeConsole.WriteLineColor(ConsoleColor.Green, "No changes needed.");
+        Console.WriteLine();
+        SafeConsole.WriteLineColor(ConsoleColor.Green, "..:: Tokens Synchronizer ::..");
         QueryLogic.AssertLoaded();
         TypeLogic.AssertLoaded();
         var recording = new TokenMigrationFile();
@@ -168,7 +168,10 @@ public static class TokenMigrationRunner
         PrintReport(ctx);
 
         if (recording.IsEmpty)
-            SafeConsole.WriteLineColor(ConsoleColor.Green, "No new token decisions to record.");
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.Green, "No changes in tokens found!");
+            return;
+        }
 
         var version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
         var comment = SafeConsole.AskString("Comment for the new token migration? ", stringValidator: s => null).Trim();

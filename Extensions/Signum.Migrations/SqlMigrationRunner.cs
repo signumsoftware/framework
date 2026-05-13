@@ -80,7 +80,8 @@ public class SqlMigrationRunner
                         AfterMigrationsCompleted?.Invoke(autoRun);
                         return;
                     case PromptResult.Continue:
-                        if (autoRun) return;
+                        if (autoRun) 
+                            return;
                         continue;
                 }
             }
