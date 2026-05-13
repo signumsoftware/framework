@@ -227,7 +227,9 @@ public class ConditionCompare : ConditionBase
         {
         retry:
             string? val = Value;
-            FixTokenResult result = QueryTokenSynchronizer.FixValue(sc.Replacements, this.ValueProvider!.Type!, ref val, allowRemoveToken: false, isList: Operation.Value.IsList(), fixInstead: true, null);
+            var qKey = sc.QueryDescription != null ? Signum.DynamicQuery.QueryUtils.GetKey(sc.QueryDescription.QueryName) : "";
+            var tokStr = this.ValueProvider!.ToString() ?? "";
+            FixTokenResult result = QueryTokenSynchronizer.FixValue(sc.TokenSync, qKey, tokStr, this.ValueProvider!.Type!, ref val, allowRemoveToken: false, isList: Operation.Value.IsList(), fixInstead: true, null);
             switch (result)
             {
                 case FixTokenResult.Fix:

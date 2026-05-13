@@ -71,7 +71,11 @@ export default function ChatMessage(p: { ctx: TypeContext<ChatMessageEntity> }):
         </div>
         <MarkdownOrJson content={ctx4.value.content}/>
       </> : <>
-        <FormGroup ctx={ctx4.subCtx(n => n.content)}>
+          {ctx4.value.reasoningContent && <FormGroup ctx={ctx4.subCtx(n => n.reasoningContent)}>
+            {id =>  ChatbotClient.renderMarkdown(ctx4.value.reasoningContent!)}
+          </FormGroup>
+          }
+          <FormGroup ctx={ctx4.subCtx(n => n.content)}>
           {id => ctx4.value.content && ChatbotClient.renderMarkdown(ctx4.value.content)}
         </FormGroup>
         {ctx.value.role == "Assistant" && ctx4.value.toolCalls.length > 0 &&

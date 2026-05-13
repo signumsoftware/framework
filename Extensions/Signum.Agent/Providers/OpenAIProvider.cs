@@ -47,7 +47,7 @@ public class OpenAIProvider : IChatbotModelProvider, IEmbeddingsProvider
 
     static string GetApiKey()
     {
-        var apiKey = ChatbotLogic.GetConfig().OpenAIAPIKey;
+        var apiKey = LanguageModelLogic.GetConfig().OpenAIAPIKey;
 
         if (apiKey.IsNullOrEmpty())
             throw new InvalidOperationException("No API Key for OpenAI configured!");

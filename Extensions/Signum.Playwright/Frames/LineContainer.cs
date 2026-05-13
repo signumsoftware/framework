@@ -1,13 +1,7 @@
-using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Playwright;
-using Signum.Engine;
 using Signum.Entities.Reflection;
 using Signum.Playwright.LineProxies;
 using Signum.Playwright.Search;
 using Signum.UserAssets.Queries;
-using System.Globalization;
-using System.Threading;
 
 namespace Signum.Playwright.Frames;
 

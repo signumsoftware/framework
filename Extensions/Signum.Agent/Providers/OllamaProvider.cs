@@ -51,7 +51,7 @@ public class OllamaProvider : IChatbotModelProvider, IEmbeddingsProvider
 
     private static string GetOllamaUrl()
     {
-        var apiKey = ChatbotLogic.GetConfig().OllamaUrl;
+        var apiKey = LanguageModelLogic.GetConfig().OllamaUrl;
 
         if (apiKey.IsNullOrEmpty())
             throw new InvalidOperationException("No Ollama URL configured!");

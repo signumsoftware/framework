@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 using Signum.API.Json;
 using System.Collections.Frozen;
 using Signum.DynamicQuery.Tokens;
-using Microsoft.AspNetCore.Http;
 
 namespace Signum.API;
 

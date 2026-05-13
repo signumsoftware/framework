@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Components;
 using Signum.Playwright.Frames;
 using Signum.Playwright.ModalProxies;
 using Signum.Playwright.Search;

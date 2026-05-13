@@ -102,7 +102,7 @@ public static class SqlPreCommandExtensions
         return list.Combine(Spacing.Simple)!;
     }
 
-    public static void OpenSqlFileRetry(this SqlPreCommand command)
+    public static void OpenSqlFileRetry(this SqlPreCommand command, string fileName)
     {
         SafeConsole.WriteLineColor(ConsoleColor.Yellow, "There are changes!");
         
@@ -111,28 +111,29 @@ public static class SqlPreCommandExtensions
             var (before, after) = c.ExtractNoTransaction();
 
             if (before != null)
-                if (!CreateAndRun(before, NoTransactionMode.BeforeScript))
+                if (!CreateAndRun(before, fileName, NoTransactionMode.BeforeScript))
                     return;
 
             if (c.Commands.Any())
-                if (!CreateAndRun(c, null))
+                if (!CreateAndRun(c, fileName, null))
                     return;
 
             if (after != null)
-                if (!CreateAndRun(after, NoTransactionMode.AfterScript))
+                if (!CreateAndRun(after, fileName, NoTransactionMode.AfterScript))
                     return;
         }
         else if(command is SqlPreCommandSimple s)
         {
-            CreateAndRun(command, s.NoTransaction);
+            CreateAndRun(command, fileName,s.NoTransaction);
         }
         else 
             throw new UnexpectedValueException(command);
 
 
-        static bool CreateAndRun(SqlPreCommand command, NoTransactionMode? noTransaction)
+        static bool CreateAndRun(SqlPreCommand command, string originalFileName, NoTransactionMode? noTransaction)
         {
-            var fileName = "Sync {0:yyyy-MM-dd HH_mm_ss}{1}.sql".FormatWith(DateTime.Now, noTransaction == null ? null : ("_" + noTransaction));
+            var fileName = noTransaction == null ? originalFileName :
+                Path.GetFileNameWithoutExtension(originalFileName) + "_" + noTransaction + Path.GetExtension(originalFileName);
 
             Save(command, fileName);
             SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, command.PlainSql());

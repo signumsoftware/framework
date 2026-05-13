@@ -1,5 +1,3 @@
-using Microsoft.Playwright;
-using Signum.Basics;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 

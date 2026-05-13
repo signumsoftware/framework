@@ -1,5 +1,4 @@
 using Signum.Playwright.Frames;
-using Signum.Playwright.ModalProxies;
 
 namespace Signum.Playwright.LineProxies;
 

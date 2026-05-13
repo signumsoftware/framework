@@ -1,7 +1,3 @@
-using Signum.API;
-using Signum.Authorization;
-using Signum.Authorization.Rules;
-
 namespace Signum.ConcurrentUser;
 public static class ConcurrentUserLogic
 {

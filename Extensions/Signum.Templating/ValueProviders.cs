@@ -904,7 +904,7 @@ public class GlobalValueProvider : ValueProviderBase
 
     public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     {
-        globalKey = sc.Replacements.SelectInteractive(globalKey, GlobalVariables.Keys, "Globals", sc.StringDistance) ?? globalKey;
+        globalKey = sc.TokenSync.AskRename(Signum.UserAssets.TokenMigrations.RenameBucket.Global, subKey: null, globalKey, GlobalVariables.Keys, sc.StringDistance) ?? globalKey;
 
         if(remainingFieldsOrProperties.HasText() && Members == null)
         {

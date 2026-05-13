@@ -1,9 +1,6 @@
-using LibGit2Sharp;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
 
 namespace Signum.Upgrade.Upgrades;
 

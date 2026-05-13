@@ -44,7 +44,7 @@ public class AnthropicProvider : IChatbotModelProvider
 
     private static string GetApiKey()
     {
-        var apiKey = ChatbotLogic.GetConfig().AnthropicAPIKey;
+        var apiKey = LanguageModelLogic.GetConfig().AnthropicAPIKey;
 
         if (apiKey.IsNullOrEmpty())
             throw new InvalidOperationException("No API Key for Claude configured!");

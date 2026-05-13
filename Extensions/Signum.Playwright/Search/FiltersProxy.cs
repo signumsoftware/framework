@@ -1,5 +1,3 @@
-using Microsoft.Playwright;
-
 namespace Signum.Playwright.Search;
 
 /// <summary>

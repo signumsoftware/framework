@@ -50,6 +50,9 @@ public class ChatMessageEntity : Entity
     [StringLengthValidator(MultiLine = true)] // The arguments of the tool call if role is Assistant and ToolID is not null
     public string? Content { get; set; }
 
+    [StringLengthValidator(MultiLine = true)]
+    public string? ReasoningContent { get; set; }
+
     [PreserveOrder, NoRepeatValidator]
     public MList<ToolCallEmbedded> ToolCalls { get; set; } = new MList<ToolCallEmbedded>();
 
@@ -86,6 +89,9 @@ public class ChatMessageEntity : Entity
 
         if (pi.Name == nameof(Content) && Content == null && Role != ChatMessageRole.Assistant && Exception == null)
             return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+        if (pi.Name == nameof(ReasoningContent) && ReasoningContent != null && Role != ChatMessageRole.Assistant)
+            return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
 
         if (pi.Name == nameof(UserFeedbackMessage) && UserFeedbackMessage != null && UserFeedback != Agent.UserFeedback.Negative)
             return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
@@ -153,6 +159,7 @@ public enum ChatbotMessage
     [Description("Session interrupted, do you want to recover?")]
     SessionInterruptedDoYouWantToRecover,
     Recover,
+    Reasoning,
 }
 
 [AutoInit]
