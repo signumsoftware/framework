@@ -98,6 +98,7 @@ public static class SymbolLogic<T>
     static void SymbolLogic_Retrieved(T ident, PostRetrievingContext ctx)
     {
         if (!avoidCache)
+        {
             try
             {
                 ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
@@ -107,6 +108,7 @@ public static class SymbolLogic<T>
                 //Could happen when not 100% synchronized
                 StartParameters.IgnoredDatabaseMismatches.Add(e);
             }
+        }
     }
 
     static SqlPreCommand? Schema_Generating()

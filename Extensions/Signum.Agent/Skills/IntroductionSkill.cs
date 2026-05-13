@@ -6,7 +6,7 @@ using System.ComponentModel;
 namespace Signum.Agent.Skills;
 
 
-public class IntroductionSkill : AgentSkill
+public class IntroductionSkill : SkillCode
 {
     public IntroductionSkill()
     {
@@ -18,11 +18,9 @@ public class IntroductionSkill : AgentSkill
         };
     }
 
-    [McpServerTool, Description("Gets the introduction for an skill and discorver new tools")]
+    [McpServerTool, Description("Gets the instructions for a skill and discovers its tools")]
     public string Describe(string skillName)
     {
-        //throw new InvalidOperationException("bla");
-
         if (skillName.Contains("error"))
             throw new Exception(skillName + " has an error");
 
@@ -38,4 +36,5 @@ public class IntroductionSkill : AgentSkill
         return this.GetSkillsRecursive().ToDictionary(a => a.Name, a => a.ShortDescription);
     }
 }
+
 
