@@ -36,37 +36,44 @@ public enum RenameBucket
 public class TokenMigrationFile
 {
     /// <summary>Query-rooted token renames (first segment of a token path). Outer key = queryKey.</summary>
-    public Dictionary<string, Dictionary<string, string>> TokensColumn { get; set; } = new();
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, Dictionary<string, string>>? TokensByQuery { get; set; }
 
     /// <summary>Type-rooted token renames (later segments inside a Type). Outer key = type FullName.</summary>
-    public Dictionary<string, Dictionary<string, string>> TokensType { get; set; } = new();
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, Dictionary<string, string>>? TokensByType { get; set; }
 
     /// <summary>Filter-value renames. Outer key = "queryKey|tokenString"; inner dict = oldValue → newValue.</summary>
-    public Dictionary<string, Dictionary<string, string>> FilterValues { get; set; } = new();
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, Dictionary<string, string>>? FilterValues { get; set; }
 
     /// <summary>
     /// Type renames — also used as query-key renames since a queryKey is conventionally a Type's
     /// clean name (or an enum ToString()). One dict covers both: Lite type renames inside filter
     /// values, AND query renames flushed from <c>QueryLogic.QueryRenamed</c> into a .query.json.
     /// </summary>
-    public Dictionary<string, string> Types { get; set; } = new();
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, string>? Types { get; set; }
 
     /// <summary>CLR member renames used by the template parser. Outer key = type FullName.</summary>
-    public Dictionary<string, Dictionary<string, string>> Members { get; set; } = new();
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, Dictionary<string, string>>? Members { get; set; }
 
     /// <summary>Global-variable renames in templates. Flat dict = oldKey → newKey.</summary>
-    public Dictionary<string, string> Globals { get; set; } = new();
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, string>? Globals { get; set; }
 
-    public List<UserAssetEntityAction> UserAssetActions { get; set; } = new();
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<UserAssetEntityAction>? UserAssetActions { get; set; }
 
     public bool IsEmpty =>
-        TokensColumn.Count == 0
-        && TokensType.Count == 0
-        && FilterValues.Count == 0
-        && Types.Count == 0
-        && Members.Count == 0
-        && Globals.Count == 0
-        && UserAssetActions.Count == 0;
+        TokensByQuery.IsNullOrEmpty()
+        && TokensByType.IsNullOrEmpty()
+        && FilterValues.IsNullOrEmpty()
+        && Types.IsNullOrEmpty()
+        && Members.IsNullOrEmpty()
+        && Globals.IsNullOrEmpty()
+        && UserAssetActions.IsNullOrEmpty();
 
     public static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -84,13 +91,13 @@ public class TokenMigrationFile
 
     public void Save(string filePath)
     {
+        if (IsEmpty)
+            return;
+
         var json = JsonSerializer.Serialize(this, JsonOptions);
         File.WriteAllText(filePath, json, Encoding.UTF8);
-
-
         Console.WriteLine("Json file saved in:  " + filePath);
         SafeConsole.WriteLineColor(ConsoleColor.DarkGray, json);
-
     }
 
     /// <summary>
@@ -101,10 +108,10 @@ public class TokenMigrationFile
     {
         return bucket switch
         {
-            RenameBucket.FilterValue => FilterValues.TryGetValue(subKey ?? throw SubKeyRequired(bucket), out var d) ? d : null,
-            RenameBucket.Types => Types.Count == 0 ? null : Types,
-            RenameBucket.Member => Members.TryGetValue(subKey ?? throw SubKeyRequired(bucket), out var d) ? d : null,
-            RenameBucket.Global => Globals.Count == 0 ? null : Globals,
+            RenameBucket.FilterValue => FilterValues != null && FilterValues.TryGetValue(subKey ?? throw SubKeyRequired(bucket), out var d) ? d : null,
+            RenameBucket.Types => Types is { Count: > 0 } ? Types : null,
+            RenameBucket.Member => Members != null && Members.TryGetValue(subKey ?? throw SubKeyRequired(bucket), out var d) ? d : null,
+            RenameBucket.Global => Globals is { Count: > 0 } ? Globals : null,
             _ => throw new ArgumentOutOfRangeException(nameof(bucket), bucket, null),
         };
     }
@@ -117,10 +124,10 @@ public class TokenMigrationFile
     {
         return bucket switch
         {
-            RenameBucket.FilterValue => FilterValues.GetOrCreate(subKey ?? throw SubKeyRequired(bucket)),
-            RenameBucket.Types => Types,
-            RenameBucket.Member => Members.GetOrCreate(subKey ?? throw SubKeyRequired(bucket)),
-            RenameBucket.Global => Globals,
+            RenameBucket.FilterValue => (FilterValues ??= new()).GetOrCreate(subKey ?? throw SubKeyRequired(bucket)),
+            RenameBucket.Types => Types ??= new(),
+            RenameBucket.Member => (Members ??= new()).GetOrCreate(subKey ?? throw SubKeyRequired(bucket)),
+            RenameBucket.Global => Globals ??= new(),
             _ => throw new ArgumentOutOfRangeException(nameof(bucket), bucket, null),
         };
     }
@@ -133,7 +140,7 @@ public class TokenMigrationFile
 
     internal void LoadTypes(Replacements rep)
     {
-        Types = rep.TryGetC(QueryLogic.QueriesKey) ?? new Dictionary<string, string>();
+        Types = rep.TryGetC(QueryLogic.QueriesKey);
     }
 }
 

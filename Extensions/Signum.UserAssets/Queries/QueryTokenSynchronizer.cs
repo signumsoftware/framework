@@ -321,8 +321,8 @@ public static class QueryTokenSynchronizer
             {
                 var file = ctx.History[fi];
                 var dic = result == null
-                    ? file.TokensColumn.TryGetC(eraSubKeys[fi])
-                    : file.TokensType.TryGetC(eraSubKeys[fi]);
+                    ? file.TokensByQuery?.TryGetC(eraSubKeys[fi])
+                    : file.TokensByType?.TryGetC(eraSubKeys[fi]);
 
                 if (dic == null)
                     continue;
@@ -417,8 +417,8 @@ public static class QueryTokenSynchronizer
         }
 
         var recTokenDic = pos == -1 ?
-            recording.TokensColumn.GetOrCreate(QueryUtils.GetKey(tokenList[0].QueryName)) :
-            recording.TokensType.GetOrCreate(CleanTypeName(tokenList[pos].Type));
+            (recording.TokensByQuery ??= new()).GetOrCreate(QueryUtils.GetKey(tokenList[0].QueryName)) :
+            (recording.TokensByType ??= new()).GetOrCreate(CleanTypeName(tokenList[pos].Type));
 
         recTokenDic[oldPartsList.ToString(".")] = newPartsList.ToString(".");
     }

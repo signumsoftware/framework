@@ -142,8 +142,6 @@ public static class TokenMigrationLogic
         public required MigrationKind Kind;
         public bool IsExecuted;
 
-        public string FileExtension => Kind == MigrationKind.Tokens ? TokensFileExtension : QueryFileExtension;
-
         public override string ToString() => Version + " (" + Kind + ")";
     }
 }

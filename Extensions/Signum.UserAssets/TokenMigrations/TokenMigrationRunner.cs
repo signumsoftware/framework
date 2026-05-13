@@ -79,7 +79,7 @@ public static class TokenMigrationRunner
     /// <c>TokenSynchronizing</c> fire. Both .tokens.json (full rename data + entity actions) and
     /// .query.json (Types only) contribute to the History pool. The chained walk inside FixToken
     /// / FixValue / AskRename traverses them per-file and consults each file's era-name (computed
-    /// from later files' Types) when looking up TokensColumn / TokensType / FilterValues — so
+    /// from later files' Types) when looking up TokensByQuery / TokensByType / FilterValues — so
     /// V1.Tokens recorded under the pre-rename query key still matches when the live key is the
     /// post-rename name from V2.Types, without ever mutating the loaded files.
     /// </summary>
@@ -118,9 +118,7 @@ public static class TokenMigrationRunner
 
     public static void AfterSynchronize(string? fileName, Replacements? rep)
     {
-        if (!SafeConsole.Ask("Synchronize tokens now?"))
-            return;
-
+        SafeConsole.WriteLineColor(ConsoleColor.Green, "No changes needed.");
         QueryLogic.AssertLoaded();
         TypeLogic.AssertLoaded();
         var recording = new TokenMigrationFile();
@@ -128,8 +126,7 @@ public static class TokenMigrationRunner
         if (rep != null)
             recording.LoadTypes(rep);
 
-        var ctx = new TokenSyncContext(TokenSyncMode.Record, [], recording);
-        TokenMigrationLogic.FireTokenSynchronizing(ctx);
+        TokenMigrationLogic.FireTokenSynchronizing(new TokenSyncContext(TokenSyncMode.Record, [], recording));
 
         if (recording.IsEmpty)
         {
@@ -140,6 +137,11 @@ public static class TokenMigrationRunner
         var newFileName = Path.GetFileNameWithoutExtension(fileName) + ".tokens.json";
 
         recording.Save(newFileName);
+
+        if (SafeConsole.Ask("Run now?"))
+        {
+            TokenMigrationLogic.FireTokenSynchronizing(new TokenSyncContext(TokenSyncMode.Apply, [recording], recording: null));
+        }
     }
 
     static void RecordNewMigration()

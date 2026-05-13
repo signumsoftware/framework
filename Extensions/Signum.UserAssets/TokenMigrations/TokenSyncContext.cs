@@ -60,7 +60,7 @@ public class TokenSyncContext
         var typeName = entity.GetType().Name;
         foreach (var file in History)
         {
-            var match = file.UserAssetActions.FirstOrDefault(a => a.EntityType == typeName && a.Guid == entity.Guid);
+            var match = file.UserAssetActions?.FirstOrDefault(a => a.EntityType == typeName && a.Guid == entity.Guid);
             if (match != null)
             {
                 action = match.Action;
@@ -80,7 +80,7 @@ public class TokenSyncContext
         if (Recording == null)
             throw new InvalidOperationException("AddUserAssetAction is only valid in Record mode.");
 
-        Recording.UserAssetActions.Add(new UserAssetEntityAction
+        (Recording.UserAssetActions ??= new()).Add(new UserAssetEntityAction
         {
             EntityType = entity.GetType().Name,
             Guid = entity.Guid,
@@ -209,7 +209,7 @@ public class TokenSyncContext
         {
             eras[fi] = running;
             // Unwind: if this file's Types maps X → running, then files prior to this used X.
-            foreach (var (oldT, newT) in History[fi].Types)
+            foreach (var (oldT, newT) in History[fi].Types.EmptyIfNull())
             {
                 if (newT == running)
                 {
