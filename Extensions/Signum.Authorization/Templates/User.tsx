@@ -73,17 +73,17 @@ export default function User(p: { ctx: TypeContext<UserEntity> }): React.JSX.Ele
   );
 }
 
-export let changePasswordVisible = (user: UserEntity) => true;
+export let changePasswordVisible = (user: UserEntity) => user.externalId == null;
 export function setChangePasswordVisibleFunction(newFunction: (user: UserEntity) => boolean): void {
   changePasswordVisible = newFunction;
 }
 
-export let userNameReadonly = (user: UserEntity) => false;
+export let userNameReadonly = (user: UserEntity) => user.externalId != null;
 export function setUserNameReadonlyFunction(newFunction: (user: UserEntity) => boolean): void {
   userNameReadonly = newFunction;
 }
 
-export let emailReadonly = (user: UserEntity) => false;
+export let emailReadonly = (user: UserEntity) => user.externalId != null;
 export function setEmailReadonlyFunction(newFunction: (user: UserEntity) => boolean): void {
   emailReadonly = newFunction;
 }

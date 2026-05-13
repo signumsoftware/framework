@@ -30,13 +30,8 @@ public static class AzureADLogic
             CultureInfo = u.CultureInfo,
             DisplayName = u.UserName,
             Email = u.Email,
-            AzureUserId = u.GetOID(),
+            ExternalId = u.ExternalId,
         });
-
-        UserWithClaims.FillClaims += (userWithClaims, user) =>
-        {
-            userWithClaims.Claims["ExternalId"] = ((UserEntity)user).ExternalId;
-        };
 
         Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
         {

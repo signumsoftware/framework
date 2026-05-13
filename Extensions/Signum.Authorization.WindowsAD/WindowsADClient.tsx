@@ -26,10 +26,6 @@ export namespace WindowsADClient {
 
     Navigator.addSettings(new EntitySettings(WindowsADConfigurationEmbedded, e => import('./WindowsADConfiguration')));
 
-    User.setChangePasswordVisibleFunction((user: UserEntity) => user.externalId == null);
-    User.setUserNameReadonlyFunction((user: UserEntity) => user.externalId != null);
-    User.setEmailReadonlyFunction((user: UserEntity) => user.externalId != null);
-
     if (options.profilePhotos) {
 
       ProfilePhoto.urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {

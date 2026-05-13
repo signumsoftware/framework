@@ -267,7 +267,7 @@ public class EmailFromEmbedded : EmailAddressEmbedded, IEquatable<EmailFromEmbed
     public EmailFromEmbedded() { }
     public EmailFromEmbedded(EmailOwnerData data) : base(data)
     {
-        AzureUserId = data.AzureUserId;
+        AzureUserId = data.ExternalId?.ToGuid();
     }
 
     public Guid? AzureUserId { get; set; }
