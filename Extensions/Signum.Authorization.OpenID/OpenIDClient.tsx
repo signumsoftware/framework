@@ -9,7 +9,7 @@ export namespace OpenIDClient {
   export function startPublic(options: { routes: RouteObject[] }): void {
     options.routes.push({
       path: "/openid-callback",
-      element: <ImportComponent onImport={() => import('./OpenIDRedirect')} />
+      element: <ImportComponent onImport={() => import('./OpenIDCallback')} />
     });
   }
 }

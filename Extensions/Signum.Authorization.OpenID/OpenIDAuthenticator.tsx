@@ -39,7 +39,7 @@ export namespace OpenIDAuthenticator {
     return window.location.origin + AppContext.toAbsoluteUrl("/openid-callback");
   }
 
-  export async function redirectToIdP(config: OpenIDConfig, returnUrl?: string): Promise<void> {
+  export async function redirectToIdP(config: OpenIDConfig, returnUrl?: string, options?: { prompt?: string }): Promise<void> {
     const discoveryUrl = `${config.authority.replace(/\/$/, '')}/.well-known/openid-configuration`;
     const discovery = await fetch(discoveryUrl).then(r => r.json()) as { authorization_endpoint: string };
 
@@ -59,7 +59,30 @@ export namespace OpenIDAuthenticator {
       state,
     });
 
+    if (options?.prompt)
+      params.set("prompt", options.prompt);
+
     window.location.href = `${discovery.authorization_endpoint}?${params.toString()}`;
+  }
+
+  export async function signOut(): Promise<void> {
+    setOpenIDActive(false);
+
+    const config = Options.getOpenIDConfig();
+    if (!config) return;
+
+    const discoveryUrl = `${config.authority.replace(/\/$/, '')}/.well-known/openid-configuration`;
+    const discovery = await fetch(discoveryUrl).then(r => r.json()) as { end_session_endpoint?: string };
+
+    if (!discovery.end_session_endpoint) return;
+
+    const params = new URLSearchParams({
+      client_id: config.clientId,
+      post_logout_redirect_uri: window.location.origin + AppContext.toAbsoluteUrl("/"),
+    });
+
+    window.location.href = `${discovery.end_session_endpoint}?${params.toString()}`;
+    return new Promise(() => { }); // Never resolves — browser is navigating away
   }
 
   function generateState(): string {
@@ -83,11 +106,16 @@ export namespace OpenIDAuthenticator {
       return undefined;
 
     // Save the current deep-link so OpenIDRedirect can restore it after login
-    const returnUrl = window.location.pathname + window.location.search + window.location.hash;
-    await redirectToIdP(config, returnUrl);
 
-    // Browser is navigating away — this promise intentionally never resolves
-    return new Promise(() => { });
+    if (window.location.pathname.toLowerCase().contains("openid-callback")) {
+      debugger;
+      return;
+    }
+    else {
+      const returnUrl = window.location.pathname + window.location.search + window.location.hash;
+      await redirectToIdP(config, returnUrl);
+      return new Promise(() => { });
+    }
   }
 
   export function setOpenIDActive(active: boolean): void {
@@ -117,12 +145,13 @@ export function OpenIDSignIn({ ctx, buttonContent }: {
   const loc = useLocation();
   const back = loc.state?.back as { pathname: string; search?: string; hash?: string } | undefined;
 
-  function handleClick() {
+  function handleClick(e: React.MouseEvent) {
     if (!config) return;
     const returnUrl = back
       ? back.pathname + (back.search ?? '') + (back.hash ?? '')
       : undefined;
-    void OpenIDAuthenticator.redirectToIdP(config, returnUrl);
+    const prompt = e.shiftKey || e.altKey ? "login" : undefined;
+    void OpenIDAuthenticator.redirectToIdP(config, returnUrl, { prompt });
   }
 
   return (
@@ -131,8 +160,7 @@ export function OpenIDSignIn({ ctx, buttonContent }: {
         <button
           type="button"
           className={`btn btn-primary w-100${ctx.loading != null ? " disabled" : ""}`}
-          onClick={handleClick}
-        >
+          onClick={handleClick}>
           {buttonContent ?? OpenIDMessage.SignInWithOpenID.niceToString()}
         </button>
       </div>

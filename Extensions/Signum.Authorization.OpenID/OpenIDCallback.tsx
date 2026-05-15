@@ -7,13 +7,14 @@ import { OpenIDAuthenticator } from './OpenIDAuthenticator'
 // Dedicated callback page for the OpenID Connect authorization code flow.
 // Keycloak / Dex redirects here after authentication with ?code=...&state=...
 // Registered as the route /openid-callback in OpenIDClient.startPublic().
-export default function OpenIDRedirect(): React.JSX.Element {
+export default function OpenIDCallback(): React.JSX.Element {
 
   React.useEffect(() => {
     handleCallback();
   }, []);
 
   async function handleCallback(): Promise<void> {
+    console.log("openid-callback");
     const qs = QueryString.parse(window.location.search);
     const code = qs["code"] as string | undefined;
     const state = qs["state"] as string | undefined;
