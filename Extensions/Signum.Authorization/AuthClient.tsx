@@ -113,11 +113,11 @@ export namespace AuthClient {
     });
   }
   
-  function logoutInternal() {
+  async function logoutInternal() : Promise<void> {
     setAuthToken(undefined, undefined);
     setCurrentUser(undefined);
     Options.disableWindowsAuthentication = true;
-    Options.onLogout();
+    await Options.onLogout();
   }
   
   Services.AuthTokenFilter.addAuthToken = addAuthToken;
@@ -256,7 +256,7 @@ export namespace AuthClient {
     export function getCookie(): string | null { return Cookies.get("sfUser"); }
     export function removeCookie(): void { return Cookies.remove("sfUser", "/", document.location.hostname); }
   
-    export let onLogout: () => void = () => {
+    export let onLogout: () => Promise<void> = () => {
       throw new Error("onLogout should be defined (check MainPublic.tsx in Southwind)");
     }
   

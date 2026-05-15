@@ -37,20 +37,15 @@ export default function OpenIDCallback(): React.JSX.Element {
         { throwErrors: true }
       );
 
-      if (!loginResponse) {
-        AppContext.navigate("/");
-        return;
-      }
-
       OpenIDAuthenticator.setOpenIDActive(true);
-      AuthClient.setAuthToken(loginResponse.token, loginResponse.authenticationType);
-      AuthClient.setCurrentUser(loginResponse.userEntity);
+      AuthClient.setAuthToken(loginResponse!.token, loginResponse!.authenticationType);
+      AuthClient.setCurrentUser(loginResponse!.userEntity);
       AuthClient.Options.onLogin(returnUrl);
 
     } catch (e) {
-      console.error("OpenID callback failed", e);
       OpenIDAuthenticator.setOpenIDActive(false);
       AppContext.navigate("/");
+      throw e; 
     }
   }
 

@@ -96,7 +96,7 @@ public class OpenIDAuthenticationServer
         return JsonSerializer.Deserialize<OpenIDTokenResponse>(json)!;
     }
 
-    static Task<OpenIdConnectConfiguration> GetDiscoveryDocument(OpenIDConfigurationEmbedded config)
+    public static Task<OpenIdConnectConfiguration> GetDiscoveryDocument(OpenIDConfigurationEmbedded config)
     {
         var endpoint = config.GetDiscoveryEndpoint();
         var retriever = new HttpDocumentRetriever

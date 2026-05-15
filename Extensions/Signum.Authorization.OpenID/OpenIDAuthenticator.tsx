@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useLocation } from 'react-router'
 import * as AppContext from '@framework/AppContext'
-import { ajaxPost } from '@framework/Services'
+import { ajaxGet, ajaxPost } from '@framework/Services'
 import { QueryString } from '@framework/QueryString'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import LoginPage, { LoginContext } from '../Signum.Authorization/Login/LoginPage'
@@ -40,8 +40,7 @@ export namespace OpenIDAuthenticator {
   }
 
   export async function redirectToIdP(config: OpenIDConfig, returnUrl?: string, options?: { prompt?: string }): Promise<void> {
-    const discoveryUrl = `${config.authority.replace(/\/$/, '')}/.well-known/openid-configuration`;
-    const discovery = await fetch(discoveryUrl).then(r => r.json()) as { authorization_endpoint: string };
+    const endpoints = await API.getEndpoints();
 
     const state = generateState();
     sessionStorage.setItem("openIDState", state);
@@ -62,26 +61,23 @@ export namespace OpenIDAuthenticator {
     if (options?.prompt)
       params.set("prompt", options.prompt);
 
-    window.location.href = `${discovery.authorization_endpoint}?${params.toString()}`;
+    window.location.href = `${endpoints.authorizationEndpoint}?${params.toString()}`;
   }
 
   export async function signOut(): Promise<void> {
     setOpenIDActive(false);
 
+    const endpoints = await API.getEndpoints();
+
+    if (!endpoints.endSessionEndpoint) return;
+
     const config = Options.getOpenIDConfig();
-    if (!config) return;
-
-    const discoveryUrl = `${config.authority.replace(/\/$/, '')}/.well-known/openid-configuration`;
-    const discovery = await fetch(discoveryUrl).then(r => r.json()) as { end_session_endpoint?: string };
-
-    if (!discovery.end_session_endpoint) return;
-
     const params = new URLSearchParams({
-      client_id: config.clientId,
+      ...(config ? { client_id: config.clientId } : {}),
       post_logout_redirect_uri: window.location.origin + AppContext.toAbsoluteUrl("/"),
     });
 
-    window.location.href = `${discovery.end_session_endpoint}?${params.toString()}`;
+    window.location.href = `${endpoints.endSessionEndpoint}?${params.toString()}`;
     return new Promise(() => { }); // Never resolves — browser is navigating away
   }
 
@@ -107,10 +103,8 @@ export namespace OpenIDAuthenticator {
 
     // Save the current deep-link so OpenIDRedirect can restore it after login
 
-    if (window.location.pathname.toLowerCase().contains("openid-callback")) {
-      debugger;
+    if (window.location.pathname.toLowerCase().contains("openid-callback"))
       return;
-    }
     else {
       const returnUrl = window.location.pathname + window.location.search + window.location.hash;
       await redirectToIdP(config, returnUrl);
@@ -131,6 +125,10 @@ export namespace OpenIDAuthenticator {
         url: "/api/auth/loginWithOpenID?" + QueryString.stringify(opts),
         avoidAuthToken: true
       }, { code, redirectUri });
+    }
+
+    export function getEndpoints(): Promise<{ authorizationEndpoint: string; endSessionEndpoint?: string }> {
+      return ajaxGet({ url: "/api/auth/openIDEndpoints", avoidAuthToken: true });
     }
   }
 }

@@ -35,7 +35,7 @@ export default function OpenIDConfiguration(p: { ctx: TypeContext<OpenIDConfigur
         {roleClaimPathSuggestions.map(s => <option key={s} value={s} />)}
       </datalist>
       <TextBoxLine ctx={ctx.subCtx(n => n.roleClaimPath)}
-        helpText="Claim path for roles (e.g. roles, groups, realm_access.roles)"
+        helpText="Claim path for parsing the roles (e.g. roles, groups, realm_access.roles)"
         valueHtmlAttributes={{ list: datalistId }} />
 
       <div className="row my-2">
