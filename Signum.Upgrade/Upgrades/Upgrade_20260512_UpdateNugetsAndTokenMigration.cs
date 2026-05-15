@@ -36,5 +36,10 @@ class Upgrade_20260512_UpdateNugetsAndTokenMigration : CodeUpgradeBase
                 TokenMigrationLogic.Start(sb);
                 """);
         });
+
+        uctx.ChangeCodeFile(@"Southwind.Server/package.json", file =>
+        {
+            file.UpdateNpmPackage("@typescript/native-preview", "beta");
+        });
     }
 }
