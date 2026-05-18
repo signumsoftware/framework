@@ -391,7 +391,7 @@ function complete(values: unknown[], allValues: unknown[], column: ChartColumn<u
   throw new Error();
 }
 
-export function getStackOffset(curveName: string): ((series: d3.Series<any, any>, order: number[]) => void) | undefined {
+export function getStackOffset(curveName: string): ((series: d3.Series<any, any>[], order: Iterable<number>) => void) | undefined {
   switch (curveName) {
     case "zero": return d3.stackOffsetNone;
     case "expand": return d3.stackOffsetExpand;
@@ -404,7 +404,7 @@ export function getStackOffset(curveName: string): ((series: d3.Series<any, any>
 
 
 
-export function getStackOrder(schemeName: string): ((series: d3.Series<any, any>) => number[]) | undefined {
+export function getStackOrder(schemeName: string): ((series: d3.Series<any, any>) => Iterable<number>) | undefined {
   switch (schemeName) {
     case "none": return d3.stackOrderNone;
     case "ascending": return d3.stackOrderAscending;

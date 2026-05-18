@@ -76,8 +76,8 @@ export default function renderStackedBars({ data, width, height, parameters, loa
   var pStack = parameters["Stack"];
 
   var stack = d3.stack<PivotRow>()
-    .offset(ChartUtils.getStackOffset(pStack)!)
-    .order(ChartUtils.getStackOrder(parameters["Order"])!)
+    .offset(ChartUtils.getStackOffset(pStack) as any)
+    .order(ChartUtils.getStackOrder(parameters["Order"]) as any)
     .keys(pivot.columns.map(d => d.key))
     .value((r, k) => r.values[k]?.value ?? 0);
 
