@@ -58,7 +58,7 @@ public static class WorkflowLogic
     {
         var type = typeof(T).ToTypeEntity();
         var user = UserEntity.Current;
-        return WorkflowLogic.WorkflowGraphLazy.Value.Values.Where(a => a.Workflow.MainEntityType.Is(type)).Any(a => a.Lanes.Any(l => l.Actors.Contains(user)));
+        return WorkflowLogic.WorkflowGraphLazy.Value.Values.Where(a => a.Workflow.MainEntityType.Is(type)).Any(a => a.Lanes != null && a.Lanes.Any(l => l.Actors.Contains(user)));
     }
 
     [AutoExpressionField]
