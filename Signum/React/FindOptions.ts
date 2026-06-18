@@ -402,6 +402,10 @@ export function isList(fo: FilterOperation): boolean {
     fo == "IsNotIn";
 }
 
+export function isPair(fo: FilterOperation): boolean {
+  return fo == "Between" || fo == "BetweenNoEnd";
+}
+
 export function isGroupList(fo: Pick<FilterGroupOption | FilterGroupOptionParsed, 'filters'>): boolean {
   return fo.filters.some(f => f != null && isFilterCondition(f as FilterOptionParsed) &&
     (f as FilterConditionOptionParsed).operation != null &&
@@ -468,6 +472,8 @@ export const filterOperations: Record<FilterType, FilterOperation[]> = {
     "GreaterThanOrEqual",
     "LessThan",
     "LessThanOrEqual",
+    "Between",
+    "BetweenNoEnd",
     "IsIn",
     "IsNotIn"
   ],

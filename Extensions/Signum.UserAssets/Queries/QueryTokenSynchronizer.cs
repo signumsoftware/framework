@@ -136,22 +136,22 @@ public static class QueryTokenSynchronizer
         }
     }
 
-    public static FixTokenResult FixValue(TokenSyncContext ctx, string queryKey, string tokenString, Type targetType, ref string? valueString, bool allowRemoveToken, bool isList, bool fixInstead, Type? currentEntityType)
+    public static FixTokenResult FixValue(TokenSyncContext ctx, string queryKey, string tokenString, Type targetType, ref string? valueString, bool allowRemoveToken, bool isListOrPair, bool fixInstead, Type? currentEntityType)
     {
-        var res = FilterValueConverter.IsValidExpression(valueString, targetType, isList, currentEntityType);
+        var res = FilterValueConverter.IsValidExpression(valueString, targetType, isListOrPair, currentEntityType);
         if (res is Result<Type>.Success)
             return FixTokenResult.Nothing;
 
         DelayedConsole.Flush();
 
         // List values: split on '|', recurse per item, recompose.
-        if (isList && valueString!.Contains('|'))
+        if (isListOrPair && valueString!.Contains('|'))
         {
             var changes = new List<string?>();
             foreach (var str in valueString.Split('|'))
             {
                 string? s = str;
-                var inner = FixValue(ctx, queryKey, tokenString, targetType, ref s, allowRemoveToken, isList: false, fixInstead, currentEntityType);
+                var inner = FixValue(ctx, queryKey, tokenString, targetType, ref s, allowRemoveToken, isListOrPair: false, fixInstead, currentEntityType);
 
                 if (inner == FixTokenResult.DeleteEntity ||
                     inner == FixTokenResult.SkipEntity ||

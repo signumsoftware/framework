@@ -535,8 +535,8 @@ export namespace LiteMessage {
 }
 
 export namespace MarkdownMessage {
-  export const _0IsCurrentlyEditable: MessageKey = new MessageKey("MarkdownMessage", "_0IsCurrentlyEditable");
-  export const _0IsCurrentlyViewableOnly: MessageKey = new MessageKey("MarkdownMessage", "_0IsCurrentlyViewableOnly");
+  export const Edit0: MessageKey = new MessageKey("MarkdownMessage", "Edit0");
+  export const Preview0: MessageKey = new MessageKey("MarkdownMessage", "Preview0");
 }
 
 export interface ModelEntity extends ModifiableEntity {

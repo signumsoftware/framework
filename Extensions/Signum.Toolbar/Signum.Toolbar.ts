@@ -22,6 +22,11 @@ export type ShowCount =
   "MoreThan0" |
   "Always";
 
+export namespace SubPageMessage {
+  export const No0FoundIn1: MessageKey = new MessageKey("SubPageMessage", "No0FoundIn1");
+  export const NotAllowedToCreate0In1: MessageKey = new MessageKey("SubPageMessage", "NotAllowedToCreate0In1");
+}
+
 export const ToolbarElementEmbedded: Type<ToolbarElementEmbedded> = new Type<ToolbarElementEmbedded>("ToolbarElementEmbedded");
 export interface ToolbarElementEmbedded extends Entities.EmbeddedEntity {
   Type: "ToolbarElementEmbedded";

@@ -65,7 +65,7 @@ public class UserAssetController : ControllerBase
 
                 var token = QueryUtils.Parse(filter.tokenString!, qd, options);
 
-                var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation!.Value.IsList());
+                var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation!.Value.IsList(), filter.operation!.Value.IsPair());
 
                 return new FilterNode
                 {
@@ -140,7 +140,7 @@ public class UserAssetController : ControllerBase
         {
             var token = QueryUtils.Parse(filter.tokenString!, qd, options);
 
-            var expectedValueType = filter.operation!.Value.IsList() ? typeof(ObservableCollection<>).MakeGenericType(token.Type.Nullify()) : token.Type;
+            var expectedValueType = filter.operation!.Value.IsList() || filter.operation!.Value.IsPair() ? typeof(ObservableCollection<>).MakeGenericType(token.Type.Nullify()) : token.Type;
             
             var val = filter.value is JsonElement jtok ?
                  jtok.ToObject(expectedValueType, SignumServer.JsonSerializerOptions) :

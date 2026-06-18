@@ -75,6 +75,8 @@ export namespace DashboardClient {
 
     Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: AppContext.currentUser && toLite(AppContext.currentUser) }));
 
+    AppContext.clearSettingsActions.push(DashboardClient.clearDashboardPageActions);
+
     Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard'), { modalSize: "xl" }));
     Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
@@ -310,6 +312,10 @@ export namespace DashboardClient {
   }
 
   export const onDashboardPageActions: Array<(dashboard: DashboardEntity) => React.ReactElement | undefined> = [];
+
+  export function clearDashboardPageActions(): void {
+    onDashboardPageActions.clear();
+  }
 
   export namespace Options {
 

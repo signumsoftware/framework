@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { areEqual, classes, KeyGenerator } from '../Globals'
 import {
-  FilterOptionParsed, QueryDescription, getFilterOperations, isList, FilterOperation,
+  FilterOptionParsed, QueryDescription, getFilterOperations, isList, isPair, FilterOperation,
   FilterConditionOptionParsed, FilterGroupOptionParsed,
   isCheckBox, canSplitValue, isFilterGroup, isFilterCondition
 } from '../FindOptions'
@@ -717,7 +717,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps): Reac
         !areEqual(f.token, newToken, a => a.preferEquals) ||
         newToken.filterType == "Lite" && f.value != null && newToken.type.name != IsByAll && !getTypeInfos(newToken.type.name).some(t => t.name == (f.value as Lite<any>).EntityType)) {
         f.operation = newToken.preferEquals ? "EqualTo" : newToken.filterType && getFilterOperations(newToken).first();
-        f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
+        f.value = f.operation && isList(f.operation) ? [undefined] : f.operation && isPair(f.operation) ? [null, null] : undefined;
       }
       else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime") {
         if (f.value) {
@@ -734,6 +734,8 @@ export function FilterConditionComponent(p: FilterConditionComponentProps): Reac
 
           if (f.operation && isList(f.operation)) {
             f.value = (f.value as string[]).map(v => convertDateToNewFormat(v));
+          } else if (f.operation && isPair(f.operation)) {
+            f.value = (f.value as [string | null, string | null]).map(v => v == null ? null : convertDateToNewFormat(v));
           } else {
             f.value = convertDateToNewFormat(f.value);
           }
@@ -756,10 +758,21 @@ export function FilterConditionComponent(p: FilterConditionComponentProps): Reac
 
   function handleChangeOperation(event: React.FormEvent<HTMLSelectElement>) {
     const operation = (event.currentTarget as HTMLSelectElement).value as FilterOperation;
-    if (isList(operation) != isList(p.filter.operation!))
-      p.filter.value = isList(operation) && p.filter.token?.filterType == "Lite" ? [p.filter.value].notNull() :
-        isList(operation) ? [p.filter.value] :
+    const waslist = isList(p.filter.operation!);
+    const wasPair = isPair(p.filter.operation!);
+    const toList = isList(operation);
+    const toPair = isPair(operation);
+
+    if (toPair && !wasPair) {
+      const scalar = waslist ? p.filter.value[0] : p.filter.value;
+      p.filter.value = [scalar ?? null, null];
+    } else if (!toPair && wasPair) {
+      p.filter.value = p.filter.value[0];
+    } else if (toList != waslist) {
+      p.filter.value = toList && p.filter.token?.filterType == "Lite" ? [p.filter.value].notNull() :
+        toList ? [p.filter.value] :
           p.filter.value[0];
+    }
 
     p.filter.operation = operation;
     if (p.filter.pinned?.splitValue && !canSplitValue(p.filter))

@@ -10,7 +10,7 @@ import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed,
   ColumnOption, ColumnOptionParsed, Pagination,
-  ResultTable, ResultRow, OrderOption, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
+  ResultTable, ResultRow, OrderOption, isList, isPair, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
   FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption,
   FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime,
   toPinnedFilterParsed, isActive, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, isFilterCondition, isGroupList,
@@ -1168,7 +1168,7 @@ export namespace Finder {
         return ({
           token: fop.token.fullKey,
           operation: effectiveOp,
-          value: value.notNull(),
+          value: isList(fop.operation) ? value.notNull() : value,
         } as FilterConditionRequest);
       }
 
@@ -1243,6 +1243,7 @@ export namespace Finder {
     if (newFO.pagination == undefined) {
       newFO.pagination = count == undefined ? { mode: "All" } : { mode: "Firsts", elementsPerPage: count };
     }
+
 
     return newFO;
   }
@@ -1565,6 +1566,12 @@ export namespace Finder {
             fo.value = [fo.value].notNull();
 
           fo.value = (fo.value as any[]).map(v => parseValue(fo.token!, v, needsModel));
+        }
+        else if (isPair(fo.operation!)) {
+          if (!Array.isArray(fo.value))
+            fo.value = [fo.value ?? null, null];
+
+          fo.value = (fo.value as [any, any]).map(v => v == null ? null : parseValue(fo.token!, v, needsModel));
         }
         else {
           if (Array.isArray(fo.value))
@@ -1903,12 +1910,12 @@ export namespace Finder {
     });
   }
 
-  export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<ResultTable> {
+  export function getResultTable(fo: FindOptions, signal?: AbortSignal, defaultIncludeDefaultFilters: boolean = true): Promise<ResultTable> {
 
     fo = defaultNoColumnsAllRows(fo, undefined);
 
     return getQueryDescription(fo.queryName)
-      .then(qd => parseFindOptions(fo!, qd, false))
+      .then(qd => parseFindOptions(fo!, qd, defaultIncludeDefaultFilters))
       .then(fop => API.executeQuery(getQueryRequest(fop), signal));
   }
 
@@ -2283,8 +2290,9 @@ export namespace Finder {
               token: parts[0],
               operation: operation,
               value: ignoreValues ? null :
-                !isList(operation) ? unscapeTildes(parts[2]) :
-                  parts.slice(2).map(a => unscapeTildes(a)).notNull(),
+                isPair(operation) ? parts.slice(2).map(a => unscapeTildes(a) ?? null) :
+                  isList(operation) ? parts.slice(2).map(a => unscapeTildes(a)).notNull() :
+                    unscapeTildes(parts[2]),
               pinned: pinned,
             }) as FilterConditionOption
           } else {

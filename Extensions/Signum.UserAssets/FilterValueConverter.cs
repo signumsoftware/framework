@@ -50,22 +50,35 @@ public static class FilterValueConverter
         return new Result<string?>.Success(result);
     }
 
-    public static object? Parse(string? stringValue, Type type, bool isList)
+    public static object? Parse(string? stringValue, Type type, bool isList, bool isPair = false)
     {
-        var result = TryParse(stringValue, type, isList);
+        var result = TryParse(stringValue, type, isList, isPair);
         if (result is Result<object?>.Error e)
             throw new FormatException(e.ErrorText);
 
         return ((Result<object?>.Success)result).Value;
     }
 
-    public static Result<object?> TryParse(string? expression, Type type, bool isList)
+    public static Result<object?> TryParse(string? expression, Type type, bool isList, bool isPair = false)
     {
-        if (isList)
+        if (isList || isPair)
         {
             IList list = (IList)Activator.CreateInstance(typeof(ObservableCollection<>).MakeGenericType(type))!;
-            foreach (var item in (expression ?? "").SplitNoEmpty('|'))
+
+            // isPair uses plain Split so that empty parts (null min/max) are preserved
+            // isList uses SplitNoEmpty to skip blanks as before
+            var parts = isPair
+                ? (expression ?? "").Split('|')
+                : (expression ?? "").SplitNoEmpty('|').ToArray();
+
+            foreach (var item in parts)
             {
+                if (isPair && item.Length == 0)
+                {
+                    list.Add(null);
+                    continue;
+                }
+
                 var result = TryParseInternal(item.Trim(), type);
                 if (result is Result<object?>.Error e)
                     return new Result<object?>.Error(e.ErrorText);
@@ -111,9 +124,9 @@ public static class FilterValueConverter
             return new Result<object?>.Error($"Impossible to parse expression '${expression}' to ${targetType}");
     }
 
-    public static Result<Type> IsValidExpression(string? expression, Type targetType, bool isList, Type? currentEntityType)
+    public static Result<Type> IsValidExpression(string? expression, Type targetType, bool isListOrPair, Type? currentEntityType)
     {
-        if (isList && expression != null && expression.Contains('|'))
+        if (isListOrPair && expression != null && expression.Contains('|'))
         {
             List<Type> list = new List<Type>();
             foreach (var item in expression.Split('|'))
@@ -122,7 +135,7 @@ public static class FilterValueConverter
                 if (result is Result<Type>.Error e)
                     return new Result<Type>.Error(e.ErrorText);
 
-                list.Add(((Result<Type>.Success)result).Value);
+                list.Add(((Result<Type>.Success)result).Value.Nullify());
             }
             return new Result<Type>.Success(list.Distinct().SingleEx());
         }

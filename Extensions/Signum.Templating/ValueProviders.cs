@@ -179,7 +179,7 @@ public abstract class ValueProviderBase
         if (Type == null)
             return;
 
-        var result = FilterValueConverter.IsValidExpression(valueString, Type, Operation!.Value.IsList(), null);
+        var result = FilterValueConverter.IsValidExpression(valueString, Type, Operation!.Value.IsListOrPair(), null);
 
         if (result is Result<Type>.Error e)
             addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, Type.TypeName(), e.ErrorText));

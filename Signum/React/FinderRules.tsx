@@ -5,7 +5,7 @@ import { Dic, classes } from './Globals'
 import {
   FilterOptionParsed, FindOptions, QueryDescription,
   FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroup, isFilterCondition,
-  getFilterOperations, getFilterGroupUnifiedFilterType, FilterConditionOption, isList
+  getFilterOperations, getFilterGroupUnifiedFilterType, FilterConditionOption, isList, isPair
 } from './FindOptions';
 import { hasToArray, QueryToken } from './QueryToken';
 import { FilterOperation } from './Signum.DynamicQuery';
@@ -32,6 +32,7 @@ import { TextAreaLine } from "./Lines/TextAreaLine";
 import { TextBoxLine } from "./Lines/TextBoxLine";
 import { AutoLine } from "./Lines/AutoLine";
 import { EnumLine } from "./Lines/EnumLine";
+import { DateTimeRange } from "./Lines/DateTimeRange";
 import { KeyNames } from "./Components";
 import QueryTokenBuilder from "./SearchControl/QueryTokenBuilder";
 import { LinkButton } from "./Basics/LinkButton";
@@ -727,6 +728,26 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
           queryName: TypeEntity,
           filterOptions: [{ token: TypeEntity.token(a => a.cleanName), operation: "IsIn", value: f.token!.parent!.type.name.split(", ") }]
         }} />
+      }
+    },
+    {
+      name: "DateRange",
+      applicable: (f, ffc) => isFilterCondition(f) && isPair(f.operation!) && f.token?.filterType == "DateTime",
+      renderValue: (f, ffc) => {
+        if (!Array.isArray(f.value))
+          f.value = [null, null];
+
+        const minCtx = new TypeContext<string | null>(undefined, { readOnly: f.frozen }, undefined, new Binding<any>(f.value, 0));
+        const maxCtx = new TypeContext<string | null>(undefined, { readOnly: f.frozen }, undefined, new Binding<any>(f.value, 1));
+
+        return (
+          <DateTimeRange
+            mainCtx={ffc.ctx}
+            label={ffc.label}
+            min={{ ctx: minCtx, type: f.token!.type, format: f.token!.format, onChange: () => ffc.handleValueChange(f) }}
+            max={{ ctx: maxCtx, type: f.token!.type, format: f.token!.format, onChange: () => ffc.handleValueChange(f) }}
+          />
+        );
       }
     },
     {

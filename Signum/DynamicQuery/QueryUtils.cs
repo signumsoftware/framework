@@ -140,6 +140,8 @@ public static class QueryUtils
                 FilterOperation.GreaterThanOrEqual,
                 FilterOperation.LessThan,
                 FilterOperation.LessThanOrEqual,
+                FilterOperation.Between,
+                FilterOperation.BetweenNoEnd,
                 FilterOperation.IsIn,
                 FilterOperation.IsNotIn,
             }.ToReadOnly()
@@ -686,6 +688,16 @@ public static class QueryUtils
     public static bool IsList(this FilterOperation fo)
     {
         return fo == FilterOperation.IsIn || fo == FilterOperation.IsNotIn;
+    }
+
+    public static bool IsPair(this FilterOperation fo)
+    {
+        return fo == FilterOperation.Between || fo == FilterOperation.BetweenNoEnd;
+    }
+
+    public static bool IsListOrPair(this FilterOperation fo)
+    {
+        return IsList(fo) || IsPair(fo);
     }
 
     public static bool IsTsQuery(this FilterOperation fo)

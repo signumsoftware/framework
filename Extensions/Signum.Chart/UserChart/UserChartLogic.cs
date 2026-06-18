@@ -298,7 +298,6 @@ public static class UserChartLogic
     {
         if (ctx.Mode == TokenSyncMode.Record)
             ctx.AddUserAssetAction(uc, UserAssetEntityActionType.Skip);
-        ctx.LogEntityChange(uc, UserAssetEntityActionType.Skip);
     }
 
     static void DeleteUserChart(TokenSyncContext ctx, UserChartEntity uc)
@@ -315,7 +314,6 @@ public static class UserChartLogic
                 tr.Commit();
             }
         }
-        ctx.LogEntityChange(uc, UserAssetEntityActionType.Delete);
     }
 
     static void SaveUserChart(UserChartEntity uc)
@@ -344,7 +342,11 @@ public static class UserChartLogic
                         return;
                 }
             }
-            catch (Exception ex) { ctx.LogEntityError(uc, ex); return; }
+            catch (Exception ex)
+            {
+                ctx.LogError(uc, ex);
+                return;
+            }
         }
 
         Console.Write(".");
@@ -413,7 +415,7 @@ public static class UserChartLogic
                 {
                 retry:
                     string? val = item.ValueString;
-                    switch (QueryTokenSynchronizer.FixValue(ctx, uc.Query.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), fixInstead: true, entityType))
+                    switch (QueryTokenSynchronizer.FixValue(ctx, uc.Query.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isListOrPair: item.Operation!.Value.IsListOrPair(), fixInstead: true, entityType))
                     {
                         case FixTokenResult.Nothing: break;
                         case FixTokenResult.RemoveToken: uc.Filters.Remove(item); entityTouched = true; changes.Add("filter value removed"); break;
@@ -464,13 +466,11 @@ public static class UserChartLogic
                     try
                     {
                         SaveUserChart(uc);
-                        ctx.LogEntityChange(uc, changes.ToArray());
                     }
-                    catch (Exception ex) { ctx.LogEntityError(uc, ex); }
+                    catch (Exception ex) { ctx.LogError(uc, ex); }
                 }
-                else ctx.LogEntityChange(uc, changes.ToArray());
             }
-            catch (Exception ex) { ctx.LogEntityError(uc, ex); }
+            catch (Exception ex) { ctx.LogError(uc, ex); }
         }
     }
 

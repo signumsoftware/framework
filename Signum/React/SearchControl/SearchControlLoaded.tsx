@@ -2466,7 +2466,8 @@ function CountEntities(p: { fop: FindOptionsParsed, tis: TypeInfo[] }): React.Re
       columnOptions: [
         { token: "Count" },
         { token: "Entity.Type" },
-      ]
+      ],
+      includeDefaultFilters: false,
     }), []);
 
   return counts == undefined ? <span>…</span> :

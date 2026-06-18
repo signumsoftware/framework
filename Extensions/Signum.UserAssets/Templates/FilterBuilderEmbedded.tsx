@@ -8,7 +8,7 @@ import { Finder } from '@framework/Finder'
 import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
 import {
   QueryDescription, FilterConditionOptionParsed,
-  isList, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed,
+  isList, isPair, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed,
   getFilterGroupUnifiedFilterType, isFilterGroup, isFilterCondition, isGroupList,
   FilterType
 } from '@framework/FindOptions'
@@ -154,6 +154,9 @@ export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.
       if (isList(f.operation!))
         return <MultiLineOrExpression ctx={ctx} onRenderItem={(ctx, onChange) => handleCreateAppropiateControl(ctx, fc, onChange, true)} onChange={fc.handleValueChange} />;
 
+      if (isPair(f.operation!))
+        return <PairValueOrExpression ctx={ctx} onRenderItem={(ctx, onChange) => handleCreateAppropiateControl(ctx, fc, onChange, false)} onChange={fc.handleValueChange} />;
+
       return handleCreateAppropiateControl(ctx, fc, fc.handleValueChange, false);
     }
   }
@@ -258,6 +261,44 @@ export namespace FilterBuilderEmbedded {
 }
 
 export default FilterBuilderEmbedded;
+
+interface PairValueOrExpressionProps {
+  ctx: TypeContext<string | null | undefined>;
+  onChange: () => void;
+  onRenderItem: (ctx: TypeContext<any>, onChange: () => void) => React.ReactElement<any>;
+}
+
+export function PairValueOrExpression(p: PairValueOrExpressionProps): React.JSX.Element {
+
+  const [parts, setParts] = React.useState<string[]>(["", ""]);
+
+  React.useEffect(() => {
+    const vals = (p.ctx.value ?? "").split("|");
+    setParts([vals[0] ?? "", vals[1] ?? ""]);
+  }, [p.ctx.value]);
+
+  const handleChange = () => {
+    p.ctx.value = parts.join("|");
+    p.onChange();
+  };
+
+  const minCtx = new TypeContext<any>(undefined,
+    { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" },
+    undefined as any,
+    new Binding<any>(parts, 0));
+
+  const maxCtx = new TypeContext<any>(undefined,
+    { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" },
+    undefined as any,
+    new Binding<any>(parts, 1));
+
+  return (
+    <div className="d-flex flex-column gap-1">
+      {p.onRenderItem(minCtx, handleChange)}
+      {p.onRenderItem(maxCtx, handleChange)}
+    </div>
+  );
+}
 
 interface MultiLineOrExpressionProps {
   ctx: TypeContext<string | null | undefined>;

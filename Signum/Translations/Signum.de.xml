@@ -284,6 +284,8 @@
     <Member Name="Or" Description="Oder" />
   </Type>
   <Type Name="FilterOperation" Description="Filteroperation">
+    <Member Name="Between" Description="zwischen" />
+    <Member Name="BetweenNoEnd" Description="zwischen (ohne Ende)" />
     <Member Name="ComplexCondition" Description="komplexe Bedingung" />
     <Member Name="Contains" Description="enthält" />
     <Member Name="DistinctTo" Description="anders als" />
@@ -703,8 +705,10 @@
     <Member Name="EditPinnedFilters" Description="Angeheftete Filter bearbeiten" />
     <Member Name="Enter" Description="Eingabe" />
     <Member Name="Equal0" Description="Gleich {0}" />
+    <Member Name="Error" Description="Fehler" />
     <Member Name="Field" Description="Feld" />
     <Member Name="FilterDesigner" Description="Filter-Designer" />
+    <Member Name="FilterGroupInvalidMixedOperations" Description="Diese Filtergruppe enthält gemischte Operationen (einige 'ist in / ist nicht in' und einige nicht). Aktivieren Sie 'Aufteilen' oder verwenden Sie denselben Operationstyp für alle Unterbedingungen." />
     <Member Name="FilterMenu" Description="Filter Menü" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="FilterTypeSelection" Description="Auswahl des Filtertyps" />

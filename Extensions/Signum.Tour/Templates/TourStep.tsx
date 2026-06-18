@@ -1,6 +1,7 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { CssStepType, TourEntity, TourMessage, TourStepEntity } from '../Signum.Tour'
-import { AutoLine, CheckboxLine, EntityLine, EntityTable, EnumLine, FormGroup, MarkdownLine, TextAreaLine, TextBoxLine, TypeContext } from '@framework/Lines'
+import { AutoLine, CheckboxLine, EntityLine, EntityTable, EnumLine, FormGroup, TextAreaLine, TextBoxLine, TypeContext } from '@framework/Lines'
+import { MarkdownLine } from '@extensions/Signum.Markdown/MarkdownLine'
 import HtmlCodeMirror from "@extensions/Signum.CodeMirror/HtmlCodeMirror"
 import { getTypeInfos, getTypeInfo } from '@framework/Reflection';
 import { PropertyRouteEntity, QueryEntity, TypeEntity } from '@framework/Signum.Basics';
@@ -162,3 +163,4 @@ export default function TourStep(p: {
     </div>
   );
 }
+
