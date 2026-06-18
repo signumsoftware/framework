@@ -58,7 +58,7 @@ public static class WorkflowLogic
     {
         var type = typeof(T).ToTypeEntity();
         var user = UserEntity.Current;
-        return WorkflowLogic.WorkflowGraphLazy.Value.Values.Where(a => a.Workflow.MainEntityType.Is(type)).Any(a => a.Lanes != null && a.Lanes.Any(l => l.Actors.Contains(user)));
+        return WorkflowLogic.WorkflowGraphLazy.Value.Values.Where(a => a.Workflow.MainEntityType.Is(type)).Any(a => a.Lanes.Any(l => l.Actors.Contains(user)));
     }
 
     [AutoExpressionField]
@@ -404,6 +404,7 @@ public static class WorkflowLogic
                 var gateways = Database.RetrieveAll<WorkflowGatewayEntity>().GroupToDictionary(a => a.Lane.Pool.Workflow.ToLite());
                 var activities = Database.RetrieveAll<WorkflowActivityEntity>().GroupToDictionary(a => a.Lane.Pool.Workflow.ToLite());
                 var connections = Database.RetrieveAll<WorkflowConnectionEntity>().GroupToDictionary(a => a.From.Lane.Pool.Workflow.ToLite());
+                var lanes = Database.RetrieveAll<WorkflowLaneEntity>().GroupToDictionary(a => a.Pool.Workflow.ToLite());
 
                 var result = Database.RetrieveAll<WorkflowEntity>().ToFrozenDictionary(workflow => workflow.ToLite(), workflow =>
                 {
@@ -415,6 +416,7 @@ public static class WorkflowLogic
                         Gateways = gateways.TryGetC(w).EmptyIfNull().ToDictionary(g => g.ToLite()),
                         Activities = activities.TryGetC(w).EmptyIfNull().ToDictionary(a => a.ToLite()),
                         Connections = connections.TryGetC(w).EmptyIfNull().ToDictionary(c => c.ToLite()),
+                        Lanes = lanes.TryGetC(w).EmptyIfNull().ToList(),
                     };
 
                     nodeGraph.FillGraphs();
