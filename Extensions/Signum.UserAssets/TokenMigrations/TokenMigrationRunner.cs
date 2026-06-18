@@ -87,17 +87,12 @@ public static class TokenMigrationRunner
 
         var ctx = new TokenSyncContext(TokenSyncMode.Apply, loaded, recording: null);
 
-        try
-        {
-            QueryLogic.AssertLoaded();
-            TypeLogic.AssertLoaded();
+      
+        QueryLogic.AssertLoaded();
+        TypeLogic.AssertLoaded();
 
-            TokenMigrationLogic.FireTokenSynchronizing(ctx);
-        }
-        finally
-        {
-            PrintReport(ctx);
-        }
+        TokenMigrationLogic.FireTokenSynchronizing(ctx);
+
 
         using (var tr = Transaction.ForceNew())
         {
@@ -133,6 +128,8 @@ public static class TokenMigrationRunner
             return;
         }
 
+        recording.Print();
+
         var newFileName = Path.GetFileNameWithoutExtension(fileName) + ".tokens.json";
 
         recording.Save(newFileName);
@@ -165,7 +162,7 @@ public static class TokenMigrationRunner
 
         TokenMigrationLogic.FireTokenSynchronizing(ctx);
 
-        PrintReport(ctx);
+       
 
         if (recording.IsEmpty)
         {
@@ -173,6 +170,9 @@ public static class TokenMigrationRunner
             Console.WriteLine();
             return false;
         }
+
+
+        recording.Print();
 
         var version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
         var comment = SafeConsole.AskString("Comment for the new token migration? ", stringValidator: s => null).Trim();
@@ -188,40 +188,6 @@ public static class TokenMigrationRunner
         recording.Save(fullPath);
 
         return true;
-    }
-
-    static void PrintReport(TokenSyncContext ctx)
-    {
-        if (ctx.Reports.Count == 0)
-            return;
-
-        Console.WriteLine();
-        foreach (var r in ctx.Reports)
-        {
-            if (r.Error != null)
-            {
-                SafeConsole.WriteLineColor(ConsoleColor.Red, $"{r.Entity.GetType().Name} {r.Entity}:");
-                SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "  " + r.Error.Message);
-            }
-            else if (r.Action != null)
-            {
-                var color = r.Action switch
-                {
-                    UserAssetEntityActionType.Skip => ConsoleColor.DarkYellow,
-                    UserAssetEntityActionType.Delete => ConsoleColor.Red,
-                    UserAssetEntityActionType.Regenerate => ConsoleColor.Magenta,
-                    _ => ConsoleColor.Gray,
-                };
-                SafeConsole.WriteLineColor(color, $"{r.Entity.GetType().Name} {r.Entity}: {r.Action.ToString()!.ToLower()}");
-            }
-            else
-            {
-                SafeConsole.WriteLineColor(ConsoleColor.White, $"{r.Entity.GetType().Name} {r.Entity}:");
-                foreach (var c in r.Changes)
-                    SafeConsole.WriteLineColor(ConsoleColor.Gray, "  " + c);
-            }
-        }
-        Console.WriteLine();
     }
 
     static void Draw(List<TokenMigrationLogic.MigrationInfo> infos)

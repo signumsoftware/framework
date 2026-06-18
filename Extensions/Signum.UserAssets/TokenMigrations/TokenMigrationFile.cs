@@ -1,4 +1,5 @@
 using Signum.Engine.Sync;
+using Signum.Files;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -89,15 +90,18 @@ public class TokenMigrationFile
             ?? throw new InvalidOperationException("Empty token migration file: " + filePath);
     }
 
+    public void Print()
+    {
+        var json = JsonSerializer.Serialize(this, JsonOptions);
+        Console.WriteLine("New Token migration:");
+        SafeConsole.WriteLineColor(ConsoleColor.DarkGray, json);
+    }
+
     public void Save(string filePath)
     {
-        if (IsEmpty)
-            return;
-
         var json = JsonSerializer.Serialize(this, JsonOptions);
         File.WriteAllText(filePath, json, Encoding.UTF8);
         Console.WriteLine("Json file saved in:  " + filePath);
-        SafeConsole.WriteLineColor(ConsoleColor.DarkGray, json);
     }
 
     /// <summary>

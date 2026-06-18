@@ -50,11 +50,6 @@ public class TokenSyncContext
         throw new IndexOutOfRangeException($"Index {index} is out of range for history and recording");
     }
 
-    /// <summary>
-    /// Per-entity log of which entities were touched and what changed. Used by the runner to print
-    /// an end-of-run summary in the same style as the existing sync log.
-    /// </summary>
-    public List<TokenSyncEntityReport> Reports { get; } = new();
 
     public TokenSyncContext(TokenSyncMode mode, TokenMigrationFile[] history, TokenMigrationFile? recording)
     {
@@ -99,23 +94,6 @@ public class TokenSyncContext
             Action = action,
         });
     }
-
-    /// <summary>
-    /// Free-form change log entry (token rename, FileName rewrite, message rendered…). Rendered in
-    /// neutral gray by the runner.
-    /// </summary>
-    public void LogEntityChange(Entity entity, params string[] changes)
-        => Reports.Add(new TokenSyncEntityReport(entity, changes.ToList(), action: null, error: null));
-
-    /// <summary>
-    /// Action-typed log entry (Skip / Delete / Regenerate). Rendered with a colour matching the
-    /// action so an operator scanning the log can immediately spot destructive operations.
-    /// </summary>
-    public void LogEntityChange(Entity entity, UserAssetEntityActionType action)
-        => Reports.Add(new TokenSyncEntityReport(entity, new List<string>(), action, error: null));
-
-    public void LogEntityError(Entity entity, Exception error)
-        => Reports.Add(new TokenSyncEntityReport(entity, new List<string>(), action: null, error));
 
     /// <summary>
     /// Walks <see cref="History"/> file by file, chaining renames at the given bucket+subKey.
@@ -231,6 +209,12 @@ public class TokenSyncContext
             }
         }
         return eras;
+    }
+
+    public void LogError(Entity entity, Exception ex)
+    {
+        SafeConsole.WriteLineColor(ConsoleColor.Red, $"{entity.GetType().Name} {entity}:");
+        SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "  " + ex.Message);
     }
 }
 

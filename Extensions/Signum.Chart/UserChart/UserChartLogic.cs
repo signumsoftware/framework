@@ -298,7 +298,6 @@ public static class UserChartLogic
     {
         if (ctx.Mode == TokenSyncMode.Record)
             ctx.AddUserAssetAction(uc, UserAssetEntityActionType.Skip);
-        ctx.LogEntityChange(uc, UserAssetEntityActionType.Skip);
     }
 
     static void DeleteUserChart(TokenSyncContext ctx, UserChartEntity uc)
@@ -315,7 +314,6 @@ public static class UserChartLogic
                 tr.Commit();
             }
         }
-        ctx.LogEntityChange(uc, UserAssetEntityActionType.Delete);
     }
 
     static void SaveUserChart(UserChartEntity uc)
@@ -344,7 +342,11 @@ public static class UserChartLogic
                         return;
                 }
             }
-            catch (Exception ex) { ctx.LogEntityError(uc, ex); return; }
+            catch (Exception ex)
+            {
+                ctx.LogError(uc, ex);
+                return;
+            }
         }
 
         Console.Write(".");
@@ -464,13 +466,11 @@ public static class UserChartLogic
                     try
                     {
                         SaveUserChart(uc);
-                        ctx.LogEntityChange(uc, changes.ToArray());
                     }
-                    catch (Exception ex) { ctx.LogEntityError(uc, ex); }
+                    catch (Exception ex) { ctx.LogError(uc, ex); }
                 }
-                else ctx.LogEntityChange(uc, changes.ToArray());
             }
-            catch (Exception ex) { ctx.LogEntityError(uc, ex); }
+            catch (Exception ex) { ctx.LogError(uc, ex); }
         }
     }
 
